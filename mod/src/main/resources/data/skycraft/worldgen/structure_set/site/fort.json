@@ -9,7 +9,8 @@
     "type": "skycraft:places",
     "salt": 718274034,
     "types": [
-      "fort"
+      "fort",
+      "dungeon_fixed"
     ],
     "variants": [
       "fort"

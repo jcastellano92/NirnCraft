@@ -2,9 +2,9 @@ package com.skycraft.audio;
 
 import com.skycraft.magic.spell.SpellSounds;
 import com.skycraft.magic.spell.SpellSounds.Slot;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.config.ModConfig;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.ModLoadingContext;
+import net.neoforged.fml.config.ModConfig;
 
 /**
  * Skycraft's own audio: the province soundtracks (driven by {@code world.client.MusicController}), the ambience engine
@@ -18,7 +18,7 @@ public final class AudioModule {
     /** Registers the sound events and the client config. Called from the mod constructor. */
     public static void init(IEventBus modBus) {
         AudioSounds.init(modBus);
-        ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, AudioConfig.CLIENT_SPEC, "skycraft-audio-client.toml");
+        com.skycraft.Skycraft.config(ModConfig.Type.CLIENT, AudioConfig.CLIENT_SPEC, "skycraft-audio-client.toml");
         overrideSpellSounds();
     }
 

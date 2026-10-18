@@ -27,14 +27,14 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.monster.Enemy;
-import net.minecraft.world.entity.npc.AbstractVillager;
+import net.minecraft.world.entity.npc.villager.AbstractVillager;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.phys.Vec3;
@@ -79,7 +79,7 @@ public final class MusicController {
         }
     }
 
-    private static final TagKey<EntityType<?>> TALKERS = TagKey.create(Registries.ENTITY_TYPE, new ResourceLocation("skycraft", "talkers"));
+    private static final TagKey<EntityType<?>> TALKERS = TagKey.create(Registries.ENTITY_TYPE, Identifier.fromNamespaceAndPath("skycraft", "talkers"));
     private static final Random RANDOM = new Random();
     /** Seconds the combat mood holds after the last sign of a fight. */
     private static final int COMBAT_HOLD_TICKS = 160;
@@ -119,7 +119,7 @@ public final class MusicController {
     public static SoundInstance titleMusic(SoundInstance requested) {
         Minecraft mc = Minecraft.getInstance();
         if (titleMusic != null && !titleMusic.isStopped() && mc.getSoundManager().isActive(titleMusic)) return null;
-        titleMusic = new FadingMusic(requested.getLocation(), 40);
+        titleMusic = new FadingMusic(requested.getIdentifier(), 40);
         return titleMusic;
     }
 
@@ -233,9 +233,9 @@ public final class MusicController {
 
     private static void start(Minecraft mc, Mood mood) {
         mc.getMusicManager().stopPlaying();
-        ResourceLocation loc = new ResourceLocation(Skycraft.MODID, mood.event());
+        Identifier loc = Identifier.fromNamespaceAndPath(Skycraft.MODID, mood.event());
         if (mc.getSoundManager().getSoundEvent(loc) == null) {
-            loc = fallback(mood).getLocation();
+            loc = fallback(mood).location();
         }
         current = new FadingMusic(loc, mood.urgent() ? 15 : 60);
         current.duck = duckLevel;
@@ -286,7 +286,7 @@ public final class MusicController {
         Level level = mc.level;
         var player = mc.player;
         boolean fight = inCombat(mc);
-        String dim = level.dimension().location().getPath();
+        String dim = level.dimension().identifier().getPath();
         if (level.dimension() == Level.NETHER || dim.contains("oblivion") || dim.contains("coldharbour") || dim.contains("soul_cairn")) {
             return fight ? new Mood(Kind.COMBAT, "music.combat") : new Mood(Kind.OBLIVION, "music.oblivion");
         }
@@ -311,7 +311,7 @@ public final class MusicController {
         if (dungeon != null) return new Mood(Kind.DUNGEON, dungeon);
         String town = town(mc, pos, region);
         if (town != null) return new Mood(Kind.TOWN, town);
-        long time = Math.floorMod(level.getDayTime(), 24000L);
+        long time = Math.floorMod(level.getDefaultClockTime(), 24000L);
         boolean night = time >= 13000 && time < 23000;
         String set = AmbienceEngine.atSea() ? "sea" : musicSet(region);
         if ("skyrim".equals(set)) return new Mood(Kind.EXPLORE, night ? "music.explore_night" : "music.explore");
@@ -415,15 +415,15 @@ public final class MusicController {
         if (AmbienceEngine.inDwemerCaverns()) return "music.dungeon.dwemer";
         boolean dark = level.getBrightness(LightLayer.SKY, pos) < 4;
         // inside a discovered dungeon-like place (barrows, mines, Dwemer ruins...)
-        ListTag list = SkyData.get(mc.player).module(WorldData.MODULE).getList("discovered", Tag.TAG_COMPOUND);
-        String dim = level.dimension().location().toString();
+        ListTag list = SkyData.get(mc.player).module(WorldData.MODULE).getListOrEmpty("discovered");
+        String dim = level.dimension().identifier().toString();
         for (int i = 0; i < list.size(); i++) {
-            CompoundTag loc = list.getCompound(i);
-            if (!loc.getString("dim").equals(dim)) continue;
-            LocationKind kind = LocationKind.byId(loc.getString("type"));
+            CompoundTag loc = list.getCompoundOrEmpty(i);
+            if (!loc.getStringOr("dim","").equals(dim)) continue;
+            LocationKind kind = LocationKind.byId(loc.getStringOr("type",""));
             if (!kind.underground()) continue;
             if (WorldData.inBox(loc, pos.getX(), pos.getY(), pos.getZ(), 0) && dark) {
-                return dungeonEvent(kind, loc.getString("name"), region);
+                return dungeonEvent(kind, loc.getStringOr("name",""), region);
             }
         }
         // a named dungeon from the Tamriel map
@@ -458,18 +458,18 @@ public final class MusicController {
             }
         }
         // ...a discovered town, or simply people about
-        ListTag list = SkyData.get(mc.player).module(WorldData.MODULE).getList("discovered", Tag.TAG_COMPOUND);
-        String dim = mc.level.dimension().location().toString();
+        ListTag list = SkyData.get(mc.player).module(WorldData.MODULE).getListOrEmpty("discovered");
+        String dim = mc.level.dimension().identifier().toString();
         for (int i = 0; i < list.size(); i++) {
-            CompoundTag loc = list.getCompound(i);
-            if (!loc.getString("dim").equals(dim)) continue;
-            LocationKind kind = LocationKind.byId(loc.getString("type"));
+            CompoundTag loc = list.getCompoundOrEmpty(i);
+            if (!loc.getStringOr("dim","").equals(dim)) continue;
+            LocationKind kind = LocationKind.byId(loc.getStringOr("type",""));
             if ((kind == LocationKind.TOWN || kind == LocationKind.INN) && WorldData.inBox(loc, pos.getX(), pos.getY(), pos.getZ(), 8)) {
                 return townEvent(region.culture());
             }
         }
         var box = mc.player.getBoundingBox().inflate(32);
-        int count = mc.level.getEntitiesOfClass(LivingEntity.class, box, e -> e instanceof AbstractVillager || e.getType().is(TALKERS)).size();
+        int count = mc.level.getEntitiesOfClass(LivingEntity.class, box, e -> e instanceof AbstractVillager || e.getType().builtInRegistryHolder().is(TALKERS)).size();
         return count >= 2 ? townEvent(region.culture()) : null;
     }
 
@@ -520,7 +520,7 @@ public final class MusicController {
      * can be ducked under stings, and avoids repeating the piece that played last when its event has others.
      */
     static final class FadingMusic extends AbstractTickableSoundInstance {
-        private static ResourceLocation lastTrack;
+        private static Identifier lastTrack;
         private final int fadeInTicks;
         private float level;
         private int fadeOutTicks;
@@ -528,7 +528,7 @@ public final class MusicController {
         float duck = 1f;
         private float duckNow = 1f;
 
-        FadingMusic(ResourceLocation event, int fadeInTicks) {
+        FadingMusic(Identifier event, int fadeInTicks) {
             super(net.minecraft.sounds.SoundEvent.createVariableRangeEvent(event), SoundSource.MUSIC, SoundInstance.createUnseededRandom());
             this.fadeInTicks = Math.max(1, fadeInTicks);
             this.looping = false;
@@ -543,10 +543,10 @@ public final class MusicController {
         }
 
         @Override
-        public WeighedSoundEvents resolve(SoundManager manager) {
-            WeighedSoundEvents w = super.resolve(manager);
+        public WeighedSoundEvents getOrResolve(SoundManager manager) {
+            WeighedSoundEvents w = super.getOrResolve(manager);
             if (w != null && w.getWeight() > 1) {
-                for (int i = 0; i < 4 && sound != null && sound.getLocation().equals(lastTrack); i++) w = super.resolve(manager);
+                for (int i = 0; i < 4 && sound != null && sound.getLocation().equals(lastTrack); i++) w = super.getOrResolve(manager);
             }
             if (sound != null && sound != SoundManager.EMPTY_SOUND) lastTrack = sound.getLocation();
             return w;

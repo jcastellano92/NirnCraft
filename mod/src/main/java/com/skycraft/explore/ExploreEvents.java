@@ -26,10 +26,10 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 /**
  * Server side of the minor sites:
@@ -41,19 +41,19 @@ import net.minecraftforge.fml.common.Mod;
  *     <li>reading a lead note marks the nearest unknown location to where the note was found.</li>
  * </ul>
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class ExploreEvents {
     private static final int INTERVAL = 40;
 
     private ExploreEvents() {}
 
     @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer player)) return;
+    public static void onPlayerTick(net.neoforged.neoforge.event.tick.PlayerTickEvent.Post event) {
+        if (!(event instanceof net.neoforged.neoforge.event.tick.PlayerTickEvent.Post) || !(event.getEntity() instanceof ServerPlayer player)) return;
         if (player.isSpectator() || player.level().dimension() != Level.OVERWORLD) return;
         if ((player.tickCount + (player.getId() & 31) + 17) % INTERVAL != 0) return;
         try {
-            ServerLevel level = player.serverLevel();
+            ServerLevel level = player.level();
             long seed = level.getSeed();
             int x = player.getBlockX(), z = player.getBlockZ();
             for (MinorSites.Site s : MinorSites.within(seed, x, z, 72)) {
@@ -74,7 +74,7 @@ public final class ExploreEvents {
     private static void foundSite(ServerPlayer player, ServerLevel level, MinorSites.Site s) {
         PlayerData data = SkyData.get(player);
         CompoundTag mod = data.module("explore");
-        long[] found = mod.getLongArray("found");
+        long[] found = mod.getLongArray("found").orElseGet(() -> new long[0]);
         long key = s.key();
         for (long k : found) if (k == key) return;
         if (!built(level, s)) return;
@@ -144,20 +144,20 @@ public final class ExploreEvents {
     private static void checkCacheMarkers(ServerPlayer player) {
         PlayerData data = SkyData.get(player);
         ListTag list = WorldData.discovered(data);
-        String dim = player.level().dimension().location().toString();
+        String dim = player.level().dimension().identifier().toString();
         for (int i = list.size() - 1; i >= 0; i--) {
-            CompoundTag loc = list.getCompound(i);
-            String id = loc.getString("id");
-            if (!id.startsWith(TreasureMapItem.MARKER_PREFIX) || !dim.equals(loc.getString("dim"))) continue;
-            double dx = loc.getInt("x") + 0.5 - player.getX(), dz = loc.getInt("z") + 0.5 - player.getZ();
+            CompoundTag loc = list.getCompoundOrEmpty(i);
+            String id = loc.getStringOr("id","");
+            if (!id.startsWith(TreasureMapItem.MARKER_PREFIX) || !dim.equals(loc.getStringOr("dim",""))) continue;
+            double dx = loc.getIntOr("x",0) + 0.5 - player.getX(), dz = loc.getIntOr("z",0) + 0.5 - player.getZ();
             if (dx * dx + dz * dz > 7 * 7) continue;
             list.remove(i);
-            ListTag done = data.module("explore").getList("caches_found", Tag.TAG_STRING);
+            ListTag done = data.module("explore").getListOrEmpty("caches_found");
             done.add(StringTag.valueOf(id));
             data.module("explore").put("caches_found", done);
             data.addStat("treasure_caches_found", 1);
             data.markDirty();
-            Notifier.message(player, Component.translatable("explore.skycraft.treasure_map.found", loc.getString("name")));
+            Notifier.message(player, Component.translatable("explore.skycraft.treasure_map.found", loc.getStringOr("name","")));
         }
     }
 
@@ -168,19 +168,19 @@ public final class ExploreEvents {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
         ItemStack stack = event.getItemStack();
         if (!(stack.getItem() instanceof LoreBookItem)) return;
-        CompoundTag tag = stack.getTag();
+        CompoundTag tag = com.skycraft.inventory.ItemData.custom(stack);
         if (tag == null || !tag.contains(ExploreLoot.LEAD_TAG)) return;
         onReadLead(player, stack, tag);
     }
 
     /** Marks the nearest location this player doesn't know yet, from where the note was found; once per reader. */
     static void onReadLead(ServerPlayer player, ItemStack stack, CompoundTag tag) {
-        ListTag readers = tag.getList("explore_readers", Tag.TAG_STRING);
+        ListTag readers = tag.getListOrEmpty("explore_readers");
         String me = player.getUUID().toString();
-        for (int i = 0; i < readers.size(); i++) if (readers.getString(i).equals(me)) return;
+        for (int i = 0; i < readers.size(); i++) if (readers.getStringOr(i, "").equals(me)) return;
         readers.add(StringTag.valueOf(me));
         tag.put("explore_readers", readers);
-        int[] at = tag.getIntArray(ExploreLoot.LEAD_TAG);
+        int[] at = tag.getIntArray(ExploreLoot.LEAD_TAG).orElseGet(() -> new int[0]);
         if (at.length < 2) return;
         BlockPos from = new BlockPos(at[0], player.getBlockY(), at[1]);
         Component name = Discovery.revealNear(player, from, 1200);

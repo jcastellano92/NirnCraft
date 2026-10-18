@@ -7,12 +7,12 @@ import com.skycraft.economy.SkillBookItem;
 import com.skycraft.tamriel.Place;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -67,7 +67,7 @@ public final class Collectibles {
         }
 
         public Component name() {
-            if (item != null) return item.get().getDescription();
+            if (item != null) return item.get().getName(new ItemStack(item.get()));
             if (collection.equals(LegendaryUniques.COLLECTION)) return Component.translatable("unique.skycraft." + id);
             return Component.translatable("collectible.skycraft." + collection + "." + id);
         }
@@ -80,8 +80,8 @@ public final class Collectibles {
             if (item == null) return ItemStack.EMPTY;
             ItemStack s = new ItemStack(item.get());
             if (s.getItem() instanceof CollectibleItem || s.getItem() instanceof BlackBookItem) {
-                s.getOrCreateTag().putString(NBT, key());
-                if (value > 0) s.getOrCreateTag().putInt(ItemValues.VALUE_NBT, value);
+                com.skycraft.inventory.ItemData.updateCustom(s, customData263 -> customData263.putString(NBT, key()));
+                if (value > 0) com.skycraft.inventory.ItemData.updateCustom(s, customData263 -> customData263.putInt(ItemValues.VALUE_NBT, value));
             }
             return s;
         }
@@ -118,7 +118,7 @@ public final class Collectibles {
 
     private static final Map<String, Collection> ALL = new LinkedHashMap<>();
     private static final Map<String, Entry> BY_KEY = new HashMap<>();
-    private static final Map<ResourceLocation, Entry> BY_ITEM = new HashMap<>();
+    private static final Map<Identifier, Entry> BY_ITEM = new HashMap<>();
 
     public static final String MASKS = "dragon_priest_masks";
     public static final String DAEDRIC = "daedric_artifacts";
@@ -232,7 +232,7 @@ public final class Collectibles {
             for (Entry e : c.entries) {
                 BY_KEY.put(e.key(), e);
                 if (e.item != null && !(e.item.get() instanceof CollectibleItem) && !(e.item.get() instanceof BlackBookItem)) {
-                    ResourceLocation id = ForgeRegistries.ITEMS.getKey(e.item.get());
+                    Identifier id = BuiltInRegistries.ITEM.getKey(e.item.get());
                     if (id != null) BY_ITEM.put(id, e);
                 }
             }
@@ -272,7 +272,7 @@ public final class Collectibles {
     }
 
     private static Item item(String id) {
-        Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(id));
+        Item item = BuiltInRegistries.ITEM.getValue(Identifier.parse(id));
         return item == null ? Items.AIR : item;
     }
 
@@ -305,9 +305,9 @@ public final class Collectibles {
     public static Entry identify(ItemStack stack) {
         if (stack.isEmpty()) return null;
         build();
-        CompoundTag tag = stack.getTag();
-        if (tag != null && tag.contains(NBT)) return BY_KEY.get(tag.getString(NBT));
-        ResourceLocation id = ForgeRegistries.ITEMS.getKey(stack.getItem());
+        CompoundTag tag = com.skycraft.inventory.ItemData.custom(stack);
+        if (tag != null && tag.contains(NBT)) return BY_KEY.get(tag.getStringOr(NBT, ""));
+        Identifier id = BuiltInRegistries.ITEM.getKey(stack.getItem());
         return id == null ? null : BY_ITEM.get(id);
     }
 
@@ -324,7 +324,7 @@ public final class Collectibles {
     // ------------------------------------------------------------------ player progress
 
     public static CompoundTag found(PlayerData data) {
-        return data.module(MODULE).getCompound("found");
+        return data.module(MODULE).getCompoundOrEmpty("found");
     }
 
     public static boolean has(PlayerData data, Entry e) {
@@ -348,7 +348,7 @@ public final class Collectibles {
     }
 
     public static boolean rewarded(PlayerData data, String collection) {
-        return data.module(MODULE).getCompound("rewarded").contains(collection);
+        return data.module(MODULE).getCompoundOrEmpty("rewarded").contains(collection);
     }
 
     /** A random entry of the collection that the player lacks and may find at this level (null if none). */

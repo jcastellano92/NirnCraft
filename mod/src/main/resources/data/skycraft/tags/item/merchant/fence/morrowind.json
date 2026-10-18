@@ -1,0 +1,25 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "skycraft:skooma",
+      "required": false
+    },
+    {
+      "id": "skycraft:moon_sugar",
+      "required": false
+    },
+    {
+      "id": "skycraft:raw_ebony",
+      "required": false
+    },
+    {
+      "id": "skycraft:dwarven_scrap",
+      "required": false
+    },
+    {
+      "id": "skycraft:dwemer_gear",
+      "required": false
+    }
+  ]
+}

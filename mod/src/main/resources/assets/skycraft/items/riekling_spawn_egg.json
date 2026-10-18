@@ -1,0 +1,16 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "skycraft:item/riekling_spawn_egg",
+    "tints": [
+      {
+        "type": "minecraft:constant",
+        "value": 5929610
+      },
+      {
+        "type": "minecraft:constant",
+        "value": 13152394
+      }
+    ]
+  }
+}

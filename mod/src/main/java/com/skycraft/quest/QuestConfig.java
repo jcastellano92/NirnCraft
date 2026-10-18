@@ -1,33 +1,33 @@
 package com.skycraft.quest;
 
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 /** Quest & party settings: config/skycraft-quest.toml (common, server-authoritative). */
 public final class QuestConfig {
-    public static final ForgeConfigSpec SPEC;
+    public static final ModConfigSpec SPEC;
 
-    public static final ForgeConfigSpec.BooleanValue FRIENDLY_FIRE;
-    public static final ForgeConfigSpec.IntValue MAX_PARTY_SIZE;
-    public static final ForgeConfigSpec.IntValue MAX_ACTIVE_QUESTS;
-    public static final ForgeConfigSpec.DoubleValue GOLD_MULTIPLIER;
-    public static final ForgeConfigSpec.IntValue SPAWN_DISTANCE;
-    public static final ForgeConfigSpec.BooleanValue MAIN_QUEST;
-    public static final ForgeConfigSpec.BooleanValue DARK_WHISPER;
-    public static final ForgeConfigSpec.BooleanValue HELGEN_START;
-    public static final ForgeConfigSpec.BooleanValue INTRO;
-    public static final ForgeConfigSpec.BooleanValue RUINED_HELGEN;
-    public static final ForgeConfigSpec.IntValue SKIP_DAYS;
-    public static final ForgeConfigSpec.BooleanValue INTRO_LOCK_EXIT;
-    public static final ForgeConfigSpec.BooleanValue INTRO_HIDE_PLAYERS;
-    public static final ForgeConfigSpec.IntValue INTRO_LOADING_SECONDS;
-    public static final ForgeConfigSpec.IntValue INTRO_CUTSCENE_SECONDS;
-    public static final ForgeConfigSpec.EnumValue<IntroMigration> INTRO_EXISTING_SAVES;
+    public static final ModConfigSpec.BooleanValue FRIENDLY_FIRE;
+    public static final ModConfigSpec.IntValue MAX_PARTY_SIZE;
+    public static final ModConfigSpec.IntValue MAX_ACTIVE_QUESTS;
+    public static final ModConfigSpec.DoubleValue GOLD_MULTIPLIER;
+    public static final ModConfigSpec.IntValue SPAWN_DISTANCE;
+    public static final ModConfigSpec.BooleanValue MAIN_QUEST;
+    public static final ModConfigSpec.BooleanValue DARK_WHISPER;
+    public static final ModConfigSpec.BooleanValue HELGEN_START;
+    public static final ModConfigSpec.BooleanValue INTRO;
+    public static final ModConfigSpec.BooleanValue RUINED_HELGEN;
+    public static final ModConfigSpec.IntValue SKIP_DAYS;
+    public static final ModConfigSpec.BooleanValue INTRO_LOCK_EXIT;
+    public static final ModConfigSpec.BooleanValue INTRO_HIDE_PLAYERS;
+    public static final ModConfigSpec.IntValue INTRO_LOADING_SECONDS;
+    public static final ModConfigSpec.IntValue INTRO_CUTSCENE_SECONDS;
+    public static final ModConfigSpec.EnumValue<IntroMigration> INTRO_EXISTING_SAVES;
 
     /** What an existing save (a character made before the cottage opening) does at its next login. */
     public enum IntroMigration { SKIP, REPLAY_IF_UNFINISHED }
 
     static {
-        ForgeConfigSpec.Builder b = new ForgeConfigSpec.Builder();
+        ModConfigSpec.Builder b = new ModConfigSpec.Builder();
         b.push("party");
         FRIENDLY_FIRE = b.comment("If false, members of the same party (and their pets) can't hurt each other.")
                 .define("friendlyFire", false);

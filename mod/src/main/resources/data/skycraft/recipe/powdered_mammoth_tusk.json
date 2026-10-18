@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "skycraft:mammoth_tusk",
+    "minecraft:flint"
+  ],
+  "result": {
+    "count": 4,
+    "id": "skycraft:powdered_mammoth_tusk"
+  }
+}

@@ -3,28 +3,11 @@
   "temperature": 2.0,
   "downfall": 0.0,
   "effects": {
-    "sky_color": 11020820,
-    "fog_color": 5641740,
-    "water_color": 7023130,
-    "water_fog_color": 3344901,
-    "mood_sound": {
-      "sound": "minecraft:ambient.cave",
-      "tick_delay": 6000,
-      "block_search_extent": 8,
-      "offset": 2.0
-    },
-    "grass_color": 8003608,
-    "foliage_color": 6953490,
-    "particle": {
-      "options": {
-        "type": "minecraft:crimson_spore"
-      },
-      "probability": 0.01
-    }
+    "water_color": "#6b2a1a",
+    "grass_color": "#7a2018",
+    "foliage_color": "#6a1a12"
   },
-  "spawners": {},
-  "spawn_costs": {},
-  "carvers": {},
+  "carvers": [],
   "features": [
     [],
     [],
@@ -48,5 +31,36 @@
       "skycraft:realm/dl_harrada_dense"
     ],
     []
-  ]
+  ],
+  "attributes": {
+    "minecraft:visual/sky_color": "#a82a14",
+    "minecraft:visual/fog_color": "#56160c",
+    "minecraft:visual/water_fog_color": "#330a05",
+    "minecraft:audio/ambient_sounds": {
+      "mood": {
+        "sound": "minecraft:ambient.cave",
+        "tick_delay": 6000,
+        "block_search_extent": 8,
+        "offset": 2.0
+      }
+    },
+    "minecraft:visual/ambient_particles": {
+      "modifier": "append",
+      "argument": [
+        {
+          "probability": 0.01,
+          "particle": {
+            "type": "minecraft:crimson_spore"
+          }
+        }
+      ]
+    },
+    "minecraft:gameplay/natural_mob_spawns": {
+      "modifier": "overlay",
+      "argument": {
+        "spawns_by_category": {},
+        "spawn_costs": {}
+      }
+    }
+  }
 }

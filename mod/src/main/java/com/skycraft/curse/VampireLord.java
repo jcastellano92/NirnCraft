@@ -56,8 +56,8 @@ import java.util.UUID;
  * feed it and earn perks. Sneak + Voice returns to mortal form.
  */
 public final class VampireLord {
-    static final UUID ARMOR = UUID.fromString("5d9a7c1e-2b44-4b5e-8f0e-3a6c9d1b7e01");
-    static final UUID KNOCKBACK = UUID.fromString("5d9a7c1e-2b44-4b5e-8f0e-3a6c9d1b7e02");
+    static final net.minecraft.resources.Identifier ARMOR = net.minecraft.resources.Identifier.fromNamespaceAndPath("skycraft", "modifier_5d9a7c1e-2b44-4b5e-8f0e-3a6c9d1b7e01");
+    static final net.minecraft.resources.Identifier KNOCKBACK = net.minecraft.resources.Identifier.fromNamespaceAndPath("skycraft", "modifier_5d9a7c1e-2b44-4b5e-8f0e-3a6c9d1b7e02");
     /** Vanilla's default flying speed (restored on revert). */
     private static final float DEFAULT_FLY = 0.05f;
     /** Levitation is a slow hover. */
@@ -90,7 +90,7 @@ public final class VampireLord {
         SkyData.get(player).addStat("vampire_lord", 1);
         CursePackets.sync(player);
         CursePackets.anim(player, CurseAnims.Anim.TRANSFORM);
-        ServerLevel level = player.serverLevel();
+        ServerLevel level = player.level();
         level.playSound(null, player.blockPosition(), SoundEvents.PHANTOM_AMBIENT, SoundSource.PLAYERS, 1.4f, 0.5f);
         level.playSound(null, player.blockPosition(), SoundEvents.BAT_TAKEOFF, SoundSource.PLAYERS, 1.2f, 0.6f);
         burst(level, player.position().add(0, 1.2, 0), 40);
@@ -101,7 +101,7 @@ public final class VampireLord {
 
     static void revert(ServerPlayer player, boolean natural) {
         CompoundTag t = Curses.tag(player);
-        if (Form.byId(t.getString(Curses.FORM)) != Form.LORD) return;
+        if (Form.byId(t.getStringOr(Curses.FORM, "")) != Form.LORD) return;
         t.remove(Curses.FORM);
         Curses.dirty(player);
         apply(player, false);
@@ -111,7 +111,7 @@ public final class VampireLord {
         CurseEvents.noFall(player, 100);
         if (natural && player.isAlive()) {
             CursePackets.anim(player, CurseAnims.Anim.TRANSFORM);
-            burst(player.serverLevel(), player.position().add(0, 1.2, 0), 25);
+            burst(player.level(), player.position().add(0, 1.2, 0), 25);
             player.level().playSound(null, player.blockPosition(), SoundEvents.BAT_TAKEOFF, SoundSource.PLAYERS, 1f, 0.8f);
             Notifier.message(player, Component.translatable("curse.skycraft.lord.reverted"));
         }
@@ -120,9 +120,9 @@ public final class VampireLord {
     /** Levitation (flight, capped near the ground on the client), thick hide, night eye. */
     static void apply(ServerPlayer player, boolean on) {
         Lycanthropy.modifier(player.getAttribute(Attributes.ARMOR), ARMOR, "Skycraft Vampire Lord", on ? 8 : 0,
-                net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADDITION);
+                net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADD_VALUE);
         Lycanthropy.modifier(player.getAttribute(Attributes.KNOCKBACK_RESISTANCE), KNOCKBACK, "Skycraft Vampire Lord", on ? 0.4 : 0,
-                net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADDITION);
+                net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADD_VALUE);
         var abilities = player.getAbilities();
         boolean changed = false;
         if (on) {
@@ -134,8 +134,8 @@ public final class VampireLord {
                 abilities.setFlyingSpeed(LORD_FLY);
                 changed = true;
             }
-            MobEffectInstance nv = player.getEffect(MobEffects.NIGHT_VISION);
-            if (nv == null || nv.getDuration() < 300) player.addEffect(new MobEffectInstance(MobEffects.NIGHT_VISION, 20 * 60, 0, false, false, false));
+            MobEffectInstance nv = player.getEffect(com.skycraft.platform.Effects.holder(MobEffects.NIGHT_VISION));
+            if (nv == null || nv.getDuration() < 300) player.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.NIGHT_VISION), 20 * 60, 0, false, false, false));
         } else {
             if (!player.isCreative() && !player.isSpectator()) {
                 abilities.mayfly = false;
@@ -143,7 +143,7 @@ public final class VampireLord {
             }
             abilities.setFlyingSpeed(DEFAULT_FLY);
             changed = true;
-            if (!Curses.tag(player).getBoolean(Curses.SIGHT)) player.removeEffect(MobEffects.NIGHT_VISION);
+            if (!Curses.tag(player).getBooleanOr(Curses.SIGHT, false)) player.removeEffect(com.skycraft.platform.Effects.holder(MobEffects.NIGHT_VISION));
         }
         if (changed) player.onUpdateAbilities();
     }
@@ -152,7 +152,7 @@ public final class VampireLord {
     static void tick(ServerPlayer player, long now) {
         apply(player, true);
         if (Buffs.active(player, NIGHT_CLOAK)) {
-            ServerLevel level = player.serverLevel();
+            ServerLevel level = player.level();
             for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(3.5),
                     e -> e != player && e.isAlive() && (e instanceof Enemy || e instanceof Mob m && m.getTarget() == player))) {
                 if (CombatHandler.secondaryHurt(e, MagicDamage.source(level, MagicDamage.SPELL, null, player), 2f)) player.heal(1f);
@@ -188,23 +188,23 @@ public final class VampireLord {
             Notifier.message(player, Component.translatable("curse.skycraft.lord.no_magicka"));
             return;
         }
-        ServerLevel level = player.serverLevel();
+        ServerLevel level = player.level();
         Vec3 from = player.getEyePosition().add(player.getViewVector(1f).scale(0.6)).add(0, -0.35, 0);
         LivingEntity target = aimed(player, DRAIN_RANGE);
         Vec3 to = target != null ? target.position().add(0, target.getBbHeight() * 0.6, 0) : rayEnd(player, DRAIN_RANGE);
-        beam(level, from, to, new DustParticleOptions(new Vector3f(0.75f, 0.05f, 0.08f), 1.1f));
+        beam(level, from, to, new DustParticleOptions(net.minecraft.util.ARGB.colorFromFloat(1f, 0.75f, 0.05f, 0.08f), 1.1f));
         CursePackets.anim(player, CurseAnims.Anim.CAST);
         if (target == null) return;
         int stage = Math.max(1, Curses.stage(player));
         float amount = 2.5f + 0.4f * stage + SkyData.get(player).getLevel() * 0.05f;
         DamageSource src = MagicDamage.source(level, MagicDamage.SPELL, null, player);
-        if (target.hurt(src, amount)) {
+        if (com.skycraft.platform.Effects.hurt(target, src, amount)) {
             player.heal(amount);
             if (target instanceof ServerPlayer tp) {
                 PlayerData td = SkyData.get(tp);
                 td.setStamina(td.getStamina() - amount * 4);
             }
-            if (player.tickCount % 4 == 0) level.playSound(null, target.blockPosition(), SoundEvents.HONEY_DRINK, SoundSource.PLAYERS, 0.6f, 0.5f);
+            if (player.tickCount % 4 == 0) level.playSound(null, target.blockPosition(), SoundEvents.HONEY_DRINK.value(), SoundSource.PLAYERS, 0.6f, 0.5f);
             if (!target.isAlive() && CurseCombat.isPerson(target)) killedByFeeding(player, target);
         }
     }
@@ -213,7 +213,7 @@ public final class VampireLord {
     static void castSpell(ServerPlayer player) {
         if (Curses.form(player) != Form.LORD) return;
         String id = CursePowers.selected(player, Curses.SELECTED_SPELL, CursePowers.RAISE_DEAD);
-        ServerLevel level = player.serverLevel();
+        ServerLevel level = player.level();
         switch (id) {
             case CursePowers.RAISE_DEAD -> {
                 CorpseEntity corpse = aimedCorpse(player, 20);
@@ -221,10 +221,10 @@ public final class VampireLord {
                     Notifier.message(player, Component.translatable("curse.skycraft.lord.no_corpse"));
                     return;
                 }
-                CompoundTag saved = corpse.saveWithoutId(new CompoundTag());
-                EntityType<?> type = EntityType.byString(saved.getString("BodyType")).orElse(null);
-                Entity probe = type == null || type == EntityType.PLAYER ? null : type.create(level);
-                if (!(probe instanceof Mob) || type.is(CombatHandler.BOSSES)) {
+                CompoundTag saved = com.skycraft.platform.EntityData.saveWithoutId(corpse);
+                EntityType<?> type = com.skycraft.platform.EntityData.type(saved.getStringOr("BodyType","")).orElse(null);
+                Entity probe = type == null || type == net.minecraft.world.entity.EntityTypes.PLAYER ? null : type.create(level, net.minecraft.world.entity.EntitySpawnReason.EVENT);
+                if (!(probe instanceof Mob) || type.builtInRegistryHolder().is(CombatHandler.BOSSES)) {
                     if (probe != null) probe.discard();
                     Notifier.message(player, Component.translatable("message.skycraft.corpse_cannot_rise"));
                     return;
@@ -234,10 +234,10 @@ public final class VampireLord {
                     Notifier.message(player, Component.translatable("curse.skycraft.lord.no_magicka"));
                     return;
                 }
-                net.minecraft.nbt.ListTag loot = saved.getList("Loot", net.minecraft.nbt.Tag.TAG_COMPOUND);
+                net.minecraft.nbt.ListTag loot = saved.getListOrEmpty("Loot");
                 for (int i = 0; i < loot.size(); i++) {
-                    net.minecraft.world.item.ItemStack stack = net.minecraft.world.item.ItemStack.of(loot.getCompound(i));
-                    if (!stack.isEmpty()) corpse.spawnAtLocation(stack, 0.3f);
+                    net.minecraft.world.item.ItemStack stack = com.skycraft.inventory.ItemData.parse(loot.getCompoundOrEmpty(i));
+                    if (!stack.isEmpty()) corpse.spawnAtLocation(level, stack, 0.3f);
                 }
                 Vec3 at = corpse.position();
                 corpse.discard();
@@ -245,7 +245,7 @@ public final class VampireLord {
                 EntityType<? extends Mob> mobType = (EntityType<? extends Mob>) type;
                 Mob thrall = Summons.conjureAt(player, mobType, "thrall", at, 20 * 60, m -> {
                     m.setCanPickUpLoot(false);
-                    m.addEffect(new MobEffectInstance(MobEffects.FIRE_RESISTANCE, 20 * 60, 0, false, false));
+                    m.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.FIRE_RESISTANCE), 20 * 60, 0, false, false));
                 });
                 if (thrall != null) {
                     thrall.setCustomName(Component.translatable("entity.skycraft.summon.thrall", thrall.getType().getDescription()));
@@ -255,16 +255,16 @@ public final class VampireLord {
             }
             case CursePowers.VAMPIRIC_GRIP -> {
                 LivingEntity target = aimed(player, 20);
-                if (target == null || target.getType().is(CombatHandler.BOSSES)) return;
+                if (target == null || target.getType().builtInRegistryHolder().is(CombatHandler.BOSSES)) return;
                 if (!Vitals.consumeMagicka(player, cost(player, 35))) {
                     Notifier.message(player, Component.translatable("curse.skycraft.lord.no_magicka"));
                     return;
                 }
                 Vec3 pull = player.position().add(player.getViewVector(1f).scale(2)).subtract(target.position()).scale(0.25);
                 target.setDeltaMovement(pull.x, Math.min(0.9, pull.y + 0.45), pull.z);
-                target.hurtMarked = true;
-                target.hurt(MagicDamage.source(level, MagicDamage.SPELL, null, player), 3f);
-                target.addEffect(new MobEffectInstance(ModEffects.STAGGER.get(), 40), player);
+                target.syncVelocity = true;
+                com.skycraft.platform.Effects.hurt(target, MagicDamage.source(level, MagicDamage.SPELL, null, player), 3f);
+                target.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(ModEffects.STAGGER.get()), 40), player);
                 beam(level, player.getEyePosition(), target.getEyePosition(), ParticleTypes.SCULK_SOUL);
             }
             case CursePowers.CORPSE_CURSE -> {
@@ -274,8 +274,8 @@ public final class VampireLord {
                     Notifier.message(player, Component.translatable("curse.skycraft.lord.no_magicka"));
                     return;
                 }
-                if (!target.getType().is(CombatHandler.BOSSES)) target.addEffect(new MobEffectInstance(ModEffects.PARALYSIS.get(), 20 * 8), player);
-                target.addEffect(new MobEffectInstance(MobEffects.WITHER, 20 * 8, 0), player);
+                if (!target.getType().builtInRegistryHolder().is(CombatHandler.BOSSES)) target.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(ModEffects.PARALYSIS.get()), 20 * 8), player);
+                target.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.WITHER), 20 * 8, 0), player);
                 beam(level, player.getEyePosition(), target.getEyePosition(), ParticleTypes.SOUL_FIRE_FLAME);
             }
             default -> {
@@ -293,7 +293,7 @@ public final class VampireLord {
             return;
         }
         if (!CursePowers.hasAbility(player, id) || !CursePowers.ready(player, id)) return;
-        ServerLevel level = player.serverLevel();
+        ServerLevel level = player.level();
         switch (id) {
             case CursePowers.BATS -> {
                 if (!Vitals.consumeStamina(player, 20f, false)) {
@@ -314,9 +314,9 @@ public final class VampireLord {
                 level.playSound(null, player.blockPosition(), SoundEvents.BAT_TAKEOFF, SoundSource.PLAYERS, 1.2f, 0.7f);
             }
             case CursePowers.MIST_FORM -> {
-                player.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, 20 * 8, 0, false, false, true));
-                player.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 20 * 8, 4, false, false, true));
-                player.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 20 * 8, 1, false, false, true));
+                player.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.INVISIBILITY), 20 * 8, 0, false, false, true));
+                player.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.RESISTANCE), 20 * 8, 4, false, false, true));
+                player.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.REGENERATION), 20 * 8, 1, false, false, true));
                 level.sendParticles(ParticleTypes.CLOUD, player.getX(), player.getY() + 1, player.getZ(), 40, 0.6, 0.9, 0.6, 0.01);
                 level.playSound(null, player.blockPosition(), SoundEvents.ILLUSIONER_MIRROR_MOVE, SoundSource.PLAYERS, 1f, 0.6f);
             }
@@ -327,7 +327,7 @@ public final class VampireLord {
             case CursePowers.DETECT_LIFE -> {
                 for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(48),
                         e -> e != player && e.isAlive() && !CurseCombat.isUndead(e))) {
-                    e.addEffect(new MobEffectInstance(MobEffects.GLOWING, 20 * 30, 0, false, false));
+                    e.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.GLOWING), 20 * 30, 0, false, false));
                 }
                 level.playSound(null, player.blockPosition(), SoundEvents.WARDEN_HEARTBEAT, SoundSource.PLAYERS, 1f, 1.2f);
             }
@@ -360,7 +360,7 @@ public final class VampireLord {
      */
     static boolean bite(ServerPlayer player, LivingEntity victim) {
         if (Curses.form(player) != Form.LORD || !victim.isAlive() || player.distanceToSqr(victim) > 4 * 4) return false;
-        if (!CurseCombat.isPerson(victim) || victim.getType().is(CombatHandler.BOSSES)) return false;
+        if (!CurseCombat.isPerson(victim) || victim.getType().builtInRegistryHolder().is(CombatHandler.BOSSES)) return false;
         boolean unaware = !(victim instanceof Mob m) || m.getTarget() != player;
         boolean weak = victim.getHealth() <= victim.getMaxHealth() * 0.5f;
         if (!victim.isSleeping() && !weak && !(unaware && !(victim instanceof Player))) {
@@ -368,11 +368,11 @@ public final class VampireLord {
             return true;
         }
         CursePackets.anim(player, CurseAnims.Anim.FEED);
-        ServerLevel level = player.serverLevel();
+        ServerLevel level = player.level();
         level.playSound(null, victim.blockPosition(), SoundEvents.PHANTOM_BITE, SoundSource.PLAYERS, 1.2f, 0.5f);
-        level.sendParticles(new DustParticleOptions(new Vector3f(0.6f, 0.02f, 0.05f), 1.4f), victim.getX(), victim.getY() + victim.getBbHeight() * 0.8,
+        level.sendParticles(new DustParticleOptions(net.minecraft.util.ARGB.colorFromFloat(1f, 0.6f, 0.02f, 0.05f), 1.4f), victim.getX(), victim.getY() + victim.getBbHeight() * 0.8,
                 victim.getZ(), 30, 0.25, 0.25, 0.25, 0.05);
-        victim.hurt(player.damageSources().playerAttack(player), victim.getHealth() + victim.getAbsorptionAmount() + 50f);
+        com.skycraft.platform.Effects.hurt(victim, player.damageSources().playerAttack(player), victim.getHealth() + victim.getAbsorptionAmount() + 50f);
         if (!victim.isAlive()) killedByFeeding(player, victim);
         return true;
     }
@@ -433,20 +433,20 @@ public final class VampireLord {
     /** A swirl of shadow and blood (transformations, Bats). */
     private static void burst(ServerLevel level, Vec3 at, int n) {
         level.sendParticles(ParticleTypes.SQUID_INK, at.x, at.y, at.z, n / 2, 0.5, 0.8, 0.5, 0.05);
-        level.sendParticles(new DustParticleOptions(new Vector3f(0.45f, 0.02f, 0.04f), 1.2f), at.x, at.y, at.z, n, 0.6, 0.9, 0.6, 0.02);
+        level.sendParticles(new DustParticleOptions(net.minecraft.util.ARGB.colorFromFloat(1f, 0.45f, 0.02f, 0.04f), 1.2f), at.x, at.y, at.z, n, 0.6, 0.9, 0.6, 0.02);
     }
 
     private static void releaseBats(ServerLevel level, Vec3 at, int n) {
         long until = level.getGameTime() + 50;
         for (int i = 0; i < n; i++) {
-            Bat bat = EntityType.BAT.create(level);
+            Bat bat = net.minecraft.world.entity.EntityTypes.BAT.create(level, net.minecraft.world.entity.EntitySpawnReason.EVENT);
             if (bat == null) continue;
-            bat.moveTo(at.x + level.random.nextGaussian() * 0.4, at.y + level.random.nextGaussian() * 0.3, at.z + level.random.nextGaussian() * 0.4, 0, 0);
+            bat.snapTo(at.x + level.getRandom().nextGaussian() * 0.4, at.y + level.getRandom().nextGaussian() * 0.3, at.z + level.getRandom().nextGaussian() * 0.4, 0, 0);
             bat.setResting(false);
-            bat.setInvulnerable(true);
+            bat.setPermanentlyInvulnerable(true);
             bat.setSilent(i > 1);
             bat.addTag("skycraft_lord_bat");
-            if (level.addFreshEntity(bat)) BATS.add(new BatEntry(bat, until + level.random.nextInt(20)));
+            if (level.addFreshEntity(bat)) BATS.add(new BatEntry(bat, until + level.getRandom().nextInt(20)));
         }
     }
 

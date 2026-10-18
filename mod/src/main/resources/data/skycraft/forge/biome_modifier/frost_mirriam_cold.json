@@ -1,6 +1,0 @@
-{
-  "type": "forge:add_features",
-  "biomes": "#skycraft:spawns/cold",
-  "features": "skycraft:frost_mirriam_patch",
-  "step": "vegetal_decoration"
-}

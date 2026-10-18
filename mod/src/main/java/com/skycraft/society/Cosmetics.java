@@ -7,15 +7,15 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 /**
  * Server side of faction cosmetics. The chosen piece is stored in the player's persisted data
  * ({@code PlayerPersisted.skycraft_cosmetic}, survives death) and sent to every client tracking the player.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class Cosmetics {
     /** Forge copies this sub-compound of the persistent data across deaths. */
     private static final String PERSISTED = "PlayerPersisted";
@@ -26,12 +26,12 @@ public final class Cosmetics {
     /** The player's Forge-persisted data (kept across deaths), not synced. */
     static CompoundTag persistedTag(Player player) {
         CompoundTag root = player.getPersistentData();
-        if (!root.contains(PERSISTED, net.minecraft.nbt.Tag.TAG_COMPOUND)) root.put(PERSISTED, new CompoundTag());
-        return root.getCompound(PERSISTED);
+        if (!com.skycraft.platform.NbtData.hasType(root, PERSISTED, net.minecraft.nbt.Tag.TAG_COMPOUND)) root.put(PERSISTED, new CompoundTag());
+        return root.getCompoundOrEmpty(PERSISTED);
     }
 
     public static String get(Player player) {
-        return persistedTag(player).getString(KEY);
+        return persistedTag(player).getStringOr(KEY, "");
     }
 
     private static SocietyPackets.CosmeticSync sync(Player player) {

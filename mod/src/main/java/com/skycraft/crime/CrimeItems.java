@@ -7,20 +7,20 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.registries.DeferredRegister;
+import net.minecraft.core.registries.BuiltInRegistries;
+import java.util.function.Supplier;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
 /** Crime items: the lockpick. */
 public final class CrimeItems {
-    public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, Skycraft.MODID);
+    public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(BuiltInRegistries.ITEM, Skycraft.MODID);
 
-    public static final RegistryObject<Item> LOCKPICK = ITEMS.register("lockpick", () -> new LockpickItem(new Item.Properties().stacksTo(64)));
-    public static final RegistryObject<Item> JAIL_KEY = ITEMS.register("jail_key", () -> new JailKeyItem(new Item.Properties().stacksTo(1)));
+    public static final Supplier<Item> LOCKPICK = ITEMS.register("lockpick", () -> new LockpickItem(com.skycraft.platform.SkyProperties.item("lockpick").stacksTo(64)));
+    public static final Supplier<Item> JAIL_KEY = ITEMS.register("jail_key", () -> new JailKeyItem(com.skycraft.platform.SkyProperties.item("jail_key").stacksTo(1)));
     /** Boolean tag on a jail key: the jail's property (never stolen goods, never confiscated, returned on leaving). */
     public static final String JAIL_PROPERTY = "skycraft_jail_property";
 
@@ -37,8 +37,8 @@ public final class CrimeItems {
         }
 
         @Override
-        public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
-            tooltip.add(Component.translatable("item.skycraft.jail_key.desc").withStyle(ChatFormatting.GRAY));
+        public void appendHoverText(ItemStack stack, net.minecraft.world.item.Item.TooltipContext context263, net.minecraft.world.item.component.TooltipDisplay display263, java.util.function.Consumer<Component> tooltip, TooltipFlag flag) {
+            tooltip.accept(Component.translatable("item.skycraft.jail_key.desc").withStyle(ChatFormatting.GRAY));
         }
     }
 
@@ -48,8 +48,8 @@ public final class CrimeItems {
         }
 
         @Override
-        public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
-            tooltip.add(Component.translatable("item.skycraft.lockpick.desc").withStyle(ChatFormatting.GRAY));
+        public void appendHoverText(ItemStack stack, net.minecraft.world.item.Item.TooltipContext context263, net.minecraft.world.item.component.TooltipDisplay display263, java.util.function.Consumer<Component> tooltip, TooltipFlag flag) {
+            tooltip.accept(Component.translatable("item.skycraft.lockpick.desc").withStyle(ChatFormatting.GRAY));
         }
     }
 }

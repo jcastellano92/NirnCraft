@@ -246,7 +246,7 @@ public enum Race {
         if (source.is(DamageTypes.LIGHTNING_BOLT) || source.is(com.skycraft.magic.MagicDamage.SHOCK)) m *= 1f - resistance("shock");
         if (source.is(DamageTypes.MAGIC) || source.is(DamageTypes.INDIRECT_MAGIC)) {
             // the poison effect hurts with plain magic damage
-            m *= victim.hasEffect(MobEffects.POISON) && source.is(DamageTypes.MAGIC) ? 1f - resistance("poison") : 1f - resistance("magic");
+            m *= victim.hasEffect(com.skycraft.platform.Effects.holder(MobEffects.POISON)) && source.is(DamageTypes.MAGIC) ? 1f - resistance("poison") : 1f - resistance("magic");
         }
         return m;
     }

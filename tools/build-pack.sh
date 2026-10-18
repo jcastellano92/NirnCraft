@@ -12,6 +12,7 @@ LIST="$ROOT/tools/modlist.txt"
 REPORT="$ROOT/pack/RESOLVE_REPORT.md"
 PY="$(command -v python3 || command -v python || { command -v py >/dev/null && echo "py -3"; })"
 command -v packwiz >/dev/null || { echo "packwiz is not on PATH" >&2; exit 2; }
+$PY "$ROOT/tools/validate_pack.py"
 cd "$PACK"
 
 MARK="$(mktemp)"

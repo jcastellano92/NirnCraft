@@ -12,13 +12,12 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
-import net.minecraft.world.entity.animal.IronGolem;
+import net.minecraft.world.entity.animal.golem.IronGolem;
 import net.minecraft.world.entity.monster.Monster;
-import net.minecraft.world.entity.npc.AbstractVillager;
+import net.minecraft.world.entity.npc.villager.AbstractVillager;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -53,9 +52,9 @@ public class DraugrEntity extends SkyHumanoid implements Ranked {
     }
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        this.entityData.define(RANK, 1);
+    protected void defineSynchedData(net.minecraft.network.syncher.SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(RANK, 1);
     }
 
     /** 0 restless, 1 draugr, 2 wight, 3 scourge, 4 overlord (helmets and armour follow it). */
@@ -70,8 +69,8 @@ public class DraugrEntity extends SkyHumanoid implements Ranked {
 
     /** Scourges and overlords know the Thu'um: Unrelenting Force. */
     @Override
-    protected void customServerAiStep() {
-        super.customServerAiStep();
+    protected void customServerAiStep(net.minecraft.server.level.ServerLevel serverLevel263) {
+        super.customServerAiStep(serverLevel263);
         if (shoutCooldown > 0) {
             shoutCooldown--;
             return;
@@ -91,15 +90,21 @@ public class DraugrEntity extends SkyHumanoid implements Ranked {
     }
 
     @Override
-    public void addAdditionalSaveData(net.minecraft.nbt.CompoundTag tag) {
-        super.addAdditionalSaveData(tag);
+    public void addAdditionalSaveData(net.minecraft.world.level.storage.ValueOutput output263) {
+        super.addAdditionalSaveData(output263);
+        net.minecraft.nbt.CompoundTag tag = new net.minecraft.nbt.CompoundTag();
+        
         tag.putInt("Rank", getRank());
+    
+        output263.store(tag);
     }
 
     @Override
-    public void readAdditionalSaveData(net.minecraft.nbt.CompoundTag tag) {
-        super.readAdditionalSaveData(tag);
-        if (tag.contains("Rank")) this.entityData.set(RANK, tag.getInt("Rank"));
+    public void readAdditionalSaveData(net.minecraft.world.level.storage.ValueInput input263) {
+        super.readAdditionalSaveData(input263);
+        net.minecraft.nbt.CompoundTag tag = com.skycraft.platform.ValueTags.read(input263 , "Rank");
+        
+        if (tag.contains("Rank")) this.entityData.set(RANK, tag.getIntOr("Rank",0));
     }
 
     @Override
@@ -111,8 +116,8 @@ public class DraugrEntity extends SkyHumanoid implements Ranked {
     }
 
     @Override
-    public MobType getMobType() {
-        return MobType.UNDEAD;
+    public boolean isInvertedHealAndHarm() {
+        return true;
     }
 
     @Override
@@ -128,7 +133,7 @@ public class DraugrEntity extends SkyHumanoid implements Ranked {
     @Override
     protected void equip(RandomSource random, DifficultyInstance difficulty) {
         // economy workstream: Ancient Nord weapons and armour pieces
-        if (!this.level().isClientSide) {
+        if (!this.level().isClientSide()) {
             com.skycraft.arsenal.LeveledGear.outfit(this, com.skycraft.arsenal.LeveledGear.Outfit.DRAUGR, random, 0.05f);
             return;
         }
@@ -150,10 +155,10 @@ public class DraugrEntity extends SkyHumanoid implements Ranked {
 
     /** The cold touch of the draugr slows its victims. */
     @Override
-    public boolean doHurtTarget(Entity target) {
-        boolean hit = super.doHurtTarget(target);
+    public boolean doHurtTarget(net.minecraft.server.level.ServerLevel serverLevel263, Entity target) {
+        boolean hit = super.doHurtTarget(serverLevel263, target);
         if (hit && target instanceof LivingEntity living && this.getRandom().nextFloat() < 0.25f) {
-            living.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 40, 0), this);
+            living.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.SLOWNESS), 40, 0), this);
         }
         return hit;
     }

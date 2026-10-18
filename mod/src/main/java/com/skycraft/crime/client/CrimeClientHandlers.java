@@ -1,7 +1,7 @@
 package com.skycraft.crime.client;
 
 import com.skycraft.crime.CrimePackets;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
 
 /** Client-side handlers for crime S2C packets (only ever class-loaded on the client). */
@@ -14,8 +14,8 @@ public final class CrimeClientHandlers {
 
     public static void openPickpocket(CrimePackets.OpenPickpocket m) {
         Minecraft mc = Minecraft.getInstance();
-        if (mc.screen instanceof PickpocketScreen screen && screen.entityId() == m.entityId()) screen.update(m);
-        else mc.setScreen(new PickpocketScreen(m));
+        if (mc.gui.screen() instanceof PickpocketScreen screen && screen.entityId() == m.entityId()) screen.update(m);
+        else mc.gui.setScreen(new PickpocketScreen(m));
     }
 
     /** The opening's loading cover, for an arrest whose jail is being built (title, subtitle, chunks ready of needed). */
@@ -31,15 +31,15 @@ public final class CrimeClientHandlers {
 
     public static void closePickpocket() {
         Minecraft mc = Minecraft.getInstance();
-        if (mc.screen instanceof PickpocketScreen) mc.setScreen(null);
+        if (mc.gui.screen() instanceof PickpocketScreen) mc.gui.setScreen(null);
     }
 
     public static void openLockpick(CrimePackets.OpenLockpick m) {
-        Minecraft.getInstance().setScreen(new LockpickScreen(m));
+        Minecraft.getInstance().gui.setScreen(new LockpickScreen(m));
     }
 
     public static void lockResult(CrimePackets.LockResult m) {
-        if (Minecraft.getInstance().screen instanceof LockpickScreen screen) screen.onResult(m);
+        if (Minecraft.getInstance().gui.screen() instanceof LockpickScreen screen) screen.onResult(m);
     }
 
     public static void containerInfo(CrimePackets.ContainerInfo m) {

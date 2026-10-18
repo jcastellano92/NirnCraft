@@ -15,6 +15,9 @@ JAR="$1"
 OUT="${2:-$ROOT/dist/pack-build}"
 PY="$(command -v python3 || command -v python || { command -v py >/dev/null && echo "py -3"; })"
 
+$PY "$ROOT/tools/validate_pack.py" --core-jar "$JAR"
+# Resolve before cleanup: an incorrect caller path must not remove anything outside dist/.
+$PY -c 'import pathlib,sys; p=pathlib.Path(sys.argv[1]).resolve(); d=pathlib.Path(sys.argv[2]).resolve(); sys.exit(0 if p.is_relative_to(d) and p!=d else "Build pack output must be a child of dist/")' "$OUT" "$ROOT/dist"
 rm -rf "$OUT"
 mkdir -p "$OUT"
 cp -R "$ROOT/pack/." "$OUT/"

@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:random_selector",
+  "features": [
+    {
+      "feature": "minecraft:acacia_checked",
+      "chance": 0.2
+    }
+  ],
+  "default": "skycraft:biome/akaviri_pine_checked"
+}

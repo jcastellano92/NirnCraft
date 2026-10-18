@@ -8,17 +8,17 @@ import com.skycraft.creatures.client.rig.defs.Defs;
 import com.skycraft.seas.SchoolFishEntity;
 import com.skycraft.seas.SeasRegistry;
 import com.skycraft.seas.client.rig.SeaDefs;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.EntityRenderersEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.minecraft.resources.Identifier;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.EntityRenderersEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 /**
  * Mod-bus client registration of the seas module: its rig models join the bestiary's model definitions, and its
  * creatures get rig renderers with their textures ({@code tools/textures/seas.py}).
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
 public final class SeasClient {
     static {
         // before any layer or renderer registration: the bestiary looks models up by name in Defs.ALL
@@ -57,7 +57,7 @@ public final class SeasClient {
 
     private static void fish(EntityRenderersEvent.RegisterRenderers event, net.minecraft.world.entity.EntityType<SchoolFishEntity> type,
                              String texture, float scale) {
-        ResourceLocation tex = BestiaryClient.tex(texture);
+        Identifier tex = BestiaryClient.tex(texture);
         event.registerEntityRenderer(type, ctx -> new RigRenderer<SchoolFishEntity>(ctx, BestiaryClient.layer("school_fish"),
                 Defs.get("school_fish"), 0.15f, e -> tex).scale(scale));
     }

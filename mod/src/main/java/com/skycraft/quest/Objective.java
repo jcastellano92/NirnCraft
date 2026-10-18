@@ -145,7 +145,7 @@ public class Objective {
 
     public int spawnCount() {
         int n = 0;
-        for (int i = 0; i < spawns.size(); i++) n += Math.max(1, spawns.getCompound(i).getInt("count"));
+        for (int i = 0; i < spawns.size(); i++) n += Math.max(1, spawns.getCompoundOrEmpty(i).getIntOr("count",0));
         return n;
     }
 
@@ -168,13 +168,13 @@ public class Objective {
         t.putBoolean("done", done);
         t.putString("topic", Quest.writeComponent(topic));
         t.putString("reply", Quest.writeComponent(reply));
-        if (npc != null) t.putUUID("npc", npc);
+        if (npc != null) t.store("npc", net.minecraft.core.UUIDUtil.CODEC,  npc);
         t.putString("npcFilter", npcFilter);
         t.put("spawns", spawns.copy());
         t.putString("placement", placement);
         t.putBoolean("spawned", spawned);
         ListTag ids = new ListTag();
-        for (UUID id : spawnedIds) ids.add(NbtUtils.createUUID(id));
+        for (UUID id : spawnedIds) ids.add(net.minecraft.core.UUIDUtil.CODEC.encodeStart(net.minecraft.nbt.NbtOps.INSTANCE, id).getOrThrow());
         t.put("spawnedIds", ids);
         t.putBoolean("sneakKill", sneakKill);
         t.putString("onComplete", onComplete);
@@ -187,39 +187,39 @@ public class Objective {
     public static Objective load(CompoundTag t) {
         Objective o = new Objective();
         try {
-            o.type = Type.valueOf(t.getString("type"));
+            o.type = Type.valueOf(t.getStringOr("type",""));
         } catch (IllegalArgumentException e) {
             o.type = Type.GO_TO;
         }
-        o.text = Quest.readComponent(t.getString("text"));
-        o.target = t.getString("target");
-        o.required = Math.max(1, t.getInt("required"));
-        o.progress = t.getInt("progress");
-        o.hasPos = t.getBoolean("hasPos");
-        o.pos = new BlockPos(t.getInt("x"), t.getInt("y"), t.getInt("z"));
-        o.yKnown = !t.contains("yKnown") || t.getBoolean("yKnown");
-        o.dim = t.contains("dim") ? t.getString("dim") : "minecraft:overworld";
-        o.radius = t.getInt("radius");
-        o.done = t.getBoolean("done");
-        o.topic = Quest.readComponent(t.getString("topic"));
-        o.reply = Quest.readComponent(t.getString("reply"));
-        o.npc = t.hasUUID("npc") ? t.getUUID("npc") : null;
-        o.npcFilter = t.getString("npcFilter");
-        o.spawns = t.getList("spawns", Tag.TAG_COMPOUND).copy();
-        o.placement = t.contains("placement") ? t.getString("placement") : "surface";
-        o.spawned = t.getBoolean("spawned");
-        ListTag ids = t.getList("spawnedIds", Tag.TAG_INT_ARRAY);
+        o.text = Quest.readComponent(t.getStringOr("text",""));
+        o.target = t.getStringOr("target","");
+        o.required = Math.max(1, t.getIntOr("required",0));
+        o.progress = t.getIntOr("progress",0);
+        o.hasPos = t.getBooleanOr("hasPos",false);
+        o.pos = new BlockPos(t.getIntOr("x",0), t.getIntOr("y",0), t.getIntOr("z",0));
+        o.yKnown = !t.contains("yKnown") || t.getBooleanOr("yKnown",false);
+        o.dim = t.contains("dim") ? t.getStringOr("dim","") : "minecraft:overworld";
+        o.radius = t.getIntOr("radius",0);
+        o.done = t.getBooleanOr("done",false);
+        o.topic = Quest.readComponent(t.getStringOr("topic",""));
+        o.reply = Quest.readComponent(t.getStringOr("reply",""));
+        o.npc = t.read("npc", net.minecraft.core.UUIDUtil.CODEC).isPresent() ? t.read("npc", net.minecraft.core.UUIDUtil.CODEC).orElseThrow() : null;
+        o.npcFilter = t.getStringOr("npcFilter","");
+        o.spawns = t.getListOrEmpty("spawns").copy();
+        o.placement = t.contains("placement") ? t.getStringOr("placement","") : "surface";
+        o.spawned = t.getBooleanOr("spawned",false);
+        ListTag ids = t.getListOrEmpty("spawnedIds");
         for (Tag id : ids) {
             try {
-                o.spawnedIds.add(NbtUtils.loadUUID(id));
+                o.spawnedIds.add(net.minecraft.core.UUIDUtil.CODEC.parse(net.minecraft.nbt.NbtOps.INSTANCE, id).getOrThrow());
             } catch (IllegalArgumentException ignored) {
             }
         }
-        o.sneakKill = t.getBoolean("sneakKill");
-        o.onComplete = t.getString("onComplete");
-        o.label = t.getString("label");
-        o.missing = t.getInt("missing");
-        o.data = t.getCompound("data").copy();
+        o.sneakKill = t.getBooleanOr("sneakKill",false);
+        o.onComplete = t.getStringOr("onComplete","");
+        o.label = t.getStringOr("label","");
+        o.missing = t.getIntOr("missing",0);
+        o.data = t.getCompoundOrEmpty("data").copy();
         return o;
     }
 }

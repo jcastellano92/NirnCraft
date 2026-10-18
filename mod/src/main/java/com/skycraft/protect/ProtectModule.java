@@ -1,8 +1,8 @@
 package com.skycraft.protect;
 
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.config.ModConfig;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.ModLoadingContext;
+import net.neoforged.fml.config.ModConfig;
 
 /**
  * Skyrim-style world protection ("you can't pick up the world"): outside a homestead nobody breaks or places blocks,
@@ -26,7 +26,7 @@ public final class ProtectModule {
 
     /** Registers this module's config and autorun task. Called from the mod constructor. */
     public static void init(IEventBus modBus) {
-        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, ProtectConfig.SPEC, "skycraft-protect.toml");
+        com.skycraft.Skycraft.config(ModConfig.Type.LOCAL, ProtectConfig.SPEC, "skycraft-protect.toml");
         ProtectSelfTest.registerAutorun();
     }
 }

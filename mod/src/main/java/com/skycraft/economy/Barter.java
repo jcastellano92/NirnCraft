@@ -13,7 +13,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /** Server side of bartering. Every price and check is done here; the client only displays the state it is sent. */
+@net.neoforged.fml.common.EventBusSubscriber(modid = com.skycraft.Skycraft.MODID)
 public final class Barter {
     public static final byte STATUS_OK = 0;
     public static final byte STATUS_NOT_DEALT = 1;
@@ -41,12 +42,14 @@ public final class Barter {
 
     private static final double MAX_DIST_SQ = 10 * 10;
     private static final int MAIN_INVENTORY = 36;
+    private record Viewer(ServerPlayer player, int entityId, java.util.UUID npc, String shop) {}
+    private static final java.util.Map<java.util.UUID, Viewer> VIEWERS = new java.util.HashMap<>();
 
     private Barter() {}
 
     /** Opens the barter menu with a merchant. */
     public static void open(ServerPlayer player, LivingEntity npc) {
-        if (!Merchants.isMerchant(npc)) return;
+        if (!Merchants.isMerchant(npc) || !canReach(player, npc)) return;
         com.skycraft.society.RaceAttitudes.Evaluation eval = com.skycraft.society.RaceAttitudes.evaluate(npc, player);
         if (com.skycraft.society.RaceAttitudes.KEY_BLOOD_KIN_REQUIRED.equals(eval.attitudeKey())) {
             Dialogue.open(player, npc, Component.translatable("society.skycraft.attitude.blood_kin_required.0"));
@@ -57,6 +60,7 @@ public final class Barter {
             return;
         }
         Shop shop = Shop.of(npc, player);
+        VIEWERS.put(player.getUUID(), new Viewer(player, npc.getId(), npc.getUUID(), shop.key()));
         sendState(player, npc, shop, Merchants.greeting(npc), true);
         // the merchant stays put and faces the player while the shop is open; closing it ends the conversation
         Dialogue.hold(player, npc);
@@ -75,8 +79,11 @@ public final class Barter {
      * C2S: buy (from stock index), sell (from inventory slot or pack entry) or buy back (from the buy-back list) one
      * item or the whole stack. {@code confirm} is the explicit second click that sells an equipped item.
      */
-    static void handleAction(ServerPlayer player, int entityId, int op, int index, boolean all, ResourceLocation itemId, boolean confirm) {
+    static void handleAction(ServerPlayer player, int entityId, int op, int index, boolean all, Identifier itemId, boolean confirm) {
+        Viewer viewer = VIEWERS.get(player.getUUID());
+        if (viewer == null || viewer.player != player || viewer.entityId != entityId) return;
         if (!(player.level().getEntity(entityId) instanceof LivingEntity npc) || !Merchants.isMerchant(npc) || !canReach(player, npc)) return;
+        if (!viewer.npc.equals(npc.getUUID())) return;
         // a screen opened at 19:59 (or before a fight) is not good for ever: the shop hours and the mood are re-checked
         if (!Merchants.alwaysOpen(npc) && !Shop.isOpen(player.level())) {
             Dialogue.open(player, npc, Component.translatable("dialogue.skycraft.economy.closed"));
@@ -95,26 +102,54 @@ public final class Barter {
         };
         sendState(player, npc, shop, msg, false);
 
-        // The stock and the gold belong to the shop: everybody at any counter of it sees the change (a client without
-        // that merchant's screen open ignores the state)
-        for (ServerPlayer other : player.serverLevel().players()) {
-            if (other == player || other.isSpectator()) continue;
-            if (canReach(other, npc)) {
-                sendState(other, npc, shop, Component.empty(), false);
+        refreshViewers(player, shop.key());
+    }
+
+    /** Shop updates go only to active, reachable screens, including other counters of the same shop. */
+    private static void refreshViewers(ServerPlayer actor, String shopKey) {
+        var iterator = VIEWERS.values().iterator();
+        while (iterator.hasNext()) {
+            Viewer v = iterator.next();
+            if (!(v.player.level().getEntity(v.npc) instanceof LivingEntity counter)
+                    || v.player.isRemoved() || !v.player.isAlive() || !canReach(v.player, counter)
+                    || !Merchants.isMerchant(counter)) {
+                iterator.remove();
+                continue;
             }
-            for (LivingEntity near : other.level().getEntitiesOfClass(LivingEntity.class, other.getBoundingBox().inflate(10),
-                    e -> e != npc && Merchants.isMerchant(e) && canReach(other, e))) {
-                Shop theirs = Shop.of(near, other);
-                if (theirs.key().equals(shop.key())) sendState(other, near, theirs, Component.empty(), false);
+            if (v.player != actor && v.shop.equals(shopKey)) {
+                Shop theirs = Shop.of(counter, v.player);
+                if (theirs.key().equals(shopKey)) sendState(v.player, counter, theirs, Component.empty(), false);
             }
         }
     }
 
-    private static boolean matches(ItemStack stack, ResourceLocation itemId) {
+    public static void close(ServerPlayer player, int entityId) {
+        Viewer v = VIEWERS.get(player.getUUID());
+        if (v != null && v.player == player && v.entityId == entityId) VIEWERS.remove(player.getUUID());
+    }
+
+    @net.neoforged.bus.api.SubscribeEvent
+    public static void onLogout(net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerLoggedOutEvent event) {
+        VIEWERS.remove(event.getEntity().getUUID());
+    }
+
+    @net.neoforged.bus.api.SubscribeEvent
+    public static void onStop(net.neoforged.neoforge.event.server.ServerStoppedEvent event) {
+        VIEWERS.clear();
+    }
+
+    @net.neoforged.bus.api.SubscribeEvent
+    public static void onTick(net.neoforged.neoforge.event.tick.ServerTickEvent.Post event) {
+        if (!(event instanceof net.neoforged.neoforge.event.tick.ServerTickEvent.Post)) return;
+        VIEWERS.values().removeIf(v -> v.player.isRemoved() || !v.player.isAlive()
+                || !(v.player.level().getEntity(v.npc) instanceof LivingEntity npc) || !canReach(v.player, npc));
+    }
+
+    private static boolean matches(ItemStack stack, Identifier itemId) {
         return !stack.isEmpty() && BuiltInRegistries.ITEM.getKey(stack.getItem()).equals(itemId);
     }
 
-    static Component buy(ServerPlayer player, Shop shop, int index, boolean all, ResourceLocation itemId) {
+    static Component buy(ServerPlayer player, Shop shop, int index, boolean all, Identifier itemId) {
         if (index < 0 || index >= shop.rows()) return Component.empty();
         ItemStack stack = shop.row(index);
         if (!matches(stack, itemId)) return Component.empty();
@@ -148,7 +183,7 @@ public final class Barter {
     }
 
 
-    static Component sell(ServerPlayer player, Shop shop, int slot, boolean all, ResourceLocation itemId, boolean confirm) {
+    static Component sell(ServerPlayer player, Shop shop, int slot, boolean all, Identifier itemId, boolean confirm) {
         Inventory inv = player.getInventory();
         boolean packed = Pack.isVirtual(slot);
         ItemStack stack;
@@ -169,7 +204,7 @@ public final class Barter {
         if (isQuestKind(stack)) return Component.translatable("message.skycraft.economy.quest_item", name);
         if (!sellable(stack) || Pricing.sellPrice(player, stack, npc) <= 0) return Component.translatable("message.skycraft.economy.cant_sell");
         // a worn item with the curse of binding can't be taken off, so it can't be sold either
-        if (eq != InventoryActions.EQ_NONE && !player.isCreative() && EnchantmentHelper.hasBindingCurse(stack)) {
+        if (eq != InventoryActions.EQ_NONE && !player.isCreative() && EnchantmentHelper.has(stack, net.minecraft.world.item.enchantment.EnchantmentEffectComponents.PREVENT_ARMOR_CHANGE)) {
             return Component.translatable("message.skycraft.economy.bound", name);
         }
         if (!Merchants.buysFrom(player, npc, stack)) return Component.translatable("message.skycraft.economy.not_dealt");
@@ -202,7 +237,7 @@ public final class Barter {
             for (int i = 0; i < Inventory.INVENTORY_SIZE; i++) {
                 if (i == slot) continue;
                 ItemStack s = inv.getItem(i);
-                if (s.isEmpty() || !ItemStack.isSameItemSameTags(s, template)) continue;
+                if (s.isEmpty() || !ItemStack.isSameItemSameComponents(s, template)) continue;
                 if (InventoryActions.equipState(player, inv, i, s) != InventoryActions.EQ_NONE) continue;
                 slots.add(i);
                 available += s.getCount();
@@ -264,12 +299,12 @@ public final class Barter {
         if (!ItemCategory.isJewelry(sold)) return;
         Item item = sold.getItem();
         if (player.getInventory().countItem(item) > 0 || Pack.count(player, item) > 0) return;
-        ResourceLocation id = BuiltInRegistries.ITEM.getKey(item);
+        Identifier id = BuiltInRegistries.ITEM.getKey(item);
         com.skycraft.core.PlayerData data = com.skycraft.core.SkyData.get(player);
         CompoundTag apparel = data.module("apparel");
         boolean changed = false;
         for (String kind : new String[]{"necklace", "ring", "circlet"}) {
-            if (id != null && id.toString().equals(apparel.getString(kind))) {
+            if (id != null && id.toString().equals(apparel.getStringOr(kind, ""))) {
                 apparel.remove(kind);
                 changed = true;
             }
@@ -281,7 +316,7 @@ public final class Barter {
     }
 
     /** Buys back what this player sold to this merchant: at the price it was paid, from the shop's stock. */
-    static Component buyback(ServerPlayer player, Shop shop, int index, boolean all, ResourceLocation itemId) {
+    static Component buyback(ServerPlayer player, Shop shop, int index, boolean all, Identifier itemId) {
         List<Buyback.Entry> list = Buyback.list(player, shop);
         if (index < 0 || index >= list.size()) return Component.empty();
         Buyback.Entry e = list.get(index);
@@ -328,8 +363,8 @@ public final class Barter {
     public static boolean isQuestKind(ItemStack stack) {
         if (stack.isEmpty()) return false;
         if (com.skycraft.quest.QuestItems.isQuestItem(stack)) return true;
-        CompoundTag tag = stack.getTag();
-        if (tag != null && tag.getBoolean(NO_SELL_NBT)) return true;
+        CompoundTag tag = com.skycraft.inventory.ItemData.custom(stack);
+        if (tag != null && tag.getBooleanOr(NO_SELL_NBT, false)) return true;
         Item it = stack.getItem();
         return it instanceof com.skycraft.quest.QuestItems.QuestItem || it instanceof com.skycraft.quest.QuestItems.RelicItem
                 || it instanceof com.skycraft.quest.QuestItems.BlackHandLetter;
@@ -339,11 +374,11 @@ public final class Barter {
     public static boolean sellable(ItemStack stack) {
         if (stack.isEmpty() || Currency.valueOf(stack) > 0 || isQuestKind(stack)) return false;
         if (com.skycraft.magic.bound.BoundWeapons.isBound(stack)) return false;
-        CompoundTag tag = stack.getTag();
+        CompoundTag tag = com.skycraft.inventory.ItemData.custom(stack);
         if (tag == null) return true;
-        if (tag.contains("Items", Tag.TAG_LIST) && !tag.getList("Items", Tag.TAG_COMPOUND).isEmpty()) return false;
-        CompoundTag be = tag.getCompound("BlockEntityTag");
-        return !(be.contains("Items", Tag.TAG_LIST) && !be.getList("Items", Tag.TAG_COMPOUND).isEmpty());
+        if (com.skycraft.platform.NbtData.hasType(tag, "Items", Tag.TAG_LIST) && !tag.getListOrEmpty("Items").isEmpty()) return false;
+        CompoundTag be = tag.getCompoundOrEmpty("BlockEntityTag");
+        return !(com.skycraft.platform.NbtData.hasType(be, "Items", Tag.TAG_LIST) && !be.getListOrEmpty("Items").isEmpty());
     }
 
     // ------------------------------------------------------------------ state
@@ -428,7 +463,7 @@ public final class Barter {
     private static void addRow(List<SellRow> rows, int index, ItemStack s, int equip) {
         if (equip == InventoryActions.EQ_NONE) {
             for (SellRow r : rows) {
-                if (r.equip == InventoryActions.EQ_NONE && ItemStack.isSameItemSameTags(r.stack, s)) {
+                if (r.equip == InventoryActions.EQ_NONE && ItemStack.isSameItemSameComponents(r.stack, s)) {
                     r.stack.grow(s.getCount());
                     return;
                 }
@@ -488,7 +523,7 @@ public final class Barter {
             line = Component.translatable(ranOut ? "dialogue.skycraft.economy.bulk.no_gold" : "dialogue.skycraft.economy.bulk.nothing");
         } else {
             Currency.give(player, total);
-            Progression.addSkillXp(player, Skill.SPEECH, total);
+            if (!Buyback.noXp(player, shop)) Progression.addSkillXp(player, Skill.SPEECH, total);
             player.level().playSound(null, player.blockPosition(), SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 0.6f, 0.9f);
             line = ranOut
                     ? Component.translatable("dialogue.skycraft.economy.bulk.partial", count, total)

@@ -14,7 +14,7 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.saveddata.SavedData;
-import net.minecraft.world.level.storage.DimensionDataStorage;
+import net.minecraft.world.level.storage.SavedDataStorage;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayDeque;
@@ -101,21 +101,21 @@ public final class RoadsData extends SavedData {
     private final Long2ObjectOpenHashMap<RoadBucket> buckets = new Long2ObjectOpenHashMap<>();
     private final LongOpenHashSet bucketKeys = new LongOpenHashSet();
     @Nullable
-    private DimensionDataStorage storage;
+    private ServerLevel storage;
     /** Roads read from an old single-file save: moved into region buckets when attached. */
     private boolean legacyRoads;
 
     public static RoadsData get(ServerLevel level) {
-        RoadsData data = level.getDataStorage().computeIfAbsent(RoadsData::load, RoadsData::new, NAME);
-        if (data.storage == null) data.attach(level.getDataStorage());
+        RoadsData data = com.skycraft.platform.SavedDataTypes.get(level, NAME, RoadsData::load, RoadsData::new, d -> d.save(new CompoundTag()));
+        if (data.storage == null) data.attach(level);
         return data;
     }
 
     /** Loads the road region files listed in the main file (and migrates roads from old saves into them). */
-    private void attach(DimensionDataStorage storage) {
+    private void attach(ServerLevel storage) {
         this.storage = storage;
         for (long key : bucketKeys.toLongArray()) {
-            RoadBucket b = storage.get(RoadBucket::load, RoadBucket.name(key));
+            RoadBucket b = com.skycraft.platform.SavedDataTypes.getIfPresent(storage, RoadBucket.name(key), RoadBucket::load, RoadBucket::new, d -> d.save(new CompoundTag()));
             if (b == null) {
                 bucketKeys.remove(key);
                 continue;
@@ -137,7 +137,7 @@ public final class RoadsData extends SavedData {
     private RoadBucket bucket(long key) {
         RoadBucket b = buckets.get(key);
         if (b == null) {
-            b = storage != null ? storage.computeIfAbsent(RoadBucket::load, RoadBucket::new, RoadBucket.name(key)) : new RoadBucket();
+            b = storage != null ? com.skycraft.platform.SavedDataTypes.get(storage, RoadBucket.name(key), RoadBucket::load, RoadBucket::new, d -> d.save(new CompoundTag())) : new RoadBucket();
             buckets.put(key, b);
             if (bucketKeys.add(key)) setDirty();
         }
@@ -180,10 +180,10 @@ public final class RoadsData extends SavedData {
         }
 
         static Link load(CompoundTag t) {
-            int[] target = t.getIntArray("t");
-            return new Link(t.getByte("k"), t.getString("n"), t.contains("b") ? t.getInt("b") : RoadGraph.DEFAULT_BRIDGE,
+            int[] target = t.getIntArray("t").orElseGet(() -> new int[0]);
+            return new Link(t.getByteOr("k", (byte) 0), t.getStringOr("n", ""), t.contains("b") ? t.getIntOr("b", 0) : RoadGraph.DEFAULT_BRIDGE,
                     target.length == 2 ? target[0] : Integer.MIN_VALUE, target.length == 2 ? target[1] : Integer.MIN_VALUE,
-                    t.getInt("fr"));
+                    t.getIntOr("fr", 0));
         }
     }
 
@@ -237,7 +237,7 @@ public final class RoadsData extends SavedData {
     }
 
     static long cellKey(int blockX, int blockZ) {
-        return ChunkPos.asLong(Math.floorDiv(blockX, RoadPlanner.CELL), Math.floorDiv(blockZ, RoadPlanner.CELL));
+        return ChunkPos.pack(Math.floorDiv(blockX, RoadPlanner.CELL), Math.floorDiv(blockZ, RoadPlanner.CELL));
     }
 
     // ------------------------------------------------------------------ settlements
@@ -248,8 +248,8 @@ public final class RoadsData extends SavedData {
         settlementById.put(s.id, s);
         settlementByKey.put(s.key, s);
         if (!s.placeId.isEmpty()) byPlace.put(s.placeId, s);
-        settlementByCenterChunk.computeIfAbsent(ChunkPos.asLong(s.x >> 4, s.z >> 4), k -> new ArrayList<>()).add(s);
-        grid.computeIfAbsent(ChunkPos.asLong(s.x >> GRID_SHIFT, s.z >> GRID_SHIFT), k -> new ArrayList<>(2)).add(s);
+        settlementByCenterChunk.computeIfAbsent(ChunkPos.pack(s.x >> 4, s.z >> 4), k -> new ArrayList<>()).add(s);
+        grid.computeIfAbsent(ChunkPos.pack(s.x >> GRID_SHIFT, s.z >> GRID_SHIFT), k -> new ArrayList<>(2)).add(s);
         if (zoneIndexRadius >= 0) indexZone(s, zoneIndexRadius);
         setDirty();
         return s;
@@ -288,7 +288,7 @@ public final class RoadsData extends SavedData {
         int r = (int) Math.ceil(radius);
         for (int gx = (x - r) >> GRID_SHIFT; gx <= (x + r) >> GRID_SHIFT; gx++) {
             for (int gz = (z - r) >> GRID_SHIFT; gz <= (z + r) >> GRID_SHIFT; gz++) {
-                List<Settlement> list = grid.get(ChunkPos.asLong(gx, gz));
+                List<Settlement> list = grid.get(ChunkPos.pack(gx, gz));
                 if (list == null) continue;
                 for (Settlement s : list) {
                     if (s.distSq(x + 0.5, z + 0.5) <= r2 && filter.test(s)) out.add(s);
@@ -363,7 +363,7 @@ public final class RoadsData extends SavedData {
         int z0 = s.zoneMinZ(radius) >> ZONE_SHIFT, z1 = s.zoneMaxZ(radius) >> ZONE_SHIFT;
         for (int rx = x0; rx <= x1; rx++) {
             for (int rz = z0; rz <= z1; rz++) {
-                zoneIndex.computeIfAbsent(ChunkPos.asLong(rx, rz), k -> new ArrayList<>(2)).add(s);
+                zoneIndex.computeIfAbsent(ChunkPos.pack(rx, rz), k -> new ArrayList<>(2)).add(s);
             }
         }
     }
@@ -392,7 +392,7 @@ public final class RoadsData extends SavedData {
     @Nullable
     Settlement noRoadZoneAt(int x, int z) {
         ensureZoneIndex();
-        List<Settlement> list = zoneIndex.get(ChunkPos.asLong(x >> ZONE_SHIFT, z >> ZONE_SHIFT));
+        List<Settlement> list = zoneIndex.get(ChunkPos.pack(x >> ZONE_SHIFT, z >> ZONE_SHIFT));
         if (list == null) return null;
         for (Settlement s : list) if (s.noRoadZone(x, z, zoneIndexRadius)) return s;
         return null;
@@ -401,7 +401,7 @@ public final class RoadsData extends SavedData {
     @Nullable
     private Settlement zoneAt(int x, int z, boolean townsOnly) {
         ensureZoneIndex();
-        List<Settlement> list = zoneIndex.get(ChunkPos.asLong(x >> ZONE_SHIFT, z >> ZONE_SHIFT));
+        List<Settlement> list = zoneIndex.get(ChunkPos.pack(x >> ZONE_SHIFT, z >> ZONE_SHIFT));
         if (list == null) return null;
         for (Settlement s : list) if ((s.town || !townsOnly) && s.inZone(x, z, zoneIndexRadius)) return s;
         return null;
@@ -416,7 +416,7 @@ public final class RoadsData extends SavedData {
         int r0z = bz >> ZONE_SHIFT, r1z = (bz + 15) >> ZONE_SHIFT;
         for (int rx = r0x; rx <= r1x; rx++) {
             for (int rz = r0z; rz <= r1z; rz++) {
-                List<Settlement> list = zoneIndex.get(ChunkPos.asLong(rx, rz));
+                List<Settlement> list = zoneIndex.get(ChunkPos.pack(rx, rz));
                 if (list == null) continue;
                 for (Settlement s : list) {
                     if (out.contains(s)) continue;
@@ -467,7 +467,7 @@ public final class RoadsData extends SavedData {
             int cz0 = (z - FOOTPRINT) >> 4, cz1 = (z + FOOTPRINT) >> 4;
             for (int cx = cx0; cx <= cx1; cx++) {
                 for (int cz = cz0; cz <= cz1; cz++) {
-                    long c = ChunkPos.asLong(cx, cz);
+                    long c = ChunkPos.pack(cx, cz);
                     chunkIndex.computeIfAbsent(c, k -> new LongArrayList()).add(entry(road.id, i));
                     touched.add(c);
                 }
@@ -480,7 +480,7 @@ public final class RoadsData extends SavedData {
     /** Registers a feature and returns its chunk. */
     long addFeature(RoadFeature f) {
         features.add(f);
-        long c = ChunkPos.asLong(f.x >> 4, f.z >> 4);
+        long c = ChunkPos.pack(f.x >> 4, f.z >> 4);
         featuresByChunk.computeIfAbsent(c, k -> new ArrayList<>(1)).add(f);
         setDirty();
         return c;
@@ -493,7 +493,7 @@ public final class RoadsData extends SavedData {
         long bestD = (long) radius * radius;
         for (int cx = (x - radius) >> 4; cx <= (x + radius) >> 4; cx++) {
             for (int cz = (z - radius) >> 4; cz <= (z + radius) >> 4; cz++) {
-                List<RoadFeature> list = featuresByChunk.get(ChunkPos.asLong(cx, cz));
+                List<RoadFeature> list = featuresByChunk.get(ChunkPos.pack(cx, cz));
                 if (list == null) continue;
                 for (RoadFeature f : list) {
                     if (f.type != RoadFeature.SIGNPOST) continue;
@@ -551,7 +551,6 @@ public final class RoadsData extends SavedData {
 
     // ------------------------------------------------------------------ persistence
 
-    @Override
     public CompoundTag save(CompoundTag tag) {
         ListTag s = new ListTag();
         for (Settlement st : settlements) s.add(st.save());
@@ -586,37 +585,37 @@ public final class RoadsData extends SavedData {
 
     public static RoadsData load(CompoundTag tag) {
         RoadsData data = new RoadsData();
-        data.nextSettlementId = Math.max(1, tag.getInt("nextSettlement"));
-        data.nextRoadId = Math.max(1, tag.getInt("nextRoad"));
-        ListTag s = tag.getList("settlements", Tag.TAG_COMPOUND);
+        data.nextSettlementId = Math.max(1, tag.getIntOr("nextSettlement", 0));
+        data.nextRoadId = Math.max(1, tag.getIntOr("nextRoad", 0));
+        ListTag s = tag.getListOrEmpty("settlements");
         for (int i = 0; i < s.size(); i++) {
-            Settlement st = Settlement.load(s.getCompound(i));
+            Settlement st = Settlement.load(s.getCompoundOrEmpty(i));
             if (st == null || data.settlementByKey.containsKey(st.key)) continue;
             data.addSettlement(st);
             data.nextSettlementId = Math.max(data.nextSettlementId, st.id + 1);
         }
         // roads live in region files (attached by get()); older saves kept them all here
-        ListTag r = tag.getList("roads", Tag.TAG_COMPOUND);
+        ListTag r = tag.getListOrEmpty("roads");
         for (int i = 0; i < r.size(); i++) {
-            Road road = Road.load(r.getCompound(i));
+            Road road = Road.load(r.getCompoundOrEmpty(i));
             if (road == null) continue;
             data.putRoad(road);
             data.legacyRoads = true;
         }
-        for (long k : tag.getLongArray("buckets")) data.bucketKeys.add(k);
-        for (long p : tag.getLongArray("failed")) data.failed.add(p);
-        ListTag f = tag.getList("features", Tag.TAG_COMPOUND);
-        for (int i = 0; i < f.size(); i++) data.addFeature(RoadFeature.load(f.getCompound(i)));
-        for (long c : tag.getLongArray("paved")) data.paved.add(c);
-        for (long p : tag.getLongArray("pending")) {
+        for (long k : tag.getLongArray("buckets").orElseGet(() -> new long[0])) data.bucketKeys.add(k);
+        for (long p : tag.getLongArray("failed").orElseGet(() -> new long[0])) data.failed.add(p);
+        ListTag f = tag.getListOrEmpty("features");
+        for (int i = 0; i < f.size(); i++) data.addFeature(RoadFeature.load(f.getCompoundOrEmpty(i)));
+        for (long c : tag.getLongArray("paved").orElseGet(() -> new long[0])) data.paved.add(c);
+        for (long p : tag.getLongArray("pending").orElseGet(() -> new long[0])) {
             if (data.pairs.add(p)) data.pending.add(p);
         }
-        ListTag l = tag.getList("links", Tag.TAG_COMPOUND);
-        for (int i = 0; i < l.size(); i++) data.links.put(l.getCompound(i).getLong("p"), Link.load(l.getCompound(i)));
-        data.planVersion = tag.getInt("planVersion");
-        data.planEra = tag.contains("planEra") && tag.getBoolean("planEra");
-        for (long k : tag.getLongArray("scanned")) data.scanned.add(k);
-        for (int k : tag.getIntArray("trailChecked")) data.trailChecked.add(k);
+        ListTag l = tag.getListOrEmpty("links");
+        for (int i = 0; i < l.size(); i++) data.links.put(l.getCompoundOrEmpty(i).getLongOr("p", 0L), Link.load(l.getCompoundOrEmpty(i)));
+        data.planVersion = tag.getIntOr("planVersion", 0);
+        data.planEra = tag.contains("planEra") && tag.getBooleanOr("planEra", false);
+        for (long k : tag.getLongArray("scanned").orElseGet(() -> new long[0])) data.scanned.add(k);
+        for (int k : tag.getIntArray("trailChecked").orElseGet(() -> new int[0])) data.trailChecked.add(k);
         data.setDirty(false);
         return data;
     }

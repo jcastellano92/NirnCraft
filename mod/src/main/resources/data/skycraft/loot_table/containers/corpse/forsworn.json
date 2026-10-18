@@ -1,0 +1,59 @@
+{
+  "type": "minecraft:entity",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:septim",
+          "weight": 50,
+          "modifier": {
+            "min": 1,
+            "max": 8,
+            "growth": 0.04,
+            "type": "skycraft:scaled_gold"
+          }
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 50
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:sugar",
+          "weight": 4,
+          "modifier": [
+            {
+              "tag": "skycraft:loot/ingredients",
+              "type": "skycraft:regional_tag"
+            },
+            {
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 1,
+                "max": 2
+              },
+              "type": "minecraft:set_count"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:loot_table",
+          "weight": 1,
+          "value": "skycraft:parts/potions"
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 5
+        }
+      ]
+    }
+  ],
+  "random_sequence": "skycraft:containers/corpse/forsworn"
+}

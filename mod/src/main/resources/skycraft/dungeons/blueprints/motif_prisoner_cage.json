@@ -26,6 +26,6 @@
  "key": {
   "I": "minecraft:iron_bars",
   "s": "minecraft:skeleton_skull[rotation=0]",
-  "C": "minecraft:chain[axis=y]"
+  "C": "minecraft:iron_chain[axis=y]"
  }
 }

@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "H",
+    "S"
+  ],
+  "key": {
+    "H": "skycraft:steel_ingot",
+    "S": "minecraft:stick"
+  },
+  "result": {
+    "count": 10,
+    "id": "skycraft:steel_bolt"
+  }
+}

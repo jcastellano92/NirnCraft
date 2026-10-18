@@ -1,7 +1,7 @@
 package com.skycraft.crafting.item;
 
 import com.skycraft.crafting.SmithingTier;
-import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
 import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.ItemStack;
 
@@ -13,23 +13,14 @@ public class SkyBowItem extends BowItem {
     public final SmithingTier smithingTier;
 
     public SkyBowItem(SmithingTier tier, Properties props) {
-        super(props);
+        super(props.enchantable(tier.getEnchantmentValue()).repairable(tier.material()));
         this.smithingTier = tier;
     }
 
     @Override
-    public AbstractArrow customArrow(AbstractArrow arrow) {
-        arrow.setBaseDamage(arrow.getBaseDamage() + (smithingTier.bowDamage - 2.0));
+    public AbstractArrow customArrow(AbstractArrow arrow, ItemStack projectileStack, ItemStack weaponStack) {
+        arrow.setBaseDamage(com.skycraft.platform.EntityData.arrowDamage(arrow) + (smithingTier.bowDamage - 2.0));
         return arrow;
     }
 
-    @Override
-    public int getEnchantmentValue() {
-        return smithingTier.getEnchantmentValue();
-    }
-
-    @Override
-    public boolean isValidRepairItem(ItemStack toRepair, ItemStack repair) {
-        return smithingTier.getRepairIngredient().test(repair) || super.isValidRepairItem(toRepair, repair);
-    }
 }

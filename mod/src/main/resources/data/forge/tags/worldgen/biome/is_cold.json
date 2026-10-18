@@ -18,6 +18,9 @@
     "skycraft:solstheim_pine_forest",
     "skycraft:throat_of_the_world",
     "skycraft:winterhold_glacier",
-    "skycraft:wrothgarian_mountains"
+    "skycraft:wrothgarian_mountains",
+    "#c:is_cold/overworld",
+    "#c:is_cold/nether",
+    "#c:is_cold/end"
   ]
 }

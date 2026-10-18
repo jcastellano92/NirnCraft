@@ -12,9 +12,9 @@ import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
-import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
+import com.skycraft.worldgen.ConfiguredFeature;
+import com.skycraft.worldgen.FeaturePlaceContext;
+import com.skycraft.worldgen.FeatureConfiguration;
 
 import java.util.List;
 
@@ -23,7 +23,7 @@ import java.util.List;
  * the weights follow a slow noise per species, so species gather in stands (a knot of aspens in a pine wood, a
  * grove of oaks among elms) instead of a uniform salt-and-pepper mix. Placed by {@code skycraft:flora_scatter}.
  */
-public class FloraTreeFeature extends Feature<FloraTreeFeature.Config> {
+public class FloraTreeFeature extends ConfiguredFeature<FloraTreeFeature.Config> {
     public record Entry(TreeSpecies species, int weight) {
         public static final Codec<Entry> CODEC = RecordCodecBuilder.create(i -> i.group(
                 TreeSpecies.CODEC.fieldOf("species").forGetter(Entry::species),
@@ -59,7 +59,7 @@ public class FloraTreeFeature extends Feature<FloraTreeFeature.Config> {
         BlockState here = box.get(x, y, z);
         if (!GenBox.isSoft(here) || here.is(BlockTags.LOGS)) return false;
         if (!soilOk(sp.soil, box.get(x, y - 1, z))) return false;
-        if (y > level.getMaxBuildHeight() - sp.maxHeight - 12) return false;
+        if (y > (level.getMaxY() + 1) - sp.maxHeight - 12) return false;
 
         TreeBuilder b = new TreeBuilder(box, ctx.random());
         double wind = FloraNoise.value(x / 900.0, z / 900.0, seed + 31) * Math.PI * 0.8 + Math.PI * 0.15;

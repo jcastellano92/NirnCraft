@@ -9,7 +9,7 @@ import com.skycraft.homestead.HomesteadPlans;
 import com.skycraft.inventory.client.SkyUi;
 import com.skycraft.network.SkyNetwork;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -21,7 +21,7 @@ import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
-import org.lwjgl.glfw.GLFW;
+import com.mojang.blaze3d.platform.InputConstants;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -59,7 +59,7 @@ public class HomesteadScreen extends AbstractContainerScreen<HomesteadMenu> {
     private EditBox nameBox;
 
     public HomesteadScreen(HomesteadMenu menu, Inventory inventory, Component title) {
-        super(menu, inventory, title);
+        super(menu, inventory, title, Math.min(net.minecraft.client.Minecraft.getInstance().getWindow().getGuiScaledWidth() - 16, 440), Math.min(net.minecraft.client.Minecraft.getInstance().getWindow().getGuiScaledHeight() - 16, 250));
         tab = lastTab;
     }
 
@@ -72,8 +72,8 @@ public class HomesteadScreen extends AbstractContainerScreen<HomesteadMenu> {
 
     @Override
     protected void init() {
-        imageWidth = Math.min(width - 16, 440);
-        imageHeight = Math.min(height - 16, 250);
+
+
         super.init();
         tabX = leftPos + 6;
         tabW = 92;
@@ -86,7 +86,7 @@ public class HomesteadScreen extends AbstractContainerScreen<HomesteadMenu> {
         // the homestead's name (the Homestead tab)
         nameBox = new EditBox(font, listX + 4, listY + 18, Math.min(260, listW + detW - 8), 16, Component.translatable("homestead.skycraft.home.name"));
         nameBox.setMaxLength(32);
-        nameBox.setValue(state().getString("home_name"));
+        nameBox.setValue(state().getStringOr("home_name", ""));
         nameBox.setHint(Component.translatable("homestead.skycraft.home.name_hint"));
         nameBox.visible = false;
         addRenderableWidget(nameBox);
@@ -98,8 +98,8 @@ public class HomesteadScreen extends AbstractContainerScreen<HomesteadMenu> {
 
     private Set<String> built() {
         Set<String> out = new HashSet<>();
-        ListTag list = state().getList("built", Tag.TAG_STRING);
-        for (int i = 0; i < list.size(); i++) out.add(list.getString(i));
+        ListTag list = state().getListOrEmpty("built");
+        for (int i = 0; i < list.size(); i++) out.add(list.getStringOr(i, ""));
         return out;
     }
 
@@ -107,7 +107,7 @@ public class HomesteadScreen extends AbstractContainerScreen<HomesteadMenu> {
         return switch (TABS[tab]) {
             case "build" -> plans.size();
             case "materials" -> Hearthfire.MATERIALS.size();
-            case "land" -> state().getString("steward").isEmpty() ? 0 : Hearthfire.OFFERS.size();
+            case "land" -> state().getStringOr("steward", "").isEmpty() ? 0 : Hearthfire.OFFERS.size();
             default -> 0;
         };
     }
@@ -123,7 +123,9 @@ public class HomesteadScreen extends AbstractContainerScreen<HomesteadMenu> {
     // ------------------------------------------------------------------ input
 
     @Override
-    public boolean mouseClicked(double mx, double my, int button) {
+    public boolean mouseClicked(net.minecraft.client.input.MouseButtonEvent event, boolean doubleClick) {
+        double mx = event.x(), my = event.y();
+        int button = com.skycraft.client.screen.UiInput.actionButton(event.button());
         if (button == 0) {
             for (Hot h : List.copyOf(hots)) {
                 if (SkyUi.inside(mx, my, h.x, h.y, h.x + h.w, h.y + h.h)) {
@@ -132,47 +134,48 @@ public class HomesteadScreen extends AbstractContainerScreen<HomesteadMenu> {
                 }
             }
         }
-        return super.mouseClicked(mx, my, button);
+        return super.mouseClicked(event, doubleClick);
     }
 
     @Override
-    public boolean mouseScrolled(double mx, double my, double delta) {
+    public boolean mouseScrolled(double mx, double my, double horizontal, double delta) {
         if (SkyUi.inside(mx, my, listX, listY, listX + listW, listY + listH)) {
             scroll = Mth.clamp(scroll - (int) Math.signum(delta), 0, Math.max(0, rows() - visibleRows()));
             return true;
         }
-        return super.mouseScrolled(mx, my, delta);
+        return super.mouseScrolled(mx, my, horizontal, delta);
     }
 
     @Override
-    public boolean keyPressed(int key, int scan, int mods) {
+    public boolean keyPressed(net.minecraft.client.input.KeyEvent event) {
+        int key = event.key(), scan = event.keycode(), mods = event.modifiers();
         // typing a name: the inventory key and the arrows belong to the text box
         if (nameBox != null && nameBox.visible && nameBox.isFocused()) {
-            if (key == GLFW.GLFW_KEY_ESCAPE) {
+            if (key == InputConstants.KEY_ESCAPE) {
                 onClose();
                 return true;
             }
-            if (key == GLFW.GLFW_KEY_ENTER || key == GLFW.GLFW_KEY_KP_ENTER) {
+            if (key == InputConstants.KEY_RETURN || key == InputConstants.KEY_NUMPADENTER) {
                 send("rename", nameBox.getValue());
                 nameBox.setFocused(false);
                 return true;
             }
-            return nameBox.keyPressed(key, scan, mods) || nameBox.canConsumeInput();
+            return nameBox.keyPressed(event) || nameBox.canConsumeInput();
         }
-        if (key == GLFW.GLFW_KEY_UP || key == GLFW.GLFW_KEY_DOWN) {
+        if (key == InputConstants.KEY_UP || key == InputConstants.KEY_DOWN) {
             int n = rows();
             if (n > 0) {
-                selected = Mth.clamp(selected + (key == GLFW.GLFW_KEY_UP ? -1 : 1), 0, n - 1);
+                selected = Mth.clamp(selected + (key == InputConstants.KEY_UP ? -1 : 1), 0, n - 1);
                 if (selected < scroll) scroll = selected;
                 if (selected >= scroll + visibleRows()) scroll = selected - visibleRows() + 1;
             }
             return true;
         }
-        if (key == GLFW.GLFW_KEY_LEFT || key == GLFW.GLFW_KEY_RIGHT) {
-            selectTab(Math.floorMod(tab + (key == GLFW.GLFW_KEY_LEFT ? -1 : 1), TABS.length));
+        if (key == InputConstants.KEY_LEFT || key == InputConstants.KEY_RIGHT) {
+            selectTab(Math.floorMod(tab + (key == InputConstants.KEY_LEFT ? -1 : 1), TABS.length));
             return true;
         }
-        return super.keyPressed(key, scan, mods);
+        return super.keyPressed(event);
     }
 
     private void selectTab(int t) {
@@ -181,37 +184,37 @@ public class HomesteadScreen extends AbstractContainerScreen<HomesteadMenu> {
         lastTab = t;
         selected = 0;
         scroll = 0;
-        if (nameBox != null && "home".equals(TABS[t])) nameBox.setValue(state().getString("home_name"));
+        if (nameBox != null && "home".equals(TABS[t])) nameBox.setValue(state().getStringOr("home_name", ""));
     }
 
     // ------------------------------------------------------------------ rendering
 
     @Override
-    public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        renderBackground(g);
+    public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
+
         hoveredStack = ItemStack.EMPTY;
-        super.render(g, mouseX, mouseY, partialTick);
-        if (!hoveredStack.isEmpty()) g.renderTooltip(font, hoveredStack, mouseX, mouseY);
+        super.extractRenderState(g, mouseX, mouseY, partialTick);
+        if (!hoveredStack.isEmpty()) g.setTooltipForNextFrame(font, hoveredStack, mouseX, mouseY);
     }
 
     @Override
-    protected void renderLabels(GuiGraphics g, int mouseX, int mouseY) {
+    protected void extractLabels(GuiGraphicsExtractor g, int mouseX, int mouseY) {
         // everything is drawn in renderBg
     }
 
     @Override
-    protected void renderBg(GuiGraphics g, float partialTick, int mx, int my) {
+    public void extractBackground(GuiGraphicsExtractor g, int mx, int my, float partialTick) {
         hots.clear();
         int x0 = leftPos, y0 = topPos, x1 = leftPos + imageWidth, y1 = topPos + imageHeight;
         g.fill(x0, y0, x1, y1, PANEL);
         frame(g, x0, y0, x1, y1, BORDER);
         frame(g, x0 + 2, y0 + 2, x1 - 2, y1 - 2, 0x408A7F66);
-        Component name = Component.Serializer.fromJson(state().getString("name"));
+        Component name = com.skycraft.platform.ArcaneData.readComponent(state().getStringOr("name", ""));
         SkyUi.scaledCentered(g, font, SkyUi.caps(name == null ? title : name), (x0 + x1) / 2f, y0 + 7, 1f, TEXT, false);
         String sub = Component.translatable(state().contains("plot")
-                ? state().getBoolean("purchased") ? "homestead.skycraft.screen.plot_owned" : "homestead.skycraft.screen.plot_for_sale"
-                : "homestead.skycraft.screen.claim", state().getString("owner"), state().getInt("radius")).getString();
-        g.drawCenteredString(font, sub, (x0 + x1) / 2, y0 + 19, DIM);
+                ? state().getBooleanOr("purchased", false) ? "homestead.skycraft.screen.plot_owned" : "homestead.skycraft.screen.plot_for_sale"
+                : "homestead.skycraft.screen.claim", state().getStringOr("owner", ""), state().getIntOr("radius", 0)).getString();
+        g.centeredText(font, sub, (x0 + x1) / 2, y0 + 19, DIM);
         SkyUi.carryLine(g, font, (x0 + x1) / 2 + font.width(SkyUi.caps(name == null ? title : name)) / 2 + 10, y0 + 7, x1 - 10);
         g.fill(x0 + 6, y0 + 29, x1 - 6, y0 + 30, 0x808A7F66);
         renderTabs(g, mx, my);
@@ -228,7 +231,7 @@ public class HomesteadScreen extends AbstractContainerScreen<HomesteadMenu> {
         }
     }
 
-    private void renderTabs(GuiGraphics g, int mx, int my) {
+    private void renderTabs(GuiGraphicsExtractor g, int mx, int my) {
         for (int i = 0; i < TABS.length; i++) {
             int y = listY + i * TAB_ROW;
             boolean sel = i == tab;
@@ -236,17 +239,17 @@ public class HomesteadScreen extends AbstractContainerScreen<HomesteadMenu> {
             if (sel) g.fill(tabX, y, tabX + tabW, y + TAB_ROW - 1, 0x50C8A050);
             else if (hover) g.fill(tabX, y, tabX + tabW, y + TAB_ROW - 1, 0x28F0E6C8);
             if (sel) g.fill(tabX, y, tabX + 2, y + TAB_ROW - 1, GOLD);
-            g.drawString(font, fit(Component.translatable("homestead.skycraft.tab." + TABS[i]).getString(), tabW - 8), tabX + 5, y + 3,
+            g.text(font, fit(Component.translatable("homestead.skycraft.tab." + TABS[i]).getString(), tabW - 8), tabX + 5, y + 3,
                     sel || hover ? TEXT : DIM, false);
             final int t = i;
             hots.add(new Hot(tabX, y, tabW, TAB_ROW - 1, () -> selectTab(t)));
         }
-        String gold = Component.translatable("homestead.skycraft.screen.gold", state().getLong("gold")).getString();
-        g.drawString(font, gold, tabX + 4, topPos + imageHeight - 14, GOLD, false);
+        String gold = Component.translatable("homestead.skycraft.screen.gold", state().getLongOr("gold", 0L)).getString();
+        g.text(font, gold, tabX + 4, topPos + imageHeight - 14, GOLD, false);
     }
 
     /** A list row; returns true if it is the selected one. */
-    private boolean row(GuiGraphics g, int mx, int my, int i, ItemStack icon, String text, int color) {
+    private boolean row(GuiGraphicsExtractor g, int mx, int my, int i, ItemStack icon, String text, int color) {
         int y = listY + (i - scroll) * ROW;
         if (y + ROW > listY + listH + 1 || i < scroll) return false;
         boolean hover = SkyUi.inside(mx, my, listX, y, listX + listW, y + ROW);
@@ -254,16 +257,16 @@ public class HomesteadScreen extends AbstractContainerScreen<HomesteadMenu> {
         else if (hover) g.fill(listX, y, listX + listW, y + ROW, 0x28F0E6C8);
         int tx = listX + 4;
         if (!icon.isEmpty()) {
-            g.renderItem(icon, listX + 2, y + 1);
+            g.item(icon, listX + 2, y + 1);
             if (hover && mx < listX + 19) hoveredStack = icon;
             tx = listX + 22;
         }
-        g.drawString(font, fit(text, listX + listW - tx - 4), tx, y + 5, color, false);
+        g.text(font, fit(text, listX + listW - tx - 4), tx, y + 5, color, false);
         hots.add(new Hot(listX, y, listW, ROW, () -> selected = i));
         return i == selected;
     }
 
-    private void renderBuild(GuiGraphics g, int mx, int my) {
+    private void renderBuild(GuiGraphicsExtractor g, int mx, int my) {
         Set<String> built = built();
         for (int i = scroll; i < plans.size(); i++) {
             HomesteadPlans p = plans.get(i);
@@ -276,22 +279,22 @@ public class HomesteadScreen extends AbstractContainerScreen<HomesteadMenu> {
         if (selected < 0 || selected >= plans.size()) return;
         HomesteadPlans p = plans.get(selected);
         int y = listY + 2;
-        g.drawString(font, Component.translatable("homestead.skycraft.plan." + p.id()), detX + 2, y, TEXT, false);
+        g.text(font, Component.translatable("homestead.skycraft.plan." + p.id()), detX + 2, y, TEXT, false);
         y += 11;
-        g.drawString(font, Component.translatable("homestead.skycraft.slot." + p.slot()), detX + 2, y, DIM, false);
+        g.text(font, Component.translatable("homestead.skycraft.slot." + p.slot()), detX + 2, y, DIM, false);
         y += 12;
         for (FormattedCharSequence line : font.split(Component.translatable("homestead.skycraft.plan." + p.id() + ".desc"), detW - 4)) {
-            g.drawString(font, line, detX + 2, y, GREY, false);
+            g.text(font, line, detX + 2, y, GREY, false);
             y += 10;
         }
         y += 4;
         String blocker = p.blocker(built);
-        boolean carpenter = state().getBoolean("carpenter");
+        boolean carpenter = state().getBooleanOr("carpenter", false);
         Inventory inv = minecraft.player.getInventory();
         boolean haveAll = true;
         if (!"built".equals(blocker)) {
-            g.drawString(font, Component.translatable("homestead.skycraft.screen.materials"), detX + 2, y, GOLD, false);
-            if (carpenter) g.drawString(font, Component.translatable("homestead.skycraft.screen.carpenter"), detX + 70, y, GOOD, false);
+            g.text(font, Component.translatable("homestead.skycraft.screen.materials"), detX + 2, y, GOLD, false);
+            if (carpenter) g.text(font, Component.translatable("homestead.skycraft.screen.carpenter"), detX + 70, y, GOOD, false);
             y += 11;
             for (Cost cost : p.costs()) {
                 ItemStack icon = cost.display().get();
@@ -299,12 +302,12 @@ public class HomesteadScreen extends AbstractContainerScreen<HomesteadMenu> {
                 int have = cost.countIn(inv, -1);
                 if (have < need) haveAll = false;
                 if (y + 16 > topPos + imageHeight - 30) continue;
-                g.renderItem(icon, detX + 2, y);
+                g.item(icon, detX + 2, y);
                 if (SkyUi.inside(mx, my, detX + 2, y, detX + 18, y + 16)) hoveredStack = icon;
                 String count = have + "/" + need;
                 int cw = font.width(count);
-                g.drawString(font, fit(icon.getHoverName().getString(), detW - cw - 30), detX + 22, y + 4, DIM, false);
-                g.drawString(font, count, detX + detW - 4 - cw, y + 4, have >= need ? GOOD : BAD, false);
+                g.text(font, fit(icon.getHoverName().getString(), detW - cw - 30), detX + 22, y + 4, DIM, false);
+                g.text(font, count, detX + detW - 4 - cw, y + 4, have >= need ? GOOD : BAD, false);
                 y += 17;
             }
         }
@@ -314,9 +317,9 @@ public class HomesteadScreen extends AbstractContainerScreen<HomesteadMenu> {
                     ? Component.translatable("homestead.skycraft.screen.blocked." + blocker.split(":")[0],
                     Component.translatable("homestead.skycraft.plan." + blocker.split(":")[1])).getString()
                     : Component.translatable("homestead.skycraft.screen.blocked." + blocker).getString();
-            g.drawCenteredString(font, fit(why, detW), detX + detW / 2, by + 5, "built".equals(blocker) ? GOLD : BAD);
-        } else if (!state().getBoolean("purchased")) {
-            g.drawCenteredString(font, Component.translatable("homestead.skycraft.plot.buy_first"), detX + detW / 2, by + 5, BAD);
+            g.centeredText(font, fit(why, detW), detX + detW / 2, by + 5, "built".equals(blocker) ? GOLD : BAD);
+        } else if (!state().getBooleanOr("purchased", false)) {
+            g.centeredText(font, Component.translatable("homestead.skycraft.plot.buy_first"), detX + detW / 2, by + 5, BAD);
         } else {
             boolean ok = haveAll || minecraft.player.isCreative();
             button(g, mx, my, Component.translatable("homestead.skycraft.screen.build"), detX + (detW - 100) / 2, by, 100, 18, ok,
@@ -324,7 +327,7 @@ public class HomesteadScreen extends AbstractContainerScreen<HomesteadMenu> {
         }
     }
 
-    private void renderMaterials(GuiGraphics g, int mx, int my) {
+    private void renderMaterials(GuiGraphicsExtractor g, int mx, int my) {
         Inventory inv = minecraft.player.getInventory();
         List<Hearthfire.Material> mats = Hearthfire.MATERIALS;
         for (int i = scroll; i < mats.size(); i++) {
@@ -337,39 +340,39 @@ public class HomesteadScreen extends AbstractContainerScreen<HomesteadMenu> {
         Hearthfire.Material m = mats.get(selected);
         ItemStack out = m.result().get();
         int y = listY + 2;
-        g.drawString(font, out.getHoverName(), detX + 2, y, TEXT, false);
+        g.text(font, out.getHoverName(), detX + 2, y, TEXT, false);
         y += 12;
         for (FormattedCharSequence line : font.split(Component.translatable("homestead.skycraft.material." + m.id() + ".desc"), detW - 4)) {
-            g.drawString(font, line, detX + 2, y, GREY, false);
+            g.text(font, line, detX + 2, y, GREY, false);
             y += 10;
         }
         y += 4;
-        g.drawString(font, Component.translatable("homestead.skycraft.screen.materials"), detX + 2, y, GOLD, false);
+        g.text(font, Component.translatable("homestead.skycraft.screen.materials"), detX + 2, y, GOLD, false);
         y += 11;
         ItemStack icon = m.cost().display().get();
         int have = m.cost().countIn(inv, -1);
-        g.renderItem(icon, detX + 2, y);
+        g.item(icon, detX + 2, y);
         if (SkyUi.inside(mx, my, detX + 2, y, detX + 18, y + 16)) hoveredStack = icon;
         String count = have + "/" + m.cost().count();
         int cw = font.width(count);
-        g.drawString(font, fit(icon.getHoverName().getString(), detW - cw - 30), detX + 22, y + 4, DIM, false);
-        g.drawString(font, count, detX + detW - 4 - cw, y + 4, have >= m.cost().count() ? GOOD : BAD, false);
+        g.text(font, fit(icon.getHoverName().getString(), detW - cw - 30), detX + 22, y + 4, DIM, false);
+        g.text(font, count, detX + detW - 4 - cw, y + 4, have >= m.cost().count() ? GOOD : BAD, false);
         int by = topPos + imageHeight - 26;
         boolean ok = have >= m.cost().count();
         int index = selected;
         button(g, mx, my, Component.translatable("homestead.skycraft.screen.craft"), detX + detW / 2 - 92, by, 88, 18, ok,
                 () -> SkyNetwork.sendToServer(new HomesteadPackets.CraftBlueprint(index, 1)));
         button(g, mx, my, Component.translatable("homestead.skycraft.screen.craft_many"), detX + detW / 2 + 4, by, 88, 18, ok,
-                () -> SkyNetwork.sendToServer(new HomesteadPackets.CraftBlueprint(index, Screen.hasShiftDown() ? 16 : 5)));
+                () -> SkyNetwork.sendToServer(new HomesteadPackets.CraftBlueprint(index, com.skycraft.client.screen.UiInput.shiftDown() ? 16 : 5)));
     }
 
-    private void renderLand(GuiGraphics g, int mx, int my) {
+    private void renderLand(GuiGraphicsExtractor g, int mx, int my) {
         // the list: the steward's goods
-        String steward = state().getString("steward");
+        String steward = state().getStringOr("steward", "");
         if (steward.isEmpty()) {
             int y = listY + 6;
             for (FormattedCharSequence line : font.split(Component.translatable("homestead.skycraft.screen.no_steward"), listW - 8)) {
-                g.drawString(font, line, listX + 4, y, GREY, false);
+                g.text(font, line, listX + 4, y, GREY, false);
                 y += 10;
             }
         } else {
@@ -380,70 +383,70 @@ public class HomesteadScreen extends AbstractContainerScreen<HomesteadMenu> {
         }
         int y = listY + 2;
         // the plot
-        g.drawString(font, Component.translatable("homestead.skycraft.screen.land"), detX + 2, y, GOLD, false);
+        g.text(font, Component.translatable("homestead.skycraft.screen.land"), detX + 2, y, GOLD, false);
         y += 12;
         if (state().contains("plot")) {
-            boolean bought = state().getBoolean("purchased");
-            g.drawString(font, Component.translatable(bought ? "homestead.skycraft.screen.deed_owned" : "homestead.skycraft.screen.deed_price",
-                    state().getInt("price")), detX + 2, y, bought ? GOOD : DIM, false);
+            boolean bought = state().getBooleanOr("purchased", false);
+            g.text(font, Component.translatable(bought ? "homestead.skycraft.screen.deed_owned" : "homestead.skycraft.screen.deed_price",
+                    state().getIntOr("price", 0)), detX + 2, y, bought ? GOOD : DIM, false);
             y += 12;
             if (!bought) {
                 button(g, mx, my, Component.translatable("homestead.skycraft.screen.buy_plot"), detX + 2, y, 110, 18,
-                        state().getLong("gold") >= state().getInt("price"), () -> send("buy_plot", ""));
+                        state().getLongOr("gold", 0L) >= state().getIntOr("price", 0), () -> send("buy_plot", ""));
                 y += 22;
             }
         } else {
             for (FormattedCharSequence line : font.split(Component.translatable("homestead.skycraft.screen.free_claim"), detW - 4)) {
-                g.drawString(font, line, detX + 2, y, GREY, false);
+                g.text(font, line, detX + 2, y, GREY, false);
                 y += 10;
             }
         }
         y += 6;
-        g.drawString(font, Component.translatable("homestead.skycraft.screen.steward"), detX + 2, y, GOLD, false);
+        g.text(font, Component.translatable("homestead.skycraft.screen.steward"), detX + 2, y, GOLD, false);
         y += 12;
         if (steward.isEmpty()) {
-            g.drawString(font, Component.translatable("homestead.skycraft.screen.steward_price", state().getInt("stewardPrice")), detX + 2, y, DIM, false);
+            g.text(font, Component.translatable("homestead.skycraft.screen.steward_price", state().getIntOr("stewardPrice", 0)), detX + 2, y, DIM, false);
             y += 12;
             button(g, mx, my, Component.translatable("homestead.skycraft.screen.hire"), detX + 2, y, 110, 18,
-                    state().getLong("gold") >= state().getInt("stewardPrice"), () -> send("hire_steward", ""));
+                    state().getLongOr("gold", 0L) >= state().getIntOr("stewardPrice", 0), () -> send("hire_steward", ""));
         } else {
-            g.drawString(font, Component.translatable("homestead.skycraft.screen.steward_name", steward), detX + 2, y, TEXT, false);
+            g.text(font, Component.translatable("homestead.skycraft.screen.steward_name", steward), detX + 2, y, TEXT, false);
             y += 14;
             if (selected >= 0 && selected < Hearthfire.OFFERS.size()) {
                 Hearthfire.Offer o = Hearthfire.OFFERS.get(selected);
-                g.drawString(font, Component.translatable("homestead.skycraft.offer." + o.id()), detX + 2, y, TEXT, false);
-                g.drawString(font, Component.translatable("homestead.skycraft.screen.price", o.price()), detX + detW - 60, y, GOLD, false);
+                g.text(font, Component.translatable("homestead.skycraft.offer." + o.id()), detX + 2, y, TEXT, false);
+                g.text(font, Component.translatable("homestead.skycraft.screen.price", o.price()), detX + detW - 60, y, GOLD, false);
                 y += 14;
                 int index = selected;
                 button(g, mx, my, Component.translatable("homestead.skycraft.screen.buy"), detX + 2, y, 90, 18,
-                        state().getLong("gold") >= o.price(), () -> send("steward_buy", Integer.toString(index)));
+                        state().getLongOr("gold", 0L) >= o.price(), () -> send("steward_buy", Integer.toString(index)));
             }
         }
     }
 
-    private void renderPermissions(GuiGraphics g, int mx, int my) {
+    private void renderPermissions(GuiGraphicsExtractor g, int mx, int my) {
         int y = listY + 6;
         CompoundTag s = state();
-        y = permRow(g, mx, my, y, "doors", s.getInt("door"), 3, v -> perms("door", v));
-        y = permRow(g, mx, my, y, "containers", s.getInt("container"), 3, v -> perms("container", v));
-        y = permRow(g, mx, my, y, "stations", s.getInt("station"), 3, v -> perms("station", v));
-        y = permRow(g, mx, my, y, "beds", s.getInt("bed"), 3, v -> perms("bed", v));
-        y = permRow(g, mx, my, y, "building", s.getInt("build"), 2, v -> perms("build", v));
+        y = permRow(g, mx, my, y, "doors", s.getIntOr("door", 0), 3, v -> perms("door", v));
+        y = permRow(g, mx, my, y, "containers", s.getIntOr("container", 0), 3, v -> perms("container", v));
+        y = permRow(g, mx, my, y, "stations", s.getIntOr("station", 0), 3, v -> perms("station", v));
+        y = permRow(g, mx, my, y, "beds", s.getIntOr("bed", 0), 3, v -> perms("bed", v));
+        y = permRow(g, mx, my, y, "building", s.getIntOr("build", 0), 2, v -> perms("build", v));
         y += 4;
         for (FormattedCharSequence line : font.split(Component.translatable("homestead.skycraft.perm.hint"), listW + detW - 8)) {
-            g.drawString(font, line, listX + 4, y, GREY, false);
+            g.text(font, line, listX + 4, y, GREY, false);
             y += 10;
         }
         y += 4;
-        String info = Component.translatable("homestead.skycraft.screen.bounds", s.getInt("radius"), s.getInt("depth"), s.getInt("height")).getString();
+        String info = Component.translatable("homestead.skycraft.screen.bounds", s.getIntOr("radius", 0), s.getIntOr("depth", 0), s.getIntOr("height", 0)).getString();
         for (FormattedCharSequence line : font.split(Component.literal(info), listW + detW - 8)) {
-            g.drawString(font, line, listX + 4, y, GREY, false);
+            g.text(font, line, listX + 4, y, GREY, false);
             y += 10;
         }
     }
 
-    private int permRow(GuiGraphics g, int mx, int my, int y, String what, int value, int options, java.util.function.IntConsumer set) {
-        g.drawString(font, Component.translatable("homestead.skycraft.perm." + what), listX + 4, y + 5, DIM, false);
+    private int permRow(GuiGraphicsExtractor g, int mx, int my, int y, String what, int value, int options, java.util.function.IntConsumer set) {
+        g.text(font, Component.translatable("homestead.skycraft.perm." + what), listX + 4, y + 5, DIM, false);
         String[] names = {"owner", "party", "public"};
         int x = listX + 90;
         for (int i = 0; i < options; i++) {
@@ -461,52 +464,52 @@ public class HomesteadScreen extends AbstractContainerScreen<HomesteadMenu> {
     private void perms(String what, int value) {
         CompoundTag s = state();
         s.putInt(what, value);
-        SkyNetwork.sendToServer(new HomesteadPackets.UpdatePerms(menu.pos, s.getInt("door"), s.getInt("container"),
-                s.getInt("station"), s.getInt("bed"), s.getInt("build")));
+        SkyNetwork.sendToServer(new HomesteadPackets.UpdatePerms(menu.pos, s.getIntOr("door", 0), s.getIntOr("container", 0),
+                s.getIntOr("station", 0), s.getIntOr("bed", 0), s.getIntOr("build", 0)));
     }
 
     /** The Homestead tab: name, build mode, the grounds' expansion and how the homestead shows on other people's maps. */
-    private void renderHome(GuiGraphics g, int mx, int my) {
+    private void renderHome(GuiGraphicsExtractor g, int mx, int my) {
         CompoundTag s = state();
         int x = listX + 4;
         int w = listW + detW - 8;
         int y = listY + 4;
-        g.drawString(font, Component.translatable("homestead.skycraft.home.name"), x, y, GOLD, false);
+        g.text(font, Component.translatable("homestead.skycraft.home.name"), x, y, GOLD, false);
         y = listY + 38;
         button(g, mx, my, Component.translatable("homestead.skycraft.home.rename"), x, y, 110, 18, true, () -> send("rename", nameBox.getValue()));
         for (FormattedCharSequence line : font.split(Component.translatable("homestead.skycraft.home.name_info"), w - 120)) {
-            g.drawString(font, line, x + 118, y + 1, GREY, false);
+            g.text(font, line, x + 118, y + 1, GREY, false);
             y += 9;
         }
         y = Math.max(y, listY + 38 + 18) + 10;
 
         // build mode
-        boolean on = s.getBoolean("build_mode");
-        g.drawString(font, Component.translatable("homestead.skycraft.home.build_mode"), x, y, GOLD, false);
+        boolean on = s.getBooleanOr("build_mode", false);
+        g.text(font, Component.translatable("homestead.skycraft.home.build_mode"), x, y, GOLD, false);
         y += 11;
         button(g, mx, my, Component.translatable(on ? "homestead.skycraft.home.build_mode.turn_off" : "homestead.skycraft.home.build_mode.turn_on"),
                 x, y, 130, 18, true, () -> send("build_mode", ""));
         for (FormattedCharSequence line : font.split(Component.translatable("homestead.skycraft.home.build_mode.info"), w - 140)) {
-            g.drawString(font, line, x + 138, y + 1, on ? GOOD : GREY, false);
+            g.text(font, line, x + 138, y + 1, on ? GOOD : GREY, false);
             y += 9;
         }
         y = Math.max(y, y) + 14;
 
         // the grounds
-        g.drawString(font, Component.translatable("homestead.skycraft.home.grounds", s.getInt("radius")), x, y, GOLD, false);
+        g.text(font, Component.translatable("homestead.skycraft.home.grounds", s.getIntOr("radius", 0)), x, y, GOLD, false);
         y += 11;
-        int next = s.getInt("next_radius");
+        int next = s.getIntOr("next_radius", 0);
         if (next <= 0) {
-            g.drawString(font, Component.translatable("homestead.skycraft.expand.max"), x, y, GREY, false);
+            g.text(font, Component.translatable("homestead.skycraft.expand.max"), x, y, GREY, false);
             y += 12;
         } else {
-            long gold = s.getLong("expand_gold");
-            ListTag mats = s.getList("expand_mats", Tag.TAG_STRING);
-            boolean ok = s.getLong("gold") >= gold;
+            long gold = s.getLongOr("expand_gold", 0L);
+            ListTag mats = s.getListOrEmpty("expand_mats");
+            boolean ok = s.getLongOr("gold", 0L) >= gold;
             Inventory inv = minecraft.player.getInventory();
             StringBuilder need = new StringBuilder();
             for (int i = 0; i < mats.size(); i++) {
-                String[] parts = mats.getString(i).split(":");
+                String[] parts = mats.getStringOr(i, "").split(":");
                 int count = Integer.parseInt(parts[1]);
                 ItemStack icon = switch (parts[0]) {
                     case "sawn_log" -> new ItemStack(com.skycraft.homestead.HomesteadRegistry.SAWN_LOG.get());
@@ -518,9 +521,9 @@ public class HomesteadScreen extends AbstractContainerScreen<HomesteadMenu> {
                 if (need.length() > 0) need.append(", ");
                 need.append(count).append(' ').append(icon.getHoverName().getString());
             }
-            g.drawString(font, fit(Component.translatable("homestead.skycraft.home.expand_cost", next, gold).getString(), w), x, y, ok ? TEXT : BAD, false);
+            g.text(font, fit(Component.translatable("homestead.skycraft.home.expand_cost", next, gold).getString(), w), x, y, ok ? TEXT : BAD, false);
             y += 11;
-            g.drawString(font, fit(need.toString(), w), x, y, ok ? DIM : BAD, false);
+            g.text(font, fit(need.toString(), w), x, y, ok ? DIM : BAD, false);
             y += 13;
             final boolean enabled = ok || minecraft.player.isCreative();
             button(g, mx, my, Component.translatable("homestead.skycraft.home.expand"), x, y, 130, 18, enabled, () -> send("expand", ""));
@@ -529,20 +532,20 @@ public class HomesteadScreen extends AbstractContainerScreen<HomesteadMenu> {
         y += 4;
         for (FormattedCharSequence line : font.split(Component.translatable("homestead.skycraft.home.map_info"), w)) {
             if (y + 9 > topPos + imageHeight - 6) break;
-            g.drawString(font, line, x, y, GREY, false);
+            g.text(font, line, x, y, GREY, false);
             y += 9;
         }
     }
 
-    private void button(GuiGraphics g, int mx, int my, Component label, int x, int y, int w, int h, boolean active, Runnable action) {
+    private void button(GuiGraphicsExtractor g, int mx, int my, Component label, int x, int y, int w, int h, boolean active, Runnable action) {
         boolean hover = SkyUi.inside(mx, my, x, y, x + w, y + h);
         g.fill(x, y, x + w, y + h, active ? (hover ? 0x60C8A050 : 0x40000000) : 0x30000000);
         frame(g, x, y, x + w, y + h, active ? BORDER : 0x608A7F66);
-        g.drawCenteredString(font, SkyUi.caps(label), x + w / 2, y + (h - 8) / 2, active ? (hover ? 0xFFFFFFFF : TEXT) : GREY);
+        g.centeredText(font, SkyUi.caps(label), x + w / 2, y + (h - 8) / 2, active ? (hover ? 0xFFFFFFFF : TEXT) : GREY);
         if (active) hots.add(new Hot(x, y, w, h, action));
     }
 
-    private void scrollbar(GuiGraphics g, int total) {
+    private void scrollbar(GuiGraphicsExtractor g, int total) {
         int visible = visibleRows();
         if (total <= visible) return;
         int x = listX + listW - 3;
@@ -552,7 +555,7 @@ public class HomesteadScreen extends AbstractContainerScreen<HomesteadMenu> {
         g.fill(x, barY, x + 2, barY + barH, BORDER);
     }
 
-    private static void frame(GuiGraphics g, int x0, int y0, int x1, int y1, int color) {
+    private static void frame(GuiGraphicsExtractor g, int x0, int y0, int x1, int y1, int color) {
         g.fill(x0, y0, x1, y0 + 1, color);
         g.fill(x0, y1 - 1, x1, y1, color);
         g.fill(x0, y0, x0 + 1, y1, color);

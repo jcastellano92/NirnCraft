@@ -6,7 +6,7 @@ import com.skycraft.society.NpcLook;
 import com.skycraft.society.Outfit;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.DynamicTexture;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.Resource;
 import org.jetbrains.annotations.Nullable;
 
@@ -25,9 +25,9 @@ import java.util.Optional;
 public final class NpcSkins {
     private static final String ROOT = "textures/entity/society/npc/";
     private static final int MAX_CACHED = 384;
-    private static final Map<Integer, ResourceLocation> CACHE = new LinkedHashMap<>(64, 0.75f, true) {
+    private static final Map<Integer, Identifier> CACHE = new LinkedHashMap<>(64, 0.75f, true) {
         @Override
-        protected boolean removeEldestEntry(Map.Entry<Integer, ResourceLocation> eldest) {
+        protected boolean removeEldestEntry(Map.Entry<Integer, Identifier> eldest) {
             if (size() <= MAX_CACHED) return false;
             Minecraft.getInstance().getTextureManager().release(eldest.getValue());
             return true;
@@ -39,14 +39,14 @@ public final class NpcSkins {
 
     /** The composited skin for a look, or null if its layers are missing (the caller falls back to role skins). */
     @Nullable
-    public static ResourceLocation get(int look) {
+    public static Identifier get(int look) {
         if (look < 0) return null;
-        ResourceLocation rl = CACHE.get(look);
+        Identifier rl = CACHE.get(look);
         if (rl != null) return rl;
         NativeImage img = compose(look);
         if (img == null) return null;
-        rl = new ResourceLocation(Skycraft.MODID, "npc_skin/" + Integer.toHexString(look));
-        Minecraft.getInstance().getTextureManager().register(rl, new DynamicTexture(img));
+        rl = Identifier.fromNamespaceAndPath(Skycraft.MODID, "npc_skin/" + Integer.toHexString(look));
+        Minecraft.getInstance().getTextureManager().register(rl, new DynamicTexture(()->"Skycraft NPC composite skin",img));
         CACHE.put(look, rl);
         return rl;
     }
@@ -54,7 +54,7 @@ public final class NpcSkins {
     /** Drops every composited texture and source layer (resource reload). */
     public static void clear() {
         var tm = Minecraft.getInstance().getTextureManager();
-        for (ResourceLocation rl : CACHE.values()) tm.release(rl);
+        for (Identifier rl : CACHE.values()) tm.release(rl);
         CACHE.clear();
         for (Optional<NativeImage> img : SOURCES.values()) img.ifPresent(NativeImage::close);
         SOURCES.clear();
@@ -83,7 +83,7 @@ public final class NpcSkins {
         Optional<NativeImage> cached = SOURCES.get(path);
         if (cached != null) return cached.orElse(null);
         NativeImage img = null;
-        Optional<Resource> res = Minecraft.getInstance().getResourceManager().getResource(new ResourceLocation(Skycraft.MODID, path));
+        Optional<Resource> res = Minecraft.getInstance().getResourceManager().getResource(Identifier.fromNamespaceAndPath(Skycraft.MODID, path));
         if (res.isPresent()) {
             try (InputStream in = res.get().open()) {
                 img = NativeImage.read(in);
@@ -107,23 +107,23 @@ public final class NpcSkins {
         int tb = tint & 255;
         for (int y = 0; y < 64; y++) {
             for (int x = 0; x < 64; x++) {
-                int s = src.getPixelRGBA(x, y);
+                int s = net.minecraft.util.ARGB.toABGR(src.getPixel(x,y));
                 int sa = s >>> 24;
                 if (sa == 0) continue;
                 int sr = (s & 255) * tr / 255;
                 int sg = (s >> 8 & 255) * tg / 255;
                 int sb = (s >> 16 & 255) * tb / 255;
                 if (sa == 255) {
-                    dst.setPixelRGBA(x, y, 0xFF000000 | sb << 16 | sg << 8 | sr);
+                    dst.setPixelABGR(x, y, 0xFF000000 | sb << 16 | sg << 8 | sr);
                     continue;
                 }
-                int d = dst.getPixelRGBA(x, y);
+                int d = net.minecraft.util.ARGB.toABGR(dst.getPixel(x,y));
                 int da = d >>> 24;
                 int r = (sr * sa + (d & 255) * (255 - sa)) / 255;
                 int g = (sg * sa + (d >> 8 & 255) * (255 - sa)) / 255;
                 int b = (sb * sa + (d >> 16 & 255) * (255 - sa)) / 255;
                 int a = Math.min(255, sa + da * (255 - sa) / 255);
-                dst.setPixelRGBA(x, y, a << 24 | b << 16 | g << 8 | r);
+                dst.setPixelABGR(x, y, a << 24 | b << 16 | g << 8 | r);
             }
         }
     }

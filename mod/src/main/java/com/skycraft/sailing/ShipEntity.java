@@ -32,7 +32,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.Pose;
-import net.minecraft.world.entity.animal.horse.AbstractHorse;
+import net.minecraft.world.entity.animal.equine.AbstractHorse;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.DismountHelper;
 import net.minecraft.world.inventory.ChestMenu;
@@ -43,7 +43,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.entity.PartEntity;
+import net.neoforged.neoforge.entity.PartEntity;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -149,20 +149,20 @@ public class ShipEntity extends Entity implements HasCustomInventoryScreen {
         for (int i = 0; i < parts.length; i++) {
             parts[i] = new ShipPart(this, shipType.parts[i], shipType.hitWidth(), shipType.height);
         }
-        if (parts.length > 0) this.setId(ENTITY_COUNTER.getAndAdd(parts.length + 1) + 1);
+        if (parts.length > 0) this.setId(this.getId());
     }
 
     @Override
-    protected void defineSynchedData() {
-        entityData.define(DATA_HULL, 0f);
-        entityData.define(DATA_SAIL, SAIL_FURLED);
-        entityData.define(DATA_WIND_DIR, 0f);
-        entityData.define(DATA_WIND, 0.5f);
-        entityData.define(DATA_INPUT, (byte) 0);
-        entityData.define(DATA_HURT, 0);
-        entityData.define(DATA_SINKING, 0);
-        entityData.define(DATA_MOORED, false);
-        entityData.define(DATA_LIVERY, 0);
+    protected void defineSynchedData(net.minecraft.network.syncher.SynchedEntityData.Builder builder) {
+        builder.define(DATA_HULL, 0f);
+        builder.define(DATA_SAIL, SAIL_FURLED);
+        builder.define(DATA_WIND_DIR, 0f);
+        builder.define(DATA_WIND, 0.5f);
+        builder.define(DATA_INPUT, (byte) 0);
+        builder.define(DATA_HURT, 0);
+        builder.define(DATA_SINKING, 0);
+        builder.define(DATA_MOORED, false);
+        builder.define(DATA_LIVERY, 0);
     }
 
     /** Freshly built ships start with a sound hull. */
@@ -199,7 +199,7 @@ public class ShipEntity extends Entity implements HasCustomInventoryScreen {
 
     /** The helm's input bits: the helmsman's own client knows them first, everyone else via the server. */
     public int getInput() {
-        return isControlledByLocalInstance() && level().isClientSide ? input : entityData.get(DATA_INPUT);
+        return isLocalInstanceAuthoritative() && level().isClientSide() ? input : entityData.get(DATA_INPUT);
     }
 
     public void setSyncedInput(int bits) {
@@ -240,7 +240,7 @@ public class ShipEntity extends Entity implements HasCustomInventoryScreen {
     /** Hands the helm to an NPC captain (null: nobody steers). */
     public void setAutopilot(@Nullable Autopilot autopilot) {
         this.autopilot = autopilot;
-        if (autopilot == null && !level().isClientSide) setSyncedInput(0);
+        if (autopilot == null && !level().isClientSide()) setSyncedInput(0);
     }
 
     public boolean isTransient() {
@@ -267,15 +267,15 @@ public class ShipEntity extends Entity implements HasCustomInventoryScreen {
     }
 
     @Override
-    public void onAddedToWorld() {
-        super.onAddedToWorld();
+    public void onAddedToLevel() {
+        super.onAddedToLevel();
         syncCarryPose();
         DeckPhysics.track(this);
     }
 
     @Override
-    public void onRemovedFromWorld() {
-        super.onRemovedFromWorld();
+    public void onRemovedFromLevel() {
+        super.onRemovedFromLevel();
         DeckPhysics.untrack(this);
     }
 
@@ -400,12 +400,12 @@ public class ShipEntity extends Entity implements HasCustomInventoryScreen {
             updateParts();
             return;
         }
-        if (!level().isClientSide && autopilot != null && getSinking() == 0) autopilot.tick(this);
+        if (!level().isClientSide() && autopilot != null && getSinking() == 0) autopilot.tick(this);
         if (isRemoved()) return;
         boolean broke = !isMoored() && breakIce();
         if (isMoored()) {
             setDeltaMovement(Vec3.ZERO);
-        } else if (isControlledByLocalInstance()) {
+        } else if (isLocalInstanceAuthoritative()) {
             if (broke) setDeltaMovement(getDeltaMovement().multiply(0.8, 1, 0.8));
             sail();
             double speed = getDeltaMovement().horizontalDistance();
@@ -415,8 +415,8 @@ public class ShipEntity extends Entity implements HasCustomInventoryScreen {
             setDeltaMovement(Vec3.ZERO);
         }
         updateParts();
-        tryCheckInsideBlocks();
-        if (!level().isClientSide) serverTick();
+        applyEffectsFromBlocks(position(), position());
+        if (!level().isClientSide()) serverTick();
         else clientEffects();
     }
 
@@ -429,8 +429,8 @@ public class ShipEntity extends Entity implements HasCustomInventoryScreen {
         double vs = v.x * side.x + v.z * side.z;
         double vy;
         double surface = waterSurface();
-        int bits = level().isClientSide ? input : autopilot != null && getControllingPassenger() == null ? autopilot.helm(this) & 15 : 0;
-        if (!level().isClientSide && autopilot != null && entityData.get(DATA_INPUT) != (byte) bits) setSyncedInput(bits);
+        int bits = level().isClientSide() ? input : autopilot != null && getControllingPassenger() == null ? autopilot.helm(this) & 15 : 0;
+        if (!level().isClientSide() && autopilot != null && entityData.get(DATA_INPUT) != (byte) bits) setSyncedInput(bits);
         boolean afloat = !Double.isNaN(surface) && surface > getY() + shipType.draft * 0.35;
         if (afloat) {
             double thrust = 0;
@@ -500,7 +500,7 @@ public class ShipEntity extends Entity implements HasCustomInventoryScreen {
                     p.set(Mth.floor(w.x), y, Mth.floor(w.z));
                     var state = level().getBlockState(p);
                     if (!state.is(net.minecraft.tags.BlockTags.ICE)) continue;
-                    if (!level().isClientSide) level().levelEvent(2001, p, net.minecraft.world.level.block.Block.getId(state));
+                    if (!level().isClientSide()) level().levelEvent(2001, p, net.minecraft.world.level.block.Block.getId(state));
                     level().setBlock(p, net.minecraft.world.level.block.Blocks.WATER.defaultBlockState(), 3);
                     BlockPos up = p.above();
                     if (level().getBlockState(up).is(net.minecraft.world.level.block.Blocks.SNOW)) {
@@ -545,7 +545,7 @@ public class ShipEntity extends Entity implements HasCustomInventoryScreen {
         crashCooldown = 20;
         float damage = (float) ((speed - 0.15) * SailingConfig.COLLISION_DAMAGE.get());
         if (damage <= 0) return;
-        if (level().isClientSide) {
+        if (level().isClientSide()) {
             SkyNetwork.sendToServer(new SailingPackets.ShipCrash(getId(), (float) speed));
             level().playLocalSound(getX(), getY(), getZ(), SoundEvents.ZOMBIE_ATTACK_WOODEN_DOOR, SoundSource.NEUTRAL, 0.7f, 0.6f, false);
         } else {
@@ -568,8 +568,7 @@ public class ShipEntity extends Entity implements HasCustomInventoryScreen {
         if ((tickCount & 1) == 0) {
             var entries = DeckPhysics.deckEntries(level, this);
             if (!entries.isEmpty()) {
-                SkyNetwork.CHANNEL.send(net.minecraftforge.network.PacketDistributor.TRACKING_ENTITY.with(() -> this),
-                        new SailingPackets.DeckSync(getId(), entries));
+                SkyNetwork.sendToTrackingOnly(this,new SailingPackets.DeckSync(getId(), entries));
             }
         }
         if ((tickCount + getId()) % 20 == 0) {
@@ -630,44 +629,40 @@ public class ShipEntity extends Entity implements HasCustomInventoryScreen {
     }
 
     private void tickLerp() {
-        if (isControlledByLocalInstance()) {
-            lerpSteps = 0;
+        if (isLocalInstanceAuthoritative()) {
+            getInterpolation().cancel();
             syncPacketPositionCodec(getX(), getY(), getZ());
-        }
-        if (lerpSteps > 0) {
-            double x = getX() + (lerpX - getX()) / lerpSteps;
-            double y = getY() + (lerpY - getY()) / lerpSteps;
-            double z = getZ() + (lerpZ - getZ()) / lerpSteps;
-            setYRot(getYRot() + Mth.wrapDegrees(lerpYRot - getYRot()) / lerpSteps);
-            --lerpSteps;
-            setPos(x, y, z);
-            setRot(getYRot(), getXRot());
         }
     }
 
     @Override
-    public void lerpTo(double x, double y, double z, float yRot, float xRot, int steps, boolean teleport) {
-        lerpX = x;
-        lerpY = y;
-        lerpZ = z;
-        lerpYRot = yRot;
-        // short interpolation: people on deck are placed against this pose, so it must not trail the server far
-        lerpSteps = 4;
+    protected net.minecraft.world.entity.InterpolationHandler createInterpolationHandler() {
+        return net.minecraft.world.entity.LinearInterpolationHandler.create(this, 4);
+    }
+
+    private static void releaseLeash(Mob mob, boolean dropLead) {
+        if (dropLead) mob.dropLeash();
+        else mob.removeLeash();
+    }
+
+    /** Drops cargo at the original height while using the authoritative native item path. */
+    private void spawnCargo(ItemStack stack, float offset) {
+        if (level() instanceof ServerLevel serverLevel) spawnAtLocation(serverLevel, stack, offset);
     }
 
     // ------------------------------------------------------------------ damage, sinking
 
     public void damageHull(float amount, @Nullable Entity by) {
-        if (level().isClientSide || getSinking() > 0 || isMoored()) return;
+        if (level().isClientSide() || getSinking() > 0 || isMoored()) return;
         setHull(getHull() - amount);
         entityData.set(DATA_HURT, 10);
         if (getHull() <= 0) startSinking();
     }
 
     @Override
-    public boolean hurt(DamageSource source, float amount) {
-        if (isInvulnerableTo(source) || isRemoved()) return false;
-        if (level().isClientSide) return true;
+    public boolean hurtServer(ServerLevel serverLevel263, DamageSource source, float amount) {
+        if (isInvulnerableToBase(source) || isRemoved()) return false;
+        if (level().isClientSide()) return true;
         if (isMoored() || getSinking() > 0) return false;
         Entity attacker = source.getEntity();
         if (attacker != null && hasPassenger(attacker) && !(attacker instanceof Player p && p.isShiftKeyDown())) return false;
@@ -699,16 +694,16 @@ public class ShipEntity extends Entity implements HasCustomInventoryScreen {
         ejectPassengers();
         for (int i = 0; i < cargo.getContainerSize(); i++) {
             ItemStack s = cargo.removeItemNoUpdate(i);
-            if (!s.isEmpty()) spawnAtLocation(s, 1.5f);
+            if (!s.isEmpty()) spawnCargo(s, 1.5f);
         }
         com.skycraft.inventory.ContainerOverflow.spill(level(), blockPosition(), cargo.bulk);
-        spawnAtLocation(new ItemStack(Items.OAK_PLANKS, 2 + random.nextInt(4)), 1.2f);
+        spawnCargo(new ItemStack(Items.OAK_PLANKS, 2 + random.nextInt(4)), 1.2f);
         level().playSound(null, getX(), getY(), getZ(), SoundEvents.ZOMBIE_BREAK_WOODEN_DOOR, SoundSource.NEUTRAL, 1.0f, 0.6f);
         level().playSound(null, getX(), getY(), getZ(), SoundEvents.GENERIC_SPLASH, SoundSource.NEUTRAL, 1.2f, 0.5f);
     }
 
     private void tickSinking() {
-        if (level().isClientSide) {
+        if (level().isClientSide()) {
             if (random.nextInt(2) == 0) {
                 Vec3 p = toWorld((random.nextFloat() - 0.5) * shipType.beam, shipType.draft + 0.3, (random.nextFloat() - 0.5) * shipType.length);
                 level().addParticle(ParticleTypes.BUBBLE_COLUMN_UP, p.x, p.y, p.z, 0, 0.1, 0);
@@ -723,16 +718,16 @@ public class ShipEntity extends Entity implements HasCustomInventoryScreen {
 
     private void dismantle(Player player) {
         ItemStack item = new ItemStack(SailingRegistry.SHIP_ITEMS.get(shipType).get());
-        if (getHull() < shipType.maxHull) item.getOrCreateTag().putFloat("Hull", getHull());
-        if (hasCustomName()) item.setHoverName(getCustomName());
+        if (getHull() < shipType.maxHull) com.skycraft.inventory.ItemData.updateCustom(item, customData263 -> customData263.putFloat("Hull", getHull()));
+        if (hasCustomName()) item.set(net.minecraft.core.component.DataComponents.CUSTOM_NAME, getCustomName());
         for (int i = 0; i < cargo.getContainerSize(); i++) {
             ItemStack s = cargo.removeItemNoUpdate(i);
-            if (!s.isEmpty()) spawnAtLocation(s, 1f);
+            if (!s.isEmpty()) spawnCargo(s, 1f);
         }
         com.skycraft.inventory.ContainerOverflow.spill(level(), blockPosition(), cargo.bulk);
         if (!player.getAbilities().instabuild || !com.skycraft.inventory.Inv.has(player, item.getItem())) {
             ItemStack rest = com.skycraft.inventory.Pack.give(player, item);
-            if (!rest.isEmpty()) spawnAtLocation(rest, 1f);
+            if (!rest.isEmpty()) spawnCargo(rest, 1f);
         }
         level().playSound(null, getX(), getY(), getZ(), SoundEvents.WOOD_BREAK, SoundSource.NEUTRAL, 1f, 0.8f);
         discard();
@@ -741,17 +736,17 @@ public class ShipEntity extends Entity implements HasCustomInventoryScreen {
     // ------------------------------------------------------------------ interaction
 
     @Override
-    public InteractionResult interact(Player player, InteractionHand hand) {
+    public InteractionResult interact(Player player, InteractionHand hand, Vec3 hit) {
         if (getSinking() > 0) return InteractionResult.PASS;
         ItemStack held = player.getItemInHand(hand);
         if (isMoored()) {
-            if (!level().isClientSide && player instanceof ServerPlayer sp) {
+            if (!level().isClientSide() && player instanceof ServerPlayer sp) {
                 Notifier.message(sp, Component.translatable("sailing.skycraft.moored_ferry"));
             }
-            return InteractionResult.sidedSuccess(level().isClientSide);
+            return com.skycraft.platform.Interactions.sidedSuccess(level().isClientSide());
         }
         if (held.is(ItemTags.PLANKS) && getHull() < shipType.maxHull) {
-            if (!level().isClientSide) {
+            if (!level().isClientSide()) {
                 setHull(getHull() + shipType.maxHull / 12f);
                 if (!player.getAbilities().instabuild) held.shrink(1);
                 level().playSound(null, getX(), getY(), getZ(), SoundEvents.WOOD_PLACE, SoundSource.NEUTRAL, 1f, 0.9f);
@@ -759,17 +754,17 @@ public class ShipEntity extends Entity implements HasCustomInventoryScreen {
                     Notifier.message(sp, Component.translatable("sailing.skycraft.repaired", Math.round(getHull()), Math.round(shipType.maxHull)));
                 }
             }
-            return InteractionResult.sidedSuccess(level().isClientSide);
+            return com.skycraft.platform.Interactions.sidedSuccess(level().isClientSide());
         }
         if (player.isSecondaryUseActive()) {
-            if (!level().isClientSide) openCustomInventoryScreen(player);
-            return InteractionResult.sidedSuccess(level().isClientSide);
+            if (!level().isClientSide()) openCustomInventoryScreen(player);
+            return com.skycraft.platform.Interactions.sidedSuccess(level().isClientSide());
         }
-        if (level().isClientSide) return InteractionResult.SUCCESS;
+        if (level().isClientSide()) return InteractionResult.SUCCESS;
         if (boardAnimals(player)) return InteractionResult.CONSUME;
         if (player.getVehicle() instanceof AbstractHorse horse && shipType.horseSeats > 0 && countHorses() < shipType.horseSeats) {
             player.stopRiding();
-            horse.startRiding(this, true);
+            horse.startRiding(this, true, true);
         }
         if (hasPassenger(player)) return InteractionResult.PASS;
         return player.startRiding(this) ? InteractionResult.CONSUME : InteractionResult.PASS;
@@ -781,8 +776,8 @@ public class ShipEntity extends Entity implements HasCustomInventoryScreen {
         for (Mob mob : level().getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(10),
                 m -> m.isLeashed() && m.getLeashHolder() == player && !m.isPassenger())) {
             if (canAddPassenger(mob)) {
-                mob.dropLeash(true, !player.getAbilities().instabuild);
-                if (mob.startRiding(this, true)) any = true;
+                releaseLeash(mob, !player.getAbilities().instabuild);
+                if (mob.startRiding(this, true, true)) any = true;
             }
         }
         return any;
@@ -860,7 +855,7 @@ public class ShipEntity extends Entity implements HasCustomInventoryScreen {
         double bob = 0;
         if (getSinking() > 0) bob = -getSinking() * 0.01;
         Vec3 w = toWorld(seat.x, 0, seat.z);
-        double y = getY() + seat.y + bob + (passenger instanceof Player ? -0.2 : passenger.getMyRidingOffset());
+        double y = getY() + seat.y + bob + (passenger instanceof Player ? -0.2 : -passenger.getVehicleAttachmentPoint(this).y);
         move.accept(passenger, w.x, y, w.z);
         if (deltaYaw != 0) {
             passenger.setYRot(passenger.getYRot() + deltaYaw);
@@ -875,11 +870,10 @@ public class ShipEntity extends Entity implements HasCustomInventoryScreen {
     @Override
     protected void removePassenger(Entity passenger) {
         super.removePassenger(passenger);
-        if (!level().isClientSide && getControllingPassenger() == null) setSyncedInput(0);
-        if (level().isClientSide && getControllingPassenger() == null) input = 0;
+        if (!level().isClientSide() && getControllingPassenger() == null) setSyncedInput(0);
+        if (level().isClientSide() && getControllingPassenger() == null) input = 0;
     }
 
-    @Override
     public double getPassengersRidingOffset() {
         return 0.4;
     }
@@ -940,7 +934,7 @@ public class ShipEntity extends Entity implements HasCustomInventoryScreen {
     }
 
     @Override
-    public boolean canBeCollidedWith() {
+    public boolean canBeCollidedWith(@Nullable Entity other) {
         return false;
     }
 
@@ -954,7 +948,6 @@ public class ShipEntity extends Entity implements HasCustomInventoryScreen {
         return new ItemStack(SailingRegistry.SHIP_ITEMS.get(shipType).get());
     }
 
-    @Override
     public AABB getBoundingBoxForCulling() {
         double r = shipType.length / 2.0 + 1;
         return new AABB(getX() - r, getY() - 1, getZ() - r, getX() + r, getY() + (shipType.hasSail() ? 13 : 3), getZ() + r);
@@ -979,41 +972,45 @@ public class ShipEntity extends Entity implements HasCustomInventoryScreen {
     // ------------------------------------------------------------------ save
 
     @Override
-    protected void addAdditionalSaveData(CompoundTag tag) {
+    protected void addAdditionalSaveData(net.minecraft.world.level.storage.ValueOutput output263) {
+        net.minecraft.nbt.CompoundTag tag = new net.minecraft.nbt.CompoundTag();
         tag.putFloat("Hull", getHull());
         tag.putInt("Sail", getSail());
         tag.putBoolean("Moored", isMoored());
         if (!port.isEmpty()) tag.putString("Port", port);
-        if (owner != null) tag.putUUID("Owner", owner);
+        if (owner != null) tag.store("Owner", net.minecraft.core.UUIDUtil.CODEC,  owner);
         ListTag items = new ListTag();
         for (int i = 0; i < cargo.getContainerSize(); i++) {
             ItemStack s = cargo.getItem(i);
             if (s.isEmpty()) continue;
             CompoundTag t = new CompoundTag();
             t.putByte("Slot", (byte) i);
-            s.save(t);
+            t.merge(com.skycraft.inventory.ItemData.save(s, registryAccess()));
             items.add(t);
         }
         tag.put("Cargo", items);
         if (!cargo.bulk.isEmpty()) tag.put("CargoBulk", cargo.bulk.save());
+    
+        output263.store(tag);
     }
 
     @Override
-    protected void readAdditionalSaveData(CompoundTag tag) {
-        setHull(tag.contains("Hull") ? tag.getFloat("Hull") : shipType.maxHull);
-        setSail(tag.getInt("Sail"));
-        setMoored(tag.getBoolean("Moored"), tag.getString("Port"));
-        owner = tag.hasUUID("Owner") ? tag.getUUID("Owner") : null;
-        ListTag items = tag.getList("Cargo", Tag.TAG_COMPOUND);
+    protected void readAdditionalSaveData(net.minecraft.world.level.storage.ValueInput input263) {
+        net.minecraft.nbt.CompoundTag tag = com.skycraft.platform.ValueTags.read(input263 , "Hull", "Sail", "Moored", "Port", "Owner", "Cargo", "CargoBulk");
+        setHull(tag.contains("Hull") ? tag.getFloatOr("Hull",0F) : shipType.maxHull);
+        setSail(tag.getIntOr("Sail",0));
+        setMoored(tag.getBooleanOr("Moored",false), tag.getStringOr("Port",""));
+        owner = tag.read("Owner", net.minecraft.core.UUIDUtil.CODEC).isPresent() ? tag.read("Owner", net.minecraft.core.UUIDUtil.CODEC).orElseThrow() : null;
+        ListTag items = tag.getListOrEmpty("Cargo");
         for (int i = 0; i < items.size(); i++) {
-            CompoundTag t = items.getCompound(i);
-            int slot = t.getByte("Slot") & 255;
-            ItemStack stack = ItemStack.of(t);
+            CompoundTag t = items.getCompoundOrEmpty(i);
+            int slot = t.getByteOr("Slot",(byte)0) & 255;
+            ItemStack stack = com.skycraft.inventory.ItemData.parse(t, input263.lookup());
             if (stack.isEmpty()) continue;
             // a slot that no longer exists (a smaller hold) keeps its stack in the overflow: loading drops nothing
             if (slot < cargo.getContainerSize() && cargo.getItem(slot).isEmpty()) cargo.setItem(slot, stack);
             else cargo.bulk.add(stack);
         }
-        cargo.bulk.load(tag.getCompound("CargoBulk"));
+        cargo.bulk.load(tag.getCompoundOrEmpty("CargoBulk"));
     }
 }

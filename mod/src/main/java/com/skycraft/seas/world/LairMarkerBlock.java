@@ -67,6 +67,6 @@ public class LairMarkerBlock extends BaseEntityBlock implements SimpleWaterlogge
     @Nullable
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
-        return level.isClientSide ? null : createTickerHelper(type, SeasRegistry.LAIR_MARKER_BE.get(), LairMarkerBlockEntity::serverTick);
+        return level.isClientSide() ? null : createTickerHelper(type, SeasRegistry.LAIR_MARKER_BE.get(), LairMarkerBlockEntity::serverTick);
     }
 }

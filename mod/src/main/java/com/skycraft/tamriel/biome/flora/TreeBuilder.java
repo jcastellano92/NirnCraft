@@ -298,7 +298,7 @@ final class TreeBuilder {
             int bx = BlockPos.getX(below), by = BlockPos.getY(below), bz = BlockPos.getZ(below);
             if (!box.contains(bx, by, bz)) continue;
             BlockState b = box.get(bx, by, bz);
-            if (!GenBox.isSoft(b) && !b.is(BlockTags.LOGS) && b.blocksMotion() && rooted.add(k)) queue.enqueue(k);
+            if (!GenBox.isSoft(b) && !b.is(BlockTags.LOGS) && b.isSolid() && rooted.add(k)) queue.enqueue(k);
         }
         if (rooted.isEmpty()) return false;
         while (!queue.isEmpty()) {

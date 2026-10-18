@@ -370,7 +370,7 @@ public final class QaGraph {
                 int x = c[0] + d.getStepX(), y = c[1] + d.getStepY(), z = c[2] + d.getStepZ();
                 if (x < area.minX() || x > area.maxX() || y < area.minY() || y > area.maxY() || z < area.minZ() || z > area.maxZ()) continue;
                 BlockState st = lvl.get(x, y, z);
-                int block = st.getLightBlock(lvl, mp.set(x, y, z));
+                int block = st.getLightDampening();
                 if (block >= 15) continue;
                 int nl = lv - Math.max(1, block);
                 int i = vidx(x, y, z);

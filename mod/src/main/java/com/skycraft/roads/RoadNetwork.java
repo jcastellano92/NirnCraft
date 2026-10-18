@@ -7,7 +7,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.ChunkPos;
@@ -19,12 +19,12 @@ import net.minecraft.world.level.levelgen.RandomState;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.level.ChunkEvent;
-import net.minecraftforge.event.server.ServerStoppingEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.LogicalSide;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.tick.LevelTickEvent;
+import net.neoforged.neoforge.event.level.ChunkEvent;
+import net.neoforged.neoforge.event.server.ServerStoppingEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+
+import net.neoforged.fml.common.Mod;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,11 +42,11 @@ import java.util.concurrent.Future;
  * <p>The chunk load event only records what it saw in thread-safe queues; all world access happens in the level
  * tick on the server thread.</p>
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class RoadNetwork {
     /** Legacy alias of {@code #skycraft:towns} (quests use it); see {@link LocationTags}. */
     public static final TagKey<Structure> SETTLEMENTS =
-            TagKey.create(Registries.STRUCTURE, new ResourceLocation(Skycraft.MODID, "settlements"));
+            TagKey.create(Registries.STRUCTURE, Identifier.fromNamespaceAndPath(Skycraft.MODID, "settlements"));
 
     private record FoundStart(Structure structure, long key, BoundingBox box) {
     }
@@ -80,20 +80,20 @@ public final class RoadNetwork {
         if (!(event.getLevel() instanceof ServerLevel level) || level.dimension() != Level.OVERWORLD) return;
         if (!(event.getChunk() instanceof LevelChunk chunk)) return;
         if (!RoadsConfig.ENABLED.get()) return;
-        LOADED.add(chunk.getPos().toLong());
+        LOADED.add(chunk.getPos().pack());
         Map<Structure, StructureStart> starts = chunk.getAllStarts();
         if (starts.isEmpty()) return;
         for (Map.Entry<Structure, StructureStart> e : starts.entrySet()) {
             StructureStart start = e.getValue();
             if (start == null || !start.isValid()) continue;
-            FOUND.add(new FoundStart(e.getKey(), start.getChunkPos().toLong(), start.getBoundingBox()));
+            FOUND.add(new FoundStart(e.getKey(), start.getChunkPos().pack(), start.getBoundingBox()));
         }
     }
 
     @SubscribeEvent
-    public static void onLevelTick(TickEvent.LevelTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || event.side != LogicalSide.SERVER) return;
-        if (!(event.level instanceof ServerLevel level) || level.dimension() != Level.OVERWORLD) return;
+    public static void onLevelTick(LevelTickEvent.Post event) {
+        if (event.getLevel().isClientSide()) return;
+        if (!(event.getLevel() instanceof ServerLevel level) || level.dimension() != Level.OVERWORLD) return;
         tick++;
         if (!RoadsConfig.ENABLED.get()) {
             FOUND.clear();
@@ -134,14 +134,14 @@ public final class RoadNetwork {
             ChunkPos cp = player.chunkPosition();
             for (int dx = -2; dx <= 2; dx++) {
                 for (int dz = -2; dz <= 2; dz++) {
-                    long c = ChunkPos.asLong(cp.x + dx, cp.z + dz);
+                    long c = ChunkPos.pack(cp.x() + dx, cp.z() + dz);
                     if (data.paved.contains(c)) {
-                        LevelChunk chunk = level.getChunkSource().getChunkNow(cp.x + dx, cp.z + dz);
+                        LevelChunk chunk = level.getChunkSource().getChunkNow(cp.x() + dx, cp.z() + dz);
                         if (chunk == null) continue;
                         for (int bx = 0; bx < 16; bx += 2) {
                             for (int bz = 0; bz < 16; bz += 2) {
-                                int x = (cp.x + dx) * 16 + bx;
-                                int z = (cp.z + dz) * 16 + bz;
+                                int x = (cp.x() + dx) * 16 + bx;
+                                int z = (cp.z() + dz) * 16 + bz;
                                 int y = level.getHeight(Heightmap.Types.WORLD_SURFACE, x, z);
                                 net.minecraft.core.BlockPos above = new net.minecraft.core.BlockPos(x, y - 1, z);
                                 if (level.getBlockState(above).is(net.minecraft.world.level.block.Blocks.SNOW)) {
@@ -181,13 +181,13 @@ public final class RoadNetwork {
     private static void drainFound(ServerLevel level, RoadsData data) {
         // wait for the world plan, so the named places' own starts are recognised as the planned destinations
         if (FOUND.isEmpty() || data.planVersion < WorldPlan.VERSION) return;
-        Registry<Structure> registry = level.registryAccess().registryOrThrow(Registries.STRUCTURE);
+        Registry<Structure> registry = level.registryAccess().lookupOrThrow(Registries.STRUCTURE);
         FoundStart f;
         while ((f = FOUND.poll()) != null) {
             if (data.settlementByKey.containsKey(f.key())) continue;
             BoundingBox box = f.box();
             if (WorldPlan.plannedAt(data, (box.minX() + box.maxX()) / 2, (box.minZ() + box.maxZ()) / 2) != null) continue;
-            Optional<Holder.Reference<Structure>> holder = registry.getResourceKey(f.structure()).flatMap(registry::getHolder);
+            Optional<Holder.Reference<Structure>> holder = registry.getResourceKey(f.structure()).flatMap(registry::get);
             if (holder.isEmpty()) continue;
             // only explicit tags decide: towns get people, other destinations only a spur road
             boolean town = holder.get().is(LocationTags.TOWNS);
@@ -202,7 +202,7 @@ public final class RoadNetwork {
     private static void reclassify(ServerLevel level, RoadsData data) {
         data.classified = true;
         for (Settlement s : new ArrayList<>(data.settlements)) {
-            ResourceLocation id = ResourceLocation.tryParse(s.structure);
+            Identifier id = Identifier.tryParse(s.structure);
             if (id == null) continue;
             // not in any tag any more (e.g. outposts registered by the old name heuristic): keep its roads, no people
             data.setTown(s, LocationTags.is(level.registryAccess(), id, LocationTags.TOWNS));
@@ -211,9 +211,9 @@ public final class RoadNetwork {
     }
 
     private static void register(ServerLevel level, RoadsData data, FoundStart f, Holder<Structure> holder, boolean town) {
-        ResourceLocation structure = holder.unwrapKey().map(ResourceKey::location).orElseThrow();
+        Identifier structure = holder.unwrapKey().map(ResourceKey::identifier).orElseThrow();
         BoundingBox box = f.box();
-        ChunkPos startChunk = new ChunkPos(f.key());
+        ChunkPos startChunk = ChunkPos.unpack(f.key());
         String locationId = SettlementNames.locationId(level.dimension(), structure, startChunk);
         String name = SettlementNames.name(level.dimension(), holder, structure, locationId);
         int cx = (box.minX() + box.maxX()) / 2;
@@ -368,7 +368,7 @@ public final class RoadNetwork {
     private static long nextPair(ServerLevel level, RoadsData data) {
         List<double[]> anchors = new ArrayList<>();
         for (net.minecraft.server.level.ServerPlayer p : level.players()) anchors.add(new double[]{p.getX(), p.getZ()});
-        if (anchors.isEmpty()) anchors.add(new double[]{level.getSharedSpawnPos().getX(), level.getSharedSpawnPos().getZ()});
+        if (anchors.isEmpty()) anchors.add(new double[]{level.getRespawnData().pos().getX(), level.getRespawnData().pos().getZ()});
         long best = -1;
         double bestD = Double.MAX_VALUE;
         for (long pair : data.pending) {

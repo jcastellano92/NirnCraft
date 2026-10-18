@@ -113,12 +113,12 @@ public final class Road {
     }
 
     static Road load(CompoundTag t) {
-        int[] xs = t.getIntArray("x");
-        int[] zs = t.getIntArray("z");
+        int[] xs = t.getIntArray("x").orElseGet(() -> new int[0]);
+        int[] zs = t.getIntArray("z").orElseGet(() -> new int[0]);
         if (xs.length < 2 || xs.length != zs.length) return null;
-        byte kind = t.contains("k") ? t.getByte("k") : ROAD;
-        Road road = new Road(t.getInt("id"), t.getInt("a"), t.getInt("b"), xs, zs, t.getByteArray("f"), kind, t.getString("n"));
-        road.plan = t.getBoolean("pl");
+        byte kind = t.contains("k") ? t.getByteOr("k", (byte) 0) : ROAD;
+        Road road = new Road(t.getIntOr("id", 0), t.getIntOr("a", 0), t.getIntOr("b", 0), xs, zs, t.getByteArray("f").orElseGet(() -> new byte[0]), kind, t.getStringOr("n", ""));
+        road.plan = t.getBooleanOr("pl", false);
         return road;
     }
 }

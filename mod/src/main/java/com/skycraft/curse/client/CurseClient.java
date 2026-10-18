@@ -21,16 +21,16 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
-import net.minecraftforge.client.event.InputEvent;
-import net.minecraftforge.client.event.RenderHandEvent;
-import net.minecraftforge.client.event.RenderPlayerEvent;
-import net.minecraftforge.client.event.ScreenEvent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
+import net.neoforged.neoforge.client.event.InputEvent;
+import net.neoforged.neoforge.client.event.RenderHandEvent;
+import net.neoforged.neoforge.client.event.RenderPlayerEvent;
+import net.neoforged.neoforge.client.event.ScreenEvent;
+
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.util.Map;
 import java.util.WeakHashMap;
@@ -41,7 +41,7 @@ import java.util.WeakHashMap;
  * levitating, no mining, no items), the low ceiling of the Vampire Lord's levitation, and the menus: while
  * transformed the magic menu opens the form's abilities and the skills menu its perk tree.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
 public final class CurseClient {
     private static final Map<Player, CurseAnims> PLAYER_ANIMS = new WeakHashMap<>();
     private static int primaryCooldown;
@@ -79,13 +79,8 @@ public final class CurseClient {
     // ------------------------------------------------------------------ rendering
 
     @SubscribeEvent(priority = EventPriority.HIGH)
-    public static void onRenderPlayer(RenderPlayerEvent.Pre event) {
-        Player player = event.getEntity();
-        Form form = Curses.form(player);
-        if (form == Form.NONE) return;
-        if (FormRenderer.render(player, form, event.getPartialTick(), event.getPoseStack(), event.getMultiBufferSource(), event.getPackedLight())) {
-            event.setCanceled(true);
-        }
+    public static void onRenderPlayer(RenderPlayerEvent.Pre<?> event) {
+        if (FormRenderer.render(event.getRenderState(),event.getPoseStack(),event.getSubmitNodeCollector())) event.setCanceled(true);
     }
 
     @SubscribeEvent(priority = EventPriority.HIGH)
@@ -97,7 +92,7 @@ public final class CurseClient {
         event.setCanceled(true);
         boolean right = event.getHand() == InteractionHand.MAIN_HAND;
         FormRenderer.renderArm(player, form, right, right ? event.getSwingProgress() : 0f, event.getEquipProgress(),
-                event.getPoseStack(), event.getMultiBufferSource(), event.getPackedLight());
+                event.getPoseStack(), event.getSubmitNodeCollector(), event.getPackedLight());
     }
 
     // ------------------------------------------------------------------ controls
@@ -135,8 +130,7 @@ public final class CurseClient {
     }
 
     @SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent event) {
-        if (event.phase != TickEvent.Phase.END) return;
+    public static void onClientTick(net.neoforged.neoforge.client.event.ClientTickEvent.Post event) {
         Minecraft mc = Minecraft.getInstance();
         LocalPlayer player = mc.player;
         if (player == null) {
@@ -148,18 +142,18 @@ public final class CurseClient {
         if (secondaryCooldown > 0) secondaryCooldown--;
         for (Map.Entry<Player, CurseAnims> e : PLAYER_ANIMS.entrySet()) e.getValue().tick(e.getKey().tickCount);
         Form form = Curses.form(player);
-        if (form == Form.LORD && player.getAbilities().flying && mc.screen == null && mc.options.keyAttack.isDown() && primaryCooldown <= 0) {
+        if (form == Form.LORD && player.getAbilities().flying && mc.gui.screen() == null && mc.options.keyAttack.isDown() && primaryCooldown <= 0) {
             primaryCooldown = 8;
             SkyNetwork.sendToServer(CursePackets.Action.of(CursePackets.Action.PRIMARY));
-            player.swing(InteractionHand.MAIN_HAND);
+            player.swing(InteractionHand.MAIN_HAND,player.getItemInHand(InteractionHand.MAIN_HAND).getAttackAnimation(),false);
         }
     }
 
     /** The Vampire Lord levitates; it doesn't fly: keep it close to the ground (movement is simulated here). */
     @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.START || !event.player.level().isClientSide || event.player != Minecraft.getInstance().player) return;
-        Player player = event.player;
+    public static void onPlayerTick(net.neoforged.neoforge.event.tick.PlayerTickEvent.Pre event) {
+        if (!event.getEntity().level().isClientSide() || event.getEntity() != Minecraft.getInstance().player) return;
+        Player player = event.getEntity();
         if (Curses.form(player) != Form.LORD || !player.getAbilities().flying) return;
         if (heightAboveGround(player) > VampireLord.CEILING) {
             Vec3 v = player.getDeltaMovement();
@@ -204,7 +198,7 @@ public final class CurseClient {
             int points = CursePerks.available(player, tree);
             Component label = Component.translatable("curse.skycraft.tree.button", tree.displayName()).append(points > 0 ? " (" + points + ")" : "");
             int w = Minecraft.getInstance().font.width(label) + 12;
-            event.addListener(Button.builder(label, b -> Minecraft.getInstance().setScreen(new CursePerkScreen(tree, skills)))
+            event.addListener(Button.builder(label, b -> Minecraft.getInstance().gui.setScreen(new CursePerkScreen(tree, skills)))
                     .bounds(x, 26, w, 16).build());
             x += w + 4;
         }

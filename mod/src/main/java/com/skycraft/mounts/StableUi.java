@@ -18,7 +18,6 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.item.HorseArmorItem;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
@@ -54,7 +53,7 @@ public final class StableUi {
     /** The stable's identity for its stock: fixed on the stablemaster the first time they are asked. */
     static String key(ServerPlayer player, LivingEntity npc) {
         CompoundTag t = npc.getPersistentData();
-        if (!t.getString(KEY).isEmpty()) return t.getString(KEY);
+        if (!t.getStringOr(KEY, "").isEmpty()) return t.getStringOr(KEY, "");
         Region r = Regions.at(player.level(), npc.blockPosition());
         BlockPos p = npc.blockPosition();
         String key = r.id() + ":" + (p.getX() >> 6) + ":" + (p.getZ() >> 6);
@@ -77,7 +76,7 @@ public final class StableUi {
         String key = key(player, npc);
         List<MountKind> kinds = sale(player, npc);
         List<MountStock.Offer> out = new ArrayList<>();
-        MountStable stock = MountStable.get(player.server);
+        MountStable stock = MountStable.get(player.level().getServer());
         for (CompoundTag token : stock.stockOf(key)) {
             MountStock.Offer o = fromToken("t:", token);
             if (o != null) out.add(o);
@@ -107,7 +106,7 @@ public final class StableUi {
     /** Takes the animal of a player-sold or pooled offer out of storage: true only for the first caller. */
     @Nullable
     private static CompoundTag takeToken(ServerPlayer player, LivingEntity npc, String offerId) {
-        MountStable stock = MountStable.get(player.server);
+        MountStable stock = MountStable.get(player.level().getServer());
         try {
             if (offerId.startsWith("t:")) return stock.take(key(player, npc), java.util.UUID.fromString(offerId.substring(2)));
             if (offerId.startsWith("p:")) return stock.takeFromPool(java.util.UUID.fromString(offerId.substring(2)));
@@ -117,17 +116,17 @@ public final class StableUi {
     }
 
     private static Set<String> sold(ServerPlayer player, long week) {
-        CompoundTag rec = Mounts.data(player).getCompound(SOLD);
+        CompoundTag rec = Mounts.data(player).getCompoundOrEmpty(SOLD);
         Set<String> out = new HashSet<>();
-        if (rec.getLong("week") != week) return out;
-        for (Tag t : rec.getList("ids", Tag.TAG_STRING)) out.add(t.getAsString());
+        if (rec.getLongOr("week",0L) != week) return out;
+        for (Tag t : rec.getListOrEmpty("ids")) out.add(t.asString().orElse(""));
         return out;
     }
 
     private static void markSold(ServerPlayer player, long week, String id) {
         CompoundTag tag = Mounts.data(player);
-        CompoundTag rec = tag.getCompound(SOLD);
-        ListTag ids = rec.getLong("week") == week ? rec.getList("ids", Tag.TAG_STRING) : new ListTag();
+        CompoundTag rec = tag.getCompoundOrEmpty(SOLD);
+        ListTag ids = rec.getLongOr("week",0L) == week ? rec.getListOrEmpty("ids") : new ListTag();
         ids.add(StringTag.valueOf(id));
         rec.putLong("week", week);
         rec.put("ids", ids);
@@ -147,13 +146,13 @@ public final class StableUi {
             saddle = own.saddle().isEmpty() ? null : SaddleType.byId(own.saddle());
             Entity e = Mounts.activeEntity(player);
             if (e instanceof Mob m) barding = MountGear.barding(m);
-            else if (!Mounts.data(player).getString("barding").isEmpty()) barding = new ItemStack(net.minecraftforge.registries.ForgeRegistries.ITEMS
-                    .getValue(new net.minecraft.resources.ResourceLocation(Mounts.data(player).getString("barding"))));
+            else if (!Mounts.data(player).getStringOr("barding", "").isEmpty()) barding = new ItemStack(net.minecraft.core.registries.BuiltInRegistries.ITEM
+                    .getValue(net.minecraft.resources.Identifier.parse(Mounts.data(player).getStringOr("barding",""))));
         }
         List<StablePackets.Offer> rows = new ArrayList<>();
         for (MountStock.Offer o : offers(player, npc)) {
             boolean saddleFits = saddle == null || MountGear.accepts(o.kind(), saddle);
-            boolean bardFits = barding.isEmpty() || (o.kind().backing == MountKind.Backing.HORSE && barding.getItem() instanceof HorseArmorItem)
+            boolean bardFits = barding.isEmpty() || (o.kind().backing == MountKind.Backing.HORSE && MountItems.isHorseArmor(barding))
                     || (o.kind().backing == MountKind.Backing.BEAST && barding.is(MountItems.BEAST_BARDING.get()));
             rows.add(new StablePackets.Offer(o.id(), MountInspect.offerView(player, o.kind(), o.stats(), o.token() == null ? "" : MountToken.name(o.token())), o.price(), saddleFits, bardFits));
         }
@@ -215,7 +214,7 @@ public final class StableUi {
         BlockPos spawnPos = npc.blockPosition().relative(npc.getDirection(), 2);
         Mob mob = Mounts.grant(player, offer.kind(), spawnPos, token, key(player, npc));
         if (mob == null) {
-            if (offer.token() != null) MountStable.get(player.server).consign(key(player, npc), token); // back where it was
+            if (offer.token() != null) MountStable.get(player.level().getServer()).consign(key(player, npc), token); // back where it was
             if (net > 0) Currency.give(player, net);
             send(player, npc, Component.translatable("mounts.skycraft.stable.nospace"), false);
             return;
@@ -223,7 +222,7 @@ public final class StableUi {
         if (net < 0) Currency.give(player, -net); // the old one was worth more than the new one costs
         if (offer.token() == null) markSold(player, week, offer.id());
         Saddlebags.fit(player, MountGear.bagCapacity(mob, offer.kind()));
-        player.level().playSound(null, spawnPos, SoundEvents.HORSE_SADDLE, SoundSource.NEUTRAL, 1.0f, 1.0f);
+        player.level().playSound(null, spawnPos, SoundEvents.HORSE_SADDLE.value(), SoundSource.NEUTRAL, 1.0f, 1.0f);
         Notifier.message(player, Component.translatable("fauna.skycraft.horse.bought", offer.kind().displayName()));
         send(player, npc, Component.translatable("mounts.skycraft.stable.bought", offer.kind().displayName()), false);
     }

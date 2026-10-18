@@ -22,7 +22,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
@@ -40,8 +40,8 @@ import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.TamableAnimal;
-import net.minecraft.world.entity.animal.Chicken;
-import net.minecraft.world.entity.animal.Rabbit;
+import net.minecraft.world.entity.animal.chicken.Chicken;
+import net.minecraft.world.entity.animal.rabbit.Rabbit;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -71,7 +71,7 @@ public final class StaffEffects {
     private StaffEffects() {}
 
     private static ResourceKey<DamageType> key(String path) {
-        return ResourceKey.create(Registries.DAMAGE_TYPE, new ResourceLocation(Skycraft.MODID, path));
+        return ResourceKey.create(Registries.DAMAGE_TYPE, Identifier.fromNamespaceAndPath(Skycraft.MODID, path));
     }
 
     // ------------------------------------------------------------------ helpers
@@ -86,10 +86,10 @@ public final class StaffEffects {
      * direct entity, so melee/archery rules don't treat it as a weapon hit, credited to {@code cause}.
      */
     public static DamageSource source(Level level, @Nullable ResourceKey<DamageType> type, @Nullable Entity direct, @Nullable Entity cause) {
-        Registry<DamageType> reg = level.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE);
+        var reg = level.registryAccess().lookupOrThrow(Registries.DAMAGE_TYPE);
         Holder<DamageType> holder = null;
-        if (type != null) holder = reg.getHolder(type).orElse(null);
-        if (holder == null) holder = reg.getHolderOrThrow(DamageTypes.INDIRECT_MAGIC);
+        if (type != null) holder = reg.get(type).orElse(null);
+        if (holder == null) holder = reg.getOrThrow(DamageTypes.INDIRECT_MAGIC);
         return new DamageSource(holder, direct, cause);
     }
 
@@ -125,7 +125,7 @@ public final class StaffEffects {
     }
 
     private static boolean resists(ServerPlayer caster, LivingEntity target, Skill skill) {
-        if (target.getType().is(CombatHandler.BOSSES) || target instanceof Player) return true;
+        if (target.getType().builtInRegistryHolder().is(CombatHandler.BOSSES) || target instanceof Player) return true;
         return target.getMaxHealth() > 30 + SkyData.get(caster).getSkill(skill) * 0.8f;
     }
 
@@ -171,7 +171,7 @@ public final class StaffEffects {
     }
 
     private static void chainLightning(ServerPlayer player, float power) {
-        ServerLevel level = player.serverLevel();
+        ServerLevel level = player.level();
         Targeting.Ray ray = Targeting.ray(player, 32, e -> true);
         LivingEntity first = ray.entity();
         Vec3 from = handPos(player);
@@ -184,7 +184,7 @@ public final class StaffEffects {
         float dealt = 0;
         for (int jump = 0; jump < 3 && current != null; jump++) {
             hit.add(current);
-            current.hurt(shock(level, null, player), damage);
+            com.skycraft.platform.Effects.hurt(current, shock(level, null, player), damage);
             drainMagicka(current, damage * 2.5f);
             dealt += damage;
             damage *= 0.75f;
@@ -210,9 +210,9 @@ public final class StaffEffects {
 
     /** A familiar for a minute, through the magic module's summon system (same limits and rules as the spell). */
     private static void conjureFamiliar(ServerPlayer player) {
-        ServerLevel level = player.serverLevel();
-        Mob wolf = Summons.conjure(player, EntityType.WOLF, "familiar", 6, 20 * 60,
-                mob -> mob.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 20 * 60, 0, false, false)));
+        ServerLevel level = player.level();
+        Mob wolf = Summons.conjure(player, net.minecraft.world.entity.EntityTypes.WOLF, "familiar", 6, 20 * 60,
+                mob -> mob.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.SPEED), 20 * 60, 0, false, false)));
         if (wolf == null) return;
         Vec3 pos = wolf.position();
         level.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, pos.x, pos.y + 0.5, pos.z, 30, 0.4, 0.5, 0.4, 0.02);
@@ -224,7 +224,7 @@ public final class StaffEffects {
 
     /** One tick of a channelled staff ({@code used} = ticks since the player started channelling). */
     public static void stream(ServerPlayer player, ItemStack stack, StaffKind kind, int used) {
-        ServerLevel level = player.serverLevel();
+        ServerLevel level = player.level();
         boolean beam = kind == StaffKind.HEALING || kind == StaffKind.MAGNUS;
         double range = kind == StaffKind.HEALING ? 2.0 : (beam ? 14 : 8);
         Targeting.Ray ray = kind == StaffKind.HEALING
@@ -232,7 +232,7 @@ public final class StaffEffects {
                 : Targeting.ray(player, range, e -> true);
         LivingEntity target = ray.entity();
         if (kind == StaffKind.HEALING && target != null && used % 6 == 0) {
-            player.swing(player.getUsedItemHand(), true);
+            player.swing(player.getUsedItemHand(), net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
         }
         if (used % 3 == 0) {
             byte fx = switch (kind) {
@@ -274,16 +274,16 @@ public final class StaffEffects {
             case FLAMES -> {
                 if (friendly(player, target)) return;
                 float dmg = 2.0f * power;
-                if (target.hurt(fire(level, null, player), dmg)) {
-                    target.setSecondsOnFire(2);
+                if (com.skycraft.platform.Effects.hurt(target, fire(level, null, player), dmg)) {
+                    target.igniteForSeconds(2);
                     xp(player, Skill.DESTRUCTION, Math.min(dmg, target.getHealth() + dmg) * CombatHandler.SKYRIM_SCALE * 0.25f);
                 }
             }
             case FROSTBITE -> {
                 if (friendly(player, target)) return;
                 float dmg = 1.6f * power;
-                if (target.hurt(frost(level, null, player), dmg)) {
-                    target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 40, 1));
+                if (com.skycraft.platform.Effects.hurt(target, frost(level, null, player), dmg)) {
+                    target.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.SLOWNESS), 40, 1));
                     target.setTicksFrozen(Math.min(target.getTicksRequiredToFreeze() + 40, target.getTicksFrozen() + 20));
                     drainStamina(target, dmg * 3f);
                     xp(player, Skill.DESTRUCTION, dmg * CombatHandler.SKYRIM_SCALE * 0.25f);
@@ -292,7 +292,7 @@ public final class StaffEffects {
             case SPARKS -> {
                 if (friendly(player, target)) return;
                 float dmg = 1.8f * power;
-                if (target.hurt(shock(level, null, player), dmg)) {
+                if (com.skycraft.platform.Effects.hurt(target, shock(level, null, player), dmg)) {
                     drainMagicka(target, dmg * 3f);
                     xp(player, Skill.DESTRUCTION, dmg * CombatHandler.SKYRIM_SCALE * 0.25f);
                 }
@@ -308,7 +308,7 @@ public final class StaffEffects {
                 }
                 if (drained < 1f) {
                     float dmg = 1.5f * power;
-                    target.hurt(source(level, null, null, player), dmg);
+                    com.skycraft.platform.Effects.hurt(target, source(level, null, null, player), dmg);
                     drained = 5f;
                 }
                 casterData.setMagicka(casterData.getMagicka() + drained);
@@ -337,21 +337,21 @@ public final class StaffEffects {
 
     /** A staff projectile hit {@code target} (or the ground at {@code pos} when target is null). */
     public static void impact(StaffBolt bolt, ServerPlayer caster, StaffBolt.Kind kind, @Nullable LivingEntity target, Vec3 pos) {
-        ServerLevel level = caster.serverLevel();
+        ServerLevel level = caster.level();
         if (bolt.level() != level) return;
         float power = bolt.power();
         switch (kind) {
             case FIREBALL -> {
                 ArsenalPackets.Fx.send(level, ArsenalPackets.Fx.FIRE_BURST, pos, pos);
-                level.playSound(null, pos.x, pos.y, pos.z, SoundEvents.GENERIC_EXPLODE, SoundSource.PLAYERS, 0.9f, 1.3f);
+                level.playSound(null, pos.x, pos.y, pos.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 0.9f, 1.3f);
                 float dealt = 0;
                 for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, new AABB(pos, pos).inflate(3.5),
                         e -> e.isAlive() && !friendly(caster, e))) {
                     double d = Math.sqrt(e.distanceToSqr(pos));
                     if (d > 3.5) continue;
                     float dmg = 7f * power * (float) (1.0 - 0.5 * d / 3.5);
-                    if (e.hurt(fire(level, bolt, caster), dmg)) {
-                        e.setSecondsOnFire(4);
+                    if (com.skycraft.platform.Effects.hurt(e, fire(level, bolt, caster), dmg)) {
+                        e.igniteForSeconds(4);
                         dealt += dmg;
                     }
                 }
@@ -360,8 +360,8 @@ public final class StaffEffects {
             case ICE_STORM -> {
                 if (target == null || friendly(caster, target)) return;
                 float dmg = 4f * power;
-                if (target.hurt(frost(level, bolt, caster), dmg)) {
-                    target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 80, 2));
+                if (com.skycraft.platform.Effects.hurt(target, frost(level, bolt, caster), dmg)) {
+                    target.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.SLOWNESS), 80, 2));
                     target.setTicksFrozen(target.getTicksRequiredToFreeze() + 80);
                     drainStamina(target, dmg * 3f);
                     ArsenalPackets.Fx.send(level, ArsenalPackets.Fx.FROST_BURST, target.position().add(0, 1, 0), target.position());
@@ -371,7 +371,7 @@ public final class StaffEffects {
             case BLADE -> {
                 if (target == null || friendly(caster, target)) return;
                 float dmg = 7f * power;
-                if (target.hurt(source(level, null, bolt, caster), dmg)) {
+                if (com.skycraft.platform.Effects.hurt(target, source(level, null, bolt, caster), dmg)) {
                     level.sendParticles(ParticleTypes.DAMAGE_INDICATOR, target.getX(), target.getY() + target.getBbHeight() * 0.6, target.getZ(),
                             6, 0.3, 0.3, 0.3, 0.1);
                     xp(caster, Skill.TWO_HANDED, dmg * CombatHandler.SKYRIM_SCALE * 0.15f);
@@ -399,11 +399,11 @@ public final class StaffEffects {
             }
             case PARALYSIS -> {
                 if (target == null || friendly(caster, target)) return;
-                if (target.getType().is(CombatHandler.BOSSES)) {
+                if (target.getType().builtInRegistryHolder().is(CombatHandler.BOSSES)) {
                     Notifier.message(caster, Component.translatable("message.skycraft.arsenal.resisted", target.getDisplayName()));
                     return;
                 }
-                target.addEffect(new MobEffectInstance(ModEffects.PARALYSIS.get(), 100, 0));
+                target.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(ModEffects.PARALYSIS.get()), 100, 0));
                 if (target instanceof Mob mob) mob.getNavigation().stop();
                 level.sendParticles(ParticleTypes.ENCHANTED_HIT, target.getX(), target.getY() + target.getBbHeight() * 0.5, target.getZ(),
                         20, 0.4, 0.5, 0.4, 0.1);
@@ -416,12 +416,12 @@ public final class StaffEffects {
     // ------------------------------------------------------------------ Wabbajack
 
     private static void wabbajack(ServerPlayer caster, @Nullable LivingEntity target, Vec3 pos, float power) {
-        ServerLevel level = caster.serverLevel();
+        ServerLevel level = caster.level();
         RandomSource r = caster.getRandom();
         level.sendParticles(ParticleTypes.WITCH, pos.x, pos.y + 0.5, pos.z, 30, 0.6, 0.6, 0.6, 0.05);
         level.playSound(null, pos.x, pos.y, pos.z, SoundEvents.ILLUSIONER_MIRROR_MOVE, SoundSource.PLAYERS, 1f, 1f);
         xp(caster, Skill.ILLUSION, 3f);
-        boolean transformable = target instanceof Mob mob && !mob.getType().is(CombatHandler.BOSSES) && !mob.hasCustomName()
+        boolean transformable = target instanceof Mob mob && !mob.getType().builtInRegistryHolder().is(CombatHandler.BOSSES) && !mob.hasCustomName()
                 && !(mob instanceof TamableAnimal t && t.isTame()) && !mob.getPersistentData().contains(WABBAJACK_ORIGINAL);
         int roll = r.nextInt(target == null ? 4 : 9);
         if (target == null) {
@@ -437,7 +437,7 @@ public final class StaffEffects {
         switch (roll) {
             case 0 -> {
                 if (transformable) chicken((Mob) target);
-                else target.addEffect(new MobEffectInstance(MobEffects.LEVITATION, 60, 1));
+                else target.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.LEVITATION), 60, 1));
             }
             case 1 -> level.explode(caster, target.getX(), target.getY() + 0.5, target.getZ(), 2.0f, Level.ExplosionInteraction.NONE);
             case 2 -> {
@@ -446,17 +446,17 @@ public final class StaffEffects {
             }
             case 3 -> goldRain(level, target.position(), r);
             case 4 -> {
-                target.setSecondsOnFire(8);
-                target.hurt(fire(level, null, caster), 4f * power);
+                target.igniteForSeconds(8);
+                com.skycraft.platform.Effects.hurt(target, fire(level, null, caster), 4f * power);
             }
             case 5 -> lightning(level, caster, target.position(), true);
-            case 6 -> target.addEffect(new MobEffectInstance(MobEffects.LEVITATION, 100, 0));
+            case 6 -> target.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.LEVITATION), 100, 0));
             case 7 -> rabbits(level, target.position(), r);
             default -> {
-                if (target instanceof Mob mob && !mob.getType().is(CombatHandler.BOSSES)) {
+                if (target instanceof Mob mob && !mob.getType().builtInRegistryHolder().is(CombatHandler.BOSSES)) {
                     Illusion.applyFrenzy(mob, 20 * 15);
                 } else {
-                    target.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, 200, 0));
+                    target.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.INVISIBILITY), 200, 0));
                 }
             }
         }
@@ -464,11 +464,11 @@ public final class StaffEffects {
 
     private static void chicken(Mob mob) {
         ServerLevel level = (ServerLevel) mob.level();
-        Chicken chicken = EntityType.CHICKEN.create(level);
+        Chicken chicken = net.minecraft.world.entity.EntityTypes.CHICKEN.create(level, net.minecraft.world.entity.EntitySpawnReason.EVENT);
         if (chicken == null) return;
-        CompoundTag saved = new CompoundTag();
-        if (!mob.save(saved)) return;
-        chicken.moveTo(mob.getX(), mob.getY(), mob.getZ(), mob.getYRot(), 0f);
+        CompoundTag saved;
+        try { saved = com.skycraft.platform.EntityData.save(mob); } catch (IllegalStateException unavailable) { return; }
+        chicken.snapTo(mob.getX(), mob.getY(), mob.getZ(), mob.getYRot(), 0f);
         chicken.getPersistentData().put(WABBAJACK_ORIGINAL, saved);
         chicken.getPersistentData().putLong(WABBAJACK_UNTIL, level.getGameTime() + 20 * 30);
         chicken.setPersistenceRequired();
@@ -480,10 +480,10 @@ public final class StaffEffects {
     /** Turns a Wabbajack chicken back into what it was. */
     public static void unchicken(LivingEntity chicken) {
         if (!(chicken.level() instanceof ServerLevel level)) return;
-        CompoundTag saved = chicken.getPersistentData().getCompound(WABBAJACK_ORIGINAL);
+        CompoundTag saved = chicken.getPersistentData().getCompoundOrEmpty(WABBAJACK_ORIGINAL);
         chicken.getPersistentData().remove(WABBAJACK_ORIGINAL);
-        EntityType.create(saved, level).ifPresent(original -> {
-            original.moveTo(chicken.getX(), chicken.getY(), chicken.getZ(), chicken.getYRot(), 0f);
+        EntityType.create(net.minecraft.world.level.storage.TagValueInput.create(net.minecraft.util.ProblemReporter.DISCARDING, level.registryAccess(), saved), level, new net.minecraft.world.entity.EntitySpawnRequest(net.minecraft.world.entity.EntitySpawnReason.CONVERSION, false)).ifPresent(original -> {
+            original.snapTo(chicken.getX(), chicken.getY(), chicken.getZ(), chicken.getYRot(), 0f);
             if (original.getUUID().equals(chicken.getUUID()) || level.getEntity(original.getUUID()) != null) {
                 original.setUUID(UUID.randomUUID());
             }
@@ -507,23 +507,23 @@ public final class StaffEffects {
     private static void rabbits(ServerLevel level, Vec3 pos, RandomSource r) {
         int n = 3 + r.nextInt(4);
         for (int i = 0; i < n; i++) {
-            Rabbit rabbit = EntityType.RABBIT.create(level);
+            Rabbit rabbit = net.minecraft.world.entity.EntityTypes.RABBIT.create(level, net.minecraft.world.entity.EntitySpawnReason.EVENT);
             if (rabbit == null) continue;
-            rabbit.moveTo(pos.x + (r.nextDouble() - 0.5) * 2, pos.y + 2 + r.nextDouble() * 2, pos.z + (r.nextDouble() - 0.5) * 2, r.nextFloat() * 360f, 0f);
+            rabbit.snapTo(pos.x + (r.nextDouble() - 0.5) * 2, pos.y + 2 + r.nextDouble() * 2, pos.z + (r.nextDouble() - 0.5) * 2, r.nextFloat() * 360f, 0f);
             level.addFreshEntity(rabbit);
         }
     }
 
     private static void lightning(ServerLevel level, ServerPlayer caster, Vec3 pos, boolean hurt) {
-        LightningBolt bolt = EntityType.LIGHTNING_BOLT.create(level);
+        LightningBolt bolt = net.minecraft.world.entity.EntityTypes.LIGHTNING_BOLT.create(level, net.minecraft.world.entity.EntitySpawnReason.EVENT);
         if (bolt == null) return;
-        bolt.moveTo(pos.x, pos.y, pos.z);
+        bolt.snapTo(pos.x, pos.y, pos.z);
         bolt.setVisualOnly(true);
         level.addFreshEntity(bolt);
         if (hurt) {
             for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, new AABB(pos, pos).inflate(2.5), e -> e.isAlive() && !friendly(caster, e))) {
-                e.hurt(shock(level, null, caster), 6f);
-                e.setSecondsOnFire(3);
+                com.skycraft.platform.Effects.hurt(e, shock(level, null, caster), 6f);
+                e.igniteForSeconds(3);
             }
         }
     }

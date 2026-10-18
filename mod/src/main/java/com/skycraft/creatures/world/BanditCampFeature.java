@@ -6,10 +6,10 @@ import com.skycraft.creatures.ModEntities;
 import com.skycraft.creatures.entity.BanditEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.BannerBlock;
 import net.minecraft.world.level.block.BarrelBlock;
@@ -20,17 +20,17 @@ import net.minecraft.world.level.block.RotatedPillarBlock;
 import net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
-import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
+import com.skycraft.worldgen.ConfiguredFeature;
+import com.skycraft.worldgen.FeaturePlaceContext;
+import com.skycraft.worldgen.NoneFeatureConfiguration;
 
 /**
  * A small bandit camp: two hide tents, a campfire with log seats, a loot chest, supply barrels, a lantern post and
  * a black banner, guarded by 3-5 persistent bandits and sometimes their chief.
  */
-public class BanditCampFeature extends Feature<NoneFeatureConfiguration> {
-    public static final ResourceLocation CHEST_LOOT = new ResourceLocation(Skycraft.MODID, "chests/bandit_camp");
-    public static final ResourceLocation SUPPLY_LOOT = new ResourceLocation(Skycraft.MODID, "chests/bandit_camp_supplies");
+public class BanditCampFeature extends ConfiguredFeature<NoneFeatureConfiguration> {
+    public static final net.minecraft.resources.ResourceKey<net.minecraft.world.level.storage.loot.LootTable> CHEST_LOOT = net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.LOOT_TABLE, Identifier.fromNamespaceAndPath(Skycraft.MODID, "chests/bandit_camp"));
+    public static final net.minecraft.resources.ResourceKey<net.minecraft.world.level.storage.loot.LootTable> SUPPLY_LOOT = net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.LOOT_TABLE, Identifier.fromNamespaceAndPath(Skycraft.MODID, "chests/bandit_camp_supplies"));
     private static final int RADIUS = 6;
 
     public BanditCampFeature(Codec<NoneFeatureConfiguration> codec) {
@@ -49,8 +49,8 @@ public class BanditCampFeature extends Feature<NoneFeatureConfiguration> {
         if (com.skycraft.creatures.spawn.SpawnPacing.nearStart(level.getLevel(), center.getX(), center.getZ())) return false;
 
         flatten(level, center, random);
-        BlockState wool = random.nextBoolean() ? Blocks.BROWN_WOOL.defaultBlockState() : Blocks.WHITE_WOOL.defaultBlockState();
-        BlockState wool2 = random.nextBoolean() ? Blocks.BROWN_WOOL.defaultBlockState() : Blocks.LIGHT_GRAY_WOOL.defaultBlockState();
+        BlockState wool = random.nextBoolean() ? com.skycraft.worldgen.VanillaBlocks.BROWN_WOOL.defaultBlockState() : com.skycraft.worldgen.VanillaBlocks.WHITE_WOOL.defaultBlockState();
+        BlockState wool2 = random.nextBoolean() ? com.skycraft.worldgen.VanillaBlocks.BROWN_WOOL.defaultBlockState() : com.skycraft.worldgen.VanillaBlocks.LIGHT_GRAY_WOOL.defaultBlockState();
         tent(level, center.offset(-4, 0, -3), wool, random);
         tent(level, center.offset(4, 0, -3), wool2, random);
 
@@ -66,19 +66,19 @@ public class BanditCampFeature extends Feature<NoneFeatureConfiguration> {
         // loot
         BlockPos chest = center.offset(0, 0, -4);
         set(level, chest, Blocks.CHEST.defaultBlockState().setValue(ChestBlock.FACING, Direction.SOUTH));
-        RandomizableContainerBlockEntity.setLootTable(level, random, chest, CHEST_LOOT);
+        com.skycraft.worldgen.WorldgenData.setLootTable(level, random, chest, CHEST_LOOT.identifier());
         BlockPos barrel1 = center.offset(-3, 0, 4);
         BlockPos barrel2 = center.offset(-2, 0, 4);
         set(level, barrel1, Blocks.BARREL.defaultBlockState().setValue(BarrelBlock.FACING, Direction.UP));
         set(level, barrel2, Blocks.BARREL.defaultBlockState().setValue(BarrelBlock.FACING, Direction.UP));
-        RandomizableContainerBlockEntity.setLootTable(level, random, barrel1, SUPPLY_LOOT);
-        RandomizableContainerBlockEntity.setLootTable(level, random, barrel2, SUPPLY_LOOT);
+        com.skycraft.worldgen.WorldgenData.setLootTable(level, random, barrel1, SUPPLY_LOOT.identifier());
+        com.skycraft.worldgen.WorldgenData.setLootTable(level, random, barrel2, SUPPLY_LOOT.identifier());
         if (random.nextBoolean()) set(level, center.offset(-2, 1, 4), Blocks.HAY_BLOCK.defaultBlockState());
 
         // lantern post and banner
         set(level, center.offset(-5, 0, 2), Blocks.SPRUCE_FENCE.defaultBlockState());
         set(level, center.offset(-5, 1, 2), Blocks.LANTERN.defaultBlockState());
-        set(level, center.offset(4, 0, 3), Blocks.BLACK_BANNER.defaultBlockState().setValue(BannerBlock.ROTATION, random.nextInt(16)));
+        set(level, center.offset(4, 0, 3), com.skycraft.worldgen.VanillaBlocks.BLACK_BANNER.defaultBlockState().setValue(BannerBlock.ROTATION, random.nextInt(16)));
         if (random.nextBoolean()) set(level, center.offset(5, 0, 1), Blocks.CRAFTING_TABLE.defaultBlockState());
         set(level, center.offset(3, 0, 4), Blocks.GRINDSTONE.defaultBlockState());
 
@@ -151,7 +151,7 @@ public class BanditCampFeature extends Feature<NoneFeatureConfiguration> {
         set(level, pos.offset(-2, 0, 2), Blocks.SPRUCE_FENCE.defaultBlockState());
         set(level, pos.offset(2, 0, 2), Blocks.SPRUCE_FENCE.defaultBlockState());
         // bedroll
-        Block carpet = random.nextBoolean() ? Blocks.RED_CARPET : Blocks.BROWN_CARPET;
+        Block carpet = random.nextBoolean() ? com.skycraft.worldgen.VanillaBlocks.RED_CARPET : com.skycraft.worldgen.VanillaBlocks.BROWN_CARPET;
         set(level, pos.offset(0, 0, -1), carpet.defaultBlockState());
         set(level, pos.offset(0, 0, 0), carpet.defaultBlockState());
     }
@@ -161,11 +161,11 @@ public class BanditCampFeature extends Feature<NoneFeatureConfiguration> {
     }
 
     private static void spawn(WorldGenLevel level, EntityType<? extends BanditEntity> type, BlockPos pos, RandomSource random) {
-        BanditEntity bandit = type.create(level.getLevel());
+        BanditEntity bandit = type.create(level.getLevel(), net.minecraft.world.entity.EntitySpawnReason.EVENT);
         if (bandit == null) return;
         int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, pos.getX(), pos.getZ());
-        bandit.moveTo(pos.getX() + 0.5, y, pos.getZ() + 0.5, random.nextFloat() * 360f, 0);
-        bandit.finalizeSpawn(level, level.getCurrentDifficultyAt(pos), MobSpawnType.STRUCTURE, null, null);
+        bandit.snapTo(pos.getX() + 0.5, y, pos.getZ() + 0.5, random.nextFloat() * 360f, 0);
+        bandit.finalizeSpawn(level, level.getCurrentDifficultyAt(pos), EntitySpawnReason.STRUCTURE, null);
         bandit.setPersistenceRequired();
         level.addFreshEntity(bandit);
     }

@@ -14,7 +14,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.BlockTags;
@@ -33,15 +33,15 @@ import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
-import net.minecraftforge.common.Tags;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.living.LivingDeathEvent;
-import net.minecraftforge.event.entity.living.LivingDropsEvent;
-import net.minecraftforge.event.entity.player.ItemFishedEvent;
-import net.minecraftforge.event.level.BlockEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.common.Tags;
+
+import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
+import net.neoforged.neoforge.event.entity.living.LivingDropsEvent;
+import net.neoforged.neoforge.event.entity.player.ItemFishedEvent;
+import net.neoforged.neoforge.event.level.BlockEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -52,10 +52,10 @@ import java.util.List;
 import java.util.Set;
 
 /** Mining, Woodcutting, Fishing and Hunting: XP gains and perk effects. */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class LifeSkills {
     /** Extra-valuable ores (Skyrim ebony, moonstone, etc.) give more Mining XP. */
-    public static final TagKey<Block> VALUABLE_ORES = TagKey.create(Registries.BLOCK, new ResourceLocation(Skycraft.MODID, "valuable_ores"));
+    public static final TagKey<Block> VALUABLE_ORES = TagKey.create(Registries.BLOCK, Identifier.fromNamespaceAndPath(Skycraft.MODID, "valuable_ores"));
     private static final ThreadLocal<Boolean> CHAIN_BREAKING = ThreadLocal.withInitial(() -> false);
 
     private LifeSkills() {}
@@ -76,7 +76,7 @@ public final class LifeSkills {
     }
 
     @SubscribeEvent(priority = EventPriority.LOW)
-    public static void onBreak(BlockEvent.BreakEvent event) {
+    public static void onBreak(net.neoforged.neoforge.event.level.block.BreakBlockEvent event) {
         if (event.isCanceled() || !(event.getPlayer() instanceof ServerPlayer player) || player.isCreative()) return;
         if (!(event.getLevel() instanceof ServerLevel level)) return;
         BlockState state = event.getState();
@@ -117,11 +117,11 @@ public final class LifeSkills {
             if (tree != null) {
                 if (level.getBlockState(pos.below()).is(BlockTags.DIRT)) {
                     Block sapling = saplingFor(state);
-                    level.getServer().tell(new TickTask(level.getServer().getTickCount() + 1, () -> {
+                    com.skycraft.magic.MagicScheduler.schedule(level.getServer(), 1, ignored263 -> {
                         if (level.getBlockState(pos).isAir() && level.getBlockState(pos.below()).is(BlockTags.DIRT)) {
                             level.setBlock(pos, sapling.defaultBlockState(), 3);
                         }
-                    }));
+                    });
                 }
                 // Entire tree crumbles and falls over in chop direction, a few blocks per tick
                 FELLING.add(tree);
@@ -252,15 +252,15 @@ public final class LifeSkills {
     private static boolean inStructure(ServerLevel level, BlockPos pos) {
         var structures = level.structureManager();
         for (var structure : structures.getAllStructuresAt(pos).keySet()) {
-            if (structures.getStructureWithPieceAt(pos, structure).isValid()) return true;
+            if (structures.getStructureWithPieceAt(pos, h -> h.value() == structure).isValid()) return true;
         }
         return false;
     }
 
     /** Topples falling trees a few blocks per tick so a big tree never stalls the server. */
     @SubscribeEvent
-    public static void onServerTick(TickEvent.ServerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || FELLING.isEmpty()) return;
+    public static void onServerTick(net.neoforged.neoforge.event.tick.ServerTickEvent.Post event) {
+        if (!(event instanceof net.neoforged.neoforge.event.tick.ServerTickEvent.Post) || FELLING.isEmpty()) return;
         CHAIN_BREAKING.set(true);
         try {
             for (Iterator<FellingJob> it = FELLING.iterator(); it.hasNext(); ) {
@@ -294,7 +294,7 @@ public final class LifeSkills {
                     net.minecraft.world.entity.item.FallingBlockEntity.fall(level, logPos, s);
             if (falling != null) {
                 double heightBonus = Math.max(0, logPos.getY() - job.cutPos.getY()) * 0.04;
-                falling.setDeltaMovement(job.fallX + (level.random.nextDouble() - 0.5) * 0.05, 0.12 + heightBonus, job.fallZ + (level.random.nextDouble() - 0.5) * 0.05);
+                falling.setDeltaMovement(job.fallX + (level.getRandom().nextDouble() - 0.5) * 0.05, 0.12 + heightBonus, job.fallZ + (level.getRandom().nextDouble() - 0.5) * 0.05);
                 falling.dropItem = true;
             }
         }
@@ -312,7 +312,7 @@ public final class LifeSkills {
     }
 
     @SubscribeEvent
-    public static void onServerStopped(net.minecraftforge.event.server.ServerStoppedEvent event) {
+    public static void onServerStopped(net.neoforged.neoforge.event.server.ServerStoppedEvent event) {
         FELLING.clear();
     }
 
@@ -373,20 +373,20 @@ public final class LifeSkills {
                     .withParameter(LootContextParams.TOOL, player.getMainHandItem())
                     .withLuck(player.getLuck())
                     .create(LootContextParamSets.FISHING);
-            extra.addAll(level.getServer().getLootData().getLootTable(BuiltInLootTables.FISHING_TREASURE).getRandomItems(params));
+            extra.addAll(com.skycraft.platform.LootTables.get(level, BuiltInLootTables.FISHING_TREASURE).getRandomItems(params));
         }
         if (Perks.has(player, "fishing.legendary_angler") && rnd.nextFloat() < 0.02f) {
             ItemStack legendary = com.skycraft.survival.fishing.Fishing.trophyOf(event.getDrops().isEmpty() ? ItemStack.EMPTY : event.getDrops().get(0), rnd);
             if (legendary.isEmpty()) {
                 legendary = new ItemStack(Items.TROPICAL_FISH);
-                legendary.setHoverName(Component.translatable("item.skycraft.legendary_fish").withStyle(ChatFormatting.GOLD));
+                legendary.set(net.minecraft.core.component.DataComponents.CUSTOM_NAME, Component.translatable("item.skycraft.legendary_fish").withStyle(ChatFormatting.GOLD));
             }
             extra.add(legendary);
             Notifier.message(player, Component.translatable("message.skycraft.legendary_fish"));
             Progression.addSkillXp(player, Skill.FISHING, 100f);
         }
         for (ItemStack stack : extra) {
-            if (!ActionHandler.addToBags(player, stack)) player.drop(stack, false);
+            if (!ActionHandler.addToBags(player, stack)) player.drop(stack, false, net.minecraft.util.Prediction.SERVER_ONLY);
         }
     }
 
@@ -401,7 +401,7 @@ public final class LifeSkills {
             if (Perks.has(player, "hunting.apex_predator")) xp *= 2f;
             Progression.addSkillXp(player, Skill.HUNTING, xp);
             SkyData.get(player).addStat("animals_killed", 1);
-        } else if (victim.getType().is(com.skycraft.combat.CombatHandler.MONSTERS)) {
+        } else if (victim.getType().builtInRegistryHolder().is(com.skycraft.combat.CombatHandler.MONSTERS)) {
             Progression.addSkillXp(player, Skill.HUNTING, victim.getMaxHealth() * 0.5f);
         }
         if (victim instanceof net.minecraft.world.entity.monster.Enemy) SkyData.get(player).addStat("enemies_killed", 1);
@@ -415,7 +415,7 @@ public final class LifeSkills {
         for (ItemEntity drop : event.getDrops()) {
             ItemStack stack = drop.getItem();
             boolean hide = stack.is(Items.LEATHER) || stack.is(Items.RABBIT_HIDE) || stack.is(Items.RABBIT_FOOT) || stack.is(net.minecraft.tags.ItemTags.WOOL);
-            boolean meat = stack.isEdible();
+            boolean meat = stack.has(net.minecraft.core.component.DataComponents.FOOD);
             boolean dup = hide && Perks.has(player, "hunting.skinner") && rnd.nextFloat() < 0.5f
                     || meat && Perks.has(player, "hunting.field_dresser") && rnd.nextFloat() < 0.5f
                     || Perks.has(player, "hunting.apex_predator") && rnd.nextFloat() < 0.25f;

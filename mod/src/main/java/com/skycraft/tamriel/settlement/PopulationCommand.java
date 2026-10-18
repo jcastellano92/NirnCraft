@@ -15,9 +15,9 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -31,13 +31,13 @@ import java.util.List;
  * {@code skycraft-previews/population_<id>.json}: beds by kind, every resident with job, bed and workplace, jobs left
  * unstaffed, the old model's head count. {@code tools/qa/population_lint.py} reads these files (qa.ps1 -Server).
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class PopulationCommand {
     private PopulationCommand() {}
 
     @SubscribeEvent
     public static void onRegister(RegisterCommandsEvent event) {
-        event.getDispatcher().register(Commands.literal("skypop").requires(s -> s.hasPermission(2))
+        event.getDispatcher().register(Commands.literal("skypop").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
                 .then(Commands.argument("id", StringArgumentType.word()).executes(PopulationCommand::run)));
     }
 

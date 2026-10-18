@@ -15,21 +15,22 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.functions.LootItemConditionalFunction;
-import net.minecraft.world.level.storage.loot.functions.LootItemFunctionType;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.neoforge.registries.DeferredRegister;
+import java.util.function.Supplier;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -50,9 +51,16 @@ import java.util.Locale;
  * other dimensions use Skyrim's. Materials near the player's level are three times as likely as old ones.</p>
  */
 public class RegionalGear extends LootItemConditionalFunction {
-    public static final DeferredRegister<LootItemFunctionType> FUNCTIONS = DeferredRegister.create(Registries.LOOT_FUNCTION_TYPE, Skycraft.MODID);
-    public static final RegistryObject<LootItemFunctionType> REGIONAL_GEAR = FUNCTIONS.register("regional_gear",
-            () -> new LootItemFunctionType(new Serializer()));
+    public static final MapCodec<RegionalGear> CODEC = RecordCodecBuilder.mapCodec(instance ->
+            commonFields(instance).and(instance.group(
+                    Codec.STRING.xmap(value -> Kind.valueOf(value.toUpperCase(Locale.ROOT)), value -> value.name().toLowerCase(Locale.ROOT))
+                            .optionalFieldOf("kind", Kind.ANY).forGetter(value -> value.kind),
+                    Codec.FLOAT.optionalFieldOf("enchant_chance", 0f).forGetter(value -> value.enchantChance),
+                    Codec.FLOAT.optionalFieldOf("quality_chance", 0f).forGetter(value -> value.qualityChance)))
+                    .apply(instance, RegionalGear::new));
+    public static final DeferredRegister<MapCodec<? extends net.minecraft.world.level.storage.loot.functions.LootItemFunction>> FUNCTIONS =
+            DeferredRegister.create(Registries.LOOT_FUNCTION_TYPE, Skycraft.MODID);
+    public static final Supplier<MapCodec<RegionalGear>> REGIONAL_GEAR = FUNCTIONS.register("regional_gear", () -> CODEC);
 
     public enum Kind { ANY, WEAPON, ARMOR, SHIELD }
 
@@ -60,7 +68,7 @@ public class RegionalGear extends LootItemConditionalFunction {
     private final float enchantChance;
     private final float qualityChance;
 
-    protected RegionalGear(LootItemCondition[] conditions, Kind kind, float enchantChance, float qualityChance) {
+    protected RegionalGear(java.util.Optional<Holder<LootItemCondition>> conditions, Kind kind, float enchantChance, float qualityChance) {
         super(conditions);
         this.kind = kind;
         this.enchantChance = enchantChance;
@@ -68,12 +76,12 @@ public class RegionalGear extends LootItemConditionalFunction {
     }
 
     @Override
-    public LootItemFunctionType getType() {
+    public MapCodec<RegionalGear> codec() {
         return REGIONAL_GEAR.get();
     }
 
     public static TagKey<Item> tag(String province) {
-        return TagKey.create(Registries.ITEM, new ResourceLocation(Skycraft.MODID, "gear/" + province));
+        return TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath(Skycraft.MODID, "gear/" + province));
     }
 
     /** The gear tag key of a region: its province, with Wrothgar and Solstheim apart. */
@@ -91,7 +99,7 @@ public class RegionalGear extends LootItemConditionalFunction {
 
     @Override
     protected ItemStack run(ItemStack stack, LootContext context) {
-        Vec3 origin = context.getParamOrNull(LootContextParams.ORIGIN);
+        Vec3 origin = context.getOptional(LootContextParams.ORIGIN);
         Region region = null;
         if (origin != null) {
             try {
@@ -114,7 +122,7 @@ public class RegionalGear extends LootItemConditionalFunction {
         List<Item> items = new ArrayList<>();
         List<Integer> weights = new ArrayList<>();
         int total = 0;
-        for (Holder<Item> h : BuiltInRegistries.ITEM.getTagOrEmpty(tag(province))) {
+        for (Holder<Item> h : BuiltInRegistries.ITEM.get(tag(province)).stream().flatMap(set -> set.stream()).toList()) {
             Item item = h.value();
             if (!matches(kind, item)) continue;
             int min = minLevel(item);
@@ -139,7 +147,7 @@ public class RegionalGear extends LootItemConditionalFunction {
             case WEAPON -> item instanceof SkyMeleeItem || item instanceof SkyAxeItem || item instanceof SkyBowItem
                     || item instanceof com.skycraft.arsenal.item.PolearmItem
                     || item instanceof com.skycraft.arsenal.item.SkyCrossbowItem;
-            case ARMOR -> item instanceof ArmorItem;
+            case ARMOR -> com.skycraft.inventory.EquipmentData.isArmor(new ItemStack(item));
             case SHIELD -> item instanceof SkyShieldItem;
         };
     }
@@ -149,29 +157,4 @@ public class RegionalGear extends LootItemConditionalFunction {
         return com.skycraft.loot.LootTiers.unlock(item);
     }
 
-    // ------------------------------------------------------------------ JSON
-
-    public static class Serializer extends LootItemConditionalFunction.Serializer<RegionalGear> {
-        @Override
-        public void serialize(JsonObject json, RegionalGear fn, JsonSerializationContext ctx) {
-            super.serialize(json, fn, ctx);
-            json.addProperty("kind", fn.kind.name().toLowerCase(Locale.ROOT));
-            if (fn.enchantChance > 0) json.addProperty("enchant_chance", fn.enchantChance);
-            if (fn.qualityChance > 0) json.addProperty("quality_chance", fn.qualityChance);
-        }
-
-        @Override
-        public RegionalGear deserialize(JsonObject json, JsonDeserializationContext ctx, LootItemCondition[] conditions) {
-            String kindName = GsonHelper.getAsString(json, "kind", "any").toUpperCase(Locale.ROOT);
-            Kind kind;
-            try {
-                kind = Kind.valueOf(kindName);
-            } catch (IllegalArgumentException e) {
-                throw new com.google.gson.JsonSyntaxException("Unknown regional_gear kind '" + kindName.toLowerCase(Locale.ROOT)
-                        + "' (expected any, weapon, armor or shield)");
-            }
-            return new RegionalGear(conditions, kind, GsonHelper.getAsFloat(json, "enchant_chance", 0f),
-                    GsonHelper.getAsFloat(json, "quality_chance", 0f));
-        }
-    }
 }

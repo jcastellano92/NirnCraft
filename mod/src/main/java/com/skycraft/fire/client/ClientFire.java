@@ -2,7 +2,7 @@ package com.skycraft.fire.client;
 
 import com.skycraft.fire.FireSites;
 import net.minecraft.client.Minecraft;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,7 +38,8 @@ public final class ClientFire {
 
     static final List<View> SERVER = new ArrayList<>();
     static final List<View> TEMP = new ArrayList<>();
-    private static ResourceLocation serverDim;
+    private static Identifier serverDim;
+    private static net.minecraft.client.multiplayer.ClientLevel temporaryLevel;
 
     private ClientFire() {}
 
@@ -52,6 +53,8 @@ public final class ClientFire {
      * @param smoke     0 none .. 3 heavy
      */
     public static void addTemporary(double x, double y, double z, float intensity, int height, int smoke, int lifeTicks) {
+        ensureTemporaryLevel();
+        if (temporaryLevel == null) return;
         long now = now();
         View v = new View();
         v.x = x;
@@ -72,6 +75,8 @@ public final class ClientFire {
 
     /** A one-off blast: a fireball that flares and fades in about 1.5 s, leaving a short smoke puff. */
     public static void burst(double x, double y, double z, float intensity, float radius) {
+        ensureTemporaryLevel();
+        if (temporaryLevel == null) return;
         long now = now();
         View v = new View();
         v.x = x;
@@ -106,7 +111,7 @@ public final class ClientFire {
         return mc.level == null ? 0L : mc.level.getGameTime();
     }
 
-    static void setServer(ResourceLocation dim, List<FireSites.Site> sites) {
+    static void setServer(Identifier dim, List<FireSites.Site> sites) {
         synchronized (SERVER) {
             serverDim = dim;
             SERVER.clear();
@@ -130,10 +135,11 @@ public final class ClientFire {
     /** The server sites if they belong to the level the player is in. */
     static boolean serverCurrent() {
         Minecraft mc = Minecraft.getInstance();
-        return mc.level != null && mc.level.dimension().location().equals(serverDim);
+        return mc.level != null && mc.level.dimension().identifier().equals(serverDim);
     }
 
     static void tick() {
+        ensureTemporaryLevel();
         long now = now();
         synchronized (TEMP) {
             TEMP.removeIf(v -> v.ends > 0 && now > v.ends);
@@ -146,10 +152,23 @@ public final class ClientFire {
             serverDim = null;
         }
         clearTemporary();
+        temporaryLevel = null;
+    }
+
+    /** Level identity also distinguishes disconnect/rejoin into the same dimension. */
+    static void ensureTemporaryLevel() {
+        var level = Minecraft.getInstance().level;
+        synchronized (TEMP) {
+            if (temporaryLevel != level) {
+                TEMP.clear();
+                temporaryLevel = level;
+            }
+        }
     }
 
     /** Sites currently known (server + temporary), for diagnostics. */
     public static int count() {
+        ensureTemporaryLevel();
         synchronized (SERVER) {
             synchronized (TEMP) {
                 return SERVER.size() + TEMP.size();
@@ -160,6 +179,7 @@ public final class ClientFire {
     /** Copies the strongest nearby smoke sources into an atmosphere-owned reusable
      * buffer (x,y,z,intensity,height,smoke). Uses the same synced/baked sites as flames. */
     public static int smokeSources(float[] out, int limit, double cx, double cz) {
+        ensureTemporaryLevel();
         int count = 0;
         synchronized (SERVER) {
             if (serverCurrent()) for (View v : SERVER) count = insertSmoke(v, out, limit, count, cx, cz);

@@ -8,19 +8,19 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.event.entity.living.LivingAttackEvent;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.event.entity.player.AttackEntityEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.neoforge.event.entity.player.AttackEntityEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 /**
  * No friendly fire between party members (direct melee weapons, punching, arrows, or direct spells).
  * Indirect accidental environmental hazards (lightning traveling through water, standing in fire or lava)
  * remain possible.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class PartyEvents {
     private PartyEvents() {}
 
@@ -30,7 +30,7 @@ public final class PartyEvents {
         if (QuestConfig.FRIENDLY_FIRE.get()) return;
         if (event.getTarget() instanceof Player target && event.getEntity() instanceof ServerPlayer attacker) {
             if (attacker != target && target instanceof ServerPlayer spTarget) {
-                if (Parties.sameParty(attacker.server, attacker, spTarget)) {
+                if (Parties.sameParty(attacker.level().getServer(), attacker, spTarget)) {
                     event.setCanceled(true);
                 }
             }
@@ -47,29 +47,29 @@ public final class PartyEvents {
             return true;
         }
         // Lightning / shock traveling through water:
-        if (victim.isInWaterRainOrBubble() && source.is(MagicDamage.SHOCK)) {
+        if ((victim.isInWaterOrRain() || victim.level().getBlockState(victim.blockPosition()).is(net.minecraft.world.level.block.Blocks.BUBBLE_COLUMN)) && source.is(MagicDamage.SHOCK)) {
             return true;
         }
         return false;
     }
 
     @SubscribeEvent(priority = EventPriority.HIGH)
-    public static void onAttack(LivingAttackEvent event) {
+    public static void onAttack(LivingIncomingDamageEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer target) || QuestConfig.FRIENDLY_FIRE.get()) return;
-        ServerPlayer attacker = Quests.asPlayer(target.server, event.getSource().getEntity());
+        ServerPlayer attacker = Quests.asPlayer(target.level().getServer(), event.getSource().getEntity());
         if (attacker == null || attacker == target) return;
-        if (Parties.sameParty(target.server, attacker, target)) {
+        if (Parties.sameParty(target.level().getServer(), attacker, target)) {
             if (isIndirectEnvironmental(event.getSource(), target)) return;
             event.setCanceled(true);
         }
     }
 
     @SubscribeEvent(priority = EventPriority.HIGH)
-    public static void onHurt(LivingHurtEvent event) {
+    public static void onHurt(com.skycraft.combat.BeforeArmorDamageEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer target) || QuestConfig.FRIENDLY_FIRE.get()) return;
-        ServerPlayer attacker = Quests.asPlayer(target.server, event.getSource().getEntity());
+        ServerPlayer attacker = Quests.asPlayer(target.level().getServer(), event.getSource().getEntity());
         if (attacker == null || attacker == target) return;
-        if (Parties.sameParty(target.server, attacker, target)) {
+        if (Parties.sameParty(target.level().getServer(), attacker, target)) {
             if (isIndirectEnvironmental(event.getSource(), target)) return;
             event.setCanceled(true);
         }

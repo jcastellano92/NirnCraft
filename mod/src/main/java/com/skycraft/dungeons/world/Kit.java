@@ -228,30 +228,30 @@ public enum Kit implements StringRepresentable {
                         .floors(Blocks.POLISHED_ANDESITE, 6, Blocks.STONE_BRICKS, 4, Blocks.SMOOTH_STONE, 3)
                         .ceilings(Blocks.STONE_BRICKS, 5, Blocks.POLISHED_ANDESITE, 2)
                         .pillar(Blocks.POLISHED_ANDESITE, Blocks.CHISELED_STONE_BRICKS).stairs(Blocks.STONE_BRICK_STAIRS, Blocks.STONE_BRICK_SLAB, Blocks.STONE_BRICK_WALL)
-                        .light(Deco.lantern(false, true)).accent(Blocks.RED_WOOL).trim(Blocks.SMOOTH_STONE);
+                        .light(Deco.lantern(false, true)).accent(com.skycraft.worldgen.VanillaBlocks.RED_WOOL).trim(Blocks.SMOOTH_STONE);
                 case AYLEID -> b.walls(Blocks.CALCITE, 8, Blocks.QUARTZ_BRICKS, 6, Blocks.SMOOTH_QUARTZ, 4, Blocks.POLISHED_DIORITE, 3, Blocks.DIORITE, 1)
                         .floors(Blocks.POLISHED_DIORITE, 5, Blocks.CALCITE, 4, Blocks.SMOOTH_QUARTZ, 3)
                         .ceilings(Blocks.SMOOTH_QUARTZ, 5, Blocks.QUARTZ_BRICKS, 3)
                         .pillar(Blocks.QUARTZ_PILLAR, Blocks.CHISELED_QUARTZ_BLOCK).stairs(Blocks.QUARTZ_STAIRS, Blocks.QUARTZ_SLAB, Blocks.DIORITE_WALL)
-                        .light(Blocks.SEA_LANTERN.defaultBlockState()).accent(Blocks.LIGHT_BLUE_STAINED_GLASS).trim(Blocks.CHISELED_QUARTZ_BLOCK).clean();
-                case VELOTHI -> b.walls(Blocks.MUD_BRICKS, 8, Blocks.PACKED_MUD, 4, Blocks.TUFF, 2, Blocks.BROWN_TERRACOTTA, 2)
+                        .light(Blocks.SEA_LANTERN.defaultBlockState()).accent(com.skycraft.worldgen.VanillaBlocks.LIGHT_BLUE_STAINED_GLASS).trim(Blocks.CHISELED_QUARTZ_BLOCK).clean();
+                case VELOTHI -> b.walls(Blocks.MUD_BRICKS, 8, Blocks.PACKED_MUD, 4, Blocks.TUFF, 2, com.skycraft.worldgen.VanillaBlocks.BROWN_TERRACOTTA, 2)
                         .floors(Blocks.PACKED_MUD, 4, Blocks.MUD_BRICKS, 4, Blocks.TUFF, 2)
                         .ceilings(Blocks.MUD_BRICKS, 5, Blocks.PACKED_MUD, 3)
                         .pillar(Blocks.MUD_BRICKS, Blocks.CHISELED_SANDSTONE).stairs(Blocks.MUD_BRICK_STAIRS, Blocks.MUD_BRICK_SLAB, Blocks.MUD_BRICK_WALL)
-                        .light(Deco.candle(Blocks.RED_CANDLE, 3, true)).accent(Blocks.BONE_BLOCK).trim(Blocks.SMOOTH_SANDSTONE);
+                        .light(Deco.candle(com.skycraft.worldgen.VanillaBlocks.RED_CANDLE, 3, true)).accent(Blocks.BONE_BLOCK).trim(Blocks.SMOOTH_SANDSTONE);
                 case DAEDRIC -> b.walls(Blocks.POLISHED_BLACKSTONE_BRICKS, 8, Blocks.CRACKED_POLISHED_BLACKSTONE_BRICKS, 3, Blocks.BLACKSTONE, 3, Blocks.RED_NETHER_BRICKS, 2, Blocks.CRYING_OBSIDIAN, 1)
                         .floors(Blocks.POLISHED_BLACKSTONE, 5, Blocks.BLACKSTONE, 3, Blocks.RED_NETHER_BRICKS, 1)
                         .ceilings(Blocks.POLISHED_BLACKSTONE_BRICKS, 5, Blocks.NETHER_BRICKS, 2)
                         .pillar(Blocks.POLISHED_BASALT, Blocks.CHISELED_POLISHED_BLACKSTONE).stairs(Blocks.POLISHED_BLACKSTONE_BRICK_STAIRS, Blocks.POLISHED_BLACKSTONE_BRICK_SLAB, Blocks.POLISHED_BLACKSTONE_BRICK_WALL)
                         .light(Blocks.SHROOMLIGHT.defaultBlockState()).accent(Blocks.CRYING_OBSIDIAN).trim(Blocks.GILDED_BLACKSTONE)
                         .rock(Blocks.BLACKSTONE, Blocks.BASALT);
-                case XANMEER -> b.walls(Blocks.MOSSY_STONE_BRICKS, 7, Blocks.MOSSY_COBBLESTONE, 4, Blocks.TUFF, 2, Blocks.GREEN_TERRACOTTA, 2, Blocks.CRACKED_STONE_BRICKS, 2)
+                case XANMEER -> b.walls(Blocks.MOSSY_STONE_BRICKS, 7, Blocks.MOSSY_COBBLESTONE, 4, Blocks.TUFF, 2, com.skycraft.worldgen.VanillaBlocks.GREEN_TERRACOTTA, 2, Blocks.CRACKED_STONE_BRICKS, 2)
                         .floors(Blocks.MOSSY_STONE_BRICKS, 4, Blocks.MUD, 2, Blocks.MOSS_BLOCK, 2, Blocks.MOSSY_COBBLESTONE, 2)
                         .ceilings(Blocks.MOSSY_STONE_BRICKS, 5, Blocks.TUFF, 2)
                         .pillar(Blocks.MOSSY_STONE_BRICKS, Blocks.CHISELED_STONE_BRICKS).stairs(Blocks.MOSSY_STONE_BRICK_STAIRS, Blocks.MOSSY_STONE_BRICK_SLAB, Blocks.MOSSY_STONE_BRICK_WALL)
-                        .light(Blocks.VERDANT_FROGLIGHT.defaultBlockState()).accent(Blocks.OXIDIZED_COPPER).trim(Blocks.CHISELED_STONE_BRICKS)
+                        .light(Blocks.VERDANT_FROGLIGHT.defaultBlockState()).accent(com.skycraft.worldgen.VanillaBlocks.OXIDIZED_COPPER).trim(Blocks.CHISELED_STONE_BRICKS)
                         .rock(Blocks.MUD, Blocks.TUFF);
-                case KHAJIIT -> b.walls(Blocks.CUT_SANDSTONE, 7, Blocks.SANDSTONE, 4, Blocks.SMOOTH_SANDSTONE, 3, Blocks.ORANGE_TERRACOTTA, 1)
+                case KHAJIIT -> b.walls(Blocks.CUT_SANDSTONE, 7, Blocks.SANDSTONE, 4, Blocks.SMOOTH_SANDSTONE, 3, com.skycraft.worldgen.VanillaBlocks.ORANGE_TERRACOTTA, 1)
                         .floors(Blocks.SMOOTH_SANDSTONE, 5, Blocks.CUT_SANDSTONE, 3, Blocks.SANDSTONE, 2)
                         .ceilings(Blocks.CUT_SANDSTONE, 4, Blocks.SMOOTH_SANDSTONE, 3)
                         .pillar(Blocks.CUT_SANDSTONE, Blocks.CHISELED_SANDSTONE).stairs(Blocks.SANDSTONE_STAIRS, Blocks.CUT_SANDSTONE_SLAB, Blocks.SANDSTONE_WALL)
@@ -263,12 +263,12 @@ public enum Kit implements StringRepresentable {
                         .pillar(Blocks.JUNGLE_LOG, Blocks.STRIPPED_JUNGLE_WOOD).stairs(Blocks.JUNGLE_STAIRS, Blocks.JUNGLE_SLAB, Blocks.JUNGLE_FENCE)
                         .light(Blocks.SHROOMLIGHT.defaultBlockState()).accent(Blocks.MANGROVE_ROOTS).trim(Blocks.STRIPPED_JUNGLE_LOG)
                         .rock(Blocks.ROOTED_DIRT, Blocks.DIRT);
-                case ALTMER -> b.walls(Blocks.SMOOTH_QUARTZ, 7, Blocks.QUARTZ_BRICKS, 4, Blocks.WHITE_CONCRETE, 2, Blocks.AMETHYST_BLOCK, 1)
+                case ALTMER -> b.walls(Blocks.SMOOTH_QUARTZ, 7, Blocks.QUARTZ_BRICKS, 4, com.skycraft.worldgen.VanillaBlocks.WHITE_CONCRETE, 2, Blocks.AMETHYST_BLOCK, 1)
                         .floors(Blocks.SMOOTH_QUARTZ, 5, Blocks.POLISHED_DIORITE, 2, Blocks.QUARTZ_BRICKS, 2)
                         .ceilings(Blocks.SMOOTH_QUARTZ, 5, Blocks.AMETHYST_BLOCK, 1)
                         .pillar(Blocks.QUARTZ_PILLAR, Blocks.CHISELED_QUARTZ_BLOCK).stairs(Blocks.SMOOTH_QUARTZ_STAIRS, Blocks.SMOOTH_QUARTZ_SLAB, Blocks.DIORITE_WALL)
                         .light(Blocks.END_ROD.defaultBlockState()).accent(Blocks.AMETHYST_BLOCK).trim(Blocks.GOLD_BLOCK).clean();
-                case REDGUARD -> b.walls(Blocks.CUT_RED_SANDSTONE, 6, Blocks.RED_SANDSTONE, 4, Blocks.SMOOTH_SANDSTONE, 3, Blocks.WHITE_TERRACOTTA, 2, Blocks.ORANGE_TERRACOTTA, 1)
+                case REDGUARD -> b.walls(Blocks.CUT_RED_SANDSTONE, 6, Blocks.RED_SANDSTONE, 4, Blocks.SMOOTH_SANDSTONE, 3, com.skycraft.worldgen.VanillaBlocks.WHITE_TERRACOTTA, 2, com.skycraft.worldgen.VanillaBlocks.ORANGE_TERRACOTTA, 1)
                         .floors(Blocks.SMOOTH_RED_SANDSTONE, 4, Blocks.CUT_SANDSTONE, 3, Blocks.TERRACOTTA, 2)
                         .ceilings(Blocks.CUT_RED_SANDSTONE, 4, Blocks.SMOOTH_SANDSTONE, 3)
                         .pillar(Blocks.CUT_RED_SANDSTONE, Blocks.CHISELED_RED_SANDSTONE).stairs(Blocks.RED_SANDSTONE_STAIRS, Blocks.CUT_RED_SANDSTONE_SLAB, Blocks.RED_SANDSTONE_WALL)
@@ -278,17 +278,17 @@ public enum Kit implements StringRepresentable {
                         .floors(Blocks.COBBLESTONE, 4, Blocks.STONE_BRICKS, 3, Blocks.SPRUCE_PLANKS, 2)
                         .ceilings(Blocks.DARK_OAK_PLANKS, 3, Blocks.STONE_BRICKS, 4)
                         .pillar(Blocks.STRIPPED_DARK_OAK_LOG, Blocks.STONE_BRICKS).stairs(Blocks.STONE_BRICK_STAIRS, Blocks.STONE_BRICK_SLAB, Blocks.COBBLESTONE_WALL)
-                        .light(Deco.lantern(false, true)).accent(Blocks.BLUE_WOOL).trim(Blocks.DEEPSLATE_TILES);
+                        .light(Deco.lantern(false, true)).accent(com.skycraft.worldgen.VanillaBlocks.BLUE_WOOL).trim(Blocks.DEEPSLATE_TILES);
                 case ORC -> b.walls(Blocks.COBBLED_DEEPSLATE, 6, Blocks.BLACKSTONE, 3, Blocks.DEEPSLATE_BRICKS, 3, Blocks.SPRUCE_LOG, 2)
                         .floors(Blocks.COARSE_DIRT, 4, Blocks.COBBLED_DEEPSLATE, 3, Blocks.SPRUCE_PLANKS, 2)
                         .ceilings(Blocks.SPRUCE_PLANKS, 3, Blocks.COBBLED_DEEPSLATE, 4)
                         .pillar(Blocks.SPRUCE_LOG, Blocks.STRIPPED_SPRUCE_LOG).stairs(Blocks.COBBLED_DEEPSLATE_STAIRS, Blocks.COBBLED_DEEPSLATE_SLAB, Blocks.COBBLED_DEEPSLATE_WALL)
                         .light(Deco.lantern(false, true)).accent(Blocks.BONE_BLOCK).trim(Blocks.DEEPSLATE_TILES);
-                case AKAVIRI -> b.walls(Blocks.POLISHED_BLACKSTONE_BRICKS, 6, Blocks.DEEPSLATE_TILES, 4, Blocks.RED_TERRACOTTA, 2, Blocks.MANGROVE_PLANKS, 2)
+                case AKAVIRI -> b.walls(Blocks.POLISHED_BLACKSTONE_BRICKS, 6, Blocks.DEEPSLATE_TILES, 4, com.skycraft.worldgen.VanillaBlocks.RED_TERRACOTTA, 2, Blocks.MANGROVE_PLANKS, 2)
                         .floors(Blocks.DEEPSLATE_TILES, 5, Blocks.MANGROVE_PLANKS, 3, Blocks.POLISHED_DEEPSLATE, 2)
                         .ceilings(Blocks.MANGROVE_PLANKS, 4, Blocks.DEEPSLATE_TILES, 3)
                         .pillar(Blocks.STRIPPED_MANGROVE_LOG, Blocks.CHISELED_POLISHED_BLACKSTONE).stairs(Blocks.DEEPSLATE_TILE_STAIRS, Blocks.DEEPSLATE_TILE_SLAB, Blocks.DEEPSLATE_TILE_WALL)
-                        .light(Deco.lantern(false, true)).accent(Blocks.RED_WOOL).trim(Blocks.GILDED_BLACKSTONE);
+                        .light(Deco.lantern(false, true)).accent(com.skycraft.worldgen.VanillaBlocks.RED_WOOL).trim(Blocks.GILDED_BLACKSTONE);
                 case ATMORAN -> b.walls(Blocks.STONE_BRICKS, 5, Blocks.PACKED_ICE, 4, Blocks.BLUE_ICE, 1, Blocks.CRACKED_STONE_BRICKS, 3, Blocks.SNOW_BLOCK, 1)
                         .floors(Blocks.PACKED_ICE, 3, Blocks.STONE_BRICKS, 4, Blocks.SNOW_BLOCK, 1)
                         .ceilings(Blocks.PACKED_ICE, 4, Blocks.STONE_BRICKS, 3)
@@ -328,9 +328,9 @@ public enum Kit implements StringRepresentable {
                         .floors(Blocks.DEEPSLATE_TILES, 5, Blocks.STONE_BRICKS, 4, Blocks.MOSSY_STONE_BRICKS, 2)
                         .ceilings(Blocks.DEEPSLATE_TILES, 4, Blocks.STONE_BRICKS, 4)
                         .pillar(Blocks.DEEPSLATE_TILES, Blocks.CHISELED_STONE_BRICKS).stairs(Blocks.DEEPSLATE_TILE_STAIRS, Blocks.DEEPSLATE_TILE_SLAB, Blocks.STONE_BRICK_WALL)
-                        .light(Deco.lantern(true, true)).accent(Blocks.BLUE_WOOL).trim(Blocks.DEEPSLATE_TILES)
+                        .light(Deco.lantern(true, true)).accent(com.skycraft.worldgen.VanillaBlocks.BLUE_WOOL).trim(Blocks.DEEPSLATE_TILES)
                         .rock(Blocks.COBBLESTONE, Blocks.STONE_BRICKS);
-                case SCORPION_DEN -> b.walls(Blocks.CUT_SANDSTONE, 5, Blocks.RED_SANDSTONE, 4, Blocks.SANDSTONE, 4, Blocks.TERRACOTTA, 2, Blocks.ORANGE_TERRACOTTA, 1)
+                case SCORPION_DEN -> b.walls(Blocks.CUT_SANDSTONE, 5, Blocks.RED_SANDSTONE, 4, Blocks.SANDSTONE, 4, Blocks.TERRACOTTA, 2, com.skycraft.worldgen.VanillaBlocks.ORANGE_TERRACOTTA, 1)
                         .floors(Blocks.SAND, 4, Blocks.RED_SAND, 3, Blocks.CUT_SANDSTONE, 3)
                         .ceilings(Blocks.SANDSTONE, 5, Blocks.RED_SANDSTONE, 3)
                         .pillar(Blocks.CUT_RED_SANDSTONE, Blocks.CHISELED_RED_SANDSTONE).stairs(Blocks.RED_SANDSTONE_STAIRS, Blocks.CUT_SANDSTONE_SLAB, Blocks.SANDSTONE_WALL)

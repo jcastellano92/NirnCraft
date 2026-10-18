@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:random_selector",
+  "features": [
+    {
+      "feature": "skycraft:biome/juniper_checked",
+      "chance": 0.3
+    },
+    {
+      "feature": "skycraft:biome/crooked_oak_checked",
+      "chance": 0.2
+    }
+  ],
+  "default": "skycraft:biome/west_gash_pine_checked"
+}

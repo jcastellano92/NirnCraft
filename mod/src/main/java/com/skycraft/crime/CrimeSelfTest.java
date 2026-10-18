@@ -63,30 +63,30 @@ final class CrimeSelfTest {
 
     /** Locks, ownership and the shop hours share one night. */
     private static void nights(Result r, ServerLevel level) {
-        long saved = level.getDayTime();
+        long saved = level.getDefaultClockTime();
         try {
             for (long t : new long[]{0, 1999, 2000, 6000, 13000, 13500, 13999, 14000, 18000, 23000, 23999}) {
-                level.setDayTime(t);
+                com.skycraft.platform.WorldTime.set(level, t);
                 r.check(Locks.isNight(level) == !Shop.isOpen(level), "night at " + t + " is the shop's closed time");
             }
-            level.setDayTime(13500);
+            com.skycraft.platform.WorldTime.set(level, 13500);
             r.check(!Locks.isNight(level), "13500 (19:30) is still shop hours, so homes are not shut yet");
-            level.setDayTime(14000);
+            com.skycraft.platform.WorldTime.set(level, 14000);
             r.check(Locks.isNight(level), "14000 (20:00) is night");
-            level.setDayTime(1000);
+            com.skycraft.platform.WorldTime.set(level, 1000);
             r.check(Locks.isNight(level), "1000 (07:00) is night");
         } finally {
-            level.setDayTime(saved);
+            com.skycraft.platform.WorldTime.set(level, saved);
         }
     }
 
     /** A door is never decided by looking at it, and the never-lock marker wins. */
     private static void doors(Result r, MinecraftServer server, ServerLevel level) {
-        BlockPos pos = level.getSharedSpawnPos().atY(level.getMaxBuildHeight() - 10).east(7);
+        BlockPos pos = level.getRespawnData().pos().atY((level.getMaxY()+1) - 10).east(7);
         level.getChunk(pos);
         BlockState oak = Blocks.OAK_DOOR.defaultBlockState();
         BlockState old = level.getBlockState(pos), oldTop = level.getBlockState(pos.above());
-        long saved = level.getDayTime();
+        long saved = level.getDefaultClockTime();
         Locks.LockData data = Locks.LockData.get(server);
         String key = Locks.key(level, pos);
         boolean hadNever = data.never.contains(key);
@@ -95,7 +95,7 @@ final class CrimeSelfTest {
             level.setBlock(pos, oak.setValue(DoorBlock.HALF, DoubleBlockHalf.LOWER), 2);
             level.setBlock(pos.above(), oak.setValue(DoorBlock.HALF, DoubleBlockHalf.UPPER), 2);
             data.locks.remove(key);
-            level.setDayTime(18000);
+            com.skycraft.platform.WorldTime.set(level, 18000);
             int first = Locks.lockLevel(level, pos);
             int again = Locks.lockLevel(level, pos.above());
             r.check(first == again, "asking about a door twice gives the same answer (" + first + " / " + again + ")");
@@ -114,7 +114,7 @@ final class CrimeSelfTest {
             data.setDirty();
             level.setBlock(pos.above(), oldTop, 2);
             level.setBlock(pos, old, 2);
-            level.setDayTime(saved);
+            com.skycraft.platform.WorldTime.set(level, saved);
         }
     }
 
@@ -122,7 +122,7 @@ final class CrimeSelfTest {
         ItemStack letter = QuestItems.markQuest(new ItemStack(Items.PAPER));
         Bounty.markStolen(letter);
         r.check(!Bounty.isStolen(letter), "a quest item is never tagged as stolen goods");
-        letter.getOrCreateTag().putBoolean(Bounty.STOLEN_TAG, true);
+        com.skycraft.inventory.ItemData.updateCustom(letter, customData263 -> customData263.putBoolean(Bounty.STOLEN_TAG, true));
         r.check(!Bounty.isStolen(letter), "a quest item that carries the tag is not confiscated either");
         ItemStack sword = new ItemStack(Items.IRON_SWORD);
         Bounty.markStolen(sword);
@@ -142,8 +142,11 @@ final class CrimeSelfTest {
         r.check(!com.skycraft.loot.Restock.holdsForeignItems(entry, chest), "a looted chest still holding part of its loot restocks");
         chest.setItem(1, new ItemStack(Items.DIAMOND));
         r.check(com.skycraft.loot.Restock.holdsForeignItems(entry, chest), "a chest holding something the table did not roll is left alone");
-        chest.setItem(1, ItemStack.EMPTY);
-        chest.setItem(2, new ItemStack(Items.IRON_SWORD, 2));
+        // Native containers clamp an unstackable sword to one per slot.
+        chest.setItem(1, new ItemStack(Items.IRON_SWORD));
+        chest.setItem(2, new ItemStack(Items.IRON_SWORD));
+        r.check(chest.getItem(0).getCount() + chest.getItem(1).getCount() + chest.getItem(2).getCount() == 3,
+                "three valid sword slots really exceed the table's two swords");
         r.check(com.skycraft.loot.Restock.holdsForeignItems(entry, chest), "more of an item than the table rolled counts as the player's");
     }
 
@@ -202,7 +205,7 @@ final class CrimeSelfTest {
         r.check(JailEvidence.takePersonal(st2, java.util.UUID.nameUUIDFromBytes("carol".getBytes())).isEmpty(), "a stranger gets nothing");
 
         // the confiscated goods are locked every time
-        net.minecraft.core.BlockPos pos = level.getSharedSpawnPos().atY(level.getMaxBuildHeight() - 12).east(9);
+        net.minecraft.core.BlockPos pos = level.getRespawnData().pos().atY((level.getMaxY()+1) - 12).east(9);
         level.getChunk(pos);
         BlockState old = level.getBlockState(pos);
         Locks.LockData data = Locks.LockData.get(server);
@@ -212,7 +215,7 @@ final class CrimeSelfTest {
         try {
             level.setBlock(pos, Blocks.BARREL.defaultBlockState(), 2);
             Locks.setLock(level, pos, Locks.ADEPT);
-            net.minecraft.server.level.ServerPlayer picker = net.minecraftforge.common.util.FakePlayerFactory.getMinecraft(level);
+            net.minecraft.server.level.ServerPlayer picker = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(level);
             r.check(Locks.blocks(picker, level, pos), "the confiscated goods are locked");
             data.unlocked.computeIfAbsent(key, k -> new java.util.HashSet<>()).add(picker.getUUID());
             r.check(!Locks.blocks(picker, level, pos), "a picked lock lets the prisoner in");
@@ -245,8 +248,8 @@ final class CrimeSelfTest {
         CompoundTag j = new CompoundTag();
         j.putInt("remaining", 3);
         r.check(!Jail.serveSecond(j) && !Jail.serveSecond(j), "a 3 second sentence is not over after 2 seconds");
-        r.check(Jail.serveSecond(j) && j.getInt("remaining") == 0, "it runs out on the third second");
-        r.check(!Jail.serveSecond(j) && j.getInt("remaining") == 0, "a served sentence stays served: the clock does not release");
+        r.check(Jail.serveSecond(j) && j.getIntOr("remaining",0) == 0, "it runs out on the third second");
+        r.check(!Jail.serveSecond(j) && j.getIntOr("remaining",0) == 0, "a served sentence stays served: the clock does not release");
         r.check(Jail.maySleep(j), "a served sentence may sleep at once");
         CompoundTag fresh = new CompoundTag();
         fresh.putInt("remaining", 300);
@@ -300,7 +303,7 @@ final class CrimeSelfTest {
 
         // held safe and hidden, and put back
         try {
-            net.minecraft.server.level.ServerPlayer p = net.minecraftforge.common.util.FakePlayerFactory.getMinecraft(server.overworld());
+            net.minecraft.server.level.ServerPlayer p = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(server.overworld());
             CompoundTag pending = new CompoundTag();
             pending.putInt("mode", net.minecraft.world.level.GameType.SURVIVAL.getId());
             Bounty.state(p).put(JailLoading.PENDING, pending);

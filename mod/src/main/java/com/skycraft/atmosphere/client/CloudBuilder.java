@@ -2,7 +2,8 @@ package com.skycraft.atmosphere.client;
 
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.renderpearl.api.pipeline.PrimitiveTopology;
+import com.skycraft.render.client.CpuMesh;
 import com.skycraft.atmosphere.AtmosphereMath;
 import com.skycraft.atmosphere.WeatherFront;
 import com.skycraft.atmosphere.WeatherPhysics;
@@ -56,7 +57,7 @@ final class CloudBuilder {
                float fogR, float fogG, float fogB, float localFog, int height, int radius, boolean fancy, boolean distant,
                float mistHour, float seconds, Map<String, float[]> climate,
                double plumeX, double plumeZ, boolean plume, double throatX, double throatZ, boolean throat,
-               List<WeatherFront> fronts) {
+               List<WeatherFront> fronts, AtmosphereMath.MoonLight masser, AtmosphereMath.MoonLight secunda) {
         Job(double camX, double camY, double camZ, double driftX, double driftZ, double highX, double highZ,
             float windX, float windZ, float wind, float sunX, float sunY, float sunZ,
             float fogR, float fogG, float fogB, float localFog, int height, int radius, boolean fancy, boolean distant,
@@ -64,14 +65,15 @@ final class CloudBuilder {
             double plumeX, double plumeZ, boolean plume, double throatX, double throatZ, boolean throat) {
             this(camX, camY, camZ, driftX, driftZ, highX, highZ, windX, windZ, wind, sunX, sunY, sunZ,
                     fogR, fogG, fogB, localFog, height, radius, fancy, distant, mistHour, seconds, climate,
-                    plumeX, plumeZ, plume, throatX, throatZ, throat, List.of());
+                    plumeX, plumeZ, plume, throatX, throatZ, throat, List.of(),
+                    AtmosphereMath.MoonLight.DARK,AtmosphereMath.MoonLight.DARK);
         }
     }
 
     /** A finished build: the two meshes (null when empty), where they were built, and the storm cells for lightning. */
     static final class Result {
-        BufferBuilder.RenderedBuffer sky;
-        BufferBuilder.RenderedBuffer ground;
+        CpuMesh sky;
+        CpuMesh ground;
         double anchorX, anchorY, anchorZ;
         double driftX, driftZ;
         /** Lightning candidates, {@link DistantStorms#STRIDE} floats each (world x, base y, z, top y, radius, strength). */
@@ -101,8 +103,6 @@ final class CloudBuilder {
 
     private final QuadList sky = new QuadList();
     private final QuadList ground = new QuadList();
-    private final BufferBuilder skyBuffer = new BufferBuilder(1 << 18);
-    private final BufferBuilder groundBuffer = new BufferBuilder(1 << 16);
     private float[] storms = new float[DistantStorms.STRIDE * 16];
     private int nCumulus, nTowers, nCaps, nFog, nCurtains, nWalls;
     private int stormCount;
@@ -147,11 +147,11 @@ final class CloudBuilder {
                 approachingFronts();
                 if (job.plume()) plume();
             }
-            out.sky = write(sky, skyBuffer);
-            out.ground = write(ground, groundBuffer);
+            out.sky = write(sky);
+            out.ground = write(ground);
         } catch (Throwable t) {
-            if (skyBuffer.building()) skyBuffer.discard();
-            if (groundBuffer.building()) groundBuffer.discard();
+            if (out.sky != null) { out.sky.close(); out.sky = null; }
+            if (out.ground != null) { out.ground.close(); out.ground = null; }
             out.failed = true;
             com.skycraft.Skycraft.LOGGER.warn("Skycraft clouds: build failed", t);
         }
@@ -164,21 +164,23 @@ final class CloudBuilder {
         return out;
     }
 
-    private static BufferBuilder.RenderedBuffer write(QuadList list, BufferBuilder bb) {
+    private static CpuMesh write(QuadList list) {
         if (list.n == 0) return null;
         list.sort();
-        bb.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+        try (var builder = CpuMesh.builder(PrimitiveTopology.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR)) {
+        BufferBuilder bb = builder.vertices();
         float[] d = list.data;
         for (int k = list.n - 1; k >= 0; k--) {     // far to near
             int base = (int) (list.keys[k] & 0xFFFFFFL) * QuadList.STRIDE;
             for (int v = 0; v < 4; v++) {
                 int o = base + v * 6;
                 int c = Float.floatToRawIntBits(d[o + 5]);
-                bb.vertex(d[o], d[o + 1], d[o + 2]).uv(d[o + 3], d[o + 4])
-                        .color(c >>> 24, (c >>> 16) & 0xFF, (c >>> 8) & 0xFF, c & 0xFF).endVertex();
+                bb.addVertex(d[o], d[o + 1], d[o + 2]).setUv(d[o + 3], d[o + 4])
+                        .setColor(c >>> 24, (c >>> 16) & 0xFF, (c >>> 8) & 0xFF, c & 0xFF);
             }
         }
-        return bb.end();
+        return builder.build();
+        }
     }
 
     // ================================================================== lighting
@@ -238,13 +240,25 @@ final class CloudBuilder {
      */
     private float color(float ar, float ag, float ab, float vert, float facing, float shadow,
                         float x, float y, float z, float dist, float alpha, float emR, float emG, float emB) {
+        // Sheets/caps retain their upward diffuse normal. Volumetric lobes pass
+        // their actual local normal below, independently for each orbiting moon.
+        return color(ar,ag,ab,vert,facing,shadow,x,y,z,dist,alpha,emR,emG,emB,0,1,0);
+    }
+
+    private float color(float ar, float ag, float ab, float vert, float facing, float shadow,
+                        float x, float y, float z, float dist, float alpha, float emR, float emG, float emB,
+                        float nx,float ny,float nz) {
         float self = 1f - shadow * (1f - vert);
         float ambK = (0.85f + 0.15f * vert) * (1f - 0.45f * shadow * (1f - vert));
         float sunK = Math.max(0f, 0.25f + 0.75f * facing) * self;
-        float moonK = Math.max(0f, 0.35f - 0.65f * facing) * self * moonI;
-        float lr = ambR * ambK + sunR * sunK + 0.12f * moonK;
-        float lg = ambG * ambK + sunG * sunK + 0.12f * moonK;
-        float lb = ambB * ambK + sunB * sunK + 0.16f * moonK;
+        float normalLength=(float)Math.sqrt(nx*nx+ny*ny+nz*nz);
+        if(normalLength>0.001f) { nx/=normalLength; ny/=normalLength; nz/=normalLength; }
+        else { nx=0;ny=1;nz=0; }
+        float masser=job.masser().diffuse(nx,ny,nz)*0.80f*self*moonI*0.14f;
+        float secunda=job.secunda().diffuse(nx,ny,nz)*0.20f*self*moonI*0.14f;
+        float lr = ambR * ambK + sunR * sunK + masser + secunda*0.78f;
+        float lg = ambG * ambK + sunG * sunK + masser*0.72f + secunda*0.88f;
+        float lb = ambB * ambK + sunB * sunK + masser*0.78f + secunda;
         float under = dusk * (1f - vert) * 0.55f;
         lr += duskR * under;
         lg += duskG * under;
@@ -487,8 +501,9 @@ final class CloudBuilder {
                     float top = hgt + 0.3f * r;
                     float vb = 0.3f + 0.7f * clamp01((py - rad * 0.7f - base) / top), vt = 0.3f + 0.7f * clamp01((py + rad * 0.7f - base) / top);
                     float facing = facing(px, (py - (base + 0.35f * hgt)) * 1.5f, pz);
-                    float cb = color(alb[0], alb[1], alb[2], vb, facing, shadow, x, y - rad * 0.5f, z, d, alpha, 0, 0, 0);
-                    float ct = color(alb[0], alb[1], alb[2], vt, facing, shadow, x, y + rad * 0.5f, z, d, alpha, 0, 0, 0);
+                    float normalY=(py-(base+0.35f*hgt))*1.5f;
+                    float cb = color(alb[0], alb[1], alb[2], vb, facing, shadow, x, y - rad * 0.5f, z, d, alpha, 0, 0, 0,px,normalY,pz);
+                    float ct = color(alb[0], alb[1], alb[2], vt, facing, shadow, x, y + rad * 0.5f, z, d, alpha, 0, 0, 0,px,normalY,pz);
                     float roll = (hash(seed, 80 + k) - 0.5f) * 0.4f;
                     billboard(sky, x, y, z, d, rad * 1.8f * (1f + 0.5f * gale), rad * 1.8f, roll, cell, hash(seed, 90 + k) < 0.5f, ct, cb);
                 }
@@ -595,8 +610,9 @@ final class CloudBuilder {
                     float ab = lerp(sunlitTurret, darkAlb[2], 1.00f);
                     float localShadow = lerp(sunlitTurret, baseShadow, 0.28f);
                     float facing = facing(px, (py - (base + 0.42f * hgt)) * 0.55f, pz);
-                    float cb = color(ar, ag, ab, vb * vb, facing, localShadow, x, y, z, d, alpha, 0, 0, 0);
-                    float ct = color(ar, ag, ab, Math.min(1f, vt + 0.15f * sunlitTurret), Math.max(facing, 0.35f * sunlitTurret), localShadow, x, y, z, d, alpha, 0, 0, 0);
+                    float normalY=(py-(base+0.42f*hgt))*0.55f;
+                    float cb = color(ar, ag, ab, vb * vb, facing, localShadow, x, y, z, d, alpha, 0, 0, 0,px,normalY,pz);
+                    float ct = color(ar, ag, ab, Math.min(1f, vt + 0.15f * sunlitTurret), Math.max(facing, 0.35f * sunlitTurret), localShadow, x, y, z, d, alpha, 0, 0, 0,px,normalY,pz);
                     float roll = (hash(seed, 600 + k) - 0.5f) * 0.35f * squash;
                     billboard(sky, x, y, z, d, rad * 1.85f, rad * 1.85f * squash, roll, cell, hash(seed, 700 + k) < 0.5f, ct, cb);
                 }

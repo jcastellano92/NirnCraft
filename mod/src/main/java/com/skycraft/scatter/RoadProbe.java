@@ -50,7 +50,7 @@ public final class RoadProbe {
      * the map hint (strength at least 0.5) is used when the live network cannot answer.
      */
     public static boolean nearRoad(Level level, int x, int z, int margin, boolean serverThread) {
-        if (IS_ROAD != null && !level.isClientSide) { // plan-backed: answers on any thread
+        if (IS_ROAD != null && !level.isClientSide()) { // plan-backed: answers on any thread
             try {
                 return (Boolean) IS_ROAD.invoke(null, level, x, z, margin);
             } catch (ReflectiveOperationException | RuntimeException e) {

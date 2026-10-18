@@ -1,7 +1,7 @@
 package com.skycraft.crime;
 
 import com.skycraft.dialogue.Dialogue;
-import net.minecraftforge.eventbus.api.IEventBus;
+import net.neoforged.bus.api.IEventBus;
 
 /**
  * Holds, bounties, guards, arrest, jail, stolen goods, pickpocketing and lockpicking.

@@ -16,14 +16,14 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.DistExecutor;
+import net.neoforged.api.distmarker.Dist;
+import com.skycraft.platform.Sides;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -60,9 +60,9 @@ public class SkillBookItem extends Item {
 
     public static boolean hasRead(PlayerData data, Skill skill, int volume) {
         String key = readKey(skill, volume);
-        ListTag read = data.module(MODULE).getList(READ_KEY, Tag.TAG_STRING);
+        ListTag read = data.module(MODULE).getListOrEmpty(READ_KEY);
         for (int i = 0; i < read.size(); i++) {
-            if (read.getString(i).equals(key)) return true;
+            if (read.getStringOr(i, "").equals(key)) return true;
         }
         return false;
     }
@@ -73,7 +73,7 @@ public class SkillBookItem extends Item {
 
     /** The book's volume, 1..{@value #VOLUMES}. */
     public static int volume(ItemStack stack) {
-        int v = stack.hasTag() ? stack.getTag().getInt(VOLUME_NBT) : 0;
+        int v = com.skycraft.inventory.ItemData.hasCustom(stack) ? com.skycraft.inventory.ItemData.custom(stack).getIntOr(VOLUME_NBT, 0) : 0;
         return Math.max(1, Math.min(VOLUMES, v));
     }
 
@@ -84,12 +84,12 @@ public class SkillBookItem extends Item {
     }
 
     @Override
-    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+    public InteractionResult use(Level level, Player player, InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
-        if (!level.isClientSide && player instanceof ServerPlayer sp) {
+        if (!level.isClientSide() && player instanceof ServerPlayer sp) {
             readStack(sp, stack);
         }
-        return InteractionResultHolder.sidedSuccess(stack, level.isClientSide);
+        return com.skycraft.platform.Interactions.sidedSuccess(level.isClientSide()).heldItemTransformedTo(stack);
     }
 
     /** Reads this skill book directly without moving it into the player's hand. */
@@ -100,7 +100,7 @@ public class SkillBookItem extends Item {
             Notifier.message(sp, Component.translatable("message.skycraft.economy.book_already_read"));
         } else {
             CompoundTag module = data.module(MODULE);
-            ListTag read = module.getList(READ_KEY, Tag.TAG_STRING);
+            ListTag read = module.getListOrEmpty(READ_KEY);
             read.add(StringTag.valueOf(readKey(skill, volume)));
             module.put(READ_KEY, read);
             data.addStat("skill_books_read", 1);
@@ -115,13 +115,14 @@ public class SkillBookItem extends Item {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
-        tooltip.add(Component.translatable("tooltip.skycraft.economy.skill_book", skill.displayName()).withStyle(ChatFormatting.GRAY));
-        if (level != null && level.isClientSide) {
+    public void appendHoverText(ItemStack stack, net.minecraft.world.item.Item.TooltipContext context263, net.minecraft.world.item.component.TooltipDisplay display263, java.util.function.Consumer<Component> tooltip, TooltipFlag flag) {
+        Level level = context263.level();
+        tooltip.accept(Component.translatable("tooltip.skycraft.economy.skill_book", skill.displayName()).withStyle(ChatFormatting.GRAY));
+        if (level != null && level.isClientSide()) {
             int volume = volume(stack);
-            Boolean read = DistExecutor.unsafeCallWhenOn(Dist.CLIENT, () -> () -> EconomyClient.hasReadBook(skill, volume));
+            Boolean read = com.skycraft.platform.Sides.callOn(Dist.CLIENT, () -> () -> EconomyClient.hasReadBook(skill, volume));
             if (Boolean.TRUE.equals(read)) {
-                tooltip.add(Component.translatable("tooltip.skycraft.economy.skill_book_read").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
+                tooltip.accept(Component.translatable("tooltip.skycraft.economy.skill_book_read").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
             }
         }
     }

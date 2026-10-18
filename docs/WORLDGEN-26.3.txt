@@ -1,0 +1,131 @@
+Native Minecraft 26.3 world and data migration
+Updated 2026-10-18
+
+Read MIGRATION-26.3.txt first for the exact loader/Java target and current full-pack
+acceptance status. The world code now compiles against the real patched native
+APIs. Compilation and static inventory checks do not certify a playable world.
+
+World generation contracts
+
+26.3 unifies configured features into the feature registry. Skycraft's
+worldgen.ConfiguredFeature binds each existing algorithm and config to its native
+MapCodec and Feature implementation. Its subfeature enumeration delegates to the
+algorithm so generation ordering remains explicit. Feature TYPE registrations are
+MapCodecs, not instances or generic Feature<T>. A small real random-patch algorithm
+retains the removed vanilla feature's tries, RNG order, offsets and placement calls.
+
+Noise and density functions compile through native CompileContext samplers. Registry
+noise references bind once to the current world's seeded sampler; using an unbound
+noise throws. No old world's registry is cached globally. Authored octave amplitudes
+are converted using the actual NormalNoise.createParity math. The native Java test
+compares all ten preserved descriptions and 960 seeded sample bit patterns against
+the checked-in native noise JSON. This does not claim that the entire 26.3 terrain
+pipeline produces the same voxels as 1.20.1: native density evaluation uses float
+buffers, and noise/surface/carvers are combined into the TERRAIN generation stage.
+The authored terrain math, placements, resource IDs, block choices and content remain.
+
+FastSurfaceRule wraps native MaterialRule. The optimized biome switch retains ordered
+fallbacks and is scoped to its decoded source, rather than a global identity map
+which could retain world registries. StageBench uses native public sampling and
+MaterialSystem APIs and compares every resulting block in its A/B surface benchmark.
+The final native buildTerrain path still needs normal in-world generation checks.
+
+Saved data and world transitions
+
+platform.SavedDataTypes wraps native SavedDataType codecs and explicitly imports
+legacy flat data/<name>.dat files into namespaced storage without deleting the source.
+The loader's native file fixing relocates selected vanilla files, not unknown mod
+files. The helper also checks the original overworld root data directory, DIM-1/data,
+DIM1/data and unchanged custom dimension folders. Native default-namespace copies
+are accepted, while canonical skycraft data always takes precedence. Each lookup
+stays in the requested dimension, including optional referenced road buckets.
+An existing canonical file that fails decoding stops the lookup instead of
+overwriting it with stale legacy data or creating replacement empty state.
+Native SavedDataStorage.set marks imported values dirty. Optional referenced road
+buckets use getIfPresent so a missing bucket does not turn into an empty new save.
+Read/write ownership and generation tokens in tile plans remain enforced.
+Legacy item payloads under mod-owned save keys are migrated by inventory.ItemData
+through the real ITEM_STACK data-fixer reference; ordinary native component stacks
+keep the direct codec path. See the separate offline Forge attachment converter
+before loading an original old world; vanilla cannot recover discarded ForgeCaps.
+
+Realm fixed times are real named world clocks with their original ticks and paused
+state. Their native has_fixed_time flag also preserves the old exclusion from
+day/night gameplay classification; a paused clock alone does not do that. Native
+dimension timelines bind to those clocks. Custom sky/cloud/weather
+renderer IDs are dimension attributes; authored biome fog colors stay in biome
+attributes. Five custom-sky realm day timelines omit vanilla fog-color darkening
+and sunrise tint to preserve the original identity fog callback and absent sunrise.
+Other light/gameplay tracks and moon timelines remain; jail retains vanilla night
+fog and Shivering Isles retain their ordinary overworld timelines.
+Realm light boosts above 1 are preserved by the native client lightmap
+path rather than silently clamped to an RGB color attribute.
+
+Every old dimension field is covered by dimension-semantics-audit.json and the
+preserved eight-definition test fixture. Ultrawarm maps to water evaporation,
+fast lava (including NeoForge lava motion) and the default lava dripstone particle.
+Natural maps to portal piglin spawning and bed eligibility; the ordinary vanilla
+clock model still works only in the sole authored natural dimension, the overworld.
+All Boolean values are explicit, including false. Jail keeps nonexploding beds
+that cannot set spawn or start ordinary vanilla sleep, matching its old unnatural
+dimension check. Bounds, ambient light, portal scale, infiniburn tag and original
+monster light limits are checked against actual decoded native dimension types.
+
+Data generation boundary
+
+tools/data_format_263.py handles native singular data directories, recipes, item and
+entity predicates, loot conditions/modifiers, exact looting probability conversion,
+custom item metadata, and NeoForge biome modifier paths. tools/worldgen/format_263.py
+adds the worldgen/biome/density/material/noise/dimension conversion. Every existing
+writer passes through the relevant boundary, including texture/content generators
+which also emit recipes, tags and loot. Do not write legacy JSON directly or restore
+old plural paths from a generator. Conversion is idempotent and does not rerun or
+replace authored bitmap assets. The partial-tag migration preserves values from both
+directories and fails on conflicting non-tag resources instead of overwriting them.
+
+Fast checks from repository root
+
+py -3 -m unittest discover -s tools -p test_data_format_263.py -v
+py -3 tools/data_format_263.py
+py -3 tools/worldgen/format_263.py
+py -3 tools/migration/audit_data_263.py --native-jar <exact patched native jar> --baseline <source-before-port.zip> --neo-sources <exact NeoForge sources jar>
+
+Common tag compatibility is explicit in tools/native_common_tags_263.json. Native
+c:/Minecraft classifications include authored legacy forge: members, and legacy
+queries retain the native default members. References only point from the full
+native tag toward the legacy custom tag; legacy tags include default MEMBERS, so
+no tag points back to itself through its bridge. The tag audit merges real Minecraft,
+NeoForge and Skycraft resources to detect cycles and missing required tag references.
+The legacy meat flag is generated from actual FoodSpec registrations into wolf_food.
+
+Native NeoForge auto-discovers loot_modifiers and sorts by descending priority;
+the old global_loot_modifiers list is no longer a valid active modifier resource.
+Its original authored order is retained in data/neoforge/skycraft_legacy and the
+converter assigns that order as native modifier priorities. Individual modifiers
+remain active, with the same predicates, chance and table payload. Keep the retained
+authoring list consistent when adding or reordering generated global modifiers.
+
+Recipes are a native dynamic registry in 26.3. NeoForge also supplies an enchanting
+recipe in its own mod-data pack, after Skycraft's ordinary pack. The intentionally
+disabled enchanting-table recipe uses an exact native pack.mcmeta resource filter,
+registered as a required TOP server-data pack with the public AddPackFindersEvent.
+The filter also removes that recipe's own unlock advancement: native advancement
+criteria and rewards hold recipe registry references, so retaining the unlock for
+an absent recipe would fail registry freeze with an unbound holder.
+Its old authored recipe
+descriptor is retained in minecraft/skycraft_legacy/disabled_recipes rather than
+being loaded as an active recipe. The converter reproduces both the move and filter;
+the genuine native WorldDataMigrationTest asserts the recipe is actually absent.
+
+The converter suite checks actual isolated writer definitions without overwriting
+generated assets. The audit verifies every baseline resource has a native destination
+and checks world registry references against the exact native jar plus current data.
+The current report is dist/code-review/neoforge-migration/native-data-audit.json.
+JUnit runs through ModDevGradle's genuine loader-backed unitTest setup. Do not fake
+FMLLoader or remove native integration assertions to make a standalone test pass.
+
+Remaining full-pack gates are owned by the normal native runtime: load all registries,
+decode all recipes/loot/worldgen, generate representative chunks in every realm, load
+and resave a separately converted old save, run gameplay selftests, then capture
+terrain-ready motion and visual comparisons with shader configurations. A static
+catalog check cannot detect an invalid codec field, wrong lighting or a worldgen seam.

@@ -1,0 +1,29 @@
+{
+  "type": "skycraft:ground_cover",
+  "config": {
+    "entries": [
+      {
+        "state": "minecraft:lily_of_the_valley",
+        "weight": 3
+      },
+      {
+        "state": "minecraft:poppy",
+        "weight": 1
+      },
+      {
+        "state": "minecraft:cornflower",
+        "weight": 1
+      }
+    ],
+    "scale": 28,
+    "patchiness": 0.85,
+    "cluster": {
+      "type": "minecraft:uniform",
+      "min_inclusive": 3,
+      "max_inclusive": 8
+    },
+    "spread": 3,
+    "salt": 2011,
+    "near_water": false
+  }
+}

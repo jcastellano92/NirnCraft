@@ -30,7 +30,7 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -43,7 +43,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.level.block.Blocks;
@@ -53,11 +53,11 @@ import net.minecraft.world.level.block.RotatedPillarBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
-import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
+import net.minecraft.core.registries.BuiltInRegistries;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.InputStream;
@@ -80,7 +80,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * multi-actor scenes, wonder moments ({@code "wonder": true}), world-sheet citations ({@code "why"}),
  * and optional one-shot quest hooks ({@code "questHook"}).
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class WildScenes {
     public static final String RESOURCE = "/skycraft/creatures/scenes.json";
     public static final String TAG_SCENE = "skycraft_scene";
@@ -292,7 +292,7 @@ public final class WildScenes {
         if (prev != null && now - prev < MIN_INTERVAL_TICKS) return 0;
 
         if (!level.getEntitiesOfClass(Mob.class, new AABB(pos).inflate(64),
-                m -> m.getPersistentData().getBoolean(TAG_SCENE)).isEmpty()) return 0;
+                m -> m.getPersistentData().getBooleanOr(TAG_SCENE, false)).isEmpty()) return 0;
         if (SpawnPacing.settlementWithin(level, pos, 80)) return 0;
 
         List<Scene> matching = new ArrayList<>();
@@ -327,12 +327,12 @@ public final class WildScenes {
      */
     @Nullable
     public static Scene rollNearPlayer(ServerPlayer player, @Nullable String forcedId) {
-        ServerLevel level = player.serverLevel();
+        ServerLevel level = player.level();
         RandomSource random = player.getRandom();
         BlockPos center = findSurfaceNear(level, player.blockPosition(), 24, 56, random);
         if (center == null) center = player.blockPosition();
         Region region = Regions.at(level, center);
-        BiomeFamily family = BiomeFamily.of(level.getBiome(center), center);
+        BiomeFamily family = BiomeFamily.of(level.getBiome(center), center, level.getSeaLevel());
         double wild = SpawnPacing.settlementWithin(level, center, 160) ? 0.1
                 : (SpawnPacing.onRoad(level, center) ? 0.35 : 0.85);
 
@@ -397,12 +397,12 @@ public final class WildScenes {
         if (!matchesRegion(s, region)) return false;
         if (!matchesPlayerAndState(s, player, region)) return false;
         if (!s.families.isEmpty() && !s.families.contains(family)) return false;
-        if ("day".equals(s.time) && !level.isDay()) return false;
-        if ("night".equals(s.time) && !level.isNight()) return false;
+        if ("day".equals(s.time) && !level.isBrightOutside()) return false;
+        if ("night".equals(s.time) && !level.isDarkOutside()) return false;
         if ("dawn_dusk".equals(s.time)) {
-            long tod = level.getDayTime() % 24000L;
+            long tod = level.getDefaultClockTime() % 24000L;
             boolean dawnOrDusk = tod <= 3000L || (tod >= 11000L && tod <= 14500L) || tod >= 22000L;
-            if (!dawnOrDusk && !level.isDay()) return false;
+            if (!dawnOrDusk && !level.isBrightOutside()) return false;
         }
         if (!s.road.isEmpty()) {
             boolean on = RoadCells.isRoad(level, pos.getX(), pos.getZ(), 10);
@@ -484,10 +484,10 @@ public final class WildScenes {
                 mob = npc;
             }
         } else if (a.entity != null) {
-            Entity e = a.entity.create(level);
+            Entity e = a.entity.create(level, net.minecraft.world.entity.EntitySpawnReason.EVENT);
             if (!(e instanceof Mob m)) return null;
-            m.moveTo(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5, r.nextFloat() * 360f, 0f);
-            m.finalizeSpawn(level, level.getCurrentDifficultyAt(pos), MobSpawnType.NATURAL, null, null);
+            m.snapTo(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5, r.nextFloat() * 360f, 0f);
+            m.finalizeSpawn(level, level.getCurrentDifficultyAt(pos), EntitySpawnReason.NATURAL, null);
             Leveling.apply(m, Leveling.regionLevel(level, pos));
             if (!level.addFreshEntity(m)) return null;
             mob = m;
@@ -499,7 +499,7 @@ public final class WildScenes {
             mob.getPersistentData().putString(TAG_QUEST_HOOK, scene.questHook);
         }
         if ("crouch".equals(a.pose)) mob.setPose(Pose.CROUCHING);
-        if (a.leash > 0 && mob instanceof PathfinderMob pm) pm.restrictTo(pos, a.leash);
+        if (a.leash > 0 && mob instanceof PathfinderMob pm) pm.setHomeTo(pos, a.leash);
         return mob;
     }
 
@@ -540,9 +540,9 @@ public final class WildScenes {
         if (event.getLevel().isClientSide() || !(event.getEntity() instanceof ServerPlayer player)) return;
         if (!(event.getTarget() instanceof LivingEntity target)) return;
         if (!target.getPersistentData().contains(TAG_QUEST_HOOK)) return;
-        if (target.getPersistentData().getBoolean(TAG_HOOK_CLAIMED)) return;
-        String hook = target.getPersistentData().getString(TAG_QUEST_HOOK);
-        String sceneId = target.getPersistentData().getString(TAG_SCENE_ID);
+        if (target.getPersistentData().getBooleanOr(TAG_HOOK_CLAIMED, false)) return;
+        String hook = target.getPersistentData().getStringOr(TAG_QUEST_HOOK, "");
+        String sceneId = target.getPersistentData().getStringOr(TAG_SCENE_ID, "");
         if (hook.isEmpty()) return;
         if (triggerQuestHook(player, target, hook, sceneId)) {
             target.getPersistentData().putBoolean(TAG_HOOK_CLAIMED, true);
@@ -574,11 +574,11 @@ public final class WildScenes {
             return Story.start(player, def);
         }
         // 3. One-shot radiant encounter quest hooks (radiant_bounty, radiant_hunt, radiant_favor)
-        ServerLevel level = player.serverLevel();
-        String dim = level.dimension().location().toString();
+        ServerLevel level = player.level();
+        String dim = level.dimension().identifier().toString();
         String hold = Holds.holdAt(level, giver.blockPosition());
         String qId = "scene_" + (sceneId == null || sceneId.isEmpty() ? hook : sceneId);
-        if (Quests.find(player.server, player.getUUID(), qId) != null) return false;
+        if (Quests.find(player.level().getServer(), player.getUUID(), qId) != null) return false;
 
         Quest q = new Quest(qId, Quest.Category.MISC,
                 Component.translatable("scene.skycraft.quest." + hook + ".title"),
@@ -657,7 +657,7 @@ public final class WildScenes {
         BlockState cur = level.getBlockState(pos);
         if (!cur.isAir() && !cur.canBeReplaced()) return;
         if (!level.getFluidState(pos).isEmpty()) return;
-        if (!level.getBlockState(pos.below()).isSolidRender(level, pos.below())) return;
+        if (!level.getBlockState(pos.below()).isSolidRender()) return;
         level.setBlock(pos, state, 2);
     }
 
@@ -665,7 +665,7 @@ public final class WildScenes {
     private static BlockPos surface(ServerLevel level, int x, int z, int nearY) {
         if (!level.hasChunk(x >> 4, z >> 4)) return null;
         int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
-        if (y <= level.getMinBuildHeight() + 1 || Math.abs(y - nearY) > 16) return null;
+        if (y <= level.getMinY() + 1 || Math.abs(y - nearY) > 16) return null;
         BlockPos pos = new BlockPos(x, y, z);
         if (!level.getFluidState(pos).isEmpty() || level.getFluidState(pos.below()).is(FluidTags.WATER)) return null;
         return pos;
@@ -679,7 +679,7 @@ public final class WildScenes {
     }
 
     private static void registerCommand(CommandDispatcher<CommandSourceStack> d) {
-        d.register(Commands.literal("skycraft-scenes").requires(s -> s.hasPermission(2))
+        d.register(Commands.literal("skycraft-scenes").requires(s -> s.permissions().hasPermission(net.minecraft.server.permissions.Permissions.COMMANDS_GAMEMASTER))
                 .then(Commands.literal("list")
                         .executes(c -> {
                             List<Scene> list = all();
@@ -797,8 +797,8 @@ public final class WildScenes {
                 NpcRole npc = a.has("npc") ? NpcRole.byId(a.get("npc").getAsString()) : null;
                 EntityType<?> entity = null;
                 if (a.has("entity")) {
-                    ResourceLocation eid = new ResourceLocation(a.get("entity").getAsString());
-                    if (ForgeRegistries.ENTITY_TYPES.containsKey(eid)) entity = ForgeRegistries.ENTITY_TYPES.getValue(eid);
+                    Identifier eid = Identifier.parse(a.get("entity").getAsString());
+                    if (BuiltInRegistries.ENTITY_TYPE.containsKey(eid)) entity = BuiltInRegistries.ENTITY_TYPE.getValue(eid);
                 }
                 if (npc == null && entity == null) continue;
                 int min = 1, max = 1;

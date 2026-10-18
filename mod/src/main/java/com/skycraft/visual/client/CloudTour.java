@@ -12,10 +12,10 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.nio.file.Files;
 import java.util.ArrayList;
@@ -30,7 +30,7 @@ import java.util.Set;
  * and screenshots every cloud type, the distant storms and the dawn fog. Finishes by timing frames with Skycraft
  * clouds on and off and writes the numbers next to the screenshots ({@code clouds-perf.txt}).
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
 final class CloudTour {
     private static final List<String> PERF = new ArrayList<>();
     private static boolean timing;
@@ -44,14 +44,14 @@ final class CloudTour {
             // no Helgen cart: the tour moves the camera itself
             if (com.skycraft.quest.QuestConfig.HELGEN_START.get()) com.skycraft.quest.QuestConfig.HELGEN_START.set(false);
             com.skycraft.network.SkyNetwork.sendToServer(new com.skycraft.network.CorePackets.ChooseRace(com.skycraft.core.Race.NORD.id()));
-            mc.setScreen(null);
-            mc.options.hideGui = true;
+            mc.gui.setScreen(null);
+            com.skycraft.client.autotest.ReviewWorlds.hudHidden(mc, true);
             mc.options.pauseOnLostFocus = false;
-            org.lwjgl.glfw.GLFW.glfwSetWindowSize(mc.getWindow().getWindow(), 1600, 900);
+            mc.getWindow().setWindowed(1600,900);
         });
-        VisualAutotest.cmd(2, "gamerule doDaylightCycle false");
-        VisualAutotest.cmd(2, "gamerule doWeatherCycle false");
-        VisualAutotest.cmd(2, "gamerule doMobSpawning false");
+        VisualAutotest.cmd(2, "gamerule advance_time false");
+        VisualAutotest.cmd(2, "gamerule advance_weather false");
+        VisualAutotest.cmd(2, "gamerule spawn_mobs false");
         VisualAutotest.cmd(2, "gamemode spectator");
         VisualAutotest.cmd(2, "time set 5000");
 
@@ -153,9 +153,9 @@ final class CloudTour {
         region(2435, 1418, "storm");
         VisualAutotest.step(700, mc -> {
             mc.options.enableVsync().set(false);
-            mc.getWindow().updateVsync(false);
+            
             mc.options.framerateLimit().set(260);
-            mc.getWindow().setFramerateLimit(260);
+            mc.getFramerateLimitTracker().setFramerateLimit(260);
         });
         time(200, "skycraft clouds");
         VisualAutotest.step(2, mc -> AtmosphereConfig.CLOUDS.set(false));
@@ -203,7 +203,7 @@ final class CloudTour {
             int h = loaded ? level.getHeight(Heightmap.Types.MOTION_BLOCKING, x, z)
                     : level.getChunkSource().getGenerator().getBaseHeight(x, z, Heightmap.Types.WORLD_SURFACE_WG, level,
                     level.getChunkSource().randomState());
-            String name = mc.player.getGameProfile().getName();
+            String name = mc.player.getGameProfile().name();
             server.getCommands().performPrefixedCommand(server.createCommandSourceStack().withSuppressedOutput(),
                     String.format(Locale.ROOT, "tp %s %d %d %d %.0f %.0f", name, x, h + up, z, yaw, pitch));
         }));
@@ -267,6 +267,7 @@ final class CloudTour {
             timingStart = System.nanoTime();
         });
         VisualAutotest.step(frames / 2, mc -> {
+            CloudRenderer.stopStats();
             timing = false;
             double ms = (System.nanoTime() - timingStart) / 1e6 / Math.max(1, timingFrames);
             PERF.add(String.format(Locale.ROOT, "%s: %.2f ms per frame (%.0f fps) over %d frames; %s", label, ms, 1000 / ms,
@@ -281,7 +282,7 @@ final class CloudTour {
     }
 
     @SubscribeEvent
-    public static void onRenderTick(TickEvent.RenderTickEvent event) {
-        if (timing && event.phase == TickEvent.Phase.END) timingFrames++;
+    public static void onRenderTick(net.neoforged.neoforge.client.event.RenderFrameEvent.Post event) {
+        if (timing) timingFrames++;
     }
 }

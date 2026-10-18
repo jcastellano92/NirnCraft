@@ -4,7 +4,8 @@
   "flavor": 0,
   "place": {
     "types": [
-      "fort"
+      "fort",
+      "dungeon_fixed"
     ],
     "variants": [
       "fort"

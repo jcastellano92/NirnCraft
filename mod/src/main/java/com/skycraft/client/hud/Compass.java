@@ -2,22 +2,23 @@ package com.skycraft.client.hud;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.client.gui.overlay.ForgeGui;
 
 /** The Skyrim compass bar at the top of the screen with cardinal directions and markers. */
 public final class Compass {
     private static final String[] DIRS = {"S", "SW", "W", "NW", "N", "NE", "E", "SE"};
-    private static final net.minecraft.resources.ResourceLocation FRAME =
-            new net.minecraft.resources.ResourceLocation(com.skycraft.Skycraft.MODID, "textures/gui/hud/compass.png");
+    private static final net.minecraft.resources.Identifier FRAME =
+            net.minecraft.resources.Identifier.fromNamespaceAndPath(com.skycraft.Skycraft.MODID, "textures/gui/hud/compass.png");
 
     private Compass() {}
 
-    public static void render(ForgeGui gui, GuiGraphics g, float partialTick, int width, int height) {
+    public static void render(GuiGraphicsExtractor g, net.minecraft.client.DeltaTracker delta) {
+        float partialTick = delta.getGameTimeDeltaPartialTick(false);
+        int width = g.guiWidth(), height = g.guiHeight();
         Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null || mc.options.hideGui) return;
+        if (mc.player == null || mc.gui.hud.isHidden()) return;
         Font font = mc.font;
         int half = 110;
         int cx = width / 2;
@@ -25,8 +26,8 @@ public final class Compass {
         float yaw = Mth.wrapDegrees(mc.player.getViewYRot(partialTick));
 
         // frame: smoky band with fading gold edges and end ornaments (textures/gui/hud/compass.png)
-        com.mojang.blaze3d.systems.RenderSystem.enableBlend();
-        g.blit(FRAME, cx - half - 6, y - 1, (half + 6) * 2, 14, 0, 0, 440, 28, 440, 28);
+        
+        com.skycraft.inventory.client.SkyUi.blit(g, FRAME, cx - half - 6, y - 1, (half + 6) * 2, 14, 0, 0, 440, 28, 440, 28);
 
         // cardinal letters every 90 degrees, smaller intercardinals between; letters fade toward the ends
         for (int i = 0; i < 8; i++) {
@@ -39,13 +40,13 @@ public final class Compass {
             boolean major = i % 2 == 0;
             int color = DIRS[i].equals("N") ? 0xE8C060 : major ? 0xF0EAD6 : 0xA8A090;
             if (major) {
-                g.drawString(font, DIRS[i], x - font.width(DIRS[i]) / 2, y + 2, a | color, true);
+                g.text(font, DIRS[i], x - font.width(DIRS[i]) / 2, y + 2, a | color, true);
             } else {
-                g.pose().pushPose();
-                g.pose().translate(x, y + 3.5f, 0);
-                g.pose().scale(0.7f, 0.7f, 1f);
-                g.drawString(font, DIRS[i], -font.width(DIRS[i]) / 2, 0, a | color, false);
-                g.pose().popPose();
+                g.pose().pushMatrix();
+                g.pose().translate(x, y + 3.5f);
+                g.pose().scale(0.7f, 0.7f);
+                g.text(font, DIRS[i], -font.width(DIRS[i]) / 2, 0, a | color, false);
+                g.pose().popMatrix();
             }
         }
         // tick marks every 15 degrees
@@ -89,11 +90,11 @@ public final class Compass {
                 boolean inTargetArea = TargetHud.isVisible() && Math.abs(x - cx) < 85;
                 if (!inTargetArea) {
                     String d = (int) dist + "m";
-                    g.pose().pushPose();
-                    g.pose().translate(x, y + 15, 0);
-                    g.pose().scale(0.75f, 0.75f, 1f);
-                    g.drawString(font, d, -font.width(d) / 2, 0, 0xFFE8C060, true);
-                    g.pose().popPose();
+                    g.pose().pushMatrix();
+                    g.pose().translate(x, y + 15);
+                    g.pose().scale(0.75f, 0.75f);
+                    g.text(font, d, -font.width(d) / 2, 0, 0xFFE8C060, true);
+                    g.pose().popMatrix();
                 }
             }
         }
@@ -101,37 +102,34 @@ public final class Compass {
         // Location text above compass: selected closest to looking direction
         if (bestCentred != null) {
             String label = bestCentred.label() + "  " + (int) bestDist + "m";
-            g.drawCenteredString(font, label, cx, y - 10, 0xFFE8E2D0);
+            g.centeredText(font, label, cx, y - 10, 0xFFE8E2D0);
         }
     }
 
-    private static final net.minecraft.resources.ResourceLocation ICONS =
-            new net.minecraft.resources.ResourceLocation(com.skycraft.Skycraft.MODID, "textures/gui/map_icons.png");
+    private static final net.minecraft.resources.Identifier ICONS =
+            net.minecraft.resources.Identifier.fromNamespaceAndPath(com.skycraft.Skycraft.MODID, "textures/gui/map_icons.png");
 
     /** A filled diamond of the given radius centred on (x, y). */
-    private static void diamond(GuiGraphics g, int x, int y, int r, int color) {
+    private static void diamond(GuiGraphicsExtractor g, int x, int y, int r, int color) {
         for (int dy = -r; dy <= r; dy++) {
             int w = r - Math.abs(dy);
             g.fill(x - w, y + dy, x + w + 1, y + dy + 1, color);
         }
     }
 
-    private static void drawMarker(GuiGraphics g, int x, int y, CompassMarkers.Marker m) {
+    private static void drawMarker(GuiGraphicsExtractor g, int x, int y, CompassMarkers.Marker m) {
         int c = 0xFF000000 | m.color();
         if (m.icon() >= 0 && (m.shape() == CompassMarkers.Shape.DISCOVERED || m.shape() == CompassMarkers.Shape.LOCATION)) {
             // Skyrim: discovered places in ink-white, undiscovered ones as dark silhouettes
             float tone = m.shape() == CompassMarkers.Shape.DISCOVERED ? 1f : 0.35f;
-            com.mojang.blaze3d.systems.RenderSystem.enableBlend();
-            g.pose().pushPose();
-            g.pose().translate(x - 5, y - 6, 0);
-            g.pose().scale(0.6875f, 0.6875f, 1f);
-            g.setColor(0f, 0f, 0f, 0.6f);
-            g.blit(ICONS, 1, 1, (float) ((m.icon() % 8) * 16), (float) ((m.icon() / 8) * 16), 16, 16, 128, 64);
-            g.setColor(tone * 1.25f, tone * 1.2f, tone * 1.1f, 1f);
-            g.blit(ICONS, 0, 0, (float) ((m.icon() % 8) * 16), (float) ((m.icon() / 8) * 16), 16, 16, 128, 64);
-            g.setColor(1f, 1f, 1f, 1f);
-            g.pose().popPose();
-            com.mojang.blaze3d.systems.RenderSystem.disableBlend();
+            
+            g.pose().pushMatrix();
+            g.pose().translate(x - 5, y - 6);
+            g.pose().scale(0.6875f, 0.6875f);
+            com.skycraft.inventory.client.SkyUi.blit(g, ICONS, 1, 1, (float) ((m.icon() % 8) * 16), (float) ((m.icon() / 8) * 16), 16, 16, 128, 64, net.minecraft.util.ARGB.colorFromFloat(0.6f, 0f, 0f, 0f));
+            com.skycraft.inventory.client.SkyUi.blit(g, ICONS, 0, 0, (float) ((m.icon() % 8) * 16), (float) ((m.icon() / 8) * 16), 16, 16, 128, 64, net.minecraft.util.ARGB.colorFromFloat(1f, tone * 1.25f, tone * 1.2f, tone * 1.1f));
+            g.pose().popMatrix();
+            
             return;
         }
         switch (m.shape()) {

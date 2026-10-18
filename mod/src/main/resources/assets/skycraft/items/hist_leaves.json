@@ -1,0 +1,12 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "skycraft:item/hist_leaves",
+    "tints": [
+      {
+        "type": "minecraft:constant",
+        "value": 5929530
+      }
+    ]
+  }
+}

@@ -680,6 +680,8 @@ def derive_deltas(grid, river_lines, D, wet, excl, land, delta_names=None):
 
 # ---------------------------------------------------------------------------------------------------------------------
 def write_json(path, obj):
+    from format_263 import prepare
+    path, obj = prepare(path, obj)
     with open(path, "w", encoding="utf-8", newline="\n") as f:
         json.dump(obj, f, separators=(",", ":"))
         f.write("\n")

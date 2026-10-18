@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:random_selector",
+  "features": [
+    {
+      "feature": "skycraft:biome/tall_pine_checked",
+      "chance": 0.3
+    },
+    {
+      "feature": "skycraft:biome/giant_spruce_checked",
+      "chance": 0.08
+    },
+    {
+      "feature": "minecraft:spruce_checked",
+      "chance": 0.15
+    }
+  ],
+  "default": "skycraft:biome/tall_spruce_checked"
+}

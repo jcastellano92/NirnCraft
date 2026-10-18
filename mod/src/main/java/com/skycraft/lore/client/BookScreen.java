@@ -2,17 +2,17 @@ package com.skycraft.lore.client;
 
 import com.skycraft.Skycraft;
 import com.skycraft.lore.LoreBooks;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.PageButton;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.FormattedCharSequence;
 import org.jetbrains.annotations.Nullable;
-import org.lwjgl.glfw.GLFW;
+import com.mojang.blaze3d.platform.InputConstants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,8 +23,8 @@ import java.util.List;
  * clicking the left/right page.
  */
 public class BookScreen extends Screen {
-    private static final ResourceLocation SPREAD = new ResourceLocation(Skycraft.MODID, "textures/gui/book_spread.png");
-    private static final ResourceLocation SHEET = new ResourceLocation(Skycraft.MODID, "textures/gui/book_sheet.png");
+    private static final Identifier SPREAD = Identifier.fromNamespaceAndPath(Skycraft.MODID, "textures/gui/book_spread.png");
+    private static final Identifier SHEET = Identifier.fromNamespaceAndPath(Skycraft.MODID, "textures/gui/book_sheet.png");
     private static final int SPREAD_W = 380, SPREAD_H = 220;
     private static final int SHEET_W = 180, SHEET_H = 220;
     private static final int PAGE_TEXT_W = 150, PAGE_LINES = 16;
@@ -164,31 +164,34 @@ public class BookScreen extends Screen {
     // ------------------------------------------------------------------ input
 
     @Override
-    public boolean keyPressed(int key, int scan, int mods) {
-        if (key == GLFW.GLFW_KEY_LEFT || key == GLFW.GLFW_KEY_A || key == GLFW.GLFW_KEY_PAGE_UP) {
+    public boolean keyPressed(net.minecraft.client.input.KeyEvent event) {
+        int key = event.key(), scan = event.keycode(), mods = event.modifiers();
+        if (key == InputConstants.KEY_LEFT || key == InputConstants.KEY_A || key == InputConstants.KEY_PAGEUP) {
             turn(-1, true);
             return true;
         }
-        if (key == GLFW.GLFW_KEY_RIGHT || key == GLFW.GLFW_KEY_D || key == GLFW.GLFW_KEY_PAGE_DOWN || key == GLFW.GLFW_KEY_SPACE) {
+        if (key == InputConstants.KEY_RIGHT || key == InputConstants.KEY_D || key == InputConstants.KEY_PAGEDOWN || key == InputConstants.KEY_SPACE) {
             turn(1, true);
             return true;
         }
-        if (minecraft != null && minecraft.options.keyInventory.matches(key, scan)) {
+        if (minecraft != null && minecraft.options.keyInventory.matches(event)) {
             onClose();
             return true;
         }
-        return super.keyPressed(key, scan, mods);
+        return super.keyPressed(event);
     }
 
     @Override
-    public boolean mouseScrolled(double mx, double my, double delta) {
+    public boolean mouseScrolled(double mx, double my, double horizontal, double delta) {
         turn(delta > 0 ? -1 : 1, true);
         return true;
     }
 
     @Override
-    public boolean mouseClicked(double mx, double my, int button) {
-        if (super.mouseClicked(mx, my, button)) return true;
+    public boolean mouseClicked(net.minecraft.client.input.MouseButtonEvent event, boolean doubleClick) {
+        double mx = event.x(), my = event.y();
+        int button = com.skycraft.client.screen.UiInput.actionButton(event.button());
+        if (super.mouseClicked(event, doubleClick)) return true;
         if (button != 0) return false;
         int w = sheet ? SHEET_W : SPREAD_W;
         int h = sheet ? SHEET_H : SPREAD_H;
@@ -205,7 +208,7 @@ public class BookScreen extends Screen {
     @Override
     public void onClose() {
         if (minecraft != null && returnScreen != null) {
-            minecraft.setScreen(returnScreen);
+            minecraft.gui.setScreen(returnScreen);
             return;
         }
         super.onClose();
@@ -214,24 +217,24 @@ public class BookScreen extends Screen {
     // ------------------------------------------------------------------ rendering
 
     @Override
-    public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        renderBackground(g);
+    public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
+
         if (sheet) {
-            g.blit(SHEET, left, top, 0, 0, SHEET_W, SHEET_H, SHEET_W, SHEET_H);
+            com.skycraft.inventory.client.SkyUi.blit(g, SHEET, left, top, 0, 0, SHEET_W, SHEET_H, SHEET_W, SHEET_H);
             drawLines(g, pages.get(view), left + 22, top + 22, SHEET_TEXT_W);
             if (pages.size() > 1) {
                 String n = (view + 1) + " / " + pages.size();
-                g.drawString(font, n, left + SHEET_W / 2 - font.width(n) / 2, top + SHEET_H - 20, FADED, false);
+                g.text(font, n, left + SHEET_W / 2 - font.width(n) / 2, top + SHEET_H - 20, FADED, false);
             }
         } else {
-            g.blit(SPREAD, left, top, 0, 0, SPREAD_W, SPREAD_H, SPREAD_W, SPREAD_H);
+            com.skycraft.inventory.client.SkyUi.blit(g, SPREAD, left, top, 0, 0, SPREAD_W, SPREAD_H, SPREAD_W, SPREAD_H);
             drawBookPage(g, view * 2, left + 22, top + 20);
             drawBookPage(g, view * 2 + 1, left + 208, top + 20);
         }
-        super.render(g, mouseX, mouseY, partialTick);
+        super.extractRenderState(g, mouseX, mouseY, partialTick);
     }
 
-    private void drawBookPage(GuiGraphics g, int index, int x, int y) {
+    private void drawBookPage(GuiGraphicsExtractor g, int index, int x, int y) {
         if (index == 0) {
             drawTitlePage(g, x, y);
             return;
@@ -240,28 +243,28 @@ public class BookScreen extends Screen {
         if (content >= pages.size()) return;
         drawLines(g, pages.get(content), x, y, PAGE_TEXT_W);
         String n = String.valueOf(index);
-        g.drawString(font, n, x + PAGE_TEXT_W / 2 - font.width(n) / 2, y + PAGE_LINES * LINE_H + 8, FADED, false);
+        g.text(font, n, x + PAGE_TEXT_W / 2 - font.width(n) / 2, y + PAGE_LINES * LINE_H + 8, FADED, false);
     }
 
-    private void drawLines(GuiGraphics g, List<Line> lines, int x, int y, int textWidth) {
+    private void drawLines(GuiGraphicsExtractor g, List<Line> lines, int x, int y, int textWidth) {
         int ly = y;
         for (Line line : lines) {
             int lx = line.center ? x + (textWidth - font.width(line.text)) / 2 : x + line.indent;
-            g.drawString(font, line.text, lx, ly, line.color, false);
+            g.text(font, line.text, lx, ly, line.color, false);
             ly += LINE_H;
         }
     }
 
-    private void drawTitlePage(GuiGraphics g, int x, int y) {
+    private void drawTitlePage(GuiGraphicsExtractor g, int x, int y) {
         int cx = x + PAGE_TEXT_W / 2;
         int yy = y + 24;
         float scale = 1.25f;
         for (FormattedCharSequence line : font.split(title, (int) (PAGE_TEXT_W / scale))) {
-            g.pose().pushPose();
-            g.pose().translate(cx, yy, 0);
-            g.pose().scale(scale, scale, 1f);
-            g.drawString(font, line, -font.width(line) / 2, 0, HEADING, false);
-            g.pose().popPose();
+            g.pose().pushMatrix();
+            g.pose().translate(cx, yy);
+            g.pose().scale(scale, scale);
+            g.text(font, line, -font.width(line) / 2, 0, HEADING, false);
+            g.pose().popMatrix();
             yy += 13;
         }
         // ornament: a rule with a diamond
@@ -274,10 +277,10 @@ public class BookScreen extends Screen {
         if (!author.isEmpty()) {
             for (FormattedCharSequence line : font.split(Component.translatable("screen.skycraft.lore.by", author)
                     .withStyle(Style.EMPTY.withItalic(true)), PAGE_TEXT_W)) {
-                g.drawString(font, line, cx - font.width(line) / 2, yy, INK, false);
+                g.text(font, line, cx - font.width(line) / 2, yy, INK, false);
                 yy += LINE_H;
             }
         }
-        g.drawString(font, label, cx - font.width(label) / 2, y + PAGE_LINES * LINE_H - 4, FADED, false);
+        g.text(font, label, cx - font.width(label) / 2, y + PAGE_LINES * LINE_H - 4, FADED, false);
     }
 }

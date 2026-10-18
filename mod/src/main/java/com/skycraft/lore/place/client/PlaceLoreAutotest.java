@@ -36,7 +36,7 @@ public final class PlaceLoreAutotest {
         STEPS.add(() -> {
             Skycraft.LOGGER.info("Place lore autotest: {} ({} lore places loaded)", PLACE, PlaceLore.all().size());
             com.skycraft.network.SkyNetwork.sendToServer(new com.skycraft.network.CorePackets.ChooseRace(com.skycraft.core.Race.NORD.id()));
-            mc.setScreen(null);
+            mc.gui.setScreen(null);
             if (mc.player != null) {
                 mc.player.connection.sendCommand("time set 6000");
                 mc.player.connection.sendCommand("skylore stats");
@@ -45,21 +45,21 @@ public final class PlaceLoreAutotest {
         if (c != null) {
             for (PlaceLore.Note n : c.notes()) {
                 STEPS.add(() -> {
-                    mc.setScreen(null);
+                    mc.gui.setScreen(null);
                     if (mc.player != null) mc.player.connection.sendCommand("skylore read " + PLACE + " " + n.id());
                 });
                 STEPS.add(() -> {
                     Skycraft.LOGGER.info("Place lore autotest: reading {} -> screen {}", n.bookId(),
-                            mc.screen == null ? "none" : mc.screen.getClass().getSimpleName());
+                            mc.gui.screen() == null ? "none" : mc.gui.screen().getClass().getSimpleName());
                     ClientAutotest.captureAndSave(mc, "pl_" + PLACE + "_" + n.id());
                 });
             }
         } else {
             Skycraft.LOGGER.warn("Place lore autotest: no lore for {}", PLACE);
         }
-        STEPS.add(() -> mc.setScreen(new com.skycraft.quest.client.JournalScreen()));
+        STEPS.add(() -> mc.gui.setScreen(new com.skycraft.quest.client.JournalScreen()));
         STEPS.add(() -> ClientAutotest.captureAndSave(mc, "pl_" + PLACE + "_journal"));
-        STEPS.add(() -> mc.setScreen(new com.skycraft.world.client.MapScreen()));
+        STEPS.add(() -> mc.gui.setScreen(new com.skycraft.world.client.MapScreen()));
         STEPS.add(() -> ClientAutotest.captureAndSave(mc, "pl_" + PLACE + "_map"));
         STEPS.add(() -> {
             Skycraft.LOGGER.info("=== Place lore autotest done ===");

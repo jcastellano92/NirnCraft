@@ -66,7 +66,7 @@ public final class NaturalRooms {
         if (s != null) p.set(s[0], room.floor, s[1], state);
     }
 
-    static void loot(Painter p, Room room, int salt, BlockState container, net.minecraft.resources.ResourceLocation table) {
+    static void loot(Painter p, Room room, int salt, BlockState container, net.minecraft.resources.Identifier table) {
         int[] s = edgeSpot(p, room, salt);
         // a cramped cavern still gets its chest: beside the middle, which is always carved
         if (s == null) s = new int[]{room.cx + 2 * (p.chance(room.cx, salt, room.cz, 105, 2) ? 1 : -1), room.cz + 2};
@@ -163,9 +163,9 @@ public final class NaturalRooms {
         int x2 = s[0] + (alongX ? 1 : 0), z2 = s[1] + (alongX ? 0 : 1);
         if (room.onLane(x2, z2) || !inside(p, room, x2, z2, 0.8)) return null;
         BlockState c = switch (p.roll(s[0], salt, s[1], 106, 3)) {
-            case 0 -> Blocks.BROWN_CARPET.defaultBlockState();
-            case 1 -> Blocks.WHITE_CARPET.defaultBlockState();
-            default -> Blocks.LIGHT_GRAY_CARPET.defaultBlockState();
+            case 0 -> com.skycraft.worldgen.VanillaBlocks.BROWN_CARPET.defaultBlockState();
+            case 1 -> com.skycraft.worldgen.VanillaBlocks.WHITE_CARPET.defaultBlockState();
+            default -> com.skycraft.worldgen.VanillaBlocks.LIGHT_GRAY_CARPET.defaultBlockState();
         };
         p.set(s[0], room.floor, s[1], c);
         p.set(x2, room.floor, z2, c);
@@ -229,9 +229,9 @@ public final class NaturalRooms {
     static void tunnelLight(Painter p, Theme t, int x, int f, int z, Direction latPlus, int flavor) {
         int lx = x + latPlus.getStepX(), lz = z + latPlus.getStepZ();
         switch (t) {
-            case VAMPIRE_LAIR -> p.set(lx, f, lz, Deco.candle(Blocks.RED_CANDLE, 2, true));
+            case VAMPIRE_LAIR -> p.set(lx, f, lz, Deco.candle(com.skycraft.worldgen.VanillaBlocks.RED_CANDLE, 2, true));
             case NECROMANCER_LAIR -> p.set(lx, f, lz, Blocks.SOUL_TORCH.defaultBlockState());
-            case HAGRAVEN_LAIR -> p.set(lx, f, lz, Deco.candle(Blocks.BROWN_CANDLE, 1, true));
+            case HAGRAVEN_LAIR -> p.set(lx, f, lz, Deco.candle(com.skycraft.worldgen.VanillaBlocks.BROWN_CANDLE, 1, true));
             case CAVE -> {
                 int roster = CaveRoster.of(flavor);
                 if (CaveRoster.inhabited(roster)) p.set(lx, f, lz, Blocks.TORCH.defaultBlockState());
@@ -260,7 +260,7 @@ public final class NaturalRooms {
             loot(p, room, 2, Deco.chest(Direction.SOUTH), Deco.LOOT_BOSS);
             loot(p, room, 3, Deco.chest(Direction.NORTH), Deco.LOOT_COMMON);
             put(p, room, 4, Deco.campfire(false, true));
-            for (int i = 0; i < 4; i++) put(p, room, 10 + i, Blocks.BROWN_CARPET.defaultBlockState());
+            for (int i = 0; i < 4; i++) put(p, room, 10 + i, com.skycraft.worldgen.VanillaBlocks.BROWN_CARPET.defaultBlockState());
             mob(p, room, 5, Mobs.bandit(), null);
             mob(p, room, 6, Mobs.bandit(), null);
             lampPost(p, room, 7, false);
@@ -338,7 +338,7 @@ public final class NaturalRooms {
                     int x = pool[0] + dx, z = pool[1] + dz;
                     if (Math.abs(dx) + Math.abs(dz) == 2 && p.chance(x, 0, z, 61, 2)) continue;
                     if (room.onLane(x, z) || !inside(p, room, x, z, 0.8)) continue;
-                    p.set(x, room.floor - 1, z, dx == 0 && dz == 0 ? Blocks.REDSTONE_BLOCK.defaultBlockState() : Blocks.RED_CONCRETE.defaultBlockState());
+                    p.set(x, room.floor - 1, z, dx == 0 && dz == 0 ? Blocks.REDSTONE_BLOCK.defaultBlockState() : com.skycraft.worldgen.VanillaBlocks.RED_CONCRETE.defaultBlockState());
                 }
             }
         }
@@ -353,9 +353,9 @@ public final class NaturalRooms {
             BlockState box = Deco.pillar(Blocks.STRIPPED_DARK_OAK_LOG, alongX ? Direction.Axis.X : Direction.Axis.Z);
             p.set(s[0], room.floor, s[1], box);
             p.set(x2, room.floor, z2, box);
-            p.set(s[0], room.floor + 1, s[1], Deco.candle(Blocks.RED_CANDLE, 1, true));
+            p.set(s[0], room.floor + 1, s[1], Deco.candle(com.skycraft.worldgen.VanillaBlocks.RED_CANDLE, 1, true));
         }
-        for (int i = 0; i < 3; i++) put(p, room, 70 + i, Deco.candle(Blocks.RED_CANDLE, 2 + i % 3, true));
+        for (int i = 0; i < 3; i++) put(p, room, 70 + i, Deco.candle(com.skycraft.worldgen.VanillaBlocks.RED_CANDLE, 2 + i % 3, true));
         putEdge(p, room, 74, Deco.skull(Blocks.SKELETON_SKULL, 0));
         if (room.boss()) {
             int[] s = edgeSpot(p, room, 75);
@@ -390,17 +390,17 @@ public final class NaturalRooms {
             p.set(a[0], room.floor + 1, a[1], Blocks.AMETHYST_CLUSTER.defaultBlockState().setValue(AmethystClusterBlock.FACING, Direction.UP));
             for (Direction d : Direction.Plane.HORIZONTAL) {
                 int x = a[0] + d.getStepX(), z = a[1] + d.getStepZ();
-                if (!room.onLane(x, z) && inside(p, room, x, z, 0.85)) p.set(x, room.floor, z, Deco.candle(Blocks.PURPLE_CANDLE, 1 + Math.floorMod(x + z, 3), true));
+                if (!room.onLane(x, z) && inside(p, room, x, z, 0.85)) p.set(x, room.floor, z, Deco.candle(com.skycraft.worldgen.VanillaBlocks.PURPLE_CANDLE, 1 + Math.floorMod(x + z, 3), true));
             }
         }
         putEdge(p, room, 92, Deco.skull(Blocks.SKELETON_SKULL, 4));
         putEdge(p, room, 93, Deco.pillar(Blocks.BONE_BLOCK, Direction.Axis.Y));
-        put(p, room, 94, Deco.candle(Blocks.BLACK_CANDLE, 3, true));
+        put(p, room, 94, Deco.candle(com.skycraft.worldgen.VanillaBlocks.BLACK_CANDLE, 3, true));
         if (room.boss()) {
             int[] s = edgeSpot(p, room, 95);
             if (s != null) {
                 p.set(s[0], room.floor, s[1], Blocks.ENCHANTING_TABLE.defaultBlockState());
-                p.set(s[0], room.floor + 1, s[1], Deco.candle(Blocks.PURPLE_CANDLE, 4, true));
+                p.set(s[0], room.floor + 1, s[1], Deco.candle(com.skycraft.worldgen.VanillaBlocks.PURPLE_CANDLE, 4, true));
             }
             loot(p, room, 96, Deco.chest(Direction.SOUTH), Deco.LOOT_BOSS);
             loot(p, room, 97, Deco.barrel(Direction.UP), Deco.LOOT_ALCHEMY);
@@ -431,14 +431,14 @@ public final class NaturalRooms {
                     int roll = p.roll(x, i, z, 121, 4);
                     p.set(x, room.floor, z, roll == 0 ? Deco.pillar(Blocks.HAY_BLOCK, Direction.Axis.Y)
                             : roll == 1 ? Blocks.MANGROVE_ROOTS.defaultBlockState()
-                            : roll == 2 ? Blocks.WHITE_CARPET.defaultBlockState() : Blocks.MUD.defaultBlockState());
+                            : roll == 2 ? com.skycraft.worldgen.VanillaBlocks.WHITE_CARPET.defaultBlockState() : Blocks.MUD.defaultBlockState());
                 }
             }
         }
         putEdge(p, room, 122, Blocks.CAULDRON.defaultBlockState());
         putEdge(p, room, 123, Blocks.BREWING_STAND.defaultBlockState());
         put(p, room, 124, Deco.pillar(Blocks.BONE_BLOCK, Direction.Axis.Z));
-        put(p, room, 125, Deco.candle(Blocks.BROWN_CANDLE, 3, true));
+        put(p, room, 125, Deco.candle(com.skycraft.worldgen.VanillaBlocks.BROWN_CANDLE, 3, true));
         lampPost(p, room, 126, false);
         if (room.boss()) {
             loot(p, room, 127, Deco.chest(Direction.SOUTH), Deco.LOOT_BOSS);

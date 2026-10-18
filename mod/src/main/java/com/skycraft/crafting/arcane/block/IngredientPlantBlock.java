@@ -49,11 +49,11 @@ public class IngredientPlantBlock extends FlowerBlock {
     private final boolean ceilingAllowed;
     private final Supplier<Item> ingredientSupplier;
 
-    public IngredientPlantBlock(MobEffect stewEffect, int stewDuration, boolean glowing, Properties props) {
+    public IngredientPlantBlock(net.minecraft.core.Holder<MobEffect> stewEffect, int stewDuration, boolean glowing, Properties props) {
         this(stewEffect, stewDuration, glowing, false, null, props);
     }
 
-    public IngredientPlantBlock(MobEffect stewEffect, int stewDuration, boolean glowing, boolean ceilingAllowed,
+    public IngredientPlantBlock(net.minecraft.core.Holder<MobEffect> stewEffect, int stewDuration, boolean glowing, boolean ceilingAllowed,
                                 Supplier<Item> ingredientSupplier, Properties props) {
         super(stewEffect, stewDuration, props);
         this.glowing = glowing;
@@ -166,13 +166,13 @@ public class IngredientPlantBlock extends FlowerBlock {
 
     @Override
     @SuppressWarnings("deprecation")
-    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+    public InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
         if (state.getValue(HARVESTED)) return InteractionResult.PASS;
         // The survival module's harvesting does the protection checks, Green Thumb and player-placed plants
         if (player instanceof ServerPlayer sp && Harvesting.harvest(sp, pos)) {
             level.gameEvent(player, GameEvent.BLOCK_CHANGE, pos);
         }
-        return InteractionResult.sidedSuccess(level.isClientSide);
+        return com.skycraft.platform.Interactions.sidedSuccess(level.isClientSide());
     }
 
     @Override

@@ -15,8 +15,8 @@ import com.skycraft.inventory.InventoryPackets;
 import com.skycraft.inventory.ItemWeights;
 import com.skycraft.inventory.ValueDensity;
 import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.util.Util;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.player.LocalPlayer;
@@ -31,12 +31,11 @@ import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.food.FoodProperties;
-import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ShieldItem;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
-import org.lwjgl.glfw.GLFW;
+import com.mojang.blaze3d.platform.InputConstants;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -248,7 +247,7 @@ public class SkyrimInventoryScreen extends Screen {
     private void openVanilla() {
         if (minecraft == null || minecraft.player == null) return;
         InventoryClientEvents.allowVanillaOnce();
-        minecraft.setScreen(new InventoryScreen(minecraft.player));
+        minecraft.gui.setScreen(new InventoryScreen(minecraft.player));
     }
 
     @Override
@@ -280,7 +279,7 @@ public class SkyrimInventoryScreen extends Screen {
     // ------------------------------------------------------------------ rendering
 
     @Override
-    public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+    public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
         if (inspectMode && selectedEntry != null) {
             renderInspectOverlay(g, mouseX, mouseY);
             return;
@@ -293,14 +292,14 @@ public class SkyrimInventoryScreen extends Screen {
         drawList(g, mouseX, mouseY);
         drawDetails(g, mouseX, mouseY);
         drawBottomBar(g, mouseX, mouseY);
-        super.render(g, mouseX, mouseY, partialTick);
+        super.extractRenderState(g, mouseX, mouseY, partialTick);
 
         if (hoverPreview && selectedEntry != null) {
-            g.renderTooltip(font, selectedEntry.icon, mouseX, mouseY);
+            g.setTooltipForNextFrame(font, selectedEntry.icon, mouseX, mouseY);
         } else if (hoverLines != null) {
-            g.renderComponentTooltip(font, hoverLines, mouseX, mouseY);
+            g.setComponentTooltipForNextFrame(font, hoverLines, mouseX, mouseY);
         } else if (hoverText != null) {
-            g.renderTooltip(font, hoverText, mouseX, mouseY);
+            g.setTooltipForNextFrame(font, hoverText, mouseX, mouseY);
         }
     }
 
@@ -331,7 +330,7 @@ public class SkyrimInventoryScreen extends Screen {
         return (v >= 0 ? "+" : "") + ItemWeights.format(v);
     }
 
-    private void renderInspectOverlay(GuiGraphics g, int mx, int my) {
+    private void renderInspectOverlay(GuiGraphicsExtractor g, int mx, int my) {
         g.fill(0, 0, width, height, 0xEE050505);
         long now = Util.getMillis();
         SkyUi.smoke(g, width, height, (now % 1_000_000L) / 1000f, 0.8f);
@@ -355,14 +354,14 @@ public class SkyrimInventoryScreen extends Screen {
         String title = SkyUi.caps(Component.literal(selectedEntry.name));
         SkyUi.scaledCentered(g, font, title, cx, 16, 1.3f, SkyUi.BRIGHT, true);
         String kind = kindLine(selectedEntry).getString();
-        g.drawString(font, kind, cx - font.width(kind) / 2, 32, SkyUi.DIM, false);
+        g.text(font, kind, cx - font.width(kind) / 2, 32, SkyUi.DIM, false);
         SkyUi.ornament(g, cx, 46, Math.min(100, width / 4), 0xC0C8BC9A);
 
         String hint = "[Drag] Rotate   [Scroll] Zoom   [X / Esc] Exit Inspect";
-        g.drawString(font, hint, cx - font.width(hint) / 2, height - 20, 0xB0A89F86, false);
+        g.text(font, hint, cx - font.width(hint) / 2, height - 20, 0xB0A89F86, false);
     }
 
-    private void drawCategories(GuiGraphics g, int mx, int my) {
+    private void drawCategories(GuiGraphicsExtractor g, int mx, int my) {
         SkyUi.panel(g, catX, top, catX + catW, bottom);
         hoverCat = -1;
         int y = top + 5;
@@ -379,11 +378,11 @@ public class SkyrimInventoryScreen extends Screen {
             }
             int color = sel ? SkyUi.BRIGHT : n == 0 ? 0xFF5E5A52 : hov ? SkyUi.TEXT : 0xFFB8B0A0;
             Component name = c.displayName();
-            g.drawString(font, name, catX + 8, y + 4, color, false);
+            g.text(font, name, catX + 8, y + 4, color, false);
             if (c == InvCategory.FAVORITES) SkyUi.star(g, catX + 8 + font.width(name) + 4, y + 5, sel ? SkyUi.GOLD : SkyUi.TRIM);
             if (n > 0) {
                 String count = String.valueOf(n);
-                g.drawString(font, count, catX + catW - 6 - font.width(count), y + 4, sel ? SkyUi.HEADER : 0xFF6E6A60, false);
+                g.text(font, count, catX + catW - 6 - font.width(count), y + 4, sel ? SkyUi.HEADER : 0xFF6E6A60, false);
             }
             y += CAT_ROW;
             if (c == InvCategory.ALL) {
@@ -404,13 +403,13 @@ public class SkyrimInventoryScreen extends Screen {
             String key = "C";
             int total = font.width(label) + 5 + font.width(key);
             int lx = (bx1 + bx2) / 2 - total / 2;
-            g.drawString(font, label, lx, by + 3, hoverCrafting ? SkyUi.BRIGHT : SkyUi.TEXT, false);
-            g.drawString(font, key, lx + font.width(label) + 5, by + 3, SkyUi.DIM, false);
+            g.text(font, label, lx, by + 3, hoverCrafting ? SkyUi.BRIGHT : SkyUi.TEXT, false);
+            g.text(font, key, lx + font.width(label) + 5, by + 3, SkyUi.DIM, false);
             if (hoverCrafting) hoverText = Component.translatable("inventory.skycraft.crafting.tooltip");
         }
     }
 
-    private void drawList(GuiGraphics g, int mx, int my) {
+    private void drawList(GuiGraphicsExtractor g, int mx, int my) {
         SkyUi.panel(g, listX, top, listX + listW, bottom);
         // Columns are measured from their header and from the widest value they can show (4 digits), so nothing
         // overflows at any GUI scale. V/W (gold per weight) is the right-most; it gives way to the name when the list
@@ -454,7 +453,7 @@ public class SkyrimInventoryScreen extends Screen {
             if (hov) hoverSort = i;
             if (hov && i == SORT_VW) vwTip = Component.translatable("inventory.skycraft.column.vw.tooltip");
             boolean active = sortMode == i;
-            g.drawString(font, hs[i], hx[i], hy, active ? SkyUi.LINE : hov ? SkyUi.TEXT : SkyUi.HEADER, false);
+            g.text(font, hs[i], hx[i], hy, active ? SkyUi.LINE : hov ? SkyUi.TEXT : SkyUi.HEADER, false);
             if (active) SkyUi.triangle(g, hx[i] - 5, hy + 2, !sortDescending, SkyUi.LINE);
         }
         if (vwTip != null) hoverText = vwTip;
@@ -463,7 +462,7 @@ public class SkyrimInventoryScreen extends Screen {
         hoverRow = -1;
         if (shown.isEmpty()) {
             Component empty = Component.translatable("inventory.skycraft.empty");
-            g.drawCenteredString(font, empty, listX + listW / 2, listTop + 10, SkyUi.DIM);
+            g.centeredText(font, empty, listX + listW / 2, listTop + 10, SkyUi.DIM);
             return;
         }
         int rows = visibleRows();
@@ -487,35 +486,35 @@ public class SkyrimInventoryScreen extends Screen {
             if (e.equip == InvEntry.RIGHT || e.equip == InvEntry.WORN) SkyUi.diamond(g, listX + 7, my0, 2, SkyUi.GOLD);
             else if (e.equip == InvEntry.LEFT) SkyUi.diamondOutline(g, listX + 7, my0, 2, SkyUi.LEFT_HAND);
 
-            g.renderItem(e.icon, listX + 12, y + 1);
-            g.renderItemDecorations(font, e.icon, listX + 12, y + 1);
+            g.item(e.icon, listX + 12, y + 1);
+            g.itemDecorations(font, e.icon, listX + 12, y + 1);
 
             String badge = e.equip == InvEntry.RIGHT ? " [R]" : e.equip == InvEntry.LEFT ? " [L]" : e.equip == InvEntry.WORN ? " [W]" : "";
             String count = e.count() > 1 ? " (" + e.count() + ")" : "";
             int room = nameEnd - nameX - font.width(count) - font.width(badge) - (e.favorite ? 9 : 0);
             String name = SkyUi.ellipsize(font, e.name, Math.max(12, room));
             int nameColor = e.stolen ? SkyUi.STOLEN : sel ? SkyUi.BRIGHT : SkyUi.TEXT;
-            g.drawString(font, name, nameX, y + 5, nameColor, false);
+            g.text(font, name, nameX, y + 5, nameColor, false);
             int nx = nameX + font.width(name);
             if (!badge.isEmpty()) {
                 int bCol = e.equip == InvEntry.LEFT ? SkyUi.LEFT_HAND : SkyUi.GOLD;
-                g.drawString(font, badge, nx, y + 5, bCol, false);
+                g.text(font, badge, nx, y + 5, bCol, false);
                 nx += font.width(badge);
             }
             if (!count.isEmpty()) {
-                g.drawString(font, count, nx, y + 5, SkyUi.DIM, false);
+                g.text(font, count, nx, y + 5, SkyUi.DIM, false);
                 nx += font.width(count);
             }
             if (e.favorite) SkyUi.star(g, nx + 3, y + 6, SkyUi.GOLD);
 
             String w = ItemWeights.format(e.weight);
-            g.drawString(font, w, wgtRight - font.width(w), y + 5, sel ? SkyUi.TEXT : 0xFFB0A898, false);
+            g.text(font, w, wgtRight - font.width(w), y + 5, sel ? SkyUi.TEXT : 0xFFB0A898, false);
             String v = String.valueOf(e.value);
-            g.drawString(font, v, valRight - font.width(v), y + 5, sel ? SkyUi.GOLD : 0xFFC0A050, false);
+            g.text(font, v, valRight - font.width(v), y + 5, sel ? SkyUi.GOLD : 0xFFC0A050, false);
             if (showVw) {
                 String r = ValueDensity.format(e.valuePerWeight);
                 int c = e.valuePerWeight < 0f ? SkyUi.DIM : sel ? 0xFFB8E0A0 : 0xFF98B888;
-                g.drawString(font, r, vwRight - font.width(r), y + 5, c, false);
+                g.text(font, r, vwRight - font.width(r), y + 5, c, false);
             }
         }
 
@@ -530,7 +529,7 @@ public class SkyrimInventoryScreen extends Screen {
         }
     }
 
-    private void drawDetails(GuiGraphics g, int mx, int my) {
+    private void drawDetails(GuiGraphicsExtractor g, int mx, int my) {
         SkyUi.panel(g, detX, top, detX + detW, bottom);
         actions.clear();
         hoverAction = -1;
@@ -556,14 +555,15 @@ public class SkyrimInventoryScreen extends Screen {
         int textW = detW - 12;
 
         // name and kind
-        Integer rarity = stack.getRarity().color.getColor();
+        var rarityColor=net.minecraft.network.chat.TextColor.fromLegacyFormat(stack.getRarity().color());
+        Integer rarity=rarityColor==null?null:rarityColor.getValue();
         int nameColor = e.stolen ? SkyUi.STOLEN : rarity != null && stack.getRarity() != net.minecraft.world.item.Rarity.COMMON
                 ? 0xFF000000 | rarity : SkyUi.BRIGHT;
         String name = SkyUi.ellipsize(font, e.name, textW);
-        g.drawString(font, name, cx - font.width(name) / 2, y, nameColor, false);
+        g.text(font, name, cx - font.width(name) / 2, y, nameColor, false);
         y += 11;
         String kind = SkyUi.ellipsize(font, kindLine(e).getString(), textW);
-        g.drawString(font, kind, cx - font.width(kind) / 2, y, SkyUi.DIM, false);
+        g.text(font, kind, cx - font.width(kind) / 2, y, SkyUi.DIM, false);
         y += 11;
         SkyUi.divider(g, cx, y + 1, detW / 2 - 8);
         y += 6;
@@ -617,9 +617,9 @@ public class SkyrimInventoryScreen extends Screen {
         for (int i = 0; i < labels.size(); i++) {
             int ccx = detX + 4 + cellW * i + cellW / 2;
             String l = SkyUi.ellipsize(font, SkyUi.caps(labels.get(i)), cellW - 2);
-            g.drawString(font, l, ccx - font.width(l) / 2, y + 2, SkyUi.HEADER, false);
+            g.text(font, l, ccx - font.width(l) / 2, y + 2, SkyUi.HEADER, false);
             String v = values.get(i);
-            g.drawString(font, v, ccx - font.width(v) / 2, y + 13, colorsList.get(i), false);
+            g.text(font, v, ccx - font.width(v) / 2, y + 13, colorsList.get(i), false);
             if (i > 0) g.fill(detX + 4 + cellW * i, y + 2, detX + 5 + cellW * i, y + 21, 0x40C8BC9A);
         }
         y += 25;
@@ -648,10 +648,11 @@ public class SkyrimInventoryScreen extends Screen {
             String key = e.equip == InvEntry.RIGHT ? "right" : e.equip == InvEntry.LEFT ? "left" : "worn";
             addLine(lines, colors, Component.translatable("inventory.skycraft.equipped." + key), SkyUi.GOLD, textW);
         }
-        if (stack.getTag() != null && stack.getTag().contains(com.skycraft.crafting.arcane.ArcaneEvents.WEAPON_POISON, 10)) {
-            CompoundTag pTag = stack.getTag().getCompound(com.skycraft.crafting.arcane.ArcaneEvents.WEAPON_POISON);
-            int hits = pTag.getInt(com.skycraft.crafting.arcane.ArcaneEvents.POISON_HITS);
-            int maxHits = Math.max(hits, pTag.getInt(com.skycraft.crafting.arcane.ArcaneEvents.POISON_MAX_HITS));
+        if (com.skycraft.inventory.ItemData.containsCustom(stack, com.skycraft.crafting.arcane.ArcaneEvents.WEAPON_POISON)) {
+            CompoundTag custom = com.skycraft.inventory.ItemData.custom(stack);
+            CompoundTag pTag = custom.getCompoundOrEmpty(com.skycraft.crafting.arcane.ArcaneEvents.WEAPON_POISON);
+            int hits = pTag.getIntOr(com.skycraft.crafting.arcane.ArcaneEvents.POISON_HITS, 0);
+            int maxHits = Math.max(hits, pTag.getIntOr(com.skycraft.crafting.arcane.ArcaneEvents.POISON_MAX_HITS, 0));
             String pName = com.skycraft.crafting.arcane.ArcaneEvents.poisonDisplayName(pTag);
             addLine(lines, colors, Component.translatable("inventory.skycraft.poisoned", pName, hits, maxHits), 0xFF88D870, textW);
         }
@@ -674,7 +675,7 @@ public class SkyrimInventoryScreen extends Screen {
         detMaxScroll = Math.max(0, lines.size() - visible);
         detScroll = Mth.clamp(detScroll, 0, detMaxScroll);
         for (int i = detScroll; i < lines.size() && i < detScroll + visible; i++) {
-            g.drawString(font, lines.get(i), detX + 6, y, colors.get(i), false);
+            g.text(font, lines.get(i), detX + 6, y, colors.get(i), false);
             y += 10;
         }
         if (detMaxScroll > 0) {
@@ -695,8 +696,8 @@ public class SkyrimInventoryScreen extends Screen {
             String label = SkyUi.ellipsize(font, b.label().getString(), b.w() - 6 - keyW);
             int total = font.width(label) + keyW;
             int lx = b.x() + (b.w() - total) / 2;
-            if (keyW > 0) g.drawString(font, b.key(), lx, b.y() + 3, SkyUi.GOLD, false);
-            g.drawString(font, label, lx + keyW, b.y() + 3, hov ? SkyUi.BRIGHT : SkyUi.TEXT, false);
+            if (keyW > 0) g.text(font, b.key(), lx, b.y() + 3, SkyUi.GOLD, false);
+            g.text(font, label, lx + keyW, b.y() + 3, hov ? SkyUi.BRIGHT : SkyUi.TEXT, false);
         }
     }
 
@@ -726,9 +727,9 @@ public class SkyrimInventoryScreen extends Screen {
             keys.add("RMB");
             runs.add(this::secondary);
         }
-        labels.add(Component.translatable(e.count() > 1 && !hasShiftDown() ? "inventory.skycraft.action.drop_one" : "inventory.skycraft.action.drop"));
+        labels.add(Component.translatable(e.count() > 1 && !com.skycraft.client.screen.UiInput.shiftDown() ? "inventory.skycraft.action.drop_one" : "inventory.skycraft.action.drop"));
         keys.add("Q");
-        runs.add(() -> drop(hasShiftDown()));
+        runs.add(() -> drop(com.skycraft.client.screen.UiInput.shiftDown()));
         labels.add(Component.translatable(e.favorite ? "inventory.skycraft.action.unfavorite" : "inventory.skycraft.action.favorite"));
         keys.add("F");
         runs.add(this::favorite);
@@ -751,7 +752,7 @@ public class SkyrimInventoryScreen extends Screen {
         }
     }
 
-    private void drawBottomBar(GuiGraphics g, int mx, int my) {
+    private void drawBottomBar(GuiGraphicsExtractor g, int mx, int my) {
         LocalPlayer player = minecraft.player;
         if (player == null) return;
         int by = height - BOTTOM_BAR;
@@ -775,9 +776,9 @@ public class SkyrimInventoryScreen extends Screen {
         for (int i = 0; i < 3; i++) statsW += font.width(labels[i]) + 4 + font.width(values[i]) + (i < 2 ? 14 : 0);
         int sx = x0 + contentW - statsW;
         for (int i = 0; i < 3; i++) {
-            g.drawString(font, labels[i], sx, ry, SkyUi.HEADER, false);
+            g.text(font, labels[i], sx, ry, SkyUi.HEADER, false);
             sx += font.width(labels[i]) + 4;
-            g.drawString(font, values[i], sx, ry, colors[i], false);
+            g.text(font, values[i], sx, ry, colors[i], false);
             if (i == 1 && SkyUi.inside(mx, my, sx - font.width(labels[i]) - 4, ry - 2, sx + font.width(values[i]), ry + 10)) {
                 hoverText = Component.translatable(over ? "inventory.skycraft.overencumbered" : "inventory.skycraft.carry_tooltip");
                 if (carryOn) hoverLines = capacityLines(player, cur, cap);
@@ -814,7 +815,7 @@ public class SkyrimInventoryScreen extends Screen {
     }
 
     /** Key hints ("E Use  Q Drop ..."), keeping the most important ones when the screen is narrow. */
-    private void drawHints(GuiGraphics g, int y) {
+    private void drawHints(GuiGraphicsExtractor g, int y) {
         String[] keys = {"E", "RMB", "Q", "Shift+Q", "F", "R", "X", "Tab"};
         String[] names = {"use", "left", "drop", "drop_all", "favorite", "sort", "inspect", "close"};
         int[] priority = {0, 5, 1, 7, 2, 6, 4, 3};
@@ -844,15 +845,15 @@ public class SkyrimInventoryScreen extends Screen {
             if (!shownHint[i]) continue;
             if (!first) x += 12;
             first = false;
-            g.drawString(font, keys[i], x, y, 0xFFC8A858, false);
+            g.text(font, keys[i], x, y, 0xFFC8A858, false);
             x += font.width(keys[i]) + 3;
-            g.drawString(font, labels[i], x, y, 0xFF8A857A, false);
+            g.text(font, labels[i], x, y, 0xFF8A857A, false);
             x += font.width(labels[i]);
         }
     }
 
     /** A faint round glow behind the item model. */
-    private static void glow(GuiGraphics g, int cx, int cy, int r) {
+    private static void glow(GuiGraphicsExtractor g, int cx, int cy, int r) {
         for (int dy = -r; dy <= r; dy += 2) {
             int half = (int) Math.sqrt((double) r * r - (double) dy * dy);
             float t = 1f - Math.abs(dy) / (float) r;
@@ -863,7 +864,7 @@ public class SkyrimInventoryScreen extends Screen {
     }
 
     /** The selected item, large and gently swinging (Skyrim turns the item model in the inventory). */
-    private static void renderPreview(GuiGraphics g, ItemStack stack, int cx, int cy, float scale) {
+    private static void renderPreview(GuiGraphicsExtractor g, ItemStack stack, int cx, int cy, float scale) {
         float t = (Util.getMillis() % 1_000_000L) / 1000f;
         float angle = (float) Math.sin(t * 0.8) * 30f;
         // a solid 3D model (the item-frame display is one block wide; ~0.9 of the old 16 px icon size)
@@ -879,41 +880,18 @@ public class SkyrimInventoryScreen extends Screen {
     }
 
     private static int quality(ItemStack stack) {
-        CompoundTag tag = stack.getTag();
-        return tag == null ? 0 : Mth.clamp(tag.getInt("skycraft_quality"), 0, 6);
+        CompoundTag tag = com.skycraft.inventory.ItemData.custom(stack);
+        return tag == null ? 0 : Mth.clamp(tag.getIntOr("skycraft_quality", 0), 0, 6);
     }
 
     /** Attack damage in the main hand like the vanilla tooltip (1 + bonuses), including tempering. 0 if no bonus. */
     private static double damage(ItemStack stack) {
-        try {
-            Multimap<Attribute, AttributeModifier> mods = stack.getAttributeModifiers(EquipmentSlot.MAINHAND);
-            double sum = 0;
-            boolean any = false;
-            for (AttributeModifier m : mods.get(Attributes.ATTACK_DAMAGE)) {
-                if (m.getOperation() == AttributeModifier.Operation.ADDITION) {
-                    sum += m.getAmount();
-                    any = true;
-                }
-            }
-            return any ? 1 + sum : 0;
-        } catch (Exception ex) {
-            return 0;
-        }
+        return SkyrimContainerScreen.damage(stack);
     }
 
-    /** Armor points in the item's own armor slot (including tempering). */
+    /** Armor points in the item's own armor slot, including tempering. */
     private static double armor(ItemStack stack) {
-        EquipmentSlot slot = InventoryActions.equipSlotFor(stack);
-        if (slot == null || slot.getType() != EquipmentSlot.Type.ARMOR) return 0;
-        try {
-            double sum = 0;
-            for (AttributeModifier m : stack.getAttributeModifiers(slot).get(Attributes.ARMOR)) {
-                if (m.getOperation() == AttributeModifier.Operation.ADDITION) sum += m.getAmount();
-            }
-            return sum;
-        } catch (Exception ex) {
-            return 0;
-        }
+        return com.skycraft.inventory.EquipmentData.defense(stack);
     }
 
     /** "Sword, One-Handed", "Heavy Armor", "Potion"... */
@@ -926,7 +904,7 @@ public class SkyrimInventoryScreen extends Screen {
                 return wc.skill != null ? Component.translatable("inventory.skycraft.kind_skill", type, wc.skill.displayName()) : type;
             }
         }
-        if (stack.getItem() instanceof ArmorItem) {
+        if (com.skycraft.inventory.EquipmentData.isArmor(stack)) {
             return Component.translatable(ArmorClass.isHeavy(stack) ? "inventory.skycraft.heavy_armor" : "inventory.skycraft.light_armor");
         }
         if (stack.getItem() instanceof ShieldItem) return Component.translatable("inventory.skycraft.shield");
@@ -938,22 +916,24 @@ public class SkyrimInventoryScreen extends Screen {
         List<Component> out = new ArrayList<>();
         ItemStack stack = e.icon;
         if (e.category == InvCategory.WEAPONS || e.category == InvCategory.APPAREL) {
-            for (Map.Entry<Enchantment, Integer> en : EnchantmentHelper.getEnchantments(stack).entrySet()) {
-                out.add(en.getKey().getFullname(en.getValue()));
+            var enchantments = stack.getOrDefault(net.minecraft.core.component.DataComponents.ENCHANTMENTS,
+                    net.minecraft.world.item.enchantment.ItemEnchantments.EMPTY);
+            for (var enchantment : enchantments.entrySet()) {
+                out.add(net.minecraft.world.item.enchantment.Enchantment.getFullname(enchantment.getKey(), enchantment.getIntValue()));
             }
             return out;
         }
         if (minecraft == null) return out;
         // food effects (golden apples, raw chicken...): the vanilla tooltip doesn't list them
-        FoodProperties food = stack.getItem().getFoodProperties(stack, minecraft.player);
-        if (food != null) {
-            for (Pair<MobEffectInstance, Float> p : food.getEffects()) {
-                MobEffectInstance effect = p.getFirst();
-                if (effect == null) continue;
-                MutableComponent line = effectName(effect);
-                float chance = p.getSecond() == null ? 1f : p.getSecond();
-                if (chance < 1f) line.append(" (" + Math.round(chance * 100) + "%)");
-                out.add(line.withStyle(effect.getEffect().isBeneficial() ? ChatFormatting.BLUE : ChatFormatting.RED));
+        var consumable = stack.get(net.minecraft.core.component.DataComponents.CONSUMABLE);
+        if (consumable != null) {
+            for (var consumeEffect : consumable.onConsumeEffects()) {
+                if (!(consumeEffect instanceof net.minecraft.world.item.consume_effects.ApplyStatusEffectsConsumeEffect applied)) continue;
+                for (MobEffectInstance effect : applied.effects()) {
+                    MutableComponent line = effectName(effect);
+                    if (applied.probability() < 1f) line.append(" (" + Math.round(applied.probability() * 100) + "%)");
+                    out.add(line.withStyle(effect.getEffect().value().isBeneficial() ? ChatFormatting.BLUE : ChatFormatting.RED));
+                }
             }
         }
         List<Component> tip = Screen.getTooltipFromItem(minecraft, stack);
@@ -982,9 +962,9 @@ public class SkyrimInventoryScreen extends Screen {
 
     /** "Regeneration II (0:05)". */
     private static MutableComponent effectName(MobEffectInstance effect) {
-        MutableComponent c = effect.getEffect().getDisplayName().copy();
+        MutableComponent c = effect.getEffect().value().getDisplayName().copy();
         if (effect.getAmplifier() > 0) c.append(" ").append(Component.translatable("potion.potency." + effect.getAmplifier()));
-        if (!effect.getEffect().isInstantenous() && effect.getDuration() > 20) {
+        if (!effect.getEffect().value().isInstantaneous() && effect.getDuration() > 20) {
             int secs = effect.getDuration() / 20;
             c.append(String.format(Locale.ROOT, " (%d:%02d)", secs / 60, secs % 60));
         }
@@ -994,9 +974,10 @@ public class SkyrimInventoryScreen extends Screen {
     // ------------------------------------------------------------------ input
 
     @Override
-    public boolean keyPressed(int key, int scan, int mods) {
+    public boolean keyPressed(net.minecraft.client.input.KeyEvent event) {
+        int key = event.key(), scan = event.keycode(), mods = event.modifiers();
         if (inspectMode) {
-            if (key == GLFW.GLFW_KEY_ESCAPE || key == GLFW.GLFW_KEY_X || key == GLFW.GLFW_KEY_TAB) {
+            if (key == InputConstants.KEY_ESCAPE || key == InputConstants.KEY_X || key == InputConstants.KEY_TAB) {
                 inspectMode = false;
                 return true;
             }
@@ -1004,43 +985,43 @@ public class SkyrimInventoryScreen extends Screen {
         }
 
         switch (key) {
-            case GLFW.GLFW_KEY_W, GLFW.GLFW_KEY_UP -> {
+            case InputConstants.KEY_W, InputConstants.KEY_UP -> {
                 move(-1);
                 return true;
             }
-            case GLFW.GLFW_KEY_S, GLFW.GLFW_KEY_DOWN -> {
+            case InputConstants.KEY_S, InputConstants.KEY_DOWN -> {
                 move(1);
                 return true;
             }
-            case GLFW.GLFW_KEY_PAGE_UP -> {
+            case InputConstants.KEY_PAGEUP -> {
                 move(-visibleRows());
                 return true;
             }
-            case GLFW.GLFW_KEY_PAGE_DOWN -> {
+            case InputConstants.KEY_PAGEDOWN -> {
                 move(visibleRows());
                 return true;
             }
-            case GLFW.GLFW_KEY_HOME -> {
+            case InputConstants.KEY_HOME -> {
                 select(0);
                 return true;
             }
-            case GLFW.GLFW_KEY_END -> {
+            case InputConstants.KEY_END -> {
                 select(shown.size() - 1);
                 return true;
             }
-            case GLFW.GLFW_KEY_A, GLFW.GLFW_KEY_LEFT -> {
+            case InputConstants.KEY_A, InputConstants.KEY_LEFT -> {
                 cycleCategory(-1);
                 return true;
             }
-            case GLFW.GLFW_KEY_D, GLFW.GLFW_KEY_RIGHT -> {
+            case InputConstants.KEY_D, InputConstants.KEY_RIGHT -> {
                 cycleCategory(1);
                 return true;
             }
-            case GLFW.GLFW_KEY_E, GLFW.GLFW_KEY_ENTER, GLFW.GLFW_KEY_KP_ENTER -> {
+            case InputConstants.KEY_E, InputConstants.KEY_RETURN, InputConstants.KEY_NUMPADENTER -> {
                 primary();
                 return true;
             }
-            case GLFW.GLFW_KEY_X -> {
+            case InputConstants.KEY_X -> {
                 if (selectedEntry != null) {
                     inspectMode = true;
                     inspectRotX = 15f;
@@ -1049,58 +1030,60 @@ public class SkyrimInventoryScreen extends Screen {
                     return true;
                 }
             }
-            case GLFW.GLFW_KEY_Q -> {
-                drop(hasShiftDown());
+            case InputConstants.KEY_Q -> {
+                drop(com.skycraft.client.screen.UiInput.shiftDown());
                 return true;
             }
-            case GLFW.GLFW_KEY_F -> {
+            case InputConstants.KEY_F -> {
                 favorite();
                 return true;
             }
-            case GLFW.GLFW_KEY_G -> {
+            case InputConstants.KEY_G -> {
                 if (selectedEntry != null && com.skycraft.crafting.arcane.ArcaneEvents.isApplicablePoison(selectedEntry.stack)) {
                     ClientInventoryHandlers.applyPoison(selectedEntry);
                     return true;
                 }
             }
-            case GLFW.GLFW_KEY_C -> {
+            case InputConstants.KEY_C -> {
                 openVanilla();
                 return true;
             }
-            case GLFW.GLFW_KEY_R -> {
+            case InputConstants.KEY_R -> {
                 setSort((sortMode + 1) % (vwVisible ? 4 : 3));
                 return true;
             }
-            case GLFW.GLFW_KEY_TAB -> {
+            case InputConstants.KEY_TAB -> {
                 onClose();
                 return true;
             }
             default -> {
             }
         }
-        if (minecraft != null && minecraft.options.keyInventory.matches(key, scan)) {
+        if (minecraft != null && minecraft.options.keyInventory.matches(event)) {
             onClose();
             return true;
         }
-        return super.keyPressed(key, scan, mods);
+        return super.keyPressed(event);
     }
 
     @Override
-    public boolean mouseClicked(double mx, double my, int button) {
+    public boolean mouseClicked(net.minecraft.client.input.MouseButtonEvent event, boolean doubleClick) {
+        double mx = event.x(), my = event.y();
+        int button = com.skycraft.client.screen.UiInput.actionButton(event.button());
         if (inspectMode) {
-            if (button == GLFW.GLFW_MOUSE_BUTTON_RIGHT) {
+            if (button == 1) {
                 inspectMode = false;
                 return true;
             }
             return true;
         }
 
-        if (button == GLFW.GLFW_MOUSE_BUTTON_LEFT || button == GLFW.GLFW_MOUSE_BUTTON_RIGHT) {
-            if (hoverCrafting && button == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
+        if (button == 0 || button == 1) {
+            if (hoverCrafting && button == 0) {
                 openVanilla();
                 return true;
             }
-            if (hoverPreview && selectedEntry != null && button == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
+            if (hoverPreview && selectedEntry != null && button == 0) {
                 inspectMode = true;
                 inspectRotX = 15f;
                 inspectRotY = 0f;
@@ -1111,18 +1094,18 @@ public class SkyrimInventoryScreen extends Screen {
                 setCategory(InvCategory.VALUES[hoverCat]);
                 return true;
             }
-            if (hoverSort >= 0 && button == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
+            if (hoverSort >= 0 && button == 0) {
                 setSort(hoverSort);
                 return true;
             }
-            if (hoverAction >= 0 && hoverAction < actions.size() && button == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
+            if (hoverAction >= 0 && hoverAction < actions.size() && button == 0) {
                 actions.get(hoverAction).run().run();
                 return true;
             }
             if (hoverRow >= 0 && hoverRow < shown.size()) {
                 long now = Util.getMillis();
                 select(hoverRow);
-                if (button == GLFW.GLFW_MOUSE_BUTTON_RIGHT) {
+                if (button == 1) {
                     secondary();
                 } else {
                     primary();
@@ -1132,22 +1115,24 @@ public class SkyrimInventoryScreen extends Screen {
                 return true;
             }
         }
-        return super.mouseClicked(mx, my, button);
+        return super.mouseClicked(event, doubleClick);
     }
 
     @Override
-    public boolean mouseDragged(double mx, double my, int button, double dragX, double dragY) {
+    public boolean mouseDragged(net.minecraft.client.input.MouseButtonEvent event, double dragX, double dragY) {
+        double mx = event.x(), my = event.y();
+        int button = com.skycraft.client.screen.UiInput.actionButton(event.button());
         if (inspectMode) {
             inspectRotY += (float) dragX * 1.5f;
             inspectRotX -= (float) dragY * 1.5f;
             inspectLastDrag = Util.getMillis();
             return true;
         }
-        return super.mouseDragged(mx, my, button, dragX, dragY);
+        return super.mouseDragged(event, dragX, dragY);
     }
 
     @Override
-    public boolean mouseScrolled(double mx, double my, double delta) {
+    public boolean mouseScrolled(double mx, double my, double horizontal, double delta) {
         if (inspectMode) {
             inspectZoom = Mth.clamp(inspectZoom + (float) delta * 0.15f, 0.5f, 3.0f);
             return true;

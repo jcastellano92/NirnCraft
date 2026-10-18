@@ -134,7 +134,7 @@ public final class Inv {
      * removed (less than {@code n} only when the player did not carry enough).
      */
     public static int take(Player player, Predicate<ItemStack> filter, int n) {
-        if (n <= 0 || player.level().isClientSide) return 0;
+        if (n <= 0 || player.level().isClientSide()) return 0;
         int left = n;
         Inventory inv = player.getInventory();
         for (int slot : carriedSlots(inv)) {
@@ -188,6 +188,6 @@ public final class Inv {
             if (!s.isEmpty() && filter.test(s)) return slot;
         }
         int idx = Pack.find(player, filter);
-        return idx < 0 ? -1 : Pack.materialize(player, idx, null, inv.selected);
+        return idx < 0 ? -1 : Pack.materialize(player, idx, null, inv.getSelectedSlot());
     }
 }

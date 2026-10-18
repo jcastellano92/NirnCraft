@@ -7,12 +7,12 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.animal.Salmon;
+import net.minecraft.world.entity.animal.fish.Salmon;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.util.List;
 
@@ -22,7 +22,7 @@ import java.util.List;
  * river runs out of fall (the spawning pools at the heads). Cheap on purpose: a nudge to fish near players every
  * half second, no new AI.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class RiverRun {
     private static final int YEAR = 96, RUN_FROM = 48, RUN_TO = 72;
     private static final int INTERVAL = 10;
@@ -32,15 +32,15 @@ public final class RiverRun {
 
     /** True during the run. */
     public static boolean running(ServerLevel level) {
-        long day = level.getDayTime() / 24000L;
+        long day = level.getDefaultClockTime() / 24000L;
         long d = Math.floorMod(day, (long) YEAR);
         return d >= RUN_FROM && d < RUN_TO;
     }
 
     @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer player)) return;
-        ServerLevel level = player.serverLevel();
+    public static void onPlayerTick(net.neoforged.neoforge.event.tick.PlayerTickEvent.Post event) {
+        if (!(event instanceof net.neoforged.neoforge.event.tick.PlayerTickEvent.Post) || !(event.getEntity() instanceof ServerPlayer player)) return;
+        ServerLevel level = player.level();
         if (level.dimension() != Level.OVERWORLD || (level.getGameTime() + player.getId()) % INTERVAL != 0) return;
         if (!running(level)) return;
         List<Salmon> fish = level.getEntitiesOfClass(Salmon.class, player.getBoundingBox().inflate(40), f -> f.isInWater());

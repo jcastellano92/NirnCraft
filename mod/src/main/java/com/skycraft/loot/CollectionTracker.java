@@ -16,37 +16,38 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 /**
  * Notices collectibles as they reach a character's inventory (a light scan once a second, plus every pick-up) and pays
  * out collection rewards: perk points, gold and reward items (Konahrik for the eight masks, the Crown of Barenziah for
  * the 24 stones). Skill book volumes count when read; all five volumes of a skill grant one more level of it.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class CollectionTracker {
     private CollectionTracker() {}
 
     @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer player)) return;
+    public static void onPlayerTick(net.neoforged.neoforge.event.tick.PlayerTickEvent.Post event) {
+        if (!(event instanceof net.neoforged.neoforge.event.tick.PlayerTickEvent.Post) || !(event.getEntity() instanceof ServerPlayer player)) return;
         if ((player.tickCount + player.getId()) % 20 != 0) return;
         scan(player);
         if ((player.tickCount + player.getId()) % 100 == 0) skillBooks(player);
     }
 
     @SubscribeEvent
-    public static void onPickup(PlayerEvent.ItemPickupEvent event) {
-        if (event.getEntity() instanceof ServerPlayer player) note(player, event.getStack());
+    public static void onPickup(net.neoforged.neoforge.event.entity.player.ItemEntityPickupEvent.Post event) {
+        if (event.getPlayer() instanceof ServerPlayer player) note(player, event.getOriginalStack());
     }
 
     /** Records every collectible carried (slots, off hand, overflow pack) and worn. */
     public static void scan(ServerPlayer player) {
         com.skycraft.inventory.Inv.forEach(player, s -> note(player, s));
-        for (ItemStack s : player.getArmorSlots()) {
+        for (var slot263 : new net.minecraft.world.entity.EquipmentSlot[]{net.minecraft.world.entity.EquipmentSlot.HEAD, net.minecraft.world.entity.EquipmentSlot.CHEST, net.minecraft.world.entity.EquipmentSlot.LEGS, net.minecraft.world.entity.EquipmentSlot.FEET}) {
+            ItemStack s = player.getItemBySlot(slot263);
             if (!s.isEmpty()) note(player, s);
         }
     }
@@ -57,7 +58,7 @@ public final class CollectionTracker {
         if (e == null) return;
         PlayerData data = SkyData.get(player);
         CompoundTag module = data.module(Collectibles.MODULE);
-        CompoundTag found = module.getCompound("found");
+        CompoundTag found = module.getCompoundOrEmpty("found");
         if (found.contains(e.key())) return;
         found.putLong(e.key(), player.level().getGameTime());
         module.put("found", found);
@@ -73,7 +74,7 @@ public final class CollectionTracker {
     private static void skillBooks(ServerPlayer player) {
         PlayerData data = SkyData.get(player);
         CompoundTag module = data.module(Collectibles.MODULE);
-        CompoundTag sets = module.getCompound("skill_sets");
+        CompoundTag sets = module.getCompoundOrEmpty("skill_sets");
         boolean changed = false;
         for (Skill skill : Skill.VALUES) {
             if (sets.contains(skill.id())) continue;
@@ -98,7 +99,7 @@ public final class CollectionTracker {
     /** Pays a completed collection's reward, once. */
     public static void complete(ServerPlayer player, PlayerData data, Collectibles.Collection c) {
         CompoundTag module = data.module(Collectibles.MODULE);
-        CompoundTag rewarded = module.getCompound("rewarded");
+        CompoundTag rewarded = module.getCompoundOrEmpty("rewarded");
         if (rewarded.contains(c.id)) return;
         rewarded.putLong(c.id, player.level().getGameTime());
         module.put("rewarded", rewarded);

@@ -41,11 +41,11 @@ public final class Palette {
     public BlockState planks = Blocks.SPRUCE_PLANKS.defaultBlockState();
     public BlockState slab = Blocks.SPRUCE_SLAB.defaultBlockState();
     public BlockState stairs = Blocks.SPRUCE_STAIRS.defaultBlockState();
-    public BlockState carpet = Blocks.BROWN_CARPET.defaultBlockState();
-    public BlockState carpet2 = Blocks.WHITE_CARPET.defaultBlockState();
+    public BlockState carpet = com.skycraft.worldgen.VanillaBlocks.BROWN_CARPET.defaultBlockState();
+    public BlockState carpet2 = com.skycraft.worldgen.VanillaBlocks.WHITE_CARPET.defaultBlockState();
     /** Banner/awning/accent colour block (wool or terracotta). */
-    public BlockState accent = Blocks.BLUE_WOOL.defaultBlockState();
-    public BlockState bed = Blocks.BROWN_BED.defaultBlockState();
+    public BlockState accent = com.skycraft.worldgen.VanillaBlocks.BLUE_WOOL.defaultBlockState();
+    public BlockState bed = com.skycraft.worldgen.VanillaBlocks.BROWN_BED.defaultBlockState();
     public BlockState hearth = Blocks.CAMPFIRE.defaultBlockState();
 
     // ---- town

@@ -8,7 +8,7 @@ import com.skycraft.tamriel.Places;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.StructureTags;
 import net.minecraft.tags.TagKey;
@@ -25,7 +25,7 @@ import java.util.Set;
 /** Finding places for quests: villages, dungeons and random wilderness spots. Never loads chunks for spots. */
 public final class Locate {
     /** Dungeons for tome retrievals and Draugr bounties (vanilla structures + optional modded ones). */
-    public static final TagKey<Structure> DUNGEONS = TagKey.create(Registries.STRUCTURE, new ResourceLocation(Skycraft.MODID, "dungeons"));
+    public static final TagKey<Structure> DUNGEONS = TagKey.create(Registries.STRUCTURE, Identifier.fromNamespaceAndPath(Skycraft.MODID, "dungeons"));
 
     /** Structure searches never look further than this (each step may compute structure starts synchronously). */
     public static final int MAX_SEARCH_CHUNKS = 32;

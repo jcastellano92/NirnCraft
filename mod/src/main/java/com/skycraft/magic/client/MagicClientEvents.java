@@ -15,13 +15,12 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.TieredItem;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 import org.joml.Vector3f;
 
 /**
@@ -36,7 +35,7 @@ import org.joml.Vector3f;
  *     <li>Z shouts (hold longer for more words).</li>
  * </ul>
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
 public final class MagicClientEvents {
     /** Ticks needed to charge the 2nd and 3rd Word of Power. */
     public static final int WORD2_TICKS = 7;
@@ -44,8 +43,8 @@ public final class MagicClientEvents {
 
     /** Fists / previous loadout toggle (default B); the magic menu also has Unequip and Unarmed buttons. */
     public static final net.minecraft.client.KeyMapping HANDS_CYCLE = new net.minecraft.client.KeyMapping("key.skycraft.hands_cycle",
-            net.minecraftforge.client.settings.KeyConflictContext.IN_GAME, com.mojang.blaze3d.platform.InputConstants.Type.KEYSYM,
-            org.lwjgl.glfw.GLFW.GLFW_KEY_B, com.skycraft.client.SkyKeys.CATEGORY);
+            net.neoforged.neoforge.client.settings.KeyConflictContext.IN_GAME, com.mojang.blaze3d.platform.InputConstants.Type.KEYBOARD,
+            com.mojang.blaze3d.platform.InputConstants.KEY_B, com.skycraft.client.SkyKeys.CATEGORY);
 
     private static boolean rightDown;
     private static boolean leftDown;
@@ -84,7 +83,7 @@ public final class MagicClientEvents {
         if (main.isEmpty()) return true;
         // two-handed items (greatswords, bows, staves, the bound battleaxe and bow) take the left hand too
         if (com.skycraft.magic.Hands.twoHanded(main)) return false;
-        if (main.getItem() instanceof TieredItem) return true;
+        if (com.skycraft.inventory.EquipmentData.toolMaterial(main)!=null) return true;
         WeaponClass wc = WeaponClass.of(main);
         return wc != WeaponClass.OTHER && wc != WeaponClass.BOW && wc != WeaponClass.UNARMED;
     }
@@ -107,8 +106,8 @@ public final class MagicClientEvents {
     }
 
     @SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent event) {
-        if (event.phase != TickEvent.Phase.END) return;
+    public static void onClientTick(net.neoforged.neoforge.client.event.ClientTickEvent.Post event) {
+        
         ClientFx.tick();
         Minecraft mc = Minecraft.getInstance();
         LocalPlayer player = mc.player;
@@ -124,20 +123,20 @@ public final class MagicClientEvents {
         }
 
         while (SkyKeys.MAGIC_MENU.consumeClick()) {
-            if (mc.screen == null) mc.setScreen(new MagicMenuScreen());
+            if (mc.gui.screen() == null) mc.gui.setScreen(new MagicMenuScreen());
         }
 
         // Right hand: LMB (attack key when hand is free) or CAST key.
         while (SkyKeys.CAST.consumeClick()) {
-            if (mc.screen == null && com.skycraft.combat.Sheathe.isSheathed(player)) {
+            if (mc.gui.screen() == null && com.skycraft.combat.Sheathe.isSheathed(player)) {
                 com.skycraft.combat.Sheathe.setSheathed(player, false);
                 SkyNetwork.sendToServer(new com.skycraft.network.CorePackets.Action(com.skycraft.network.CorePackets.Action.SHEATHE_TOGGLE, 0));
                 consumeClickForUnsheathe();
             }
         }
-        boolean castKeyDown = SkyKeys.CAST.isDown() && mc.screen == null;
-        boolean atkKeyDown = mc.options.keyAttack.isDown() && mc.screen == null;
-        boolean useDown = mc.options.keyUse.isDown() && mc.screen == null;
+        boolean castKeyDown = SkyKeys.CAST.isDown() && mc.gui.screen() == null;
+        boolean atkKeyDown = mc.options.keyAttack.isDown() && mc.gui.screen() == null;
+        boolean useDown = mc.options.keyUse.isDown() && mc.gui.screen() == null;
         if (!castKeyDown && !atkKeyDown && !useDown) {
             castUnsheathed = false;
         }
@@ -181,7 +180,7 @@ public final class MagicClientEvents {
 
         // Hands cycle key: fists (no spells, nothing held) <-> your previous loadout.
         while (HANDS_CYCLE.consumeClick()) {
-            if (mc.screen == null) SkyNetwork.sendToServer(new MagicPackets.MenuAction(MagicPackets.MenuAction.CYCLE_HANDS, ""));
+            if (mc.gui.screen() == null) SkyNetwork.sendToServer(new MagicPackets.MenuAction(MagicPackets.MenuAction.CYCLE_HANDS, ""));
         }
 
         // An equipped spell shows as a small glow in its hand (no item model, nothing drawn over the arm).
@@ -195,7 +194,7 @@ public final class MagicClientEvents {
         while (SkyKeys.SHOUT.consumeClick()) {
             // drained; handled through isDown()
         }
-        if (mc.screen != null) {
+        if (mc.gui.screen() != null) {
             shoutHeld = -1;
         } else if (SkyKeys.SHOUT.isDown()) {
             shoutHeld = shoutHeld < 0 ? 0 : shoutHeld + 1;
@@ -210,10 +209,10 @@ public final class MagicClientEvents {
      * water's surface (sneak to sink), and Levitate never lets you rise too far above the ground.
      */
     @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.START || !event.player.level().isClientSide || event.player != Minecraft.getInstance().player) return;
-        LocalPlayer player = (LocalPlayer) event.player;
-        if (player.hasEffect(com.skycraft.magic.MagicRegistry.WATER_WALKING.get()) && !player.isShiftKeyDown() && !player.isUnderWater()) {
+    public static void onPlayerTick(net.neoforged.neoforge.event.tick.PlayerTickEvent.Pre event) {
+        if (!event.getEntity().level().isClientSide() || event.getEntity() != Minecraft.getInstance().player) return;
+        LocalPlayer player = (LocalPlayer) event.getEntity();
+        if (player.hasEffect(com.skycraft.platform.Effects.holder(com.skycraft.magic.MagicRegistry.WATER_WALKING.get())) && !player.isShiftKeyDown() && !player.isUnderWater()) {
             net.minecraft.core.BlockPos below = net.minecraft.core.BlockPos.containing(player.getX(), player.getY() - 0.06, player.getZ());
             boolean waterBelow = player.level().getFluidState(below).is(net.minecraft.tags.FluidTags.WATER);
             Vec3 v = player.getDeltaMovement();
@@ -225,7 +224,7 @@ public final class MagicClientEvents {
                 player.fallDistance = 0;
             }
         }
-        if (player.hasEffect(com.skycraft.magic.MagicRegistry.LEVITATE.get()) && player.getAbilities().flying
+        if (player.hasEffect(com.skycraft.platform.Effects.holder(com.skycraft.magic.MagicRegistry.LEVITATE.get())) && player.getAbilities().flying
                 && com.skycraft.magic.spell.Mysticism.heightAboveGround(player) > com.skycraft.magic.spell.Mysticism.levitateCeiling(player)) {
             Vec3 v = player.getDeltaMovement();
             player.setDeltaMovement(v.x, Math.min(v.y, -0.08), v.z);
@@ -254,7 +253,7 @@ public final class MagicClientEvents {
     }
 
     @SubscribeEvent
-    public static void onLoggingOut(net.minecraftforge.client.event.ClientPlayerNetworkEvent.LoggingOut event) {
+    public static void onLoggingOut(net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent.LoggingOut event) {
         ActiveEffectsHud.clear();
     }
 
@@ -263,18 +262,18 @@ public final class MagicClientEvents {
         if (spell == null) return;
         int rgb = spell.school.color;
         Vec3 p = Targeting.handPos(player, hand == SpellCasting.LEFT ? -1 : 1);
-        DustParticleOptions dust = new DustParticleOptions(new Vector3f(((rgb >> 16) & 0xFF) / 255f, ((rgb >> 8) & 0xFF) / 255f, (rgb & 0xFF) / 255f), 0.6f);
+        DustParticleOptions dust = new DustParticleOptions(rgb,0.6f);
         mc.level.addParticle(dust, p.x + (player.getRandom().nextDouble() - 0.5) * 0.15, p.y + (player.getRandom().nextDouble() - 0.5) * 0.15,
                 p.z + (player.getRandom().nextDouble() - 0.5) * 0.15, 0, 0.01, 0);
     }
 
     /** Cancel normal punch/attack swing when right-hand spell is active. */
     @SubscribeEvent
-    public static void onAttackKey(net.minecraftforge.client.event.InputEvent.InteractionKeyMappingTriggered event) {
+    public static void onAttackKey(net.neoforged.neoforge.client.event.InputEvent.InteractionKeyMappingTriggered event) {
         if (!event.isAttack()) return;
         Minecraft mc = Minecraft.getInstance();
         LocalPlayer player = mc.player;
-        if (player == null || mc.screen != null) return;
+        if (player == null || mc.gui.screen() != null) return;
         if (com.skycraft.combat.Sheathe.isSheathed(player)
                 && player.getMainHandItem().isEmpty()
                 && !MagicData.selectedSpell(player).isEmpty()) {
@@ -293,7 +292,7 @@ public final class MagicClientEvents {
 
     /** Render the left/offhand arm in first person when wielding or casting magic with empty offhand. */
     @SubscribeEvent
-    public static void onRenderHand(net.minecraftforge.client.event.RenderHandEvent event) {
+    public static void onRenderHand(net.neoforged.neoforge.client.event.RenderHandEvent event) {
         if (event.getHand() != net.minecraft.world.InteractionHand.OFF_HAND) return;
         if (!event.getItemStack().isEmpty()) return;
         Minecraft mc = Minecraft.getInstance();
@@ -307,10 +306,10 @@ public final class MagicClientEvents {
         if (com.skycraft.combat.Sheathe.isSheathed(player)) return;
 
         var poseStack = event.getPoseStack();
-        var buffer = event.getMultiBufferSource();
+        var buffer = event.getSubmitNodeCollector();
         int light = event.getPackedLight();
         float partialTick = event.getPartialTick();
-        float swing = player.getAttackAnim(partialTick);
+        float swing = player.getSwingAnimation(partialTick);
         float equip = event.getEquipProgress();
 
         poseStack.pushPose();
@@ -319,19 +318,20 @@ public final class MagicClientEvents {
         float f3 = 0.4F * net.minecraft.util.Mth.sin(f1 * ((float) Math.PI * 2F));
         float f4 = -0.4F * net.minecraft.util.Mth.sin(swing * (float) Math.PI);
         poseStack.translate(-(f2 + 0.64F), f3 + -0.6F + equip * -0.6F, f4 + -0.72F);
-        poseStack.mulPose(com.mojang.math.Axis.YP.rotationDegrees(-45.0F));
+        poseStack.rotateDegrees(com.mojang.math.Axis.YP, -45.0F);
         float f5 = net.minecraft.util.Mth.sin(swing * swing * (float) Math.PI);
         float f6 = net.minecraft.util.Mth.sin(f1 * (float) Math.PI);
-        poseStack.mulPose(com.mojang.math.Axis.YP.rotationDegrees(-f6 * 70.0F));
-        poseStack.mulPose(com.mojang.math.Axis.ZP.rotationDegrees(f5 * -20.0F));
+        poseStack.rotateDegrees(com.mojang.math.Axis.YP, -f6 * 70.0F);
+        poseStack.rotateDegrees(com.mojang.math.Axis.ZP, f5 * -20.0F);
         poseStack.translate(1.0F, 3.6F, 3.5F);
-        poseStack.mulPose(com.mojang.math.Axis.ZP.rotationDegrees(-120.0F));
-        poseStack.mulPose(com.mojang.math.Axis.XP.rotationDegrees(200.0F));
-        poseStack.mulPose(com.mojang.math.Axis.YP.rotationDegrees(135.0F));
+        poseStack.rotateDegrees(com.mojang.math.Axis.ZP, -120.0F);
+        poseStack.rotateDegrees(com.mojang.math.Axis.XP, 200.0F);
+        poseStack.rotateDegrees(com.mojang.math.Axis.YP, 135.0F);
         poseStack.translate(-5.6F, 0.0F, 0.0F);
 
-        var renderer = (net.minecraft.client.renderer.entity.player.PlayerRenderer) mc.getEntityRenderDispatcher().getRenderer(player);
-        renderer.renderLeftHand(poseStack, buffer, light, player);
+        var renderer = (net.minecraft.client.renderer.entity.player.AvatarRenderer<net.minecraft.client.player.AbstractClientPlayer>) mc.getEntityRenderDispatcher().getRenderer(player);
+        var state=(net.minecraft.client.renderer.entity.state.AvatarRenderState) renderer.createRenderState(player,partialTick);
+        renderer.renderLeftHand(poseStack,buffer,light,state.skin.body().texturePath(),state.showLeftSleeve);
         poseStack.popPose();
         event.setCanceled(true);
     }

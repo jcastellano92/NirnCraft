@@ -13,8 +13,8 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.npc.Villager;
-import net.minecraft.world.entity.npc.VillagerProfession;
+import net.minecraft.world.entity.npc.villager.Villager;
+import net.minecraft.world.entity.npc.villager.VillagerProfession;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -52,7 +52,7 @@ public final class RadiantQuests {
             this.npc = npc;
             this.r = player.getRandom();
             this.lvl = SkyData.get(player).getLevel();
-            this.dim = level.dimension().location().toString();
+            this.dim = level.dimension().identifier().toString();
             this.hold = Holds.holdAt(level, npc.blockPosition());
         }
 
@@ -100,7 +100,7 @@ public final class RadiantQuests {
     }
 
     static Objective fetchObjective(Ctx c, Item item, int count) {
-        Component name = item.getDescription();
+        Component name = new ItemStack(item).getHoverName();
         return new Objective(Objective.Type.FETCH, tr("quest.skycraft.obj.fetch", count, name, c.npc.getDisplayName()))
                 .target(itemId(item)).count(count).npc(c.npc.getUUID()).at(c.npc.blockPosition(), c.dim, 0)
                 .topic(tr("dialogue.skycraft.quest.fetch", count, name), tr("quest.skycraft.reply.thanks"))
@@ -119,8 +119,8 @@ public final class RadiantQuests {
     }
 
     private static void giveOnStart(Quest q, ItemStack stack) {
-        ListTag list = q.extra.getList("give_on_start", 10);
-        list.add(stack.save(new CompoundTag()));
+        ListTag list = q.extra.getListOrEmpty("give_on_start");
+        list.add(com.skycraft.inventory.ItemData.save(stack));
         q.extra.put("give_on_start", list);
     }
 
@@ -130,7 +130,7 @@ public final class RadiantQuests {
     }
 
     @Nullable
-    private static Fetch[] fetchTable(VillagerProfession prof) {
+    private static Fetch[] fetchTable(net.minecraft.resources.ResourceKey<VillagerProfession> prof) {
         if (prof == VillagerProfession.FARMER) return new Fetch[]{new Fetch(Items.WHEAT, 16, 60, "harvest"),
                 new Fetch(Items.CARROT, 16, 60, "harvest"), new Fetch(Items.POTATO, 16, 60, "harvest"), new Fetch(Items.PUMPKIN, 4, 70, "harvest")};
         if (prof == VillagerProfession.BUTCHER) return new Fetch[]{new Fetch(Items.LEATHER, 8, 80, "hides"),
@@ -142,7 +142,7 @@ public final class RadiantQuests {
             return new Fetch[]{new Fetch(Items.IRON_INGOT, 8, 120, "iron"), new Fetch(Items.COAL, 16, 70, "coal")};
         if (prof == VillagerProfession.CLERIC) return new Fetch[]{new Fetch(Items.GLOWSTONE_DUST, 5, 110, "ingredients"),
                 new Fetch(Items.NETHER_WART, 6, 120, "ingredients"), new Fetch(Items.SPIDER_EYE, 4, 90, "ingredients")};
-        if (prof == VillagerProfession.SHEPHERD) return new Fetch[]{new Fetch(Items.WHITE_WOOL, 12, 70, "wool")};
+        if (prof == VillagerProfession.SHEPHERD) return new Fetch[]{new Fetch(com.skycraft.worldgen.VanillaBlocks.WHITE_WOOL.asItem(), 12, 70, "wool")};
         if (prof == VillagerProfession.FLETCHER) return new Fetch[]{new Fetch(Items.FEATHER, 12, 70, "feathers"), new Fetch(Items.FLINT, 8, 70, "feathers")};
         if (prof == VillagerProfession.MASON) return new Fetch[]{new Fetch(Items.CLAY_BALL, 16, 70, "clay")};
         if (prof == VillagerProfession.LIBRARIAN) return new Fetch[]{new Fetch(Items.BOOK, 6, 100, "books")};
@@ -155,7 +155,7 @@ public final class RadiantQuests {
     public static Offer villager(ServerPlayer player, LivingEntity villager) {
         Ctx c = new Ctx(player, villager);
         // villagers, and Skycraft townsfolk by the profession their trade matches
-        VillagerProfession prof = com.skycraft.economy.Merchants.profession(villager);
+        net.minecraft.resources.ResourceKey<VillagerProfession> prof = com.skycraft.economy.Merchants.profession(villager);
         if (prof == null) prof = VillagerProfession.NONE;
         if (prof == VillagerProfession.FARMER && c.r.nextBoolean()) return skeevers(c);
         if (prof == VillagerProfession.LIBRARIAN && c.r.nextInt(3) > 0) {
@@ -172,7 +172,7 @@ public final class RadiantQuests {
     }
 
     private static Offer fetch(Ctx c, Fetch f) {
-        Component item = f.item().getDescription();
+        Component item = new ItemStack(f.item()).getHoverName();
         long gold = scale(f.gold(), c.lvl, 50, 500);
         Quest q = base(c, "villager_fetch", Quest.Category.MISC, f.count(), item, c.npc.getDisplayName(), c.holdName());
         q.add(fetchObjective(c, f.item(), f.count())).reward(gold);
@@ -535,10 +535,10 @@ public final class RadiantQuests {
         Fetch f = pick(c.r, new Fetch[]{new Fetch(Items.NOTE_BLOCK, 6, 150, ""), new Fetch(Items.GOAT_HORN, 1, 400, ""),
                 new Fetch(Items.JUKEBOX, 1, 300, ""), new Fetch(Items.AMETHYST_SHARD, 8, 200, "")});
         long gold = scale(f.gold(), c.lvl, 100, 500);
-        Quest q = base(c, "bards_instruments", Quest.Category.FACTION, f.count(), f.item().getDescription());
+        Quest q = base(c, "bards_instruments", Quest.Category.FACTION, f.count(), new ItemStack(f.item()).getHoverName());
         q.add(fetchObjective(c, f.item(), f.count()));
         q.faction(Faction.BARDS_COLLEGE.id, 1, false).reward(gold);
-        return offer(q, f.count(), f.item().getDescription(), gold);
+        return offer(q, f.count(), new ItemStack(f.item()).getHoverName(), gold);
     }
 
     // ------------------------------------------------------------------ unique challenges

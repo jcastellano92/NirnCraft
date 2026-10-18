@@ -25,7 +25,7 @@ public abstract class CurseMonster extends Monster implements CurseAnims.Animate
 
     /** Server: plays a one-shot animation for everyone watching. */
     public void playAnim(CurseAnims.Anim anim) {
-        if (!this.level().isClientSide) this.level().broadcastEntityEvent(this, CurseAnims.event(anim));
+        if (!this.level().isClientSide()) this.level().broadcastEntityEvent(this, CurseAnims.event(anim));
     }
 
     @Override
@@ -38,7 +38,7 @@ public abstract class CurseMonster extends Monster implements CurseAnims.Animate
     @Override
     public void tick() {
         super.tick();
-        if (this.level().isClientSide) anims.tick(this.tickCount);
+        if (this.level().isClientSide()) anims.tick(this.tickCount);
     }
 
     /** Extra damage taken from fire (vampires and their creatures: 0.5 = 50% more). */
@@ -47,8 +47,8 @@ public abstract class CurseMonster extends Monster implements CurseAnims.Animate
     }
 
     @Override
-    public boolean hurt(DamageSource source, float amount) {
+    public boolean hurtServer(net.minecraft.server.level.ServerLevel serverLevel263, DamageSource source, float amount) {
         if (fireWeakness() > 0 && source.is(DamageTypeTags.IS_FIRE)) amount *= 1f + fireWeakness();
-        return super.hurt(source, amount);
+        return super.hurtServer(serverLevel263, source, amount);
     }
 }

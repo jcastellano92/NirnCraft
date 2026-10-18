@@ -1,0 +1,81 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "#skycraft:talkers",
+      "required": false
+    },
+    {
+      "id": "#skycraft:guards",
+      "required": false
+    },
+    {
+      "id": "#skycraft:merchants",
+      "required": false
+    },
+    {
+      "id": "skycraft:bandit",
+      "required": false
+    },
+    {
+      "id": "skycraft:bandit_chief",
+      "required": false
+    },
+    {
+      "id": "skycraft:forsworn",
+      "required": false
+    },
+    {
+      "id": "skycraft:necromancer",
+      "required": false
+    },
+    {
+      "id": "skycraft:giant",
+      "required": false
+    },
+    {
+      "id": "skycraft:mammoth",
+      "required": false
+    },
+    {
+      "id": "skycraft:deer",
+      "required": false
+    },
+    {
+      "id": "skycraft:elk",
+      "required": false
+    },
+    {
+      "id": "skycraft:sabre_cat",
+      "required": false
+    },
+    {
+      "id": "skycraft:bear",
+      "required": false
+    },
+    {
+      "id": "skycraft:wolf",
+      "required": false
+    },
+    {
+      "id": "minecraft:horse",
+      "required": false
+    },
+    {
+      "id": "minecraft:wolf",
+      "required": false
+    },
+    {
+      "id": "minecraft:goat",
+      "required": false
+    },
+    {
+      "id": "minecraft:villager",
+      "required": false
+    },
+    {
+      "id": "minecraft:wandering_trader",
+      "required": false
+    }
+  ]
+}

@@ -411,7 +411,7 @@ final class ColdharbourSites {
                     d.box(xo, fy + 1, z, xo, fy + wh - 8, z, dark());
                     d.set(x, fy + wh - 1, z, Gates.spike(Direction.UP));
                     d.set(xo, fy + wh - 7, z, Gates.spike(Direction.UP));
-                    if (z + 3 < z1) d.box(s < 0 ? x0 : x1, fy + 5, z + 3, s < 0 ? x0 : x1, fy + 14, z + 3, b(Blocks.RED_STAINED_GLASS));
+                    if (z + 3 < z1) d.box(s < 0 ? x0 : x1, fy + 5, z + 3, s < 0 ? x0 : x1, fy + 14, z + 3, b(com.skycraft.worldgen.VanillaBlocks.RED_STAINED_GLASS));
                 }
             }
             // the roof, broken open over one bay
@@ -435,7 +435,7 @@ final class ColdharbourSites {
                 for (int y = fy + 11; y <= fy + 19; y++) {
                     double rr = Math.sqrt((x - cx) * (x - cx) + (y - fy - 15) * (y - fy - 15));
                     if (rr > 3.6) continue;
-                    d.set(x, y, z1, rr < 1 || x == cx || y == fy + 15 ? b(Blocks.POLISHED_BLACKSTONE) : b(Blocks.RED_STAINED_GLASS));
+                    d.set(x, y, z1, rr < 1 || x == cx || y == fy + 15 ? b(Blocks.POLISHED_BLACKSTONE) : b(com.skycraft.worldgen.VanillaBlocks.RED_STAINED_GLASS));
                 }
             // twin spires flanking the front
             for (int s = -1; s <= 1; s += 2) {
@@ -445,10 +445,10 @@ final class ColdharbourSites {
                 d.tube(tx, tz, 4.7, 3.6, fy + 38, fy + 39, dark());
                 d.cone(tx, tz, 4.2, 0.5, fy + 40, fy + 54, dark());
                 d.set(tx, fy + 55, tz, Gates.spike(Direction.UP));
-                for (int y = fy + 12; y <= fy + 32; y += 10) d.box(tx, y, tz + 4, tx, y + 3, tz + 4, b(Blocks.RED_STAINED_GLASS));
+                for (int y = fy + 12; y <= fy + 32; y += 10) d.box(tx, y, tz + 4, tx, y + 3, tz + 4, b(com.skycraft.worldgen.VanillaBlocks.RED_STAINED_GLASS));
             }
             // the runner, braziers down the nave
-            for (int z = z0 + 8; z <= z1 - 1; z++) d.box(cx - 1, fy + 1, z, cx + 1, fy + 1, z, b(Blocks.RED_CARPET));
+            for (int z = z0 + 8; z <= z1 - 1; z++) d.box(cx - 1, fy + 1, z, cx + 1, fy + 1, z, b(com.skycraft.worldgen.VanillaBlocks.RED_CARPET));
             for (int z = z0 + 10; z <= z1 - 6; z += 12) {
                 brazier(d, cx - 4, fy, z);
                 brazier(d, cx + 4, fy, z);

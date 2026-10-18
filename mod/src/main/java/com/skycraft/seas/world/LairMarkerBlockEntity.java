@@ -10,19 +10,19 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 /**
  * The inhabitants a site's {@link LairMarkerBlock} holds until a player comes within {@link #RANGE} blocks: creatures
@@ -79,12 +79,12 @@ public class LairMarkerBlockEntity extends BlockEntity {
     private void populate(ServerLevel level, Player near) {
         RandomSource r = level.getRandom();
         for (int i = 0; i < spawns.size(); i++) {
-            CompoundTag t = spawns.getCompound(i);
-            int count = Math.max(1, t.getInt("Count"));
-            int spread = Math.max(0, t.getInt("Spread"));
+            CompoundTag t = spawns.getCompoundOrEmpty(i);
+            int count = Math.max(1, t.getIntOr("Count",0));
+            int spread = Math.max(0, t.getIntOr("Spread",0));
             for (int n = 0; n < count; n++) {
                 BlockPos at = spot(level, worldPosition, spread, r);
-                Mob mob = t.contains("Npc") ? npc(level, at, t, near) : creature(level, at, t.getString("Id"));
+                Mob mob = t.contains("Npc") ? npc(level, at, t, near) : creature(level, at, t.getStringOr("Id",""));
                 if (mob == null) continue;
                 mob.setPersistenceRequired();
                 mob.getPersistentData().putBoolean("skycraft_seas_site", true);
@@ -94,18 +94,18 @@ public class LairMarkerBlockEntity extends BlockEntity {
     }
 
     private static Mob creature(ServerLevel level, BlockPos at, String id) {
-        ResourceLocation rl = ResourceLocation.tryParse(id);
-        if (rl == null || !ForgeRegistries.ENTITY_TYPES.containsKey(rl)) return null;
-        EntityType<?> type = ForgeRegistries.ENTITY_TYPES.getValue(rl);
-        Entity e = type == null ? null : type.create(level);
+        Identifier rl = Identifier.tryParse(id);
+        if (rl == null || !BuiltInRegistries.ENTITY_TYPE.containsKey(rl)) return null;
+        EntityType<?> type = BuiltInRegistries.ENTITY_TYPE.getValue(rl);
+        Entity e = type == null ? null : type.create(level, net.minecraft.world.entity.EntitySpawnReason.EVENT);
         if (!(e instanceof Mob mob)) {
             if (e != null) e.discard();
             return null;
         }
         float yaw = level.getRandom().nextFloat() * 360f;
-        mob.moveTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, yaw, 0f);
+        mob.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, yaw, 0f);
         mob.setYHeadRot(yaw);
-        net.minecraftforge.event.ForgeEventFactory.onFinalizeSpawn(mob, level, level.getCurrentDifficultyAt(at), MobSpawnType.STRUCTURE, null, null);
+        net.neoforged.neoforge.event.EventHooks.finalizeMobSpawn(mob, level, level.getCurrentDifficultyAt(at), EntitySpawnReason.STRUCTURE, null);
         if (mob.isSpawnCancelled()) {
             mob.discard();
             return null;
@@ -114,13 +114,13 @@ public class LairMarkerBlockEntity extends BlockEntity {
     }
 
     private static Mob npc(ServerLevel level, BlockPos at, CompoundTag t, Player near) {
-        NpcRole role = NpcRole.byId(t.getString("Npc"));
+        NpcRole role = NpcRole.byId(t.getStringOr("Npc",""));
         if (role == null) return null;
         NpcEntity npc = Npcs.create(level, at, role);
         if (npc == null) return null;
-        String name = t.getString("Name");
+        String name = t.getStringOr("Name","");
         if (!name.isEmpty()) npc.setCustomName(Component.translatable(name));
-        if (t.getBoolean("Hostile")) npc.setHuntTarget(near.getUUID());
+        if (t.getBooleanOr("Hostile",false)) npc.setHuntTarget(near.getUUID());
         return npc;
     }
 
@@ -137,16 +137,19 @@ public class LairMarkerBlockEntity extends BlockEntity {
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag) {
-        super.saveAdditional(tag);
+    protected void saveAdditional(net.minecraft.world.level.storage.ValueOutput output263) {
+        super.saveAdditional(output263);
+        CompoundTag tag = new CompoundTag();
         tag.put("Spawns", spawns.copy());
+        output263.store(tag);
     }
 
     @Override
-    public void load(CompoundTag tag) {
-        super.load(tag);
+    protected void loadAdditional(net.minecraft.world.level.storage.ValueInput input263) {
+        super.loadAdditional(input263);
+        CompoundTag tag = com.skycraft.platform.ValueTags.read(input263, "Spawns");
         spawns.clear();
-        ListTag list = tag.getList("Spawns", Tag.TAG_COMPOUND);
-        for (int i = 0; i < list.size(); i++) spawns.add(list.getCompound(i));
+        ListTag list = tag.getListOrEmpty("Spawns");
+        for (int i = 0; i < list.size(); i++) spawns.add(list.getCompoundOrEmpty(i));
     }
 }

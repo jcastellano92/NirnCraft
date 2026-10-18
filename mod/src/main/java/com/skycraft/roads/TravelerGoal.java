@@ -3,8 +3,8 @@ package com.skycraft.roads;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.goal.Goal;
-import net.minecraft.world.entity.npc.AbstractVillager;
-import net.minecraft.world.entity.npc.Villager;
+import net.minecraft.world.entity.npc.villager.AbstractVillager;
+import net.minecraft.world.entity.npc.villager.Villager;
 
 import java.util.EnumSet;
 
@@ -24,7 +24,7 @@ final class TravelerGoal extends Goal {
     @Override
     public boolean canUse() {
         CompoundTag t = Travelers.tag(mob);
-        if (t == null || t.getBoolean("arrived") || t.getBoolean("static")) return false;
+        if (t == null || t.getBooleanOr("arrived", false) || t.getBooleanOr("static", false)) return false;
         if (mob.getTarget() != null || mob.isPassenger() || mob.isLeashed()) return false;
         return !(mob instanceof AbstractVillager v && v.isTrading());
     }

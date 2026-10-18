@@ -26,10 +26,10 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.util.FakePlayer;
-import net.minecraftforge.common.util.FakePlayerFactory;
-import net.minecraftforge.event.level.BlockEvent;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.common.util.FakePlayer;
+import net.neoforged.neoforge.common.util.FakePlayerFactory;
+import net.neoforged.neoforge.event.level.BlockEvent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -97,7 +97,7 @@ public final class HomesteadSelfTest {
         FakePlayer neighbour = FakePlayerFactory.get(level, NEIGHBOUR);
         try {
             for (FakePlayer fake : List.of(owner, guest, neighbour)) {
-                if (fake.connection == null) new ServerGamePacketListenerImpl(server, new Connection(PacketFlow.SERVERBOUND), fake);
+                if (fake.connection == null) new ServerGamePacketListenerImpl(server, new Connection(PacketFlow.SERVERBOUND), fake, net.minecraft.server.network.CommonListenerCookie.createInitial(fake.getGameProfile(), false));
             }
             runChecks(server, level, owner, guest, neighbour, c, cleanup);
         } catch (RuntimeException e) {
@@ -204,7 +204,7 @@ public final class HomesteadSelfTest {
                         && HomesteadBlocks.isAllowedBuildingBlock(Blocks.FARMLAND.defaultBlockState())
                         && HomesteadBlocks.isAllowedBuildingBlock(Blocks.WHEAT.defaultBlockState())
                         && HomesteadBlocks.isAllowedBuildingBlock(
-                        net.minecraft.core.registries.BuiltInRegistries.BLOCK.get(new net.minecraft.resources.ResourceLocation("skycraft", "blacksmith_forge"))
+                        net.minecraft.core.registries.BuiltInRegistries.BLOCK.getOptional(net.minecraft.resources.Identifier.fromNamespaceAndPath("skycraft", "blacksmith_forge")).orElseThrow()
                                 .defaultBlockState()), "stations and garden blocks");
 
         // ---- 5. build mode: a chest is carried with what is in it, and only then
@@ -228,19 +228,18 @@ public final class HomesteadSelfTest {
         c.check("the owner enters build mode inside the homestead", on && HomesteadBuildMode.isOn(owner), "on=" + on);
         boolean cancelled = postBreak(level, owner, chest);
         ItemStack carried = Inv.find(owner, s -> s.is(Blocks.CHEST.asItem()));
-        CompoundTag tag = carried == null ? null : carried.getTagElement("BlockEntityTag");
+        CompoundTag tag = carried == null ? null : carried.has(net.minecraft.core.component.DataComponents.BLOCK_ENTITY_DATA) ? carried.get(net.minecraft.core.component.DataComponents.BLOCK_ENTITY_DATA).copyTagWithoutId() : null;
         c.check("build mode: the chest is taken up, not broken", cancelled && level.getBlockState(chest).isAir() && carried != null && !carried.isEmpty(),
                 "block " + level.getBlockState(chest).getBlock());
-        c.check("the carried chest holds its contents (diamonds and gold)", tag != null && tag.getList("Items", 10).size() == 2,
-                tag == null ? "no block entity data" : tag.getList("Items", 10).size() + " stacks");
+        c.check("the carried chest holds its contents (diamonds and gold)", tag != null && tag.getListOrEmpty("Items").size() == 2,
+                tag == null ? "no block entity data" : tag.getListOrEmpty("Items").size() + " stacks");
         c.check("nothing spilled onto the ground", level.getEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class,
                 new net.minecraft.world.phys.AABB(chest).inflate(3)).isEmpty(), "no item entities near the chest");
         // leaving the grounds turns it off
         owner.setPos(home.getX() + 400.5, home.getY(), home.getZ() + 0.5);
-        net.minecraftforge.event.TickEvent.PlayerTickEvent tick = new net.minecraftforge.event.TickEvent.PlayerTickEvent(
-                net.minecraftforge.event.TickEvent.Phase.END, owner);
+        net.neoforged.neoforge.event.tick.PlayerTickEvent tick = new net.neoforged.neoforge.event.tick.PlayerTickEvent.Post(owner);
         owner.tickCount = 20;
-        MinecraftForge.EVENT_BUS.post(tick);
+        NeoForge.EVENT_BUS.post(tick);
         c.check("leaving the homestead turns build mode off", !HomesteadBuildMode.isOn(owner), "400 blocks away");
         owner.setPos(home.getX() + 0.5, home.getY(), home.getZ() + 0.5);
 
@@ -253,22 +252,22 @@ public final class HomesteadSelfTest {
         String id = HomesteadDiscovery.id(owner.getUUID());
         CompoundTag mine = WorldData.find(SkyData.get(owner), id);
         CompoundTag hidden = WorldData.find(SkyData.get(guest), id);
-        c.check("the owner knows the homestead by the name they set", mine != null && !mine.getBoolean("known") && "Test Hold".equals(mine.getString("name")),
-                mine == null ? "no entry" : mine.getString("name"));
-        c.check("a stranger 120 blocks away has only a hidden, nameless point", hidden != null && hidden.getBoolean("hidden")
-                && hidden.getBoolean("known") && hidden.getString("name").isEmpty(), hidden == null ? "no entry" : hidden.toString());
+        c.check("the owner knows the homestead by the name they set", mine != null && !mine.getBooleanOr("known",false) && "Test Hold".equals(mine.getStringOr("name","")),
+                mine == null ? "no entry" : mine.getStringOr("name",""));
+        c.check("a stranger 120 blocks away has only a hidden, nameless point", hidden != null && hidden.getBooleanOr("hidden",false)
+                && hidden.getBooleanOr("known",false) && hidden.getStringOr("name", "").isEmpty(), hidden == null ? "no entry" : hidden.toString());
         guest.setPos(home.getX() + 600.5, home.getY(), home.getZ() + 0.5);
-        c.check("fast travel refuses the hidden point", hidden != null && hidden.getBoolean("known"), "known flag keeps FastTravelHandler out");
+        c.check("fast travel refuses the hidden point", hidden != null && hidden.getBooleanOr("known",false), "known flag keeps FastTravelHandler out");
         guest.setPos(home.getX() + 3.5, home.getY(), home.getZ() + 0.5);
         HomesteadDiscovery.sync(guest);
         CompoundTag found = WorldData.find(SkyData.get(guest), id);
-        c.check("coming close discovers it under its name (on the map and the fast-travel list)", found != null && !found.getBoolean("known")
-                && !found.getBoolean("hidden") && "Test Hold".equals(found.getString("name")), found == null ? "no entry" : found.getString("name"));
+        c.check("coming close discovers it under its name (on the map and the fast-travel list)", found != null && !found.getBooleanOr("known",false)
+                && !found.getBooleanOr("hidden",false) && "Test Hold".equals(found.getStringOr("name","")), found == null ? "no entry" : found.getStringOr("name",""));
         claim.setName("Renamed");
         HomesteadDiscovery.sync(guest);
         found = WorldData.find(SkyData.get(guest), id);
-        c.check("a rename reaches the stranger who discovered it", found != null && "Renamed".equals(found.getString("name")),
-                found == null ? "no entry" : found.getString("name"));
+        c.check("a rename reaches the stranger who discovered it", found != null && "Renamed".equals(found.getStringOr("name","")),
+                found == null ? "no entry" : found.getStringOr("name",""));
         c.check("names are cleaned (no formatting codes, 32 characters)", HomesteadClaim.sanitizeName("§cBad  Name<script>" + "x".repeat(40))
                 .length() <= 32 && !HomesteadClaim.sanitizeName("§cBad").contains("§"), HomesteadClaim.sanitizeName("§cBad  Name<>"));
 
@@ -290,9 +289,9 @@ public final class HomesteadSelfTest {
                 && WorldData.find(SkyData.get(owner), id) == null, "entries removed");
         cleanup.add(() -> {
             ListTag l1 = WorldData.discovered(SkyData.get(guest));
-            for (int i = l1.size() - 1; i >= 0; i--) if (l1.getCompound(i).getString("id").startsWith(HomesteadDiscovery.PREFIX)) l1.remove(i);
+            for (int i = l1.size() - 1; i >= 0; i--) if (l1.getCompoundOrEmpty(i).getStringOr("id","").startsWith(HomesteadDiscovery.PREFIX)) l1.remove(i);
             ListTag l2 = WorldData.discovered(SkyData.get(owner));
-            for (int i = l2.size() - 1; i >= 0; i--) if (l2.getCompound(i).getString("id").startsWith(HomesteadDiscovery.PREFIX)) l2.remove(i);
+            for (int i = l2.size() - 1; i >= 0; i--) if (l2.getCompoundOrEmpty(i).getStringOr("id","").startsWith(HomesteadDiscovery.PREFIX)) l2.remove(i);
         });
     }
 
@@ -325,8 +324,8 @@ public final class HomesteadSelfTest {
     /** Posts a break event for the block at {@code pos} (as it is) and returns whether it was cancelled. */
     private static boolean postBreak(ServerLevel level, FakePlayer player, BlockPos pos) {
         BlockState state = level.getBlockState(pos);
-        BlockEvent.BreakEvent event = new BlockEvent.BreakEvent(level, pos, state, player);
-        MinecraftForge.EVENT_BUS.post(event);
+        net.neoforged.neoforge.event.level.block.BreakBlockEvent event = new net.neoforged.neoforge.event.level.block.BreakBlockEvent(level, pos, state, player);
+        NeoForge.EVENT_BUS.post(event);
         return event.isCanceled();
     }
 
@@ -345,9 +344,9 @@ public final class HomesteadSelfTest {
         BlockState old = level.getBlockState(pos);
         level.setBlock(pos, state, 18);
         try {
-            net.minecraftforge.common.util.BlockSnapshot snapshot = net.minecraftforge.common.util.BlockSnapshot.create(level.dimension(), level, pos);
+            net.neoforged.neoforge.common.util.BlockSnapshot snapshot = net.neoforged.neoforge.common.util.BlockSnapshot.create(level.dimension(), level, pos);
             BlockEvent.EntityPlaceEvent event = new BlockEvent.EntityPlaceEvent(snapshot, Blocks.STONE.defaultBlockState(), player);
-            MinecraftForge.EVENT_BUS.post(event);
+            NeoForge.EVENT_BUS.post(event);
             return event.isCanceled();
         } finally {
             level.setBlock(pos, old, 18);

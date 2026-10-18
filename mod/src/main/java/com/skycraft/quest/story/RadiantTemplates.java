@@ -131,8 +131,8 @@ public final class RadiantTemplates {
     @Nullable
     private static RadiantQuests.Offer build(ServerPlayer p, LivingEntity npc, Region region, String culture, Template t,
                                              RandomSource r, boolean dry) {
-        ServerLevel level = p.serverLevel();
-        String dim = level.dimension().location().toString();
+        ServerLevel level = p.level();
+        String dim = level.dimension().identifier().toString();
         JsonArray steps = arr(t.json, "steps");
         // where: the first step that needs a site decides it
         BlockPos site = null;

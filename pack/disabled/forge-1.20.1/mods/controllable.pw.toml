@@ -1,0 +1,9 @@
+name = "Controllable (Forge)"
+filename = "controllable-forge-1.20.1-0.21.9-release.jar"
+side = "client"
+
+[download]
+url = "https://github.com/MrCrayfish/Controllable/releases/download/v1.20.1-0.21.9/controllable-forge-1.20.1-0.21.9-release.jar"
+hash-format = "sha512"
+hash = "85ca348502e9725480bb4943d9bd29deb8035569a68fe2293537417bbeb1f238b6543072e012d26ed141262be7d5c6f187ec6723a720aeaf9bdf3e98ad2330f3"
+

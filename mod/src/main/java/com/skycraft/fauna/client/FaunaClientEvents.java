@@ -7,15 +7,15 @@ import com.skycraft.fauna.TameBalance;
 import com.skycraft.network.SkyNetwork;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RenderGuiEvent;
-import net.minecraftforge.client.event.ViewportEvent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.RenderGuiEvent;
+import net.neoforged.neoforge.client.event.ViewportEvent;
+
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 /**
  * Client events for Fauna:
@@ -27,7 +27,7 @@ import net.minecraftforge.fml.common.Mod;
  *     camera rolls and yaws with the animal's bucking and eases back when it ends.</li>
  * </ul>
  */
-@Mod.EventBusSubscriber(modid = com.skycraft.Skycraft.MODID, value = Dist.CLIENT)
+@net.neoforged.fml.common.EventBusSubscriber(modid = com.skycraft.Skycraft.MODID, value = Dist.CLIENT)
 public final class FaunaClientEvents {
     private static boolean active;
     /** Last state from the server (percent values as sent). */
@@ -57,7 +57,7 @@ public final class FaunaClientEvents {
     }
 
     private static int steer(Minecraft mc) {
-        if (mc.screen != null) return 0;
+        if (mc.gui.screen() != null) return 0;
         int s = 0;
         if (mc.options.keyLeft.isDown()) s--;
         if (mc.options.keyRight.isDown()) s++;
@@ -65,8 +65,7 @@ public final class FaunaClientEvents {
     }
 
     @SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent event) {
-        if (event.phase != TickEvent.Phase.END) return;
+    public static void onClientTick(net.neoforged.neoforge.client.event.ClientTickEvent.Post event) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null) return;
         tick++;
@@ -97,9 +96,9 @@ public final class FaunaClientEvents {
     }
 
     @SubscribeEvent
-    public static void onMount(net.minecraftforge.event.entity.EntityMountEvent event) {
+    public static void onMount(net.neoforged.neoforge.event.entity.EntityMountEvent event) {
         if (event.isDismounting() && active && event.getEntityMounting() == Minecraft.getInstance().player) {
-            if (event.isCancelable()) {
+            {
                 event.setCanceled(true);
             }
         }
@@ -119,8 +118,8 @@ public final class FaunaClientEvents {
     public static void renderTameBar(RenderGuiEvent.Post event) {
         if (!active) return;
         Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null || mc.options.hideGui) return;
-        GuiGraphics g = event.getGuiGraphics();
+        if (mc.player == null || mc.gui.hud.isHidden()) return;
+        GuiGraphicsExtractor g = event.getGuiGraphics();
         Font font = mc.font;
         int w = mc.getWindow().getGuiScaledWidth();
         int h = mc.getWindow().getGuiScaledHeight();
@@ -145,6 +144,6 @@ public final class FaunaClientEvents {
         g.fill(mx - 2, by - 3, mx + 3, by + barH + 3, 0xFFE8C060);
         g.fill(mx - 1, by - 3, mx + 2, by + barH + 3, 0xFFFFF0B0);
         Component hint = Component.translatable("mounts.skycraft.tame.hint");
-        g.drawString(font, hint, w / 2 - font.width(hint) / 2, by + barH + 5, 0xFFE8E0C8, true);
+        g.text(font, hint, w / 2 - font.width(hint) / 2, by + barH + 5, 0xFFE8E0C8, true);
     }
 }

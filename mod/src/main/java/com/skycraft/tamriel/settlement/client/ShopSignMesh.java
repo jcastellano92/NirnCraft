@@ -181,18 +181,20 @@ public final class ShopSignMesh {
     }
 
     public void render(PoseStack poseStack, VertexConsumer vc, int packedLight) {
-        PoseStack.Pose last = poseStack.last();
+        render(poseStack.last(),vc,packedLight);
+    }
+    public void render(PoseStack.Pose last,VertexConsumer vc,int packedLight) {
         Matrix4f pose = last.pose();
         Matrix3f normal = last.normal();
         for (Quad q : quads) {
-            vc.vertex(pose, q.x0, q.y0, q.z0).color(255, 255, 255, 255).uv(q.u0, q.v0)
-                    .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(packedLight).normal(normal, q.nx, q.ny, q.nz).endVertex();
-            vc.vertex(pose, q.x1, q.y1, q.z1).color(255, 255, 255, 255).uv(q.u1, q.v0)
-                    .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(packedLight).normal(normal, q.nx, q.ny, q.nz).endVertex();
-            vc.vertex(pose, q.x2, q.y2, q.z2).color(255, 255, 255, 255).uv(q.u1, q.v1)
-                    .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(packedLight).normal(normal, q.nx, q.ny, q.nz).endVertex();
-            vc.vertex(pose, q.x3, q.y3, q.z3).color(255, 255, 255, 255).uv(q.u0, q.v1)
-                    .overlayCoords(OverlayTexture.NO_OVERLAY).uv2(packedLight).normal(normal, q.nx, q.ny, q.nz).endVertex();
+            vc.addVertex(pose, q.x0, q.y0, q.z0).setColor(255, 255, 255, 255).setUv(q.u0, q.v0)
+                    .setOverlay(OverlayTexture.NO_OVERLAY).setLight(packedLight).setNormal(last, q.nx, q.ny, q.nz);
+            vc.addVertex(pose, q.x1, q.y1, q.z1).setColor(255, 255, 255, 255).setUv(q.u1, q.v0)
+                    .setOverlay(OverlayTexture.NO_OVERLAY).setLight(packedLight).setNormal(last, q.nx, q.ny, q.nz);
+            vc.addVertex(pose, q.x2, q.y2, q.z2).setColor(255, 255, 255, 255).setUv(q.u1, q.v1)
+                    .setOverlay(OverlayTexture.NO_OVERLAY).setLight(packedLight).setNormal(last, q.nx, q.ny, q.nz);
+            vc.addVertex(pose, q.x3, q.y3, q.z3).setColor(255, 255, 255, 255).setUv(q.u0, q.v1)
+                    .setOverlay(OverlayTexture.NO_OVERLAY).setLight(packedLight).setNormal(last, q.nx, q.ny, q.nz);
         }
     }
 }

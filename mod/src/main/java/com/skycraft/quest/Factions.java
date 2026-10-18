@@ -11,7 +11,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -32,7 +32,7 @@ import java.util.Optional;
  * {@code factions} (id -> rank, the cross-module contract) and {@code faction_points} (id -> reputation).
  */
 public final class Factions {
-    public static final TagKey<Item> SPELL_TOMES = TagKey.create(Registries.ITEM, new ResourceLocation(Skycraft.MODID, "spell_tomes"));
+    public static final TagKey<Item> SPELL_TOMES = TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath(Skycraft.MODID, "spell_tomes"));
 
     private Factions() {}
 
@@ -40,20 +40,20 @@ public final class Factions {
 
     public static CompoundTag factionsTag(PlayerData data) {
         CompoundTag mod = data.module("quest");
-        if (!mod.contains("factions", Tag.TAG_COMPOUND)) mod.put("factions", new CompoundTag());
-        return mod.getCompound("factions");
+        if (!com.skycraft.platform.NbtData.hasType(mod, "factions", Tag.TAG_COMPOUND)) mod.put("factions", new CompoundTag());
+        return mod.getCompoundOrEmpty("factions");
     }
 
     private static CompoundTag pointsTag(PlayerData data) {
         CompoundTag mod = data.module("quest");
-        if (!mod.contains("faction_points", Tag.TAG_COMPOUND)) mod.put("faction_points", new CompoundTag());
-        return mod.getCompound("faction_points");
+        if (!com.skycraft.platform.NbtData.hasType(mod, "faction_points", Tag.TAG_COMPOUND)) mod.put("faction_points", new CompoundTag());
+        return mod.getCompoundOrEmpty("faction_points");
     }
 
     /** Rank in the faction, or -1 if not a member. */
     public static int rank(PlayerData data, Faction f) {
-        CompoundTag t = data.module("quest").getCompound("factions");
-        return t.contains(f.id) ? t.getInt(f.id) : -1;
+        CompoundTag t = data.module("quest").getCompoundOrEmpty("factions");
+        return t.contains(f.id) ? t.getIntOr(f.id, 0) : -1;
     }
 
     public static boolean isMember(PlayerData data, Faction f) {
@@ -61,7 +61,7 @@ public final class Factions {
     }
 
     public static int points(PlayerData data, Faction f) {
-        return data.module("quest").getCompound("faction_points").getInt(f.id);
+        return data.module("quest").getCompoundOrEmpty("faction_points").getIntOr(f.id, 0);
     }
 
     /** Joins a faction. Fails (with a message) if already a member or enemy of it. */
@@ -146,33 +146,33 @@ public final class Factions {
 
     private static ItemStack named(Item item, String nameKey) {
         ItemStack stack = new ItemStack(item);
-        stack.setHoverName(Component.translatable("item.skycraft.reward." + nameKey));
+        stack.set(net.minecraft.core.component.DataComponents.CUSTOM_NAME, Component.translatable("item.skycraft.reward." + nameKey));
         return stack;
     }
 
-    private static ItemStack enchanted(ItemStack stack, Enchantment e, int level) {
-        stack.enchant(e, level);
+    private static ItemStack enchanted(ItemStack stack, net.minecraft.resources.ResourceKey<Enchantment> e, int level) {
+        stack.enchant(com.skycraft.platform.EnchantmentsAccess.holder(e), level);
         return stack;
     }
 
     private static ItemStack dyedNamed(Item item, int color, String nameKey) {
         ItemStack s = QuestSpawner.dyed(item, color);
-        s.setHoverName(Component.translatable("item.skycraft.reward." + nameKey));
+        s.set(net.minecraft.core.component.DataComponents.CUSTOM_NAME, Component.translatable("item.skycraft.reward." + nameKey));
         return s;
     }
 
-    private static void armorSet(ServerPlayer p, int color, String nameKey, @Nullable Enchantment e, int level) {
+    private static void armorSet(ServerPlayer p, int color, String nameKey, @Nullable net.minecraft.resources.ResourceKey<Enchantment> e, int level) {
         Item[] pieces = {Items.LEATHER_HELMET, Items.LEATHER_CHESTPLATE, Items.LEATHER_LEGGINGS, Items.LEATHER_BOOTS};
         for (Item piece : pieces) {
             ItemStack s = dyedNamed(piece, color, nameKey);
-            if (e != null) s.enchant(e, level);
+            if (e != null) s.enchant(com.skycraft.platform.EnchantmentsAccess.holder(e, p.registryAccess()), level);
             Quests.give(p, s);
         }
     }
 
     /** A random spell tome from {@code #skycraft:spell_tomes} (magic module), if any exist. */
     public static ItemStack randomSpellTome(RandomSource random) {
-        Optional<Item> item = BuiltInRegistries.ITEM.getTag(SPELL_TOMES)
+        Optional<Item> item = BuiltInRegistries.ITEM.get(SPELL_TOMES)
                 .flatMap(set -> set.getRandomElement(random))
                 .map(Holder::value);
         return item.map(ItemStack::new).orElse(ItemStack.EMPTY);
@@ -212,13 +212,13 @@ public final class Factions {
                 if (rank == f.maxRank()) {
                     giveTome(p);
                     giveTome(p);
-                    Quests.give(p, enchanted(named(Items.DIAMOND_HELMET, "morokei"), Enchantments.ALL_DAMAGE_PROTECTION, 3));
+                    Quests.give(p, enchanted(named(Items.DIAMOND_HELMET, "morokei"), Enchantments.PROTECTION, 3));
                     Currency.give(p, 1000);
                 }
             }
             case THIEVES_GUILD -> {
                 if (rank == 0) armorSet(p, 0x2B2B2B, "thieves_guild_armor", null, 0);
-                else if (rank == 3) armorSet(p, 0x1E1A24, "nightingale_armor", Enchantments.ALL_DAMAGE_PROTECTION, 2);
+                else if (rank == 3) armorSet(p, 0x1E1A24, "nightingale_armor", Enchantments.PROTECTION, 2);
                 else if (rank == f.maxRank()) {
                     Quests.give(p, enchanted(named(Items.DIAMOND_SWORD, "chillrend"), Enchantments.SHARPNESS, 4));
                     Currency.give(p, 2000);
@@ -265,11 +265,11 @@ public final class Factions {
         if (!QuestConfig.DARK_WHISPER.get()) return;
         PlayerData data = SkyData.get(player);
         CompoundTag mod = data.module("quest");
-        if (mod.getBoolean("db_whispered") || isMember(data, Faction.DARK_BROTHERHOOD)) return;
-        if (data.module("crime").getInt("murders") < 1) return;
+        if (mod.getBooleanOr("db_whispered",false) || isMember(data, Faction.DARK_BROTHERHOOD)) return;
+        if (data.module("crime").getIntOr("murders",0) < 1) return;
         Level level = player.level();
         if (level.dimension() != Level.OVERWORLD) return;
-        long time = level.getDayTime() % 24000L;
+        long time = level.getDefaultClockTime() % 24000L;
         if (time < 13000 || time > 23000) return;
         mod.putBoolean("db_whispered", true);
         data.markDirty();
@@ -280,7 +280,7 @@ public final class Factions {
     }
 
     public static boolean isNight(Level level) {
-        long time = level.getDayTime() % 24000L;
+        long time = level.getDefaultClockTime() % 24000L;
         return time >= 13000 && time <= 23000;
     }
 }

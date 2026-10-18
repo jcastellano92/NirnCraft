@@ -3050,6 +3050,8 @@ pal("realm/alpine", fallback="province/skyrim", upland_y=100, peak_y=200,
 
 # ================================================================================================= writers
 def dump(path, obj):
+    from format_263 import prepare
+    path, obj = prepare(path, obj)
     os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, "w", encoding="utf-8", newline="\n") as f:
         json.dump(obj, f, indent=2, ensure_ascii=False)

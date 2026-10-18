@@ -31,6 +31,9 @@
     "skycraft:tropical_beach",
     "skycraft:tsaesci_jungle",
     "skycraft:valenwood_mangrove_coast",
-    "skycraft:valenwood_rainforest"
+    "skycraft:valenwood_rainforest",
+    "#c:is_wet/overworld",
+    "#c:is_wet/nether",
+    "#c:is_wet/end"
   ]
 }

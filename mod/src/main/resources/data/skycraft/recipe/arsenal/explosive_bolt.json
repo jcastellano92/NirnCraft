@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "skycraft:steel_bolt",
+    "skycraft:steel_bolt",
+    "skycraft:steel_bolt",
+    "skycraft:steel_bolt",
+    "minecraft:gunpowder",
+    "minecraft:gunpowder"
+  ],
+  "result": {
+    "count": 4,
+    "id": "skycraft:explosive_bolt"
+  }
+}

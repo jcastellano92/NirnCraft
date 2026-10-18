@@ -9,25 +9,24 @@ import com.skycraft.tamriel.Region;
 import com.skycraft.tamriel.Regions;
 import com.skycraft.world.Provinces;
 import com.skycraft.world.client.MusicController;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.commands.Commands;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.Mth;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
-import net.minecraftforge.client.event.RegisterClientCommandsEvent;
-import net.minecraftforge.client.event.RegisterGuiOverlaysEvent;
-import net.minecraftforge.client.gui.overlay.ForgeGui;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
+import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
+import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
+
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.util.Locale;
 
@@ -41,10 +40,10 @@ import java.util.Locale;
  *   {@link MusicController}.</li>
  * </ul>
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
 public final class GuideClient {
     private static final long ARRIVAL_BANNER_MS = 5500L;
-    private static final ResourceLocation DISCOVERY_STING = new ResourceLocation(Skycraft.MODID, "music.discovery");
+    private static final Identifier DISCOVERY_STING = Identifier.fromNamespaceAndPath(Skycraft.MODID, "music.discovery");
 
     /** Opened on the next tick: a chat command's screen would otherwise be closed by the chat screen itself. */
     private static boolean openPending;
@@ -59,29 +58,28 @@ public final class GuideClient {
     private GuideClient() {}
 
     public static void openHandbook() {
-        Minecraft.getInstance().setScreen(new HandbookScreen());
+        Minecraft.getInstance().gui.setScreen(new HandbookScreen());
     }
 
     @SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent event) {
-        if (event.phase != TickEvent.Phase.END) return;
+    public static void onClientTick(net.neoforged.neoforge.client.event.ClientTickEvent.Post event) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null) return;
 
         // Check for newly synced region arrival from GuideEvents
         CompoundTag mod = SkyData.get(mc.player).module(GuideEvents.MODULE);
-        int seq = mod.getInt("last_arrival_seq");
+        int seq = mod.getIntOr("last_arrival_seq",0);
         if (lastSeenArrivalSeq == -1) {
             // First client tick after login/respawn: only remember the counter. Replaying a stored arrival here made
             // the banner pop up again on every load while a single region had been entered.
             lastSeenArrivalSeq = seq;
         } else if (seq > lastSeenArrivalSeq) {
             lastSeenArrivalSeq = seq;
-            String regionId = mod.getString("last_arrival_region");
+            String regionId = mod.getStringOr("last_arrival_region","");
             if (!regionId.isEmpty()) showArrivalBanner(mc, regionId, false);
         }
 
-        if (!openPending || mc.screen != null) return;
+        if (!openPending || mc.gui.screen() != null) return;
         openPending = false;
         if (openChapter != null) HandbookScreen.preselect(openChapter);
         openChapter = null;
@@ -134,10 +132,12 @@ public final class GuideClient {
         return Component.literal(sb.toString());
     }
 
-    public static void renderArrivalBanner(ForgeGui gui, GuiGraphics g, float partialTick, int width, int height) {
+    public static void renderArrivalBanner(GuiGraphicsExtractor g, net.minecraft.client.DeltaTracker delta) {
+        float partialTick = delta.getGameTimeDeltaPartialTick(false);
+        int width = g.guiWidth(), height = g.guiHeight();
         if (bannerTitle == null) return;
         Minecraft mc = Minecraft.getInstance();
-        if (mc.options.hideGui || mc.player == null) return;
+        if (mc.gui.hud.isHidden() || mc.player == null) return;
         long age = Util.getMillis() - bannerStartMs;
         if (age < 0 || age > ARRIVAL_BANNER_MS) {
             bannerTitle = null;
@@ -153,20 +153,20 @@ public final class GuideClient {
         int y = Math.max(96, height / 2 - 68);
 
         if (bannerProvince != null && !bannerProvince.getString().isEmpty()) {
-            g.drawCenteredString(font, bannerProvince, width / 2, y - 12, alpha | 0xC8BFA6);
+            g.centeredText(font, bannerProvince, width / 2, y - 12, alpha | 0xC8BFA6);
         }
-        g.pose().pushPose();
-        g.pose().translate(width / 2f, y, 0);
-        g.pose().scale(1.6f, 1.6f, 1f);
-        g.drawCenteredString(font, bannerTitle, 0, 0, alpha | 0xF5EBC8);
-        g.pose().popPose();
+        g.pose().pushMatrix();
+        g.pose().translate(width / 2f,  y);
+        g.pose().scale(1.6f,  1.6f);
+        g.centeredText(font, bannerTitle, 0, 0, alpha | 0xF5EBC8);
+        g.pose().popMatrix();
 
         int half = Math.min(width / 2 - 12, (int) (font.width(bannerTitle) * 0.85f) + 16);
         g.fill(width / 2 - half, y + 16, width / 2 + half, y + 17, alpha | 0x8A7F66);
 
         if (bannerRumour != null) {
             String sub = font.plainSubstrByWidth(bannerRumour.getString(), width - 32);
-            g.drawCenteredString(font, sub, width / 2, y + 21, alpha | 0xE6D296);
+            g.centeredText(font, sub, width / 2, y + 21, alpha | 0xE6D296);
         }
     }
 
@@ -222,14 +222,14 @@ public final class GuideClient {
     }
 
     /** Mod-bus client registration. */
-    @Mod.EventBusSubscriber(modid = Skycraft.MODID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+    @net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
     public static final class Setup {
         private Setup() {}
 
         @SubscribeEvent
-        public static void overlays(RegisterGuiOverlaysEvent event) {
-            event.registerAboveAll("region_arrival", GuideClient::renderArrivalBanner);
-            event.registerAboveAll("tutorial_hints", TutorialHints::render);
+        public static void overlays(RegisterGuiLayersEvent event) {
+            event.registerAboveAll(net.minecraft.resources.Identifier.fromNamespaceAndPath("skycraft", "region_arrival"), GuideClient::renderArrivalBanner);
+            event.registerAboveAll(net.minecraft.resources.Identifier.fromNamespaceAndPath("skycraft", "tutorial_hints"), TutorialHints::render);
         }
     }
 }

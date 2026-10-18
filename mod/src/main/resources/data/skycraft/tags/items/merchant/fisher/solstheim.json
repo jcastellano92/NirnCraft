@@ -1,9 +1,0 @@
-{
-  "replace": false,
-  "values": [
-    {"id": "skycraft:ash_perch", "required": false},
-    {"id": "skycraft:arctic_char", "required": false},
-    {"id": "skycraft:mudcrab_chitin", "required": false},
-    {"id": "skycraft:small_pearl", "required": false}
-  ]
-}

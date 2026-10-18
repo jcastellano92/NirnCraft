@@ -12,7 +12,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -21,11 +21,11 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraftforge.event.entity.living.LivingDeathEvent;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -41,7 +41,7 @@ import java.util.UUID;
  * <p>Favours are small radiant tasks: the NPC asks for a few items of its trade (wheat, iron, firewood, fish...)
  * and pays in gold and goodwill.</p>
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class Relationships {
     public enum Rank {
         ENEMY(-100), DISLIKED(-40), STRANGER(-10), ACQUAINTANCE(10), FRIEND(25), CONFIDANT(50), ALLY(75);
@@ -74,8 +74,8 @@ public final class Relationships {
     }
 
     public static int personalDisposition(NpcEntity npc, Player player) {
-        CompoundTag d = npc.social().getCompound("disp");
-        int base = d.getInt(player.getStringUUID());
+        CompoundTag d = npc.social().getCompoundOrEmpty("disp");
+        int base = d.getIntOr(player.getStringUUID(), 0);
         if (!d.contains(player.getStringUUID())) {
             base = Math.max(-30, Math.min(20, Reputation.get(player, Reputation.TOWNSFOLK) / 3));
         }
@@ -96,7 +96,7 @@ public final class Relationships {
 
     /** Changes how {@code npc} feels about {@code player}; tells the player when the rank changes. */
     public static void adjust(NpcEntity npc, Player player, int delta) {
-        if (delta == 0 || npc.level().isClientSide) return;
+        if (delta == 0 || npc.level().isClientSide()) return;
         int before = disposition(npc, player);
         int personalBefore = personalDisposition(npc, player);
         int personalAfter = Math.max(-100, Math.min(100, personalBefore + delta));
@@ -127,19 +127,19 @@ public final class Relationships {
     }
 
     @SubscribeEvent(priority = EventPriority.LOW)
-    public static void onHurt(LivingHurtEvent event) {
-        if (event.isCanceled() || !(event.getEntity() instanceof NpcEntity npc) || npc.level().isClientSide) return;
+    public static void onHurt(com.skycraft.combat.BeforeArmorDamageEvent event) {
+        if (event.isCanceled() || !(event.getEntity() instanceof NpcEntity npc) || npc.level().isClientSide()) return;
         if (!(event.getSource().getEntity() instanceof ServerPlayer player) || player.isCreative()) return;
         if (Followers.isFollowerOf(npc, player) && event.getAmount() < 4) return;
         long now = npc.level().getGameTime();
-        if (now - npc.social().getLong("last_hurt") < 40) return; // one grudge per flurry of blows
+        if (now - npc.social().getLongOr("last_hurt",0L) < 40) return; // one grudge per flurry of blows
         npc.social().putLong("last_hurt", now);
         adjust(npc, player, npc.role().civilian ? -20 : -10);
     }
 
     @SubscribeEvent
     public static void onDeath(LivingDeathEvent event) {
-        if (!(event.getEntity() instanceof NpcEntity npc) || npc.level().isClientSide) return;
+        if (!(event.getEntity() instanceof NpcEntity npc) || npc.level().isClientSide()) return;
         if (event.getSource().getEntity() instanceof ServerPlayer killer && npc.role().civilian) {
             // the dead's friends and neighbours who saw it never forget
             for (NpcEntity w : npc.level().getEntitiesOfClass(NpcEntity.class, npc.getBoundingBox().inflate(20),
@@ -168,21 +168,21 @@ public final class Relationships {
                     Relationships::gift));
         }
         if (npc.role().townsfolk()) {
-            CompoundTag favor = npc.social().getCompound("favor");
+            CompoundTag favor = npc.social().getCompoundOrEmpty("favor");
             String key = player.getStringUUID();
-            if (favor.contains("item") && key.equals(favor.getString("for"))) {
-                Item item = BuiltInRegistries.ITEM.get(new ResourceLocation(favor.getString("item")));
-                int count = favor.getInt("count");
+            if (favor.contains("item") && key.equals(favor.getStringOr("for",""))) {
+                Item item = BuiltInRegistries.ITEM.getValue(Identifier.parse(favor.getStringOr("item","")));
+                int count = favor.getIntOr("count",0);
                 if (count(player, item) >= count) {
                     Component label = com.skycraft.quest.QuestDialogue.questLabel(
                             Component.translatable("dialogue.skycraft.society.favor_done", count, new ItemStack(item).getHoverName()));
                     out.add(new DialogueOption("society.favor_done", label, 105, Relationships::completeFavor));
                 }
-            } else if (npc.level().getGameTime() >= npc.social().getLong("favor_next")
+            } else if (npc.level().getGameTime() >= npc.social().getLongOr("favor_next",0L)
                     && com.skycraft.economy.Merchants.profession(npc) == null
                     && com.skycraft.quest.story.QuestNpcs.idOf(npc).isEmpty()
                     && com.skycraft.quest.QuestDialogue.canOfferQuest(player, npc)
-                    && ((npc.getUUID().getLeastSignificantBits() ^ (npc.level().getDayTime() / DAY)) & 7L) == 0L) {
+                    && ((npc.getUUID().getLeastSignificantBits() ^ (npc.level().getDefaultClockTime() / DAY)) & 7L) == 0L) {
                 out.add(new DialogueOption("society.favor",
                         com.skycraft.quest.QuestDialogue.questLabel(Component.translatable("dialogue.skycraft.society.favor")),
                         475, Relationships::offerFavor));
@@ -202,9 +202,9 @@ public final class Relationships {
         if (!(entity instanceof NpcEntity npc) || player.distanceToSqr(npc) > 64) return;
         ItemStack held = player.getMainHandItem();
         if (held.isEmpty()) return;
-        long day = player.level().getDayTime() / DAY;
+        long day = player.level().getDefaultClockTime() / DAY;
         CompoundTag gifts = Npcs.sub(npc.social(), "gift_day");
-        if (gifts.getLong(player.getStringUUID()) == day + 1) {
+        if (gifts.getLongOr(player.getStringUUID(), 0L) == day + 1) {
             Dialogue.open(player, npc, Component.translatable("society.skycraft.say.gift.again"));
             return;
         }
@@ -222,21 +222,21 @@ public final class Relationships {
 
     /** Each trade appreciates its own kind of gift; everyone likes a sweetroll. */
     private static boolean likes(NpcEntity npc, ItemStack stack) {
-        ResourceLocation id = BuiltInRegistries.ITEM.getKey(stack.getItem());
+        Identifier id = BuiltInRegistries.ITEM.getKey(stack.getItem());
         String path = id.getPath();
         if (path.contains("sweetroll") || path.contains("mead") || stack.is(Items.CAKE) || path.contains("flower") || stack.is(Items.POPPY)) {
             return true;
         }
         return switch (npc.role()) {
             case BLACKSMITH -> path.contains("ingot") || path.contains("ore");
-            case FARMER, BUTCHER, INNKEEPER -> stack.isEdible();
+            case FARMER, BUTCHER, INNKEEPER -> stack.has(net.minecraft.core.component.DataComponents.FOOD);
             case SCHOLAR, MAGE, PRIEST -> path.contains("book") || path.contains("soul_gem") || path.contains("scroll");
             case APOTHECARY -> com.skycraft.economy.ItemCategory.of(stack) == com.skycraft.economy.ItemCategory.INGREDIENTS;
             case BARD -> path.contains("lute") || path.contains("drum") || path.contains("flute") || stack.is(Items.NOTE_BLOCK);
             case HUNTER -> path.contains("pelt") || path.contains("hide") || stack.is(Items.ARROW);
             case MINER -> path.contains("gem") || stack.is(Items.DIAMOND) || stack.is(Items.EMERALD);
-            case CHILD -> stack.isEdible() || stack.is(Items.SNOWBALL);
-            case BEGGAR -> stack.isEdible();
+            case CHILD -> stack.has(net.minecraft.core.component.DataComponents.FOOD) || stack.is(Items.SNOWBALL);
+            case BEGGAR -> stack.has(net.minecraft.core.component.DataComponents.FOOD);
             default -> com.skycraft.economy.ItemCategory.isJewelry(stack);
         };
     }
@@ -282,13 +282,13 @@ public final class Relationships {
 
     private static void completeFavor(ServerPlayer player, LivingEntity entity) {
         if (!(entity instanceof NpcEntity npc) || player.distanceToSqr(npc) > 64) return;
-        CompoundTag favor = npc.social().getCompound("favor");
-        if (!favor.contains("item") || !player.getStringUUID().equals(favor.getString("for"))) return;
-        Item item = BuiltInRegistries.ITEM.get(new ResourceLocation(favor.getString("item")));
-        int count = favor.getInt("count");
+        CompoundTag favor = npc.social().getCompoundOrEmpty("favor");
+        if (!favor.contains("item") || !player.getStringUUID().equals(favor.getStringOr("for",""))) return;
+        Item item = BuiltInRegistries.ITEM.getValue(Identifier.parse(favor.getStringOr("item","")));
+        int count = favor.getIntOr("count",0);
         if (count(player, item) < count) return;
         take(player, item, count);
-        int reward = favor.getInt("reward");
+        int reward = favor.getIntOr("reward",0);
         if (reward > 0) Currency.give(player, reward);
         npc.social().remove("favor");
         npc.social().putLong("favor_next", npc.level().getGameTime() + 2 * DAY);
@@ -308,7 +308,7 @@ public final class Relationships {
 
     /** Gives a stack to the player's bags (or drops it at their feet). */
     static void give(ServerPlayer player, ItemStack stack) {
-        if (!ActionHandler.addToBags(player, stack)) player.drop(stack, false);
+        if (!ActionHandler.addToBags(player, stack)) player.drop(stack, false, net.minecraft.util.Prediction.SERVER_ONLY);
     }
 
     @Nullable

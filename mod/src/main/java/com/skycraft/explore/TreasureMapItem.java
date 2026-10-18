@@ -14,14 +14,14 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.DistExecutor;
+import net.neoforged.api.distmarker.Dist;
+import com.skycraft.platform.Sides;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -46,7 +46,7 @@ public class TreasureMapItem extends Item {
 
     public static ItemStack create(MinorSites.Site cache, RandomSource random) {
         ItemStack stack = new ItemStack(ExploreRegistry.TREASURE_MAP.get());
-        CompoundTag tag = stack.getOrCreateTag();
+        CompoundTag tag = com.skycraft.inventory.ItemData.customOrEmpty(stack);
         tag.putInt("tx", cache.x());
         tag.putInt("tz", cache.z());
         tag.putInt("ox", cache.x() + random.nextInt(161) - 80);
@@ -55,39 +55,40 @@ public class TreasureMapItem extends Item {
         near.ifPresent(p -> tag.putString("near", p.id()));
         // a stable number per cache, like Skyrim's "Treasure Map IV"
         tag.putInt("no", 1 + (int) Math.floorMod(cache.key() * 0x9E3779B97F4A7C15L >>> 40, 40L));
+        com.skycraft.inventory.ItemData.setCustom(stack, tag);
         return stack;
     }
 
     @Override
     public Component getName(ItemStack stack) {
-        CompoundTag tag = stack.getTag();
+        CompoundTag tag = com.skycraft.inventory.ItemData.custom(stack);
         if (tag == null || !tag.contains("no")) return super.getName(stack);
-        return Component.translatable("item.skycraft.treasure_map.numbered", roman(tag.getInt("no")));
+        return Component.translatable("item.skycraft.treasure_map.numbered", roman(tag.getIntOr("no",0)));
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> lines, TooltipFlag flag) {
-        CompoundTag tag = stack.getTag();
+    public void appendHoverText(ItemStack stack, net.minecraft.world.item.Item.TooltipContext context263, net.minecraft.world.item.component.TooltipDisplay display263, java.util.function.Consumer<Component> lines, TooltipFlag flag) {
+        CompoundTag tag = com.skycraft.inventory.ItemData.custom(stack);
         if (tag == null || !tag.contains("tx")) {
-            lines.add(Component.translatable("item.skycraft.treasure_map.blank").withStyle(ChatFormatting.GRAY));
+            lines.accept(Component.translatable("item.skycraft.treasure_map.blank").withStyle(ChatFormatting.GRAY));
             return;
         }
-        String region = TamrielMap.region(tag.getInt("tx"), tag.getInt("tz")).name().getString();
-        lines.add(Component.translatable("item.skycraft.treasure_map.where", region).withStyle(ChatFormatting.GRAY));
-        lines.add(Component.translatable("item.skycraft.treasure_map.hint").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
+        String region = TamrielMap.region(tag.getIntOr("tx",0), tag.getIntOr("tz",0)).name().getString();
+        lines.accept(Component.translatable("item.skycraft.treasure_map.where", region).withStyle(ChatFormatting.GRAY));
+        lines.accept(Component.translatable("item.skycraft.treasure_map.hint").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
     }
 
     @Override
-    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+    public InteractionResult use(Level level, Player player, InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
-        CompoundTag tag = stack.getTag();
-        if (tag == null || !tag.contains("tx")) return InteractionResultHolder.pass(stack);
-        if (level.isClientSide) {
-            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> com.skycraft.explore.client.ExploreClient.openTreasureMap(stack));
+        CompoundTag tag = com.skycraft.inventory.ItemData.custom(stack);
+        if (tag == null || !tag.contains("tx")) return InteractionResult.PASS;
+        if (level.isClientSide()) {
+            Sides.runOn(Dist.CLIENT, () -> () -> com.skycraft.explore.client.ExploreClient.openTreasureMap(stack));
         } else if (player instanceof ServerPlayer sp && ExploreConfig.flag(ExploreConfig.TREASURE_MAP_MARKERS, true)) {
-            mark(sp, tag.getInt("tx"), tag.getInt("tz"), tag.getInt("no"));
+            mark(sp, tag.getIntOr("tx",0), tag.getIntOr("tz",0), tag.getIntOr("no",0));
         }
-        return InteractionResultHolder.sidedSuccess(stack, level.isClientSide);
+        return com.skycraft.platform.Interactions.sidedSuccess(level.isClientSide()).heldItemTransformedTo(stack);
     }
 
     /** Adds the cache to the player's map as a known (unvisited) location, once. */
@@ -95,8 +96,8 @@ public class TreasureMapItem extends Item {
         PlayerData data = SkyData.get(player);
         String id = MARKER_PREFIX + Math.floorDiv(x, MinorSites.CELL) + "," + Math.floorDiv(z, MinorSites.CELL);
         if (WorldData.find(data, id) != null) return;
-        if (data.module("explore").getList("caches_found", net.minecraft.nbt.Tag.TAG_STRING).stream()
-                .anyMatch(t -> t.getAsString().equals(id))) return;
+        if (data.module("explore").getListOrEmpty("caches_found").stream()
+                .anyMatch(t -> t instanceof net.minecraft.nbt.StringTag string && string.value().equals(id))) return;
         int y = Math.max(player.level().getSeaLevel() + 1, (int) TamrielMap.elevation(x, z));
         CompoundTag loc = new CompoundTag();
         loc.putString("id", id);
@@ -105,7 +106,7 @@ public class TreasureMapItem extends Item {
         loc.putInt("x", x);
         loc.putInt("y", y);
         loc.putInt("z", z);
-        loc.putString("dim", player.level().dimension().location().toString());
+        loc.putString("dim", player.level().dimension().identifier().toString());
         loc.putInt("ax", x);
         loc.putInt("ay", y);
         loc.putInt("az", z);
@@ -118,7 +119,7 @@ public class TreasureMapItem extends Item {
     /** Label for the drawing: the nearest named place. */
     public static Component nearName(CompoundTag tag) {
         if (!tag.contains("near")) return Component.empty();
-        return Places.byId(tag.getString("near")).map(p -> (Component) Component.literal(PlaceText.plain(p))).orElse(Component.empty());
+        return Places.byId(tag.getStringOr("near","")).map(p -> (Component) Component.literal(PlaceText.plain(p))).orElse(Component.empty());
     }
 
     public static String roman(int n) {

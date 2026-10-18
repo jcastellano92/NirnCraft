@@ -1,8 +1,8 @@
 package com.skycraft.atmosphere;
 
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.config.ModConfig;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.ModLoadingContext;
+import net.neoforged.fml.config.ModConfig;
 
 /**
  * Skyrim sky (Masser and Secunda, aurora, stars) and the original Skycraft soundtrack.
@@ -22,8 +22,8 @@ public final class AtmosphereModule {
     /** Registers this module's DeferredRegisters and mod-bus listeners. Called from the mod constructor. */
     public static void init(IEventBus modBus) {
         AtmosphereSounds.init(modBus);
-        ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, AtmosphereConfig.CLIENT_SPEC, "skycraft-atmosphere-client.toml");
-        ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, AtmosphereConfig.SERVER_SPEC, "skycraft-atmosphere-server.toml");
+        com.skycraft.Skycraft.config(ModConfig.Type.CLIENT, AtmosphereConfig.CLIENT_SPEC, "skycraft-atmosphere-client.toml");
+        com.skycraft.Skycraft.config(ModConfig.Type.SYNCED, AtmosphereConfig.SERVER_SPEC, "skycraft-atmosphere-server.toml");
         com.skycraft.visual.VisualModule.init(modBus);
     }
 

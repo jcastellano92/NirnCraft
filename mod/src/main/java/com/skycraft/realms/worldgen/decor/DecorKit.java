@@ -26,7 +26,7 @@ public final class DecorKit {
 
     public boolean inReach(int x, int y, int z) {
         return Math.abs(x - origin.getX()) <= REACH && Math.abs(z - origin.getZ()) <= REACH
-                && y > level.getMinBuildHeight() && y < level.getMaxBuildHeight() - 1;
+                && y > level.getMinY() && y < (level.getMaxY() + 1) - 1;
     }
 
     public BlockState get(int x, int y, int z) {

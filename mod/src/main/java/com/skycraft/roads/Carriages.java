@@ -140,8 +140,8 @@ public final class Carriages {
 
     public static boolean isCarriageDriver(LivingEntity npc) {
         if (npc == null || !npc.isAlive()) return false;
-        if (npc.getPersistentData().getBoolean("skycraft_carriage_driver")) return true;
-        if (npc.getPersistentData().getBoolean("skycraft_stable_master")) return false;
+        if (npc.getPersistentData().getBooleanOr("skycraft_carriage_driver", false)) return true;
+        if (npc.getPersistentData().getBooleanOr("skycraft_stable_master", false)) return false;
         String desc = npc.getType().getDescriptionId().toLowerCase(java.util.Locale.ROOT);
         if (desc.contains("carriage") || desc.contains("driver")) return true;
         if (npc.hasCustomName()) {
@@ -346,23 +346,26 @@ public final class Carriages {
         }
         if (npc != null && player.distanceToSqr(npc) > 8 * 8) return;
 
-        if (!Currency.take(player, fare)) {
+        if (com.skycraft.perf.Prewarm.busy(player.getUUID())) return;
+        if (fare < 0 || !Currency.canAfford(player, fare)) {
             if (npc != null) Dialogue.open(player, npc, Component.translatable("dialogue.skycraft.carriage.no_gold", fare));
             else Notifier.message(player, Component.translatable("dialogue.skycraft.carriage.no_gold", fare));
             return;
         }
-
-        if (!com.skycraft.perf.Prewarm.isReady(player.serverLevel(), dest.x(), dest.z())
-                && com.skycraft.perf.Prewarm.start(player, dest.x(), dest.z(), dest.name(),
-                () -> finishTravel(player, npc, dest, fare))) {
-            return; // the destination loads first (progress bar), then the ride completes
-        }
-        finishTravel(player, npc, dest, fare);
+        com.skycraft.travel.TravelNetworks.prewarmTo(player, dest.x(), dest.z(), dest.name(), () -> {
+            // Charge only the accepted journey, after terrain is ready. Cancellation leaves gold untouched.
+            if (!Currency.take(player, fare)) {
+                if (npc != null) Dialogue.open(player, npc, Component.translatable("dialogue.skycraft.carriage.no_gold", fare));
+                else Notifier.message(player, Component.translatable("dialogue.skycraft.carriage.no_gold", fare));
+                return;
+            }
+            finishTravel(player, npc, dest, fare);
+        });
     }
 
     private static void finishTravel(ServerPlayer player, LivingEntity npc, Place dest, int fare) {
         if (!player.isAlive()) return;
-        ServerLevel level = player.serverLevel();
+        ServerLevel level = player.level();
         BlockPos targetPos = stopFor(level, dest);
 
         // Find mounted horse if riding, or nearby followers
@@ -373,13 +376,13 @@ public final class Carriages {
         double distance = Math.sqrt(player.blockPosition().distSqr(targetPos));
 
         player.stopRiding();
-        player.teleportTo(level, targetPos.getX() + 0.5, targetPos.getY(), targetPos.getZ() + 0.5, player.getYRot(), player.getXRot());
+        player.teleportTo(level, targetPos.getX() + 0.5, targetPos.getY(), targetPos.getZ() + 0.5, java.util.Set.of(),  player.getYRot(), player.getXRot(), true);
         player.resetFallDistance();
 
         if (vehicle != null && vehicle.isAlive()) {
             vehicle.teleportTo(targetPos.getX() + 0.5, targetPos.getY(), targetPos.getZ() + 0.5);
             vehicle.resetFallDistance();
-            player.startRiding(vehicle, true);
+            player.startRiding(vehicle, true, true);
         }
 
         int i = 0;
@@ -395,10 +398,10 @@ public final class Carriages {
         // Advance time for carriage journey (carriages are slower than walking straight there)
         int hours = 0;
         int perHour = com.skycraft.world.WorldConfig.BLOCKS_PER_TRAVEL_HOUR.get();
-        long online = player.server.getPlayerList().getPlayers().stream().filter(p -> !p.isSpectator()).count();
+        long online = player.level().getServer().getPlayerList().getPlayers().stream().filter(p -> !p.isSpectator()).count();
         if (perHour > 0 && online <= 1) {
             hours = Mth.clamp((int) Math.round(distance / perHour), 1, 72);
-            RestManager.advanceTime(player.server, hours * (long) RestManager.TICKS_PER_HOUR);
+            RestManager.advanceTime(player.level().getServer(), hours * (long) RestManager.TICKS_PER_HOUR);
         }
 
         SkyNetwork.sendToPlayer(player, new WorldPackets.RestFade(hours, WorldPackets.RestFade.TRAVEL));
@@ -442,7 +445,7 @@ public final class Carriages {
         int c0z = (place.z() - outer) >> 4, c1z = (place.z() + outer) >> 4;
         for (int cx = c0x; cx <= c1x; cx++) {
             for (int cz = c0z; cz <= c1z; cz++) {
-                LongArrayList entries = data.chunkIndex.get(ChunkPos.asLong(cx, cz));
+                LongArrayList entries = data.chunkIndex.get(ChunkPos.pack(cx, cz));
                 if (entries == null) continue;
                 for (int k = 0; k < entries.size(); k++) {
                     long e = entries.getLong(k);

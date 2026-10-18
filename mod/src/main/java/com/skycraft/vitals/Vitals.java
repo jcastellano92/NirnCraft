@@ -16,12 +16,12 @@ import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.GameRules;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.living.LivingEntityUseItemEvent;
-import net.minecraftforge.event.entity.living.LivingEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.minecraft.world.level.gamerules.GameRules;
+
+import net.neoforged.neoforge.event.entity.living.LivingEntityUseItemEvent;
+import net.neoforged.neoforge.event.entity.living.LivingEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.util.UUID;
 
@@ -29,10 +29,10 @@ import java.util.UUID;
  * Health, Magicka and Stamina: Skyrim-style pools, regeneration rates, sprint drain, and attribute syncing.
  * Other modules spend resources through {@link #consumeMagicka} / {@link #consumeStamina}.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class Vitals {
-    private static final UUID HEALTH_MOD = UUID.fromString("6f1d3b4c-2a8e-4f7d-9b1a-5c3e2d1f0a01");
-    private static final UUID HEAVY_SPEED_MOD = UUID.fromString("6f1d3b4c-2a8e-4f7d-9b1a-5c3e2d1f0a02");
+    private static final net.minecraft.resources.Identifier HEALTH_MOD = net.minecraft.resources.Identifier.parse("skycraft:modifier_6f1d3b4c-2a8e-4f7d-9b1a-5c3e2d1f0a01");
+    private static final net.minecraft.resources.Identifier HEAVY_SPEED_MOD = net.minecraft.resources.Identifier.parse("skycraft:modifier_6f1d3b4c-2a8e-4f7d-9b1a-5c3e2d1f0a02");
     /** Ticks after which a player counts as out of combat. */
     public static final int COMBAT_TIMEOUT = 160;
 
@@ -79,9 +79,9 @@ public final class Vitals {
         if (maxHealth != null) {
             double bonus = data.maxHealth() / 5.0 - 20.0;
             AttributeModifier existing = maxHealth.getModifier(HEALTH_MOD);
-            if (existing == null || existing.getAmount() != bonus) {
+            if (existing == null || existing.amount() != bonus) {
                 if (existing != null) maxHealth.removeModifier(HEALTH_MOD);
-                if (bonus != 0) maxHealth.addPermanentModifier(new AttributeModifier(HEALTH_MOD, "Skycraft health", bonus, AttributeModifier.Operation.ADDITION));
+                if (bonus != 0) maxHealth.addPermanentModifier(new AttributeModifier(HEALTH_MOD, bonus, AttributeModifier.Operation.ADD_VALUE));
                 if (player.getHealth() > player.getMaxHealth()) player.setHealth(player.getMaxHealth());
             }
         }
@@ -99,16 +99,16 @@ public final class Vitals {
         int heavy = ArmorClass.countHeavy(player);
         double penalty = Perks.has(data, "heavy_armor.conditioning") ? 0 : -0.025 * heavy;
         AttributeModifier existing = speed.getModifier(HEAVY_SPEED_MOD);
-        if (existing != null && existing.getAmount() == penalty) return;
+        if (existing != null && existing.amount() == penalty) return;
         if (existing != null) speed.removeModifier(HEAVY_SPEED_MOD);
-        if (penalty != 0) speed.addTransientModifier(new AttributeModifier(HEAVY_SPEED_MOD, "Skycraft heavy armor", penalty, AttributeModifier.Operation.MULTIPLY_TOTAL));
+        if (penalty != 0) speed.addTransientModifier(new AttributeModifier(HEAVY_SPEED_MOD, penalty, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
     }
 
     // ------------------------------------------------------------------ ticking
 
     @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer player)) return;
+    public static void onPlayerTick(net.neoforged.neoforge.event.tick.PlayerTickEvent.Post event) {
+        if (!(event instanceof net.neoforged.neoforge.event.tick.PlayerTickEvent.Post) || !(event.getEntity() instanceof ServerPlayer player)) return;
         PlayerData data = SkyData.get(player);
         long now = player.level().getGameTime();
         boolean combat = inCombat(player);
@@ -143,11 +143,18 @@ public final class Vitals {
         if (SkyConfig.SKYRIM_HUNGER.get()) {
             if (player.getFoodData().getFoodLevel() != 17) player.getFoodData().setFoodLevel(17);
             player.getFoodData().setSaturation(0f);
-            player.getFoodData().setExhaustion(0f);
+            clearExhaustion(player);
         }
 
         // The "detected" flag is computed by combat/Stealth's single per-player mob scan.
         sync(player, data);
+    }
+
+    private static void clearExhaustion(ServerPlayer player) {
+        var output = net.minecraft.world.level.storage.TagValueOutput.createWithoutContext(net.minecraft.util.ProblemReporter.DISCARDING);
+        player.getFoodData().addAdditionalSaveData(output);
+        var food = output.buildResult(); food.putFloat("foodExhaustionLevel", 0);
+        player.getFoodData().readAdditionalSaveData(net.minecraft.world.level.storage.TagValueInput.create(net.minecraft.util.ProblemReporter.DISCARDING, player.registryAccess(), food));
     }
 
     private static final java.util.Set<UUID> EXHAUSTED = new java.util.HashSet<>();
@@ -218,10 +225,10 @@ public final class Vitals {
      * level.dat, so an operator who turns it back on afterwards is respected instead of overridden every tick).
      */
     @SubscribeEvent
-    public static void onServerStarted(net.minecraftforge.event.server.ServerStartedEvent event) {
+    public static void onServerStarted(net.neoforged.neoforge.event.server.ServerStartedEvent event) {
         var rules = event.getServer().getGameRules();
-        if (SkyConfig.SKYRIM_REGEN.get() && rules.getBoolean(GameRules.RULE_NATURAL_REGENERATION)) {
-            rules.getRule(GameRules.RULE_NATURAL_REGENERATION).set(false, event.getServer());
+        if (SkyConfig.SKYRIM_REGEN.get() && rules.get(GameRules.NATURAL_HEALTH_REGENERATION)) {
+            rules.set(GameRules.NATURAL_HEALTH_REGENERATION, false, event.getServer());
         }
     }
 
@@ -235,7 +242,7 @@ public final class Vitals {
      * etc., throttled), the appearance to tracking players, and the vitals pools.
      */
     private static void sync(ServerPlayer player, PlayerData data) {
-        int tick = player.server.getTickCount();
+        int tick = player.level().getServer().getTickCount();
         boolean full = false;
         if (data.isDirty() && tick - data.getLastFullSync() >= FULL_SYNC_INTERVAL) {
             data.consumeDirty();
@@ -264,7 +271,7 @@ public final class Vitals {
 
     private static void sendVitals(ServerPlayer player, PlayerData data) {
         byte flags = 0;
-        if (data.module("vitals").getBoolean("detected")) flags |= CorePackets.SyncVitals.DETECTED;
+        if (data.module("vitals").getBooleanOr("detected",false)) flags |= CorePackets.SyncVitals.DETECTED;
         if (inCombat(player)) flags |= CorePackets.SyncVitals.IN_COMBAT;
         if (isExhausted(player)) flags |= CorePackets.SyncVitals.EXHAUSTED;
         SkyNetwork.sendToPlayer(player, new CorePackets.SyncVitals(data.getMagicka(), data.getStamina(), flags));
@@ -283,10 +290,16 @@ public final class Vitals {
     @SubscribeEvent
     public static void onEat(LivingEntityUseItemEvent.Finish event) {
         if (!(event.getEntity() instanceof ServerPlayer player) || !SkyConfig.SKYRIM_HUNGER.get()) return;
-        var food = event.getItem().getFoodProperties(player);
+        var food = event.getItem().get(net.minecraft.core.component.DataComponents.FOOD);
         if (food == null) return;
-        player.heal(food.getNutrition() * 0.75f);
+        player.heal(food.nutrition() * 0.75f);
         PlayerData data = SkyData.get(player);
-        data.setStamina(data.getStamina() + food.getNutrition() * 4f + food.getSaturationModifier() * 10f);
+        data.setStamina(data.getStamina() + foodStamina(food));
+    }
+
+    /** Native saturation is absolute food saturation; the legacy stamina formula used its modifier. */
+    public static float foodStamina(net.minecraft.world.food.FoodProperties food) {
+        float modifier = food.nutrition() > 0 ? food.saturation() / (2f * food.nutrition()) : 0;
+        return food.nutrition() * 4f + modifier * 10f;
     }
 }

@@ -1,7 +1,7 @@
 package com.skycraft.society.client;
 
 import com.skycraft.society.entity.NpcEntity;
-import net.minecraft.client.model.PlayerModel;
+import net.minecraft.client.model.player.PlayerModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.builders.CubeDeformation;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
@@ -14,7 +14,7 @@ import net.minecraft.world.item.ItemStack;
  * Player-shaped NPC model (full 64x64 skin layout with overlays). Adds poses: bound hands for prisoners, raised
  * hands while casting (mages, priests), and strumming while a bard plays.
  */
-public class NpcModel extends PlayerModel<NpcEntity> {
+public class NpcModel extends PlayerModel {
     public NpcModel(ModelPart root) {
         super(root, false);
     }
@@ -23,11 +23,10 @@ public class NpcModel extends PlayerModel<NpcEntity> {
         return LayerDefinition.create(PlayerModel.createMesh(CubeDeformation.NONE, false), 64, 64);
     }
 
-    @Override
-    public void prepareMobModel(NpcEntity entity, float limbSwing, float limbSwingAmount, float partialTick) {
+    private void prepareNpcPose(NpcRenderData entity, net.minecraft.client.renderer.entity.state.AvatarRenderState state) {
         ArmPose main = ArmPose.EMPTY;
         ArmPose off = ArmPose.EMPTY;
-        boolean sheathed = com.skycraft.arsenal.Sheathe.isSheathedOrHolstered(entity);
+        boolean sheathed = entity.sheathed();
         ItemStack mainStack = entity.getMainHandItem();
         if (mainStack.getItem() instanceof com.skycraft.audio.InstrumentItem) {
             main = ArmPose.ITEM;
@@ -37,24 +36,27 @@ public class NpcModel extends PlayerModel<NpcEntity> {
             if (!entity.getOffhandItem().isEmpty()) off = ArmPose.ITEM;
         }
         if (entity.getMainArm() == HumanoidArm.RIGHT) {
-            this.rightArmPose = main;
-            this.leftArmPose = off;
+            state.rightArmPose = main;
+            state.leftArmPose = off;
         } else {
-            this.leftArmPose = main;
-            this.rightArmPose = off;
+            state.leftArmPose = main;
+            state.rightArmPose = off;
         }
         // aftermath poses: sitting on the ground uses the seated leg pose, kneeling and tending the crouch.
         // This model instance is shared by every NPC the renderer draws and nothing in vanilla resets `crouching`
         // for a non-player (LivingEntityRenderer only resets `riding`), so it is assigned for EVERY entity here:
         // set only when true it leaked from the first kneeling Helgen survivor to every NPC drawn after it.
-        if (entity.isHuddled()) this.riding = true; // LivingEntityRenderer resets `riding` before every render
-        this.crouching = entity.showsCrouchPose();
-        super.prepareMobModel(entity, limbSwing, limbSwingAmount, partialTick);
+        if (entity.isHuddled()) state.isPassenger = true; // LivingEntityRenderer resets `riding` before every render
+        state.isCrouching = entity.showsCrouchPose();
     }
 
     @Override
-    public void setupAnim(NpcEntity entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
-        super.setupAnim(entity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
+    public void setupAnim(net.minecraft.client.renderer.entity.state.AvatarRenderState state) {
+        NpcRenderData entity = NpcRenderData.get(state);
+        if (entity == null) { super.setupAnim(state); return; }
+        prepareNpcPose(entity, state);
+        super.setupAnim(state);
+        float ageInTicks = state.ageInTicks;
         // children: a bigger head on the small body (the renderer scales the whole child down)
         float headScale = entity.isChild() ? 1.22F : 1.0F;
         this.head.xScale = this.head.yScale = this.head.zScale = headScale;
@@ -71,7 +73,7 @@ public class NpcModel extends PlayerModel<NpcEntity> {
             this.leftArm.yRot = 0.0F;
             this.leftArm.zRot = 0.35F;
             this.head.xRot = Math.max(this.head.xRot, 0.35F);
-            this.hat.copyFrom(this.head);
+            this.hat.loadPose(this.head.storePose());
         } else if (entity.isCasting()) {
             float wave = Mth.cos(ageInTicks * 0.65F) * 0.09F;
             com.skycraft.magic.spell.Spell spell = entity.getCastingSpell();
@@ -102,7 +104,7 @@ public class NpcModel extends PlayerModel<NpcEntity> {
             }
             float sway = Mth.sin(ageInTicks * 0.22F) * 0.05F;
             this.head.zRot += sway;
-            this.hat.copyFrom(this.head);
+            this.hat.loadPose(this.head.storePose());
             switch (pose) {
                 case FLUTE, HORN -> {
                     float breath = Mth.sin(ageInTicks * 0.45F) * 0.05F;
@@ -139,23 +141,23 @@ public class NpcModel extends PlayerModel<NpcEntity> {
                     this.rightArm.zRot = 0.0F;
                 }
             }
-        } else if (this.attackTime > 0.0F && entity.isAggressive()) {
+        } else if (state.swingAnimation > 0.0F && entity.isAggressive()) {
             // Power-attack cleave / two-handed swing follow-through
-            float swing = Mth.sin(this.attackTime * (float) Math.PI);
+            float swing = Mth.sin(state.swingAnimation * (float) Math.PI);
             this.rightArm.xRot -= swing * 0.55F;
             this.body.yRot += swing * 0.18F;
-            this.jacket.copyFrom(this.body);
+            this.jacket.loadPose(this.body.storePose());
         } else {
             changed = false;
         }
         if (changed) {
-            this.leftSleeve.copyFrom(this.leftArm);
-            this.rightSleeve.copyFrom(this.rightArm);
+            this.leftSleeve.loadPose(this.leftArm.storePose());
+            this.rightSleeve.loadPose(this.rightArm.storePose());
         }
     }
 
     /** Huddled, kneeling, tending, working, weeping: the people of a burnt town (see fire.aftermath.Tableau). */
-    private void aftermathPose(NpcEntity entity, float age) {
+    private void aftermathPose(NpcRenderData entity, float age) {
         float breath = Mth.sin(age * 0.09F + entity.getId()) * 0.02F;
         if (entity.isHuddled()) {
             // knees up, arms round them, head down
@@ -210,9 +212,9 @@ public class NpcModel extends PlayerModel<NpcEntity> {
             this.head.xRot = Math.max(this.head.xRot, 0.5F);
             this.body.xRot += shake;
         }
-        this.hat.copyFrom(this.head);
-        this.jacket.copyFrom(this.body);
-        this.leftPants.copyFrom(this.leftLeg);
-        this.rightPants.copyFrom(this.rightLeg);
+        this.hat.loadPose(this.head.storePose());
+        this.jacket.loadPose(this.body.storePose());
+        this.leftPants.loadPose(this.leftLeg.storePose());
+        this.rightPants.loadPose(this.rightLeg.storePose());
     }
 }

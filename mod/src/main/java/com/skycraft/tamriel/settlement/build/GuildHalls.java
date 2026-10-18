@@ -43,20 +43,20 @@ public final class GuildHalls {
     /** The faction's colours as a wool block. */
     static BlockState colours(String faction) {
         return B.s(switch (faction) {
-            case "fighters_guild", "renrijra_krin", "tribunal_temple" -> Blocks.ORANGE_WOOL;
-            case "mages_guild", "east_empire_company" -> Blocks.BLUE_WOOL;
-            case "thieves_guild", "blades" -> Blocks.GRAY_WOOL;
-            case "dark_brotherhood", "camonna_tong" -> Blocks.BLACK_WOOL;
-            case "imperial_legion", "arena", "house_redoran", "morag_tong", "knights_of_the_dragon" -> Blocks.RED_WOOL;
-            case "knights_of_the_nine", "imperial_cult", "vigilants_of_stendarr" -> Blocks.WHITE_WOOL;
-            case "house_hlaalu", "aldmeri_dominion", "crowns" -> Blocks.YELLOW_WOOL;
-            case "house_telvanni", "moon_priests" -> Blocks.PURPLE_WOOL;
-            case "psijic_order", "forebears" -> Blocks.CYAN_WOOL;
-            case "thalmor", "shadowscales", "orc_strongholds" -> Blocks.GREEN_WOOL;
-            case "green_pact" -> Blocks.LIME_WOOL;
-            case "knights_of_the_rose" -> Blocks.PINK_WOOL;
-            case "ashlanders", "undaunted" -> Blocks.BROWN_WOOL;
-            default -> Blocks.LIGHT_GRAY_WOOL;
+            case "fighters_guild", "renrijra_krin", "tribunal_temple" -> com.skycraft.worldgen.VanillaBlocks.ORANGE_WOOL;
+            case "mages_guild", "east_empire_company" -> com.skycraft.worldgen.VanillaBlocks.BLUE_WOOL;
+            case "thieves_guild", "blades" -> com.skycraft.worldgen.VanillaBlocks.GRAY_WOOL;
+            case "dark_brotherhood", "camonna_tong" -> com.skycraft.worldgen.VanillaBlocks.BLACK_WOOL;
+            case "imperial_legion", "arena", "house_redoran", "morag_tong", "knights_of_the_dragon" -> com.skycraft.worldgen.VanillaBlocks.RED_WOOL;
+            case "knights_of_the_nine", "imperial_cult", "vigilants_of_stendarr" -> com.skycraft.worldgen.VanillaBlocks.WHITE_WOOL;
+            case "house_hlaalu", "aldmeri_dominion", "crowns" -> com.skycraft.worldgen.VanillaBlocks.YELLOW_WOOL;
+            case "house_telvanni", "moon_priests" -> com.skycraft.worldgen.VanillaBlocks.PURPLE_WOOL;
+            case "psijic_order", "forebears" -> com.skycraft.worldgen.VanillaBlocks.CYAN_WOOL;
+            case "thalmor", "shadowscales", "orc_strongholds" -> com.skycraft.worldgen.VanillaBlocks.GREEN_WOOL;
+            case "green_pact" -> com.skycraft.worldgen.VanillaBlocks.LIME_WOOL;
+            case "knights_of_the_rose" -> com.skycraft.worldgen.VanillaBlocks.PINK_WOOL;
+            case "ashlanders", "undaunted" -> com.skycraft.worldgen.VanillaBlocks.BROWN_WOOL;
+            default -> com.skycraft.worldgen.VanillaBlocks.LIGHT_GRAY_WOOL;
         });
     }
 
@@ -223,7 +223,7 @@ public final class GuildHalls {
         Props.table(c, p, r.cx(), y, r.cz());
         Props.clutter(c, p, r.cx(), y + 1, r.cz(), Direction.SOUTH, FurnitureKind.CLUTTER_TANKARD);
         Props.chair(c, p, r.cx() - 1, y, r.cz(), Direction.WEST);
-        Props.rug(c, colours.is(Blocks.WHITE_WOOL) ? p.carpet : p.carpet2, r.cx() - 1, y, r.z0() + 1, r.cx() + 1, r.z1() - 1);
+        Props.rug(c, colours.is(com.skycraft.worldgen.VanillaBlocks.WHITE_WOOL) ? p.carpet : p.carpet2, r.cx() - 1, y, r.z0() + 1, r.cx() + 1, r.z1() - 1);
         Props.lantern(c, p, r.cx(), r.ceil() - 1, r.cz() + 2, true);
     }
 }

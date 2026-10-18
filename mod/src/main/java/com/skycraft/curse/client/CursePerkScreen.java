@@ -4,7 +4,7 @@ import com.skycraft.curse.CursePackets;
 import com.skycraft.curse.CursePerks;
 import com.skycraft.magic.client.MagicUi;
 import com.skycraft.network.SkyNetwork;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
@@ -67,7 +67,7 @@ public class CursePerkScreen extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+    public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
         LocalPlayer player = minecraft.player;
         if (player == null) return;
         boolean lord = tree == CursePerks.Tree.VAMPIRE_LORD;
@@ -118,7 +118,7 @@ public class CursePerkScreen extends Screen {
             g.fill(x - r, y, x + r + 1, y + 1, 0xFF000000 | core);
             g.fill(x, y - r, x + 1, y + r + 1, 0xFF000000 | core);
             g.fill(x - r / 2, y - r / 2, x + r / 2 + 1, y + r / 2 + 1, 0xFF000000 | core);
-            if (p.maxRank() > 1 && owned) g.drawString(font, rank + "/" + p.maxRank(), x + 6, y - 3, 0xFFC8BC9A, false);
+            if (p.maxRank() > 1 && owned) g.text(font, rank + "/" + p.maxRank(), x + 6, y - 3, 0xFFC8BC9A, false);
             if (Math.abs(mouseX - x) <= 7 && Math.abs(mouseY - y) <= 7) hovered = p;
         }
 
@@ -128,7 +128,7 @@ public class CursePerkScreen extends Screen {
         int earned = CursePerks.earned(player, tree);
         int next = CursePerks.feedsFor(earned + 1);
         Component status = Component.translatable("curse.skycraft.tree.status", CursePerks.available(player, tree), feeds, next);
-        g.drawCenteredString(font, status, width / 2, 24, 0xFFA89F86);
+        g.centeredText(font, status, width / 2, 24, 0xFFA89F86);
         // progress to the next perk
         int bw = 120, bx = width / 2 - bw / 2, by = 36;
         int prev = CursePerks.feedsFor(earned);
@@ -139,14 +139,14 @@ public class CursePerkScreen extends Screen {
         if (hovered != null) tooltip(g, hovered, player);
         if (pending != null) {
             g.fill(width / 2 - 120, height - 66, width / 2 + 120, height - 28, 0xD0101010);
-            g.drawCenteredString(font, Component.translatable("curse.skycraft.tree.confirm", pending.displayName()), width / 2, height - 60, 0xFFE8E0C8);
+            g.centeredText(font, Component.translatable("curse.skycraft.tree.confirm", pending.displayName()), width / 2, height - 60, 0xFFE8E0C8);
         } else {
-            g.drawCenteredString(font, Component.translatable("curse.skycraft.tree.hint"), width / 2, height - 14, 0xFF807A6A);
+            g.centeredText(font, Component.translatable("curse.skycraft.tree.hint"), width / 2, height - 14, 0xFF807A6A);
         }
-        super.render(g, mouseX, mouseY, partialTick);
+        super.extractRenderState(g, mouseX, mouseY, partialTick);
     }
 
-    private void tooltip(GuiGraphics g, CursePerks.CursePerk p, LocalPlayer player) {
+    private void tooltip(GuiGraphicsExtractor g, CursePerks.CursePerk p, LocalPlayer player) {
         int w = 200;
         int x = Mth.clamp(sx(p) + 12, 4, width - w - 4);
         int y = Mth.clamp(sy(p) - 10, 50, height - 80);
@@ -156,15 +156,15 @@ public class CursePerkScreen extends Screen {
         g.fill(x, y, x + w, y + 1, 0xFF8A7F66);
         g.fill(x, y + h - 1, x + w, y + h, 0xFF8A7F66);
         Component name = p.maxRank() > 1 ? p.displayName().copy().append(" (" + CursePerks.rank(player, p.id()) + "/" + p.maxRank() + ")") : p.displayName();
-        g.drawString(font, name, x + 5, y + 5, 0xFFF0E6C8, false);
+        g.text(font, name, x + 5, y + 5, 0xFFF0E6C8, false);
         int ly = y + 18;
         for (FormattedCharSequence l : lines) {
-            g.drawString(font, l, x + 5, ly, 0xFFC8C0A8, false);
+            g.text(font, l, x + 5, ly, 0xFFC8C0A8, false);
             ly += 10;
         }
     }
 
-    private static void line(GuiGraphics g, int x0, int y0, int x1, int y1, int color) {
+    private static void line(GuiGraphicsExtractor g, int x0, int y0, int x1, int y1, int color) {
         int dx = x1 - x0, dy = y1 - y0;
         int steps = Math.max(Math.abs(dx), Math.abs(dy));
         for (int i = 0; i <= steps; i++) {
@@ -175,8 +175,10 @@ public class CursePerkScreen extends Screen {
     }
 
     @Override
-    public boolean mouseClicked(double mx, double my, int button) {
-        if (super.mouseClicked(mx, my, button)) return true;
+    public boolean mouseClicked(net.minecraft.client.input.MouseButtonEvent event, boolean doubleClick) {
+        double mx = event.x(), my = event.y();
+        int button = com.skycraft.client.screen.UiInput.actionButton(event.button());
+        if (super.mouseClicked(event, doubleClick)) return true;
         LocalPlayer player = minecraft.player;
         if (button == 0 && hovered != null && player != null && pending == null
                 && (CursePerks.available(player, tree) > 0 || player.isCreative()) && CursePerks.canUnlock(player, hovered)) {
@@ -188,7 +190,7 @@ public class CursePerkScreen extends Screen {
 
     @Override
     public void onClose() {
-        minecraft.setScreen(parent);
+        minecraft.gui.setScreen(parent);
     }
 
     @Override

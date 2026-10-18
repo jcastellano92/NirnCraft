@@ -19,9 +19,9 @@ import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,7 +31,7 @@ import java.util.Locale;
  * {@code /skycraft-seas ship <kind> | site <kind> | traffic} (operators only): put a ship of the traffic on the water
  * near you, build a sea, islet or coast site in your chunk, list the traffic.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class SeasCommands {
     private SeasCommands() {}
 
@@ -46,7 +46,7 @@ public final class SeasCommands {
     @SubscribeEvent
     public static void register(RegisterCommandsEvent event) {
         CommandDispatcher<CommandSourceStack> d = event.getDispatcher();
-        d.register(Commands.literal("skycraft-seas").requires(s -> s.hasPermission(2))
+        d.register(Commands.literal("skycraft-seas").requires(s -> s.permissions().hasPermission(net.minecraft.server.permissions.Permissions.COMMANDS_GAMEMASTER))
                 .then(Commands.literal("ship").then(Commands.argument("kind", StringArgumentType.word())
                         .suggests((c, b) -> SharedSuggestionProvider.suggest(java.util.Arrays.stream(ShipKind.values()).map(k -> k.id), b))
                         .executes(SeasCommands::ship)))
@@ -63,7 +63,7 @@ public final class SeasCommands {
             c.getSource().sendFailure(Component.literal("Unknown ship kind"));
             return 0;
         }
-        ShipEntity ship = SeaTraffic.trySpawn(p.serverLevel(), p, kind);
+        ShipEntity ship = SeaTraffic.trySpawn(p.level(), p, kind);
         if (ship == null) {
             c.getSource().sendFailure(Component.literal("No open water 40-60 blocks around"));
             return 0;
@@ -74,7 +74,7 @@ public final class SeasCommands {
 
     private static int site(CommandContext<CommandSourceStack> c) throws CommandSyntaxException {
         ServerPlayer p = c.getSource().getPlayerOrException();
-        ServerLevel level = p.serverLevel();
+        ServerLevel level = p.level();
         String name = StringArgumentType.getString(c, "kind").toLowerCase(Locale.ROOT);
         SiteKit k = new SiteKit(level, level.getRandom(), p.blockPosition());
         boolean ok;

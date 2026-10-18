@@ -4,9 +4,9 @@ import com.mojang.serialization.Codec;
 import com.skycraft.Skycraft;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.WorldGenLevel;
-import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
-import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
+import com.skycraft.worldgen.ConfiguredFeature;
+import com.skycraft.worldgen.FeaturePlaceContext;
+import com.skycraft.worldgen.NoneFeatureConfiguration;
 
 import java.util.List;
 
@@ -16,7 +16,7 @@ import java.util.List;
  * sites. A site writes only inside the 3x3 chunks around its own, never loads another chunk, and gives way to
  * structures already planned over it.
  */
-public class LandmarkFeature extends Feature<NoneFeatureConfiguration> {
+public class LandmarkFeature extends ConfiguredFeature<NoneFeatureConfiguration> {
     public LandmarkFeature(Codec<NoneFeatureConfiguration> codec) {
         super(codec);
     }
@@ -24,8 +24,8 @@ public class LandmarkFeature extends Feature<NoneFeatureConfiguration> {
     @Override
     public boolean place(FeaturePlaceContext<NoneFeatureConfiguration> ctx) {
         WorldGenLevel level = ctx.level();
-        ChunkPos chunk = new ChunkPos(ctx.origin());
-        List<LandmarkSite> sites = Landmarks.inChunk(level.getSeed(), chunk.x, chunk.z);
+        ChunkPos chunk = ChunkPos.containing(ctx.origin());
+        List<LandmarkSite> sites = Landmarks.inChunk(level.getSeed(), chunk.x(), chunk.z());
         if (sites.isEmpty()) return false;
         boolean any = false;
         for (LandmarkSite site : sites) {

@@ -13,13 +13,13 @@ import com.skycraft.tamriel.Region;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -174,7 +174,7 @@ public final class ShopStock {
     private static void innGoods(BulkStore out, String gearKey, @org.jetbrains.annotations.Nullable String placeId, RandomSource rnd) {
         List<Item> goods = new ArrayList<>();
         for (Item item : items(com.skycraft.survival.inn.Innkeepers.INN_GOODS)) {
-            ResourceLocation id = BuiltInRegistries.ITEM.getKey(item);
+            Identifier id = BuiltInRegistries.ITEM.getKey(item);
             if (id != null && ShopTrades.servedAt(id.toString(), gearKey, placeId, ShopType.FOOD)) goods.add(item);
         }
         // an inn beside hives sells their honey: the place's own produce (see LocalProduce)
@@ -204,16 +204,16 @@ public final class ShopStock {
         List<Item> base = t.stockItems();
         // goods the data ties to other provinces, embargoed goods, or categories outside the trade are not on this shelf
         base.removeIf(i -> {
-            ResourceLocation id = BuiltInRegistries.ITEM.getKey(i);
+            Identifier id = BuiltInRegistries.ITEM.getKey(i);
             return (id != null && !ShopTrades.servedAt(id.toString(), key, placeId, t))
                     || !trade.allows(ItemCategory.of(new ItemStack(i)));
         });
         List<Item> local = new ArrayList<>(t.provinceItems(key));
         for (String expId : placeId != null && !TradeNetwork.localExports(placeId).isEmpty()
                 ? TradeNetwork.localExports(placeId) : TradeNetwork.provinceExports(key)) {
-            ResourceLocation rl = ResourceLocation.tryParse(expId);
+            Identifier rl = Identifier.tryParse(expId);
             if (rl == null) continue;
-            Item expItem = BuiltInRegistries.ITEM.get(rl);
+            Item expItem = BuiltInRegistries.ITEM.getValue(rl);
             if (expItem != null && expItem != net.minecraft.world.item.Items.AIR && !local.contains(expItem)) {
                 if (t == ShopType.GENERAL || t == ShopType.EXOTIC || base.contains(expItem)) {
                     local.add(expItem);
@@ -221,7 +221,7 @@ public final class ShopStock {
             }
         }
         local.removeIf(i -> {
-            ResourceLocation id = BuiltInRegistries.ITEM.getKey(i);
+            Identifier id = BuiltInRegistries.ITEM.getKey(i);
             return (id != null && !TradeNetwork.mayStock(t, key, placeId, id.toString()))
                     || (id != null && t != ShopType.FENCE && t != ShopType.EXOTIC && !ShopTrades.servedAt(id.toString(), key, placeId, t))
                     || !trade.allows(ItemCategory.of(new ItemStack(i)));
@@ -253,14 +253,14 @@ public final class ShopStock {
         if (out.size() >= min) return;
         List<Item> candidates = new ArrayList<>();
         for (Item item : t.provinceItems(key)) {
-            ResourceLocation id = BuiltInRegistries.ITEM.getKey(item);
+            Identifier id = BuiltInRegistries.ITEM.getKey(item);
             if (id != null && TradeNetwork.mayStock(t, key, placeId, id.toString())
                     && (t == ShopType.FENCE || t == ShopType.EXOTIC || ShopTrades.servedAt(id.toString(), key, placeId, t))) {
                 candidates.add(item);
             }
         }
         for (Item item : t.stockItems()) {
-            ResourceLocation id = BuiltInRegistries.ITEM.getKey(item);
+            Identifier id = BuiltInRegistries.ITEM.getKey(item);
             if (id != null && ShopTrades.servedAt(id.toString(), key, placeId, t) && !candidates.contains(item)) {
                 candidates.add(item);
             }
@@ -300,7 +300,7 @@ public final class ShopStock {
 
     /** Empty soul gems by shop size, and a few filled ones (Skyrim's court wizards sell both). */
     private static void soulGems(BulkStore out, int level, RandomSource rnd) {
-        List<Item> gems = items(TagKey.create(Registries.ITEM, new ResourceLocation("skycraft", "soul_gems")));
+        List<Item> gems = items(TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("skycraft", "soul_gems")));
         gems.removeIf(g -> !(g instanceof SoulGemItem s) || s.reusable || s.black && level < 4);
         if (gems.isEmpty()) return;
         for (int i = 0; i < 1 + level; i++) {
@@ -317,7 +317,7 @@ public final class ShopStock {
 
     /** Plain (non-artifact) staves whose spell level suits the customer. */
     private static void staves(BulkStore out, int gearLevel, int level, RandomSource rnd) {
-        List<Item> staves = items(TagKey.create(Registries.ITEM, new ResourceLocation("skycraft", "staves")));
+        List<Item> staves = items(TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("skycraft", "staves")));
         staves.removeIf(s -> s instanceof ArtifactItem);
         if (staves.isEmpty()) return;
         for (int i = 0; i < level / 2; i++) {
@@ -330,8 +330,8 @@ public final class ShopStock {
     /** Rings, necklaces and circlets (bigger shops enchant some), gems and precious metals. */
     private static void jewelry(BulkStore out, int level, RandomSource rnd, int n) {
         List<Item> jewels = items(ShopType.JEWELRY);
-        jewels.removeIf(i -> i instanceof ArtifactItem || ForgeRegistries.ITEMS.getKey(i).getPath().startsWith("mask_"));
-        List<Item> gems = items(TagKey.create(Registries.ITEM, new ResourceLocation("skycraft", "merchant/gems")));
+        jewels.removeIf(i -> i instanceof ArtifactItem || BuiltInRegistries.ITEM.getKey(i).getPath().startsWith("mask_"));
+        List<Item> gems = items(TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("skycraft", "merchant/gems")));
         for (int i = 0; i < n; i++) {
             boolean gem = !gems.isEmpty() && (jewels.isEmpty() || rnd.nextInt(3) == 0);
             List<Item> pool = gem ? gems : jewels;
@@ -340,7 +340,7 @@ public final class ShopStock {
             int value = ItemValues.get(stack);
             if (value > 150 * level && rnd.nextInt(3) > 0) continue;
             if (!gem && level >= 2 && rnd.nextFloat() < 0.1f * level) {
-                stack = net.minecraft.world.item.enchantment.EnchantmentHelper.enchantItem(rnd, stack, 5 + 4 * level, false);
+                stack = StockEnchantments.enchant(rnd, stack, 5 + 4 * level);
                 if (!stack.isEnchanted()) stack = enchantJewelry(stack, rnd, level);
             }
             add(out, stack);
@@ -352,15 +352,16 @@ public final class ShopStock {
      * the jeweller's own enchanted pieces pick one of those.
      */
     private static ItemStack enchantJewelry(ItemStack stack, RandomSource rnd, int level) {
-        List<net.minecraft.world.item.enchantment.Enchantment> options = new ArrayList<>();
-        for (net.minecraft.world.item.enchantment.Enchantment e : ForgeRegistries.ENCHANTMENTS) {
-            if (!e.isCurse() && !e.isTreasureOnly() && com.skycraft.crafting.arcane.enchant.Enchanting.fits(stack, e)) options.add(e);
+        List<net.minecraft.core.Holder<net.minecraft.world.item.enchantment.Enchantment>> options = new ArrayList<>();
+        for (var e : com.skycraft.inventory.ItemData.currentRegistries().lookupOrThrow(net.minecraft.core.registries.Registries.ENCHANTMENT).listElements().toList()) {
+            if (!e.is(net.minecraft.tags.EnchantmentTags.CURSE) && !e.is(net.minecraft.tags.EnchantmentTags.TREASURE)
+                    && com.skycraft.crafting.arcane.enchant.Enchanting.fits(stack, e.value())) options.add(e);
         }
         if (options.isEmpty()) return stack;
-        net.minecraft.world.item.enchantment.Enchantment e = options.get(rnd.nextInt(options.size()));
+        var e = options.get(rnd.nextInt(options.size()));
         ItemStack out = stack.copy();
         out.setCount(1);
-        out.enchant(e, Math.min(e.getMaxLevel(), 1 + rnd.nextInt(Math.max(1, level / 2 + 1))));
+        out.enchant(e, Math.min(e.value().getMaxLevel(), 1 + rnd.nextInt(Math.max(1, level / 2 + 1))));
         return out;
     }
 
@@ -389,16 +390,16 @@ public final class ShopStock {
             }
         }
         for (var ro : com.skycraft.magic.MagicRegistry.TOMES.values()) put.accept(ro.get(), ShopType.ARCANE);
-        for (Item i : items(TagKey.create(Registries.ITEM, new ResourceLocation("skycraft", "soul_gems")))) {
+        for (Item i : items(TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("skycraft", "soul_gems")))) {
             if (!(i instanceof SoulGemItem s) || !s.reusable) put.accept(i, ShopType.ARCANE);
         }
-        for (Item i : items(TagKey.create(Registries.ITEM, new ResourceLocation("skycraft", "staves")))) {
+        for (Item i : items(TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("skycraft", "staves")))) {
             if (!(i instanceof ArtifactItem)) put.accept(i, ShopType.ARCANE);
         }
         for (Item i : items(ItemCategory.SKILL_BOOKS)) put.accept(i, ShopType.LIBRARY);
         put.accept(com.skycraft.lore.LoreModule.BOOK.get(), ShopType.LIBRARY);
         for (Item i : items(ShopType.JEWELRY)) {
-            if (!(i instanceof ArtifactItem) && !ForgeRegistries.ITEMS.getKey(i).getPath().startsWith("mask_")) put.accept(i, ShopType.JEWELER);
+            if (!(i instanceof ArtifactItem) && !BuiltInRegistries.ITEM.getKey(i).getPath().startsWith("mask_")) put.accept(i, ShopType.JEWELER);
         }
         return out;
     }

@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:random_selector",
+  "features": [
+    {
+      "feature": "skycraft:biome/baobab_checked",
+      "chance": 0.1
+    }
+  ],
+  "default": "skycraft:biome/juniper_checked"
+}

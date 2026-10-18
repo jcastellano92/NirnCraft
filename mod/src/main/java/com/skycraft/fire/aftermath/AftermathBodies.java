@@ -7,11 +7,11 @@ import com.skycraft.society.NpcRole;
 import com.skycraft.society.Npcs;
 import com.skycraft.society.entity.NpcEntity;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -41,7 +41,7 @@ public final class AftermathBodies {
     public static CorpseEntity spawn(ServerLevel level, BlockPos pos, NpcRole role, float yaw, boolean lootable, float roll) {
         NpcEntity dead = Npcs.create(level, pos, role);
         if (dead == null) return null;
-        CorpseEntity corpse = ModEntities.CORPSE.get().create(level);
+        CorpseEntity corpse = ModEntities.CORPSE.get().create(level, net.minecraft.world.entity.EntitySpawnReason.EVENT);
         if (corpse == null) {
             dead.discard();
             return null;
@@ -50,12 +50,12 @@ public final class AftermathBodies {
         int coins = 1 + level.getRandom().nextInt(role.civilian ? 6 : 14);
         corpse.addLoot(Currency.coins(coins));
         String[] table = role.civilian ? CIVILIAN : SOLDIER;
-        Item thing = ForgeRegistries.ITEMS.getValue(new ResourceLocation(table[level.getRandom().nextInt(table.length)]));
+        Item thing = BuiltInRegistries.ITEM.getValue(Identifier.parse(table[level.getRandom().nextInt(table.length)]));
         if (thing != null) corpse.addLoot(new ItemStack(thing, 1 + (thing == net.minecraft.world.item.Items.ARROW ? level.getRandom().nextInt(4) : 0)));
         corpse.setBody(dead);
         corpse.setPersistent(true);
         corpse.setLocked(false);
-        corpse.moveTo(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5, yaw, 0f);
+        corpse.snapTo(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5, yaw, 0f);
         corpse.setCentered(true);
         corpse.setAppearDelay(0);
         corpse.getPersistentData().putString(Tableau.KEY, "body");

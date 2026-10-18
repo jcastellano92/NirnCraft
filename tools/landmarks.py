@@ -532,7 +532,7 @@ DWEMER_SPAWNS = {"monster": {"bounding_box": "piece", "spawns": [
     {"type": "skycraft:dwarven_spider", "weight": 10, "minCount": 1, "maxCount": 2},
     {"type": "skycraft:dwarven_sphere", "weight": 3, "minCount": 1, "maxCount": 1}]}}
 
-UNDERGROUND = {"barrow", "cave", "dwemer", "mine", "vampire_lair", "necromancer_lair", "hagraven_lair", "ruin"}
+UNDERGROUND = {"barrow", "cave", "dwemer", "mine", "vampire_lair", "necromancer_lair", "hagraven_lair", "ruin", "scorpion_den"}
 
 # Named sites of the provinces beyond Skyrim (places from tools/provinces.py): sid, place types, variants, structure.
 # The variant names a kind of site; culture ruins wear their culture's kit, keeps and towers the region's own.
@@ -554,9 +554,30 @@ PROVINCE_SITES = [
     ("site/imperial_crypt", ["dungeon_fixed"], ["imperial_crypt"], dict(theme="ruin", kit="imperial")),
     ("site/tower", ["dungeon_fixed"], ["tower"], dict(theme="watchtower", flavor=0, regional=True)),
     ("site/fort_keep", ["fort"], ["keep"], dict(theme="fort", regional=True)),
-    ("site/fort_akaviri", ["fort"], ["akaviri_fort"], dict(theme="fort", flavor=0, kit="akaviri")),
+    ("site/fort_akaviri", ["fort", "dungeon_fixed"], ["akaviri_fort"], dict(theme="fort", flavor=0, kit="akaviri")),
     ("site/egg_mine", ["dungeon_fixed"], ["egg_mine"], dict(theme="mine", regional=True)),
     ("site/sixth_house_base", ["dungeon_fixed"], ["sixth_house_base"], dict(theme="cave", kit="daedric")),
+]
+
+
+# Added after the original salt sequence. Only variants whose existing builders preserve the declared
+# architecture/inhabitants are included. Coastal/submerged sites, living camps, Hist/fungal towers and
+# material-specific mines need their own contracts and must not silently become generic caves/bandits.
+ADDITIONAL_PROVINCE_SITES = [
+    ("site/bosmer_ossuary", ["dungeon_fixed"], ["bosmer_ossuary"], dict(theme="ruin", kit="bosmer")),
+    ("site/cultist_lair", ["dungeon_fixed"], ["cultist_lair"], dict(theme="necromancer_lair", kit="daedric")),
+    ("site/dunmer_stronghold", ["dungeon_fixed"], ["dunmer_stronghold"], dict(theme="fort", kit="velothi")),
+    ("site/elven_ruin", ["dungeon_fixed"], ["elven_ruin"], dict(theme="ruin", kit="altmer")),
+    ("site/imperial_prison_fort", ["dungeon_fixed"], ["imperial_prison_fort"], dict(theme="fort", kit="imperial")),
+    ("site/orichalc_ruin", ["dungeon_fixed"], ["orichalc_ruin"], dict(theme="ruin", kit="redguard")),
+    ("site/sandstone_tomb", ["dungeon_fixed"], ["sandstone_tomb"], dict(theme="ruin", kit="khajiit")),
+    ("site/tsaesci_fortress", ["dungeon_fixed"], ["tsaesci_fortress"], dict(theme="fort", kit="akaviri")),
+    ("site/altmer_sky_spire", ["dungeon_fixed"], ["altmer_sky_spire"], dict(theme="mage_tower", kit="altmer")),
+    ("site/velothi_tower", ["dungeon_fixed"], ["velothi_tower"], dict(theme="watchtower", kit="velothi")),
+    ("site/hound_den", ["dungeon_fixed"], ["hound_den"], dict(theme="cave", kit="bosmer", flavor=1)),
+    ("site/root_hollow", ["dungeon_fixed"], ["root_hollow"], dict(theme="cave", kit="bosmer", flavor=6)),
+    ("site/khajiit_shrine", ["dungeon_fixed"], ["khajiit_shrine"], dict(theme="ruin", kit="khajiit")),
+    ("site/kamal_ice_vault", ["dungeon_fixed"], ["kamal_ice_vault"], dict(theme="ruin", kit="ice")),
 ]
 
 
@@ -637,9 +658,9 @@ def structures():
         ("site/watchtower", D, ["watchtower"], dict(theme="watchtower", flavor=0)),
         ("site/nordic_tower", D, ["nordic_tower"], dict(theme="watchtower", flavor=1)),
         ("site/forsworn_tower", D, ["forsworn_tower"], dict(theme="watchtower", flavor=1, kit="forsworn")),
-        ("site/great_lift", D, ["great_lift"], dict(theme="great_lift")),
+        ("site/great_lift", D, ["great_lift", "mzark"], dict(theme="great_lift")),
         ("site/mage_tower", D, ["mage_tower"], dict(theme="mage_tower", kit="daedric")),
-        ("site/fort", ["fort"], ["fort"], dict(theme="fort", flavor=0)),
+        ("site/fort", ["fort", "dungeon_fixed"], ["fort"], dict(theme="fort", flavor=0)),
         ("site/fort_forsworn", ["fort"], ["fort_forsworn"], dict(theme="fort", flavor=1, kit="forsworn")),
         ("site/fort_vampire", ["fort"], ["fort_vampire"], dict(theme="fort", flavor=2)),
         ("site/fort_mage", ["fort"], ["fort_mage"], dict(theme="fort", flavor=3)),
@@ -688,6 +709,22 @@ def structures():
     salt[0] = 718274500
     for sid, types, variants, kw in PROVINCE_SITES:
         kw = dict(kw)
+        theme = kw.pop("theme")
+        place_set(sid, types, variants, structure(theme, place=pf(types, variants), **kw))
+        if theme in ("ruin", "fort"):
+            road_ids.append("skycraft:" + sid)
+
+    # Added after the historical sequence: preserve every existing placement salt.
+    for sid, types, variants, kw in [
+        ("site/scorpion_den", D, ["scorpion_den"], dict(theme="scorpion_den", kit="scorpion_den", flavor=10)),
+        ("site/breton_keep_ruin", ["fort", "dungeon_fixed"], ["breton_keep_ruin"],
+         dict(theme="breton_keep_ruin", kit="breton_keep_ruin")),
+    ]:
+        theme = kw.pop("theme")
+        place_set(sid, types, variants, structure(theme, place=pf(types, variants), **kw))
+
+    for sid, types, variants, options in ADDITIONAL_PROVINCE_SITES:
+        kw = dict(options)
         theme = kw.pop("theme")
         place_set(sid, types, variants, structure(theme, place=pf(types, variants), **kw))
         if theme in ("ruin", "fort"):

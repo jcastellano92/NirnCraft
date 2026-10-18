@@ -352,9 +352,9 @@ hostiles and wildlife have separate budgets.
 
 [WORLD.md](WORLD.md) covers the geography. In brief:
 
-* **The map.** Tamriel is built at full scale, with Whiterun at 0, 0. Foreign lands lie beyond it, and deterministic
-  4,096×4,096 endless generated tiles (`TilePlanner`) beyond those. There are 113 biomes, 533 micro-biomes, 83 regions
-  and 7,546 named places.
+* **The map.** Tamriel is built with Whiterun at 0,0, plus its fixed foreign lands. Beyond them is ocean,
+  with far-ocean crossings wrapping to the opposite world edge. The former procedural expansion planner
+  is dormant.
 * **Discovery.** You get "DISCOVERED" and "CLEARED" banners, region arrival banners with local rumours and music stings,
   and compass markers (including subtle hints for undiscovered places within 150 blocks).
 * **The map screen** (**M**). A painted parchment map with fog of war, your discoveries, quest markers, your party

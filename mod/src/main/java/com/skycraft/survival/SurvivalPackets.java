@@ -3,62 +3,59 @@ package com.skycraft.survival;
 import com.skycraft.network.SkyNetwork;
 import com.skycraft.survival.cooking.Cooking;
 import com.skycraft.survival.cooking.CookingMenu;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.network.NetworkDirection;
-import net.minecraftforge.network.NetworkEvent;
+import net.neoforged.api.distmarker.Dist;
+import com.skycraft.platform.Sides;
+import net.minecraft.network.protocol.PacketFlow;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-import java.util.function.Supplier;
 
 /** Survival packets (registered in this order). */
 public final class SurvivalPackets {
     private SurvivalPackets() {}
 
     public static void register() {
-        SkyNetwork.register(Cook.class, NetworkDirection.PLAY_TO_SERVER, Cook::encode, Cook::decode, Cook::handle);
-        SkyNetwork.register(Meters.class, NetworkDirection.PLAY_TO_CLIENT, Meters::encode, Meters::decode, Meters::handle);
-        SkyNetwork.register(Bite.class, NetworkDirection.PLAY_TO_CLIENT, Bite::encode, Bite::decode, Bite::handle);
-        SkyNetwork.register(ReelResult.class, NetworkDirection.PLAY_TO_SERVER, ReelResult::encode, ReelResult::decode, ReelResult::handle);
+        SkyNetwork.register(Cook.class, PacketFlow.SERVERBOUND, Cook::encode, Cook::decode, Cook::handle);
+        SkyNetwork.register(Meters.class, PacketFlow.CLIENTBOUND, Meters::encode, Meters::decode, Meters::handle);
+        SkyNetwork.register(Bite.class, PacketFlow.CLIENTBOUND, Bite::encode, Bite::decode, Bite::handle);
+        SkyNetwork.register(ReelResult.class, PacketFlow.SERVERBOUND, ReelResult::encode, ReelResult::decode, ReelResult::handle);
     }
 
     /** C2S: client completed the Stardew-style fishing catch bar minigame (caught = 100% progress, false = 0% escaped). */
     public record ReelResult(boolean caught) {
-        static void encode(ReelResult m, FriendlyByteBuf buf) {
+        static void encode(ReelResult m, RegistryFriendlyByteBuf buf) {
             buf.writeBoolean(m.caught);
         }
 
-        static ReelResult decode(FriendlyByteBuf buf) {
+        static ReelResult decode(RegistryFriendlyByteBuf buf) {
             return new ReelResult(buf.readBoolean());
         }
 
-        static void handle(ReelResult m, Supplier<NetworkEvent.Context> ctx) {
-            ServerPlayer player = ctx.get().getSender();
+        static void handle(ReelResult m, IPayloadContext ctx) {
+            ServerPlayer player = SkyNetwork.sender(ctx);
             if (player != null && player.fishing instanceof com.skycraft.survival.fishing.SkyFishingHook hook) {
                 hook.completeMinigame(player, m.caught);
             }
-            ctx.get().setPacketHandled(true);
         }
     }
 
     /** C2S: cook {@code times} of a cooking pot recipe at the open cooking pot. */
     public record Cook(String recipeId, int times) {
-        static void encode(Cook m, FriendlyByteBuf buf) {
+        static void encode(Cook m, RegistryFriendlyByteBuf buf) {
             buf.writeUtf(m.recipeId, 128);
             buf.writeVarInt(m.times);
         }
 
-        static Cook decode(FriendlyByteBuf buf) {
+        static Cook decode(RegistryFriendlyByteBuf buf) {
             return new Cook(buf.readUtf(128), buf.readVarInt());
         }
 
-        static void handle(Cook m, Supplier<NetworkEvent.Context> ctx) {
-            ServerPlayer player = ctx.get().getSender();
+        static void handle(Cook m, IPayloadContext ctx) {
+            ServerPlayer player = SkyNetwork.sender(ctx);
             if (player != null && player.containerMenu instanceof CookingMenu menu && menu.stillValid(player)) {
                 Cooking.cook(player, menu, m.recipeId, m.times);
             }
-            ctx.get().setPacketHandled(true);
         }
     }
 
@@ -70,7 +67,7 @@ public final class SurvivalPackets {
     public record Meters(short hunger, short fatigue, short cold, short warmth, byte flags, byte trend) {
         public static final int ACTIVE = 1, HEAT = 2, WET = 4, WELL_FED = 8;
 
-        static void encode(Meters m, FriendlyByteBuf buf) {
+        static void encode(Meters m, RegistryFriendlyByteBuf buf) {
             buf.writeShort(m.hunger);
             buf.writeShort(m.fatigue);
             buf.writeShort(m.cold);
@@ -79,13 +76,12 @@ public final class SurvivalPackets {
             buf.writeByte(m.trend);
         }
 
-        static Meters decode(FriendlyByteBuf buf) {
+        static Meters decode(RegistryFriendlyByteBuf buf) {
             return new Meters(buf.readShort(), buf.readShort(), buf.readShort(), buf.readShort(), buf.readByte(), buf.readByte());
         }
 
-        static void handle(Meters m, Supplier<NetworkEvent.Context> ctx) {
-            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> com.skycraft.survival.client.ClientSurvival.receive(m));
-            ctx.get().setPacketHandled(true);
+        static void handle(Meters m, IPayloadContext ctx) {
+            Sides.runOn(Dist.CLIENT, () -> () -> com.skycraft.survival.client.ClientSurvival.receive(m));
         }
 
         public boolean has(int flag) {
@@ -100,7 +96,7 @@ public final class SurvivalPackets {
      * 3 too late).
      */
     public record Bite(byte phase, short zoneStart, short zoneEnd, short periodTicks, short windowTicks, byte result, String fish) {
-        static void encode(Bite m, FriendlyByteBuf buf) {
+        static void encode(Bite m, RegistryFriendlyByteBuf buf) {
             buf.writeByte(m.phase);
             buf.writeShort(m.zoneStart);
             buf.writeShort(m.zoneEnd);
@@ -110,13 +106,12 @@ public final class SurvivalPackets {
             buf.writeUtf(m.fish, 64);
         }
 
-        static Bite decode(FriendlyByteBuf buf) {
+        static Bite decode(RegistryFriendlyByteBuf buf) {
             return new Bite(buf.readByte(), buf.readShort(), buf.readShort(), buf.readShort(), buf.readShort(), buf.readByte(), buf.readUtf(64));
         }
 
-        static void handle(Bite m, Supplier<NetworkEvent.Context> ctx) {
-            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> com.skycraft.survival.client.FishingHud.receive(m));
-            ctx.get().setPacketHandled(true);
+        static void handle(Bite m, IPayloadContext ctx) {
+            Sides.runOn(Dist.CLIENT, () -> () -> com.skycraft.survival.client.FishingHud.receive(m));
         }
     }
 }

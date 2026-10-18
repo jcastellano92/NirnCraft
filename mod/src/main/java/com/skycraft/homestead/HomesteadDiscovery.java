@@ -16,9 +16,9 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -38,7 +38,7 @@ import java.util.UUID;
  * </ul>
  * Nothing here is persisted besides the player's own data; the claims live in {@link HomesteadData}.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class HomesteadDiscovery {
     public static final String PREFIX = "homestead|";
     private static final int INTERVAL = 40;
@@ -50,8 +50,8 @@ public final class HomesteadDiscovery {
     }
 
     @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer player) || player.isSpectator()) return;
+    public static void onPlayerTick(net.neoforged.neoforge.event.tick.PlayerTickEvent.Post event) {
+        if (!(event instanceof net.neoforged.neoforge.event.tick.PlayerTickEvent.Post) || !(event.getEntity() instanceof ServerPlayer player) || player.isSpectator()) return;
         if ((player.tickCount + (player.getId() & 31) + 11) % INTERVAL != 0) return;
         try {
             sync(player);
@@ -62,11 +62,11 @@ public final class HomesteadDiscovery {
 
     /** Brings this player's homestead entries in line with the claims (adds, reveals, renames, removes). */
     public static void sync(ServerPlayer player) {
-        MinecraftServer server = player.server;
+        MinecraftServer server = player.level().getServer();
         HomesteadData claims = HomesteadData.get(server);
         PlayerData data = SkyData.get(player);
         ListTag list = WorldData.discovered(data);
-        String dim = player.level().dimension().location().toString();
+        String dim = player.level().dimension().identifier().toString();
         int hint = SurvivalConfig.HOMESTEAD_HINT_RANGE.get();
         int margin = SurvivalConfig.HOMESTEAD_DISCOVER_MARGIN.get();
         boolean changed = false;
@@ -110,7 +110,7 @@ public final class HomesteadDiscovery {
                 continue;
             }
             live.add(id);
-            if (loc.getBoolean("hidden")) {
+            if (loc.getBooleanOr("hidden",false)) {
                 if (sameDim && d2 <= reveal) {
                     loc.remove("hidden");
                     loc.remove("known");
@@ -125,7 +125,7 @@ public final class HomesteadDiscovery {
 
         // homesteads that are gone
         for (int i = list.size() - 1; i >= 0; i--) {
-            String id = list.getCompound(i).getString("id");
+            String id = list.getCompoundOrEmpty(i).getStringOr("id","");
             if (id.startsWith(PREFIX) && !live.contains(id)) {
                 list.remove(i);
                 changed = true;
@@ -141,7 +141,7 @@ public final class HomesteadDiscovery {
             PlayerData data = SkyData.get(p);
             ListTag list = WorldData.discovered(data);
             for (int i = list.size() - 1; i >= 0; i--) {
-                if (list.getCompound(i).getString("id").equals(id)) {
+                if (list.getCompoundOrEmpty(i).getStringOr("id","").equals(id)) {
                     list.remove(i);
                     data.markDirty();
                 }

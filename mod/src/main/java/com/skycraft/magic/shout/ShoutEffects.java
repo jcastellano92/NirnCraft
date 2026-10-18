@@ -54,7 +54,7 @@ public final class ShoutEffects {
     private ShoutEffects() {}
 
     private static boolean boss(LivingEntity e) {
-        return e.getType().is(CombatHandler.BOSSES);
+        return e.getType().builtInRegistryHolder().is(CombatHandler.BOSSES);
     }
 
     /** IIZ SLEN NUS: your Thu'um freezes an opponent solid. */
@@ -63,15 +63,15 @@ public final class ShoutEffects {
         float damage = new float[]{2f, 3f, 4f}[w - 1];
         boolean any = false;
         for (LivingEntity e : Targeting.cone(p, 12, 0.75, e -> Targeting.canHarm(p, e))) {
-            e.invulnerableTime = 0;
-            e.hurt(SpellEffects.damage(p, Element.FROST, null), damage);
+            e.setInvulnerableTime(0);
+            com.skycraft.platform.Effects.hurt(e, SpellEffects.damage(p, Element.FROST, null), damage);
             e.setTicksFrozen(e.getTicksRequiredToFreeze() + 40);
             if (boss(e)) {
-                e.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, seconds * 20, 2));
+                e.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.SLOWNESS), seconds * 20, 2));
             } else {
                 int ticks = e instanceof Player ? Math.min(60, seconds * 20) : seconds * 20;
-                e.addEffect(new MobEffectInstance(MagicRegistry.ICE_FORM.get(), ticks, 0));
-                e.addEffect(new MobEffectInstance(ModEffects.PARALYSIS.get(), ticks, 0));
+                e.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MagicRegistry.ICE_FORM.get()), ticks, 0));
+                e.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(ModEffects.PARALYSIS.get()), ticks, 0));
                 if (e instanceof Mob mob) mob.setTarget(null);
                 e.setDeltaMovement(0, Math.min(0, e.getDeltaMovement().y), 0);
             }
@@ -85,7 +85,7 @@ public final class ShoutEffects {
 
     /** ZUL MEY GUT: your voice comes from somewhere else; enemies go to look. */
     static boolean throwVoice(ServerPlayer p, int w) {
-        ServerLevel level = p.serverLevel();
+        ServerLevel level = p.level();
         Vec3 eye = p.getEyePosition();
         BlockHitResult hit = level.clip(new ClipContext(eye, eye.add(p.getViewVector(1f).scale(48)), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, p));
         Vec3 at = hit.getLocation();
@@ -96,7 +96,7 @@ public final class ShoutEffects {
                 m -> m.isAlive() && !boss(m) && !Targeting.isFriendly(p, m))) {
             if (mob.getTarget() != null && mob.getTarget() != p) continue;
             mob.setTarget(null);
-            mob.addEffect(new MobEffectInstance(MagicRegistry.CALM.get(), ticks, 0, false, false));
+            mob.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MagicRegistry.CALM.get()), ticks, 0, false, false));
             if (mob instanceof PathfinderMob pm) pm.getNavigation().moveTo(at.x, at.y, at.z, 1.1);
         }
         return true;
@@ -125,15 +125,15 @@ public final class ShoutEffects {
             Notifier.message(p, Component.translatable("message.skycraft.call_dragon_weak"));
             return true;
         }
-        ServerLevel level = p.serverLevel();
+        ServerLevel level = p.level();
         if (!level.dimensionType().hasSkyLight() || !level.canSeeSky(p.blockPosition().above())) {
             Notifier.message(p, Component.translatable("message.skycraft.no_sky"));
             return false;
         }
         Mob dragon = Summons.conjureAlly(p, "odahviing", "odahviing", 6, 20 * 150, mob -> {
-            mob.moveTo(p.getX() + 8, p.getY() + 14, p.getZ() + 8, p.getYRot(), 0f);
+            mob.snapTo(p.getX() + 8, p.getY() + 14, p.getZ() + 8, p.getYRot(), 0f);
         });
-        if (dragon == null || !dragon.getType().is(MagicRegistry.DRAGONS)) {
+        if (dragon == null || !dragon.getType().builtInRegistryHolder().is(MagicRegistry.DRAGONS)) {
             if (dragon != null) Summons.dismiss(dragon);
             Notifier.message(p, Component.translatable("message.skycraft.call_dragon_none"));
             return true;
@@ -153,7 +153,7 @@ public final class ShoutEffects {
             m.setHealth(m.getMaxHealth());
             AttributeInstance atk = m.getAttribute(Attributes.ATTACK_DAMAGE);
             if (atk != null) atk.setBaseValue(6 + 2 * w);
-            m.addEffect(new MobEffectInstance(MobEffects.GLOWING, 20 * 60, 0, false, false));
+            m.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.GLOWING), 20 * 60, 0, false, false));
             m.setCanPickUpLoot(false);
         });
         if (mob == null) return false;
@@ -173,16 +173,16 @@ public final class ShoutEffects {
         MagicScheduler.area(p, start, false, 2.2, 30 + 15 * w, 1, "cyclone", (level, owner, area) -> {
             area.center = area.center.add(step);
             level.sendParticles(ParticleTypes.CLOUD, area.center.x, area.center.y + 1, area.center.z, 6, 0.6, 1.2, 0.6, 0.05);
-            level.sendParticles(ParticleTypes.SWEEP_ATTACK, area.center.x, area.center.y + 0.8 + level.random.nextDouble() * 2, area.center.z, 1, 0.4, 0.4, 0.4, 0);
+            level.sendParticles(ParticleTypes.SWEEP_ATTACK, area.center.x, area.center.y + 0.8 + level.getRandom().nextDouble() * 2, area.center.z, 1, 0.4, 0.4, 0.4, 0);
             if (area.age % 10 == 0) level.playSound(null, area.center.x, area.center.y, area.center.z, SoundEvents.ELYTRA_FLYING, SoundSource.PLAYERS, 0.6f, 0.6f);
             if (owner == null) return;
             for (LivingEntity e : Targeting.around(level, area.center.add(0, 1, 0), area.radius, e -> Targeting.canHarm(owner, e))) {
                 if (!struck.add(e.getUUID())) continue;
-                e.invulnerableTime = 0;
-                e.hurt(MagicDamage.source(level, MagicDamage.SPELL, null, owner), damage);
+                e.setInvulnerableTime(0);
+                com.skycraft.platform.Effects.hurt(e, MagicDamage.source(level, MagicDamage.SPELL, null, owner), damage);
                 double l = boss(e) ? lift * 0.3 : lift;
                 e.setDeltaMovement(step.x * 2, l, step.z * 2);
-                e.hurtMarked = true;
+                e.syncVelocity = true;
                 Vitals.markInCombat(owner);
             }
         });
@@ -198,13 +198,13 @@ public final class ShoutEffects {
                 d.setStamina(Math.max(0, d.getStamina() - 50));
                 if (w >= 2) d.setMagicka(Math.max(0, d.getMagicka() - 50));
             } else {
-                e.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, ticks, 0));
-                e.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, ticks, 0));
+                e.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.WEAKNESS), ticks, 0));
+                e.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.SLOWNESS), ticks, 0));
             }
             if (w >= 3) {
-                e.addEffect(new MobEffectInstance(MobEffects.WITHER, ticks / 2, 0));
-                e.invulnerableTime = 0;
-                e.hurt(MagicDamage.source(p.level(), MagicDamage.SPELL, null, p), 4f);
+                e.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.WITHER), ticks / 2, 0));
+                e.setInvulnerableTime(0);
+                com.skycraft.platform.Effects.hurt(e, MagicDamage.source(p.level(), MagicDamage.SPELL, null, p), 4f);
             }
             MagicFx.send(e, MagicFx.AURA, Element.SOUL, e.position(), e.position(), e.getId(), w);
             Vitals.markInCombat(p);
@@ -223,12 +223,12 @@ public final class ShoutEffects {
         for (LivingEntity e : Targeting.cone(p, 16, 0.8, e -> Targeting.canHarm(p, e))) {
             if (!(e instanceof Player) && !boss(e)) {
                 CompoundTag pd = e.getPersistentData();
-                pd.putUUID(SOUL_TEAR_BY, p.getUUID());
+                pd.store(SOUL_TEAR_BY, net.minecraft.core.UUIDUtil.CODEC, p.getUUID());
                 pd.putLong(SOUL_TEAR_UNTIL, now + 100);
                 SpellEffects.soulTrap(p, e, 100);
             }
-            e.invulnerableTime = 0;
-            e.hurt(MagicDamage.source(p.level(), MagicDamage.SPELL, null, p), 10f);
+            e.setInvulnerableTime(0);
+            com.skycraft.platform.Effects.hurt(e, MagicDamage.source(p.level(), MagicDamage.SPELL, null, p), 10f);
             MagicFx.send(e, MagicFx.AURA, Element.SOUL, e.position(), e.position(), e.getId(), 4);
             Vitals.markInCombat(p);
             any = true;
@@ -239,21 +239,21 @@ public final class ShoutEffects {
     /** Called when a creature dies: a Soul Tear victim rises as its tormentor's permanent thrall. */
     public static void onDeath(LivingEntity dead) {
         CompoundTag pd = dead.getPersistentData();
-        if (!pd.hasUUID(SOUL_TEAR_BY) || pd.getLong(SOUL_TEAR_UNTIL) < dead.level().getGameTime() || dead.getServer() == null) return;
-        ServerPlayer owner = dead.getServer().getPlayerList().getPlayer(pd.getUUID(SOUL_TEAR_BY));
+        if (!pd.read(SOUL_TEAR_BY, net.minecraft.core.UUIDUtil.CODEC).isPresent() || pd.getLongOr(SOUL_TEAR_UNTIL, 0L) < dead.level().getGameTime() || dead.level().getServer() == null) return;
+        ServerPlayer owner = dead.level().getServer().getPlayerList().getPlayer(pd.read(SOUL_TEAR_BY, net.minecraft.core.UUIDUtil.CODEC).orElseThrow());
         if (owner == null || owner.level() != dead.level() || !(dead instanceof Mob)) return;
         @SuppressWarnings("unchecked")
         EntityType<? extends Mob> type = (EntityType<? extends Mob>) dead.getType();
         Vec3 at = dead.position();
-        com.skycraft.magic.MagicScheduler.schedule(owner.server, 20, server -> {
+        com.skycraft.magic.MagicScheduler.schedule(owner.level().getServer(), 20, server -> {
             if (!owner.isAlive()) return;
             Mob thrall = Summons.conjureAt(owner, type, "thrall", at, Summons.PERMANENT, m -> {
-                m.addEffect(new MobEffectInstance(MobEffects.FIRE_RESISTANCE, Summons.PERMANENT, 0, false, false));
+                m.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.FIRE_RESISTANCE), Summons.PERMANENT, 0, false, false));
                 m.setCanPickUpLoot(false);
             });
             if (thrall != null) {
                 thrall.setCustomName(Component.translatable("entity.skycraft.summon.thrall", thrall.getType().getDescription()));
-                MagicFx.sendNear(owner.serverLevel(), at, 64, MagicFx.SUMMON, Element.SOUL, at, at, thrall.getId(), 20);
+                MagicFx.sendNear(owner.level(), at, 64, MagicFx.SUMMON, Element.SOUL, at, at, thrall.getId(), 20);
             }
         });
     }
@@ -264,7 +264,7 @@ public final class ShoutEffects {
         float limit = new float[]{30f, 80f, 400f}[w - 1];
         for (LivingEntity e : Targeting.cone(p, 16, 0.75, e -> Targeting.canHarm(p, e) && e instanceof Mob)) {
             Mob mob = (Mob) e;
-            boolean dragon = mob.getType().is(MagicRegistry.DRAGONS);
+            boolean dragon = mob.getType().builtInRegistryHolder().is(MagicRegistry.DRAGONS);
             if (dragon ? w < 3 : boss(mob) || mob.getMaxHealth() > limit || Summons.isSummon(mob)) continue;
             if (w < 2 && Illusion.isPerson(mob)) continue;
             Summons.makeAlly(mob, p, until);
@@ -277,12 +277,12 @@ public final class ShoutEffects {
 
     /** MUL QAH DIIV: you take on the aspect of a dragon: armor, stronger blows, and shouts that recover faster. */
     static boolean dragonAspect(ServerPlayer p, int w) {
-        if (p.hasEffect(MagicRegistry.DRAGON_ASPECT.get())) {
+        if (p.hasEffect(com.skycraft.platform.Effects.holder(MagicRegistry.DRAGON_ASPECT.get()))) {
             Notifier.message(p, Component.translatable("message.skycraft.dragon_aspect_active"));
             return false;
         }
         int seconds = new int[]{60, 150, 300}[w - 1];
-        p.addEffect(new MobEffectInstance(MagicRegistry.DRAGON_ASPECT.get(), seconds * 20, w - 1, false, true, true));
+        p.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MagicRegistry.DRAGON_ASPECT.get()), seconds * 20, w - 1, false, true, true));
         MagicFx.send(p, MagicFx.AURA, Element.FIRE, p.position(), p.position(), p.getId(), 4);
         p.level().playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.ENDER_DRAGON_GROWL, SoundSource.PLAYERS, 0.8f, 1.2f);
         return true;
@@ -293,8 +293,8 @@ public final class ShoutEffects {
         int ticks = new int[]{30, 45, 60}[w - 1] * 20;
         List<LivingEntity> allies = Targeting.around(p, p.position(), 24, e -> e != p && Targeting.isFriendly(p, e));
         for (LivingEntity e : allies) {
-            e.addEffect(new MobEffectInstance(MobEffects.DIG_SPEED, ticks, w - 1));
-            e.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, ticks, w - 1));
+            e.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.HASTE), ticks, w - 1));
+            e.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.STRENGTH), ticks, w - 1));
             MagicFx.send(e, MagicFx.AURA, Element.FIRE, e.position(), e.position(), e.getId(), 1);
         }
         if (allies.isEmpty()) Notifier.message(p, Component.translatable("message.skycraft.no_ally"));

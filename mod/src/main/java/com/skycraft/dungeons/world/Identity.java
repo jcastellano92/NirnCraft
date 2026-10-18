@@ -7,7 +7,7 @@ import com.skycraft.Skycraft;
 import com.skycraft.lore.place.PlaceLore;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
@@ -44,7 +44,7 @@ public final class Identity {
     private Identity() {}
 
     /** One place's identity. {@code sign} has four lines of at most 14 characters. */
-    public record Entry(String id, String family, String boss, String person, List<String> sign, String motif, ResourceLocation loot,
+    public record Entry(String id, String family, String boss, String person, List<String> sign, String motif, Identifier loot,
                         String entrance, String entranceKind, String bossNote, String story) {
     }
 
@@ -89,7 +89,7 @@ public final class Identity {
     }
 
     /** The chest table a story chest rolls in this place instead of an ordinary dungeon table, or the table itself. */
-    public static ResourceLocation loot(String place, ResourceLocation table, long roll) {
+    public static Identifier loot(String place, Identifier table, long roll) {
         Entry e = of(place);
         if (e == null) return table;
         String path = table.getPath();
@@ -99,7 +99,7 @@ public final class Identity {
     }
 
     /** The side branch's strongbox: the place's own loot two times in three. */
-    public static ResourceLocation cacheLoot(String place, ResourceLocation table, int roll) {
+    public static Identifier cacheLoot(String place, Identifier table, int roll) {
         Entry e = of(place);
         return e == null || roll == 0 ? table : e.loot();
     }
@@ -118,7 +118,7 @@ public final class Identity {
             if (b == null) return null;
             s = com.skycraft.lore.LoreBookItem.create(b);
         }
-        s.getOrCreateTag().putString(NOTE_TAG, bookId);
+        com.skycraft.inventory.ItemData.updateCustom(s, tag -> tag.putString(NOTE_TAG, bookId));
         return s;
     }
 
@@ -223,13 +223,13 @@ public final class Identity {
             int rotation = Math.floorMod(Math.round(out.toYRot() / 22.5f), 16);
             p.set(sx, sy, sz, Blocks.SPRUCE_SIGN.defaultBlockState().setValue(StandingSignBlock.ROTATION, rotation));
             if (p.blockEntity(sx, sy, sz) instanceof SignBlockEntity sign) {
-                SignText text = new SignText();
-                for (int i = 0; i < 4 && i < e.sign().size(); i++) text = text.setMessage(i, Component.literal(e.sign().get(i)));
+                SignText text = SignText.EMPTY;
+                for (int i = 0; i < 4 && i < e.sign().size(); i++) text = text.asMutable().setLine(i, Component.literal(e.sign().get(i))).asImmutable();
                 // worldgen block entities have no level yet: load the text through NBT (setText would notify the level)
-                net.minecraft.nbt.CompoundTag tag = sign.saveWithoutMetadata();
-                SignText.DIRECT_CODEC.encodeStart(net.minecraft.nbt.NbtOps.INSTANCE, text).result().ifPresent(t -> tag.put("front_text", t));
+                net.minecraft.nbt.CompoundTag tag = sign.saveWithoutMetadata(p.level.registryAccess());
+                SignText.CODEC.encodeStart(net.minecraft.nbt.NbtOps.INSTANCE, text).result().ifPresent(t -> tag.put("front_text", t));
                 tag.putBoolean("is_waxed", true);
-                sign.load(tag);
+                com.skycraft.worldgen.WorldgenData.load(sign, tag, p.level.registryAccess());
             } else {
                 p.set(sx, sy, sz, Blocks.AIR.defaultBlockState());
             }
@@ -358,7 +358,7 @@ public final class Identity {
                 if (o.has("sign")) for (JsonElement l : o.getAsJsonArray("sign")) sign.add(l.getAsString());
                 String loot = str(o, "loot");
                 out.put(pe.getKey(), new Entry(pe.getKey(), str(o, "family"), str(o, "boss"), str(o, "person"), List.copyOf(sign),
-                        str(o, "motif"), new ResourceLocation(Skycraft.MODID, "chests/story_" + (loot.isEmpty() ? "cave" : loot)),
+                        str(o, "motif"), Identifier.fromNamespaceAndPath(Skycraft.MODID, "chests/story_" + (loot.isEmpty() ? "cave" : loot)),
                         str(o, "entrance"), str(o, "entranceKind"), str(o, "bossNote"), str(o, "story")));
             }
         }

@@ -10,7 +10,7 @@ import com.skycraft.tamriel.Region;
 import com.skycraft.tamriel.Regions;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.BlockTags;
@@ -22,7 +22,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CampfireBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 /**
  * How cold it is where a player stands (Skyrim Survival Mode): the "target" the cold meter drifts toward, 0..300.
@@ -51,7 +51,7 @@ public final class Climate {
     public record Env(float target, float riseMul, boolean heat, boolean sheltered, boolean inWater, float base) {}
 
     public static Env sample(ServerPlayer player) {
-        ServerLevel level = player.serverLevel();
+        ServerLevel level = player.level();
         BlockPos pos = player.blockPosition();
         if (level.dimension() == Level.NETHER) return new Env(0, 1, true, true, false, 0);
         if (level.dimension() != Level.OVERWORLD) return new Env(10, 1, false, true, false, 10);
@@ -135,10 +135,10 @@ public final class Climate {
             base = Math.max(base, 200);
         }
 
-        ResourceLocation key = holder.unwrapKey().map(k -> k.location()).orElse(null);
+        Identifier key = holder.unwrapKey().map(k -> k.identifier()).orElse(null);
         String biomeId = key == null ? "" : key.getPath();
         if (biomeId.contains("hot_spring") || biomeId.contains("volcanic") || biomeId.contains("lava")) base = Math.min(base, 30);
-        if (biome.coldEnoughToSnow(pos)) base = Math.max(base, 150);
+        if (biome.coldEnoughToSnow(pos, level.getSeaLevel())) base = Math.max(base, 150);
         return base;
     }
 
@@ -156,7 +156,7 @@ public final class Climate {
     }
 
     private static boolean isNight(Level level) {
-        long time = level.getDayTime() % 24000L;
+        long time = level.getDefaultClockTime() % 24000L;
         return time >= 13000 && time <= 23000;
     }
 
@@ -201,7 +201,7 @@ public final class Climate {
         if (state.getFluidState().is(FluidTags.LAVA)) return true;
         if (state.getBlock() instanceof AbstractFurnaceBlock) return state.getValue(AbstractFurnaceBlock.LIT);
         if (state.hasProperty(BlockStateProperties.LIT) && !state.getValue(BlockStateProperties.LIT)) return false;
-        ResourceLocation id = ForgeRegistries.BLOCKS.getKey(state.getBlock());
+        Identifier id = BuiltInRegistries.BLOCK.getKey(state.getBlock());
         if (id == null || !id.getNamespace().equals("skycraft")) return false;
         String path = id.getPath();
         return path.contains("forge") || path.contains("smelter") || path.contains("hearth") || path.contains("brazier");

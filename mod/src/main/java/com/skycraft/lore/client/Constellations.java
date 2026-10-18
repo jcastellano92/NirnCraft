@@ -1,7 +1,7 @@
 package com.skycraft.lore.client;
 
 import com.skycraft.lore.StandingStone;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 
 /**
  * The sigil of every Standing Stone as stars and connecting lines, in a 12 x 22 grid (same shapes the block
@@ -49,7 +49,7 @@ public final class Constellations {
     }
 
     /** Draws the constellation with its top-left at (x, y), {@code scale} GUI pixels per grid unit. */
-    public static void draw(GuiGraphics g, StandingStone s, int x, int y, int scale, int alpha) {
+    public static void draw(GuiGraphicsExtractor g, StandingStone s, int x, int y, int scale, int alpha) {
         int[][] stars = stars(s);
         int lineColor = (alpha * 2 / 3) << 24 | 0xB8C4E0;
         for (int[] l : lines(s)) {
@@ -68,7 +68,7 @@ public final class Constellations {
         }
     }
 
-    private static void line(GuiGraphics g, int x0, int y0, int x1, int y1, int color) {
+    private static void line(GuiGraphicsExtractor g, int x0, int y0, int x1, int y1, int color) {
         int dx = x1 - x0, dy = y1 - y0;
         int steps = Math.max(Math.abs(dx), Math.abs(dy));
         if (steps == 0) return;

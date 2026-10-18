@@ -21,9 +21,9 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.entity.LecternBlockEntity;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.saveddata.SavedData;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -37,7 +37,7 @@ import java.util.Set;
  * facing it. Reading it hands the reader every lectern note of the place ({@link PlaceLoreEvents#onRightClickBlock}).
  * Once per world and place (world data {@code skycraft_place_lore}); places another module claimed are skipped.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class PlaceLorePlacer {
     private static final int CHECK_INTERVAL = 100;
 
@@ -65,17 +65,16 @@ public final class PlaceLorePlacer {
         final Set<String> placed = new HashSet<>();
 
         static Store get(ServerLevel level) {
-            return level.getServer().overworld().getDataStorage().computeIfAbsent(Store::load, Store::new, NAME);
+            return com.skycraft.platform.SavedDataTypes.get(level.getServer().overworld(), NAME, Store::load, Store::new, value263 -> value263.save(new net.minecraft.nbt.CompoundTag()));
         }
 
         static Store load(CompoundTag tag) {
             Store s = new Store();
-            ListTag list = tag.getList("placed", Tag.TAG_STRING);
-            for (int i = 0; i < list.size(); i++) s.placed.add(list.getString(i));
+            ListTag list = tag.getListOrEmpty("placed");
+            for (int i = 0; i < list.size(); i++) s.placed.add(list.getStringOr(i, ""));
             return s;
         }
 
-        @Override
         public CompoundTag save(CompoundTag tag) {
             ListTag list = new ListTag();
             for (String id : placed) list.add(StringTag.valueOf(id));
@@ -87,8 +86,8 @@ public final class PlaceLorePlacer {
     // ------------------------------------------------------------------ triggers
 
     @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer player) || player.isSpectator()) return;
+    public static void onPlayerTick(net.neoforged.neoforge.event.tick.PlayerTickEvent.Post event) {
+        if (!(event instanceof net.neoforged.neoforge.event.tick.PlayerTickEvent.Post) || !(event.getEntity() instanceof ServerPlayer player) || player.isSpectator()) return;
         if ((player.tickCount + (player.getId() & 63)) % CHECK_INTERVAL != 0) return;
         if (player.level().dimension() != Level.OVERWORLD) return;
         int x = player.getBlockX(), z = player.getBlockZ();
@@ -105,7 +104,7 @@ public final class PlaceLorePlacer {
         if (c == null) return;
         List<PlaceLore.Note> notes = lecternNotes(c);
         if (notes.isEmpty()) return;
-        ServerLevel level = player.serverLevel();
+        ServerLevel level = player.level();
         Store store = Store.get(level);
         if (store.placed.contains(place.id())) return;
         try {

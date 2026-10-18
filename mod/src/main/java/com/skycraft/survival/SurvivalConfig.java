@@ -1,56 +1,56 @@
 package com.skycraft.survival;
 
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 /** Survival module settings: {@code config/skycraft-survival.toml}. */
 public final class SurvivalConfig {
-    public static final ForgeConfigSpec SPEC;
+    public static final ModConfigSpec SPEC;
 
-    public static final ForgeConfigSpec.BooleanValue ORE_REGEN;
-    public static final ForgeConfigSpec.IntValue ORE_REGEN_TICKS;
-    public static final ForgeConfigSpec.BooleanValue ORE_REGEN_NETHER;
+    public static final ModConfigSpec.BooleanValue ORE_REGEN;
+    public static final ModConfigSpec.IntValue ORE_REGEN_TICKS;
+    public static final ModConfigSpec.BooleanValue ORE_REGEN_NETHER;
 
-    public static final ForgeConfigSpec.BooleanValue DISEASES;
-    public static final ForgeConfigSpec.DoubleValue DISEASE_CHANCE;
-    public static final ForgeConfigSpec.IntValue CURE_PRICE;
-    public static final ForgeConfigSpec.IntValue BLESSING_TICKS;
+    public static final ModConfigSpec.BooleanValue DISEASES;
+    public static final ModConfigSpec.DoubleValue DISEASE_CHANCE;
+    public static final ModConfigSpec.IntValue CURE_PRICE;
+    public static final ModConfigSpec.IntValue BLESSING_TICKS;
 
-    public static final ForgeConfigSpec.BooleanValue INNKEEPERS;
-    public static final ForgeConfigSpec.IntValue ROOM_PRICE;
-    public static final ForgeConfigSpec.IntValue INNKEEPER_RESPAWN_TICKS;
+    public static final ModConfigSpec.BooleanValue INNKEEPERS;
+    public static final ModConfigSpec.IntValue ROOM_PRICE;
+    public static final ModConfigSpec.IntValue INNKEEPER_RESPAWN_TICKS;
 
-    public static final ForgeConfigSpec.BooleanValue SURVIVAL_MODE;
-    public static final ForgeConfigSpec.DoubleValue HUNGER_PER_HOUR;
-    public static final ForgeConfigSpec.DoubleValue FATIGUE_PER_HOUR;
-    public static final ForgeConfigSpec.DoubleValue COLD_RATE;
-    public static final ForgeConfigSpec.DoubleValue CARRY_PENALTY;
-    public static final ForgeConfigSpec.BooleanValue FREEZING_DAMAGE;
-    public static final ForgeConfigSpec.BooleanValue BLOCK_FAST_TRAVEL;
-    public static final ForgeConfigSpec.BooleanValue STAGE_MESSAGES;
+    public static final ModConfigSpec.BooleanValue SURVIVAL_MODE;
+    public static final ModConfigSpec.DoubleValue HUNGER_PER_HOUR;
+    public static final ModConfigSpec.DoubleValue FATIGUE_PER_HOUR;
+    public static final ModConfigSpec.DoubleValue COLD_RATE;
+    public static final ModConfigSpec.DoubleValue CARRY_PENALTY;
+    public static final ModConfigSpec.BooleanValue FREEZING_DAMAGE;
+    public static final ModConfigSpec.BooleanValue BLOCK_FAST_TRAVEL;
+    public static final ModConfigSpec.BooleanValue STAGE_MESSAGES;
 
-    public static final ForgeConfigSpec.BooleanValue FISHING_MINIGAME;
-    public static final ForgeConfigSpec.DoubleValue FISHING_BITE_SPEED;
-    public static final ForgeConfigSpec.IntValue FISH_STOCK_REGEN_TICKS;
+    public static final ModConfigSpec.BooleanValue FISHING_MINIGAME;
+    public static final ModConfigSpec.DoubleValue FISHING_BITE_SPEED;
+    public static final ModConfigSpec.IntValue FISH_STOCK_REGEN_TICKS;
 
-    public static final ForgeConfigSpec.BooleanValue PLAYER_CORPSES;
-    public static final ForgeConfigSpec.ConfigValue<String> CORPSE_LOOT_ACCESS;
-    public static final ForgeConfigSpec.IntValue EMPTY_CORPSE_SECONDS;
+    public static final ModConfigSpec.BooleanValue PLAYER_CORPSES;
+    public static final ModConfigSpec.ConfigValue<String> CORPSE_LOOT_ACCESS;
+    public static final ModConfigSpec.IntValue EMPTY_CORPSE_SECONDS;
 
-    public static final ForgeConfigSpec.IntValue PLOT_PRICE;
-    public static final ForgeConfigSpec.IntValue STEWARD_PRICE;
+    public static final ModConfigSpec.IntValue PLOT_PRICE;
+    public static final ModConfigSpec.IntValue STEWARD_PRICE;
     /** Where a homestead may be founded (docs/HOMESTEAD.md): distances in blocks from the table. */
-    public static final ForgeConfigSpec.IntValue CLAIM_SETTLEMENT_DISTANCE;
-    public static final ForgeConfigSpec.IntValue CLAIM_DUNGEON_DISTANCE;
-    public static final ForgeConfigSpec.IntValue CLAIM_PLACE_CLEARANCE;
-    public static final ForgeConfigSpec.IntValue CLAIM_SPACING;
-    public static final ForgeConfigSpec.IntValue CLAIM_PRICE_DRAFTING_TABLE;
-    public static final ForgeConfigSpec.IntValue CLAIM_EXPAND_GOLD;
-    public static final ForgeConfigSpec.IntValue CLAIM_MAX_RADIUS;
-    public static final ForgeConfigSpec.IntValue HOMESTEAD_HINT_RANGE;
-    public static final ForgeConfigSpec.IntValue HOMESTEAD_DISCOVER_MARGIN;
+    public static final ModConfigSpec.IntValue CLAIM_SETTLEMENT_DISTANCE;
+    public static final ModConfigSpec.IntValue CLAIM_DUNGEON_DISTANCE;
+    public static final ModConfigSpec.IntValue CLAIM_PLACE_CLEARANCE;
+    public static final ModConfigSpec.IntValue CLAIM_SPACING;
+    public static final ModConfigSpec.IntValue CLAIM_PRICE_DRAFTING_TABLE;
+    public static final ModConfigSpec.IntValue CLAIM_EXPAND_GOLD;
+    public static final ModConfigSpec.IntValue CLAIM_MAX_RADIUS;
+    public static final ModConfigSpec.IntValue HOMESTEAD_HINT_RANGE;
+    public static final ModConfigSpec.IntValue HOMESTEAD_DISCOVER_MARGIN;
 
     static {
-        ForgeConfigSpec.Builder b = new ForgeConfigSpec.Builder();
+        ModConfigSpec.Builder b = new ModConfigSpec.Builder();
         b.push("ore_veins");
         ORE_REGEN = b.comment("Mined natural ore veins become depleted and grow back after a while (Skyrim ore veins).")
                 .define("regenerateOre", true);

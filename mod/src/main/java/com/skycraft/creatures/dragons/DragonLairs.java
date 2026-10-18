@@ -17,10 +17,10 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.living.LivingDeathEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+
+import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.util.Optional;
 
@@ -36,7 +36,7 @@ import java.util.Optional;
  *     <li><b>The Throat of the World</b>: Paarthurnax waits on the summit.</li>
  * </ul>
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class DragonLairs {
     private static final int CHECK_INTERVAL = 100;
     private static final long LAIR_RESPAWN = 24000L * 7;
@@ -47,9 +47,9 @@ public final class DragonLairs {
     private DragonLairs() {}
 
     @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer player)) return;
-        ServerLevel level = player.serverLevel();
+    public static void onPlayerTick(net.neoforged.neoforge.event.tick.PlayerTickEvent.Post event) {
+        if (!(event instanceof net.neoforged.neoforge.event.tick.PlayerTickEvent.Post) || !(event.getEntity() instanceof ServerPlayer player)) return;
+        ServerLevel level = player.level();
         if ((level.getGameTime() + player.getId() * 13L) % CHECK_INTERVAL != 0) return;
         if (level.dimension() != Level.OVERWORLD || player.isSpectator() || !player.isAlive()) return;
         int stage = MainQuest.stage(SkyData.get(player));
@@ -62,8 +62,8 @@ public final class DragonLairs {
     }
 
     private static boolean dragonNear(ServerLevel level, double x, double z, double radius) {
-        return !level.getEntitiesOfClass(DragonEntity.class, new AABB(x - radius, level.getMinBuildHeight(), z - radius,
-                x + radius, level.getMaxBuildHeight(), z + radius), d -> d.isAlive()).isEmpty();
+        return !level.getEntitiesOfClass(DragonEntity.class, new AABB(x - radius, level.getMinY(), z - radius,
+                x + radius, (level.getMaxY()+1), z + radius), d -> d.isAlive()).isEmpty();
     }
 
     private static void checkMound(ServerLevel level, ServerPlayer player, DragonWorldData data, int x, int z) {
@@ -113,8 +113,8 @@ public final class DragonLairs {
         long dx = x - tx;
         long dz = z - tz;
         if (dx * dx + dz * dz > 128L * 128L || !level.hasChunk(tx >> 4, tz >> 4)) return;
-        if (!level.getEntitiesOfClass(DragonEntity.class, new AABB(tx - 160, level.getMinBuildHeight(), tz - 160, tx + 160,
-                level.getMaxBuildHeight(), tz + 160), d -> d.getVariant() == DragonEntity.PAARTHURNAX).isEmpty()) return;
+        if (!level.getEntitiesOfClass(DragonEntity.class, new AABB(tx - 160, level.getMinY(), tz - 160, tx + 160,
+                (level.getMaxY()+1), tz + 160), d -> d.getVariant() == DragonEntity.PAARTHURNAX).isEmpty()) return;
         BlockPos summit = NamedDragons.summit(level, tx, tz, throat != null ? Math.min(48, throat.radius()) : 48);
         NamedDragons.spawnPaarthurnax(level, summit);
     }

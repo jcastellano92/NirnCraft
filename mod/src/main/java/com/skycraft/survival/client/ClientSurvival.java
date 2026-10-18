@@ -3,7 +3,7 @@ package com.skycraft.survival.client;
 import com.skycraft.Skycraft;
 import com.skycraft.survival.SurvivalPackets;
 import com.skycraft.survival.fishing.FishingSpots;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
@@ -11,17 +11,17 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+
+import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 /**
  * Client copy of the Survival Mode meters ({@link SurvivalPackets.Meters}) for the HUD, plus the jumping fish at
  * fishing spots ({@link FishingSpots}: the spots are fixed, so the client finds them itself).
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
 public final class ClientSurvival {
     public static int hunger, fatigue, cold, warmth, trend;
     public static int flags;
@@ -69,14 +69,13 @@ public final class ClientSurvival {
     // ------------------------------------------------------------------ fishing spots
 
     @SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent event) {
-        if (event.phase != TickEvent.Phase.END) return;
+    public static void onClientTick(net.neoforged.neoforge.client.event.ClientTickEvent.Post event) {
         Minecraft mc = Minecraft.getInstance();
         ClientLevel level = mc.level;
         if (level == null || mc.player == null || mc.isPaused()) return;
         FishingHud.clientTick(mc);
         if (level.getGameTime() % 3 != 0) return;
-        RandomSource r = level.random;
+        RandomSource r = level.getRandom();
         int px = mc.player.getBlockX(), pz = mc.player.getBlockZ();
         int cx = Math.floorDiv(px, FishingSpots.CELL), cz = Math.floorDiv(pz, FishingSpots.CELL);
         for (int dx = -1; dx <= 1; dx++) {

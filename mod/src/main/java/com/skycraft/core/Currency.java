@@ -43,7 +43,7 @@ public final class Currency {
         data.setGold(data.getGold() + amount);
         if (found) {
             net.minecraft.nbt.CompoundTag tag = data.module("currency");
-            long unfound = tag.getLong("unfound");
+            long unfound = tag.getLongOr("unfound", 0L);
             long used = Math.min(unfound, amount);
             if (used > 0) tag.putLong("unfound", unfound - used);
             if (amount - used > 0) data.addStat("gold_found", (int) Math.min(Integer.MAX_VALUE, amount - used));
@@ -57,14 +57,14 @@ public final class Currency {
     public static void markNotFound(Player player, long amount) {
         if (amount <= 0) return;
         net.minecraft.nbt.CompoundTag tag = SkyData.get(player).module("currency");
-        tag.putLong("unfound", Math.min(tag.getLong("unfound") + amount, 1_000_000_000L));
+        tag.putLong("unfound", Math.min(tag.getLongOr("unfound", 0L) + amount, 1_000_000_000L));
     }
 
     /** Creates physical gold: loose Septims for small amounts, a coin purse holding the amount otherwise. */
     public static ItemStack coins(long amount) {
         if (amount <= 64) return new ItemStack(ModItems.SEPTIM.get(), (int) Math.max(1, amount));
         ItemStack purse = new ItemStack(ModItems.COIN_PURSE.get());
-        purse.getOrCreateTag().putLong("gold", amount);
+        com.skycraft.inventory.ItemData.updateCustom(purse, customData263 -> customData263.putLong("gold", amount));
         return purse;
     }
 
@@ -72,7 +72,8 @@ public final class Currency {
     public static long valueOf(ItemStack stack) {
         if (stack.is(ModItems.SEPTIM.get())) return stack.getCount();
         if (stack.is(ModItems.COIN_PURSE.get())) {
-            long v = stack.getTag() != null ? stack.getTag().getLong("gold") : 0;
+            var custom = com.skycraft.inventory.ItemData.custom(stack);
+            long v = custom != null ? custom.getLongOr("gold", 0L) : 0;
             return (v <= 0 ? 25 : v) * stack.getCount();
         }
         return 0;

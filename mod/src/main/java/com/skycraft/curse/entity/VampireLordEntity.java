@@ -20,7 +20,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
@@ -32,7 +32,7 @@ import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.monster.Monster;
-import net.minecraft.world.entity.npc.AbstractVillager;
+import net.minecraft.world.entity.npc.villager.AbstractVillager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.levelgen.Heightmap;
@@ -55,7 +55,7 @@ public class VampireLordEntity extends CurseMonster {
     public VampireLordEntity(EntityType<? extends VampireLordEntity> type, Level level) {
         super(type, level);
         this.xpReward = 60;
-        this.setMaxUpStep(1.1f);
+        this.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.STEP_HEIGHT).setBaseValue(1.1f);
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -69,9 +69,9 @@ public class VampireLordEntity extends CurseMonster {
     }
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        this.entityData.define(LEVITATING, false);
+    protected void defineSynchedData(net.minecraft.network.syncher.SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(LEVITATING, false);
     }
 
     public boolean isLevitating() {
@@ -94,14 +94,14 @@ public class VampireLordEntity extends CurseMonster {
         this.targetSelector.addGoal(1, new HurtByTargetGoal(this).setAlertOthers());
         this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, true));
         this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, NpcEntity.class, 10, true, false,
-                e -> e instanceof NpcEntity npc && npc.role() != com.skycraft.society.NpcRole.VAMPIRE));
+                (e, targetLevel263) -> e instanceof NpcEntity npc && npc.role() != com.skycraft.society.NpcRole.VAMPIRE));
         this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, AbstractVillager.class, true));
     }
 
     @Override
-    public boolean doHurtTarget(Entity target) {
+    public boolean doHurtTarget(net.minecraft.server.level.ServerLevel serverLevel263, Entity target) {
         playAnim(CurseAnims.Anim.ATTACK);
-        boolean hit = super.doHurtTarget(target);
+        boolean hit = super.doHurtTarget(serverLevel263, target);
         if (hit) this.heal(2f);
         return hit;
     }
@@ -112,9 +112,9 @@ public class VampireLordEntity extends CurseMonster {
     }
 
     @Override
-    public boolean hurt(DamageSource source, float amount) {
-        boolean hurt = super.hurt(source, amount);
-        if (hurt && !this.level().isClientSide) {
+    public boolean hurtServer(net.minecraft.server.level.ServerLevel serverLevel263, DamageSource source, float amount) {
+        boolean hurt = super.hurtServer(serverLevel263, source, amount);
+        if (hurt && !this.level().isClientSide()) {
             damageSinceBats += amount;
             if (damageSinceBats > this.getMaxHealth() * 0.2f && this.level().getGameTime() >= nextBats && this.getTarget() != null) bats();
         }
@@ -143,15 +143,15 @@ public class VampireLordEntity extends CurseMonster {
         playAnim(CurseAnims.Anim.HOWL);
         this.playSound(SoundEvents.EVOKER_PREPARE_SUMMON, 1.2f, 0.6f);
         int existing = level.getEntitiesOfClass(Mob.class, getBoundingBox().inflate(24),
-                m -> m.getTags().contains("skycraft_lord_thrall") && m.isAlive()).size();
+                m -> m.entityTags().contains("skycraft_lord_thrall") && m.isAlive()).size();
         if (existing >= 3) return;
         for (int i = 0; i < 2; i++) {
-            Mob thrall = i == 0 ? CurseRegistry.DEATH_HOUND.get().create(level) : EntityType.SKELETON.create(level);
+            Mob thrall = i == 0 ? CurseRegistry.DEATH_HOUND.get().create(level, net.minecraft.world.entity.EntitySpawnReason.EVENT) : net.minecraft.world.entity.EntityTypes.SKELETON.create(level, net.minecraft.world.entity.EntitySpawnReason.EVENT);
             if (thrall == null) continue;
             BlockPos at = this.blockPosition().offset(this.random.nextInt(5) - 2, 0, this.random.nextInt(5) - 2);
-            thrall.moveTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, this.random.nextFloat() * 360, 0);
-            if (!level.noCollision(thrall)) thrall.moveTo(getX(), getY(), getZ());
-            thrall.finalizeSpawn(level, level.getCurrentDifficultyAt(at), MobSpawnType.MOB_SUMMONED, null, null);
+            thrall.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, this.random.nextFloat() * 360, 0);
+            if (!level.noCollision(thrall)) thrall.snapTo(getX(), getY(), getZ());
+            thrall.finalizeSpawn(level, level.getCurrentDifficultyAt(at), EntitySpawnReason.MOB_SUMMONED, null);
             thrall.addTag("skycraft_lord_thrall");
             if (i == 1) thrall.setCustomName(Component.translatable("entity.skycraft.vampire_lord.thrall"));
             thrall.setTarget(this.getTarget());
@@ -163,8 +163,8 @@ public class VampireLordEntity extends CurseMonster {
     @Override
     public void aiStep() {
         super.aiStep();
-        if (this.level().isClientSide && isLevitating() && this.random.nextInt(3) == 0) {
-            this.level().addParticle(new DustParticleOptions(new Vector3f(0.35f, 0.02f, 0.05f), 0.8f),
+        if (this.level().isClientSide() && isLevitating() && this.random.nextInt(3) == 0) {
+            this.level().addParticle(new DustParticleOptions(net.minecraft.util.ARGB.colorFromFloat(1f, 0.35f, 0.02f, 0.05f), 0.8f),
                     getRandomX(0.6), getY() + 0.2, getRandomZ(0.6), 0, -0.02, 0);
         }
     }
@@ -190,7 +190,7 @@ public class VampireLordEntity extends CurseMonster {
     }
 
     @Override
-    public boolean causeFallDamage(float distance, float multiplier, DamageSource source) {
+    public boolean causeFallDamage(double distance, float multiplier, DamageSource source) {
         return false;
     }
 
@@ -253,10 +253,10 @@ public class VampireLordEntity extends CurseMonster {
                 int steps = (int) (d.length() * 3);
                 for (int i = 0; i <= steps; i++) {
                     Vec3 p = from.add(d.scale(i / (double) Math.max(1, steps)));
-                    sl.sendParticles(new DustParticleOptions(new Vector3f(0.7f, 0.04f, 0.08f), 1.1f), p.x, p.y, p.z, 1, 0.03, 0.03, 0.03, 0);
+                    sl.sendParticles(new DustParticleOptions(net.minecraft.util.ARGB.colorFromFloat(1f, 0.7f, 0.04f, 0.08f), 1.1f), p.x, p.y, p.z, 1, 0.03, 0.03, 0.03, 0);
                 }
-                if (t.hurt(MagicDamage.source(sl, MagicDamage.SPELL, null, VampireLordEntity.this), 3f)) heal(3f);
-                if (channel % 20 == 0) playSound(SoundEvents.HONEY_DRINK, 0.8f, 0.5f);
+                if (com.skycraft.platform.Effects.hurt(t, MagicDamage.source(sl, MagicDamage.SPELL, null, VampireLordEntity.this), 3f)) heal(3f);
+                if (channel % 20 == 0) playSound(SoundEvents.HONEY_DRINK.value(), 0.8f, 0.5f);
             }
         }
 

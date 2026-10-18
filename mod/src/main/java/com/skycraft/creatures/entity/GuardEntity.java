@@ -21,7 +21,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
@@ -37,7 +37,7 @@ import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.monster.Creeper;
-import net.minecraft.world.entity.monster.EnderMan;
+import net.minecraft.world.entity.monster.Enderman;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -98,9 +98,9 @@ public class GuardEntity extends PathfinderMob {
     }
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        this.entityData.define(PROFILE, 0);
+    protected void defineSynchedData(net.minecraft.network.syncher.SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(PROFILE, 0);
     }
 
     @Override
@@ -127,7 +127,7 @@ public class GuardEntity extends PathfinderMob {
         this.goalSelector.addGoal(8, new RandomLookAroundGoal(this));
         this.targetSelector.addGoal(1, new HurtByTargetGoal(this, GuardEntity.class).setAlertOthers());
         this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Mob.class, 5, false, false,
-                e -> e instanceof Enemy && !(e instanceof Creeper) && !(e instanceof EnderMan) && !(e instanceof GiantEntity)) {
+                (e, targetLevel263) -> e instanceof Enemy && !(e instanceof Creeper) && !(e instanceof Enderman) && !(e instanceof GiantEntity)) {
             @Override
             public boolean canUse() {
                 // never replace a player target set by the crime module
@@ -162,7 +162,7 @@ public class GuardEntity extends PathfinderMob {
     /** Guards patrol within 32 blocks of their home (the village meeting point). */
     public void setHome(BlockPos pos) {
         this.home = pos.immutable();
-        this.restrictTo(this.home, 40);
+        this.setHomeTo(this.home, 40);
     }
 
     /** Pins this guard to a post: it stands there facing {@code yaw}, never strolls, and walks back after a fight. */
@@ -170,7 +170,7 @@ public class GuardEntity extends PathfinderMob {
         this.post = pos.immutable();
         this.postYaw = yaw;
         this.home = this.post;
-        this.restrictTo(this.post, 8);
+        this.setHomeTo(this.post, 8);
     }
 
     @Nullable
@@ -185,7 +185,7 @@ public class GuardEntity extends PathfinderMob {
     public void setPatrol(BlockPos center, int radius, java.util.List<BlockPos> waypoints) {
         this.post = null;
         this.home = center.immutable();
-        this.restrictTo(this.home, Math.max(16, radius));
+        this.setHomeTo(this.home, Math.max(16, radius));
         this.route = new long[waypoints.size()];
         for (int i = 0; i < route.length; i++) route[i] = waypoints.get(i).asLong();
         this.routeIndex = -1;
@@ -332,9 +332,9 @@ public class GuardEntity extends PathfinderMob {
 
     @Override
     @Nullable
-    public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, MobSpawnType reason,
-                                        @Nullable SpawnGroupData data, @Nullable CompoundTag tag) {
-        data = super.finalizeSpawn(level, difficulty, reason, data, tag);
+    public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, EntitySpawnReason reason,
+                                        @Nullable SpawnGroupData data) {
+        data = super.finalizeSpawn(level, difficulty, reason, data);
         initialize(level.getLevel());
         return data;
     }
@@ -359,7 +359,7 @@ public class GuardEntity extends PathfinderMob {
 
     @Override
     public float getWalkTargetValue(BlockPos pos, net.minecraft.world.level.LevelReader level) {
-        if (!this.level().isClientSide) {
+        if (!this.level().isClientSide()) {
             if (com.skycraft.society.NpcPlacement.isFireHazard(level, pos)
                     || com.skycraft.society.NpcPlacement.isSlabHazard(level, pos)
                     || com.skycraft.society.NpcPlacement.isFurnitureHazard(level, pos)) {
@@ -373,8 +373,8 @@ public class GuardEntity extends PathfinderMob {
     }
 
     @Override
-    protected void customServerAiStep() {
-        super.customServerAiStep();
+    protected void customServerAiStep(net.minecraft.server.level.ServerLevel serverLevel263) {
+        super.customServerAiStep(serverLevel263);
         if (!initialized) initialize(this.level());
         if ((this.tickCount + this.getId()) % 20 == 0 && this.level() instanceof net.minecraft.server.level.ServerLevel sl) {
             BlockPos here = this.blockPosition();
@@ -391,7 +391,7 @@ public class GuardEntity extends PathfinderMob {
                         setHome(safe);
                     }
                     this.getNavigation().stop();
-                    this.moveTo(safe.getX() + 0.5, safe.getY(), safe.getZ() + 0.5, this.getYRot(), 0.0F);
+                    this.snapTo(safe.getX() + 0.5, safe.getY(), safe.getZ() + 0.5, this.getYRot(), 0.0F);
                 }
             }
         }
@@ -443,15 +443,15 @@ public class GuardEntity extends PathfinderMob {
     }
 
     @Override
-    public boolean hurt(DamageSource source, float amount) {
+    public boolean hurtServer(net.minecraft.server.level.ServerLevel serverLevel263, DamageSource source, float amount) {
         // no friendly fire between guards
         if (source.getEntity() instanceof GuardEntity) return false;
-        return super.hurt(source, amount);
+        return super.hurtServer(serverLevel263, source, amount);
     }
 
     @Override
-    public boolean doHurtTarget(Entity target) {
-        boolean hit = super.doHurtTarget(target);
+    public boolean doHurtTarget(net.minecraft.server.level.ServerLevel serverLevel263, Entity target) {
+        boolean hit = super.doHurtTarget(serverLevel263, target);
         if (hit) this.playSound(SoundEvents.PLAYER_ATTACK_STRONG, 0.8f, 1.0f);
         return hit;
     }
@@ -474,30 +474,36 @@ public class GuardEntity extends PathfinderMob {
     // ------------------------------------------------------------------ save
 
     @Override
-    public void addAdditionalSaveData(CompoundTag tag) {
-        super.addAdditionalSaveData(tag);
+    public void addAdditionalSaveData(net.minecraft.world.level.storage.ValueOutput output263) {
+        super.addAdditionalSaveData(output263);
+        net.minecraft.nbt.CompoundTag tag = new net.minecraft.nbt.CompoundTag();
+        
         tag.putString("Profile", getProfile().id());
         tag.putBoolean("SkycraftInit", initialized);
-        if (home != null) tag.put("Home", NbtUtils.writeBlockPos(home));
+        if (home != null) tag.put("Home", com.skycraft.platform.NbtPositions.write(home));
         if (route.length > 0) tag.put("Route", new LongArrayTag(route));
         if (post != null) {
-            tag.put("Post", NbtUtils.writeBlockPos(post));
+            tag.put("Post", com.skycraft.platform.NbtPositions.write(post));
             tag.putFloat("PostYaw", postYaw);
         }
+    
+        output263.store(tag);
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag tag) {
-        super.readAdditionalSaveData(tag);
+    public void readAdditionalSaveData(net.minecraft.world.level.storage.ValueInput input263) {
+        super.readAdditionalSaveData(input263);
+        net.minecraft.nbt.CompoundTag tag = com.skycraft.platform.ValueTags.read(input263 , "Profile", "Hold", "SkycraftInit", "Home", "Route", "Post", "PostYaw");
+        
         if (tag.contains("Profile")) {
-            GuardProfiles.Profile p = GuardProfiles.byId(tag.getString("Profile"));
+            GuardProfiles.Profile p = GuardProfiles.byId(tag.getStringOr("Profile",""));
             if (p != null) setProfile(p);
         } else if (tag.contains("Hold")) {
-            setProfile(GuardProfiles.ofHoldIndex(tag.getInt("Hold"))); // a guard saved before the profiles
+            setProfile(GuardProfiles.ofHoldIndex(tag.getIntOr("Hold",0))); // a guard saved before the profiles
         }
-        initialized = tag.getBoolean("SkycraftInit");
-        if (tag.contains("Home")) setHome(NbtUtils.readBlockPos(tag.getCompound("Home")));
-        if (tag.contains("Route")) route = tag.getLongArray("Route");
-        if (tag.contains("Post")) setPost(NbtUtils.readBlockPos(tag.getCompound("Post")), tag.getFloat("PostYaw"));
+        initialized = tag.getBooleanOr("SkycraftInit",false);
+        if (tag.contains("Home")) setHome(com.skycraft.platform.NbtPositions.read(tag.getCompoundOrEmpty("Home")));
+        if (tag.contains("Route")) route = tag.getLongArray("Route").orElseGet(() -> new long[0]);
+        if (tag.contains("Post")) setPost(com.skycraft.platform.NbtPositions.read(tag.getCompoundOrEmpty("Post")), tag.getFloatOr("PostYaw",0F));
     }
 }

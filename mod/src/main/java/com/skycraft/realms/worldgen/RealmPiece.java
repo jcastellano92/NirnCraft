@@ -40,13 +40,13 @@ public class RealmPiece extends StructurePiece {
 
     public RealmPiece(StructurePieceSerializationContext context, CompoundTag tag) {
         super(RealmWorldgen.REALM_PIECE.get(), tag);
-        this.site = tag.getString("Site");
-        this.ox = tag.getInt("OX");
-        this.oy = tag.getInt("OY");
-        this.oz = tag.getInt("OZ");
-        this.param = tag.getInt("Param");
-        this.facing = tag.getInt("Facing");
-        this.seed = tag.getLong("Seed");
+        this.site = tag.getStringOr("Site", "");
+        this.ox = tag.getIntOr("OX", 0);
+        this.oy = tag.getIntOr("OY", 0);
+        this.oz = tag.getIntOr("OZ", 0);
+        this.param = tag.getIntOr("Param", 0);
+        this.facing = tag.getIntOr("Facing", 0);
+        this.seed = tag.getLongOr("Seed", 0L);
     }
 
     @Override

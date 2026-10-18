@@ -7,13 +7,15 @@ import com.skycraft.creatures.client.kit.RigRenderer;
 import com.skycraft.creatures.client.rig.defs.Defs;
 import com.skycraft.creatures.entity.DragonEntity;
 import com.skycraft.creatures.entity.anim.AnimSlot;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import com.skycraft.client.PoseRenderState;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
 
@@ -23,9 +25,9 @@ import org.jetbrains.annotations.Nullable;
  * A dead dragon's body burns away to its skeleton after its soul is absorbed: the flesh fades over the bones.
  */
 public class DragonRenderer extends RigRenderer<DragonEntity> {
-    private static final ResourceLocation[] TEXTURES = new ResourceLocation[DragonEntity.VARIANTS.length];
-    private static final ResourceLocation[] GLOW = new ResourceLocation[DragonEntity.VARIANTS.length];
-    private static final ResourceLocation SKELETON = BestiaryClient.tex("dragon_skeletal");
+    private static final Identifier[] TEXTURES = new Identifier[DragonEntity.VARIANTS.length];
+    private static final Identifier[] GLOW = new Identifier[DragonEntity.VARIANTS.length];
+    private static final Identifier SKELETON = BestiaryClient.tex("dragon_skeletal");
 
     static {
         for (int i = 0; i < TEXTURES.length; i++) {
@@ -49,33 +51,32 @@ public class DragonRenderer extends RigRenderer<DragonEntity> {
         });
     }
 
-    private static ResourceLocation texture(DragonEntity dragon) {
+    private static Identifier texture(DragonEntity dragon) {
         return TEXTURES[dragon.getVariant()];
     }
 
-    @Override
-    public void render(DragonEntity dragon, float yaw, float partialTicks, PoseStack pose, MultiBufferSource buffers, int light) {
-        RigModel<DragonEntity> m = this.getModel();
-        float burn = burn(dragon, partialTicks);
+    @Override public void extractRenderState(DragonEntity dragon, PoseRenderState state, float partialTicks) {
+        super.extractRenderState(dragon, state, partialTicks);
+        state.burn = burn(dragon, partialTicks);
+        state.skeletalVariant = dragon.getVariant() == DragonEntity.SKELETAL;
+        float alpha=1, r=1, g=1, b=1;
         if (dragon.isEthereal()) {
-            m.alpha = 0.35f + 0.1f * Mth.sin((dragon.tickCount + partialTicks) * 0.3f);
-            m.tintR = 0.75f;
-            m.tintG = 0.9f;
-            m.tintB = 1.0f;
-        } else if (burn > 0f) {
-            m.alpha = Mth.clamp(1f - burn, 0f, 1f);
-            float char01 = Mth.clamp(burn * 1.6f, 0f, 1f);
-            m.tintR = 1f - 0.55f * char01;
-            m.tintG = 1f - 0.65f * char01;
-            m.tintB = 1f - 0.7f * char01;
-        } else {
-            m.alpha = 1f;
-            m.tintR = m.tintG = m.tintB = 1f;
+            alpha=.35f+.1f*Mth.sin(state.ageInTicks*.3f); r=.75f; g=.9f;
+        } else if (state.burn>0) {
+            alpha=Mth.clamp(1-state.burn,0,1);
+            float ch=Mth.clamp(state.burn*1.6f,0,1);
+            r=1-.55f*ch; g=1-.65f*ch; b=1-.7f*ch;
         }
-        super.render(dragon, yaw, partialTicks, pose, buffers, light);
-        m.alpha = 1f;
-        m.tintR = m.tintG = m.tintB = 1f;
+        state.modelColor=((int)(alpha*255)<<24)|((int)(r*255)<<16)|((int)(g*255)<<8)|(int)(b*255);
+        state.translucentBody=dragon.isEthereal()||state.burn>0;
+        state.hideBody=state.burn>=1;
+        state.bankFlying=dragon.isFlying()&&dragon.deathTime<=0&&!dragon.isCorpsePose();
+        state.bankHeight=1.75f;
+        state.bankRoll=Mth.clamp(Mth.wrapDegrees(dragon.yBodyRot-dragon.yBodyRotO)*4f,-35f,35f);
     }
+
+    @Override protected boolean affectedByCulling(DragonEntity dragon){return false;}
+    @Override protected net.minecraft.world.phys.AABB getBoundingBoxForCulling(DragonEntity dragon,float partialTicks){return dragon.getBoundingBoxForCulling();}
 
     /** How much of the flesh is gone: burning corpses (soul absorbed) and dragons rising from their mounds. */
     static float burn(DragonEntity dragon, float partialTicks) {
@@ -86,54 +87,21 @@ public class DragonRenderer extends RigRenderer<DragonEntity> {
         return Mth.clamp((rising - partialTicks) / (DragonEntity.RISE_TICKS * 0.66f), 0f, 1f);
     }
 
-    @Nullable
-    @Override
-    protected RenderType getRenderType(DragonEntity dragon, boolean bodyVisible, boolean translucentVisible, boolean glowing) {
-        float burn = burn(dragon, 0f);
-        if (bodyVisible && (dragon.isEthereal() || burn > 0f)) {
-            if (burn >= 1f) return null; // only the skeleton is left
-            return RenderType.entityTranslucent(getTextureLocation(dragon));
+    @Nullable @Override
+    protected RenderType getRenderType(PoseRenderState state, boolean bodyVisible, boolean translucentVisible, boolean glowing) {
+        if (bodyVisible && state.translucentBody) {
+            if (state.hideBody) return null;
+            return RenderTypes.entityTranslucent(getTextureLocation(state));
         }
-        return super.getRenderType(dragon, bodyVisible, translucentVisible, glowing);
-    }
-
-    @Override
-    protected void setupRotations(DragonEntity dragon, PoseStack pose, float ageInTicks, float rotationYaw, float partialTicks) {
-        super.setupRotations(dragon, pose, ageInTicks, rotationYaw, partialTicks);
-        if (dragon.isFlying() && dragon.deathTime <= 0 && !dragon.isCorpsePose()) {
-            float pitch = Mth.lerp(partialTicks, dragon.xRotO, dragon.getXRot());
-            float turn = Mth.wrapDegrees(dragon.yBodyRot - dragon.yBodyRotO);
-            float roll = Mth.clamp(turn * 4.0f, -35.0f, 35.0f);
-            pose.translate(0.0, 1.75, 0.0);
-            pose.mulPose(Axis.XP.rotationDegrees(-pitch));
-            pose.mulPose(Axis.ZP.rotationDegrees(roll));
-            pose.translate(0.0, -1.75, 0.0);
-        }
+        return super.getRenderType(state, bodyVisible, translucentVisible, glowing);
     }
 
     /** The bones under a burning corpse's fading flesh (and all that remains afterwards). */
-    static final class SkeletonLayer extends RenderLayer<DragonEntity, RigModel<DragonEntity>> {
-        SkeletonLayer(RenderLayerParent<DragonEntity, RigModel<DragonEntity>> parent) {
-            super(parent);
-        }
-
-        @Override
-        public void render(PoseStack pose, MultiBufferSource buffers, int light, DragonEntity dragon, float limbSwing, float amount,
-                           float partialTick, float age, float yaw, float pitch) {
-            if (dragon.getVariant() == DragonEntity.SKELETAL) return; // the main pass already draws the bones
-            if (burn(dragon, partialTick) <= 0f) return;
-            RigModel<DragonEntity> m = this.getParentModel();
-            float a = m.alpha;
-            float r = m.tintR;
-            float g = m.tintG;
-            float b = m.tintB;
-            m.alpha = 1f;
-            m.tintR = m.tintG = m.tintB = 1f;
-            m.renderToBuffer(pose, buffers.getBuffer(RenderType.entityCutoutNoCull(SKELETON)), light, OverlayTexture.NO_OVERLAY, 1f, 1f, 1f, 1f);
-            m.alpha = a;
-            m.tintR = r;
-            m.tintG = g;
-            m.tintB = b;
+    static final class SkeletonLayer extends RenderLayer<PoseRenderState, RigModel<DragonEntity>> {
+        SkeletonLayer(RenderLayerParent<PoseRenderState, RigModel<DragonEntity>> parent) { super(parent); }
+        @Override public void submit(PoseStack pose, SubmitNodeCollector collector, int light, PoseRenderState state, float yaw, float pitch) {
+            if (!state.skeletalVariant && state.burn>0)
+                collector.submitModel(getParentModel(),state,pose,RenderTypes.entityCutout(SKELETON),light,OverlayTexture.NO_OVERLAY,-1,null,state.outlineColor);
         }
     }
 }

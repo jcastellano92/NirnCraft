@@ -42,7 +42,7 @@ final class SocietyCommands {
                             return 1;
                         })));
 
-        d.register(Commands.literal("skycraft-society").requires(s -> s.hasPermission(2))
+        d.register(Commands.literal("skycraft-society").requires(s -> s.permissions().hasPermission(net.minecraft.server.permissions.Permissions.COMMANDS_GAMEMASTER))
                 .then(Commands.literal("npc")
                         .then(Commands.argument("role", StringArgumentType.word())
                                 .suggests((c, b) -> SharedSuggestionProvider.suggest(roles, b))
@@ -62,7 +62,7 @@ final class SocietyCommands {
                                 .then(Commands.argument("x", IntegerArgumentType.integer())
                                         .then(Commands.argument("z", IntegerArgumentType.integer()).executes(c -> {
                                             var level = c.getSource().getLevel();
-                                            var fake = net.minecraftforge.common.util.FakePlayerFactory.get(level,
+                                            var fake = net.neoforged.neoforge.common.util.FakePlayerFactory.get(level,
                                                     new com.mojang.authlib.GameProfile(java.util.UUID.nameUUIDFromBytes("skycraft-society-census".getBytes()), "[Census]"));
                                             int x = IntegerArgumentType.getInteger(c, "x"), z = IntegerArgumentType.getInteger(c, "z");
                                             fake.setPos(x + 0.5, level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z), z + 0.5);
@@ -70,8 +70,8 @@ final class SocietyCommands {
                                             int n = 0;
                                             for (var e : level.getEntitiesOfClass(net.minecraft.world.entity.Mob.class,
                                                     fake.getBoundingBox().inflate(150, 200, 150), m -> m.getPersistentData().contains(com.skycraft.roads.Travelers.TAG))) {
-                                                String kind = e.getPersistentData().getCompound(com.skycraft.roads.Travelers.TAG).getString("kind");
-                                                String line = "  " + kind + ": " + e.getType().builtInRegistryHolder().key().location().getPath()
+                                                String kind = e.getPersistentData().getCompoundOrEmpty(com.skycraft.roads.Travelers.TAG).getStringOr("kind","");
+                                                String line = "  " + kind + ": " + e.getType().builtInRegistryHolder().key().identifier().getPath()
                                                         + (e instanceof com.skycraft.society.entity.NpcEntity npc ? "/" + npc.role().id + "/" + npc.race().name().toLowerCase() : "")
                                                         + " '" + e.getDisplayName().getString() + "' at " + e.blockPosition().toShortString();
                                                 c.getSource().sendSuccess(() -> Component.literal(line), false);

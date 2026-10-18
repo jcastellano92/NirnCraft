@@ -4,10 +4,10 @@ import com.skycraft.Skycraft;
 import com.skycraft.client.SkyBossHud;
 import com.skycraft.inventory.client.SkyUi;
 import com.skycraft.visual.VisualConfig;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
@@ -22,12 +22,11 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.gui.overlay.ForgeGui;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.player.AttackEntityEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.neoforge.event.entity.player.AttackEntityEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.util.Locale;
 
@@ -40,7 +39,7 @@ import java.util.Locale;
  * Title-Cased names, and dynamic Celtic knot ornamental brackets that adapt to name lengths.
  * </p>
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
 public final class TargetHud {
     private static final double RANGE = 36.0;
     private static final long LINGER_MS = 3200;
@@ -80,7 +79,7 @@ public final class TargetHud {
     /** When the local player attacks an entity, immediately engage it. */
     @SubscribeEvent
     public static void onAttack(AttackEntityEvent event) {
-        if (event.getEntity().level().isClientSide && event.getEntity() == Minecraft.getInstance().player
+        if (event.getEntity().level().isClientSide() && event.getEntity() == Minecraft.getInstance().player
                 && event.getTarget() instanceof LivingEntity le && !(le instanceof ArmorStand)) {
             lastAttacked = le;
             lastAttackedTime = Util.getMillis();
@@ -91,8 +90,7 @@ public final class TargetHud {
     }
 
     @SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent event) {
-        if (event.phase != TickEvent.Phase.END) return;
+    public static void onClientTick(ClientTickEvent.Post event) {
         Minecraft mc = Minecraft.getInstance();
         LocalPlayer player = mc.player;
         if (player == null || mc.level == null) {
@@ -241,13 +239,15 @@ public final class TargetHud {
     /**
      * Renders the authentic Skyrim target health bar under the compass.
      */
-    public static void render(ForgeGui gui, GuiGraphics g, float partialTick, int width, int height) {
+    public static void render(GuiGraphicsExtractor g, net.minecraft.client.DeltaTracker delta) {
+        float partialTick = delta.getGameTimeDeltaPartialTick(false);
+        int width = g.guiWidth(), height = g.guiHeight();
         Minecraft mc = Minecraft.getInstance();
         long now = Util.getMillis();
         float dt = Mth.clamp((now - lastFrame) / 1000f, 0f, 0.25f);
         lastFrame = now;
 
-        if (!VisualConfig.TARGET_BAR.get() || mc.options.hideGui || mc.player == null) return;
+        if (!VisualConfig.TARGET_BAR.get() || mc.gui.hud.isHidden() || mc.player == null) return;
         LivingEntity e = target;
         boolean visible = e != null && (now - lastSeen < LINGER_MS);
         alpha += ((visible ? 1f : 0f) - alpha) * (1f - (float) Math.exp((visible ? -10.0 : -4.0) * dt));
@@ -364,7 +364,7 @@ public final class TargetHud {
         SkyUi.scaledCentered(g, font, name, cx, nameY, scale, SkyUi.fade(0xFFECE6D8, alpha), true);
     }
 
-    private static void drawKnot(GuiGraphics g, int kx, int ky, float alpha) {
+    private static void drawKnot(GuiGraphicsExtractor g, int kx, int ky, float alpha) {
         int ribbonColor = SkyUi.fade(0xFFC4BEB0, alpha);
         int shadowColor = SkyUi.fade(0xFF282420, alpha);
         for (int y = 0; y < 6; y++) {
@@ -377,7 +377,7 @@ public final class TargetHud {
         }
     }
 
-    private static void drawAngledCap(GuiGraphics g, int x, int y, boolean left, int color) {
+    private static void drawAngledCap(GuiGraphicsExtractor g, int x, int y, boolean left, int color) {
         if (left) {
             g.fill(x + 2, y, x + 3, y + 1, color);
             g.fill(x + 1, y + 1, x + 2, y + 2, color);

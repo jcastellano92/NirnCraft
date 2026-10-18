@@ -85,7 +85,7 @@ public final class Exteriors {
             }
         }
         // the bandits who got here first
-        Towers.tent(fr, ef + 16, -9, Blocks.BROWN_WOOL.defaultBlockState());
+        Towers.tent(fr, ef + 16, -9, com.skycraft.worldgen.VanillaBlocks.BROWN_WOOL.defaultBlockState());
         Camps.fire(fr, ef + 17, 9);
         fr.container(ef + 15, 0, -12, Deco.chest(fr.f), Deco.LOOT_COMMON);
         fr.spawn(Mobs.bandit(), ef + 14, 0, 10, fr.f, null);
@@ -124,8 +124,8 @@ public final class Exteriors {
             if (p.chance(x, 0, z, 1010, 3)) p.set(x, fr.base - 1, z, Blocks.COARSE_DIRT.defaultBlockState());
         });
         // the College's tents and scaffolds
-        Towers.tent(fr, ef + 14, -8, Blocks.LIGHT_BLUE_WOOL.defaultBlockState());
-        Towers.tent(fr, ef + 14, 8, Blocks.LIGHT_BLUE_WOOL.defaultBlockState());
+        Towers.tent(fr, ef + 14, -8, com.skycraft.worldgen.VanillaBlocks.LIGHT_BLUE_WOOL.defaultBlockState());
+        Towers.tent(fr, ef + 14, 8, com.skycraft.worldgen.VanillaBlocks.LIGHT_BLUE_WOOL.defaultBlockState());
         for (int dy = 0; dy <= 4; dy++) {
             fr.set(ef + 4, dy, -8, Blocks.SCAFFOLDING.defaultBlockState().setValue(net.minecraft.world.level.block.ScaffoldingBlock.DISTANCE, 0));
             fr.set(ef + 4, dy, 8, Blocks.SCAFFOLDING.defaultBlockState().setValue(net.minecraft.world.level.block.ScaffoldingBlock.DISTANCE, 0));
@@ -135,7 +135,7 @@ public final class Exteriors {
             int fw = ef + 6 + fr.roll(i, 0, 1011, 12), lt = fr.roll(i, 1, 1011, 25) - 12;
             if (reserved(ef, fw, lt)) continue;
             fr.set(fw, 0, lt, Blocks.SPRUCE_FENCE);
-            fr.set(fw, 1, lt, Blocks.WHITE_BANNER.defaultBlockState());
+            fr.set(fw, 1, lt, com.skycraft.worldgen.VanillaBlocks.WHITE_BANNER.defaultBlockState());
         }
         fr.set(ef + 12, 0, 0 + 9, Blocks.CARTOGRAPHY_TABLE);
         fr.container(ef + 12, 0, -10, Deco.barrel(Direction.UP), Deco.LOOT_MINOR);
@@ -174,7 +174,7 @@ public final class Exteriors {
         // banners of the dragon cult, braziers, and the Word Wall on the upper terrace
         for (int lt : new int[]{-10, 10}) {
             for (int dy = 0; dy <= 4; dy++) fr.set(ef + 2, dy, lt, stone.at(p, fr.x(ef + 2, lt), fr.base + dy, fr.z(ef + 2, lt)));
-            fr.set(ef + 3, 3, lt, Blocks.BLACK_BANNER.defaultBlockState());
+            fr.set(ef + 3, 3, lt, com.skycraft.worldgen.VanillaBlocks.BLACK_BANNER.defaultBlockState());
             fr.set(ef + 6, 0, lt, Blocks.CHISELED_STONE_BRICKS);
             fr.set(ef + 6, 1, lt, Deco.campfire(false, true));
         }
@@ -204,10 +204,10 @@ public final class Exteriors {
         // a timber headframe
         for (int[] leg : new int[][]{{-1, -1}, {-1, 1}, {1, -1}, {1, 1}}) for (int dy = 0; dy <= 5; dy++) fr.set(ef + 14 + leg[0], dy, -9 + leg[1], Deco.pillar(Blocks.SPRUCE_LOG, Direction.Axis.Y));
         fr.fill(ef + 13, 6, -10, ef + 15, 6, -8, Blocks.SPRUCE_PLANKS);
-        fr.set(ef + 14, 5, -9, Blocks.CHAIN);
+        fr.set(ef + 14, 5, -9, com.skycraft.worldgen.VanillaBlocks.CHAIN);
         // the Forsworn have taken it
         Camps.fire(fr, ef + 16, 0);
-        Towers.tent(fr, ef + 20, -4, Blocks.BROWN_WOOL.defaultBlockState());
+        Towers.tent(fr, ef + 20, -4, com.skycraft.worldgen.VanillaBlocks.BROWN_WOOL.defaultBlockState());
         fr.container(ef + 19, 0, 6, Deco.chest(fr.f), Deco.LOOT_MINE);
         fr.spawn(Mobs.forsworn(), ef + 15, 0, 3, fr.f, null);
         fr.spawn(Mobs.forsworn(), ef + 18, 0, -7, fr.f, null);
@@ -260,7 +260,7 @@ public final class Exteriors {
                 for (int dx = -2; dx <= 2; dx++) for (int dy = -2; dy <= 2; dy++) for (int dz = -2; dz <= 2; dz++) {
                     double d = Math.sqrt(dx * dx + dy * dy + dz * dz);
                     if (d > 2.4) continue;
-                    p.set(cx + dx, cy + dy, cz + dz, d < 1.2 ? Blocks.SEA_LANTERN.defaultBlockState() : Blocks.LIGHT_BLUE_STAINED_GLASS.defaultBlockState());
+                    p.set(cx + dx, cy + dy, cz + dz, d < 1.2 ? Blocks.SEA_LANTERN.defaultBlockState() : com.skycraft.worldgen.VanillaBlocks.LIGHT_BLUE_STAINED_GLASS.defaultBlockState());
                 }
                 for (int y = room.floor; y < cy - 2; y++) p.set(cx, y, cz, Blocks.CHISELED_QUARTZ_BLOCK.defaultBlockState());
             }
@@ -290,16 +290,7 @@ public final class Exteriors {
      * reader's client; the title is plain text.
      */
     static ItemStack book(String title, List<Component> pages) {
-        ItemStack stack = new ItemStack(Items.WRITTEN_BOOK);
-        CompoundTag tag = stack.getOrCreateTag();
-        tag.putString("title", title);
-        tag.putString("author", "?");
-        ListTag list = new ListTag();
-        for (Component page : pages) list.add(StringTag.valueOf(Component.Serializer.toJson(page)));
-        tag.put("pages", list);
-        tag.putBoolean("resolved", true);
-        tag.putBoolean(com.skycraft.lore.place.StoryReader.STORY_TAG, true);
-        return stack;
+        return com.skycraft.worldgen.AuthoredBooks.create(title, "?", pages);
     }
 
     /** The Dragonstone's map, as a rubbing: every dragon burial mound. */

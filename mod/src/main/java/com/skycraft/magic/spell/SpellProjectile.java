@@ -42,15 +42,16 @@ public class SpellProjectile extends ThrowableProjectile {
     }
 
     public SpellProjectile(Level level, LivingEntity owner, Spell spell) {
-        super(MagicRegistry.SPELL_PROJECTILE.get(), owner, level);
+        super(MagicRegistry.SPELL_PROJECTILE.get(), owner.getX(), owner.getEyeY() - 0.1, owner.getZ(), level);
+        setOwner(owner);
         this.entityData.set(SPELL, spell.id);
         this.entityData.set(DUAL, spell.dual);
     }
 
     @Override
-    protected void defineSynchedData() {
-        this.entityData.define(SPELL, "");
-        this.entityData.define(DUAL, false);
+    protected void defineSynchedData(net.minecraft.network.syncher.SynchedEntityData.Builder builder) {
+        builder.define(SPELL, "");
+        builder.define(DUAL, false);
     }
 
     /** The spell this projectile carries (the dual-cast variant if it was dual cast). */
@@ -61,7 +62,7 @@ public class SpellProjectile extends ThrowableProjectile {
     }
 
     @Override
-    protected float getGravity() {
+    protected double getDefaultGravity() {
         return 0f;
     }
 
@@ -75,7 +76,7 @@ public class SpellProjectile extends ThrowableProjectile {
         super.tick();
         if (isRemoved()) return;
         Spell spell = spell();
-        if (level().isClientSide) {
+        if (level().isClientSide()) {
             if (spell != null) trail(spell);
             return;
         }
@@ -114,7 +115,7 @@ public class SpellProjectile extends ThrowableProjectile {
     @Override
     protected void onHitEntity(EntityHitResult result) {
         super.onHitEntity(result);
-        if (level().isClientSide) return;
+        if (level().isClientSide()) return;
         Spell spell = spell();
         ServerPlayer caster = caster();
         if (spell != null && caster != null && spell.impact != null) {
@@ -127,11 +128,11 @@ public class SpellProjectile extends ThrowableProjectile {
     @Override
     protected void onHitBlock(BlockHitResult result) {
         super.onHitBlock(result);
-        if (level().isClientSide) return;
+        if (level().isClientSide()) return;
         Spell spell = spell();
         ServerPlayer caster = caster();
         if (spell != null && caster != null && spell.impact != null) {
-            Vec3 pos = result.getLocation().add(Vec3.atLowerCornerOf(result.getDirection().getNormal()).scale(0.2));
+            Vec3 pos = result.getLocation().add(result.getDirection().getUnitVec3().scale(0.2));
             spell.impact.hit(this, caster, spell, null, pos);
         }
         discard();
@@ -143,19 +144,25 @@ public class SpellProjectile extends ThrowableProjectile {
     }
 
     @Override
-    protected void addAdditionalSaveData(CompoundTag tag) {
-        super.addAdditionalSaveData(tag);
+    protected void addAdditionalSaveData(net.minecraft.world.level.storage.ValueOutput output263) {
+        super.addAdditionalSaveData(output263);
+        net.minecraft.nbt.CompoundTag tag = new net.minecraft.nbt.CompoundTag();
+        
         tag.putString("spell", this.entityData.get(SPELL));
         tag.putBoolean("dual", this.entityData.get(DUAL));
         tag.putInt("life", life);
+    
+        output263.store(tag);
     }
 
     @Override
-    protected void readAdditionalSaveData(CompoundTag tag) {
-        super.readAdditionalSaveData(tag);
-        this.entityData.set(SPELL, tag.getString("spell"));
-        this.entityData.set(DUAL, tag.getBoolean("dual"));
-        this.life = tag.getInt("life");
+    protected void readAdditionalSaveData(net.minecraft.world.level.storage.ValueInput input263) {
+        super.readAdditionalSaveData(input263);
+        net.minecraft.nbt.CompoundTag tag = com.skycraft.platform.ValueTags.read(input263 , "spell", "dual", "life");
+        
+        this.entityData.set(SPELL, tag.getStringOr("spell", ""));
+        this.entityData.set(DUAL, tag.getBooleanOr("dual", false));
+        this.life = tag.getIntOr("life", 0);
     }
 
     // ------------------------------------------------------------------ client trail
@@ -214,6 +221,6 @@ public class SpellProjectile extends ThrowableProjectile {
     }
 
     private static ParticleOptions dust(float red, float green, float blue, float scale) {
-        return new DustParticleOptions(new Vector3f(red, green, blue), scale);
+        return new DustParticleOptions(net.minecraft.util.ARGB.colorFromFloat(1f, red, green, blue), scale);
     }
 }

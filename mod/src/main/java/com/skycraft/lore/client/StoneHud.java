@@ -6,10 +6,9 @@ import com.skycraft.lore.StandingStone;
 import com.skycraft.lore.StandingStones;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
-import net.minecraftforge.client.gui.overlay.ForgeGui;
 
 import java.util.List;
 
@@ -36,7 +35,7 @@ public final class StoneHud {
 
     /** Watches the synced stone id; ignores the first few seconds after joining (initial sync). */
     static void tick(Minecraft mc) {
-        String now = SkyData.get(mc.player).module(StandingStones.MODULE).getString(StandingStones.KEY);
+        String now = SkyData.get(mc.player).module(StandingStones.MODULE).getStringOr(StandingStones.KEY, "");
         if (settle < SETTLE_TICKS) {
             settle++;
             last = now;
@@ -52,9 +51,11 @@ public final class StoneHud {
         }
     }
 
-    public static void render(ForgeGui gui, GuiGraphics g, float partialTick, int width, int height) {
+    public static void render(GuiGraphicsExtractor g, net.minecraft.client.DeltaTracker delta) {
+        float partialTick = delta.getGameTimeDeltaPartialTick(false);
+        int width = g.guiWidth(), height = g.guiHeight();
         Minecraft mc = Minecraft.getInstance();
-        if (shown == null || mc.player == null || mc.options.hideGui) return;
+        if (shown == null || mc.player == null || mc.gui.hud.isHidden()) return;
         long age = System.currentTimeMillis() - shownAt;
         if (age > SHOW_MS) {
             shown = null;
@@ -76,11 +77,11 @@ public final class StoneHud {
         Constellations.draw(g, shown, x + 6, y + (h - 44) / 2, 2, alpha);
 
         int tx = x + 36;
-        g.drawString(font, Component.translatable("hud.skycraft.lore.active_stone"), tx, y + 4, alpha << 24 | 0xBDB59E, false);
-        g.drawString(font, shown.stoneName(), tx, y + 14, alpha << 24 | shown.color, true);
+        g.text(font, Component.translatable("hud.skycraft.lore.active_stone"), tx, y + 4, alpha << 24 | 0xBDB59E, false);
+        g.text(font, shown.stoneName(), tx, y + 14, alpha << 24 | shown.color, true);
         int ly = y + 26;
         for (FormattedCharSequence line : desc) {
-            g.drawString(font, line, tx, ly, alpha << 24 | 0xD8D0B8, false);
+            g.text(font, line, tx, ly, alpha << 24 | 0xD8D0B8, false);
             ly += 10;
         }
     }

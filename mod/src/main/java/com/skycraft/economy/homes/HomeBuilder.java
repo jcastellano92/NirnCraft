@@ -223,7 +223,7 @@ public final class HomeBuilder {
             return s.hasProperty(net.minecraft.world.level.block.LeavesBlock.PERSISTENT) && !s.getValue(net.minecraft.world.level.block.LeavesBlock.PERSISTENT);
         }
         if (s.is(Blocks.VINE) || s.canBeReplaced() && s.getFluidState().isEmpty()) return true;
-        var key = net.minecraftforge.registries.ForgeRegistries.BLOCKS.getKey(s.getBlock());
+        var key = net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(s.getBlock());
         if (key == null || !key.getNamespace().equals("skycraft")) return false;
         String p = key.getPath();
         return p.contains("mushroom") || p.contains("cap") || p.contains("frond");

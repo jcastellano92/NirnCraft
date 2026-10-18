@@ -27,10 +27,10 @@ import net.minecraft.world.level.block.TripWireBlock;
 import net.minecraft.world.level.block.TripWireHookBlock;
 import net.minecraft.world.level.block.entity.DispenserBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,7 +40,7 @@ import java.util.List;
  * strung at ankle height between two hooks, and dart throwers above the hooks in both walls; and the barred window
  * (no trap: a view into the boss chamber through iron bars).
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class Traps {
     private Traps() {}
 
@@ -162,7 +162,7 @@ public final class Traps {
                     for (int dz = -2; dz <= 2; dz++) {
                         BlockPos dp = anchor.offset(dx, dy, dz);
                         if (sl.getBlockEntity(dp) instanceof DispenserBlockEntity disp) {
-                            if (!disp.getPersistentData().getBoolean("skycraft_stocked") && disp.isEmpty()) {
+                            if (!disp.getPersistentData().getBooleanOr("skycraft_stocked", false) && disp.isEmpty()) {
                                 disp.setItem(0, Deco.ARROWS.copy());
                                 disp.getPersistentData().putBoolean("skycraft_stocked", true);
                             }

@@ -1,28 +1,28 @@
 package com.skycraft.audio;
 
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 /** Client settings of the audio module: {@code config/skycraft-audio-client.toml}. */
 public final class AudioConfig {
-    public static final ForgeConfigSpec CLIENT_SPEC;
+    public static final ModConfigSpec CLIENT_SPEC;
 
-    public static final ForgeConfigSpec.BooleanValue AMBIENCE;
-    public static final ForgeConfigSpec.DoubleValue AMBIENCE_VOLUME;
-    public static final ForgeConfigSpec.BooleanValue AMBIENT_CALLS;
-    public static final ForgeConfigSpec.BooleanValue DISTANT_DRAGONS;
+    public static final ModConfigSpec.BooleanValue AMBIENCE;
+    public static final ModConfigSpec.DoubleValue AMBIENCE_VOLUME;
+    public static final ModConfigSpec.BooleanValue AMBIENT_CALLS;
+    public static final ModConfigSpec.BooleanValue DISTANT_DRAGONS;
 
-    public static final ForgeConfigSpec.BooleanValue REVERB;
-    public static final ForgeConfigSpec.DoubleValue REVERB_AMOUNT;
-    public static final ForgeConfigSpec.BooleanValue OCCLUSION;
+    public static final ModConfigSpec.BooleanValue REVERB;
+    public static final ModConfigSpec.DoubleValue REVERB_AMOUNT;
+    public static final ModConfigSpec.BooleanValue OCCLUSION;
 
-    public static final ForgeConfigSpec.BooleanValue PROVINCE_MUSIC;
-    public static final ForgeConfigSpec.BooleanValue BOSS_MUSIC;
-    public static final ForgeConfigSpec.BooleanValue JUKEBOX_DUCKING;
-    public static final ForgeConfigSpec.IntValue MIN_SILENCE;
-    public static final ForgeConfigSpec.IntValue MAX_SILENCE;
+    public static final ModConfigSpec.BooleanValue PROVINCE_MUSIC;
+    public static final ModConfigSpec.BooleanValue BOSS_MUSIC;
+    public static final ModConfigSpec.BooleanValue JUKEBOX_DUCKING;
+    public static final ModConfigSpec.IntValue MIN_SILENCE;
+    public static final ModConfigSpec.IntValue MAX_SILENCE;
 
     static {
-        ForgeConfigSpec.Builder b = new ForgeConfigSpec.Builder();
+        ModConfigSpec.Builder b = new ModConfigSpec.Builder();
         b.comment("Skycraft ambience: looping environment beds (wind, forests, marshes, caves...) and random calls around you.")
                 .push("ambience");
         AMBIENCE = b.comment("Play the ambience engine's looping beds.").define("enabled", true);

@@ -1,12 +1,13 @@
 package com.skycraft.tamriel;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.Vec3i;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.ChunkGeneratorStructureState;
 import net.minecraft.world.level.levelgen.structure.placement.StructurePlacement;
-import net.minecraft.world.level.levelgen.structure.placement.StructurePlacementType;
+
 
 import java.util.List;
 import java.util.Optional;
@@ -19,24 +20,27 @@ import java.util.Optional;
  *
  * <pre>{@code "placement": {"type": "skycraft:places", "salt": 1, "types": ["capital", "city"], "variants": []}}</pre>
  */
-public class PlacesPlacement extends StructurePlacement {
-    public static final Codec<PlacesPlacement> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+public class PlacesPlacement implements StructurePlacement {
+    public static final MapCodec<PlacesPlacement> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
             Codec.INT.optionalFieldOf("salt", 0).forGetter(PlacesPlacement::salt),
             Codec.STRING.listOf().fieldOf("types").forGetter(p -> p.types),
             Codec.STRING.listOf().optionalFieldOf("variants", List.of()).forGetter(p -> p.variants)
     ).apply(instance, PlacesPlacement::new));
 
+    private final int salt;
+    public int salt() { return salt; }
     private final List<String> types;
     private final List<String> variants;
 
     public PlacesPlacement(int salt, List<String> types, List<String> variants) {
-        super(Vec3i.ZERO, FrequencyReductionMethod.DEFAULT, 1.0f, salt, Optional.empty());
+
+        this.salt = salt;
         this.types = List.copyOf(types);
         this.variants = List.copyOf(variants);
     }
 
     @Override
-    protected boolean isPlacementChunk(ChunkGeneratorStructureState state, int chunkX, int chunkZ) {
+    public boolean isStructureChunk(ChunkGeneratorStructureState state, int chunkX, int chunkZ) {
         return placeFor(new ChunkPos(chunkX, chunkZ)).isPresent();
     }
 
@@ -53,7 +57,5 @@ public class PlacesPlacement extends StructurePlacement {
     }
 
     @Override
-    public StructurePlacementType<?> type() {
-        return TamrielStructures.PLACES_PLACEMENT.get();
-    }
+    public MapCodec<? extends StructurePlacement> codec() { return CODEC; }
 }

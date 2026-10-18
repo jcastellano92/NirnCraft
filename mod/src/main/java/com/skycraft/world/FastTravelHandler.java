@@ -9,7 +9,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.BlockTags;
@@ -30,7 +30,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /** Server side of fast travel from the world map. */
 public final class FastTravelHandler {
-    public static final ResourceLocation JAIL = new ResourceLocation(Skycraft.MODID, "jail");
+    public static final Identifier JAIL = Identifier.fromNamespaceAndPath(Skycraft.MODID, "jail");
     private static final Map<Class<?>, Optional<Method>> OWNER_METHODS = new ConcurrentHashMap<>();
 
     private FastTravelHandler() {}
@@ -53,18 +53,18 @@ public final class FastTravelHandler {
             return;
         }
         CompoundTag loc = WorldData.find(SkyData.get(player), id);
-        if (loc == null || loc.getBoolean("known")) {
+        if (loc == null || loc.getBooleanOr("known", false)) {
             fail(player, "unknown");
             return;
         }
         ServerLevel level = (ServerLevel) player.level();
-        if (level.dimension().location().equals(JAIL)
+        if (level.dimension().identifier().equals(JAIL)
                 || com.skycraft.crime.Jail.isJailed(player)
                 || com.skycraft.crime.Jail.isLoadingJail(player)) {
             fail(player, "jail");
             return;
         }
-        if (!loc.getString("dim").equals(level.dimension().location().toString())) {
+        if (!loc.getStringOr("dim", "").equals(level.dimension().identifier().toString())) {
             fail(player, "dimension");
             return;
         }
@@ -88,8 +88,8 @@ public final class FastTravelHandler {
             return;
         }
 
-        LocationKind kind = LocationKind.byId(loc.getString("type"));
-        BlockPos arrival = new BlockPos(loc.getInt("ax"), loc.getInt("ay"), loc.getInt("az"));
+        LocationKind kind = LocationKind.byId(loc.getStringOr("type", ""));
+        BlockPos arrival = new BlockPos(loc.getIntOr("ax", 0), loc.getIntOr("ay", 0), loc.getIntOr("az", 0));
         if (!prewarmed && !com.skycraft.perf.Prewarm.isReady(level, arrival.getX(), arrival.getZ())) {
             // load/generate the destination first (progress bar on the client), then run the whole request again
             if (!com.skycraft.perf.Prewarm.start(player, arrival.getX(), arrival.getZ(), WorldData.displayName(loc),
@@ -109,7 +109,7 @@ public final class FastTravelHandler {
         double distance = Math.sqrt(player.blockPosition().distSqr(target));
 
         player.stopRiding();
-        player.teleportTo(level, target.getX() + 0.5, target.getY(), target.getZ() + 0.5, player.getYRot(), player.getXRot());
+        player.teleportTo(level, target.getX() + 0.5, target.getY(), target.getZ() + 0.5, java.util.Set.of(),  player.getYRot(), player.getXRot(), true);
         player.resetFallDistance();
         int i = 0;
         for (Mob mob : followers) {
@@ -124,10 +124,10 @@ public final class FastTravelHandler {
         // Travel takes time (also with others online, unless the server turned travelTimeMultiplayer off).
         int hours = 0;
         int perHour = WorldConfig.BLOCKS_PER_TRAVEL_HOUR.get();
-        long online = player.server.getPlayerList().getPlayers().stream().filter(p -> !p.isSpectator()).count();
+        long online = player.level().getServer().getPlayerList().getPlayers().stream().filter(p -> !p.isSpectator()).count();
         if (perHour > 0 && (online <= 1 || WorldConfig.TRAVEL_TIME_MULTIPLAYER.get())) {
             hours = Mth.clamp((int) Math.round(distance / perHour), 1, 72);
-            RestManager.advanceTime(player.server, hours * (long) RestManager.TICKS_PER_HOUR);
+            RestManager.advanceTime(player.level().getServer(), hours * (long) RestManager.TICKS_PER_HOUR);
         }
         SkyNetwork.sendToPlayer(player, new WorldPackets.RestFade(hours, WorldPackets.RestFade.TRAVEL));
         Notifier.message(player, hours > 0
@@ -146,7 +146,7 @@ public final class FastTravelHandler {
         if (mob.isLeashed() && mob.getLeashHolder() == player) return true;
         if (mob instanceof TamableAnimal pet) return pet.isTame() && pet.isOwnedBy(player) && !pet.isOrderedToSit();
         if (mob instanceof OwnableEntity owned) {
-            if (player.getUUID().equals(owned.getOwnerUUID())) return true;
+            if (owned.getOwnerReference() != null && owned.getOwnerReference().matches(player)) return true;
         }
         // e.g. Recruits: soldiers expose a public UUID getOwnerUUID() without implementing OwnableEntity
         Optional<Method> m = OWNER_METHODS.computeIfAbsent(mob.getClass(), c -> {
@@ -212,7 +212,7 @@ public final class FastTravelHandler {
     }
 
     public static boolean isSafe(ServerLevel level, BlockPos pos) {
-        if (pos.getY() <= level.getMinBuildHeight() || pos.getY() >= level.getMaxBuildHeight() - 2) return false;
+        if (pos.getY() <= level.getMinY() || pos.getY() >= (level.getMaxY() + 1) - 2) return false;
         if (!level.getWorldBorder().isWithinBounds(pos)) return false;
         BlockPos below = pos.below();
         BlockState floor = level.getBlockState(below);

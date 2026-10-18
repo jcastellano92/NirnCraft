@@ -22,13 +22,13 @@ public class HouseKeyItem extends Item {
 
     public static ItemStack forHouse(String houseId) {
         ItemStack stack = new ItemStack(EconomyItems.HOUSE_KEY.get());
-        stack.getOrCreateTag().putString(TAG, houseId);
+        com.skycraft.inventory.ItemData.updateCustom(stack, customData263 -> customData263.putString(TAG, houseId));
         return stack;
     }
 
     @Nullable
     public static String houseOf(ItemStack stack) {
-        return stack.getTag() != null && stack.getTag().contains(TAG) ? stack.getTag().getString(TAG) : null;
+        return com.skycraft.inventory.ItemData.custom(stack) != null && com.skycraft.inventory.ItemData.custom(stack).contains(TAG) ? com.skycraft.inventory.ItemData.custom(stack).getStringOr(TAG, "") : null;
     }
 
     @Override
@@ -39,10 +39,10 @@ public class HouseKeyItem extends Item {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
+    public void appendHoverText(ItemStack stack, net.minecraft.world.item.Item.TooltipContext context263, net.minecraft.world.item.component.TooltipDisplay display263, java.util.function.Consumer<Component> tooltip, TooltipFlag flag) {
         String house = houseOf(stack);
         if (house != null) {
-            tooltip.add(Component.translatable("item.skycraft.house_key.tooltip", Component.translatable("settlement.skycraft.name." + house)));
+            tooltip.accept(Component.translatable("item.skycraft.house_key.tooltip", Component.translatable("settlement.skycraft.name." + house)));
         }
     }
 }

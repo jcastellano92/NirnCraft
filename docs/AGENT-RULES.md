@@ -1,5 +1,14 @@
 # Skycraft agent rules
 
+**Current platform override: Minecraft 26.3 / NeoForge 26.3.0.90 / Java 25.** Before building or controlling a runtime,
+read [NATIVE-26.3-PREVIEW.md](NATIVE-26.3-PREVIEW.md). Use the isolated native build helper and current native devserver;
+legacy Forge artifacts, Java 17 signatures and old runtime paths below are historical, not fallbacks. Preserve old
+worlds/custom integrations. Normal Minecraft multiplayer/LAN replaces the older Essential requirement. Source/build
+success does not replace the dedicated-server and actual loaded-world visual gates. Other ownership, legal, Git,
+world-building and verification rules continue to apply.
+
+For concurrent sessions, also read [ACTIVE-AGENT-COORDINATION.txt](ACTIVE-AGENT-COORDINATION.txt) before editing shared UI/rendering files or controlling a runtime.
+
 Rules every agent/workstream follows. Reference data from the owner's game installs lives in `.reference/` (gitignored, facts only).
 New sessions start at `docs/START-HERE.md`; the roadmap and its state table are in `docs/world/WORLD-PLAN.md`, the
 phase prompts in `docs/prompts/`. The world-building rules at the end of this file apply to every workstream.

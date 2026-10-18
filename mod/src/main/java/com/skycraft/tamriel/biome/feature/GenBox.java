@@ -28,12 +28,12 @@ public final class GenBox {
         this.maxX = center.getMaxBlockX() + 16;
         this.minZ = center.getMinBlockZ() - 16;
         this.maxZ = center.getMaxBlockZ() + 16;
-        this.minY = level.getMinBuildHeight() + 1;
-        this.maxY = level.getMaxBuildHeight() - 1;
+        this.minY = level.getMinY() + 1;
+        this.maxY = (level.getMaxY() + 1) - 1;
     }
 
     public static GenBox of(WorldGenLevel level, BlockPos origin) {
-        ChunkPos center = level instanceof WorldGenRegion region ? region.getCenter() : new ChunkPos(origin);
+        ChunkPos center = level instanceof WorldGenRegion region ? region.getCenter() : ChunkPos.containing(origin);
         return new GenBox(level, center);
     }
 

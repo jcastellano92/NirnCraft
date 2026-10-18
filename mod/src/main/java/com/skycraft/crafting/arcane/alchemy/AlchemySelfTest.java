@@ -13,12 +13,12 @@ import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.util.FakePlayer;
-import net.minecraftforge.common.util.FakePlayerFactory;
-import net.minecraftforge.event.entity.living.LivingEntityUseItemEvent;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.server.ServerLifecycleHooks;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.common.util.FakePlayer;
+import net.neoforged.neoforge.common.util.FakePlayerFactory;
+import net.neoforged.neoforge.event.entity.living.LivingEntityUseItemEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -59,7 +59,7 @@ public final class AlchemySelfTest {
         }
         FakePlayer player = FakePlayerFactory.get(server.overworld(), PROFILE);
         // a fake player has no connection: give it one that queues packets, so notifications may be sent to it
-        if (player.connection == null) new ServerGamePacketListenerImpl(server, new Connection(PacketFlow.SERVERBOUND), player);
+        if (player.connection == null) new ServerGamePacketListenerImpl(server, new Connection(PacketFlow.SERVERBOUND), player, net.minecraft.server.network.CommonListenerCookie.createInitial(player.getGameProfile(), false));
         try {
             playerChecks(player, problems);
         } catch (RuntimeException e) {
@@ -156,7 +156,7 @@ public final class AlchemySelfTest {
         if (Integer.bitCount(mask) != 1) problems.add("alchemy bite: learned mask " + mask + " after one bite");
         if (Alchemy.announcedTotal() - before != 1 || first.messages() != 1) problems.add("alchemy bite: expected exactly one 'You learned' message");
         if ((mask & (1 << first.taste().index())) == 0) problems.add("alchemy bite: the applied effect was not the learned one");
-        if (first.applied() == null || !player.hasEffect(first.applied().getEffect())) problems.add("alchemy bite: the effect was not applied");
+        if (first.applied() == null || !player.hasEffect(com.skycraft.platform.Effects.holder(first.applied().getEffect()))) problems.add("alchemy bite: the effect was not applied");
 
         // ---- everything known: bites apply a random one of the four and never announce again
         Alchemy.learn(player, flower, 0xF);
@@ -167,7 +167,7 @@ public final class AlchemySelfTest {
             Alchemy.Tasted t = Alchemy.discoverByTasting(player, flower);
             seen.add(t.taste().index());
             if (t.taste().learned() != 0) problems.add("alchemy bite: learned something when all four were known");
-            if (t.applied() == null || !player.hasEffect(t.applied().getEffect())) problems.add("alchemy bite: known effect " + t.taste().index() + " not applied");
+            if (t.applied() == null || !player.hasEffect(com.skycraft.platform.Effects.holder(t.applied().getEffect()))) problems.add("alchemy bite: known effect " + t.taste().index() + " not applied");
         }
         if (Alchemy.announcedTotal() != before) problems.add("alchemy bite: messages sent for known effects");
         if (seen.size() < 2) problems.add("alchemy bite: 40 bites always picked effect " + seen);
@@ -181,20 +181,20 @@ public final class AlchemySelfTest {
         player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(flower.item(), 3));
         before = Alchemy.announcedTotal();
         PlayerInteractEvent.RightClickItem click = new PlayerInteractEvent.RightClickItem(player, InteractionHand.MAIN_HAND);
-        MinecraftForge.EVENT_BUS.post(click);
+        NeoForge.EVENT_BUS.post(click);
         if (!click.isCanceled()) problems.add("alchemy right-click: the click was not consumed");
         if (player.getMainHandItem().getCount() != 2) problems.add("alchemy right-click: " + player.getMainHandItem().getCount() + " flowers left of 3");
         if (Integer.bitCount(Alchemy.knownMask(player, flower)) != 1) problems.add("alchemy right-click: mask " + Alchemy.knownMask(player, flower));
         if (Alchemy.announcedTotal() - before != 1) problems.add("alchemy right-click: expected exactly one message");
         boolean active = false;
-        for (AlchemyEffect e : flower.effects()) if (player.hasEffect(e.mobEffect())) active = true;
+        for (AlchemyEffect e : flower.effects()) if (player.hasEffect(com.skycraft.platform.Effects.holder(e.mobEffect()))) active = true;
         if (!active) problems.add("alchemy right-click: no effect applied");
 
         // ---- finishing a food ingredient (the handler of ArcaneEvents)
         reset(player);
         ItemStack food = new ItemStack(carrot.item());
         before = Alchemy.announcedTotal();
-        MinecraftForge.EVENT_BUS.post(new LivingEntityUseItemEvent.Finish(player, food, 0, food));
+        NeoForge.EVENT_BUS.post(new LivingEntityUseItemEvent.Finish(player, food, 0, food));
         if (Integer.bitCount(Alchemy.knownMask(player, carrot)) != 1) problems.add("alchemy eat: mask " + Alchemy.knownMask(player, carrot));
         if (Alchemy.announcedTotal() - before != 1) problems.add("alchemy eat: expected exactly one message");
     }

@@ -9,10 +9,10 @@ public final class StableClient {
 
     public static void handle(StablePackets.State state) {
         Minecraft mc = Minecraft.getInstance();
-        if (mc.screen instanceof StableScreen screen && screen.npcId() == state.npcId()) {
+        if (mc.gui.screen() instanceof StableScreen screen && screen.npcId() == state.npcId()) {
             screen.update(state);
         } else if (state.open()) {
-            mc.setScreen(new StableScreen(state));
+            mc.gui.setScreen(new StableScreen(state));
         }
     }
 }

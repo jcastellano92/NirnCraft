@@ -30,9 +30,9 @@ public enum StationType {
 
     public BlockBehaviour.Properties properties() {
         return switch (this) {
-            case FORGE, SMELTER -> BlockBehaviour.Properties.of().mapColor(MapColor.STONE).strength(3.5f)
+            case FORGE, SMELTER -> com.skycraft.platform.SkyProperties.block(blockId).mapColor(MapColor.STONE).strength(3.5f)
                     .requiresCorrectToolForDrops().sound(SoundType.STONE).lightLevel(state -> 9);
-            default -> BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(2.5f).sound(SoundType.WOOD);
+            default -> com.skycraft.platform.SkyProperties.block(blockId).mapColor(MapColor.WOOD).strength(2.5f).sound(SoundType.WOOD);
         };
     }
 }

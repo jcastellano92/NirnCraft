@@ -1,6 +1,7 @@
 package com.skycraft.tamriel.settlement;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.skycraft.tamriel.Place;
 import com.skycraft.tamriel.Places;
@@ -9,7 +10,7 @@ import net.minecraft.core.Vec3i;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.ChunkGeneratorStructureState;
 import net.minecraft.world.level.levelgen.structure.placement.StructurePlacement;
-import net.minecraft.world.level.levelgen.structure.placement.StructurePlacementType;
+
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
@@ -24,8 +25,8 @@ import java.util.Optional;
  *
  * <pre>{@code "placement": {"type": "skycraft:settlement_districts", "salt": 1}}</pre>
  */
-public class DistrictPlacement extends StructurePlacement {
-    public static final Codec<DistrictPlacement> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+public class DistrictPlacement implements StructurePlacement {
+    public static final MapCodec<DistrictPlacement> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
             Codec.INT.optionalFieldOf("salt", 0).forGetter(DistrictPlacement::salt)
     ).apply(instance, DistrictPlacement::new));
 
@@ -39,19 +40,20 @@ public class DistrictPlacement extends StructurePlacement {
 
     private static volatile Map<Long, District> districts;
 
+    private final int salt;
+    public int salt() { return salt; }
+
     public DistrictPlacement(int salt) {
-        super(Vec3i.ZERO, FrequencyReductionMethod.DEFAULT, 1.0f, salt, Optional.empty());
+        this.salt = salt;
     }
 
     @Override
-    protected boolean isPlacementChunk(ChunkGeneratorStructureState state, int chunkX, int chunkZ) {
+    public boolean isStructureChunk(ChunkGeneratorStructureState state, int chunkX, int chunkZ) {
         return at(new ChunkPos(chunkX, chunkZ)) != null;
     }
 
     @Override
-    public StructurePlacementType<?> type() {
-        return SettlementStructures.DISTRICTS.get();
-    }
+    public MapCodec<? extends StructurePlacement> codec() { return CODEC; }
 
     /** The district whose start is in this chunk, if any. */
     @Nullable
@@ -63,7 +65,7 @@ public class DistrictPlacement extends StructurePlacement {
                 m = districts;
             }
         }
-        return m.get(pos.toLong());
+        return m.get(pos.pack());
     }
 
     /** Grid cells needed on each side of the anchor for a layout reaching {@code reach} blocks. */
@@ -82,7 +84,7 @@ public class DistrictPlacement extends StructurePlacement {
             for (int i = -n; i <= n; i++) {
                 for (int j = -n; j <= n; j++) {
                     if (i == 0 && j == 0) continue;
-                    m.put(ChunkPos.asLong(acx + i * STEP, acz + j * STEP), new District(p, i, j));
+                    m.put(ChunkPos.pack(acx + i * STEP, acz + j * STEP), new District(p, i, j));
                 }
             }
         }

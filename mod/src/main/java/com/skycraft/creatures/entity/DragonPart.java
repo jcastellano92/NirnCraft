@@ -6,7 +6,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.entity.PartEntity;
+import net.neoforged.neoforge.entity.PartEntity;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -28,15 +28,19 @@ public class DragonPart extends PartEntity<DragonEntity> {
     }
 
     @Override
-    protected void defineSynchedData() {
+    protected void defineSynchedData(net.minecraft.network.syncher.SynchedEntityData.Builder builder) {
     }
 
     @Override
-    protected void readAdditionalSaveData(CompoundTag tag) {
+    protected void readAdditionalSaveData(net.minecraft.world.level.storage.ValueInput input263) {
+        net.minecraft.nbt.CompoundTag tag = com.skycraft.platform.ValueTags.read(input263);
     }
 
     @Override
-    protected void addAdditionalSaveData(CompoundTag tag) {
+    protected void addAdditionalSaveData(net.minecraft.world.level.storage.ValueOutput output263) {
+        net.minecraft.nbt.CompoundTag tag = new net.minecraft.nbt.CompoundTag();
+    
+        output263.store(tag);
     }
 
     @Override
@@ -51,8 +55,8 @@ public class DragonPart extends PartEntity<DragonEntity> {
     }
 
     @Override
-    public boolean hurt(DamageSource source, float amount) {
-        return !this.isInvulnerableTo(source) && getParent().hurtFromPart(this, source, amount * damageScale);
+    public boolean hurtServer(net.minecraft.server.level.ServerLevel serverLevel263, DamageSource source, float amount) {
+        return !this.isInvulnerableToBase(source) && getParent().hurtFromPart(this, source, amount * damageScale);
     }
 
     @Override

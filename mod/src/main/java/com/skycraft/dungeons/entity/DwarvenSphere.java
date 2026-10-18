@@ -21,8 +21,8 @@ import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.AbstractArrow;
-import net.minecraft.world.entity.projectile.Arrow;
+import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
+import net.minecraft.world.entity.projectile.arrow.Arrow;
 import net.minecraft.world.level.Level;
 
 /**
@@ -59,9 +59,9 @@ public class DwarvenSphere extends Automaton {
     }
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        this.entityData.define(DATA_OPEN, false);
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(DATA_OPEN, false);
     }
 
     public boolean isOpen() {
@@ -83,9 +83,9 @@ public class DwarvenSphere extends Automaton {
     }
 
     @Override
-    public EntityDimensions getDimensions(Pose pose) {
-        EntityDimensions base = super.getDimensions(pose);
-        return isOpen() ? base : EntityDimensions.scalable(base.width, base.width);
+    protected EntityDimensions getDefaultDimensions(Pose pose) {
+        EntityDimensions base = super.getDefaultDimensions(pose);
+        return isOpen() ? base : EntityDimensions.scalable(base.width(), base.width());
     }
 
     @Override
@@ -118,7 +118,7 @@ public class DwarvenSphere extends Automaton {
     @Override
     public void tick() {
         super.tick();
-        if (this.level().isClientSide) {
+        if (this.level().isClientSide()) {
             openAnimO = openAnim;
             openAnim += ((isOpen() ? 1.0f : 0.0f) - openAnim) * 0.18f;
             rollAngleO = rollAngle;
@@ -128,8 +128,8 @@ public class DwarvenSphere extends Automaton {
     }
 
     @Override
-    protected void customServerAiStep() {
-        super.customServerAiStep();
+    protected void customServerAiStep(net.minecraft.server.level.ServerLevel serverLevel) {
+        super.customServerAiStep(serverLevel);
         LivingEntity target = this.getTarget();
         boolean engaged = target != null && target.isAlive() && this.distanceToSqr(target) < 14 * 14;
         if (engaged) {
@@ -154,7 +154,7 @@ public class DwarvenSphere extends Automaton {
     }
 
     private void shootBolt(LivingEntity target) {
-        Arrow bolt = new Arrow(this.level(), this);
+        Arrow bolt = new Arrow(this.level(), this, new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.ARROW), null);
         double dx = target.getX() - this.getX();
         double dy = target.getY(0.4) - bolt.getY();
         double dz = target.getZ() - this.getZ();
@@ -167,20 +167,26 @@ public class DwarvenSphere extends Automaton {
     }
 
     @Override
-    public boolean doHurtTarget(Entity target) {
+    public boolean doHurtTarget(net.minecraft.server.level.ServerLevel serverLevel, Entity target) {
         if (!isOpen() || unfold > 0) return false;
-        return super.doHurtTarget(target);
+        return super.doHurtTarget(serverLevel, target);
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag tag) {
-        super.addAdditionalSaveData(tag);
+    public void addAdditionalSaveData(net.minecraft.world.level.storage.ValueOutput output263) {
+        super.addAdditionalSaveData(output263);
+        net.minecraft.nbt.CompoundTag tag = new net.minecraft.nbt.CompoundTag();
+        
         tag.putBoolean("Open", isOpen());
+    
+        output263.store(tag);
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag tag) {
-        super.readAdditionalSaveData(tag);
-        this.entityData.set(DATA_OPEN, tag.getBoolean("Open"));
+    public void readAdditionalSaveData(net.minecraft.world.level.storage.ValueInput input263) {
+        super.readAdditionalSaveData(input263);
+        net.minecraft.nbt.CompoundTag tag = com.skycraft.platform.ValueTags.read(input263 , "Open");
+        
+        this.entityData.set(DATA_OPEN, tag.getBooleanOr("Open", false));
     }
 }

@@ -8,10 +8,10 @@ import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.GameType;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +22,7 @@ import java.util.List;
  * singleplayer world, flies the player to each stop at noon, waits for the chunks to build and takes a screenshot
  * ({@code screenshots/tour_<name>.png}), then quits.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
 public final class SettlementTour {
     private static final String SPEC = System.getProperty("skycraft.tour", "");
     private static final int SETTLE_TICKS = Integer.getInteger("skycraft.tour.wait", 500);
@@ -54,27 +54,27 @@ public final class SettlementTour {
     }
 
     @SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent event) {
-        if (SPEC.isEmpty() || event.phase != TickEvent.Phase.END || !parse()) return;
+    public static void onClientTick(net.neoforged.neoforge.client.event.ClientTickEvent.Post event) {
+        if (SPEC.isEmpty() || !parse()) return;
         Minecraft mc = Minecraft.getInstance();
         switch (state) {
             case 0 -> {
-                if (mc.screen instanceof TitleScreen || mc.screen instanceof com.skycraft.client.screen.title.SkyTitleScreen) {
+                if (mc.gui.screen() instanceof TitleScreen || mc.gui.screen() instanceof com.skycraft.client.screen.title.SkyTitleScreen) {
                     state = 1;
                     Skycraft.LOGGER.info("Settlement tour: loading world {}", world);
-                    mc.createWorldOpenFlows().loadLevel(mc.screen, world);
+                    com.skycraft.client.autotest.ReviewWorlds.open(mc,world,mc.gui.screen());
                 }
             }
             case 1 -> {
                 // confirm prompts on the way in (experimental settings, backups)
-                if (mc.screen != null && ++wait % 20 == 0) {
-                    for (var child : mc.screen.children()) {
+                if (mc.gui.screen() != null && ++wait % 20 == 0) {
+                    for (var child : mc.gui.screen().children()) {
                         if (!(child instanceof net.minecraft.client.gui.components.Button b)) continue;
                         String label = b.getMessage().getString().toLowerCase(java.util.Locale.ROOT);
                         if (label.equals("proceed") || label.equals("yes") || label.equals("load") || label.equals("continue")
                                 || label.contains("i know what") || label.equals("play")) {
-                            Skycraft.LOGGER.info("Settlement tour: pressing '{}' on {}", label, mc.screen.getClass().getSimpleName());
-                            b.onPress();
+                            Skycraft.LOGGER.info("Settlement tour: pressing '{}' on {}", label, mc.gui.screen().getClass().getSimpleName());
+                            b.onPress(new net.minecraft.client.input.KeyEvent(com.mojang.blaze3d.platform.InputConstants.KEY_RETURN,0,0));
                             break;
                         }
                     }
@@ -82,11 +82,11 @@ public final class SettlementTour {
                 if (mc.level != null && mc.player != null && mc.getSingleplayerServer() != null) {
                     state = 2;
                     wait = 100;
-                    mc.options.hideGui = true;
+                    com.skycraft.client.autotest.ReviewWorlds.hudHidden(mc,true);
                 }
             }
             case 2 -> {
-                if (mc.screen != null) mc.setScreen(null);
+                if (mc.gui.screen() != null) mc.gui.setScreen(null);
                 if (--wait > 0) return;
                 if (index >= stops.size()) {
                     Skycraft.LOGGER.info("Settlement tour: done");
@@ -98,13 +98,13 @@ public final class SettlementTour {
                 IntegratedServer server = mc.getSingleplayerServer();
                 server.execute(() -> {
                     ServerLevel level = server.overworld();
-                    level.setDayTime(6000);
-                    level.setWeatherParameters(6000, 0, false, false);
+                    server.getCommands().performPrefixedCommand(server.createCommandSourceStack().withSuppressedOutput(),"time set 6000");
+                    server.getCommands().performPrefixedCommand(server.createCommandSourceStack().withSuppressedOutput(),"weather clear");
                     for (ServerPlayer p : server.getPlayerList().getPlayers()) {
                         p.setGameMode(GameType.CREATIVE);
                         p.getAbilities().flying = true;
                         p.onUpdateAbilities();
-                        p.teleportTo(level, s.x(), s.y(), s.z(), s.yaw(), s.pitch());
+                        p.teleportTo(level,s.x(),s.y(),s.z(),java.util.Set.of(),s.yaw(),s.pitch(),true);
                     }
                 });
                 Skycraft.LOGGER.info("Settlement tour: stop {} at {}, {}, {}", s.name(), s.x(), s.y(), s.z());
@@ -112,7 +112,7 @@ public final class SettlementTour {
                 wait = SETTLE_TICKS;
             }
             case 3 -> {
-                if (mc.screen != null) mc.setScreen(null);
+                if (mc.gui.screen() != null) mc.gui.setScreen(null);
                 if (mc.player != null) {
                     Stop s = stops.get(index);
                     mc.player.setYRot(s.yaw());
@@ -120,8 +120,7 @@ public final class SettlementTour {
                 }
                 if (--wait > 0) return;
                 Stop s = stops.get(index);
-                Screenshot.grab(mc.gameDirectory, "tour_" + s.name() + ".png", mc.getMainRenderTarget(),
-                        msg -> Skycraft.LOGGER.info("Settlement tour: {}", msg.getString()));
+                Screenshot.grab(mc.gameDirectory, "tour_" + s.name() + ".png", mc.gameRenderer.mainRenderTarget(), 1, msg -> Skycraft.LOGGER.info("Settlement tour: {}", msg.getString()));
                 index++;
                 state = 2;
                 wait = 20;

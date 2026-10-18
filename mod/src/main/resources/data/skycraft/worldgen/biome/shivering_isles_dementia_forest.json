@@ -3,28 +3,11 @@
   "temperature": 0.7,
   "downfall": 0.9,
   "effects": {
-    "sky_color": 4740694,
-    "fog_color": 3029554,
-    "water_color": 3033652,
-    "water_fog_color": 924176,
-    "mood_sound": {
-      "sound": "minecraft:ambient.cave",
-      "tick_delay": 6000,
-      "block_search_extent": 8,
-      "offset": 2.0
-    },
-    "grass_color": 3625006,
-    "foliage_color": 2769958,
-    "particle": {
-      "options": {
-        "type": "minecraft:mycelium"
-      },
-      "probability": 0.012
-    }
+    "water_color": "#2e4a34",
+    "grass_color": "#37502e",
+    "foliage_color": "#2a4426"
   },
-  "spawners": {},
-  "spawn_costs": {},
-  "carvers": {},
+  "carvers": [],
   "features": [
     [],
     [],
@@ -43,5 +26,36 @@
       "skycraft:realm/si_vines"
     ],
     []
-  ]
+  ],
+  "attributes": {
+    "minecraft:visual/sky_color": "#485656",
+    "minecraft:visual/fog_color": "#2e3a32",
+    "minecraft:visual/water_fog_color": "#0e1a10",
+    "minecraft:audio/ambient_sounds": {
+      "mood": {
+        "sound": "minecraft:ambient.cave",
+        "tick_delay": 6000,
+        "block_search_extent": 8,
+        "offset": 2.0
+      }
+    },
+    "minecraft:visual/ambient_particles": {
+      "modifier": "append",
+      "argument": [
+        {
+          "probability": 0.012,
+          "particle": {
+            "type": "minecraft:mycelium"
+          }
+        }
+      ]
+    },
+    "minecraft:gameplay/natural_mob_spawns": {
+      "modifier": "overlay",
+      "argument": {
+        "spawns_by_category": {},
+        "spawn_costs": {}
+      }
+    }
+  }
 }

@@ -29,8 +29,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.DistExecutor;
+import net.neoforged.api.distmarker.Dist;
+import com.skycraft.platform.Sides;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Locale;
@@ -51,7 +51,7 @@ import java.util.UUID;
  */
 public class PlayerCorpseEntity extends CorpseEntity {
     public static final int SLOTS = 54;
-    private static final EntityDataAccessor<Optional<UUID>> OWNER = SynchedEntityData.defineId(PlayerCorpseEntity.class, EntityDataSerializers.OPTIONAL_UUID);
+    private static final EntityDataAccessor<Optional<UUID>> OWNER = SynchedEntityData.defineId(PlayerCorpseEntity.class, com.skycraft.survival.SurvivalRegistry.OPTIONAL_UUID);
     private static final EntityDataAccessor<String> OWNER_NAME = SynchedEntityData.defineId(PlayerCorpseEntity.class, EntityDataSerializers.STRING);
 
     private final Items items = new Items();
@@ -73,17 +73,17 @@ public class PlayerCorpseEntity extends CorpseEntity {
     }
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        this.entityData.define(OWNER, Optional.empty());
-        this.entityData.define(OWNER_NAME, "");
+    protected void defineSynchedData(net.minecraft.network.syncher.SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(OWNER, Optional.empty());
+        builder.define(OWNER_NAME, "");
     }
 
     /** Sets whose body this is and the safe ground it returns to if it ever falls into lava or the void. */
     public void setOwner(ServerPlayer owner, BlockPos safeGround) {
         this.entityData.set(OWNER, Optional.of(owner.getUUID()));
-        this.entityData.set(OWNER_NAME, owner.getGameProfile().getName());
-        this.setCustomName(Component.translatable("entity.skycraft.player_corpse.named", owner.getGameProfile().getName()));
+        this.entityData.set(OWNER_NAME, owner.getGameProfile().name());
+        this.setCustomName(Component.translatable("entity.skycraft.player_corpse.named", owner.getGameProfile().name()));
         this.safe = safeGround.immutable();
     }
 
@@ -144,8 +144,8 @@ public class PlayerCorpseEntity extends CorpseEntity {
     /** Taking the body away (command, creative punch) never deletes what it holds: it spills where it lies. */
     @Override
     public void remove(RemovalReason reason) {
-        if (!this.level().isClientSide && reason.shouldDestroy() && hasItems() && this.level() instanceof net.minecraft.server.level.ServerLevel level) {
-            BlockPos at = this.getY() < level.getMinBuildHeight() + 1 ? (safe != null ? safe : level.getSharedSpawnPos()) : this.blockPosition();
+        if (!this.level().isClientSide() && reason.shouldDestroy() && hasItems() && this.level() instanceof net.minecraft.server.level.ServerLevel level) {
+            BlockPos at = this.getY() < level.getMinY() + 1 ? (safe != null ? safe : level.getRespawnData().pos()) : this.blockPosition();
             for (int i = 0; i < items.getContainerSize(); i++) {
                 ItemStack s = items.removeItemNoUpdate(i);
                 if (!s.isEmpty()) bulk.add(s);
@@ -165,8 +165,8 @@ public class PlayerCorpseEntity extends CorpseEntity {
     @Override
     public void tick() {
         super.tick();
-        if (this.level().isClientSide || this.isRemoved()) return;
-        if (this.isInLava() || this.getY() < this.level().getMinBuildHeight() + 1) rescue();
+        if (this.level().isClientSide() || this.isRemoved()) return;
+        if (this.isInLava() || this.getY() < this.level().getMinY() + 1) rescue();
         if (hasItems() || items.openers > 0) {
             emptyTicks = 0;
         } else if (++emptyTicks > SurvivalConfig.EMPTY_CORPSE_SECONDS.get() * 20) {
@@ -176,7 +176,7 @@ public class PlayerCorpseEntity extends CorpseEntity {
 
     /** Back onto the safe ground recorded at death. */
     private void rescue() {
-        BlockPos to = safe != null ? safe : this.level().getSharedSpawnPos();
+        BlockPos to = safe != null ? safe : this.level().getRespawnData().pos();
         this.setDeltaMovement(0, 0, 0);
         this.teleportTo(to.getX() + 0.5, to.getY() + 0.1, to.getZ() + 0.5);
         this.clearFire();
@@ -200,18 +200,18 @@ public class PlayerCorpseEntity extends CorpseEntity {
     }
 
     @Override
-    public InteractionResult interact(Player player, InteractionHand hand) {
+    public InteractionResult interact(Player player, InteractionHand hand, net.minecraft.world.phys.Vec3 hit) {
         if (hand != InteractionHand.MAIN_HAND) return InteractionResult.PASS;
-        if (player.isShiftKeyDown() && this.isDragged()) return super.interact(player, hand);
-        if (!this.level().isClientSide && player instanceof ServerPlayer sp) {
+        if (player.isShiftKeyDown() && this.isDragged()) return super.interact(player, hand, hit);
+        if (!this.level().isClientSide() && player instanceof ServerPlayer sp) {
             if (!canLoot(sp)) {
                 Notifier.message(sp, Component.translatable("survival.skycraft.corpse.not_yours", ownerName()));
                 return InteractionResult.CONSUME;
             }
             sp.openMenu(new SimpleMenuProvider((id, inventory, p) -> ChestMenu.sixRows(id, inventory, items), this.getDisplayName()));
-            this.playSound(SoundEvents.ARMOR_EQUIP_LEATHER, 0.6f, 0.9f);
+            this.playSound(SoundEvents.ARMOR_EQUIP_LEATHER.value(), 0.6f, 0.9f);
         }
-        return InteractionResult.sidedSuccess(this.level().isClientSide);
+        return com.skycraft.platform.Interactions.sidedSuccess(this.level().isClientSide());
     }
 
     // ------------------------------------------------------------------ client body
@@ -222,7 +222,7 @@ public class PlayerCorpseEntity extends CorpseEntity {
         if (dummy != null || dummyTried) return dummy;
         if (owner() == null) return null; // not synced yet
         dummyTried = true;
-        dummy = DistExecutor.unsafeCallWhenOn(Dist.CLIENT, () -> () -> com.skycraft.survival.client.PlayerCorpseClient.dummy(this));
+        dummy = com.skycraft.platform.Sides.callOn(Dist.CLIENT, () -> () -> com.skycraft.survival.client.PlayerCorpseClient.dummy(this));
         return dummy;
     }
 
@@ -238,44 +238,50 @@ public class PlayerCorpseEntity extends CorpseEntity {
     // ------------------------------------------------------------------ save
 
     @Override
-    protected void addAdditionalSaveData(CompoundTag tag) {
-        super.addAdditionalSaveData(tag);
+    protected void addAdditionalSaveData(net.minecraft.world.level.storage.ValueOutput output263) {
+        super.addAdditionalSaveData(output263);
+        net.minecraft.nbt.CompoundTag tag = new net.minecraft.nbt.CompoundTag();
+        
         ListTag list = new ListTag();
         for (int i = 0; i < items.getContainerSize(); i++) {
             ItemStack stack = items.getItem(i);
             if (stack.isEmpty()) continue;
             CompoundTag t = new CompoundTag();
             t.putByte("Slot", (byte) i);
-            stack.save(t);
+            com.skycraft.platform.ItemTags.saveInto(stack, t);
             list.add(t);
         }
         tag.put("PlayerItems", list);
         if (!bulk.isEmpty()) tag.put("PlayerBulk", bulk.save());
-        this.entityData.get(OWNER).ifPresent(u -> tag.putUUID("Owner", u));
+        this.entityData.get(OWNER).ifPresent(u -> tag.store("Owner", net.minecraft.core.UUIDUtil.CODEC,  u));
         tag.putString("OwnerName", ownerName());
-        if (safe != null) tag.put("Safe", NbtUtils.writeBlockPos(safe));
+        if (safe != null) tag.put("Safe", com.skycraft.platform.NbtPositions.write(safe));
         tag.putInt("PlayerEmptyTicks", emptyTicks);
+    
+        output263.store(tag);
     }
 
     @Override
-    protected void readAdditionalSaveData(CompoundTag tag) {
-        super.readAdditionalSaveData(tag);
-        bulk.load(tag.getCompound("PlayerBulk"));
-        ListTag list = tag.getList("PlayerItems", Tag.TAG_COMPOUND);
+    protected void readAdditionalSaveData(net.minecraft.world.level.storage.ValueInput input263) {
+        super.readAdditionalSaveData(input263);
+        net.minecraft.nbt.CompoundTag tag = com.skycraft.platform.ValueTags.read(input263 , "PlayerBulk", "PlayerItems", "Owner", "OwnerName", "Safe", "PlayerEmptyTicks");
+        
+        bulk.load(tag.getCompoundOrEmpty("PlayerBulk"));
+        ListTag list = tag.getListOrEmpty("PlayerItems");
         for (int i = 0; i < list.size(); i++) {
-            CompoundTag t = list.getCompound(i);
-            int slot = t.getByte("Slot") & 255;
-            ItemStack stack = ItemStack.of(t);
+            CompoundTag t = list.getCompoundOrEmpty(i);
+            int slot = t.getByteOr("Slot",(byte)0) & 255;
+            ItemStack stack = com.skycraft.inventory.ItemData.parse(t);
             if (stack.isEmpty()) continue;
             // a slot that no longer exists (the body used to be bigger) or is taken keeps its stack in the overflow:
             // nothing a body saved is ever dropped on load
             if (slot < SLOTS && items.getItem(slot).isEmpty()) items.setItem(slot, stack);
             else bulk.add(stack);
         }
-        if (tag.hasUUID("Owner")) this.entityData.set(OWNER, Optional.of(tag.getUUID("Owner")));
-        this.entityData.set(OWNER_NAME, tag.getString("OwnerName"));
-        if (tag.contains("Safe")) safe = NbtUtils.readBlockPos(tag.getCompound("Safe"));
-        emptyTicks = tag.getInt("PlayerEmptyTicks");
+        if (tag.read("Owner", net.minecraft.core.UUIDUtil.CODEC).isPresent()) this.entityData.set(OWNER, Optional.of(tag.read("Owner", net.minecraft.core.UUIDUtil.CODEC).orElseThrow()));
+        this.entityData.set(OWNER_NAME, tag.getStringOr("OwnerName",""));
+        if (tag.contains("Safe")) safe = com.skycraft.platform.NbtPositions.read(tag.getCompoundOrEmpty("Safe"));
+        emptyTicks = tag.getIntOr("PlayerEmptyTicks",0);
     }
 
     /** The body's inventory; valid while the body exists and the looter is close. */
@@ -297,12 +303,12 @@ public class PlayerCorpseEntity extends CorpseEntity {
         }
 
         @Override
-        public void startOpen(Player player) {
+        public void startOpen(net.minecraft.world.entity.ContainerUser player) {
             openers++;
         }
 
         @Override
-        public void stopOpen(Player player) {
+        public void stopOpen(net.minecraft.world.entity.ContainerUser player) {
             openers = Math.max(0, openers - 1);
         }
     }

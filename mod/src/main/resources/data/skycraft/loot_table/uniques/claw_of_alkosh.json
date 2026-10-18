@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:stick",
+          "weight": 1,
+          "modifier": {
+            "id": "claw_of_alkosh",
+            "type": "skycraft:unique"
+          }
+        }
+      ]
+    }
+  ],
+  "random_sequence": "skycraft:uniques/claw_of_alkosh"
+}

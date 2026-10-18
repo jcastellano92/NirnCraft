@@ -15,14 +15,14 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.DistExecutor;
+import net.neoforged.api.distmarker.Dist;
+import com.skycraft.platform.Sides;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -49,15 +49,16 @@ public class LoreBookItem extends Item {
     }
 
     private static void setBook(ItemStack stack, LoreBooks.Book book) {
-        CompoundTag tag = stack.getOrCreateTag();
+        CompoundTag tag = com.skycraft.inventory.ItemData.customOrEmpty(stack);
         tag.putString(TAG, book.id());
         tag.putInt(ItemValues.VALUE_NBT, book.value());
+        com.skycraft.inventory.ItemData.setCustom(stack, tag);
     }
 
     @Nullable
     public static LoreBooks.Book bookOf(ItemStack stack) {
-        CompoundTag tag = stack.getTag();
-        return tag == null ? null : LoreBooks.get(tag.getString(TAG));
+        CompoundTag tag = com.skycraft.inventory.ItemData.custom(stack);
+        return tag == null ? null : LoreBooks.get(tag.getStringOr(TAG, ""));
     }
 
     /** Cover index for the item model override (client). */
@@ -67,9 +68,9 @@ public class LoreBookItem extends Item {
     }
 
     public static boolean hasRead(PlayerData data, String id) {
-        ListTag read = data.module(StandingStones.MODULE).getList(READ_KEY, Tag.TAG_STRING);
+        ListTag read = data.module(StandingStones.MODULE).getListOrEmpty(READ_KEY);
         for (int i = 0; i < read.size(); i++) {
-            if (read.getString(i).equals(id)) return true;
+            if (read.getString(i).orElse("").equals(id)) return true;
         }
         return false;
     }
@@ -79,7 +80,7 @@ public class LoreBookItem extends Item {
         PlayerData data = SkyData.get(player);
         if (!hasRead(data, book.id())) {
             CompoundTag module = data.module(StandingStones.MODULE);
-            ListTag read = module.getList(READ_KEY, Tag.TAG_STRING);
+            ListTag read = module.getListOrEmpty(READ_KEY);
             read.add(StringTag.valueOf(book.id()));
             module.put(READ_KEY, read);
             data.addStat("lore_books_read", 1);
@@ -99,19 +100,19 @@ public class LoreBookItem extends Item {
     }
 
     @Override
-    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+    public InteractionResult use(Level level, Player player, InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
-        if (!level.isClientSide && player instanceof ServerPlayer sp) {
+        if (!level.isClientSide() && player instanceof ServerPlayer sp) {
             readStack(sp, stack);
         }
-        return InteractionResultHolder.sidedSuccess(stack, level.isClientSide);
+        return com.skycraft.platform.Interactions.sidedSuccess(level.isClientSide()).heldItemTransformedTo(stack);
     }
 
     /** Reads this lore book directly without moving it into the player's hand. */
     public void readStack(ServerPlayer sp, ItemStack stack) {
         LoreBooks.Book book = bookOf(stack);
         if (book == null) {
-            book = LoreBooks.random(sp.level().random, b -> !b.category().isSheet());
+            book = LoreBooks.random(sp.level().getRandom(), b -> !b.category().isSheet());
             if (book == null) return;
             setBook(stack, book);
         }
@@ -120,21 +121,22 @@ public class LoreBookItem extends Item {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
+    public void appendHoverText(ItemStack stack, net.minecraft.world.item.Item.TooltipContext context263, net.minecraft.world.item.component.TooltipDisplay display263, java.util.function.Consumer<Component> tooltip, TooltipFlag flag) {
+        Level level = context263.level();
         LoreBooks.Book book = bookOf(stack);
         if (book == null) {
-            tooltip.add(Component.translatable("tooltip.skycraft.lore.unknown_book").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
+            tooltip.accept(Component.translatable("tooltip.skycraft.lore.unknown_book").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
             return;
         }
-        tooltip.add(book.category().displayName().copy().withStyle(ChatFormatting.GRAY));
-        if (level != null && level.isClientSide) {
-            String author = DistExecutor.unsafeCallWhenOn(Dist.CLIENT, () -> () -> LoreClient.author(book.id()));
+        tooltip.accept(book.category().displayName().copy().withStyle(ChatFormatting.GRAY));
+        if (level != null && level.isClientSide()) {
+            String author = com.skycraft.platform.Sides.callOn(Dist.CLIENT, () -> () -> LoreClient.author(book.id()));
             if (author != null && !author.isEmpty()) {
-                tooltip.add(Component.translatable("tooltip.skycraft.lore.author", author).withStyle(ChatFormatting.DARK_GRAY));
+                tooltip.accept(Component.translatable("tooltip.skycraft.lore.author", author).withStyle(ChatFormatting.DARK_GRAY));
             }
-            Boolean read = DistExecutor.unsafeCallWhenOn(Dist.CLIENT, () -> () -> LoreClient.hasRead(book.id()));
+            Boolean read = com.skycraft.platform.Sides.callOn(Dist.CLIENT, () -> () -> LoreClient.hasRead(book.id()));
             if (Boolean.TRUE.equals(read)) {
-                tooltip.add(Component.translatable("tooltip.skycraft.lore.read").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
+                tooltip.accept(Component.translatable("tooltip.skycraft.lore.read").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
             }
         }
     }

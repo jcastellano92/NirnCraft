@@ -4,7 +4,7 @@ import com.skycraft.Skycraft;
 import com.skycraft.arsenal.item.ArtifactItem;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -25,7 +25,7 @@ import java.util.Map;
  * coins, conjured weapons and filled containers are not sold at all ({@link Barter#sellable}).</p>
  */
 public final class Resale {
-    public static final TagKey<Item> NO_RESALE = TagKey.create(Registries.ITEM, new ResourceLocation(Skycraft.MODID, "no_resale"));
+    public static final TagKey<Item> NO_RESALE = TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath(Skycraft.MODID, "no_resale"));
 
     private Resale() {}
 
@@ -34,14 +34,14 @@ public final class Resale {
         if (stack.isEmpty()) return false;
         Item item = stack.getItem();
         if (item instanceof ArtifactItem || stack.is(NO_RESALE)) return true;
-        CompoundTag tag = stack.getTag();
+        CompoundTag tag = com.skycraft.inventory.ItemData.custom(stack);
         // a written book is somebody's words; a blank book and quill is just paper
         if (item instanceof WrittenBookItem) return true;
-        if (item instanceof WritableBookItem && tag != null && tag.contains("pages")) return true;
-        if (tag != null && (tag.getBoolean("skycraft_is_legendary") || tag.getBoolean("skycraft_unique"))) return true;
-        if (stack.isEnchanted() || stack.getItem() instanceof net.minecraft.world.item.EnchantedBookItem) {
-            for (Map.Entry<Enchantment, Integer> e : EnchantmentHelper.getEnchantments(stack).entrySet()) {
-                if (e.getKey().isCurse()) return true;
+        if (item instanceof WritableBookItem && stack.getOrDefault(net.minecraft.core.component.DataComponents.WRITABLE_BOOK_CONTENT, net.minecraft.world.item.component.WritableBookContent.EMPTY).pages().size() > 0) return true;
+        if (tag != null && (tag.getBooleanOr("skycraft_is_legendary",false) || tag.getBooleanOr("skycraft_unique",false))) return true;
+        if (stack.isEnchanted() || stack.is(net.minecraft.world.item.Items.ENCHANTED_BOOK)) {
+            for (var e : EnchantmentHelper.getEnchantmentsForCrafting(stack).entrySet()) {
+                if (e.getKey().is(net.minecraft.tags.EnchantmentTags.CURSE)) return true;
             }
         }
         return false;

@@ -10,22 +10,22 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.animal.Animal;
-import net.minecraft.world.entity.animal.PolarBear;
-import net.minecraft.world.entity.animal.Wolf;
+import net.minecraft.world.entity.animal.polarbear.PolarBear;
+import net.minecraft.world.entity.animal.wolf.Wolf;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.living.LivingChangeTargetEvent;
-import net.minecraftforge.event.entity.living.LivingEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+
+import net.neoforged.neoforge.event.entity.living.LivingChangeTargetEvent;
+import net.neoforged.neoforge.event.entity.living.LivingEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 /**
  * Sneaking and detection in one place: how visible a crouching player is, whether a mob may notice (acquire) a
  * sneaking player, when a chasing mob loses them, the HUD "detected" eye, Sneak training and Hunting's Beast Lore.
  * One mob scan per player feeds the losing-track check, the detected flag and the training.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class Stealth {
     /** Radius of the per-player mob scan. */
     private static final double SCAN_RADIUS = 24;
@@ -105,7 +105,7 @@ public final class Stealth {
 
     @SubscribeEvent
     public static void onTarget(LivingChangeTargetEvent event) {
-        if (!(event.getNewTarget() instanceof Player player) || player.level().isClientSide) return;
+        if (!(event.getNewAboutToBeSetTarget() instanceof Player player) || player.level().isClientSide()) return;
         LivingEntity entity = event.getEntity();
         PlayerData data = SkyData.get(player);
         // Hunting "Beast Lore": wild predators leave you alone unless you attack them first.
@@ -121,15 +121,15 @@ public final class Stealth {
             return;
         }
         // remember the post a hostile leaves when it starts a chase, so it can walk back after losing the player
-        if (entity instanceof Mob mob && mob instanceof Enemy && !mob.hasRestriction() && !SEARCHES.containsKey(mob.getUUID())
+        if (entity instanceof Mob mob && mob instanceof Enemy && !mob.hasHome() && !SEARCHES.containsKey(mob.getUUID())
                 && !mob.getPersistentData().contains(POST_KEY)) {
             mob.getPersistentData().putLong(POST_KEY, mob.blockPosition().asLong());
         }
     }
 
     @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer player)) return;
+    public static void onPlayerTick(net.neoforged.neoforge.event.tick.PlayerTickEvent.Post event) {
+        if (!(event instanceof net.neoforged.neoforge.event.tick.PlayerTickEvent.Post) || !(event.getEntity() instanceof ServerPlayer player)) return;
         boolean crouching = player.isCrouching();
         // Crouching: every 10 ticks (losing track must feel responsive). Otherwise only the HUD flag, every 20.
         if (player.tickCount % (crouching ? 10 : 20) != 0) return;
@@ -197,7 +197,7 @@ public final class Stealth {
 
     /** As {@link #beginSearch(Mob, net.minecraft.world.phys.Vec3)}, remembering the player it lost (for the compass). */
     public static void beginSearch(Mob mob, net.minecraft.world.phys.Vec3 spot, @org.jetbrains.annotations.Nullable java.util.UUID player) {
-        if (mob.level().isClientSide) return;
+        if (mob.level().isClientSide()) return;
         mob.setTarget(null);
         mob.getNavigation().stop();
         Search search = new Search(mob, spot, mob.level().getGameTime());
@@ -217,20 +217,20 @@ public final class Stealth {
     }
 
     private static net.minecraft.world.phys.Vec3 postOf(Mob mob) {
-        if (mob.hasRestriction()) return net.minecraft.world.phys.Vec3.atBottomCenterOf(mob.getRestrictCenter());
+        if (mob.hasHome()) return net.minecraft.world.phys.Vec3.atBottomCenterOf(mob.getHomePosition());
         if (!mob.getPersistentData().contains(POST_KEY)) return null;
-        return net.minecraft.world.phys.Vec3.atBottomCenterOf(net.minecraft.core.BlockPos.of(mob.getPersistentData().getLong(POST_KEY)));
+        return net.minecraft.world.phys.Vec3.atBottomCenterOf(net.minecraft.core.BlockPos.of(mob.getPersistentData().getLongOr(POST_KEY, 0L)));
     }
 
     @SubscribeEvent
-    public static void onServerStopped(net.minecraftforge.event.server.ServerStoppedEvent event) {
+    public static void onServerStopped(net.neoforged.neoforge.event.server.ServerStoppedEvent event) {
         SEARCHES.clear();
     }
 
     @SubscribeEvent
-    public static void onLevelTick(TickEvent.LevelTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || event.level.isClientSide || SEARCHES.isEmpty()) return;
-        long now = event.level.getGameTime();
+    public static void onLevelTick(net.neoforged.neoforge.event.tick.LevelTickEvent.Post event) {
+        if (!(event instanceof net.neoforged.neoforge.event.tick.LevelTickEvent.Post) || event.getLevel().isClientSide() || SEARCHES.isEmpty()) return;
+        long now = event.getLevel().getGameTime();
         if (now % 10 != 3) return;
         java.util.Iterator<Search> it = SEARCHES.values().iterator();
         while (it.hasNext()) {
@@ -240,7 +240,7 @@ public final class Stealth {
                 it.remove();
                 continue;
             }
-            if (mob.level() != event.level) continue;
+            if (mob.level() != event.getLevel()) continue;
             if (mob.getTarget() != null) {
                 it.remove();
                 continue;

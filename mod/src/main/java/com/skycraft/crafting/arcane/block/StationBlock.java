@@ -19,7 +19,7 @@ import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
@@ -30,7 +30,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
  * actions are validated against the station's position).
  */
 public class StationBlock extends Block {
-    public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
+    public static final EnumProperty<net.minecraft.core.Direction> FACING = BlockStateProperties.HORIZONTAL_FACING;
 
     public enum Kind {ENCHANTER, ALCHEMY}
 
@@ -79,8 +79,8 @@ public class StationBlock extends Block {
 
     @Override
     @SuppressWarnings("deprecation")
-    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
-        if (!level.isClientSide && player instanceof ServerPlayer sp) {
+    public InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+        if (!level.isClientSide() && player instanceof ServerPlayer sp) {
             if (com.skycraft.crime.Ownership.isOwnedByOther(sp, level, pos) && !com.skycraft.economy.Shop.isOpen(level)) {
                 com.skycraft.core.Notifier.message(sp, net.minecraft.network.chat.Component.translatable("dialogue.skycraft.economy.closed"));
                 level.playSound(null, pos, net.minecraft.sounds.SoundEvents.CHEST_LOCKED, net.minecraft.sounds.SoundSource.BLOCKS, 0.8f, 1.0f);
@@ -88,7 +88,7 @@ public class StationBlock extends Block {
             }
             SkyNetwork.sendToPlayer(sp, new ArcanePackets.OpenStation(kind.ordinal(), pos));
         }
-        return InteractionResult.sidedSuccess(level.isClientSide);
+        return com.skycraft.platform.Interactions.sidedSuccess(level.isClientSide());
     }
 
     @Override
@@ -100,7 +100,7 @@ public class StationBlock extends Block {
                         z + (random.nextDouble() - 0.5) * 1.6, (random.nextDouble() - 0.5) * 0.3, -0.3, (random.nextDouble() - 0.5) * 0.3);
             }
         } else if (random.nextInt(6) == 0) {
-            level.addParticle(ParticleTypes.EFFECT, x + (random.nextDouble() - 0.5) * 0.6, y + 0.15, z + (random.nextDouble() - 0.5) * 0.6, 0, 0.02, 0);
+            level.addParticle(net.minecraft.core.particles.SpellParticleOption.create(ParticleTypes.EFFECT, 0xFFFFFF, 1f), x + (random.nextDouble() - 0.5) * 0.6, y + 0.15, z + (random.nextDouble() - 0.5) * 0.6, 0, 0.02, 0);
         }
     }
 }

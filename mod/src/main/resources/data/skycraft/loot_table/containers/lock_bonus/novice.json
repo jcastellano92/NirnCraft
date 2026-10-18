@@ -1,0 +1,41 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:septim",
+          "weight": 1,
+          "modifier": {
+            "min": 2,
+            "max": 8,
+            "growth": 0.02,
+            "type": "skycraft:scaled_gold"
+          }
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:loot_table",
+          "weight": 6,
+          "value": "skycraft:parts/lockpicks"
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:garnet",
+          "weight": 1
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 5
+        }
+      ]
+    }
+  ],
+  "random_sequence": "skycraft:containers/lock_bonus/novice"
+}

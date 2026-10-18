@@ -7,7 +7,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -32,35 +32,35 @@ public class ShipItem extends Item {
     }
 
     @Override
-    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+    public InteractionResult use(Level level, Player player, InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
         BlockHitResult hit = getPlayerPOVHitResult(level, player, ClipContext.Fluid.ANY);
-        if (hit.getType() != HitResult.Type.BLOCK) return InteractionResultHolder.pass(stack);
+        if (hit.getType() != HitResult.Type.BLOCK) return InteractionResult.PASS;
         BlockPos pos = hit.getBlockPos();
         if (!level.getFluidState(pos).is(FluidTags.WATER)) {
             if (player instanceof ServerPlayer sp) {
                 com.skycraft.core.Notifier.message(sp, Component.translatable("sailing.skycraft.launch_water"));
             }
-            return InteractionResultHolder.fail(stack);
+            return InteractionResult.FAIL;
         }
-        if (level.isClientSide) return InteractionResultHolder.success(stack);
+        if (level.isClientSide()) return InteractionResult.SUCCESS.heldItemTransformedTo(stack);
         // the water surface at the clicked column
         BlockPos.MutableBlockPos p = pos.mutable();
         while (level.getFluidState(p.above()).is(FluidTags.WATER) && p.getY() < pos.getY() + 8) p.move(0, 1, 0);
         double surface = p.getY() + level.getFluidState(p).getHeight(level, p);
-        ShipEntity ship = SailingRegistry.type(type).create(level);
-        if (ship == null) return InteractionResultHolder.fail(stack);
+        ShipEntity ship = SailingRegistry.type(type).create(level, net.minecraft.world.entity.EntitySpawnReason.EVENT);
+        if (ship == null) return InteractionResult.FAIL;
         Vec3 at = hit.getLocation();
-        ship.moveTo(at.x, surface - type.draft, at.z, player.getYRot(), 0f);
+        ship.snapTo(at.x, surface - type.draft, at.z, player.getYRot(), 0f);
         if (!level.noCollision(ship, ship.getBoundingBox().deflate(0.05)) || !roomFor(level, ship)) {
             if (player instanceof ServerPlayer sp) {
                 com.skycraft.core.Notifier.message(sp, Component.translatable("sailing.skycraft.launch_room"));
             }
-            return InteractionResultHolder.fail(stack);
+            return InteractionResult.FAIL;
         }
         ship.initNew(player);
-        if (stack.hasTag() && stack.getTag().contains("Hull")) ship.setHull(stack.getTag().getFloat("Hull"));
-        if (stack.hasCustomHoverName()) ship.setCustomName(stack.getHoverName());
+        if (com.skycraft.inventory.ItemData.hasCustom(stack) && com.skycraft.inventory.ItemData.custom(stack).contains("Hull")) ship.setHull(com.skycraft.inventory.ItemData.custom(stack).getFloatOr("Hull",0F));
+        if (stack.has(net.minecraft.core.component.DataComponents.CUSTOM_NAME)) ship.setCustomName(stack.getHoverName());
         level.addFreshEntity(ship);
         level.gameEvent(player, GameEvent.ENTITY_PLACE, at);
         if (!player.getAbilities().instabuild) stack.shrink(1);
@@ -68,7 +68,7 @@ public class ShipItem extends Item {
         if (player instanceof ServerPlayer sp) {
             com.skycraft.core.Notifier.message(sp, Component.translatable("sailing.skycraft.launched", ship.getDisplayName()));
         }
-        return InteractionResultHolder.consume(stack);
+        return InteractionResult.CONSUME.heldItemTransformedTo(stack);
     }
 
     /** The whole hull, bow to stern, must lie on water free of blocks. */
@@ -86,14 +86,14 @@ public class ShipItem extends Item {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
-        tooltip.add(Component.translatable("sailing.skycraft.tooltip." + type.id).withStyle(ChatFormatting.GRAY));
-        tooltip.add(Component.translatable("sailing.skycraft.tooltip.seats", type.seats.length, type.horseSeats, type.cargoSlots)
+    public void appendHoverText(ItemStack stack, net.minecraft.world.item.Item.TooltipContext context263, net.minecraft.world.item.component.TooltipDisplay display263, java.util.function.Consumer<Component> tooltip, TooltipFlag flag) {
+        tooltip.accept(Component.translatable("sailing.skycraft.tooltip." + type.id).withStyle(ChatFormatting.GRAY));
+        tooltip.accept(Component.translatable("sailing.skycraft.tooltip.seats", type.seats.length, type.horseSeats, type.cargoSlots)
                 .withStyle(ChatFormatting.DARK_GRAY));
-        if (stack.hasTag() && stack.getTag().contains("Hull")) {
-            tooltip.add(Component.translatable("sailing.skycraft.tooltip.hull", Math.round(stack.getTag().getFloat("Hull")),
+        if (com.skycraft.inventory.ItemData.hasCustom(stack) && com.skycraft.inventory.ItemData.custom(stack).contains("Hull")) {
+            tooltip.accept(Component.translatable("sailing.skycraft.tooltip.hull", Math.round(com.skycraft.inventory.ItemData.custom(stack).getFloatOr("Hull",0F)),
                     Math.round(type.maxHull)).withStyle(ChatFormatting.RED));
         }
-        tooltip.add(Component.translatable("sailing.skycraft.tooltip.launch").withStyle(ChatFormatting.DARK_AQUA));
+        tooltip.accept(Component.translatable("sailing.skycraft.tooltip.launch").withStyle(ChatFormatting.DARK_AQUA));
     }
 }

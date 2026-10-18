@@ -38,6 +38,13 @@ MIN_X, MIN_Z, CELL = -15360, -5120, 32
 
 
 def write(path, obj):
+    import importlib.util
+    from pathlib import Path
+    converter = Path(__file__).resolve().parents[1] / "worldgen" / "format_263.py"
+    spec = importlib.util.spec_from_file_location("skycraft_worldgen_263", converter)
+    native = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(native)
+    path, obj = native.prepare(path, obj)
     os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, "w", encoding="utf-8", newline="\n") as f:
         json.dump(obj, f, indent=2, ensure_ascii=False)
@@ -118,7 +125,7 @@ def pool(entries, rolls=1):
 
 
 def loot(name, *pools):
-    write(os.path.join(DATA, "loot_tables", "explore", name + ".json"),
+    write(os.path.join(DATA, "loot_table", "explore", name + ".json"),
           {"type": "minecraft:chest", "pools": list(pools), "random_sequence": "skycraft:explore/" + name})
 
 
@@ -399,7 +406,7 @@ def gen_assets(lang):
     # a fluted white pedestal holding a glowing welkynd stone (vanilla textures, original model)
     write(os.path.join(ASSETS, "models", "block", "ayleid_well.json"), {
         "parent": "minecraft:block/block",
-        "textures": {"particle": "minecraft:block/quartz_pillar", "pillar": "minecraft:block/quartz_pillar",
+        "textures": {"particle": "minecraft:block/quartz_pillar_side", "pillar": "minecraft:block/quartz_pillar_side",
                      "top": "minecraft:block/quartz_pillar_top", "stone": "minecraft:block/sea_lantern"},
         "elements": [
             {"from": [3, 0, 3], "to": [13, 2, 13], "faces": {d: {"texture": "#top" if d in ("up", "down") else "#pillar"}
@@ -413,7 +420,7 @@ def gen_assets(lang):
     write(os.path.join(ASSETS, "models", "item", "ayleid_well.json"), {"parent": "skycraft:block/ayleid_well"})
     write(os.path.join(ASSETS, "models", "item", "treasure_map.json"),
           {"parent": "minecraft:item/generated", "textures": {"layer0": "skycraft:item/treasure_map"}})
-    write(os.path.join(DATA, "loot_tables", "blocks", "ayleid_well.json"), {"type": "minecraft:block", "pools": []})
+    write(os.path.join(DATA, "loot_table", "blocks", "ayleid_well.json"), {"type": "minecraft:block", "pools": []})
     # the icon: a curled parchment with ink lines and a red X (procedural)
     s = 16
     img = Image.new("RGBA", (s, s), (0, 0, 0, 0))

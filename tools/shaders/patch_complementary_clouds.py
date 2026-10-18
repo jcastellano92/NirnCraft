@@ -33,6 +33,9 @@ Patches ComplementaryReimagined_r5.9.3.zip and its .txt option files so that:
 from __future__ import annotations
 
 import pathlib
+import hashlib
+import importlib.util
+import json
 import re
 import shutil
 import sys
@@ -40,6 +43,51 @@ import tempfile
 import zipfile
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
+SUPPORTED_UPSTREAM_SHA256 = "fed6c879e732cf7fc7bc6570ebb1def43235aa7e96f62859fbdbdbfa0b484b38"
+PATCH_MANIFEST = "shaders/skycraft-patch-manifest.json"
+
+
+def validate_shader_input(path: pathlib.Path) -> None:
+    """Pin fresh upstream packs; validate previous output before an in-place upgrade."""
+    with zipfile.ZipFile(path) as archive:
+        if len(archive.namelist()) != len(set(archive.namelist())):
+            raise ValueError("Shader pack contains duplicate paths")
+        if PATCH_MANIFEST in archive.namelist():
+            manifest = json.loads(archive.read(PATCH_MANIFEST))
+            if manifest.get("upstream_sha256") != SUPPORTED_UPSTREAM_SHA256 or manifest.get("schema") != 1:
+                raise ValueError("Unsupported Skycraft shader patch provenance")
+            hashes = manifest.get("checked_outputs", {})
+            if not hashes:
+                raise ValueError("Shader patch manifest has no checked outputs")
+            for name, digest in hashes.items():
+                if name not in archive.namelist() or hashlib.sha256(archive.read(name)).hexdigest() != digest:
+                    raise ValueError("Previously patched shader changed outside its declared pipeline: " + name)
+            return
+    if hashlib.sha256(path.read_bytes()).hexdigest() != SUPPORTED_UPSTREAM_SHA256:
+        raise ValueError("Unsupported upstream shader pack. Rebuild from the pinned Complementary Reimagined r5.9.3 cache.")
+
+
+PATCH_POSTCONDITIONS = {
+    "shaders/lib/uniforms.glsl": ("uniform sampler2D skycraftFogRadianceTex;", "uniform sampler2D skycraftSmokeTex;"),
+    "shaders/lib/lighting/mainLighting.glsl": ("SKYCRAFT_FINITE_DARK_HIGHLIGHT", "SKYCRAFT_LOCAL_AIR_LIGHT", "SKYCRAFT_CHANNEL_RECEIVER"),
+    "shaders/lib/atmospherics/fog/mainFog.glsl": ("SKYCRAFT_SHARED_AIR", "SKYCRAFT_SHELTERED_STOCK_FOG"),
+    "shaders/lib/materials/materialMethods/wavingBlocks.glsl": ("SKYCRAFT_ROOTED_WIND",),
+    "shaders/lib/atmospherics/clouds/unboundClouds.glsl": ("SKYCRAFT_BOUNDED_FIRE_RAYS", "inout float firstHitPos"),
+    "shaders/lib/atmospherics/volumetricLight/volumetricLight.glsl": ("SKYCRAFT_VOLUME_DEPTH_CLIP",),
+}
+
+
+def validate_shader_output(archive: zipfile.ZipFile) -> dict[str, str]:
+    for name, markers in PATCH_POSTCONDITIONS.items():
+        text = archive.read(name).decode("utf-8")
+        for marker in markers:
+            if text.count(marker) != 1:
+                raise ValueError(f"Required shader postcondition {name}: expected one {marker!r}, found {text.count(marker)}")
+    # The companion solar patch adds its sampler to uniforms/properties after
+    # this stage; all other GLSL outputs must stay byte-identical until upgrade.
+    return {name: hashlib.sha256(archive.read(name)).hexdigest() for name in sorted(archive.namelist())
+            if name.endswith(".glsl") and name != "shaders/lib/uniforms.glsl"}
+
 CELESTIAL_ASSETS = {
     "skycraftMasserTex": "masser_phases", "skycraftSecundaTex": "secunda_phases",
     "skycraftGalaxyTex": "galaxy", "skycraftAtmosphereTex": "atmosphere_transmittance",
@@ -196,6 +244,7 @@ struct SkycraftPlume { vec2 xz; vec2 wind; float y; float height; float radius; 
 SkycraftPlume skycraftPlumes[24];
 bool skycraftPlumesLoaded = false;
 bool skycraftVolcanoLoaded = false;
+SkycraftPlume skycraftVolcano=SkycraftPlume(vec2(0.0),vec2(0.0),0.0,0.0,0.0,0.0);
 int skycraftPlumeCount = 0;
 int skycraftRayCount = 0;
 int skycraftRaySource[23];
@@ -217,7 +266,7 @@ void SkycraftLoadPlumes() {
     if (skycraftPlumesLoaded) return;
     skycraftPlumesLoaded = true;
     skycraftPlumeCount = clamp(int(texelFetch(skycraftSmokeTex,ivec2(31,3),0).r*255.0+0.5),0,24);
-    skycraftPlumes[0]=SkycraftReadPlume(0);
+    skycraftVolcano=SkycraftReadPlume(0);
     for (int source = 1; source < skycraftPlumeCount; source++) skycraftPlumes[source]=SkycraftReadPlume(source);
     skycraftVolcanoLoaded=true;
 }
@@ -239,10 +288,10 @@ float SkycraftSourceDensity(SkycraftPlume plume, vec3 tracePos) {
 }
 
 float SkycraftPlumeDensity(vec3 tracePos, vec2 playerOffsetXZ) {
-    if(!skycraftVolcanoLoaded) { skycraftPlumes[0]=SkycraftReadPlume(0); skycraftVolcanoLoaded=true; }
+    if(!skycraftVolcanoLoaded) { skycraftVolcano=SkycraftReadPlume(0); skycraftVolcanoLoaded=true; }
     // Local fires have a bounded, clipped integral of their own. Sampling them
     // only at kilometre-scale cloud steps misses narrow distant columns.
-    return SkycraftSourceDensity(skycraftPlumes[0],tracePos);
+    return SkycraftSourceDensity(skycraftVolcano,tracePos);
 }
 
 void SkycraftInitFireRay(vec3 origin,vec3 direction,float limit) {
@@ -330,12 +379,18 @@ vec4 SampleSkycraftWeather(vec2 playerOffsetXZ) {
     return weather;
 }
 
+#include "/lib/atmospherics/skycraftWind.glsl"
+
 vec4 SampleSkycraftDynamics(vec2 playerOffsetXZ) {
     vec2 worldXZ = GetSkycraftWorldXZ(playerOffsetXZ);
-    vec4 local = texture2DLod(skycraftDynamicsTex, fract(worldXZ / 8192.0), 0.0);
+    vec4 local = SkycraftSampleDynamics(skycraftDynamicsTex,worldXZ / 8192.0);
     float farBlend = smoothstep(2200.0, 3600.0, length(playerOffsetXZ));
-    if (farBlend > 0.0)
-        local = mix(local, texture2DLod(skycraftDynamicsFarTex, fract(worldXZ / 65536.0), 0.0), farBlend);
+    if (farBlend > 0.0) {
+        vec4 distant=SkycraftSampleDynamics(skycraftDynamicsFarTex,worldXZ / 65536.0);
+        float angle=SkycraftMixWindAngle(local.b,distant.b,farBlend);
+        local=mix(local,distant,farBlend);
+        local.b=angle;
+    }
     return local;
 }
 
@@ -589,7 +644,7 @@ void AccumulateSkycraftVolume(inout vec4 volume, vec3 color, float alpha) {
 
 // SKYCRAFT_BOUNDED_FIRE_RAYS: intersect source bounds once, then integrate only
 // overlapping subintervals. Every source keeps its actual flame origin and depth.
-void SkycraftIntegrateFire(inout vec4 volume,vec3 origin,vec3 direction,float from,float to) {
+void SkycraftIntegrateFire(inout vec4 volume,inout float firstHitPos,vec3 origin,vec3 direction,float from,float to) {
     float opticalDepth=0.0; vec3 scattering=vec3(0.0);
     for(int r=0;r<skycraftRayCount;r++) {
         vec2 interval=skycraftRayInterval[r];
@@ -603,6 +658,9 @@ void SkycraftIntegrateFire(inout vec4 volume,vec3 origin,vec3 direction,float fr
             if(sigma<=0.00001) continue;
             vec3 player=point-cameraPosition;
             sigma*=SkycraftWeatherExposure(player);
+            if(sigma<=0.0) continue;
+            float hitDistance=a+(float(k)+0.5)*stepLength;
+            firstHitPos=firstHitPos<0.0?hitDistance:min(firstHitPos,hitDistance);
             float height=point.y-plume.y;
             vec3 soot=cloudAmbientColor*vec3(0.26,0.24,0.22)+SkycraftKeyRadiance(point.y)*0.12;
             soot+=vec3(1.0,0.24,0.045)*plume.strength*0.10*exp(-height/8.0);
@@ -914,7 +972,7 @@ vec4 GetVolumetricClouds(int cloudAltitude, float distanceThreshold, inout float
     vec3 tracePos = cameraPos;
     float traceDistance = minPlaneDistance;
 
-    float firstHitPos = 0.0;
+    float firstHitPos = -1.0;
     float VdotSM1 = max0(dot(nPlayerPos, skycraftKeyDirection));
     float VdotSM1M = VdotSM1 * invRainFactor;
     float VdotSM2 = pow2(VdotSM1) * abs(sunVisibility - 0.5) * 2.0;
@@ -942,7 +1000,7 @@ vec4 GetVolumetricClouds(int cloudAltitude, float distanceThreshold, inout float
         float intervalEnd = i == sampleCount - 1 ? maxPlaneDistance
                 : min(maxPlaneDistance, traceDistance + intervalStep);
         stepLength = max(0.0, intervalEnd - traceDistance);
-        SkycraftIntegrateFire(volumetricClouds,cameraPos,nPlayerPos,traceDistance,intervalEnd);
+        SkycraftIntegrateFire(volumetricClouds,firstHitPos,cameraPos,nPlayerPos,traceDistance,intervalEnd);
         float withinStep = fract(dither + float(i) * 0.61803398875);
         tracePos = cameraPos + nPlayerPos * (traceDistance + stepLength * withinStep);
         traceDistance = intervalEnd;
@@ -964,9 +1022,7 @@ vec4 GetVolumetricClouds(int cloudAltitude, float distanceThreshold, inout float
             // A mountain shadow attenuates illumination, never density. The pack's
             // closed-area skip carved triangular holes through distant clouds.
 
-            if (firstHitPos < 1.0) {
-                firstHitPos = lTracePos;
-            }
+            firstHitPos = firstHitPos < 0.0 ? lTracePos : min(firstHitPos,lTracePos);
 
             float effectiveCov = max(skyCov, skyCurtain * 0.68);
             float skyAerosolRaw = skyW.a * 4.0;
@@ -1032,10 +1088,10 @@ vec4 GetVolumetricClouds(int cloudAltitude, float distanceThreshold, inout float
             volumetricClouds.rgb += colorSample * sampleWeight;
             volumetricClouds.a += sampleWeight;
 
-            if (volumetricClouds.a > 0.995) {
-                break;
-            }
         }
+        // All participating media share this accumulator. Stop only when its
+        // remaining float weight is exactly zero, preserving bright HDR tails.
+        if (volumetricClouds.a >= 1.0) break;
     }
 
     if (volumetricClouds.a > 0.98) cloudLinearDepth = min(cloudLinearDepth, sqrt(firstHitPos / SKYCRAFT_CLOUD_DEPTH_RANGE));
@@ -1167,7 +1223,7 @@ CLOUD_SHADOWS_GLSL = """#ifndef INCLUDE_CLOUD_SHADOWS
 def patch_uniforms_glsl(text: str) -> str:
     if "SKYCRAFT_CLOUD_DEPTH_RANGE" not in text:
         text += '\n#ifdef CLOUDS_UNBOUND\n#define SKYCRAFT_CLOUD_DEPTH_RANGE 30000.0\n#else\n#define SKYCRAFT_CLOUD_DEPTH_RANGE renderDistance\n#endif\n'
-    for name in ("skycraftDynamicsTex", "skycraftDynamicsFarTex", "skycraftFogRadianceTex", "skycraftSmokeTex", "skycraftCloudNoiseTex", "skycraftMasserTex", "skycraftSecundaTex", "skycraftGalaxyTex", "skycraftAtmosphereTex", "skycraftLightningTex"):
+    for name in ("skycraftDynamicsTex", "skycraftDynamicsFarTex", "skycraftFogRadianceTex", "skycraftLocalOcclusionTex", "skycraftSmokeTex", "skycraftCloudNoiseTex", "skycraftMasserTex", "skycraftSecundaTex", "skycraftGalaxyTex", "skycraftAtmosphereTex", "skycraftLightningTex"):
         if name not in text:
             text += "\r\nuniform sampler2D " + name + ";\r\n"
     if "skycraftWeatherFarTex" not in text and "uniform sampler2D skycraftWeatherTex;" in text:
@@ -1186,7 +1242,7 @@ def patch_shaders_properties(text: str) -> str:
     text=re.sub(r"(?m)^size\.buffer\.colortex9\s*=.*(?:\n|$)", "", text)
     if "skycraftAtmosphereTex" not in text:
         text += "\ncustomTexture.skycraftAtmosphereTex = skycraft:textures/environment/atmosphere_transmittance.png\n"
-    for name, resource in (("skycraftLightningTex", "lightning_sources"), ("skycraftDynamicsTex", "weather_dynamics"), ("skycraftDynamicsFarTex", "weather_dynamics_far"), ("skycraftFogRadianceTex", "fog_radiance"), ("skycraftSmokeTex", "smoke_sources"), ("skycraftCloudNoiseTex", "cloud_noise_volume"), ("skycraftMasserTex", "masser_phases"), ("skycraftSecundaTex", "secunda_phases"), ("skycraftGalaxyTex", "galaxy")):
+    for name, resource in (("skycraftLightningTex", "lightning_sources"), ("skycraftDynamicsTex", "weather_dynamics"), ("skycraftDynamicsFarTex", "weather_dynamics_far"), ("skycraftFogRadianceTex", "fog_radiance"), ("skycraftLocalOcclusionTex", "local_occlusion"), ("skycraftSmokeTex", "smoke_sources"), ("skycraftCloudNoiseTex", "cloud_noise_volume"), ("skycraftMasserTex", "masser_phases"), ("skycraftSecundaTex", "secunda_phases"), ("skycraftGalaxyTex", "galaxy")):
         if name not in text:
             text += "\r\ncustomTexture." + name + " = skycraft:textures/environment/" + resource + ".png\r\n"
     for name, resource in CELESTIAL_ASSETS.items():
@@ -1730,11 +1786,16 @@ vec3 GetStars(vec2 starCoord, float VdotU, float VdotS) {
 
 def patch_waving_blocks_glsl(text: str) -> str:
     if "SKYCRAFT_ROOTED_WIND" in text:
+        if '#include "/lib/atmospherics/skycraftWind.glsl"' not in text:
+            text = '#include "/lib/atmospherics/skycraftWind.glsl"\n' + text
+        text = text.replace("texture2DLod(skycraftDynamicsTex, fract(pos.xz / 8192.0), 0.0)",
+                            "SkycraftSampleDynamics(skycraftDynamicsTex,pos.xz / 8192.0)")
         return text
     text = text.replace("\r\n", "\n").replace("\r", "")
-    helper = '''// SKYCRAFT_ROOTED_WIND: the same world clock/direction as the atmosphere.
+    helper = '''#include "/lib/atmospherics/skycraftWind.glsl"
+// SKYCRAFT_ROOTED_WIND: the same world clock/direction as the atmosphere.
 void SkycraftSurfaceGust(vec3 pos, out vec2 direction, out float strength, out float gust, out float time) {
-    vec4 dynamics = texture2DLod(skycraftDynamicsTex, fract(pos.xz / 8192.0), 0.0);
+    vec4 dynamics = SkycraftSampleDynamics(skycraftDynamicsTex,pos.xz / 8192.0);
     vec4 header = texelFetch(skycraftSmokeTex, ivec2(11, 1), 0);
     vec4 bytes = floor(texelFetch(skycraftSmokeTex, ivec2(13, 1), 0) * 255.0 + 0.5);
     time = (dot(bytes, vec4(1.0, 256.0, 65536.0, 16777216.0)) + header.r) * 0.05 * WAVING_SPEED;
@@ -1835,6 +1896,16 @@ def patch_block_properties(text: str) -> str:
 def patch_shaderpack_zip(zip_path: pathlib.Path) -> None:
     if not zip_path.exists():
         return
+    validate_shader_input(zip_path)
+    upstream=zip_path if hashlib.sha256(zip_path.read_bytes()).hexdigest()==SUPPORTED_UPSTREAM_SHA256 else next(
+        (p for p in (ROOT/"dist/.cache").glob("*ComplementaryReimagined_r5.9.3.zip")
+         if hashlib.sha256(p.read_bytes()).hexdigest()==SUPPORTED_UPSTREAM_SHA256),None)
+    if upstream is None:
+        raise ValueError("Pinned original required to rebuild isolated realm shaders; run the instance builder")
+    realm_spec=importlib.util.spec_from_file_location("skycraft_realm_pipeline",pathlib.Path(__file__).with_name("realm_pipeline.py"))
+    realm_pipeline=importlib.util.module_from_spec(realm_spec)
+    realm_spec.loader.exec_module(realm_pipeline)
+    realm_files=realm_pipeline.build(upstream)
     with tempfile.NamedTemporaryFile(delete=False, suffix=".zip", dir=str(zip_path.parent)) as tmp:
         tmp_path = pathlib.Path(tmp.name)
 
@@ -1843,16 +1914,20 @@ def patch_shaderpack_zip(zip_path: pathlib.Path) -> None:
             tmp_path, "w", compression=zipfile.ZIP_DEFLATED
         ) as zout:
             for item in zin.infolist():
+                if item.filename == PATCH_MANIFEST: continue
+                if item.filename in realm_files or item.filename.startswith("shaders/skycraftRealm/"): continue
+                if item.filename in ("shaders/lib/atmospherics/skycraftLocalOcclusion.glsl", "shaders/lib/atmospherics/skycraftVolumeNoise.glsl",
+                                     "shaders/lib/atmospherics/skycraftFogLight.glsl", "shaders/lib/atmospherics/skycraftLocalMedia.glsl"): continue
                 if item.filename == "shaders/lib/atmospherics/clouds/skycraftLightCache.glsl": continue
                 if item.filename in ("shaders/world0/prepare.fsh","shaders/world0/prepare.vsh"):
                     if "SKYCRAFT_LIGHT_CACHE_WRITE" in zin.read("shaders/world0/prepare.fsh").decode(errors="replace"): continue
-                if item.filename in ("shaders/lib/atmospherics/clouds/skycraftDensity.glsl", "shaders/lib/atmospherics/skycraftCelestial.glsl", "shaders/lib/atmospherics/skycraftCelestialFrame.glsl", "shaders/lib/atmospherics/skycraftAtmosphere.glsl", "shaders/lib/atmospherics/skycraftLightning.glsl", "shaders/lib/atmospherics/skycraftInterior.glsl", "shaders/lib/atmospherics/skycraftInteriorDensity.glsl") or item.filename.startswith("shaders/lib/textures/skycraft_"):
+                if item.filename in ("shaders/lib/atmospherics/clouds/skycraftDensity.glsl", "shaders/lib/atmospherics/skycraftCelestial.glsl", "shaders/lib/atmospherics/skycraftCelestialFrame.glsl", "shaders/lib/atmospherics/skycraftAtmosphere.glsl", "shaders/lib/atmospherics/skycraftLightning.glsl", "shaders/lib/atmospherics/skycraftInterior.glsl", "shaders/lib/atmospherics/skycraftInteriorDensity.glsl", "shaders/lib/atmospherics/skycraftWind.glsl") or item.filename.startswith("shaders/lib/textures/skycraft_"):
                     continue  # replaced below when upgrading an already patched pack
                 raw = zin.read(item.filename)
                 if item.filename == "shaders/lib/uniforms.glsl":
                     raw = patch_uniforms_glsl(raw.decode("utf-8")).encode("utf-8")
                 elif item.filename == "shaders/shaders.properties":
-                    raw = patch_shaders_properties(raw.decode("utf-8")).encode("utf-8")
+                    raw = realm_pipeline.program_properties(patch_shaders_properties(raw.decode("utf-8"))).encode("utf-8")
                 elif item.filename == "shaders/lib/atmospherics/clouds/mainClouds.glsl":
                     raw = patch_main_clouds_glsl(raw.decode("utf-8")).encode("utf-8")
                 elif item.filename == "shaders/lib/atmospherics/clouds/unboundClouds.glsl":
@@ -1915,12 +1990,19 @@ float moonPhaseInfluence = 1.0;
             zout.writestr("shaders/lib/atmospherics/skycraftLightning.glsl", (ROOT / "mod/src/main/resources/assets/skycraft/shaders/include/lightning.glsl").read_bytes())
             zout.writestr("shaders/lib/atmospherics/skycraftAtmosphere.glsl", (ROOT / "mod/src/main/resources/assets/skycraft/shaders/include/atmosphere.glsl").read_bytes())
             zout.writestr("shaders/lib/atmospherics/skycraftCelestialFrame.glsl", (ROOT / "mod/src/main/resources/assets/skycraft/shaders/include/celestial_frame.glsl").read_bytes())
-            for shader_name, asset in (("skycraftInterior", "interior"), ("skycraftInteriorDensity", "interior_density")):
+            for shader_name, asset in (("skycraftInterior", "interior"), ("skycraftInteriorDensity", "interior_density"), ("skycraftWind", "wind"), ("skycraftLocalOcclusion", "local_occlusion"),
+                                       ("skycraftVolumeNoise","volume_noise"),("skycraftFogLight","fog_light"),("skycraftLocalMedia","local_media")):
                 zout.writestr("shaders/lib/atmospherics/" + shader_name + ".glsl",
                               (ROOT / "mod/src/main/resources/assets/skycraft/shaders/include" / (asset + ".glsl")).read_bytes())
             for resource in CELESTIAL_ASSETS.values():
                 zout.writestr("shaders/lib/textures/skycraft_" + resource + ".png",
                               (ROOT / "mod/src/main/resources/assets/skycraft/textures/environment" / (resource + ".png")).read_bytes())
+            for name,raw in realm_files.items(): zout.writestr(name,raw)
+        with zipfile.ZipFile(tmp_path) as checked:
+            hashes = validate_shader_output(checked)
+        with zipfile.ZipFile(tmp_path, "a", compression=zipfile.ZIP_DEFLATED) as checked:
+            checked.writestr(PATCH_MANIFEST, json.dumps({"schema": 1, "upstream_sha256": SUPPORTED_UPSTREAM_SHA256,
+                "checked_outputs": hashes}, sort_keys=True, indent=2) + "\n")
         shutil.move(str(tmp_path), str(zip_path))
         print(f"Patched shaderpack zip: {zip_path}")
     finally:

@@ -10,14 +10,14 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
+import com.skycraft.worldgen.NoneFeatureConfiguration;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
-import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.registries.DeferredRegister;
+import net.minecraft.core.registries.BuiltInRegistries;
+import java.util.function.Supplier;
 
 import java.util.EnumMap;
 import java.util.Map;
@@ -35,54 +35,54 @@ import java.util.Map;
  * </ul>
  */
 public final class LoreModule {
-    public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, Skycraft.MODID);
-    public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, Skycraft.MODID);
-    public static final DeferredRegister<Feature<?>> FEATURES = DeferredRegister.create(ForgeRegistries.FEATURES, Skycraft.MODID);
+    public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(BuiltInRegistries.BLOCK, Skycraft.MODID);
+    public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(BuiltInRegistries.ITEM, Skycraft.MODID);
+    public static final DeferredRegister<com.mojang.serialization.MapCodec<? extends Feature>> FEATURES = DeferredRegister.create(BuiltInRegistries.FEATURE_TYPE, Skycraft.MODID);
 
-    public static final Map<StandingStone, RegistryObject<Block>> STONES = new EnumMap<>(StandingStone.class);
+    public static final Map<StandingStone, Supplier<Block>> STONES = new EnumMap<>(StandingStone.class);
 
     static {
         for (StandingStone sign : StandingStone.VALUES) {
-            RegistryObject<Block> block = BLOCKS.register("standing_stone_" + sign.id(), () -> new StandingStoneBlock(sign,
-                    BlockBehaviour.Properties.of()
+            Supplier<Block> block = BLOCKS.register("standing_stone_" + sign.id(), key -> new StandingStoneBlock(sign,
+                    BlockBehaviour.Properties.of().setId(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.BLOCK,key))
                             .mapColor(MapColor.STONE)
                             .strength(-1f, 3600000f)
                             .noLootTable()
                             .noOcclusion()
                             .lightLevel(state -> 7)
                             .sound(SoundType.STONE)
-                            .pushReaction(PushReaction.BLOCK)
+                            .pushReaction(PushReaction.IMMOVEABLE)
                             .isValidSpawn((state, level, pos, type) -> false)));
             STONES.put(sign, block);
-            ITEMS.register("standing_stone_" + sign.id(), () -> new BlockItem(block.get(), new Item.Properties().rarity(Rarity.EPIC)));
+            ITEMS.register("standing_stone_" + sign.id(), key -> new BlockItem(block.get(), new Item.Properties().setId(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.ITEM,key)).rarity(Rarity.EPIC)));
         }
     }
 
     /** Solstheim's All-Maker stones ({@link AllMakerStones}). */
-    public static final Map<AllMakerStone, RegistryObject<Block>> ALL_MAKER_STONES = new EnumMap<>(AllMakerStone.class);
+    public static final Map<AllMakerStone, Supplier<Block>> ALL_MAKER_STONES = new EnumMap<>(AllMakerStone.class);
 
     static {
         for (AllMakerStone stone : AllMakerStone.VALUES) {
             String id = "standing_stone_allmaker_" + stone.id();
-            RegistryObject<Block> block = BLOCKS.register(id, () -> new AllMakerStoneBlock(stone,
-                    BlockBehaviour.Properties.of()
+            Supplier<Block> block = BLOCKS.register(id, key -> new AllMakerStoneBlock(stone,
+                    BlockBehaviour.Properties.of().setId(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.BLOCK,key))
                             .mapColor(MapColor.STONE)
                             .strength(-1f, 3600000f)
                             .noLootTable()
                             .noOcclusion()
                             .lightLevel(state -> 7)
                             .sound(SoundType.STONE)
-                            .pushReaction(PushReaction.BLOCK)
+                            .pushReaction(PushReaction.IMMOVEABLE)
                             .isValidSpawn((state, level, pos, type) -> false)));
             ALL_MAKER_STONES.put(stone, block);
-            ITEMS.register(id, () -> new BlockItem(block.get(), new Item.Properties().rarity(Rarity.EPIC)));
+            ITEMS.register(id, key -> new BlockItem(block.get(), new Item.Properties().setId(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.ITEM,key)).rarity(Rarity.EPIC)));
         }
     }
 
-    public static final RegistryObject<Item> BOOK =ITEMS.register("book", () -> new LoreBookItem(new Item.Properties().stacksTo(16)));
+    public static final Supplier<Item> BOOK =ITEMS.register("book", key -> new LoreBookItem(new Item.Properties().setId(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.ITEM,key)).stacksTo(16)));
 
-    public static final RegistryObject<Feature<NoneFeatureConfiguration>> STANDING_STONE_SHRINE = FEATURES.register("standing_stone_shrine",
-            () -> new StandingStoneShrineFeature(NoneFeatureConfiguration.CODEC));
+    public static final Supplier<com.mojang.serialization.MapCodec<? extends Feature>> STANDING_STONE_SHRINE = FEATURES.register("standing_stone_shrine",
+            () -> new StandingStoneShrineFeature(NoneFeatureConfiguration.CODEC).codec());
 
     private LoreModule() {}
 
@@ -103,7 +103,7 @@ public final class LoreModule {
 
     /** Every book (with its NBT) in the Skycraft creative tab; the tab itself already lists the plain item. */
     private static void creativeTab(BuildCreativeModeTabContentsEvent event) {
-        if (!event.getTabKey().equals(ModCreativeTab.MAIN.getKey())) return;
+        if (!event.getTabKey().equals(net.minecraft.core.registries.BuiltInRegistries.CREATIVE_MODE_TAB.getResourceKey(ModCreativeTab.MAIN.get()).orElseThrow())) return;
         for (LoreBooks.Book book : LoreBooks.all()) event.accept(LoreBookItem.create(book));
     }
 }

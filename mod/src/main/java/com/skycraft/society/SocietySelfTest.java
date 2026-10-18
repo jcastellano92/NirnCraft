@@ -21,11 +21,11 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
-import net.minecraftforge.common.util.FakePlayer;
-import net.minecraftforge.common.util.FakePlayerFactory;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.common.util.FakePlayer;
+import net.neoforged.neoforge.common.util.FakePlayerFactory;
+
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -52,7 +52,7 @@ import java.util.function.Consumer;
  * {@code society} and as {@code /skycraft-society selftest}; the result is one log line,
  * {@code Society selftest: n/m checks passed, k problems}.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class SocietySelfTest {
     private static final GameProfile PROFILE = new GameProfile(UUID.nameUUIDFromBytes("skycraft-society-selftest".getBytes()), "[SocietyTest]");
 
@@ -139,9 +139,9 @@ public final class SocietySelfTest {
     }
 
     @SubscribeEvent
-    public static void onServerTick(TickEvent.ServerTickEvent event) {
+    public static void onServerTick(net.neoforged.neoforge.event.tick.ServerTickEvent.Post event) {
         Run r = running;
-        if (r == null || event.phase != TickEvent.Phase.END) return;
+        if (r == null || !(event instanceof net.neoforged.neoforge.event.tick.ServerTickEvent.Post)) return;
         if (r.wait-- > 0) return;
         Step s = r.steps.poll();
         if (s == null) {
@@ -175,7 +175,7 @@ public final class SocietySelfTest {
         try {
             if (r.server != null) {
                 ServerLevel level = r.server.overworld();
-                if (r.originalTime >= 0 && r.town != null) level.setDayTime(r.originalTime);
+                if (r.originalTime >= 0 && r.town != null) level.dimensionType().defaultClock().ifPresent(clock -> level.clockManager().setTotalTicks(clock, r.originalTime));
                 forceSettlement(level, r.town, false);
                 Places.byId(MINOR_SAMPLE).ifPresent(p -> forceSettlement(level, p, false));
                 Places.byId(HAMLET_SAMPLE).ifPresent(p -> forceSettlement(level, p, false));
@@ -190,7 +190,7 @@ public final class SocietySelfTest {
 
     private static void plan(Run r) {
         ServerLevel level = r.server.overworld();
-        r.originalTime = level.getDayTime();
+        r.originalTime = level.getDefaultClockTime();
         r.town = Places.byId("whiterun").orElseGet(() -> Places.all().stream()
                 .filter(p -> p.type().isSettlement() && !"homestead".equals(p.variant())).findFirst().orElse(null));
         if (r.town == null) {
@@ -219,8 +219,8 @@ public final class SocietySelfTest {
         r.steps.add(new Step(10, () -> gateReplaceChecks(r, level)));
         // night: everybody is still here, and asleep in a bed
         r.steps.add(new Step(40, () -> {
-            long day = level.getDayTime() / 24000L;
-            level.setDayTime(day * 24000L + 18000L);
+            long day = level.getDefaultClockTime() / 24000L;
+            level.dimensionType().defaultClock().ifPresent(clock -> level.clockManager().setTotalTicks(clock, day * 24000L + 18000L));
             SocietyCensus.visit(level, r.town);
         }));
         // the settlement tick runs every two seconds with a player about: the visits stand in for it
@@ -231,7 +231,7 @@ public final class SocietySelfTest {
             Optional<Place> sample = Places.byId(id);
             if (sample.isEmpty()) continue;
             r.steps.add(new Step(0, () -> {
-                level.setDayTime((level.getDayTime() / 24000L) * 24000L + 6000L);
+                level.dimensionType().defaultClock().ifPresent(clock -> level.clockManager().setTotalTicks(clock, (level.getDefaultClockTime() / 24000L) * 24000L + 6000L));
                 forceSettlement(level, sample.get(), true);
                 SocietyCensus.visit(level, sample.get());
             }));
@@ -347,13 +347,13 @@ public final class SocietySelfTest {
         String want = com.skycraft.creatures.GuardProfiles.of(town).profile().id();
         for (GuardEntity g : guards) {
             var pd = g.getPersistentData();
-            if (key.equals(pd.getString(GuardWatch.PATROL_KEY))) {
+            if (key.equals(pd.getStringOr(GuardWatch.PATROL_KEY, ""))) {
                 patrol++;
                 walking |= g.isPatrolling() && g.getPost() == null;
                 ownProfile &= g.getProfile().id().equals(want);
             } else if (pd.contains(GatePosts.KEY)) {
                 posted++;
-            } else if (!pd.getBoolean(GuardWatch.SCRIPTED)) {
+            } else if (!pd.getBooleanOr(GuardWatch.SCRIPTED, false)) {
                 foreign++;
             }
         }
@@ -366,7 +366,7 @@ public final class SocietySelfTest {
         GatePosts.tick(level, r.fake);
         GatePosts.tick(level, r.fake);
         int again = 0;
-        for (GuardEntity g : guardsAround(level, entry.get())) if (key.equals(g.getPersistentData().getString(GuardWatch.PATROL_KEY))) again++;
+        for (GuardEntity g : guardsAround(level, entry.get())) if (key.equals(g.getPersistentData().getStringOr(GuardWatch.PATROL_KEY, ""))) again++;
         r.check("visiting a minor settlement again never makes a second guard", again == 1, again + " patrol guards");
     }
 
@@ -382,12 +382,12 @@ public final class SocietySelfTest {
         // the open country: no guard stands anywhere that is not a settlement's, a patrol's or somebody's scripted one
         int stray = 0;
         for (GuardEntity g : level.getEntitiesOfClass(GuardEntity.class,
-                new AABB(village.x() - 300, level.getMinBuildHeight(), village.z() - 300, village.x() + 300, level.getMaxBuildHeight(),
+                new AABB(village.x() - 300, level.getMinY(), village.z() - 300, village.x() + 300, (level.getMaxY()+1),
                         village.z() + 300), GuardEntity::isAlive)) {
             var pd = g.getPersistentData();
-            if (!pd.contains(GatePosts.KEY) && !pd.contains(GuardWatch.PATROL_KEY) && !pd.getBoolean(GuardWatch.SCRIPTED)
+            if (!pd.contains(GatePosts.KEY) && !pd.contains(GuardWatch.PATROL_KEY) && !pd.getBooleanOr(GuardWatch.SCRIPTED, false)
                     && !pd.contains(com.skycraft.quest.QuestSpawner.TAG_QUEST) && !pd.contains(com.skycraft.quest.story.QuestNpcs.TAG)
-                    && !Encounters.isTagged(g) && !g.getTags().contains(com.skycraft.crime.Jail.NPC_TAG)) {
+                    && !Encounters.isTagged(g) && !g.entityTags().contains(com.skycraft.crime.Jail.NPC_TAG)) {
                 stray++;
             }
         }
@@ -484,7 +484,7 @@ public final class SocietySelfTest {
         // duplicates of one slot
         Map<String, Integer> perSlot = new HashMap<>();
         for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, boxOf(entry.get(), level), x -> x.isAlive())) {
-            String slot = e.getPersistentData().getString(Housing.SLOT_KEY);
+            String slot = e.getPersistentData().getStringOr(Housing.SLOT_KEY, "");
             if (!slot.isEmpty()) perSlot.merge(slot, 1, Integer::sum);
         }
         int dup = 0;
@@ -499,9 +499,9 @@ public final class SocietySelfTest {
         int posted = 0, others = 0, wrongSide = 0, moving = 0;
         List<String> found = new ArrayList<>();
         for (GuardEntity guard : guardsAround(level, entry.get())) {
-            String k = guard.getPersistentData().getString(GatePosts.KEY);
+            String k = guard.getPersistentData().getStringOr(GatePosts.KEY, "");
             if (k.isEmpty()) {
-                if (!guard.getPersistentData().getBoolean(GuardWatch.SCRIPTED)) others++;
+                if (!guard.getPersistentData().getBooleanOr(GuardWatch.SCRIPTED, false)) others++;
                 continue;
             }
             posted++;
@@ -522,7 +522,7 @@ public final class SocietySelfTest {
 
     private static AABB boxOf(SettlementAnchors.Entry e, ServerLevel level) {
         int rad = e.radius + 20;
-        return new AABB(e.x - rad, level.getMinBuildHeight(), e.z - rad, e.x + rad, level.getMaxBuildHeight(), e.z + rad);
+        return new AABB(e.x - rad, level.getMinY(), e.z - rad, e.x + rad, (level.getMaxY()+1), e.z + rad);
     }
 
     private static void gateReplaceChecks(Run r, ServerLevel level) {
@@ -535,7 +535,7 @@ public final class SocietySelfTest {
             if (!level.isLoaded(g) || !level.isPositionEntityTicking(g)) continue;
             GuardEntity victim = null;
             for (GuardEntity guard : level.getEntitiesOfClass(GuardEntity.class, boxOf(entry.get(), level), GuardEntity::isAlive)) {
-                if (keys.get(i).equals(guard.getPersistentData().getString(GatePosts.KEY))) victim = guard;
+                if (keys.get(i).equals(guard.getPersistentData().getStringOr(GatePosts.KEY, ""))) victim = guard;
             }
             if (victim == null) continue;
             victim.discard(); // killed
@@ -546,7 +546,7 @@ public final class SocietySelfTest {
             int total = 0;
             for (GuardEntity guard : level.getEntitiesOfClass(GuardEntity.class, boxOf(entry.get(), level), GuardEntity::isAlive)) {
                 if (guard.getPersistentData().contains(GatePosts.KEY)) total++;
-                if (keys.get(i).equals(guard.getPersistentData().getString(GatePosts.KEY))) back = true;
+                if (keys.get(i).equals(guard.getPersistentData().getStringOr(GatePosts.KEY, ""))) back = true;
             }
             r.check("a gate guard that is killed is replaced (and the gate still has exactly two)", back && total == 2,
                     "post " + i + " of " + entry.get().key + ", the visitor stands "
@@ -730,9 +730,9 @@ public final class SocietySelfTest {
         com.skycraft.society.entity.NpcEntity sampleNpc = Npcs.create(level, new BlockPos(0, 80, 0), sampleEntry.npcRole());
         if (sampleNpc != null) {
             SocietyResidents.applyToNpc(sampleNpc, sampleEntry);
-            String appliedId = sampleNpc.getPersistentData().getString(SocietyResidents.RESIDENT_ID_KEY);
-            String appliedWhy = sampleNpc.getPersistentData().getString(Housing.WHY_KEY);
-            String appliedGreet = sampleNpc.getPersistentData().getString(SocietyResidents.GREET_KEY);
+            String appliedId = sampleNpc.getPersistentData().getStringOr(SocietyResidents.RESIDENT_ID_KEY, "");
+            String appliedWhy = sampleNpc.getPersistentData().getStringOr(Housing.WHY_KEY, "");
+            String appliedGreet = sampleNpc.getPersistentData().getStringOr(SocietyResidents.GREET_KEY, "");
             r.check("applying authored resident sets custom name, SkycraftResidentId, SkycraftWhy, and SkycraftGreet on NPC",
                     sampleEntry.id().equals(appliedId) && !appliedWhy.isBlank() && !appliedGreet.isBlank()
                             && sampleNpc.getName().getString().contains(sampleEntry.name()),

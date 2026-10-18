@@ -10,7 +10,7 @@ import com.skycraft.society.Housing;
 import com.skycraft.society.NpcRole;
 import com.skycraft.society.Settlers;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.npc.AbstractVillager;
+import net.minecraft.world.entity.npc.villager.AbstractVillager;
 import org.jetbrains.annotations.Nullable;
 import com.skycraft.society.Npcs;
 import com.skycraft.society.entity.NpcEntity;
@@ -27,10 +27,10 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.MobSpawnType;
-import net.minecraft.world.entity.npc.Villager;
-import net.minecraft.world.entity.npc.VillagerProfession;
-import net.minecraft.world.entity.npc.VillagerType;
+import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.world.entity.npc.villager.Villager;
+import net.minecraft.world.entity.npc.villager.VillagerProfession;
+import net.minecraft.world.entity.npc.villager.VillagerType;
 
 import java.util.EnumMap;
 import java.util.List;
@@ -69,21 +69,18 @@ public final class SettlementPopulation {
         return 2;
     }
 
-    /** The housing plan per settlement, recomputed when more of its anchors have been recorded. */
-    private static final Map<String, Housing.Plan> PLANS = new java.util.HashMap<>();
-    private static final Map<String, Integer> PLAN_SIZE = new java.util.HashMap<>();
+    /** Entry identity isolates saves; an exact immutable snapshot detects replacements as well as appends. */
+    private record CachedHousing(List<Anchor> anchors, int tier, Housing.Plan plan) {}
+    private static final Map<SettlementAnchors.Entry, CachedHousing> PLANS = new java.util.WeakHashMap<>();
 
-    /** The housing model of a recorded settlement (cached until its anchor list grows). */
-    public static Housing.Plan housing(SettlementAnchors.Entry e) {
-        int size = e.anchors().size();
-        Integer have = PLAN_SIZE.get(e.key);
-        Housing.Plan plan = PLANS.get(e.key);
-        if (plan == null || have == null || have != size) {
-            plan = Housing.plan(e.key, e.anchors(), tier(e));
-            PLANS.put(e.key, plan);
-            PLAN_SIZE.put(e.key, size);
+    public static synchronized Housing.Plan housing(SettlementAnchors.Entry e) {
+        int tier = tier(e);
+        CachedHousing cached = PLANS.get(e);
+        if (cached == null || cached.tier != tier || !cached.anchors.equals(e.anchors)) {
+            cached = new CachedHousing(List.copyOf(e.anchors), tier, Housing.plan(e.key, e.anchors, tier));
+            PLANS.put(e, cached);
         }
-        return plan;
+        return cached.plan;
     }
 
     /**
@@ -313,7 +310,7 @@ public final class SettlementPopulation {
                         && (x instanceof NpcEntity || x instanceof AbstractVillager || x instanceof GuardEntity))) {
             CompoundTag pd = l.getPersistentData();
             String job = ruinedHelgen
-                    && !pd.getBoolean(com.skycraft.fire.aftermath.HelgenFolk.CART) && !(l instanceof GuardEntity)
+                    && !pd.getBooleanOr(com.skycraft.fire.aftermath.HelgenFolk.CART, false) && !(l instanceof GuardEntity)
                     ? "survivor" : res.job();
             pd.putString(Housing.JOB_KEY, job);
             pd.putString(Housing.SLOT_KEY, slot);
@@ -419,7 +416,7 @@ public final class SettlementPopulation {
                                 || com.skycraft.society.NpcPlacement.isFurnitureHazard(level, p)) continue;
                         boolean crowded = !level.getEntitiesOfClass(net.minecraft.world.entity.LivingEntity.class,
                                 new net.minecraft.world.phys.AABB(p).inflate(SPAWN_GAP),
-                                l -> l.isAlive() && (l instanceof NpcEntity || l instanceof net.minecraft.world.entity.npc.AbstractVillager
+                                l -> l.isAlive() && (l instanceof NpcEntity || l instanceof net.minecraft.world.entity.npc.villager.AbstractVillager
                                         || l instanceof GuardEntity)).isEmpty();
                         if (!crowded) return p;
                     }
@@ -471,13 +468,13 @@ public final class SettlementPopulation {
     static boolean guard(ServerLevel level, BlockPos at) {
         at = freeSpot(level, at);
         if (at == null) return false;
-        GuardEntity g = ModEntities.GUARD.get().create(level);
+        GuardEntity g = ModEntities.GUARD.get().create(level, net.minecraft.world.entity.EntitySpawnReason.STRUCTURE);
         if (g == null) return false;
-        g.moveTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, level.getRandom().nextFloat() * 360f, 0);
+        g.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, level.getRandom().nextFloat() * 360f, 0);
         // only a scripted garrison (Helgen's soldiers) is placed from guard anchors now: the watch is society.GuardWatch's
         g.getPersistentData().putBoolean(com.skycraft.society.GuardWatch.SCRIPTED, true);
         g.setHome(at);
-        g.finalizeSpawn(level, level.getCurrentDifficultyAt(at), MobSpawnType.EVENT, null, null);
+        g.finalizeSpawn(level, level.getCurrentDifficultyAt(at), EntitySpawnReason.EVENT, null);
         g.setPersistenceRequired();
         return level.addFreshEntity(g);
     }
@@ -487,11 +484,11 @@ public final class SettlementPopulation {
      * are cancelled and replaced by {@link com.skycraft.society.VillagerConversion}, which made a failed
      * {@code addFreshEntity} look like "not spawned yet" and turned every retry of an anchor into one more resident.
      */
-    static NpcEntity merchant(ServerLevel level, BlockPos at, VillagerProfession prof, String pool, String nameKey) {
+    static NpcEntity merchant(ServerLevel level, BlockPos at, net.minecraft.resources.ResourceKey<VillagerProfession> prof, String pool, String nameKey) {
         return merchant(level, at, prof, pool, nameKey, null);
     }
 
-    static NpcEntity merchant(ServerLevel level, BlockPos at, VillagerProfession prof, String pool, String nameKey,
+    static NpcEntity merchant(ServerLevel level, BlockPos at, net.minecraft.resources.ResourceKey<VillagerProfession> prof, String pool, String nameKey,
                               @Nullable String authoredName, String... morePools) {
         at = freeSpot(level, at);
         if (at == null) return null;
@@ -504,7 +501,7 @@ public final class SettlementPopulation {
                 : firstName(npc.race(), npc.isFemale(), level.getRandom());
         npc.setCustomName(Component.translatable(nameKey, chosenName));
         CompoundTag pd = npc.getPersistentData();
-        var key = net.minecraftforge.registries.ForgeRegistries.VILLAGER_PROFESSIONS.getKey(prof);
+        var key = prof.identifier();
         if (key != null) pd.putString(Npcs.PROFESSION_KEY, key.toString());
         CompoundTag shop = new CompoundTag();
         ListTag pools = new ListTag();

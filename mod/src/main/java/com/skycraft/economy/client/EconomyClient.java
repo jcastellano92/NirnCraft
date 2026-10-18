@@ -12,22 +12,22 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.event.entity.player.ItemTooltipEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 /** Client side of the economy: packet handlers and the item value tooltip line. */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
 public final class EconomyClient {
     private EconomyClient() {}
 
     public static void handleBarterState(EconomyPackets.BarterState state) {
         Minecraft mc = Minecraft.getInstance();
-        if (mc.screen instanceof BarterScreen screen && screen.entityId() == state.entityId()) {
+        if (mc.gui.screen() instanceof BarterScreen screen && screen.entityId() == state.entityId()) {
             screen.update(state);
         } else if (state.open()) {
-            mc.setScreen(new BarterScreen(state));
+            mc.gui.setScreen(new BarterScreen(state));
         }
     }
 

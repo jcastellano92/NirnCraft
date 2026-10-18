@@ -1,12 +1,12 @@
 package com.skycraft.fire;
 
 import com.skycraft.Skycraft;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.registries.DeferredRegister;
+import net.minecraft.core.registries.BuiltInRegistries;
+import java.util.function.Supplier;
 
 /**
  * Sound events of the fire module: the Helgen aftermath score and the quiet ambience of a burnt town (fire crackle,
@@ -14,21 +14,21 @@ import net.minecraftforge.registries.RegistryObject;
  * {@code tools/music/sound_catalog.py}; every name here must exist there ({@code --check}).
  */
 public final class FireSounds {
-    public static final DeferredRegister<SoundEvent> SOUNDS = DeferredRegister.create(ForgeRegistries.SOUND_EVENTS, Skycraft.MODID);
+    public static final DeferredRegister<SoundEvent> SOUNDS = DeferredRegister.create(BuiltInRegistries.SOUND_EVENT, Skycraft.MODID);
 
     /** The mournful, tense piece that plays inside the footprint of a place that has just been attacked. */
-    public static final RegistryObject<SoundEvent> MUSIC_HELGEN_AFTERMATH = register("music.helgen_aftermath");
-    public static final RegistryObject<SoundEvent> FIRE_CRACKLE = register("ambient.fire_crackle");
-    public static final RegistryObject<SoundEvent> FIRE_ROAR = register("ambient.fire_roar");
-    public static final RegistryObject<SoundEvent> TIMBER_CREAK = register("ambient.timber_creak");
-    public static final RegistryObject<SoundEvent> TIMBER_COLLAPSE = register("ambient.timber_collapse");
-    public static final RegistryObject<SoundEvent> SOBBING = register("ambient.sobbing");
-    public static final RegistryObject<SoundEvent> MOURNING = register("ambient.mourning");
+    public static final Supplier<SoundEvent> MUSIC_HELGEN_AFTERMATH = register("music.helgen_aftermath");
+    public static final Supplier<SoundEvent> FIRE_CRACKLE = register("ambient.fire_crackle");
+    public static final Supplier<SoundEvent> FIRE_ROAR = register("ambient.fire_roar");
+    public static final Supplier<SoundEvent> TIMBER_CREAK = register("ambient.timber_creak");
+    public static final Supplier<SoundEvent> TIMBER_COLLAPSE = register("ambient.timber_collapse");
+    public static final Supplier<SoundEvent> SOBBING = register("ambient.sobbing");
+    public static final Supplier<SoundEvent> MOURNING = register("ambient.mourning");
 
     private FireSounds() {}
 
-    private static RegistryObject<SoundEvent> register(String name) {
-        return SOUNDS.register(name, () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(Skycraft.MODID, name)));
+    private static Supplier<SoundEvent> register(String name) {
+        return SOUNDS.register(name, () -> SoundEvent.createVariableRangeEvent(Identifier.fromNamespaceAndPath(Skycraft.MODID, name)));
     }
 
     static void init(IEventBus modBus) {

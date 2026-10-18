@@ -158,7 +158,7 @@ public class HomesteadClaim {
     }
 
     public boolean isInside(Level level, BlockPos pos) {
-        if (!level.dimension().location().toString().equals(dimension)) return false;
+        if (!level.dimension().identifier().toString().equals(dimension)) return false;
         int dx = pos.getX() - center.getX();
         int dz = pos.getZ() - center.getZ();
         if (dx * dx + dz * dz > radius * radius) return false;
@@ -166,7 +166,7 @@ public class HomesteadClaim {
     }
 
     public boolean isHorizontallyInside(Level level, BlockPos pos) {
-        if (!level.dimension().location().toString().equals(dimension)) return false;
+        if (!level.dimension().identifier().toString().equals(dimension)) return false;
         int dx = pos.getX() - center.getX();
         int dz = pos.getZ() - center.getZ();
         return dx * dx + dz * dz <= radius * radius;
@@ -379,9 +379,9 @@ public class HomesteadClaim {
 
     public CompoundTag save() {
         CompoundTag tag = new CompoundTag();
-        tag.putUUID("owner", ownerId);
+        tag.store("owner", net.minecraft.core.UUIDUtil.CODEC,  ownerId);
         tag.putString("name", ownerName);
-        tag.put("center", NbtUtils.writeBlockPos(center));
+        tag.put("center", com.skycraft.platform.NbtPositions.write(center));
         tag.putString("dim", dimension);
         tag.putInt("radius", radius);
         tag.putInt("minDepth", minDepth);
@@ -395,10 +395,10 @@ public class HomesteadClaim {
         ListTag builtList = new ListTag();
         for (String b : built) builtList.add(StringTag.valueOf(b));
         tag.put("built", builtList);
-        if (steward != null) tag.putUUID("steward", steward);
+        if (steward != null) tag.store("steward", net.minecraft.core.UUIDUtil.CODEC,  steward);
         tag.putString("stewardName", stewardName);
         ListTag bedList = new ListTag();
-        for (BlockPos b : beds) bedList.add(NbtUtils.writeBlockPos(b));
+        for (BlockPos b : beds) bedList.add(com.skycraft.platform.NbtPositions.write(b));
         tag.put("beds", bedList);
         tag.putInt("childBeds", childBeds);
         tag.putInt("stationPerm", stationPerm);
@@ -418,34 +418,34 @@ public class HomesteadClaim {
     }
 
     public static HomesteadClaim load(CompoundTag tag) {
-        UUID owner = tag.getUUID("owner");
-        String name = tag.getString("name");
-        BlockPos center = NbtUtils.readBlockPos(tag.getCompound("center"));
-        String dim = tag.getString("dim");
-        int rad = tag.contains("radius") ? tag.getInt("radius") : DEFAULT_RADIUS;
-        int depth = tag.contains("minDepth") ? tag.getInt("minDepth") : DEFAULT_MIN_DEPTH;
-        int height = tag.contains("maxHeight") ? tag.getInt("maxHeight") : DEFAULT_MAX_HEIGHT;
-        int door = tag.getInt("doorPerm");
-        int cont = tag.getInt("contPerm");
-        int build = tag.getInt("buildPerm");
+        UUID owner = tag.read("owner", net.minecraft.core.UUIDUtil.CODEC).orElseThrow();
+        String name = tag.getStringOr("name","");
+        BlockPos center = com.skycraft.platform.NbtPositions.read(tag.getCompoundOrEmpty("center"));
+        String dim = tag.getStringOr("dim","");
+        int rad = tag.contains("radius") ? tag.getIntOr("radius",0) : DEFAULT_RADIUS;
+        int depth = tag.contains("minDepth") ? tag.getIntOr("minDepth",0) : DEFAULT_MIN_DEPTH;
+        int height = tag.contains("maxHeight") ? tag.getIntOr("maxHeight",0) : DEFAULT_MAX_HEIGHT;
+        int door = tag.getIntOr("doorPerm",0);
+        int cont = tag.getIntOr("contPerm",0);
+        int build = tag.getIntOr("buildPerm",0);
         HomesteadClaim claim = new HomesteadClaim(owner, name, center, dim, rad, depth, height, door, cont, build);
-        if (tag.contains("plot")) claim.plot = tag.getString("plot");
-        claim.purchased = tag.getBoolean("purchased");
-        if (tag.contains("facing")) claim.setFacing(Direction.from2DDataValue(tag.getInt("facing")));
-        ListTag builtList = tag.getList("built", Tag.TAG_STRING);
-        for (int i = 0; i < builtList.size(); i++) claim.built.add(builtList.getString(i));
-        if (tag.hasUUID("steward")) claim.steward = tag.getUUID("steward");
-        claim.stewardName = tag.getString("stewardName");
-        ListTag bedList = tag.getList("beds", Tag.TAG_COMPOUND);
-        for (int i = 0; i < bedList.size(); i++) claim.beds.add(NbtUtils.readBlockPos(bedList.getCompound(i)));
-        claim.childBeds = Math.min(claim.beds.size(), tag.getInt("childBeds"));
-        if (tag.contains("stationPerm")) claim.setStationPerm(tag.getInt("stationPerm"));
-        if (tag.contains("bedPerm")) claim.setBedPerm(tag.getInt("bedPerm"));
-        claim.name = tag.getString("homeName");
-        ListTag ov = tag.getList("overrides", Tag.TAG_COMPOUND);
+        if (tag.contains("plot")) claim.plot = tag.getStringOr("plot","");
+        claim.purchased = tag.getBooleanOr("purchased",false);
+        if (tag.contains("facing")) claim.setFacing(Direction.from2DDataValue(tag.getIntOr("facing",0)));
+        ListTag builtList = tag.getListOrEmpty("built");
+        for (int i = 0; i < builtList.size(); i++) claim.built.add(builtList.getStringOr(i, ""));
+        if (tag.read("steward", net.minecraft.core.UUIDUtil.CODEC).isPresent()) claim.steward = tag.read("steward", net.minecraft.core.UUIDUtil.CODEC).orElseThrow();
+        claim.stewardName = tag.getStringOr("stewardName","");
+        ListTag bedList = tag.getListOrEmpty("beds");
+        for (int i = 0; i < bedList.size(); i++) claim.beds.add(com.skycraft.platform.NbtPositions.read(bedList.getCompoundOrEmpty(i)));
+        claim.childBeds = Math.min(claim.beds.size(), tag.getIntOr("childBeds",0));
+        if (tag.contains("stationPerm")) claim.setStationPerm(tag.getIntOr("stationPerm",0));
+        if (tag.contains("bedPerm")) claim.setBedPerm(tag.getIntOr("bedPerm",0));
+        claim.name = tag.getStringOr("homeName","");
+        ListTag ov = tag.getListOrEmpty("overrides");
         for (int i = 0; i < ov.size(); i++) {
-            CompoundTag o = ov.getCompound(i);
-            claim.overrides.put(o.getLong("p"), Math.max(0, Math.min(PERM_PUBLIC, o.getInt("l"))));
+            CompoundTag o = ov.getCompoundOrEmpty(i);
+            claim.overrides.put(o.getLongOr("p",0L), Math.max(0, Math.min(PERM_PUBLIC, o.getIntOr("l",0))));
         }
         return claim;
     }

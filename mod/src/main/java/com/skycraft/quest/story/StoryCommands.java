@@ -60,7 +60,7 @@ public final class StoryCommands {
     }
 
     public static void register(CommandDispatcher<CommandSourceStack> d) {
-        d.register(Commands.literal("skycraft-quest").requires(s -> s.hasPermission(2))
+        d.register(Commands.literal("skycraft-quest").requires(s -> s.permissions().hasPermission(net.minecraft.server.permissions.Permissions.COMMANDS_GAMEMASTER))
                 .then(Commands.literal("stage").then(Commands.argument("quest", StringArgumentType.word()).suggests(StoryCommands::questIds)
                         .then(Commands.argument("n", IntegerArgumentType.integer(0, 64))
                                 .executes(c -> stage(c, false))
@@ -86,7 +86,7 @@ public final class StoryCommands {
                         }))
                         .then(Commands.literal("goto").executes(c -> {
                             ServerPlayer p = c.getSource().getPlayerOrException();
-                            BlockPos a = QuestNpcs.lastPos(p.server, StringArgumentType.getString(c, "id"));
+                            BlockPos a = QuestNpcs.lastPos(p.level().getServer(), StringArgumentType.getString(c, "id"));
                             if (a == null) return fail(c, "Unknown NPC or place.");
                             Story.teleportTo(p, a.getX(), a.getZ());
                             return 1;
@@ -182,7 +182,7 @@ public final class StoryCommands {
      */
     private static int selftestFlow(CommandContext<CommandSourceStack> c) {
         net.minecraft.server.MinecraftServer server = c.getSource().getServer();
-        ServerPlayer fake = net.minecraftforge.common.util.FakePlayerFactory.get(server.overworld(),
+        ServerPlayer fake = net.neoforged.neoforge.common.util.FakePlayerFactory.get(server.overworld(),
                 new com.mojang.authlib.GameProfile(java.util.UUID.nameUUIDFromBytes("skycraft-quest-selftest".getBytes()), "[QuestSelftest]"));
         String key = Quests.personalKey(fake.getUUID());
         com.skycraft.quest.QuestStore store = com.skycraft.quest.QuestStore.get(server);
@@ -248,7 +248,7 @@ public final class StoryCommands {
      */
     private static int selftest(CommandContext<CommandSourceStack> c) {
         net.minecraft.server.MinecraftServer server = c.getSource().getServer();
-        ServerPlayer fake = net.minecraftforge.common.util.FakePlayerFactory.getMinecraft(server.overworld());
+        ServerPlayer fake = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(server.overworld());
         List<String> problems = new ArrayList<>();
         int built = 0, objectives = 0, spawns = 0, fallbackSpawns = 0;
         for (StoryData.QuestDef def : StoryData.quests()) {
@@ -279,7 +279,7 @@ public final class StoryCommands {
                     String type = StoryData.str(s, "type", "");
                     if (type.startsWith("npc:")) {
                         if (com.skycraft.society.NpcRole.byId(type.substring(4)) == null) problems.add(def.id + ": unknown NPC role " + type);
-                    } else if (net.minecraft.world.entity.EntityType.byString(type).isEmpty()) {
+                    } else if (com.skycraft.worldgen.RegistryTypes.entity(type).isEmpty()) {
                         if (com.skycraft.quest.QuestSpawner.resolveType(type).isPresent()) fallbackSpawns++;
                         else if (!s.has("if")) problems.add(def.id + ": spawn " + type + " has no entity or fallback");
                     }
@@ -343,7 +343,7 @@ public final class StoryCommands {
         int n = IntegerArgumentType.getInteger(c, "n");
         if (StoryData.quest(id) == null) {
             // a non-story quest of the player: same jump on its objectives
-            Quests.Ref ref = Quests.find(p.server, p.getUUID(), id);
+            Quests.Ref ref = Quests.find(p.level().getServer(), p.getUUID(), id);
             if (ref == null) return fail(c, "Unknown quest " + id);
         }
         if (!Story.jumpTo(p, id, n)) return fail(c, "Couldn't set " + id + " to stage " + n);
@@ -367,7 +367,7 @@ public final class StoryCommands {
 
     private static int skip(CommandContext<CommandSourceStack> c, boolean hasPlayer) throws CommandSyntaxException {
         ServerPlayer p = target(c, hasPlayer);
-        Quests.Ref ref = Quests.find(p.server, p.getUUID(), StringArgumentType.getString(c, "quest"));
+        Quests.Ref ref = Quests.find(p.level().getServer(), p.getUUID(), StringArgumentType.getString(c, "quest"));
         if (ref == null || ref.quest().current() == null) return fail(c, "No such active quest.");
         ref.quest().current().data.putLong(Story.SKIP_AT, 1);
         return Story.skip(p, ref.quest().id) ? 1 : 0;

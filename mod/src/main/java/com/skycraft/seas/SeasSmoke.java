@@ -3,10 +3,10 @@ package com.skycraft.seas;
 import com.skycraft.Skycraft;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.server.ServerStartedEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+
+import net.neoforged.neoforge.event.server.ServerStartedEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 /**
  * Developer smoke test for a dedicated server ({@code -Dskycraft.seastest.server=true}): once started, it loads a
@@ -14,7 +14,7 @@ import net.minecraftforge.fml.common.Mod;
  * off Atmora) so the sea, garden, islet and coast features generate, logs the time each took, and stops the server.
  * Does nothing in normal play.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class SeasSmoke {
     private static final boolean ENABLED = Boolean.getBoolean("skycraft.seastest.server");
     private static final int[][] AREAS = {{-120, -2700}, {6980, 1080}, {-6120, 9380}, {-7320, 4380}, {-120, -5120}};
@@ -33,8 +33,8 @@ public final class SeasSmoke {
     }
 
     @SubscribeEvent
-    public static void onTick(TickEvent.ServerTickEvent event) {
-        if (!ENABLED || stage < 0 || event.phase != TickEvent.Phase.END) return;
+    public static void onTick(net.neoforged.neoforge.event.tick.ServerTickEvent.Post event) {
+        if (!ENABLED || stage < 0 || !(event instanceof net.neoforged.neoforge.event.tick.ServerTickEvent.Post)) return;
         if (--wait > 0) return;
         MinecraftServer server = event.getServer();
         ServerLevel level = server.overworld();

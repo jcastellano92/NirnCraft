@@ -1,0 +1,51 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:septim",
+          "weight": 1,
+          "modifier": {
+            "min": 18,
+            "max": 40,
+            "growth": 0.02,
+            "type": "skycraft:scaled_gold"
+          }
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:loot_table",
+          "weight": 3,
+          "value": "skycraft:parts/lockpicks"
+        },
+        {
+          "type": "minecraft:loot_table",
+          "weight": 4,
+          "value": "skycraft:parts/gems"
+        },
+        {
+          "type": "minecraft:loot_table",
+          "weight": 3,
+          "value": "skycraft:parts/soul_gems"
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:gold_ring",
+          "weight": 2,
+          "modifier": {
+            "tag": "skycraft:loot/trinkets",
+            "type": "skycraft:regional_tag"
+          }
+        }
+      ]
+    }
+  ],
+  "random_sequence": "skycraft:containers/lock_bonus/expert"
+}

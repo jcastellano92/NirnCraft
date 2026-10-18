@@ -6,7 +6,7 @@ import com.skycraft.creatures.client.rig.Anim;
 import com.skycraft.creatures.client.rig.CreatureDef;
 import com.skycraft.creatures.entity.anim.AnimSlot;
 import com.skycraft.creatures.entity.anim.AnimatedCreature;
-import net.minecraft.client.model.HierarchicalModel;
+import com.skycraft.client.PoseEntityModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.AnimationState;
@@ -30,7 +30,7 @@ import java.util.Map.Entry;
  * </ul>
  * Subclasses or the {@link #extra} hook add procedural touches (tail physics, glowing pulses, bone toggles).
  */
-public class RigModel<T extends LivingEntity> extends HierarchicalModel<T> {
+public class RigModel<T extends LivingEntity> extends PoseEntityModel<T> {
     /** Per-frame procedural hook, run after the keyframe animations. */
     @FunctionalInterface
     public interface Extra<T extends LivingEntity> {
@@ -52,6 +52,7 @@ public class RigModel<T extends LivingEntity> extends HierarchicalModel<T> {
     public float alpha = 1f;
 
     public RigModel(ModelPart meshRoot, CreatureDef def) {
+        super(meshRoot);
         this.meshRoot = meshRoot;
         this.def = def;
         index(meshRoot);
@@ -93,11 +94,6 @@ public class RigModel<T extends LivingEntity> extends HierarchicalModel<T> {
     public RigModel<T> withExtra(Extra<T> extra) {
         extras.add(extra);
         return this;
-    }
-
-    @Override
-    public ModelPart root() {
-        return meshRoot;
     }
 
     /** A bone by rig name, or null. */
@@ -169,9 +165,8 @@ public class RigModel<T extends LivingEntity> extends HierarchicalModel<T> {
                     BoundAnim a = slots[slot.ordinal()];
                     if (a == null) continue;
                     AnimationState state = ac.anims().state(slot);
-                    state.updateTime(ageInTicks, 1f);
                     if (!state.isStarted()) continue;
-                    float t = state.getAccumulatedTime() / 1000f;
+                    float t = state.getTimeInMillis(ageInTicks) / 1000f;
                     float len = a.length();
                     if (t > len) {
                         state.stop();
@@ -207,8 +202,4 @@ public class RigModel<T extends LivingEntity> extends HierarchicalModel<T> {
         if (idle != null) idle.apply(seconds, weight);
     }
 
-    @Override
-    public void renderToBuffer(PoseStack pose, VertexConsumer buffer, int light, int overlay, float r, float g, float b, float a) {
-        meshRoot.render(pose, buffer, light, overlay, r * tintR, g * tintG, b * tintB, a * alpha);
-    }
 }

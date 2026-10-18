@@ -10,10 +10,10 @@ import com.skycraft.worldplan.RoadPlan;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
-import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.event.server.ServerAboutToStartEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.neoforge.event.server.ServerAboutToStartEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.util.Locale;
 import java.util.Map;
@@ -25,7 +25,7 @@ import java.util.TreeMap;
  * (the nearest scene, with its reason and props), {@code list <anchor> [n]} (coordinates for renders) and
  * {@code verify} (plans live and compares byte for byte). Autorun task {@code sceneplan} = stats.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class ScenePlanCommands {
     private ScenePlanCommands() {}
 
@@ -35,6 +35,7 @@ public final class ScenePlanCommands {
             for (String line : stats(ScenePlan.get()).split("\n")) Skycraft.LOGGER.info("[sceneplan] {}", line);
             done.run();
         });
+        if (!com.skycraft.tamriel.terrain.TamrielSpawn.isTamriel(event.getServer())) return;
         Thread t = new Thread(() -> {
             try {
                 RoadPlan.warm();
@@ -98,7 +99,7 @@ public final class ScenePlanCommands {
     @SubscribeEvent
     public static void onCommands(RegisterCommandsEvent event) {
         CommandDispatcher<CommandSourceStack> d = event.getDispatcher();
-        d.register(Commands.literal("skycraft-sceneplan").requires(s -> s.hasPermission(2))
+        d.register(Commands.literal("skycraft-sceneplan").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
                 .then(Commands.literal("stats").executes(c -> {
                     String s = stats(ScenePlan.get());
                     for (String line : s.split("\n")) c.getSource().sendSuccess(() -> Component.literal(line), false);
@@ -117,7 +118,7 @@ public final class ScenePlanCommands {
                         .executes(c -> list(c.getSource(), StringArgumentType.getString(c, "anchor"), 10))
                         .then(Commands.argument("n", IntegerArgumentType.integer(1, 200))
                                 .executes(c -> list(c.getSource(), StringArgumentType.getString(c, "anchor"), IntegerArgumentType.getInteger(c, "n"))))))
-                .then(Commands.literal("verify").requires(s -> s.hasPermission(4)).executes(c -> {
+                .then(Commands.literal("verify").requires(Commands.hasPermission(Commands.LEVEL_OWNERS)).executes(c -> {
                     CommandSourceStack src = c.getSource();
                     Thread t = new Thread(() -> {
                         try {

@@ -11,13 +11,14 @@ import net.minecraft.world.entity.LivingEntity;
  * gauntlets model has forearm cubes on the arms, the helmet model only head cubes...), so every part is drawn whatever
  * visibility the armour layer copied from the vanilla slot rules (which would hide the gauntlets' arms).
  */
-public class SkyArmorModel extends HumanoidModel<LivingEntity> {
+public class SkyArmorModel extends HumanoidModel<net.minecraft.client.renderer.entity.state.HumanoidRenderState> {
     public SkyArmorModel(ModelPart root) {
         super(root);
     }
 
     @Override
-    public void renderToBuffer(PoseStack pose, VertexConsumer buffer, int light, int overlay, float r, float g, float b, float a) {
+    public void setupAnim(net.minecraft.client.renderer.entity.state.HumanoidRenderState state) {
+        super.setupAnim(state);
         head.visible = true;
         hat.visible = true;
         body.visible = true;
@@ -25,6 +26,5 @@ public class SkyArmorModel extends HumanoidModel<LivingEntity> {
         leftArm.visible = true;
         rightLeg.visible = true;
         leftLeg.visible = true;
-        super.renderToBuffer(pose, buffer, light, overlay, r, g, b, a);
     }
 }

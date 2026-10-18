@@ -1,25 +1,23 @@
 package com.skycraft.atmosphere.client;
 
 import com.mojang.blaze3d.platform.NativeImage;
-import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.platform.TextureUtil;
+import com.skycraft.render.client.DataTexture;
+import com.mojang.renderpearl.api.textures.GpuTexture;
 import com.skycraft.Skycraft;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.renderer.texture.SimpleTexture;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.phys.Vec3;
-import org.lwjgl.opengl.GL11;
 
 /** Small cache of Minecraft's propagated block light, for nearby illuminated mist.
  * Reads loaded chunks only; 256 probes per tick. A bounded walk up Minecraft's
  * propagated light gradient identifies the dominant emitter's colour. */
 final class FogRadianceTexture {
-    private static final ResourceLocation LOCATION = new ResourceLocation(Skycraft.MODID, "textures/environment/fog_radiance.png");
-    private static int uploadedId = -1;
+    private static final Identifier LOCATION = Identifier.fromNamespaceAndPath(Skycraft.MODID, "textures/environment/fog_radiance.png");
+    private static GpuTexture uploaded;
     private static final RoofShelterCache SHELTER = new RoofShelterCache();
     private static NativeImage image;
     private static int slice;
@@ -36,6 +34,7 @@ final class FogRadianceTexture {
     private FogRadianceTexture() {}
 
     static void tick(ClientLevel level, Vec3 camera) {
+        try(var uploadState=TextureUploadState.preserve()) {
         long began=System.nanoTime(); gradientReads=0;
         if(trackedLevel!=level) {
             trackedLevel=level;
@@ -47,13 +46,7 @@ final class FogRadianceTexture {
         }
         var manager = Minecraft.getInstance().getTextureManager();
         if (image == null) image = new NativeImage(128, 128, true);
-        // Update the original resource object; preserve cached Oculus sampler bindings.
-        var texture = manager.getTexture(LOCATION, null);
-        if (texture == null) { texture = new SimpleTexture(LOCATION); manager.register(LOCATION, texture); }
-        if (texture.getId() != uploadedId) {
-            uploadedId = texture.getId();
-            TextureUtil.prepareImage(uploadedId, 0, 128, 128);
-        }
+        uploaded = DataTexture.target(LOCATION, image);
         SHELTER.tick(level, camera);
         int cx = Mth.floor(camera.x / 4), cy = Mth.floor(camera.y / 4), cz = Mth.floor(camera.z / 4);
         int y = nearest(cy, slice);
@@ -78,20 +71,54 @@ final class FogRadianceTexture {
             display[index] = Mth.lerp(0.25f, display[index], target[index]);
             int light = Math.round(display[index] * 255);
             int px = (layer & 3) * 16 + x, pz = (layer >> 2) * 16 + z;
-            image.setPixelRGBA(px, pz, SHELTER.packed(px, pz) | light);
+            image.setPixelABGR(px, pz, SHELTER.packed(px, pz) | light);
             int rgb=0xFF000000;
             for(int channel=0;channel<3;channel++) {
                 tintDisplay[channel][index]=Mth.lerp(0.25f,tintDisplay[channel][index],tintTarget[channel][index]);
                 rgb|=Mth.clamp(Math.round(tintDisplay[channel][index]*255),0,255)<<(channel*8);
             }
-            image.setPixelRGBA(px+64,pz,rgb);
+            image.setPixelABGR(px+64,pz,rgb);
         }
         InteriorAtmosphere.write(image, level, camera);
-        GlStateManager._bindTexture(uploadedId);
-        image.upload(0, 0, 0, 0, 0, 128, 128, true, false, false, false);
-        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
-        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
+        image.setPixelABGR(0,75,(int)level.getGameTime());
+        image.setPixelABGR(1,75,0);
+        var policy=com.skycraft.atmosphere.DimensionMediaPolicy.of(level.dimension().identifier().toString());
+        image.setPixelABGR(2,75,policy.localMedia()?1:0);
+        float[] range=policy.terrestrialWeather()?new float[]{0,0}:
+                com.skycraft.realms.client.RealmsClient.localMediaRange(level);
+        int near=Mth.clamp(Math.round(range[0]*16),0,65535),far=Mth.clamp(Math.round(range[1]*16),0,65535);
+        image.setPixelABGR(3,75,near | far<<16);
+
+        DataTexture.write(LOCATION, image);
+
+
         updateNanos=System.nanoTime()-began;
+        }
+    }
+
+    static void renderClock(float partialTick) {
+        if(image==null || !currentTexture()) return;
+        try(var uploadState=TextureUploadState.preserve()) {
+        image.setPixelABGR(1,75,Mth.clamp(Math.round(partialTick*255),0,255));
+
+        DataTexture.writeRect(LOCATION, image, 1, 75, 1, 1);
+        }
+    }
+
+    static void clearLocalState() {
+        trackedLevel=null;
+        if(image==null) return;
+        for(int y=64;y<=75;y++) for(int x=0;x<64;x++) image.setPixelABGR(x,y,0);
+        if(!currentTexture()) return;
+        try(var uploadState=TextureUploadState.preserve()) {
+
+        DataTexture.writeRect(LOCATION, image, 0, 64, 64, 12);
+        }
+    }
+
+    private static boolean currentTexture() {
+        var texture=Minecraft.getInstance().getTextureManager().getTexture(LOCATION);
+        return DataTexture.current(LOCATION, uploaded);
     }
 
     private static int dominantColour(ClientLevel level,BlockPos origin) {

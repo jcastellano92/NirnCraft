@@ -2,7 +2,7 @@ package com.skycraft.fire;
 
 import com.skycraft.Skycraft;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
@@ -13,7 +13,7 @@ import net.minecraft.world.level.block.state.BlockState;
  * protection's fire handling) must skip these.
  */
 public final class PersistentFire {
-    public static final TagKey<Block> TAG = TagKey.create(Registries.BLOCK, new ResourceLocation(Skycraft.MODID, "persistent_fire"));
+    public static final TagKey<Block> TAG = TagKey.create(Registries.BLOCK, Identifier.fromNamespaceAndPath(Skycraft.MODID, "persistent_fire"));
 
     private PersistentFire() {}
 

@@ -5,18 +5,18 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.EntityJoinLevelEvent;
-import net.minecraftforge.event.entity.EntityMountEvent;
-import net.minecraftforge.event.entity.living.LivingAttackEvent;
-import net.minecraftforge.event.entity.living.LivingChangeTargetEvent;
-import net.minecraftforge.event.entity.living.LivingDamageEvent;
-import net.minecraftforge.event.entity.living.LivingDeathEvent;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+
+import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
+import net.neoforged.neoforge.event.entity.EntityMountEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.neoforge.event.entity.living.LivingChangeTargetEvent;
+import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
+import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 /**
  * Forge-bus glue of {@link MountCompanion}: an owned mount that would die lies down instead, a downed mount is not a
@@ -24,40 +24,40 @@ import net.minecraftforge.fml.common.Mod;
  * resolved at logout and load. Handlers run before the other mount and fauna handlers so that a death is turned into
  * going down before anything reacts to it.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class MountCompanionEvents {
     private MountCompanionEvents() {}
 
     @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer player)) return;
+    public static void onPlayerTick(net.neoforged.neoforge.event.tick.PlayerTickEvent.Post event) {
+        if (!(event instanceof net.neoforged.neoforge.event.tick.PlayerTickEvent.Post) || !(event.getEntity() instanceof ServerPlayer player)) return;
         MountCompanion.tick(player);
     }
 
     /** A blow on a downed mount does nothing (aimed or area); only an explicit kill gets through. */
     @SubscribeEvent(priority = EventPriority.HIGHEST)
-    public static void onAttack(LivingAttackEvent event) {
+    public static void onAttack(LivingIncomingDamageEvent event) {
         LivingEntity victim = event.getEntity();
-        if (victim.level().isClientSide || !MountCompanion.isDowned(victim)) return;
+        if (victim.level().isClientSide() || !MountCompanion.isDowned(victim)) return;
         if (event.getSource().is(net.minecraft.world.damagesource.DamageTypes.GENERIC_KILL)) return;
         event.setCanceled(true);
     }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
-    public static void onHurt(LivingHurtEvent event) {
+    public static void onHurt(com.skycraft.combat.BeforeArmorDamageEvent event) {
         LivingEntity victim = event.getEntity();
-        if (victim.level().isClientSide || !MountCompanion.isDowned(victim)) return;
+        if (victim.level().isClientSide() || !MountCompanion.isDowned(victim)) return;
         if (event.getSource().is(net.minecraft.world.damagesource.DamageTypes.GENERIC_KILL)) return;
         event.setCanceled(true);
     }
 
     /** The damage that would be the end: cancel it and lay the mount down with a sliver of health. */
     @SubscribeEvent(priority = EventPriority.HIGHEST)
-    public static void onDamage(LivingDamageEvent event) {
+    public static void onDamage(LivingDamageEvent.Pre event) {
         LivingEntity victim = event.getEntity();
-        if (victim.level().isClientSide || !(victim instanceof Mob mob) || !MountCompanion.mayDown(mob, event.getSource())) return;
-        if (event.getAmount() < mob.getHealth()) return;
-        event.setCanceled(true);
+        if (victim.level().isClientSide() || !(victim instanceof Mob mob) || !MountCompanion.mayDown(mob, event.getSource())) return;
+        if (event.getNewDamage() < mob.getHealth()) return;
+        event.setNewDamage(0f);
         MountCompanion.down(mob, mob.level().getGameTime(), MountCompanion.owner(mob));
     }
 
@@ -65,7 +65,7 @@ public final class MountCompanionEvents {
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void onDeath(LivingDeathEvent event) {
         LivingEntity victim = event.getEntity();
-        if (victim.level().isClientSide || !(victim instanceof Mob mob)) return;
+        if (victim.level().isClientSide() || !(victim instanceof Mob mob)) return;
         if (MountCompanion.isDowned(mob) && !event.getSource().is(net.minecraft.world.damagesource.DamageTypes.GENERIC_KILL)) {
             event.setCanceled(true); // already lying down: a second death call changes nothing
             return;
@@ -78,8 +78,8 @@ public final class MountCompanionEvents {
     /** Nothing takes a downed mount as its target, and a downed mob takes none. */
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void onChangeTarget(LivingChangeTargetEvent event) {
-        if (event.getEntity().level().isClientSide) return;
-        LivingEntity next = event.getNewTarget();
+        if (event.getEntity().level().isClientSide()) return;
+        LivingEntity next = event.getNewAboutToBeSetTarget();
         if (next != null && MountCompanion.isDowned(next) || next != null && MountCompanion.isDowned(event.getEntity())) {
             event.setCanceled(true);
         }

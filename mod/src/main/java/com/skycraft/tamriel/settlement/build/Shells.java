@@ -423,7 +423,7 @@ public final class Shells {
             }
         }
         c.set(cx, y + r + 1, cz, p.column);
-        c.set(cx, y + r + 2, cz, B.s(Blocks.LIGHTNING_ROD));
+        c.set(cx, y + r + 2, cz, B.s(com.skycraft.worldgen.VanillaBlocks.LIGHTNING_ROD));
     }
 
     /** Open lean-to over the first {@code width} columns (a smithy's forge yard). */
@@ -514,7 +514,7 @@ public final class Shells {
                 c.foundation(x, -1, z, p.foundation, 6);
             }
         }
-        BlockState[] cloth = {p.accent, B.s(Blocks.RED_WOOL), B.s(Blocks.YELLOW_WOOL), B.s(Blocks.ORANGE_WOOL)};
+        BlockState[] cloth = {p.accent, B.s(com.skycraft.worldgen.VanillaBlocks.RED_WOOL), B.s(com.skycraft.worldgen.VanillaBlocks.YELLOW_WOOL), B.s(com.skycraft.worldgen.VanillaBlocks.ORANGE_WOOL)};
         BlockState stripe = cloth[c.roll(0, 0, 0, 3, cloth.length)];
         for (int z = 0; z < d; z++) {
             for (int x = 0; x < w; x++) {
@@ -807,7 +807,7 @@ public final class Shells {
                 }
             }
             c.set(cx, sy + w + 2, cz, p.column);
-            c.set(cx, sy + w + 3, cz, p.name.equals("altmer") ? B.s(Blocks.AMETHYST_CLUSTER) : B.s(Blocks.LIGHTNING_ROD));
+            c.set(cx, sy + w + 3, cz, p.name.equals("altmer") ? B.s(Blocks.AMETHYST_CLUSTER) : B.s(com.skycraft.worldgen.VanillaBlocks.LIGHTNING_ROD));
         } else {
             // overhanging parapet deck
             for (int x = -1; x <= w; x++) {
@@ -926,7 +926,7 @@ public final class Shells {
         // finial
         int cx = (w - 1) / 2, cz = (d - 1) / 2;
         hipRoof(c, p, inset - 2, inset - 2, w - 1 - inset + 2, d - 1 - inset + 2, y0 + 1);
-        c.set(cx, y0 + Math.min(w, d) / 2 + 2, cz, B.s(Blocks.LIGHTNING_ROD));
+        c.set(cx, y0 + Math.min(w, d) / 2 + 2, cz, B.s(com.skycraft.worldgen.VanillaBlocks.LIGHTNING_ROD));
         door(c, p, cx, 0);
         // red lacquered gate posts in front (torii-like)
         for (int y = 1; y <= 4; y++) {

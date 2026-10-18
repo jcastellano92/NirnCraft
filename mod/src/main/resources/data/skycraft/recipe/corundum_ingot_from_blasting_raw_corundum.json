@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:blasting",
+  "category": "misc",
+  "group": "corundum_ingot",
+  "ingredient": "skycraft:raw_corundum",
+  "result": {
+    "id": "skycraft:corundum_ingot"
+  },
+  "experience": 0.7,
+  "cookingtime": 100
+}

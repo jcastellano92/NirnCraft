@@ -26,7 +26,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 DATA = ROOT / "mod" / "src" / "main" / "resources" / "data"
 AFFIX_DIR = ROOT / "mod" / "src" / "main" / "resources" / "skycraft" / "loot" / "affixes"
-LOOT = DATA / "skycraft" / "loot_tables"
+LOOT = DATA / "skycraft" / "loot_table"
 SK = "skycraft:"
 LEVELS = [1, 3, 6, 9, 12, 15, 18, 22, 27, 32, 36, 40, 46, 50, 55, 60]
 

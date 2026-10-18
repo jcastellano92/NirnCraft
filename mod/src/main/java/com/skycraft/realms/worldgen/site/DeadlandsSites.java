@@ -68,8 +68,8 @@ final class DeadlandsSites {
 
         @Override
         public Optional<RealmSites.Start> locate(Structure.GenerationContext ctx) {
-            int cx = Math.floorDiv(ctx.chunkPos().x, RealmLayout.DL_SPACING / 16);
-            int cz = Math.floorDiv(ctx.chunkPos().z, RealmLayout.DL_SPACING / 16);
+            int cx = Math.floorDiv(ctx.chunkPos().x(), RealmLayout.DL_SPACING / 16);
+            int cz = Math.floorDiv(ctx.chunkPos().z(), RealmLayout.DL_SPACING / 16);
             return Optional.of(new RealmSites.Start(RealmLayout.keepX(cx), RealmLayout.DL_KEEP_FLOOR, RealmLayout.keepZ(cz), 0, 2));
         }
 
@@ -123,7 +123,7 @@ final class DeadlandsSites {
                 for (int y0 = fy + 14; y0 < sf - 6; y0 += 16) {
                     double r = radius(y0) - 0.6;
                     int x = (int) Math.floor(kx + 0.5 + Math.cos(a) * r), z = (int) Math.floor(kz + 0.5 + Math.sin(a) * r);
-                    for (int y = y0; y < y0 + 4; y++) d.set(x, y, z, Blocks.RED_STAINED_GLASS.defaultBlockState());
+                    for (int y = y0; y < y0 + 4; y++) d.set(x, y, z, com.skycraft.worldgen.VanillaBlocks.RED_STAINED_GLASS.defaultBlockState());
                 }
             }
             // the spiral ramp and the updraft shaft
@@ -188,9 +188,8 @@ final class DeadlandsSites {
                 m.getPersistentData().putBoolean("skycraft_sigil_keeper", true);
                 var hp = m.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH);
                 if (hp != null) {
-                    hp.addPermanentModifier(new net.minecraft.world.entity.ai.attributes.AttributeModifier(
-                            java.util.UUID.fromString("5a1d9c3e-4b7f-4e21-9a3d-2f6c8e1b7d40"), "Sigil Keeper", 1.5,
-                            net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.MULTIPLY_BASE));
+                    hp.addPermanentModifier(new net.minecraft.world.entity.ai.attributes.AttributeModifier(net.minecraft.resources.Identifier.fromNamespaceAndPath("skycraft", "legacy/5a1d9c3e-4b7f-4e21-9a3d-2f6c8e1b7d40"), 1.5,
+                            net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADD_MULTIPLIED_BASE));
                     m.setHealth(m.getMaxHealth());
                 }
             });
@@ -250,7 +249,7 @@ final class DeadlandsSites {
     }
 
     /** A round spire with a door, a cone roof and a chest inside. */
-    static void spire(Draw d, Painter p, int cx, int fy, int cz, double r, int h, Direction door, net.minecraft.resources.ResourceLocation loot) {
+    static void spire(Draw d, Painter p, int cx, int fy, int cz, double r, int h, Direction door, net.minecraft.resources.Identifier loot) {
         d.footing(cx, cz, r + 1, fy, 70, rock());
         d.cylinder(cx, cz, r + 1, fy, fy, Gates.daedric());
         d.tube(cx, cz, r, r - 1.2, fy + 1, fy + h, glyphBand(Gates.daedric(), 7));

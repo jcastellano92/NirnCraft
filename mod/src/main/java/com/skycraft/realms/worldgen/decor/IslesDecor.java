@@ -117,7 +117,7 @@ final class IslesDecor {
         int height = 5 + s * 2 + random.nextInt(4);
         BlockState crystal = BiomeBlocks.CRYSTAL_BLOCK.get().defaultBlockState();
         BlockState bud = DecorBase.cluster(BiomeBlocks.CRYSTAL_CLUSTER.get(), Direction.UP);
-        Block[] glass = {Blocks.LIGHT_BLUE_STAINED_GLASS, Blocks.CYAN_STAINED_GLASS, Blocks.PURPLE_STAINED_GLASS, Blocks.MAGENTA_STAINED_GLASS};
+        Block[] glass = {com.skycraft.worldgen.VanillaBlocks.LIGHT_BLUE_STAINED_GLASS, com.skycraft.worldgen.VanillaBlocks.CYAN_STAINED_GLASS, com.skycraft.worldgen.VanillaBlocks.PURPLE_STAINED_GLASS, com.skycraft.worldgen.VanillaBlocks.MAGENTA_STAINED_GLASS};
         double lean = random.nextDouble() * 1.5, a = random.nextDouble() * Math.PI * 2;
         double topX = x0 + 0.5 + Math.cos(a) * lean, topZ = z0 + 0.5 + Math.sin(a) * lean;
         k.line(x0 + 0.5, y0 - 1, z0 + 0.5, topX, y0 + height, topZ, 0.6 + s * 0.3, crystal, false);

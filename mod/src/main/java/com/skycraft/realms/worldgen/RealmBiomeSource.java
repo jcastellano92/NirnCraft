@@ -1,6 +1,8 @@
 package com.skycraft.realms.worldgen;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import net.minecraft.world.level.biome.BiomeResolver;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.skycraft.realms.Realm;
@@ -30,7 +32,7 @@ public class RealmBiomeSource extends BiomeSource {
         return r == null ? DataResult.error(() -> "Unknown realm " + s) : DataResult.success(r);
     }, r -> r.id);
 
-    public static final Codec<RealmBiomeSource> CODEC = RecordCodecBuilder.create(i -> i.group(
+    public static final MapCodec<RealmBiomeSource> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
             REALM.fieldOf("realm").forGetter(s -> s.realm),
             Codec.unboundedMap(Codec.STRING, Biome.CODEC).fieldOf("biomes").forGetter(s -> s.biomes)
     ).apply(i, i.stable(RealmBiomeSource::new)));
@@ -47,7 +49,7 @@ public class RealmBiomeSource extends BiomeSource {
     }
 
     @Override
-    protected Codec<? extends BiomeSource> codec() {
+    protected MapCodec<? extends BiomeSource> codec() {
         return CODEC;
     }
 
@@ -61,7 +63,10 @@ public class RealmBiomeSource extends BiomeSource {
         return b != null ? b : fallback;
     }
 
-    @Override
+    @Override public BiomeResolver createResolver(Climate.Sampler sampler) {
+        return (x, y, z) -> getNoiseBiome(x, y, z, sampler);
+    }
+
     public Holder<Biome> getNoiseBiome(int qx, int qy, int qz, Climate.Sampler sampler) {
         Climate.TargetPoint tp = sampler.sample(qx, qy, qz);
         return role(pick(realm, qx << 2, qy << 2, qz << 2, Climate.unquantizeCoord(tp.continentalness()),

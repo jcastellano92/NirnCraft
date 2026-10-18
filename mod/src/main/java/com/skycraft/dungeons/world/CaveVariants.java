@@ -119,8 +119,8 @@ public final class CaveVariants {
         if (s == null) return;
         boolean dark = room.theme() == Theme.VAMPIRE_LAIR || room.theme() == Theme.NECROMANCER_LAIR;
         BlockState slab = (dark ? Blocks.POLISHED_BLACKSTONE_SLAB : Blocks.STONE_BRICK_SLAB).defaultBlockState();
-        net.minecraft.world.level.block.Block candle = room.theme() == Theme.VAMPIRE_LAIR ? Blocks.RED_CANDLE
-                : room.theme() == Theme.NECROMANCER_LAIR ? Blocks.PURPLE_CANDLE : Blocks.CANDLE;
+        net.minecraft.world.level.block.Block candle = room.theme() == Theme.VAMPIRE_LAIR ? com.skycraft.worldgen.VanillaBlocks.RED_CANDLE
+                : room.theme() == Theme.NECROMANCER_LAIR ? com.skycraft.worldgen.VanillaBlocks.PURPLE_CANDLE : Blocks.CANDLE;
         for (int dx = -1; dx <= 1; dx++) {
             for (int dz = -1; dz <= 1; dz++) {
                 if (free(p, room, s[0] + dx, s[1] + dz)) p.setIfOpen(s[0] + dx, room.floor, s[1] + dz, slab);
@@ -198,7 +198,7 @@ public final class CaveVariants {
         p.feature("room:ritual_circle");
         int[] s = spot(p, room, 2170);
         if (s == null) return;
-        net.minecraft.world.level.block.Block candle = room.theme() == Theme.VAMPIRE_LAIR ? Blocks.RED_CANDLE : Blocks.PURPLE_CANDLE;
+        net.minecraft.world.level.block.Block candle = room.theme() == Theme.VAMPIRE_LAIR ? com.skycraft.worldgen.VanillaBlocks.RED_CANDLE : com.skycraft.worldgen.VanillaBlocks.PURPLE_CANDLE;
         for (int dx = -3; dx <= 3; dx++) {
             for (int dz = -3; dz <= 3; dz++) {
                 double d = Math.sqrt(dx * dx + dz * dz);

@@ -77,12 +77,12 @@ public final class RoadFeature {
     }
 
     static RoadFeature load(CompoundTag t) {
-        RoadFeature f = new RoadFeature(t.getInt("type"), t.getInt("x"), t.getInt("z"), t.getInt("road"));
-        f.variant = t.getInt("v");
-        ListTag list = t.getList("dests", Tag.TAG_COMPOUND);
+        RoadFeature f = new RoadFeature(t.getIntOr("type", 0), t.getIntOr("x", 0), t.getIntOr("z", 0), t.getIntOr("road", 0));
+        f.variant = t.getIntOr("v", 0);
+        ListTag list = t.getListOrEmpty("dests");
         for (int i = 0; i < list.size(); i++) {
-            CompoundTag dt = list.getCompound(i);
-            f.dests.add(new Dest(dt.getInt("s"), dt.getInt("d"), dt.getFloat("dx"), dt.getFloat("dz"), dt.getString("n")));
+            CompoundTag dt = list.getCompoundOrEmpty(i);
+            f.dests.add(new Dest(dt.getIntOr("s", 0), dt.getIntOr("d", 0), dt.getFloatOr("dx", 0f), dt.getFloatOr("dz", 0f), dt.getStringOr("n", "")));
         }
         return f;
     }

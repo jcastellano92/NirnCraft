@@ -2,10 +2,11 @@ package com.skycraft.roads;
 
 import com.skycraft.Skycraft;
 import com.skycraft.survival.Divine;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 
 /**
  * Wayside shrines of the Divines along the highways: which Divine a land honours. Nords favour Talos, Kynareth and
@@ -40,7 +41,7 @@ final class Wayshrines {
     /** The shrine block of a Divine (a lectern if the survival module's shrine is missing). */
     static Block block(int divine) {
         Divine d = divine >= 0 && divine < Divine.VALUES.length ? Divine.VALUES[divine] : Divine.TALOS;
-        Block b = ForgeRegistries.BLOCKS.getValue(new ResourceLocation(Skycraft.MODID, d.shrineId()));
+        Block b = BuiltInRegistries.BLOCK.getValue(Identifier.fromNamespaceAndPath(Skycraft.MODID, d.shrineId()));
         return b == null || b == Blocks.AIR ? Blocks.LECTERN : b;
     }
 }

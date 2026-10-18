@@ -17,12 +17,13 @@ public class CloakEffect extends MagicEffect {
     }
 
     @Override
-    public void applyEffectTick(LivingEntity entity, int amplifier) {
-        if (!entity.level().isClientSide && entity instanceof ServerPlayer p) DestructionSpells.cloakPulse(p, element);
-    }
+    public boolean applyEffectTick(net.minecraft.server.level.ServerLevel level, LivingEntity entity, int amplifier) {
+        if (!entity.level().isClientSide() && entity instanceof ServerPlayer p) DestructionSpells.cloakPulse(p, element);
+        return true;
+        }
 
     @Override
-    public boolean isDurationEffectTick(int duration, int amplifier) {
+    public boolean shouldApplyEffectTickThisTick(int duration, int amplifier) {
         return duration % 10 == 0;
     }
 }

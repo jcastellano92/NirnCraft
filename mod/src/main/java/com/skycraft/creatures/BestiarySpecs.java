@@ -20,8 +20,8 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobCategory;
-import net.minecraft.world.entity.animal.Rabbit;
-import net.minecraft.world.entity.animal.Sheep;
+import net.minecraft.world.entity.animal.rabbit.Rabbit;
+import net.minecraft.world.entity.animal.sheep.Sheep;
 import net.minecraft.world.entity.animal.goat.Goat;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ServerLevelAccessor;
@@ -37,7 +37,7 @@ final class BestiarySpecs {
     // ================================================================================================ helpers
 
     static boolean cold(ServerLevelAccessor level, BlockPos pos) {
-        return level.getBiome(pos).value().coldEnoughToSnow(pos) || level.getBiome(pos).value().getBaseTemperature() < 0.15f;
+        return level.getBiome(pos).value().coldEnoughToSnow(pos, level.getSeaLevel()) || level.getBiome(pos).value().getBaseTemperature() < 0.15f;
     }
 
     private static String id(LivingEntity e) {
@@ -64,8 +64,8 @@ final class BestiarySpecs {
             if (mob.tickCount % 20 != 0 || mob.getTarget() == null) return;
             for (LivingEntity e : mob.level().getEntitiesOfClass(LivingEntity.class, mob.getBoundingBox().inflate(radius),
                     e -> Attacks.validVictim(mob, e) && (e == mob.getTarget() || e instanceof Player))) {
-                e.hurt(MagicDamage.source(mob.level(), type, null, mob), damage);
-                if (type == MagicDamage.FROST) e.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 40, 0), mob);
+                com.skycraft.platform.Effects.hurt(e, MagicDamage.source(mob.level(), type, null, mob), damage);
+                if (type == MagicDamage.FROST) e.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.SLOWNESS), 40, 0), mob);
             }
         };
     }
@@ -100,7 +100,7 @@ final class BestiarySpecs {
                 .prey(BestiarySpecs::smallGame)
                 .variants(2, (level, pos, r) -> cold(level, pos) ? 1 : 0, "", "ice")
                 .voice("wolf", 1.0f)
-                .step(() -> SoundEvents.WOLF_STEP);
+                .step(() -> SoundEvents.WOLF_STEP.value());
         s.category = MobCategory.MONSTER;
         s.aggroRange = 22;
         s.fleeBelow = 0.2f;
@@ -265,7 +265,7 @@ final class BestiarySpecs {
         s.onDeath = mob -> {
             mob.level().explode(mob, mob.getX(), mob.getY() + 1, mob.getZ(), 1.5f, true, net.minecraft.world.level.Level.ExplosionInteraction.NONE);
             for (LivingEntity e : mob.level().getEntitiesOfClass(LivingEntity.class, mob.getBoundingBox().inflate(3), e -> e != mob)) {
-                e.setSecondsOnFire(4);
+                e.igniteForSeconds(4);
             }
         };
         return s;

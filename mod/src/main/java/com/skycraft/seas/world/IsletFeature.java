@@ -7,9 +7,9 @@ import com.skycraft.tamriel.TamrielMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
-import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
+import com.skycraft.worldgen.ConfiguredFeature;
+import com.skycraft.worldgen.FeaturePlaceContext;
+import com.skycraft.worldgen.NoneFeatureConfiguration;
 
 /**
  * Small islands raised from the shallows with something on them ({@link IslandSites}): a lighthouse and its keeper,
@@ -17,7 +17,7 @@ import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConf
  * hermit's hut, a wreck cast up on a sandbar, or (in the Sea of Ghosts) an ice floe with horkers and seals. Placed in
  * the sea biomes by {@code skycraft:seas_islets}.
  */
-public class IsletFeature extends Feature<NoneFeatureConfiguration> {
+public class IsletFeature extends ConfiguredFeature<NoneFeatureConfiguration> {
     public enum Kind { LIGHTHOUSE, PIRATE_COVE, TIDAL_CAVE, ROOKERY, SEA_STACK, HERMIT, WRECK, ICE_FLOE }
 
     /** Sites placed since start (logged by the developer smoke test). */

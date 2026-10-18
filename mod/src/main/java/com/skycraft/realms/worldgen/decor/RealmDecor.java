@@ -5,9 +5,9 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.WorldGenLevel;
-import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
-import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
+import com.skycraft.worldgen.ConfiguredFeature;
+import com.skycraft.worldgen.FeaturePlaceContext;
+import com.skycraft.worldgen.FeatureConfiguration;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;
@@ -21,7 +21,7 @@ import java.util.Map;
  *
  * <pre>{@code {"type": "skycraft:realm_decor", "config": {"kind": "giant_mushroom", "size": 1}}}</pre>
  */
-public class RealmDecor extends Feature<RealmDecor.Config> {
+public class RealmDecor extends ConfiguredFeature<RealmDecor.Config> {
     public record Config(String kind, int size) implements FeatureConfiguration {
         public static final Codec<Config> CODEC = RecordCodecBuilder.create(i -> i.group(
                 Codec.STRING.fieldOf("kind").forGetter(Config::kind),

@@ -13,9 +13,9 @@ import net.minecraft.world.level.block.DoorBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.event.entity.living.LivingDeathEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 import java.util.UUID;
 
 import java.util.ArrayList;
@@ -35,7 +35,7 @@ import java.util.Map;
  * run: {@link Crimes#findGuardWitness} with its sneak and darkness rules, line of sight needed); this class only moves
  * the guards, opens the gate and the front door for them, and sends guards to a noise ({@link #noise}).</p>
  */
-@Mod.EventBusSubscriber(modid = com.skycraft.Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = com.skycraft.Skycraft.MODID)
 final class JailPatrol {
     private JailPatrol() {}
 
@@ -59,7 +59,7 @@ final class JailPatrol {
     /** A guard of a jail died: his body waits to be found. */
     @SubscribeEvent
     public static void onDeath(LivingDeathEvent event) {
-        if (event.getEntity().level().isClientSide || !(event.getEntity() instanceof Mob m) || !m.getTags().contains(TAG)) return;
+        if (event.getEntity().level().isClientSide() || !(event.getEntity() instanceof Mob m) || !m.entityTags().contains(TAG)) return;
         long now = m.level().getGameTime();
         BODIES.values().removeIf(b -> now - b.time() > 20L * 60 * 10);
         BODIES.put(m.getUUID(), new Body(m.blockPosition(), now));
@@ -148,13 +148,13 @@ final class JailPatrol {
     /** Called every second for every player: the jail they are at (if any) gets its rounds. */
     static void tick(ServerPlayer player) {
         if (player.isSpectator()) return;
-        ServerLevel level = player.serverLevel();
+        ServerLevel level = player.level();
         long now = level.getGameTime();
         if (Jail.isJailDimension(level)) {
             String key = "dim#" + player.getUUID();
             if (LAST.getOrDefault(key, -1L) == now) return;
             LAST.put(key, now);
-            Jail.Site site = Jail.dimensionSite(player.server, level, player.getUUID());
+            Jail.Site site = Jail.dimensionSite(player.level().getServer(), level, player.getUUID());
             tickDim(level, site.min(), now / 20);
             return;
         }
@@ -274,16 +274,16 @@ final class JailPatrol {
     // ------------------------------------------------------------------ guards
 
     private static List<Mob> guardsIn(ServerLevel level, AABB box) {
-        return new ArrayList<>(level.getEntitiesOfClass(Mob.class, box, m -> m.isAlive() && m.getTags().contains(TAG)));
+        return new ArrayList<>(level.getEntitiesOfClass(Mob.class, box, m -> m.isAlive() && m.entityTags().contains(TAG)));
     }
 
     private static int indexOf(Mob m) {
-        return m.getPersistentData().contains(INDEX) ? m.getPersistentData().getInt(INDEX) : -1;
+        return m.getPersistentData().contains(INDEX) ? m.getPersistentData().getIntOr(INDEX, 0) : -1;
     }
 
     private static Mob spawn(ServerLevel level, BlockPos at, int idx) {
         try {
-            var guard = com.skycraft.creatures.ModEntities.GUARD.get().create(level);
+            var guard = com.skycraft.creatures.ModEntities.GUARD.get().create(level, net.minecraft.world.entity.EntitySpawnReason.EVENT);
             if (guard == null) return null;
             guard.setCustomName(Component.translatable("crime.skycraft.jail.npc.guard"));
             guard.setCustomNameVisible(true);
@@ -307,8 +307,8 @@ final class JailPatrol {
 
     /** Walks one guard to its stop (unless he is busy with a prisoner or a noise, or fighting). */
     private static void walk(Mob m, BlockPos target, long now) {
-        if (m.getTarget() != null || m.getPersistentData().getLong(BUSY) > now) return;
-        m.restrictTo(target, 3);
+        if (m.getTarget() != null || m.getPersistentData().getLongOr(BUSY, 0L) > now) return;
+        m.setHomeTo(target, 3);
         if (m.distanceToSqr(center(target)) > 2.5) {
             m.getNavigation().moveTo(target.getX() + 0.5, target.getY(), target.getZ() + 0.5, 1.0);
         }
@@ -328,7 +328,7 @@ final class JailPatrol {
      * blocks come to look, line of sight or not. They only see what the normal detection rules let them see.
      */
     static void noise(ServerPlayer player, double range) {
-        ServerLevel level = player.serverLevel();
+        ServerLevel level = player.level();
         long until = level.getGameTime() + 100;
         for (Mob g : level.getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(range), m -> m.isAlive() && Crimes.isGuard(m))) {
             if (g.getTarget() != null) continue;

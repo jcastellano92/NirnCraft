@@ -11,9 +11,9 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.biome.Biome;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -31,7 +31,7 @@ import java.util.Map;
  * <p>Lines are {@code society.skycraft.chat.<topic>.<variant>.<0..2>} (speaker A, B, A); {@link #TOPICS} holds the
  * variant count of each topic.</p>
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class Chatter {
     /** Topic -> number of variants (each variant is three lines). */
     static final Map<String, Integer> TOPICS = new HashMap<>();
@@ -190,12 +190,12 @@ public final class Chatter {
 
     @Nullable
     private static List<Component> buildResidentExchange(NpcEntity a, NpcEntity b, RandomSource r) {
-        String aBark = a.getPersistentData().getString(SocietyResidents.BARK_KEY);
-        String aTalk = a.getPersistentData().getString(SocietyResidents.TALK_KEY);
-        String aSecret = a.getPersistentData().getString(SocietyResidents.SECRET_KEY);
-        String bBark = b.getPersistentData().getString(SocietyResidents.BARK_KEY);
-        String bTalk = b.getPersistentData().getString(SocietyResidents.TALK_KEY);
-        String bSecret = b.getPersistentData().getString(SocietyResidents.SECRET_KEY);
+        String aBark = a.getPersistentData().getStringOr(SocietyResidents.BARK_KEY, "");
+        String aTalk = a.getPersistentData().getStringOr(SocietyResidents.TALK_KEY, "");
+        String aSecret = a.getPersistentData().getStringOr(SocietyResidents.SECRET_KEY, "");
+        String bBark = b.getPersistentData().getStringOr(SocietyResidents.BARK_KEY, "");
+        String bTalk = b.getPersistentData().getStringOr(SocietyResidents.TALK_KEY, "");
+        String bSecret = b.getPersistentData().getStringOr(SocietyResidents.SECRET_KEY, "");
 
         String line0 = !aBark.isBlank() ? aBark : aTalk;
         String line1 = !bTalk.isBlank() ? bTalk : (!bBark.isBlank() ? bBark : bSecret);
@@ -246,7 +246,7 @@ public final class Chatter {
         if (a.isChild()) return "children";
         BlockPos pos = a.blockPosition();
         if (level.isRaining() && level.canSeeSky(pos) && r.nextInt(3) == 0) {
-            Biome.Precipitation p = level.getBiome(pos).value().getPrecipitationAt(pos);
+            Biome.Precipitation p = level.getBiome(pos).value().getPrecipitationAt(pos, level.getSeaLevel());
             if (p == Biome.Precipitation.SNOW) return "snow";
             if (p == Biome.Precipitation.RAIN) return "rain";
         }
@@ -310,14 +310,14 @@ public final class Chatter {
     }
 
     @SubscribeEvent
-    public static void onServerStopped(net.minecraftforge.event.server.ServerStoppedEvent event) {
+    public static void onServerStopped(net.neoforged.neoforge.event.server.ServerStoppedEvent event) {
         ACTIVE.clear();
         SINGING.clear();
     }
 
     @SubscribeEvent
-    public static void onServerTick(TickEvent.ServerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || event.getServer().getTickCount() % 10 != 3) return;
+    public static void onServerTick(net.neoforged.neoforge.event.tick.ServerTickEvent.Post event) {
+        if (!(event instanceof net.neoforged.neoforge.event.tick.ServerTickEvent.Post) || event.getServer().getTickCount() % 10 != 3) return;
         if (!SINGING.isEmpty()) tickSongs();
         if (ACTIVE.isEmpty()) return;
         for (Iterator<Talk> it = ACTIVE.iterator(); it.hasNext(); ) {

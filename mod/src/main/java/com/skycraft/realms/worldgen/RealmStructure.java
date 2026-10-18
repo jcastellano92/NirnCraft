@@ -17,7 +17,7 @@ import java.util.Optional;
  * Realm sites list their realm's biomes; the Nirn entries list every overworld biome.
  */
 public class RealmStructure extends Structure {
-    public static final Codec<RealmStructure> CODEC = RecordCodecBuilder.create(i -> i.group(
+    public static final com.mojang.serialization.MapCodec<RealmStructure> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
             settingsCodec(i),
             Codec.STRING.fieldOf("site").forGetter(s -> s.site)
     ).apply(i, RealmStructure::new));

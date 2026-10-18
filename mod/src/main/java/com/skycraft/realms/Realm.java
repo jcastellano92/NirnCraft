@@ -4,7 +4,7 @@ import com.skycraft.Skycraft;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.Level;
 
 import javax.annotation.Nullable;
@@ -52,7 +52,7 @@ public enum Realm {
     }
 
     private static ResourceKey<Level> key(String path) {
-        return ResourceKey.create(Registries.DIMENSION, new ResourceLocation(Skycraft.MODID, path));
+        return ResourceKey.create(Registries.DIMENSION, Identifier.fromNamespaceAndPath(Skycraft.MODID, path));
     }
 
     /** {@code realm.skycraft.<id>}: "The Deadlands", "Sovngarde"... */
@@ -61,8 +61,8 @@ public enum Realm {
     }
 
     /** The dimension effects id the realm's dimension type uses ({@code skycraft:<id>}). */
-    public ResourceLocation effects() {
-        return new ResourceLocation(Skycraft.MODID, id);
+    public Identifier effects() {
+        return Identifier.fromNamespaceAndPath(Skycraft.MODID, id);
     }
 
     /** True for the four dimensions Skycraft adds (not the reused Nether and End). */
@@ -87,7 +87,7 @@ public enum Realm {
         if (id == null) return null;
         String s = id.toLowerCase(Locale.ROOT);
         if (s.contains(":")) {
-            for (Realm r : VALUES) if (r.dimension.location().toString().equals(s)) return r;
+            for (Realm r : VALUES) if (r.dimension.identifier().toString().equals(s)) return r;
             s = s.substring(s.indexOf(':') + 1);
         }
         for (Realm r : VALUES) if (r.id.equals(s)) return r;

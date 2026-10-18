@@ -9,17 +9,17 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraftforge.event.entity.living.LivingEvent;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.entity.living.LivingEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 /**
  * Draugr asleep in their alcoves and sarcophagi. A dormant mob has no AI (it lies still where the barrow put it)
  * until a player walks up to it (closer when sneaking) or anything hurts it; then it rises with a groan and a puff of
  * grave dust, and wakes the sleepers around it.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class DormantMobs {
     public static final String TAG = "skycraft_dormant";
     private static final double WAKE = 4.5;
@@ -36,11 +36,11 @@ public final class DormantMobs {
     }
 
     public static boolean isDormant(LivingEntity e) {
-        return e.getPersistentData().getBoolean(TAG);
+        return e.getPersistentData().getBooleanOr(TAG, false);
     }
 
     @SubscribeEvent
-    public static void onTick(LivingEvent.LivingTickEvent event) {
+    public static void onTick(net.neoforged.neoforge.event.tick.EntityTickEvent.Post event) {
         if (!(event.getEntity() instanceof Mob mob) || !(mob.level() instanceof ServerLevel level)) return;
         if ((mob.tickCount + mob.getId()) % 10 != 0 || !isDormant(mob)) return;
         for (ServerPlayer p : level.players()) {
@@ -60,7 +60,7 @@ public final class DormantMobs {
     }
 
     @SubscribeEvent
-    public static void onHurt(LivingHurtEvent event) {
+    public static void onHurt(com.skycraft.combat.BeforeArmorDamageEvent event) {
         if (event.getEntity() instanceof Mob mob && mob.level() instanceof ServerLevel level && isDormant(mob)) {
             wake(level, mob, true);
         }
@@ -76,7 +76,7 @@ public final class DormantMobs {
         if (!chain) return;
         // the dead stir together
         for (Mob other : level.getEntitiesOfClass(Mob.class, mob.getBoundingBox().inflate(CHAIN), DormantMobs::isDormant)) {
-            if (other != mob && level.random.nextInt(3) != 0) wake(level, other, false);
+            if (other != mob && level.getRandom().nextInt(3) != 0) wake(level, other, false);
         }
     }
 }

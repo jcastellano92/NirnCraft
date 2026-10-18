@@ -1,6 +1,6 @@
 package com.skycraft.guide;
 
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 import java.util.List;
 
@@ -9,26 +9,26 @@ import java.util.List;
  * {@code config/skycraft-guide-client.toml} (tutorial hints, per player).
  */
 public final class GuideConfig {
-    public static final ForgeConfigSpec COMMON_SPEC;
-    public static final ForgeConfigSpec CLIENT_SPEC;
+    public static final ModConfigSpec COMMON_SPEC;
+    public static final ModConfigSpec CLIENT_SPEC;
 
     // common
-    public static final ForgeConfigSpec.BooleanValue GIVE_HANDBOOK;
+    public static final ModConfigSpec.BooleanValue GIVE_HANDBOOK;
 
     // client
-    public static final ForgeConfigSpec.BooleanValue HINTS;
-    public static final ForgeConfigSpec.IntValue HINT_SECONDS;
-    public static final ForgeConfigSpec.ConfigValue<List<? extends String>> SEEN_HINTS;
+    public static final ModConfigSpec.BooleanValue HINTS;
+    public static final ModConfigSpec.IntValue HINT_SECONDS;
+    public static final ModConfigSpec.ConfigValue<List<? extends String>> SEEN_HINTS;
 
     static {
-        ForgeConfigSpec.Builder b = new ForgeConfigSpec.Builder();
+        ModConfigSpec.Builder b = new ModConfigSpec.Builder();
         b.push("handbook");
         GIVE_HANDBOOK = b.comment("Give every player a Traveler's Handbook the first time they join a world.")
                 .define("giveOnFirstJoin", true);
         b.pop();
         COMMON_SPEC = b.build();
 
-        ForgeConfigSpec.Builder c = new ForgeConfigSpec.Builder();
+        ModConfigSpec.Builder c = new ModConfigSpec.Builder();
         c.push("hints");
         HINTS = c.comment("Show Skyrim-style tutorial hints in the top-left corner the first time you do something",
                         "(sneak, pick a lock, learn a Word of Power, feel the cold...). Each hint is shown once.")

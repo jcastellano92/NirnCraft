@@ -38,15 +38,15 @@ public final class PlaceLoreEvents {
     /** Whether the player already has (or had) this note: handed to them, or read. */
     public static boolean hasFound(PlayerData d, String bookId) {
         if (LoreBookItem.hasRead(d, bookId)) return true;
-        ListTag found = d.module(MODULE).getList(FOUND, Tag.TAG_STRING);
-        for (int i = 0; i < found.size(); i++) if (found.getString(i).equals(bookId)) return true;
+        ListTag found = d.module(MODULE).getListOrEmpty(FOUND);
+        for (int i = 0; i < found.size(); i++) if (found.getStringOr(i, "").equals(bookId)) return true;
         return false;
     }
 
     public static void markFound(PlayerData d, String bookId) {
         if (hasFound(d, bookId)) return;
         CompoundTag mod = d.module(MODULE);
-        ListTag found = mod.getList(FOUND, Tag.TAG_STRING);
+        ListTag found = mod.getListOrEmpty(FOUND);
         found.add(StringTag.valueOf(bookId));
         mod.put(FOUND, found);
         d.markDirty();

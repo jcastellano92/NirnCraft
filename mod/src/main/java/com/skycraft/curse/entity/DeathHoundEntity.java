@@ -7,7 +7,6 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
@@ -19,7 +18,7 @@ import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.monster.Monster;
-import net.minecraft.world.entity.npc.AbstractVillager;
+import net.minecraft.world.entity.npc.villager.AbstractVillager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 
@@ -31,7 +30,7 @@ public class DeathHoundEntity extends CurseMonster {
     public DeathHoundEntity(EntityType<? extends DeathHoundEntity> type, Level level) {
         super(type, level);
         this.xpReward = 12;
-        this.setMaxUpStep(1.0f);
+        this.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.STEP_HEIGHT).setBaseValue(1.0f);
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -54,19 +53,19 @@ public class DeathHoundEntity extends CurseMonster {
         this.targetSelector.addGoal(1, new HurtByTargetGoal(this).setAlertOthers());
         this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, true));
         this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, NpcEntity.class, 10, true, false,
-                e -> e instanceof NpcEntity npc && npc.role() != com.skycraft.society.NpcRole.VAMPIRE));
+                (e, targetLevel263) -> e instanceof NpcEntity npc && npc.role() != com.skycraft.society.NpcRole.VAMPIRE));
         this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, AbstractVillager.class, true));
     }
 
     @Override
-    public boolean doHurtTarget(Entity target) {
+    public boolean doHurtTarget(net.minecraft.server.level.ServerLevel serverLevel263, Entity target) {
         playAnim(CurseAnims.Anim.ATTACK);
-        return super.doHurtTarget(target);
+        return super.doHurtTarget(serverLevel263, target);
     }
 
     @Override
-    public MobType getMobType() {
-        return MobType.UNDEAD;
+    public boolean isInvertedHealAndHarm() {
+        return true;
     }
 
     @Override

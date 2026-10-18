@@ -4,7 +4,7 @@ import com.skycraft.Skycraft;
 import com.skycraft.tamriel.settlement.kit.Palette;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CandleBlock;
 import net.minecraft.world.level.block.FlowerPotBlock;
@@ -68,8 +68,8 @@ public final class Props {
 
     // ------------------------------------------------------------------ loot tables (household loot: theft is a crime)
 
-    public static ResourceLocation loot(String name) {
-        return new ResourceLocation(Skycraft.MODID, "chests/village/" + name);
+    public static Identifier loot(String name) {
+        return Identifier.fromNamespaceAndPath(Skycraft.MODID, "chests/village/" + name);
     }
 
     private static String palName(Palette p) {
@@ -206,7 +206,7 @@ public final class Props {
                     }
                 }
                 if (roofY < 0) return;
-                for (int cy = y + 1; cy < roofY; cy++) c.set(x, cy, z, B.s(Blocks.CHAIN));
+                for (int cy = y + 1; cy < roofY; cy++) c.set(x, cy, z, B.s(com.skycraft.worldgen.VanillaBlocks.CHAIN));
             }
         }
         c.set(x, y, z, l);
@@ -297,7 +297,7 @@ public final class Props {
      * regional plaque, and sculpted double-sided trade symbol.
      */
     public static void shopSign(Canvas c, Palette p, String useId, int x, int y, int z, Direction facing, Component title, Component subtitle) {
-        ResourceLocation id = net.minecraftforge.registries.ForgeRegistries.BLOCKS.getKey(p.sign.getBlock());
+        Identifier id = net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(p.sign.getBlock());
         BlockState hanging = id == null ? B.s(Blocks.SPRUCE_WALL_HANGING_SIGN)
                 : B.id(id.toString().replace("_wall_sign", "_wall_hanging_sign"), Blocks.SPRUCE_WALL_HANGING_SIGN);
         Component emblem = Component.literal(tradeEmblem(useId));

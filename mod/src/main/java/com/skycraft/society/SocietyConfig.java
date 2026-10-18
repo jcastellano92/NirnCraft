@@ -1,49 +1,49 @@
 package com.skycraft.society;
 
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 /** Society configuration: config/skycraft-society.toml (COMMON, server-authoritative). */
 public final class SocietyConfig {
-    public static final ForgeConfigSpec SPEC;
+    public static final ModConfigSpec SPEC;
 
     // ------------------------------------------------------------------ npcs
-    public static final ForgeConfigSpec.BooleanValue POPULATE_SETTLEMENTS;
-    public static final ForgeConfigSpec.IntValue MAX_RESIDENTS;
-    public static final ForgeConfigSpec.BooleanValue CONVERT_VILLAGERS;
-    public static final ForgeConfigSpec.BooleanValue ROUTINES;
-    public static final ForgeConfigSpec.BooleanValue CHATTER;
-    public static final ForgeConfigSpec.IntValue SPOUSE_DAILY_GOLD;
+    public static final ModConfigSpec.BooleanValue POPULATE_SETTLEMENTS;
+    public static final ModConfigSpec.IntValue MAX_RESIDENTS;
+    public static final ModConfigSpec.BooleanValue CONVERT_VILLAGERS;
+    public static final ModConfigSpec.BooleanValue ROUTINES;
+    public static final ModConfigSpec.BooleanValue CHATTER;
+    public static final ModConfigSpec.IntValue SPOUSE_DAILY_GOLD;
 
     // ------------------------------------------------------------------ barks
-    public static final ForgeConfigSpec.BooleanValue AMBIENT_BARKS;
-    public static final ForgeConfigSpec.IntValue BARK_RANGE;
-    public static final ForgeConfigSpec.IntValue BARK_COOLDOWN_MIN;
-    public static final ForgeConfigSpec.IntValue BARK_COOLDOWN_MAX;
-    public static final ForgeConfigSpec.IntValue MAX_BARKS_PER_SECOND;
+    public static final ModConfigSpec.BooleanValue AMBIENT_BARKS;
+    public static final ModConfigSpec.IntValue BARK_RANGE;
+    public static final ModConfigSpec.IntValue BARK_COOLDOWN_MIN;
+    public static final ModConfigSpec.IntValue BARK_COOLDOWN_MAX;
+    public static final ModConfigSpec.IntValue MAX_BARKS_PER_SECOND;
 
     // ------------------------------------------------------------------ reputation
-    public static final ForgeConfigSpec.IntValue HOSTILE_THRESHOLD;
-    public static final ForgeConfigSpec.IntValue RECOVERY_MINUTES;
+    public static final ModConfigSpec.IntValue HOSTILE_THRESHOLD;
+    public static final ModConfigSpec.IntValue RECOVERY_MINUTES;
 
     // ------------------------------------------------------------------ hit squads
-    public static final ForgeConfigSpec.BooleanValue HIT_SQUADS;
-    public static final ForgeConfigSpec.IntValue SQUAD_MIN_MINUTES;
-    public static final ForgeConfigSpec.IntValue SQUAD_MAX_MINUTES;
+    public static final ModConfigSpec.BooleanValue HIT_SQUADS;
+    public static final ModConfigSpec.IntValue SQUAD_MIN_MINUTES;
+    public static final ModConfigSpec.IntValue SQUAD_MAX_MINUTES;
 
     // ------------------------------------------------------------------ encounters
-    public static final ForgeConfigSpec.BooleanValue ENCOUNTERS;
-    public static final ForgeConfigSpec.IntValue ENCOUNTER_MIN_SECONDS;
-    public static final ForgeConfigSpec.IntValue ENCOUNTER_MAX_SECONDS;
-    public static final ForgeConfigSpec.IntValue ENCOUNTER_CAP;
-    public static final ForgeConfigSpec.BooleanValue DRAGON_FLYBYS;
-    public static final ForgeConfigSpec.BooleanValue HOSTILE_ENCOUNTERS;
+    public static final ModConfigSpec.BooleanValue ENCOUNTERS;
+    public static final ModConfigSpec.IntValue ENCOUNTER_MIN_SECONDS;
+    public static final ModConfigSpec.IntValue ENCOUNTER_MAX_SECONDS;
+    public static final ModConfigSpec.IntValue ENCOUNTER_CAP;
+    public static final ModConfigSpec.BooleanValue DRAGON_FLYBYS;
+    public static final ModConfigSpec.BooleanValue HOSTILE_ENCOUNTERS;
 
     // ------------------------------------------------------------------ pvp / cosmetics
-    public static final ForgeConfigSpec.BooleanValue PVP_BOUNTY;
-    public static final ForgeConfigSpec.BooleanValue COSMETICS;
+    public static final ModConfigSpec.BooleanValue PVP_BOUNTY;
+    public static final ModConfigSpec.BooleanValue COSMETICS;
 
     static {
-        ForgeConfigSpec.Builder b = new ForgeConfigSpec.Builder();
+        ModConfigSpec.Builder b = new ModConfigSpec.Builder();
         b.push("npcs");
         POPULATE_SETTLEMENTS = b.comment("Give every detected settlement (roads module) a few townsfolk: innkeeper, bard, priest, workers,",
                         "and the first settlement of each hold its Jarl and housecarl.")

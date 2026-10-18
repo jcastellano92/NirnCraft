@@ -1,6 +1,6 @@
 package com.skycraft.dungeons.client;
 
-import net.minecraft.client.model.HierarchicalModel;
+import com.skycraft.client.PoseEntityModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.CubeListBuilder;
@@ -14,7 +14,7 @@ import net.minecraft.world.entity.Entity;
  * Dwarven spider: a riveted bronze body with a domed soul-gem housing, a lensed head and six jointed legs.
  * Texture 64x32 (see tools/textures/dungeons.py for the UV map).
  */
-public class DwarvenSpiderModel<T extends Entity> extends HierarchicalModel<T> {
+public class DwarvenSpiderModel<T extends Entity> extends PoseEntityModel<T> {
     private static final float[] LEG_Z = {-2.5f, 0.0f, 2.5f};
     private final ModelPart root;
     private final ModelPart body;
@@ -23,6 +23,7 @@ public class DwarvenSpiderModel<T extends Entity> extends HierarchicalModel<T> {
     private final ModelPart[] leftLegs = new ModelPart[3];
 
     public DwarvenSpiderModel(ModelPart root) {
+        super(root);
         this.root = root;
         this.body = root.getChild("body");
         this.head = root.getChild("head");
@@ -59,11 +60,6 @@ public class DwarvenSpiderModel<T extends Entity> extends HierarchicalModel<T> {
                     PartPose.offsetAndRotation(-5.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.85f));
         }
         return LayerDefinition.create(mesh, 64, 32);
-    }
-
-    @Override
-    public ModelPart root() {
-        return root;
     }
 
     @Override

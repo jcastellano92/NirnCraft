@@ -4,12 +4,12 @@ import com.skycraft.Skycraft;
 import com.skycraft.crime.Bounty;
 import com.skycraft.crime.Crimes;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.event.entity.living.LivingDeathEvent;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -20,7 +20,7 @@ import java.util.UUID;
  * murder (the Dark Brotherhood always counts it). Hitting back at someone who attacked you first is self-defense.
  * Party friendly fire is already blocked by the quest module (cancelled events are ignored here).
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class PvpRules {
     /** Self-defense window and assault throttle, in ticks (30 s). */
     private static final long WINDOW = 600;
@@ -57,14 +57,14 @@ public final class PvpRules {
         if (!SocietyConfig.PVP_BOUNTY.get() || attacker == victim || victim.isCreative() || victim.isSpectator()
                 || !Crimes.canCommitCrime(attacker) || Bounty.isHostile(victim)) return false;
         // Homestead grounds permit PvP without hold bounties
-        if (com.skycraft.homestead.HomesteadData.get(victim.server).getClaimAt(victim.level(), victim.blockPosition()) != null) {
+        if (com.skycraft.homestead.HomesteadData.get(victim.level().getServer()).getClaimAt(victim.level(), victim.blockPosition()) != null) {
             return false;
         }
         return true;
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
-    public static void onHurt(LivingHurtEvent event) {
+    public static void onHurt(com.skycraft.combat.BeforeArmorDamageEvent event) {
         if (event.isCanceled() || event.getAmount() <= 0) return;
         if (!(event.getEntity() instanceof ServerPlayer victim) || !(event.getSource().getEntity() instanceof ServerPlayer attacker)) return;
         if (attacker == victim) return;

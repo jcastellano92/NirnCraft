@@ -7,19 +7,19 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 /** {@code /skycraft-inventory} (operators): {@code pack} (what your overflow pack holds) and {@code selftest}. */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class InventoryCommands {
     private InventoryCommands() {}
 
     @SubscribeEvent
     public static void registerInventoryCommands(RegisterCommandsEvent event) {
         CommandDispatcher<CommandSourceStack> d = event.getDispatcher();
-        d.register(Commands.literal("skycraft-inventory").requires(s -> s.hasPermission(2))
+        d.register(Commands.literal("skycraft-inventory").requires(s -> s.permissions().hasPermission(net.minecraft.server.permissions.Permissions.COMMANDS_GAMEMASTER))
                 .then(Commands.literal("pack").executes(InventoryCommands::pack))
                 .then(Commands.literal("selftest").executes(InventoryCommands::selftest)));
     }

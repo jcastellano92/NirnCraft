@@ -1,13 +1,16 @@
 name = "Default Options"
-filename = "defaultoptions-forge-1.20.1-18.0.5.jar"
+filename = "defaultoptions-neoforge-26.3-26.3.0.1.jar"
 side = "client"
 
 [download]
-url = "https://cdn.modrinth.com/data/WEg59z5b/versions/AVz3mvZZ/defaultoptions-forge-1.20.1-18.0.5.jar"
+url = "https://cdn.modrinth.com/data/WEg59z5b/versions/peusN710/defaultoptions-neoforge-26.3-26.3.0.1.jar"
 hash-format = "sha512"
-hash = "703f2a710ab099fadaaeb96a02fd381ef8eda2f60bb80537c2e7855fc505bf36bbff3e1df216bc85fd60841bb548c3785314fdcef39d12c2ebfabb224b066e0d"
+hash = "79ed8c0326e5ff5b71638c5c8df23e6e9166c100ad0466c3e6f5e58ca447cd53cb8c70c13a9a7566b0ca2ca44575674caeb0a12e3d237d6a6bb7e541d0418c5a"
 
-[update]
 [update.modrinth]
 mod-id = "WEg59z5b"
-version = "AVz3mvZZ"
+version = "peusN710"
+
+[skycraft]
+minecraft = "26.3"
+loader = "neoforge"

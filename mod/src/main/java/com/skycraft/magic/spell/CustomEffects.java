@@ -17,8 +17,7 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobType;
-import net.minecraft.world.entity.animal.AbstractGolem;
+import net.minecraft.world.entity.animal.golem.AbstractGolem;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
@@ -101,8 +100,8 @@ public final class CustomEffects {
                 if (self || !Targeting.canHarm(p, t)) return false;
                 Element el = e.type().element;
                 float dmg = mag / CombatHandler.SKYRIM_SCALE * SpellMath.damageMult(p, el, t);
-                t.invulnerableTime = 0;
-                if (!t.hurt(SpellEffects.damage(p, el, null), dmg)) return false;
+                t.setInvulnerableTime(0);
+                if (!com.skycraft.platform.Effects.hurt(t, SpellEffects.damage(p, el, null), dmg)) return false;
                 SpellEffects.applyElement(p, el, t, dmg, false);
                 Vitals.markInCombat(p);
                 return true;
@@ -111,34 +110,34 @@ public final class CustomEffects {
                 return !self && RestorationSpells.sunDamage(p, t, mag / CombatHandler.SKYRIM_SCALE);
             }
             case RESTORE_HEALTH -> {
-                if (!self && (!Targeting.isHelpable(p, t) || t.getMobType() == MobType.UNDEAD || t instanceof AbstractGolem)) return false;
+                if (!self && (!Targeting.isHelpable(p, t) || com.skycraft.platform.Effects.isUndead(t) || t instanceof AbstractGolem)) return false;
                 return SpellEffects.heal(p, t, mag / CombatHandler.SKYRIM_SCALE * SpellMath.healMult(p)) > 0;
             }
             case TURN_UNDEAD -> {
-                if (t.getMobType() != MobType.UNDEAD || t.getType().is(CombatHandler.BOSSES) || t.getMaxHealth() > mag * SpellMath.undeadMult(p, t)) {
+                if (!com.skycraft.platform.Effects.isUndead(t) || t.getType().builtInRegistryHolder().is(CombatHandler.BOSSES) || t.getMaxHealth() > mag * SpellMath.undeadMult(p, t)) {
                     return false;
                 }
                 Illusion.applyFear(p.position(), t, ticks);
-                t.setSecondsOnFire(2);
+                t.igniteForSeconds(2);
                 return true;
             }
             case SHIELD -> {
                 if (!self) return false;
                 MobEffect effect = mag <= 4 ? MagicRegistry.OAKFLESH.get() : mag <= 6 ? MagicRegistry.STONEFLESH.get()
                         : mag <= 8 ? MagicRegistry.IRONFLESH.get() : MagicRegistry.EBONYFLESH.get();
-                boolean wasActive = p.hasEffect(effect);
+                boolean wasActive = p.hasEffect(com.skycraft.platform.Effects.holder(effect));
                 int rank = com.skycraft.perk.Perks.rank(p, "alteration.mage_armor");
                 if (rank > 0 && SpellEffects.wearsNoArmor(p)) mag *= rank >= 3 ? 3f : rank == 2 ? 2.5f : 2f;
-                p.addEffect(new MobEffectInstance(effect, ticks, Math.max(0, Math.round(mag) - 1), false, true, true));
+                p.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(effect), ticks, Math.max(0, Math.round(mag) - 1), false, true, true));
                 return SpellEffects.buffResult(p, wasActive) == Spell.Result.EFFECT;
             }
             case WATER_BREATHING -> {
-                t.addEffect(new MobEffectInstance(MobEffects.WATER_BREATHING, ticks, 0, false, true, true));
+                t.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.WATER_BREATHING), ticks, 0, false, true, true));
                 return t.isInWater();
             }
             case PARALYZE -> {
-                if (self || !Targeting.canHarm(p, t) || t.getType().is(CombatHandler.BOSSES)) return false;
-                t.addEffect(new MobEffectInstance(ModEffects.PARALYSIS.get(), ticks, 0));
+                if (self || !Targeting.canHarm(p, t) || t.getType().builtInRegistryHolder().is(CombatHandler.BOSSES)) return false;
+                t.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(ModEffects.PARALYSIS.get()), ticks, 0));
                 if (t instanceof Mob mob) mob.setTarget(null);
                 Vitals.markInCombat(p);
                 return true;
@@ -151,7 +150,7 @@ public final class CustomEffects {
                 int found = 0;
                 com.skycraft.magic.ActiveMagic.note(p, "custom_detect", net.minecraft.network.chat.Component.translatable("spell.skycraft.detect_life"), ticks, 0xB888FF);
                 for (LivingEntity o : Targeting.around(p, p.position(), mag, o -> o != p && !(o instanceof ArmorStand))) {
-                    o.addEffect(new MobEffectInstance(MobEffects.GLOWING, ticks, 0, false, false));
+                    o.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.GLOWING), ticks, 0, false, false));
                     found++;
                 }
                 return found > 0;
@@ -166,8 +165,8 @@ public final class CustomEffects {
                 String kind = e.type() == SpellEffectType.CALM ? "calm" : e.type() == SpellEffectType.FEAR ? "fear" : "frenzy";
                 int pvp = Illusion.onPlayer(p, t, kind);
                 if (pvp >= 0) return pvp > 0;
-                if (!(t instanceof Mob) || t.getType().is(CombatHandler.BOSSES) || t.getMaxHealth() > mag) return false;
-                boolean resistant = t.getMobType() == MobType.UNDEAD || t instanceof AbstractGolem;
+                if (!(t instanceof Mob) || t.getType().builtInRegistryHolder().is(CombatHandler.BOSSES) || t.getMaxHealth() > mag) return false;
+                boolean resistant = com.skycraft.platform.Effects.isUndead(t) || t instanceof AbstractGolem;
                 if (resistant && !com.skycraft.perk.Perks.has(p, "illusion.master_of_the_mind")) return false;
                 switch (kind) {
                     case "calm" -> Illusion.applyCalm(t, ticks);
@@ -178,14 +177,14 @@ public final class CustomEffects {
                 return true;
             }
             case INVISIBILITY -> {
-                boolean useful = !t.hasEffect(MobEffects.INVISIBILITY) && SpellEffects.hostilesNear(p, 24);
-                t.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, ticks, 0, false, false, true));
+                boolean useful = !t.hasEffect(com.skycraft.platform.Effects.holder(MobEffects.INVISIBILITY)) && SpellEffects.hostilesNear(p, 24);
+                t.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.INVISIBILITY), ticks, 0, false, false, true));
                 if (self) p.getPersistentData().putBoolean(Illusion.INVIS_FLAG, true);
                 return useful;
             }
             case MUFFLE -> {
-                boolean wasActive = t.hasEffect(MagicRegistry.MUFFLE.get());
-                t.addEffect(new MobEffectInstance(MagicRegistry.MUFFLE.get(), ticks, 0, false, true, true));
+                boolean wasActive = t.hasEffect(com.skycraft.platform.Effects.holder(MagicRegistry.MUFFLE.get()));
+                t.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MagicRegistry.MUFFLE.get()), ticks, 0, false, true, true));
                 return SpellEffects.buffResult(p, wasActive) == Spell.Result.EFFECT;
             }
             case DISPEL -> {
@@ -194,9 +193,9 @@ public final class CustomEffects {
             }
             case REFLECT_SPELL, SPELL_ABSORPTION -> {
                 MobEffect effect = e.type() == SpellEffectType.REFLECT_SPELL ? MagicRegistry.REFLECT_SPELL.get() : MagicRegistry.SPELL_ABSORPTION.get();
-                boolean wasActive = t.hasEffect(effect);
+                boolean wasActive = t.hasEffect(com.skycraft.platform.Effects.holder(effect));
                 int chance = Math.max(5, Math.min(80, Math.round(mag)));
-                t.addEffect(new MobEffectInstance(effect, ticks, Math.max(0, chance / 5 - 1), false, true, true));
+                t.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(effect), ticks, Math.max(0, chance / 5 - 1), false, true, true));
                 return SpellEffects.buffResult(p, wasActive) == Spell.Result.EFFECT;
             }
             case ABSORB_HEALTH -> {
@@ -208,13 +207,13 @@ public final class CustomEffects {
                 return true;
             }
             case WATER_WALKING -> {
-                boolean wasActive = t.hasEffect(MagicRegistry.WATER_WALKING.get());
-                t.addEffect(new MobEffectInstance(MagicRegistry.WATER_WALKING.get(), ticks, 0, false, true, true));
+                boolean wasActive = t.hasEffect(com.skycraft.platform.Effects.holder(MagicRegistry.WATER_WALKING.get()));
+                t.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MagicRegistry.WATER_WALKING.get()), ticks, 0, false, true, true));
                 return !wasActive && (t.isInWater() || t.level().getFluidState(t.blockPosition().below()).isSource());
             }
             case SLOWFALL -> {
                 boolean falling = !t.onGround() && t.fallDistance > 2;
-                t.addEffect(new MobEffectInstance(MobEffects.SLOW_FALLING, ticks, 0, false, true, true));
+                t.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.SLOW_FALLING), ticks, 0, false, true, true));
                 t.fallDistance = 0;
                 return falling;
             }

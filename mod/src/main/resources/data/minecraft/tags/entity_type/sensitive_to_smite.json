@@ -1,0 +1,15 @@
+{
+  "replace": false,
+  "values": [
+    "skycraft:draugr",
+    "skycraft:draugr_deathlord",
+    "skycraft:ash_spawn",
+    "skycraft:death_hound",
+    "skycraft:dragon_priest",
+    "skycraft:gargoyle",
+    "skycraft:keeper",
+    "skycraft:boneman",
+    "skycraft:mistman",
+    "skycraft:wrathman"
+  ]
+}

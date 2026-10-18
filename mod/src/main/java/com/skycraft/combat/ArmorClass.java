@@ -2,33 +2,32 @@ package com.skycraft.combat;
 
 import com.skycraft.Skycraft;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.item.ArmorItem;
-import net.minecraft.world.item.ArmorMaterials;
+import net.minecraft.world.item.equipment.ArmorMaterials;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
 /** Light vs heavy armor classification (tags first, vanilla material heuristic as fallback). */
 public final class ArmorClass {
-    public static final TagKey<Item> HEAVY = TagKey.create(Registries.ITEM, new ResourceLocation(Skycraft.MODID, "heavy_armor"));
-    public static final TagKey<Item> LIGHT = TagKey.create(Registries.ITEM, new ResourceLocation(Skycraft.MODID, "light_armor"));
+    public static final TagKey<Item> HEAVY = TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath(Skycraft.MODID, "heavy_armor"));
+    public static final TagKey<Item> LIGHT = TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath(Skycraft.MODID, "light_armor"));
     private static final EquipmentSlot[] ARMOR_SLOTS = {EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET};
 
     private ArmorClass() {}
 
     public static boolean isHeavy(ItemStack stack) {
-        if (stack.isEmpty() || !(stack.getItem() instanceof ArmorItem armor)) return false;
+        if (stack.isEmpty() || !com.skycraft.inventory.EquipmentData.isArmor(stack)) return false;
         if (stack.is(HEAVY)) return true;
         if (stack.is(LIGHT)) return false;
-        var mat = armor.getMaterial();
-        return mat != ArmorMaterials.LEATHER && mat != ArmorMaterials.CHAIN && mat != ArmorMaterials.TURTLE;
+        var mat = com.skycraft.inventory.EquipmentData.armorMaterial(stack);
+        return mat != ArmorMaterials.LEATHER && mat != ArmorMaterials.CHAINMAIL && mat != ArmorMaterials.TURTLE_SCUTE;
     }
 
     public static boolean isLight(ItemStack stack) {
-        return !stack.isEmpty() && stack.getItem() instanceof ArmorItem && !isHeavy(stack);
+        return !stack.isEmpty() && com.skycraft.inventory.EquipmentData.isArmor(stack) && !isHeavy(stack);
     }
 
     public static int countHeavy(LivingEntity entity) {
@@ -48,9 +47,9 @@ public final class ArmorClass {
         Object material = null;
         for (EquipmentSlot slot : ARMOR_SLOTS) {
             ItemStack stack = entity.getItemBySlot(slot);
-            if (!(stack.getItem() instanceof ArmorItem armor)) return false;
-            if (material == null) material = armor.getMaterial();
-            else if (material != armor.getMaterial()) return false;
+            if (!com.skycraft.inventory.EquipmentData.isArmor(stack)) return false;
+            if (material == null) material = com.skycraft.inventory.EquipmentData.armorMaterial(stack);
+            else if (material != com.skycraft.inventory.EquipmentData.armorMaterial(stack)) return false;
         }
         return true;
     }

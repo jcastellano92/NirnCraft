@@ -18,8 +18,8 @@ public interface ArtifactItem {
     }
 
     /** Adds the effect line and the italic lore line. */
-    static void tooltip(String id, List<Component> tooltip) {
-        tooltip.add(Component.translatable("tooltip.skycraft.artifact." + id).withStyle(ChatFormatting.GOLD));
-        tooltip.add(Component.translatable("lore.skycraft.artifact." + id).withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
+    static void tooltip(String id, java.util.function.Consumer<Component> tooltip) {
+        tooltip.accept(Component.translatable("tooltip.skycraft.artifact." + id).withStyle(ChatFormatting.GOLD));
+        tooltip.accept(Component.translatable("lore.skycraft.artifact." + id).withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
     }
 }

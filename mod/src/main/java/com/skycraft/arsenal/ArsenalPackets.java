@@ -4,16 +4,15 @@ import com.skycraft.arsenal.client.KillCamClient;
 import com.skycraft.magic.MagicFx;
 import com.skycraft.magic.spell.Element;
 import com.skycraft.network.SkyNetwork;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.network.NetworkDirection;
-import net.minecraftforge.network.NetworkEvent;
+import net.neoforged.api.distmarker.Dist;
+import com.skycraft.platform.Sides;
+import net.minecraft.network.protocol.PacketFlow;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-import java.util.function.Supplier;
 
 /**
  * Arsenal packets: kill cams (S2C), Bloodskal swings (C2S). Registered in a fixed order. Staff visuals go through the
@@ -23,9 +22,9 @@ public final class ArsenalPackets {
     private ArsenalPackets() {}
 
     public static void register() {
-        SkyNetwork.register(KillCam.class, NetworkDirection.PLAY_TO_CLIENT, KillCam::encode, KillCam::decode, KillCam::handle);
-        SkyNetwork.register(BladeSwing.class, NetworkDirection.PLAY_TO_SERVER, BladeSwing::encode, BladeSwing::decode, BladeSwing::handle);
-        SkyNetwork.register(CollectArrow.class, NetworkDirection.PLAY_TO_SERVER, CollectArrow::encode, CollectArrow::decode, CollectArrow::handle);
+        SkyNetwork.register(KillCam.class, PacketFlow.CLIENTBOUND, KillCam::encode, KillCam::decode, KillCam::handle);
+        SkyNetwork.register(BladeSwing.class, PacketFlow.SERVERBOUND, BladeSwing::encode, BladeSwing::decode, BladeSwing::handle);
+        SkyNetwork.register(CollectArrow.class, PacketFlow.SERVERBOUND, CollectArrow::encode, CollectArrow::decode, CollectArrow::handle);
     }
 
     // ------------------------------------------------------------------ S2C
@@ -40,7 +39,7 @@ public final class ArsenalPackets {
         public static final byte MELEE = 0;
         public static final byte ARROW = 1;
 
-        static void encode(KillCam m, FriendlyByteBuf buf) {
+        static void encode(KillCam m, RegistryFriendlyByteBuf buf) {
             buf.writeVarInt(m.victimId);
             buf.writeByte(m.kind);
             buf.writeVarInt(m.arrowId);
@@ -52,15 +51,14 @@ public final class ArsenalPackets {
             buf.writeFloat(m.vz);
         }
 
-        static KillCam decode(FriendlyByteBuf buf) {
+        static KillCam decode(RegistryFriendlyByteBuf buf) {
             return new KillCam(buf.readVarInt(), buf.readByte(), buf.readVarInt(), buf.readFloat(), buf.readFloat(), buf.readFloat(),
                     buf.readFloat(), buf.readFloat(), buf.readFloat());
         }
 
-        static void handle(KillCam m, Supplier<NetworkEvent.Context> ctx) {
-            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> KillCamClient.start(m.victimId, m.kind, m.arrowId,
+        static void handle(KillCam m, IPayloadContext ctx) {
+            Sides.runOn(Dist.CLIENT, () -> () -> KillCamClient.start(m.victimId, m.kind, m.arrowId,
                     new Vec3(m.dx, m.dy, m.dz), new Vec3(m.vx, m.vy, m.vz)));
-            ctx.get().setPacketHandled(true);
         }
     }
 
@@ -93,41 +91,39 @@ public final class ArsenalPackets {
 
     /** The client swung Bloodskal at full strength without hitting a creature (hits are handled server-side). */
     public record BladeSwing() {
-        static void encode(BladeSwing m, FriendlyByteBuf buf) {
+        static void encode(BladeSwing m, RegistryFriendlyByteBuf buf) {
         }
 
-        static BladeSwing decode(FriendlyByteBuf buf) {
+        static BladeSwing decode(RegistryFriendlyByteBuf buf) {
             return new BladeSwing();
         }
 
-        static void handle(BladeSwing m, Supplier<NetworkEvent.Context> ctx) {
-            ServerPlayer player = ctx.get().getSender();
+        static void handle(BladeSwing m, IPayloadContext ctx) {
+            ServerPlayer player = SkyNetwork.sender(ctx);
             if (player != null) ArtifactEvents.bloodskalSwing(player);
-            ctx.get().setPacketHandled(true);
         }
     }
 
     /** Collect a stuck or floating arrow (or pull an arrow from a creature's body) via [F] or right-click. */
     public record CollectArrow(int entityId) {
-        static void encode(CollectArrow m, FriendlyByteBuf buf) {
+        static void encode(CollectArrow m, RegistryFriendlyByteBuf buf) {
             buf.writeVarInt(m.entityId);
         }
 
-        static CollectArrow decode(FriendlyByteBuf buf) {
+        static CollectArrow decode(RegistryFriendlyByteBuf buf) {
             return new CollectArrow(buf.readVarInt());
         }
 
-        static void handle(CollectArrow m, Supplier<NetworkEvent.Context> ctx) {
-            ServerPlayer player = ctx.get().getSender();
+        static void handle(CollectArrow m, IPayloadContext ctx) {
+            ServerPlayer player = SkyNetwork.sender(ctx);
             if (player != null) {
                 net.minecraft.world.entity.Entity target = player.level().getEntity(m.entityId);
-                if (target instanceof net.minecraft.world.entity.projectile.AbstractArrow arrow) {
+                if (target instanceof net.minecraft.world.entity.projectile.arrow.AbstractArrow arrow) {
                     ArsenalEvents.tryPickupArrow(player, arrow);
                 } else if (target instanceof net.minecraft.world.entity.LivingEntity living) {
                     ArsenalEvents.tryPullArrowFromBody(player, living);
                 }
             }
-            ctx.get().setPacketHandled(true);
         }
     }
 }

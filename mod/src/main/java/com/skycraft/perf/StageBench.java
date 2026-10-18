@@ -11,7 +11,7 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.chunk.ChunkAccess;
-import net.minecraft.world.level.chunk.ChunkStatus;
+import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.chunk.ProtoChunk;
 import net.minecraft.world.level.chunk.UpgradeData;
@@ -19,7 +19,17 @@ import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
 import net.minecraft.world.level.levelgen.NoiseChunk;
 import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
 import net.minecraft.world.level.levelgen.RandomState;
-import net.minecraft.world.level.levelgen.SurfaceRules;
+import net.minecraft.world.level.levelgen.material.rule.MaterialRule;
+import net.minecraft.world.level.levelgen.material.rule.SequenceRule;
+import net.minecraft.world.level.levelgen.material.rule.ConditionRule;
+import net.minecraft.world.level.levelgen.densityfunction.DensityVolume;
+import net.minecraft.world.level.levelgen.densityfunction.SamplerContext;
+import net.minecraft.world.level.levelgen.Aquifer;
+import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.QuartPos;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.WorldGenerationContext;
 import net.minecraft.world.level.levelgen.blending.Blender;
 
@@ -65,13 +75,13 @@ public final class StageBench {
         }
         RandomState rs = level.getChunkSource().randomState();
         NoiseGeneratorSettings settings = gen.generatorSettings().value();
-        Registry<Biome> biomes = level.registryAccess().registryOrThrow(Registries.BIOME);
+        Registry<Biome> biomes = level.registryAccess().lookupOrThrow(Registries.BIOME);
         BiomeSource source = gen.getBiomeSource();
-        BiomeManager manager = new BiomeManager((x, y, z) -> source.getNoiseBiome(x, y, z, rs.sampler()),
+        BiomeManager manager = new BiomeManager(source.createUncachedResolver(rs),
                 BiomeManager.obfuscateSeed(level.getSeed()));
-        SurfaceRules.RuleSource fast = settings.surfaceRule();
-        SurfaceRules.RuleSource plain = fast instanceof FastSurfaceRule.Source f ? f.rule() : fast;
-        boolean ab = fast instanceof FastSurfaceRule.Source;
+        MaterialRule fast = settings.materialRule().value();
+        MaterialRule plain = plain(fast);
+        boolean ab = containsFast(fast);
         Executor direct = Runnable::run;
         int side = Math.max(1, (int) Math.round(Math.sqrt(perArea)));
         long tStarts = 0, tBiomes = 0, tNoise = 0, tPlain = 0, tFast = 0;
@@ -88,20 +98,16 @@ public final class StageBench {
                     long t0 = System.nanoTime();
                     ProtoChunk starts = proto(level, biomes, pos);
                     gen.createStructures(level.registryAccess(), level.getChunkSource().getGeneratorState(),
-                            level.structureManager(), starts, level.getStructureManager());
+                            level.structureManager(), starts, level.getStructureTemplateManager(), level.dimension());
                     long t1 = System.nanoTime();
                     ProtoChunk a1 = proto(level, biomes, pos);
-                    StructureManager sm = level.structureManager().forWorldGenRegion(
-                            new WorldGenRegion(level, List.of(a1), ChunkStatus.SURFACE, 0));
-                    gen.createBiomes(direct, rs, Blender.empty(), sm, a1).join();
+                    biomes(rs, source, a1);
                     long t2 = System.nanoTime();
-                    gen.fillFromNoise(direct, Blender.empty(), rs, sm, a1).join();
+                    noise(rs, settings, a1);
                     long t3 = System.nanoTime();
                     ProtoChunk b1 = proto(level, biomes, pos);
-                    StructureManager smB = level.structureManager().forWorldGenRegion(
-                            new WorldGenRegion(level, List.of(b1), ChunkStatus.SURFACE, 0));
-                    gen.createBiomes(direct, rs, Blender.empty(), smB, b1).join();
-                    gen.fillFromNoise(direct, Blender.empty(), rs, smB, b1).join();
+                    biomes(rs, source, b1);
+                    noise(rs, settings, b1);
                     long t4 = System.nanoTime();
                     surface(rs, manager, biomes, settings, gen, a1, plain);
                     long t5 = System.nanoTime();
@@ -130,18 +136,84 @@ public final class StageBench {
 
     /** A blank proto chunk, marked as past structure references (it has none) so a region over it can be read. */
     private static ProtoChunk proto(ServerLevel level, Registry<Biome> biomes, ChunkPos pos) {
-        ProtoChunk c = new ProtoChunk(pos, UpgradeData.EMPTY, level, biomes, null);
-        c.setStatus(ChunkStatus.STRUCTURE_REFERENCES);
+        ProtoChunk c = new ProtoChunk(pos, UpgradeData.EMPTY, level, net.minecraft.world.level.chunk.PalettedContainerFactory.create(level.registryAccess()), null);
+        c.setPersistedStatus(ChunkStatus.STRUCTURE_REFERENCES);
         return c;
     }
 
+    private static void biomes(RandomState rs, BiomeSource source, ChunkAccess chunk) {
+        var pool = rs.acquireDensityBufferPool();
+        try {
+            var sampler = rs.createClimateSampler(SamplerContext.builder().enableCaches().useBufferArena(pool).build());
+            ChunkPos pos = chunk.getPos();
+            chunk.fillBiomesFromNoise(source.createResolverForChunk(sampler, QuartPos.fromBlock(pos.getMinBlockX()),
+                    QuartPos.fromBlock(chunk.getMinY()), QuartPos.fromBlock(pos.getMinBlockZ()),
+                    4, QuartPos.fromBlock(chunk.getHeight()), 4));
+        } finally { rs.releaseDensityBufferPool(pool); }
+    }
+
+    private static NoiseChunk noiseChunk(RandomState rs, NoiseGeneratorSettings settings, ChunkAccess chunk) {
+        var noise = settings.noiseSettings().clampToHeightAccessor(chunk.getHeightAccessorForGeneration());
+        var lava = new Aquifer.FluidStatus(-54, Blocks.LAVA.defaultBlockState());
+        var sea = new Aquifer.FluidStatus(settings.seaLevel(), settings.defaultFluid());
+        var empty = new Aquifer.FluidStatus(net.minecraft.world.level.dimension.DimensionType.MIN_Y * 2, Blocks.AIR.defaultBlockState());
+        Aquifer.FluidPicker fluids = (x, y, z) -> net.minecraft.SharedConstants.DEBUG_DISABLE_FLUID_GENERATION
+                ? empty : y < Math.min(-54, settings.seaLevel()) ? lava : sea;
+        ChunkPos pos = chunk.getPos();
+        return new NoiseChunk(rs, null, settings, fluids, Blender.empty(),
+                new DensityVolume(16, noise.height(), 16, pos.getMinBlockX(), noise.minY(), pos.getMinBlockZ()));
+    }
+
+    /** Native scalar/volume density and aquifer path, with the same iteration and heightmaps as buildTerrain. */
+    private static void noise(RandomState rs, NoiseGeneratorSettings settings, ChunkAccess chunk) {
+        try (NoiseChunk noise = noiseChunk(rs, settings, chunk)) {
+            var volume = noise.volume();
+            var aquifer = noise.aquifer();
+            var sampler = noise.cachingSamplers().get(settings.noiseRouter().finalDensity());
+            Heightmap ocean = chunk.getOrCreateHeightmapUnprimed(Heightmap.Types.OCEAN_FLOOR_WG);
+            Heightmap surface = chunk.getOrCreateHeightmapUnprimed(Heightmap.Types.WORLD_SURFACE_WG);
+            BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+            try (var buffer = sampler.sampleVolume(volume)) {
+                for (int z = 0; z < volume.sizeZ(); z++) for (int x = 0; x < volume.sizeX(); x++) {
+                    for (int y = volume.sizeY() - 1; y >= 0; y--) {
+                        int blockY = volume.blockY(y);
+                        BlockState state = aquifer.computeSubstance(volume.blockX(x), blockY, volume.blockZ(z),
+                                buffer.get(volume.indexUnchecked(x, y, z)));
+                        if (state == null) state = settings.defaultBlock();
+                        if (!state.isAir()) {
+                            chunk.getSection(chunk.getSectionIndex(blockY)).setBlockState(x, blockY & 15, z, state, false);
+                            ocean.update(x, blockY, z, state);
+                            surface.update(x, blockY, z, state);
+                            if (aquifer.shouldScheduleFluidUpdate() && !state.getFluidState().isEmpty())
+                                chunk.markPosForPostProcessing(pos.set(volume.blockX(x), blockY, volume.blockZ(z)));
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     private static void surface(RandomState rs, BiomeManager manager, Registry<Biome> biomes, NoiseGeneratorSettings settings,
-                                NoiseBasedChunkGenerator gen, ChunkAccess chunk, SurfaceRules.RuleSource rule) {
-        NoiseChunk noise = chunk.getOrCreateNoiseChunk(c -> {
-            throw new IllegalStateException("no noise chunk");
-        });
-        rs.surfaceSystem().buildSurface(rs, manager, biomes, settings.useLegacyRandomSource(),
-                new WorldGenerationContext(gen, chunk), chunk, noise, rule);
+                                NoiseBasedChunkGenerator gen, ChunkAccess chunk, MaterialRule rule) {
+        try (NoiseChunk noise = noiseChunk(rs, settings, chunk)) {
+            rs.surfaceSystem().buildSurface(rs, manager, new WorldGenerationContext(gen, chunk.getHeightAccessorForGeneration()),
+                    chunk, noise, rule, gen.getBiomeSource().possibleBiomes());
+        }
+    }
+
+    private static boolean containsFast(MaterialRule rule) {
+        if (rule instanceof FastSurfaceRule.Source) return true;
+        if (rule instanceof MaterialRule.HolderHolder ref) return containsFast(ref.holder().value());
+        if (rule instanceof ConditionRule condition) return containsFast(condition.thenRun());
+        return rule instanceof SequenceRule sequence && sequence.sequence().stream().anyMatch(StageBench::containsFast);
+    }
+
+    private static MaterialRule plain(MaterialRule rule) {
+        if (rule instanceof FastSurfaceRule.Source fast) return plain(fast.rule());
+        if (rule instanceof MaterialRule.HolderHolder ref) return plain(ref.holder().value());
+        if (rule instanceof ConditionRule condition) return new ConditionRule(condition.ifTrue(), plain(condition.thenRun()));
+        if (rule instanceof SequenceRule sequence) return new SequenceRule(sequence.sequence().stream().map(StageBench::plain).toList());
+        return rule;
     }
 
     /** {blocks compared, blocks that differ}. */

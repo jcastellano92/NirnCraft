@@ -43,7 +43,7 @@ public class MudcrabEntity extends FaunaAnimal {
         this.goalSelector.addGoal(7, new RandomLookAroundGoal(this));
         this.targetSelector.addGoal(1, new HurtByTargetGoal(this));
         this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, 10, true, false,
-                p -> canAttackPlayers(p) && this.distanceToSqr(p) < 64.0));
+                (p, targetLevel263) -> canAttackPlayers(p) && this.distanceToSqr(p) < 64.0));
     }
 
     @Override
@@ -65,10 +65,9 @@ public class MudcrabEntity extends FaunaAnimal {
     @org.jetbrains.annotations.Nullable
     public net.minecraft.world.entity.SpawnGroupData finalizeSpawn(net.minecraft.world.level.ServerLevelAccessor level,
                                                                    net.minecraft.world.DifficultyInstance difficulty,
-                                                                   net.minecraft.world.entity.MobSpawnType reason,
-                                                                   @org.jetbrains.annotations.Nullable net.minecraft.world.entity.SpawnGroupData data,
-                                                                   @org.jetbrains.annotations.Nullable net.minecraft.nbt.CompoundTag tag) {
-        data = super.finalizeSpawn(level, difficulty, reason, data, tag);
+                                                                   net.minecraft.world.entity.EntitySpawnReason reason,
+                                                                   @org.jetbrains.annotations.Nullable net.minecraft.world.entity.SpawnGroupData data) {
+        data = super.finalizeSpawn(level, difficulty, reason, data);
         if (isGiant()) {
             var hp = this.getAttribute(Attributes.MAX_HEALTH);
             if (hp != null) hp.setBaseValue(36.0);
@@ -82,8 +81,8 @@ public class MudcrabEntity extends FaunaAnimal {
     }
 
     @Override
-    public net.minecraft.world.entity.EntityDimensions getDimensions(net.minecraft.world.entity.Pose pose) {
-        net.minecraft.world.entity.EntityDimensions d = super.getDimensions(pose);
+    protected net.minecraft.world.entity.EntityDimensions getDefaultDimensions(net.minecraft.world.entity.Pose pose) {
+        net.minecraft.world.entity.EntityDimensions d = super.getDefaultDimensions(pose);
         return isGiant() ? d.scale(2.2f) : d;
     }
 

@@ -14,13 +14,13 @@ import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
-import net.minecraftforge.client.event.ScreenEvent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.player.ItemTooltipEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
+import net.neoforged.neoforge.client.event.ScreenEvent;
+
+import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.util.List;
 
@@ -29,7 +29,7 @@ import java.util.List;
  * for the Skyrim ones ({@link MenuSkins}), the favorites key and number keys, and item weights in tooltips
  * (over-encumbered sprint blocking: core ClientEvents).
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
 public final class InventoryClientEvents {
     /** Class of the world module's map screen (fast travel), matched by name to avoid a hard dependency. */
     private static final String MAP_SCREEN = "com.skycraft.world.client.MapScreen";
@@ -92,21 +92,20 @@ public final class InventoryClientEvents {
         Minecraft mc = Minecraft.getInstance();
         Component label = Component.translatable("inventory.skycraft.open_skyrim");
         int w = mc.font.width(label) + 16;
-        event.addListener(Button.builder(label, b -> mc.setScreen(new SkyrimInventoryScreen())).bounds(4, 4, w, 16).build());
+        event.addListener(Button.builder(label, b -> mc.gui.setScreen(new SkyrimInventoryScreen())).bounds(4, 4, w, 16).build());
     }
 
     // ------------------------------------------------------------------ keys & sprinting
 
     @SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent event) {
-        if (event.phase != TickEvent.Phase.END) return;
+    public static void onClientTick(net.neoforged.neoforge.client.event.ClientTickEvent.Post event) {
         Minecraft mc = Minecraft.getInstance();
         LocalPlayer player = mc.player;
         if (player == null) return;
 
         // Universal [F] Key for Interactions (talk to NPCs, pick up items, open doors, harvest plants)
         while (com.skycraft.client.SkyKeys.INTERACT.consumeClick()) {
-            if (mc.screen != null || player.isSpectator()) continue;
+            if (mc.gui.screen() != null || player.isSpectator()) continue;
             // 1. Pick up looked-at world item
             var lookedItem = com.skycraft.crime.client.CrimeHud.getLookedAtItem(mc, 3.5);
             if (lookedItem != null) {
@@ -117,13 +116,13 @@ public final class InventoryClientEvents {
             if (mc.crosshairPickEntity != null) {
                 if (mc.crosshairPickEntity instanceof com.skycraft.creatures.entity.CorpseEntity corpse) {
                     if (mc.gameMode != null) {
-                        mc.gameMode.interact(player, corpse, net.minecraft.world.InteractionHand.MAIN_HAND);
+                        mc.gameMode.interact(player, corpse, mc.hitResult instanceof net.minecraft.world.phys.EntityHitResult hit && hit.getEntity()==corpse?hit:new net.minecraft.world.phys.EntityHitResult(corpse), net.minecraft.world.InteractionHand.MAIN_HAND);
                     }
                     continue;
                 }
                 if (mc.crosshairPickEntity instanceof net.minecraft.world.entity.LivingEntity le && le.isAlive()) {
                     if (mc.gameMode != null) {
-                        mc.gameMode.interact(player, le, net.minecraft.world.InteractionHand.MAIN_HAND);
+                        mc.gameMode.interact(player, le, mc.hitResult instanceof net.minecraft.world.phys.EntityHitResult hit && hit.getEntity()==le?hit:new net.minecraft.world.phys.EntityHitResult(le), net.minecraft.world.InteractionHand.MAIN_HAND);
                     }
                     continue;
                 }
@@ -143,7 +142,7 @@ public final class InventoryClientEvents {
         }
 
         while (InventoryKeys.FAVORITES.consumeClick()) {
-            if (mc.screen == null && !player.isSpectator()) mc.setScreen(new FavoritesScreen());
+            if (mc.gui.screen() == null && !player.isSpectator()) mc.gui.setScreen(new FavoritesScreen());
         }
         // Over-encumbered: no running. The client-side sprint block lives in ClientEvents (with exhaustion).
     }
@@ -154,11 +153,10 @@ public final class InventoryClientEvents {
      * Key 9 is never touched.
      */
     @SubscribeEvent
-    public static void onClientTickStart(TickEvent.ClientTickEvent event) {
-        if (event.phase != TickEvent.Phase.START) return;
+    public static void onClientTickStart(net.neoforged.neoforge.client.event.ClientTickEvent.Pre event) {
         Minecraft mc = Minecraft.getInstance();
         LocalPlayer player = mc.player;
-        if (player == null || mc.screen != null || mc.options == null || player.isCreative() || player.isSpectator()) return;
+        if (player == null || mc.gui.screen() != null || mc.options == null || player.isCreative() || player.isSpectator()) return;
         List<FavoritesScreen.Row> favs = null;
         for (int i = 0; i < Math.min(8, mc.options.keyHotbarSlots.length); i++) {
             while (mc.options.keyHotbarSlots[i].consumeClick()) {
@@ -169,7 +167,7 @@ public final class InventoryClientEvents {
                     }
                     FavoritesScreen.activate(favs.get(i), false);
                 } else {
-                    player.getInventory().selected = i; // what vanilla would have done with this press
+                    player.getInventory().setSelectedSlot(i); // what vanilla would have done with this press
                 }
             }
         }
@@ -185,11 +183,11 @@ public final class InventoryClientEvents {
     private static int lastDrawnMainSlot = 0;
 
     @SubscribeEvent
-    public static void onMouseScroll(net.minecraftforge.client.event.InputEvent.MouseScrollingEvent event) {
+    public static void onMouseScroll(net.neoforged.neoforge.client.event.InputEvent.MouseScrollingEvent event) {
         Minecraft mc = Minecraft.getInstance();
         LocalPlayer player = mc.player;
-        if (player == null || mc.screen != null || player.isCreative() || player.isSpectator()) return;
-        double delta = event.getScrollDelta();
+        if (player == null || mc.gui.screen() != null || player.isCreative() || player.isSpectator()) return;
+        double delta = event.getScrollDeltaY();
         if (delta == 0) return;
 
         // The wheel only draws and sheathes (Skyrim): up draws the weapon, down puts it away. It never cycles the
@@ -197,12 +195,12 @@ public final class InventoryClientEvents {
         event.setCanceled(true);
         boolean sheathed = com.skycraft.combat.Sheathe.isSheathed(player);
         if (delta < 0 && !sheathed) {
-            if (!player.getMainHandItem().isEmpty()) lastDrawnMainSlot = player.getInventory().selected;
+            if (!player.getMainHandItem().isEmpty()) lastDrawnMainSlot = player.getInventory().getSelectedSlot();
             com.skycraft.combat.Sheathe.setSheathed(player, true);
             com.skycraft.network.SkyNetwork.sendToServer(new CorePackets.Action(CorePackets.Action.SHEATHE_TOGGLE, 0));
             for (int i = 0; i < 9; i++) {
                 if (player.getInventory().getItem(i).isEmpty()) {
-                    player.getInventory().selected = i;
+                    player.getInventory().setSelectedSlot(i);
                     break;
                 }
             }
@@ -211,7 +209,7 @@ public final class InventoryClientEvents {
             com.skycraft.combat.Sheathe.setSheathed(player, false);
             com.skycraft.network.SkyNetwork.sendToServer(new CorePackets.Action(CorePackets.Action.SHEATHE_TOGGLE, 0));
             if (lastDrawnMainSlot >= 0 && lastDrawnMainSlot < 9 && !player.getInventory().getItem(lastDrawnMainSlot).isEmpty()) {
-                player.getInventory().selected = lastDrawnMainSlot;
+                player.getInventory().setSelectedSlot(lastDrawnMainSlot);
             }
         }
     }

@@ -31,6 +31,7 @@ public final class PlanGround {
     /** Per-thread dev-harness mode, see {@link #mode}. */
     private static final ThreadLocal<int[]> MODE = ThreadLocal.withInitial(() -> new int[1]);
     private static final ThreadLocal<Bed> SCRATCH = ThreadLocal.withInitial(Bed::new);
+    private static final ThreadLocal<RoadPlan.Hit> OWNER_HIT = ThreadLocal.withInitial(RoadPlan.Hit::new);
 
     /** Flat zone beyond the half width (blocks): the 4-block cell corners of every bed column must be flat too. */
     static final float FLAT_PAD = 4.5f, TRAIL_PAD = 3.5f;
@@ -97,7 +98,6 @@ public final class PlanGround {
     private final boolean[] padded;
     private final Long2ObjectOpenHashMap<int[]> siteGrid = new Long2ObjectOpenHashMap<>();
 
-    private static volatile PlanGround cached;
 
     /** Own edge index: 32-block buckets, every edge in each bucket within {@link #OUTER} blocks of it. */
     private static final int BUCKET_SHIFT = 5;
@@ -187,13 +187,23 @@ public final class PlanGround {
 
     /** Built once per plan: the loader thread, the server thread and every worldgen worker may ask at the same time. */
     private static PlanGround of(RoadPlan p) {
-        PlanGround g = cached;
-        if (g != null && g.plan == p) return g;
-        synchronized (PlanGround.class) {
-            g = cached;
-            if (g == null || g.plan != p) cached = g = new PlanGround(p);
+        PlanGround g = p.groundIndex;
+        if (g != null) return g;
+        synchronized (p) {
+            g = p.groundIndex;
+            if (g == null) p.groundIndex = g = new PlanGround(p);
             return g;
         }
+    }
+
+    /** Runtime terrain selects the same tile geometry as the painter. Bake-time get() stays seed independent. */
+    public static PlanGround getAt(int x, int z) {
+        if (!com.skycraft.tamriel.TamrielMap.inTamriel(x, z)
+                && !RoadPlan.get().atAuthored(x, z, OWNER_HIT.get())) {
+            RoadPlan tile = com.skycraft.worldplan.tile.TilePlanner.roadPlanAt(x, z);
+            if (tile != null) return of(tile);
+        }
+        return get();
     }
 
     /** Dev harness modes (per thread): plan shaping (production), old terrain, and natural terrain with the detail
@@ -241,7 +251,7 @@ public final class PlanGround {
 
     /** Terrain-shaping influence of road and pad at a column, 0..1 (for the cave/overhang channels). */
     public static float influence(int x, int z) {
-        PlanGround g = of(RoadPlan.get());
+        PlanGround g = getAt(x, z);
         Bed b = scratch();
         float w = 0f;
         if (g.bed(x, z, b)) w = b.weight;

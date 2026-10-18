@@ -9,8 +9,8 @@ import com.skycraft.fauna.entity.MammothEntity;
 import com.skycraft.fauna.entity.MudcrabEntity;
 import com.skycraft.fauna.entity.SabreCatEntity;
 import com.skycraft.fauna.entity.SlaughterfishEntity;
-import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
-import net.minecraftforge.eventbus.api.IEventBus;
+import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
+import net.neoforged.bus.api.IEventBus;
 
 /**
  * Skyrim wildlife, livestock, catchable insects and regrowing alchemy plants.

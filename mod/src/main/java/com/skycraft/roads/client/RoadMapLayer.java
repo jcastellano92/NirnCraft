@@ -1,17 +1,11 @@
 package com.skycraft.roads.client;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.BufferUploader;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.math.Axis;
 import com.skycraft.roads.Road;
 import com.skycraft.roads.RoadsPackets;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
 import org.joml.Matrix4f;
@@ -47,17 +41,12 @@ public final class RoadMapLayer {
      * @param sy    world z to screen y
      * @param scale screen pixels per block
      */
-    public static void draw(GuiGraphics g, Font font, DoubleUnaryOperator sx, DoubleUnaryOperator sy, double scale,
+    public static void draw(GuiGraphicsExtractor g, Font font, DoubleUnaryOperator sx, DoubleUnaryOperator sy, double scale,
                             int left, int top, int right, int bottom) {
         List<RoadsPackets.Line> lines = RoadsClient.network();
         if (lines.isEmpty()) return;
-        g.flush();
-        RenderSystem.enableBlend();
-        RenderSystem.defaultBlendFunc();
-        RenderSystem.setShader(GameRenderer::getPositionColorShader);
-        Matrix4f m = g.pose().last().pose();
-        BufferBuilder buf = Tesselator.getInstance().getBuilder();
-        buf.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+        var vertices=new it.unimi.dsi.fastutil.floats.FloatArrayList();
+        var colors=new it.unimi.dsi.fastutil.ints.IntArrayList();
         int quads = 0;
         float zoom = (float) Math.max(0.6, Math.min(2.2, Math.sqrt(scale * 12)));
         // draw lesser roads first so highways lie on top
@@ -84,10 +73,11 @@ public final class RoadMapLayer {
                             float nx = -dy / len * w, ny = dx / len * w;
                             // extend each segment by half the width so the joints have no gaps
                             float ex = dx / len * w, ey = dy / len * w;
-                            buf.vertex(m, px - ex + nx, py - ey + ny, 0).color(r, gg, b, a).endVertex();
-                            buf.vertex(m, qx + ex + nx, qy + ey + ny, 0).color(r, gg, b, a).endVertex();
-                            buf.vertex(m, qx + ex - nx, qy + ey - ny, 0).color(r, gg, b, a).endVertex();
-                            buf.vertex(m, px - ex - nx, py - ey - ny, 0).color(r, gg, b, a).endVertex();
+                            vertices.add(px-ex+nx);vertices.add(py-ey+ny);
+                            vertices.add(qx+ex+nx);vertices.add(qy+ey+ny);
+                            vertices.add(qx+ex-nx);vertices.add(qy+ey-ny);
+                            vertices.add(px-ex-nx);vertices.add(py-ey-ny);
+                            colors.add((alpha<<24)|rgb);
                             quads++;
                         }
                     }
@@ -96,12 +86,25 @@ public final class RoadMapLayer {
                 }
             }
         }
-        if (quads > 0) BufferUploader.drawWithShader(buf.end());
-        else buf.end();
+        if(quads>0) g.submitGuiElementRenderState(new RoadState(vertices.toFloatArray(),colors.toIntArray(),new org.joml.Matrix3x2f(g.pose()),g.peekScissorStack(),
+            new net.minecraft.client.gui.navigation.ScreenRectangle(left-4,top-4,right-left+8,bottom-top+8).transformMaxBounds(g.pose())));
         if (scale > 1 / 45.0 && scale < 1.0) drawNames(g, font, sx, sy, scale, left, top, right, bottom);
     }
 
-    private static void drawNames(GuiGraphics g, Font font, DoubleUnaryOperator sx, DoubleUnaryOperator sy, double scale,
+    private record RoadState(float[] xy,int[] colors,org.joml.Matrix3x2fc pose,
+        net.minecraft.client.gui.navigation.ScreenRectangle scissorArea,net.minecraft.client.gui.navigation.ScreenRectangle bounds)
+        implements net.minecraft.client.renderer.state.gui.GuiElementRenderState {
+        @Override public com.mojang.renderpearl.api.pipeline.RenderPipeline pipeline() { return net.minecraft.client.renderer.RenderPipelines.GUI; }
+        @Override public net.minecraft.client.gui.render.TextureSetup textureSetup() { return net.minecraft.client.gui.render.TextureSetup.noTexture(); }
+        @Override public void buildVertices(com.mojang.blaze3d.vertex.VertexConsumer consumer) {
+            for(int q=0;q<colors.length;q++) for(int v=0;v<4;v++) {
+                int i=q*8+v*2;
+                consumer.addVertexWith2DPose(pose,xy[i],xy[i+1]).setColor(colors[q]);
+            }
+        }
+    }
+
+    private static void drawNames(GuiGraphicsExtractor g, Font font, DoubleUnaryOperator sx, DoubleUnaryOperator sy, double scale,
                                   int left, int top, int right, int bottom) {
         if (labels == null) labels = buildLabels(RoadsClient.network());
         for (Label l : labels) {
@@ -109,12 +112,12 @@ public final class RoadMapLayer {
             if (x < left || x > right || y < top || y > bottom) continue;
             int w = font.width(l.text());
             if (w * 0.75 > l.length() * scale) continue; // the road is too short on screen for its name
-            g.pose().pushPose();
-            g.pose().translate((float) x, (float) y, 0);
-            g.pose().mulPose(Axis.ZP.rotation(l.angle()));
-            g.pose().scale(0.75f, 0.75f, 1f);
-            g.drawString(font, l.text(), -w / 2, -10, 0xC05A2810, false);
-            g.pose().popPose();
+            g.pose().pushMatrix();
+            g.pose().translate((float)x,(float)y);
+            g.pose().rotate(l.angle());
+            g.pose().scale(.75f,.75f);
+            g.text(font, l.text(), -w / 2, -10, 0xC05A2810, false);
+            g.pose().popMatrix();
         }
     }
 

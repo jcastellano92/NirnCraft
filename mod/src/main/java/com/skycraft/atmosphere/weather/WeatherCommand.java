@@ -15,9 +15,9 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.util.Arrays;
 
@@ -25,14 +25,14 @@ import java.util.Arrays;
  * {@code /skycraft-weather info | set <kind> [minutes] | reroll} (operators only): the regional weather where the
  * executing player stands.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class WeatherCommand {
     private WeatherCommand() {}
 
     @SubscribeEvent
     public static void register(RegisterCommandsEvent event) {
         CommandDispatcher<CommandSourceStack> d = event.getDispatcher();
-        d.register(Commands.literal("skycraft-weather").requires(s -> s.hasPermission(2))
+        d.register(Commands.literal("skycraft-weather").requires(s -> s.permissions().hasPermission(net.minecraft.server.permissions.Permissions.COMMANDS_GAMEMASTER))
                 .then(Commands.literal("info").executes(WeatherCommand::info))
                 .then(Commands.literal("reroll").executes(WeatherCommand::reroll))
                 .then(Commands.literal("set").then(Commands.argument("kind", StringArgumentType.word())
@@ -78,7 +78,7 @@ public final class WeatherCommand {
         Region r = here(c);
         ServerLevel ow = c.getSource().getServer().overworld();
         WeatherProfile profile = WeatherProfile.of(r);
-        WeatherKind kind = profile.roll(ow.random, RegionalWeather.kindOf(c.getSource().getServer(), r.id()));
+        WeatherKind kind = profile.roll(ow.getRandom(), RegionalWeather.kindOf(c.getSource().getServer(), r.id()));
         RegionalWeather.set(c.getSource().getServer(), r, kind, 0);
         c.getSource().sendSuccess(() -> Component.translatable("command.skycraft.weather.set", r.id(), kind.id()), true);
         return 1;

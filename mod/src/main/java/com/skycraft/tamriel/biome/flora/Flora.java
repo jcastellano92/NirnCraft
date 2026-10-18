@@ -4,11 +4,12 @@ import com.mojang.serialization.Codec;
 import com.skycraft.Skycraft;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.placement.PlacementModifierType;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegistryObject;
+import com.mojang.serialization.MapCodec;
+import net.minecraft.world.level.levelgen.placement.PlacementModifier;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.registries.DeferredRegister;
+import net.minecraft.core.registries.BuiltInRegistries;
+import java.util.function.Supplier;
 
 /**
  * Nirn's vegetation: the procedural tree generator ({@link FloraTreeFeature}, {@link TreeSpecies}), ground cover in
@@ -17,30 +18,27 @@ import net.minecraftforge.registries.RegistryObject;
  * tools/worldgen/biomes.py generates; see docs/FLORA.md.
  */
 public final class Flora {
-    public static final DeferredRegister<Feature<?>> FEATURES = DeferredRegister.create(ForgeRegistries.FEATURES, Skycraft.MODID);
-    public static final DeferredRegister<PlacementModifierType<?>> PLACEMENTS =
+    public static final DeferredRegister<MapCodec<? extends Feature>> FEATURES = DeferredRegister.create(Registries.FEATURE_TYPE, Skycraft.MODID);
+    public static final DeferredRegister<MapCodec<? extends PlacementModifier>> PLACEMENTS =
             DeferredRegister.create(Registries.PLACEMENT_MODIFIER_TYPE, Skycraft.MODID);
 
-    public static final RegistryObject<Feature<FloraTreeFeature.Config>> TREE = FEATURES.register("flora_tree",
-            () -> new FloraTreeFeature(FloraTreeFeature.Config.CODEC));
-    public static final RegistryObject<Feature<GroundCoverFeature.Config>> GROUND_COVER = FEATURES.register("ground_cover",
-            () -> new GroundCoverFeature(GroundCoverFeature.Config.CODEC));
-    public static final RegistryObject<Feature<RockFeature.Config>> ROCK = FEATURES.register("flora_rock",
-            () -> new RockFeature(RockFeature.Config.CODEC));
+    public static final Supplier<MapCodec<? extends Feature>> TREE = FEATURES.register("flora_tree",
+            () -> new FloraTreeFeature(FloraTreeFeature.Config.CODEC).codec());
+    public static final Supplier<MapCodec<? extends Feature>> GROUND_COVER = FEATURES.register("ground_cover",
+            () -> new GroundCoverFeature(GroundCoverFeature.Config.CODEC).codec());
+    public static final Supplier<MapCodec<? extends Feature>> ROCK = FEATURES.register("flora_rock",
+            () -> new RockFeature(RockFeature.Config.CODEC).codec());
 
-    public static final RegistryObject<PlacementModifierType<ScatterPlacement>> SCATTER =
-            PLACEMENTS.register("flora_scatter", () -> type(ScatterPlacement.CODEC));
-    public static final RegistryObject<PlacementModifierType<DensityFilter>> DENSITY =
-            PLACEMENTS.register("flora_density", () -> type(DensityFilter.CODEC));
+    public static final Supplier<MapCodec<? extends PlacementModifier>> SCATTER =
+            PLACEMENTS.register("flora_scatter", () -> ScatterPlacement.CODEC);
+    public static final Supplier<MapCodec<? extends PlacementModifier>> DENSITY =
+            PLACEMENTS.register("flora_density", () -> DensityFilter.CODEC);
 
-    public static final RegistryObject<PlacementModifierType<MaskFilter>> MASK =
-            PLACEMENTS.register("placement_mask", () -> type(MaskFilter.CODEC));
+    public static final Supplier<MapCodec<? extends PlacementModifier>> MASK =
+            PLACEMENTS.register("placement_mask", () -> MaskFilter.CODEC);
 
     private Flora() {}
 
-    private static <P extends net.minecraft.world.level.levelgen.placement.PlacementModifier> PlacementModifierType<P> type(Codec<P> codec) {
-        return () -> codec;
-    }
 
     public static void init(IEventBus modBus) {
         FEATURES.register(modBus);

@@ -12,7 +12,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobType;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
@@ -34,17 +33,17 @@ public final class RestorationSpells {
 
     /** Whether a turning spell of this level works on {@code e}. */
     static boolean turnable(ServerPlayer caster, Spell spell, LivingEntity e) {
-        return e.getMobType() == MobType.UNDEAD && !e.getType().is(CombatHandler.BOSSES) && e.getMaxHealth() <= undeadLimit(caster, spell, e);
+        return com.skycraft.platform.Effects.isUndead(e) && !e.getType().builtInRegistryHolder().is(CombatHandler.BOSSES) && e.getMaxHealth() <= undeadLimit(caster, spell, e);
     }
 
     /** Sun damage: holy fire, doubled against the undead (and with Necromage, more). */
     static boolean sunDamage(ServerPlayer caster, LivingEntity target, float amount) {
         if (!Targeting.canHarm(caster, target)) return false;
         float dmg = amount;
-        if (target.getMobType() == MobType.UNDEAD) dmg *= 2f * SpellMath.undeadMult(caster, target);
+        if (com.skycraft.platform.Effects.isUndead(target)) dmg *= 2f * SpellMath.undeadMult(caster, target);
         boolean hurt = Targeting.hurtNoKnockback(target, MagicDamage.source(caster.level(), MagicDamage.SPELL, null, caster), dmg);
         if (hurt) {
-            if (target.getMobType() == MobType.UNDEAD) target.setSecondsOnFire(3);
+            if (com.skycraft.platform.Effects.isUndead(target)) target.igniteForSeconds(3);
             Vitals.markInCombat(caster);
         }
         return hurt;
@@ -66,13 +65,13 @@ public final class RestorationSpells {
         SpellSounds.impact(level, pos, Element.HOLY, 1.2f);
         int n = 0;
         boolean tooStrong = false;
-        for (LivingEntity e : Targeting.around(level, pos, spell.radius, e -> e.getMobType() == MobType.UNDEAD && Targeting.canHarm(caster, e))) {
+        for (LivingEntity e : Targeting.around(level, pos, spell.radius, e -> com.skycraft.platform.Effects.isUndead(e) && Targeting.canHarm(caster, e))) {
             if (!turnable(caster, spell, e)) {
                 tooStrong = true;
                 continue;
             }
             Illusion.applyFear(pos, e, spell.duration);
-            e.setSecondsOnFire(2);
+            e.igniteForSeconds(2);
             MagicFx.send(e, MagicFx.HEAL, Element.HOLY, e.position(), e.position(), e.getId(), 1);
             n++;
         }
@@ -89,13 +88,13 @@ public final class RestorationSpells {
             MagicFx.sendNear(level, area.center, 64, MagicFx.RING, Element.HOLY, area.center.add(0, 0.1, 0), area.center, -1, (int) (area.radius * 10));
             if (owner == null) return;
             for (LivingEntity e : Targeting.around(level, area.center.add(0, 1, 0), area.radius + 1.5,
-                    e -> e.getMobType() == MobType.UNDEAD && Targeting.canHarm(owner, e) && turnable(owner, spell, e))) {
+                    e -> com.skycraft.platform.Effects.isUndead(e) && Targeting.canHarm(owner, e) && turnable(owner, spell, e))) {
                 Illusion.applyFear(area.center, e, 80);
                 Vec3 out = e.position().subtract(area.center).multiply(1, 0, 1);
                 if (out.lengthSqr() > 1e-4) {
                     out = out.normalize().scale(0.6);
                     e.push(out.x, 0.15, out.z);
-                    e.hurtMarked = true;
+                    e.syncVelocity = true;
                 }
             }
         });
@@ -104,17 +103,17 @@ public final class RestorationSpells {
 
     /** Bane of the Undead: every undead around you is set on fire and flees for 30 seconds. */
     public static Spell.Result baneOfTheUndead(ServerPlayer p, Spell spell, int tick) {
-        ServerLevel level = p.serverLevel();
+        ServerLevel level = p.level();
         Vec3 c = p.position();
         MagicFx.sendNear(level, c, 96, MagicFx.RING, Element.HOLY, c.add(0, 0.2, 0), c, p.getId(), Math.round(spell.radius * 10));
         MagicFx.burst(level, c.add(0, 1, 0), Element.HOLY, 6f);
         MagicFx.sound(p, SoundEvents.BEACON_ACTIVATE, 2f, 0.7f);
         SpellSounds.world(level, c, SpellSounds.Slot.IMPACT_HOLY, 2f, 0.6f);
         int n = 0;
-        for (LivingEntity e : Targeting.around(p, c, spell.radius, e -> e.getMobType() == MobType.UNDEAD && Targeting.canHarm(p, e))) {
+        for (LivingEntity e : Targeting.around(p, c, spell.radius, e -> com.skycraft.platform.Effects.isUndead(e) && Targeting.canHarm(p, e))) {
             if (!turnable(p, spell, e)) continue;
             Illusion.applyFear(c, e, spell.duration);
-            e.setSecondsOnFire(8);
+            e.igniteForSeconds(8);
             sunDamage(p, e, spell.magnitude);
             n++;
         }
@@ -123,7 +122,7 @@ public final class RestorationSpells {
 
     /** Vampire's Bane: a burst of sunlight around you (40 points; the undead take double). */
     public static Spell.Result vampiresBane(ServerPlayer p, Spell spell, int tick) {
-        ServerLevel level = p.serverLevel();
+        ServerLevel level = p.level();
         Vec3 c = p.position().add(0, 1, 0);
         MagicFx.sendNear(level, c, 96, MagicFx.RING, Element.HOLY, p.position().add(0, 0.2, 0), c, p.getId(), Math.round(spell.radius * 10));
         MagicFx.burst(level, c, Element.HOLY, spell.radius * 0.7f);

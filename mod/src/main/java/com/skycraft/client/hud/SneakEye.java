@@ -5,11 +5,11 @@ import com.skycraft.Skycraft;
 import com.skycraft.client.ClientState;
 import com.skycraft.inventory.client.SkyUi;
 import com.skycraft.network.CorePackets;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 
 /**
@@ -19,7 +19,7 @@ import net.minecraft.util.Mth;
  * changes.
  */
 public final class SneakEye {
-    private static final ResourceLocation EYE = new ResourceLocation(Skycraft.MODID, "textures/gui/hud/sneak_eye.png");
+    private static final Identifier EYE = Identifier.fromNamespaceAndPath(Skycraft.MODID, "textures/gui/hud/sneak_eye.png");
     public static final int HIDDEN = 0;
     public static final int CAUTION = 1;
     public static final int DETECTED = 2;
@@ -47,7 +47,7 @@ public final class SneakEye {
     }
 
     /** Draws the eye centred at (cx, cy) when the player is sneaking. */
-    public static void render(GuiGraphics g, int cx, int cy) {
+    public static void render(GuiGraphicsExtractor g, int cx, int cy) {
         Minecraft mc = Minecraft.getInstance();
         long now = Util.getMillis();
         float dt = Mth.clamp((now - lastFrame) / 1000f, 0f, 0.25f);
@@ -72,15 +72,12 @@ public final class SneakEye {
             case CAUTION -> { r = 0.95f; gr = 0.88f; b = 0.68f; a = 0.95f; }
             default -> { r = 0.82f; gr = 0.82f; b = 0.82f; a = 0.9f; }
         }
-        RenderSystem.enableBlend();
+        
         // dark outline so the eye reads on snow, sand and sky
-        RenderSystem.setShaderColor(0f, 0f, 0f, a * 0.5f);
-        g.blit(EYE, cx - 16 + 1, cy - 8 + 1, 32, 16, 0, frame * 32, 64, 32, 64, 160);
-        g.blit(EYE, cx - 16 - 1, cy - 8, 32, 16, 0, frame * 32, 64, 32, 64, 160);
-        g.blit(EYE, cx - 16, cy - 8 - 1, 32, 16, 0, frame * 32, 64, 32, 64, 160);
-        RenderSystem.setShaderColor(r, gr, b, a);
-        g.blit(EYE, cx - 16, cy - 8, 32, 16, 0, frame * 32, 64, 32, 64, 160);
-        RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
+        com.skycraft.inventory.client.SkyUi.blit(g, EYE, cx - 16 + 1, cy - 8 + 1, 32, 16, 0, frame * 32, 64, 32, 64, 160, net.minecraft.util.ARGB.colorFromFloat(a * 0.5f, 0f, 0f, 0f));
+        com.skycraft.inventory.client.SkyUi.blit(g, EYE, cx - 16 - 1, cy - 8, 32, 16, 0, frame * 32, 64, 32, 64, 160, net.minecraft.util.ARGB.colorFromFloat(a * 0.5f, 0f, 0f, 0f));
+        com.skycraft.inventory.client.SkyUi.blit(g, EYE, cx - 16, cy - 8 - 1, 32, 16, 0, frame * 32, 64, 32, 64, 160, net.minecraft.util.ARGB.colorFromFloat(a * 0.5f, 0f, 0f, 0f));
+        com.skycraft.inventory.client.SkyUi.blit(g, EYE, cx - 16, cy - 8, 32, 16, 0, frame * 32, 64, 32, 64, 160, net.minecraft.util.ARGB.colorFromFloat(a, r, gr, b));
 
         float labelAlpha = Mth.clamp(1.6f - (now - stateSince) / 1000f, 0f, 1f);
         if (labelAlpha > 0.03f) {

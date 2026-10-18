@@ -1,0 +1,18 @@
+{
+  "structures": [
+    {
+      "structure": "skycraft:site/tsaesci_fortress",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "skycraft:places",
+    "salt": 718274530,
+    "types": [
+      "dungeon_fixed"
+    ],
+    "variants": [
+      "tsaesci_fortress"
+    ]
+  }
+}

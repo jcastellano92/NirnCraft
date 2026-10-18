@@ -13,16 +13,16 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.util.Arrays;
 
 /**
  * {@code /skycraft ...} admin commands plus player commands {@code /pay}, {@code /withdraw} and {@code /gold}.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class SkyCommands {
     private SkyCommands() {}
 
@@ -31,7 +31,7 @@ public final class SkyCommands {
         CommandDispatcher<CommandSourceStack> d = event.getDispatcher();
         // the /skycraft root is shared with other modules (e.g. /skycraft magic), so each admin subcommand carries its own op check
         d.register(Commands.literal("skycraft")
-                .then(Commands.literal("setskill").requires(s -> s.hasPermission(2)).then(Commands.argument("player", EntityArgument.player())
+                .then(Commands.literal("setskill").requires(s -> s.permissions().hasPermission(net.minecraft.server.permissions.Permissions.COMMANDS_GAMEMASTER)).then(Commands.argument("player", EntityArgument.player())
                         .then(Commands.argument("skill", StringArgumentType.word())
                                 .suggests((c, b) -> SharedSuggestionProvider.suggest(Arrays.stream(Skill.VALUES).map(Skill::id), b))
                                 .then(Commands.argument("level", IntegerArgumentType.integer(0, 100)).executes(c -> {
@@ -42,7 +42,7 @@ public final class SkyCommands {
                                     c.getSource().sendSuccess(() -> Component.literal("Set " + skill.id()), true);
                                     return 1;
                                 })))))
-                .then(Commands.literal("addskill").requires(s -> s.hasPermission(2)).then(Commands.argument("player", EntityArgument.player())
+                .then(Commands.literal("addskill").requires(s -> s.permissions().hasPermission(net.minecraft.server.permissions.Permissions.COMMANDS_GAMEMASTER)).then(Commands.argument("player", EntityArgument.player())
                         .then(Commands.argument("skill", StringArgumentType.word())
                                 .suggests((c, b) -> SharedSuggestionProvider.suggest(Arrays.stream(Skill.VALUES).map(Skill::id), b))
                                 .then(Commands.argument("levels", IntegerArgumentType.integer(1, 100)).executes(c -> {
@@ -52,14 +52,14 @@ public final class SkyCommands {
                                     Progression.increaseSkill(p, skill, IntegerArgumentType.getInteger(c, "levels"));
                                     return 1;
                                 })))))
-                .then(Commands.literal("perkpoints").requires(s -> s.hasPermission(2)).then(Commands.argument("player", EntityArgument.player())
+                .then(Commands.literal("perkpoints").requires(s -> s.permissions().hasPermission(net.minecraft.server.permissions.Permissions.COMMANDS_GAMEMASTER)).then(Commands.argument("player", EntityArgument.player())
                         .then(Commands.argument("amount", IntegerArgumentType.integer(0)).executes(c -> {
                             ServerPlayer p = EntityArgument.getPlayer(c, "player");
                             PlayerData data = SkyData.get(p);
                             data.setPerkPoints(data.getPerkPoints() + IntegerArgumentType.getInteger(c, "amount"));
                             return 1;
                         }))))
-                .then(Commands.literal("gold").requires(s -> s.hasPermission(2)).then(Commands.argument("player", EntityArgument.player())
+                .then(Commands.literal("gold").requires(s -> s.permissions().hasPermission(net.minecraft.server.permissions.Permissions.COMMANDS_GAMEMASTER)).then(Commands.argument("player", EntityArgument.player())
                         .then(Commands.argument("amount", LongArgumentType.longArg()).executes(c -> {
                             ServerPlayer p = EntityArgument.getPlayer(c, "player");
                             long amount = LongArgumentType.getLong(c, "amount");
@@ -67,12 +67,12 @@ public final class SkyCommands {
                             data.setGold(data.getGold() + amount);
                             return 1;
                         }))))
-                .then(Commands.literal("resetrace").requires(s -> s.hasPermission(2)).then(Commands.argument("player", EntityArgument.player()).executes(c -> {
+                .then(Commands.literal("resetrace").requires(s -> s.permissions().hasPermission(net.minecraft.server.permissions.Permissions.COMMANDS_GAMEMASTER)).then(Commands.argument("player", EntityArgument.player()).executes(c -> {
                     ServerPlayer p = EntityArgument.getPlayer(c, "player");
                     SkyData.get(p).setRace(null);
                     return 1;
                 })))
-                .then(Commands.literal("reset").requires(s -> s.hasPermission(2)).then(Commands.argument("player", EntityArgument.player()).executes(c -> {
+                .then(Commands.literal("reset").requires(s -> s.permissions().hasPermission(net.minecraft.server.permissions.Permissions.COMMANDS_GAMEMASTER)).then(Commands.argument("player", EntityArgument.player()).executes(c -> {
                     ServerPlayer p = EntityArgument.getPlayer(c, "player");
                     SkyData.get(p).load(new PlayerData().save());
                     Vitals.refreshAttributes(p);

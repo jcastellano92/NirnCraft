@@ -75,10 +75,11 @@ public final class BoundWeapons {
 
     private static Spell.Result give(ServerPlayer p, Spell spell, Item item) {
         ItemStack stack = new ItemStack(item);
-        CompoundTag tag = stack.getOrCreateTag();
+        CompoundTag tag = com.skycraft.inventory.ItemData.customOrEmpty(stack);
         tag.putLong(UNTIL, p.level().getGameTime() + spell.duration);
-        tag.putUUID(OWNER, p.getUUID());
+        tag.store(OWNER, net.minecraft.core.UUIDUtil.CODEC, p.getUUID());
         tag.putInt(DURATION, spell.duration);
+        com.skycraft.inventory.ItemData.setCustom(stack, tag);
         boolean leftHand = com.skycraft.magic.spell.SpellCasting.castingSide() < 0 && !Hands.twoHanded(stack);
         // One hand system (magic.Hands): the weapon replaces what the casting hand held (a re-cast refreshes the old copy).
         if (!Hands.equipBound(p, stack, leftHand)) {
@@ -93,20 +94,20 @@ public final class BoundWeapons {
 
     /** Whether a bound stack should vanish right now in the inventory of {@code holder}. */
     public static boolean expired(ItemStack stack, Level level, Entity holder) {
-        CompoundTag tag = stack.getTag();
-        if (tag == null || !tag.hasUUID(OWNER)) return true;
-        if (tag.getLong(UNTIL) <= level.getGameTime()) return true;
-        UUID owner = tag.getUUID(OWNER);
+        CompoundTag tag = com.skycraft.inventory.ItemData.custom(stack);
+        if (tag == null || !tag.read(OWNER, net.minecraft.core.UUIDUtil.CODEC).isPresent()) return true;
+        if (tag.getLongOr(UNTIL, 0L) <= level.getGameTime()) return true;
+        UUID owner = tag.read(OWNER, net.minecraft.core.UUIDUtil.CODEC).orElseThrow();
         return !(holder instanceof Player p) || !p.getUUID().equals(owner) || !p.isAlive();
     }
 
     /** Shared inventoryTick for bound items. */
     public static void inventoryTick(ItemStack stack, Level level, Entity holder) {
-        if (level.isClientSide || level.getGameTime() % 10 != 0) return;
+        if (level.isClientSide() || level.getGameTime() % 10 != 0) return;
         if (expired(stack, level, holder)) {
-            CompoundTag tag = stack.getTag();
-            boolean ranOut = tag != null && tag.hasUUID(OWNER) && tag.getUUID(OWNER).equals(holder.getUUID())
-                    && tag.getLong(UNTIL) <= level.getGameTime();
+            CompoundTag tag = com.skycraft.inventory.ItemData.custom(stack);
+            boolean ranOut = tag != null && tag.read(OWNER, net.minecraft.core.UUIDUtil.CODEC).isPresent() && tag.read(OWNER, net.minecraft.core.UUIDUtil.CODEC).orElseThrow().equals(holder.getUUID())
+                    && tag.getLongOr(UNTIL, 0L) <= level.getGameTime();
             CompoundTag from = tag == null ? new CompoundTag() : tag.copy();
             boolean heldRight = holder instanceof ServerPlayer hp && hp.getMainHandItem() == stack;
             boolean heldLeft = holder instanceof ServerPlayer hp && hp.getOffhandItem() == stack;
@@ -154,7 +155,7 @@ public final class BoundWeapons {
 
     /** Bound items never lie around in the world. */
     public static boolean onEntityItemUpdate(ItemEntity entity) {
-        if (!entity.level().isClientSide) entity.discard();
+        if (!entity.level().isClientSide()) entity.discard();
         return true;
     }
 
@@ -162,11 +163,11 @@ public final class BoundWeapons {
     public static boolean holdsBound(ItemStack stack) {
         if (isBound(stack)) return true;
         if (!(stack.getItem() instanceof BundleItem)) return false;
-        CompoundTag tag = stack.getTag();
-        if (tag == null || !tag.contains(BUNDLE_ITEMS, Tag.TAG_LIST)) return false;
-        ListTag items = tag.getList(BUNDLE_ITEMS, Tag.TAG_COMPOUND);
+        CompoundTag tag = com.skycraft.inventory.ItemData.custom(stack);
+        if (tag == null || !com.skycraft.platform.NbtData.hasType(tag, BUNDLE_ITEMS, Tag.TAG_LIST)) return false;
+        ListTag items = tag.getListOrEmpty(BUNDLE_ITEMS);
         for (int i = 0; i < items.size(); i++) {
-            if (holdsBound(ItemStack.of(items.getCompound(i)))) return true;
+            if (holdsBound(com.skycraft.inventory.ItemData.parse(items.getCompoundOrEmpty(i)))) return true;
         }
         return false;
     }
@@ -174,17 +175,17 @@ public final class BoundWeapons {
     /** Removes bound weapons from a bundle's contents (also nested bundles). Returns true if anything was removed. */
     public static boolean purgeBundle(ItemStack bundle) {
         if (!(bundle.getItem() instanceof BundleItem)) return false;
-        CompoundTag tag = bundle.getTag();
-        if (tag == null || !tag.contains(BUNDLE_ITEMS, Tag.TAG_LIST)) return false;
-        ListTag items = tag.getList(BUNDLE_ITEMS, Tag.TAG_COMPOUND);
+        CompoundTag tag = com.skycraft.inventory.ItemData.custom(bundle);
+        if (tag == null || !com.skycraft.platform.NbtData.hasType(tag, BUNDLE_ITEMS, Tag.TAG_LIST)) return false;
+        ListTag items = tag.getListOrEmpty(BUNDLE_ITEMS);
         boolean changed = false;
         for (int i = items.size() - 1; i >= 0; i--) {
-            ItemStack inside = ItemStack.of(items.getCompound(i));
+            ItemStack inside = com.skycraft.inventory.ItemData.parse(items.getCompoundOrEmpty(i));
             if (isBound(inside)) {
                 items.remove(i);
                 changed = true;
             } else if (purgeBundle(inside)) {
-                items.set(i, inside.save(new CompoundTag()));
+                items.set(i, com.skycraft.inventory.ItemData.save(inside));
                 changed = true;
             }
         }
@@ -219,8 +220,8 @@ public final class BoundWeapons {
 
     /** Seconds left, for the tooltip (client side uses the client level time). */
     public static long secondsLeft(ItemStack stack, Level level) {
-        CompoundTag tag = stack.getTag();
+        CompoundTag tag = com.skycraft.inventory.ItemData.custom(stack);
         if (tag == null) return 0;
-        return Math.max(0, (tag.getLong(UNTIL) - level.getGameTime()) / 20);
+        return Math.max(0, (tag.getLongOr(UNTIL, 0L) - level.getGameTime()) / 20);
     }
 }

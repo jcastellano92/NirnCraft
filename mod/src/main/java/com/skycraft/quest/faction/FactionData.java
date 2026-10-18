@@ -7,14 +7,14 @@ import com.skycraft.quest.QuestSpawner;
 import com.skycraft.quest.Quests;
 import com.skycraft.society.NpcRole;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.Enchantments;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.EnumMap;
@@ -140,26 +140,26 @@ public final class FactionData {
     // ------------------------------------------------------------------ rank gear
 
     private static Item item(String id, Item fallback) {
-        ResourceLocation rl = ResourceLocation.tryParse(id);
-        Item item = rl == null ? null : ForgeRegistries.ITEMS.getValue(rl);
+        Identifier rl = Identifier.tryParse(id);
+        Item item = rl == null ? null : BuiltInRegistries.ITEM.getValue(rl);
         return item == null || item == Items.AIR ? fallback : item;
     }
 
     private static ItemStack named(String id, Item fallback, String key) {
         ItemStack s = new ItemStack(item(id, fallback));
-        s.setHoverName(Component.translatable("item.skycraft.reward." + key));
+        s.set(net.minecraft.core.component.DataComponents.CUSTOM_NAME, Component.translatable("item.skycraft.reward." + key));
         return s;
     }
 
-    private static ItemStack ench(ItemStack s, Enchantment e, int lvl) {
-        s.enchant(e, lvl);
+    private static ItemStack ench(ItemStack s, net.minecraft.resources.ResourceKey<Enchantment> e, int lvl) {
+        s.enchant(com.skycraft.platform.EnchantmentsAccess.holder(e), lvl);
         return s;
     }
 
     /** Robes: a dyed leather tunic in the faction's colours. */
     private static ItemStack robe(int color, String key) {
         ItemStack s = QuestSpawner.dyed(Items.LEATHER_CHESTPLATE, color);
-        s.setHoverName(Component.translatable("item.skycraft.reward." + key));
+        s.set(net.minecraft.core.component.DataComponents.CUSTOM_NAME, Component.translatable("item.skycraft.reward." + key));
         return s;
     }
 
@@ -195,7 +195,7 @@ public final class FactionData {
             case MAGES_GUILD -> {
                 if (gift) give(p, robe(0x2F4FA8, "mages_guild_robes"));
                 if (gift) give(p, Factions.randomSpellTome(p.getRandom()));
-                if (middle) give(p, ench(robe(0x22357A, "mages_guild_wizard_robes"), Enchantments.ALL_DAMAGE_PROTECTION, 2));
+                if (middle) give(p, ench(robe(0x22357A, "mages_guild_wizard_robes"), Enchantments.PROTECTION, 2));
                 if (last) give(p, ench(named("skycraft:staff_of_magnus", Items.BLAZE_ROD, "arch_mages_staff"), Enchantments.FIRE_ASPECT, 2));
             }
             case UNDAUNTED -> {
@@ -205,8 +205,8 @@ public final class FactionData {
             }
             case IMPERIAL_CULT -> {
                 if (gift) give(p, named("skycraft:amulet_of_mara", Items.GOLD_NUGGET, "imperial_cult_amulet"));
-                if (middle) give(p, ench(robe(0xD8C070, "imperial_cult_robes"), Enchantments.ALL_DAMAGE_PROTECTION, 2));
-                if (last) give(p, ench(named("skycraft:amulet_of_talos", Items.GOLD_INGOT, "primates_amulet"), Enchantments.ALL_DAMAGE_PROTECTION, 3));
+                if (middle) give(p, ench(robe(0xD8C070, "imperial_cult_robes"), Enchantments.PROTECTION, 2));
+                if (last) give(p, ench(named("skycraft:amulet_of_talos", Items.GOLD_INGOT, "primates_amulet"), Enchantments.PROTECTION, 3));
             }
             case THALMOR -> {
                 if (gift) give(p, robe(0x2D2D2D, "thalmor_robes"));
@@ -230,7 +230,7 @@ public final class FactionData {
             }
             case HOUSE_HLAALU -> {
                 if (gift) give(p, named("skycraft:netch_chestplate", Items.LEATHER_CHESTPLATE, "hlaalu_netch_jerkin"));
-                if (middle) give(p, ench(named("skycraft:gold_ring", Items.GOLD_INGOT, "hlaalu_councilors_ring"), Enchantments.ALL_DAMAGE_PROTECTION, 1));
+                if (middle) give(p, ench(named("skycraft:gold_ring", Items.GOLD_INGOT, "hlaalu_councilors_ring"), Enchantments.PROTECTION, 1));
                 if (last) give(p, ench(named("skycraft:ebony_sword", Items.DIAMOND_SWORD, "hlaalu_grandmasters_blade"), Enchantments.SHARPNESS, 4));
             }
             case HOUSE_REDORAN -> {
@@ -240,7 +240,7 @@ public final class FactionData {
             }
             case HOUSE_TELVANNI -> {
                 if (gift) give(p, robe(0x5B3A8C, "telvanni_robes"));
-                if (middle) give(p, ench(robe(0x3F2466, "telvanni_wizards_robes"), Enchantments.ALL_DAMAGE_PROTECTION, 3));
+                if (middle) give(p, ench(robe(0x3F2466, "telvanni_wizards_robes"), Enchantments.PROTECTION, 3));
                 if (last) give(p, ench(named("skycraft:glass_dagger", Items.DIAMOND_SWORD, "archmagisters_dagger"), Enchantments.SHARPNESS, 4));
             }
             case TRIBUNAL_TEMPLE -> {
@@ -265,7 +265,7 @@ public final class FactionData {
             }
             case EAST_EMPIRE_COMPANY -> {
                 if (gift) give(p, robe(0x2F5F9F, "eec_factors_coat"));
-                if (middle) give(p, ench(named("skycraft:imperial_light_chestplate", Items.CHAINMAIL_CHESTPLATE, "eec_agents_cuirass"), Enchantments.ALL_DAMAGE_PROTECTION, 2));
+                if (middle) give(p, ench(named("skycraft:imperial_light_chestplate", Items.CHAINMAIL_CHESTPLATE, "eec_agents_cuirass"), Enchantments.PROTECTION, 2));
                 if (last) give(p, ench(named("skycraft:imperial_sword", Items.DIAMOND_SWORD, "directors_sabre"), Enchantments.SHARPNESS, 4));
             }
             case SHADOWSCALES -> {
@@ -286,7 +286,7 @@ public final class FactionData {
             case GREEN_PACT -> {
                 if (gift) give(p, named("skycraft:bosmer_helmet", Items.LEATHER_HELMET, "warden_hood"));
                 if (middle) set(p, "bosmer", LEATHER, "warden_set");
-                if (last) give(p, ench(named("skycraft:elven_bow", Items.BOW, "bow_of_the_green"), Enchantments.POWER_ARROWS, 4));
+                if (last) give(p, ench(named("skycraft:elven_bow", Items.BOW, "bow_of_the_green"), Enchantments.POWER, 4));
             }
             case ALDMERI_DOMINION -> {
                 if (gift) give(p, named("skycraft:elven_dagger", Items.IRON_SWORD, "dominion_dagger"));
@@ -296,7 +296,7 @@ public final class FactionData {
             case PSIJIC_ORDER -> {
                 if (gift) give(p, robe(0x3E8E84, "psijic_robes"));
                 if (middle) give(p, Factions.randomSpellTome(p.getRandom()));
-                if (last) give(p, ench(named("minecraft:golden_helmet", Items.GOLDEN_HELMET, "ritemasters_circlet"), Enchantments.ALL_DAMAGE_PROTECTION, 4));
+                if (last) give(p, ench(named("minecraft:golden_helmet", Items.GOLDEN_HELMET, "ritemasters_circlet"), Enchantments.PROTECTION, 4));
             }
             case CROWNS -> {
                 if (gift) give(p, named("skycraft:steel_sword", Items.IRON_SWORD, "crown_scimitar"));
@@ -325,7 +325,7 @@ public final class FactionData {
             }
             case GREYBEARDS -> {
                 if (gift) give(p, robe(0x8C8C96, "greybeard_robes"));
-                if (last) give(p, ench(robe(0x6E6E78, "master_of_the_voice_robes"), Enchantments.ALL_DAMAGE_PROTECTION, 3));
+                if (last) give(p, ench(robe(0x6E6E78, "master_of_the_voice_robes"), Enchantments.PROTECTION, 3));
             }
             case VIGILANTS_OF_STENDARR -> {
                 if (gift) give(p, robe(0xE8DCA0, "vigilant_robes"));

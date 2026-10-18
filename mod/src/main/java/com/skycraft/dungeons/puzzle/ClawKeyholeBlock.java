@@ -19,7 +19,8 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
+import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.phys.BlockHitResult;
 
@@ -29,7 +30,7 @@ import net.minecraft.world.phys.BlockHitResult;
  * Turning the matching claw while the rings show its palm opens the whole door; the claw is kept.
  */
 public class ClawKeyholeBlock extends Block {
-    public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
+    public static final EnumProperty<Direction> FACING = HorizontalDirectionalBlock.FACING;
     public static final IntegerProperty CLAW = IntegerProperty.create("claw", 0, Claw.VALUES.length - 1);
 
     public ClawKeyholeBlock(Properties props) {
@@ -52,11 +53,10 @@ public class ClawKeyholeBlock extends Block {
         return facing.getCounterClockWise();
     }
 
-    @Override
     @SuppressWarnings("deprecation")
     public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
         if (hand != InteractionHand.MAIN_HAND) return InteractionResult.PASS;
-        if (level.isClientSide) return InteractionResult.SUCCESS;
+        if (level.isClientSide()) return InteractionResult.SUCCESS;
         Claw claw = Claw.byIndex(state.getValue(CLAW));
         ItemStack held = player.getMainHandItem();
         if (!(held.getItem() instanceof DragonClawItem item)) {
@@ -129,5 +129,14 @@ public class ClawKeyholeBlock extends Block {
             }
         }
         return out;
+    }
+
+    @Override protected net.minecraft.world.InteractionResult useItemOn(net.minecraft.world.item.ItemStack stack,
+            BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+        return use(state, level, pos, player, hand, hit);
+    }
+    @Override protected net.minecraft.world.InteractionResult useWithoutItem(BlockState state, Level level,
+            BlockPos pos, Player player, BlockHitResult hit) {
+        return use(state, level, pos, player, InteractionHand.MAIN_HAND, hit);
     }
 }

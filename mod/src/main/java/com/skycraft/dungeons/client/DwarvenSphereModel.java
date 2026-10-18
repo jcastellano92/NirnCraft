@@ -1,7 +1,7 @@
 package com.skycraft.dungeons.client;
 
 import com.skycraft.dungeons.entity.DwarvenSphere;
-import net.minecraft.client.model.HierarchicalModel;
+import com.skycraft.client.PoseEntityModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.CubeListBuilder;
@@ -14,7 +14,7 @@ import net.minecraft.util.Mth;
  * Dwarven sphere: a rolling bronze ball that unfolds into a torso on a wheel, with a blade arm and a crossbow arm.
  * The ball and the warrior are separate parts cross-faded by the unfold progress. Texture 64x64.
  */
-public class DwarvenSphereModel extends HierarchicalModel<DwarvenSphere> {
+public class DwarvenSphereModel extends PoseEntityModel<DwarvenSphere> {
     private final ModelPart root;
     private final ModelPart ball;
     private final ModelPart wheel;
@@ -26,6 +26,7 @@ public class DwarvenSphereModel extends HierarchicalModel<DwarvenSphere> {
     private float roll;
 
     public DwarvenSphereModel(ModelPart root) {
+        super(root);
         this.root = root;
         this.ball = root.getChild("ball");
         this.wheel = root.getChild("wheel");
@@ -60,14 +61,10 @@ public class DwarvenSphereModel extends HierarchicalModel<DwarvenSphere> {
     }
 
     @Override
-    public ModelPart root() {
-        return root;
-    }
-
-    @Override
-    public void prepareMobModel(DwarvenSphere entity, float limbSwing, float limbSwingAmount, float partialTick) {
+    public void extractPose(DwarvenSphere entity, com.skycraft.client.PoseRenderState state, float partialTick) {
         this.open = Mth.lerp(partialTick, entity.openAnimO, entity.openAnim);
         this.roll = Mth.lerp(partialTick, entity.rollAngleO, entity.rollAngle);
+        super.extractPose(entity,state,partialTick);
     }
 
     @Override

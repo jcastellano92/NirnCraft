@@ -24,7 +24,7 @@ public final class ContainerOverflowClient {
         if (m.start() == 0) staging = new ArrayList<>();
         if (staging == null) return;
         for (InventoryPackets.PackSync.Row r : m.rows()) {
-            ItemStack s = ItemStack.of(r.key());
+            ItemStack s = com.skycraft.inventory.ItemData.parse(r.key());
             if (!s.isEmpty()) s.setCount(Math.max(1, r.count()));
             staging.add(s); // unreadable rows stay as EMPTY placeholders: indexes must match the server's
         }

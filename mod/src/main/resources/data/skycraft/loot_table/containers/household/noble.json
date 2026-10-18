@@ -1,0 +1,110 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:septim",
+          "weight": 1,
+          "modifier": {
+            "min": 30,
+            "max": 90,
+            "growth": 0.05,
+            "type": "skycraft:scaled_gold"
+          }
+        }
+      ]
+    },
+    {
+      "rolls": {
+        "type": "minecraft:uniform",
+        "min": 2,
+        "max": 3
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:gold_ring",
+          "weight": 30,
+          "modifier": {
+            "tag": "skycraft:loot/trinkets",
+            "type": "skycraft:regional_tag"
+          }
+        },
+        {
+          "type": "minecraft:loot_table",
+          "weight": 25,
+          "value": "skycraft:parts/gems"
+        },
+        {
+          "type": "minecraft:loot_table",
+          "weight": 10,
+          "value": "skycraft:parts/soul_gems"
+        },
+        {
+          "type": "minecraft:loot_table",
+          "weight": 15,
+          "value": "skycraft:parts/gear_rich"
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:book",
+          "weight": 8,
+          "modifier": {
+            "type": "skycraft:leveled_tome"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:book",
+          "weight": 4,
+          "modifier": {
+            "type": "skycraft:skill_book"
+          }
+        },
+        {
+          "type": "minecraft:loot_table",
+          "weight": 8,
+          "value": "skycraft:parts/potions"
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:book",
+          "weight": 60,
+          "modifier": {
+            "type": "skycraft:regional_book"
+          }
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 40
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:regional_treasure",
+          "weight": 3,
+          "modifier": {
+            "type": "skycraft:regional_treasure"
+          }
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 97
+        }
+      ]
+    }
+  ],
+  "random_sequence": "skycraft:containers/household/noble"
+}

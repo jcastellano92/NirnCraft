@@ -1,0 +1,14 @@
+{
+  "layers": {
+    "humanoid": [
+      {
+        "texture": "skycraft:netch"
+      }
+    ],
+    "humanoid_leggings": [
+      {
+        "texture": "skycraft:netch"
+      }
+    ]
+  }
+}

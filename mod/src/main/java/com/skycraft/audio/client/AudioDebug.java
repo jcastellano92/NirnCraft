@@ -5,10 +5,10 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RegisterClientCommandsEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,7 +20,7 @@ import java.util.Map;
  * {@code /skycraft-audio debug}: for 10 seconds counts every sound started within 20 blocks of the player (sound id,
  * channel, positional or not, loudest volume) and prints the busiest ones. How a runaway rustle gets found.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
 public final class AudioDebug {
     private static final class Stat {
         int count;
@@ -56,7 +56,7 @@ public final class AudioDebug {
         }
         boolean rel = s.isRelative();
         if (!rel && mc.player.distanceToSqr(s.getX(), s.getY(), s.getZ()) > 400) return;
-        String key = s.getLocation() + " [" + s.getSource().getName() + "]";
+        String key = s.getIdentifier() + " [" + s.getSource().getName() + "]";
         Stat st = STATS.computeIfAbsent(key, k -> new Stat());
         st.count++;
         st.relative = rel;

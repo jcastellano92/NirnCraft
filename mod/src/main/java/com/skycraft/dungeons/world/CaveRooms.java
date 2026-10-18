@@ -42,7 +42,7 @@ public final class CaveRooms {
             }
         }
         scatter(p, room, 610, 3, r -> r % 3 == 0 ? Blocks.BONE_BLOCK.defaultBlockState() : Deco.skull(Blocks.SKELETON_SKULL, r % 16));
-        putEdge(p, room, 615, Blocks.WHITE_WOOL.defaultBlockState());
+        putEdge(p, room, 615, com.skycraft.worldgen.VanillaBlocks.WHITE_WOOL.defaultBlockState());
         if (room.boss()) {
             boss(p, room, 620, Mobs.orElse("skycraft:giant_frostbite_spider", "skycraft:frostbite_spider", "minecraft:spider"), "Giant Frostbite Spider");
             mob(p, room, 621, Mobs.spider(), null);
@@ -142,7 +142,7 @@ public final class CaveRooms {
         int[] s = edgeSpot(p, room, 684);
         if (s != null) {
             p.set(s[0], room.floor, s[1], Blocks.SPRUCE_FENCE.defaultBlockState());
-            p.set(s[0], room.floor + 1, s[1], Blocks.BROWN_WOOL.defaultBlockState());
+            p.set(s[0], room.floor + 1, s[1], com.skycraft.worldgen.VanillaBlocks.BROWN_WOOL.defaultBlockState());
         }
         String named = Painter.entityExists("skycraft:forsworn") ? null : "Forsworn";
         if (room.boss()) {

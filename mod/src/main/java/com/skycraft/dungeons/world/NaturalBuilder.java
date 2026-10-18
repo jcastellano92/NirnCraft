@@ -31,7 +31,7 @@ public final class NaturalBuilder {
         }
         return switch (t) {
             case MINE -> roll < 8 ? Blocks.COBBLESTONE.defaultBlockState() : roll < 12 ? Blocks.ANDESITE.defaultBlockState() : rock(y);
-            case VAMPIRE_LAIR -> roll < 6 ? Blocks.BLACKSTONE.defaultBlockState() : roll < 8 ? Blocks.RED_TERRACOTTA.defaultBlockState() : rock(y);
+            case VAMPIRE_LAIR -> roll < 6 ? Blocks.BLACKSTONE.defaultBlockState() : roll < 8 ? com.skycraft.worldgen.VanillaBlocks.RED_TERRACOTTA.defaultBlockState() : rock(y);
             case NECROMANCER_LAIR -> roll < 6 ? Blocks.SOUL_SOIL.defaultBlockState() : roll < 9 ? Blocks.TUFF.defaultBlockState() : rock(y);
             case HAGRAVEN_LAIR -> roll < 6 ? Blocks.MUD.defaultBlockState() : roll < 10 ? Blocks.MOSS_BLOCK.defaultBlockState()
                     : roll < 12 ? Blocks.ROOTED_DIRT.defaultBlockState() : rock(y);
@@ -51,7 +51,7 @@ public final class NaturalBuilder {
                     : roll < 44 ? Blocks.COBBLESTONE.defaultBlockState() : roll < 56 ? Blocks.TUFF.defaultBlockState()
                     : roll < 66 ? Blocks.GRAVEL.defaultBlockState() : roll < 72 ? Blocks.COARSE_DIRT.defaultBlockState() : base;
             case VAMPIRE_LAIR -> roll < 34 ? Blocks.BLACKSTONE.defaultBlockState() : roll < 52 ? Blocks.CRACKED_DEEPSLATE_BRICKS.defaultBlockState()
-                    : roll < 60 ? Blocks.RED_TERRACOTTA.defaultBlockState() : roll < 66 ? Blocks.BONE_BLOCK.defaultBlockState() : base;
+                    : roll < 60 ? com.skycraft.worldgen.VanillaBlocks.RED_TERRACOTTA.defaultBlockState() : roll < 66 ? Blocks.BONE_BLOCK.defaultBlockState() : base;
             case NECROMANCER_LAIR -> roll < 30 ? Blocks.TUFF.defaultBlockState() : roll < 50 ? Blocks.SOUL_SOIL.defaultBlockState()
                     : roll < 66 ? Blocks.COBBLED_DEEPSLATE.defaultBlockState() : roll < 72 ? Blocks.AMETHYST_BLOCK.defaultBlockState() : base;
             case HAGRAVEN_LAIR -> roll < 36 ? Blocks.MOSS_BLOCK.defaultBlockState() : roll < 56 ? Blocks.MUD.defaultBlockState()

@@ -18,14 +18,13 @@ final class RoadBucket extends SavedData {
     final Int2ObjectLinkedOpenHashMap<Road> roads = new Int2ObjectLinkedOpenHashMap<>();
 
     static long keyOf(Road road) {
-        return ChunkPos.asLong(road.xs[0] >> SHIFT, road.zs[0] >> SHIFT);
+        return ChunkPos.pack(road.xs[0] >> SHIFT, road.zs[0] >> SHIFT);
     }
 
     static String name(long key) {
         return RoadsData.NAME + "_r_" + ChunkPos.getX(key) + "_" + ChunkPos.getZ(key);
     }
 
-    @Override
     public CompoundTag save(CompoundTag tag) {
         ListTag r = new ListTag();
         for (Road road : roads.values()) r.add(road.save());
@@ -35,9 +34,9 @@ final class RoadBucket extends SavedData {
 
     static RoadBucket load(CompoundTag tag) {
         RoadBucket b = new RoadBucket();
-        ListTag r = tag.getList("roads", Tag.TAG_COMPOUND);
+        ListTag r = tag.getListOrEmpty("roads");
         for (int i = 0; i < r.size(); i++) {
-            Road road = Road.load(r.getCompound(i));
+            Road road = Road.load(r.getCompoundOrEmpty(i));
             if (road != null) b.roads.put(road.id, road);
         }
         return b;

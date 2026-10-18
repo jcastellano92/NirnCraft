@@ -14,16 +14,16 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.animal.horse.AbstractHorse;
+import net.minecraft.world.entity.animal.equine.AbstractHorse;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.living.LivingDeathEvent;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+
+import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -38,10 +38,10 @@ import java.util.UUID;
  * <p>XP: distance ridden (one use per 16 blocks of real travel) and kills from the saddle. The speed and jump bonuses
  * are transient attribute modifiers on the horse, only while you ride it.</p>
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class Riding {
-    private static final UUID SPEED_ID = UUID.fromString("2f8f9a3e-7d41-4c55-9a8e-5b1c2d3e4f60");
-    private static final UUID JUMP_ID = UUID.fromString("2f8f9a3e-7d41-4c55-9a8e-5b1c2d3e4f61");
+    private static final net.minecraft.resources.Identifier SPEED_ID = net.minecraft.resources.Identifier.parse("skycraft:modifier_2f8f9a3e-7d41-4c55-9a8e-5b1c2d3e4f60");
+    private static final net.minecraft.resources.Identifier JUMP_ID = net.minecraft.resources.Identifier.parse("skycraft:modifier_2f8f9a3e-7d41-4c55-9a8e-5b1c2d3e4f61");
     /** Distance ridden since the last XP award, per player. */
     private static final Map<UUID, Double> RIDDEN = new HashMap<>();
     private static final Map<UUID, Vec3> LAST_POS = new HashMap<>();
@@ -53,8 +53,8 @@ public final class Riding {
     }
 
     @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer p)) return;
+    public static void onPlayerTick(net.neoforged.neoforge.event.tick.PlayerTickEvent.Post event) {
+        if (!(event instanceof net.neoforged.neoforge.event.tick.PlayerTickEvent.Post) || !(event.getEntity() instanceof ServerPlayer p)) return;
         AbstractHorse horse = mount(p);
         if (horse == null) {
             LAST_POS.remove(p.getUUID());
@@ -84,9 +84,9 @@ public final class Riding {
             for (LivingEntity e : horse.level().getEntitiesOfClass(LivingEntity.class, horse.getBoundingBox().inflate(0.4),
                     e -> e != horse && e != p && e.isAlive() && e.getBbHeight() < 1.6f && com.skycraft.magic.Targeting.canHarm(p, e))) {
                 Vec3 push = horse.getDeltaMovement().multiply(1, 0, 1).normalize().scale(0.9);
-                e.hurt(horse.damageSources().mobAttack(horse), 4f);
+                com.skycraft.platform.Effects.hurt(e, horse.damageSources().mobAttack(horse), 4f);
                 e.push(push.x, 0.35, push.z);
-                e.hurtMarked = true;
+                e.syncVelocity = true;
                 CombatHandler.stagger(p, e, 25);
                 horse.level().playSound(null, e.blockPosition(), SoundEvents.HORSE_STEP, SoundSource.PLAYERS, 1f, 0.6f);
             }
@@ -100,25 +100,25 @@ public final class Riding {
         set(horse.getAttribute(Attributes.JUMP_STRENGTH), JUMP_ID, "Endurance Rider", Perks.has(data, "riding.endurance_rider") ? 0.2 : 0);
     }
 
-    private static void set(AttributeInstance inst, UUID id, String name, double value) {
+    private static void set(AttributeInstance inst, net.minecraft.resources.Identifier id, String name, double value) {
         if (inst == null) return;
         AttributeModifier old = inst.getModifier(id);
-        if (old != null && Math.abs(old.getAmount() - value) < 1e-6) return;
+        if (old != null && Math.abs(old.amount() - value) < 1e-6) return;
         if (old != null) inst.removeModifier(id);
-        if (value > 0) inst.addTransientModifier(new AttributeModifier(id, name, value, AttributeModifier.Operation.MULTIPLY_BASE));
+        if (value > 0) inst.addTransientModifier(new AttributeModifier(id, value, AttributeModifier.Operation.ADD_MULTIPLIED_BASE));
     }
 
     /** Removes the rider's bonuses from a horse it got off (dismounts are checked when the horse next ticks). */
     @SubscribeEvent
-    public static void onMountChange(net.minecraftforge.event.entity.EntityMountEvent event) {
-        if (event.isDismounting() && event.getEntityBeingMounted() instanceof AbstractHorse horse && !horse.level().isClientSide) {
+    public static void onMountChange(net.neoforged.neoforge.event.entity.EntityMountEvent event) {
+        if (event.isDismounting() && event.getEntityBeingMounted() instanceof AbstractHorse horse && !horse.level().isClientSide()) {
             set(horse.getAttribute(Attributes.MOVEMENT_SPEED), SPEED_ID, "", 0);
             set(horse.getAttribute(Attributes.JUMP_STRENGTH), JUMP_ID, "", 0);
         }
     }
 
     @SubscribeEvent(priority = EventPriority.LOW)
-    public static void onHurt(LivingHurtEvent event) {
+    public static void onHurt(com.skycraft.combat.BeforeArmorDamageEvent event) {
         LivingEntity victim = event.getEntity();
         // Stable Hand: your horse takes 25% less damage while you ride it.
         if (victim instanceof AbstractHorse horse && horse.getControllingPassenger() instanceof ServerPlayer rider

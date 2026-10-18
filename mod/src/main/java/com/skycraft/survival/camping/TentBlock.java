@@ -84,8 +84,8 @@ public class TentBlock extends HorizontalDirectionalBlock {
     }
 
     @Override
-    public void playerWillDestroy(Level level, BlockPos pos, BlockState state, Player player) {
-        if (!level.isClientSide) {
+    public BlockState playerWillDestroy(Level level, BlockPos pos, BlockState state, Player player) {
+        if (!level.isClientSide()) {
             BlockPos origin = origin(pos, state);
             Direction facing = state.getValue(FACING);
             for (Part part : Part.values()) {
@@ -94,7 +94,7 @@ public class TentBlock extends HorizontalDirectionalBlock {
             }
             if (!player.isCreative()) Block.popResource(level, pos, new ItemStack(SurvivalRegistry.TENT_KIT.get()));
         }
-        super.playerWillDestroy(level, pos, state, player);
+        return super.playerWillDestroy(level, pos, state, player);
     }
 
     @Override
@@ -118,7 +118,7 @@ public class TentBlock extends HorizontalDirectionalBlock {
     }
 
     @Override
-    public boolean propagatesSkylightDown(BlockState state, BlockGetter level, BlockPos pos) {
+    public boolean propagatesSkylightDown(BlockState state) {
         return true;
     }
 

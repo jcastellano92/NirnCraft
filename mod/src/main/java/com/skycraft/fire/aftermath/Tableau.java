@@ -106,7 +106,7 @@ public final class Tableau {
     @Nullable
     public static Pose poseOf(Entity e) {
         if (!e.getPersistentData().contains(KEY)) return null;
-        return Pose.byId(e.getPersistentData().getString(KEY));
+        return Pose.byId(e.getPersistentData().getStringOr(KEY, ""));
     }
 
     /** Eye height of an actor in its pose (tears fall from there). */

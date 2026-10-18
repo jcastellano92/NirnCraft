@@ -146,10 +146,10 @@ public final class LandmarkBuilder {
         Registry<Structure> registry = null;
         for (int dx = -reach; dx <= reach; dx++) {
             for (int dz = -reach; dz <= reach; dz++) {
-                ChunkAccess access = level.getChunk(centre.x + dx, centre.z + dz);
+                ChunkAccess access = level.getChunk(centre.x() + dx, centre.z() + dz);
                 var refs = access.getAllReferences();
                 if (refs.isEmpty()) continue;
-                if (registry == null) registry = level.registryAccess().registryOrThrow(Registries.STRUCTURE);
+                if (registry == null) registry = level.registryAccess().lookupOrThrow(Registries.STRUCTURE);
                 for (var e : refs.entrySet()) {
                     if (e.getValue().isEmpty()) continue;
                     Structure s = e.getKey();

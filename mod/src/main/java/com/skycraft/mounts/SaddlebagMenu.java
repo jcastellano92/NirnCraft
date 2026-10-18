@@ -46,7 +46,7 @@ public final class SaddlebagMenu extends ChestMenu {
     /** True for an item that is gear: it goes on the mount through {@link #equipFrom}, never into the cargo. */
     public boolean isGear(ItemStack stack) {
         return SaddleType.of(stack) != null || MountGear.wearsBarding(bag.mount, bag.kind, stack)
-                || stack.getItem() instanceof net.minecraft.world.item.HorseArmorItem;
+                || MountItems.isHorseArmor(stack);
     }
 
     /**

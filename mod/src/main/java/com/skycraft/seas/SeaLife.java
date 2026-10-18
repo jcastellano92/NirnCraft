@@ -7,7 +7,7 @@ import com.skycraft.tamriel.MapSample;
 import com.skycraft.tamriel.Region;
 import com.skycraft.tamriel.TamrielMap;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.FluidTags;
@@ -16,13 +16,13 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.registries.ForgeRegistries;
+
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,7 +40,7 @@ import java.util.List;
  * Spots 24-64 blocks away in loaded, ticking chunks only; bounded per player; what it places is tagged as a region
  * spawn, so it leaves again a minute after everyone has gone.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class SeaLife {
     private static final int INTERVAL = 40;
     private static final String TAG = "skycraft_sea_life";
@@ -50,16 +50,16 @@ public final class SeaLife {
     private record Pick(String id, int weight, int min, int max, boolean bed) {}
 
     @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer player)) return;
-        ServerLevel level = player.serverLevel();
+    public static void onPlayerTick(net.neoforged.neoforge.event.tick.PlayerTickEvent.Post event) {
+        if (!(event instanceof net.neoforged.neoforge.event.tick.PlayerTickEvent.Post) || !(event.getEntity() instanceof ServerPlayer player)) return;
+        ServerLevel level = player.level();
         if ((level.getGameTime() + player.getId() * 13L) % INTERVAL != 0) return;
         if (!SeasConfig.SEA_LIFE.get() || level.dimension() != Level.OVERWORLD || player.isSpectator() || !player.isAlive()) return;
-        if (!level.getGameRules().getBoolean(net.minecraft.world.level.GameRules.RULE_DOMOBSPAWNING)) return;
-        List<Mob> mine = level.getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(96), m -> m.getTags().contains(TAG));
+        if (!level.getGameRules().get(net.minecraft.world.level.gamerules.GameRules.SPAWN_MOBS)) return;
+        List<Mob> mine = level.getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(96), m -> m.entityTags().contains(TAG));
         RandomSource r = level.getRandom();
         if (mine.size() < SeasConfig.SEA_LIFE_BUDGET.get()) water(level, player, mine, r);
-        if (SeasConfig.HAWKS.get() && level.isDay()) sky(level, player, mine, r);
+        if (SeasConfig.HAWKS.get() && level.isBrightOutside()) sky(level, player, mine, r);
     }
 
     // ------------------------------------------------------------------ the water
@@ -171,7 +171,7 @@ public final class SeaLife {
         if (!level.isLoaded(col) || !level.isPositionEntityTicking(col)) return;
         var biome = level.getBiome(col);
         float temp = biome.value().getBaseTemperature();
-        String path = biome.unwrapKey().map(k -> k.location().getPath()).orElse("");
+        String path = biome.unwrapKey().map(k -> k.identifier().getPath()).orElse("");
         boolean open = path.contains("tundra") || path.contains("plains") || path.contains("crag") || path.contains("coast")
                 || path.contains("shore") || path.contains("meadow") || path.contains("highland") || path.contains("steppe")
                 || path.contains("peak") || path.contains("savanna") || path.contains("moor");
@@ -181,19 +181,19 @@ public final class SeaLife {
     }
 
     private static void spawn(ServerLevel level, String id, BlockPos at) {
-        EntityType<?> type = ForgeRegistries.ENTITY_TYPES.getValue(new ResourceLocation(id));
+        EntityType<?> type = BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.parse(id));
         if (type == null) return;
-        Entity e = type.create(level);
+        Entity e = type.create(level, net.minecraft.world.entity.EntitySpawnReason.EVENT);
         if (!(e instanceof Mob mob)) {
             if (e != null) e.discard();
             return;
         }
-        mob.moveTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, level.getRandom().nextFloat() * 360f, 0);
+        mob.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, level.getRandom().nextFloat() * 360f, 0);
         if (!level.noCollision(mob)) return;
         mob.addTag(TAG);
         mob.addTag(SkyCreature.REGION_SPAWN_TAG);
         mob.getPersistentData().putLong("skycraft_rs_seen", com.skycraft.world.RestManager.liveTime(level));
-        net.minecraftforge.event.ForgeEventFactory.onFinalizeSpawn(mob, level, level.getCurrentDifficultyAt(at), MobSpawnType.NATURAL, null, null);
+        net.neoforged.neoforge.event.EventHooks.finalizeMobSpawn(mob, level, level.getCurrentDifficultyAt(at), EntitySpawnReason.NATURAL, null);
         if (mob.isSpawnCancelled()) return;
         level.addFreshEntity(mob);
     }

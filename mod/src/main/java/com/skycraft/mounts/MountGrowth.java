@@ -43,9 +43,9 @@ public final class MountGrowth {
     public static final String RECORDS = "tokens";
     /** The first version kept bare stats per kind here; they are turned into tokens when first read. */
     private static final String LEGACY = "mstats";
-    private static final UUID SPEED_ID = UUID.fromString("7a0e5f10-3b1c-4a77-8c0d-61a7d2b9e101");
-    private static final UUID HEALTH_ID = UUID.fromString("7a0e5f10-3b1c-4a77-8c0d-61a7d2b9e102");
-    private static final UUID JUMP_ID = UUID.fromString("7a0e5f10-3b1c-4a77-8c0d-61a7d2b9e103");
+    private static final net.minecraft.resources.Identifier SPEED_ID = net.minecraft.resources.Identifier.fromNamespaceAndPath("skycraft", "modifier_7a0e5f10-3b1c-4a77-8c0d-61a7d2b9e101");
+    private static final net.minecraft.resources.Identifier HEALTH_ID = net.minecraft.resources.Identifier.fromNamespaceAndPath("skycraft", "modifier_7a0e5f10-3b1c-4a77-8c0d-61a7d2b9e102");
+    private static final net.minecraft.resources.Identifier JUMP_ID = net.minecraft.resources.Identifier.fromNamespaceAndPath("skycraft", "modifier_7a0e5f10-3b1c-4a77-8c0d-61a7d2b9e103");
     /** Experience a second is capped at this (a farm for it would be a long walk). */
     private static final float MAX_XP_PER_SECOND = 2.5f;
     private static final long FEED_COOLDOWN = 600;
@@ -73,13 +73,13 @@ public final class MountGrowth {
     @Nullable
     public static CompoundTag tokenOf(Player p, MountKind kind) {
         CompoundTag rec = Mounts.data(p);
-        CompoundTag all = rec.getCompound(RECORDS);
-        if (all.contains(kind.id, 10)) return all.getCompound(kind.id).copy();
-        CompoundTag old = rec.getCompound(LEGACY);
-        if (old.contains(kind.id, 10)) {
+        CompoundTag all = rec.getCompoundOrEmpty(RECORDS);
+        if (com.skycraft.platform.NbtData.hasType(all, kind.id, 10)) return all.getCompoundOrEmpty(kind.id).copy();
+        CompoundTag old = rec.getCompoundOrEmpty(LEGACY);
+        if (com.skycraft.platform.NbtData.hasType(old, kind.id, 10)) {
             // a record of the first version: the stats become the token of the animal that is active
-            CompoundTag token = MountToken.create(kind, MountStats.fromTag(kind, old.getCompound(kind.id)), null,
-                    rec.hasUUID("uuid") && kind == Mounts.active(p) ? rec.getUUID("uuid") : UUID.randomUUID());
+            CompoundTag token = MountToken.create(kind, MountStats.fromTag(kind, old.getCompoundOrEmpty(kind.id)), null,
+                    rec.read("uuid", net.minecraft.core.UUIDUtil.CODEC).isPresent() && kind == Mounts.active(p) ? rec.read("uuid", net.minecraft.core.UUIDUtil.CODEC).orElseThrow() : UUID.randomUUID());
             old.remove(kind.id);
             rec.put(LEGACY, old);
             all.put(kind.id, token);
@@ -91,7 +91,7 @@ public final class MountGrowth {
 
     public static void putToken(Player p, MountKind kind, CompoundTag token) {
         CompoundTag tag = Mounts.data(p);
-        CompoundTag all = tag.getCompound(RECORDS);
+        CompoundTag all = tag.getCompoundOrEmpty(RECORDS);
         all.put(kind.id, token.copy());
         tag.put(RECORDS, all);
         SkyData.get(p).markDirty();
@@ -103,7 +103,7 @@ public final class MountGrowth {
         CompoundTag token = tokenOf(p, kind);
         if (token != null) {
             CompoundTag tag = Mounts.data(p);
-            CompoundTag all = tag.getCompound(RECORDS);
+            CompoundTag all = tag.getCompoundOrEmpty(RECORDS);
             all.remove(kind.id);
             tag.put(RECORDS, all);
             SkyData.get(p).markDirty();
@@ -152,8 +152,8 @@ public final class MountGrowth {
         if (p instanceof ServerPlayer sp && Mounts.activeEntity(sp) instanceof Mob m && Mounts.kindOf(m) == k) return MountStats.of(m, k);
         MountStats s = recorded(p, k);
         CompoundTag tag = Mounts.data(p);
-        if (s == null && tag.hasUUID("uuid")) {
-            s = MountStats.roll(k, MountStats.seedOf(tag.getUUID("uuid"), k), 0f, false);
+        if (s == null && tag.read("uuid", net.minecraft.core.UUIDUtil.CODEC).isPresent()) {
+            s = MountStats.roll(k, MountStats.seedOf(tag.read("uuid", net.minecraft.core.UUIDUtil.CODEC).orElseThrow(), k), 0f, false);
             record(p, k, s);
         }
         return s;
@@ -218,23 +218,23 @@ public final class MountGrowth {
 
     /** Speed, health and jump of the animal from its stats (stamina and carry are read where they are used). */
     public static void applyAttributes(Mob mob, MountKind kind) {
-        if (mob.level().isClientSide) return;
+        if (mob.level().isClientSide()) return;
         MountStats s = MountStats.of(mob, kind);
         AttributeInstance speed = mob.getAttribute(Attributes.MOVEMENT_SPEED);
         if (speed != null) {
-            MountGear.setModifier(speed, SPEED_ID, "Individual speed", s.speedMult() - 1.0, AttributeModifier.Operation.MULTIPLY_TOTAL);
+            MountGear.setModifier(speed, SPEED_ID, "Individual speed", s.speedMult() - 1.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
         }
         AttributeInstance hp = mob.getAttribute(Attributes.MAX_HEALTH);
         if (hp != null) {
             float ratio = mob.getMaxHealth() <= 0 ? 1f : mob.getHealth() / mob.getMaxHealth();
-            if (MountGear.setModifier(hp, HEALTH_ID, "Individual health", s.mult(MountProfile.HEALTH) - 1.0, AttributeModifier.Operation.MULTIPLY_BASE)) {
+            if (MountGear.setModifier(hp, HEALTH_ID, "Individual health", s.mult(MountProfile.HEALTH) - 1.0, AttributeModifier.Operation.ADD_MULTIPLIED_BASE)) {
                 mob.setHealth(Math.max(1f, Math.min(mob.getMaxHealth(), ratio * mob.getMaxHealth())));
             }
         }
         if (mob instanceof MountBeast b) b.setJumpMult(s.mult(MountProfile.JUMP));
         AttributeInstance jump = mob.getAttribute(Attributes.JUMP_STRENGTH);
         if (jump != null) {
-            MountGear.setModifier(jump, JUMP_ID, "Individual jump", s.mult(MountProfile.JUMP) - 1.0, AttributeModifier.Operation.MULTIPLY_TOTAL);
+            MountGear.setModifier(jump, JUMP_ID, "Individual jump", s.mult(MountProfile.JUMP) - 1.0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
         }
     }
 

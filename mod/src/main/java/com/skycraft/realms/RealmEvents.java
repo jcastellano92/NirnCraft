@@ -6,7 +6,7 @@ import com.skycraft.core.SkyData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -17,22 +17,22 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.EntityTravelToDimensionEvent;
-import net.minecraftforge.event.entity.living.LivingDeathEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.tick.ServerTickEvent;
+import net.neoforged.neoforge.event.entity.EntityTravelToDimensionEvent;
+import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 /**
  * Server events of the realms: return points, Sovngarde through vanilla End portals, safe respawns after dying in a
  * realm, first-entry titles, Tsun at the Whalebone Bridge, and tidying the End dragon fight's leftovers in Sovngarde.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class RealmEvents {
-    private static final ResourceLocation TSUN = new ResourceLocation(Skycraft.MODID, "tsun");
+    private static final Identifier TSUN = Identifier.fromNamespaceAndPath(Skycraft.MODID, "tsun");
 
     private RealmEvents() {}
 
@@ -47,17 +47,16 @@ public final class RealmEvents {
         Realm to = Realm.of(event.getDimension());
         Realm from = Realm.of(p.level());
         if (to == null || from != null) return;
-        if (p.level().dimension().location().getPath().equals("jail")) return;
+        if (p.level().dimension().identifier().getPath().equals("jail")) return;
         RealmTravel.rememberReturn(p);
         if (to == Realm.SOVNGARDE && p.level().getBlockState(p.blockPosition()).is(Blocks.END_PORTAL)) {
             event.setCanceled(true);
-            RealmTravel.schedule(p.server, 1, () -> RealmTravel.enter(p, Realm.SOVNGARDE, RealmTravel.arrival(Realm.SOVNGARDE, p, 0)));
+            RealmTravel.schedule(p.level().getServer(), 1, () -> RealmTravel.enter(p, Realm.SOVNGARDE, RealmTravel.arrival(Realm.SOVNGARDE, p, 0)));
         }
     }
 
     @SubscribeEvent
-    public static void onServerTick(TickEvent.ServerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END) return;
+    public static void onServerTick(ServerTickEvent.Post event) {
         RealmTravel.tick(event.getServer());
         if (event.getServer().getTickCount() % 40 == 0) {
             ServerLevel end = event.getServer().getLevel(Level.END);
@@ -69,7 +68,7 @@ public final class RealmEvents {
 
     @SubscribeEvent
     public static void onDeath(LivingDeathEvent event) {
-        if (event.getEntity().getPersistentData().getBoolean("skycraft_sigil_keeper")
+        if (event.getEntity().getPersistentData().getBooleanOr("skycraft_sigil_keeper", false)
                 && event.getEntity().level() instanceof ServerLevel level) {
             // the Sigil Keeper falls: everyone who fought in the tower may take the stone (quests read this flag)
             for (ServerPlayer m : level.players()) {
@@ -94,8 +93,8 @@ public final class RealmEvents {
         if (!d.contains("died_in")) return;
         d.remove("died_in");
         SkyData.get(p).markDirty();
-        if (p.getRespawnPosition() != null || !d.contains("ret") || Realm.of(p.level()) != null) return;
-        RealmTravel.schedule(p.server, 2, () -> {
+        if (p.getRespawnConfig() != null || !d.contains("ret") || Realm.of(p.level()) != null) return;
+        RealmTravel.schedule(p.level().getServer(), 2, () -> {
             if (p.isAlive() && Realm.of(p.level()) == null) RealmTravel.returnHome(p);
         });
     }
@@ -109,7 +108,7 @@ public final class RealmEvents {
         if (r == null || !r.ownDimension()) return; // the Nether and End already get their titles (world module)
         CompoundTag d = RealmTravel.data(p);
         String key = "seen_" + r.id;
-        if (!d.getBoolean(key)) {
+        if (!d.getBooleanOr(key, false)) {
             d.putBoolean(key, true);
             SkyData.get(p).markDirty();
             Notifier.title(p, r.displayName(), Component.translatable("realm.skycraft." + r.id + ".sub"));
@@ -123,19 +122,19 @@ public final class RealmEvents {
     /** Tsun guards the Whalebone Bridge; he sends the living back to Nirn when asked (sneak and speak with him). */
     @SubscribeEvent
     public static void onInteract(PlayerInteractEvent.EntityInteract event) {
-        if (event.getLevel().isClientSide || event.getHand() != InteractionHand.MAIN_HAND) return;
+        if (event.getLevel().isClientSide() || event.getHand() != InteractionHand.MAIN_HAND) return;
         if (!(event.getEntity() instanceof ServerPlayer p)) return;
-        ResourceLocation id = EntityType.getKey(event.getTarget().getType());
+        Identifier id = EntityType.getKey(event.getTarget().getType());
         if (!TSUN.equals(id)) return;
         event.setCanceled(true);
         event.setCancellationResult(InteractionResult.SUCCESS);
-        boolean alduinDead = SovngardeFight.alduinDefeated(p.serverLevel());
+        boolean alduinDead = SovngardeFight.alduinDefeated(p.level());
         int line = Math.floorMod((int) (p.level().getGameTime() / 100), 3);
         if (p.isShiftKeyDown() || alduinDead) {
             com.skycraft.core.Notifier.message(p, Component.translatable(alduinDead ? "realm.skycraft.tsun.victory" : "realm.skycraft.tsun.return")
                     .withStyle(net.minecraft.ChatFormatting.GOLD));
             p.level().playSound(null, p.blockPosition(), SoundEvents.BEACON_POWER_SELECT, SoundSource.NEUTRAL, 1f, 0.6f);
-            RealmTravel.schedule(p.server, 50, () -> {
+            RealmTravel.schedule(p.level().getServer(), 50, () -> {
                 if (p.isAlive() && Realm.of(p.level()) == Realm.SOVNGARDE) RealmTravel.returnHome(p);
             });
         } else {

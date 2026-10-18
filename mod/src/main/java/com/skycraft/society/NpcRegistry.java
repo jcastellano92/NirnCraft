@@ -32,7 +32,7 @@ public final class NpcRegistry extends SavedData {
     private final Set<String> names = new HashSet<>();
 
     public static NpcRegistry get(MinecraftServer server) {
-        return server.overworld().getDataStorage().computeIfAbsent(NpcRegistry::load, NpcRegistry::new, NAME);
+        return com.skycraft.platform.SavedDataTypes.get(server.overworld(), NAME, NpcRegistry::load, NpcRegistry::new, value263 -> value263.save(new net.minecraft.nbt.CompoundTag()));
     }
 
     @Nullable
@@ -57,7 +57,7 @@ public final class NpcRegistry extends SavedData {
 
     /** Records a named NPC that settled somewhere (server; no-op for unnamed NPCs or unchanged entries). */
     public static void onSettled(NpcEntity npc) {
-        String name = npc.getPersistentData().getString(NAME_KEY);
+        String name = npc.getPersistentData().getStringOr(NAME_KEY, "");
         NpcRegistry registry = get(npc.level());
         if (registry != null && !name.isEmpty()) registry.record(npc, name);
     }
@@ -66,12 +66,12 @@ public final class NpcRegistry extends SavedData {
     public void record(NpcEntity npc, String name) {
         CompoundTag e = entries.computeIfAbsent(npc.getUUID(), k -> new CompoundTag());
         CompoundTag before = e.copy();
-        String old = e.getString("name");
+        String old = e.getStringOr("name","");
         if (!old.isEmpty() && !old.equals(name)) names.remove(key(old));
         e.putString("name", name);
         e.putString("role", npc.role().id);
         e.putInt("look", npc.getLook());
-        e.putString("dim", npc.level().dimension().location().toString());
+        e.putString("dim", npc.level().dimension().identifier().toString());
         BlockPos home = npc.getHome() != null ? npc.getHome() : npc.blockPosition();
         e.putLong("home", home.asLong());
         e.putBoolean("dead", false);
@@ -81,7 +81,7 @@ public final class NpcRegistry extends SavedData {
 
     public void markDead(UUID id) {
         CompoundTag e = entries.get(id);
-        if (e == null || e.getBoolean("dead")) return;
+        if (e == null || e.getBooleanOr("dead",false)) return;
         e.putBoolean("dead", true);
         setDirty();
     }
@@ -90,7 +90,7 @@ public final class NpcRegistry extends SavedData {
         CompoundTag e = entries.get(npc);
         if (e == null) return;
         if (player == null) e.remove("spouse");
-        else e.putUUID("spouse", player);
+        else e.store("spouse", net.minecraft.core.UUIDUtil.CODEC,  player);
         setDirty();
     }
 
@@ -109,7 +109,7 @@ public final class NpcRegistry extends SavedData {
 
     public boolean isDead(UUID id) {
         CompoundTag e = entries.get(id);
-        return e != null && e.getBoolean("dead");
+        return e != null && e.getBooleanOr("dead",false);
     }
 
     public int size() {
@@ -118,12 +118,12 @@ public final class NpcRegistry extends SavedData {
 
     static NpcRegistry load(CompoundTag tag) {
         NpcRegistry r = new NpcRegistry();
-        CompoundTag all = tag.getCompound("npcs");
-        for (String k : all.getAllKeys()) {
+        CompoundTag all = tag.getCompoundOrEmpty("npcs");
+        for (String k : all.keySet()) {
             try {
-                CompoundTag e = all.getCompound(k);
+                CompoundTag e = all.getCompoundOrEmpty(k);
                 r.entries.put(UUID.fromString(k), e);
-                if (!e.getBoolean("dead") && e.contains("name", Tag.TAG_STRING)) r.names.add(key(e.getString("name")));
+                if (!e.getBooleanOr("dead",false) && com.skycraft.platform.NbtData.hasType(e, "name", Tag.TAG_STRING)) r.names.add(key(e.getStringOr("name","")));
             } catch (IllegalArgumentException ignored) {
                 // a corrupt key: skip it
             }
@@ -131,7 +131,6 @@ public final class NpcRegistry extends SavedData {
         return r;
     }
 
-    @Override
     public CompoundTag save(CompoundTag tag) {
         CompoundTag all = new CompoundTag();
         entries.forEach((id, e) -> all.put(id.toString(), e));

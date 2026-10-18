@@ -17,7 +17,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.animal.horse.AbstractHorse;
+import net.minecraft.world.entity.animal.equine.AbstractHorse;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 
@@ -117,7 +117,7 @@ public final class WildHorseTaming {
         mob.getNavigation().stop();
         mob.setNoAi(true);
         mob.getPersistentData().putBoolean(NOAI_TAG, true);
-        player.startRiding(mob, true);
+        player.startRiding(mob, true, true);
 
         TamingSession session = new TamingSession(player.getUUID(), mob.getId(), kind, saddle, balance, mob.getYRot());
         ACTIVE_SESSIONS.put(player.getUUID(), session);
@@ -157,7 +157,7 @@ public final class WildHorseTaming {
 
         if (!(player.getVehicle() instanceof Mob mob) || mob.getId() != session.horseId || !mob.isAlive()) {
             ACTIVE_SESSIONS.remove(player.getUUID());
-            if (player.serverLevel().getEntity(session.horseId) instanceof Mob m) release(m);
+            if (player.level().getEntity(session.horseId) instanceof Mob m) release(m);
             refund(player, session);
             SkyNetwork.sendToPlayer(player, new FaunaPackets.TameState(false, 0, 0, 0, 0, 0, 0));
             return;
@@ -203,7 +203,7 @@ public final class WildHorseTaming {
     public static void onLogout(ServerPlayer player) {
         TamingSession session = ACTIVE_SESSIONS.remove(player.getUUID());
         if (session != null) {
-            if (player.serverLevel().getEntity(session.horseId) instanceof Mob m) release(m);
+            if (player.level().getEntity(session.horseId) instanceof Mob m) release(m);
             refund(player, session);
         }
     }
@@ -225,7 +225,7 @@ public final class WildHorseTaming {
 
     /** Gives the animal its own mind back after a breaking. */
     public static void release(Mob mob) {
-        if (mob.getPersistentData().getBoolean(NOAI_TAG)) {
+        if (mob.getPersistentData().getBooleanOr(NOAI_TAG, false)) {
             mob.getPersistentData().remove(NOAI_TAG);
             mob.setNoAi(false);
         }
@@ -236,7 +236,7 @@ public final class WildHorseTaming {
     private static void refund(ServerPlayer player, TamingSession session) {
         if (session.refunded) return;
         session.refunded = true;
-        if (player.serverLevel().getEntity(session.horseId) instanceof Mob mob && mob.isAlive() && !MountGear.isOwned(mob)) {
+        if (player.level().getEntity(session.horseId) instanceof Mob mob && mob.isAlive() && !MountGear.isOwned(mob)) {
             MountGear.clearSaddle(mob);
         }
         if (!player.isCreative()) {
@@ -245,7 +245,7 @@ public final class WildHorseTaming {
             if (held.isEmpty()) {
                 player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, saddleStack);
                 player.containerMenu.broadcastChanges();
-            } else if (ItemStack.isSameItemSameTags(held, saddleStack) && held.getCount() < held.getMaxStackSize()) {
+            } else if (ItemStack.isSameItemSameComponents(held, saddleStack) && held.getCount() < held.getMaxStackSize()) {
                 held.grow(1);
                 player.containerMenu.broadcastChanges();
             } else {

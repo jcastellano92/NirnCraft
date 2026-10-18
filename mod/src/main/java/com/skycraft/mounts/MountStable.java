@@ -43,15 +43,13 @@ public final class MountStable extends SavedData {
     }
 
     public static MountStable get(MinecraftServer server) {
-        return server.overworld().getDataStorage().computeIfAbsent(MountStable::load,
-                () -> new MountStable(new CompoundTag(), new ListTag(), new CompoundTag()), NAME);
+        return com.skycraft.platform.SavedDataTypes.get(server.overworld(), NAME, MountStable::load, () -> new MountStable(new CompoundTag(), new ListTag(), new CompoundTag()), value263 -> value263.save(new net.minecraft.nbt.CompoundTag()));
     }
 
     private static MountStable load(CompoundTag t) {
-        return new MountStable(t.getCompound("stock"), t.getList("pool", Tag.TAG_COMPOUND), t.getCompound("fates"));
+        return new MountStable(t.getCompoundOrEmpty("stock"), t.getListOrEmpty("pool"), t.getCompoundOrEmpty("fates"));
     }
 
-    @Override
     public CompoundTag save(CompoundTag out) {
         out.put("stock", stock);
         out.put("pool", pool);
@@ -64,18 +62,18 @@ public final class MountStable extends SavedData {
     /** The tokens a stable holds, oldest first (copies: nothing here is changed by editing them). */
     public List<CompoundTag> stockOf(String stableKey) {
         List<CompoundTag> out = new ArrayList<>();
-        for (Tag t : stock.getList(stableKey, Tag.TAG_COMPOUND)) out.add(((CompoundTag) t).copy());
+        for (Tag t : stock.getListOrEmpty(stableKey)) out.add(((CompoundTag) t).copy());
         return out;
     }
 
     /** A player's animal joins a stable's stock; when it is over {@value #PER_STABLE} the oldest goes to the pool. */
     public void consign(String stableKey, CompoundTag token) {
-        ListTag list = stock.getList(stableKey, Tag.TAG_COMPOUND);
+        ListTag list = stock.getListOrEmpty(stableKey);
         UUID id = MountToken.id(token);
-        for (int i = list.size() - 1; i >= 0; i--) if (MountToken.id(list.getCompound(i)).equals(id)) list.remove(i);
+        for (int i = list.size() - 1; i >= 0; i--) if (MountToken.id(list.getCompoundOrEmpty(i)).equals(id)) list.remove(i);
         list.add(token.copy());
         while (list.size() > PER_STABLE) {
-            CompoundTag oldest = list.getCompound(0);
+            CompoundTag oldest = list.getCompoundOrEmpty(0);
             list.remove(0);
             toPool(oldest);
         }
@@ -86,10 +84,10 @@ public final class MountStable extends SavedData {
     /** Removes and returns the animal with this id from a stable's stock, or null (already bought). */
     @Nullable
     public CompoundTag take(String stableKey, UUID id) {
-        ListTag list = stock.getList(stableKey, Tag.TAG_COMPOUND);
+        ListTag list = stock.getListOrEmpty(stableKey);
         for (int i = 0; i < list.size(); i++) {
-            if (MountToken.id(list.getCompound(i)).equals(id)) {
-                CompoundTag token = list.getCompound(i).copy();
+            if (MountToken.id(list.getCompoundOrEmpty(i)).equals(id)) {
+                CompoundTag token = list.getCompoundOrEmpty(i).copy();
                 list.remove(i);
                 stock.put(stableKey, list);
                 setDirty();
@@ -104,7 +102,7 @@ public final class MountStable extends SavedData {
     /** An animal that went back to no stable in particular. */
     public void toPool(CompoundTag token) {
         UUID id = MountToken.id(token);
-        for (int i = pool.size() - 1; i >= 0; i--) if (MountToken.id(pool.getCompound(i)).equals(id)) pool.remove(i);
+        for (int i = pool.size() - 1; i >= 0; i--) if (MountToken.id(pool.getCompoundOrEmpty(i)).equals(id)) pool.remove(i);
         pool.add(token.copy());
         while (pool.size() > POOL) pool.remove(0);
         setDirty();
@@ -119,8 +117,8 @@ public final class MountStable extends SavedData {
     @Nullable
     public CompoundTag takeFromPool(UUID id) {
         for (int i = 0; i < pool.size(); i++) {
-            if (MountToken.id(pool.getCompound(i)).equals(id)) {
-                CompoundTag token = pool.getCompound(i).copy();
+            if (MountToken.id(pool.getCompoundOrEmpty(i)).equals(id)) {
+                CompoundTag token = pool.getCompoundOrEmpty(i).copy();
                 pool.remove(i);
                 setDirty();
                 return token;
@@ -132,8 +130,8 @@ public final class MountStable extends SavedData {
     /** Whether a token with this id is held anywhere here (selftests, duplicate checks). */
     public boolean holds(UUID id) {
         for (Tag t : pool) if (MountToken.id((CompoundTag) t).equals(id)) return true;
-        for (String key : stock.getAllKeys()) {
-            for (Tag t : stock.getList(key, Tag.TAG_COMPOUND)) if (MountToken.id((CompoundTag) t).equals(id)) return true;
+        for (String key : stock.keySet()) {
+            for (Tag t : stock.getListOrEmpty(key)) if (MountToken.id((CompoundTag) t).equals(id)) return true;
         }
         return false;
     }
@@ -144,7 +142,7 @@ public final class MountStable extends SavedData {
     public void fate(UUID id, Fate fate) {
         if (fates.size() >= FATES) {
             // bounded: the oldest are forgotten (a stray animal then simply stays what it was)
-            String first = fates.getAllKeys().iterator().next();
+            String first = fates.keySet().iterator().next();
             fates.remove(first);
         }
         fates.putString(id.toString(), fate.name());
@@ -158,7 +156,7 @@ public final class MountStable extends SavedData {
         for (UUID id : ids) {
             String key = id.toString();
             if (fates.contains(key)) {
-                found = Fate.valueOf(fates.getString(key));
+                found = Fate.valueOf(fates.getStringOr(key, ""));
                 fates.remove(key);
                 setDirty();
             }

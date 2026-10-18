@@ -3,10 +3,10 @@ package com.skycraft.fauna;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.animal.horse.AbstractHorse;
-import net.minecraft.world.entity.animal.horse.Horse;
-import net.minecraft.world.entity.animal.horse.Markings;
-import net.minecraft.world.entity.animal.horse.Variant;
+import net.minecraft.world.entity.animal.equine.AbstractHorse;
+import net.minecraft.world.entity.animal.equine.Horse;
+import net.minecraft.world.entity.animal.equine.Markings;
+import net.minecraft.world.entity.animal.equine.Variant;
 
 /**
  * Breeds of Tamriel's horses with distinctive speed, health, jump, coat and taming difficulty. Skyrim's hold breeds,
@@ -66,13 +66,13 @@ public enum HorseBreed {
 
     public void apply(Horse horse) {
         applyStats(horse);
-        horse.setVariant(variant);
+        horse.setComponent(net.minecraft.core.component.DataComponents.HORSE_VARIANT, variant);
         if (markings != Markings.NONE || horse.getMarkings() != Markings.NONE) {
             // coat markings have no public setter: round-trip the saved "Variant" field (fresh entities only)
             CompoundTag tag = new CompoundTag();
-            horse.addAdditionalSaveData(tag);
+            tag.merge(com.skycraft.platform.EntityData.saveWithoutId(horse));
             tag.putInt("Variant", variant.getId() & 255 | markings.getId() << 8 & 65280);
-            horse.readAdditionalSaveData(tag);
+            com.skycraft.platform.EntityData.load(horse, tag);
         }
     }
 

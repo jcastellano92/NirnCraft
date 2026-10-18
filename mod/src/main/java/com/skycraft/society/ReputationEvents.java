@@ -7,17 +7,17 @@ import com.skycraft.crime.Crimes;
 import com.skycraft.society.entity.NpcEntity;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.monster.AbstractIllager;
-import net.minecraftforge.event.entity.living.LivingDeathEvent;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.world.entity.monster.illager.AbstractIllager;
+import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -33,14 +33,14 @@ import java.util.UUID;
  *     <li>time: negative standings slowly recover.</li>
  * </ul>
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class ReputationEvents {
     private static final String[] CRIME_COUNTERS = {"murders", "assaults", "items_stolen", "pickpockets"};
     private static final String[] QUEST_FACTIONS = {"companions", "college", "thieves_guild", "dark_brotherhood", "imperial_legion",
             "stormcloaks", "bards_college"};
-    private static final ResourceLocation BANDIT = new ResourceLocation(Skycraft.MODID, "bandit");
-    private static final ResourceLocation BANDIT_CHIEF = new ResourceLocation(Skycraft.MODID, "bandit_chief");
-    private static final ResourceLocation DRAGON = new ResourceLocation(Skycraft.MODID, "dragon");
+    private static final Identifier BANDIT = Identifier.fromNamespaceAndPath(Skycraft.MODID, "bandit");
+    private static final Identifier BANDIT_CHIEF = Identifier.fromNamespaceAndPath(Skycraft.MODID, "bandit_chief");
+    private static final Identifier DRAGON = Identifier.fromNamespaceAndPath(Skycraft.MODID, "dragon");
     private static final long HURT_THROTTLE = 600;
 
     private static final Map<String, Long> LAST_HURT = new HashMap<>();
@@ -54,7 +54,7 @@ public final class ReputationEvents {
     public static void onDeath(LivingDeathEvent event) {
         if (event.isCanceled()) return;
         LivingEntity victim = event.getEntity();
-        if (victim.level().isClientSide || !(event.getSource().getEntity() instanceof ServerPlayer player)) return;
+        if (victim.level().isClientSide() || !(event.getSource().getEntity() instanceof ServerPlayer player)) return;
         if (victim instanceof NpcEntity npc) {
             npcKilled(player, npc);
             return;
@@ -63,7 +63,7 @@ public final class ReputationEvents {
             Reputation.add(player, Reputation.GUARDS, -12);
             return;
         }
-        ResourceLocation id = ForgeRegistries.ENTITY_TYPES.getKey(victim.getType());
+        Identifier id = BuiltInRegistries.ENTITY_TYPE.getKey(victim.getType());
         if (BANDIT.equals(id) || BANDIT_CHIEF.equals(id)) {
             Reputation.add(player, Reputation.BANDITS, BANDIT_CHIEF.equals(id) ? -8 : -4);
             Reputation.add(player, Reputation.TOWNSFOLK, 1);
@@ -123,9 +123,9 @@ public final class ReputationEvents {
     // ------------------------------------------------------------------ assaults on faction members
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
-    public static void onHurt(LivingHurtEvent event) {
+    public static void onHurt(com.skycraft.combat.BeforeArmorDamageEvent event) {
         if (event.isCanceled() || event.getAmount() <= 0) return;
-        if (!(event.getEntity() instanceof NpcEntity npc) || npc.level().isClientSide) return;
+        if (!(event.getEntity() instanceof NpcEntity npc) || npc.level().isClientSide()) return;
         if (!(event.getSource().getEntity() instanceof ServerPlayer player)) return;
         NpcRole role = npc.role();
         if (role.civilian || role.faction == null || npc.getTarget() == player || player.getUUID().equals(npc.getHuntTarget())) return;
@@ -145,17 +145,17 @@ public final class ReputationEvents {
     static void scan(ServerPlayer player) {
         PlayerData data = SkyData.get(player);
         CompoundTag mod = data.module(Reputation.MODULE);
-        boolean first = !mod.contains("seen", Tag.TAG_COMPOUND);
+        boolean first = !com.skycraft.platform.NbtData.hasType(mod, "seen", Tag.TAG_COMPOUND);
         CompoundTag seen = Npcs.sub(mod, "seen");
         CompoundTag crime = data.module("crime");
         CompoundTag quest = data.module("quest");
-        CompoundTag ranks = quest.getCompound("factions");
-        CompoundTag points = quest.getCompound("faction_points");
+        CompoundTag ranks = quest.getCompoundOrEmpty("factions");
+        CompoundTag points = quest.getCompoundOrEmpty("faction_points");
         boolean changed = first;
 
         for (String c : CRIME_COUNTERS) {
-            int now = crime.getInt(c);
-            int was = seen.getInt(c);
+            int now = crime.getIntOr(c, 0);
+            int was = seen.getIntOr(c, 0);
             if (now != was) {
                 seen.putInt(c, now);
                 changed = true;
@@ -163,15 +163,15 @@ public final class ReputationEvents {
             }
         }
         for (String f : QUEST_FACTIONS) {
-            int rank = ranks.contains(f) ? ranks.getInt(f) : -1;
-            int wasRank = seen.contains("rank_" + f) ? seen.getInt("rank_" + f) : -1;
+            int rank = ranks.contains(f) ? ranks.getIntOr(f, 0) : -1;
+            int wasRank = seen.contains("rank_" + f) ? seen.getIntOr("rank_" + f,0) : -1;
             if (rank != wasRank) {
                 seen.putInt("rank_" + f, rank);
                 changed = true;
                 if (!first) rankChanged(player, f, wasRank, rank);
             }
-            int pts = points.getInt(f);
-            int wasPts = seen.getInt("pts_" + f);
+            int pts = points.getIntOr(f, 0);
+            int wasPts = seen.getIntOr("pts_" + f,0);
             if (pts != wasPts) {
                 seen.putInt("pts_" + f, pts);
                 changed = true;
@@ -239,8 +239,8 @@ public final class ReputationEvents {
         PlayerData data = SkyData.get(player);
         CompoundTag rep = Reputation.tag(data);
         boolean changed = false;
-        for (String f : rep.getAllKeys().toArray(new String[0])) {
-            int v = rep.getInt(f);
+        for (String f : rep.keySet().toArray(new String[0])) {
+            int v = rep.getIntOr(f, 0);
             if (v < 0) {
                 if (v + 1 == 0) rep.remove(f);
                 else rep.putInt(f, v + 1);

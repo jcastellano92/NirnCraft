@@ -1,6 +1,0 @@
-{
-  "type": "forge:add_features",
-  "biomes": "#minecraft:is_mountain",
-  "features": "skycraft:ore_moonstone_mountain",
-  "step": "underground_ores"
-}

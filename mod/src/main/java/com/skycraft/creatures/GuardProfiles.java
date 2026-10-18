@@ -8,12 +8,12 @@ import com.skycraft.core.Holds;
 import com.skycraft.tamriel.Place;
 import com.skycraft.tamriel.settlement.SettlementAnchors;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.InputStream;
@@ -46,8 +46,8 @@ public final class GuardProfiles {
 
     /** One guard look: {@code id} is also the skin ({@code guard_<id>.png}) and the lang key suffix. */
     public record Profile(String id, int index, String weapon, String shield, boolean skyrimLines) {
-        public ResourceLocation texture() {
-            return new ResourceLocation(Skycraft.MODID, "textures/entity/guard/guard_" + id + ".png");
+        public Identifier texture() {
+            return Identifier.fromNamespaceAndPath(Skycraft.MODID, "textures/entity/guard/guard_" + id + ".png");
         }
 
         public String nameKey() {
@@ -124,9 +124,9 @@ public final class GuardProfiles {
     }
 
     private static Item item(String id, Item fallback) {
-        ResourceLocation rl = ResourceLocation.tryParse(id);
+        Identifier rl = Identifier.tryParse(id);
         if (rl == null) return fallback;
-        Item it = ForgeRegistries.ITEMS.getValue(rl);
+        Item it = BuiltInRegistries.ITEM.getValue(rl);
         return it == null || it == Items.AIR ? fallback : it;
     }
 

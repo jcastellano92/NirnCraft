@@ -5,12 +5,12 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.event.entity.player.PlayerSetSpawnEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.entity.player.PlayerSetSpawnEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 /** Bedrolls and tents are for a night's rest only: they never become your respawn point. */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class CampingEvents {
     private CampingEvents() {}
 
@@ -18,7 +18,7 @@ public final class CampingEvents {
     public static void onSetSpawn(PlayerSetSpawnEvent event) {
         BlockPos pos = event.getNewSpawn();
         if (pos == null || !(event.getEntity() instanceof ServerPlayer player)) return;
-        ServerLevel level = player.server.getLevel(event.getSpawnLevel());
+        ServerLevel level = player.level().getServer().getLevel(event.getSpawnLevel());
         if (isCampBed(level, pos)) event.setCanceled(true);
     }
 

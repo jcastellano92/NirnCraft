@@ -13,13 +13,13 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.vehicle.MinecartChest;
+import net.minecraft.world.entity.vehicle.minecart.MinecartChest;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ChunkPos;
@@ -125,8 +125,8 @@ public final class QaDungeon {
                 double threat = hp * (1 + dmg / 3.0);
                 String name = mob.hasCustomName() ? mob.getCustomName().getString() : "";
                 mobs.add(new Mobile(BuiltInRegistries.ENTITY_TYPE.getKey(mob.getType()).toString(), mob.blockPosition(), threat,
-                        DormantMobs.isDormant(mob), name, mob.getPersistentData().getBoolean(com.skycraft.dungeons.DungeonTelemetry.BOSS_TAG),
-                        mob.getPersistentData().getBoolean("skycraft_dungeon_elite")));
+                        DormantMobs.isDormant(mob), name, mob.getPersistentData().getBooleanOr(com.skycraft.dungeons.DungeonTelemetry.BOSS_TAG, false),
+                        mob.getPersistentData().getBooleanOr("skycraft_dungeon_elite", false)));
             }
         }
         for (Mobile mo : mobs) {
@@ -433,7 +433,7 @@ public final class QaDungeon {
                 warnings.add("unreachable container " + table + " at " + pos.toShortString());
                 continue;
             }
-            double ev = loot.expected(level, new ResourceLocation(table), pos);
+            double ev = loot.expected(level, Identifier.parse(table), pos);
             tables.put(pos, table);
             lootTotal += ev;
             lootChests++;
@@ -447,10 +447,9 @@ public final class QaDungeon {
         }
         for (Entity e : lvl.spawned) {
             if (e instanceof MinecartChest cart) {
-                CompoundTag tag = new CompoundTag();
-                cart.saveWithoutId(tag);
+                CompoundTag tag = com.skycraft.platform.EntityData.saveWithoutId(cart);
                 if (tag.contains("LootTable")) {
-                    double ev = loot.expected(level, new ResourceLocation(tag.getString("LootTable")), cart.blockPosition());
+                    double ev = loot.expected(level, Identifier.parse(tag.getStringOr("LootTable", "")), cart.blockPosition());
                     lootTotal += ev;
                     lootChests++;
                 }
@@ -884,16 +883,16 @@ public final class QaDungeon {
     static List<ItemStack> items(BlockEntity be) {
         List<ItemStack> out = new ArrayList<>();
         if (be == null) return out;
-        CompoundTag tag = be.saveWithoutMetadata();
-        net.minecraft.nbt.ListTag list = tag.getList("Items", net.minecraft.nbt.Tag.TAG_COMPOUND);
-        for (int i = 0; i < list.size(); i++) out.add(ItemStack.of(list.getCompound(i)));
+        CompoundTag tag = be.saveWithoutMetadata(java.util.Objects.requireNonNull(be.getLevel()).registryAccess());
+        net.minecraft.nbt.ListTag list = tag.getListOrEmpty("Items");
+        for (int i = 0; i < list.size(); i++) out.add(com.skycraft.inventory.ItemData.parse(list.getCompoundOrEmpty(i), be.getLevel().registryAccess()));
         return out;
     }
 
     private static String lootTable(BlockEntity be) {
         if (!(be instanceof RandomizableContainerBlockEntity)) return null;
-        CompoundTag tag = be.saveWithoutMetadata();
-        return tag.contains("LootTable") ? tag.getString("LootTable") : null;
+        CompoundTag tag = be.saveWithoutMetadata(java.util.Objects.requireNonNull(be.getLevel()).registryAccess());
+        return tag.contains("LootTable") ? tag.getStringOr("LootTable", "") : null;
     }
 
     /** Spearman rank correlation of the curve against its index (+1: threat rises steadily to the end). */

@@ -47,17 +47,20 @@ public class DepletedOreBlockEntity extends BlockEntity {
     }
 
     @Override
-    public void load(CompoundTag tag) {
-        super.load(tag);
-        original = tag.contains("original", Tag.TAG_COMPOUND)
-                ? NbtUtils.readBlockState(BuiltInRegistries.BLOCK.asLookup(), tag.getCompound("original")) : null;
-        regenAt = tag.getLong("regen_at");
+    protected void loadAdditional(net.minecraft.world.level.storage.ValueInput input) {
+        super.loadAdditional(input);
+        CompoundTag tag = com.skycraft.platform.ValueTags.read(input, "original", "regen_at");
+        original = com.skycraft.platform.NbtData.hasType(tag, "original", Tag.TAG_COMPOUND)
+                ? NbtUtils.readBlockState(BuiltInRegistries.BLOCK, tag.getCompoundOrEmpty("original")) : null;
+        regenAt = tag.getLongOr("regen_at",0L);
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag) {
-        super.saveAdditional(tag);
+    protected void saveAdditional(net.minecraft.world.level.storage.ValueOutput output) {
+        super.saveAdditional(output);
+        CompoundTag tag = new CompoundTag();
         if (original != null) tag.put("original", NbtUtils.writeBlockState(original));
         tag.putLong("regen_at", regenAt);
+        output.store(tag);
     }
 }

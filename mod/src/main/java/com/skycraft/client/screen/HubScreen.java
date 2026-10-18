@@ -6,11 +6,11 @@ import com.skycraft.magic.client.MagicClient;
 import com.skycraft.quest.client.JournalClient;
 import com.skycraft.world.client.MapClient;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
-import org.lwjgl.glfw.GLFW;
+import com.mojang.blaze3d.platform.InputConstants;
 
 /**
  * Skyrim four-way Hub Menu (Tab key):
@@ -41,7 +41,7 @@ public class HubScreen extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+    public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
         g.fillGradient(0, 0, width, height, 0xD0000000, 0xE8080604);
 
         int cx = width / 2;
@@ -89,24 +89,24 @@ public class HubScreen extends Screen {
         if (minecraft.player != null) {
             var data = com.skycraft.core.SkyData.get(minecraft.player);
             String centerText = "LVL " + data.getLevel();
-            g.drawCenteredString(font, centerText, cx, cy + 10, (hoveredSection == 4) ? GOLD_COLOR : DIM_COLOR);
+            g.centeredText(font, centerText, cx, cy + 10, (hoveredSection == 4) ? GOLD_COLOR : DIM_COLOR);
             if (hoveredSection == 4) {
-                g.drawCenteredString(font, Component.translatable("screen.skycraft.hub_character"), cx, cy - 16, HIGHLIGHT_COLOR);
+                g.centeredText(font, Component.translatable("screen.skycraft.hub_character"), cx, cy - 16, HIGHLIGHT_COLOR);
             }
         }
 
         // Hint bar at the bottom
-        g.drawCenteredString(font, Component.translatable("screen.skycraft.hub_hint"), cx, height - 20, DIM_COLOR);
+        g.centeredText(font, Component.translatable("screen.skycraft.hub_hint"), cx, height - 20, DIM_COLOR);
 
-        super.render(g, mouseX, mouseY, partialTick);
+        super.extractRenderState(g, mouseX, mouseY, partialTick);
     }
 
-    private void drawOption(GuiGraphics g, Font font, Component label, int x, int y, boolean hovered, int align) {
+    private void drawOption(GuiGraphicsExtractor g, Font font, Component label, int x, int y, boolean hovered, int align) {
         int color = hovered ? HIGHLIGHT_COLOR : TEXT_COLOR;
         String text = label.getString().toUpperCase(java.util.Locale.ROOT);
         int tw = font.width(text);
         int drawX = (align == 0) ? x - tw / 2 : (align == 1) ? x - tw : x;
-        g.drawString(font, text, drawX, y, color, true);
+        g.text(font, text, drawX, y, color, true);
 
         if (hovered) {
             // Draw a subtle gold underline
@@ -114,14 +114,14 @@ public class HubScreen extends Screen {
         }
     }
 
-    private void drawDiamond(GuiGraphics g, int cx, int cy, int r, int color) {
+    private void drawDiamond(GuiGraphicsExtractor g, int cx, int cy, int r, int color) {
         for (int i = -r; i <= r; i++) {
             int w = r - Math.abs(i);
             g.fill(cx - w, cy + i, cx + w + 1, cy + i + 1, color);
         }
     }
 
-    private void drawFadingLine(GuiGraphics g, int x1, int y1, int x2, int y2, boolean highlight) {
+    private void drawFadingLine(GuiGraphicsExtractor g, int x1, int y1, int x2, int y2, boolean highlight) {
         int color = highlight ? GOLD_COLOR : 0x80807868;
         if (x1 == x2) {
             int minY = Math.min(y1, y2);
@@ -135,50 +135,53 @@ public class HubScreen extends Screen {
     }
 
     @Override
-    public boolean mouseClicked(double mx, double my, int button) {
+    public boolean mouseClicked(net.minecraft.client.input.MouseButtonEvent event, boolean doubleClick) {
+        double mx = event.x(), my = event.y();
+        int button = com.skycraft.client.screen.UiInput.actionButton(event.button());
         if (button == 0 && hoveredSection >= 0) {
             selectSection(hoveredSection);
             return true;
         }
-        return super.mouseClicked(mx, my, button);
+        return super.mouseClicked(event, doubleClick);
     }
 
     @Override
-    public boolean keyPressed(int key, int scan, int mods) {
-        if (key == GLFW.GLFW_KEY_UP || key == GLFW.GLFW_KEY_W) {
+    public boolean keyPressed(net.minecraft.client.input.KeyEvent event) {
+        int key = event.key(), scan = event.keycode(), mods = event.modifiers();
+        if (key == InputConstants.KEY_UP || key == InputConstants.KEY_W) {
             selectSection(0);
             return true;
         }
-        if (key == GLFW.GLFW_KEY_LEFT || key == GLFW.GLFW_KEY_A) {
+        if (key == InputConstants.KEY_LEFT || key == InputConstants.KEY_A) {
             selectSection(1);
             return true;
         }
-        if (key == GLFW.GLFW_KEY_RIGHT || key == GLFW.GLFW_KEY_D) {
+        if (key == InputConstants.KEY_RIGHT || key == InputConstants.KEY_D) {
             selectSection(2);
             return true;
         }
-        if (key == GLFW.GLFW_KEY_DOWN || key == GLFW.GLFW_KEY_S) {
+        if (key == InputConstants.KEY_DOWN || key == InputConstants.KEY_S) {
             selectSection(3);
             return true;
         }
-        if (com.skycraft.client.SkyKeys.JOURNAL.matches(key, scan) || key == GLFW.GLFW_KEY_J) {
+        if (com.skycraft.client.SkyKeys.JOURNAL.matches(event) || key == InputConstants.KEY_J) {
             JournalClient.open();
             return true;
         }
-        if (key == GLFW.GLFW_KEY_C || key == GLFW.GLFW_KEY_ENTER) {
+        if (key == InputConstants.KEY_C || key == InputConstants.KEY_RETURN) {
             selectSection(4);
             return true;
         }
-        if (com.skycraft.client.SkyKeys.HUB.matches(key, scan) || key == GLFW.GLFW_KEY_TAB) {
+        if (com.skycraft.client.SkyKeys.HUB.matches(event) || key == InputConstants.KEY_TAB) {
             onClose();
             return true;
         }
-        return super.keyPressed(key, scan, mods);
+        return super.keyPressed(event);
     }
 
     private void selectSection(int section) {
         switch (section) {
-            case 0 -> minecraft.setScreen(new SkillsScreen());
+            case 0 -> minecraft.gui.setScreen(new SkillsScreen());
             case 1 -> InventoryClient.open();
             case 2 -> MagicClient.openMagicMenu();
             case 3 -> MapClient.openMap();

@@ -1,0 +1,36 @@
+{
+  "type": "minecraft:entity",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:loot_table",
+          "weight": 1,
+          "value": "skycraft:containers/corpse/vampire"
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:vampire_dust",
+          "weight": 1
+        }
+      ],
+      "condition": {
+        "type": "minecraft:random_chance_with_enchanted_bonus",
+        "unenchanted_chance": 0.6,
+        "enchantment": "minecraft:looting",
+        "enchanted_chance": {
+          "type": "minecraft:linear",
+          "base": 0.65,
+          "per_level_above_first": 0.05
+        }
+      }
+    }
+  ],
+  "random_sequence": "skycraft:entities/vampire"
+}

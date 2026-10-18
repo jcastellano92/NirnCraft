@@ -41,12 +41,12 @@ final class Formations2 {
                 } else {
                     // sulfur crust and cracks
                     double t = 1 - d / R;
-                    BlockState crust = t > 0.55 ? Blocks.YELLOW_TERRACOTTA.defaultBlockState()
-                            : (s.chance(dx * 7 + dz, 0.4) ? Blocks.ORANGE_TERRACOTTA.defaultBlockState() : s.rk(dx, gy, dz));
+                    BlockState crust = t > 0.55 ? com.skycraft.worldgen.VanillaBlocks.YELLOW_TERRACOTTA.defaultBlockState()
+                            : (s.chance(dx * 7 + dz, 0.4) ? com.skycraft.worldgen.VanillaBlocks.ORANGE_TERRACOTTA.defaultBlockState() : s.rk(dx, gy, dz));
                     s.set(dx, gy, dz, crust);
                     if (t > 0.3 && t < 0.5 && s.chance(dx * 11 + dz, 0.1)) s.set(dx, gy, dz, Blocks.MAGMA_BLOCK);
                     int up = (int) Math.round(t * 3 * s.n(dx, 0, dz, 3, 8));
-                    for (int k = 1; k <= up; k++) s.set(dx, gy + k, dz, s.chance(dx + k * 5 + dz, 0.5) ? Blocks.YELLOW_TERRACOTTA.defaultBlockState() : Blocks.SMOOTH_BASALT.defaultBlockState());
+                    for (int k = 1; k <= up; k++) s.set(dx, gy + k, dz, s.chance(dx + k * 5 + dz, 0.5) ? com.skycraft.worldgen.VanillaBlocks.YELLOW_TERRACOTTA.defaultBlockState() : Blocks.SMOOTH_BASALT.defaultBlockState());
                 }
             }
         }
@@ -338,9 +338,9 @@ final class Formations2 {
                 for (int y = gy + 2; y > gy - dd; y--) s.air(dx, y, dz);
                 boolean crack = ((dx * 7 + dz * 3) % 5 == 0 || s.n(dx, 0, dz, 2.2, 4) > 0.78) && t < 0.9;
                 BlockState b;
-                if (crack) b = s.chance(dx + dz * 9, 0.5) ? Blocks.COARSE_DIRT.defaultBlockState() : Blocks.BROWN_TERRACOTTA.defaultBlockState();
-                else b = t < 0.4 ? Blocks.WHITE_TERRACOTTA.defaultBlockState()
-                        : (s.chance(dx * 5 + dz, 0.5) ? Blocks.TERRACOTTA.defaultBlockState() : Blocks.LIGHT_GRAY_TERRACOTTA.defaultBlockState());
+                if (crack) b = s.chance(dx + dz * 9, 0.5) ? Blocks.COARSE_DIRT.defaultBlockState() : com.skycraft.worldgen.VanillaBlocks.BROWN_TERRACOTTA.defaultBlockState();
+                else b = t < 0.4 ? com.skycraft.worldgen.VanillaBlocks.WHITE_TERRACOTTA.defaultBlockState()
+                        : (s.chance(dx * 5 + dz, 0.5) ? Blocks.TERRACOTTA.defaultBlockState() : com.skycraft.worldgen.VanillaBlocks.LIGHT_GRAY_TERRACOTTA.defaultBlockState());
                 if (s.snowy) b = t < 0.5 ? Blocks.PACKED_ICE.defaultBlockState() : Blocks.SNOW_BLOCK.defaultBlockState();
                 s.set(dx, gy - dd, dz, b);
                 if (!crack && s.chance(dx * 13 + dz, 0.025)) s.set(dx, gy - dd + 1, dz, Blocks.DEAD_BUSH);

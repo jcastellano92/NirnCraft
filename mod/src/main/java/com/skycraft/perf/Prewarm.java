@@ -7,32 +7,33 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.TicketType;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.server.ServerStoppedEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+
+import net.neoforged.neoforge.event.server.ServerStoppedEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
 /**
  * Loads (and if needed generates) the area around a fast-travel destination before the player is moved, using region
  * tickets that are released shortly after. The player sees a "Travelling to ..." progress bar (chunks ready / needed,
- * {@link PerfPackets.PrewarmProgress}); the travel continuation runs when the area is ready or after a timeout, so
+ * {@link PerfPackets.PrewarmProgress}); the travel continuation runs when the area is ready; unready timed-out journeys are cancelled, so
  * arrival is instant and no chunk is generated synchronously on the server thread.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class Prewarm {
-    private static final TicketType<ChunkPos> TICKET = TicketType.create("skycraft_prewarm", Comparator.comparingLong(ChunkPos::toLong));
+    private static final java.util.function.Supplier<TicketType> TICKET = com.skycraft.perf.PerfTickets.PREWARM;
     public static final int RADIUS = 3;
     private static final int TIMEOUT = 20 * 25;
     /** Tickets stay this long after completion so the arrival does not unload what was just loaded. */
     private static final int GRACE = 20 * 8;
 
     private static final class Job {
+        final UUID ticket = UUID.randomUUID();
+        boolean released;
+        ServerPlayer requester;
         ServerLevel level;
         List<ChunkPos> chunks;
         UUID player;
@@ -41,13 +42,24 @@ public final class Prewarm {
         long start;
         long releaseAt = -1;
         int lastSent = -1;
-        /** Ticks before the continuation runs anyway (the area is not ready). */
+        /** Maximum wait; an unready journey is cancelled without running the continuation. */
         int timeout = TIMEOUT;
     }
 
     private static final List<Job> JOBS = new ArrayList<>();
+    private static final java.util.Map<ServerLevel, LeaseSet<Long, UUID>> LEASES = new java.util.IdentityHashMap<>();
 
     private Prewarm() {}
+
+    public enum Result { READY, STARTED, BUSY, FAILED }
+
+    /** The caller executes its continuation only for READY; STARTED owns it until completion/cancellation. */
+    public static Result request(ServerPlayer player, int x, int z, Component label, Runnable then) {
+        if (player == null || !player.isAlive()) return Result.FAILED;
+        if (busy(player.getUUID())) return Result.BUSY;
+        if (isReady(player.level(), x, z)) return Result.READY;
+        return start(player, x, z, label, then) ? Result.STARTED : Result.BUSY;
+    }
 
     /** True when the destination chunk (and its 3x3 neighbourhood) is already fully loaded. */
     public static boolean isReady(ServerLevel level, int x, int z) {
@@ -71,9 +83,10 @@ public final class Prewarm {
      */
     public static boolean start(ServerPlayer player, int x, int z, Component label, Runnable then) {
         if (busy(player.getUUID())) return false;
-        ServerLevel level = player.serverLevel();
+        ServerLevel level = player.level();
         Job j = job(level, x, z, RADIUS);
         j.player = player.getUUID();
+        j.requester = player;
         j.label = label;
         j.then = then;
         JOBS.add(j);
@@ -82,12 +95,12 @@ public final class Prewarm {
 
     /**
      * Prewarms several areas at once ({@code points}: {x, z, radiusInChunks} each, x and z in blocks) and runs {@code then}
-     * when all are ready or after {@code timeoutTicks}. For a jail: the settlement's start chunk (which records its
+     * when all are ready; cancels after {@code timeoutTicks} if they are still unready. For a jail: the settlement's start chunk (which records its
      * anchors) and the building's own chunks. Returns false when this player already has a prewarm running.
      */
     public static boolean start(ServerPlayer player, java.util.List<int[]> points, Component label, int timeoutTicks, Runnable then) {
         if (busy(player.getUUID()) || points.isEmpty()) return false;
-        ServerLevel level = player.serverLevel();
+        ServerLevel level = player.level();
         Job j = new Job();
         j.level = level;
         j.start = level.getServer().getTickCount();
@@ -95,6 +108,7 @@ public final class Prewarm {
         j.timeout = timeoutTicks;
         for (int[] pt : points) addArea(j, level, pt[0] >> 4, pt[1] >> 4, pt[2]);
         j.player = player.getUUID();
+        j.requester = player;
         j.label = label;
         j.then = then;
         JOBS.add(j);
@@ -107,7 +121,7 @@ public final class Prewarm {
                 ChunkPos p = new ChunkPos(cx + dx, cz + dz);
                 if (j.chunks.contains(p)) continue;
                 j.chunks.add(p);
-                level.getChunkSource().addRegionTicket(TICKET, p, 0, p);
+                acquire(level, p, j.ticket);
             }
         }
     }
@@ -129,34 +143,36 @@ public final class Prewarm {
             for (int dz = -radius; dz <= radius; dz++) {
                 ChunkPos p = new ChunkPos(cx + dx, cz + dz);
                 j.chunks.add(p);
-                level.getChunkSource().addRegionTicket(TICKET, p, 0, p);
+                acquire(level, p, j.ticket);
             }
         }
         return j;
     }
 
     @SubscribeEvent
-    public static void onTick(TickEvent.ServerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || JOBS.isEmpty()) return;
+    public static void onTick(net.neoforged.neoforge.event.tick.ServerTickEvent.Post event) {
+        if (!(event instanceof net.neoforged.neoforge.event.tick.ServerTickEvent.Post) || JOBS.isEmpty()) return;
         long now = event.getServer().getTickCount();
-        for (Iterator<Job> it = JOBS.iterator(); it.hasNext(); ) {
-            Job j = it.next();
+        // Continuations can enqueue holds or another job; iterate the initial snapshot safely.
+        for (Job j : List.copyOf(JOBS)) {
             if (j.releaseAt >= 0 && j.player == null) {
                 if (now >= j.releaseAt) {
                     release(j);
-                    it.remove();
+                    JOBS.remove(j);
                 }
                 continue;
             }
             if (j.player == null) continue;
             int ready = 0;
-            for (ChunkPos p : j.chunks) if (j.level.getChunkSource().getChunkNow(p.x, p.z) != null) ready++;
+            for (ChunkPos p : j.chunks) if (j.level.getChunkSource().getChunkNow(p.x(), p.z()) != null) ready++;
             ServerPlayer player = event.getServer().getPlayerList().getPlayer(j.player);
             if (j.releaseAt < 0) {
-                boolean done = ready == j.chunks.size() || now - j.start > j.timeout;
-                if (player == null || !player.isAlive()) {
+                boolean done = ready == j.chunks.size();
+                if (player == null || player != j.requester || !player.isAlive() || player.level() != j.level
+                        || (!done && now - j.start > j.timeout)) {
                     release(j);
-                    it.remove();
+                    JOBS.remove(j);
+                    if (player != null) SkyNetwork.sendToPlayer(player, new PerfPackets.PrewarmProgress(0, 0, Component.empty()));
                     continue;
                 }
                 if (!done) {
@@ -175,7 +191,7 @@ public final class Prewarm {
                 }
             } else if (now >= j.releaseAt) {
                 release(j);
-                it.remove();
+                JOBS.remove(j);
             }
         }
     }
@@ -191,9 +207,24 @@ public final class Prewarm {
             }
         }
         JOBS.clear();
+        LEASES.clear();
+    }
+
+    private static void acquire(ServerLevel level, ChunkPos pos, UUID owner) {
+        LEASES.computeIfAbsent(level, ignored -> new LeaseSet<>()).acquire(pos.pack(), owner,
+                () -> level.getChunkSource().addTicketWithRadius(TICKET.get(), pos, 0));
+    }
+
+    private static void release(ServerLevel level, ChunkPos pos, UUID owner) {
+        LeaseSet<Long, UUID> leases = LEASES.get(level);
+        if (leases == null) return;
+        leases.release(pos.pack(), owner, () -> level.getChunkSource().removeTicketWithRadius(TICKET.get(), pos, 0));
+        if (leases.isEmpty()) LEASES.remove(level);
     }
 
     private static void release(Job j) {
-        for (ChunkPos p : j.chunks) j.level.getChunkSource().removeRegionTicket(TICKET, p, 0, p);
+        if (j.released) return;
+        j.released = true;
+        for (ChunkPos p : j.chunks) release(j.level, p, j.ticket);
     }
 }

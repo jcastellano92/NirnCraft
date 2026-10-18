@@ -13,8 +13,8 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.animal.camel.Camel;
-import net.minecraft.world.entity.animal.horse.AbstractHorse;
-import net.minecraft.world.entity.animal.horse.Horse;
+import net.minecraft.world.entity.animal.equine.AbstractHorse;
+import net.minecraft.world.entity.animal.equine.Horse;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -32,7 +32,7 @@ public final class MountTaming {
         if (mob instanceof Horse h) {
             if (h.isTamed()) return null;
             if (h.getPersistentData().contains("skycraft_breed")) {
-                MountKind k = MountKind.forBreed(HorseBreed.byId(h.getPersistentData().getString("skycraft_breed")));
+                MountKind k = MountKind.forBreed(HorseBreed.byId(h.getPersistentData().getStringOr("skycraft_breed","")));
                 if (k != null && k.tameDifficulty > 0) return k;
             }
             return regionalHorse(mob);
@@ -79,7 +79,7 @@ public final class MountTaming {
             Mob beast = Mounts.create(level, kind, wild.getX(), wild.getY(), wild.getZ(), wild.getYRot(), player);
             if (beast == null) return null;
             MountStats.store(beast, born); // the same animal in its mount body: its stats, its id and its name go with it
-            beast.getPersistentData().putUUID(MountToken.ID_TAG, MountToken.idOf(wild));
+            beast.getPersistentData().store(MountToken.ID_TAG, net.minecraft.core.UUIDUtil.CODEC,  MountToken.idOf(wild));
             if (wild.hasCustomName()) beast.setCustomName(wild.getCustomName());
             MountGear.refresh(beast);
             float health = wild.getHealth() / Math.max(1f, wild.getMaxHealth());
@@ -87,7 +87,7 @@ public final class MountTaming {
             wild.discard();
             beast.setHealth(Math.max(1f, beast.getMaxHealth() * health));
             level.addFreshEntity(beast);
-            player.startRiding(beast, true);
+            player.startRiding(beast, true, true);
             mount = beast;
         }
         // it wears the saddle it was broken in with (adopt records it as this kind's saddle)

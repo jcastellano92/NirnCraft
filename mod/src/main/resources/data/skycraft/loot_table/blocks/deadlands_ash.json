@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:block",
+  "random_sequence": "skycraft:blocks/deadlands_ash",
+  "pools": [
+    {
+      "rolls": 1,
+      "bonus_rolls": 0,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:deadlands_ash"
+        }
+      ],
+      "condition": {
+        "type": "minecraft:survives_explosion"
+      }
+    }
+  ]
+}

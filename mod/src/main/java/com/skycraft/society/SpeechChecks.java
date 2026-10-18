@@ -38,7 +38,7 @@ public final class SpeechChecks {
         if (success) {
             if (awardXp) Progression.addSkillXp(player, Skill.SPEECH, difficulty * 2.5f);
             Notifier.message(player, Component.translatable("society.skycraft.speech.persuade_success"));
-            player.playNotifySound(SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.5f, 1.6f);
+            com.skycraft.magic.MagicFx.soundToPlayer(player, SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.5f, 1.6f);
         } else {
             Notifier.message(player, Component.translatable("society.skycraft.speech.persuade_fail"));
         }
@@ -57,7 +57,7 @@ public final class SpeechChecks {
         if (success) {
             Progression.addSkillXp(player, Skill.SPEECH, difficulty * 2.5f);
             Notifier.message(player, Component.translatable("society.skycraft.speech.intimidate_success"));
-            player.playNotifySound(SoundEvents.ANVIL_LAND, SoundSource.PLAYERS, 0.4f, 1.4f);
+            com.skycraft.magic.MagicFx.soundToPlayer(player, SoundEvents.ANVIL_LAND, SoundSource.PLAYERS, 0.4f, 1.4f);
         } else {
             Notifier.message(player, Component.translatable("society.skycraft.speech.intimidate_fail"));
         }

@@ -2,22 +2,21 @@ package com.skycraft.atmosphere.weather;
 
 import com.skycraft.atmosphere.WeatherFront;
 import com.skycraft.network.SkyNetwork;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.network.NetworkDirection;
-import net.minecraftforge.network.NetworkEvent;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.neoforged.api.distmarker.Dist;
+import com.skycraft.platform.Sides;
+import net.minecraft.network.protocol.PacketFlow;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Supplier;
 
 /** Server -> client sync of the regional weather table and active moving synoptic {@link WeatherFront}s. */
 public final class WeatherPackets {
     private WeatherPackets() {}
 
     public static void register() {
-        SkyNetwork.register(Sync.class, NetworkDirection.PLAY_TO_CLIENT, Sync::encode, Sync::decode, Sync::handle);
+        SkyNetwork.register(Sync.class, PacketFlow.CLIENTBOUND, Sync::encode, Sync::decode, Sync::handle);
     }
 
     /** One region's current weather; {@code kind < 0} removes the region from the client's table. */
@@ -35,7 +34,7 @@ public final class WeatherPackets {
             this(full, entries, null);
         }
 
-        public static void encode(Sync m, FriendlyByteBuf buf) {
+        public static void encode(Sync m, RegistryFriendlyByteBuf buf) {
             buf.writeBoolean(m.full);
             buf.writeVarInt(m.entries.size());
             for (Entry e : m.entries) {
@@ -53,7 +52,7 @@ public final class WeatherPackets {
             }
         }
 
-        public static Sync decode(FriendlyByteBuf buf) {
+        public static Sync decode(RegistryFriendlyByteBuf buf) {
             boolean full = buf.readBoolean();
             int n = Math.min(buf.readVarInt(), MAX_ENTRIES);
             List<Entry> list = new ArrayList<>(n);
@@ -71,9 +70,8 @@ public final class WeatherPackets {
             return new Sync(full, list, fronts);
         }
 
-        static void handle(Sync m, Supplier<NetworkEvent.Context> ctx) {
-            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> com.skycraft.atmosphere.client.ClientWeather.receive(m));
-            ctx.get().setPacketHandled(true);
+        static void handle(Sync m, IPayloadContext ctx) {
+            Sides.runOn(Dist.CLIENT, () -> () -> com.skycraft.atmosphere.client.ClientWeather.receive(m));
         }
     }
 }

@@ -1,0 +1,65 @@
+{
+  "type": "minecraft:entity",
+  "pools": [
+    {
+      "rolls": 1,
+      "bonus_rolls": 0,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:slaughterfish_scales",
+          "modifier": [
+            {
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 1,
+                "max": 2
+              },
+              "type": "minecraft:set_count"
+            },
+            {
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 0,
+                "max": 1
+              },
+              "type": "minecraft:enchanted_count_increase",
+              "enchantment": "minecraft:looting"
+            }
+          ]
+        }
+      ],
+      "condition": {
+        "type": "minecraft:random_chance_with_enchanted_bonus",
+        "unenchanted_chance": 0.85,
+        "enchantment": "minecraft:looting",
+        "enchanted_chance": {
+          "type": "minecraft:linear",
+          "base": 0.9,
+          "per_level_above_first": 0.05
+        }
+      }
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:nordic_barnacle",
+          "weight": 1
+        }
+      ],
+      "condition": {
+        "type": "minecraft:random_chance_with_enchanted_bonus",
+        "unenchanted_chance": 0.1,
+        "enchantment": "minecraft:looting",
+        "enchanted_chance": {
+          "type": "minecraft:linear",
+          "base": 0.12000000000000001,
+          "per_level_above_first": 0.02
+        }
+      }
+    }
+  ],
+  "random_sequence": "skycraft:entities/slaughterfish"
+}

@@ -5,17 +5,17 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.skycraft.Skycraft;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
-import net.minecraftforge.common.loot.IGlobalLootModifier;
-import net.minecraftforge.common.loot.LootModifier;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.neoforge.common.loot.IGlobalLootModifier;
+import net.neoforged.neoforge.common.loot.LootModifier;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.registries.DeferredRegister;
+import net.minecraft.core.registries.BuiltInRegistries;
+import java.util.function.Supplier;
 
 import java.util.List;
 import java.util.function.Supplier;
@@ -29,23 +29,23 @@ import java.util.function.Supplier;
  *   "table": "skycraft:chests/skill_books", "chance": 0.25 }</pre>
  */
 public class SkillBookModifier extends LootModifier {
-    public static final DeferredRegister<Codec<? extends IGlobalLootModifier>> SERIALIZERS =
-            DeferredRegister.create(ForgeRegistries.Keys.GLOBAL_LOOT_MODIFIER_SERIALIZERS, Skycraft.MODID);
+    public static final DeferredRegister<com.mojang.serialization.MapCodec<? extends IGlobalLootModifier>> SERIALIZERS =
+            DeferredRegister.create(net.neoforged.neoforge.registries.NeoForgeRegistries.Keys.GLOBAL_LOOT_MODIFIER_SERIALIZERS, Skycraft.MODID);
 
-    public static final Supplier<Codec<SkillBookModifier>> CODEC = Suppliers.memoize(() -> RecordCodecBuilder.create(inst -> codecStart(inst)
-            .and(ResourceLocation.CODEC.listOf().fieldOf("tables").forGetter(m -> m.tables))
-            .and(ResourceLocation.CODEC.fieldOf("table").forGetter(m -> m.table))
+    public static final Supplier<com.mojang.serialization.MapCodec<SkillBookModifier>> CODEC = Suppliers.memoize(() -> RecordCodecBuilder.mapCodec(inst -> codecStart(inst)
+            .and(Identifier.CODEC.listOf().fieldOf("tables").forGetter(m -> m.tables))
+            .and(Identifier.CODEC.fieldOf("table").forGetter(m -> m.table))
             .and(Codec.FLOAT.optionalFieldOf("chance", 0.1f).forGetter(m -> m.chance))
             .apply(inst, SkillBookModifier::new)));
 
-    public static final RegistryObject<Codec<SkillBookModifier>> SKILL_BOOKS = SERIALIZERS.register("explore_skill_books", CODEC);
+    public static final Supplier<com.mojang.serialization.MapCodec<SkillBookModifier>> SKILL_BOOKS = SERIALIZERS.register("explore_skill_books", CODEC);
 
-    private final List<ResourceLocation> tables;
-    private final ResourceLocation table;
+    private final List<Identifier> tables;
+    private final Identifier table;
     private final float chance;
 
-    public SkillBookModifier(LootItemCondition[] conditions, List<ResourceLocation> tables, ResourceLocation table, float chance) {
-        super(conditions);
+    public SkillBookModifier(java.util.Optional<net.minecraft.core.Holder<LootItemCondition>> conditions, int priority, List<Identifier> tables, Identifier table, float chance) {
+        super(conditions, priority);
         this.tables = List.copyOf(tables);
         this.table = table;
         this.chance = chance;
@@ -57,15 +57,15 @@ public class SkillBookModifier extends LootModifier {
 
     @Override
     protected ObjectArrayList<ItemStack> doApply(ObjectArrayList<ItemStack> loot, LootContext context) {
-        ResourceLocation id = context.getQueriedLootTableId();
+        Identifier id = context.getQueriedLootTableId();
         if (id == null || !tables.contains(id) || context.getRandom().nextFloat() >= chance) return loot;
-        LootTable extra = context.getResolver().getLootTable(table);
+        LootTable extra = context.getResolver().lookupOrThrow(net.minecraft.core.registries.Registries.LOOT_TABLE).getOrThrow(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.LOOT_TABLE, table)).value();
         extra.getRandomItemsRaw(context, loot::add);
         return loot;
     }
 
     @Override
-    public Codec<? extends IGlobalLootModifier> codec() {
+    public com.mojang.serialization.MapCodec<? extends IGlobalLootModifier> codec() {
         return CODEC.get();
     }
 }

@@ -1,18 +1,18 @@
 package com.skycraft.scatter;
 
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 /** Scatter settings: {@code config/skycraft-scatter.toml}. */
 public final class ScatterConfig {
-    public static final ForgeConfigSpec SPEC;
-    public static final ForgeConfigSpec.BooleanValue ENABLED;
-    public static final ForgeConfigSpec.DoubleValue DENSITY;
-    public static final ForgeConfigSpec.BooleanValue DISCOVERIES;
-    public static final ForgeConfigSpec.DoubleValue DISCOVERY_XP;
-    public static final ForgeConfigSpec.BooleanValue FOUND_MESSAGES;
+    public static final ModConfigSpec SPEC;
+    public static final ModConfigSpec.BooleanValue ENABLED;
+    public static final ModConfigSpec.DoubleValue DENSITY;
+    public static final ModConfigSpec.BooleanValue DISCOVERIES;
+    public static final ModConfigSpec.DoubleValue DISCOVERY_XP;
+    public static final ModConfigSpec.BooleanValue FOUND_MESSAGES;
 
     static {
-        ForgeConfigSpec.Builder b = new ForgeConfigSpec.Builder();
+        ModConfigSpec.Builder b = new ModConfigSpec.Builder();
         b.push("scatter");
         ENABLED = b.comment("Place ambient scatter (debris, leftovers of camps, natural formations) outside settlements.",
                 "Changing this only affects newly generated chunks.").define("enabled", true);

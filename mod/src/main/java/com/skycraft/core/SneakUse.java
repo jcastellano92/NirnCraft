@@ -8,11 +8,11 @@ import net.minecraft.world.level.block.DoorBlock;
 import net.minecraft.world.level.block.FenceGateBlock;
 import net.minecraft.world.level.block.LeverBlock;
 import net.minecraft.world.level.block.TrapDoorBlock;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.eventbus.api.Event;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.bus.api.Event;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 /**
  * Sneaking never stops a hand from working a door, gate, trapdoor, lever or button. Vanilla skips the block's use
@@ -21,7 +21,7 @@ import net.minecraftforge.fml.common.Mod;
  * after every guard: a lock, house door, claim or other handler that cancelled or denied the click is respected.
  * Chests, bodies and stations are handled by their own modules (crime/Locks, CraftingEvents).
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class SneakUse {
     private SneakUse() {}
 
@@ -29,11 +29,11 @@ public final class SneakUse {
     public static void onRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
         Player player = event.getEntity();
         if (!player.isSecondaryUseActive() || player.isSpectator()) return;
-        if (event.getUseBlock() == Event.Result.DENY) return;
+        if (event.getUseBlock() == net.minecraft.util.TriState.FALSE) return;
         Block block = event.getLevel().getBlockState(event.getPos()).getBlock();
         if (block instanceof DoorBlock || block instanceof TrapDoorBlock || block instanceof FenceGateBlock
                 || block instanceof LeverBlock || block instanceof ButtonBlock) {
-            event.setUseBlock(Event.Result.ALLOW);
+            event.setUseBlock(net.minecraft.util.TriState.TRUE);
         }
     }
 }

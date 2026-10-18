@@ -1,23 +1,15 @@
 package com.skycraft.atmosphere.client;
 
-import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.BufferUploader;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.blaze3d.vertex.VertexFormat;
 import com.skycraft.atmosphere.AtmosphereConfig;
 import com.skycraft.atmosphere.LightningMath;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraft.world.level.chunk.ChunkStatus;
+import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.chunk.EmptyLevelChunk;
 import com.skycraft.atmosphere.WeatherFront;
 import com.skycraft.atmosphere.WeatherPhysics;
 import com.skycraft.atmosphere.weather.WeatherKind;
 import com.skycraft.tamriel.TamrielMap;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.sounds.SoundEvents;
@@ -29,6 +21,8 @@ import org.joml.Matrix4f;
 
 import java.util.List;
 import java.util.Map;
+import com.skycraft.render.client.WorldVertices;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 
 /**
  * Distant lightning across Tamriel's storm systems:
@@ -151,7 +145,7 @@ final class DistantStorms {
         int forcedCell = -1;
         if (force) {
             // Select an actual storm in the camera's view, rather than the first grid cell behind it.
-            var look = mc.gameRenderer.getMainCamera().getLookVector();
+            var look = mc.gameRenderer.mainCamera().forwardVector();
             double best = -Double.MAX_VALUE;
             for (int c = 0; c < cellCount; c++) {
                 int o = c * STRIDE;
@@ -298,7 +292,7 @@ final class DistantStorms {
      * Qualifies electrical columns independently of mesh rebuilding for both renderer paths.
      */
     private static void discoverStormCells(Vec3 cam, double timeSec) {
-        long dayTime = Minecraft.getInstance().level.getDayTime();
+        long dayTime = Minecraft.getInstance().level.getDefaultClockTime();
         float[] buf = SHADER_CELLS;
         int count = 0;
         int cloudBase = 232;
@@ -396,47 +390,19 @@ final class DistantStorms {
     private static void playThunder(Minecraft mc, Vec3 cam, float[] t) {
         // from the storm's direction, without distance falloff: the volume already carries the distance
         double x = cam.x + t[2] * 12.0, z = cam.z + t[3] * 12.0;
-        mc.getSoundManager().play(new SimpleSoundInstance(SoundEvents.LIGHTNING_BOLT_THUNDER.getLocation(), SoundSource.WEATHER,
+        mc.getSoundManager().play(new SimpleSoundInstance(SoundEvents.LIGHTNING_BOLT_THUNDER.location(), SoundSource.WEATHER,
                 t[0], t[1], RandomSource.create(RNG.nextLong()), false, 0, SoundInstance.Attenuation.NONE, x, cam.y + 4.0, z, false));
     }
 
-    /** Draws the flashes (additive). The caller has set up blending and depth; camera-relative coordinates. */
-    static void render(Matrix4f modelView, Matrix4f proj, Vec3 cam, float pt, float daylight) {
-        render(modelView, proj, cam, pt, daylight, false);
-    }
+    record RenderFrame(WorldVertices glow, WorldVertices bolts) {}
 
-    static void renderBolts(Matrix4f modelView, Matrix4f proj, Vec3 cam, float pt) {
-        render(modelView, proj, cam, pt, 0f, true);
-    }
-
-    private static void render(Matrix4f modelView, Matrix4f proj, Vec3 cam, float pt, float daylight, boolean boltsOnly) {
-        if (!hasActiveFlash()) return;
-        com.mojang.blaze3d.vertex.PoseStack mvs = RenderSystem.getModelViewStack();
-        mvs.pushPose();
-        mvs.setIdentity();
-        mvs.mulPoseMatrix(modelView);
-        RenderSystem.applyModelViewMatrix();
-        RenderSystem.backupProjectionMatrix();
-        RenderSystem.setProjectionMatrix(proj, com.mojang.blaze3d.vertex.VertexSorting.DISTANCE_TO_ORIGIN);
-        try {
-            draw(cam, pt, daylight, boltsOnly);
-        } finally {
-            RenderSystem.restoreProjectionMatrix();
-            mvs.popPose();
-            RenderSystem.applyModelViewMatrix();
-        }
-    }
-
-    private static void draw(Vec3 cam, float pt, float daylight, boolean boltsOnly) {
-        RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE,
-                GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-        BufferBuilder bb = Tesselator.getInstance().getBuilder();
+    /** Capture original channel growth and sheet-lightning geometry without touching GPU or mutable draw state. */
+    static RenderFrame extract(Vec3 cam, float pt, float daylight, boolean boltsOnly) {
+        var glow = new WorldVertices.Builder(true);
+        var channels = new WorldVertices.Builder(false);
+        if (!hasActiveFlash()) return new RenderFrame(glow.build(), channels.build());
         if (!boltsOnly) {
-        CloudRenderer.ensureTextureLoaded();
-        // 1. Internal cloud sheet & anvil glow
-        RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
-        RenderSystem.setShaderTexture(0, CloudRenderer.TEXTURE);
-        bb.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+            VertexConsumer bb = glow;
         float dim = 1f - 0.55f * daylight;
         for (int s = 0; s < MAX_FLASHES; s++) {
             float[] f = FLASH[s];
@@ -467,13 +433,8 @@ final class DistantStorms {
                 glow(bb, x1, y1, z1, f[4] * 2.8f, cr, cg, cb, k * (0.35f + 0.45f * prog));
             }
         }
-        BufferUploader.drawWithShader(bb.end());
         }
-
-        // 2. Cloud-to-Cloud (C2C) anvil crawlers and Cloud-to-Ground (CG) forked bolts
-        RenderSystem.setShader(GameRenderer::getPositionColorShader);
-        bb.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
-        boolean bolts = false;
+        VertexConsumer bb = channels;
         for (int s = 0; s < MAX_FLASHES; s++) {
             float[] f = FLASH[s];
             int mode = FLASH_MODE[s];
@@ -481,12 +442,8 @@ final class DistantStorms {
             float k = strobe(FLASH_SEED[s], f[6] + pt, f[7]);
             if (k < 0.04f) continue;
             drawChannel(bb, cam, s, k, f[6] + pt);
-            bolts = true;
         }
-        if (bolts) BufferUploader.drawWithShader(bb.end());
-        else bb.end().release();
-        RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA,
-                GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+        return new RenderFrame(glow.build(), channels.build());
     }
 
     private static float strobe(long seed, float age, float life) {
@@ -509,7 +466,7 @@ final class DistantStorms {
             // ClientLevel.hasChunk is not a residency check. Read only real cached columns.
             float y = available ? chunk.getHeight(Heightmap.Types.MOTION_BLOCKING, x & 15, z & 15) + 1
                     : Math.max(TamrielMap.SEA_LEVEL, TamrielMap.elevation(x, z));
-            if (available && y <= mc.level.getMinBuildHeight()) {
+            if (available && y <= mc.level.getMinY()) {
                 available = false;
                 y = Math.max(TamrielMap.SEA_LEVEL, TamrielMap.elevation(x, z));
             }
@@ -550,7 +507,7 @@ final class DistantStorms {
             if (selected < 0) break;
             used |= 1 << selected; count++;
             float[] f = FLASH[selected];
-            image.setPixelRGBA(0, row, LightningFieldTexture.rgba(strobe(FLASH_SEED[selected], f[6] + pt, f[7]),
+            image.setPixelABGR(0, row, LightningFieldTexture.rgba(strobe(FLASH_SEED[selected], f[6] + pt, f[7]),
                     LightningMath.progress(FLASH_SEED[selected], f[6] + pt),
                     FLASH_MODE[selected] == MODE_CLOUD_TO_GROUND ? 1 : 0, f[11] / 1.25f));
             LightningMath.Channel channel = CHANNELS[selected];
@@ -564,7 +521,7 @@ final class DistantStorms {
         return count;
     }
 
-    private static void drawChannel(BufferBuilder bb, Vec3 cam, int slot, float pulse, float age) {
+    private static void drawChannel(VertexConsumer bb, Vec3 cam, int slot, float pulse, float age) {
         LightningMath.Channel c = CHANNELS[slot];
         float[] f = FLASH[slot];
         float distance = (float) cam.distanceTo(new Vec3(f[0], f[1], f[2]));
@@ -590,7 +547,7 @@ final class DistantStorms {
         }
     }
 
-    private static void glow(BufferBuilder bb, float x, float y, float z, float size, float r, float g, float b, float a) {
+    private static void glow(VertexConsumer bb, float x, float y, float z, float size, float r, float g, float b, float a) {
         float d = Mth.sqrt(x * x + y * y + z * z);
         if (d < 1f) return;
         float tx = -x / d, ty = -y / d, tz = -z / d;
@@ -601,18 +558,18 @@ final class DistantStorms {
         rz /= rl;
         float ux = ty * rz, uy = tz * rx - tx * rz, uz = -ty * rx;
         float u0 = 0.25f, v0 = 0.75f, u1 = 0.5f, v1 = 1.0f;  // atlas cell 13: the glow
-        bb.vertex(x - (rx + ux) * size, y - uy * size, z - (rz + uz) * size).uv(u0, v1).color(r, g, b, a).endVertex();
-        bb.vertex(x + (rx - ux) * size, y - uy * size, z + (rz - uz) * size).uv(u1, v1).color(r, g, b, a).endVertex();
-        bb.vertex(x + (rx + ux) * size, y + uy * size, z + (rz + uz) * size).uv(u1, v0).color(r, g, b, a).endVertex();
-        bb.vertex(x - (rx - ux) * size, y + uy * size, z - (rz + uz) * size).uv(u0, v0).color(r, g, b, a).endVertex();
+        bb.addVertex(x - (rx + ux) * size, y - uy * size, z - (rz + uz) * size).setUv(u0, v1).setColor(r, g, b, a);
+        bb.addVertex(x + (rx - ux) * size, y - uy * size, z + (rz - uz) * size).setUv(u1, v1).setColor(r, g, b, a);
+        bb.addVertex(x + (rx + ux) * size, y + uy * size, z + (rz + uz) * size).setUv(u1, v0).setColor(r, g, b, a);
+        bb.addVertex(x - (rx - ux) * size, y + uy * size, z - (rz + uz) * size).setUv(u0, v0).setColor(r, g, b, a);
     }
 
-    private static void ribbon(BufferBuilder bb, Vec3 cam, float[] px, float[] py, float[] pz, int n, float w,
+    private static void ribbon(VertexConsumer bb, Vec3 cam, float[] px, float[] py, float[] pz, int n, float w,
                                float r, float g, float b, float a) {
         ribbon(bb, cam, px, py, pz, n, w, r, g, b, a, 1f);
     }
 
-    private static void ribbon(BufferBuilder bb, Vec3 cam, float[] px, float[] py, float[] pz, int n, float w,
+    private static void ribbon(VertexConsumer bb, Vec3 cam, float[] px, float[] py, float[] pz, int n, float w,
                                float r, float g, float b, float a, float progress) {
         for (int i = 0; i < n - 1; i++) {
             float fraction = Mth.clamp(progress * (n - 1) - i, 0f, 1f);
@@ -629,10 +586,10 @@ final class DistantStorms {
             sx = sx / sl * w;
             sy = sy / sl * w;
             sz = sz / sl * w;
-            bb.vertex(x0 - sx, y0 - sy, z0 - sz).color(r, g, b, a).endVertex();
-            bb.vertex(x0 + sx, y0 + sy, z0 + sz).color(r, g, b, a).endVertex();
-            bb.vertex(x1 + sx, y1 + sy, z1 + sz).color(r, g, b, a).endVertex();
-            bb.vertex(x1 - sx, y1 - sy, z1 - sz).color(r, g, b, a).endVertex();
+            bb.addVertex(x0 - sx, y0 - sy, z0 - sz).setColor(r, g, b, a);
+            bb.addVertex(x0 + sx, y0 + sy, z0 + sz).setColor(r, g, b, a);
+            bb.addVertex(x1 + sx, y1 + sy, z1 + sz).setColor(r, g, b, a);
+            bb.addVertex(x1 - sx, y1 - sy, z1 - sz).setColor(r, g, b, a);
         }
     }
 }

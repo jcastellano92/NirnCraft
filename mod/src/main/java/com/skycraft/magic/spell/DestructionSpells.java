@@ -19,7 +19,6 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobType;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -49,7 +48,7 @@ public final class DestructionSpells {
 
     /** Fire/Frost/Lightning Rune: a glyph on the surface you aim at that explodes when an enemy comes near. */
     public static Spell.Result rune(ServerPlayer p, Spell spell, int tick) {
-        ServerLevel level = p.serverLevel();
+        ServerLevel level = p.level();
         double range = Perks.has(p, "destruction.rune_master") ? 50 : 10;
         Vec3 eye = p.getEyePosition();
         Vec3 end = eye.add(p.getViewVector(1f).scale(range));
@@ -58,7 +57,7 @@ public final class DestructionSpells {
             Notifier.message(p, Component.translatable("message.skycraft.rune_no_surface"));
             return Spell.Result.FAILED;
         }
-        Vec3 at = hit.getLocation().add(Vec3.atLowerCornerOf(hit.getDirection().getNormal()).scale(0.1));
+        Vec3 at = hit.getLocation().add(hit.getDirection().getUnitVec3().scale(0.1));
         // Keep the newest runes only.
         List<MagicScheduler.Area> runes = MagicScheduler.areas(p.getUUID(), "rune#");
         while (runes.size() >= MAX_RUNES) MagicScheduler.remove(runes.remove(0));
@@ -74,7 +73,7 @@ public final class DestructionSpells {
             if (near.isEmpty()) return;
             area.ticksLeft = 0;
             MagicFx.burst(lvl, area.center, element, (float) area.radius);
-            MagicFx.worldSound(lvl, area.center, SoundEvents.GENERIC_EXPLODE, SoundSource.PLAYERS, 1.2f, 1.3f);
+            MagicFx.worldSound(lvl, area.center, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 1.2f, 1.3f);
             MagicFx.worldSound(lvl, area.center, element == Element.FIRE ? SoundEvents.BLAZE_SHOOT
                     : element == Element.FROST ? SoundEvents.GLASS_BREAK : SoundEvents.LIGHTNING_BOLT_IMPACT, SoundSource.PLAYERS, 1f, 0.8f);
             if (SpellEffects.areaDamage(owner, spell, area.center, area.radius, damage, null, 0.6) > 0) SpellEffects.xp(owner, spell);
@@ -101,16 +100,16 @@ public final class DestructionSpells {
     public static Spell.Result cloak(ServerPlayer p, Spell spell, int tick) {
         // Only one cloak at a time, like Skyrim.
         for (Element e : new Element[]{Element.FIRE, Element.FROST, Element.SHOCK, Element.HOLY}) {
-            if (e != spell.element) p.removeEffect(cloakEffect(e));
+            if (e != spell.element) p.removeEffect(com.skycraft.platform.Effects.holder(cloakEffect(e)));
         }
         MobEffect effect = cloakEffect(spell.element);
-        boolean wasActive = p.hasEffect(effect);
+        boolean wasActive = p.hasEffect(com.skycraft.platform.Effects.holder(effect));
         CompoundTag pd = p.getPersistentData();
         pd.putFloat(CLOAK_MAG + spell.element.name(), spell.magnitude);
         pd.putString(CLOAK_SPELL + spell.element.name(), spell.id);
-        p.addEffect(new MobEffectInstance(effect, spell.duration, 0, false, false, true));
+        p.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(effect), spell.duration, 0, false, false, true));
         MagicFx.send(p, MagicFx.AURA, spell.element, p.position(), p.position(), p.getId(), 2);
-        MagicFx.sendNear(p.serverLevel(), p.position(), 48, MagicFx.RING, spell.element, p.position().add(0, 0.2, 0), p.position(), p.getId(),
+        MagicFx.sendNear(p.level(), p.position(), 48, MagicFx.RING, spell.element, p.position().add(0, 0.2, 0), p.position(), p.getId(),
                 Math.round(spell.radius * 10));
         SpellSounds.cast(p, spell);
         // XP comes from the cloak burning enemies (pulse), not from putting it on.
@@ -120,10 +119,10 @@ public final class DestructionSpells {
     /** One cloak pulse (every half second while the cloak effect lasts). */
     public static void cloakPulse(ServerPlayer p, Element element) {
         CompoundTag pd = p.getPersistentData();
-        float perSecond = pd.getFloat(CLOAK_MAG + element.name());
-        Spell spell = Spells.byId(pd.getString(CLOAK_SPELL + element.name()));
+        float perSecond = pd.getFloatOr(CLOAK_MAG + element.name(), 0f);
+        Spell spell = Spells.byId(pd.getStringOr(CLOAK_SPELL + element.name(), ""));
         if (spell == null || perSecond <= 0) return;
-        ServerLevel level = p.serverLevel();
+        ServerLevel level = p.level();
         if (p.level().getGameTime() % 20 < 10) {
             MagicFx.sendNear(level, p.position(), 32, MagicFx.RING, element, p.position().add(0, 0.6, 0), p.position(), p.getId(),
                     Math.round(spell.radius * 10));
@@ -132,9 +131,9 @@ public final class DestructionSpells {
         for (LivingEntity e : Targeting.around(p, p.position().add(0, 1, 0), spell.radius + 0.5, e -> Targeting.canHarm(p, e))) {
             if (element == Element.HOLY) {
                 // Stendarr's Aura only burns the undead (and vampires, which are undead here).
-                if (e.getMobType() != MobType.UNDEAD) continue;
+                if (!com.skycraft.platform.Effects.isUndead(e)) continue;
                 if (Targeting.hurtNoKnockback(e, SpellEffects.damage(p, Element.HOLY, null), perSecond / 2f * SpellMath.undeadMult(p, e))) {
-                    e.setSecondsOnFire(2);
+                    e.igniteForSeconds(2);
                     hits++;
                 }
             } else if (SpellEffects.hit(p, spell, e, perSecond / 2f, null, true, false)) {
@@ -151,7 +150,7 @@ public final class DestructionSpells {
 
     /** Wall of Flames/Frost/Storms: hold to draw a burning line on the ground where you aim. */
     public static Spell.Result wall(ServerPlayer p, Spell spell, int tick) {
-        ServerLevel level = p.serverLevel();
+        ServerLevel level = p.level();
         if (tick % 3 == 0) {
             Vec3 eye = p.getEyePosition();
             Vec3 end = eye.add(p.getViewVector(1f).scale(spell.radius));
@@ -184,7 +183,7 @@ public final class DestructionSpells {
 
     /** Lightning Storm: after a two second charge, a massive beam that does 75 points of shock damage per second. */
     public static Spell.Result lightningStorm(ServerPlayer p, Spell spell, int tick) {
-        ServerLevel level = p.serverLevel();
+        ServerLevel level = p.level();
         Targeting.Ray ray = Targeting.ray(p, spell.radius, e -> Targeting.canHarm(p, e));
         Vec3 hand = Targeting.handPos(p);
         if (tick % 2 == 0) MagicFx.sendNear(level, hand, 96, MagicFx.ARC, Element.SHOCK, hand, ray.end(), -1, 1);

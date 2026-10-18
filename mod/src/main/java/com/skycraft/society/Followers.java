@@ -28,15 +28,12 @@ import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ChestMenu;
-import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
-import net.minecraft.world.item.ArmorItem;
-import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.CrossbowItem;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.SwordItem;
 import net.minecraft.world.item.TridentItem;
 
 import javax.annotation.Nullable;
@@ -80,14 +77,14 @@ public final class Followers {
     @Nullable
     public static UUID followerOf(Player player) {
         CompoundTag mod = SkyData.get(player).module(Reputation.MODULE);
-        return mod.hasUUID(PLAYER_KEY) ? mod.getUUID(PLAYER_KEY) : null;
+        return mod.read(PLAYER_KEY, net.minecraft.core.UUIDUtil.CODEC).isPresent() ? mod.read(PLAYER_KEY, net.minecraft.core.UUIDUtil.CODEC).orElseThrow() : null;
     }
 
     private static void setFollowerOf(Player player, @Nullable UUID npc) {
         PlayerData data = SkyData.get(player);
         CompoundTag mod = data.module(Reputation.MODULE);
         if (npc == null) mod.remove(PLAYER_KEY);
-        else mod.putUUID(PLAYER_KEY, npc);
+        else mod.store(PLAYER_KEY, net.minecraft.core.UUIDUtil.CODEC,  npc);
         data.markDirty();
     }
 
@@ -113,7 +110,7 @@ public final class Followers {
      * follower gets its own gear back). What does not fit the owner's bags drops at the owner; nothing is deleted.
      */
     private static void returnGear(LivingEntity npc, Player owner) {
-        if (npc.level().isClientSide) return;
+        if (npc.level().isClientSide()) return;
         SimpleContainer inv = getFollowerInventory(npc);
         for (int i = 0; i < inv.getContainerSize(); i++) {
             ItemStack s = inv.getItem(i);
@@ -157,23 +154,23 @@ public final class Followers {
     public static boolean isFollowerOf(@Nullable Entity npc, @Nullable Player player) {
         if (npc == null || player == null) return false;
         CompoundTag pd = npc.getPersistentData();
-        if (!pd.contains(FOLLOWER_KEY, Tag.TAG_COMPOUND)) return false;
-        CompoundTag f = pd.getCompound(FOLLOWER_KEY);
-        return player.getStringUUID().equals(f.getString("owner"));
+        if (!com.skycraft.platform.NbtData.hasType(pd, FOLLOWER_KEY, Tag.TAG_COMPOUND)) return false;
+        CompoundTag f = pd.getCompoundOrEmpty(FOLLOWER_KEY);
+        return player.getStringUUID().equals(f.getStringOr("owner",""));
     }
 
     public static boolean isFollower(Entity npc) {
         if (npc == null) return false;
-        return npc.getPersistentData().contains(FOLLOWER_KEY, Tag.TAG_COMPOUND);
+        return com.skycraft.platform.NbtData.hasType(npc.getPersistentData(), FOLLOWER_KEY, Tag.TAG_COMPOUND);
     }
 
     @Nullable
     public static UUID getOwnerId(Entity npc) {
         if (npc == null) return null;
         CompoundTag pd = npc.getPersistentData();
-        if (!pd.contains(FOLLOWER_KEY, Tag.TAG_COMPOUND)) return null;
+        if (!com.skycraft.platform.NbtData.hasType(pd, FOLLOWER_KEY, Tag.TAG_COMPOUND)) return null;
         try {
-            return UUID.fromString(pd.getCompound(FOLLOWER_KEY).getString("owner"));
+            return UUID.fromString(pd.getCompoundOrEmpty(FOLLOWER_KEY).getStringOr("owner",""));
         } catch (IllegalArgumentException e) {
             return null;
         }
@@ -182,14 +179,14 @@ public final class Followers {
     public static boolean isWaiting(Entity npc) {
         if (npc == null) return false;
         CompoundTag pd = npc.getPersistentData();
-        if (!pd.contains(FOLLOWER_KEY, Tag.TAG_COMPOUND)) return false;
-        return "WAIT".equals(pd.getCompound(FOLLOWER_KEY).getString("state"));
+        if (!com.skycraft.platform.NbtData.hasType(pd, FOLLOWER_KEY, Tag.TAG_COMPOUND)) return false;
+        return "WAIT".equals(pd.getCompoundOrEmpty(FOLLOWER_KEY).getStringOr("state",""));
     }
 
     public static void setWaiting(LivingEntity npc, boolean wait) {
         CompoundTag pd = npc.getPersistentData();
-        if (!pd.contains(FOLLOWER_KEY, Tag.TAG_COMPOUND)) return;
-        CompoundTag f = pd.getCompound(FOLLOWER_KEY);
+        if (!com.skycraft.platform.NbtData.hasType(pd, FOLLOWER_KEY, Tag.TAG_COMPOUND)) return;
+        CompoundTag f = pd.getCompoundOrEmpty(FOLLOWER_KEY);
         f.putString("state", wait ? "WAIT" : "FOLLOW");
         pd.put(FOLLOWER_KEY, f);
     }
@@ -200,8 +197,8 @@ public final class Followers {
         if (owner != null && !owner.equals(player.getUUID())) return; // someone else's follower
         // Dismiss any existing follower (an unloaded one lets go when it next meets the owner, see validate)
         UUID existing = followerOf(player);
-        if (existing != null && !existing.equals(npc.getUUID()) && player.getServer() != null) {
-            for (ServerLevel sl : player.getServer().getAllLevels()) {
+        if (existing != null && !existing.equals(npc.getUUID()) && player.level().getServer() != null) {
+            for (ServerLevel sl : player.level().getServer().getAllLevels()) {
                 Entity old = sl.getEntity(existing);
                 if (old instanceof LivingEntity livingOld && isFollowerOf(livingOld, player)) {
                     dismiss(player, livingOld);
@@ -229,7 +226,7 @@ public final class Followers {
         rescale(npc, player, true);
 
         Notifier.message(player, Component.translatable("society.skycraft.follower.recruited", npc.getDisplayName()));
-        player.playNotifySound(SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.6f, 1.3f);
+        com.skycraft.magic.MagicFx.soundToPlayer(player, SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.6f, 1.3f);
     }
 
     public static void dismiss(ServerPlayer player, LivingEntity npc) {
@@ -246,10 +243,10 @@ public final class Followers {
     public static void rescale(LivingEntity npc, Player owner, boolean fullHeal) {
         if (!(npc.level() instanceof ServerLevel level)) return;
         CompoundTag pd = npc.getPersistentData();
-        if (!pd.contains(FOLLOWER_KEY, Tag.TAG_COMPOUND)) return;
-        CompoundTag f = pd.getCompound(FOLLOWER_KEY);
+        if (!com.skycraft.platform.NbtData.hasType(pd, FOLLOWER_KEY, Tag.TAG_COMPOUND)) return;
+        CompoundTag f = pd.getCompoundOrEmpty(FOLLOWER_KEY);
         int lvl = Math.max(Leveling.regionLevel(level, npc.blockPosition()), SkyData.get(owner).getLevel());
-        if (!fullHeal && f.getInt("lvl") == lvl) return;
+        if (!fullHeal && f.getIntOr("lvl",0) == lvl) return;
         f.putInt("lvl", lvl);
         pd.put(FOLLOWER_KEY, f);
 
@@ -277,7 +274,7 @@ public final class Followers {
     public static boolean isDefendTarget(LivingEntity npc, Player owner, @Nullable LivingEntity target) {
         if (target == null || !target.isAlive() || target == npc || target == owner) return false;
         if (target instanceof Player || isFollower(target) || target.isAlliedTo(npc) || target.isAlliedTo(owner)) return false;
-        if (target instanceof net.minecraft.world.entity.TamableAnimal pet && owner.getUUID().equals(pet.getOwnerUUID())) return false;
+        if (target instanceof net.minecraft.world.entity.TamableAnimal pet && pet.getOwnerReference() != null && pet.getOwnerReference().matches(owner)) return false;
         if (target.distanceToSqr(npc) > 24 * 24) return false;
         if (target == owner.getLastHurtByMob() && owner.tickCount - owner.getLastHurtByMobTimestamp() <= 200) return true;
         return target == owner.getLastHurtMob() && owner.tickCount - owner.getLastHurtMobTimestamp() <= 200;
@@ -293,11 +290,11 @@ public final class Followers {
 
     /** Called when a follower dies: everything the player gave them drops (equipped gear drops via drop chances). */
     public static void onDeath(LivingEntity npc) {
-        if (npc.level().isClientSide) return;
+        if (npc.level().isClientSide()) return;
         SimpleContainer inv = getFollowerInventory(npc);
         for (int i = 0; i < inv.getContainerSize(); i++) {
             ItemStack s = inv.getItem(i);
-            if (!s.isEmpty()) npc.spawnAtLocation(s);
+            if (!s.isEmpty() && npc.level() instanceof ServerLevel level) npc.spawnAtLocation(level, s);
         }
         // the overflow falls where it stood as persistent item entities (a huge pile is bounded, never deleted)
         if (inv instanceof Bags b) com.skycraft.inventory.ContainerOverflow.spill(npc.level(), npc.blockPosition(), b.overflow);
@@ -316,6 +313,8 @@ public final class Followers {
      */
     private static final class Bags extends SimpleContainer implements com.skycraft.inventory.OverflowHost {
         final com.skycraft.inventory.BulkStore overflow;
+        private Runnable onChange;
+        @Override public void setChanged() { super.setChanged(); if (onChange != null) onChange.run(); }
 
         Bags() {
             super(INVENTORY_SIZE);
@@ -374,14 +373,14 @@ public final class Followers {
     public static SimpleContainer getFollowerInventory(LivingEntity npc) {
         Bags container = new Bags();
         CompoundTag pd = npc.getPersistentData();
-        if (pd.contains(OVERFLOW_KEY, Tag.TAG_COMPOUND)) container.overflow.load(pd.getCompound(OVERFLOW_KEY));
-        if (pd.contains(INVENTORY_KEY, Tag.TAG_LIST)) {
-            ListTag list = pd.getList(INVENTORY_KEY, Tag.TAG_COMPOUND);
+        if (com.skycraft.platform.NbtData.hasType(pd, OVERFLOW_KEY, Tag.TAG_COMPOUND)) container.overflow.load(pd.getCompoundOrEmpty(OVERFLOW_KEY));
+        if (com.skycraft.platform.NbtData.hasType(pd, INVENTORY_KEY, Tag.TAG_LIST)) {
+            ListTag list = pd.getListOrEmpty(INVENTORY_KEY);
             for (int i = 0; i < list.size(); i++) {
-                CompoundTag itemTag = list.getCompound(i);
-                int slot = itemTag.getInt("Slot");
+                CompoundTag itemTag = list.getCompoundOrEmpty(i);
+                int slot = itemTag.getIntOr("Slot",0);
                 if (slot >= 0 && slot < INVENTORY_SIZE) {
-                    container.setItem(slot, ItemStack.of(itemTag));
+                    container.setItem(slot, com.skycraft.inventory.ItemData.parse(itemTag));
                 }
             }
         }
@@ -395,7 +394,7 @@ public final class Followers {
             if (!stack.isEmpty()) {
                 CompoundTag itemTag = new CompoundTag();
                 itemTag.putInt("Slot", i);
-                stack.save(itemTag);
+                com.skycraft.platform.ItemTags.saveInto(stack, itemTag);
                 list.add(itemTag);
             }
         }
@@ -409,11 +408,11 @@ public final class Followers {
     // ------------------------------------------------------------------ gear
 
     private static double armorScore(ItemStack stack) {
-        return stack.getItem() instanceof ArmorItem a ? a.getDefense() + a.getToughness() : -1;
+        return com.skycraft.inventory.EquipmentData.isArmor(stack) ? com.skycraft.inventory.EquipmentData.defense(stack) + com.skycraft.inventory.EquipmentData.toughness(stack) : -1;
     }
 
     private static boolean isMelee(ItemStack stack) {
-        return stack.getItem() instanceof SwordItem || stack.getItem() instanceof AxeItem || stack.getItem() instanceof TridentItem;
+        return stack.is(net.minecraft.tags.ItemTags.SWORDS) || stack.is(net.minecraft.tags.ItemTags.AXES) || stack.getItem() instanceof TridentItem;
     }
 
     private static boolean isRanged(ItemStack stack) {
@@ -422,8 +421,8 @@ public final class Followers {
 
     private static double weaponScore(ItemStack stack) {
         if (stack.isEmpty()) return -1;
-        double dmg = 0;
-        for (var mod : stack.getAttributeModifiers(EquipmentSlot.MAINHAND).get(Attributes.ATTACK_DAMAGE)) dmg += mod.getAmount();
+        double dmg = stack.getOrDefault(net.minecraft.core.component.DataComponents.ATTRIBUTE_MODIFIERS,
+                net.minecraft.world.item.component.ItemAttributeModifiers.EMPTY).compute(Attributes.ATTACK_DAMAGE, 0.0, EquipmentSlot.MAINHAND);
         if (isMelee(stack)) return 10 + dmg; // any real weapon beats bare hands and tools
         if (isRanged(stack)) return 5;       // used only when no melee weapon was given
         return -1;
@@ -432,7 +431,7 @@ public final class Followers {
     /** Puts {@code stack} into the follower's bags, or drops it at their feet if they are full. */
     private static void stow(LivingEntity npc, Container container, ItemStack stack) {
         if (stack.isEmpty()) return;
-        if (!put(container, stack)) npc.spawnAtLocation(stack);
+        if (!put(container, stack) && npc.level() instanceof ServerLevel level) npc.spawnAtLocation(level, stack);
     }
 
     /**
@@ -465,8 +464,8 @@ public final class Followers {
         if (oldGiven) {
             stow(npc, container, old);
         } else {
-            CompoundTag nat = npc.getPersistentData().getCompound(NATIVE_KEY);
-            if (!nat.contains(slot.getName())) nat.put(slot.getName(), old.save(new CompoundTag()));
+            CompoundTag nat = npc.getPersistentData().getCompoundOrEmpty(NATIVE_KEY);
+            if (!nat.contains(slot.getName())) nat.put(slot.getName(), com.skycraft.inventory.ItemData.save(old, npc.registryAccess()));
             npc.getPersistentData().put(NATIVE_KEY, nat);
         }
     }
@@ -479,7 +478,7 @@ public final class Followers {
             double bestScore = armorScore(npc.getItemBySlot(slot));
             for (int i = 0; i < container.getContainerSize(); i++) {
                 ItemStack s = container.getItem(i);
-                if (s.getItem() instanceof ArmorItem a && a.getEquipmentSlot() == slot && armorScore(s) > bestScore) {
+                if (com.skycraft.inventory.EquipmentData.isArmor(s) && com.skycraft.inventory.EquipmentData.slot(s) == slot && armorScore(s) > bestScore) {
                     best = i;
                     bestScore = armorScore(s);
                 }
@@ -501,11 +500,11 @@ public final class Followers {
 
     /** Empty slots get the follower's own gear back. */
     private static void restoreNative(NpcEntity npc) {
-        CompoundTag nat = npc.getPersistentData().getCompound(NATIVE_KEY);
+        CompoundTag nat = npc.getPersistentData().getCompoundOrEmpty(NATIVE_KEY);
         if (nat.isEmpty()) return;
         for (EquipmentSlot slot : EquipmentSlot.values()) {
             if (!nat.contains(slot.getName()) || !npc.getItemBySlot(slot).isEmpty()) continue;
-            npc.setItemSlot(slot, ItemStack.of(nat.getCompound(slot.getName())));
+            npc.setItemSlot(slot, com.skycraft.inventory.ItemData.parse(nat.getCompoundOrEmpty(slot.getName())));
             npc.setDropChance(slot, 0.085f);
             nat.remove(slot.getName());
         }
@@ -535,7 +534,7 @@ public final class Followers {
         SimpleContainer container = getFollowerInventory(npc);
         unequipGiven(npc, container);
         saveFollowerInventory(npc, container);
-        container.addListener(c -> saveFollowerInventory(npc, c));
+        if (container instanceof Bags bags) bags.onChange = () -> saveFollowerInventory(npc, bags);
         player.openMenu(new SimpleMenuProvider(
                 (containerId, playerInv, p) -> new FollowerMenu(containerId, playerInv, container, npc),
                 Component.translatable("society.skycraft.follower.trade_title", npc.getDisplayName())
@@ -566,7 +565,7 @@ public final class Followers {
         }
 
         @Override
-        public void clicked(int slot, int button, ClickType type, Player pl) {
+        public void clicked(int slot, int button, ContainerInput type, Player pl) {
             // the NPC may have died this tick (its bags already dropped): no more taking
             if (!canTrade(npc, pl)) return;
             super.clicked(slot, button, type, pl);
@@ -678,24 +677,24 @@ public final class Followers {
     }
 
     private static boolean persuadeOnCooldown(LivingEntity npc, Player player) {
-        CompoundTag fails = npc.getPersistentData().getCompound(PERSUADE_FAIL_KEY);
+        CompoundTag fails = npc.getPersistentData().getCompoundOrEmpty(PERSUADE_FAIL_KEY);
         String key = player.getStringUUID();
-        return fails.contains(key) && npc.level().getGameTime() - fails.getLong(key) < PERSUADE_COOLDOWN;
+        return fails.contains(key) && npc.level().getGameTime() - fails.getLongOr(key, 0L) < PERSUADE_COOLDOWN;
     }
 
     /** One try per NPC per player per day; the Speech XP is only earned the first time this NPC is won over. */
     private static void persuade(ServerPlayer player, LivingEntity npc, int difficulty) {
         if (isFollower(npc) || persuadeOnCooldown(npc, player)) return;
         CompoundTag pd = npc.getPersistentData();
-        CompoundTag xp = pd.getCompound(PERSUADE_XP_KEY);
+        CompoundTag xp = pd.getCompoundOrEmpty(PERSUADE_XP_KEY);
         String key = player.getStringUUID();
-        if (SpeechChecks.checkPersuade(player, difficulty, !xp.getBoolean(key))) {
+        if (SpeechChecks.checkPersuade(player, difficulty, !xp.getBooleanOr(key, false))) {
             xp.putBoolean(key, true);
             pd.put(PERSUADE_XP_KEY, xp);
             recruit(player, npc);
             Dialogue.open(player, npc, Component.translatable("society.skycraft.say.follower_accept"));
         } else {
-            CompoundTag fails = pd.getCompound(PERSUADE_FAIL_KEY);
+            CompoundTag fails = pd.getCompoundOrEmpty(PERSUADE_FAIL_KEY);
             fails.putLong(key, npc.level().getGameTime());
             pd.put(PERSUADE_FAIL_KEY, fails);
             Dialogue.open(player, npc, Component.translatable("society.skycraft.say.follower_refuse"));

@@ -8,7 +8,7 @@ import com.skycraft.magic.spell.Spell;
 import com.skycraft.magic.spell.Spells;
 import com.skycraft.network.SkyNetwork;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
@@ -16,7 +16,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
-import org.lwjgl.glfw.GLFW;
+import com.mojang.blaze3d.platform.InputConstants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,7 +41,7 @@ public class StaffEnchanterScreen extends Screen {
     }
 
     public static void open(BlockPos pos) {
-        Minecraft.getInstance().setScreen(new StaffEnchanterScreen(pos));
+        Minecraft.getInstance().gui.setScreen(new StaffEnchanterScreen(pos));
     }
 
     private LocalPlayer player() {
@@ -89,8 +89,10 @@ public class StaffEnchanterScreen extends Screen {
     }
 
     @Override
-    public boolean mouseClicked(double mx, double my, int button) {
-        if (super.mouseClicked(mx, my, button)) return true;
+    public boolean mouseClicked(net.minecraft.client.input.MouseButtonEvent event, boolean doubleClick) {
+        double mx = event.x(), my = event.y();
+        int button = com.skycraft.client.screen.UiInput.actionButton(event.button());
+        if (super.mouseClicked(event, doubleClick)) return true;
         if (mx >= listX && mx < listX + listW && my >= top + 14) {
             int idx = (int) ((my - top - 14) / ROW) + scroll;
             if (idx >= 0 && idx < spells.size() && idx - scroll < visibleRows()) {
@@ -102,28 +104,29 @@ public class StaffEnchanterScreen extends Screen {
     }
 
     @Override
-    public boolean mouseScrolled(double mx, double my, double delta) {
+    public boolean mouseScrolled(double mx, double my, double horizontal, double delta) {
         scroll = Mth.clamp(scroll - (int) Math.signum(delta), 0, Math.max(0, spells.size() - visibleRows()));
         return true;
     }
 
     @Override
-    public boolean keyPressed(int key, int scan, int mods) {
+    public boolean keyPressed(net.minecraft.client.input.KeyEvent event) {
+        int key = event.key(), scan = event.keycode(), mods = event.modifiers();
         switch (key) {
-            case GLFW.GLFW_KEY_UP, GLFW.GLFW_KEY_W -> {
+            case InputConstants.KEY_UP, InputConstants.KEY_W -> {
                 move(-1);
                 return true;
             }
-            case GLFW.GLFW_KEY_DOWN, GLFW.GLFW_KEY_S -> {
+            case InputConstants.KEY_DOWN, InputConstants.KEY_S -> {
                 move(1);
                 return true;
             }
-            case GLFW.GLFW_KEY_ENTER, GLFW.GLFW_KEY_E -> {
+            case InputConstants.KEY_RETURN, InputConstants.KEY_E -> {
                 enchant();
                 return true;
             }
             default -> {
-                return super.keyPressed(key, scan, mods);
+                return super.keyPressed(event);
             }
         }
     }
@@ -136,20 +139,20 @@ public class StaffEnchanterScreen extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        renderBackground(g);
+    public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
+
         LocalPlayer p = player();
         if (p == null) return;
         g.fill(0, 0, width, height, 0x80000000);
         MagicUi.capsCentered(g, font, title, width / 2, 10, MagicUi.TEXT);
 
         MagicUi.panel(g, listX - 4, top - 4, listX + listW + 4, bottom + 4);
-        g.drawString(font, MagicUi.caps(Component.translatable("staff_enchanter.skycraft.spells")), listX, top, MagicUi.HEADER, false);
+        g.text(font, MagicUi.caps(Component.translatable("staff_enchanter.skycraft.spells")), listX, top, MagicUi.HEADER, false);
         int y0 = top + 14;
         if (spells.isEmpty()) {
             int y = y0;
             for (FormattedCharSequence line : font.split(Component.translatable("staff_enchanter.skycraft.no_spells"), listW)) {
-                g.drawString(font, line, listX, y, MagicUi.DIM, false);
+                g.text(font, line, listX, y, MagicUi.DIM, false);
                 y += 10;
             }
         }
@@ -162,7 +165,7 @@ public class StaffEnchanterScreen extends Screen {
             if (idx == cursor) g.fill(listX - 2, y - 1, listX + listW + 2, y + ROW - 1, 0x40FFFFFF);
             else if (hover) g.fill(listX - 2, y - 1, listX + listW + 2, y + ROW - 1, 0x20FFFFFF);
             g.fill(listX, y + 3, listX + 3, y + 6, 0xFF000000 | s.school.color);
-            g.drawString(font, MagicUi.ellipsize(font, s.displayName().getString(), listW - 10), listX + 6, y + 2,
+            g.text(font, MagicUi.ellipsize(font, s.displayName().getString(), listW - 10), listX + 6, y + 2,
                     idx == cursor ? MagicUi.BRIGHT : MagicUi.TEXT, false);
         }
         if (spells.size() > rows) {
@@ -175,13 +178,13 @@ public class StaffEnchanterScreen extends Screen {
         Spell s = selected();
         if (s != null) {
             int y = top;
-            g.drawString(font, s.displayName(), detailX, y, 0xFF000000 | s.school.color, true);
+            g.text(font, s.displayName(), detailX, y, 0xFF000000 | s.school.color, true);
             y += 12;
-            g.drawString(font, Component.translatable("tooltip.skycraft.spell_school", s.school.displayName(), s.tier.displayName()),
+            g.text(font, Component.translatable("tooltip.skycraft.spell_school", s.school.displayName(), s.tier.displayName()),
                     detailX, y, MagicUi.HEADER, false);
             y += 12;
             for (FormattedCharSequence line : font.split(s.description(), detailW)) {
-                g.drawString(font, line, detailX, y, MagicUi.TEXT, false);
+                g.text(font, line, detailX, y, MagicUi.TEXT, false);
                 y += 10;
             }
             y += 6;
@@ -189,20 +192,20 @@ public class StaffEnchanterScreen extends Screen {
             y += 6;
             boolean staff = StaffEnchanting.findStaff(p) >= 0;
             int gem = StaffEnchanting.findGem(p);
-            g.drawString(font, Component.translatable("staff_enchanter.skycraft.need_staff"), detailX, y, staff ? MagicUi.GOOD : MagicUi.BAD, false);
+            g.text(font, Component.translatable("staff_enchanter.skycraft.need_staff"), detailX, y, staff ? MagicUi.GOOD : MagicUi.BAD, false);
             y += 11;
-            g.drawString(font, Component.translatable("staff_enchanter.skycraft.need_gem"), detailX, y, gem >= 0 ? MagicUi.GOOD : MagicUi.BAD, false);
+            g.text(font, Component.translatable("staff_enchanter.skycraft.need_gem"), detailX, y, gem >= 0 ? MagicUi.GOOD : MagicUi.BAD, false);
             y += 11;
             if (gem >= 0) {
                 int charges = StaffEnchanting.chargesFor(p, StaffEnchanting.soulAt(p, gem));
-                g.drawString(font, Component.translatable("staff_enchanter.skycraft.charges", charges), detailX, y, MagicUi.MAGICKA, false);
+                g.text(font, Component.translatable("staff_enchanter.skycraft.charges", charges), detailX, y, MagicUi.MAGICKA, false);
             }
             enchantButton.active = StaffEnchanting.problem(p, s) == null;
         } else {
             enchantButton.active = false;
         }
         String hint = MagicUi.ellipsize(font, Component.translatable("staff_enchanter.skycraft.hint").getString(), detailX + detailW - 120 - listX);
-        g.drawString(font, hint, listX, height - 22, MagicUi.DIM, false);
-        super.render(g, mouseX, mouseY, partialTick);
+        g.text(font, hint, listX, height - 22, MagicUi.DIM, false);
+        super.extractRenderState(g, mouseX, mouseY, partialTick);
     }
 }

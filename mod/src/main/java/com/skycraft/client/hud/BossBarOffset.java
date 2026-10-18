@@ -1,12 +1,12 @@
 package com.skycraft.client.hud;
 
 import com.skycraft.Skycraft;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RenderGuiOverlayEvent;
-import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.RenderGuiLayerEvent;
+import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 /**
  * Vanilla boss bars that Skycraft doesn't redraw itself (named quest bosses such as Alduin at Helgen, raids, other
@@ -14,7 +14,7 @@ import net.minecraftforge.fml.common.Mod;
  * Skycraft's own boss bar sits (y 34). Pushed only when the overlay really renders (lowest priority, not on cancelled
  * events), so the pose stack always gets its matching pop in the Post event.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
 public final class BossBarOffset {
     private static final float OFFSET = 30.0F;
     private static boolean pushed;
@@ -22,17 +22,17 @@ public final class BossBarOffset {
     private BossBarOffset() {}
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
-    public static void pre(RenderGuiOverlayEvent.Pre event) {
-        if (!event.getOverlay().id().equals(VanillaGuiOverlay.BOSS_EVENT_PROGRESS.id())) return;
-        event.getGuiGraphics().pose().pushPose();
-        event.getGuiGraphics().pose().translate(0.0F, OFFSET, 0.0F);
+    public static void pre(RenderGuiLayerEvent.Pre event) {
+        if (!event.getName().equals(VanillaGuiLayers.BOSS_OVERLAY)) return;
+        event.getGuiGraphics().pose().pushMatrix();
+        event.getGuiGraphics().pose().translate(0.0F, OFFSET);
         pushed = true;
     }
 
     @SubscribeEvent
-    public static void post(RenderGuiOverlayEvent.Post event) {
-        if (!pushed || !event.getOverlay().id().equals(VanillaGuiOverlay.BOSS_EVENT_PROGRESS.id())) return;
-        event.getGuiGraphics().pose().popPose();
+    public static void post(RenderGuiLayerEvent.Post event) {
+        if (!pushed || !event.getName().equals(VanillaGuiLayers.BOSS_OVERLAY)) return;
+        event.getGuiGraphics().pose().popMatrix();
         pushed = false;
     }
 }

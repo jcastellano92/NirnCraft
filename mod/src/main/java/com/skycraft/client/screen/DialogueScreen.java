@@ -2,11 +2,11 @@ package com.skycraft.client.screen;
 
 import com.skycraft.dialogue.DialoguePackets;
 import com.skycraft.network.SkyNetwork;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
-import org.lwjgl.glfw.GLFW;
+import com.mojang.blaze3d.platform.InputConstants;
 
 import java.util.List;
 
@@ -35,7 +35,7 @@ public class DialogueScreen extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+    public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
         // Player's Current Gold in top-right
         if (minecraft != null && minecraft.player != null) {
             long playerGold = com.skycraft.core.Currency.balance(minecraft.player);
@@ -48,10 +48,10 @@ public class DialogueScreen extends Screen {
 
             g.fill(gx - 8, gBoxY - 4, width - 12, gBoxY + 14, 0x90000000);
             g.fill(gx - 8, gBoxY - 4, gx - 6, gBoxY + 14, 0xFFE0B020);
-            g.drawString(font, goldLabel, gx, gBoxY, 0xFFD8D0B8, true);
-            g.drawString(font, goldCompact, gx + font.width(goldLabel), gBoxY, 0xFFE0B020, true);
+            g.text(font, goldLabel, gx, gBoxY, 0xFFD8D0B8, true);
+            g.text(font, goldCompact, gx + font.width(goldLabel), gBoxY, 0xFFE0B020, true);
             if (!goldFull.isEmpty()) {
-                g.drawString(font, goldFull, gx + font.width(goldLabel) + font.width(goldCompact), gBoxY, 0xFFA09880, false);
+                g.text(font, goldFull, gx + font.width(goldLabel) + font.width(goldCompact), gBoxY, 0xFFA09880, false);
             }
         }
 
@@ -116,19 +116,19 @@ public class DialogueScreen extends Screen {
             if (hi) {
                 g.fillGradient(x - 12, boxY1, x + maxW + 4, boxY2, 0x40FFFFFF, 0x10FFFFFF);
                 g.fill(x - 12, boxY1, x - 10, boxY2, 0xFFE5B83B);
-                g.drawString(font, "▶", x - 7, curY, 0xFFE5B83B, true);
+                g.text(font, "▶", x - 7, curY, 0xFFE5B83B, true);
             }
             int textX = hi ? x + 4 : x;
             int textY = curY;
             int textColor = off ? 0xFF5C5850 : hi ? 0xFFFFFFFF : 0xFFA8A090;
             for (FormattedCharSequence lineSeq : wrapped) {
-                g.drawString(font, lineSeq, textX, textY, textColor, true);
+                g.text(font, lineSeq, textX, textY, textColor, true);
                 textY += 11;
             }
         }
         g.disableScissor();
-        if (optScroll > 0) g.drawString(font, "▲", width - 22, areaTop - 9, 0xFFE5B83B, true);
-        if (optScroll < maxOptScroll) g.drawString(font, "▼", width - 22, areaBottom + 1, 0xFFE5B83B, true);
+        if (optScroll > 0) g.text(font, "▲", width - 22, areaTop - 9, 0xFFE5B83B, true);
+        if (optScroll < maxOptScroll) g.text(font, "▼", width - 22, areaBottom + 1, 0xFFE5B83B, true);
 
         // ---- speech plate (drawn last so nothing covers it): name tag, divider, wrapped line
         g.fill(plateX, plateY, plateX + plateW, plateY + plateH, 0xEE0E0D0B);
@@ -144,7 +144,7 @@ public class DialogueScreen extends Screen {
 
         int nameY = plateY + 6;
         List<FormattedCharSequence> nameLines = font.split(dialogue.npcName(), plateW - 24);
-        if (!nameLines.isEmpty()) g.drawCenteredString(font, nameLines.get(0), plateX + plateW / 2, nameY, 0xFFF5EBC8);
+        if (!nameLines.isEmpty()) g.centeredText(font, nameLines.get(0), plateX + plateW / 2, nameY, 0xFFF5EBC8);
         int divW = Math.min(180, plateW / 2);
         int divX = plateX + (plateW - divW) / 2;
         int divY = nameY + 11;
@@ -153,38 +153,41 @@ public class DialogueScreen extends Screen {
 
         int curGy = divY + 6;
         for (int i = textScroll; i < textScroll + shownLines; i++) {
-            g.drawCenteredString(font, greetingLines.get(i), plateX + plateW / 2, curGy, 0xFFE6DEC8);
+            g.centeredText(font, greetingLines.get(i), plateX + plateW / 2, curGy, 0xFFE6DEC8);
             curGy += 12;
         }
-        if (textScroll > 0) g.drawString(font, "▲", plateX + plateW - 14, divY + 4, 0xFFE5B83B, true);
-        if (textScroll < maxScroll) g.drawString(font, "▼", plateX + plateW - 14, plateY + plateH - 12, 0xFFE5B83B, true);
+        if (textScroll > 0) g.text(font, "▲", plateX + plateW - 14, divY + 4, 0xFFE5B83B, true);
+        if (textScroll < maxScroll) g.text(font, "▼", plateX + plateW - 14, plateY + plateH - 12, 0xFFE5B83B, true);
         plateBounds = new int[]{plateX, plateY, plateX + plateW, plateY + plateH};
-        super.render(g, mouseX, mouseY, partialTick);
+        super.extractRenderState(g, mouseX, mouseY, partialTick);
     }
 
     @Override
-    public boolean mouseClicked(double mx, double my, int button) {
+    public boolean mouseClicked(net.minecraft.client.input.MouseButtonEvent event, boolean doubleClick) {
+        double mx = event.x(), my = event.y();
+        int button = com.skycraft.client.screen.UiInput.actionButton(event.button());
         if (hovered >= 0) {
             if (dialogue.lines().get(hovered).enabled()) choose(hovered);
             return true; // a greyed-out line swallows the click
         }
-        return super.mouseClicked(mx, my, button);
+        return super.mouseClicked(event, doubleClick);
     }
 
     @Override
-    public boolean keyPressed(int key, int scan, int mods) {
+    public boolean keyPressed(net.minecraft.client.input.KeyEvent event) {
+        int key = event.key(), scan = event.keycode(), mods = event.modifiers();
         int n = dialogue.lines().size();
-        if (key == GLFW.GLFW_KEY_UP || key == GLFW.GLFW_KEY_W) selected = step(selected, -1, n);
-        else if (key == GLFW.GLFW_KEY_DOWN || key == GLFW.GLFW_KEY_S) selected = step(selected, 1, n);
-        else if (key == GLFW.GLFW_KEY_ENTER || key == GLFW.GLFW_KEY_E) {
+        if (key == InputConstants.KEY_UP || key == InputConstants.KEY_W) selected = step(selected, -1, n);
+        else if (key == InputConstants.KEY_DOWN || key == InputConstants.KEY_S) selected = step(selected, 1, n);
+        else if (key == InputConstants.KEY_RETURN || key == InputConstants.KEY_E) {
             if (selected >= 0 && selected < n && dialogue.lines().get(selected).enabled()) choose(selected);
-        } else return super.keyPressed(key, scan, mods);
+        } else return super.keyPressed(event);
         ensureVisible = true;
         return true;
     }
 
     @Override
-    public boolean mouseScrolled(double mx, double my, double delta) {
+    public boolean mouseScrolled(double mx, double my, double horizontal, double delta) {
         int step = delta > 0 ? -1 : 1;
         if (mx >= plateBounds[0] && mx <= plateBounds[2] && my >= plateBounds[1] && my <= plateBounds[3]) textScroll += step;
         else optScroll += step * 22;

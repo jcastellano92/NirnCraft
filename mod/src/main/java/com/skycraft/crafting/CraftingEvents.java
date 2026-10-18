@@ -2,7 +2,7 @@ package com.skycraft.crafting;
 
 import com.skycraft.Skycraft;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -11,29 +11,27 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.AbstractArrow;
-import net.minecraft.world.item.ArmorItem;
+import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ProjectileWeaponItem;
 import net.minecraft.world.item.ShieldItem;
-import net.minecraftforge.event.ItemAttributeModifierEvent;
-import net.minecraftforge.event.entity.EntityJoinLevelEvent;
-import net.minecraftforge.event.entity.living.LivingDropsEvent;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
+import net.neoforged.neoforge.event.ItemAttributeModifierEvent;
+import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
+import net.neoforged.neoforge.event.entity.living.LivingDropsEvent;
 import com.skycraft.crafting.menu.StationMenu;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.api.distmarker.Dist;
+import com.skycraft.platform.Sides;
+import net.neoforged.fml.common.Mod;
 
 import java.util.UUID;
 
 /** Forge-bus hooks of the smithing module: tempering bonuses, silver against the undead and animal hides. */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class CraftingEvents {
     private static final UUID WEAPON_UUID = UUID.fromString("5b7d3a2e-1c4f-4e8b-9a61-2f0d8c3e7a10");
     private static final UUID[] ARMOR_UUIDS = {
@@ -45,7 +43,7 @@ public final class CraftingEvents {
     private static final UUID SHIELD_UUID = UUID.fromString("5b7d3a2e-1c4f-4e8b-9a61-2f0d8c3e7a15");
     private static final String ARROW_FLAG = "skycraft_tempered_arrow";
     /** Animals that drop Skyrim hide when killed by a player. */
-    public static final TagKey<EntityType<?>> DROPS_HIDE = TagKey.create(Registries.ENTITY_TYPE, new ResourceLocation(Skycraft.MODID, "drops_hide"));
+    public static final TagKey<EntityType<?>> DROPS_HIDE = TagKey.create(Registries.ENTITY_TYPE, Identifier.fromNamespaceAndPath(Skycraft.MODID, "drops_hide"));
 
     private CraftingEvents() {}
 
@@ -55,21 +53,22 @@ public final class CraftingEvents {
         ItemStack stack = event.getItemStack();
         int quality = Tempering.quality(stack);
         if (quality <= 0) return;
-        EquipmentSlot slot = event.getSlotType();
-        if (stack.getItem() instanceof ArmorItem armor) {
-            if (slot == armor.getEquipmentSlot() && slot.getType() == EquipmentSlot.Type.ARMOR) {
-                event.addModifier(Attributes.ARMOR, new AttributeModifier(ARMOR_UUIDS[slot.getIndex()], "Skycraft tempering",
-                        0.5 * quality, AttributeModifier.Operation.ADDITION));
+        EquipmentSlot slot = com.skycraft.inventory.EquipmentData.slot(stack);
+        if (com.skycraft.inventory.EquipmentData.isArmor(stack)) {
+            if (slot != null && slot.getType() == EquipmentSlot.Type.HUMANOID_ARMOR) {
+                event.addModifier(Attributes.ARMOR, new AttributeModifier(
+                        Identifier.fromNamespaceAndPath(Skycraft.MODID, "tempering_" + ARMOR_UUIDS[slot.getIndex()]),
+                        0.5 * quality, AttributeModifier.Operation.ADD_VALUE), net.minecraft.world.entity.EquipmentSlotGroup.bySlot(slot));
             }
         } else if (stack.getItem() instanceof ShieldItem) {
-            if (slot == EquipmentSlot.OFFHAND) {
-                event.addModifier(Attributes.ARMOR, new AttributeModifier(SHIELD_UUID, "Skycraft tempering",
-                        0.5 * quality, AttributeModifier.Operation.ADDITION));
-            }
-        } else if (slot == EquipmentSlot.MAINHAND && Tempering.kind(stack) == Tempering.Kind.WEAPON
+            event.addModifier(Attributes.ARMOR, new AttributeModifier(
+                    Identifier.fromNamespaceAndPath(Skycraft.MODID, "tempering_" + SHIELD_UUID),
+                    0.5 * quality, AttributeModifier.Operation.ADD_VALUE), net.minecraft.world.entity.EquipmentSlotGroup.OFFHAND);
+        } else if (Tempering.kind(stack) == Tempering.Kind.WEAPON
                 && !(stack.getItem() instanceof ProjectileWeaponItem)) {
-            event.addModifier(Attributes.ATTACK_DAMAGE, new AttributeModifier(WEAPON_UUID, "Skycraft tempering",
-                    0.5 * quality, AttributeModifier.Operation.ADDITION));
+            event.addModifier(Attributes.ATTACK_DAMAGE, new AttributeModifier(
+                    Identifier.fromNamespaceAndPath(Skycraft.MODID, "tempering_" + WEAPON_UUID),
+                    0.5 * quality, AttributeModifier.Operation.ADD_VALUE), net.minecraft.world.entity.EquipmentSlotGroup.MAINHAND);
         }
     }
 
@@ -77,14 +76,14 @@ public final class CraftingEvents {
     @SubscribeEvent
     public static void onArrow(EntityJoinLevelEvent event) {
         if (event.getLevel().isClientSide() || !(event.getEntity() instanceof AbstractArrow arrow)) return;
-        if (arrow.getPersistentData().getBoolean(ARROW_FLAG)) return;
+        if (arrow.getPersistentData().getBooleanOr(ARROW_FLAG, false)) return;
         arrow.getPersistentData().putBoolean(ARROW_FLAG, true);
         if (!(arrow.getOwner() instanceof LivingEntity owner)) return;
         ItemStack weapon = owner.getUseItem();
         if (!(weapon.getItem() instanceof ProjectileWeaponItem)) weapon = owner.getMainHandItem();
         if (!(weapon.getItem() instanceof ProjectileWeaponItem)) weapon = owner.getOffhandItem();
         int quality = Tempering.quality(weapon);
-        if (quality > 0) arrow.setBaseDamage(arrow.getBaseDamage() + 0.15 * quality);
+        if (quality > 0) arrow.setBaseDamage(com.skycraft.platform.EntityData.arrowDamage(arrow) + 0.15 * quality);
     }
 
     /**
@@ -92,12 +91,12 @@ public final class CraftingEvents {
      * +50% (at least +3) to undead mobs.
      */
     @SubscribeEvent
-    public static void onSilverHit(LivingHurtEvent event) {
+    public static void onSilverHit(com.skycraft.combat.BeforeArmorDamageEvent event) {
         if (!(event.getSource().getDirectEntity() instanceof LivingEntity attacker) || attacker != event.getSource().getEntity()) return;
         ItemStack weapon = attacker.getMainHandItem();
         SmithingTier tier = weapon.getItem() instanceof com.skycraft.crafting.item.SkyMeleeItem m ? m.smithingTier
                 : weapon.getItem() instanceof com.skycraft.crafting.item.SkyAxeItem a ? a.smithingTier : null;
-        if (tier != SmithingTier.SILVER || event.getEntity().getMobType() != net.minecraft.world.entity.MobType.UNDEAD) return;
+        if (tier != SmithingTier.SILVER || !com.skycraft.platform.Effects.isUndead(event.getEntity())) return;
         event.setAmount(event.getAmount() + Math.max(3f, event.getAmount() * 0.5f));
     }
 
@@ -105,11 +104,15 @@ public final class CraftingEvents {
     @SubscribeEvent
     public static void onDrops(LivingDropsEvent event) {
         LivingEntity victim = event.getEntity();
-        if (!(event.getSource().getEntity() instanceof Player) || victim.isBaby() || !victim.getType().is(DROPS_HIDE)) return;
+        if (!(event.getSource().getEntity() instanceof Player) || victim.isBaby() || !victim.getType().builtInRegistryHolder().is(DROPS_HIDE)) return;
         var random = victim.getRandom();
-        if (random.nextFloat() >= 0.6f + 0.1f * event.getLootingLevel()) return;
+        if (random.nextFloat() >= 0.6f + 0.1f * net.minecraft.world.item.enchantment.EnchantmentHelper.getEnchantmentLevel(com.skycraft.platform.EnchantmentsAccess.holder(net.minecraft.world.item.enchantment.Enchantments.LOOTING, victim.registryAccess()), (LivingEntity) event.getSource().getEntity())) return;
         event.getDrops().add(new ItemEntity(victim.level(), victim.getX(), victim.getY() + 0.5, victim.getZ(),
                 new ItemStack(CraftingItems.HIDE.get())));
+    }
+
+    private static net.minecraft.world.phys.Vec3 hitLocation(net.minecraft.world.entity.Entity entity, net.minecraft.world.phys.Vec3 eye, net.minecraft.world.phys.Vec3 end) {
+        return entity.getBoundingBox().inflate(0.5).clip(eye, end).orElse(entity.position()).subtract(entity.position());
     }
 
     /**
@@ -132,7 +135,7 @@ public final class CraftingEvents {
             var corpses = event.getLevel().getEntitiesOfClass(com.skycraft.creatures.entity.CorpseEntity.class, searchBox,
                     c -> c.isAlive() && c.getBoundingBox().inflate(0.5).clip(eye, end).isPresent());
             if (!corpses.isEmpty()) {
-                var res = corpses.get(0).interact(player, event.getHand());
+                var res = corpses.get(0).interact(player, event.getHand(), hitLocation(corpses.get(0), eye, end));
                 event.setCancellationResult(res);
                 event.setCanceled(true);
                 return;
@@ -154,8 +157,8 @@ public final class CraftingEvents {
             if (sneaking) return; // vanilla cartography table
             event.setCanceled(true);
             event.setCancellationResult(InteractionResult.SUCCESS);
-            if (event.getLevel().isClientSide) {
-                DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> com.skycraft.world.client.MapClient.openMap());
+            if (event.getLevel().isClientSide()) {
+                Sides.runOn(Dist.CLIENT, () -> () -> com.skycraft.world.client.MapClient.openMap());
             }
             return;
         }

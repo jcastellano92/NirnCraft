@@ -31,7 +31,7 @@ public final class ClientQuestData {
         /** Best known position: the live entity when it's loaded on this client, else the last synced position. */
         public Vec3 position() {
             Minecraft mc = Minecraft.getInstance();
-            if (mc.level != null && mc.level.dimension().location().toString().equals(dim)) {
+            if (mc.level != null && mc.level.dimension().identifier().toString().equals(dim)) {
                 Player p = mc.level.getPlayerByUUID(id);
                 if (p != null) return p.position();
             }
@@ -46,7 +46,7 @@ public final class ClientQuestData {
 
     public static void onQuests(CompoundTag tag) {
         List<Quest> list = new ArrayList<>();
-        for (Tag t : tag.getList("quests", Tag.TAG_COMPOUND)) list.add(Quest.load((CompoundTag) t));
+        for (Tag t : tag.getListOrEmpty("quests")) list.add(Quest.load((CompoundTag) t));
         quests = list;
         refreshCompass();
     }
@@ -61,15 +61,15 @@ public final class ClientQuestData {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null || target.equals(mc.player.getUUID())) return;
         PartyTravelScreen screen = new PartyTravelScreen(target, name, leader, null);
-        if (mc.screen == null || mc.screen instanceof PartyScreen) mc.setScreen(screen);
+        if (mc.gui.screen() == null || mc.gui.screen() instanceof PartyScreen) mc.gui.setScreen(screen);
         else pendingPrompt = screen;
     }
 
     /** Opens a prompt that arrived while another screen was open. Called every client tick. */
     static void showPendingPrompt() {
         Minecraft mc = Minecraft.getInstance();
-        if (pendingPrompt != null && mc.player != null && mc.screen == null && mc.getOverlay() == null) {
-            mc.setScreen(pendingPrompt);
+        if (pendingPrompt != null && mc.player != null && mc.gui.screen() == null && mc.gui.overlay() == null) {
+            mc.gui.setScreen(pendingPrompt);
             pendingPrompt = null;
         }
     }
@@ -81,7 +81,7 @@ public final class ClientQuestData {
             CompassMarkers.clear("party");
             return;
         }
-        String dim = mc.level.dimension().location().toString();
+        String dim = mc.level.dimension().identifier().toString();
         List<CompassMarkers.Marker> out = new ArrayList<>();
         for (Member m : members()) {
             if (!m.online() || m.id().equals(mc.player.getUUID()) || !m.dim().equals(dim)) continue;
@@ -107,7 +107,7 @@ public final class ClientQuestData {
 
     public static String tracked() {
         Minecraft mc = Minecraft.getInstance();
-        return mc.player == null ? "" : SkyData.get(mc.player).module("quest").getString("tracked");
+        return mc.player == null ? "" : SkyData.get(mc.player).module("quest").getStringOr("tracked","");
     }
 
     /** The tracked quest, or the main quest if nothing is tracked. */
@@ -127,7 +127,7 @@ public final class ClientQuestData {
     public static void refreshCompass() {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null || mc.level == null) return;
-        String dim = mc.level.dimension().location().toString();
+        String dim = mc.level.dimension().identifier().toString();
         List<CompassMarkers.Marker> others = new ArrayList<>();
         List<CompassMarkers.Marker> tracked = new ArrayList<>();
         for (Quest q : quests) {
@@ -157,23 +157,23 @@ public final class ClientQuestData {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null || mc.level == null) return;
         net.minecraft.nbt.ListTag list = SkyData.get(mc.player).module(com.skycraft.world.WorldData.MODULE)
-                .getList("discovered", Tag.TAG_COMPOUND);
-        String dim = mc.level.dimension().location().toString();
+                .getListOrEmpty("discovered");
+        String dim = mc.level.dimension().identifier().toString();
         double range = com.skycraft.world.WorldConfig.COMPASS_RANGE.get();
         net.minecraft.core.BlockPos p = mc.player.blockPosition();
         List<CompassMarkers.Marker> markers = new ArrayList<>();
         java.util.Set<String> listed = new java.util.HashSet<>();
         for (int i = 0; i < list.size(); i++) {
-            CompoundTag loc = list.getCompound(i);
-            if (!loc.getString("dim").equals(dim)) continue;
-            if (!loc.getString("place").isEmpty()) listed.add(loc.getString("place"));
-            double dx = loc.getInt("x") - p.getX();
-            double dz = loc.getInt("z") - p.getZ();
+            CompoundTag loc = list.getCompoundOrEmpty(i);
+            if (!loc.getStringOr("dim","").equals(dim)) continue;
+            if (!loc.getStringOr("place", "").isEmpty()) listed.add(loc.getStringOr("place",""));
+            double dx = loc.getIntOr("x",0) - p.getX();
+            double dz = loc.getIntOr("z",0) - p.getZ();
             if (dx * dx + dz * dz > range * range) continue;
-            com.skycraft.world.LocationKind kind = com.skycraft.world.LocationKind.byId(loc.getString("type"));
-            boolean knownOnly = loc.getBoolean("known");
+            com.skycraft.world.LocationKind kind = com.skycraft.world.LocationKind.byId(loc.getStringOr("type",""));
+            boolean knownOnly = loc.getBooleanOr("known",false);
             markers.add(new CompassMarkers.Marker(
-                    new Vec3(loc.getInt("x") + 0.5, loc.getInt("y"), loc.getInt("z") + 0.5),
+                    new Vec3(loc.getIntOr("x",0) + 0.5, loc.getIntOr("y",0), loc.getIntOr("z",0) + 0.5),
                     knownOnly ? CompassMarkers.Shape.LOCATION : CompassMarkers.Shape.DISCOVERED,
                     kind.color, com.skycraft.world.WorldData.displayName(loc).getString(), range, kind.icon));
         }
@@ -242,23 +242,23 @@ public final class ClientQuestData {
     // ------------------------------------------------------------------ party
 
     public static boolean inParty() {
-        return party.getBoolean("inParty");
+        return party.getBooleanOr("inParty",false);
     }
 
     public static int maxSize() {
-        return Math.max(2, party.getInt("max"));
+        return Math.max(2, party.getIntOr("max",0));
     }
 
     public static UUID leader() {
-        return party.hasUUID("leader") ? party.getUUID("leader") : null;
+        return party.read("leader", net.minecraft.core.UUIDUtil.CODEC).isPresent() ? party.read("leader", net.minecraft.core.UUIDUtil.CODEC).orElseThrow() : null;
     }
 
     public static List<Member> members() {
         List<Member> out = new ArrayList<>();
-        for (Tag t : party.getList("members", Tag.TAG_COMPOUND)) {
+        for (Tag t : party.getListOrEmpty("members")) {
             CompoundTag m = (CompoundTag) t;
-            out.add(new Member(m.getUUID("uuid"), m.getString("name"), m.getBoolean("online"),
-                    m.getFloat("health"), m.getFloat("max"), m.getString("dim"), m.getDouble("x"), m.getDouble("y"), m.getDouble("z")));
+            out.add(new Member(m.read("uuid", net.minecraft.core.UUIDUtil.CODEC).orElseThrow(), m.getStringOr("name",""), m.getBooleanOr("online",false),
+                    m.getFloatOr("health",0F), m.getFloatOr("max",0F), m.getStringOr("dim",""), m.getDoubleOr("x",0D), m.getDoubleOr("y",0D), m.getDoubleOr("z",0D)));
         }
         return out;
     }
@@ -276,9 +276,9 @@ public final class ClientQuestData {
 
     public static List<Invite> invites() {
         List<Invite> out = new ArrayList<>();
-        for (Tag t : party.getList("invites", Tag.TAG_COMPOUND)) {
+        for (Tag t : party.getListOrEmpty("invites")) {
             CompoundTag i = (CompoundTag) t;
-            out.add(new Invite(i.getUUID("party"), i.getString("from")));
+            out.add(new Invite(i.read("party", net.minecraft.core.UUIDUtil.CODEC).orElseThrow(), i.getStringOr("from","")));
         }
         return out;
     }

@@ -12,19 +12,19 @@ import com.skycraft.economy.ItemValues;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
-import net.minecraft.commands.arguments.ResourceLocationArgument;
+import net.minecraft.commands.arguments.IdentifierArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.LootDataType;
-import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.event.server.ServerStartedEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.neoforge.event.server.ServerStartedEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.io.File;
 import java.io.Writer;
@@ -47,7 +47,7 @@ import java.util.TreeSet;
  * When {@code skycraft-loot-sample.request} exists in the server directory, the server writes the curve of every
  * {@code skycraft:containers/*} table to {@code skycraft-loot-sample.txt} on start (used by the smoke test).
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class LootCommand {
     private static final String REQUEST = "skycraft-loot-sample.request";
     private static final String OUTPUT = "skycraft-loot-sample.txt";
@@ -63,7 +63,7 @@ public final class LootCommand {
         }
     }
 
-    public static Stats stats(ServerLevel level, ResourceLocation table, BlockPos pos, int lootLevel, int rolls, ServerPlayer player) {
+    public static Stats stats(ServerLevel level, Identifier table, BlockPos pos, int lootLevel, int rolls, ServerPlayer player) {
         double value = 0, gold = 0, items = 0, enchanted = 0;
         int top = 0;
         String topItem = "-";
@@ -79,7 +79,7 @@ public final class LootCommand {
                     int tier = LootTiers.unlock(s.getItem());
                     if (tier > top) {
                         top = tier;
-                        topItem = String.valueOf(net.minecraftforge.registries.ForgeRegistries.ITEMS.getKey(s.getItem()));
+                        topItem = String.valueOf(net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(s.getItem()));
                     }
                 }
             }
@@ -93,15 +93,15 @@ public final class LootCommand {
     @SubscribeEvent
     public static void register(RegisterCommandsEvent event) {
         CommandDispatcher<CommandSourceStack> d = event.getDispatcher();
-        d.register(Commands.literal("skyloot").requires(s -> s.hasPermission(2))
-                .then(Commands.literal("sample").then(Commands.argument("table", ResourceLocationArgument.id())
+        d.register(Commands.literal("skyloot").requires(s -> s.permissions().hasPermission(net.minecraft.server.permissions.Permissions.COMMANDS_GAMEMASTER))
+                .then(Commands.literal("sample").then(Commands.argument("table", IdentifierArgument.id())
                         .suggests((c, b) -> SharedSuggestionProvider.suggestResource(tables(c.getSource().getServer()), b))
                         .executes(c -> sample(c, -1, 200))
                         .then(Commands.argument("level", IntegerArgumentType.integer(1, 100))
                                 .executes(c -> sample(c, IntegerArgumentType.getInteger(c, "level"), 200))
                                 .then(Commands.argument("rolls", IntegerArgumentType.integer(1, 5000))
                                         .executes(c -> sample(c, IntegerArgumentType.getInteger(c, "level"), IntegerArgumentType.getInteger(c, "rolls")))))))
-                .then(Commands.literal("curve").then(Commands.argument("table", ResourceLocationArgument.id())
+                .then(Commands.literal("curve").then(Commands.argument("table", IdentifierArgument.id())
                         .suggests((c, b) -> SharedSuggestionProvider.suggestResource(tables(c.getSource().getServer()), b))
                         .executes(c -> curve(c, 300))
                         .then(Commands.argument("rolls", IntegerArgumentType.integer(1, 5000)).executes(c -> curve(c, IntegerArgumentType.getInteger(c, "rolls"))))))
@@ -115,8 +115,8 @@ public final class LootCommand {
                             Collectibles.Entry e = Collectibles.entry(StringArgumentType.getString(c, "collection") + "/" + StringArgumentType.getString(c, "entry"));
                             return give(c, e == null ? ItemStack.EMPTY : e.create());
                         })))));
-        d.register(Commands.literal("skycraft-items").requires(s -> s.hasPermission(2))
-                .then(Commands.literal("roll").then(Commands.argument("table", ResourceLocationArgument.id())
+        d.register(Commands.literal("skycraft-items").requires(s -> s.permissions().hasPermission(net.minecraft.server.permissions.Permissions.COMMANDS_GAMEMASTER))
+                .then(Commands.literal("roll").then(Commands.argument("table", IdentifierArgument.id())
                         .suggests((c, b) -> SharedSuggestionProvider.suggestResource(tables(c.getSource().getServer()), b))
                         .executes(c -> rollItems(c, -1))
                         .then(Commands.argument("level", IntegerArgumentType.integer(1, 100))
@@ -131,12 +131,12 @@ public final class LootCommand {
 
     private static int rollItems(CommandContext<CommandSourceStack> c, int level) throws com.mojang.brigadier.exceptions.CommandSyntaxException {
         ServerPlayer player = c.getSource().getPlayerOrException();
-        ResourceLocation table = ResourceLocationArgument.getId(c, "table");
+        Identifier table = IdentifierArgument.getId(c, "table");
         int lvl = level > 0 ? level : SkyData.get(player).getLevel();
         LootLevels.override(lvl);
         List<ItemStack> rolled;
         try {
-            rolled = LootApi.roll(player.serverLevel(), table, player.blockPosition(), player);
+            rolled = LootApi.roll(player.level(), table, player.blockPosition(), player);
         } finally {
             LootLevels.override(null);
         }
@@ -154,9 +154,9 @@ public final class LootCommand {
         return rolled.size();
     }
 
-    private static List<ResourceLocation> tables(MinecraftServer server) {
-        List<ResourceLocation> out = new ArrayList<>();
-        for (ResourceLocation id : new TreeSet<>(server.getLootData().getKeys(LootDataType.TABLE))) {
+    private static List<Identifier> tables(MinecraftServer server) {
+        List<Identifier> out = new ArrayList<>();
+        for (Identifier id : new TreeSet<>(com.skycraft.platform.LootTables.keys(server))) {
             if (id.getNamespace().equals(Skycraft.MODID) && (id.getPath().startsWith("containers/") || id.getPath().startsWith("uniques/"))) out.add(id);
         }
         return out;
@@ -164,12 +164,12 @@ public final class LootCommand {
 
     private static int sample(CommandContext<CommandSourceStack> c, int level, int rolls) throws com.mojang.brigadier.exceptions.CommandSyntaxException {
         ServerPlayer player = c.getSource().getPlayerOrException();
-        ResourceLocation table = ResourceLocationArgument.getId(c, "table");
+        Identifier table = IdentifierArgument.getId(c, "table");
         int lvl = level > 0 ? level : SkyData.get(player).getLevel();
         LootLevels.override(lvl);
         List<ItemStack> one;
         try {
-            one = LootApi.roll(player.serverLevel(), table, player.blockPosition(), player);
+            one = LootApi.roll(player.level(), table, player.blockPosition(), player);
         } finally {
             LootLevels.override(null);
         }
@@ -179,13 +179,13 @@ public final class LootCommand {
                     + (s.isEnchanted() ? ", enchanted" : "") + ")";
             c.getSource().sendSuccess(() -> Component.literal(line), false);
         }
-        Stats st = stats(player.serverLevel(), table, player.blockPosition(), lvl, rolls, null);
+        Stats st = stats(player.level(), table, player.blockPosition(), lvl, rolls, null);
         c.getSource().sendSuccess(() -> Component.literal("average of " + rolls + ": " + st.line(lvl)), false);
         return 1;
     }
 
     private static int curve(CommandContext<CommandSourceStack> c, int rolls) {
-        ResourceLocation table = ResourceLocationArgument.getId(c, "table");
+        Identifier table = IdentifierArgument.getId(c, "table");
         ServerLevel level = c.getSource().getLevel();
         BlockPos pos = BlockPos.containing(c.getSource().getPosition());
         c.getSource().sendSuccess(() -> Component.literal(table + " (" + rolls + " rolls per level):"), false);
@@ -222,14 +222,15 @@ public final class LootCommand {
     @SubscribeEvent
     public static void onStarted(ServerStartedEvent event) {
         MinecraftServer server = event.getServer();
-        File dir = server.getServerDirectory();
+        File dir = server.getServerDirectory().toFile();
         if (!new File(dir, REQUEST).exists()) return;
         ServerLevel level = server.overworld();
+        if (level == null) return;
         // Red Mountain: a region whose band (28-45) never caps the curve, so the levels show uncapped
         BlockPos pos = new BlockPos(7100, 100, -400);
         StringBuilder out = new StringBuilder();
         long start = System.currentTimeMillis();
-        for (ResourceLocation table : tables(server)) {
+        for (Identifier table : tables(server)) {
             if (!table.getPath().startsWith("containers/")) continue;
             out.append(table).append('\n');
             for (int lvl : LEVELS) out.append("  ").append(stats(level, table, pos, lvl, 200, null).line(lvl)).append('\n');

@@ -1,15 +1,14 @@
 package com.skycraft.creatures.entity;
 
 import com.skycraft.Skycraft;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.item.DyeableLeatherItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 /** Equipment helpers for humanoid creatures. Skyrim weapons from the crafting module are used when present. */
 public final class Gear {
@@ -19,7 +18,7 @@ public final class Gear {
 
     /** A {@code skycraft:<path>} item (owned by another module) or the vanilla fallback when it doesn't exist. */
     public static Item modItem(String path, Item fallback) {
-        Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(Skycraft.MODID, path));
+        Item item = BuiltInRegistries.ITEM.getValue(Identifier.fromNamespaceAndPath(Skycraft.MODID, path));
         return item == null || item == Items.AIR ? fallback : item;
     }
 
@@ -29,7 +28,7 @@ public final class Gear {
 
     public static ItemStack dyedLeather(Item item, int color) {
         ItemStack stack = new ItemStack(item);
-        if (stack.getItem() instanceof DyeableLeatherItem dyeable) dyeable.setColor(stack, color);
+        stack.set(net.minecraft.core.component.DataComponents.DYED_COLOR, new net.minecraft.world.item.component.DyedItemColor(color));
         return stack;
     }
 

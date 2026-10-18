@@ -8,16 +8,16 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,7 +55,7 @@ import java.util.function.Predicate;
  *
  * <p>Server only mutates; the client copy is replaced wholesale by sync packets. The accessors work on both sides.</p>
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class Pack {
     public static final String MODULE = "pack";
     private static final String LIST = "e";
@@ -88,8 +88,8 @@ public final class Pack {
 
     private static ListTag list(Player player) {
         CompoundTag m = module(player);
-        if (!m.contains(LIST, Tag.TAG_LIST)) m.put(LIST, new ListTag());
-        return m.getList(LIST, Tag.TAG_COMPOUND);
+        if (!com.skycraft.platform.NbtData.hasType(m, LIST, Tag.TAG_LIST)) m.put(LIST, new ListTag());
+        return m.getListOrEmpty(LIST);
     }
 
     /**
@@ -101,14 +101,14 @@ public final class Pack {
     }
 
     private static ItemStack stackOf(CompoundTag entry) {
-        ItemStack s = ItemStack.of(entry.getCompound(STACK));
-        if (!s.isEmpty()) s.setCount(Math.max(1, entry.getInt(COUNT)));
+        ItemStack s = com.skycraft.inventory.ItemData.parse(entry.getCompoundOrEmpty(STACK));
+        if (!s.isEmpty()) s.setCount(Math.max(1, entry.getIntOr(COUNT, 0)));
         return s;
     }
 
     private static void changed(Player player) {
         module(player).remove("w");
-        if (!player.level().isClientSide) {
+        if (!player.level().isClientSide()) {
             DIRTY.add(player.getUUID());
             CarryWeight.invalidate(player);
         }
@@ -147,7 +147,7 @@ public final class Pack {
         if (l.isEmpty()) return 0f;
         CompoundTag m = module(player);
         long version = ItemWeights.version();
-        if (m.contains("w", Tag.TAG_FLOAT) && m.getLong("wv") == version) return m.getFloat("w");
+        if (com.skycraft.platform.NbtData.hasType(m, "w", Tag.TAG_FLOAT) && m.getLongOr("wv", 0L) == version) return m.getFloatOr("w", 0f);
         float sum = store(player).weight();
         m.putFloat("w", sum);
         m.putLong("wv", version);
@@ -228,9 +228,9 @@ public final class Pack {
         String purse = String.valueOf(BuiltInRegistries.ITEM.getKey(com.skycraft.registry.ModItems.COIN_PURSE.get()));
         long total = 0;
         for (int i = l.size() - 1; i >= 0; i--) {
-            String id = l.getCompound(i).getCompound(STACK).getString("id");
+            String id = l.getCompoundOrEmpty(i).getCompoundOrEmpty(STACK).getStringOr("id", "");
             if (!id.equals(septim) && !id.equals(purse)) continue; // cheap pre-check: this runs every 10 ticks
-            ItemStack s = stackOf(l.getCompound(i));
+            ItemStack s = stackOf(l.getCompoundOrEmpty(i));
             long v = s.isEmpty() ? 0 : Currency.valueOf(s);
             if (v > 0) {
                 total += v;
@@ -261,7 +261,7 @@ public final class Pack {
         if (player instanceof ServerPlayer sp) {
             com.skycraft.core.Notifier.message(sp, net.minecraft.network.chat.Component.translatable("inventory.skycraft.pack.cap"));
         }
-        player.drop(rest, false);
+        player.drop(rest, false, net.minecraft.util.Prediction.SERVER_ONLY);
     }
 
     // ------------------------------------------------------------------ virtual slots
@@ -282,11 +282,11 @@ public final class Pack {
      * entry, wrong item, or the pack cannot take the displaced stack). With all 36 slots full the stack in the last
      * unequipped storage slot (not in {@code keep}) moves into the pack instead.
      */
-    static int materialize(ServerPlayer player, int index, ResourceLocation expected, int... keep) {
+    static int materialize(ServerPlayer player, int index, Identifier expected, int... keep) {
         Inventory inv = player.getInventory();
         ListTag l = list(player);
         if (index < 0 || index >= l.size()) return -1;
-        ItemStack probe = stackOf(l.getCompound(index));
+        ItemStack probe = stackOf(l.getCompoundOrEmpty(index));
         if (probe.isEmpty()) return -1;
         if (expected != null && !BuiltInRegistries.ITEM.getKey(probe.getItem()).equals(expected)) return -1;
         int dest = freeStorageSlot(inv);
@@ -294,7 +294,7 @@ public final class Pack {
             int victim = -1;
             for (int i = Inventory.INVENTORY_SIZE - 1; i >= 0 && victim < 0; i--) {
                 ItemStack candidate = inv.getItem(i);
-                if (i == inv.selected || contains(keep, i) || candidate.isEmpty()
+                if (i == inv.getSelectedSlot() || contains(keep, i) || candidate.isEmpty()
                         || com.skycraft.magic.bound.BoundWeapons.isBound(candidate)) continue;
                 victim = i;
             }
@@ -324,7 +324,7 @@ public final class Pack {
      * Server: a slot id from a client request to a real inventory slot. Real ids pass through unchanged (the caller
      * validates them); virtual ids are materialised. -1 when the request is stale.
      */
-    public static int resolveSlot(ServerPlayer player, int slot, ResourceLocation expected, int... keep) {
+    public static int resolveSlot(ServerPlayer player, int slot, Identifier expected, int... keep) {
         if (slot < VIRTUAL_BASE) return slot;
         return materialize(player, slot - VIRTUAL_BASE, expected, keep);
     }
@@ -362,9 +362,9 @@ public final class Pack {
             for (int i = Inventory.getSelectionSize(); i < Inventory.INVENTORY_SIZE && dest < 0; i++) if (inv.getItem(i).isEmpty()) dest = i;
             if (dest < 0) break; // the hotbar is the player's own arrangement: never rearranged in the background
             int pick = -1;
-            for (int i = 0; i < l.size() && pick < 0; i++) if (!stackOf(l.getCompound(i)).isEmpty()) pick = i;
+            for (int i = 0; i < l.size() && pick < 0; i++) if (!stackOf(l.getCompoundOrEmpty(i)).isEmpty()) pick = i;
             if (pick < 0) break;
-            ItemStack s = stackOf(l.getCompound(pick));
+            ItemStack s = stackOf(l.getCompoundOrEmpty(pick));
             ItemStack pulled = take(player, pick, s.getMaxStackSize());
             if (pulled.isEmpty()) break;
             inv.setItem(dest, pulled);
@@ -387,8 +387,8 @@ public final class Pack {
         for (int start = 0; start < total; start += SYNC_ROWS) {
             List<InventoryPackets.PackSync.Row> rows = new ArrayList<>();
             for (int i = start; i < Math.min(total, start + SYNC_ROWS); i++) {
-                CompoundTag e = l.getCompound(i);
-                rows.add(new InventoryPackets.PackSync.Row(e.getCompound(STACK).copy(), e.getInt(COUNT)));
+                CompoundTag e = l.getCompoundOrEmpty(i);
+                rows.add(new InventoryPackets.PackSync.Row(e.getCompoundOrEmpty(STACK).copy(), e.getIntOr(COUNT, 0)));
             }
             out.add(new InventoryPackets.PackSync(start, total, rows));
         }
@@ -414,7 +414,7 @@ public final class Pack {
         }
         if (staging.size() >= total) {
             CompoundTag m = module(player);
-            for (String k : new ArrayList<>(m.getAllKeys())) m.remove(k);
+            for (String k : new ArrayList<>(m.keySet())) m.remove(k);
             m.put(LIST, staging);
             staging = null;
         }
@@ -423,8 +423,8 @@ public final class Pack {
     // ------------------------------------------------------------------ events
 
     @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer player)) return;
+    public static void onPlayerTick(net.neoforged.neoforge.event.tick.PlayerTickEvent.Post event) {
+        if (!(event instanceof net.neoforged.neoforge.event.tick.PlayerTickEvent.Post) || !(event.getEntity() instanceof ServerPlayer player)) return;
         if (player.tickCount % REFILL_INTERVAL == 0 && player.isAlive()) {
             if (refill(player)) {
                 player.containerMenu.broadcastChanges();

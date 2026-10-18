@@ -22,7 +22,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundUpdateMobEffectPacket;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -75,7 +75,7 @@ public final class RealmTravel {
             leaveWithCompanions(p);
             return;
         }
-        ServerLevel from = p.serverLevel();
+        ServerLevel from = p.level();
         switch (realm) {
             case DEADLANDS -> OblivionGates.enterGate(p, pos);
             case SOUL_CAIRN -> {
@@ -97,7 +97,7 @@ public final class RealmTravel {
             return;
         }
         p.level().playSound(null, pos, SoundEvents.WOODEN_DOOR_OPEN, SoundSource.BLOCKS, 1f, 0.6f);
-        enterWithCompanions(p, realm, arrival(realm, p, 0), p.serverLevel());
+        enterWithCompanions(p, realm, arrival(realm, p, 0), p.level());
     }
 
     /** A Black Book open on a pedestal. */
@@ -110,11 +110,11 @@ public final class RealmTravel {
                 int cx = Math.floorDiv(pos.getX() + RealmLayout.AP_SPACING / 2, RealmLayout.AP_SPACING);
                 int next = cx >= RealmLayout.APOCRYPHA_CHAPTERS || cx < 1 ? 0 : cx + 1;
                 apocryphaEffects(p);
-                enterWithCompanions(p, Realm.APOCRYPHA, chapterArrival(next), p.serverLevel());
+                enterWithCompanions(p, Realm.APOCRYPHA, chapterArrival(next), p.level());
             }
             case ENTER -> {
                 apocryphaEffects(p);
-                enterWithCompanions(p, Realm.APOCRYPHA, chapterArrival(altarChapter(pos)), p.serverLevel());
+                enterWithCompanions(p, Realm.APOCRYPHA, chapterArrival(altarChapter(pos)), p.level());
             }
         }
     }
@@ -127,7 +127,7 @@ public final class RealmTravel {
         }
         p.level().playSound(null, p.blockPosition(), SoundEvents.BOOK_PAGE_TURN, SoundSource.PLAYERS, 1f, 0.6f);
         apocryphaEffects(p);
-        enterWithCompanions(p, Realm.APOCRYPHA, chapterArrival(chapter), p.serverLevel());
+        enterWithCompanions(p, Realm.APOCRYPHA, chapterArrival(chapter), p.level());
     }
 
     /**
@@ -140,7 +140,7 @@ public final class RealmTravel {
             if (Realm.of(p.level()) != null && dest.dimension() == Level.OVERWORLD) {
                 returnHome(p);
             } else {
-                p.changeDimension(dest);
+                p.teleport(new net.minecraft.world.level.portal.TeleportTransition(dest, p.position(), p.getDeltaMovement(), p.getYRot(), p.getXRot(), net.minecraft.world.level.portal.TeleportTransition.DO_NOTHING));
             }
             return;
         }
@@ -204,7 +204,7 @@ public final class RealmTravel {
         for (ServerPlayer c : companions) {
             i++;
             final int k = i;
-            schedule(p.server, 2 * k, () -> {
+            schedule(p.level().getServer(), 2 * k, () -> {
                 if (c.isAlive() && c.level() == from) enter(c, realm, new Arrival(a.x() + (k % 2 == 0 ? 2 : -2), a.z() + k / 2, a.yaw()));
             });
         }
@@ -214,7 +214,7 @@ public final class RealmTravel {
     static void leaveWithCompanions(ServerPlayer p) {
         List<ServerPlayer> companions = companions(p);
         returnHome(p);
-        for (ServerPlayer c : companions) schedule(p.server, 3, () -> {
+        for (ServerPlayer c : companions) schedule(p.level().getServer(), 3, () -> {
             if (c.isAlive() && Realm.of(c.level()) != null) returnHome(c);
         });
     }
@@ -223,7 +223,7 @@ public final class RealmTravel {
         List<ServerPlayer> out = new ArrayList<>();
         Party party = Parties.partyOf(p);
         if (party == null) return out;
-        for (ServerPlayer m : Parties.onlineMembers(p.server, party)) {
+        for (ServerPlayer m : Parties.onlineMembers(p.level().getServer(), party)) {
             if (m != p && m.level() == p.level() && m.isAlive() && !m.isSpectator() && m.distanceTo(p) <= FOLLOW_RANGE) out.add(m);
         }
         return out;
@@ -231,7 +231,7 @@ public final class RealmTravel {
 
     /** Moves a player into a realm at an arrival column (generates the landing first; builds a footing if unsafe). */
     public static boolean enter(ServerPlayer p, Realm realm, Arrival a) {
-        ServerLevel level = p.server.getLevel(realm.dimension);
+        ServerLevel level = p.level().getServer().getLevel(realm.dimension);
         if (level == null) {
             Skycraft.LOGGER.warn("Realm {} has no dimension loaded", realm.id);
             Notifier.message(p, Component.translatable("realm.skycraft.missing", realm.displayName()));
@@ -251,18 +251,18 @@ public final class RealmTravel {
         BlockPos pos = null;
         float yaw = p.getYRot();
         if (d.contains("ret")) {
-            CompoundTag r = d.getCompound("ret");
-            ResourceLocation dim = ResourceLocation.tryParse(r.getString("dim"));
-            if (dim != null) level = p.server.getLevel(ResourceKey.create(Registries.DIMENSION, dim));
+            CompoundTag r = d.getCompoundOrEmpty("ret");
+            Identifier dim = Identifier.tryParse(r.getStringOr("dim", ""));
+            if (dim != null) level = p.level().getServer().getLevel(ResourceKey.create(Registries.DIMENSION, dim));
             if (level != null && Realm.of(level.dimension()) != null) level = null;
-            pos = new BlockPos(r.getInt("x"), r.getInt("y"), r.getInt("z"));
-            yaw = r.getFloat("yaw") + 180f;
+            pos = new BlockPos(r.getIntOr("x", 0), r.getIntOr("y", 0), r.getIntOr("z", 0));
+            yaw = r.getFloatOr("yaw", 0f) + 180f;
         }
         if (level == null) {
-            level = p.server.getLevel(p.getRespawnDimension());
-            if (level == null || Realm.of(level.dimension()) != null) level = p.server.overworld();
-            BlockPos respawn = p.getRespawnPosition();
-            pos = respawn != null && level.dimension() == p.getRespawnDimension() ? respawn : level.getSharedSpawnPos();
+            level = p.level().getServer().getLevel(ServerPlayer.RespawnConfig.getDimensionOrDefault(p.getRespawnConfig()));
+            if (level == null || Realm.of(level.dimension()) != null) level = p.level().getServer().overworld();
+            BlockPos respawn = p.getRespawnConfig() == null ? null : p.getRespawnConfig().respawnData().pos();
+            pos = respawn != null && level.dimension() == ServerPlayer.RespawnConfig.getDimensionOrDefault(p.getRespawnConfig()) ? respawn : level.getRespawnData().pos();
         }
         level.getChunk(pos.getX() >> 4, pos.getZ() >> 4);
         BlockPos spot = safeSpot(level, pos, false, null);
@@ -274,11 +274,11 @@ public final class RealmTravel {
     static void teleport(ServerPlayer p, ServerLevel level, BlockPos spot, float yaw) {
         p.stopRiding();
         SkyNetwork.sendToPlayer(p, new WorldPackets.RestFade(0, WorldPackets.RestFade.TRAVEL));
-        p.teleportTo(level, spot.getX() + 0.5, spot.getY(), spot.getZ() + 0.5, yaw, 0f);
+        p.teleportTo(level, spot.getX() + 0.5, spot.getY(), spot.getZ() + 0.5, java.util.Set.of(), yaw, 0f, true);
         p.setPortalCooldown();
         p.resetFallDistance();
         // the client loses its effect list on a dimension change by teleport
-        for (MobEffectInstance e : p.getActiveEffects()) p.connection.send(new ClientboundUpdateMobEffectPacket(p.getId(), e));
+        for (MobEffectInstance e : p.getActiveEffects()) p.connection.send(new ClientboundUpdateMobEffectPacket(p.getId(), e, false));
         level.playSound(null, spot, SoundEvents.PORTAL_TRAVEL, SoundSource.PLAYERS, 0.25f, 1.4f);
     }
 
@@ -328,12 +328,12 @@ public final class RealmTravel {
      */
     static boolean payToll(ServerPlayer p) {
         CompoundTag d = data(p);
-        if (d.getBoolean("soul_toll") || p.getAbilities().instabuild) return true;
+        if (d.getBooleanOr("soul_toll", false) || p.getAbilities().instabuild) return true;
         if (com.skycraft.inventory.Inv.take(p, s -> s.getItem() instanceof SoulGemItem && SoulGemItem.getSoul(s) > 0, 1) > 0) {
             d.putBoolean("soul_toll", true);
             SkyData.get(p).markDirty();
             Notifier.message(p, Component.translatable("realm.skycraft.soul_cairn.toll_paid"));
-            p.level().playSound(null, p.blockPosition(), SoundEvents.SOUL_ESCAPE, SoundSource.PLAYERS, 1f, 0.6f);
+            p.level().playSound(null, p.blockPosition(), SoundEvents.SOUL_ESCAPE.value(), SoundSource.PLAYERS, 1f, 0.6f);
             return true;
         }
         Notifier.message(p, Component.translatable("realm.skycraft.soul_cairn.toll"));
@@ -341,8 +341,8 @@ public final class RealmTravel {
     }
 
     private static void apocryphaEffects(ServerPlayer p) {
-        p.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 120, 0, false, false));
-        p.addEffect(new MobEffectInstance(MobEffects.DARKNESS, 60, 0, false, false));
+        p.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.NAUSEA), 120, 0, false, false));
+        p.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.DARKNESS), 60, 0, false, false));
     }
 
     // ------------------------------------------------------------------ player data
@@ -354,7 +354,7 @@ public final class RealmTravel {
     /** Remembers where a player left from (called before every move into a realm from outside the realms). */
     public static void rememberReturn(ServerPlayer p) {
         CompoundTag r = new CompoundTag();
-        r.putString("dim", p.level().dimension().location().toString());
+        r.putString("dim", p.level().dimension().identifier().toString());
         r.putInt("x", p.getBlockX());
         r.putInt("y", p.getBlockY());
         r.putInt("z", p.getBlockZ());

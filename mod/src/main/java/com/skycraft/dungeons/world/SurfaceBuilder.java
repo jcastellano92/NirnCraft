@@ -247,14 +247,14 @@ public final class SurfaceBuilder {
     /** An A-frame hide tent with a bedroll, along fwd, centred at (fwd, lat). */
     private static void tent(Spot s, int fwd0, int lat0) {
         int base = s.base();
-        BlockState hide = lat0 < 0 ? Blocks.BROWN_WOOL.defaultBlockState() : Blocks.WHITE_WOOL.defaultBlockState();
+        BlockState hide = lat0 < 0 ? com.skycraft.worldgen.VanillaBlocks.BROWN_WOOL.defaultBlockState() : com.skycraft.worldgen.VanillaBlocks.WHITE_WOOL.defaultBlockState();
         for (int fwd = fwd0 - 2; fwd <= fwd0 + 1; fwd++) {
             s.set(fwd, base, lat0 - 1, hide);
             s.set(fwd, base + 1, lat0 - 1, hide);
             s.set(fwd, base, lat0 + 1, hide);
             s.set(fwd, base + 1, lat0 + 1, hide);
             s.set(fwd, base + 2, lat0, hide);
-            s.set(fwd, base, lat0, fwd < fwd0 ? Blocks.RED_CARPET.defaultBlockState() : Blocks.AIR.defaultBlockState());
+            s.set(fwd, base, lat0, fwd < fwd0 ? com.skycraft.worldgen.VanillaBlocks.RED_CARPET.defaultBlockState() : Blocks.AIR.defaultBlockState());
         }
     }
 
@@ -303,10 +303,10 @@ public final class SurfaceBuilder {
             for (int lat = -5; lat <= 5; lat++) {
                 boolean post = (fwd == -8 || fwd == -3) && Math.abs(lat) == 5;
                 if (post) for (int y = base; y < roofY; y++) s.set(fwd, y, lat, Deco.pillar(Blocks.SPRUCE_LOG, Direction.Axis.Y));
-                s.set(fwd, roofY, lat, Math.floorMod(lat, 3) == 0 ? Blocks.WHITE_WOOL.defaultBlockState() : Blocks.BROWN_WOOL.defaultBlockState());
+                s.set(fwd, roofY, lat, Math.floorMod(lat, 3) == 0 ? com.skycraft.worldgen.VanillaBlocks.WHITE_WOOL.defaultBlockState() : com.skycraft.worldgen.VanillaBlocks.BROWN_WOOL.defaultBlockState());
             }
         }
-        for (int lat = -4; lat <= 4; lat += 2) s.set(-7, base, lat, Blocks.BROWN_CARPET.defaultBlockState());
+        for (int lat = -4; lat <= 4; lat += 2) s.set(-7, base, lat, com.skycraft.worldgen.VanillaBlocks.BROWN_CARPET.defaultBlockState());
         p.container(s.x(-7, 3), base, s.z(-7, 3), Deco.chest(s.f()), Deco.LOOT_GIANT);
         // mammoth tusks
         for (int lat : new int[]{-4, 4}) {
@@ -436,8 +436,8 @@ public final class SurfaceBuilder {
         s.set(fw, base + 12, 3, Blocks.SEA_LANTERN.defaultBlockState());
         // altar
         for (int lat = -1; lat <= 1; lat++) s.set(-1, base, lat, lat == 0 ? Blocks.CRYING_OBSIDIAN.defaultBlockState() : Blocks.CHISELED_POLISHED_BLACKSTONE.defaultBlockState());
-        s.set(-1, base + 1, -1, Deco.candle(Blocks.BLACK_CANDLE, 3, true));
-        s.set(-1, base + 1, 1, Deco.candle(Blocks.PURPLE_CANDLE, 3, true));
+        s.set(-1, base + 1, -1, Deco.candle(com.skycraft.worldgen.VanillaBlocks.BLACK_CANDLE, 3, true));
+        s.set(-1, base + 1, 1, Deco.candle(com.skycraft.worldgen.VanillaBlocks.PURPLE_CANDLE, 3, true));
         s.set(-1, base + 1, 0, Blocks.AMETHYST_CLUSTER.defaultBlockState());
         p.container(s.x(-2, 2), base, s.z(-2, 2), Deco.chest(s.f()), Deco.LOOT_SHRINE);
         // braziers of soul fire

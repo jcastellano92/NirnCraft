@@ -4,7 +4,7 @@ import com.skycraft.inventory.client.SkyUi;
 import com.skycraft.network.SkyNetwork;
 import com.skycraft.quest.QuestPackets;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -96,34 +96,34 @@ public final class NoticeBoardScreen extends Screen {
     public static void open(CompoundTag tag) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null) return;
-        String settlementId = tag.getString("settlementId");
-        String settlementName = tag.getString("settlementName");
-        ListTag list = tag.getList("jobs", Tag.TAG_COMPOUND);
+        String settlementId = tag.getStringOr("settlementId", "");
+        String settlementName = tag.getStringOr("settlementName", "");
+        ListTag list = tag.getListOrEmpty("jobs");
         List<NoticeEntry> entries = new ArrayList<>(list.size());
         for (int i = 0; i < list.size(); i++) {
-            CompoundTag j = list.getCompound(i);
+            CompoundTag j = list.getCompoundOrEmpty(i);
             List<String> stages = new ArrayList<>(3);
-            ListTag stageTags = j.getList("stages", Tag.TAG_COMPOUND);
+            ListTag stageTags = j.getListOrEmpty("stages");
             for (int s = 0; s < stageTags.size(); s++) {
-                stages.add(stageTags.getCompound(s).getString("text"));
+                stages.add(stageTags.getCompoundOrEmpty(s).getStringOr("text", ""));
             }
             entries.add(new NoticeEntry(
-                    j.getInt("index"),
-                    j.getString("id"),
-                    j.getString("archetype"),
-                    j.getString("title"),
-                    j.getString("targetPlace"),
-                    j.getString("size"),
-                    j.getLong("gold"),
-                    j.getInt("xp"),
-                    j.getInt("rep"),
-                    j.getString("poster"),
-                    j.getString("letter"),
+                    j.getIntOr("index", 0),
+                    j.getStringOr("id", ""),
+                    j.getStringOr("archetype", ""),
+                    j.getStringOr("title", ""),
+                    j.getStringOr("targetPlace", ""),
+                    j.getStringOr("size", ""),
+                    j.getLongOr("gold", 0L),
+                    j.getIntOr("xp", 0),
+                    j.getIntOr("rep", 0),
+                    j.getStringOr("poster", ""),
+                    j.getStringOr("letter", ""),
                     stages,
-                    j.getBoolean("taken")
+                    j.getBooleanOr("taken", false)
             ));
         }
-        mc.setScreen(new NoticeBoardScreen(settlementId, settlementName, entries));
+        mc.gui.setScreen(new NoticeBoardScreen(settlementId, settlementName, entries));
     }
 
     @Override
@@ -144,15 +144,15 @@ public final class NoticeBoardScreen extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        this.renderBackground(g);
+    public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
+
         drawTimberBoard(g);
         drawPinnedCards(g, mouseX, mouseY);
         drawSelectedParchment(g, mouseX, mouseY);
-        super.render(g, mouseX, mouseY, partialTick);
+        super.extractRenderState(g, mouseX, mouseY, partialTick);
     }
 
-    private void drawTimberBoard(GuiGraphics g) {
+    private void drawTimberBoard(GuiGraphicsExtractor g) {
         // Outer drop shadow & heavy timber frame
         g.fill(boardX - 4, boardY - 4, boardX + boardW + 4, boardY + boardH + 4, 0xA0000000);
         g.fill(boardX, boardY, boardX + boardW, boardY + boardH, WOOD_OUTER);
@@ -182,13 +182,13 @@ public final class NoticeBoardScreen extends Screen {
 
         // Header beam
         String header = (settlementName + " — Notice Board").toUpperCase();
-        g.drawCenteredString(this.font, header, boardX + boardW / 2, boardY + 8, SkyUi.GOLD);
-        g.drawCenteredString(this.font, "Pinned Contracts, Bounties & Petitions of the Hold",
+        g.centeredText(this.font, header, boardX + boardW / 2, boardY + 8, SkyUi.GOLD);
+        g.centeredText(this.font, "Pinned Contracts, Bounties & Petitions of the Hold",
                 boardX + boardW / 2, boardY + 19, SkyUi.DIM);
         SkyUi.divider(g, innerX + innerW / 2, boardY + 30, innerW / 2);
     }
 
-    private void drawCornerBracket(GuiGraphics g, int x, int y, boolean left, boolean top) {
+    private void drawCornerBracket(GuiGraphicsExtractor g, int x, int y, boolean left, boolean top) {
         g.fill(x, y, x + 12, y + 3, IRON_BRACKET);
         g.fill(x, y, x + 3, y + 12, IRON_BRACKET);
         int rx = left ? x + 4 : x + 7;
@@ -196,14 +196,14 @@ public final class NoticeBoardScreen extends Screen {
         g.fill(rx, ry, rx + 2, ry + 2, 0xFF9EA4AE);
     }
 
-    private void drawPinnedCards(GuiGraphics g, int mouseX, int mouseY) {
+    private void drawPinnedCards(GuiGraphicsExtractor g, int mouseX, int mouseY) {
         int listX = boardX + 14;
         int listY = boardY + 38;
         int listW = 172;
         int availH = boardH - 48;
 
         if (notices.isEmpty()) {
-            g.drawCenteredString(this.font, "No notices pinned today.", listX + listW / 2, listY + availH / 2 - 4, SkyUi.DIM);
+            g.centeredText(this.font, "No notices pinned today.", listX + listW / 2, listY + availH / 2 - 4, SkyUi.DIM);
             return;
         }
 
@@ -223,7 +223,7 @@ public final class NoticeBoardScreen extends Screen {
             int bg = n.taken() ? PARCHMENT_TAKEN : (sel ? PARCHMENT_CARD_SEL : (hov ? PARCHMENT_CARD_HOVER : PARCHMENT_CARD));
             int border = sel ? PARCHMENT_BORDER_SEL : PARCHMENT_BORDER;
             g.fill(listX, cy, listX + listW, cy + cardH, bg);
-            g.renderOutline(listX, cy, listW, cardH, border);
+            g.outline(listX, cy, listW, cardH, border);
 
             // Colored wax seal & brass pin at top-left of card
             int sealColor = sealColorFor(n.archetype());
@@ -232,19 +232,19 @@ public final class NoticeBoardScreen extends Screen {
 
             // Contract title
             String title = SkyUi.ellipsize(this.font, n.title(), listW - 24);
-            g.drawString(this.font, title, listX + 17, cy + 5, INK_TITLE, false);
+            g.text(this.font, title, listX + 17, cy + 5, INK_TITLE, false);
 
             // Poster & gold reward on bottom line of card
             String rewardText = n.taken() ? "TAKEN" : (n.gold() + "g");
             int rewardW = this.font.width(rewardText);
             String poster = SkyUi.ellipsize(this.font, "— " + n.poster(), listW - 26 - rewardW);
-            g.drawString(this.font, poster, listX + 17, cy + cardH - 12, INK_MUTED, false);
-            g.drawString(this.font, rewardText, listX + listW - 6 - rewardW, cy + cardH - 12,
+            g.text(this.font, poster, listX + 17, cy + cardH - 12, INK_MUTED, false);
+            g.text(this.font, rewardText, listX + listW - 6 - rewardW, cy + cardH - 12,
                     n.taken() ? STAMP_TAKEN : INK_GOLD, false);
         }
     }
 
-    private void drawSelectedParchment(GuiGraphics g, int mouseX, int mouseY) {
+    private void drawSelectedParchment(GuiGraphicsExtractor g, int mouseX, int mouseY) {
         if (selectedIndex < 0 || selectedIndex >= notices.size()) return;
         NoticeEntry n = notices.get(selectedIndex);
 
@@ -256,8 +256,8 @@ public final class NoticeBoardScreen extends Screen {
         // Shadow & aged parchment sheet
         g.fill(sheetX + 3, sheetY + 3, sheetX + sheetW + 3, sheetY + sheetH + 3, 0x70000000);
         g.fill(sheetX, sheetY, sheetX + sheetW, sheetY + sheetH, PARCHMENT_BG);
-        g.renderOutline(sheetX, sheetY, sheetW, sheetH, PARCHMENT_BORDER);
-        g.renderOutline(sheetX + 2, sheetY + 2, sheetW - 4, sheetH - 4, 0xFFCBB894);
+        g.outline(sheetX, sheetY, sheetW, sheetH, PARCHMENT_BORDER);
+        g.outline(sheetX + 2, sheetY + 2, sheetW - 4, sheetH - 4, 0xFFCBB894);
 
         // Top iron pin + wax seal emblem
         int pinX = sheetX + sheetW / 2;
@@ -271,11 +271,11 @@ public final class NoticeBoardScreen extends Screen {
 
         // Contract title & target location subtitle
         String title = SkyUi.ellipsize(this.font, n.title(), textW);
-        g.drawString(this.font, title, padX, y, INK_TITLE, false);
+        g.text(this.font, title, padX, y, INK_TITLE, false);
         y += 11;
 
         String meta = categoryBadge(n.archetype()) + "  •  " + n.targetPlace();
-        g.drawString(this.font, SkyUi.ellipsize(this.font, meta, textW), padX, y, INK_MUTED, false);
+        g.text(this.font, SkyUi.ellipsize(this.font, meta, textW), padX, y, INK_MUTED, false);
         y += 10;
 
         // Ink divider rule
@@ -286,27 +286,27 @@ public final class NoticeBoardScreen extends Screen {
         List<FormattedCharSequence> lines = this.font.split(Component.literal(n.letter()), textW);
         int maxLetterLines = 6;
         for (int i = 0; i < Math.min(lines.size(), maxLetterLines); i++) {
-            g.drawString(this.font, lines.get(i), padX, y, INK_BODY, false);
+            g.text(this.font, lines.get(i), padX, y, INK_BODY, false);
             y += 9;
         }
 
         // Poster signature right-aligned
         String sig = "— " + n.poster();
         int sigW = this.font.width(sig);
-        g.drawString(this.font, sig, sheetX + sheetW - 10 - sigW, y + 1, INK_MUTED, false);
+        g.text(this.font, sig, sheetX + sheetW - 10 - sigW, y + 1, INK_MUTED, false);
         y += 12;
 
         // 3-Stage Witcher-style contract steps box
         int stageBoxY = Math.max(y, sheetY + sheetH - 86);
         int stageBoxH = 42;
         g.fill(padX, stageBoxY, padX + textW, stageBoxY + stageBoxH, 0x163A2610);
-        g.renderOutline(padX, stageBoxY, textW, stageBoxH, 0x448A6E48);
+        g.outline(padX, stageBoxY, textW, stageBoxH, 0x448A6E48);
 
         int sy = stageBoxY + 4;
         String[] numerals = {"I.", "II.", "III."};
         for (int i = 0; i < Math.min(3, n.stages().size()); i++) {
             String stepLine = numerals[i] + " " + n.stages().get(i);
-            g.drawString(this.font, SkyUi.ellipsize(this.font, stepLine, textW - 8), padX + 4, sy, INK_STAGE, false);
+            g.text(this.font, SkyUi.ellipsize(this.font, stepLine, textW - 8), padX + 4, sy, INK_STAGE, false);
             sy += 12;
         }
 
@@ -315,13 +315,13 @@ public final class NoticeBoardScreen extends Screen {
         this.btnY = sheetY + sheetH - 28;
 
         int rewardY = this.btnY + 2;
-        g.drawString(this.font, "Reward: " + n.gold() + " Septims", padX, rewardY, INK_GOLD, false);
-        g.drawString(this.font, "+" + n.xp() + " XP  •  +" + n.rep() + " Hold Standing", padX, rewardY + 10, INK_MUTED, false);
+        g.text(this.font, "Reward: " + n.gold() + " Septims", padX, rewardY, INK_GOLD, false);
+        g.text(this.font, "+" + n.xp() + " XP  •  +" + n.rep() + " Hold Standing", padX, rewardY + 10, INK_MUTED, false);
 
         if (n.taken()) {
             g.fill(btnX, btnY, btnX + btnW, btnY + btnH, 0x338A2E22);
-            g.renderOutline(btnX, btnY, btnW, btnH, STAMP_TAKEN);
-            g.drawCenteredString(this.font, "Contract Taken", btnX + btnW / 2, btnY + 6, STAMP_TAKEN);
+            g.outline(btnX, btnY, btnW, btnH, STAMP_TAKEN);
+            g.centeredText(this.font, "Contract Taken", btnX + btnW / 2, btnY + 6, STAMP_TAKEN);
         } else {
             boolean btnHover = mouseX >= btnX && mouseX < btnX + btnW && mouseY >= btnY && mouseY < btnY + btnH;
             SkyUi.button(g, this.font, Component.literal("Accept Contract"), btnX, btnY, btnW, btnH, btnHover, true, 1.0f);
@@ -347,7 +347,9 @@ public final class NoticeBoardScreen extends Screen {
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    public boolean mouseClicked(net.minecraft.client.input.MouseButtonEvent event, boolean doubleClick) {
+        double mouseX = event.x(), mouseY = event.y();
+        int button = com.skycraft.client.screen.UiInput.actionButton(event.button());
         if (button == 0) {
             int listX = boardX + 14;
             int listY = boardY + 38;
@@ -376,11 +378,12 @@ public final class NoticeBoardScreen extends Screen {
                 }
             }
         }
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.mouseClicked(event, doubleClick);
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+    public boolean keyPressed(net.minecraft.client.input.KeyEvent event) {
+        int keyCode = event.key(), scanCode = event.keycode(), modifiers = event.modifiers();
         if (keyCode == 257 || keyCode == 335) { // Enter / Numpad Enter
             if (selectedIndex >= 0 && selectedIndex < notices.size() && !notices.get(selectedIndex).taken()) {
                 acceptSelected();
@@ -393,7 +396,7 @@ public final class NoticeBoardScreen extends Screen {
             selectedIndex++;
             return true;
         }
-        return super.keyPressed(keyCode, scanCode, modifiers);
+        return super.keyPressed(event);
     }
 
     private void acceptSelected() {

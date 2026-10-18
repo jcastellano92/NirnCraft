@@ -25,14 +25,14 @@ import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
 import net.minecraft.world.entity.ai.goal.PanicGoal;
 import net.minecraft.world.entity.monster.Enemy;
-import net.minecraft.world.entity.npc.AbstractVillager;
+import net.minecraft.world.entity.npc.villager.AbstractVillager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BowItem;
 import net.minecraft.world.level.block.BedBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.Tags;
+import net.neoforged.neoforge.common.Tags;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -181,7 +181,7 @@ final class NpcGoals {
                 }
                 double push = 0.12D * (PERSONAL_SPACE - Math.min(PERSONAL_SPACE, d)) + 0.05D;
                 npc.setDeltaMovement(npc.getDeltaMovement().add(dx / d * push, 0.0D, dz / d * push));
-                npc.hurtMarked = true;
+                npc.syncVelocity = true;
                 break;
             }
             return false; // pure side effect: never takes the goal slot
@@ -724,12 +724,12 @@ final class NpcGoals {
             }
             npc.getNavigation().stop();
             if (ticks % 14 == 0) {
-                npc.swing(InteractionHand.MAIN_HAND);
+                npc.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT);
                 // The hit sound of a crop / farmland / leaf is a grass or gravel scuff: every 0.7 s per worker it was the
                 // "loud shuffling and rustling" of playtest 2. Now one soft sound every ~2 s, only with a player within
                 // 20 blocks, and at most a few per second across all workers.
                 if (ticks % 42 == 0 && laborSoundAllowed(level)) {
-                    boolean soft = state.is(BlockTags.CROPS) || state.getBlock() instanceof net.minecraft.world.level.block.FarmBlock
+                    boolean soft = state.is(BlockTags.CROPS) || state.getBlock() instanceof net.minecraft.world.level.block.FarmlandBlock
                             || state.is(BlockTags.LEAVES);
                     if (level.getNearestPlayer(npc, 20) != null) {
                         level.playSound(null, spot, state.getSoundType(level, spot, npc).getHitSound(), SoundSource.NEUTRAL,
@@ -750,7 +750,7 @@ final class NpcGoals {
             List<BlockPos> found = new ArrayList<>();
             for (BlockPos p : BlockPos.betweenClosed(base.offset(-6, -1, -6), base.offset(6, 1, 6))) {
                 BlockState s = npc.level().getBlockState(p);
-                if (s.is(BlockTags.CROPS) || s.getBlock() instanceof net.minecraft.world.level.block.FarmBlock) {
+                if (s.is(BlockTags.CROPS) || s.getBlock() instanceof net.minecraft.world.level.block.FarmlandBlock) {
                     found.add(p.immutable());
                     if (found.size() >= 8) break;
                 }
@@ -778,7 +778,7 @@ final class NpcGoals {
             if (!near(spot, 2.6)) return;
             npc.getLookControl().setLookAt(spot.getX() + 0.5, spot.getY() + 0.8, spot.getZ() + 0.5);
             if (ticks % 16 == 0) {
-                npc.swing(InteractionHand.MAIN_HAND);
+                npc.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT);
                 level.playSound(null, spot, SoundEvents.ANVIL_USE, SoundSource.NEUTRAL, 0.35f, 0.9f + npc.getRandom().nextFloat() * 0.3f);
                 level.sendParticles(ParticleTypes.CRIT, spot.getX() + 0.5, spot.getY() + 1.0, spot.getZ() + 0.5, 6, 0.2, 0.1, 0.2, 0.15);
                 if (npc.getRandom().nextInt(3) == 0) {
@@ -801,8 +801,8 @@ final class NpcGoals {
             else if (seat != null) faceSeat(npc, level, seat);
             else faceStation(npc, level, post);
             if (ticks % 40 == 0) {
-                npc.swing(InteractionHand.MAIN_HAND);
-                level.playSound(null, npc.blockPosition(), npc.role() == NpcRole.BUTCHER ? SoundEvents.AXE_STRIP : SoundEvents.BOTTLE_FILL,
+                npc.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT);
+                level.playSound(null, npc.blockPosition(), npc.role() == NpcRole.BUTCHER ? SoundEvents.AXE_STRIP.value() : SoundEvents.BOTTLE_FILL,
                         SoundSource.NEUTRAL, 0.4f, 1.0f);
             }
         }
@@ -821,7 +821,7 @@ final class NpcGoals {
             else {
                 if (seat != null) faceSeat(npc, level, seat);
                 else faceStation(npc, level, post);
-                if (ticks % 60 == 0) npc.swing(InteractionHand.OFF_HAND);
+                if (ticks % 60 == 0) npc.swing(InteractionHand.OFF_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT);
             }
         }
 
@@ -834,7 +834,7 @@ final class NpcGoals {
             if (!near(spot, 3.5)) return;
             npc.getLookControl().setLookAt(spot.getX() + 0.5, spot.getY() + 0.5, spot.getZ() + 0.5);
             if (ticks % 50 == 0) {
-                npc.swing(InteractionHand.MAIN_HAND);
+                npc.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT);
                 level.sendParticles(ParticleTypes.FISHING, spot.getX() + 0.5, spot.getY() + 0.9, spot.getZ() + 0.5, 4, 0.2, 0, 0.2, 0.02);
                 if (npc.getRandom().nextInt(4) == 0) level.playSound(null, spot, SoundEvents.FISHING_BOBBER_SPLASH, SoundSource.NEUTRAL, 0.3f, 1.0f);
             }
@@ -876,7 +876,7 @@ final class NpcGoals {
             int note = melody.get(step);
             if (note < 0) return;
             com.skycraft.audio.BardPerformance.playStep(level, npc, note, step);
-            if (noteIndex % 2 == 0) npc.swing(InteractionHand.MAIN_HAND);
+            if (noteIndex % 2 == 0) npc.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT);
         }
 
         // -------- priests
@@ -977,7 +977,7 @@ final class NpcGoals {
             if (distSq > 36 * 36 && owner.onGround()) {
                 BlockPos target = owner.blockPosition().offset(npc.getRandom().nextInt(3) - 1, 0, npc.getRandom().nextInt(3) - 1);
                 if (level.getBlockState(target).isAir() && level.getBlockState(target.above()).isAir()) {
-                    npc.moveTo(target.getX() + 0.5, target.getY(), target.getZ() + 0.5, npc.getYRot(), npc.getXRot());
+                    npc.snapTo(target.getX() + 0.5, target.getY(), target.getZ() + 0.5, npc.getYRot(), npc.getXRot());
                     npc.getNavigation().stop();
                     return;
                 }
@@ -1140,7 +1140,7 @@ final class NpcGoals {
         @Override
         public boolean canUse() {
             if (npc.isBusy() || npc.getTarget() != null || !npc.role().civilian) return false;
-            if (npc.social().hasUUID("engaged")) return false; // waiting at the temple for the wedding
+            if (npc.social().read("engaged", net.minecraft.core.UUIDUtil.CODEC).isPresent()) return false; // waiting at the temple for the wedding
             // people on the road (roads.Travelers) are walking, not keeping a townsperson's day: no beds, no plaza
             if (npc.getPersistentData().contains("skycraft_traveler")) return false;
             if (routines()) return true;
@@ -1468,9 +1468,9 @@ final class NpcGoals {
                 default -> net.minecraft.world.item.Items.BAKED_POTATO;
             });
             Vec3 mouth = npc.getEyePosition().add(npc.getLookAngle().scale(0.35));
-            sl.sendParticles(new net.minecraft.core.particles.ItemParticleOption(ParticleTypes.ITEM, food), mouth.x, mouth.y - 0.15, mouth.z,
+            sl.sendParticles(new net.minecraft.core.particles.ItemParticleOption(ParticleTypes.ITEM, net.minecraft.world.item.ItemStackTemplate.fromNonEmptyStack(food)), mouth.x, mouth.y - 0.15, mouth.z,
                     5, 0.08, 0.05, 0.08, 0.03);
-            sl.playSound(null, npc.blockPosition(), SoundEvents.GENERIC_EAT, SoundSource.NEUTRAL, 0.5f, 0.9f + npc.getRandom().nextFloat() * 0.2f);
+            sl.playSound(null, npc.blockPosition(), SoundEvents.GENERIC_EAT.value(), SoundSource.NEUTRAL, 0.5f, 0.9f + npc.getRandom().nextFloat() * 0.2f);
         }
 
         // -------- night

@@ -1,0 +1,16 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "skycraft:item/mammoth_spawn_egg",
+    "tints": [
+      {
+        "type": "minecraft:constant",
+        "value": 4862498
+      },
+      {
+        "type": "minecraft:constant",
+        "value": 15787728
+      }
+    ]
+  }
+}

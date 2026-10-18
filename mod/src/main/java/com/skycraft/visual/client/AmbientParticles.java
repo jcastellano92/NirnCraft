@@ -7,12 +7,12 @@ import com.skycraft.atmosphere.weather.WeatherProfile;
 import com.skycraft.visual.VisualConfig;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.ParticleStatus;
+import net.minecraft.server.level.ParticleStatus;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.SpriteSet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
@@ -20,7 +20,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.monster.AbstractIllager;
+import net.minecraft.world.entity.monster.illager.AbstractIllager;
 import net.minecraft.world.entity.npc.Npc;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -31,11 +31,11 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.common.Tags;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.common.Tags;
+
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 /**
  * Spawns the atmospheric particles around the camera every client tick: regional precipitation vanilla can't draw
@@ -44,10 +44,10 @@ import net.minecraftforge.fml.common.Mod;
  * with Video Settings > Particles, and only looks at a handful of blocks per tick (lava is scanned every two
  * seconds into a fixed-size cache). Nothing here allocates except the particles themselves.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
 public final class AmbientParticles {
     static final SpriteSet[] SPRITES = new SpriteSet[AtmosParticle.Kind.values().length];
-    private static final TagKey<EntityType<?>> BREATHERS = TagKey.create(Registries.ENTITY_TYPE, new ResourceLocation(Skycraft.MODID, "frost_breath"));
+    private static final TagKey<EntityType<?>> BREATHERS = TagKey.create(Registries.ENTITY_TYPE, Identifier.fromNamespaceAndPath(Skycraft.MODID, "frost_breath"));
 
     private static final BlockPos.MutableBlockPos POS = new BlockPos.MutableBlockPos();
     private static final int MAX_LAVA = 24;
@@ -66,8 +66,8 @@ public final class AmbientParticles {
     private AmbientParticles() {}
 
     @SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent event) {
-        if (event.phase != TickEvent.Phase.END) return;
+    public static void onClientTick(net.neoforged.neoforge.client.event.ClientTickEvent.Post event) {
+        if (!(event instanceof net.neoforged.neoforge.client.event.ClientTickEvent.Post)) return;
         Minecraft mc = Minecraft.getInstance();
         ClientLevel level = mc.level;
         if (level != lastLevel) {
@@ -86,9 +86,9 @@ public final class AmbientParticles {
         int budget = (int) (VisualConfig.PARTICLE_BUDGET.get() * scale);
         if (budget <= 0) return;
 
-        Camera camera = mc.gameRenderer.getMainCamera();
-        Vec3 cam = camera.getPosition();
-        RandomSource rnd = level.random;
+        Camera camera = mc.gameRenderer.mainCamera();
+        Vec3 cam = camera.position();
+        RandomSource rnd = level.getRandom();
         ticks++;
         if (ticks % 10 == 0) refreshContext(level, mc.player);
         if (ticks % 40 == 0 && VisualConfig.EMBERS.get()) scanLava(level, mc.player.blockPosition());
@@ -140,7 +140,7 @@ public final class AmbientParticles {
         underground = level.getBrightness(LightLayer.SKY, p) <= 2 && p.getY() < surface - 4;
         Biome biome = level.getBiome(p).value();
         WeatherProfile profile = ClientWeather.profile();
-        coldHere = !biome.warmEnoughToRain(p) || profile == WeatherProfile.SKYRIM_COLD || profile == WeatherProfile.FROZEN
+        coldHere = !biome.warmEnoughToRain(p, level.getSeaLevel()) || profile == WeatherProfile.SKYRIM_COLD || profile == WeatherProfile.FROZEN
                 || profile.snowLine < p.getY() || ClientWeather.snow() > 0.2f;
         float temp = biome.getBaseTemperature();
         var holder = level.getBiome(p);
@@ -237,7 +237,8 @@ public final class AmbientParticles {
                 if (!s.is(BlockTags.LEAVES)) continue;
                 if (!level.getBlockState(POS.set(x, y - 1, z)).isAir()) break;
                 if (rnd.nextFloat() > dropChance) break;
-                int color = mc.getBlockColors().getColor(s, level, POS.set(x, y, z), 0);
+                var tint = mc.getBlockColors().getTintSource(s, 0);
+                int color = tint == null ? -1 : tint.colorInWorld(s, level, POS.set(x, y, z));
                 if (color == -1) color = s.getMapColor(level, POS).col;
                 AtmosParticle p = spawn(level, AtmosParticle.Kind.LEAF, x + rnd.nextDouble(), y - 0.05, z + rnd.nextDouble(), wx * 0.5, -0.03, wz * 0.5);
                 if (p != null) p.wind(wx, wz).color(shade(color, 0.85f + rnd.nextFloat() * 0.25f));
@@ -255,7 +256,7 @@ public final class AmbientParticles {
 
     /** Fireflies drift up from the undergrowth on clear warm nights. */
     private static void fireflies(ClientLevel level, RandomSource rnd, Vec3 cam, float scale, int budget) {
-        long time = level.getDayTime() % 24000L;
+        long time = level.getDefaultClockTime() % 24000L;
         if (time < 13000L || time > 23000L) return;
         if (level.getRainLevel(1f) > 0.2f) return;
         if (rnd.nextFloat() > 0.35f * scale || !room(budget)) return;
@@ -269,7 +270,7 @@ public final class AmbientParticles {
 
     /** Low wisps of fog over marsh ground and water, mostly at dawn, dusk and night. */
     private static void marshWisps(ClientLevel level, RandomSource rnd, Vec3 cam, float scale, int budget, float wx, float wz) {
-        long time = level.getDayTime() % 24000L;
+        long time = level.getDefaultClockTime() % 24000L;
         boolean dim = time > 11500L || time < 1500L;
         float rate = (dim ? 0.12f : 0.04f) + ClientWeather.fog() * 0.15f;
         if (rnd.nextFloat() > rate * scale || !room(budget)) return;
@@ -335,7 +336,7 @@ public final class AmbientParticles {
             int cadence = 46 + (e.getId() & 15);
             if ((time + e.getId() * 7L) % cadence != 0) continue;
             if (e.distanceToSqr(cam) > 24 * 24) continue;
-            if (!(e instanceof Player || e instanceof Npc || e instanceof AbstractIllager || e.getType().is(BREATHERS))) continue;
+            if (!(e instanceof Player || e instanceof Npc || e instanceof AbstractIllager || e.getType().builtInRegistryHolder().is(BREATHERS))) continue;
             if (!isCold(level, e)) continue;
             boolean self = e == mc.player && mc.options.getCameraType().isFirstPerson();
             Vec3 look = e.getViewVector(1f);
@@ -355,6 +356,6 @@ public final class AmbientParticles {
     private static boolean isCold(ClientLevel level, Entity e) {
         if (e == Minecraft.getInstance().player) return coldHere;
         BlockPos p = e.blockPosition();
-        return !level.getBiome(p).value().warmEnoughToRain(p) || coldHere && e.distanceToSqr(Minecraft.getInstance().player) < 48 * 48;
+        return !level.getBiome(p).value().warmEnoughToRain(p, level.getSeaLevel()) || coldHere && e.distanceToSqr(Minecraft.getInstance().player) < 48 * 48;
     }
 }

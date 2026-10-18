@@ -6,32 +6,31 @@ import com.skycraft.magic.shout.Shouting;
 import com.skycraft.magic.spell.SpellCasting;
 import com.skycraft.magic.spell.Spells;
 import com.skycraft.network.SkyNetwork;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.network.NetworkDirection;
-import net.minecraftforge.network.NetworkEvent;
+import net.neoforged.api.distmarker.Dist;
+import com.skycraft.platform.Sides;
+import net.minecraft.network.protocol.PacketFlow;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-import java.util.function.Supplier;
 
 /** Packets of the magic module. Registered in this fixed order by {@link MagicModule#registerPackets()}. */
 public final class MagicPackets {
     private MagicPackets() {}
 
     public static void register() {
-        SkyNetwork.register(Cast.class, NetworkDirection.PLAY_TO_SERVER, Cast::encode, Cast::decode, Cast::handle);
-        SkyNetwork.register(ShoutPacket.class, NetworkDirection.PLAY_TO_SERVER, ShoutPacket::encode, ShoutPacket::decode, ShoutPacket::handle);
-        SkyNetwork.register(MenuAction.class, NetworkDirection.PLAY_TO_SERVER, MenuAction::encode, MenuAction::decode, MenuAction::handle);
-        SkyNetwork.register(Fx.class, NetworkDirection.PLAY_TO_CLIENT, Fx::encode, Fx::decode, Fx::handle);
-        SkyNetwork.register(ShoutFx.class, NetworkDirection.PLAY_TO_CLIENT, ShoutFx::encode, ShoutFx::decode, ShoutFx::handle);
-        SkyNetwork.register(MakeSpell.class, NetworkDirection.PLAY_TO_SERVER, MakeSpell::encode, MakeSpell::decode, MakeSpell::handle);
-        SkyNetwork.register(StaffEnchant.class, NetworkDirection.PLAY_TO_SERVER, StaffEnchant::encode, StaffEnchant::decode, StaffEnchant::handle);
-        SkyNetwork.register(com.skycraft.skills.Acrobatics.DoubleJump.class, NetworkDirection.PLAY_TO_SERVER,
+        SkyNetwork.register(Cast.class, PacketFlow.SERVERBOUND, Cast::encode, Cast::decode, Cast::handle);
+        SkyNetwork.register(ShoutPacket.class, PacketFlow.SERVERBOUND, ShoutPacket::encode, ShoutPacket::decode, ShoutPacket::handle);
+        SkyNetwork.register(MenuAction.class, PacketFlow.SERVERBOUND, MenuAction::encode, MenuAction::decode, MenuAction::handle);
+        SkyNetwork.register(Fx.class, PacketFlow.CLIENTBOUND, Fx::encode, Fx::decode, Fx::handle);
+        SkyNetwork.register(ShoutFx.class, PacketFlow.CLIENTBOUND, ShoutFx::encode, ShoutFx::decode, ShoutFx::handle);
+        SkyNetwork.register(MakeSpell.class, PacketFlow.SERVERBOUND, MakeSpell::encode, MakeSpell::decode, MakeSpell::handle);
+        SkyNetwork.register(StaffEnchant.class, PacketFlow.SERVERBOUND, StaffEnchant::encode, StaffEnchant::decode, StaffEnchant::handle);
+        SkyNetwork.register(com.skycraft.skills.Acrobatics.DoubleJump.class, PacketFlow.SERVERBOUND,
                 com.skycraft.skills.Acrobatics.DoubleJump::encode, com.skycraft.skills.Acrobatics.DoubleJump::decode,
                 com.skycraft.skills.Acrobatics.DoubleJump::handle);
-        SkyNetwork.register(Timers.class, NetworkDirection.PLAY_TO_CLIENT, Timers::encode, Timers::decode, Timers::handle);
+        SkyNetwork.register(Timers.class, PacketFlow.CLIENTBOUND, Timers::encode, Timers::decode, Timers::handle);
     }
 
     /**
@@ -42,62 +41,59 @@ public final class MagicPackets {
         /** {@code ticks} left of {@code total} (0 if unknown), shown in {@code rgb}. */
         public record Entry(net.minecraft.network.chat.Component name, int ticks, int total, int rgb) {}
 
-        static void encode(Timers m, FriendlyByteBuf buf) {
+        static void encode(Timers m, RegistryFriendlyByteBuf buf) {
             buf.writeVarInt(m.list.size());
             for (Entry e : m.list) {
-                buf.writeComponent(e.name);
+                net.minecraft.network.chat.ComponentSerialization.STREAM_CODEC.encode(buf, e.name);
                 buf.writeVarInt(e.ticks);
                 buf.writeVarInt(e.total);
                 buf.writeInt(e.rgb);
             }
         }
 
-        static Timers decode(FriendlyByteBuf buf) {
+        static Timers decode(RegistryFriendlyByteBuf buf) {
             int n = Math.min(32, buf.readVarInt());
             java.util.List<Entry> out = new java.util.ArrayList<>(n);
-            for (int i = 0; i < n; i++) out.add(new Entry(buf.readComponent(), buf.readVarInt(), buf.readVarInt(), buf.readInt()));
+            for (int i = 0; i < n; i++) out.add(new Entry(net.minecraft.network.chat.ComponentSerialization.STREAM_CODEC.decode(buf), buf.readVarInt(), buf.readVarInt(), buf.readInt()));
             return new Timers(out);
         }
 
-        static void handle(Timers m, Supplier<NetworkEvent.Context> ctx) {
-            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> com.skycraft.magic.client.ActiveEffectsHud.set(m.list));
-            ctx.get().setPacketHandled(true);
+        static void handle(Timers m, IPayloadContext ctx) {
+            Sides.runOn(Dist.CLIENT, () -> () -> com.skycraft.magic.client.ActiveEffectsHud.set(m.list));
         }
     }
 
     /** Spellmaking Altar: make the spell encoded in {@code id} (see {@link com.skycraft.magic.spell.spellmaking.CustomSpells}). */
     public record MakeSpell(net.minecraft.core.BlockPos pos, String id) {
-        static void encode(MakeSpell m, FriendlyByteBuf buf) {
+        static void encode(MakeSpell m, RegistryFriendlyByteBuf buf) {
             buf.writeBlockPos(m.pos);
             buf.writeUtf(m.id, 256);
         }
 
-        static MakeSpell decode(FriendlyByteBuf buf) {
+        static MakeSpell decode(RegistryFriendlyByteBuf buf) {
             return new MakeSpell(buf.readBlockPos(), buf.readUtf(256));
         }
 
-        static void handle(MakeSpell m, Supplier<NetworkEvent.Context> ctx) {
-            ServerPlayer player = ctx.get().getSender();
+        static void handle(MakeSpell m, IPayloadContext ctx) {
+            ServerPlayer player = SkyNetwork.sender(ctx);
             if (player != null) com.skycraft.magic.spell.spellmaking.SpellmakingAltarBlock.make(player, m.pos, m.id);
-            ctx.get().setPacketHandled(true);
         }
     }
 
     /** Staff Enchanter: bind a known spell into the unenchanted staff in the player's inventory. */
     public record StaffEnchant(net.minecraft.core.BlockPos pos, String spellId) {
-        static void encode(StaffEnchant m, FriendlyByteBuf buf) {
+        static void encode(StaffEnchant m, RegistryFriendlyByteBuf buf) {
             buf.writeBlockPos(m.pos);
             buf.writeUtf(m.spellId, 256);
         }
 
-        static StaffEnchant decode(FriendlyByteBuf buf) {
+        static StaffEnchant decode(RegistryFriendlyByteBuf buf) {
             return new StaffEnchant(buf.readBlockPos(), buf.readUtf(256));
         }
 
-        static void handle(StaffEnchant m, Supplier<NetworkEvent.Context> ctx) {
-            ServerPlayer player = ctx.get().getSender();
+        static void handle(StaffEnchant m, IPayloadContext ctx) {
+            ServerPlayer player = SkyNetwork.sender(ctx);
             if (player != null) com.skycraft.arsenal.StaffEnchanting.enchant(player, m.pos, m.spellId);
-            ctx.get().setPacketHandled(true);
         }
     }
 
@@ -108,41 +104,39 @@ public final class MagicPackets {
      * {@link SpellCasting#LEFT} (use key with an empty off hand).
      */
     public record Cast(int hand, boolean start) {
-        static void encode(Cast m, FriendlyByteBuf buf) {
+        static void encode(Cast m, RegistryFriendlyByteBuf buf) {
             buf.writeByte(m.hand);
             buf.writeBoolean(m.start);
         }
 
-        static Cast decode(FriendlyByteBuf buf) {
+        static Cast decode(RegistryFriendlyByteBuf buf) {
             return new Cast(buf.readByte(), buf.readBoolean());
         }
 
-        static void handle(Cast m, Supplier<NetworkEvent.Context> ctx) {
-            ServerPlayer player = ctx.get().getSender();
+        static void handle(Cast m, IPayloadContext ctx) {
+            ServerPlayer player = SkyNetwork.sender(ctx);
             if (player != null && (m.hand == SpellCasting.RIGHT || m.hand == SpellCasting.LEFT)) {
                 // curse module: no spells in Beast Form or Vampire Lord form (they have their own)
                 if (m.start) {
                     if (!com.skycraft.curse.Curses.transformed(player)) SpellCasting.start(player, m.hand);
                 } else SpellCasting.stop(player, m.hand);
             }
-            ctx.get().setPacketHandled(true);
         }
     }
 
     /** Shout key released after charging {@code words} (1..3) words. */
     public record ShoutPacket(int words) {
-        static void encode(ShoutPacket m, FriendlyByteBuf buf) {
+        static void encode(ShoutPacket m, RegistryFriendlyByteBuf buf) {
             buf.writeByte(m.words);
         }
 
-        static ShoutPacket decode(FriendlyByteBuf buf) {
+        static ShoutPacket decode(RegistryFriendlyByteBuf buf) {
             return new ShoutPacket(buf.readByte());
         }
 
-        static void handle(ShoutPacket m, Supplier<NetworkEvent.Context> ctx) {
-            ServerPlayer player = ctx.get().getSender();
+        static void handle(ShoutPacket m, IPayloadContext ctx) {
+            ServerPlayer player = SkyNetwork.sender(ctx);
             if (player != null) Shouting.executeVoice(player, Math.max(1, Math.min(3, m.words)));
-            ctx.get().setPacketHandled(true);
         }
     }
 
@@ -164,17 +158,17 @@ public final class MagicPackets {
         public static final int UNARMED = 9;
         public static final int CYCLE_HANDS = 10;
 
-        static void encode(MenuAction m, FriendlyByteBuf buf) {
+        static void encode(MenuAction m, RegistryFriendlyByteBuf buf) {
             buf.writeVarInt(m.action);
             buf.writeUtf(m.id, 256);
         }
 
-        static MenuAction decode(FriendlyByteBuf buf) {
+        static MenuAction decode(RegistryFriendlyByteBuf buf) {
             return new MenuAction(buf.readVarInt(), buf.readUtf(256));
         }
 
-        static void handle(MenuAction m, Supplier<NetworkEvent.Context> ctx) {
-            ServerPlayer player = ctx.get().getSender();
+        static void handle(MenuAction m, IPayloadContext ctx) {
+            ServerPlayer player = SkyNetwork.sender(ctx);
             if (player != null) {
                 switch (m.action) {
                     case SELECT_SPELL -> {
@@ -230,7 +224,6 @@ public final class MagicPackets {
                     }
                 }
             }
-            ctx.get().setPacketHandled(true);
         }
     }
 
@@ -238,7 +231,7 @@ public final class MagicPackets {
 
     /** A spell visual, see {@link MagicFx} for kinds. */
     public record Fx(int kind, int element, Vec3 a, Vec3 b, int entity, int extra) {
-        static void encode(Fx m, FriendlyByteBuf buf) {
+        static void encode(Fx m, RegistryFriendlyByteBuf buf) {
             buf.writeByte(m.kind);
             buf.writeByte(m.element);
             buf.writeFloat((float) m.a.x);
@@ -251,7 +244,7 @@ public final class MagicPackets {
             buf.writeVarInt(m.extra);
         }
 
-        static Fx decode(FriendlyByteBuf buf) {
+        static Fx decode(RegistryFriendlyByteBuf buf) {
             int kind = buf.readByte();
             int element = buf.readByte();
             Vec3 a = new Vec3(buf.readFloat(), buf.readFloat(), buf.readFloat());
@@ -259,27 +252,25 @@ public final class MagicPackets {
             return new Fx(kind, element, a, b, buf.readVarInt() - 1, buf.readVarInt());
         }
 
-        static void handle(Fx m, Supplier<NetworkEvent.Context> ctx) {
-            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> ClientFx.handle(m));
-            ctx.get().setPacketHandled(true);
+        static void handle(Fx m, IPayloadContext ctx) {
+            Sides.runOn(Dist.CLIENT, () -> () -> ClientFx.handle(m));
         }
     }
 
     /** Somebody shouted: show the words and the shout's particles. */
     public record ShoutFx(int entity, int shout, int words) {
-        static void encode(ShoutFx m, FriendlyByteBuf buf) {
+        static void encode(ShoutFx m, RegistryFriendlyByteBuf buf) {
             buf.writeVarInt(m.entity);
             buf.writeVarInt(m.shout);
             buf.writeByte(m.words);
         }
 
-        static ShoutFx decode(FriendlyByteBuf buf) {
+        static ShoutFx decode(RegistryFriendlyByteBuf buf) {
             return new ShoutFx(buf.readVarInt(), buf.readVarInt(), buf.readByte());
         }
 
-        static void handle(ShoutFx m, Supplier<NetworkEvent.Context> ctx) {
-            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> ClientFx.handleShout(m));
-            ctx.get().setPacketHandled(true);
+        static void handle(ShoutFx m, IPayloadContext ctx) {
+            Sides.runOn(Dist.CLIENT, () -> () -> ClientFx.handleShout(m));
         }
     }
 }

@@ -1,6 +1,6 @@
 package com.skycraft.magic;
 
-import net.minecraftforge.eventbus.api.IEventBus;
+import net.neoforged.bus.api.IEventBus;
 
 /**
  * Spells (learned from tomes), casting, magicka costs, Dragon Shouts, Words of Power and Word Walls.

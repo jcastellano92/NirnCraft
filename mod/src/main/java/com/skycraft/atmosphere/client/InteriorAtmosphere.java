@@ -2,6 +2,7 @@ package com.skycraft.atmosphere.client;
 
 import com.mojang.blaze3d.platform.NativeImage;
 import com.skycraft.atmosphere.DungeonAir;
+import com.skycraft.atmosphere.LocalAirCoordinates;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
@@ -10,15 +11,15 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.block.CampfireBlock;
 import net.minecraft.world.level.block.entity.CampfireBlockEntity;
-import net.minecraft.world.level.chunk.ChunkStatus;
+import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.*;
 
 /** Bounded local media and actual scene emitters. Geometry remains in the native depth/shadow buffers. */
-@net.minecraftforge.fml.common.Mod.EventBusSubscriber(modid = com.skycraft.Skycraft.MODID,
-        value = net.minecraftforge.api.distmarker.Dist.CLIENT)
+@net.neoforged.fml.common.EventBusSubscriber(modid = com.skycraft.Skycraft.MODID,
+        value = net.neoforged.api.distmarker.Dist.CLIENT)
 public final class InteriorAtmosphere {
     private static String dimension = "";
     private static List<DungeonAir.Volume> volumes = List.of();
@@ -39,30 +40,36 @@ public final class InteriorAtmosphere {
 
     public static boolean readyAt(Vec3 point) {
         var level=Minecraft.getInstance().level;
-        return level!=null && dimension.equals(level.dimension().location().toString())
-                && (Mth.floor(point.x)>>4)==sourceChunkX && (Mth.floor(point.z)>>4)==sourceChunkZ && ROOM_BLEND.settled();
+        return level!=null && dimension.equals(level.dimension().identifier().toString())
+                && (Mth.floor(point.x)>>4)==sourceChunkX && (Mth.floor(point.z)>>4)==sourceChunkZ && ROOM_BLEND.settled()
+                && (!ShaderCompat.shadersActive() || !LocalOcclusionTexture.enabled() || LocalOcclusionTexture.ready());
     }
 
-    @net.minecraftforge.eventbus.api.SubscribeEvent
-    public static void logout(net.minecraftforge.client.event.ClientPlayerNetworkEvent.LoggingOut event) {
+    @net.neoforged.bus.api.SubscribeEvent
+    public static void logout(net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent.LoggingOut event) {
         dimension=""; volumes=List.of(); bursts.clear(); fires.clear(); impulses.clear(); tracked=null; ROOM_BLEND.clear();
     }
 
     public static int profileAt(Vec3 point) {
         var level=Minecraft.getInstance().level;
-        if(level==null || !dimension.equals(level.dimension().location().toString())) return -1;
+        if(level==null || !dimension.equals(level.dimension().identifier().toString())) return -1;
         for(var v:volumes) if(v.distanceSquared(point.x,point.y,point.z)==0) return v.style();
         return -1;
     }
 
     public static String describe() {
-        return "rooms="+renderedRooms+" received="+volumes.size()+" lights="+renderedLights+" smoke="+renderedSmoke;
+        return "rooms="+renderedRooms+" received="+volumes.size()+" lights="+renderedLights+" smoke="+renderedSmoke
+                +" "+LocalOcclusionTexture.describe();
     }
+
+    /** Developer probe only until receiver-cache performance and visual parity are measured. */
+    public static void experimentalOcclusion(boolean enabled) { LocalOcclusionTexture.enabled(enabled); }
 
     /** Called by real spell FX, not a separate dungeon showcase effect. */
     public static void light(Vec3 position, int color, float energy, float radius, int ticks) {
         var level = Minecraft.getInstance().level;
         if (level == null || !Double.isFinite(position.x + position.y + position.z)) return;
+        ensureLevel(level);
         bursts.removeIf(l -> l.until < level.getGameTime() || l.position.distanceToSqr(position) < 0.25);
         if (bursts.size() >= 32) bursts.remove(0);
         bursts.add(new Light(position, color, Mth.clamp(energy, 0, 8), Mth.clamp(radius, 1, 32),
@@ -73,28 +80,34 @@ public final class InteriorAtmosphere {
     public static void displace(Vec3 position, float radius) {
         var level = Minecraft.getInstance().level;
         if (level == null) return;
+        ensureLevel(level);
         if (impulses.size() >= 4) impulses.remove(0);
         impulses.add(new Impulse(position, Mth.clamp(radius, 1, 16), level.getGameTime()));
     }
 
     static void write(NativeImage image, ClientLevel level, Vec3 camera) {
-        if (tracked != level) { tracked = level; bursts.clear(); fires.clear(); impulses.clear(); ROOM_BLEND.clear(); }
-        List<DungeonAir.Volume> nearby = dimension.equals(level.dimension().location().toString())
+        ensureLevel(level);
+        List<DungeonAir.Volume> nearby = dimension.equals(level.dimension().identifier().toString())
                 ? new ArrayList<>(volumes) : new ArrayList<>();
         nearby.removeIf(v -> v.distanceSquared(camera.x, camera.y, camera.z) > 140*140);
         nearby.sort(Comparator.comparingDouble(v -> v.distanceSquared(camera.x, camera.y, camera.z)));
-        for (int y=64; y<74; y++) for (int x=0; x<64; x++) image.setPixelRGBA(x,y,0);
+        for (int y=64; y<74; y++) for (int x=0; x<64; x++) image.setPixelABGR(x,y,0);
+        Vec3 origin=new Vec3(LocalAirCoordinates.anchor(camera.x),LocalAirCoordinates.anchor(camera.y),
+                LocalAirCoordinates.anchor(camera.z));
+        image.setPixelABGR(60,74,(int)origin.x);
+        image.setPixelABGR(61,74,(int)origin.y);
+        image.setPixelABGR(62,74,(int)origin.z);
         var blended = ROOM_BLEND.update(nearby.subList(0,Math.min(4,nearby.size())));
         int count = blended.size();
         for (int i=0; i<count; i++) {
             var entry=blended.get(i);
             var v=entry.volume();
-            point(image,i*2,64,new Vec3(v.x0(),v.y0(),v.z0()).subtract(camera));
-            point(image,i*2,65,new Vec3(v.x1(),v.y1(),v.z1()).subtract(camera));
-            int floor=encode(v.floor()+1-camera.y);
-            image.setPixelRGBA(i,66,(floor&255) | (floor>>>8)<<8 | v.style()<<16 | Math.round(entry.weight()*255)<<24);
+            point(image,i*2,64,new Vec3(v.x0(),v.y0(),v.z0()).subtract(origin));
+            point(image,i*2,65,new Vec3(v.x1(),v.y1(),v.z1()).subtract(origin));
+            int floor=encode(v.floor()+1-origin.y);
+            image.setPixelABGR(i,66,(floor&255) | (floor>>>8)<<8 | v.style()<<16 | Math.round(entry.weight()*255)<<24);
         }
-        image.setPixelRGBA(63,66,count);
+        image.setPixelABGR(63,66,count);
         long time=level.getGameTime();
         bursts.removeIf(l -> l.until < time);
         impulses.removeIf(i -> time-i.start > 30);
@@ -124,19 +137,21 @@ public final class InteriorAtmosphere {
             if(l.position.distanceToSqr(camera)>64*64) continue;
             // Conservative visibility: no light through a solid wall. A full point-light
             // shadow volume would be needed to light around an occluding corner.
-            var hit=level.clip(new ClipContext(camera,l.position,ClipContext.Block.COLLIDER,
-                    ClipContext.Fluid.NONE,Minecraft.getInstance().player));
-            if(hit.getType()!=HitResult.Type.MISS && hit.getLocation().distanceToSqr(l.position)>0.6) continue;
-            point(image,lightCount*2,68,l.position.subtract(camera));
+            if(!ShaderCompat.shadersActive() || !LocalOcclusionTexture.enabled()) {
+                var hit=level.clip(new ClipContext(camera,l.position,ClipContext.Block.COLLIDER,
+                        ClipContext.Fluid.NONE,Minecraft.getInstance().player));
+                if(hit.getType()!=HitResult.Type.MISS && hit.getLocation().distanceToSqr(l.position)>0.6) continue;
+            }
+            point(image,lightCount*2,68,l.position.subtract(origin));
             float fade=Mth.clamp((l.until-time)/4f,0,1);
             // Scene lights added each tick have no expiration fade.
             if(l.until==time+1) fade=1;
             int rgb=l.color;
-            image.setPixelRGBA(lightCount,69,rgba(((rgb>>16)&255)/255f*l.energy*fade/4,
+            image.setPixelABGR(lightCount,69,rgba(((rgb>>16)&255)/255f*l.energy*fade/4,
                     ((rgb>>8)&255)/255f*l.energy*fade/4,(rgb&255)/255f*l.energy*fade/4,l.radius/32));
             lightCount++;
         }
-        image.setPixelRGBA(63,69,lightCount);
+        image.setPixelABGR(63,69,lightCount);
         int smokeCount=0;
         for(var p:fires) {
             if(smokeCount>=4) break;
@@ -146,17 +161,21 @@ public final class InteriorAtmosphere {
             if(!level.getBlockState(p).getValue(CampfireBlock.LIT)) continue;
             int height=1;
             while(height<24 && level.getBlockState(p.above(height)).getCollisionShape(level,p.above(height)).isEmpty()) height++;
-            point(image,smokeCount*2,70,Vec3.atCenterOf(p).add(0,0.3,0).subtract(camera));
-            image.setPixelRGBA(smokeCount,71,rgba(height/32f,1f,0f,1f));
+            point(image,smokeCount*2,70,Vec3.atCenterOf(p).add(0,0.3,0).subtract(origin));
+            image.setPixelABGR(smokeCount,71,rgba(height/32f,1f,0f,1f));
             smokeCount++;
         }
-        image.setPixelRGBA(63,71,smokeCount);
+        image.setPixelABGR(63,71,smokeCount);
         for(int i=0;i<Math.min(4,impulses.size());i++) {
-            var impulse=impulses.get(i); point(image,i*2,72,impulse.position.subtract(camera));
-            image.setPixelRGBA(i,73,rgba(impulse.radius/16f,(time-impulse.start)/30f,0,1));
+            var impulse=impulses.get(i); point(image,i*2,72,impulse.position.subtract(origin));
+            image.setPixelABGR(i,73,rgba(impulse.radius/16f,(time-impulse.start)/30f,0,1));
         }
-        image.setPixelRGBA(63,73,Math.min(4,impulses.size()));
+        image.setPixelABGR(63,73,Math.min(4,impulses.size()));
         renderedRooms=count; renderedLights=lightCount; renderedSmoke=smokeCount;
+    }
+
+    private static void ensureLevel(ClientLevel level) {
+        if (tracked != level) { tracked = level; bursts.clear(); fires.clear(); impulses.clear(); ROOM_BLEND.clear(); }
     }
 
     private static void discoverFires(ClientLevel level,Vec3 camera) {
@@ -176,10 +195,10 @@ public final class InteriorAtmosphere {
         return Mth.clamp(Math.round(r*255),0,255) | Mth.clamp(Math.round(g*255),0,255)<<8
                 | Mth.clamp(Math.round(b*255),0,255)<<16 | Mth.clamp(Math.round(a*255),0,255)<<24;
     }
-    private static int encode(double v) { return Mth.clamp((int)Math.round(v*4)+32768,0,65535); }
+    private static int encode(double v) { return LocalAirCoordinates.encode(v); }
     private static void point(NativeImage image,int column,int row,Vec3 p) {
         int x=encode(p.x),y=encode(p.y),z=encode(p.z);
-        image.setPixelRGBA(column,row,(x&255) | (x>>>8)<<8 | (y&255)<<16 | (y>>>8)<<24);
-        image.setPixelRGBA(column+1,row,z);
+        image.setPixelABGR(column,row,(x&255) | (x>>>8)<<8 | (y&255)<<16 | (y>>>8)<<24);
+        image.setPixelABGR(column+1,row,z);
     }
 }

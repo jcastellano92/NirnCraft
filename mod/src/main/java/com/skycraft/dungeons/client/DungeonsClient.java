@@ -9,31 +9,31 @@ import com.skycraft.dungeons.entity.DwarvenSpider;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.EntityRenderersEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.minecraft.resources.Identifier;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.EntityRenderersEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 /** Mod-bus client registration for the dungeons module: automaton model layers and renderers. */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
 public final class DungeonsClient {
     public static final ModelLayerLocation SPIDER = layer("dwarven_spider");
     public static final ModelLayerLocation SPHERE = layer("dwarven_sphere");
     public static final ModelLayerLocation CENTURION = layer("dwarven_centurion");
 
-    private static final ResourceLocation SPIDER_TEX = tex("dwarven_spider");
-    private static final ResourceLocation SPHERE_TEX = tex("dwarven_sphere");
-    private static final ResourceLocation CENTURION_TEX = tex("dwarven_centurion");
+    private static final Identifier SPIDER_TEX = tex("dwarven_spider");
+    private static final Identifier SPHERE_TEX = tex("dwarven_sphere");
+    private static final Identifier CENTURION_TEX = tex("dwarven_centurion");
 
     private DungeonsClient() {}
 
     private static ModelLayerLocation layer(String name) {
-        return new ModelLayerLocation(new ResourceLocation(Skycraft.MODID, name), "main");
+        return new ModelLayerLocation(Identifier.fromNamespaceAndPath(Skycraft.MODID, name), "main");
     }
 
-    private static ResourceLocation tex(String name) {
-        return new ResourceLocation(Skycraft.MODID, "textures/entity/dwemer/" + name + ".png");
+    private static Identifier tex(String name) {
+        return Identifier.fromNamespaceAndPath(Skycraft.MODID, "textures/entity/dwemer/" + name + ".png");
     }
 
     @SubscribeEvent
@@ -50,41 +50,13 @@ public final class DungeonsClient {
         event.registerEntityRenderer(DungeonsRegistry.DWARVEN_CENTURION.get(), CenturionRenderer::new);
     }
 
-    static final class SpiderRenderer extends MobRenderer<DwarvenSpider, DwarvenSpiderModel<DwarvenSpider>> {
-        SpiderRenderer(EntityRendererProvider.Context ctx) {
-            super(ctx, new DwarvenSpiderModel<>(ctx.bakeLayer(SPIDER)), 0.5f);
-        }
-
-        @Override
-        public ResourceLocation getTextureLocation(DwarvenSpider entity) {
-            return SPIDER_TEX;
-        }
+    static final class SpiderRenderer extends com.skycraft.fauna.client.FaunaRenderer<DwarvenSpider,DwarvenSpiderModel<DwarvenSpider>> {
+        SpiderRenderer(EntityRendererProvider.Context ctx){super(ctx,new DwarvenSpiderModel<>(ctx.bakeLayer(SPIDER)),.5f,1,e->SPIDER_TEX);}
     }
-
-    static final class SphereRenderer extends MobRenderer<DwarvenSphere, DwarvenSphereModel> {
-        SphereRenderer(EntityRendererProvider.Context ctx) {
-            super(ctx, new DwarvenSphereModel(ctx.bakeLayer(SPHERE)), 0.5f);
-        }
-
-        @Override
-        public ResourceLocation getTextureLocation(DwarvenSphere entity) {
-            return SPHERE_TEX;
-        }
+    static final class SphereRenderer extends com.skycraft.fauna.client.FaunaRenderer<DwarvenSphere,DwarvenSphereModel> {
+        SphereRenderer(EntityRendererProvider.Context ctx){super(ctx,new DwarvenSphereModel(ctx.bakeLayer(SPHERE)),.5f,1,e->SPHERE_TEX);}
     }
-
-    static final class CenturionRenderer extends MobRenderer<DwarvenCenturion, DwarvenCenturionModel> {
-        CenturionRenderer(EntityRendererProvider.Context ctx) {
-            super(ctx, new DwarvenCenturionModel(ctx.bakeLayer(CENTURION)), 1.2f);
-        }
-
-        @Override
-        protected void scale(DwarvenCenturion entity, PoseStack pose, float partialTick) {
-            pose.scale(1.75f, 1.75f, 1.75f);
-        }
-
-        @Override
-        public ResourceLocation getTextureLocation(DwarvenCenturion entity) {
-            return CENTURION_TEX;
-        }
+    static final class CenturionRenderer extends com.skycraft.fauna.client.FaunaRenderer<DwarvenCenturion,DwarvenCenturionModel> {
+        CenturionRenderer(EntityRendererProvider.Context ctx){super(ctx,new DwarvenCenturionModel(ctx.bakeLayer(CENTURION)),1.2f/1.75f,1.75f,e->CENTURION_TEX);}
     }
 }

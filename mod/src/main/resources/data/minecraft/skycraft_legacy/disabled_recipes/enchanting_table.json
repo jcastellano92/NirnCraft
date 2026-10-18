@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    " B ",
+    "D#D",
+    "###"
+  ],
+  "key": {
+    "B": "minecraft:book",
+    "#": "minecraft:obsidian",
+    "D": "minecraft:diamond"
+  },
+  "result": {
+    "id": "minecraft:enchanting_table"
+  },
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:false"
+    }
+  ]
+}

@@ -20,7 +20,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.TagKey;
@@ -33,19 +33,18 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.food.FoodProperties;
-import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.living.LivingEntityUseItemEvent;
-import net.minecraftforge.event.entity.player.ItemTooltipEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.event.entity.player.PlayerWakeUpEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+
+import net.neoforged.neoforge.event.entity.living.LivingEntityUseItemEvent;
+import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerWakeUpEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
@@ -69,20 +68,25 @@ import java.util.UUID;
  * </ul>
  *
  * <p>Survival Mode also lowers carry weight, and optionally blocks map fast travel. It runs only when the
- * {@code survival_mode.enabled} config and the world's {@code skycraftSurvivalMode} game rule are both on, and never
+ * {@code survival_mode.enabled} config and the world's {@code skycraft:survival_mode} game rule are both on, and never
  * for creative or spectator players. Meters live in {@code SkyData.module("survival_mode")}; the penalties go through
  * the core's {@code module("bonus")} pools (only the difference to what was applied before, like the shrines do).</p>
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class SurvivalMode {
-    /** Per-world switch: {@code /gamerule skycraftSurvivalMode false}. */
-    public static final GameRules.Key<GameRules.BooleanValue> RULE =
-            GameRules.register("skycraftSurvivalMode", GameRules.Category.PLAYER, GameRules.BooleanValue.create(true));
+    /** Per-world switch: {@code /gamerule skycraft:survival_mode false}. */
+    private static final net.neoforged.neoforge.registries.DeferredRegister<net.minecraft.world.level.gamerules.GameRule<?>> RULES =
+            net.neoforged.neoforge.registries.DeferredRegister.create(net.minecraft.core.registries.BuiltInRegistries.GAME_RULE, Skycraft.MODID);
+    public static final net.minecraft.world.level.gamerules.GameRule<Boolean> RULE = new net.minecraft.world.level.gamerules.GameRule<>(
+            net.minecraft.world.level.gamerules.GameRuleCategory.PLAYER, net.minecraft.world.level.gamerules.GameRuleType.BOOL,
+            com.mojang.brigadier.arguments.BoolArgumentType.bool(), net.minecraft.world.level.gamerules.GameRuleTypeVisitor::visitBoolean,
+            com.mojang.serialization.Codec.BOOL, value -> value ? 1 : 0, true, net.minecraft.world.flag.FeatureFlagSet.of());
+    static { RULES.register("survival_mode", () -> RULE); }
 
     public static final String KEY = "survival_mode";
     public static final float MAX_HUNGER = 240f, MAX_FATIGUE = 240f, MAX_COLD = Climate.MAX;
     /** Foods that warm you (stews, soups and other hot dishes); every stew counts too. */
-    public static final TagKey<Item> WARMING_FOOD = TagKey.create(Registries.ITEM, new ResourceLocation(Skycraft.MODID, "warming_food"));
+    public static final TagKey<Item> WARMING_FOOD = TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath(Skycraft.MODID, "warming_food"));
     public static final int WARMING_TICKS = 6000;
 
     private static final float[] HUNGER_STAMINA = {0f, 0.05f, 0.10f, 0.25f, 0.40f};
@@ -93,8 +97,8 @@ public final class SurvivalMode {
     private static final float[] COLD_HEALTH = {0f, 0.05f, 0.15f, 0.30f, 0.45f};
     private static final float[] COLD_REGEN = {1f, 1f, 0.85f, 0.7f, 0.5f};
 
-    private static final UUID SPEED_MOD = UUID.fromString("3b6c2f1e-8a4d-4c7b-9e15-0a1b2c3d4e51");
-    private static final UUID ATTACK_MOD = UUID.fromString("3b6c2f1e-8a4d-4c7b-9e15-0a1b2c3d4e52");
+    private static final Identifier SPEED_MOD = Identifier.fromNamespaceAndPath(Skycraft.MODID, "survival_speed");
+    private static final Identifier ATTACK_MOD = Identifier.fromNamespaceAndPath(Skycraft.MODID, "survival_attack");
     private static final String[] POOLS = {"health", "magicka", "stamina", "carry"};
 
     /** Last state sent to each player (only changes are sent). */
@@ -117,7 +121,7 @@ public final class SurvivalMode {
     public static float restRecover(ServerPlayer player, float points) {
         if (!active(player)) return 0f;
         CompoundTag t = tag(player);
-        float v = Math.max(0f, t.getFloat("fatigue") - points);
+        float v = Math.max(0f, t.getFloatOr("fatigue",0F) - points);
         t.putFloat("fatigue", v);
         return v;
     }
@@ -135,11 +139,12 @@ public final class SurvivalMode {
     }
 
     /** Forces class loading (registers the game rule early). */
-    public static void init() {
+    public static void init(net.neoforged.bus.api.IEventBus modBus) {
+        RULES.register(modBus);
         Progression.registerXpModifier((player, skill) -> {
             // Well Rested and Lover's Comfort are the core's (skills/Progression); Rested is the bedroll's lesser one
             float m = 1f;
-            if (player.hasEffect(SurvivalEffects.RESTED.get()) && !player.hasEffect(ModEffects.WELL_RESTED.get())) m *= 1.05f;
+            if (player.hasEffect(com.skycraft.platform.Effects.holder(SurvivalEffects.RESTED.get())) && !player.hasEffect(com.skycraft.platform.Effects.holder(ModEffects.WELL_RESTED.get()))) m *= 1.05f;
             if (active(player)) m *= FATIGUE_XP[fatigueStage(fatigue(player))];
             return m;
         });
@@ -154,7 +159,7 @@ public final class SurvivalMode {
         } catch (IllegalStateException e) {
             return false;
         }
-        return level.getGameRules().getBoolean(RULE);
+        return level instanceof ServerLevel server && server.getGameRules().get(RULE);
     }
 
     /** Survival Mode applies to this player now. */
@@ -163,15 +168,15 @@ public final class SurvivalMode {
     }
 
     public static float hunger(Player player) {
-        return tag(player).getFloat("hunger");
+        return tag(player).getFloatOr("hunger",0F);
     }
 
     public static float fatigue(Player player) {
-        return tag(player).getFloat("fatigue");
+        return tag(player).getFloatOr("fatigue",0F);
     }
 
     public static float cold(Player player) {
-        return tag(player).getFloat("cold");
+        return tag(player).getFloatOr("cold",0F);
     }
 
     /** Sets a meter ({@code hunger}, {@code fatigue} or {@code cold}) and re-applies the penalties now. */
@@ -184,13 +189,13 @@ public final class SurvivalMode {
     /** Lowers hunger, e.g. when eating outside the usual food path. */
     public static void feed(ServerPlayer player, float amount) {
         CompoundTag t = tag(player);
-        t.putFloat("hunger", Math.max(0f, t.getFloat("hunger") - amount));
+        t.putFloat("hunger", Math.max(0f, t.getFloatOr("hunger",0F) - amount));
     }
 
     /** Warms the player at once by {@code amount} cold points. */
     public static void warm(ServerPlayer player, float amount) {
         CompoundTag t = tag(player);
-        t.putFloat("cold", Math.max(0f, t.getFloat("cold") - amount));
+        t.putFloat("cold", Math.max(0f, t.getFloatOr("cold",0F) - amount));
     }
 
     /** Map fast travel is blocked (Skyrim's Survival Mode rule, off by default). */
@@ -217,8 +222,8 @@ public final class SurvivalMode {
     // ------------------------------------------------------------------ ticking
 
     @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer player)) return;
+    public static void onPlayerTick(net.neoforged.neoforge.event.tick.PlayerTickEvent.Post event) {
+        if (!(event instanceof net.neoforged.neoforge.event.tick.PlayerTickEvent.Post) || !(event.getEntity() instanceof ServerPlayer player)) return;
         if (!player.isAlive()) return;
         long now = player.level().getGameTime();
         if (now % 5 == 0 && active(player)) drainRegen(player);
@@ -236,7 +241,7 @@ public final class SurvivalMode {
         // 2 = a fast-forward of the rest system is running: RestManager feeds the meters hour by hour (restStep)
         int restState = RESTING.getOrDefault(player.getUUID(), 0);
         if (on && advance && restState != 2) {
-            long delta = clock - t.getLong("t");
+            long delta = clock - t.getLongOr("t",0L);
             if (delta < 0 || delta > 24000L * 3) delta = ticks;
             long[] woke = WOKE.remove(player.getUUID());
             if (delta > 600 && woke != null && player.level().getGameTime() - woke[0] < 100) {
@@ -244,9 +249,9 @@ public final class SurvivalMode {
                 rested(player, (int) (delta / 1000), true, BlockPos.of(woke[1]), false);
             } else {
                 float hours = delta / 1000f;
-                t.putFloat("hunger", Math.min(MAX_HUNGER, t.getFloat("hunger") + hours * (float) (double) SurvivalConfig.HUNGER_PER_HOUR.get()));
+                t.putFloat("hunger", Math.min(MAX_HUNGER, t.getFloatOr("hunger",0F) + hours * (float) (double) SurvivalConfig.HUNGER_PER_HOUR.get()));
                 if (!player.isSleeping() && restState == 0) { // lying or sitting in the rest system does not tire you
-                    t.putFloat("fatigue", Math.min(MAX_FATIGUE, t.getFloat("fatigue") + hours * (float) (double) SurvivalConfig.FATIGUE_PER_HOUR.get()));
+                    t.putFloat("fatigue", Math.min(MAX_FATIGUE, t.getFloatOr("fatigue",0F) + hours * (float) (double) SurvivalConfig.FATIGUE_PER_HOUR.get()));
                 }
             }
             stepCold(player, t, Math.max(1, ticks), delta > 600 ? (int) Math.min(delta, 24000) : 0);
@@ -261,15 +266,15 @@ public final class SurvivalMode {
 
     /** The clock that drives hunger and fatigue: the day clock, or plain game time while the daylight cycle is off. */
     private static long clock(ServerPlayer player) {
-        ServerLevel ow = player.server.overworld();
-        return ow.getGameRules().getBoolean(GameRules.RULE_DAYLIGHT) ? ow.getDayTime() : ow.getGameTime();
+        ServerLevel ow = player.level().getServer().overworld();
+        return ow.getGameRules().get(GameRules.ADVANCE_TIME) ? ow.getDefaultClockTime() : ow.getGameTime();
     }
 
     private static void stepCold(ServerPlayer player, CompoundTag t, int ticks, int skippedTicks) {
         Climate.Env env = Climate.sample(player);
-        float cold = t.getFloat("cold");
+        float cold = t.getFloatOr("cold",0F);
         float target = env.target();
-        if (player.hasEffect(SurvivalEffects.WARMING_MEAL.get())) target = Math.max(0f, target - 50f);
+        if (player.hasEffect(com.skycraft.platform.Effects.holder(SurvivalEffects.WARMING_MEAL.get()))) target = Math.max(0f, target - 50f);
         int warmth = Warmth.of(player);
         float rate = (float) (double) SurvivalConfig.COLD_RATE.get();
         float seconds = ticks / 20f;
@@ -294,23 +299,23 @@ public final class SurvivalMode {
         // numbing cold water kills
         if (env.inWater() && cold >= Climate.NUMB + 40 && SurvivalConfig.FREEZING_DAMAGE.get()
                 && player.level().getGameTime() % 40 < 20) {
-            player.hurt(player.damageSources().freeze(), 2.0f);
+            com.skycraft.platform.Effects.hurt(player, player.damageSources().freeze(), 2.0f);
         }
     }
 
     // ------------------------------------------------------------------ penalties
 
     private static void applyPenalties(ServerPlayer player, PlayerData data, CompoundTag t, boolean on) {
-        CompoundTag applied = t.getCompound("applied");
+        CompoundTag applied = t.getCompoundOrEmpty("applied");
         float[] want = new float[4];
-        int hs = hungerStage(t.getFloat("hunger"));
-        int fs = fatigueStage(t.getFloat("fatigue"));
-        int cs = coldStage(t.getFloat("cold"));
+        int hs = hungerStage(t.getFloatOr("hunger",0F));
+        int fs = fatigueStage(t.getFloatOr("fatigue",0F));
+        int cs = coldStage(t.getFloatOr("cold",0F));
         if (on) {
             // the pools without our own share
-            float baseHealth = data.maxHealth() - applied.getFloat("health");
-            float baseMagicka = data.maxMagicka() - applied.getFloat("magicka");
-            float baseStamina = data.maxStamina() - applied.getFloat("stamina");
+            float baseHealth = data.maxHealth() - applied.getFloatOr("health",0F);
+            float baseMagicka = data.maxMagicka() - applied.getFloatOr("magicka",0F);
+            float baseStamina = data.maxStamina() - applied.getFloatOr("stamina",0F);
             want[0] = -Math.round(baseHealth * COLD_HEALTH[cs]);
             want[1] = -Math.round(baseMagicka * FATIGUE_MAGICKA[fs]);
             want[2] = -Math.round(baseStamina * HUNGER_STAMINA[hs]);
@@ -319,9 +324,9 @@ public final class SurvivalMode {
         CompoundTag bonus = data.module("bonus");
         boolean changed = false;
         for (int i = 0; i < POOLS.length; i++) {
-            float diff = want[i] - applied.getFloat(POOLS[i]);
+            float diff = want[i] - applied.getFloatOr(POOLS[i], 0f);
             if (Math.abs(diff) < 0.5f) continue;
-            bonus.putFloat(POOLS[i], bonus.getFloat(POOLS[i]) + diff);
+            bonus.putFloat(POOLS[i], bonus.getFloatOr(POOLS[i], 0f) + diff);
             applied.putFloat(POOLS[i], want[i]);
             changed = true;
         }
@@ -335,21 +340,21 @@ public final class SurvivalMode {
         modifier(player, Attributes.ATTACK_SPEED, ATTACK_MOD, on && cs >= 4 ? -0.10 : 0);
     }
 
-    private static void modifier(ServerPlayer player, Attribute attribute, UUID id, double amount) {
+    private static void modifier(ServerPlayer player, net.minecraft.core.Holder<Attribute> attribute, Identifier id, double amount) {
         AttributeInstance inst = player.getAttribute(attribute);
         if (inst == null) return;
         AttributeModifier existing = inst.getModifier(id);
-        if (existing != null && existing.getAmount() == amount) return;
+        if (existing != null && existing.amount() == amount) return;
         if (existing != null) inst.removeModifier(id);
-        if (amount != 0) inst.addTransientModifier(new AttributeModifier(id, "Skycraft survival", amount, AttributeModifier.Operation.MULTIPLY_TOTAL));
+        if (amount != 0) inst.addTransientModifier(new AttributeModifier(id, amount, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
     }
 
     /** Hunger and cold slow stamina regeneration, fatigue magicka (same cadence and conditions as the core's regen). */
     private static void drainRegen(ServerPlayer player) {
         PlayerData data = SkyData.get(player);
         CompoundTag t = data.module(KEY);
-        float st = HUNGER_REGEN[hungerStage(t.getFloat("hunger"))] * COLD_REGEN[coldStage(t.getFloat("cold"))];
-        float mg = FATIGUE_REGEN[fatigueStage(t.getFloat("fatigue"))];
+        float st = HUNGER_REGEN[hungerStage(t.getFloatOr("hunger",0F))] * COLD_REGEN[coldStage(t.getFloatOr("cold",0F))];
+        float mg = FATIGUE_REGEN[fatigueStage(t.getFloatOr("fatigue",0F))];
         long now = player.level().getGameTime();
         boolean combat = Vitals.inCombat(player);
         if (st < 1f && now - data.getLastStaminaUseTick() > 20 && !player.isSprinting() && data.getStamina() < data.maxStamina()) {
@@ -365,10 +370,10 @@ public final class SurvivalMode {
     // ------------------------------------------------------------------ messages & sync
 
     private static void notifyStages(ServerPlayer player, CompoundTag t) {
-        int hs = hungerStage(t.getFloat("hunger"));
-        int fs = fatigueStage(t.getFloat("fatigue"));
-        int cs = coldStage(t.getFloat("cold"));
-        int last = t.contains("stages") ? t.getInt("stages") : -1;
+        int hs = hungerStage(t.getFloatOr("hunger",0F));
+        int fs = fatigueStage(t.getFloatOr("fatigue",0F));
+        int cs = coldStage(t.getFloatOr("cold",0F));
+        int last = t.contains("stages") ? t.getIntOr("stages",0) : -1;
         int now = hs | fs << 4 | cs << 8;
         if (last == now) return;
         t.putInt("stages", now);
@@ -385,21 +390,21 @@ public final class SurvivalMode {
     }
 
     private static void sync(ServerPlayer player, CompoundTag t, boolean on) {
-        int hunger = Math.round(t.getFloat("hunger"));
-        int fatigue = Math.round(t.getFloat("fatigue"));
-        int cold = Math.round(t.getFloat("cold"));
+        int hunger = Math.round(t.getFloatOr("hunger",0F));
+        int fatigue = Math.round(t.getFloatOr("fatigue",0F));
+        int cold = Math.round(t.getFloatOr("cold",0F));
         int flags = (on ? SurvivalPackets.Meters.ACTIVE : 0)
-                | (t.getBoolean("heat") ? SurvivalPackets.Meters.HEAT : 0)
-                | (t.getBoolean("wet") ? SurvivalPackets.Meters.WET : 0)
-                | (player.level().getGameTime() < t.getLong("well_fed") ? SurvivalPackets.Meters.WELL_FED : 0);
-        int target = t.getShort("target");
+                | (t.getBooleanOr("heat",false) ? SurvivalPackets.Meters.HEAT : 0)
+                | (t.getBooleanOr("wet",false) ? SurvivalPackets.Meters.WET : 0)
+                | (player.level().getGameTime() < t.getLongOr("well_fed",0L) ? SurvivalPackets.Meters.WELL_FED : 0);
+        int target = t.getShortOr("target",(short)0);
         int trend = target > cold + 2 ? 1 : target < cold - 2 ? 2 : 0;
-        int hash = ((hunger * 31 + fatigue) * 31 + cold) * 31 + t.getShort("warmth") + flags * 7919 + trend * 104729;
+        int hash = ((hunger * 31 + fatigue) * 31 + cold) * 31 + t.getShortOr("warmth",(short)0) + flags * 7919 + trend * 104729;
         Integer last = SENT.get(player.getUUID());
         if (last != null && last == hash && player.tickCount % 200 >= 20) return;
         SENT.put(player.getUUID(), hash);
         SkyNetwork.sendToPlayer(player, new SurvivalPackets.Meters((short) hunger, (short) fatigue, (short) cold,
-                t.getShort("warmth"), (byte) flags, (byte) trend));
+                t.getShortOr("warmth",(short)0), (byte) flags, (byte) trend));
     }
 
     // ------------------------------------------------------------------ eating
@@ -408,19 +413,19 @@ public final class SurvivalMode {
     public static void onEat(LivingEntityUseItemEvent.Finish event) {
         if (!(event.getEntity() instanceof ServerPlayer player) || !active(player)) return;
         ItemStack stack = event.getItem();
-        FoodProperties food = stack.getFoodProperties(player);
+        FoodProperties food = stack.get(net.minecraft.core.component.DataComponents.FOOD);
         if (food == null) return;
         CompoundTag t = tag(player);
-        float relief = food.getNutrition() * 10f + food.getNutrition() * food.getSaturationModifier() * 10f;
+        float relief = food.nutrition() * 10f + food.saturation() * 5f;
         boolean cooked = com.skycraft.skills.Cookery.isMeal(stack)
                 || stack.getItem() instanceof SkyFoodItem sky && (sky.spec().healTicks() > 0 || sky.spec().fortifyTicks() > 0);
         if (cooked) relief *= 1.25f;
-        t.putFloat("hunger", Math.max(0f, t.getFloat("hunger") - relief));
+        t.putFloat("hunger", Math.max(0f, t.getFloatOr("hunger",0F) - relief));
         if (cooked) t.putLong("well_fed", player.level().getGameTime() + 6000);
         boolean hot = stack.is(WARMING_FOOD) || stack.getItem() instanceof SkyFoodItem sky && sky.spec().fortifyTicks() > 0;
         if (hot) {
-            t.putFloat("cold", Math.max(0f, t.getFloat("cold") - 60f));
-            player.addEffect(new MobEffectInstance(SurvivalEffects.WARMING_MEAL.get(), WARMING_TICKS, 0, false, true, true));
+            t.putFloat("cold", Math.max(0f, t.getFloatOr("cold",0F) - 60f));
+            player.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(SurvivalEffects.WARMING_MEAL.get()), WARMING_TICKS, 0, false, true, true));
         }
         update(player, 0, false);
     }
@@ -452,11 +457,11 @@ public final class SurvivalMode {
     private static void advanceMeters(ServerPlayer player, CompoundTag t, int hours, boolean sleep) {
         float hungerRate = (float) (double) SurvivalConfig.HUNGER_PER_HOUR.get();
         float fatigueRate = (float) (double) SurvivalConfig.FATIGUE_PER_HOUR.get();
-        t.putFloat("hunger", Math.min(MAX_HUNGER, t.getFloat("hunger") + hours * hungerRate * (sleep ? 0.6f : 1f)));
+        t.putFloat("hunger", Math.min(MAX_HUNGER, t.getFloatOr("hunger",0F) + hours * hungerRate * (sleep ? 0.6f : 1f)));
         if (sleep) {
-            t.putFloat("fatigue", Math.max(0f, t.getFloat("fatigue") - hours * 30f));
+            t.putFloat("fatigue", Math.max(0f, t.getFloatOr("fatigue",0F) - hours * 30f));
         } else {
-            t.putFloat("fatigue", Math.min(MAX_FATIGUE, t.getFloat("fatigue") + hours * fatigueRate));
+            t.putFloat("fatigue", Math.min(MAX_FATIGUE, t.getFloatOr("fatigue",0F) + hours * fatigueRate));
         }
         stepCold(player, t, 20, hours * 1000);
         t.putLong("t", clock(player));
@@ -467,13 +472,13 @@ public final class SurvivalMode {
         Entity spouse = bed == null || bedroll ? null : com.skycraft.homestead.Homesteads.spouseNear(player, bed, 48);
         int ticks = com.skycraft.world.WorldConfig.WELL_RESTED_TICKS.get();
         if (spouse != null) {
-            player.removeEffect(ModEffects.WELL_RESTED.get());
-            player.removeEffect(SurvivalEffects.RESTED.get());
-            player.addEffect(new MobEffectInstance(ModEffects.LOVERS_COMFORT.get(), Math.max(ticks, 6000), 0, false, false, true));
+            player.removeEffect(com.skycraft.platform.Effects.holder(ModEffects.WELL_RESTED.get()));
+            player.removeEffect(com.skycraft.platform.Effects.holder(SurvivalEffects.RESTED.get()));
+            player.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(ModEffects.LOVERS_COMFORT.get()), Math.max(ticks, 6000), 0, false, false, true));
             Notifier.message(player, Component.translatable("survival.skycraft.rest.lovers_comfort"));
         } else if (bedroll) {
-            player.removeEffect(ModEffects.WELL_RESTED.get());
-            player.addEffect(new MobEffectInstance(SurvivalEffects.RESTED.get(), Math.max(ticks, 6000), 0, false, false, true));
+            player.removeEffect(com.skycraft.platform.Effects.holder(ModEffects.WELL_RESTED.get()));
+            player.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(SurvivalEffects.RESTED.get()), Math.max(ticks, 6000), 0, false, false, true));
             Notifier.message(player, Component.translatable("survival.skycraft.rest.rested"));
         }
     }
@@ -494,8 +499,8 @@ public final class SurvivalMode {
         if (!event.isWasDeath() || !(event.getEntity() instanceof ServerPlayer player)) return;
         CompoundTag t = tag(player);
         t.putFloat("cold", 0f);
-        t.putFloat("hunger", Math.min(t.getFloat("hunger"), 60f));
-        t.putFloat("fatigue", Math.min(t.getFloat("fatigue"), 60f));
+        t.putFloat("hunger", Math.min(t.getFloatOr("hunger",0F), 60f));
+        t.putFloat("fatigue", Math.min(t.getFloatOr("fatigue",0F), 60f));
         t.remove("stages");
     }
 
@@ -528,7 +533,7 @@ public final class SurvivalMode {
     @SubscribeEvent
     public static void onTooltip(ItemTooltipEvent event) {
         ItemStack stack = event.getItemStack();
-        if (!(stack.getItem() instanceof ArmorItem) && !Warmth.isCloak(stack)) return;
+        if (!(com.skycraft.inventory.EquipmentData.isArmor(stack)) && !Warmth.isCloak(stack)) return;
         int warmth = Warmth.tooltipValue(stack);
         if (warmth > 0) {
             event.getToolTip().add(Component.translatable("tooltip.skycraft.survival.warmth", warmth).withStyle(ChatFormatting.AQUA));

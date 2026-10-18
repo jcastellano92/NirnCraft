@@ -23,7 +23,7 @@ import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.phys.BlockHitResult;
@@ -39,7 +39,7 @@ import org.joml.Vector3f;
  */
 public class StandingStoneBlock extends Block {
     public static final EnumProperty<DoubleBlockHalf> HALF = BlockStateProperties.DOUBLE_BLOCK_HALF;
-    public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
+    public static final EnumProperty<net.minecraft.core.Direction> FACING = HorizontalDirectionalBlock.FACING;
 
     // Front faces north/south (stone is wide along X).
     private static final VoxelShape LOWER_X = Shapes.or(Block.box(1, 0, 4, 15, 3, 12), Block.box(2, 3, 5, 14, 16, 11));
@@ -95,7 +95,7 @@ public class StandingStoneBlock extends Block {
     public BlockState getStateForPlacement(BlockPlaceContext ctx) {
         BlockPos pos = ctx.getClickedPos();
         Level level = ctx.getLevel();
-        if (pos.getY() >= level.getMaxBuildHeight() - 1 || !level.getBlockState(pos.above()).canBeReplaced(ctx)) return null;
+        if (pos.getY() >= (level.getMaxY()+1) - 1 || !level.getBlockState(pos.above()).canBeReplaced(ctx)) return null;
         return defaultBlockState().setValue(FACING, ctx.getHorizontalDirection().getOpposite()).setValue(HALF, DoubleBlockHalf.LOWER);
     }
 
@@ -107,12 +107,12 @@ public class StandingStoneBlock extends Block {
     /** Each half needs the other: if one goes, so does the other (creative breaking, explosions in creative...). */
     @Override
     @SuppressWarnings("deprecation")
-    public BlockState updateShape(BlockState state, Direction direction, BlockState neighbor, LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
+    public BlockState updateShape(BlockState state, net.minecraft.world.level.LevelReader level, net.minecraft.world.level.ScheduledTickAccess ticks263, BlockPos pos, Direction direction, BlockPos neighborPos, BlockState neighbor, net.minecraft.util.RandomSource random263) {
         DoubleBlockHalf half = state.getValue(HALF);
         if (direction.getAxis() == Direction.Axis.Y && (half == DoubleBlockHalf.LOWER) == (direction == Direction.UP)) {
             return neighbor.is(this) && neighbor.getValue(HALF) != half ? state : Blocks.AIR.defaultBlockState();
         }
-        return super.updateShape(state, direction, neighbor, level, pos, neighborPos);
+        return super.updateShape(state, level, ticks263, pos, direction, neighborPos, neighbor, random263);
     }
 
     @Override
@@ -127,15 +127,24 @@ public class StandingStoneBlock extends Block {
         return state.rotate(mirror.getRotation(state.getValue(FACING)));
     }
 
-    @Override
     @SuppressWarnings("deprecation")
+        @Override
+    protected InteractionResult useItemOn(net.minecraft.world.item.ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+        return use(state, level, pos, player, hand, hit);
+    }
+
+    @Override
+    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+        return use(state, level, pos, player, InteractionHand.MAIN_HAND, hit);
+    }
+
     public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
         if (hand != InteractionHand.MAIN_HAND) return InteractionResult.PASS;
-        if (!level.isClientSide && player instanceof ServerPlayer sp) {
+        if (!level.isClientSide() && player instanceof ServerPlayer sp) {
             BlockPos base = state.getValue(HALF) == DoubleBlockHalf.UPPER ? pos.below() : pos;
             activate(sp, base);
         }
-        return InteractionResult.sidedSuccess(level.isClientSide);
+        return com.skycraft.platform.Interactions.sidedSuccess(level.isClientSide());
     }
 
     /** Motes of the sign's color rise from the sigil; now and then a spark drifts up into the sky. */
@@ -152,7 +161,7 @@ public class StandingStoneBlock extends Block {
             double x = pos.getX() + 0.5 + facing.getStepX() * side + (random.nextDouble() - 0.5) * Math.abs(facing.getStepZ()) * 0.7;
             double z = pos.getZ() + 0.5 + facing.getStepZ() * side + (random.nextDouble() - 0.5) * Math.abs(facing.getStepX()) * 0.7;
             double y = pos.getY() - 0.6 + random.nextDouble() * 1.4;
-            level.addParticle(new DustParticleOptions(new Vector3f(r, g, b), 0.8f), x, y, z, 0, 0.02, 0);
+            level.addParticle(new DustParticleOptions(net.minecraft.util.ARGB.colorFromFloat(1f, r, g, b), 0.8f), x, y, z, 0, 0.02, 0);
         }
         if (random.nextInt(10) == 0) {
             level.addParticle(ParticleTypes.END_ROD, pos.getX() + 0.5, pos.getY() + 1.0, pos.getZ() + 0.5,

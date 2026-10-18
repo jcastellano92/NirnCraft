@@ -13,7 +13,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
@@ -298,7 +298,7 @@ public final class Stage {
             else if (u < 0.30 + grow * 0.2) set(dx, dy, dz, Blocks.FERN);
         } else if (lush) {
             if (u < 0.2 * grow + 0.05) set(dx, dy, dz, Blocks.MOSS_CARPET);
-            else if (u < 0.3 + grow * 0.15) set(dx, dy, dz, u < 0.37 ? Blocks.FERN : Blocks.GRASS);
+            else if (u < 0.3 + grow * 0.15) set(dx, dy, dz, u < 0.37 ? Blocks.FERN : com.skycraft.worldgen.VanillaBlocks.GRASS);
         } else if (sandy || fam.equals("savanna")) {
             if (u < 0.08) set(dx, dy, dz, Blocks.DEAD_BUSH);
         }
@@ -351,12 +351,12 @@ public final class Stage {
     private void writeSign(BlockPos p, String[] lines) {
         BlockEntity be = level.getBlockEntity(p);
         if (!(be instanceof SignBlockEntity sign)) return;
-        SignText text = new SignText();
-        for (int i = 0; i < Math.min(4, lines.length); i++) text = text.setMessage(i, Component.literal(lines[i] == null ? "" : lines[i]));
-        CompoundTag tag = sign.saveWithoutMetadata();
-        SignText.DIRECT_CODEC.encodeStart(NbtOps.INSTANCE, text).result().ifPresent(t -> tag.put("front_text", t));
+        SignText text = SignText.EMPTY;
+        for (int i = 0; i < Math.min(4, lines.length); i++) text = text.asMutable().setLine(i, Component.literal(lines[i] == null ? "" : lines[i])).asImmutable();
+        CompoundTag tag = sign.saveWithoutMetadata(level.registryAccess());
+        SignText.CODEC.encodeStart(NbtOps.INSTANCE, text).result().ifPresent(t -> tag.put("front_text", t));
         tag.putBoolean("is_waxed", true);
-        sign.load(tag);
+        com.skycraft.worldgen.WorldgenData.load(sign, tag, level.registryAccess());
     }
 
     /** A lectern holding {@code book}, facing the local direction. */
@@ -369,7 +369,7 @@ public final class Stage {
 
     /** A chest with a loot table (a path under {@code loot_tables/}). */
     public BlockPos chest(int dx, int dy, int dz, Direction face, String table) {
-        return b.chest(dx, dy, dz, face, new ResourceLocation("skycraft", table));
+        return b.chest(dx, dy, dz, face, Identifier.fromNamespaceAndPath("skycraft", table));
     }
 
     /** A small loot table of the explore module for a pack, a cache or a camp (a path under loot_tables/). */
@@ -379,7 +379,7 @@ public final class Stage {
     }
 
     public BlockPos barrel(int dx, int dy, int dz, String table) {
-        return b.barrel(dx, dy, dz, table == null ? null : new ResourceLocation("skycraft", table));
+        return b.barrel(dx, dy, dz, table == null ? null : Identifier.fromNamespaceAndPath("skycraft", table));
     }
 
     /** Adds a stack to the container at a local position (a note into a barrel...). */
@@ -401,7 +401,7 @@ public final class Stage {
 
     public void setLootOn(BlockPos p, String table) {
         if (b.writable(p)) {
-            RandomizableContainerBlockEntity.setLootTable(level, r, p, new ResourceLocation("skycraft", table));
+            com.skycraft.worldgen.WorldgenData.setLootTable(level, r, p, Identifier.fromNamespaceAndPath("skycraft", table));
         }
     }
 

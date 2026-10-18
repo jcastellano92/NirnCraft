@@ -1009,6 +1009,8 @@ LOOT_TABLES = {
 
 
 def write(path, data):
+    from format_263 import prepare
+    path, data = prepare(path, data)
     os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, "w", encoding="utf-8", newline="\n") as f:
         json.dump(data, f, indent=1, ensure_ascii=False)

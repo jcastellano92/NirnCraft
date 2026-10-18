@@ -50,7 +50,7 @@ public final class DragonSouls {
                         dragon.getBbWidth() * 0.4, dragon.getBbHeight() * 0.3, dragon.getBbWidth() * 0.4, 0.04);
                 level.sendParticles(ParticleTypes.FLAME, corpse.x, corpse.y - 0.5, corpse.z, 10,
                         dragon.getBbWidth() * 0.5, 0.3, dragon.getBbWidth() * 0.5, 0.02);
-                if (step % 20 == 0) level.playSound(null, corpse.x, corpse.y, corpse.z, SoundEvents.SOUL_ESCAPE, SoundSource.HOSTILE, 2f, 0.5f);
+                if (step % 20 == 0) level.playSound(null, corpse.x, corpse.y, corpse.z, SoundEvents.SOUL_ESCAPE.value(), SoundSource.HOSTILE, 2f, 0.5f);
             });
         }
 
@@ -64,7 +64,7 @@ public final class DragonSouls {
 
     private static void absorb(ServerPlayer p) {
         int souls = MagicData.dragonSouls(p);
-        boolean first = !MagicData.tag(p).getBoolean("dragonborn");
+        boolean first = !MagicData.tag(p).getBooleanOr("dragonborn", false);
         MagicData.setDragonSouls(p, souls + 1);
         SkyData.get(p).addStat("dragon_souls", 1);
         if (first) {

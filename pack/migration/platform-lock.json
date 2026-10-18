@@ -1,0 +1,661 @@
+{
+  "schema": 1,
+  "target": {
+    "minecraft": "26.3",
+    "neoforge": "26.3.0.90",
+    "java": 25,
+    "instanceName": "Skycraft-26.3-autotest"
+  },
+  "multiplayer": "vanilla-multiplayer-and-lan",
+  "shaderPolicy": "Iris installed with shaders disabled; custom shader sources, patchers, previous metadata and presets preserved; rebase and visual acceptance required before enabling.",
+  "distantHorizonsPolicy": "Matching stock candidate recorded but disabled; customized previous runtime must be rebased and validated separately.",
+  "active": [
+    {
+      "key": "balm",
+      "name": "Balm",
+      "metadata": "mods/balm.pw.toml",
+      "filename": "balm-neoforge-26.3-26.3.0.3.jar",
+      "side": "both",
+      "source": "https://modrinth.com/mod/balm/version/QcBcRJZb",
+      "version": "26.3.0.3+neoforge-26.3",
+      "versionId": "QcBcRJZb",
+      "projectId": "MBAkmtvl",
+      "hashFormat": "sha512",
+      "hash": "7e741916eb3893f5732902cbda274284ef32aad9bcf0686fe0321fc43323061c8ae7fedaed574e613623fced59150f6237ddbfa6e6dd3339fef06798b91f3f6e",
+      "minecraft": "26.3",
+      "loader": "neoforge",
+      "requiredDependencies": []
+    },
+    {
+      "key": "better-combat",
+      "name": "Better Combat",
+      "metadata": "mods/better-combat.pw.toml",
+      "filename": "bettercombat-neoforge-3.2.2+26.3.jar",
+      "side": "both",
+      "source": "https://modrinth.com/mod/better-combat/version/RbEnSa47",
+      "version": "3.2.2+26.3-neoforge",
+      "versionId": "RbEnSa47",
+      "projectId": "5sy6g3kz",
+      "hashFormat": "sha512",
+      "hash": "2ad3584995acc8bc7693942a150d674a9147651c2103f6d8225eb61203c04cd19c8cd8f0fdf530ff6ddd6fc7c061f5d80ecd1df225b84390675d78b69fcb4843",
+      "minecraft": "26.3",
+      "loader": "neoforge",
+      "requiredDependencies": [
+        {
+          "version_id": null,
+          "project_id": "9s6osm5g",
+          "file_name": null,
+          "dependency_type": "required"
+        },
+        {
+          "version_id": null,
+          "project_id": "ha1mEyJS",
+          "file_name": null,
+          "dependency_type": "required"
+        }
+      ]
+    },
+    {
+      "key": "cloth-config",
+      "name": "Cloth Config API",
+      "metadata": "mods/cloth-config.pw.toml",
+      "filename": "cloth-config-neoforge-26.3.159.jar",
+      "side": "both",
+      "source": "https://modrinth.com/mod/cloth-config/version/GchRXPnb",
+      "version": "26.3.159+neoforge",
+      "versionId": "GchRXPnb",
+      "projectId": "9s6osm5g",
+      "hashFormat": "sha512",
+      "hash": "941dd8aab50d658cfa6da071dacd05802c7097643ad569935d0073b39231a2137f2ade2403b791f70cf5ebf1649d7b6337862568a8b340c88e5d364569f94431",
+      "minecraft": "26.3",
+      "loader": "neoforge",
+      "requiredDependencies": []
+    },
+    {
+      "key": "clumps",
+      "name": "Clumps",
+      "metadata": "mods/clumps.pw.toml",
+      "filename": "Clumps-neoforge-26.3-26.3.2.jar",
+      "side": "both",
+      "source": "https://modrinth.com/mod/clumps/version/kV095inH",
+      "version": "26.3.2",
+      "versionId": "kV095inH",
+      "projectId": "Wnxd13zP",
+      "hashFormat": "sha512",
+      "hash": "710ac1f2ac8f2f6d39b6a4f56a7b0159a32bb64d3ff8337e20fca9eb991b32df54d38c7c0c1e3487a7c220bde80988def8562925fbc5dc5e2c94134244f41b4a",
+      "minecraft": "26.3",
+      "loader": "neoforge",
+      "requiredDependencies": []
+    },
+    {
+      "key": "creativecore",
+      "name": "CreativeCore",
+      "metadata": "mods/creativecore.pw.toml",
+      "filename": "CreativeCore_NEOFORGE_v2.14.21_mc26.3.jar",
+      "side": "both",
+      "source": "https://modrinth.com/mod/creativecore/version/zdCqLdHs",
+      "version": "2.14.21",
+      "versionId": "zdCqLdHs",
+      "projectId": "OsZiaDHq",
+      "hashFormat": "sha512",
+      "hash": "e900ee1d3f072143bd8077c1a82719ec501b3fc6d62e0d588fe9c4662109980c7c6a10f973e0635322bd04c98b33d8cd3ceb297287ccae212db5fe6e14c73221",
+      "minecraft": "26.3",
+      "loader": "neoforge",
+      "requiredDependencies": []
+    },
+    {
+      "key": "default-options",
+      "name": "Default Options",
+      "metadata": "mods/default-options.pw.toml",
+      "filename": "defaultoptions-neoforge-26.3-26.3.0.1.jar",
+      "side": "client",
+      "source": "https://modrinth.com/mod/default-options/version/peusN710",
+      "version": "26.3.0.1+neoforge-26.3",
+      "versionId": "peusN710",
+      "projectId": "WEg59z5b",
+      "hashFormat": "sha512",
+      "hash": "79ed8c0326e5ff5b71638c5c8df23e6e9166c100ad0466c3e6f5e58ca447cd53cb8c70c13a9a7566b0ca2ca44575674caeb0a12e3d237d6a6bb7e541d0418c5a",
+      "minecraft": "26.3",
+      "loader": "neoforge",
+      "requiredDependencies": [
+        {
+          "version_id": null,
+          "project_id": "MBAkmtvl",
+          "file_name": null,
+          "dependency_type": "required"
+        }
+      ]
+    },
+    {
+      "key": "dynamic-fps",
+      "name": "Dynamic FPS",
+      "metadata": "mods/dynamic-fps.pw.toml",
+      "filename": "dynamic-fps-3.11.10+minecraft-26.3.0-neoforge.jar",
+      "side": "client",
+      "source": "https://modrinth.com/mod/dynamic-fps/version/KGWebRrW",
+      "version": "3.11.10",
+      "versionId": "KGWebRrW",
+      "projectId": "LQ3K71Q1",
+      "hashFormat": "sha512",
+      "hash": "8add2316e6b41405535a1411daf40e9e700c70091963baac530a2769f122ee3a70608ef51e95a821d5aae80e17b384d9822d2a8b4e3dff38dfd7e72d727bd282",
+      "minecraft": "26.3",
+      "loader": "neoforge",
+      "requiredDependencies": []
+    },
+    {
+      "key": "entityculling",
+      "name": "Entity Culling",
+      "metadata": "mods/entityculling.pw.toml",
+      "filename": "entityculling-neoforge-1.11.3-mc26.3.jar",
+      "side": "client",
+      "source": "https://modrinth.com/mod/entityculling/version/YWSFNKio",
+      "version": "1.11.3",
+      "versionId": "YWSFNKio",
+      "projectId": "NNAgCjsB",
+      "hashFormat": "sha512",
+      "hash": "129b94d59a6ff5513e3dca34a59aadb9eefedde8508bdbfb6997146647971fb5a49b5e111353753955888ddefc886a7893637951088c759ed3b0390b61cfe7e0",
+      "minecraft": "26.3",
+      "loader": "neoforge",
+      "requiredDependencies": []
+    },
+    {
+      "key": "ferrite-core",
+      "name": "FerriteCore",
+      "metadata": "mods/ferrite-core.pw.toml",
+      "filename": "ferritecore-9.0.0-neoforge.jar",
+      "side": "both",
+      "source": "https://modrinth.com/mod/ferrite-core/version/LtVvw4uS",
+      "version": "9.0.0-neoforge",
+      "versionId": "LtVvw4uS",
+      "projectId": "uXXizFIs",
+      "hashFormat": "sha512",
+      "hash": "e96a99ac5539f56a1f4cd109d62b668ebd5283f0068491ede956f52e67023beba7abe2e40021499352ffc41ead950bebcabce7792352249a1b45c5dccb3cf99c",
+      "minecraft": "26.3",
+      "loader": "neoforge",
+      "requiredDependencies": []
+    },
+    {
+      "key": "immediatelyfast",
+      "name": "ImmediatelyFast",
+      "metadata": "mods/immediatelyfast.pw.toml",
+      "filename": "ImmediatelyFast-NeoForge-1.17.1+26.3.jar",
+      "side": "client",
+      "source": "https://modrinth.com/mod/immediatelyfast/version/4SovUFpn",
+      "version": "1.17.1+26.3-neoforge",
+      "versionId": "4SovUFpn",
+      "projectId": "5ZwdcRci",
+      "hashFormat": "sha512",
+      "hash": "6fddcf7e9de2bf179bdd18cc317fa1cc50ea9c3a40b06a0e0673ecb1dba29fb2ac2743ada361e32f52c2c1f333043795a5149b8b89ee467665c2b734e7d5d951",
+      "minecraft": "26.3",
+      "loader": "neoforge",
+      "requiredDependencies": []
+    },
+    {
+      "key": "itemphysic-lite",
+      "name": "ItemPhysic Lite",
+      "metadata": "mods/itemphysic-lite.pw.toml",
+      "filename": "ItemPhysicLite_NEOFORGE_v1.6.13_mc26.3.jar",
+      "side": "client",
+      "source": "https://modrinth.com/mod/itemphysic-lite/version/LQs3Ting",
+      "version": "1.6.13",
+      "versionId": "LQs3Ting",
+      "projectId": "OuyCgP8t",
+      "hashFormat": "sha512",
+      "hash": "0d2928303b978fcf07faf07b87a45eaf19d9c626bfc4d3d4146cd403ef38e0219a8cb7cf491a53a4cb5a9acfaeef469e3cdd5713f5bdb1bee31504b9b52977e0",
+      "minecraft": "26.3",
+      "loader": "neoforge",
+      "requiredDependencies": [
+        {
+          "version_id": null,
+          "project_id": "OsZiaDHq",
+          "file_name": null,
+          "dependency_type": "required"
+        }
+      ]
+    },
+    {
+      "key": "lootr",
+      "name": "Lootr",
+      "metadata": "mods/lootr.pw.toml",
+      "filename": "lootr-neoforge-26.3-1.25.42.124.jar",
+      "side": "both",
+      "source": "https://modrinth.com/mod/lootr/version/PdFGq3vT",
+      "version": "1.25.42.124",
+      "versionId": "PdFGq3vT",
+      "projectId": "EltpO5cN",
+      "hashFormat": "sha512",
+      "hash": "e4046fb42bc66584c7b3c1c96063afc95bf8fc2bd45a00b53420ac43f0ed593c8bbd7682d8d1c9225f9529dea399423a9935b36692606d52d39f6a29e7b4508d",
+      "minecraft": "26.3",
+      "loader": "neoforge",
+      "requiredDependencies": []
+    },
+    {
+      "key": "mouse-tweaks",
+      "name": "Mouse Tweaks",
+      "metadata": "mods/mouse-tweaks.pw.toml",
+      "filename": "MouseTweaks-neoforge-mc26.3-2.31.jar",
+      "side": "client",
+      "source": "https://modrinth.com/mod/mouse-tweaks/version/f4tPRGDq",
+      "version": "26.3-2.31-neoforge",
+      "versionId": "f4tPRGDq",
+      "projectId": "aC3cM3Vq",
+      "hashFormat": "sha512",
+      "hash": "93e7ac34bbc15de635073722054b11fed3981e0f39954286e8a57214ce5ce007e5562882cb81cd230c8ea49970970c84548cfc598332c539777986090b090798",
+      "minecraft": "26.3",
+      "loader": "neoforge",
+      "requiredDependencies": []
+    },
+    {
+      "key": "resourceful-config",
+      "name": "Resourceful Config",
+      "metadata": "mods/resourceful-config.pw.toml",
+      "filename": "ResourcefulConfig-6.0.2.jar",
+      "side": "both",
+      "source": "https://modrinth.com/mod/resourceful-config/version/qT3EZMil",
+      "version": "6.0.2",
+      "versionId": "qT3EZMil",
+      "projectId": "M1953qlQ",
+      "hashFormat": "sha512",
+      "hash": "fee083b2d28a6b23f9044c2f7bcbe6334d69e58b408d8e3cfb7a827b00baf3385935452d5c9df172b74bc0099677dffcbbb2d1e2c2d34bc1316f1dac715a0ebc",
+      "minecraft": "26.3",
+      "loader": "neoforge",
+      "requiredDependencies": []
+    },
+    {
+      "key": "spark",
+      "name": "spark",
+      "metadata": "mods/spark.pw.toml",
+      "filename": "spark-1.10.187-neoforge.jar",
+      "side": "both",
+      "source": "https://modrinth.com/mod/spark/version/HwHxykP9",
+      "version": "1.10.187-neoforge",
+      "versionId": "HwHxykP9",
+      "projectId": "l6YH9Als",
+      "hashFormat": "sha512",
+      "hash": "130c6f529346cd275460070491a47d76c0e61b30f1d02530e97aae7fce3eccba2b82b4e3bef5abe5febff62daf53066a235d843a94e81fed2ecf1def5946349a",
+      "minecraft": "26.3",
+      "loader": "neoforge",
+      "requiredDependencies": []
+    },
+    {
+      "key": "structure-layout-optimizer",
+      "name": "Structure Layout Optimizer",
+      "metadata": "mods/structure-layout-optimizer.pw.toml",
+      "filename": "structure_layout_optimizer-1.1.4+26.3-neoforge.jar",
+      "side": "both",
+      "source": "https://modrinth.com/mod/structure-layout-optimizer/version/N47yt6NT",
+      "version": "1.1.4+26.3-neoforge",
+      "versionId": "N47yt6NT",
+      "projectId": "ayPU0OHc",
+      "hashFormat": "sha512",
+      "hash": "01107b5c62f735e5f7578568f63fc605e456d76423a111ad55bd23a44b80465e015f6c0673f07287538662af6081b1378ee112288efcb7c2bd0abb47d067d6c3",
+      "minecraft": "26.3",
+      "loader": "neoforge",
+      "requiredDependencies": [
+        {
+          "version_id": null,
+          "project_id": "M1953qlQ",
+          "file_name": null,
+          "dependency_type": "required"
+        }
+      ]
+    },
+    {
+      "key": "lithium",
+      "name": "Lithium",
+      "metadata": "mods/lithium.pw.toml",
+      "filename": "lithium-neoforge-0.26.2+mc26.3.jar",
+      "side": "both",
+      "source": "https://modrinth.com/mod/lithium/version/1rb9wI5K",
+      "version": "mc26.3-0.26.2-neoforge",
+      "versionId": "1rb9wI5K",
+      "projectId": "gvQqBUqZ",
+      "hashFormat": "sha512",
+      "hash": "af579327afba03fac855b0a55c1cd25236483d2d2a22f7686eb7b046a1a814511caa1c767dc5967f69ce92dcd5980e85340047b5b732ab7ba190f093788c20db",
+      "minecraft": "26.3",
+      "loader": "neoforge",
+      "requiredDependencies": []
+    },
+    {
+      "key": "player-animation-library",
+      "name": "Player Animation Library",
+      "metadata": "mods/player-animation-library.pw.toml",
+      "filename": "PlayerAnimationLibMerged-1.2.8+mc.26.3.jar",
+      "side": "both",
+      "source": "https://modrinth.com/mod/player-animation-library/version/xJ30QmpE",
+      "version": "1.2.8",
+      "versionId": "xJ30QmpE",
+      "projectId": "ha1mEyJS",
+      "hashFormat": "sha512",
+      "hash": "d6870759e2f5f83c6a74b2d02aeabab937d6d8da8c46245566646bc6e8efaeeb06c978edc43a50b57a0de2d015b341c284382bc5d4ae2e450d1b6aa5f8e2e97e",
+      "minecraft": "26.3",
+      "loader": "neoforge",
+      "requiredDependencies": []
+    },
+    {
+      "key": "sodium",
+      "name": "Sodium",
+      "metadata": "mods/sodium.pw.toml",
+      "filename": "sodium-neoforge-0.9.3-beta.1+mc26.3.jar",
+      "side": "client",
+      "source": "https://modrinth.com/mod/sodium/version/SS023RVV",
+      "version": "mc26.3-0.9.3-beta.1-neoforge",
+      "versionId": "SS023RVV",
+      "projectId": "AANobbMI",
+      "hashFormat": "sha512",
+      "hash": "92cdb344cb8049993685e3d81498411d4e6965a8f054c912a297bfe550937ed4792b7c1cb4efea5b5ac9c0e6c32aea777389207e481f008ce6f176b5ae6aab93",
+      "minecraft": "26.3",
+      "loader": "neoforge",
+      "requiredDependencies": []
+    },
+    {
+      "key": "iris",
+      "name": "Iris Shaders",
+      "metadata": "mods/iris.pw.toml",
+      "filename": "iris-neoforge-1.11.7+mc26.3.jar",
+      "side": "client",
+      "source": "https://modrinth.com/mod/iris/version/Ag5S66CF",
+      "version": "1.11.7+26.3-neoforge",
+      "versionId": "Ag5S66CF",
+      "projectId": "YL57xq9U",
+      "hashFormat": "sha512",
+      "hash": "302659f09e50d02a6cd96075be93aade2a2f9d709afe21d56465228fb7d7f4717566e3702a7872479df2fff9b7a5ff5b1b6047cc95e09ee6120fad5ea5857eec",
+      "minecraft": "26.3",
+      "loader": "neoforge",
+      "requiredDependencies": [
+        {
+          "version_id": "VHtnT9Q4",
+          "project_id": "AANobbMI",
+          "file_name": null,
+          "dependency_type": "required"
+        }
+      ]
+    },
+    {
+      "key": "controllable",
+      "name": "Controllable",
+      "metadata": "mods/controllable.pw.toml",
+      "filename": "controllable-neoforge-0.26.2+26.3-signed.jar",
+      "side": "client",
+      "source": "https://github.com/MrCrayfish/Controllable/releases/tag/v0.26.2%2B26.3",
+      "version": "v0.26.2+26.3",
+      "versionId": null,
+      "projectId": null,
+      "hashFormat": "sha256",
+      "hash": "0aeca1e79043177950e80d6433f3ffac2d28358dfcb0ef9ee3454e0ae8c6ed0c",
+      "minecraft": "26.3",
+      "loader": "neoforge",
+      "requiredDependencies": [
+        {
+          "key": "framework",
+          "minimumVersion": "0.13.27"
+        }
+      ]
+    },
+    {
+      "key": "framework",
+      "name": "Framework",
+      "metadata": "mods/framework.pw.toml",
+      "filename": "framework-neoforge-0.13.27+26.3-signed.jar",
+      "side": "both",
+      "source": "https://github.com/MrCrayfish/Framework/releases/tag/v0.13.27%2B26.3",
+      "version": "v0.13.27+26.3",
+      "versionId": null,
+      "projectId": null,
+      "hashFormat": "sha256",
+      "hash": "1d18809e402156b3ff4244baa9a156c6b7e957b3452cc09b7e550753fdcc8183",
+      "minecraft": "26.3",
+      "loader": "neoforge",
+      "requiredDependencies": []
+    }
+  ],
+  "disabledCandidates": [
+    {
+      "key": "distanthorizons",
+      "name": "Distant Horizons",
+      "metadata": "disabled/neoforge-26.3/distanthorizons.pw.toml",
+      "filename": "DistantHorizons-3.3.4-26.3-fabric-neoforge.jar",
+      "side": "both",
+      "source": "https://modrinth.com/mod/distanthorizons/version/TGgEbP9A",
+      "version": "3.3.4-26.3",
+      "versionId": "TGgEbP9A",
+      "projectId": "uCdwusMi",
+      "hashFormat": "sha512",
+      "hash": "0b90b1b08d99974bfc3c8e86b2ceb252e2f91715ed66b925004c28335fb44e1bddbbb6b8043e4d4d53c87ed247789cd1788b1ba4e3f4394efe154e0c59cff236",
+      "minecraft": "26.3",
+      "loader": "neoforge",
+      "requiredDependencies": []
+    },
+    {
+      "key": "c2me-neoforge",
+      "name": "Concurrent Chunk Management Engine (NeoForge)",
+      "metadata": "disabled/neoforge-26.3/c2me-neoforge.pw.toml",
+      "filename": "c2me-neoforge-mc26.3-0.4.2-alpha.0.105.jar",
+      "side": "both",
+      "source": "https://modrinth.com/mod/c2me-neoforge/version/Y11FDzxb",
+      "version": "0.4.2-alpha.0.105+26.3",
+      "versionId": "Y11FDzxb",
+      "projectId": "COlSi5iR",
+      "hashFormat": "sha512",
+      "hash": "7680706003eef8405f08e984d7c740de800f7f703f71cfac21be6c2bdd440d4948a5519b1a463e85f0010ea1d550e3c9e68d05ab3ac7d0bf24b32f129494526e",
+      "minecraft": "26.3",
+      "loader": "neoforge",
+      "requiredDependencies": []
+    }
+  ],
+  "preservedLegacy": [
+    {
+      "key": "balm",
+      "name": "Balm",
+      "filename": "balm-forge-1.20.1-7.3.44.jar",
+      "archive": "disabled/forge-1.20.1/mods/balm.pw.toml"
+    },
+    {
+      "key": "better-combat",
+      "name": "Better Combat",
+      "filename": "bettercombat-forge-1.9.0+1.20.1.jar",
+      "archive": "disabled/forge-1.20.1/mods/better-combat.pw.toml"
+    },
+    {
+      "key": "canary",
+      "name": "Canary",
+      "filename": "canary-mc1.20.1-0.3.3.jar",
+      "archive": "disabled/forge-1.20.1/mods/canary.pw.toml"
+    },
+    {
+      "key": "cloth-config",
+      "name": "Cloth Config API",
+      "filename": "cloth-config-11.1.136-forge.jar",
+      "archive": "disabled/forge-1.20.1/mods/cloth-config.pw.toml"
+    },
+    {
+      "key": "clumps",
+      "name": "Clumps",
+      "filename": "Clumps-forge-1.20.1-12.0.0.4.jar",
+      "archive": "disabled/forge-1.20.1/mods/clumps.pw.toml"
+    },
+    {
+      "key": "controllable",
+      "name": "Controllable (Forge)",
+      "filename": "controllable-forge-1.20.1-0.21.9-release.jar",
+      "archive": "disabled/forge-1.20.1/mods/controllable.pw.toml"
+    },
+    {
+      "key": "creativecore",
+      "name": "CreativeCore",
+      "filename": "CreativeCore_FORGE_v2.12.40_mc1.20.1.jar",
+      "archive": "disabled/forge-1.20.1/mods/creativecore.pw.toml"
+    },
+    {
+      "key": "default-options",
+      "name": "Default Options",
+      "filename": "defaultoptions-forge-1.20.1-18.0.5.jar",
+      "archive": "disabled/forge-1.20.1/mods/default-options.pw.toml"
+    },
+    {
+      "key": "distanthorizons",
+      "name": "Distant Horizons",
+      "filename": "DistantHorizons-3.3.3-1.20.1-fabric-forge.jar",
+      "archive": "disabled/forge-1.20.1/mods/distanthorizons.pw.toml"
+    },
+    {
+      "key": "dynamic-fps",
+      "name": "Dynamic FPS",
+      "filename": "dynamic-fps-3.11.4+minecraft-1.20.0-forge.jar",
+      "archive": "disabled/forge-1.20.1/mods/dynamic-fps.pw.toml"
+    },
+    {
+      "key": "dynamiclights-reforged",
+      "name": "Sodium/Embeddium Dynamic Lights",
+      "filename": "sodiumdynamiclights-forge-1.0.10-1.20.1.jar",
+      "archive": "disabled/forge-1.20.1/mods/dynamiclights-reforged.pw.toml"
+    },
+    {
+      "key": "embeddium",
+      "name": "Embeddium",
+      "filename": "embeddium-0.3.31+mc1.20.1.jar",
+      "archive": "disabled/forge-1.20.1/mods/embeddium.pw.toml"
+    },
+    {
+      "key": "entityculling",
+      "name": "Entity Culling",
+      "filename": "entityculling-forge-1.11.3-mc1.20.1.jar",
+      "archive": "disabled/forge-1.20.1/mods/entityculling.pw.toml"
+    },
+    {
+      "key": "essential",
+      "name": "Essential Mod",
+      "filename": "Essential_1-5-0-1_forge_1-20-1.jar",
+      "archive": "disabled/forge-1.20.1/mods/essential.pw.toml"
+    },
+    {
+      "key": "ferrite-core",
+      "name": "FerriteCore",
+      "filename": "ferritecore-6.0.1-forge.jar",
+      "archive": "disabled/forge-1.20.1/mods/ferrite-core.pw.toml"
+    },
+    {
+      "key": "framework",
+      "name": "Framework (Forge)",
+      "filename": "framework-forge-1.20.1-0.8.0-signed.jar",
+      "archive": "disabled/forge-1.20.1/mods/framework.pw.toml"
+    },
+    {
+      "key": "immediatelyfast",
+      "name": "ImmediatelyFast",
+      "filename": "ImmediatelyFast-Forge-1.5.5+1.20.4.jar",
+      "archive": "disabled/forge-1.20.1/mods/immediatelyfast.pw.toml"
+    },
+    {
+      "key": "itemphysic-lite",
+      "name": "ItemPhysic Lite",
+      "filename": "ItemPhysicLite_FORGE_v1.6.13_mc1.20.1.jar",
+      "archive": "disabled/forge-1.20.1/mods/itemphysic-lite.pw.toml"
+    },
+    {
+      "key": "krypton-fnp",
+      "name": "Krypton Reno",
+      "filename": "Krypton Reno-forge-1.20.1-26.1.1-1.20.1.jar",
+      "archive": "disabled/forge-1.20.1/mods/krypton-fnp.pw.toml"
+    },
+    {
+      "key": "lootr",
+      "name": "Lootr",
+      "filename": "lootr-forge-1.20-0.7.35.94.jar",
+      "archive": "disabled/forge-1.20.1/mods/lootr.pw.toml"
+    },
+    {
+      "key": "memoryleakfix",
+      "name": "Memory Leak Fix",
+      "filename": "memoryleakfix-forge-1.17+-1.1.5.jar",
+      "archive": "disabled/forge-1.20.1/mods/memoryleakfix.pw.toml"
+    },
+    {
+      "key": "modernfix",
+      "name": "ModernFix",
+      "filename": "modernfix-forge-5.27.87+mc1.20.1.jar",
+      "archive": "disabled/forge-1.20.1/mods/modernfix.pw.toml"
+    },
+    {
+      "key": "mouse-tweaks",
+      "name": "Mouse Tweaks",
+      "filename": "MouseTweaks-forge-mc1.20.1-2.25.1.jar",
+      "archive": "disabled/forge-1.20.1/mods/mouse-tweaks.pw.toml"
+    },
+    {
+      "key": "oculus",
+      "name": "Oculus",
+      "filename": "oculus-mc1.20.1-1.8.0.jar",
+      "archive": "disabled/forge-1.20.1/mods/oculus.pw.toml"
+    },
+    {
+      "key": "playeranimator",
+      "name": "playerAnimator",
+      "filename": "player-animation-lib-forge-1.0.2-rc1+1.20.jar",
+      "archive": "disabled/forge-1.20.1/mods/playeranimator.pw.toml"
+    },
+    {
+      "key": "resourceful-config",
+      "name": "Resourceful Config",
+      "filename": "resourcefulconfig-forge-1.20.1-2.1.3.jar",
+      "archive": "disabled/forge-1.20.1/mods/resourceful-config.pw.toml"
+    },
+    {
+      "key": "saturn",
+      "name": "Saturn",
+      "filename": "saturn-mc1.20.1-0.1.3.jar",
+      "archive": "disabled/forge-1.20.1/mods/saturn.pw.toml"
+    },
+    {
+      "key": "sodium-options-api",
+      "name": "Sodium/Embeddium Options API",
+      "filename": "sodiumoptionsapi-forge-1.0.10-1.20.1.jar",
+      "archive": "disabled/forge-1.20.1/mods/sodium-options-api.pw.toml"
+    },
+    {
+      "key": "spark",
+      "name": "spark",
+      "filename": "spark-1.10.53-forge.jar",
+      "archive": "disabled/forge-1.20.1/mods/spark.pw.toml"
+    },
+    {
+      "key": "structure-layout-optimizer",
+      "name": "Structure Layout Optimizer",
+      "filename": "structure_layout_optimizer-forge-1.0.11.jar",
+      "archive": "disabled/forge-1.20.1/mods/structure-layout-optimizer.pw.toml"
+    }
+  ],
+  "retention": {
+    "legacyPack": "disabled/forge-1.20.1",
+    "runtimeSnapshot": "E:/Skycraft-scratch/migration-26.3/baseline-20261018",
+    "archiveIsInstalled": false
+  },
+  "integrationStatus": "Exact26.3 native build36/server/core diagnostic render passed; approved Sodium0.9.3-beta.1 compatibility fix requires full-pack client/TCP/render acceptance. Customized shaders and Distant Horizons remain disabled.",
+  "dependencyOverrides": [
+    {
+      "id": "iris-1.11.7-sodium-0.9.3-beta.1-neoforge26.3",
+      "requiringProjectId": "YL57xq9U",
+      "requiringVersionId": "Ag5S66CF",
+      "dependencyProjectId": "AANobbMI",
+      "declaredVersionId": "VHtnT9Q4",
+      "resolvedVersionId": "SS023RVV",
+      "requiringSha512": "302659f09e50d02a6cd96075be93aade2a2f9d709afe21d56465228fb7d7f4717566e3702a7872479df2fff9b7a5ff5b1b6047cc95e09ee6120fad5ea5857eec",
+      "resolvedSha512": "92cdb344cb8049993685e3d81498411d4e6965a8f054c912a297bfe550937ed4792b7c1cb4efea5b5ac9c0e6c32aea777389207e481f008ce6f176b5ae6aab93",
+      "nativeDependencyRange": "[0.6,)",
+      "ownerApproved": true,
+      "reason": "Official Sodium PR3948 fixes NeoForge26.3.0.65+ LevelExtractor compatibility; the unchanged Iris jar accepts Sodium[0.6,).",
+      "source": "https://github.com/CaffeineMC/sodium/pull/3948"
+    }
+  ],
+  "compatibilityHistory": [
+    {
+      "project": "sodium",
+      "previousVersionId": "VHtnT9Q4",
+      "preservedMetadata": "disabled/neoforge-26.3/sodium-0.9.2.pw.toml",
+      "preservedLock": "disabled/neoforge-26.3/sodium-0.9.2-lock.json",
+      "originalCachedArtifactRetained": true,
+      "replacementVersionId": "SS023RVV",
+      "ownerApproved": true
+    }
+  ]
+}

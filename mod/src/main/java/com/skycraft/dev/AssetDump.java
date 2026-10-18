@@ -8,7 +8,7 @@ import com.skycraft.Skycraft;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.BlockItem;
@@ -16,11 +16,11 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.properties.Property;
-import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.event.server.ServerStartedEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.neoforge.event.server.ServerStartedEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 import java.io.File;
 import java.io.Writer;
@@ -38,7 +38,7 @@ import java.util.Map;
  * ({@code -Dskycraft.autorun} or {@code -Dskycraft.dev} set) or when {@code skycraft-asset-audit.request} exists, and on
  * demand with the op command {@code /skycraft-assets dump}. Nothing happens on ordinary servers.</p>
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class AssetDump {
     static final String REQUEST = "skycraft-asset-audit.request";
     static final String OUTPUT = "skycraft-asset-audit.json";
@@ -49,14 +49,14 @@ public final class AssetDump {
     public static void onStarted(ServerStartedEvent event) {
         MinecraftServer server = event.getServer();
         boolean harness = !System.getProperty("skycraft.autorun", "").isEmpty() || System.getProperty("skycraft.dev") != null;
-        if (!harness && !new File(server.getServerDirectory(), REQUEST).exists()) return;
+        if (!harness && !server.getServerDirectory().resolve(REQUEST).toFile().exists()) return;
         write(server);
     }
 
     @SubscribeEvent
     public static void onRegister(RegisterCommandsEvent event) {
         CommandDispatcher<CommandSourceStack> d = event.getDispatcher();
-        d.register(Commands.literal("skycraft-assets").requires(s -> s.hasPermission(2))
+        d.register(Commands.literal("skycraft-assets").requires(s -> s.permissions().hasPermission(net.minecraft.server.permissions.Permissions.COMMANDS_GAMEMASTER))
                 .then(Commands.literal("dump").executes(ctx -> {
                     String msg = write(ctx.getSource().getServer());
                     ctx.getSource().sendSuccess(() -> Component.literal(msg), false);
@@ -67,7 +67,7 @@ public final class AssetDump {
     private static String write(MinecraftServer server) {
         try {
             JsonObject root = dump();
-            File out = new File(server.getServerDirectory(), OUTPUT);
+            File out = server.getServerDirectory().resolve(OUTPUT).toFile();
             try (Writer w = Files.newBufferedWriter(out.toPath(), StandardCharsets.UTF_8)) {
                 new GsonBuilder().disableHtmlEscaping().create().toJson(root, w);
             }
@@ -83,10 +83,10 @@ public final class AssetDump {
 
     static JsonObject dump() {
         JsonObject blocks = new JsonObject();
-        for (Map.Entry<net.minecraft.resources.ResourceKey<Block>, Block> e : ForgeRegistries.BLOCKS.getEntries()) {
-            ResourceLocation id = e.getKey().location();
+        for (var e : BuiltInRegistries.BLOCK.listElements().toList()) {
+            Identifier id = e.key().identifier();
             if (!id.getNamespace().equals(Skycraft.MODID)) continue;
-            Block b = e.getValue();
+            Block b = e.value();
             JsonObject o = new JsonObject();
             o.addProperty("class", b.getClass().getName());
             RenderShape rs = b.defaultBlockState().getRenderShape();
@@ -99,27 +99,27 @@ public final class AssetDump {
             blocks.add(id.getPath(), o);
         }
         JsonObject items = new JsonObject();
-        for (Map.Entry<net.minecraft.resources.ResourceKey<Item>, Item> e : ForgeRegistries.ITEMS.getEntries()) {
-            ResourceLocation id = e.getKey().location();
+        for (var e : BuiltInRegistries.ITEM.listElements().toList()) {
+            Identifier id = e.key().identifier();
             if (!id.getNamespace().equals(Skycraft.MODID)) continue;
             JsonObject o = new JsonObject();
-            o.addProperty("class", e.getValue().getClass().getName());
-            o.addProperty("block", e.getValue() instanceof BlockItem);
+            o.addProperty("class", e.value().getClass().getName());
+            o.addProperty("block", e.value() instanceof BlockItem);
             items.add(id.getPath(), o);
         }
         JsonArray entities = new JsonArray();
-        for (Map.Entry<net.minecraft.resources.ResourceKey<EntityType<?>>, EntityType<?>> e : ForgeRegistries.ENTITY_TYPES.getEntries()) {
-            ResourceLocation id = e.getKey().location();
+        for (var e : BuiltInRegistries.ENTITY_TYPE.listElements().toList()) {
+            Identifier id = e.key().identifier();
             if (id.getNamespace().equals(Skycraft.MODID)) entities.add(id.getPath());
         }
         // every other builtin registry (enchantments, effects, particle types, sounds, villager professions, ...)
         JsonObject registries = new JsonObject();
         for (net.minecraft.core.Registry<?> reg : net.minecraft.core.registries.BuiltInRegistries.REGISTRY) {
             JsonArray names = new JsonArray();
-            for (ResourceLocation k : reg.keySet()) {
+            for (Identifier k : reg.keySet()) {
                 if (k.getNamespace().equals(Skycraft.MODID)) names.add(k.getPath());
             }
-            if (!names.isEmpty()) registries.add(reg.key().location().getPath(), names);
+            if (!names.isEmpty()) registries.add(reg.key().identifier().getPath(), names);
         }
         JsonObject root = new JsonObject();
         root.add("registries", registries);

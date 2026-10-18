@@ -46,13 +46,13 @@ public class SprigganEntity extends SkyHumanoid implements Ranked {
     }
 
     @Override
-    protected void customServerAiStep() {
-        super.customServerAiStep();
+    protected void customServerAiStep(net.minecraft.server.level.ServerLevel serverLevel263) {
+        super.customServerAiStep(serverLevel263);
         // Taproot emergency healing burst when below 40% health
         if (!usedHealing && this.getHealth() < this.getMaxHealth() * 0.4f && this.isAlive()) {
             usedHealing = true;
             this.heal(20.0f);
-            this.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 120, 1), this);
+            this.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.REGENERATION), 120, 1), this);
             this.playSound(SoundEvents.ENCHANTMENT_TABLE_USE, 1.2f, 0.9f);
             if (this.level() instanceof ServerLevel sl) {
                 sl.sendParticles(ParticleTypes.HAPPY_VILLAGER, this.getX(), this.getY() + 1.0, this.getZ(), 20, 0.5, 0.5, 0.5, 0.05);
@@ -61,11 +61,11 @@ public class SprigganEntity extends SkyHumanoid implements Ranked {
     }
 
     @Override
-    public boolean doHurtTarget(Entity target) {
-        boolean hit = super.doHurtTarget(target);
+    public boolean doHurtTarget(net.minecraft.server.level.ServerLevel serverLevel263, Entity target) {
+        boolean hit = super.doHurtTarget(serverLevel263, target);
         if (hit && target instanceof LivingEntity living) {
             // Nature swarm venom
-            living.addEffect(new MobEffectInstance(MobEffects.POISON, 60, 0), this);
+            living.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.POISON), 60, 0), this);
         }
         return hit;
     }

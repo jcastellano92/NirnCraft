@@ -1,6 +1,5 @@
 {
   "type": "skycraft:explore_skill_books",
-  "conditions": [],
   "tables": [
     "skycraft:chests/dungeon_common",
     "skycraft:chests/dungeon_minor",
@@ -11,5 +10,6 @@
     "skycraft:chests/mine_ore"
   ],
   "table": "skycraft:chests/skill_books",
-  "chance": 0.06
+  "chance": 0.06,
+  "priority": 2
 }

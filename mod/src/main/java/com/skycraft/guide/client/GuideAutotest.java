@@ -3,7 +3,6 @@ package com.skycraft.guide.client;
 import com.skycraft.Skycraft;
 import com.skycraft.client.autotest.ClientAutotest;
 import net.minecraft.client.Minecraft;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,11 +32,11 @@ public final class GuideAutotest {
 
     private static void plan(Minecraft mc) {
         STEPS.add(() -> {
-            GLFW.glfwRestoreWindow(mc.getWindow().getWindow());
-            GLFW.glfwSetWindowSize(mc.getWindow().getWindow(), 1280, 800);
+            
+            mc.getWindow().setWindowed(1280,800);
             mc.options.guiScale().set(3);
             com.skycraft.network.SkyNetwork.sendToServer(new com.skycraft.network.CorePackets.ChooseRace(com.skycraft.core.Race.NORD.id()));
-            mc.setScreen(null);
+            mc.gui.setScreen(null);
             if (mc.player != null) {
                 mc.player.connection.sendCommand("time set 6000");
                 mc.player.connection.sendCommand("weather clear");
@@ -45,7 +44,7 @@ public final class GuideAutotest {
             TutorialHints.setEnabled(false); // only the hints this test forces
         });
         STEPS.add(() -> {
-            mc.resizeDisplay();
+            mc.resizeGui();
             boolean gift = mc.player != null && mc.player.getInventory().contains(
                     new net.minecraft.world.item.ItemStack(com.skycraft.guide.GuideModule.HANDBOOK.get()));
             Skycraft.LOGGER.info("Guide autotest: first-join handbook in inventory: {}", gift);
@@ -53,12 +52,12 @@ public final class GuideAutotest {
         for (String chapter : new String[]{"contents", "getting_started", "controls", "races", "magic", "world", "multiplayer"}) {
             STEPS.add(() -> {
                 HandbookScreen.preselect(chapter);
-                mc.setScreen(new HandbookScreen());
+                mc.gui.setScreen(new HandbookScreen());
             });
             STEPS.add(() -> ClientAutotest.captureAndSave(mc, "g_handbook_" + chapter));
         }
         STEPS.add(() -> {
-            mc.setScreen(null);
+            mc.gui.setScreen(null);
             TutorialHints.force("sneak");
         });
         STEPS.add(() -> {});
@@ -67,15 +66,15 @@ public final class GuideAutotest {
         STEPS.add(() -> {});
         STEPS.add(() -> ClientAutotest.captureAndSave(mc, "g_hint_word_wall"));
         // a smaller GUI than the Deck's (960x600 at scale 3 = 320x200): the book scales down to fit
-        STEPS.add(() -> GLFW.glfwSetWindowSize(mc.getWindow().getWindow(), 960, 600));
+        STEPS.add(() -> mc.getWindow().setWindowed(960,600));
         STEPS.add(() -> {
-            mc.resizeDisplay();
+            mc.resizeGui();
             HandbookScreen.preselect("skills");
-            mc.setScreen(new HandbookScreen());
+            mc.gui.setScreen(new HandbookScreen());
         });
         STEPS.add(() -> ClientAutotest.captureAndSave(mc, "g_handbook_small"));
         STEPS.add(() -> {
-            mc.setScreen(null);
+            mc.gui.setScreen(null);
             TutorialHints.setEnabled(true);
             Skycraft.LOGGER.info("=== Skycraft Autotest: Completed successfully! Closing client. ===");
             mc.stop();

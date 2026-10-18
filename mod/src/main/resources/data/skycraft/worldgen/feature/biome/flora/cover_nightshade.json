@@ -1,0 +1,26 @@
+{
+  "type": "skycraft:ground_cover",
+  "config": {
+    "entries": [
+      {
+        "state": {
+          "id": "skycraft:nightshade",
+          "properties": {
+            "harvested": "false"
+          }
+        },
+        "weight": 1
+      }
+    ],
+    "scale": 24,
+    "patchiness": 0.6,
+    "cluster": {
+      "type": "minecraft:uniform",
+      "min_inclusive": 1,
+      "max_inclusive": 3
+    },
+    "spread": 2,
+    "salt": 1754,
+    "near_water": false
+  }
+}

@@ -6,20 +6,20 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.valueproviders.IntProvider;
-import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
-import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
+import com.skycraft.worldgen.ConfiguredFeature;
+import com.skycraft.worldgen.FeaturePlaceContext;
+import com.skycraft.worldgen.FeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.stateproviders.BlockStateProvider;
 
 /**
  * A boulder of mixed rock half sunk into the ground: two or three overlapping blobs. Unlike vanilla's forest rock it
  * sits on any ground (ash, sand, snow), so every biome can have its own stones.
  */
-public class BoulderFeature extends Feature<BoulderFeature.Config> {
+public class BoulderFeature extends ConfiguredFeature<BoulderFeature.Config> {
     public record Config(BlockStateProvider state, IntProvider radius) implements FeatureConfiguration {
         public static final Codec<Config> CODEC = RecordCodecBuilder.create(i -> i.group(
-                BlockStateProvider.CODEC.fieldOf("state").forGetter(Config::state),
-                IntProvider.codec(1, 6).fieldOf("radius").forGetter(Config::radius)
+                BlockStateProvider.DIRECT_CODEC.fieldOf("state").forGetter(Config::state),
+                net.minecraft.util.valueproviders.IntProviders.codec(1, 6).fieldOf("radius").forGetter(Config::radius)
         ).apply(i, Config::new));
     }
 
@@ -53,7 +53,7 @@ public class BoulderFeature extends Feature<BoulderFeature.Config> {
                         float d = dx * dx + dy * dy * 1.4f + dz * dz;
                         if (d > rr * rr || (d > (rr - 1) * (rr - 1) && random.nextFloat() < 0.3f)) continue;
                         p.set(bx + dx, by + dy, bz + dz);
-                        box.set(p.getX(), p.getY(), p.getZ(), ctx.config().state().getState(random, p));
+                        box.set(p.getX(), p.getY(), p.getZ(), ctx.config().state().getState(ctx.level(), random, p));
                     }
                 }
             }

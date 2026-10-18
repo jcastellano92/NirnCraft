@@ -13,7 +13,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.tags.TagKey;
@@ -24,13 +24,8 @@ import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.food.FoodProperties;
-import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.BookItem;
 import net.minecraft.world.item.CrossbowItem;
-import net.minecraft.world.item.DiggerItem;
-import net.minecraft.world.item.ElytraItem;
-import net.minecraft.world.item.EnchantedBookItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.PotionItem;
@@ -73,8 +68,10 @@ public final class ItemWeights {
     /** Weight of ONE item of {@code stack} (never negative). Multiply by the count for the whole stack. */
     public static float get(ItemStack stack) {
         if (stack == null || stack.isEmpty()) return 0f;
-        CompoundTag nbt = stack.getTag();
-        if (nbt != null && nbt.contains(WEIGHT_NBT, Tag.TAG_ANY_NUMERIC)) return Math.max(0f, nbt.getFloat(WEIGHT_NBT));
+        if (ItemData.containsCustom(stack, WEIGHT_NBT)) {
+            CompoundTag nbt = ItemData.custom(stack);
+            if (nbt != null && com.skycraft.platform.NbtData.hasType(nbt, WEIGHT_NBT, 99)) return Math.max(0f, nbt.getFloatOr(WEIGHT_NBT, 0f));
+        }
         if (Currency.valueOf(stack) > 0) return 0f;
         return base(stack.getItem());
     }
@@ -110,21 +107,21 @@ public final class ItemWeights {
 
     /** Immutable snapshot of the loaded data (swapped atomically on reload / client sync). */
     static final class Table {
-        final Map<ResourceLocation, Float> items;
-        final Map<ResourceLocation, Float> tags;
+        final Map<Identifier, Float> items;
+        final Map<Identifier, Float> tags;
         final List<Map.Entry<TagKey<Item>, Float>> tagKeys = new ArrayList<>();
         final Map<Item, Float> cache = new ConcurrentHashMap<>();
 
-        Table(Map<ResourceLocation, Float> items, Map<ResourceLocation, Float> tags) {
+        Table(Map<Identifier, Float> items, Map<Identifier, Float> tags) {
             this.items = Collections.unmodifiableMap(new HashMap<>(items));
             this.tags = Collections.unmodifiableMap(new LinkedHashMap<>(tags));
-            for (Map.Entry<ResourceLocation, Float> e : this.tags.entrySet()) {
+            for (Map.Entry<Identifier, Float> e : this.tags.entrySet()) {
                 tagKeys.add(Map.entry(TagKey.create(Registries.ITEM, e.getKey()), e.getValue()));
             }
         }
 
         float resolve(Item item) {
-            ResourceLocation id = BuiltInRegistries.ITEM.getKey(item);
+            Identifier id = BuiltInRegistries.ITEM.getKey(item);
             Float direct = items.get(id);
             if (direct != null) return Math.max(0f, direct);
             if (!tagKeys.isEmpty()) {
@@ -143,16 +140,16 @@ public final class ItemWeights {
         }
     }
 
-    static Map<ResourceLocation, Float> itemTable() {
+    static Map<Identifier, Float> itemTable() {
         return table.items;
     }
 
-    static Map<ResourceLocation, Float> tagTable() {
+    static Map<Identifier, Float> tagTable() {
         return table.tags;
     }
 
     /** Replaces the table (server reload, or client receiving the sync packet). */
-    static void setTable(Map<ResourceLocation, Float> items, Map<ResourceLocation, Float> tags) {
+    static void setTable(Map<Identifier, Float> items, Map<Identifier, Float> tags) {
         table = new Table(items, tags);
         generation++;
     }
@@ -175,9 +172,9 @@ public final class ItemWeights {
     static float heuristic(Item item) {
         ItemStack stack = new ItemStack(item);
 
-        if (item instanceof ArmorItem armor) {
+        if (EquipmentData.isArmor(stack)) {
             boolean heavy = ArmorClass.isHeavy(stack);
-            EquipmentSlot slot = armor.getEquipmentSlot();
+            EquipmentSlot slot = EquipmentData.slot(stack);
             float base = switch (slot) {
                 case HEAD -> heavy ? 6f : 2f;
                 case CHEST -> heavy ? 30f : 7f;
@@ -186,30 +183,30 @@ public final class ItemWeights {
                 default -> heavy ? 8f : 3f;
             };
             // sturdier armor is a little heavier
-            float defense = armor.getDefense() + armor.getToughness();
+            float defense = EquipmentData.defense(stack) + EquipmentData.toughness(stack);
             return round1(base * (0.8f + 0.05f * Math.min(8f, defense)));
         }
         if (item instanceof ShieldItem) return 10f;
-        if (item instanceof ElytraItem) return 5f;
+        if (stack.has(net.minecraft.core.component.DataComponents.GLIDER)) return 5f;
         if (item instanceof CrossbowItem) return 14f;
         if (item instanceof ProjectileWeaponItem) return 7f;
 
         double damage = attackDamage(item);
-        if (item instanceof DiggerItem && damage < 6) {
+        if ((stack.has(net.minecraft.core.component.DataComponents.TOOL) && !stack.is(net.minecraft.tags.ItemTags.SWORDS)) && damage < 6) {
             // pickaxes, shovels, hoes (axes with big damage fall through to the weapon rule)
             return round1((float) Mth.clamp(3 + damage * 1.2, 3, 12));
         }
         if (damage >= 2) return round1((float) Mth.clamp(damage * 1.8, 2, 35));
 
         if (item instanceof PotionItem) return 0.5f;
-        if (item instanceof BookItem || item instanceof WritableBookItem || item instanceof WrittenBookItem
-                || item instanceof EnchantedBookItem || stack.is(ItemCategory.SPELL_TOMES) || stack.is(ItemCategory.SKILL_BOOKS)) {
+        if (item == net.minecraft.world.item.Items.BOOK || item instanceof WritableBookItem || item instanceof WrittenBookItem
+                || item == net.minecraft.world.item.Items.ENCHANTED_BOOK || stack.is(ItemCategory.SPELL_TOMES) || stack.is(ItemCategory.SKILL_BOOKS)) {
             return 1f;
         }
         if (stack.is(ItemCategory.INGREDIENTS_TAG)) return 0.1f;
 
-        FoodProperties food = item.getFoodProperties();
-        if (food != null) return round1(Mth.clamp(0.1f + food.getNutrition() * 0.05f, 0.1f, 0.5f));
+        FoodProperties food = stack.get(net.minecraft.core.component.DataComponents.FOOD);
+        if (food != null) return round1(Mth.clamp(0.1f + food.nutrition() * 0.05f, 0.1f, 0.5f));
 
         if (item instanceof BlockItem block) {
             float hardness;
@@ -232,40 +229,39 @@ public final class ItemWeights {
 
     /** Extra attack damage granted in the main hand (0 for non-weapons). */
     private static double attackDamage(Item item) {
-        try {
-            Multimap<Attribute, AttributeModifier> mods = item.getDefaultAttributeModifiers(EquipmentSlot.MAINHAND);
-            double sum = 0;
-            for (AttributeModifier m : mods.get(Attributes.ATTACK_DAMAGE)) {
-                if (m.getOperation() == AttributeModifier.Operation.ADDITION) sum += m.getAmount();
-            }
-            return Math.max(0, sum);
-        } catch (Exception e) {
-            return 0;
+        var modifiers = new ItemStack(item).getOrDefault(net.minecraft.core.component.DataComponents.ATTRIBUTE_MODIFIERS,
+                net.minecraft.world.item.component.ItemAttributeModifiers.EMPTY);
+        double sum = 0;
+        for (var entry : modifiers.modifiers()) {
+            if (entry.attribute().equals(Attributes.ATTACK_DAMAGE)
+                    && entry.slot().test(EquipmentSlot.MAINHAND)
+                    && entry.modifier().operation() == AttributeModifier.Operation.ADD_VALUE) sum += entry.modifier().amount();
         }
+        return Math.max(0, sum);
     }
 
     // ------------------------------------------------------------------ data loading
 
     /** Loads every {@code data/<ns>/skycraft_weights/*.json}. Registered from {@link InventoryEvents}. */
-    public static class Loader extends SimpleJsonResourceReloadListener {
+    public static class Loader extends SimpleJsonResourceReloadListener<JsonElement> {
         private static final Gson GSON = new GsonBuilder().create();
 
         public Loader() {
-            super(GSON, "skycraft_weights");
+            super(net.minecraft.util.ExtraCodecs.JSON, net.minecraft.resources.FileToIdConverter.json("skycraft_weights"));
         }
 
         @Override
-        protected void apply(Map<ResourceLocation, JsonElement> files, ResourceManager manager, ProfilerFiller profiler) {
-            Map<ResourceLocation, Float> items = new HashMap<>();
-            Map<ResourceLocation, Float> tags = new LinkedHashMap<>();
+        protected void apply(Map<Identifier, JsonElement> files, ResourceManager manager, ProfilerFiller profiler) {
+            Map<Identifier, Float> items = new HashMap<>();
+            Map<Identifier, Float> tags = new LinkedHashMap<>();
             // deterministic order: "default" files first so other files override them
-            List<ResourceLocation> ids = new ArrayList<>(files.keySet());
+            List<Identifier> ids = new ArrayList<>(files.keySet());
             ids.sort((a, b) -> {
                 boolean da = a.getPath().equals("default"), db = b.getPath().equals("default");
                 if (da != db) return da ? -1 : 1;
                 return a.toString().compareTo(b.toString());
             });
-            for (ResourceLocation file : ids) {
+            for (Identifier file : ids) {
                 try {
                     JsonElement root = files.get(file);
                     if (!root.isJsonObject()) continue;
@@ -281,7 +277,7 @@ public final class ItemWeights {
                             continue;
                         }
                         boolean tag = key.startsWith("#");
-                        ResourceLocation id = ResourceLocation.tryParse(tag ? key.substring(1) : key);
+                        Identifier id = Identifier.tryParse(tag ? key.substring(1) : key);
                         if (id == null) {
                             Skycraft.LOGGER.warn("Bad item id {} in {}", key, file);
                             continue;

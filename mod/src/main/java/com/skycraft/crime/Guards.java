@@ -73,7 +73,7 @@ public final class Guards {
 
     static void tick(ServerPlayer player) {
         if (player.isSpectator() || Jail.isJailed(player) || Jail.isLoadingJail(player) || Jail.isJailDimension(player.level())) return;
-        var level = player.serverLevel();
+        var level = player.level();
         String hold = Holds.holdAt(level, player.blockPosition());
         int bounty = player.isCreative() ? 0 : Bounty.get(player, hold);
         boolean hostile = bounty > 0 && (bounty >= Bounty.KILL_ON_SIGHT || Bounty.isHostile(player));
@@ -238,7 +238,7 @@ public final class Guards {
      * does meanwhile (a new petty crime must not re-open it).
      */
     private static boolean triedRecently(ServerPlayer player, String hold) {
-        long at = Bounty.state(player).getLong("persuade_at_" + hold);
+        long at = Bounty.state(player).getLongOr("persuade_at_" + hold,0L);
         long now = player.level().getGameTime();
         return at > 0 && now + 1 >= at && now + 1 - at < PERSUADE_COOLDOWN;
     }

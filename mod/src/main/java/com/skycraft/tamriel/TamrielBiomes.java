@@ -1,14 +1,15 @@
 package com.skycraft.tamriel;
 
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.Codec;
 import com.skycraft.Skycraft;
 import com.skycraft.tamriel.biome.BiomeBlocks;
 import com.skycraft.tamriel.biome.BiomeFeatures;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.biome.BiomeSource;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.registries.DeferredRegister;
+import java.util.function.Supplier;
 
 /**
  * Biomes: the skycraft:tamriel biome source, biome blocks, trees and vegetation features (Phase 2 workstream B).
@@ -16,10 +17,10 @@ import net.minecraftforge.registries.RegistryObject;
  * tools/worldgen/biomes.py; see docs/TAMRIEL.md section 5.
  */
 public final class TamrielBiomes {
-    public static final DeferredRegister<Codec<? extends BiomeSource>> BIOME_SOURCES =
+    public static final DeferredRegister<MapCodec<? extends BiomeSource>> BIOME_SOURCES =
             DeferredRegister.create(Registries.BIOME_SOURCE, Skycraft.MODID);
 
-    public static final RegistryObject<Codec<? extends BiomeSource>> TAMRIEL_SOURCE =
+    public static final Supplier<MapCodec<? extends BiomeSource>> TAMRIEL_SOURCE =
             BIOME_SOURCES.register("tamriel", () -> TamrielBiomeSource.CODEC);
 
     private TamrielBiomes() {}

@@ -20,12 +20,13 @@ import org.jetbrains.annotations.Nullable;
  *
  * <p>Ticks on the server via {@link DenBlockEntity} to populate the den with 1–3 region-appropriate residents
  * (bears, wolves, sabre cats, trolls, giant spiders, spriggans, kagouti, nix-hounds, senche-tigers, wamasu, etc.)
- * tethered to the den territory via {@code mob.restrictTo(worldPosition, 24)}, and manages their nocturnal/diurnal
+ * tethered to the den territory via {@code mob.setHomeTo(worldPosition, 24)}, and manages their nocturnal/diurnal
  * rest cycles.</p>
  */
 public class DenBlock extends BaseEntityBlock {
-    public DenBlock() {
-        super(BlockBehaviour.Properties.copy(Blocks.COARSE_DIRT)
+
+    public DenBlock(BlockBehaviour.Properties properties) {
+        super(properties
                 .mapColor(MapColor.DIRT)
                 .strength(1.5f, 6.0f)
                 .sound(SoundType.ROOTED_DIRT));
@@ -45,7 +46,7 @@ public class DenBlock extends BaseEntityBlock {
     @Nullable
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
-        if (level.isClientSide) {
+        if (level.isClientSide()) {
             return null;
         }
         return createTickerHelper(type, BiomeBlocks.CREATURE_DEN_BE.get(), DenBlockEntity::serverTick);

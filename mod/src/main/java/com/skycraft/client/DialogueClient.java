@@ -10,6 +10,6 @@ public final class DialogueClient {
 
     public static void open(DialoguePackets.OpenDialogue msg) {
         DialogueCamera.start(msg.entityId());
-        Minecraft.getInstance().setScreen(new DialogueScreen(msg));
+        Minecraft.getInstance().gui.setScreen(new DialogueScreen(msg));
     }
 }

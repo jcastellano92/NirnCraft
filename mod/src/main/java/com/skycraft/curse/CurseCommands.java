@@ -27,7 +27,7 @@ public final class CurseCommands {
     private CurseCommands() {}
 
     static void register(CommandDispatcher<CommandSourceStack> d) {
-        d.register(Commands.literal("skycraft-curse").requires(s -> s.hasPermission(2))
+        d.register(Commands.literal("skycraft-curse").requires(s -> s.permissions().hasPermission(net.minecraft.server.permissions.Permissions.COMMANDS_GAMEMASTER))
                 .then(each("infect", Curses::infect))
                 .then(each("vampire", Curses::turnVampire))
                 .then(Commands.literal("stage").then(withTargets(Commands.argument("stage", IntegerArgumentType.integer(1, 4)),
@@ -121,9 +121,9 @@ public final class CurseCommands {
 
     private static Component describe(ServerPlayer p) {
         CompoundTag t = Curses.tag(p);
-        String s = p.getGameProfile().getName() + ": form=" + Curses.form(p).name().toLowerCase()
+        String s = p.getGameProfile().name() + ": form=" + Curses.form(p).name().toLowerCase()
                 + (Curses.isVampire(p) ? ", vampire stage " + Curses.stage(p) + (Curses.hasVampireLord(p) ? " (lord)" : "") : "")
-                + (Curses.hasSanguinare(p) ? ", sanguinare day " + t.getInt(Curses.SANG_DAYS) : "")
+                + (Curses.hasSanguinare(p) ? ", sanguinare day " + t.getIntOr(Curses.SANG_DAYS, 0) : "")
                 + (Curses.isWerewolf(p) ? ", werewolf" : "")
                 + (Vampirism.inSun(p) ? ", in sun" : "")
                 + ", feeds wolf/lord=" + CursePerks.feeds(p, CursePerks.Tree.WEREWOLF) + "/" + CursePerks.feeds(p, CursePerks.Tree.VAMPIRE_LORD)

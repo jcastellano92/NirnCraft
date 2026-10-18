@@ -6,13 +6,13 @@ import com.skycraft.economy.ItemCategory;
 import com.skycraft.inventory.ValueDensity;
 import com.skycraft.network.SkyNetwork;
 import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.util.Util;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
-import org.lwjgl.glfw.GLFW;
+import com.mojang.blaze3d.platform.InputConstants;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -142,20 +142,20 @@ public class BarterScreen extends Screen {
     // ------------------------------------------------------------------ rendering
 
     @Override
-    public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+    public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
         g.fillGradient(0, 0, width, height, 0xC8080808, 0xE0080808);
 
         // header: merchant name and gold
-        g.pose().pushPose();
-        g.pose().translate(width / 2f, 6, 0);
-        g.pose().scale(1.2f, 1.2f, 1f);
-        g.drawCenteredString(font, state.merchantName(), 0, 0, 0xFFF5EBC8);
-        g.pose().popPose();
+        g.pose().pushMatrix();
+        g.pose().translate(width / 2f, 6);
+        g.pose().scale(1.2f, 1.2f);
+        g.centeredText(font, state.merchantName(), 0, 0, 0xFFF5EBC8);
+        g.pose().popMatrix();
 
         Component gold = Component.translatable("barter.skycraft.your_gold", com.skycraft.core.Currency.formatGold(state.playerGold()))
                 .append(Component.literal("   |   "))
                 .append(Component.translatable("barter.skycraft.merchant_gold", com.skycraft.core.Currency.formatGold(state.merchantGold())));
-        g.drawCenteredString(font, gold, width / 2, 22, GOLD);
+        g.centeredText(font, gold, width / 2, 22, GOLD);
 
         // BUY / SELL / BUY BACK mode buttons
         hoveredMode = -1;
@@ -172,7 +172,7 @@ public class BarterScreen extends Screen {
             boolean on = m == active;
             g.fill(bx, modeY, bx + modeW, modeY + modeH, on ? 0x50FFFFFF : hov ? 0x28FFFFFF : 0x18000000);
             if (on) g.fill(bx, modeY + modeH - 1, bx + modeW, modeY + modeH, LINE);
-            g.drawCenteredString(font, Component.translatable(modeKeys[m]), bx + modeW / 2, modeY + 3,
+            g.centeredText(font, Component.translatable(modeKeys[m]), bx + modeW / 2, modeY + 3,
                     on ? 0xFFFFFFFF : hov ? TEXT : 0xFFA8A090);
         }
 
@@ -192,7 +192,7 @@ public class BarterScreen extends Screen {
             } else if (hov) {
                 g.fill(tx, 56, tx + w, 70, 0x28FFFFFF);
             }
-            g.drawString(font, c.displayName(), tx + 7, 59, sel ? 0xFFFFFFFF : hov ? TEXT : 0xFFA8A090, false);
+            g.text(font, c.displayName(), tx + 7, 59, sel ? 0xFFFFFFFF : hov ? TEXT : 0xFFA8A090, false);
             tx += w;
         }
 
@@ -213,7 +213,7 @@ public class BarterScreen extends Screen {
         long age = Util.getMillis() - messageAt;
         if (!message.getString().isEmpty() && age < 5000) {
             int alpha = age < 4000 ? 0xFF : (int) (0xFF * (5000 - age) / 1000f);
-            g.drawCenteredString(font, message, width / 2, height - 26, (Math.max(8, alpha) << 24) | 0xF0E6C8);
+            g.centeredText(font, message, width / 2, height - 26, (Math.max(8, alpha) << 24) | 0xF0E6C8);
         }
         // what you carry: buying adds weight (the sell list and the buy list both change it)
         com.skycraft.inventory.client.SkyUi.carryLine(g, font, 12, height - 26, 12 + 130);
@@ -224,17 +224,17 @@ public class BarterScreen extends Screen {
         // the corner readouts repeat the header: on narrow screens (427 px at GUI scale 3) they make room for the hint
         int between = width - 24 - font.width(pGold) - font.width(mGold) - 16;
         if (hintW <= between) {
-            g.drawString(font, pGold, 12, height - 14, GOLD, true);
-            g.drawString(font, mGold, width - font.width(mGold) - 12, height - 14, GOLD, true);
+            g.text(font, pGold, 12, height - 14, GOLD, true);
+            g.text(font, mGold, width - font.width(mGold) - 12, height - 14, GOLD, true);
         }
         float hintScale = Math.min(1f, (width - 16) / (float) Math.max(1, hintW));
-        g.pose().pushPose();
-        g.pose().translate(width / 2f, height - 13, 0);
-        g.pose().scale(hintScale, hintScale, 1f);
-        g.drawCenteredString(font, hint, 0, 0, 0xFF8A8478);
-        g.pose().popPose();
+        g.pose().pushMatrix();
+        g.pose().translate(width / 2f, height - 13);
+        g.pose().scale(hintScale, hintScale);
+        g.centeredText(font, hint, 0, 0, 0xFF8A8478);
+        g.pose().popMatrix();
 
-        super.render(g, mouseX, mouseY, partialTick);
+        super.extractRenderState(g, mouseX, mouseY, partialTick);
 
         if (hoveredEntry != null) {
             List<Component> lines = new ArrayList<>(Screen.getTooltipFromItem(minecraft, hoveredEntry.stack()));
@@ -259,25 +259,26 @@ public class BarterScreen extends Screen {
             }
             float vw = ValueDensity.of(hoveredEntry.stack());
             lines.add(Component.translatable("barter.skycraft.vw.line", ValueDensity.format(vw)).withStyle(ChatFormatting.GRAY));
-            g.renderComponentTooltip(font, lines, mouseX, mouseY);
+            g.setComponentTooltipForNextFrame(font, lines, mouseX, mouseY);
         } else if (vwTooltip != null) {
             List<Component> lines = new ArrayList<>();
             lines.add(vwTooltip);
             lines.add(Component.translatable("barter.skycraft.vw.sort").withStyle(ChatFormatting.DARK_GRAY));
-            g.renderComponentTooltip(font, lines, mouseX, mouseY);
+            g.setComponentTooltipForNextFrame(font, lines, mouseX, mouseY);
         }
     }
 
     private int countCarrying(ItemStack target) {
         if (minecraft == null || minecraft.player == null) return 0;
         int count = 0;
-        for (ItemStack s : minecraft.player.getInventory().items) {
+        for(int i=0;i<net.minecraft.world.entity.player.Inventory.INVENTORY_SIZE;i++){
+            ItemStack s=minecraft.player.getInventory().getItem(i);
             if (!s.isEmpty() && s.getItem() == target.getItem()) count += s.getCount();
         }
         return count + com.skycraft.inventory.Pack.count(minecraft.player, target.getItem()); // overflow pack too
     }
 
-    private void drawCatalog(GuiGraphics g, int x, int w, Component title, List<EconomyPackets.Entry> entries, int scroll,
+    private void drawCatalog(GuiGraphicsExtractor g, int x, int w, Component title, List<EconomyPackets.Entry> entries, int scroll,
                              boolean buy, int mouseX, int mouseY) {
         int bottom = listBottom();
         g.fill(x, TOP - 10, x + w, bottom + 2, 0x70000000);
@@ -297,21 +298,21 @@ public class BarterScreen extends Screen {
         boolean showVw = (vwRight - vwColW) - (x + 26) >= 76;
         int colLeft = showVw ? vwRight - vwColW : priceRight - priceColW;
 
-        g.drawString(font, font.plainSubstrByWidth(title.getString(), Math.max(20, colLeft - 12 - (x + 6))), x + 6, TOP - 8, LINE, false);
-        g.drawString(font, priceHeader, priceRight - font.width(priceHeader), TOP - 8, LINE, false);
+        g.text(font, font.plainSubstrByWidth(title.getString(), Math.max(20, colLeft - 12 - (x + 6))), x + 6, TOP - 8, LINE, false);
+        g.text(font, priceHeader, priceRight - font.width(priceHeader), TOP - 8, LINE, false);
         if (showVw) {
             boolean hov = mouseX >= vwRight - vwColW - 8 && mouseX < vwRight + 3 && mouseY >= TOP - 10 && mouseY < TOP;
             if (hov) {
                 hoveredVwHeader = true;
                 vwTooltip = Component.translatable("barter.skycraft.vw.tooltip");
             }
-            g.drawString(font, vwHead, vwRight - font.width(vwHead), TOP - 8, vwSort != 0 ? 0xFFFFFFFF : hov ? TEXT : LINE, false);
+            g.text(font, vwHead, vwRight - font.width(vwHead), TOP - 8, vwSort != 0 ? 0xFFFFFFFF : hov ? TEXT : LINE, false);
             if (vwSort != 0) com.skycraft.inventory.client.SkyUi.triangle(g, vwRight - font.width(vwHead) - 5, TOP - 6, vwSort == 2, 0xFFFFFFFF);
         }
         g.fill(x, TOP - 1, x + w, TOP, 0x80C8BC9A);
 
         if (entries.isEmpty()) {
-            g.drawCenteredString(font, Component.translatable(buybackMode ? "barter.skycraft.buyback.empty" : "barter.skycraft.empty"), x + w / 2, TOP + 12, DIM);
+            g.centeredText(font, Component.translatable(buybackMode ? "barter.skycraft.buyback.empty" : "barter.skycraft.empty"), x + w / 2, TOP + 12, DIM);
             return;
         }
         int rows = visibleRows();
@@ -326,7 +327,7 @@ public class BarterScreen extends Screen {
                 g.fill(x, y, x + 2, y + ROW, LINE);
             }
             ItemStack stack = e.stack();
-            g.renderItem(stack, x + 4, y + 2);
+            g.item(stack, x + 4, y + 2);
 
             String price = com.skycraft.core.Currency.formatCompact(e.price()) + "g";
             int priceW = font.width(price);
@@ -344,7 +345,7 @@ public class BarterScreen extends Screen {
                 int bx = colLeft - badgeW - 8;
                 g.fill(x, y, x + w, y + ROW, 0x20000000 | (tint & 0xFFFFFF));
                 g.fill(bx, y + 4, bx + badgeW, y + ROW - 4, 0xC0000000 | (tint & 0xFFFFFF));
-                g.drawString(font, badge, bx + 4, y + 6, 0xFF1A1710, false);
+                g.text(font, badge, bx + 4, y + 6, 0xFF1A1710, false);
                 nameColor = tint;
                 badgeW += 8;
             }
@@ -352,14 +353,14 @@ public class BarterScreen extends Screen {
             String count = stack.getCount() > 1 ? " (" + stack.getCount() + ")" : "";
             int nameSpace = colLeft - 8 - (x + 26) - font.width(count) - badgeW;
             String name = font.plainSubstrByWidth(stack.getHoverName().getString(), Math.max(10, nameSpace));
-            g.drawString(font, name, x + 26, y + 6, nameColor, false);
-            if (!count.isEmpty()) g.drawString(font, count, x + 26 + font.width(name), y + 6, DIM, false);
+            g.text(font, name, x + 26, y + 6, nameColor, false);
+            if (!count.isEmpty()) g.text(font, count, x + 26 + font.width(name), y + 6, DIM, false);
             if (showVw) {
                 float vw = ValueDensity.of(stack);
                 String vws = ValueDensity.format(vw);
-                g.drawString(font, vws, vwRight - font.width(vws), y + 6, vw < 0f ? DIM : VW, false);
+                g.text(font, vws, vwRight - font.width(vws), y + 6, vw < 0f ? DIM : VW, false);
             }
-            g.drawString(font, price, priceRight - priceW, y + 6, !ok ? DIM : affordable ? GOLD : 0xFFC04040, false);
+            g.text(font, price, priceRight - priceW, y + 6, !ok ? DIM : affordable ? GOLD : 0xFFC04040, false);
         }
 
         // scrollbar
@@ -375,7 +376,9 @@ public class BarterScreen extends Screen {
     // ------------------------------------------------------------------ input
 
     @Override
-    public boolean mouseClicked(double mx, double my, int button) {
+    public boolean mouseClicked(net.minecraft.client.input.MouseButtonEvent event, boolean doubleClick) {
+        double mx = event.x(), my = event.y();
+        int button = com.skycraft.client.screen.UiInput.actionButton(event.button());
         if (hoveredMode >= 0) {
             setMode(hoveredMode);
             return true;
@@ -384,7 +387,7 @@ public class BarterScreen extends Screen {
             setTab(ItemCategory.byOrdinal(hoveredTab));
             return true;
         }
-        if (hoveredVwHeader && button == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
+        if (hoveredVwHeader && button == 0) {
             vwSort = (vwSort + 1) % 3;
             scrollLeft = 0;
             scrollRight = 0;
@@ -392,7 +395,7 @@ public class BarterScreen extends Screen {
             refilter();
             return true;
         }
-        if (hoveredEntry != null && (button == GLFW.GLFW_MOUSE_BUTTON_LEFT || button == GLFW.GLFW_MOUSE_BUTTON_RIGHT)) {
+        if (hoveredEntry != null && (button == 0 || button == 1)) {
             ItemStack stack = hoveredEntry.stack();
             int op = buybackMode ? Barter.OP_BUYBACK : sellMode ? Barter.OP_SELL : Barter.OP_BUY;
             // an equipped row, or a keepsake the shop will not put on its shelves, needs a second click on the same
@@ -405,14 +408,14 @@ public class BarterScreen extends Screen {
                 armedAt = now;
             }
             SkyNetwork.sendToServer(new EconomyPackets.BarterAction(state.entityId(), op, hoveredEntry.index(),
-                    hasShiftDown(), BuiltInRegistries.ITEM.getKey(stack.getItem()), confirm));
+                    com.skycraft.client.screen.UiInput.shiftDown(), BuiltInRegistries.ITEM.getKey(stack.getItem()), confirm));
             return true;
         }
-        return super.mouseClicked(mx, my, button);
+        return super.mouseClicked(event, doubleClick);
     }
 
     @Override
-    public boolean mouseScrolled(double mx, double my, double delta) {
+    public boolean mouseScrolled(double mx, double my, double horizontal, double delta) {
         int step = delta > 0 ? -1 : delta < 0 ? 1 : 0;
         if (buybackMode) {
             scrollBack = clampScroll(scrollBack + step, back.size());
@@ -431,31 +434,37 @@ public class BarterScreen extends Screen {
     }
 
     @Override
-    public boolean keyPressed(int key, int scan, int mods) {
-        if (key == GLFW.GLFW_KEY_TAB) {
+    public boolean keyPressed(net.minecraft.client.input.KeyEvent event) {
+        int key = event.key(), scan = event.keycode(), mods = event.modifiers();
+        if (key == InputConstants.KEY_TAB) {
             setMode(((buybackMode ? 2 : sellMode ? 1 : 0) + 1) % 3);
             return true;
         }
         int n = ItemCategory.VALUES.length;
-        if (key == GLFW.GLFW_KEY_LEFT || key == GLFW.GLFW_KEY_A) {
+        if (key == InputConstants.KEY_LEFT || key == InputConstants.KEY_A) {
             setTab(ItemCategory.byOrdinal((tab.ordinal() + n - 1) % n));
             return true;
         }
-        if (key == GLFW.GLFW_KEY_RIGHT || key == GLFW.GLFW_KEY_D) {
+        if (key == InputConstants.KEY_RIGHT || key == InputConstants.KEY_D) {
             setTab(ItemCategory.byOrdinal((tab.ordinal() + 1) % n));
             return true;
         }
-        if (minecraft != null && minecraft.options.keyInventory.matches(key, scan)) {
+        if (minecraft != null && minecraft.options.keyInventory.matches(event)) {
             onClose();
             return true;
         }
-        return super.keyPressed(key, scan, mods);
+        return super.keyPressed(event);
     }
 
     @Override
     public void onClose() {
-        SkyNetwork.sendToServer(new com.skycraft.dialogue.DialoguePackets.CloseDialogue(state.entityId()));
         super.onClose();
+    }
+
+    @Override
+    public void removed() {
+        SkyNetwork.sendToServer(new com.skycraft.dialogue.DialoguePackets.CloseDialogue(state.entityId()));
+        super.removed();
     }
 
     private void setTab(ItemCategory c) {

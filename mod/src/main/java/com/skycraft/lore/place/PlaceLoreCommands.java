@@ -14,9 +14,9 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,13 +32,13 @@ import java.util.List;
  *  /skylore selftest lecterns        story reader self-test: simulated right-clicks on story lecterns, signs, barrels
  * </pre>
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class PlaceLoreCommands {
     private PlaceLoreCommands() {}
 
     @SubscribeEvent
     public static void onRegister(RegisterCommandsEvent event) {
-        event.getDispatcher().register(Commands.literal("skylore").requires(s -> s.hasPermission(2))
+        event.getDispatcher().register(Commands.literal("skylore").requires(s -> s.permissions().hasPermission(net.minecraft.server.permissions.Permissions.COMMANDS_GAMEMASTER))
                 .then(Commands.literal("stats").executes(PlaceLoreCommands::stats))
                 .then(Commands.literal("show").then(place().executes(PlaceLoreCommands::show)))
                 .then(Commands.literal("give").then(place().executes(c -> give(c, ""))
@@ -58,7 +58,7 @@ public final class PlaceLoreCommands {
      * {@code /skylore stats} and both story selftests (their results go to the log) once started, then stops.
      */
     @SubscribeEvent
-    public static void onServerStarted(net.minecraftforge.event.server.ServerStartedEvent event) {
+    public static void onServerStarted(net.neoforged.neoforge.event.server.ServerStartedEvent event) {
         java.io.File request = new java.io.File("skycraft-lore-selftest.request");
         if (!request.exists()) return;
         net.minecraft.server.MinecraftServer server = event.getServer();
@@ -148,7 +148,7 @@ public final class PlaceLoreCommands {
         if (place == null) return 0;
         List<PlaceLore.Note> notes = PlaceLorePlacer.lecternNotes(x);
         PlaceLore.Note note = notes.isEmpty() ? x.notes().get(0) : notes.get(0);
-        boolean ok = PlaceLorePlacer.placeLectern(p.serverLevel(), place, note);
+        boolean ok = PlaceLorePlacer.placeLectern(p.level(), place, note);
         c.getSource().sendSuccess(() -> Component.literal(ok ? "Lectern placed" : "No free loaded spot near the place's centre"), false);
         return ok ? 1 : 0;
     }

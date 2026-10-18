@@ -8,9 +8,9 @@ import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
-import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
+import com.skycraft.worldgen.ConfiguredFeature;
+import com.skycraft.worldgen.FeaturePlaceContext;
+import com.skycraft.worldgen.NoneFeatureConfiguration;
 
 /**
  * {@code skycraft:map_water}: fills the map's lakes and rivers above sea level. The terrain density carves their
@@ -18,7 +18,7 @@ import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConf
  * water source blocks in every carved column up to that level. Rivers step down along their course, so the surface
  * drops a block at a time (small waterfalls). It only touches the chunk being decorated.
  */
-public class MapWaterFeature extends Feature<NoneFeatureConfiguration> {
+public class MapWaterFeature extends ConfiguredFeature<NoneFeatureConfiguration> {
     private static final BlockState WATER = Blocks.WATER.defaultBlockState();
 
     public MapWaterFeature(Codec<NoneFeatureConfiguration> codec) {

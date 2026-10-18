@@ -8,13 +8,14 @@ import com.skycraft.tamriel.terrain.TamrielDevCommands;
 import com.skycraft.tamriel.terrain.TamrielHeight;
 import com.skycraft.tamriel.terrain.TamrielSpawn;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.world.level.levelgen.DensityFunction;
+import net.minecraft.world.level.levelgen.densityfunction.DensityFunction;
 import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.RegistryObject;
+import com.mojang.serialization.MapCodec;
+import com.skycraft.worldgen.NoneFeatureConfiguration;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.registries.DeferredRegister;
+import java.util.function.Supplier;
 
 /**
  * Terrain (Phase 2 workstream T): the density function types and the map water feature used by the
@@ -23,23 +24,25 @@ import net.minecraftforge.registries.RegistryObject;
  * {@code tools/worldgen/noise_settings.py}.
  */
 public final class TamrielTerrain {
-    public static final DeferredRegister<Codec<? extends DensityFunction>> DENSITY_TYPES =
+    public static final DeferredRegister<MapCodec<? extends DensityFunction>> DENSITY_TYPES =
             DeferredRegister.create(Registries.DENSITY_FUNCTION_TYPE, Skycraft.MODID);
-    public static final DeferredRegister<Feature<?>> FEATURES = DeferredRegister.create(Registries.FEATURE, Skycraft.MODID);
+    public static final DeferredRegister<MapCodec<? extends Feature>> FEATURES = DeferredRegister.create(Registries.FEATURE_TYPE, Skycraft.MODID);
 
-    public static final RegistryObject<Codec<? extends DensityFunction>> CHANNEL =
-            DENSITY_TYPES.register("tamriel_channel", TamrielChannel.CODEC::codec);
-    public static final RegistryObject<Codec<? extends DensityFunction>> HEIGHT =
-            DENSITY_TYPES.register("tamriel_height", TamrielHeight.CODEC::codec);
-    public static final RegistryObject<MapWaterFeature> MAP_WATER =
-            FEATURES.register("map_water", () -> new MapWaterFeature(NoneFeatureConfiguration.CODEC));
+    public static final Supplier<MapCodec<? extends DensityFunction>> CHANNEL =
+            DENSITY_TYPES.register("tamriel_channel", () -> TamrielChannel.CODEC);
+    public static final Supplier<MapCodec<? extends DensityFunction>> HEIGHT =
+            DENSITY_TYPES.register("tamriel_height", () -> TamrielHeight.CODEC);
+    public static final Supplier<MapCodec<? extends Feature>> MAP_WATER =
+            FEATURES.register("map_water", () -> new MapWaterFeature(NoneFeatureConfiguration.CODEC).codec());
+    public static final Supplier<MapCodec<? extends Feature>> RANDOM_PATCH =
+            FEATURES.register("random_patch", () -> new com.skycraft.worldgen.RandomPatchFeature().codec());
 
     private TamrielTerrain() {}
 
     public static void init(IEventBus modBus) {
         DENSITY_TYPES.register(modBus);
         FEATURES.register(modBus);
-        MinecraftForge.EVENT_BUS.addListener(TamrielSpawn::onCreateSpawn);
-        MinecraftForge.EVENT_BUS.addListener(TamrielDevCommands::register);
+        NeoForge.EVENT_BUS.addListener(TamrielSpawn::onCreateSpawn);
+        NeoForge.EVENT_BUS.addListener(TamrielDevCommands::register);
     }
 }

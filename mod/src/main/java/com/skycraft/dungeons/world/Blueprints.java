@@ -8,7 +8,7 @@ import com.skycraft.Skycraft;
 import net.minecraft.commands.arguments.blocks.BlockStateParser;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.state.BlockState;
 
 import javax.annotation.Nullable;
@@ -149,7 +149,7 @@ public final class Blueprints {
         } else if (v.startsWith("loot:")) {
             String[] parts = v.split(":", 3);
             BlockState box = parts[1].equals("barrel") ? Deco.barrel(inward) : Deco.chest(inward);
-            p.container(x, y, z, box, new ResourceLocation(parts[2]));
+            p.container(x, y, z, box, Identifier.parse(parts[2]));
         } else if (v.startsWith("foe")) {
             String id = Beats.foe(p, room);
             if (v.endsWith(":dormant")) p.spawnDormant(id, x, y, z, Painter.yaw(inward));
@@ -168,7 +168,7 @@ public final class Blueprints {
         if (STATES.containsKey(text)) return STATES.get(text);
         BlockState s = null;
         try {
-            s = BlockStateParser.parseForBlock(BuiltInRegistries.BLOCK.asLookup(), text, false).blockState();
+            s = BlockStateParser.parseForBlock(BuiltInRegistries.BLOCK, text, false).blockState();
         } catch (Exception e) {
             Skycraft.LOGGER.warn("Skycraft dungeons: bad blueprint block {}", text);
         }

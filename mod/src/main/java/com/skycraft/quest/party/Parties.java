@@ -52,7 +52,7 @@ public final class Parties {
 
     @Nullable
     public static Party partyOf(ServerPlayer player) {
-        return PartyManager.get(player.server).partyOf(player.getUUID());
+        return PartyManager.get(player.level().getServer()).partyOf(player.getUUID());
     }
 
     public static boolean sameParty(MinecraftServer server, ServerPlayer a, ServerPlayer b) {
@@ -77,20 +77,20 @@ public final class Parties {
     // ------------------------------------------------------------------ actions
 
     public static boolean create(ServerPlayer player) {
-        PartyManager m = PartyManager.get(player.server);
+        PartyManager m = PartyManager.get(player.level().getServer());
         if (m.partyOf(player.getUUID()) != null) {
             com.skycraft.core.Notifier.message(player, err("already_in_party"));
             return false;
         }
-        m.create(player.getUUID(), player.getGameProfile().getName());
+        m.create(player.getUUID(), player.getGameProfile().name());
         com.skycraft.core.Notifier.message(player, msg("created"));
-        Quests.onPartyChanged(player.server, player.getUUID());
+        Quests.onPartyChanged(player.level().getServer(), player.getUUID());
         sync(player);
         return true;
     }
 
     public static boolean invite(ServerPlayer from, ServerPlayer to) {
-        MinecraftServer server = from.server;
+        MinecraftServer server = from.level().getServer();
         PartyManager m = PartyManager.get(server);
         if (from == to) {
             com.skycraft.core.Notifier.message(from, err("self"));
@@ -98,7 +98,7 @@ public final class Parties {
         }
         Party party = m.partyOf(from.getUUID());
         if (party == null) {
-            party = m.create(from.getUUID(), from.getGameProfile().getName());
+            party = m.create(from.getUUID(), from.getGameProfile().name());
             com.skycraft.core.Notifier.message(from, msg("created"));
             Quests.onPartyChanged(server, from.getUUID());
         } else if (!party.leader.equals(from.getUUID())) {
@@ -116,7 +116,7 @@ public final class Parties {
         List<Invite> list = INVITES.computeIfAbsent(to.getUUID(), k -> new ArrayList<>());
         final UUID partyId = party.id;
         list.removeIf(i -> i.partyId().equals(partyId));
-        list.add(new Invite(party.id, from.getUUID(), from.getGameProfile().getName(), server.getTickCount() + INVITE_TICKS));
+        list.add(new Invite(party.id, from.getUUID(), from.getGameProfile().name(), server.getTickCount() + INVITE_TICKS));
         com.skycraft.core.Notifier.message(from, msg("invited", to.getDisplayName()));
         com.skycraft.core.Notifier.message(to, msg("invite_received", from.getDisplayName()));
         sync(from);
@@ -138,7 +138,7 @@ public final class Parties {
 
     /** Accepts the invite from {@code partyId}, or the most recent one if null. */
     public static boolean accept(ServerPlayer player, @Nullable UUID partyId) {
-        MinecraftServer server = player.server;
+        MinecraftServer server = player.level().getServer();
         PartyManager m = PartyManager.get(server);
         if (m.partyOf(player.getUUID()) != null) {
             com.skycraft.core.Notifier.message(player, err("already_in_party"));
@@ -163,7 +163,7 @@ public final class Parties {
             return false;
         }
         INVITES.remove(player.getUUID());
-        m.addMember(party, player.getUUID(), player.getGameProfile().getName());
+        m.addMember(party, player.getUUID(), player.getGameProfile().name());
         broadcast(server, party, msg("joined", player.getDisplayName()));
         Quests.onPartyChanged(server, player.getUUID());
         syncParty(server, party);
@@ -172,7 +172,7 @@ public final class Parties {
     }
 
     public static boolean decline(ServerPlayer player, @Nullable UUID partyId) {
-        MinecraftServer server = player.server;
+        MinecraftServer server = player.level().getServer();
         List<Invite> invites = invitesFor(server, player.getUUID());
         if (invites.isEmpty()) {
             com.skycraft.core.Notifier.message(player, err("no_invite"));
@@ -194,20 +194,20 @@ public final class Parties {
     }
 
     public static boolean leave(ServerPlayer player) {
-        MinecraftServer server = player.server;
+        MinecraftServer server = player.level().getServer();
         PartyManager m = PartyManager.get(server);
         Party party = m.partyOf(player.getUUID());
         if (party == null) {
             com.skycraft.core.Notifier.message(player, err("not_in_party"));
             return false;
         }
-        removeFrom(server, party, player.getUUID(), player.getGameProfile().getName(), false);
+        removeFrom(server, party, player.getUUID(), player.getGameProfile().name(), false);
         com.skycraft.core.Notifier.message(player, msg("you_left"));
         return true;
     }
 
     public static boolean kick(ServerPlayer leader, UUID target) {
-        MinecraftServer server = leader.server;
+        MinecraftServer server = leader.level().getServer();
         Party party = PartyManager.get(server).partyOf(leader.getUUID());
         if (party == null) {
             com.skycraft.core.Notifier.message(leader, err("not_in_party"));
@@ -229,7 +229,7 @@ public final class Parties {
     }
 
     public static boolean promote(ServerPlayer leader, UUID target) {
-        MinecraftServer server = leader.server;
+        MinecraftServer server = leader.level().getServer();
         PartyManager m = PartyManager.get(server);
         Party party = m.partyOf(leader.getUUID());
         if (party == null || !party.leader.equals(leader.getUUID())) {
@@ -273,17 +273,17 @@ public final class Parties {
             return;
         }
         Component line = Component.translatable("party.skycraft.chat", player.getDisplayName(), text).withStyle(ChatFormatting.AQUA);
-        broadcast(player.server, party, line);
+        broadcast(player.level().getServer(), party, line);
     }
 
     public static void onLogin(ServerPlayer player) {
-        PartyManager.get(player.server).rename(player.getUUID(), player.getGameProfile().getName());
+        PartyManager.get(player.level().getServer()).rename(player.getUUID(), player.getGameProfile().name());
         Party party = partyOf(player);
         if (party != null) {
-            for (ServerPlayer other : onlineMembers(player.server, party)) {
+            for (ServerPlayer other : onlineMembers(player.level().getServer(), party)) {
                 if (other != player) com.skycraft.core.Notifier.message(other, msg("member_online", player.getDisplayName()));
             }
-            PROMPTS.put(player.getUUID(), player.server.getTickCount() + LOGIN_PROMPT_DELAY);
+            PROMPTS.put(player.getUUID(), player.level().getServer().getTickCount() + LOGIN_PROMPT_DELAY);
         }
         sync(player);
     }
@@ -322,7 +322,7 @@ public final class Parties {
     }
 
     public static void sync(ServerPlayer player) {
-        MinecraftServer server = player.server;
+        MinecraftServer server = player.level().getServer();
         Party party = PartyManager.get(server).partyOf(player.getUUID());
         List<Invite> invites = invitesFor(server, player.getUUID());
         if (party == null && invites.isEmpty()) {
@@ -338,19 +338,19 @@ public final class Parties {
         tag.putInt("max", QuestConfig.MAX_PARTY_SIZE.get());
         if (party != null) {
             tag.putBoolean("inParty", true);
-            tag.putUUID("id", party.id);
-            tag.putUUID("leader", party.leader);
+            tag.store("id", net.minecraft.core.UUIDUtil.CODEC,  party.id);
+            tag.store("leader", net.minecraft.core.UUIDUtil.CODEC,  party.leader);
             ListTag members = new ListTag();
             party.members.forEach((uuid, name) -> {
                 CompoundTag m = new CompoundTag();
-                m.putUUID("uuid", uuid);
+                m.store("uuid", net.minecraft.core.UUIDUtil.CODEC,  uuid);
                 m.putString("name", name);
                 ServerPlayer p = server.getPlayerList().getPlayer(uuid);
                 m.putBoolean("online", p != null);
                 if (p != null) {
                     m.putFloat("health", p.getHealth());
                     m.putFloat("max", p.getMaxHealth());
-                    m.putString("dim", p.level().dimension().location().toString());
+                    m.putString("dim", p.level().dimension().identifier().toString());
                     // positions for the world map and compass, even far outside tracking range
                     m.putDouble("x", p.getX());
                     m.putDouble("y", p.getY());
@@ -363,7 +363,7 @@ public final class Parties {
         ListTag inv = new ListTag();
         for (Invite i : invites) {
             CompoundTag t = new CompoundTag();
-            t.putUUID("party", i.partyId());
+            t.store("party", net.minecraft.core.UUIDUtil.CODEC,  i.partyId());
             t.putString("from", i.inviterName());
             inv.add(t);
         }

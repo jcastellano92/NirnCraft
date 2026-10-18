@@ -37,7 +37,7 @@ public class DwarvenCenturion extends Automaton {
     private static final EntityDataAccessor<Boolean> DATA_STEAM = SynchedEntityData.defineId(DwarvenCenturion.class, EntityDataSerializers.BOOLEAN);
     private static final double STEAM_RANGE = 9.0;
 
-    private final ServerBossEvent bossEvent = new ServerBossEvent(Component.translatable("entity.skycraft.dwarven_centurion"),
+    private final ServerBossEvent bossEvent = new ServerBossEvent(java.util.UUID.randomUUID(), Component.translatable("entity.skycraft.dwarven_centurion"),
             BossEvent.BossBarColor.YELLOW, BossEvent.BossBarOverlay.NOTCHED_10);
     private int steamTicks;
     private int steamCooldown = 80;
@@ -45,7 +45,7 @@ public class DwarvenCenturion extends Automaton {
     public DwarvenCenturion(EntityType<? extends DwarvenCenturion> type, Level level) {
         super(type, level);
         this.xpReward = 60;
-        this.setMaxUpStep(1.0f);
+        this.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.STEP_HEIGHT).setBaseValue(1.0);
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -61,9 +61,9 @@ public class DwarvenCenturion extends Automaton {
     }
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        this.entityData.define(DATA_STEAM, false);
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(DATA_STEAM, false);
     }
 
     public boolean isSteaming() {
@@ -92,8 +92,8 @@ public class DwarvenCenturion extends Automaton {
     }
 
     @Override
-    protected void customServerAiStep() {
-        super.customServerAiStep();
+    protected void customServerAiStep(net.minecraft.server.level.ServerLevel serverLevel) {
+        super.customServerAiStep(serverLevel);
         this.bossEvent.setProgress(this.getHealth() / this.getMaxHealth());
         if (this.tickCount % 20 == 0 && this.level() instanceof ServerLevel sl) {
             double rangeSq = 48.0 * 48.0;
@@ -146,14 +146,14 @@ public class DwarvenCenturion extends Automaton {
             if (len > STEAM_RANGE || len < 0.01) continue;
             if (to.scale(1.0 / len).dot(look) < 0.72) continue;
             if (!this.hasLineOfSight(e)) continue;
-            e.invulnerableTime = 0;
-            e.hurt(this.damageSources().indirectMagic(this, this), 3.0f);
+            e.setInvulnerableTime(0);
+            com.skycraft.platform.Effects.hurt(e, this.damageSources().indirectMagic(this, this), 3.0f);
         }
     }
 
     @Override
-    public boolean doHurtTarget(Entity target) {
-        boolean hit = super.doHurtTarget(target);
+    public boolean doHurtTarget(net.minecraft.server.level.ServerLevel serverLevel, Entity target) {
+        boolean hit = super.doHurtTarget(serverLevel, target);
         if (hit) {
             this.playSound(SoundEvents.ANVIL_LAND, 0.6f, 0.6f);
             if (this.level() instanceof ServerLevel server) {
@@ -165,7 +165,7 @@ public class DwarvenCenturion extends Automaton {
     }
 
     @Override
-    public boolean causeFallDamage(float distance, float multiplier, DamageSource source) {
+    public boolean causeFallDamage(double distance, float multiplier, DamageSource source) {
         return false;
     }
 
@@ -195,15 +195,17 @@ public class DwarvenCenturion extends Automaton {
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag tag) {
-        super.readAdditionalSaveData(tag);
+    public void readAdditionalSaveData(net.minecraft.world.level.storage.ValueInput input263) {
+        super.readAdditionalSaveData(input263);
+        net.minecraft.nbt.CompoundTag tag = com.skycraft.platform.ValueTags.read(input263);
+        
         if (this.hasCustomName()) this.bossEvent.setName(this.getDisplayName());
     }
 
     @Override
     public void tick() {
         super.tick();
-        if (this.level().isClientSide && isSteaming()) {
+        if (this.level().isClientSide() && isSteaming()) {
             Vec3 eye = this.getEyePosition();
             Vec3 look = this.getViewVector(1.0f);
             for (int i = 0; i < 3; i++) {
@@ -211,7 +213,7 @@ public class DwarvenCenturion extends Automaton {
                         look.x * 0.6 + (this.random.nextDouble() - 0.5) * 0.15, look.y * 0.6, look.z * 0.6 + (this.random.nextDouble() - 0.5) * 0.15);
             }
         }
-        if (this.level().isClientSide && this.tickCount % 6 == 0) {
+        if (this.level().isClientSide() && this.tickCount % 6 == 0) {
             // exhaust stacks
             Vec3 back = this.getViewVector(1.0f).scale(-0.7);
             this.level().addParticle(ParticleTypes.SMOKE, this.getX() + back.x, this.getY() + this.getBbHeight() + 0.1, this.getZ() + back.z, 0, 0.05, 0);

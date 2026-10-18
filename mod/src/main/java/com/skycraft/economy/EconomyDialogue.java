@@ -9,7 +9,7 @@ import com.skycraft.perk.Perks;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.npc.VillagerProfession;
+import net.minecraft.world.entity.npc.villager.VillagerProfession;
 
 import java.util.List;
 
@@ -25,7 +25,7 @@ public final class EconomyDialogue {
         if (Merchants.isMerchant(npc)) {
             out.add(new DialogueOption("economy.barter", Component.translatable("dialogue.skycraft.economy.barter"), 100, Barter::open));
 
-            VillagerProfession p = Merchants.profession(npc);
+            net.minecraft.resources.ResourceKey<VillagerProfession> p = Merchants.profession(npc);
             if (p == VillagerProfession.FARMER && Barter.hasAny(player, ShopType.CROPS)) {
                 out.add(new DialogueOption("economy.sell_crops", Component.translatable("dialogue.skycraft.economy.sell_crops"), 110,
                         (pl, n) -> Barter.bulkSell(pl, n, ShopType.CROPS)));
@@ -62,14 +62,14 @@ public final class EconomyDialogue {
                         ? Component.translatable("dialogue.skycraft.economy.house.buy", Currency.formatCompact(house.cost()))
                         : Component.translatable("dialogue.skycraft.economy.house.buy_named", house.displayName(), Currency.formatCompact(house.cost()));
                 out.add(new DialogueOption("economy.buy_house." + house.id(), label, 250,
-                        (p, n) -> Houses.purchaseHouse(p, p.serverLevel(), house, null)));
+                        (p, n) -> Houses.purchaseHouse(p, p.level(), house, null)));
             } else {
-                Houses.HousesData data = Houses.HousesData.get(player.server.overworld().getServer());
+                Houses.HousesData data = Houses.HousesData.get(player.level().getServer().overworld().getServer());
                 for (Houses.Furnishing furn : Houses.UPGRADES) {
                     if (!house.homestead() && !data.hasFurnishing(house.id(), furn.id())) {
                         out.add(new DialogueOption("economy.furnish." + house.id() + "." + furn.id(),
                                 Component.translatable("dialogue.skycraft.economy.house.furnish_option", furn.name(), Currency.formatCompact(furn.cost())), 260,
-                                (p, n) -> Houses.purchaseFurnishing(p, p.serverLevel(), house, furn)));
+                                (p, n) -> Houses.purchaseFurnishing(p, p.level(), house, furn)));
                     }
                 }
             }
@@ -77,7 +77,7 @@ public final class EconomyDialogue {
     }
 
     public static boolean isStewardOrJarl(LivingEntity npc) {
-        if (npc.getPersistentData().getBoolean("skycraft_steward")) return true;
+        if (npc.getPersistentData().getBooleanOr("skycraft_steward",false)) return true;
         if (com.skycraft.crime.Crimes.isGuard(npc) || npc.getType().getDescriptionId().contains("guard")) {
             return false;
         }

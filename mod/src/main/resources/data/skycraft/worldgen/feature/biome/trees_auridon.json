@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:random_selector",
+  "features": [
+    {
+      "feature": "minecraft:cherry_checked",
+      "chance": 0.2
+    },
+    {
+      "feature": "skycraft:biome/cypress_checked",
+      "chance": 0.2
+    }
+  ],
+  "default": "skycraft:biome/olive_checked"
+}

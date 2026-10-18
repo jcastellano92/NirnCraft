@@ -1,6 +1,6 @@
 package com.skycraft.tamriel;
 
-import net.minecraftforge.eventbus.api.IEventBus;
+import net.neoforged.bus.api.IEventBus;
 
 /**
  * Nirn worldgen and geography: the Tamriel map, terrain, biomes, regions, places and their structures.
@@ -10,6 +10,8 @@ public final class TamrielModule {
     private TamrielModule() {}
 
     public static void init(IEventBus modBus) {
+        modBus.addListener(com.skycraft.worldgen.NativeRecipeRules::addPacks);
+        com.skycraft.world.ocean.OceanWorldConfig.register();
         TamrielTerrain.init(modBus);
         TamrielBiomes.init(modBus);
         TamrielStructures.init(modBus);

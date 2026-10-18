@@ -12,7 +12,7 @@ import com.skycraft.survival.inn.Innkeepers;
 import com.skycraft.vitals.Vitals;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffect;
@@ -21,20 +21,19 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.ThrownPotion;
+import net.minecraft.world.entity.projectile.throwableitemprojectile.AbstractThrownPotion;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.alchemy.PotionUtils;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.ProjectileImpactEvent;
-import net.minecraftforge.event.entity.living.LivingEntityUseItemEvent;
-import net.minecraftforge.event.entity.living.LivingHealEvent;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.event.entity.living.MobEffectEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.registries.ForgeRegistries;
+
+import net.neoforged.neoforge.event.entity.ProjectileImpactEvent;
+import net.neoforged.neoforge.event.entity.living.LivingEntityUseItemEvent;
+import net.neoforged.neoforge.event.entity.living.LivingHealEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.neoforge.event.entity.living.MobEffectEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 import java.util.HashSet;
 import java.util.List;
@@ -45,9 +44,9 @@ import java.util.UUID;
  * Runtime rules of the survival module: disease and blessing effects on the vitals, catching diseases from creatures,
  * curing them with the arcane {@code skycraft:cure_disease} effect, the skooma crash and the inn's rested bonus.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class SurvivalEvents {
-    public static final ResourceLocation CURE_DISEASE_ID = new ResourceLocation(Skycraft.MODID, "cure_disease");
+    public static final Identifier CURE_DISEASE_ID = Identifier.fromNamespaceAndPath(Skycraft.MODID, "cure_disease");
     /** Buff flag set when a player slept in a rented inn room (+5% skill XP on top of Well Rested). */
     public static final String INN_RESTED = "inn_rested";
     private static final String[] POOLS = {"health", "magicka", "stamina"};
@@ -66,18 +65,18 @@ public final class SurvivalEvents {
     }
 
     private static boolean isCureDisease(MobEffect effect) {
-        return CURE_DISEASE_ID.equals(ForgeRegistries.MOB_EFFECTS.getKey(effect));
+        return CURE_DISEASE_ID.equals(BuiltInRegistries.MOB_EFFECT.getKey(effect));
     }
 
-    private static boolean has(Player player, net.minecraftforge.registries.RegistryObject<MobEffect> effect) {
-        return effect.isPresent() && player.hasEffect(effect.get());
+    private static boolean has(Player player, java.util.function.Supplier<MobEffect> effect) {
+        return player.hasEffect(com.skycraft.platform.Effects.holder(effect.get()));
     }
 
     // ------------------------------------------------------------------ ticking
 
     @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer player)) return;
+    public static void onPlayerTick(net.neoforged.neoforge.event.tick.PlayerTickEvent.Post event) {
+        if (!(event instanceof net.neoforged.neoforge.event.tick.PlayerTickEvent.Post) || !(event.getEntity() instanceof ServerPlayer player)) return;
         if (!CURE_QUEUE.isEmpty() && CURE_QUEUE.remove(player.getUUID())) Diseases.cureAll(player);
         long now = player.level().getGameTime();
         if (now % 5 == 0) adjustRegen(player, SkyData.get(player), now);
@@ -96,7 +95,7 @@ public final class SurvivalEvents {
         boolean combat = Vitals.inCombat(player);
         float stMul = 0f;
         if (has(player, SurvivalEffects.RATTLES)) stMul -= 0.5f;
-        MobEffectInstance fortify = player.getEffect(SurvivalEffects.FORTIFY_STAMINA_REGEN.get());
+        MobEffectInstance fortify = player.getEffect(com.skycraft.platform.Effects.holder(SurvivalEffects.FORTIFY_STAMINA_REGEN.get()));
         if (fortify != null) stMul += 0.25f * (fortify.getAmplifier() + 1);
         if (stMul != 0f && now - data.getLastStaminaUseTick() > 20 && !player.isSprinting() && data.getStamina() < data.maxStamina()) {
             float pct = (float) (double) SkyConfig.STAMINA_REGEN_PERCENT.get() / 100f * (combat ? 0.5f : 1f);
@@ -117,7 +116,7 @@ public final class SurvivalEvents {
      * so other modules' bonuses in the same keys are left alone.
      */
     public static void reconcileBonuses(Player player) {
-        if (player.level().isClientSide) return;
+        if (player.level().isClientSide()) return;
         float[] want = new float[3];
         if (has(player, SurvivalEffects.BLESSINGS.get(Divine.ARKAY))) want[0] += 25;
         if (has(player, SurvivalEffects.GREENSPORE)) want[0] -= 25;
@@ -127,13 +126,13 @@ public final class SurvivalEvents {
         if (has(player, SurvivalEffects.BONE_BREAK_FEVER)) want[2] -= 25;
 
         PlayerData data = SkyData.get(player);
-        CompoundTag mine = data.module("survival").getCompound("applied_bonus");
+        CompoundTag mine = data.module("survival").getCompoundOrEmpty("applied_bonus");
         CompoundTag bonus = data.module("bonus");
         boolean changed = false;
         for (int i = 0; i < 3; i++) {
-            float diff = want[i] - mine.getFloat(POOLS[i]);
+            float diff = want[i] - mine.getFloatOr(POOLS[i], 0f);
             if (diff == 0f) continue;
-            bonus.putFloat(POOLS[i], bonus.getFloat(POOLS[i]) + diff);
+            bonus.putFloat(POOLS[i], bonus.getFloatOr(POOLS[i], 0f) + diff);
             mine.putFloat(POOLS[i], want[i]);
             changed = true;
         }
@@ -155,24 +154,30 @@ public final class SurvivalEvents {
     private static void checkSkooma(ServerPlayer player) {
         PlayerData data = SkyData.get(player);
         CompoundTag tag = data.module("survival");
-        long crash = tag.getLong("skooma_crash");
+        long crash = tag.getLongOr("skooma_crash",0L);
         if (crash <= 0 || player.level().getGameTime() < crash) return;
         tag.remove("skooma_crash");
         data.markDirty();
-        player.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 90 * 20, 0));
-        player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 90 * 20, 0));
-        player.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 8 * 20, 0, false, false, true));
+        player.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.WEAKNESS), 90 * 20, 0));
+        player.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.SLOWNESS), 90 * 20, 0));
+        player.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.NAUSEA), 8 * 20, 0, false, false, true));
         data.setStamina(data.getStamina() * 0.5f);
         Notifier.message(player, Component.translatable("message.skycraft.survival.skooma_crash"));
     }
 
     // ------------------------------------------------------------------ cures
 
+    @SubscribeEvent public static void onEffectRemoved(MobEffectEvent.Remove event) {
+        if (event.getEffect().value() instanceof SurvivalEffects.SurvivalEffect effect && effect.resistsMilk()
+                && com.skycraft.platform.ItemUse.consuming(event.getEntity()).is(net.minecraft.world.item.Items.MILK_BUCKET))
+            event.setCanceled(true);
+    }
+
     @SubscribeEvent
     public static void onEffectAdded(MobEffectEvent.Added event) {
         LivingEntity entity = event.getEntity();
-        if (entity.level().isClientSide) return;
-        MobEffect effect = event.getEffectInstance().getEffect();
+        if (entity.level().isClientSide()) return;
+        MobEffect effect = event.getEffectInstance().getEffect().value();
         if (isCureDisease(effect)) {
             queueCure(entity);
         } else if (effect == ModEffects.WELL_RESTED.get() && entity instanceof ServerPlayer player) {
@@ -183,7 +188,7 @@ public final class SurvivalEvents {
     /** Drinking a potion with Cure Disease (instant effects never fire {@link MobEffectEvent.Added}). */
     @SubscribeEvent
     public static void onUseFinish(LivingEntityUseItemEvent.Finish event) {
-        if (event.getEntity().level().isClientSide) return;
+        if (event.getEntity().level().isClientSide()) return;
         if (hasCure(event.getItem())) queueCure(event.getEntity());
         if (event.getEntity() instanceof ServerPlayer player) {
             checkRawMeatInfection(player, event.getItem());
@@ -191,8 +196,8 @@ public final class SurvivalEvents {
     }
 
     private static boolean isRawMeat(ItemStack stack) {
-        if (stack.isEmpty() || !stack.isEdible()) return false;
-        ResourceLocation id = ForgeRegistries.ITEMS.getKey(stack.getItem());
+        if (stack.isEmpty() || !stack.has(net.minecraft.core.component.DataComponents.FOOD)) return false;
+        Identifier id = BuiltInRegistries.ITEM.getKey(stack.getItem());
         if (id == null) return false;
         String path = id.getPath();
         if (path.equals("beef") || path.equals("porkchop") || path.equals("chicken") ||
@@ -208,7 +213,7 @@ public final class SurvivalEvents {
         if (!isRawMeat(item)) return;
         double chance = 0.35 * (1.0 - Diseases.resistance(player));
         if (player.getRandom().nextDouble() >= chance) return;
-        List<net.minecraftforge.registries.RegistryObject<MobEffect>> diseases = List.of(
+        List<java.util.function.Supplier<MobEffect>> diseases = List.of(
                 SurvivalEffects.COLLYWOBBLES, SurvivalEffects.GREENSPORE,
                 SurvivalEffects.SWAMP_ROT, SurvivalEffects.ATAXIA, SurvivalEffects.RATTLES
         );
@@ -218,15 +223,15 @@ public final class SurvivalEvents {
 
     @SubscribeEvent
     public static void onPotionImpact(ProjectileImpactEvent event) {
-        if (!(event.getProjectile() instanceof ThrownPotion potion) || potion.level().isClientSide) return;
+        if (!(event.getProjectile() instanceof AbstractThrownPotion potion) || potion.level().isClientSide()) return;
         if (!hasCure(potion.getItem())) return;
         for (Player p : potion.level().getEntitiesOfClass(Player.class, potion.getBoundingBox().inflate(4.0, 2.0, 4.0))) queueCure(p);
     }
 
     private static boolean hasCure(ItemStack stack) {
         if (stack.isEmpty()) return false;
-        for (MobEffectInstance inst : PotionUtils.getMobEffects(stack)) {
-            if (isCureDisease(inst.getEffect())) return true;
+        for (MobEffectInstance inst : com.skycraft.platform.ArcaneData.effects(stack)) {
+            if (isCureDisease(inst.getEffect().value())) return true;
         }
         return false;
     }
@@ -240,9 +245,9 @@ public final class SurvivalEvents {
     // ------------------------------------------------------------------ combat & healing
 
     @SubscribeEvent(priority = EventPriority.LOW)
-    public static void onHurt(LivingHurtEvent event) {
+    public static void onHurt(com.skycraft.combat.BeforeArmorDamageEvent event) {
         LivingEntity victim = event.getEntity();
-        if (victim.level().isClientSide) return;
+        if (victim.level().isClientSide()) return;
         DamageSource source = event.getSource();
         Entity attacker = source.getEntity();
         // Rockjoint: melee damage -25%
@@ -261,7 +266,7 @@ public final class SurvivalEvents {
 
     private static void maybeInfect(ServerPlayer player, LivingEntity carrier) {
         if (!SurvivalConfig.DISEASES.get() || player.isCreative() || player.isSpectator()) return;
-        List<net.minecraftforge.registries.RegistryObject<MobEffect>> diseases = Diseases.carriedBy(carrier);
+        List<java.util.function.Supplier<MobEffect>> diseases = Diseases.carriedBy(carrier);
         if (diseases.isEmpty()) return;
         double chance = SurvivalConfig.DISEASE_CHANCE.get() * (1.0 - Diseases.resistance(player));
         if (player.getRandom().nextDouble() >= chance) return;
@@ -271,7 +276,7 @@ public final class SurvivalEvents {
 
     @SubscribeEvent
     public static void onHeal(LivingHealEvent event) {
-        if (!(event.getEntity() instanceof Player player) || player.level().isClientSide) return;
+        if (!(event.getEntity() instanceof Player player) || player.level().isClientSide()) return;
         float amount = event.getAmount();
         if (has(player, SurvivalEffects.SWAMP_ROT)) amount *= 0.75f;
         if (has(player, SurvivalEffects.BLESSINGS.get(Divine.MARA))) amount *= 1.1f;

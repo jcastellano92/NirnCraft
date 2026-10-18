@@ -215,18 +215,18 @@ public final class WeatherFront {
     }
 
     public static WeatherFront load(CompoundTag tag) {
-        WeatherKind k = WeatherKind.byId(tag.getString("kind"));
+        WeatherKind k = WeatherKind.byId(tag.getStringOr("kind",""));
         if (k == null) k = WeatherKind.STORM;
         return new WeatherFront(
-                tag.getInt("id"),
-                tag.getFloat("x"),
-                tag.getFloat("z"),
-                tag.getFloat("radius"),
-                tag.getFloat("vx"),
-                tag.getFloat("vz"),
+                tag.getIntOr("id",0),
+                tag.getFloatOr("x",0F),
+                tag.getFloatOr("z",0F),
+                tag.getFloatOr("radius",0F),
+                tag.getFloatOr("vx",0F),
+                tag.getFloatOr("vz",0F),
                 k,
-                tag.getFloat("intensity"),
-                tag.getInt("ticksLeft")
+                tag.getFloatOr("intensity",0F),
+                tag.getIntOr("ticksLeft",0)
         );
     }
 

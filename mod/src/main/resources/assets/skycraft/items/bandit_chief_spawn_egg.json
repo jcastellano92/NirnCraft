@@ -1,0 +1,16 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "skycraft:item/bandit_chief_spawn_egg",
+    "tints": [
+      {
+        "type": "minecraft:constant",
+        "value": 3877406
+      },
+      {
+        "type": "minecraft:constant",
+        "value": 13224393
+      }
+    ]
+  }
+}

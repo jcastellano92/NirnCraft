@@ -1,30 +1,30 @@
 package com.skycraft.protect;
 
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 import java.util.List;
 
 /** World protection settings: {@code config/skycraft-protect.toml}. */
 public final class ProtectConfig {
-    public static final ForgeConfigSpec SPEC;
+    public static final ModConfigSpec SPEC;
 
-    public static final ForgeConfigSpec.BooleanValue ENABLED;
-    public static final ForgeConfigSpec.BooleanValue CREATIVE_BYPASS;
-    public static final ForgeConfigSpec.ConfigValue<String> TERRAIN_DIGGING;
-    public static final ForgeConfigSpec.BooleanValue HOMESTEAD_FREE_DIGGING;
-    public static final ForgeConfigSpec.BooleanValue ORE_MINING;
-    public static final ForgeConfigSpec.BooleanValue TREE_CHOPPING;
-    public static final ForgeConfigSpec.BooleanValue GRIEFING_OFF;
-    public static final ForgeConfigSpec.BooleanValue FIRE_SPREAD_OFF;
-    public static final ForgeConfigSpec.BooleanValue FLUIDS_OFF;
-    public static final ForgeConfigSpec.BooleanValue PROTECT_ENTITIES;
-    public static final ForgeConfigSpec.BooleanValue TOOL_ACTIONS_OFF;
-    public static final ForgeConfigSpec.IntValue HINT_COOLDOWN_TICKS;
-    public static final ForgeConfigSpec.IntValue SETTLEMENT_MARGIN;
-    public static final ForgeConfigSpec.IntValue ROAD_MARGIN;
+    public static final ModConfigSpec.BooleanValue ENABLED;
+    public static final ModConfigSpec.BooleanValue CREATIVE_BYPASS;
+    public static final ModConfigSpec.ConfigValue<String> TERRAIN_DIGGING;
+    public static final ModConfigSpec.BooleanValue HOMESTEAD_FREE_DIGGING;
+    public static final ModConfigSpec.BooleanValue ORE_MINING;
+    public static final ModConfigSpec.BooleanValue TREE_CHOPPING;
+    public static final ModConfigSpec.BooleanValue GRIEFING_OFF;
+    public static final ModConfigSpec.BooleanValue FIRE_SPREAD_OFF;
+    public static final ModConfigSpec.BooleanValue FLUIDS_OFF;
+    public static final ModConfigSpec.BooleanValue PROTECT_ENTITIES;
+    public static final ModConfigSpec.BooleanValue TOOL_ACTIONS_OFF;
+    public static final ModConfigSpec.IntValue HINT_COOLDOWN_TICKS;
+    public static final ModConfigSpec.IntValue SETTLEMENT_MARGIN;
+    public static final ModConfigSpec.IntValue ROAD_MARGIN;
 
     static {
-        ForgeConfigSpec.Builder b = new ForgeConfigSpec.Builder();
+        ModConfigSpec.Builder b = new ModConfigSpec.Builder();
         ENABLED = b.comment("Skyrim-style world protection: nobody can break or place blocks outside a homestead they may build in,",
                 "except the designated harvests (ore veins, wild trees, plants) and blocks they placed themselves.")
                 .define("enabled", true);
@@ -37,7 +37,7 @@ public final class ProtectConfig {
                 "              but never inside a settlement, road, structure or landmark footprint;",
                 "  homestead = never outside a homestead (strict Skyrim: the Mining perks only matter at home);",
                 "  free      = no terrain rule of its own (the perk rules of the dig module still apply).")
-                .defineInList("terrainDigging", "perks", List.of("perks", "homestead", "free"));
+                .define("terrainDigging", "perks", value -> value instanceof String mode && List.of("perks", "homestead", "free").contains(mode));
         HOMESTEAD_FREE_DIGGING = b.comment("Inside a homestead you may build in, terrain can be dug without the Mining perks.",
                 "Off (owner decision, playtest 4): digging at home still needs Excavator / Stonebreaker / Deep Delver.")
                 .define("homesteadFreeDiggingWithoutPerks", false);

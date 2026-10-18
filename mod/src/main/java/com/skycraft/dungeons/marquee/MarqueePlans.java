@@ -81,7 +81,9 @@ public final class MarqueePlans {
         if (index != null && index.isJsonArray()) {
             for (JsonElement f : index.getAsJsonArray()) {
                 try {
-                    JsonElement e = read("/skycraft/dungeons/marquee/" + f.getAsString());
+                    String file = f.getAsString();
+                    if (!file.endsWith(".json")) file += ".json";
+                    JsonElement e = read("/skycraft/dungeons/marquee/" + file);
                     if (e != null && e.isJsonObject()) {
                         Plan plan = parse(e.getAsJsonObject());
                         BY_ID.put(plan.id, plan);

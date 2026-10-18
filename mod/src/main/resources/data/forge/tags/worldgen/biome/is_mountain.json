@@ -9,6 +9,9 @@
     "skycraft:skyrim_highlands",
     "skycraft:snowy_slopes",
     "skycraft:throat_of_the_world",
-    "skycraft:wrothgarian_mountains"
+    "skycraft:wrothgarian_mountains",
+    "#minecraft:is_mountain",
+    "#c:is_mountain/peak",
+    "#c:is_mountain/slope"
   ]
 }

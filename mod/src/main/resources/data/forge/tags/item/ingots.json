@@ -1,0 +1,18 @@
+{
+  "replace": false,
+  "values": [
+    "#forge:ingots/corundum",
+    "#forge:ingots/orichalcum",
+    "#forge:ingots/moonstone",
+    "#forge:ingots/malachite",
+    "#forge:ingots/quicksilver",
+    "#forge:ingots/ebony",
+    "#forge:ingots/silver",
+    "#forge:ingots/steel",
+    "#forge:ingots/dwarven_metal",
+    "#c:ingots/copper",
+    "#c:ingots/gold",
+    "#c:ingots/iron",
+    "#c:ingots/netherite"
+  ]
+}

@@ -42,12 +42,12 @@ public class TentKitItem extends Item {
         BlockPos origin = level.getBlockState(clicked).canBeReplaced() ? clicked : clicked.above();
         Direction facing = player.getDirection().getOpposite();
         if (!canPitch(level, origin, facing)) {
-            if (!level.isClientSide && player instanceof ServerPlayer sp) {
+            if (!level.isClientSide() && player instanceof ServerPlayer sp) {
                 Notifier.message(sp, Component.translatable("survival.skycraft.camping.no_room"));
             }
             return InteractionResult.FAIL;
         }
-        if (level.isClientSide) return InteractionResult.SUCCESS;
+        if (level.isClientSide()) return InteractionResult.SUCCESS;
 
         for (TentBlock.Part part : TentBlock.Part.values()) {
             BlockPos partPos = TentBlock.partPos(origin, facing, part);
@@ -66,7 +66,7 @@ public class TentKitItem extends Item {
             if (!player.isCreative()) Inv.take(player, SurvivalRegistry.BEDROLL_ITEM.get(), 1);
         }
         level.playSound(null, origin, SoundEvents.WOOL_PLACE, SoundSource.BLOCKS, 1.0f, 0.8f);
-        level.playSound(null, origin, SoundEvents.ARMOR_EQUIP_LEATHER, SoundSource.BLOCKS, 1.0f, 0.9f);
+        level.playSound(null, origin, SoundEvents.ARMOR_EQUIP_LEATHER.value(), SoundSource.BLOCKS, 1.0f, 0.9f);
         if (!player.isCreative()) ctx.getItemInHand().shrink(1);
         return InteractionResult.CONSUME;
     }
@@ -87,7 +87,7 @@ public class TentKitItem extends Item {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
-        tooltip.add(Component.translatable("tooltip.skycraft.survival.tent_kit").withStyle(ChatFormatting.GRAY));
+    public void appendHoverText(ItemStack stack, net.minecraft.world.item.Item.TooltipContext context263, net.minecraft.world.item.component.TooltipDisplay display263, java.util.function.Consumer<Component> tooltip, TooltipFlag flag) {
+        tooltip.accept(Component.translatable("tooltip.skycraft.survival.tent_kit").withStyle(ChatFormatting.GRAY));
     }
 }

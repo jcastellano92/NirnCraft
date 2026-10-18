@@ -1,6 +1,6 @@
 package com.skycraft.client.screen.title;
 
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.EditBox;
@@ -10,9 +10,8 @@ import net.minecraft.client.gui.screens.worldselection.WorldCreationUiState;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.Difficulty;
-import org.lwjgl.glfw.GLFW;
+import com.mojang.blaze3d.platform.InputConstants;
 
-import java.lang.reflect.Method;
 
 /**
  * Skyrim-styled New Game Screen:
@@ -48,14 +47,7 @@ public class SkyCreateWorldScreen extends Screen {
 
     @Override
     protected void init() {
-        if (this.minecraft != null) {
-            try {
-                java.lang.reflect.Field mcField = Screen.class.getDeclaredField("minecraft");
-                mcField.setAccessible(true);
-                mcField.set(underlying, this.minecraft);
-            } catch (Exception ignored) {}
-            underlying.init(this.minecraft, this.width, this.height);
-        }
+        underlying.init(this.width, this.height);
 
         int cx = width / 2;
         int startY = Math.max(45, height / 5);
@@ -63,7 +55,7 @@ public class SkyCreateWorldScreen extends Screen {
         // Pre-configure underlying UI state: force survival, no cheats, no bonus chest
         WorldCreationUiState state = underlying.getUiState();
         state.setGameMode(WorldCreationUiState.SelectedGameMode.SURVIVAL);
-        state.setAllowCheats(false);
+        state.setAllowCommands(false);
         state.setBonusChest(false);
         state.setGenerateStructures(true);
         state.setDifficulty(selectedDifficulty);
@@ -85,8 +77,7 @@ public class SkyCreateWorldScreen extends Screen {
                 case NORMAL -> Component.literal("Adept (Normal)");
                 case HARD -> Component.literal("Expert (Challenging)");
             };
-        }).withValues(Difficulty.PEACEFUL, Difficulty.EASY, Difficulty.NORMAL, Difficulty.HARD)
-          .withInitialValue(selectedDifficulty)
+        },selectedDifficulty).withValues(Difficulty.PEACEFUL, Difficulty.EASY, Difficulty.NORMAL, Difficulty.HARD)
           .create(cx - boxW / 2, diffY, boxW, boxH, Component.literal("Difficulty"), (btn, val) -> {
               this.selectedDifficulty = val;
               state.setDifficulty(val);
@@ -129,63 +120,26 @@ public class SkyCreateWorldScreen extends Screen {
         state.setSeed(seed.isEmpty() ? com.skycraft.bake.WorldSeed.NAME : seed);
 
         state.setGameMode(WorldCreationUiState.SelectedGameMode.SURVIVAL);
-        state.setAllowCheats(false);
+        state.setAllowCommands(false);
         state.setBonusChest(false);
         state.setGenerateStructures(true);
         state.setDifficulty(selectedDifficulty);
 
-        // Ensure underlying has valid minecraft reference before onCreate
-        if (this.minecraft != null) {
-            for (Class<?> cl = underlying.getClass(); cl != null && cl != Object.class; cl = cl.getSuperclass()) {
-                for (java.lang.reflect.Field f : cl.getDeclaredFields()) {
-                    if (f.getType() == net.minecraft.client.Minecraft.class) {
-                        try {
-                            f.setAccessible(true);
-                            f.set(underlying, this.minecraft);
-                        } catch (Throwable ignored) {}
-                    }
-                }
-            }
-        }
-
-        // Invoke onCreate on underlying CreateWorldScreen
-        try {
-            Method onCreate = null;
-            for (String name : new String[]{"onCreate", "m_100972_", "C"}) {
-                try {
-                    onCreate = CreateWorldScreen.class.getDeclaredMethod(name);
-                    if (onCreate != null) break;
-                } catch (Throwable ignored) {}
-            }
-            if (onCreate == null) {
-                try {
-                    onCreate = net.minecraftforge.fml.util.ObfuscationReflectionHelper.findMethod(CreateWorldScreen.class, "m_100972_");
-                } catch (Throwable ignored) {}
-            }
-            if (onCreate != null) {
-                onCreate.setAccessible(true);
-                onCreate.invoke(underlying);
+        // Use the real create button callback, retaining vanilla validation/data-pack lifecycle.
+        for (net.minecraft.client.gui.components.events.GuiEventListener child : underlying.children()) {
+            if (child instanceof Button button && button.active
+                    && button.getMessage().getContents() instanceof net.minecraft.network.chat.contents.TranslatableContents text
+                    && text.getKey().equals("selectWorld.create")) {
+                button.onPress(new net.minecraft.client.input.KeyEvent(InputConstants.KEY_RETURN, org.lwjgl.sdl.SDLKeycode.SDLK_RETURN, 0));
                 return;
             }
-
-            // Fallback: trigger Create button on underlying screen
-            for (net.minecraft.client.gui.components.events.GuiEventListener child : underlying.children()) {
-                if (child instanceof Button b && b.getMessage().getString().toLowerCase(java.util.Locale.ROOT).contains("create")) {
-                    b.onPress();
-                    return;
-                }
-            }
-            underlying.onClose();
-        } catch (Throwable ex) {
-            ex.printStackTrace();
-            if (this.minecraft != null) {
-                this.minecraft.setScreen(new SkyTitleScreen());
-            }
         }
+        // Preserve access to the fully functional vanilla screen if its layout changes.
+        minecraft.gui.setScreen(underlying);
     }
 
     @Override
-    public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+    public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
         // Deep Nordic slate background
         g.fillGradient(0, 0, width, height, 0xFF080808, 0xFF141210);
 
@@ -193,8 +147,8 @@ public class SkyCreateWorldScreen extends Screen {
         int startY = Math.max(45, height / 5);
 
         // Header
-        g.drawCenteredString(font, "NEW JOURNEY", cx, startY - 28, GOLD_COLOR);
-        g.drawCenteredString(font, "Begin an adventure in the lands of Skyrim", cx, startY - 16, DIM_COLOR);
+        g.centeredText(font, "NEW JOURNEY", cx, startY - 28, GOLD_COLOR);
+        g.centeredText(font, "Begin an adventure in the lands of Skyrim", cx, startY - 16, DIM_COLOR);
 
         // Decorative horizontal gold line
         int divW = 140;
@@ -202,26 +156,27 @@ public class SkyCreateWorldScreen extends Screen {
 
         // Labels
         int boxW = 200;
-        g.drawString(font, "ADVENTURE NAME", cx - boxW / 2, startY + 10, TEXT_COLOR, false);
-        g.drawString(font, "DIFFICULTY", cx - boxW / 2, startY + 50, TEXT_COLOR, false);
-        g.drawString(font, "WORLD SEED (DEFAULT: NIRN)", cx - boxW / 2, startY + 92, TEXT_COLOR, false);
+        g.text(font, "ADVENTURE NAME", cx - boxW / 2, startY + 10, TEXT_COLOR, false);
+        g.text(font, "DIFFICULTY", cx - boxW / 2, startY + 50, TEXT_COLOR, false);
+        g.text(font, "WORLD SEED (DEFAULT: NIRN)", cx - boxW / 2, startY + 92, TEXT_COLOR, false);
 
-        super.render(g, mouseX, mouseY, partialTick);
+        super.extractRenderState(g, mouseX, mouseY, partialTick);
     }
 
     @Override
-    public boolean keyPressed(int key, int scan, int mods) {
-        if (key == GLFW.GLFW_KEY_ENTER) {
+    public boolean keyPressed(net.minecraft.client.input.KeyEvent event) {
+        int key = event.key(), scan = event.keycode(), mods = event.modifiers();
+        if (key == InputConstants.KEY_RETURN) {
             startJourney();
             return true;
         }
-        return super.keyPressed(key, scan, mods);
+        return super.keyPressed(event);
     }
 
     @Override
     public void onClose() {
         if (this.minecraft != null) {
-            this.minecraft.setScreen(new SkyTitleScreen());
+            this.minecraft.gui.setScreen(new SkyTitleScreen());
         }
     }
 }

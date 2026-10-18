@@ -26,34 +26,34 @@ public final class Statues {
                     Blocks.SEA_LANTERN.defaultBlockState(), 2, true, "hair", "moon_star");
             case BOETHIAH -> new Look(Blocks.POLISHED_BLACKSTONE, Blocks.RED_NETHER_BRICKS, Blocks.GOLD_BLOCK, Blocks.BLACKSTONE,
                     Blocks.POLISHED_BLACKSTONE_BRICKS, Deco.campfire(false, true), 2, false, "horns", "sword");
-            case CLAVICUS_VILE -> new Look(Blocks.POLISHED_ANDESITE, Blocks.BROWN_TERRACOTTA, Blocks.GOLD_BLOCK, Blocks.STONE_BRICKS,
+            case CLAVICUS_VILE -> new Look(Blocks.POLISHED_ANDESITE, com.skycraft.worldgen.VanillaBlocks.BROWN_TERRACOTTA, Blocks.GOLD_BLOCK, Blocks.STONE_BRICKS,
                     Blocks.CHISELED_STONE_BRICKS, Deco.lantern(false, false), 2, false, "horns", "staff");
             case HERMAEUS_MORA -> new Look(Blocks.DARK_PRISMARINE, Blocks.PRISMARINE, Blocks.SEA_LANTERN, Blocks.DARK_PRISMARINE,
                     Blocks.PRISMARINE_BRICKS, Blocks.SEA_LANTERN.defaultBlockState(), 0, false, "eyes", "none");
-            case HIRCINE -> new Look(Blocks.STRIPPED_SPRUCE_WOOD, Blocks.BROWN_WOOL, Blocks.BONE_BLOCK, Blocks.PODZOL,
+            case HIRCINE -> new Look(Blocks.STRIPPED_SPRUCE_WOOD, com.skycraft.worldgen.VanillaBlocks.BROWN_WOOL, Blocks.BONE_BLOCK, Blocks.PODZOL,
                     Blocks.MOSSY_COBBLESTONE, Deco.campfire(false, true), 2, false, "antlers", "spear");
             case MALACATH -> new Look(Blocks.COBBLED_DEEPSLATE, Blocks.BLACKSTONE, Blocks.BONE_BLOCK, Blocks.COARSE_DIRT,
                     Blocks.COBBLED_DEEPSLATE, Deco.campfire(false, true), 2, false, "horns", "club");
             case MEHRUNES_DAGON -> new Look(Blocks.RED_NETHER_BRICKS, Blocks.NETHER_BRICKS, Blocks.GILDED_BLACKSTONE, Blocks.BLACKSTONE,
                     Blocks.RED_NETHER_BRICKS, Blocks.MAGMA_BLOCK.defaultBlockState(), 4, true, "horns", "razor");
-            case MEPHALA -> new Look(Blocks.BLACK_CONCRETE, Blocks.BLACKSTONE, Blocks.CRYING_OBSIDIAN, Blocks.POLISHED_BLACKSTONE,
-                    Blocks.POLISHED_BLACKSTONE_BRICKS, Deco.candle(Blocks.BLACK_CANDLE, 4, true), 6, false, "hood", "none");
-            case MERIDIA -> new Look(Blocks.GOLD_BLOCK, Blocks.WHITE_CONCRETE, Blocks.GLOWSTONE, Blocks.SMOOTH_QUARTZ,
+            case MEPHALA -> new Look(com.skycraft.worldgen.VanillaBlocks.BLACK_CONCRETE, Blocks.BLACKSTONE, Blocks.CRYING_OBSIDIAN, Blocks.POLISHED_BLACKSTONE,
+                    Blocks.POLISHED_BLACKSTONE_BRICKS, Deco.candle(com.skycraft.worldgen.VanillaBlocks.BLACK_CANDLE, 4, true), 6, false, "hood", "none");
+            case MERIDIA -> new Look(Blocks.GOLD_BLOCK, com.skycraft.worldgen.VanillaBlocks.WHITE_CONCRETE, Blocks.GLOWSTONE, Blocks.SMOOTH_QUARTZ,
                     Blocks.CHISELED_QUARTZ_BLOCK, Blocks.GLOWSTONE.defaultBlockState(), 2, true, "crown", "sword");
-            case MOLAG_BAL -> new Look(Blocks.POLISHED_DEEPSLATE, Blocks.BLACKSTONE, Blocks.CHAIN, Blocks.POLISHED_BLACKSTONE_BRICKS,
+            case MOLAG_BAL -> new Look(Blocks.POLISHED_DEEPSLATE, Blocks.BLACKSTONE, com.skycraft.worldgen.VanillaBlocks.CHAIN, Blocks.POLISHED_BLACKSTONE_BRICKS,
                     Blocks.CHISELED_POLISHED_BLACKSTONE, Deco.campfire(true, true), 2, false, "horns", "mace");
             case NAMIRA -> new Look(Blocks.TUFF, Blocks.MOSSY_COBBLESTONE, Blocks.BONE_BLOCK, Blocks.MUD,
-                    Blocks.MOSSY_COBBLESTONE, Deco.candle(Blocks.BROWN_CANDLE, 3, true), 2, false, "hood", "none");
-            case NOCTURNAL -> new Look(Blocks.OBSIDIAN, Blocks.BLACK_WOOL, Blocks.AMETHYST_BLOCK, Blocks.DEEPSLATE_TILES,
+                    Blocks.MOSSY_COBBLESTONE, Deco.candle(com.skycraft.worldgen.VanillaBlocks.BROWN_CANDLE, 3, true), 2, false, "hood", "none");
+            case NOCTURNAL -> new Look(Blocks.OBSIDIAN, com.skycraft.worldgen.VanillaBlocks.BLACK_WOOL, Blocks.AMETHYST_BLOCK, Blocks.DEEPSLATE_TILES,
                     Blocks.POLISHED_DEEPSLATE, Deco.lantern(true, false), 2, false, "hood", "raven");
-            case PERYITE -> new Look(Blocks.OXIDIZED_COPPER, Blocks.GREEN_TERRACOTTA, Blocks.SLIME_BLOCK, Blocks.MOSS_BLOCK,
+            case PERYITE -> new Look(com.skycraft.worldgen.VanillaBlocks.OXIDIZED_COPPER, com.skycraft.worldgen.VanillaBlocks.GREEN_TERRACOTTA, Blocks.SLIME_BLOCK, Blocks.MOSS_BLOCK,
                     Blocks.MOSSY_STONE_BRICKS, Blocks.VERDANT_FROGLIGHT.defaultBlockState(), 0, false, "dragon", "none");
-            case SANGUINE -> new Look(Blocks.RED_TERRACOTTA, Blocks.RED_WOOL, Blocks.GOLD_BLOCK, Blocks.RED_NETHER_BRICKS,
-                    Blocks.NETHER_BRICKS, Deco.candle(Blocks.RED_CANDLE, 4, true), 2, true, "horns", "goblet");
-            case SHEOGORATH -> new Look(Blocks.GOLD_BLOCK, Blocks.PURPLE_WOOL, Blocks.YELLOW_TERRACOTTA, Blocks.PURPUR_BLOCK,
+            case SANGUINE -> new Look(com.skycraft.worldgen.VanillaBlocks.RED_TERRACOTTA, com.skycraft.worldgen.VanillaBlocks.RED_WOOL, Blocks.GOLD_BLOCK, Blocks.RED_NETHER_BRICKS,
+                    Blocks.NETHER_BRICKS, Deco.candle(com.skycraft.worldgen.VanillaBlocks.RED_CANDLE, 4, true), 2, true, "horns", "goblet");
+            case SHEOGORATH -> new Look(Blocks.GOLD_BLOCK, com.skycraft.worldgen.VanillaBlocks.PURPLE_WOOL, com.skycraft.worldgen.VanillaBlocks.YELLOW_TERRACOTTA, Blocks.PURPUR_BLOCK,
                     Blocks.PURPUR_PILLAR, Blocks.JACK_O_LANTERN.defaultBlockState(), 2, false, "crown", "staff");
-            case VAERMINA -> new Look(Blocks.PURPUR_BLOCK, Blocks.PURPLE_TERRACOTTA, Blocks.AMETHYST_BLOCK, Blocks.PURPUR_BLOCK,
-                    Blocks.PURPUR_PILLAR, Deco.candle(Blocks.PURPLE_CANDLE, 4, true), 2, true, "hood", "skull_staff");
+            case VAERMINA -> new Look(Blocks.PURPUR_BLOCK, com.skycraft.worldgen.VanillaBlocks.PURPLE_TERRACOTTA, Blocks.AMETHYST_BLOCK, Blocks.PURPUR_BLOCK,
+                    Blocks.PURPUR_PILLAR, Deco.candle(com.skycraft.worldgen.VanillaBlocks.PURPLE_CANDLE, 4, true), 2, true, "hood", "skull_staff");
         };
     }
 
@@ -191,7 +191,7 @@ public final class Statues {
             }
             case "goblet" -> part(fr, fc, base, s, 0.3, 0.8, 12, 12.6, 1.6, 2.2, Blocks.GOLD_BLOCK.defaultBlockState());
             case "raven" -> {
-                part(fr, fc, base, s, -0.2, 0.3, 8.6, 9.4, 1.0, 1.6, Blocks.BLACK_WOOL.defaultBlockState());
+                part(fr, fc, base, s, -0.2, 0.3, 8.6, 9.4, 1.0, 1.6, com.skycraft.worldgen.VanillaBlocks.BLACK_WOOL.defaultBlockState());
                 part(fr, fc, base, s, 0.3, 0.6, 8.8, 9.2, 1.1, 1.5, Blocks.BLACKSTONE.defaultBlockState());
             }
             default -> {
@@ -245,13 +245,13 @@ public final class Statues {
         switch (prince) {
             case CLAVICUS_VILE -> {
                 // Barbas, the faithful hound, sits at his master's feet
-                fr.fill(-1, 0, 3, 1, 1, 4, Blocks.BROWN_TERRACOTTA);
-                fr.set(1, 2, 4, Blocks.BROWN_TERRACOTTA);
-                fr.set(2, 2, 4, Blocks.BROWN_TERRACOTTA);
-                fr.set(-2, 0, 4, Blocks.BROWN_TERRACOTTA);
+                fr.fill(-1, 0, 3, 1, 1, 4, com.skycraft.worldgen.VanillaBlocks.BROWN_TERRACOTTA);
+                fr.set(1, 2, 4, com.skycraft.worldgen.VanillaBlocks.BROWN_TERRACOTTA);
+                fr.set(2, 2, 4, com.skycraft.worldgen.VanillaBlocks.BROWN_TERRACOTTA);
+                fr.set(-2, 0, 4, com.skycraft.worldgen.VanillaBlocks.BROWN_TERRACOTTA);
             }
             case MOLAG_BAL -> {
-                for (int lt : new int[]{-5, 5}) for (int dy = 0; dy <= 3; dy++) fr.set(-1, dy, lt, dy == 3 ? Blocks.CHAIN.defaultBlockState() : Blocks.POLISHED_BLACKSTONE_WALL.defaultBlockState());
+                for (int lt : new int[]{-5, 5}) for (int dy = 0; dy <= 3; dy++) fr.set(-1, dy, lt, dy == 3 ? com.skycraft.worldgen.VanillaBlocks.CHAIN.defaultBlockState() : Blocks.POLISHED_BLACKSTONE_WALL.defaultBlockState());
             }
             case MEPHALA, NAMIRA -> {
                 for (int i = 0; i < 8; i++) fr.setIfOpen(fr.roll(i, 0, 961, 13) - 6, fr.roll(i, 1, 961, 3), fr.roll(i, 2, 961, 13) - 6, Blocks.COBWEB.defaultBlockState());
@@ -261,17 +261,17 @@ public final class Statues {
                 fr.fill(4, 0, -5, 6, 0, -4, Blocks.SPRUCE_PLANKS);
                 fr.set(5, 1, -5, Blocks.BARREL);
                 fr.set(5, 1, -4, Blocks.SWEET_BERRY_BUSH);
-                for (int fw = -2; fw <= 6; fw++) fr.set(fw, 0, 0, Blocks.RED_CARPET);
+                for (int fw = -2; fw <= 6; fw++) fr.set(fw, 0, 0, com.skycraft.worldgen.VanillaBlocks.RED_CARPET);
             }
             case HIRCINE -> {
                 for (int i = 0; i < 5; i++) fr.set(fr.roll(i, 5, 963, 13) - 6, 0, fr.roll(i, 6, 963, 13) - 6, Deco.pillar(Blocks.BONE_BLOCK, Direction.Axis.X));
             }
             case SHEOGORATH -> {
-                for (int i = 0; i < 3; i++) fr.set(4 + i, 0, 5, Blocks.YELLOW_TERRACOTTA);
+                for (int i = 0; i < 3; i++) fr.set(4 + i, 0, 5, com.skycraft.worldgen.VanillaBlocks.YELLOW_TERRACOTTA);
             }
             case VAERMINA -> {
                 for (int i = 0; i < 10; i++) fr.setIfOpen(fr.roll(i, 7, 964, 13) - 6, 4 + fr.roll(i, 8, 964, 4), fr.roll(i, 9, 964, 13) - 6,
-                        Blocks.PURPLE_STAINED_GLASS.defaultBlockState());
+                        com.skycraft.worldgen.VanillaBlocks.PURPLE_STAINED_GLASS.defaultBlockState());
             }
             case MERIDIA -> {
                 if (giant) for (int dy = 40; dy <= 44; dy++) fr.set(-6, dy, 0, Blocks.GLOWSTONE);

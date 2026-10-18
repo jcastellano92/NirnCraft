@@ -12,7 +12,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.animal.horse.Horse;
+import net.minecraft.world.entity.animal.equine.Horse;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.levelgen.Heightmap;
 
@@ -54,9 +54,9 @@ final class MountsAutotest {
     }
 
     private static void cmd(ServerPlayer p, String command) {
-        var server = p.getServer();
+        var server = p.level().getServer();
         server.getCommands().performPrefixedCommand(server.createCommandSourceStack().withSuppressedOutput(),
-                command.replace("@p", p.getGameProfile().getName()));
+                command.replace("@p", p.getGameProfile().name()));
     }
 
     static void tick(Minecraft mc) {
@@ -66,16 +66,16 @@ final class MountsAutotest {
         switch (s) {
             case 0 -> {
                 com.skycraft.network.SkyNetwork.sendToServer(new com.skycraft.network.CorePackets.ChooseRace(com.skycraft.core.Race.NORD.id()));
-                mc.setScreen(null);
+                mc.gui.setScreen(null);
                 server(mc, p -> {
-                    cmd(p, "gamerule doDaylightCycle false");
-                    cmd(p, "gamerule doMobSpawning false");
+                    cmd(p, "gamerule advance_time false");
+                    cmd(p, "gamerule spawn_mobs false");
                     cmd(p, "time set 6000");
                     cmd(p, "weather clear 1000000");
                     cmd(p, "gamemode creative @p");
                     com.skycraft.quest.story.Story.setFlag(com.skycraft.core.SkyData.get(p), "helgen_arrived", true);
                     // the open tundra west of Whiterun, away from the forests and the Helgen scene
-                    ServerLevel level = p.serverLevel();
+                    ServerLevel level = p.level();
                     int x = LINEUP_X, z = LINEUP_Z;
                     level.getChunk(x >> 4, z >> 4);
                     int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
@@ -86,7 +86,7 @@ final class MountsAutotest {
             }
             case 1 -> {
                 server(mc, MountsAutotest::lineUp);
-                mc.options.hideGui = true;
+                com.skycraft.client.autotest.ReviewWorlds.hudHidden(mc, true);
             }
             case 2, 4, 6 -> {
                 int g = ((s - 2) / 2 + 1) % 3; // the horses last: the Helgen opening may still move the player early on
@@ -95,7 +95,7 @@ final class MountsAutotest {
             }
             case 3, 5, 7 -> ClientAutotest.captureAndSave(mc, String.format("m%02d_mounts_group%d", s, ((s - 3) / 2 + 1) % 3 + 1));
             case 8 -> {
-                mc.options.hideGui = false;
+                com.skycraft.client.autotest.ReviewWorlds.hudHidden(mc, false);
                 server(mc, MountsAutotest::ride);
                 mc.options.setCameraType(CameraType.THIRD_PERSON_BACK);
                 wait = 80;
@@ -115,7 +115,7 @@ final class MountsAutotest {
     // ------------------------------------------------------------------ the line-up
 
     private static void lineUp(ServerPlayer p) {
-        ServerLevel level = p.serverLevel();
+        ServerLevel level = p.level();
         BlockPos o = origin != null ? origin : p.blockPosition();
         // a level stage for the line-up and the camera: grass at the origin's height, open sky above
         int y0 = o.getY();
@@ -174,18 +174,18 @@ final class MountsAutotest {
         BlockPos o = origin != null ? origin : p.blockPosition();
         int x = o.getX() + g * 60 + 2;
         int z = o.getZ() - 4;
-        int y = p.serverLevel().getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z) + 3;
+        int y = p.level().getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z) + 3;
         cmd(p, String.format(java.util.Locale.ROOT, "tp @p %d %d %d 0 12", x, y, z));
     }
 
     private static void ride(ServerPlayer p) {
         BlockPos o = origin != null ? origin : p.blockPosition();
-        var list = p.serverLevel().getEntitiesOfClass(MountBeast.class, new net.minecraft.world.phys.AABB(o).inflate(160, 40, 160),
+        var list = p.level().getEntitiesOfClass(MountBeast.class, new net.minecraft.world.phys.AABB(o).inflate(160, 40, 160),
                 b -> b.kind() == MountKind.SENCHE && b.getVariant() == 2);
         if (list.isEmpty()) return;
         MountBeast b = list.get(0);
         p.teleportTo(b.getX() - 3, b.getY() + 1, b.getZ());
-        p.startRiding(b, true);
+        p.startRiding(b, true, true);
     }
 
     // ------------------------------------------------------------------ the homes
@@ -212,7 +212,7 @@ final class MountsAutotest {
             case 1 -> {
                 homeState = "";
                 server(mc, p -> {
-                    var site = Houses.site(p.serverLevel(), id);
+                    var site = Houses.site(p.level(), id);
                     if (site.isEmpty() || site.get().bed() == null) {
                         homeState = site.isEmpty() ? "no site" : "not built";
                         return;
@@ -239,7 +239,7 @@ final class MountsAutotest {
                 }
                 ClientAutotest.captureAndSave(mc, String.format("h%02d_%s_front", i, id));
                 server(mc, p -> {
-                    var site = Houses.site(p.serverLevel(), id);
+                    var site = Houses.site(p.level(), id);
                     BlockPos c = site.map(x -> x.center()).orElse(Houses.byId(id).approxPos());
                     cmd(p, String.format(java.util.Locale.ROOT, "tp @p %d %d %d 30 40", c.getX() - 12, c.getY() + 22, c.getZ() - 20));
                 });

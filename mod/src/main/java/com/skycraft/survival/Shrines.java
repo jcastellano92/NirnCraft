@@ -21,17 +21,17 @@ public final class Shrines {
         int ticks = SurvivalConfig.BLESSING_TICKS.get();
         for (Divine other : Divine.VALUES) {
             if (other == divine) continue;
-            player.removeEffect(SurvivalEffects.BLESSINGS.get(other).get());
+            player.removeEffect(com.skycraft.platform.Effects.holder(SurvivalEffects.BLESSINGS.get(other).get()));
             if (Buffs.active(player, other.buffFlag())) Buffs.clear(player, other.buffFlag());
         }
-        player.addEffect(new MobEffectInstance(SurvivalEffects.BLESSINGS.get(divine).get(), ticks, 0, false, false, true));
+        player.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(SurvivalEffects.BLESSINGS.get(divine).get()), ticks, 0, false, false, true));
         Buffs.apply(player, divine.buffFlag(), ticks);
         SurvivalEvents.reconcileBonuses(player);
         SkyData.get(player).addStat("shrines_prayed", 1);
 
         Notifier.message(player, Component.translatable("message.skycraft.survival.blessed", divine.displayName()));
         Notifier.message(player, Component.translatable("survival.skycraft.blessing." + divine.id() + ".desc"));
-        ServerLevel level = player.serverLevel();
+        ServerLevel level = player.level();
         level.playSound(null, pos, com.skycraft.world.WorldSounds.MAGIC_SHRINE_PRAY.get(), SoundSource.BLOCKS, 1.4f, 1.0f);
         level.sendParticles(ParticleTypes.END_ROD, pos.getX() + 0.5, pos.getY() + 1.2, pos.getZ() + 0.5, 16, 0.3, 0.4, 0.3, 0.02);
     }

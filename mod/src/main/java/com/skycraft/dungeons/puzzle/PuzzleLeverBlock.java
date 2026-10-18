@@ -8,11 +8,10 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.AbstractArrow;
-import net.minecraft.world.entity.projectile.Arrow;
+import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
+import net.minecraft.world.entity.projectile.arrow.Arrow;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -44,10 +43,19 @@ public class PuzzleLeverBlock extends LeverBlock {
     }
 
     @Override
+    protected InteractionResult useItemOn(net.minecraft.world.item.ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+        return use(state, level, pos, player, hand, hit);
+    }
+
+    @Override
+    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+        return use(state, level, pos, player, InteractionHand.MAIN_HAND, hit);
+    }
+
     public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
-        if (level.isClientSide || state.getValue(POWERED)) return super.use(state, level, pos, player, hand, hit);
+        if (level.isClientSide() || state.getValue(POWERED)) return super.useWithoutItem(state, level, pos, player, hit);
         Direction inward = state.getValue(FACING);
-        if (solved(level, pos, inward)) return super.use(state, level, pos, player, hand, hit);
+        if (solved(level, pos, inward)) return super.useWithoutItem(state, level, pos, player, hit);
         darts(level, pos, inward, player);
         if (player instanceof net.minecraft.server.level.ServerPlayer sp) {
             com.skycraft.core.Notifier.message(sp, Component.translatable("message.skycraft.puzzle.wrong"));
@@ -95,8 +103,7 @@ public class PuzzleLeverBlock extends LeverBlock {
             BlockPos from = door.relative(right, s).relative(inward, 1).above(2);
             Vec3 origin = Vec3.atCenterOf(from);
             Vec3 d = target.subtract(origin);
-            Arrow arrow = new Arrow(level, origin.x, origin.y, origin.z);
-            arrow.setEffectsFromItem(PotionUtils.setPotion(new ItemStack(Items.TIPPED_ARROW), Potions.POISON));
+            Arrow arrow = new Arrow(level, origin.x, origin.y, origin.z, net.minecraft.world.item.alchemy.PotionContents.createItemStack(Items.TIPPED_ARROW, Potions.POISON), null);
             arrow.pickup = AbstractArrow.Pickup.DISALLOWED;
             arrow.shoot(d.x, d.y, d.z, 1.4f, 3.0f);
             level.addFreshEntity(arrow);

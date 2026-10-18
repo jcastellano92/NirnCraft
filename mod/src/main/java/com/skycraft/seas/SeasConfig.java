@@ -1,25 +1,25 @@
 package com.skycraft.seas;
 
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 /** Seas and skies configuration: config/skycraft-seas.toml (COMMON, server-authoritative). */
 public final class SeasConfig {
-    public static final ForgeConfigSpec SPEC;
+    public static final ModConfigSpec SPEC;
 
-    public static final ForgeConfigSpec.BooleanValue SEA_TRAFFIC;
-    public static final ForgeConfigSpec.IntValue TRAFFIC_INTERVAL;
-    public static final ForgeConfigSpec.IntValue TRAFFIC_PER_PLAYER;
-    public static final ForgeConfigSpec.IntValue TRAFFIC_MAX;
-    public static final ForgeConfigSpec.DoubleValue GHOST_SHIP_CHANCE;
-    public static final ForgeConfigSpec.BooleanValue PIRATES_ATTACK;
+    public static final ModConfigSpec.BooleanValue SEA_TRAFFIC;
+    public static final ModConfigSpec.IntValue TRAFFIC_INTERVAL;
+    public static final ModConfigSpec.IntValue TRAFFIC_PER_PLAYER;
+    public static final ModConfigSpec.IntValue TRAFFIC_MAX;
+    public static final ModConfigSpec.DoubleValue GHOST_SHIP_CHANCE;
+    public static final ModConfigSpec.BooleanValue PIRATES_ATTACK;
 
-    public static final ForgeConfigSpec.BooleanValue SEA_LIFE;
-    public static final ForgeConfigSpec.IntValue SEA_LIFE_BUDGET;
-    public static final ForgeConfigSpec.DoubleValue SERPENT_CHANCE;
-    public static final ForgeConfigSpec.BooleanValue HAWKS;
+    public static final ModConfigSpec.BooleanValue SEA_LIFE;
+    public static final ModConfigSpec.IntValue SEA_LIFE_BUDGET;
+    public static final ModConfigSpec.DoubleValue SERPENT_CHANCE;
+    public static final ModConfigSpec.BooleanValue HAWKS;
 
     static {
-        ForgeConfigSpec.Builder b = new ForgeConfigSpec.Builder();
+        ModConfigSpec.Builder b = new ModConfigSpec.Builder();
         b.push("traffic");
         SEA_TRAFFIC = b.comment("NPC ships sail Nirn's seas near players at sea: merchants, the Imperial navy, Nord longships, pirates,",
                         "Maormer warships off Pyandonea, Sload hulks off Thras, and ghost ships at night.")

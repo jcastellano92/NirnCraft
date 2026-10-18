@@ -1,0 +1,82 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:book",
+          "weight": 9,
+          "modifier": {
+            "tag": "{book:\"letter_homesick_legionnaire\",skycraft_value:5}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:book",
+          "weight": 9,
+          "modifier": {
+            "tag": "{book:\"note_camp_orders\",skycraft_value:5}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:book",
+          "weight": 9,
+          "modifier": {
+            "tag": "{book:\"note_scrawled_warning\",skycraft_value:5}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:book",
+          "weight": 9,
+          "modifier": {
+            "tag": "{book:\"note_shopping_list\",skycraft_value:5}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:book",
+          "weight": 7,
+          "modifier": {
+            "tag": "{book:\"journal_lost_explorer\",skycraft_value:10}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:book",
+          "weight": 6,
+          "modifier": {
+            "tag": "{book:\"note_treasure_hint\",skycraft_value:10}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:book",
+          "weight": 8,
+          "modifier": {
+            "tag": "{book:\"for_the_nords\",skycraft_value:5}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:book",
+          "weight": 8,
+          "modifier": {
+            "tag": "{book:\"empire_keeps_us_whole\",skycraft_value:5}",
+            "type": "minecraft:set_custom_data"
+          }
+        }
+      ]
+    }
+  ]
+}

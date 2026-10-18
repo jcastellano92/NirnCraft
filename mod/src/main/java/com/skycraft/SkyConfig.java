@@ -1,38 +1,38 @@
 package com.skycraft;
 
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 /** Common (server-authoritative) configuration: config/skycraft-common.toml */
 public final class SkyConfig {
-    public static final ForgeConfigSpec SPEC;
+    public static final ModConfigSpec SPEC;
 
-    public static final ForgeConfigSpec.DoubleValue SKILL_XP_RATE;
-    public static final ForgeConfigSpec.DoubleValue LEVEL_XP_RATE;
-    public static final ForgeConfigSpec.IntValue PERK_POINTS_PER_LEVEL;
-    public static final ForgeConfigSpec.BooleanValue RESTRICT_DIGGING;
-    public static final ForgeConfigSpec.BooleanValue REQUIRE_CORRECT_TOOL;
-    public static final ForgeConfigSpec.BooleanValue SKYRIM_HUNGER;
-    public static final ForgeConfigSpec.BooleanValue SKYRIM_REGEN;
-    public static final ForgeConfigSpec.DoubleValue SPRINT_STAMINA_PER_SECOND;
-    public static final ForgeConfigSpec.DoubleValue POWER_ATTACK_STAMINA;
-    public static final ForgeConfigSpec.DoubleValue JUMP_STAMINA;
-    public static final ForgeConfigSpec.DoubleValue HEALTH_REGEN_PERCENT;
-    public static final ForgeConfigSpec.DoubleValue MAGICKA_REGEN_PERCENT;
-    public static final ForgeConfigSpec.DoubleValue STAMINA_REGEN_PERCENT;
-    public static final ForgeConfigSpec.DoubleValue WEAPON_SKILL_DAMAGE_SCALE;
-    public static final ForgeConfigSpec.BooleanValue SNEAK_ATTACKS;
-    public static final ForgeConfigSpec.BooleanValue PROMPT_RACE;
-    public static final ForgeConfigSpec.IntValue MAX_TRAININGS_PER_LEVEL;
-    public static final ForgeConfigSpec.IntValue POWER_COOLDOWN_MAX_SECONDS;
-    public static final ForgeConfigSpec.IntValue POWER_COOLDOWN_MIN_SECONDS;
-    public static final ForgeConfigSpec.EnumValue<DeathDrops> DEATH_DROPS;
-    public static final ForgeConfigSpec.DoubleValue DEATH_GOLD_DROP_PERCENT;
-    public static final ForgeConfigSpec.IntValue DEATH_VALUABLE_MIN_VALUE;
-    public static final ForgeConfigSpec.EnumValue<RespawnMode> RESPAWN_MODE;
-    public static final ForgeConfigSpec.IntValue RESPAWN_INVULN_SECONDS;
-    public static final ForgeConfigSpec.IntValue RESPAWN_SAFE_RADIUS;
-    public static final ForgeConfigSpec.BooleanValue HAND_SPELL_GLOW;
-    public static final ForgeConfigSpec.BooleanValue STORY_LECTERN_TAKEABLE;
+    public static final ModConfigSpec.DoubleValue SKILL_XP_RATE;
+    public static final ModConfigSpec.DoubleValue LEVEL_XP_RATE;
+    public static final ModConfigSpec.IntValue PERK_POINTS_PER_LEVEL;
+    public static final ModConfigSpec.BooleanValue RESTRICT_DIGGING;
+    public static final ModConfigSpec.BooleanValue REQUIRE_CORRECT_TOOL;
+    public static final ModConfigSpec.BooleanValue SKYRIM_HUNGER;
+    public static final ModConfigSpec.BooleanValue SKYRIM_REGEN;
+    public static final ModConfigSpec.DoubleValue SPRINT_STAMINA_PER_SECOND;
+    public static final ModConfigSpec.DoubleValue POWER_ATTACK_STAMINA;
+    public static final ModConfigSpec.DoubleValue JUMP_STAMINA;
+    public static final ModConfigSpec.DoubleValue HEALTH_REGEN_PERCENT;
+    public static final ModConfigSpec.DoubleValue MAGICKA_REGEN_PERCENT;
+    public static final ModConfigSpec.DoubleValue STAMINA_REGEN_PERCENT;
+    public static final ModConfigSpec.DoubleValue WEAPON_SKILL_DAMAGE_SCALE;
+    public static final ModConfigSpec.BooleanValue SNEAK_ATTACKS;
+    public static final ModConfigSpec.BooleanValue PROMPT_RACE;
+    public static final ModConfigSpec.IntValue MAX_TRAININGS_PER_LEVEL;
+    public static final ModConfigSpec.IntValue POWER_COOLDOWN_MAX_SECONDS;
+    public static final ModConfigSpec.IntValue POWER_COOLDOWN_MIN_SECONDS;
+    public static final ModConfigSpec.EnumValue<DeathDrops> DEATH_DROPS;
+    public static final ModConfigSpec.DoubleValue DEATH_GOLD_DROP_PERCENT;
+    public static final ModConfigSpec.IntValue DEATH_VALUABLE_MIN_VALUE;
+    public static final ModConfigSpec.EnumValue<RespawnMode> RESPAWN_MODE;
+    public static final ModConfigSpec.IntValue RESPAWN_INVULN_SECONDS;
+    public static final ModConfigSpec.IntValue RESPAWN_SAFE_RADIUS;
+    public static final ModConfigSpec.BooleanValue HAND_SPELL_GLOW;
+    public static final ModConfigSpec.BooleanValue STORY_LECTERN_TAKEABLE;
 
     /** Where you wake after dying with no bed: the nearest settlement you have visited, or the world spawn. */
     public enum RespawnMode { VISITED_SETTLEMENT, WORLD_SPAWN }
@@ -41,7 +41,7 @@ public final class SkyConfig {
     public enum DeathDrops { VALUABLES, GEAR, EVERYTHING }
 
     static {
-        ForgeConfigSpec.Builder b = new ForgeConfigSpec.Builder();
+        ModConfigSpec.Builder b = new ModConfigSpec.Builder();
         b.push("progression");
         SKILL_XP_RATE = b.comment("Multiplier for all skill XP gains.")
                 .defineInRange("skillXpRate", 1.0, 0.01, 100.0);

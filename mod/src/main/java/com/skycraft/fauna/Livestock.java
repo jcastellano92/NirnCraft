@@ -10,23 +10,23 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ai.village.poi.PoiManager;
 import net.minecraft.world.entity.ai.village.poi.PoiTypes;
 import net.minecraft.world.entity.animal.Animal;
-import net.minecraft.world.entity.animal.Chicken;
-import net.minecraft.world.entity.animal.Cow;
-import net.minecraft.world.entity.animal.Pig;
-import net.minecraft.world.entity.animal.Sheep;
+import net.minecraft.world.entity.animal.chicken.Chicken;
+import net.minecraft.world.entity.animal.cow.Cow;
+import net.minecraft.world.entity.animal.pig.Pig;
+import net.minecraft.world.entity.animal.sheep.Sheep;
 import net.minecraft.world.entity.animal.goat.Goat;
-import net.minecraft.world.entity.animal.horse.AbstractHorse;
-import net.minecraft.world.entity.animal.horse.Donkey;
-import net.minecraft.world.entity.animal.horse.Horse;
-import net.minecraft.world.entity.animal.horse.Mule;
+import net.minecraft.world.entity.animal.equine.AbstractHorse;
+import net.minecraft.world.entity.animal.equine.Donkey;
+import net.minecraft.world.entity.animal.equine.Horse;
+import net.minecraft.world.entity.animal.equine.Mule;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.EntityJoinLevelEvent;
-import net.minecraftforge.event.entity.living.BabyEntitySpawnEvent;
-import net.minecraftforge.event.server.ServerStoppedEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.server.ServerLifecycleHooks;
+
+import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
+import net.neoforged.neoforge.event.entity.living.BabyEntitySpawnEvent;
+import net.neoforged.neoforge.event.server.ServerStoppedEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -41,7 +41,7 @@ import java.util.Deque;
  * wandering into town). Animals bred by a player, tamed horses and animals a player leads on a leash are the player's
  * own and never become owned. Babies of owned animals born without a player's help are owned.</p>
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class Livestock {
     /** Persistent-data boolean: this animal belongs to a village. */
     public static final String OWNED = "skycraft_owned_livestock";
@@ -59,7 +59,7 @@ public final class Livestock {
 
     /** True if this entity is village livestock (killing it is a crime). */
     public static boolean isOwned(Entity entity) {
-        return entity != null && entity.getPersistentData().getBoolean(OWNED);
+        return entity != null && entity.getPersistentData().getBooleanOr(OWNED, false);
     }
 
     /** The farm animals this module tracks. */
@@ -71,7 +71,7 @@ public final class Livestock {
     private static boolean candidate(Entity entity) {
         if (!isLivestock(entity) || !entity.isAlive()) return false;
         CompoundTag data = entity.getPersistentData();
-        if (data.getBoolean(OWNED) || data.getBoolean(PLAYER_OWNED)) return false;
+        if (data.getBooleanOr(OWNED, false) || data.getBooleanOr(PLAYER_OWNED, false)) return false;
         if (entity instanceof AbstractHorse horse && horse.isTamed()) {
             data.putBoolean(PLAYER_OWNED, true);
             return false;
@@ -114,8 +114,8 @@ public final class Livestock {
     }
 
     @SubscribeEvent
-    public static void onServerTick(TickEvent.ServerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END) return;
+    public static void onServerTick(net.neoforged.neoforge.event.tick.ServerTickEvent.Post event) {
+        if (!(event instanceof net.neoforged.neoforge.event.tick.ServerTickEvent.Post)) return;
         for (int i = 0; i < 64 && !PENDING.isEmpty(); i++) {
             Entity entity = PENDING.poll();
             if (entity != null && !entity.isRemoved()) check(entity);
@@ -126,7 +126,7 @@ public final class Livestock {
             long now = level.getGameTime();
             for (ServerPlayer player : level.players()) {
                 for (Animal animal : level.getEntitiesOfClass(Animal.class, player.getBoundingBox().inflate(64), Livestock::candidate)) {
-                    if (now - animal.getPersistentData().getLong(CHECKED) >= RECHECK_TICKS) check(animal);
+                    if (now - animal.getPersistentData().getLongOr(CHECKED, 0L) >= RECHECK_TICKS) check(animal);
                 }
             }
         }

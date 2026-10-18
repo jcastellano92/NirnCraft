@@ -194,8 +194,8 @@ final class QaExport {
             m.addProperty("z", e.getBlockZ());
             if (e instanceof LivingEntity le) {
                 m.addProperty("dormant", DormantMobs.isDormant(le));
-                m.addProperty("boss", e.getPersistentData().getBoolean(com.skycraft.dungeons.DungeonTelemetry.BOSS_TAG));
-                m.addProperty("elite", e.getPersistentData().getBoolean("skycraft_dungeon_elite"));
+                m.addProperty("boss", e.getPersistentData().getBooleanOr(com.skycraft.dungeons.DungeonTelemetry.BOSS_TAG, false));
+                m.addProperty("elite", e.getPersistentData().getBooleanOr("skycraft_dungeon_elite", false));
                 if (e.hasCustomName()) m.addProperty("name", e.getCustomName().getString());
             }
             ents.add(m);
@@ -216,32 +216,33 @@ final class QaExport {
                 ItemStack book = lec.getBook();
                 boolean hasBook = lec.hasBook() || !book.isEmpty();
                 m.addProperty("book", hasBook);
-                if (hasBook && book.getTag() != null) {
+                if (hasBook && com.skycraft.inventory.ItemData.custom(book) != null) {
                     // a place's lore note (its book id) or a written book's title
-                    CompoundTag bt = book.getTag();
-                    for (String k : bt.getAllKeys()) {
-                        if (bt.getTagType(k) == 8 && bt.getString(k).startsWith("place.")) m.addProperty("note", bt.getString(k));
+                    CompoundTag bt = com.skycraft.inventory.ItemData.customOrEmpty(book);
+                    for (String k : bt.keySet()) {
+                        if (bt.get(k) instanceof net.minecraft.nbt.StringTag && bt.getStringOr(k, "").startsWith("place.")) m.addProperty("note", bt.getStringOr(k, ""));
                     }
-                    if (bt.contains("title", 8)) m.addProperty("title", bt.getString("title"));
+                    var content = book.get(net.minecraft.core.component.DataComponents.WRITTEN_BOOK_CONTENT);
+                    if (content != null) m.addProperty("title", content.title().raw());
                 }
                 lecterns.add(m);
             } else if (be instanceof net.minecraft.world.level.block.entity.SignBlockEntity sign) {
                 JsonArray lines = new JsonArray();
-                for (net.minecraft.network.chat.Component c : sign.getFrontText().getMessages(false)) lines.add(c.getString());
+                for (net.minecraft.network.chat.Component c : sign.getText(net.minecraft.world.level.block.entity.SignTextSlot.FRONT).getMessages(false)) lines.add(c.getString());
                 m.add("lines", lines);
                 signs.add(m);
             } else if (be instanceof Container) {
-                CompoundTag tag = be.saveWithoutMetadata();
-                if (tag.contains("LootTable")) m.addProperty("loot", tag.getString("LootTable"));
+                CompoundTag tag = be.saveWithoutMetadata(lvl.real.registryAccess());
+                if (tag.contains("LootTable")) m.addProperty("loot", tag.getStringOr("LootTable", ""));
                 int n = 0;
                 for (ItemStack st : QaDungeon.items(be)) if (!st.isEmpty()) n++;
                 m.addProperty("items", n);
                 chests.add(m);
             } else if (BuiltInRegistries.BLOCK.getKey(be.getBlockState().getBlock()).getPath().contains("spawner")) {
-                CompoundTag tag = be.saveWithoutMetadata();
+                CompoundTag tag = be.saveWithoutMetadata(lvl.real.registryAccess());
                 String ent = "?";
-                if (tag.contains("SpawnData") && tag.getCompound("SpawnData").contains("entity")) {
-                    ent = tag.getCompound("SpawnData").getCompound("entity").getString("id");
+                if (tag.contains("SpawnData") && tag.getCompoundOrEmpty("SpawnData").contains("entity")) {
+                    ent = tag.getCompoundOrEmpty("SpawnData").getCompoundOrEmpty("entity").getStringOr("id", "");
                 }
                 m.addProperty("entity", ent);
                 spawners.add(m);

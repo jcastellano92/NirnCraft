@@ -19,7 +19,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -86,24 +86,24 @@ public final class Mysticism {
     // ================================================================== Telekinesis
 
     /** Intercepts an incoming or aimed arrow while channeling Telekinesis. */
-    public static boolean catchArrow(ServerPlayer p, net.minecraft.world.entity.projectile.AbstractArrow arrow) {
+    public static boolean catchArrow(ServerPlayer p, net.minecraft.world.entity.projectile.arrow.AbstractArrow arrow) {
         if (p == null || arrow == null || !arrow.isAlive() || !SpellCasting.isCasting(p, "telekinesis")) return false;
         Integer curArrowId = HELD_ARROWS.get(p.getUUID());
         if (curArrowId != null && curArrowId != arrow.getId()
-                && p.serverLevel().getEntity(curArrowId) instanceof net.minecraft.world.entity.projectile.AbstractArrow existing
+                && p.level().getEntity(curArrowId) instanceof net.minecraft.world.entity.projectile.arrow.AbstractArrow existing
                 && existing.isAlive()) {
             return false;
         }
         // Release any held item if we are catching an arrow
         Integer itemId = HELD.remove(p.getUUID());
-        if (itemId != null && p.serverLevel().getEntity(itemId) instanceof ItemEntity ie && ie.isAlive()) {
+        if (itemId != null && p.level().getEntity(itemId) instanceof ItemEntity ie && ie.isAlive()) {
             ie.setNoGravity(false);
         }
         com.skycraft.arsenal.entity.SkyArrow.setArrowInGround(arrow, false);
         arrow.setNoGravity(true);
         arrow.setOwner(p);
         arrow.setDeltaMovement(Vec3.ZERO);
-        arrow.hurtMarked = true;
+        arrow.syncVelocity = true;
         arrow.fallDistance = 0;
         HELD_ARROWS.put(p.getUUID(), arrow.getId());
         SpellSounds.play(p, SpellSounds.Slot.CAST_ARCANE, 0.9f, 1.7f);
@@ -113,12 +113,12 @@ public final class Mysticism {
 
     /** Telekinesis: hold to pull a distant item or intercept an incoming/grounded arrow; let go to launch it. */
     public static Spell.Result telekinesis(ServerPlayer p, Spell spell, int tick) {
-        ServerLevel level = p.serverLevel();
+        ServerLevel level = p.level();
 
         // 1. Check if already holding or able to intercept an arrow
         Integer heldArrowId = HELD_ARROWS.get(p.getUUID());
-        net.minecraft.world.entity.projectile.AbstractArrow arrow = heldArrowId == null ? null
-                : level.getEntity(heldArrowId) instanceof net.minecraft.world.entity.projectile.AbstractArrow a && a.isAlive() ? a : null;
+        net.minecraft.world.entity.projectile.arrow.AbstractArrow arrow = heldArrowId == null ? null
+                : level.getEntity(heldArrowId) instanceof net.minecraft.world.entity.projectile.arrow.AbstractArrow a && a.isAlive() ? a : null;
         if (arrow == null) {
             HELD_ARROWS.remove(p.getUUID());
             if (!HELD.containsKey(p.getUUID())) {
@@ -140,7 +140,7 @@ public final class Mysticism {
             double horiz = Math.sqrt(look.x * look.x + look.z * look.z);
             arrow.setYRot((float) (Math.atan2(look.x, look.z) * (180.0 / Math.PI)));
             arrow.setXRot((float) (Math.atan2(look.y, horiz) * (180.0 / Math.PI)));
-            arrow.hurtMarked = true;
+            arrow.syncVelocity = true;
             if (tick % 2 == 0) MagicFx.send(p, MagicFx.BEAM, Element.ARCANE, Targeting.handPos(p), arrow.position(), p.getId(), 1);
             if (tick % 20 == 0) SpellSounds.loop(p, spell);
             if (!arrow.getUUID().equals(LAST_GRAB.get(p.getUUID()))) {
@@ -171,7 +171,7 @@ public final class Mysticism {
         Vec3 to = hold.subtract(item.position());
         item.setDeltaMovement(to.scale(0.3));
         item.setNoGravity(true);
-        item.hurtMarked = true;
+        item.syncVelocity = true;
         item.fallDistance = 0;
         if (tick % 2 == 0) MagicFx.send(p, MagicFx.BEAM, Element.ARCANE, Targeting.handPos(p), item.position().add(0, 0.2, 0), p.getId(), 1);
         if (tick % 20 == 0) SpellSounds.loop(p, spell);
@@ -184,15 +184,15 @@ public final class Mysticism {
     }
 
     @Nullable
-    private static net.minecraft.world.entity.projectile.AbstractArrow aimedOrIncomingArrow(ServerPlayer p, double range) {
+    private static net.minecraft.world.entity.projectile.arrow.AbstractArrow aimedOrIncomingArrow(ServerPlayer p, double range) {
         Vec3 eye = p.getEyePosition();
         Vec3 look = p.getViewVector(1f);
 
         // Priority 1: In-flight incoming arrows near the caster
-        net.minecraft.world.entity.projectile.AbstractArrow bestIncoming = null;
+        net.minecraft.world.entity.projectile.arrow.AbstractArrow bestIncoming = null;
         double bestIncDist = Double.MAX_VALUE;
-        for (net.minecraft.world.entity.projectile.AbstractArrow a : p.level().getEntitiesOfClass(
-                net.minecraft.world.entity.projectile.AbstractArrow.class, p.getBoundingBox().inflate(5.5),
+        for (net.minecraft.world.entity.projectile.arrow.AbstractArrow a : p.level().getEntitiesOfClass(
+                net.minecraft.world.entity.projectile.arrow.AbstractArrow.class, p.getBoundingBox().inflate(5.5),
                 a -> a.isAlive() && !com.skycraft.arsenal.entity.SkyArrow.isArrowInGround(a) && a.getOwner() != p)) {
             Vec3 toPlayer = eye.subtract(a.position());
             Vec3 vel = a.getDeltaMovement();
@@ -212,10 +212,10 @@ public final class Mysticism {
         Vec3 end = eye.add(look.scale(range));
         BlockHitResult block = p.level().clip(new ClipContext(eye, end, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, p));
         Vec3 limit = block.getType() == HitResult.Type.MISS ? end : block.getLocation().add(look.scale(0.5));
-        net.minecraft.world.entity.projectile.AbstractArrow bestAimed = null;
+        net.minecraft.world.entity.projectile.arrow.AbstractArrow bestAimed = null;
         double bestAimDist = Double.MAX_VALUE;
-        for (net.minecraft.world.entity.projectile.AbstractArrow a : p.level().getEntitiesOfClass(
-                net.minecraft.world.entity.projectile.AbstractArrow.class, new AABB(eye, limit).inflate(1.2),
+        for (net.minecraft.world.entity.projectile.arrow.AbstractArrow a : p.level().getEntitiesOfClass(
+                net.minecraft.world.entity.projectile.arrow.AbstractArrow.class, new AABB(eye, limit).inflate(1.2),
                 a -> com.skycraft.arsenal.ArsenalEvents.isCollectibleArrow(p, a))) {
             Optional<Vec3> hit = a.getBoundingBox().inflate(0.55).clip(eye, limit);
             if (hit.isPresent()) {
@@ -253,7 +253,7 @@ public final class Mysticism {
     /** Lets go of a held arrow or item: launched forward along the caster's aim if still floating nearby. */
     public static void release(ServerPlayer p) {
         Integer arrowId = HELD_ARROWS.remove(p.getUUID());
-        if (arrowId != null && p.serverLevel().getEntity(arrowId) instanceof net.minecraft.world.entity.projectile.AbstractArrow arrow && arrow.isAlive()) {
+        if (arrowId != null && p.level().getEntity(arrowId) instanceof net.minecraft.world.entity.projectile.arrow.AbstractArrow arrow && arrow.isAlive()) {
             com.skycraft.arsenal.entity.SkyArrow.setArrowInGround(arrow, false);
             arrow.setNoGravity(false);
             arrow.setOwner(p);
@@ -261,8 +261,8 @@ public final class Mysticism {
                 Vec3 look = p.getViewVector(1f);
                 arrow.shoot(look.x, look.y, look.z, 3.2F, 0.2F);
                 arrow.setCritArrow(true);
-                arrow.setBaseDamage(Math.max(arrow.getBaseDamage(), 2.5));
-                arrow.hurtMarked = true;
+                arrow.setBaseDamage(Math.max(com.skycraft.platform.EntityData.arrowDamage(arrow), 2.5));
+                arrow.syncVelocity = true;
                 SpellSounds.play(p, SpellSounds.Slot.CAST_ARCANE, 0.9f, 1.1f);
                 p.level().playSound(null, p.blockPosition(), SoundEvents.ARROW_SHOOT, net.minecraft.sounds.SoundSource.PLAYERS, 1.0f, 1.2f);
                 Vitals.markInCombat(p);
@@ -271,12 +271,12 @@ public final class Mysticism {
 
         Integer id = HELD.remove(p.getUUID());
         if (id == null) return;
-        if (!(p.serverLevel().getEntity(id) instanceof ItemEntity item) || !item.isAlive()) return;
+        if (!(p.level().getEntity(id) instanceof ItemEntity item) || !item.isAlive()) return;
         item.setNoGravity(false);
         if (item.distanceToSqr(p) < 25) {
             item.setDeltaMovement(p.getViewVector(1f).scale(1.3));
-            item.hurtMarked = true;
-            item.getPersistentData().putUUID(THROWN_BY, p.getUUID());
+            item.syncVelocity = true;
+            item.getPersistentData().store(THROWN_BY, net.minecraft.core.UUIDUtil.CODEC, p.getUUID());
             item.getPersistentData().putLong(THROWN_UNTIL, p.level().getGameTime() + 30);
             item.setPickUpDelay(20);
             THROWN.add(item);
@@ -290,16 +290,16 @@ public final class Mysticism {
         THROWN.removeIf(item -> {
             if (!item.isAlive() || !(item.level() instanceof ServerLevel level)) return true;
             CompoundTag pd = item.getPersistentData();
-            if (pd.getLong(THROWN_UNTIL) < level.getGameTime() || !pd.hasUUID(THROWN_BY)) {
+            if (pd.getLongOr(THROWN_UNTIL, 0L) < level.getGameTime() || !pd.read(THROWN_BY, net.minecraft.core.UUIDUtil.CODEC).isPresent()) {
                 pd.remove(THROWN_BY);
                 return true;
             }
-            ServerPlayer thrower = server.getPlayerList().getPlayer(pd.getUUID(THROWN_BY));
+            ServerPlayer thrower = server.getPlayerList().getPlayer(pd.read(THROWN_BY, net.minecraft.core.UUIDUtil.CODEC).orElseThrow());
             if (thrower == null) return true;
             for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, item.getBoundingBox().inflate(0.4),
                     e -> e != thrower && Targeting.canHarm(thrower, e))) {
                 float dmg = 1f + Math.min(4f, item.getItem().getCount() / 8f + (item.getItem().getMaxStackSize() == 1 ? 2f : 0f));
-                e.hurt(MagicDamage.source(level, MagicDamage.SPELL, item, thrower), dmg);
+                com.skycraft.platform.Effects.hurt(e, MagicDamage.source(level, MagicDamage.SPELL, item, thrower), dmg);
                 item.setDeltaMovement(item.getDeltaMovement().scale(-0.2));
                 pd.remove(THROWN_BY);
                 Vitals.markInCombat(thrower);
@@ -317,11 +317,11 @@ public final class Mysticism {
         int ticks = duration(p, spell, false);
         com.skycraft.magic.ActiveMagic.note(p, spell, ticks);
         for (LivingEntity e : Targeting.around(p, p.position(), reach(p, spell), e -> e != p && !(e instanceof ArmorStand))) {
-            e.addEffect(new MobEffectInstance(MobEffects.GLOWING, ticks, 0, false, false));
+            e.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.GLOWING), ticks, 0, false, false));
             found++;
         }
         MagicFx.send(p, MagicFx.AURA, Element.ARCANE, p.position(), p.position(), p.getId(), 4);
-        MagicFx.sendNear(p.serverLevel(), p.position(), 48, MagicFx.RING, Element.ARCANE, p.position().add(0, 0.3, 0), p.position(), p.getId(), 60);
+        MagicFx.sendNear(p.level(), p.position(), 48, MagicFx.RING, Element.ARCANE, p.position().add(0, 0.3, 0), p.position(), p.getId(), 60);
         SpellSounds.play(p, SpellSounds.Slot.CAST_ARCANE, 1f, 0.7f);
         return found > 0 ? Spell.Result.EFFECT : Spell.Result.CAST;
     }
@@ -330,8 +330,8 @@ public final class Mysticism {
 
     /** Slowfall: you fall gently for 30 seconds. */
     public static Spell.Result slowfall(ServerPlayer p, Spell spell, int tick) {
-        boolean useful = !p.onGround() && p.fallDistance > 2 || !p.hasEffect(MobEffects.SLOW_FALLING) && SpellEffects.hostilesNear(p, 16);
-        p.addEffect(new MobEffectInstance(MobEffects.SLOW_FALLING, duration(p, spell, true), 0, false, true, true));
+        boolean useful = !p.onGround() && p.fallDistance > 2 || !p.hasEffect(com.skycraft.platform.Effects.holder(MobEffects.SLOW_FALLING)) && SpellEffects.hostilesNear(p, 16);
+        p.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.SLOW_FALLING), duration(p, spell, true), 0, false, true, true));
         p.fallDistance = 0;
         MagicFx.send(p, MagicFx.AURA, Element.ARCANE, p.position(), p.position(), p.getId(), 1);
         SpellSounds.play(p, SpellSounds.Slot.LEVITATE, 0.4f, 1.6f);
@@ -340,10 +340,10 @@ public final class Mysticism {
 
     /** Water Walking: you walk on water as if it were solid ground. */
     public static Spell.Result waterWalking(ServerPlayer p, Spell spell, int tick) {
-        boolean wasActive = p.hasEffect(MagicRegistry.WATER_WALKING.get());
+        boolean wasActive = p.hasEffect(com.skycraft.platform.Effects.holder(MagicRegistry.WATER_WALKING.get()));
         boolean nearWater = p.isInWater() || p.level().getBlockState(p.blockPosition().below()).getFluidState().isSource()
                 || p.level().getBlockState(p.blockPosition().below(2)).getFluidState().isSource();
-        p.addEffect(new MobEffectInstance(MagicRegistry.WATER_WALKING.get(), duration(p, spell, true), 0, false, true, true));
+        p.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MagicRegistry.WATER_WALKING.get()), duration(p, spell, true), 0, false, true, true));
         MagicFx.send(p, MagicFx.AURA, Element.FROST, p.position(), p.position(), p.getId(), 1);
         MagicFx.sound(p, SoundEvents.BUBBLE_COLUMN_UPWARDS_INSIDE, 1f, 1.5f);
         return nearWater && !wasActive ? Spell.Result.EFFECT : Spell.Result.CAST;
@@ -357,8 +357,8 @@ public final class Mysticism {
     /** Starts (or extends) levitation; returns true if the player wasn't already levitating. */
     static boolean startLevitation(ServerPlayer p, int ticks) {
         if (p.isCreative() || p.isSpectator()) return false;
-        boolean wasActive = p.hasEffect(MagicRegistry.LEVITATE.get());
-        p.addEffect(new MobEffectInstance(MagicRegistry.LEVITATE.get(), ticks, 0, false, true, true));
+        boolean wasActive = p.hasEffect(com.skycraft.platform.Effects.holder(MagicRegistry.LEVITATE.get()));
+        p.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MagicRegistry.LEVITATE.get()), ticks, 0, false, true, true));
         Abilities ab = p.getAbilities();
         ab.mayfly = true;
         ab.flying = true;
@@ -378,7 +378,7 @@ public final class Mysticism {
 
     private static void endLevitation(ServerPlayer p) {
         CompoundTag pd = p.getPersistentData();
-        if (!pd.getBoolean(LEVITATING)) return;
+        if (!pd.getBooleanOr(LEVITATING, false)) return;
         pd.remove(LEVITATING);
         if (p.isCreative() || p.isSpectator()) return;
         Abilities ab = p.getAbilities();
@@ -386,21 +386,21 @@ public final class Mysticism {
         ab.flying = false;
         ab.setFlyingSpeed(0.05f);
         p.onUpdateAbilities();
-        p.addEffect(new MobEffectInstance(MobEffects.SLOW_FALLING, 100, 0, false, false, true));
-        p.removeEffect(MagicRegistry.LEVITATE.get());
+        p.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.SLOW_FALLING), 100, 0, false, false, true));
+        p.removeEffect(com.skycraft.platform.Effects.holder(MagicRegistry.LEVITATE.get()));
     }
 
     // ================================================================== dispel
 
     private static boolean isHarmful(MobEffectInstance e) {
-        return e.getEffect().getCategory() == MobEffectCategory.HARMFUL;
+        return e.getEffect().value().getCategory() == MobEffectCategory.HARMFUL;
     }
 
     /** Removes harmful magic from {@code e}; returns how many effects were removed. */
     static int cleanse(LivingEntity e) {
-        List<MobEffect> remove = new ArrayList<>();
+        List<net.minecraft.core.Holder<MobEffect>> remove = new ArrayList<>();
         for (MobEffectInstance inst : e.getActiveEffects()) {
-            if (isHarmful(inst) && inst.getEffect() != MagicRegistry.ASH_SHELL.get()) remove.add(inst.getEffect());
+            if (isHarmful(inst) && inst.getEffect().value() != MagicRegistry.ASH_SHELL.get()) remove.add(inst.getEffect());
         }
         remove.forEach(e::removeEffect);
         int n = remove.size();
@@ -413,9 +413,9 @@ public final class Mysticism {
 
     /** Strips beneficial magic from an enemy; returns how many effects were removed. */
     private static int strip(LivingEntity e) {
-        List<MobEffect> remove = new ArrayList<>();
+        List<net.minecraft.core.Holder<MobEffect>> remove = new ArrayList<>();
         for (MobEffectInstance inst : e.getActiveEffects()) {
-            if (inst.getEffect().getCategory() == MobEffectCategory.BENEFICIAL) remove.add(inst.getEffect());
+            if (inst.getEffect().value().getCategory() == MobEffectCategory.BENEFICIAL) remove.add(inst.getEffect());
         }
         remove.forEach(e::removeEffect);
         return remove.size();
@@ -438,7 +438,7 @@ public final class Mysticism {
             }
         }
         MagicFx.send(p, MagicFx.AURA, Element.ARCANE, p.position(), p.position(), p.getId(), 2);
-        MagicFx.sendNear(p.serverLevel(), p.position(), 48, MagicFx.RING, Element.ARCANE, p.position().add(0, 0.3, 0), p.position(), p.getId(),
+        MagicFx.sendNear(p.level(), p.position(), 48, MagicFx.RING, Element.ARCANE, p.position().add(0, 0.3, 0), p.position(), p.getId(),
                 Math.round(spell.radius * 10));
         SpellSounds.play(p, SpellSounds.Slot.DISPEL, 1f, 1.4f);
         return removed > 0 ? Spell.Result.EFFECT : Spell.Result.CAST;
@@ -446,7 +446,7 @@ public final class Mysticism {
 
     /** Mass Dispel: allies around you are cleansed; enemies lose their magic and enemy summons are banished. */
     public static Spell.Result massDispel(ServerPlayer p, Spell spell, int tick) {
-        ServerLevel level = p.serverLevel();
+        ServerLevel level = p.level();
         int n = cleanse(p);
         for (LivingEntity e : Targeting.around(p, p.position(), spell.radius, e -> e != p)) {
             if (Targeting.isFriendly(p, e)) {
@@ -457,10 +457,10 @@ public final class Mysticism {
                     n++;
                 } else {
                     n += strip(e);
-                    if (e.removeEffect(MagicRegistry.FLAME_CLOAK.get())) n++;
-                    if (e.removeEffect(MagicRegistry.FROST_CLOAK.get())) n++;
-                    if (e.removeEffect(MagicRegistry.LIGHTNING_CLOAK.get())) n++;
-                    if (e.removeEffect(MagicRegistry.STENDARRS_AURA.get())) n++;
+                    if (e.removeEffect(com.skycraft.platform.Effects.holder(MagicRegistry.FLAME_CLOAK.get()))) n++;
+                    if (e.removeEffect(com.skycraft.platform.Effects.holder(MagicRegistry.FROST_CLOAK.get()))) n++;
+                    if (e.removeEffect(com.skycraft.platform.Effects.holder(MagicRegistry.LIGHTNING_CLOAK.get()))) n++;
+                    if (e.removeEffect(com.skycraft.platform.Effects.holder(MagicRegistry.STENDARRS_AURA.get()))) n++;
                 }
             }
         }
@@ -508,8 +508,8 @@ public final class Mysticism {
             amount = Math.min(amount, td.getStamina());
             td.setStamina(td.getStamina() - amount);
         } else {
-            t.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 30, 0));
-            t.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 30, 0));
+            t.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.SLOWNESS), 30, 0));
+            t.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.WEAKNESS), 30, 0));
         }
         if (amount <= 0) return Spell.Result.CAST;
         PlayerData data = SkyData.get(p);
@@ -556,16 +556,16 @@ public final class Mysticism {
     }
 
     public static Spell.Result reflect(ServerPlayer p, Spell spell, int tick) {
-        boolean wasActive = p.hasEffect(MagicRegistry.REFLECT_SPELL.get());
-        p.addEffect(new MobEffectInstance(MagicRegistry.REFLECT_SPELL.get(), duration(p, spell, false), amp(chance(p, spell.magnitude)), false, true, true));
+        boolean wasActive = p.hasEffect(com.skycraft.platform.Effects.holder(MagicRegistry.REFLECT_SPELL.get()));
+        p.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MagicRegistry.REFLECT_SPELL.get()), duration(p, spell, false), amp(chance(p, spell.magnitude)), false, true, true));
         MagicFx.send(p, MagicFx.WARD, Element.ARCANE, p.getEyePosition(), p.getViewVector(1f), p.getId(), 1);
         SpellSounds.play(p, SpellSounds.Slot.REFLECT, 0.8f, 1.4f);
         return SpellEffects.buffResult(p, wasActive);
     }
 
     public static Spell.Result absorption(ServerPlayer p, Spell spell, int tick) {
-        boolean wasActive = p.hasEffect(MagicRegistry.SPELL_ABSORPTION.get());
-        p.addEffect(new MobEffectInstance(MagicRegistry.SPELL_ABSORPTION.get(), duration(p, spell, false), amp(chance(p, spell.magnitude)), false, true, true));
+        boolean wasActive = p.hasEffect(com.skycraft.platform.Effects.holder(MagicRegistry.SPELL_ABSORPTION.get()));
+        p.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MagicRegistry.SPELL_ABSORPTION.get()), duration(p, spell, false), amp(chance(p, spell.magnitude)), false, true, true));
         MagicFx.send(p, MagicFx.AURA, Element.ARCANE, p.position(), p.position(), p.getId(), 2);
         SpellSounds.play(p, SpellSounds.Slot.ABSORB, 0.8f, 1.2f);
         return SpellEffects.buffResult(p, wasActive);
@@ -573,10 +573,10 @@ public final class Mysticism {
 
     /** Spell Turning: a strong reflect and half as strong an absorption at once. */
     public static Spell.Result spellTurning(ServerPlayer p, Spell spell, int tick) {
-        boolean wasActive = p.hasEffect(MagicRegistry.REFLECT_SPELL.get());
+        boolean wasActive = p.hasEffect(com.skycraft.platform.Effects.holder(MagicRegistry.REFLECT_SPELL.get()));
         int d = duration(p, spell, false);
-        p.addEffect(new MobEffectInstance(MagicRegistry.REFLECT_SPELL.get(), d, amp(chance(p, spell.magnitude)), false, true, true));
-        p.addEffect(new MobEffectInstance(MagicRegistry.SPELL_ABSORPTION.get(), d, amp(chance(p, spell.magnitude / 2)), false, true, true));
+        p.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MagicRegistry.REFLECT_SPELL.get()), d, amp(chance(p, spell.magnitude)), false, true, true));
+        p.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MagicRegistry.SPELL_ABSORPTION.get()), d, amp(chance(p, spell.magnitude / 2)), false, true, true));
         MagicFx.send(p, MagicFx.AURA, Element.ARCANE, p.position(), p.position(), p.getId(), 4);
         MagicFx.send(p, MagicFx.WARD, Element.ARCANE, p.getEyePosition(), p.getViewVector(1f), p.getId(), 1);
         SpellSounds.play(p, SpellSounds.Slot.REFLECT, 1f, 1.0f);
@@ -597,9 +597,9 @@ public final class Mysticism {
             Vec3 dir = e.position().subtract(caster.position()).multiply(1, 0, 1);
             dir = dir.lengthSqr() < 1e-4 ? caster.getViewVector(1f) : dir.normalize();
             if (Targeting.hurtNoKnockback(e, MagicDamage.source(level, MagicDamage.SPELL, proj, caster), dmg)) {
-                double force = e.getType().is(CombatHandler.BOSSES) ? 0.3 : 1.4;
+                double force = e.getType().builtInRegistryHolder().is(CombatHandler.BOSSES) ? 0.3 : 1.4;
                 e.setDeltaMovement(dir.x * force, 0.55 + force * 0.2, dir.z * force);
-                e.hurtMarked = true;
+                e.syncVelocity = true;
                 CombatHandler.stagger(caster, e, 30);
                 n++;
             }
@@ -614,14 +614,14 @@ public final class Mysticism {
 
     public static Spell.Result mark(ServerPlayer p, Spell spell, int tick) {
         CompoundTag m = new CompoundTag();
-        m.putString("dim", p.level().dimension().location().toString());
+        m.putString("dim", p.level().dimension().identifier().toString());
         m.putDouble("x", p.getX());
         m.putDouble("y", p.getY());
         m.putDouble("z", p.getZ());
         m.putFloat("yaw", p.getYRot());
         MagicData.tag(p).put("mark", m);
         SkyData.get(p).markDirty();
-        MagicFx.sendNear(p.serverLevel(), p.position(), 48, MagicFx.RUNE, Element.ARCANE, p.position().add(0, 0.05, 0), p.position(), -1, 12);
+        MagicFx.sendNear(p.level(), p.position(), 48, MagicFx.RUNE, Element.ARCANE, p.position().add(0, 0.05, 0), p.position(), -1, 12);
         SpellSounds.play(p, SpellSounds.Slot.CAST_ARCANE, 1f, 0.6f);
         Notifier.message(p, Component.translatable("message.skycraft.mark_set"));
         // Mark trains Mysticism only through Recall (no free XP for re-marking the same spot).
@@ -629,13 +629,13 @@ public final class Mysticism {
     }
 
     public static Spell.Result recall(ServerPlayer p, Spell spell, int tick) {
-        CompoundTag m = MagicData.tag(p).getCompound("mark");
+        CompoundTag m = MagicData.tag(p).getCompoundOrEmpty("mark");
         if (m.isEmpty()) {
             Notifier.message(p, Component.translatable("message.skycraft.no_mark"));
             return Spell.Result.FAILED;
         }
-        ResourceLocation dimId = ResourceLocation.tryParse(m.getString("dim"));
-        ServerLevel target = dimId == null ? null : p.server.getLevel(ResourceKey.create(Registries.DIMENSION, dimId));
+        Identifier dimId = Identifier.tryParse(m.getStringOr("dim", ""));
+        ServerLevel target = dimId == null ? null : p.level().getServer().getLevel(ResourceKey.create(Registries.DIMENSION, dimId));
         if (target == null) {
             Notifier.message(p, Component.translatable("message.skycraft.no_mark"));
             return Spell.Result.FAILED;
@@ -644,9 +644,9 @@ public final class Mysticism {
             Notifier.message(p, Component.translatable("message.skycraft.mark_other_world"));
             return Spell.Result.FAILED;
         }
-        Vec3 dest = new Vec3(m.getDouble("x"), m.getDouble("y"), m.getDouble("z"));
+        Vec3 dest = new Vec3(m.getDoubleOr("x", 0d), m.getDoubleOr("y", 0d), m.getDoubleOr("z", 0d));
         boolean far = target != p.level() || dest.distanceToSqr(p.position()) > 64 * 64;
-        teleport(p, target, dest, m.getFloat("yaw"));
+        teleport(p, target, dest, m.getFloatOr("yaw", 0f));
         return far ? Spell.Result.EFFECT : Spell.Result.CAST;
     }
 
@@ -691,7 +691,7 @@ public final class Mysticism {
     }
 
     private static Spell.Result intervene(ServerPlayer p, @Nullable Place place) {
-        ServerLevel overworld = p.server.getLevel(Level.OVERWORLD);
+        ServerLevel overworld = p.level().getServer().getLevel(Level.OVERWORLD);
         if (place == null || overworld == null) {
             Notifier.message(p, Component.translatable("message.skycraft.intervention_failed"));
             return Spell.Result.FAILED;
@@ -707,12 +707,12 @@ public final class Mysticism {
     }
 
     private static void teleport(ServerPlayer p, ServerLevel level, Vec3 dest, float yaw) {
-        ServerLevel from = p.serverLevel();
+        ServerLevel from = p.level();
         MagicFx.sendNear(from, p.position(), 48, MagicFx.SUMMON, Element.ARCANE, p.position(), p.position(), p.getId(), 20);
         SpellSounds.world(from, p.position(), SpellSounds.Slot.TELEPORT, 1f, 0.8f);
         p.stopRiding();
         SpellCasting.stop(p);
-        p.teleportTo(level, dest.x, dest.y, dest.z, yaw, p.getXRot());
+        p.teleportTo(level, dest.x, dest.y, dest.z, java.util.Set.of(), yaw, p.getXRot(), false);
         p.fallDistance = 0;
         MagicFx.sendNear(level, dest, 48, MagicFx.SUMMON, Element.ARCANE, dest, dest, p.getId(), 20);
         SpellSounds.world(level, dest, SpellSounds.Slot.TELEPORT, 1f, 1.1f);
@@ -726,21 +726,21 @@ public final class Mysticism {
             release(p);
         }
         CompoundTag pd = p.getPersistentData();
-        if (pd.getBoolean(LEVITATING)) {
-            if (!p.hasEffect(MagicRegistry.LEVITATE.get()) || !p.isAlive()) {
+        if (pd.getBooleanOr(LEVITATING, false)) {
+            if (!p.hasEffect(com.skycraft.platform.Effects.holder(MagicRegistry.LEVITATE.get())) || !p.isAlive()) {
                 endLevitation(p);
             } else {
                 p.fallDistance = 0;
                 if (p.tickCount % 10 == 0 && heightAboveGround(p) > levitateCeiling(p) + 2) {
                     p.setDeltaMovement(p.getDeltaMovement().x, -0.3, p.getDeltaMovement().z);
-                    p.hurtMarked = true;
+                    p.syncVelocity = true;
                 }
                 if (p.tickCount % 6 == 0) {
-                    p.serverLevel().sendParticles(net.minecraft.core.particles.ParticleTypes.END_ROD, p.getX(), p.getY() + 0.1, p.getZ(), 1, 0.25, 0.05, 0.25, 0.0);
+                    p.level().sendParticles(net.minecraft.core.particles.ParticleTypes.END_ROD, p.getX(), p.getY() + 0.1, p.getZ(), 1, 0.25, 0.05, 0.25, 0.0);
                 }
             }
         }
-        if (p.hasEffect(MagicRegistry.WATER_WALKING.get()) && !p.isShiftKeyDown()) {
+        if (p.hasEffect(com.skycraft.platform.Effects.holder(MagicRegistry.WATER_WALKING.get())) && !p.isShiftKeyDown()) {
             BlockPos below = BlockPos.containing(p.getX(), p.getY() - 0.1, p.getZ());
             if (p.level().getFluidState(below).isSource() || p.isInWater()) p.fallDistance = 0;
         }
@@ -770,7 +770,7 @@ public final class Mysticism {
 
     /** On login: a levitation that ran out while away is ended. */
     public static void onLogin(ServerPlayer p) {
-        if (p.getPersistentData().getBoolean(LEVITATING) && !p.hasEffect(MagicRegistry.LEVITATE.get())) endLevitation(p);
+        if (p.getPersistentData().getBooleanOr(LEVITATING, false) && !p.hasEffect(com.skycraft.platform.Effects.holder(MagicRegistry.LEVITATE.get()))) endLevitation(p);
     }
 
     public static void clear() {

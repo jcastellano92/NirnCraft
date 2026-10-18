@@ -14,7 +14,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.PacketFlow;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
@@ -30,14 +30,14 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.util.BlockSnapshot;
-import net.minecraftforge.common.util.FakePlayer;
-import net.minecraftforge.common.util.FakePlayerFactory;
-import net.minecraftforge.event.entity.EntityMobGriefingEvent;
-import net.minecraftforge.event.level.BlockEvent;
-import net.minecraftforge.event.level.ExplosionEvent;
-import net.minecraftforge.eventbus.api.Event;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.common.util.BlockSnapshot;
+import net.neoforged.neoforge.common.util.FakePlayer;
+import net.neoforged.neoforge.common.util.FakePlayerFactory;
+import net.neoforged.neoforge.event.entity.EntityMobGriefingEvent;
+import net.neoforged.neoforge.event.level.BlockEvent;
+import net.neoforged.neoforge.event.level.ExplosionEvent;
+import net.neoforged.bus.api.Event;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -151,7 +151,7 @@ public final class ProtectSelfTest {
 
         for (FakePlayer fake : List.of(player, stranger)) {
             // a fake player has no connection: give it one that queues packets, so every handler may message it
-            if (fake.connection == null) new ServerGamePacketListenerImpl(server, new Connection(PacketFlow.SERVERBOUND), fake);
+            if (fake.connection == null) new ServerGamePacketListenerImpl(server, new Connection(PacketFlow.SERVERBOUND), fake, net.minecraft.server.network.CommonListenerCookie.createInitial(fake.getGameProfile(), false));
         }
         player.setPos(T.getX() + 0.5, T.getY(), T.getZ() + 0.5);
         player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.IRON_PICKAXE));
@@ -159,12 +159,12 @@ public final class ProtectSelfTest {
         // ---- 1. breaking in a town: glass and a bed are never breakable
         c.check("break glass in town -> cancelled", breakCancelled(level, player, T, Blocks.GLASS.defaultBlockState()), "glass at " + fmt(T));
         c.check("break glass pane in town -> cancelled", breakCancelled(level, player, T.above(), Blocks.GLASS_PANE.defaultBlockState()), "pane");
-        c.check("break a bed in town -> cancelled", breakCancelled(level, player, T, Blocks.RED_BED.defaultBlockState()), "red bed");
+        c.check("break a bed in town -> cancelled", breakCancelled(level, player, T, com.skycraft.worldgen.VanillaBlocks.RED_BED.defaultBlockState()), "red bed");
         c.check("break a chest in town -> cancelled", breakCancelled(level, player, T, Blocks.CHEST.defaultBlockState()), "chest");
         c.check("break a torch in the wilderness -> cancelled", breakCancelled(level, player, W, Blocks.TORCH.defaultBlockState()), "torch");
 
         // ---- 2. the designated harvests
-        Block veinBlock = BuiltInRegistries.BLOCK.getOptional(new ResourceLocation(Skycraft.MODID, "orichalcum_ore")).orElse(Blocks.IRON_ORE);
+        Block veinBlock = BuiltInRegistries.BLOCK.getOptional(Identifier.fromNamespaceAndPath(Skycraft.MODID, "orichalcum_ore")).orElse(Blocks.IRON_ORE);
         c.check("mine an ore vein with a pickaxe -> allowed", !breakCancelled(level, player, W, veinBlock.defaultBlockState()),
                 BuiltInRegistries.BLOCK.getKey(veinBlock) + " at " + fmt(W));
         c.check("mine an ore vein in town -> cancelled", breakCancelled(level, player, T, Blocks.IRON_ORE.defaultBlockState()), "iron ore in the plaza");
@@ -227,12 +227,12 @@ public final class ProtectSelfTest {
         player.setPos(T.getX() + 0.5, T.getY(), T.getZ() + 0.5);
         c.check("explosion in town (event) leaves every block", explosionKeepsBlocks(level, T), "synthetic detonation of 3 blocks");
         c.check("explosion in town (real) changes no block", realExplosionKeepsBlocks(level, T), "8 glass blocks next to a power 4 blast");
-        EntityMobGriefingEvent zombie = new EntityMobGriefingEvent(EntityType.ZOMBIE.create(level));
-        MinecraftForge.EVENT_BUS.post(zombie);
-        c.check("zombies may not grief (doors, blocks)", zombie.getResult() == Event.Result.DENY, "result " + zombie.getResult());
-        EntityMobGriefingEvent villager = new EntityMobGriefingEvent(EntityType.VILLAGER.create(level));
-        MinecraftForge.EVENT_BUS.post(villager);
-        c.check("villagers keep their farm work", villager.getResult() != Event.Result.DENY, "result " + villager.getResult());
+        EntityMobGriefingEvent zombie = new EntityMobGriefingEvent(level, net.minecraft.world.entity.EntityTypes.ZOMBIE.create(level, net.minecraft.world.entity.EntitySpawnReason.EVENT));
+        NeoForge.EVENT_BUS.post(zombie);
+        c.check("zombies may not grief (doors, blocks)", !zombie.canGrief(), "result " + zombie.canGrief());
+        EntityMobGriefingEvent villager = new EntityMobGriefingEvent(level, net.minecraft.world.entity.EntityTypes.VILLAGER.create(level, net.minecraft.world.entity.EntitySpawnReason.EVENT));
+        NeoForge.EVENT_BUS.post(villager);
+        c.check("villagers keep their farm work", villager.canGrief(), "result " + villager.canGrief());
 
         // ---- 8. taking things is never blocked
         player.setPos(T.getX() + 0.5, T.getY(), T.getZ() + 0.5);
@@ -258,7 +258,7 @@ public final class ProtectSelfTest {
         level.getChunk(x >> 4, z >> 4);
         BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos(x, level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z) + above, z);
         // a free, block-entity-free spot: the test puts blocks here and puts the old ones back
-        while (p.getY() < level.getMaxBuildHeight() - 40 && (!level.getBlockState(p).isAir() || level.getBlockEntity(p) != null)) p.move(0, 1, 0);
+        while (p.getY() < (level.getMaxY()+1) - 40 && (!level.getBlockState(p).isAir() || level.getBlockEntity(p) != null)) p.move(0, 1, 0);
         return p.immutable();
     }
 
@@ -289,8 +289,8 @@ public final class ProtectSelfTest {
         BlockState old = level.getBlockState(pos);
         level.setBlock(pos, state, 18);
         try {
-            BlockEvent.BreakEvent event = new BlockEvent.BreakEvent(level, pos, state, player);
-            MinecraftForge.EVENT_BUS.post(event);
+            net.neoforged.neoforge.event.level.block.BreakBlockEvent event = new net.neoforged.neoforge.event.level.block.BreakBlockEvent(level, pos, state, player);
+            NeoForge.EVENT_BUS.post(event);
             return event.isCanceled();
         } finally {
             level.setBlock(pos, old, 18);
@@ -305,7 +305,7 @@ public final class ProtectSelfTest {
         try {
             BlockSnapshot snapshot = BlockSnapshot.create(level.dimension(), level, pos);
             BlockEvent.EntityPlaceEvent event = new BlockEvent.EntityPlaceEvent(snapshot, Blocks.STONE.defaultBlockState(), player);
-            MinecraftForge.EVENT_BUS.post(event);
+            NeoForge.EVENT_BUS.post(event);
             return event.isCanceled();
         } finally {
             level.setBlock(pos, old, 18);
@@ -322,10 +322,10 @@ public final class ProtectSelfTest {
     /** The same, lit by {@code igniter} (a player's own TNT): it must leave every block as well, at home too. */
     private static boolean explosionKeepsBlocks(ServerLevel level, BlockPos at, net.minecraft.world.entity.Entity igniter) {
         List<BlockPos> blocks = new ArrayList<>(List.of(at.below(), at.east(), at.north()));
-        Explosion explosion = new Explosion(level, igniter, at.getX() + 0.5, at.getY() + 0.5, at.getZ() + 0.5, 3.0f, blocks);
-        ExplosionEvent.Detonate event = new ExplosionEvent.Detonate(level, explosion, new ArrayList<>());
-        MinecraftForge.EVENT_BUS.post(event);
-        return explosion.getToBlow().isEmpty();
+        net.minecraft.world.level.ServerExplosion explosion = new net.minecraft.world.level.ServerExplosion(level, igniter, null, null, net.minecraft.world.phys.Vec3.atCenterOf(at), 3f, false, Explosion.BlockInteraction.DESTROY);
+        ExplosionEvent.Detonate event = new ExplosionEvent.Detonate(level, explosion, new ArrayList<>(), blocks);
+        NeoForge.EVENT_BUS.post(event);
+        return event.getAffectedBlocks().isEmpty();
     }
 
     /** A real blast (power 4, TNT rules, no igniter) beside a cube of glass high above the town centre. */

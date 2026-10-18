@@ -15,9 +15,9 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
-import net.minecraft.world.entity.animal.IronGolem;
+import net.minecraft.world.entity.animal.golem.IronGolem;
 import net.minecraft.world.entity.monster.Monster;
-import net.minecraft.world.entity.npc.AbstractVillager;
+import net.minecraft.world.entity.npc.villager.AbstractVillager;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
@@ -61,12 +61,12 @@ public class VampireEntity extends SkyHumanoid implements Ranked {
     }
 
     @Override
-    public boolean doHurtTarget(Entity target) {
-        boolean hit = super.doHurtTarget(target);
+    public boolean doHurtTarget(net.minecraft.server.level.ServerLevel serverLevel263, Entity target) {
+        boolean hit = super.doHurtTarget(serverLevel263, target);
         if (hit && target instanceof LivingEntity living) {
             // Vampiric drain: heal vampire and apply brief weakness
             this.heal(2.5f);
-            living.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 60, 0), this);
+            living.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.WEAKNESS), 60, 0), this);
             this.playSound(SoundEvents.PLAYER_BURP, 0.6f, 1.8f);
             if (this.level() instanceof ServerLevel sl) {
                 sl.sendParticles(ParticleTypes.DAMAGE_INDICATOR, living.getX(), living.getY() + 1.0, living.getZ(), 4, 0.2, 0.3, 0.2, 0.01);
@@ -79,16 +79,15 @@ public class VampireEntity extends SkyHumanoid implements Ranked {
     @Override
     @Nullable
     public net.minecraft.world.entity.SpawnGroupData finalizeSpawn(net.minecraft.world.level.ServerLevelAccessor level, DifficultyInstance difficulty,
-                                                                   net.minecraft.world.entity.MobSpawnType reason,
-                                                                   @Nullable net.minecraft.world.entity.SpawnGroupData data,
-                                                                   @Nullable net.minecraft.nbt.CompoundTag tag) {
-        data = super.finalizeSpawn(level, difficulty, reason, data, tag);
-        if (reason == net.minecraft.world.entity.MobSpawnType.NATURAL && this.random.nextInt(4) == 0) {
-            var hound = com.skycraft.curse.CurseRegistry.DEATH_HOUND.get().create(level.getLevel());
+                                                                   net.minecraft.world.entity.EntitySpawnReason reason,
+                                                                   @Nullable net.minecraft.world.entity.SpawnGroupData data) {
+        data = super.finalizeSpawn(level, difficulty, reason, data);
+        if (reason == net.minecraft.world.entity.EntitySpawnReason.NATURAL && this.random.nextInt(4) == 0) {
+            var hound = com.skycraft.curse.CurseRegistry.DEATH_HOUND.get().create(level.getLevel(), net.minecraft.world.entity.EntitySpawnReason.EVENT);
             if (hound != null) {
-                hound.moveTo(getX() + 1, getY(), getZ(), getYRot(), 0);
+                hound.snapTo(getX() + 1, getY(), getZ(), getYRot(), 0);
                 if (level.noCollision(hound)) {
-                    hound.finalizeSpawn(level, difficulty, net.minecraft.world.entity.MobSpawnType.REINFORCEMENT, null, null);
+                    hound.finalizeSpawn(level, difficulty, net.minecraft.world.entity.EntitySpawnReason.REINFORCEMENT, null);
                     level.addFreshEntity(hound);
                 }
             }

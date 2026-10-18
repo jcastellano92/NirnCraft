@@ -1,0 +1,16 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "skycraft:item/draugr_deathlord_spawn_egg",
+    "tints": [
+      {
+        "type": "minecraft:constant",
+        "value": 2961974
+      },
+      {
+        "type": "minecraft:constant",
+        "value": 4176127
+      }
+    ]
+  }
+}

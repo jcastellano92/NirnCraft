@@ -1,8 +1,8 @@
 package com.skycraft.survival;
 
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.config.ModConfig;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.ModLoadingContext;
+import net.neoforged.fml.config.ModConfig;
 
 /**
  * Skyrim food and drink, cooking, inns and renting rooms, diseases and shrines, regenerating ore veins.
@@ -30,8 +30,8 @@ public final class SurvivalModule {
         SurvivalRegistry.init(modBus);
         com.skycraft.survival.fishing.FishingRegistry.init(modBus);
         com.skycraft.homestead.HomesteadRegistry.init(modBus);
-        com.skycraft.survival.mode.SurvivalMode.init();
-        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, SurvivalConfig.SPEC, "skycraft-survival.toml");
+        com.skycraft.survival.mode.SurvivalMode.init(modBus);
+        com.skycraft.Skycraft.config(ModConfig.Type.LOCAL, SurvivalConfig.SPEC, "skycraft-survival.toml");
         SurvivalDialogue.register();
         SurvivalEvents.register();
     }

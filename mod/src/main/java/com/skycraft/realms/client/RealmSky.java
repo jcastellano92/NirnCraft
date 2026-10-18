@@ -1,30 +1,33 @@
 package com.skycraft.realms.client;
 
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.BufferUploader;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.blaze3d.vertex.VertexFormat;
 import com.skycraft.Skycraft;
 import com.skycraft.realms.Realm;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.renderer.FogRenderer;
+import net.minecraft.client.renderer.fog.FogRenderer;
 import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.level.material.FogType;
 import org.joml.Matrix4f;
+import org.joml.Matrix4fc;
+import org.joml.Vector4f;
+import com.skycraft.render.client.CpuMesh;
+import com.skycraft.render.client.WorldMesh;
+import com.skycraft.render.client.WorldDraw;
+import com.mojang.renderpearl.api.pipeline.PrimitiveTopology;
+import com.mojang.renderpearl.api.vertex.VertexFormat;
 
 import java.util.Random;
 
 /**
- * The realms' skies, drawn instead of vanilla's (never allocating per frame beyond the shared tesselator):
+ * The realms' skies, drawn instead of vanilla's through extracted native meshes:
  * <ul>
  *     <li>a gradient dome from the fog colour at the horizon to each realm's zenith;</li>
  *     <li>the Deadlands: a blood-red sky with a slowly turning burning vortex (Dagon's eye) and drifting smoke;</li>
@@ -36,14 +39,14 @@ import java.util.Random;
  * The Shivering Isles keep vanilla's sky (sun, moons, stars, clouds) with their biomes' colours.
  */
 public final class RealmSky {
-    private static final ResourceLocation DEADLANDS_EYE = tex("deadlands_eye");
-    private static final ResourceLocation DEADLANDS_SMOKE = tex("deadlands_smoke");
-    private static final ResourceLocation SOVNGARDE_SUN = tex("sovngarde_sun");
-    private static final ResourceLocation APOCRYPHA_EYE = tex("apocrypha_eye");
-    private static final ResourceLocation SOUL_ORB = tex("soul_cairn_orb");
-    private static final ResourceLocation COLDHARBOUR_SUN = tex("coldharbour_sun");
-    private static final ResourceLocation COLDHARBOUR_CLOUDS = tex("coldharbour_clouds");
-    private static final ResourceLocation GLOW = tex("glow");
+    private static final Identifier DEADLANDS_EYE = tex("deadlands_eye");
+    private static final Identifier DEADLANDS_SMOKE = tex("deadlands_smoke");
+    private static final Identifier SOVNGARDE_SUN = tex("sovngarde_sun");
+    private static final Identifier APOCRYPHA_EYE = tex("apocrypha_eye");
+    private static final Identifier SOUL_ORB = tex("soul_cairn_orb");
+    private static final Identifier COLDHARBOUR_SUN = tex("coldharbour_sun");
+    private static final Identifier COLDHARBOUR_CLOUDS = tex("coldharbour_clouds");
+    private static final Identifier GLOW = tex("glow");
 
     private static final int STARS = 900;
     private static final float[] STAR = new float[STARS * 4];
@@ -60,27 +63,56 @@ public final class RealmSky {
         }
     }
 
+    private final Scene scene=new Scene();
+    private boolean additive;
     private RealmSky() {}
-
-    private static ResourceLocation tex(String name) {
-        return new ResourceLocation(Skycraft.MODID, "textures/environment/realms/" + name + ".png");
+    private static final WorldDraw.Material COLOR=material("realm_color",DefaultVertexFormat.POSITION_COLOR,WorldDraw.Blend.ALPHA);
+    private static final WorldDraw.Material COLOR_ADD=material("realm_color_add",DefaultVertexFormat.POSITION_COLOR,WorldDraw.Blend.ADDITIVE);
+    private static final WorldDraw.Material TEXTURED=material("realm_textured",DefaultVertexFormat.POSITION_TEX_COLOR,WorldDraw.Blend.ALPHA);
+    private static final WorldDraw.Material TEXTURED_ADD=material("realm_textured_add",DefaultVertexFormat.POSITION_TEX_COLOR,WorldDraw.Blend.ADDITIVE);
+    private static WorldDraw.Material material(String id,VertexFormat format,WorldDraw.Blend blend){
+        return WorldDraw.material(Identifier.fromNamespaceAndPath("skycraft",id),format,PrimitiveTopology.QUADS,blend,false,false,true);
+    }
+    static void register(net.neoforged.neoforge.client.event.RegisterRenderPipelinesEvent event){
+        for(var material:java.util.List.of(COLOR,COLOR_ADD,TEXTURED,TEXTURED_ADD))material.register(event);
+    }
+    private static final class Part implements AutoCloseable {
+        CpuMesh cpu;WorldMesh gpu;final Identifier texture;final WorldDraw.Material material;
+        net.minecraft.client.renderer.texture.AbstractTexture preparedTexture;
+        Part(CpuMesh cpu,Identifier texture,WorldDraw.Material material){this.cpu=cpu;this.texture=texture;this.material=material;}
+        void prepare(){
+            if(cpu!=null){gpu=new WorldMesh(cpu);cpu=null;}else if(gpu!=null)gpu.prepare();
+            // TextureManager can upload a previously unseen texture; only resolve it outside a render pass.
+            preparedTexture=texture==null?null:Minecraft.getInstance().getTextureManager().getTexture(texture);
+        }
+        @Override public void close(){if(cpu!=null){cpu.close();cpu=null;}if(gpu!=null){gpu.close();gpu=null;}preparedTexture=null;}
+    }
+    static final class Scene implements AutoCloseable {
+        final java.util.List<Part> parts=new java.util.ArrayList<>();
+        void prepare(){for(var part:parts)part.prepare();}
+        void render(Matrix4fc modelView){
+            try(var pass=WorldDraw.open()){
+                for(var part:parts)if(part.gpu!=null)pass.draw(part.gpu,part.material,modelView,new Vector4f(1,1,1,1),part.preparedTexture);
+            }
+        }
+        @Override public void close(){for(var part:parts)part.close();parts.clear();}
+    }
+    private void finish(CpuMesh.Builder builder,Identifier texture){
+        boolean textured=texture!=null;
+        scene.parts.add(new Part(builder.build(),texture,textured?(additive?TEXTURED_ADD:TEXTURED):(additive?COLOR_ADD:COLOR)));
+        builder.close();
     }
 
-    static void render(Realm realm, ClientLevel level, int ticks, float pt, PoseStack pose, Camera camera, Matrix4f proj, Runnable setupFog) {
-        Minecraft mc = Minecraft.getInstance();
-        FogType fluid = camera.getFluidInCamera();
-        if (fluid == FogType.LAVA || fluid == FogType.POWDER_SNOW) return;
-        if (mc.player != null && (mc.player.hasEffect(MobEffects.BLINDNESS) || mc.player.hasEffect(MobEffects.DARKNESS))) return;
-        double t = (ticks + pt) / 20.0;
-        FogRenderer.levelFogColor();
-        float[] fog = RenderSystem.getShaderFogColor();
-        float fr = fog[0], fg = fog[1], fb = fog[2];
-        FogRenderer.setupNoFog();
-        RenderSystem.depthMask(false);
-        RenderSystem.disableCull();
-        RenderSystem.enableBlend();
-        RenderSystem.defaultBlendFunc();
-        try {
+    private static Identifier tex(String name) {
+        return Identifier.fromNamespaceAndPath(Skycraft.MODID, "textures/environment/realms/" + name + ".png");
+    }
+
+    static Scene extract(Realm realm,double time,org.joml.Vector4fc fog){
+        RealmSky sky=new RealmSky();
+        try{sky.build(realm,time,fog);return sky.scene;}catch(RuntimeException|Error failure){sky.scene.close();throw failure;}
+    }
+    private void build(Realm realm,double t,org.joml.Vector4fc fog){
+        PoseStack pose=new PoseStack();float fr=fog.x(),fg=fog.y(),fb=fog.z();
             switch (realm) {
                 case DEADLANDS -> {
                     dome(pose, fr, fg, fb, 0.42f, 0.04f, 0.02f, 0.10f, 0.02f, 0.01f);
@@ -129,34 +161,18 @@ public final class RealmSky {
                 default -> {
                 }
             }
-        } finally {
-            RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
-            RenderSystem.defaultBlendFunc();
-            RenderSystem.disableBlend();
-            RenderSystem.enableCull();
-            RenderSystem.depthMask(true);
-            setupFog.run();
-        }
     }
-
-    private static void additive() {
-        RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE,
-                GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
-    }
-
-    private static void normal() {
-        RenderSystem.defaultBlendFunc();
-    }
+    private void additive(){additive=true;}
+    private void normal(){additive=false;}
 
     /**
      * The gradient dome: below the horizon the fog colour darkens toward {@code below}; above it rises to the
      * {@code zenith} colour.
      */
-    private static void dome(PoseStack pose, float hr, float hg, float hb, float zr, float zg, float zb, float br, float bg, float bb) {
+    private void dome(PoseStack pose, float hr, float hg, float hb, float zr, float zg, float zb, float br, float bg, float bb) {
         Matrix4f m = pose.last().pose();
-        RenderSystem.setShader(GameRenderer::getPositionColorShader);
-        BufferBuilder b = Tesselator.getInstance().getBuilder();
-        b.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+        CpuMesh.Builder mesh=CpuMesh.builder(PrimitiveTopology.QUADS,DefaultVertexFormat.POSITION_COLOR);
+        BufferBuilder b=mesh.vertices();
         int seg = 32;
         float[] el = {-90, -40, -12, -3, 0, 4, 10, 20, 34, 52, 72, 90};
         float r = 100f;
@@ -172,7 +188,7 @@ public final class RealmSky {
                 vtx(b, m, e1, a0, r, c1);
             }
         }
-        BufferUploader.drawWithShader(b.end());
+        finish(mesh,null);
     }
 
     private static float[] domeColor(float elevDeg, float hr, float hg, float hb, float zr, float zg, float zb, float br, float bg, float bb) {
@@ -186,40 +202,36 @@ public final class RealmSky {
 
     private static void vtx(BufferBuilder b, Matrix4f m, float e, float a, float r, float[] c) {
         float ce = Mth.cos(e);
-        b.vertex(m, ce * Mth.sin(a) * r, Mth.sin(e) * r, ce * Mth.cos(a) * r).color(c[0], c[1], c[2], 1f).endVertex();
+        b.addVertex(m, ce * Mth.sin(a) * r, Mth.sin(e) * r, ce * Mth.cos(a) * r).setColor(c[0], c[1], c[2], 1f);
     }
 
     /**
      * A textured square facing the viewer at azimuth {@code yawDeg} (0 = south, 90 = west, 180 = north),
      * elevation {@code pitchDeg}, half-size {@code size} at distance 100, spun by {@code spinDeg}.
      */
-    private static void sprite(PoseStack pose, ResourceLocation texture, float yawDeg, float pitchDeg, float size, float spinDeg,
+    private void sprite(PoseStack pose, Identifier texture, float yawDeg, float pitchDeg, float size, float spinDeg,
                                float r, float g, float bl, float a) {
         pose.pushPose();
-        pose.mulPose(com.mojang.math.Axis.YP.rotationDegrees(-yawDeg));
-        pose.mulPose(com.mojang.math.Axis.XP.rotationDegrees(-pitchDeg));
-        pose.mulPose(com.mojang.math.Axis.ZP.rotationDegrees(spinDeg));
+        pose.rotateDegrees(com.mojang.math.Axis.YP, -yawDeg);
+        pose.rotateDegrees(com.mojang.math.Axis.XP, -pitchDeg);
+        pose.rotateDegrees(com.mojang.math.Axis.ZP, spinDeg);
         Matrix4f m = pose.last().pose();
-        RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
-        RenderSystem.setShaderTexture(0, texture);
-        BufferBuilder b = Tesselator.getInstance().getBuilder();
-        b.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
-        b.vertex(m, -size, -size, 100f).uv(0f, 0f).color(r, g, bl, a).endVertex();
-        b.vertex(m, size, -size, 100f).uv(1f, 0f).color(r, g, bl, a).endVertex();
-        b.vertex(m, size, size, 100f).uv(1f, 1f).color(r, g, bl, a).endVertex();
-        b.vertex(m, -size, size, 100f).uv(0f, 1f).color(r, g, bl, a).endVertex();
-        BufferUploader.drawWithShader(b.end());
+        CpuMesh.Builder mesh=CpuMesh.builder(PrimitiveTopology.QUADS,DefaultVertexFormat.POSITION_TEX_COLOR);
+        BufferBuilder b=mesh.vertices();
+        b.addVertex(m, -size, -size, 100f).setUv(0f, 0f).setColor(r, g, bl, a);
+        b.addVertex(m, size, -size, 100f).setUv(1f, 0f).setColor(r, g, bl, a);
+        b.addVertex(m, size, size, 100f).setUv(1f, 1f).setColor(r, g, bl, a);
+        b.addVertex(m, -size, size, 100f).setUv(0f, 1f).setColor(r, g, bl, a);
+        finish(mesh,texture);
         pose.popPose();
     }
 
     /** A horizontal cloud/smoke layer {@code height} above the eye, scrolling, fading out toward its rim. */
-    private static void layer(PoseStack pose, ResourceLocation texture, float height, float extent, float du, float dv,
+    private void layer(PoseStack pose, Identifier texture, float height, float extent, float du, float dv,
                               float r, float g, float bl, float a) {
         Matrix4f m = pose.last().pose();
-        RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
-        RenderSystem.setShaderTexture(0, texture);
-        BufferBuilder b = Tesselator.getInstance().getBuilder();
-        b.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+        CpuMesh.Builder mesh=CpuMesh.builder(PrimitiveTopology.QUADS,DefaultVertexFormat.POSITION_TEX_COLOR);
+        BufferBuilder b=mesh.vertices();
         int n = 6;
         float step = extent * 2 / n;
         float uvScale = 3f / n;
@@ -227,12 +239,12 @@ public final class RealmSky {
             for (int j = 0; j < n; j++) {
                 float x0 = -extent + i * step, z0 = -extent + j * step, x1 = x0 + step, z1 = z0 + step;
                 float u0 = i * uvScale + du, v0 = j * uvScale + dv, u1 = u0 + uvScale, v1 = v0 + uvScale;
-                b.vertex(m, x0, height, z0).uv(u0, v0).color(r, g, bl, a * fade(x0, z0, extent)).endVertex();
-                b.vertex(m, x0, height, z1).uv(u0, v1).color(r, g, bl, a * fade(x0, z1, extent)).endVertex();
-                b.vertex(m, x1, height, z1).uv(u1, v1).color(r, g, bl, a * fade(x1, z1, extent)).endVertex();
-                b.vertex(m, x1, height, z0).uv(u1, v0).color(r, g, bl, a * fade(x1, z0, extent)).endVertex();
+                b.addVertex(m, x0, height, z0).setUv(u0, v0).setColor(r, g, bl, a * fade(x0, z0, extent));
+                b.addVertex(m, x0, height, z1).setUv(u0, v1).setColor(r, g, bl, a * fade(x0, z1, extent));
+                b.addVertex(m, x1, height, z1).setUv(u1, v1).setColor(r, g, bl, a * fade(x1, z1, extent));
+                b.addVertex(m, x1, height, z0).setUv(u1, v0).setColor(r, g, bl, a * fade(x1, z0, extent));
             }
-        BufferUploader.drawWithShader(b.end());
+        finish(mesh,texture);
     }
 
     private static float fade(float x, float z, float extent) {
@@ -240,11 +252,10 @@ public final class RealmSky {
         return Mth.clamp(1.2f - d * 1.1f, 0f, 1f);
     }
 
-    private static void stars(PoseStack pose, float alpha, double t, float r, float g, float bl) {
+    private void stars(PoseStack pose, float alpha, double t, float r, float g, float bl) {
         Matrix4f m = pose.last().pose();
-        RenderSystem.setShader(GameRenderer::getPositionColorShader);
-        BufferBuilder b = Tesselator.getInstance().getBuilder();
-        b.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+        CpuMesh.Builder mesh=CpuMesh.builder(PrimitiveTopology.QUADS,DefaultVertexFormat.POSITION_COLOR);
+        BufferBuilder b=mesh.vertices();
         for (int i = 0; i < STARS; i++) {
             float x = STAR[i * 4] * 100, y = STAR[i * 4 + 1] * 100, z = STAR[i * 4 + 2] * 100;
             if (y < 4) continue;
@@ -261,20 +272,19 @@ public final class RealmSky {
             ux = ux / ul * s;
             uy = uy / ul * s;
             uz = uz / ul * s;
-            b.vertex(m, x - ax - ux, y - uy, z - az - uz).color(r, g, bl, tw).endVertex();
-            b.vertex(m, x + ax - ux, y - uy, z + az - uz).color(r, g, bl, tw).endVertex();
-            b.vertex(m, x + ax + ux, y + uy, z + az + uz).color(r, g, bl, tw).endVertex();
-            b.vertex(m, x - ax + ux, y + uy, z - az + uz).color(r, g, bl, tw).endVertex();
+            b.addVertex(m, x - ax - ux, y - uy, z - az - uz).setColor(r, g, bl, tw);
+            b.addVertex(m, x + ax - ux, y - uy, z + az - uz).setColor(r, g, bl, tw);
+            b.addVertex(m, x + ax + ux, y + uy, z + az + uz).setColor(r, g, bl, tw);
+            b.addVertex(m, x - ax + ux, y + uy, z - az + uz).setColor(r, g, bl, tw);
         }
-        BufferUploader.drawWithShader(b.end());
+        finish(mesh,null);
     }
 
     /** Sovngarde's aurora: three slow ribbons over the north (the Hall's side), gold below, green-blue above. */
-    private static void aurora(PoseStack pose, double t, float alpha) {
+    private void aurora(PoseStack pose, double t, float alpha) {
         Matrix4f m = pose.last().pose();
-        RenderSystem.setShader(GameRenderer::getPositionColorShader);
-        BufferBuilder b = Tesselator.getInstance().getBuilder();
-        b.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+        CpuMesh.Builder mesh=CpuMesh.builder(PrimitiveTopology.QUADS,DefaultVertexFormat.POSITION_COLOR);
+        BufferBuilder b=mesh.vertices();
         int steps = 56;
         for (int k = 0; k < 3; k++) {
             float base = 22 + k * 9;
@@ -293,11 +303,11 @@ public final class RealmSky {
                 avtx(b, m, e0 + t0, a0, hi, 0f);
             }
         }
-        BufferUploader.drawWithShader(b.end());
+        finish(mesh,null);
     }
 
     private static void avtx(BufferBuilder b, Matrix4f m, float e, float a, float[] c, float alpha) {
         float ce = Mth.cos(e), r = 98f;
-        b.vertex(m, ce * Mth.sin(a) * r, Mth.sin(e) * r, ce * Mth.cos(a) * r).color(c[0], c[1], c[2], alpha).endVertex();
+        b.addVertex(m, ce * Mth.sin(a) * r, Mth.sin(e) * r, ce * Mth.cos(a) * r).setColor(c[0], c[1], c[2], alpha);
     }
 }

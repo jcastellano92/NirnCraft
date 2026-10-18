@@ -1,6 +1,0 @@
-{
-  "type": "forge:add_features",
-  "biomes": "#skycraft:spawns/wilderness",
-  "features": "skycraft:bandit_camp",
-  "step": "top_layer_modification"
-}

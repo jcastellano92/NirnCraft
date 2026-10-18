@@ -12,7 +12,6 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.network.NetworkHooks;
 
 /**
  * Menu of every crafting station. It has no slots of its own: it mirrors the whole player inventory with hidden,
@@ -37,7 +36,7 @@ public class StationMenu extends AbstractContainerMenu {
     }
 
     public static void open(ServerPlayer player, StationType type, BlockPos pos) {
-        NetworkHooks.openScreen(player,
+        player.openMenu(
                 new SimpleMenuProvider((id, inv, p) -> new StationMenu(id, inv, type, ContainerLevelAccess.create(player.level(), pos)), type.title()),
                 buf -> buf.writeEnum(type));
     }

@@ -190,7 +190,7 @@ public final class Jails {
                 c.anchor(AnchorType.JAIL_CELL, stand, y, zc);
                 // a straw bed in the back corner and a slop bucket
                 int bx = left ? 2 : 12;
-                c.bed(bx, y, za, B.s(Blocks.BROWN_BED), left ? Direction.WEST : Direction.EAST);
+                c.bed(bx, y, za, B.s(com.skycraft.worldgen.VanillaBlocks.BROWN_BED), left ? Direction.WEST : Direction.EAST);
                 c.set(left ? 1 : 13, y, zb, B.s(Blocks.CAULDRON));
                 if (cell % 2 == 0) c.setIfOpen(left ? 2 : 12, y, zb, B.slab(B.s(Blocks.SPRUCE_SLAB), false));
                 if (cell >= 4) c.anchor(AnchorType.JAIL_PRISONER, stand, y, zc);
@@ -315,7 +315,7 @@ public final class Jails {
             for (int yy = 1; yy <= 3; yy++) c.set(xa + 1, yy, frontZ, wall);
             c.set(xa + 2, 2, frontZ, B.s(Blocks.AIR));
             c.anchor(AnchorType.JAIL_CELL, xa + 1, y, 10);
-            c.bed(xa + 2, y, 10, B.s(Blocks.BROWN_BED), Direction.SOUTH);
+            c.bed(xa + 2, y, 10, B.s(com.skycraft.worldgen.VanillaBlocks.BROWN_BED), Direction.SOUTH);
             c.set(xa, y, 11, B.s(Blocks.CAULDRON));
             if (k < cells - 1) {
                 for (int z = frontZ; z <= d - 2; z++) {

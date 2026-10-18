@@ -1,11 +1,10 @@
 package com.skycraft.client.screen.title;
 
-import net.minecraft.client.renderer.PanoramaRenderer;
 import net.minecraft.client.gui.screens.TitleScreen;
-import net.minecraft.client.gui.screens.OptionsScreen;
+import net.minecraft.client.gui.screens.options.OptionsScreen;
 import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.worldselection.CreateWorldScreen;
@@ -13,9 +12,9 @@ import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.LevelSummary;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
-import org.lwjgl.glfw.GLFW;
+import com.mojang.blaze3d.platform.InputConstants;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -32,16 +31,13 @@ public class SkyTitleScreen extends Screen {
     private static final int COLOR_NORMAL = 0xFF9E9689;
     private static final int COLOR_DIM = 0xFF605A50;
 
-    private static final ResourceLocation TITLE_BACKGROUND = new ResourceLocation("skycraft", "textures/gui/title_background.png");
-
-    private final PanoramaRenderer panorama = new PanoramaRenderer(TitleScreen.CUBE_MAP);
+    private static final Identifier TITLE_BACKGROUND = Identifier.fromNamespaceAndPath("skycraft", "textures/gui/title_background.png");
 
     private enum MenuItem {
         CONTINUE("menu.skycraft.continue", "Continue Journey"),
         NEW_GAME("menu.skycraft.new_game", "New Game"),
         LOAD("menu.skycraft.load", "Load Game"),
         MULTIPLAYER("menu.skycraft.multiplayer", "Multiplayer"),
-        FRIENDS("menu.skycraft.friends", "Friends & Host (Essential)"),
         SETTINGS("menu.skycraft.settings", "Settings"),
         MODS("menu.skycraft.mods", "Mods"),
         QUIT("menu.skycraft.quit", "Quit");
@@ -157,7 +153,6 @@ public class SkyTitleScreen extends Screen {
             menuItems.add(MenuItem.LOAD);
         }
         menuItems.add(MenuItem.MULTIPLAYER);
-        menuItems.add(MenuItem.FRIENDS);
         menuItems.add(MenuItem.SETTINGS);
         menuItems.add(MenuItem.MODS);
         menuItems.add(MenuItem.QUIT);
@@ -174,9 +169,9 @@ public class SkyTitleScreen extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+    public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
         // Draw the cinematic Skycraft Skyrim landscape backdrop
-        g.blit(TITLE_BACKGROUND, 0, 0, 0, 0, width, height, width, height);
+        com.skycraft.inventory.client.SkyUi.blit(g, TITLE_BACKGROUND, 0, 0, 0, 0, width, height, width, height);
 
         // Subtle overall atmosphere vignette
         g.fillGradient(0, 0, width, height, 0x10000000, 0x40000000);
@@ -190,12 +185,12 @@ public class SkyTitleScreen extends Screen {
         // Title: large spaced capitals over an ornament
         int titleX = 40;
         int titleY = titleY();
-        g.pose().pushPose();
-        g.pose().translate(titleX, titleY - 6, 0);
-        g.pose().scale(2.0f, 2.0f, 1f);
-        g.drawString(font, "S K Y C R A F T", 0, 0, COLOR_GOLD, true);
-        g.pose().popPose();
-        g.drawString(font, "THE ELDER SCROLLS IN MINECRAFT", titleX, titleY + 14, 0xFF8A8272, false);
+        g.pose().pushMatrix();
+        g.pose().translate(titleX, titleY - 6);
+        g.pose().scale(2.0f, 2.0f);
+        g.text(font, "S K Y C R A F T", 0, 0, COLOR_GOLD, true);
+        g.pose().popMatrix();
+        g.text(font, "THE ELDER SCROLLS IN MINECRAFT", titleX, titleY + 14, 0xFF8A8272, false);
 
         // Decorative ornament divider
         int divW = Math.min(180, width / 2 - 30);
@@ -236,18 +231,18 @@ public class SkyTitleScreen extends Screen {
             if (item == MenuItem.CONTINUE && mostRecentSave != null) {
                 String saveName = mostRecentSave.getLevelName();
                 if (saveName.length() > 18) saveName = saveName.substring(0, 16) + "...";
-                g.drawString(font, "CONTINUE", titleX, itemY + 1, textColor, isSelected);
-                g.drawString(font, "(" + saveName + ")", titleX + font.width("CONTINUE") + 6, itemY + 2, COLOR_DIM, false);
+                g.text(font, "CONTINUE", titleX, itemY + 1, textColor, isSelected);
+                g.text(font, "(" + saveName + ")", titleX + font.width("CONTINUE") + 6, itemY + 2, COLOR_DIM, false);
             } else {
-                g.drawString(font, label.getString().toUpperCase(java.util.Locale.ROOT), titleX, itemY + 1, textColor, isSelected);
+                g.text(font, label.getString().toUpperCase(java.util.Locale.ROOT), titleX, itemY + 1, textColor, isSelected);
             }
         }
 
         // Bottom version & lore footer
         String footer = "Skycraft v0.1.0 • Skyrim Adventure System";
-        g.drawString(font, footer, width - font.width(footer) - 8, height - 12, COLOR_DIM, false);
+        g.text(font, footer, width - font.width(footer) - 8, height - 12, COLOR_DIM, false);
 
-        super.render(g, mouseX, mouseY, partialTick);
+        super.extractRenderState(g, mouseX, mouseY, partialTick);
     }
 
     /** Layout that fits the whole menu down to the Steam Deck's 427x267 scaled screen. */
@@ -265,7 +260,9 @@ public class SkyTitleScreen extends Screen {
     }
 
     @Override
-    public boolean mouseClicked(double mx, double my, int button) {
+    public boolean mouseClicked(net.minecraft.client.input.MouseButtonEvent event, boolean doubleClick) {
+        double mx = event.x(), my = event.y();
+        int button = com.skycraft.client.screen.UiInput.actionButton(event.button());
         if (button == 0) {
             int titleX = 40;
             int menuStartY = menuStartY();
@@ -281,38 +278,39 @@ public class SkyTitleScreen extends Screen {
                 }
             }
         }
-        return super.mouseClicked(mx, my, button);
+        return super.mouseClicked(event, doubleClick);
     }
 
     @Override
-    public boolean keyPressed(int key, int scan, int mods) {
-        if (key == GLFW.GLFW_KEY_UP || key == GLFW.GLFW_KEY_W) {
+    public boolean keyPressed(net.minecraft.client.input.KeyEvent event) {
+        int key = event.key(), scan = event.keycode(), mods = event.modifiers();
+        if (key == InputConstants.KEY_UP || key == InputConstants.KEY_W) {
             if (!menuItems.isEmpty()) {
                 selectedIndex = Math.floorMod(selectedIndex - 1, menuItems.size());
                 playUiSound(com.skycraft.world.WorldSounds.UI_MENU_CLICK.get(), 1.0f);
                 return true;
             }
         }
-        if (key == GLFW.GLFW_KEY_DOWN || key == GLFW.GLFW_KEY_S) {
+        if (key == InputConstants.KEY_DOWN || key == InputConstants.KEY_S) {
             if (!menuItems.isEmpty()) {
                 selectedIndex = Math.floorMod(selectedIndex + 1, menuItems.size());
                 playUiSound(com.skycraft.world.WorldSounds.UI_MENU_CLICK.get(), 1.0f);
                 return true;
             }
         }
-        if (key == GLFW.GLFW_KEY_ENTER || key == GLFW.GLFW_KEY_SPACE) {
+        if (key == InputConstants.KEY_RETURN || key == InputConstants.KEY_SPACE) {
             if (selectedIndex >= 0 && selectedIndex < menuItems.size()) {
                 playUiSound(com.skycraft.world.WorldSounds.UI_MENU_OPEN.get(), 1.0f);
                 activateItem(menuItems.get(selectedIndex));
                 return true;
             }
         }
-        if (key == GLFW.GLFW_KEY_ESCAPE) {
+        if (key == InputConstants.KEY_ESCAPE) {
             playUiSound(com.skycraft.world.WorldSounds.UI_MENU_CLOSE.get(), 1.0f);
             confirmQuit();
             return true;
         }
-        return super.keyPressed(key, scan, mods);
+        return super.keyPressed(event);
     }
 
     private void activateItem(MenuItem item) {
@@ -321,54 +319,25 @@ public class SkyTitleScreen extends Screen {
             case CONTINUE -> {
                 if (mostRecentSave != null) {
                     stopTitleMusic();
-                    mc.createWorldOpenFlows().loadLevel(this, mostRecentSave.getLevelId());
+                    mc.createWorldOpenFlows().openWorld(mostRecentSave.getLevelId(), () -> mc.gui.setScreen(this));
                 }
             }
             case NEW_GAME -> {
                 stopTitleMusic();
-                CreateWorldScreen.openFresh(mc, this);
+                CreateWorldScreen.openFresh(mc, () -> mc.gui.setScreen(this));
             }
             case LOAD -> {
-                mc.setScreen(new SkyLoadWorldScreen(this));
+                mc.gui.setScreen(new SkyLoadWorldScreen(this));
             }
             case MULTIPLAYER -> {
                 stopTitleMusic();
-                mc.setScreen(new JoinMultiplayerScreen(this));
-            }
-            case FRIENDS -> {
-                try {
-                    // Method 1: Essential's official CommandMcFriends handler
-                    Class<?> cmdClass = Class.forName("gg.essential.commands.impl.CommandMcFriends");
-                    Object cmd = cmdClass.getConstructor().newInstance();
-                    cmdClass.getMethod("handle").invoke(cmd);
-                    return;
-                } catch (Throwable t1) {
-                    try {
-                        // Method 2: Instantiate SocialMenu directly and open via GuiUtil
-                        Class<?> socialMenu = Class.forName("gg.essential.gui.friends.SocialMenu");
-                        Object inst = socialMenu.getConstructor().newInstance();
-                        if (inst instanceof Screen s) {
-                            try {
-                                Class<?> guiUtil = Class.forName("gg.essential.util.GuiUtil");
-                                java.lang.reflect.Field f = guiUtil.getField("INSTANCE");
-                                Object guiUtilInst = f.get(null);
-                                java.lang.reflect.Method openM = guiUtil.getMethod("openScreen", Screen.class);
-                                openM.invoke(guiUtilInst, s);
-                            } catch (Throwable ignored) {
-                                mc.setScreen(s);
-                            }
-                            return;
-                        }
-                    } catch (Throwable t2) {
-                        mc.setScreen(new JoinMultiplayerScreen(this));
-                    }
-                }
+                mc.gui.setScreen(new SkyMultiplayerScreen(this));
             }
             case SETTINGS -> {
-                mc.setScreen(new OptionsScreen(this, mc.options));
+                mc.gui.setScreen(new OptionsScreen(this, mc.options));
             }
             case MODS -> {
-                mc.setScreen(new net.minecraftforge.client.gui.ModListScreen(this));
+                mc.gui.setScreen(net.neoforged.neoforge.client.gui.modlist.ModListScreen.create(this));
             }
             case QUIT -> {
                 confirmQuit();
@@ -378,12 +347,12 @@ public class SkyTitleScreen extends Screen {
 
     private void confirmQuit() {
         Minecraft mc = Minecraft.getInstance();
-        mc.setScreen(new ConfirmScreen(
+        mc.gui.setScreen(new ConfirmScreen(
                 confirm -> {
                     if (confirm) {
                         mc.stop();
                     } else {
-                        mc.setScreen(this);
+                        mc.gui.setScreen(this);
                     }
                 },
                 Component.translatableWithFallback("menu.skycraft.quit_confirm_title", "Quit Skycraft?"),

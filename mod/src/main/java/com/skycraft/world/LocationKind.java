@@ -4,7 +4,7 @@ import com.skycraft.tamriel.Place;
 import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.levelgen.structure.Structure;
 
@@ -106,7 +106,7 @@ public enum LocationKind {
             case DUNGEON_FIXED -> {
                 String hint = (place.variant() + "_" + place.id()).toLowerCase(Locale.ROOT);
                 if (hint.contains("ayleid") || hint.contains("velothi") || hint.contains("xanmeer")) yield RUIN;
-                LocationKind k = classify(new ResourceLocation("skycraft", hint.replaceAll("[^a-z0-9_]", "_")), Level.OVERWORLD);
+                LocationKind k = classify(Identifier.fromNamespaceAndPath("skycraft", hint.replaceAll("[^a-z0-9_]", "_")), Level.OVERWORLD);
                 yield k == null || k == LANDMARK || k == TOWN || k == INN || k == HUT || k == MANOR ? BARROW : k;
             }
         };
@@ -125,7 +125,7 @@ public enum LocationKind {
     @org.jetbrains.annotations.Nullable
     public static LocationKind classify(Holder<Structure> structure, ResourceKey<Level> dimension) {
         if (structure.is(LocationTags.IGNORED_LANDMARKS)) return null;
-        ResourceLocation key = structure.unwrapKey().map(ResourceKey::location).orElse(null);
+        Identifier key = structure.unwrapKey().map(ResourceKey::identifier).orElse(null);
         if (key == null) return null;
         if (structure.is(LocationTags.TOWNS)) {
             return key.getPath().toLowerCase(Locale.ROOT).contains("tavern") ? INN : TOWN;
@@ -143,7 +143,7 @@ public enum LocationKind {
      * Keyword-only classification of a structure registry key, or {@code null} if it should not be discovered at all.
      * Prefer {@link #classify(Holder, ResourceKey)}, which also honours the structure tags.
      */
-    public static LocationKind classify(ResourceLocation key, ResourceKey<Level> dimension) {
+    public static LocationKind classify(Identifier key, ResourceKey<Level> dimension) {
         String path = key.getPath().toLowerCase(Locale.ROOT);
         String[] tokens = path.split("[/_\\-.]+");
         Set<String> t = new HashSet<>(Arrays.asList(tokens));

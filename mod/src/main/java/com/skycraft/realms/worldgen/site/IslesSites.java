@@ -505,12 +505,12 @@ final class IslesSites {
             // tall windows between the buttresses
             for (int x = x0 + 2; x < x1; x += 4) {
                 for (int z : new int[]{KZ0, KZ1}) {
-                    d.box(x, fy + 5, z, x, fy + 11, z, z < SPLIT ? b(Blocks.MAGENTA_STAINED_GLASS) : b(Blocks.BLACK_STAINED_GLASS));
+                    d.box(x, fy + 5, z, x, fy + 11, z, z < SPLIT ? b(com.skycraft.worldgen.VanillaBlocks.MAGENTA_STAINED_GLASS) : b(com.skycraft.worldgen.VanillaBlocks.BLACK_STAINED_GLASS));
                 }
             }
             for (int z = KZ0 + 2; z < KZ1; z += 4) {
                 for (int x : new int[]{x0, x1}) {
-                    d.box(x, fy + 5, z, x, fy + 11, z, z < SPLIT ? b(Blocks.LIGHT_BLUE_STAINED_GLASS) : b(Blocks.GRAY_STAINED_GLASS));
+                    d.box(x, fy + 5, z, x, fy + 11, z, z < SPLIT ? b(com.skycraft.worldgen.VanillaBlocks.LIGHT_BLUE_STAINED_GLASS) : b(com.skycraft.worldgen.VanillaBlocks.GRAY_STAINED_GLASS));
                 }
             }
             // corner towers with bright and dark cones
@@ -522,11 +522,11 @@ final class IslesSites {
                     d.cylinder(tx, z, 4, fy + 1, fy + 28, pal);
                     d.tube(tx, z, 4.6, 3.4, fy + 28, fy + 29, pal);
                     d.cone(tx, z, 4.6, 0.4, fy + 30, fy + 42, bright
-                            ? RealmKit.weighted(new Block[]{Blocks.PURPUR_BLOCK, Blocks.MAGENTA_TERRACOTTA, Blocks.AMETHYST_BLOCK}, new int[]{4, 3, 1})
+                            ? RealmKit.weighted(new Block[]{Blocks.PURPUR_BLOCK, com.skycraft.worldgen.VanillaBlocks.MAGENTA_TERRACOTTA, Blocks.AMETHYST_BLOCK}, new int[]{4, 3, 1})
                             : RealmKit.weighted(new Block[]{Blocks.BLACKSTONE, Blocks.DEEPSLATE_TILES}, new int[]{3, 2}));
                     d.set(tx, fy + 43, z, bright ? b(Blocks.OCHRE_FROGLIGHT) : b(Blocks.CRYING_OBSIDIAN));
                     for (int y = fy + 12; y <= fy + 24; y += 6) {
-                        d.set(tx + 4 * sx, y, z, bright ? b(Blocks.MAGENTA_STAINED_GLASS) : b(Blocks.BLACK_STAINED_GLASS));
+                        d.set(tx + 4 * sx, y, z, bright ? b(com.skycraft.worldgen.VanillaBlocks.MAGENTA_STAINED_GLASS) : b(com.skycraft.worldgen.VanillaBlocks.BLACK_STAINED_GLASS));
                     }
                 }
             // the great tower over the throne room, split down the middle
@@ -535,13 +535,13 @@ final class IslesSites {
             for (int y = fy + KH + 6; y <= fy + 40; y += 7) {
                 for (Direction dir : Direction.Plane.HORIZONTAL) {
                     d.box(6 * dir.getStepX(), y, tz + 6 * dir.getStepZ(), 6 * dir.getStepX(), y + 3, tz + 6 * dir.getStepZ(),
-                            tz + 6 * dir.getStepZ() < SPLIT ? b(Blocks.MAGENTA_STAINED_GLASS) : b(Blocks.BLACK_STAINED_GLASS));
+                            tz + 6 * dir.getStepZ() < SPLIT ? b(com.skycraft.worldgen.VanillaBlocks.MAGENTA_STAINED_GLASS) : b(com.skycraft.worldgen.VanillaBlocks.BLACK_STAINED_GLASS));
                 }
             }
             d.cylinder(0, tz, 7.5, fy + 44, fy + 44, pal);
             d.tube(0, tz, 7.5, 6.5, fy + 45, fy + 45, pal);
             d.cone(0, tz, 6.5, 0.5, fy + 46, fy + 64, RealmKit.byZ(SPLIT,
-                    RealmKit.weighted(new Block[]{Blocks.PURPUR_BLOCK, Blocks.MAGENTA_TERRACOTTA, Blocks.AMETHYST_BLOCK}, new int[]{4, 3, 1}),
+                    RealmKit.weighted(new Block[]{Blocks.PURPUR_BLOCK, com.skycraft.worldgen.VanillaBlocks.MAGENTA_TERRACOTTA, Blocks.AMETHYST_BLOCK}, new int[]{4, 3, 1}),
                     RealmKit.weighted(new Block[]{Blocks.BLACKSTONE, Blocks.DEEPSLATE_TILES, Blocks.CRYING_OBSIDIAN}, new int[]{4, 3, 1})));
             d.set(0, fy + 65, tz, b(Blocks.GOLD_BLOCK));
             d.box(0, fy + 66, tz, 0, fy + 67, tz, b(Blocks.END_ROD));
@@ -570,9 +570,9 @@ final class IslesSites {
             }
             // the runner from the south door to the dais
             for (int z = KZ0 + 5; z <= KZ1 - 1; z++) {
-                d.set(0, fy + 1, z, b(Blocks.PURPLE_CARPET));
-                d.set(-1, fy + 1, z, z < SPLIT ? b(Blocks.MAGENTA_CARPET) : b(Blocks.BLACK_CARPET));
-                d.set(1, fy + 1, z, z < SPLIT ? b(Blocks.MAGENTA_CARPET) : b(Blocks.BLACK_CARPET));
+                d.set(0, fy + 1, z, b(com.skycraft.worldgen.VanillaBlocks.PURPLE_CARPET));
+                d.set(-1, fy + 1, z, z < SPLIT ? b(com.skycraft.worldgen.VanillaBlocks.MAGENTA_CARPET) : b(com.skycraft.worldgen.VanillaBlocks.BLACK_CARPET));
+                d.set(1, fy + 1, z, z < SPLIT ? b(com.skycraft.worldgen.VanillaBlocks.MAGENTA_CARPET) : b(com.skycraft.worldgen.VanillaBlocks.BLACK_CARPET));
             }
             // the dais and the throne: half Mania, half Dementia
             d.box(-5, fy + 1, KZ0 + 1, 5, fy + 1, KZ0 + 4, b(Blocks.SMOOTH_QUARTZ));
@@ -611,8 +611,8 @@ final class IslesSites {
             // shoes and legs
             d.set(-1, y, sz + 1, b(Blocks.BLACKSTONE));
             d.set(1, y, sz + 1, b(Blocks.BLACKSTONE));
-            d.box(-1, y, sz, -1, y + 3, sz, b(Blocks.PURPLE_TERRACOTTA));
-            d.box(1, y, sz, 1, y + 3, sz, b(Blocks.RED_TERRACOTTA));
+            d.box(-1, y, sz, -1, y + 3, sz, b(com.skycraft.worldgen.VanillaBlocks.PURPLE_TERRACOTTA));
+            d.box(1, y, sz, 1, y + 3, sz, b(com.skycraft.worldgen.VanillaBlocks.RED_TERRACOTTA));
             // the coat, its tails and its gold buttons
             d.box(-2, y + 4, sz - 1, 2, y + 8, sz + 1, coat);
             d.box(-2, y + 3, sz - 1, 2, y + 3, sz - 1, coat);
@@ -691,7 +691,7 @@ final class IslesSites {
             d.cylinder(x, z, r, fy + 1, fy + h, pal);
             d.tube(x, z, r + 0.6, r - 0.6, fy + h + 1, fy + h + 1, pal);
             d.cone(x, z, r + 0.4, 0.4, fy + h + 2, fy + h + 9, bright
-                    ? RealmKit.weighted(new Block[]{Blocks.PURPUR_BLOCK, Blocks.MAGENTA_TERRACOTTA, Blocks.LIGHT_BLUE_TERRACOTTA}, new int[]{3, 2, 1})
+                    ? RealmKit.weighted(new Block[]{Blocks.PURPUR_BLOCK, com.skycraft.worldgen.VanillaBlocks.MAGENTA_TERRACOTTA, com.skycraft.worldgen.VanillaBlocks.LIGHT_BLUE_TERRACOTTA}, new int[]{3, 2, 1})
                     : RealmKit.weighted(new Block[]{Blocks.BLACKSTONE, Blocks.DEEPSLATE_TILES}, new int[]{3, 2}));
             d.set(x, fy + h + 10, z, bright ? cap(x + z) : b(Blocks.SOUL_LANTERN));
         }
@@ -705,26 +705,26 @@ final class IslesSites {
             if (bliss) {
                 return switch (Math.floorMod(i, 5)) {
                     case 0 -> new Style(b(Blocks.CALCITE), b(Blocks.STRIPPED_WARPED_STEM), Blocks.WARPED_STAIRS, b(Blocks.WARPED_PLANKS),
-                            b(Blocks.LIGHT_BLUE_STAINED_GLASS), Blocks.WARPED_DOOR);
-                    case 1 -> new Style(b(Blocks.PINK_TERRACOTTA), b(Blocks.CHERRY_LOG), Blocks.CHERRY_STAIRS, b(Blocks.CHERRY_PLANKS),
-                            b(Blocks.MAGENTA_STAINED_GLASS), Blocks.CHERRY_DOOR);
-                    case 2 -> new Style(b(Blocks.WHITE_TERRACOTTA), b(Blocks.STRIPPED_CRIMSON_STEM), Blocks.CRIMSON_STAIRS,
-                            b(Blocks.CRIMSON_PLANKS), b(Blocks.YELLOW_STAINED_GLASS), Blocks.CRIMSON_DOOR);
-                    case 3 -> new Style(b(Blocks.LIGHT_BLUE_TERRACOTTA), b(Blocks.PURPUR_PILLAR), Blocks.PURPUR_STAIRS, b(Blocks.PURPUR_BLOCK),
-                            b(Blocks.PURPLE_STAINED_GLASS), Blocks.BIRCH_DOOR);
-                    default -> new Style(b(Blocks.YELLOW_TERRACOTTA), b(Blocks.BAMBOO_BLOCK), Blocks.BAMBOO_STAIRS, b(Blocks.BAMBOO_PLANKS),
-                            b(Blocks.ORANGE_STAINED_GLASS), Blocks.BAMBOO_DOOR);
+                            b(com.skycraft.worldgen.VanillaBlocks.LIGHT_BLUE_STAINED_GLASS), Blocks.WARPED_DOOR);
+                    case 1 -> new Style(b(com.skycraft.worldgen.VanillaBlocks.PINK_TERRACOTTA), b(Blocks.CHERRY_LOG), Blocks.CHERRY_STAIRS, b(Blocks.CHERRY_PLANKS),
+                            b(com.skycraft.worldgen.VanillaBlocks.MAGENTA_STAINED_GLASS), Blocks.CHERRY_DOOR);
+                    case 2 -> new Style(b(com.skycraft.worldgen.VanillaBlocks.WHITE_TERRACOTTA), b(Blocks.STRIPPED_CRIMSON_STEM), Blocks.CRIMSON_STAIRS,
+                            b(Blocks.CRIMSON_PLANKS), b(com.skycraft.worldgen.VanillaBlocks.YELLOW_STAINED_GLASS), Blocks.CRIMSON_DOOR);
+                    case 3 -> new Style(b(com.skycraft.worldgen.VanillaBlocks.LIGHT_BLUE_TERRACOTTA), b(Blocks.PURPUR_PILLAR), Blocks.PURPUR_STAIRS, b(Blocks.PURPUR_BLOCK),
+                            b(com.skycraft.worldgen.VanillaBlocks.PURPLE_STAINED_GLASS), Blocks.BIRCH_DOOR);
+                    default -> new Style(b(com.skycraft.worldgen.VanillaBlocks.YELLOW_TERRACOTTA), b(Blocks.BAMBOO_BLOCK), Blocks.BAMBOO_STAIRS, b(Blocks.BAMBOO_PLANKS),
+                            b(com.skycraft.worldgen.VanillaBlocks.ORANGE_STAINED_GLASS), Blocks.BAMBOO_DOOR);
                 };
             }
             return switch (Math.floorMod(i, 4)) {
                 case 0 -> new Style(b(Blocks.MUD_BRICKS), b(Blocks.DARK_OAK_LOG), Blocks.DARK_OAK_STAIRS, b(Blocks.DARK_OAK_PLANKS),
                         null, Blocks.DARK_OAK_DOOR);
                 case 1 -> new Style(b(Blocks.COBBLED_DEEPSLATE), b(Blocks.DARK_OAK_LOG), Blocks.DEEPSLATE_TILE_STAIRS, b(Blocks.DEEPSLATE_TILES),
-                        b(Blocks.GRAY_STAINED_GLASS), Blocks.SPRUCE_DOOR);
+                        b(com.skycraft.worldgen.VanillaBlocks.GRAY_STAINED_GLASS), Blocks.SPRUCE_DOOR);
                 case 2 -> new Style(b(Blocks.MOSSY_COBBLESTONE), b(Blocks.STRIPPED_DARK_OAK_LOG), Blocks.MUD_BRICK_STAIRS, b(Blocks.MUD_BRICKS),
                         null, Blocks.DARK_OAK_DOOR);
                 default -> new Style(b(Blocks.PACKED_MUD), b(Blocks.MANGROVE_LOG), Blocks.BLACKSTONE_STAIRS, b(Blocks.BLACKSTONE),
-                        b(Blocks.BROWN_STAINED_GLASS), Blocks.MANGROVE_DOOR);
+                        b(com.skycraft.worldgen.VanillaBlocks.BROWN_STAINED_GLASS), Blocks.MANGROVE_DOOR);
             };
         }
 
@@ -770,7 +770,7 @@ final class IslesSites {
             if (bliss) {
                 d.set(ix, fy + 1, iz, b(Blocks.LANTERN));
                 d.box(hx - 1, fy + 1, hz - 1, hx + 1, fy + 1, hz + 1,
-                        (h >>> 16 & 1) == 0 ? b(Blocks.MAGENTA_CARPET) : b(Blocks.LIGHT_BLUE_CARPET));
+                        (h >>> 16 & 1) == 0 ? b(com.skycraft.worldgen.VanillaBlocks.MAGENTA_CARPET) : b(com.skycraft.worldgen.VanillaBlocks.LIGHT_BLUE_CARPET));
             } else {
                 d.set(ix, fy + 1, iz, b(Blocks.BARREL));
                 d.set(hx, fy + 1, hz, b(Blocks.CANDLE).setValue(net.minecraft.world.level.block.CandleBlock.LIT, true));

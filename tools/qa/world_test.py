@@ -6,6 +6,7 @@ Use `list`, `plan`, `run --tier fast`, `capture CAMERA`, `review RUN CASE`, and
 import argparse
 import hashlib
 import importlib.util
+import importlib.metadata
 import json
 import os
 from pathlib import Path
@@ -52,8 +53,8 @@ def selected(values, selector):
     if not selector or selector == 'all':
         return list(values)
     names = selector.split(',')
-    result = [v for v in values if v['id'] in names or v.get('province') in names]
-    found = {v['id'] for v in result} | {v.get('province') for v in result}
+    result = [v for v in values if any(v.get(key) in names for key in ('id', 'province', 'dimension', 'scope'))]
+    found = {v.get(key) for v in result for key in ('id', 'province', 'dimension', 'scope')}
     missing = set(names) - found
     if missing:
         raise ValueError('Unknown selection: ' + ', '.join(sorted(missing)))
@@ -146,19 +147,49 @@ def new_run(kind, systems, regions):
     return path, data
 
 
+def fast_environment():
+    packages = {}
+    for name in ('Pillow', 'numpy'):
+        try:
+            packages[name] = importlib.metadata.version(name)
+        except importlib.metadata.PackageNotFoundError:
+            packages[name] = None
+    return {'python': sys.version, 'platform': sys.platform, 'packages': packages}
+
+
+def reusable_fast_result(previous, check, key, environment):
+    if (previous.get('status') != 'passed' or previous.get('inputHash') != key
+            or previous.get('environment') != environment or previous.get('fastEvidenceVersion') != 2
+            or previous.get('inputHashAfter') != key):
+        return False
+
+    def intact(relative, expected):
+        if not relative or not expected:
+            return False
+        path = (ROOT / relative).resolve()
+        return (path.is_relative_to(ROOT.resolve()) and path.is_file()
+                and hashlib.sha256(path.read_bytes()).hexdigest() == expected)
+
+    if not intact(previous.get('log'), previous.get('logSha256')):
+        return False
+    artifacts = previous.get('artifacts', [])
+    if {a.get('source') for a in artifacts} != set(check.get('artifacts', [])):
+        return False
+    return all(intact(a.get('path'), a.get('sha256')) for a in artifacts)
+
+
 def run_fast(spec, systems, regions, resume=None):
     if not load_checks(spec,systems):raise ValueError('No fast checks selected; not a pass')
     path, data = new_run('fast', systems, regions)
     prior = read(Path(resume) / 'run.json') if resume else {'results': []}
     prior_results = {r['id']: r for r in prior['results']}
-    hashes = {}
+    environment = fast_environment()
     for check in load_checks(spec, systems):
         inputs = check.get('inputs', spec['defaultInputs'])
         patterns=tuple(inputs + ['tools/qa/world-tests.json', 'tools/qa/world_test.py'])
-        if patterns not in hashes: hashes[patterns]=fingerprint(patterns)
-        key=hashes[patterns]
+        key=fingerprint(patterns)
         previous = prior_results.get(check['id'], {})
-        if previous.get('status') == 'passed' and previous.get('inputHash') == key:
+        if reusable_fast_result(previous, check, key, environment):
             result = {**previous, 'reusedFrom': str(resume)}
         else:
             argv = [sys.executable if part == '{python}' else part for part in check['command']]
@@ -177,7 +208,9 @@ def run_fast(spec, systems, regions, resume=None):
             result = {'id': check['id'], 'systems': check['systems'], 'scope': check.get('scope', 'global'),
                       'status': verdict(check, code, output), 'exitCode': code,
                       'seconds': round(time.monotonic()-started, 3), 'inputHash': key,
-                      'command': argv, 'log': str(log.relative_to(ROOT)), 'tier': 'fast'}
+                      'command': argv, 'log': str(log.relative_to(ROOT)), 'tier': 'fast',
+                      'logSha256': hashlib.sha256(log.read_bytes()).hexdigest(),
+                      'fastEvidenceVersion': 2, 'environment': environment}
             import shutil
             result['artifacts']=[]
             for relative in check.get('artifacts',[]):
@@ -189,8 +222,13 @@ def run_fast(spec, systems, regions, resume=None):
                 target=path/'artifacts'/check['id']/artifact.name
                 target.parent.mkdir(parents=True,exist_ok=True)
                 shutil.copy2(artifact,target)
-                result['artifacts'].append({'path':str(target.relative_to(ROOT)),
+                result['artifacts'].append({'path':str(target.relative_to(ROOT)), 'source':relative,
                     'sha256':hashlib.sha256(target.read_bytes()).hexdigest()})
+            after=fingerprint(patterns)
+            result['inputHashAfter']=after
+            if after != key:
+                result['status']='failed'
+                result['evidenceError']='inputs_changed_during_check'
         data['results'].append(result)
         write(path / 'run.json', data)
         print(result['status'].upper(), result['id'], result.get('seconds'), flush=True)
@@ -206,17 +244,22 @@ def plan(spec, systems, regions):
     cases = []
     for region in regions:
         for system in systems:
+            if system['id'] in region.get('excludedSystems', {}):
+                continue
             poses = [name for name, p in cameras.items() if p.get('region') == region['id']
                      and system['id'] in p.get('systems', [])]
             for condition in system['conditions']:
                 cases.append({'id': region['id'] + ':' + system['id'] + ':' + condition,
-                              'region': region['id'], 'system': system['id'], 'condition': condition,
+                              'region': region['id'], 'dimension': region.get('dimension', 'minecraft:overworld'),
+                              'system': system['id'], 'condition': condition,
                               'cameraCandidates': poses, 'status': 'not_run',
                               'required': ['runtime', 'visual:shaders_on', 'visual:shaders_off', 'performance'],
                               'acceptance': system['acceptance'],
                               'next': 'Reuse approved camera after identity check' if poses else
                                       'Inspect real plans/routes, load region, scout and visually approve camera'})
     write(OUT / 'plan.json', {'version': 1, 'regions': [r['id'] for r in regions], 'cases': cases,
+                            'excludedSystems': [{'region': r['id'], 'system': s, 'reason': why}
+                                                for r in regions for s, why in r.get('excludedSystems', {}).items()],
                             'note': 'Coverage obligations, not completed tests. Cases may share evidence only when it actually demonstrates each condition.'})
     print(len(cases), 'regional condition cases ->', OUT / 'plan.json')
 
@@ -337,7 +380,7 @@ def report(path):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--systems', default='all', help='Comma-separated system IDs')
-    parser.add_argument('--regions', default='all', help='Region IDs or province IDs')
+    parser.add_argument('--regions', default='all', help='Region IDs, province/realm IDs, or dimension IDs')
     sub = parser.add_subparsers(dest='action', required=True)
     sub.add_parser('list')
     sub.add_parser('plan')
@@ -371,7 +414,7 @@ def main():
     rep.add_argument('run', type=Path)
     args = parser.parse_args()
     spec = read(SPEC)
-    regions = selected(read(ROOT / 'mod/src/main/resources/skycraft/tamriel/regions.json'), args.regions)
+    regions = selected(module('qa_regions', 'tools/qa/world_regions.py').registry(ROOT), args.regions)
     systems = selected(spec['systems'], args.systems)
     if args.action == 'list':
         print(json.dumps({'systems': systems, 'checks': load_checks(spec, systems),

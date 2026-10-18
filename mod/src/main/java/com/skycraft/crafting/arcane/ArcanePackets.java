@@ -5,43 +5,41 @@ import com.skycraft.crafting.arcane.client.ArcaneClientHandlers;
 import com.skycraft.crafting.arcane.enchant.Enchanting;
 import com.skycraft.network.SkyNetwork;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.network.NetworkDirection;
-import net.minecraftforge.network.NetworkEvent;
+import net.neoforged.api.distmarker.Dist;
+import com.skycraft.platform.Sides;
+import net.minecraft.network.protocol.PacketFlow;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-import java.util.function.Supplier;
 
 /** Arcane packets: the server opens station screens; the client asks for (validated) station actions. */
 public final class ArcanePackets {
     private ArcanePackets() {}
 
     public static void register() {
-        SkyNetwork.register(OpenStation.class, NetworkDirection.PLAY_TO_CLIENT, OpenStation::encode, OpenStation::decode, OpenStation::handle);
-        SkyNetwork.register(Disenchant.class, NetworkDirection.PLAY_TO_SERVER, Disenchant::encode, Disenchant::decode, Disenchant::handle);
-        SkyNetwork.register(Enchant.class, NetworkDirection.PLAY_TO_SERVER, Enchant::encode, Enchant::decode, Enchant::handle);
-        SkyNetwork.register(Combine.class, NetworkDirection.PLAY_TO_SERVER, Combine::encode, Combine::decode, Combine::handle);
-        SkyNetwork.register(Taste.class, NetworkDirection.PLAY_TO_SERVER, Taste::encode, Taste::decode, Taste::handle);
+        SkyNetwork.register(OpenStation.class, PacketFlow.CLIENTBOUND, OpenStation::encode, OpenStation::decode, OpenStation::handle);
+        SkyNetwork.register(Disenchant.class, PacketFlow.SERVERBOUND, Disenchant::encode, Disenchant::decode, Disenchant::handle);
+        SkyNetwork.register(Enchant.class, PacketFlow.SERVERBOUND, Enchant::encode, Enchant::decode, Enchant::handle);
+        SkyNetwork.register(Combine.class, PacketFlow.SERVERBOUND, Combine::encode, Combine::decode, Combine::handle);
+        SkyNetwork.register(Taste.class, PacketFlow.SERVERBOUND, Taste::encode, Taste::decode, Taste::handle);
     }
 
     // ------------------------------------------------------------------ S2C
 
     /** Opens the Arcane Enchanter ({@code kind} 0) or Alchemy Lab (1) screen for the station at {@code pos}. */
     public record OpenStation(int kind, BlockPos pos) {
-        static void encode(OpenStation m, FriendlyByteBuf buf) {
+        static void encode(OpenStation m, RegistryFriendlyByteBuf buf) {
             buf.writeVarInt(m.kind);
             buf.writeBlockPos(m.pos);
         }
 
-        static OpenStation decode(FriendlyByteBuf buf) {
+        static OpenStation decode(RegistryFriendlyByteBuf buf) {
             return new OpenStation(buf.readVarInt(), buf.readBlockPos());
         }
 
-        static void handle(OpenStation m, Supplier<NetworkEvent.Context> ctx) {
-            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> ArcaneClientHandlers.openStation(m.kind, m.pos));
-            ctx.get().setPacketHandled(true);
+        static void handle(OpenStation m, IPayloadContext ctx) {
+            Sides.runOn(Dist.CLIENT, () -> () -> ArcaneClientHandlers.openStation(m.kind, m.pos));
         }
     }
 
@@ -49,51 +47,49 @@ public final class ArcanePackets {
 
     /** Destroy the item in an inventory slot and learn its enchantments. */
     public record Disenchant(BlockPos pos, int slot) {
-        static void encode(Disenchant m, FriendlyByteBuf buf) {
+        static void encode(Disenchant m, RegistryFriendlyByteBuf buf) {
             buf.writeBlockPos(m.pos);
             buf.writeVarInt(m.slot);
         }
 
-        static Disenchant decode(FriendlyByteBuf buf) {
+        static Disenchant decode(RegistryFriendlyByteBuf buf) {
             return new Disenchant(buf.readBlockPos(), buf.readVarInt());
         }
 
-        static void handle(Disenchant m, Supplier<NetworkEvent.Context> ctx) {
-            ServerPlayer player = ctx.get().getSender();
+        static void handle(Disenchant m, IPayloadContext ctx) {
+            ServerPlayer player = SkyNetwork.sender(ctx);
             if (player != null) Enchanting.disenchant(player, m.pos, m.slot);
-            ctx.get().setPacketHandled(true);
         }
     }
 
     /** Enchant the item in {@code itemSlot} with a known enchantment, powered by the soul gem in {@code gemSlot}. */
     public record Enchant(BlockPos pos, int itemSlot, String enchantment, int gemSlot) {
-        static void encode(Enchant m, FriendlyByteBuf buf) {
+        static void encode(Enchant m, RegistryFriendlyByteBuf buf) {
             buf.writeBlockPos(m.pos);
             buf.writeVarInt(m.itemSlot);
             buf.writeUtf(m.enchantment, 256);
             buf.writeVarInt(m.gemSlot);
         }
 
-        static Enchant decode(FriendlyByteBuf buf) {
+        static Enchant decode(RegistryFriendlyByteBuf buf) {
             return new Enchant(buf.readBlockPos(), buf.readVarInt(), buf.readUtf(256), buf.readVarInt());
         }
 
-        static void handle(Enchant m, Supplier<NetworkEvent.Context> ctx) {
-            ServerPlayer player = ctx.get().getSender();
+        static void handle(Enchant m, IPayloadContext ctx) {
+            ServerPlayer player = SkyNetwork.sender(ctx);
             if (player != null) Enchanting.enchant(player, m.pos, m.itemSlot, m.enchantment, m.gemSlot);
-            ctx.get().setPacketHandled(true);
         }
     }
 
     /** Combine the ingredients in 2-3 inventory slots into a potion or poison. */
     public record Combine(BlockPos pos, int[] slots) {
-        static void encode(Combine m, FriendlyByteBuf buf) {
+        static void encode(Combine m, RegistryFriendlyByteBuf buf) {
             buf.writeBlockPos(m.pos);
             buf.writeVarInt(m.slots.length);
             for (int s : m.slots) buf.writeVarInt(s);
         }
 
-        static Combine decode(FriendlyByteBuf buf) {
+        static Combine decode(RegistryFriendlyByteBuf buf) {
             BlockPos pos = buf.readBlockPos();
             int n = Math.max(0, Math.min(8, buf.readVarInt()));
             int[] slots = new int[n];
@@ -101,28 +97,26 @@ public final class ArcanePackets {
             return new Combine(pos, slots);
         }
 
-        static void handle(Combine m, Supplier<NetworkEvent.Context> ctx) {
-            ServerPlayer player = ctx.get().getSender();
+        static void handle(Combine m, IPayloadContext ctx) {
+            ServerPlayer player = SkyNetwork.sender(ctx);
             if (player != null) Alchemy.combine(player, m.pos, m.slots);
-            ctx.get().setPacketHandled(true);
         }
     }
 
     /** Taste (eat) one ingredient to learn its first unknown effect(s). */
     public record Taste(BlockPos pos, int slot) {
-        static void encode(Taste m, FriendlyByteBuf buf) {
+        static void encode(Taste m, RegistryFriendlyByteBuf buf) {
             buf.writeBlockPos(m.pos);
             buf.writeVarInt(m.slot);
         }
 
-        static Taste decode(FriendlyByteBuf buf) {
+        static Taste decode(RegistryFriendlyByteBuf buf) {
             return new Taste(buf.readBlockPos(), buf.readVarInt());
         }
 
-        static void handle(Taste m, Supplier<NetworkEvent.Context> ctx) {
-            ServerPlayer player = ctx.get().getSender();
+        static void handle(Taste m, IPayloadContext ctx) {
+            ServerPlayer player = SkyNetwork.sender(ctx);
             if (player != null) Alchemy.taste(player, m.pos, m.slot);
-            ctx.get().setPacketHandled(true);
         }
     }
 }

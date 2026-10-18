@@ -11,16 +11,16 @@ import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.RotatedPillarBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
-import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
+import com.skycraft.worldgen.ConfiguredFeature;
+import com.skycraft.worldgen.FeaturePlaceContext;
+import com.skycraft.worldgen.NoneFeatureConfiguration;
 
 /**
  * Valenwood's Graht-oaks: giant trees with a flared, rooted trunk 5-7 blocks across, 35-55 blocks tall, and thick
  * flat-topped branches you can walk along, each ending in a leaf crown. The tree is re-centred on the decorated
  * chunk so its whole crown (up to 22 blocks out) stays inside the 3×3-chunk write area.
  */
-public class GrahtOakFeature extends Feature<NoneFeatureConfiguration> {
+public class GrahtOakFeature extends ConfiguredFeature<NoneFeatureConfiguration> {
     public GrahtOakFeature(Codec<NoneFeatureConfiguration> codec) {
         super(codec);
     }
@@ -37,7 +37,7 @@ public class GrahtOakFeature extends Feature<NoneFeatureConfiguration> {
         int y0 = box.surface(cx, cz);
         BlockState ground = box.get(cx, y0 - 1, cz);
         if (!ground.is(BlockTags.DIRT) && !ground.is(net.minecraft.world.level.block.Blocks.MUD)) return false;
-        if (y0 > level.getMaxBuildHeight() - 70) return false;
+        if (y0 > (level.getMaxY() + 1) - 70) return false;
 
         BlockState wood = BiomeBlocks.GRAHT_OAK_WOOD.get().defaultBlockState();
         BlockState leaves = BiomeBlocks.GRAHT_OAK_LEAVES.get().defaultBlockState().setValue(LeavesBlock.PERSISTENT, true);

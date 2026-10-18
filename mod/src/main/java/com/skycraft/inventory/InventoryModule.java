@@ -1,8 +1,8 @@
 package com.skycraft.inventory;
 
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.config.ModConfig;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.ModLoadingContext;
+import net.neoforged.fml.config.ModConfig;
 
 /**
  * Skyrim inventory screen, item weights, carry weight, favorites, hand assignment and item persistence.
@@ -17,8 +17,9 @@ public final class InventoryModule {
 
     /** Registers this module's DeferredRegisters and mod-bus listeners. Called from the mod constructor. */
     public static void init(IEventBus modBus) {
-        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, InventoryConfig.COMMON_SPEC, "skycraft-inventory-common.toml");
-        ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, InventoryConfig.CLIENT_SPEC, "skycraft-inventory-client.toml");
+        ContainerOverflow.init(modBus);
+        com.skycraft.Skycraft.config(ModConfig.Type.LOCAL, InventoryConfig.COMMON_SPEC, "skycraft-inventory-common.toml");
+        com.skycraft.Skycraft.config(ModConfig.Type.CLIENT, InventoryConfig.CLIENT_SPEC, "skycraft-inventory-client.toml");
         PackSelfTest.registerAutorun();
     }
 

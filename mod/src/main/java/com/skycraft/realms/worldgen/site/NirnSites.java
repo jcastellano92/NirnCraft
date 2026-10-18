@@ -108,7 +108,7 @@ final class NirnSites {
             // files list Oblivion's own gates (landmark variant "oblivion_gate", e.g. places/oblivion_gates.json),
             // those stand in Cyrodiil instead and random gates keep to the other provinces, away from them.
             boolean namedGates = namedGateCount() >= 5;
-            if ("cyrodiil".equals(province) ? namedGates : Math.floorMod(RealmSites.hash(ctx.seed(), cp.x, cp.z), 100) >= 35) {
+            if ("cyrodiil".equals(province) ? namedGates : Math.floorMod(RealmSites.hash(ctx.seed(), cp.x(), cp.z()), 100) >= 35) {
                 return Optional.empty();
             }
             if (namedGates) {
@@ -210,7 +210,7 @@ final class NirnSites {
     /** True if a town may start within {@code range} chunks of this context's chunk (gates keep away from towns). */
     static boolean nearTown(Structure.GenerationContext ctx, int range) {
         List<Holder<StructureSet>> sets = new ArrayList<>();
-        ctx.registryAccess().registryOrThrow(Registries.STRUCTURE_SET).holders().forEach(set -> {
+        ctx.registryAccess().lookupOrThrow(Registries.STRUCTURE_SET).listElements().forEach(set -> {
             for (StructureSet.StructureSelectionEntry e : set.value().structures()) {
                 if (e.structure().is(LocationTags.TOWNS)) {
                     sets.add(set);
@@ -220,16 +220,16 @@ final class NirnSites {
         });
         if (sets.isEmpty()) return false;
         ChunkGeneratorStructureState state = ChunkGeneratorStructureState.createForFlat(ctx.randomState(), ctx.seed(),
-                ctx.biomeSource(), Stream.empty());
+                ctx.chunkPos(), ctx.biomeSource(), Stream.empty());
         ChunkPos cp = ctx.chunkPos();
         int y = QuartPos.fromBlock(ctx.chunkGenerator().getSeaLevel());
         for (Holder<StructureSet> set : sets) {
             StructurePlacement placement = set.value().placement();
-            for (int x = cp.x - range; x <= cp.x + range; x++)
-                for (int z = cp.z - range; z <= cp.z + range; z++) {
+            for (int x = cp.x() - range; x <= cp.x() + range; x++)
+                for (int z = cp.z() - range; z <= cp.z() + range; z++) {
                     if (!placement.isStructureChunk(state, x, z)) continue;
-                    Holder<Biome> biome = ctx.biomeSource().getNoiseBiome(QuartPos.fromBlock((x << 4) + 8), y,
-                            QuartPos.fromBlock((z << 4) + 8), ctx.randomState().sampler());
+                    Holder<Biome> biome = ctx.biomeSource().createUncachedResolver(ctx.randomState()).getNoiseBiome(QuartPos.fromBlock((x << 4) + 8), y,
+                            QuartPos.fromBlock((z << 4) + 8));
                     for (StructureSet.StructureSelectionEntry e : set.value().structures()) {
                         if (e.structure().is(LocationTags.TOWNS) && e.structure().value().biomes().contains(biome)) return true;
                     }
@@ -290,7 +290,7 @@ final class NirnSites {
                     for (int y = h + 1; y <= h + 12; y++) clearGrowth(p, x, y, z);
                     if (h > 63 && dist > 3 && p.chance(x, h, z, 3, 4)) {
                         p.set(x, h + 1, z, p.chance(x, h, z, 4, 3) ? st(RealmBlocks.MANIA_BLOOM)
-                                : Blocks.GRASS.defaultBlockState());
+                                : com.skycraft.worldgen.VanillaBlocks.GRASS.defaultBlockState());
                     }
                 }
             // the door in its carved frame, facing the Isles' way (east)
@@ -444,7 +444,7 @@ final class NirnSites {
                         cx + 0.5 + Math.cos(a) * 7, y + 7, cz + 0.5 + Math.sin(a) * 7, 1.2, 0.5, dark);
             }
             // the chain rising into the sky
-            BlockState chain = Blocks.CHAIN.defaultBlockState().setValue(ChainBlock.AXIS, Direction.Axis.Y);
+            BlockState chain = com.skycraft.worldgen.VanillaBlocks.CHAIN.defaultBlockState().setValue(ChainBlock.AXIS, Direction.Axis.Y);
             for (int h = y + 7; h <= y + 66; h++) {
                 d.set(cx, h, cz, chain);
                 if (h % 6 == 0) {

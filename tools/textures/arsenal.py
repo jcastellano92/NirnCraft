@@ -46,6 +46,12 @@ def save(img, name):
 
 
 def write_json(path, obj):
+    import sys
+    from pathlib import Path
+    native_tools263 = str(Path(__file__).resolve().parents[1])
+    if native_tools263 not in sys.path: sys.path.insert(0, native_tools263)
+    from data_format_263 import prepare
+    path, obj = prepare(path, obj)
     os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, "w") as f:
         json.dump(obj, f, indent=2)
@@ -526,7 +532,7 @@ def enchanter_models():
     states = {"variants": {f"facing={f}": ({"model": "skycraft:block/staff_enchanter", "y": r} if r else {"model": "skycraft:block/staff_enchanter"})
                            for f, r in (("north", 0), ("east", 90), ("south", 180), ("west", 270))}}
     write_json(os.path.join(RES, "assets", "skycraft", "blockstates", "staff_enchanter.json"), states)
-    write_json(os.path.join(DATA, "loot_tables", "blocks", "staff_enchanter.json"), {
+    write_json(os.path.join(DATA, "loot_table", "blocks", "staff_enchanter.json"), {
         "type": "minecraft:block",
         "pools": [{"rolls": 1, "entries": [{"type": "minecraft:item", "name": "skycraft:staff_enchanter"}],
                    "conditions": [{"condition": "minecraft:survives_explosion"}]}],
@@ -911,7 +917,7 @@ def pool(rolls, entries):
 
 
 def loot_table(path, ltype, pools):
-    write_json(os.path.join(DATA, "loot_tables", path + ".json"),
+    write_json(os.path.join(DATA, "loot_table", path + ".json"),
                {"type": ltype, "pools": pools, "random_sequence": f"skycraft:{path}"})
 
 
@@ -963,7 +969,7 @@ def tags_and_values():
     staves = [s for s in STAVES if s not in ("wabbajack", "staff_of_magnus")]
     artifacts = list(ARTIFACTS) + ["wabbajack", "staff_of_magnus"]
     sk = lambda ids: [f"skycraft:{i}" for i in ids]  # noqa: E731
-    tag = lambda path, ids: write_json(os.path.join(DATA, "tags", "items", path + ".json"), {"replace": False, "values": ids})  # noqa: E731
+    tag = lambda path, ids: write_json(os.path.join(DATA, "tags", "item", path + ".json"), {"replace": False, "values": ids})  # noqa: E731
     polearms = [f"{t}_{k}" for t in POLEARM_TIERS for k in POLEARMS]
     tag("arsenal_goods", sk(arrows + bolts + crossbows + staves + polearms + ["unenchanted_staff"]))
     tag("polearms", sk(polearms))
@@ -976,9 +982,9 @@ def tags_and_values():
     tag("arsenal/battleaxes", sk(["wuuthrad"]))
     tag("arsenal/warhammers", sk(["volendrung"]))
     tag("arsenal/two_handed", sk(["ebony_blade", "bloodskal_blade", "wuuthrad", "volendrung"]))
-    write_json(os.path.join(RES, "data", "minecraft", "tags", "items", "arrows.json"), {"replace": False, "values": sk(arrows)})
-    write_json(os.path.join(RES, "data", "forge", "tags", "items", "tools", "crossbows.json"), {"replace": False, "values": sk(crossbows)})
-    write_json(os.path.join(RES, "data", "forge", "tags", "items", "tools", "shields.json"), {"replace": False, "values": sk(["spellbreaker"])})
+    write_json(os.path.join(RES, "data", "minecraft", "tags", "item", "arrows.json"), {"replace": False, "values": sk(arrows)})
+    write_json(os.path.join(RES, "data", "forge", "tags", "item", "tools", "crossbows.json"), {"replace": False, "values": sk(crossbows)})
+    write_json(os.path.join(RES, "data", "forge", "tags", "item", "tools", "shields.json"), {"replace": False, "values": sk(["spellbreaker"])})
 
     values, weights = {}, {}
     for i, v in ARROWS.items():
@@ -1011,7 +1017,7 @@ def tags_and_values():
 
 
 def recipes():
-    out = os.path.join(DATA, "recipes", "arsenal")
+    out = os.path.join(DATA, "recipe", "arsenal")
 
     def shaped(name, pattern, key, result, count):
         write_json(os.path.join(out, name + ".json"), {

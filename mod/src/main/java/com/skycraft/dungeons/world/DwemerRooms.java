@@ -58,7 +58,7 @@ public final class DwemerRooms {
     }
 
     static BlockState rod() {
-        return Blocks.LIGHTNING_ROD.defaultBlockState().setValue(LightningRodBlock.FACING, Direction.UP);
+        return com.skycraft.worldgen.VanillaBlocks.LIGHTNING_ROD.defaultBlockState().setValue(LightningRodBlock.FACING, Direction.UP);
     }
 
     /** Horizontal chain pipes under the ceiling and vertical rod pipes in the wall corners. */
@@ -77,8 +77,8 @@ public final class DwemerRooms {
         }
         for (int x : new int[]{room.minX + 1, room.maxX - 1}) {
             for (int z : new int[]{room.minZ + 1, room.maxZ - 1}) {
-                for (int yy = room.floor; yy < y; yy++) p.set(x, yy, z, yy == room.floor ? Blocks.WAXED_COPPER_BLOCK.defaultBlockState() : rod());
-                p.set(x, y, z, Blocks.WAXED_CUT_COPPER.defaultBlockState());
+                for (int yy = room.floor; yy < y; yy++) p.set(x, yy, z, yy == room.floor ? com.skycraft.worldgen.VanillaBlocks.WAXED_COPPER_BLOCK.defaultBlockState() : rod());
+                p.set(x, y, z, com.skycraft.worldgen.VanillaBlocks.WAXED_CUT_COPPER.defaultBlockState());
             }
         }
     }
@@ -118,7 +118,7 @@ public final class DwemerRooms {
             if (room.onLane(bx, bz) || room.nearDoor(bx, bz, 1)) continue;
             int top = Math.min(room.floor + 3, room.maxY - 2);
             for (int y = room.floor; y <= top; y++) {
-                p.set(bx, y, bz, y == top ? Blocks.WAXED_CUT_COPPER.defaultBlockState() : Blocks.WAXED_EXPOSED_COPPER.defaultBlockState());
+                p.set(bx, y, bz, y == top ? com.skycraft.worldgen.VanillaBlocks.WAXED_CUT_COPPER.defaultBlockState() : com.skycraft.worldgen.VanillaBlocks.WAXED_EXPOSED_COPPER.defaultBlockState());
             }
             for (int y = top + 1; y < room.maxY; y++) p.set(bx, y, bz, rod());
         }
@@ -130,7 +130,7 @@ public final class DwemerRooms {
                 Blocks.SMITHING_TABLE.defaultBlockState(),
                 Blocks.CHIPPED_ANVIL.defaultBlockState().setValue(AnvilBlock.FACING, Direction.NORTH),
                 Blocks.GRINDSTONE.defaultBlockState(),
-                Blocks.WAXED_CUT_COPPER_SLAB.defaultBlockState(),
+                com.skycraft.worldgen.VanillaBlocks.WAXED_CUT_COPPER_SLAB.defaultBlockState(),
                 Blocks.CRAFTING_TABLE.defaultBlockState()};
         int i = 0;
         for (int x = room.minX + 1; x < room.maxX; x += 2) {
@@ -154,9 +154,9 @@ public final class DwemerRooms {
             for (int dz = -1; dz <= 1; dz++) {
                 int x = ox + dx, z = oz + dz;
                 if (!room.interior(x, z) || room.onLane(x, z) || room.nearDoor(x, z, 0)) continue;
-                p.set(x, room.floor, z, dx == 0 && dz == 0 ? Blocks.WAXED_COPPER_BLOCK.defaultBlockState() : Blocks.POLISHED_BLACKSTONE_SLAB.defaultBlockState());
+                p.set(x, room.floor, z, dx == 0 && dz == 0 ? com.skycraft.worldgen.VanillaBlocks.WAXED_COPPER_BLOCK.defaultBlockState() : Blocks.POLISHED_BLACKSTONE_SLAB.defaultBlockState());
                 if (dx == 0 && dz == 0) {
-                    p.set(x, room.floor + 1, z, Blocks.WAXED_EXPOSED_COPPER.defaultBlockState());
+                    p.set(x, room.floor + 1, z, com.skycraft.worldgen.VanillaBlocks.WAXED_EXPOSED_COPPER.defaultBlockState());
                     p.set(x, room.floor + 2, z, Blocks.OCHRE_FROGLIGHT.defaultBlockState());
                     for (int y = room.floor + 3; y < room.maxY; y++) p.set(x, y, z, rod());
                 }
@@ -212,14 +212,14 @@ public final class DwemerRooms {
                 int x = room.localX(f, fwd, s), z = room.localZ(f, fwd, s);
                 p.set(x, room.floor, z, fwd == halfF - 4 && Math.abs(s) <= 1
                         ? Deco.stair(Blocks.POLISHED_BLACKSTONE_BRICK_STAIRS, f, false)
-                        : (Math.floorMod(s, 2) == 0 ? Blocks.WAXED_CUT_COPPER.defaultBlockState() : Blocks.POLISHED_BLACKSTONE_BRICKS.defaultBlockState()));
+                        : (Math.floorMod(s, 2) == 0 ? com.skycraft.worldgen.VanillaBlocks.WAXED_CUT_COPPER.defaultBlockState() : Blocks.POLISHED_BLACKSTONE_BRICKS.defaultBlockState()));
             }
         }
         p.feature("setpiece:centurion_arena");
         // giant pipes on the far wall
         for (int s : new int[]{-3, -1, 1, 3}) {
             int x = room.localX(f, halfF - 1, s), z = room.localZ(f, halfF - 1, s);
-            for (int rel = 1; rel <= top; rel++) p.set(x, room.floor + rel, z, Math.abs(s) == 1 ? rod() : Blocks.WAXED_COPPER_BLOCK.defaultBlockState());
+            for (int rel = 1; rel <= top; rel++) p.set(x, room.floor + rel, z, Math.abs(s) == 1 ? rod() : com.skycraft.worldgen.VanillaBlocks.WAXED_COPPER_BLOCK.defaultBlockState());
         }
         p.set(room.localX(f, halfF, 0), room.floor + 3, room.localZ(f, halfF, 0), Blocks.OCHRE_FROGLIGHT.defaultBlockState());
         // colonnade

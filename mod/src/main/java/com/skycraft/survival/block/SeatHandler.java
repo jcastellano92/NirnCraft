@@ -17,11 +17,11 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.Half;
 import net.minecraft.world.phys.AABB;
-import net.minecraftforge.event.entity.EntityMountEvent;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.event.level.BlockEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.entity.EntityMountEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.neoforge.event.level.BlockEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.util.List;
 
@@ -29,7 +29,7 @@ import java.util.List;
  * Sittable chairs and benches: right-click any bottom-half stair chair or bench with an empty hand to sit down.
  * Uses an invisible marker {@link ArmorStand} seat mount that cleans itself up immediately when dismounted or broken.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class SeatHandler {
     public static final String SEAT_TAG = "skycraft_seat";
 
@@ -63,38 +63,38 @@ public final class SeatHandler {
         }
 
         List<ArmorStand> existing = level.getEntitiesOfClass(ArmorStand.class, new AABB(pos),
-                e -> e.getTags().contains(SEAT_TAG));
+                e -> e.entityTags().contains(SEAT_TAG));
         if (!existing.isEmpty()) {
             for (ArmorStand stand : existing) {
                 if (!stand.getPassengers().isEmpty()) return;
-                if (!level.isClientSide) stand.discard();
+                if (!level.isClientSide()) stand.discard();
             }
         }
 
         event.setCanceled(true);
-        event.setCancellationResult(InteractionResult.sidedSuccess(level.isClientSide));
-        if (level.isClientSide) return;
+        event.setCancellationResult(com.skycraft.platform.Interactions.sidedSuccess(level.isClientSide()));
+        if (level.isClientSide()) return;
 
-        ArmorStand seat = EntityType.ARMOR_STAND.create(level);
+        ArmorStand seat = net.minecraft.world.entity.EntityTypes.ARMOR_STAND.create(level, net.minecraft.world.entity.EntitySpawnReason.EVENT);
         if (seat == null) return;
         float seatYaw = back.getOpposite().toYRot();
-        seat.moveTo(pos.getX() + 0.5, pos.getY() + 0.3, pos.getZ() + 0.5, seatYaw, 0.0f);
+        seat.snapTo(pos.getX() + 0.5, pos.getY() + 0.3, pos.getZ() + 0.5, seatYaw, 0.0f);
         seat.setInvisible(true);
         seat.setNoGravity(true);
         seat.setSilent(true);
-        seat.setInvulnerable(true);
+        seat.setPermanentlyInvulnerable(true);
         seat.addTag(SEAT_TAG);
         // Set Marker via NBT so hitbox is zero-size and never interferes with clicks
         net.minecraft.nbt.CompoundTag tag = new net.minecraft.nbt.CompoundTag();
-        seat.saveWithoutId(tag);
+        tag.merge(com.skycraft.platform.EntityData.saveWithoutId(seat));
         tag.putBoolean("Marker", true);
         tag.putBoolean("Small", true);
-        seat.load(tag);
+        com.skycraft.platform.EntityData.load(seat, tag);
 
         level.addFreshEntity(seat);
         player.setYRot(seatYaw);
         player.setYHeadRot(seatYaw);
-        player.startRiding(seat, true);
+        player.startRiding(seat, true, true);
         level.playSound(null, pos, SoundEvents.WOOD_STEP, SoundSource.BLOCKS, 0.6f, 0.9f);
     }
 
@@ -103,8 +103,8 @@ public final class SeatHandler {
         if (!event.isDismounting()) return;
         Entity mount = event.getEntityBeingMounted();
         if (mount == null || mount.isRemoved() || event.getEntityMounting().isRemoved()) return;
-        if (mount instanceof ArmorStand stand && stand.getTags().contains(SEAT_TAG)) {
-            if (!mount.level().isClientSide) {
+        if (mount instanceof ArmorStand stand && stand.entityTags().contains(SEAT_TAG)) {
+            if (!mount.level().isClientSide()) {
                 Entity rider = event.getEntityMounting();
                 BlockPos seatPos = stand.blockPosition();
                 stand.discard();
@@ -116,11 +116,11 @@ public final class SeatHandler {
     }
 
     @SubscribeEvent
-    public static void onChairBreak(BlockEvent.BreakEvent event) {
-        if (event.getLevel() instanceof Level level && !level.isClientSide) {
+    public static void onChairBreak(net.neoforged.neoforge.event.level.block.BreakBlockEvent event) {
+        if (event.getLevel() instanceof Level level && !level.isClientSide()) {
             BlockPos pos = event.getPos();
             for (ArmorStand seat : level.getEntitiesOfClass(ArmorStand.class, new AABB(pos).inflate(0.5),
-                    e -> e.getTags().contains(SEAT_TAG))) {
+                    e -> e.entityTags().contains(SEAT_TAG))) {
                 seat.ejectPassengers();
                 seat.discard();
             }

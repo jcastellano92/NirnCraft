@@ -61,7 +61,7 @@ public final class Remains {
         }
         // the pack they carried, a burnt-out torch and a bedroll they never unrolled
         b.chest(-1, 0, -1, Direction.EAST, ExploreLoot.table("adventurer"));
-        b.set(2, 0, -1, Blocks.BROWN_CARPET);
+        b.set(2, 0, -1, com.skycraft.worldgen.VanillaBlocks.BROWN_CARPET);
         if (b.r.nextBoolean()) b.lying(-2, 0, 0, new ItemStack(Items.TORCH));
         if (b.r.nextInt(3) == 0) {
             // what killed them is still about
@@ -110,7 +110,7 @@ public final class Remains {
             ItemStack hand = LeveledGear.weapon(level, b.r);
             b.standWith(b.r.nextInt(11) - 5, b.r.nextInt(11) - 5, b.r.nextFloat() * 360f,
                     b.r.nextBoolean() ? new ItemStack(Items.SKELETON_SKULL) : ItemStack.EMPTY,
-                    chest.getItem() instanceof net.minecraft.world.item.ArmorItem a && a.getType() == net.minecraft.world.item.ArmorItem.Type.CHESTPLATE ? chest : ItemStack.EMPTY,
+                    com.skycraft.inventory.EquipmentData.slot(chest) == net.minecraft.world.entity.EquipmentSlot.CHEST ? chest : ItemStack.EMPTY,
                     ItemStack.EMPTY, ItemStack.EMPTY, hand);
         }
         // the war chest, half buried
@@ -156,7 +156,7 @@ public final class Remains {
         // the snapped mast and torn sail
         for (int z = 2; z <= 8; z++) b.set(1, b.ground(1, z) + 1 - b.y, z, Blocks.SPRUCE_LOG.defaultBlockState()
                 .setValue(RotatedPillarBlock.AXIS, Direction.Axis.Z));
-        for (int i = 0; i < 6; i++) b.scatter(7, 1, Blocks.WHITE_CARPET.defaultBlockState(), true);
+        for (int i = 0; i < 6; i++) b.scatter(7, 1, com.skycraft.worldgen.VanillaBlocks.WHITE_CARPET.defaultBlockState(), true);
         // cargo strewn along the sand
         b.chest(-2, b.ground(-2, 1) + 1 - b.y, 1, Direction.SOUTH, ExploreLoot.table("shipwreck"));
         for (int i = 0; i < 3; i++) {
@@ -165,7 +165,7 @@ public final class Remains {
             int up = b.groundAt(p.getX(), p.getZ()) + 1 - b.y;
             if (!b.waterAt(dx, dz)) b.set(dx, up, dz, Blocks.BARREL.defaultBlockState().setValue(BarrelBlock.FACING, Direction.NORTH));
         }
-        b.scatter(6, 4, Blocks.CHAIN.defaultBlockState().setValue(net.minecraft.world.level.block.ChainBlock.AXIS, Direction.Axis.X), true);
+        b.scatter(6, 4, com.skycraft.worldgen.VanillaBlocks.CHAIN.defaultBlockState().setValue(net.minecraft.world.level.block.ChainBlock.AXIS, Direction.Axis.X), true);
         return true;
     }
 }

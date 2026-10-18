@@ -5,7 +5,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerBossEvent;
 import net.minecraft.server.level.ServerLevel;
@@ -18,7 +18,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.Item;
@@ -29,8 +29,8 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
-import net.minecraftforge.event.ForgeEventFactory;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.neoforge.event.EventHooks;
+import net.minecraft.core.registries.BuiltInRegistries;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -145,7 +145,7 @@ public final class QuestSpawner {
         }
 
         public Spawn weapon(Item item) {
-            ResourceLocation id = ForgeRegistries.ITEMS.getKey(item);
+            Identifier id = BuiltInRegistries.ITEM.getKey(item);
             if (id != null) tag.putString("weapon", id.toString());
             return this;
         }
@@ -157,8 +157,8 @@ public final class QuestSpawner {
 
     public static boolean isBossObjective(Objective o) {
         for (int i = 0; i < o.spawns.size(); i++) {
-            CompoundTag s = o.spawns.getCompound(i);
-            if (s.getBoolean("boss")) return true;
+            CompoundTag s = o.spawns.getCompoundOrEmpty(i);
+            if (s.getBooleanOr("boss",false)) return true;
         }
         return false;
     }
@@ -166,11 +166,11 @@ public final class QuestSpawner {
     // ------------------------------------------------------------------ entity creation
 
     public static Optional<EntityType<?>> resolveType(String id) {
-        Optional<EntityType<?>> type = EntityType.byString(id);
+        Optional<EntityType<?>> type = com.skycraft.worldgen.RegistryTypes.entity(id);
         // fallbacks may chain (alduin -> dragon -> ghast)
         for (int i = 0; i < 3 && type.isEmpty() && FALLBACKS.containsKey(id); i++) {
             id = FALLBACKS.get(id);
-            type = EntityType.byString(id);
+            type = com.skycraft.worldgen.RegistryTypes.entity(id);
         }
         return type;
     }
@@ -187,13 +187,13 @@ public final class QuestSpawner {
             typeId = "skycraft:bandit";
         }
         Optional<EntityType<?>> type = resolveType(typeId);
-        if (type.isEmpty()) type = EntityType.byString("minecraft:zombie");
-        return type.map(t -> (Entity) t.create(level)).orElse(null);
+        if (type.isEmpty()) type = com.skycraft.worldgen.RegistryTypes.entity("minecraft:zombie");
+        return type.map(t -> (Entity) t.create(level, net.minecraft.world.entity.EntitySpawnReason.EVENT)).orElse(null);
     }
 
     /** Spawns the objective's enemies. Returns true if anything was spawned. */
     public static boolean spawnFor(ServerLevel level, String owner, Quest quest, Objective o) {
-        RandomSource r = level.random;
+        RandomSource r = level.getRandom();
         BlockPos base = resolveBase(level, o, r);
         o.pos = base;
         o.yKnown = true;
@@ -202,23 +202,23 @@ public final class QuestSpawner {
         o.missing = 0;
         boolean targetSet = false;
         for (int i = 0; i < o.spawns.size(); i++) {
-            CompoundTag spec = o.spawns.getCompound(i);
+            CompoundTag spec = o.spawns.getCompoundOrEmpty(i);
             // story branches: "if": "flag:helgen_ralof" spawns only for the side the party took
             if (!com.skycraft.quest.story.Story.spawnAllowed(level.getServer(), owner, spec)) continue;
-            int count = Math.max(1, spec.getInt("count"));
-            boolean target = spec.getBoolean("target");
-            boolean decor = spec.getBoolean("decor");
+            int count = Math.max(1, spec.getIntOr("count",0));
+            boolean target = spec.getBooleanOr("target",false);
+            boolean decor = spec.getBooleanOr("decor",false);
             for (int n = 0; n < count; n++) {
                 BlockPos p = target && n == 0 ? base : scatter(level, base, o.placement, r);
                 Entity e = spawnOne(level, owner, quest, spec, p, target && n == 0);
                 if (e != null && decor) {
                     // scenery (a dragon circling overhead): not an enemy of the objective
-                    int[] c = spec.getIntArray("circle");
+                    int[] c = spec.getIntArray("circle").orElseGet(() -> new int[0]);
                     if (c.length == 3) com.skycraft.quest.story.Scenes.circle(e, net.minecraft.world.phys.Vec3.atCenterOf(base), c[0], c[1], c[2]);
                     continue;
                 }
                 if (e != null) {
-                    if (spec.getBoolean("hostile") && e instanceof com.skycraft.society.entity.NpcEntity npc) {
+                    if (spec.getBooleanOr("hostile",false) && e instanceof com.skycraft.society.entity.NpcEntity npc) {
                         ServerPlayer near = level.getNearestPlayer(e, 64) instanceof ServerPlayer sp ? sp : null;
                         if (near != null) npc.setHuntTarget(near.getUUID());
                     }
@@ -246,11 +246,11 @@ public final class QuestSpawner {
     /** Creates, decorates, tags and adds one quest entity; null if it couldn't be added. */
     @Nullable
     private static Entity spawnOne(ServerLevel level, String owner, Quest quest, CompoundTag spec, BlockPos p, boolean isTarget) {
-        Entity e = create(level, spec.getString("type"));
+        Entity e = create(level, spec.getStringOr("type",""));
         if (e == null) return null;
-        e.moveTo(p.getX() + 0.5, p.getY(), p.getZ() + 0.5, level.random.nextFloat() * 360f, 0f);
+        e.snapTo(p.getX() + 0.5, p.getY(), p.getZ() + 0.5, level.getRandom().nextFloat() * 360f, 0f);
         if (e instanceof Mob mob) {
-            ForgeEventFactory.onFinalizeSpawn(mob, level, level.getCurrentDifficultyAt(p), MobSpawnType.EVENT, null, null);
+            EventHooks.finalizeMobSpawn(mob, level, level.getCurrentDifficultyAt(p), EntitySpawnReason.EVENT, null);
             mob.setPersistenceRequired();
         }
         decorate(e, spec, isTarget);
@@ -267,16 +267,16 @@ public final class QuestSpawner {
             com.skycraft.creatures.Leveling.apply(mob, foeLevel);
         }
         // the boss bar comes back whenever the boss is (re)loaded (see QuestEvents#onEntityJoin)
-        if (isTarget && spec.getBoolean("boss")) e.addTag(BOSS_TAG);
+        if (isTarget && spec.getBooleanOr("boss",false)) e.addTag(BOSS_TAG);
         if (!level.addFreshEntity(e)) return null;
-        if (e.getTags().contains(BOSS_TAG)) BossBars.track(e);
+        if (e.entityTags().contains(BOSS_TAG)) BossBars.track(e);
         return e;
     }
 
     /** One quest entity from a spec outside any objective (a story ambush): decorated, tagged, boss bar if a boss. */
     @Nullable
     public static Entity spawnLoose(ServerLevel level, String owner, Quest quest, CompoundTag spec, BlockPos p) {
-        return spawnOne(level, owner, quest, spec, p, spec.getBoolean("boss"));
+        return spawnOne(level, owner, quest, spec, p, spec.getBooleanOr("boss",false));
     }
 
     /**
@@ -285,8 +285,8 @@ public final class QuestSpawner {
      */
     public static boolean respawnTarget(ServerLevel level, String owner, Quest quest, Objective o) {
         for (int i = 0; i < o.spawns.size(); i++) {
-            CompoundTag spec = o.spawns.getCompound(i);
-            if (!spec.getBoolean("target")) continue;
+            CompoundTag spec = o.spawns.getCompoundOrEmpty(i);
+            if (!spec.getBooleanOr("target",false)) continue;
             BlockPos p = surface(level, o.pos.getX(), o.pos.getZ());
             if ("structure".equals(o.placement) || level.dimensionType().hasCeiling()) {
                 BlockPos s = scanDown(level, o.pos.above(2), 8);
@@ -303,14 +303,14 @@ public final class QuestSpawner {
 
     private static void decorate(Entity e, CompoundTag spec, boolean isTarget) {
         if (spec.contains("name")) {
-            e.setCustomName(Quest.readComponent(spec.getString("name")));
-            e.setCustomNameVisible(isTarget || spec.getBoolean("boss"));
+            e.setCustomName(Quest.readComponent(spec.getStringOr("name","")));
+            e.setCustomNameVisible(isTarget || spec.getBooleanOr("boss",false));
         }
-        if (spec.getBoolean("glow")) e.setGlowingTag(true);
-        if (spec.getBoolean("invulnerable")) e.setInvulnerable(true);
+        if (spec.getBooleanOr("glow",false)) e.setGlowingTag(true);
+        if (spec.getBooleanOr("invulnerable",false)) e.setPermanentlyInvulnerable(true);
         if (e instanceof LivingEntity le) {
-            float hp = spec.contains("hp") ? spec.getFloat("hp") : 1f;
-            float dmg = spec.contains("dmg") ? spec.getFloat("dmg") : 1f;
+            float hp = spec.contains("hp") ? spec.getFloatOr("hp",0F) : 1f;
+            float dmg = spec.contains("dmg") ? spec.getFloatOr("dmg",0F) : 1f;
             AttributeInstance maxHealth = le.getAttribute(Attributes.MAX_HEALTH);
             if (maxHealth != null && hp != 1f) maxHealth.setBaseValue(Math.min(1024, maxHealth.getBaseValue() * hp));
             AttributeInstance attack = le.getAttribute(Attributes.ATTACK_DAMAGE);
@@ -319,15 +319,15 @@ public final class QuestSpawner {
         }
         if (e instanceof Mob mob) {
             if (spec.contains("armor")) {
-                int color = spec.getInt("armor");
+                int color = spec.getIntOr("armor",0);
                 equip(mob, EquipmentSlot.HEAD, dyed(Items.LEATHER_HELMET, color));
                 equip(mob, EquipmentSlot.CHEST, dyed(Items.LEATHER_CHESTPLATE, color));
                 equip(mob, EquipmentSlot.LEGS, dyed(Items.LEATHER_LEGGINGS, color));
                 equip(mob, EquipmentSlot.FEET, dyed(Items.LEATHER_BOOTS, color));
             }
             if (spec.contains("weapon")) {
-                ResourceLocation id = ResourceLocation.tryParse(spec.getString("weapon"));
-                Item item = id == null ? null : ForgeRegistries.ITEMS.getValue(id);
+                Identifier id = Identifier.tryParse(spec.getStringOr("weapon",""));
+                Item item = id == null ? null : BuiltInRegistries.ITEM.getValue(id);
                 if (item != null && item != Items.AIR) equip(mob, EquipmentSlot.MAINHAND, new ItemStack(item));
             }
         }
@@ -340,7 +340,7 @@ public final class QuestSpawner {
 
     public static ItemStack dyed(Item item, int color) {
         ItemStack stack = new ItemStack(item);
-        stack.getOrCreateTagElement("display").putInt("color", color);
+        stack.set(net.minecraft.core.component.DataComponents.DYED_COLOR, new net.minecraft.world.item.component.DyedItemColor(color));
         return stack;
     }
 
@@ -358,13 +358,13 @@ public final class QuestSpawner {
         }
         BlockPos base = "near".equals(o.placement) ? surface(level, o.pos.getX(), o.pos.getZ()) : landNear(level, o.pos, r);
         // over the void (the End's islands) there is no surface: keep the height the spot was given
-        if (base.getY() <= level.getMinBuildHeight() + 1 && o.yKnown) return o.pos;
+        if (base.getY() <= level.getMinY() + 1 && o.yKnown) return o.pos;
         return base;
     }
 
     public static BlockPos surface(ServerLevel level, int x, int z) {
         int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
-        return new BlockPos(x, Math.max(level.getMinBuildHeight() + 1, y), z);
+        return new BlockPos(x, Math.max(level.getMinY() + 1, y), z);
     }
 
     /** The surface at {@code pos}, or a nearby loaded land column if that's water. */
@@ -421,7 +421,7 @@ public final class QuestSpawner {
     @Nullable
     private static BlockPos scanDown(Level level, BlockPos start, int steps) {
         BlockPos.MutableBlockPos p = start.mutable();
-        for (int i = 0; i < steps && p.getY() > level.getMinBuildHeight() + 1; i++, p.move(Direction.DOWN)) {
+        for (int i = 0; i < steps && p.getY() > level.getMinY() + 1; i++, p.move(Direction.DOWN)) {
             if (free(level, p) && free(level, p.above())) {
                 BlockPos below = p.below();
                 if (level.getBlockState(below).isFaceSturdy(level, below, Direction.UP)) return p.immutable();
@@ -468,7 +468,7 @@ public final class QuestSpawner {
 
         public static void track(Entity e) {
             if (BARS.containsKey(e.getUUID())) return;
-            ServerBossEvent event = new ServerBossEvent(e.getDisplayName(), BossEvent.BossBarColor.RED, BossEvent.BossBarOverlay.NOTCHED_10);
+            ServerBossEvent event = new ServerBossEvent(java.util.UUID.randomUUID(), e.getDisplayName(), BossEvent.BossBarColor.RED, BossEvent.BossBarOverlay.NOTCHED_10);
             BARS.put(e.getUUID(), new Bar(event, e.level().dimension()));
         }
 

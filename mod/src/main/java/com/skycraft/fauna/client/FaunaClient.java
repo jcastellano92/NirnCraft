@@ -13,36 +13,36 @@ import com.skycraft.fauna.entity.MudcrabEntity;
 import com.skycraft.fauna.entity.SabreCatEntity;
 import com.skycraft.fauna.entity.SlaughterfishEntity;
 import net.minecraft.client.model.geom.ModelLayerLocation;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.EntityRenderersEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.minecraft.resources.Identifier;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.EntityRenderersEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 /** Mod-bus client registration for the fauna module: model layers and entity renderers. */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
 public final class FaunaClient {
     public static final ModelLayerLocation BUTTERFLY = layer("butterfly");
     public static final ModelLayerLocation DRAGONFLY = layer("dragonfly");
     public static final ModelLayerLocation TORCHBUG = layer("torchbug");
 
-    private static final ResourceLocation[] BUTTERFLY_TEX = {tex("butterfly_monarch"), tex("butterfly_blue")};
-    private static final ResourceLocation MOTH_TEX = tex("luna_moth");
-    private static final ResourceLocation DRAGONFLY_TEX = tex("dragonfly");
-    private static final ResourceLocation TORCHBUG_TEX = tex("torchbug");
-    private static final ResourceLocation TORCHBUG_GLOW = tex("torchbug_glow");
+    private static final Identifier[] BUTTERFLY_TEX = {tex("butterfly_monarch"), tex("butterfly_blue")};
+    private static final Identifier MOTH_TEX = tex("luna_moth");
+    private static final Identifier DRAGONFLY_TEX = tex("dragonfly");
+    private static final Identifier TORCHBUG_TEX = tex("torchbug");
+    private static final Identifier TORCHBUG_GLOW = tex("torchbug_glow");
 
     private FaunaClient() {}
 
     private static ModelLayerLocation layer(String name) {
-        return new ModelLayerLocation(new ResourceLocation(Skycraft.MODID, name), "main");
+        return new ModelLayerLocation(Identifier.fromNamespaceAndPath(Skycraft.MODID, name), "main");
     }
 
-    private static ResourceLocation tex(String name) {
-        return new ResourceLocation(Skycraft.MODID, "textures/entity/fauna/" + name + ".png");
+    private static Identifier tex(String name) {
+        return Identifier.fromNamespaceAndPath(Skycraft.MODID, "textures/entity/fauna/" + name + ".png");
     }
 
-    private static ResourceLocation pick(ResourceLocation[] options, int variant) {
+    private static Identifier pick(Identifier[] options, int variant) {
         return options[Math.floorMod(variant, options.length)];
     }
 

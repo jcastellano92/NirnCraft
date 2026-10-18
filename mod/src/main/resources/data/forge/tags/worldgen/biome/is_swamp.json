@@ -14,6 +14,8 @@
     "skycraft:reedlands",
     "skycraft:shadowfen",
     "skycraft:tigonus_marsh",
-    "skycraft:valenwood_mangrove_coast"
+    "skycraft:valenwood_mangrove_coast",
+    "minecraft:swamp",
+    "minecraft:mangrove_swamp"
   ]
 }

@@ -87,8 +87,8 @@ public final class CrewGoals {
                 // over the rail and onto their deck
                 double speed = Math.min(0.95, 0.22 + d * 0.13);
                 mob.setDeltaMovement(dx / d * speed, 0.62, dz / d * speed);
-                mob.hasImpulse = true;
-                mob.swing(InteractionHand.MAIN_HAND);
+                mob.needsSync = true;
+                mob.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, false);
                 leapCooldown = 40;
                 return;
             }
@@ -98,8 +98,8 @@ public final class CrewGoals {
                 mob.getMoveControl().setWantedPosition(tp.x, tp.y, tp.z, speed);
             }
             if (d <= reach && Math.abs(tp.y - mob.getY()) < 2.5 && cooldown <= 0) {
-                mob.swing(InteractionHand.MAIN_HAND);
-                mob.doHurtTarget(t);
+                mob.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, false);
+                mob.doHurtTarget((net.minecraft.server.level.ServerLevel) mob.level(), t);
                 cooldown = 20 + mob.getRandom().nextInt(10);
             }
         }

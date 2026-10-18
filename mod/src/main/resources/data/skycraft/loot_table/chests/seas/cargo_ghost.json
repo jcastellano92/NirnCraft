@@ -1,0 +1,88 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": {
+        "type": "minecraft:uniform",
+        "min": 3,
+        "max": 6
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:septim",
+          "weight": 6,
+          "modifier": {
+            "count": {
+              "type": "minecraft:uniform",
+              "min": 20,
+              "max": 90
+            },
+            "type": "minecraft:set_count"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:garnet",
+          "weight": 6
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:ruby",
+          "weight": 4
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:sapphire",
+          "weight": 3
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:flawless_ruby",
+          "weight": 1
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:flawless_diamond",
+          "weight": 1
+        },
+        {
+          "type": "minecraft:loot_table",
+          "weight": 2,
+          "value": "skycraft:leveled/weapon"
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:nordic_barnacle",
+          "weight": 3,
+          "modifier": {
+            "count": {
+              "type": "minecraft:uniform",
+              "min": 1,
+              "max": 3
+            },
+            "type": "minecraft:set_count"
+          }
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:book",
+          "weight": 1,
+          "modifier": {
+            "tag": "{book:\"seas_ghost_ship\",skycraft_value:15}",
+            "type": "minecraft:set_custom_data"
+          }
+        }
+      ],
+      "condition": {
+        "chance": 0.6,
+        "type": "minecraft:random_chance"
+      }
+    }
+  ]
+}

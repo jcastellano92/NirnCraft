@@ -1,5 +1,12 @@
 # Skycraft: instructions for any Claude session
 
+**Current platform: Minecraft 26.3, NeoForge 26.3.0.90, Java 25.** Read
+[`docs/NATIVE-26.3-PREVIEW.md`](docs/NATIVE-26.3-PREVIEW.md) before any build, server or client command.
+Use `tools/dev/build_263.py` for the isolated native build and the updated native `devserver.ps1` for the fast loop.
+Older Forge/Java 17 references below and in historical phase documents do not select the current platform.
+Keep previous instances, worlds and custom shader/Distant Horizons integrations preserved; native runtime acceptance
+is recorded separately from source compilation. Normal Minecraft multiplayer/LAN replaces Essential/e4mc.
+
 **Start by reading `docs/START-HERE.md`** (what the project is, the current state, the next phase and its prompt file),
 then `docs/AGENT-RULES.md`. The master plan and its state table are `docs/world/WORLD-PLAN.md` (section 7: update it
 on every merge); ready-to-run phase prompts are in `docs/prompts/`; the previous session's loose ends are in

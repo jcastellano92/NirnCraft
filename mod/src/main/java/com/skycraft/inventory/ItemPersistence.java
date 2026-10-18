@@ -8,14 +8,14 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.event.entity.EntityJoinLevelEvent;
-import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
-import net.minecraftforge.event.entity.item.ItemTossEvent;
-import net.minecraftforge.event.entity.living.LivingDropsEvent;
-import net.minecraftforge.event.server.ServerStoppedEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
+import net.neoforged.neoforge.event.entity.EntityLeaveLevelEvent;
+import net.neoforged.neoforge.event.entity.item.ItemTossEvent;
+import net.neoforged.neoforge.event.entity.living.LivingDropsEvent;
+import net.neoforged.neoforge.event.server.ServerStoppedEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -30,7 +30,7 @@ import java.util.UUID;
  * etc. keep vanilla despawning. To protect servers from item hoards, each dimension keeps at most
  * {@code maxPerDimension} loaded persistent items: when exceeded, the oldest ones go back to a normal lifetime.</p>
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class ItemPersistence {
     public static final String KEEP = "skycraft_keep";
 
@@ -57,20 +57,20 @@ public final class ItemPersistence {
 
     /** Marks an item entity as player-dropped and makes it permanent. */
     public static void keep(ItemEntity item) {
-        if (item == null || item.level().isClientSide || !enabled()) return;
+        if (item == null || item.level().isClientSide() || !enabled()) return;
         item.getPersistentData().putLong(KEEP, item.level().getGameTime());
         item.setUnlimitedLifetime();
     }
 
     @SubscribeEvent(priority = EventPriority.LOW)
     public static void onToss(ItemTossEvent event) {
-        if (event.isCanceled() || event.getPlayer().level().isClientSide) return;
+        if (event.isCanceled() || event.getPlayer().level().isClientSide()) return;
         keep(event.getEntity());
     }
 
     @SubscribeEvent(priority = EventPriority.LOW)
     public static void onPlayerDrops(LivingDropsEvent event) {
-        if (event.isCanceled() || !(event.getEntity() instanceof Player player) || player.level().isClientSide) return;
+        if (event.isCanceled() || !(event.getEntity() instanceof Player player) || player.level().isClientSide()) return;
         for (ItemEntity item : event.getDrops()) keep(item);
     }
 
@@ -84,7 +84,7 @@ public final class ItemPersistence {
             return;
         }
         Map<UUID, Long> loaded = LOADED.computeIfAbsent(event.getLevel().dimension(), k -> new LinkedHashMap<>());
-        loaded.put(item.getUUID(), data.getLong(KEEP));
+        loaded.put(item.getUUID(), data.getLongOr(KEEP, 0L));
         int cap = cap();
         if (loaded.size() > cap && event.getLevel() instanceof ServerLevel level) {
             enforceCap(level, loaded, cap, item);
@@ -127,9 +127,9 @@ public final class ItemPersistence {
         item.getPersistentData().remove(KEEP);
         try {
             // ItemEntity has no public age setter besides "unlimited": reload it with Age 0.
-            CompoundTag tag = item.saveWithoutId(new CompoundTag());
+            CompoundTag tag = com.skycraft.platform.EntityData.saveWithoutId(item);
             tag.putShort("Age", (short) 0);
-            item.load(tag);
+            com.skycraft.platform.EntityData.load(item, tag);
         } catch (Exception e) {
             Skycraft.LOGGER.debug("Could not reset the lifetime of {}", item, e);
         }

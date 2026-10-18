@@ -6,7 +6,7 @@ import com.skycraft.lore.LoreBooks;
 import com.skycraft.tamriel.terrain.Hydrology;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.world.entity.vehicle.Boat;
+import net.minecraft.world.entity.vehicle.boat.Boat;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
@@ -199,8 +199,9 @@ public final class RiverBuilds {
         if (top != Integer.MIN_VALUE) {
             BlockPos p = b.at(1, 0, zAt + 2);
             if (b.writable(p) && b.level.getFluidState(new BlockPos(p.getX(), top, p.getZ())).isSource()) {
-                Boat boat = new Boat(b.level.getLevel(), p.getX() + 0.5, top + 0.5, p.getZ() + 0.5);
-                boat.setVariant(Boat.Type.SPRUCE);
+                Boat boat = net.minecraft.world.entity.EntityTypes.SPRUCE_BOAT.create(b.level.getLevel(), net.minecraft.world.entity.EntitySpawnReason.STRUCTURE);
+                if (boat == null) return false;
+                boat.setPos(p.getX() + 0.5, top + 0.5, p.getZ() + 0.5);
                 boat.setYRot(b.r.nextFloat() * 360f);
                 b.level.addFreshEntity(boat);
             }
@@ -295,7 +296,7 @@ public final class RiverBuilds {
         BlockPos cp = b.at(0, 0, -6);
         BlockPos chest = new BlockPos(cp.getX(), floorY + 1, cp.getZ());
         b.put(chest, Blocks.CHEST.defaultBlockState().setValue(net.minecraft.world.level.block.ChestBlock.FACING, b.dir(Direction.SOUTH)));
-        net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity.setLootTable(b.level, b.r, chest, ExploreLoot.table("cache"));
+        com.skycraft.worldgen.WorldgenData.setLootTable(b.level, b.r, chest, ExploreLoot.table("cache"));
         b.mainChest = chest;
         note(b, chest, b.r.nextBoolean() ? "explore_note_cache_ledger" : "explore_note_fishers_almanac");
         return true;
@@ -310,7 +311,7 @@ public final class RiverBuilds {
         if (surface - floor < 3 || b.level.getFluidState(new BlockPos(c.getX(), surface - 1, c.getZ())).isEmpty()) return false;
         BlockPos p = new BlockPos(c.getX(), floor, c.getZ());
         b.put(p, Blocks.CHEST.defaultBlockState().setValue(net.minecraft.world.level.block.ChestBlock.FACING, b.dir(Direction.SOUTH)));
-        net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity.setLootTable(b.level, b.r, p, ExploreLoot.table("shipwreck"));
+        com.skycraft.worldgen.WorldgenData.setLootTable(b.level, b.r, p, ExploreLoot.table("shipwreck"));
         b.mainChest = p;
         for (int[] o : new int[][]{{1, 0}, {-1, 0}, {0, 1}, {0, -1}}) {
             BlockPos q = b.at(o[0], 0, o[1]);

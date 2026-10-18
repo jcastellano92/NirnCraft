@@ -4,9 +4,9 @@ import com.mojang.serialization.Codec;
 import com.skycraft.tamriel.MapSample;
 import com.skycraft.tamriel.Region;
 import com.skycraft.tamriel.TamrielMap;
-import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
-import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
+import com.skycraft.worldgen.ConfiguredFeature;
+import com.skycraft.worldgen.FeaturePlaceContext;
+import com.skycraft.worldgen.NoneFeatureConfiguration;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +23,7 @@ import java.util.List;
  * </ul>
  * Placed in the sea biomes by {@code skycraft:seas_sea_sites}.
  */
-public class SeaSiteFeature extends Feature<NoneFeatureConfiguration> {
+public class SeaSiteFeature extends ConfiguredFeature<NoneFeatureConfiguration> {
     public enum Kind { YOKUDAN_RUIN, SLOAD_SPIRE, DREUGH_LAIR, MAORMER_WRECK, DWEMER_RUIN, NORDIC_GRAVE, SLAUGHTERFISH_NEST, SERPENT_LAIR }
 
     /** Sites placed since start (logged by the developer smoke test). */

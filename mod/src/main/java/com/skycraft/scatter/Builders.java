@@ -448,7 +448,7 @@ public final class Builders {
         // 5. Subterranean micro-elements inside the chamber (all placed directly on the y = -2 floor)
         // Bedding nest in the back alcove
         br.force(-1, -2, -2, Blocks.MOSS_CARPET.defaultBlockState());
-        br.force(0, -2, -2, Blocks.BROWN_CARPET.defaultBlockState());
+        br.force(0, -2, -2, com.skycraft.worldgen.VanillaBlocks.BROWN_CARPET.defaultBlockState());
         // Gnawed ribcage / bone pile and skull inside and at the threshold
         br.force(1, -2, -1, pillar(Blocks.BONE_BLOCK, Direction.Axis.Z));
         br.b.lying(0, -2, 0, new ItemStack(Items.BONE));
@@ -472,7 +472,7 @@ public final class Builders {
     // ------------------------------------------------------------------ shore
 
     private static Block strippedOf(Block log) {
-        net.minecraft.resources.ResourceLocation key = net.minecraftforge.registries.ForgeRegistries.BLOCKS.getKey(log);
+        net.minecraft.resources.Identifier key = net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(log);
         if (key == null) return Blocks.STRIPPED_OAK_LOG;
         return Terrain.block(key.getNamespace() + ":stripped_" + key.getPath(), Blocks.STRIPPED_OAK_LOG);
     }
@@ -556,8 +556,8 @@ public final class Builders {
         br.set(1, 0, 0, planks);
         int mastH = 2 + br.r.nextInt(2);
         for (int y = 1; y <= mastH; y++) br.set(0, y, 0, br.b.pal.fence());
-        br.set(0, mastH, 1, Blocks.WHITE_WOOL);
-        if (mastH >= 3) br.set(0, mastH - 1, 1, Blocks.WHITE_WOOL);
+        br.set(0, mastH, 1, com.skycraft.worldgen.VanillaBlocks.WHITE_WOOL);
+        if (mastH >= 3) br.set(0, mastH - 1, 1, com.skycraft.worldgen.VanillaBlocks.WHITE_WOOL);
         br.b.barrel(-1, 0, 0, ExploreLoot.table("shipwreck"));
         return any;
     }
@@ -722,7 +722,7 @@ public final class Builders {
         for (int x = -2; x <= 2; x++) {
             br.force(x, -1, 0, Blocks.WATER.defaultBlockState());
             for (int z = -1; z <= 1; z += 2) {
-                br.force(x, -1, z, Blocks.FARMLAND.defaultBlockState().setValue(net.minecraft.world.level.block.FarmBlock.MOISTURE, 7));
+                br.force(x, -1, z, Blocks.FARMLAND.defaultBlockState().setValue(net.minecraft.world.level.block.FarmlandBlock.MOISTURE, 7));
                 BlockState c = crop.defaultBlockState();
                 c = c.setValue(net.minecraft.world.level.block.CropBlock.AGE, 2 + br.r.nextInt(5));
                 any |= br.set(x, 0, z, c);

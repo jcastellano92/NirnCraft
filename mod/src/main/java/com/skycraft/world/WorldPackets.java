@@ -3,26 +3,25 @@ package com.skycraft.world;
 import com.skycraft.network.SkyNetwork;
 import com.skycraft.world.client.WorldClient;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.network.NetworkDirection;
-import net.minecraftforge.network.NetworkEvent;
+import net.neoforged.api.distmarker.Dist;
+import com.skycraft.platform.Sides;
+import net.minecraft.network.protocol.PacketFlow;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-import java.util.function.Supplier;
 
 /** Packets of the world module. Registration order is fixed (ids must match on both sides). */
 public final class WorldPackets {
     private WorldPackets() {}
 
     static void register() {
-        SkyNetwork.register(Cue.class, NetworkDirection.PLAY_TO_CLIENT, Cue::encode, Cue::decode, Cue::handle);
-        SkyNetwork.register(RestFade.class, NetworkDirection.PLAY_TO_CLIENT, RestFade::encode, RestFade::decode, RestFade::handle);
-        SkyNetwork.register(RestState.class, NetworkDirection.PLAY_TO_CLIENT, RestState::encode, RestState::decode, RestState::handle);
-        SkyNetwork.register(RestHint.class, NetworkDirection.PLAY_TO_CLIENT, RestHint::encode, RestHint::decode, RestHint::handle);
-        SkyNetwork.register(Rest.class, NetworkDirection.PLAY_TO_SERVER, Rest::encode, Rest::decode, Rest::handle);
-        SkyNetwork.register(FastTravel.class, NetworkDirection.PLAY_TO_SERVER, FastTravel::encode, FastTravel::decode, FastTravel::handle);
+        SkyNetwork.register(Cue.class, PacketFlow.CLIENTBOUND, Cue::encode, Cue::decode, Cue::handle);
+        SkyNetwork.register(RestFade.class, PacketFlow.CLIENTBOUND, RestFade::encode, RestFade::decode, RestFade::handle);
+        SkyNetwork.register(RestState.class, PacketFlow.CLIENTBOUND, RestState::encode, RestState::decode, RestState::handle);
+        SkyNetwork.register(RestHint.class, PacketFlow.CLIENTBOUND, RestHint::encode, RestHint::decode, RestHint::handle);
+        SkyNetwork.register(Rest.class, PacketFlow.SERVERBOUND, Rest::encode, Rest::decode, Rest::handle);
+        SkyNetwork.register(FastTravel.class, PacketFlow.SERVERBOUND, FastTravel::encode, FastTravel::decode, FastTravel::handle);
     }
 
     // ------------------------------------------------------------------ S2C
@@ -31,17 +30,16 @@ public final class WorldPackets {
     public record Cue(int cue) {
         public static final int DISCOVERY = 0;
 
-        static void encode(Cue m, FriendlyByteBuf buf) {
+        static void encode(Cue m, RegistryFriendlyByteBuf buf) {
             buf.writeVarInt(m.cue);
         }
 
-        static Cue decode(FriendlyByteBuf buf) {
+        static Cue decode(RegistryFriendlyByteBuf buf) {
             return new Cue(buf.readVarInt());
         }
 
-        static void handle(Cue m, Supplier<NetworkEvent.Context> ctx) {
-            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> WorldClient.cue(m.cue));
-            ctx.get().setPacketHandled(true);
+        static void handle(Cue m, IPayloadContext ctx) {
+            Sides.runOn(Dist.CLIENT, () -> () -> WorldClient.cue(m.cue));
         }
     }
 
@@ -51,18 +49,17 @@ public final class WorldPackets {
         public static final int SLEEP = 1;
         public static final int TRAVEL = 2;
 
-        static void encode(RestFade m, FriendlyByteBuf buf) {
+        static void encode(RestFade m, RegistryFriendlyByteBuf buf) {
             buf.writeVarInt(m.hours);
             buf.writeVarInt(m.kind);
         }
 
-        static RestFade decode(FriendlyByteBuf buf) {
+        static RestFade decode(RegistryFriendlyByteBuf buf) {
             return new RestFade(buf.readVarInt(), buf.readVarInt());
         }
 
-        static void handle(RestFade m, Supplier<NetworkEvent.Context> ctx) {
-            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> WorldClient.fade(m.hours, m.kind));
-            ctx.get().setPacketHandled(true);
+        static void handle(RestFade m, IPayloadContext ctx) {
+            Sides.runOn(Dist.CLIENT, () -> () -> WorldClient.fade(m.hours, m.kind));
         }
     }
 
@@ -80,7 +77,7 @@ public final class WorldPackets {
         /** The player can still be cancelled out of (always); reserved. */
         public static final int F_JAIL = 16;
 
-        static void encode(RestState m, FriendlyByteBuf buf) {
+        static void encode(RestState m, RegistryFriendlyByteBuf buf) {
             buf.writeVarInt(m.phase);
             buf.writeVarInt(m.mode);
             buf.writeVarInt(m.flags);
@@ -91,32 +88,30 @@ public final class WorldPackets {
             buf.writeUtf(m.initiator, 64);
         }
 
-        static RestState decode(FriendlyByteBuf buf) {
+        static RestState decode(RegistryFriendlyByteBuf buf) {
             return new RestState(buf.readVarInt(), buf.readVarInt(), buf.readVarInt(), buf.readVarInt(), buf.readVarInt(),
                     buf.readVarInt(), buf.readVarInt(), buf.readUtf(64));
         }
 
-        static void handle(RestState m, Supplier<NetworkEvent.Context> ctx) {
-            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> WorldClient.restState(m));
-            ctx.get().setPacketHandled(true);
+        static void handle(RestState m, IPayloadContext ctx) {
+            Sides.runOn(Dist.CLIENT, () -> () -> WorldClient.restState(m));
         }
     }
 
     /** "Name is resting. Press [key] to rest and join (n/m)" for a player who is not resting; {@code required} 0 clears it. */
     public record RestHint(String who, int resting, int required) {
-        static void encode(RestHint m, FriendlyByteBuf buf) {
+        static void encode(RestHint m, RegistryFriendlyByteBuf buf) {
             buf.writeUtf(m.who, 64);
             buf.writeVarInt(m.resting);
             buf.writeVarInt(m.required);
         }
 
-        static RestHint decode(FriendlyByteBuf buf) {
+        static RestHint decode(RegistryFriendlyByteBuf buf) {
             return new RestHint(buf.readUtf(64), buf.readVarInt(), buf.readVarInt());
         }
 
-        static void handle(RestHint m, Supplier<NetworkEvent.Context> ctx) {
-            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> WorldClient.restHint(m));
-            ctx.get().setPacketHandled(true);
+        static void handle(RestHint m, IPayloadContext ctx) {
+            Sides.runOn(Dist.CLIENT, () -> () -> WorldClient.restHint(m));
         }
     }
 
@@ -132,37 +127,35 @@ public final class WorldPackets {
         public static final int START = 1;
         public static final int CANCEL = 2;
 
-        static void encode(Rest m, FriendlyByteBuf buf) {
+        static void encode(Rest m, RegistryFriendlyByteBuf buf) {
             buf.writeVarInt(m.action);
             buf.writeVarInt(m.mode);
             buf.writeVarInt(m.hours);
         }
 
-        static Rest decode(FriendlyByteBuf buf) {
+        static Rest decode(RegistryFriendlyByteBuf buf) {
             return new Rest(buf.readVarInt(), buf.readVarInt(), buf.readVarInt());
         }
 
-        static void handle(Rest m, Supplier<NetworkEvent.Context> ctx) {
-            ServerPlayer player = ctx.get().getSender();
+        static void handle(Rest m, IPayloadContext ctx) {
+            ServerPlayer player = SkyNetwork.sender(ctx);
             if (player != null) RestManager.handle(player, m.action, m.mode, m.hours);
-            ctx.get().setPacketHandled(true);
         }
     }
 
     /** Fast travel to a discovered location by id. */
     public record FastTravel(String id) {
-        static void encode(FastTravel m, FriendlyByteBuf buf) {
+        static void encode(FastTravel m, RegistryFriendlyByteBuf buf) {
             buf.writeUtf(m.id, 512);
         }
 
-        static FastTravel decode(FriendlyByteBuf buf) {
+        static FastTravel decode(RegistryFriendlyByteBuf buf) {
             return new FastTravel(buf.readUtf(512));
         }
 
-        static void handle(FastTravel m, Supplier<NetworkEvent.Context> ctx) {
-            ServerPlayer player = ctx.get().getSender();
+        static void handle(FastTravel m, IPayloadContext ctx) {
+            ServerPlayer player = SkyNetwork.sender(ctx);
             if (player != null) FastTravelHandler.travel(player, m.id);
-            ctx.get().setPacketHandled(true);
         }
     }
 }

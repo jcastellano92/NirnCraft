@@ -2,10 +2,9 @@ package com.skycraft.quest.client;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
-import net.minecraftforge.client.gui.overlay.ForgeGui;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,26 +14,28 @@ import java.util.UUID;
 public final class PartyHud {
     private PartyHud() {}
 
-    public static void render(ForgeGui gui, GuiGraphics g, float partialTick, int width, int height) {
+    public static void render(GuiGraphicsExtractor g, net.minecraft.client.DeltaTracker delta) {
+        float partialTick = delta.getGameTimeDeltaPartialTick(false);
+        int width = g.guiWidth(), height = g.guiHeight();
         Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null || mc.options.hideGui || !ClientQuestData.inParty()) return;
+        if (mc.player == null || mc.gui.hud.isHidden() || !ClientQuestData.inParty()) return;
         UUID self = mc.player.getUUID();
         UUID leader = ClientQuestData.leader();
         List<ClientQuestData.Member> others = new ArrayList<>();
         for (ClientQuestData.Member m : ClientQuestData.members()) if (!m.id().equals(self)) others.add(m);
         if (others.isEmpty()) return;
         Font font = mc.font;
-        String dim = mc.level == null ? "" : mc.level.dimension().location().toString();
+        String dim = mc.level == null ? "" : mc.level.dimension().identifier().toString();
         int x = 6;
         int y = height / 2 - others.size() * 10;
         for (ClientQuestData.Member m : others) {
             int nameColor = m.online() ? 0xFFE8E2D0 : 0xFF808080;
             String name = (m.id().equals(leader) ? "★ " : "") + m.name();
-            g.drawString(font, name, x, y, nameColor, true);
+            g.text(font, name, x, y, nameColor, true);
             if (!m.online()) {
-                g.drawString(font, Component.translatable("party.skycraft.offline"), x + font.width(name) + 4, y, 0xFF707070, true);
+                g.text(font, Component.translatable("party.skycraft.offline"), x + font.width(name) + 4, y, 0xFF707070, true);
             } else if (!m.dim().equals(dim)) {
-                g.drawString(font, Component.translatable("party.skycraft.far"), x + font.width(name) + 4, y, 0xFF909090, true);
+                g.text(font, Component.translatable("party.skycraft.far"), x + font.width(name) + 4, y, 0xFF909090, true);
             }
             float fill = m.online() && m.maxHealth() > 0 ? Mth.clamp(m.health() / m.maxHealth(), 0, 1) : 0;
             int bw = 64;

@@ -4,7 +4,7 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
-import net.minecraft.world.level.chunk.ChunkStatus;
+import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.chunk.EmptyLevelChunk;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec3;
@@ -66,7 +66,7 @@ final class RoofShelterCache {
     private void sample(ClientLevel level, int x, int z) {
         int index = Math.floorMod(z, SIDE) * SIDE + Math.floorMod(x, SIDE);
         cellX[index] = x; cellZ[index] = z; valid[index] = false;
-        int highest = level.getMinBuildHeight();
+        int highest = level.getMinY();
         // Max of the four block columns conservatively covers narrow roof edges.
         for (int dz = 0; dz < 2; dz++) for (int dx = 0; dx < 2; dx++) {
             int bx = x * 2 + dx, bz = z * 2 + dz;
@@ -75,9 +75,9 @@ final class RoofShelterCache {
             int y = chunk.getHeight(Heightmap.Types.MOTION_BLOCKING, bx & 15, bz & 15);
             int scans = 0;
             // Leaves are not an indoor roof: retain outdoor mist beneath a forest canopy.
-            while (y >= level.getMinBuildHeight()) {
+            while (y >= level.getMinY()) {
                 var state = chunk.getBlockState(probe.set(bx, y, bz));
-                if (!state.is(BlockTags.LEAVES) && (state.blocksMotion() || !state.getFluidState().isEmpty())) break;
+                if (!state.is(BlockTags.LEAVES) && (state.isSolid() || !state.getFluidState().isEmpty())) break;
                 if (++scans >= 48) return;
                 y--;
             }

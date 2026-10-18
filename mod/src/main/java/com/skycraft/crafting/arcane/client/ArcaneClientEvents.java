@@ -11,15 +11,15 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.event.entity.player.ItemTooltipEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.util.List;
 
 /** Client tooltips: known alchemy effects on ingredients, applied weapon poisons and the poison-coating hint. */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
 public final class ArcaneClientEvents {
     private ArcaneClientEvents() {}
 
@@ -36,20 +36,20 @@ public final class ArcaneClientEvents {
             for (Component line : Alchemy.effectLines(player, ing)) tooltip.add(Component.literal("  ").append(line));
         }
 
-        CompoundTag tag = stack.getTag();
+        CompoundTag tag = com.skycraft.inventory.ItemData.custom(stack);
         if (tag == null) return;
-        if (tag.contains(ArcaneEvents.WEAPON_POISON, Tag.TAG_COMPOUND)) {
-            CompoundTag poison = tag.getCompound(ArcaneEvents.WEAPON_POISON);
+        if (com.skycraft.platform.NbtData.hasType(tag, ArcaneEvents.WEAPON_POISON, Tag.TAG_COMPOUND)) {
+            CompoundTag poison = tag.getCompoundOrEmpty(ArcaneEvents.WEAPON_POISON);
             Component name;
             try {
-                name = Component.Serializer.fromJson(poison.getString("Name"));
+                name = com.skycraft.platform.ArcaneData.readComponent(poison.getStringOr("Name",""));
             } catch (RuntimeException e) {
                 name = null;
             }
             if (name == null) name = Component.translatable("tooltip.skycraft.alchemy.poison");
-            tooltip.add(Component.translatable("tooltip.skycraft.alchemy.poisoned", name, poison.getInt("Hits")).withStyle(ChatFormatting.DARK_GREEN));
+            tooltip.add(Component.translatable("tooltip.skycraft.alchemy.poisoned", name, poison.getIntOr("Hits",0)).withStyle(ChatFormatting.DARK_GREEN));
         }
-        if (tag.getBoolean(Alchemy.POISON_TAG)) {
+        if (tag.getBooleanOr(Alchemy.POISON_TAG, false)) {
             tooltip.add(Component.translatable("tooltip.skycraft.alchemy.coat_hint").withStyle(ChatFormatting.DARK_GRAY));
         }
     }

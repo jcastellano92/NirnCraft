@@ -7,23 +7,23 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.valueproviders.IntProvider;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
-import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
+import com.skycraft.worldgen.ConfiguredFeature;
+import com.skycraft.worldgen.FeaturePlaceContext;
+import com.skycraft.worldgen.FeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.stateproviders.BlockStateProvider;
 
 /**
  * A cluster of leaning spires growing from the ground: Summerset crystal, Thras coral, basalt pillars in the ash,
  * ice pinnacles in Atmora. Tall spires are two blocks thick at the foot; each ends in a tip block.
  */
-public class SpireClusterFeature extends Feature<SpireClusterFeature.Config> {
+public class SpireClusterFeature extends ConfiguredFeature<SpireClusterFeature.Config> {
     public record Config(BlockStateProvider body, BlockStateProvider tip, IntProvider count, IntProvider height,
                          int spread, float lean) implements FeatureConfiguration {
         public static final Codec<Config> CODEC = RecordCodecBuilder.create(i -> i.group(
-                BlockStateProvider.CODEC.fieldOf("body").forGetter(Config::body),
-                BlockStateProvider.CODEC.fieldOf("tip").forGetter(Config::tip),
-                IntProvider.codec(1, 32).fieldOf("count").forGetter(Config::count),
-                IntProvider.codec(1, 48).fieldOf("height").forGetter(Config::height),
+                BlockStateProvider.DIRECT_CODEC.fieldOf("body").forGetter(Config::body),
+                BlockStateProvider.DIRECT_CODEC.fieldOf("tip").forGetter(Config::tip),
+                net.minecraft.util.valueproviders.IntProviders.codec(1, 32).fieldOf("count").forGetter(Config::count),
+                net.minecraft.util.valueproviders.IntProviders.codec(1, 48).fieldOf("height").forGetter(Config::height),
                 Codec.intRange(0, 12).fieldOf("spread").forGetter(Config::spread),
                 Codec.floatRange(0f, 1f).fieldOf("lean").forGetter(Config::lean)
         ).apply(i, Config::new));
@@ -57,10 +57,10 @@ public class SpireClusterFeature extends Feature<SpireClusterFeature.Config> {
             for (int dy = -1; dy < h; dy++) {
                 int bx = Mth.floor(sx), bz = Mth.floor(sz);
                 pos.set(bx, y + dy, bz);
-                box.set(bx, y + dy, bz, cfg.body().getState(random, pos));
+                box.set(bx, y + dy, bz, cfg.body().getState(ctx.level(), random, pos));
                 if (h >= 6 && dy < h / 3) {
-                    box.set(bx + 1, y + dy, bz, cfg.body().getState(random, pos));
-                    box.set(bx, y + dy, bz + 1, cfg.body().getState(random, pos));
+                    box.set(bx + 1, y + dy, bz, cfg.body().getState(ctx.level(), random, pos));
+                    box.set(bx, y + dy, bz + 1, cfg.body().getState(ctx.level(), random, pos));
                 }
                 lastX = bx;
                 lastZ = bz;
@@ -69,7 +69,7 @@ public class SpireClusterFeature extends Feature<SpireClusterFeature.Config> {
                 sz += Math.sin(a) * lean;
             }
             pos.set(lastX, lastY + 1, lastZ);
-            box.setSoft(lastX, lastY + 1, lastZ, cfg.tip().getState(random, pos));
+            box.setSoft(lastX, lastY + 1, lastZ, cfg.tip().getState(ctx.level(), random, pos));
             any = true;
         }
         return any;

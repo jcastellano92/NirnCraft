@@ -34,6 +34,21 @@ public final class AtmosphereMath {
         return (float) (0.5 + 0.5 * Math.cos(cycle * Math.PI * 2.0));
     }
 
+    /** Immutable orbital light snapshot; native geometry uses the same orbit as the shader frame. */
+    public record MoonLight(float x,float y,float z,float illumination) {
+        public static final MoonLight DARK=new MoonLight(0,1,0,0);
+        public float diffuse(float nx,float ny,float nz) {
+            return Math.max(0f,0.35f+0.65f*(x*nx+y*ny+z*nz))*illumination;
+        }
+    }
+
+    public static MoonLight moonLight(double solarAngle,double dayTime,boolean secunda) {
+        double cycle=moonCycle(dayTime,secunda),orbit=solarAngle+cycle*Math.PI*2;
+        double inclination=secunda?Math.toRadians(24):0;
+        return new MoonLight((float)Math.sin(orbit),(float)(-Math.cos(orbit)*Math.cos(inclination)),
+                (float)(Math.cos(orbit)*Math.sin(inclination)),visibleMoonIllumination(solarAngle,cycle,secunda));
+    }
+
     /** The orbit and illumination share the sun's angular frame, including Secunda's inclination. */
     public static float moonElevation(double solarAngle, double cycle, boolean secunda) {
         return (float) (-Math.cos(solarAngle + cycle * Math.PI * 2) * (secunda ? Math.cos(Math.toRadians(24)) : 1));

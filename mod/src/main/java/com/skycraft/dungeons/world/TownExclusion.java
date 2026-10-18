@@ -35,7 +35,7 @@ final class TownExclusion {
         Cache c = cache;
         if (c != null && c.access() == access) return c.sets();
         List<Holder<StructureSet>> sets = new ArrayList<>();
-        access.registryOrThrow(Registries.STRUCTURE_SET).holders().forEach(set -> {
+        access.lookupOrThrow(Registries.STRUCTURE_SET).listElements().forEach(set -> {
             for (StructureSet.StructureSelectionEntry e : set.value().structures()) {
                 if (e.structure().is(LocationTags.TOWNS)) {
                     sets.add(set);
@@ -53,18 +53,18 @@ final class TownExclusion {
         List<Holder<StructureSet>> sets = townSets(ctx.registryAccess());
         if (sets.isEmpty()) return false;
         // a bare state: random-spread placements only need the seed from it
-        ChunkGeneratorStructureState state = ChunkGeneratorStructureState.createForFlat(ctx.randomState(), ctx.seed(),
+        ChunkGeneratorStructureState state = ChunkGeneratorStructureState.createForFlat(ctx.randomState(), ctx.seed(), ctx.chunkPos(),
                 ctx.biomeSource(), Stream.empty());
         ChunkPos cp = ctx.chunkPos();
         int y = QuartPos.fromBlock(ctx.chunkGenerator().getSeaLevel());
         for (Holder<StructureSet> set : sets) {
             StructurePlacement placement = set.value().placement();
-            for (int x = cp.x - range; x <= cp.x + range; x++) {
-                for (int z = cp.z - range; z <= cp.z + range; z++) {
+            for (int x = cp.x() - range; x <= cp.x() + range; x++) {
+                for (int z = cp.z() - range; z <= cp.z() + range; z++) {
                     if (!placement.isStructureChunk(state, x, z)) continue;
                     // the start chunk is chosen; would a town (not some other member of the set) like its biome?
-                    Holder<Biome> biome = ctx.biomeSource().getNoiseBiome(QuartPos.fromBlock((x << 4) + 8), y,
-                            QuartPos.fromBlock((z << 4) + 8), ctx.randomState().sampler());
+                    Holder<Biome> biome = ctx.biomeSource().createUncachedResolver(ctx.randomState()).getNoiseBiome(QuartPos.fromBlock((x << 4) + 8), y,
+                            QuartPos.fromBlock((z << 4) + 8));
                     for (StructureSet.StructureSelectionEntry e : set.value().structures()) {
                         if (e.structure().is(LocationTags.TOWNS) && e.structure().value().biomes().contains(biome)) return true;
                     }

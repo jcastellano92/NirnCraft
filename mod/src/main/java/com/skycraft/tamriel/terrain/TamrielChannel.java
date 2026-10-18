@@ -3,9 +3,12 @@ package com.skycraft.tamriel.terrain;
 import com.mojang.serialization.MapCodec;
 import com.skycraft.tamriel.MapSample;
 import com.skycraft.tamriel.TamrielMap;
-import net.minecraft.util.KeyDispatchDataCodec;
+import net.minecraft.util.Interval;
+import net.minecraft.world.level.levelgen.densityfunction.*;
+import com.skycraft.worldgen.WorldNoise;
+import com.skycraft.worldgen.WorldDensitySampler;
 import net.minecraft.util.StringRepresentable;
-import net.minecraft.world.level.levelgen.DensityFunction;
+import net.minecraft.world.level.levelgen.densityfunction.DensityFunction;
 
 import java.util.Locale;
 
@@ -19,7 +22,7 @@ import java.util.Locale;
  * up to 1 far inland), erosion from roughness and ridges (-0.75 for jagged mountains, 0.75 for flat land),
  * ridges = mountain ridge strength 0..1.</p>
  */
-public record TamrielChannel(Channel channel) implements DensityFunction.SimpleFunction {
+public record TamrielChannel(Channel channel) implements DensityFunction {
     public enum Channel implements StringRepresentable {
         ELEVATION(-64, 640), CONTINENTALNESS(-1.2, 1), EROSION(-1, 1), RIDGES(0, 1), RIVER(0, 1), LAKE(0, 1),
         ROUGHNESS(0, 1), CRAG(0, 1), DUNES(0, 1), WETLAND(0, 1), WATER_LEVEL(-64, 640), COAST(-100000, 100000),
@@ -41,14 +44,13 @@ public record TamrielChannel(Channel channel) implements DensityFunction.SimpleF
 
     public static final MapCodec<TamrielChannel> DATA_CODEC =
             Channel.CODEC.fieldOf("channel").xmap(TamrielChannel::new, TamrielChannel::channel);
-    public static final KeyDispatchDataCodec<TamrielChannel> CODEC = KeyDispatchDataCodec.of(DATA_CODEC);
+    public static final MapCodec<TamrielChannel> CODEC = DATA_CODEC;
 
-    @Override
-    public double compute(FunctionContext ctx) {
-        double v = value(channel, TamrielMap.sampleScratch(ctx.blockX(), ctx.blockZ()));
+    public double compute(int blockX, int blockY, int blockZ) {
+        double v = value(channel, TamrielMap.sampleScratch(blockX, blockZ));
         if ((channel == Channel.ROAD || channel == Channel.OVERHANG) && com.skycraft.worldplan.PlanGround.blending()) {
             // P2: the planned road beds and site pads also keep caves and overhangs off the surface
-            double w = com.skycraft.worldplan.PlanGround.influence(ctx.blockX(), ctx.blockZ());
+            double w = com.skycraft.worldplan.PlanGround.influence(blockX, blockZ);
             v = channel == Channel.ROAD ? Math.max(v, w) : v * (1 - w);
         }
         return v;
@@ -81,18 +83,25 @@ public record TamrielChannel(Channel channel) implements DensityFunction.SimpleF
         return -0.11 + 1.11 * Math.min(1.0, (cd - 64) / 2500.0);
     }
 
-    @Override
     public double minValue() {
         return channel.min;
     }
 
-    @Override
     public double maxValue() {
         return channel.max;
     }
 
+    @Override public DensitySampler compileSampler(CompileContext context) {
+        var bound = this;
+        return (WorldDensitySampler) (sampling, x, y, z) -> (float) bound.compute(x, y, z);
+    }
+
+    @Override public DensityFunction rewriteChildren(DfRewriteRule rule) { return this; }
+    @Override public Interval range() { return Interval.of((float) minValue(), (float) maxValue()); }
+    @Override public int domainAxes() { return DensityFunction.AXIS_X | DensityFunction.AXIS_Z; }
+
     @Override
-    public KeyDispatchDataCodec<? extends DensityFunction> codec() {
+    public MapCodec<? extends DensityFunction> codec() {
         return CODEC;
     }
 }

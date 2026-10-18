@@ -20,18 +20,14 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ArmorItem;
-import net.minecraft.world.item.ArmorMaterial;
-import net.minecraft.world.item.ArmorMaterials;
+import net.minecraft.world.item.equipment.ArmorMaterial;
+import net.minecraft.world.item.equipment.ArmorMaterials;
 import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.CrossbowItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.ShieldItem;
-import net.minecraft.world.item.Tier;
-import net.minecraft.world.item.TieredItem;
-import net.minecraft.world.item.Tiers;
 import net.minecraft.world.item.TridentItem;
 import net.minecraft.world.item.crafting.Ingredient;
 import org.jetbrains.annotations.Nullable;
@@ -57,16 +53,16 @@ public final class Tempering {
     // ------------------------------------------------------------------ quality NBT
 
     public static int quality(ItemStack stack) {
-        CompoundTag tag = stack.getTag();
-        return tag == null ? 0 : Math.max(0, Math.min(MAX, tag.getInt(TAG)));
+        CompoundTag tag = com.skycraft.inventory.ItemData.custom(stack);
+        return tag == null ? 0 : Math.max(0, Math.min(MAX, tag.getIntOr(TAG, 0)));
     }
 
     public static void setQuality(ItemStack stack, int quality) {
         if (quality <= 0) {
-            CompoundTag tag = stack.getTag();
-            if (tag != null) tag.remove(TAG);
+            CompoundTag tag = com.skycraft.inventory.ItemData.custom(stack);
+            if (tag != null) com.skycraft.inventory.ItemData.updateCustom(stack, custom -> custom.remove(TAG));
         } else {
-            stack.getOrCreateTag().putInt(TAG, Math.min(MAX, quality));
+            com.skycraft.inventory.ItemData.updateCustom(stack, customData263 -> customData263.putInt(TAG, Math.min(MAX, quality)));
         }
         com.skycraft.loot.affix.ItemAffixes.onTemper(stack);
     }
@@ -80,7 +76,7 @@ public final class Tempering {
     public static Kind kind(ItemStack stack) {
         if (stack.isEmpty() || stack.getCount() != 1) return Kind.NONE;
         Item item = stack.getItem();
-        if (item instanceof ArmorItem || item instanceof ShieldItem) return Kind.ARMOR;
+        if (com.skycraft.inventory.EquipmentData.isArmor(stack) || item instanceof ShieldItem) return Kind.ARMOR;
         if (!stack.isDamageableItem() && !(item instanceof SkyBowItem)) return Kind.NONE;
         WeaponClass wc = WeaponClass.of(stack);
         if (wc != WeaponClass.UNARMED && wc != WeaponClass.OTHER) return Kind.WEAPON;
@@ -102,19 +98,14 @@ public final class Tempering {
         if (item instanceof SkyAxeItem axe) return Cost.of(axe.smithingTier::material, 1);
         if (item instanceof SkyShieldItem shield) return Cost.of(shield.set::material, 1);
         if (item instanceof ShieldItem) return Cost.of(() -> Items.IRON_INGOT, 1);
-        if (item instanceof ArmorItem armor) {
-            ArmorMaterial mat = armor.getMaterial();
-            if (mat instanceof SkyArmorMaterial sky) return Cost.of(sky::material, 1);
-            if (mat == ArmorMaterials.NETHERITE) return Cost.of(() -> Items.NETHERITE_SCRAP, 1);
-            if (mat == ArmorMaterials.CHAIN) return Cost.of(() -> Items.IRON_INGOT, 1);
-            return ingredientCost(mat.getRepairIngredient());
-        }
-        if (item instanceof TieredItem tiered) {
-            Tier tier = tiered.getTier();
-            if (tier instanceof SmithingTier st) return Cost.of(st::material, 1);
-            if (tier == Tiers.NETHERITE) return Cost.of(() -> Items.NETHERITE_SCRAP, 1);
-            return ingredientCost(tier.getRepairIngredient());
-        }
+        if (item instanceof com.skycraft.crafting.item.SkyArmorItem armor) return Cost.of(armor.set::material, 1);
+        ArmorMaterial armor = com.skycraft.inventory.EquipmentData.armorMaterial(stack);
+        if (armor == ArmorMaterials.NETHERITE) return Cost.of(() -> Items.NETHERITE_SCRAP, 1);
+        if (armor == ArmorMaterials.CHAINMAIL) return Cost.of(() -> Items.IRON_INGOT, 1);
+        net.minecraft.world.item.ToolMaterial tool = com.skycraft.inventory.EquipmentData.toolMaterial(stack);
+        if (tool == net.minecraft.world.item.ToolMaterial.NETHERITE) return Cost.of(() -> Items.NETHERITE_SCRAP, 1);
+        var repair = stack.get(net.minecraft.core.component.DataComponents.REPAIRABLE);
+        if (repair != null) return ingredientCost(Ingredient.of(repair.items()));
         if (item instanceof BowItem || item instanceof CrossbowItem) return Cost.of(CraftingItems.FIREWOOD, 1);
         if (item instanceof TridentItem) return Cost.of(() -> Items.PRISMARINE_SHARD, 1);
         return null;
@@ -132,18 +123,11 @@ public final class Tempering {
         if (item instanceof SkyMeleeItem melee) return melee.smithingTier.temperPerk;
         if (item instanceof SkyAxeItem axe) return axe.smithingTier.temperPerk;
         if (item instanceof SkyShieldItem shield) return shield.set.temperPerk;
-        if (item instanceof ArmorItem armor) {
-            ArmorMaterial mat = armor.getMaterial();
-            if (mat instanceof SkyArmorMaterial sky) return sky.temperPerk;
-            if (mat == ArmorMaterials.DIAMOND) return "smithing.advanced_armors";
-            if (mat == ArmorMaterials.NETHERITE) return "smithing.daedric_smithing";
-            return "smithing.steel_smithing";
-        }
-        if (item instanceof TieredItem tiered) {
-            Tier tier = tiered.getTier();
-            if (tier == Tiers.DIAMOND) return "smithing.advanced_armors";
-            if (tier == Tiers.NETHERITE) return "smithing.daedric_smithing";
-        }
+        if (item instanceof com.skycraft.crafting.item.SkyArmorItem armor) return armor.set.temperPerk;
+        ArmorMaterial armor = com.skycraft.inventory.EquipmentData.armorMaterial(stack);
+        net.minecraft.world.item.ToolMaterial tool = com.skycraft.inventory.EquipmentData.toolMaterial(stack);
+        if (armor == ArmorMaterials.DIAMOND || tool == net.minecraft.world.item.ToolMaterial.DIAMOND) return "smithing.advanced_armors";
+        if (armor == ArmorMaterials.NETHERITE || tool == net.minecraft.world.item.ToolMaterial.NETHERITE) return "smithing.daedric_smithing";
         return "smithing.steel_smithing";
     }
 

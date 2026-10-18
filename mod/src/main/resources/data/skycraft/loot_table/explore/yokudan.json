@@ -1,0 +1,103 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": {
+        "type": "minecraft:uniform",
+        "min": 2,
+        "max": 4
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:septim",
+          "weight": 14,
+          "modifier": {
+            "count": {
+              "type": "minecraft:uniform",
+              "min": 20,
+              "max": 64
+            },
+            "type": "minecraft:set_count"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:ruby",
+          "weight": 4
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:gold_ring",
+          "weight": 3
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:iron_sword",
+          "weight": 6,
+          "modifier": {
+            "kind": "weapon",
+            "enchant_chance": 0.3,
+            "quality_chance": 0.3,
+            "type": "skycraft:regional_gear"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:gold_ingot",
+          "weight": 4,
+          "modifier": {
+            "count": {
+              "type": "minecraft:uniform",
+              "min": 1,
+              "max": 3
+            },
+            "type": "minecraft:set_count"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:potion",
+          "weight": 4,
+          "modifier": {
+            "poison": false,
+            "type": "skycraft:skyrim_potion"
+          }
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:book",
+          "weight": 40,
+          "modifier": {
+            "tag": "{book:\"explore_note_obelisk_rubbing\",skycraft_value:2}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 60
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:loot_table",
+          "weight": 5,
+          "value": "skycraft:chests/skill_books"
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 95
+        }
+      ]
+    }
+  ],
+  "random_sequence": "skycraft:explore/yokudan"
+}

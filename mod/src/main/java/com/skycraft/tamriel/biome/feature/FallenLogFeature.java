@@ -7,12 +7,12 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.RotatedPillarBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
-import net.minecraft.world.level.levelgen.feature.configurations.BlockStateConfiguration;
+import com.skycraft.worldgen.ConfiguredFeature;
+import com.skycraft.worldgen.FeaturePlaceContext;
+import com.skycraft.worldgen.BlockStateConfiguration;
 
 /** A fallen trunk lying on the forest floor, a stump beside it, moss on its back. */
-public class FallenLogFeature extends Feature<BlockStateConfiguration> {
+public class FallenLogFeature extends ConfiguredFeature<BlockStateConfiguration> {
     public FallenLogFeature(Codec<BlockStateConfiguration> codec) {
         super(codec);
     }

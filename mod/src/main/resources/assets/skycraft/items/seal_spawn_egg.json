@@ -1,0 +1,16 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "skycraft:item/seal_spawn_egg",
+    "tints": [
+      {
+        "type": "minecraft:constant",
+        "value": 8026752
+      },
+      {
+        "type": "minecraft:constant",
+        "value": 13158592
+      }
+    ]
+  }
+}

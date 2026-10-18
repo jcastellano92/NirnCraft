@@ -2,7 +2,7 @@ package com.skycraft.dungeons.world;
 
 import com.skycraft.Skycraft;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
@@ -34,16 +34,16 @@ public final class Deco {
     private Deco() {}
 
     // arsenal's leveled loot tables (contract 20); missing tables just generate empty containers
-    public static final ResourceLocation LOOT_COMMON = new ResourceLocation(Skycraft.MODID, "chests/dungeon_common");
-    public static final ResourceLocation LOOT_BOSS = new ResourceLocation(Skycraft.MODID, "chests/dungeon_boss");
-    public static final ResourceLocation LOOT_MINOR = new ResourceLocation(Skycraft.MODID, "chests/dungeon_minor");
+    public static final Identifier LOOT_COMMON = Identifier.fromNamespaceAndPath(Skycraft.MODID, "chests/dungeon_common");
+    public static final Identifier LOOT_BOSS = Identifier.fromNamespaceAndPath(Skycraft.MODID, "chests/dungeon_boss");
+    public static final Identifier LOOT_MINOR = Identifier.fromNamespaceAndPath(Skycraft.MODID, "chests/dungeon_minor");
     // dungeons' own supplementary tables
-    public static final ResourceLocation LOOT_DWEMER = new ResourceLocation(Skycraft.MODID, "chests/dwemer_scrap");
-    public static final ResourceLocation LOOT_GIANT = new ResourceLocation(Skycraft.MODID, "chests/giant_camp");
-    public static final ResourceLocation LOOT_MINE = new ResourceLocation(Skycraft.MODID, "chests/mine_ore");
-    public static final ResourceLocation LOOT_DRAGON = new ResourceLocation(Skycraft.MODID, "chests/dragon_lair");
-    public static final ResourceLocation LOOT_SHRINE = new ResourceLocation(Skycraft.MODID, "chests/daedric_offerings");
-    public static final ResourceLocation LOOT_ALCHEMY = new ResourceLocation(Skycraft.MODID, "chests/lair_reagents");
+    public static final Identifier LOOT_DWEMER = Identifier.fromNamespaceAndPath(Skycraft.MODID, "chests/dwemer_scrap");
+    public static final Identifier LOOT_GIANT = Identifier.fromNamespaceAndPath(Skycraft.MODID, "chests/giant_camp");
+    public static final Identifier LOOT_MINE = Identifier.fromNamespaceAndPath(Skycraft.MODID, "chests/mine_ore");
+    public static final Identifier LOOT_DRAGON = Identifier.fromNamespaceAndPath(Skycraft.MODID, "chests/dragon_lair");
+    public static final Identifier LOOT_SHRINE = Identifier.fromNamespaceAndPath(Skycraft.MODID, "chests/daedric_offerings");
+    public static final Identifier LOOT_ALCHEMY = Identifier.fromNamespaceAndPath(Skycraft.MODID, "chests/lair_reagents");
 
     public static final ItemStack ARROWS = new ItemStack(Items.ARROW, 9);
 
@@ -72,7 +72,7 @@ public final class Deco {
     }
 
     public static BlockState chain(Direction.Axis axis) {
-        return Blocks.CHAIN.defaultBlockState().setValue(ChainBlock.AXIS, axis);
+        return com.skycraft.worldgen.VanillaBlocks.CHAIN.defaultBlockState().setValue(ChainBlock.AXIS, axis);
     }
 
     public static BlockState chest(Direction facing) {

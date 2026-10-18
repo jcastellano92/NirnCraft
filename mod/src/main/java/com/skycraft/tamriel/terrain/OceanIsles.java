@@ -51,6 +51,8 @@ public final class OceanIsles {
         if (unit(h, 0) >= 0.40) return null;
         int ix = cx * CELL + 112 + (int) Math.round(unit(h, 1) * (CELL - 224));
         int iz = cz * CELL + 112 + (int) Math.round(unit(h, 2) * (CELL - 224));
+        // Keep local maritime detail around the fixed world, never repopulate the quiet outer ocean.
+        if (!Beyond.ENDLESS_LANDS_ENABLED && !Beyond.fixedWorldFootprint(ix, iz)) return null;
         MapSample ms = new MapSample();
         TamrielMap.sample(ix, iz, ms);
         if (ms.coastDistance > MIN_CENTER_COAST) return null;

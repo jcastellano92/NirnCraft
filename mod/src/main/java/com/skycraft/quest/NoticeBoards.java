@@ -342,7 +342,7 @@ public final class NoticeBoards {
     /** True if {@code sign} is a settlement or inn Notice Board sign. */
     public static boolean isNoticeBoardSign(Level level, BlockPos pos, SignBlockEntity sign) {
         if (level.dimension() != Level.OVERWORLD) return false;
-        if (matchesBoardText(sign.getFrontText()) || matchesBoardText(sign.getBackText())) {
+        if (matchesBoardText(sign.getText(net.minecraft.world.level.block.entity.SignTextSlot.FRONT)) || matchesBoardText(sign.getText(net.minecraft.world.level.block.entity.SignTextSlot.BACK))) {
             return nearestBoardSettlement(level, pos, 256).isPresent();
         }
         return false;
@@ -350,7 +350,7 @@ public final class NoticeBoards {
 
     private static boolean matchesBoardText(SignText text) {
         for (int i = 0; i < 4; i++) {
-            Component msg = text.getMessage(i, false);
+            Component msg = text.getMessages(false).get(i);
             String raw = msg.getString().toLowerCase(Locale.ROOT);
             String str = msg.toString().toLowerCase(Locale.ROOT);
             if (str.contains("settlement.skycraft.notice.title")
@@ -369,7 +369,7 @@ public final class NoticeBoards {
 
     public static long currentEpoch(@Nullable MinecraftServer server) {
         if (server == null || server.overworld() == null) return 0L;
-        return Math.max(0L, server.overworld().getDayTime() / REFRESH_TICKS);
+        return Math.max(0L, server.overworld().getDefaultClockTime() / REFRESH_TICKS);
     }
 
     /** Determines the dungeon {@link Size} tier of a target {@link Place}. */
@@ -532,7 +532,7 @@ public final class NoticeBoards {
 
     private static boolean isCleared(PlayerData data, Place place) {
         CompoundTag loc = WorldData.find(data, WorldData.placeLocId(place.id()));
-        return loc != null && loc.getBoolean("cleared");
+        return loc != null && loc.getBooleanOr("cleared",false);
     }
 
     private static String provinceOf(Place p) {
@@ -548,13 +548,13 @@ public final class NoticeBoards {
 
     /** Opens the custom Notice Board screen for {@code settlement} on {@code player}'s client. */
     public static int showBoard(ServerPlayer player, Place settlement) {
-        List<Job> jobs = jobsFor(player.server, settlement, player);
+        List<Job> jobs = jobsFor(player.level().getServer(), settlement, player);
         CompoundTag payload = new CompoundTag();
         payload.putString("settlementId", settlement.id());
         payload.putString("settlementName", settlement.name().getString());
         net.minecraft.nbt.ListTag list = new net.minecraft.nbt.ListTag();
         for (Job job : jobs) {
-            boolean activeOrDone = Quests.find(player.server, player.getUUID(), job.id()) != null;
+            boolean activeOrDone = Quests.find(player.level().getServer(), player.getUUID(), job.id()) != null;
             CompoundTag jt = new CompoundTag();
             jt.putInt("index", job.index());
             jt.putString("id", job.id());
@@ -600,7 +600,7 @@ public final class NoticeBoards {
             Notifier.message(player, Component.translatable("quest.skycraft.too_many"));
             return false;
         }
-        List<Job> jobs = jobsFor(player.server, settlement, player);
+        List<Job> jobs = jobsFor(player.level().getServer(), settlement, player);
         if (jobs.isEmpty()) return false;
         int resolved = index;
         if (resolved < 0 || resolved >= jobs.size()) {
@@ -611,7 +611,7 @@ public final class NoticeBoards {
             }
         }
         Job job = jobs.get(resolved);
-        if (Quests.find(player.server, player.getUUID(), job.id()) != null) {
+        if (Quests.find(player.level().getServer(), player.getUUID(), job.id()) != null) {
             Notifier.message(player, Component.translatable("quest.skycraft.board.already_taken").withStyle(ChatFormatting.RED));
             return false;
         }
@@ -620,8 +620,8 @@ public final class NoticeBoards {
         if (!Quests.start(player, q)) return false;
 
         // Track the newly accepted board quest and mark the target Place on every party member's map and compass
-        String ownerKey = Quests.keyForNew(player.server, player.getUUID());
-        for (ServerPlayer member : Quests.onlineMembers(player.server, ownerKey)) {
+        String ownerKey = Quests.keyForNew(player.level().getServer(), player.getUUID());
+        for (ServerPlayer member : Quests.onlineMembers(player.level().getServer(), ownerKey)) {
             markPlaceKnown(member, job.targetPlace());
             PlayerData md = SkyData.get(member);
             md.module("quest").putString("tracked", q.id);
@@ -808,16 +808,16 @@ public final class NoticeBoards {
     /** Awards bonus XP and hold reputation when a notice board job is completed by a player or party. */
     public static void onQuestCompleted(MinecraftServer server, String ownerKey, Quest q) {
         if (q == null || !q.kind.startsWith("board_")) return;
-        int xp = q.extra.getInt("board_xp");
-        int rep = q.extra.getInt("board_rep");
+        int xp = q.extra.getIntOr("board_xp",0);
+        int rep = q.extra.getIntOr("board_rep",0);
         for (ServerPlayer member : Quests.onlineMembers(server, ownerKey)) {
             PlayerData data = SkyData.get(member);
             if (xp > 0) {
                 com.skycraft.skills.Progression.awardQuestXp(member, xp);
             }
             if (rep > 0 && !q.hold.isEmpty()) {
-                CompoundTag holdRep = data.module("quest").getCompound("hold_reputation");
-                holdRep.putInt(q.hold, holdRep.getInt(q.hold) + rep);
+                CompoundTag holdRep = data.module("quest").getCompoundOrEmpty("hold_reputation");
+                holdRep.putInt(q.hold, holdRep.getIntOr(q.hold, 0) + rep);
                 data.module("quest").put("hold_reputation", holdRep);
                 data.markDirty();
             }

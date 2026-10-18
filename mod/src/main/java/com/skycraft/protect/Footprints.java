@@ -14,7 +14,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.ChunkAccess;
-import net.minecraft.world.level.chunk.ChunkStatus;
+import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructurePiece;
@@ -145,7 +145,7 @@ public final class Footprints {
     }
 
     private static synchronized int[] places(int cx, int cz) {
-        long key = ChunkPos.asLong(cx, cz);
+        long key = ChunkPos.pack(cx, cz);
         int[] cached = PLACES.get(key);
         if (cached != null) return cached;
         int x0 = cx << 4, z0 = cz << 4;

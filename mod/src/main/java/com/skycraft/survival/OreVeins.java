@@ -16,16 +16,16 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
-import net.minecraftforge.common.Tags;
-import net.minecraftforge.common.util.FakePlayer;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.event.level.BlockEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.server.ServerLifecycleHooks;
+import net.neoforged.neoforge.common.Tags;
+import net.neoforged.neoforge.common.util.FakePlayer;
+
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.neoforge.event.level.BlockEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -41,7 +41,7 @@ import java.util.UUID;
  * <p>The replacement waits a tick so the ore's drops, Mining XP and the Vein Miner chain (which breaks each block
  * through {@code destroyBlock} and fires its own break event) all see the real ore.</p>
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class OreVeins {
     private record Pending(ResourceKey<Level> dim, BlockPos pos, BlockState ore, int attempts) {
     }
@@ -57,7 +57,7 @@ public final class OreVeins {
 
     /** The clock regrowth is measured in: game time, but sleeping/waiting (which moves the day time) counts too. */
     public static long clock(Level level) {
-        return Math.max(level.getDayTime(), level.getGameTime());
+        return Math.max(level.getDefaultClockTime(), level.getGameTime());
     }
 
     private static boolean applies(Level level) {
@@ -67,7 +67,7 @@ public final class OreVeins {
     }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
-    public static void onBreakFirst(BlockEvent.BreakEvent event) {
+    public static void onBreakFirst(net.neoforged.neoforge.event.level.block.BreakBlockEvent event) {
         if (!(event.getLevel() instanceof ServerLevel level) || !(event.getPlayer() instanceof ServerPlayer player)) return;
         if (player.isCreative() || player instanceof FakePlayer || !applies(level)) return;
         BlockState state = event.getState();
@@ -77,15 +77,15 @@ public final class OreVeins {
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
-    public static void onBreakLast(BlockEvent.BreakEvent event) {
+    public static void onBreakLast(net.neoforged.neoforge.event.level.block.BreakBlockEvent event) {
         if (CANDIDATES.isEmpty() || !(event.getLevel() instanceof ServerLevel level)) return;
         BlockState ore = CANDIDATES.remove(GlobalPos.of(level.dimension(), event.getPos()));
         if (ore != null) PENDING.add(new Pending(level.dimension(), event.getPos().immutable(), ore, 0));
     }
 
     @SubscribeEvent
-    public static void onServerTick(TickEvent.ServerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END) return;
+    public static void onServerTick(net.neoforged.neoforge.event.tick.ServerTickEvent.Post event) {
+        if (!(event instanceof net.neoforged.neoforge.event.tick.ServerTickEvent.Post)) return;
         CANDIDATES.clear(); // breaks that were cancelled after HIGHEST
         if (PENDING.isEmpty()) return;
         MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
@@ -143,7 +143,7 @@ public final class OreVeins {
         if (ore.is(Tags.Blocks.ORES_IN_GROUND_DEEPSLATE)) return DepletedOreBlock.Host.DEEPSLATE;
         if (ore.is(Tags.Blocks.ORES_IN_GROUND_NETHERRACK)) return DepletedOreBlock.Host.NETHERRACK;
         if (ore.is(Tags.Blocks.ORES_IN_GROUND_STONE)) return DepletedOreBlock.Host.STONE;
-        var key = net.minecraftforge.registries.ForgeRegistries.BLOCKS.getKey(ore.getBlock());
+        var key = net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(ore.getBlock());
         if (key != null && key.getPath().contains("deepslate")) return DepletedOreBlock.Host.DEEPSLATE;
         if (level.dimension() == Level.NETHER) return DepletedOreBlock.Host.NETHERRACK;
         return DepletedOreBlock.Host.STONE;

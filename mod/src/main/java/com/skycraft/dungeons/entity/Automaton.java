@@ -29,7 +29,7 @@ public abstract class Automaton extends Monster {
     public boolean canBeAffected(MobEffectInstance effect) {
         var e = effect.getEffect();
         if (e == MobEffects.POISON || e == MobEffects.WITHER || e == MobEffects.REGENERATION || e == MobEffects.HUNGER
-                || e == MobEffects.CONFUSION || e == MobEffects.BLINDNESS) return false;
+                || e == MobEffects.NAUSEA || e == MobEffects.BLINDNESS) return false;
         return super.canBeAffected(effect);
     }
 
@@ -75,7 +75,7 @@ public abstract class Automaton extends Monster {
             server.sendParticles(ParticleTypes.ELECTRIC_SPARK, at.x, at.y, at.z, 1, 0.05, 0.05, 0.05, 0.0);
         }
         this.playSound(SoundEvents.BEE_STING, 0.8f, 1.8f);
-        target.invulnerableTime = 0;
-        target.hurt(this.damageSources().indirectMagic(this, this), damage);
+        target.setInvulnerableTime(0);
+        com.skycraft.platform.Effects.hurt(target, this.damageSources().indirectMagic(this, this), damage);
     }
 }

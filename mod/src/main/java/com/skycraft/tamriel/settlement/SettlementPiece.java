@@ -35,7 +35,7 @@ public class SettlementPiece extends StructurePiece {
     public final int index;
 
     public SettlementPiece(Spec spec, long seed, String settlement, int index) {
-        super(SettlementStructures.PIECE.orElse(null), 0, box(spec));
+        super(SettlementStructures.PIECE.get(), 0, box(spec));
         this.spec = spec;
         this.seed = seed;
         this.settlement = settlement;
@@ -43,11 +43,11 @@ public class SettlementPiece extends StructurePiece {
     }
 
     public SettlementPiece(StructurePieceSerializationContext context, CompoundTag tag) {
-        super(SettlementStructures.PIECE.orElse(null), tag);
-        Spec s = new Spec(Archetype.byOrdinal(tag.getInt("K")));
-        s.culture = tag.getInt("C");
-        s.style = tag.getInt("St");
-        int[] g = tag.getIntArray("G");
+        super(SettlementStructures.PIECE.get(), tag);
+        Spec s = new Spec(Archetype.byOrdinal(tag.getIntOr("K", 0)));
+        s.culture = tag.getIntOr("C", 0);
+        s.style = tag.getIntOr("St", 0);
+        int[] g = tag.getIntArray("G").orElseGet(() -> new int[0]);
         if (g.length >= 12) {
             s.x = g[0];
             s.z = g[1];
@@ -62,9 +62,9 @@ public class SettlementPiece extends StructurePiece {
             s.variant = g[10];
             s.margin = g[11];
         }
-        s.facing = Direction.from2DDataValue(tag.getInt("F"));
-        s.name = tag.getString("N");
-        int[] gx = tag.getIntArray("Gx");
+        s.facing = Direction.from2DDataValue(tag.getIntOr("F", 0));
+        s.name = tag.getStringOr("N", "");
+        int[] gx = tag.getIntArray("Gx").orElseGet(() -> new int[0]);
         if (gx.length >= 4) {
             s.use = gx[0];
             s.wealth = gx[1];
@@ -72,9 +72,9 @@ public class SettlementPiece extends StructurePiece {
             s.slope = gx[3];
         }
         this.spec = s;
-        this.seed = tag.getLong("Seed");
-        this.settlement = tag.getString("S");
-        this.index = tag.getInt("I");
+        this.seed = tag.getLongOr("Seed", 0L);
+        this.settlement = tag.getStringOr("S", "");
+        this.index = tag.getIntOr("I", 0);
     }
 
     @Override

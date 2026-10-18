@@ -9,7 +9,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -34,13 +34,13 @@ public class SpellTomeItem extends Item {
     }
 
     @Override
-    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+    public InteractionResult use(Level level, Player player, InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
         Spell spell = spell();
-        if (spell == null) return InteractionResultHolder.pass(stack);
-        if (level.isClientSide) return InteractionResultHolder.success(stack);
+        if (spell == null) return InteractionResult.PASS;
+        if (level.isClientSide()) return InteractionResult.SUCCESS;
         ServerPlayer sp = (ServerPlayer) player;
-        return readStack(sp, stack) ? InteractionResultHolder.consume(stack) : InteractionResultHolder.fail(stack);
+        return readStack(sp, stack) ? InteractionResult.CONSUME : InteractionResult.FAIL;
     }
 
     /** Reads this spell tome directly from any inventory slot without moving it into the player's hand. */
@@ -60,7 +60,7 @@ public class SpellTomeItem extends Item {
             }
             int collegeRank = com.skycraft.quest.Factions.rank(data, com.skycraft.quest.Faction.COLLEGE);
             String schoolQuestKey = "college_" + spell.school.id();
-            boolean completedSchoolQuest = data.module("quest").getBoolean(schoolQuestKey + "_completed");
+            boolean completedSchoolQuest = data.module("quest").getBooleanOr(schoolQuestKey + "_completed", false);
             int skillLevel = data.getSkill(spell.school.skill);
             boolean allowed = switch (spell.tier) {
                 case NOVICE -> true;
@@ -87,21 +87,21 @@ public class SpellTomeItem extends Item {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
+    public void appendHoverText(ItemStack stack, TooltipContext context, net.minecraft.world.item.component.TooltipDisplay display, java.util.function.Consumer<Component> tooltip, TooltipFlag flag) {
         Spell spell = spell();
         if (spell == null) return;
-        tooltip.add(spell.displayName().copy().withStyle(ChatFormatting.WHITE));
-        tooltip.add(Component.translatable("tooltip.skycraft.spell_school", spell.school.displayName(), spell.tier.displayName())
+        tooltip.accept(spell.displayName().copy().withStyle(ChatFormatting.WHITE));
+        tooltip.accept(Component.translatable("tooltip.skycraft.spell_school", spell.school.displayName(), spell.tier.displayName())
                 .withStyle(s -> s.withColor(spell.school.color)));
         String unit = spell.isConcentration() ? "tooltip.skycraft.spell_cost_per_second" : "tooltip.skycraft.spell_cost";
-        tooltip.add(Component.translatable(unit, Math.round(spell.cost)).withStyle(ChatFormatting.AQUA));
-        if (spell.chargeTicks > 0) tooltip.add(Component.translatable("tooltip.skycraft.spell_charged").withStyle(ChatFormatting.DARK_AQUA));
-        tooltip.add(spell.description().copy().withStyle(ChatFormatting.GRAY));
+        tooltip.accept(Component.translatable(unit, Math.round(spell.cost)).withStyle(ChatFormatting.AQUA));
+        if (spell.chargeTicks > 0) tooltip.accept(Component.translatable("tooltip.skycraft.spell_charged").withStyle(ChatFormatting.DARK_AQUA));
+        tooltip.accept(spell.description().copy().withStyle(ChatFormatting.GRAY));
         if (spell.tier != Tier.NOVICE) {
-            tooltip.add(Component.translatable("tooltip.skycraft.spell_tome_requires_college", spell.school.displayName())
+            tooltip.accept(Component.translatable("tooltip.skycraft.spell_tome_requires_college", spell.school.displayName())
                     .withStyle(ChatFormatting.DARK_PURPLE));
         }
-        tooltip.add(Component.translatable("tooltip.skycraft.spell_tome_hint").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
+        tooltip.accept(Component.translatable("tooltip.skycraft.spell_tome_hint").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
     }
 
     @Override

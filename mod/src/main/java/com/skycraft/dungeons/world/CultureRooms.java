@@ -111,7 +111,7 @@ public final class CultureRooms {
                 int x = alongX ? room.cx + a : room.cx + s, z = alongX ? room.cz + s : room.cz + a;
                 if (!room.interior(x, z) || room.onLane(x, z) || room.nearDoor(x, z, 1)) continue;
                 for (int rel = 0; rel <= top; rel++) p.set(x, room.floor + rel, z, pal.pillar(rel, top));
-                if (room.height >= 5) p.set(x, room.floor + top - 1, z, pal.accent.is(Blocks.LIGHT_BLUE_STAINED_GLASS) ? pal.light : pal.trim);
+                if (room.height >= 5) p.set(x, room.floor + top - 1, z, pal.accent.is(com.skycraft.worldgen.VanillaBlocks.LIGHT_BLUE_STAINED_GLASS) ? pal.light : pal.trim);
             }
         }
     }

@@ -9,9 +9,7 @@ import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.DynamicTexture;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraft.resources.Identifier;
 
 
 import java.util.Iterator;
@@ -30,7 +28,6 @@ import java.util.concurrent.LinkedBlockingDeque;
  *
  * <p>Levels of detail are blocks per tile pixel: 64, 16, 4 and 1. Tiles are cached (LRU) for the whole session.</p>
  */
-@OnlyIn(Dist.CLIENT)
 public final class MapTiles {
     public static final int SIZE = 128;
     /** Blocks per tile pixel of each level of detail, coarsest first. */
@@ -45,7 +42,7 @@ public final class MapTiles {
     private record Done(Key key, NativeImage image) {
     }
 
-    private static final LinkedHashMap<Key, ResourceLocation> TEXTURES = new LinkedHashMap<>(256, 0.75f, true);
+    private static final LinkedHashMap<Key, Identifier> TEXTURES = new LinkedHashMap<>(256, 0.75f, true);
     private static final Map<Key, Boolean> PENDING = new ConcurrentHashMap<>();
     private static final LinkedBlockingDeque<Key> QUEUE = new LinkedBlockingDeque<>();
     private static final ConcurrentLinkedQueue<Done> DONE = new ConcurrentLinkedQueue<>();
@@ -68,9 +65,9 @@ public final class MapTiles {
     }
 
     /** The texture of a tile if ready; otherwise queues it (newest requests first) and returns null. */
-    public static ResourceLocation get(int lod, int tx, int tz) {
+    public static Identifier get(int lod, int tx, int tz) {
         Key key = new Key(lod, tx, tz);
-        ResourceLocation tex = TEXTURES.get(key);
+        Identifier tex = TEXTURES.get(key);
         if (tex != null) return tex;
         if (PENDING.putIfAbsent(key, Boolean.TRUE) == null) {
             QUEUE.offerFirst(key);
@@ -96,16 +93,15 @@ public final class MapTiles {
             Done d = DONE.poll();
             if (d == null) break;
             PENDING.remove(d.key());
-            DynamicTexture texture = new DynamicTexture(d.image());
-            texture.setFilter(true, false);
-            ResourceLocation rl = new ResourceLocation(Skycraft.MODID, "map_tile/" + (counter++));
+            DynamicTexture texture = new com.skycraft.client.UiDynamicTexture("Skycraft map tile",d.image(),true);
+            Identifier rl = Identifier.fromNamespaceAndPath(Skycraft.MODID, "map_tile/" + (counter++));
             mc.getTextureManager().register(rl, texture);
             TEXTURES.put(d.key(), rl);
         }
         if (TEXTURES.size() > MAX_TEXTURES) {
-            Iterator<Map.Entry<Key, ResourceLocation>> it = TEXTURES.entrySet().iterator();
+            Iterator<Map.Entry<Key, Identifier>> it = TEXTURES.entrySet().iterator();
             while (TEXTURES.size() > MAX_TEXTURES && it.hasNext()) {
-                Map.Entry<Key, ResourceLocation> e = it.next();
+                Map.Entry<Key, Identifier> e = it.next();
                 if (e.getKey().lod() == 0) continue; // the overview stays
                 mc.getTextureManager().release(e.getValue());
                 it.remove();
@@ -116,7 +112,7 @@ public final class MapTiles {
     /** Drops every texture (logout / resource reload). */
     public static void clear() {
         Minecraft mc = Minecraft.getInstance();
-        for (ResourceLocation rl : TEXTURES.values()) mc.getTextureManager().release(rl);
+        for (Identifier rl : TEXTURES.values()) mc.getTextureManager().release(rl);
         TEXTURES.clear();
         QUEUE.clear();
         PENDING.clear();
@@ -207,7 +203,7 @@ public final class MapTiles {
                     int rgb = water[k] ? waterColor(k, bpp) : landColor(k, slopeScale, px, py, wx, wz);
                     // paper grain in world space so neighbouring tiles match
                     float grain = 0.95f + 0.05f * noise(wx >> 4, wz >> 4) + 0.025f * noise((wx >> 1) + 7919, (wz >> 1) - 7919);
-                    img.setPixelRGBA(px, py, abgr(rgb, grain));
+                    img.setPixelABGR(px, py, abgr(rgb, grain));
                 }
             }
             return img;

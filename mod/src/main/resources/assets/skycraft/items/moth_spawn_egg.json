@@ -1,0 +1,16 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "skycraft:item/moth_spawn_egg",
+    "tints": [
+      {
+        "type": "minecraft:constant",
+        "value": 12120256
+      },
+      {
+        "type": "minecraft:constant",
+        "value": 6986352
+      }
+    ]
+  }
+}

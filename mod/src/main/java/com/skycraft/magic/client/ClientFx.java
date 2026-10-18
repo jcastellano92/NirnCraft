@@ -5,7 +5,7 @@ import com.skycraft.magic.MagicFx;
 import com.skycraft.magic.MagicPackets;
 import com.skycraft.magic.shout.Shout;
 import com.skycraft.magic.spell.Element;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.particles.DustParticleOptions;
@@ -212,7 +212,7 @@ public final class ClientFx {
     }
 
     private static ParticleOptions dust(int rgb, float scale) {
-        return new DustParticleOptions(new Vector3f(((rgb >> 16) & 0xFF) / 255f, ((rgb >> 8) & 0xFF) / 255f, (rgb & 0xFF) / 255f), scale);
+        return new DustParticleOptions(rgb,scale);
     }
 
     private static ParticleOptions elementParticle(Element el) {
@@ -373,7 +373,7 @@ public final class ClientFx {
         if (el == Element.FIRE && radius >= 2.5f) {
             level.addParticle(ParticleTypes.EXPLOSION_EMITTER, c.x, c.y, c.z, 0, 0, 0);
         } else if (radius >= 1f) {
-            level.addParticle(ParticleTypes.FLASH, c.x, c.y, c.z, 0, 0, 0);
+            level.addParticle(net.minecraft.core.particles.ColorParticleOption.create(ParticleTypes.FLASH,0xffffffff), c.x, c.y, c.z, 0, 0, 0);
         }
     }
 
@@ -439,7 +439,7 @@ public final class ClientFx {
             if (i % 2 == 0) level.addParticle(elementParticle(el), base.x + Math.cos(a) * r, y, base.z + Math.sin(a) * r, 0, 0.03, 0);
             if (i % 5 == 0) level.addParticle(ParticleTypes.SOUL, base.x + j(0.6), base.y + 0.1, base.z + j(0.6), 0, 0.05, 0);
         }
-        level.addParticle(ParticleTypes.FLASH, base.x, base.y + height / 2, base.z, 0, 0, 0);
+        level.addParticle(net.minecraft.core.particles.ColorParticleOption.create(ParticleTypes.FLASH,0xffffffff), base.x, base.y + height / 2, base.z, 0, 0, 0);
     }
 
     private static void ward(ClientLevel level, Entity e, boolean flash) {
@@ -462,7 +462,7 @@ public final class ClientFx {
         Vec3 top = ground.add(j(3), 24, j(3));
         arc(level, top, ground, 2);
         for (int i = 0; i < 20; i++) level.addParticle(com.skycraft.visual.VisualParticles.SPELL_SPARK.get(), ground.x, ground.y + 0.2, ground.z, j(0.8), R.nextDouble() * 0.6, j(0.8));
-        level.addParticle(ParticleTypes.FLASH, ground.x, ground.y + 1, ground.z, 0, 0, 0);
+        level.addParticle(net.minecraft.core.particles.ColorParticleOption.create(ParticleTypes.FLASH,0xffffffff), ground.x, ground.y + 1, ground.z, 0, 0, 0);
     }
 
     private static void aura(ClientLevel level, Element el, Entity e, int strength) {
@@ -644,7 +644,7 @@ public final class ClientFx {
     // ------------------------------------------------------------------ staves and artifacts (arsenal)
 
     private static DustParticleOptions dust(float r, float g, float b, float s) {
-        return new DustParticleOptions(new Vector3f(r, g, b), s);
+        return new DustParticleOptions(((int)(r*255)<<16)|((int)(g*255)<<8)|(int)(b*255),s);
     }
 
     /** Staff/artifact visuals, {@code kind} from {@code ArsenalPackets.Fx}. */
@@ -660,7 +660,7 @@ public final class ClientFx {
             com.skycraft.atmosphere.client.InteriorAtmosphere.light(a,color,1.3f,9f,6);
             com.skycraft.atmosphere.client.InteriorAtmosphere.light(lerp(a,b,0.5),color,1.5f,10f,6);
         }
-        RandomSource r = level.random;
+        RandomSource r = level.getRandom();
         switch (kind) {
             case ArsenalPackets.Fx.FIRE_STREAM -> staffStream(level, r, a, b, ParticleTypes.FLAME, ParticleTypes.SMOKE);
             case ArsenalPackets.Fx.FROST_STREAM -> staffStream(level, r, a, b, com.skycraft.visual.VisualParticles.SPELL_FROST.get(), com.skycraft.visual.VisualParticles.SPELL_FROST.get());
@@ -678,7 +678,7 @@ public final class ClientFx {
             case ArsenalPackets.Fx.SUN_BURST -> {
                 staffBurst(level, r, a, dust(1f, 0.95f, 0.6f, 1.6f), 50, 0.3);
                 staffBurst(level, r, a, ParticleTypes.END_ROD, 25, 0.2);
-                level.addParticle(ParticleTypes.FLASH, a.x, a.y, a.z, 0, 0, 0);
+                level.addParticle(net.minecraft.core.particles.ColorParticleOption.create(ParticleTypes.FLASH,0xffffffff), a.x, a.y, a.z, 0, 0, 0);
             }
             case ArsenalPackets.Fx.FROST_BURST -> staffBurst(level, r, a, com.skycraft.visual.VisualParticles.SPELL_FROST.get(), 20, 0.15);
             case ArsenalPackets.Fx.WARD -> staffWard(level, r, a, b);

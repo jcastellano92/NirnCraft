@@ -2,6 +2,10 @@
   "replace": false,
   "values": [
     "skycraft:alpine_meadow",
-    "skycraft:snowy_slopes"
+    "skycraft:snowy_slopes",
+    "minecraft:snowy_slopes",
+    "minecraft:meadow",
+    "minecraft:grove",
+    "minecraft:cherry_grove"
   ]
 }

@@ -4,11 +4,12 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.skycraft.Skycraft;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -99,8 +100,8 @@ public final class Mats {
     }
 
     private static Block lookup(String id) {
-        ResourceLocation rl = ResourceLocation.tryParse(id);
-        Block b = rl == null ? null : ForgeRegistries.BLOCKS.getValue(rl);
+        Identifier rl = Identifier.tryParse(id);
+        Block b = rl == null ? null : BuiltInRegistries.BLOCK.getValue(rl);
         if (b == null || b == Blocks.AIR) {
             Skycraft.LOGGER.warn("Skycraft landmarks: unknown block {}", id);
             return Blocks.STONE;

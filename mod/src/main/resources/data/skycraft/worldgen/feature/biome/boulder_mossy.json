@@ -1,0 +1,31 @@
+{
+  "type": "skycraft:boulder",
+  "config": {
+    "state": {
+      "type": "minecraft:weighted",
+      "entries": [
+        {
+          "data": "minecraft:mossy_cobblestone",
+          "weight": 5
+        },
+        {
+          "data": "minecraft:cobblestone",
+          "weight": 2
+        },
+        {
+          "data": "minecraft:stone",
+          "weight": 2
+        },
+        {
+          "data": "minecraft:moss_block",
+          "weight": 1
+        }
+      ]
+    },
+    "radius": {
+      "type": "minecraft:uniform",
+      "min_inclusive": 1,
+      "max_inclusive": 2
+    }
+  }
+}

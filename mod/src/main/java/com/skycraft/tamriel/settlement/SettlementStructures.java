@@ -4,10 +4,11 @@ import com.skycraft.Skycraft;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.levelgen.structure.StructureType;
 import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceType;
-import net.minecraft.world.level.levelgen.structure.placement.StructurePlacementType;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.RegistryObject;
+import net.minecraft.world.level.levelgen.structure.placement.StructurePlacement;
+import com.mojang.serialization.MapCodec;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.registries.DeferredRegister;
+import java.util.function.Supplier;
 
 /**
  * Registry objects of Skycraft settlements: the {@code skycraft:settlement} structure type, its piece type and the
@@ -16,14 +17,14 @@ import net.minecraftforge.registries.RegistryObject;
 public final class SettlementStructures {
     public static final DeferredRegister<StructureType<?>> STRUCTURE_TYPES = DeferredRegister.create(Registries.STRUCTURE_TYPE, Skycraft.MODID);
     public static final DeferredRegister<StructurePieceType> PIECE_TYPES = DeferredRegister.create(Registries.STRUCTURE_PIECE, Skycraft.MODID);
-    public static final DeferredRegister<StructurePlacementType<?>> PLACEMENTS = DeferredRegister.create(Registries.STRUCTURE_PLACEMENT, Skycraft.MODID);
+    public static final DeferredRegister<MapCodec<? extends StructurePlacement>> PLACEMENTS = DeferredRegister.create(Registries.STRUCTURE_PLACEMENT, Skycraft.MODID);
 
-    public static final RegistryObject<StructureType<SettlementStructure>> SETTLEMENT =
+    public static final Supplier<StructureType<SettlementStructure>> SETTLEMENT =
             STRUCTURE_TYPES.register("settlement", () -> () -> SettlementStructure.CODEC);
-    public static final RegistryObject<StructurePieceType> PIECE =
+    public static final Supplier<StructurePieceType> PIECE =
             PIECE_TYPES.register("settlement_piece", () -> (StructurePieceType) SettlementPiece::new);
-    public static final RegistryObject<StructurePlacementType<DistrictPlacement>> DISTRICTS =
-            PLACEMENTS.register("settlement_districts", () -> () -> DistrictPlacement.CODEC);
+    public static final Supplier<MapCodec<? extends StructurePlacement>> DISTRICTS =
+            PLACEMENTS.register("settlement_districts", () -> DistrictPlacement.CODEC);
 
     private SettlementStructures() {}
 

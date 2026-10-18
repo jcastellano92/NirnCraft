@@ -4,7 +4,7 @@ import com.mojang.serialization.Codec;
 import com.skycraft.Skycraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.WorldGenLevel;
@@ -17,9 +17,9 @@ import net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
-import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
+import com.skycraft.worldgen.ConfiguredFeature;
+import com.skycraft.worldgen.FeaturePlaceContext;
+import com.skycraft.worldgen.NoneFeatureConfiguration;
 
 /**
  * A ship lost at sea, lying on the sea bed: a broken clinker hull listing to one side, planks stove in, the mast
@@ -27,9 +27,9 @@ import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConf
  * {@code skycraft:chests/sea_wreck} and barrels of {@code skycraft:chests/flotsam}). Fits within one chunk of its
  * origin; placed in ocean biomes ({@code skycraft:sea_wreck}).
  */
-public class SeaWreckFeature extends Feature<NoneFeatureConfiguration> {
-    private static final ResourceLocation WRECK_LOOT = new ResourceLocation(Skycraft.MODID, "chests/sea_wreck");
-    private static final ResourceLocation FLOTSAM_LOOT = new ResourceLocation(Skycraft.MODID, "chests/flotsam");
+public class SeaWreckFeature extends ConfiguredFeature<NoneFeatureConfiguration> {
+    private static final Identifier WRECK_LOOT = Identifier.fromNamespaceAndPath(Skycraft.MODID, "chests/sea_wreck");
+    private static final Identifier FLOTSAM_LOOT = Identifier.fromNamespaceAndPath(Skycraft.MODID, "chests/flotsam");
 
     public SeaWreckFeature(Codec<NoneFeatureConfiguration> codec) {
         super(codec);
@@ -98,7 +98,7 @@ public class SeaWreckFeature extends Feature<NoneFeatureConfiguration> {
                 if (k >= 3 && k <= 6 && r.nextBoolean()) {
                     BlockPos rag = p.relative(fwd, r.nextBoolean() ? 1 : -1);
                     int ry = height(level, Heightmap.Types.OCEAN_FLOOR_WG, rag.getX(), rag.getZ());
-                    put(level, rag.atY(ry), r.nextInt(3) == 0 ? Blocks.GRAY_WOOL.defaultBlockState() : Blocks.WHITE_WOOL.defaultBlockState());
+                    put(level, rag.atY(ry), r.nextInt(3) == 0 ? com.skycraft.worldgen.VanillaBlocks.GRAY_WOOL.defaultBlockState() : com.skycraft.worldgen.VanillaBlocks.WHITE_WOOL.defaultBlockState());
                 }
             }
         }
@@ -128,9 +128,9 @@ public class SeaWreckFeature extends Feature<NoneFeatureConfiguration> {
         setBlock(level, pos, state);
     }
 
-    private static void loot(WorldGenLevel level, BlockPos pos, ResourceLocation table, RandomSource r) {
+    private static void loot(WorldGenLevel level, BlockPos pos, Identifier table, RandomSource r) {
         BlockEntity be = level.getBlockEntity(pos);
-        if (be instanceof RandomizableContainerBlockEntity c) c.setLootTable(table, r.nextLong());
+        if (be instanceof RandomizableContainerBlockEntity c) c.setLootTable(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.LOOT_TABLE, table), r.nextLong());
     }
 
     /** A worldgen heightmap, or its live counterpart when placed by command in a finished world. */

@@ -5,7 +5,7 @@ import com.skycraft.core.Holds;
 import com.skycraft.dialogue.Dialogue;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.Entity;
@@ -13,13 +13,13 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.monster.Enemy;
-import net.minecraft.world.entity.npc.AbstractVillager;
+import net.minecraft.world.entity.npc.villager.AbstractVillager;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.event.entity.living.LivingDeathEvent;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
@@ -29,9 +29,9 @@ import java.util.Map;
  * Crime detection: who counts as a witness, reporting crimes to a hold, and the violent crimes (assault, murder).
  * A crime is only added to the bounty when someone sees it. Victims always witness their own assault.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class Crimes {
-    public static final TagKey<EntityType<?>> GUARDS = TagKey.create(Registries.ENTITY_TYPE, new ResourceLocation(Skycraft.MODID, "guards"));
+    public static final TagKey<EntityType<?>> GUARDS = TagKey.create(Registries.ENTITY_TYPE, Identifier.fromNamespaceAndPath(Skycraft.MODID, "guards"));
     public static final double WITNESS_RANGE = 20;
     /** Assaulting the same victim again only counts once per this many ticks (30 s). */
     private static final long ASSAULT_THROTTLE = 600;
@@ -50,14 +50,14 @@ public final class Crimes {
     // ------------------------------------------------------------------ who's who
 
     public static boolean isGuard(Entity entity) {
-        return entity.getType().is(GUARDS);
+        return entity.getType().builtInRegistryHolder().is(GUARDS);
     }
 
     /** Townsfolk whose murder or assault is a crime, and who report crimes they see. */
     public static boolean isCivilian(Entity entity) {
         if (!(entity instanceof LivingEntity)) return false;
         if (entity instanceof AbstractVillager || isGuard(entity)) return true;
-        return entity.getType().is(Dialogue.TALKERS) && !(entity instanceof Enemy);
+        return entity.getType().builtInRegistryHolder().is(Dialogue.TALKERS) && !(entity instanceof Enemy);
     }
 
     /** Whether crimes are possible where the player is (not in creative, not in jail). */
@@ -90,7 +90,7 @@ public final class Crimes {
         for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(WITNESS_RANGE),
                 e -> e != exclude && e != player && e.isAlive() && (guardsOnly ? isGuard(e) : isCivilian(e)))) {
             if (e.isSleeping()) continue;
-            double range = WITNESS_RANGE * Math.max(0.1, player.getVisibilityPercent(e));
+            double range = WITNESS_RANGE * Math.max(0.1, player.getVisibilityPercent(level, e));
             if (dark && player.isCrouching()) range *= 0.5;
             double dist = e.distanceTo(player);
             if (dist > Math.max(2.5, range)) continue;
@@ -167,7 +167,7 @@ public final class Crimes {
     public static boolean selfDefense(LivingEntity victim, ServerPlayer player) {
         if (isGuard(victim)) return false;
         var data = victim.getPersistentData();
-        if (data.hasUUID(com.skycraft.society.NpcDialogue.DUEL_TAG) && player.getUUID().equals(data.getUUID(com.skycraft.society.NpcDialogue.DUEL_TAG))) return true;
+        if (data.read(com.skycraft.society.NpcDialogue.DUEL_TAG, net.minecraft.core.UUIDUtil.CODEC).isPresent() && player.getUUID().equals(data.read(com.skycraft.society.NpcDialogue.DUEL_TAG, net.minecraft.core.UUIDUtil.CODEC).orElseThrow())) return true;
         // the player started it: fighting back doesn't make the victim fair game
         Long assaulted = LAST_ASSAULT.get(victim.getUUID() + "|" + player.getUUID());
         if (assaulted != null && player.level().getGameTime() - assaulted < 6000) return false;
@@ -178,10 +178,10 @@ public final class Crimes {
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
-    public static void onHurt(LivingHurtEvent event) {
+    public static void onHurt(com.skycraft.combat.BeforeArmorDamageEvent event) {
         if (event.isCanceled() || event.getAmount() <= 0) return;
         LivingEntity victim = event.getEntity();
-        if (victim.level().isClientSide) return;
+        if (victim.level().isClientSide()) return;
         if (victim instanceof ServerPlayer hurtPlayer && event.getSource().getEntity() instanceof LivingEntity aggressor
                 && !(aggressor instanceof net.minecraft.world.entity.player.Player)) {
             noteAggression(aggressor, hurtPlayer);
@@ -261,7 +261,7 @@ public final class Crimes {
     public static void onDeath(LivingDeathEvent event) {
         if (event.isCanceled()) return;
         LivingEntity victim = event.getEntity();
-        if (victim.level().isClientSide) return;
+        if (victim.level().isClientSide()) return;
         ServerPlayer player = attacker(event.getSource());
         if (player == null || !canCommitCrime(player)) return;
 

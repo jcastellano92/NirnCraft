@@ -1,0 +1,16 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "skycraft:item/wisp_spawn_egg",
+    "tints": [
+      {
+        "type": "minecraft:constant",
+        "value": 10146047
+      },
+      {
+        "type": "minecraft:constant",
+        "value": 16777215
+      }
+    ]
+  }
+}

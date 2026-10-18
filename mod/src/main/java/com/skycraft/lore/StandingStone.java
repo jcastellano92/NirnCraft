@@ -7,7 +7,7 @@ import java.util.Locale;
 
 /**
  * The thirteen Standing Stones (the birthsigns of the north). Touching a stone grants its blessing; only one stone's
- * blessing can be active at a time. The active sign id is stored in {@code data.module("lore").getString("stone")}.
+ * blessing can be active at a time. The active sign id is stored in {@code data.module("lore").getStringOr("stone","")}.
  */
 public enum StandingStone {
     WARRIOR(0xD85A48, true, false),

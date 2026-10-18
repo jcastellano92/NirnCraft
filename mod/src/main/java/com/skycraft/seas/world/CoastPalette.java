@@ -21,10 +21,10 @@ public record CoastPalette(BlockState wall, BlockState wallAlt, BlockState base,
             case "dunmer", "velothi" -> new CoastPalette(Blocks.SMOOTH_SANDSTONE.defaultBlockState(), Blocks.CUT_SANDSTONE.defaultBlockState(),
                     Blocks.SANDSTONE.defaultBlockState(), Blocks.SMOOTH_SANDSTONE.defaultBlockState(), Blocks.SMOOTH_SANDSTONE_STAIRS,
                     Blocks.TERRACOTTA.defaultBlockState(), Blocks.DARK_OAK_LOG.defaultBlockState(), Blocks.DARK_OAK_FENCE.defaultBlockState(),
-                    Blocks.BROWN_TERRACOTTA.defaultBlockState(), Blocks.LANTERN.defaultBlockState());
+                    com.skycraft.worldgen.VanillaBlocks.BROWN_TERRACOTTA.defaultBlockState(), Blocks.LANTERN.defaultBlockState());
             case "redguard", "khajiit", "yokudan" -> new CoastPalette(Blocks.SMOOTH_SANDSTONE.defaultBlockState(), Blocks.CUT_SANDSTONE.defaultBlockState(),
                     Blocks.SANDSTONE.defaultBlockState(), Blocks.CUT_SANDSTONE.defaultBlockState(), Blocks.SANDSTONE_STAIRS,
-                    Blocks.ORANGE_TERRACOTTA.defaultBlockState(), Blocks.ACACIA_LOG.defaultBlockState(), Blocks.ACACIA_FENCE.defaultBlockState(),
+                    com.skycraft.worldgen.VanillaBlocks.ORANGE_TERRACOTTA.defaultBlockState(), Blocks.ACACIA_LOG.defaultBlockState(), Blocks.ACACIA_FENCE.defaultBlockState(),
                     Blocks.CHISELED_SANDSTONE.defaultBlockState(), Blocks.LANTERN.defaultBlockState());
             case "altmer", "maormer" -> new CoastPalette(Blocks.QUARTZ_BLOCK.defaultBlockState(), Blocks.SMOOTH_QUARTZ.defaultBlockState(),
                     Blocks.CALCITE.defaultBlockState(), Blocks.BIRCH_PLANKS.defaultBlockState(), Blocks.QUARTZ_STAIRS,

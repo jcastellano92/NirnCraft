@@ -26,9 +26,9 @@ import net.minecraft.world.level.block.WallBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.WallSide;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
-import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
+import com.skycraft.worldgen.ConfiguredFeature;
+import com.skycraft.worldgen.FeaturePlaceContext;
+import com.skycraft.worldgen.NoneFeatureConfiguration;
 
 import java.util.concurrent.atomic.LongAdder;
 
@@ -59,7 +59,7 @@ import java.util.concurrent.atomic.LongAdder;
  * blended (a natural top block with room above becomes road surface, so a road still runs through a gate), never cleared.
  * Everything is deterministic from the plan and the culture of the land.</p>
  */
-public class RoadPaint extends Feature<NoneFeatureConfiguration> {
+public class RoadPaint extends ConfiguredFeature<NoneFeatureConfiguration> {
     /** Block writes without neighbour updates (worldgen). */
     private static final int FLAGS = Block.UPDATE_CLIENTS;
     private static final int HEADROOM = 4;
@@ -75,12 +75,12 @@ public class RoadPaint extends Feature<NoneFeatureConfiguration> {
     }
 
     /** Logs the totals when a server stops (the benchmark numbers of the generation that just ran). */
-    @net.minecraftforge.fml.common.Mod.EventBusSubscriber(modid = Skycraft.MODID)
+    @net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
     public static final class Log {
         private Log() {}
 
-        @net.minecraftforge.eventbus.api.SubscribeEvent
-        public static void onStop(net.minecraftforge.event.server.ServerStoppingEvent e) {
+        @net.neoforged.bus.api.SubscribeEvent
+        public static void onStop(net.neoforged.neoforge.event.server.ServerStoppingEvent e) {
             Skycraft.LOGGER.info(stats());
         }
     }
@@ -100,7 +100,7 @@ public class RoadPaint extends Feature<NoneFeatureConfiguration> {
         } catch (IllegalStateException e) {
             // config not loaded (tools): paint
         }
-        ChunkPos chunk = new ChunkPos(ctx.origin());
+        ChunkPos chunk = ChunkPos.containing(ctx.origin());
         int x0 = chunk.getMinBlockX(), z0 = chunk.getMinBlockZ();
         RoadPlan plan = RoadPlan.get();
         RoadPlan.Hit hit = new RoadPlan.Hit();
@@ -111,7 +111,7 @@ public class RoadPaint extends Feature<NoneFeatureConfiguration> {
         try {
             p.run();
         } catch (RuntimeException e) {
-            Skycraft.LOGGER.warn("Skycraft roads: painting chunk {} {} failed", chunk.x, chunk.z, e);
+            Skycraft.LOGGER.warn("Skycraft roads: painting chunk {} {} failed", chunk.x(), chunk.z(), e);
         }
         if (p.columns > 0) {
             CHUNKS.increment();
@@ -127,7 +127,8 @@ public class RoadPaint extends Feature<NoneFeatureConfiguration> {
     /** One chunk's painting. */
     private static final class Painter {
         final WorldGenLevel level;
-        final RoadPlan plan;
+        final RoadPlan lookup;
+        RoadPlan plan;
         final int x0, z0, minY, maxY;
         final RoadPlan.Hit hit = new RoadPlan.Hit(), other = new RoadPlan.Hit(), joined = new RoadPlan.Hit();
         final MapSample sample = new MapSample();
@@ -140,18 +141,20 @@ public class RoadPaint extends Feature<NoneFeatureConfiguration> {
 
         Painter(WorldGenLevel level, RoadPlan plan, int x0, int z0) {
             this.level = level;
+            this.lookup = plan;
             this.plan = plan;
             this.x0 = x0;
             this.z0 = z0;
-            this.minY = level.getMinBuildHeight();
-            this.maxY = level.getMaxBuildHeight() - 1;
+            this.minY = level.getMinY();
+            this.maxY = (level.getMaxY() + 1) - 1;
         }
 
         void run() {
             for (int dz = 0; dz < 16; dz++) {
                 for (int dx = 0; dx < 16; dx++) {
                     int x = x0 + dx, z = z0 + dz;
-                    if (!plan.at(x + 0.5, z + 0.5, hit)) continue;
+                    if (!lookup.at(x + 0.5, z + 0.5, hit)) continue;
+                    plan = hit.owner;
                     // P5: near a junction the branch's bed overlaps the road it joins: that road keeps its own surface
                     // (a branch whose profile has not yet come down to it would leave a step in the main road)
                     int join = junctionOf(hit);
@@ -266,7 +269,7 @@ public class RoadPaint extends Feature<NoneFeatureConfiguration> {
 
         /** Town approaches get a half-block curb on the edge columns of highways and roads. */
         boolean curb(int x, int z) {
-            PlanGround g = PlanGround.get();
+            PlanGround g = PlanGround.getAt(x, z);
             return g.pad(x, z, bed) && bed.padWeight > 0.35f;
         }
 
@@ -654,7 +657,7 @@ public class RoadPaint extends Feature<NoneFeatureConfiguration> {
             float lower = heightAtArc(hit.along + (dh >= 0 ? -1.0f : 1.0f));
             if ((int) Math.floor(lower) >= sy) return flat;
             Block stairs = kind >= 2 ? woodStairs(c) : stoneStairs(c);
-            return stairs.defaultBlockState().setValue(StairBlock.FACING, Direction.getNearest(ux, 0, uz));
+            return stairs.defaultBlockState().setValue(StairBlock.FACING, Direction.getApproximateNearest(ux, 0, uz));
         }
 
         /** Profile height at {@code arc} blocks along the segment of the current hit (clamped to the segment). */
@@ -801,10 +804,10 @@ public class RoadPaint extends Feature<NoneFeatureConfiguration> {
         BlockState connect(BlockState s, int x, int z) {
             boolean n = railAt(x, z - 1), e = railAt(x + 1, z), so = railAt(x, z + 1), w = railAt(x - 1, z);
             if (s.getBlock() instanceof WallBlock) {
-                return s.setValue(WallBlock.NORTH_WALL, n ? WallSide.LOW : WallSide.NONE)
-                        .setValue(WallBlock.EAST_WALL, e ? WallSide.LOW : WallSide.NONE)
-                        .setValue(WallBlock.SOUTH_WALL, so ? WallSide.LOW : WallSide.NONE)
-                        .setValue(WallBlock.WEST_WALL, w ? WallSide.LOW : WallSide.NONE)
+                return s.setValue(WallBlock.NORTH, n ? WallSide.LOW : WallSide.NONE)
+                        .setValue(WallBlock.EAST, e ? WallSide.LOW : WallSide.NONE)
+                        .setValue(WallBlock.SOUTH, so ? WallSide.LOW : WallSide.NONE)
+                        .setValue(WallBlock.WEST, w ? WallSide.LOW : WallSide.NONE)
                         .setValue(WallBlock.UP, !(n && so && !e && !w) && !(e && w && !n && !so));
             }
             if (s.hasProperty(CrossCollisionBlock.NORTH)) {

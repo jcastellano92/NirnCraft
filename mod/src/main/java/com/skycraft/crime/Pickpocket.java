@@ -15,7 +15,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -24,7 +24,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.monster.Enemy;
-import net.minecraft.world.entity.npc.AbstractVillager;
+import net.minecraft.world.entity.npc.villager.AbstractVillager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.LootParams;
@@ -32,10 +32,10 @@ import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,10 +45,10 @@ import java.util.List;
  * pockets (generated from {@code skycraft:pickpocket/<villager|guard>} and kept on the entity for several in-game days).
  * Each item shows a success chance; the server rolls when the player tries to take it.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class Pickpocket {
-    public static final ResourceLocation VILLAGER_TABLE = new ResourceLocation(Skycraft.MODID, "pickpocket/villager");
-    public static final ResourceLocation GUARD_TABLE = new ResourceLocation(Skycraft.MODID, "pickpocket/guard");
+    public static final Identifier VILLAGER_TABLE = Identifier.fromNamespaceAndPath(Skycraft.MODID, "pickpocket/villager");
+    public static final Identifier GUARD_TABLE = Identifier.fromNamespaceAndPath(Skycraft.MODID, "pickpocket/guard");
     private static final String POCKETS = "skycraft_pockets";
     private static final String POCKETS_DAY = "skycraft_pockets_day";
     private static final String STOLEN_TODAY = "skycraft_pockets_stolen";
@@ -63,7 +63,7 @@ public final class Pickpocket {
         if (!npc.isAlive()) return false;
         if (npc instanceof AbstractVillager) return true;
         if (Crimes.isGuard(npc)) return true;
-        return npc.getType().is(Dialogue.TALKERS) && !(npc instanceof Enemy) && !npc.getType().is(Dialogue.NO_DIALOGUE);
+        return npc.getType().builtInRegistryHolder().is(Dialogue.TALKERS) && !(npc instanceof Enemy) && !npc.getType().builtInRegistryHolder().is(Dialogue.NO_DIALOGUE);
     }
 
     @SubscribeEvent(priority = EventPriority.HIGH)
@@ -105,39 +105,39 @@ public final class Pickpocket {
 
     private static List<ItemStack> pockets(ServerPlayer player, LivingEntity npc) {
         CompoundTag data = npc.getPersistentData();
-        long day = npc.level().getDayTime() / 24000L;
-        long since = day - data.getLong(POCKETS_DAY);
+        long day = npc.level().getDefaultClockTime() / 24000L;
+        long since = day - data.getLongOr(POCKETS_DAY, 0L);
         // pockets refill on a long cooldown per person, not every dawn: sleeping through days must not farm them
         // a jail guard's key is what the prison break needs: his ring is refilled every day
-        boolean jailGuard = Crimes.isGuard(npc) && (npc.getTags().contains(Jail.NPC_TAG) || Jail.isJailArea(npc.level(), npc.blockPosition()));
-        if (!data.contains(POCKETS, Tag.TAG_LIST) || since < 0 || since >= (jailGuard ? 1 : REFILL_DAYS)) {
+        boolean jailGuard = Crimes.isGuard(npc) && (npc.entityTags().contains(Jail.NPC_TAG) || Jail.isJailArea(npc.level(), npc.blockPosition()));
+        if (!com.skycraft.platform.NbtData.hasType(data, POCKETS, Tag.TAG_LIST) || since < 0 || since >= (jailGuard ? 1 : REFILL_DAYS)) {
             ListTag list = new ListTag();
             for (ItemStack s : generate(player, npc)) {
-                if (!s.isEmpty()) list.add(s.save(new CompoundTag()));
+                if (!s.isEmpty()) list.add(com.skycraft.inventory.ItemData.save(s));
                 if (list.size() >= 8) break;
             }
             data.put(POCKETS, list);
             data.putLong(POCKETS_DAY, day);
             data.putInt(STOLEN_TODAY, 0);
         }
-        ListTag list = data.getList(POCKETS, Tag.TAG_COMPOUND);
+        ListTag list = data.getListOrEmpty(POCKETS);
         List<ItemStack> out = new ArrayList<>();
-        for (int i = 0; i < list.size(); i++) out.add(ItemStack.of(list.getCompound(i)));
+        for (int i = 0; i < list.size(); i++) out.add(com.skycraft.inventory.ItemData.parse(list.getCompoundOrEmpty(i)));
         return out;
     }
 
     private static void savePockets(LivingEntity npc, List<ItemStack> items) {
         ListTag list = new ListTag();
         for (ItemStack s : items) {
-            if (!s.isEmpty()) list.add(s.save(new CompoundTag()));
+            if (!s.isEmpty()) list.add(com.skycraft.inventory.ItemData.save(s));
         }
         npc.getPersistentData().put(POCKETS, list);
     }
 
     private static List<ItemStack> generate(ServerPlayer player, LivingEntity npc) {
-        ServerLevel level = player.serverLevel();
-        ResourceLocation id = Crimes.isGuard(npc) ? GUARD_TABLE : VILLAGER_TABLE;
-        LootTable table = level.getServer().getLootData().getLootTable(id);
+        ServerLevel level = player.level();
+        Identifier id = Crimes.isGuard(npc) ? GUARD_TABLE : VILLAGER_TABLE;
+        LootTable table = com.skycraft.platform.LootTables.get(level, id);
         LootParams params = new LootParams.Builder(level)
                 .withParameter(LootContextParams.ORIGIN, npc.position())
                 .withParameter(LootContextParams.THIS_ENTITY, npc)
@@ -146,7 +146,7 @@ public final class Pickpocket {
         List<ItemStack> result = new ArrayList<>(items);
         if ((level.dimension() == Jail.JAIL || Jail.isJailArea(level, npc.blockPosition())) && Crimes.isGuard(npc)) {
             ItemStack key = new ItemStack(CrimeItems.JAIL_KEY.get());
-            key.getOrCreateTag().putBoolean(CrimeItems.JAIL_PROPERTY, true);
+            com.skycraft.inventory.ItemData.updateCustom(key, customData263 -> customData263.putBoolean(CrimeItems.JAIL_PROPERTY, true));
             result.add(0, key);
         }
         return result;
@@ -171,7 +171,7 @@ public final class Pickpocket {
         if (gold && Perks.has(player, "pickpocket.cutpurse")) c *= 1.5;
         if (stack.is(CrimeItems.LOCKPICK.get()) && Perks.has(player, "pickpocket.keymaster")) c = Math.max(c, 90);
         // every theft from the same person today makes them warier; Extra Pockets lets you take more
-        int stolen = npc.getPersistentData().getInt(STOLEN_TODAY);
+        int stolen = npc.getPersistentData().getIntOr(STOLEN_TODAY, 0);
         c -= stolen * (Perks.has(player, "pickpocket.extra_pockets") ? 3 : 8);
         return (int) Math.max(1, Math.min(95, Math.round(c)));
     }
@@ -189,7 +189,7 @@ public final class Pickpocket {
 
     static void open(ServerPlayer player, LivingEntity npc) {
         long now = npc.level().getGameTime();
-        if (npc.getPersistentData().getLong(WARY_UNTIL) > now) {
+        if (npc.getPersistentData().getLongOr(WARY_UNTIL, 0L) > now) {
             Notifier.message(player, Component.translatable("crime.skycraft.pickpocket.wary", npc.getDisplayName()));
             return;
         }
@@ -210,7 +210,7 @@ public final class Pickpocket {
             return;
         }
         // a victim who just caught someone keeps a hand on their purse (the screen may still be open client-side)
-        if (npc.getPersistentData().getLong(WARY_UNTIL) > npc.level().getGameTime()) {
+        if (npc.getPersistentData().getLongOr(WARY_UNTIL, 0L) > npc.level().getGameTime()) {
             SkyNetwork.sendToPlayer(player, new CrimePackets.ClosePickpocket());
             Notifier.message(player, Component.translatable("crime.skycraft.pickpocket.wary", npc.getDisplayName()));
             return;
@@ -227,7 +227,7 @@ public final class Pickpocket {
             items.remove(slot);
             savePockets(npc, items);
             CompoundTag pd = npc.getPersistentData();
-            pd.putInt(STOLEN_TODAY, pd.getInt(STOLEN_TODAY) + 1);
+            pd.putInt(STOLEN_TODAY, pd.getIntOr(STOLEN_TODAY, 0) + 1);
             if (isGold(stack)) {
                 Currency.give(player, Currency.valueOf(stack));
             } else {

@@ -6,12 +6,11 @@ import com.skycraft.fauna.entity.MammothEntity;
 import com.skycraft.society.entity.NpcEntity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.npc.Villager;
+import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.util.List;
 
@@ -26,12 +25,12 @@ import java.util.List;
  *     <li>Towns: Hold guards immediately defend attacked villagers and citizens.</li>
  * </ul>
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class FactionDefenseEvents {
     private FactionDefenseEvents() {}
 
     @SubscribeEvent(priority = EventPriority.LOW)
-    public static void onLivingHurt(LivingHurtEvent event) {
+    public static void onLivingHurt(com.skycraft.combat.BeforeArmorDamageEvent event) {
         if (event.isCanceled() || event.getEntity().level().isClientSide()) return;
         LivingEntity victim = event.getEntity();
         LivingEntity attacker = event.getSource().getEntity() instanceof LivingEntity le ? le : null;

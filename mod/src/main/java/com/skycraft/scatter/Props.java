@@ -6,14 +6,15 @@ import com.skycraft.explore.build.SiteBuilder;
 import com.skycraft.scatter.ScatterRules.Entry;
 import com.skycraft.scatter.ScatterRules.Kind;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -65,7 +66,7 @@ public final class Props {
             case "chest", "barrel" -> {
                 int dy = k.follow ? br.gy(e.p[0], e.p[2]) + e.p[1] : e.p[1];
                 if (!b.free(e.p[0], dy, e.p[2])) return;
-                ResourceLocation loot = e.loot == null ? null : e.loot.indexOf(':') >= 0 ? new ResourceLocation(e.loot) : ExploreLoot.table(e.loot);
+                Identifier loot = e.loot == null ? null : e.loot.indexOf(':') >= 0 ? Identifier.parse(e.loot) : ExploreLoot.table(e.loot);
                 if (e.type.equals("chest")) b.chest(e.p[0], dy, e.p[2], dir(e.facing), loot == null ? ExploreLoot.table("camp") : loot);
                 else b.barrel(e.p[0], dy, e.p[2], loot);
                 br.written++;
@@ -113,7 +114,7 @@ public final class Props {
             return;
         }
         if (br.set(dx, dy, dz, s) && dy == 0) {
-            BlockState supportMat = s.isSolidRender(br.b.level, br.b.at(dx, dy, dz))
+            BlockState supportMat = s.isSolidRender()
                     ? Blocks.DIRT.defaultBlockState()
                     : Blocks.COARSE_DIRT.defaultBlockState();
             br.support(dx, dy, dz, supportMat);
@@ -166,8 +167,8 @@ public final class Props {
 
     @Nullable
     public static Item item(String id) {
-        ResourceLocation rl = id.indexOf(':') < 0 ? new ResourceLocation("minecraft", id) : new ResourceLocation(id);
-        return ForgeRegistries.ITEMS.containsKey(rl) ? ForgeRegistries.ITEMS.getValue(rl) : null;
+        Identifier rl = id.indexOf(':') < 0 ? Identifier.fromNamespaceAndPath("minecraft", id) : Identifier.parse(id);
+        return BuiltInRegistries.ITEM.containsKey(rl) ? BuiltInRegistries.ITEM.getValue(rl) : null;
     }
 
     private static Direction dir(String s) {

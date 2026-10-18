@@ -107,7 +107,7 @@ final class RoadPlanner {
         }
 
         Cell cell(int cx, int cz) {
-            long k = ChunkPos.asLong(cx, cz);
+            long k = ChunkPos.pack(cx, cz);
             Cell c = cache.get(k);
             if (c != null) return c;
             c = new Cell();
@@ -261,7 +261,7 @@ final class RoadPlanner {
         PriorityQueue<Open> open = new PriorityQueue<>((p, q) -> Double.compare(p.f(), q.f()));
         Node start = new Node(sx, sz);
         start.g = 0;
-        nodes.put(ChunkPos.asLong(sx, sz), start);
+        nodes.put(ChunkPos.pack(sx, sz), start);
         open.add(new Open(heuristic(sx, sz, gx, gz, cell), 0, start));
         int expansions = 0;
 
@@ -282,7 +282,7 @@ final class RoadPlanner {
                 for (int d = 0; d < 8; d++) {
                     int nx = cur.x + DX[d], nz = cur.z + DZ[d];
                     if (nx < minX || nx > maxX || nz < minZ || nz > maxZ) continue;
-                    long key = ChunkPos.asLong(nx, nz);
+                    long key = ChunkPos.pack(nx, nz);
                     Node nb = nodes.get(key);
                     if (nb != null && nb.closed) continue;
 
@@ -367,7 +367,7 @@ final class RoadPlanner {
     }
 
     private static long cellOf(double[] p, int cell) {
-        return ChunkPos.asLong(Math.floorDiv((int) Math.floor(p[0]), cell), Math.floorDiv((int) Math.floor(p[1]), cell));
+        return ChunkPos.pack(Math.floorDiv((int) Math.floor(p[0]), cell), Math.floorDiv((int) Math.floor(p[1]), cell));
     }
 
     private static boolean clearLine(double[] a, double[] b, Heights heights, int cell) {
@@ -378,7 +378,7 @@ final class RoadPlanner {
         for (int s = 0; s <= steps; s++) {
             double t = s / (double) steps;
             int cx = Math.floorDiv((int) Math.floor(a[0] + dx * t), cell), cz = Math.floorDiv((int) Math.floor(a[1] + dz * t), cell);
-            Cell c = heights.cache.get(ChunkPos.asLong(cx, cz));
+            Cell c = heights.cache.get(ChunkPos.pack(cx, cz));
             if (c == null || c.blocked || c.penalty > 0 || c.water != Integer.MIN_VALUE) return false;
             if (last != Integer.MIN_VALUE && Math.abs(c.raw - last) > STRAIGHT_RISE) return false;
             last = c.raw;

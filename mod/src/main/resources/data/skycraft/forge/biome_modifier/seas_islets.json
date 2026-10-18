@@ -1,6 +1,0 @@
-{
-  "type": "forge:add_features",
-  "biomes": "#skycraft:tamriel/sea",
-  "features": "skycraft:islet",
-  "step": "surface_structures"
-}

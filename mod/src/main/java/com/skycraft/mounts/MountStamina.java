@@ -45,8 +45,8 @@ public final class MountStamina {
     private static final String PARK_MAX = "parked_max";
     /** In the mount record: the active mount's stamina points when it was last left (it may be unloaded). */
     static final String SAVED = "stamina_pts";
-    private static final UUID GALLOP = UUID.fromString("0f6b9c2a-71de-4f0b-8a73-2c9b0b5c4e11");
-    private static final UUID LOAD = UUID.fromString("5d1b7e34-9a2c-4c6f-b3f1-6e0a8d2c7b19");
+    private static final net.minecraft.resources.Identifier GALLOP = net.minecraft.resources.Identifier.fromNamespaceAndPath("skycraft", "modifier_0f6b9c2a-71de-4f0b-8a73-2c9b0b5c4e11");
+    private static final net.minecraft.resources.Identifier LOAD = net.minecraft.resources.Identifier.fromNamespaceAndPath("skycraft", "modifier_5d1b7e34-9a2c-4c6f-b3f1-6e0a8d2c7b19");
     /** A jump costs this fraction of the mount's stamina. */
     private static final float JUMP_COST = 0.06f;
 
@@ -80,19 +80,19 @@ public final class MountStamina {
     /** The mount's stamina points (its tag, else full), never above its current maximum. */
     public static float stamina(Entity mount, MountKind kind) {
         int max = MountGear.maxStamina(mount, kind);
-        return mount.getPersistentData().contains(TAG) ? Math.min(max, mount.getPersistentData().getFloat(TAG)) : max;
+        return mount.getPersistentData().contains(TAG) ? Math.min(max, mount.getPersistentData().getFloatOr(TAG, 0f)) : max;
     }
 
     /** True while the player's bar shows their mount's stamina (server side). */
     public static boolean swapped(net.minecraft.world.entity.player.Player player) {
-        return !player.level().isClientSide && SkyData.get(player).module(Mounts.MODULE).contains(PARKED);
+        return !player.level().isClientSide() && SkyData.get(player).module(Mounts.MODULE).contains(PARKED);
     }
 
     /** True while the mount you steer is exhausted: the vitals module reports it so you can't run either. */
     public static boolean exhausted(net.minecraft.world.entity.player.Player player) {
         if (!(player instanceof ServerPlayer sp) || !swapped(sp)) return false;
         LivingEntity mount = steered(sp);
-        return mount != null && mount.getPersistentData().getBoolean(EXHAUSTED);
+        return mount != null && mount.getPersistentData().getBooleanOr(EXHAUSTED, false);
     }
 
     /** The mount the player steers (their own, or any when creative), or null. */
@@ -125,7 +125,7 @@ public final class MountStamina {
         if (!parked) {
             // taking the reins: park the player's own stamina, show the mount's
             rec.putFloat(PARKED, data.getStamina());
-            rec.putUUID(PARK_MOUNT, mount.getUUID());
+            rec.store(PARK_MOUNT, net.minecraft.core.UUIDUtil.CODEC,  mount.getUUID());
             data.setStamina(stamina(mount, kind) / max * pm);
             data.markDirty();
             LAST.remove(player.getUUID());
@@ -146,7 +146,7 @@ public final class MountStamina {
 
         // the bar is the truth: whatever else spent or restored it since last tick is the mount's wind too
         float st = Math.max(0f, Math.min(max, data.getStamina() / pm * max));
-        boolean exhausted = mount.getPersistentData().getBoolean(EXHAUSTED);
+        boolean exhausted = mount.getPersistentData().getBooleanOr(EXHAUSTED, false);
         boolean gallop = moving && !exhausted && st > 0 && WANTS.containsKey(player.getUUID());
         if (gallop) {
             // Endurance (perk) slows the burn
@@ -162,14 +162,14 @@ public final class MountStamina {
         mount.getPersistentData().putFloat(TAG, st);
         mount.getPersistentData().putBoolean(EXHAUSTED, exhausted);
         data.setStamina(st / max * pm);
-        if (rec.hasUUID("uuid") && rec.getUUID("uuid").equals(mount.getUUID())) rec.putFloat(SAVED, st);
+        if (rec.read("uuid", net.minecraft.core.UUIDUtil.CODEC).isPresent() && rec.read("uuid", net.minecraft.core.UUIDUtil.CODEC).orElseThrow().equals(mount.getUUID())) rec.putFloat(SAVED, st);
 
         MountGrowth.ride(player, mount, kind, speed, gallop, jumped); // distance, jumps and loads grow the mount
         AttributeInstance move = mount.getAttribute(Attributes.MOVEMENT_SPEED);
         if (move != null) {
             boolean has = move.getModifier(GALLOP) != null;
             if (gallop && !has) {
-                move.addTransientModifier(new AttributeModifier(GALLOP, "Gallop", kind.gallop, AttributeModifier.Operation.MULTIPLY_TOTAL));
+                move.addTransientModifier(new AttributeModifier(GALLOP, kind.gallop, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
             } else if (!gallop && has) {
                 move.removeModifier(GALLOP);
             }
@@ -181,9 +181,9 @@ public final class MountStamina {
             // the mount slows with the rider's load more gently than a person does, and stops outright at +150%
             double penalty = over <= 0f ? 0 : -Math.min(1.0, Math.round(over / 1.5f * 50f) / 50.0);
             AttributeModifier cur = move.getModifier(LOAD);
-            if (penalty < 0 && (cur == null || cur.getAmount() != penalty)) {
+            if (penalty < 0 && (cur == null || cur.amount() != penalty)) {
                 if (cur != null) move.removeModifier(LOAD);
-                move.addTransientModifier(new AttributeModifier(LOAD, "Rider load", penalty, AttributeModifier.Operation.MULTIPLY_TOTAL));
+                move.addTransientModifier(new AttributeModifier(LOAD, penalty, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
             } else if (penalty == 0 && cur != null) {
                 move.removeModifier(LOAD);
             }
@@ -217,14 +217,14 @@ public final class MountStamina {
         CompoundTag rec = Mounts.data(player);
         if (!rec.contains(PARKED)) return;
         PlayerData data = SkyData.get(player);
-        float parked = rec.getFloat(PARKED);
-        int max = Math.max(1, rec.getInt(PARK_MAX));
+        float parked = rec.getFloatOr(PARKED, 0f);
+        int max = Math.max(1, rec.getIntOr(PARK_MAX, 0));
         float pm = Math.max(1f, data.maxStamina());
         float pts = Math.max(0f, Math.min(max, data.getStamina() / pm * max));
-        if (rec.hasUUID(PARK_MOUNT)) {
-            UUID id = rec.getUUID(PARK_MOUNT);
-            if (rec.hasUUID("uuid") && rec.getUUID("uuid").equals(id)) rec.putFloat(SAVED, pts);
-            for (ServerLevel level : player.server.getAllLevels()) {
+        if (rec.read(PARK_MOUNT, net.minecraft.core.UUIDUtil.CODEC).isPresent()) {
+            UUID id = rec.read(PARK_MOUNT, net.minecraft.core.UUIDUtil.CODEC).orElseThrow();
+            if (rec.read("uuid", net.minecraft.core.UUIDUtil.CODEC).isPresent() && rec.read("uuid", net.minecraft.core.UUIDUtil.CODEC).orElseThrow().equals(id)) rec.putFloat(SAVED, pts);
+            for (ServerLevel level : player.level().getServer().getAllLevels()) {
                 Entity m = level.getEntity(id);
                 if (m != null) {
                     m.getPersistentData().putFloat(TAG, pts);

@@ -7,13 +7,12 @@ import com.skycraft.crafting.SkyOre;
 import com.skycraft.crafting.SmithingTier;
 import com.skycraft.crafting.StationType;
 import com.skycraft.crafting.WeaponType;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.ItemTags;
-import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ItemLike;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -96,7 +95,7 @@ public final class SmithingRecipes {
         // (Iron is Skycraft's Iron set; hide, leather, fur and studded sets can also be made at the tanning rack)
         int[] stripsByPiece = {1, 3, 2, 1};
         for (SkyArmorMaterial mat : SkyArmorMaterial.values()) {
-            for (ArmorItem.Type type : CraftingItems.ARMOR_TYPES) {
+            for (net.minecraft.world.item.equipment.ArmorType type : CraftingItems.ARMOR_TYPES) {
                 int i = SkyArmorMaterial.index(type);
                 List<Cost> costs = armorCosts(mat, mat.mainCount(i), stripsByPiece[i]);
                 Supplier<Item> result = CraftingItems.ARMOR.get(mat).get(type);
@@ -312,9 +311,9 @@ public final class SmithingRecipes {
     }
 
     private static Supplier<Item> byId(String path) {
-        ResourceLocation id = new ResourceLocation(Skycraft.MODID, path);
+        Identifier id = Identifier.fromNamespaceAndPath(Skycraft.MODID, path);
         return () -> {
-            Item item = ForgeRegistries.ITEMS.getValue(id);
+            Item item = BuiltInRegistries.ITEM.getValue(id);
             return item == null ? Items.AIR : item;
         };
     }

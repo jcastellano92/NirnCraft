@@ -1,0 +1,16 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "skycraft:item/dwarven_ballista_spawn_egg",
+    "tints": [
+      {
+        "type": "minecraft:constant",
+        "value": 11569722
+      },
+      {
+        "type": "minecraft:constant",
+        "value": 6349055
+      }
+    ]
+  }
+}

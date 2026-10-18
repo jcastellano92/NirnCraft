@@ -1,9 +1,9 @@
 {
   "type": "skycraft:explore_skill_books",
-  "conditions": [],
   "tables": [
     "skycraft:chests/dungeon_boss"
   ],
   "table": "skycraft:chests/skill_books",
-  "chance": 0.3
+  "chance": 0.3,
+  "priority": 1
 }

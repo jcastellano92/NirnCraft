@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "G": "minecraft:gold_ingot",
+    "L": "minecraft:leather",
+    "S": "minecraft:saddle",
+    "W": "minecraft:red_wool"
+  },
+  "pattern": [
+    "GWG",
+    "LSL"
+  ],
+  "result": {
+    "id": "skycraft:noble_saddle"
+  }
+}

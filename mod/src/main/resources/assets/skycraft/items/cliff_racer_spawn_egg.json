@@ -1,0 +1,16 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "skycraft:item/cliff_racer_spawn_egg",
+    "tints": [
+      {
+        "type": "minecraft:constant",
+        "value": 5925498
+      },
+      {
+        "type": "minecraft:constant",
+        "value": 11575434
+      }
+    ]
+  }
+}

@@ -13,17 +13,17 @@ import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.WorldDataConfiguration;
 import net.minecraft.world.level.levelgen.WorldOptions;
 import net.minecraft.world.level.levelgen.presets.WorldPresets;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.api.distmarker.Dist;
+
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -39,7 +39,7 @@ import java.util.function.Consumer;
  * transforms the player into each form (front, back, howling, levitating, first-person claws), opens the form and
  * perk screens, saves screenshots to {@code build/cursetest-screenshots/} and quits. Does nothing in normal play.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
 public final class CurseAutotest {
     private static final boolean ENABLED = Files.exists(Paths.get("skycraft-cursetest.txt")) || "1".equals(System.getenv("SKYCRAFT_CURSETEST"));
     private static final Path OUT = Paths.get("build", "cursetest-screenshots");
@@ -55,10 +55,10 @@ public final class CurseAutotest {
     static {
         step(100, mc -> {
             com.skycraft.network.SkyNetwork.sendToServer(new CorePackets.ChooseRace(com.skycraft.core.Race.NORD.id()));
-            mc.setScreen(null);
+            mc.gui.setScreen(null);
         });
-        cmd(2, "gamerule doDaylightCycle false");
-        cmd(2, "gamerule doMobSpawning false");
+        cmd(2, "gamerule advance_time false");
+        cmd(2, "gamerule spawn_mobs false");
         cmd(2, "time set 6000");
         cmd(2, "effect give @s minecraft:resistance 99999 255 true");
         cmd(2, "skycraft-weather set clear 60");
@@ -66,7 +66,7 @@ public final class CurseAutotest {
         cmd(2, "tp @s ~ 190 ~");
         cmd(4, "fill ~-10 ~-1 ~-10 ~10 ~-1 ~10 minecraft:polished_andesite");
         cmd(2, "kill @e[type=!player]");
-        step(60, mc -> mc.gui.getChat().clearMessages(false));
+        step(60, mc -> mc.gui.hud.getChat().clearMessages(false));
         // the creatures, one at a time in front of the camera
         creature("werewolf", "01_werewolf", 0);
         creature("werewolf", "02_werewolf_howl", 1);
@@ -89,11 +89,11 @@ public final class CurseAutotest {
         step(10, mc -> mc.options.setCameraType(CameraType.FIRST_PERSON));
         step(20, mc -> shot(mc, "14_beast_first_person"));
         cmd(2, "skycraft-curse feed werewolf 9");
-        step(10, mc -> mc.setScreen(new CursePerkScreen(CursePerks.Tree.WEREWOLF, null)));
+        step(10, mc -> mc.gui.setScreen(new CursePerkScreen(CursePerks.Tree.WEREWOLF, null)));
         step(20, mc -> shot(mc, "15_werewolf_perks"));
-        step(2, mc -> mc.setScreen(new CurseFormScreen(Form.BEAST)));
+        step(2, mc -> mc.gui.setScreen(new CurseFormScreen(Form.BEAST)));
         step(20, mc -> shot(mc, "16_beast_menu"));
-        step(2, mc -> mc.setScreen(null));
+        step(2, mc -> mc.gui.setScreen(null));
         // the Vampire Lord
         cmd(10, "skycraft-curse lord");
         step(60, mc -> mc.options.setCameraType(CameraType.THIRD_PERSON_FRONT));
@@ -117,11 +117,11 @@ public final class CurseAutotest {
         step(20, mc -> mc.options.setCameraType(CameraType.FIRST_PERSON));
         step(20, mc -> shot(mc, "25_lord_first_person"));
         cmd(2, "skycraft-curse feed vampire_lord 5");
-        step(10, mc -> mc.setScreen(new CursePerkScreen(CursePerks.Tree.VAMPIRE_LORD, null)));
+        step(10, mc -> mc.gui.setScreen(new CursePerkScreen(CursePerks.Tree.VAMPIRE_LORD, null)));
         step(20, mc -> shot(mc, "26_lord_perks"));
-        step(2, mc -> mc.setScreen(new CurseFormScreen(Form.LORD)));
+        step(2, mc -> mc.gui.setScreen(new CurseFormScreen(Form.LORD)));
         step(20, mc -> shot(mc, "27_lord_menu"));
-        step(2, mc -> mc.setScreen(null));
+        step(2, mc -> mc.gui.setScreen(null));
         // a vampire in the sun (HUD), then cured
         cmd(10, "skycraft-curse revert");
         cmd(20, "skycraft-curse stage 4");
@@ -156,8 +156,8 @@ public final class CurseAutotest {
         double dist = id.equals("death_hound") ? 3 : 4.5;
         cmd(4, "summon skycraft:" + id + " ~0.5 ~ ~" + dist + " {NoAI:1b,PersistenceRequired:1b,Rotation:[160f,0f]" + extra + "}");
         step(2, mc -> {
-            mc.options.hideGui = true;
-            mc.gui.getChat().clearMessages(false);
+            com.skycraft.client.autotest.ReviewWorlds.hudHidden(mc,true);
+            mc.gui.hud.getChat().clearMessages(false);
         });
         step(30, mc -> {
             Entity e = find(mc, id);
@@ -172,12 +172,12 @@ public final class CurseAutotest {
             }
         });
         step(animation > 0 ? 14 : 10, mc -> shot(mc, shot));
-        step(2, mc -> mc.options.hideGui = false);
+        step(2, mc -> com.skycraft.client.autotest.ReviewWorlds.hudHidden(mc,false));
     }
 
     private static Entity find(Minecraft mc, String id) {
         if (mc.level == null) return null;
-        EntityType<?> type = ForgeRegistries.ENTITY_TYPES.getValue(new net.minecraft.resources.ResourceLocation(Skycraft.MODID, id));
+        EntityType<?> type = BuiltInRegistries.ENTITY_TYPE.getValue(net.minecraft.resources.Identifier.fromNamespaceAndPath(Skycraft.MODID, id));
         for (Entity e : mc.level.entitiesForRendering()) if (e.getType() == type) return e;
         return null;
     }
@@ -188,7 +188,7 @@ public final class CurseAutotest {
 
     private static void look(Minecraft mc, float yaw, float pitch) {
         if (mc.player == null) return;
-        mc.gui.getChat().clearMessages(false);
+        mc.gui.hud.getChat().clearMessages(false);
         mc.player.setYRot(yaw);
         mc.player.setXRot(pitch);
         mc.player.yRotO = yaw;
@@ -198,31 +198,23 @@ public final class CurseAutotest {
     }
 
     private static void shot(Minecraft mc, String name) {
-        try {
-            Files.createDirectories(OUT);
-            NativeImage img = Screenshot.takeScreenshot(mc.getMainRenderTarget());
-            File out = OUT.resolve(name + ".png").toFile();
-            img.writeToFile(out);
-            img.close();
-            Skycraft.LOGGER.info("Curse autotest: saved {}", out.getAbsolutePath());
-        } catch (Exception e) {
-            Skycraft.LOGGER.warn("Curse autotest: screenshot {} failed", name, e);
-        }
+        com.skycraft.client.autotest.ReviewCaptures.capture(mc, OUT, name,
+                output -> Skycraft.LOGGER.info("Curse autotest: saved {}", output.toAbsolutePath()));
     }
 
     @SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent event) {
-        if (!ENABLED || event.phase != TickEvent.Phase.END) return;
+    public static void onClientTick(net.neoforged.neoforge.client.event.ClientTickEvent.Post event) {
+        if (!ENABLED) return;
+        if (com.skycraft.client.autotest.ReviewCaptures.pending() > 0) return;
         Minecraft mc = Minecraft.getInstance();
         if (mc.level == null) {
-            if (mc.screen instanceof net.minecraft.client.gui.screens.AccessibilityOnboardingScreen) mc.setScreen(new TitleScreen());
-            if (!worldRequested && (mc.screen instanceof TitleScreen || mc.screen instanceof com.skycraft.client.screen.title.SkyTitleScreen)) {
+            if (mc.gui.screen() instanceof net.minecraft.client.gui.screens.AccessibilityOnboardingScreen) mc.gui.setScreen(new TitleScreen());
+            if (!worldRequested && (mc.gui.screen() instanceof TitleScreen || mc.gui.screen() instanceof com.skycraft.client.screen.title.SkyTitleScreen)) {
                 worldRequested = true;
                 String name = "cursetest-" + System.currentTimeMillis();
-                LevelSettings settings = new LevelSettings(name, GameType.SURVIVAL, false, Difficulty.EASY, true,
-                        new GameRules(), WorldDataConfiguration.DEFAULT);
-                mc.createWorldOpenFlows().createFreshLevel(name, settings, new WorldOptions(20261010L, false, false),
-                        WorldPresets::createNormalWorldDimensions);
+                LevelSettings settings = com.skycraft.client.autotest.ReviewWorlds.settings(name,  GameType.SURVIVAL,  false,  Difficulty.EASY,  true,  WorldDataConfiguration.DEFAULT);
+                com.skycraft.client.autotest.ReviewWorlds.create(mc, name,  settings,  new WorldOptions(20261010L, false, false), 
+                        com.skycraft.client.autotest.ReviewWorlds::normal, mc.gui.screen());
             }
             return;
         }

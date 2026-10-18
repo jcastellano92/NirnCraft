@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:random_selector",
+  "features": [
+    {
+      "feature": "minecraft:oak_checked",
+      "chance": 0.25
+    },
+    {
+      "feature": "skycraft:biome/cypress_checked",
+      "chance": 0.15
+    },
+    {
+      "feature": "minecraft:fancy_oak_checked",
+      "chance": 0.1
+    }
+  ],
+  "default": "skycraft:biome/tall_spruce_checked"
+}

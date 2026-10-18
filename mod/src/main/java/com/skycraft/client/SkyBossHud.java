@@ -3,7 +3,7 @@ package com.skycraft.client;
 import com.skycraft.Skycraft;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
@@ -11,13 +11,12 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
 import net.minecraft.world.phys.AABB;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RenderGuiOverlayEvent;
-import net.minecraftforge.client.gui.overlay.ForgeGui;
-import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.RenderGuiLayerEvent;
+import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 /**
  * Authentic Skyrim Boss Health Bar:
@@ -25,7 +24,7 @@ import net.minecraftforge.fml.common.Mod;
  * Fades out smoothly when the player retreats beyond the encounter range (> 32-48 blocks)
  * or when the player enters a sneak HIDDEN state out of combat.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
 public final class SkyBossHud {
     private static final int COLOR_GOLD = 0xFFE8C060;
     private static final int COLOR_HEALTH = 0xFFB22222; // Skyrim deep crimson
@@ -62,8 +61,7 @@ public final class SkyBossHud {
     }
 
     @SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent event) {
-        if (event.phase != TickEvent.Phase.END) return;
+    public static void onClientTick(ClientTickEvent.Post event) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null || mc.level == null) {
             activeBoss = null;
@@ -123,7 +121,7 @@ public final class SkyBossHud {
 
     public static boolean isBossEntity(LivingEntity e) {
         if (e instanceof EnderDragon || e instanceof WitherBoss) return true;
-        if (e.getType().is(com.skycraft.combat.CombatHandler.BOSSES)) return true;
+        if (e.getType().builtInRegistryHolder().is(com.skycraft.combat.CombatHandler.BOSSES)) return true;
         if (e.getMaxHealth() < 80.0f) return false;
         String name = e.getType().getDescriptionId().toLowerCase(java.util.Locale.ROOT);
         if (name.contains("dragonfly") || name.contains("dartwing") || name.contains("butterfly") || name.contains("insect")) return false;
@@ -132,7 +130,9 @@ public final class SkyBossHud {
     }
 
     /** HUD overlay "sky_boss_bar" (registered by {@code visual.client.VisualClientSetup}). */
-    public static void render(ForgeGui gui, GuiGraphics g, float partialTick, int width, int height) {
+    public static void render(GuiGraphicsExtractor g, net.minecraft.client.DeltaTracker delta) {
+        float partialTick = delta.getGameTimeDeltaPartialTick(false);
+        int width = g.guiWidth(), height = g.guiHeight();
         // Boss health bars are handled uniformly by TargetHud under the compass, matching Skyrim.
         // Doing nothing here guarantees only ONE bar is ever rendered.
     }

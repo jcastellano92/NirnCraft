@@ -11,17 +11,17 @@ import net.minecraft.client.Screenshot;
 import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.WorldDataConfiguration;
 import net.minecraft.world.level.levelgen.WorldOptions;
 import net.minecraft.world.level.levelgen.presets.WorldPresets;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -39,7 +39,7 @@ import java.util.function.Consumer;
  * the player on a sailing ship's deck and checks it is carried, lines up the sea creatures, puts gulls in the sky, and
  * saves screenshots to {@code build/seastest-screenshots/}, then quits. Does nothing in normal play.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
 public final class SeasAutotest {
     private static final boolean ENABLED = Files.exists(Paths.get("skycraft-seastest.txt")) || "1".equals(System.getenv("SKYCRAFT_SEASTEST"));
     private static final Path OUT = Paths.get("build", "seastest-screenshots");
@@ -61,13 +61,13 @@ public final class SeasAutotest {
         step(100, mc -> {
             mc.options.pauseOnLostFocus = false;
             com.skycraft.network.SkyNetwork.sendToServer(new CorePackets.ChooseRace(com.skycraft.core.Race.NORD.id()));
-            mc.setScreen(null);
+            mc.gui.setScreen(null);
         });
         // no Helgen cart: the intro would carry the player off mid-test
         cmd(60, "skycraft-quest skip main_unbound");
-        cmd(2, "gamerule doDaylightCycle false");
-        cmd(2, "gamerule doWeatherCycle false");
-        cmd(2, "gamerule doMobSpawning false");
+        cmd(2, "gamerule advance_time false");
+        cmd(2, "gamerule advance_weather false");
+        cmd(2, "gamerule spawn_mobs false");
         cmd(2, "effect give @s minecraft:resistance 99999 255 true");
         cmd(2, "effect give @s minecraft:water_breathing 99999 0 true");
         cmd(2, "effect give @s minecraft:night_vision 99999 0 true");
@@ -247,37 +247,29 @@ public final class SeasAutotest {
     }
 
     private static void shot(Minecraft mc, String name) {
-        try {
-            Files.createDirectories(OUT);
-            NativeImage img = Screenshot.takeScreenshot(mc.getMainRenderTarget());
-            File out = OUT.resolve(name + ".png").toFile();
-            img.writeToFile(out);
-            img.close();
-            Skycraft.LOGGER.info("Seas autotest: saved {}", out.getAbsolutePath());
-        } catch (Exception e) {
-            Skycraft.LOGGER.warn("Seas autotest: screenshot {} failed", name, e);
-        }
+        com.skycraft.client.autotest.ReviewCaptures.capture(mc, OUT, name,
+                output -> Skycraft.LOGGER.info("Seas autotest: saved {}", output.toAbsolutePath()));
     }
 
     @SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent event) {
-        if (!ENABLED || event.phase != TickEvent.Phase.END) return;
+    public static void onClientTick(net.neoforged.neoforge.client.event.ClientTickEvent.Post event) {
+        if (!ENABLED) return;
+        if (com.skycraft.client.autotest.ReviewCaptures.pending() > 0) return;
         Minecraft mc = Minecraft.getInstance();
         if (mc.level == null) {
-            if (mc.screen instanceof net.minecraft.client.gui.screens.AccessibilityOnboardingScreen) mc.setScreen(new TitleScreen());
-            if (!worldRequested && (mc.screen instanceof TitleScreen || mc.screen instanceof com.skycraft.client.screen.title.SkyTitleScreen)) {
+            if (mc.gui.screen() instanceof net.minecraft.client.gui.screens.AccessibilityOnboardingScreen) mc.gui.setScreen(new TitleScreen());
+            if (!worldRequested && (mc.gui.screen() instanceof TitleScreen || mc.gui.screen() instanceof com.skycraft.client.screen.title.SkyTitleScreen)) {
                 worldRequested = true;
                 String name = "seastest-" + System.currentTimeMillis();
-                LevelSettings settings = new LevelSettings(name, GameType.CREATIVE, false, Difficulty.NORMAL, true,
-                        new GameRules(), WorldDataConfiguration.DEFAULT);
-                mc.createWorldOpenFlows().createFreshLevel(name, settings, new WorldOptions(20261011L, false, false),
-                        WorldPresets::createNormalWorldDimensions);
+                LevelSettings settings = com.skycraft.client.autotest.ReviewWorlds.settings(name,  GameType.CREATIVE,  false,  Difficulty.NORMAL,  true,  WorldDataConfiguration.DEFAULT);
+                com.skycraft.client.autotest.ReviewWorlds.create(mc, name,  settings,  new WorldOptions(20261011L, false, false), 
+                        com.skycraft.client.autotest.ReviewWorlds::normal, mc.gui.screen());
             }
             return;
         }
         if (mc.player == null || stepIndex >= STEPS.size()) return;
-        if (mc.screen instanceof net.minecraft.client.gui.screens.PauseScreen || mc.screen instanceof com.skycraft.client.screen.title.SkyPauseScreen) {
-            mc.setScreen(null);
+        if (mc.gui.screen() instanceof net.minecraft.client.gui.screens.PauseScreen || mc.gui.screen() instanceof com.skycraft.client.screen.title.SkyPauseScreen) {
+            mc.gui.setScreen(null);
         }
         if (inWorld++ == 0) waitLeft = STEPS.get(0).delay();
         if (--waitLeft > 0) return;

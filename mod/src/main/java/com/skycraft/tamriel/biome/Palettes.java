@@ -10,7 +10,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.HolderGetter;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.biome.Biome;
 import org.jetbrains.annotations.Nullable;
 
@@ -449,7 +449,7 @@ public final class Palettes {
     @Nullable
     private static Holder<Biome> resolve(HolderGetter<Biome> biomes, String id, Map<String, Holder<Biome>> resolved) {
         if (resolved.containsKey(id)) return resolved.get(id);
-        ResourceLocation loc = ResourceLocation.tryParse(id);
+        Identifier loc = Identifier.tryParse(id);
         Holder<Biome> h = loc == null ? null : biomes.get(ResourceKey.create(Registries.BIOME, loc)).orElse(null);
         if (h == null) Skycraft.LOGGER.warn("Tamriel palettes: unknown biome {}", id);
         resolved.put(id, h);

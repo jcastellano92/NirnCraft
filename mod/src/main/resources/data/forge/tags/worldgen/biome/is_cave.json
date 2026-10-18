@@ -5,6 +5,10 @@
     "skycraft:falmer_glow_caves",
     "skycraft:ice_caves",
     "skycraft:lava_caves",
-    "skycraft:mushroom_grottos"
+    "skycraft:mushroom_grottos",
+    "minecraft:lush_caves",
+    "minecraft:dripstone_caves",
+    "minecraft:sulfur_caves",
+    "minecraft:deep_dark"
   ]
 }

@@ -1,10 +1,7 @@
 {
   "ambient_light": 0.0,
-  "bed_works": true,
   "coordinate_scale": 1.0,
-  "effects": "minecraft:overworld",
   "has_ceiling": false,
-  "has_raids": true,
   "has_skylight": true,
   "height": 704,
   "infiniburn": "#minecraft:infiniburn_overworld",
@@ -13,13 +10,31 @@
   "monster_spawn_block_light_limit": 0,
   "monster_spawn_light_level": {
     "type": "minecraft:uniform",
-    "value": {
-      "max_inclusive": 7,
-      "min_inclusive": 0
-    }
+    "max_inclusive": 7,
+    "min_inclusive": 0
   },
-  "natural": true,
-  "piglin_safe": false,
-  "respawn_anchor_works": false,
-  "ultrawarm": false
+  "attributes": {
+    "minecraft:gameplay/bed_rule": {
+      "can_sleep": "when_dark",
+      "can_set_spawn": "always",
+      "error_message": {
+        "translate": "block.minecraft.bed.no_sleep"
+      }
+    },
+    "minecraft:gameplay/can_start_raid": true,
+    "minecraft:gameplay/piglins_zombify": true,
+    "minecraft:gameplay/respawn_anchor_works": false,
+    "minecraft:gameplay/water_evaporates": false,
+    "neoforge:custom_clouds": "skycraft:tamriel_clouds",
+    "minecraft:visual/cloud_height": 330.0,
+    "minecraft:gameplay/fast_lava": false,
+    "minecraft:visual/default_dripstone_particle": {
+      "type": "minecraft:dripping_dripstone_water"
+    },
+    "minecraft:gameplay/nether_portal_spawns_piglin": true
+  },
+  "has_ender_dragon_fight": false,
+  "default_clock": "minecraft:overworld",
+  "timelines": "#minecraft:in_overworld",
+  "has_fixed_time": false
 }

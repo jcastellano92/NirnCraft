@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""Live packaged-world preview. Targets only Prism's disposable Skycraft-autotest instance.
+"""Live packaged-world preview. Targets only explicitly allowlisted disposable native instances.
 
 See docs/LIVE-WORLD-PREVIEW.md. Run `status` before starting work; never overwrite a busy QA queue.
 """
 import argparse
+from contextlib import nullcontext
 import hashlib
 import json
 import os
@@ -18,7 +19,21 @@ import zipfile
 import zlib
 
 REPO = Path(__file__).resolve().parents[2]
-INSTANCE = Path(os.environ.get("APPDATA", "")) / "PrismLauncher/instances/Skycraft-autotest"
+sys.path.insert(0, str(REPO / "tools"))
+from validate_pack import TARGET, validate_core_jar
+from dev.process_guard import process_guard
+PRISM_ROOT = Path(os.environ.get("SKYCRAFT_PRISM_ROOT", str(Path(os.environ.get("APPDATA", "")) / "PrismLauncher"))).resolve()
+DIAGNOSTIC_NAME = "Skycraft-26.3-core-diagnostic"
+
+
+def selected_instance(name):
+    if name not in (TARGET["instanceName"], DIAGNOSTIC_NAME):
+        raise ValueError("Only the exact native preview or core diagnostic instance can be controlled")
+    return name
+
+
+INSTANCE_NAME = selected_instance(os.environ.get("SKYCRAFT_NATIVE_INSTANCE", TARGET["instanceName"]))
+INSTANCE = PRISM_ROOT / "instances" / INSTANCE_NAME
 GAME = INSTANCE / ".minecraft"
 DEV = GAME / "world-preview"
 GROUPS = {
@@ -44,14 +59,47 @@ def read_json(path):
         return {}
 
 
+def validate_components(components):
+    """Prism adds the official LWJGL dependency after resolving exact26.3 metadata."""
+    expected = {"net.minecraft": TARGET["minecraft"], "net.neoforged": TARGET["neoforge"]}
+    actual = {row["uid"]: row["version"] for row in components}
+    if len(actual) != len(components) or any(actual.get(uid) != version for uid, version in expected.items()):
+        raise ValueError("Preview platform is not exactly Minecraft26.3 / the pinned NeoForge")
+    for row in components:
+        if row['uid'] not in expected and not (row['uid'] == 'org.lwjgl3' and row['version'] == '3.4.3' and row.get('dependencyOnly') is True):
+            raise ValueError("Unexpected preview platform component: " + row['uid'])
+
+
+def validate_diagnostic_instance(instance):
+    """Core diagnostics have a separate receipt and can never certify the full pack."""
+    game = instance / ".minecraft"
+    marker = read_json(game / "migration/core-diagnostic.json")
+    expected = {key: TARGET[key] for key in ("minecraft", "neoforge", "java")}
+    if instance.name != DIAGNOSTIC_NAME or marker.get("instanceName") != DIAGNOSTIC_NAME or \
+            marker.get("diagnosticOnly") is not True or marker.get("fullPackAcceptance") is not False or \
+            marker.get("target") != expected:
+        raise ValueError("Missing or mismatched native core diagnostic identity")
+    if {path.name for path in (game / "mods").iterdir()} != {"skycraft-core.jar"}:
+        raise ValueError("Core diagnostic must contain only the actual native Skycraft core")
+    core = game / "mods/skycraft-core.jar"
+    validate_core_jar(core)
+    if hashlib.sha256(core.read_bytes()).hexdigest() != marker.get("coreSha256"):
+        raise ValueError("Core diagnostic changed since preparation; rebuild its separate diagnostic archive")
+    if (game / "shaderpacks").exists() and any((game / "shaderpacks").iterdir()):
+        raise ValueError("Core diagnostic must not contain shader packs")
+    validate_components(read_json(instance / "mmc-pack.json")["components"])
+    return marker
+
+
 def processes():
     # Never print command lines (they contain launcher authentication). Select exactly this instance.
+    pattern = re.escape(INSTANCE.as_posix()).replace("/", r"[/\\]") + r"[/\\]"
     script = r"""$p = @(Get-CimInstance Win32_Process | Where-Object {
-        $_.Name -match '^javaw?\.exe$' -and $_.CommandLine -match '[/\\]instances[/\\]Skycraft-autotest[/\\]'
+        $_.Name -match '^javaw?\.exe$' -and $_.CommandLine -match 'INSTANCE_PATTERN'
     } | ForEach-Object {
         $g = Get-Process -Id $_.ProcessId -ErrorAction SilentlyContinue
         [pscustomobject]@{pid=$_.ProcessId; window=$g.MainWindowTitle; windowOpen=($g.MainWindowHandle -ne 0); responding=$g.Responding}
-    }); ConvertTo-Json -InputObject $p -Compress"""
+    }); ConvertTo-Json -InputObject $p -Compress""".replace("INSTANCE_PATTERN", pattern.replace("'", "''"))
     result = subprocess.run(["powershell", "-NoProfile", "-Command", script], capture_output=True, text=True, check=True)
     return json.loads(result.stdout or "[]")
 
@@ -67,8 +115,11 @@ def status():
     lines = ready.read_text().splitlines() if ready.exists() else []
     ready_pid = int(lines[0]) if lines and lines[0].isdigit() else None
     server_fresh = heartbeat.exists() and time.time() - heartbeat.stat().st_mtime < 15
-    return {"instance": str(INSTANCE), "running": bool(procs), "processes": procs,
-            "client": live, "serverReady": server_fresh and any(p["pid"] == ready_pid for p in procs),
+    return {"instance": str(INSTANCE), "diagnosticOnly": INSTANCE_NAME == DIAGNOSTIC_NAME,
+            "fullPackAcceptance": False, "running": bool(procs), "processes": procs,
+            "client": live, "remoteConnected": bool(live.get("fresh") and live.get("connected")
+                and live.get("worldLoaded") and live.get("isMemoryConnection") is False),
+            "serverReady": not live.get("remote", False) and server_fresh and any(p["pid"] == ready_pid for p in procs),
             "serverHeartbeat": heartbeat.read_text().strip() if heartbeat.exists() else "",
             "inbox": sorted(p.name for p in (DEV / "inbox").glob("*.cmd"))}
 
@@ -110,7 +161,17 @@ def require_ready():
     return state
 
 
+def live_guard():
+    # Shared across both allowlisted instances in this Prism data directory.
+    return process_guard(PRISM_ROOT / ".skycraft-live.lock", "live_world.py")
+
+
 def submit(lines, timeout=900):
+    with live_guard():
+        return _submit(lines, timeout)
+
+
+def _submit(lines, timeout=900):
     require_ready()
     job = str(time.time_ns()) + "-" + uuid.uuid4().hex[:6]
     atomic(DEV / "inbox" / (job + ".cmd"), ("\n".join(lines) + "\n").encode())
@@ -133,6 +194,11 @@ def submit(lines, timeout=900):
 
 
 def live_actions(lines, timeout=180, cancel=False):
+    with live_guard():
+        return _live_actions(lines, timeout, cancel)
+
+
+def _live_actions(lines, timeout=180, cancel=False):
     state = status()
     c = state["client"]
     if not c.get("fresh"):
@@ -284,16 +350,55 @@ def jar_bake_inputs(archive):
     return h.hexdigest()
 
 
+def stage_core(jar, folder, output):
+    """Stage runtime bakes into a rebuilt core only when its declared dependencies match the verified JVM."""
+    jar, folder, output = Path(jar), Path(folder), Path(output)
+    validate_core_jar(jar)
+    core = GAME / 'mods/skycraft-core.jar'
+    receipt = read_json(DEV / 'outbox/runtime.json')
+    runtime_sha = hashlib.sha256(core.read_bytes()).hexdigest()
+    if receipt.get('coreSha256') != runtime_sha:
+        raise ValueError('Runtime receipt does not match installed core; launch the intended core first')
+    expected = (DEV / 'outbox/bake-packaged-inputs').read_text().strip()
+    validated = validate_bakes(folder, expected)
+    with zipfile.ZipFile(core) as old, zipfile.ZipFile(jar) as new:
+        bake_class = 'com/skycraft/bake/Bake.class'
+        if (old.read(bake_class) != new.read(bake_class) or jar_bake_inputs(old) != expected
+                or jar_bake_inputs(new) != expected):
+            raise ValueError('Rebuilt core has different bake dependencies; compute and verify bakes in that runtime')
+        if output.resolve() in (core.resolve(), jar.resolve()) or output.exists():
+            raise ValueError('Stage to a new artifact path; never replace the installed or input core')
+        replacements = {'skycraft/baked/' + n: (folder / n).read_bytes() for n in [*validated, 'manifest.json']}
+        output.parent.mkdir(parents=True, exist_ok=True)
+        tmp = output.with_suffix('.staging')
+        try:
+            with zipfile.ZipFile(tmp, 'w', zipfile.ZIP_DEFLATED) as target:
+                for entry in new.infolist():
+                    if entry.filename not in replacements: target.writestr(entry, new.read(entry))
+                for name, raw in replacements.items(): target.writestr(name, raw)
+            os.replace(tmp, output)
+        finally:
+            if tmp.exists(): tmp.unlink()
+    result = {'output': str(output), 'sha256': hashlib.sha256(output.read_bytes()).hexdigest(),
+              'inputCoreSha256': hashlib.sha256(jar.read_bytes()).hexdigest(), 'runtimeCoreSha256': runtime_sha,
+              'bakeInputs': expected, 'bakes': validated,
+              'scope': 'Dependency-verified staging; runtime checks and visual acceptance still required.'}
+    atomic(output.with_suffix('.receipt.json'), (json.dumps(result, indent=2) + '\n').encode())
+    print(json.dumps(result, indent=2))
+
+
 def install_core(jar):
     """Preserve runtime plans only when every changed entry is in known preview/render paths."""
     if processes():
         raise RuntimeError('Close the disposable preview before installing code')
+    validate_core_jar(jar)
     core = GAME / 'mods/skycraft-core.jar'
     receipt = read_json(DEV / 'outbox/runtime.json')
     known = receipt.get('coreSha256') == hashlib.sha256(core.read_bytes()).hexdigest()
     with zipfile.ZipFile(core) as old, zipfile.ZipFile(jar) as new:
-        names = set(old.namelist()) | set(new.namelist())
-        changed = [n for n in sorted(names) if n not in old.namelist() or n not in new.namelist()
+        old_names,new_names=set(old.namelist()),set(new.namelist())
+        names = old_names | new_names
+        changed = [n for n in sorted(names) if n not in old_names or n not in new_names
                    or old.read(n) != new.read(n)]
         safe = known and all(n.startswith(('com/skycraft/client/autotest/', 'com/skycraft/fire/client/',
                                           'com/skycraft/atmosphere/client/', 'assets/skycraft/shaders/', 'skycraft/baked/'))
@@ -302,22 +407,32 @@ def install_core(jar):
                                     ('com/skycraft/inventory/PackSelfTest','com/skycraft/inventory/OverflowSelfTest')) for n in changed)
         expected=(DEV/'outbox/bake-packaged-inputs').read_text().strip() if known else ''
         bake_class='com/skycraft/bake/Bake.class'
-        if known and bake_class in old.namelist() and bake_class in new.namelist() and old.read(bake_class)==new.read(bake_class):
+        if known and bake_class in old_names and bake_class in new_names and old.read(bake_class)==new.read(bake_class):
             # QA/server ticket changes need not trigger an expensive rebake when
             # every declared bake dependency still has the exact runtime hash.
             safe=jar_bake_inputs(old)==expected and jar_bake_inputs(new)==expected
         replacements = {}
+        fresh_verified_bakes = False
         if safe:
-            manifest = json.loads(old.read('skycraft/baked/manifest.json'))
-            expected = (DEV / 'outbox/bake-packaged-inputs').read_text().strip()
-            if manifest.get('inputs') != expected:
-                raise ValueError('Existing packaged bake has not been verified for the running inputs')
-            for n in manifest['files']:
-                raw = old.read('skycraft/baked/' + n)
-                if decode_bake(raw)[0] != expected:
-                    raise ValueError('Existing packaged bake contains mixed inputs')
-                replacements['skycraft/baked/' + n] = raw
-            replacements['skycraft/baked/manifest.json'] = old.read('skycraft/baked/manifest.json')
+            def verified_entries(archive):
+                manifest = json.loads(archive.read('skycraft/baked/manifest.json'))
+                names = {n + '.bin' for n in ('landmass', 'roadplan', 'streetplan', 'sceneplan')}
+                if manifest.get('format') != 1 or set(manifest.get('files', [])) != names or manifest.get('inputs') != expected:
+                    raise ValueError('Packaged bake manifest is stale or incomplete')
+                entries = {'skycraft/baked/manifest.json': archive.read('skycraft/baked/manifest.json')}
+                for name in names:
+                    raw = archive.read('skycraft/baked/' + name)
+                    if decode_bake(raw)[0] != expected: raise ValueError('Packaged bake has mixed inputs')
+                    entries['skycraft/baked/' + name] = raw
+                return entries
+            try:
+                replacements = verified_entries(old)
+            except (ValueError, KeyError):
+                # A core can have computed live because its embedded bake was stale. A staged,
+                # fully verified replacement should replace that bake, never inherit it.
+                verified_entries(new)
+                safe = False
+                fresh_verified_bakes = True
         backup = DEV / 'core-backups' / str(time.time_ns()) / 'skycraft-core.jar'
         backup.parent.mkdir(parents=True)
         shutil.copy2(core, backup)
@@ -327,7 +442,9 @@ def install_core(jar):
                 target.writestr(entry, replacements.get(entry.filename, new.read(entry)))
     os.replace(tmp, core)
     print(json.dumps({'installed': str(jar), 'backup': str(backup), 'changedEntries': changed,
-                      'verifiedRuntimeBakesPreserved': safe, 'restartRequired': True}, indent=2))
+                      'installedSha256': hashlib.sha256(core.read_bytes()).hexdigest(),
+                      'verifiedRuntimeBakesPreserved': safe, 'freshVerifiedBakes': fresh_verified_bakes,
+                      'restartRequired': True}, indent=2))
 
 
 def main():
@@ -349,8 +466,21 @@ def main():
     bake.add_argument("folder", type=Path)
     install = sub.add_parser('install-core')
     install.add_argument('jar', type=Path)
+    staged = sub.add_parser('stage-core')
+    staged.add_argument('jar', type=Path)
+    staged.add_argument('bakes', type=Path)
+    staged.add_argument('output', type=Path)
     args = ap.parse_args()
-    if args.action == 'install-core':
+    with nullcontext() if args.action in ("status", "storage", "profile") else live_guard():
+        dispatch(args)
+
+
+def dispatch(args):
+    if INSTANCE_NAME == DIAGNOSTIC_NAME and args.action in ("shader", "upload-bakes", "install-core", "stage-core"):
+        raise ValueError("Build and prepare a new core diagnostic archive instead of modifying its recorded core")
+    if args.action == 'stage-core':
+        stage_core(args.jar, args.bakes, args.output)
+    elif args.action == 'install-core':
         install_core(args.jar)
     elif args.action == "profile":
         print(json.dumps(profile(), indent=2))
@@ -379,9 +509,20 @@ def main():
             return
         if not INSTANCE.is_dir():
             raise RuntimeError("Prepare the disposable instance first with tools/qa/prism_autotest.ps1")
+        validate_core_jar(GAME / "mods/skycraft-core.jar")
+        components = json.loads((INSTANCE / "mmc-pack.json").read_text(encoding="utf-8-sig"))["components"]
+        validate_components(components)
+        if INSTANCE_NAME == DIAGNOSTIC_NAME:
+            validate_diagnostic_instance(INSTANCE)
+        # A second native preview would compete for memory and invalidate performance captures.
+        sys.path.insert(0, str(REPO / "tools/qa"))
+        from prepare_prism_263 import exact_processes
+        other = TARGET["instanceName"] if INSTANCE_NAME == DIAGNOSTIC_NAME else DIAGNOSTIC_NAME
+        if exact_processes(PRISM_ROOT, other):
+            raise RuntimeError("Another disposable native client is running; close it cleanly first")
         atomic(GAME / "skycraft-live.txt", b"# New preview session; idle\n")
         launcher = Path(os.environ["LOCALAPPDATA"]) / "Programs/PrismLauncher/prismlauncher.exe"
-        subprocess.Popen([str(launcher), "--launch", "Skycraft-autotest"], creationflags=subprocess.CREATE_NO_WINDOW)
+        subprocess.Popen([str(launcher), "--dir", str(PRISM_ROOT), "--launch", INSTANCE_NAME], creationflags=subprocess.CREATE_NO_WINDOW)
         print("Preview launch requested; status will report when the world heartbeat is ready")
     elif args.action == "close":
         if not processes():
@@ -429,6 +570,9 @@ def main():
                 f"skycraft-dev regen {x1} {z1} {x2} {z2}", "skycraft-dev status"])
         print("Fresh area ready; use a dungeon view/camera command to return. Release tickets when done.")
     elif args.action == "shader":
+        acceptance = read_json(GAME / "migration/custom-shader-acceptance.json")
+        if acceptance.get("target") != TARGET or acceptance.get("integrationVerified") is not True:
+            raise RuntimeError("The customized Complementary integration is preserved but has not passed native 26.3 acceptance; no shader files were changed")
         require_ready()
         sys.path.insert(0, str(REPO / "tools/shaders"))
         import patch_complementary_clouds

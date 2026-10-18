@@ -59,7 +59,7 @@ public final class RoadCells {
         double best = Double.MAX_VALUE;
         for (int cx = (x - reach) >> 4; cx <= (x + reach) >> 4; cx++) {
             for (int cz = (z - reach) >> 4; cz <= (z + reach) >> 4; cz++) {
-                LongArrayList entries = data.chunkIndex.get(ChunkPos.asLong(cx, cz));
+                LongArrayList entries = data.chunkIndex.get(ChunkPos.pack(cx, cz));
                 if (entries == null) continue;
                 for (int k = 0; k < entries.size(); k++) {
                     long e = entries.getLong(k);

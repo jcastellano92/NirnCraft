@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:smelting",
+  "category": "misc",
+  "group": "refined_moonstone",
+  "ingredient": "skycraft:raw_moonstone",
+  "result": {
+    "id": "skycraft:refined_moonstone"
+  },
+  "experience": 0.7,
+  "cookingtime": 200
+}

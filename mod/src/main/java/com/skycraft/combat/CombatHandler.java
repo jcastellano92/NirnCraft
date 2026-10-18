@@ -15,7 +15,7 @@ import com.skycraft.vitals.RacePowers;
 import com.skycraft.vitals.Vitals;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -32,21 +32,20 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.AbstractArrow;
-import net.minecraft.world.item.ArmorItem;
+import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
 import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.ShieldItem;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.living.LivingEntityUseItemEvent;
-import net.minecraftforge.event.entity.living.LivingFallEvent;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.event.entity.living.ShieldBlockEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+
+import net.neoforged.neoforge.event.entity.living.LivingEntityUseItemEvent;
+import net.neoforged.neoforge.event.entity.living.LivingFallEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.neoforge.event.entity.living.LivingShieldBlockEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -56,23 +55,23 @@ import java.util.UUID;
  * Skyrim combat rules: skill/perk damage scaling, power attacks (stamina), sneak attacks, weapon & shield
  * blocking, armor skills, racial resistances and the combat/armor/block/sneak/archery perks.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class CombatHandler {
     /** Entities that take reduced sneak attack multipliers and can't be paralyzed (bosses, dragons). */
-    public static final TagKey<EntityType<?>> BOSSES = TagKey.create(Registries.ENTITY_TYPE, new ResourceLocation("forge", "bosses"));
+    public static final TagKey<EntityType<?>> BOSSES = TagKey.create(Registries.ENTITY_TYPE, Identifier.fromNamespaceAndPath("forge", "bosses"));
     /** Creatures counted as "beasts/monsters" for the Hunting tree's Monster Hunter perk. */
-    public static final TagKey<EntityType<?>> MONSTERS = TagKey.create(Registries.ENTITY_TYPE, new ResourceLocation(Skycraft.MODID, "monsters"));
+    public static final TagKey<EntityType<?>> MONSTERS = TagKey.create(Registries.ENTITY_TYPE, Identifier.fromNamespaceAndPath(Skycraft.MODID, "monsters"));
     /** Skyrim damage is roughly 5x Minecraft damage; XP use values are computed in Skyrim units. */
     public static final float SKYRIM_SCALE = 5f;
 
-    /** Set while a combat side effect deals its damage, so the nested LivingHurtEvent isn't treated as a new swing. */
+    /** Set while a combat side effect deals its damage, so the nested LivingIncomingDamageEvent isn't treated as a new swing. */
     private static final ThreadLocal<Boolean> SECONDARY = ThreadLocal.withInitial(() -> false);
     /** Game time of each player's last melee swing (vanilla sweeping hits arrive in the same tick). */
     private static final Map<UUID, Long> LAST_SWING = new HashMap<>();
     /** Transient attribute modifier IDs for Dual Flurry, Ranger, and Block Runner perks. */
-    private static final UUID DUAL_FLURRY_SPEED_ID = UUID.fromString("92b4c5d6-7e8f-4a1b-9c2d-3e4f5a6b7c8d");
-    private static final UUID RANGER_SPEED_ID = UUID.fromString("a3c5d7e9-1f2a-4b3c-8d9e-0f1a2b3c4d5e");
-    private static final UUID BLOCK_RUNNER_SPEED_ID = UUID.fromString("b4d6e8f0-2a3b-4c5d-9e0f-1a2b3c4d5e6f");
+    private static final net.minecraft.resources.Identifier DUAL_FLURRY_SPEED_ID = net.minecraft.resources.Identifier.parse("skycraft:modifier_92b4c5d6-7e8f-4a1b-9c2d-3e4f5a6b7c8d");
+    private static final net.minecraft.resources.Identifier RANGER_SPEED_ID = net.minecraft.resources.Identifier.parse("skycraft:modifier_a3c5d7e9-1f2a-4b3c-8d9e-0f1a2b3c4d5e");
+    private static final net.minecraft.resources.Identifier BLOCK_RUNNER_SPEED_ID = net.minecraft.resources.Identifier.parse("skycraft:modifier_b4d6e8f0-2a3b-4c5d-9e0f-1a2b3c4d5e6f");
 
     private CombatHandler() {}
 
@@ -100,7 +99,7 @@ public final class CombatHandler {
         if (SECONDARY.get()) return false;
         SECONDARY.set(true);
         try {
-            return target.hurt(source, amount);
+            return com.skycraft.platform.Effects.hurt(target, source, amount);
         } finally {
             SECONDARY.set(false);
         }
@@ -119,16 +118,16 @@ public final class CombatHandler {
     // ------------------------------------------------------------------ offense & defense
 
     @SubscribeEvent(priority = EventPriority.HIGH)
-    public static void onHurt(LivingHurtEvent event) {
+    public static void onHurt(com.skycraft.combat.BeforeArmorDamageEvent event) {
         LivingEntity target = event.getEntity();
         DamageSource source = event.getSource();
-        if (target.level().isClientSide) return;
+        if (target.level().isClientSide()) return;
 
         // Party & companion protection: party members and friendly companions/summons cannot be damaged by the player's magic/projectiles
         if (source.getEntity() instanceof ServerPlayer attacker && attacker != target) {
             boolean samePartyPlayer = false;
             if (target instanceof ServerPlayer defender) {
-                var pm = com.skycraft.quest.party.PartyManager.get(attacker.getServer());
+                var pm = com.skycraft.quest.party.PartyManager.get(attacker.level().getServer());
                 var p1 = pm.partyOf(attacker.getUUID());
                 var p2 = pm.partyOf(defender.getUUID());
                 samePartyPlayer = p1 != null && p1 == p2;
@@ -224,7 +223,7 @@ public final class CombatHandler {
             if (data.getRace() != null) amount += data.getRace().clawDamage(); // Khajiit, Ka Po' Tun, Imga, Tsaesci
             if (Perks.has(data, "heavy_armor.fists_of_steel")) {
                 ItemStack chest = player.getItemBySlot(EquipmentSlot.CHEST);
-                if (chest.getItem() instanceof ArmorItem a && ArmorClass.isHeavy(chest)) amount += a.getDefense() * 0.5f;
+                if (com.skycraft.inventory.EquipmentData.isArmor(chest) && ArmorClass.isHeavy(chest)) amount += com.skycraft.inventory.EquipmentData.defense(chest) * 0.5f;
             }
             if (Perks.has(data, "unarmed.heavy_strikes")) stagger(player, target, 25);
             if (Perks.has(data, "unarmed.grandmaster") && rnd.nextFloat() < 0.2f) {
@@ -281,8 +280,8 @@ public final class CombatHandler {
                 stagger(player, target, 20);
                 boolean paralyzePerk = wc.skill == Skill.ONE_HANDED ? Perks.has(data, "one_handed.paralyzing_strike")
                         : Perks.has(data, "two_handed.warmaster");
-                if (paralyzePerk && rnd.nextFloat() < 0.25f && !target.getType().is(BOSSES)) {
-                    target.addEffect(new MobEffectInstance(ModEffects.PARALYSIS.get(), 60));
+                if (paralyzePerk && rnd.nextFloat() < 0.25f && !target.getType().builtInRegistryHolder().is(BOSSES)) {
+                    target.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(ModEffects.PARALYSIS.get()), 60));
                 }
                 if (wc.twoHanded() && Perks.has(data, "two_handed.sweep")) sweep(player, target, amount * mult * 0.5f);
                 player.level().playSound(null, target.blockPosition(), SoundEvents.PLAYER_ATTACK_STRONG, SoundSource.PLAYERS, 1f, 0.7f);
@@ -301,11 +300,11 @@ public final class CombatHandler {
                 case WOUNDING -> bleed(target, 3);
                 case VAMPIRIC -> player.heal(Math.max(1f, amount * mult * 0.15f));
                 case INCENDIARY -> {
-                    target.setSecondsOnFire(5);
+                    target.igniteForSeconds(5);
                     amount += 4f;
                 }
                 case FREEZING -> {
-                    target.addEffect(new MobEffectInstance(net.minecraft.world.effect.MobEffects.MOVEMENT_SLOWDOWN, 80, 1));
+                    target.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(net.minecraft.world.effect.MobEffects.SLOWNESS), 80, 1));
                     amount += 4f;
                 }
                 case SHOCKING -> {
@@ -349,8 +348,8 @@ public final class CombatHandler {
             Notifier.message(player, Component.translatable("message.skycraft.critical"));
         }
         if (Perks.has(data, "archery.power_shot") && arrow.isCritArrow()) stagger(player, target, 20);
-        if (Perks.has(data, "archery.bullseye") && rnd.nextFloat() < 0.15f && !target.getType().is(BOSSES)) {
-            target.addEffect(new MobEffectInstance(ModEffects.PARALYSIS.get(), 60));
+        if (Perks.has(data, "archery.bullseye") && rnd.nextFloat() < 0.15f && !target.getType().builtInRegistryHolder().is(BOSSES)) {
+            target.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(ModEffects.PARALYSIS.get()), 60));
         }
         mult *= huntingMultiplier(data, target);
         mult *= sneakMultiplier(player, data, target, WeaponClass.BOW);
@@ -362,8 +361,8 @@ public final class CombatHandler {
     private static float huntingMultiplier(PlayerData data, LivingEntity target) {
         float mult = 1f;
         if (target instanceof Animal) mult += 0.2f * Perks.rank(data, "hunting.tracker");
-        if (target.getType().is(MONSTERS) && Perks.has(data, "hunting.monster_hunter")) mult += 0.25f;
-        if (Perks.has(data, "hunting.apex_predator") && (target instanceof Animal || target.getType().is(MONSTERS))) mult += 0.25f;
+        if (target.getType().builtInRegistryHolder().is(MONSTERS) && Perks.has(data, "hunting.monster_hunter")) mult += 0.25f;
+        if (Perks.has(data, "hunting.apex_predator") && (target instanceof Animal || target.getType().builtInRegistryHolder().is(MONSTERS))) mult += 0.25f;
         return mult;
     }
 
@@ -377,7 +376,7 @@ public final class CombatHandler {
             case BOW -> Perks.has(data, "sneak.deadly_aim") ? 3f : 2f;
             default -> 2f;
         };
-        if (target.getType().is(BOSSES)) mult = Math.min(mult, 2f);
+        if (target.getType().builtInRegistryHolder().is(BOSSES)) mult = Math.min(mult, 2f);
         Notifier.message(player, Component.translatable("message.skycraft.sneak_attack", (int) mult));
         Progression.addSkillXp(player, Skill.SNEAK, 2.5f * mult);
         data.addStat("sneak_attacks", 1);
@@ -447,12 +446,12 @@ public final class CombatHandler {
 
         // Heavy armor makes you hard to knock around.
         if (heavy >= 4 && Perks.has(data, "heavy_armor.tower_of_strength")) {
-            player.removeEffect(ModEffects.STAGGER.get());
+            player.removeEffect(com.skycraft.platform.Effects.holder(ModEffects.STAGGER.get()));
         }
 
         // Legendary armor effects
         for (EquipmentSlot slot : EquipmentSlot.values()) {
-            if (slot.getType() == EquipmentSlot.Type.ARMOR) {
+            if (slot.getType() == EquipmentSlot.Type.HUMANOID_ARMOR) {
                 LegendaryItem.Prefix lp = LegendaryItem.getPrefix(player.getItemBySlot(slot));
                 if (lp != null) {
                     if (lp == LegendaryItem.Prefix.BOLSTERING) {
@@ -469,7 +468,7 @@ public final class CombatHandler {
     }
 
     @SubscribeEvent
-    public static void onAttackEntity(net.minecraftforge.event.entity.player.AttackEntityEvent event) {
+    public static void onAttackEntity(net.neoforged.neoforge.event.entity.player.AttackEntityEvent event) {
         if (event.getEntity() instanceof ServerPlayer player && Sheathe.isSheathed(player)) {
             event.setCanceled(true);
             Sheathe.setSheathed(player, false);
@@ -479,7 +478,7 @@ public final class CombatHandler {
             net.minecraft.world.InteractionHand hand = (player.tickCount % 2 == 0)
                     ? net.minecraft.world.InteractionHand.MAIN_HAND
                     : net.minecraft.world.InteractionHand.OFF_HAND;
-            player.swing(hand, true);
+            player.swing(hand, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
         }
     }
 
@@ -501,16 +500,16 @@ public final class CombatHandler {
     }
 
     private static void bleed(LivingEntity target, int rank) {
-        if (rank > 0) target.addEffect(new MobEffectInstance(ModEffects.BLEEDING.get(), 60, rank - 1));
+        if (rank > 0) target.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(ModEffects.BLEEDING.get()), 60, rank - 1));
     }
 
     public static void stagger(Entity source, LivingEntity target, int ticks) {
-        if (target.getType().is(BOSSES)) return;
+        if (target.getType().builtInRegistryHolder().is(BOSSES)) return;
         if (target instanceof ServerPlayer p && ArmorClass.countHeavy(p) >= 4 && Perks.has(p, "heavy_armor.tower_of_strength")) return;
-        target.addEffect(new MobEffectInstance(ModEffects.STAGGER.get(), ticks, 0, false, false));
+        target.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(ModEffects.STAGGER.get()), ticks, 0, false, false));
         Vec3 push = target.position().subtract(source.position()).multiply(1, 0, 1).normalize().scale(0.6);
         target.push(push.x, 0.15, push.z);
-        target.hurtMarked = true;
+        target.syncVelocity = true;
     }
 
     private static void sweep(ServerPlayer player, LivingEntity primary, float damage) {
@@ -525,7 +524,7 @@ public final class CombatHandler {
     // ------------------------------------------------------------------ shields
 
     @SubscribeEvent
-    public static void onShieldBlock(ShieldBlockEvent event) {
+    public static void onShieldBlock(LivingShieldBlockEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
         PlayerData data = SkyData.get(player);
         DamageSource source = event.getDamageSource();
@@ -544,7 +543,7 @@ public final class CombatHandler {
             if (Perks.has(data, "block.deadly_bash")) secondaryHurt(attacker, player.damageSources().playerAttack(player), blocked * 0.25f);
             if (Perks.has(data, "block.disarming_bash") && attacker instanceof Mob mob && player.getRandom().nextFloat() < 0.1f
                     && !mob.getMainHandItem().isEmpty()) {
-                mob.spawnAtLocation(mob.getMainHandItem().copy());
+                mob.spawnAtLocation((net.minecraft.server.level.ServerLevel)mob.level(), mob.getMainHandItem().copy());
                 mob.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
                 Notifier.message(player, Component.translatable("message.skycraft.disarmed"));
             }
@@ -571,15 +570,15 @@ public final class CombatHandler {
                 int amp = steadyRank >= 2 ? 2 : 0; // ~25% slow at rank 1, ~50% slow at rank 2
                 for (LivingEntity e : sp.level().getEntitiesOfClass(LivingEntity.class, sp.getBoundingBox().inflate(24.0),
                         e -> e != sp && e.isAlive() && !(e instanceof Player))) {
-                    e.addEffect(new MobEffectInstance(net.minecraft.world.effect.MobEffects.MOVEMENT_SLOWDOWN, 12, amp, true, false));
+                    e.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(net.minecraft.world.effect.MobEffects.SLOWNESS), 12, amp, true, false));
                 }
             }
         }
     }
 
     @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer player)) return;
+    public static void onPlayerTick(net.neoforged.neoforge.event.tick.PlayerTickEvent.Post event) {
+        if (!(event instanceof net.neoforged.neoforge.event.tick.PlayerTickEvent.Post) || !(event.getEntity() instanceof ServerPlayer player)) return;
         updateCombatPerkAttributes(player);
         if (player.tickCount % 20 == 0) {
             RacePowers.tickFireCloak(player);
@@ -600,11 +599,10 @@ public final class CombatHandler {
             double flurryBonus = flurryRank >= 2 ? 0.35 : (flurryRank == 1 ? 0.20 : 0.0);
             var existing = attackSpeed.getModifier(DUAL_FLURRY_SPEED_ID);
             if (flurryBonus > 0.0) {
-                if (existing == null || Math.abs(existing.getAmount() - flurryBonus) > 1e-4) {
+                if (existing == null || Math.abs(existing.amount() - flurryBonus) > 1e-4) {
                     if (existing != null) attackSpeed.removeModifier(DUAL_FLURRY_SPEED_ID);
-                    attackSpeed.addTransientModifier(new net.minecraft.world.entity.ai.attributes.AttributeModifier(
-                            DUAL_FLURRY_SPEED_ID, "Dual Flurry", flurryBonus,
-                            net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.MULTIPLY_TOTAL));
+                    attackSpeed.addTransientModifier(new net.minecraft.world.entity.ai.attributes.AttributeModifier(DUAL_FLURRY_SPEED_ID, flurryBonus,
+                            net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
                 }
             } else if (existing != null) {
                 attackSpeed.removeModifier(DUAL_FLURRY_SPEED_ID);
@@ -618,9 +616,8 @@ public final class CombatHandler {
             boolean rangerActive = drawingRanged && Perks.has(player, "archery.ranger");
             var existingRanger = moveSpeed.getModifier(RANGER_SPEED_ID);
             if (rangerActive && existingRanger == null) {
-                moveSpeed.addTransientModifier(new net.minecraft.world.entity.ai.attributes.AttributeModifier(
-                        RANGER_SPEED_ID, "Ranger", 0.35,
-                        net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.MULTIPLY_TOTAL));
+                moveSpeed.addTransientModifier(new net.minecraft.world.entity.ai.attributes.AttributeModifier(RANGER_SPEED_ID, 0.35,
+                        net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
             } else if (!rangerActive && existingRanger != null) {
                 moveSpeed.removeModifier(RANGER_SPEED_ID);
             }
@@ -629,9 +626,8 @@ public final class CombatHandler {
             boolean blockRunnerActive = blocking && Perks.has(player, "block.block_runner");
             var existingBlockRunner = moveSpeed.getModifier(BLOCK_RUNNER_SPEED_ID);
             if (blockRunnerActive && existingBlockRunner == null) {
-                moveSpeed.addTransientModifier(new net.minecraft.world.entity.ai.attributes.AttributeModifier(
-                        BLOCK_RUNNER_SPEED_ID, "Block Runner", 0.35,
-                        net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.MULTIPLY_TOTAL));
+                moveSpeed.addTransientModifier(new net.minecraft.world.entity.ai.attributes.AttributeModifier(BLOCK_RUNNER_SPEED_ID, 0.35,
+                        net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
             } else if (!blockRunnerActive && existingBlockRunner != null) {
                 moveSpeed.removeModifier(BLOCK_RUNNER_SPEED_ID);
             }

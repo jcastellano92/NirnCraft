@@ -9,7 +9,6 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.network.PacketDistributor;
 
 /**
  * Server-side helpers that ask nearby clients to draw spell visuals ({@link MagicPackets.Fx}) and play sounds.
@@ -48,7 +47,7 @@ public final class MagicFx {
 
     /** Sends an effect to every player within {@code radius} blocks of {@code pos}. */
     public static void sendNear(ServerLevel level, Vec3 pos, double radius, int kind, Element element, Vec3 a, Vec3 b, int entityId, int extra) {
-        SkyNetwork.CHANNEL.send(PacketDistributor.NEAR.with(PacketDistributor.TargetPoint.p(pos.x, pos.y, pos.z, radius, level.dimension())),
+        SkyNetwork.sendNear(level, pos.x, pos.y, pos.z, radius,
                 new MagicPackets.Fx(kind, element.ordinal(), a, b, entityId, extra));
     }
 
@@ -56,10 +55,19 @@ public final class MagicFx {
         sendNear(level, pos, 64, BURST, element, pos, pos, -1, Math.round(radius * 10));
     }
 
+    /** Sends a local notification without broadcasting it to nearby players. */
+    public static void soundToPlayer(ServerPlayer player, SoundEvent sound, SoundSource source, float volume, float pitch) {
+        player.connection.send(new net.minecraft.network.protocol.game.ClientboundSoundPacket(
+                net.minecraft.core.registries.BuiltInRegistries.SOUND_EVENT.wrapAsHolder(sound), source,
+                player.getX(), player.getY(), player.getZ(), volume, pitch, player.getRandom().nextLong()));
+    }
+
     /** Plays a spell sound. With the Quiet Casting perk only the caster hears it. */
     public static void sound(ServerPlayer caster, Vec3 pos, SoundEvent sound, float volume, float pitch) {
         if (Perks.has(caster, "illusion.quiet_casting")) {
-            caster.playNotifySound(sound, SoundSource.PLAYERS, volume * 0.6f, pitch);
+            caster.connection.send(new net.minecraft.network.protocol.game.ClientboundSoundPacket(
+                    net.minecraft.core.Holder.direct(sound), SoundSource.PLAYERS,
+                    caster.getX(), caster.getY(), caster.getZ(), volume * 0.6f, pitch, caster.getRandom().nextLong()));
         } else {
             caster.level().playSound(null, pos.x, pos.y, pos.z, sound, SoundSource.PLAYERS, volume, pitch);
         }

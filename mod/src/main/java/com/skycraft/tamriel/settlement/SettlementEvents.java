@@ -15,12 +15,12 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructurePiece;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.level.ChunkEvent;
-import net.minecraftforge.event.server.ServerStoppingEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.LogicalSide;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.tick.LevelTickEvent;
+import net.neoforged.neoforge.event.level.ChunkEvent;
+import net.neoforged.neoforge.event.server.ServerStoppingEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+
+import net.neoforged.fml.common.Mod;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,7 +33,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  * queues; the level tick does the work), gives household containers and beds their owners, hands finished house
  * sites to {@link com.skycraft.economy.Houses}, and populates settlements as players come near.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class SettlementEvents {
     private static final ConcurrentLinkedQueue<StructureStart> FOUND = new ConcurrentLinkedQueue<>();
     private static long tick;
@@ -52,9 +52,9 @@ public final class SettlementEvents {
     }
 
     @SubscribeEvent
-    public static void onLevelTick(TickEvent.LevelTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || event.side != LogicalSide.SERVER) return;
-        if (!(event.level instanceof ServerLevel level) || level.dimension() != Level.OVERWORLD) return;
+    public static void onLevelTick(LevelTickEvent.Post event) {
+        if (event.getLevel().isClientSide()) return;
+        if (!(event.getLevel() instanceof ServerLevel level) || level.dimension() != Level.OVERWORLD) return;
         tick++;
         try {
             StructureStart start;
@@ -80,7 +80,7 @@ public final class SettlementEvents {
     /** Records the anchors of every piece of a start (once per start), applies ownership, tells houses. */
     static void record(ServerLevel level, StructureStart start) {
         SettlementAnchors data = SettlementAnchors.get(level);
-        long startKey = start.getChunkPos().toLong();
+        long startKey = start.getChunkPos().pack();
         List<StructurePiece> pieces = start.getPieces();
         if (pieces.isEmpty() || !(pieces.get(0) instanceof SettlementPiece first)) return;
         String key = first.settlement;

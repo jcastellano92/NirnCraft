@@ -1,87 +1,68 @@
 package com.skycraft.fire.client;
 
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.VertexFormat;
-import com.skycraft.Skycraft;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.resources.ResourceLocation;
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.renderpearl.api.pipeline.*;
+import com.mojang.renderpearl.api.textures.AddressMode;
+import com.mojang.renderpearl.api.textures.FilterMode;
+import net.minecraft.client.renderer.BindGroupLayouts;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.renderer.oit.OitPipelineSet;
+import net.minecraft.client.renderer.rendertype.RenderSetup;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.resources.Identifier;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.client.event.RegisterRenderPipelinesEvent;
 
-/**
- * Render types of the far fire renderer. They are built on vanilla's own entity shaders ({@code rendertype_eyes} for
- * the additive flames and glow, {@code rendertype_entity_translucent} for smoke), so Oculus/Iris maps them to the
- * shader pack's {@code gbuffers_spidereyes} / {@code gbuffers_entities_translucent} programs and they sit in the pack's
- * lighting and tone mapping instead of bypassing it. No face culling (the quads are camera-facing billboards) and no
- * depth writes (they are sorted, and must not occlude one another).
- *
- * <p>Extends {@link RenderType} only to reach its protected state shards; never instantiated.</p>
- */
-public final class FireRenderTypes extends RenderType {
-    static final ResourceLocation FLAME_TEX = new ResourceLocation(Skycraft.MODID, "textures/fire/far_flame.png");
-    static final ResourceLocation SMOKE_TEX = new ResourceLocation(Skycraft.MODID, "textures/fire/far_smoke.png");
-    static final ResourceLocation GLOW_TEX = new ResourceLocation(Skycraft.MODID, "textures/fire/far_glow.png");
-    private static final TransparencyStateShard SOFT_ADDITIVE = new TransparencyStateShard("skycraft_soft_additive",()->{
-        com.mojang.blaze3d.systems.RenderSystem.enableBlend();
-        com.mojang.blaze3d.systems.RenderSystem.blendFuncSeparate(
-                com.mojang.blaze3d.platform.GlStateManager.SourceFactor.SRC_ALPHA,
-                com.mojang.blaze3d.platform.GlStateManager.DestFactor.ONE,
-                com.mojang.blaze3d.platform.GlStateManager.SourceFactor.ONE,
-                com.mojang.blaze3d.platform.GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-    },()->{
-        com.mojang.blaze3d.systems.RenderSystem.disableBlend();
-        com.mojang.blaze3d.systems.RenderSystem.defaultBlendFunc();
-    });
-
-    /** Additive flame sprites. */
-    public static final RenderType FLAME = create("skycraft_far_flame", DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.QUADS, 4096,
-            false, false, CompositeState.builder()
-                    .setShaderState(RENDERTYPE_EYES_SHADER)
-                    .setTextureState(new TextureStateShard(FLAME_TEX, false, false))
-                    .setTransparencyState(ADDITIVE_TRANSPARENCY)
-                    .setWriteMaskState(COLOR_WRITE)
-                    .setCullState(NO_CULL)
-                    .setDepthTestState(LEQUAL_DEPTH_TEST)
-                    .createCompositeState(false));
-
-    /** Additive soft glow. */
-    public static final RenderType GLOW = create("skycraft_far_glow", DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.QUADS, 2048,
-            false, false, CompositeState.builder()
-                    .setShaderState(RENDERTYPE_EYES_SHADER)
-                    .setTextureState(new TextureStateShard(GLOW_TEX, false, false))
-                    .setTransparencyState(ADDITIVE_TRANSPARENCY)
-                    .setWriteMaskState(COLOR_WRITE)
-                    .setCullState(NO_CULL)
-                    .setDepthTestState(LEQUAL_DEPTH_TEST)
-                    .createCompositeState(false));
-
-    /** Alpha-blended, lit smoke puffs. */
-    public static final RenderType SMOKE = create("skycraft_far_smoke", DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.QUADS, 8192,
-            false, false, CompositeState.builder()
-                    .setShaderState(RENDERTYPE_ENTITY_TRANSLUCENT_SHADER)
-                    .setTextureState(new TextureStateShard(SMOKE_TEX, true, false))
-                    .setTransparencyState(TRANSLUCENT_TRANSPARENCY)
-                    .setWriteMaskState(COLOR_WRITE)
-                    .setCullState(NO_CULL)
-                    .setDepthTestState(LEQUAL_DEPTH_TEST)
-                    .setLightmapState(LIGHTMAP)
-                    .setOverlayState(OVERLAY)
-                    .createCompositeState(false));
-
-    // Vanilla eyes output straight RGB. Its ONE/ONE blend ignores the feathered
-    // alpha and bright RGB in transparent texels, painting rectangular flares.
-    public static final RenderType FLAME_NATIVE=softAdditive("skycraft_far_flame_native",FLAME_TEX);
-    public static final RenderType GLOW_NATIVE=softAdditive("skycraft_far_glow_native",GLOW_TEX);
-
-    private static RenderType softAdditive(String name,ResourceLocation texture) {
-        return create(name,DefaultVertexFormat.NEW_ENTITY,VertexFormat.Mode.QUADS,4096,false,false,
-                CompositeState.builder().setShaderState(RENDERTYPE_EYES_SHADER)
-                        .setTextureState(new TextureStateShard(texture,true,false))
-                        .setTransparencyState(SOFT_ADDITIVE).setWriteMaskState(COLOR_WRITE)
-                        .setCullState(NO_CULL).setDepthTestState(LEQUAL_DEPTH_TEST).createCompositeState(false));
+/** Native entity lighting and OIT, explicit soft additive blending, and no duplicate distance fog. */
+@EventBusSubscriber(modid="skycraft",value=Dist.CLIENT)
+public final class FireRenderTypes {
+    static final Identifier FLAME_TEX=texture("far_flame"),SMOKE_TEX=texture("far_smoke"),GLOW_TEX=texture("far_glow");
+    private static Identifier texture(String name){return Identifier.fromNamespaceAndPath("skycraft","textures/fire/"+name+".png");}
+    private static final RenderPipeline SMOKE_PIPELINE=smokePipeline();
+    private static final RenderPipeline FLAME_PIPELINE=flamePipeline();
+    private static final OitPipelineSet SMOKE_OIT=OitPipelineSet.builder(id("fire_smoke"),
+        oitEntity().withShaderDefine("ALPHA_CUTOUT",0.1f))
+        .withAccumulateModifier(p->p.withShaderDefine("PER_FACE_LIGHTING").withBindGroupLayout(BindGroupLayouts.SAMPLER1).withBindGroupLayout(BindGroupLayouts.SAMPLER2)).build();
+    private static final OitPipelineSet FLAME_OIT=OitPipelineSet.builder(id("fire_flame"),
+        oitEntity(RenderPipelines.EYES_SNIPPET).withShaderDefine("OIT_ADDITIVE")).build();
+    public static final RenderType SMOKE=type("skycraft_far_smoke",SMOKE_TEX,SMOKE_PIPELINE,SMOKE_OIT,true);
+    public static final RenderType FLAME=type("skycraft_far_flame",FLAME_TEX,FLAME_PIPELINE,FLAME_OIT,false);
+    public static final RenderType GLOW=type("skycraft_far_glow",GLOW_TEX,FLAME_PIPELINE,FLAME_OIT,false);
+    public static final RenderType FLAME_NATIVE=FLAME,GLOW_NATIVE=GLOW;
+    private static Identifier id(String path){return Identifier.fromNamespaceAndPath("skycraft",path);}
+    private static RenderPipeline.Builder oitEntity(RenderPipeline.Snippet... snippets){
+        return RenderPipeline.builder(snippets).withBindGroupLayout(BindGroupLayouts.DYNAMIC_TRANSFORMS)
+            .withBindGroupLayout(BindGroupLayouts.FOG).withBindGroupLayout(BindGroupLayouts.LIGHTING).withBindGroupLayout(BindGroupLayouts.SAMPLER0)
+            .withVertexShader(Identifier.withDefaultNamespace("core/entity")).withFragmentShader(id("core/fire_entity"))
+            .withVertexBinding(0,com.mojang.blaze3d.vertex.DefaultVertexFormat.ENTITY).withPrimitiveTopology(PrimitiveTopology.QUADS)
+            .withDepthStencilState(new DepthStencilState(CompareOp.GREATER_THAN_OR_EQUAL,false)).withCull(false);
     }
-
-    private FireRenderTypes(String name, VertexFormat format, VertexFormat.Mode mode, int size, boolean crumbling, boolean sort,
-                            Runnable setup, Runnable clear) {
-        super(name, format, mode, size, crumbling, sort, setup, clear);
-        throw new IllegalStateException("not instantiable");
+    private static RenderPipeline smokePipeline(){
+        return RenderPipeline.builder(RenderPipelines.ENTITY_SNIPPET).withLocation(id("pipeline/fire_smoke"))
+            .withFragmentShader(id("core/fire_entity")).withBindGroupLayout(BindGroupLayouts.SAMPLER1)
+            .withShaderDefine("PER_FACE_LIGHTING").withShaderDefine("ALPHA_CUTOUT",0.1f)
+            .withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT))
+            .withDepthStencilState(new DepthStencilState(CompareOp.GREATER_THAN_OR_EQUAL,false)).withCull(false).build();
     }
+    private static RenderPipeline flamePipeline(){
+        return RenderPipeline.builder(RenderPipelines.ENTITY_NO_LIGHTMAP_SNIPPET,RenderPipelines.EYES_SNIPPET)
+            .withLocation(id("pipeline/fire_flame")).withFragmentShader(id("core/fire_entity"))
+            .withColorTargetState(new ColorTargetState(new BlendFunction(BlendFactor.SRC_ALPHA,BlendFactor.ONE,BlendFactor.ONE,BlendFactor.ONE_MINUS_SRC_ALPHA)))
+            .withDepthStencilState(new DepthStencilState(CompareOp.GREATER_THAN_OR_EQUAL,false)).withCull(false).build();
+    }
+    private static RenderType type(String name,Identifier texture,RenderPipeline pipeline,OitPipelineSet oit,boolean lit){
+        var builder=RenderSetup.builder(pipeline).setOitPipelines(oit).sortOnUpload()
+            .withTexture("Sampler0",texture,()->RenderSystem.getSamplerCache().getSampler(AddressMode.CLAMP_TO_EDGE,AddressMode.CLAMP_TO_EDGE,FilterMode.LINEAR,FilterMode.LINEAR,false));
+        if(lit)builder.useLightmap().useOverlay();
+        return RenderType.create(name,builder.createRenderSetup());
+    }
+    @SubscribeEvent public static void register(RegisterRenderPipelinesEvent event){
+        event.registerPipeline(SMOKE_PIPELINE);event.registerPipeline(FLAME_PIPELINE);
+        for(var oit:java.util.List.of(SMOKE_OIT,FLAME_OIT)){
+            event.registerPipeline(oit.depthBoundsPipeline());event.registerPipeline(oit.transmittancePipeline());event.registerPipeline(oit.accumulatePipeline());
+        }
+    }
+    private FireRenderTypes(){}
 }

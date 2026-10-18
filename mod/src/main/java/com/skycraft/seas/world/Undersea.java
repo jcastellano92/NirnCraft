@@ -1,7 +1,7 @@
 package com.skycraft.seas.world;
 
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.DoorBlock;
@@ -28,7 +28,7 @@ final class Undersea {
         return b.defaultBlockState();
     }
 
-    private static ResourceLocation loot(String name) {
+    private static Identifier loot(String name) {
         return SiteKit.loot("chests/seas/" + name);
     }
 
@@ -68,7 +68,7 @@ final class Undersea {
         int base = k.floor(k.cx, k.cz) + 1;
         if (base + 9 > SEA) base = Math.max(k.floor(k.cx, k.cz) + 1, SEA - 12);
         BlockState cut = s(Blocks.CUT_SANDSTONE), smooth = s(Blocks.SMOOTH_SANDSTONE), chis = s(Blocks.CHISELED_SANDSTONE);
-        BlockState orange = s(Blocks.ORANGE_TERRACOTTA), yellow = s(Blocks.YELLOW_TERRACOTTA);
+        BlockState orange = s(com.skycraft.worldgen.VanillaBlocks.ORANGE_TERRACOTTA), yellow = s(com.skycraft.worldgen.VanillaBlocks.YELLOW_TERRACOTTA);
         // platform (filled down to the bed) with a border frieze
         for (int a = -8; a <= 8; a++) {
             for (int l = -8; l <= 8; l++) {
@@ -250,7 +250,7 @@ final class Undersea {
             if (dx * dx + dz * dz > 16) continue;
             int x = k.cx + dx, z = k.cz + dz;
             int roll = k.r.nextInt(6);
-            BlockState st = roll < 2 ? s(Blocks.HONEYCOMB_BLOCK) : roll < 3 ? s(Blocks.BONE_BLOCK) : roll < 4 ? s(Blocks.BROWN_TERRACOTTA)
+            BlockState st = roll < 2 ? s(Blocks.HONEYCOMB_BLOCK) : roll < 3 ? s(Blocks.BONE_BLOCK) : roll < 4 ? s(com.skycraft.worldgen.VanillaBlocks.BROWN_TERRACOTTA)
                     : roll < 5 ? com.skycraft.seas.SeasRegistry.KOLLOP.get().defaultBlockState() : s(Blocks.SPRUCE_SLAB);
             k.set(x, bed + 1, z, st);
         }
@@ -289,8 +289,8 @@ final class Undersea {
         int bed = k.floor(k.cx, k.cz);
         int base = bed + 2;
         if (base + 8 > SEA - 1) return false;
-        BlockState cut = s(Blocks.WAXED_CUT_COPPER), exposed = s(Blocks.WAXED_EXPOSED_CUT_COPPER), weathered = s(Blocks.WAXED_WEATHERED_CUT_COPPER),
-                block = s(Blocks.WAXED_COPPER_BLOCK), stone = s(Blocks.POLISHED_DEEPSLATE), glass = s(Blocks.GLASS);
+        BlockState cut = s(com.skycraft.worldgen.VanillaBlocks.WAXED_CUT_COPPER), exposed = s(com.skycraft.worldgen.VanillaBlocks.WAXED_EXPOSED_CUT_COPPER), weathered = s(com.skycraft.worldgen.VanillaBlocks.WAXED_WEATHERED_CUT_COPPER),
+                block = s(com.skycraft.worldgen.VanillaBlocks.WAXED_COPPER_BLOCK), stone = s(Blocks.POLISHED_DEEPSLATE), glass = s(Blocks.GLASS);
         int r = 5;
         // plinth
         for (int a = -r - 1; a <= r + 1; a++) {
@@ -346,16 +346,16 @@ final class Undersea {
         k.setDry(fr.wx(-r + 1, 0), base + 1, fr.wz(-r + 1, 0), s(Blocks.SMITHING_TABLE));
         k.setDry(fr.wx(-r + 1, 1), base + 1, fr.wz(-r + 1, 1), SiteKit.facing(s(Blocks.BLAST_FURNACE), out));
         k.chest(fr.wx(-r + 1, -1), base + 1, fr.wz(-r + 1, -1), out, loot("dwemer_air_chamber"));
-        k.setDry(fr.wx(-2, r - 1), base + 1, fr.wz(-2, r - 1), s(Blocks.WAXED_COPPER_BLOCK));
-        k.setDry(fr.wx(-2, r - 1), base + 2, fr.wz(-2, r - 1), s(Blocks.LIGHTNING_ROD));
-        k.setDry(fr.wx(1, -r + 1), base + 1, fr.wz(1, -r + 1), s(Blocks.WAXED_CUT_COPPER_STAIRS)
+        k.setDry(fr.wx(-2, r - 1), base + 1, fr.wz(-2, r - 1), s(com.skycraft.worldgen.VanillaBlocks.WAXED_COPPER_BLOCK));
+        k.setDry(fr.wx(-2, r - 1), base + 2, fr.wz(-2, r - 1), s(com.skycraft.worldgen.VanillaBlocks.LIGHTNING_ROD));
+        k.setDry(fr.wx(1, -r + 1), base + 1, fr.wz(1, -r + 1), s(com.skycraft.worldgen.VanillaBlocks.WAXED_CUT_COPPER_STAIRS)
                 .setValue(StairBlock.FACING, fr.side).setValue(StairBlock.HALF, Half.BOTTOM));
         LairMarkerBlockEntity m = k.marker(fr.wx(1, 2), base + 1, fr.wz(1, 2));
         if (m != null) m.creature("skycraft:dwarven_spider", 1 + k.r.nextInt(2), 2);
         // pipes running off into the silt
         for (int i = 1; i <= 6; i++) {
             int x = fr.wx(-r - 1 - i, 2), z = fr.wz(-r - 1 - i, 2);
-            k.set(x, k.floor(x, z), z, s(Blocks.WAXED_CUT_COPPER_SLAB));
+            k.set(x, k.floor(x, z), z, s(com.skycraft.worldgen.VanillaBlocks.WAXED_CUT_COPPER_SLAB));
         }
         return true;
     }
@@ -370,7 +370,7 @@ final class Undersea {
         Frame fr = frame(k);
         int half = 7;
         BlockState plank = s(Blocks.DARK_OAK_PLANKS), log = s(Blocks.DARK_OAK_LOG).setValue(RotatedPillarBlock.AXIS, fr.f.getAxis());
-        BlockState[] shields = {s(Blocks.RED_WOOL), s(Blocks.WHITE_WOOL), s(Blocks.BLUE_WOOL), s(Blocks.YELLOW_WOOL)};
+        BlockState[] shields = {s(com.skycraft.worldgen.VanillaBlocks.RED_WOOL), s(com.skycraft.worldgen.VanillaBlocks.WHITE_WOOL), s(com.skycraft.worldgen.VanillaBlocks.BLUE_WOOL), s(com.skycraft.worldgen.VanillaBlocks.YELLOW_WOOL)};
         for (int a = -half; a <= half; a++) {
             double t = a / (half + 1.0);
             int w = Math.max(0, (int) Math.round(2.4 * Math.sqrt(Math.max(0, 1 - t * t))));
@@ -573,7 +573,7 @@ final class Undersea {
             k.set(x, k.floor(x, z), z, s(Blocks.STRIPPED_BIRCH_LOG).setValue(RotatedPillarBlock.AXIS, fall.getAxis()));
             if (i >= 3 && k.r.nextBoolean()) {
                 int x2 = x + fr.f.getStepX(), z2 = z + fr.f.getStepZ();
-                k.set(x2, k.floor(x2, z2), z2, k.r.nextBoolean() ? s(Blocks.LIGHT_BLUE_WOOL) : s(Blocks.WHITE_WOOL));
+                k.set(x2, k.floor(x2, z2), z2, k.r.nextBoolean() ? s(com.skycraft.worldgen.VanillaBlocks.LIGHT_BLUE_WOOL) : s(com.skycraft.worldgen.VanillaBlocks.WHITE_WOOL));
             }
         }
         k.chest(fr.wx(-2, 0), fr.floor(-2, 0) + 1, fr.wz(-2, 0), fr.f, loot("maormer_cargo"));

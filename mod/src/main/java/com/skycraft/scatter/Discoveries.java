@@ -239,7 +239,7 @@ public final class Discoveries {
     static boolean generate(WorldGenLevel level, ChunkPos cp) {
         if (!ScatterConfig.discoveries()) return false;
         long seed = level.getSeed();
-        Find f = inChunk(seed, cp.x, cp.z);
+        Find f = inChunk(seed, cp.x(), cp.z());
         if (f == null) return false;
         Kind k = ScatterRules.get().kinds.get(f.type().kind);
         if (k == null || k.builder == null) return false;

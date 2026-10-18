@@ -4,32 +4,30 @@ import com.skycraft.Skycraft;
 import com.skycraft.quest.story.IntroPackets;
 import com.skycraft.quest.story.IntroState;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.PauseScreen;
-import net.minecraft.client.gui.screens.ReceivingLevelScreen;
 import com.skycraft.client.screen.RaceScreen;
 import com.skycraft.core.SkyData;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
-import net.minecraftforge.client.event.InputEvent;
-import net.minecraftforge.client.event.MovementInputUpdateEvent;
-import net.minecraftforge.client.event.RegisterGuiOverlaysEvent;
-import net.minecraftforge.client.event.RenderGuiOverlayEvent;
-import net.minecraftforge.client.event.RenderHandEvent;
-import net.minecraftforge.client.event.RenderLevelStageEvent;
-import net.minecraftforge.client.event.RenderNameTagEvent;
-import net.minecraftforge.client.event.RenderPlayerEvent;
-import net.minecraftforge.client.event.ScreenEvent;
-import net.minecraftforge.client.event.ViewportEvent;
-import net.minecraftforge.client.gui.overlay.ForgeGui;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.Event;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
+import net.neoforged.neoforge.client.event.InputEvent;
+import net.neoforged.neoforge.client.event.MovementInputUpdateEvent;
+import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
+import net.neoforged.neoforge.client.event.RenderGuiLayerEvent;
+import net.neoforged.neoforge.client.event.RenderHandEvent;
+import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
+import net.neoforged.neoforge.client.event.RenderNameTagEvent;
+import net.neoforged.neoforge.client.event.RenderPlayerEvent;
+import net.neoforged.neoforge.client.event.ScreenEvent;
+import net.neoforged.neoforge.client.event.ViewportEvent;
+
+import net.neoforged.bus.api.Event;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.util.HashSet;
 import java.util.List;
@@ -47,6 +45,12 @@ public final class IntroClient {
     private static Set<UUID> hidden = new HashSet<>();
     private static IntroCutscene cutscene;
     private static long loadingSince;
+    private static final net.minecraft.util.context.ContextKey<Boolean> HIDDEN=new net.minecraft.util.context.ContextKey<>(net.minecraft.resources.Identifier.fromNamespaceAndPath("skycraft","intro_hidden"));
+    private static final net.minecraft.util.context.ContextKey<IntroCutscene.Extracted> DRAGON=new net.minecraft.util.context.ContextKey<>(net.minecraft.resources.Identifier.fromNamespaceAndPath("skycraft","intro_dragon"));
+    public static void extractPlayer(net.minecraft.world.entity.player.Player player,net.minecraft.client.renderer.entity.state.AvatarRenderState state) {
+        state.setRenderData(HIDDEN,player!=Minecraft.getInstance().player&&hidden.contains(player.getUUID()));
+    }
+
     /** True from joining until the server has said whether this player is in the opening: the world is not shown meanwhile. */
     private static boolean awaiting;
     private static int awaitTicks;
@@ -127,13 +131,13 @@ public final class IntroClient {
 
     // ------------------------------------------------------------------ events
 
-    @Mod.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
+    @net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
     public static final class IntroClientEvents {
         private IntroClientEvents() {}
 
         @SubscribeEvent
-        public static void introClientTick(TickEvent.ClientTickEvent event) {
-            if (event.phase != TickEvent.Phase.END) return;
+        public static void introClientTick(net.neoforged.neoforge.client.event.ClientTickEvent.Post event) {
+            
             Minecraft mc = Minecraft.getInstance();
             if (mc.player == null || mc.level == null) return;
             if (awaiting && ++awaitTicks > 200) awaiting = false; // the server never answered: do not hold the world back
@@ -145,17 +149,17 @@ public final class IntroClient {
                 }
             }
             if (coverWanted()) {
-                var s = mc.screen;
+                var s = mc.gui.screen();
                 if (needsCharacter(mc)) {
-                    if (!(s instanceof RaceScreen)) mc.setScreen(new RaceScreen());
-                } else if (!(s instanceof IntroLoadingScreen) && !(s instanceof RaceScreen) && !(s instanceof ReceivingLevelScreen)) {
-                    mc.setScreen(new IntroLoadingScreen());
+                    if (!(s instanceof RaceScreen)) mc.gui.setScreen(new RaceScreen());
+                } else if (!(s instanceof IntroLoadingScreen) && !(s instanceof RaceScreen)) {
+                    mc.gui.setScreen(new IntroLoadingScreen());
                 }
             }
             if (cutscene != null) {
-                if (mc.screen != null && !(mc.screen instanceof PauseScreen) && !(mc.screen instanceof IntroLoadingScreen)
-                        && mc.screen.getClass().getName().indexOf("Pause") < 0) {
-                    mc.setScreen(null);
+                if (mc.gui.screen() != null && !(mc.gui.screen() instanceof PauseScreen) && !(mc.gui.screen() instanceof IntroLoadingScreen)
+                        && mc.gui.screen().getClass().getName().indexOf("Pause") < 0) {
+                    mc.gui.setScreen(null);
                 }
                 cutscene.tick(mc);
                 if (cutscene.finished()) cutscene = null;
@@ -166,27 +170,21 @@ public final class IntroClient {
         @SubscribeEvent
         public static void introHidePlayer(RenderPlayerEvent.Pre event) {
             if (hidden.isEmpty()) return;
-            Minecraft mc = Minecraft.getInstance();
-            if (event.getEntity() != mc.player && hidden.contains(event.getEntity().getUUID())) event.setCanceled(true);
+            if(Boolean.TRUE.equals(event.getRenderState().getRenderData(HIDDEN)))event.setCanceled(true);
         }
 
         @SubscribeEvent
-        public static void introHideNameTag(RenderNameTagEvent event) {
+        public static void introHideNameTag(RenderNameTagEvent.CanRender event) {
             if (hidden.isEmpty()) return;
             Minecraft mc = Minecraft.getInstance();
-            if (event.getEntity() != mc.player && hidden.contains(event.getEntity().getUUID())) event.setResult(Event.Result.DENY);
+            if (event.getEntity() != mc.player && hidden.contains(event.getEntity().getUUID())) event.setCanRender(net.minecraft.util.TriState.FALSE);
         }
 
         /** Controls stopped: no walking, jumping or sneaking while the scene or the loading screen runs. */
         @SubscribeEvent
         public static void introMovementInput(MovementInputUpdateEvent event) {
             if (!controlsLocked()) return;
-            var in = event.getInput();
-            in.forwardImpulse = 0;
-            in.leftImpulse = 0;
-            in.up = in.down = in.left = in.right = false;
-            in.jumping = false;
-            in.shiftKeyDown = false;
+            com.skycraft.client.SkyMovementInput.stop(event);
         }
 
         @SubscribeEvent
@@ -199,11 +197,11 @@ public final class IntroClient {
 
         /** The camera is the scene's: the view is held where the scene looks, whatever the mouse does. */
         @SubscribeEvent
-        public static void introHoldLook(TickEvent.RenderTickEvent event) {
-            if (event.phase != TickEvent.Phase.START || cutscene == null) return;
+        public static void introHoldLook(net.neoforged.neoforge.client.event.RenderFrameEvent.Pre event) {
+            if (cutscene == null) return;
             LocalPlayer pl = Minecraft.getInstance().player;
             if (pl == null) return;
-            float partial = event.renderTickTime;
+            float partial = event.getPartialTick().getGameTimeDeltaPartialTick(false);
             float yaw = cutscene.yaw(partial), pitch = cutscene.pitch(partial);
             pl.setYRot(yaw);
             pl.setXRot(pitch);
@@ -217,7 +215,7 @@ public final class IntroClient {
 
         @SubscribeEvent
         public static void introFov(ViewportEvent.ComputeFov event) {
-            if (cutscene == null || !event.usedConfiguredFov()) return;
+            if (cutscene == null) return;
             event.setFOV(event.getFOV() * cutscene.zoom((float) event.getPartialTick()));
         }
 
@@ -237,19 +235,19 @@ public final class IntroClient {
 
         /** The vanilla and mod HUD steps aside for the cutscene (the narration and the bars stay). */
         @SubscribeEvent
-        public static void introNoHud(RenderGuiOverlayEvent.Pre event) {
+        public static void introNoHud(RenderGuiLayerEvent.Pre event) {
             if (cutscene == null) return;
-            String id = event.getOverlay().id().toString();
+            String id = event.getName().toString();
             if (id.equals("skycraft:narration") || id.equals("skycraft:intro_letterbox")) return;
             event.setCanceled(true);
         }
 
-        @SubscribeEvent
-        public static void introRenderDragon(RenderLevelStageEvent event) {
-            if (cutscene == null || event.getStage() != RenderLevelStageEvent.Stage.AFTER_ENTITIES) return;
-            Minecraft mc = Minecraft.getInstance();
-            Vec3 cam = event.getCamera().getPosition();
-            cutscene.render(mc, event.getPoseStack(), cam, event.getPartialTick());
+        @SubscribeEvent public static void extractDragon(net.neoforged.neoforge.client.event.ExtractLevelRenderStateEvent event) {
+            if(cutscene!=null) event.getRenderState().setRenderData(DRAGON,cutscene.extract(Minecraft.getInstance(),event.getDeltaTracker().getGameTimeDeltaPartialTick(false)));
+        }
+        @SubscribeEvent public static void submitDragon(net.neoforged.neoforge.client.event.SubmitCustomGeometryEvent event) {
+            var dragon=event.getLevelRenderState().getRenderData(DRAGON);
+            if(dragon!=null) dragon.submit(event.getPoseStack(),event.getSubmitNodeCollector(),event.getLevelRenderState().cameraRenderState);
         }
 
         @SubscribeEvent
@@ -279,17 +277,18 @@ public final class IntroClient {
     }
 
     /** Mod bus: the letterbox overlay (above everything, including the narration card's band). */
-    @Mod.EventBusSubscriber(modid = Skycraft.MODID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+    @net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
     public static final class IntroClientSetup {
         private IntroClientSetup() {}
 
         @SubscribeEvent
-        public static void introOverlays(RegisterGuiOverlaysEvent event) {
-            event.registerAboveAll("intro_letterbox", IntroClient::renderLetterbox);
+        public static void introOverlays(RegisterGuiLayersEvent event) {
+            event.registerAboveAll(net.minecraft.resources.Identifier.fromNamespaceAndPath("skycraft", "intro_letterbox"), IntroClient::renderLetterbox);
         }
     }
 
-    private static void renderLetterbox(ForgeGui gui, GuiGraphics g, float partialTick, int width, int height) {
+    private static void renderLetterbox(GuiGraphicsExtractor g,net.minecraft.client.DeltaTracker delta) {
+        float partialTick=delta.getGameTimeDeltaPartialTick(false);int width=g.guiWidth(),height=g.guiHeight();
         IntroCutscene c = cutscene;
         if (c == null) return;
         int bar = Math.round(height * c.bars(partialTick));

@@ -8,10 +8,10 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.Component;
-import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.event.server.ServerAboutToStartEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.neoforge.event.server.ServerAboutToStartEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.util.List;
 import java.util.Locale;
@@ -19,12 +19,13 @@ import java.util.Locale;
 /**
  * Debug command {@code /skycraft-world sheet <scope> [layer]} and background sheet preloader (MS22).
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class WorldSheetCommand {
     private WorldSheetCommand() {}
 
     @SubscribeEvent
     public static void onServerAboutToStart(ServerAboutToStartEvent event) {
+        if (!com.skycraft.tamriel.terrain.TamrielSpawn.isTamriel(event.getServer())) return;
         WorldSheets.preloadAsync();
     }
 
@@ -34,7 +35,7 @@ public final class WorldSheetCommand {
     }
 
     public static void register(CommandDispatcher<CommandSourceStack> d) {
-        d.register(Commands.literal("skycraft-world").requires(s -> s.hasPermission(2))
+        d.register(Commands.literal("skycraft-world").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
                 .then(Commands.literal("sheet")
                         .then(Commands.argument("scope", StringArgumentType.word())
                                 .suggests((ctx, b) -> SharedSuggestionProvider.suggest(WorldSheets.scopes(), b))

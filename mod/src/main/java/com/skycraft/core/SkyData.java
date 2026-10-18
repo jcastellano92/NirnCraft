@@ -1,65 +1,42 @@
 package com.skycraft.core;
 
 import com.skycraft.Skycraft;
-import net.minecraft.core.Direction;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.CapabilityManager;
-import net.minecraftforge.common.capabilities.CapabilityToken;
-import net.minecraftforge.common.capabilities.ICapabilitySerializable;
-import net.minecraftforge.common.util.LazyOptional;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.attachment.AttachmentType;
+import net.neoforged.neoforge.registries.DeferredRegister;
+import net.neoforged.neoforge.registries.NeoForgeRegistries;
 
-/** Capability plumbing for {@link PlayerData}. Use {@link #get(Player)} everywhere. */
+import java.util.function.Supplier;
+
+/** Persistent NeoForge attachment for RPG data; explicit packets preserve owner-only and appearance sync. */
 public final class SkyData {
-    public static final Capability<PlayerData> CAP = CapabilityManager.get(new CapabilityToken<>() {});
-    public static final ResourceLocation KEY = new ResourceLocation(Skycraft.MODID, "player_data");
+    public static final Identifier KEY = Identifier.fromNamespaceAndPath(Skycraft.MODID, "player_data");
+    private static final DeferredRegister<AttachmentType<?>> TYPES =
+            DeferredRegister.create(NeoForgeRegistries.ATTACHMENT_TYPES, Skycraft.MODID);
+    public static final Supplier<AttachmentType<PlayerData>> DATA = TYPES.register("player_data", () ->
+            AttachmentType.builder(PlayerData::new)
+                    .serialize(PlayerData.CODEC)
+                    .copyHandler((old, holder, registries) -> {
+                        PlayerData copy = new PlayerData();
+                        copy.copyFrom(old);
+                        return copy;
+                    })
+                    .build());
 
     private SkyData() {}
 
-    /**
-     * The player's data. If the capability is somehow missing (e.g. during early client init) a fresh, throwaway
-     * instance is returned so callers never NPE (never a shared object: writes to it must not leak across players
-     * or sides).
-     */
+    public static void init(IEventBus modBus) {
+        TYPES.register(modBus);
+    }
+
+    /** A null player receives an independent temporary instance, never shared between players or sides. */
     public static PlayerData get(Player player) {
-        if (player == null) return new PlayerData();
-        PlayerData data = player.getCapability(CAP).orElse(null);
-        return data != null ? data : new PlayerData();
+        return player == null ? new PlayerData() : player.getData(DATA.get());
     }
 
     public static boolean has(Player player) {
-        return player != null && player.getCapability(CAP).isPresent();
-    }
-
-    public static class Provider implements ICapabilitySerializable<CompoundTag> {
-        private final PlayerData data = new PlayerData();
-        private LazyOptional<PlayerData> optional = LazyOptional.of(() -> data);
-
-        @Override
-        public @NotNull <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, @Nullable Direction side) {
-            // A dead player's caps are invalidated when the old body is removed, and reviveCaps() (used in
-            // PlayerEvent.Clone) does not revive an invalidated LazyOptional: without a fresh one the clone read an
-            // empty capability, so respawn lost race, stats and quests and re-opened the character creator.
-            if (!optional.isPresent()) optional = LazyOptional.of(() -> data);
-            return CAP.orEmpty(cap, optional);
-        }
-
-        @Override
-        public CompoundTag serializeNBT() {
-            return data.save();
-        }
-
-        @Override
-        public void deserializeNBT(CompoundTag nbt) {
-            data.load(nbt);
-        }
-
-        public void invalidate() {
-            optional.invalidate();
-        }
+        return player != null && player.hasData(DATA.get());
     }
 }

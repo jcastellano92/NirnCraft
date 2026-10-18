@@ -8,13 +8,13 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.npc.Villager;
-import net.minecraft.world.entity.npc.VillagerProfession;
-import net.minecraft.world.entity.npc.WanderingTrader;
+import net.minecraft.world.entity.npc.villager.Villager;
+import net.minecraft.world.entity.npc.villager.VillagerProfession;
+import net.minecraft.world.entity.npc.wanderingtrader.WanderingTrader;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
@@ -29,7 +29,7 @@ import java.util.List;
  * merchant through its persistent data: {@code skycraft_shop: {pools: ["blacksmith", ...], level: 1..5}}.</p>
  */
 public final class Merchants {
-    public static final TagKey<EntityType<?>> MERCHANTS = TagKey.create(Registries.ENTITY_TYPE, new ResourceLocation(Skycraft.MODID, "merchants"));
+    public static final TagKey<EntityType<?>> MERCHANTS = TagKey.create(Registries.ENTITY_TYPE, Identifier.fromNamespaceAndPath(Skycraft.MODID, "merchants"));
     public static final String STOLEN_NBT = "skycraft_stolen";
 
     private Merchants() {}
@@ -39,22 +39,22 @@ public final class Merchants {
         if (com.skycraft.roads.Carriages.isCarriageDriver(npc)) return false;
         if (npc instanceof Villager v) {
             if (v.isBaby()) return false;
-            VillagerProfession p = v.getVillagerData().getProfession();
+            net.minecraft.resources.ResourceKey<VillagerProfession> p = v.getVillagerData().profession().unwrapKey().orElseThrow();
             return p != VillagerProfession.NONE && p != VillagerProfession.NITWIT;
         }
         if (npc instanceof WanderingTrader) return true;
         if (npc.isBaby()) return false;
         // Skycraft townsfolk with a shop (society module: trades, caravan traders, innkeepers)
-        if (npc.getPersistentData().getCompound(Shop.KEY).contains("pools", Tag.TAG_LIST)) return true;
+        if (com.skycraft.platform.NbtData.hasType(npc.getPersistentData().getCompoundOrEmpty(Shop.KEY), "pools", Tag.TAG_LIST)) return true;
         // the inn's cook and server work the inn's counter: a job the shop data declares (economy/shop_trades.json)
         ShopTrades.Job job = ShopTrades.job(jobId(npc));
         if (job != null && !job.pools().isEmpty()) return true;
-        return npc.getType().is(MERCHANTS);
+        return npc.getType().builtInRegistryHolder().is(MERCHANTS);
     }
 
     /** The job an NPC holds: its housing job ("cook", "smith"...), else its society role id, else "". */
     public static String jobId(LivingEntity npc) {
-        String job = npc.getPersistentData().getString(com.skycraft.society.Housing.JOB_KEY);
+        String job = npc.getPersistentData().getStringOr(com.skycraft.society.Housing.JOB_KEY, "");
         if (!job.isEmpty()) return job;
         if (npc instanceof com.skycraft.society.entity.NpcEntity n && n.role() != null) return n.role().id;
         return "";
@@ -74,7 +74,7 @@ public final class Merchants {
 
     /** Khajiit caravan traders (wandering traders and society's caravan traders). */
     public static boolean isCaravan(LivingEntity npc) {
-        return npc instanceof WanderingTrader || "caravan_trader".equals(npc.getPersistentData().getString("skycraft_role"));
+        return npc instanceof WanderingTrader || "caravan_trader".equals(npc.getPersistentData().getStringOr("skycraft_role",""));
     }
 
     /**
@@ -84,25 +84,25 @@ public final class Merchants {
     public static boolean alwaysOpen(LivingEntity npc) {
         if (isCaravan(npc)) return true;
         CompoundTag pd = npc.getPersistentData();
-        return pd.contains("skycraft_traveler") || pd.getBoolean("skycraft_always_open");
+        return pd.contains("skycraft_traveler") || pd.getBooleanOr("skycraft_always_open",false);
     }
 
     /** Merchant level 1..5 (villager level; wandering traders are journeymen). */
     public static int level(LivingEntity npc) {
-        if (npc instanceof Villager v) return Math.max(1, Math.min(5, v.getVillagerData().getLevel()));
+        if (npc instanceof Villager v) return Math.max(1, Math.min(5, v.getVillagerData().level()));
         if (npc instanceof WanderingTrader) return 3;
-        CompoundTag shop = npc.getPersistentData().getCompound(Shop.KEY);
-        int lvl = shop.getInt("level");
+        CompoundTag shop = npc.getPersistentData().getCompoundOrEmpty(Shop.KEY);
+        int lvl = shop.getIntOr("level",0);
         return lvl <= 0 ? 2 : Math.min(5, lvl);
     }
 
     /** Profession of a villager, the matching profession of a Skycraft townsperson's trade, or null. */
-    public static VillagerProfession profession(LivingEntity npc) {
-        if (npc instanceof Villager v) return v.getVillagerData().getProfession();
-        String id = npc.getPersistentData().getString(PROFESSION_KEY);
+    public static net.minecraft.resources.ResourceKey<VillagerProfession> profession(LivingEntity npc) {
+        if (npc instanceof Villager v) return v.getVillagerData().profession().unwrapKey().orElseThrow();
+        String id = npc.getPersistentData().getStringOr(PROFESSION_KEY, "");
         if (id.isEmpty()) return null;
-        net.minecraft.resources.ResourceLocation rl = net.minecraft.resources.ResourceLocation.tryParse(id);
-        return rl == null ? null : net.minecraftforge.registries.ForgeRegistries.VILLAGER_PROFESSIONS.getValue(rl);
+        net.minecraft.resources.Identifier rl = net.minecraft.resources.Identifier.tryParse(id);
+        return rl == null || !net.minecraft.core.registries.BuiltInRegistries.VILLAGER_PROFESSION.containsKey(rl) ? null : net.minecraft.resources.ResourceKey.create(Registries.VILLAGER_PROFESSION, rl);
     }
 
     /**
@@ -118,11 +118,11 @@ public final class Merchants {
     /** The pools the NPC itself declares (its shop tag, its job, its profession), whatever building it stands in. */
     public static List<ShopType> ownPools(LivingEntity npc) {
         List<ShopType> out = new ArrayList<>();
-        CompoundTag shop = npc.getPersistentData().getCompound(Shop.KEY);
-        if (shop.contains("pools", Tag.TAG_LIST)) {
-            ListTag list = shop.getList("pools", Tag.TAG_STRING);
+        CompoundTag shop = npc.getPersistentData().getCompoundOrEmpty(Shop.KEY);
+        if (com.skycraft.platform.NbtData.hasType(shop, "pools", Tag.TAG_LIST)) {
+            ListTag list = shop.getListOrEmpty("pools");
             for (int i = 0; i < list.size(); i++) {
-                ShopType t = ShopType.byId(list.getString(i));
+                ShopType t = ShopType.byId(list.getStringOr(i, ""));
                 if (t != null && !out.contains(t)) out.add(t);
             }
             if (!out.isEmpty()) return out;
@@ -136,7 +136,7 @@ public final class Merchants {
             return out;
         }
         // Skycraft trades without a vanilla profession (settlements may give townsfolk these ids)
-        String trade = npc.getPersistentData().getString(PROFESSION_KEY);
+        String trade = npc.getPersistentData().getStringOr(PROFESSION_KEY, "");
         if (trade.equals("skycraft:jeweler")) {
             out.add(ShopType.JEWELER);
             return out;
@@ -149,7 +149,7 @@ public final class Merchants {
             out.add(ShopType.LIBRARY);
             return out;
         }
-        VillagerProfession p = profession(npc);
+        net.minecraft.resources.ResourceKey<VillagerProfession> p = profession(npc);
         if (p == VillagerProfession.WEAPONSMITH || p == VillagerProfession.ARMORER || p == VillagerProfession.TOOLSMITH) {
             out.add(ShopType.BLACKSMITH);
         } else if (p == VillagerProfession.CLERIC) {
@@ -180,7 +180,7 @@ public final class Merchants {
     }
 
     public static boolean inThievesGuild(Player player) {
-        return SkyData.get(player).module("quest").getCompound("factions").contains("thieves_guild");
+        return SkyData.get(player).module("quest").getCompoundOrEmpty("factions").contains("thieves_guild");
     }
 
     /** Whether this merchant fences stolen goods for this player. */
@@ -190,11 +190,11 @@ public final class Merchants {
     }
 
     public static boolean isStolen(ItemStack stack) {
-        return stack.getTag() != null && stack.getTag().getBoolean(STOLEN_NBT);
+        return com.skycraft.inventory.ItemData.custom(stack) != null && com.skycraft.inventory.ItemData.custom(stack).getBooleanOr(STOLEN_NBT, false);
     }
 
     /** Moon sugar and skooma: legal in Elsweyr, Morrowind and the south, smuggled goods in Skyrim and Cyrodiil. */
-    public static final TagKey<net.minecraft.world.item.Item> CONTRABAND = TagKey.create(Registries.ITEM, new ResourceLocation(Skycraft.MODID, "contraband"));
+    public static final TagKey<net.minecraft.world.item.Item> CONTRABAND = TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath(Skycraft.MODID, "contraband"));
 
     /** Provinces whose law bans {@link #CONTRABAND} (the Empire's heartland and Skyrim). */
     public static boolean contrabandBannedIn(String province) {
@@ -218,10 +218,10 @@ public final class Merchants {
 
     /** Removes the stolen flag (a fence's copy of the item). */
     public static void clearStolen(ItemStack stack) {
-        CompoundTag tag = stack.getTag();
+        CompoundTag tag = com.skycraft.inventory.ItemData.custom(stack);
         if (tag == null || !tag.contains(STOLEN_NBT)) return;
         tag.remove(STOLEN_NBT);
-        if (tag.isEmpty()) stack.setTag(null);
+        if (tag.isEmpty()) com.skycraft.inventory.ItemData.setCustom(stack, null);
     }
 
     /** Whether the merchant deals in this kind of merchandise (ignoring the Speech "Merchant" perk). */
@@ -255,7 +255,7 @@ public final class Merchants {
             };
             variants = 3;
         }
-        int pick = Math.floorMod(npc.getUUID().hashCode() + (int) (npc.level().getDayTime() / 24000L), variants);
+        int pick = Math.floorMod(npc.getUUID().hashCode() + (int) (npc.level().getDefaultClockTime() / 24000L), variants);
         return Component.translatable("dialogue.skycraft.economy.greeting." + kind + "." + pick);
     }
 }

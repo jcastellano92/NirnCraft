@@ -1,5 +1,9 @@
 package com.skycraft.lore.place;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
@@ -11,7 +15,7 @@ import com.skycraft.lore.LoreModule;
 import com.skycraft.tamriel.Place;
 import com.skycraft.tamriel.Places;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
@@ -21,17 +25,16 @@ import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.LootPool;
 import net.minecraft.world.level.storage.loot.entries.LootItem;
 import net.minecraft.world.level.storage.loot.functions.LootItemConditionalFunction;
-import net.minecraft.world.level.storage.loot.functions.LootItemFunctionType;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
-import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
+import net.minecraft.world.level.storage.loot.providers.number.ints.ConstantValue;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.event.LootTableLoadEvent;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.neoforge.event.LootTableLoadEvent;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.neoforge.registries.DeferredRegister;
+import java.util.function.Supplier;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -46,11 +49,11 @@ import java.util.List;
  * ({@link PlaceLore#claimPlacement}) are skipped. With Lootr every player rolls their own copy; without it the first
  * opener gets the note (they can share it).
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class PlaceLoreLoot {
-    public static final DeferredRegister<LootItemFunctionType> FUNCTIONS = DeferredRegister.create(Registries.LOOT_FUNCTION_TYPE, Skycraft.MODID);
-    public static final RegistryObject<LootItemFunctionType> PLACE_NOTE = FUNCTIONS.register("place_lore_note",
-            () -> new LootItemFunctionType(new NoteFunction.Serializer()));
+    public static final DeferredRegister<MapCodec<? extends net.minecraft.world.level.storage.loot.functions.LootItemFunction>> FUNCTIONS = DeferredRegister.create(Registries.LOOT_FUNCTION_TYPE, Skycraft.MODID);
+    public static final Supplier<MapCodec<? extends LootItemConditionalFunction>> PLACE_NOTE = FUNCTIONS.register("place_lore_note",
+            () -> NoteFunction.MAP_CODEC);
 
     /** Table path prefixes (namespace skycraft) that get the note pool. */
     private static final List<String> TABLES = List.of("containers/dungeon/boss", "containers/dungeon/standard", "containers/camp/",
@@ -65,23 +68,23 @@ public final class PlaceLoreLoot {
 
     @SubscribeEvent
     public static void onTableLoad(LootTableLoadEvent event) {
-        ResourceLocation id = event.getName();
+        Identifier id = event.getName();
         if (!id.getNamespace().equals(Skycraft.MODID)) return;
         String path = id.getPath();
         boolean match = false;
         for (String t : TABLES) if (path.startsWith(t)) match = true;
         if (!match || path.startsWith("containers/household_stores")) return;
         boolean boss = path.endsWith("/boss") || path.contains("dragon_lair");
-        event.getTable().addPool(LootPool.lootPool().name("skycraft_place_lore").setRolls(ConstantValue.exactly(1))
-                .add(LootItem.lootTableItem(LoreModule.BOOK.get()).apply(() -> new NoteFunction(new LootItemCondition[0], boss)))
+        event.getTable().addPool(LootPool.lootPool().name("skycraft_place_lore").setRolls(net.minecraft.core.Holder.direct(new ConstantValue(1)))
+                .add(LootItem.lootTableItem(LoreModule.BOOK.get()).apply(() -> new NoteFunction(java.util.Optional.empty(), boss)))
                 .build());
     }
 
     /** The note for the player opening a container at the loot's origin, or null. */
     @Nullable
     static PlaceLore.Note pick(LootContext context, boolean bossChest) {
-        Vec3 o = context.getParamOrNull(LootContextParams.ORIGIN);
-        Entity self = context.getParamOrNull(LootContextParams.THIS_ENTITY);
+        Vec3 o = context.getOptional(LootContextParams.ORIGIN);
+        Entity self = context.getOptional(LootContextParams.THIS_ENTITY);
         if (!(self instanceof ServerPlayer player) || o == null || context.getLevel().dimension() != Level.OVERWORLD) return null;
         int x = Mth.floor(o.x), z = Mth.floor(o.z);
         PlayerData data = SkyData.get(player);
@@ -111,13 +114,13 @@ public final class PlaceLoreLoot {
     public static final class NoteFunction extends LootItemConditionalFunction {
         private final boolean boss;
 
-        NoteFunction(LootItemCondition[] conditions, boolean boss) {
+        NoteFunction(java.util.Optional<net.minecraft.core.Holder<LootItemCondition>> conditions, boolean boss) {
             super(conditions);
             this.boss = boss;
         }
 
         @Override
-        public LootItemFunctionType getType() {
+        public MapCodec<? extends LootItemConditionalFunction> codec() {
             return PLACE_NOTE.get();
         }
 
@@ -125,22 +128,11 @@ public final class PlaceLoreLoot {
         protected ItemStack run(ItemStack stack, LootContext context) {
             PlaceLore.Note n = pick(context, boss);
             if (n == null) return ItemStack.EMPTY;
-            Entity self = context.getParamOrNull(LootContextParams.THIS_ENTITY);
+            Entity self = context.getOptional(LootContextParams.THIS_ENTITY);
             if (self instanceof ServerPlayer player) PlaceLoreEvents.markFound(SkyData.get(player), n.bookId());
             return LoreBookItem.create(n.book());
         }
 
-        public static class Serializer extends LootItemConditionalFunction.Serializer<NoteFunction> {
-            @Override
-            public void serialize(JsonObject json, NoteFunction f, JsonSerializationContext ctx) {
-                super.serialize(json, f, ctx);
-                json.addProperty("boss", f.boss);
-            }
-
-            @Override
-            public NoteFunction deserialize(JsonObject json, JsonDeserializationContext ctx, LootItemCondition[] conditions) {
-                return new NoteFunction(conditions, json.has("boss") && json.get("boss").getAsBoolean());
-            }
-        }
+        public static final MapCodec<NoteFunction> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> commonFields(i).and(Codec.BOOL.optionalFieldOf("boss", false).forGetter(f -> f.boss)).apply(i, NoteFunction::new));
     }
 }

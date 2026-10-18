@@ -67,7 +67,7 @@ public final class Saddlebags {
         float scale = kind.bagRows / 2f * MountGear.capacityMult(mob, kind);
         player.openMenu(new SimpleMenuProvider((id, inv, p) -> new SaddlebagMenu(id, inv, bag),
                 Component.translatable("mounts.skycraft.bags.title", kind.displayName(), String.valueOf(scale))));
-        mount.playSound(net.minecraft.sounds.SoundEvents.ARMOR_EQUIP_LEATHER, 0.8f, 1.0f);
+        mount.playSound(net.minecraft.sounds.SoundEvents.ARMOR_EQUIP_LEATHER.value(), 0.8f, 1.0f);
     }
 
     /**
@@ -78,17 +78,17 @@ public final class Saddlebags {
         Bag open = openBag(player);
         if (open != null) open.persist(); // the menu's slots are the truth while it is open
         CompoundTag tag = Mounts.data(player);
-        ListTag list = tag.getList(BAGS, Tag.TAG_COMPOUND);
+        ListTag list = tag.getListOrEmpty(BAGS);
         BulkStore ov = overflowIfAny(player);
         List<CompoundTag> entries = new ArrayList<>();
         float total = ov == null ? 0f : ov.weight();
         for (int i = 0; i < list.size(); i++) {
-            CompoundTag t = list.getCompound(i);
+            CompoundTag t = list.getCompoundOrEmpty(i);
             entries.add(t);
-            total += ItemWeights.getStack(ItemStack.of(t));
+            total += ItemWeights.getStack(com.skycraft.inventory.ItemData.parse(t));
         }
         if (total <= capacityKg + 0.001f) return;
-        entries.sort((a, b) -> Integer.compare(a.getByte("Slot") & 255, b.getByte("Slot") & 255));
+        entries.sort((a, b) -> Integer.compare(a.getByteOr("Slot",(byte)0) & 255, b.getByteOr("Slot",(byte)0) & 255));
         boolean spilled = false;
         // the overflow goes first (last row first): the slots are what you packed on purpose, the rows the surplus
         if (ov != null) {
@@ -106,7 +106,7 @@ public final class Saddlebags {
         }
         for (int i = entries.size() - 1; i >= 0 && total > capacityKg + 0.001f; i--) {
             CompoundTag t = entries.get(i);
-            ItemStack s = ItemStack.of(t);
+            ItemStack s = com.skycraft.inventory.ItemData.parse(t);
             float unit = ItemWeights.get(s);
             if (unit <= 0f) continue;
             int n = Math.min(s.getCount(), (int) Math.ceil((total - capacityKg) / unit - 1e-4));
@@ -121,8 +121,8 @@ public final class Saddlebags {
                 entries.remove(i);
             } else {
                 CompoundTag rest = new CompoundTag();
-                s.save(rest);
-                rest.putByte("Slot", t.getByte("Slot"));
+                com.skycraft.platform.ItemTags.saveInto(s, rest);
+                rest.putByte("Slot", t.getByteOr("Slot",(byte)0));
                 entries.set(i, rest);
             }
         }
@@ -142,11 +142,11 @@ public final class Saddlebags {
         Bag open = openBag(player);
         if (open != null) open.persist(); // an open menu holds its slots in memory: write them first, then empty
         CompoundTag tag = Mounts.data(player);
-        ListTag list = tag.getList(BAGS, Tag.TAG_COMPOUND);
+        ListTag list = tag.getListOrEmpty(BAGS);
         BulkStore ov = overflowIfAny(player);
         boolean any = !list.isEmpty();
         if (any) tag.remove(BAGS);
-        for (int i = 0; i < list.size(); i++) Inv.giveOrDrop(player, ItemStack.of(list.getCompound(i)));
+        for (int i = 0; i < list.size(); i++) Inv.giveOrDrop(player, com.skycraft.inventory.ItemData.parse(list.getCompoundOrEmpty(i)));
         if (ov != null) {
             // whole rows with their int counts, last first (the indexes below stay valid); unreadable rows stay
             for (int i = ov.size() - 1; i >= 0; i--) {
@@ -164,8 +164,8 @@ public final class Saddlebags {
     /** Weight (kg) of everything in the bags of the player's record: the slot stacks and the overflow. */
     public static float load(Player player) {
         float sum = 0f;
-        ListTag list = Mounts.data(player).getList(BAGS, Tag.TAG_COMPOUND);
-        for (int i = 0; i < list.size(); i++) sum += ItemWeights.getStack(ItemStack.of(list.getCompound(i)));
+        ListTag list = Mounts.data(player).getListOrEmpty(BAGS);
+        for (int i = 0; i < list.size(); i++) sum += ItemWeights.getStack(com.skycraft.inventory.ItemData.parse(list.getCompoundOrEmpty(i)));
         BulkStore ov = overflowIfAny(player);
         return ov == null ? sum : sum + ov.weight();
     }
@@ -178,8 +178,8 @@ public final class Saddlebags {
         if (open != null) return open.overflow; // one instance per open menu: its version drives the screen sync
         com.skycraft.core.PlayerData data = SkyData.get(player);
         CompoundTag m = data.module(OVERFLOW_MODULE);
-        if (!m.contains(BulkStore.LIST, Tag.TAG_LIST)) m.put(BulkStore.LIST, new ListTag());
-        return new BulkStore(m.getList(BulkStore.LIST, Tag.TAG_COMPOUND), ContainerOverflow.MAX_ENTRIES,
+        if (!com.skycraft.platform.NbtData.hasType(m, BulkStore.LIST, Tag.TAG_LIST)) m.put(BulkStore.LIST, new ListTag());
+        return new BulkStore(m.getListOrEmpty(BulkStore.LIST), ContainerOverflow.MAX_ENTRIES,
                 ContainerOverflow.MAX_PER_ENTRY, data::markDirty);
     }
 
@@ -188,7 +188,7 @@ public final class Saddlebags {
     static BulkStore overflowIfAny(Player player) {
         Bag open = openBag(player);
         if (open != null) return open.overflow.isEmpty() ? null : open.overflow;
-        if (!SkyData.get(player).module(OVERFLOW_MODULE).contains(BulkStore.LIST, Tag.TAG_LIST)) return null;
+        if (!com.skycraft.platform.NbtData.hasType(SkyData.get(player).module(OVERFLOW_MODULE), BulkStore.LIST, Tag.TAG_LIST)) return null;
         BulkStore s = overflowOf(player);
         return s.isEmpty() ? null : s;
     }
@@ -268,11 +268,11 @@ public final class Saddlebags {
                 ItemStack saddle = MountGear.saddle(mount) == null ? ItemStack.EMPTY : MountGear.saddle(mount).stack();
                 setItem(0, saddle);
                 setItem(1, MountGear.barding(mount));
-                ListTag list = Mounts.data(owner).getList(BAGS, Tag.TAG_COMPOUND);
+                ListTag list = Mounts.data(owner).getListOrEmpty(BAGS);
                 for (int i = 0; i < list.size(); i++) {
-                    CompoundTag t = list.getCompound(i);
-                    int slot = (t.getByte("Slot") & 255) + GEAR;
-                    if (slot < getContainerSize()) setItem(slot, ItemStack.of(t));
+                    CompoundTag t = list.getCompoundOrEmpty(i);
+                    int slot = (t.getByteOr("Slot",(byte)0) & 255) + GEAR;
+                    if (slot < getContainerSize()) setItem(slot, com.skycraft.inventory.ItemData.parse(t));
                 }
             } finally {
                 loading = false;
@@ -299,7 +299,7 @@ public final class Saddlebags {
                 if (s.isEmpty()) continue;
                 CompoundTag t = new CompoundTag();
                 t.putByte("Slot", (byte) (i - GEAR));
-                s.save(t);
+                com.skycraft.platform.ItemTags.saveInto(s, t);
                 list.add(t);
             }
             tag.put(BAGS, list);
@@ -329,7 +329,7 @@ public final class Saddlebags {
         }
 
         @Override
-        public void stopOpen(Player player) {
+        public void stopOpen(net.minecraft.world.entity.ContainerUser player) {
             super.stopOpen(player);
             persist();
             fit(owner, capacity());

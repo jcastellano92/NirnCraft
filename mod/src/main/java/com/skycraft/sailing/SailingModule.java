@@ -1,8 +1,8 @@
 package com.skycraft.sailing;
 
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.config.ModConfig;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.ModLoadingContext;
+import net.neoforged.fml.config.ModConfig;
 
 /**
  * Crossing the seas of Nirn: ships, ports, ferries and the sea itself.
@@ -30,8 +30,9 @@ public final class SailingModule {
 
     /** Registers this module's DeferredRegisters and mod-bus listeners. Called from the mod constructor. */
     public static void init(IEventBus modBus) {
-        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, SailingConfig.SPEC, "skycraft-sailing.toml");
+        com.skycraft.Skycraft.config(ModConfig.Type.LOCAL, SailingConfig.SPEC, "skycraft-sailing.toml");
         SailingRegistry.init(modBus);
+        Harbors.register(modBus);
         Ferries.register();
         com.skycraft.seas.SeasModule.init(modBus);
     }

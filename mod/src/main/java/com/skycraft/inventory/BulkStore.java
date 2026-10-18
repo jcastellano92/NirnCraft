@@ -4,7 +4,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
@@ -66,12 +66,12 @@ public final class BulkStore {
     public static CompoundTag key(ItemStack stack) {
         ItemStack one = stack.copy();
         one.setCount(1);
-        return one.save(new CompoundTag());
+        return ItemData.save(one);
     }
 
     private static ItemStack stackOf(CompoundTag entry) {
-        ItemStack s = ItemStack.of(entry.getCompound(STACK));
-        if (!s.isEmpty()) s.setCount(Math.max(1, entry.getInt(COUNT)));
+        ItemStack s = com.skycraft.inventory.ItemData.parse(entry.getCompoundOrEmpty(STACK));
+        if (!s.isEmpty()) s.setCount(Math.max(1, entry.getIntOr(COUNT, 0)));
         return s;
     }
 
@@ -114,30 +114,30 @@ public final class BulkStore {
     /** Copy of entry {@code index} with its full (int) count; EMPTY when out of range or the item no longer exists. */
     public ItemStack get(int index) {
         if (index < 0 || index >= list.size()) return ItemStack.EMPTY;
-        return stackOf(list.getCompound(index));
+        return stackOf(list.getCompoundOrEmpty(index));
     }
 
     /** Raw count of entry {@code index} (0 when out of range). */
     public int countAt(int index) {
-        return index < 0 || index >= list.size() ? 0 : list.getCompound(index).getInt(COUNT);
+        return index < 0 || index >= list.size() ? 0 : list.getCompoundOrEmpty(index).getIntOr(COUNT, 0);
     }
 
     /** The key (stack saved with count 1) of entry {@code index}; do not modify. */
     public CompoundTag keyAt(int index) {
-        return index < 0 || index >= list.size() ? new CompoundTag() : list.getCompound(index).getCompound(STACK);
+        return index < 0 || index >= list.size() ? new CompoundTag() : list.getCompoundOrEmpty(index).getCompoundOrEmpty(STACK);
     }
 
     /** All entries as copies, index-aligned (unreadable entries are EMPTY). */
     public List<ItemStack> entries() {
         List<ItemStack> out = new ArrayList<>(list.size());
-        for (int i = 0; i < list.size(); i++) out.add(stackOf(list.getCompound(i)));
+        for (int i = 0; i < list.size(); i++) out.add(stackOf(list.getCompoundOrEmpty(i)));
         return out;
     }
 
     /** Calls {@code each} with every readable entry (a fresh copy) in order. */
     public void forEach(Consumer<ItemStack> each) {
         for (int i = 0; i < list.size(); i++) {
-            ItemStack s = stackOf(list.getCompound(i));
+            ItemStack s = stackOf(list.getCompoundOrEmpty(i));
             if (!s.isEmpty()) each.accept(s);
         }
     }
@@ -145,7 +145,7 @@ public final class BulkStore {
     /** Total number of items. */
     public long totalItems() {
         long n = 0;
-        for (int i = 0; i < list.size(); i++) n += list.getCompound(i).getInt(COUNT);
+        for (int i = 0; i < list.size(); i++) n += list.getCompoundOrEmpty(i).getIntOr(COUNT, 0);
         return n;
     }
 
@@ -153,7 +153,7 @@ public final class BulkStore {
     public float weight() {
         float sum = 0f;
         for (int i = 0; i < list.size(); i++) {
-            ItemStack s = stackOf(list.getCompound(i));
+            ItemStack s = stackOf(list.getCompoundOrEmpty(i));
             if (!s.isEmpty()) sum += ItemWeights.getStack(s);
         }
         return sum;
@@ -163,7 +163,7 @@ public final class BulkStore {
     public int count(Predicate<ItemStack> filter) {
         long n = 0;
         for (int i = 0; i < list.size(); i++) {
-            ItemStack s = stackOf(list.getCompound(i));
+            ItemStack s = stackOf(list.getCompoundOrEmpty(i));
             if (!s.isEmpty() && filter.test(s)) n += s.getCount();
         }
         return (int) Math.min(Integer.MAX_VALUE, n);
@@ -171,13 +171,13 @@ public final class BulkStore {
 
     /** Items of one type (cheap: compares the item id only). */
     public int count(Item item) {
-        ResourceLocation id = BuiltInRegistries.ITEM.getKey(item);
+        Identifier id = BuiltInRegistries.ITEM.getKey(item);
         if (id == null) return 0;
         String want = id.toString();
         long n = 0;
         for (int i = 0; i < list.size(); i++) {
-            CompoundTag e = list.getCompound(i);
-            if (want.equals(e.getCompound(STACK).getString("id"))) n += e.getInt(COUNT);
+            CompoundTag e = list.getCompoundOrEmpty(i);
+            if (want.equals(e.getCompoundOrEmpty(STACK).getStringOr("id", ""))) n += e.getIntOr(COUNT, 0);
         }
         return (int) Math.min(Integer.MAX_VALUE, n);
     }
@@ -189,7 +189,7 @@ public final class BulkStore {
     /** Index of the first entry matching, or -1. */
     public int find(Predicate<ItemStack> filter) {
         for (int i = 0; i < list.size(); i++) {
-            ItemStack s = stackOf(list.getCompound(i));
+            ItemStack s = stackOf(list.getCompoundOrEmpty(i));
             if (!s.isEmpty() && filter.test(s)) return i;
         }
         return -1;
@@ -202,7 +202,7 @@ public final class BulkStore {
 
     private int indexOfKey(CompoundTag key) {
         for (int i = 0; i < list.size(); i++) {
-            if (list.getCompound(i).getCompound(STACK).equals(key)) return i;
+            if (list.getCompoundOrEmpty(i).getCompoundOrEmpty(STACK).equals(key)) return i;
         }
         return -1;
     }
@@ -220,10 +220,10 @@ public final class BulkStore {
         int idx = indexOfKey(key);
         int taken;
         if (idx >= 0) {
-            CompoundTag e = list.getCompound(idx);
-            taken = Math.min(maxPerEntry - e.getInt(COUNT), want);
+            CompoundTag e = list.getCompoundOrEmpty(idx);
+            taken = Math.min(maxPerEntry - e.getIntOr(COUNT, 0), want);
             if (taken <= 0) return 0;
-            e.putInt(COUNT, e.getInt(COUNT) + taken);
+            e.putInt(COUNT, e.getIntOr(COUNT, 0) + taken);
         } else {
             if (list.size() >= maxEntries) return 0;
             taken = Math.min(maxPerEntry, want);
@@ -240,10 +240,10 @@ public final class BulkStore {
     /** Removes up to {@code max} items of entry {@code index} and returns them as one stack (may exceed the max stack size). */
     public ItemStack take(int index, int max) {
         if (index < 0 || index >= list.size() || max <= 0) return ItemStack.EMPTY;
-        CompoundTag e = list.getCompound(index);
+        CompoundTag e = list.getCompoundOrEmpty(index);
         ItemStack s = stackOf(e);
         if (s.isEmpty()) return ItemStack.EMPTY;
-        int n = e.getInt(COUNT);
+        int n = e.getIntOr(COUNT, 0);
         int t = Math.min(n, max);
         s.setCount(t);
         if (t >= n) list.remove(index);
@@ -256,7 +256,7 @@ public final class BulkStore {
     public int remove(Predicate<ItemStack> filter, int max) {
         int left = max;
         for (int i = 0; i < list.size() && left > 0; ) {
-            ItemStack s = stackOf(list.getCompound(i));
+            ItemStack s = stackOf(list.getCompoundOrEmpty(i));
             if (s.isEmpty() || !filter.test(s)) {
                 i++;
                 continue;
@@ -290,8 +290,8 @@ public final class BulkStore {
     public int removeBadRows() {
         int removed = 0;
         for (int i = list.size() - 1; i >= 0; i--) {
-            CompoundTag e = list.getCompound(i);
-            if (e.getInt(COUNT) <= 0 || !e.contains(STACK, Tag.TAG_COMPOUND) || e.getCompound(STACK).getString("id").isEmpty()) {
+            CompoundTag e = list.getCompoundOrEmpty(i);
+            if (e.getIntOr(COUNT, 0) <= 0 || !com.skycraft.platform.NbtData.hasType(e, STACK, Tag.TAG_COMPOUND) || e.getCompoundOrEmpty(STACK).getStringOr("id", "").isEmpty()) {
                 list.remove(i);
                 removed++;
             }
@@ -336,7 +336,7 @@ public final class BulkStore {
         CompoundTag tag = new CompoundTag();
         tag.putInt(VERSION_KEY, VERSION);
         ListTag out = new ListTag();
-        for (int i = 0; i < list.size(); i++) out.add(list.getCompound(i).copy());
+        for (int i = 0; i < list.size(); i++) out.add(list.getCompoundOrEmpty(i).copy());
         tag.put(LIST, out);
         return tag;
     }
@@ -348,21 +348,21 @@ public final class BulkStore {
      */
     public void load(CompoundTag tag) {
         list.clear();
-        if (tag == null || !tag.contains(LIST, Tag.TAG_LIST)) return;
-        ListTag in = tag.getList(LIST, Tag.TAG_COMPOUND);
+        if (tag == null || !com.skycraft.platform.NbtData.hasType(tag, LIST, Tag.TAG_LIST)) return;
+        ListTag in = tag.getListOrEmpty(LIST);
         for (int i = 0; i < in.size(); i++) {
-            CompoundTag row = in.getCompound(i);
-            CompoundTag stack = row.getCompound(STACK);
-            int n = row.getInt(COUNT);
-            if (stack.getString("id").isEmpty() || n <= 0) continue;
+            CompoundTag row = in.getCompoundOrEmpty(i);
+            CompoundTag stack = row.getCompoundOrEmpty(STACK);
+            int n = row.getIntOr(COUNT, 0);
+            if (stack.getStringOr("id", "").isEmpty() || n <= 0) continue;
             // the key is normalised through an ItemStack so that a hand-edited or older row still merges
             CompoundTag key = stack;
-            ItemStack probe = ItemStack.of(stack);
+            ItemStack probe = com.skycraft.inventory.ItemData.parse(stack);
             if (!probe.isEmpty()) key = key(probe);
             int idx = indexOfKey(key);
             if (idx >= 0) {
-                CompoundTag e = list.getCompound(idx);
-                e.putInt(COUNT, (int) Math.min(maxPerEntry, (long) e.getInt(COUNT) + n));
+                CompoundTag e = list.getCompoundOrEmpty(idx);
+                e.putInt(COUNT, (int) Math.min(maxPerEntry, (long) e.getIntOr(COUNT, 0) + n));
             } else if (list.size() < maxEntries) {
                 CompoundTag e = new CompoundTag();
                 e.put(STACK, key.copy());

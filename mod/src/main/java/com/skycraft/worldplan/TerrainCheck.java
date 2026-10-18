@@ -159,7 +159,7 @@ final class TerrainCheck {
                 StringBuilder col = new StringBuilder();
                 net.minecraft.world.level.NoiseColumn nc = gen.getBaseColumn(x, z, level, rs);
                 for (int y = Math.min(70, (int) bProfile + 3); y >= Math.max(40, top - 6); y--) {
-                    col.append(y).append(':').append(nc.getBlock(y).getBlock().builtInRegistryHolder().key().location().getPath()).append(' ');
+                    col.append(y).append(':').append(nc.getBlock(y).getBlock().builtInRegistryHolder().key().identifier().getPath()).append(' ');
                 }
                 StringBuilder cor = new StringBuilder();
                 int lx = x & ~3, lz = z & ~3;

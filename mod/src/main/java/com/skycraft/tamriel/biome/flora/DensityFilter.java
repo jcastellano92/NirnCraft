@@ -1,20 +1,21 @@
 package com.skycraft.tamriel.biome.flora;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.levelgen.placement.PlacementContext;
 import net.minecraft.world.level.levelgen.placement.PlacementFilter;
-import net.minecraft.world.level.levelgen.placement.PlacementModifierType;
+
 
 /**
  * {@code skycraft:flora_density}: keeps a position with probability {@code floor + (density - floor) * field(x, z)}.
  * After {@code count + in_square} it turns an even sprinkle of ground cover into drifts, meadows and bare patches
  * that follow a {@link FloraField}.
  */
-public class DensityFilter extends PlacementFilter {
-    public static final Codec<DensityFilter> CODEC = RecordCodecBuilder.create(i -> i.group(
+public class DensityFilter implements PlacementFilter {
+    public static final MapCodec<DensityFilter> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
             Codec.floatRange(0f, 1f).optionalFieldOf("density", 1f).forGetter(f -> f.density),
             Codec.floatRange(0f, 1f).optionalFieldOf("floor", 0f).forGetter(f -> f.floor),
             FloraField.CODEC.fieldOf("field").forGetter(f -> f.field)
@@ -30,13 +31,11 @@ public class DensityFilter extends PlacementFilter {
     }
 
     @Override
-    protected boolean shouldPlace(PlacementContext ctx, RandomSource random, BlockPos pos) {
+    public boolean shouldPlace(PlacementContext ctx, RandomSource random, BlockPos pos) {
         double p = floor + (density - floor) * field.sample(ctx.getLevel().getSeed(), pos.getX(), pos.getZ());
         return random.nextDouble() < p;
     }
 
     @Override
-    public PlacementModifierType<?> type() {
-        return Flora.DENSITY.get();
-    }
+    public MapCodec<? extends PlacementFilter> codec() { return CODEC; }
 }

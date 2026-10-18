@@ -57,12 +57,12 @@ public class KollopBlock extends HorizontalDirectionalBlock implements SimpleWat
 
     @Override
     @SuppressWarnings("deprecation")
-    public BlockState updateShape(BlockState state, Direction dir, BlockState neighbor, LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
-        if (state.getValue(WATERLOGGED)) level.scheduleTick(pos, Fluids.WATER, Fluids.WATER.getTickDelay(level));
+    public BlockState updateShape(BlockState state, net.minecraft.world.level.LevelReader level, net.minecraft.world.level.ScheduledTickAccess ticks263, BlockPos pos, Direction dir, BlockPos neighborPos, BlockState neighbor, net.minecraft.util.RandomSource random263) {
+        if (state.getValue(WATERLOGGED)) ticks263.scheduleTick(pos, Fluids.WATER, Fluids.WATER.getTickDelay(level));
         if (dir == Direction.DOWN && !canSurvive(state, level, pos)) {
             return (state.getValue(WATERLOGGED) ? net.minecraft.world.level.block.Blocks.WATER : net.minecraft.world.level.block.Blocks.AIR).defaultBlockState();
         }
-        return super.updateShape(state, dir, neighbor, level, pos, neighborPos);
+        return super.updateShape(state, level, ticks263, pos, dir, neighborPos, neighbor, random263);
     }
 
     @Override

@@ -43,13 +43,13 @@ public final class SlowTime {
         int w = Math.max(1, Math.min(3, words));
         FIELDS.removeIf(f -> f.owner.equals(p.getUUID()));
         FIELDS.add(new Field(p.getUUID(), PERIOD[w - 1], p.level().getGameTime() + SECONDS[w - 1] * 20L));
-        MagicFx.sendNear(p.serverLevel(), p.position(), 64, MagicFx.TIME_FIELD, Element.ARCANE, p.position(), p.position(), p.getId(), 12);
+        MagicFx.sendNear(p.level(), p.position(), 64, MagicFx.TIME_FIELD, Element.ARCANE, p.position(), p.position(), p.getId(), 12);
     }
 
     /** Whether this creature skips the current tick (called from the living tick event, server side only). */
     public static boolean skipsTick(LivingEntity e) {
         if (e instanceof Player) return false;
-        MobEffectInstance inst = e.getEffect(MagicRegistry.TIME_SLOWED.get());
+        MobEffectInstance inst = e.getEffect(com.skycraft.platform.Effects.holder(MagicRegistry.TIME_SLOWED.get()));
         if (inst == null) return false;
         int period = PERIOD[Math.max(0, Math.min(2, inst.getAmplifier()))];
         return (e.level().getGameTime() + e.getId()) % period != 0;
@@ -65,16 +65,16 @@ public final class SlowTime {
                 it.remove();
                 continue;
             }
-            ServerLevel level = owner.serverLevel();
+            ServerLevel level = owner.level();
             long now = level.getGameTime();
             if (now % 5 == 0) {
                 int amp = f.period == 2 ? 0 : f.period == 3 ? 1 : 2;
                 for (LivingEntity e : Targeting.around(level, owner.position(), RADIUS, e -> e != owner && !e.isSpectator())) {
                     if (e instanceof ServerPlayer other) {
-                        if (Targeting.canHarm(owner, other)) other.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 10, amp + 2, false, false));
+                        if (Targeting.canHarm(owner, other)) other.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.SLOWNESS), 10, amp + 2, false, false));
                     } else {
                         // the effect only counts down on the ticks the creature gets, so it lasts ~2 real seconds
-                        e.addEffect(new MobEffectInstance(MagicRegistry.TIME_SLOWED.get(), Math.max(2, 40 / f.period), amp, false, false, true));
+                        e.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MagicRegistry.TIME_SLOWED.get()), Math.max(2, 40 / f.period), amp, false, false, true));
                     }
                 }
             }
@@ -83,20 +83,20 @@ public final class SlowTime {
             }
             for (Projectile proj : level.getEntitiesOfClass(Projectile.class, owner.getBoundingBox().inflate(RADIUS),
                     pr -> pr.getOwner() != owner && pr.isAlive())) {
-                if (proj instanceof net.minecraft.world.entity.projectile.AbstractArrow a && com.skycraft.arsenal.entity.SkyArrow.isArrowInGround(a)) continue;
+                if (proj instanceof net.minecraft.world.entity.projectile.arrow.AbstractArrow a && com.skycraft.arsenal.entity.SkyArrow.isArrowInGround(a)) continue;
                 inside.add(proj);
                 CompoundTag pd = proj.getPersistentData();
                 if (!pd.contains(PROJ_KEY)) {
                     pd.putInt(PROJ_KEY, f.period);
                     proj.setDeltaMovement(proj.getDeltaMovement().scale(1.0 / f.period));
-                    proj.hurtMarked = true;
+                    proj.syncVelocity = true;
                     SLOWED.add(proj);
                 } else if (!proj.isNoGravity()) {
                     // slowed time slows gravity too: give back all but 1/period^2 of this tick's pull
-                    double g = proj instanceof net.minecraft.world.entity.projectile.AbstractArrow ? 0.05
+                    double g = proj instanceof net.minecraft.world.entity.projectile.arrow.AbstractArrow ? 0.05
                             : proj instanceof com.skycraft.magic.spell.SpellProjectile ? 0
                             : proj instanceof net.minecraft.world.entity.projectile.ThrowableProjectile ? 0.03 : 0;
-                    int period = Math.max(1, pd.getInt(PROJ_KEY));
+                    int period = Math.max(1, pd.getIntOr(PROJ_KEY, 0));
                     if (g > 0) proj.setDeltaMovement(proj.getDeltaMovement().add(0, g * (1 - 1.0 / (period * period)), 0));
                 }
             }
@@ -108,11 +108,11 @@ public final class SlowTime {
                 it.remove();
             } else if (!inside.contains(proj)) {
                 CompoundTag pd = proj.getPersistentData();
-                int period = Math.max(1, pd.getInt(PROJ_KEY));
+                int period = Math.max(1, pd.getIntOr(PROJ_KEY, 0));
                 pd.remove(PROJ_KEY);
                 Vec3 v = proj.getDeltaMovement();
                 proj.setDeltaMovement(v.scale(period));
-                proj.hurtMarked = true;
+                proj.syncVelocity = true;
                 it.remove();
             }
         }

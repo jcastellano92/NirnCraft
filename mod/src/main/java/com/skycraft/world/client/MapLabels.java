@@ -5,8 +5,6 @@ import com.skycraft.tamriel.Region;
 import com.skycraft.tamriel.TamrielMap;
 import com.skycraft.world.Provinces;
 import net.minecraft.network.chat.Component;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -18,7 +16,6 @@ import java.util.Map;
  * session on a background thread by sampling {@link TamrielMap#region} over Tamriel and the foreign lands. Until
  * that finishes (or for provinces it can't place) the fixed anchors of {@link Provinces} are used.
  */
-@OnlyIn(Dist.CLIENT)
 public final class MapLabels {
     private static final int STEP = 96;
     private static final int MIN_X = -24000, MAX_X = 24000, MIN_Z = -16000, MAX_Z = 24000;

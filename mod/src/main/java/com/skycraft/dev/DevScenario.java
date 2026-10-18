@@ -8,7 +8,7 @@ import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -41,9 +41,9 @@ final class DevScenario {
                 var difficulty=net.minecraft.world.Difficulty.byName(a[1]);
                 if(difficulty==null) throw new IllegalArgumentException("Unknown difficulty");
                 src.getServer().setDifficulty(difficulty,true);
-                src.sendSuccess(()->Component.literal("SCENARIO DIFFICULTY requested="+difficulty.getKey()
-                        +" world="+src.getServer().getWorldData().getDifficulty().getKey()
-                        +" level="+src.getLevel().getDifficulty().getKey()),false);return 1;
+                src.sendSuccess(()->Component.literal("SCENARIO DIFFICULTY requested="+difficulty.getSerializedName()
+                        +" world="+src.getServer().getWorldData().getDifficulty().getSerializedName()
+                        +" level="+src.getLevel().getDifficulty().getSerializedName()),false);return 1;
             }
             if(a.length==2 && a[0].equals("equip")) {
                 var player=src.getPlayerOrException();
@@ -57,14 +57,14 @@ final class DevScenario {
             var actors=ACTORS.computeIfAbsent(src.getLevel(),k->new LinkedHashMap<>());
             if(a[0].equals("spawn") && (a.length==6 || a.length==7)) {
                 if(actors.containsKey(a[1]) || actors.size()>=32) throw new IllegalArgumentException("Actor exists or32-actor limit reached");
-                var type=BuiltInRegistries.ENTITY_TYPE.getOptional(new ResourceLocation(a[2])).orElseThrow();
+                var type=BuiltInRegistries.ENTITY_TYPE.getOptional(Identifier.parse(a[2])).orElseThrow();
                 double x=Double.parseDouble(a[3]),y=Double.parseDouble(a[4]),z=Double.parseDouble(a[5]);
                 var position=BlockPos.containing(x,y,z);
                 if(!Double.isFinite(x+y+z) || !src.getLevel().isInWorldBounds(position) || !src.getLevel().hasChunkAt(position))
                     throw new IllegalArgumentException("Actor location must be finite and loaded");
-                if(type==net.minecraft.world.entity.EntityType.VILLAGER || type==net.minecraft.world.entity.EntityType.WANDERING_TRADER)
+                if(type==net.minecraft.world.entity.EntityTypes.VILLAGER || type==net.minecraft.world.entity.EntityTypes.WANDERING_TRADER)
                     throw new IllegalArgumentException("Use skycraft:npc; vanilla villagers are converted and cannot remain tracked fixtures");
-                var entity=type.create(src.getLevel());
+                var entity=type.create(src.getLevel(), net.minecraft.world.entity.EntitySpawnReason.EVENT);
                 if(!(entity instanceof LivingEntity living)) throw new IllegalArgumentException("Living entity required");
                 living.setPos(x,y,z);
                 living.addTag("skycraft_qa_fixture");
@@ -96,7 +96,7 @@ final class DevScenario {
                 data.put("tag",a[1]);data.put("uuid",e.getUUID().toString());data.put("entity",BuiltInRegistries.ENTITY_TYPE.getKey(e.getType()).toString());
                 data.put("initialHealth",actor.initial);data.put("health",e.getHealth());data.put("healthLost",actor.initial-e.getHealth());
                 data.put("alive",e.isAlive());data.put("removed",e.isRemoved());data.put("position",java.util.List.of(e.getX(),e.getY(),e.getZ()));
-                data.put("ticks",src.getLevel().getGameTime()-actor.started);data.put("dimension",src.getLevel().dimension().location().toString());
+                data.put("ticks",src.getLevel().getGameTime()-actor.started);data.put("dimension",src.getLevel().dimension().identifier().toString());
                 data.put("noAI",e instanceof Mob mob && mob.isNoAi());
                 data.put("onGround",e.onGround());
                 if(actor.goal!=null) {
@@ -107,7 +107,7 @@ final class DevScenario {
                 var attacker=e.getLastHurtByMob();
                 data.put("lastAttacker",attacker==null?"":attacker.getUUID().toString());
                 data.put("damageFromObserver",attacker!=null && attacker==src.getEntity());
-                data.put("difficulty",src.getLevel().getDifficulty().getKey());
+                data.put("difficulty",src.getLevel().getDifficulty().getSerializedName());
                 if(src.getEntity() instanceof net.minecraft.server.level.ServerPlayer player) {
                     var ray=com.skycraft.magic.Targeting.ray(player,12,other->com.skycraft.magic.Targeting.canHarm(player,other));
                     data.put("rayTarget",ray.entity()==null?"":ray.entity().getUUID().toString());

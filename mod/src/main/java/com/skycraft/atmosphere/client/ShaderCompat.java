@@ -1,6 +1,6 @@
 package com.skycraft.atmosphere.client;
 
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 
 import java.lang.reflect.Method;
 

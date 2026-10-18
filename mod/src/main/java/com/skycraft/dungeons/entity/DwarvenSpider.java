@@ -53,8 +53,8 @@ public class DwarvenSpider extends Automaton {
     }
 
     @Override
-    protected void customServerAiStep() {
-        super.customServerAiStep();
+    protected void customServerAiStep(ServerLevel level) {
+        super.customServerAiStep(level);
         LivingEntity target = this.getTarget();
         if (zapCooldown > 0) zapCooldown--;
         if (target != null && target.isAlive() && zapCooldown <= 0) {
@@ -67,11 +67,11 @@ public class DwarvenSpider extends Automaton {
     }
 
     @Override
-    public boolean doHurtTarget(Entity target) {
-        boolean hit = super.doHurtTarget(target);
+    public boolean doHurtTarget(ServerLevel level, Entity target) {
+        boolean hit = super.doHurtTarget(level, target);
         if (hit && target instanceof LivingEntity living) {
-            living.invulnerableTime = 0;
-            living.hurt(this.damageSources().indirectMagic(this, this), 2.0f);
+            living.setInvulnerableTime(0);
+            com.skycraft.platform.Effects.hurt(living, this.damageSources().indirectMagic(this, this), 2.0f);
             if (this.level() instanceof ServerLevel server) {
                 server.sendParticles(ParticleTypes.ELECTRIC_SPARK, target.getX(), target.getY() + target.getBbHeight() * 0.5, target.getZ(),
                         8, 0.25, 0.3, 0.25, 0.05);

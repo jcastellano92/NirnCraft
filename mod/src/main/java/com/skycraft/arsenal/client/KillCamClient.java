@@ -15,16 +15,16 @@ import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
-import net.minecraftforge.client.event.RenderGuiOverlayEvent;
-import net.minecraftforge.client.event.RenderHandEvent;
-import net.minecraftforge.client.event.ScreenEvent;
-import net.minecraftforge.client.event.ViewportEvent;
-import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
+import net.neoforged.neoforge.client.event.RenderGuiLayerEvent;
+import net.neoforged.neoforge.client.event.RenderHandEvent;
+import net.neoforged.neoforge.client.event.ScreenEvent;
+import net.neoforged.neoforge.client.event.ViewportEvent;
+import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
+
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 /**
  * Skyrim kill cams. The camera is moved to a client-only, never-spawned {@link ArmorStand} ({@link
@@ -32,7 +32,7 @@ import net.minecraftforge.fml.common.Mod;
  * and the HUD hidden. Everything is restored when the cam ends, a screen opens, the player is hurt or dies, or the
  * player logs out. Purely client-side: the server only sends the trigger.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
 public final class KillCamClient {
     private static final int MELEE_TICKS = 26;
     private static final int ARROW_FLIGHT_TICKS = 14;
@@ -74,7 +74,7 @@ public final class KillCamClient {
             Minecraft mc = Minecraft.getInstance();
             LocalPlayer player = mc.player;
             ClientLevel level = mc.level;
-            if (active || player == null || level == null || mc.screen != null || !player.isAlive() || mc.getCameraEntity() != player) return;
+            if (active || player == null || level == null || mc.gui.screen() != null || !player.isAlive() || mc.getCameraEntity() != player) return;
             if (victimMid.distanceToSqr(player.position()) > 96 * 96) return;
             if (!ArsenalConfig.KILL_CAM_NEAR_PLAYERS.get()) {
                 for (Player other : level.players()) {
@@ -86,7 +86,7 @@ public final class KillCamClient {
             tick = 0;
             Entity victim = level.getEntity(victimId);
             if (victim != null && !victim.isRemoved()) victimMid = victim.position().add(0, victim.getBbHeight() * 0.55, 0);
-            side = level.random.nextBoolean() ? 1f : -1f;
+            side = level.getRandom().nextBoolean() ? 1f : -1f;
             if (kind == ArsenalPackets.KillCam.ARROW) {
                 Vec3 d = dir.lengthSqr() < 1e-6 ? victimMid.subtract(player.getEyePosition()) : dir;
                 d = d.normalize();
@@ -113,10 +113,10 @@ public final class KillCamClient {
             marker.setOldPosAndRot();
 
             prevCamera = mc.options.getCameraType();
-            prevHideGui = mc.options.hideGui;
+            prevHideGui = mc.gui.hud.isHidden();
             changedHud = ArsenalConfig.KILL_CAM_HIDE_HUD.get();
             mc.options.setCameraType(CameraType.FIRST_PERSON);
-            if (changedHud) mc.options.hideGui = true;
+            if (changedHud) if(mc.gui.hud.isHidden()!=true) mc.gui.hud.toggle();
             mc.setCameraEntity(marker);
             active = true;
         } catch (Throwable t) {
@@ -185,13 +185,13 @@ public final class KillCamClient {
     }
 
     @SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || !active) return;
+    public static void onClientTick(net.neoforged.neoforge.client.event.ClientTickEvent.Post event) {
+        if (!active) return;
         try {
             Minecraft mc = Minecraft.getInstance();
             LocalPlayer player = mc.player;
             if (player == null || mc.level == null || marker == null || marker.level() != mc.level || !player.isAlive()
-                    || mc.screen != null || mc.getCameraEntity() != marker || (player.hurtTime > 0 && tick > 1)) {
+                    || mc.gui.screen() != null || mc.getCameraEntity() != marker || (player.hurtTime > 0 && tick > 1)) {
                 stop();
                 return;
             }
@@ -221,7 +221,7 @@ public final class KillCamClient {
             }
             if (wasActive) {
                 if (prevCamera != null) mc.options.setCameraType(prevCamera);
-                if (changedHud) mc.options.hideGui = prevHideGui;
+                if (changedHud) if(mc.gui.hud.isHidden()!=prevHideGui) mc.gui.hud.toggle();
             }
         } finally {
             marker = null;
@@ -251,65 +251,49 @@ public final class KillCamClient {
         event.setRoll(event.getRoll() + roll * side);
     }
 
-    private static boolean pushedKillCamPose;
-
-    @SubscribeEvent
-    public static void onRenderLivingPre(net.minecraftforge.client.event.RenderLivingEvent.Pre<?, ?> event) {
-        pushedKillCamPose = false;
-        net.minecraft.world.entity.LivingEntity entity = event.getEntity();
-        float pt = event.getPartialTick();
-        float camProgress = active && duration > 0 ? Mth.clamp((tick + pt) / (float) duration, 0.0f, 1.0f) : 1.0f;
-
-        // 1. Dying CorpseEntity render dummy: smoothly topple from 0 degrees (upright) to 90 degrees (flat)
-        if (!entity.isAddedToWorld()) {
-            float fallProgress = com.skycraft.loot.CorpseEvents.getDeathFallProgress(entity, pt, active, camProgress);
-            if (fallProgress < 0.999f) {
-                var poseStack = event.getPoseStack();
-                poseStack.pushPose();
-                pushedKillCamPose = true;
-                float half = entity.getBbHeight() * 0.5f;
-                float lift = Math.min(entity.getBbWidth() * 0.5f, 0.75f);
-                // Undo CorpseRenderer's static 90-degree flat pose and interpolate smoothly by fallProgress
-                poseStack.mulPose(com.mojang.math.Axis.ZP.rotationDegrees(-90.0f));
-                poseStack.translate(-half, -lift, 0.0f);
-                poseStack.translate(half * fallProgress, lift * fallProgress, 0.0f);
-                poseStack.mulPose(com.mojang.math.Axis.ZP.rotationDegrees(90.0f * fallProgress));
-                entity.hurtTime = fallProgress < 0.35f ? 8 : 0;
-                if (event.getRenderer().getModel() instanceof net.minecraft.client.model.HumanoidModel<?> hm) {
-                    hm.rightArmPose = net.minecraft.client.model.HumanoidModel.ArmPose.SPYGLASS;
-                    hm.leftArmPose = net.minecraft.client.model.HumanoidModel.ArmPose.SPYGLASS;
+    private record Pose(float fall,float half,float lift,boolean lunge,float dx,float dz) {}
+    private static final net.minecraft.util.context.ContextKey<Pose> POSE=new net.minecraft.util.context.ContextKey<>(net.minecraft.resources.Identifier.fromNamespaceAndPath("skycraft","kill_camera_pose"));
+    private static final net.minecraft.util.context.ContextKey<Boolean> PUSHED=new net.minecraft.util.context.ContextKey<>(net.minecraft.resources.Identifier.fromNamespaceAndPath("skycraft","kill_camera_pushed"));
+    public static void extract(net.minecraft.world.entity.LivingEntity entity,net.minecraft.client.renderer.entity.state.LivingEntityRenderState state) {
+        state.setRenderData(POSE,null);state.setRenderData(PUSHED,false);
+        float progress=active&&duration>0?Mth.clamp((tick+state.partialTick)/duration,0,1):1;
+        if(!entity.isAddedToLevel()) {
+            float fall=com.skycraft.loot.CorpseEvents.getDeathFallProgress(entity,state.partialTick,active,progress);
+            if(fall<.999f) {
+                state.setRenderData(POSE,new Pose(fall,entity.getBbHeight()*.5f,Math.min(entity.getBbWidth()*.5f,.75f),false,0,0));
+                state.hasRedOverlay=fall<.35f;
+                if(state instanceof net.minecraft.client.renderer.entity.state.HumanoidRenderState humanoid) {
+                    humanoid.rightArmPose=net.minecraft.client.model.HumanoidModel.ArmPose.SPYGLASS;
+                    humanoid.leftArmPose=net.minecraft.client.model.HumanoidModel.ArmPose.SPYGLASS;
                 }
             }
-            return;
-        }
-
-        // 2. Player attacker during melee kill-cam: cinematic overhead cleave and finishing follow-through
-        if (active && kind == ArsenalPackets.KillCam.MELEE && entity == Minecraft.getInstance().player
-                && event.getRenderer().getModel() instanceof net.minecraft.client.model.PlayerModel<?> pm) {
-            pm.rightArmPose = camProgress < 0.38f
-                    ? net.minecraft.client.model.HumanoidModel.ArmPose.THROW_SPEAR
-                    : net.minecraft.client.model.HumanoidModel.ArmPose.BLOCK;
-            float lunge = Mth.sin(camProgress * (float) Math.PI);
-            var poseStack = event.getPoseStack();
-            poseStack.pushPose();
-            pushedKillCamPose = true;
-            double yawRad = Math.toRadians(Mth.rotLerp(pt, entity.yBodyRotO, entity.yBodyRot));
-            poseStack.translate(-Math.sin(yawRad) * 0.28 * lunge, 0.0, Math.cos(yawRad) * 0.28 * lunge);
+        } else if(active&&kind==ArsenalPackets.KillCam.MELEE&&entity==Minecraft.getInstance().player&&state instanceof net.minecraft.client.renderer.entity.state.AvatarRenderState avatar) {
+            avatar.rightArmPose=progress<.38f?net.minecraft.client.model.HumanoidModel.ArmPose.THROW_TRIDENT:net.minecraft.client.model.HumanoidModel.ArmPose.BLOCK;
+            float lunge=Mth.sin(progress*(float)Math.PI);double yaw=Math.toRadians(state.bodyRot);
+            state.setRenderData(POSE,new Pose(1,0,0,true,(float)(-Math.sin(yaw)*.28*lunge),(float)(Math.cos(yaw)*.28*lunge)));
         }
     }
-
-    @SubscribeEvent
-    public static void onRenderLivingPost(net.minecraftforge.client.event.RenderLivingEvent.Post<?, ?> event) {
-        if (pushedKillCamPose) {
-            event.getPoseStack().popPose();
-            pushedKillCamPose = false;
+    @SubscribeEvent public static void onRenderLivingPre(net.neoforged.neoforge.client.event.RenderLivingEvent.Pre<?,?,?> event) {
+        var state=event.getRenderState();Pose data=state.getRenderData(POSE);if(event.isCanceled()||data==null)return;
+        var pose=event.getPoseStack();pose.pushPose();state.setRenderData(PUSHED,true);
+        if(data.lunge()) pose.translate(data.dx(),0,data.dz());
+        else {
+            pose.rotateDegrees(com.mojang.math.Axis.ZP,-90);
+            pose.translate(-data.half(),-data.lift(),0);
+            pose.translate(data.half()*data.fall(),data.lift()*data.fall(),0);
+            pose.rotateDegrees(com.mojang.math.Axis.ZP,90*data.fall());
+        }
+    }
+    @SubscribeEvent public static void onRenderLivingPost(net.neoforged.neoforge.client.event.RenderLivingEvent.Post<?,?,?> event) {
+        if(Boolean.TRUE.equals(event.getRenderState().getRenderData(PUSHED))) {
+            event.getPoseStack().popPose();event.getRenderState().setRenderData(PUSHED,false);
         }
     }
 
     @SubscribeEvent
     public static void onFov(ViewportEvent.ComputeFov event) {
         if (!active || marker == null || Minecraft.getInstance().getCameraEntity() != marker) return;
-        event.setFOV(event.getFOV() * (kind == ArsenalPackets.KillCam.ARROW ? 0.85 : 0.92));
+        event.setFOV(event.getFOV() * (kind == ArsenalPackets.KillCam.ARROW ? .85f : .92f));
     }
 
     @SubscribeEvent
@@ -318,8 +302,8 @@ public final class KillCamClient {
     }
 
     @SubscribeEvent
-    public static void onOverlay(RenderGuiOverlayEvent.Pre event) {
-        if (active && event.getOverlay() == VanillaGuiOverlay.CROSSHAIR.type()) event.setCanceled(true);
+    public static void onOverlay(RenderGuiLayerEvent.Pre event) {
+        if (active && event.getName().equals(net.neoforged.neoforge.client.gui.VanillaGuiLayers.CROSSHAIR)) event.setCanceled(true);
     }
 
     @SubscribeEvent

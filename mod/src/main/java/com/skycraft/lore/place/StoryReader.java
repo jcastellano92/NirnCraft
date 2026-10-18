@@ -31,10 +31,10 @@ import net.minecraft.world.level.block.entity.BarrelBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.LecternBlockEntity;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -58,7 +58,7 @@ import java.util.List;
  * module data), counts it, and for place notes runs the whole lore flow (read list, reveal, mini-quest, a copy for
  * the pack). Nothing here trusts the client: the server decides, then sends the text.</p>
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class StoryReader {
     /** Written-book tag naming the place note a lectern stands for. */
     public static final String NOTE_TAG = "SkyNote";
@@ -112,43 +112,47 @@ public final class StoryReader {
         if (stack.isEmpty()) return null;
         LoreBooks.Book lore = LoreBookItem.bookOf(stack);
         if (lore != null) return Story.lore(lore, kind);
-        if (!stack.is(Items.WRITTEN_BOOK) || stack.getTag() == null) return null;
-        CompoundTag tag = stack.getTag();
-        if (tag.contains(NOTE_TAG, Tag.TAG_STRING)) {
-            LoreBooks.Book note = PlaceLore.book(tag.getString(NOTE_TAG));
+        if (!stack.is(Items.WRITTEN_BOOK) || com.skycraft.inventory.ItemData.custom(stack) == null) return null;
+        CompoundTag tag = com.skycraft.inventory.ItemData.custom(stack);
+        if (com.skycraft.platform.NbtData.hasType(tag, NOTE_TAG, Tag.TAG_STRING)) {
+            LoreBooks.Book note = PlaceLore.book(tag.getStringOr(NOTE_TAG, ""));
             if (note != null) return Story.lore(note, kind);
         }
-        if (!worldMade && !tag.getBoolean(STORY_TAG)) return null;
-        ListTag pages = tag.getList("pages", Tag.TAG_STRING);
-        List<String> out = new ArrayList<>(Math.min(pages.size(), LorePackets.OpenStory.MAX_PAGES));
+        if (!worldMade && !tag.getBooleanOr(STORY_TAG, false)) return null;
+        var content = stack.get(net.minecraft.core.component.DataComponents.WRITTEN_BOOK_CONTENT);
+        ListTag legacyPages = tag.getListOrEmpty("pages");
+        int size = content != null ? content.pages().size() : legacyPages.size();
+        List<String> out = new ArrayList<>(Math.min(size, LorePackets.OpenStory.MAX_PAGES));
         int chars = 0;
-        for (int i = 0; i < pages.size() && i < LorePackets.OpenStory.MAX_PAGES; i++) {
-            String p = pages.getString(i);
+        for (int i = 0; i < size && i < LorePackets.OpenStory.MAX_PAGES; i++) {
+            String p = content != null ? com.skycraft.platform.ArcaneData.writeComponent(content.pages().get(i).raw())
+                    : legacyPages.getString(i).orElse("");
             if (p.length() > LorePackets.OpenStory.MAX_PAGE) p = p.substring(0, LorePackets.OpenStory.MAX_PAGE);
             chars += p.length();
             out.add(p);
         }
         if (out.isEmpty()) return null;
-        String author = tag.getString("author");
+        String author = content != null ? content.author() : tag.getStringOr("author", "");
         if (author.equals("?")) author = "";
         boolean sheet = out.size() <= SHEET_MAX_PAGES && chars <= SHEET_MAX_CHARS;
-        return new Story(null, tag.getString("title"), author, out, sheet, kind);
+        String title = content != null ? content.title().raw() : tag.getStringOr("title", "");
+        return new Story(null, title, author, out, sheet, kind);
     }
 
     /** The story of a sign or barrel marked by the world builders (see {@link #mark}); null when unmarked. */
     @Nullable
     private static Story ofMarked(BlockEntity be, String kind) {
         CompoundTag data = be.getPersistentData();
-        if (!data.contains(MARK, Tag.TAG_COMPOUND)) return null;
-        CompoundTag m = data.getCompound(MARK);
-        ListTag pages = m.getList("pages", Tag.TAG_STRING);
+        if (!com.skycraft.platform.NbtData.hasType(data, MARK, Tag.TAG_COMPOUND)) return null;
+        CompoundTag m = data.getCompoundOrEmpty(MARK);
+        ListTag pages = m.getListOrEmpty("pages");
         List<String> out = new ArrayList<>();
         for (int i = 0; i < pages.size() && i < LorePackets.OpenStory.MAX_PAGES; i++) {
-            String p = pages.getString(i);
-            out.add(Component.Serializer.toJson(Component.literal(p.length() > 4000 ? p.substring(0, 4000) : p)));
+            String p = pages.getString(i).orElse("");
+            out.add(com.skycraft.platform.ArcaneData.writeComponent(Component.literal(p.length() > 4000 ? p.substring(0, 4000) : p)));
         }
         if (out.isEmpty()) return null;
-        return new Story(null, m.getString("title"), m.getString("author"), out, true, kind);
+        return new Story(null, m.getStringOr("title",""), m.getStringOr("author",""), out, true, kind);
     }
 
     /**
@@ -181,7 +185,7 @@ public final class StoryReader {
     public static Click resolve(ServerPlayer player, ServerLevel level, BlockPos pos) {
         BlockEntity be = level.getBlockEntity(pos);
         if (be == null) return null;
-        String key = level.dimension().location() + "@" + pos.asLong();
+        String key = level.dimension().identifier() + "@" + pos.asLong();
         if (be instanceof LecternBlockEntity lectern && level.getBlockState(pos).getBlock() instanceof LecternBlock) {
             // sneaking takes the book the vanilla way, when the server allows it
             if (player.isShiftKeyDown() && SkyConfig.STORY_LECTERN_TAKEABLE.get()) return null;
@@ -193,7 +197,7 @@ public final class StoryReader {
             Story s = ofMarked(be, "sign");
             return s == null ? null : new Click(s, key);
         }
-        if (be instanceof BarrelBlockEntity barrel && be.getPersistentData().contains(MARK, Tag.TAG_COMPOUND)) {
+        if (be instanceof BarrelBlockEntity barrel && com.skycraft.platform.NbtData.hasType(be.getPersistentData(), MARK, Tag.TAG_COMPOUND)) {
             if (com.skycraft.crime.Locks.blocks(player, level, pos) || com.skycraft.crime.Ownership.isOwnedByOther(player, level, pos)) return null;
             for (int i = 0; i < barrel.getContainerSize(); i++) {
                 Story s = ofBook(barrel.getItem(i), false, "note");
@@ -207,7 +211,7 @@ public final class StoryReader {
     public static void onRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
         if (event.getHand() != InteractionHand.MAIN_HAND || event.isCanceled()) return;
         Level level = event.getLevel();
-        if (level.isClientSide || !(event.getEntity() instanceof ServerPlayer player) || !(level instanceof ServerLevel sl)) return;
+        if (level.isClientSide() || !(event.getEntity() instanceof ServerPlayer player) || !(level instanceof ServerLevel sl)) return;
         Click click = resolve(player, sl, event.getPos());
         if (click == null) return;
         event.setCanceled(true);
@@ -245,9 +249,9 @@ public final class StoryReader {
         }
         PlayerData d = SkyData.get(player);
         CompoundTag module = d.module(MODULE);
-        ListTag read = module.getList(READ, Tag.TAG_STRING);
+        ListTag read = module.getListOrEmpty(READ);
         boolean first = true;
-        for (int i = 0; i < read.size(); i++) if (read.getString(i).equals(click.key())) first = false;
+        for (int i = 0; i < read.size(); i++) if (read.getStringOr(i, "").equals(click.key())) first = false;
         if (first) {
             read.add(StringTag.valueOf(click.key()));
             while (read.size() > MAX_REMEMBERED) read.remove(0);

@@ -5,12 +5,12 @@ prisoner on a cart to Helgen. From there you level up skills by using them, look
 learn spells from tomes, absorb dragon souls and shout. Along the way you join factions, follow the Dragonborn's
 story, trade, get thrown in jail, buy a house, and explore a whole continent with your friends.
 
-Skycraft Core (`mod/`) is one custom Forge mod that builds all of this itself: the world, its people, creatures,
-music and rules. The pack (`pack/`) adds only performance mods, a few libraries and helpers such as Essential,
+Skycraft Core (`mod/`) is one custom NeoForge mod that builds all of this itself: the world, its people, creatures,
+music and rules. The pack (`pack/`) adds only performance mods, a few libraries and helpers such as
 Better Combat, Lootr and Controllable.
 
-* **Minecraft 1.20.1, Forge 47.4.10, Java 17.**
-* Runs on a Steam Deck-class PC. Every menu fits the Deck's 1280×800 screen.
+* **Minecraft 26.3, NeoForge 26.3.0.90, Java 25.** See [native acceptance](docs/NATIVE-26.3-PREVIEW.md).
+* Targets a Steam Deck-class PC. Every menu is designed for the Deck's 1280×800 screen.
 
 ## Highlights
 
@@ -62,22 +62,23 @@ Better Combat, Lootr and Controllable.
 ## Install
 
 Build the full Prism instance locally with `tools/build_release.ps1`; the result is
-`dist/Skycraft-client-instance.zip`. Import it through **Prism Launcher → Add Instance → Import**.
-GitHub Actions is disabled. Local packaging commands and the optional manual workflow are documented in
-[docs/DEVELOPING.md](docs/DEVELOPING.md#building-downloads-locally).
+`Skycraft-26.3-client-instance.zip` in a fresh release directory under `dist`. Import it through
+**Prism Launcher → Add Instance → Import**. GitHub Actions is disabled. Exact native packaging and acceptance
+commands are documented in [NATIVE-26.3-PREVIEW.md](docs/NATIVE-26.3-PREVIEW.md) and
+[SERVER-26.3.md](docs/SERVER-26.3.md).
 
 The packaging tools support these outputs:
 
 | Artifact | Use |
 | --- | --- |
-| `Skycraft-client-instance` | Zip for **Prism Launcher / MultiMC**: *Add Instance → Import → zip*. Includes Forge, all mods, configs and shaders. Uses 6 GB of RAM (8 GB if you host). |
-| `Skycraft-server` | A ready Forge dedicated server. Accept the EULA, then run `run.sh` / `run.bat`. |
+| `Skycraft-26.3-client-instance.zip` | **Prism Launcher / MultiMC** instance with exact NeoForge and pinned mods/configs. Custom shaders and Distant Horizons are preserved and disabled until native acceptance. |
+| `Skycraft-26.3-server.zip` | Complete NeoForge dedicated server with server-side mods and checked Java 25 launchers. Accept the EULA, then run `run.sh` / `run.bat`. |
 | `Skycraft-exports` | `Skycraft.mrpack` (Modrinth App) and `Skycraft-curseforge.zip` (CurseForge App). |
 | `skycraft-core-jar` | Just the Skycraft Core mod. |
 
-**Playing with friends:** Essential is included, so the host just opens their world and invites friends from the
-Essential menu. No port forwarding is needed. Full instructions, including the dedicated server, shaders and
-Distant Horizons settings, updating and troubleshooting, are in [docs/INSTALL.md](docs/INSTALL.md).
+**Playing with friends:** use Minecraft's **Open to LAN** on the same network, or **Multiplayer** with a server's
+address. Everyone needs the matching full client pack. Dedicated-server setup is in
+[SERVER-26.3.md](docs/SERVER-26.3.md); install instructions are in [docs/INSTALL.md](docs/INSTALL.md).
 
 ## Controls
 

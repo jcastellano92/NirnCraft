@@ -120,7 +120,7 @@ public final class Regions {
 
     public static Region at(Level level, BlockPos pos) {
         if (level.dimension() != Level.OVERWORLD) {
-            String dim = level.dimension().location().toString();
+            String dim = level.dimension().identifier().toString();
             return DIMENSIONS.computeIfAbsent(dim, Regions::dimensionRegion);
         }
         return TamrielMap.region(pos.getX(), pos.getZ());

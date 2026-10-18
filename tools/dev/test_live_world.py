@@ -15,8 +15,86 @@ spec = importlib.util.spec_from_file_location("live_world", Path(__file__).with_
 live = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(live)
 
+# These fixtures test bake validity after the real native platform check passes.
+NATIVE_CORE = {
+    'META-INF/neoforge.mods.toml': b'''license="MIT"
+[[mods]]
+modId="skycraft"
+version="0.1.0"
+[[dependencies.skycraft]]
+modId="minecraft"
+type="required"
+versionRange="[26.3]"
+[[dependencies.skycraft]]
+modId="neoforge"
+type="required"
+versionRange="[26.3.0.90,26.4)"
+''',
+    # Only the class header is inspected by the offline platform validator.
+    'com/skycraft/Skycraft.class': b'\xca\xfe\xba\xbe\0\0\0\x45',
+}
+
 
 class PreviewTest(unittest.TestCase):
+    def test_verified_staged_bake_replaces_stale_embedded_bake_without_weakening_the_guard(self):
+        for valid in (True,False):
+            with self.subTest(valid=valid),tempfile.TemporaryDirectory() as folder:
+                root=Path(folder);game=root/'game';dev=game/'world-preview';(dev/'outbox').mkdir(parents=True)
+                core=game/'mods/skycraft-core.jar';core.parent.mkdir();new=root/'new.jar'
+                expected='a'*64;stale='b'*64
+                for path,key in ((core,stale),(new,expected if valid else stale)):
+                    raw=b'\x00\x40'+key.encode()+zlib.compress(b'plan')
+                    names=[n+'.bin' for n in ('landmass','roadplan','streetplan','sceneplan')]
+                    with zipfile.ZipFile(path,'w') as z:
+                        for name,data in NATIVE_CORE.items():z.writestr(name,data)
+                        z.writestr('com/skycraft/bake/Bake.class',b'same-validator')
+                        z.writestr('skycraft/baked/manifest.json',json.dumps({'format':1,'inputs':key,'files':names}))
+                        for name in names:z.writestr('skycraft/baked/'+name,raw)
+                original=core.read_bytes()
+                (dev/'outbox/runtime.json').write_text(json.dumps({'coreSha256':hashlib.sha256(original).hexdigest()}))
+                (dev/'outbox/bake-packaged-inputs').write_text(expected)
+                with patch.object(live,'GAME',game),patch.object(live,'DEV',dev),patch.object(live,'processes',return_value=[]), \
+                        patch.object(live,'jar_bake_inputs',return_value=expected),contextlib.redirect_stdout(io.StringIO()):
+                    if valid:live.install_core(new)
+                    else:
+                        with self.assertRaises(ValueError):live.install_core(new)
+                        self.assertEqual(original,core.read_bytes())
+                if valid:
+                    with zipfile.ZipFile(core) as z:
+                        self.assertEqual(expected,json.loads(z.read('skycraft/baked/manifest.json'))['inputs'])
+
+    def test_staging_runtime_bakes_requires_exact_dependencies_and_does_not_touch_installed_core(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root=Path(folder);game=root/'game';dev=game/'world-preview';(dev/'outbox').mkdir(parents=True)
+            core=game/'mods/skycraft-core.jar';core.parent.mkdir();candidate=root/'candidate.jar'
+            expected='b'*64;bakes=root/'bakes';bakes.mkdir()
+            names=[n+'.bin' for n in ('landmass','roadplan','streetplan','sceneplan')]
+            raw=b'\x00\x40'+expected.encode()+zlib.compress(b'verified plan')
+            for name in names:(bakes/name).write_bytes(raw)
+            (bakes/'manifest.json').write_text(json.dumps({'format':1,'inputs':expected,'files':names}))
+            for path in (core,candidate):
+                with zipfile.ZipFile(path,'w') as archive:
+                    for name,data in NATIVE_CORE.items():archive.writestr(name,data)
+                    archive.writestr('com/skycraft/bake/Bake.class',b'same-validator')
+                    archive.writestr('dependency',expected)
+                    archive.writestr('skycraft/baked/manifest.json',b'stale')
+                    archive.writestr('unrelated-rendering',b'new' if path==candidate else b'old')
+            original=core.read_bytes();old_digest=hashlib.sha256(original).hexdigest()
+            (dev/'outbox/runtime.json').write_text(json.dumps({'coreSha256':old_digest}))
+            (dev/'outbox/bake-packaged-inputs').write_text(expected)
+            with patch.object(live,'GAME',game),patch.object(live,'DEV',dev), \
+                    patch.object(live,'jar_bake_inputs',side_effect=lambda z:z.read('dependency').decode()), \
+                    contextlib.redirect_stdout(io.StringIO()):
+                staged=root/'staged.jar';live.stage_core(candidate,bakes,staged)
+                self.assertEqual(original,core.read_bytes())
+                with zipfile.ZipFile(staged) as archive:
+                    self.assertEqual(b'new',archive.read('unrelated-rendering'))
+                    self.assertEqual(raw,archive.read('skycraft/baked/roadplan.bin'))
+                with self.assertRaises(ValueError):live.stage_core(candidate,bakes,staged)
+                with patch.object(live,'jar_bake_inputs',return_value='changed'):
+                    with self.assertRaises(ValueError):live.stage_core(candidate,bakes,root/'rejected.jar')
+                self.assertFalse((root/'rejected.jar').exists())
+
     def test_install_preserves_runtime_bakes_only_when_every_other_change_is_qa(self):
         for changed in ('com/skycraft/client/autotest/VisualCamera.class', 'com/skycraft/dungeons/world/Builder.class'):
             with self.subTest(changed=changed), tempfile.TemporaryDirectory() as temp:
@@ -26,7 +104,7 @@ class PreviewTest(unittest.TestCase):
                 inputs='a'*64
                 names=[n+'.bin' for n in ('landmass','roadplan','streetplan','sceneplan')]
                 raw=b'\x00\x40'+inputs.encode()+zlib.compress(b'verified runtime payload')
-                entries={**{'skycraft/baked/'+n:raw for n in names},
+                entries={**NATIVE_CORE,**{'skycraft/baked/'+n:raw for n in names},
                          'skycraft/baked/manifest.json':json.dumps({'format':1,'inputs':inputs,'files':names}).encode(),
                          changed:b'old class'}
                 with zipfile.ZipFile(core,'w') as z:

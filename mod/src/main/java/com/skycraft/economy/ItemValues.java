@@ -11,7 +11,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.tags.TagKey;
@@ -22,16 +22,13 @@ import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.food.FoodProperties;
-import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.PotionItem;
 import net.minecraft.world.item.ProjectileWeaponItem;
 import net.minecraft.world.item.Rarity;
-import net.minecraft.world.item.TieredItem;
 import net.minecraft.world.item.TippedArrowItem;
-import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 
@@ -73,21 +70,21 @@ public final class ItemValues {
         long coins = Currency.valueOf(stack);
         if (coins > 0) return (int) Math.min(Integer.MAX_VALUE, coins / Math.max(1, stack.getCount()));
 
-        CompoundTag nbt = stack.getTag();
+        CompoundTag nbt = com.skycraft.inventory.ItemData.custom(stack);
         double value;
-        if (nbt != null && nbt.contains(VALUE_NBT, Tag.TAG_ANY_NUMERIC)) value = Math.max(0, nbt.getInt(VALUE_NBT));
+        if (nbt != null && com.skycraft.platform.NbtData.hasType(nbt, VALUE_NBT, com.skycraft.platform.NbtData.ANY_NUMERIC)) value = Math.max(0, nbt.getIntOr(VALUE_NBT, 0));
         else value = base(stack.getItem());
 
         // potions: an empty bottle of water is worth nothing, real potions scale with their effects
         if (stack.getItem() instanceof PotionItem || stack.getItem() instanceof TippedArrowItem) {
-            List<MobEffectInstance> effects = PotionUtils.getMobEffects(stack);
+            List<MobEffectInstance> effects = com.skycraft.platform.ArcaneData.effects(stack);
             if (effects.isEmpty()) {
                 value = Math.min(value, 1);
             } else {
                 double factor = 0;
                 for (MobEffectInstance e : effects) {
                     double strength = 1 + 0.75 * e.getAmplifier();
-                    double length = e.getEffect().isInstantenous() ? 1 : Math.max(0.5, Math.sqrt(e.getDuration() / 3600.0));
+                    double length = e.getEffect().value().isInstantaneous() ? 1 : Math.max(0.5, Math.sqrt(e.getDuration() / 3600.0));
                     factor += strength * length;
                 }
                 value *= Math.max(0.5, factor);
@@ -95,31 +92,27 @@ public final class ItemValues {
         }
 
         // enchantments (also reads the stored enchantments of enchanted books)
-        Map<Enchantment, Integer> enchantments = EnchantmentHelper.getEnchantments(stack);
+        var enchantments = EnchantmentHelper.getEnchantmentsForCrafting(stack);
         if (!enchantments.isEmpty()) {
             double bonus = 0;
-            for (Map.Entry<Enchantment, Integer> e : enchantments.entrySet()) {
-                Enchantment ench = e.getKey();
-                int lvl = Math.max(1, e.getValue());
-                if (ench.isCurse()) {
+            for (var entry : enchantments.entrySet()) {
+                var holder = entry.getKey();
+                Enchantment ench = holder.value();
+                int lvl = Math.max(1, entry.getIntValue());
+                if (holder.is(net.minecraft.tags.EnchantmentTags.CURSE)) {
                     bonus -= 25.0 * lvl;
                     continue;
                 }
-                double rarity = switch (ench.getRarity()) {
-                    case COMMON -> 1.0;
-                    case UNCOMMON -> 1.5;
-                    case RARE -> 2.0;
-                    case VERY_RARE -> 3.0;
-                    default -> 1.0;
-                };
-                bonus += 50.0 * lvl * rarity * (ench.isTreasureOnly() ? 1.5 : 1.0);
+                int weight = ench.getWeight();
+                double rarity = weight >= 10 ? 1.0 : weight >= 5 ? 1.5 : weight >= 2 ? 2.0 : 3.0;
+                bonus += 50.0 * lvl * rarity * (holder.is(net.minecraft.tags.EnchantmentTags.TREASURE) ? 1.5 : 1.0);
             }
             value = Math.max(value * 0.5, value + bonus);
         }
 
         // Smithing quality from tempering at the grindstone/workbench (crafting module)
-        if (nbt != null && nbt.contains(QUALITY_NBT, Tag.TAG_ANY_NUMERIC)) {
-            int q = nbt.getInt(QUALITY_NBT);
+        if (nbt != null && com.skycraft.platform.NbtData.hasType(nbt, QUALITY_NBT, com.skycraft.platform.NbtData.ANY_NUMERIC)) {
+            int q = nbt.getIntOr(QUALITY_NBT, 0);
             if (q > 0) value *= 1 + 0.15 * q;
         }
 
@@ -154,21 +147,21 @@ public final class ItemValues {
 
     /** Immutable snapshot of the loaded data (swapped atomically on reload / client sync). */
     static final class Table {
-        final Map<ResourceLocation, Integer> items;
-        final Map<ResourceLocation, Integer> tags;
+        final Map<Identifier, Integer> items;
+        final Map<Identifier, Integer> tags;
         final List<Map.Entry<TagKey<Item>, Integer>> tagKeys = new ArrayList<>();
         final Map<Item, Integer> cache = new ConcurrentHashMap<>();
 
-        Table(Map<ResourceLocation, Integer> items, Map<ResourceLocation, Integer> tags) {
+        Table(Map<Identifier, Integer> items, Map<Identifier, Integer> tags) {
             this.items = Collections.unmodifiableMap(new HashMap<>(items));
             this.tags = Collections.unmodifiableMap(new LinkedHashMap<>(tags));
-            for (Map.Entry<ResourceLocation, Integer> e : this.tags.entrySet()) {
+            for (Map.Entry<Identifier, Integer> e : this.tags.entrySet()) {
                 tagKeys.add(Map.entry(TagKey.create(Registries.ITEM, e.getKey()), e.getValue()));
             }
         }
 
         int resolve(Item item) {
-            ResourceLocation id = BuiltInRegistries.ITEM.getKey(item);
+            Identifier id = BuiltInRegistries.ITEM.getKey(item);
             Integer direct = items.get(id);
             if (direct != null) return Math.max(0, direct);
             if (!tagKeys.isEmpty()) {
@@ -183,16 +176,16 @@ public final class ItemValues {
         }
     }
 
-    static Map<ResourceLocation, Integer> itemTable() {
+    static Map<Identifier, Integer> itemTable() {
         return table.items;
     }
 
-    static Map<ResourceLocation, Integer> tagTable() {
+    static Map<Identifier, Integer> tagTable() {
         return table.tags;
     }
 
     /** Replaces the table (server reload, or client receiving the sync packet). */
-    static void setTable(Map<ResourceLocation, Integer> items, Map<ResourceLocation, Integer> tags) {
+    static void setTable(Map<Identifier, Integer> items, Map<Identifier, Integer> tags) {
         table = new Table(items, tags);
     }
 
@@ -209,30 +202,27 @@ public final class ItemValues {
         ItemStack stack = new ItemStack(item);
         double value = 0;
 
-        if (item instanceof ArmorItem armor) {
-            double defense = armor.getDefense();
-            double toughness = armor.getToughness();
-            value = Math.max(value, defense * 15 * (1 + toughness * 0.5) + armor.getMaterial().getEnchantmentValue());
+        if (com.skycraft.inventory.EquipmentData.isArmor(stack)) {
+            double defense = com.skycraft.inventory.EquipmentData.defense(stack);
+            double toughness = com.skycraft.inventory.EquipmentData.toughness(stack);
+            var enchantable = stack.get(net.minecraft.core.component.DataComponents.ENCHANTABLE);
+            value = Math.max(value, defense * 15 * (1 + toughness * 0.5) + (enchantable == null ? 0 : enchantable.value()));
         }
-
+        var material = com.skycraft.inventory.EquipmentData.toolMaterial(stack);
+        int tier = material == null ? -1 : Math.max(0, (int) material.attackDamageBonus());
         double damage = attackDamage(item);
         if (damage > 0) {
-            double weapon;
-            if (item instanceof TieredItem tiered) {
-                int tier = Math.max(0, tiered.getTier().getLevel());
-                weapon = (damage + 1) * 1.2 * Math.pow(3, tier);
-            } else {
-                weapon = (damage + 1) * (damage + 1) * 1.5;
-            }
+            double weapon = tier >= 0 ? (damage + 1) * 1.2 * Math.pow(3, tier)
+                    : (damage + 1) * (damage + 1) * 1.5;
             value = Math.max(value, weapon);
-        } else if (item instanceof TieredItem tiered) {
-            value = Math.max(value, 2 * Math.pow(3, Math.max(0, tiered.getTier().getLevel())));
+        } else if (tier >= 0) {
+            value = Math.max(value, 2 * Math.pow(3, tier));
         }
         if (item instanceof ProjectileWeaponItem) value = Math.max(value, 30);
 
-        FoodProperties food = item.getFoodProperties();
+        FoodProperties food = stack.get(net.minecraft.core.component.DataComponents.FOOD);
         if (food != null) {
-            value = Math.max(value, food.getNutrition() * (1 + food.getSaturationModifier()) * 0.7);
+            value = Math.max(value, (food.nutrition() + food.saturation() * 0.5) * 0.7);
         }
 
         if (value <= 0 && stack.isDamageableItem()) value = stack.getMaxDamage() / 20.0;
@@ -250,41 +240,39 @@ public final class ItemValues {
     }
 
     /** Extra attack damage granted in the main hand (0 for non-weapons). */
-    private static double attackDamage(Item item) {
-        try {
-            Multimap<Attribute, AttributeModifier> mods = item.getDefaultAttributeModifiers(EquipmentSlot.MAINHAND);
-            double sum = 0;
-            for (AttributeModifier m : mods.get(Attributes.ATTACK_DAMAGE)) {
-                if (m.getOperation() == AttributeModifier.Operation.ADDITION) sum += m.getAmount();
-            }
-            return Math.max(0, sum);
-        } catch (Exception e) {
-            return 0;
+    public static double attackDamage(Item item) {
+        double sum = 0;
+        var modifiers = new ItemStack(item).getOrDefault(net.minecraft.core.component.DataComponents.ATTRIBUTE_MODIFIERS,
+                net.minecraft.world.item.component.ItemAttributeModifiers.EMPTY);
+        for (var entry : modifiers.modifiers()) {
+            if (entry.slot().test(EquipmentSlot.MAINHAND) && entry.attribute().equals(Attributes.ATTACK_DAMAGE)
+                    && entry.modifier().operation() == AttributeModifier.Operation.ADD_VALUE) sum += entry.modifier().amount();
         }
+        return Math.max(0, sum);
     }
 
     // ------------------------------------------------------------------ data loading
 
     /** Loads every {@code data/<ns>/skycraft_values/*.json}. Registered from {@link EconomyEvents}. */
-    public static class Loader extends SimpleJsonResourceReloadListener {
+    public static class Loader extends SimpleJsonResourceReloadListener<JsonElement> {
         private static final Gson GSON = new GsonBuilder().create();
 
         public Loader() {
-            super(GSON, "skycraft_values");
+            super(net.minecraft.util.ExtraCodecs.JSON, net.minecraft.resources.FileToIdConverter.json("skycraft_values"));
         }
 
         @Override
-        protected void apply(Map<ResourceLocation, JsonElement> files, ResourceManager manager, ProfilerFiller profiler) {
-            Map<ResourceLocation, Integer> items = new HashMap<>();
-            Map<ResourceLocation, Integer> tags = new LinkedHashMap<>();
+        protected void apply(Map<Identifier, JsonElement> files, ResourceManager manager, ProfilerFiller profiler) {
+            Map<Identifier, Integer> items = new HashMap<>();
+            Map<Identifier, Integer> tags = new LinkedHashMap<>();
             // deterministic order: "vanilla" files first so other modules' files override them
-            List<ResourceLocation> ids = new ArrayList<>(files.keySet());
+            List<Identifier> ids = new ArrayList<>(files.keySet());
             ids.sort((a, b) -> {
                 boolean va = a.getPath().equals("vanilla"), vb = b.getPath().equals("vanilla");
                 if (va != vb) return va ? -1 : 1;
                 return a.toString().compareTo(b.toString());
             });
-            for (ResourceLocation file : ids) {
+            for (Identifier file : ids) {
                 try {
                     JsonElement root = files.get(file);
                     if (!root.isJsonObject()) continue;
@@ -300,7 +288,7 @@ public final class ItemValues {
                             continue;
                         }
                         boolean tag = key.startsWith("#");
-                        ResourceLocation id = ResourceLocation.tryParse(tag ? key.substring(1) : key);
+                        Identifier id = Identifier.tryParse(tag ? key.substring(1) : key);
                         if (id == null) {
                             Skycraft.LOGGER.warn("Bad item id {} in {}", key, file);
                             continue;

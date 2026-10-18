@@ -15,16 +15,17 @@ public class MagicEffect extends MobEffect {
     }
 
     @Override
-    public void applyEffectTick(LivingEntity entity, int amplifier) {
-        if (entity.level().isClientSide) return;
+    public boolean applyEffectTick(net.minecraft.server.level.ServerLevel level, LivingEntity entity, int amplifier) {
+        if (entity.level().isClientSide()) return true;
         if (this == MagicRegistry.MARKED_FOR_DEATH.get() && entity.getHealth() > 1f) {
             // Skyrim: 1 point of health per second per word (here 0.2 health/s per level, every 2 seconds)
-            entity.hurt(entity.damageSources().magic(), 0.4f * (amplifier + 1));
+            com.skycraft.platform.Effects.hurt(entity, entity.damageSources().magic(), 0.4f * (amplifier + 1));
         }
-    }
+        return true;
+        }
 
     @Override
-    public boolean isDurationEffectTick(int duration, int amplifier) {
+    public boolean shouldApplyEffectTickThisTick(int duration, int amplifier) {
         return this == MagicRegistry.MARKED_FOR_DEATH.get() && duration % 40 == 0;
     }
 }

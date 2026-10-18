@@ -11,16 +11,16 @@ import net.minecraft.client.Screenshot;
 import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.WorldDataConfiguration;
 import net.minecraft.world.level.levelgen.WorldOptions;
 import net.minecraft.world.level.levelgen.presets.WorldPresets;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -37,7 +37,7 @@ import java.util.function.Consumer;
  * takes the ferry to Raven Rock, and saves screenshots to {@code build/sailtest-screenshots/}, then quits. Does
  * nothing in normal play.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
 public final class SailingAutotest {
     private static final boolean ENABLED = Files.exists(Paths.get("skycraft-sailtest.txt")) || "1".equals(System.getenv("SKYCRAFT_SAILTEST"));
     private static final Path OUT = Paths.get("build", "sailtest-screenshots");
@@ -56,11 +56,11 @@ public final class SailingAutotest {
         step(100, mc -> {
             mc.options.pauseOnLostFocus = false;
             com.skycraft.network.SkyNetwork.sendToServer(new CorePackets.ChooseRace(com.skycraft.core.Race.NORD.id()));
-            mc.setScreen(null);
+            mc.gui.setScreen(null);
         });
-        cmd(2, "gamerule doDaylightCycle false");
-        cmd(2, "gamerule doMobSpawning false");
-        cmd(2, "gamerule doWeatherCycle false");
+        cmd(2, "gamerule advance_time false");
+        cmd(2, "gamerule spawn_mobs false");
+        cmd(2, "gamerule advance_weather false");
         cmd(2, "effect give @s minecraft:resistance 99999 255 true");
         cmd(2, "time set 5000");
         cmd(2, "skycraft-weather set clear 60");
@@ -122,11 +122,11 @@ public final class SailingAutotest {
         });
         step(2, mc -> mc.options.keyUp.setDown(false));
         step(2, mc -> mc.options.setCameraType(CameraType.FIRST_PERSON));
-        step(2, mc -> mc.setScreen(new com.skycraft.world.client.MapScreen()));
+        step(2, mc -> mc.gui.setScreen(new com.skycraft.world.client.MapScreen()));
         step(60, mc -> shot(mc, "30_map_ports"));
-        step(2, mc -> mc.setScreen(new ShipwrightScreen(mc.player.blockPosition())));
+        step(2, mc -> mc.gui.setScreen(new ShipwrightScreen(mc.player.blockPosition())));
         step(30, mc -> shot(mc, "31_shipwright"));
-        step(2, mc -> mc.setScreen(null));
+        step(2, mc -> mc.gui.setScreen(null));
         cmd(2, "ride @s dismount");
         cmd(20, "skycraft-sailing voyage windhelm");
         step(50, mc -> shot(mc, "40_voyage"));
@@ -152,8 +152,8 @@ public final class SailingAutotest {
 
     private static void look(Minecraft mc, float yaw, float pitch) {
         if (mc.player == null) return;
-        if (mc.screen instanceof net.minecraft.client.gui.screens.PauseScreen || mc.screen instanceof com.skycraft.client.screen.title.SkyPauseScreen) {
-            mc.setScreen(null);
+        if (mc.gui.screen() instanceof net.minecraft.client.gui.screens.PauseScreen || mc.gui.screen() instanceof com.skycraft.client.screen.title.SkyPauseScreen) {
+            mc.gui.setScreen(null);
         }
         mc.player.setYRot(yaw);
         mc.player.setXRot(pitch);
@@ -195,31 +195,23 @@ public final class SailingAutotest {
     }
 
     private static void shot(Minecraft mc, String name) {
-        try {
-            Files.createDirectories(OUT);
-            NativeImage img = Screenshot.takeScreenshot(mc.getMainRenderTarget());
-            File out = OUT.resolve(name + ".png").toFile();
-            img.writeToFile(out);
-            img.close();
-            Skycraft.LOGGER.info("Sailing autotest: saved {}", out.getAbsolutePath());
-        } catch (Exception e) {
-            Skycraft.LOGGER.warn("Sailing autotest: screenshot {} failed", name, e);
-        }
+        com.skycraft.client.autotest.ReviewCaptures.capture(mc, OUT, name,
+                output -> Skycraft.LOGGER.info("Sailing autotest: saved {}", output.toAbsolutePath()));
     }
 
     @SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent event) {
-        if (!ENABLED || event.phase != TickEvent.Phase.END) return;
+    public static void onClientTick(net.neoforged.neoforge.client.event.ClientTickEvent.Post event) {
+        if (!ENABLED) return;
+        if (com.skycraft.client.autotest.ReviewCaptures.pending() > 0) return;
         Minecraft mc = Minecraft.getInstance();
         if (mc.level == null) {
-            if (mc.screen instanceof net.minecraft.client.gui.screens.AccessibilityOnboardingScreen) mc.setScreen(new TitleScreen());
-            if (!worldRequested && (mc.screen instanceof TitleScreen || mc.screen instanceof com.skycraft.client.screen.title.SkyTitleScreen)) {
+            if (mc.gui.screen() instanceof net.minecraft.client.gui.screens.AccessibilityOnboardingScreen) mc.gui.setScreen(new TitleScreen());
+            if (!worldRequested && (mc.gui.screen() instanceof TitleScreen || mc.gui.screen() instanceof com.skycraft.client.screen.title.SkyTitleScreen)) {
                 worldRequested = true;
                 String name = "sailtest-" + System.currentTimeMillis();
-                LevelSettings settings = new LevelSettings(name, GameType.CREATIVE, false, Difficulty.PEACEFUL, true,
-                        new GameRules(), WorldDataConfiguration.DEFAULT);
-                mc.createWorldOpenFlows().createFreshLevel(name, settings, new WorldOptions(20261010L, false, false),
-                        WorldPresets::createNormalWorldDimensions);
+                LevelSettings settings = com.skycraft.client.autotest.ReviewWorlds.settings(name,  GameType.CREATIVE,  false,  Difficulty.PEACEFUL,  true,  WorldDataConfiguration.DEFAULT);
+                com.skycraft.client.autotest.ReviewWorlds.create(mc, name,  settings,  new WorldOptions(20261010L, false, false), 
+                        com.skycraft.client.autotest.ReviewWorlds::normal, mc.gui.screen());
             }
             return;
         }

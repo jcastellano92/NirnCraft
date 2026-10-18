@@ -1,20 +1,20 @@
 package com.skycraft.explore;
 
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 /** Exploration settings: {@code config/skycraft-explore.toml}. */
 public final class ExploreConfig {
-    public static final ForgeConfigSpec SPEC;
+    public static final ModConfigSpec SPEC;
 
-    public static final ForgeConfigSpec.BooleanValue MINOR_SITES;
-    public static final ForgeConfigSpec.DoubleValue DENSITY;
-    public static final ForgeConfigSpec.DoubleValue DISCOVERY_XP;
-    public static final ForgeConfigSpec.DoubleValue MINOR_SITE_XP;
-    public static final ForgeConfigSpec.BooleanValue FOUND_MESSAGES;
-    public static final ForgeConfigSpec.BooleanValue TREASURE_MAP_MARKERS;
+    public static final ModConfigSpec.BooleanValue MINOR_SITES;
+    public static final ModConfigSpec.DoubleValue DENSITY;
+    public static final ModConfigSpec.DoubleValue DISCOVERY_XP;
+    public static final ModConfigSpec.DoubleValue MINOR_SITE_XP;
+    public static final ModConfigSpec.BooleanValue FOUND_MESSAGES;
+    public static final ModConfigSpec.BooleanValue TREASURE_MAP_MARKERS;
 
     static {
-        ForgeConfigSpec.Builder b = new ForgeConfigSpec.Builder();
+        ModConfigSpec.Builder b = new ModConfigSpec.Builder();
         b.push("explore");
         MINOR_SITES = b.comment("Generate minor sites (camps, wayshrines, caches, cairns, wells, shrines...) between the named places.",
                         "Changing this only affects newly generated chunks.")
@@ -47,7 +47,7 @@ public final class ExploreConfig {
         }
     }
 
-    static double value(ForgeConfigSpec.DoubleValue v, double fallback) {
+    static double value(ModConfigSpec.DoubleValue v, double fallback) {
         try {
             return v.get();
         } catch (IllegalStateException e) {
@@ -55,7 +55,7 @@ public final class ExploreConfig {
         }
     }
 
-    static boolean flag(ForgeConfigSpec.BooleanValue v, boolean fallback) {
+    static boolean flag(ModConfigSpec.BooleanValue v, boolean fallback) {
         try {
             return v.get();
         } catch (IllegalStateException e) {

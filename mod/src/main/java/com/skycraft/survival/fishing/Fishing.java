@@ -17,7 +17,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.material.FluidState;
-import net.minecraftforge.registries.RegistryObject;
+import java.util.function.Supplier;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -39,7 +39,7 @@ public final class Fishing {
     public static Waters waters(ServerLevel level, BlockPos hook) {
         Set<FishSpecies.Water> kinds = EnumSet.noneOf(FishSpecies.Water.class);
         Holder<Biome> biome = level.getBiome(hook);
-        String biomeId = biome.unwrapKey().map(k -> k.location().getPath()).orElse("");
+        String biomeId = biome.unwrapKey().map(k -> k.identifier().getPath()).orElse("");
         Region region = Regions.at(level, hook);
         int depth = 0;
         BlockPos.MutableBlockPos p = hook.mutable();
@@ -71,7 +71,7 @@ public final class Fishing {
         if (base <= 30) kinds.add(FishSpecies.Water.WARM);
         WeatherKind weather = RegionalWeather.kindAt(level, hook);
         boolean rain = weather != null && weather.wet();
-        return new Waters(kinds, region.province(), region.shortId(), depth, rain, level.getDayTime());
+        return new Waters(kinds, region.province(), region.shortId(), depth, rain, level.getDefaultClockTime());
     }
 
     /** True if {@code s} can bite in these waters. */
@@ -129,7 +129,7 @@ public final class Fishing {
 
     /** A caught fish of species {@code s}, with a length (trophies are near the top of the range or above). */
     public static ItemStack catchOf(FishSpecies s, RandomSource random, boolean trophy) {
-        RegistryObject<net.minecraft.world.item.Item> item = FishingRegistry.FISH_ITEMS.get(s.id());
+        Supplier<net.minecraft.world.item.Item> item = FishingRegistry.FISH_ITEMS.get(s.id());
         if (item == null) return ItemStack.EMPTY;
         float t = random.nextFloat();
         t = t * t; // most catches are on the small side

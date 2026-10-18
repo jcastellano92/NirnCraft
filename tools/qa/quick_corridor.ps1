@@ -24,7 +24,7 @@ param(
 $ErrorActionPreference = "Continue"
 $Root = Resolve-Path (Join-Path $PSScriptRoot "..\..")
 $Dev = Join-Path $Root "tools\dev\devserver.ps1"
-$World = Join-Path $Root "mod\run\devworld\world"
+$World = Join-Path $Root "mod\run\devworld-26.3\world"
 $t0 = Get-Date
 function Lap([string]$what) { Write-Host ("[{0,5:N1} s] {1}" -f ((Get-Date) - $t0).TotalSeconds, $what) }
 

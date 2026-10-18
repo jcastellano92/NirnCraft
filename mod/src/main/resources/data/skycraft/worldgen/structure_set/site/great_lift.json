@@ -12,7 +12,8 @@
       "dungeon_fixed"
     ],
     "variants": [
-      "great_lift"
+      "great_lift",
+      "mzark"
     ]
   }
 }

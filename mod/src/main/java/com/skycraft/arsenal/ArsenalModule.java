@@ -4,16 +4,16 @@ import com.skycraft.arsenal.entity.SkyArrow;
 import com.skycraft.arsenal.item.ArrowKind;
 import com.skycraft.arsenal.item.SkyArrowItem;
 import net.minecraft.core.Position;
-import net.minecraft.core.dispenser.AbstractProjectileDispenseBehavior;
-import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.core.dispenser.ProjectileDispenseBehavior;
+import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.DispenserBlock;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.ModLoadingContext;
+import net.neoforged.fml.config.ModConfig;
+import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 
 /**
  * Leveled loot, named artifacts, arrow types, crossbows, staves, arrow physics and kill cams.
@@ -31,8 +31,8 @@ public final class ArsenalModule {
 
     /** Registers this module's DeferredRegisters and mod-bus listeners. Called from the mod constructor. */
     public static void init(IEventBus modBus) {
-        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, ArsenalConfig.COMMON_SPEC, "skycraft-arsenal-common.toml");
-        ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, ArsenalConfig.CLIENT_SPEC, "skycraft-arsenal-client.toml");
+        com.skycraft.Skycraft.config(ModConfig.Type.LOCAL, ArsenalConfig.COMMON_SPEC, "skycraft-arsenal-common.toml");
+        com.skycraft.Skycraft.config(ModConfig.Type.CLIENT, ArsenalConfig.CLIENT_SPEC, "skycraft-arsenal-client.toml");
         ArsenalBlocks.BLOCKS.register(modBus);
         ArsenalItems.ITEMS.register(modBus);
         ArsenalEntities.ENTITIES.register(modBus);
@@ -49,18 +49,7 @@ public final class ArsenalModule {
         event.enqueueWork(() -> {
             // Dispensers shoot Skyrim arrows and bolts like vanilla arrows.
             for (ArrowKind kind : ArrowKind.VALUES) {
-                DispenserBlock.registerBehavior(ArsenalItems.arrow(kind), new AbstractProjectileDispenseBehavior() {
-                    @Override
-                    protected Projectile getProjectile(Level level, Position pos, ItemStack stack) {
-                        SkyArrow arrow = new SkyArrow(level, pos.x(), pos.y(), pos.z(), stack);
-                        arrow.pickup = AbstractArrow.Pickup.ALLOWED;
-                        if (stack.getItem() instanceof SkyArrowItem item) {
-                            arrow.setBaseDamage(item.kind.damage);
-                            if (item.kind.element == ArrowKind.Element.FIRE) arrow.setSecondsOnFire(100);
-                        }
-                        return arrow;
-                    }
-                });
+                DispenserBlock.registerBehavior(ArsenalItems.arrow(kind), new ProjectileDispenseBehavior(ArsenalItems.arrow(kind)));
             }
         });
     }

@@ -21,7 +21,7 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.LongTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -55,15 +55,15 @@ import java.util.Set;
  */
 public final class OblivionGates extends SavedData {
     private static final String NAME = "skycraft_oblivion_gates";
-    public static final ResourceLocation GATE = new ResourceLocation(Skycraft.MODID, "nirn/oblivion_gate");
-    public static final ResourceLocation NAMED_GATE = new ResourceLocation(Skycraft.MODID, "nirn/named_gate");
+    public static final Identifier GATE = Identifier.fromNamespaceAndPath(Skycraft.MODID, "nirn/oblivion_gate");
+    public static final Identifier NAMED_GATE = Identifier.fromNamespaceAndPath(Skycraft.MODID, "nirn/named_gate");
 
     private final Set<Long> closed = new HashSet<>();
     private final Set<Long> taken = new HashSet<>();
     private final Map<Long, Long> links = new HashMap<>();
 
     public static OblivionGates get(ServerLevel any) {
-        return any.getServer().overworld().getDataStorage().computeIfAbsent(OblivionGates::load, OblivionGates::new, NAME);
+        return com.skycraft.platform.SavedDataTypes.get(any.getServer().overworld(), NAME, OblivionGates::load, OblivionGates::new, d -> d.save(new CompoundTag()));
     }
 
     private static long cellKey(int cx, int cz) {
@@ -79,15 +79,15 @@ public final class OblivionGates extends SavedData {
     /** The centre (origin) of the Oblivion gate whose structure covers {@code near}, or null. */
     @Nullable
     public static BlockPos gateCenter(ServerLevel level, BlockPos near) {
-        var registry = level.registryAccess().registryOrThrow(Registries.STRUCTURE);
-        Structure[] gates = {registry.get(GATE), registry.get(NAMED_GATE)};
-        ChunkPos c = new ChunkPos(near);
+        var registry = level.registryAccess().lookupOrThrow(Registries.STRUCTURE);
+        Structure[] gates = {registry.getValue(GATE), registry.getValue(NAMED_GATE)};
+        ChunkPos c = ChunkPos.containing(near);
         BlockPos best = null;
         double bestD = Double.MAX_VALUE;
         for (int dx = -2; dx <= 2; dx++)
             for (int dz = -2; dz <= 2; dz++) {
-                if (!level.hasChunk(c.x + dx, c.z + dz)) continue;
-                var chunk = level.getChunk(c.x + dx, c.z + dz);
+                if (!level.hasChunk(c.x() + dx, c.z() + dz)) continue;
+                var chunk = level.getChunk(c.x() + dx, c.z() + dz);
                 for (Structure s : gates) {
                     if (s == null) continue;
                     StructureStart start = chunk.getStartForStructure(s);
@@ -108,7 +108,7 @@ public final class OblivionGates extends SavedData {
 
     /** Walking into a gate's fire in Nirn (or a quest step beside it): to the keep of the gate's cell. */
     public static void enterGate(ServerPlayer p, BlockPos portalPos) {
-        ServerLevel level = p.serverLevel();
+        ServerLevel level = p.level();
         BlockPos gate = gateCenter(level, portalPos);
         if (gate == null) gate = portalPos;
         OblivionGates data = get(level);
@@ -121,7 +121,7 @@ public final class OblivionGates extends SavedData {
 
     /** Quest travel to the Deadlands: through the gate the party stands at, else the keep of their cell. */
     public static void enterNear(ServerPlayer p) {
-        ServerLevel level = p.serverLevel();
+        ServerLevel level = p.level();
         BlockPos gate = Realm.of(level) == null ? gateCenter(level, p.blockPosition()) : null;
         if (gate == null) gate = p.blockPosition();
         enterVia(p, gate, get(level));
@@ -139,14 +139,14 @@ public final class OblivionGates extends SavedData {
         data.setDirty();
         RealmTravel.Arrival a = new RealmTravel.Arrival(RealmLayout.keepX(cx), RealmLayout.keepZ(cz) + RealmLayout.DL_ARRIVAL_DZ, 180f);
         boolean regrow = data.taken.remove(key);
-        ServerLevel from = p.serverLevel();
+        ServerLevel from = p.level();
         java.util.List<ServerPlayer> companions = companionsOf(p);
         if (!RealmTravel.enter(p, Realm.DEADLANDS, a)) return;
-        if (regrow) regrowStone(p.serverLevel(), cx, cz);
+        if (regrow) regrowStone(p.level(), cx, cz);
         int i = 0;
         for (ServerPlayer c : companions) {
             int k = ++i;
-            RealmTravel.schedule(p.server, 2 * k, () -> {
+            RealmTravel.schedule(p.level().getServer(), 2 * k, () -> {
                 if (!c.isAlive() || c.level() != from) return;
                 RealmTravel.data(c).putLong("gate", gate.asLong());
                 RealmTravel.enter(c, Realm.DEADLANDS, new RealmTravel.Arrival(a.x() + (k % 2 == 0 ? 2 : -2), a.z() + k / 2, a.yaw()));
@@ -158,7 +158,7 @@ public final class OblivionGates extends SavedData {
         java.util.List<ServerPlayer> out = new java.util.ArrayList<>();
         var party = com.skycraft.quest.party.Parties.partyOf(p);
         if (party == null) return out;
-        for (ServerPlayer m : com.skycraft.quest.party.Parties.onlineMembers(p.server, party)) {
+        for (ServerPlayer m : com.skycraft.quest.party.Parties.onlineMembers(p.level().getServer(), party)) {
             if (m != p && m.level() == p.level() && m.isAlive() && !m.isSpectator() && m.distanceTo(p) <= 6) out.add(m);
         }
         return out;
@@ -179,7 +179,7 @@ public final class OblivionGates extends SavedData {
 
     /** A player takes a Sigil Stone: the gate collapses and everyone on the island goes home. */
     public static void takeSigilStone(ServerPlayer p, BlockPos pos) {
-        ServerLevel deadlands = p.serverLevel();
+        ServerLevel deadlands = p.level();
         if (Realm.of(deadlands) != Realm.DEADLANDS) return;
         int cx = RealmLayout.keepCellOf(pos.getX()), cz = RealmLayout.keepCellOf(pos.getZ());
         long key = cellKey(cx, cz);
@@ -188,14 +188,14 @@ public final class OblivionGates extends SavedData {
         BlockPos gate = null;
         CompoundTag d = RealmTravel.data(p);
         if (d.contains("gate")) {
-            BlockPos g = BlockPos.of(d.getLong("gate"));
+            BlockPos g = BlockPos.of(d.getLongOr("gate", 0L));
             if (RealmLayout.deadlandsCellX(g.getX()) == cx && RealmLayout.deadlandsCellZ(g.getZ()) == cz) gate = g;
         }
         if (gate == null && data.links.containsKey(key)) gate = BlockPos.of(data.links.get(key));
 
         deadlands.removeBlock(pos, false);
         deadlands.playSound(null, pos, SoundEvents.BEACON_DEACTIVATE, SoundSource.BLOCKS, 2f, 0.5f);
-        deadlands.playSound(null, pos, SoundEvents.GENERIC_EXPLODE, SoundSource.BLOCKS, 1.5f, 0.6f);
+        deadlands.playSound(null, pos, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.BLOCKS, 1.5f, 0.6f);
         deadlands.sendParticles(ParticleTypes.FLAME, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 120, 2, 2, 2, 0.15);
         deadlands.sendParticles(ParticleTypes.EXPLOSION, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 6, 1.5, 1.5, 1.5, 0);
         ItemStack stone = SigilStoneItem.roll(RealmItems.SIGIL_STONE.get(), p.getRandom());
@@ -204,7 +204,7 @@ public final class OblivionGates extends SavedData {
         String placeFlag = null;
         if (gate != null && !data.closed.contains(gate.asLong())) {
             data.closed.add(gate.asLong());
-            ServerLevel nirn = p.server.overworld();
+            ServerLevel nirn = p.level().getServer().overworld();
             collapse(nirn, gate);
             Place named = nearestPlace(gate);
             if (named != null) placeFlag = named.id() + "_closed";
@@ -222,7 +222,7 @@ public final class OblivionGates extends SavedData {
                     ? "realm.skycraft.sigil.taken.sub" : "realm.skycraft.sigil.taken.sub_nogate"));
             m.connection.send(new net.minecraft.network.protocol.game.ClientboundSoundPacket(
                     net.minecraft.core.Holder.direct(SoundEvents.WITHER_DEATH), SoundSource.AMBIENT, m.getX(), m.getY(), m.getZ(), 0.6f, 0.5f, 0));
-            RealmTravel.schedule(p.server, 70, () -> {
+            RealmTravel.schedule(p.level().getServer(), 70, () -> {
                 if (m.isAlive() && m.level() == deadlands) RealmTravel.returnHome(m);
             });
         }
@@ -269,24 +269,23 @@ public final class OblivionGates extends SavedData {
         }
         nirn.sendParticles(ParticleTypes.EXPLOSION_EMITTER, gate.getX() + 0.5, gate.getY() + 6, gate.getZ() + 0.5, 3, 3, 4, 3, 0);
         nirn.sendParticles(ParticleTypes.LARGE_SMOKE, gate.getX() + 0.5, gate.getY() + 6, gate.getZ() + 0.5, 200, 5, 6, 5, 0.05);
-        nirn.playSound(null, gate, SoundEvents.GENERIC_EXPLODE, SoundSource.BLOCKS, 4f, 0.5f);
+        nirn.playSound(null, gate, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.BLOCKS, 4f, 0.5f);
     }
 
     // ------------------------------------------------------------------ persistence
 
     private static OblivionGates load(CompoundTag tag) {
         OblivionGates d = new OblivionGates();
-        for (Tag t : tag.getList("Closed", Tag.TAG_LONG)) d.closed.add(((LongTag) t).getAsLong());
-        for (Tag t : tag.getList("Taken", Tag.TAG_LONG)) d.taken.add(((LongTag) t).getAsLong());
-        ListTag links = tag.getList("Links", Tag.TAG_COMPOUND);
+        for (Tag t : tag.getListOrEmpty("Closed")) d.closed.add(((LongTag) t).value());
+        for (Tag t : tag.getListOrEmpty("Taken")) d.taken.add(((LongTag) t).value());
+        ListTag links = tag.getListOrEmpty("Links");
         for (int i = 0; i < links.size(); i++) {
-            CompoundTag l = links.getCompound(i);
-            d.links.put(l.getLong("Cell"), l.getLong("Gate"));
+            CompoundTag l = links.getCompoundOrEmpty(i);
+            d.links.put(l.getLongOr("Cell", 0L), l.getLongOr("Gate", 0L));
         }
         return d;
     }
 
-    @Override
     public CompoundTag save(CompoundTag tag) {
         ListTag c = new ListTag();
         for (long v : closed) c.add(LongTag.valueOf(v));

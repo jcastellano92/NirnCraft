@@ -6,15 +6,14 @@ import com.skycraft.network.SkyNetwork;
 import com.skycraft.quest.client.ClientQuestData;
 import com.skycraft.quest.party.Parties;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.network.NetworkDirection;
-import net.minecraftforge.network.NetworkEvent;
+import net.neoforged.api.distmarker.Dist;
+import com.skycraft.platform.Sides;
+import net.minecraft.network.protocol.PacketFlow;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.UUID;
-import java.util.function.Supplier;
 
 /** Quest & party packets: journal sync, party state (HUD), party actions and quest actions (track, abandon). */
 public final class QuestPackets {
@@ -24,15 +23,15 @@ public final class QuestPackets {
     private QuestPackets() {}
 
     public static void register() {
-        SkyNetwork.register(SyncQuests.class, NetworkDirection.PLAY_TO_CLIENT, SyncQuests::encode, SyncQuests::decode, SyncQuests::handle);
-        SkyNetwork.register(SyncParty.class, NetworkDirection.PLAY_TO_CLIENT, SyncParty::encode, SyncParty::decode, SyncParty::handle);
-        SkyNetwork.register(PartyAction.class, NetworkDirection.PLAY_TO_SERVER, PartyAction::encode, PartyAction::decode, PartyAction::handle);
-        SkyNetwork.register(QuestAction.class, NetworkDirection.PLAY_TO_SERVER, QuestAction::encode, QuestAction::decode, QuestAction::handle);
-        SkyNetwork.register(PartyTravelPrompt.class, NetworkDirection.PLAY_TO_CLIENT, PartyTravelPrompt::encode, PartyTravelPrompt::decode, PartyTravelPrompt::handle);
-        SkyNetwork.register(PartyTravel.class, NetworkDirection.PLAY_TO_SERVER, PartyTravel::encode, PartyTravel::decode, PartyTravel::handle);
-        SkyNetwork.register(NarrationCard.class, NetworkDirection.PLAY_TO_CLIENT, NarrationCard::encode, NarrationCard::decode, NarrationCard::handle);
-        SkyNetwork.register(OpenNoticeBoard.class, NetworkDirection.PLAY_TO_CLIENT, OpenNoticeBoard::encode, OpenNoticeBoard::decode, OpenNoticeBoard::handle);
-        SkyNetwork.register(AcceptBoardJob.class, NetworkDirection.PLAY_TO_SERVER, AcceptBoardJob::encode, AcceptBoardJob::decode, AcceptBoardJob::handle);
+        SkyNetwork.register(SyncQuests.class, PacketFlow.CLIENTBOUND, SyncQuests::encode, SyncQuests::decode, SyncQuests::handle);
+        SkyNetwork.register(SyncParty.class, PacketFlow.CLIENTBOUND, SyncParty::encode, SyncParty::decode, SyncParty::handle);
+        SkyNetwork.register(PartyAction.class, PacketFlow.SERVERBOUND, PartyAction::encode, PartyAction::decode, PartyAction::handle);
+        SkyNetwork.register(QuestAction.class, PacketFlow.SERVERBOUND, QuestAction::encode, QuestAction::decode, QuestAction::handle);
+        SkyNetwork.register(PartyTravelPrompt.class, PacketFlow.CLIENTBOUND, PartyTravelPrompt::encode, PartyTravelPrompt::decode, PartyTravelPrompt::handle);
+        SkyNetwork.register(PartyTravel.class, PacketFlow.SERVERBOUND, PartyTravel::encode, PartyTravel::decode, PartyTravel::handle);
+        SkyNetwork.register(NarrationCard.class, PacketFlow.CLIENTBOUND, NarrationCard::encode, NarrationCard::decode, NarrationCard::handle);
+        SkyNetwork.register(OpenNoticeBoard.class, PacketFlow.CLIENTBOUND, OpenNoticeBoard::encode, OpenNoticeBoard::decode, OpenNoticeBoard::handle);
+        SkyNetwork.register(AcceptBoardJob.class, PacketFlow.SERVERBOUND, AcceptBoardJob::encode, AcceptBoardJob::decode, AcceptBoardJob::handle);
         com.skycraft.quest.story.IntroPackets.register();
     }
 
@@ -40,70 +39,66 @@ public final class QuestPackets {
 
     /** Every quest (active and finished) of the player and their party, as {@code {quests: [Quest NBT + shared]}}. */
     public record SyncQuests(CompoundTag tag) {
-        static void encode(SyncQuests m, FriendlyByteBuf buf) {
+        static void encode(SyncQuests m, RegistryFriendlyByteBuf buf) {
             buf.writeNbt(m.tag);
         }
 
-        static SyncQuests decode(FriendlyByteBuf buf) {
+        static SyncQuests decode(RegistryFriendlyByteBuf buf) {
             CompoundTag tag = buf.readNbt();
             return new SyncQuests(tag == null ? new CompoundTag() : tag);
         }
 
-        static void handle(SyncQuests m, Supplier<NetworkEvent.Context> ctx) {
-            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> ClientQuestData.onQuests(m.tag));
-            ctx.get().setPacketHandled(true);
+        static void handle(SyncQuests m, IPayloadContext ctx) {
+            Sides.runOn(Dist.CLIENT, () -> () -> ClientQuestData.onQuests(m.tag));
         }
     }
 
     /** A narration card (the opening): a short text shown wrapped in a band on screen for {@code stay} ticks. */
     public record NarrationCard(net.minecraft.network.chat.Component text, int stay) {
-        static void encode(NarrationCard m, FriendlyByteBuf buf) {
-            buf.writeComponent(m.text);
+        static void encode(NarrationCard m, RegistryFriendlyByteBuf buf) {
+            net.minecraft.network.chat.ComponentSerialization.STREAM_CODEC.encode(buf, m.text);
             buf.writeVarInt(m.stay);
         }
 
-        static NarrationCard decode(FriendlyByteBuf buf) {
-            return new NarrationCard(buf.readComponent(), buf.readVarInt());
+        static NarrationCard decode(RegistryFriendlyByteBuf buf) {
+            return new NarrationCard(net.minecraft.network.chat.ComponentSerialization.STREAM_CODEC.decode(buf), buf.readVarInt());
         }
 
-        static void handle(NarrationCard m, Supplier<NetworkEvent.Context> ctx) {
-            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> com.skycraft.quest.client.NarrationOverlay.show(m.text, m.stay));
-            ctx.get().setPacketHandled(true);
+        static void handle(NarrationCard m, IPayloadContext ctx) {
+            Sides.runOn(Dist.CLIENT, () -> () -> com.skycraft.quest.client.NarrationOverlay.show(m.text, m.stay));
         }
     }
 
     /** Party state for the HUD and party screen (members with health, pending invites). Empty tag = no party. */
     public record SyncParty(CompoundTag tag) {
-        static void encode(SyncParty m, FriendlyByteBuf buf) {
+        static void encode(SyncParty m, RegistryFriendlyByteBuf buf) {
             buf.writeNbt(m.tag);
         }
 
-        static SyncParty decode(FriendlyByteBuf buf) {
+        static SyncParty decode(RegistryFriendlyByteBuf buf) {
             CompoundTag tag = buf.readNbt();
             return new SyncParty(tag == null ? new CompoundTag() : tag);
         }
 
-        static void handle(SyncParty m, Supplier<NetworkEvent.Context> ctx) {
-            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> ClientQuestData.onParty(m.tag));
-            ctx.get().setPacketHandled(true);
+        static void handle(SyncParty m, IPayloadContext ctx) {
+            Sides.runOn(Dist.CLIENT, () -> () -> ClientQuestData.onParty(m.tag));
         }
     }
 
     /** "Fast travel to {@code name} (party leader)?" shown on join / when joining a party. */
     public record PartyTravelPrompt(UUID target, String name, boolean leader) {
-        static void encode(PartyTravelPrompt m, FriendlyByteBuf buf) {
+        static void encode(PartyTravelPrompt m, RegistryFriendlyByteBuf buf) {
             buf.writeUUID(m.target);
             buf.writeUtf(m.name, 64);
             buf.writeBoolean(m.leader);
         }
 
-        static PartyTravelPrompt decode(FriendlyByteBuf buf) {
+        static PartyTravelPrompt decode(RegistryFriendlyByteBuf buf) {
             return new PartyTravelPrompt(buf.readUUID(), buf.readUtf(64), buf.readBoolean());
         }
 
-        static void handle(PartyTravelPrompt m, Supplier<NetworkEvent.Context> ctx) {
-            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> ClientQuestData.onTravelPrompt(m.target, m.name, m.leader));
-            ctx.get().setPacketHandled(true);
+        static void handle(PartyTravelPrompt m, IPayloadContext ctx) {
+            Sides.runOn(Dist.CLIENT, () -> () -> ClientQuestData.onTravelPrompt(m.target, m.name, m.leader));
         }
     }
 
@@ -111,18 +106,17 @@ public final class QuestPackets {
 
     /** Fast travel to a party member (validated on the server). */
     public record PartyTravel(UUID target) {
-        static void encode(PartyTravel m, FriendlyByteBuf buf) {
+        static void encode(PartyTravel m, RegistryFriendlyByteBuf buf) {
             buf.writeUUID(m.target);
         }
 
-        static PartyTravel decode(FriendlyByteBuf buf) {
+        static PartyTravel decode(RegistryFriendlyByteBuf buf) {
             return new PartyTravel(buf.readUUID());
         }
 
-        static void handle(PartyTravel m, Supplier<NetworkEvent.Context> ctx) {
-            ServerPlayer player = ctx.get().getSender();
+        static void handle(PartyTravel m, IPayloadContext ctx) {
+            ServerPlayer player = SkyNetwork.sender(ctx);
             if (player != null) com.skycraft.quest.party.PartyTravel.travel(player, m.target);
-            ctx.get().setPacketHandled(true);
         }
     }
 
@@ -135,23 +129,23 @@ public final class QuestPackets {
         public static final int KICK = 5;
         public static final int PROMOTE = 6;
 
-        static void encode(PartyAction m, FriendlyByteBuf buf) {
+        static void encode(PartyAction m, RegistryFriendlyByteBuf buf) {
             buf.writeVarInt(m.action);
             buf.writeUUID(m.target);
         }
 
-        static PartyAction decode(FriendlyByteBuf buf) {
+        static PartyAction decode(RegistryFriendlyByteBuf buf) {
             return new PartyAction(buf.readVarInt(), buf.readUUID());
         }
 
-        static void handle(PartyAction m, Supplier<NetworkEvent.Context> ctx) {
-            ServerPlayer player = ctx.get().getSender();
+        static void handle(PartyAction m, IPayloadContext ctx) {
+            ServerPlayer player = SkyNetwork.sender(ctx);
             if (player != null) {
                 UUID target = NONE.equals(m.target) ? null : m.target;
                 switch (m.action) {
                     case CREATE -> Parties.create(player);
                     case INVITE -> {
-                        ServerPlayer other = target == null ? null : player.server.getPlayerList().getPlayer(target);
+                        ServerPlayer other = target == null ? null : player.level().getServer().getPlayerList().getPlayer(target);
                         if (other != null) Parties.invite(player, other);
                     }
                     case ACCEPT -> Parties.accept(player, target);
@@ -167,7 +161,6 @@ public final class QuestPackets {
                     }
                 }
             }
-            ctx.get().setPacketHandled(true);
         }
     }
 
@@ -179,22 +172,22 @@ public final class QuestPackets {
         /** Skip the current step of a quest stuck for longer than the configured days (validated on the server). */
         public static final int SKIP = 4;
 
-        static void encode(QuestAction m, FriendlyByteBuf buf) {
+        static void encode(QuestAction m, RegistryFriendlyByteBuf buf) {
             buf.writeVarInt(m.action);
             buf.writeUtf(m.questId, 64);
         }
 
-        static QuestAction decode(FriendlyByteBuf buf) {
+        static QuestAction decode(RegistryFriendlyByteBuf buf) {
             return new QuestAction(buf.readVarInt(), buf.readUtf(64));
         }
 
-        static void handle(QuestAction m, Supplier<NetworkEvent.Context> ctx) {
-            ServerPlayer player = ctx.get().getSender();
+        static void handle(QuestAction m, IPayloadContext ctx) {
+            ServerPlayer player = SkyNetwork.sender(ctx);
             if (player != null) {
                 PlayerData data = SkyData.get(player);
                 switch (m.action) {
                     case TRACK -> {
-                        if (Quests.find(player.server, player.getUUID(), m.questId) != null) {
+                        if (Quests.find(player.level().getServer(), player.getUUID(), m.questId) != null) {
                             data.module("quest").putString("tracked", m.questId);
                             data.markDirty();
                         }
@@ -210,45 +203,42 @@ public final class QuestPackets {
                     }
                 }
             }
-            ctx.get().setPacketHandled(true);
         }
     }
 
     /** Opens the interactive Notice Board parchment UI for a settlement (S2C). */
     public record OpenNoticeBoard(CompoundTag tag) {
-        static void encode(OpenNoticeBoard m, FriendlyByteBuf buf) {
+        static void encode(OpenNoticeBoard m, RegistryFriendlyByteBuf buf) {
             buf.writeNbt(m.tag);
         }
 
-        static OpenNoticeBoard decode(FriendlyByteBuf buf) {
+        static OpenNoticeBoard decode(RegistryFriendlyByteBuf buf) {
             CompoundTag tag = buf.readNbt();
             return new OpenNoticeBoard(tag == null ? new CompoundTag() : tag);
         }
 
-        static void handle(OpenNoticeBoard m, Supplier<NetworkEvent.Context> ctx) {
-            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> com.skycraft.quest.client.NoticeBoardScreen.open(m.tag));
-            ctx.get().setPacketHandled(true);
+        static void handle(OpenNoticeBoard m, IPayloadContext ctx) {
+            Sides.runOn(Dist.CLIENT, () -> () -> com.skycraft.quest.client.NoticeBoardScreen.open(m.tag));
         }
     }
 
     /** Accepts a pinned contract from the Notice Board screen (C2S). */
     public record AcceptBoardJob(String settlementId, int jobIndex) {
-        static void encode(AcceptBoardJob m, FriendlyByteBuf buf) {
+        static void encode(AcceptBoardJob m, RegistryFriendlyByteBuf buf) {
             buf.writeUtf(m.settlementId, 64);
             buf.writeVarInt(m.jobIndex);
         }
 
-        static AcceptBoardJob decode(FriendlyByteBuf buf) {
+        static AcceptBoardJob decode(RegistryFriendlyByteBuf buf) {
             return new AcceptBoardJob(buf.readUtf(64), buf.readVarInt());
         }
 
-        static void handle(AcceptBoardJob m, Supplier<NetworkEvent.Context> ctx) {
-            ServerPlayer player = ctx.get().getSender();
+        static void handle(AcceptBoardJob m, IPayloadContext ctx) {
+            ServerPlayer player = SkyNetwork.sender(ctx);
             if (player != null) {
                 NoticeBoards.resolveSettlement(m.settlementId, player)
                         .ifPresent(place -> NoticeBoards.accept(player, place, m.jobIndex));
             }
-            ctx.get().setPacketHandled(true);
         }
     }
 }

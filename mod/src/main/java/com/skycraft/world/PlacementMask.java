@@ -18,7 +18,7 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.chunk.ChunkAccess;
-import net.minecraft.world.level.chunk.ChunkStatus;
+import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.Structure;
@@ -107,12 +107,12 @@ public final class PlacementMask {
     private PlacementMask() {}
 
     /** Logs the totals when a server stops (the benchmark numbers of the generation that just ran). */
-    @net.minecraftforge.fml.common.Mod.EventBusSubscriber(modid = Skycraft.MODID)
+    @net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
     public static final class Log {
         private Log() {}
 
-        @net.minecraftforge.eventbus.api.SubscribeEvent
-        public static void onStop(net.minecraftforge.event.server.ServerStoppingEvent e) {
+        @net.neoforged.bus.api.SubscribeEvent
+        public static void onStop(net.neoforged.neoforge.event.server.ServerStoppingEvent e) {
             Skycraft.LOGGER.info(stats());
         }
     }
@@ -180,7 +180,7 @@ public final class PlacementMask {
             c.lastKey = Long.MIN_VALUE;
             c.last = null;
         }
-        long key = ChunkPos.asLong(x >> 4, z >> 4);
+        long key = ChunkPos.pack(x >> 4, z >> 4);
         byte[] m;
         if (key == c.lastKey) {
             m = c.last;
@@ -361,13 +361,13 @@ public final class PlacementMask {
         }
         for (int dx = -START_RING; dx <= START_RING; dx++) {
             for (int dz = -START_RING; dz <= START_RING; dz++) {
-                long pos = ChunkPos.asLong(cx + dx, cz + dz);
+                long pos = ChunkPos.pack(cx + dx, cz + dz);
                 if (seen.add(pos)) boxes = collect(region, boxes, cx + dx, cz + dz, x0, z0);
             }
         }
         if (boxes == null) return;
         // ground height per column: the decorated chunk's own heightmap is ready; neighbours use the macro map
-        boolean own16 = region.getCenter().x == cx && region.getCenter().z == cz;
+        boolean own16 = region.getCenter().x() == cx && region.getCenter().z() == cz;
         int macro = own16 ? 0 : (int) TamrielMap.elevation(x0 + 8, z0 + 8);
         for (int dz = 0; dz < 16; dz++) {
             for (int dx = 0; dx < 16; dx++) {

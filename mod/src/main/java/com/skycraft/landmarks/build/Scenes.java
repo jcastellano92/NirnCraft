@@ -97,7 +97,7 @@ final class Scenes {
             }
         }
         // the pilgrim's mat, candles, offerings
-        s.set(0, g, 0, Blocks.RED_CARPET);
+        s.set(0, g, 0, com.skycraft.worldgen.VanillaBlocks.RED_CARPET);
         Vignettes.candle(s, -2, g, 1, 3, true);
         Vignettes.candle(s, 2, g, 1, 3, true);
         s.lying(-1, g, -1, Vignettes.offering(s, 2));
@@ -165,9 +165,9 @@ final class Scenes {
         s.set(-2, g + 3, -1, s.wood.fence());
         s.set(-3, g + 3, -1, s.wood.fence());
         s.set(-1, g + 3, -1, s.wood.fence());
-        s.set(-2, g + 2, -1, Blocks.CHAIN);
-        s.set(-2, g + 1, -1, s.chance(1, 0.5) ? Blocks.RED_WOOL : Blocks.BROWN_WOOL);
-        s.set(-2, g, -1, s.chance(2, 0.5) ? Blocks.RED_WOOL : Blocks.BONE_BLOCK);
+        s.set(-2, g + 2, -1, com.skycraft.worldgen.VanillaBlocks.CHAIN);
+        s.set(-2, g + 1, -1, s.chance(1, 0.5) ? com.skycraft.worldgen.VanillaBlocks.RED_WOOL : com.skycraft.worldgen.VanillaBlocks.BROWN_WOOL);
+        s.set(-2, g, -1, s.chance(2, 0.5) ? com.skycraft.worldgen.VanillaBlocks.RED_WOOL : Blocks.BONE_BLOCK);
         // drying rack with stretched hides
         for (int x = 1; x <= 4; x++) {
             s.set(x, g, -4, s.wood.fence());
@@ -175,8 +175,8 @@ final class Scenes {
         }
         s.set(1, g + 1, -4, s.wood.fence());
         s.set(4, g + 1, -4, s.wood.fence());
-        s.set(2, g + 1, -4, Blocks.BROWN_CARPET);
-        s.set(3, g + 1, -4, Blocks.WHITE_CARPET);
+        s.set(2, g + 1, -4, com.skycraft.worldgen.VanillaBlocks.BROWN_CARPET);
+        s.set(3, g + 1, -4, com.skycraft.worldgen.VanillaBlocks.WHITE_CARPET);
         s.set(1, g + 2, -4, s.wood.fence());
         s.set(4, g + 2, -4, s.wood.fence());
         s.set(2, g + 2, -4, s.wood.fence());
@@ -201,7 +201,7 @@ final class Scenes {
         BlockPos p1 = s.barrel(-3, g, 2, "explore/adventurer");
         s.put(p1, note(s, "traveller", "Travel Diary"));
         s.barrel(3, g, 2, null);
-        s.set(-3, g + 1, 2, Blocks.BROWN_CARPET);
+        s.set(-3, g + 1, 2, com.skycraft.worldgen.VanillaBlocks.BROWN_CARPET);
         s.set(2, g, -3, slab(s.wood.slab(), SlabType.BOTTOM));
         s.set(3, g, -3, slab(s.wood.slab(), SlabType.BOTTOM));
         s.set(4, g, 0, s.wood.fence());
@@ -230,7 +230,7 @@ final class Scenes {
         // the marks: a stone on the post, a cloth on a stick
         s.set(-3, g, -2, s.wood.fence());
         s.set(-3, g + 1, -2, s.wood.fence());
-        s.set(-3, g + 2, -2, Blocks.BLACK_WOOL);
+        s.set(-3, g + 2, -2, com.skycraft.worldgen.VanillaBlocks.BLACK_WOOL);
         s.set(3, g, -2, s.rubble(3, g, -2));
         s.set(3, g + 1, -2, s.rubble(3, g, -2));
         s.rubbleRing(0, 0, 6, 6);
@@ -296,7 +296,7 @@ final class Scenes {
         s.set(-1, g + 1, 2, Blocks.BARREL);
         s.set(3, g, -1, Blocks.BARREL);
         s.set(1, g, -2, Blocks.HAY_BLOCK);
-        s.set(-2, g, -2, Blocks.WHITE_WOOL);
+        s.set(-2, g, -2, com.skycraft.worldgen.VanillaBlocks.WHITE_WOOL);
         // the dead: bones and gear
         s.set(2, g, -3, Blocks.SKELETON_SKULL);
         s.set(1, g, -3, Blocks.BONE_BLOCK);
@@ -366,8 +366,8 @@ final class Scenes {
             }
         }
         for (int y = 1; y <= 4; y++) s.set(1, g + y, 0, s.wood.fence());
-        s.set(1, g + 3, 1, Blocks.WHITE_WOOL);
-        s.set(1, g + 2, 1, Blocks.WHITE_WOOL);
+        s.set(1, g + 3, 1, com.skycraft.worldgen.VanillaBlocks.WHITE_WOOL);
+        s.set(1, g + 2, 1, com.skycraft.worldgen.VanillaBlocks.WHITE_WOOL);
         BlockPos b = s.barrel(-2, g + 1, 0, "explore/shipwreck");
         s.put(b, note(s, "traveller", "Ship's Log"));
         s.barrel(2, g + 1, 0, null);
@@ -384,10 +384,10 @@ final class Scenes {
         int g = 0;
         for (int dx = -2; dx <= 2; dx++) for (int dz = -2; dz <= 2; dz++) {
             if (Math.abs(dx) + Math.abs(dz) > 3) continue;
-            s.set(dx, g - 1, dz, s.chance(dx * 7 + dz, 0.3) ? Blocks.RED_TERRACOTTA.defaultBlockState() : s.rk(dx, g - 1, dz));
+            s.set(dx, g - 1, dz, s.chance(dx * 7 + dz, 0.3) ? com.skycraft.worldgen.VanillaBlocks.RED_TERRACOTTA.defaultBlockState() : s.rk(dx, g - 1, dz));
         }
         for (int dx = -1; dx <= 1; dx++) s.set(dx, g, 0, s.rk(dx, g, 0));
-        s.set(0, g + 1, 0, s.chance(1, 0.5) ? Blocks.RED_CARPET : Blocks.BLACK_CARPET);
+        s.set(0, g + 1, 0, s.chance(1, 0.5) ? com.skycraft.worldgen.VanillaBlocks.RED_CARPET : com.skycraft.worldgen.VanillaBlocks.BLACK_CARPET);
         for (int i = 0; i < 8; i++) {
             double a = i * Math.PI / 4;
             int x = (int) Math.round(Math.cos(a) * 4), z = (int) Math.round(Math.sin(a) * 4);
@@ -498,11 +498,11 @@ final class Scenes {
         }
         // an A-frame tent and a work table
         for (int dz = 2; dz <= 4; dz++) {
-            s.set(-2, g, dz + 3, Blocks.WHITE_WOOL);
-            s.set(2, g, dz + 3, Blocks.WHITE_WOOL);
-            s.set(-1, g + 1, dz + 3, Blocks.WHITE_WOOL);
-            s.set(1, g + 1, dz + 3, Blocks.WHITE_WOOL);
-            s.set(0, g + 2, dz + 3, Blocks.WHITE_WOOL);
+            s.set(-2, g, dz + 3, com.skycraft.worldgen.VanillaBlocks.WHITE_WOOL);
+            s.set(2, g, dz + 3, com.skycraft.worldgen.VanillaBlocks.WHITE_WOOL);
+            s.set(-1, g + 1, dz + 3, com.skycraft.worldgen.VanillaBlocks.WHITE_WOOL);
+            s.set(1, g + 1, dz + 3, com.skycraft.worldgen.VanillaBlocks.WHITE_WOOL);
+            s.set(0, g + 2, dz + 3, com.skycraft.worldgen.VanillaBlocks.WHITE_WOOL);
         }
         s.set(0, g, 6, Blocks.AIR);
         BlockPos b = s.chest(0, g, 7, Direction.NORTH, "explore/mage");

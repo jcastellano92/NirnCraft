@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:blasting",
+  "category": "misc",
+  "group": "refined_moonstone",
+  "ingredient": [
+    "skycraft:moonstone_ore",
+    "skycraft:deepslate_moonstone_ore"
+  ],
+  "result": {
+    "id": "skycraft:refined_moonstone"
+  },
+  "experience": 0.7,
+  "cookingtime": 100
+}

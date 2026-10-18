@@ -13,10 +13,9 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.animal.horse.AbstractHorse;
-import net.minecraft.world.entity.animal.horse.Horse;
+import net.minecraft.world.entity.animal.equine.AbstractHorse;
+import net.minecraft.world.entity.animal.equine.Horse;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.HorseArmorItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import org.jetbrains.annotations.Nullable;
@@ -38,9 +37,9 @@ public final class MountGear {
     public static final String SADDLE_TAG = "skycraft_saddle";
     /** Persistent-data flag: a {@link MountBeast} wears its barding (its variant shows it). */
     public static final String BARDED_TAG = "skycraft_barded";
-    private static final UUID SADDLE_SPEED = UUID.fromString("5d2f6a14-0c7b-4e0a-9e53-7a1b3c4d5e61");
-    private static final UUID BARDING_HEALTH = UUID.fromString("5d2f6a14-0c7b-4e0a-9e53-7a1b3c4d5e62");
-    private static final UUID BARDING_ARMOR = UUID.fromString("6b1f3c1e-5a3d-4d61-9d0f-2f4c1d7e8a10");
+    private static final net.minecraft.resources.Identifier SADDLE_SPEED = net.minecraft.resources.Identifier.fromNamespaceAndPath("skycraft", "modifier_5d2f6a14-0c7b-4e0a-9e53-7a1b3c4d5e61");
+    private static final net.minecraft.resources.Identifier BARDING_HEALTH = net.minecraft.resources.Identifier.fromNamespaceAndPath("skycraft", "modifier_5d2f6a14-0c7b-4e0a-9e53-7a1b3c4d5e62");
+    private static final net.minecraft.resources.Identifier BARDING_ARMOR = net.minecraft.resources.Identifier.fromNamespaceAndPath("skycraft", "modifier_6b1f3c1e-5a3d-4d61-9d0f-2f4c1d7e8a10");
     /** Armour a beast's barding adds (the barding stat of a plate horse barding of the middle tiers). */
     private static final int BEAST_BARDING_ARMOR = 8;
 
@@ -143,7 +142,7 @@ public final class MountGear {
 
     /** The weight a player's mount takes off their back right now (0 on the client and when not steering a mount). */
     public static float carryBonus(Player player) {
-        if (player.level().isClientSide || !(player.getVehicle() instanceof LivingEntity m) || m.getControllingPassenger() != player) return 0f;
+        if (player.level().isClientSide() || !(player.getVehicle() instanceof LivingEntity m) || m.getControllingPassenger() != player) return 0f;
         MountKind kind = Mounts.kindOf(m);
         return kind == null ? 0f : carryKg(m, kind);
     }
@@ -154,7 +153,7 @@ public final class MountGear {
     @Nullable
     public static SaddleType saddle(Entity e) {
         CompoundTag tag = e.getPersistentData();
-        if (tag.contains(SADDLE_TAG)) return SaddleType.byId(tag.getString(SADDLE_TAG));
+        if (tag.contains(SADDLE_TAG)) return SaddleType.byId(tag.getStringOr(SADDLE_TAG, ""));
         boolean legacy = e instanceof AbstractHorse h ? h.isSaddled()
                 : e instanceof MountBeast b ? b.getVariant() >= 1
                 : e instanceof GuarEntity g && g.isSaddled();
@@ -193,7 +192,7 @@ public final class MountGear {
     }
 
     public static boolean barded(MountBeast b) {
-        return b.getPersistentData().getBoolean(BARDED_TAG) || b.getVariant() == 2;
+        return b.getPersistentData().getBooleanOr(BARDED_TAG, false) || b.getVariant() == 2;
     }
 
     /** Puts one barding item on (or, with empty, takes it off). Does not check that the mount takes it. */
@@ -214,7 +213,7 @@ public final class MountGear {
 
     /** Re-applies what the tack does to the mount (called after every change and when a mount loads). */
     public static void refresh(Mob mob) {
-        if (mob.level().isClientSide) return;
+        if (mob.level().isClientSide()) return;
         SaddleType s = saddle(mob);
         if (mob instanceof MountBeast b) {
             int v = s == null ? 0 : barded(b) ? 2 : 1;
@@ -222,31 +221,31 @@ public final class MountGear {
         }
         AttributeInstance speed = mob.getAttribute(Attributes.MOVEMENT_SPEED);
         if (speed != null) {
-            setModifier(speed, SADDLE_SPEED, "Saddle", s == null ? 0 : s.speedMod, AttributeModifier.Operation.MULTIPLY_TOTAL);
+            setModifier(speed, SADDLE_SPEED, "Saddle", s == null ? 0 : s.speedMod, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
         }
         ItemStack bard = barding(mob);
-        int protection = bard.isEmpty() ? 0 : bard.getItem() instanceof HorseArmorItem a ? a.getProtection() : BEAST_BARDING_ARMOR;
+        int protection = bard.isEmpty() ? 0 : MountItems.isHorseArmor(bard) ? MountItems.armorProtection(bard) : BEAST_BARDING_ARMOR;
         AttributeInstance hp = mob.getAttribute(Attributes.MAX_HEALTH);
         if (hp != null) {
             float ratio = mob.getMaxHealth() <= 0 ? 1f : mob.getHealth() / mob.getMaxHealth();
-            if (setModifier(hp, BARDING_HEALTH, "Barding", protection * 2.0, AttributeModifier.Operation.ADDITION)) {
+            if (setModifier(hp, BARDING_HEALTH, "Barding", protection * 2.0, AttributeModifier.Operation.ADD_VALUE)) {
                 mob.setHealth(Math.max(1f, Math.min(mob.getMaxHealth(), ratio * mob.getMaxHealth())));
             }
         }
         if (mob instanceof MountBeast) {
             AttributeInstance armor = mob.getAttribute(Attributes.ARMOR);
-            if (armor != null) setModifier(armor, BARDING_ARMOR, "Barding", bard.isEmpty() ? 0 : BEAST_BARDING_ARMOR, AttributeModifier.Operation.ADDITION);
+            if (armor != null) setModifier(armor, BARDING_ARMOR, "Barding", bard.isEmpty() ? 0 : BEAST_BARDING_ARMOR, AttributeModifier.Operation.ADD_VALUE);
         }
         MountKind kind = Mounts.kindOf(mob);
         if (kind != null) MountGrowth.applyAttributes(mob, kind); // the individual: speed, health and jump of its stats
     }
 
     /** Sets (or clears, at 0) a permanent modifier; true when its value changed. */
-    static boolean setModifier(AttributeInstance attr, UUID id, String name, double amount, AttributeModifier.Operation op) {
+    static boolean setModifier(AttributeInstance attr, net.minecraft.resources.Identifier id, String name, double amount, AttributeModifier.Operation op) {
         AttributeModifier cur = attr.getModifier(id);
-        if (cur == null ? amount == 0 : cur.getAmount() == amount) return false;
+        if (cur == null ? amount == 0 : cur.amount() == amount) return false;
         if (cur != null) attr.removeModifier(id);
-        if (amount != 0) attr.addPermanentModifier(new AttributeModifier(id, name, amount, op));
+        if (amount != 0) attr.addPermanentModifier(new AttributeModifier(id, amount, op));
         return true;
     }
 
@@ -255,13 +254,13 @@ public final class MountGear {
     /** The saddle a mount of this kind of the player's came with (the plain one when never changed). */
     @Nullable
     public static SaddleType remembered(Player player, MountKind kind) {
-        CompoundTag saddles = Mounts.data(player).getCompound("saddles");
-        return saddles.contains(kind.id) ? SaddleType.byId(saddles.getString(kind.id)) : SaddleType.PLAIN;
+        CompoundTag saddles = Mounts.data(player).getCompoundOrEmpty("saddles");
+        return saddles.contains(kind.id) ? SaddleType.byId(saddles.getStringOr(kind.id, "")) : SaddleType.PLAIN;
     }
 
     static void remember(Player player, MountKind kind, @Nullable SaddleType type) {
         CompoundTag tag = Mounts.data(player);
-        CompoundTag saddles = tag.getCompound("saddles");
+        CompoundTag saddles = tag.getCompoundOrEmpty("saddles");
         saddles.putString(kind.id, type == null ? "none" : type.id);
         tag.put("saddles", saddles);
         com.skycraft.core.SkyData.get(player).markDirty();
@@ -288,7 +287,7 @@ public final class MountGear {
         remember(player, kind, t);
         if (old != null) give(player, old.stack());
         Saddlebags.fit(player, bagCapacity(mount, kind));
-        mount.playSound(SoundEvents.HORSE_SADDLE, 0.8f, 1.0f);
+        mount.playSound(SoundEvents.HORSE_SADDLE.value(), 0.8f, 1.0f);
         return Result.OK;
     }
 
@@ -305,14 +304,14 @@ public final class MountGear {
         remember(player, kind, null);
         if (giveBack) give(player, old.stack());
         Saddlebags.fit(player, 0f);
-        mount.playSound(SoundEvents.HORSE_SADDLE, 0.8f, 0.8f);
+        mount.playSound(SoundEvents.HORSE_SADDLE.value(), 0.8f, 0.8f);
         return Result.OK;
     }
 
     /** True when this item is barding the mount can wear. */
     public static boolean wearsBarding(Mob mount, MountKind kind, ItemStack stack) {
         if (stack.isEmpty() || !kind.bardable()) return false;
-        if (mount instanceof Horse) return stack.getItem() instanceof HorseArmorItem;
+        if (mount instanceof Horse) return MountItems.isHorseArmor(stack);
         return mount instanceof MountBeast && stack.is(MountItems.BEAST_BARDING.get());
     }
 
@@ -325,7 +324,7 @@ public final class MountGear {
         setBarding(mount, one);
         syncRecord(player, mount, one);
         give(player, old);
-        mount.playSound(SoundEvents.HORSE_ARMOR, 0.8f, 1.0f);
+        mount.playSound(SoundEvents.HORSE_ARMOR.value(), 0.8f, 1.0f);
         return Result.OK;
     }
 
@@ -335,7 +334,7 @@ public final class MountGear {
         setBarding(mount, ItemStack.EMPTY);
         syncRecord(player, mount, ItemStack.EMPTY);
         if (giveBack) give(player, old);
-        mount.playSound(SoundEvents.HORSE_ARMOR, 0.8f, 0.8f);
+        mount.playSound(SoundEvents.HORSE_ARMOR.value(), 0.8f, 0.8f);
         return Result.OK;
     }
 

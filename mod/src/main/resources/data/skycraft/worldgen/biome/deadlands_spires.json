@@ -3,26 +3,9 @@
   "temperature": 2.0,
   "downfall": 0.0,
   "effects": {
-    "sky_color": 10100752,
-    "fog_color": 4460552,
-    "water_color": 7023130,
-    "water_fog_color": 3344901,
-    "mood_sound": {
-      "sound": "minecraft:ambient.cave",
-      "tick_delay": 6000,
-      "block_search_extent": 8,
-      "offset": 2.0
-    },
-    "particle": {
-      "options": {
-        "type": "minecraft:white_ash"
-      },
-      "probability": 0.01
-    }
+    "water_color": "#6b2a1a"
   },
-  "spawners": {},
-  "spawn_costs": {},
-  "carvers": {},
+  "carvers": [],
   "features": [
     [],
     [],
@@ -46,5 +29,36 @@
       "skycraft:realm/dl_bloodgrass_sparse"
     ],
     []
-  ]
+  ],
+  "attributes": {
+    "minecraft:visual/sky_color": "#9a2010",
+    "minecraft:visual/fog_color": "#441008",
+    "minecraft:visual/water_fog_color": "#330a05",
+    "minecraft:audio/ambient_sounds": {
+      "mood": {
+        "sound": "minecraft:ambient.cave",
+        "tick_delay": 6000,
+        "block_search_extent": 8,
+        "offset": 2.0
+      }
+    },
+    "minecraft:visual/ambient_particles": {
+      "modifier": "append",
+      "argument": [
+        {
+          "probability": 0.01,
+          "particle": {
+            "type": "minecraft:white_ash"
+          }
+        }
+      ]
+    },
+    "minecraft:gameplay/natural_mob_spawns": {
+      "modifier": "overlay",
+      "argument": {
+        "spawns_by_category": {},
+        "spawn_costs": {}
+      }
+    }
+  }
 }

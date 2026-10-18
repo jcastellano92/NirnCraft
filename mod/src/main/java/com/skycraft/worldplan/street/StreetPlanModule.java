@@ -12,16 +12,18 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
-import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.event.server.ServerAboutToStartEvent;
-import net.minecraftforge.event.server.ServerStoppingEvent;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegistryObject;
+import com.mojang.serialization.MapCodec;
+import com.skycraft.worldgen.NoneFeatureConfiguration;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.neoforge.event.server.ServerAboutToStartEvent;
+import net.neoforged.neoforge.event.server.ServerStoppingEvent;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.neoforge.registries.DeferredRegister;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import java.util.function.Supplier;
 
 import java.util.Locale;
 
@@ -33,11 +35,11 @@ import java.util.Locale;
  * {@code at <x> <z>}, {@code lint [id]} (unreachable doors, gate joins), {@code verify} (plans live off the server
  * thread and compares with the loaded plan byte for byte). Autorun task {@code streetplan} = stats + lint.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class StreetPlanModule {
-    public static final DeferredRegister<Feature<?>> FEATURES = DeferredRegister.create(ForgeRegistries.FEATURES, Skycraft.MODID);
-    public static final RegistryObject<Feature<NoneFeatureConfiguration>> STREET_PAINT = FEATURES.register("street_paint",
-            () -> new StreetPaint(NoneFeatureConfiguration.CODEC));
+    public static final DeferredRegister<MapCodec<? extends Feature>> FEATURES = DeferredRegister.create(Registries.FEATURE_TYPE, Skycraft.MODID);
+    public static final Supplier<MapCodec<? extends Feature>> STREET_PAINT = FEATURES.register("street_paint",
+            () -> new StreetPaint(NoneFeatureConfiguration.CODEC).codec());
 
     private StreetPlanModule() {}
 
@@ -54,6 +56,7 @@ public final class StreetPlanModule {
             Skycraft.LOGGER.info("[streetplan] {}", lint(StreetPlan.get(), null, 40));
             done.run();
         });
+        if (!com.skycraft.tamriel.terrain.TamrielSpawn.isTamriel(event.getServer())) return;
         Thread t = new Thread(() -> {
             try {
                 StreetPlan.warm();
@@ -146,7 +149,7 @@ public final class StreetPlanModule {
     @SubscribeEvent
     public static void onCommands(RegisterCommandsEvent event) {
         CommandDispatcher<CommandSourceStack> d = event.getDispatcher();
-        d.register(Commands.literal("skycraft-streetplan").requires(s -> s.hasPermission(2))
+        d.register(Commands.literal("skycraft-streetplan").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
                 .then(Commands.literal("stats").executes(c -> {
                     String s = stats(StreetPlan.get()) + "\n" + StreetPaint.stats();
                     c.getSource().sendSuccess(() -> Component.literal(s), false);
@@ -210,7 +213,7 @@ public final class StreetPlanModule {
                                     c.getSource().sendSuccess(() -> Component.literal(s), false);
                                     return 1;
                                 })))))
-                .then(Commands.literal("verify").requires(s -> s.hasPermission(4)).executes(c -> {
+                .then(Commands.literal("verify").requires(Commands.hasPermission(Commands.LEVEL_OWNERS)).executes(c -> {
                     CommandSourceStack src = c.getSource();
                     Thread t = new Thread(() -> {
                         try {

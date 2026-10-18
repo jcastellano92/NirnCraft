@@ -1,20 +1,20 @@
 package com.skycraft.dungeons;
 
-import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.fml.loading.FMLLoader;
+import net.neoforged.neoforge.common.ModConfigSpec;
+import net.neoforged.fml.loading.FMLLoader;
 
 /** Dungeons configuration: config/skycraft-dungeons.toml (COMMON, server-authoritative). */
 public final class DungeonsConfig {
-    public static final ForgeConfigSpec SPEC;
+    public static final ModConfigSpec SPEC;
 
-    public static final ForgeConfigSpec.BooleanValue TELEMETRY;
+    public static final ModConfigSpec.BooleanValue TELEMETRY;
 
     static {
-        ForgeConfigSpec.Builder b = new ForgeConfigSpec.Builder();
+        ModConfigSpec.Builder b = new ModConfigSpec.Builder();
         b.push("telemetry");
         TELEMETRY = b.comment("Log every player's dungeon runs (enter and clear time, deaths, chests opened, loot value, boss killed)",
                         "to logs/skycraft-dungeons.csv for playtests. On by default in development, off in the released pack.")
-                .define("enabled", !FMLLoader.isProduction());
+                .define("enabled", !FMLLoader.getCurrent().isProduction());
         b.pop();
         SPEC = b.build();
     }

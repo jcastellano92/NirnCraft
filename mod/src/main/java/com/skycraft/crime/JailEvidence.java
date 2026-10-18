@@ -107,7 +107,7 @@ final class JailEvidence {
             for (var it = confiscatedBatches.iterator(); it.hasNext(); ) {
                 ConfiscatedBatch b = it.next();
                 if (now >= b.addedAt() && now - b.addedAt() >= CONFISCATED_TTL_TICKS) {
-                    ItemStack template = ItemStack.of(b.key());
+                    ItemStack template = com.skycraft.inventory.ItemData.parse(b.key());
                     if (!template.isEmpty()) {
                         confiscated.take(template, b.count());
                     }
@@ -147,22 +147,22 @@ final class JailEvidence {
 
         static Stores load(CompoundTag tag, Runnable changed) {
             Stores st = new Stores(changed);
-            st.tier = Math.max(Locks.NOVICE, Math.min(Locks.MASTER, tag.contains("tier") ? tag.getInt("tier") : Locks.APPRENTICE));
-            st.confiscated.load(tag.getCompound("confiscated"));
-            if (tag.contains("confiscated_batches", net.minecraft.nbt.Tag.TAG_LIST)) {
-                net.minecraft.nbt.ListTag batches = tag.getList("confiscated_batches", net.minecraft.nbt.Tag.TAG_COMPOUND);
+            st.tier = Math.max(Locks.NOVICE, Math.min(Locks.MASTER, tag.contains("tier") ? tag.getIntOr("tier",0) : Locks.APPRENTICE));
+            st.confiscated.load(tag.getCompoundOrEmpty("confiscated"));
+            if (com.skycraft.platform.NbtData.hasType(tag, "confiscated_batches", net.minecraft.nbt.Tag.TAG_LIST)) {
+                net.minecraft.nbt.ListTag batches = tag.getListOrEmpty("confiscated_batches");
                 for (int i = 0; i < batches.size(); i++) {
-                    CompoundTag bt = batches.getCompound(i);
-                    int n = bt.getInt("n");
-                    if (n > 0 && bt.contains("k", net.minecraft.nbt.Tag.TAG_COMPOUND)) {
-                        st.confiscatedBatches.add(new ConfiscatedBatch(bt.getCompound("k"), n, bt.getLong("t")));
+                    CompoundTag bt = batches.getCompoundOrEmpty(i);
+                    int n = bt.getIntOr("n",0);
+                    if (n > 0 && com.skycraft.platform.NbtData.hasType(bt, "k", net.minecraft.nbt.Tag.TAG_COMPOUND)) {
+                        st.confiscatedBatches.add(new ConfiscatedBatch(bt.getCompoundOrEmpty("k"), n, bt.getLongOr("t",0L)));
                     }
                 }
             }
-            CompoundTag p = tag.getCompound("personal");
-            for (String k : p.getAllKeys()) {
+            CompoundTag p = tag.getCompoundOrEmpty("personal");
+            for (String k : p.keySet()) {
                 try {
-                    st.personal(UUID.fromString(k)).load(p.getCompound(k));
+                    st.personal(UUID.fromString(k)).load(p.getCompoundOrEmpty(k));
                 } catch (IllegalArgumentException ignored) {
                     // corrupt entry
                 }
@@ -200,7 +200,7 @@ final class JailEvidence {
      */
     static void confiscate(ServerPlayer player, String jailKey, ItemStack stack) {
         if (stack.isEmpty()) return;
-        route(stores(player.server, jailKey), player.getUUID(), stack, player.level().getGameTime());
+        route(stores(player.level().getServer(), jailKey), player.getUUID(), stack, player.level().getGameTime());
         if (!stack.isEmpty()) Inv.giveOrDrop(player, stack);
     }
 
@@ -249,7 +249,7 @@ final class JailEvidence {
      * armour to its slot when empty, the rest into the bags, never deleted. Returns how many items.
      */
     static int returnPersonal(ServerPlayer player, String jailKey) {
-        MinecraftServer server = player.server;
+        MinecraftServer server = player.level().getServer();
         Jail.JailData jd = Jail.JailData.get(server);
         UUID id = player.getUUID();
         int n = 0;
@@ -281,8 +281,8 @@ final class JailEvidence {
     /** Armour goes to its empty slot, everything else into the bags (and, only past the pack's cap, the floor). */
     static void giveBack(ServerPlayer player, ItemStack stack) {
         if (stack.isEmpty()) return;
-        EquipmentSlot slot = LivingEntity.getEquipmentSlotForItem(stack);
-        if (slot.getType() == EquipmentSlot.Type.ARMOR && player.getItemBySlot(slot).isEmpty()) {
+        EquipmentSlot slot = player.getEquipmentSlotForItem(stack);
+        if (slot.getType() == EquipmentSlot.Type.HUMANOID_ARMOR && player.getItemBySlot(slot).isEmpty()) {
             player.setItemSlot(slot, stack);
             return;
         }
@@ -348,7 +348,7 @@ final class JailEvidence {
     static void openConfiscated(ServerPlayer player, ServerLevel level, BlockPos pos) {
         migrateAt(level, pos);
         String key = keyAt(level, pos);
-        Stores st = stores(player.server, key);
+        Stores st = stores(player.level().getServer(), key);
         // locked again the moment it has been opened: the next one has to pick it, too
         relock(level, pos);
         Locks.setLock(level, pos, st.tier);
@@ -446,9 +446,9 @@ final class JailEvidence {
         if (!level.getBlockState(pos).isAir()) return;
         level.setBlock(pos, Blocks.OAK_WALL_SIGN.defaultBlockState().setValue(WallSignBlock.FACING, face), 3);
         if (level.getBlockEntity(pos) instanceof SignBlockEntity sbe) {
-            SignText text = new SignText().setMessage(0, Component.translatable(line1)).setMessage(1, Component.translatable(line2))
-                    .setMessage(2, Component.translatable(use, Component.keybind("key.skycraft.interact")));
-            sbe.setText(text, true);
+            SignText.Mutable text = SignText.EMPTY.asMutable().setLine(0, Component.translatable(line1)).setLine(1, Component.translatable(line2))
+                    .setLine(2, Component.translatable(use, Component.keybind("key.skycraft.interact")));
+            sbe.setText(text.asImmutable(), net.minecraft.world.level.block.entity.SignTextSlot.FRONT);
             sbe.setChanged();
         }
     }

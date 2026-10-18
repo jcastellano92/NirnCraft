@@ -33,27 +33,28 @@ public class FishItem extends SkyFoodItem {
 
     /** A freshly caught fish of {@code cm} centimetres. */
     public static ItemStack withLength(ItemStack stack, int cm, boolean trophy) {
-        CompoundTag tag = stack.getOrCreateTagElement(TAG);
+        CompoundTag tag = com.skycraft.platform.ItemTags.childOrEmpty(stack, TAG);
         tag.putInt("cm", cm);
         if (trophy) tag.putBoolean("trophy", true);
+        com.skycraft.platform.ItemTags.setChild(stack, TAG, tag);
         return stack;
     }
 
     @Override
     public Component getName(ItemStack stack) {
-        CompoundTag tag = stack.getTagElement(TAG);
-        if (tag != null && tag.getBoolean("trophy")) {
+        CompoundTag tag = com.skycraft.platform.ItemTags.child(stack, TAG);
+        if (tag != null && tag.getBooleanOr("trophy",false)) {
             return Component.translatable("item.skycraft.fish.trophy", super.getName(stack)).withStyle(ChatFormatting.GOLD);
         }
         return super.getName(stack);
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
-        CompoundTag tag = stack.getTagElement(TAG);
-        if (tag != null && tag.getInt("cm") > 0) {
-            int cm = tag.getInt("cm");
-            tooltip.add(Component.translatable("tooltip.skycraft.fish.length", cm,
+    public void appendHoverText(ItemStack stack, net.minecraft.world.item.Item.TooltipContext context263, net.minecraft.world.item.component.TooltipDisplay display263, java.util.function.Consumer<Component> tooltip, TooltipFlag flag) {
+        CompoundTag tag = com.skycraft.platform.ItemTags.child(stack, TAG);
+        if (tag != null && tag.getIntOr("cm",0) > 0) {
+            int cm = tag.getIntOr("cm",0);
+            tooltip.accept(Component.translatable("tooltip.skycraft.fish.length", cm,
                     String.format(Locale.ROOT, "%.1f", species.weightKg(cm))).withStyle(ChatFormatting.GRAY));
         }
         MutableComponent where = Component.empty();
@@ -66,9 +67,9 @@ public class FishItem extends SkyFoodItem {
         if (species.time() != FishSpecies.Time.ANY) {
             where.append(" · ").append(Component.translatable("fishing.skycraft.time." + species.time().name().toLowerCase(Locale.ROOT)));
         }
-        tooltip.add(where.withStyle(ChatFormatting.DARK_AQUA));
-        tooltip.add(Component.translatable("fishing.skycraft.rarity." + species.rarity()).withStyle(
+        tooltip.accept(where.withStyle(ChatFormatting.DARK_AQUA));
+        tooltip.accept(Component.translatable("fishing.skycraft.rarity." + species.rarity()).withStyle(
                 species.rarity() >= 2 ? ChatFormatting.LIGHT_PURPLE : species.rarity() == 1 ? ChatFormatting.AQUA : ChatFormatting.GRAY));
-        super.appendHoverText(stack, level, tooltip, flag);
+        super.appendHoverText(stack, context263, display263, tooltip, flag);
     }
 }

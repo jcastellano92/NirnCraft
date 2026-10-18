@@ -21,8 +21,7 @@ import org.jetbrains.annotations.Nullable;
  */
 public class DragonPriestEntity extends SkyMonster {
     public static final String[] MASKS = {"", "morokei", "rahgot", "vokun", "volsung", "nahkriin", "otar", "krosis", "hevnoraak", "konahrik"};
-    private final ServerBossEvent bossEvent = new ServerBossEvent(Component.translatable("entity.skycraft.dragon_priest"),
-            BossEvent.BossBarColor.YELLOW, BossEvent.BossBarOverlay.NOTCHED_10);
+    private final ServerBossEvent bossEvent = new ServerBossEvent(java.util.UUID.randomUUID(), Component.translatable("entity.skycraft.dragon_priest"), BossEvent.BossBarColor.YELLOW, BossEvent.BossBarOverlay.NOTCHED_10);
 
     public DragonPriestEntity(EntityType<? extends DragonPriestEntity> type, Level level) {
         super(type, level);
@@ -38,10 +37,9 @@ public class DragonPriestEntity extends SkyMonster {
     @Nullable
     public net.minecraft.world.entity.SpawnGroupData finalizeSpawn(net.minecraft.world.level.ServerLevelAccessor level,
                                                                    net.minecraft.world.DifficultyInstance difficulty,
-                                                                   net.minecraft.world.entity.MobSpawnType reason,
-                                                                   @Nullable net.minecraft.world.entity.SpawnGroupData data,
-                                                                   @Nullable CompoundTag tag) {
-        data = super.finalizeSpawn(level, difficulty, reason, data, tag);
+                                                                   net.minecraft.world.entity.EntitySpawnReason reason,
+                                                                   @Nullable net.minecraft.world.entity.SpawnGroupData data) {
+        data = super.finalizeSpawn(level, difficulty, reason, data);
         if (getVariant() > 0) {
             // the named priests: half again as strong as their nameless brethren (Konahrik twice)
             var hp = this.getAttribute(Attributes.MAX_HEALTH);
@@ -56,7 +54,7 @@ public class DragonPriestEntity extends SkyMonster {
     @Override
     public void aiStep() {
         super.aiStep();
-        if (!this.level().isClientSide) this.bossEvent.setProgress(this.getHealth() / this.getMaxHealth());
+        if (!this.level().isClientSide()) this.bossEvent.setProgress(this.getHealth() / this.getMaxHealth());
     }
 
     @Override
@@ -79,17 +77,19 @@ public class DragonPriestEntity extends SkyMonster {
 
     /** Named priests drop their mask. */
     @Override
-    protected void dropCustomDeathLoot(DamageSource source, int looting, boolean recentlyHit) {
-        super.dropCustomDeathLoot(source, looting, recentlyHit);
+    protected void dropCustomDeathLoot(net.minecraft.server.level.ServerLevel lootLevel263, DamageSource source, boolean recentlyHit) {
+        super.dropCustomDeathLoot(lootLevel263, source, recentlyHit);
         int v = getVariant();
         if (v > 0 && v < MASKS.length) {
-            CreatureItems.mask(MASKS[v]).ifPresent(item -> this.spawnAtLocation(new ItemStack(item)));
+            CreatureItems.mask(MASKS[v]).ifPresent(item -> this.spawnAtLocation(lootLevel263, new ItemStack(item)));
         }
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag tag) {
-        super.readAdditionalSaveData(tag);
+    public void readAdditionalSaveData(net.minecraft.world.level.storage.ValueInput input263) {
+        super.readAdditionalSaveData(input263);
+        net.minecraft.nbt.CompoundTag tag = com.skycraft.platform.ValueTags.read(input263);
+        
         this.bossEvent.setName(this.getDisplayName());
     }
 }

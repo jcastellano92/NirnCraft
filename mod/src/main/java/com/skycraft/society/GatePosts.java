@@ -10,7 +10,7 @@ import com.skycraft.tamriel.settlement.SettlementAnchors;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
@@ -146,7 +146,7 @@ public final class GatePosts {
         int px = -out[1], pz = out[0];
         // the whole settlement: a guard answering a shout is away from its post, and must not be replaced meanwhile
         int reach = e.radius + 24;
-        AABB box = new AABB(e.x - reach, level.getMinBuildHeight(), e.z - reach, e.x + reach, level.getMaxBuildHeight(), e.z + reach);
+        AABB box = new AABB(e.x - reach, level.getMinY(), e.z - reach, e.x + reach, (level.getMaxY()+1), e.z + reach);
         List<GuardEntity> near = level.getEntitiesOfClass(GuardEntity.class, box, g -> g.isAlive());
         long now = level.getGameTime();
         float yaw = (float) (Math.atan2(-out[0], out[1]) * (180.0 / Math.PI));
@@ -154,7 +154,7 @@ public final class GatePosts {
             String key = e.key + "|" + gate.id() + "|" + side;
             GuardEntity holder = null;
             for (GuardEntity g : near) {
-                if (!key.equals(g.getPersistentData().getString(KEY))) continue;
+                if (!key.equals(g.getPersistentData().getStringOr(KEY, ""))) continue;
                 if (holder == null) holder = g;
                 else g.discard(); // two guards on one post: the later one goes
             }
@@ -168,14 +168,14 @@ public final class GatePosts {
             BlockPos want = new BlockPos(at.getX() + px * FLANK * sign, at.getY(), at.getZ() + pz * FLANK * sign);
             BlockPos spot = standable(level, want, at);
             if (spot == null) return;
-            GuardEntity guard = ModEntities.GUARD.get().create(level);
+            GuardEntity guard = ModEntities.GUARD.get().create(level, net.minecraft.world.entity.EntitySpawnReason.STRUCTURE);
             if (guard == null) return;
-            guard.moveTo(spot.getX() + 0.5, spot.getY(), spot.getZ() + 0.5, yaw, 0f);
+            guard.snapTo(spot.getX() + 0.5, spot.getY(), spot.getZ() + 0.5, yaw, 0f);
             guard.setYHeadRot(yaw);
             guard.yBodyRot = yaw;
             guard.getPersistentData().putString(KEY, key);
             guard.setProfile(GuardProfiles.of(e).profile());
-            guard.finalizeSpawn(level, level.getCurrentDifficultyAt(spot), MobSpawnType.EVENT, null, null);
+            guard.finalizeSpawn(level, level.getCurrentDifficultyAt(spot), EntitySpawnReason.EVENT, null);
             guard.setPost(spot, yaw);
             guard.setPersistenceRequired();
             if (level.addFreshEntity(guard)) LAST_FILLED.put(key, now);

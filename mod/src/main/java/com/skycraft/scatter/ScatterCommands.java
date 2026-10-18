@@ -11,9 +11,9 @@ import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -38,7 +38,7 @@ import java.util.TreeMap;
  *     <li>{@code reset}: clears this session's placement counters.</li>
  * </ul>
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class ScatterCommands {
     private static final int MAX_RADIUS = 1536;
 
@@ -50,7 +50,7 @@ public final class ScatterCommands {
     }
 
     static void register(CommandDispatcher<CommandSourceStack> d) {
-        d.register(Commands.literal("skycraft-scatter").requires(s -> s.hasPermission(2))
+        d.register(Commands.literal("skycraft-scatter").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
                 .then(Commands.literal("stats")
                         .then(Commands.argument("x", IntegerArgumentType.integer())
                                 .then(Commands.argument("z", IntegerArgumentType.integer())
@@ -184,7 +184,7 @@ public final class ScatterCommands {
         ServerLevel level = src.getLevel();
         long seed = level.getSeed();
         ScatterRules rules = ScatterRules.get();
-        Path dir = src.getServer().getServerDirectory().toPath().resolve("skycraft-scatter");
+        Path dir = src.getServer().getServerDirectory().resolve("skycraft-scatter");
         Path file = dir.resolve("export_" + x + "_" + z + ".csv");
         try {
             Files.createDirectories(dir);

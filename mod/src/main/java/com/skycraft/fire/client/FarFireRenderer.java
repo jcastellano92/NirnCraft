@@ -8,14 +8,13 @@ import com.skycraft.fire.FireSites;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.renderer.LightTexture;
-import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.level.material.FogType;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.client.event.RenderLevelStageEvent;
+import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
@@ -41,7 +40,8 @@ import java.util.List;
  * </ul>
  */
 public final class FarFireRenderer {
-    private static final MultiBufferSource.BufferSource BUFFERS = MultiBufferSource.immediate(new BufferBuilder(1 << 16));
+    private record Frame(com.skycraft.client.CapturedGeometry smoke,com.skycraft.client.CapturedGeometry glow,com.skycraft.client.CapturedGeometry flame) {}
+    private static final net.minecraft.util.context.ContextKey<Frame> FRAME=new net.minecraft.util.context.ContextKey<>(net.minecraft.resources.Identifier.fromNamespaceAndPath("skycraft","far_fire"));
 
     private static final int MAX_PUFFS = 2400;
     private static final float[] PUFF = new float[MAX_PUFFS * 8];
@@ -63,24 +63,25 @@ public final class FarFireRenderer {
                 +" sharedSmoke="+ShaderCheck.sharedSmoke()+" volumeSources="+com.skycraft.atmosphere.client.SmokeSourceTexture.activeSources();
     }
 
-    public static void render(RenderLevelStageEvent event) {
+    public static void extract(net.neoforged.neoforge.client.event.ExtractLevelRenderStateEvent event) {
         Minecraft mc = Minecraft.getInstance();
-        ClientLevel level = mc.level;
+        ClientLevel level = event.getLevel();
+        event.getRenderState().setRenderData(FRAME,null);
         if (level == null || !FireConfig.FAR_FIRE.get() || mc.player == null) return;
         Camera cam = event.getCamera();
         if (cam.getFluidInCamera() != FogType.NONE) return;
-        if (cam.getEntity() instanceof net.minecraft.world.entity.LivingEntity le
+        if (cam.entity() instanceof net.minecraft.world.entity.LivingEntity le
                 && (le.hasEffect(MobEffects.BLINDNESS) || le.hasEffect(MobEffects.DARKNESS))) return;
         long t0 = System.nanoTime();
 
-        Vec3 cp = cam.getPosition();
-        float pt = event.getPartialTick();
+        Vec3 cp = cam.position();
+        float pt = event.getDeltaTracker().getGameTimeDeltaPartialTick(false);
         double time = level.getGameTime() + pt;
-        double far = mc.gameRenderer.getDepthFar() - 24.0;
+        double far = event.getRenderState().cameraRenderState.depthFar - 24.0;
         double maxDist = Math.min(FireConfig.FAR_FIRE_DISTANCE.get(), far);
-        Vector3f look = cam.getLookVector();
-        Vector3f left = cam.getLeftVector();
-        Vector3f up = cam.getUpVector();
+        Vector3f look = new Vector3f(cam.forwardVector());
+        Vector3f left = new Vector3f(cam.leftVector());
+        Vector3f up = new Vector3f(cam.upVector());
         // vertical billboards turn about y only: their right vector is the camera's left, flattened
         float hx = left.x(), hz = left.z();
         float hl = Mth.sqrt(hx * hx + hz * hz);
@@ -91,7 +92,7 @@ public final class FarFireRenderer {
             hx /= hl;
             hz /= hl;
         }
-        float angle = level.getTimeOfDay(pt) * Mth.TWO_PI;
+        float angle = cam.attributeProbe().getValue(net.minecraft.world.attribute.EnvironmentAttributes.SUN_ANGLE,pt) * Mth.DEG_TO_RAD;
         float daylight = Mth.clamp(Mth.cos(angle) * 2f + 0.3f, 0f, 1f);
         float rain = level.getRainLevel(pt);
         daylight *= 1f - 0.5f * rain;
@@ -102,19 +103,11 @@ public final class FarFireRenderer {
             lastQuads = 0;
             return;
         }
-        Matrix4f m = event.getPoseStack().last().pose();
-        boolean shaders = ShaderCheck.shadersActive();
-        float fogStart = 0, fogEnd = 0;
-        com.mojang.blaze3d.shaders.FogShape fogShape = null;
-        if (!shaders) {
-            fogStart = RenderSystem.getShaderFogStart();
-            fogEnd = RenderSystem.getShaderFogEnd();
-            fogShape = RenderSystem.getShaderFogShape();
-            RenderSystem.setShaderFogStart(Float.MAX_VALUE);
-            RenderSystem.setShaderFogEnd(Float.MAX_VALUE);
-        }
-        int quads = 0;
-        try {
+        Matrix4f m=new Matrix4f();
+        var smokeVertices=new com.skycraft.client.CapturedGeometry.Builder();
+        var glowVertices=new com.skycraft.client.CapturedGeometry.Builder();
+        var flameVertices=new com.skycraft.client.CapturedGeometry.Builder();
+        int quads=0;
             puffs = 0;
             int n = CANDIDATES.size();
             // ---- smoke (sorted far to near over all sites), then glow and flames (additive, order does not matter)
@@ -126,31 +119,28 @@ public final class FarFireRenderer {
                     if(!shared || site.blast || !com.skycraft.atmosphere.client.SmokeSourceTexture.containsFire(site.x,site.z))
                         smokeOf(site, DIST.get(i), cp, time, daylight, maxDist);
                 }
-                quads += emitPuffs(m, cp, left, up, maxDist);
+                quads += emitPuffs(smokeVertices,m, cp, left, up, maxDist);
             }
-            var glowType=shaders?FireRenderTypes.GLOW:FireRenderTypes.GLOW_NATIVE;
-            var flameType=shaders?FireRenderTypes.FLAME:FireRenderTypes.FLAME_NATIVE;
-            VertexConsumer glow = BUFFERS.getBuffer(glowType);
-            for (int i = 0; i < n; i++) quads += glowOf(glow, m, cp, left, up, CANDIDATES.get(i), DIST.get(i), time, daylight);
-            BUFFERS.endBatch(glowType);
-            VertexConsumer flame = BUFFERS.getBuffer(flameType);
-            for (int i = 0; i < n; i++) quads += flamesOf(flame, m, cp, hx, hz, CANDIDATES.get(i), DIST.get(i), time);
-            BUFFERS.endBatch(flameType);
-        } finally {
-            if (!shaders) {
-                RenderSystem.setShaderFogStart(fogStart);
-                RenderSystem.setShaderFogEnd(fogEnd);
-                RenderSystem.setShaderFogShape(fogShape);
-            }
-        }
+            for(int i=0;i<n;i++)quads+=glowOf(glowVertices,m,cp,left,up,CANDIDATES.get(i),DIST.get(i),time,daylight);
+            for(int i=0;i<n;i++)quads+=flamesOf(flameVertices,m,cp,hx,hz,CANDIDATES.get(i),DIST.get(i),time);
+        event.getRenderState().setRenderData(FRAME,new Frame(smokeVertices.build(),glowVertices.build(),flameVertices.build()));
         lastSites = CANDIDATES.size();
         lastQuads = quads;
         lastNanos = System.nanoTime() - t0;
     }
 
+    public static void submit(net.neoforged.neoforge.client.event.SubmitCustomGeometryEvent event){
+        var frame=event.getLevelRenderState().getRenderData(FRAME);if(frame==null)return;
+        var collector=event.getSubmitNodeCollector();var pose=event.getPoseStack();
+        frame.smoke().submit(pose,collector,FireRenderTypes.SMOKE);
+        frame.glow().submit(pose,collector,FireRenderTypes.GLOW);
+        frame.flame().submit(pose,collector,FireRenderTypes.FLAME);
+    }
+
     // ------------------------------------------------------------------ candidates
 
     private static void collect(Vec3 cp, Vector3f look, double maxDist, int maxSites, double time) {
+        ClientFire.ensureTemporaryLevel();
         CANDIDATES.clear();
         DIST.clear();
         if (ClientFire.serverCurrent()) {
@@ -229,7 +219,7 @@ public final class FarFireRenderer {
             // a little sway
             double sway = Math.sin(time * 0.11 + v.id + i * 2.0) * w * 0.05;
             standing(c, m, cx + hx * sway, by, cz + hz * sway, hx * w * scale * 0.5f, hz * w * scale * 0.5f, h * scale,
-                    frame / 8f, (frame + 1) / 8f, 1f, 1f, 1f, alpha, LightTexture.FULL_BRIGHT);
+                    frame / 8f, (frame + 1) / 8f, 1f, 1f, 1f, alpha, LightCoordsUtil.FULL_BRIGHT);
             quads++;
         }
         return quads;
@@ -251,7 +241,7 @@ public final class FarFireRenderer {
         if (a <= 0.005f) return 0;
         double x = v.x - cp.x, y = v.y - cp.y + h * 0.45, z = v.z - cp.z;
         quad(c, m, x, y, z, left.x() * size * 0.5f, left.y() * size * 0.5f, left.z() * size * 0.5f,
-                up.x() * size * 0.5f, up.y() * size * 0.5f, up.z() * size * 0.5f, 0f, 0f, 1f, 1f, 1f, 0.85f, 0.55f, a, LightTexture.FULL_BRIGHT);
+                up.x() * size * 0.5f, up.y() * size * 0.5f, up.z() * size * 0.5f, 0f, 0f, 1f, 1f, 1f, 0.85f, 0.55f, a, LightCoordsUtil.FULL_BRIGHT);
         return 1;
     }
 
@@ -301,7 +291,7 @@ public final class FarFireRenderer {
         }
     }
 
-    private static int emitPuffs(Matrix4f m, Vec3 cp, Vector3f left, Vector3f up, double maxDist) {
+    private static int emitPuffs(VertexConsumer c,Matrix4f m, Vec3 cp, Vector3f left, Vector3f up, double maxDist) {
         int n = puffs;
         if (n == 0) return 0;
         // counting sort by distance, far first
@@ -316,7 +306,6 @@ public final class FarFireRenderer {
             int b = Mth.clamp((int) (PUFF[i * 8] / span * 255.0), 0, 255);
             ORDER[BUCKET[b]++] = i;
         }
-        VertexConsumer c = BUFFERS.getBuffer(FireRenderTypes.SMOKE);
         int quads = 0;
         for (int k = n - 1; k >= 0; k--) {
             int p = ORDER[k] * 8;
@@ -331,11 +320,10 @@ public final class FarFireRenderer {
             float heat = Mth.clamp(1f - uf * 3.2f, 0f, 1f);
             float r = Mth.lerp(heat, 0.46f, 1.0f), g = Mth.lerp(heat, 0.44f, 0.62f), b = Mth.lerp(heat, 0.43f, 0.34f);
             int block = Math.round(Mth.lerp(Mth.clamp(uf * 2.0f, 0f, 1f), 13f, 1f));
-            int light = LightTexture.pack(block, 15);
+            int light = LightCoordsUtil.pack(block, 15);
             quad(c, m, PUFF[p + 1], PUFF[p + 2], PUFF[p + 3], rx, ry, rz, ux, uy, uz, variant / 4f, 0f, (variant + 1) / 4f, 1f, r, g, b, a, light);
             quads++;
         }
-        BUFFERS.endBatch(FireRenderTypes.SMOKE);
         return quads;
     }
 
@@ -364,7 +352,7 @@ public final class FarFireRenderer {
 
     private static void vertex(VertexConsumer c, Matrix4f m, float x, float y, float z, float u, float v, float r, float g, float b,
                                float a, int light) {
-        c.vertex(m, x, y, z).color(r, g, b, a).uv(u, v).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(0f, 1f, 0f).endVertex();
+        c.addVertex(m, x, y, z).setColor(r, g, b, a).setUv(u, v).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(0f, 1f, 0f);
     }
 
     /** Whether a shader pack is in use (Oculus / Iris API by reflection; any failure means no). */
@@ -384,7 +372,7 @@ public final class FarFireRenderer {
 
         static boolean sharedSmoke() {
             if(!shadersActive()) return false;
-            long now=net.minecraft.Util.getMillis();
+            long now=net.minecraft.util.Util.getMillis();
             if(now<nextSharedCheck) return shared;
             nextSharedCheck=now+1000;
             try {
@@ -404,7 +392,7 @@ public final class FarFireRenderer {
 
         static boolean shadersActive() {
             if (unavailable) return false;
-            long now = net.minecraft.Util.getMillis();
+            long now = net.minecraft.util.Util.getMillis();
             if (checked && now - last < 1000L) return cached;
             checked = true;
             last = now;

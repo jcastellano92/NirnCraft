@@ -13,7 +13,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.npc.Villager;
+import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BedBlock;
@@ -24,10 +24,10 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.phys.AABB;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.event.level.BlockEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.neoforge.event.level.BlockEvent;
+import net.neoforged.fml.common.Mod;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;
@@ -43,7 +43,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * <p>Containers, beds, doors, and placed clutter in settlements are owned by the household or shop.
  * Blocks in enemy camps and dungeons are never "owned": looting them is not a crime.</p>
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class Ownership {
     public static final String ENTITY_OWNER_KEY = "skycraft_owner";
 
@@ -57,11 +57,11 @@ public final class Ownership {
     /** Faction property ({@code faction:<id>}: guild hall beds and chests) is free to the faction's members. */
     private static boolean memberOf(Player player, String ownerId) {
         return ownerId.startsWith("faction:")
-                && com.skycraft.core.SkyData.get(player).module("quest").getCompound("factions").contains(ownerId.substring(8));
+                && com.skycraft.core.SkyData.get(player).module("quest").getCompoundOrEmpty("factions").contains(ownerId.substring(8));
     }
 
     private static String key(Level level, BlockPos pos) {
-        return level.dimension().location() + "|" + pos.getX() + "|" + pos.getY() + "|" + pos.getZ();
+        return level.dimension().identifier() + "|" + pos.getX() + "|" + pos.getY() + "|" + pos.getZ();
     }
 
     /**
@@ -77,7 +77,7 @@ public final class Ownership {
 
         // Check explicit saved/synced data
         String k = key(level, pos);
-        if (level.isClientSide) {
+        if (level.isClientSide()) {
             OwnerEntry entry = CLIENT_CACHE.get(k);
             if (entry != null) {
                 if ("public".equals(entry.ownerId)) return false;
@@ -178,7 +178,7 @@ public final class Ownership {
 
         CompoundTag pd = entity.getPersistentData();
         if (pd.contains(ENTITY_OWNER_KEY)) {
-            String ownerId = pd.getString(ENTITY_OWNER_KEY);
+            String ownerId = pd.getStringOr(ENTITY_OWNER_KEY, "");
             if ("public".equals(ownerId) || ("player:" + player.getStringUUID()).equals(ownerId)) return false;
             return true;
         }
@@ -275,7 +275,7 @@ public final class Ownership {
     @Nullable
     public static Component ownerName(Level level, BlockPos pos) {
         String k = key(level, pos);
-        if (level.isClientSide) {
+        if (level.isClientSide()) {
             OwnerEntry entry = CLIENT_CACHE.get(k);
             return entry != null ? entry.ownerName() : null;
         }
@@ -295,29 +295,28 @@ public final class Ownership {
         final Map<String, OwnerEntry> entries = new HashMap<>();
 
         static OwnershipData get(MinecraftServer server) {
-            return server.overworld().getDataStorage().computeIfAbsent(OwnershipData::load, OwnershipData::new, NAME);
+            return com.skycraft.platform.SavedDataTypes.get(server.overworld(), NAME, OwnershipData::load, OwnershipData::new, value263 -> value263.save(new net.minecraft.nbt.CompoundTag()));
         }
 
         static OwnershipData load(CompoundTag tag) {
             OwnershipData data = new OwnershipData();
-            CompoundTag list = tag.getCompound("entries");
-            for (String k : list.getAllKeys()) {
-                CompoundTag entryTag = list.getCompound(k);
-                String id = entryTag.getString("id");
-                Component name = entryTag.contains("name") ? Component.Serializer.fromJson(entryTag.getString("name")) : null;
+            CompoundTag list = tag.getCompoundOrEmpty("entries");
+            for (String k : list.keySet()) {
+                CompoundTag entryTag = list.getCompoundOrEmpty(k);
+                String id = entryTag.getStringOr("id","");
+                Component name = entryTag.contains("name") ? com.skycraft.platform.ArcaneData.readComponent(entryTag.getStringOr("name","")) : null;
                 data.entries.put(k, new OwnerEntry(id, name));
             }
             return data;
         }
 
-        @Override
         public CompoundTag save(CompoundTag tag) {
             CompoundTag list = new CompoundTag();
             for (Map.Entry<String, OwnerEntry> e : entries.entrySet()) {
                 CompoundTag entryTag = new CompoundTag();
                 entryTag.putString("id", e.getValue().ownerId());
                 if (e.getValue().ownerName() != null) {
-                    entryTag.putString("name", Component.Serializer.toJson(e.getValue().ownerName()));
+                    entryTag.putString("name", com.skycraft.platform.ArcaneData.writeComponent(e.getValue().ownerName()));
                 }
                 list.put(e.getKey(), entryTag);
             }

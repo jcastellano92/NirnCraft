@@ -32,12 +32,12 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.EntityMountEvent;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.tick.LevelTickEvent;
+import net.neoforged.neoforge.event.entity.EntityMountEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.util.List;
 
@@ -50,7 +50,7 @@ import java.util.List;
  *   <li>Searching writing desks for regional lore notes and journals.</li>
  * </ul>
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class InteriorInteractions {
     public static final String SEAT_TAG = "skycraft_seat";
 
@@ -72,7 +72,7 @@ public final class InteriorInteractions {
         if (kind.isSeat()) {
             if (player.isShiftKeyDown()) return;
             event.setCanceled(true);
-            event.setCancellationResult(InteractionResult.sidedSuccess(level.isClientSide));
+            event.setCancellationResult(InteractionResult.SUCCESS);
             if (level instanceof ServerLevel sl && player instanceof ServerPlayer sp) {
                 sitEntity(sl, pos, state, kind, sp);
             }
@@ -82,7 +82,7 @@ public final class InteriorInteractions {
         // 2. Taking weapons from weapon racks or items from tabletop clutter
         if (kind.isTakeableClutter() && !fbe.isEmpty()) {
             event.setCanceled(true);
-            event.setCancellationResult(InteractionResult.sidedSuccess(level.isClientSide));
+            event.setCancellationResult(InteractionResult.SUCCESS);
             if (level instanceof ServerLevel sl && player instanceof ServerPlayer sp) {
                 takeClutter(sl, pos, fbe, kind, sp);
             }
@@ -92,7 +92,7 @@ public final class InteriorInteractions {
         // 3. Searching writing desks for notes/journals
         if (kind == FurnitureKind.DESK && !fbe.isEmpty()) {
             event.setCanceled(true);
-            event.setCancellationResult(InteractionResult.sidedSuccess(level.isClientSide));
+            event.setCancellationResult(InteractionResult.SUCCESS);
             if (level instanceof ServerLevel sl && player instanceof ServerPlayer sp) {
                 searchDesk(sl, pos, fbe, sp);
             }
@@ -105,7 +105,7 @@ public final class InteriorInteractions {
         }
         // Check if seat is already occupied
         List<ArmorStand> existing = sl.getEntitiesOfClass(ArmorStand.class, new AABB(pos).inflate(0.6),
-                a -> a.getTags().contains(SEAT_TAG));
+                a -> a.entityTags().contains(SEAT_TAG));
         for (ArmorStand stand : existing) {
             if (stand.isVehicle()) {
                 Entity first = stand.getFirstPassenger();
@@ -138,27 +138,26 @@ public final class InteriorInteractions {
         ArmorStand seat = new ArmorStand(sl, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5);
         seat.setInvisible(true);
         seat.setNoGravity(true);
-        seat.setInvulnerable(true);
+        seat.setPermanentlyInvulnerable(true);
         seat.setSilent(true);
         seat.setNoBasePlate(true);
-        net.minecraft.nbt.CompoundTag markerTag = new net.minecraft.nbt.CompoundTag();
-        seat.addAdditionalSaveData(markerTag);
+        net.minecraft.nbt.CompoundTag markerTag = com.skycraft.platform.EntityData.saveWithoutId(seat);
         markerTag.putBoolean("Marker", true);
         markerTag.putBoolean("Small", true);
-        seat.readAdditionalSaveData(markerTag);
+        com.skycraft.platform.EntityData.load(seat, markerTag);
         seat.addTag(SEAT_TAG);
         seat.setYRot(yaw);
         seat.setYHeadRot(yaw);
         seat.setYBodyRot(yaw);
 
-        double standY = pos.getY() + seatSurfaceY - seat.getPassengersRidingOffset() - rider.getMyRidingOffset();
+        double standY = pos.getY() + seatSurfaceY - (seat.getPassengerRidingPosition(rider).y - seat.getY()) + rider.getVehicleAttachmentPoint(seat).y;
         seat.setPos(pos.getX() + 0.5, standY, pos.getZ() + 0.5);
         sl.addFreshEntity(seat);
 
         rider.setYRot(yaw);
         rider.setYHeadRot(yaw);
         rider.setYBodyRot(yaw);
-        boolean mounted = rider.startRiding(seat, true);
+        boolean mounted = rider.startRiding(seat, true, true);
         if (mounted) {
             sl.playSound(null, pos, SoundEvents.WOOD_STEP, SoundSource.BLOCKS, 0.65f, 0.9f);
         } else {
@@ -180,10 +179,10 @@ public final class InteriorInteractions {
 
         fbe.setEmpty(true);
         sl.playSound(null, pos,
-                kind == FurnitureKind.WEAPON_RACK ? SoundEvents.ARMOR_EQUIP_IRON : SoundEvents.ITEM_PICKUP,
+                kind == FurnitureKind.WEAPON_RACK ? SoundEvents.ARMOR_EQUIP_IRON.value() : SoundEvents.ITEM_PICKUP,
                 SoundSource.BLOCKS, 0.8f, 1.05f);
         if (!ActionHandler.addToBags(sp, stack)) {
-            sp.drop(stack, false);
+            sp.drop(stack, false, net.minecraft.util.Prediction.SERVER_ONLY);
         }
     }
 
@@ -198,20 +197,20 @@ public final class InteriorInteractions {
             }
             case CLUTTER_TANKARD -> {
                 ItemStack mead = new ItemStack(Items.HONEY_BOTTLE);
-                mead.setHoverName(Component.literal("Nordic Honningbrew Mead"));
+                mead.set(net.minecraft.core.component.DataComponents.CUSTOM_NAME,Component.literal("Nordic Honningbrew Mead"));
                 yield mead;
             }
             case CLUTTER_PLATTER -> new ItemStack(Items.COOKED_BEEF, 2);
             case CLUTTER_GOBLETS -> {
                 ItemStack goblet = new ItemStack(Items.GOLD_NUGGET, 3);
-                goblet.setHoverName(Component.literal("Silver Goblet"));
+                goblet.set(net.minecraft.core.component.DataComponents.CUSTOM_NAME,Component.literal("Silver Goblet"));
                 yield goblet;
             }
             case CLUTTER_APOTHECARY -> new ItemStack(Items.EXPERIENCE_BOTTLE);
             case CLUTTER_SCALES -> new ItemStack(Items.GOLD_NUGGET, 5);
             case CLUTTER_LEDGER -> {
                 String province = Regions.at(sl, pos).province();
-                LoreBooks.Book book = LoreBooks.randomFor(sl.random, province, b -> true);
+                LoreBooks.Book book = LoreBooks.randomFor(sl.getRandom(), province, b -> true);
                 yield book != null ? LoreBookItem.create(book) : new ItemStack(Items.BOOK);
             }
             default -> new ItemStack(Items.BREAD);
@@ -222,7 +221,7 @@ public final class InteriorInteractions {
         fbe.setEmpty(true);
         sl.playSound(null, pos, SoundEvents.BOOK_PAGE_TURN, SoundSource.BLOCKS, 0.9f, 1.0f);
         String province = Regions.at(sl, pos).province();
-        LoreBooks.Book book = LoreBooks.randomFor(sl.random, province, b -> true);
+        LoreBooks.Book book = LoreBooks.randomFor(sl.getRandom(), province, b -> true);
         if (book != null) {
             ItemStack stack = LoreBookItem.create(book);
             if (Ownership.isOwnedByOther(sp, sl, pos)) {
@@ -230,7 +229,7 @@ public final class InteriorInteractions {
             }
             Notifier.message(sp, Component.translatable("message.skycraft.lore.shelf_found", book.title()));
             if (!ActionHandler.addToBags(sp, stack)) {
-                sp.drop(stack, false);
+                sp.drop(stack, false, net.minecraft.util.Prediction.SERVER_ONLY);
             }
         } else {
             Notifier.message(sp, Component.translatable("message.skycraft.lore.shelf_nothing"));
@@ -244,9 +243,9 @@ public final class InteriorInteractions {
         // Unloading a rider or removing its seat also fires dismount. Do not teleport an
         // unloading entity or recursively remove the seat from inside its own removal.
         if (mounted == null || mounted.isRemoved() || event.getEntityMounting().isRemoved()) return;
-        if (mounted instanceof ArmorStand stand && stand.getTags().contains(SEAT_TAG)) {
+        if (mounted instanceof ArmorStand stand && stand.entityTags().contains(SEAT_TAG)) {
             Entity rider = event.getEntityMounting();
-            if (!mounted.level().isClientSide) {
+            if (!mounted.level().isClientSide()) {
                 BlockPos bpos = stand.blockPosition();
                 BlockState state = mounted.level().getBlockState(bpos);
                 Direction facing = state.hasProperty(FurnitureBlock.FACING)
@@ -262,12 +261,12 @@ public final class InteriorInteractions {
     }
 
     @SubscribeEvent
-    public static void onLevelTick(TickEvent.LevelTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || !(event.level instanceof ServerLevel sl)) return;
+    public static void onLevelTick(LevelTickEvent.Post event) {
+        if (!(event.getLevel() instanceof ServerLevel sl)) return;
         long time = sl.getGameTime();
         if (time % 20 == 0) {
             for (Entity e : sl.getAllEntities()) {
-                if (e instanceof ArmorStand stand && stand.getTags().contains(SEAT_TAG)) {
+                if (e instanceof ArmorStand stand && stand.entityTags().contains(SEAT_TAG)) {
                     BlockPos bpos = stand.blockPosition();
                     boolean validSeatBlock = sl.getBlockState(bpos).getBlock() instanceof FurnitureBlock
                             || sl.getBlockState(bpos.above()).getBlock() instanceof FurnitureBlock;
@@ -290,7 +289,7 @@ public final class InteriorInteractions {
                 List<NpcEntity> npcs = sl.getEntitiesOfClass(NpcEntity.class, player.getBoundingBox().inflate(24),
                         n -> n.isAlive() && !n.isPassenger() && n.getTarget() == null && n.getNavigation().isDone());
                 for (NpcEntity npc : npcs) {
-                    if (sl.random.nextFloat() > 0.25f) continue;
+                    if (sl.getRandom().nextFloat() > 0.25f) continue;
                     BlockPos base = npc.blockPosition();
                     if (sl.canSeeSky(base)) continue; // indoor seating only
                     seatLoop:

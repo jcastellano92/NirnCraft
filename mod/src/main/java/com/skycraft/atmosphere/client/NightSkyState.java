@@ -25,10 +25,10 @@ final class NightSkyState {
                 || player.getOffhandItem().is(net.minecraft.world.item.Items.LANTERN))) target = Math.max(target, 0.85f);
         if (previousLevel != level) { pollution = target; previousLevel = level; }
         pollution = Mth.lerp(0.04f, pollution, target);
-        double solarAngle = level.getTimeOfDay(1f) * Math.PI * 2;
-        masserLight = AtmosphereMath.visibleMoonIllumination(solarAngle, AtmosphereMath.moonCycle(level.getDayTime(), false), false);
-        secundaLight = AtmosphereMath.visibleMoonIllumination(solarAngle, AtmosphereMath.moonCycle(level.getDayTime(), true), true);
-        night = Mth.clamp(level.getStarBrightness(1f) * 2f, 0f, 1f);
+        double solarAngle = com.skycraft.atmosphere.client.SkyEnvironment.sunCycle(level, 1f) * Math.PI * 2;
+        masserLight = AtmosphereMath.visibleMoonIllumination(solarAngle, AtmosphereMath.moonCycle(level.getDefaultClockTime(), false), false);
+        secundaLight = AtmosphereMath.visibleMoonIllumination(solarAngle, AtmosphereMath.moonCycle(level.getDefaultClockTime(), true), true);
+        night = Mth.clamp(com.skycraft.atmosphere.client.SkyEnvironment.starBrightness(level, 1f) * 2f, 0f, 1f);
         visibility = AtmosphereMath.nightSkyVisibility(night, 0.80f * masserLight + 0.20f * secundaLight, pollution);
     }
 }

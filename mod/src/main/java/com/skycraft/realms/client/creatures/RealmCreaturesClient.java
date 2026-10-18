@@ -8,20 +8,20 @@ import com.skycraft.creatures.entity.anim.AnimatedCreature;
 import com.skycraft.realms.client.rig.RealmDefs;
 import com.skycraft.realms.creatures.RealmCreatures;
 import net.minecraft.client.model.geom.ModelPart;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Mob;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.EntityRenderersEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.EntityRenderersEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 /**
  * Client side of the realm creatures: their rig models join the bestiary's model definitions (so
  * {@link BestiaryClient}'s own layer registration bakes them), and each type gets its rig renderer with its variant
  * skins, glow layers, ghostly translucency and per-variant gear.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
 public final class RealmCreaturesClient {
     private RealmCreaturesClient() {}
 
@@ -40,7 +40,7 @@ public final class RealmCreaturesClient {
         BestiaryClient.rig(event, RealmCreatures.DAEDROTH, "daedroth", 0.8f, 1.15f, null, v("daedroth_glow"), r -> {});
         BestiaryClient.rig(event, RealmCreatures.SPIDER_DAEDRA, "spider_daedra", 0.9f, 1.1f, null, v("spider_daedra_glow"), r -> {});
         // the Shivering Isles
-        ResourceLocation magusGlow = BestiaryClient.tex("grummite_magus_glow");
+        Identifier magusGlow = BestiaryClient.tex("grummite_magus_glow");
         BestiaryClient.rig(event, RealmCreatures.GRUMMITE, "grummite", 0.4f, 1.0f, v("grummite", "grummite_magus"), null,
                 r -> r.glow(e -> variant(e) == 1 ? magusGlow : null)
                         .withExtra((m, e, a, b, c, d, f) -> {

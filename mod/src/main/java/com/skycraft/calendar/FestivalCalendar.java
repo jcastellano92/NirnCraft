@@ -30,10 +30,10 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.InputStream;
@@ -54,14 +54,14 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Tamrielic festival calendar (MS16).
  *
- * <p>Maps Minecraft world days ({@code level.getDayTime() / 24000L}) onto Tamriel's 12 months
+ * <p>Maps Minecraft world days ({@code level.getDefaultClockTime() / 24000L}) onto Tamriel's 12 months
  * (30 days per month, 360 days per year) and activates regional hold festivals loaded from
  * {@code /skycraft/calendar/festivals.json}. When a festival is active in a settlement, a
  * non-destructive temporary plaza overlay (lanterns, hold banners, campfire brazier) is placed
  * in air blocks around {@link AnchorType#MEETING} and cleaned up automatically when the festival
  * ends.</p>
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class FestivalCalendar {
     public static final int DAYS_PER_MONTH = 30;
     public static final int MONTHS_PER_YEAR = 12;
@@ -260,7 +260,7 @@ public final class FestivalCalendar {
     }
 
     public static TamrielDate dateAt(ServerLevel level) {
-        return dateFromDayTime(level.getDayTime());
+        return dateFromDayTime(level.getDefaultClockTime());
     }
 
     public static TamrielDate dateFromDayTime(long dayTime) {
@@ -361,7 +361,7 @@ public final class FestivalCalendar {
             int by = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, bx, bz);
             BlockPos basePos = new BlockPos(bx, by, bz);
             BlockPos groundPos = basePos.below();
-            if (!level.getBlockState(groundPos).isSolidRender(level, groundPos)) continue;
+            if (!level.getBlockState(groundPos).isSolidRender()) continue;
             if (!level.getBlockState(basePos).isAir()) continue;
 
             if (i < 4) {
@@ -383,7 +383,7 @@ public final class FestivalCalendar {
                     center.getZ());
             if (level.hasChunk(firePos.getX() >> 4, firePos.getZ() >> 4)
                     && level.getBlockState(firePos).isAir()
-                    && level.getBlockState(firePos.below()).isSolidRender(level, firePos.below())) {
+                    && level.getBlockState(firePos.below()).isSolidRender()) {
                 level.setBlock(firePos, Blocks.CAMPFIRE.defaultBlockState(), 3);
                 placed.add(firePos);
             }
@@ -411,19 +411,19 @@ public final class FestivalCalendar {
 
     private static Block bannerForColor(String color) {
         return switch (color.toLowerCase(Locale.ROOT)) {
-            case "white" -> Blocks.WHITE_BANNER;
-            case "orange" -> Blocks.ORANGE_BANNER;
-            case "magenta" -> Blocks.MAGENTA_BANNER;
-            case "light_blue" -> Blocks.LIGHT_BLUE_BANNER;
-            case "yellow" -> Blocks.YELLOW_BANNER;
-            case "lime" -> Blocks.LIME_BANNER;
-            case "pink" -> Blocks.PINK_BANNER;
-            case "cyan" -> Blocks.CYAN_BANNER;
-            case "purple" -> Blocks.PURPLE_BANNER;
-            case "blue" -> Blocks.BLUE_BANNER;
-            case "green" -> Blocks.GREEN_BANNER;
-            case "red" -> Blocks.RED_BANNER;
-            default -> Blocks.LIGHT_GRAY_BANNER;
+            case "white" -> com.skycraft.worldgen.VanillaBlocks.WHITE_BANNER;
+            case "orange" -> com.skycraft.worldgen.VanillaBlocks.ORANGE_BANNER;
+            case "magenta" -> com.skycraft.worldgen.VanillaBlocks.MAGENTA_BANNER;
+            case "light_blue" -> com.skycraft.worldgen.VanillaBlocks.LIGHT_BLUE_BANNER;
+            case "yellow" -> com.skycraft.worldgen.VanillaBlocks.YELLOW_BANNER;
+            case "lime" -> com.skycraft.worldgen.VanillaBlocks.LIME_BANNER;
+            case "pink" -> com.skycraft.worldgen.VanillaBlocks.PINK_BANNER;
+            case "cyan" -> com.skycraft.worldgen.VanillaBlocks.CYAN_BANNER;
+            case "purple" -> com.skycraft.worldgen.VanillaBlocks.PURPLE_BANNER;
+            case "blue" -> com.skycraft.worldgen.VanillaBlocks.BLUE_BANNER;
+            case "green" -> com.skycraft.worldgen.VanillaBlocks.GREEN_BANNER;
+            case "red" -> com.skycraft.worldgen.VanillaBlocks.RED_BANNER;
+            default -> com.skycraft.worldgen.VanillaBlocks.LIGHT_GRAY_BANNER;
         };
     }
 
@@ -448,10 +448,10 @@ public final class FestivalCalendar {
     public static boolean offerFestivalQuest(ServerPlayer player, Festival f) {
         if (f.festivalQuest() == null || f.festivalQuest().isEmpty()) return false;
         String qid = "festival_" + f.id();
-        if (Quests.find(player.server, player.getUUID(), qid) != null) return false;
+        if (Quests.find(player.level().getServer(), player.getUUID(), qid) != null) return false;
         if (!Quests.canTakeMore(player)) return false;
 
-        Region reg = Regions.at(player.serverLevel(), player.blockPosition());
+        Region reg = Regions.at(player.level(), player.blockPosition());
         Quest q = new Quest();
         q.id = qid;
         q.kind = f.festivalQuest();
@@ -483,8 +483,8 @@ public final class FestivalCalendar {
     // ------------------------------------------------------------------ Forge events
 
     @SubscribeEvent
-    public static void onLevelTick(TickEvent.LevelTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || !(event.level instanceof ServerLevel level)) return;
+    public static void onLevelTick(net.neoforged.neoforge.event.tick.LevelTickEvent.Post event) {
+        if (!(event instanceof net.neoforged.neoforge.event.tick.LevelTickEvent.Post) || !(event.getLevel() instanceof ServerLevel level)) return;
         if (level.dimension() != Level.OVERWORLD) return;
         long gameTime = level.getGameTime();
         if (gameTime % 200L != 43L) return;
@@ -528,12 +528,12 @@ public final class FestivalCalendar {
 
     @SubscribeEvent
     public static void onEntityInteract(PlayerInteractEvent.EntityInteract event) {
-        if (event.getLevel().isClientSide || event.getHand() != InteractionHand.MAIN_HAND) return;
+        if (event.getLevel().isClientSide() || event.getHand() != InteractionHand.MAIN_HAND) return;
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
         if (!(event.getTarget() instanceof NpcEntity)) return;
         if (!player.isShiftKeyDown()) return;
 
-        ServerLevel level = player.serverLevel();
+        ServerLevel level = player.level();
         Region reg = Regions.at(level, player.blockPosition());
         List<Festival> active = activeFestivals(level, shortHoldId(reg.id()));
         if (active.isEmpty()) return;

@@ -34,7 +34,7 @@ public final class Sanity {
         BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos();
         BlockState air = Blocks.AIR.defaultBlockState();
         java.util.List<BlockPos> shaped = new java.util.ArrayList<>();
-        int minY = Math.max(clip.minY(), level.getMinBuildHeight() + 1), maxY = Math.min(clip.maxY(), level.getMaxBuildHeight() - 2);
+        int minY = Math.max(clip.minY(), level.getMinY() + 1), maxY = Math.min(clip.maxY(), (level.getMaxY() + 1) - 2);
         for (int pass = 0; pass < 2; pass++) {
             for (int x = clip.minX(); x <= clip.maxX(); x++) {
                 for (int z = clip.minZ(); z <= clip.maxZ(); z++) {
@@ -156,7 +156,7 @@ public final class Sanity {
             for (Direction d : Direction.Plane.HORIZONTAL) {
                 np.set(p).move(d);
                 BlockState ns = readable(chunkBox, np) ? level.getBlockState(np) : Blocks.AIR.defaultBlockState();
-                n = n.updateShape(d, ns, level, p, np);
+                n = n.updateShape(level, level, p, d, np, ns, level.getRandom());
             }
             if (n != s) level.setBlock(p, n, 2);
         }
@@ -219,14 +219,14 @@ public final class Sanity {
         if (inside(chunkBox, up) && s.getBlock() instanceof ChestBlock) {
             BlockState u = level.getBlockState(up);
             if (!u.isAir()) {
-                if (u.isSolidRender(level, up) || u.getBlock() instanceof LadderBlock) return false;
+                if (u.isSolidRender() || u.getBlock() instanceof LadderBlock) return false;
             }
         }
         for (Direction d : Direction.Plane.HORIZONTAL) {
             BlockPos n = p.relative(d);
             if (!readable(chunkBox, n)) return true;
             BlockState ns = level.getBlockState(n);
-            if (ns.isAir() || ns.canBeReplaced() || !ns.isSolidRender(level, n)) return true;
+            if (ns.isAir() || ns.canBeReplaced() || !ns.isSolidRender()) return true;
         }
         return false;
     }

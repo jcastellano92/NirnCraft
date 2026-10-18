@@ -8,7 +8,7 @@ import com.skycraft.tamriel.Place;
 import com.skycraft.tamriel.Places;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -19,13 +19,13 @@ import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructurePiece;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.living.LivingDeathEvent;
-import net.minecraftforge.event.entity.player.PlayerContainerEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.event.server.ServerStoppingEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerContainerEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.server.ServerStoppingEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -48,7 +48,7 @@ import java.util.UUID;
  * containers they opened and what was in them (gold value), and whether the boss died. A visit ends when the player
  * has been out of the dungeon for 30 seconds, logs out or the server stops.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class DungeonTelemetry {
     /** Persistent-data flag on a dungeon's boss ({@code Painter#spawnBoss}). */
     public static final String BOSS_TAG = "skycraft_dungeon_boss";
@@ -81,9 +81,9 @@ public final class DungeonTelemetry {
     }
 
     @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer player) || player.tickCount % 20 != 0 || !on()) return;
-        ServerLevel level = player.serverLevel();
+    public static void onPlayerTick(PlayerTickEvent.Post event) {
+        if (!(event.getEntity() instanceof ServerPlayer player) || player.tickCount % 20 != 0 || !on()) return;
+        ServerLevel level = player.level();
         long now = level.getGameTime();
         BlockPos pos = player.blockPosition();
         Visit v = VISITS.get(player.getUUID());
@@ -93,10 +93,10 @@ public final class DungeonTelemetry {
         }
         StructureStart start = dungeonAt(level, pos);
         if (start != null) {
-            if (v != null) finish(player.getServer(), player, v);
+            if (v != null) finish(player.level().getServer(), player, v);
             VISITS.put(player.getUUID(), begin(level, start, now));
         } else if (v != null && now - v.lastSeen > LEAVE_TICKS) {
-            finish(player.getServer(), player, v);
+            finish(player.level().getServer(), player, v);
             VISITS.remove(player.getUUID());
         }
     }
@@ -105,7 +105,7 @@ public final class DungeonTelemetry {
     private static StructureStart dungeonAt(ServerLevel level, BlockPos pos) {
         for (Map.Entry<Structure, it.unimi.dsi.fastutil.longs.LongSet> e : level.structureManager().getAllStructuresAt(pos).entrySet()) {
             if (!(e.getKey() instanceof DungeonStructure ds) || !ds.theme.underground()) continue;
-            StructureStart start = level.structureManager().getStructureWithPieceAt(pos, ds);
+            StructureStart start = level.structureManager().getStructureWithPieceAt(pos, h -> h.value() == ds);
             if (start.isValid()) return start;
         }
         return null;
@@ -114,7 +114,7 @@ public final class DungeonTelemetry {
     private static Visit begin(ServerLevel level, StructureStart start, long now) {
         Visit v = new Visit();
         DungeonStructure ds = (DungeonStructure) start.getStructure();
-        ResourceLocation id = level.registryAccess().registryOrThrow(Registries.STRUCTURE).getKey(ds);
+        Identifier id = level.registryAccess().lookupOrThrow(Registries.STRUCTURE).getKey(ds);
         v.structure = id == null ? "?" : id.toString();
         v.theme = ds.theme.id;
         v.box = start.getBoundingBox();
@@ -137,7 +137,7 @@ public final class DungeonTelemetry {
             if (v != null) v.deaths++;
             return;
         }
-        if (!(event.getEntity() instanceof Mob mob) || !mob.getPersistentData().getBoolean(BOSS_TAG)) return;
+        if (!(event.getEntity() instanceof Mob mob) || !mob.getPersistentData().getBooleanOr(BOSS_TAG, false)) return;
         BlockPos pos = mob.blockPosition();
         for (Visit v : VISITS.values()) {
             if (v.boss || !v.box.inflatedBy(4).isInside(pos)) continue;
@@ -162,7 +162,7 @@ public final class DungeonTelemetry {
     public static void onLogout(PlayerEvent.PlayerLoggedOutEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) {
             Visit v = VISITS.remove(player.getUUID());
-            if (v != null) finish(player.getServer(), player, v);
+            if (v != null) finish(player.level().getServer(), player, v);
         }
     }
 
@@ -178,10 +178,10 @@ public final class DungeonTelemetry {
     private static void finish(MinecraftServer server, ServerPlayer player, Visit v) {
         if (server == null) return;
         long ticks = Math.max(0, v.lastSeen - v.enterTick);
-        String row = String.format(Locale.ROOT, "%s,%s,%s,%s,%s,%d,%d,%s,%d,%s,%d,%d,%d,%s%n", Instant.now(), player.getGameProfile().getName(),
+        String row = String.format(Locale.ROOT, "%s,%s,%s,%s,%s,%d,%d,%s,%d,%s,%d,%d,%d,%s%n", Instant.now(), player.getGameProfile().name(),
                 v.structure, v.theme, v.place, v.box.getCenter().getX(), v.box.getCenter().getZ(), v.entered, ticks / 20,
                 v.clearTick >= 0 ? String.valueOf((v.clearTick - v.enterTick) / 20) : "", v.deaths, v.containers, v.loot, v.boss);
-        Path file = server.getServerDirectory().toPath().resolve("logs").resolve("skycraft-dungeons.csv");
+        Path file = server.getServerDirectory().resolve("logs").resolve("skycraft-dungeons.csv");
         try {
             Files.createDirectories(file.getParent());
             if (!Files.exists(file)) Files.writeString(file, HEADER, StandardCharsets.UTF_8);

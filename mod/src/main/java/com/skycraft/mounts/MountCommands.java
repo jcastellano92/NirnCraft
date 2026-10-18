@@ -24,7 +24,7 @@ public final class MountCommands {
     static void register(CommandDispatcher<CommandSourceStack> d) {
         d.register(Commands.literal("skycraft-mounts")
                 .then(Commands.literal("list").executes(MountCommands::list))
-                .then(Commands.literal("selftest").requires(s -> s.hasPermission(2)).executes(c -> {
+                .then(Commands.literal("selftest").requires(s -> s.permissions().hasPermission(net.minecraft.server.permissions.Permissions.COMMANDS_GAMEMASTER)).executes(c -> {
                     MountsSelfTest.Report r = MountsSelfTest.run(c.getSource().getServer());
                     for (String line : r.lines()) c.getSource().sendSuccess(() -> Component.literal(line), false);
                     c.getSource().sendSuccess(() -> Component.literal(r.summary()), false);
@@ -48,12 +48,12 @@ public final class MountCommands {
                     Mounts.call(c.getSource().getPlayerOrException());
                     return 1;
                 }))
-                .then(Commands.literal("grant").requires(s -> s.hasPermission(2))
+                .then(Commands.literal("grant").requires(s -> s.permissions().hasPermission(net.minecraft.server.permissions.Permissions.COMMANDS_GAMEMASTER))
                         .then(Commands.argument("kind", StringArgumentType.word()).suggests(MountCommands::kinds)
                                 .executes(c -> grant(c, c.getSource().getPlayerOrException()))
                                 .then(Commands.argument("player", EntityArgument.player())
                                         .executes(c -> grant(c, EntityArgument.getPlayer(c, "player"))))))
-                .then(Commands.literal("spawn").requires(s -> s.hasPermission(2))
+                .then(Commands.literal("spawn").requires(s -> s.permissions().hasPermission(net.minecraft.server.permissions.Permissions.COMMANDS_GAMEMASTER))
                         .then(Commands.argument("kind", StringArgumentType.word()).suggests(MountCommands::kinds)
                                 .executes(MountCommands::spawn))));
     }
@@ -89,10 +89,10 @@ public final class MountCommands {
         ServerPlayer p = c.getSource().getPlayerOrException();
         MountKind k = MountKind.byId(StringArgumentType.getString(c, "kind"));
         if (k == null) return 0;
-        var at = Mounts.safeSpot(p.serverLevel(), p.blockPosition().relative(p.getDirection(), 3));
-        Mob m = Mounts.create(p.serverLevel(), k, at.getX() + 0.5, at.getY(), at.getZ() + 0.5, p.getYRot() + 180, null);
+        var at = Mounts.safeSpot(p.level(), p.blockPosition().relative(p.getDirection(), 3));
+        Mob m = Mounts.create(p.level(), k, at.getX() + 0.5, at.getY(), at.getZ() + 0.5, p.getYRot() + 180, null);
         if (m == null) return 0;
-        p.serverLevel().addFreshEntity(m);
+        p.level().addFreshEntity(m);
         return 1;
     }
 }

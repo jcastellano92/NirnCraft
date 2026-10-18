@@ -50,7 +50,7 @@ public final class WordWalls {
     }
 
     public static String wallKey(ServerLevel level, BlockPos pos) {
-        return level.dimension().location() + "@" + pos.asLong();
+        return level.dimension().identifier() + "@" + pos.asLong();
     }
 
     /**

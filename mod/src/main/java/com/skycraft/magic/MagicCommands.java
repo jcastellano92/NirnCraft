@@ -21,9 +21,9 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,7 +39,7 @@ import java.util.Locale;
  *     <li>{@code /skycraft magic learnall}: the caller learns every spell and every word of power, unlocked</li>
  * </ul>
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class MagicCommands {
     private MagicCommands() {}
 
@@ -51,8 +51,8 @@ public final class MagicCommands {
                         .then(Commands.argument("school", StringArgumentType.word()).executes(c -> spells(c, StringArgumentType.getString(c, "school")))))
                 .then(Commands.literal("shouts").executes(MagicCommands::shouts))
                 .then(Commands.literal("skills").executes(MagicCommands::skills))
-                .then(Commands.literal("selftest").requires(s -> s.hasPermission(2)).executes(MagicCommands::selftest))
-                .then(Commands.literal("learnall").requires(s -> s.hasPermission(2)).executes(MagicCommands::learnAll))));
+                .then(Commands.literal("selftest").requires(s -> s.permissions().hasPermission(net.minecraft.server.permissions.Permissions.COMMANDS_GAMEMASTER)).executes(MagicCommands::selftest))
+                .then(Commands.literal("learnall").requires(s -> s.permissions().hasPermission(net.minecraft.server.permissions.Permissions.COMMANDS_GAMEMASTER)).executes(MagicCommands::learnAll))));
     }
 
     private static void out(CommandSourceStack src, String line) {

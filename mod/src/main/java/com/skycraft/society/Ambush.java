@@ -18,10 +18,10 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.level.GameRules;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.minecraft.world.level.gamerules.GameRules;
+
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -38,7 +38,7 @@ import java.util.UUID;
  * period or cooldown (it is a hostile event like any other, see {@link SpawnPacing}), and the bandits are ordinary
  * encounter mobs ({@link Encounters#TAG}) so the usual despawn rules clean them up.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class Ambush {
     /** The decision window. */
     public static final int TIMER_TICKS = 200;
@@ -72,9 +72,9 @@ public final class Ambush {
 
     /** Whether an ambush may begin around this player now (pacing, distance from towns, wilderness, bandits exist). */
     public static boolean eligible(ServerPlayer player) {
-        ServerLevel level = player.serverLevel();
+        ServerLevel level = player.level();
         if (!SocietyConfig.ENCOUNTERS.get() || !SocietyConfig.HOSTILE_ENCOUNTERS.get()) return false;
-        if (level.getDifficulty() == Difficulty.PEACEFUL || !level.getGameRules().getBoolean(GameRules.RULE_DOMOBSPAWNING)) return false;
+        if (level.getDifficulty() == Difficulty.PEACEFUL || !level.getGameRules().get(GameRules.SPAWN_MOBS)) return false;
         if (player.isCreative() || player.isSpectator() || ACTIVE.containsKey(player.getUUID())) return false;
         if (!Encounters.exists(Encounters.BANDIT) || !Encounters.wilderness(player)) return false;
         if (!SpawnPacing.hostileReady(player)) return false; // grace period after login/respawn and the shared cooldown
@@ -92,7 +92,7 @@ public final class Ambush {
 
     /** Places the bandits ahead of the player and makes the demand (also the forced path of the encounter command). */
     public static boolean start(ServerPlayer player) {
-        ServerLevel level = player.serverLevel();
+        ServerLevel level = player.level();
         if (!Encounters.exists(Encounters.BANDIT) || ACTIVE.containsKey(player.getUUID())) return false;
         RandomSource r = player.getRandom();
         int n = 2 + r.nextInt(2);
@@ -135,8 +135,8 @@ public final class Ambush {
 
     private static MutableComponent option(String id, Component label, ChatFormatting color) {
         Style s = Style.EMPTY.withColor(color)
-                .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/skycraft-ambush " + id))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("society.skycraft.ambush.hover." + id)));
+                .withClickEvent(new ClickEvent.RunCommand("/skycraft-ambush " + id))
+                .withHoverEvent(new HoverEvent.ShowText( Component.translatable("society.skycraft.ambush.hover." + id)));
         return Component.empty().append(label).withStyle(s);
     }
 
@@ -160,7 +160,7 @@ public final class Ambush {
             com.skycraft.core.Notifier.message(player, Component.translatable("society.skycraft.ambush.none"));
             return;
         }
-        ServerLevel level = player.serverLevel();
+        ServerLevel level = player.level();
         switch (choice) {
             case "pay" -> {
                 if (!Currency.take(player, st.demand)) {
@@ -253,8 +253,8 @@ public final class Ambush {
     // ------------------------------------------------------------------ clock
 
     @SubscribeEvent
-    public static void onLevelTick(TickEvent.LevelTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || !(event.level instanceof ServerLevel level)) return;
+    public static void onLevelTick(net.neoforged.neoforge.event.tick.LevelTickEvent.Post event) {
+        if (!(event instanceof net.neoforged.neoforge.event.tick.LevelTickEvent.Post) || !(event.getLevel() instanceof ServerLevel level)) return;
         long now = com.skycraft.world.RestManager.liveTime(level);
         if (now % 10 != 0) return;
         if (!LEAVING.isEmpty()) {
@@ -304,9 +304,9 @@ public final class Ambush {
 
     /** Stale ambush bandits (left over from before a restart, no clock running) are cleared when they load. */
     @SubscribeEvent
-    public static void onJoin(net.minecraftforge.event.entity.EntityJoinLevelEvent event) {
-        if (event.getLevel().isClientSide || !(event.getEntity() instanceof Mob mob)) return;
-        if (!mob.getPersistentData().getBoolean(TAG_AMBUSH)) return;
+    public static void onJoin(net.neoforged.neoforge.event.entity.EntityJoinLevelEvent event) {
+        if (event.getLevel().isClientSide() || !(event.getEntity() instanceof Mob mob)) return;
+        if (!mob.getPersistentData().getBooleanOr(TAG_AMBUSH, false)) return;
         for (State st : ACTIVE.values()) if (st.mobs.contains(mob.getUUID())) return;
         mob.discard();
     }

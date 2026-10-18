@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:smelting",
+  "category": "misc",
+  "group": "refined_malachite",
+  "ingredient": "skycraft:raw_malachite",
+  "result": {
+    "id": "skycraft:refined_malachite"
+  },
+  "experience": 0.7,
+  "cookingtime": 200
+}

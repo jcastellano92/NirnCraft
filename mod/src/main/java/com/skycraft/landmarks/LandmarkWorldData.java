@@ -12,16 +12,15 @@ public final class LandmarkWorldData extends SavedData {
     private final LongSet populated = new LongOpenHashSet();
 
     public static LandmarkWorldData get(ServerLevel level) {
-        return level.getServer().overworld().getDataStorage().computeIfAbsent(LandmarkWorldData::load, LandmarkWorldData::new, NAME);
+        return com.skycraft.platform.SavedDataTypes.get(level.getServer().overworld(), NAME, LandmarkWorldData::load, LandmarkWorldData::new, d -> d.save(new CompoundTag()));
     }
 
     private static LandmarkWorldData load(CompoundTag tag) {
         LandmarkWorldData d = new LandmarkWorldData();
-        for (long k : tag.getLongArray("populated")) d.populated.add(k);
+        for (long k : tag.getLongArray("populated").orElseGet(() -> new long[0])) d.populated.add(k);
         return d;
     }
 
-    @Override
     public CompoundTag save(CompoundTag tag) {
         tag.putLongArray("populated", populated.toLongArray());
         return tag;

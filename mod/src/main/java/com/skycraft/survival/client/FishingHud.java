@@ -4,15 +4,14 @@ import com.skycraft.inventory.client.SkyUi;
 import com.skycraft.network.SkyNetwork;
 import com.skycraft.survival.SurvivalPackets;
 import com.skycraft.survival.fishing.SkyFishingHook;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
-import net.minecraftforge.client.gui.overlay.ForgeGui;
 
 /**
  * Stardew-style fishing minigame HUD: when a fish bites, a vertical water column and catch progress bar appear next to
@@ -141,9 +140,9 @@ public final class FishingHud {
         // Fish AI movement along the water column
         if (--fishMoveTimer <= 0) {
             float span = 0.25f + rarity * 0.14f;
-            float delta = (mc.level.random.nextFloat() - 0.48f) * span * 2f;
+            float delta = (mc.level.getRandom().nextFloat() - 0.48f) * span * 2f;
             fishTarget = Mth.clamp(fishPos + delta, 0.06f, 0.94f);
-            fishMoveTimer = Math.max(9, 32 - rarity * 5 + mc.level.random.nextInt(16));
+            fishMoveTimer = Math.max(9, 32 - rarity * 5 + mc.level.getRandom().nextInt(16));
         }
         float diff = fishTarget - fishPos;
         float maxFishSpeed = 0.016f + rarity * 0.0065f;
@@ -174,9 +173,11 @@ public final class FishingHud {
         }
     }
 
-    public static void render(ForgeGui gui, GuiGraphics g, float partialTick, int width, int height) {
+    public static void render(GuiGraphicsExtractor g, net.minecraft.client.DeltaTracker delta) {
+        float partialTick = delta.getGameTimeDeltaPartialTick(false);
+        int width = g.guiWidth(), height = g.guiHeight();
         Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null || mc.level == null || mc.options.hideGui || mc.screen != null) return;
+        if (mc.player == null || mc.level == null || mc.gui.hud.isHidden() || mc.gui.screen() != null) return;
         Font font = mc.font;
         int cx = width / 2;
         int y = height / 2 + 34;

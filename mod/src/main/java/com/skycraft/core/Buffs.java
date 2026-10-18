@@ -19,7 +19,7 @@ public final class Buffs {
 
     public static boolean active(Player player, String buff) {
         CompoundTag tag = SkyData.get(player).module("buffs");
-        return tag.contains(buff) && tag.getLong(buff) > player.level().getGameTime();
+        return tag.contains(buff) && tag.getLongOr(buff, 0L) > player.level().getGameTime();
     }
 
     public static void clear(Player player, String buff) {

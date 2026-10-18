@@ -2,14 +2,14 @@ package com.skycraft.inventory.client;
 
 import com.skycraft.lore.client.BookScreen;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.BookViewScreen;
 import net.minecraft.client.gui.screens.inventory.MenuAccess;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.inventory.LecternMenu;
 import net.minecraft.world.item.ItemStack;
-import org.lwjgl.glfw.GLFW;
+import com.mojang.blaze3d.platform.InputConstants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,22 +38,21 @@ public class SkyrimLecternScreen extends BookScreen implements MenuAccess<Lecter
     }
 
     private static Component titleOf(ItemStack book) {
-        CompoundTag tag = book.getTag();
-        if (tag != null && !tag.getString("title").isBlank()) return Component.literal(tag.getString("title"));
+        var content = book.get(net.minecraft.core.component.DataComponents.WRITTEN_BOOK_CONTENT);
+        if (content != null && !content.title().raw().isBlank()) return Component.literal(content.title().raw());
         return Component.translatable("screen.skycraft.lore.story.untitled");
     }
 
     private static String authorOf(ItemStack book) {
-        CompoundTag tag = book.getTag();
-        return tag == null ? "" : tag.getString("author");
+        var content = book.get(net.minecraft.core.component.DataComponents.WRITTEN_BOOK_CONTENT);
+        return content == null ? "" : content.author();
     }
 
     private static List<String> pagesOf(ItemStack book) {
-        List<String> out = new ArrayList<>();
-        if (book.isEmpty()) return out;
-        BookViewScreen.BookAccess access = BookViewScreen.BookAccess.fromItem(book);
-        for (int i = 0; i < access.getPageCount(); i++) out.add(access.getPage(i).getString());
-        return out;
+        var written = book.get(net.minecraft.core.component.DataComponents.WRITTEN_BOOK_CONTENT);
+        if (written != null) return written.pages().stream().map(page -> page.raw().getString()).toList();
+        var writable = book.get(net.minecraft.core.component.DataComponents.WRITABLE_BOOK_CONTENT);
+        return writable == null ? List.of() : writable.pages().stream().map(net.minecraft.server.network.Filterable::raw).toList();
     }
 
     @Override
@@ -61,7 +60,7 @@ public class SkyrimLecternScreen extends BookScreen implements MenuAccess<Lecter
         super.tick();
         if (!hadBook) {
             // the contents packet arrived after the screen was built: build it again with the book (the menu stays open)
-            if (!menu.getBook().isEmpty()) Minecraft.getInstance().setScreen(new SkyrimLecternScreen(menu));
+            if (!menu.getBook().isEmpty()) Minecraft.getInstance().gui.setScreen(new SkyrimLecternScreen(menu));
             return;
         }
         // somebody took the book (or the lectern is gone): nothing left to read
@@ -76,23 +75,24 @@ public class SkyrimLecternScreen extends BookScreen implements MenuAccess<Lecter
     }
 
     @Override
-    public boolean keyPressed(int key, int scan, int mods) {
-        if (key == GLFW.GLFW_KEY_T) {
+    public boolean keyPressed(net.minecraft.client.input.KeyEvent event) {
+        int key = event.key(), scan = event.keycode(), mods = event.modifiers();
+        if (key == InputConstants.KEY_T) {
             Minecraft mc = Minecraft.getInstance();
             if (mc.gameMode != null) mc.gameMode.handleInventoryButtonClick(menu.containerId, LecternMenu.BUTTON_TAKE_BOOK);
             return true;
         }
-        if (key == GLFW.GLFW_KEY_ESCAPE || key == GLFW.GLFW_KEY_TAB) {
+        if (key == InputConstants.KEY_ESCAPE || key == InputConstants.KEY_TAB) {
             onClose();
             return true;
         }
-        return super.keyPressed(key, scan, mods);
+        return super.keyPressed(event);
     }
 
     @Override
-    public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        super.render(g, mouseX, mouseY, partialTick);
+    public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
+        super.extractRenderState(g, mouseX, mouseY, partialTick);
         Component hint = Component.literal("[T] ").append(Component.translatable("inventory.skycraft.machine.hint.take_book"));
-        g.drawCenteredString(font, hint, width / 2, height - 14, SkyUi.GOLD);
+        g.centeredText(font, hint, width / 2, height - 14, SkyUi.GOLD);
     }
 }

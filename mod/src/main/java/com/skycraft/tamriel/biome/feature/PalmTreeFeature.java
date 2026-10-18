@@ -7,15 +7,15 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
-import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
+import com.skycraft.worldgen.ConfiguredFeature;
+import com.skycraft.worldgen.FeaturePlaceContext;
+import com.skycraft.worldgen.NoneFeatureConfiguration;
 
 /**
  * Palm and date trees of the warm coasts (Elsweyr, Hammerfell, Summerset, the southern isles): a slender trunk that
  * curves away from straight, topped by drooping fronds. Date palms are shorter and straighter with a fuller head.
  */
-public class PalmTreeFeature extends Feature<NoneFeatureConfiguration> {
+public class PalmTreeFeature extends ConfiguredFeature<NoneFeatureConfiguration> {
     private static final int[][] DIRS = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}, {1, 1}, {1, -1}, {-1, 1}, {-1, -1}};
 
     public PalmTreeFeature(Codec<NoneFeatureConfiguration> codec) {

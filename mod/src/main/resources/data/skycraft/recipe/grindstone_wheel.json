@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "G",
+    "L"
+  ],
+  "key": {
+    "G": "minecraft:grindstone",
+    "L": "#minecraft:logs"
+  },
+  "result": {
+    "count": 1,
+    "id": "skycraft:grindstone_wheel"
+  }
+}

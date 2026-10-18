@@ -17,9 +17,9 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -39,7 +39,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  *     they are.</li>
  * </ul>
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class ExploreCommands {
     private static final AtomicBoolean BUSY = new AtomicBoolean();
 
@@ -51,7 +51,7 @@ public final class ExploreCommands {
     }
 
     static void register(CommandDispatcher<CommandSourceStack> d) {
-        d.register(Commands.literal("skycraft-explore").requires(s -> s.hasPermission(2))
+        d.register(Commands.literal("skycraft-explore").requires(s -> s.permissions().hasPermission(net.minecraft.server.permissions.Permissions.COMMANDS_GAMEMASTER))
                 .then(Commands.literal("audit")
                         .executes(c -> audit(c, "all", 2, 8))
                         .then(Commands.argument("mode", StringArgumentType.word())
@@ -90,7 +90,7 @@ public final class ExploreCommands {
         }
         MinecraftServer server = src.getServer();
         ServerLevel level = server.overworld();
-        Path dir = server.getServerDirectory().toPath().resolve("skycraft-explore");
+        Path dir = server.getServerDirectory().resolve("skycraft-explore");
         src.sendSuccess(() -> Component.literal("Density audit (" + mode + ") started; this takes a few minutes"), true);
         Thread t = new Thread(() -> {
             try {
@@ -181,7 +181,7 @@ public final class ExploreCommands {
     private static int map(CommandContext<CommandSourceStack> c) throws com.mojang.brigadier.exceptions.CommandSyntaxException {
         ServerPlayer player = c.getSource().getPlayerOrException();
         if (player.level().dimension() != Level.OVERWORLD) return 0;
-        MinorSites.Site s = MinorSites.nearest(player.serverLevel().getSeed(), SiteKind.TREASURE_CACHE, player.getBlockX(),
+        MinorSites.Site s = MinorSites.nearest(player.level().getSeed(), SiteKind.TREASURE_CACHE, player.getBlockX(),
                 player.getBlockZ(), ExploreLoot.MAP_RANGE, Long.MIN_VALUE);
         if (s == null) {
             c.getSource().sendFailure(Component.literal("No treasure cache nearby"));

@@ -14,7 +14,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
 
@@ -112,16 +112,16 @@ public final class GuardWatch {
     /** Whether the guard is a settlement's watch or somebody's scripted guard (anything else in a settlement is legacy). */
     private static boolean belongs(GuardEntity g) {
         CompoundTag pd = g.getPersistentData();
-        if (pd.contains(GatePosts.KEY) || pd.contains(PATROL_KEY) || pd.getBoolean(SCRIPTED)) return true;
+        if (pd.contains(GatePosts.KEY) || pd.contains(PATROL_KEY) || pd.getBooleanOr(SCRIPTED, false)) return true;
         if (pd.contains(com.skycraft.quest.QuestSpawner.TAG_QUEST) || pd.contains(com.skycraft.quest.story.QuestNpcs.TAG)
                 || pd.contains(com.skycraft.quest.faction.FactionStaff.TAG) || Encounters.isTagged(g)) return true;
-        return g.getTags().contains(com.skycraft.crime.Jail.NPC_TAG) || g.getTags().contains("skycraft_keep");
+        return g.entityTags().contains(com.skycraft.crime.Jail.NPC_TAG) || g.entityTags().contains("skycraft_keep");
     }
 
     /** What the settlement tick does for {@code e} (a player is near): remove legacy guards, keep the patrol. */
     static void keep(ServerLevel level, SettlementAnchors.Entry e, Watch watch) {
         int r = e.radius + 24;
-        AABB box = new AABB(e.x - r, level.getMinBuildHeight(), e.z - r, e.x + r, level.getMaxBuildHeight(), e.z + r);
+        AABB box = new AABB(e.x - r, level.getMinY(), e.z - r, e.x + r, (level.getMaxY()+1), e.z + r);
         for (GuardEntity g : level.getEntitiesOfClass(GuardEntity.class, box, x -> x.isAlive() && !belongs(x))) {
             if (g.distanceToSqr(e.x, g.getY(), e.z) <= (double) r * r) g.discard();
         }
@@ -133,7 +133,7 @@ public final class GuardWatch {
         for (GuardEntity g : level.getEntitiesOfClass(GuardEntity.class, player.getBoundingBox().inflate(96, 64, 96), GuardEntity::isAlive)) {
             CompoundTag pd = g.getPersistentData();
             if (pd.contains(com.skycraft.roads.Travelers.TAG)
-                    && com.skycraft.roads.Travelers.PATROL.equals(pd.getCompound(com.skycraft.roads.Travelers.TAG).getString("kind"))) {
+                    && com.skycraft.roads.Travelers.PATROL.equals(pd.getCompoundOrEmpty(com.skycraft.roads.Travelers.TAG).getStringOr("kind",""))) {
                 g.discard();
             }
         }
@@ -144,11 +144,11 @@ public final class GuardWatch {
     private static void keepPatrol(ServerLevel level, SettlementAnchors.Entry e) {
         String key = e.key + "|patrol";
         int r = e.radius + 16;
-        AABB box = new AABB(e.x - r, level.getMinBuildHeight(), e.z - r, e.x + r, level.getMaxBuildHeight(), e.z + r);
+        AABB box = new AABB(e.x - r, level.getMinY(), e.z - r, e.x + r, (level.getMaxY()+1), e.z + r);
         long now = level.getGameTime();
         GuardEntity holder = null;
         for (GuardEntity g : level.getEntitiesOfClass(GuardEntity.class, box, x -> x.isAlive())) {
-            if (!key.equals(g.getPersistentData().getString(PATROL_KEY))) continue;
+            if (!key.equals(g.getPersistentData().getStringOr(PATROL_KEY, ""))) continue;
             if (holder == null) holder = g;
             else g.discard(); // two guards on one patrol: the later one goes
         }
@@ -162,12 +162,12 @@ public final class GuardWatch {
         if (route.isEmpty()) return;
         BlockPos spot = GatePosts.standable(level, route.get(0), route.get(0));
         if (spot == null || !level.isLoaded(spot) || !level.isPositionEntityTicking(spot)) return;
-        GuardEntity guard = ModEntities.GUARD.get().create(level);
+        GuardEntity guard = ModEntities.GUARD.get().create(level, net.minecraft.world.entity.EntitySpawnReason.STRUCTURE);
         if (guard == null) return;
-        guard.moveTo(spot.getX() + 0.5, spot.getY(), spot.getZ() + 0.5, level.getRandom().nextFloat() * 360f, 0f);
+        guard.snapTo(spot.getX() + 0.5, spot.getY(), spot.getZ() + 0.5, level.getRandom().nextFloat() * 360f, 0f);
         guard.getPersistentData().putString(PATROL_KEY, key);
         guard.setProfile(GuardProfiles.of(e).profile());
-        guard.finalizeSpawn(level, level.getCurrentDifficultyAt(spot), MobSpawnType.EVENT, null, null);
+        guard.finalizeSpawn(level, level.getCurrentDifficultyAt(spot), EntitySpawnReason.EVENT, null);
         guard.setPatrol(new BlockPos(e.x, spot.getY(), e.z), Math.min(56, Math.max(24, e.radius)), route);
         guard.setPersistenceRequired();
         if (level.addFreshEntity(guard)) LAST_FILLED.put(key, now);

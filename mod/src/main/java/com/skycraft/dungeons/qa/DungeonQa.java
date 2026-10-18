@@ -17,7 +17,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -32,11 +32,11 @@ import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructurePiece;
 import net.minecraft.world.level.levelgen.structure.pieces.PiecesContainer;
-import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.server.ServerStartedEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.neoforge.event.tick.ServerTickEvent;
+import net.neoforged.neoforge.event.server.ServerStartedEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -69,7 +69,7 @@ import java.util.TreeMap;
  * </ul>
  * Start a run with {@code -Dskycraft.dungeonqa.auto=<count>:<tag>} to have the server analyse on start-up and stop.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class DungeonQa {
     private static Job job;
 
@@ -78,7 +78,7 @@ public final class DungeonQa {
     @SubscribeEvent
     public static void register(RegisterCommandsEvent event) {
         CommandDispatcher<CommandSourceStack> d = event.getDispatcher();
-        d.register(Commands.literal("skycraft-dungeon-qa").requires(s -> s.hasPermission(2))
+        d.register(Commands.literal("skycraft-dungeon-qa").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
                 .then(Commands.literal("run")
                         .then(Commands.argument("count", IntegerArgumentType.integer(0, 5000))
                                 .executes(c -> start(c.getSource(), IntegerArgumentType.getInteger(c, "count"), "latest", null))
@@ -141,8 +141,8 @@ public final class DungeonQa {
     }
 
     @SubscribeEvent
-    public static void onServerTick(TickEvent.ServerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || job == null) return;
+    public static void onServerTick(ServerTickEvent.Post event) {
+        if (job == null) return;
         long until = System.nanoTime() + 250_000_000L;
         while (job != null && System.nanoTime() < until) {
             if (!job.step()) {
@@ -227,7 +227,7 @@ public final class DungeonQa {
                 sb.append('\n');
             }
         }
-        Path out = src.getServer().getServerDirectory().toPath().resolve("dungeon_qa").resolve("dump-" + id + ".txt");
+        Path out = src.getServer().getServerDirectory().resolve("dungeon_qa").resolve("dump-" + id + ".txt");
         try {
             Files.createDirectories(out.getParent());
             Files.writeString(out, sb.toString());
@@ -244,7 +244,7 @@ public final class DungeonQa {
      * {@code tools/qa/dungeon_reach.py}. Nothing is generated in the world.
      */
     private static int export(CommandSourceStack src, String ids) {
-        Path dir = src.getServer().getServerDirectory().toPath().resolve("qa-exports");
+        Path dir = src.getServer().getServerDirectory().resolve("qa-exports");
         int ok = 0;
         for (String id : ids.split("[\\s,;|]+")) {
             if (id.isBlank()) continue;
@@ -355,8 +355,8 @@ public final class DungeonQa {
             src.sendFailure(Component.literal("No such room in " + id));
             return 0;
         }
-        player.teleportTo(level, x, y, z, yaw, what.equals("mouth")?-8f:what.equals("hall")?3f:15f);
-        player.addEffect(new MobEffectInstance(MobEffects.NIGHT_VISION, 20 * 60, 0, false, false));
+        player.teleportTo(level, x, y, z, java.util.Set.of(),  yaw, what.equals("mouth")?-8f:what.equals("hall")?3f:15f, true);
+        player.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.NIGHT_VISION), 20 * 60, 0, false, false));
         double fx = x, fy = y, fz = z;
         src.sendSuccess(() -> Component.literal(String.format(Locale.ROOT, "%s %s at %.0f %.0f %.0f", id, what, fx, fy, fz)), false);
         return 1;
@@ -390,7 +390,7 @@ public final class DungeonQa {
                 result.add(row);
             }
         }
-        Path output=src.getServer().getServerDirectory().toPath().resolve("dungeon_qa/atmosphere-scenes.json");
+        Path output=src.getServer().getServerDirectory().resolve("dungeon_qa/atmosphere-scenes.json");
         try {
             Files.createDirectories(output.getParent());
             Files.writeString(output,new com.google.gson.GsonBuilder().setPrettyPrinting().create().toJson(result));
@@ -418,17 +418,17 @@ public final class DungeonQa {
             this.src = src;
             this.tag = tag;
             this.level = server.overworld();
-            this.registry = level.registryAccess().registryOrThrow(Registries.STRUCTURE);
+            this.registry = level.registryAccess().lookupOrThrow(Registries.STRUCTURE);
         }
 
         /** Every named underground dungeon, then {@code count} random sites spread over the random structures. */
         void plan(int count, Theme filter) {
-            List<Map.Entry<ResourceLocation, DungeonStructure>> randoms = new ArrayList<>();
+            List<Map.Entry<Identifier, DungeonStructure>> randoms = new ArrayList<>();
             for (Map.Entry<net.minecraft.resources.ResourceKey<Structure>, Structure> e : registry.entrySet()) {
                 if (!(e.getValue() instanceof DungeonStructure ds)) continue;
                 if (!ds.theme.underground() || !ds.sites.isEmpty()) continue;
                 if (filter != null && ds.theme != filter) continue;
-                ResourceLocation id = e.getKey().location();
+                Identifier id = e.getKey().identifier();
                 if (ds.place.isPresent()) {
                     for (Place p : Places.all()) {
                         if (ds.place.get().matches(p)) queue.add(new QaSample(p.id(), "named", id, ds, p.x(), p.z(), p.id()));
@@ -440,7 +440,7 @@ public final class DungeonQa {
             randoms.sort(Map.Entry.comparingByKey());
             RandomSource r = RandomSource.create(0x5EED_D00DL);
             for (int i = 0; i < count && !randoms.isEmpty(); i++) {
-                Map.Entry<ResourceLocation, DungeonStructure> e = randoms.get(i % randoms.size());
+                Map.Entry<Identifier, DungeonStructure> e = randoms.get(i % randoms.size());
                 queue.add(new QaSample(e.getKey().getPath() + "#" + (i / randoms.size()), "random", e.getKey(), e.getValue(),
                         r.nextInt(), r.nextInt(), null));
             }
@@ -451,7 +451,7 @@ public final class DungeonQa {
             if (pl == null) return null;
             for (Map.Entry<net.minecraft.resources.ResourceKey<Structure>, Structure> e : registry.entrySet()) {
                 if (e.getValue() instanceof DungeonStructure ds && ds.place.isPresent() && ds.place.get().matches(pl)) {
-                    return new QaSample(pl.id(), "named", e.getKey().location(), ds, pl.x(), pl.z(), pl.id());
+                    return new QaSample(pl.id(), "named", e.getKey().identifier(), ds, pl.x(), pl.z(), pl.id());
                 }
             }
             return null;
@@ -466,9 +466,9 @@ public final class DungeonQa {
             if (parts.length < 3) return null;
             int x = Integer.parseInt(parts[parts.length - 2].replace('m', '-')), z = Integer.parseInt(parts[parts.length - 1].replace('m', '-'));
             String path = String.join("/", java.util.Arrays.copyOf(parts, parts.length - 2));
-            Structure st = registry.get(new ResourceLocation(Skycraft.MODID, path));
+            Structure st = registry.getValue(Identifier.fromNamespaceAndPath(Skycraft.MODID, path));
             if (!(st instanceof DungeonStructure ds)) return null;
-            return new QaSample(code, "named", new ResourceLocation(Skycraft.MODID, path), ds, x, z, null);
+            return new QaSample(code, "named", Identifier.fromNamespaceAndPath(Skycraft.MODID, path), ds, x, z, null);
         }
 
         boolean step() {
@@ -528,7 +528,7 @@ public final class DungeonQa {
         private static final int[][] FOREIGN = {{0, -11000}, {17000, 3000}, {-19000, 7000}, {-17000, 19000}, {-15000, 16500}};
 
         private Structure.GenerationContext context(ChunkGenerator gen, RandomState rs, ChunkPos cp) {
-            return new Structure.GenerationContext(level.registryAccess(), gen, gen.getBiomeSource(), rs, server.getStructureManager(),
+            return new Structure.GenerationContext(level.registryAccess(), gen, gen.getBiomeSource(), rs.createClimateSampler(net.minecraft.world.level.levelgen.densityfunction.SamplerContext.EMPTY_UNCACHED),  rs, server.getStructureTemplateManager(),
                     level.getSeed(), cp, level, b -> true);
         }
 
@@ -569,8 +569,8 @@ public final class DungeonQa {
                 BoundingBox b = sp.getBoundingBox();
                 all = all == null ? new BoundingBox(b.minX(), b.minY(), b.minZ(), b.maxX(), b.maxY(), b.maxZ()) : all.encapsulate(b);
             }
-            int minY = Math.max(level.getMinBuildHeight(), all.minY() - 3);
-            int maxY = Math.min(level.getMaxBuildHeight() - 1, Math.max(all.maxY(), surfaceY + 8) + 6);
+            int minY = Math.max(level.getMinY(), all.minY() - 3);
+            int maxY = Math.min((level.getMaxY() + 1) - 1, Math.max(all.maxY(), surfaceY + 8) + 6);
             BoundingBox area = new BoundingBox(all.minX() - 4, minY, all.minZ() - 4, all.maxX() + 4, maxY, all.maxZ() + 4);
             // exact terrain round the entrance (the tunnel's surface end and forecourt), interpolated elsewhere
             BoundingBox exact = null;
@@ -586,12 +586,12 @@ public final class DungeonQa {
             try {
                 for (int cx = area.minX() >> 4; cx <= area.maxX() >> 4; cx++) {
                     for (int cz = area.minZ() >> 4; cz <= area.maxZ() >> 4; cz++) {
-                        BoundingBox chunkBox = new BoundingBox(cx << 4, level.getMinBuildHeight(), cz << 4, (cx << 4) + 15,
-                                level.getMaxBuildHeight() - 1, (cz << 4) + 15);
+                        BoundingBox chunkBox = new BoundingBox(cx << 4, level.getMinY(), cz << 4, (cx << 4) + 15,
+                                (level.getMaxY() + 1) - 1, (cz << 4) + 15);
                         ChunkPos cp = new ChunkPos(cx, cz);
                         for (StructurePiece sp : pieces) {
                             if (!sp.getBoundingBox().intersects(chunkBox)) continue;
-                            sp.postProcess(lvl, level.structureManager(), gen, RandomSource.create(cp.toLong()), chunkBox, cp, chunkBox.getCenter());
+                            sp.postProcess(lvl, level.structureManager(), gen, RandomSource.create(cp.pack()), chunkBox, cp, chunkBox.getCenter());
                         }
                     }
                 }
@@ -638,10 +638,10 @@ public final class DungeonQa {
 
         void finish() {
             QaReport.similarity(done);
-            Path out = server.getServerDirectory().toPath().resolve("dungeon_qa").resolve(tag);
+            Path out = server.getServerDirectory().resolve("dungeon_qa").resolve(tag);
             List<Path> outs = new ArrayList<>();
             outs.add(out);
-            Path repo = server.getServerDirectory().toPath().toAbsolutePath().normalize().getParent();
+            Path repo = server.getServerDirectory().toAbsolutePath().normalize().getParent();
             if (repo != null && repo.getParent() != null && Files.isDirectory(repo.getParent().resolve("tools"))) {
                 outs.add(repo.getParent().resolve("tools").resolve("dungeon_qa").resolve(tag));
             }

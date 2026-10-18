@@ -7,39 +7,39 @@ import com.skycraft.curse.client.model.GargoyleModel;
 import com.skycraft.curse.client.model.VampireLordModel;
 import com.skycraft.curse.client.model.WerewolfModel;
 import net.minecraft.client.model.geom.ModelLayerLocation;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.EntityRenderersEvent;
-import net.minecraftforge.client.event.RegisterGuiOverlaysEvent;
-import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.minecraft.resources.Identifier;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.EntityRenderersEvent;
+import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
+import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 /** Mod-bus client registration of the curse module: model layers, creature renderers, the player forms, HUD overlays. */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
 public final class CurseClientSetup {
     public static final ModelLayerLocation WEREWOLF = layer("werewolf");
     public static final ModelLayerLocation VAMPIRE_LORD = layer("vampire_lord");
     public static final ModelLayerLocation DEATH_HOUND = layer("death_hound");
     public static final ModelLayerLocation GARGOYLE = layer("gargoyle");
 
-    public static final ResourceLocation WEREWOLF_TEX = tex("werewolf");
-    public static final ResourceLocation WEREWOLF_EYES = tex("werewolf_eyes");
-    public static final ResourceLocation LORD_TEX = tex("vampire_lord");
-    public static final ResourceLocation LORD_EYES = tex("vampire_lord_eyes");
-    static final ResourceLocation HOUND_TEX = tex("death_hound");
-    static final ResourceLocation HOUND_EYES = tex("death_hound_eyes");
-    static final ResourceLocation GARGOYLE_TEX = tex("gargoyle");
-    static final ResourceLocation GARGOYLE_EYES = tex("gargoyle_eyes");
+    public static final Identifier WEREWOLF_TEX = tex("werewolf");
+    public static final Identifier WEREWOLF_EYES = tex("werewolf_eyes");
+    public static final Identifier LORD_TEX = tex("vampire_lord");
+    public static final Identifier LORD_EYES = tex("vampire_lord_eyes");
+    static final Identifier HOUND_TEX = tex("death_hound");
+    static final Identifier HOUND_EYES = tex("death_hound_eyes");
+    static final Identifier GARGOYLE_TEX = tex("gargoyle");
+    static final Identifier GARGOYLE_EYES = tex("gargoyle_eyes");
 
     private CurseClientSetup() {}
 
     private static ModelLayerLocation layer(String name) {
-        return new ModelLayerLocation(new ResourceLocation(Skycraft.MODID, name), "main");
+        return new ModelLayerLocation(Identifier.fromNamespaceAndPath(Skycraft.MODID, name), "main");
     }
 
-    private static ResourceLocation tex(String name) {
-        return new ResourceLocation(Skycraft.MODID, "textures/entity/curse/" + name + ".png");
+    private static Identifier tex(String name) {
+        return Identifier.fromNamespaceAndPath(Skycraft.MODID, "textures/entity/curse/" + name + ".png");
     }
 
     @SubscribeEvent
@@ -69,8 +69,8 @@ public final class CurseClientSetup {
     }
 
     @SubscribeEvent
-    public static void overlays(RegisterGuiOverlaysEvent event) {
-        event.registerAbove(VanillaGuiOverlay.VIGNETTE.id(), "curse_tint", CurseHud::renderTint);
-        event.registerAbove(VanillaGuiOverlay.HOTBAR.id(), "curse", CurseHud::render);
+    public static void overlays(RegisterGuiLayersEvent event) {
+        event.registerAbove(VanillaGuiLayers.CAMERA_OVERLAYS, net.minecraft.resources.Identifier.fromNamespaceAndPath("skycraft", "curse_tint"), CurseHud::renderTint);
+        event.registerAbove(VanillaGuiLayers.HOTBAR, net.minecraft.resources.Identifier.fromNamespaceAndPath("skycraft", "curse"), CurseHud::render);
     }
 }

@@ -1,6 +1,6 @@
 package com.skycraft.crafting.arcane.client;
 
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 
 /** Drawing helpers and palette shared by the arcane screens (Skyrim-like dark panels with gold trim). */
 public final class ArcaneUi {
@@ -13,7 +13,7 @@ public final class ArcaneUi {
 
     private ArcaneUi() {}
 
-    public static void frame(GuiGraphics g, int x, int y, int w, int h, int color) {
+    public static void frame(GuiGraphicsExtractor g, int x, int y, int w, int h, int color) {
         g.fill(x, y, x + w, y + 1, color);
         g.fill(x, y + h - 1, x + w, y + h, color);
         g.fill(x, y, x + 1, y + h, color);
@@ -21,7 +21,7 @@ public final class ArcaneUi {
     }
 
     /** A dark translucent panel with a double gold border and corner studs. */
-    public static void panel(GuiGraphics g, int x, int y, int w, int h, int accent) {
+    public static void panel(GuiGraphicsExtractor g, int x, int y, int w, int h, int accent) {
         g.fillGradient(x, y, x + w, y + h, 0xF0080A14, 0xF0141A2C);
         frame(g, x, y, w, h, 0xFFB89A50);
         frame(g, x + 2, y + 2, w - 4, h - 4, 0x60B89A50);
@@ -33,7 +33,7 @@ public final class ArcaneUi {
     }
 
     /** A thin decorative divider with a diamond in the middle. */
-    public static void divider(GuiGraphics g, int x, int y, int w) {
+    public static void divider(GuiGraphicsExtractor g, int x, int y, int w) {
         g.fill(x, y, x + w, y + 1, 0x80B89A50);
         int cx = x + w / 2;
         g.fill(cx - 1, y - 2, cx + 2, y + 3, 0xFFE8C060);

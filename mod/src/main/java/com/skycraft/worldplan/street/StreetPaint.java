@@ -5,7 +5,7 @@ import com.skycraft.Skycraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
@@ -17,9 +17,9 @@ import net.minecraft.world.level.block.FenceBlock;
 import net.minecraft.world.level.block.FenceGateBlock;
 import net.minecraft.world.level.block.LadderBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
-import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
+import com.skycraft.worldgen.ConfiguredFeature;
+import com.skycraft.worldgen.FeaturePlaceContext;
+import com.skycraft.worldgen.NoneFeatureConfiguration;
 
 import java.util.concurrent.atomic.LongAdder;
 
@@ -39,7 +39,7 @@ import java.util.concurrent.atomic.LongAdder;
  * (built on the real ground); the painter only joins doors and road ends to them.
  * Inside a building, tower, wall or gatehouse footprint nothing is built or removed except plants and snow.
  */
-public class StreetPaint extends Feature<NoneFeatureConfiguration> {
+public class StreetPaint extends ConfiguredFeature<NoneFeatureConfiguration> {
     private static final int FLAGS = Block.UPDATE_CLIENTS;
     /** Longest gate lane painted (a longer one runs across the town: the doorstep paths join it instead). */
     private static final float MAX_LANE = 28f;
@@ -61,9 +61,9 @@ public class StreetPaint extends Feature<NoneFeatureConfiguration> {
     public boolean place(FeaturePlaceContext<NoneFeatureConfiguration> ctx) {
         WorldGenLevel level = ctx.level();
         if (level.getLevel().dimension() != Level.OVERWORLD) return false;
-        ChunkPos chunk = new ChunkPos(ctx.origin());
-        StreetPlan plan = StreetPlan.get();
-        int k = plan.bucket(chunk.x, chunk.z);
+        ChunkPos chunk = ChunkPos.containing(ctx.origin());
+        StreetPlan plan = StreetPlan.planFor(chunk.getMiddleBlockX(), chunk.getMiddleBlockZ());
+        int k = plan.bucket(chunk.x(), chunk.z());
         if (k < 0) return false;
         long t0 = System.nanoTime();
         Painter p = new Painter(level, plan, chunk.getMinBlockX(), chunk.getMinBlockZ(), k);
@@ -73,7 +73,7 @@ public class StreetPaint extends Feature<NoneFeatureConfiguration> {
             p.run();
             if (p.trace.length() > 0) Skycraft.LOGGER.info("[streetplan] paint trace{}", p.trace);
         } catch (RuntimeException e) {
-            Skycraft.LOGGER.warn("Skycraft streets: painting chunk {} {} failed", chunk.x, chunk.z, e);
+            Skycraft.LOGGER.warn("Skycraft streets: painting chunk {} {} failed", chunk.x(), chunk.z(), e);
         }
         if (p.cells > 0) {
             CHUNKS.increment();
@@ -89,7 +89,7 @@ public class StreetPaint extends Feature<NoneFeatureConfiguration> {
      * building, wall or gatehouse plot: the road painter may pave it like open ground (P5).
      */
     public static boolean workOnly(int x, int z) {
-        StreetPlan plan = StreetPlan.get();
+        StreetPlan plan = StreetPlan.planFor(x, z);
         int k = plan.bucket(x >> StreetPlan.BUCKET_SHIFT, z >> StreetPlan.BUCKET_SHIFT);
         if (k < 0) return false;
         boolean work = false;
@@ -104,7 +104,7 @@ public class StreetPaint extends Feature<NoneFeatureConfiguration> {
 
     /** Dev aid: paints the chunk of (x, z) again in a live level; returns "cells painted, blocks changed". */
     static String repaint(WorldGenLevel level, int x, int z) {
-        StreetPlan plan = StreetPlan.get();
+        StreetPlan plan = StreetPlan.planFor(x, z);
         int k = plan.bucket(x >> 4, z >> 4);
         if (k < 0) return "no street plan data in that chunk";
         Painter p = new Painter(level, plan, (x >> 4) << 4, (z >> 4) << 4, k);
@@ -133,8 +133,8 @@ public class StreetPaint extends Feature<NoneFeatureConfiguration> {
             this.x0 = x0;
             this.z0 = z0;
             this.bucket = bucket;
-            this.minY = level.getMinBuildHeight() + 1;
-            this.maxY = level.getMaxBuildHeight() - 4;
+            this.minY = level.getMinY() + 1;
+            this.maxY = (level.getMaxY() + 1) - 4;
         }
 
         void run() {
@@ -263,7 +263,7 @@ public class StreetPaint extends Feature<NoneFeatureConfiguration> {
                 }
                 // a full block of a building stays (the plan routed the path round every building); clutter, plants,
                 // low walls, slabs and stairs of yard props, tree trunks and natural ground (a cut) go
-                if (s.isSolidRender(level, pos.set(x, y, z)) && !natural(s) && !s.is(BlockTags.BASE_STONE_OVERWORLD)
+                if (s.isSolidRender() && !natural(s) && !s.is(BlockTags.BASE_STONE_OVERWORLD)
                         && !s.is(BlockTags.OVERWORLD_NATURAL_LOGS) && !s.is(BlockTags.LEAVES)) {
                     continue;
                 }
@@ -303,9 +303,9 @@ public class StreetPaint extends Feature<NoneFeatureConfiguration> {
 
         /** The fence gate of a fence's wood (oak when there is none). */
         static BlockState gateFor(BlockState fence) {
-            ResourceLocation id = BuiltInRegistries.BLOCK.getKey(fence.getBlock());
-            ResourceLocation g = new ResourceLocation(id.getNamespace(), id.getPath() + "_gate");
-            Block b = BuiltInRegistries.BLOCK.get(g);
+            Identifier id = BuiltInRegistries.BLOCK.getKey(fence.getBlock());
+            Identifier g = Identifier.fromNamespaceAndPath(id.getNamespace(), id.getPath() + "_gate");
+            Block b = BuiltInRegistries.BLOCK.getValue(g);
             if (b == Blocks.AIR || !(b instanceof FenceGateBlock)) b = Blocks.OAK_FENCE_GATE;
             return b.defaultBlockState();
         }

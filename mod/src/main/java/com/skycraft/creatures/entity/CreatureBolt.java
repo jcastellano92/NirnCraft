@@ -32,10 +32,10 @@ public class CreatureBolt extends ThrowableProjectile {
     public enum Kind { FIRE, FROST, SHOCK, POISON, ASH, ROCK, BOLT, SHADOW, WATER }
 
     private static final EntityDataAccessor<Byte> KIND = SynchedEntityData.defineId(CreatureBolt.class, EntityDataSerializers.BYTE);
-    private static final DustParticleOptions POISON_DUST = new DustParticleOptions(new Vector3f(0.45f, 0.75f, 0.15f), 1.2f);
-    private static final DustParticleOptions ASH_DUST = new DustParticleOptions(new Vector3f(0.3f, 0.28f, 0.26f), 1.5f);
-    private static final DustParticleOptions ROCK_DUST = new DustParticleOptions(new Vector3f(0.5f, 0.48f, 0.44f), 1.6f);
-    private static final DustParticleOptions SHADOW_DUST = new DustParticleOptions(new Vector3f(0.35f, 0.1f, 0.45f), 1.3f);
+    private static final DustParticleOptions POISON_DUST = new DustParticleOptions(net.minecraft.util.ARGB.colorFromFloat(1f, 0.45f, 0.75f, 0.15f), 1.2f);
+    private static final DustParticleOptions ASH_DUST = new DustParticleOptions(net.minecraft.util.ARGB.colorFromFloat(1f, 0.3f, 0.28f, 0.26f), 1.5f);
+    private static final DustParticleOptions ROCK_DUST = new DustParticleOptions(net.minecraft.util.ARGB.colorFromFloat(1f, 0.5f, 0.48f, 0.44f), 1.6f);
+    private static final DustParticleOptions SHADOW_DUST = new DustParticleOptions(net.minecraft.util.ARGB.colorFromFloat(1f, 0.35f, 0.1f, 0.45f), 1.3f);
 
     private float damage = 4f;
     private int life;
@@ -45,14 +45,15 @@ public class CreatureBolt extends ThrowableProjectile {
     }
 
     public CreatureBolt(EntityType<? extends CreatureBolt> type, LivingEntity owner, Level level, Kind kind, float damage) {
-        super(type, owner, level);
+        super(type, owner.getX(), owner.getEyeY() - 0.1, owner.getZ(), level);
+        setOwner(owner);
         setKind(kind);
         this.damage = damage;
     }
 
     @Override
-    protected void defineSynchedData() {
-        this.entityData.define(KIND, (byte) 0);
+    protected void defineSynchedData(net.minecraft.network.syncher.SynchedEntityData.Builder builder) {
+        builder.define(KIND, (byte) 0);
     }
 
     public Kind kind() {
@@ -64,7 +65,7 @@ public class CreatureBolt extends ThrowableProjectile {
     }
 
     @Override
-    protected float getGravity() {
+    protected double getDefaultGravity() {
         return switch (kind()) {
             case POISON, ASH, WATER -> 0.02f;
             case ROCK -> 0.04f;
@@ -80,7 +81,7 @@ public class CreatureBolt extends ThrowableProjectile {
             this.discard();
             return;
         }
-        if (this.level().isClientSide) {
+        if (this.level().isClientSide()) {
             ParticleOptions p = trail();
             for (int i = 0; i < 3; i++) {
                 double f = i / 3.0;
@@ -111,7 +112,7 @@ public class CreatureBolt extends ThrowableProjectile {
     @Override
     protected void onHitEntity(EntityHitResult hit) {
         super.onHitEntity(hit);
-        if (this.level().isClientSide) return;
+        if (this.level().isClientSide()) return;
         Entity target = hit.getEntity();
         Entity owner = this.getOwner();
         if (target == owner || owner != null && target.getType() == owner.getType()) return;
@@ -122,24 +123,24 @@ public class CreatureBolt extends ThrowableProjectile {
             case SHADOW -> MagicDamage.source(this.level(), MagicDamage.SPELL, this, owner);
             default -> this.damageSources().thrown(this, owner);
         };
-        target.hurt(src, damage);
+        com.skycraft.platform.Effects.hurt(target, src, damage);
         if (target instanceof LivingEntity living) {
             switch (kind()) {
-                case FIRE -> living.setSecondsOnFire(4);
+                case FIRE -> living.igniteForSeconds(4);
                 case FROST -> {
-                    living.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 80, 1), owner);
+                    living.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.SLOWNESS), 80, 1), owner);
                     if (living.canFreeze()) living.setTicksFrozen(Math.min(living.getTicksRequiredToFreeze() + 60, living.getTicksFrozen() + 50));
                 }
-                case POISON -> living.addEffect(new MobEffectInstance(MobEffects.POISON, 100, 1), owner);
+                case POISON -> living.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.POISON), 100, 1), owner);
                 case ASH -> {
-                    living.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 40, 0), owner);
-                    living.setSecondsOnFire(2);
+                    living.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.BLINDNESS), 40, 0), owner);
+                    living.igniteForSeconds(2);
                 }
                 case ROCK, BOLT -> {
                     Vec3 push = this.getDeltaMovement().multiply(1, 0, 1).normalize().scale(0.6);
                     living.push(push.x, 0.2, push.z);
                 }
-                case SHADOW -> living.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 100, 0), owner);
+                case SHADOW -> living.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.WEAKNESS), 100, 0), owner);
                 default -> {}
             }
         }
@@ -150,7 +151,7 @@ public class CreatureBolt extends ThrowableProjectile {
     @Override
     protected void onHit(HitResult result) {
         super.onHit(result);
-        if (!this.level().isClientSide && result.getType() == HitResult.Type.BLOCK) {
+        if (!this.level().isClientSide() && result.getType() == HitResult.Type.BLOCK) {
             burst();
             this.discard();
         }
@@ -169,16 +170,22 @@ public class CreatureBolt extends ThrowableProjectile {
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag tag) {
-        super.addAdditionalSaveData(tag);
+    public void addAdditionalSaveData(net.minecraft.world.level.storage.ValueOutput output263) {
+        super.addAdditionalSaveData(output263);
+        net.minecraft.nbt.CompoundTag tag = new net.minecraft.nbt.CompoundTag();
+        
         tag.putByte("Kind", (byte) kind().ordinal());
         tag.putFloat("Damage", damage);
+    
+        output263.store(tag);
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag tag) {
-        super.readAdditionalSaveData(tag);
-        setKind(Kind.values()[Math.floorMod(tag.getByte("Kind"), Kind.values().length)]);
-        damage = tag.getFloat("Damage");
+    public void readAdditionalSaveData(net.minecraft.world.level.storage.ValueInput input263) {
+        super.readAdditionalSaveData(input263);
+        net.minecraft.nbt.CompoundTag tag = com.skycraft.platform.ValueTags.read(input263 , "Kind", "Damage");
+        
+        setKind(Kind.values()[Math.floorMod(tag.getByteOr("Kind",(byte)0), Kind.values().length)]);
+        damage = tag.getFloatOr("Damage",0F);
     }
 }

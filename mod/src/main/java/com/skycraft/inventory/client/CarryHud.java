@@ -5,10 +5,9 @@ import com.skycraft.inventory.InventoryConfig;
 import com.skycraft.inventory.ItemWeights;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
-import net.minecraftforge.client.gui.overlay.ForgeGui;
 
 /**
  * "Carry 312/300" above the stamina bar (bottom right), only while close to or over the carry capacity. Takes its slot
@@ -17,10 +16,12 @@ import net.minecraftforge.client.gui.overlay.ForgeGui;
 public final class CarryHud {
     private CarryHud() {}
 
-    public static void render(ForgeGui gui, GuiGraphics g, float partialTick, int width, int height) {
+    public static void render(GuiGraphicsExtractor g, net.minecraft.client.DeltaTracker delta) {
+        float partialTick = delta.getGameTimeDeltaPartialTick(false);
+        int width = g.guiWidth(), height = g.guiHeight();
         Minecraft mc = Minecraft.getInstance();
         LocalPlayer player = mc.player;
-        if (player == null || mc.options.hideGui || !gui.shouldDrawSurvivalElements() || player.isCreative() || player.isSpectator()) return;
+        if (player == null || mc.gui.hud.isHidden() || !(mc.gameMode!=null&&mc.gameMode.hasExperience()) || player.isCreative() || player.isSpectator()) return;
         if (!ClientInventoryHandlers.received || !ClientInventoryHandlers.enabled) return;
         boolean show;
         double threshold;
@@ -56,6 +57,6 @@ public final class CarryHud {
         } else {
             color = 0xFFE8D9A0;
         }
-        g.drawString(font, text, x, y, color, true);
+        g.text(font, text, x, y, color, true);
     }
 }

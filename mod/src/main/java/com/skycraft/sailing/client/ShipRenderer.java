@@ -7,13 +7,16 @@ import com.skycraft.Skycraft;
 import com.skycraft.sailing.ShipEntity;
 import com.skycraft.sailing.ShipLivery;
 import com.skycraft.sailing.ShipType;
-import net.minecraft.client.renderer.LightTexture;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.util.LightCoordsUtil;
+import com.skycraft.client.CapturedGeometry;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.entity.state.EntityRenderState;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 
 /**
@@ -22,25 +25,23 @@ import net.minecraft.util.Mth;
  * the helm, the yard is braced round to the wind, the sail fills and billows (or flogs when the wind is wrong) as it
  * is set, and the masthead pennant streams downwind.
  */
-public class ShipRenderer extends EntityRenderer<ShipEntity> {
-    public static final ResourceLocation ATLAS = new ResourceLocation(Skycraft.MODID, "textures/entity/sailing/ship_atlas.png");
+public class ShipRenderer extends EntityRenderer<ShipEntity,ShipRenderer.State> {
+    public static final Identifier ATLAS = Identifier.fromNamespaceAndPath(Skycraft.MODID, "textures/entity/sailing/ship_atlas.png");
     /** The liveries' sails (pirate, navy, Maormer, Sload, ghost, merchant): 64 px pictures in a 4 x 4 grid. */
-    public static final ResourceLocation LIVERY_SAILS = new ResourceLocation(Skycraft.MODID, "textures/entity/sailing/livery_sails.png");
-    private final ShipMesh dynamic = new ShipMesh();
-    private final ShipMesh cloth = new ShipMesh();
+    public static final Identifier LIVERY_SAILS = Identifier.fromNamespaceAndPath(Skycraft.MODID, "textures/entity/sailing/livery_sails.png");
+    public static class State extends EntityRenderState { CapturedGeometry hull,cloth;RenderType hullType,clothType; }
+    @Override protected net.minecraft.world.phys.AABB getBoundingBoxForCulling(ShipEntity ship,float partialTicks){return ship.getBoundingBoxForCulling();}
+    @Override public State createRenderState(){return new State();}
 
     public ShipRenderer(EntityRendererProvider.Context ctx) {
         super(ctx);
         this.shadowRadius = 0.0f;
     }
 
-    @Override
-    public ResourceLocation getTextureLocation(ShipEntity ship) {
-        return ATLAS;
-    }
-
-    @Override
-    public void render(ShipEntity ship, float yaw, float partial, PoseStack pose, MultiBufferSource buffers, int light) {
+    @Override public void extractRenderState(ShipEntity ship,State state,float partial) {
+        super.extractRenderState(ship,state,partial);
+        var mainVertices=new CapturedGeometry.Builder();var clothVertices=new CapturedGeometry.Builder();
+        ShipMesh dynamic=new ShipMesh(),cloth=new ShipMesh();PoseStack pose=new PoseStack();int light=state.lightCoords;
         ShipType type = ship.shipType;
         ShipModels.Model model = ShipModels.get(type);
         float t = ship.tickCount + partial + ship.getId() * 13.7f;
@@ -66,19 +67,21 @@ public class ShipRenderer extends EntityRenderer<ShipEntity> {
             pitch -= s * 14f;
         }
         pose.translate(0, heave, 0);
-        pose.mulPose(Axis.YP.rotationDegrees(-shipYaw));
-        pose.mulPose(Axis.XP.rotationDegrees(pitch));
-        pose.mulPose(Axis.ZP.rotationDegrees(roll));
+        pose.rotateDegrees(Axis.YP, -shipYaw);
+        pose.rotateDegrees(Axis.XP, pitch);
+        pose.rotateDegrees(Axis.ZP, roll);
 
         ShipLivery livery = ship.getLivery();
         boolean ghost = livery.a < 1f;
         float lr = livery.r, lg = livery.g, lb = livery.b, la = livery.a;
         if (ghost) {
             // a ghost ship: pale and see-through, glowing faintly, its outline wavering
-            light = LightTexture.pack(12, 12);
+            light = LightCoordsUtil.pack(12,12);
             la *= 0.85f + 0.15f * Mth.sin(t * 0.07f);
         }
-        VertexConsumer vc = buffers.getBuffer(ghost ? RenderType.entityTranslucent(ATLAS) : RenderType.entityCutoutNoCull(ATLAS));
+        state.hullType=ghost?net.minecraft.client.renderer.rendertype.RenderTypes.entityTranslucent(ATLAS):net.minecraft.client.renderer.rendertype.RenderTypes.entityCutout(ATLAS);
+        state.clothType=ghost?net.minecraft.client.renderer.rendertype.RenderTypes.entityTranslucent(LIVERY_SAILS):net.minecraft.client.renderer.rendertype.RenderTypes.entityCutout(LIVERY_SAILS);
+        VertexConsumer vc=mainVertices;
         int overlay = OverlayTexture.NO_OVERLAY;
         model.hull.render(pose.last(), vc, light, overlay, lr, lg, lb, la);
 
@@ -91,8 +94,8 @@ public class ShipRenderer extends EntityRenderer<ShipEntity> {
             float dip = rowing ? 24f + 9f * Mth.cos(phase) : 14f;
             pose.pushPose();
             pose.translate(o[0], o[1], o[2]);
-            pose.mulPose(Axis.YP.rotationDegrees(side > 0 ? 90f + sweep : -90f - sweep));
-            pose.mulPose(Axis.XP.rotationDegrees(dip));
+            pose.rotateDegrees(Axis.YP, side > 0 ? 90f + sweep : -90f - sweep);
+            pose.rotateDegrees(Axis.XP, dip);
             model.oar.render(pose.last(), vc, light, overlay, lr, lg, lb, la);
             pose.popPose();
         }
@@ -102,7 +105,7 @@ public class ShipRenderer extends EntityRenderer<ShipEntity> {
             float rudder = Mth.lerp(partial, ship.rudderO, ship.rudder);
             pose.pushPose();
             pose.translate(model.rudderPivot[0], model.rudderPivot[1], model.rudderPivot[2]);
-            pose.mulPose(Axis.YP.rotationDegrees(rudder * 28f));
+            pose.rotateDegrees(Axis.YP, rudder * 28f);
             model.rudder.render(pose.last(), vc, light, overlay, lr, lg, lb, la);
             pose.popPose();
         }
@@ -122,7 +125,7 @@ public class ShipRenderer extends EntityRenderer<ShipEntity> {
             buildPennant(dynamic, model, rel, wind, t);
             dynamic.render(pose.last(), vc, light, overlay, lr, lg, lb, la);
             if (cloth.quadCount() > 0) {
-                VertexConsumer sv = buffers.getBuffer(ghost ? RenderType.entityTranslucent(LIVERY_SAILS) : RenderType.entityCutoutNoCull(LIVERY_SAILS));
+                VertexConsumer sv=clothVertices;
                 cloth.render(pose.last(), sv, light, overlay, ghost ? 0.9f : 1f, ghost ? 1f : 1f, 1f, ghost ? la : 1f);
             }
         }
@@ -131,11 +134,16 @@ public class ShipRenderer extends EntityRenderer<ShipEntity> {
         if (model.lantern.quadCount() > 0) {
             pose.pushPose();
             pose.translate(0, 3.85f, -6.35f);
-            model.lantern.render(pose.last(), vc, LightTexture.FULL_BRIGHT, overlay, 1f, 1f, 1f, 1f);
+            model.lantern.render(pose.last(), vc, 0xf000f0, overlay, 1f, 1f, 1f, 1f);
             pose.popPose();
         }
         pose.popPose();
-        super.render(ship, yaw, partial, pose, buffers, light);
+        state.hull=mainVertices.build();state.cloth=clothVertices.build();
+    }
+
+    @Override public void submit(State state,PoseStack pose,SubmitNodeCollector collector,CameraRenderState camera) {
+        state.hull.submit(pose,collector,state.hullType);state.cloth.submit(pose,collector,state.clothType);
+        super.submit(state,pose,collector,camera);
     }
 
     /** Yard plus the sail: furled under the yard, or set as a billowing cloth grid to the deployed depth. */

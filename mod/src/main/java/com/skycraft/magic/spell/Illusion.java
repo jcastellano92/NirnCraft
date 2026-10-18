@@ -17,19 +17,18 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.NeutralMob;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.util.DefaultRandomPos;
-import net.minecraft.world.entity.animal.AbstractGolem;
+import net.minecraft.world.entity.animal.golem.AbstractGolem;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.decoration.ArmorStand;
-import net.minecraft.world.entity.monster.AbstractIllager;
+import net.minecraft.world.entity.monster.illager.AbstractIllager;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.Witch;
 import net.minecraft.world.entity.monster.piglin.AbstractPiglin;
-import net.minecraft.world.entity.npc.AbstractVillager;
+import net.minecraft.world.entity.npc.villager.AbstractVillager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
@@ -85,10 +84,10 @@ public final class Illusion {
      * by {@link #onPlayer} instead.
      */
     public static boolean affects(ServerPlayer caster, Spell spell, LivingEntity target, String kind, boolean feedback) {
-        if (!(target instanceof Mob) || target instanceof ArmorStand || target.getType().is(CombatHandler.BOSSES)) return false;
+        if (!(target instanceof Mob) || target instanceof ArmorStand || target.getType().builtInRegistryHolder().is(CombatHandler.BOSSES)) return false;
         Tier tier = spell.tier;
         float dualMult = spell.dual ? 1.5f : 1f;
-        boolean resistant = target.getMobType() == MobType.UNDEAD || target instanceof AbstractGolem;
+        boolean resistant = com.skycraft.platform.Effects.isUndead(target) || target instanceof AbstractGolem;
         if (resistant && !Perks.has(caster, "illusion.master_of_the_mind")) {
             if (feedback) Notifier.message(caster, Component.translatable("message.skycraft.illusion_immune", target.getDisplayName()));
             return false;
@@ -103,16 +102,16 @@ public final class Illusion {
     // ------------------------------------------------------------------ applying states
 
     public static void applyCalm(LivingEntity target, int ticks) {
-        target.removeEffect(MagicRegistry.FRENZY.get());
-        target.removeEffect(MagicRegistry.FEAR.get());
-        target.addEffect(new MobEffectInstance(MagicRegistry.CALM.get(), ticks, 0));
+        target.removeEffect(com.skycraft.platform.Effects.holder(MagicRegistry.FRENZY.get()));
+        target.removeEffect(com.skycraft.platform.Effects.holder(MagicRegistry.FEAR.get()));
+        target.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MagicRegistry.CALM.get()), ticks, 0));
         if (target instanceof Mob mob) clearAggression(mob);
     }
 
     public static void applyFear(Vec3 from, LivingEntity target, int ticks) {
-        target.removeEffect(MagicRegistry.CALM.get());
-        target.removeEffect(MagicRegistry.FRENZY.get());
-        target.addEffect(new MobEffectInstance(MagicRegistry.FEAR.get(), ticks, 0));
+        target.removeEffect(com.skycraft.platform.Effects.holder(MagicRegistry.CALM.get()));
+        target.removeEffect(com.skycraft.platform.Effects.holder(MagicRegistry.FRENZY.get()));
+        target.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MagicRegistry.FEAR.get()), ticks, 0));
         CompoundTag pd = target.getPersistentData();
         pd.putDouble(FEAR_X, from.x);
         pd.putDouble(FEAR_Y, from.y);
@@ -124,9 +123,9 @@ public final class Illusion {
     }
 
     public static void applyFrenzy(LivingEntity target, int ticks) {
-        target.removeEffect(MagicRegistry.CALM.get());
-        target.removeEffect(MagicRegistry.FEAR.get());
-        target.addEffect(new MobEffectInstance(MagicRegistry.FRENZY.get(), ticks, 0));
+        target.removeEffect(com.skycraft.platform.Effects.holder(MagicRegistry.CALM.get()));
+        target.removeEffect(com.skycraft.platform.Effects.holder(MagicRegistry.FEAR.get()));
+        target.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MagicRegistry.FRENZY.get()), ticks, 0));
         if (target instanceof Mob mob) frenzyRetarget(mob, null);
     }
 
@@ -142,7 +141,7 @@ public final class Illusion {
     private static void flee(Mob mob) {
         if (!(mob instanceof PathfinderMob pm)) return;
         CompoundTag pd = mob.getPersistentData();
-        Vec3 from = pd.contains(FEAR_X) ? new Vec3(pd.getDouble(FEAR_X), pd.getDouble(FEAR_Y), pd.getDouble(FEAR_Z)) : mob.position();
+        Vec3 from = pd.contains(FEAR_X) ? new Vec3(pd.getDoubleOr(FEAR_X, 0d), pd.getDoubleOr(FEAR_Y, 0d), pd.getDoubleOr(FEAR_Z, 0d)) : mob.position();
         Vec3 away = DefaultRandomPos.getPosAway(pm, 16, 7, from);
         if (away != null) pm.getNavigation().moveTo(away.x, away.y, away.z, 1.35);
     }
@@ -165,13 +164,13 @@ public final class Illusion {
 
     /** Behaviour of calmed / feared / frenzied mobs, called every 5 ticks from the living tick event. */
     public static void tickMob(Mob mob) {
-        if (mob.hasEffect(MagicRegistry.CALM.get())) {
+        if (mob.hasEffect(com.skycraft.platform.Effects.holder(MagicRegistry.CALM.get()))) {
             if (mob.getTarget() != null || mob.isAggressive()) clearAggression(mob);
-        } else if (mob.hasEffect(MagicRegistry.FEAR.get())) {
+        } else if (mob.hasEffect(com.skycraft.platform.Effects.holder(MagicRegistry.FEAR.get()))) {
             if (mob.getTarget() != null) clearAggression(mob);
             if (mob instanceof Creeper creeper) creeper.setSwellDir(-1);
             if (mob.getNavigation().isDone() || mob.tickCount % 40 == 0) flee(mob);
-        } else if (mob.hasEffect(MagicRegistry.FRENZY.get())) {
+        } else if (mob.hasEffect(com.skycraft.platform.Effects.holder(MagicRegistry.FRENZY.get()))) {
             LivingEntity t = mob.getTarget();
             if (t == null || !t.isAlive() || mob.tickCount % 60 == 0) frenzyRetarget(mob, null);
         }
@@ -189,20 +188,20 @@ public final class Illusion {
         if (tp == caster || !Targeting.canHarm(caster, tp)) return 0;
         switch (kind) {
             case "fear" -> {
-                tp.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 100, 1));
-                tp.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 100, 0));
+                tp.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.SLOWNESS), 100, 1));
+                tp.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.WEAKNESS), 100, 0));
                 Notifier.message(tp, Component.translatable("message.skycraft.pvp_feared", caster.getDisplayName()));
             }
             case "calm" -> {
-                tp.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 60, 4));
+                tp.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.WEAKNESS), 60, 4));
                 Notifier.message(tp, Component.translatable("message.skycraft.pvp_calmed", caster.getDisplayName()));
             }
             default -> {
-                tp.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 100, 0));
+                tp.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.NAUSEA), 100, 0));
                 Notifier.message(tp, Component.translatable("message.skycraft.pvp_frenzied", caster.getDisplayName()));
             }
         }
-        mindFx(tp.serverLevel(), tp);
+        mindFx(tp.level(), tp);
         Vitals.markInCombat(caster);
         Vitals.markInCombat(tp);
         return 1;
@@ -263,13 +262,13 @@ public final class Illusion {
      */
     public static void turnUndeadHit(SpellProjectile proj, ServerPlayer caster, Spell spell, @Nullable LivingEntity target, Vec3 pos) {
         MagicFx.burst((ServerLevel) proj.level(), pos, Element.HOLY, 0.8f);
-        if (target == null || target.getMobType() != MobType.UNDEAD || target.getType().is(CombatHandler.BOSSES)) return;
+        if (target == null || !com.skycraft.platform.Effects.isUndead(target) || target.getType().builtInRegistryHolder().is(CombatHandler.BOSSES)) return;
         if (!RestorationSpells.turnable(caster, spell, target)) {
             Notifier.message(caster, Component.translatable("message.skycraft.illusion_too_strong", target.getDisplayName()));
             return;
         }
         applyFear(caster.position(), target, spell.duration);
-        target.setSecondsOnFire(2);
+        target.igniteForSeconds(2);
         MagicFx.send(target, MagicFx.HEAL, Element.HOLY, target.position(), target.position(), target.getId(), 1);
         SpellEffects.xp(caster, spell);
     }
@@ -313,22 +312,22 @@ public final class Illusion {
     }
 
     public static Spell.Result harmony(ServerPlayer p, Spell spell, int tick) {
-        MagicFx.sendNear(p.serverLevel(), p.position(), 96, MagicFx.RING, Element.MIND, p.position().add(0, 0.2, 0), p.position(), p.getId(), Math.round(spell.radius * 10));
+        MagicFx.sendNear(p.level(), p.position(), 96, MagicFx.RING, Element.MIND, p.position().add(0, 0.2, 0), p.position(), p.getId(), Math.round(spell.radius * 10));
         MagicFx.sound(p, SoundEvents.ILLUSIONER_CAST_SPELL, 1.5f, 0.7f);
         return area(p, spell, p.position(), "calm") > 0 ? Spell.Result.EFFECT : Spell.Result.CAST;
     }
 
     public static Spell.Result mayhem(ServerPlayer p, Spell spell, int tick) {
-        MagicFx.sendNear(p.serverLevel(), p.position(), 96, MagicFx.RING, Element.FIRE, p.position().add(0, 0.2, 0), p.position(), p.getId(), Math.round(spell.radius * 10));
+        MagicFx.sendNear(p.level(), p.position(), 96, MagicFx.RING, Element.FIRE, p.position().add(0, 0.2, 0), p.position(), p.getId(), Math.round(spell.radius * 10));
         MagicFx.sound(p, SoundEvents.EVOKER_PREPARE_WOLOLO, 1.5f, 0.6f);
         Vitals.markInCombat(p);
         return area(p, spell, p.position(), "frenzy") > 0 ? Spell.Result.EFFECT : Spell.Result.CAST;
     }
 
     private static void embolden(LivingEntity e, int ticks) {
-        e.removeEffect(MagicRegistry.FEAR.get());
-        e.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, ticks, 0));
-        e.addEffect(new MobEffectInstance(MobEffects.ABSORPTION, ticks, 1));
+        e.removeEffect(com.skycraft.platform.Effects.holder(MagicRegistry.FEAR.get()));
+        e.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.STRENGTH), ticks, 0));
+        e.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.ABSORPTION), ticks, 1));
         MagicFx.send(e, MagicFx.AURA, Element.HOLY, e.position(), e.position(), e.getId(), 0);
     }
 
@@ -361,27 +360,27 @@ public final class Illusion {
             embolden(e, spell.duration);
             n++;
         }
-        MagicFx.sendNear(p.serverLevel(), p.position(), 64, MagicFx.RING, Element.HOLY, p.position().add(0, 0.2, 0), p.position(), p.getId(), Math.round(spell.radius * 10));
+        MagicFx.sendNear(p.level(), p.position(), 64, MagicFx.RING, Element.HOLY, p.position().add(0, 0.2, 0), p.position(), p.getId(), Math.round(spell.radius * 10));
         MagicFx.sound(p, SoundEvents.ILLUSIONER_CAST_SPELL, 1.2f, 1.3f);
         return n > 0 ? Spell.Result.EFFECT : Spell.Result.CAST;
     }
 
     public static Spell.Result muffle(ServerPlayer p, Spell spell, int tick) {
-        MobEffectInstance current = p.getEffect(MagicRegistry.MUFFLE.get());
+        MobEffectInstance current = p.getEffect(com.skycraft.platform.Effects.holder(MagicRegistry.MUFFLE.get()));
         boolean wasActive = current != null && current.getDuration() > spell.duration / 2;
-        p.addEffect(new MobEffectInstance(MagicRegistry.MUFFLE.get(), spell.duration, 0, false, true, true));
+        p.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MagicRegistry.MUFFLE.get()), spell.duration, 0, false, true, true));
         MagicFx.send(p, MagicFx.AURA, Element.MIND, p.position(), p.position(), p.getId(), 0);
-        p.playNotifySound(SoundEvents.WOOL_PLACE, SoundSource.PLAYERS, 1f, 0.6f);
+        com.skycraft.magic.MagicFx.soundToPlayer(p, SoundEvents.WOOL_PLACE, SoundSource.PLAYERS, 1f, 0.6f);
         return SpellEffects.buffResult(p, wasActive);
     }
 
     public static Spell.Result invisibility(ServerPlayer p, Spell spell, int tick) {
-        boolean wasActive = p.hasEffect(MobEffects.INVISIBILITY);
+        boolean wasActive = p.hasEffect(com.skycraft.platform.Effects.holder(MobEffects.INVISIBILITY));
         boolean useful = !wasActive && SpellEffects.hostilesNear(p, 24);
-        p.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, spell.duration, 0, false, false, true));
+        p.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.INVISIBILITY), spell.duration, 0, false, false, true));
         p.getPersistentData().putBoolean(INVIS_FLAG, true);
         MagicFx.send(p, MagicFx.AURA, Element.MIND, p.position(), p.position(), p.getId(), 3);
-        p.playNotifySound(SoundEvents.ILLUSIONER_MIRROR_MOVE, SoundSource.PLAYERS, 1f, 1f);
+        com.skycraft.magic.MagicFx.soundToPlayer(p, SoundEvents.ILLUSIONER_MIRROR_MOVE, SoundSource.PLAYERS, 1f, 1f);
         // Enemies lose track of you.
         for (Mob mob : p.level().getEntitiesOfClass(Mob.class, p.getBoundingBox().inflate(32), m -> m.getTarget() == p)) {
             mob.setTarget(null);
@@ -401,7 +400,7 @@ public final class Illusion {
 
     /** Hysteria: everything around you flees in terror for 30 seconds. */
     public static Spell.Result hysteria(ServerPlayer p, Spell spell, int tick) {
-        MagicFx.sendNear(p.serverLevel(), p.position(), 96, MagicFx.RING, Element.SOUL, p.position().add(0, 0.2, 0), p.position(), p.getId(),
+        MagicFx.sendNear(p.level(), p.position(), 96, MagicFx.RING, Element.SOUL, p.position().add(0, 0.2, 0), p.position(), p.getId(),
                 Math.round(spell.radius * 10));
         MagicFx.sound(p, SoundEvents.EVOKER_PREPARE_ATTACK, 1.5f, 0.5f);
         MagicFx.sound(p, SoundEvents.WARDEN_ROAR, 0.4f, 1.5f);
@@ -414,15 +413,15 @@ public final class Illusion {
         for (LivingEntity e : Targeting.around(p, p.position(), spell.radius, e -> e != p && (Targeting.isFriendly(p, e)
                 || !(e instanceof net.minecraft.world.entity.monster.Enemy) && Targeting.isHelpable(p, e) && !(e instanceof net.minecraft.world.entity.animal.Animal)))) {
             embolden(e, spell.duration);
-            e.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, spell.duration, 0));
-            e.addEffect(new MobEffectInstance(MobEffects.HEALTH_BOOST, spell.duration, 1));
+            e.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.RESISTANCE), spell.duration, 0));
+            e.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.HEALTH_BOOST), spell.duration, 1));
             if (e instanceof ServerPlayer tp) {
                 com.skycraft.core.PlayerData data = com.skycraft.core.SkyData.get(tp);
                 data.setStamina(data.maxStamina());
             }
             n++;
         }
-        MagicFx.sendNear(p.serverLevel(), p.position(), 96, MagicFx.RING, Element.HOLY, p.position().add(0, 0.2, 0), p.position(), p.getId(),
+        MagicFx.sendNear(p.level(), p.position(), 96, MagicFx.RING, Element.HOLY, p.position().add(0, 0.2, 0), p.position(), p.getId(),
                 Math.round(spell.radius * 10));
         MagicFx.sound(p, SoundEvents.RAID_HORN.value(), 0.6f, 1.4f);
         return n > 0 ? Spell.Result.EFFECT : Spell.Result.CAST;
@@ -461,14 +460,14 @@ public final class Illusion {
 
     @Nullable
     private static Vec3 clairvoyanceGoal(ServerPlayer p) {
-        net.minecraft.nbt.ListTag markers = com.skycraft.core.SkyData.get(p).module("quest").getList("markers", net.minecraft.nbt.Tag.TAG_COMPOUND);
-        String dim = p.level().dimension().location().toString();
+        net.minecraft.nbt.ListTag markers = com.skycraft.core.SkyData.get(p).module("quest").getListOrEmpty("markers");
+        String dim = p.level().dimension().identifier().toString();
         Vec3 best = null;
         double bestDist = Double.MAX_VALUE;
         for (int i = 0; i < markers.size(); i++) {
-            CompoundTag m = markers.getCompound(i);
-            if (!m.getString("dim").isEmpty() && !m.getString("dim").equals(dim)) continue;
-            Vec3 v = new Vec3(m.getInt("x") + 0.5, m.getInt("y"), m.getInt("z") + 0.5);
+            CompoundTag m = markers.getCompoundOrEmpty(i);
+            if (!m.getStringOr("dim", "").isEmpty() && !m.getStringOr("dim", "").equals(dim)) continue;
+            Vec3 v = new Vec3(m.getIntOr("x", 0) + 0.5, m.getIntOr("y", 0), m.getIntOr("z", 0) + 0.5);
             double d = v.distanceToSqr(p.position());
             if (d < bestDist) {
                 bestDist = d;

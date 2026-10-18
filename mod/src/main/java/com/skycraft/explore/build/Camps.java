@@ -91,7 +91,7 @@ public final class Camps {
         BlockState beam = b.pal.trapdoor().defaultBlockState().setValue(TrapDoorBlock.HALF, Half.TOP)
                 .setValue(TrapDoorBlock.OPEN, true).setValue(TrapDoorBlock.FACING, Direction.NORTH);
         b.set(ox + 1, 1, oz, beam);
-        b.set(ox + 1, 0, oz, Blocks.BROWN_CARPET);
+        b.set(ox + 1, 0, oz, com.skycraft.worldgen.VanillaBlocks.BROWN_CARPET);
     }
 
     // ------------------------------------------------------------------ abandoned camp
@@ -117,14 +117,14 @@ public final class Camps {
     public static boolean huntersCamp(SiteBuilder b) {
         if (b.waterAt(0, 0) || b.settle(4) > 9) return false;
         b.level(5, null, b.pal.path().defaultBlockState(), 5);
-        tent(b, -3, -1, (b.r.nextBoolean() ? Blocks.BROWN_WOOL : Blocks.WHITE_WOOL).defaultBlockState(), false);
+        tent(b, -3, -1, (b.r.nextBoolean() ? com.skycraft.worldgen.VanillaBlocks.BROWN_WOOL : com.skycraft.worldgen.VanillaBlocks.WHITE_WOOL).defaultBlockState(), false);
         // a lit fire with a smoke column you can see over the trees
         b.campfire(1, 0, 1, true, true);
         spit(b, 1, 1);
         seats(b, 1, 1);
         rack(b, 2, -3);
-        b.set(-1, 0, 3, Blocks.WHITE_CARPET);
-        b.set(-2, 0, 3, Blocks.BROWN_CARPET);
+        b.set(-1, 0, 3, com.skycraft.worldgen.VanillaBlocks.WHITE_CARPET);
+        b.set(-2, 0, 3, com.skycraft.worldgen.VanillaBlocks.BROWN_CARPET);
         b.chest(4, 0, 2, Direction.WEST, ExploreLoot.table("hunter"));
         b.set(4, 0, 0, b.pal.log());
         b.lying(4, 1, 0, new ItemStack(Items.IRON_AXE));
@@ -233,7 +233,7 @@ public final class Camps {
         b.set(-1, top + 1, 1, Blocks.BARREL.defaultBlockState().setValue(BarrelBlock.FACING, Direction.UP));
         // their fire below
         b.campfire(3, 0, 3, true, true);
-        if (ModEntities.BANDIT.isPresent()) {
+        if (ModEntities.BANDIT.get() != null) {
             b.spawn(ModEntities.BANDIT.get(), 3, 1);
             if (b.r.nextBoolean()) b.spawn(ModEntities.BANDIT.get(), -3, 3);
         }

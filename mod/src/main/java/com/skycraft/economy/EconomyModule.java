@@ -1,6 +1,6 @@
 package com.skycraft.economy;
 
-import net.minecraftforge.eventbus.api.IEventBus;
+import net.neoforged.bus.api.IEventBus;
 
 /**
  * Item values, barter menus, merchants, skill trainers, skill books and Speech.

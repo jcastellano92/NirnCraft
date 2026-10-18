@@ -687,7 +687,7 @@
    {
     "type": "hang",
     "block": [
-     "minecraft:chain"
+     "minecraft:iron_chain"
     ],
     "density": 4,
     "len": [

@@ -63,7 +63,7 @@ public final class BarrowRooms {
     }
 
     /** A loot container in a free corner (deterministic). */
-    static void treasure(Painter p, Room room, int inset, net.minecraft.resources.ResourceLocation loot) {
+    static void treasure(Painter p, Room room, int inset, net.minecraft.resources.Identifier loot) {
         int[][] corners = {
                 {room.minX + inset, room.minZ + inset}, {room.maxX - inset, room.minZ + inset},
                 {room.minX + inset, room.maxZ - inset}, {room.maxX - inset, room.maxZ - inset}};
@@ -205,7 +205,7 @@ public final class BarrowRooms {
                 p.set(x, room.floor, z, Deco.pillar(Blocks.BONE_BLOCK, Direction.Axis.Y));
                 int roll = p.roll(x, room.floor, z, 25, 6);
                 if (roll == 0) p.set(x, room.floor + 1, z, Deco.skull(Blocks.SKELETON_SKULL, Deco.skullRotation(towardCenter(room, x, z))));
-                else if (roll == 1) p.set(x, room.floor + 1, z, Deco.candle(Blocks.WHITE_CANDLE, 2, true));
+                else if (roll == 1) p.set(x, room.floor + 1, z, Deco.candle(com.skycraft.worldgen.VanillaBlocks.WHITE_CANDLE, 2, true));
             }
         }
         for (int[] c : new int[][]{{-1, -1}, {1, 1}, {1, -1}, {-1, 1}}) {

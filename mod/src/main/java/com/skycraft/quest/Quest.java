@@ -104,7 +104,7 @@ public class Quest {
 
     public static String writeComponent(Component c) {
         try {
-            return Component.Serializer.toJson(c == null ? Component.empty() : c);
+            return com.skycraft.platform.ArcaneData.writeComponent(c == null ? Component.empty() : c);
         } catch (Exception e) {
             return "\"\"";
         }
@@ -113,7 +113,7 @@ public class Quest {
     public static Component readComponent(String json) {
         if (json == null || json.isEmpty()) return Component.empty();
         try {
-            MutableComponent c = Component.Serializer.fromJson(json);
+            Component c = com.skycraft.platform.ArcaneData.readComponent(json);
             return c == null ? Component.empty() : c;
         } catch (Exception e) {
             return Component.literal(json);
@@ -130,7 +130,7 @@ public class Quest {
         t.putString("title", writeComponent(title));
         t.putString("description", writeComponent(description));
         t.putString("giverName", writeComponent(giverName));
-        if (giver != null) t.putUUID("giver", giver);
+        if (giver != null) t.store("giver", net.minecraft.core.UUIDUtil.CODEC,  giver);
         t.putInt("gx", giverPos.getX());
         t.putInt("gy", giverPos.getY());
         t.putInt("gz", giverPos.getZ());
@@ -144,7 +144,7 @@ public class Quest {
         t.put("objectives", objs);
         t.putLong("rewardGold", rewardGold);
         ListTag items = new ListTag();
-        for (ItemStack s : rewardItems) items.add(s.save(new CompoundTag()));
+        for (ItemStack s : rewardItems) items.add(com.skycraft.inventory.ItemData.save(s));
         t.put("rewardItems", items);
         t.putString("status", status.name());
         t.putLong("started", started);
@@ -155,30 +155,30 @@ public class Quest {
 
     public static Quest load(CompoundTag t) {
         Quest q = new Quest();
-        q.id = t.getString("id");
-        q.kind = t.getString("kind");
-        q.category = parse(Category.class, t.getString("category"), Category.MISC);
-        q.title = readComponent(t.getString("title"));
-        q.description = readComponent(t.getString("description"));
-        q.giverName = readComponent(t.getString("giverName"));
-        q.giver = t.hasUUID("giver") ? t.getUUID("giver") : null;
-        q.giverPos = new BlockPos(t.getInt("gx"), t.getInt("gy"), t.getInt("gz"));
-        q.giverDim = t.contains("giverDim") ? t.getString("giverDim") : "minecraft:overworld";
-        q.hold = t.getString("hold");
-        q.faction = t.getString("faction");
-        q.factionJoin = t.getBoolean("factionJoin");
-        q.factionPoints = t.getInt("factionPoints");
-        for (Tag o : t.getList("objectives", Tag.TAG_COMPOUND)) q.objectives.add(Objective.load((CompoundTag) o));
-        q.rewardGold = t.getLong("rewardGold");
-        for (Tag s : t.getList("rewardItems", Tag.TAG_COMPOUND)) {
-            ItemStack stack = ItemStack.of((CompoundTag) s);
+        q.id = t.getStringOr("id","");
+        q.kind = t.getStringOr("kind","");
+        q.category = parse(Category.class, t.getStringOr("category",""), Category.MISC);
+        q.title = readComponent(t.getStringOr("title",""));
+        q.description = readComponent(t.getStringOr("description",""));
+        q.giverName = readComponent(t.getStringOr("giverName",""));
+        q.giver = t.read("giver", net.minecraft.core.UUIDUtil.CODEC).isPresent() ? t.read("giver", net.minecraft.core.UUIDUtil.CODEC).orElseThrow() : null;
+        q.giverPos = new BlockPos(t.getIntOr("gx",0), t.getIntOr("gy",0), t.getIntOr("gz",0));
+        q.giverDim = t.contains("giverDim") ? t.getStringOr("giverDim","") : "minecraft:overworld";
+        q.hold = t.getStringOr("hold","");
+        q.faction = t.getStringOr("faction","");
+        q.factionJoin = t.getBooleanOr("factionJoin",false);
+        q.factionPoints = t.getIntOr("factionPoints",0);
+        for (Tag o : t.getListOrEmpty("objectives")) q.objectives.add(Objective.load((CompoundTag) o));
+        q.rewardGold = t.getLongOr("rewardGold",0L);
+        for (Tag s : t.getListOrEmpty("rewardItems")) {
+            ItemStack stack = com.skycraft.inventory.ItemData.parse((CompoundTag) s);
             if (!stack.isEmpty()) q.rewardItems.add(stack);
         }
-        q.status = parse(Status.class, t.getString("status"), Status.ACTIVE);
-        q.started = t.getLong("started");
-        q.finished = t.getLong("finished");
-        q.extra = t.getCompound("extra").copy();
-        q.shared = t.getBoolean("shared");
+        q.status = parse(Status.class, t.getStringOr("status",""), Status.ACTIVE);
+        q.started = t.getLongOr("started",0L);
+        q.finished = t.getLongOr("finished",0L);
+        q.extra = t.getCompoundOrEmpty("extra").copy();
+        q.shared = t.getBooleanOr("shared",false);
         return q;
     }
 

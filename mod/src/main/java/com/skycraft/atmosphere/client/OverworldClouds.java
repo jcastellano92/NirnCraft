@@ -1,47 +1,35 @@
 package com.skycraft.atmosphere.client;
 
+import com.mojang.renderpearl.api.commands.RenderPass;
+import com.mojang.renderpearl.api.textures.GpuTextureView;
 import com.skycraft.Skycraft;
-import com.skycraft.atmosphere.AtmosphereConfig;
-import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.renderer.DimensionSpecialEffects;
-import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RegisterDimensionSpecialEffectsEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import org.joml.Matrix4f;
+import net.minecraft.client.CloudStatus;
+import net.minecraft.client.renderer.oit.OitRenderPassProvider;
+import net.minecraft.client.renderer.oit.OitStage;
+import net.minecraft.client.renderer.state.level.LevelRenderState;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.phys.Vec3;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.neoforge.client.CustomCloudsRenderer;
+import net.neoforged.neoforge.client.event.RegisterCustomEnvironmentEffectRendererEvent;
+import org.joml.Matrix4fc;
 
-/**
- * Raises the overworld cloud layer from vanilla's y 192 to {@link AtmosphereConfig#CLOUD_HEIGHT} (default 330), so the
- * clouds no longer slice through the Reach, the Velothi and the Jerall Mountains. It replaces the effects registered
- * for {@code minecraft:overworld} with vanilla's own {@link DimensionSpecialEffects.OverworldEffects} and changes only
- * {@link DimensionSpecialEffects#getCloudHeight()}. Vanilla, Embeddium and Oculus/Iris (the {@code cloudHeight}
- * uniform that Complementary's clouds follow) all read the height from there. It is also Skycraft's cloud hook:
- * {@code renderClouds} hands the pass to {@link CloudRenderer}, which suppresses vanilla's mesh when a shader pack
- * draws volumetric clouds, and declines when Skycraft clouds are off.
- */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
-public final class OverworldClouds {
-    private OverworldClouds() {}
-
-    @SubscribeEvent
-    public static void onRegisterEffects(RegisterDimensionSpecialEffectsEvent event) {
-        event.register(BuiltinDimensionTypes.OVERWORLD_EFFECTS, new DimensionSpecialEffects.OverworldEffects() {
-            @Override
-            public float getCloudHeight() {
-                try {
-                    return AtmosphereConfig.CLOUD_HEIGHT.get();
-                } catch (IllegalStateException notLoadedYet) {
-                    return 330.0F;
-                }
-            }
-
-            @Override
-            public boolean renderClouds(ClientLevel level, int ticks, float partialTick, PoseStack poseStack, double camX,
-                                        double camY, double camZ, Matrix4f projectionMatrix) {
-                return CloudRenderer.render(level, partialTick, poseStack, camX, camY, camZ, projectionMatrix);
-            }
-        });
+/** Native environment attribute hook, selected by the Tamriel overworld dimension data. */
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
+public final class OverworldClouds implements CustomCloudsRenderer {
+    @SubscribeEvent public static void register(RegisterCustomEnvironmentEffectRendererEvent event) {
+        event.registerCloudRenderer(Identifier.fromNamespaceAndPath(Skycraft.MODID, "tamriel_clouds"), new OverworldClouds());
+    }
+    @Override public void prepare(LevelRenderState state, Vec3 position, CloudStatus status, int color,
+                                  float height, int range, Matrix4fc modelView) { CloudRenderer.prepare(state); }
+    @Override public boolean renderClouds(LevelRenderState state, CloudStatus status, Matrix4fc modelView, RenderPass pass) {
+        return CloudRenderer.render(state, modelView, pass, null);
+    }
+    @Override public boolean renderCloudsOit(LevelRenderState state, CloudStatus status, Matrix4fc modelView,
+                                           OitStage stage, GpuTextureView depth, OitRenderPassProvider.Parameters parameters) {
+        try (var pass = OitRenderPassProvider.createRenderPass(stage, () -> "Skycraft regional clouds", parameters)) {
+            return CloudRenderer.render(state, modelView, pass, stage);
+        }
     }
 }

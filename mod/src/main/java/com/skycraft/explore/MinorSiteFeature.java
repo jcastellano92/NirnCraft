@@ -19,9 +19,9 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.levelgen.GenerationStep;
-import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
-import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
+import com.skycraft.worldgen.ConfiguredFeature;
+import com.skycraft.worldgen.FeaturePlaceContext;
+import com.skycraft.worldgen.NoneFeatureConfiguration;
 import net.minecraft.world.level.levelgen.structure.Structure;
 
 /**
@@ -30,7 +30,7 @@ import net.minecraft.world.level.levelgen.structure.Structure;
  * trees and plants it clears. Sites give way to surface structures already planned over the chunk (towns, camps,
  * forts), except unique sites and treasure caches, which treasure maps and notes point to.
  */
-public class MinorSiteFeature extends Feature<NoneFeatureConfiguration> {
+public class MinorSiteFeature extends ConfiguredFeature<NoneFeatureConfiguration> {
     public MinorSiteFeature(Codec<NoneFeatureConfiguration> codec) {
         super(codec);
     }
@@ -38,8 +38,8 @@ public class MinorSiteFeature extends Feature<NoneFeatureConfiguration> {
     @Override
     public boolean place(FeaturePlaceContext<NoneFeatureConfiguration> ctx) {
         WorldGenLevel level = ctx.level();
-        ChunkPos chunk = new ChunkPos(ctx.origin());
-        MinorSites.Site site = MinorSites.inChunk(level.getSeed(), chunk.x, chunk.z);
+        ChunkPos chunk = ChunkPos.containing(ctx.origin());
+        MinorSites.Site site = MinorSites.inChunk(level.getSeed(), chunk.x(), chunk.z());
         if (site == null) return false;
         boolean pinned = site.unique() != null || site.kind() == SiteKind.TREASURE_CACHE;
         if (!pinned && surfaceStructureHere(level, chunk)) return false;
@@ -60,8 +60,8 @@ public class MinorSiteFeature extends Feature<NoneFeatureConfiguration> {
             // post-placement support check (same as the landmarks): whatever hovers is pillared down to the ground or removed
             try {
                 int pad = site.kind().radius + 4;
-                int minX = Math.max(site.x() - pad, (chunk.x - 1) << 4), maxX = Math.min(site.x() + pad, ((chunk.x + 1) << 4) + 15);
-                int minZ = Math.max(site.z() - pad, (chunk.z - 1) << 4), maxZ = Math.min(site.z() + pad, ((chunk.z + 1) << 4) + 15);
+                int minX = Math.max(site.x() - pad, (chunk.x() - 1) << 4), maxX = Math.min(site.x() + pad, ((chunk.x() + 1) << 4) + 15);
+                int minZ = Math.max(site.z() - pad, (chunk.z() - 1) << 4), maxZ = Math.min(site.z() + pad, ((chunk.z() + 1) << 4) + 15);
                 com.skycraft.landmarks.Grounding.fix(level, minX, minZ, maxX, maxZ, b::writable, b.pal.stone().defaultBlockState());
             } catch (RuntimeException e) {
                 Skycraft.LOGGER.debug("Skycraft explore: support check failed for {}", MinorSites.describe(site), e);
@@ -123,10 +123,10 @@ public class MinorSiteFeature extends Feature<NoneFeatureConfiguration> {
      * chunk's own references are read: they are complete by the decoration step and need no other chunk.
      */
     static boolean surfaceStructureHere(WorldGenLevel level, ChunkPos chunk) {
-        ChunkAccess access = level.getChunk(chunk.x, chunk.z);
+        ChunkAccess access = level.getChunk(chunk.x(), chunk.z());
         var refs = access.getAllReferences();
         if (refs.isEmpty()) return false;
-        Registry<Structure> registry = level.registryAccess().registryOrThrow(Registries.STRUCTURE);
+        Registry<Structure> registry = level.registryAccess().lookupOrThrow(Registries.STRUCTURE);
         for (var e : refs.entrySet()) {
             if (e.getValue().isEmpty()) continue;
             Structure s = e.getKey();

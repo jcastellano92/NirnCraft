@@ -67,7 +67,7 @@ public final class Scatter {
         double density = ScatterConfig.density();
         if (density <= 0) return 0;
         long seed = level.getSeed();
-        Info info = ZoneModel.chunk(seed, cp.x, cp.z);
+        Info info = ZoneModel.chunk(seed, cp.x(), cp.z());
         ScatterZone zone = info.zone();
         if (zone == ScatterZone.NONE) return 0;
         int flags = structureFlags(level, cp);
@@ -76,9 +76,9 @@ public final class Scatter {
         ScatterRules rules = ScatterRules.get();
         List<Group> groups = rules.zones.get(zone);
         if (groups == null || groups.isEmpty()) return 0;
-        RandomSource rnd = RandomSource.create(mix(seed ^ mix(((long) cp.x << 32) ^ (cp.z & 0xFFFFFFFFL) ^ SALT)));
+        RandomSource rnd = RandomSource.create(mix(seed ^ mix(((long) cp.x() << 32) ^ (cp.z() & 0xFFFFFFFFL) ^ SALT)));
         Run run = new Run(level, cp, info, zone, rnd, rules);
-        ScatterStats.rolled(cp.x, cp.z, zone);
+        ScatterStats.rolled(cp.x(), cp.z(), zone);
         for (Group g : groups) {
             double mult = switch (g.scale) {
                 case "human" -> 0.35 + 1.3 * info.humanity();
@@ -107,7 +107,7 @@ public final class Scatter {
         Info info = ZoneModel.at(seed, x, z);
         Run run = new Run(level, cp, info, info.zone(), rnd, ScatterRules.get());
         run.planned = true;
-        int minX = cp.x * 16 + 1, maxX = cp.x * 16 + 14, minZ = cp.z * 16 + 1, maxZ = cp.z * 16 + 14;
+        int minX = cp.x() * 16 + 1, maxX = cp.x() * 16 + 14, minZ = cp.z() * 16 + 1, maxZ = cp.z() * 16 + 14;
         for (int attempt = 0; attempt < 4; attempt++) {
             int px = attempt == 0 ? x : Math.max(minX, Math.min(maxX, x + rnd.nextInt(5) - 2));
             int pz = attempt == 0 ? z : Math.max(minZ, Math.min(maxZ, z + rnd.nextInt(5) - 2));
@@ -141,10 +141,10 @@ public final class Scatter {
 
     /** 1 = a surface structure (town, camp, fort) has a piece over the chunk; 2 = a dungeon structure does. */
     static int structureFlags(WorldGenLevel level, ChunkPos chunk) {
-        ChunkAccess access = level.getChunk(chunk.x, chunk.z);
+        ChunkAccess access = level.getChunk(chunk.x(), chunk.z());
         var refs = access.getAllReferences();
         if (refs.isEmpty()) return 0;
-        Registry<Structure> registry = level.registryAccess().registryOrThrow(Registries.STRUCTURE);
+        Registry<Structure> registry = level.registryAccess().lookupOrThrow(Registries.STRUCTURE);
         int flags = 0;
         for (var e : refs.entrySet()) {
             if (e.getValue().isEmpty()) continue;
@@ -155,7 +155,7 @@ public final class Scatter {
             if (h.is(LocationTags.DUNGEONS)) {
                 // only the surface above a dungeon's start (its entrance end) is "dungeon-adjacent", not its whole extent
                 for (long start : e.getValue()) {
-                    if (Math.abs(ChunkPos.getX(start) - chunk.x) <= 3 && Math.abs(ChunkPos.getZ(start) - chunk.z) <= 3) flags |= 2;
+                    if (Math.abs(ChunkPos.getX(start) - chunk.x()) <= 3 && Math.abs(ChunkPos.getZ(start) - chunk.z()) <= 3) flags |= 2;
                 }
             }
         }
@@ -193,7 +193,7 @@ public final class Scatter {
             this.rules = rules;
             this.seed = level.getSeed();
             this.palette = Palette.of(info.province(), info.archetype());
-            this.sites = MinorSites.within(seed, cp.x * 16 + 8, cp.z * 16 + 8, 60);
+            this.sites = MinorSites.within(seed, cp.x() * 16 + 8, cp.z() * 16 + 8, 60);
         }
 
         /** Weighted pick of a kind of the group that may stand in this province and height. */
@@ -220,7 +220,7 @@ public final class Scatter {
             if ("animal_den".equals(k.id)) {
                 // Monster/animal dens avoid populated settlements, traveled road corridors, and cluster sparsely
                 if (info.settleEdge() < 180 || info.roadHint() >= 0.22f || info.humanity() >= 0.25f) return false;
-                if (((cp.x * 31 + cp.z * 17) & 7) != 0) return false;
+                if (((cp.x() * 31 + cp.z() * 17) & 7) != 0) return false;
             }
             return perKind.getOrDefault(k.id, 0) < rules.caps.perKind;
         }
@@ -234,14 +234,14 @@ public final class Scatter {
             for (int attempt = 0; attempt < rules.caps.attempts; attempt++) {
                 int x, z;
                 if (radius < 0) {
-                    x = cp.x * 16 + MARGIN + r.nextInt(16 - 2 * MARGIN);
-                    z = cp.z * 16 + MARGIN + r.nextInt(16 - 2 * MARGIN);
+                    x = cp.x() * 16 + MARGIN + r.nextInt(16 - 2 * MARGIN);
+                    z = cp.z() * 16 + MARGIN + r.nextInt(16 - 2 * MARGIN);
                 } else {
                     x = ox + r.nextInt(radius * 2 + 1) - radius;
                     z = oz + r.nextInt(radius * 2 + 1) - radius;
                     // members stay within the same chunk neighbourhood the engine owns
-                    x = Math.max(cp.x * 16 + 1, Math.min(cp.x * 16 + 14, x));
-                    z = Math.max(cp.z * 16 + 1, Math.min(cp.z * 16 + 14, z));
+                    x = Math.max(cp.x() * 16 + 1, Math.min(cp.x() * 16 + 14, x));
+                    z = Math.max(cp.z() * 16 + 1, Math.min(cp.z() * 16 + 14, z));
                 }
                 if (build(k, x, z, true)) return true;
             }
@@ -263,7 +263,7 @@ public final class Scatter {
         boolean placeCluster(Kind k) {
             ScatterRules.Cluster c = k.cluster;
             if (c.members.isEmpty()) return false;
-            int cx = cp.x * 16 + 6 + r.nextInt(5), cz = cp.z * 16 + 6 + r.nextInt(5);
+            int cx = cp.x() * 16 + 6 + r.nextInt(5), cz = cp.z() * 16 + 6 + r.nextInt(5);
             int n = c.min + r.nextInt(Math.max(1, c.max - c.min + 1));
             int placed = 0;
             for (int i = 0; i < n && count < rules.caps.chunk; i++) {
@@ -384,7 +384,7 @@ public final class Scatter {
             count += Math.max(1, k.items);
             if (k.isolated) isolated++;
             perKind.merge(k.id, 1, Integer::sum);
-            ScatterStats.placed(cp.x, cp.z, zone, k, x, z, info.humanity(), planned);
+            ScatterStats.placed(cp.x(), cp.z(), zone, k, x, z, info.humanity(), planned);
             return true;
         }
     }

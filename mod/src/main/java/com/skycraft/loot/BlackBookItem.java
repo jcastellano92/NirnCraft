@@ -12,11 +12,11 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.BookItem;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
@@ -30,7 +30,7 @@ import java.util.Map;
  * moment and grants a secret: one perk point and two levels in the book's skill. Read books are remembered in
  * {@code module("loot").black_books_read}. Never enchantable (it is a book only in name).
  */
-public class BlackBookItem extends BookItem {
+public class BlackBookItem extends Item {
     /** The secret each book teaches (Skyrim's Black Books give a choice of three powers; Skycraft grants a skill). */
     private static final Map<String, Skill> SECRET = Map.of(
             "epistolary_acumen", Skill.ENCHANTING,
@@ -46,14 +46,7 @@ public class BlackBookItem extends BookItem {
     }
 
     @Override
-    public boolean isEnchantable(ItemStack stack) {
-        return false;
-    }
-
-    @Override
-    public int getEnchantmentValue() {
-        return 0;
-    }
+    public boolean supportsEnchantment(ItemStack stack, net.minecraft.core.Holder<net.minecraft.world.item.enchantment.Enchantment> enchantment) { return false; }
 
     @Override
     public Component getName(ItemStack stack) {
@@ -67,23 +60,23 @@ public class BlackBookItem extends BookItem {
     }
 
     public static boolean hasRead(PlayerData data, String book) {
-        return data.module(Collectibles.MODULE).getCompound("black_books_read").contains(book);
+        return data.module(Collectibles.MODULE).getCompoundOrEmpty("black_books_read").contains(book);
     }
 
     @Override
-    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+    public InteractionResult use(Level level, Player player, InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
         Collectibles.Entry e = CollectibleItem.entry(stack);
         if (e == null) {
             // a realm-placed Black Book with only a chapter: it just opens the way into Apocrypha
-            if (!level.isClientSide && player instanceof ServerPlayer sp) {
+            if (!level.isClientSide() && player instanceof ServerPlayer sp) {
                 com.skycraft.realms.RealmTravel.readBlackBookItem(sp, com.skycraft.realms.item.BlackBookItem.chapter(stack));
             }
-            return InteractionResultHolder.sidedSuccess(stack, level.isClientSide);
+            return com.skycraft.platform.Interactions.sidedSuccess(level.isClientSide()).heldItemTransformedTo(stack);
         }
-        if (!level.isClientSide && player instanceof ServerPlayer sp) {
+        if (!level.isClientSide() && player instanceof ServerPlayer sp) {
             PlayerData data = SkyData.get(sp);
-            CompoundTag read = data.module(Collectibles.MODULE).getCompound("black_books_read");
+            CompoundTag read = data.module(Collectibles.MODULE).getCompoundOrEmpty("black_books_read");
             if (read.contains(e.id())) {
                 Notifier.message(sp, Component.translatable("message.skycraft.loot.black_book_read_again"));
             } else {
@@ -93,28 +86,28 @@ public class BlackBookItem extends BookItem {
                 Skill skill = SECRET.getOrDefault(e.id(), Skill.ENCHANTING);
                 if (data.getSkill(skill) < Skill.MAX_LEVEL) Progression.increaseSkill(sp, skill, 2);
                 data.markDirty();
-                sp.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 20 * 6, 0));
-                sp.addEffect(new MobEffectInstance(MobEffects.DARKNESS, 20 * 4, 0));
+                sp.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.NAUSEA), 20 * 6, 0));
+                sp.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.DARKNESS), 20 * 4, 0));
                 Notifier.title(sp, Component.translatable("message.skycraft.loot.black_book_title").withStyle(ChatFormatting.DARK_GREEN),
                         Component.translatable("message.skycraft.loot.black_book_secret", skill.displayName()));
                 level.playSound(null, player.blockPosition(), SoundEvents.ENDER_EYE_DEATH, SoundSource.PLAYERS, 1f, 0.5f);
             }
             // every Black Book is also a door: reading it pulls the reader into Apocrypha (chapter from the book, else by title)
-            int chapter = stack.hasTag() && stack.getTag().contains("chapter")
+            int chapter = com.skycraft.inventory.ItemData.hasCustom(stack) && com.skycraft.inventory.ItemData.custom(stack).contains("chapter")
                     ? com.skycraft.realms.item.BlackBookItem.chapter(stack)
                     : 1 + Math.floorMod(e.id().hashCode(), com.skycraft.realms.RealmLayout.APOCRYPHA_CHAPTERS);
             com.skycraft.realms.RealmTravel.readBlackBookItem(sp, chapter);
         }
-        return InteractionResultHolder.sidedSuccess(stack, level.isClientSide);
+        return com.skycraft.platform.Interactions.sidedSuccess(level.isClientSide()).heldItemTransformedTo(stack);
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
+    public void appendHoverText(ItemStack stack, net.minecraft.world.item.Item.TooltipContext context263, net.minecraft.world.item.component.TooltipDisplay display263, java.util.function.Consumer<Component> tooltip, TooltipFlag flag) {
         Collectibles.Entry e = CollectibleItem.entry(stack);
         if (e == null) return;
         Skill skill = SECRET.get(e.id());
-        tooltip.add(Component.translatable("tooltip.skycraft.loot.black_book").withStyle(ChatFormatting.DARK_GREEN));
-        if (skill != null) tooltip.add(Component.translatable("tooltip.skycraft.loot.black_book_secret", skill.displayName())
+        tooltip.accept(Component.translatable("tooltip.skycraft.loot.black_book").withStyle(ChatFormatting.DARK_GREEN));
+        if (skill != null) tooltip.accept(Component.translatable("tooltip.skycraft.loot.black_book_secret", skill.displayName())
                 .withStyle(ChatFormatting.GRAY));
     }
 }

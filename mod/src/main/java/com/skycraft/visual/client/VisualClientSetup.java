@@ -6,16 +6,16 @@ import com.skycraft.client.hud.SkyCrosshair;
 import com.skycraft.client.hud.TargetHud;
 import com.skycraft.visual.VisualParticles;
 import net.minecraft.core.particles.SimpleParticleType;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RegisterGuiOverlaysEvent;
-import net.minecraftforge.client.event.RegisterParticleProvidersEvent;
-import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
+import net.neoforged.neoforge.client.event.RegisterParticleProvidersEvent;
+import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
+import java.util.function.Supplier;
 
 /** Mod-bus client registration of the visual package: particle sprites and the extra HUD overlays. */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
 public final class VisualClientSetup {
     private VisualClientSetup() {}
 
@@ -34,7 +34,7 @@ public final class VisualClientSetup {
         register(event, VisualParticles.SPELL_SPARK, AtmosParticle.Kind.SPELL_SPARK);
     }
 
-    private static void register(RegisterParticleProvidersEvent event, RegistryObject<SimpleParticleType> type, AtmosParticle.Kind kind) {
+    private static void register(RegisterParticleProvidersEvent event, Supplier<SimpleParticleType> type, AtmosParticle.Kind kind) {
         event.registerSpriteSet(type.get(), sprites -> {
             AmbientParticles.SPRITES[kind.ordinal()] = sprites;
             return new AtmosParticle.Provider(kind, sprites);
@@ -42,9 +42,9 @@ public final class VisualClientSetup {
     }
 
     @SubscribeEvent
-    public static void overlays(RegisterGuiOverlaysEvent event) {
-        event.registerAbove(VanillaGuiOverlay.CROSSHAIR.id(), "sky_crosshair", SkyCrosshair::render);
-        event.registerAbove(VanillaGuiOverlay.BOSS_EVENT_PROGRESS.id(), "target_bar", TargetHud::render);
-        event.registerAbove(VanillaGuiOverlay.BOSS_EVENT_PROGRESS.id(), "sky_boss_bar", SkyBossHud::render);
+    public static void overlays(RegisterGuiLayersEvent event) {
+        event.registerAbove(VanillaGuiLayers.CROSSHAIR, net.minecraft.resources.Identifier.fromNamespaceAndPath(Skycraft.MODID, "sky_crosshair"), SkyCrosshair::render);
+        event.registerAbove(VanillaGuiLayers.BOSS_OVERLAY, net.minecraft.resources.Identifier.fromNamespaceAndPath(Skycraft.MODID, "target_bar"), TargetHud::render);
+        event.registerAbove(VanillaGuiLayers.BOSS_OVERLAY, net.minecraft.resources.Identifier.fromNamespaceAndPath(Skycraft.MODID, "sky_boss_bar"), SkyBossHud::render);
     }
 }

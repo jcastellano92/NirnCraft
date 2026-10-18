@@ -92,7 +92,7 @@ public final class SettlementAnchors extends SavedData {
 
     public static SettlementAnchors get(ServerLevel level) {
         ServerLevel overworld = level.getServer().overworld();
-        return overworld.getDataStorage().computeIfAbsent(SettlementAnchors::load, SettlementAnchors::new, NAME);
+        return com.skycraft.platform.SavedDataTypes.get(overworld, NAME, SettlementAnchors::load, SettlementAnchors::new, d -> d.save(new CompoundTag()));
     }
 
     // ------------------------------------------------------------------ public API
@@ -279,20 +279,20 @@ public final class SettlementAnchors extends SavedData {
 
     public static SettlementAnchors load(CompoundTag tag) {
         SettlementAnchors d = new SettlementAnchors();
-        ListTag list = tag.getList("entries", Tag.TAG_COMPOUND);
+        ListTag list = tag.getListOrEmpty("entries");
         for (int i = 0; i < list.size(); i++) {
-            CompoundTag t = list.getCompound(i);
-            Entry e = new Entry(t.getString("key"), t.getInt("x"), t.getInt("z"), t.getInt("r"));
-            for (long s : t.getLongArray("starts")) e.starts.add(s);
-            for (int s : t.getIntArray("spawned")) e.spawned.add(s);
-            ListTag owners = t.getList("owners", Tag.TAG_STRING);
-            byte[] types = t.getByteArray("types");
-            long[] pos = t.getLongArray("pos");
-            int[] own = t.getIntArray("own");
+            CompoundTag t = list.getCompoundOrEmpty(i);
+            Entry e = new Entry(t.getStringOr("key", ""), t.getIntOr("x", 0), t.getIntOr("z", 0), t.getIntOr("r", 0));
+            for (long s : t.getLongArray("starts").orElseGet(() -> new long[0])) e.starts.add(s);
+            for (int s : t.getIntArray("spawned").orElseGet(() -> new int[0])) e.spawned.add(s);
+            ListTag owners = t.getListOrEmpty("owners");
+            byte[] types = t.getByteArray("types").orElseGet(() -> new byte[0]);
+            long[] pos = t.getLongArray("pos").orElseGet(() -> new long[0]);
+            int[] own = t.getIntArray("own").orElseGet(() -> new int[0]);
             for (int k = 0; k < Math.min(types.length, Math.min(pos.length, own.length)); k++) {
                 int ti = types[k] & 0xFF;
                 if (ti >= AnchorType.VALUES.length) continue;
-                String owner = own[k] >= 0 && own[k] < owners.size() ? owners.getString(own[k]) : "";
+                String owner = own[k] >= 0 && own[k] < owners.size() ? owners.getStringOr(own[k], "") : "";
                 e.anchors.add(new Anchor(AnchorType.VALUES[ti], BlockPos.of(pos[k]), owner));
             }
             d.entries.put(e.key, e);
@@ -300,7 +300,6 @@ public final class SettlementAnchors extends SavedData {
         return d;
     }
 
-    @Override
     public CompoundTag save(CompoundTag tag) {
         ListTag list = new ListTag();
         for (Entry e : entries.values()) {

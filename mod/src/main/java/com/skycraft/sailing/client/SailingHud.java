@@ -4,10 +4,9 @@ import com.skycraft.core.HudStack;
 import com.skycraft.sailing.ShipEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
-import net.minecraftforge.client.gui.overlay.ForgeGui;
 
 /**
  * The sailing panel shown while aboard a ship (bottom right): a wind rose with the ship's head up and the wind
@@ -18,9 +17,11 @@ public final class SailingHud {
 
     private SailingHud() {}
 
-    public static void render(ForgeGui gui, GuiGraphics g, float partial, int width, int height) {
+    public static void render(GuiGraphicsExtractor g, net.minecraft.client.DeltaTracker delta) {
+        float partial = delta.getGameTimeDeltaPartialTick(false);
+        int width = g.guiWidth(), height = g.guiHeight();
         Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null || mc.options.hideGui || VoyageOverlay.active()) return;
+        if (mc.player == null || mc.gui.hud.isHidden() || VoyageOverlay.active()) return;
         if (!(mc.player.getVehicle() instanceof ShipEntity ship)) return;
         Font font = mc.font;
         int w = 168, h = 58;
@@ -61,23 +62,23 @@ public final class SailingHud {
                 : off < 35 ? "sailing.skycraft.hud.running" : off < 80 ? "sailing.skycraft.hud.broad_reach"
                 : off < 110 ? "sailing.skycraft.hud.beam_reach" : off < ship.shipType.upwindLimit ? "sailing.skycraft.hud.close_hauled"
                 : "sailing.skycraft.hud.in_irons";
-        g.drawString(font, Component.translatable(pointKey), tx, ty, TEXT, false);
+        g.text(font, Component.translatable(pointKey), tx, ty, TEXT, false);
         ty += 11;
         if (ship.shipType.hasSail()) {
             Component sail = Component.translatable("sailing.skycraft.hud.sail", Component.translatable("sailing.skycraft.sail." + ship.getSail()),
                     SailingClient.SAIL_UP.getTranslatedKeyMessage(), SailingClient.SAIL_DOWN.getTranslatedKeyMessage());
-            g.drawString(font, sail, tx, ty, DIM, false);
+            g.text(font, sail, tx, ty, DIM, false);
         }
         ty += 11;
         // hull bar
         float hull = ship.getHull() / ship.shipType.maxHull;
-        g.drawString(font, Component.translatable("sailing.skycraft.hud.hull"), tx, ty, DIM, false);
+        g.text(font, Component.translatable("sailing.skycraft.hud.hull"), tx, ty, DIM, false);
         int bx = tx + 28, bw = w - (bx - x) - 6;
         g.fill(bx, ty + 2, bx + bw, ty + 7, 0xFF2A1A12);
         int col = hull > 0.5f ? 0xFFB08A50 : hull > 0.25f ? 0xFFD07030 : 0xFFE03020;
         g.fill(bx, ty + 2, bx + Math.round(bw * hull), ty + 7, col);
         ty += 11;
         double speed = Math.hypot(ship.getX() - ship.xo, ship.getZ() - ship.zo) * 20;
-        g.drawString(font, Component.translatable("sailing.skycraft.hud.speed", String.format(java.util.Locale.ROOT, "%.1f", speed)), tx, ty, DIM, false);
+        g.text(font, Component.translatable("sailing.skycraft.hud.speed", String.format(java.util.Locale.ROOT, "%.1f", speed)), tx, ty, DIM, false);
     }
 }

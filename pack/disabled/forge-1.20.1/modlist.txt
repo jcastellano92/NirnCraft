@@ -1,0 +1,46 @@
+# Skycraft mod list for Minecraft 1.20.1 / Forge 47.4.10
+# Format: <source>:<slug> [| <fallback source>:<slug>]   # comment
+# Sources: mr = Modrinth, cf = CurseForge. tools/build-pack.sh resolves each entry with packwiz
+# (dependencies are added automatically) and fails if any entry can't be resolved.
+# An entry whose pack/<mods|shaderpacks|resourcepacks>/<slug>.pw.toml already exists keeps that pinned version;
+# to update a mod, edit or delete its .pw.toml.
+# Skycraft prefers its own implementations over third-party feature mods: trees, townsfolk, followers, NPC dialogue, the map
+# and physics are Skycraft Core's. Library and performance mods are fine.
+
+# --- Performance (runs efficiently, even with huge view distances) ---
+mr:embeddium                     # Sodium-based renderer for Forge (client)
+mr:oculus                        # shader support (works with Distant Horizons) (client)
+mr:distanthorizons               # Distant Horizons: LOD terrain to the horizon
+mr:modernfix                     # faster launch, lower memory
+mr:ferrite-core                  # memory usage
+mr:saturn                        # more memory savings (complements FerriteCore/ModernFix)
+mr:entityculling                 # skip rendering hidden entities (client)
+mr:immediatelyfast               # faster immediate-mode rendering: HUD, text, maps (client)
+mr:dynamic-fps                   # lower FPS when the window is in the background (client)
+mr:canary                        # Lithium port: server tick optimisations
+mr:krypton-fnp                   # Krypton (FNP/Reno): faster networking stack
+mr:clumps                        # merges XP orbs: fewer entities
+mr:structure-layout-optimizer    # faster jigsaw structure generation (towns, dungeons)
+mr:memoryleakfix
+mr:spark                         # profiler for diagnosing lag
+
+# --- Core RPG behaviour (Skycraft Core is injected at build time from mod/build/libs; see docs/DEVELOPING.md) ---
+mr:lootr                         # per-player loot chests: every player gets their own dungeon loot
+mr:better-combat                 # directional combos and weapon swings
+cf:dynamiclights-reforged | mr:dynamic-lights-reforged   # torches light up the world in your hand
+mr:mouse-tweaks
+mr:controllable | cf:controllable   # controller support (Steam Deck, gamepads)
+mr:default-options               # ships default keybinds for new players
+mr:essential                     # easy multiplayer hosting/invites with friends, skins & cosmetics
+mr:itemphysic-lite | cf:item-physic-lite   # dropped items lie in the world with physics (Skyrim clutter)
+
+# --- NPCs, factions: townsfolk, companions, followers and marriage are Skycraft's own (society module) ---
+
+# --- Vampires, werewolves: Skycraft's own (curse module) ---
+
+# --- Towns, cities, dungeons, roads and secrets ---
+
+# --- Survival: fishing, camping (bedrolls, tents) and player corpses are Skycraft's own (survival module) ---
+
+# --- Shaders (optional, client) ---
+mr:complementary-reimagined         # shader pack with Distant Horizons support

@@ -1,0 +1,16 @@
+name = "Iris Shaders"
+filename = "iris-neoforge-1.11.7+mc26.3.jar"
+side = "client"
+
+[download]
+url = "https://cdn.modrinth.com/data/YL57xq9U/versions/Ag5S66CF/iris-neoforge-1.11.7%2Bmc26.3.jar"
+hash-format = "sha512"
+hash = "302659f09e50d02a6cd96075be93aade2a2f9d709afe21d56465228fb7d7f4717566e3702a7872479df2fff9b7a5ff5b1b6047cc95e09ee6120fad5ea5857eec"
+
+[update.modrinth]
+mod-id = "YL57xq9U"
+version = "Ag5S66CF"
+
+[skycraft]
+minecraft = "26.3"
+loader = "neoforge"

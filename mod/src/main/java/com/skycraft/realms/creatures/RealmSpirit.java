@@ -19,8 +19,8 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobSpawnType;
-import net.minecraft.world.entity.MobType;
+import net.minecraft.world.entity.EntitySpawnReason;
+
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.control.LookControl;
@@ -50,7 +50,7 @@ public class RealmSpirit extends PathfinderMob implements SkyCreature {
         super(type, level);
         CreatureSpec s = spec();
         this.xpReward = s.xp;
-        this.setMaxUpStep(s.stepHeight);
+        this.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.STEP_HEIGHT).setBaseValue(s.stepHeight);
         MoveControl move = CreatureCore.moveControl(this, s);
         if (move != null) this.moveControl = move;
         LookControl look = CreatureCore.lookControl(this, s);
@@ -71,9 +71,9 @@ public class RealmSpirit extends PathfinderMob implements SkyCreature {
     }
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        this.entityData.define(VARIANT, 0);
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(VARIANT, 0);
     }
 
     @Override
@@ -112,9 +112,9 @@ public class RealmSpirit extends PathfinderMob implements SkyCreature {
 
     @Override
     @Nullable
-    public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, MobSpawnType reason,
-                                        @Nullable SpawnGroupData data, @Nullable CompoundTag tag) {
-        data = super.finalizeSpawn(level, difficulty, reason, data, tag);
+    public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, EntitySpawnReason reason,
+                                        @Nullable SpawnGroupData data) {
+        data = super.finalizeSpawn(level, difficulty, reason, data);
         if (!variantChosen && spec().variantPicker != null) setVariant(spec().variantPicker.pick(level, this.blockPosition(), this.getRandom()));
         CreatureCore.applyVariantPower(this, spec(), getVariant());
         return data;
@@ -135,15 +135,15 @@ public class RealmSpirit extends PathfinderMob implements SkyCreature {
     // ------------------------------------------------------------------ combat & body
 
     @Override
-    public boolean hurt(DamageSource source, float amount) {
+    public boolean hurtServer(net.minecraft.server.level.ServerLevel serverLevel, DamageSource source, float amount) {
         if (source.is(DamageTypeTags.IS_FIRE)) lastFireHurt = this.tickCount;
         float mult = CreatureCore.damageMultiplier(spec(), source);
         if (mult <= 0) return false;
-        return super.hurt(source, amount * mult);
+        return super.hurtServer(serverLevel, source, amount * mult);
     }
 
     @Override
-    public boolean doHurtTarget(Entity target) {
+    public boolean doHurtTarget(net.minecraft.server.level.ServerLevel serverLevel, Entity target) {
         // the moves strike through the attack goal; plain melee (e.g. a summon's vanilla goals) uses the same blow
         return target instanceof LivingEntity living && com.skycraft.creatures.spec.Attacks.strike(this, living, 1f);
     }
@@ -164,12 +164,12 @@ public class RealmSpirit extends PathfinderMob implements SkyCreature {
     }
 
     @Override
-    public MobType getMobType() {
-        return spec().undead ? MobType.UNDEAD : super.getMobType();
+    public boolean isInvertedHealAndHarm() {
+        return spec().undead || super.isInvertedHealAndHarm();
     }
 
     @Override
-    public boolean causeFallDamage(float distance, float multiplier, DamageSource source) {
+    public boolean causeFallDamage(double distance, float multiplier, DamageSource source) {
         if (spec().move != CreatureSpec.Move.WALK) return false;
         return super.causeFallDamage(distance, multiplier, source);
     }
@@ -182,7 +182,7 @@ public class RealmSpirit extends PathfinderMob implements SkyCreature {
     @Override
     public void aiStep() {
         super.aiStep();
-        if (this.level().isClientSide) {
+        if (this.level().isClientSide()) {
             if (spec().clientTick != null) spec().clientTick.accept(this);
         } else {
             CreatureCore.serverTick(this, spec(), lastFireHurt);
@@ -252,20 +252,26 @@ public class RealmSpirit extends PathfinderMob implements SkyCreature {
     @Override
     public void die(DamageSource source) {
         super.die(source);
-        if (!this.level().isClientSide && spec().onDeath != null) spec().onDeath.accept(this);
+        if (!this.level().isClientSide() && spec().onDeath != null) spec().onDeath.accept(this);
     }
 
     // ------------------------------------------------------------------ save
 
     @Override
-    public void addAdditionalSaveData(CompoundTag tag) {
-        super.addAdditionalSaveData(tag);
+    public void addAdditionalSaveData(net.minecraft.world.level.storage.ValueOutput output263) {
+        super.addAdditionalSaveData(output263);
+        net.minecraft.nbt.CompoundTag tag = new net.minecraft.nbt.CompoundTag();
+        
         tag.putInt("Variant", getVariant());
+    
+        output263.store(tag);
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag tag) {
-        super.readAdditionalSaveData(tag);
-        if (tag.contains("Variant")) setVariant(tag.getInt("Variant"));
+    public void readAdditionalSaveData(net.minecraft.world.level.storage.ValueInput input263) {
+        super.readAdditionalSaveData(input263);
+        net.minecraft.nbt.CompoundTag tag = com.skycraft.platform.ValueTags.read(input263 , "Variant");
+        
+        if (tag.contains("Variant")) setVariant(tag.getIntOr("Variant", 0));
     }
 }

@@ -22,12 +22,12 @@ public final class FishStock extends SavedData {
     private final Long2LongOpenHashMap entries = new Long2LongOpenHashMap();
 
     public static FishStock get(ServerLevel level) {
-        return level.getDataStorage().computeIfAbsent(FishStock::load, FishStock::new, NAME);
+        return com.skycraft.platform.SavedDataTypes.get(level, NAME, FishStock::load, FishStock::new, value263 -> value263.save(new net.minecraft.nbt.CompoundTag()));
     }
 
     /** Fish left around {@code pos} right now (0..{@value #MAX}). */
     public int stock(ServerLevel level, BlockPos pos) {
-        long key = ChunkPos.asLong(pos.getX() >> 4, pos.getZ() >> 4);
+        long key = ChunkPos.pack(pos.getX() >> 4, pos.getZ() >> 4);
         if (!entries.containsKey(key)) return MAX;
         long v = entries.get(key);
         int stock = (int) (v >>> 56);
@@ -40,7 +40,7 @@ public final class FishStock extends SavedData {
 
     /** One fish was caught here. */
     public void take(ServerLevel level, BlockPos pos) {
-        long key = ChunkPos.asLong(pos.getX() >> 4, pos.getZ() >> 4);
+        long key = ChunkPos.pack(pos.getX() >> 4, pos.getZ() >> 4);
         int left = Math.max(0, stock(level, pos) - 1);
         if (left >= MAX) {
             entries.remove(key);
@@ -54,15 +54,14 @@ public final class FishStock extends SavedData {
 
     public static FishStock load(CompoundTag tag) {
         FishStock s = new FishStock();
-        ListTag list = tag.getList("stock", Tag.TAG_COMPOUND);
+        ListTag list = tag.getListOrEmpty("stock");
         for (int i = 0; i < list.size(); i++) {
-            CompoundTag t = list.getCompound(i);
-            s.entries.put(t.getLong("k"), t.getLong("v"));
+            CompoundTag t = list.getCompoundOrEmpty(i);
+            s.entries.put(t.getLongOr("k",0L), t.getLongOr("v",0L));
         }
         return s;
     }
 
-    @Override
     public CompoundTag save(CompoundTag tag) {
         ListTag list = new ListTag();
         entries.long2LongEntrySet().forEach(e -> {

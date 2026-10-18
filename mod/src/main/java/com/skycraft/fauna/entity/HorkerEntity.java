@@ -46,7 +46,7 @@ public class HorkerEntity extends FaunaAnimal {
         this.goalSelector.addGoal(7, new RandomLookAroundGoal(this));
         this.targetSelector.addGoal(1, new HurtByTargetGoal(this).setAlertOthers());
         this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, 10, true, false,
-                p -> canAttackPlayers(p) && this.distanceToSqr(p) < 25.0));
+                (p, targetLevel263) -> canAttackPlayers(p) && this.distanceToSqr(p) < 25.0));
     }
 
     @Override

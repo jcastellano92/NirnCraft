@@ -131,7 +131,7 @@ public final class GroundCheck {
         root.addProperty("counters", Grounding.counters());
         say.accept("  counters since boot: " + Grounding.counters());
         try {
-            Path dir = level.getServer().getServerDirectory().toPath().resolve("skycraft-landmarks");
+            Path dir = level.getServer().getServerDirectory().resolve("skycraft-landmarks");
             Files.createDirectories(dir);
             Files.writeString(dir.resolve("groundcheck.json"), root.toString(), StandardCharsets.UTF_8);
         } catch (java.io.IOException e) {
@@ -225,7 +225,7 @@ public final class GroundCheck {
                         // the lowest block of the biggest part, to tell what hovers
                         most = p.size();
                         BlockPos lowest = BlockPos.of(p.feet.getLong(0));
-                        what = " " + level.getBlockState(lowest).getBlock().builtInRegistryHolder().key().location().getPath()
+                        what = " " + level.getBlockState(lowest).getBlock().builtInRegistryHolder().key().identifier().getPath()
                                 + "@" + (lowest.getX() - site.x()) + "," + lowest.getY() + "," + (lowest.getZ() - site.z());
                     }
                 }

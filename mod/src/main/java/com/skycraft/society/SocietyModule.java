@@ -1,10 +1,10 @@
 package com.skycraft.society;
 
 import com.skycraft.society.entity.NpcEntity;
-import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.config.ModConfig;
+import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.ModLoadingContext;
+import net.neoforged.fml.config.ModConfig;
 
 /**
  * NPC types, overhead dialogue barks, reputation, random encounters, faction cosmetics and PvP rules.
@@ -35,10 +35,10 @@ public final class SocietyModule {
         com.skycraft.homestead.Homesteads.setSpouseLocator((player, bed, radius) -> {
             java.util.UUID spouse = Marriage.spouseOf(player);
             if (spouse == null) return null;
-            net.minecraft.world.entity.Entity e = player.serverLevel().getEntity(spouse);
+            net.minecraft.world.entity.Entity e = player.level().getEntity(spouse);
             return e != null && e.distanceToSqr(bed.getX() + 0.5, bed.getY(), bed.getZ() + 0.5) <= radius * radius ? e : null;
         });
-        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, SocietyConfig.SPEC, "skycraft-society.toml");
+        com.skycraft.Skycraft.config(ModConfig.Type.LOCAL, SocietyConfig.SPEC, "skycraft-society.toml");
         NpcEntities.init(modBus);
         modBus.addListener(SocietyModule::onAttributes);
         NpcDialogue.register();

@@ -1,0 +1,125 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": {
+        "type": "minecraft:uniform",
+        "min": 2,
+        "max": 4
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:iron_sword",
+          "weight": 12,
+          "modifier": {
+            "kind": "weapon",
+            "enchant_chance": 0.05,
+            "quality_chance": 0.1,
+            "type": "skycraft:leveled_gear"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:iron_sword",
+          "weight": 6,
+          "modifier": {
+            "kind": "shield",
+            "enchant_chance": 0.05,
+            "quality_chance": 0.1,
+            "type": "skycraft:regional_gear"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:iron_chestplate",
+          "weight": 8,
+          "modifier": {
+            "kind": "armor",
+            "enchant_chance": 0.05,
+            "quality_chance": 0.1,
+            "type": "skycraft:leveled_gear"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:arrow",
+          "weight": 8,
+          "modifier": [
+            {
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 5,
+                "max": 14
+              },
+              "type": "minecraft:set_count"
+            },
+            {
+              "kind": "arrow",
+              "type": "skycraft:leveled_gear"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:septim",
+          "weight": 8,
+          "modifier": {
+            "count": {
+              "type": "minecraft:uniform",
+              "min": 5,
+              "max": 40
+            },
+            "type": "minecraft:set_count"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:iron_ingot",
+          "weight": 4,
+          "modifier": {
+            "count": {
+              "type": "minecraft:uniform",
+              "min": 1,
+              "max": 3
+            },
+            "type": "minecraft:set_count"
+          }
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:book",
+          "weight": 35,
+          "modifier": {
+            "tag": "{book:\"explore_note_last_orders\",skycraft_value:2}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 65
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:loot_table",
+          "weight": 6,
+          "value": "skycraft:chests/skill_books"
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 94
+        }
+      ]
+    }
+  ],
+  "random_sequence": "skycraft:explore/battlefield"
+}

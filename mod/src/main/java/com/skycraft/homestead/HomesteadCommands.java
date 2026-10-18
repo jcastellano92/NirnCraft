@@ -6,19 +6,19 @@ import com.skycraft.Skycraft;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
-import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 /** {@code /skycraft-homestead} (operators): {@code list} the claims, {@code selftest}. */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class HomesteadCommands {
     private HomesteadCommands() {}
 
     @SubscribeEvent
     public static void registerHomesteadCommands(RegisterCommandsEvent event) {
         CommandDispatcher<CommandSourceStack> d = event.getDispatcher();
-        d.register(Commands.literal("skycraft-homestead").requires(s -> s.hasPermission(2))
+        d.register(Commands.literal("skycraft-homestead").requires(s -> s.permissions().hasPermission(net.minecraft.server.permissions.Permissions.COMMANDS_GAMEMASTER))
                 .then(Commands.literal("list").executes(HomesteadCommands::list))
                 .then(Commands.literal("selftest").executes(HomesteadCommands::selftest)));
     }

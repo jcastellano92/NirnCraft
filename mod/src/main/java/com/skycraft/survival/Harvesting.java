@@ -18,7 +18,7 @@ import com.skycraft.survival.block.SkyCropBlock;
 import com.skycraft.vitals.ActionHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -42,11 +42,11 @@ import net.minecraft.world.level.block.SweetBerryBushBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.level.BlockEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.level.BlockEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -63,12 +63,12 @@ import java.util.List;
  * Thumb bonus), crops in a settlement belong to it (taking them is theft), and this class is the only place the Alchemy
  * perk Green Thumb adds produce.</p>
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class Harvesting {
     /** Farmed plants that regrow / are replanted when harvested. */
-    public static final TagKey<Block> HARVESTABLE_CROPS = BlockTags.create(new ResourceLocation(Skycraft.MODID, "harvestable_crops"));
+    public static final TagKey<Block> HARVESTABLE_CROPS = BlockTags.create(Identifier.fromNamespaceAndPath(Skycraft.MODID, "harvestable_crops"));
     /** Wild flowers, mushrooms and alchemy plants that are picked. */
-    public static final TagKey<Block> HARVESTABLE_FLORA = BlockTags.create(new ResourceLocation(Skycraft.MODID, "harvestable_flora"));
+    public static final TagKey<Block> HARVESTABLE_FLORA = BlockTags.create(Identifier.fromNamespaceAndPath(Skycraft.MODID, "harvestable_flora"));
 
     /** True while {@link #mayHarvest} posts its permission-check break event, so {@link #onBreak} ignores it. */
     private static boolean probing;
@@ -120,12 +120,12 @@ public final class Harvesting {
 
     /**
      * Deliberate harvesting ([F] / Take, right-clicking an alchemy plant) on the server. Checks reach, the player's
-     * right to break the block (adventure mode, spawn protection, claims, jail: a {@link BlockEvent.BreakEvent} is
+     * right to break the block (adventure mode, spawn protection, claims, jail: a {@link net.neoforged.neoforge.event.level.block.BreakBlockEvent} is
      * posted and must not be cancelled), then yields the produce directly into the player's bags.
      */
     public static boolean harvest(ServerPlayer player, BlockPos pos) {
         if (player == null || pos == null || player.isSpectator()) return false;
-        ServerLevel level = player.serverLevel();
+        ServerLevel level = player.level();
         if (!level.isLoaded(pos) || player.distanceToSqr(Vec3.atCenterOf(pos)) > 36.0) return false;
 
         BlockState state = level.getBlockState(pos);
@@ -149,10 +149,10 @@ public final class Harvesting {
         if (!player.mayInteract(level, pos) || !player.mayBuild()) return false;
         if (player.blockActionRestricted(level, pos, player.gameMode.getGameModeForPlayer())) return false;
         if (level.getServer().isUnderSpawnProtection(level, pos, player)) return false;
-        BlockEvent.BreakEvent probe = new BlockEvent.BreakEvent(level, pos, state, player);
+        net.neoforged.neoforge.event.level.block.BreakBlockEvent probe = new net.neoforged.neoforge.event.level.block.BreakBlockEvent(level, pos, state, player);
         probing = true;
         try {
-            MinecraftForge.EVENT_BUS.post(probe);
+            NeoForge.EVENT_BUS.post(probe);
         } finally {
             probing = false;
         }
@@ -196,7 +196,7 @@ public final class Harvesting {
             // The replanted crop costs one seed of the harvest
             Item seed = getSeedItem(crop);
             boolean seedPaid = false;
-            boolean seedIsProduce = seed.isEdible();
+            boolean seedIsProduce = seed.getDefaultInstance().has(net.minecraft.core.component.DataComponents.FOOD);
             for (ItemStack s : drops) {
                 if (s.isEmpty()) continue;
                 ItemStack copy = s.copy();
@@ -226,7 +226,7 @@ public final class Harvesting {
             Progression.addSkillXp(player, Skill.ALCHEMY, 2.0f);
 
         } else if (block instanceof NetherWartBlock) {
-            int count = 2 + level.random.nextInt(3) - 1; // one wart replants the crop
+            int count = 2 + level.getRandom().nextInt(3) - 1; // one wart replants the crop
             if (greenThumb) count *= 2;
             harvestedItems.add(new ItemStack(Items.NETHER_WART, count));
 
@@ -269,7 +269,7 @@ public final class Harvesting {
         } else if (block instanceof SweetBerryBushBlock) {
             List<ItemStack> drops = Block.getDrops(state, level, pos, level.getBlockEntity(pos), player, player.getMainHandItem());
             int age = state.getValue(SweetBerryBushBlock.AGE);
-            int count = 1 + level.random.nextInt(2) + (age == 3 ? 1 : 0);
+            int count = 1 + level.getRandom().nextInt(2) + (age == 3 ? 1 : 0);
             if (greenThumb) count *= 2;
             harvestedItems.add(new ItemStack(Items.SWEET_BERRIES, count));
             if (!placed) {
@@ -481,7 +481,7 @@ public final class Harvesting {
 
     /** Remembers whether the block being broken was player-placed before the dig module forgets it. */
     @SubscribeEvent(priority = EventPriority.HIGHEST)
-    public static void onBreakFirst(BlockEvent.BreakEvent event) {
+    public static void onBreakFirst(net.neoforged.neoforge.event.level.block.BreakBlockEvent event) {
         if (probing || !(event.getLevel() instanceof ServerLevel level)) return;
         breakingPos = event.getPos().immutable();
         breakingPlaced = PlacedBlocks.isPlayerPlaced(level, event.getPos());
@@ -492,7 +492,7 @@ public final class Harvesting {
      * so the produce goes directly into the bags instead of falling to the ground.
      */
     @SubscribeEvent(priority = EventPriority.LOWEST)
-    public static void onBreak(BlockEvent.BreakEvent event) {
+    public static void onBreak(net.neoforged.neoforge.event.level.block.BreakBlockEvent event) {
         if (probing || event.isCanceled() || !(event.getPlayer() instanceof ServerPlayer player) || player.isCreative()) return;
         if (!(event.getLevel() instanceof ServerLevel level)) return;
         BlockState state = event.getState();

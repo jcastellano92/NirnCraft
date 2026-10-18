@@ -1,36 +1,63 @@
-# One command that always produces a Prism instance zip WITH an up-to-date bake, whatever changed in the code.
-#
-#   tools\build_release.ps1 [-SkipQa]
-#
-# 1. gradle build (compiles; the bake's hash covers the computing classes' bytecode, so it must be baked after this)
-# 2. tools\bake\bake.ps1 (boots a dev server on the Nirn seed, writes mod\src\main\resources\skycraft\baked\*)
-# 3. gradle build again (packs the fresh bake; class bytes are unchanged so the hash stays valid)
-# 4. packwiz refresh, Prism instance zip (dist\Skycraft-client-instance.zip)
-# 5. qa.ps1 -Server -Bake -NoBuild (world boots, quests complete, "Bake is up to date")
-param([switch]$SkipQa)
-$ErrorActionPreference = "Continue"  # native tools write notices to stderr; failures are caught via $LASTEXITCODE
-$root = Resolve-Path (Join-Path $PSScriptRoot "..")
-Set-Location $root
-function Step($n) { Write-Host "`n=== $n ===" -ForegroundColor Cyan }
-
-Step "1/5 build"
-Push-Location mod; & .\gradlew.bat build -x test -q; if ($LASTEXITCODE) { throw "gradle build failed" }; Pop-Location
-
-Step "2/5 bake"
-& (Join-Path $root "tools\bake\bake.ps1")
-if ($LASTEXITCODE) { throw "bake failed" }
-
-Step "3/5 build with bake"
-Push-Location mod; & .\gradlew.bat build -x test -q; if ($LASTEXITCODE) { throw "gradle build failed" }; Pop-Location
-
-Step "4/5 pack + Prism instance"
-py -3 -I tools/refresh_packwiz.py; if ($LASTEXITCODE) { throw "packwiz refresh failed" }
-py -3 -I tools/build_prism_instance.py
-if ($LASTEXITCODE) { throw "prism build failed" }
-
-if (-not $SkipQa) {
-    Step "5/5 qa (server + bake check)"
-    & (Join-Path $root "tools\qa\qa.ps1") -Server -Bake -NoBuild
-    if ($LASTEXITCODE) { throw "qa failed" }
+<#
+Native release loop: full Java25 build/tests, independently verified bake in a
+fresh E: QA world, repack, full client/server candidates, actual server smoke gate.
+Existing worlds and archives are preserved. Run only with exclusive runtime access.
+#>
+param(
+    [switch]$SkipQa,
+    [string]$OutputDir = '',
+    [string]$Java = '',
+    [string]$Xmx = '4G'
+)
+$ErrorActionPreference = 'Stop'
+$root = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
+Set-Location -LiteralPath $root
+$scratch = if ($env:SKYCRAFT_263_SCRATCH) { [IO.Path]::GetFullPath($env:SKYCRAFT_263_SCRATCH) } else { 'E:\Skycraft-scratch\migration-26.3' }
+if (-not $Java) {
+    $javaRoot = if ($env:SKYCRAFT_JAVA25_HOME) { $env:SKYCRAFT_JAVA25_HOME } else { (Get-Content -LiteralPath 'E:\Skycraft-scratch\toolchains\java25-location.txt' -Raw).Trim() }
+    $Java = Join-Path $javaRoot 'bin/java.exe'
 }
-Write-Host "`nRelease build OK: dist\Skycraft-client-instance.zip" -ForegroundColor Green
+$Java = (Resolve-Path -LiteralPath $Java).Path
+if (-not $OutputDir) { $OutputDir = Join-Path $root ('dist/release-26.3-' + (Get-Date -Format 'yyyyMMdd-HHmmss-fff')) }
+$OutputDir = [IO.Path]::GetFullPath($OutputDir)
+$clientZip = Join-Path $OutputDir 'Skycraft-26.3-client-instance.zip'
+$serverZip = Join-Path $OutputDir 'Skycraft-26.3-server.zip'
+if ((Test-Path -LiteralPath $clientZip) -or (Test-Path -LiteralPath $serverZip)) { throw 'Preserve previous packages; choose a fresh OutputDir.' }
+$oldJava = $env:SKYCRAFT_JAVA25_HOME
+$env:SKYCRAFT_JAVA25_HOME = Split-Path (Split-Path $Java -Parent) -Parent
+try {
+    & py -3 -I tools/build_server_instance.py --check-java --java $Java
+    if ($LASTEXITCODE -ne 0) { throw 'Select Java 25 before starting the release build.' }
+    New-Item -ItemType Directory -Force -Path $OutputDir | Out-Null
+    Write-Host '1/5 Full exact-platform build and native tests'
+    & py -3 -I tools/dev/build_263.py --log (Join-Path $OutputDir 'build.log') build
+    if ($LASTEXITCODE -ne 0) { throw 'Native build/tests failed.' }
+    Write-Host '2/5 Verify/rebake in a new native world; preserve old worlds'
+    & (Join-Path $root 'tools/bake/bake.ps1') -Xmx $Xmx
+    if ($LASTEXITCODE -ne 0) { throw 'Native independent bake verification failed.' }
+    Write-Host '3/5 Package the verified native bakes'
+    & py -3 -I tools/dev/build_263.py --log (Join-Path $OutputDir 'jar.log') jar
+    if ($LASTEXITCODE -ne 0) { throw 'Native jar build failed.' }
+    $core = Get-ChildItem -LiteralPath (Join-Path $scratch 'build/libs') -Filter '*.jar' |
+        Where-Object { $_.Name -notmatch '-(sources|javadoc|slim)\.jar$' } |
+        Sort-Object LastWriteTime -Descending | Select-Object -First 1
+    if (-not $core) { throw 'Native build did not produce a core jar.' }
+    & py -3 -I tools/refresh_packwiz.py
+    if ($LASTEXITCODE -ne 0) { throw 'Pack index refresh failed.' }
+    & py -3 -I tools/validate_pack.py --core-jar $core.FullName
+    if ($LASTEXITCODE -ne 0) { throw 'Exact pack/core validation failed.' }
+    Write-Host '4/5 Full server installation and client package'
+    & py -3 -I tools/build_server_instance.py --core-jar $core.FullName --java $Java --output-zip $serverZip --work-root (Join-Path $scratch 'server-build') --cache (Join-Path $scratch 'server-cache')
+    if ($LASTEXITCODE -ne 0) { throw 'Native full server packaging failed.' }
+    & py -3 -I tools/build_prism_instance.py --core-jar $core.FullName --output-zip $clientZip
+    if ($LASTEXITCODE -ne 0) { throw 'Native client packaging failed.' }
+    if (-not $SkipQa) {
+        Write-Host '5/5 Actual full-mod installed server boot, live bake check, save and clean stop'
+        & py -3 -I tools/qa/test_server_package_263.py --archive $serverZip --java $Java --work-root (Join-Path $scratch 'server-qa') --heap $Xmx
+        if ($LASTEXITCODE -ne 0) { throw 'Native installed server acceptance failed; candidates/evidence retained.' }
+        Write-Host "Server gate passed. Client visual and multiplayer connection acceptance remain separate: $OutputDir"
+    } else {
+        Write-Host "Candidate packages created; dedicated server QA was not run (-SkipQa): $OutputDir"
+    }
+} finally { $env:SKYCRAFT_JAVA25_HOME = $oldJava }
+exit 0

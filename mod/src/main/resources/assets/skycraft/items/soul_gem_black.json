@@ -1,0 +1,19 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "skycraft:filled",
+    "entries": [
+      {
+        "threshold": 1,
+        "model": {
+          "type": "minecraft:model",
+          "model": "skycraft:item/soul_gem_black_filled"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "skycraft:item/soul_gem_black"
+    }
+  }
+}

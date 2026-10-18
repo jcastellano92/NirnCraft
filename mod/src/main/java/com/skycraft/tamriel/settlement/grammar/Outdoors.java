@@ -11,8 +11,8 @@ import net.minecraft.core.Direction;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobSpawnType;
-import net.minecraft.world.entity.animal.Wolf;
+import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.world.entity.animal.wolf.Wolf;
 import net.minecraft.world.level.block.BeehiveBlock;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CampfireBlock;
@@ -71,17 +71,17 @@ public final class Outdoors {
         int wx = c.wx(x, z), wz = c.wz(x, z), wy = c.oy + y;
         if (!c.okWorld(wx, wy, wz)) return;
         try {
-            Entity e = type.create(c.level.getLevel());
+            Entity e = type.create(c.level.getLevel(), EntitySpawnReason.STRUCTURE);
             if (e == null) return;
-            e.moveTo(wx + 0.5, wy, wz + 0.5, (float) c.roll(x, y, z, 81, 360), 0f);
+            e.snapTo(wx + 0.5, wy, wz + 0.5, (float) c.roll(x, y, z, 81, 360), 0f);
             if (e instanceof Mob mob) {
                 mob.setPersistenceRequired();
-                mob.finalizeSpawn(c.level, c.level.getCurrentDifficultyAt(e.blockPosition()), MobSpawnType.STRUCTURE, null, null);
+                mob.finalizeSpawn(c.level, c.level.getCurrentDifficultyAt(e.blockPosition()), EntitySpawnReason.STRUCTURE, null);
             }
             if (e instanceof Wolf wolf) {
                 // a town dog: tame (to nobody in particular), so it leaves the sheep alone
-                wolf.setTame(true);
-                wolf.setOwnerUUID(new java.util.UUID(c.hash(wx, wy, wz, 83), c.seed));
+                wolf.setTame(true, true);
+                wolf.setOwnerReference(net.minecraft.world.entity.EntityReference.of(new java.util.UUID(c.hash(wx, wy, wz, 83), c.seed)));
             }
             c.level.addFreshEntityWithPassengers(e);
         } catch (RuntimeException ignored) {
@@ -90,22 +90,22 @@ public final class Outdoors {
     }
 
     public static EntityType<?> animalType(String id) {
-        if (id == null) return EntityType.CHICKEN;
+        if (id == null) return net.minecraft.world.entity.EntityTypes.CHICKEN;
         return switch (id.trim().toLowerCase(java.util.Locale.ROOT)) {
-            case "cow" -> EntityType.COW;
-            case "sheep" -> EntityType.SHEEP;
-            case "pig" -> EntityType.PIG;
-            case "goat" -> EntityType.GOAT;
-            case "horse" -> EntityType.HORSE;
-            case "donkey" -> EntityType.DONKEY;
-            case "mule" -> EntityType.MULE;
-            case "camel" -> EntityType.CAMEL;
-            case "llama" -> EntityType.LLAMA;
-            case "cat" -> EntityType.CAT;
-            case "dog" -> EntityType.WOLF;
-            case "frog" -> EntityType.FROG;
-            case "rabbit" -> EntityType.RABBIT;
-            case "turtle" -> EntityType.TURTLE;
+            case "cow" -> net.minecraft.world.entity.EntityTypes.COW;
+            case "sheep" -> net.minecraft.world.entity.EntityTypes.SHEEP;
+            case "pig" -> net.minecraft.world.entity.EntityTypes.PIG;
+            case "goat" -> net.minecraft.world.entity.EntityTypes.GOAT;
+            case "horse" -> net.minecraft.world.entity.EntityTypes.HORSE;
+            case "donkey" -> net.minecraft.world.entity.EntityTypes.DONKEY;
+            case "mule" -> net.minecraft.world.entity.EntityTypes.MULE;
+            case "camel" -> net.minecraft.world.entity.EntityTypes.CAMEL;
+            case "llama" -> net.minecraft.world.entity.EntityTypes.LLAMA;
+            case "cat" -> net.minecraft.world.entity.EntityTypes.CAT;
+            case "dog" -> net.minecraft.world.entity.EntityTypes.WOLF;
+            case "frog" -> net.minecraft.world.entity.EntityTypes.FROG;
+            case "rabbit" -> net.minecraft.world.entity.EntityTypes.RABBIT;
+            case "turtle" -> net.minecraft.world.entity.EntityTypes.TURTLE;
             case "guar" -> com.skycraft.creatures.Bestiary.GUAR.get();
             case "netch" -> com.skycraft.creatures.Bestiary.NETCH.get();
             case "kwama_forager", "kwama" -> com.skycraft.creatures.Bestiary.CHAURUS.get();
@@ -127,7 +127,7 @@ public final class Outdoors {
             case "mudcrab" -> com.skycraft.fauna.FaunaEntities.MUDCRAB.get();
             case "sabre_cat" -> com.skycraft.fauna.FaunaEntities.SABRE_CAT.get();
             case "bear" -> com.skycraft.fauna.FaunaEntities.BEAR.get();
-            default -> EntityType.CHICKEN;
+            default -> net.minecraft.world.entity.EntityTypes.CHICKEN;
         };
     }
 
@@ -167,7 +167,7 @@ public final class Outdoors {
                 int gy = Math.max(ground(c, 0, 0), ground(c, w - 1, 0)) + 3;
                 String[] cloth = {"white", "light_blue", "red", "yellow", "white", "brown"};
                 for (int x = 0; x < w; x++) {
-                    c.set(x, gy, 0, x == 0 || x == w - 1 ? p.fence : B.s(Blocks.CHAIN).setValue(BlockStateProperties.AXIS, c.dir(Direction.EAST).getAxis()));
+                    c.set(x, gy, 0, x == 0 || x == w - 1 ? p.fence : B.s(com.skycraft.worldgen.VanillaBlocks.CHAIN).setValue(BlockStateProperties.AXIS, c.dir(Direction.EAST).getAxis()));
                     if (x > 0 && x < w - 1 && c.chance(x, 0, 0, 15, 3) == false) c.set(x, gy - 1, 0, Materials.carpet(cloth[c.roll(x, 0, 0, 17, cloth.length)]));
                 }
             }
@@ -254,7 +254,7 @@ public final class Outdoors {
                     if (edge) gset(c, x, 1, z, x == w / 2 && z == 0 ? B.face(p.gate, Direction.NORTH) : p.fence);
                     else if (x == 1 && z == d - 2) gset(c, x, 1, z, B.s(Blocks.HAY_BLOCK));
                 }
-                for (int i = 0; i < 3; i++) animal(c, 1 + i % Math.max(1, w - 2), ground(c, 1, 1) + 1, 1 + i / 2 % Math.max(1, d - 2), EntityType.CHICKEN);
+                for (int i = 0; i < 3; i++) animal(c, 1 + i % Math.max(1, w - 2), ground(c, 1, 1) + 1, 1 + i / 2 % Math.max(1, d - 2), net.minecraft.world.entity.EntityTypes.CHICKEN);
             }
             case TREE -> {
                 int cx = w / 2, cz = d / 2;
@@ -287,7 +287,7 @@ public final class Outdoors {
             case KENNEL -> {
                 gset(c, 0, 1, 0, p.planks);
                 gset(c, 1, 1, 0, B.stair(p.roof, Direction.WEST, false));
-                animal(c, 1, ground(c, 1, 1) + 1, 1, c.chance(0, 0, 0, 3, 2) ? EntityType.WOLF : EntityType.CAT);
+                animal(c, 1, ground(c, 1, 1) + 1, 1, c.chance(0, 0, 0, 3, 2) ? net.minecraft.world.entity.EntityTypes.WOLF : net.minecraft.world.entity.EntityTypes.CAT);
             }
             case SHRINE -> {
                 int g = ground(c, 0, 0);
@@ -483,8 +483,8 @@ public final class Outdoors {
                 c.anchor(AnchorType.MINER, w / 2, 1, d / 2);
             }
             case SALVAGE -> {
-                BlockState[] scrap = {B.s(Blocks.WAXED_OXIDIZED_CUT_COPPER), B.s(Blocks.WAXED_WEATHERED_COPPER), B.s(Blocks.WAXED_EXPOSED_CUT_COPPER),
-                        B.s(Blocks.CHAIN), B.s(Blocks.LIGHTNING_ROD), B.id("skycraft:dwemer_pipes", Blocks.WAXED_CUT_COPPER)};
+                BlockState[] scrap = {B.s(com.skycraft.worldgen.VanillaBlocks.WAXED_OXIDIZED_CUT_COPPER), B.s(com.skycraft.worldgen.VanillaBlocks.WAXED_WEATHERED_COPPER), B.s(com.skycraft.worldgen.VanillaBlocks.WAXED_EXPOSED_CUT_COPPER),
+                        B.s(com.skycraft.worldgen.VanillaBlocks.CHAIN), B.s(com.skycraft.worldgen.VanillaBlocks.LIGHTNING_ROD), B.id("skycraft:dwemer_pipes", com.skycraft.worldgen.VanillaBlocks.WAXED_CUT_COPPER)};
                 for (int x = 0; x < w; x++) for (int z = 0; z < d; z++) {
                     if (!c.chance(x, 0, z, 51, 3)) continue;
                     gset(c, x, 1, z, scrap[c.roll(x, 1, z, 53, scrap.length)]);
@@ -497,7 +497,7 @@ public final class Outdoors {
                 campfire(c, p, w / 2, d / 2);
                 gset(c, w / 2 - 2, 1, d / 2, B.axis(B.s(Blocks.SPRUCE_LOG), c.dir(Direction.SOUTH).getAxis()));
                 gset(c, w / 2 + 2, 1, d / 2, B.axis(B.s(Blocks.SPRUCE_LOG), c.dir(Direction.SOUTH).getAxis()));
-                gset(c, w / 2, 1, d / 2 + 2, B.id("skycraft:bedroll", Blocks.BROWN_CARPET));
+                gset(c, w / 2, 1, d / 2 + 2, B.id("skycraft:bedroll", com.skycraft.worldgen.VanillaBlocks.BROWN_CARPET));
             }
             default -> {
             }
@@ -573,7 +573,7 @@ public final class Outdoors {
         for (int i = 0; i < 3; i++) c.set(1 + i, 1, 0, B.s(Blocks.STONE_BRICKS));
         for (int y = 1; y <= 6; y++) c.set(w - 1, y, 0, B.axis(p.post, Direction.Axis.Y));
         for (int x = w - 4; x < w; x++) c.set(x, 6, 0, B.axis(p.beam, Direction.Axis.X));
-        for (int y = 2; y <= 5; y++) c.set(w - 4, y, 0, B.s(Blocks.CHAIN));
+        for (int y = 2; y <= 5; y++) c.set(w - 4, y, 0, B.s(com.skycraft.worldgen.VanillaBlocks.CHAIN));
         c.set(w / 2, -depth + 1, d / 2, B.s(Blocks.STONECUTTER));
         c.anchor(AnchorType.WORKER, w / 2, -depth + 1, d / 2 - 1);
         c.anchor(AnchorType.MINER, 2, 1, 1);

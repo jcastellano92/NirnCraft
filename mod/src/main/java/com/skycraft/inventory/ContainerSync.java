@@ -5,11 +5,11 @@ import com.skycraft.network.SkyNetwork;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.player.PlayerContainerEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+
+import net.neoforged.neoforge.event.entity.player.PlayerContainerEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,7 +27,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * resent on the first server tick after the store changed (another player's change to a shared chest included, because
  * the version is the store's own counter), and ends with the menu. Menus with no overflow cost nothing.</p>
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class ContainerSync {
     static final int ROWS = 100;
     /** Smallest gap between two syncs of one session (ticks): a burst of take requests is one resend. */
@@ -94,8 +94,8 @@ public final class ContainerSync {
     }
 
     @SubscribeEvent
-    public static void onTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer player)) return;
+    public static void onTick(net.neoforged.neoforge.event.tick.PlayerTickEvent.Post event) {
+        if (!(event instanceof net.neoforged.neoforge.event.tick.PlayerTickEvent.Post) || !(event.getEntity() instanceof ServerPlayer player)) return;
         Session s = SESSIONS.get(player.getUUID());
         if (s == null) return;
         if (player.containerMenu.containerId != s.containerId || player.containerMenu == player.inventoryMenu) {

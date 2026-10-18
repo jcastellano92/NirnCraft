@@ -123,7 +123,7 @@ public final class ContextualDialogue {
             if (key != null) return key;
         }
         if (level.isRaining() && level.canSeeSky(pos)) {
-            Biome.Precipitation p = level.getBiome(pos).value().getPrecipitationAt(pos);
+            Biome.Precipitation p = level.getBiome(pos).value().getPrecipitationAt(pos, level.getSeaLevel());
             if (p == Biome.Precipitation.SNOW) return "weather.blizzard";
             if (p == Biome.Precipitation.RAIN) return "weather.storm";
         }
@@ -158,11 +158,11 @@ public final class ContextualDialogue {
     /** Returns the list of deeds the player has earned in {@code hold} and across the world. */
     public static List<String> activeDeeds(ServerPlayer player, @Nullable String hold) {
         PlayerData data = SkyData.get(player);
-        CompoundTag quests = data.module("quest").getCompound("completed");
+        CompoundTag quests = data.module("quest").getCompoundOrEmpty("completed");
         List<String> out = new java.util.ArrayList<>();
 
-        if (data.getStat("dragon_souls") > 0 || data.module("magic").getInt("dragon_souls") > 0
-                || quests.getBoolean("mq_04_dragon_rising")) {
+        if (data.getStat("dragon_souls") > 0 || data.module("magic").getIntOr("dragon_souls",0) > 0
+                || quests.getBooleanOr("mq_04_dragon_rising",false)) {
             out.add("dragon_slayer");
         }
         if (Reputation.get(player, Reputation.COMPANIONS) >= 20
@@ -220,8 +220,8 @@ public final class ContextualDialogue {
     }
 
     private static boolean hasCompletedPrefix(CompoundTag completed, String prefix) {
-        for (String k : completed.getAllKeys()) {
-            if (k.startsWith(prefix) && completed.getBoolean(k)) return true;
+        for (String k : completed.keySet()) {
+            if (k.startsWith(prefix) && completed.getBooleanOr(k, false)) return true;
         }
         return false;
     }
@@ -253,7 +253,7 @@ public final class ContextualDialogue {
         String province = region != null ? region.province() : null;
         List<String> deeds = activeDeeds(player, hold);
         if (deeds.isEmpty()) return null;
-        String deed = deeds.get(Math.floorMod(speaker.getUUID().hashCode() + (int) (speaker.level().getDayTime() / 1200L), deeds.size()));
+        String deed = deeds.get(Math.floorMod(speaker.getUUID().hashCode() + (int) (speaker.level().getDefaultClockTime() / 1200L), deeds.size()));
         String key = resolveReactiveKey(hold, province, deed);
         return Component.translatable(key, player.getName());
     }
@@ -291,7 +291,7 @@ public final class ContextualDialogue {
         }
 
         // 3c. Authored resident greeting (T1): surface unique settlement/resident greeting line when present
-        String authoredGreet = npc.getPersistentData().getString(SocietyResidents.GREET_KEY);
+        String authoredGreet = npc.getPersistentData().getStringOr(SocietyResidents.GREET_KEY, "");
         if (!authoredGreet.isBlank() && r.nextInt(3) != 0) {
             return Component.literal(authoredGreet);
         }
@@ -326,7 +326,7 @@ public final class ContextualDialogue {
 
         // 6. Recent world / quest milestones (Dragonborn recognition)
         PlayerData data = SkyData.get(player);
-        boolean dragonSlayer = data.getStat("dragon_souls") > 0 || data.module("magic").getInt("dragon_souls") > 0;
+        boolean dragonSlayer = data.getStat("dragon_souls") > 0 || data.module("magic").getIntOr("dragon_souls",0) > 0;
         if (dragonSlayer && r.nextInt(5) == 0) {
             return Component.translatable("society.skycraft.context.greet.dragonborn." + r.nextInt(2), player.getName());
         }
@@ -362,7 +362,7 @@ public final class ContextualDialogue {
         if (weatherKey != null && level.canSeeSky(pos) && r.nextInt(3) == 0) {
             return Component.translatable(weatherKey);
         }
-        long time = level.getDayTime() % 24000L;
+        long time = level.getDefaultClockTime() % 24000L;
         if (time >= 13500L && time < 22500L && r.nextInt(4) == 0) {
             return Component.translatable("society.skycraft.context.greet.night." + r.nextInt(2));
         }
@@ -408,7 +408,7 @@ public final class ContextualDialogue {
             return Component.translatable(weatherKey);
         }
 
-        String authoredBark = speaker.getPersistentData().getString(SocietyResidents.BARK_KEY);
+        String authoredBark = speaker.getPersistentData().getStringOr(SocietyResidents.BARK_KEY, "");
         if (!authoredBark.isBlank() && r.nextInt(3) == 0) {
             return Component.literal(authoredBark);
         }
@@ -434,13 +434,13 @@ public final class ContextualDialogue {
     /** Adds a contextual local-life / current-events dialogue option for civilian townsfolk outside ruined Helgen. */
     public static void addContextualOptions(ServerPlayer player, NpcEntity npc, List<DialogueOption> out) {
         if (HelgenFolk.inHelgen(npc) || !npc.role().civilian || npc.isChild() || npc.isPrisoner()) return;
-        String secret = npc.getPersistentData().getString(SocietyResidents.SECRET_KEY);
+        String secret = npc.getPersistentData().getStringOr(SocietyResidents.SECRET_KEY, "");
         if (!secret.isBlank()) {
             out.add(new DialogueOption("society.secret",
                     Component.translatable("dialogue.skycraft.society.secret"),
                     520,
                     (p, n) -> Dialogue.open(p, n, Component.literal(secret))));
-        } else if (Math.floorMod(npc.getUUID().hashCode(), 3) == 2 || !npc.getPersistentData().getString(SocietyResidents.TALK_KEY).isBlank()) {
+        } else if (Math.floorMod(npc.getUUID().hashCode(), 3) == 2 || !npc.getPersistentData().getStringOr(SocietyResidents.TALK_KEY, "").isBlank()) {
             out.add(new DialogueOption("society.context",
                     Component.translatable("dialogue.skycraft.society.context"),
                     525,
@@ -481,7 +481,7 @@ public final class ContextualDialogue {
             return Component.translatable("society.skycraft.context.say.bounty", placeName);
         }
 
-        String authoredTalk = npc.getPersistentData().getString(SocietyResidents.TALK_KEY);
+        String authoredTalk = npc.getPersistentData().getStringOr(SocietyResidents.TALK_KEY, "");
         if (!authoredTalk.isBlank()) {
             return Component.literal(authoredTalk);
         }
@@ -492,15 +492,15 @@ public final class ContextualDialogue {
         }
 
         PlayerData data = SkyData.get(player);
-        CompoundTag quests = data.module("quest").getCompound("completed");
-        if (quests.getBoolean("mq_04_dragon_rising") || data.getStat("dragon_souls") > 0) {
+        CompoundTag quests = data.module("quest").getCompoundOrEmpty("completed");
+        if (quests.getBooleanOr("mq_04_dragon_rising",false) || data.getStat("dragon_souls") > 0) {
             if (npc.getRandom().nextBoolean()) {
                 return Component.translatable("society.skycraft.context.say.dragons", placeName);
             }
         }
 
         Personality p = Personality.of(npc);
-        long time = level.getDayTime() % 24000L;
+        long time = level.getDefaultClockTime() % 24000L;
         boolean night = time >= 13000L && time < 23000L;
         float temp = level.getBiome(pos).value().getBaseTemperature();
 

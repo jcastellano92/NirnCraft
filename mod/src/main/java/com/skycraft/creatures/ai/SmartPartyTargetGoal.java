@@ -136,7 +136,7 @@ public class SmartPartyTargetGoal extends Goal {
         UUID ownerId = Summons.ownerOf(target);
         if (ownerId == null) ownerId = Followers.getOwnerId(target);
         if (ownerId == null && target instanceof NpcEntity npc) ownerId = npc.getLeader();
-        if (ownerId == null && target instanceof TamableAnimal tame) ownerId = tame.getOwnerUUID();
+        if (ownerId == null && target instanceof TamableAnimal tame) ownerId = com.skycraft.platform.EntityData.ownerId(tame);
         if (ownerId != null) {
             return this.mob.level().getPlayerByUUID(ownerId);
         }

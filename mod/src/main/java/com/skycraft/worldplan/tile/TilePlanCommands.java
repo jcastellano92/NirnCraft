@@ -9,12 +9,14 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.event.server.ServerAboutToStartEvent;
-import net.minecraftforge.event.server.ServerStartedEvent;
-import net.minecraftforge.event.server.ServerStoppingEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.minecraft.world.level.Level;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.neoforge.event.level.LevelEvent;
+import net.neoforged.neoforge.event.server.ServerAboutToStartEvent;
+import net.neoforged.neoforge.event.server.ServerStartedEvent;
+import net.neoforged.neoforge.event.server.ServerStoppingEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.util.List;
 import java.util.Locale;
@@ -22,7 +24,7 @@ import java.util.Locale;
 /**
  * Event hooks and developer commands ({@code /skycraft-tile}) for stage P7 Endless Lands tile planning.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class TilePlanCommands {
     private TilePlanCommands() {
     }
@@ -40,22 +42,31 @@ public final class TilePlanCommands {
     }
 
     @SubscribeEvent
+    public static void onLevelLoad(LevelEvent.Load event) {
+        // MinecraftServer installs the overworld in its levels map before this event, then prepares spawn.
+        // ServerStarted is later: first structure/noise consumers must already see this save's session.
+        if (event.getLevel() instanceof ServerLevel level && level.dimension() == Level.OVERWORLD) {
+            TilePlanData.attach(level);
+        }
+    }
+
+    @SubscribeEvent
     public static void onServerStarted(ServerStartedEvent event) {
         ServerLevel overworld = event.getServer().overworld();
+        if (overworld == null) return;
         TilePlanData.attach(overworld);
     }
 
     @SubscribeEvent
     public static void onServerStopping(ServerStoppingEvent event) {
-        TilePlanner.setPersistence(null, null);
-        TilePlanner.clearCache();
+        TilePlanner.detach();
     }
 
     @SubscribeEvent
     public static void onRegisterCommands(RegisterCommandsEvent event) {
         CommandDispatcher<CommandSourceStack> d = event.getDispatcher();
         d.register(Commands.literal("skycraft-tile")
-                .requires(s -> s.hasPermission(2))
+                .requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
                 .then(Commands.literal("plan")
                         .then(Commands.argument("tileX", IntegerArgumentType.integer())
                                 .then(Commands.argument("tileZ", IntegerArgumentType.integer())

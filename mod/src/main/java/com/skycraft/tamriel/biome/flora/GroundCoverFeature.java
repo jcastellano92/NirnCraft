@@ -17,9 +17,9 @@ import net.minecraft.world.level.block.DoublePlantBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
-import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
+import com.skycraft.worldgen.ConfiguredFeature;
+import com.skycraft.worldgen.FeaturePlaceContext;
+import com.skycraft.worldgen.FeatureConfiguration;
 
 import java.util.List;
 
@@ -31,7 +31,7 @@ import java.util.List;
  * {@code count + in_square + skycraft:flora_density}, which decides where the drifts and the bare ground are. With
  * {@code near_water} the plants keep to the shore.
  */
-public class GroundCoverFeature extends Feature<GroundCoverFeature.Config> {
+public class GroundCoverFeature extends ConfiguredFeature<GroundCoverFeature.Config> {
     public record Entry(BlockState state, int weight) {
         public static final Codec<Entry> CODEC = RecordCodecBuilder.create(i -> i.group(
                 BlockState.CODEC.fieldOf("state").forGetter(Entry::state),
@@ -45,7 +45,7 @@ public class GroundCoverFeature extends Feature<GroundCoverFeature.Config> {
                 Entry.CODEC.listOf().fieldOf("entries").forGetter(Config::entries),
                 Codec.floatRange(2f, 1024f).optionalFieldOf("scale", 24f).forGetter(Config::scale),
                 Codec.floatRange(0f, 1f).optionalFieldOf("patchiness", 0.6f).forGetter(Config::patchiness),
-                IntProvider.codec(1, 32).optionalFieldOf("cluster", net.minecraft.util.valueproviders.ConstantInt.of(1))
+                net.minecraft.util.valueproviders.IntProviders.codec(1, 32).optionalFieldOf("cluster", net.minecraft.util.valueproviders.ConstantInt.of(1))
                         .forGetter(Config::cluster),
                 Codec.intRange(0, 6).optionalFieldOf("spread", 2).forGetter(Config::spread),
                 Codec.INT.optionalFieldOf("salt", 0).forGetter(Config::salt),
@@ -76,11 +76,11 @@ public class GroundCoverFeature extends Feature<GroundCoverFeature.Config> {
                 z += Math.round((random.nextFloat() - random.nextFloat()) * cfg.spread() * 1.3f);
             }
             // stay in the decorated chunk: its heightmaps are the only ones ready
-            if ((x >> 4) != box.center.x || (z >> 4) != box.center.z) continue;
+            if ((x >> 4) != box.center.x() || (z >> 4) != box.center.z()) continue;
             // not on a road, street, plot or pad (the paver would only have to clear it again)
             if (!com.skycraft.world.PlacementMask.clear(level, x, z, 0)) continue;
             int y = findTrueGroundY(level, x, z);
-            if (y <= level.getMinBuildHeight() + 1) continue;
+            if (y <= level.getMinY() + 1) continue;
             p.set(x, y, z);
             if (!level.getBlockState(p).isAir()) continue;
             BlockPos belowPos = p.below();
@@ -110,7 +110,7 @@ public class GroundCoverFeature extends Feature<GroundCoverFeature.Config> {
      */
     private static int findTrueGroundY(WorldGenLevel level, int x, int z) {
         int top = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
-        int min = level.getMinBuildHeight() + 1;
+        int min = level.getMinY() + 1;
         BlockPos.MutableBlockPos cursor = new BlockPos.MutableBlockPos();
         for (int y = top; y > min; y--) {
             cursor.set(x, y - 1, z);
@@ -157,10 +157,10 @@ public class GroundCoverFeature extends Feature<GroundCoverFeature.Config> {
                                                   boolean nearWaterCfg, RandomSource random, BlockPos.MutableBlockPos p) {
         int x = ox + random.nextInt(5) - 2;
         int z = oz + random.nextInt(5) - 2;
-        if ((x >> 4) != box.center.x || (z >> 4) != box.center.z) return;
+        if ((x >> 4) != box.center.x() || (z >> 4) != box.center.z()) return;
         if (!com.skycraft.world.PlacementMask.clear(level, x, z, 0)) return;
         int y = findTrueGroundY(level, x, z);
-        if (y <= level.getMinBuildHeight() + 1) return;
+        if (y <= level.getMinY() + 1) return;
         p.set(x, y, z);
         if (!level.getBlockState(p).isAir()) return;
         BlockPos belowPos = p.below();

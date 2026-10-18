@@ -2,13 +2,13 @@ package com.skycraft.audio;
 
 import com.skycraft.Skycraft;
 import com.skycraft.magic.shout.Shout;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.registries.DeferredRegister;
+import net.minecraft.core.registries.BuiltInRegistries;
+import java.util.function.Supplier;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -23,8 +23,8 @@ import java.util.Map;
  * {@code assets/skycraft/sounds.json} and {@code lang/skycraft/audio.json}; every name below must exist there.</p>
  */
 public final class AudioSounds {
-    public static final DeferredRegister<SoundEvent> SOUNDS = DeferredRegister.create(ForgeRegistries.SOUND_EVENTS, Skycraft.MODID);
-    private static final Map<String, RegistryObject<SoundEvent>> BY_NAME = new HashMap<>();
+    public static final DeferredRegister<SoundEvent> SOUNDS = DeferredRegister.create(BuiltInRegistries.SOUND_EVENT, Skycraft.MODID);
+    private static final Map<String, Supplier<SoundEvent>> BY_NAME = new HashMap<>();
 
     /** Exploration music sets besides Skyrim's ({@code music.explore} / {@code music.explore_night}). */
     public static final String[] MUSIC_SETS = {"cyrodiil", "morrowind", "black_marsh", "elsweyr", "valenwood", "summerset",
@@ -146,7 +146,7 @@ public final class AudioSounds {
     private AudioSounds() {}
 
     private static void register(String name) {
-        BY_NAME.put(name, SOUNDS.register(name, () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(Skycraft.MODID, name))));
+        BY_NAME.put(name, SOUNDS.register(name, () -> SoundEvent.createVariableRangeEvent(Identifier.fromNamespaceAndPath(Skycraft.MODID, name))));
     }
 
     public static void init(IEventBus modBus) {
@@ -156,8 +156,8 @@ public final class AudioSounds {
 
     /** The registered event {@code skycraft:<name>}, or a harmless vanilla fallback if the name is unknown. */
     public static SoundEvent get(String name) {
-        RegistryObject<SoundEvent> ro = BY_NAME.get(name);
-        if (ro == null || !ro.isPresent()) {
+        Supplier<SoundEvent> ro = BY_NAME.get(name);
+        if (ro == null) {
             Skycraft.LOGGER.warn("Unknown Skycraft sound event {}", name);
             return SoundEvents.EMPTY;
         }

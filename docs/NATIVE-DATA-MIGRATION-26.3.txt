@@ -1,0 +1,181 @@
+Skycraft saved data and configuration migration to exact Minecraft 26.3
+Verified against NeoForge 26.3.0.90 / FancyModLoader 12.0.12, 2026-10-18
+
+Never open the only copy of a legacy save in a new Minecraft version. Keep the
+old instance and save intact. Stop its running Minecraft/server before copying.
+From the repository root, create a separate upgraded copy:
+
+py -3 tools/migration/legacy_attachments_263.py OLD_WORLD NEW_WORLD
+
+The command refuses existing destinations and running-world session locks. It
+copies the complete world before importing Skycraft's player, container-overflow
+and placed-block attachments. Original ForgeCaps payloads and unknown NBT remain;
+the original source files are never edited. The manifest in the new world records
+the conversions. A failed conversion retains a separately named incomplete copy;
+it is never published under NEW_WORLD. Minecraft's normal vanilla DataVersion
+upgrade still runs when loading the finished new copy. Custom legacy item stacks
+inside our data use Minecraft's real item DataFixer when decoded by Skycraft.
+Native 26.3 world load/save/reload remains a required acceptance check.
+
+The converter also changes the copied world's old skycraftSurvivalMode string
+gamerule to the typed boolean skycraft:survival_mode. An existing native value
+wins. All vanilla rules remain for Minecraft's own GameRuleRegistryFix and
+LevelDatToSavedDataFileFix, which move the upgraded map into
+data/minecraft/game_rules.dat. The obsolete unregistered Skycraft key is removed
+from the copy; the source remains intact. Invalid legacy boolean values fail
+conversion instead of silently changing a world's survival setting.
+
+Configuration changes that the enum rename alone does not cover
+
+FML LOCAL was formerly COMMON; SYNCED was formerly SERVER. Skycraft retains the
+explicit existing filenames, including skycraft-common.toml and the three
+skycraft-*-server.toml files. They must not be renamed to local/synced suffixes.
+
+The real 26.3 server resolves each SYNCED file in this order:
+1. WORLD/syncedconfig/EXACT_FILENAME, if that file exists.
+2. INSTANCE/config/EXACT_FILENAME otherwise.
+3. If the selected file is absent, INSTANCE/defaultconfigs/EXACT_FILENAME seeds
+   the newly created selected file; absent a template, spec defaults create it.
+
+The defaultconfigs directory can be changed by the loader's defaultConfigPath.
+It seeds missing files, rather than overriding existing configuration. Templates
+also apply to missing LOCAL/CLIENT/STARTUP files through the same ConfigTracker
+setup path. Synced files are sent to connecting players by the actual loader.
+
+WORLD/serverconfig is no longer an override source in this exact release. The
+offline converter copies the three registered Skycraft legacy overrides into
+WORLD/syncedconfig, retaining filenames and exact bytes. Existing native overrides
+win and are recorded in the migration manifest. It retains the old directory and
+does not import unrelated disabled mods' server settings into active overrides.
+
+For an existing instance configuration directory, copy the owner's Skycraft
+configuration files to the new instance's config directory without replacing
+customized destination files. The active migration pack currently has no
+defaultconfigs directory; archived Forge configs remain in pack/disabled and are
+preserved. Do not flatten world-specific overrides into global instance config:
+multiple worlds can deliberately use different weather/ocean/performance values.
+
+Exact primary source evidence (downloaded source jars, no inferred path names)
+
+https://maven.neoforged.net/releases/net/neoforged/fancymodloader/loader/12.0.12/loader-12.0.12-sources.jar
+  net/neoforged/fml/config/ModConfig.java: Type SYNCED and LOCAL documentation.
+  net/neoforged/fml/config/ConfigTracker.java: resolveBasePath, setupConfigFile.
+  net/neoforged/fml/loading/FMLConfig.java: DEFAULT_CONFIG_PATH.
+
+https://maven.neoforged.net/releases/net/neoforged/neoforge/26.3.0.90/neoforge-26.3.0.90-sources.jar
+  net/neoforged/neoforge/server/ServerLifecycleHooks.java:
+  SYNCEDCONFIG = new LevelResource("syncedconfig"); loadConfigs selects that
+  override directory and FMLPaths.CONFIGDIR. Its generated readme still contains
+  a stale serverconfig example; the actual executable path above takes precedence.
+
+Verification
+py -3 -m unittest discover -s tools/migration -p test_legacy_attachments_263.py -v
+These tests check typed NBT conservation, all attachment payloads, existing-native
+precedence, region compression/layout, source-file preservation, malformed input,
+world-specific config copy/precedence/idempotence and complete SYNCED registration
+coverage. They complement actual native server/client and converted-save checks.
+
+Native JUnit resource acceptance
+
+ModDevGradle unitTest.enable() supplies genuine FML loading. Tests that inspect
+item default components or dynamic worldgen/loot/recipe registries must use
+@ExtendWith(com.skycraft.testing.BoundedServerProvider.class) and take the actual
+MinecraftServer parameter. Static Bootstrap alone cannot bind 26.3 default item
+components. World mutation still requires a real playable server/GameTest.
+
+The test-only provider manages a subclass of NeoForge's real JUnitServer and
+retains the exact 26.3.0.90 WorldLoader/WorldStem datapack bootstrap. It changes
+only lifecycle ownership: startup has a 90-second limit with early crash checks;
+cleanup halts and joins the native loop within 15 seconds before FML closes.
+The JUnit root store and an FML close callback share idempotent cleanup. The
+server's native stop/file deletion runs once. This avoids the upstream helper's
+unconditional stopServer callback racing its still-running server thread.
+No fake registries/worlds, reflection into the loader, or disabled assertions
+are used. Source attribution and LGPL-2.1-only notice remain in the adapter.
+
+Tests that install synthetic jobs in production static state, including Prewarm
+ownership tests, must enqueue their complete setup/assertions/finally cleanup as
+one actual server-thread task. Running only individual calls there permits real
+native ticks to interleave and invalidate the synthetic test fixture.
+
+Legacy random-sequence schema completion
+
+The real 1.20.1 RandomSequences stores a flat sequence-ID map, each with its exact
+Xoroshiro128 source pair. Newly created streams use world seed + sequence ID.
+Native RandomSequenceSettingsFix at schema3565 wraps the map as sequences, but
+omits salt; the 26.3 RandomSequences.CODEC now requires salt. Ordinary native
+loading therefore rejects the old file and may replace it with fresh state.
+
+The offline converter now completes this one exact transition on the new copy:
+salt=0, include_world_seed=true, include_sequence_id=true, all original sequence
+states unchanged under sequences. ONLY this file advances to DataVersion3565,
+preventing native DFU from wrapping it again. Other file DataVersions remain
+unchanged. The manifest records this exception explicitly. Malformed old states
+fail closed rather than resetting them. Never recover from an already overwritten
+scratch random_sequences.dat when the original archive is available.
+
+Source evidence: cached actual Forge1.20.1-47.3.0 mapped official sources,
+net/minecraft/world/{RandomSequences,RandomSequence}.java; exact native26.3 sources
+for RandomSequenceSettingsFix and RandomSequences.CODEC. Test resources preserve
+the actual fifteen-stream archived file and its converted3565 counterpart.
+Python regressions compare every typed source pair and unknown root field;
+the loader-backed NativeRandomSequenceMigrationTest applies subsequent real DFU,
+uses the actual native codec, and checks every stream's exact next random result.
+
+Populated legacy acceptance fixtures
+
+The archived world has 298 overflow attachments and 2,715 placed-block attachments;
+these are attachment counts, not nonempty item/position counts. The original
+archive and its first converted copy stay immutable. legacy_fixture_263.py makes
+separately labeled new copies, populates only legacy ForgeCaps at one real barrel
+(-53,162,994), and runs the real converter. The fixture contains 297 arrows plus
+3 worn Sharpness-II swords and 3 player-placed positions, with explicit markers.
+No player file is invented: the native inventory selftest covers populated player
+attachment save/load/clone paths directly.
+
+legacy_probe_263.py scans real offline Anvil records without changing worlds.
+Select probes from its pre-native baseline for fast follow-up scans, then compare
+each native saved/reloaded copy against that original baseline. Acceptance checks
+exact counts, row order/markers, damage/enchantments and placed-position sets;
+it also requires an advanced chunk DataVersion and native item-component rows.
+An untouched converted copy cannot claim native load/save acceptance.
+
+The probe resolves vanilla dimensions relocated by native DimensionStorageFileFix
+while keeping each original dimension/chunk identity stable. It explicitly handles
+the native schema4885 RemoveBlockEntityTagFix for minecraft:bed: a removed legacy
+bed record is acceptable only with no extra payload or attachment, and with the
+same bed block and normalized properties proven at its original coordinates.
+Missing containers, bed payloads, changed blocks and missing state proof fail.
+The original sampled beds contain only id, coordinates and keepPacked; no custom
+bed payload is being declared migrated by this check.
+
+Playable inventory fixtures now acquire a scoped real forced-chunk area and wait
+for actual entity-loaded/ticking readiness before counting entities. They restore
+only their newly forced chunks. Full terrain without entity visibility is not a
+valid conservation test. Recording network endpoints inspect real distributor
+recipient choices and explicitly advertise no client channels; physical network
+negotiation and codec transport still require the multiplayer acceptance gate.
+
+Native TCP payload acceptance
+
+A singleplayer memory connection can bypass serialization. Use an actual native
+dedicated server and remote client on loopback, and prove Connection is connected
+and isMemoryConnection is false. Successful required-channel negotiation covers
+the registered type/version catalogue, not every message body's encoding.
+With skycraft.dev or skycraft.autotest enabled, SkyNetwork.diagnostics() records
+successful actual StreamCodec encodes/decodes and codec exceptions per registered
+class/direction. /skycraft-dev network reports the dedicated endpoint snapshot;
+the client can record the same JSON. Distinct exercised types remain separate
+from registeredPayloads. Counters retain no payload content, are thread-safe and
+are absent in the default runtime. Record both endpoints after representative
+real actions, and inspect disconnect/handler errors separately. These counters
+alone do not prove that every registered packet has been exercised.
+
+DevServer @idle waits for queued server work and lighting, and for requested
+forced/player-tracked chunks to have full terrain, completed generation/send
+dependencies and loaded entities. ChunkMap.hasWork is not a readiness predicate:
+native26.3 includes resident updatingChunkMap entries and active tickets, so a
+fully ready force-loaded world can keep it true forever. The corrected step body
+was schema-checked against the actual running server and successfully hot-swapped
+through the existing public JDWP tool; the blocked job immediately continued to
+real data inspection, native save and all six realm map jobs.

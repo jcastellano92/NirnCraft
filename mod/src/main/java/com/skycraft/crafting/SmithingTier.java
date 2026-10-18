@@ -1,13 +1,13 @@
 package com.skycraft.crafting;
 
 import com.google.common.base.Suppliers;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.Rarity;
-import net.minecraft.world.item.Tier;
+import net.minecraft.world.item.ToolMaterial;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +23,7 @@ import java.util.function.Supplier;
  * edit the catalogue, not the block between the {@code gear:tiers} markers. Not every material makes every weapon
  * family ({@link #has}).</p>
  */
-public enum SmithingTier implements Tier {
+public enum SmithingTier  {
     // id, forge category, uses, mining speed, damage bonus, harvest level, enchantability, bow arrow damage, perk,
     // temper perk, rarity, fire resistant, main material, extra forge costs, weapon families, leveled-list level
     // <gear:tiers>
@@ -74,16 +74,16 @@ public enum SmithingTier implements Tier {
     public final boolean fireResistant;
     /** Character level from which leveled and regional loot hands out this material. */
     public final int minLevel;
-    private final ResourceLocation mainId;
+    private final Identifier mainId;
     private final List<Material> extras;
     private final String families;
     private final Supplier<Item> main;
     private final Supplier<Ingredient> repair = Suppliers.memoize(() -> Ingredient.of(material()));
 
     /** An extra forge cost: {@code count} of the item {@code id}. */
-    public record Material(ResourceLocation id, int count) {
+    public record Material(Identifier id, int count) {
         public Item item() {
-            Item item = ForgeRegistries.ITEMS.getValue(id);
+            Item item = BuiltInRegistries.ITEM.getValue(id);
             return item == null ? Items.AIR : item;
         }
 
@@ -93,7 +93,7 @@ public enum SmithingTier implements Tier {
             if (spec == null || spec.isEmpty()) return List.of();
             for (String part : spec.split(",")) {
                 String[] kv = part.split("\\*");
-                out.add(new Material(new ResourceLocation(kv[0]), kv.length > 1 ? Integer.parseInt(kv[1]) : 1));
+                out.add(new Material(Identifier.parse(kv[0]), kv.length > 1 ? Integer.parseInt(kv[1]) : 1));
             }
             return List.copyOf(out);
         }
@@ -115,11 +115,11 @@ public enum SmithingTier implements Tier {
         this.rarity = rarity;
         this.fireResistant = fireResistant;
         this.minLevel = minLevel;
-        this.mainId = new ResourceLocation(main);
+        this.mainId = Identifier.parse(main);
         this.extras = Material.parse(extras);
         this.families = families;
         this.main = Suppliers.memoize(() -> {
-            Item item = ForgeRegistries.ITEMS.getValue(mainId);
+            Item item = BuiltInRegistries.ITEM.getValue(mainId);
             return item == null ? Items.IRON_INGOT : item;
         });
     }
@@ -139,32 +139,44 @@ public enum SmithingTier implements Tier {
         return families.indexOf(type.letter) >= 0;
     }
 
-    @Override
+    /** Native tool material; repair tags are generated from the same catalogue as the recipes. */
+    public ToolMaterial vanilla() { return nativeMaterial.get(); }
+
+    private final Supplier<ToolMaterial> nativeMaterial = Suppliers.memoize(this::buildNativeMaterial);
+
+    private ToolMaterial buildNativeMaterial() {
+        net.minecraft.tags.TagKey<net.minecraft.world.level.block.Block> incorrect = switch (level) {
+            case 0 -> net.minecraft.tags.BlockTags.INCORRECT_FOR_WOODEN_TOOL;
+            case 1 -> net.minecraft.tags.BlockTags.INCORRECT_FOR_STONE_TOOL;
+            case 2 -> net.minecraft.tags.BlockTags.INCORRECT_FOR_IRON_TOOL;
+            case 3 -> net.minecraft.tags.BlockTags.INCORRECT_FOR_DIAMOND_TOOL;
+            default -> net.minecraft.tags.BlockTags.INCORRECT_FOR_NETHERITE_TOOL;
+        };
+        return new ToolMaterial(incorrect, uses, speed, damage, enchantment,
+                net.minecraft.tags.TagKey.create(net.minecraft.core.registries.Registries.ITEM,
+                        Identifier.fromNamespaceAndPath("skycraft", "repair_tools/" + id)));
+    }
+
     public int getUses() {
         return uses;
     }
 
-    @Override
     public float getSpeed() {
         return speed;
     }
 
-    @Override
     public float getAttackDamageBonus() {
         return damage;
     }
 
-    @Override
     public int getLevel() {
         return level;
     }
 
-    @Override
     public int getEnchantmentValue() {
         return enchantment;
     }
 
-    @Override
     public Ingredient getRepairIngredient() {
         return repair.get();
     }

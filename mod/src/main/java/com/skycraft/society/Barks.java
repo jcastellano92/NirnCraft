@@ -16,20 +16,16 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.npc.AbstractVillager;
+import net.minecraft.world.entity.npc.villager.AbstractVillager;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.DiggerItem;
-import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ProjectileWeaponItem;
-import net.minecraft.world.item.SwordItem;
-import net.minecraft.world.item.TieredItem;
 import net.minecraft.world.item.TridentItem;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.util.HashMap;
 import java.util.List;
@@ -44,7 +40,7 @@ import java.util.UUID;
  * <p>Lines are translation keys {@code society.skycraft.bark.<category>.<n>}; {@link #LINES} holds each category's
  * line count.</p>
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class Barks {
     public static final double HEAR_RANGE = 24;
     /** How long a line stays up, in ticks. */
@@ -205,8 +201,8 @@ public final class Barks {
     // ------------------------------------------------------------------ ambient lines
 
     @SubscribeEvent
-    public static void onServerTick(TickEvent.ServerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END) return;
+    public static void onServerTick(net.neoforged.neoforge.event.tick.ServerTickEvent.Post event) {
+        if (!(event instanceof net.neoforged.neoforge.event.tick.ServerTickEvent.Post)) return;
         MinecraftServer server = event.getServer();
         int tick = server.getTickCount();
         if (tick % 20 == 0) budget = SocietyConfig.MAX_BARKS_PER_SECOND.get();
@@ -313,11 +309,11 @@ public final class Barks {
         Level level = speaker.level();
         BlockPos pos = speaker.blockPosition();
         if (level.isRaining() && r.nextInt(3) == 0 && level.canSeeSky(pos)) {
-            Biome.Precipitation p = level.getBiome(pos).value().getPrecipitationAt(pos);
+            Biome.Precipitation p = level.getBiome(pos).value().getPrecipitationAt(pos, level.getSeaLevel());
             if (p == Biome.Precipitation.RAIN) return "town.rain";
             if (p == Biome.Precipitation.SNOW) return "town.snow";
         }
-        long time = level.getDayTime() % 24000L;
+        long time = level.getDefaultClockTime() % 24000L;
         if (time > 13000 && time < 23000 && r.nextInt(3) == 0) return group + ".night";
         if (!guard && time < 3000 && r.nextInt(3) == 0) return "town.morning";
         return group + ".generic";
@@ -325,20 +321,20 @@ public final class Barks {
 
     public static boolean weaponDrawn(Player player) {
         Item item = player.getMainHandItem().getItem();
-        if (item instanceof SwordItem || item instanceof AxeItem || item instanceof ProjectileWeaponItem || item instanceof TridentItem) return true;
-        return item instanceof TieredItem && !(item instanceof DiggerItem);
+        if (new net.minecraft.world.item.ItemStack(item).is(net.minecraft.tags.ItemTags.SWORDS) || new net.minecraft.world.item.ItemStack(item).is(net.minecraft.tags.ItemTags.AXES) || item instanceof ProjectileWeaponItem || item instanceof TridentItem) return true;
+        return com.skycraft.inventory.EquipmentData.toolMaterial(new net.minecraft.world.item.ItemStack(item)) != null && !com.skycraft.economy.ItemCategory.isDigger(new net.minecraft.world.item.ItemStack(item));
     }
 
     /** Dragon slayers and veterans get recognized. */
     public static boolean famous(Player player) {
         PlayerData data = SkyData.get(player);
-        return data.getLevel() >= 20 || data.getStat("dragon_souls") > 0 || data.module("magic").getInt("dragon_souls") > 0;
+        return data.getLevel() >= 20 || data.getStat("dragon_souls") > 0 || data.module("magic").getIntOr("dragon_souls",0) > 0;
     }
 
     private static final String[] MEMBER_LINES = {"companions", "college", "thieves_guild", "imperial_legion", "stormcloaks", "bards_college"};
 
     private static String memberFaction(Player player, RandomSource r) {
-        var factions = SkyData.get(player).module("quest").getCompound("factions");
+        var factions = SkyData.get(player).module("quest").getCompoundOrEmpty("factions");
         int start = r.nextInt(MEMBER_LINES.length);
         for (int i = 0; i < MEMBER_LINES.length; i++) {
             String f = MEMBER_LINES[(start + i) % MEMBER_LINES.length];

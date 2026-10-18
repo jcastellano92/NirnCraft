@@ -23,7 +23,7 @@ import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.phys.BlockHitResult;
 import org.jetbrains.annotations.Nullable;
 
@@ -32,7 +32,7 @@ import org.jetbrains.annotations.Nullable;
  * Power. Each wall teaches each player once.
  */
 public class WordWallBlock extends BaseEntityBlock {
-    public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
+    public static final EnumProperty<net.minecraft.core.Direction> FACING = HorizontalDirectionalBlock.FACING;
 
     public WordWallBlock(Properties props) {
         super(props);
@@ -76,16 +76,16 @@ public class WordWallBlock extends BaseEntityBlock {
     @Nullable
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
-        return level.isClientSide ? null : createTickerHelper(type, MagicRegistry.WORD_WALL_BE.get(), WordWallBlockEntity::serverTick);
+        return level.isClientSide() ? null : createTickerHelper(type, MagicRegistry.WORD_WALL_BE.get(), WordWallBlockEntity::serverTick);
     }
 
     @Override
     @SuppressWarnings("deprecation")
-    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
-        if (level.isClientSide) return InteractionResult.SUCCESS;
-        if (hand == InteractionHand.MAIN_HAND && player instanceof ServerPlayer sp && level instanceof ServerLevel server
+    public InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+        if (level.isClientSide()) return InteractionResult.SUCCESS;
+        if (player instanceof ServerPlayer sp && level instanceof ServerLevel server
                 && level.getBlockEntity(pos) instanceof WordWallBlockEntity be) {
-            WordWalls.teach(sp, server, pos, be.shout(level.random), true);
+            WordWalls.teach(sp, server, pos, be.shout(level.getRandom()), true);
         }
         return InteractionResult.CONSUME;
     }

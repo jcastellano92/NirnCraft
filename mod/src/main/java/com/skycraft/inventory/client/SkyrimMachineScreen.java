@@ -6,7 +6,7 @@ import com.skycraft.inventory.ItemWeights;
 import com.skycraft.inventory.Pack;
 import com.skycraft.network.SkyNetwork;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.player.LocalPlayer;
@@ -17,7 +17,7 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.AnvilMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import org.lwjgl.glfw.GLFW;
+import com.mojang.blaze3d.platform.InputConstants;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -74,14 +74,14 @@ public class SkyrimMachineScreen extends AbstractContainerScreen<AbstractContain
     private int hover = -1;
     private EditBox rename;
     private boolean renaming;
-    private String renameItemKey = "";
+    private ItemRowKey renameItemKey;
 
     public SkyrimMachineScreen(AbstractContainerMenu menu, Inventory inventory, Component title) {
-        super(menu, inventory, title);
+        super(menu, inventory, title, 380, 220);
         this.profile = MachineProfile.of(menu);
         if (profile == null) throw new IllegalArgumentException("no machine profile for " + menu.getClass().getName());
-        this.imageWidth = 380;
-        this.imageHeight = 220;
+
+
     }
 
     /** Whether the Skyrim machine screen can show this menu. */
@@ -165,7 +165,7 @@ public class SkyrimMachineScreen extends AbstractContainerScreen<AbstractContain
         LocalPlayer player = Minecraft.getInstance().player;
         if (player == null) return out;
         Inventory inv = player.getInventory();
-        Map<String, Held> groups = new LinkedHashMap<>();
+        Map<ItemRowKey, Held> groups = new LinkedHashMap<>();
         for (Slot s : menu.slots) {
             if (s.container != inv || !s.hasItem()) continue;
             ItemStack st = s.getItem();
@@ -200,35 +200,35 @@ public class SkyrimMachineScreen extends AbstractContainerScreen<AbstractContain
         return out;
     }
 
-    private static String key(ItemStack st) {
-        return st.getItem().getDescriptionId() + ":" + (st.getTag() != null ? st.getTag().toString() : "");
+    private static ItemRowKey key(ItemStack st) {
+        return ItemRowKey.of(st);
     }
 
     // ------------------------------------------------------------------ render
 
     @Override
-    protected void renderBg(GuiGraphics g, float partialTick, int mouseX, int mouseY) {
+    public void extractBackground(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
         // the whole Skyrim panel is drawn in render()
     }
 
     @Override
-    protected void renderLabels(GuiGraphics g, int mouseX, int mouseY) {
+    protected void extractLabels(GuiGraphicsExtractor g, int mouseX, int mouseY) {
         // no vanilla labels
     }
 
     @Override
-    public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        renderBackground(g);
+    public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
+
         int px = leftPos, py = topPos, pw = imageWidth, ph = imageHeight;
         SkyUi.panel(g, px, py, px + pw, py + ph);
 
         int headerY = py + 8;
-        g.drawString(font, tab == 0 ? title : Component.translatable("inventory.skycraft.my_items"), px + 12, headerY, SkyUi.TEXT, false);
+        g.text(font, tab == 0 ? title : Component.translatable("inventory.skycraft.my_items"), px + 12, headerY, SkyUi.TEXT, false);
         String t0 = "[1] " + Component.translatable("inventory.skycraft.machine.tab.station").getString();
         String t1 = "[2] " + Component.translatable("inventory.skycraft.my_items").getString();
         int tabX = px + pw - font.width(t0) - font.width(t1) - 24;
-        g.drawString(font, t0, tabX, headerY, tab == 0 ? SkyUi.GOLD : SkyUi.DIM, false);
-        g.drawString(font, t1, tabX + font.width(t0) + 12, headerY, tab == 1 ? SkyUi.GOLD : SkyUi.DIM, false);
+        g.text(font, t0, tabX, headerY, tab == 0 ? SkyUi.GOLD : SkyUi.DIM, false);
+        g.text(font, t1, tabX + font.width(t0) + 12, headerY, tab == 1 ? SkyUi.GOLD : SkyUi.DIM, false);
         SkyUi.hline(g, px + 8, px + pw - 8, py + 22, 0x80);
 
         hover = -1;
@@ -243,10 +243,10 @@ public class SkyrimMachineScreen extends AbstractContainerScreen<AbstractContain
         drawDetails(g, mouseX, mouseY, partialTick);
         drawHints(g);
 
-        if (renaming && rename != null) rename.render(g, mouseX, mouseY, partialTick);
+        if (renaming && rename != null) rename.extractRenderState(g, mouseX, mouseY, partialTick);
     }
 
-    private void drawRows(GuiGraphics g, int mx, int my) {
+    private void drawRows(GuiGraphicsExtractor g, int mx, int my) {
         List<Row> rows = rows();
         if (sel >= rows.size()) sel = Math.max(0, rows.size() - 1);
         if (!rows.isEmpty() && !selectable(rows.get(sel))) sel = firstSelectable(rows);
@@ -261,7 +261,7 @@ public class SkyrimMachineScreen extends AbstractContainerScreen<AbstractContain
             int y = ly + i * ROW;
             if (r.kind() == K_HEADER) {
                 Component h = profile.choicesTitle();
-                if (h != null) g.drawString(font, SkyUi.caps(h), lx + 4, y + 5, SkyUi.HEADER, false);
+                if (h != null) g.text(font, SkyUi.caps(h), lx + 4, y + 5, SkyUi.HEADER, false);
                 SkyUi.hline(g, lx, lx + lw, y + ROW - 2, 0x60);
                 continue;
             }
@@ -277,26 +277,26 @@ public class SkyrimMachineScreen extends AbstractContainerScreen<AbstractContain
                 MachineProfile.Cell c = cellOf(r);
                 ItemStack st = stackOf(c);
                 String role = SkyUi.ellipsize(font, c.label().getString(), 78);
-                g.drawString(font, role, lx + 6, y + 5, SkyUi.HEADER, false);
+                g.text(font, role, lx + 6, y + 5, SkyUi.HEADER, false);
                 int nx = lx + 88;
                 if (st.isEmpty()) {
-                    g.drawString(font, Component.translatable("inventory.skycraft.machine.empty"), nx, y + 5, SkyUi.DIM, false);
+                    g.text(font, Component.translatable("inventory.skycraft.machine.empty"), nx, y + 5, SkyUi.DIM, false);
                 } else {
-                    g.renderItem(st, nx, y + 1);
+                    g.item(st, nx, y + 1);
                     String name = st.getHoverName().getString() + (st.getCount() > 1 ? " (" + st.getCount() + ")" : "");
-                    g.drawString(font, SkyUi.ellipsize(font, name, lw - (nx - lx) - 26), nx + 20, y + 5,
+                    g.text(font, SkyUi.ellipsize(font, name, lw - (nx - lx) - 26), nx + 20, y + 5,
                             selected ? SkyUi.BRIGHT : hovered ? SkyUi.TEXT : SkyUi.DIM, false);
                 }
             } else {
                 if (choices == null) choices = profile.choices();
                 if (r.index() >= choices.size()) continue;
                 MachineProfile.Choice ch = choices.get(r.index());
-                g.renderItem(ch.icon(), lx + 2, y + 1);
+                g.item(ch.icon(), lx + 2, y + 1);
                 int color = !ch.enabled() ? SkyUi.DIM : ch.selected() ? SkyUi.GOLD : selected ? SkyUi.BRIGHT : hovered ? SkyUi.TEXT : SkyUi.DIM;
                 String detail = ch.detail().getString();
                 int dw = detail.isEmpty() ? 0 : font.width(detail) + 6;
-                g.drawString(font, SkyUi.ellipsize(font, ch.label().getString(), lw - 28 - dw), lx + 22, y + 5, color, false);
-                if (!detail.isEmpty()) g.drawString(font, detail, lx + lw - font.width(detail) - 6, y + 5, SkyUi.GOLD, false);
+                g.text(font, SkyUi.ellipsize(font, ch.label().getString(), lw - 28 - dw), lx + 22, y + 5, color, false);
+                if (!detail.isEmpty()) g.text(font, detail, lx + lw - font.width(detail) - 6, y + 5, SkyUi.GOLD, false);
                 if (ch.selected()) SkyUi.diamond(g, lx + lw - 3, y + ROW / 2, 1, SkyUi.GOLD);
             }
         }
@@ -310,7 +310,7 @@ public class SkyrimMachineScreen extends AbstractContainerScreen<AbstractContain
         return listY() + 20;
     }
 
-    private void drawGrid(GuiGraphics g, int mx, int my) {
+    private void drawGrid(GuiGraphicsExtractor g, int mx, int my) {
         List<MachineProfile.Cell> cells = profile.cells();
         if (sel >= cells.size()) sel = 0;
         int ox = gridOriginX(), oy = gridOriginY();
@@ -329,26 +329,26 @@ public class SkyrimMachineScreen extends AbstractContainerScreen<AbstractContain
             g.fill(x + CELL - 1, y, x + CELL, y + CELL, line);
             ItemStack st = stackOf(c);
             if (!st.isEmpty()) {
-                g.renderItem(st, x + 5, y + 5);
-                g.renderItemDecorations(font, st, x + 5, y + 5);
+                g.item(st, x + 5, y + 5);
+                g.itemDecorations(font, st, x + 5, y + 5);
             }
         }
         // the arrow into the result cell
         int ax = ox + 3 * (CELL + 4) + 4;
         int ay = oy + (CELL + 4) + CELL / 2 - 4;
-        g.drawString(font, ">", ax, ay, SkyUi.GOLD, false);
+        g.text(font, ">", ax, ay, SkyUi.GOLD, false);
         MachineProfile.Cell cur = cells.get(sel);
-        g.drawString(font, cur.label(), listX() + 6, listY() + 4, SkyUi.HEADER, false);
+        g.text(font, cur.label(), listX() + 6, listY() + 4, SkyUi.HEADER, false);
     }
 
-    private void drawHeld(GuiGraphics g, int mx, int my) {
+    private void drawHeld(GuiGraphicsExtractor g, int mx, int my) {
         List<Held> items = held();
         if (itemSel >= items.size()) itemSel = Math.max(0, items.size() - 1);
         int visible = visibleRows();
         itemScroll = Math.max(0, Math.min(itemScroll, Math.max(0, items.size() - visible)));
         int lx = listX(), ly = listY(), lw = listW();
         if (items.isEmpty()) {
-            g.drawString(font, Component.translatable("inventory.skycraft.empty"), lx + 8, ly + 12, SkyUi.DIM, false);
+            g.text(font, Component.translatable("inventory.skycraft.empty"), lx + 8, ly + 12, SkyUi.DIM, false);
             return;
         }
         for (int i = 0; i < visible; i++) {
@@ -364,19 +364,19 @@ public class SkyrimMachineScreen extends AbstractContainerScreen<AbstractContain
                 SkyUi.hline(g, lx, lx + lw, y, selected ? 0x90 : 0x50);
                 SkyUi.hline(g, lx, lx + lw, y + ROW - 1, selected ? 0x90 : 0x50);
             }
-            g.renderItem(h.stack, lx + 2, y + 1);
+            g.item(h.stack, lx + 2, y + 1);
             String name = h.stack.getHoverName().getString() + (h.count > 1 ? " (" + h.count + ")" : "");
             String val = h.value + "g";
             String wt = ItemWeights.format(h.weight);
             int infoX = lx + lw - font.width(val) - 6;
             int color = !h.fits ? SkyUi.DIM : selected ? SkyUi.BRIGHT : hovered ? SkyUi.TEXT : 0xFFC8C0A8;
-            g.drawString(font, SkyUi.ellipsize(font, name, lw - 75), lx + 22, y + 5, color, false);
-            g.drawString(font, val, infoX, y + 5, SkyUi.GOLD, false);
-            g.drawString(font, wt, infoX - font.width(wt) - 6, y + 5, SkyUi.DIM, false);
+            g.text(font, SkyUi.ellipsize(font, name, lw - 75), lx + 22, y + 5, color, false);
+            g.text(font, val, infoX, y + 5, SkyUi.GOLD, false);
+            g.text(font, wt, infoX - font.width(wt) - 6, y + 5, SkyUi.DIM, false);
         }
     }
 
-    private void drawDetails(GuiGraphics g, int mx, int my, float pt) {
+    private void drawDetails(GuiGraphicsExtractor g, int mx, int my, float pt) {
         int detX = detX(), detW = detW(), detY = listY();
         int cx = detX + detW / 2;
         ItemStack show = ItemStack.EMPTY;
@@ -431,10 +431,10 @@ public class SkyrimMachineScreen extends AbstractContainerScreen<AbstractContain
         if (!show.isEmpty()) SkyrimContainerScreen.renderPreview(g, show, cx, detY + previewH / 2, previewH / 16f * 0.9f);
         int y = detY + previewH + 4;
         String n = SkyUi.ellipsize(font, name.getString(), detW);
-        g.drawString(font, n, cx - font.width(n) / 2, y, SkyUi.BRIGHT, false);
+        g.text(font, n, cx - font.width(n) / 2, y, SkyUi.BRIGHT, false);
         y += 12;
         String k = SkyUi.ellipsize(font, line2.getString(), detW);
-        g.drawString(font, k, cx - font.width(k) / 2, y, SkyUi.DIM, false);
+        g.text(font, k, cx - font.width(k) / 2, y, SkyUi.DIM, false);
         y += 12;
         SkyUi.divider(g, cx, y, detW / 2 - 6);
         y += 8;
@@ -442,60 +442,60 @@ public class SkyrimMachineScreen extends AbstractContainerScreen<AbstractContain
             double arm = SkyrimContainerScreen.armor(show);
             double dmg = SkyrimContainerScreen.damage(show);
             if (arm > 0) {
-                g.drawString(font, "ARMOR", detX, y, SkyUi.HEADER, false);
-                g.drawString(font, String.valueOf((int) arm), detX + 50, y, SkyUi.BRIGHT, false);
+                g.text(font, "ARMOR", detX, y, SkyUi.HEADER, false);
+                g.text(font, String.valueOf((int) arm), detX + 50, y, SkyUi.BRIGHT, false);
                 y += 11;
             } else if (dmg > 1) {
-                g.drawString(font, "DAMAGE", detX, y, SkyUi.HEADER, false);
-                g.drawString(font, String.valueOf((int) dmg), detX + 50, y, SkyUi.BRIGHT, false);
+                g.text(font, "DAMAGE", detX, y, SkyUi.HEADER, false);
+                g.text(font, String.valueOf((int) dmg), detX + 50, y, SkyUi.BRIGHT, false);
                 y += 11;
             }
-            g.drawString(font, "WEIGHT", detX, y, SkyUi.HEADER, false);
-            g.drawString(font, ItemWeights.format(weight), detX + 50, y, SkyUi.BRIGHT, false);
+            g.text(font, "WEIGHT", detX, y, SkyUi.HEADER, false);
+            g.text(font, ItemWeights.format(weight), detX + 50, y, SkyUi.BRIGHT, false);
             y += 11;
-            g.drawString(font, "VALUE", detX, y, SkyUi.HEADER, false);
-            g.drawString(font, String.valueOf(value), detX + 50, y, SkyUi.GOLD, false);
+            g.text(font, "VALUE", detX, y, SkyUi.HEADER, false);
+            g.text(font, String.valueOf(value), detX + 50, y, SkyUi.GOLD, false);
         }
 
         // meters (fuel, progress, brewing) and notes (anvil cost) of the machine
         int my0 = topPos + 144;
         if (tab == 0) {
             for (MachineProfile.Meter m : profile.meters()) {
-                g.drawString(font, SkyUi.caps(m.label()), detX, my0, SkyUi.HEADER, false);
+                g.text(font, SkyUi.caps(m.label()), detX, my0, SkyUi.HEADER, false);
                 SkyUi.bar(g, detX + 4, my0 + 10, detW - 8, m.fill(), m.rgb());
                 my0 += 17;
             }
             List<Component> notes = profile.notes();
             for (int i = 0; i < notes.size(); i++) {
-                g.drawString(font, SkyUi.ellipsize(font, notes.get(i).getString(), detW), detX, my0, profile.noteColor(i), false);
+                g.text(font, SkyUi.ellipsize(font, notes.get(i).getString(), detW), detX, my0, profile.noteColor(i), false);
                 my0 += 11;
             }
         }
         SkyUi.carryLine(g, font, detX, topPos + imageHeight - 35, leftPos + imageWidth - 10);
     }
 
-    private void drawHints(GuiGraphics g) {
+    private void drawHints(GuiGraphicsExtractor g) {
         int px = leftPos, pw = imageWidth;
         int y = topPos + imageHeight - 22;
         SkyUi.hline(g, px + 8, px + pw - 8, y - 4, 0x80);
         int x = px + 12;
         String act = actionHint();
-        g.drawString(font, "[F] " + act, x, y, SkyUi.GOLD, false);
+        g.text(font, "[F] " + act, x, y, SkyUi.GOLD, false);
         x += font.width("[F] " + act) + 16;
         if (tab == 0) {
             String all = "[R] " + Component.translatable("inventory.skycraft.machine.hint.all").getString();
-            g.drawString(font, all, x, y, SkyUi.GOLD, false);
+            g.text(font, all, x, y, SkyUi.GOLD, false);
             x += font.width(all) + 16;
         }
         String space = "[Space] " + Component.translatable(tab == 0 ? "inventory.skycraft.my_items" : "inventory.skycraft.machine.tab.station").getString();
-        g.drawString(font, space, x, y, SkyUi.DIM, false);
+        g.text(font, space, x, y, SkyUi.DIM, false);
         x += font.width(space) + 16;
         if (profile.renameable() && tab == 0) {
             String rn = "[N] " + Component.translatable("inventory.skycraft.machine.hint.rename").getString();
-            g.drawString(font, rn, x, y, renaming ? SkyUi.GOLD : SkyUi.DIM, false);
+            g.text(font, rn, x, y, renaming ? SkyUi.GOLD : SkyUi.DIM, false);
         }
         String close = "[Tab/Esc] " + Component.translatable("inventory.skycraft.machine.hint.close").getString();
-        g.drawString(font, close, px + pw - font.width(close) - 12, y, SkyUi.DIM, false);
+        g.text(font, close, px + pw - font.width(close) - 12, y, SkyUi.DIM, false);
     }
 
     private String actionHint() {
@@ -583,7 +583,7 @@ public class SkyrimMachineScreen extends AbstractContainerScreen<AbstractContain
         Slot slot = menu.getSlot(0);
         if (!slot.hasItem() || !(menu instanceof AnvilMenu anvil)) return;
         String s = name;
-        if (!slot.getItem().hasCustomHoverName() && name.equals(slot.getItem().getHoverName().getString())) s = "";
+        if (!slot.getItem().has(net.minecraft.core.component.DataComponents.CUSTOM_NAME) && name.equals(slot.getItem().getHoverName().getString())) s = "";
         Minecraft mc = Minecraft.getInstance();
         if (anvil.setItemName(s) && mc.player != null && mc.player.connection != null) {
             mc.player.connection.send(new ServerboundRenameItemPacket(s));
@@ -602,13 +602,12 @@ public class SkyrimMachineScreen extends AbstractContainerScreen<AbstractContain
     protected void containerTick() {
         super.containerTick();
         if (rename != null) {
-            rename.tick();
             // a different item in the anvil's first slot: the box follows it (vanilla does the same)
-            String k = menu.getSlot(0).hasItem() ? key(menu.getSlot(0).getItem()) : "";
-            if (!k.equals(renameItemKey)) {
+            ItemRowKey k = menu.getSlot(0).hasItem() ? key(menu.getSlot(0).getItem()) : null;
+            if (!java.util.Objects.equals(k, renameItemKey)) {
                 renameItemKey = k;
-                if (renaming && !k.isEmpty()) rename.setValue(menu.getSlot(0).getItem().getHoverName().getString());
-                if (k.isEmpty()) renaming = false;
+                if (renaming && k != null) rename.setValue(menu.getSlot(0).getItem().getHoverName().getString());
+                if (k == null) renaming = false;
             }
         }
     }
@@ -662,78 +661,82 @@ public class SkyrimMachineScreen extends AbstractContainerScreen<AbstractContain
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+    public boolean keyPressed(net.minecraft.client.input.KeyEvent event) {
+        int keyCode = event.key(), scanCode = event.keycode(), modifiers = event.modifiers();
         if (renaming && rename != null) {
-            if (keyCode == GLFW.GLFW_KEY_ESCAPE || keyCode == GLFW.GLFW_KEY_ENTER || keyCode == GLFW.GLFW_KEY_KP_ENTER) {
+            if (keyCode == InputConstants.KEY_ESCAPE || keyCode == InputConstants.KEY_RETURN || keyCode == InputConstants.KEY_NUMPADENTER) {
                 renaming = false;
                 return true;
             }
-            return rename.keyPressed(keyCode, scanCode, modifiers) || rename.canConsumeInput();
+            return rename.keyPressed(event) || rename.canConsumeInput();
         }
         switch (keyCode) {
-            case GLFW.GLFW_KEY_F, GLFW.GLFW_KEY_E, GLFW.GLFW_KEY_ENTER -> {
+            case InputConstants.KEY_F, InputConstants.KEY_E, InputConstants.KEY_RETURN -> {
                 activate();
                 return true;
             }
-            case GLFW.GLFW_KEY_R -> {
+            case InputConstants.KEY_R -> {
                 if (tab == 0) takeAll();
                 return true;
             }
-            case GLFW.GLFW_KEY_N -> {
+            case InputConstants.KEY_N -> {
                 if (profile.renameable() && tab == 0) startRename();
                 return true;
             }
-            case GLFW.GLFW_KEY_SPACE -> {
+            case InputConstants.KEY_SPACE -> {
                 setTab(1 - tab);
                 return true;
             }
-            case GLFW.GLFW_KEY_1 -> {
+            case InputConstants.KEY_1 -> {
                 setTab(0);
                 return true;
             }
-            case GLFW.GLFW_KEY_2 -> {
+            case InputConstants.KEY_2 -> {
                 setTab(1);
                 return true;
             }
-            case GLFW.GLFW_KEY_3, GLFW.GLFW_KEY_4, GLFW.GLFW_KEY_5, GLFW.GLFW_KEY_6, GLFW.GLFW_KEY_7, GLFW.GLFW_KEY_8, GLFW.GLFW_KEY_9 -> {
+            case InputConstants.KEY_3, InputConstants.KEY_4, InputConstants.KEY_5, InputConstants.KEY_6, InputConstants.KEY_7, InputConstants.KEY_8, InputConstants.KEY_9 -> {
                 return true;
             }
-            case GLFW.GLFW_KEY_UP, GLFW.GLFW_KEY_W -> {
+            case InputConstants.KEY_UP, InputConstants.KEY_W -> {
                 moveSelection(-1);
                 return true;
             }
-            case GLFW.GLFW_KEY_DOWN, GLFW.GLFW_KEY_S -> {
+            case InputConstants.KEY_DOWN, InputConstants.KEY_S -> {
                 moveSelection(1);
                 return true;
             }
-            case GLFW.GLFW_KEY_LEFT, GLFW.GLFW_KEY_A -> {
+            case InputConstants.KEY_LEFT, InputConstants.KEY_A -> {
                 if (tab == 0 && profile.grid()) gridMove(-1, 0);
                 return true;
             }
-            case GLFW.GLFW_KEY_RIGHT, GLFW.GLFW_KEY_D -> {
+            case InputConstants.KEY_RIGHT, InputConstants.KEY_D -> {
                 if (tab == 0 && profile.grid()) gridMove(1, 0);
                 return true;
             }
-            case GLFW.GLFW_KEY_TAB, GLFW.GLFW_KEY_ESCAPE -> {
+            case InputConstants.KEY_TAB, InputConstants.KEY_ESCAPE -> {
                 onClose();
                 return true;
             }
             default -> {
             }
         }
-        return super.keyPressed(keyCode, scanCode, modifiers);
+        return super.keyPressed(event);
     }
 
     @Override
-    public boolean charTyped(char c, int mods) {
-        if (renaming && rename != null) return rename.charTyped(c, mods);
-        return super.charTyped(c, mods);
+    public boolean charTyped(net.minecraft.client.input.CharacterEvent event) {
+        char c = (char) event.codepoint();
+        if (renaming && rename != null) return rename.charTyped(event);
+        return super.charTyped(event);
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    public boolean mouseClicked(net.minecraft.client.input.MouseButtonEvent event, boolean doubleClick) {
+        double mouseX = event.x(), mouseY = event.y();
+        int button = com.skycraft.client.screen.UiInput.actionButton(event.button());
         int mx = (int) mouseX, my = (int) mouseY;
-        if (renaming && rename != null && rename.mouseClicked(mouseX, mouseY, button)) return true;
+        if (renaming && rename != null && rename.mouseClicked(event, doubleClick)) return true;
         if (button != 0) return true; // never fall through to vanilla slot clicking: the slots are not drawn
         int px = leftPos, py = topPos, pw = imageWidth;
         int headerY = py + 8;
@@ -757,8 +760,8 @@ public class SkyrimMachineScreen extends AbstractContainerScreen<AbstractContain
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
-        if (delta == 0) return super.mouseScrolled(mouseX, mouseY, delta);
+    public boolean mouseScrolled(double mouseX, double mouseY, double horizontal, double delta) {
+        if (delta == 0) return super.mouseScrolled(mouseX, mouseY, horizontal, delta);
         if (tab == 1) {
             int max = Math.max(0, held().size() - visibleRows());
             itemScroll = Math.max(0, Math.min(max, itemScroll - (int) Math.signum(delta)));

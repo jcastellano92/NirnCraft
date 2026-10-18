@@ -1,0 +1,16 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "skycraft:item/lurker_spawn_egg",
+    "tints": [
+      {
+        "type": "minecraft:constant",
+        "value": 1188376
+      },
+      {
+        "type": "minecraft:constant",
+        "value": 7274360
+      }
+    ]
+  }
+}

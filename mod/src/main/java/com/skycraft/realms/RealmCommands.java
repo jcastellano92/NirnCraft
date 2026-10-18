@@ -16,9 +16,9 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.MapColor;
-import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -30,14 +30,14 @@ import java.util.Arrays;
  * keep of your cell), {@code home} returns, {@code where} prints the landmarks, and {@code map <realm> <x> <z> <radius>}
  * generates a square of a realm and writes a shaded top-down map to {@code realm-maps/} (worldgen smoke tests).
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class RealmCommands {
     private RealmCommands() {}
 
     @SubscribeEvent
     public static void register(RegisterCommandsEvent event) {
         CommandDispatcher<CommandSourceStack> d = event.getDispatcher();
-        d.register(Commands.literal("skycraft-realm").requires(s -> s.hasPermission(2))
+        d.register(Commands.literal("skycraft-realm").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
                 .then(Commands.literal("go").then(Commands.argument("realm", StringArgumentType.word())
                         .executes(c -> go(c, 1))
                         .then(Commands.argument("param", IntegerArgumentType.integer(0, 64)).executes(c -> go(c, IntegerArgumentType.getInteger(c, "param"))))))
@@ -62,7 +62,7 @@ public final class RealmCommands {
      * file as a console command once the server has started, one per few ticks, then stops the server.
      */
     @SubscribeEvent
-    public static void smoke(net.minecraftforge.event.server.ServerStartedEvent event) {
+    public static void smoke(net.neoforged.neoforge.event.server.ServerStartedEvent event) {
         String file = System.getProperty("skycraft.realms.smoke", "");
         if (file.isEmpty()) return;
         java.util.List<String> lines;
@@ -107,7 +107,7 @@ public final class RealmCommands {
     /** Stands the player {@code dx, dz} away from (x, z), {@code up} above the ground, looking at the target. */
     private static int look(CommandContext<CommandSourceStack> c) throws CommandSyntaxException {
         ServerPlayer p = c.getSource().getPlayerOrException();
-        ServerLevel level = p.serverLevel();
+        ServerLevel level = p.level();
         int x = IntegerArgumentType.getInteger(c, "x"), z = IntegerArgumentType.getInteger(c, "z");
         int vx = x + IntegerArgumentType.getInteger(c, "dx"), vz = z + IntegerArgumentType.getInteger(c, "dz");
         level.getChunk(x >> 4, z >> 4);
@@ -117,7 +117,7 @@ public final class RealmCommands {
         double dx = x + 0.5 - (vx + 0.5), dz = z + 0.5 - (vz + 0.5), dy = ty + 3 - (vy + 1.6);
         float yaw = (float) Math.toDegrees(Math.atan2(-dx, dz));
         float pitch = (float) -Math.toDegrees(Math.atan2(dy, Math.sqrt(dx * dx + dz * dz)));
-        p.teleportTo(level, vx + 0.5, vy, vz + 0.5, yaw, pitch);
+        p.teleportTo(level, vx + 0.5, vy, vz + 0.5, java.util.Set.of(),  yaw, pitch, true);
         return 1;
     }
 
@@ -146,7 +146,7 @@ public final class RealmCommands {
         int size = rad * 2;
         BufferedImage img = new BufferedImage(size, size, BufferedImage.TYPE_INT_RGB);
         int[] heights = new int[size * size];
-        Arrays.fill(heights, level.getMinBuildHeight());
+        Arrays.fill(heights, level.getMinY());
         long t0 = System.nanoTime();
         int chunks = 0;
         for (int qx = (cx - rad) >> 4; qx <= (cx + rad - 1) >> 4; qx++)

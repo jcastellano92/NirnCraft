@@ -17,27 +17,26 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
-import net.minecraftforge.client.event.ViewportEvent;
-import net.minecraftforge.client.event.sound.PlaySoundEvent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
+import net.neoforged.neoforge.client.event.ViewportEvent;
+import net.neoforged.neoforge.client.event.sound.PlaySoundEvent;
+
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /** Forge-bus client events of the world module: WAIT/MAP keys, compass locations, soundtrack, realm fog. */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
 public final class WorldClientEvents {
     private static int ticks;
 
     private WorldClientEvents() {}
 
     @SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent event) {
-        if (event.phase != TickEvent.Phase.END) return;
+    public static void onClientTick(net.neoforged.neoforge.client.event.ClientTickEvent.Post event) {
         Minecraft mc = Minecraft.getInstance();
         MusicController.tick(mc);
         if (mc.player == null || mc.level == null) return;
@@ -46,7 +45,7 @@ public final class WorldClientEvents {
             RestClient.onWaitKey(mc);
         }
         while (SkyKeys.MAP.consumeClick()) {
-            if (mc.screen == null) mc.setScreen(new MapScreen());
+            if (mc.gui.screen() == null) mc.gui.setScreen(new MapScreen());
         }
         ExploredMap.tick(mc);
         RegionBanner.tick(mc);
@@ -61,22 +60,22 @@ public final class WorldClientEvents {
      * the player has heard of and undiscovered named places close by (dark icons).
      */
     private static void updateCompass(Minecraft mc) {
-        ListTag list = SkyData.get(mc.player).module(WorldData.MODULE).getList("discovered", Tag.TAG_COMPOUND);
-        String dim = mc.level.dimension().location().toString();
+        ListTag list = SkyData.get(mc.player).module(WorldData.MODULE).getListOrEmpty("discovered");
+        String dim = mc.level.dimension().identifier().toString();
         double range = WorldConfig.COMPASS_RANGE.get();
         BlockPos p = mc.player.blockPosition();
         List<CompassMarkers.Marker> markers = new ArrayList<>();
         java.util.Set<String> listed = new java.util.HashSet<>();
         for (int i = 0; i < list.size(); i++) {
-            CompoundTag loc = list.getCompound(i);
-            if (!loc.getString("dim").equals(dim)) continue;
-            if (!loc.getString("place").isEmpty()) listed.add(loc.getString("place"));
-            double dx = loc.getInt("x") - p.getX();
-            double dz = loc.getInt("z") - p.getZ();
+            CompoundTag loc = list.getCompoundOrEmpty(i);
+            if (!loc.getStringOr("dim","").equals(dim)) continue;
+            if (!loc.getStringOr("place", "").isEmpty()) listed.add(loc.getStringOr("place",""));
+            double dx = loc.getIntOr("x",0) - p.getX();
+            double dz = loc.getIntOr("z",0) - p.getZ();
             if (dx * dx + dz * dz > range * range) continue;
-            LocationKind kind = LocationKind.byId(loc.getString("type"));
-            boolean known = loc.getBoolean("known");
-            markers.add(new CompassMarkers.Marker(new Vec3(loc.getInt("x") + 0.5, loc.getInt("y"), loc.getInt("z") + 0.5),
+            LocationKind kind = LocationKind.byId(loc.getStringOr("type",""));
+            boolean known = loc.getBooleanOr("known",false);
+            markers.add(new CompassMarkers.Marker(new Vec3(loc.getIntOr("x",0) + 0.5, loc.getIntOr("y",0), loc.getIntOr("z",0) + 0.5),
                     known ? CompassMarkers.Shape.LOCATION : CompassMarkers.Shape.DISCOVERED, kind.color,
                     WorldData.displayName(loc).getString(), range, kind.icon));
         }
@@ -107,8 +106,8 @@ public final class WorldClientEvents {
             MusicController.recordStarted(sound);
             return;
         }
-        String ns = sound.getLocation().getNamespace();
-        String path = sound.getLocation().getPath();
+        String ns = sound.getIdentifier().getNamespace();
+        String path = sound.getIdentifier().getPath();
         if (Skycraft.MODID.equals(ns) && (path.equals("music.discovery") || path.equals("music.level_up"))) {
             MusicController.stingStarted(path.equals("music.discovery") ? 9 : 4); // stings play as UI sounds
             return;

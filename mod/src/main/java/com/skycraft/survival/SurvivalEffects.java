@@ -10,10 +10,10 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.registries.DeferredRegister;
+import net.minecraft.core.registries.BuiltInRegistries;
+import java.util.function.Supplier;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -25,45 +25,45 @@ import java.util.Map;
  * blessings of the Nine Divines (see {@link Divine}). Diseases and blessings are not cured by milk.
  */
 public final class SurvivalEffects {
-    public static final DeferredRegister<MobEffect> EFFECTS = DeferredRegister.create(ForgeRegistries.MOB_EFFECTS, Skycraft.MODID);
+    public static final DeferredRegister<MobEffect> EFFECTS = DeferredRegister.create(BuiltInRegistries.MOB_EFFECT, Skycraft.MODID);
 
     // ---------------------------------------------------------------- food
     /** Restores 3 stamina per second per level (cooked food, mead). */
-    public static final RegistryObject<MobEffect> REGENERATE_STAMINA_FOOD = EFFECTS.register("regenerate_stamina_food",
+    public static final Supplier<MobEffect> REGENERATE_STAMINA_FOOD = EFFECTS.register("regenerate_stamina_food",
             () -> new StaminaFoodEffect(MobEffectCategory.BENEFICIAL, 0x8CCB5E));
     /** Stews: stamina regenerates 25% faster per level (applied by {@link SurvivalEvents}). */
-    public static final RegistryObject<MobEffect> FORTIFY_STAMINA_REGEN = EFFECTS.register("fortify_stamina_regen",
+    public static final Supplier<MobEffect> FORTIFY_STAMINA_REGEN = EFFECTS.register("fortify_stamina_regen",
             () -> new SurvivalEffect(MobEffectCategory.BENEFICIAL, 0xC8A050, true));
 
     // ---------------------------------------------------------------- survival mode (survival/mode)
     /** A hot stew or soup: the cold can't reach you as easily (and you warmed up when you ate it). */
-    public static final RegistryObject<MobEffect> WARMING_MEAL = EFFECTS.register("warming_meal",
+    public static final Supplier<MobEffect> WARMING_MEAL = EFFECTS.register("warming_meal",
             () -> new SurvivalEffect(MobEffectCategory.BENEFICIAL, 0xE08A40, false));
     /**
      * Slept in a bedroll or tent: skills improve 5% faster (a proper bed gives the core's Well Rested instead, and
      * sleeping near your spouse its Lover's Comfort).
      */
-    public static final RegistryObject<MobEffect> RESTED = EFFECTS.register("rested",
+    public static final Supplier<MobEffect> RESTED = EFFECTS.register("rested",
             () -> new SurvivalEffect(MobEffectCategory.BENEFICIAL, 0x9AB0D8, true));
 
     // ---------------------------------------------------------------- diseases (Diseases lists them)
-    public static final RegistryObject<MobEffect> ATAXIA = disease("ataxia", 0x7A8A5A);
-    public static final RegistryObject<MobEffect> BONE_BREAK_FEVER = disease("bone_break_fever", 0xB8A890);
-    public static final RegistryObject<MobEffect> BRAIN_ROT = disease("brain_rot", 0x8A6A8A);
-    public static final RegistryObject<MobEffect> RATTLES = disease("rattles", 0x9A9A60);
-    public static final RegistryObject<MobEffect> ROCKJOINT = disease("rockjoint", 0x707070);
-    public static final RegistryObject<MobEffect> WITBANE = disease("witbane", 0x5A6A9A);
-    public static final RegistryObject<MobEffect> SWAMP_ROT = disease("swamp_rot", 0x4A6A3A);
-    public static final RegistryObject<MobEffect> COLLYWOBBLES = EFFECTS.register("collywobbles",
+    public static final Supplier<MobEffect> ATAXIA = disease("ataxia", 0x7A8A5A);
+    public static final Supplier<MobEffect> BONE_BREAK_FEVER = disease("bone_break_fever", 0xB8A890);
+    public static final Supplier<MobEffect> BRAIN_ROT = disease("brain_rot", 0x8A6A8A);
+    public static final Supplier<MobEffect> RATTLES = disease("rattles", 0x9A9A60);
+    public static final Supplier<MobEffect> ROCKJOINT = disease("rockjoint", 0x707070);
+    public static final Supplier<MobEffect> WITBANE = disease("witbane", 0x5A6A9A);
+    public static final Supplier<MobEffect> SWAMP_ROT = disease("swamp_rot", 0x4A6A3A);
+    public static final Supplier<MobEffect> COLLYWOBBLES = EFFECTS.register("collywobbles",
             () -> new SurvivalEffect(MobEffectCategory.HARMFUL, 0xA0A040, true)
-                    .addAttributeModifier(Attributes.ATTACK_SPEED, "5b8e2c1a-3d4f-4e6a-9b7c-1d2e3f4a5b01", -0.10, AttributeModifier.Operation.MULTIPLY_TOTAL));
-    public static final RegistryObject<MobEffect> GREENSPORE = disease("greenspore", 0x5AA05A);
-    public static final RegistryObject<MobEffect> DROOPS = EFFECTS.register("droops",
+                    .addAttributeModifier(Attributes.ATTACK_SPEED, net.minecraft.resources.Identifier.fromNamespaceAndPath("skycraft", "effect_5b8e2c1a-3d4f-4e6a-9b7c-1d2e3f4a5b01"), -0.10, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
+    public static final Supplier<MobEffect> GREENSPORE = disease("greenspore", 0x5AA05A);
+    public static final Supplier<MobEffect> DROOPS = EFFECTS.register("droops",
             () -> new SurvivalEffect(MobEffectCategory.HARMFUL, 0x8A7A6A, true)
-                    .addAttributeModifier(Attributes.MOVEMENT_SPEED, "5b8e2c1a-3d4f-4e6a-9b7c-1d2e3f4a5b02", -0.10, AttributeModifier.Operation.MULTIPLY_TOTAL));
+                    .addAttributeModifier(Attributes.MOVEMENT_SPEED, net.minecraft.resources.Identifier.fromNamespaceAndPath("skycraft", "effect_5b8e2c1a-3d4f-4e6a-9b7c-1d2e3f4a5b02"), -0.10, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
 
     // ---------------------------------------------------------------- blessings of the Divines
-    public static final Map<Divine, RegistryObject<MobEffect>> BLESSINGS = new EnumMap<>(Divine.class);
+    public static final Map<Divine, Supplier<MobEffect>> BLESSINGS = new EnumMap<>(Divine.class);
 
     static {
         for (Divine d : Divine.values()) {
@@ -73,7 +73,7 @@ public final class SurvivalEffects {
 
     private SurvivalEffects() {}
 
-    private static RegistryObject<MobEffect> disease(String id, int color) {
+    private static Supplier<MobEffect> disease(String id, int color) {
         return EFFECTS.register(id, () -> new SurvivalEffect(MobEffectCategory.HARMFUL, color, true));
     }
 
@@ -92,10 +92,8 @@ public final class SurvivalEffects {
             this.noMilk = noMilk;
         }
 
-        @Override
-        public List<ItemStack> getCurativeItems() {
-            return noMilk ? new ArrayList<>() : super.getCurativeItems();
-        }
+        public boolean resistsMilk() { return noMilk; }
+
     }
 
     /** Restores {@code 3 * level} stamina every second. */
@@ -105,15 +103,16 @@ public final class SurvivalEffects {
         }
 
         @Override
-        public boolean isDurationEffectTick(int duration, int amplifier) {
+        public boolean shouldApplyEffectTickThisTick(int duration, int amplifier) {
             return duration % 20 == 0;
         }
 
         @Override
-        public void applyEffectTick(LivingEntity entity, int amplifier) {
-            if (entity.level().isClientSide || !(entity instanceof Player player)) return;
+        public boolean applyEffectTick(net.minecraft.server.level.ServerLevel serverLevel, LivingEntity entity, int amplifier) {
+            if (!(entity instanceof Player player)) return true;
             PlayerData data = SkyData.get(player);
             data.setStamina(data.getStamina() + 3f * (amplifier + 1));
+            return true;
         }
     }
 }

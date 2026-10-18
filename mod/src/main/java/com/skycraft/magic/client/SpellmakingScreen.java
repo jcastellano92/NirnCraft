@@ -12,7 +12,7 @@ import com.skycraft.network.SkyNetwork;
 import com.skycraft.perk.Perks;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
@@ -122,11 +122,13 @@ public class SpellmakingScreen extends Screen {
     // ------------------------------------------------------------------ input
 
     @Override
-    public boolean mouseClicked(double mx, double my, int button) {
-        if (super.mouseClicked(mx, my, button)) return true;
+    public boolean mouseClicked(net.minecraft.client.input.MouseButtonEvent event, boolean doubleClick) {
+        double mx = event.x(), my = event.y();
+        int button = com.skycraft.client.screen.UiInput.actionButton(event.button());
+        if (super.mouseClicked(event, doubleClick)) return true;
         for (Hit h : hits) {
             if (MagicUi.inside(mx, my, h.x1, h.y1, h.x2, h.y2)) {
-                if (hasShiftDown() && h.shiftClick != null) h.shiftClick.run();
+                if (com.skycraft.client.screen.UiInput.shiftDown() && h.shiftClick != null) h.shiftClick.run();
                 else h.click.run();
                 Minecraft.getInstance().getSoundManager().play(net.minecraft.client.resources.sounds.SimpleSoundInstance.forUI(
                         net.minecraft.sounds.SoundEvents.UI_BUTTON_CLICK.value(), 1.6f, 0.25f));
@@ -137,12 +139,12 @@ public class SpellmakingScreen extends Screen {
     }
 
     @Override
-    public boolean mouseScrolled(double mx, double my, double delta) {
+    public boolean mouseScrolled(double mx, double my, double horizontal, double delta) {
         if (mx < listX + listW) {
             scroll = Mth.clamp(scroll - (int) Math.signum(delta), 0, Math.max(0, known.size() - visibleRows()));
             return true;
         }
-        return super.mouseScrolled(mx, my, delta);
+        return super.mouseScrolled(mx, my, horizontal, delta);
     }
 
     private int visibleRows() {
@@ -169,24 +171,24 @@ public class SpellmakingScreen extends Screen {
     // ------------------------------------------------------------------ rendering
 
     @Override
-    public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        renderBackground(g);
+    public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
+
         LocalPlayer p = player();
         if (p == null) return;
         hits.clear();
         g.fill(0, 0, width, height, 0x80000000);
         MagicUi.capsCentered(g, font, title, width / 2, 10, MagicUi.TEXT);
         Component gold = Component.translatable("spellmaking.skycraft.gold", Currency.formatGold(Currency.balance(p)));
-        g.drawString(font, gold, width - 12 - font.width(gold), 10, MagicUi.GOLD, false);
+        g.text(font, gold, width - 12 - font.width(gold), 10, MagicUi.GOLD, false);
 
         // ---------------------------------------------------------------- known effects
         MagicUi.panel(g, listX - 4, top - 4, listX + listW + 4, bottom + 4);
-        g.drawString(font, MagicUi.caps(Component.translatable("spellmaking.skycraft.known_effects")), listX, top, MagicUi.HEADER, false);
+        g.text(font, MagicUi.caps(Component.translatable("spellmaking.skycraft.known_effects")), listX, top, MagicUi.HEADER, false);
         int y0 = top + 14;
         if (known.isEmpty()) {
             int y = y0;
             for (var line : font.split(Component.translatable("spellmaking.skycraft.no_effects"), listW)) {
-                g.drawString(font, line, listX, y, MagicUi.DIM, false);
+                g.text(font, line, listX, y, MagicUi.DIM, false);
                 y += 10;
             }
         }
@@ -199,7 +201,7 @@ public class SpellmakingScreen extends Screen {
             if (hover && !used) g.fill(listX - 2, y - 1, listX + listW + 2, y + ROW - 1, 0x30FFFFFF);
             g.fill(listX, y + 3, listX + 3, y + 6, 0xFF000000 | t.school.color);
             String name = MagicUi.ellipsize(font, t.displayName().getString(), listW - 10);
-            g.drawString(font, name, listX + 6, y + 2, used ? MagicUi.DIM : hover ? MagicUi.BRIGHT : MagicUi.TEXT, false);
+            g.text(font, name, listX + 6, y + 2, used ? MagicUi.DIM : hover ? MagicUi.BRIGHT : MagicUi.TEXT, false);
             if (!used) hits.add(new Hit(listX - 2, y - 1, listX + listW + 2, y + ROW - 1, () -> add(t), null));
         }
         if (known.size() > rows) {
@@ -212,12 +214,12 @@ public class SpellmakingScreen extends Screen {
         MagicUi.panel(g, specX - 4, top - 4, specX + specW + 4, bottom + 4);
         MagicUi.hline(g, specX, specX + Math.min(specW - 8, 160) + 4, top + 16, 0xA0);
         if (nameBox.getValue().isEmpty() && !nameBox.isFocused()) {
-            g.drawString(font, Component.translatable("spellmaking.skycraft.name_hint"), specX + 4, top + 4, MagicUi.DIM, false);
+            g.text(font, Component.translatable("spellmaking.skycraft.name_hint"), specX + 4, top + 4, MagicUi.DIM, false);
         }
         int y = top + 22;
         if (lines.isEmpty()) {
             for (var line : font.split(Component.translatable("spellmaking.skycraft.help"), specW - 4)) {
-                g.drawString(font, line, specX + 2, y, MagicUi.DIM, false);
+                g.text(font, line, specX + 2, y, MagicUi.DIM, false);
                 y += 10;
             }
         }
@@ -240,16 +242,16 @@ public class SpellmakingScreen extends Screen {
             if (Perks.has(p, tier.perkFor(school))) cost *= 0.5f;
             Component sum = Component.translatable("spellmaking.skycraft.summary", school.displayName(), tier.displayName(),
                     Math.round(cost), Math.round(base));
-            g.drawString(font, sum, specX + 2, sy, 0xFF000000 | school.color, false);
+            g.text(font, sum, specX + 2, sy, 0xFF000000 | school.color, false);
             Component fee = Component.translatable("spellmaking.skycraft.fee", CustomSpells.goldCost(def));
-            g.drawString(font, fee, specX + 2, sy + 11, MagicUi.GOLD, false);
+            g.text(font, fee, specX + 2, sy + 11, MagicUi.GOLD, false);
             String problem = CustomSpells.problem(p, def);
             if (problem != null) {
                 Component pc = problem.endsWith(".skill")
                         ? Component.translatable(problem, school.displayName(), CustomSpells.skillFor(tier)) : Component.translatable(problem);
                 int py = sy + 22;
                 for (var line : font.split(pc, specW - 4)) {
-                    g.drawString(font, line, specX + 2, py, MagicUi.BAD, false);
+                    g.text(font, line, specX + 2, py, MagicUi.BAD, false);
                     py += 10;
                 }
             }
@@ -258,24 +260,24 @@ public class SpellmakingScreen extends Screen {
             makeButton.active = false;
         }
         Component hint = Component.translatable("spellmaking.skycraft.hint");
-        g.drawString(font, MagicUi.ellipsize(font, hint.getString(), specX + specW - 120 - listX), listX, height - 22, MagicUi.DIM, false);
-        super.render(g, mouseX, mouseY, partialTick);
+        g.text(font, MagicUi.ellipsize(font, hint.getString(), specX + specW - 120 - listX), listX, height - 22, MagicUi.DIM, false);
+        super.extractRenderState(g, mouseX, mouseY, partialTick);
     }
 
-    private void drawLine(GuiGraphics g, Line l, int index, int x, int y, int w, int mouseX, int mouseY) {
+    private void drawLine(GuiGraphicsExtractor g, Line l, int index, int x, int y, int w, int mouseX, int mouseY) {
         Font font = this.font;
         g.fill(x, y + 2, x + 3, y + 5, 0xFF000000 | l.type.school.color);
-        g.drawString(font, l.type.displayName(), x + 6, y, MagicUi.TEXT, false);
+        g.text(font, l.type.displayName(), x + 6, y, MagicUi.TEXT, false);
         // remove
         int rx = x + w - 10;
         boolean hotX = MagicUi.inside(mouseX, mouseY, rx - 3, y - 2, rx + 9, y + 10);
-        g.drawString(font, "x", rx, y, hotX ? MagicUi.BAD : MagicUi.DIM, false);
+        g.text(font, "x", rx, y, hotX ? MagicUi.BAD : MagicUi.DIM, false);
         hits.add(new Hit(rx - 3, y - 2, rx + 9, y + 10, () -> lines.remove(l), null));
         // range toggle
         String range = MagicUi.caps(l.range.displayName());
         int gx = rx - 10 - font.width(range);
         boolean hotR = MagicUi.inside(mouseX, mouseY, gx - 3, y - 2, gx + font.width(range) + 3, y + 10);
-        g.drawString(font, range, gx, y, hotR ? MagicUi.BRIGHT : MagicUi.GOLD, false);
+        g.text(font, range, gx, y, hotR ? MagicUi.BRIGHT : MagicUi.GOLD, false);
         hits.add(new Hit(gx - 3, y - 2, gx + font.width(range) + 3, y + 10, () -> l.range = nextRange(l.type, l.range), null));
         // steppers
         int sx = x + 6;
@@ -293,26 +295,26 @@ public class SpellmakingScreen extends Screen {
                     d -> l.area = Mth.clamp(l.area + d, 0, SpellEffectType.MAX_AREA), 1, 5);
         }
         String cost = String.valueOf(Math.round(CustomSpells.effectCost(l.effect())));
-        g.drawString(font, cost, x + w - 4 - font.width(cost), sy, MagicUi.MAGICKA, false);
+        g.text(font, cost, x + w - 4 - font.width(cost), sy, MagicUi.MAGICKA, false);
         MagicUi.hline(g, x, x + w, y + LINE_H - 4, 0x40);
     }
 
     /** "Label ‹ 25 ›": returns the x after it. */
-    private int stepper(GuiGraphics g, int x, int y, Component label, int value, int mouseX, int mouseY,
+    private int stepper(GuiGraphicsExtractor g, int x, int y, Component label, int value, int mouseX, int mouseY,
                         java.util.function.IntConsumer change, int step, int bigStep) {
         Font font = this.font;
         String lab = label.getString();
-        g.drawString(font, lab, x, y, MagicUi.HEADER, false);
+        g.text(font, lab, x, y, MagicUi.HEADER, false);
         int ax = x + font.width(lab) + 3;
         boolean hotL = MagicUi.inside(mouseX, mouseY, ax - 2, y - 3, ax + 7, y + 10);
-        g.drawString(font, "<", ax, y, hotL ? MagicUi.BRIGHT : MagicUi.GOLD, false);
+        g.text(font, "<", ax, y, hotL ? MagicUi.BRIGHT : MagicUi.GOLD, false);
         hits.add(new Hit(ax - 2, y - 3, ax + 7, y + 10, () -> change.accept(-step), () -> change.accept(-bigStep)));
         String v = String.valueOf(value);
         int vx = ax + 9;
-        g.drawString(font, v, vx, y, MagicUi.BRIGHT, false);
+        g.text(font, v, vx, y, MagicUi.BRIGHT, false);
         int bx = vx + Math.max(font.width("000"), font.width(v)) + 3;
         boolean hotR = MagicUi.inside(mouseX, mouseY, bx - 2, y - 3, bx + 7, y + 10);
-        g.drawString(font, ">", bx, y, hotR ? MagicUi.BRIGHT : MagicUi.GOLD, false);
+        g.text(font, ">", bx, y, hotR ? MagicUi.BRIGHT : MagicUi.GOLD, false);
         hits.add(new Hit(bx - 2, y - 3, bx + 7, y + 10, () -> change.accept(step), () -> change.accept(bigStep)));
         return bx + 14;
     }

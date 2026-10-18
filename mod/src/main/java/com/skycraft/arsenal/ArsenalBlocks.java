@@ -20,33 +20,33 @@ import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.api.distmarker.Dist;
+import com.skycraft.platform.Sides;
+import net.neoforged.neoforge.registries.DeferredRegister;
+import net.minecraft.core.registries.BuiltInRegistries;
+import java.util.function.Supplier;
 
 /** Blocks of the arsenal: the Staff Enchanter (Dragonborn). */
 public final class ArsenalBlocks {
-    public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, Skycraft.MODID);
+    public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(BuiltInRegistries.BLOCK, Skycraft.MODID);
 
-    public static final RegistryObject<Block> STAFF_ENCHANTER = BLOCKS.register("staff_enchanter", () -> new StaffEnchanterBlock(
-            BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_GRAY).strength(3.5f, 9f).requiresCorrectToolForDrops()
+    public static final Supplier<Block> STAFF_ENCHANTER = BLOCKS.register("staff_enchanter", () -> new StaffEnchanterBlock(
+            com.skycraft.platform.SkyProperties.block("staff_enchanter").mapColor(MapColor.COLOR_GRAY).strength(3.5f, 9f).requiresCorrectToolForDrops()
                     .lightLevel(state -> 5).noOcclusion().sound(SoundType.STONE)));
-    public static final RegistryObject<Item> STAFF_ENCHANTER_ITEM = ArsenalItems.ITEMS.register("staff_enchanter",
-            () -> new BlockItem(STAFF_ENCHANTER.get(), new Item.Properties().rarity(Rarity.UNCOMMON)));
+    public static final Supplier<Item> STAFF_ENCHANTER_ITEM = ArsenalItems.ITEMS.register("staff_enchanter",
+            () -> new BlockItem(STAFF_ENCHANTER.get(), com.skycraft.platform.SkyProperties.item("staff_enchanter").rarity(Rarity.UNCOMMON)));
 
     private ArsenalBlocks() {}
 
     /** A carved Dwemer-and-stone pedestal with a socket for a staff; use it to open the enchanting screen. */
     public static class StaffEnchanterBlock extends Block {
-        public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
+        public static final EnumProperty<net.minecraft.core.Direction> FACING = HorizontalDirectionalBlock.FACING;
         private static final VoxelShape SHAPE = Shapes.or(Block.box(2, 0, 2, 14, 4, 14), Block.box(5, 4, 5, 11, 12, 11), Block.box(3, 12, 3, 13, 15, 13));
 
         public StaffEnchanterBlock(Properties props) {
@@ -72,12 +72,11 @@ public final class ArsenalBlocks {
 
         @Override
         @SuppressWarnings("deprecation")
-        public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
-            if (hand != InteractionHand.MAIN_HAND) return InteractionResult.PASS;
-            if (level.isClientSide) {
-                DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> com.skycraft.arsenal.client.StaffEnchanterScreen.open(pos));
+        public InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+            if (level.isClientSide()) {
+                Sides.runOn(Dist.CLIENT, () -> () -> com.skycraft.arsenal.client.StaffEnchanterScreen.open(pos));
             }
-            return InteractionResult.sidedSuccess(level.isClientSide);
+            return com.skycraft.platform.Interactions.sidedSuccess(level.isClientSide());
         }
 
         @Override

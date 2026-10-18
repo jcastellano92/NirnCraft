@@ -9,8 +9,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * All persistent RPG state of a player. Lives in a capability on the player (both sides; the client copy is
- * filled by {@link com.skycraft.network.SyncPlayerDataPacket}).
+ * All persistent RPG state of a player. Lives in a NeoForge attachment on both sides; owner and appearance
+ * packets populate the appropriate client copies.
  *
  * <p>Feature modules that need their own persistent per-player state store it in a named sub-tag obtained
  * through {@link #module(String)} and call {@link #markDirty()} after changing it so it gets synced.</p>
@@ -19,6 +19,14 @@ import java.util.Map;
  * progress packet, throttled) and {@link #markAppearanceDirty()} (race/sheathe/apparel, sent to tracking players).</p>
  */
 public class PlayerData {
+    /** The attachment keeps the established RPG/module NBT inside one versioned storage field. */
+    public static final com.mojang.serialization.MapCodec<PlayerData> CODEC = CompoundTag.CODEC.fieldOf("data")
+            .xmap(tag -> {
+                PlayerData data = new PlayerData();
+                data.load(tag);
+                return data;
+            }, PlayerData::save);
+
     public static final int BASE_HEALTH = 100;
     public static final int BASE_MAGICKA = 100;
     public static final int BASE_STAMINA = 100;
@@ -205,16 +213,16 @@ public class PlayerData {
 
     /** Skyrim-scale max health (100 base). One Minecraft half-heart is 5 Skyrim health. */
     public int maxHealth() {
-        return BASE_HEALTH + healthPoints * ATTRIBUTE_STEP + (race == null ? 0 : race.bonusHealth) + (int) module("bonus").getFloat("health");
+        return BASE_HEALTH + healthPoints * ATTRIBUTE_STEP + (race == null ? 0 : race.bonusHealth) + (int) module("bonus").getFloatOr("health", 0f);
     }
 
     public float maxMagicka() {
         int race = this.race == null ? 0 : this.race.bonusMagicka;
-        return BASE_MAGICKA + magickaPoints * ATTRIBUTE_STEP + race + module("bonus").getFloat("magicka");
+        return BASE_MAGICKA + magickaPoints * ATTRIBUTE_STEP + race + module("bonus").getFloatOr("magicka", 0f);
     }
 
     public float maxStamina() {
-        return BASE_STAMINA + staminaPoints * ATTRIBUTE_STEP + (race == null ? 0 : race.bonusStamina) + module("bonus").getFloat("stamina");
+        return BASE_STAMINA + staminaPoints * ATTRIBUTE_STEP + (race == null ? 0 : race.bonusStamina) + module("bonus").getFloatOr("stamina", 0f);
     }
 
     public float getMagicka() {
@@ -431,28 +439,28 @@ public class PlayerData {
 
     /** Client side: applies a {@link #saveProgress()} tag. */
     public void loadProgress(CompoundTag tag) {
-        int[] lvl = tag.getIntArray("lvl");
-        int[] leg = tag.getIntArray("leg");
-        int[] xp = tag.getIntArray("xp");
+        int[] lvl = tag.getIntArray("lvl").orElseGet(() -> new int[0]);
+        int[] leg = tag.getIntArray("leg").orElseGet(() -> new int[0]);
+        int[] xp = tag.getIntArray("xp").orElseGet(() -> new int[0]);
         for (int i = 0; i < Skill.VALUES.length; i++) {
             Skill s = Skill.VALUES[i];
             if (i < lvl.length) skillLevels.put(s, lvl[i]);
             if (i < leg.length) legendary.put(s, leg[i]);
             if (i < xp.length) skillXp.put(s, Float.intBitsToFloat(xp[i]));
         }
-        level = Math.max(1, tag.getInt("level"));
-        levelXp = tag.getFloat("levelXp");
-        perkPoints = tag.getInt("perkPoints");
-        pendingLevelUps = tag.getInt("pendingLevelUps");
-        healthPoints = tag.getInt("hp");
-        magickaPoints = tag.getInt("mp");
-        staminaPoints = tag.getInt("sp");
-        gold = tag.getLong("gold");
-        powerReadyAt = tag.getLong("powerReadyAt");
-        trainingsThisLevel = tag.getInt("trainings");
+        level = Math.max(1, tag.getIntOr("level", 0));
+        levelXp = tag.getFloatOr("levelXp", 0f);
+        perkPoints = tag.getIntOr("perkPoints", 0);
+        pendingLevelUps = tag.getIntOr("pendingLevelUps", 0);
+        healthPoints = tag.getIntOr("hp", 0);
+        magickaPoints = tag.getIntOr("mp", 0);
+        staminaPoints = tag.getIntOr("sp", 0);
+        gold = tag.getLongOr("gold", 0L);
+        powerReadyAt = tag.getLongOr("powerReadyAt", 0L);
+        trainingsThisLevel = tag.getIntOr("trainings", 0);
         stats.clear();
-        CompoundTag statTag = tag.getCompound("stats");
-        for (String k : statTag.getAllKeys()) stats.put(k, statTag.getInt(k));
+        CompoundTag statTag = tag.getCompoundOrEmpty("stats");
+        for (String k : statTag.keySet()) stats.put(k, statTag.getIntOr(k, 0));
     }
 
     /** What other players need to render this player: race, sheathe state and worn apparel. */
@@ -461,8 +469,8 @@ public class PlayerData {
         if (race != null) tag.putString("race", race.id());
         // the chosen face, hair and body (society.NpcLook packing; see client.RaceSkins)
         CompoundTag look = modules.get("race");
-        if (look != null && look.contains("look")) tag.putInt("look", look.getInt("look"));
-        tag.putBoolean("sheathed", module("combat").getBoolean("sheathed"));
+        if (look != null && look.contains("look")) tag.putInt("look", look.getIntOr("look", 0));
+        tag.putBoolean("sheathed", module("combat").getBooleanOr("sheathed", false));
         CompoundTag apparel = modules.get("apparel");
         if (apparel != null && !apparel.isEmpty()) tag.put("apparel", apparel.copy());
         return tag;
@@ -470,15 +478,20 @@ public class PlayerData {
 
     /** Client side: applies an {@link #appearance()} tag to another player's copy of the data. */
     public void loadAppearance(CompoundTag tag) {
-        race = tag.contains("race") ? Race.byId(tag.getString("race")) : null;
-        if (tag.contains("look")) module("race").putInt("look", tag.getInt("look"));
+        race = tag.contains("race") ? Race.byId(tag.getStringOr("race", "")) : null;
+        if (tag.contains("look")) module("race").putInt("look", tag.getIntOr("look", 0));
         else module("race").remove("look");
-        module("combat").putBoolean("sheathed", tag.getBoolean("sheathed"));
-        if (tag.contains("apparel", Tag.TAG_COMPOUND)) modules.put("apparel", tag.getCompound("apparel").copy());
+        module("combat").putBoolean("sheathed", tag.getBooleanOr("sheathed", false));
+        if (tag.get("apparel") instanceof CompoundTag) modules.put("apparel", tag.getCompoundOrEmpty("apparel").copy());
         else modules.remove("apparel");
     }
 
     public CompoundTag save() {
+        return saveExcludingModules(java.util.List.of());
+    }
+
+    /** Full persistence shape, without copying modules carried by separate sync channels. */
+    public CompoundTag saveExcludingModules(java.util.List<String> excluded) {
         CompoundTag tag = new CompoundTag();
         CompoundTag skills = new CompoundTag();
         for (Skill s : Skill.VALUES) {
@@ -496,8 +509,15 @@ public class PlayerData {
         stats.forEach(statTag::putInt);
         tag.put("stats", statTag);
         CompoundTag moduleTag = new CompoundTag();
-        modules.forEach((k, v) -> moduleTag.put(k, v.copy()));
+        modules.forEach((k, v) -> {
+            if (!excluded.contains(k)) moduleTag.put(k, v.copy());
+        });
         tag.put("modules", moduleTag);
+        ListTag omitted = new ListTag();
+        for (String key : excluded) {
+            if (modules.containsKey(key)) omitted.add(net.minecraft.nbt.StringTag.valueOf(key));
+        }
+        if (!omitted.isEmpty()) tag.put("omitted", omitted);
 
         tag.putInt("level", level);
         tag.putFloat("levelXp", levelXp);
@@ -516,42 +536,42 @@ public class PlayerData {
     }
 
     public void load(CompoundTag tag) {
-        CompoundTag skills = tag.getCompound("skills");
+        CompoundTag skills = tag.getCompoundOrEmpty("skills");
         for (Skill s : Skill.VALUES) {
-            if (skills.contains(s.id(), Tag.TAG_COMPOUND)) {
-                CompoundTag st = skills.getCompound(s.id());
-                skillLevels.put(s, st.getInt("lvl"));
-                skillXp.put(s, st.getFloat("xp"));
-                legendary.put(s, st.getInt("legendary"));
+            if (skills.get(s.id()) instanceof CompoundTag) {
+                CompoundTag st = skills.getCompoundOrEmpty(s.id());
+                skillLevels.put(s, st.getIntOr("lvl", 0));
+                skillXp.put(s, st.getFloatOr("xp", 0f));
+                legendary.put(s, st.getIntOr("legendary", 0));
             }
         }
         perks.clear();
-        CompoundTag perkTag = tag.getCompound("perks");
-        for (String k : perkTag.getAllKeys()) perks.put(k, perkTag.getInt(k));
+        CompoundTag perkTag = tag.getCompoundOrEmpty("perks");
+        for (String k : perkTag.keySet()) perks.put(k, perkTag.getIntOr(k, 0));
         stats.clear();
-        CompoundTag statTag = tag.getCompound("stats");
-        for (String k : statTag.getAllKeys()) stats.put(k, statTag.getInt(k));
+        CompoundTag statTag = tag.getCompoundOrEmpty("stats");
+        for (String k : statTag.keySet()) stats.put(k, statTag.getIntOr(k, 0));
         // A full sync that had to leave oversized modules out lists them in "omitted": keep the copy we have.
         java.util.Set<String> omitted = new java.util.HashSet<>();
-        ListTag omittedTag = tag.getList("omitted", Tag.TAG_STRING);
-        for (int i = 0; i < omittedTag.size(); i++) omitted.add(omittedTag.getString(i));
+        ListTag omittedTag = tag.getListOrEmpty("omitted");
+        for (int i = 0; i < omittedTag.size(); i++) omitted.add(omittedTag.getStringOr(i, ""));
         modules.keySet().removeIf(k -> !omitted.contains(k));
-        CompoundTag moduleTag = tag.getCompound("modules");
-        for (String k : moduleTag.getAllKeys()) modules.put(k, moduleTag.getCompound(k).copy());
+        CompoundTag moduleTag = tag.getCompoundOrEmpty("modules");
+        for (String k : moduleTag.keySet()) modules.put(k, moduleTag.getCompoundOrEmpty(k).copy());
 
-        level = Math.max(1, tag.getInt("level"));
-        levelXp = tag.getFloat("levelXp");
-        perkPoints = tag.getInt("perkPoints");
-        pendingLevelUps = tag.getInt("pendingLevelUps");
-        healthPoints = tag.getInt("hp");
-        magickaPoints = tag.getInt("mp");
-        staminaPoints = tag.getInt("sp");
-        magicka = tag.getFloat("magicka");
-        stamina = tag.getFloat("stamina");
-        gold = tag.getLong("gold");
-        race = tag.contains("race") ? Race.byId(tag.getString("race")) : null;
-        powerReadyAt = tag.getLong("powerReadyAt");
-        trainingsThisLevel = tag.getInt("trainings");
+        level = Math.max(1, tag.getIntOr("level", 0));
+        levelXp = tag.getFloatOr("levelXp", 0f);
+        perkPoints = tag.getIntOr("perkPoints", 0);
+        pendingLevelUps = tag.getIntOr("pendingLevelUps", 0);
+        healthPoints = tag.getIntOr("hp", 0);
+        magickaPoints = tag.getIntOr("mp", 0);
+        staminaPoints = tag.getIntOr("sp", 0);
+        magicka = tag.getFloatOr("magicka", 0f);
+        stamina = tag.getFloatOr("stamina", 0f);
+        gold = tag.getLongOr("gold", 0L);
+        race = tag.contains("race") ? Race.byId(tag.getStringOr("race", "")) : null;
+        powerReadyAt = tag.getLongOr("powerReadyAt", 0L);
+        trainingsThisLevel = tag.getIntOr("trainings", 0);
         markDirty();
         markProgressDirty();
         markVitalsDirty();

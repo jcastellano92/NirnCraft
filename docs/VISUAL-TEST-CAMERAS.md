@@ -29,7 +29,14 @@ Lighting, shader or spell-only builds that preserve generation inputs keep the s
 The current fingerprint is deliberately conservative: a generation change elsewhere may also request review.
 
 `settle TIMEOUT [LOD_CHUNKS]` is a deadline, not a sleep. It checks the native render radius, the active native
-renderer, clear camera geometry and camera-local synchronized media. Optional LOD readiness samples 48 public DH
+renderer, clear camera geometry and camera-local synchronized media. On the installed Embeddium version, a
+queue-empty flag alone is insufficient: scheduled/active mesh work, pending uploads and all rebuild queues must
+be empty, and the visible-section count must stabilize across completed render frames. Client packet-light tasks
+and light-engine propagation must also finish. Unsupported renderer diagnostics fail capture readiness explicitly.
+For cave motion comparisons, first warm the short planned route and return to the starting pose using these
+checks; retain stationary before/after views at the exact same pose. A changing, incompletely loaded cave does
+not establish a fog defect. Motion captures are diagnostic, not automatically approved reference frames.
+Optional LOD readiness samples 48 public DH
 data columns on three rings. Missing/unsupported observations fail the capture; sampled data is **not proof of all
 LOD GPU meshes**, exposure convergence or every point between probes. Status/logs identify this limit explicitly.
 Retain visual horizon review for outdoor captures.

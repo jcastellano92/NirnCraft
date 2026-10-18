@@ -19,13 +19,13 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.material.FogType;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
-import net.minecraftforge.client.event.ViewportEvent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
+import net.neoforged.neoforge.client.event.ViewportEvent;
+
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -46,7 +46,7 @@ import java.util.Map;
  * </ul>
  * If the server sent no table (regional weather off), nothing is overridden and vanilla weather shows as usual.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
 public final class ClientWeather {
     private static final int[][] SAMPLES = {
             {0, 0}, {96, 0}, {-96, 0}, {0, 96}, {0, -96},
@@ -210,8 +210,8 @@ public final class ClientWeather {
     // ------------------------------------------------------------------ ticking
 
     @SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent event) {
-        if (event.phase != TickEvent.Phase.END) return;
+    public static void onClientTick(net.neoforged.neoforge.client.event.ClientTickEvent.Post event) {
+        if (!(event instanceof net.neoforged.neoforge.client.event.ClientTickEvent.Post)) return;
         Minecraft mc = Minecraft.getInstance();
         ClientLevel level = mc.level;
         Player player = mc.player;
@@ -241,8 +241,8 @@ public final class ClientWeather {
 
     /** Re-apply right before the frame too, in case a server weather packet arrived since the tick. */
     @SubscribeEvent
-    public static void onRenderTick(TickEvent.RenderTickEvent event) {
-        if (event.phase != TickEvent.Phase.START) return;
+    public static void onRenderTick(net.neoforged.neoforge.client.event.RenderFrameEvent.Pre event) {
+        if (!(event instanceof net.neoforged.neoforge.client.event.RenderFrameEvent.Pre)) return;
         ClientLevel level = Minecraft.getInstance().level;
         if (level != null) applyVanilla(level);
     }
@@ -270,7 +270,7 @@ public final class ClientWeather {
         BlockPos.MutableBlockPos probe = new BlockPos.MutableBlockPos();
         BlockPos here = player.blockPosition();
         Biome biome = level.getBiome(here).value();
-        Biome.Precipitation biomePrecip = biome.getPrecipitationAt(here);
+        Biome.Precipitation biomePrecip = biome.getPrecipitationAt(here, level.getSeaLevel());
         float total = 0f;
         float tintW = 0f;
         float heatSum = 0f, wetSum = 0f, duneSum = 0f, coastSum = 0f, elevSum = 0f;
@@ -433,7 +433,7 @@ public final class ClientWeather {
         // The local precipitation and visibility sample the same world-space band
         // seen at a distance. A summit above a valley fog layer must remain clear.
         var column = com.skycraft.atmosphere.WeatherPhysics.evaluate(here.getX(), here.getZ(),
-                level.getGameTime() / 20.0, CloudClimate.snapshot().get(region.id()), kind(), windX(), windZ(), fronts(), level.getDayTime());
+                level.getGameTime() / 20.0, CloudClimate.snapshot().get(region.id()), kind(), windX(), windZ(), fronts(), level.getDefaultClockTime());
         float bandAmount = Mth.clamp(0.35f + 1.25f * column.curtainDensity(), 0.2f, 1f);
         target[P.VANILLA] *= bandAmount;
         target[P.SNOW] *= bandAmount;
@@ -459,8 +459,8 @@ public final class ClientWeather {
         Minecraft mc = Minecraft.getInstance();
         if (!active() || !AtmosphereConfig.WEATHER_FOG.get() || mc.level == null || mc.level.dimension() != Level.OVERWORLD) return false;
         if (camera.getFluidInCamera() != FogType.NONE) return false;
-        return !(camera.getEntity() instanceof net.minecraft.world.entity.LivingEntity le
-                && (le.hasEffect(MobEffects.BLINDNESS) || le.hasEffect(MobEffects.DARKNESS)));
+        return !(camera.entity() instanceof net.minecraft.world.entity.LivingEntity le
+                && (le.hasEffect(com.skycraft.platform.Effects.holder(MobEffects.BLINDNESS)) || le.hasEffect(com.skycraft.platform.Effects.holder(MobEffects.DARKNESS))));
     }
 
     @SubscribeEvent
@@ -474,21 +474,16 @@ public final class ClientWeather {
         float targetFar = isHaboob
                 ? (58f + 220f * inv)
                 : (isBlizzard ? (18f + 145f * inv * (float) Math.sqrt(inv)) : (16f + 200f * inv * (float) Math.sqrt(inv)));
-        if (event.getMode() == net.minecraft.client.renderer.FogRenderer.FogMode.FOG_SKY) {
-            // In desert haboobs, keep the upper sky dome visible above the rolling brown dust wall
-            float skyFogWeight = isHaboob ? f * 0.35f : f;
-            float far = Math.min(vanillaFar, Mth.lerp(skyFogWeight, vanillaFar, targetFar * (isHaboob ? 1.8f : 0.8f)));
-            event.setNearPlaneDistance(0f);
-            event.setFarPlaneDistance(far);
-        } else {
-            float far = Math.min(vanillaFar, targetFar);
-            float near = isBlizzard
-                    ? Math.min(event.getNearPlaneDistance(), far * (0.02f + 0.28f * inv))
-                    : Math.min(event.getNearPlaneDistance(), far * (0.08f + 0.55f * inv * inv));
-            event.setNearPlaneDistance(near);
-            event.setFarPlaneDistance(far);
-        }
-        event.setCanceled(true);
+        var fog = event.getFogData();
+        // Native 26.3 carries sky and terrain ranges in the same fog snapshot.
+        float skyWeight = isHaboob ? f * .35f : f;
+        fog.skyEnd = Math.min(fog.skyEnd, Mth.lerp(skyWeight, fog.skyEnd, targetFar * (isHaboob ? 1.8f : .8f)));
+        float far = Math.min(vanillaFar, targetFar);
+        float near = isBlizzard
+                ? Math.min(event.getNearPlaneDistance(), far * (.02f + .28f * inv))
+                : Math.min(event.getNearPlaneDistance(), far * (.08f + .55f * inv * inv));
+        event.setNearPlaneDistance(near);
+        event.setFarPlaneDistance(far);
     }
 
     @SubscribeEvent(priority = EventPriority.LOW)
@@ -496,7 +491,7 @@ public final class ClientWeather {
         Minecraft mc = Minecraft.getInstance();
         if (fogApplies(event.getCamera())) {
             float pt = (float) event.getPartialTick();
-            float angle = mc.level.getTimeOfDay(pt) * Mth.TWO_PI;
+            float angle = com.skycraft.atmosphere.client.SkyEnvironment.sunCycle(mc.level, pt) * Mth.TWO_PI;
             float sunY = Mth.cos(angle);
             float day = Mth.clamp(sunY * 2.0f + 0.5f, 0f, 1f);
             float light = 0.06f + 0.94f * day;
@@ -523,7 +518,7 @@ public final class ClientWeather {
                 b = Mth.lerp(wSand, b, 0.45f * light);
             }
             // Regional & latitude-driven twilight Rayleigh/Mie scattering so horizon fog is never generic
-            double camZ = event.getCamera().getPosition().z;
+            double camZ = event.getCamera().position().z;
             float lat = (float) com.skycraft.atmosphere.AtmosphereMath.latitudeFactor(camZ);
             float twilightSpan = 0.24f + 0.10f * lat; // polar latitudes have longer lingering twilight
             float twilight = Mth.clamp(1f - Math.abs(sunY - 0.02f) / twilightSpan, 0f, 1f);

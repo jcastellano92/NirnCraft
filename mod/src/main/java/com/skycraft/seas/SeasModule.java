@@ -1,8 +1,8 @@
 package com.skycraft.seas;
 
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.config.ModConfig;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.ModLoadingContext;
+import net.neoforged.fml.config.ModConfig;
 
 /**
  * Seas and skies: what makes Nirn's oceans, coasts, islands and skies worth exploring. Started from
@@ -27,7 +27,7 @@ public final class SeasModule {
     private SeasModule() {}
 
     public static void init(IEventBus modBus) {
-        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, SeasConfig.SPEC, "skycraft-seas.toml");
+        com.skycraft.Skycraft.config(ModConfig.Type.LOCAL, SeasConfig.SPEC, "skycraft-seas.toml");
         SeasRegistry.init(modBus);
         SeasLore.register();
     }

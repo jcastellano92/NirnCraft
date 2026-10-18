@@ -1,0 +1,16 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "skycraft:item/wolf_spawn_egg",
+    "tints": [
+      {
+        "type": "minecraft:constant",
+        "value": 4866104
+      },
+      {
+        "type": "minecraft:constant",
+        "value": 11839118
+      }
+    ]
+  }
+}

@@ -22,13 +22,13 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,7 +41,7 @@ import java.util.List;
  * <p>Ports are the named places below when the world has them; Balmora, Vivec, Ald'ruhn and Ebonheart fall back to
  * their anchors from the world plan.</p>
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class StriderPorts {
     /** A port: place id and fallback anchor (null = only when the place exists). */
     private record Port(String id, Integer x, Integer z) {}
@@ -136,9 +136,9 @@ public final class StriderPorts {
     }
 
     @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer player)) return;
-        ServerLevel level = player.serverLevel();
+    public static void onPlayerTick(net.neoforged.neoforge.event.tick.PlayerTickEvent.Post event) {
+        if (!(event instanceof net.neoforged.neoforge.event.tick.PlayerTickEvent.Post) || !(event.getEntity() instanceof ServerPlayer player)) return;
+        ServerLevel level = player.level();
         if ((level.getGameTime() + player.getId() * 11L) % 200 != 0 || level.dimension() != Level.OVERWORLD) return;
         for (Port port : PORTS) {
             if ("aldruhn".equals(port.id())) continue; // avoid duplicate spawn with ald_ruhn
@@ -147,14 +147,14 @@ public final class StriderPorts {
             long dx = player.getBlockX() - at[0];
             long dz = player.getBlockZ() - at[1];
             if (dx * dx + dz * dz > 160L * 160L || !level.hasChunk(at[0] >> 4, at[1] >> 4)) continue;
-            if (!level.getEntitiesOfClass(SiltStriderEntity.class, new AABB(at[0] - 48, level.getMinBuildHeight(), at[1] - 48,
-                    at[0] + 48, level.getMaxBuildHeight(), at[1] + 48)).isEmpty()) continue;
+            if (!level.getEntitiesOfClass(SiltStriderEntity.class, new AABB(at[0] - 48, level.getMinY(), at[1] - 48,
+                    at[0] + 48, (level.getMaxY()+1), at[1] + 48)).isEmpty()) continue;
             int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, at[0], at[1]);
-            SiltStriderEntity strider = Bestiary.SILT_STRIDER.get().create(level);
+            SiltStriderEntity strider = Bestiary.SILT_STRIDER.get().create(level, net.minecraft.world.entity.EntitySpawnReason.EVENT);
             if (strider == null) continue;
             BlockPos pos = new BlockPos(at[0], y, at[1]);
-            strider.moveTo(pos.getX() + 0.5, y, pos.getZ() + 0.5, level.getRandom().nextFloat() * 360f, 0);
-            strider.finalizeSpawn(level, level.getCurrentDifficultyAt(pos), MobSpawnType.EVENT, null, null);
+            strider.snapTo(pos.getX() + 0.5, y, pos.getZ() + 0.5, level.getRandom().nextFloat() * 360f, 0);
+            strider.finalizeSpawn(level, level.getCurrentDifficultyAt(pos), EntitySpawnReason.EVENT, null);
             strider.setHome(pos, port.id());
             level.addFreshEntity(strider);
         }
@@ -222,22 +222,24 @@ public final class StriderPorts {
             Dialogue.open(player, strider, Component.translatable("world.skycraft.travel.combat"));
             return;
         }
-        if (!Currency.take(player, fare)) {
+        if (com.skycraft.perf.Prewarm.busy(player.getUUID())) return;
+        if (fare < 0 || !Currency.canAfford(player, fare)) {
             Dialogue.open(player, strider, Component.translatable("dialogue.skycraft.silt_strider.no_gold", fare));
             return;
         }
-        Dialogue.endConversation(player, strider.getId());
-        if (!com.skycraft.perf.Prewarm.isReady(player.serverLevel(), at[0], at[1])
-                && com.skycraft.perf.Prewarm.start(player, at[0], at[1], name,
-                () -> finishTravel(player, at, name, destId))) {
-            return;
-        }
-        finishTravel(player, at, name, destId);
+        com.skycraft.travel.TravelNetworks.prewarmTo(player, at[0], at[1], name, () -> {
+            if (!Currency.take(player, fare)) {
+                Dialogue.open(player, strider, Component.translatable("dialogue.skycraft.silt_strider.no_gold", fare));
+                return;
+            }
+            Dialogue.endConversation(player, strider.getId());
+            finishTravel(player, at, name, destId);
+        });
     }
 
     private static void finishTravel(ServerPlayer player, int[] at, Component name, String destId) {
         if (!player.isAlive()) return;
-        ServerLevel level = player.serverLevel();
+        ServerLevel level = player.level();
         int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, at[0] - 4, at[1]);
         double tx = at[0] - 4 + 0.5;
         double tz = at[1] + 0.5;
@@ -246,11 +248,11 @@ public final class StriderPorts {
         List<Mob> followers = new ArrayList<>(level.getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(16),
                 m -> m.isAlive() && !m.isPassenger() && FastTravelHandler.isFollower(m, player)));
         player.stopRiding();
-        player.teleportTo(level, tx, y, tz, player.getYRot(), player.getXRot());
+        player.teleportTo(level, tx, y, tz, java.util.Set.of(), player.getYRot(), player.getXRot(), true);
         player.resetFallDistance();
         if (vehicle != null && vehicle.isAlive()) {
             vehicle.teleportTo(tx, y, tz);
-            player.startRiding(vehicle, true);
+            player.startRiding(vehicle, true, true);
         }
         int i = 0;
         for (Mob mob : followers) {
@@ -260,10 +262,10 @@ public final class StriderPorts {
         }
         int hours = 0;
         int perHour = com.skycraft.world.WorldConfig.BLOCKS_PER_TRAVEL_HOUR.get();
-        long online = player.server.getPlayerList().getPlayers().stream().filter(p -> !p.isSpectator()).count();
+        long online = player.level().getServer().getPlayerList().getPlayers().stream().filter(p -> !p.isSpectator()).count();
         if (perHour > 0 && online <= 1) {
             hours = Mth.clamp((int) Math.round(distance / perHour), 1, 24);
-            RestManager.advanceTime(player.server, hours * (long) RestManager.TICKS_PER_HOUR);
+            RestManager.advanceTime(player.level().getServer(), hours * (long) RestManager.TICKS_PER_HOUR);
         }
         SkyNetwork.sendToPlayer(player, new WorldPackets.RestFade(hours, WorldPackets.RestFade.TRAVEL));
         Notifier.message(player, Component.translatable("dialogue.skycraft.silt_strider.arrived", name));

@@ -1,9 +1,9 @@
 package com.skycraft.fire;
 
 import com.skycraft.fire.aftermath.AftermathPainters;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.config.ModConfig;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.ModLoadingContext;
+import net.neoforged.fml.config.ModConfig;
 
 /**
  * Fire and the aftermath of fire: the big fire block family and charred building set ({@link FireBlocks}), fire sites
@@ -18,8 +18,8 @@ public final class FireModule {
     public static void init(IEventBus modBus) {
         FireBlocks.init(modBus);
         FireSounds.init(modBus);
-        ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, FireConfig.CLIENT_SPEC, "skycraft-fire-client.toml");
-        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, FireConfig.COMMON_SPEC, "skycraft-fire.toml");
+        com.skycraft.Skycraft.config(ModConfig.Type.CLIENT, FireConfig.CLIENT_SPEC, "skycraft-fire-client.toml");
+        com.skycraft.Skycraft.config(ModConfig.Type.LOCAL, FireConfig.COMMON_SPEC, "skycraft-fire.toml");
         AftermathPainters.register();
     }
 

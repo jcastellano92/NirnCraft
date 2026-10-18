@@ -15,7 +15,7 @@ public final class HomeStyle {
     BlockState foundation = s(Blocks.STONE_BRICKS);
     BlockState floor = s(Blocks.OAK_PLANKS);
     BlockState wallLow = s(Blocks.STONE_BRICKS);
-    BlockState wall = s(Blocks.WHITE_TERRACOTTA);
+    BlockState wall = s(com.skycraft.worldgen.VanillaBlocks.WHITE_TERRACOTTA);
     BlockState post = s(Blocks.STRIPPED_OAK_LOG);
     BlockState roofStairs = s(Blocks.BRICK_STAIRS);
     BlockState roofSlab = s(Blocks.BRICK_SLAB);
@@ -24,11 +24,11 @@ public final class HomeStyle {
     BlockState window = s(Blocks.GLASS_PANE);
     BlockState door = s(Blocks.OAK_DOOR);
     BlockState light = s(Blocks.LANTERN);
-    BlockState carpet = s(Blocks.RED_CARPET);
-    BlockState bed = s(Blocks.RED_BED);
+    BlockState carpet = s(com.skycraft.worldgen.VanillaBlocks.RED_CARPET);
+    BlockState bed = s(com.skycraft.worldgen.VanillaBlocks.RED_BED);
     BlockState table = s(Blocks.OAK_FENCE);
     BlockState chair = s(Blocks.OAK_STAIRS);
-    BlockState accent = s(Blocks.RED_WOOL);
+    BlockState accent = s(com.skycraft.worldgen.VanillaBlocks.RED_WOOL);
     Roof roof = Roof.GABLE;
     boolean round;
     boolean stilts;
@@ -55,8 +55,8 @@ public final class HomeStyle {
                 h.post = s(Blocks.QUARTZ_PILLAR);
                 h.roof = HomeStyle.Roof.HIP;
                 h.storeys = 2;
-                h.bed = s(Blocks.RED_BED);
-                h.carpet = s(Blocks.RED_CARPET);
+                h.bed = s(com.skycraft.worldgen.VanillaBlocks.RED_BED);
+                h.carpet = s(com.skycraft.worldgen.VanillaBlocks.RED_CARPET);
                 h.table = s(Blocks.DARK_OAK_FENCE);
                 h.chair = s(Blocks.DARK_OAK_STAIRS);
                 h.floor = s(Blocks.POLISHED_ANDESITE);
@@ -67,14 +67,14 @@ public final class HomeStyle {
                 h.storeys = 2;
             }
             case "imperial_cottage" -> {
-                h.wall = s(Blocks.WHITE_TERRACOTTA);
+                h.wall = s(com.skycraft.worldgen.VanillaBlocks.WHITE_TERRACOTTA);
                 h.wallLow = s(Blocks.COBBLESTONE);
                 h.timber = true;
                 h.roofStairs = s(Blocks.SPRUCE_STAIRS);
                 h.roofSlab = s(Blocks.SPRUCE_SLAB);
                 h.roofBlock = s(Blocks.SPRUCE_PLANKS);
-                h.carpet = s(Blocks.BROWN_CARPET);
-                h.bed = s(Blocks.BROWN_BED);
+                h.carpet = s(com.skycraft.worldgen.VanillaBlocks.BROWN_CARPET);
+                h.bed = s(com.skycraft.worldgen.VanillaBlocks.BROWN_BED);
             }
             case "imperial_shack" -> {
                 h.foundation = s(Blocks.OAK_PLANKS);
@@ -85,8 +85,8 @@ public final class HomeStyle {
                 h.roofSlab = s(Blocks.OAK_SLAB);
                 h.roofBlock = s(Blocks.OAK_PLANKS);
                 h.window = s(Blocks.OAK_FENCE);
-                h.carpet = s(Blocks.BROWN_CARPET);
-                h.bed = s(Blocks.BROWN_BED);
+                h.carpet = s(com.skycraft.worldgen.VanillaBlocks.BROWN_CARPET);
+                h.bed = s(com.skycraft.worldgen.VanillaBlocks.BROWN_BED);
                 h.stilts = true;
                 h.timber = true;
             }
@@ -116,9 +116,9 @@ public final class HomeStyle {
                 h.window = s(Blocks.DARK_OAK_FENCE);
                 h.door = s(Blocks.DARK_OAK_DOOR);
                 h.floor = s(Blocks.DARK_OAK_PLANKS);
-                h.carpet = s(Blocks.ORANGE_CARPET);
-                h.bed = s(Blocks.ORANGE_BED);
-                h.accent = s(Blocks.BROWN_WOOL);
+                h.carpet = s(com.skycraft.worldgen.VanillaBlocks.ORANGE_CARPET);
+                h.bed = s(com.skycraft.worldgen.VanillaBlocks.ORANGE_BED);
+                h.accent = s(com.skycraft.worldgen.VanillaBlocks.BROWN_WOOL);
                 h.table = s(Blocks.DARK_OAK_FENCE);
                 h.chair = s(Blocks.DARK_OAK_STAIRS);
                 h.storeys = 2;
@@ -131,13 +131,13 @@ public final class HomeStyle {
                 h.roof = HomeStyle.Roof.MUSHROOM;
                 h.roofBlock = s(Blocks.BROWN_MUSHROOM_BLOCK);
                 h.roofSlab = s(Blocks.MUD_BRICK_SLAB);
-                h.window = s(Blocks.PURPLE_STAINED_GLASS_PANE);
+                h.window = s(com.skycraft.worldgen.VanillaBlocks.PURPLE_STAINED_GLASS_PANE);
                 h.door = s(Blocks.CRIMSON_DOOR);
                 h.light = s(Blocks.SHROOMLIGHT);
                 h.floor = s(Blocks.CRIMSON_PLANKS);
-                h.carpet = s(Blocks.PURPLE_CARPET);
-                h.bed = s(Blocks.PURPLE_BED);
-                h.accent = s(Blocks.PURPLE_WOOL);
+                h.carpet = s(com.skycraft.worldgen.VanillaBlocks.PURPLE_CARPET);
+                h.bed = s(com.skycraft.worldgen.VanillaBlocks.PURPLE_BED);
+                h.accent = s(com.skycraft.worldgen.VanillaBlocks.PURPLE_WOOL);
                 h.table = s(Blocks.CRIMSON_FENCE);
                 h.chair = s(Blocks.CRIMSON_STAIRS);
                 h.round = true;
@@ -146,7 +146,7 @@ public final class HomeStyle {
             case "breton" -> {
                 h.foundation = s(Blocks.COBBLESTONE);
                 h.wallLow = s(Blocks.COBBLESTONE);
-                h.wall = s(Blocks.WHITE_TERRACOTTA);
+                h.wall = s(com.skycraft.worldgen.VanillaBlocks.WHITE_TERRACOTTA);
                 h.post = s(Blocks.DARK_OAK_LOG);
                 h.timber = true;
                 h.roofStairs = s(Blocks.DEEPSLATE_TILE_STAIRS);
@@ -154,9 +154,9 @@ public final class HomeStyle {
                 h.roofBlock = s(Blocks.DEEPSLATE_TILES);
                 h.door = s(Blocks.DARK_OAK_DOOR);
                 h.floor = s(Blocks.DARK_OAK_PLANKS);
-                h.carpet = s(Blocks.BLUE_CARPET);
-                h.bed = s(Blocks.BLUE_BED);
-                h.accent = s(Blocks.BLUE_WOOL);
+                h.carpet = s(com.skycraft.worldgen.VanillaBlocks.BLUE_CARPET);
+                h.bed = s(com.skycraft.worldgen.VanillaBlocks.BLUE_BED);
+                h.accent = s(com.skycraft.worldgen.VanillaBlocks.BLUE_WOOL);
                 h.table = s(Blocks.DARK_OAK_FENCE);
                 h.chair = s(Blocks.DARK_OAK_STAIRS);
                 h.storeys = 2;
@@ -173,9 +173,9 @@ public final class HomeStyle {
                 h.window = s(Blocks.SPRUCE_FENCE);
                 h.door = s(Blocks.SPRUCE_DOOR);
                 h.floor = s(Blocks.SPRUCE_PLANKS);
-                h.carpet = s(Blocks.GRAY_CARPET);
-                h.bed = s(Blocks.GRAY_BED);
-                h.accent = s(Blocks.GRAY_WOOL);
+                h.carpet = s(com.skycraft.worldgen.VanillaBlocks.GRAY_CARPET);
+                h.bed = s(com.skycraft.worldgen.VanillaBlocks.GRAY_BED);
+                h.accent = s(com.skycraft.worldgen.VanillaBlocks.GRAY_WOOL);
                 h.table = s(Blocks.SPRUCE_FENCE);
                 h.chair = s(Blocks.SPRUCE_STAIRS);
                 h.hearth = true;
@@ -186,14 +186,14 @@ public final class HomeStyle {
                 h.wall = s(Blocks.SMOOTH_SANDSTONE);
                 h.post = s(Blocks.CHISELED_SANDSTONE);
                 h.roof = HomeStyle.Roof.DOME;
-                h.roofBlock = s(Blocks.CYAN_TERRACOTTA);
+                h.roofBlock = s(com.skycraft.worldgen.VanillaBlocks.CYAN_TERRACOTTA);
                 h.roofSlab = s(Blocks.SMOOTH_SANDSTONE_SLAB);
                 h.trim = s(Blocks.SANDSTONE_SLAB);
                 h.window = s(Blocks.ACACIA_FENCE);
                 h.door = s(Blocks.ACACIA_DOOR);
                 h.floor = s(Blocks.ACACIA_PLANKS);
-                h.carpet = s(Blocks.RED_CARPET);
-                h.bed = s(Blocks.RED_BED);
+                h.carpet = s(com.skycraft.worldgen.VanillaBlocks.RED_CARPET);
+                h.bed = s(com.skycraft.worldgen.VanillaBlocks.RED_BED);
                 h.table = s(Blocks.ACACIA_FENCE);
                 h.chair = s(Blocks.ACACIA_STAIRS);
             }
@@ -203,14 +203,14 @@ public final class HomeStyle {
                 h.wall = s(Blocks.SANDSTONE);
                 h.post = s(Blocks.STRIPPED_ACACIA_LOG);
                 h.roof = HomeStyle.Roof.DOME;
-                h.roofBlock = s(Blocks.ORANGE_TERRACOTTA);
+                h.roofBlock = s(com.skycraft.worldgen.VanillaBlocks.ORANGE_TERRACOTTA);
                 h.roofSlab = s(Blocks.SANDSTONE_SLAB);
                 h.window = s(Blocks.ACACIA_FENCE);
                 h.door = s(Blocks.ACACIA_DOOR);
                 h.floor = s(Blocks.ACACIA_PLANKS);
-                h.carpet = s(Blocks.ORANGE_CARPET);
-                h.bed = s(Blocks.ORANGE_BED);
-                h.accent = s(Blocks.ORANGE_WOOL);
+                h.carpet = s(com.skycraft.worldgen.VanillaBlocks.ORANGE_CARPET);
+                h.bed = s(com.skycraft.worldgen.VanillaBlocks.ORANGE_BED);
+                h.accent = s(com.skycraft.worldgen.VanillaBlocks.ORANGE_WOOL);
                 h.table = s(Blocks.ACACIA_FENCE);
                 h.chair = s(Blocks.ACACIA_STAIRS);
             }
@@ -225,9 +225,9 @@ public final class HomeStyle {
                 h.window = s(Blocks.JUNGLE_FENCE);
                 h.door = s(Blocks.JUNGLE_DOOR);
                 h.floor = s(Blocks.JUNGLE_PLANKS);
-                h.carpet = s(Blocks.GREEN_CARPET);
-                h.bed = s(Blocks.GREEN_BED);
-                h.accent = s(Blocks.GREEN_WOOL);
+                h.carpet = s(com.skycraft.worldgen.VanillaBlocks.GREEN_CARPET);
+                h.bed = s(com.skycraft.worldgen.VanillaBlocks.GREEN_BED);
+                h.accent = s(com.skycraft.worldgen.VanillaBlocks.GREEN_WOOL);
                 h.table = s(Blocks.JUNGLE_FENCE);
                 h.chair = s(Blocks.JUNGLE_STAIRS);
                 h.round = true;
@@ -243,13 +243,13 @@ public final class HomeStyle {
                 h.roofSlab = s(Blocks.PRISMARINE_BRICK_SLAB);
                 h.roofBlock = s(Blocks.PRISMARINE_BRICKS);
                 h.trim = s(Blocks.QUARTZ_SLAB);
-                h.window = s(Blocks.LIGHT_BLUE_STAINED_GLASS_PANE);
+                h.window = s(com.skycraft.worldgen.VanillaBlocks.LIGHT_BLUE_STAINED_GLASS_PANE);
                 h.door = s(Blocks.BIRCH_DOOR);
                 h.light = s(Blocks.SEA_LANTERN);
                 h.floor = s(Blocks.BIRCH_PLANKS);
-                h.carpet = s(Blocks.YELLOW_CARPET);
-                h.bed = s(Blocks.LIGHT_BLUE_BED);
-                h.accent = s(Blocks.YELLOW_WOOL);
+                h.carpet = s(com.skycraft.worldgen.VanillaBlocks.YELLOW_CARPET);
+                h.bed = s(com.skycraft.worldgen.VanillaBlocks.LIGHT_BLUE_BED);
+                h.accent = s(com.skycraft.worldgen.VanillaBlocks.YELLOW_WOOL);
                 h.table = s(Blocks.BIRCH_FENCE);
                 h.chair = s(Blocks.BIRCH_STAIRS);
                 h.storeys = 2;
@@ -266,9 +266,9 @@ public final class HomeStyle {
                 h.door = s(Blocks.MANGROVE_DOOR);
                 h.light = s(Blocks.VERDANT_FROGLIGHT);
                 h.floor = s(Blocks.MANGROVE_PLANKS);
-                h.carpet = s(Blocks.GREEN_CARPET);
-                h.bed = s(Blocks.GREEN_BED);
-                h.accent = s(Blocks.GREEN_WOOL);
+                h.carpet = s(com.skycraft.worldgen.VanillaBlocks.GREEN_CARPET);
+                h.bed = s(com.skycraft.worldgen.VanillaBlocks.GREEN_BED);
+                h.accent = s(com.skycraft.worldgen.VanillaBlocks.GREEN_WOOL);
                 h.table = s(Blocks.MANGROVE_FENCE);
                 h.chair = s(Blocks.MANGROVE_STAIRS);
                 h.round = true;

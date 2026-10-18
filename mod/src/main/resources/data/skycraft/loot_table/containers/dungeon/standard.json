@@ -1,0 +1,184 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:septim",
+          "weight": 1,
+          "modifier": {
+            "min": 5,
+            "max": 16,
+            "growth": 0.05,
+            "type": "skycraft:scaled_gold"
+          }
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:loot_table",
+          "weight": 70,
+          "value": "skycraft:parts/gear_common"
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 30
+        }
+      ]
+    },
+    {
+      "rolls": {
+        "type": "minecraft:uniform",
+        "min": 1,
+        "max": 2
+      },
+      "entries": [
+        {
+          "type": "minecraft:loot_table",
+          "weight": 12,
+          "value": "skycraft:parts/soul_gems"
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:sugar",
+          "weight": 18,
+          "modifier": [
+            {
+              "tag": "skycraft:loot/ingredients",
+              "type": "skycraft:regional_tag"
+            },
+            {
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 1,
+                "max": 3
+              },
+              "type": "minecraft:set_count"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:loot_table",
+          "weight": 8,
+          "value": "skycraft:parts/lockpicks"
+        },
+        {
+          "type": "minecraft:loot_table",
+          "weight": 10,
+          "value": "skycraft:parts/gems"
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:book",
+          "weight": 5,
+          "modifier": {
+            "type": "skycraft:leveled_tome"
+          }
+        },
+        {
+          "type": "minecraft:loot_table",
+          "weight": 14,
+          "value": "skycraft:parts/potions"
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:book",
+          "weight": 5,
+          "modifier": {
+            "type": "skycraft:regional_book"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:gold_ring",
+          "weight": 4,
+          "modifier": {
+            "tag": "skycraft:loot/trinkets",
+            "type": "skycraft:regional_tag"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:book",
+          "weight": 2,
+          "modifier": {
+            "type": "skycraft:skill_book"
+          }
+        },
+        {
+          "type": "minecraft:loot_table",
+          "weight": 6,
+          "value": "skycraft:parts/food"
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 16
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:regional_treasure",
+          "weight": 3,
+          "condition": {
+            "min": 12,
+            "max": 999,
+            "type": "skycraft:loot_level"
+          },
+          "modifier": {
+            "type": "skycraft:regional_treasure"
+          }
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 97
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:loot_table",
+          "weight": 1,
+          "value": "skycraft:parts/gems"
+        }
+      ],
+      "condition": {
+        "type": "minecraft:all_of",
+        "terms": [
+          {
+            "collection": "stones_of_barenziah",
+            "type": "skycraft:collection_complete"
+          },
+          {
+            "chance": 0.3,
+            "type": "minecraft:random_chance"
+          }
+        ]
+      }
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:stick",
+          "weight": 1,
+          "modifier": {
+            "type": "skycraft:place_collectibles"
+          }
+        }
+      ]
+    }
+  ],
+  "random_sequence": "skycraft:containers/dungeon/standard"
+}

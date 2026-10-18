@@ -107,7 +107,7 @@ final class RoadLayout {
         if (existing != null) {
             if (!existing.hasDest(dest) && existing.dests.size() < RoadFeature.MAX_DESTINATIONS) {
                 existing.dests.add(d);
-                touched.add(ChunkPos.asLong(existing.x >> 4, existing.z >> 4));
+                touched.add(ChunkPos.pack(existing.x >> 4, existing.z >> 4));
                 data.setDirty();
             }
             return;
@@ -187,7 +187,7 @@ final class RoadLayout {
         if (existing != null) {
             if (!existing.hasDest(road.a) && existing.dests.size() < RoadFeature.MAX_DESTINATIONS) {
                 existing.dests.add(toSite);
-                touched.add(ChunkPos.asLong(existing.x >> 4, existing.z >> 4));
+                touched.add(ChunkPos.pack(existing.x >> 4, existing.z >> 4));
                 data.setDirty();
             }
             return;
@@ -268,7 +268,7 @@ final class RoadLayout {
 
     /** Nearest point of another (already indexed) road within {@link #MEET_DIST}, encoded, or -1. */
     private static long nearestOther(RoadsData data, int x, int z) {
-        LongArrayList entries = data.chunkIndex.get(ChunkPos.asLong(x >> 4, z >> 4));
+        LongArrayList entries = data.chunkIndex.get(ChunkPos.pack(x >> 4, z >> 4));
         if (entries == null) return -1;
         long best = -1;
         int bestD = MEET_DIST * MEET_DIST + 1;

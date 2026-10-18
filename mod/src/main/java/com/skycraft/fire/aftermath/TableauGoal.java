@@ -28,8 +28,8 @@ public final class TableauGoal extends Goal {
 
     @Override
     public boolean canUse() {
-        if (npc.level().isClientSide || npc.isPrisoner() || npc.getTarget() != null) return false;
-        long[] walk = npc.getPersistentData().getLongArray(Tableau.WALK_KEY);
+        if (npc.level().isClientSide() || npc.isPrisoner() || npc.getTarget() != null) return false;
+        long[] walk = npc.getPersistentData().getLongArray(Tableau.WALK_KEY).orElseGet(() -> new long[0]);
         if (walk.length < 2) return false;
         from = BlockPos.of(walk[0]);
         to = BlockPos.of(walk[1]);
@@ -58,9 +58,9 @@ public final class TableauGoal extends Goal {
         npc.setPoseFlag(NpcEntity.FLAG_CARRY, on);
         if (on) {
             ItemStack stack = new ItemStack(Items.OAK_PLANKS);
-            String id = npc.getPersistentData().getString("skycraft_tableau_item");
+            String id = npc.getPersistentData().getStringOr("skycraft_tableau_item","");
             if (!id.isEmpty()) {
-                var item = net.minecraftforge.registries.ForgeRegistries.ITEMS.getValue(new net.minecraft.resources.ResourceLocation(id));
+                var item = net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.parse(id));
                 if (item != null && item != Items.AIR) stack = new ItemStack(item);
             }
             npc.setItemSlot(EquipmentSlot.MAINHAND, stack);
@@ -78,7 +78,7 @@ public final class TableauGoal extends Goal {
             npc.getLookControl().setLookAt(goal.getX() + 0.5, goal.getY() + 0.6, goal.getZ() + 0.5);
             if (++wait >= 30) {
                 wait = 0;
-                npc.swing(InteractionHand.MAIN_HAND);
+                npc.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, false);
                 setLoaded(!loaded);
             }
             return;

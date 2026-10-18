@@ -43,6 +43,12 @@ def save(img, path):
 
 
 def write_json(path, obj):
+    import sys
+    from pathlib import Path
+    native_tools263 = str(Path(__file__).resolve().parents[1])
+    if native_tools263 not in sys.path: sys.path.insert(0, native_tools263)
+    from data_format_263 import prepare
+    path, obj = prepare(path, obj)
     os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, "w", encoding="utf-8", newline="\n") as f:
         json.dump(obj, f, indent=2)
@@ -582,7 +588,7 @@ def main():
     models = os.path.join(ASSETS, "models", "block")
     items = os.path.join(ASSETS, "models", "item")
     states = os.path.join(ASSETS, "blockstates")
-    loot = os.path.join(DATA, "loot_tables", "blocks")
+    loot = os.path.join(DATA, "loot_table", "blocks")
 
     # fire family
     write_json(os.path.join(models, "big_fire.json"), fire_model("big_fire", "fire_coals", True))

@@ -1,9 +1,7 @@
 package com.skycraft.fire;
 
-import com.skycraft.visual.VisualParticles;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Mob;
@@ -14,12 +12,10 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.pathfinder.BlockPathTypes;
+import net.minecraft.world.level.pathfinder.PathType;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -69,41 +65,41 @@ public class BigFireBlock extends Block {
     }
 
     @Override
-    public boolean propagatesSkylightDown(BlockState state, BlockGetter level, BlockPos pos) {
+    public boolean propagatesSkylightDown(BlockState state) {
         return true;
     }
 
     @Override
-    public void entityInside(BlockState state, Level level, BlockPos pos, Entity entity) {
-        if (level.isClientSide || kind.damage <= 0.0f || !FireConfig.BIG_FIRE_HURTS.get() || entity instanceof ItemEntity) return;
+    public void entityInside(BlockState state, Level level, BlockPos pos, Entity entity, net.minecraft.world.entity.InsideBlockEffectApplier effects, boolean precise) {
+        if (level.isClientSide() || kind.damage <= 0.0f || !FireConfig.BIG_FIRE_HURTS.get() || entity instanceof ItemEntity) return;
         if (entity.fireImmune()) return;
         if (entity instanceof com.skycraft.society.entity.NpcEntity
-                || entity instanceof net.minecraft.world.entity.npc.AbstractVillager
+                || entity instanceof net.minecraft.world.entity.npc.villager.AbstractVillager
                 || entity instanceof com.skycraft.creatures.entity.GuardEntity) {
             return;
         }
         if (kind == Kind.EMBERS) {
             // hot coals: like a magma block (a careful step is safe), they hurt but do not set you alight
             if (!entity.isSteppingCarefully() && entity instanceof net.minecraft.world.entity.LivingEntity) {
-                entity.hurt(level.damageSources().hotFloor(), kind.damage);
+                com.skycraft.platform.Effects.hurt(entity, level.damageSources().hotFloor(), kind.damage);
             }
             return;
         }
-        entity.setSecondsOnFire(kind.burnSeconds);
-        entity.hurt(level.damageSources().inFire(), kind.damage);
+        entity.igniteForSeconds(kind.burnSeconds);
+        com.skycraft.platform.Effects.hurt(entity, level.damageSources().inFire(), kind.damage);
     }
 
     /** Pathfinders keep out of the flames (a person walks round a burning house, not through it). */
     @Nullable
     @Override
-    public BlockPathTypes getBlockPathType(BlockState state, BlockGetter level, BlockPos pos, @Nullable Mob mob) {
-        return kind.damage > 0.0f ? BlockPathTypes.DAMAGE_FIRE : null;
+    public PathType getBlockPathType(BlockState state, BlockGetter level, BlockPos pos, @Nullable Mob mob) {
+        return kind.damage > 0.0f ? PathType.FIRE : null;
     }
 
     @Nullable
     @Override
-    public BlockPathTypes getAdjacentBlockPathType(BlockState state, BlockGetter level, BlockPos pos, @Nullable Mob mob, BlockPathTypes originalType) {
-        return kind.damage > 0.0f ? BlockPathTypes.DANGER_FIRE : super.getAdjacentBlockPathType(state, level, pos, mob, originalType);
+    public PathType getAdjacentBlockPathType(BlockState state, BlockGetter level, BlockPos pos, @Nullable Mob mob, PathType originalType) {
+        return kind.damage > 0.0f ? PathType.FIRE_IN_NEIGHBOR : super.getAdjacentBlockPathType(state, level, pos, mob, originalType);
     }
 
     @Override
@@ -117,40 +113,15 @@ public class BigFireBlock extends Block {
     }
 
     @Override
-    public BlockState updateShape(BlockState state, Direction dir, BlockState neighbor, LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
+    public BlockState updateShape(BlockState state, net.minecraft.world.level.LevelReader level, net.minecraft.world.level.ScheduledTickAccess ticks, BlockPos pos, Direction dir, BlockPos neighborPos, BlockState neighbor, net.minecraft.util.RandomSource random) {
         if (dir == Direction.DOWN && !state.canSurvive(level, pos)) return Blocks.AIR.defaultBlockState();
-        return super.updateShape(state, dir, neighbor, level, pos, neighborPos);
+        return super.updateShape(state, level, ticks, pos, dir, neighborPos, neighbor, random);
     }
 
-    @OnlyIn(Dist.CLIENT)
     @Override
     public void animateTick(BlockState state, Level level, BlockPos pos, RandomSource r) {
-        boolean outdoor = level.dimension() == Level.OVERWORLD && level.canSeeSky(pos.above());
-        float wind = outdoor ? com.skycraft.atmosphere.client.ClientWeather.wind() : 0f;
-        double wx = outdoor ? com.skycraft.atmosphere.client.ClientWeather.windX() * wind * 0.065 : 0.0;
-        double wz = outdoor ? com.skycraft.atmosphere.client.ClientWeather.windZ() * wind * 0.065 : 0.0;
-        if (kind == Kind.EMBERS) {
-            if (r.nextInt(18) == 0) {
-                level.addParticle(ParticleTypes.SMOKE, pos.getX() + r.nextDouble(), pos.getY() + 0.2, pos.getZ() + r.nextDouble(), wx * 0.7, 0.03, wz * 0.7);
-            }
-            return;
-        }
-        double x = pos.getX() + 0.2 + r.nextDouble() * 0.6, z = pos.getZ() + 0.2 + r.nextDouble() * 0.6;
-        if (r.nextInt(kind == Kind.BASE ? 5 : 9) == 0) {
-            level.addParticle(ParticleTypes.LARGE_SMOKE, x, pos.getY() + 0.9, z, wx, 0.06, wz);
-        }
-        if (outdoor && wind > 0.28f && r.nextInt(7) == 0) {
-            level.addParticle(ParticleTypes.FLAME, x, pos.getY() + 0.5 + r.nextDouble() * 0.4, z, wx * 0.85, 0.025, wz * 0.85);
-        }
-        if (r.nextInt(10) == 0) {
-            level.addParticle(VisualParticles.EMBER.get(), x, pos.getY() + 0.6, z,
-                    (r.nextDouble() - 0.5) * 0.04 + wx * 1.3, 0.05, (r.nextDouble() - 0.5) * 0.04 + wz * 1.3);
-        }
-        if (kind == Kind.BASE && r.nextInt(150) == 0) {
-            level.playLocalSound(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, FireSounds.FIRE_CRACKLE.get(),
-                    net.minecraft.sounds.SoundSource.BLOCKS, 0.35f * FireConfig.AMBIENT_VOLUME.get().floatValue(),
-                    0.9f + r.nextFloat() * 0.25f, false);
-        }
+        com.skycraft.platform.Sides.runOn(net.neoforged.api.distmarker.Dist.CLIENT,
+                () -> () -> com.skycraft.fire.client.BigFireParticles.animate(kind, level, pos, r));
     }
 
     /**

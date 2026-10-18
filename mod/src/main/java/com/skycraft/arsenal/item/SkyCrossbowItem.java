@@ -7,7 +7,6 @@ import net.minecraft.world.item.CrossbowItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.client.extensions.common.IClientItemExtensions;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -24,7 +23,8 @@ public class SkyCrossbowItem extends CrossbowItem {
     public final float armorPierce;
 
     public SkyCrossbowItem(float bonusDamage, float armorPierce, Properties props) {
-        super(props);
+        super(props.enchantable(1).component(net.minecraft.core.component.DataComponents.CHARGED_PROJECTILES,
+                net.minecraft.world.item.component.ChargedProjectiles.EMPTY));
         this.bonusDamage = bonusDamage;
         this.armorPierce = armorPierce;
     }
@@ -40,16 +40,12 @@ public class SkyCrossbowItem extends CrossbowItem {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
-        super.appendHoverText(stack, level, tooltip, flag);
-        tooltip.add(Component.translatable("tooltip.skycraft.arsenal.crossbow_damage", String.format(Locale.ROOT, "+%.1f", bonusDamage))
+    public void appendHoverText(ItemStack stack, net.minecraft.world.item.Item.TooltipContext context263, net.minecraft.world.item.component.TooltipDisplay display263, java.util.function.Consumer<Component> tooltip, TooltipFlag flag) {
+        super.appendHoverText(stack, context263, display263, tooltip, flag);
+        tooltip.accept(Component.translatable("tooltip.skycraft.arsenal.crossbow_damage", String.format(Locale.ROOT, "+%.1f", bonusDamage))
                 .withStyle(ChatFormatting.GRAY));
-        tooltip.add(Component.translatable("tooltip.skycraft.arsenal.armor_pierce", Math.round(armorPierce * 100))
+        tooltip.accept(Component.translatable("tooltip.skycraft.arsenal.armor_pierce", Math.round(armorPierce * 100))
                 .withStyle(ChatFormatting.BLUE));
     }
 
-    @Override
-    public void initializeClient(Consumer<IClientItemExtensions> consumer) {
-        consumer.accept(com.skycraft.arsenal.client.ArsenalItemExtensions.CROSSBOW);
-    }
 }

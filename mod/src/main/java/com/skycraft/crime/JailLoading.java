@@ -26,10 +26,10 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -51,7 +51,7 @@ import java.util.UUID;
  * collides with or targets them, nothing hurts them), held in place every tick, rides and screens dropped. The state
  * is saved with the player ({@code crime.jail_pending}): a restart or a relog resumes the load.</p>
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 final class JailLoading {
     private JailLoading() {}
 
@@ -93,7 +93,7 @@ final class JailLoading {
 
     /** Whether the player is being held while their jail loads (works on both sides: the state is synced data). */
     static boolean isLoading(Player player) {
-        return Bounty.state(player).contains(PENDING, net.minecraft.nbt.Tag.TAG_COMPOUND);
+        return com.skycraft.platform.NbtData.hasType(Bounty.state(player), PENDING, net.minecraft.nbt.Tag.TAG_COMPOUND);
     }
 
     // ------------------------------------------------------------------ which jail
@@ -211,7 +211,7 @@ final class JailLoading {
      */
     static boolean begin(ServerPlayer player, String hold, int bounty, @Nullable String forced) {
         if (isLoading(player)) return true;
-        MinecraftServer server = player.server;
+        MinecraftServer server = player.level().getServer();
         ServerLevel overworld = server.overworld();
         Place target = forced != null ? Places.byId(forced).filter(Halls::hasJail).orElse(null) : placeFor(hold, player.blockPosition());
         if (target == null || generated(overworld, target.id())) return false;
@@ -251,7 +251,7 @@ final class JailLoading {
         LOADS.put(l.player, l);
         Component label = Component.translatable("crime.skycraft.jail.loading_label", target.name());
         // the prewarm is for the player's level; the settlement is in the overworld
-        if (player.serverLevel() == overworld) {
+        if (player.level() == overworld) {
             Prewarm.start(player, pointsFor(target), label, TIMEOUT_TICKS, () -> { });
         } else {
             // a crime in another dimension: tickets in the overworld are placed through a silent hold
@@ -263,21 +263,21 @@ final class JailLoading {
 
     /** Resumes an arrest that was waiting for its jail when the player left (or the server stopped). */
     static void resume(ServerPlayer player) {
-        CompoundTag tag = Bounty.state(player).getCompound(PENDING);
+        CompoundTag tag = Bounty.state(player).getCompoundOrEmpty(PENDING);
         if (tag.isEmpty() || LOADS.containsKey(player.getUUID())) return;
         Load l = new Load();
         l.player = player.getUUID();
-        l.hold = tag.getString("hold");
-        l.bounty = tag.getInt("bounty");
-        l.forced = tag.getString("forced").isEmpty() ? null : tag.getString("forced");
-        l.place = tag.getString("place");
+        l.hold = tag.getStringOr("hold","");
+        l.bounty = tag.getIntOr("bounty",0);
+        l.forced = tag.getStringOr("forced", "").isEmpty() ? null : tag.getStringOr("forced","");
+        l.place = tag.getStringOr("place","");
         l.x = player.getX();
         l.y = player.getY();
         l.z = player.getZ();
         l.yaw = player.getYRot();
         l.pitch = player.getXRot();
         hide(player);
-        if (!arm(player, l, player.server)) release(player);
+        if (!arm(player, l, player.level().getServer())) release(player);
     }
 
     @SubscribeEvent
@@ -298,8 +298,8 @@ final class JailLoading {
 
     /** Puts the game mode back and forgets the pending arrest (the caller starts the sentence). */
     static void release(ServerPlayer player) {
-        CompoundTag tag = Bounty.state(player).getCompound(PENDING);
-        GameType mode = GameType.byId(tag.contains("mode") ? tag.getInt("mode") : GameType.SURVIVAL.getId());
+        CompoundTag tag = Bounty.state(player).getCompoundOrEmpty(PENDING);
+        GameType mode = GameType.byId(tag.contains("mode") ? tag.getIntOr("mode",0) : GameType.SURVIVAL.getId());
         if (mode == GameType.SPECTATOR) mode = GameType.SURVIVAL;
         player.setGameMode(mode);
         Bounty.state(player).remove(PENDING);
@@ -312,8 +312,8 @@ final class JailLoading {
     // ------------------------------------------------------------------ the loop
 
     @SubscribeEvent
-    public static void onServerTick(TickEvent.ServerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || LOADS.isEmpty()) return;
+    public static void onServerTick(net.neoforged.neoforge.event.tick.ServerTickEvent.Post event) {
+        if (!(event instanceof net.neoforged.neoforge.event.tick.ServerTickEvent.Post) || LOADS.isEmpty()) return;
         MinecraftServer server = event.getServer();
         long now = server.getTickCount();
         for (Iterator<Load> it = LOADS.values().iterator(); it.hasNext(); ) {
@@ -350,7 +350,7 @@ final class JailLoading {
                 Jail.startSentence(player, l.hold, l.bounty, l.forced, site);
             } else {
                 Skycraft.LOGGER.warn("[jail] the jail of {} was not ready after {} s: the jail dimension serves {}", l.place,
-                        TIMEOUT_TICKS / 20, player.getGameProfile().getName());
+                        TIMEOUT_TICKS / 20, player.getGameProfile().name());
                 Jail.sendToDimension(player, l.hold, l.bounty, l.forced);
             }
         }
@@ -370,7 +370,7 @@ final class JailLoading {
             for (int dx = -pt[2]; dx <= pt[2]; dx++) {
                 for (int dz = -pt[2]; dz <= pt[2]; dz++) {
                     int cx = (pt[0] >> 4) + dx, cz = (pt[1] >> 4) + dz;
-                    if (!seen.add(net.minecraft.world.level.ChunkPos.asLong(cx, cz))) continue;
+                    if (!seen.add(net.minecraft.world.level.ChunkPos.pack(cx, cz))) continue;
                     total++;
                     if (overworld.getChunkSource().getChunkNow(cx, cz) != null) ready++;
                 }

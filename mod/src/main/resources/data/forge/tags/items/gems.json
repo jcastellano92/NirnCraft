@@ -1,9 +1,0 @@
-{
-  "replace": false,
-  "values": [
-    "#forge:gems/garnet",
-    "#forge:gems/ruby",
-    "#forge:gems/sapphire",
-    "skycraft:flawless_diamond"
-  ]
-}

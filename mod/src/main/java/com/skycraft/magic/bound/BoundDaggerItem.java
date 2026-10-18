@@ -5,24 +5,24 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
-import net.minecraft.world.item.SwordItem;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.common.ToolAction;
-import net.minecraftforge.common.ToolActions;
+import net.neoforged.neoforge.common.ItemAbility;
+import net.neoforged.neoforge.common.ItemAbilities;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
 /** Bound Dagger (Conjuration, Novice; Dragonborn): quick, light, and tagged as a dagger for sneak attacks. */
-public class BoundDaggerItem extends SwordItem implements BoundWeapons.BoundItem {
+public class BoundDaggerItem extends Item implements BoundWeapons.BoundItem {
     public BoundDaggerItem(Properties props) {
-        super(BoundTier.INSTANCE, 1, -1.6f, props.stacksTo(1).rarity(Rarity.UNCOMMON).fireResistant());
+        super(BoundTier.weapon(props.stacksTo(1).rarity(Rarity.UNCOMMON).fireResistant(), 1, -1.6f, false));
     }
 
     @Override
-    public void inventoryTick(ItemStack stack, Level level, Entity entity, int slot, boolean selected) {
+    public void inventoryTick(ItemStack stack, net.minecraft.server.level.ServerLevel level, Entity entity, net.minecraft.world.entity.EquipmentSlot slot) {
         BoundWeapons.inventoryTick(stack, level, entity);
     }
 
@@ -32,8 +32,8 @@ public class BoundDaggerItem extends SwordItem implements BoundWeapons.BoundItem
     }
 
     @Override
-    public boolean canPerformAction(ItemStack stack, ToolAction toolAction) {
-        return toolAction != ToolActions.SWORD_SWEEP && super.canPerformAction(stack, toolAction);
+    public boolean canPerformAction(net.minecraft.world.item.ItemInstance stack, ItemAbility toolAction) {
+        return toolAction != ItemAbilities.SWORD_SWEEP && super.canPerformAction(stack, toolAction);
     }
 
     @Override
@@ -42,22 +42,7 @@ public class BoundDaggerItem extends SwordItem implements BoundWeapons.BoundItem
     }
 
     @Override
-    public boolean isEnchantable(ItemStack stack) {
-        return false;
-    }
-
-    @Override
-    public boolean isBookEnchantable(ItemStack stack, ItemStack book) {
-        return false;
-    }
-
-    @Override
-    public boolean canApplyAtEnchantingTable(ItemStack stack, Enchantment enchantment) {
-        return false;
-    }
-
-    @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
-        BoundTooltip.add(stack, level, tooltip);
+    public void appendHoverText(ItemStack stack, net.minecraft.world.item.Item.TooltipContext context, net.minecraft.world.item.component.TooltipDisplay display, java.util.function.Consumer<Component> tooltip, TooltipFlag flag) {
+        BoundTooltip.add(stack, context.level(), tooltip);
     }
 }

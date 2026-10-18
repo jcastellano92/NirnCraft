@@ -41,10 +41,10 @@ public class CampfireKitItem extends Item {
         boolean ok = level.getBlockState(pos).canBeReplaced() && level.getFluidState(pos).isEmpty()
                 && level.getBlockState(pos.below()).isFaceSturdy(level, pos.below(), Direction.UP);
         if (!ok) {
-            if (!level.isClientSide && player instanceof ServerPlayer sp) Notifier.message(sp, Component.translatable("survival.skycraft.camping.no_room"));
+            if (!level.isClientSide() && player instanceof ServerPlayer sp) Notifier.message(sp, Component.translatable("survival.skycraft.camping.no_room"));
             return InteractionResult.FAIL;
         }
-        if (level.isClientSide) return InteractionResult.SUCCESS;
+        if (level.isClientSide()) return InteractionResult.SUCCESS;
         Direction facing = player == null ? Direction.NORTH : player.getDirection().getOpposite();
         BlockState fire = Blocks.CAMPFIRE.defaultBlockState().setValue(CampfireBlock.FACING, facing).setValue(CampfireBlock.LIT, true);
         // setBlock bypasses the placement events, so ask the protection module (someone else's homestead, a town) here
@@ -65,7 +65,7 @@ public class CampfireKitItem extends Item {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
-        tooltip.add(Component.translatable("tooltip.skycraft.survival.campfire_kit").withStyle(ChatFormatting.GRAY));
+    public void appendHoverText(ItemStack stack, net.minecraft.world.item.Item.TooltipContext context263, net.minecraft.world.item.component.TooltipDisplay display263, java.util.function.Consumer<Component> tooltip, TooltipFlag flag) {
+        tooltip.accept(Component.translatable("tooltip.skycraft.survival.campfire_kit").withStyle(ChatFormatting.GRAY));
     }
 }

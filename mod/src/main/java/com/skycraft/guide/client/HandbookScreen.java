@@ -1,7 +1,7 @@
 package com.skycraft.guide.client;
 
 import com.skycraft.Skycraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
@@ -9,10 +9,10 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.FormattedCharSequence;
-import org.lwjgl.glfw.GLFW;
+import com.mojang.blaze3d.platform.InputConstants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,8 +28,8 @@ import java.util.List;
  * Backspace returns to the contents.</p>
  */
 public class HandbookScreen extends Screen {
-    private static final ResourceLocation SPREAD = new ResourceLocation(Skycraft.MODID, "textures/gui/book_spread.png");
-    private static final ResourceLocation ARROWS = new ResourceLocation("textures/gui/book.png");
+    private static final Identifier SPREAD = Identifier.fromNamespaceAndPath(Skycraft.MODID, "textures/gui/book_spread.png");
+    private static final Identifier ARROWS = Identifier.parse("textures/gui/book.png");
     private static final int W = 380, H = 220;
     private static final int TEXT_W = 150, LINES = 16, LINE_H = 10;
     private static final int LEFT_X = 22, RIGHT_X = 208, TEXT_Y = 20;
@@ -177,41 +177,44 @@ public class HandbookScreen extends Screen {
     }
 
     @Override
-    public boolean keyPressed(int key, int scan, int mods) {
-        if (key == GLFW.GLFW_KEY_LEFT || key == GLFW.GLFW_KEY_A || key == GLFW.GLFW_KEY_PAGE_UP) {
+    public boolean keyPressed(net.minecraft.client.input.KeyEvent event) {
+        int key = event.key(), scan = event.keycode(), mods = event.modifiers();
+        if (key == InputConstants.KEY_LEFT || key == InputConstants.KEY_A || key == InputConstants.KEY_PAGEUP) {
             turn(-1);
             return true;
         }
-        if (key == GLFW.GLFW_KEY_RIGHT || key == GLFW.GLFW_KEY_D || key == GLFW.GLFW_KEY_PAGE_DOWN || key == GLFW.GLFW_KEY_SPACE) {
+        if (key == InputConstants.KEY_RIGHT || key == InputConstants.KEY_D || key == InputConstants.KEY_PAGEDOWN || key == InputConstants.KEY_SPACE) {
             turn(1);
             return true;
         }
-        if (key == GLFW.GLFW_KEY_HOME || key == GLFW.GLFW_KEY_BACKSPACE) {
+        if (key == InputConstants.KEY_HOME || key == InputConstants.KEY_BACKSPACE) {
             goTo(0);
             return true;
         }
-        if (key == GLFW.GLFW_KEY_END) {
+        if (key == InputConstants.KEY_END) {
             goTo(views() - 1);
             return true;
         }
-        if (minecraft != null && minecraft.options.keyInventory.matches(key, scan)) {
+        if (minecraft != null && minecraft.options.keyInventory.matches(event)) {
             onClose();
             return true;
         }
-        return super.keyPressed(key, scan, mods);
+        return super.keyPressed(event);
     }
 
     @Override
-    public boolean mouseScrolled(double mx, double my, double delta) {
+    public boolean mouseScrolled(double mx, double my, double horizontal, double delta) {
         turn(delta > 0 ? -1 : 1);
         return true;
     }
 
     @Override
-    public boolean mouseClicked(double mx, double my, int button) {
-        if (button != 0) return super.mouseClicked(mx, my, button);
+    public boolean mouseClicked(net.minecraft.client.input.MouseButtonEvent event, boolean doubleClick) {
+        double mx = event.x(), my = event.y();
+        int button = com.skycraft.client.screen.UiInput.actionButton(event.button());
+        if (button != 0) return super.mouseClicked(event, doubleClick);
         double x = bx(mx), y = by(my);
-        if (x < 0 || x > W || y < 0 || y > H) return super.mouseClicked(mx, my, button);
+        if (x < 0 || x > W || y < 0 || y > H) return super.mouseClicked(event, doubleClick);
         if (view == 0) {
             int entry = contentsEntryAt(x, y);
             if (entry >= 0) {
@@ -235,7 +238,7 @@ public class HandbookScreen extends Screen {
     @Override
     public void onClose() {
         if (minecraft != null && returnScreen != null) {
-            minecraft.setScreen(returnScreen);
+            minecraft.gui.setScreen(returnScreen);
             return;
         }
         super.onClose();
@@ -266,13 +269,13 @@ public class HandbookScreen extends Screen {
     // ------------------------------------------------------------------ rendering
 
     @Override
-    public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        renderBackground(g);
+    public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
+
         double mx = bx(mouseX), my = by(mouseY);
-        g.pose().pushPose();
-        g.pose().translate(left, top, 0);
-        g.pose().scale(scale, scale, 1f);
-        g.blit(SPREAD, 0, 0, 0, 0, W, H, W, H);
+        g.pose().pushMatrix();
+        g.pose().translate(left, top);
+        g.pose().scale(scale, scale);
+        com.skycraft.inventory.client.SkyUi.blit(g, SPREAD, 0, 0, 0, 0, W, H, W, H);
         if (view == 0) {
             drawTitlePage(g);
             drawContents(g, contentsEntryAt(mx, my));
@@ -280,43 +283,43 @@ public class HandbookScreen extends Screen {
             drawPage(g, 2 * (view - 1), LEFT_X);
             drawPage(g, 2 * (view - 1) + 1, RIGHT_X);
             Component link = Component.translatable("guide.skycraft.contents_link");
-            g.drawString(font, link, 52, ARROW_Y + 3, overContentsLink(mx, my) ? HOVER : FADED, false);
+            g.text(font, link, 52, ARROW_Y + 3, overContentsLink(mx, my) ? HOVER : FADED, false);
         }
         drawArrow(g, false, overArrow(mx, my, false));
         drawArrow(g, true, overArrow(mx, my, true));
-        g.pose().popPose();
-        super.render(g, mouseX, mouseY, partialTick);
+        g.pose().popMatrix();
+        super.extractRenderState(g, mouseX, mouseY, partialTick);
     }
 
-    private void drawArrow(GuiGraphics g, boolean forward, boolean hover) {
+    private void drawArrow(GuiGraphicsExtractor g, boolean forward, boolean hover) {
         if (forward ? view >= views() - 1 : view <= 0) return;
         int ax = forward ? W - 20 - 23 : 20;
-        g.blit(ARROWS, ax, ARROW_Y, hover ? 23 : 0, forward ? 192 : 205, 23, 13);
+        com.skycraft.inventory.client.SkyUi.blit(g, ARROWS, ax, ARROW_Y, hover ? 23 : 0, forward ? 192 : 205, 23, 13,256,256);
     }
 
-    private void drawPage(GuiGraphics g, int index, int x) {
+    private void drawPage(GuiGraphicsExtractor g, int index, int x) {
         if (index >= pages.size()) return;
         int y = TEXT_Y;
         for (Line line : pages.get(index)) {
             int lx = line.center ? x + (TEXT_W - font.width(line.text)) / 2 : x + line.indent;
-            if (line.bullet) g.drawString(font, "•", x + 1, y, FADED, false);
-            g.drawString(font, line.text, lx, y, line.color, false);
+            if (line.bullet) g.text(font, "•", x + 1, y, FADED, false);
+            g.text(font, line.text, lx, y, line.color, false);
             y += LINE_H;
         }
         String n = String.valueOf(index + 1);
-        g.drawString(font, n, x + TEXT_W / 2 - font.width(n) / 2, TEXT_Y + LINES * LINE_H + 8, FADED, false);
+        g.text(font, n, x + TEXT_W / 2 - font.width(n) / 2, TEXT_Y + LINES * LINE_H + 8, FADED, false);
     }
 
-    private void drawTitlePage(GuiGraphics g) {
+    private void drawTitlePage(GuiGraphicsExtractor g) {
         int cx = LEFT_X + TEXT_W / 2;
         int y = TEXT_Y + 22;
         float s = 1.5f;
         for (FormattedCharSequence line : font.split(Component.translatable("guide.skycraft.title"), (int) (TEXT_W / s))) {
-            g.pose().pushPose();
-            g.pose().translate(cx, y, 0);
-            g.pose().scale(s, s, 1f);
-            g.drawString(font, line, -font.width(line) / 2, 0, HEADING, false);
-            g.pose().popPose();
+            g.pose().pushMatrix();
+            g.pose().translate(cx, y);
+            g.pose().scale(s, s);
+            g.text(font, line, -font.width(line) / 2, 0, HEADING, false);
+            g.pose().popMatrix();
             y += 15;
         }
         y += 6;
@@ -324,26 +327,26 @@ public class HandbookScreen extends Screen {
         y += 12;
         for (FormattedCharSequence line : font.split(Component.translatable("guide.skycraft.subtitle")
                 .withStyle(Style.EMPTY.withItalic(true)), TEXT_W)) {
-            g.drawString(font, line, cx - font.width(line) / 2, y, INK, false);
+            g.text(font, line, cx - font.width(line) / 2, y, INK, false);
             y += LINE_H;
         }
         int by = TEXT_Y + LINES * LINE_H - 22;
         for (FormattedCharSequence line : font.split(Component.translatable("guide.skycraft.how_to_read"), TEXT_W)) {
-            g.drawString(font, line, cx - font.width(line) / 2, by, FADED, false);
+            g.text(font, line, cx - font.width(line) / 2, by, FADED, false);
             by += LINE_H;
         }
     }
 
-    private void ornament(GuiGraphics g, int cx, int y) {
+    private void ornament(GuiGraphicsExtractor g, int cx, int y) {
         g.fill(cx - 34, y, cx - 5, y + 1, FADED);
         g.fill(cx + 6, y, cx + 35, y + 1, FADED);
         g.fill(cx - 1, y - 2, cx + 2, y + 3, HEADING);
         g.fill(cx - 2, y - 1, cx + 3, y + 2, HEADING);
     }
 
-    private void drawContents(GuiGraphics g, int hovered) {
+    private void drawContents(GuiGraphicsExtractor g, int hovered) {
         Component heading = Component.translatable("guide.skycraft.contents").withStyle(Style.EMPTY.withBold(true));
-        g.drawString(font, heading, RIGHT_X + (TEXT_W - font.width(heading)) / 2, TEXT_Y, HEADING, false);
+        g.text(font, heading, RIGHT_X + (TEXT_W - font.width(heading)) / 2, TEXT_Y, HEADING, false);
         ornament(g, RIGHT_X + TEXT_W / 2, TEXT_Y + LINE_H + 3);
         for (int i = 0; i < CHAPTERS.size(); i++) {
             int y = CONTENTS_Y + i * (LINE_H + 1);
@@ -351,8 +354,8 @@ public class HandbookScreen extends Screen {
             String num = String.valueOf(chapterStart[i] + 1);
             int numW = font.width(num);
             String title = font.plainSubstrByWidth(I18n.get("guide.skycraft.chapter." + CHAPTERS.get(i)), TEXT_W - numW - 14);
-            g.drawString(font, title, RIGHT_X, y, color, false);
-            g.drawString(font, num, RIGHT_X + TEXT_W - numW, y, color, false);
+            g.text(font, title, RIGHT_X, y, color, false);
+            g.text(font, num, RIGHT_X + TEXT_W - numW, y, color, false);
             // dotted leader between the title and the page number
             for (int dx = RIGHT_X + font.width(title) + 3; dx < RIGHT_X + TEXT_W - numW - 3; dx += 3) {
                 g.fill(dx, y + 6, dx + 1, y + 7, FADED);

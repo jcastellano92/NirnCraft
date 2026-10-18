@@ -21,7 +21,7 @@ import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
-import net.minecraft.world.entity.animal.Chicken;
+import net.minecraft.world.entity.animal.chicken.Chicken;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -59,12 +59,12 @@ public class SkeeverEntity extends Monster implements AnimatedCreature, Ranked {
     }
 
     @Override
-    public boolean doHurtTarget(Entity target) {
-        boolean hit = super.doHurtTarget(target);
+    public boolean doHurtTarget(net.minecraft.server.level.ServerLevel serverLevel263, Entity target) {
+        boolean hit = super.doHurtTarget(serverLevel263, target);
         if (hit && target instanceof Player living && this.getRandom().nextFloat() < 0.08f) {
             // Rattles: the classic skeever disease
-            living.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 1200, 0), this);
-            living.addEffect(new MobEffectInstance(MobEffects.HUNGER, 300, 0), this);
+            living.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.WEAKNESS), 1200, 0), this);
+            living.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.HUNGER), 300, 0), this);
         }
         return hit;
     }
@@ -101,7 +101,7 @@ public class SkeeverEntity extends Monster implements AnimatedCreature, Ranked {
     }
 
     @Override
-    public boolean isPreventingPlayerRest(Player player) {
+    public boolean isPreventingPlayerRest(net.minecraft.server.level.ServerLevel serverLevel263, Player player) {
         return this.getTarget() == player;
     }
 
@@ -121,8 +121,9 @@ public class SkeeverEntity extends Monster implements AnimatedCreature, Ranked {
 
     /** Every melee swing plays an attack animation (alternating blows). */
     @Override
-    public void swing(net.minecraft.world.InteractionHand hand) {
-        super.swing(hand);
-        if (!this.level().isClientSide) CreatureAnims.play(this, this.getRandom().nextInt(3) == 0 ? AnimSlot.ATTACK2 : AnimSlot.ATTACK);
+    public boolean swing(net.minecraft.world.InteractionHand hand, net.minecraft.world.item.component.SwingAnimation animation263, boolean updateSelf263) {
+        boolean swung263 = super.swing(hand, animation263, updateSelf263);
+        if (!this.level().isClientSide()) CreatureAnims.play(this, this.getRandom().nextInt(3) == 0 ? AnimSlot.ATTACK2 : AnimSlot.ATTACK);
+        return swung263;
     }
 }

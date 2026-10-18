@@ -34,7 +34,7 @@ public final class Shipwright {
             if (item != null) return new ItemStack(item);
             if (tag == ItemTags.PLANKS) return new ItemStack(Items.SPRUCE_PLANKS);
             if (tag == ItemTags.LOGS) return new ItemStack(Items.SPRUCE_LOG);
-            if (tag == ItemTags.WOOL) return new ItemStack(Items.WHITE_WOOL);
+            if (tag == ItemTags.WOOL) return new ItemStack(com.skycraft.worldgen.VanillaBlocks.WHITE_WOOL.asItem());
             return ItemStack.EMPTY;
         }
     }

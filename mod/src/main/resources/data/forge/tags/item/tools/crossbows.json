@@ -1,0 +1,10 @@
+{
+  "replace": false,
+  "values": [
+    "skycraft:imperial_crossbow",
+    "skycraft:enhanced_crossbow",
+    "skycraft:dwarven_crossbow",
+    "skycraft:enhanced_dwarven_crossbow",
+    "minecraft:crossbow"
+  ]
+}

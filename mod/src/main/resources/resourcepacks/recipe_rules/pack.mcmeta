@@ -1,0 +1,25 @@
+{
+  "pack": {
+    "description": "Skycraft recipe rules",
+    "min_format": [
+      121,
+      0
+    ],
+    "max_format": [
+      121,
+      0
+    ]
+  },
+  "filter": {
+    "block": [
+      {
+        "namespace": "minecraft",
+        "path": "recipe/enchanting_table[.]json"
+      },
+      {
+        "namespace": "minecraft",
+        "path": "advancement/recipes/decorations/enchanting_table[.]json"
+      }
+    ]
+  }
+}

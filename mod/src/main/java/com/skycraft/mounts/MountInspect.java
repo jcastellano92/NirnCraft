@@ -8,7 +8,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.HorseArmorItem;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
@@ -104,7 +103,7 @@ public final class MountInspect {
         String ownerName = "";
         if (owner != null && !own) {
             Player o = viewer.level().getPlayerByUUID(owner);
-            ownerName = o != null ? o.getGameProfile().getName() : "";
+            ownerName = o != null ? o.getGameProfile().name() : "";
         }
         String name = mob.hasCustomName() ? mob.getCustomName().getString() : "";
         return build(viewer, kind, s, own ? 1 : owner == null ? 0 : 2, ownerName, name, MountGear.saddle(mob), MountGear.barding(mob),
@@ -122,12 +121,12 @@ public final class MountInspect {
         MountStats s = kind == null ? null : MountGrowth.known(p, kind);
         if (kind == null || s == null) return null;
         Entity e = Mounts.activeEntity(p);
-        if (e instanceof Mob m && !m.level().isClientSide) return viewOf(p, m, kind);
+        if (e instanceof Mob m && !m.level().isClientSide()) return viewOf(p, m, kind);
         SaddleType saddle = MountGear.remembered(p, kind);
         ItemStack barding = ItemStack.EMPTY;
-        String b = Mounts.data(p).getString("barding");
+        String b = Mounts.data(p).getStringOr("barding","");
         if (!b.isEmpty()) {
-            var item = net.minecraftforge.registries.ForgeRegistries.ITEMS.getValue(new net.minecraft.resources.ResourceLocation(b));
+            var item = net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.parse(b));
             if (item != null) barding = new ItemStack(item);
         }
         float pack = MountGrowth.packMult(p);
@@ -181,7 +180,7 @@ public final class MountInspect {
             }
         }
         int armor = 0;
-        if (!barding.isEmpty()) armor = barding.getItem() instanceof HorseArmorItem a ? a.getProtection() : 8;
+        if (!barding.isEmpty()) armor = MountItems.isHorseArmor(barding) ? MountItems.armorProtection(barding) : 8;
         float trust = detail >= 2 && known ? s.trust : MountView.HIDDEN;
         return new MountView(kind.id, name, (byte) owner, ownerName, (byte) detail, (byte) s.level(), s.levelProgress(), lo, hi, value,
                 growth, caps, trust, saddle == null ? "" : saddle.id, armor, bagKg, health, maxHealth);

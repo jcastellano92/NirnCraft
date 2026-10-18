@@ -222,7 +222,7 @@ public final class DevReload {
         }
         Map<Long, List<Place>> byChunk = new HashMap<>();
         for (Place p : byId.values()) {
-            byChunk.computeIfAbsent(ChunkPos.asLong(p.x() >> 4, p.z() >> 4), k -> new ArrayList<>(1)).add(p);
+            byChunk.computeIfAbsent(ChunkPos.pack(p.x() >> 4, p.z() >> 4), k -> new ArrayList<>(1)).add(p);
         }
         byChunk.replaceAll((k, v) -> List.copyOf(v));
         Map<Long, List<Place>> byBucket = new HashMap<>();

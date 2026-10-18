@@ -16,16 +16,15 @@ import com.skycraft.curse.Lycanthropy;
 import com.skycraft.curse.Vampirism;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
-import net.minecraftforge.client.gui.overlay.ForgeGui;
 
 /**
  * The curses on the HUD, kept Skyrim-subtle: a blood drop with four pips for the vampire's stage beside the health
@@ -34,16 +33,18 @@ import net.minecraftforge.client.gui.overlay.ForgeGui;
  * sleeper or a corpse, and the screen's edge tint while transformed or burning in the sun.
  */
 public final class CurseHud {
-    private static final ResourceLocation VIGNETTE = new ResourceLocation(Skycraft.MODID, "textures/gui/curse_vignette.png");
-    private static final ResourceLocation ICONS = new ResourceLocation(Skycraft.MODID, "textures/gui/curse_icons.png");
+    private static final Identifier VIGNETTE = Identifier.fromNamespaceAndPath(Skycraft.MODID, "textures/gui/curse_vignette.png");
+    private static final Identifier ICONS = Identifier.fromNamespaceAndPath(Skycraft.MODID, "textures/gui/curse_icons.png");
 
     private CurseHud() {}
 
     /** Screen-edge tint: amber-red in Beast Form, deep crimson as the Vampire Lord, a hot glare in sunlight. */
-    public static void renderTint(ForgeGui gui, GuiGraphics g, float partialTick, int width, int height) {
+    public static void renderTint(GuiGraphicsExtractor g, net.minecraft.client.DeltaTracker delta) {
+        float partialTick = delta.getGameTimeDeltaPartialTick(false);
+        int width = g.guiWidth(), height = g.guiHeight();
         Minecraft mc = Minecraft.getInstance();
         LocalPlayer player = mc.player;
-        if (player == null || mc.options.hideGui) return;
+        if (player == null || mc.gui.hud.isHidden()) return;
         Form form = Curses.form(player);
         float r, gr, b, a;
         if (form == Form.BEAST) {
@@ -58,19 +59,15 @@ public final class CurseHud {
         } else {
             return;
         }
-        RenderSystem.enableBlend();
-        RenderSystem.defaultBlendFunc();
-        RenderSystem.depthMask(false);
-        g.setColor(r, gr, b, a);
-        g.blit(VIGNETTE, 0, 0, -90, 0f, 0f, width, height, width, height);
-        g.setColor(1f, 1f, 1f, 1f);
-        RenderSystem.depthMask(true);
+        com.skycraft.inventory.client.SkyUi.blit(g,VIGNETTE,0,0,0f,0f,width,height,width,height,((int)(a*255)<<24)|((int)(r*255)<<16)|((int)(gr*255)<<8)|(int)(b*255));
     }
 
-    public static void render(ForgeGui gui, GuiGraphics g, float partialTick, int width, int height) {
+    public static void render(GuiGraphicsExtractor g, net.minecraft.client.DeltaTracker delta) {
+        float partialTick = delta.getGameTimeDeltaPartialTick(false);
+        int width = g.guiWidth(), height = g.guiHeight();
         Minecraft mc = Minecraft.getInstance();
         LocalPlayer player = mc.player;
-        if (player == null || mc.level == null || mc.options.hideGui || mc.screen != null || !gui.shouldDrawSurvivalElements()) return;
+        if (player == null || mc.level == null || mc.gui.hud.isHidden() || mc.gui.screen() != null || !(mc.gameMode!=null&&mc.gameMode.hasExperience())) return;
         Font font = mc.font;
         Form form = Curses.form(player);
         long now = mc.level.getGameTime();
@@ -82,24 +79,20 @@ public final class CurseHud {
         if (stage > 0) {
             boolean sun = Vampirism.inSun(player);
             float alpha = sun ? 1f : 0.75f;
-            g.setColor(1f, sun ? 0.85f : 1f, sun ? 0.6f : 1f, alpha);
-            g.blit(ICONS, hx - 17, hy - 4, 0, 0, 9, 12, 64, 16);
-            g.setColor(1f, 1f, 1f, 1f);
-            for (int i = 0; i < 4; i++) {
+            com.skycraft.inventory.client.SkyUi.blit(g,ICONS,hx-17,hy-4,0f,0f,9,12,64,16,((int)(alpha*255)<<24)|(sun?0xffd999:0xffffff));
+                for (int i = 0; i < 4; i++) {
                 int col = i < stage ? (stage >= 4 ? 0xFFE02020 : 0xFFA01820) : 0x60302020;
                 g.fill(hx - 7, hy + 6 - i * 3, hx - 5, hy + 8 - i * 3, col);
             }
-            if (sun) g.blit(ICONS, hx - 30, hy - 3, 32, 0, 11, 11, 64, 16);
+            if(sun) com.skycraft.inventory.client.SkyUi.blit(g,ICONS,hx-30,hy-3,32f,0f,11,11,64,16);
         } else if (Curses.isWerewolf(player) && form == Form.NONE) {
             boolean ready = CursePowers.readyAt(player, CursePowers.BEAST_FORM) <= now;
-            g.setColor(1f, 1f, 1f, ready ? 0.9f : 0.35f);
-            g.blit(ICONS, hx - 18, hy - 3, 16, 0, 11, 11, 64, 16);
-            g.setColor(1f, 1f, 1f, 1f);
-        }
+            com.skycraft.inventory.client.SkyUi.blit(g,ICONS,hx-18,hy-3,16f,0f,11,11,64,16,ready?0xe6ffffff:0x59ffffff);
+            }
 
         // ---------------------------------------------------------- Beast Form countdown
         if (form == Form.BEAST) {
-            long until = Curses.tag(player).getLong("form_until");
+            long until = Curses.tag(player).getLongOr("form_until",0L);
             float left = Math.max(0, until - now);
             float total = Math.max(Lycanthropy.DURATION, left);
             float frac = Mth.clamp(left / total, 0, 1);
@@ -114,34 +107,34 @@ public final class CurseHud {
         // ---------------------------------------------------------- the form's ability (where the Voice meter is)
         if (form != Form.NONE) {
             String key = form == Form.BEAST ? "howl" : "lord_power";
-            String id = Curses.tag(player).getString(key);
+            String id = Curses.tag(player).getStringOr(key, "");
             if (id.isEmpty() || !CursePowers.hasAbility(player, id)) id = form == Form.BEAST ? CursePowers.HOWL_OF_TERROR : CursePowers.BATS;
             int abilityY = HudStack.reserve(HudStack.Zone.BOTTOM_RIGHT, HudStack.BR_VOICE, 14, height);
             drawAbility(g, font, CursePowers.name(id), CursePowers.readyAt(player, id), CursePowers.cooldown(id), now, width - 12, abilityY, true);
             if (form == Form.LORD) {
-                String spell = Curses.tag(player).getString("lord_spell");
+                String spell = Curses.tag(player).getStringOr("lord_spell","");
                 if (spell.isEmpty() || !CursePowers.hasAbility(player, spell)) spell = CursePowers.RAISE_DEAD;
                 Component label = player.getAbilities().flying ? CursePowers.name(spell)
                         : Component.translatable("curse.skycraft.hud.levitate");
-                g.drawString(font, label, 12, HudStack.reserve(HudStack.Zone.BOTTOM_LEFT, HudStack.BL_LEFT_SPELL, 10, height), 0xFFD06070, true);
+                g.text(font, label, 12, HudStack.reserve(HudStack.Zone.BOTTOM_LEFT, HudStack.BL_LEFT_SPELL, 10, height), 0xFFD06070, true);
             }
             CursePerks.Tree tree = form == Form.BEAST ? CursePerks.Tree.WEREWOLF : CursePerks.Tree.VAMPIRE_LORD;
             if (CursePerks.available(player, tree) > 0) {
                 Component hint = Component.translatable("curse.skycraft.hud.perk", SkyKeys.SKILLS.getTranslatedKeyMessage());
-                g.drawString(font, hint, width - font.width(hint) - 6,
+                g.text(font, hint, width - font.width(hint) - 6,
                         HudStack.reserve(HudStack.Zone.TOP_RIGHT, HudStack.TR_CURSE_PERKS, 10, height), 0xFFE8C080, true);
             }
         }
 
         // ---------------------------------------------------------- feeding prompt
         Component feed = feedPrompt(mc, player, form);
-        if (feed != null) g.drawCenteredString(font, feed, width / 2, height / 2 + 14, 0xFFE07070);
+        if (feed != null) g.centeredText(font, feed, width / 2, height / 2 + 14, 0xFFE07070);
     }
 
-    private static void drawAbility(GuiGraphics g, Font font, Component name, long ready, long total, long now, int rightEdge, int y, boolean meter) {
+    private static void drawAbility(GuiGraphicsExtractor g, Font font, Component name, long ready, long total, long now, int rightEdge, int y, boolean meter) {
         boolean isReady = ready <= now;
         int nameW = font.width(name);
-        g.drawString(font, name, rightEdge - nameW, y, isReady ? 0xFFD04850 : 0xFF8A7A7A, true);
+        g.text(font, name, rightEdge - nameW, y, isReady ? 0xFFD04850 : 0xFF8A7A7A, true);
         if (!meter) return;
         int meterW = Math.max(40, nameW);
         int mx = rightEdge - meterW, my = y + 10;
@@ -157,7 +150,7 @@ public final class CurseHud {
         Entity e = eh.getEntity();
         if (player.distanceToSqr(e) > 4 * 4) return null;
         boolean ok = switch (form) {
-            case BEAST -> e instanceof CorpseEntity && !e.getPersistentData().getBoolean(Lycanthropy.FED_TAG);
+            case BEAST -> e instanceof CorpseEntity && !e.getPersistentData().getBooleanOr(Lycanthropy.FED_TAG, false);
             case LORD -> e instanceof LivingEntity l && CurseCombat.isPerson(l) && !player.getAbilities().flying;
             default -> Curses.isVampire(player) && !player.isShiftKeyDown() && e instanceof LivingEntity l && l.isSleeping() && CurseCombat.isPerson(l);
         };

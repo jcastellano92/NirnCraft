@@ -9,14 +9,13 @@ import com.skycraft.magic.spell.Spell;
 import com.skycraft.magic.spell.SpellCasting;
 import com.skycraft.magic.spell.SpellMath;
 import com.skycraft.magic.spell.Spells;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
-import net.minecraftforge.client.gui.overlay.ForgeGui;
 
 /**
  * Magic HUD: the equipped spell and its magicka cost above the magicka bar (bottom left), the equipped shout's
@@ -26,10 +25,12 @@ import net.minecraftforge.client.gui.overlay.ForgeGui;
 public final class MagicHud {
     private MagicHud() {}
 
-    public static void render(ForgeGui gui, GuiGraphics g, float partialTick, int width, int height) {
+    public static void render(GuiGraphicsExtractor g, net.minecraft.client.DeltaTracker delta) {
+        float partialTick = delta.getGameTimeDeltaPartialTick(false);
+        int width = g.guiWidth(), height = g.guiHeight();
         Minecraft mc = Minecraft.getInstance();
         LocalPlayer player = mc.player;
-        if (player == null || mc.level == null || mc.options.hideGui || player.isSpectator()) return;
+        if (player == null || mc.level == null || mc.gui.hud.isHidden() || player.isSpectator()) return;
         // curse module: a transformed player's abilities are drawn by CurseHud instead
         if (com.skycraft.curse.Curses.transformed(player)) return;
         Font font = mc.font;
@@ -57,7 +58,7 @@ public final class MagicHud {
         if (left == null && right == null && player.getMainHandItem().isEmpty() && player.getOffhandItem().isEmpty()
                 && !com.skycraft.combat.Sheathe.isSheathed(player)) {
             int uy = HudStack.reserve(HudStack.Zone.BOTTOM_LEFT, HudStack.BL_LEFT_SPELL, 10, height);
-            g.drawString(font, Component.translatable("magic.skycraft.hud_unarmed", MagicClientEvents.HANDS_CYCLE.getTranslatedKeyMessage()),
+            g.text(font, Component.translatable("magic.skycraft.hud_unarmed", MagicClientEvents.HANDS_CYCLE.getTranslatedKeyMessage()),
                     12, uy, 0xFFB8B2A0, true);
         }
 
@@ -93,7 +94,7 @@ public final class MagicHud {
                 String stoneId = voice.substring("power:stone:".length());
                 com.skycraft.lore.StandingStone stone = com.skycraft.lore.StandingStone.byId(stoneId);
                 powerName = stone != null ? stone.powerName() : Component.literal("Stone Power");
-                ready = data.module("lore").getLong("power_" + stoneId);
+                ready = data.module("lore").getLongOr("power_" + stoneId,0L);
                 if (stone != null) powerColor = 0xFF000000 | stone.color;
             }
             long now = mc.level.getGameTime();
@@ -103,7 +104,7 @@ public final class MagicHud {
             int y = HudStack.reserve(HudStack.Zone.BOTTOM_RIGHT, HudStack.BR_VOICE, 14, height);
             int nameW = font.width(powerName);
             int x = rightEdge - nameW;
-            g.drawString(font, powerName, x, y, isReady ? powerColor : 0xFF8A9AAA, true);
+            g.text(font, powerName, x, y, isReady ? powerColor : 0xFF8A9AAA, true);
             // Voice meter
             int meterW = Math.max(40, nameW);
             int mx = rightEdge - meterW;
@@ -136,7 +137,7 @@ public final class MagicHud {
                     if (i < charging) color = 0xFFFFFFFF;
                     else if (i < usable) color = remaining > 0 ? 0xFF8A9AAA : 0xFFD8E4F0;
                     else color = 0xFF505860;
-                    g.drawString(font, shout.word(i), x, y, color, true);
+                    g.text(font, shout.word(i), x, y, color, true);
                     x += widths[i] + 5;
                 }
                 // Voice meter: refills while the shout recharges.
@@ -171,18 +172,18 @@ public final class MagicHud {
                 int a = (int) (alpha * 255);
                 if (a >= 8) {
                     float scale = ClientFx.shoutTextSelf ? 2.6f + age * 0.6f : 1.6f;
-                    g.pose().pushPose();
-                    g.pose().translate(width / 2f, height * (ClientFx.shoutTextSelf ? 0.28f : 0.2f), 0);
-                    g.pose().scale(scale, scale, 1f);
-                    g.drawCenteredString(font, ClientFx.shoutText, 0, 0, a << 24 | 0xF2F6FF);
-                    g.pose().popPose();
+                    g.pose().pushMatrix();
+                    g.pose().translate(width / 2f,  height * (ClientFx.shoutTextSelf ? 0.28f : 0.2f));
+                    g.pose().scale(scale,  scale);
+                    g.centeredText(font, ClientFx.shoutText, 0, 0, a << 24 | 0xF2F6FF);
+                    g.pose().popMatrix();
                 }
             }
         }
     }
 
     /** One hand's spell: gem, name and magicka cost; right-aligned for the right hand. */
-    private static void drawSpell(GuiGraphics g, Font font, LocalPlayer player, PlayerData data, Spell spell, int anchor, int y,
+    private static void drawSpell(GuiGraphicsExtractor g, Font font, LocalPlayer player, PlayerData data, Spell spell, int anchor, int y,
                                   boolean alignRight, boolean casting, boolean dual) {
         float cost = SpellMath.cost(player, spell) * (dual ? Spell.DUAL_COST : 1f);
         boolean affordable = player.isCreative() || data.getMagicka() >= (spell.isConcentration() ? cost / 5f : cost);
@@ -191,21 +192,21 @@ public final class MagicHud {
         int width = 9 + font.width(name) + 4 + font.width(costText);
         int x = alignRight ? anchor - width : anchor;
         gem(g, x + 3, y + 3, spell.school.color, casting);
-        g.drawString(font, name, x + 9, y, casting ? 0xFFFFFFFF : 0xFFE8E2D0, true);
-        g.drawString(font, costText, x + 13 + font.width(name), y, affordable ? 0xFF7FB2FF : 0xFFD06060, true);
+        g.text(font, name, x + 9, y, casting ? 0xFFFFFFFF : 0xFFE8E2D0, true);
+        g.text(font, costText, x + 13 + font.width(name), y, affordable ? 0xFF7FB2FF : 0xFFD06060, true);
     }
 
     /** Coated weapon poison indicator + depletion meter in the bottom-right HUD stack; disappears once depleted. */
-    private static void drawWeaponPoison(GuiGraphics g, Font font, LocalPlayer player, int width, int height) {
+    private static void drawWeaponPoison(GuiGraphicsExtractor g, Font font, LocalPlayer player, int width, int height) {
         net.minecraft.world.item.ItemStack weapon = player.getMainHandItem();
-        if (weapon.getTag() == null || !weapon.getTag().contains(com.skycraft.crafting.arcane.ArcaneEvents.WEAPON_POISON, 10)) {
+        if (com.skycraft.inventory.ItemData.custom(weapon) == null || !com.skycraft.inventory.ItemData.custom(weapon).getCompound(com.skycraft.crafting.arcane.ArcaneEvents.WEAPON_POISON).isPresent()) {
             weapon = player.getOffhandItem();
         }
-        if (weapon.getTag() == null || !weapon.getTag().contains(com.skycraft.crafting.arcane.ArcaneEvents.WEAPON_POISON, 10)) return;
-        net.minecraft.nbt.CompoundTag p = weapon.getTag().getCompound(com.skycraft.crafting.arcane.ArcaneEvents.WEAPON_POISON);
-        int hits = p.getInt(com.skycraft.crafting.arcane.ArcaneEvents.POISON_HITS);
+        if (com.skycraft.inventory.ItemData.custom(weapon) == null || !com.skycraft.inventory.ItemData.custom(weapon).getCompound(com.skycraft.crafting.arcane.ArcaneEvents.WEAPON_POISON).isPresent()) return;
+        net.minecraft.nbt.CompoundTag p = com.skycraft.inventory.ItemData.custom(weapon).getCompoundOrEmpty(com.skycraft.crafting.arcane.ArcaneEvents.WEAPON_POISON);
+        int hits = p.getIntOr(com.skycraft.crafting.arcane.ArcaneEvents.POISON_HITS, 0);
         if (hits <= 0) return;
-        int maxHits = Math.max(hits, p.getInt(com.skycraft.crafting.arcane.ArcaneEvents.POISON_MAX_HITS));
+        int maxHits = Math.max(hits, p.getIntOr(com.skycraft.crafting.arcane.ArcaneEvents.POISON_MAX_HITS, 0));
         String name = com.skycraft.crafting.arcane.ArcaneEvents.poisonDisplayName(p);
         String label = name + " (" + hits + "/" + maxHits + ")";
         int rightEdge = width - 12;
@@ -213,7 +214,7 @@ public final class MagicHud {
         int labelW = font.width(label);
         int x = rightEdge - labelW;
         gem(g, x - 6, y + 3, 0x58C850, false);
-        g.drawString(font, label, x, y, 0xFF88D870, true);
+        g.text(font, label, x, y, 0xFF88D870, true);
         int meterW = Math.max(44, labelW + 8);
         int mx = rightEdge - meterW;
         int my = y + 10;
@@ -223,7 +224,7 @@ public final class MagicHud {
     }
 
     /** A small diamond "spell gem" in the school color. */
-    private static void gem(GuiGraphics g, int cx, int cy, int rgb, boolean bright) {
+    private static void gem(GuiGraphicsExtractor g, int cx, int cy, int rgb, boolean bright) {
         int c = 0xFF000000 | (bright ? lighten(rgb) : rgb);
         g.fill(cx - 1, cy - 3, cx + 1, cy + 3, c);
         g.fill(cx - 2, cy - 2, cx + 2, cy + 2, c);

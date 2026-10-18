@@ -41,10 +41,10 @@ public final class StableMasters {
         BlockPos at = spot(e);
         if (at == null || !level.isPositionEntityTicking(at)) return;
         if (!level.getEntitiesOfClass(LivingEntity.class, new AABB(at).inflate(40, 16, 40),
-                l -> l.isAlive() && l.getPersistentData().getBoolean("skycraft_stable_master")).isEmpty()) return;
+                l -> l.isAlive() && l.getPersistentData().getBooleanOr("skycraft_stable_master",false)).isEmpty()) return;
         Data data = Data.get(level);
         long now = level.getGameTime();
-        if (data.tag.contains(e.key) && now - data.tag.getLong(e.key) < RESPAWN) return;
+        if (data.tag.contains(e.key) && now - data.tag.getLongOr(e.key, 0L) < RESPAWN) return;
         NpcEntity npc = Npcs.create(level, standing(level, at), NpcRole.FARMER);
         if (npc == null) return;
         npc.setPersistenceRequired();
@@ -88,11 +88,9 @@ public final class StableMasters {
         }
 
         static Data get(ServerLevel level) {
-            return level.getServer().overworld().getDataStorage().computeIfAbsent(
-                    t -> new Data(t.getCompound("spawned")), () -> new Data(new CompoundTag()), "skycraft_stablemasters");
+            return com.skycraft.platform.SavedDataTypes.get(level.getServer().overworld(), "skycraft_stablemasters", t -> new Data(t.getCompoundOrEmpty("spawned")), () -> new Data(new CompoundTag()), value263 -> value263.save(new net.minecraft.nbt.CompoundTag()));
         }
 
-        @Override
         public CompoundTag save(CompoundTag out) {
             out.put("spawned", tag);
             return out;

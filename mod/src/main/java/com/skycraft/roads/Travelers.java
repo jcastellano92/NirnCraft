@@ -10,7 +10,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.BlockTags;
@@ -20,32 +20,33 @@ import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.goal.WrappedGoal;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.WalkTarget;
-import net.minecraft.world.entity.animal.horse.AbstractHorse;
-import net.minecraft.world.entity.npc.Villager;
-import net.minecraft.world.entity.npc.VillagerProfession;
-import net.minecraft.world.entity.npc.VillagerType;
-import net.minecraft.world.entity.npc.WanderingTrader;
+import net.minecraft.world.entity.animal.equine.AbstractHorse;
+import net.minecraft.world.entity.npc.villager.Villager;
+import net.minecraft.world.entity.npc.villager.VillagerProfession;
+import net.minecraft.world.entity.npc.villager.VillagerType;
+import net.minecraft.world.entity.npc.wanderingtrader.WanderingTrader;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.event.entity.EntityJoinLevelEvent;
-import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
+import net.neoforged.neoforge.event.entity.EntityLeaveLevelEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -63,7 +64,7 @@ import java.util.UUID;
  * ({@code skycraft_always_open}). A traveller's stay at a settlement is limited ({@link #LINGER}); nobody lives on the
  * road for more than {@link #LIFETIME}.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class Travelers {
     public static final String TAG = "skycraft_traveler";
     public static final String CARAVAN = "caravan";
@@ -84,8 +85,8 @@ public final class Travelers {
     public static final String[] KINDS = {CARAVAN, COURIER, PATROL, AMBUSH, PILGRIM, HUNTER, BARD, SOLDIERS, TINKER, FARMER,
             REFUGEES, ADVENTURER, TAX};
 
-    private static final ResourceLocation GUARD = new ResourceLocation(Skycraft.MODID, "guard");
-    private static final ResourceLocation BANDIT = new ResourceLocation(Skycraft.MODID, "bandit");
+    private static final Identifier GUARD = Identifier.fromNamespaceAndPath(Skycraft.MODID, "guard");
+    private static final Identifier BANDIT = Identifier.fromNamespaceAndPath(Skycraft.MODID, "bandit");
     private static final int MIN_SPAWN = 40, MAX_SPAWN = 100;
     private static final double CAP_RADIUS = 128;
     /** A group is gone for good this many ticks after it appeared (when nobody is looking). */
@@ -103,7 +104,7 @@ public final class Travelers {
     @Nullable
     static CompoundTag tag(Entity entity) {
         CompoundTag pd = entity.getPersistentData();
-        return pd.contains(TAG, Tag.TAG_COMPOUND) ? pd.getCompound(TAG) : null;
+        return com.skycraft.platform.NbtData.hasType(pd, TAG, Tag.TAG_COMPOUND) ? pd.getCompoundOrEmpty(TAG) : null;
     }
 
     static int loadedCount() {
@@ -119,13 +120,13 @@ public final class Travelers {
 
     @SubscribeEvent
     public static void onJoin(EntityJoinLevelEvent event) {
-        if (event.getLevel().isClientSide || !(event.getEntity() instanceof Mob mob)) return;
+        if (event.getLevel().isClientSide() || !(event.getEntity() instanceof Mob mob)) return;
         CompoundTag t = tag(mob);
         if (t == null) return;
         TRAVELERS.put(mob.getUUID(), mob);
-        String kind = t.getString("kind");
-        if (t.getBoolean("static") || LLAMA.equals(kind)) return;
-        if (PATROL.equals(kind) && mob instanceof PathfinderMob pm) pm.clearRestriction(); // don't get pulled home
+        String kind = t.getStringOr("kind", "");
+        if (t.getBooleanOr("static", false) || LLAMA.equals(kind)) return;
+        if (PATROL.equals(kind) && mob instanceof PathfinderMob pm) pm.clearHome(); // don't get pulled home
         for (WrappedGoal g : mob.goalSelector.getAvailableGoals()) {
             if (g.getGoal() instanceof TravelerGoal) return;
         }
@@ -134,7 +135,7 @@ public final class Travelers {
 
     @SubscribeEvent
     public static void onLeave(EntityLeaveLevelEvent event) {
-        if (event.getLevel().isClientSide) return;
+        if (event.getLevel().isClientSide()) return;
         Entity e = event.getEntity();
         TRAVELERS.remove(e.getUUID(), e);
     }
@@ -142,7 +143,7 @@ public final class Travelers {
     /** Naming or leashing a traveler adopts it: it is no longer managed (or despawned) by the roads module. */
     @SubscribeEvent
     public static void onInteract(PlayerInteractEvent.EntityInteract event) {
-        if (event.getLevel().isClientSide) return;
+        if (event.getLevel().isClientSide()) return;
         Entity target = event.getTarget();
         if (tag(target) == null) return;
         if (event.getItemStack().is(Items.NAME_TAG) || event.getItemStack().is(Items.LEAD)) {
@@ -160,7 +161,7 @@ public final class Travelers {
     static void tick(ServerLevel level, RoadsData data, long tick) {
         if (tick % 100 == 50) despawnPass(level);
         if (tick % 20 != 0 || !RoadsConfig.TRAVELERS.get()) return;
-        if (data.roads.isEmpty() || !level.getGameRules().getBoolean(GameRules.RULE_DOMOBSPAWNING)) return;
+        if (data.roads.isEmpty() || !level.getGameRules().get(GameRules.SPAWN_MOBS)) return;
         int interval = RoadsConfig.TRAVELER_INTERVAL.get();
         for (ServerPlayer player : level.players()) {
             if (player.isSpectator()) continue;
@@ -195,22 +196,22 @@ public final class Travelers {
                 gone.add(m);
                 continue;
             }
-            if (t.hasUUID("leader")) continue; // group members leave with their leader (below)
+            if (t.read("leader", net.minecraft.core.UUIDUtil.CODEC).isPresent()) continue; // group members leave with their leader (below)
             long now = level.getGameTime();
             if (!t.contains("born")) t.putLong("born", now);
-            long born = t.getLong("born");
-            boolean arrived = t.getBoolean("arrived") || t.getInt("stuck") > 60;
+            long born = t.getLongOr("born", 0L);
+            boolean arrived = t.getBooleanOr("arrived", false) || t.getIntOr("stuck", 0) > 60;
             if (arrived && !t.contains("arrivedAt")) t.putLong("arrivedAt", now);
             boolean watched = level.getNearestPlayer(m, 24) != null;
-            if (arrived && now - t.getLong("arrivedAt") > LINGER) {
+            if (arrived && now - t.getLongOr("arrivedAt", 0L) > LINGER) {
                 // the visit is over: out of sight they vanish, in sight they turn round and walk away
                 if (!watched) gone.add(m);
-                else if (!t.getBoolean("leaving")) leave(t);
-            } else if (t.getBoolean("leaving") && level.getNearestPlayer(m, 40) == null) {
+                else if (!t.getBooleanOr("leaving", false)) leave(t);
+            } else if (t.getBooleanOr("leaving", false) && level.getNearestPlayer(m, 40) == null) {
                 gone.add(m);
             } else if (now - born > LIFETIME && level.getNearestPlayer(m, 40) == null) {
                 gone.add(m);
-            } else if (now - born > LIFETIME * 2 && !t.getBoolean("leaving")) {
+            } else if (now - born > LIFETIME * 2 && !t.getBooleanOr("leaving", false)) {
                 leave(t); // a lifetime is a lifetime: they start for the horizon even with someone watching
             }
         }
@@ -219,8 +220,8 @@ public final class Travelers {
         List<Mob> followers = new ArrayList<>();
         for (Mob m : TRAVELERS.values()) {
             CompoundTag t = tag(m);
-            if (t == null || !t.hasUUID("leader") || gone.contains(m) || m.isRemoved()) continue;
-            UUID leader = t.getUUID("leader");
+            if (t == null || !t.read("leader", net.minecraft.core.UUIDUtil.CODEC).isPresent() || gone.contains(m) || m.isRemoved()) continue;
+            UUID leader = t.read("leader", net.minecraft.core.UUIDUtil.CODEC).orElseThrow();
             for (Mob g : gone) {
                 if (g.getUUID().equals(leader)) {
                     followers.add(m);
@@ -230,14 +231,14 @@ public final class Travelers {
         }
         gone.addAll(followers);
         for (Mob m : gone) {
-            if (m.isLeashed()) m.dropLeash(true, false);
+            if (m.isLeashed()) m.removeLeash();
         }
         for (Mob m : gone) m.discard();
     }
 
     /** Sends a traveller back down the road it came along (no further legs); it vanishes once nobody is near. */
     private static void leave(CompoundTag t) {
-        t.putInt("dir", t.getInt("dir") >= 0 ? -1 : 1);
+        t.putInt("dir", t.getIntOr("dir", 0) >= 0 ? -1 : 1);
         t.putBoolean("arrived", false);
         t.putBoolean("leaving", true);
         t.putInt("legs", 99);
@@ -249,7 +250,7 @@ public final class Travelers {
 
     private static double speed(Mob mob) {
         CompoundTag t = tag(mob);
-        String kind = t == null ? "" : t.getString("kind");
+        String kind = t == null ? "" : t.getStringOr("kind", "");
         return switch (kind) {
             case PILGRIM, REFUGEES -> 0.42;
             case FARMER, CARAVAN -> 0.5;
@@ -283,46 +284,46 @@ public final class Travelers {
         if (!(mob.level() instanceof ServerLevel level)) return;
         CompoundTag t = tag(mob);
         if (t == null) return;
-        if (t.hasUUID("leader")) {
-            Entity leader = level.getEntity(t.getUUID("leader"));
+        if (t.read("leader", net.minecraft.core.UUIDUtil.CODEC).isPresent()) {
+            Entity leader = level.getEntity(t.read("leader", net.minecraft.core.UUIDUtil.CODEC).orElseThrow());
             if (leader instanceof Mob lm && lm.isAlive() && lm.distanceToSqr(mob) < 48 * 48) {
                 t.putInt("lost", 0);
                 CompoundTag lt = tag(lm);
                 if (lt != null) {
-                    t.putInt("idx", lt.getInt("idx"));
-                    t.putBoolean("arrived", lt.getBoolean("arrived"));
+                    t.putInt("idx", lt.getIntOr("idx", 0));
+                    t.putBoolean("arrived", lt.getBooleanOr("arrived", false));
                 }
                 if (mob.distanceToSqr(lm) > 9) moveTo(mob, lm.getX(), lm.getY(), lm.getZ(), speed(mob) * 1.15);
                 return;
             }
-            int lost = t.getInt("lost") + 1;
+            int lost = t.getIntOr("lost", 0) + 1;
             t.putInt("lost", lost);
             if (lost < 5) return;
             t.remove("leader"); // the leader is gone: lead the rest of the way
         }
         if (!RoadNetwork.isRoadLevel(level)) return;
         // a rest at the roadside: the bard plays a tune, the pilgrim stands in prayer, the rest sit about
-        int rest = t.getInt("rest");
+        int rest = t.getIntOr("rest", 0);
         if (rest > 0) {
             t.putInt("rest", rest - 1);
             mob.getNavigation().stop();
             if (rest == 1 && mob instanceof NpcEntity n) n.setPlaying(false);
             return;
         }
-        String kind = t.getString("kind");
-        if (rests(kind) && !t.getBoolean("leaving") && level.getRandom().nextInt(110) == 0) {
+        String kind = t.getStringOr("kind", "");
+        if (rests(kind) && !t.getBooleanOr("leaving", false) && level.getRandom().nextInt(110) == 0) {
             t.putInt("rest", 12 + level.getRandom().nextInt(26));
             mob.getNavigation().stop();
             if (mob instanceof NpcEntity n && kind.equals(BARD)) n.setPlaying(true);
             return;
         }
-        Road road = RoadsData.get(level).road(t.getInt("road"));
+        Road road = RoadsData.get(level).road(t.getIntOr("road", 0));
         if (road == null) {
             t.putBoolean("arrived", true);
             return;
         }
-        int dir = t.getInt("dir") >= 0 ? 1 : -1;
-        int idx = road.clamp(t.getInt("idx"));
+        int dir = t.getIntOr("dir", 0) >= 0 ? 1 : -1;
+        int idx = road.clamp(t.getIntOr("idx", 0));
         int best = idx;
         double bestD = Double.MAX_VALUE;
         for (int k = -4; k <= 24; k++) {
@@ -342,10 +343,10 @@ public final class Travelers {
             if (!continueJourney(level, mob, t, road, dir > 0 ? road.b : road.a)) t.putBoolean("arrived", true);
             return;
         }
-        double mx = mob.getX() - t.getDouble("lx"), mz = mob.getZ() - t.getDouble("lz");
+        double mx = mob.getX() - t.getDoubleOr("lx", 0d), mz = mob.getZ() - t.getDoubleOr("lz", 0d);
         t.putDouble("lx", mob.getX());
         t.putDouble("lz", mob.getZ());
-        int stuck = mx * mx + mz * mz < 0.25 ? t.getInt("stuck") + 1 : 0;
+        int stuck = mx * mx + mz * mz < 0.25 ? t.getIntOr("stuck", 0) + 1 : 0;
         t.putInt("stuck", stuck);
         if (stuck > 0 && stuck % 6 == 0) idx = road.clamp(idx + dir * 4); // try a point further ahead
         t.putInt("idx", idx);
@@ -362,7 +363,7 @@ public final class Travelers {
      * crossing the province, patrols walking their beat), up to a few legs; group members follow their leader.
      */
     private static boolean continueJourney(ServerLevel level, Mob mob, CompoundTag t, Road road, int at) {
-        int legs = t.getInt("legs");
+        int legs = t.getIntOr("legs", 0);
         if (legs >= 4 || level.getRandom().nextInt(100) >= 65) return false;
         RoadsData data = RoadsData.get(level);
         it.unimi.dsi.fastutil.ints.IntArrayList options = new it.unimi.dsi.fastutil.ints.IntArrayList();
@@ -391,7 +392,7 @@ public final class Travelers {
         for (Mob m : TRAVELERS.values()) {
             if (m.isRemoved() || m.level() != player.level()) continue;
             CompoundTag t = tag(m);
-            if (t == null || t.hasUUID("leader")) continue;
+            if (t == null || t.read("leader", net.minecraft.core.UUIDUtil.CODEC).isPresent()) continue;
             if (m.distanceToSqr(player) < CAP_RADIUS * CAP_RADIUS) n++;
         }
         return n;
@@ -401,7 +402,7 @@ public final class Travelers {
         return switch (kind) {
             case PATROL -> false; // no hold guards on the roads (owner, playtest 5): the watch stays in its settlement
             case AMBUSH -> RoadsConfig.BANDIT_AMBUSHES.get() && level.getDifficulty() != Difficulty.PEACEFUL
-                    && ForgeRegistries.ENTITY_TYPES.containsKey(BANDIT);
+                    && BuiltInRegistries.ENTITY_TYPE.containsKey(BANDIT);
             case CARAVAN, COURIER, PILGRIM, HUNTER, BARD, SOLDIERS, TINKER, FARMER, REFUGEES, ADVENTURER, TAX -> true;
             default -> false;
         };
@@ -480,7 +481,7 @@ public final class Travelers {
         LongArrayList candidates = new LongArrayList();
         for (int cx = pcx - r; cx <= pcx + r; cx++) {
             for (int cz = pcz - r; cz <= pcz + r; cz++) {
-                LongArrayList entries = data.chunkIndex.get(ChunkPos.asLong(cx, cz));
+                LongArrayList entries = data.chunkIndex.get(ChunkPos.pack(cx, cz));
                 if (entries == null) continue;
                 for (int k = 0; k < entries.size(); k++) {
                     long e = entries.getLong(k);
@@ -563,7 +564,7 @@ public final class Travelers {
                 if (trader == null) yield false;
                 int llamas = 1 + random.nextInt(2);
                 for (int i = 1; i <= llamas; i++) {
-                    Mob llama = spawn(level, EntityType.TRADER_LLAMA, road, road.clamp(idx - dir * (i + 1)), dir, 0,
+                    Mob llama = spawn(level, net.minecraft.world.entity.EntityTypes.TRADER_LLAMA, road, road.clamp(idx - dir * (i + 1)), dir, 0,
                             newTag(LLAMA, road, idx, dir, dest, trader.getUUID()));
                     if (llama != null) llama.setLeashedTo(trader, true);
                 }
@@ -572,7 +573,7 @@ public final class Travelers {
             case TINKER -> {
                 Mob tinker = spawnNpc(level, NpcRole.MERCHANT, kind, road, idx, dir, 0, newTag(kind, road, idx, dir, dest, null));
                 if (tinker == null) yield false;
-                Mob beast = spawn(level, EntityType.DONKEY, road, road.clamp(idx - dir * 2), dir, 0,
+                Mob beast = spawn(level, net.minecraft.world.entity.EntityTypes.DONKEY, road, road.clamp(idx - dir * 2), dir, 0,
                         newTag(BEAST, road, idx, dir, dest, tinker.getUUID()));
                 if (beast != null) beast.setLeashedTo(tinker, true);
                 yield true;
@@ -580,7 +581,7 @@ public final class Travelers {
             case FARMER -> {
                 Mob farmer = spawnNpc(level, NpcRole.FARMER, kind, road, idx, dir, 0, newTag(kind, road, idx, dir, dest, null));
                 if (farmer == null) yield false;
-                Mob cart = spawn(level, EntityType.DONKEY, road, road.clamp(idx - dir * 2), dir, 0,
+                Mob cart = spawn(level, net.minecraft.world.entity.EntityTypes.DONKEY, road, road.clamp(idx - dir * 2), dir, 0,
                         newTag(BEAST, road, idx, dir, dest, farmer.getUUID()));
                 if (cart != null) cart.setLeashedTo(farmer, true);
                 yield true;
@@ -625,7 +626,7 @@ public final class Travelers {
                 yield true;
             }
             case PATROL -> {
-                EntityType<?> type = ForgeRegistries.ENTITY_TYPES.getValue(GUARD);
+                EntityType<?> type = BuiltInRegistries.ENTITY_TYPE.getValue(GUARD);
                 if (type == null) yield false;
                 Mob first = spawn(level, type, road, idx, dir, 0, newTag(kind, road, idx, dir, dest, null));
                 if (first == null) yield false;
@@ -633,7 +634,7 @@ public final class Travelers {
                 yield true;
             }
             case AMBUSH -> {
-                EntityType<?> type = ForgeRegistries.ENTITY_TYPES.getValue(BANDIT);
+                EntityType<?> type = BuiltInRegistries.ENTITY_TYPE.getValue(BANDIT);
                 if (type == null) yield false;
                 int side = random.nextBoolean() ? 1 : -1;
                 int count = 2 + random.nextInt(2);
@@ -657,7 +658,7 @@ public final class Travelers {
         t.putInt("idx", idx);
         t.putInt("dir", dir);
         t.putInt("dest", dest);
-        if (leader != null) t.putUUID("leader", leader);
+        if (leader != null) t.store("leader", net.minecraft.core.UUIDUtil.CODEC, leader);
         return t;
     }
 
@@ -672,14 +673,14 @@ public final class Travelers {
         }
         BlockPos pos = groundAt(level, x, z);
         if (pos == null) return null;
-        Entity entity = type.create(level);
+        Entity entity = type.create(level, net.minecraft.world.entity.EntitySpawnReason.STRUCTURE);
         if (!(entity instanceof Mob mob)) return null;
         int ahead = road.clamp(idx + dir * 3);
         float yaw = (float) (Mth.atan2(road.zs[ahead] - road.zs[idx], road.xs[ahead] - road.xs[idx]) * (180.0 / Math.PI)) - 90.0f;
-        mob.moveTo(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5, yaw, 0.0f);
+        mob.snapTo(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5, yaw, 0.0f);
         mob.setYHeadRot(yaw);
         if (!level.noCollision(mob)) return null;
-        mob.finalizeSpawn(level, level.getCurrentDifficultyAt(pos), MobSpawnType.EVENT, null, null);
+        mob.finalizeSpawn(level, level.getCurrentDifficultyAt(pos), EntitySpawnReason.EVENT, null);
         tag.putLong("born", level.getGameTime());
         mob.getPersistentData().put(TAG, tag);
         if (!level.addFreshEntity(mob)) return null;
@@ -706,7 +707,7 @@ public final class Travelers {
         if (npc == null) return null;
         int ahead = road.clamp(idx + dir * 3);
         float yaw = (float) (Mth.atan2(road.zs[ahead] - road.zs[idx], road.xs[ahead] - road.xs[idx]) * (180.0 / Math.PI)) - 90.0f;
-        npc.moveTo(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5, yaw, 0.0f);
+        npc.snapTo(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5, yaw, 0.0f);
         npc.setYHeadRot(yaw);
         if (!level.noCollision(npc)) return null;
         tag.putLong("born", level.getGameTime());

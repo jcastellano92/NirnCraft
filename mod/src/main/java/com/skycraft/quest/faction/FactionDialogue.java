@@ -111,7 +111,7 @@ public final class FactionDialogue {
     }
 
     private static boolean hasActiveFactionQuest(ServerPlayer p, Faction f) {
-        for (com.skycraft.quest.Quests.Ref ref : com.skycraft.quest.Quests.active(p.server, p.getUUID())) {
+        for (com.skycraft.quest.Quests.Ref ref : com.skycraft.quest.Quests.active(p.level().getServer(), p.getUUID())) {
             if (f.id.equals(ref.quest().faction)) return true;
         }
         return false;
@@ -171,23 +171,23 @@ public final class FactionDialogue {
         }
         if (f == Faction.COLLEGE) {
             CompoundTag qmod = SkyData.get(p).module("quest");
-            if (!qmod.getBoolean("college_destruction_completed") && !com.skycraft.quest.Quests.hasActiveKind(p.server, p.getUUID(), "college_")) {
+            if (!qmod.getBooleanOr("college_destruction_completed",false) && !com.skycraft.quest.Quests.hasActiveKind(p.level().getServer(), p.getUUID(), "college_")) {
                 QuestDialogue.offer(p, npc, "college_dest", () -> com.skycraft.quest.CollegeQuests.destructionOffer(p, npc));
                 return;
             }
-            if (!qmod.getBoolean("college_restoration_completed") && !com.skycraft.quest.Quests.hasActiveKind(p.server, p.getUUID(), "college_")) {
+            if (!qmod.getBooleanOr("college_restoration_completed",false) && !com.skycraft.quest.Quests.hasActiveKind(p.level().getServer(), p.getUUID(), "college_")) {
                 QuestDialogue.offer(p, npc, "college_rest", () -> com.skycraft.quest.CollegeQuests.restorationOffer(p, npc));
                 return;
             }
-            if (!qmod.getBoolean("college_alteration_completed") && !com.skycraft.quest.Quests.hasActiveKind(p.server, p.getUUID(), "college_")) {
+            if (!qmod.getBooleanOr("college_alteration_completed",false) && !com.skycraft.quest.Quests.hasActiveKind(p.level().getServer(), p.getUUID(), "college_")) {
                 QuestDialogue.offer(p, npc, "college_alt", () -> com.skycraft.quest.CollegeQuests.alterationOffer(p, npc));
                 return;
             }
-            if (!qmod.getBoolean("college_conjuration_completed") && !com.skycraft.quest.Quests.hasActiveKind(p.server, p.getUUID(), "college_")) {
+            if (!qmod.getBooleanOr("college_conjuration_completed",false) && !com.skycraft.quest.Quests.hasActiveKind(p.level().getServer(), p.getUUID(), "college_")) {
                 QuestDialogue.offer(p, npc, "college_conj", () -> com.skycraft.quest.CollegeQuests.conjurationOffer(p, npc));
                 return;
             }
-            if (!qmod.getBoolean("college_illusion_completed") && !com.skycraft.quest.Quests.hasActiveKind(p.server, p.getUUID(), "college_")) {
+            if (!qmod.getBooleanOr("college_illusion_completed",false) && !com.skycraft.quest.Quests.hasActiveKind(p.level().getServer(), p.getUUID(), "college_")) {
                 QuestDialogue.offer(p, npc, "college_ill", () -> com.skycraft.quest.CollegeQuests.illusionOffer(p, npc));
                 return;
             }
@@ -215,7 +215,7 @@ public final class FactionDialogue {
         RandomSource r = p.getRandom();
         Kind kind = kind(f);
         BlockPos spot = Locate.randomSpot(level, r, npc.blockPosition(), 200, 500);
-        String dim = level.dimension().location().toString();
+        String dim = level.dimension().identifier().toString();
         int lvl = SkyData.get(p).getLevel();
         long gold = Math.max(150, Math.min(1200, Math.round(250 * (1 + lvl / 20.0))));
         String k = kind.name().toLowerCase(java.util.Locale.ROOT);
@@ -260,7 +260,7 @@ public final class FactionDialogue {
             if (info == null || Factions.rank(data, f) < 3) continue;
             for (String g : info.governs()) {
                 boolean ok = switch (g) {
-                    case "imperial", "stormcloak" -> g.equals(com.skycraft.quest.story.CivilWar.controller(p.server, region.id()));
+                    case "imperial", "stormcloak" -> g.equals(com.skycraft.quest.story.CivilWar.controller(p.level().getServer(), region.id()));
                     default -> g.startsWith("province/") ? region.province().equals(g.substring(9)) : region.id().equals(g);
                 };
                 if (ok) return f;
@@ -286,8 +286,8 @@ public final class FactionDialogue {
         int bounty = Bounty.get(p, hold);
         if (rank < 3 || bounty <= 0) return;
         CompoundTag mod = data.module("quest");
-        long day = p.level().getDayTime() / 24000L;
-        if (mod.getLong("faction_pull_day") == day + 1) {
+        long day = p.level().getDefaultClockTime() / 24000L;
+        if (mod.getLongOr("faction_pull_day",0L) == day + 1) {
             Dialogue.open(p, guard, tr("faction.skycraft.reply.pull_used"));
             return;
         }

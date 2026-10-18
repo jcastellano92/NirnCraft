@@ -6,7 +6,7 @@ import com.google.gson.JsonObject;
 import com.skycraft.Skycraft;
 import net.minecraft.commands.arguments.blocks.BlockStateParser;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -122,7 +122,7 @@ public final class CavernProfile {
     public final String eliteName;
     /** Loot tables of the relic cache on a gallery, the platform chest and the minor chests; null = the dungeon's own. */
     @Nullable
-    public final ResourceLocation lootRelic, lootPlatform, lootMinor;
+    public final Identifier lootRelic, lootPlatform, lootMinor;
     public final List<Ambient> ambient;
     public final String particle, sound, lightColor;
 
@@ -265,9 +265,9 @@ public final class CavernProfile {
 
     // ------------------------------------------------------------------ parsing helpers
 
-    private static ResourceLocation rl(String s) {
-        ResourceLocation r = ResourceLocation.tryParse(s);
-        return r != null ? r : new ResourceLocation(Skycraft.MODID, "chests/dungeon_common");
+    private static Identifier rl(String s) {
+        Identifier r = Identifier.tryParse(s);
+        return r != null ? r : Identifier.fromNamespaceAndPath(Skycraft.MODID, "chests/dungeon_common");
     }
 
     private static String str(JsonObject o, String k, @Nullable String def) {
@@ -304,7 +304,7 @@ public final class CavernProfile {
         if (STATES.containsKey(text)) return STATES.get(text);
         BlockState s;
         try {
-            s = BlockStateParser.parseForBlock(BuiltInRegistries.BLOCK.asLookup(), text, false).blockState();
+            s = BlockStateParser.parseForBlock(BuiltInRegistries.BLOCK, text, false).blockState();
         } catch (Exception e) {
             Skycraft.LOGGER.warn("Skycraft caverns: bad block '{}' in {}", text, where);
             s = Blocks.STONE.defaultBlockState();

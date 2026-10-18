@@ -10,15 +10,21 @@ import com.skycraft.tamriel.settlement.Culture;
 import com.skycraft.tamriel.settlement.client.ShopSignModels.ShopSignType;
 import com.skycraft.tamriel.settlement.client.ShopSignModels.SignModelPair;
 import net.minecraft.client.renderer.LevelRenderer;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.blockentity.state.*;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
+import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.level.block.entity.BlockEntityTypes;
+import net.minecraft.world.level.block.entity.SignTextSlot;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.blockentity.HangingSignRenderer;
-import net.minecraft.client.renderer.blockentity.SignRenderer;
+import net.minecraft.client.renderer.blockentity.StandingSignRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.CeilingHangingSignBlock;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
@@ -30,10 +36,10 @@ import net.minecraft.world.level.block.entity.SignBlockEntity;
 import net.minecraft.world.level.block.entity.SignText;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.RotationSegment;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.EntityRenderersEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.EntityRenderersEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.util.Locale;
 
@@ -48,10 +54,10 @@ import java.util.Locale;
  *       and player-placed signs.</li>
  * </ul>
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
 public final class ShopSignRenderer {
-    public static final ResourceLocation ATLAS =
-            new ResourceLocation(Skycraft.MODID, "textures/entity/settlement/shop_signs.png");
+    public static final Identifier ATLAS =
+            Identifier.fromNamespaceAndPath(Skycraft.MODID, "textures/entity/settlement/shop_signs.png");
 
     public enum Kind {
         VANILLA,
@@ -68,97 +74,51 @@ public final class ShopSignRenderer {
 
     @SubscribeEvent
     public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
-        event.registerBlockEntityRenderer(BlockEntityType.HANGING_SIGN, Hanging::new);
-        event.registerBlockEntityRenderer(BlockEntityType.SIGN, Wall::new);
+        event.registerBlockEntityRenderer(BlockEntityTypes.HANGING_SIGN, Hanging::new);
+        event.registerBlockEntityRenderer(BlockEntityTypes.SIGN, Wall::new);
     }
 
+    private record Extra(Classification classification,Direction outward,SignModelPair pair,float sway) {}
+    private static Extra extractExtra(SignBlockEntity be,float partial,boolean standing) {
+        Classification c=standing?Classification.VANILLA:classify(be);
+        if(c.kind()!=Kind.SHOP_3D||c.type()==null)return new Extra(c,Direction.SOUTH,null,0);
+        float time=be.getLevel()==null?partial:be.getLevel().getGameTime()+partial;
+        float phase=(be.getBlockPos().asLong()&0xffffL)*.017f;
+        return new Extra(c,resolveOutwardDirection(be),ShopSignModels.get(c.culture(),c.type()),(float)Math.sin(time*.075f+phase)*2.2f);
+    }
+    public static class HangingState extends HangingSignRenderState { Extra extra; }
+    public static class WallState extends StandingSignRenderState { Extra extra; }
     public static final class Hanging extends HangingSignRenderer {
-        public Hanging(BlockEntityRendererProvider.Context ctx) {
-            super(ctx);
+        public Hanging(BlockEntityRendererProvider.Context ctx){super(ctx);}
+        @Override public HangingState createRenderState(){return new HangingState();}
+        @Override public void extractRenderState(SignBlockEntity be,HangingSignRenderState state,float partial,Vec3 camera,ModelFeatureRenderer.CrumblingOverlay breaking){
+            super.extractRenderState(be,state,partial,camera,breaking);((HangingState)state).extra=extractExtra(be,partial,false);
         }
-
-        @Override
-        public void render(
-                SignBlockEntity be, float partialTick, PoseStack poseStack,
-                MultiBufferSource bufferSource, int packedLight, int packedOverlay
-        ) {
-            Classification c = classify(be);
-            if (c.kind() == Kind.HIDE_HOME_SIGN) {
-                return;
-            }
-            if (c.kind() == Kind.SHOP_3D && c.type() != null) {
-                render3DSign(be, partialTick, poseStack, bufferSource, packedLight, c.culture(), c.type());
-                return;
-            }
-            super.render(be, partialTick, poseStack, bufferSource, packedLight, packedOverlay);
+        @Override public void submit(HangingSignRenderState state,PoseStack pose,SubmitNodeCollector collector,CameraRenderState camera){
+            Extra extra=((HangingState)state).extra;
+            if(extra.classification().kind()==Kind.VANILLA)super.submit(state,pose,collector,camera);
+            else if(extra.classification().kind()==Kind.SHOP_3D)submitSign(extra,state.lightCoords,pose,collector);
         }
     }
-
-    public static final class Wall extends SignRenderer {
-        public Wall(BlockEntityRendererProvider.Context ctx) {
-            super(ctx);
+    public static final class Wall extends StandingSignRenderer {
+        public Wall(BlockEntityRendererProvider.Context ctx){super(ctx);}
+        @Override public WallState createRenderState(){return new WallState();}
+        @Override public void extractRenderState(SignBlockEntity be,StandingSignRenderState state,float partial,Vec3 camera,ModelFeatureRenderer.CrumblingOverlay breaking){
+            super.extractRenderState(be,state,partial,camera,breaking);((WallState)state).extra=extractExtra(be,partial,be.getBlockState().getBlock() instanceof StandingSignBlock);
         }
-
-        @Override
-        public void render(
-                SignBlockEntity be, float partialTick, PoseStack poseStack,
-                MultiBufferSource bufferSource, int packedLight, int packedOverlay
-        ) {
-            // Standing signs are road signposts or homestead signs; always keep vanilla
-            if (be.getBlockState().getBlock() instanceof StandingSignBlock) {
-                super.render(be, partialTick, poseStack, bufferSource, packedLight, packedOverlay);
-                return;
-            }
-            Classification c = classify(be);
-            if (c.kind() == Kind.HIDE_HOME_SIGN) {
-                return;
-            }
-            if (c.kind() == Kind.SHOP_3D && c.type() != null) {
-                render3DSign(be, partialTick, poseStack, bufferSource, packedLight, c.culture(), c.type());
-                return;
-            }
-            super.render(be, partialTick, poseStack, bufferSource, packedLight, packedOverlay);
+        @Override public void submit(StandingSignRenderState state,PoseStack pose,SubmitNodeCollector collector,CameraRenderState camera){
+            Extra extra=((WallState)state).extra;
+            if(extra.classification().kind()==Kind.VANILLA)super.submit(state,pose,collector,camera);
+            else if(extra.classification().kind()==Kind.SHOP_3D)submitSign(extra,state.lightCoords,pose,collector);
         }
     }
-
-    public static void render3DSign(
-            SignBlockEntity be, float partialTick, PoseStack poseStack,
-            MultiBufferSource bufferSource, int packedLight,
-            Culture culture, ShopSignType type
-    ) {
-        Level level = be.getLevel();
-        BlockPos pos = be.getBlockPos();
-        int light = packedLight;
-        if (level != null) {
-            light = Math.max(packedLight, LevelRenderer.getLightColor(level, pos));
-        }
-
-        Direction outward = resolveOutwardDirection(be);
-        SignModelPair pair = ShopSignModels.get(culture, type);
-        VertexConsumer vc = bufferSource.getBuffer(RenderType.entityCutoutNoCull(ATLAS));
-
-        poseStack.pushPose();
-        poseStack.translate(0.5f, 0.5f, 0.5f);
-        poseStack.mulPose(Axis.YP.rotationDegrees(-outward.toYRot()));
-
-        // Render static wall mount & cantilevered bracket
-        pair.bracket().render(poseStack, vc, light);
-
-        // Apply subtle wind sway to the suspended plaque + 3D sculpted emblem
-        float time = (level != null ? (level.getGameTime() + partialTick) : partialTick);
-        long posHash = pos.asLong();
-        float phase = (float) ((posHash & 0xFFFFL) * 0.017f);
-        float swayDeg = (float) Math.sin(time * 0.075f + phase) * 2.2f;
-
-        poseStack.pushPose();
-        // Hinge pivot at the bottom of the suspension chains (Y = +5.4 px = +0.3375 blocks)
-        poseStack.translate(0f, 5.4f / 16.0f, 0f);
-        poseStack.mulPose(Axis.ZP.rotationDegrees(swayDeg));
-        poseStack.translate(0f, -5.4f / 16.0f, 0f);
-        pair.swingingPlaque().render(poseStack, vc, light);
-        poseStack.popPose();
-
-        poseStack.popPose();
+    private static void submitSign(Extra extra,int light,PoseStack pose,SubmitNodeCollector collector){
+        var type=net.minecraft.client.renderer.rendertype.RenderTypes.entityCutout(ATLAS);
+        pose.pushPose();pose.translate(.5,.5,.5);pose.rotateDegrees(Axis.YP,-extra.outward().toYRot());
+        collector.submitCustomGeometry(pose,type,(p,v)->extra.pair().bracket().render(p,v,light));
+        pose.translate(0,5.4f/16,0);pose.rotateDegrees(Axis.ZP,extra.sway());pose.translate(0,-5.4f/16,0);
+        collector.submitCustomGeometry(pose,type,(p,v)->extra.pair().swingingPlaque().render(p,v,light));
+        pose.popPose();
     }
 
     private static Direction resolveOutwardDirection(SignBlockEntity be) {
@@ -234,17 +194,17 @@ public final class ShopSignRenderer {
 
     public static Classification classify(SignBlockEntity be) {
         if (be == null) return Classification.VANILLA;
-        SignText text = be.getFrontText();
-        String l0 = clean(text.getMessage(0, false));
-        String l1 = clean(text.getMessage(1, false));
-        String l2 = clean(text.getMessage(2, false));
-        String l3 = clean(text.getMessage(3, false));
+        SignText text = be.getText(SignTextSlot.FRONT);
+        String l0 = clean(text.getMessages(false).get(0));
+        String l1 = clean(text.getMessages(false).get(1));
+        String l2 = clean(text.getMessages(false).get(2));
+        String l3 = clean(text.getMessages(false).get(3));
         if (l0.isEmpty() && l1.isEmpty() && l2.isEmpty() && l3.isEmpty()) {
-            SignText back = be.getBackText();
-            l0 = clean(back.getMessage(0, false));
-            l1 = clean(back.getMessage(1, false));
-            l2 = clean(back.getMessage(2, false));
-            l3 = clean(back.getMessage(3, false));
+            SignText back = be.getText(SignTextSlot.BACK);
+            l0 = clean(back.getMessages(false).get(0));
+            l1 = clean(back.getMessages(false).get(1));
+            l2 = clean(back.getMessages(false).get(2));
+            l3 = clean(back.getMessages(false).get(3));
         }
 
         String title = (l1 + " " + l2).trim().replaceAll("\\s+", " ");

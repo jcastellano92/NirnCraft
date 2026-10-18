@@ -89,7 +89,7 @@ public final class AmbienceEngine {
         BlockPos at = BlockPos.containing(eye);
         Holder<Biome> here = level.getBiome(at);
         String id = Soundscapes.id(here);
-        String dim = level.dimension().location().getPath();
+        String dim = level.dimension().identifier().getPath();
         // the realms: fire and wails in the Deadlands, Coldharbour and the Soul Cairn; Sovngarde's horns
         h.nether = level.dimension() == Level.NETHER || dim.contains("oblivion") || dim.contains("coldharbour") || dim.contains("soul_cairn");
         h.end = level.dimension() == Level.END || dim.contains("sovngarde");
@@ -109,7 +109,7 @@ public final class AmbienceEngine {
             n += (int) w;
             float[] f = Soundscapes.of(b, bid);
             for (int k = 0; k < sum.length; k++) sum[k] += f[k] * w;
-            if (b.value().coldEnoughToSnow(p)) snowyAround += w;
+            if (b.value().coldEnoughToSnow(p,mc.level.getSeaLevel())) snowyAround += w;
         }
         float inv = n == 0 ? 0f : 1f / n;
         h.forest = sum[Soundscapes.F.FOREST.ordinal()] * inv;
@@ -137,7 +137,7 @@ public final class AmbienceEngine {
         h.onWater = mc.player.isInWater() || mc.player.getVehicle() != null && mc.player.getVehicle().isInWater()
                 || level.getFluidState(at.below()).isSource();
 
-        long time = Math.floorMod(level.getDayTime(), 24000L);
+        long time = Math.floorMod(level.getDefaultClockTime(), 24000L);
         // smooth day/night: dusk 12000..13500, dawn 22500..24000
         float night;
         if (time < 12000) night = 0f;
@@ -273,8 +273,8 @@ public final class AmbienceEngine {
         float targetDuck = movingFast ? 0.55f : 1.0f;
         movementDuck += (targetDuck - movementDuck) * 0.08f;
 
-        Camera camera = mc.gameRenderer.getMainCamera();
-        Vec3 eye = camera.isInitialized() ? camera.getPosition() : mc.player.getEyePosition();
+        Camera camera = mc.gameRenderer.mainCamera();
+        Vec3 eye = camera.isInitialized() ? camera.position() : mc.player.getEyePosition();
         if (ticks % 10 == 0) {
             sense(mc, eye);
             if (AudioConfig.AMBIENCE.get()) mixBeds(mc);

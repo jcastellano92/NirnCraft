@@ -2,3 +2,6 @@ RESOLVE_REPORT.md
 README.md
 # Build output, never committed; tools/prepare-build-pack.sh adds it to a build copy of the pack (and drops this line).
 mods/skycraft-core.jar
+
+# Previous loader/custom assets are preserved for migration, never installed as active pack files.
+disabled/**

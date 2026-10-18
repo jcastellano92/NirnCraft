@@ -12,13 +12,13 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.common.Tags;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.eventbus.api.Event;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.common.Tags;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.bus.api.Event;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.util.HashMap;
 import java.util.List;
@@ -31,7 +31,7 @@ import java.util.Map;
  * attack before it starts: no cracks, no block that vanishes for a moment and comes back. The server still decides
  * everything; a wrong guess here only means a refused swing is sent (and a denied one is never shown).
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
 public final class ProtectClient {
     /** Learned refusals live this long (ticks) and cover this many columns (8x8 cells). */
     private static final long LEARNED_TICKS = 20 * 45L;
@@ -137,6 +137,6 @@ public final class ProtectClient {
         if (at.canBeReplaced()) target = event.getPos();
         if (!placeDenied(player, target, item.getBlock().defaultBlockState())) return;
         // the block is not placed (no ghost block that pops away); using the block clicked (a door, a chest) still works
-        event.setUseItem(Event.Result.DENY);
+        event.setUseItem(net.minecraft.util.TriState.FALSE);
     }
 }

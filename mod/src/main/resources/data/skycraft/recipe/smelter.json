@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "CIC",
+    "CFC",
+    "CCC"
+  ],
+  "key": {
+    "I": "minecraft:iron_ingot",
+    "C": "#minecraft:stone_crafting_materials",
+    "F": "minecraft:furnace"
+  },
+  "result": {
+    "count": 1,
+    "id": "skycraft:smelter"
+  }
+}

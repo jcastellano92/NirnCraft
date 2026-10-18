@@ -25,11 +25,11 @@ import net.minecraft.tags.ItemTags;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ItemLike;
-import net.minecraftforge.common.Tags;
+import net.neoforged.neoforge.common.Tags;
 
 import java.util.List;
 import java.util.function.Supplier;
@@ -53,7 +53,7 @@ public final class Hearthfire {
             new Material("iron_fittings", () -> new ItemStack(HomesteadRegistry.IRON_FITTINGS.get(), 1), Cost.of(() -> Items.IRON_INGOT, 1)),
             new Material("sawn_log", () -> new ItemStack(HomesteadRegistry.SAWN_LOG.get(), 1), Cost.tag(ItemTags.LOGS, () -> Items.SPRUCE_LOG, 3)),
             new Material("quarried_stone", () -> new ItemStack(HomesteadRegistry.QUARRIED_STONE.get(), 1),
-                    Cost.tag(Tags.Items.COBBLESTONE, () -> Items.COBBLESTONE, 4)),
+                    Cost.tag(Tags.Items.COBBLESTONES, () -> Items.COBBLESTONE, 4)),
             new Material("glass_pane", () -> new ItemStack(Items.GLASS_PANE, 16), Cost.of(() -> Items.GLASS, 6)));
 
     public static final List<Offer> OFFERS = List.of(
@@ -61,9 +61,9 @@ public final class Hearthfire {
             new Offer("quarried_stone", () -> new ItemStack(HomesteadRegistry.QUARRIED_STONE.get(), 10), 100, null),
             new Offer("clay", () -> new ItemStack(Items.CLAY_BALL, 10), 80, null),
             new Offer("nails", () -> new ItemStack(HomesteadRegistry.NAILS.get(), 40), 60, null),
-            new Offer("cow", () -> new ItemStack(Items.LEATHER), 300, EntityType.COW),
-            new Offer("chicken", () -> new ItemStack(Items.FEATHER), 50, EntityType.CHICKEN),
-            new Offer("horse", () -> new ItemStack(Items.SADDLE), 1000, EntityType.HORSE));
+            new Offer("cow", () -> new ItemStack(Items.LEATHER), 300, net.minecraft.world.entity.EntityTypes.COW),
+            new Offer("chicken", () -> new ItemStack(Items.FEATHER), 50, net.minecraft.world.entity.EntityTypes.CHICKEN),
+            new Offer("horse", () -> new ItemStack(Items.SADDLE), 1000, net.minecraft.world.entity.EntityTypes.HORSE));
 
     private Hearthfire() {}
 
@@ -73,11 +73,11 @@ public final class Hearthfire {
         // bought through the economy module's house sales: the deed is already paid for
         if (!claim.isPurchased() && claim.isOwner(player) && Homesteads.ownsPlotElsewhere(player, claim.getPlot())) {
             claim.setPurchased(true);
-            HomesteadBuilder.placeDeposits(player.serverLevel(), claim);
-            HomesteadData.get(player.server).setDirty();
+            HomesteadBuilder.placeDeposits(player.level(), claim);
+            HomesteadData.get(player.level().getServer()).setDirty();
         }
         CompoundTag t = new CompoundTag();
-        t.putString("name", Component.Serializer.toJson(claim.displayName()));
+        t.putString("name", com.skycraft.platform.ArcaneData.writeComponent(claim.displayName()));
         t.putString("owner", claim.getOwnerName());
         if (claim.getPlot() != null) t.putString("plot", claim.getPlot());
         t.putBoolean("purchased", claim.isPurchased());
@@ -153,8 +153,8 @@ public final class Hearthfire {
             Notifier.message(player, Component.translatable("homestead.skycraft.plot.buy_first"));
             return;
         }
-        HomesteadData data = HomesteadData.get(player.server);
-        HomesteadData.Denial denial = data.checkExpansion(player.serverLevel(), claim, next);
+        HomesteadData data = HomesteadData.get(player.level().getServer());
+        HomesteadData.Denial denial = data.checkExpansion(player.level(), claim, next);
         if (denial != null) {
             Notifier.message(player, denial.message());
             return;
@@ -190,7 +190,7 @@ public final class Hearthfire {
     public static void rename(ServerPlayer player, HomesteadClaim claim, String raw) {
         String name = HomesteadClaim.sanitizeName(raw);
         claim.setName(name);
-        HomesteadData.get(player.server).setDirty();
+        HomesteadData.get(player.level().getServer()).setDirty();
         Notifier.message(player, Component.translatable(name.isEmpty() ? "homestead.skycraft.rename.reset" : "homestead.skycraft.rename.done", claim.plainName()));
         HomesteadDiscovery.sync(player);
         sync(player, claim);
@@ -224,8 +224,8 @@ public final class Hearthfire {
             return;
         }
         claim.setPurchased(true);
-        HomesteadBuilder.placeDeposits(player.serverLevel(), claim);
-        HomesteadData.get(player.server).setDirty();
+        HomesteadBuilder.placeDeposits(player.level(), claim);
+        HomesteadData.get(player.level().getServer()).setDirty();
         Notifier.send(player, NotifyKind.BIG_TITLE, Component.translatable("homestead.skycraft.plot.bought"), claim.displayName());
         player.level().playSound(null, player.blockPosition(), SoundEvents.VILLAGER_YES, SoundSource.PLAYERS, 0.6f, 1.0f);
         sync(player, claim);
@@ -243,7 +243,7 @@ public final class Hearthfire {
             Notifier.message(player, Component.translatable("homestead.skycraft.build.blocked." + blocker.split(":")[0]));
             return;
         }
-        ServerLevel level = player.serverLevel();
+        ServerLevel level = player.level();
         String site = HomesteadBuilder.checkSite(level, claim, planId);
         if (site != null) {
             Notifier.message(player, Component.translatable(site));
@@ -261,7 +261,7 @@ public final class Hearthfire {
         }
         HomesteadBuilder.build(level, claim, planId);
         claim.getBuilt().add(planId);
-        HomesteadData.get(player.server).setDirty();
+        HomesteadData.get(player.level().getServer()).setDirty();
         Progression.addSkillXp(player, Skill.WOODCUTTING, 40f + 4f * plan.costs().size());
         level.playSound(null, claim.getCenter(), SoundEvents.ANVIL_USE, SoundSource.BLOCKS, 0.8f, 0.8f);
         level.playSound(null, claim.getCenter(), SoundEvents.WOOD_PLACE, SoundSource.BLOCKS, 1.0f, 0.9f);
@@ -278,7 +278,7 @@ public final class Hearthfire {
             if (m.cost().countIn(player.getInventory(), -1) < m.cost().count()) break;
             m.cost().removeFrom(player.getInventory(), m.cost().count(), -1);
             ItemStack out = m.result().get();
-            if (!ActionHandler.addToBags(player, out)) player.drop(out, false);
+            if (!ActionHandler.addToBags(player, out)) player.drop(out, false, net.minecraft.util.Prediction.SERVER_ONLY);
             made++;
         }
         if (made == 0) {
@@ -291,7 +291,7 @@ public final class Hearthfire {
     }
 
     public static void hireSteward(ServerPlayer player, HomesteadClaim claim) {
-        if (claim.getSteward() != null && stewardAlive(player.serverLevel(), claim)) {
+        if (claim.getSteward() != null && stewardAlive(player.level(), claim)) {
             Notifier.message(player, Component.translatable("homestead.skycraft.steward.already", claim.getStewardName()));
             return;
         }
@@ -304,7 +304,7 @@ public final class Hearthfire {
             Notifier.message(player, Component.translatable("homestead.skycraft.plot.no_gold", price));
             return;
         }
-        ServerLevel level = player.serverLevel();
+        ServerLevel level = player.level();
         HomesteadBuilder.Frame f = HomesteadBuilder.frame(claim);
         BlockPos home = claim.getBuilt().contains("main_hall") ? f.at(0, 0, 9) : f.at(0, 0, 3);
         NpcEntity npc = Npcs.create(level, home, com.skycraft.society.NpcRole.HOUSECARL);
@@ -316,10 +316,10 @@ public final class Hearthfire {
         npc.setCustomName(Component.translatable("homestead.skycraft.steward.title", first));
         npc.setHome(home, 12);
         npc.setPersistenceRequired();
-        npc.getPersistentData().putUUID("skycraft_steward_of", player.getUUID());
+        npc.getPersistentData().store("skycraft_steward_of", net.minecraft.core.UUIDUtil.CODEC,  player.getUUID());
         level.addFreshEntity(npc);
         claim.setSteward(npc.getUUID(), first);
-        HomesteadData.get(player.server).setDirty();
+        HomesteadData.get(player.level().getServer()).setDirty();
         Notifier.message(player, Component.translatable("homestead.skycraft.steward.hired", first));
         sync(player, claim);
     }
@@ -333,7 +333,7 @@ public final class Hearthfire {
     public static void stewardBuy(ServerPlayer player, HomesteadClaim claim, int index) {
         if (claim.getSteward() == null || index < 0 || index >= OFFERS.size()) return;
         Offer offer = OFFERS.get(index);
-        if (offer.animal() != null && !claim.getBuilt().contains("animal_pen") && offer.animal() != EntityType.HORSE) {
+        if (offer.animal() != null && !claim.getBuilt().contains("animal_pen") && offer.animal() != net.minecraft.world.entity.EntityTypes.HORSE) {
             Notifier.message(player, Component.translatable("homestead.skycraft.steward.no_pen"));
             return;
         }
@@ -342,20 +342,20 @@ public final class Hearthfire {
             return;
         }
         if (offer.animal() != null) {
-            ServerLevel level = player.serverLevel();
+            ServerLevel level = player.level();
             HomesteadBuilder.Frame f = HomesteadBuilder.frame(claim);
-            BlockPos at = offer.animal() == EntityType.HORSE ? f.at(-10, 0, -3) : f.at(-10, 0, 3);
-            Mob mob = offer.animal().create(level);
+            BlockPos at = offer.animal() == net.minecraft.world.entity.EntityTypes.HORSE ? f.at(-10, 0, -3) : f.at(-10, 0, 3);
+            Mob mob = offer.animal().create(level, net.minecraft.world.entity.EntitySpawnReason.EVENT);
             if (mob != null) {
-                mob.moveTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, level.random.nextFloat() * 360f, 0);
-                mob.finalizeSpawn(level, level.getCurrentDifficultyAt(at), MobSpawnType.EVENT, null, null);
+                mob.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, level.getRandom().nextFloat() * 360f, 0);
+                mob.finalizeSpawn(level, level.getCurrentDifficultyAt(at), EntitySpawnReason.EVENT, null);
                 mob.setPersistenceRequired();
-                if (mob instanceof net.minecraft.world.entity.animal.horse.AbstractHorse horse) horse.tameWithName(player);
+                if (mob instanceof net.minecraft.world.entity.animal.equine.AbstractHorse horse) horse.tameWithName(player);
                 level.addFreshEntity(mob);
             }
         } else {
             ItemStack out = offer.icon().get();
-            if (!ActionHandler.addToBags(player, out)) player.drop(out, false);
+            if (!ActionHandler.addToBags(player, out)) player.drop(out, false, net.minecraft.util.Prediction.SERVER_ONLY);
         }
         player.level().playSound(null, player.blockPosition(), SoundEvents.VILLAGER_TRADE, SoundSource.PLAYERS, 0.6f, 1.0f);
         Notifier.message(player, Component.translatable("homestead.skycraft.steward.bought",

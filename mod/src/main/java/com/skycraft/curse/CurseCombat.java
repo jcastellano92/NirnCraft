@@ -21,10 +21,9 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobType;
-import net.minecraft.world.entity.monster.AbstractIllager;
+import net.minecraft.world.entity.monster.illager.AbstractIllager;
 import net.minecraft.world.entity.monster.Witch;
-import net.minecraft.world.entity.npc.AbstractVillager;
+import net.minecraft.world.entity.npc.villager.AbstractVillager;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.Nullable;
 
@@ -51,7 +50,7 @@ public final class CurseCombat {
     public static boolean isUndead(@Nullable Entity e) {
         if (e == null) return false;
         if (e instanceof DraugrEntity || e instanceof DraugrDeathlordEntity || e instanceof GargoyleEntity || e instanceof VampireLordEntity) return true;
-        return e instanceof LivingEntity l && l.getMobType() == MobType.UNDEAD;
+        return e instanceof LivingEntity l && com.skycraft.platform.Effects.isUndead(l);
     }
 
     /**
@@ -76,14 +75,14 @@ public final class CurseCombat {
             Vitals.consumeStamina(player, 4f, true);
         }
         if (form == Form.LORD && CursePerks.has(player, CursePerks.POISON_TALONS)) {
-            target.addEffect(new MobEffectInstance(MobEffects.POISON, 20 * 5, 1), player);
+            target.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.POISON), 20 * 5, 1), player);
         }
         if (form == Form.BEAST && CursePerks.has(player, CursePerks.BLOOD_FRENZY)) {
             // the scent of blood: each hit on a wounded foe hits harder
             if (target.getHealth() < target.getMaxHealth() * 0.5f) mult *= 1.2f;
         }
         CursePackets.anim(player, CurseAnims.Anim.ATTACK);
-        player.level().playSound(null, target.blockPosition(), form == Form.BEAST ? SoundEvents.WOLF_GROWL : SoundEvents.PHANTOM_BITE,
+        player.level().playSound(null, target.blockPosition(), form == Form.BEAST ? SoundEvents.WOLF_SOUNDS.get(net.minecraft.world.entity.animal.wolf.WolfSoundVariants.SoundSet.CLASSIC).adultSounds().growlSound().value() : SoundEvents.PHANTOM_BITE,
                 SoundSource.PLAYERS, 0.7f, form == Form.BEAST ? 0.7f : 0.9f);
         float result = amount * mult;
         Progression.addSkillXp(player, Skill.UNARMED, Math.min(result, target.getHealth()) * 5f * 0.2f);
@@ -94,7 +93,7 @@ public final class CurseCombat {
     static void onKill(ServerPlayer player, LivingEntity victim) {
         if (Curses.form(player) == Form.BEAST && CursePerks.has(player, CursePerks.BLOOD_FRENZY) && isPerson(victim)) {
             net.minecraft.nbt.CompoundTag t = Curses.tag(player);
-            t.putLong(Curses.FORM_UNTIL, t.getLong(Curses.FORM_UNTIL) + 20 * 10);
+            t.putLong(Curses.FORM_UNTIL, t.getLongOr(Curses.FORM_UNTIL, 0L) + 20 * 10);
             Curses.dirty(player);
         }
     }

@@ -31,15 +31,15 @@ final class RestAtNightGoal extends Goal {
 
     @Override
     public boolean canUse() {
-        if (!animal.sleepsAtNight() || !animal.level().isNight()) return false;
-        if (animal.getTarget() != null || hurtRecently(600) || animal.isInWaterOrBubble() || animal.isLeashed() || animal.isVehicle()) return false;
+        if (!animal.sleepsAtNight() || !animal.level().isDarkOutside()) return false;
+        if (animal.getTarget() != null || hurtRecently(600) || animal.isInWater() || animal.isLeashed() || animal.isVehicle()) return false;
         if (animal.getRandom().nextInt(80) != 0) return false; // they settle gradually, not all at once
         return !disturbed(14.0);
     }
 
     @Override
     public boolean canContinueToUse() {
-        return animal.level().isNight() && animal.getTarget() == null && !hurtRecently(100) && !animal.isInWaterOrBubble() && !disturbed(9.0);
+        return animal.level().isDarkOutside() && animal.getTarget() == null && !hurtRecently(100) && !animal.isInWater() && !disturbed(9.0);
     }
 
     @Override

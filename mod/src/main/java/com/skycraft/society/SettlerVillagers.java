@@ -6,10 +6,10 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.WalkTarget;
-import net.minecraft.world.entity.npc.Villager;
-import net.minecraftforge.event.entity.living.LivingEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.minecraft.world.entity.npc.villager.Villager;
+import net.neoforged.neoforge.event.entity.living.LivingEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 /**
  * Settlement shopkeepers and farmers are vanilla villagers (economy contract). Every ~2 s each settler villager:
@@ -22,14 +22,14 @@ import net.minecraftforge.fml.common.Mod;
  *     ({@link Workplaces#leisureFor}), instead of strolling off down the street.</li>
  * </ul>
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class SettlerVillagers {
     private SettlerVillagers() {}
 
     @SubscribeEvent
-    public static void onTick(LivingEvent.LivingTickEvent event) {
-        if (!(event.getEntity() instanceof Villager v) || v.level().isClientSide) return;
-        if ((v.tickCount + v.getId()) % 40 != 0 || !v.getPersistentData().getBoolean("skycraft_settler")) return;
+    public static void onTick(net.neoforged.neoforge.event.tick.EntityTickEvent.Post event) {
+        if (!(event.getEntity() instanceof Villager v) || v.level().isClientSide()) return;
+        if ((v.tickCount + v.getId()) % 40 != 0 || !v.getPersistentData().getBooleanOr("skycraft_settler",false)) return;
         if (v.isSleeping()) return;
         try {
             if (!v.getBrain().hasMemoryValue(MemoryModuleType.HOME)) Settlers.homeForVillager(v);
@@ -45,7 +45,7 @@ public final class SettlerVillagers {
         CompoundTag pd = v.getPersistentData();
         if (!pd.contains(Housing.WORK_KEY)) return;
         int h = Schedule.hour(level);
-        BlockPos post = BlockPos.of(pd.getLong(Housing.WORK_KEY));
+        BlockPos post = BlockPos.of(pd.getLongOr(Housing.WORK_KEY, 0L));
         BlockPos target;
         int within;
         if ((h >= 8 && h < 12) || (h >= 13 && h < 20)) {

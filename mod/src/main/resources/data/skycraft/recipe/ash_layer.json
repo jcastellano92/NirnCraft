@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "###"
+  ],
+  "key": {
+    "#": "skycraft:ash_block"
+  },
+  "result": {
+    "count": 6,
+    "id": "skycraft:ash_layer"
+  }
+}

@@ -23,7 +23,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.animal.IronGolem;
+import net.minecraft.world.entity.animal.golem.IronGolem;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -64,14 +64,21 @@ public final class Summons {
 
     private Summons() {}
 
+    @Nullable
+    private static EntityType<?> entityTypeById(String value) {
+        net.minecraft.resources.Identifier id = net.minecraft.resources.Identifier.tryParse(value);
+        return id == null ? null : net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getOptional(id).orElse(null);
+    }
+
+
     // ------------------------------------------------------------------ queries
 
     public static boolean isSummon(Entity e) {
-        return e.getTags().contains(TAG);
+        return e.entityTags().contains(TAG);
     }
 
     public static boolean isAlly(Entity e) {
-        return e.getTags().contains(ALLY_TAG);
+        return e.entityTags().contains(ALLY_TAG);
     }
 
     /** A summon or an ally: it fights for a player, so it isn't a wild creature (no leveling, no loot body). */
@@ -84,7 +91,7 @@ public final class Summons {
     public static UUID ownerOf(Entity e) {
         if (!isSummon(e) && !isAlly(e)) return null;
         CompoundTag pd = e.getPersistentData();
-        return pd.hasUUID(OWNER) ? pd.getUUID(OWNER) : null;
+        return pd.read(OWNER, net.minecraft.core.UUIDUtil.CODEC).isPresent() ? pd.read(OWNER, net.minecraft.core.UUIDUtil.CODEC).orElseThrow() : null;
     }
 
     public static List<Mob> summonsOf(ServerPlayer player) {
@@ -129,12 +136,12 @@ public final class Summons {
     @SuppressWarnings("unchecked")
     public static EntityType<? extends Mob> entityType(String kind) {
         for (String id : TYPES.getOrDefault(kind, List.of())) {
-            net.minecraft.resources.ResourceLocation rl = net.minecraft.resources.ResourceLocation.tryParse(id);
-            if (rl == null || !net.minecraftforge.registries.ForgeRegistries.ENTITY_TYPES.containsKey(rl)) continue;
-            EntityType<?> type = net.minecraftforge.registries.ForgeRegistries.ENTITY_TYPES.getValue(rl);
+            net.minecraft.resources.Identifier rl = net.minecraft.resources.Identifier.tryParse(id);
+            if (rl == null || !net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.containsKey(rl)) continue;
+            EntityType<?> type = net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getValue(rl);
             if (type != null && isMobType(type)) return (EntityType<? extends Mob>) type;
         }
-        return EntityType.ZOMBIE;
+        return net.minecraft.world.entity.EntityTypes.ZOMBIE;
     }
 
     private static final java.util.Map<EntityType<?>, Boolean> MOB_TYPES = new java.util.concurrent.ConcurrentHashMap<>();
@@ -143,9 +150,9 @@ public final class Summons {
     private static boolean isMobType(EntityType<?> type) {
         Boolean known = MOB_TYPES.get(type);
         if (known != null) return known;
-        net.minecraft.server.MinecraftServer server = net.minecraftforge.server.ServerLifecycleHooks.getCurrentServer();
+        net.minecraft.server.MinecraftServer server = net.neoforged.neoforge.server.ServerLifecycleHooks.getCurrentServer();
         if (server == null) return false;
-        Entity e = type.create(server.overworld());
+        Entity e = type.create(server.overworld(), net.minecraft.world.entity.EntitySpawnReason.COMMAND);
         boolean mob = e instanceof Mob;
         if (e != null) e.discard();
         MOB_TYPES.put(type, mob);
@@ -166,7 +173,7 @@ public final class Summons {
         return summon(p, spell, entityType("flaming_familiar"), "flaming_familiar", false, false, mob -> {
             setHealth(mob, 30);
             setAttack(mob, 6);
-            mob.addEffect(new MobEffectInstance(MobEffects.FIRE_RESISTANCE, 20 * 60 * 30, 0, false, false));
+            mob.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.FIRE_RESISTANCE), 20 * 60 * 30, 0, false, false));
         });
     }
 
@@ -218,7 +225,7 @@ public final class Summons {
 
     private static void setupFlameAtronach(Mob mob) {
         setHealth(mob, 30);
-        mob.addEffect(new MobEffectInstance(MobEffects.FIRE_RESISTANCE, 20 * 60 * 60, 0, false, false));
+        mob.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.FIRE_RESISTANCE), 20 * 60 * 60, 0, false, false));
     }
 
     private static void setupFrostAtronach(Mob mob) {
@@ -237,7 +244,7 @@ public final class Summons {
 
     public static Spell.Result dremoraLord(ServerPlayer p, Spell spell, int tick) {
         return summon(p, spell, entityType("dremora_lord"), "dremora_lord", true, false, mob -> {
-            if (mob.getMainHandItem().isEmpty() || mob.getType() == EntityType.WITHER_SKELETON) {
+            if (mob.getMainHandItem().isEmpty() || mob.getType() == net.minecraft.world.entity.EntityTypes.WITHER_SKELETON) {
                 mob.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.NETHERITE_SWORD));
                 mob.setDropChance(EquipmentSlot.MAINHAND, 0f);
             }
@@ -266,20 +273,20 @@ public final class Summons {
      * it calls a generic undead of {@code fallbackKind} out of the earth instead.
      */
     private static Spell.Result reanimate(ServerPlayer p, Spell spell, String fallbackKind, float maxBodyHealth, double health, double attack) {
-        ServerLevel level = p.serverLevel();
+        ServerLevel level = p.level();
         boolean permanent = "dead_thrall".equals(fallbackKind);
         double range = 14 * (1 + 0.5 * Perks.rank(p, "conjuration.summoner"));
         com.skycraft.creatures.entity.CorpseEntity corpse = aimedCorpse(p, range);
         double hp = Perks.has(p, "conjuration.dark_souls") ? health * 2 : health;
         Consumer<Mob> undead = mob -> {
             mob.setCanPickUpLoot(false);
-            mob.addEffect(new MobEffectInstance(MobEffects.FIRE_RESISTANCE, 20 * 60 * 60, 0, false, false));
+            mob.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.FIRE_RESISTANCE), 20 * 60 * 60, 0, false, false));
         };
         if (corpse != null) {
-            CompoundTag saved = corpse.saveWithoutId(new CompoundTag());
-            EntityType<?> bodyType = EntityType.byString(saved.getString("BodyType")).orElse(null);
-            Entity probe = bodyType == null || bodyType == EntityType.PLAYER ? null : bodyType.create(level);
-            if (!(probe instanceof Mob bodyMob) || bodyType.is(com.skycraft.magic.MagicRegistry.DRAGONS) || bodyType.is(com.skycraft.combat.CombatHandler.BOSSES)) {
+            CompoundTag saved = com.skycraft.platform.EntityData.saveWithoutId(corpse);
+            EntityType<?> bodyType = entityTypeById(saved.getStringOr("BodyType", ""));
+            Entity probe = bodyType == null || bodyType == net.minecraft.world.entity.EntityTypes.PLAYER ? null : bodyType.create(level, net.minecraft.world.entity.EntitySpawnReason.MOB_SUMMONED);
+            if (!(probe instanceof Mob bodyMob) || bodyType.builtInRegistryHolder().is(com.skycraft.magic.MagicRegistry.DRAGONS) || bodyType.builtInRegistryHolder().is(com.skycraft.combat.CombatHandler.BOSSES)) {
                 if (probe != null) probe.discard();
                 Notifier.message(p, Component.translatable("message.skycraft.corpse_cannot_rise"));
                 return Spell.Result.FAILED;
@@ -291,10 +298,10 @@ public final class Summons {
                 return Spell.Result.FAILED;
             }
             // what the body carried falls to the ground
-            net.minecraft.nbt.ListTag loot = saved.getList("Loot", net.minecraft.nbt.Tag.TAG_COMPOUND);
+            net.minecraft.nbt.ListTag loot = saved.getListOrEmpty("Loot");
             for (int i = 0; i < loot.size(); i++) {
-                ItemStack stack = ItemStack.of(loot.getCompound(i));
-                if (!stack.isEmpty()) corpse.spawnAtLocation(stack, 0.3f);
+                ItemStack stack = com.skycraft.inventory.ItemData.parse(loot.getCompoundOrEmpty(i));
+                if (!stack.isEmpty()) corpse.spawnAtLocation(level, stack, 0.3f);
             }
             Vec3 at = corpse.position();
             corpse.discard();
@@ -353,7 +360,7 @@ public final class Summons {
     /** Summoned or daedric creatures: atronachs, dremora, seekers and familiars, or any creature tagged as daedra. */
     public static boolean isDaedra(Entity e) {
         if (isSummon(e)) {
-            String kind = e.getPersistentData().getString(KIND);
+            String kind = e.getPersistentData().getStringOr(KIND, "");
             if (kind.contains("atronach") || kind.contains("dremora") || kind.contains("seeker") || kind.contains("familiar")) return true;
         }
         String id = String.valueOf(EntityType.getKey(e.getType()));
@@ -366,7 +373,7 @@ public final class Summons {
         MagicFx.burst(level, pos, Element.CONJURE, 1.2f);
         SpellSounds.world(level, pos, SpellSounds.Slot.BANISH, 1f, 0.8f);
         if (!(target instanceof Mob mob) || !isDaedra(mob) || caster.getUUID().equals(ownerOf(mob))) return;
-        if (target.getType().is(com.skycraft.combat.CombatHandler.BOSSES) || target.getMaxHealth() > 150f * (spell.dual ? 1.5f : 1f)) {
+        if (target.getType().builtInRegistryHolder().is(com.skycraft.combat.CombatHandler.BOSSES) || target.getMaxHealth() > 150f * (spell.dual ? 1.5f : 1f)) {
             Notifier.message(caster, Component.translatable("message.skycraft.illusion_too_strong", target.getDisplayName()));
             return;
         }
@@ -384,11 +391,11 @@ public final class Summons {
         ServerLevel level = (ServerLevel) proj.level();
         MagicFx.burst(level, pos, Element.CONJURE, 1f);
         if (!(target instanceof Mob mob) || !isDaedra(mob) || caster.getUUID().equals(ownerOf(mob))) return;
-        if (target.getType().is(com.skycraft.combat.CombatHandler.BOSSES)) return;
-        String kind = mob.getPersistentData().getString(KIND);
+        if (target.getType().builtInRegistryHolder().is(com.skycraft.combat.CombatHandler.BOSSES)) return;
+        String kind = mob.getPersistentData().getStringOr(KIND, "");
         mob.addTag(TAG);
         CompoundTag pd = mob.getPersistentData();
-        pd.putUUID(OWNER, caster.getUUID());
+        pd.store(OWNER, net.minecraft.core.UUIDUtil.CODEC, caster.getUUID());
         pd.putLong(UNTIL, com.skycraft.world.RestManager.liveTime(level) + spell.duration);
         pd.putString(KIND, kind.isEmpty() ? "commanded" : kind);
         mob.setTarget(null);
@@ -408,7 +415,7 @@ public final class Summons {
         Mob mob = conjureAt(p, entityType(kind), nameKind, null, range, duration, true, setup);
         if (mob != null) {
             Vec3 pos = mob.position();
-            MagicFx.sendNear(p.serverLevel(), pos, 96, MagicFx.SUMMON, Element.HOLY, pos, pos, mob.getId(), Math.round(mob.getBbHeight() * 10));
+            MagicFx.sendNear(p.level(), pos, 96, MagicFx.SUMMON, Element.HOLY, pos, pos, mob.getId(), Math.round(mob.getBbHeight() * 10));
         }
         return mob;
     }
@@ -432,7 +439,7 @@ public final class Summons {
     /** {@code fixedDuration} > 0 overrides the spell's duration and its perks (permanent thralls). */
     private static Spell.Result summon(ServerPlayer p, Spell spell, EntityType<? extends Mob> type, String kind,
                                        boolean atronach, boolean undead, int fixedDuration, Consumer<Mob> setup) {
-        ServerLevel level = p.serverLevel();
+        ServerLevel level = p.level();
         double range = 14 * (1 + 0.5 * Perks.rank(p, "conjuration.summoner"));
         int duration = spell.duration;
         if (atronach && Perks.has(p, "conjuration.atromancy")) duration *= 2;
@@ -469,11 +476,11 @@ public final class Summons {
     @Nullable
     private static Mob conjureAt(ServerPlayer p, EntityType<? extends Mob> type, String kind, @Nullable Vec3 at, double range, int duration,
                                  boolean free, Consumer<Mob> setup) {
-        ServerLevel level = p.serverLevel();
-        Mob mob = type.create(level);
+        ServerLevel level = p.level();
+        Mob mob = type.create(level, net.minecraft.world.entity.EntitySpawnReason.MOB_SUMMONED);
         if (mob == null) return null;
         Vec3 pos = at != null ? at : spawnPos(p, range, mob);
-        mob.moveTo(pos.x, pos.y, pos.z, p.getYRot(), 0f);
+        mob.snapTo(pos.x, pos.y, pos.z, p.getYRot(), 0f);
         mob.setYHeadRot(p.getYRot());
         setup.accept(mob);
 
@@ -481,13 +488,13 @@ public final class Summons {
         // Shout allies (Call of Valor, Call Dragon) are "free": they neither count nor get dismissed.
         int max = Perks.has(p, "conjuration.twin_souls") ? 2 : 1;
         List<Mob> existing = summonsOf(p);
-        existing.removeIf(m -> m.getPersistentData().getBoolean(FREE));
-        existing.sort(Comparator.comparingLong(m -> m.getPersistentData().getLong(UNTIL)));
+        existing.removeIf(m -> m.getPersistentData().getBooleanOr(FREE, false));
+        existing.sort(Comparator.comparingLong(m -> m.getPersistentData().getLongOr(UNTIL, 0L)));
         while (!free && existing.size() >= max) dismiss(existing.remove(0));
 
         mob.addTag(TAG);
         CompoundTag pd = mob.getPersistentData();
-        pd.putUUID(OWNER, p.getUUID());
+        pd.store(OWNER, net.minecraft.core.UUIDUtil.CODEC, p.getUUID());
         pd.putLong(UNTIL, com.skycraft.world.RestManager.liveTime(level) + duration);
         pd.putString(KIND, kind);
         if (free) pd.putBoolean(FREE, true);
@@ -499,18 +506,18 @@ public final class Summons {
 
     /** Where the player is looking (up to {@code range}), dropped to the ground; falls back to just in front. */
     private static Vec3 spawnPos(ServerPlayer p, double range, Mob mob) {
-        ServerLevel level = p.serverLevel();
+        ServerLevel level = p.level();
         Vec3 eye = p.getEyePosition();
         Vec3 end = eye.add(p.getViewVector(1f).scale(range));
         BlockHitResult hit = level.clip(new ClipContext(eye, end, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, p));
         BlockPos pos = hit.getType() == HitResult.Type.MISS ? BlockPos.containing(end) : hit.getBlockPos().relative(hit.getDirection());
         for (int i = 0; i < 10 && level.getBlockState(pos.below()).getCollisionShape(level, pos.below()).isEmpty(); i++) pos = pos.below();
         Vec3 v = Vec3.atBottomCenterOf(pos);
-        if (level.noCollision(mob, mob.getType().getAABB(v.x, v.y, v.z))) return v;
+        if (level.noCollision(mob, mob.getType().getDimensions().makeBoundingBox(v))) return v;
         Vec3 look = p.getViewVector(1f).multiply(1, 0, 1);
         if (look.lengthSqr() < 1e-4) look = new Vec3(0, 0, 1);
         Vec3 front = p.position().add(look.normalize().scale(1.5));
-        if (level.noCollision(mob, mob.getType().getAABB(front.x, front.y, front.z))) return front;
+        if (level.noCollision(mob, mob.getType().getDimensions().makeBoundingBox(front))) return front;
         return p.position();
     }
 
@@ -533,7 +540,7 @@ public final class Summons {
     public static void upgradeLegacy(Entity e) {
         if (isCompanion(e)) return;
         CompoundTag pd = e.getPersistentData();
-        if (!pd.hasUUID(OWNER) || !pd.contains(UNTIL)) return;
+        if (!pd.read(OWNER, net.minecraft.core.UUIDUtil.CODEC).isPresent() || !pd.contains(UNTIL)) return;
         e.addTag(TAG);
         if (!pd.contains(KIND)) pd.putString(KIND, "familiar");
     }
@@ -547,7 +554,7 @@ public final class Summons {
         }
         mob.addTag(ALLY_TAG);
         CompoundTag pd = mob.getPersistentData();
-        pd.putUUID(OWNER, owner.getUUID());
+        pd.store(OWNER, net.minecraft.core.UUIDUtil.CODEC, owner.getUUID());
         pd.putLong(UNTIL, until);
         mob.setTarget(null);
     }
@@ -584,12 +591,12 @@ public final class Summons {
         boolean summon = isSummon(mob);
         ServerPlayer owner = ownerId == null ? null : level.getServer().getPlayerList().getPlayer(ownerId);
         long now = com.skycraft.world.RestManager.liveTime(level);
-        long until = mob.getPersistentData().getLong(UNTIL);
+        long until = mob.getPersistentData().getLongOr(UNTIL, 0L);
         boolean ownerOk = owner != null && owner.isAlive() && owner.level() == level;
         if (summon) {
             if (!ownerOk || now >= until) {
                 if (owner != null && now >= until) Notifier.message(owner, Component.translatable("message.skycraft.summon_expired", mob.getDisplayName()));
-                if (owner != null && now >= until && "flaming_familiar".equals(mob.getPersistentData().getString(KIND))) explode(level, mob, owner);
+                if (owner != null && now >= until && "flaming_familiar".equals(mob.getPersistentData().getStringOr(KIND, ""))) explode(level, mob, owner);
                 dismiss(mob);
                 return;
             }
@@ -646,15 +653,15 @@ public final class Summons {
     private static void explode(ServerLevel level, Mob mob, ServerPlayer owner) {
         Vec3 c = mob.position().add(0, mob.getBbHeight() / 2, 0);
         MagicFx.burst(level, c, Element.FIRE, 3f);
-        level.playSound(null, c.x, c.y, c.z, SoundEvents.GENERIC_EXPLODE, SoundSource.PLAYERS, 1f, 1.3f);
+        level.playSound(null, c.x, c.y, c.z, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 1f, 1.3f);
         for (LivingEntity e : Targeting.around(level, c, 3.5, e -> Targeting.canHarm(owner, e))) {
             Targeting.hurtNoKnockback(e, MagicDamage.source(level, MagicDamage.FIRE, null, owner), 6f);
-            e.setSecondsOnFire(4);
+            e.igniteForSeconds(4);
         }
     }
 
     private static void ambient(ServerLevel level, Mob mob) {
-        String kind = mob.getPersistentData().getString(KIND);
+        String kind = mob.getPersistentData().getStringOr(KIND, "");
         ParticleOptions particle = switch (kind) {
             case "flame_atronach", "flaming_familiar" -> ParticleTypes.FLAME;
             case "frost_atronach" -> ParticleTypes.SNOWFLAKE;

@@ -80,7 +80,7 @@ public final class Vampirism {
 
     /** Whether the player stands in direct sunlight right now (server: cached each second; client: synced flag). */
     public static boolean inSun(Player player) {
-        if (player.level().isClientSide) return (Curses.ClientView.flags(player) & CursePackets.Sync.IN_SUN) != 0;
+        if (player.level().isClientSide()) return (Curses.ClientView.flags(player) & CursePackets.Sync.IN_SUN) != 0;
         return IN_SUN.contains(player.getUUID());
     }
 
@@ -88,11 +88,11 @@ public final class Vampirism {
     static boolean computeSun(ServerPlayer player) {
         Level level = player.level();
         if (level.dimension() != Level.OVERWORLD || player.isSpectator()) return false;
-        long t = level.getDayTime() % DAY;
+        long t = level.getDefaultClockTime() % DAY;
         if (t > 12600 && t < 23400) return false;
         BlockPos eye = BlockPos.containing(player.getX(), player.getEyeY(), player.getZ());
         if (!level.canSeeSky(eye)) return false;
-        return RegionalWeather.kindAt(player.serverLevel(), eye).clouds < 0.9f;
+        return RegionalWeather.kindAt(player.level(), eye).clouds < 0.9f;
     }
 
     static void forget(UUID player) {
@@ -104,13 +104,13 @@ public final class Vampirism {
     static boolean infect(ServerPlayer player) {
         if (player.isCreative() || player.isSpectator()) return false;
         CompoundTag t = Curses.tag(player);
-        if (t.getBoolean(Curses.VAMPIRE) || t.getBoolean(Curses.WEREWOLF) || t.getLong(Curses.SANGUINARE) > 0) return false;
+        if (t.getBooleanOr(Curses.VAMPIRE, false) || t.getBooleanOr(Curses.WEREWOLF, false) || t.getLongOr(Curses.SANGUINARE, 0L) > 0) return false;
         // Argonians and Bosmer resist disease (as in Skyrim's disease resistance)
         Race race = SkyData.get(player).getRace();
         if ((race == Race.ARGONIAN || race == Race.BOSMER) && player.getRandom().nextBoolean()) return false;
         t.putLong(Curses.SANGUINARE, Math.max(1, player.level().getGameTime()));
         t.putInt(Curses.SANG_DAYS, 0);
-        player.addEffect(new MobEffectInstance(CurseRegistry.SANGUINARE.get(), MobEffectInstance.INFINITE_DURATION, 0, false, false, true));
+        player.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(CurseRegistry.SANGUINARE.get()), MobEffectInstance.INFINITE_DURATION, 0, false, false, true));
         Curses.dirty(player);
         Notifier.message(player, Component.translatable("message.skycraft.survival.contracted", CurseRegistry.SANGUINARE.get().getDisplayName()));
         return true;
@@ -119,7 +119,7 @@ public final class Vampirism {
     /** Turns the player into a vampire at stage 1. Beast blood and the vampire's hunger don't mix: it is cured. */
     static void turn(ServerPlayer player) {
         CompoundTag t = Curses.tag(player);
-        if (t.getBoolean(Curses.WEREWOLF)) Curses.cure(player, CurseType.LYCANTHROPY, false);
+        if (t.getBooleanOr(Curses.WEREWOLF, false)) Curses.cure(player, CurseType.LYCANTHROPY, false);
         Curses.cureSanguinare(player);
         t.putBoolean(Curses.VAMPIRE, true);
         t.putLong(Curses.FED, player.level().getGameTime());
@@ -134,7 +134,7 @@ public final class Vampirism {
     /** A feeding: the hunger falls back to stage 1, wounds close. */
     public static void fed(ServerPlayer player) {
         CompoundTag t = Curses.tag(player);
-        if (!t.getBoolean(Curses.VAMPIRE)) return;
+        if (!t.getBooleanOr(Curses.VAMPIRE, false)) return;
         int before = Curses.stage(player);
         t.putLong(Curses.FED, player.level().getGameTime());
         t.putInt(Curses.STAGE_SEEN, 1);
@@ -152,12 +152,12 @@ public final class Vampirism {
     static boolean feedOnSleeper(ServerPlayer player, LivingEntity victim) {
         if (!Curses.isVampire(player) || Curses.transformed(player) || !victim.isSleeping() || !victim.isAlive()) return false;
         if (player.distanceToSqr(victim) > 3.5 * 3.5) return false;
-        ServerLevel level = player.serverLevel();
-        level.playSound(null, victim.blockPosition(), SoundEvents.HONEY_DRINK, SoundSource.PLAYERS, 0.9f, 0.6f);
-        level.sendParticles(new DustParticleOptions(new Vector3f(0.55f, 0.02f, 0.05f), 1.0f), victim.getX(), victim.getY() + 0.5,
+        ServerLevel level = player.level();
+        level.playSound(null, victim.blockPosition(), SoundEvents.HONEY_DRINK.value(), SoundSource.PLAYERS, 0.9f, 0.6f);
+        level.sendParticles(new DustParticleOptions(net.minecraft.util.ARGB.colorFromFloat(1f, 0.55f, 0.02f, 0.05f), 1.0f), victim.getX(), victim.getY() + 0.5,
                 victim.getZ(), 14, 0.25, 0.15, 0.25, 0.01);
         // the victim wakes up weak in the morning, none the wiser
-        victim.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 20 * 60 * 5, 0));
+        victim.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.WEAKNESS), 20 * 60 * 5, 0));
         CursePackets.anim(player, CurseAnims.Anim.FEED);
         fed(player);
         Notifier.message(player, Component.translatable("curse.skycraft.vampire.fed"));
@@ -171,9 +171,9 @@ public final class Vampirism {
     static void tick(ServerPlayer player, long now) {
         CompoundTag t = Curses.tag(player);
         // Sanguinare Vampiris runs its course
-        long sang = t.getLong(Curses.SANGUINARE);
+        long sang = t.getLongOr(Curses.SANGUINARE, 0L);
         if (sang > 0) {
-            if (!player.hasEffect(CurseRegistry.SANGUINARE.get())) {
+            if (!player.hasEffect(com.skycraft.platform.Effects.holder(CurseRegistry.SANGUINARE.get()))) {
                 // cured by a potion, a shrine or death (those remove the effect)
                 t.remove(Curses.SANGUINARE);
                 t.remove(Curses.SANG_DAYS);
@@ -182,7 +182,7 @@ public final class Vampirism {
                 turn(player);
             } else {
                 int days = (int) ((now - sang) / DAY);
-                if (days > t.getInt(Curses.SANG_DAYS)) {
+                if (days > t.getIntOr(Curses.SANG_DAYS, 0)) {
                     t.putInt(Curses.SANG_DAYS, days);
                     Curses.dirty(player);
                     Notifier.message(player, Component.translatable("curse.skycraft.sanguinare.day" + Math.min(2, days)));
@@ -190,7 +190,7 @@ public final class Vampirism {
             }
         }
 
-        boolean vampire = t.getBoolean(Curses.VAMPIRE);
+        boolean vampire = t.getBooleanOr(Curses.VAMPIRE, false);
         boolean sun = vampire && computeSun(player);
         boolean wasSun = IN_SUN.contains(player.getUUID());
         if (sun != wasSun) {
@@ -199,16 +199,16 @@ public final class Vampirism {
             refreshBonuses(player);
             CursePackets.sync(player);
             if (sun) {
-                player.addEffect(new MobEffectInstance(CurseRegistry.SUN_DAMAGE.get(), MobEffectInstance.INFINITE_DURATION, 0, false, false, true));
+                player.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(CurseRegistry.SUN_DAMAGE.get()), MobEffectInstance.INFINITE_DURATION, 0, false, false, true));
             } else {
-                player.removeEffect(CurseRegistry.SUN_DAMAGE.get());
+                player.removeEffect(com.skycraft.platform.Effects.holder(CurseRegistry.SUN_DAMAGE.get()));
             }
         }
         if (!vampire) return;
 
         int stage = Curses.stage(player);
-        if (stage != t.getInt(Curses.STAGE_SEEN)) {
-            int previous = t.getInt(Curses.STAGE_SEEN);
+        if (stage != t.getIntOr(Curses.STAGE_SEEN, 0)) {
+            int previous = t.getIntOr(Curses.STAGE_SEEN, 0);
             t.putInt(Curses.STAGE_SEEN, stage);
             Curses.dirty(player);
             refreshBonuses(player);
@@ -220,18 +220,18 @@ public final class Vampirism {
             }
         }
         if (sun && player.tickCount % 40 < 20) {
-            player.serverLevel().sendParticles(ParticleTypes.SMOKE, player.getX(), player.getY() + 1.2, player.getZ(), 3 + stage, 0.25, 0.4, 0.25, 0.005);
+            player.level().sendParticles(ParticleTypes.SMOKE, player.getX(), player.getY() + 1.2, player.getZ(), 3 + stage, 0.25, 0.4, 0.25, 0.005);
         }
         // Vampire's Sight is a toggle: keep the night eye topped up while it's on
-        if (t.getBoolean(Curses.SIGHT)) {
-            MobEffectInstance nv = player.getEffect(MobEffects.NIGHT_VISION);
-            if (nv == null || nv.getDuration() < 300) player.addEffect(new MobEffectInstance(MobEffects.NIGHT_VISION, 20 * 30, 0, false, false, false));
+        if (t.getBooleanOr(Curses.SIGHT, false)) {
+            MobEffectInstance nv = player.getEffect(com.skycraft.platform.Effects.holder(MobEffects.NIGHT_VISION));
+            if (nv == null || nv.getDuration() < 300) player.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.NIGHT_VISION), 20 * 30, 0, false, false, false));
         }
     }
 
     /** Removes the vampire's lasting effects (on cure). */
     static void clearEffects(ServerPlayer player) {
-        player.removeEffect(CurseRegistry.SUN_DAMAGE.get());
+        player.removeEffect(com.skycraft.platform.Effects.holder(CurseRegistry.SUN_DAMAGE.get()));
         IN_SUN.remove(player.getUUID());
     }
 
@@ -245,11 +245,11 @@ public final class Vampirism {
     public static void refreshBonuses(ServerPlayer player) {
         CompoundTag t = Curses.tag(player);
         float[] want = new float[3];
-        if (t.getBoolean(Curses.VAMPIRE) && IN_SUN.contains(player.getUUID())) {
+        if (t.getBooleanOr(Curses.VAMPIRE, false) && IN_SUN.contains(player.getUUID())) {
             float pen = SUN_PENALTY * Curses.stage(player);
             for (int i = 0; i < 3; i++) want[i] -= pen;
         }
-        Form form = Form.byId(t.getString(Curses.FORM));
+        Form form = Form.byId(t.getStringOr(Curses.FORM, ""));
         if (form == Form.BEAST) {
             want[0] += 50;
             want[2] += 50;
@@ -265,13 +265,13 @@ public final class Vampirism {
             }
         }
         PlayerData data = SkyData.get(player);
-        CompoundTag mine = t.getCompound(APPLIED);
+        CompoundTag mine = t.getCompoundOrEmpty(APPLIED);
         CompoundTag bonus = data.module("bonus");
         boolean changed = false;
         for (int i = 0; i < 3; i++) {
-            float diff = want[i] - mine.getFloat(POOLS[i]);
+            float diff = want[i] - mine.getFloatOr(POOLS[i], 0f);
             if (diff == 0f) continue;
-            bonus.putFloat(POOLS[i], bonus.getFloat(POOLS[i]) + diff);
+            bonus.putFloat(POOLS[i], bonus.getFloatOr(POOLS[i], 0f) + diff);
             mine.putFloat(POOLS[i], want[i]);
             changed = true;
         }

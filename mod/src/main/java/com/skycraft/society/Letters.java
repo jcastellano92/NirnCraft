@@ -51,7 +51,7 @@ public final class Letters {
         String sender = NpcNames.generate(NpcNames.raceFor(NpcRole.JARL, r), r.nextBoolean(), r);
         int gold = kind == INHERITANCE ? 50 + r.nextInt(151) : 0;
         ItemStack letter = letter(kind, player, sender, gold);
-        if (!ActionHandler.addToBags(player, letter)) player.drop(letter, false);
+        if (!ActionHandler.addToBags(player, letter)) player.drop(letter, false, net.minecraft.util.Prediction.SERVER_ONLY);
         player.level().playSound(null, player.blockPosition(), SoundEvents.BOOK_PAGE_TURN, SoundSource.PLAYERS, 1.0f, 1.0f);
         Notifier.message(player, Component.translatable("society.skycraft.letter.received"));
         if (gold > 0) Currency.give(player, gold);
@@ -65,17 +65,15 @@ public final class Letters {
     public static ItemStack letter(int kind, Player player, String sender, int gold) {
         String key = "society.skycraft.letter." + KINDS[kind];
         ItemStack book = new ItemStack(Items.WRITTEN_BOOK);
-        CompoundTag tag = book.getOrCreateTag();
-        tag.putString("title", "Letter");
-        tag.putString("author", sender);
-        tag.putBoolean("resolved", true);
-        ListTag pages = new ListTag();
+        java.util.List<net.minecraft.server.network.Filterable<Component>> pages = new java.util.ArrayList<>();
         for (int i = 0; i < PAGES[kind]; i++) {
             Component page = Component.translatable(key + ".page." + i, player.getName(), sender, gold);
-            pages.add(StringTag.valueOf(Component.Serializer.toJson(page)));
+            pages.add(net.minecraft.server.network.Filterable.passThrough(page));
         }
-        tag.put("pages", pages);
-        book.setHoverName(Component.translatable(key + ".title"));
+        book.set(net.minecraft.core.component.DataComponents.WRITTEN_BOOK_CONTENT,
+                new net.minecraft.world.item.component.WrittenBookContent(
+                        net.minecraft.server.network.Filterable.passThrough("Letter"), sender, 0, pages, true));
+        book.set(net.minecraft.core.component.DataComponents.CUSTOM_NAME, Component.translatable(key + ".title"));
         return book;
     }
 }

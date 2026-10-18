@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:wheat_seeds",
+    "minecraft:wheat_seeds",
+    "minecraft:dirt"
+  ],
+  "result": {
+    "count": 2,
+    "id": "skycraft:fishing_bait"
+  }
+}

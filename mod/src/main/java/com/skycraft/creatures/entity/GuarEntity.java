@@ -31,22 +31,22 @@ public class GuarEntity extends SkyBeast {
     public InteractionResult mobInteract(Player player, InteractionHand hand) {
         ItemStack held = player.getItemInHand(hand);
         if (!isSaddled() && held.is(Items.SADDLE)) {
-            if (!this.level().isClientSide) {
+            if (!this.level().isClientSide()) {
                 setVariant(1);
                 this.setPersistenceRequired();
                 this.removeTag(SkyCreature.REGION_SPAWN_TAG);
                 if (!player.getAbilities().instabuild) held.shrink(1);
-                this.playSound(net.minecraft.sounds.SoundEvents.HORSE_SADDLE, 1.0f, 0.8f);
+                this.playSound(net.minecraft.sounds.SoundEvents.HORSE_SADDLE.value(), 1.0f, 0.8f);
             }
-            return InteractionResult.sidedSuccess(this.level().isClientSide);
+            return com.skycraft.platform.Interactions.sidedSuccess(this.level().isClientSide());
         }
         if (isSaddled() && !this.isVehicle() && !player.isSecondaryUseActive() && this.getTarget() == null) {
-            if (!this.level().isClientSide) {
+            if (!this.level().isClientSide()) {
                 player.setYRot(this.getYRot());
                 player.startRiding(this);
                 this.setPersistenceRequired();
             }
-            return InteractionResult.sidedSuccess(this.level().isClientSide);
+            return com.skycraft.platform.Interactions.sidedSuccess(this.level().isClientSide());
         }
         return super.mobInteract(player, hand);
     }
@@ -80,7 +80,11 @@ public class GuarEntity extends SkyBeast {
     }
 
     @Override
-    public double getPassengersRidingOffset() {
+    protected Vec3 getPassengerAttachmentPoint(Entity passenger, net.minecraft.world.entity.EntityDimensions dimensions, float scale) {
+        return new Vec3(0, passengerRidingOffset263(), 0);
+    }
+
+    private double passengerRidingOffset263() {
         return this.getBbHeight() * 0.78;
     }
 

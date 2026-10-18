@@ -1,8 +1,8 @@
 {
   "parent": "minecraft:block/block",
   "textures": {
-    "particle": "minecraft:block/quartz_pillar",
-    "pillar": "minecraft:block/quartz_pillar",
+    "particle": "minecraft:block/quartz_pillar_side",
+    "pillar": "minecraft:block/quartz_pillar_side",
     "top": "minecraft:block/quartz_pillar_top",
     "stone": "minecraft:block/sea_lantern"
   },

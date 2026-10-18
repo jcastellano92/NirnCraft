@@ -1,13 +1,16 @@
 name = "CreativeCore"
-filename = "CreativeCore_FORGE_v2.12.40_mc1.20.1.jar"
+filename = "CreativeCore_NEOFORGE_v2.14.21_mc26.3.jar"
 side = "both"
 
 [download]
-url = "https://cdn.modrinth.com/data/OsZiaDHq/versions/ChKayKur/CreativeCore_FORGE_v2.12.40_mc1.20.1.jar"
+url = "https://cdn.modrinth.com/data/OsZiaDHq/versions/zdCqLdHs/CreativeCore_NEOFORGE_v2.14.21_mc26.3.jar"
 hash-format = "sha512"
-hash = "c883749ebe3825694c9d7aad6f406ca6c30de70ca7621cbafb7ebbfaa54766db065b5abd66f42827abca19b25983b2884c425934f6d04d629dc9fa731fe9aa0c"
+hash = "e900ee1d3f072143bd8077c1a82719ec501b3fc6d62e0d588fe9c4662109980c7c6a10f973e0635322bd04c98b33d8cd3ceb297287ccae212db5fe6e14c73221"
 
-[update]
 [update.modrinth]
 mod-id = "OsZiaDHq"
-version = "ChKayKur"
+version = "zdCqLdHs"
+
+[skycraft]
+minecraft = "26.3"
+loader = "neoforge"

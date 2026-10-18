@@ -1,0 +1,42 @@
+{
+  "type": "skycraft:ground_cover",
+  "config": {
+    "entries": [
+      {
+        "state": "minecraft:pink_tulip",
+        "weight": 3
+      },
+      {
+        "state": "minecraft:allium",
+        "weight": 3
+      },
+      {
+        "state": "minecraft:dandelion",
+        "weight": 2
+      },
+      {
+        "state": "minecraft:azure_bluet",
+        "weight": 1
+      },
+      {
+        "state": {
+          "id": "minecraft:peony",
+          "properties": {
+            "half": "lower"
+          }
+        },
+        "weight": 1
+      }
+    ],
+    "scale": 28,
+    "patchiness": 0.85,
+    "cluster": {
+      "type": "minecraft:uniform",
+      "min_inclusive": 3,
+      "max_inclusive": 8
+    },
+    "spread": 3,
+    "salt": 2732,
+    "near_water": false
+  }
+}

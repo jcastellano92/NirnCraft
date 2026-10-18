@@ -2,12 +2,12 @@ package com.skycraft.crime.client;
 
 import com.skycraft.crime.CrimePackets;
 import com.skycraft.network.SkyNetwork;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
-import org.lwjgl.glfw.GLFW;
+import com.mojang.blaze3d.platform.InputConstants;
 
 import java.util.List;
 
@@ -64,20 +64,20 @@ public class PickpocketScreen extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        renderBackground(g);
+    public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
+
         int x = left();
         int y = top();
         int h = panelH();
         g.fill(x - 1, y - 1, x + PANEL_W + 1, y + h + 1, 0xFF8A7F66);
         g.fill(x, y, x + PANEL_W, y + h, 0xE0101010);
-        g.drawCenteredString(font, title, width / 2, y + 7, 0xFFF5EBC8);
+        g.centeredText(font, title, width / 2, y + 7, 0xFFF5EBC8);
         g.fill(x + 10, y + 19, x + PANEL_W - 10, y + 20, 0x808A7F66);
 
         hovered = -1;
         int rowY = y + 24;
         if (entries.isEmpty()) {
-            g.drawCenteredString(font, Component.translatable("screen.skycraft.pickpocket.empty"), width / 2, rowY + 6, 0xFFA8A090);
+            g.centeredText(font, Component.translatable("screen.skycraft.pickpocket.empty"), width / 2, rowY + 6, 0xFFA8A090);
         }
         for (int i = 0; i < entries.size(); i++) {
             CrimePackets.PocketEntry entry = entries.get(i);
@@ -87,39 +87,42 @@ public class PickpocketScreen extends Screen {
             boolean hi = over || hovered < 0 && selected == i;
             if (hi) g.fill(x + 4, ry, x + PANEL_W - 4, ry + ROW, 0x30FFFFFF);
             ItemStack stack = entry.stack();
-            g.renderItem(stack, x + 8, ry + 2);
-            g.renderItemDecorations(font, stack, x + 8, ry + 2);
-            g.drawString(font, stack.getHoverName(), x + 30, ry + 6, hi ? 0xFFFFFFFF : 0xFFD8D0B8, true);
+            g.item(stack, x + 8, ry + 2);
+            g.itemDecorations(font, stack, x + 8, ry + 2);
+            g.text(font, stack.getHoverName(), x + 30, ry + 6, hi ? 0xFFFFFFFF : 0xFFD8D0B8, true);
             int chance = entry.chance();
             int color = chance >= 70 ? 0xFF7FD07F : chance >= 40 ? 0xFFE8D070 : 0xFFE06060;
             String pct = chance + "%";
-            g.drawString(font, pct, x + PANEL_W - 10 - font.width(pct), ry + 6, color, true);
+            g.text(font, pct, x + PANEL_W - 10 - font.width(pct), ry + 6, color, true);
         }
-        g.drawCenteredString(font, Component.translatable("screen.skycraft.pickpocket.hint"), width / 2, y + h - 12, 0xFF8A8270);
-        super.render(g, mouseX, mouseY, partialTick);
+        g.centeredText(font, Component.translatable("screen.skycraft.pickpocket.hint"), width / 2, y + h - 12, 0xFF8A8270);
+        super.extractRenderState(g, mouseX, mouseY, partialTick);
         if (hovered >= 0) {
             ItemStack stack = entries.get(hovered).stack();
-            if (mouseX < x + 28) g.renderTooltip(font, stack, mouseX, mouseY);
+            if (mouseX < x + 28) g.setTooltipForNextFrame(font, stack, mouseX, mouseY);
         }
     }
 
     @Override
-    public boolean mouseClicked(double mx, double my, int button) {
+    public boolean mouseClicked(net.minecraft.client.input.MouseButtonEvent event, boolean doubleClick) {
+        double mx = event.x(), my = event.y();
+        int button = com.skycraft.client.screen.UiInput.actionButton(event.button());
         if (hovered >= 0 && button == 0) {
             steal(hovered);
             return true;
         }
-        return super.mouseClicked(mx, my, button);
+        return super.mouseClicked(event, doubleClick);
     }
 
     @Override
-    public boolean keyPressed(int key, int scan, int mods) {
+    public boolean keyPressed(net.minecraft.client.input.KeyEvent event) {
+        int key = event.key(), scan = event.keycode(), mods = event.modifiers();
         int n = entries.size();
-        if (n > 0 && (key == GLFW.GLFW_KEY_UP || key == GLFW.GLFW_KEY_W)) selected = (selected + n - 1) % n;
-        else if (n > 0 && (key == GLFW.GLFW_KEY_DOWN || key == GLFW.GLFW_KEY_S)) selected = (selected + 1) % n;
-        else if (n > 0 && (key == GLFW.GLFW_KEY_ENTER || key == GLFW.GLFW_KEY_SPACE)) steal(selected);
-        else if (minecraft != null && minecraft.options.keyInventory.matches(key, scan)) onClose();
-        else return super.keyPressed(key, scan, mods);
+        if (n > 0 && (key == InputConstants.KEY_UP || key == InputConstants.KEY_W)) selected = (selected + n - 1) % n;
+        else if (n > 0 && (key == InputConstants.KEY_DOWN || key == InputConstants.KEY_S)) selected = (selected + 1) % n;
+        else if (n > 0 && (key == InputConstants.KEY_RETURN || key == InputConstants.KEY_SPACE)) steal(selected);
+        else if (minecraft != null && minecraft.options.keyInventory.matches(event)) onClose();
+        else return super.keyPressed(event);
         return true;
     }
 

@@ -1,23 +1,27 @@
 {
   "type": "skycraft:add_table",
-  "conditions": [
-    {
-      "condition": "minecraft:any_of",
-      "terms": [
-        {
-          "condition": "forge:loot_table_id",
-          "loot_table_id": "minecraft:blocks/sugar_cane"
-        }
-      ]
-    },
-    {
-      "condition": "skycraft:region",
-      "provinces": [
-        "elsweyr"
-      ]
-    }
-  ],
   "table": "skycraft:forage/moon_sugar",
   "prefix": "blocks/",
-  "chance": 0.35
+  "chance": 0.35,
+  "condition": {
+    "terms": [
+      {
+        "terms": [
+          {
+            "loot_table_id": "minecraft:blocks/sugar_cane",
+            "type": "neoforge:loot_table_id"
+          }
+        ],
+        "type": "minecraft:any_of"
+      },
+      {
+        "provinces": [
+          "elsweyr"
+        ],
+        "type": "skycraft:region"
+      }
+    ],
+    "type": "minecraft:all_of"
+  },
+  "priority": 5
 }

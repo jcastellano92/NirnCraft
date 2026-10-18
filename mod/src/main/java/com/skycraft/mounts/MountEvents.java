@@ -9,26 +9,26 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.animal.horse.AbstractHorse;
+import net.minecraft.world.entity.animal.equine.AbstractHorse;
 import net.minecraft.world.inventory.HorseInventoryMenu;
-import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.EntityJoinLevelEvent;
-import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
-import net.minecraftforge.event.entity.EntityMountEvent;
-import net.minecraftforge.event.entity.living.AnimalTameEvent;
-import net.minecraftforge.event.entity.player.PlayerContainerEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
+
+import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
+import net.neoforged.neoforge.event.entity.EntityLeaveLevelEvent;
+import net.neoforged.neoforge.event.entity.EntityMountEvent;
+import net.neoforged.neoforge.event.entity.living.AnimalTameEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerContainerEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 /**
  * Forge-bus glue of the mount system: stamina and gallop each tick, stale mount copies, tack applied when a mount
  * loads, no vanilla horse screen, vanilla horse taming joining the stable, the legendary steeds' quest flags,
  * stablemasters, and the {@code /skycraft-mounts} command.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class MountEvents {
     /** Story flags that bind a legendary steed (set by a quest's {@code flag:} action). */
     private static final String[][] LEGEND_FLAGS = {{"mount_shadowmere", "shadowmere"}, {"mount_arvak", "arvak"}};
@@ -36,8 +36,8 @@ public final class MountEvents {
     private MountEvents() {}
 
     @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer player)) return;
+    public static void onPlayerTick(net.neoforged.neoforge.event.tick.PlayerTickEvent.Post event) {
+        if (!(event instanceof net.neoforged.neoforge.event.tick.PlayerTickEvent.Post) || !(event.getEntity() instanceof ServerPlayer player)) return;
         MountStamina.tick(player); // takes and gives back the stamina bar (cheap when not riding)
         if (player.tickCount % 40 == 7) legends(player);
         if (player.tickCount % 100 == 13) StableMasters.tick(player);
@@ -68,7 +68,7 @@ public final class MountEvents {
         // an animal that was sold, traded in or let go while its chunk was unloaded: its token has moved on (or it is
         // wild now), so this body must not come back as the player's
         if (e instanceof Mob loaded && Mounts.kindOf(loaded) != null && event.getLevel().getServer() != null) {
-            java.util.UUID mid = loaded.getPersistentData().hasUUID(MountToken.ID_TAG) ? loaded.getPersistentData().getUUID(MountToken.ID_TAG) : e.getUUID();
+            java.util.UUID mid = loaded.getPersistentData().read(MountToken.ID_TAG, net.minecraft.core.UUIDUtil.CODEC).isPresent() ? loaded.getPersistentData().read(MountToken.ID_TAG, net.minecraft.core.UUIDUtil.CODEC).orElseThrow() : e.getUUID();
             MountStable.Fate fate = MountStable.get(event.getLevel().getServer()).takeFate(mid, e.getUUID());
             if (fate == MountStable.Fate.DELETE) {
                 event.setCanceled(true);
@@ -77,7 +77,7 @@ public final class MountEvents {
             if (fate == MountStable.Fate.RELEASE) Mounts.release(loaded);
         }
         // a breaking that was cut short (a crash, a chunk unloading) must not leave the animal without its mind
-        if (e instanceof Mob m && m.getPersistentData().getBoolean(WildHorseTaming.NOAI_TAG)) WildHorseTaming.release(m);
+        if (e instanceof Mob m && m.getPersistentData().getBooleanOr(WildHorseTaming.NOAI_TAG, false)) WildHorseTaming.release(m);
         if (e instanceof Mob mob && Mounts.kindOf(mob) != null) {
             MountGrowth.syncFromRecord(mob); // the record is the truth (training happens while it is away)
             MountGear.refresh(mob);
@@ -91,7 +91,7 @@ public final class MountEvents {
      */
     @SubscribeEvent
     public static void onLeave(EntityLeaveLevelEvent event) {
-        if (event.getLevel().isClientSide() || !(event.getEntity() instanceof Mob mob) || mob.getPersistentData().getString(Mounts.OWNER).isEmpty()) return;
+        if (event.getLevel().isClientSide() || !(event.getEntity() instanceof Mob mob) || mob.getPersistentData().getStringOr(Mounts.OWNER, "").isEmpty()) return;
         var reason = mob.getRemovalReason();
         if (reason == null || !reason.shouldSave() || Mounts.kindOf(mob) == null || event.getLevel().getServer() == null) return;
         java.util.UUID owner = Mounts.ownerOf(mob);
@@ -103,10 +103,8 @@ public final class MountEvents {
     public static void onMount(EntityMountEvent event) {
         if (!event.isDismounting() || event.getEntityBeingMounted() == null || event.getLevel().isClientSide()) return;
         if (event.getEntityMounting() instanceof ServerPlayer player && WildHorseTaming.isTaming(player)) {
-            if (event.isCancelable()) {
-                event.setCanceled(true);
-                return;
-            }
+            event.setCanceled(true);
+            return;
         }
         MountStamina.dismounted(event.getEntityBeingMounted());
         // the bar goes back to the rider's own the moment they leave the saddle

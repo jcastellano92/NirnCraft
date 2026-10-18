@@ -2,69 +2,74 @@ package com.skycraft.fauna.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
-import net.minecraft.client.model.EntityModel;
-import net.minecraft.client.renderer.RenderType;
+import com.skycraft.client.PoseEntityModel;
+import com.skycraft.client.PoseRenderState;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.EyesLayer;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Mob;
 
 import java.util.function.Function;
 
 /** Generic renderer of the fauna module: a model, a per-entity texture and a uniform scale. */
-public class FaunaRenderer<T extends Mob, M extends EntityModel<T>> extends MobRenderer<T, M> {
-    private final Function<T, ResourceLocation> texture;
+public class FaunaRenderer<T extends Mob, M extends PoseEntityModel<T>> extends MobRenderer<T, PoseRenderState, M> {
+    private final Function<T, Identifier> texture;
     private final float scale;
 
-    public FaunaRenderer(EntityRendererProvider.Context context, M model, float shadow, float scale, Function<T, ResourceLocation> texture) {
+    public FaunaRenderer(EntityRendererProvider.Context context, M model, float shadow, float scale, Function<T, Identifier> texture) {
         super(context, model, shadow * scale);
         this.texture = texture;
         this.scale = scale;
     }
 
     /** Adds a full-bright layer (e.g. the torchbug's glowing abdomen). */
-    public FaunaRenderer<T, M> withGlow(ResourceLocation glowTexture) {
+    public FaunaRenderer<T, M> withGlow(Identifier glowTexture) {
         this.addLayer(new GlowLayer<>(this, glowTexture));
         return this;
     }
 
-    @Override
-    public ResourceLocation getTextureLocation(T entity) {
-        return texture.apply(entity);
+    @Override public PoseRenderState createRenderState() { return new PoseRenderState(); }
+    @Override public Identifier getTextureLocation(PoseRenderState state) { return state.texture; }
+    @Override public void extractRenderState(T entity, PoseRenderState state, float partialTick) {
+        super.extractRenderState(entity, state, partialTick);
+        state.texture = texture.apply(entity);
+        model.extractPose(entity, state, partialTick);
     }
 
     @Override
-    protected void scale(T entity, PoseStack poseStack, float partialTick) {
+    protected void scale(PoseRenderState entity, PoseStack poseStack) {
         if (scale != 1.0f) poseStack.scale(scale, scale, scale);
     }
 
     /** Fish out of water: wiggle, and flop on the side (like vanilla cod). */
-    public static class Fish<T extends Mob, M extends EntityModel<T>> extends FaunaRenderer<T, M> {
-        public Fish(EntityRendererProvider.Context context, M model, float shadow, float scale, Function<T, ResourceLocation> texture) {
+    public static class Fish<T extends Mob, M extends PoseEntityModel<T>> extends FaunaRenderer<T, M> {
+        public Fish(EntityRendererProvider.Context context, M model, float shadow, float scale, Function<T, Identifier> texture) {
             super(context, model, shadow, scale, texture);
         }
 
         @Override
-        protected void setupRotations(T entity, PoseStack poseStack, float ageInTicks, float rotationYaw, float partialTicks) {
-            super.setupRotations(entity, poseStack, ageInTicks, rotationYaw, partialTicks);
-            poseStack.mulPose(Axis.YP.rotationDegrees(4.3f * Mth.sin(0.6f * ageInTicks)));
-            if (!entity.isInWater()) {
+        protected void setupRotations(PoseRenderState entity, PoseStack poseStack, float rotationYaw, float entityScale) {
+            super.setupRotations(entity, poseStack, rotationYaw, entityScale);
+            poseStack.rotateDegrees(Axis.YP, 4.3f * Mth.sin(0.6f * entity.ageInTicks));
+            if (!entity.isInWater) {
                 poseStack.translate(0.1f, 0.1f, -0.1f);
-                poseStack.mulPose(Axis.ZP.rotationDegrees(90.0f));
+                poseStack.rotateDegrees(Axis.ZP, 90.0f);
             }
         }
     }
 
     /** A full-bright emissive layer. */
-    public static class GlowLayer<T extends Mob, M extends EntityModel<T>> extends EyesLayer<T, M> {
+    public static class GlowLayer<T extends Mob, M extends PoseEntityModel<T>> extends EyesLayer<PoseRenderState, M> {
         private final RenderType type;
 
-        public GlowLayer(RenderLayerParent<T, M> parent, ResourceLocation texture) {
+        public GlowLayer(RenderLayerParent<PoseRenderState, M> parent, Identifier texture) {
             super(parent);
-            this.type = RenderType.eyes(texture);
+            this.type = RenderTypes.eyes(texture);
         }
 
         @Override

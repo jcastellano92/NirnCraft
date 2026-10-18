@@ -3,7 +3,7 @@ package com.skycraft.society.client;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.skycraft.society.Cosmetic;
-import net.minecraft.client.model.PlayerModel;
+import net.minecraft.client.model.player.PlayerModel;
 import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
@@ -13,8 +13,8 @@ import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.client.player.AbstractClientPlayer;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -22,14 +22,21 @@ import net.minecraft.world.entity.EquipmentSlot;
 
 /**
  * Draws a player's faction regalia (tabard, cloak, wolf pelt, sash, hood) over their skin and armor. Being a plain
- * render layer it stacks with other cosmetics mods (e.g. Essential) instead of replacing the skin.
+ * render layer it stacks with other other cosmetic render layers instead of replacing the skin.
  *
  * <p>Texture layout (64x64): hood 8x8x8 at (0,0), torso 8x12x4 at (0,16), tabard front/back panels 9x9x1 at (0,32)
  * and (24,32), cloak 10x19x1 at (0,44), shoulder pelts 5x4x5 at (32,0) and (32,10).</p>
  */
-public class CosmeticLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> {
+public class CosmeticLayer extends RenderLayer<net.minecraft.client.renderer.entity.state.AvatarRenderState, PlayerModel> {
     private final Parts normal;
     private final Parts armored;
+    private final com.skycraft.client.CapturedPartModel normalModel, armoredModel;
+    private static final net.minecraft.util.context.ContextKey<Cosmetic> COSMETIC = new net.minecraft.util.context.ContextKey<>(
+            net.minecraft.resources.Identifier.fromNamespaceAndPath("skycraft", "cosmetic"));
+
+    public static void extract(net.minecraft.world.entity.player.Player player, net.minecraft.client.renderer.entity.state.AvatarRenderState state) {
+        state.setRenderData(COSMETIC, Cosmetic.byId(ClientCosmetics.get(player.getUUID())));
+    }
 
     private record Parts(ModelPart root, ModelPart hood, ModelPart torso, ModelPart skirtFront, ModelPart skirtBack,
                          ModelPart cloak, ModelPart rightPelt, ModelPart leftPelt) {
@@ -40,10 +47,12 @@ public class CosmeticLayer extends RenderLayer<AbstractClientPlayer, PlayerModel
         }
     }
 
-    public CosmeticLayer(RenderLayerParent<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> parent, EntityModelSet models) {
+    public CosmeticLayer(RenderLayerParent<net.minecraft.client.renderer.entity.state.AvatarRenderState, PlayerModel> parent, EntityModelSet models) {
         super(parent);
         this.normal = Parts.of(models.bakeLayer(SocietyClient.COSMETIC_LAYER));
         this.armored = Parts.of(models.bakeLayer(SocietyClient.COSMETIC_ARMORED_LAYER));
+        normalModel = new com.skycraft.client.CapturedPartModel(normal.root());
+        armoredModel = new com.skycraft.client.CapturedPartModel(armored.root());
     }
 
     /** {@code armored}: inflated to sit over a chestplate. */
@@ -71,26 +80,27 @@ public class CosmeticLayer extends RenderLayer<AbstractClientPlayer, PlayerModel
     }
 
     @Override
-    public void render(PoseStack pose, MultiBufferSource buffers, int packedLight, AbstractClientPlayer player, float limbSwing,
-                       float limbSwingAmount, float partialTick, float ageInTicks, float netHeadYaw, float headPitch) {
-        if (player.isInvisible()) return;
-        Cosmetic cosmetic = Cosmetic.byId(ClientCosmetics.get(player.getUUID()));
+    public void submit(PoseStack pose, SubmitNodeCollector buffers, int packedLight,
+                       net.minecraft.client.renderer.entity.state.AvatarRenderState player, float netHeadYaw, float headPitch) {
+        if (player.isInvisible) return;
+        float limbSwingAmount = player.walkAnimationSpeed;
+        Cosmetic cosmetic = player.getRenderData(COSMETIC);
         if (cosmetic == null) return;
-        Parts parts = player.getItemBySlot(EquipmentSlot.CHEST).isEmpty() ? normal : armored;
-        PlayerModel<AbstractClientPlayer> model = this.getParentModel();
+        Parts parts = player.chestEquipment.isEmpty() ? normal : armored;
+        PlayerModel model = this.getParentModel();
 
-        parts.hood().copyFrom(model.head);
-        parts.torso().copyFrom(model.body);
-        parts.rightPelt().copyFrom(model.rightArm);
-        parts.leftPelt().copyFrom(model.leftArm);
+        parts.hood().loadPose(model.head.storePose());
+        parts.torso().loadPose(model.body.storePose());
+        parts.rightPelt().loadPose(model.rightArm.storePose());
+        parts.leftPelt().loadPose(model.leftArm.storePose());
 
-        parts.hood().visible = cosmetic.has(Cosmetic.Part.HOOD) && player.getItemBySlot(EquipmentSlot.HEAD).isEmpty();
+        parts.hood().visible = cosmetic.has(Cosmetic.Part.HOOD) && player.headEquipment.isEmpty();
         parts.torso().visible = true; // carries the skirt and cloak children
         boolean torsoBox = cosmetic.has(Cosmetic.Part.TORSO);
         boolean skirt = cosmetic.has(Cosmetic.Part.SKIRT);
         parts.skirtFront().visible = skirt;
         parts.skirtBack().visible = skirt;
-        parts.cloak().visible = cosmetic.has(Cosmetic.Part.CLOAK) && !player.isFallFlying();
+        parts.cloak().visible = cosmetic.has(Cosmetic.Part.CLOAK) && !player.isFallFlying;
         parts.rightPelt().visible = cosmetic.has(Cosmetic.Part.PELTS);
         parts.leftPelt().visible = cosmetic.has(Cosmetic.Part.PELTS);
 
@@ -99,24 +109,12 @@ public class CosmeticLayer extends RenderLayer<AbstractClientPlayer, PlayerModel
         float backward = Math.max(0.0f, Math.max(model.rightLeg.xRot, model.leftLeg.xRot));
         parts.skirtFront().xRot = forward * 0.9f;
         parts.skirtBack().xRot = backward * 0.9f;
-        float stream = Math.min(1.0f, limbSwingAmount) * 0.55f + (player.isCrouching() ? 0.15f : 0.06f);
+        float stream = Math.min(1.0f, limbSwingAmount) * 0.55f + (player.isCrouching ? 0.15f : 0.06f);
         parts.cloak().xRot = stream + backward * 0.4f;
 
-        VertexConsumer vc = buffers.getBuffer(RenderType.entityCutoutNoCull(cosmetic.texture));
-        int overlay = OverlayTexture.NO_OVERLAY;
-        if (torsoBox) {
-            parts.torso().render(pose, vc, packedLight, overlay);
-        } else {
-            // render only the torso's children (skirt/cloak) without its own box
-            pose.pushPose();
-            parts.torso().translateAndRotate(pose);
-            parts.skirtFront().render(pose, vc, packedLight, overlay);
-            parts.skirtBack().render(pose, vc, packedLight, overlay);
-            parts.cloak().render(pose, vc, packedLight, overlay);
-            pose.popPose();
-        }
-        parts.hood().render(pose, vc, packedLight, overlay);
-        parts.rightPelt().render(pose, vc, packedLight, overlay);
-        parts.leftPelt().render(pose, vc, packedLight, overlay);
+        parts.torso().skipDraw = !torsoBox;
+        (parts == normal ? normalModel : armoredModel).submit(buffers, pose,
+                RenderTypes.entityCutout(cosmetic.texture), packedLight, OverlayTexture.NO_OVERLAY, -1);
+        parts.torso().skipDraw = false;
     }
 }

@@ -356,7 +356,7 @@ public final class Nature {
         // the gatherers' baskets
         b.barrel(-2, 0, 2, ExploreLoot.table("beehive"));
         b.set(-2, 0, 1, Blocks.BARREL);
-        for (int i = 0; i < 3; i++) b.spawn(EntityType.BEE, 3, 2);
+        for (int i = 0; i < 3; i++) b.spawn(net.minecraft.world.entity.EntityTypes.BEE, 3, 2);
         return true;
     }
 
@@ -389,25 +389,25 @@ public final class Nature {
     public static boolean dwemerVent(SiteBuilder b) {
         if (b.waterAt(0, 0) || b.settle(3) > 10) return false;
         b.level(4, null, Blocks.STONE.defaultBlockState(), 6);
-        BlockState metal = Blocks.WAXED_CUT_COPPER.defaultBlockState();
+        BlockState metal = com.skycraft.worldgen.VanillaBlocks.WAXED_CUT_COPPER.defaultBlockState();
         // a grated shaft head breathing steam
         for (int x = -1; x <= 1; x++) for (int z = -1; z <= 1; z++) {
             b.set(x, -1, z, x == 0 && z == 0 ? Blocks.HAY_BLOCK.defaultBlockState() : metal);
         }
         b.set(0, 0, 0, Blocks.CAMPFIRE.defaultBlockState().setValue(BlockStateProperties.SIGNAL_FIRE, true));
         for (int x = -1; x <= 1; x++) for (int z = -1; z <= 1; z++) {
-            if (x != 0 || z != 0) b.set(x, 0, z, Blocks.WAXED_CUT_COPPER_SLAB);
+            if (x != 0 || z != 0) b.set(x, 0, z, com.skycraft.worldgen.VanillaBlocks.WAXED_CUT_COPPER_SLAB);
         }
         // pipes running into the ground, a sealed hatch
-        BlockState pipeX = Blocks.LIGHTNING_ROD.defaultBlockState().setValue(LightningRodBlock.FACING, Direction.EAST);
+        BlockState pipeX = com.skycraft.worldgen.VanillaBlocks.LIGHTNING_ROD.defaultBlockState().setValue(LightningRodBlock.FACING, Direction.EAST);
         for (int x = 2; x <= 4; x++) b.set(x, 1, 0, pipeX);
-        b.set(5, 1, 0, Blocks.WAXED_COPPER_BLOCK);
-        b.set(5, 0, 0, Blocks.WAXED_COPPER_BLOCK);
-        BlockState pipeUp = Blocks.LIGHTNING_ROD.defaultBlockState().setValue(LightningRodBlock.FACING, Direction.UP);
-        for (int k = 0; k <= 3; k++) b.set(-3, k, -2, k == 3 ? Blocks.WAXED_EXPOSED_COPPER.defaultBlockState() : pipeUp);
+        b.set(5, 1, 0, com.skycraft.worldgen.VanillaBlocks.WAXED_COPPER_BLOCK);
+        b.set(5, 0, 0, com.skycraft.worldgen.VanillaBlocks.WAXED_COPPER_BLOCK);
+        BlockState pipeUp = com.skycraft.worldgen.VanillaBlocks.LIGHTNING_ROD.defaultBlockState().setValue(LightningRodBlock.FACING, Direction.UP);
+        for (int k = 0; k <= 3; k++) b.set(-3, k, -2, k == 3 ? com.skycraft.worldgen.VanillaBlocks.WAXED_EXPOSED_COPPER.defaultBlockState() : pipeUp);
         b.set(-3, 4, -2, Blocks.LANTERN);
         b.set(2, 0, -3, Blocks.IRON_TRAPDOOR);
-        b.set(2, -1, -3, Blocks.CHAIN.defaultBlockState());
+        b.set(2, -1, -3, com.skycraft.worldgen.VanillaBlocks.CHAIN.defaultBlockState());
         b.chest(-3, 0, 2, Direction.EAST, ExploreLoot.table("dwemer"));
         if (b.r.nextInt(4) == 0) Shrines.spawnById(b, "skycraft:dwarven_spider", 3, 3, true);
         return true;
@@ -442,7 +442,7 @@ public final class Nature {
         b.set(-2, 1, -2, Blocks.BOOKSHELF);
         b.set(2, 0, -2, Blocks.CHISELED_BOOKSHELF.defaultBlockState().setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.SOUTH));
         b.set(0, -1, 1, Blocks.CRYING_OBSIDIAN);
-        for (int[] c : new int[][]{{-1, 1}, {1, 1}, {0, 0}, {0, 2}}) b.set(c[0], 0, c[1], Blocks.PURPLE_CANDLE.defaultBlockState().setValue(BlockStateProperties.LIT, b.r.nextBoolean()));
+        for (int[] c : new int[][]{{-1, 1}, {1, 1}, {0, 0}, {0, 2}}) b.set(c[0], 0, c[1], com.skycraft.worldgen.VanillaBlocks.PURPLE_CANDLE.defaultBlockState().setValue(BlockStateProperties.LIT, b.r.nextBoolean()));
         b.set(0, 0, 1, Blocks.SOUL_LANTERN);
         b.chest(2, 0, 1, Direction.WEST, ExploreLoot.table("mage"));
         b.banner(-3, 0, 2, DyeColor.PURPLE);

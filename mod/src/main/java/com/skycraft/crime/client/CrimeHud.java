@@ -9,16 +9,15 @@ import com.skycraft.crime.Jail;
 import com.skycraft.crime.Locks;
 import com.skycraft.crime.Ownership;
 import com.skycraft.network.CorePackets;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.world.entity.npc.AbstractVillager;
+import net.minecraft.world.entity.npc.villager.AbstractVillager;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
-import net.minecraftforge.client.gui.overlay.ForgeGui;
 
 /**
  * Crime HUD: the bounty in the current hold (small red text under the compass), the jail countdown, the
@@ -35,9 +34,11 @@ public final class CrimeHud {
 
     private CrimeHud() {}
 
-    public static void render(ForgeGui gui, GuiGraphics g, float partialTick, int width, int height) {
+    public static void render(GuiGraphicsExtractor g, net.minecraft.client.DeltaTracker delta) {
+        float partialTick = delta.getGameTimeDeltaPartialTick(false);
+        int width = g.guiWidth(), height = g.guiHeight();
         Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null || mc.level == null || mc.options.hideGui) return;
+        if (mc.player == null || mc.level == null || mc.gui.hud.isHidden()) return;
         Font font = mc.font;
 
         // ---- status line under the compass
@@ -69,7 +70,7 @@ public final class CrimeHud {
         }
 
         // ---- crosshair hints (Skyrim interactive prompts; ordinary blocks show nothing)
-        if (mc.screen != null) return;
+        if (mc.gui.screen() != null) return;
         int cx = width / 2;
         int cy = height / 2 + 10;
 
@@ -136,7 +137,7 @@ public final class CrimeHud {
 
             if (block instanceof net.minecraft.world.level.block.BedBlock) {
                 if (Jail.isJailed(mc.player)) {
-                    int served = Bounty.state(mc.player).getCompound("jail").getInt("served");
+                    int served = Bounty.state(mc.player).getCompoundOrEmpty("jail").getIntOr("served",0);
                     int left = Math.max(0, 60 - served);
                     if (left > 0) {
                         drawSmall(g, font, Component.literal("[F] Rest  Serve Sentence (" + left + "s wait)"), cx, cy, 0.75f, 0xD0000000 | RED);
@@ -223,7 +224,7 @@ public final class CrimeHud {
                     || block instanceof net.minecraft.world.level.block.TrapDoorBlock
                     || block instanceof net.minecraft.world.level.block.FenceGateBlock) {
                 boolean owned = Ownership.isOwnedByOther(mc.player, mc.level, bpos);
-                long dayTime = mc.level.getDayTime() % 24000L;
+                long dayTime = mc.level.getDefaultClockTime() % 24000L;
                 boolean night = dayTime >= 13000L && dayTime <= 23000L;
                 boolean matchesInfo = info != null && (info.pos().equals(bpos) || info.pos().equals(bpos.below()) || info.pos().equals(bpos.above()));
                 boolean locked = (matchesInfo && info.lock() != Locks.NOT_LOCKED && !info.unlocked())
@@ -339,7 +340,7 @@ public final class CrimeHud {
         return anyCaution ? SneakState.CAUTION : SneakState.HIDDEN;
     }
 
-    private static void renderSneakEye(GuiGraphics g, Font font, net.minecraft.world.entity.player.Player player, int width, int height) {
+    private static void renderSneakEye(GuiGraphicsExtractor g, Font font, net.minecraft.world.entity.player.Player player, int width, int height) {
         SneakState state = getSneakState(player);
         // The Skyrim eye itself is drawn at the crosshair by client.hud.SneakEye; this module supplies the state.
         if (com.skycraft.client.hud.SneakEye.report(state.ordinal())) return;
@@ -382,12 +383,12 @@ public final class CrimeHud {
         return false;
     }
 
-    private static void drawSmall(GuiGraphics g, Font font, Component text, int x, int y, float scale, int argb) {
-        g.pose().pushPose();
-        g.pose().translate(x, y, 0);
-        g.pose().scale(scale, scale, 1f);
-        g.drawCenteredString(font, text, 0, 0, argb);
-        g.pose().popPose();
+    private static void drawSmall(GuiGraphicsExtractor g, Font font, Component text, int x, int y, float scale, int argb) {
+        g.pose().pushMatrix();
+        g.pose().translate(x,  y);
+        g.pose().scale(scale,  scale);
+        g.centeredText(font, text, 0, 0, argb);
+        g.pose().popMatrix();
     }
 
     /** Cached per looked-at block for 10 client ticks (two entity scans + a block scan are too much per frame). */

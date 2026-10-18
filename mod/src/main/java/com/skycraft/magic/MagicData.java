@@ -41,16 +41,16 @@ public final class MagicData {
     // ------------------------------------------------------------------ spells
 
     public static List<String> knownSpells(Player player) {
-        ListTag list = tag(player).getList("spells", Tag.TAG_STRING);
+        ListTag list = tag(player).getListOrEmpty("spells");
         List<String> out = new ArrayList<>(list.size());
-        for (int i = 0; i < list.size(); i++) out.add(list.getString(i));
+        for (int i = 0; i < list.size(); i++) out.add(list.getStringOr(i, ""));
         return out;
     }
 
     public static boolean knows(Player player, String spellId) {
-        ListTag list = tag(player).getList("spells", Tag.TAG_STRING);
+        ListTag list = tag(player).getListOrEmpty("spells");
         for (int i = 0; i < list.size(); i++) {
-            if (list.getString(i).equals(spellId)) return true;
+            if (list.getStringOr(i, "").equals(spellId)) return true;
         }
         return false;
     }
@@ -62,7 +62,7 @@ public final class MagicData {
     public static boolean learn(Player player, String spellId) {
         if (knows(player, spellId)) return false;
         CompoundTag tag = tag(player);
-        ListTag list = tag.getList("spells", Tag.TAG_STRING);
+        ListTag list = tag.getListOrEmpty("spells");
         list.add(StringTag.valueOf(spellId));
         tag.put("spells", list);
         dirty(player);
@@ -76,19 +76,19 @@ public final class MagicData {
     /** Removes a spell (made spells can be forgotten); it leaves the hands and favorites too. */
     public static void forget(Player player, String spellId) {
         CompoundTag tag = tag(player);
-        ListTag list = tag.getList("spells", Tag.TAG_STRING);
+        ListTag list = tag.getListOrEmpty("spells");
         for (int i = list.size() - 1; i >= 0; i--) {
-            if (list.getString(i).equals(spellId)) list.remove(i);
+            if (list.getStringOr(i, "").equals(spellId)) list.remove(i);
         }
         tag.put("spells", list);
-        if (spellId.equals(tag.getString("right_spell")) || spellId.equals(tag.getString("selected_spell"))) {
+        if (spellId.equals(tag.getStringOr("right_spell", "")) || spellId.equals(tag.getStringOr("selected_spell", ""))) {
             tag.putString("right_spell", "");
             tag.putString("selected_spell", "");
         }
-        if (spellId.equals(tag.getString("left_spell"))) tag.putString("left_spell", "");
-        ListTag favs = tag.getList("favorites", Tag.TAG_STRING);
+        if (spellId.equals(tag.getStringOr("left_spell", ""))) tag.putString("left_spell", "");
+        ListTag favs = tag.getListOrEmpty("favorites");
         for (int i = favs.size() - 1; i >= 0; i--) {
-            if (favs.getString(i).equals(spellId)) favs.remove(i);
+            if (favs.getStringOr(i, "").equals(spellId)) favs.remove(i);
         }
         tag.put("favorites", favs);
         dirty(player);
@@ -97,8 +97,8 @@ public final class MagicData {
     /** The right-hand spell ({@code right_spell}; {@code selected_spell} is kept as an alias for older data). */
     public static String selectedSpell(Player player) {
         CompoundTag tag = tag(player);
-        String right = tag.getString("right_spell");
-        return right.isEmpty() ? tag.getString("selected_spell") : right;
+        String right = tag.getStringOr("right_spell", "");
+        return right.isEmpty() ? tag.getStringOr("selected_spell", "") : right;
     }
 
     /** Equips the right-hand spell. */
@@ -111,7 +111,7 @@ public final class MagicData {
 
     /** The left-hand spell, or "" (casting with an empty left hand then uses the right-hand spell). */
     public static String leftSpell(Player player) {
-        return tag(player).getString("left_spell");
+        return tag(player).getStringOr("left_spell", "");
     }
 
     /** Marks the left hand as deliberately empty (an empty {@code left_spell} falls back to the right-hand spell). */
@@ -138,18 +138,18 @@ public final class MagicData {
     }
 
     public static List<String> favorites(Player player) {
-        ListTag list = tag(player).getList("favorites", Tag.TAG_STRING);
+        ListTag list = tag(player).getListOrEmpty("favorites");
         List<String> out = new ArrayList<>(list.size());
-        for (int i = 0; i < list.size(); i++) out.add(list.getString(i));
+        for (int i = 0; i < list.size(); i++) out.add(list.getStringOr(i, ""));
         return out;
     }
 
     public static void toggleFavorite(Player player, String id) {
         CompoundTag tag = tag(player);
-        ListTag list = tag.getList("favorites", Tag.TAG_STRING);
+        ListTag list = tag.getListOrEmpty("favorites");
         boolean removed = false;
         for (int i = list.size() - 1; i >= 0; i--) {
-            if (list.getString(i).equals(id)) {
+            if (list.getStringOr(i, "").equals(id)) {
                 list.remove(i);
                 removed = true;
             }
@@ -191,25 +191,25 @@ public final class MagicData {
     // ------------------------------------------------------------------ shouts
 
     public static int wordsLearned(Player player, Shout shout) {
-        return Math.min(3, tag(player).getCompound("words").getInt(shout.id()));
+        return Math.min(3, tag(player).getCompoundOrEmpty("words").getIntOr(shout.id(), 0));
     }
 
     public static void setWordsLearned(Player player, Shout shout, int words) {
         CompoundTag tag = tag(player);
-        CompoundTag w = tag.getCompound("words");
+        CompoundTag w = tag.getCompoundOrEmpty("words");
         w.putInt(shout.id(), Math.max(0, Math.min(3, words)));
         tag.put("words", w);
-        if (tag.getString("selected_shout").isEmpty()) tag.putString("selected_shout", shout.id());
+        if (tag.getStringOr("selected_shout", "").isEmpty()) tag.putString("selected_shout", shout.id());
         dirty(player);
     }
 
     public static int wordsUnlocked(Player player, Shout shout) {
-        return Math.min(3, tag(player).getCompound("unlocked").getInt(shout.id()));
+        return Math.min(3, tag(player).getCompoundOrEmpty("unlocked").getIntOr(shout.id(), 0));
     }
 
     public static void setWordsUnlocked(Player player, Shout shout, int words) {
         CompoundTag tag = tag(player);
-        CompoundTag w = tag.getCompound("unlocked");
+        CompoundTag w = tag.getCompoundOrEmpty("unlocked");
         w.putInt(shout.id(), Math.max(0, Math.min(3, words)));
         tag.put("unlocked", w);
         dirty(player);
@@ -221,7 +221,7 @@ public final class MagicData {
     }
 
     public static int dragonSouls(Player player) {
-        return tag(player).getInt("dragon_souls");
+        return tag(player).getIntOr("dragon_souls", 0);
     }
 
     public static void setDragonSouls(Player player, int souls) {
@@ -230,7 +230,7 @@ public final class MagicData {
     }
 
     public static String selectedShout(Player player) {
-        return tag(player).getString("selected_shout");
+        return tag(player).getStringOr("selected_shout", "");
     }
 
     public static void setSelectedShout(Player player, String shoutId) {
@@ -243,9 +243,9 @@ public final class MagicData {
     /** The currently equipped Voice slot: "shout:<id>", "power:racial", or "power:stone:<id>". */
     public static String selectedVoice(Player player) {
         CompoundTag tag = tag(player);
-        String voice = tag.getString("voice");
+        String voice = tag.getStringOr("voice", "");
         if (!voice.isEmpty()) return voice;
-        String shout = tag.getString("selected_shout");
+        String shout = tag.getStringOr("selected_shout", "");
         if (!shout.isEmpty()) return "shout:" + shout;
         return "power:racial";
     }
@@ -261,12 +261,12 @@ public final class MagicData {
 
     /** Game time at which the voice is ready again. */
     public static long shoutReadyAt(Player player) {
-        return tag(player).getLong("shout_ready");
+        return tag(player).getLongOr("shout_ready", 0L);
     }
 
     /** Length of the current voice cooldown in ticks (for the HUD meter). */
     public static long shoutCooldownTotal(Player player) {
-        return tag(player).getLong("shout_total");
+        return tag(player).getLongOr("shout_total", 0L);
     }
 
     public static void setShoutCooldown(Player player, long readyAt, long total) {
@@ -279,16 +279,16 @@ public final class MagicData {
     // ------------------------------------------------------------------ word walls
 
     public static boolean hasReadWall(Player player, String wallKey) {
-        ListTag list = tag(player).getList("walls", Tag.TAG_STRING);
+        ListTag list = tag(player).getListOrEmpty("walls");
         for (int i = 0; i < list.size(); i++) {
-            if (list.getString(i).equals(wallKey)) return true;
+            if (list.getStringOr(i, "").equals(wallKey)) return true;
         }
         return false;
     }
 
     public static void markWallRead(Player player, String wallKey) {
         CompoundTag tag = tag(player);
-        ListTag list = tag.getList("walls", Tag.TAG_STRING);
+        ListTag list = tag.getListOrEmpty("walls");
         list.add(StringTag.valueOf(wallKey));
         tag.put("walls", list);
         dirty(player);

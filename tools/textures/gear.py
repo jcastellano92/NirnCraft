@@ -57,6 +57,12 @@ def save_png(img, folder, name):
 
 
 def write_json(path, obj):
+    import sys
+    from pathlib import Path
+    native_tools263 = str(Path(__file__).resolve().parents[1])
+    if native_tools263 not in sys.path: sys.path.insert(0, native_tools263)
+    from data_format_263 import prepare
+    path, obj = prepare(path, obj)
     os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, "w", encoding="utf-8", newline="\n") as f:
         json.dump(obj, f, indent=2, ensure_ascii=False)
@@ -331,8 +337,8 @@ def merge_tag(path, items, owned):
 def tags():
     owned = {f"skycraft:{i}" for i in all_gear_ids()}
     owned |= {"minecraft:iron_helmet", "minecraft:iron_chestplate", "minecraft:iron_leggings", "minecraft:iron_boots"}
-    T = os.path.join(DATA, "tags", "items")
-    F = os.path.join(RES, "data", "forge", "tags", "items")
+    T = os.path.join(DATA, "tags", "item")
+    F = os.path.join(RES, "data", "forge", "tags", "item")
     weapons_by = {}
     for item_id, t, w in cat.weapon_items():
         weapons_by.setdefault(w, []).append(f"skycraft:{item_id}")
@@ -384,7 +390,7 @@ def tags():
 # ============================================================================================= loot
 
 def loot():
-    write_json(os.path.join(DATA, "loot_tables", "gear", "regional.json"), {
+    write_json(os.path.join(DATA, "loot_table", "gear", "regional.json"), {
         "type": "minecraft:chest",
         "pools": [{"rolls": 1, "bonus_rolls": 0, "entries": [{
             "type": "minecraft:item", "name": "minecraft:iron_ingot",
@@ -393,7 +399,7 @@ def loot():
     write_json(os.path.join(DATA, "loot_modifiers", "regional_gear.json"), {
         "type": "skycraft:add_table", "conditions": [], "table": "skycraft:gear/regional", "prefix": "chests/", "chance": 0.35})
     # raw materials of the new sets in the smithing-materials chests
-    path = os.path.join(DATA, "loot_tables", "chests", "smithing_materials.json")
+    path = os.path.join(DATA, "loot_table", "chests", "smithing_materials.json")
     table = read_json(path)
     if table:
         entries = table["pools"][0]["entries"]

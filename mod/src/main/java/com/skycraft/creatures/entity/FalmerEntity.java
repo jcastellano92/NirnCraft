@@ -94,8 +94,8 @@ public class FalmerEntity extends SkyHumanoid implements Ranked {
     }
 
     @Override
-    protected void customServerAiStep() {
-        super.customServerAiStep();
+    protected void customServerAiStep(net.minecraft.server.level.ServerLevel serverLevel263) {
+        super.customServerAiStep(serverLevel263);
         if (this.tickCount % 25 == 0 && this.getTarget() == null) {
             // Listen for noisy intruders within 24 blocks
             for (net.minecraft.world.entity.player.Player p : this.level().getEntitiesOfClass(
@@ -120,11 +120,11 @@ public class FalmerEntity extends SkyHumanoid implements Ranked {
     }
 
     @Override
-    public boolean doHurtTarget(Entity target) {
-        boolean hit = super.doHurtTarget(target);
+    public boolean doHurtTarget(net.minecraft.server.level.ServerLevel serverLevel263, Entity target) {
+        boolean hit = super.doHurtTarget(serverLevel263, target);
         if (hit && target instanceof LivingEntity living) {
             // Falmer coat their weapons in Chaurus venom
-            living.addEffect(new MobEffectInstance(MobEffects.POISON, 80, 0), this);
+            living.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.POISON), 80, 0), this);
             alertPack(living);
         }
         return hit;

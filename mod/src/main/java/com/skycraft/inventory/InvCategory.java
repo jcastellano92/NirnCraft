@@ -3,10 +3,8 @@ package com.skycraft.inventory;
 import com.skycraft.economy.ItemCategory;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.item.BookItem;
-import net.minecraft.world.item.EnchantedBookItem;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.UseAnim;
+import net.minecraft.world.item.ItemUseAnimation;
 
 import java.util.Locale;
 
@@ -37,7 +35,7 @@ public enum InvCategory {
             case INGREDIENTS -> INGREDIENTS;
             case BOOKS -> BOOKS;
             case FOOD -> FOOD;
-            default -> stack.getUseAnimation() == UseAnim.DRINK ? POTIONS : MISC;
+            default -> stack.getUseAnimation() == ItemUseAnimation.DRINK ? POTIONS : MISC;
         };
     }
 
@@ -50,27 +48,29 @@ public enum InvCategory {
     }
 
     public static boolean isFavorite(ItemStack stack) {
-        CompoundTag tag = stack.getTag();
-        return tag != null && tag.getBoolean(FAVORITE_NBT);
+        if (!ItemData.containsCustom(stack, FAVORITE_NBT)) return false;
+        CompoundTag tag = com.skycraft.inventory.ItemData.custom(stack);
+        return tag != null && tag.getBooleanOr(FAVORITE_NBT, false);
     }
 
     public static boolean isStolen(ItemStack stack) {
-        CompoundTag tag = stack.getTag();
-        return tag != null && tag.getBoolean(STOLEN_NBT);
+        if (!ItemData.containsCustom(stack, STOLEN_NBT)) return false;
+        CompoundTag tag = com.skycraft.inventory.ItemData.custom(stack);
+        return tag != null && tag.getBooleanOr(STOLEN_NBT, false);
     }
 
     /** Eaten or drunk straight from the inventory. */
     public static boolean isConsumable(ItemStack stack) {
-        if (stack.isEdible() || com.skycraft.crafting.arcane.alchemy.Ingredients.isIngredient(stack)) return true;
+        if (stack.has(net.minecraft.core.component.DataComponents.FOOD) || com.skycraft.crafting.arcane.alchemy.Ingredients.isIngredient(stack)) return true;
         if (stack.getItem() instanceof net.minecraft.world.item.PotionItem) return true;
-        UseAnim anim = stack.getUseAnimation();
-        return anim == UseAnim.DRINK;
+        ItemUseAnimation anim = stack.getUseAnimation();
+        return anim == ItemUseAnimation.DRINK;
     }
 
     /** "Read" instead of "Equip". */
     public static boolean isReadable(ItemStack stack) {
         // blank books and enchanted books have nothing to read
-        if (stack.getItem() instanceof BookItem || stack.getItem() instanceof EnchantedBookItem) return false;
+        if (stack.is(net.minecraft.world.item.Items.BOOK) || stack.is(net.minecraft.world.item.Items.ENCHANTED_BOOK)) return false;
         InvCategory c = of(stack);
         return c == BOOKS || c == SPELL_TOMES;
     }

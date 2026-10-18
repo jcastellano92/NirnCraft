@@ -1,22 +1,16 @@
 package com.skycraft.atmosphere.client;
 
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.NativeImage;
-import com.mojang.blaze3d.platform.TextureUtil;
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.skycraft.render.client.DataTexture;
 import com.skycraft.Skycraft;
 import com.skycraft.tamriel.MapSample;
 import com.skycraft.tamriel.TamrielMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.renderer.texture.AbstractTexture;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
-import org.lwjgl.opengl.GL11;
 
-import java.io.IOException;
 
 /**
  * One texel telling the shader pack how high the terrain stands on the horizon in the direction of the sun, so the sun
@@ -29,8 +23,8 @@ import java.io.IOException;
  * Red channel = sine of that angle / {@link #MAX_SIN}. Nearby terrain and buildings are left to the shader's own
  * shadow map.</p>
  */
-public final class SunHorizonTexture extends AbstractTexture {
-    public static final ResourceLocation LOCATION = new ResourceLocation(Skycraft.MODID, "textures/environment/sun_horizon.png");
+public final class SunHorizonTexture implements AutoCloseable {
+    public static final Identifier LOCATION = Identifier.fromNamespaceAndPath(Skycraft.MODID, "textures/environment/sun_horizon.png");
     /** Horizon sines above this saturate (about 30 degrees). */
     static final float MAX_SIN = 0.5f;
     private static final double NEAR = 192.0, FAR = 14000.0;
@@ -40,6 +34,7 @@ public final class SunHorizonTexture extends AbstractTexture {
     private static final MapSample SAMPLE = new MapSample();
 
     private final NativeImage image = new NativeImage(NativeImage.Format.RGBA, 1, 1, false);
+    private ClientLevel trackedLevel;
     private float eased;
     private boolean primed;
     private int lastTick = Integer.MIN_VALUE;
@@ -57,8 +52,7 @@ public final class SunHorizonTexture extends AbstractTexture {
         Minecraft mc = Minecraft.getInstance();
         if (mc == null || mc.getTextureManager() == null) return;
         SunHorizonTexture tex = get();
-        AbstractTexture existing = mc.getTextureManager().getTexture(LOCATION, null);
-        if (existing != tex) mc.getTextureManager().register(LOCATION, tex);
+        mc.getTextureManager().getTexture(LOCATION);
     }
 
     /** Client tick: refreshes the horizon every few ticks. */
@@ -81,11 +75,12 @@ public final class SunHorizonTexture extends AbstractTexture {
     }
 
     private void update(ClientLevel level, Vec3 cam) {
+        if (trackedLevel != level) { trackedLevel = level; primed = false; lastTick = Integer.MIN_VALUE; eased = 0f; }
         int now = (int) level.getGameTime();
         if (primed && Math.abs(now - lastTick) < UPDATE_TICKS) return;
         lastTick = now;
         // vanilla sun direction: (-sin(t), cos(t), 0) with t the time-of-day angle, so +x (east) while rising
-        double angle = level.getTimeOfDay(1.0f) * Math.PI * 2.0;
+        double angle = com.skycraft.atmosphere.client.SkyEnvironment.sunCycle(level, 1.0f) * Math.PI * 2.0;
         int dirX = -Math.sin(angle) >= 0.0 ? 1 : -1;
         float target = horizonSin(cam.x, cam.y, cam.z, dirX);
         if (!primed) {
@@ -100,44 +95,18 @@ public final class SunHorizonTexture extends AbstractTexture {
 
     private void write(float sin) {
         int r = Math.max(0, Math.min(255, Math.round(Mth.clamp(sin / MAX_SIN, 0f, 1f) * 255f)));
-        image.setPixelRGBA(0, 0, (255 << 24) | r);
-    }
-
-    @Override
-    public void load(ResourceManager manager) throws IOException {
-        if (RenderSystem.isOnRenderThreadOrInit()) {
-            uploadToGl(getId());
-        } else {
-            RenderSystem.recordRenderCall(() -> uploadToGl(getId()));
-        }
+        image.setPixelABGR(0, 0, (255 << 24) | r);
     }
 
     private void uploadAllTargets() {
-        if (!RenderSystem.isOnRenderThreadOrInit()) {
-            RenderSystem.recordRenderCall(this::uploadAllTargets);
-            return;
-        }
-        uploadToGl(getId());
-        Minecraft mc = Minecraft.getInstance();
-        if (mc != null && mc.getTextureManager() != null) {
-            AbstractTexture registered = mc.getTextureManager().getTexture(LOCATION, null);
-            if (registered != null && registered != this && registered.getId() != getId()) uploadToGl(registered.getId());
-        }
-    }
-
-    private void uploadToGl(int glId) {
-        TextureUtil.prepareImage(glId, 0, 1, 1);
-        GlStateManager._bindTexture(glId);
-        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
-        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
-        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL11.GL_CLAMP);
-        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL11.GL_CLAMP);
-        image.upload(0, 0, 0, 0, 0, 1, 1, true, false, false, false);
+        try (var uploadState = TextureUploadState.preserve()) { DataTexture.write(LOCATION, image); }
     }
 
     @Override
     public void close() {
         image.close();
+        trackedLevel = null;
+        if (instance == this) instance = null;
     }
 }
 

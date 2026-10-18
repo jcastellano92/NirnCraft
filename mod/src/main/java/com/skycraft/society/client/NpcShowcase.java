@@ -7,10 +7,10 @@ import com.skycraft.society.NpcNames;
 import com.skycraft.society.Outfit;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Screenshot;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -24,7 +24,7 @@ import java.util.List;
  * {@code --quickPlaySingleplayer}), lines up every race in several outfits in front of the player, takes screenshots
  * into {@code build/npc-showcase/}, then closes the client. Does nothing otherwise.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
 public final class NpcShowcase {
     /** On with {@code -Dskycraft.npcshowcase=true} or a file {@code npc-showcase.flag} in the game directory. */
     public static final boolean ENABLED = Boolean.getBoolean("skycraft.npcshowcase") || Files.exists(Paths.get("npc-showcase.flag"));
@@ -38,30 +38,31 @@ public final class NpcShowcase {
     private NpcShowcase() {}
 
     @SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent event) {
-        if (!ENABLED || event.phase != TickEvent.Phase.END) return;
+    public static void onClientTick(net.neoforged.neoforge.client.event.ClientTickEvent.Post event) {
+        if (!ENABLED) return;
+        if (com.skycraft.client.autotest.ReviewCaptures.pending() > 0) return;
         Minecraft mc = Minecraft.getInstance();
         if (mc.level == null || mc.player == null) {
             if (step > 0) {
-                Skycraft.LOGGER.warn("NPC showcase: left the world (screen {}), closing", mc.screen);
+                Skycraft.LOGGER.warn("NPC showcase: left the world (screen {}), closing", mc.gui.screen());
                 mc.stop();
                 return;
             }
-            if (!opened && mc.screen != null && mc.getOverlay() == null && Files.isDirectory(Paths.get("saves", WORLD))) {
+            if (!opened && mc.gui.screen() != null && mc.gui.overlay() == null && Files.isDirectory(Paths.get("saves", WORLD))) {
                 opened = true;
                 open(mc);
             }
             return;
         }
         if (++tick < 200 || tick % 60 != 0) return;
-        Skycraft.LOGGER.info("NPC showcase step {} (screen {})", step, mc.screen == null ? "none" : mc.screen.getClass().getSimpleName());
+        Skycraft.LOGGER.info("NPC showcase step {} (screen {})", step, mc.gui.screen() == null ? "none" : mc.gui.screen().getClass().getSimpleName());
         if (step == 0) chooseRace(mc);
-        if (mc.screen instanceof com.skycraft.client.screen.RaceScreen && step > 0) mc.setScreen(null);
+        if (mc.gui.screen() instanceof com.skycraft.client.screen.RaceScreen && step > 0) mc.gui.setScreen(null);
 
         switch (step++) {
             case 0 -> {
-                run(mc, "gamerule doDaylightCycle false");
-                run(mc, "gamerule doMobSpawning false");
+                run(mc, "gamerule advance_time false");
+                run(mc, "gamerule spawn_mobs false");
                 run(mc, "time set 6000");
                 run(mc, "weather clear");
                 run(mc, "gamemode creative");
@@ -70,7 +71,7 @@ public final class NpcShowcase {
             case 1 -> {
                 // a stage in the sky: nothing in the way, plain background
                 run(mc, "fill ~-10 199 ~-3 ~10 199 ~12 minecraft:smooth_stone");
-                mc.options.hideGui = true;
+                com.skycraft.client.autotest.ReviewWorlds.hudHidden(mc,true);
             }
             case 2 -> lineup(mc, 0);
             case 3 -> shot(mc, "01_humans");
@@ -88,7 +89,7 @@ public final class NpcShowcase {
             case 15 -> shot(mc, "05_closeup");
             case 16 -> {
                 clear(mc);
-                mc.options.hideGui = false;
+                com.skycraft.client.autotest.ReviewWorlds.hudHidden(mc,false);
                 run(mc, "execute at @s positioned over motion_blocking_no_leaves run tp @s ~ ~1 ~ 0 25");
             }
             case 17 -> run(mc, "execute positioned ^ ^ ^9 run skycraft-society populate town");
@@ -111,7 +112,7 @@ public final class NpcShowcase {
         java.util.UUID id = mc.player.getUUID();
         server.execute(() -> {
             var sp = server.getPlayerList().getPlayer(id);
-            if (sp != null) server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4), cmd);
+            if (sp != null) server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(net.minecraft.server.permissions.PermissionSet.ALL_PERMISSIONS), cmd);
         });
     }
 
@@ -135,14 +136,14 @@ public final class NpcShowcase {
                 if (p.length == 4 && p[0] == net.minecraft.client.gui.screens.Screen.class && p[1] == String.class
                         && p[2] == boolean.class && p[3] == boolean.class) {
                     m.setAccessible(true);
-                    m.invoke(flows, mc.screen, WORLD, false, false);
+                    m.invoke(flows, mc.gui.screen(), WORLD, false, false);
                     return;
                 }
             }
         } catch (Exception e) {
             Skycraft.LOGGER.warn("NPC showcase: direct world load failed, using the normal flow", e);
         }
-        flows.loadLevel(mc.screen, WORLD);
+        com.skycraft.client.autotest.ReviewWorlds.open(mc,WORLD,mc.gui.screen());
     }
 
     private static void lineup(Minecraft mc, int set) {
@@ -208,15 +209,7 @@ public final class NpcShowcase {
     }
 
     private static void shot(Minecraft mc, String name) {
-        try {
-            Files.createDirectories(DIR);
-            NativeImage img = Screenshot.takeScreenshot(mc.getMainRenderTarget());
-            File out = DIR.resolve(name + ".png").toFile();
-            img.writeToFile(out);
-            img.close();
-            Skycraft.LOGGER.info("NPC showcase screenshot: {}", out.getAbsolutePath());
-        } catch (Exception e) {
-            Skycraft.LOGGER.warn("NPC showcase screenshot failed", e);
-        }
+        com.skycraft.client.autotest.ReviewCaptures.capture(mc, DIR, name,
+                output -> Skycraft.LOGGER.info("NPC showcase: saved {}", output.toAbsolutePath()));
     }
 }

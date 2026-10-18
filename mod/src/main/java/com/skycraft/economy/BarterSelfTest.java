@@ -10,13 +10,14 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.contents.TranslatableContents;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.npc.Villager;
-import net.minecraft.world.entity.npc.VillagerProfession;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.npc.villager.Villager;
+import net.minecraft.world.entity.npc.villager.VillagerProfession;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -43,12 +44,12 @@ public final class BarterSelfTest {
     public static void run(MinecraftServer server, ServerLevel level, ServerPlayer p, PackSelfTest.Checks c) {
         p.getInventory().clearContent();
         Pack.clear(p);
-        Villager npc = EntityType.VILLAGER.create(level);
+        Villager npc = net.minecraft.world.entity.EntityTypes.VILLAGER.create(level, net.minecraft.world.entity.EntitySpawnReason.STRUCTURE);
         if (npc == null) {
             c.check("barter: a test merchant", false, "could not create a villager");
             return;
         }
-        npc.setVillagerData(npc.getVillagerData().setProfession(VillagerProfession.CARTOGRAPHER).setLevel(2));
+        npc.setVillagerData(npc.getVillagerData().withProfession(net.minecraft.core.registries.BuiltInRegistries.VILLAGER_PROFESSION.getOrThrow(VillagerProfession.CARTOGRAPHER)).withLevel(2));
         npc.setPos(p.getX(), p.getY(), p.getZ());
         Shop shop = Shop.of(npc, p);
         SkyData.get(p).setGold(1000);
@@ -66,13 +67,13 @@ public final class BarterSelfTest {
             c.check("barter: the test merchant deals in something", false, "no candidate item is bought by " + Merchants.pools(npc));
             return;
         }
-        ResourceLocation sellId = BuiltInRegistries.ITEM.getKey(sellItem);
+        Identifier sellId = BuiltInRegistries.ITEM.getKey(sellItem);
 
         // ---- quest items: filtered out of the list and refused server-side (slot and pack)
         ItemStack letter = QuestItems.letter("whiterun");
         ItemStack key = QuestItems.cottageKey(p.getUUID());
         ItemStack relic = new ItemStack(QuestItems.QUEST_RELIC.get());
-        relic.getOrCreateTag().putString(QuestItems.RELIC_TAG, "selftest");
+        com.skycraft.inventory.ItemData.updateCustom(relic, customData263 -> customData263.putString(QuestItems.RELIC_TAG, "selftest"));
         p.getInventory().setItem(10, letter);
         p.getInventory().setItem(11, key);
         p.getInventory().setItem(12, relic); // a relic by item kind alone (no quest flag in its NBT)
@@ -99,7 +100,7 @@ public final class BarterSelfTest {
 
         // ---- equipped rows: marked, listed apart, confirmed, one at a time; the unequipped row sells around them
         Inventory inv = p.getInventory();
-        inv.setItem(inv.selected, new ItemStack(sellItem, 1));
+        inv.setItem(inv.getSelectedSlot(), new ItemStack(sellItem, 1));
         inv.setItem(10, new ItemStack(sellItem, 1));
         inv.setItem(11, new ItemStack(sellItem, 1));
         Pack.add(p, new ItemStack(sellItem, 1)); // the pack part of the same row (a virtual slot)
@@ -113,18 +114,18 @@ public final class BarterSelfTest {
                 else freeRow = e;
             }
         }
-        c.check("barter: the held item is its own marked row", heldRow != null && heldRow.equip() == 1 && heldRow.index() == inv.selected,
+        c.check("barter: the held item is its own marked row", heldRow != null && heldRow.equip() == 1 && heldRow.index() == inv.getSelectedSlot(),
                 heldRow == null ? "no row" : "equip " + heldRow.equip());
         c.check("barter: the unequipped copies are one row (slots and pack together)",
                 freeRow != null && freeRow.equip() == 0 && freeRow.stack().getCount() == unequipped, freeRow == null ? "no row" : "count " + freeRow.stack().getCount());
-        String confirm = key(Barter.sell(p, shop, inv.selected, false, sellId, false));
+        String confirm = key(Barter.sell(p, shop, inv.getSelectedSlot(), false, sellId, false));
         c.check("barter: selling an equipped item without confirmation is refused", confirm.endsWith("confirm_equipped")
-                && !inv.getItem(inv.selected).isEmpty(), confirm);
+                && !inv.getItem(inv.getSelectedSlot()).isEmpty(), confirm);
         long gold0 = Currency.balance(p);
         String rowSale = key(Barter.sell(p, shop, freeRow == null ? 10 : freeRow.index(), true, sellId, false));
         c.check("barter: 'sell all' on the unequipped row sells only the unequipped items",
-                rowSale.endsWith("sold") && !inv.getItem(inv.selected).isEmpty() && inv.getItem(10).isEmpty() && inv.getItem(11).isEmpty()
-                        && Pack.count(p, sellItem) == 0, rowSale + ", held kept: " + !inv.getItem(inv.selected).isEmpty());
+                rowSale.endsWith("sold") && !inv.getItem(inv.getSelectedSlot()).isEmpty() && inv.getItem(10).isEmpty() && inv.getItem(11).isEmpty()
+                        && Pack.count(p, sellItem) == 0, rowSale + ", held kept: " + !inv.getItem(inv.getSelectedSlot()).isEmpty());
         long goldAfterSale = Currency.balance(p);
 
         // ---- buy back: everything just sold, at the price it was paid
@@ -137,8 +138,8 @@ public final class BarterSelfTest {
                 + ", after the sale " + goldAfterSale + ")");
 
         // the equipped item itself: confirmed sale sells one, then it can be bought back too
-        String eq = key(Barter.sell(p, shop, inv.selected, true, sellId, true));
-        c.check("barter: a confirmed sale of the equipped item sells exactly that one", eq.endsWith("sold") && inv.getItem(inv.selected).isEmpty()
+        String eq = key(Barter.sell(p, shop, inv.getSelectedSlot(), true, sellId, true));
+        c.check("barter: a confirmed sale of the equipped item sells exactly that one", eq.endsWith("sold") && inv.getItem(inv.getSelectedSlot()).isEmpty()
                 && count(p, sellItem) == unequipped, eq + ", items left " + count(p, sellItem));
         String eb = key(Barter.buyback(p, shop, 0, false, sellId));
         c.check("barter: the equipped item can be bought back", eb.endsWith("bought_back") && count(p, sellItem) == unequipped + 1, eb);
@@ -147,6 +148,8 @@ public final class BarterSelfTest {
         Buyback.forget(p.getUUID());
         ShopBook.get(server).forget(shop.key());
         sharedShops(server, level, p, c);
+        bulkBuybackXp(level, p, c);
+        activeShopViewers(server, level, p, c);
         tradeLint(level, p, c);
         valueDensity(c);
         tradeNetworkAndHomesteads(level, c);
@@ -156,9 +159,9 @@ public final class BarterSelfTest {
 
     /** A villager working at a counter of the shop {@code key}, selling the {@code general} trade (it buys anything). */
     private static Villager counter(ServerLevel level, ServerPlayer p, String key, String job) {
-        Villager v = EntityType.VILLAGER.create(level);
+        Villager v = net.minecraft.world.entity.EntityTypes.VILLAGER.create(level, net.minecraft.world.entity.EntitySpawnReason.STRUCTURE);
         if (v == null) return null;
-        v.setVillagerData(v.getVillagerData().setProfession(VillagerProfession.CARTOGRAPHER).setLevel(3));
+        v.setVillagerData(v.getVillagerData().withProfession(net.minecraft.core.registries.BuiltInRegistries.VILLAGER_PROFESSION.getOrThrow(VillagerProfession.CARTOGRAPHER)).withLevel(3));
         v.setPos(p.getX(), p.getY(), p.getZ());
         CompoundTag shop = new CompoundTag();
         net.minecraft.nbt.ListTag pools = new net.minecraft.nbt.ListTag();
@@ -171,10 +174,107 @@ public final class BarterSelfTest {
         return v;
     }
 
+    private static void bulkBuybackXp(ServerLevel level, ServerPlayer p, PackSelfTest.Checks c) {
+        String shopKey = "selftest/bulk-xp";
+        Villager npc = counter(level, p, shopKey, null);
+        if (npc == null) { c.check("bulk sale: merchant exists", false, "no villager"); return; }
+        npc.getPersistentData().putBoolean("skycraft_always_open", true);
+        p.getInventory().clearContent();
+        Pack.clear(p);
+        Buyback.forget(p.getUUID());
+        Shop shop = Shop.of(npc, p);
+        shop.record().gold = 100_000;
+        SkyData.get(p).setGold(100_000);
+        p.getInventory().setItem(10, new ItemStack(Items.WHEAT, 6));
+        Barter.bulkSell(p, npc, ShopType.CROPS);
+        var entries = Buyback.list(p, shop);
+        int row = -1;
+        for (int i = 0; i < entries.size(); i++) if (entries.get(i).original.is(Items.WHEAT)) row = i;
+        c.check("bulk sale: wheat enters real buyback", row >= 0, entries.size() + " rows");
+        if (row >= 0) {
+            Barter.buyback(p, shop, row, true, BuiltInRegistries.ITEM.getKey(Items.WHEAT));
+            var data = SkyData.get(p);
+            int skill = data.getSkill(com.skycraft.core.Skill.SPEECH);
+            float xp = data.getSkillXp(com.skycraft.core.Skill.SPEECH);
+            int before = count(p, Items.WHEAT);
+            Barter.bulkSell(p, npc, ShopType.CROPS);
+            c.check("bulk sale: recently bought back goods still sell without Speech XP",
+                    before == 6 && count(p, Items.WHEAT) == 0 && Buyback.noXp(p, shop)
+                    && skill == data.getSkill(com.skycraft.core.Skill.SPEECH)
+                    && xp == data.getSkillXp(com.skycraft.core.Skill.SPEECH), "wheat " + before + " -> " + count(p, Items.WHEAT));
+        }
+        Buyback.forget(p.getUUID());
+        ShopBook.get(level.getServer()).forget(shopKey);
+        p.getInventory().clearContent();
+        Pack.clear(p);
+    }
+
+    /** Real merchant/player identities and PacketDistributor recipient dispatch, recorded at the native listener boundary.
+     * This checks subscriptions; physical connection negotiation/codec acceptance is a separate multiplayer gate. */
+    private static void activeShopViewers(MinecraftServer server, ServerLevel level, ServerPlayer anchor, PackSelfTest.Checks c) {
+        String key = "selftest/viewers";
+        var players = new java.util.ArrayList<ServerPlayer>();
+        var wires = new java.util.ArrayList<PackSelfTest.RecordingPacketListener>();
+        var merchants = new java.util.ArrayList<LivingEntity>();
+        try {
+            for (int i = 0; i < 3; i++) {
+                var p = new net.neoforged.neoforge.common.util.FakePlayer(level,
+                        new com.mojang.authlib.GameProfile(java.util.UUID.randomUUID(), "[TradeView" + i + "]"));
+                p.setPos(anchor.getX() + i, anchor.getY(), anchor.getZ());
+                var wire = new PackSelfTest.RecordingPacketListener(server, p);
+                players.add(p); wires.add(wire);
+                level.addNewPlayer(p);
+            }
+            for (int i = 0; i < 2; i++) {
+                var npc = com.skycraft.society.NpcEntities.NPC.get().create(level, net.minecraft.world.entity.EntitySpawnReason.STRUCTURE);
+                if (npc == null) throw new IllegalStateException("Cannot create test counter");
+                npc.setRole(com.skycraft.society.NpcRole.MERCHANT);
+                npc.setPos(anchor.getX(), anchor.getY(), anchor.getZ());
+                npc.setNoAi(true);
+                CompoundTag shop = new CompoundTag();
+                var pools = new net.minecraft.nbt.ListTag();
+                pools.add(net.minecraft.nbt.StringTag.valueOf("general"));
+                shop.put("pools", pools);
+                shop.putString(ShopKeys.KEY, key);
+                shop.putInt("level", 3);
+                npc.getPersistentData().put(Shop.KEY, shop);
+                npc.getPersistentData().putBoolean("skycraft_always_open", true);
+                merchants.add(npc);
+                if (!level.addFreshEntity(npc)) throw new IllegalStateException("Cannot add test counter");
+            }
+            Barter.open(players.get(0), merchants.get(0));
+            Barter.open(players.get(1), merchants.get(1));
+            wires.forEach(w -> w.packets = 0);
+            Barter.handleAction(players.get(0), merchants.get(0).getId(), 999, 0, false,
+                    BuiltInRegistries.ITEM.getKey(Items.WHEAT), false);
+            c.check("barter subscriptions: active other counter refreshes; nearby bystander gets no packets",
+                    wires.get(0).packets == 1 && wires.get(1).packets == 1 && wires.get(2).packets == 0,
+                    wires.stream().map(w -> Integer.toString(w.packets)).collect(java.util.stream.Collectors.joining("/")));
+            Barter.close(players.get(1), merchants.get(1).getId());
+            wires.forEach(w -> w.packets = 0);
+            Barter.handleAction(players.get(0), merchants.get(0).getId(), 999, 0, false,
+                    BuiltInRegistries.ITEM.getKey(Items.WHEAT), false);
+            c.check("barter subscriptions: closing a screen stops updates", wires.get(0).packets == 1
+                    && wires.get(1).packets == 0 && wires.get(2).packets == 0, "closed and unopened peers receive0");
+            wires.forEach(w -> w.packets = 0);
+            Barter.handleAction(players.get(2), merchants.get(0).getId(), 999, 0, false,
+                    BuiltInRegistries.ITEM.getKey(Items.WHEAT), false);
+            c.check("barter subscriptions: unopened screen cannot issue actions", wires.stream().allMatch(w -> w.packets == 0),
+                    "no packets sent");
+        } finally {
+            for (ServerPlayer p : players) {
+                for (LivingEntity npc : merchants) com.skycraft.dialogue.Dialogue.endConversation(p, npc.getId());
+                level.removePlayerImmediately(p, net.minecraft.world.entity.Entity.RemovalReason.DISCARDED);
+            }
+            merchants.forEach(net.minecraft.world.entity.Entity::discard);
+            ShopBook.get(server).forget(key);
+        }
+    }
+
     private static boolean sameStock(List<ItemStack> a, List<ItemStack> b) {
         if (a.size() != b.size()) return false;
         for (int i = 0; i < a.size(); i++) {
-            if (a.get(i).getCount() != b.get(i).getCount() || !ItemStack.isSameItemSameTags(a.get(i), b.get(i))) return false;
+            if (a.get(i).getCount() != b.get(i).getCount() || !ItemStack.isSameItemSameComponents(a.get(i), b.get(i))) return false;
         }
         return true;
     }
@@ -223,7 +323,7 @@ public final class BarterSelfTest {
         int total = 0;
         for (ItemStack s : a.stock()) total += s.getCount();
         ItemStack row0 = a.row(0);
-        ResourceLocation row0Id = BuiltInRegistries.ITEM.getKey(row0.getItem());
+        Identifier row0Id = BuiltInRegistries.ITEM.getKey(row0.getItem());
         int before = a.count(row0);
         int carried = count(p, row0.getItem());
         Component bought = Barter.buy(p, a, 0, false, row0Id);
@@ -273,7 +373,7 @@ public final class BarterSelfTest {
         if (sold == null) {
             c.check("shops: a sale candidate", false, "none of the candidates is worth gold");
         } else {
-            ResourceLocation soldId = BuiltInRegistries.ITEM.getKey(sold);
+            Identifier soldId = BuiltInRegistries.ITEM.getKey(sold);
             p.getInventory().setItem(10, new ItemStack(sold, 3));
             String sale = key(Barter.sell(p, a, 10, true, soldId, false));
             c.check("shops: a sale is paid", sale.endsWith("sold") && p.getInventory().getItem(10).isEmpty(), sale);
@@ -298,11 +398,11 @@ public final class BarterSelfTest {
         }
 
         // artifacts are kept for the seller only: never on a shelf, back from the buy-back list, persisted
-        Item artifact = BuiltInRegistries.ITEM.get(new ResourceLocation("skycraft", "dawnbreaker"));
+        Item artifact = BuiltInRegistries.ITEM.getValue(Identifier.fromNamespaceAndPath("skycraft", "dawnbreaker"));
         if (artifact == Items.AIR) {
             c.check("shops: an artifact is a keepsake", false, "skycraft:dawnbreaker is not registered");
         } else {
-            ResourceLocation artId = BuiltInRegistries.ITEM.getKey(artifact);
+            Identifier artId = BuiltInRegistries.ITEM.getKey(artifact);
             p.getInventory().setItem(11, new ItemStack(artifact));
             c.check("shops: an artifact is a keepsake (never resold)", Resale.isKeepsake(new ItemStack(artifact)), "isKeepsake");
             String ask = key(Barter.sell(p, a, 11, false, artId, false));
@@ -337,7 +437,8 @@ public final class BarterSelfTest {
         // caps: a flood of sold kinds is bounded, nothing throws, the ledger stays a subset of the shelves
         for (int i = 0; i < ShopBook.MAX_SOLD_ROWS + 20; i++) {
             ItemStack junk = new ItemStack(Items.STICK);
-            junk.getOrCreateTag().putInt("selftest_kind", i);
+            final int kind = i;
+            com.skycraft.inventory.ItemData.updateCustom(junk, customData263 -> customData263.putInt("selftest_kind", kind));
             a.addSold(junk);
         }
         boolean subset = true;
@@ -347,7 +448,7 @@ public final class BarterSelfTest {
 
         // a restock keeps what players sold (and rebuilds the rest): move the clock one period on
         ItemStack mark = new ItemStack(Items.STICK);
-        mark.getOrCreateTag().putInt("selftest_kind", ShopBook.MAX_SOLD_ROWS + 19);
+        com.skycraft.inventory.ItemData.updateCustom(mark, customData263 -> customData263.putInt("selftest_kind", ShopBook.MAX_SOLD_ROWS + 19));
         int markCount = a.count(mark);
         a.record().period -= 1;
         Shop restocked = Shop.of(innkeeper, p);
@@ -562,7 +663,7 @@ public final class BarterSelfTest {
                 "senche_tiger", "indrik", "horker", "mammoth", "camel"};
         List<String> chickenFallbacks = new java.util.ArrayList<>();
         for (String animal : nativeLivestock) {
-            if (com.skycraft.tamriel.settlement.grammar.Outdoors.animalType(animal) == EntityType.CHICKEN) {
+            if (com.skycraft.tamriel.settlement.grammar.Outdoors.animalType(animal) == net.minecraft.world.entity.EntityTypes.CHICKEN) {
                 chickenFallbacks.add(animal);
             }
         }

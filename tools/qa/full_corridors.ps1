@@ -22,7 +22,7 @@ param(
 $ErrorActionPreference = "Continue"
 $Root = Resolve-Path (Join-Path $PSScriptRoot "..\..")
 $Dev = Join-Path $Root "tools\dev\devserver.ps1"
-$World = Join-Path $Root "mod\run\devworld\world"
+$World = Join-Path $Root "mod\run\devworld-26.3\world"
 $DevSettings = @{}
 if ($RuntimeRoot) { $DevSettings.RuntimeRoot = $RuntimeRoot; $World = Join-Path ([IO.Path]::GetFullPath($RuntimeRoot)) 'world' }
 $Tile = Join-Path $PSScriptRoot "corridor_tile.py"

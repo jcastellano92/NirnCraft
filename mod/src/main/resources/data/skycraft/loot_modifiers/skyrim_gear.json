@@ -1,7 +1,7 @@
 {
   "type": "skycraft:add_table",
-  "conditions": [],
   "table": "skycraft:chests/skyrim_gear",
   "prefix": "chests/",
-  "chance": 0.3
+  "chance": 0.3,
+  "priority": 16
 }

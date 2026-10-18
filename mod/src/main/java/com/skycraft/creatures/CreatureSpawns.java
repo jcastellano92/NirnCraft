@@ -13,7 +13,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.SectionPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -24,13 +24,13 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.ai.village.poi.PoiManager;
 import net.minecraft.world.entity.ai.village.poi.PoiTypes;
-import net.minecraft.world.entity.animal.Wolf;
-import net.minecraft.world.entity.npc.AbstractVillager;
+import net.minecraft.world.entity.animal.wolf.Wolf;
+import net.minecraft.world.entity.npc.villager.AbstractVillager;
 import net.minecraft.world.level.BaseSpawner;
-import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.biome.Biome;
@@ -40,14 +40,14 @@ import net.minecraft.world.level.block.entity.SpawnerBlockEntity;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.phys.AABB;
-import net.minecraftforge.common.Tags;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.living.LivingEvent;
-import net.minecraftforge.event.entity.living.MobSpawnEvent;
-import net.minecraftforge.event.server.ServerStartedEvent;
-import net.minecraftforge.event.server.ServerStoppedEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.common.Tags;
+
+import net.neoforged.neoforge.event.entity.living.LivingEvent;
+import net.neoforged.neoforge.event.entity.living.MobSpawnEvent;
+import net.neoforged.neoforge.event.server.ServerStartedEvent;
+import net.neoforged.neoforge.event.server.ServerStoppedEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
@@ -59,7 +59,7 @@ import java.util.Optional;
  * vanilla night monsters make way for skeevers and (a few, transient) wolves, phantoms are disabled, dragons attack
  * travelers, and iron golems make way for nothing (the guards are the settlement's own: society.GuardWatch).
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class CreatureSpawns {
     private static final int GUARD_CHECK_INTERVAL = 600;
     private static final int MIN_GUARDS = 2;
@@ -70,7 +70,7 @@ public final class CreatureSpawns {
     @SubscribeEvent
     public static void onServerStarted(ServerStartedEvent event) {
         if (CreaturesConfig.DISABLE_INSOMNIA.get()) {
-            event.getServer().getGameRules().getRule(GameRules.RULE_DOINSOMNIA).set(false, event.getServer());
+            event.getServer().getGameRules().set(GameRules.SPAWN_PHANTOMS, false, event.getServer());
         }
     }
 
@@ -137,53 +137,53 @@ public final class CreatureSpawns {
      * Forge also fires this event while chunks generate (structure pieces, chunk-generation spawns) on worldgen threads,
      * with a WorldGenRegion instead of the ServerLevel. True for those: no POI or entity lookups allowed.
      */
-    private static boolean isWorldgen(MobSpawnEvent.FinalizeSpawn event) {
-        MobSpawnType type = event.getSpawnType();
-        if (type == MobSpawnType.STRUCTURE || type == MobSpawnType.CHUNK_GENERATION) return true;
+    private static boolean isWorldgen(net.neoforged.neoforge.event.entity.living.FinalizeSpawnEvent event) {
+        EntitySpawnReason type = event.getSpawnType();
+        if (type == EntitySpawnReason.STRUCTURE || type == EntitySpawnReason.CHUNK_GENERATION) return true;
         return !(event.getLevel() instanceof ServerLevel level) || !level.getServer().isSameThread();
     }
 
     @SubscribeEvent
-    public static void onFinalizeSpawn(MobSpawnEvent.FinalizeSpawn event) {
+    public static void onFinalizeSpawn(net.neoforged.neoforge.event.entity.living.FinalizeSpawnEvent event) {
         if (event.isSpawnCancelled()) return;
         Mob mob = event.getEntity();
         ServerLevelAccessor level = event.getLevel();
         BlockPos pos = BlockPos.containing(event.getX(), event.getY(), event.getZ());
-        MobSpawnType type = event.getSpawnType();
+        EntitySpawnReason type = event.getSpawnType();
         EntityType<?> entityType = mob.getType();
 
         if (isWorldgen(event)) {
             // Only cheap replacements that stay inside the region being generated.
-            if (entityType == EntityType.ZOMBIE && isNorth(level, pos) && level.getRandom().nextFloat() < CreaturesConfig.DRAUGR_REPLACES_ZOMBIES.get()) {
-                replace(event, ModEntities.DRAUGR.get().create(level.getLevel()));
-            } else if (entityType == EntityType.SPIDER || entityType == EntityType.CAVE_SPIDER) {
-                replace(event, ModEntities.FROSTBITE_SPIDER.get().create(level.getLevel()));
+            if (entityType == net.minecraft.world.entity.EntityTypes.ZOMBIE && isNorth(level, pos) && level.getRandom().nextFloat() < CreaturesConfig.DRAUGR_REPLACES_ZOMBIES.get()) {
+                replace(event, ModEntities.DRAUGR.get().create(level.getLevel(), net.minecraft.world.entity.EntitySpawnReason.EVENT));
+            } else if (entityType == net.minecraft.world.entity.EntityTypes.SPIDER || entityType == net.minecraft.world.entity.EntityTypes.CAVE_SPIDER) {
+                replace(event, ModEntities.FROSTBITE_SPIDER.get().create(level.getLevel(), net.minecraft.world.entity.EntitySpawnReason.EVENT));
             }
             return;
         }
         ServerLevel serverLevel = (ServerLevel) level;
 
-        if (type == MobSpawnType.SPAWNER) {
+        if (type == EntitySpawnReason.SPAWNER) {
             onSpawnerSpawn(event, serverLevel, pos, entityType);
             return;
         }
 
         // 1. Suppress all hostiles spawning on their own inside settlements or houses (including wild trolls); spawn
         // eggs, commands and scripted events still work there
-        boolean wild = type == MobSpawnType.NATURAL || type == MobSpawnType.PATROL || type == MobSpawnType.REINFORCEMENT;
+        boolean wild = type == EntitySpawnReason.NATURAL || type == EntitySpawnReason.PATROL || type == EntitySpawnReason.REINFORCEMENT;
         if (wild && mob instanceof net.minecraft.world.entity.monster.Enemy && isSettlementOrHouse(serverLevel, pos)) {
             event.setSpawnCancelled(true);
             return;
         }
 
         // No Iron Golems in towns, and no guards in their place: the watch is the settlement's own (society.GuardWatch)
-        if (entityType == EntityType.IRON_GOLEM && isSettlementOrHouse(serverLevel, pos)) {
+        if (entityType == net.minecraft.world.entity.EntityTypes.IRON_GOLEM && isSettlementOrHouse(serverLevel, pos)) {
             event.setSpawnCancelled(true);
             return;
         }
 
         // 2. Vanilla natural night hostiles in the Overworld make way for Skyrim's creatures
-        if (serverLevel.dimension() == Level.OVERWORLD && type == MobSpawnType.NATURAL && isVanillaDarkHostile(entityType)) {
+        if (serverLevel.dimension() == Level.OVERWORLD && type == EntitySpawnReason.NATURAL && isVanillaDarkHostile(entityType)) {
             RandomSource random = serverLevel.getRandom();
             // pacing: calm around spawn and towns, safe roads, one hostile event per cooldown near a player
             net.minecraft.server.level.ServerPlayer near = com.skycraft.creatures.spawn.SpawnPacing.playerNear(serverLevel, pos, 128);
@@ -195,38 +195,38 @@ public final class CreatureSpawns {
                 return;
             }
             // draugr rise in the cold north, frostbite spiders lurk underground
-            if (entityType == EntityType.ZOMBIE && isNorth(serverLevel, pos) && random.nextFloat() < CreaturesConfig.DRAUGR_REPLACES_ZOMBIES.get()
+            if (entityType == net.minecraft.world.entity.EntityTypes.ZOMBIE && isNorth(serverLevel, pos) && random.nextFloat() < CreaturesConfig.DRAUGR_REPLACES_ZOMBIES.get()
                     && fewNearby(serverLevel, ModEntities.DRAUGR.get(), pos, 48, 4)) {
                 if (near != null) com.skycraft.creatures.spawn.SpawnPacing.noteHostile(near);
-                replace(event, ModEntities.DRAUGR.get().create(serverLevel));
+                replace(event, ModEntities.DRAUGR.get().create(serverLevel, net.minecraft.world.entity.EntitySpawnReason.EVENT));
                 return;
             }
-            if ((entityType == EntityType.SPIDER || entityType == EntityType.CAVE_SPIDER) && !serverLevel.canSeeSky(pos)
+            if ((entityType == net.minecraft.world.entity.EntityTypes.SPIDER || entityType == net.minecraft.world.entity.EntityTypes.CAVE_SPIDER) && !serverLevel.canSeeSky(pos)
                     && random.nextFloat() < 0.35f && fewNearby(serverLevel, ModEntities.FROSTBITE_SPIDER.get(), pos, 32, 3)) {
                 if (near != null) com.skycraft.creatures.spawn.SpawnPacing.noteHostile(near);
-                replace(event, ModEntities.FROSTBITE_SPIDER.get().create(serverLevel));
+                replace(event, ModEntities.FROSTBITE_SPIDER.get().create(serverLevel, net.minecraft.world.entity.EntitySpawnReason.EVENT));
                 return;
             }
             event.setSpawnCancelled(true);
 
             // Small chance to spawn Skyrim wild night hostiles (skeevers or wolves) out in the wild
-            if (serverLevel.isNight() && !isSettlementOrHouse(serverLevel, pos)) {
+            if (serverLevel.isDarkOutside() && !isSettlementOrHouse(serverLevel, pos)) {
                 float roll = random.nextFloat();
                 if (roll < 0.12f) {
                     if (near != null) com.skycraft.creatures.spawn.SpawnPacing.noteHostile(near);
-                    SkeeverEntity skeever = ModEntities.SKEEVER.get().create(serverLevel);
+                    SkeeverEntity skeever = ModEntities.SKEEVER.get().create(serverLevel, net.minecraft.world.entity.EntitySpawnReason.EVENT);
                     if (skeever != null) {
-                        skeever.moveTo(event.getX(), event.getY(), event.getZ(), mob.getYRot(), 0);
-                        skeever.finalizeSpawn(serverLevel, event.getDifficulty(), MobSpawnType.NATURAL, null, null);
+                        skeever.snapTo(event.getX(), event.getY(), event.getZ(), mob.getYRot(), 0);
+                        skeever.finalizeSpawn(serverLevel, event.getDifficulty(), EntitySpawnReason.NATURAL, null);
                         serverLevel.addFreshEntity(skeever);
                     }
                 } else if (roll < 0.20f && fewWildWolves(serverLevel, pos)) {
                     // Skyrim's wolves (ice wolves in the cold), cleaned up by the region spawner's despawn rule
                     if (near != null) com.skycraft.creatures.spawn.SpawnPacing.noteHostile(near);
-                    Mob wolf = Bestiary.WOLF.get().create(serverLevel);
+                    Mob wolf = Bestiary.WOLF.get().create(serverLevel, net.minecraft.world.entity.EntitySpawnReason.EVENT);
                     if (wolf != null) {
-                        wolf.moveTo(event.getX(), event.getY(), event.getZ(), mob.getYRot(), 0);
-                        wolf.finalizeSpawn(serverLevel, event.getDifficulty(), MobSpawnType.NATURAL, null, null);
+                        wolf.snapTo(event.getX(), event.getY(), event.getZ(), mob.getYRot(), 0);
+                        wolf.finalizeSpawn(serverLevel, event.getDifficulty(), EntitySpawnReason.NATURAL, null);
                         wolf.addTag(com.skycraft.creatures.entity.SkyCreature.REGION_SPAWN_TAG);
                         serverLevel.addFreshEntity(wolf);
                     }
@@ -239,10 +239,9 @@ public final class CreatureSpawns {
      * Spawners: all vanilla mob spawners are removed (Skyrim mines and dungeons are clearable and have no spinning mob
      * cages). Also stripped on chunk load in {@link #onChunkLoad}.
      */
-    private static void onSpawnerSpawn(MobSpawnEvent.FinalizeSpawn event, ServerLevel level, BlockPos pos, EntityType<?> entityType) {
+    private static void onSpawnerSpawn(net.neoforged.neoforge.event.entity.living.FinalizeSpawnEvent event, ServerLevel level, BlockPos pos, EntityType<?> entityType) {
         event.setSpawnCancelled(true);
-        BaseSpawner spawner = event.getSpawner();
-        BlockEntity block = spawner == null ? null : spawner.getSpawnerBlockEntity();
+        BlockEntity block = event.getSpawner() == null ? null : event.getSpawner().left().orElse(null);
         if (block instanceof SpawnerBlockEntity && block.getBlockState().is(Blocks.SPAWNER)) {
             level.removeBlock(block.getBlockPos(), false);
         } else if (level.getBlockState(pos).is(Blocks.SPAWNER)) {
@@ -255,7 +254,7 @@ public final class CreatureSpawns {
      * underground, and ensures dungeon trap dispensers generated before the MutableBlockPos fix are stocked with arrows.
      */
     @SubscribeEvent
-    public static void onChunkLoad(net.minecraftforge.event.level.ChunkEvent.Load event) {
+    public static void onChunkLoad(net.neoforged.neoforge.event.level.ChunkEvent.Load event) {
         if (!(event.getLevel() instanceof ServerLevel level)) return;
         net.minecraft.world.level.chunk.ChunkAccess chunk = event.getChunk();
         java.util.List<BlockPos> positions = new java.util.ArrayList<>(chunk.getBlockEntitiesPos());
@@ -273,7 +272,7 @@ public final class CreatureSpawns {
             } else if (st.is(Blocks.DISPENSER)) {
                 BlockEntity be = chunk.getBlockEntity(bePos);
                 if (be instanceof net.minecraft.world.level.block.entity.DispenserBlockEntity disp
-                        && !disp.getPersistentData().getBoolean("skycraft_stocked")) {
+                        && !disp.getPersistentData().getBooleanOr("skycraft_stocked",false)) {
                     disp.getPersistentData().putBoolean("skycraft_stocked", true);
                     if (disp.isEmpty()) {
                         disp.setItem(0, com.skycraft.dungeons.world.Deco.ARROWS.copy());
@@ -285,44 +284,44 @@ public final class CreatureSpawns {
 
     /** Inside (a piece of) a structure registered under the {@code skycraft} namespace. */
     private static boolean inSkycraftStructure(ServerLevel level, BlockPos pos) {
-        Registry<Structure> registry = level.registryAccess().registryOrThrow(Registries.STRUCTURE);
+        var registry = level.registryAccess().lookupOrThrow(Registries.STRUCTURE);
         for (Structure structure : level.structureManager().getAllStructuresAt(pos).keySet()) {
-            ResourceLocation id = registry.getKey(structure);
+            Identifier id = registry.listElements().filter(h -> h.value() == structure).map(h -> h.key().identifier()).findFirst().orElse(null);
             if (id == null || !Skycraft.MODID.equals(id.getNamespace())) continue;
-            if (level.structureManager().getStructureWithPieceAt(pos, structure).isValid()) return true;
+            if (level.structureManager().getStructureWithPieceAt(pos, h -> h.value() == structure).isValid()) return true;
         }
         return false;
     }
 
     /** Cancels the event's spawn and puts {@code replacement} there instead (same spawn reason). */
-    private static void replace(MobSpawnEvent.FinalizeSpawn event, @Nullable Mob replacement) {
+    private static void replace(net.neoforged.neoforge.event.entity.living.FinalizeSpawnEvent event, @Nullable Mob replacement) {
         if (replacement == null) return;
         Mob mob = event.getEntity();
         ServerLevelAccessor level = event.getLevel();
-        replacement.moveTo(event.getX(), event.getY(), event.getZ(), mob.getYRot(), 0);
-        replacement.finalizeSpawn(level, event.getDifficulty(), event.getSpawnType(), null, null);
+        replacement.snapTo(event.getX(), event.getY(), event.getZ(), mob.getYRot(), 0);
+        replacement.finalizeSpawn(level, event.getDifficulty(), event.getSpawnType(), null);
         if (mob.isPersistenceRequired()) replacement.setPersistenceRequired();
         event.setSpawnCancelled(true);
         level.addFreshEntity(replacement);
     }
 
     private static boolean isVanillaDarkHostile(EntityType<?> entityType) {
-        return entityType == EntityType.ZOMBIE
-                || entityType == EntityType.SKELETON
-                || entityType == EntityType.CREEPER
-                || entityType == EntityType.SPIDER
-                || entityType == EntityType.CAVE_SPIDER
-                || entityType == EntityType.WITCH
-                || entityType == EntityType.ENDERMAN
-                || entityType == EntityType.ZOMBIE_VILLAGER
-                || entityType == EntityType.SLIME;
+        return entityType == net.minecraft.world.entity.EntityTypes.ZOMBIE
+                || entityType == net.minecraft.world.entity.EntityTypes.SKELETON
+                || entityType == net.minecraft.world.entity.EntityTypes.CREEPER
+                || entityType == net.minecraft.world.entity.EntityTypes.SPIDER
+                || entityType == net.minecraft.world.entity.EntityTypes.CAVE_SPIDER
+                || entityType == net.minecraft.world.entity.EntityTypes.WITCH
+                || entityType == net.minecraft.world.entity.EntityTypes.ENDERMAN
+                || entityType == net.minecraft.world.entity.EntityTypes.ZOMBIE_VILLAGER
+                || entityType == net.minecraft.world.entity.EntityTypes.SLIME;
     }
 
     /** Cold, mountain and taiga biomes (draugr country). Region-safe: only reads the biome. */
     private static boolean isNorth(ServerLevelAccessor level, BlockPos pos) {
         Holder<Biome> biome = level.getBiome(pos);
         return biome.is(BiomeTags.IS_TAIGA) || biome.is(BiomeTags.IS_MOUNTAIN) || biome.is(Tags.Biomes.IS_SNOWY)
-                || biome.value().coldEnoughToSnow(pos);
+                || biome.value().coldEnoughToSnow(pos, level.getSeaLevel());
     }
 
     private static boolean fewNearby(ServerLevel level, EntityType<?> type, BlockPos pos, double radius, int max) {
@@ -338,9 +337,9 @@ public final class CreatureSpawns {
      * someone tamed, leashed or named one). New wild wolves are Skyrim wolves ({@link Bestiary#WOLF}).
      */
     @SubscribeEvent
-    public static void onLivingTick(LivingEvent.LivingTickEvent event) {
-        if (!(event.getEntity() instanceof Wolf wolf) || wolf.tickCount % 100 != 0 || wolf.level().isClientSide
-                || !wolf.getTags().contains(WILD_WOLF_TAG)) return;
+    public static void onLivingTick(net.neoforged.neoforge.event.tick.EntityTickEvent.Pre event) {
+        if (!(event.getEntity() instanceof Wolf wolf) || wolf.tickCount % 100 != 0 || wolf.level().isClientSide()
+                || !wolf.entityTags().contains(WILD_WOLF_TAG)) return;
         if (wolf.isTame() || wolf.isLeashed() || wolf.hasCustomName() || wolf.isPersistenceRequired()) {
             wolf.removeTag(WILD_WOLF_TAG);
             return;
@@ -356,9 +355,9 @@ public final class CreatureSpawns {
     // ------------------------------------------------------------------ per-player world events
 
     @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer player)) return;
-        ServerLevel level = player.serverLevel();
+    public static void onPlayerTick(net.neoforged.neoforge.event.tick.PlayerTickEvent.Post event) {
+        if (!(event instanceof net.neoforged.neoforge.event.tick.PlayerTickEvent.Post) || !(event.getEntity() instanceof ServerPlayer player)) return;
+        ServerLevel level = player.level();
         long time = level.getGameTime() + player.getId() * 37L;
         // guards are no longer topped up around any bell or settlement: the watch is society.GuardWatch's (none in the
         // wilderness, one patrol in a minor settlement, two posted at a major one's gate); maintainGuards is retired
@@ -399,12 +398,12 @@ public final class CreatureSpawns {
         for (int i = 0; i < wanted; i++) {
             BlockPos pos = findGroundNear(level, center, spread, random);
             if (pos == null) continue;
-            GuardEntity guard = ModEntities.GUARD.get().create(level);
+            GuardEntity guard = ModEntities.GUARD.get().create(level, net.minecraft.world.entity.EntitySpawnReason.EVENT);
             if (guard == null) continue;
-            guard.moveTo(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5, random.nextFloat() * 360f, 0);
+            guard.snapTo(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5, random.nextFloat() * 360f, 0);
             if (!level.noCollision(guard)) continue;
             guard.setHome(center);
-            guard.finalizeSpawn(level, level.getCurrentDifficultyAt(pos), MobSpawnType.EVENT, null, null);
+            guard.finalizeSpawn(level, level.getCurrentDifficultyAt(pos), EntitySpawnReason.EVENT, null);
             guard.setPersistenceRequired();
             level.addFreshEntity(guard);
         }
@@ -441,7 +440,7 @@ public final class CreatureSpawns {
         int questStage = com.skycraft.quest.MainQuest.stage(data);
         if (questStage < 4) return;
 
-        long dayTime = level.getDayTime() % 24000L;
+        long dayTime = level.getDefaultClockTime() % 24000L;
         if (dayTime > 13500L) return; // day and dusk only
 
         float baseChance = (float) (double) CreaturesConfig.DRAGON_ATTACK_CHANCE.get();
@@ -469,11 +468,11 @@ public final class CreatureSpawns {
             if (!level.isLoaded(column)) continue;
             int ground = level.getHeight(Heightmap.Types.MOTION_BLOCKING, column.getX(), column.getZ());
             double y = Math.max(player.getY() + 40, ground + 30);
-            y = Math.min(y, level.getMaxBuildHeight() - 5);
-            DragonEntity dragon = ModEntities.DRAGON.get().create(level);
+            y = Math.min(y, (level.getMaxY()+1) - 5);
+            DragonEntity dragon = ModEntities.DRAGON.get().create(level, net.minecraft.world.entity.EntitySpawnReason.EVENT);
             if (dragon == null) return null;
-            dragon.moveTo(x, y, z, (float) (Mth.atan2(player.getZ() - z, player.getX() - x) * Mth.RAD_TO_DEG) - 90f, 0);
-            dragon.finalizeSpawn(level, level.getCurrentDifficultyAt(column), MobSpawnType.EVENT, null, null);
+            dragon.snapTo(x, y, z, (float) (Mth.atan2(player.getZ() - z, player.getX() - x) * Mth.RAD_TO_DEG) - 90f, 0);
+            dragon.finalizeSpawn(level, level.getCurrentDifficultyAt(column), EntitySpawnReason.EVENT, null);
             dragon.setFlying(true);
             dragon.noPhysics = true;
             dragon.setTarget(player);

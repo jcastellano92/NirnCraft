@@ -1,0 +1,26 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:septim",
+          "weight": 85,
+          "modifier": {
+            "min": 5,
+            "max": 40,
+            "growth": 0.04,
+            "type": "skycraft:scaled_gold"
+          }
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 15
+        }
+      ]
+    }
+  ],
+  "random_sequence": "skycraft:chests/gold"
+}

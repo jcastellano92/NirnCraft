@@ -21,7 +21,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
@@ -40,9 +40,9 @@ import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.monster.RangedAttackMob;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
-import net.minecraft.world.entity.projectile.SmallFireball;
+import net.minecraft.world.entity.projectile.hurtingprojectile.SmallFireball;
 import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -145,10 +145,10 @@ public class NpcEntity extends PathfinderMob implements RangedAttackMob {
         super(type, level);
         this.xpReward = 5;
         this.setCanPickUpLoot(false);
-        this.setPathfindingMalus(net.minecraft.world.level.pathfinder.BlockPathTypes.DAMAGE_FIRE, -1.0F);
-        this.setPathfindingMalus(net.minecraft.world.level.pathfinder.BlockPathTypes.DANGER_FIRE, -1.0F);
-        this.setPathfindingMalus(net.minecraft.world.level.pathfinder.BlockPathTypes.LAVA, -1.0F);
-        this.setPathfindingMalus(net.minecraft.world.level.pathfinder.BlockPathTypes.DAMAGE_OTHER, -1.0F);
+        this.setPathfindingMalus(net.minecraft.world.level.pathfinder.PathType.FIRE, -1.0F);
+        this.setPathfindingMalus(net.minecraft.world.level.pathfinder.PathType.FIRE_IN_NEIGHBOR, -1.0F);
+        this.setPathfindingMalus(net.minecraft.world.level.pathfinder.PathType.LAVA, -1.0F);
+        this.setPathfindingMalus(net.minecraft.world.level.pathfinder.PathType.DAMAGING, -1.0F);
         if (this.getNavigation() instanceof GroundPathNavigation nav) nav.setCanOpenDoors(true);
     }
 
@@ -163,14 +163,14 @@ public class NpcEntity extends PathfinderMob implements RangedAttackMob {
     }
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        this.entityData.define(ROLE, "");
-        this.entityData.define(SKIN, 0);
-        this.entityData.define(FLAGS, (byte) 0);
-        this.entityData.define(CONVERSATION_PARTNER, -1);
-        this.entityData.define(LOOK, -1);
-        this.entityData.define(CASTING_SPELL, "");
+    protected void defineSynchedData(net.minecraft.network.syncher.SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(ROLE, "");
+        builder.define(SKIN, 0);
+        builder.define(FLAGS, (byte) 0);
+        builder.define(CONVERSATION_PARTNER, -1);
+        builder.define(LOOK, -1);
+        builder.define(CASTING_SPELL, "");
     }
 
     @Override
@@ -186,12 +186,12 @@ public class NpcEntity extends PathfinderMob implements RangedAttackMob {
 
     /** Kneeling and huddled people are shorter: their hitbox follows the pose. */
     @Override
-    public net.minecraft.world.entity.EntityDimensions getDimensions(net.minecraft.world.entity.Pose pose) {
-        net.minecraft.world.entity.EntityDimensions d = super.getDimensions(pose);
+    protected net.minecraft.world.entity.EntityDimensions getDefaultDimensions(net.minecraft.world.entity.Pose pose) {
+        net.minecraft.world.entity.EntityDimensions d = super.getDefaultDimensions(pose);
         if (this.entityData == null) return d;
         int f = this.entityData.get(FLAGS);
-        if ((f & FLAG_HUDDLE) != 0) return net.minecraft.world.entity.EntityDimensions.scalable(d.width, d.height * 0.52f);
-        if ((f & FLAG_KNEEL) != 0) return net.minecraft.world.entity.EntityDimensions.scalable(d.width, d.height * 0.68f);
+        if ((f & FLAG_HUDDLE) != 0) return net.minecraft.world.entity.EntityDimensions.scalable(d.width(), d.height() * 0.52f);
+        if ((f & FLAG_KNEEL) != 0) return net.minecraft.world.entity.EntityDimensions.scalable(d.width(), d.height() * 0.68f);
         return d;
     }
 
@@ -275,14 +275,14 @@ public class NpcEntity extends PathfinderMob implements RangedAttackMob {
             }
         });
         this.targetSelector.addGoal(1, new NpcGoals.FollowerDefend(this));
-        this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, LivingEntity.class, 10, true, false, this::isHostileTo) {
+        this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, LivingEntity.class, 10, true, false, (target, level) -> this.isHostileTo(target)) {
             @Override
             public boolean canUse() {
                 return NpcEntity.this.canFight() && super.canUse();
             }
         });
         this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, Animal.class, 20, true, false,
-                e -> e.getType().is(NpcEntities.GAME) && !e.isBaby() && !e.hasCustomName() && !(e instanceof Mob m && m.isLeashed())) {
+                (e, level) -> e.getType().builtInRegistryHolder().is(NpcEntities.GAME) && !e.isBaby() && !e.hasCustomName() && !(e instanceof Mob m && m.isLeashed())) {
             @Override
             public boolean canUse() {
                 return NpcEntity.this.role() == NpcRole.HUNTER && !NpcEntity.this.isPrisoner() && super.canUse();
@@ -355,7 +355,7 @@ public class NpcEntity extends PathfinderMob implements RangedAttackMob {
     }
 
     @Override
-    public float getScale() {
+    public float getAgeScale() {
         return isChild() ? 0.62F : 1.0F;
     }
 
@@ -415,7 +415,7 @@ public class NpcEntity extends PathfinderMob implements RangedAttackMob {
     public void startSpellWindup(String spellId) {
         this.entityData.set(CASTING_SPELL, spellId == null ? "" : spellId);
         setFlag(FLAG_CASTING, true);
-        if (!this.level().isClientSide) {
+        if (!this.level().isClientSide()) {
             this.playSound(com.skycraft.audio.AudioSounds.spell("charge"), 0.7f, 1.0f + this.getRandom().nextFloat() * 0.2f);
         }
     }
@@ -474,14 +474,14 @@ public class NpcEntity extends PathfinderMob implements RangedAttackMob {
     /** Townsfolk stay within {@code radius} blocks of their home. */
     public void setHome(BlockPos pos, int radius) {
         this.home = pos.immutable();
-        this.restrictTo(this.home, radius);
-        if (!this.level().isClientSide && this.isAddedToWorld()) com.skycraft.society.NpcRegistry.onSettled(this);
+        this.setHomeTo(this.home, radius);
+        if (!this.level().isClientSide() && this.isAddedToLevel()) com.skycraft.society.NpcRegistry.onSettled(this);
     }
 
     @Override
-    public void onAddedToWorld() {
-        super.onAddedToWorld();
-        if (!this.level().isClientSide && home != null) com.skycraft.society.NpcRegistry.onSettled(this);
+    public void onAddedToLevel() {
+        super.onAddedToLevel();
+        if (!this.level().isClientSide() && home != null) com.skycraft.society.NpcRegistry.onSettled(this);
     }
 
     @Nullable
@@ -588,8 +588,8 @@ public class NpcEntity extends PathfinderMob implements RangedAttackMob {
     }
 
     @Override
-    public boolean isAlliedTo(Entity other) {
-        if (super.isAlliedTo(other)) return true;
+    protected boolean considersEntityAsAlly(Entity other) {
+        if (super.considersEntityAsAlly(other)) return true;
         if (other instanceof NpcEntity o && !o.isPrisoner() && !isPrisoner()) {
             NpcRole a = role();
             NpcRole b = o.role();
@@ -603,7 +603,7 @@ public class NpcEntity extends PathfinderMob implements RangedAttackMob {
     public void setTarget(@Nullable LivingEntity target) {
         LivingEntity previous = this.getTarget();
         super.setTarget(target);
-        if (this.level().isClientSide || target == null || target == previous) return;
+        if (this.level().isClientSide() || target == null || target == previous) return;
         if (target instanceof Player player) {
             long now = this.level().getGameTime();
             if (now >= nextCombatBark) {
@@ -615,7 +615,7 @@ public class NpcEntity extends PathfinderMob implements RangedAttackMob {
     }
 
     @Override
-    public boolean hurt(DamageSource source, float amount) {
+    public boolean hurtServer(net.minecraft.server.level.ServerLevel level, DamageSource source, float amount) {
         // like Skyrim's children: nothing but /kill and the void can hurt them
         if (isChild() && !source.is(net.minecraft.tags.DamageTypeTags.BYPASSES_INVULNERABILITY)) return false;
         Entity attacker = source.getEntity();
@@ -623,12 +623,12 @@ public class NpcEntity extends PathfinderMob implements RangedAttackMob {
                 || source.is(net.minecraft.world.damagesource.DamageTypes.HOT_FLOOR))
                 && (!role().villain || !this.level().canSeeSky(this.blockPosition()))) {
             this.clearFire();
-            if (!this.level().isClientSide) com.skycraft.society.NpcPlacement.rescueFromFireOrSlab(this);
+            if (!this.level().isClientSide()) com.skycraft.society.NpcPlacement.rescueFromFireOrSlab(this);
             return false;
         }
         if (attacker instanceof NpcEntity o && this.isAlliedTo(o)) return false;
-        boolean hurt = super.hurt(source, amount);
-        if (hurt && !this.level().isClientSide && attacker instanceof LivingEntity living && living != this
+        boolean hurt = super.hurtServer(level, source, amount);
+        if (hurt && !this.level().isClientSide() && attacker instanceof LivingEntity living && living != this
                 && !(living instanceof Player p && com.skycraft.society.Followers.isFollowerOf(this, p))) {
             provoker = living.getUUID();
             lastProvokedBy = this.level().getGameTime();
@@ -638,8 +638,8 @@ public class NpcEntity extends PathfinderMob implements RangedAttackMob {
     }
 
     @Override
-    public boolean doHurtTarget(Entity target) {
-        boolean hit = super.doHurtTarget(target);
+    public boolean doHurtTarget(net.minecraft.server.level.ServerLevel level, Entity target) {
+        boolean hit = super.doHurtTarget(level, target);
         if (hit) {
             this.playSound(SoundEvents.PLAYER_ATTACK_STRONG, 0.7f, 1.0f);
             if (role() == NpcRole.VAMPIRE) this.heal(2.0f); // life drain
@@ -651,9 +651,9 @@ public class NpcEntity extends PathfinderMob implements RangedAttackMob {
 
     @Override
     public void performRangedAttack(LivingEntity target, float power) {
-        AbstractArrow arrow = ProjectileUtil.getMobArrow(this, new ItemStack(Items.ARROW), power);
+        AbstractArrow arrow = ProjectileUtil.getMobArrow(this, new ItemStack(Items.ARROW), power, this.getMainHandItem());
         ItemStack bow = this.getMainHandItem();
-        if (bow.getItem() instanceof BowItem bowItem) arrow = bowItem.customArrow(arrow);
+        if (bow.getItem() instanceof BowItem bowItem) arrow = bowItem.customArrow(arrow, new ItemStack(Items.ARROW), bow);
         double dx = target.getX() - this.getX();
         double dy = target.getY(0.3333333333333333D) - arrow.getY();
         double dz = target.getZ() - this.getZ();
@@ -709,7 +709,7 @@ public class NpcEntity extends PathfinderMob implements RangedAttackMob {
                 var eff = "stoneflesh".equals(spell.id)
                         ? com.skycraft.magic.MagicRegistry.STONEFLESH.get()
                         : com.skycraft.magic.MagicRegistry.OAKFLESH.get();
-                this.addEffect(new net.minecraft.world.effect.MobEffectInstance(eff, spell.duration, Math.max(0, (int) spell.magnitude - 1)));
+                this.addEffect(new net.minecraft.world.effect.MobEffectInstance(com.skycraft.platform.Effects.holder(eff), spell.duration, Math.max(0, (int) spell.magnitude - 1)));
                 com.skycraft.magic.MagicFx.send(this, com.skycraft.magic.MagicFx.AURA, com.skycraft.magic.spell.Element.NATURE,
                         this.position(), this.position(), this.getId(), 0);
                 this.playSound(com.skycraft.audio.AudioSounds.spell("alteration"), 0.8f, 1.0f);
@@ -751,7 +751,7 @@ public class NpcEntity extends PathfinderMob implements RangedAttackMob {
                 com.skycraft.magic.MagicFx.burst(serverLevel, to, com.skycraft.magic.spell.Element.SHOCK, 1.2f);
                 this.playSound(com.skycraft.audio.AudioSounds.spell("shock"), 0.9f, 1.0f + this.getRandom().nextFloat() * 0.2f);
                 DamageSource shockSrc = com.skycraft.magic.MagicDamage.source(serverLevel, com.skycraft.magic.MagicDamage.SHOCK, null, this);
-                target.hurt(shockSrc, spell.magnitude);
+                com.skycraft.platform.Effects.hurt(target, shockSrc, spell.magnitude);
                 if ("chain_lightning".equals(spell.id)) {
                     int chained = 0;
                     for (LivingEntity extra : serverLevel.getEntitiesOfClass(LivingEntity.class, target.getBoundingBox().inflate(spell.radius),
@@ -759,7 +759,7 @@ public class NpcEntity extends PathfinderMob implements RangedAttackMob {
                         net.minecraft.world.phys.Vec3 arcTo = extra.getBoundingBox().getCenter();
                         com.skycraft.magic.MagicFx.sendNear(serverLevel, to, 64, com.skycraft.magic.MagicFx.ARC,
                                 com.skycraft.magic.spell.Element.SHOCK, to, arcTo, -1, 0);
-                        extra.hurt(shockSrc, spell.magnitude * 0.65f);
+                        com.skycraft.platform.Effects.hurt(extra, shockSrc, spell.magnitude * 0.65f);
                         if (++chained >= 2) break;
                     }
                 }
@@ -778,14 +778,14 @@ public class NpcEntity extends PathfinderMob implements RangedAttackMob {
                 // Run Entity/Projectile base movement and collision without SpellProjectile's ServerPlayer-only check
                 super.baseTick();
                 net.minecraft.world.phys.HitResult hit = net.minecraft.world.entity.projectile.ProjectileUtil.getHitResultOnMoveVector(this, this::canHitEntity);
-                if (hit.getType() != net.minecraft.world.phys.HitResult.Type.MISS && !net.minecraftforge.event.ForgeEventFactory.onProjectileImpact(this, hit)) {
+                if (hit.getType() != net.minecraft.world.phys.HitResult.Type.MISS && !net.neoforged.neoforge.event.EventHooks.onProjectileImpact(this, hit)) {
                     this.onHit(hit);
                 }
-                this.checkInsideBlocks();
+                this.applyEffectsFromBlocks(this.position(), this.position());
                 net.minecraft.world.phys.Vec3 v = this.getDeltaMovement();
                 this.setPos(this.getX() + v.x, this.getY() + v.y, this.getZ() + v.z);
                 this.updateRotation();
-                if (this.level().isClientSide || this.isRemoved()) return;
+                if (this.level().isClientSide() || this.isRemoved()) return;
                 if (++npcLife > 80 || (castSpell.element == com.skycraft.magic.spell.Element.FIRE && this.isInWater())) {
                     this.discard();
                 }
@@ -843,14 +843,14 @@ public class NpcEntity extends PathfinderMob implements RangedAttackMob {
         com.skycraft.magic.MagicFx.worldSound(level, pos, com.skycraft.audio.AudioSounds.spell(impactSound),
                 net.minecraft.sounds.SoundSource.HOSTILE, 0.8f, 1.0f);
         if (directTarget != null) {
-            directTarget.hurt(src, spell.magnitude);
+            com.skycraft.platform.Effects.hurt(directTarget, src, spell.magnitude);
             applyNpcSpellElement(spell.element, directTarget);
         }
         if (spell.radius > 1.5f) {
             for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class,
                     net.minecraft.world.phys.AABB.ofSize(pos, spell.radius * 2, spell.radius * 2, spell.radius * 2),
                     e -> e != this && e != directTarget && e.isAlive() && !this.isAlliedTo(e))) {
-                e.hurt(src, spell.magnitude * 0.65f);
+                com.skycraft.platform.Effects.hurt(e, src, spell.magnitude * 0.65f);
                 applyNpcSpellElement(spell.element, e);
             }
         }
@@ -858,9 +858,9 @@ public class NpcEntity extends PathfinderMob implements RangedAttackMob {
 
     private static void applyNpcSpellElement(com.skycraft.magic.spell.Element element, LivingEntity target) {
         switch (element) {
-            case FIRE -> target.setSecondsOnFire(4);
-            case FROST -> target.addEffect(new net.minecraft.world.effect.MobEffectInstance(
-                    net.minecraft.world.effect.MobEffects.MOVEMENT_SLOWDOWN, 60, 1));
+            case FIRE -> target.igniteForSeconds(4);
+            case FROST -> target.addEffect(new net.minecraft.world.effect.MobEffectInstance(com.skycraft.platform.Effects.holder(
+                    com.skycraft.platform.Effects.holder(net.minecraft.world.effect.MobEffects.SLOWNESS)), 60, 1));
             default -> {}
         }
     }
@@ -892,16 +892,16 @@ public class NpcEntity extends PathfinderMob implements RangedAttackMob {
 
     @Override
     @Nullable
-    public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, MobSpawnType reason,
-                                        @Nullable SpawnGroupData data, @Nullable CompoundTag tag) {
-        data = super.finalizeSpawn(level, difficulty, reason, data, tag);
+    public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, EntitySpawnReason reason,
+                                        @Nullable SpawnGroupData data) {
+        data = super.finalizeSpawn(level, difficulty, reason, data);
         initialize();
         return data;
     }
 
     /** Picks role (if none was set), skin, name, gear and stats once. */
     public void initialize() {
-        if (initialized || this.level().isClientSide) return;
+        if (initialized || this.level().isClientSide()) return;
         initialized = true;
         if (!hasRole()) setRole(Npcs.randomRole(this.getRandom(), this.getType() == NpcEntities.NPC_FIGHTER.get()));
         if (getLook() < 0) setSkin(this.getRandom().nextInt(NpcRole.SKINS));
@@ -912,7 +912,7 @@ public class NpcEntity extends PathfinderMob implements RangedAttackMob {
 
     /** Walking people pass through each other so doorways and gates never jam, but stationary people do not stack on the same spot. */
     private boolean passThrough(Entity other) {
-        if (!(other instanceof NpcEntity || other instanceof net.minecraft.world.entity.npc.AbstractVillager)) return false;
+        if (!(other instanceof NpcEntity || other instanceof net.minecraft.world.entity.npc.villager.AbstractVillager)) return false;
         if (this.isSleeping() || (other instanceof LivingEntity l && l.isSleeping())) return true;
         if (!this.getNavigation().isDone()) return true;
         if (other instanceof Mob m && !m.getNavigation().isDone()) return true;
@@ -934,7 +934,7 @@ public class NpcEntity extends PathfinderMob implements RangedAttackMob {
     /** Roofs, fire pits, half-slabs, and counters/furniture are not places to wander to. */
     @Override
     public float getWalkTargetValue(BlockPos pos, net.minecraft.world.level.LevelReader level) {
-        if (!this.level().isClientSide) {
+        if (!this.level().isClientSide()) {
             if (com.skycraft.society.NpcPlacement.isFireHazard(level, pos)
                     || com.skycraft.society.NpcPlacement.isSlabHazard(level, pos)
                     || com.skycraft.society.NpcPlacement.isFurnitureHazard(level, pos)) {
@@ -952,7 +952,7 @@ public class NpcEntity extends PathfinderMob implements RangedAttackMob {
     private void placeBySchedule() {
         if (placed || this.tickCount < 4 || this.tickCount % 10 != 0) return;
         if (!com.skycraft.society.SocietyConfig.ROUTINES.get() || home == null || isBusy() || getTarget() != null || isPrisoner()
-                || !(role().townsfolk() || com.skycraft.society.Marriage.isSpouse(this)) || social.hasUUID("engaged") || isSleeping()) {
+                || !(role().townsfolk() || com.skycraft.society.Marriage.isSpouse(this)) || social.read("engaged", net.minecraft.core.UUIDUtil.CODEC).isPresent() || isSleeping()) {
             placed = true;
             return;
         }
@@ -968,7 +968,7 @@ public class NpcEntity extends PathfinderMob implements RangedAttackMob {
     @Override
     public void tick() {
         super.tick();
-        if (this.level().isClientSide) {
+        if (this.level().isClientSide()) {
             if (isCasting() && this.tickCount % 2 == 0) {
                 com.skycraft.magic.spell.Spell spell = getCastingSpell();
                 com.skycraft.magic.spell.Element elem = spell != null ? spell.element : com.skycraft.magic.spell.Element.FIRE;
@@ -1005,8 +1005,8 @@ public class NpcEntity extends PathfinderMob implements RangedAttackMob {
     }
 
     @Override
-    protected void customServerAiStep() {
-        super.customServerAiStep();
+    protected void customServerAiStep(net.minecraft.server.level.ServerLevel level) {
+        super.customServerAiStep(level);
         if (isConversing()) {
             Entity partner = this.level().getEntity(getConversationPartner());
             if (partner == null || !partner.isAlive() || this.distanceToSqr(partner) > 64) {
@@ -1064,27 +1064,27 @@ public class NpcEntity extends PathfinderMob implements RangedAttackMob {
 
     /** Whether the item in {@code slot} was given by the follower's player (it always drops; see Followers). */
     public boolean isGivenGear(net.minecraft.world.entity.EquipmentSlot slot) {
-        return this.getEquipmentDropChance(slot) > 1.0f;
+        return this.getDropChances().byEquipment(slot) > 1.0f;
     }
 
     @Override
-    public boolean canBeLeashed(Player player) {
+    public boolean canBeLeashed() {
         return false;
     }
 
     @Override
-    protected void dropCustomDeathLoot(DamageSource source, int looting, boolean recentlyHit) {
-        super.dropCustomDeathLoot(source, looting, recentlyHit);
+    protected void dropCustomDeathLoot(net.minecraft.server.level.ServerLevel level, DamageSource source, boolean recentlyHit) {
+        super.dropCustomDeathLoot(level, source, recentlyHit);
         if (recentlyHit && role() != NpcRole.BEGGAR && this.getRandom().nextFloat() < 0.6f) {
             int gold = 3 + this.getRandom().nextInt(role().civilian ? 12 : 30);
-            this.spawnAtLocation(Currency.coins(gold));
+            this.spawnAtLocation(level, Currency.coins(gold));
         }
     }
 
     /** Runs on every death, whatever doMobLoot says: a follower's bags (the player's items) always drop. */
     @Override
-    protected void dropEquipment() {
-        super.dropEquipment();
+    protected void dropEquipment(net.minecraft.server.level.ServerLevel level) {
+        super.dropEquipment(level);
         com.skycraft.society.Followers.onDeath(this);
     }
 
@@ -1101,55 +1101,61 @@ public class NpcEntity extends PathfinderMob implements RangedAttackMob {
     // ------------------------------------------------------------------ save
 
     @Override
-    public void addAdditionalSaveData(CompoundTag tag) {
-        super.addAdditionalSaveData(tag);
+    public void addAdditionalSaveData(net.minecraft.world.level.storage.ValueOutput output263) {
+        super.addAdditionalSaveData(output263);
+        net.minecraft.nbt.CompoundTag tag = new net.minecraft.nbt.CompoundTag();
+        
         tag.putString("Role", role().id);
         tag.putInt("Skin", getSkin());
         tag.putByte("NpcFlags", (byte) (this.entityData.get(FLAGS) & SAVED_FLAGS));
         tag.putBoolean("SkycraftInit", initialized);
-        if (huntTarget != null) tag.putUUID("Hunt", huntTarget);
-        if (seekTarget != null) tag.putUUID("Seek", seekTarget);
-        if (leader != null) tag.putUUID("Leader", leader);
-        if (destination != null) tag.put("Destination", NbtUtils.writeBlockPos(destination));
+        if (huntTarget != null) tag.store("Hunt", net.minecraft.core.UUIDUtil.CODEC,  huntTarget);
+        if (seekTarget != null) tag.store("Seek", net.minecraft.core.UUIDUtil.CODEC,  seekTarget);
+        if (leader != null) tag.store("Leader", net.minecraft.core.UUIDUtil.CODEC,  leader);
+        if (destination != null) tag.put("Destination", com.skycraft.platform.NbtPositions.write(destination));
         if (home != null) {
-            tag.put("Home", NbtUtils.writeBlockPos(home));
-            tag.putInt("HomeRadius", (int) this.getRestrictRadius());
+            tag.put("Home", com.skycraft.platform.NbtPositions.write(home));
+            tag.putInt("HomeRadius", (int) this.getHomeRadius());
         }
         if (letter >= 0) tag.putInt("Letter", letter);
-        if (fearedPlayerUuid != null) tag.putUUID("FearedPlayer", fearedPlayerUuid);
-        if (bed != null) tag.put("Bed", NbtUtils.writeBlockPos(bed));
+        if (fearedPlayerUuid != null) tag.store("FearedPlayer", net.minecraft.core.UUIDUtil.CODEC,  fearedPlayerUuid);
+        if (bed != null) tag.put("Bed", com.skycraft.platform.NbtPositions.write(bed));
         tag.putInt("Look", getLook());
-        if (workplace != null) tag.put("Workplace", NbtUtils.writeBlockPos(workplace));
-        if (inn != null) tag.put("Inn", NbtUtils.writeBlockPos(inn));
+        if (workplace != null) tag.put("Workplace", com.skycraft.platform.NbtPositions.write(workplace));
+        if (inn != null) tag.put("Inn", com.skycraft.platform.NbtPositions.write(inn));
         if (!social.isEmpty()) tag.put("Social", social);
+    
+        output263.store(tag);
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag tag) {
-        super.readAdditionalSaveData(tag);
-        NpcRole r = NpcRole.byId(tag.getString("Role"));
+    public void readAdditionalSaveData(net.minecraft.world.level.storage.ValueInput input263) {
+        super.readAdditionalSaveData(input263);
+        net.minecraft.nbt.CompoundTag tag = com.skycraft.platform.ValueTags.read(input263 , "Role", "Skin", "NpcFlags", "SkycraftInit", "Hunt", "Seek", "Leader", "Destination", "Home", "HomeRadius", "Letter", "FearedPlayer", "Bed", "Look", "Workplace", "Inn", "Social");
+        
+        NpcRole r = NpcRole.byId(tag.getStringOr("Role",""));
         if (r != null) setRole(r);
-        setSkin(tag.getInt("Skin"));
-        this.entityData.set(FLAGS, (byte) (tag.getByte("NpcFlags") & SAVED_FLAGS));
-        initialized = tag.getBoolean("SkycraftInit");
-        huntTarget = tag.hasUUID("Hunt") ? tag.getUUID("Hunt") : null;
-        seekTarget = tag.hasUUID("Seek") ? tag.getUUID("Seek") : null;
-        leader = tag.hasUUID("Leader") ? tag.getUUID("Leader") : null;
-        destination = tag.contains("Destination") ? NbtUtils.readBlockPos(tag.getCompound("Destination")) : null;
-        if (tag.contains("Home")) setHome(NbtUtils.readBlockPos(tag.getCompound("Home")), Math.max(8, tag.getInt("HomeRadius")));
-        letter = tag.contains("Letter") ? tag.getInt("Letter") : -1;
-        fearedPlayerUuid = tag.hasUUID("FearedPlayer") ? tag.getUUID("FearedPlayer") : null;
-        bed = tag.contains("Bed") ? NbtUtils.readBlockPos(tag.getCompound("Bed")) : null;
-        if (tag.contains("Look")) setLook(tag.getInt("Look"));
-        workplace = tag.contains("Workplace") ? NbtUtils.readBlockPos(tag.getCompound("Workplace")) : null;
-        inn = tag.contains("Inn") ? NbtUtils.readBlockPos(tag.getCompound("Inn")) : null;
-        social = tag.getCompound("Social");
+        setSkin(tag.getIntOr("Skin",0));
+        this.entityData.set(FLAGS, (byte) (tag.getByteOr("NpcFlags",(byte)0) & SAVED_FLAGS));
+        initialized = tag.getBooleanOr("SkycraftInit",false);
+        huntTarget = tag.read("Hunt", net.minecraft.core.UUIDUtil.CODEC).isPresent() ? tag.read("Hunt", net.minecraft.core.UUIDUtil.CODEC).orElseThrow() : null;
+        seekTarget = tag.read("Seek", net.minecraft.core.UUIDUtil.CODEC).isPresent() ? tag.read("Seek", net.minecraft.core.UUIDUtil.CODEC).orElseThrow() : null;
+        leader = tag.read("Leader", net.minecraft.core.UUIDUtil.CODEC).isPresent() ? tag.read("Leader", net.minecraft.core.UUIDUtil.CODEC).orElseThrow() : null;
+        destination = tag.contains("Destination") ? com.skycraft.platform.NbtPositions.read(tag.getCompoundOrEmpty("Destination")) : null;
+        if (tag.contains("Home")) setHome(com.skycraft.platform.NbtPositions.read(tag.getCompoundOrEmpty("Home")), Math.max(8, tag.getIntOr("HomeRadius",0)));
+        letter = tag.contains("Letter") ? tag.getIntOr("Letter",0) : -1;
+        fearedPlayerUuid = tag.read("FearedPlayer", net.minecraft.core.UUIDUtil.CODEC).isPresent() ? tag.read("FearedPlayer", net.minecraft.core.UUIDUtil.CODEC).orElseThrow() : null;
+        bed = tag.contains("Bed") ? com.skycraft.platform.NbtPositions.read(tag.getCompoundOrEmpty("Bed")) : null;
+        if (tag.contains("Look")) setLook(tag.getIntOr("Look",0));
+        workplace = tag.contains("Workplace") ? com.skycraft.platform.NbtPositions.read(tag.getCompoundOrEmpty("Workplace")) : null;
+        inn = tag.contains("Inn") ? com.skycraft.platform.NbtPositions.read(tag.getCompoundOrEmpty("Inn")) : null;
+        social = tag.getCompoundOrEmpty("Social");
     }
 
     @Override
     public void remove(RemovalReason reason) {
         // killed or discarded for good (not just unloaded): free the bed for someone else
-        if (reason.shouldDestroy() && !this.level().isClientSide) {
+        if (reason.shouldDestroy() && !this.level().isClientSide()) {
             com.skycraft.society.Settlers.releaseBed(this);
             if (reason == RemovalReason.KILLED) com.skycraft.society.Relationships.onDeath(this);
         }

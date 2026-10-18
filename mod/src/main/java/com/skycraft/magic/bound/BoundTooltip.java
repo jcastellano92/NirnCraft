@@ -11,10 +11,10 @@ import java.util.List;
 final class BoundTooltip {
     private BoundTooltip() {}
 
-    static void add(ItemStack stack, @Nullable Level level, List<Component> tooltip) {
-        tooltip.add(Component.translatable("tooltip.skycraft.bound_weapon").withStyle(ChatFormatting.LIGHT_PURPLE));
-        if (level != null && stack.hasTag()) {
-            tooltip.add(Component.translatable("tooltip.skycraft.bound_time", BoundWeapons.secondsLeft(stack, level)).withStyle(ChatFormatting.GRAY));
+    static void add(ItemStack stack, @Nullable Level level, java.util.function.Consumer<Component> tooltip) {
+        tooltip.accept(Component.translatable("tooltip.skycraft.bound_weapon").withStyle(ChatFormatting.LIGHT_PURPLE));
+        if (level != null && com.skycraft.inventory.ItemData.hasCustom(stack)) {
+            tooltip.accept(Component.translatable("tooltip.skycraft.bound_time", BoundWeapons.secondsLeft(stack, level)).withStyle(ChatFormatting.GRAY));
         }
     }
 }

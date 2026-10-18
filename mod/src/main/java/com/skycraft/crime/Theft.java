@@ -14,7 +14,7 @@ import net.minecraft.world.Container;
 import net.minecraft.world.entity.ai.village.poi.PoiManager;
 import net.minecraft.world.entity.ai.village.poi.PoiType;
 import net.minecraft.world.entity.ai.village.poi.PoiTypes;
-import net.minecraft.world.entity.npc.Villager;
+import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -24,13 +24,13 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.phys.AABB;
-import net.minecraftforge.event.entity.item.ItemTossEvent;
-import net.minecraftforge.event.entity.player.EntityItemPickupEvent;
-import net.minecraftforge.event.entity.player.PlayerContainerEvent;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.entity.item.ItemTossEvent;
+import net.neoforged.neoforge.event.entity.player.ItemEntityPickupEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerContainerEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -46,7 +46,7 @@ import java.util.UUID;
  * closes: items that moved from the container to the player are stolen ({@code skycraft_stolen}), and if anyone saw
  * it while the container was open, the hold adds a bounty of half the stolen value.</p>
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class Theft {
     private static final Map<UUID, Click> LAST_CLICK = new HashMap<>();
     private static final Map<UUID, Session> SESSIONS = new HashMap<>();
@@ -109,7 +109,7 @@ public final class Theft {
         if (com.skycraft.tamriel.settlement.SettlementAnchors.inSettlement(level, pos)) return true;
         // villagers, townsfolk and meeting points: scanned once per 4x4x4 cell and a few seconds, not per door click
         long now = level.getGameTime();
-        String key = level.dimension().location() + "|" + (pos.getX() >> 2) + "|" + (pos.getY() >> 2) + "|" + (pos.getZ() >> 2);
+        String key = level.dimension().identifier() + "|" + (pos.getX() >> 2) + "|" + (pos.getY() >> 2) + "|" + (pos.getZ() >> 2);
         long[] hit = VILLAGE_CACHE.get(key);
         if (hit != null && hit[0] > now && hit[0] - VILLAGE_CACHE_TICKS <= now) return hit[1] != 0;
         if (VILLAGE_CACHE.size() > 2048) VILLAGE_CACHE.clear();
@@ -134,8 +134,8 @@ public final class Theft {
     /** The loot table a container still has to generate, or null. */
     static String lootTable(BlockEntity be) {
         if (!(be instanceof RandomizableContainerBlockEntity)) return null;
-        CompoundTag tag = be.saveWithoutMetadata();
-        return tag.contains("LootTable", Tag.TAG_STRING) ? tag.getString("LootTable") : null;
+        CompoundTag tag = be.saveWithoutMetadata(be.getLevel().registryAccess());
+        return com.skycraft.platform.NbtData.hasType(tag, "LootTable", Tag.TAG_STRING) ? tag.getStringOr("LootTable","") : null;
     }
 
     // ------------------------------------------------------------------ tracking which block a menu belongs to
@@ -169,7 +169,7 @@ public final class Theft {
         if (click == null || player.level().getGameTime() - click.tick() > 2 || !Crimes.canCommitCrime(player)) return;
         AbstractContainerMenu menu = event.getContainer();
         if (menu == player.inventoryMenu) return;
-        ServerLevel level = player.serverLevel();
+        ServerLevel level = player.level();
         if (click.dungeonLoot()) return; // dungeon loot: finders keepers
         if (click.villageLoot()) {
             if (PlacedBlocks.isPlayerPlaced(level, click.pos()) || !inVillage(level, click.pos())) return;
@@ -277,11 +277,11 @@ public final class Theft {
      * It must be intentionally taken/stolen with [F].
      */
     @SubscribeEvent
-    public static void onPickup(EntityItemPickupEvent event) {
-        if (!(event.getEntity() instanceof ServerPlayer player)) return;
-        ItemEntity itemEntity = event.getItem();
+    public static void onPickup(ItemEntityPickupEvent.Pre event) {
+        if (!(event.getPlayer() instanceof ServerPlayer player)) return;
+        ItemEntity itemEntity = event.getItemEntity();
         if (Ownership.isOwnedByOther(player, itemEntity)) {
-            event.setCanceled(true);
+            event.setCanPickup(net.minecraft.util.TriState.FALSE);
         }
     }
 
@@ -294,9 +294,9 @@ public final class Theft {
     private static final List<PendingReport> PENDING_REPORTS = new ArrayList<>();
 
     @SubscribeEvent
-    public static void onServerTick(net.minecraftforge.event.TickEvent.ServerTickEvent event) {
-        if (event.phase != net.minecraftforge.event.TickEvent.Phase.END || PENDING_REPORTS.isEmpty()) return;
-        var server = net.minecraftforge.server.ServerLifecycleHooks.getCurrentServer();
+    public static void onServerTick(net.neoforged.neoforge.event.tick.ServerTickEvent.Post event) {
+        if (!(event instanceof net.neoforged.neoforge.event.tick.ServerTickEvent.Post) || PENDING_REPORTS.isEmpty()) return;
+        var server = net.neoforged.neoforge.server.ServerLifecycleHooks.getCurrentServer();
         if (server == null) return;
         var it = PENDING_REPORTS.iterator();
         while (it.hasNext()) {
@@ -307,7 +307,7 @@ public final class Theft {
                 it.remove();
                 continue;
             }
-            ServerLevel level = player.serverLevel();
+            ServerLevel level = player.level();
             net.minecraft.world.entity.Entity witnessEntity = level.getEntity(r.witnessUuid());
             if (!(witnessEntity instanceof net.minecraft.world.entity.LivingEntity witness) || !witness.isAlive()) {
                 // Witness was neutralized or fled world; no report!
@@ -358,10 +358,10 @@ public final class Theft {
         if (witness instanceof com.skycraft.society.entity.NpcEntity npc) {
             isFighter = npc.role().combatant;
         } else if (witness instanceof Villager v) {
-            var prof = v.getVillagerData().getProfession();
-            isFighter = prof == net.minecraft.world.entity.npc.VillagerProfession.ARMORER
-                    || prof == net.minecraft.world.entity.npc.VillagerProfession.WEAPONSMITH
-                    || prof == net.minecraft.world.entity.npc.VillagerProfession.TOOLSMITH;
+            var prof = v.getVillagerData().profession();
+            isFighter = prof.is(net.minecraft.world.entity.npc.villager.VillagerProfession.ARMORER)
+                    || prof.is(net.minecraft.world.entity.npc.villager.VillagerProfession.WEAPONSMITH)
+                    || prof.is(net.minecraft.world.entity.npc.villager.VillagerProfession.TOOLSMITH);
         }
 
         if (isFighter) {
@@ -393,7 +393,7 @@ public final class Theft {
     }
 
     public static void punchAndRetrieve(net.minecraft.world.entity.LivingEntity witness, ServerPlayer player, BlockPos pos, int bounty) {
-        player.hurt(player.damageSources().mobAttack(witness), 1.5f);
+        com.skycraft.platform.Effects.hurt(player, player.damageSources().mobAttack(witness), 1.5f);
         witness.level().playSound(null, player.blockPosition(), net.minecraft.sounds.SoundEvents.PLAYER_ATTACK_KNOCKBACK, net.minecraft.sounds.SoundSource.PLAYERS, 1.0f, 1.0f);
 
         boolean retrieved = false;
@@ -432,7 +432,7 @@ public final class Theft {
         List<ItemStack> split = new ArrayList<>();
         for (int i = 0; i < inv.getContainerSize() && left > 0; i++) {
             ItemStack stack = inv.getItem(i);
-            if (stack.isEmpty() || Bounty.isStolen(stack) || !ItemStack.isSameItemSameTags(stack, proto)) continue;
+            if (stack.isEmpty() || Bounty.isStolen(stack) || !ItemStack.isSameItemSameComponents(stack, proto)) continue;
             if (stack.getCount() <= left) {
                 left -= stack.getCount();
                 Bounty.markStolen(stack);
@@ -482,7 +482,7 @@ public final class Theft {
     private static void add(List<Entry> list, ItemStack stack) {
         if (stack.isEmpty()) return;
         for (Entry e : list) {
-            if (ItemStack.isSameItemSameTags(e.proto, stack)) {
+            if (ItemStack.isSameItemSameComponents(e.proto, stack)) {
                 e.count += stack.getCount();
                 return;
             }
@@ -500,7 +500,7 @@ public final class Theft {
 
     private static int countOf(List<Entry> list, ItemStack proto) {
         for (Entry e : list) {
-            if (ItemStack.isSameItemSameTags(e.proto, proto)) return e.count;
+            if (ItemStack.isSameItemSameComponents(e.proto, proto)) return e.count;
         }
         return 0;
     }

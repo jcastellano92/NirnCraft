@@ -28,7 +28,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkSource;
-import net.minecraft.world.level.chunk.ChunkStatus;
+import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.entity.EntityTypeTest;
 import net.minecraft.world.level.gameevent.GameEvent;
@@ -127,7 +127,7 @@ public final class QaLevel implements WorldGenLevel {
             if (be == null || !be.getType().isValid(state)) {
                 BlockPos key = pos.immutable();
                 be = eb.newBlockEntity(key, state);
-                if (be != null) blockEntities.put(key, be);
+                if (be != null) { be.setLevel(real); blockEntities.put(key, be); }
             } else {
                 be.setBlockState(state);
             }
@@ -289,7 +289,7 @@ public final class QaLevel implements WorldGenLevel {
     }
 
     @Override
-    public void playSound(@Nullable Player player, BlockPos pos, SoundEvent sound, SoundSource source, float volume, float pitch) {
+    public void playSound(@Nullable Entity player, BlockPos pos, SoundEvent sound, SoundSource source, float volume, float pitch) {
     }
 
     @Override
@@ -297,11 +297,11 @@ public final class QaLevel implements WorldGenLevel {
     }
 
     @Override
-    public void levelEvent(@Nullable Player player, int type, BlockPos pos, int data) {
+    public void levelEvent(@Nullable Entity player, int type, BlockPos pos, int data) {
     }
 
     @Override
-    public void gameEvent(GameEvent event, Vec3 pos, GameEvent.Context context) {
+    public void gameEvent(Holder<GameEvent> event, Vec3 pos, GameEvent.Context context) {
     }
 
     @Nullable
@@ -355,7 +355,6 @@ public final class QaLevel implements WorldGenLevel {
         return real.enabledFeatures();
     }
 
-    @Override
     public float getShade(Direction direction, boolean shade) {
         return 1.0f;
     }
@@ -365,7 +364,6 @@ public final class QaLevel implements WorldGenLevel {
         return real.getLightEngine();
     }
 
-    @Override
     public int getBlockTint(BlockPos pos, ColorResolver resolver) {
         return 0;
     }
@@ -381,9 +379,8 @@ public final class QaLevel implements WorldGenLevel {
         return this;
     }
 
-    @Override
     public long dayTime() {
-        return real.dayTime();
+        return real.getDefaultClockTime();
     }
 
     @Override
@@ -392,7 +389,9 @@ public final class QaLevel implements WorldGenLevel {
     }
 
     @Override
-    public int getMinBuildHeight() {
-        return real.getMinBuildHeight();
+    public int getMinY() {
+        return real.getMinY();
     }
+
+    @Override public net.minecraft.world.attribute.EnvironmentAttributeReader environmentAttributes() { return real.environmentAttributes(); }
 }

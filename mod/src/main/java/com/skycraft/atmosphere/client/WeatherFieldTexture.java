@@ -1,9 +1,7 @@
 package com.skycraft.atmosphere.client;
 
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.platform.NativeImage;
-import com.mojang.blaze3d.platform.TextureUtil;
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.skycraft.render.client.DataTexture;
 import com.skycraft.Skycraft;
 import com.skycraft.atmosphere.WeatherFront;
 import com.skycraft.atmosphere.WeatherPhysics;
@@ -11,22 +9,15 @@ import com.skycraft.atmosphere.weather.WeatherKind;
 import com.skycraft.tamriel.TamrielMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.renderer.texture.AbstractTexture;
-import net.minecraft.client.renderer.texture.DynamicTexture;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
-import org.lwjgl.opengl.GL11;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
- * Toroidal world-space {@code 128x128} {@link AbstractTexture} bound at
+ * Toroidal world-space {@code 128x128} resource texture bound at
  * {@code skycraft:textures/environment/weather_field.png} ({@code uniform sampler2D skycraftWeatherTex} in
  * Complementary Reimagined). A second 512-block grid spans 65,536 blocks for DH;
  * local detail blends into that field before the local toroidal window ends.
@@ -52,21 +43,20 @@ import java.util.Set;
  *       conservatively marks columns that may contain an actual smoke source.</li>
  * </ul>
  */
-public final class WeatherFieldTexture extends AbstractTexture {
-    public static final ResourceLocation LOCATION = new ResourceLocation(Skycraft.MODID, "textures/environment/weather_field.png");
-    public static final ResourceLocation FAR_LOCATION = new ResourceLocation(Skycraft.MODID, "textures/environment/weather_field_far.png");
-    public static final ResourceLocation DYNAMICS_LOCATION = new ResourceLocation(Skycraft.MODID, "textures/environment/weather_dynamics.png");
-    public static final ResourceLocation FAR_DYNAMICS_LOCATION = new ResourceLocation(Skycraft.MODID, "textures/environment/weather_dynamics_far.png");
+public final class WeatherFieldTexture implements AutoCloseable {
+    public static final Identifier LOCATION = Identifier.fromNamespaceAndPath(Skycraft.MODID, "textures/environment/weather_field.png");
+    public static final Identifier FAR_LOCATION = Identifier.fromNamespaceAndPath(Skycraft.MODID, "textures/environment/weather_field_far.png");
+    public static final Identifier DYNAMICS_LOCATION = Identifier.fromNamespaceAndPath(Skycraft.MODID, "textures/environment/weather_dynamics.png");
+    public static final Identifier FAR_DYNAMICS_LOCATION = Identifier.fromNamespaceAndPath(Skycraft.MODID, "textures/environment/weather_dynamics_far.png");
     private final int size;
     private final int cell;
-    private final ResourceLocation location;
+    private final Identifier location;
 
     private static WeatherFieldTexture instance;
     private static WeatherFieldTexture farInstance;
     private final NativeImage image;
     private final NativeImage dynamicsImage;
-    private final DynamicTexture dynamicsTexture;
-    private final ResourceLocation dynamicsLocation;
+    private final Identifier dynamicsLocation;
     private final float[] baseR;
     private final float[] baseG;
     private final float[] baseB;
@@ -75,28 +65,31 @@ public final class WeatherFieldTexture extends AbstractTexture {
     private final float[] displayR, displayG, displayB;
     private final float[] targetHeight, targetSurface, targetWindX, targetWindZ, targetFog;
     private final float[] displayHeight, displaySurface, displayWindX, displayWindZ, displayFog;
-    private final Set<Integer> preparedTextures = new HashSet<>();
     private boolean initialized;
     private int lastCenterCellX = Integer.MIN_VALUE;
     private int lastCenterCellZ = Integer.MIN_VALUE;
     private static final java.util.concurrent.ExecutorService SAMPLER=java.util.concurrent.Executors.newSingleThreadExecutor(r->{
         Thread t=new Thread(r,"Skycraft weather grids"); t.setDaemon(true); return t;
     });
-    private record Grid(int x,int z,WeatherPhysics.ColumnState[] columns,double millis) {}
+    private static final java.util.concurrent.atomic.AtomicLong STATIC_INPUT_EPOCH=new java.util.concurrent.atomic.AtomicLong();
+    private record Grid(Object identity,int x,int z,WeatherPhysics.ColumnState[] columns,double millis,long stencilHits,long stencilMisses) {}
+    private final com.skycraft.atmosphere.WeatherRegionStencil regionStencil;
+    private Object samplingIdentity=new Object();
+    private long staticInputEpoch=Long.MIN_VALUE,stencilHits,stencilMisses;
     private java.util.concurrent.CompletableFuture<Grid> pendingGrid;
     private final int[] sampledX=new int[128*128], sampledZ=new int[128*128];
     private ClientLevel trackedLevel;
     private long nextGrid;
     private double workerMillis, presentationMillis;
 
-    private WeatherFieldTexture(ResourceLocation location, int size, int cell) {
+    private WeatherFieldTexture(Identifier location, int size, int cell) {
         this.location = location;
         this.size = size;
         this.cell = cell;
+        regionStencil=new com.skycraft.atmosphere.WeatherRegionStencil(size*size,(x,z)->TamrielMap.region(x,z).id());
         image = new NativeImage(NativeImage.Format.RGBA, size, size, false);
         dynamicsLocation = location.equals(LOCATION) ? DYNAMICS_LOCATION : FAR_DYNAMICS_LOCATION;
         dynamicsImage = new NativeImage(NativeImage.Format.RGBA, size, size, false);
-        dynamicsTexture = new DynamicTexture(dynamicsImage);
         baseR = new float[size * size];
         baseG = new float[size * size];
         baseB = new float[size * size];
@@ -126,11 +119,10 @@ public final class WeatherFieldTexture extends AbstractTexture {
         register(mc, farInstance);
     }
 
-    private static void register(Minecraft mc, WeatherFieldTexture tex) {
-        AbstractTexture existing = mc.getTextureManager().getTexture(tex.location, null);
-        if (existing != tex) mc.getTextureManager().register(tex.location, tex);
-        if (mc.getTextureManager().getTexture(tex.dynamicsLocation, null) != tex.dynamicsTexture)
-            mc.getTextureManager().register(tex.dynamicsLocation, tex.dynamicsTexture);
+    private static void register(Minecraft mc, WeatherFieldTexture field) {
+        // Keep the original resource objects so Iris and normal renderers observe the same GPU textures.
+        mc.getTextureManager().getTexture(field.location);
+        mc.getTextureManager().getTexture(field.dynamicsLocation);
     }
 
     private void fillDefault() {
@@ -147,22 +139,9 @@ public final class WeatherFieldTexture extends AbstractTexture {
                 displaySurface[idx] = targetSurface[idx] = 63f;
                 displayWindX[idx] = targetWindX[idx] = 0.8f;
                 displayWindZ[idx] = targetWindZ[idx] = 0.6f;
-                image.setPixelRGBA(x, z, defaultPixel);
-                dynamicsImage.setPixelRGBA(x, z, (26 << 16) | (16 << 8) | 58);
+                image.setPixelABGR(x, z, defaultPixel);
+                dynamicsImage.setPixelABGR(x, z, (26 << 16) | (16 << 8) | 58);
             }
-        }
-    }
-
-    @Override
-    public void load(ResourceManager manager) throws IOException {
-        if (RenderSystem.isOnRenderThreadOrInit()) {
-            preparedTextures.clear();
-            uploadToGl(getId());
-        } else {
-            RenderSystem.recordRenderCall(() -> {
-                preparedTextures.clear();
-                uploadToGl(getId());
-            });
         }
     }
 
@@ -171,9 +150,11 @@ public final class WeatherFieldTexture extends AbstractTexture {
      * with lightning transported separately by {@link LightningFieldTexture}.
      */
     public static void tickUpdate(ClientLevel level, Vec3 cam, float partialTick) {
+        try(var uploadState=TextureUploadState.preserve()) {
         ensureRegistered();
         get().update(level, cam, partialTick);
         farInstance.update(level, cam, partialTick);
+        }
     }
 
     private void update(ClientLevel level, Vec3 cam, float partialTick) {
@@ -187,14 +168,20 @@ public final class WeatherFieldTexture extends AbstractTexture {
         lastCenterCellZ = centerCellZ;
 
         long presentationStart=System.nanoTime();
-        if(trackedLevel!=level) {
-            trackedLevel=level; initialized=false; nextGrid=0;
+        long epoch=STATIC_INPUT_EPOCH.get();
+        if(trackedLevel!=level || staticInputEpoch!=epoch) {
+            trackedLevel=level;staticInputEpoch=epoch;samplingIdentity=new Object();
+            initialized=false; nextGrid=0;
             if(pendingGrid!=null) pendingGrid.cancel(false);
             pendingGrid=null; java.util.Arrays.fill(sampledX,Integer.MIN_VALUE);
         }
         if(pendingGrid!=null && pendingGrid.isDone()) {
+            nextGrid=System.currentTimeMillis()+750;
             try {
-                Grid grid=pendingGrid.join(); workerMillis=grid.millis;
+                Grid grid=pendingGrid.join();
+                if(grid.identity==samplingIdentity) {
+                workerMillis=grid.millis;
+                stencilHits=grid.stencilHits;stencilMisses=grid.stencilMisses;
                 for(int row=0;row<size;row++) for(int col=0;col<size;col++) {
                     int i=row*size+col;
                     int gx=nearestWorldCell(grid.x,col), gz=nearestWorldCell(grid.z,row);
@@ -217,10 +204,11 @@ public final class WeatherFieldTexture extends AbstractTexture {
                     }
                 }
                 initialized=true;
+                } else nextGrid=0;
             } catch(java.util.concurrent.CompletionException e) {
                 Skycraft.LOGGER.error("Weather grid sampling failed",e);
             }
-            pendingGrid=null; nextGrid=System.currentTimeMillis()+750;
+            pendingGrid=null;
         }
         if(pendingGrid==null && (System.currentTimeMillis()>=nextGrid || teleported)) {
             var climate=CloudClimate.snapshot();
@@ -234,7 +222,8 @@ public final class WeatherFieldTexture extends AbstractTexture {
             WeatherKind fallback=level.getThunderLevel(partialTick)>0.2f?WeatherKind.STORM
                     :level.getRainLevel(partialTick)>0.2f?WeatherKind.RAIN:WeatherKind.CLEAR;
             double seconds=(level.getGameTime()+partialTick)/20.0;
-            long dayTime=level.getDayTime();
+            long dayTime=level.getDefaultClockTime();
+            Object identity=samplingIdentity;
             // Immutable inputs only: no ClientLevel, entity, chunk, GL or mutable table reads.
             pendingGrid=java.util.concurrent.CompletableFuture.supplyAsync(()->{
                 long started=System.nanoTime();
@@ -242,12 +231,14 @@ public final class WeatherFieldTexture extends AbstractTexture {
                 for(int row=0;row<size;row++) for(int col=0;col<size;col++) {
                     double x=(nearestWorldCell(centerCellX,col)+0.5)*cell;
                     double z=(nearestWorldCell(centerCellZ,row)+0.5)*cell;
-                    String region=TamrielMap.region((int)x,(int)z).id();
-                    float[] params=regional?blendedParams(climate,region,x,z):null;
+                    int slot=row*size+col;
+                    String region=regional?regionStencil.region(identity,slot,(int)x,(int)z,0):null;
+                    float[] params=regional?regionStencil.blend(identity,slot,(int)x,(int)z,climate,blendScratch):null;
                     columns[row*size+col]=WeatherPhysics.evaluate(x,z,seconds,params,
                             regional?kinds.get(region):fallback,wx,wz,fronts,dayTime);
                 }
-                return new Grid(centerCellX,centerCellZ,columns,(System.nanoTime()-started)*1e-6);
+                return new Grid(identity,centerCellX,centerCellZ,columns,(System.nanoTime()-started)*1e-6,
+                        regionStencil.hits(),regionStencil.misses());
             },SAMPLER);
         }
 
@@ -266,9 +257,9 @@ public final class WeatherFieldTexture extends AbstractTexture {
                 // Lightning has its own 512-byte 3D packet; never rescan both weather grids per flash.
                 int rgba = packAbgr(displayR[i], displayG[i], displayB[i], baseBand[i]);
                 int alpha = ((rgba >>> 24) & 254) | (smokeColumns[i] ? 1 : 0);
-                image.setPixelRGBA(col, row, (rgba & 0x00FFFFFF) | (alpha << 24));
+                image.setPixelABGR(col, row, (rgba & 0x00FFFFFF) | (alpha << 24));
                 int windAngle = clampByte((float) (Math.atan2(displayWindZ[i], displayWindX[i]) / (Math.PI * 2.0) + 1.0) % 1f);
-                dynamicsImage.setPixelRGBA(col, row, (clampByte(displayFog[i]) << 24) | (windAngle << 16)
+                dynamicsImage.setPixelABGR(col, row, (clampByte(displayFog[i]) << 24) | (windAngle << 16)
                         | (clampByte(displaySurface[i] / 1024f) << 8) | clampByte(displayHeight[i] / 1024f));
             }
         }
@@ -279,7 +270,10 @@ public final class WeatherFieldTexture extends AbstractTexture {
     public static String diagnostics() {
         return instance==null?"weather grids pending":"weather_grid_worker_ms="+instance.workerMillis
                 +" weather_grid_present_ms="+instance.presentationMillis
-                +" far_worker_ms="+(farInstance==null?0:farInstance.workerMillis);
+                +" far_worker_ms="+(farInstance==null?0:farInstance.workerMillis)
+                +" weather_stencil_hits="+instance.stencilHits+" weather_stencil_misses="+instance.stencilMisses
+                +" far_stencil_hits="+(farInstance==null?0:farInstance.stencilHits)
+                +" far_stencil_misses="+(farInstance==null?0:farInstance.stencilMisses);
     }
 
     public static boolean ready() {
@@ -292,31 +286,10 @@ public final class WeatherFieldTexture extends AbstractTexture {
         return sampledX[i]==lastCenterCellX && sampledZ[i]==lastCenterCellZ;
     }
 
-    private static final int BLEND = 384;
-    private static final int[][] BLEND_AT = {{0, 0}, {BLEND, 0}, {-BLEND, 0}, {0, BLEND}, {0, -BLEND}, {BLEND, BLEND}, {-BLEND, BLEND}, {BLEND, -BLEND}, {-BLEND, -BLEND}};
-    private static final float[] BLEND_W = {4f, 2f, 2f, 2f, 2f, 1f, 1f, 1f, 1f};
     private final float[] blendScratch = new float[CloudClimate.COUNT];
 
-    /**
-     * The cloud parameters of the region at (x, z) mixed with those of the regions {@link #BLEND} blocks around it, so
-     * a region border is a soft gradient rather than a line. Falls back to the plain region (or null) when unknown.
-     */
-    private float[] blendedParams(Map<String, float[]> climate, String centreId, double x, double z) {
-        float[] centre = climate.get(centreId);
-        if (centre == null) return null;
-        float[] out = blendScratch;
-        java.util.Arrays.fill(out, 0f);
-        float total = 0f;
-        for (int i = 0; i < BLEND_AT.length; i++) {
-            float[] p = i == 0 ? centre : climate.get(TamrielMap.region((int) x + BLEND_AT[i][0], (int) z + BLEND_AT[i][1]).id());
-            if (p == null) p = centre;
-            float w = BLEND_W[i];
-            for (int k = 0; k < out.length; k++) out[k] += p[k] * w;
-            total += w;
-        }
-        for (int k = 0; k < out.length; k++) out[k] /= total;
-        return out;
-    }
+    /** Static region stencils belong to a world/resource epoch; no dynamic weather values are cached. */
+    public static void invalidateStaticInputs() { STATIC_INPUT_EPOCH.incrementAndGet(); }
 
     /**
      * Maps a toroidal texel index {@code texel in [0, 127]} to the world cell index closest to {@code centerCell}
@@ -350,42 +323,16 @@ public final class WeatherFieldTexture extends AbstractTexture {
     }
 
     private void uploadAllTargets() {
-        if (!RenderSystem.isOnRenderThreadOrInit()) {
-            RenderSystem.recordRenderCall(this::uploadAllTargets);
-            return;
+        try (var uploadState = TextureUploadState.preserve()) {
+            DataTexture.write(location, image);
+            DataTexture.write(dynamicsLocation, dynamicsImage);
         }
-        uploadToGl(getId());
-        dynamicsTexture.upload();
-        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
-        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
-        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL11.GL_REPEAT);
-        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL11.GL_REPEAT);
-        Minecraft mc = Minecraft.getInstance();
-        if (mc != null && mc.getTextureManager() != null) {
-            AbstractTexture registered = mc.getTextureManager().getTexture(location, null);
-            if (registered != null && registered != this && registered.getId() != getId()) {
-                uploadToGl(registered.getId());
-            }
-        }
-    }
-
-    private void uploadToGl(int glId) {
-        // Allocate storage once per target, then update texels. Reallocating it every client tick
-        // forces unnecessary driver work and can stall the frame on integrated graphics.
-        if (preparedTextures.add(glId)) TextureUtil.prepareImage(glId, 0, size, size);
-        GlStateManager._bindTexture(glId);
-        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
-        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
-        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL11.GL_REPEAT);
-        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL11.GL_REPEAT);
-        image.upload(0, 0, 0, 0, 0, size, size, true, false, false, false);
     }
 
     @Override
     public void close() {
         image.close();
-        dynamicsTexture.close();
-        preparedTextures.clear();
+        dynamicsImage.close();
         if (instance == this) instance = null;
         if (farInstance == this) farInstance = null;
     }

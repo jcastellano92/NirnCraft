@@ -1,6 +1,8 @@
 package com.skycraft.tamriel;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import net.minecraft.world.level.biome.BiomeResolver;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.skycraft.tamriel.biome.BiomeNoise;
 import com.skycraft.tamriel.biome.Palettes;
@@ -12,7 +14,7 @@ import net.minecraft.core.HolderGetter;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.biome.Climate;
@@ -41,7 +43,7 @@ import java.util.stream.Stream;
  * shape {@code {"type": "skycraft:tamriel"}} are fixed.</p>
  */
 public class TamrielBiomeSource extends BiomeSource {
-    public static final Codec<TamrielBiomeSource> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+    public static final MapCodec<TamrielBiomeSource> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
             RegistryOps.retrieveGetter(Registries.BIOME)
     ).apply(instance, instance.stable(TamrielBiomeSource::new)));
 
@@ -116,11 +118,11 @@ public class TamrielBiomeSource extends BiomeSource {
     }
 
     private static Holder<Biome> lookupBiome(HolderGetter<Biome> biomes, String path) {
-        return biomes.get(ResourceKey.create(Registries.BIOME, new ResourceLocation("skycraft", path))).orElse(null);
+        return biomes.get(ResourceKey.create(Registries.BIOME, Identifier.fromNamespaceAndPath("skycraft", path))).orElse(null);
     }
 
     @Override
-    protected Codec<? extends BiomeSource> codec() {
+    protected MapCodec<? extends BiomeSource> codec() {
         return CODEC;
     }
 
@@ -129,7 +131,10 @@ public class TamrielBiomeSource extends BiomeSource {
         return palettes.all.stream();
     }
 
-    @Override
+    @Override public BiomeResolver createResolver(Climate.Sampler sampler) {
+        return (x, y, z) -> getNoiseBiome(x, y, z, sampler);
+    }
+
     public Holder<Biome> getNoiseBiome(int qx, int qy, int qz, Climate.Sampler sampler) {
         if (grid) return gridBiome(qx, qz);
         Column col = column(qx, qz);
@@ -360,7 +365,7 @@ public class TamrielBiomeSource extends BiomeSource {
     }
 
     private static String key(Holder<Biome> h) {
-        return h.unwrapKey().map(k -> k.location().toString()).orElse("?");
+        return h.unwrapKey().map(k -> k.identifier().toString()).orElse("?");
     }
 
     @Override

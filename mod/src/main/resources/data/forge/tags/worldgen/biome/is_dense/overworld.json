@@ -12,6 +12,12 @@
     "skycraft:pyandonean_jungle_isles",
     "skycraft:rivenspire",
     "skycraft:tsaesci_jungle",
-    "skycraft:valenwood_rainforest"
+    "skycraft:valenwood_rainforest",
+    "minecraft:dark_forest",
+    "minecraft:old_growth_birch_forest",
+    "minecraft:old_growth_spruce_taiga",
+    "minecraft:jungle",
+    "minecraft:bamboo_jungle",
+    "minecraft:mangrove_swamp"
   ]
 }

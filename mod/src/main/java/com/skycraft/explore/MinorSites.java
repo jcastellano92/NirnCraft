@@ -49,7 +49,7 @@ public final class MinorSites {
 
         /** Stable key of the cell, for "found" sets and spawned hermits. */
         public long key() {
-            return ChunkPos.asLong(cellX, cellZ);
+            return ChunkPos.pack(cellX, cellZ);
         }
 
         public Direction direction() {
@@ -87,7 +87,7 @@ public final class MinorSites {
             c = new Cache(worldSeed);
             cache = c;
         }
-        long key = ChunkPos.asLong(cellX, cellZ);
+        long key = ChunkPos.pack(cellX, cellZ);
         Optional<Site> hit = c.sites.get(key);
         if (hit != null) return hit.orElse(null);
         Site site = compute(worldSeed, cellX, cellZ);

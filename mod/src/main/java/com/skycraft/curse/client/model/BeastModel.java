@@ -3,10 +3,10 @@ package com.skycraft.curse.client.model;
 import com.skycraft.curse.CurseAnims;
 import com.skycraft.curse.client.CurseClient;
 import net.minecraft.client.animation.AnimationDefinition;
-import net.minecraft.client.model.HierarchicalModel;
+import com.skycraft.client.PoseEntityModel;
 import net.minecraft.client.model.geom.ModelPart;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
 
@@ -17,12 +17,12 @@ import java.util.function.Function;
  * the creature itself or, for a transformed player, to {@link CurseClient}. Subclasses pose the looping motion (idle,
  * walk, run, hover) and list their one-shot animations.
  */
-public abstract class BeastModel<T extends LivingEntity> extends HierarchicalModel<T> {
+public abstract class BeastModel<T extends LivingEntity> extends PoseEntityModel<T> {
     protected final ModelPart root;
     protected final ModelPart head;
 
-    protected BeastModel(ModelPart root, Function<ResourceLocation, RenderType> renderType) {
-        super(renderType);
+    protected BeastModel(ModelPart root, Function<Identifier, RenderType> renderType) {
+        super(root,renderType);
         this.root = root;
         this.head = find(root, "head");
     }
@@ -31,11 +31,6 @@ public abstract class BeastModel<T extends LivingEntity> extends HierarchicalMod
         if (root.hasChild(name)) return root.getChild(name);
         if (root.hasChild("body") && root.getChild("body").hasChild(name)) return root.getChild("body").getChild(name);
         return null;
-    }
-
-    @Override
-    public ModelPart root() {
-        return root;
     }
 
     /** The one-shot animation for a {@link CurseAnims.Anim}, or null if this model has none. */
@@ -60,11 +55,19 @@ public abstract class BeastModel<T extends LivingEntity> extends HierarchicalMod
         }
     }
 
-    private static final org.joml.Vector3f CACHE = new org.joml.Vector3f();
+    private final java.util.Map<AnimationDefinition,net.minecraft.client.animation.KeyframeAnimation> bakedAnimations=new java.util.IdentityHashMap<>();
 
     /** Applies a looping animation by the entity's age (no state: the model instance is shared by all entities). */
     protected void looping(AnimationDefinition def, float ageInTicks, float scale) {
-        net.minecraft.client.animation.KeyframeAnimations.animate(this, def, (long) (ageInTicks * 50f), scale, CACHE);
+        bakedAnimations.computeIfAbsent(def,d->d.bake(root)).apply((long)(ageInTicks*50f),scale);
+    }
+
+    protected void animate(net.minecraft.world.entity.AnimationState state,AnimationDefinition def,float age) {
+        bakedAnimations.computeIfAbsent(def,d->d.bake(root)).apply(state,age);
+    }
+
+    protected void animateWalk(AnimationDefinition def,float walk,float speed,float speedFactor,float scaleFactor) {
+        bakedAnimations.computeIfAbsent(def,d->d.bake(root)).applyWalk(walk,speed,speedFactor,scaleFactor);
     }
 
     /** Whether the creature hovers (Vampire Lord levitating, a transformed player in the air). */

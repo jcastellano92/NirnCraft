@@ -1,25 +1,22 @@
 package com.skycraft.crafting.item;
 
 import com.skycraft.crafting.SkyArmorMaterial;
-import net.minecraft.world.item.ArmorItem;
-import net.minecraftforge.client.extensions.common.IClientItemExtensions;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.equipment.ArmorType;
 
-import java.util.function.Consumer;
-
-/**
- * A piece of a Skyrim armour set. Worn, it renders with the set's 3D model (horned helms, pauldrons, hoods, gauntlets
- * on the forearms...) instead of the vanilla armour boxes; see {@code crafting.client.armor.GearArmorModels}.
- */
-public class SkyArmorItem extends ArmorItem {
+/** Original Skyrim armor geometry is supplied by the physical-client equipment renderer. */
+public class SkyArmorItem extends Item {
     public final SkyArmorMaterial set;
+    private final ArmorType type;
 
-    public SkyArmorItem(SkyArmorMaterial set, Type type, Properties props) {
-        super(set, type, props);
+    public SkyArmorItem(SkyArmorMaterial set, ArmorType type, Properties props) {
+        super(props.humanoidArmor(set.vanilla(), type).repairable(set.material()));
         this.set = set;
+        this.type = type;
     }
 
-    @Override
-    public void initializeClient(Consumer<IClientItemExtensions> consumer) {
-        consumer.accept(com.skycraft.crafting.client.armor.GearArmorClient.EXTENSIONS);
-    }
+    public ArmorType getType() { return type; }
+    public int getDefense() { return set.getDefenseForType(type); }
+    public float getToughness() { return set.getToughness(); }
+    public net.minecraft.world.item.equipment.ArmorMaterial getMaterial() { return set.vanilla(); }
 }

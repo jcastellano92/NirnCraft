@@ -12,14 +12,14 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
-import net.minecraft.world.entity.animal.IronGolem;
+import net.minecraft.world.entity.animal.golem.IronGolem;
 import net.minecraft.world.entity.monster.Monster;
-import net.minecraft.world.entity.npc.AbstractVillager;
-import net.minecraft.world.entity.projectile.WitherSkull;
+import net.minecraft.world.entity.npc.villager.AbstractVillager;
+import net.minecraft.world.entity.projectile.hurtingprojectile.WitherSkull;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
@@ -63,8 +63,8 @@ public class NecromancerEntity extends SkyHumanoid implements Ranked {
     }
 
     @Override
-    protected void customServerAiStep() {
-        super.customServerAiStep();
+    protected void customServerAiStep(net.minecraft.server.level.ServerLevel serverLevel263) {
+        super.customServerAiStep(serverLevel263);
         LivingEntity target = this.getTarget();
         if (target == null || !target.isAlive()) return;
 
@@ -74,10 +74,10 @@ public class NecromancerEntity extends SkyHumanoid implements Ranked {
         if (!summonedUndead && this.getHealth() < this.getMaxHealth() * 0.75f && this.level() instanceof ServerLevel sl) {
             summonedUndead = true;
             this.playSound(SoundEvents.EVOKER_PREPARE_SUMMON, 1.0f, 0.8f);
-            DraugrEntity minion = ModEntities.DRAUGR.get().create(sl);
+            DraugrEntity minion = ModEntities.DRAUGR.get().create(sl, net.minecraft.world.entity.EntitySpawnReason.EVENT);
             if (minion != null) {
-                minion.moveTo(this.getX() + (this.random.nextDouble() - 0.5) * 3, this.getY(), this.getZ() + (this.random.nextDouble() - 0.5) * 3, this.getYRot(), 0);
-                minion.finalizeSpawn(sl, sl.getCurrentDifficultyAt(minion.blockPosition()), MobSpawnType.MOB_SUMMONED, null, null);
+                minion.snapTo(this.getX() + (this.random.nextDouble() - 0.5) * 3, this.getY(), this.getZ() + (this.random.nextDouble() - 0.5) * 3, this.getYRot(), 0);
+                minion.finalizeSpawn(sl, sl.getCurrentDifficultyAt(minion.blockPosition()), EntitySpawnReason.MOB_SUMMONED, null);
                 minion.setTarget(target);
                 sl.addFreshEntity(minion);
                 sl.sendParticles(ParticleTypes.SOUL, minion.getX(), minion.getY() + 0.5, minion.getZ(), 15, 0.3, 0.5, 0.3, 0.02);
@@ -90,7 +90,7 @@ public class NecromancerEntity extends SkyHumanoid implements Ranked {
             double dx = target.getX() - this.getX();
             double dy = target.getY(0.5) - this.getY(0.5);
             double dz = target.getZ() - this.getZ();
-            WitherSkull skull = new WitherSkull(this.level(), this, dx, dy, dz);
+            WitherSkull skull = new WitherSkull(this.level(), this, new net.minecraft.world.phys.Vec3(dx, dy, dz));
             skull.setPosRaw(this.getX(), this.getEyeY() - 0.1, this.getZ());
             this.level().addFreshEntity(skull);
             this.playSound(SoundEvents.WITHER_SHOOT, 1.0f, 1.2f);

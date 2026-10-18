@@ -47,15 +47,15 @@ public class WispmotherEntity extends SkyHumanoid {
     @Override
     public void aiStep() {
         super.aiStep();
-        if (this.level().isClientSide) {
+        if (this.level().isClientSide()) {
             Vec3 pos = this.position().add((this.random.nextDouble() - 0.5) * 0.5, this.getBbHeight() * 0.6, (this.random.nextDouble() - 0.5) * 0.5);
             this.level().addParticle(ParticleTypes.CLOUD, pos.x, pos.y, pos.z, 0, 0.02, 0);
         }
     }
 
     @Override
-    protected void customServerAiStep() {
-        super.customServerAiStep();
+    protected void customServerAiStep(net.minecraft.server.level.ServerLevel serverLevel263) {
+        super.customServerAiStep(serverLevel263);
         LivingEntity target = this.getTarget();
         if (target == null || !target.isAlive()) return;
 
@@ -65,11 +65,11 @@ public class WispmotherEntity extends SkyHumanoid {
             wispCooldown = 300;
             com.skycraft.creatures.entity.anim.CreatureAnims.play(this, com.skycraft.creatures.entity.anim.AnimSlot.SUMMON);
             for (int i = 0; i < 2; i++) {
-                var wisp = com.skycraft.creatures.Bestiary.WISP.get().create(sl);
+                var wisp = com.skycraft.creatures.Bestiary.WISP.get().create(sl, net.minecraft.world.entity.EntitySpawnReason.EVENT);
                 if (wisp == null) break;
-                wisp.moveTo(this.getX() + (this.random.nextDouble() - 0.5) * 3, this.getY() + 1.5, this.getZ() + (this.random.nextDouble() - 0.5) * 3,
+                wisp.snapTo(this.getX() + (this.random.nextDouble() - 0.5) * 3, this.getY() + 1.5, this.getZ() + (this.random.nextDouble() - 0.5) * 3,
                         this.getYRot(), 0);
-                wisp.finalizeSpawn(sl, sl.getCurrentDifficultyAt(this.blockPosition()), net.minecraft.world.entity.MobSpawnType.MOB_SUMMONED, null, null);
+                wisp.finalizeSpawn(sl, sl.getCurrentDifficultyAt(this.blockPosition()), net.minecraft.world.entity.EntitySpawnReason.MOB_SUMMONED, null);
                 wisp.setTarget(target);
                 sl.addFreshEntity(wisp);
             }
@@ -78,8 +78,8 @@ public class WispmotherEntity extends SkyHumanoid {
         if (--frostCooldown <= 0 && distSqr < 144.0 && this.hasLineOfSight(target)) {
             frostCooldown = 50 + this.random.nextInt(25);
             com.skycraft.creatures.entity.anim.CreatureAnims.play(this, com.skycraft.creatures.entity.anim.AnimSlot.CAST);
-            target.hurt(this.damageSources().indirectMagic(this, this), 3.0f);
-            target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 60, 1), this);
+            com.skycraft.platform.Effects.hurt(target, this.damageSources().indirectMagic(this, this), 3.0f);
+            target.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.SLOWNESS), 60, 1), this);
             if (target.canFreeze()) {
                 target.setTicksFrozen(Math.min(target.getTicksRequiredToFreeze() + 60, target.getTicksFrozen() + 30));
             }
@@ -88,10 +88,10 @@ public class WispmotherEntity extends SkyHumanoid {
     }
 
     @Override
-    public boolean doHurtTarget(Entity target) {
-        boolean hit = super.doHurtTarget(target);
+    public boolean doHurtTarget(net.minecraft.server.level.ServerLevel serverLevel263, Entity target) {
+        boolean hit = super.doHurtTarget(serverLevel263, target);
         if (hit && target instanceof LivingEntity living) {
-            living.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 80, 1), this);
+            living.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.SLOWNESS), 80, 1), this);
         }
         return hit;
     }

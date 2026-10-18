@@ -12,24 +12,24 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 /**
  * "Found: Waterfall Cave" for the river sites ({@code hydrology.json}): the first time a player comes within a few
  * blocks of one. Stored per player in the explore module's {@code river_found} long array (the site's chunk key), so
  * it never touches the minor-site bookkeeping.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class RiverEvents {
     private static final int INTERVAL = 50;
 
     private RiverEvents() {}
 
     @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer player)) return;
+    public static void onPlayerTick(net.neoforged.neoforge.event.tick.PlayerTickEvent.Post event) {
+        if (!(event instanceof net.neoforged.neoforge.event.tick.PlayerTickEvent.Post) || !(event.getEntity() instanceof ServerPlayer player)) return;
         if (player.isSpectator() || player.level().dimension() != Level.OVERWORLD) return;
         if ((player.tickCount + (player.getId() & 31) + 29) % INTERVAL != 0) return;
         try {
@@ -48,8 +48,8 @@ public final class RiverEvents {
     private static void found(ServerPlayer player, Hydrology.Site s) {
         PlayerData data = SkyData.get(player);
         CompoundTag mod = data.module("explore");
-        long key = ChunkPos.asLong(s.chunkX(), s.chunkZ());
-        long[] have = mod.getLongArray("river_found");
+        long key = ChunkPos.pack(s.chunkX(), s.chunkZ());
+        long[] have = mod.getLongArray("river_found").orElseGet(() -> new long[0]);
         for (long k : have) if (k == key) return;
         long[] grown = java.util.Arrays.copyOf(have, have.length + 1);
         grown[have.length] = key;

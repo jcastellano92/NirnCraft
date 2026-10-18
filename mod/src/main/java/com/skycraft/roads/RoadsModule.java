@@ -2,13 +2,15 @@ package com.skycraft.roads;
 
 import com.skycraft.Skycraft;
 import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegistryObject;
+import com.mojang.serialization.MapCodec;
+import com.skycraft.worldgen.NoneFeatureConfiguration;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.ModLoadingContext;
+import net.neoforged.fml.config.ModConfig;
+import net.neoforged.neoforge.registries.DeferredRegister;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import java.util.function.Supplier;
 
 /**
  * Road network between settlements, signposts, and travelers/caravans/patrols walking the roads.
@@ -27,20 +29,20 @@ import net.minecraftforge.registries.RegistryObject;
  *     <li>{@link RoadsPackets}: compass markers for nearby undiscovered settlements (source {@code "roads"}).</li>
  *     <li>{@link RoadsCommands}: {@code /skycraft-roads}.</li>
  * </ul>
- * Forge-bus handlers are registered through {@code @Mod.EventBusSubscriber}.
+ * Forge-bus handlers are registered through {@code @net.neoforged.fml.common.EventBusSubscriber}.
  */
 public final class RoadsModule {
-    public static final DeferredRegister<Feature<?>> FEATURES = DeferredRegister.create(ForgeRegistries.FEATURES, Skycraft.MODID);
+    public static final DeferredRegister<MapCodec<? extends Feature>> FEATURES = DeferredRegister.create(Registries.FEATURE_TYPE, Skycraft.MODID);
 
     /** {@code skycraft:road_paint}: added to every overworld biome at the last decoration step by a biome modifier. */
-    public static final RegistryObject<Feature<NoneFeatureConfiguration>> ROAD_PAINT = FEATURES.register("road_paint",
-            () -> new RoadPaint(NoneFeatureConfiguration.CODEC));
+    public static final Supplier<MapCodec<? extends Feature>> ROAD_PAINT = FEATURES.register("road_paint",
+            () -> new RoadPaint(NoneFeatureConfiguration.CODEC).codec());
 
     private RoadsModule() {}
 
     /** Registers this module's DeferredRegisters and mod-bus listeners. Called from the mod constructor. */
     public static void init(IEventBus modBus) {
-        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, RoadsConfig.SPEC, "skycraft-roads.toml");
+        com.skycraft.Skycraft.config(ModConfig.Type.LOCAL, RoadsConfig.SPEC, "skycraft-roads.toml");
         FEATURES.register(modBus);
         RoadLights.init(modBus);
         RoadMask.install();

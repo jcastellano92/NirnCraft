@@ -9,8 +9,8 @@ import com.skycraft.survival.inn.Innkeepers;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.npc.Villager;
-import net.minecraft.world.entity.npc.VillagerProfession;
+import net.minecraft.world.entity.npc.villager.Villager;
+import net.minecraft.world.entity.npc.villager.VillagerProfession;
 
 import java.util.List;
 
@@ -48,12 +48,12 @@ public final class SurvivalDialogue {
     }
 
     public static boolean isPriest(LivingEntity npc) {
-        if (npc instanceof Villager v && !v.isBaby() && v.getVillagerData().getProfession() == VillagerProfession.CLERIC) return true;
+        if (npc instanceof Villager v && !v.isBaby() && v.getVillagerData().profession().is(VillagerProfession.CLERIC)) return true;
         if (npc instanceof com.skycraft.society.entity.NpcEntity n
                 && (n.role() == com.skycraft.society.NpcRole.PRIEST || n.role() == com.skycraft.society.NpcRole.APOTHECARY)) return true;
-        String job = npc.getPersistentData().getString(com.skycraft.society.Housing.JOB_KEY);
+        String job = npc.getPersistentData().getStringOr(com.skycraft.society.Housing.JOB_KEY, "");
         if ("priest".equalsIgnoreCase(job) || "healer".equalsIgnoreCase(job) || "apothecary".equalsIgnoreCase(job)) return true;
-        return npc.getPersistentData().getBoolean(PRIEST_TAG) || "priest".equals(npc.getPersistentData().getString("skycraft_role"));
+        return npc.getPersistentData().getBooleanOr(PRIEST_TAG, false) || "priest".equals(npc.getPersistentData().getStringOr("skycraft_role",""));
     }
 
     private static void cure(ServerPlayer player, LivingEntity npc) {

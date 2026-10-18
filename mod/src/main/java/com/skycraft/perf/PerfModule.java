@@ -1,14 +1,14 @@
 package com.skycraft.perf;
 
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.skycraft.Skycraft;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.world.level.levelgen.SurfaceRules;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.RegistryObject;
+import net.minecraft.world.level.levelgen.material.rule.MaterialRule;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.ModLoadingContext;
+import net.neoforged.fml.config.ModConfig;
+import net.neoforged.neoforge.registries.DeferredRegister;
+import java.util.function.Supplier;
 
 /**
  * Worldgen performance: the {@code skycraft:fast_surface} surface rule wrapper ({@link FastSurfaceRule}), the
@@ -17,16 +17,17 @@ import net.minecraftforge.registries.RegistryObject;
  * ({@link PerfConfig}).
  */
 public final class PerfModule {
-    public static final DeferredRegister<Codec<? extends SurfaceRules.RuleSource>> RULES =
-            DeferredRegister.create(Registries.MATERIAL_RULE, Skycraft.MODID);
-    public static final RegistryObject<Codec<? extends SurfaceRules.RuleSource>> FAST_SURFACE =
-            RULES.register("fast_surface", FastSurfaceRule::codecForRegistry);
+    public static final DeferredRegister<MapCodec<? extends MaterialRule>> RULES =
+            DeferredRegister.create(Registries.MATERIAL_RULE_TYPE, Skycraft.MODID);
+    public static final Supplier<MapCodec<FastSurfaceRule.Source>> FAST_SURFACE =
+            RULES.register("fast_surface", () -> FastSurfaceRule.Source.CODEC);
 
     private PerfModule() {}
 
     public static void init(IEventBus modBus) {
+        PerfTickets.init(modBus);
         RULES.register(modBus);
         PerfPackets.register();
-        ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, PerfConfig.SPEC, "skycraft-perf-server.toml");
+        com.skycraft.Skycraft.config(ModConfig.Type.SYNCED, PerfConfig.SPEC, "skycraft-perf-server.toml");
     }
 }

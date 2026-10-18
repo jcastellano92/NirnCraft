@@ -107,7 +107,7 @@ final class Giants {
             }
             if (y > 0 && y < H - 6) {
                 int lz = bz + (int) Math.floor(rr - 1.9);
-                if (s.get(bx, g + y, lz + 1).isSolidRender(level(s), s.b.at(bx, g + y, lz + 1)) || true) {
+                if (s.get(bx, g + y, lz + 1).isSolidRender() || true) {
                     s.set(bx, g + y, lz, Blocks.LADDER.defaultBlockState().setValue(LadderBlock.FACING, Direction.NORTH));
                 }
             }
@@ -513,7 +513,7 @@ final class Giants {
         int g = s.top(0, 0) - 1;
         int H = 48 + (int) (s.size * 14);
         Block body = s.chance(1, 0.5) ? Blocks.AMETHYST_BLOCK : Blocks.QUARTZ_BLOCK;
-        Block shell = Blocks.WHITE_STAINED_GLASS;
+        Block shell = com.skycraft.worldgen.VanillaBlocks.WHITE_STAINED_GLASS;
         // the broad base of calcite
         for (int dx = -10; dx <= 10; dx++) for (int dz = -10; dz <= 10; dz++) {
             double d = Math.hypot(dx, dz);

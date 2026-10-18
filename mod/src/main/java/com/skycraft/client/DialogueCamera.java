@@ -6,17 +6,17 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RenderNameTagEvent;
-import net.minecraftforge.client.event.ViewportEvent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.RenderNameTagEvent;
+import net.neoforged.neoforge.client.event.ViewportEvent;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 /**
  * Skyrim-style conversation camera ease: smoothly rotates view toward NPC face and zooms FOV in.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
 public final class DialogueCamera {
     private static int targetEntityId = -1;
     private static boolean active = false;
@@ -52,13 +52,12 @@ public final class DialogueCamera {
     }
 
     @SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent event) {
-        if (event.phase != TickEvent.Phase.END) return;
+    public static void onClientTick(ClientTickEvent.Post event) {
         prevEaseProgress = easeProgress;
         if (active) {
             Minecraft mc = Minecraft.getInstance();
-            if (mc.screen instanceof com.skycraft.client.screen.DialogueScreen
-                    || mc.screen instanceof com.skycraft.economy.client.BarterScreen) {
+            if (mc.gui.screen() instanceof com.skycraft.client.screen.DialogueScreen
+                    || mc.gui.screen() instanceof com.skycraft.economy.client.BarterScreen) {
                 missingScreenTicks = 0;
             } else {
                 missingScreenTicks++;
@@ -120,14 +119,14 @@ public final class DialogueCamera {
         double baseFov = event.getFOV();
         // Zoom in by ~18% (Skyrim conversation zoom)
         double targetFov = baseFov * 0.82;
-        event.setFOV(Mth.lerp(smoothFactor, baseFov, targetFov));
+        event.setFOV((float)Mth.lerp(smoothFactor, baseFov, targetFov));
     }
 
     /** The talker's floating nameplate would draw giant over its own face (and the dialogue's plate): hide it while talking. */
     @SubscribeEvent
-    public static void onNameTag(RenderNameTagEvent event) {
+    public static void onNameTag(RenderNameTagEvent.CanRender event) {
         if ((active || easeProgress > 0.0f) && event.getEntity().getId() == targetEntityId) {
-            event.setResult(net.minecraftforge.eventbus.api.Event.Result.DENY);
+            event.setCanRender(net.minecraft.util.TriState.FALSE);
         }
     }
 }

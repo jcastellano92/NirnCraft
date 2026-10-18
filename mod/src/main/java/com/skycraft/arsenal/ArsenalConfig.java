@@ -1,32 +1,32 @@
 package com.skycraft.arsenal;
 
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 /**
  * Arsenal configuration: {@code config/skycraft-arsenal-common.toml} (server-authoritative rules) and
  * {@code config/skycraft-arsenal-client.toml} (kill cam presentation, per player).
  */
 public final class ArsenalConfig {
-    public static final ForgeConfigSpec COMMON_SPEC;
-    public static final ForgeConfigSpec CLIENT_SPEC;
+    public static final ModConfigSpec COMMON_SPEC;
+    public static final ModConfigSpec CLIENT_SPEC;
 
     // common
-    public static final ForgeConfigSpec.BooleanValue HEADSHOTS;
-    public static final ForgeConfigSpec.DoubleValue HEADSHOT_MULTIPLIER;
-    public static final ForgeConfigSpec.BooleanValue RECORD_ARROWS;
-    public static final ForgeConfigSpec.DoubleValue MOB_WEAPON_DROP_CHANCE;
-    public static final ForgeConfigSpec.BooleanValue KILL_CAMS;
-    public static final ForgeConfigSpec.DoubleValue KILL_CAM_LAST_ENEMY_CHANCE;
-    public static final ForgeConfigSpec.DoubleValue KILL_CAM_OTHER_CHANCE;
+    public static final ModConfigSpec.BooleanValue HEADSHOTS;
+    public static final ModConfigSpec.DoubleValue HEADSHOT_MULTIPLIER;
+    public static final ModConfigSpec.BooleanValue RECORD_ARROWS;
+    public static final ModConfigSpec.DoubleValue MOB_WEAPON_DROP_CHANCE;
+    public static final ModConfigSpec.BooleanValue KILL_CAMS;
+    public static final ModConfigSpec.DoubleValue KILL_CAM_LAST_ENEMY_CHANCE;
+    public static final ModConfigSpec.DoubleValue KILL_CAM_OTHER_CHANCE;
 
     // client
-    public static final ForgeConfigSpec.BooleanValue CLIENT_KILL_CAMS;
-    public static final ForgeConfigSpec.BooleanValue KILL_CAM_NEAR_PLAYERS;
-    public static final ForgeConfigSpec.BooleanValue KILL_CAM_HIDE_HUD;
-    public static final ForgeConfigSpec.DoubleValue KILL_CAM_ROLL;
+    public static final ModConfigSpec.BooleanValue CLIENT_KILL_CAMS;
+    public static final ModConfigSpec.BooleanValue KILL_CAM_NEAR_PLAYERS;
+    public static final ModConfigSpec.BooleanValue KILL_CAM_HIDE_HUD;
+    public static final ModConfigSpec.DoubleValue KILL_CAM_ROLL;
 
     static {
-        ForgeConfigSpec.Builder b = new ForgeConfigSpec.Builder();
+        ModConfigSpec.Builder b = new ModConfigSpec.Builder();
         b.push("archery");
         HEADSHOTS = b.comment("Arrows that hit a humanoid's head deal extra damage.").define("headshots", true);
         HEADSHOT_MULTIPLIER = b.defineInRange("headshotMultiplier", 1.5, 1.0, 10.0);
@@ -45,7 +45,7 @@ public final class ArsenalConfig {
         b.pop();
         COMMON_SPEC = b.build();
 
-        ForgeConfigSpec.Builder c = new ForgeConfigSpec.Builder();
+        ModConfigSpec.Builder c = new ModConfigSpec.Builder();
         c.push("killcams");
         CLIENT_KILL_CAMS = c.comment("Show Skyrim-style kill cams on killing blows.").define("enabled", true);
         KILL_CAM_NEAR_PLAYERS = c.comment("Also show kill cams while other players are within 32 blocks.").define("whenPlayersNearby", false);

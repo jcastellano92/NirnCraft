@@ -18,13 +18,20 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 MAIN = ROOT / "mod" / "src" / "main"
 DATA = MAIN / "resources" / "data" / "skycraft"
-LOOT = DATA / "loot_tables"
-TAGS = DATA / "tags" / "items"
+LOOT = DATA / "loot_table"
+TAGS = DATA / "tags" / "item"
 JAVA = MAIN / "java" / "com" / "skycraft"
 SK = "skycraft:"
 
 
 def write(path, obj):
+    import sys
+    from pathlib import Path
+    native_tools263 = str(Path(__file__).resolve().parents[0])
+    if native_tools263 not in sys.path: sys.path.insert(0, native_tools263)
+    from data_format_263 import prepare
+    path, obj = prepare(path, obj)
+    path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     with open(path, "w", encoding="utf-8", newline="\n") as f:
         json.dump(obj, f, indent=2)

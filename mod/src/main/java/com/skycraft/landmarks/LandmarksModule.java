@@ -2,11 +2,13 @@ package com.skycraft.landmarks;
 
 import com.skycraft.Skycraft;
 import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegistryObject;
+import com.mojang.serialization.MapCodec;
+import com.skycraft.worldgen.NoneFeatureConfiguration;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.registries.DeferredRegister;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import java.util.function.Supplier;
 
 /**
  * Natural landmarks and vignettes: tiered (S, M, L, XL), parametric formations and small human scenes with
@@ -14,10 +16,10 @@ import net.minecraftforge.registries.RegistryObject;
  * is under {@code skycraft/landmarks/}; the debug command is {@code /skycraft-landmarks}. See docs/LANDMARKS.md.
  */
 public final class LandmarksModule {
-    public static final DeferredRegister<Feature<?>> FEATURES = DeferredRegister.create(ForgeRegistries.FEATURES, Skycraft.MODID);
+    public static final DeferredRegister<MapCodec<? extends Feature>> FEATURES = DeferredRegister.create(Registries.FEATURE_TYPE, Skycraft.MODID);
 
-    public static final RegistryObject<Feature<NoneFeatureConfiguration>> LANDMARK = FEATURES.register("landmark",
-            () -> new LandmarkFeature(NoneFeatureConfiguration.CODEC));
+    public static final Supplier<MapCodec<? extends Feature>> LANDMARK = FEATURES.register("landmark",
+            () -> new LandmarkFeature(NoneFeatureConfiguration.CODEC).codec());
 
     private LandmarksModule() {}
 

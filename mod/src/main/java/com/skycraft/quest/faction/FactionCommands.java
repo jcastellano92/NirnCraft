@@ -18,9 +18,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -30,7 +30,7 @@ import java.util.Optional;
  * jail of a city ({@code halls <place>}), a trip into one ({@code tp <place> jail|<faction>}) and a stay in a city's
  * jail ({@code imprison <place>}).
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class FactionCommands {
     private FactionCommands() {}
 
@@ -45,7 +45,7 @@ public final class FactionCommands {
     private static int autorunTicks;
 
     @SubscribeEvent
-    public static void onStarted(net.minecraftforge.event.server.ServerStartedEvent event) {
+    public static void onStarted(net.neoforged.neoforge.event.server.ServerStartedEvent event) {
         if (AUTORUN.isEmpty()) return;
         // "+" stands for a space (JAVA_TOOL_OPTIONS splits on spaces)
         for (String c : AUTORUN.split("\\|")) if (!c.isBlank()) QUEUE.add(c.trim().replace('+', ' '));
@@ -53,8 +53,8 @@ public final class FactionCommands {
     }
 
     @SubscribeEvent
-    public static void onServerTick(net.minecraftforge.event.TickEvent.ServerTickEvent event) {
-        if (QUEUE.isEmpty() || event.phase != net.minecraftforge.event.TickEvent.Phase.END || --autorunTicks > 0) return;
+    public static void onServerTick(net.neoforged.neoforge.event.tick.ServerTickEvent.Post event) {
+        if (QUEUE.isEmpty() || !(event instanceof net.neoforged.neoforge.event.tick.ServerTickEvent.Post) || --autorunTicks > 0) return;
         String cmd = QUEUE.poll();
         autorunTicks = AUTORUN_WAIT;
         var server = event.getServer();
@@ -66,14 +66,14 @@ public final class FactionCommands {
     public static void onRegister(RegisterCommandsEvent event) {
         event.getDispatcher().register(Commands.literal("skycraft-faction")
                 .then(Commands.literal("list").executes(FactionCommands::list))
-                .then(Commands.literal("halls").requires(s -> s.hasPermission(2))
+                .then(Commands.literal("halls").requires(s -> s.permissions().hasPermission(net.minecraft.server.permissions.Permissions.COMMANDS_GAMEMASTER))
                         .then(Commands.argument("place", StringArgumentType.word()).executes(FactionCommands::halls)))
-                .then(Commands.literal("imprison").requires(s -> s.hasPermission(2))
+                .then(Commands.literal("imprison").requires(s -> s.permissions().hasPermission(net.minecraft.server.permissions.Permissions.COMMANDS_GAMEMASTER))
                         .then(Commands.argument("place", StringArgumentType.word()).executes(c -> {
                             com.skycraft.crime.Jail.imprison(c.getSource().getPlayerOrException(), StringArgumentType.getString(c, "place"));
                             return 1;
                         })))
-                .then(Commands.literal("tp").requires(s -> s.hasPermission(2))
+                .then(Commands.literal("tp").requires(s -> s.permissions().hasPermission(net.minecraft.server.permissions.Permissions.COMMANDS_GAMEMASTER))
                         .then(Commands.argument("place", StringArgumentType.word())
                                 .then(Commands.argument("what", StringArgumentType.word())
                                         .suggests((c, b) -> SharedSuggestionProvider.suggest(
@@ -132,7 +132,7 @@ public final class FactionCommands {
             c.getSource().sendFailure(Component.literal("No " + what + " recorded in " + place));
             return 0;
         }
-        p.teleportTo(level, at.getX() + 0.5, at.getY(), at.getZ() + 0.5, p.getYRot(), p.getXRot());
+        p.teleportTo(level, at.getX() + 0.5, at.getY(), at.getZ() + 0.5, java.util.Set.of(), p.getYRot(), p.getXRot(), false);
         return 1;
     }
 }

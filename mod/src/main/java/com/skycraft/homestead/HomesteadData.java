@@ -32,7 +32,7 @@ public class HomesteadData extends SavedData {
     private final Map<UUID, HomesteadClaim> claimsByOwner = new HashMap<>();
 
     public static HomesteadData get(MinecraftServer server) {
-        return server.overworld().getDataStorage().computeIfAbsent(HomesteadData::load, HomesteadData::new, NAME);
+        return com.skycraft.platform.SavedDataTypes.get(server.overworld(), NAME, HomesteadData::load, HomesteadData::new, value263 -> value263.save(new net.minecraft.nbt.CompoundTag()));
     }
 
     @Nullable
@@ -76,7 +76,7 @@ public class HomesteadData extends SavedData {
             return new Denial("message.skycraft.homestead.already_claimed");
         }
 
-        ServerLevel level = player.serverLevel();
+        ServerLevel level = player.level();
 
         // Hearthfire plots (Lakeview, Windstad, Heljarchen) lie by farms and roads: only one owner each
         Homesteads.Plot plot = Homesteads.plotAt(pos);
@@ -123,7 +123,7 @@ public class HomesteadData extends SavedData {
         // 4. Check distance to existing claims
         int spacing = Math.max(SurvivalConfig.CLAIM_SPACING.get(), 0);
         for (HomesteadClaim claim : claimsByOwner.values()) {
-            if (claim.getDimension().equals(level.dimension().location().toString())) {
+            if (claim.getDimension().equals(level.dimension().identifier().toString())) {
                 double dist = Math.sqrt(claim.getCenter().distSqr(pos));
                 // an expanded homestead keeps its whole grounds clear of a neighbour's
                 if (dist < Math.max(spacing, claim.getRadius() + HomesteadClaim.DEFAULT_RADIUS + 8)) {
@@ -204,7 +204,7 @@ public class HomesteadData extends SavedData {
                 player.getUUID(),
                 player.getName().getString(),
                 pos,
-                player.level().dimension().location().toString()
+                player.level().dimension().identifier().toString()
         );
         // the house grows away from the drafting table's front (where whoever placed it stood)
         net.minecraft.world.level.block.state.BlockState table = player.level().getBlockState(pos);
@@ -229,7 +229,7 @@ public class HomesteadData extends SavedData {
         Iterator<Map.Entry<UUID, HomesteadClaim>> it = claimsByOwner.entrySet().iterator();
         while (it.hasNext()) {
             HomesteadClaim claim = it.next().getValue();
-            if (claim.getCenter().equals(pos) && claim.getDimension().equals(level.dimension().location().toString())) {
+            if (claim.getCenter().equals(pos) && claim.getDimension().equals(level.dimension().identifier().toString())) {
                 it.remove();
                 setDirty();
                 return true;
@@ -244,15 +244,14 @@ public class HomesteadData extends SavedData {
 
     public static HomesteadData load(CompoundTag tag) {
         HomesteadData data = new HomesteadData();
-        ListTag list = tag.getList("claims", Tag.TAG_COMPOUND);
+        ListTag list = tag.getListOrEmpty("claims");
         for (int i = 0; i < list.size(); i++) {
-            HomesteadClaim claim = HomesteadClaim.load(list.getCompound(i));
+            HomesteadClaim claim = HomesteadClaim.load(list.getCompoundOrEmpty(i));
             data.claimsByOwner.put(claim.getOwnerId(), claim);
         }
         return data;
     }
 
-    @Override
     public CompoundTag save(CompoundTag tag) {
         ListTag list = new ListTag();
         for (HomesteadClaim claim : claimsByOwner.values()) {

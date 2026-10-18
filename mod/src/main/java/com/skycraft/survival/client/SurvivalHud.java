@@ -7,14 +7,13 @@ import com.skycraft.inventory.client.SkyUi;
 import com.skycraft.survival.SurvivalPackets;
 import com.skycraft.survival.mode.Climate;
 import com.skycraft.survival.mode.SurvivalMode;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
-import net.minecraftforge.client.gui.overlay.ForgeGui;
 
 /**
  * Survival Mode meters in the Skyrim HUD style: three small ornate bars right above the health bar (hunger, fatigue,
@@ -23,8 +22,8 @@ import net.minecraftforge.client.gui.overlay.ForgeGui;
  * for a few seconds after it changes. Freezing frosts the screen edges; a flame shows while a fire warms you.
  */
 public final class SurvivalHud {
-    private static final ResourceLocation ICONS = new ResourceLocation(Skycraft.MODID, "textures/gui/survival/icons.png");
-    private static final ResourceLocation FROST = new ResourceLocation("textures/misc/powder_snow_outline.png");
+    private static final Identifier ICONS = Identifier.fromNamespaceAndPath(Skycraft.MODID, "textures/gui/survival/icons.png");
+    private static final Identifier FROST = Identifier.parse("textures/misc/powder_snow_outline.png");
     private static final int HUNGER = 0xC8862A, FATIGUE = 0x8C78C8, COLD = 0x6FB8E8;
     private static final int BAR_W = 34;
     private static final long LABEL_MS = 4000;
@@ -34,9 +33,11 @@ public final class SurvivalHud {
 
     private SurvivalHud() {}
 
-    public static void render(ForgeGui gui, GuiGraphics g, float partialTick, int width, int height) {
+    public static void render(GuiGraphicsExtractor g, net.minecraft.client.DeltaTracker delta) {
+        float partialTick = delta.getGameTimeDeltaPartialTick(false);
+        int width = g.guiWidth(), height = g.guiHeight();
         Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null || mc.options.hideGui || !gui.shouldDrawSurvivalElements() || !ClientSurvival.active()) {
+        if (mc.player == null || mc.gui.hud.isHidden() || !(mc.gameMode!=null&&mc.gameMode.hasExperience()) || !ClientSurvival.active()) {
             alpha = 0f;
             return;
         }
@@ -51,7 +52,7 @@ public final class SurvivalHud {
         alpha += ((show ? 1f : 0f) - alpha) * step;
 
         frost(g, width, height, cs, now);
-        if (alpha < 0.02f || mc.screen != null) return;
+        if (alpha < 0.02f || mc.gui.screen() != null) return;
 
         Font font = mc.font;
         int total = 3 * (BAR_W + 12) + 2 * 8;
@@ -78,13 +79,10 @@ public final class SurvivalHud {
     }
 
     /** Icon, ornate bar (fill shrinks toward the middle), stage notches and, after a change, the stage name above. */
-    private static void meter(GuiGraphics g, Font font, int x, int y, int icon, float fill, int rgb, int stage, String label,
+    private static void meter(GuiGraphicsExtractor g, Font font, int x, int y, int icon, float fill, int rgb, int stage, String label,
                               long changed, long now) {
         float a = alpha;
-        RenderSystem.enableBlend();
-        RenderSystem.setShaderColor(1f, 1f, 1f, a);
-        g.blit(ICONS, x, y - 3, icon * 10, 0, 10, 10, 64, 16);
-        RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
+        SkyUi.blit(g,ICONS,x,y-3,icon*10f,0f,10,10,64,16,SkyUi.fade(-1,a));
         int bx = x + 12;
         int color = stage >= 3 ? lerp(rgb, 0xD04030, 0.45f + 0.15f * (stage - 3)) : rgb;
         if (stage >= 4 && (now / 400) % 2 == 0) color = SkyUi.brighten(color, 40);
@@ -108,17 +106,10 @@ public final class SurvivalHud {
     }
 
     /** Frost creeping in from the screen edges while Freezing or Numb. */
-    private static void frost(GuiGraphics g, int width, int height, int stage, long now) {
+    private static void frost(GuiGraphicsExtractor g, int width, int height, int stage, long now) {
         if (stage < 3) return;
         float f = stage == 3 ? 0.3f : 0.55f + 0.1f * (float) Math.sin(now / 500.0);
-        RenderSystem.disableDepthTest();
-        RenderSystem.depthMask(false);
-        RenderSystem.enableBlend();
-        RenderSystem.setShaderColor(1f, 1f, 1f, f);
-        g.blit(FROST, 0, 0, -90, 0f, 0f, width, height, width, height);
-        RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
-        RenderSystem.depthMask(true);
-        RenderSystem.enableDepthTest();
+        SkyUi.blit(g,FROST,0,0,0f,0f,width,height,width,height,SkyUi.fade(-1,f));
     }
 
     private static int lerp(int a, int b, float t) {

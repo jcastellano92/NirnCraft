@@ -2,14 +2,13 @@ package com.skycraft.survival.mode;
 
 import com.skycraft.Skycraft;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -73,7 +72,7 @@ public final class Warmth {
     private Warmth() {}
 
     private static TagKey<Item> tag(String name) {
-        return TagKey.create(Registries.ITEM, new ResourceLocation(Skycraft.MODID, name));
+        return TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath(Skycraft.MODID, name));
     }
 
     /** Sets the warmth class of an item (other modules: call during common setup). */
@@ -106,8 +105,8 @@ public final class Warmth {
 
     /** Tooltip value: warmth of the item in its own armor slot, or 0 if it isn't wearable. */
     public static int tooltipValue(ItemStack stack) {
-        if (stack.getItem() instanceof ArmorItem armor) {
-            int v = ofItem(stack, armor.getEquipmentSlot());
+        if (com.skycraft.inventory.EquipmentData.isArmor(stack)) {
+            int v = ofItem(stack, com.skycraft.inventory.EquipmentData.slot(stack));
             return isCloak(stack) ? v + CLOAK_BONUS : v;
         }
         return isCloak(stack) ? CLOAK_BONUS : 0;
@@ -122,8 +121,8 @@ public final class Warmth {
         if (stack.is(WARM)) return Kind.WARM;
         if (stack.is(POOR)) return Kind.POOR;
         if (stack.is(NORMAL)) return Kind.NORMAL;
-        if (!(item instanceof ArmorItem) && !stack.is(CLOAK)) return Kind.NONE;
-        ResourceLocation id = ForgeRegistries.ITEMS.getKey(item);
+        if (!(com.skycraft.inventory.EquipmentData.isArmor(stack)) && !stack.is(CLOAK)) return Kind.NONE;
+        Identifier id = BuiltInRegistries.ITEM.getKey(item);
         String path = id == null ? "" : id.getPath();
         if (has(path, WARM_WORDS)) return Kind.WARM;
         if (has(path, POOR_WORDS)) return Kind.POOR;
@@ -134,12 +133,12 @@ public final class Warmth {
 
     public static boolean isCloak(ItemStack stack) {
         if (stack.is(CLOAK)) return true;
-        ResourceLocation id = ForgeRegistries.ITEMS.getKey(stack.getItem());
+        Identifier id = BuiltInRegistries.ITEM.getKey(stack.getItem());
         return id != null && id.getPath().contains("cloak") && !id.getPath().contains("spell");
     }
 
     private static boolean isHood(Item item) {
-        ResourceLocation id = ForgeRegistries.ITEMS.getKey(item);
+        Identifier id = BuiltInRegistries.ITEM.getKey(item);
         return id != null && (id.getPath().contains("hood") || id.getPath().contains("cowl"));
     }
 

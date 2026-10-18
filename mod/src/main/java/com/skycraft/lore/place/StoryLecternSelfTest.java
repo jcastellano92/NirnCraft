@@ -25,9 +25,9 @@ import net.minecraft.world.level.block.entity.LecternBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.util.FakePlayerFactory;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.common.util.FakePlayerFactory;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -67,8 +67,8 @@ final class StoryLecternSelfTest {
             LoreBookItem.openHook = (p, id) -> openedBooks.add(id);
             StoryReader.testSink = openedStories::add;
             ServerPlayer player = FakePlayerFactory.getMinecraft(level);
-            BlockPos base = level.getSharedSpawnPos();
-            int y = level.getMaxBuildHeight() - 12;
+            BlockPos base = level.getRespawnData().pos();
+            int y = (level.getMaxY()+1) - 12;
             level.getChunk(base.getX() >> 4, base.getZ() >> 4);
 
             // a place note without side effects (no reveal, no quest) if there is one
@@ -97,14 +97,15 @@ final class StoryLecternSelfTest {
             // 2. a written book tagged SkyNote (a dungeon's lectern)
             BlockPos b = at(level, base, 2, y, cleanup);
             ItemStack written = new ItemStack(Items.WRITTEN_BOOK);
-            CompoundTag t = written.getOrCreateTag();
+            CompoundTag t = com.skycraft.inventory.ItemData.customOrEmpty(written);
             t.putString("title", "Note");
             t.putString("author", "Someone");
             ListTag pages = new ListTag();
-            pages.add(StringTag.valueOf(Component.Serializer.toJson(Component.literal("Words."))));
+            pages.add(StringTag.valueOf(com.skycraft.platform.ArcaneData.writeComponent(Component.literal("Words."))));
             t.put("pages", pages);
             t.putBoolean("resolved", true);
             t.putString(StoryReader.NOTE_TAG, noteId);
+            com.skycraft.inventory.ItemData.setCustom(written, t);
             lectern(level, b, written);
             openedBooks.clear();
             canceled = click(player, b, false);
@@ -113,9 +114,9 @@ final class StoryLecternSelfTest {
             // 3. a written book of the world builders (SkyStory) and 4. an untagged one on a lectern no player placed
             BlockPos c = at(level, base, 4, y, cleanup);
             ItemStack story = written.copy();
-            story.getTag().remove(StoryReader.NOTE_TAG);
-            story.getTag().putBoolean(StoryReader.STORY_TAG, true);
-            story.getTag().putString("title", "A Journal");
+            com.skycraft.inventory.ItemData.updateCustom(story, customData263 -> customData263.remove(StoryReader.NOTE_TAG));
+            com.skycraft.inventory.ItemData.updateCustom(story, customData263 -> customData263.putBoolean(StoryReader.STORY_TAG, true));
+            com.skycraft.inventory.ItemData.updateCustom(story, customData263 -> customData263.putString("title", "A Journal"));
             lectern(level, c, story);
             openedStories.clear();
             canceled = click(player, c, false);
@@ -125,8 +126,8 @@ final class StoryLecternSelfTest {
 
             BlockPos d = at(level, base, 6, y, cleanup);
             ItemStack plain = story.copy();
-            plain.getTag().remove(StoryReader.STORY_TAG);
-            plain.getTag().putString("title", "Old Scene Note");
+            com.skycraft.inventory.ItemData.updateCustom(plain, customData263 -> customData263.remove(StoryReader.STORY_TAG));
+            com.skycraft.inventory.ItemData.updateCustom(plain, customData263 -> customData263.putString("title", "Old Scene Note"));
             lectern(level, d, plain);
             openedStories.clear();
             canceled = click(player, d, false);
@@ -185,6 +186,19 @@ final class StoryLecternSelfTest {
             canceled = click(player, i, false);
             r.check(!canceled, "empty lectern: untouched");
 
+            // Native written content must reach the same reader, including translated/component pages.
+            BlockPos nativeLectern = at(level, base, 18, y, cleanup);
+            ItemStack nativeBook = com.skycraft.worldgen.AuthoredBooks.create("Native Journal", "Someone",
+                    List.of(Component.literal("Words from the native component.")));
+            lectern(level, nativeLectern, nativeBook);
+            openedStories.clear();
+            canceled = click(player, nativeLectern, false);
+            r.check(canceled && openedStories.size() == 1 && openedStories.get(0).title().equals("Native Journal")
+                    && openedStories.get(0).author().equals("Someone")
+                    && openedStories.get(0).pagesJson().size() == 1
+                    && openedStories.get(0).pagesJson().get(0).contains("Words from the native component."),
+                    "native written-book lectern: preserves component title, author and page (got " + openedStories + ")");
+
             // 9. the lore book list knows the note was read (the lore flow ran)
             r.check(LoreBookItem.hasRead(com.skycraft.core.SkyData.get(player), noteId), "reading marks the note as read");
         } catch (RuntimeException ex) {
@@ -230,7 +244,7 @@ final class StoryLecternSelfTest {
         player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
         BlockHitResult hit = new BlockHitResult(Vec3.atCenterOf(pos), Direction.UP, pos, false);
         PlayerInteractEvent.RightClickBlock event = new PlayerInteractEvent.RightClickBlock(player, InteractionHand.MAIN_HAND, pos, hit);
-        MinecraftForge.EVENT_BUS.post(event);
+        NeoForge.EVENT_BUS.post(event);
         player.setShiftKeyDown(false);
         return event.isCanceled();
     }

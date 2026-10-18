@@ -18,7 +18,7 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -27,18 +27,17 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.OwnableEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.animal.camel.Camel;
-import net.minecraft.world.entity.animal.horse.AbstractHorse;
-import net.minecraft.world.entity.animal.horse.Horse;
+import net.minecraft.world.entity.animal.equine.AbstractHorse;
+import net.minecraft.world.entity.animal.equine.Horse;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.HorseArmorItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -80,14 +79,14 @@ public final class Mounts {
 
     /** The fauna module's old single-horse record becomes the active mount. */
     private static void migrate(Player player, PlayerData d, CompoundTag tag) {
-        if (tag.getBoolean("migrated")) return;
+        if (tag.getBooleanOr("migrated",false)) return;
         tag.putBoolean("migrated", true);
         CompoundTag old = d.module(HorseManager.MODULE);
-        if (old.hasUUID(HorseManager.HORSE_UUID) && !tag.contains("active")) {
-            MountKind k = MountKind.forBreed(HorseBreed.byId(old.getString(HorseManager.HORSE_BREED)));
+        if (old.read(HorseManager.HORSE_UUID, net.minecraft.core.UUIDUtil.CODEC).isPresent() && !tag.contains("active")) {
+            MountKind k = MountKind.forBreed(HorseBreed.byId(old.getStringOr(HorseManager.HORSE_BREED, "")));
             if (k != null) {
                 tag.putString("active", k.id);
-                tag.putUUID("uuid", old.getUUID(HorseManager.HORSE_UUID));
+                tag.store("uuid", net.minecraft.core.UUIDUtil.CODEC,  old.read(HorseManager.HORSE_UUID, net.minecraft.core.UUIDUtil.CODEC).orElseThrow());
                 addToStable(tag, k);
             }
         }
@@ -96,13 +95,13 @@ public final class Mounts {
 
     @Nullable
     public static MountKind active(Player player) {
-        return MountKind.byId(data(player).getString("active"));
+        return MountKind.byId(data(player).getStringOr("active",""));
     }
 
     public static List<MountKind> stable(Player player) {
         List<MountKind> out = new ArrayList<>();
-        for (Tag t : data(player).getList("stable", Tag.TAG_STRING)) {
-            MountKind k = MountKind.byId(t.getAsString());
+        for (Tag t : data(player).getListOrEmpty("stable")) {
+            MountKind k = MountKind.byId(t.asString().orElse(""));
             if (k != null && !out.contains(k)) out.add(k);
         }
         return out;
@@ -113,8 +112,8 @@ public final class Mounts {
     }
 
     private static void addToStable(CompoundTag tag, MountKind kind) {
-        ListTag list = tag.getList("stable", Tag.TAG_STRING);
-        for (Tag t : list) if (t.getAsString().equals(kind.id)) return;
+        ListTag list = tag.getListOrEmpty("stable");
+        for (Tag t : list) if (t.asString().orElse("").equals(kind.id)) return;
         list.add(StringTag.valueOf(kind.id));
         tag.put("stable", list);
     }
@@ -122,8 +121,8 @@ public final class Mounts {
     @Nullable
     public static Entity activeEntity(ServerPlayer player) {
         CompoundTag tag = data(player);
-        if (!tag.hasUUID("uuid")) return null;
-        Entity e = player.serverLevel().getEntity(tag.getUUID("uuid"));
+        if (!tag.read("uuid", net.minecraft.core.UUIDUtil.CODEC).isPresent()) return null;
+        Entity e = player.level().getEntity(tag.read("uuid", net.minecraft.core.UUIDUtil.CODEC).orElseThrow());
         return e != null && e.isAlive() ? e : null;
     }
 
@@ -133,10 +132,10 @@ public final class Mounts {
     public static MountKind kindOf(@Nullable Entity e) {
         if (e == null) return null;
         if (e instanceof MountBeast b) return b.kind();
-        MountKind k = MountKind.byId(e.getPersistentData().getString(KIND));
+        MountKind k = MountKind.byId(e.getPersistentData().getStringOr(KIND, ""));
         if (k != null) return k;
         if (e instanceof Horse h && h.getPersistentData().contains("skycraft_breed")) {
-            return MountKind.forBreed(HorseBreed.byId(h.getPersistentData().getString("skycraft_breed")));
+            return MountKind.forBreed(HorseBreed.byId(h.getPersistentData().getStringOr("skycraft_breed","")));
         }
         return null;
     }
@@ -148,14 +147,14 @@ public final class Mounts {
 
     @Nullable
     public static UUID ownerOf(Entity e) {
-        String s = e.getPersistentData().getString(OWNER);
+        String s = e.getPersistentData().getStringOr(OWNER, "");
         if (s.startsWith("player:")) {
             try {
                 return UUID.fromString(s.substring(7));
             } catch (IllegalArgumentException ignored) {
             }
         }
-        if (e instanceof OwnableEntity o && e instanceof AbstractHorse) return o.getOwnerUUID();
+        if (e instanceof OwnableEntity o && e instanceof AbstractHorse) return com.skycraft.platform.EntityData.ownerId(o);
         return null;
     }
 
@@ -186,17 +185,17 @@ public final class Mounts {
     public static Mob create(ServerLevel level, MountKind kind, double x, double y, double z, float yaw, @Nullable ServerPlayer owner) {
         Mob mob = switch (kind.backing) {
             case HORSE -> {
-                Horse h = EntityType.HORSE.create(level);
+                Horse h = net.minecraft.world.entity.EntityTypes.HORSE.create(level, net.minecraft.world.entity.EntitySpawnReason.EVENT);
                 if (h != null) kind.breed.apply(h);
                 yield h;
             }
             case SKELETON -> {
-                AbstractHorse h = EntityType.SKELETON_HORSE.create(level);
+                AbstractHorse h = net.minecraft.world.entity.EntityTypes.SKELETON_HORSE.create(level, net.minecraft.world.entity.EntitySpawnReason.EVENT);
                 if (h != null) kind.breed.applyStats(h);
                 yield h;
             }
             case CAMEL -> {
-                Camel c = EntityType.CAMEL.create(level);
+                Camel c = net.minecraft.world.entity.EntityTypes.CAMEL.create(level, net.minecraft.world.entity.EntitySpawnReason.EVENT);
                 if (c != null) {
                     c.getAttribute(Attributes.MAX_HEALTH).setBaseValue(40);
                     c.setHealth(40);
@@ -204,7 +203,7 @@ public final class Mounts {
                 yield c;
             }
             case GUAR -> {
-                GuarEntity g = Bestiary.GUAR.get().create(level);
+                GuarEntity g = Bestiary.GUAR.get().create(level, net.minecraft.world.entity.EntitySpawnReason.EVENT);
                 if (g != null) {
                     g.setVariant(1);
                     // a pack guar: hardier and steadier than a wild one
@@ -216,14 +215,14 @@ public final class Mounts {
             }
             case BEAST -> {
                 EntityType<MountBeast> t = MountEntities.type(kind);
-                MountBeast b = t == null ? null : t.create(level);
+                MountBeast b = t == null ? null : t.create(level, net.minecraft.world.entity.EntitySpawnReason.EVENT);
                 if (b != null) b.setVariant(1);
                 yield b;
             }
         };
         if (mob == null) return null;
-        mob.moveTo(x, y, z, yaw, 0f);
-        if (mob instanceof SkyCreature) mob.finalizeSpawn(level, level.getCurrentDifficultyAt(BlockPos.containing(x, y, z)), MobSpawnType.EVENT, null, null);
+        mob.snapTo(x, y, z, yaw, 0f);
+        if (mob instanceof SkyCreature) mob.finalizeSpawn(level, level.getCurrentDifficultyAt(BlockPos.containing(x, y, z)), EntitySpawnReason.EVENT, null);
         if (mob instanceof SkyCreature sc && kind.backing != MountKind.Backing.BEAST) sc.setVariant(1);
         if (mob instanceof MountBeast b) b.setVariant(1);
         mob.getPersistentData().putString(KIND, kind.id);
@@ -231,14 +230,14 @@ public final class Mounts {
         if (mob instanceof AbstractHorse h) {
             if (owner != null) h.tameWithName(owner);
             else h.setTamed(true);
-            h.equipSaddle(SoundSource.NEUTRAL);
+            h.setItemSlot(net.minecraft.world.entity.EquipmentSlot.SADDLE, new ItemStack(net.minecraft.world.item.Items.SADDLE));
         }
         // the tack the player left this kind of mount in (a bought one comes in a plain saddle); the legends wear their own
         MountGear.setSaddle(mob, owner != null && !MountGear.fixedTack(kind) ? MountGear.remembered(owner, kind) : SaddleType.PLAIN);
         if (owner != null) setOwner(mob, owner);
         if (owner != null) MountGrowth.bind(owner, mob, kind); // its individual stats: the record's, else newly rolled
         if (kind == MountKind.SHADOWMERE || kind == MountKind.ARVAK) mob.setCustomName(kind.displayName());
-        if (kind == MountKind.ARVAK) mob.setInvulnerable(false);
+        if (kind == MountKind.ARVAK) mob.setPermanentlyInvulnerable(false);
         return mob;
     }
 
@@ -251,17 +250,17 @@ public final class Mounts {
     /** Spawns the player's active mount near {@code near} and records it. */
     @Nullable
     public static Mob spawnActive(ServerPlayer player, MountKind kind, BlockPos near) {
-        ServerLevel level = player.serverLevel();
+        ServerLevel level = player.level();
         BlockPos at = safeSpot(level, near);
         Mob mob = create(level, kind, at.getX() + 0.5, at.getY(), at.getZ() + 0.5, player.getYRot(), player);
         if (mob == null) return null;
-        applyBarding(mob, data(player).getString("barding"));
+        applyBarding(mob, data(player).getStringOr("barding",""));
         // a mount brought back from the stable or from afar is as winded as it was left
-        if (data(player).contains(MountStamina.SAVED)) mob.getPersistentData().putFloat(MountStamina.TAG, data(player).getFloat(MountStamina.SAVED));
+        if (data(player).contains(MountStamina.SAVED)) mob.getPersistentData().putFloat(MountStamina.TAG, data(player).getFloatOr(MountStamina.SAVED, 0f));
         level.addFreshEntity(mob);
         CompoundTag tag = data(player);
         tag.putString("active", kind.id);
-        tag.putUUID("uuid", mob.getUUID());
+        tag.store("uuid", net.minecraft.core.UUIDUtil.CODEC,  mob.getUUID());
         tag.remove("cooldown");
         SkyData.get(player).markDirty();
         return mob;
@@ -387,9 +386,9 @@ public final class Mounts {
      */
     public static Carried retire(ServerPlayer player, boolean pay, boolean traded, @Nullable String stableKey) {
         CompoundTag tag = data(player);
-        MountStable stock = MountStable.get(player.server);
+        MountStable stock = MountStable.get(player.level().getServer());
         Saddlebags.emptyToPlayer(player);
-        MountKind active = MountKind.byId(tag.getString("active"));
+        MountKind active = MountKind.byId(tag.getStringOr("active",""));
         SaddleType saddle = null;
         ItemStack barding = ItemStack.EMPTY;
         long payout = 0;
@@ -403,8 +402,8 @@ public final class Mounts {
                 if (e instanceof Mob m) {
                     barding = MountGear.barding(m);
                     if (!barding.isEmpty()) MountGear.setBarding(m, ItemStack.EMPTY);
-                } else if (!tag.getString("barding").isEmpty()) {
-                    var item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(tag.getString("barding")));
+                } else if (!tag.getStringOr("barding", "").isEmpty()) {
+                    var item = BuiltInRegistries.ITEM.getValue(Identifier.parse(tag.getStringOr("barding","")));
                     if (item != null && item != Items.AIR) barding = new ItemStack(item);
                 }
             } else if (worn != null) {
@@ -423,7 +422,7 @@ public final class Mounts {
             } else if (isActive) {
                 // out of reach: dealt with when it loads (by its animal id and by its entity UUID)
                 MountStable.Fate fate = release ? MountStable.Fate.RELEASE : MountStable.Fate.DELETE;
-                if (tag.hasUUID("uuid")) stock.fate(tag.getUUID("uuid"), fate);
+                if (tag.read("uuid", net.minecraft.core.UUIDUtil.CODEC).isPresent()) stock.fate(tag.read("uuid", net.minecraft.core.UUIDUtil.CODEC).orElseThrow(), fate);
                 if (token != null) stock.fate(MountToken.id(token), fate);
             }
             if (!release && token != null) {
@@ -434,9 +433,9 @@ public final class Mounts {
         }
         // forget the retired kinds
         ListTag keep = new ListTag();
-        CompoundTag saddles = tag.getCompound("saddles");
-        for (Tag t : tag.getList("stable", Tag.TAG_STRING)) {
-            MountKind k = MountKind.byId(t.getAsString());
+        CompoundTag saddles = tag.getCompoundOrEmpty("saddles");
+        for (Tag t : tag.getListOrEmpty("stable")) {
+            MountKind k = MountKind.byId(t.asString().orElse(""));
             if (k == null) continue;
             if (k.unique()) {
                 keep.add(t);
@@ -501,7 +500,7 @@ public final class Mounts {
         t.remove(MountToken.ORIGIN_TAG);
         t.remove(Livestock.PLAYER_OWNED);
         if (mob instanceof AbstractHorse h) {
-            h.setOwnerUUID(null);
+            h.setOwner(null);
             h.setTamed(false);
         }
         mob.getNavigation().stop();
@@ -510,7 +509,7 @@ public final class Mounts {
     /** Removes the player's active mount from the world (it goes back to the stable); its barding comes back to you. */
     public static void dismissActive(ServerPlayer player) {
         CompoundTag tag = data(player);
-        MountKind leaving = MountKind.byId(tag.getString("active"));
+        MountKind leaving = MountKind.byId(tag.getStringOr("active",""));
         Entity e = activeEntity(player);
         if (leaving != null && e instanceof Mob m && kindOf(m) == leaving) MountGrowth.captureToken(player, m); // the entity is the truth: the token takes its stats along
         if (leaving != null) MountGrowth.leftAtStable(player, leaving);
@@ -522,9 +521,9 @@ public final class Mounts {
                 if (!refund.isEmpty()) MountGear.setBarding(m, ItemStack.EMPTY);
             }
             e.discard();
-        } else if (!tag.getString("barding").isEmpty()) {
+        } else if (!tag.getStringOr("barding", "").isEmpty()) {
             // the mount is far away (its copy is dropped when it loads): the barding it wore
-            var item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(tag.getString("barding")));
+            var item = BuiltInRegistries.ITEM.getValue(Identifier.parse(tag.getStringOr("barding","")));
             if (item != null && item != Items.AIR) refund = new ItemStack(item);
         }
         if (!refund.isEmpty()) com.skycraft.inventory.Pack.giveOrDrop(player, refund);
@@ -537,8 +536,8 @@ public final class Mounts {
     static void syncBarding(ServerPlayer player, Entity mount) {
         if (!(mount instanceof Horse h) || !isActive(player, mount)) return;
         CompoundTag tag = data(player);
-        String now = h.isWearingArmor() ? key(h.getSlot(401).get()) : "";
-        if (!now.equals(tag.getString("barding"))) {
+        String now = !h.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.BODY).isEmpty() ? key(h.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.BODY)) : "";
+        if (!now.equals(tag.getStringOr("barding",""))) {
             if (now.isEmpty()) tag.remove("barding");
             else tag.putString("barding", now);
         }
@@ -572,7 +571,7 @@ public final class Mounts {
         mob.setPersistenceRequired();
         setOwner(mob, player);
         tag.putString("active", kind.id);
-        tag.putUUID("uuid", mob.getUUID());
+        tag.store("uuid", net.minecraft.core.UUIDUtil.CODEC,  mob.getUUID());
         tag.remove("barding");
         tag.remove("cooldown");
         tag.remove(MountStamina.SAVED);
@@ -606,7 +605,7 @@ public final class Mounts {
 
     public static void call(ServerPlayer player) {
         CompoundTag tag = data(player);
-        MountKind kind = MountKind.byId(tag.getString("active"));
+        MountKind kind = MountKind.byId(tag.getStringOr("active",""));
         if (kind == null) {
             Notifier.message(player, Component.translatable("mounts.skycraft.none"));
             return;
@@ -615,12 +614,12 @@ public final class Mounts {
         // sneak + the call key: the mount close by fights at your side or holds (MountCompanion)
         if (player.isShiftKeyDown() && MountCompanion.toggleStance(player)) return;
         long now = player.level().getGameTime();
-        if (tag.contains("cooldown") && now < tag.getLong("cooldown") && kind != MountKind.ARVAK) {
-            int secs = (int) Math.ceil((tag.getLong("cooldown") - now) / 20.0);
+        if (tag.contains("cooldown") && now < tag.getLongOr("cooldown",0L) && kind != MountKind.ARVAK) {
+            int secs = (int) Math.ceil((tag.getLongOr("cooldown",0L) - now) / 20.0);
             Notifier.message(player, Component.translatable("fauna.skycraft.horse.cooldown", secs));
             return;
         }
-        ServerLevel level = player.serverLevel();
+        ServerLevel level = player.level();
         BlockPos target = safeSpot(level, player.blockPosition().relative(player.getDirection().getOpposite(), 3));
         Entity existing = activeEntity(player);
         // lying down after a fight: it gets up first when the area is calm, otherwise it stays down
@@ -653,7 +652,7 @@ public final class Mounts {
         ServerPlayer p = mount.level().getServer().getPlayerList().getPlayer(owner);
         if (p == null) return;
         CompoundTag tag = data(p);
-        if (!tag.hasUUID("uuid") || !tag.getUUID("uuid").equals(mount.getUUID())) return;
+        if (!tag.read("uuid", net.minecraft.core.UUIDUtil.CODEC).isPresent() || !tag.read("uuid", net.minecraft.core.UUIDUtil.CODEC).orElseThrow().equals(mount.getUUID())) return;
         tag.putLong("cooldown", p.level().getGameTime() + (kindOf(mount) == MountKind.ARVAK ? 200 : DEATH_COOLDOWN_TICKS));
         tag.remove("uuid");
         tag.remove("barding"); // dropped where it fell
@@ -670,7 +669,7 @@ public final class Mounts {
         ServerPlayer p = e.level().getServer().getPlayerList().getPlayer(owner);
         if (p == null) return false;
         CompoundTag tag = data(p);
-        return tag.hasUUID("uuid") && !tag.getUUID("uuid").equals(e.getUUID());
+        return tag.read("uuid", net.minecraft.core.UUIDUtil.CODEC).isPresent() && !tag.read("uuid", net.minecraft.core.UUIDUtil.CODEC).orElseThrow().equals(e.getUUID());
     }
 
     // ------------------------------------------------------------------ interaction
@@ -750,20 +749,20 @@ public final class Mounts {
 
     static boolean isActive(Player player, Entity e) {
         CompoundTag tag = data(player);
-        return tag.hasUUID("uuid") && tag.getUUID("uuid").equals(e.getUUID());
+        return tag.read("uuid", net.minecraft.core.UUIDUtil.CODEC).isPresent() && tag.read("uuid", net.minecraft.core.UUIDUtil.CODEC).orElseThrow().equals(e.getUUID());
     }
 
     // ------------------------------------------------------------------ barding
 
     static String key(ItemStack stack) {
-        ResourceLocation id = ForgeRegistries.ITEMS.getKey(stack.getItem());
+        Identifier id = BuiltInRegistries.ITEM.getKey(stack.getItem());
         return id == null ? "" : id.toString();
     }
 
     /** Puts the recorded barding back on a respawned mount. */
     static void applyBarding(Mob mob, String itemId) {
         if (itemId == null || itemId.isEmpty()) return;
-        var item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(itemId));
+        var item = BuiltInRegistries.ITEM.getValue(Identifier.parse(itemId));
         if (item == null || item == Items.AIR) return;
         MountKind kind = kindOf(mob);
         ItemStack one = new ItemStack(item);

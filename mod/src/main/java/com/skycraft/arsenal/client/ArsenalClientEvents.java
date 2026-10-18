@@ -9,19 +9,19 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.InputEvent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.InputEvent;
+
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 import org.jetbrains.annotations.Nullable;
 
 /** Forge-bus client hooks: Bloodskal Blade swings into thin air and interactive arrow pickup via [F] or right-click. */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
 public final class ArsenalClientEvents {
     private static boolean interactWasDown = false;
 
@@ -31,14 +31,14 @@ public final class ArsenalClientEvents {
     public static void onClickInput(InputEvent.InteractionKeyMappingTriggered event) {
         Minecraft mc = Minecraft.getInstance();
         LocalPlayer player = mc.player;
-        if (player == null || mc.screen != null) return;
+        if (player == null || mc.gui.screen() != null) return;
 
         if (event.isUseItem()) {
             AbstractArrow targetArrow = findAimedArrow(player, 4.0);
             if (targetArrow != null) {
                 event.setCanceled(true);
                 event.setSwingHand(true);
-                player.swing(InteractionHand.MAIN_HAND);
+                player.swing(InteractionHand.MAIN_HAND,player.getItemInHand(InteractionHand.MAIN_HAND).getAttackAnimation(),false);
                 SkyNetwork.sendToServer(new ArsenalPackets.CollectArrow(targetArrow.getId()));
                 return;
             }
@@ -53,11 +53,10 @@ public final class ArsenalClientEvents {
     }
 
     @SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent event) {
-        if (event.phase != TickEvent.Phase.END) return;
+    public static void onClientTick(net.neoforged.neoforge.client.event.ClientTickEvent.Post event) {
         Minecraft mc = Minecraft.getInstance();
         LocalPlayer player = mc.player;
-        if (player == null || mc.screen != null) {
+        if (player == null || mc.gui.screen() != null) {
             interactWasDown = false;
             return;
         }
@@ -65,11 +64,11 @@ public final class ArsenalClientEvents {
         if (down && !interactWasDown) {
             AbstractArrow targetArrow = findAimedArrow(player, 4.0);
             if (targetArrow != null) {
-                player.swing(InteractionHand.MAIN_HAND);
+                player.swing(InteractionHand.MAIN_HAND,player.getItemInHand(InteractionHand.MAIN_HAND).getAttackAnimation(),false);
                 SkyNetwork.sendToServer(new ArsenalPackets.CollectArrow(targetArrow.getId()));
             } else if (mc.crosshairPickEntity instanceof net.minecraft.world.entity.LivingEntity living
                     && living.getArrowCount() > 0) {
-                player.swing(InteractionHand.MAIN_HAND);
+                player.swing(InteractionHand.MAIN_HAND,player.getItemInHand(InteractionHand.MAIN_HAND).getAttackAnimation(),false);
                 SkyNetwork.sendToServer(new ArsenalPackets.CollectArrow(living.getId()));
             }
         }
@@ -108,7 +107,7 @@ public final class ArsenalClientEvents {
     }
 
     @SubscribeEvent
-    public static void onTooltip(net.minecraftforge.event.entity.player.ItemTooltipEvent event) {
+    public static void onTooltip(net.neoforged.neoforge.event.entity.player.ItemTooltipEvent event) {
         com.skycraft.loot.affix.ItemAffixes.appendTooltip(event.getItemStack(), event.getToolTip());
     }
 }

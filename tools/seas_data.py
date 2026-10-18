@@ -22,6 +22,13 @@ ASSETS = os.path.join(ROOT, "assets", "skycraft")
 
 
 def write(path, obj):
+    import importlib.util
+    from pathlib import Path
+    converter = Path(__file__).resolve().parents[0] / "worldgen" / "format_263.py"
+    spec = importlib.util.spec_from_file_location("skycraft_worldgen_263", converter)
+    native = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(native)
+    path, obj = native.prepare(path, obj)
     os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, "w", encoding="utf-8", newline="\n") as f:
         json.dump(obj, f, indent=2)
@@ -62,11 +69,11 @@ def pool(entries, lo=1, hi=None, chance=None):
 
 
 def chest(name, pools):
-    write(os.path.join(DATA, "loot_tables", "chests", "seas", name + ".json"), {"type": "minecraft:chest", "pools": pools})
+    write(os.path.join(DATA, "loot_table", "chests", "seas", name + ".json"), {"type": "minecraft:chest", "pools": pools})
 
 
 def entity(name, pools):
-    write(os.path.join(DATA, "loot_tables", "entities", name + ".json"), {"type": "minecraft:entity", "pools": pools})
+    write(os.path.join(DATA, "loot_table", "entities", name + ".json"), {"type": "minecraft:entity", "pools": pools})
 
 
 GEMS = [item("skycraft:garnet", 6), item("skycraft:ruby", 4), item("skycraft:sapphire", 3), item("skycraft:flawless_ruby", 1),
@@ -184,7 +191,7 @@ def loot_tables():
     entity("river_betty", [pool([item("skycraft:river_betty", 1)])])
     entity("abecean_longfin", [pool([item("skycraft:abecean_longfin", 1)])])
 
-    write(os.path.join(DATA, "loot_tables", "blocks", "kollop_bed.json"), {
+    write(os.path.join(DATA, "loot_table", "blocks", "kollop_bed.json"), {
         "type": "minecraft:block",
         "pools": [{
             "rolls": 1,
@@ -250,7 +257,7 @@ def assets():
 
 
 def tags():
-    write(os.path.join(DATA, "tags", "entity_types", "sea_bosses.json"), {"replace": False, "values": [
+    write(os.path.join(DATA, "tags", "entity_type", "sea_bosses.json"), {"replace": False, "values": [
         "skycraft:dreugh_queen", "skycraft:sea_leviathan", {"id": "skycraft:sea_serpent", "required": False}]})
 
 

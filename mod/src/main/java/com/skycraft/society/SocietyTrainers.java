@@ -392,19 +392,19 @@ public final class SocietyTrainers {
         if (entity == null) return false;
         if (entity instanceof NpcEntity npc && npc.role() == NpcRole.TRAINER) return true;
         CompoundTag pd = entity.getPersistentData();
-        return pd.getBoolean(TAG) || pd.getBoolean("skycraft_guild_trainer") || pd.contains(SKILL_KEY);
+        return pd.getBooleanOr(TAG, false) || pd.getBooleanOr("skycraft_guild_trainer",false) || pd.contains(SKILL_KEY);
     }
 
     /** Skills this trainer can teach. */
     public static List<Skill> skillsOf(LivingEntity entity) {
         if (entity == null) return List.of();
         CompoundTag pd = entity.getPersistentData();
-        String single = pd.getString(SKILL_KEY);
+        String single = pd.getStringOr(SKILL_KEY, "");
         if (!single.isEmpty()) {
             Skill s = Skill.byId(single);
             if (s != null) return List.of(s);
         }
-        String multi = pd.getString("skycraft_train_skills");
+        String multi = pd.getStringOr("skycraft_train_skills","");
         if (!multi.isEmpty()) {
             List<Skill> out = new ArrayList<>();
             for (String part : multi.split(",")) {
@@ -424,9 +424,9 @@ public final class SocietyTrainers {
     public static int capOf(LivingEntity entity) {
         if (entity == null) return JOURNEYMAN_CAP;
         CompoundTag pd = entity.getPersistentData();
-        int cap = pd.getInt(CAP_KEY);
+        int cap = pd.getIntOr(CAP_KEY, 0);
         if (cap > 0) return cap;
-        if (pd.getBoolean("skycraft_guild_trainer")) return EXPERT_CAP;
+        if (pd.getBooleanOr("skycraft_guild_trainer",false)) return EXPERT_CAP;
         return JOURNEYMAN_CAP;
     }
 

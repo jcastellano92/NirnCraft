@@ -1,13 +1,14 @@
 package com.skycraft.fauna.client;
 
-import net.minecraft.client.model.HierarchicalModel;
+import com.skycraft.client.PoseEntityModel;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 
@@ -16,13 +17,14 @@ public final class InsectModels {
     private InsectModels() {}
 
     /** Butterfly / luna moth: a slim body with antennae and two broad wings. */
-    public static class Butterfly<T extends Entity> extends HierarchicalModel<T> {
+    public static class Butterfly<T extends Entity> extends PoseEntityModel<T> {
         private final ModelPart root;
         private final ModelPart body;
         private final ModelPart wingLeft;
         private final ModelPart wingRight;
 
         public Butterfly(ModelPart root) {
+            super(root);
             this.root = root;
             this.body = root.getChild("body");
             this.wingLeft = root.getChild("wing_left");
@@ -44,11 +46,6 @@ public final class InsectModels {
         }
 
         @Override
-        public ModelPart root() {
-            return root;
-        }
-
-        @Override
         public void setupAnim(T entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
             if (entity instanceof com.skycraft.fauna.entity.InsectEntity insect && insect.isPerched()) {
                 float fold = 1.18f + Mth.sin(ageInTicks * 0.12f) * 0.08f;
@@ -65,7 +62,7 @@ public final class InsectModels {
     }
 
     /** Dragonfly: long thin abdomen, big-eyed head, four narrow translucent wings beating fast. */
-    public static class Dragonfly<T extends Entity> extends HierarchicalModel<T> {
+    public static class Dragonfly<T extends Entity> extends PoseEntityModel<T> {
         private final ModelPart root;
         private final ModelPart frontLeft;
         private final ModelPart frontRight;
@@ -73,7 +70,7 @@ public final class InsectModels {
         private final ModelPart rearRight;
 
         public Dragonfly(ModelPart root) {
-            super(RenderType::entityTranslucent);
+            super(root, RenderTypes::entityTranslucent);
             this.root = root;
             this.frontLeft = root.getChild("front_left");
             this.frontRight = root.getChild("front_right");
@@ -100,11 +97,6 @@ public final class InsectModels {
         }
 
         @Override
-        public ModelPart root() {
-            return root;
-        }
-
-        @Override
         public void setupAnim(T entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
             float a = Mth.sin(ageInTicks * 3.0f) * 0.35f;
             float b = Mth.sin(ageInTicks * 3.0f + Mth.PI * 0.5f) * 0.35f;
@@ -116,12 +108,13 @@ public final class InsectModels {
     }
 
     /** Torchbug: a little beetle with a fat glowing abdomen (glow layer) and two small wings. */
-    public static class Torchbug<T extends Entity> extends HierarchicalModel<T> {
+    public static class Torchbug<T extends Entity> extends PoseEntityModel<T> {
         private final ModelPart root;
         private final ModelPart wingLeft;
         private final ModelPart wingRight;
 
         public Torchbug(ModelPart root) {
+            super(root);
             this.root = root;
             this.wingLeft = root.getChild("wing_left");
             this.wingRight = root.getChild("wing_right");
@@ -139,11 +132,6 @@ public final class InsectModels {
             root.addOrReplaceChild("wing_right", CubeListBuilder.create().texOffs(12, 0).mirror().addBox(-4.0f, 0.0f, -1.0f, 4, 0, 3),
                     PartPose.offset(-0.5f, 21.0f, -0.5f));
             return LayerDefinition.create(mesh, 32, 32);
-        }
-
-        @Override
-        public ModelPart root() {
-            return root;
         }
 
         @Override

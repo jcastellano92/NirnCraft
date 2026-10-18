@@ -4,7 +4,7 @@ import com.skycraft.Skycraft;
 import com.skycraft.crafting.arcane.block.IngredientPlantBlock;
 import com.skycraft.crafting.arcane.block.StationBlock;
 import com.skycraft.crafting.arcane.item.SoulGemItem;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.food.FoodProperties;
@@ -18,10 +18,10 @@ import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.MapColor;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.registries.DeferredRegister;
+import net.minecraft.core.registries.BuiltInRegistries;
+import java.util.function.Supplier;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -31,66 +31,66 @@ import java.util.function.Supplier;
 
 /** Blocks and items of the arcane sub-module (soul gems, crafting stations, alchemy ingredients and plants). */
 public final class ArcaneRegistry {
-    public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, Skycraft.MODID);
-    public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, Skycraft.MODID);
+    public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(BuiltInRegistries.BLOCK, Skycraft.MODID);
+    public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(BuiltInRegistries.ITEM, Skycraft.MODID);
 
     /** Every alchemy ingredient can be eaten (Skyrim style) to learn its first effect. */
-    public static final FoodProperties INGREDIENT_FOOD = new FoodProperties.Builder().nutrition(1).saturationMod(0.1f).alwaysEat().fast().build();
+    public static final FoodProperties INGREDIENT_FOOD = new FoodProperties.Builder().nutrition(1).saturationModifier(0.1f).alwaysEdible().build();
 
     /** All registered 3D harvestable alchemy flora blocks keyed by block ID. */
-    public static final Map<String, RegistryObject<Block>> FLORA_BLOCKS = new LinkedHashMap<>();
+    public static final Map<String, Supplier<Block>> FLORA_BLOCKS = new LinkedHashMap<>();
 
     // ---------------------------------------------------------------- stations
-    public static final RegistryObject<Block> ARCANE_ENCHANTER = BLOCKS.register("arcane_enchanter",
-            () -> new StationBlock(StationBlock.Kind.ENCHANTER, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PURPLE)
+    public static final Supplier<Block> ARCANE_ENCHANTER = BLOCKS.register("arcane_enchanter",
+            () -> new StationBlock(StationBlock.Kind.ENCHANTER, com.skycraft.platform.SkyProperties.block("arcane_enchanter").mapColor(MapColor.COLOR_PURPLE)
                     .strength(3.5f, 1200f).sound(SoundType.WOOD).noOcclusion().lightLevel(s -> 7)));
-    public static final RegistryObject<Block> ALCHEMY_LAB = BLOCKS.register("alchemy_lab",
-            () -> new StationBlock(StationBlock.Kind.ALCHEMY, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD)
+    public static final Supplier<Block> ALCHEMY_LAB = BLOCKS.register("alchemy_lab",
+            () -> new StationBlock(StationBlock.Kind.ALCHEMY, com.skycraft.platform.SkyProperties.block("alchemy_lab").mapColor(MapColor.WOOD)
                     .strength(2.5f, 6f).sound(SoundType.WOOD).noOcclusion().lightLevel(s -> 3)));
 
     // ---------------------------------------------------------------- wild alchemy plants
-    public static final RegistryObject<Block> NIGHTSHADE = registerFloraBlock("nightshade",
-            () -> new IngredientPlantBlock(MobEffects.POISON, 10, false, BlockBehaviour.Properties.copy(Blocks.POPPY)
+    public static final Supplier<Block> NIGHTSHADE = registerFloraBlock("nightshade",
+            () -> new IngredientPlantBlock(MobEffects.POISON, 10, false, com.skycraft.platform.SkyProperties.block("nightshade", BlockBehaviour.Properties.ofFullCopy(Blocks.POPPY))
                     .offsetType(BlockBehaviour.OffsetType.XZ)));
-    public static final RegistryObject<Block> DEATHBELL = registerFloraBlock("deathbell",
-            () -> new IngredientPlantBlock(MobEffects.WITHER, 6, false, BlockBehaviour.Properties.copy(Blocks.POPPY)
+    public static final Supplier<Block> DEATHBELL = registerFloraBlock("deathbell",
+            () -> new IngredientPlantBlock(MobEffects.WITHER, 6, false, com.skycraft.platform.SkyProperties.block("deathbell", BlockBehaviour.Properties.ofFullCopy(Blocks.POPPY))
                     .offsetType(BlockBehaviour.OffsetType.XZ)));
-    public static final RegistryObject<Block> NIRNROOT = registerFloraBlock("nirnroot",
-            () -> new IngredientPlantBlock(MobEffects.INVISIBILITY, 8, true, BlockBehaviour.Properties.copy(Blocks.POPPY)
+    public static final Supplier<Block> NIRNROOT = registerFloraBlock("nirnroot",
+            () -> new IngredientPlantBlock(MobEffects.INVISIBILITY, 8, true, com.skycraft.platform.SkyProperties.block("nirnroot", BlockBehaviour.Properties.ofFullCopy(Blocks.POPPY))
                     .offsetType(BlockBehaviour.OffsetType.XZ)
                     .lightLevel(s -> s.getValue(IngredientPlantBlock.HARVESTED) ? 0 : 6)));
-    public static final RegistryObject<Block> FROST_MIRRIAM = registerFloraBlock("frost_mirriam",
-            () -> new IngredientPlantBlock(MobEffects.FIRE_RESISTANCE, 8, false, BlockBehaviour.Properties.copy(Blocks.POPPY)
+    public static final Supplier<Block> FROST_MIRRIAM = registerFloraBlock("frost_mirriam",
+            () -> new IngredientPlantBlock(MobEffects.FIRE_RESISTANCE, 8, false, com.skycraft.platform.SkyProperties.block("frost_mirriam", BlockBehaviour.Properties.ofFullCopy(Blocks.POPPY))
                     .offsetType(BlockBehaviour.OffsetType.XZ)));
 
-    public static final RegistryObject<Item> ARCANE_ENCHANTER_ITEM = ITEMS.register("arcane_enchanter",
-            () -> new BlockItem(ARCANE_ENCHANTER.get(), new Item.Properties().rarity(Rarity.UNCOMMON)));
-    public static final RegistryObject<Item> ALCHEMY_LAB_ITEM = ITEMS.register("alchemy_lab",
-            () -> new BlockItem(ALCHEMY_LAB.get(), new Item.Properties()));
-    public static final RegistryObject<Item> NIGHTSHADE_ITEM = plantItem("nightshade", NIGHTSHADE);
-    public static final RegistryObject<Item> DEATHBELL_ITEM = plantItem("deathbell", DEATHBELL);
-    public static final RegistryObject<Item> NIRNROOT_ITEM = ITEMS.register("nirnroot",
-            () -> new BlockItem(NIRNROOT.get(), new Item.Properties().food(INGREDIENT_FOOD).rarity(Rarity.UNCOMMON)));
-    public static final RegistryObject<Item> FROST_MIRRIAM_ITEM = plantItem("frost_mirriam", FROST_MIRRIAM);
+    public static final Supplier<Item> ARCANE_ENCHANTER_ITEM = ITEMS.register("arcane_enchanter",
+            () -> new BlockItem(ARCANE_ENCHANTER.get(), com.skycraft.platform.SkyProperties.item("arcane_enchanter").rarity(Rarity.UNCOMMON)));
+    public static final Supplier<Item> ALCHEMY_LAB_ITEM = ITEMS.register("alchemy_lab",
+            () -> new BlockItem(ALCHEMY_LAB.get(), com.skycraft.platform.SkyProperties.item("alchemy_lab")));
+    public static final Supplier<Item> NIGHTSHADE_ITEM = plantItem("nightshade", NIGHTSHADE);
+    public static final Supplier<Item> DEATHBELL_ITEM = plantItem("deathbell", DEATHBELL);
+    public static final Supplier<Item> NIRNROOT_ITEM = ITEMS.register("nirnroot",
+            () -> new BlockItem(NIRNROOT.get(), com.skycraft.platform.SkyProperties.item("nirnroot").food(INGREDIENT_FOOD, net.minecraft.world.item.component.Consumables.defaultFood().consumeSeconds(0.8f).build()).rarity(Rarity.UNCOMMON)));
+    public static final Supplier<Item> FROST_MIRRIAM_ITEM = plantItem("frost_mirriam", FROST_MIRRIAM);
 
     // ---------------------------------------------------------------- soul gems
-    public static final RegistryObject<Item> SOUL_GEM_PETTY = gem("soul_gem_petty", 1, false, 10, Rarity.COMMON);
-    public static final RegistryObject<Item> SOUL_GEM_LESSER = gem("soul_gem_lesser", 2, false, 25, Rarity.COMMON);
-    public static final RegistryObject<Item> SOUL_GEM_COMMON = gem("soul_gem_common", 3, false, 50, Rarity.COMMON);
-    public static final RegistryObject<Item> SOUL_GEM_GREATER = gem("soul_gem_greater", 4, false, 100, Rarity.UNCOMMON);
-    public static final RegistryObject<Item> SOUL_GEM_GRAND = gem("soul_gem_grand", 5, false, 200, Rarity.UNCOMMON);
-    public static final RegistryObject<Item> SOUL_GEM_BLACK = gem("soul_gem_black", 5, true, 250, Rarity.RARE);
-    public static final RegistryObject<Item> AZURAS_STAR = ITEMS.register("azuras_star",
-            () -> new SoulGemItem(5, false, true, 1500, new Item.Properties().stacksTo(1).rarity(Rarity.EPIC).fireResistant()));
+    public static final Supplier<Item> SOUL_GEM_PETTY = gem("soul_gem_petty", 1, false, 10, Rarity.COMMON);
+    public static final Supplier<Item> SOUL_GEM_LESSER = gem("soul_gem_lesser", 2, false, 25, Rarity.COMMON);
+    public static final Supplier<Item> SOUL_GEM_COMMON = gem("soul_gem_common", 3, false, 50, Rarity.COMMON);
+    public static final Supplier<Item> SOUL_GEM_GREATER = gem("soul_gem_greater", 4, false, 100, Rarity.UNCOMMON);
+    public static final Supplier<Item> SOUL_GEM_GRAND = gem("soul_gem_grand", 5, false, 200, Rarity.UNCOMMON);
+    public static final Supplier<Item> SOUL_GEM_BLACK = gem("soul_gem_black", 5, true, 250, Rarity.RARE);
+    public static final Supplier<Item> AZURAS_STAR = ITEMS.register("azuras_star",
+            () -> new SoulGemItem(5, false, true, 1500, com.skycraft.platform.SkyProperties.item("azuras_star").stacksTo(1).rarity(Rarity.EPIC).fireResistant()));
 
     // ---------------------------------------------------------------- ingredients
-    public static final RegistryObject<Item> SALT_PILE = ingredient("salt_pile");
-    public static final RegistryObject<Item> VOID_SALTS = ingredient("void_salts");
-    public static final RegistryObject<Item> FIRE_SALTS = ingredient("fire_salts");
-    public static final RegistryObject<Item> FROST_SALTS = ingredient("frost_salts");
-    public static final RegistryObject<Item> VAMPIRE_DUST = ingredient("vampire_dust");
-    public static final RegistryObject<Item> BEAR_CLAWS = ingredient("bear_claws");
-    public static final RegistryObject<Item> HAWK_FEATHER = ingredient("hawk_feather");
+    public static final Supplier<Item> SALT_PILE = ingredient("salt_pile");
+    public static final Supplier<Item> VOID_SALTS = ingredient("void_salts");
+    public static final Supplier<Item> FIRE_SALTS = ingredient("fire_salts");
+    public static final Supplier<Item> FROST_SALTS = ingredient("frost_salts");
+    public static final Supplier<Item> VAMPIRE_DUST = ingredient("vampire_dust");
+    public static final Supplier<Item> BEAR_CLAWS = ingredient("bear_claws");
+    public static final Supplier<Item> HAWK_FEATHER = ingredient("hawk_feather");
 
     /**
      * Skyrim's other ingredients plus the classic ingredients of Morrowind, Elsweyr and Black Marsh. Their effects are in
@@ -151,8 +151,8 @@ public final class ArcaneRegistry {
 
     private ArcaneRegistry() {}
 
-    private static RegistryObject<Block> registerFloraBlock(String id, Supplier<Block> factory) {
-        RegistryObject<Block> ro = BLOCKS.register(id, factory);
+    private static Supplier<Block> registerFloraBlock(String id, Supplier<Block> factory) {
+        Supplier<Block> ro = BLOCKS.register(id, factory);
         FLORA_BLOCKS.put(id, ro);
         return ro;
     }
@@ -162,11 +162,11 @@ public final class ArcaneRegistry {
         boolean glowing = "crimson_nirnroot".equals(id);
         boolean ceiling = CEILING_FLORA_IDS.contains(id);
         SoundType sound = FUNGI_IDS.contains(id) ? SoundType.FUNGUS : SoundType.GRASS;
-        MobEffect effect = FUNGI_IDS.contains(id) ? MobEffects.NIGHT_VISION : MobEffects.REGENERATION;
+        net.minecraft.core.Holder<MobEffect> effect = FUNGI_IDS.contains(id) ? MobEffects.NIGHT_VISION : MobEffects.REGENERATION;
         registerFloraBlock(id, () -> new IngredientPlantBlock(
                 effect, 6, glowing, ceiling,
                 () -> lookupItem(id),
-                BlockBehaviour.Properties.copy(Blocks.POPPY).sound(sound)
+                com.skycraft.platform.SkyProperties.block(id, BlockBehaviour.Properties.ofFullCopy(Blocks.POPPY)).sound(sound)
                         .offsetType(BlockBehaviour.OffsetType.XZ)
                         .lightLevel(s -> s.getValue(IngredientPlantBlock.HARVESTED) ? 0 : light)));
     }
@@ -176,11 +176,11 @@ public final class ArcaneRegistry {
         boolean glowing = "crimson_nirnroot".equals(blockId);
         boolean ceiling = CEILING_FLORA_IDS.contains(blockId);
         SoundType sound = FUNGI_IDS.contains(blockId) ? SoundType.FUNGUS : SoundType.GRASS;
-        MobEffect effect = glowing ? MobEffects.INVISIBILITY : (FUNGI_IDS.contains(blockId) ? MobEffects.NIGHT_VISION : MobEffects.REGENERATION);
+        net.minecraft.core.Holder<MobEffect> effect = glowing ? MobEffects.INVISIBILITY : (FUNGI_IDS.contains(blockId) ? MobEffects.NIGHT_VISION : MobEffects.REGENERATION);
         registerFloraBlock(blockId, () -> new IngredientPlantBlock(
                 effect, 7, glowing, ceiling,
                 () -> lookupItem(dropItemId),
-                BlockBehaviour.Properties.copy(Blocks.POPPY).sound(sound)
+                com.skycraft.platform.SkyProperties.block(blockId, BlockBehaviour.Properties.ofFullCopy(Blocks.POPPY)).sound(sound)
                         .offsetType(BlockBehaviour.OffsetType.XZ)
                         .lightLevel(s -> s.getValue(IngredientPlantBlock.HARVESTED) ? 0 : light)));
     }
@@ -197,13 +197,13 @@ public final class ArcaneRegistry {
     }
 
     private static Item lookupItem(String id) {
-        Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(Skycraft.MODID, id));
+        Item item = BuiltInRegistries.ITEM.getValue(Identifier.fromNamespaceAndPath(Skycraft.MODID, id));
         return item != null && item != Items.AIR ? item : NIRNROOT_ITEM.get();
     }
 
     /** Returns a registered 3D alchemy plant block by ID, defaulting to {@link #NIGHTSHADE} if unknown. */
     public static Block floraBlock(String id) {
-        RegistryObject<Block> ro = FLORA_BLOCKS.get(id);
+        Supplier<Block> ro = FLORA_BLOCKS.get(id);
         return ro != null ? ro.get() : NIGHTSHADE.get();
     }
 
@@ -218,28 +218,28 @@ public final class ArcaneRegistry {
 
     /** Returns true if the given block is one of the cave/marsh fungi species. */
     public static boolean isFungusBlock(Block block) {
-        ResourceLocation key = ForgeRegistries.BLOCKS.getKey(block);
+        Identifier key = BuiltInRegistries.BLOCK.getKey(block);
         return key != null && FUNGI_IDS.contains(key.getPath());
     }
 
-    private static RegistryObject<Item> gem(String id, int capacity, boolean black, int value, Rarity rarity) {
-        return ITEMS.register(id, () -> new SoulGemItem(capacity, black, false, value, new Item.Properties().stacksTo(16).rarity(rarity)));
+    private static Supplier<Item> gem(String id, int capacity, boolean black, int value, Rarity rarity) {
+        return ITEMS.register(id, () -> new SoulGemItem(capacity, black, false, value, com.skycraft.platform.SkyProperties.item(id).stacksTo(16).rarity(rarity)));
     }
 
-    private static RegistryObject<Item> ingredient(String id) {
-        RegistryObject<Block> plant = FLORA_BLOCKS.get(id);
+    private static Supplier<Item> ingredient(String id) {
+        Supplier<Block> plant = FLORA_BLOCKS.get(id);
         if (plant != null) {
-            return ITEMS.register(id, () -> new BlockItem(plant.get(), new Item.Properties().food(INGREDIENT_FOOD)));
+            return ITEMS.register(id, () -> new BlockItem(plant.get(), com.skycraft.platform.SkyProperties.item(id).food(INGREDIENT_FOOD, net.minecraft.world.item.component.Consumables.defaultFood().consumeSeconds(0.8f).build())));
         }
-        return ITEMS.register(id, () -> new Item(new Item.Properties().food(INGREDIENT_FOOD)));
+        return ITEMS.register(id, () -> new Item(com.skycraft.platform.SkyProperties.item(id).food(INGREDIENT_FOOD, net.minecraft.world.item.component.Consumables.defaultFood().consumeSeconds(0.8f).build())));
     }
 
-    private static RegistryObject<Item> plantItem(String id, RegistryObject<Block> block) {
-        return ITEMS.register(id, () -> new BlockItem(block.get(), new Item.Properties().food(INGREDIENT_FOOD)));
+    private static Supplier<Item> plantItem(String id, Supplier<Block> block) {
+        return ITEMS.register(id, () -> new BlockItem(block.get(), com.skycraft.platform.SkyProperties.item(id).food(INGREDIENT_FOOD, net.minecraft.world.item.component.Consumables.defaultFood().consumeSeconds(0.8f).build())));
     }
 
     /** All soul gems, smallest first. */
-    public static List<RegistryObject<Item>> soulGems() {
+    public static List<Supplier<Item>> soulGems() {
         return List.of(SOUL_GEM_PETTY, SOUL_GEM_LESSER, SOUL_GEM_COMMON, SOUL_GEM_GREATER, SOUL_GEM_GRAND, SOUL_GEM_BLACK, AZURAS_STAR);
     }
 

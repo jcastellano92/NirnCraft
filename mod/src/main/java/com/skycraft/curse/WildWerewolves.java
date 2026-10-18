@@ -8,8 +8,8 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.Difficulty;
-import net.minecraft.world.entity.MobSpawnType;
-import net.minecraft.world.level.GameRules;
+import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.levelgen.Heightmap;
 
@@ -35,14 +35,14 @@ public final class WildWerewolves {
     static void tick(MinecraftServer server) {
         if (server.getTickCount() % 100 != 37) return;
         ServerLevel level = server.overworld();
-        if (level.getDifficulty() == Difficulty.PEACEFUL || !level.getGameRules().getBoolean(GameRules.RULE_DOMOBSPAWNING)) return;
-        if (!level.isNight()) return;
+        if (level.getDifficulty() == Difficulty.PEACEFUL || !level.getGameRules().get(net.minecraft.world.level.gamerules.GameRules.SPAWN_MOBS)) return;
+        if (!level.isDarkOutside()) return;
         long now = level.getGameTime();
         for (ServerPlayer player : level.players()) {
             if (player.isSpectator() || player.isCreative()) continue;
             com.skycraft.core.PlayerData data = com.skycraft.core.SkyData.get(player);
             if (data.getLevel() < MIN_PLAYER_LEVEL) continue;
-            long lastSpawn = Curses.tag(player).getLong(LAST_SPAWN_KEY);
+            long lastSpawn = Curses.tag(player).getLongOr(LAST_SPAWN_KEY, 0L);
             if (lastSpawn > 0 && now - lastSpawn < SPAWN_COOLDOWN && now >= lastSpawn) continue;
             Long last = LAST.get(player.getUUID());
             if (last != null && now - last < INTERVAL && now >= last) continue;
@@ -53,7 +53,7 @@ public final class WildWerewolves {
                     || com.skycraft.creatures.spawn.SpawnPacing.onRoad(level, pPos)
                     || !com.skycraft.creatures.spawn.SpawnPacing.hostileReady(player)) continue;
             RandomSource r = player.getRandom();
-            float chance = CHANCE * (level.getMoonBrightness() >= 1f ? 2f : 1f);
+            float chance = CHANCE * (level.getMoonBrightness(pPos) >= 1f ? 2f : 1f);
             if (r.nextFloat() >= chance) continue;
             if (!level.canSeeSky(pPos) || CreatureSpawns.isSettlementOrHouse(level, pPos)) continue;
             if (!level.getEntitiesOfClass(WerewolfEntity.class, player.getBoundingBox().inflate(160)).isEmpty()) continue;
@@ -75,11 +75,11 @@ public final class WildWerewolves {
             if (CreatureSpawns.isSettlementOrHouse(level, pos)
                     || com.skycraft.creatures.spawn.SpawnPacing.calm(level, pos)
                     || com.skycraft.creatures.spawn.SpawnPacing.onRoad(level, pos)) continue;
-            WerewolfEntity wolf = CurseRegistry.WEREWOLF.get().create(level);
+            WerewolfEntity wolf = CurseRegistry.WEREWOLF.get().create(level, net.minecraft.world.entity.EntitySpawnReason.EVENT);
             if (wolf == null) return;
-            wolf.moveTo(x + 0.5, y, z + 0.5, r.nextFloat() * 360, 0);
+            wolf.snapTo(x + 0.5, y, z + 0.5, r.nextFloat() * 360, 0);
             if (!level.noCollision(wolf)) continue;
-            wolf.finalizeSpawn(level, level.getCurrentDifficultyAt(pos), MobSpawnType.EVENT, null, null);
+            wolf.finalizeSpawn(level, level.getCurrentDifficultyAt(pos), EntitySpawnReason.EVENT, null);
             wolf.setWild(true);
             level.addFreshEntity(wolf);
             Curses.tag(player).putLong(LAST_SPAWN_KEY, now);

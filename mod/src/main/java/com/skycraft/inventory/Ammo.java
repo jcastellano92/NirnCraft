@@ -5,11 +5,11 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ProjectileWeaponItem;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 /**
  * Arrows (and bolts, and anything else a bow or crossbow takes) that sit only in the overflow {@link Pack} are found by
@@ -21,7 +21,7 @@ import net.minecraftforge.fml.common.Mod;
  * </ul>
  * One stack is materialised ({@link Pack#materialize}); the pack keeps the rest and refills it as ammo is shot.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class Ammo {
     private Ammo() {}
 
@@ -31,7 +31,7 @@ public final class Ammo {
         if (!player.getProjectile(weapon).isEmpty()) return false;
         int idx = Pack.find(player, s -> ranged.getAllSupportedProjectiles().test(s));
         if (idx < 0) return false;
-        return Pack.materialize(player, idx, null, player.getInventory().selected) >= 0;
+        return Pack.materialize(player, idx, null, player.getInventory().getSelectedSlot()) >= 0;
     }
 
     @SubscribeEvent(priority = EventPriority.HIGH)
@@ -41,8 +41,8 @@ public final class Ammo {
     }
 
     @SubscribeEvent
-    public static void onTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer player)) return;
+    public static void onTick(net.neoforged.neoforge.event.tick.PlayerTickEvent.Post event) {
+        if (!(event instanceof net.neoforged.neoforge.event.tick.PlayerTickEvent.Post) || !(event.getEntity() instanceof ServerPlayer player)) return;
         if (player.tickCount % 5 != 0 || Pack.size(player) == 0) return;
         ItemStack main = player.getMainHandItem();
         if (main.getItem() instanceof ProjectileWeaponItem) ensure(player, main);
