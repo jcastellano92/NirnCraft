@@ -140,7 +140,8 @@ def launch_and_wait(limit=900):
     while time.monotonic() - t0 < limit:
         st = client_state()
         c = st.get("client", {})
-        if c.get("fresh") and st.get("serverReady"):
+        remote = c.get("connected") and c.get("remote") and not c.get("integratedServer")  # TCP multiplayer
+        if c.get("fresh") and (st.get("serverReady") or (remote and c.get("worldLoaded"))):
             print(f"world ready after {time.monotonic() - t0:.0f} s")
             return
         gone = gone + 1 if not st.get("running") else 0
@@ -182,7 +183,7 @@ def run(a):
         print(f"synced {sync()} changed file(s) into {DEST}")
     since = LOG.stat().st_size if LOG.exists() else 0
     t0 = time.monotonic()
-    actions(["shaders off", "shaders on", "settle 1200"])
+    actions(["shaders off", "shaders on"])  # each pose settles itself (the spawn pose may be buried)
     errs = shader_errors(since)
     print(f"reload acknowledged in {time.monotonic() - t0:.1f} s; {len(errs)} shader log line(s)")
     for e in errs[:40]:
