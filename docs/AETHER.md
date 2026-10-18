@@ -216,3 +216,35 @@ Run `native/build_linux.sh` (Linux) or `native\build.ps1 -Validate` (Windows) on
   runs 64-bit integer ops at low rate: compare the bench to the 3090's per-set ratios.
 - **A hybrid laptop** (iGPU + dGPU): run the game on each GPU; the log must show the matching device chosen
   (`pickedForGlContext` true) and zero-copy, not a cross-GPU host-copy.
+
+## Testing in the real game (2026-10-18)
+
+Single player, the fast loop (one client, under the live lease `.work/lease/live.json`):
+
+```powershell
+py -3 tools/dev/build_263.py --offline build
+py -3 tools/dev/live_world.py install-core E:/Skycraft-scratch/migration-26.3/build/libs/skycraft-0.1.0.jar
+py -3 .claude/worktrees/aether/shaderpack/tools/pack_live.py --launch --close --cams helgen-near-smoke `
+    --visit "n:-20,1158,90,180,-6" --wait 300 --off --tag mytest
+```
+
+`pack_live.py` syncs the pack from its worktree (or `--no-sync`), reloads it in Iris (`shaders off/on`), prints only
+shader errors, captures after full readiness and closes cleanly. `live_world.py close` also closes a client that is
+stuck on a menu (normal window close, never a kill).
+
+Multiplayer over TCP (full-pack dedicated server + the full-pack client):
+
+```powershell
+py -3 -I tools/build_server_instance.py --core-jar <jar> --java <java25> --work-root <dir> --cache <dir> --output-zip <server.zip>
+py -3 tools/build_prism_instance.py --core-jar <jar>
+py -3 tools/dev/mp_server.py setup --zip <server.zip>; py -3 tools/dev/mp_server.py start
+tools\qa\prism_autotest.ps1 -PrepareOnly -Live -SourceZip dist\Skycraft-26.3-client-instance.zip -Server 127.0.0.1:25790 -Java <java25>
+py -3 tools/dev/live_world.py launch      # status: remoteConnected
+py -3 tools/dev/mp_server.py cmd "op <player>" "tp <player> x y z"   # live controls need op in remote mode
+py -3 tools/dev/live_world.py actions <file with: settle 1800 / wait 300 / capture TAG>
+py -3 tools/dev/mp_server.py stop
+```
+
+Evidence lines: server `aether tile service: first request from <player>` and `N tiles (X MB) sent`, client
+`aether: asking the server for far tiles` and `N far tiles received`. First run: 114 tiles / 1.6 MB in a minute; the
+client caches them under `.minecraft/aether-cache/<world>` (revisits are instant and ask nothing).
