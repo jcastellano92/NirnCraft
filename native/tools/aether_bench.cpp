@@ -2,10 +2,8 @@
 // no readback), median GPU time per feature set. The harness's host path reads every output back over PCIe, so
 // its timings at high resolutions mostly measure the bus, not the kernel.
 //   aether_bench [w=2560 h=1440 frames=40 x=0 z=0 above=60 yaw=105 pitch=2]
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-
 #include <algorithm>
+#include <chrono>
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
@@ -16,6 +14,7 @@
 
 #include "aether/aether.h"
 #include "camera.hpp"
+#include "gl_context.hpp"
 
 static double arg(int argc, char** argv, const char* k, double d) {
     for (int i = 1; i < argc; i++) {
@@ -26,17 +25,12 @@ static double arg(int argc, char** argv, const char* k, double d) {
 }
 
 int main(int argc, char** argv) {
-    WNDCLASSA wc{};
-    wc.lpfnWndProc = DefWindowProcA;
-    wc.hInstance = GetModuleHandleA(nullptr);
-    wc.lpszClassName = "aether_bench";
-    RegisterClassA(&wc);
-    HWND wnd = CreateWindowA("aether_bench", "aether", WS_OVERLAPPEDWINDOW, 0, 0, 64, 64, nullptr, nullptr, wc.hInstance, nullptr);
-    HDC dc = GetDC(wnd);
-    PIXELFORMATDESCRIPTOR pfd{sizeof(pfd), 1, PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL, PFD_TYPE_RGBA, 32};
-    SetPixelFormat(dc, ChoosePixelFormat(dc, &pfd), &pfd);
-    HGLRC rc = wglCreateContext(dc);
-    wglMakeCurrent(dc, rc);
+    aether_test::GlContext glc;
+    std::string glErr;
+    if (!glc.create(glErr)) {
+        std::printf("no GL context: %s\n", glErr.c_str());
+        return 1;
+    }
 
     uint32_t W = uint32_t(arg(argc, argv, "w", 2560)), H = uint32_t(arg(argc, argv, "h", 1440));
     int frames = int(arg(argc, argv, "frames", 40));
@@ -73,6 +67,7 @@ int main(int argc, char** argv) {
         std::printf("attach failed: %s\n", aether_last_error(ctx));
         return 1;
     }
+    std::printf("%s\n", aether_info(ctx));
     AetherFrame f{};
     f.cameraPos[0] = x;
     f.cameraPos[1] = y;
@@ -101,23 +96,31 @@ int main(int argc, char** argv) {
     for (int i = 0; i < 250; i++) aether_gl_render(ctx, &f);
     std::printf("%ux%u, camera (%.0f, %.0f, %.0f), sets interleaved\n", W, H, x, y, z);
     const int NS = int(sizeof(sets) / sizeof(sets[0]));
-    std::vector<std::vector<double>> gpu(NS);
+    std::vector<std::vector<double>> gpu(NS), cpu(NS);
     // interleaved so every set sees the same clocks and background load. A render reports the GPU time of the frame
     // that finished before it (two behind), and a set's first frame after a switch has no cloud history, so each set renders five frames and keeps the last report.
     for (int i = 0; i < frames; i++)
         for (int k = 0; k < NS; k++) {
             f.flags = sets[k].flags;
-            for (int r = 0; r < 5; r++) aether_gl_render(ctx, &f);
+            for (int r = 0; r < 4; r++) aether_gl_render(ctx, &f);
+            auto c0 = std::chrono::steady_clock::now();
+            aether_gl_render(ctx, &f);
+            cpu[k].push_back(std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - c0).count());
             AetherStats st{};
             aether_get_stats(ctx, &st);
             gpu[k].push_back(st.lastFrameMs);
         }
     for (int k = 0; k < NS; k++) {
         std::sort(gpu[k].begin(), gpu[k].end());
-        std::printf("  %-24s GPU median %6.2f ms  (p10 %.2f, p90 %.2f)\n", sets[k].name, gpu[k][gpu[k].size() / 2],
-                    gpu[k][gpu[k].size() / 10], gpu[k][gpu[k].size() * 9 / 10]);
+        std::sort(cpu[k].begin(), cpu[k].end());
+        // CPU: the aether_gl_render call itself (zero-copy: recording; host-copy: plus the wait and the uploads)
+        std::printf("  %-24s GPU median %6.2f ms  (p10 %.2f, p90 %.2f)  CPU per call median %6.2f ms\n", sets[k].name,
+                    gpu[k][gpu[k].size() / 2], gpu[k][gpu[k].size() / 10], gpu[k][gpu[k].size() * 9 / 10],
+                    cpu[k][cpu[k].size() / 2]);
     }
+    std::printf("%s\n", aether_info(ctx));
     aether_gl_detach(ctx);
     aether_destroy(ctx);
+    glc.destroy();
     return 0;
 }

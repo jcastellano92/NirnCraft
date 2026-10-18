@@ -14,7 +14,9 @@ compile against 26.3 before that. Then:
 1. Copy `src/com/skycraft/aether/` and `../src/com/skycraft/aether/AetherNative.java` into
    `mod/src/main/java/com/skycraft/aether/` (drop `AetherProbe.java`; `compile-stubs/` and `harness/` stay here).
 2. Package the DLL: copy `native/build/Release/aether_core.dll` to
-   `mod/src/main/resources/natives/windows-x86_64/aether_core.dll` (a release build step, like the shader pack zip).
+   `mod/src/main/resources/natives/windows-x86_64/aether_core.dll` (a release build step, like the shader pack zip),
+   and the Linux build (`native/build_linux.sh`, see docs/AETHER.md "Portability") `native/build-linux/libaether_core.so`
+   to `mod/src/main/resources/natives/linux-x86_64/libaether_core.so`. `AetherLibrary` picks the one for the OS.
 3. Call `AetherClient.init(modBus)` from the client setup of `Skycraft.java`, `AetherServer.init()` from common
    setup, and add `com.skycraft.aether.AetherNet.register();` to the module list in `SkyNetwork.init`.
 4. Wire the weather feed: `WeatherFieldTexture` implements `AetherClient.WeatherFeed` (it already builds the four

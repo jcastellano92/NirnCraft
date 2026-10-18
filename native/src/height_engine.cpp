@@ -1,7 +1,7 @@
 // Exact seeded-noise batches for the terrain height (aether_height_*): shaders/aether_height.slang on its own Vulkan
 // compute device, or the same kernel compiled to C++. Self-contained (no AetherContext): the client's column
 // workers and the tile server call it from their own threads; calls on one handle serialise.
-#include <vulkan/vulkan.h>
+#include "vk_loader.hpp"  // first: VK_NO_PROTOTYPES; the Vulkan loader is opened at run time (aether::vk*)
 
 #include <algorithm>
 #include <atomic>
@@ -25,6 +25,8 @@ struct AetherHeightGroupRange {
     uint32_t end[3];
 };
 extern "C" void heightMain(void* varyingInput, void* entryPointParams, void* globalParams);
+
+using namespace aether;  // the vk* entry points (vk_loader.hpp)
 
 namespace {
 
@@ -158,7 +160,9 @@ public:
         app.apiVersion = VK_API_VERSION_1_2;
         VkInstanceCreateInfo ici{VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO};
         ici.pApplicationInfo = &app;
+        if (!aether::vkLoadGlobal(err)) return false;  // no Vulkan loader: the caller keeps the CPU path
         if (vkCreateInstance(&ici, nullptr, &inst_) != VK_SUCCESS) return fail(err, "vkCreateInstance failed");
+        if (!aether::vkLoadInstance(inst_, err)) return false;
         uint32_t n = 0;
         vkEnumeratePhysicalDevices(inst_, &n, nullptr);
         std::vector<VkPhysicalDevice> devs(n);

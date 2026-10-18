@@ -1,17 +1,41 @@
-cmake_minimum_required(VERSION 3.28)
+cmake_minimum_required(VERSION 3.20)
 project(aether_core VERSION 0.1.0 LANGUAGES CXX)
 
-# Toolchains live outside the repo (see native/README.md); env.ps1 sets these.
+# Toolchains live outside the repo (see native/README.md); env.ps1 sets these on Windows, build_linux.sh on Linux.
 set(SLANG_ROOT "$ENV{SLANG_ROOT}" CACHE PATH "Slang release root")
-set(VULKAN_SDK "$ENV{VULKAN_SDK}" CACHE PATH "Vulkan SDK root")
+set(VULKAN_SDK "$ENV{VULKAN_SDK}" CACHE PATH "Vulkan SDK root (Windows; optional on Linux)")
+set(VULKAN_HEADERS "$ENV{VULKAN_HEADERS}" CACHE PATH "Vulkan-Headers checkout (Linux, when no system vulkan/vulkan.h)")
 if(NOT EXISTS "${SLANG_ROOT}/bin/slangc.exe" AND NOT EXISTS "${SLANG_ROOT}/bin/slangc")
-  message(FATAL_ERROR "SLANG_ROOT does not point at a Slang release (run toolchains/env.ps1)")
+  message(FATAL_ERROR "SLANG_ROOT does not point at a Slang release (run toolchains/env.ps1 or build_linux.sh)")
 endif()
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 if(MSVC)
   add_compile_options(/W3 /permissive- /bigobj /utf-8 /Zc:__cplusplus)
+  add_compile_definitions(_CRT_SECURE_NO_WARNINGS)  # getenv / fopen are fine here (and portable)
+else()
+  # GCC / Clang (Linux): export only AETHER_API symbols, like the DLL
+  add_compile_options(-Wall -Wno-unused-function -Wno-unused-variable -Wno-missing-braces)
+  set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+  set(CMAKE_VISIBILITY_INLINES_HIDDEN ON)
+  set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+endif()
+find_package(Threads REQUIRED)
+
+# Vulkan: headers only. The loader (vulkan-1.dll / libvulkan.so.1) is opened at run time (src/vk_loader.cpp), so the
+# library has no link-time Vulkan dependency. Linux headers: the system's, a Vulkan-Headers checkout, or an SDK.
+if(WIN32)
+  set(AETHER_VK_INCLUDE "${VULKAN_SDK}/Include")
+  set(AETHER_GL_LIBS opengl32)
+  set(AETHER_TEST_GL_LIBS opengl32 gdi32 user32)
+else()
+  find_path(AETHER_VK_INCLUDE vulkan/vulkan.h HINTS "${VULKAN_HEADERS}/include" "${VULKAN_SDK}/include" "${VULKAN_SDK}/Include")
+  if(NOT AETHER_VK_INCLUDE)
+    message(FATAL_ERROR "Vulkan headers not found (set VULKAN_HEADERS to a Vulkan-Headers checkout)")
+  endif()
+  set(AETHER_GL_LIBS ${CMAKE_DL_LIBS})  # GL is resolved at run time from the caller's EGL / GLX context
+  set(AETHER_TEST_GL_LIBS ${CMAKE_DL_LIBS})
 endif()
 
 set(GEN "${CMAKE_BINARY_DIR}/gen")
@@ -76,14 +100,29 @@ add_custom_command(
   DEPENDS ${KERNEL_DEPS} COMMENT "slangc aether_far -> C++ (CPU reference)")
 
 add_library(aether_core SHARED
-  src/api.cpp src/svdag.cpp src/world.cpp src/preview_source.cpp src/cpu_backend.cpp src/vk_backend.cpp src/gl_api.cpp
+  src/api.cpp src/svdag.cpp src/world.cpp src/preview_source.cpp src/cpu_backend.cpp src/vk_backend.cpp src/vk_loader.cpp
+  src/gl_api.cpp
   "${GEN}/aether_far_cpu.cpp" "${GEN}/aether_far_spv.h" "${GEN}/aether_publish_spv.h" "${GEN}/aether_ingest_spv.h"
   "${GEN}/aether_cloud_spv.h" "${GEN}/aether_sunmap_spv.h")
-target_include_directories(aether_core PUBLIC include PRIVATE src "${GEN}" "${SLANG_ROOT}/include" "${VULKAN_SDK}/Include")
-target_compile_definitions(aether_core PRIVATE AETHER_BUILD AETHER_VERSION_STRING="${PROJECT_VERSION}")
-target_link_libraries(aether_core PRIVATE "${VULKAN_SDK}/Lib/vulkan-1.lib" opengl32)
+target_include_directories(aether_core PUBLIC include PRIVATE src "${GEN}" "${SLANG_ROOT}/include" "${AETHER_VK_INCLUDE}")
+target_compile_definitions(aether_core PRIVATE AETHER_BUILD AETHER_VERSION_STRING="${PROJECT_VERSION}" VK_NO_PROTOTYPES)
+target_link_libraries(aether_core PRIVATE ${AETHER_GL_LIBS} Threads::Threads)
+if(NOT MSVC)
+  # one .so for every distro: the C++ runtime inside (a container-built library loads in the game's JVM on the host,
+  # whatever libstdc++ that has), none of its symbols exported, and no undefined symbol left for load time
+  option(AETHER_STATIC_RUNTIME "link libstdc++ / libgcc into libaether_core.so" ON)
+  if(AETHER_STATIC_RUNTIME)
+    target_link_options(aether_core PRIVATE -static-libstdc++ -static-libgcc -Wl,--exclude-libs,ALL)
+  endif()
+  target_link_options(aether_core PRIVATE -Wl,--no-undefined)
+endif()
 # The generated kernel is plain arithmetic; keep MSVC from contracting differently than the GPU where it can.
-set_source_files_properties("${GEN}/aether_far_cpu.cpp" PROPERTIES COMPILE_OPTIONS "/fp:precise;/W0")
+if(MSVC)
+  set_source_files_properties("${GEN}/aether_far_cpu.cpp" PROPERTIES COMPILE_OPTIONS "/fp:precise;/W0")
+else()
+  # no FMA contraction (the GPU and MSVC builds do not contract either), no warnings from generated code
+  set_source_files_properties("${GEN}/aether_far_cpu.cpp" PROPERTIES COMPILE_OPTIONS "-ffp-contract=off;-fno-fast-math;-w")
+endif()
 
 add_executable(aether_render tools/aether_render.cpp)
 target_link_libraries(aether_render PRIVATE aether_core)
@@ -91,19 +130,22 @@ target_include_directories(aether_render PRIVATE src)
 
 add_executable(aether_tests tests/test_main.cpp src/svdag.cpp)
 target_include_directories(aether_tests PRIVATE src include)
-target_link_libraries(aether_tests PRIVATE aether_core)
+target_link_libraries(aether_tests PRIVATE aether_core Threads::Threads)
 
 add_executable(aether_gl_test tests/gl_interop_test.cpp src/gl_api.cpp)
 target_include_directories(aether_gl_test PRIVATE src include)
-target_link_libraries(aether_gl_test PRIVATE aether_core opengl32 gdi32 user32)
+target_include_directories(aether_gl_test PRIVATE tests)
+target_link_libraries(aether_gl_test PRIVATE aether_core ${AETHER_TEST_GL_LIBS} Threads::Threads)
 
 add_executable(aether_pack_test tests/pack_parity_test.cpp src/gl_api.cpp)
 target_include_directories(aether_pack_test PRIVATE src include)
-target_link_libraries(aether_pack_test PRIVATE aether_core opengl32 gdi32 user32)
+target_include_directories(aether_pack_test PRIVATE tests)
+target_link_libraries(aether_pack_test PRIVATE aether_core ${AETHER_TEST_GL_LIBS})
 
 add_executable(aether_bench tools/aether_bench.cpp)
 target_include_directories(aether_bench PRIVATE src include)
-target_link_libraries(aether_bench PRIVATE aether_core opengl32 gdi32 user32)
+target_include_directories(aether_bench PRIVATE tests)
+target_link_libraries(aether_bench PRIVATE aether_core ${AETHER_TEST_GL_LIBS})
 
 # Exact terrain height (aether_height.slang): precise floating point, then spv_exact adds the float controls and
 # refuses the build unless every arithmetic instruction is NoContraction and no inexact extended instruction is used.
