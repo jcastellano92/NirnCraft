@@ -44,7 +44,7 @@ vec3 linearToSrgb(vec3 c) {
 void main() {
     vec3 hdr = texture(colortex5, texcoord).rgb;
 #if NIGHT_VISION > 0
-    hdr = nightVision(hdr, float(NIGHT_VISION) * 0.3);
+    hdr = nightVision(hdr, float(NIGHT_VISION) * 0.35);
 #endif
     vec3 c = linearToSrgb(aces(hdr * exp2(exposureNow(colortex8)) * EXPOSURE));
 #if defined REGION_GRADE && !defined SKYCRAFT_REALM

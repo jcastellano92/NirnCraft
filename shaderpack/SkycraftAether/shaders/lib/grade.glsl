@@ -17,10 +17,10 @@ uniform sampler2D gradeLut;  // customTexture: textures/grade_lut.png
 uniform sampler2D gradeMap;  // customTexture: textures/grade_map.png
 #endif
 
-// rods: luminance under ~0.05 (moonlight on the ground) turns towards the scotopic look, fully by ~0.004
+// rods: luminance under ~0.08 (moonlight on the ground) turns towards the scotopic look, fully by ~0.007
 vec3 nightVision(vec3 c, float strength) {
     float l = dot(c, vec3(0.2126, 0.7152, 0.0722));
-    float m = clamp((log2(0.05) - log2(max(l, 1e-6))) / 3.6, 0.0, 1.0) * strength;
+    float m = clamp((log2(0.08) - log2(max(l, 1e-6))) / 3.6, 0.0, 1.0) * strength;
     float rod = dot(c, vec3(0.04, 0.50, 0.46));
     return mix(c, rod * vec3(0.60, 0.80, 1.20) / 0.787, m);
 }
