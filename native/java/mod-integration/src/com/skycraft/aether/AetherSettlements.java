@@ -2,6 +2,9 @@ package com.skycraft.aether;
 
 // aether:sandbox-only (compiled against the real mod by sandbox_check.ps1, not by compile_check.ps1's stubs)
 
+import com.skycraft.tamriel.Place;
+import com.skycraft.tamriel.PlaceType;
+import com.skycraft.tamriel.Places;
 import com.skycraft.tamriel.settlement.Culture;
 import com.skycraft.tamriel.settlement.build.Builders;
 import com.skycraft.tamriel.settlement.build.LandmarkRegistry;
@@ -23,12 +26,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.IntBinaryOperator;
 
 /**
  * Far-field buildings: Skycraft's planned settlements (StreetPlan: every named capital, city, town, village and farm,
  * baked and seed-free, so clients draw them themselves) rasterised into aether's per-tile structure layers. Each
  * planned piece becomes massing: grammar buildings their blueprint's parts with wall top, roof rise and roof shape;
- * city walls lines from floor to floor2; gates and towers boxes; landmarks a tower profile. Wall and roof colours
+ * city walls lines from floor to floor2; gates and towers boxes; landmarks a tower profile. Forts (not in the plan:
+ * SurfaceBuilder's fixed 27-block square of curtain wall, corner towers and keep) stand on the ground. Wall and roof colours
  * are the kit's blocks' map colours, registered as extra palette entries. Detail below a column's size is sampled
  * away (houses fade with distance), but walls stay at least one column thick so a city's outline carries to the
  * horizon.
@@ -47,20 +52,26 @@ final class AetherSettlements implements AetherFarField.Overlay {
     record Line(float ax, float az, float bx, float bz, float half, float topA, float topB, short mat) {}
 
     private final StreetPlan plan;
+    private final IntBinaryOperator ground;  // block x, z -> terrain height, for forts (null: aether's stand-in)
     private final Map<Integer, List<Object>> bySettlement = new HashMap<>();  // settlement index -> masses and lines
+    private final Map<String, List<Object>> forts = new HashMap<>();
     private final Map<BlockState, Short> ids = new HashMap<>();
     private final List<float[]> newMaterials = new ArrayList<>();
     private final Set<Long> uploaded = new HashSet<>();
     private final float[] wallTop = new float[N], roofTop = new float[N];
     private final short[] wallMat = new short[N], roofMat = new short[N];
 
-    AetherSettlements(StreetPlan plan) {
+    AetherSettlements(StreetPlan plan, IntBinaryOperator ground) {
         this.plan = plan;
+        this.ground = ground;
     }
 
-    /** Over the mod's street plan (loads or plans it on first use: call off the render thread). */
-    static AetherSettlements create() {
-        return new AetherSettlements(StreetPlan.get());
+    /**
+     * Over the mod's street plan (loads or plans it on first use: call off the render thread). ground: the terrain
+     * height forts stand on (the exact one in single player), or null for aether's raster stand-in.
+     */
+    static AetherSettlements create(IntBinaryOperator ground) {
+        return new AetherSettlements(StreetPlan.get(), ground);
     }
 
     /**
@@ -78,7 +89,8 @@ final class AetherSettlements implements AetherFarField.Overlay {
                     continue;
                 }
                 if (!uploaded.add(k)) continue;
-                if (!fill(lod, tx, tz)) continue;  // nothing planned here
+                IntBinaryOperator g = ground != null ? ground : (x, z) -> (int) Math.floor(ctx.previewHeight(x + 0.5, z + 0.5));
+                if (!fill(lod, tx, tz, g)) continue;  // nothing planned here
                 if (!newMaterials.isEmpty()) {
                     ctx.setMaterials(FIRST_MATERIAL + ids.size() - newMaterials.size(), newMaterials.toArray(new float[0][]));
                     newMaterials.clear();
@@ -87,8 +99,8 @@ final class AetherSettlements implements AetherFarField.Overlay {
             }
     }
 
-    /** Rasterises tile (lod, tx, tz) into the arrays; false when no settlement reaches it. */
-    boolean fill(int lod, int tx, int tz) {
+    /** Rasterises tile (lod, tx, tz) into the arrays; false when no settlement or fort reaches it. */
+    boolean fill(int lod, int tx, int tz, IntBinaryOperator g) {
         int s = 1 << lod, bx = tx * (AetherNative.TILE << lod), bz = tz * (AetherNative.TILE << lod);
         int ex = bx + (AetherNative.TILE << lod), ez = bz + (AetherNative.TILE << lod);
         boolean any = false;
@@ -102,12 +114,45 @@ final class AetherSettlements implements AetherFarField.Overlay {
                 Arrays.fill(roofMat, (short) 0);
                 any = true;
             }
-            for (Object o : pieces(i)) {
-                if (o instanceof Mass m) stamp(m, s, bx, bz);
-                else stamp((Line) o, s, bx, bz);
+            for (Object o : pieces(i)) stamp(o, s, bx, bz);
+        }
+        for (Place p : Places.overlapping(bx - 20, bz - 20, ex + 20, ez + 20)) {
+            if (p.type() != PlaceType.FORT) continue;
+            if (!any) {
+                Arrays.fill(wallTop, Float.NaN);
+                Arrays.fill(roofTop, Float.NaN);
+                Arrays.fill(wallMat, (short) 0);
+                Arrays.fill(roofMat, (short) 0);
+                any = true;
             }
+            for (Object o : forts.computeIfAbsent(p.id(), id -> fort(p, g))) stamp(o, s, bx, bz);
         }
         return any;
+    }
+
+    private void stamp(Object o, int s, int bx, int bz) {
+        if (o instanceof Mass m) stamp(m, s, bx, bz);
+        else stamp((Line) o, s, bx, bz);
+    }
+
+    /**
+     * SurfaceBuilder.fort's massing around the place: curtain wall on the square ring 12 out (to base + 7), 5-block
+     * towers on its corners (base + 11), a 9-block keep (base + 12). Its facing is per world, its plan symmetric.
+     */
+    private List<Object> fort(Place p, IntBinaryOperator g) {
+        int cx = p.x(), cz = p.z();
+        float base = g.applyAsInt(cx, cz) + 1;
+        short stone = id(net.minecraft.world.level.block.Blocks.STONE_BRICKS.defaultBlockState());
+        List<Object> out = new ArrayList<>();
+        float[][] ring = {{-12, -12}, {12, -12}, {12, 12}, {-12, 12}};
+        for (int k = 0; k < 4; k++) {
+            float[] a = ring[k], b = ring[(k + 1) % 4];
+            out.add(new Line(cx + a[0] + 0.5f, cz + a[1] + 0.5f, cx + b[0] + 0.5f, cz + b[1] + 0.5f, 0.5f, base + 7, base + 7, stone));
+            out.add(new Mass(cx + (int) a[0] - 2, cz + (int) a[1] - 2, cx + (int) a[0] + 2, cz + (int) a[1] + 2, base + 10, 1,
+                    Roof.FLAT, stone, stone));
+        }
+        out.add(new Mass(cx - 4, cz - 4, cx + 4, cz + 4, base + 11, 1, Roof.FLAT, stone, stone));
+        return out;
     }
 
     private void stamp(Mass m, int s, int bx, int bz) {

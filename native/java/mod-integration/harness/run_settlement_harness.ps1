@@ -2,7 +2,7 @@
 # moved in) on vanilla 26.3 + NeoForge + FML jars, the main tree's resources read in place, exact terrain and the
 # StreetPlan's buildings rendered by aether_core.dll. Needs native\build.ps1 first. Run from the repo root.
 #   .\native\java\mod-integration\harness\run_settlement_harness.ps1 [-Place whiterun] [-Seed 12345] [-Rebuild]
-param([string]$Place = 'whiterun', [long]$Seed = 12345, [switch]$Rebuild, [string]$Out = 'native/out/settlements.png')
+param([string]$Place = 'whiterun', [long]$Seed = 12345, [switch]$Rebuild, [string]$Out = 'native/out/settlements.png', [double]$MidHeight = 45)
 $ErrorActionPreference = 'Stop'
 $ref = 'F:\Projects\Personal\Skycraft\toolchains\ref\mc26.3'
 $jdk = 'F:\Projects\Personal\Skycraft\toolchains\jdk-25.0.4.1+1\bin'
@@ -28,5 +28,5 @@ $src = @(Get-ChildItem "$PSScriptRoot\settlements" -Recurse -Filter *.java | For
 if ($LASTEXITCODE) { throw 'settlement harness does not compile' }
 $cp = (@($classes, "$sandbox\classes", $resources) + $mc) -join ';'
 & "$jdk\java.exe" --enable-native-access=ALL-UNNAMED -Xmx6g -cp $cp com.skycraft.aether.SettlementHarness `
-    native/build/Release/aether_core.dll native/data $Out $Place $Seed
+    native/build/Release/aether_core.dll native/data $Out $Place $Seed $MidHeight
 if ($LASTEXITCODE) { throw 'settlement harness failed' }

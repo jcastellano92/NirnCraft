@@ -5,7 +5,7 @@ package com.skycraft.aether;
  * needs the mod's settlement classes and is compiled against the real mod by sandbox_check.ps1. Never moved in.
  */
 final class AetherSettlements implements AetherFarField.Overlay {
-    static AetherSettlements create() {
+    static AetherSettlements create(java.util.function.IntBinaryOperator ground) {
         throw new UnsupportedOperationException("stub: settlements need the real mod (sandbox_check.ps1)");
     }
 

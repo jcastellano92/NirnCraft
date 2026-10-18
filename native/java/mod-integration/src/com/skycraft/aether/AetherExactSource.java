@@ -78,6 +78,13 @@ final class AetherExactSource extends AetherRefiningSource {
         return h == null ? null : new AetherExactSource(h, raster, defaultThreads());
     }
 
+    /** The terrain height at a block column (what forts and the like stand on). Thread-safe. */
+    int groundAt(int x, int z) {
+        MapSample m = new MapSample();
+        TamrielMap.sample(x, z, m);
+        return (int) Math.floor(height.height(x, z, m));
+    }
+
     @Override
     Refined refine(AetherNative.Context ctx, int lod, int tx, int tz) {
         fill(lod, tx, tz, surface, water);

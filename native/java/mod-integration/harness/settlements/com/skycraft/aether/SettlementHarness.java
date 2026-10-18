@@ -42,11 +42,23 @@ public final class SettlementHarness {
         net.minecraft.server.Bootstrap.bootStrap();
         TamrielHeight height = HarnessSeed.height(seed);
         StreetPlan plan = StreetPlan.get();
-        int si = plan.settlement(place);
-        if (si < 0) throw new IllegalArgumentException("no settlement " + place);
-        int px = plan.sX[si], pz = plan.sZ[si];
-        OUT.printf("bootstrap + plans: %.0f ms; %d settlements; %s at %d, %d (reach %d)%n", (System.nanoTime() - t0) / 1e6,
-                plan.settlements(), place, px, pz, plan.sReach[si]);
+        int px, pz;
+        if (place.startsWith("place:")) {  // any place by id (forts, landmarks ...)
+            var p = com.skycraft.tamriel.Places.byId(place.substring(6)).orElseThrow(() -> new IllegalArgumentException("no place " + place));
+            px = p.x();
+            pz = p.z();
+        } else {
+            int si = plan.settlement(place);
+            if (si < 0) throw new IllegalArgumentException("no settlement " + place);
+            px = plan.sX[si];
+            pz = plan.sZ[si];
+        }
+        OUT.printf("bootstrap + plans: %.0f ms; %d settlements; %s at %d, %d%n", (System.nanoTime() - t0) / 1e6,
+                plan.settlements(), place, px, pz);
+        com.skycraft.tamriel.Place fort = null;
+        for (var p : com.skycraft.tamriel.Places.all())
+            if (p.type() == com.skycraft.tamriel.PlaceType.FORT && (fort == null || p.distSqr(px, pz) < fort.distSqr(px, pz))) fort = p;
+        if (fort != null) OUT.printf("nearest fort: place:%s at %d, %d%n", fort.id(), fort.x(), fort.z());
 
         AetherNative n = AetherNative.load(dll);
         Path raster = data.resolve("tamriel_raster.bin");
@@ -56,7 +68,8 @@ public final class SettlementHarness {
             noise = new int[64 * 64 * 64];
             ByteBuffer.wrap(Files.readAllBytes(noisePath)).order(ByteOrder.LITTLE_ENDIAN).asIntBuffer().get(noise);
         }
-        double[][] views = {{2400, 70}, {800, 45}};  // distance from the centre, height over the ground
+        double mid = a.length > 5 ? Double.parseDouble(a[5]) : 45;
+        double[][] views = {{2400, 70}, {800, mid}};  // distance from the centre, height over the ground
         int w = 1600, h = 900;
         int[][] images = new int[3][];
         int[] buildingPx = new int[1];
@@ -66,7 +79,7 @@ public final class SettlementHarness {
             AetherExactSource src2 = new AetherExactSource(height, () -> raster, 8);
             src.prepare(ctx);
             src2.prepare(bare);
-            AetherSettlements towns = new AetherSettlements(plan);
+            AetherSettlements towns = new AetherSettlements(plan, src::groundAt);
             for (int v = 0; v < views.length; v++) {
                 double dist = views[v][0];
                 double cx = px + 0.8 * dist, cz = pz + 0.6 * dist;

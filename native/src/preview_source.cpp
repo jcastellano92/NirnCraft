@@ -373,7 +373,7 @@ void PreviewSource::dressRows(Tile& tile, int jBegin, int jEnd) const {
                         // fine LODs: single crowns on a jittered 7-block grid (domes, or cones for conifers), ground
                         // showing between them
                         int gx = int(std::floor(x / 7.0)), gz = int(std::floor(z / 7.0));
-                        float best = 1e9f, crownR = 0, treeH = 0;
+                        float best = 1e9f, treeH = 0;
                         for (int dz = -1; dz <= 1; dz++)
                             for (int dx = -1; dx <= 1; dx++) {
                                 uint32_t hh = uint32_t(hashI(gx + dx, gz + dz, 71));
@@ -383,13 +383,12 @@ void PreviewSource::dressRows(Tile& tile, int jBegin, int jEnd) const {
                                 float dd = float(std::hypot(x - tcx, z - tcz)) / r;
                                 if (dd < best) {
                                     best = dd;
-                                    crownR = r;
+
                                     treeH = base + 5.0f * float((hh >> 28) & 15) / 15.0f;
                                 }
                             }
                         if (best < 1.0f) ht = treeH * (conifer ? 0.45f + 0.55f * (1.0f - best)
                                                               : 0.55f + 0.45f * std::sqrt(1.0f - best * best));
-                        (void)crownR;
                     } else {
                         ht = base + 5.0f * float(clump);
                     }
