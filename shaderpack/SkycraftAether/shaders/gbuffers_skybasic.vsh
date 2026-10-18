@@ -1,4 +1,4 @@
 #version 330 compatibility
 #define VSH
-#define SKY
+#define DISCARD
 #include "/lib/gbuffers.glsl"

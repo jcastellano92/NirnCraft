@@ -1,9 +1,12 @@
-// Forward lighting for the near field: the same sun/sky radiance aether shades the far field with, plus Minecraft's
-// light map (sky light for openness, block light for torches) and a sun shadow map.
+// Lighting for the near field: the same sun/sky radiance aether shades the far field with, Minecraft's light map
+// (sky light for openness, block light for torches), soft sun shadows from the shadow map, and aether's sun map for
+// what lies beyond it (mountains over valleys, clouds). keyVisibility() is shared by the forward path
+// (translucents, particles) and deferred.fsh.
 #ifndef SKYCRAFT_LIGHTING
 #define SKYCRAFT_LIGHTING
 
 #include "/lib/atmosphere.glsl"
+#include "/lib/noise.glsl"
 
 #ifdef SHADOWS
 uniform sampler2DShadow shadowtex0;
@@ -16,8 +19,9 @@ vec3 distortShadow(vec3 p) {
     return vec3(p.xy / f, p.z * 0.25);
 }
 
-// playerPos: camera-relative world position (before curvature); n: world normal; toLight: world direction
-float sunShadow(vec3 playerPos, vec3 n, vec3 toLight) {
+// playerPos: camera-relative world position (before curvature); n: world normal; toLight: world direction;
+// px: the pixel (rotates the sample disk per pixel so a few taps read as a soft edge)
+float sunShadow(vec3 playerPos, vec3 n, vec3 toLight, vec2 px) {
     float ndl = dot(n, toLight);
     if (ndl <= 0.0) return 0.0;
     float dist = length(playerPos);
@@ -27,11 +31,17 @@ float sunShadow(vec3 playerPos, vec3 n, vec3 toLight) {
     vec4 sp = shadowProjection * (shadowModelView * vec4(p, 1.0));
     vec3 s = distortShadow(sp.xyz / sp.w) * 0.5 + 0.5;
     float texel = 1.0 / float(shadowMapResolution);
+    float radius = texel * SHADOW_SOFTNESS * (1.5 + dist * 0.02);
+    float rot = ign(px, 0.0) * 6.2831853;
     float lit = 0.0;
-    for (int y = -1; y <= 1; y++)
-        for (int x = -1; x <= 1; x++) lit += texture(shadowtex0, vec3(s.xy + vec2(x, y) * texel, s.z - 0.0004));
+    for (int i = 0; i < SHADOW_TAPS; i++) {
+        // golden-angle spiral
+        float r = sqrt((float(i) + 0.5) / float(SHADOW_TAPS));
+        float a = float(i) * 2.39996 + rot;
+        lit += texture(shadowtex0, vec3(s.xy + vec2(cos(a), sin(a)) * r * radius, s.z - 0.0004));
+    }
     float fade = smoothstep(shadowDistance * 0.8, shadowDistance, dist);
-    return mix(lit / 9.0, 1.0, fade);
+    return mix(lit / float(SHADOW_TAPS), 1.0, fade);
 }
 #endif
 
@@ -72,27 +82,42 @@ vec2 aetherSun(vec3 playerPos) {
 }
 #endif
 
-// albedo linear; lm = light map (block, sky) in 0..1; sun = world direction to the sun; moon = to the moon
-vec3 shadeForward(vec3 albedo, vec3 n, vec2 lm, vec3 playerPos, vec3 sun, float emissive) {
-    float sky = lm.y * lm.y;
-    vec3 toLight = sun.y > -0.05 ? sun : -sun;
-    vec3 lightRad = sun.y > -0.05 ? sunRadiance(sun) : vec3(0.035, 0.05, 0.09) * smoothstep(-0.05, -0.2, sun.y);
+vec3 keyLightDir(vec3 sun) { return sun.y > -0.05 ? sun : -sun; }
+
+vec3 keyLightRadiance(vec3 sun) {
+    return sun.y > -0.05 ? sunRadiance(sun) : vec3(0.035, 0.05, 0.09) * smoothstep(-0.05, -0.2, sun.y);
+}
+
+// how much of the key light (sun, or moon at night) reaches this point: shadow map, distant terrain, clouds
+float keyVisibility(vec3 playerPos, vec3 n, vec3 toLight, vec2 px) {
     float vis = 1.0;
 #ifdef SHADOWS
-    vis = sunShadow(playerPos, n, toLight);
+    vis = sunShadow(playerPos, n, toLight, px);
 #else
-    vis = clamp(dot(n, toLight), 0.0, 1.0);
+    vis = clamp(dot(n, toLight) * 4.0, 0.0, 1.0);
 #endif
 #ifdef AETHER_FAR_FIELD
-    vec2 far = aetherSun(playerPos);  // mountains over valleys, cloud shadows
+    vec2 far = aetherSun(playerPos);
     vis *= far.x * mix(0.25, 1.0, far.y);
 #endif
+    return vis;
+}
+
+// the light map's block light as colour: warm firelight
+vec3 blockLight(float bl) {
+    return vec3(1.0, 0.62, 0.32) * (pow(bl, 3.2) * 1.8 + pow(bl, 12.0) * 2.0);
+}
+
+// forward shading (translucents, particles). albedo linear; lm = light map (block, sky) 0..1
+vec3 shadeForward(vec3 albedo, vec3 n, vec2 lm, vec3 playerPos, vec3 sun, float emissive) {
+    float sky = lm.y * lm.y;
+    vec3 toLight = keyLightDir(sun);
+    float vis = keyVisibility(playerPos, n, toLight, gl_FragCoord.xy);
     // no sun where the sky cannot reach (caves): sky light is the light map's own occlusion
     float open = smoothstep(0.05, 0.35, lm.y);
-    vec3 direct = lightRad * max(dot(n, toLight), 0.0) * vis * open;
+    vec3 direct = keyLightRadiance(sun) * max(dot(n, toLight), 0.0) * vis * open;
     vec3 ambient = skyAmbient(n, sun) * sky + vec3(0.012, 0.012, 0.016);
-    vec3 torch = vec3(1.0, 0.68, 0.38) * pow(lm.x, 3.0) * 1.6;
-    return albedo * (direct + ambient + torch) + albedo * emissive * 2.0;
+    return albedo * (direct + ambient + blockLight(lm.x)) + albedo * emissive * 3.0;
 }
 
 #endif

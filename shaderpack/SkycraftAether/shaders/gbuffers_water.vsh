@@ -1,6 +1,4 @@
 #version 330 compatibility
 #define VSH
-#define TEXTURED
-#define LIT
-#define WATER
+#define TRANSLUCENT
 #include "/lib/gbuffers.glsl"

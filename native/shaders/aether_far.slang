@@ -168,8 +168,11 @@ bool traceRegion(RegionGpu r, float3 ro, float3 rd, float t0, float t1, float ep
             uint b = uint(l.x + 4 * l.z + 16 * l.y);
             if (((bits >> b) & 1) != 0) {
                 rank += popcount64(bits & ((uint64_t(1) << b) - 1));
+                uint hitMat = lookupMaterial(r, rank);
+                bool passWater = (frame.dims.z & FRAME_SEE_THROUGH_WATER) != 0 && uint(palette[hitMat].emisClass.y) == 2u;
+                if (!passWater) {
                 res.t = t;
-                res.mat = lookupMaterial(r, rank);
+                res.mat = hitMat;
                 // the face we entered through: the axis whose slab the ray entered last (robust for rays that
                 // graze a boundary plane, unlike the last DDA crossing)
                 float3 vv = float3(v);
@@ -179,6 +182,7 @@ bool traceRegion(RegionGpu r, float3 ro, float3 rd, float t0, float t1, float ep
                 if (abs(rd.z) <= 1e-12) tNear.z = -1e30;
                 res.axis = tNear.x >= tNear.y && tNear.x >= tNear.z ? 0 : (tNear.y >= tNear.z ? 1 : 2);
                 return true;
+                }
             }
             uint sb = uint((l.x & 2) + 4 * (l.z & 2) + 16 * (l.y & 2));
             uint64_t sub = (uint64_t(0x33) << sb) | (uint64_t(0x33) << (sb + 16));
@@ -384,12 +388,83 @@ float traceShadow(float3 p, float3 dir, int lod) {
     return 1.0;
 }
 
-// What a far water surface mirrors: a straight reflected ray through the same scene (coarser LOD, no shadows), shaded
-// simply, else the sky. Only water pixels pay for it.
-float3 waterReflection(float3 p, float3 dir, float k, float t, int lod, float3 sun) {
-    float3 slope = normalize(dir + float3(0, 2.0 * k * t, 0));
-    float3 r = reflect(slope, float3(0, 1, 0));
+// Far water continues the shader pack's waves (shaderpack lib/waves.glsl, waveField at its default 12 waves, open
+// water): the same seeds, spectrum, drag and footprint fade, so the long swell runs on across the near/far hand-off
+// until it shrinks under a few pixels. What is no longer drawn becomes the glint's roughness (farWaterAlpha).
+static const int FAR_WAVES = 12;
+
+float waterFootprint(float dist) { return 0.02 + dist * 0.0013; }
+
+float3 farWaveNormal(float2 p, float time, float storm, float dist) {
+    float wl = 26.0;
+    float decay = pow(0.7 / wl, 1.0 / float(FAR_WAVES - 1));
+    float amp = 0.07 * (1.0 + 1.6 * storm);
+    float foot = waterFootprint(dist);
+    float2 g = float2(0, 0);
+    float seed = 0.7;
+    for (int i = 0; i < FAR_WAVES; i++) {
+        float fade = smoothstep(3.0 * foot, 8.0 * foot, wl);
+        if (fade <= 0.0) break;
+        float2 d = float2(sin(seed), cos(seed));
+        float kk = 6.2831853 / wl;
+        float x = dot(d, p) * kk + time * sqrt(9.81 * kk);
+        float e = exp(sin(x) - 1.0);
+        float de = e * cos(x);
+        float a = amp * fade;
+        g += a * de * kk * d;
+        p -= d * de * a * 0.38 * 6.0;
+        wl *= decay;
+        amp *= decay;
+        seed += 1232.399963;
+    }
+    return normalize(float3(-g.x, 1.0, -g.y));
+}
+
+// GGX-like alpha of the glint: the rms slope of the waves too small to draw at this distance (lib/waves.glsl
+// waveRoughness with openness 1)
+float farWaterAlpha(float storm, float dist) {
+    float foot = waterFootprint(dist);
+    float wl = 26.0;
+    float decay = pow(0.7 / wl, 1.0 / float(FAR_WAVES - 1));
+    float slope = 0.07 * (1.0 + 1.6 * storm) * 6.2831853 / wl * 0.6;
+    float lost = 0.0;
+    for (int i = 0; i < FAR_WAVES; i++) {
+        lost += 1.0 - smoothstep(3.0 * foot, 8.0 * foot, wl);
+        wl *= decay;
+    }
+    float alpha = sqrt(0.00005 + 2.0 * slope * slope * lost) + storm * 0.03;
+    return clamp(alpha, 0.005, 0.36);
+}
+
+// the sky a far water surface mirrors, with the cloud deck in it: the reflected ray meets the cloud base, where the
+// weather columns say how much cloud there is (cheap: no march, the deck's broad shapes only)
+float3 reflectedSky(float3 p, float3 r, float3 sun) {
     float3 sky = skyColor(r, sun);
+    if ((frame.dims.z & FRAME_CLOUDS) == 0 || r.y < 0.02) return sky;
+    float3 ci = float3(frame.camInt.xyz);
+    float y = p.y + ci.y;
+    CloudColumn here = sampleColumn(p.xz + ci.xz, length(p.xz));
+    float base = here.dynamics.r * 1024.0;
+    float t = max(base - y, 1.0) / r.y;
+    if (t > 30000.0) return sky;
+    float2 q = p.xz + r.xz * t;
+    CloudColumn c = sampleColumn(q + ci.xz, length(q));
+    float cov = c.weather.r + 0.5 * c.weather.g;
+    float breakup = valueNoise((q + ci.xz) / 380.0) * 0.6 + valueNoise((q + ci.xz) / 130.0 + 7.0) * 0.4;
+    float dens = smoothstep(0.3, 0.75, cov + (breakup - 0.5) * 0.6) * (1.0 - smoothstep(9000.0, 30000.0, t));
+    float3 up = float3(0, 1, 0);
+    float3 cloud = keyLightRadiance(sun) * 0.28 * (1.0 - 0.6 * c.weather.g) + skyAmbient(up, sun) * 0.85;
+    return lerp(sky, cloud, dens * 0.85);
+}
+
+// What a far water surface mirrors: a straight reflected ray through the same scene (coarser LOD, no shadows), shaded
+// simply, else the sky with its clouds. Only water pixels pay for it.
+float3 waterReflection(float3 p, float3 dir, float k, float t, int lod, float3 sun, float3 wn) {
+    float3 slope = normalize(dir + float3(0, 2.0 * k * t, 0));
+    float3 r = reflect(slope, wn);
+    r.y = max(r.y, 0.005);
+    r = normalize(r);
+    float3 sky = reflectedSky(p, r, sun);
     if (r.y > 0.35) return sky;  // steep reflections only see sky
     TraceResult rr;
     rr.t = 0; rr.mat = 0; rr.axis = -1; rr.lod = 0; rr.steps = 0;
@@ -701,10 +776,15 @@ void farMain(uint3 id : SV_DispatchThreadID) {
         }
         if ((frame.dims.z & FRAME_DEBUG_LOD) != 0) albedo = lodTint(res.lod);
         float3 reflection = float3(0, 0, 0);
-        if (cls == 2u) reflection = waterReflection(p, dir, k, tHit, res.lod, sun);
+        if (cls == 2u) {
+            if (n.y > 0.5) n = farWaveNormal(p.xz + float2(frame.camInt.xz), frame.sunDir.w, frame.weatherParams.x, tHit);
+            m.albedoRough.a = farWaterAlpha(frame.weatherParams.x, tHit);
+            reflection = waterReflection(p, dir, k, tHit, res.lod, sun, n.y > 0.5 ? n : float3(0, 1, 0));
+        }
         color = shadeSurface(albedo, m, n, dir, sun, sunVis, cls, ao, reflection);
         depth = tHit;
         color = applyAerial(color, dir, sun, tHit, frame);
+        if ((frame.dims.z & FRAME_DEBUG_ALBEDO) != 0) color = albedo;
         if ((frame.dims.z & FRAME_DEBUG_WEATHER) != 0) {
             float3 wpos = p + float3(frame.camInt.xyz);
             CloudColumn dbg = sampleColumn(wpos.xz, length(p.xz));

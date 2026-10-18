@@ -10,6 +10,8 @@ static const uint FRAME_NEAR_DEPTH = 0x20u;  // nearDepth holds the near field's
 static const uint FRAME_FLAT_NORMALS = 0x40u;  // face normals only (cheaper; a quality setting)
 static const uint FRAME_CLOUDS_QUARTER = 0x80u;  // cloud pass at quarter instead of half resolution (performance)
 static const uint FRAME_DEBUG_LOD = 0x100u;
+static const uint FRAME_DEBUG_ALBEDO = 0x400u;        // surfaces output their albedo (the pack lab's G-buffer)
+static const uint FRAME_SEE_THROUGH_WATER = 0x800u;  // rays pass water voxels (the bed under a lake, for the lab)
 static const uint FRAME_DEBUG_WEATHER = 0x200u;  // ground shows the sampled weather column (cov, tower, curtain)
 static const int MAX_LODS = 8;
 
@@ -112,11 +114,14 @@ float3 shadeSurface(float3 albedo, MaterialGpu m, float3 n, float3 v, float3 sun
     float3 direct = keyLightRadiance(sun) * ndl * lightVis;
     float3 c = albedo * (direct + skyAmbient(n, sun) * ao);
     if (cls == 2u) {
-        // water: Schlick Fresnel against what it reflects, plus a soft glint of the key light
-        float cosv = saturate(-v.y);
+        // water: Schlick Fresnel against what it reflects, plus the key light's glint; m.albedoRough.a carries the
+        // glint's alpha (the far field sets it from the waves it can no longer draw: a sun path widening with distance)
+        float cosv = saturate(dot(-v, n));
         float f = 0.02 + 0.98 * pow(1.0 - cosv, 5.0);
-        float3 r = reflect(v, float3(0, 1, 0));
-        float spec = pow(saturate(dot(r, L)), 400.0) * lightVis * 6.0;
+        float3 r = reflect(v, n);
+        float alpha = clamp(m.albedoRough.a, 0.005, 0.5);
+        float e = 2.0 / (alpha * alpha) - 2.0;  // the Phong lobe matching that alpha, energy-normalised
+        float spec = pow(saturate(dot(r, L)), e) * (e + 8.0) / 25.1327 * 0.37 * lightVis;
         c = lerp(c, reflection, f) + keyLightRadiance(sun) * spec;
     }
     c += albedo * m.emisClass.x * 2.0;

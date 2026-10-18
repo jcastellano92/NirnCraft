@@ -107,3 +107,10 @@ target_link_libraries(aether_bench PRIVATE aether_core opengl32 gdi32 user32)
 
 enable_testing()
 add_test(NAME aether_tests COMMAND aether_tests WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
+
+# offline lab for the shader pack's screen passes over an aether-rendered scene (Windows, GL compatibility context)
+if(WIN32)
+  add_executable(pack_lab tools/pack_lab.cpp)
+  target_link_libraries(pack_lab PRIVATE aether_core opengl32)
+  target_include_directories(pack_lab PRIVATE src)
+endif()

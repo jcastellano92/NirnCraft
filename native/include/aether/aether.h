@@ -113,6 +113,8 @@ typedef struct AetherFrame {
 #define AETHER_FRAME_CLOUDS_QUARTER 0x80u /* cloud pass at quarter resolution (default half): about 4x cheaper */
 #define AETHER_FRAME_DEBUG_LOD 0x100u
 #define AETHER_FRAME_DEBUG_WEATHER 0x200u
+#define AETHER_FRAME_DEBUG_ALBEDO 0x400u      /* surfaces output their albedo (offline G-buffers: the pack lab) */
+#define AETHER_FRAME_SEE_THROUGH_WATER 0x800u /* rays pass water (the bed under it, offline) */
 
 /*
  * Frame outputs (any pointer may be NULL to skip). Layout matches the shared G-buffer images:

@@ -1,5 +1,4 @@
 #version 330 compatibility
 #define FSH
-#define TEXTURED
-#define LIT
+#define PARTICLES
 #include "/lib/gbuffers.glsl"

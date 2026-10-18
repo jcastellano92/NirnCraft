@@ -1,4 +1,4 @@
 #version 330 compatibility
 #define FSH
-#define TEXTURED
+#define SKYTEX
 #include "/lib/gbuffers.glsl"
