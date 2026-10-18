@@ -40,6 +40,8 @@
 #define FOG_LAYERS              // low valley fog, marsh mist and height fog by weather and time of day
 #define MEDIA_STEPS 10 // [0 4 6 10 14 16] the near air march: fog sealed out of houses and caves, dungeon air, halos
 #define HALO_STEPS 8 // [0 6 8 12 16] lamps, torches, fires and spells glow in the fog around them (0: off)
+#define PLUME_STEPS 10 // [0 6 10 16] smoke columns: the Red Mountain volcano (and fires with the option below)
+//#define SMOKE_FIRE_VOLUMES      // fires' smoke as volumes too (the mod draws fire smoke as sprites: one or the other)
 #define LIGHTNING_LIGHT 1 // [0 1] storm channels light the ground, the rain and the clouds (outdoors only)
 //#define LIGHT_OCCLUSION        // the mod's point lights are shadowed by walls (needs -Dskycraft.localLightOcclusion)
 #define VOLUMETRIC_LIGHT        // light shafts through clouds, trees and windows

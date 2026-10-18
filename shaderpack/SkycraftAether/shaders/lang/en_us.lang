@@ -56,3 +56,7 @@ option.COLORED_LIGHT.comment=Torch, soul lantern, lava and crystal light take th
 option.BLOCKLIGHT_FLICKER=Flame flicker
 option.SUN_HORIZON_TAPS=Mountain sunsets (no aether)
 option.SUN_HORIZON_TAPS.comment=Without the far-field renderer: distant mountains still block the low sun. 0 off.
+option.PLUME_STEPS=Smoke columns
+option.PLUME_STEPS.comment=The Red Mountain volcano's ash column (and fire smoke volumes with the option below). 0 off.
+option.SMOKE_FIRE_VOLUMES=Fire smoke volumes
+option.SMOKE_FIRE_VOLUMES.comment=Fires' smoke as volumes too. The mod already draws fire smoke as sprites: leave off unless it stops.
