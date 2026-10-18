@@ -7,7 +7,8 @@
 // reads and writes the same buffer) in a GL compatibility context, with Iris-style uniforms.
 //
 // usage: pack_lab out.png [x=0 z=0 above=40 yaw=105 pitch=-4 time=0.25 rain=0 water=0 near=256 w=1280 h=720
-//                          clouds=1 temp=0.6 cold=0]
+//                          clouds=1 temp=0.6 cold=0 aether=1]
+//   aether=0: aether's frame absent (1x1 blanks): the pack's fallback cloud deck and plain fog
 //   time: 0 sunrise, 0.25 noon, 0.5 sunset, 0.75 midnight; water=1 puts the eye under water
 #define WIN32_LEAN_AND_MEAN
 #define NOMINMAX
@@ -333,6 +334,7 @@ int main(int argc, char** argv) {
     double ground = aether_preview_height(ctx, x, z);
     double y = std::max(ground, 63.0) + arg(argc, argv, "above", 40);
     if (eyeInWater) y = std::max(ground + 2.0, 60.0);
+    std::printf("pack_lab: camera %.0f %.0f %.0f (ground %.0f)\n", x, y, z, ground);
     for (int lod = 0; lod < 7; lod++) {
         int span = 256 << lod;
         int cx = int(std::floor(x / span)), cz = int(std::floor(z / span));
@@ -350,6 +352,8 @@ int main(int argc, char** argv) {
     }
     if (haveNoise) aether_set_cloud_noise(ctx, noise.data());
     std::vector<uint32_t> fld(128 * 128), dyn(128 * 128);
+    double groundFog = arg(argc, argv, "fog", 0);  // the mod's ground-fog drive (weather_dynamics a)
+    int band = int(arg(argc, argv, "band", 0));     // aerosol band: 0 rain, 1 snow, 2 dust, 3 ash
     for (int i = 0; i < 128 * 128; i++) {
         // smooth value noise over the cells (two octaves): patchy cover rather than a regular pattern
         auto hash = [](int x, int y) { uint32_t h = uint32_t(x) * 374761393u + uint32_t(y) * 668265263u; h = (h ^ (h >> 13)) * 1274126177u; return (h & 0xFFFFFF) / 16777215.0; };
@@ -364,8 +368,10 @@ int main(int argc, char** argv) {
         };
         double cx = i % 128, cy = i / 128;
         double c = 0.2 + 0.25 * rain + 0.35 * vnoise(cx / 9, cy / 9) + 0.2 * vnoise(cx / 3.5 + 11, cy / 3.5 + 5);
-        fld[i] = uint32_t(std::min(c, 1.0) * 255) | uint32_t(rain * 255) << 8 | uint32_t(rain * 0.6 * 255) << 16;
-        dyn[i] = uint32_t(240.0 / 1024 * 255) | uint32_t(120.0 / 1024 * 255) << 8 | uint32_t(0.1024 * 255) << 16;
+        fld[i] = uint32_t(std::min(c, 1.0) * 255) | uint32_t(rain * 255) << 8 | uint32_t(rain * 0.6 * 255) << 16
+               | uint32_t(std::lround((band * 0.25 + 0.02) * 255)) << 24;
+        dyn[i] = uint32_t(240.0 / 1024 * 255) | uint32_t(120.0 / 1024 * 255) << 8 | uint32_t(0.1024 * 255) << 16
+               | uint32_t(std::lround(groundFog * 255)) << 24;
     }
     AetherWeather wth{fld.data(), dyn.data(), fld.data(), dyn.data(), float(rain)};
     aether_set_weather(ctx, &wth);
@@ -449,6 +455,44 @@ int main(int argc, char** argv) {
         double ndc = (P.m[10] * cz + P.m[14]) / -cz;
         return float(std::min(1.0, ndc * 0.5 + 0.5));
     };
+    // ---- the mod's data textures, synthetic (see lib/modtex.glsl for the packing): lamps (fog_radiance block-light
+    // cells + the G-buffer's block light), a dungeon room, a point light, the volcano / a fire plume, a discharge,
+    // the sun horizon. lamps=1 room=1 light=1 volcano=1 fire=1 strike=1 horizon=0.3 fog=0..1 (ground-fog drive)
+    struct Lamp { double p[3]; double c[3]; };
+    std::vector<Lamp> lamps;
+    double fwd[3] = {std::sin(yaw * PI / 180), 0, -std::cos(yaw * PI / 180)}, side[3] = {-fwd[2], 0, fwd[0]};
+    auto ahead = [&](double along, double across, double up, double out[3]) {
+        for (int k = 0; k < 3; k++) out[k] = (k == 0 ? x : k == 1 ? y : z) + fwd[k] * along + side[k] * across;
+        out[1] = y + up;
+        double g = aether_preview_height(ctx, out[0], out[2]);
+        if (up < 0) out[1] = std::max(g, 63.0) + 1.5;  // on the ground
+    };
+    if (arg(argc, argv, "lamps", 0) != 0) {
+        Lamp a, b, c;
+        ahead(10, -3, -1, a.p); a.c[0] = 1.0; a.c[1] = 0.69; a.c[2] = 0.44;   // a torch (0xFFB070)
+        ahead(16, 5, -1, b.p); b.c[0] = 0.44; b.c[1] = 0.86; b.c[2] = 1.0;    // a soul lantern (0x71DBFF)
+        ahead(22, -8, -1, c.p); c.c[0] = 1.0; c.c[1] = 0.44; c.c[2] = 0.16;   // lava light (0xFF7028)
+        lamps = {a, b, c};
+    }
+    auto lampLight = [&](const double w[3], double rgb[3]) {  // Minecraft-like: falls 1/15 per block
+        double best = 0;
+        rgb[0] = rgb[1] = rgb[2] = 0;
+        for (auto& l : lamps) {
+            double d = std::abs(w[0] - l.p[0]) + std::abs(w[1] - l.p[1]) + std::abs(w[2] - l.p[2]);
+            double v = std::max(0.0, 1.0 - d / 15.0);
+            if (v > best) { best = v; for (int k = 0; k < 3; k++) rgb[k] = l.c[k]; }
+        }
+        return best;
+    };
+    auto rayOf = [&](size_t i, double d[3]) {
+        size_t py = i / W, px = i % W;
+        double nx = (px + 0.5) / W * 2 - 1, ny = 1 - (py + 0.5) / H * 2, p[4];
+        for (int k = 0; k < 4; k++) p[k] = iVP.m[k] * nx + iVP.m[4 + k] * ny + iVP.m[8 + k] * 0.5 + iVP.m[12 + k];
+        double l = 0;
+        for (int k = 0; k < 3; k++) { d[k] = p[k] / p[3]; l += d[k] * d[k]; }
+        l = std::sqrt(l);
+        for (int k = 0; k < 3; k++) d[k] /= l;
+    };
     size_t nearPx = 0, waterPx = 0;
     for (size_t i = 0; i < N; i++) {
         size_t g = row(i);
@@ -472,6 +516,12 @@ int main(int argc, char** argv) {
         normalLm[g * 4 + 0] = uint16_t(std::lround((ex * 0.5 + 0.5) * 65535));
         normalLm[g * 4 + 1] = uint16_t(std::lround((ez * 0.5 + 0.5) * 65535));
         normalLm[g * 4 + 2] = 0;      // block light
+        if (!lamps.empty() && nearBed) {
+            double d[3], w[3], rgb[3];
+            rayOf(i, d);
+            for (int k = 0; k < 3; k++) w[k] = (k == 0 ? x : k == 1 ? y : z) + d[k] * bd;
+            normalLm[g * 4 + 2] = uint16_t(std::lround(lampLight(w, rgb) * 65535));
+        }
         normalLm[g * 4 + 3] = 65535;  // sky light: outdoors
         bool foliage = cls == 1;      // AETHER_CLASS_FOLIAGE
         specularBuf[g * 4 + 0] = uint8_t(foliage ? 0.35 * 255 : 0.25 * 255);
@@ -505,18 +555,153 @@ int main(int argc, char** argv) {
         aether::writePng(base + "_normal.png", nn.data(), W, H);
     }
 
+    auto rgba8 = [](double r, double g, double b, double a) {
+        auto c = [](double v) { return uint32_t(std::lround(std::min(std::max(v, 0.0), 1.0) * 255)); };
+        return c(r) | c(g) << 8 | c(b) << 16 | c(a) << 24;
+    };
+    auto pack16 = [](int lo, int hi) { return uint32_t(lo & 0xFFFF) | uint32_t(hi & 0xFFFF) << 16; };
+    std::vector<uint32_t> fogRad(128 * 128, 0u), smoke(32 * 4, 0u), bolt(32 * 4, 0u);
+    {
+        int cx = int(std::floor(x / 4)), cy = int(std::floor(y / 4)), cz = int(std::floor(z / 4));
+        auto nearest = [](int centre, int texel) { int start = centre - 8; return start + (((texel - start) % 16) + 16) % 16; };
+        for (int ly = 0; ly < 16; ly++)
+            for (int tz = 0; tz < 16; tz++)
+                for (int tx = 0; tx < 16; tx++) {
+                    double w[3] = {nearest(cx, tx) * 4 + 2.0, nearest(cy, ly) * 4 + 2.0, nearest(cz, tz) * 4 + 2.0}, rgb[3];
+                    double light = lampLight(w, rgb);
+                    int px = (ly & 3) * 16 + tx, pz = (ly >> 2) * 16 + tz;
+                    fogRad[pz * 128 + px] = uint32_t(std::lround(light * 255));  // roof unknown (a = 0)
+                    fogRad[pz * 128 + px + 64] = rgba8(rgb[0] * light, rgb[1] * light, rgb[2] * light, 1);
+                }
+        if (arg(argc, argv, "roof", 0) != 0) {  // a roof 3 blocks over the eye across the whole 128-block cache
+            uint32_t roofY = uint32_t(int(std::floor(y)) + 3 + 64);
+            for (int i = 0; i < 64 * 64; i++) {
+                int px = i % 64, pz = i / 64;
+                fogRad[pz * 128 + px] = (fogRad[pz * 128 + px] & 255u) | (roofY & 255u) << 8 | (roofY >> 8 & 255u) << 16 | 255u << 24;
+            }
+        }
+        double ox = std::floor(x / 256) * 256, oy = std::floor(y / 256) * 256, oz = std::floor(z / 256) * 256;
+        auto q = [](double v) { return int(std::lround(v * 4)) + 32768; };
+        auto point = [&](int col, int row, double px, double py, double pz) {
+            fogRad[row * 128 + col] = pack16(q(px - ox), q(py - oy));
+            fogRad[row * 128 + col + 1] = uint32_t(q(pz - oz));
+        };
+        fogRad[74 * 128 + 60] = uint32_t(int32_t(ox));
+        fogRad[74 * 128 + 61] = uint32_t(int32_t(oy));
+        fogRad[74 * 128 + 62] = uint32_t(int32_t(oz));
+        fogRad[75 * 128 + 0] = 2400;  // the game clock (ticks)
+        fogRad[75 * 128 + 2] = 1;     // local media allowed (the Overworld)
+        if (arg(argc, argv, "room", 0) != 0) {  // a dungeon hall ahead, Falmer-style air (style 3)
+            double lo[3], hi[3];
+            ahead(6, -14, -1, lo); ahead(40, 14, -1, hi);
+            double fl = std::min(lo[1], hi[1]) - 1.5;
+            point(0, 64, std::min(lo[0], hi[0]), fl, std::min(lo[2], hi[2]));
+            point(0, 65, std::max(lo[0], hi[0]), fl + 14, std::max(lo[2], hi[2]));
+            fogRad[66 * 128 + 0] = uint32_t(q(fl + 1 - oy)) | 3u << 16 | 255u << 24;
+            fogRad[66 * 128 + 63] = 1;
+        }
+        if (arg(argc, argv, "light", 0) != 0) {  // a frost atronach's glow (0x83D8FF, energy 1, radius 10)
+            double p[3];
+            ahead(14, 2, 2, p);
+            point(0, 68, p[0], p[1], p[2]);
+            fogRad[69 * 128 + 0] = rgba8(0x83 / 255.0 / 4, 0xD8 / 255.0 / 4, 1.0 / 4, 10.0 / 32);
+            fogRad[69 * 128 + 63] = 1;
+        }
+        // smoke sources: 0 the volcano (height 1000, radius 190, heavy), 1 a fire
+        auto source = [&](int index, double sx, double sy, double sz, double intensity, double height, double radius, int heavy) {
+            int ix = int(std::lround(sx)) + 32768, iz = int(std::lround(sz)) + 32768, iy = int(std::lround(sy)) + 64;
+            int row = index < 8 ? 0 : 2, slot = index < 8 ? index : index - 8;
+            smoke[row * 32 + slot * 2] = pack16(ix, iz);
+            smoke[row * 32 + slot * 2 + 1] = uint32_t(iy & 0xFFFF) | uint32_t(std::lround(intensity * 100)) << 16 | uint32_t(heavy * 70) << 24;
+            smoke[(row + 1) * 32 + slot * 2] = uint32_t(int(std::lround(height)) & 0xFFFF) | uint32_t(std::lround(radius)) << 16;
+        };
+        int sources = 0;
+        if (arg(argc, argv, "volcano", 0) != 0) {
+            double p[3];
+            ahead(arg(argc, argv, "vdist", 2600), arg(argc, argv, "vside", 300), -1, p);
+            source(0, p[0], p[1], p[2], 1.0, 1000, 190, 3);
+            sources = 1;
+        }
+        if (arg(argc, argv, "fire", 0) != 0) {
+            double p[3];
+            ahead(70, 10, -1, p);
+            source(1, p[0], p[1], p[2], 1.5, 14 + 18 * 3 + 8, 6, 3);
+            sources = 2;
+        }
+        smoke[3 * 32 + 31] = uint32_t(sources);
+        smoke[1 * 32 + 11] = rgba8(0, 1, 0.4, 0);  // partial tick, budget, wind
+        // the mod's sky (moons=1): the clock (day= days; 0.75 puts Masser full and high at midnight), night-sky
+        // state, options, and an aurora (aurora=1: one curtain in the north and its light on the ground)
+        if (arg(argc, argv, "moons", 0) != 0) {
+            smoke[1 * 32 + 1] = uint32_t(std::lround(arg(argc, argv, "day", 0.75) * 24000));
+            smoke[1 * 32 + 13] = 2400;
+            smoke[1 * 32 + 3] = rgba8(1, 0, 1, 1);
+            smoke[1 * 32 + 7] = rgba8(1, 1, 1, arg(argc, argv, "aurora", 0) != 0 ? 1 : 0);
+            if (arg(argc, argv, "aurora", 0) != 0) {
+                smoke[1 * 32 + 15] = rgba8(0, 0, 0, 1);
+                smoke[1 * 32 + 5] = rgba8(0.8, 1, 0.2, 1);
+                int amp = 52000;
+                for (int k = 0; k < 2; k++) {
+                    smoke[1 * 32 + 16 + k * 2] = rgba8(0.5 + k * 0.06, 0.5 / 1.5, (0.22 + k * 0.08) / 1.5, 0.3);
+                    smoke[1 * 32 + 17 + k * 2] = uint32_t(amp & 255) | uint32_t(amp >> 8) << 8 | uint32_t(70 + k * 60) << 16 | 128u << 24;
+                }
+                smoke[1 * 32 + 28] = rgba8(0.15, 0.6, 0.3, 1);
+                for (int k = 29; k < 32; k++) smoke[1 * 32 + k] = rgba8(0.5, 0.5, 0.5, 1);
+            }
+        }
+        if (arg(argc, argv, "strike", 0) != 0) {  // a cloud-to-ground discharge ahead, at full strobe
+            double g[3];
+            ahead(arg(argc, argv, "sdist", 260), arg(argc, argv, "sside", 60), -1, g);
+            bolt[0] = rgba8(1.0, 1.0, 1.0, 1.0 / 1.25);
+            for (int k = 0; k < 6; k++) {
+                double t = k < 4 ? k / 3.0 : (k == 4 ? 0.0 : 0.5);
+                double px = g[0] - x + (k == 5 ? 60 : 0) + std::sin(k * 2.1) * 14, py = g[1] - y + 420 * (1 - t),
+                       pz = g[2] - z + std::cos(k * 1.7) * 10;
+                auto e = [](double v) { return int(std::lround(v + 32768)); };
+                bolt[1 + k * 2] = pack16(e(px), e(py));
+                bolt[2 + k * 2] = uint32_t(e(pz));
+            }
+            bolt[31] = 1;
+        }
+    }
+    uint32_t horizon = rgba8(arg(argc, argv, "horizon", 0) / 0.5, 0, 0, 1);
+    // stand-ins for the mod's Masser / Secunda phase atlases (4 x 4 tiles of 16 phases): a cratered grey disc lit
+    // from the side the phase puts the sun on
+    std::vector<uint32_t> phases(256 * 256, 0u);
+    for (int py = 0; py < 256; py++)
+        for (int px = 0; px < 256; px++) {
+            int tile = (py / 64) * 4 + px / 64;
+            double u = (px % 64 + 0.5) / 32.0 - 1, v = (py % 64 + 0.5) / 32.0 - 1, r2 = u * u + v * v;
+            if (r2 >= 1) continue;
+            double nz = std::sqrt(1 - r2), ang = tile / 16.0 * 2 * PI;  // 0 full .. 8 new
+            double lit = std::max(0.0, u * -std::sin(ang) + nz * std::cos(ang)) * 0.9 + 0.02;
+            double crater = 0.85 + 0.15 * std::sin(u * 23) * std::cos(v * 19);
+            phases[py * 256 + px] = rgba8(lit * crater * 0.8, lit * crater * 0.78, lit * crater * 0.76, 1);
+        }
+    GLuint phaseTex = texture2d(GL_RGBA8, 256, 256, GL_RGBA, GL_UNSIGNED_BYTE, phases.data(), true);
+    GLuint fogRadTex = texture2d(GL_RGBA8, 128, 128, GL_RGBA, GL_UNSIGNED_BYTE, fogRad.data());
+    GLuint smokeTex = texture2d(GL_RGBA8, 32, 4, GL_RGBA, GL_UNSIGNED_BYTE, smoke.data());
+    GLuint boltTex = texture2d(GL_RGBA8, 32, 4, GL_RGBA, GL_UNSIGNED_BYTE, bolt.data());
+    GLuint horizonTex = texture2d(GL_RGBA8, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, &horizon);
+
     GLuint tex[8];
     tex[0] = texture2d(GL_RGBA8, W, H, GL_RGBA, GL_UNSIGNED_BYTE, albedo.data());
     tex[1] = texture2d(GL_RGBA16_, W, H, GL_RGBA, GL_UNSIGNED_SHORT, normalLm.data());
     tex[2] = texture2d(GL_RGBA8, W, H, GL_RGBA, GL_UNSIGNED_BYTE, specularBuf.data());
     tex[3] = texture2d(GL_RGBA8, W, H, GL_RGBA, GL_UNSIGNED_BYTE, material.data());
-    for (int i = 4; i < 8; i++) tex[i] = texture2d(i == 6 ? GL_RGBA16_ : GL_RGBA16F_, W, H, GL_RGBA, GL_FLOAT, nullptr, i == 4);
+    std::vector<float> zeroes(N * 4, 0.0f);  // Iris clears the translucent and realm-sky buffers to 0
+    for (int i = 4; i < 8; i++) tex[i] = texture2d(i == 6 ? GL_RGBA16_ : GL_RGBA16F_, W, H, GL_RGBA, GL_FLOAT, zeroes.data(), i == 4);
     GLuint alt4 = texture2d(GL_RGBA16F_, W, H, GL_RGBA, GL_FLOAT, nullptr, true), alt0 = texture2d(GL_RGBA16F_, W, H, GL_RGBA, GL_FLOAT, nullptr);
     GLuint d0 = texture2d(GL_DEPTH_COMPONENT32F_, W, H, GL_DEPTH_COMPONENT, GL_FLOAT, depth0.data());
     GLuint d1 = texture2d(GL_DEPTH_COMPONENT32F_, W, H, GL_DEPTH_COMPONENT, GL_FLOAT, depth1.data());
     GLuint labWater = texture2d(GL_RGBA8, W, H, GL_RGBA, GL_UNSIGNED_BYTE, waterMask.data());
-    GLuint aetherColor = texture2d(GL_RGBA16F_, W, H, GL_RGBA, GL_FLOAT, aColor.data());
-    GLuint aetherDepth = texture2d(GL_R32F_, W, H, GL_RED, GL_FLOAT, aDepth.data());
+    // aether=0: the mod's renderer absent (other dimensions, aether off): 1x1 blanks, as the mod registers them
+    bool aetherOn = arg(argc, argv, "aether", 1) != 0;
+    float zero4[4] = {0, 0, 0, 0};
+    GLuint aetherColor = aetherOn ? texture2d(GL_RGBA16F_, W, H, GL_RGBA, GL_FLOAT, aColor.data())
+                                  : texture2d(GL_RGBA16F_, 1, 1, GL_RGBA, GL_FLOAT, zero4);
+    GLuint aetherDepth = aetherOn ? texture2d(GL_R32F_, W, H, GL_RED, GL_FLOAT, aDepth.data())
+                                  : texture2d(GL_R32F_, 1, 1, GL_RED, GL_FLOAT, zero4);
     GLuint aetherSunMap = haveSunMap ? texture2d(GL_RG32F_, 1024, 1025, GL_RG_, GL_FLOAT, sunMap.data())
                                      : texture2d(GL_RG32F_, 1, 2, GL_RG_, GL_FLOAT, nullptr);
     float one = 1.0f;
@@ -569,6 +754,10 @@ int main(int argc, char** argv) {
         m4("shadowProjection", shadowP);  // everything lands inside the lit 1x1 stand-in map
         GLint l = pglGetUniformLocation(pr.id, "sunPosition");
         if (l >= 0) pglUniform3f(l, float(sv[0] * 100), float(sv[1] * 100), float(sv[2] * 100));
+        // Iris' shadow light: the sun by day, the vanilla moon opposite it by night
+        double sl = sun[1] > 0 ? 100.0 : -100.0;
+        l = pglGetUniformLocation(pr.id, "shadowLightPosition");
+        if (l >= 0) pglUniform3f(l, float(sv[0] * sl), float(sv[1] * sl), float(sv[2] * sl));
         l = pglGetUniformLocation(pr.id, "cameraPosition");
         if (l >= 0) pglUniform3f(l, float(x), float(y), float(z));
         f1("rainStrength", float(rain));
@@ -578,6 +767,10 @@ int main(int argc, char** argv) {
         f1("viewWidth", float(W));
         f1("viewHeight", float(H));
         f1("temperature", float(temp));
+        l = pglGetUniformLocation(pr.id, "fogColor");  // the Deadlands' ember fog (realm=1)
+        if (l >= 0) pglUniform3f(l, float(arg(argc, argv, "fogr", 0.42)), float(arg(argc, argv, "fogg", 0.10)), float(arg(argc, argv, "fogb", 0.06)));
+        f1("fogStart", float(arg(argc, argv, "fogstart", 24)));
+        f1("fogEnd", float(arg(argc, argv, "fogend", 180)));
         l = pglGetUniformLocation(pr.id, "isEyeInWater");
         if (l >= 0) pglUniform1i(l, eyeInWater);
         l = pglGetUniformLocation(pr.id, "eyeBrightnessSmooth");
@@ -606,7 +799,9 @@ int main(int argc, char** argv) {
         glEnd();
         return glGetError() == GL_NO_ERROR;
     };
-    std::string S = PACK + "/";
+    // realm=1: the realm program set (shaders/realm/: no terrestrial sky or haze; a realm's fog colour and range)
+    bool realm = arg(argc, argv, "realm", 0) != 0;
+    std::string S = PACK + (realm ? "/realm/" : "/");
     Program pWater = program(S + "composite.vsh", "tools/pack_lab_water.fsh");
     Program pDeferred = program(S + "deferred.vsh", S + "deferred.fsh");
     Program pComposite = program(S + "composite.vsh", S + "composite.fsh");
@@ -614,9 +809,11 @@ int main(int argc, char** argv) {
     Program pFinal = program(S + "final.vsh", S + "final.fsh");
     if (!pWater.id || !pDeferred.id || !pComposite.id || !pBloom.id || !pFinal.id) return 1;
 
-    samplers = {{"colortex0", tex[0]}, {"colortex1", tex[1]}, {"colortex2", tex[2]}, {"colortex3", tex[3]},
+    samplers = {{"colortex7", tex[7]}, {"colortex0", tex[0]}, {"colortex1", tex[1]}, {"colortex2", tex[2]}, {"colortex3", tex[3]},
                 {"labWater", labWater}, {"aetherColor", aetherColor}, {"aetherDepth", aetherDepth},
-                {"aetherSunMap", aetherSunMap}, {"weatherField", weatherFieldTex}, {"weatherDyn", weatherDynTex}};
+                {"aetherSunMap", aetherSunMap}, {"weatherField", weatherFieldTex}, {"weatherDyn", weatherDynTex},
+                {"fogRadianceTex", fogRadTex}, {"smokeSourcesTex", smokeTex}, {"lightningTex", boltTex},
+                {"sunHorizonTex", horizonTex}, {"masserPhases", phaseTex}, {"secundaPhases", phaseTex}};
     bool ok = run(pWater, {{5, tex[5]}, {6, tex[6]}}, false);
     ok = ok && run(pDeferred, {{4, tex[4]}}, true);  // deferred sees the opaque depth only
     samplers["colortex4"] = tex[4];

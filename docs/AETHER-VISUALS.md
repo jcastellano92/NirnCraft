@@ -22,21 +22,26 @@ Shared inputs, computed once and used by both fields:
 | Mountain shadows on the near field | sun map | traced | 512 / 256 map | **done** (in-game look unverified) |
 | Cloud shadows | sun map (cloud transmittance) | traced | off | **done** (near in-game unverified) |
 | PBR (labPBR normal / specular, default per material) | GGX sun + sky, roughness by material | roughness widened with distance (no shimmer) | Blinn, no maps | *planned* |
-| Emissive and coloured light: lava, lamps, fire, magic | emissive maps + block light colour by light source | emissive classes glow through haze; lava light over volcanoes | no bloom | *planned* |
+| Emissive and coloured light: lava, lamps, fire, magic | emissive maps; block light coloured by its emitter (the mod's emitter cache) and flickering for flames; the mod's point lights (spells, atronachs); additive HDR flames; bloom | emissive classes glow through haze; lava light over volcanoes | white block light, no bloom | near **done**, far *planned* |
 | Long-distance lights (towns at night, lava fields) | - | emissive massing windows / lava, visible for km | off | *planned* |
 | Water waves by body | water map: ocean swell, lake chop, calm ponds, wind and storm amplitude | same wave field, filtered by distance | static normals | *planned* |
 | Shore lapping, foam | water map shore distance, animated | foam band on far shores | none | *planned* |
-| Rivers, rapids, waterfalls | flow-advected normals, white water on steep flow, mist at falls | flow tint, white water, falls as bright sheets | static | *planned* |
+| Rivers, rapids, waterfalls | flow from the flowing sprite's basis + face slope: advected waves, rapids foam on steep / fast runs, white water streaming down falls, spray and mist where a fall meets the pool | flow tint, white water, falls as bright sheets | static | near **done** (in-game unverified), far *planned* |
 | Reflections | sky + screen-space + aether far field | traced (**done**) | sky only | near *planned* |
 | Refraction (water, glass, ice) | screen-space offset by normal, tint, IOR | - | tint only | *planned* |
 | Underwater | depth absorption fog, caustics from the wave field, light shafts | - | fog only | *planned* |
 | Light shafts | sun and moon shafts through clouds, trees, windows (screen space + sun map) | cloud-shaft term in the aerial perspective | off | *planned* |
-| Fog | height fog, valley / low-level fog by weather, time and wetness, marsh mist | same in the aerial perspective | linear fog | far **done** (haze), near *planned* |
-| Rain, snow, ash, dust | weather pass by aerosol kind, wind slant, splashes, snow sparkle | rain shafts and curtains (**done**), snow / dust haze | fewer layers | *planned* |
+| Fog | sealed local air (lib/media.glsl): the mod's ground-fog drive + dawn / night / wet mists only where the sky reaches (roof cache, terrain), never in houses or caves; dungeon air with a low creeping floor layer; lamp and point-light halos; closed form beyond 128 blocks | same in the aerial perspective | 4-step march, no halos | far **done** (haze), near **done** |
+| Rain, snow, ash, dust | rain mist under rain bands, blowing snow, ash haze by the weather's aerosol band (outdoors only); rain and particles shaded and fogged forward | rain shafts and curtains (**done**), snow / dust haze | fewer layers | near **done** (air), weather pass *planned* |
 | Dust motes, embers | screen-space particles in light shafts, embers near lava | - | off | *planned* |
 | Wind on foliage | rooted waving (leaves, grass, crops), gusts from the weather wind | far canopy sway in the normal | off | *planned* |
-| Sky: stars, Milky Way, moon phases, aurora | stars rotate with time, twinkle by humidity; aurora in the north and frozen regions at night | the same sky behind the far field | fewer octaves | *planned* |
-| Volcanic glow, ash sky | Red Mountain / ash regions: ash aerosol, ember glow on clouds from lava | lava emissive, clouds lit from below | off | *planned* |
+| Sky: stars, Milky Way, moon phases, aurora | Masser and Secunda on their orbits with phase atlases (the mod's sky state), stars veiled by moon glare and light pollution, the mod's live aurora and its light on the ground; nights keyed and shadowed by the brighter moon; the pack's own stars / aurora without the mod | the same sky behind the far field | pack sky, vanilla moon | near **done**, far *planned* |
+| Volcanic glow, ash sky | the Red Mountain column from the mod's smoke source 0 (bounded volume, wind-leaning, vent glow at night), ash haze in volcanic air | lava emissive, clouds lit from below | off | near **done**, far *planned* |
+| Storm light (lightning) | the mod's discharge packets light facing ground and walls, the rain and mist round the channel and the sky over it; outdoors only (no flashes underground) | - | off | near **done** |
+| Smoke columns (fires) | the mod's sprite smoke, shaded as a lit volume and fogged; volumes from smoke sources opt-in (SMOKE_FIRE_VOLUMES) | - | sprites | **done** |
+| Clouds without aether | a weather-driven fallback deck with its own ground shadow, only when aether's frame is absent | - | flat deck | **done** |
+| Mountain sunsets without aether | terrain transmission over the mod's surface heights from each receiver; sun disc and shafts set behind sun_horizon | sun map | off | **done** |
+| Realms | shaders/realm/ (dimension.properties): the realm's own sky dome, its authored fog and hue, local media only | - | - | **done** (in-game unverified) |
 | Far creatures (dragons, ships, players) | the game's models within tracking range | impostors beyond, cross-fading at the boundary, wing flaps | fewer | impostors **done**; fades *planned* |
 | LOD transitions | - | dithered blend across LOD boundaries | hard switch | *planned* |
 | Underground | lightmap, block light | off (near field covers it: near-zero cost) | - | **done** |

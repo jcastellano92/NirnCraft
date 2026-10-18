@@ -15,16 +15,16 @@
 #include "/lib/noise.glsl"
 #include "/lib/weather.glsl"
 #include "/lib/waves.glsl"
+#include "/lib/aether.glsl"
+#include "/lib/media.glsl"
+#include "/lib/plumes.glsl"
+#include "/lib/flow.glsl"
 
 uniform sampler2D colortex4;
 uniform sampler2D colortex5;
 uniform sampler2D colortex6;
 uniform sampler2D depthtex0;
 uniform sampler2D depthtex1;
-#ifdef AETHER_FAR_FIELD
-uniform sampler2D aetherColor;  // customTexture (shaders.properties): RGBA16F linear, premultiplied
-uniform sampler2D aetherDepth;  // customTexture: R32F view distance of the nearest thing aether drew
-#endif
 uniform mat4 gbufferProjectionInverse;
 uniform mat4 gbufferProjection;
 uniform mat4 gbufferModelViewInverse;
@@ -45,25 +45,9 @@ in vec2 texcoord;
 /* RENDERTARGETS: 4 */
 layout(location = 0) out vec4 outColor;
 
-#ifdef AETHER_FAR_FIELD
-// aether renders at its own (dynamic) resolution: colour upsampled bilinearly (at scale 1 the texel centres fall on
-// the pixels: exact), depth from the nearest texel (it stays a real distance at edges)
-vec4 aetherColorAt(vec2 uv) {
-    ivec2 sz = textureSize(aetherColor, 0);
-    vec2 p = uv * vec2(sz) - 0.5;
-    ivec2 i = ivec2(floor(p));
-    vec2 f = p - vec2(i);
-    ivec2 m = sz - 1;
-    vec4 a = texelFetch(aetherColor, clamp(i, ivec2(0), m), 0), b = texelFetch(aetherColor, clamp(i + ivec2(1, 0), ivec2(0), m), 0);
-    vec4 c = texelFetch(aetherColor, clamp(i + ivec2(0, 1), ivec2(0), m), 0), d = texelFetch(aetherColor, clamp(i + ivec2(1, 1), ivec2(0), m), 0);
-    return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
-}
 
-float aetherDepthAt(vec2 uv) {
-    ivec2 sz = textureSize(aetherDepth, 0);
-    return texelFetch(aetherDepth, clamp(ivec2(uv * vec2(sz)), ivec2(0), sz - 1), 0).r;
-}
-#endif
+// the world clock the local air drifts by (the mod's game time when present: the same in every pass)
+float airClock() { return haveAir() ? airTime() : frameTimeCounter; }
 
 vec3 viewAt(vec2 uv, float d) {
     vec4 v = gbufferProjectionInverse * vec4(uv * 2.0 - 1.0, d * 2.0 - 1.0, 1.0);
@@ -76,7 +60,7 @@ vec2 toScreen(vec3 view) {
 }
 
 // the opaque scene at uv: lit near field, aerial perspective, the far field under it, ground fog over both
-vec3 sceneAt(vec2 uv, vec3 sun) {
+vec3 sceneAt(vec2 uv, vec3 sun, bool marched) {
     vec3 col = texture(colortex4, uv).rgb;
     float d = texture(depthtex1, uv).r;
     vec3 vp = viewAt(uv, d);
@@ -86,6 +70,7 @@ vec3 sceneAt(vec2 uv, vec3 sun) {
     if (!sky) col = applyAerial(col, dir, sun, dist, cameraPosition.y, rainStrength);
     float fogDist = dist;
 #ifdef AETHER_FAR_FIELD
+    if (aetherPresent()) {
     vec4 farc = aetherColorAt(uv);
     float farDist = aetherDepthAt(uv);
     vec3 over = col * (1.0 - farc.a) + farc.rgb;
@@ -95,8 +80,17 @@ vec3 sceneAt(vec2 uv, vec3 sun) {
         col = over;
         fogDist = min(dist, farDist);
     }
+    }
 #endif
-    if (fogDist < 1e29) col = applyGroundFog(col, dir, sun, fogDist, cameraPosition.y, wetness, rainStrength);
+    if (marched && isEyeInWater == 0) {
+        // smoke columns (the volcano; fires with SMOKE_FIRE_VOLUMES) in front of whatever is behind them
+        vec4 pl = plumesAlong(cameraPosition, dir, fogDist, sun, airClock(), ign(gl_FragCoord.xy, 1.0), rainStrength);
+        col = col * pl.a + pl.rgb;
+    }
+    if (sky && fogDist >= 1e29) col += lightningSky(dir, outdoorExposure(cameraPosition, cameraPosition));
+    else if (fogDist >= far) col += lightningSky(dir, outdoorExposure(cameraPosition, cameraPosition)) * 0.35;  // on the far field
+    if (isEyeInWater == 0)
+        col = applyMedia(col, dir, fogDist, sun, cameraPosition, wetness, rainStrength, airClock(), ign(gl_FragCoord.xy, 0.0), marched);
     return col;
 }
 
@@ -122,7 +116,7 @@ vec3 reflectionAt(vec3 vp, vec3 rWorld, vec3 sun, float skyLight) {
             float dz = hit.z - p.z;
             if (dz > 0.0 && dz < stepLen * 2.5) {
                 float edge = smoothstep(0.0, 0.08, min(min(uv.x, 1.0 - uv.x), min(uv.y, 1.0 - uv.y)));
-                return mix(sky, sceneAt(uv, sun), edge);
+                return mix(sky, sceneAt(uv, sun, false), edge);
             }
         }
     }
@@ -130,7 +124,7 @@ vec3 reflectionAt(vec3 vp, vec3 rWorld, vec3 sun, float skyLight) {
 #ifdef AETHER_FAR_FIELD
     // far terrain mirrored in lakes: where the reflected ray points on screen, if aether drew land there
     vec2 uvF = toScreen(vp + rView * 2000.0);
-    if (all(greaterThan(uvF, vec2(0.0))) && all(lessThan(uvF, vec2(1.0)))) {
+    if (aetherPresent() && all(greaterThan(uvF, vec2(0.0))) && all(lessThan(uvF, vec2(1.0)))) {
         vec4 fc = aetherColorAt(uvF);
         // fade towards the bare sky near the screen's edge, where the mirrored far field runs out
         float edge = smoothstep(0.0, 0.12, min(min(uvF.x, 1.0 - uvF.x), min(uvF.y, 1.0 - uvF.y)));
@@ -140,9 +134,33 @@ vec3 reflectionAt(vec3 vp, vec3 rWorld, vec3 sun, float skyLight) {
     return sky;
 }
 
+#if defined WATER_FLOW && defined FALLS_MIST
+// where a fall meets the water below: on a water top, a fall (vertical water) just above on screen and at about the
+// same distance; on a fall, the water top just below. Up to four taps over ~2.5 blocks; 0 elsewhere
+float fallsSpray(vec2 uv, vec3 n, float dist) {
+    bool top = n.y > 0.5;
+    if (!top && abs(n.y) > 0.3) return 0.0;
+    float span = 2.5 * viewHeight / (1.4 * max(dist, 1.0)) / viewHeight;  // ~2.5 blocks in uv
+    float best = 0.0;
+    for (int k = 1; k <= 4; k++) {
+        vec2 q = uv + vec2(0.0, (top ? 1.0 : -1.0) * span * float(k) / 4.0);
+        if (q.y < 0.0 || q.y > 1.0) break;
+        vec4 inf = texture(colortex6, q);
+        if (int(inf.b * 255.0 + 0.5) != MAT_WATER) continue;
+        vec3 nq = octDecode(inf.rg);
+        bool other = top ? abs(nq.y) < 0.3 : nq.y > 0.5;
+        if (!other) continue;
+        float dq = length(viewAt(q, texture(depthtex0, q).r));
+        if (abs(dq - dist) > 3.0) continue;
+        best = max(best, 1.0 - float(k - 1) / 4.0);
+    }
+    return best;
+}
+#endif
+
 // screen-space light shafts: march towards the light's screen position, collecting how much of the way is open sky
 vec3 lightShafts(vec2 uv, vec3 sun, float dist) {
-#ifdef VOLUMETRIC_LIGHT
+#if defined VOLUMETRIC_LIGHT && !defined SKYCRAFT_REALM
     vec3 L = sun.y > -0.05 ? sun : -sun;
     vec3 lightView = mat3(gbufferModelView) * L;
     if (lightView.z > -0.05) return vec3(0.0);  // behind the camera
@@ -163,6 +181,8 @@ vec3 lightShafts(vec2 uv, vec3 sun, float dist) {
         w *= 0.96;
     }
     open /= max(wsum, 1e-3);
+    // without the far field on screen, the low sun behind the horizon's mountains (the mod's sun_horizon) casts none
+    if (!aetherPresent() && sun.y > -0.05) open *= smoothstep(-0.015, 0.015, sun.y - sunHorizonSin());
     vec3 dir = normalize(mat3(gbufferModelViewInverse) * viewAt(uv, 1.0));
     float mu = max(dot(dir, L), 0.0);
     float phase = 0.25 + 1.5 * pow(mu, 8.0);
@@ -189,7 +209,9 @@ void main() {
 
     if (tr.a > 0.001 && d0 < d1 && (mat == MAT_WATER || mat == MAT_GLASS)) {
         vec3 n = octDecode(info.rg);
-        float skyLight = info.a;
+        vec2 skyFoam = unpackSkyFoam(info.a);
+        float skyLight = skyFoam.x;
+        float foam = skyFoam.y;
         // refraction: displace by the surface's slope, but only onto what really lies behind it
         vec2 uvR = texcoord;
 #ifdef REFRACTION
@@ -197,7 +219,7 @@ void main() {
         vec2 cand = texcoord + off / max(1.0, dist0 * 0.05);
         if (texture(depthtex1, cand).r > d0) uvR = cand;
 #endif
-        vec3 behind = sceneAt(uvR, sun);
+        vec3 behind = sceneAt(uvR, sun, false);
         float thick = max(length(viewAt(uvR, texture(depthtex1, uvR).r)) - dist0, 0.0);
         if (texture(depthtex1, uvR).r >= 1.0) thick = 60.0;
         if (mat == MAT_WATER && isEyeInWater == 0) {
@@ -227,17 +249,35 @@ void main() {
             float shallow = smoothstep(1.4, 0.0, thick);
             vec2 wp = (cameraPosition + mat3(gbufferModelViewInverse) * vp0).xz;
             float lap = 0.5 + 0.5 * sin(frameTimeCounter * 1.3 - thick * 5.0 + valueNoise(wp * 0.3) * 4.0);
-            float foam = shallow * lap * smoothstep(0.35, 0.75, fbm2(wp * 1.5 + frameTimeCounter * 0.2, 3));
-            col = mix(col, skyAmbient(vec3(0, 1, 0), sun) * 1.3 + rad * 0.25, foam * 0.85);
+            float shore = shallow * lap * smoothstep(0.35, 0.75, fbm2(wp * 1.5 + frameTimeCounter * 0.2, 3));
+            col = mix(col, skyAmbient(vec3(0, 1, 0), sun) * 1.3 + rad * 0.25, shore * 0.85);
+#endif
+#ifdef WATER_FLOW
+            // white water of rapids and falls (from gbuffers), and the spray where a fall meets the water below
+            float spray = 0.0;
+#ifdef FALLS_MIST
+            spray = fallsSpray(texcoord, n, dist0);
+#endif
+            float white = clamp(max(foam, spray * 0.85), 0.0, 1.0);
+            if (white > 0.0 || spray > 0.0) {
+                vec3 foamLit = (skyAmbient(vec3(0, 1, 0), sun) * 1.3 + rad * 0.3 * (0.4 + 0.6 * max(dot(n, L), 0.0)))
+                             * mix(0.15, 1.0, skyLight) + vec3(0.012);
+                col = mix(col, foamLit, white * 0.9);
+                col += foamLit * spray * 0.3;  // the bright mist hanging over the pool
+            }
 #endif
         } else {
             // glass and ice (and water seen from below): the tinted surface over what it refracts
             col = behind * (1.0 - tr.a) + tr.rgb;
         }
         col = applyAerial(col, dir, sun, dist0, cameraPosition.y, rainStrength);
+        if (isEyeInWater == 0)
+            col = applyMedia(col, dir, dist0, sun, cameraPosition, wetness, rainStrength, airClock(), ign(gl_FragCoord.xy, 0.0), true);
     } else {
-        col = sceneAt(texcoord, sun);
-        if (tr.a > 0.001 && d0 <= d1) col = col * (1.0 - tr.a) + tr.rgb;  // weather, particles, other translucents
+        col = sceneAt(texcoord, sun, true);
+        // weather, particles, smoke, lines and the rest (shaded and fogged forward, premultiplied; additive light such
+        // as flames and lightning channels carries no coverage)
+        if (max(tr.a, max(tr.r, max(tr.g, tr.b))) > 1e-4) col = col * (1.0 - tr.a) + tr.rgb;
     }
 
     if (isEyeInWater == 1) {

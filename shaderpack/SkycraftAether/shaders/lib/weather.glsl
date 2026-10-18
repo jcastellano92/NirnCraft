@@ -8,7 +8,11 @@
 uniform sampler2D weatherField;
 uniform sampler2D weatherDyn;
 
+#ifdef SKYCRAFT_REALM
+bool haveWeather() { return false; }  // terrestrial weather belongs to the Overworld (DimensionMediaPolicy)
+#else
 bool haveWeather() { return textureSize(weatherField, 0).x == 128 && textureSize(weatherDyn, 0).x == 128; }
+#endif
 
 vec4 weatherTexel(sampler2D t, ivec2 c) { return texelFetch(t, ivec2(c.x & 127, c.y & 127), 0); }
 

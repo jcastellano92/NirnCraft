@@ -16,6 +16,9 @@ vec3 celestial(vec3 dir, vec3 sun) {
 }
 
 vec3 stars(vec3 dir, vec3 sun, float time, float humidity) {
+#ifdef SKYCRAFT_REALM
+    return vec3(0.0);
+#endif
     float night = smoothstep(0.05, -0.2, sun.y);
     if (night <= 0.0 || dir.y < -0.05) return vec3(0.0);
     vec3 c = celestial(dir, sun);
@@ -46,6 +49,9 @@ vec3 stars(vec3 dir, vec3 sun, float time, float humidity) {
 
 // north: Tamriel's north is -Z (Skyrim at the top of the map). coldNorth 0..1: how cold and northern this place is
 vec3 aurora(vec3 dir, float time, float coldNorth, vec3 sun) {
+#ifdef SKYCRAFT_REALM
+    return vec3(0.0);
+#endif
     float night = smoothstep(0.0, -0.25, sun.y);
     if (coldNorth <= 0.0 || night <= 0.0 || dir.y < 0.02) return vec3(0.0);
     vec3 col = vec3(0.0);

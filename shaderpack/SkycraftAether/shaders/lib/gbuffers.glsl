@@ -3,7 +3,16 @@
 //   TERRAIN     blocks with material ids (block.properties): wind, PBR defaults, emitters
 //   EMISSIVE    always glowing (spider eyes, beacon beams)
 //   TRANSLUCENT water, stained glass, ice: forward-tinted, refracted / reflected in composite.fsh
-//   PARTICLES   particles: forward-lit into the translucent buffer (full-bright ones glow: magic, embers)
+//   FORWARD_LIT what Iris draws in the translucent phase, after deferred.fsh has lit the G-buffer (translucent
+//               entities: 26.3 draws avatar bodies so; translucent block entities): lit forward with its own
+//               normals (sun, shadow, sky, block light), premultiplied; an opaque texel looks as an opaque entity
+//   ENTITY      with SOLID or FORWARD_LIT: Iris' entityColor (the hurt / freeze flash) over the texture
+//   PARTICLES   particles and the mod's alpha meshes (fire smoke, atmosphere particles): forward-lit like a thin
+//               volume (sun through it, sky all round), fogged forward (full-bright ones glow: magic, embers)
+//   ADDITIVE    with EMISSIVE: pure added light (the mod's flames and additive meshes, spider eyes), HDR for bloom
+//   BASIC       untextured geometry (the mod's lightning channels and POSITION_COLOR quads, block outlines,
+//               leads): colour from the vertex only (Iris may leave any texture bound), lit forward; bright
+//               near-white colours (lightning) are emitted as light
 //   WEATHER     rain and snow: into the translucent buffer
 //   SKYTEX      the moon (and anything else drawn as a textured sky): marked for the deferred sky
 //   DISCARD     draws nothing (vanilla clouds and sky: aether and deferred.fsh draw those)
@@ -12,6 +21,14 @@
 // subsurface / emission, colortex3 material id / AO / metal. Translucents: colortex5 premultiplied colour,
 // colortex6 normal + material id + sky light.
 #include "/lib/settings.glsl"
+#if defined SKYBASIC && !defined SKYCRAFT_REALM
+#define DISCARD  // the Overworld's sky is deferred.fsh's atmosphere
+#endif
+#if defined SKYBASIC || defined SKYTEX
+#ifdef SKYCRAFT_REALM
+#define REALM_SKY  // a realm's own dome and sprites, as the mod (or vanilla) draws them
+#endif
+#endif
 #include "/lib/common.glsl"
 #include "/lib/curvature.glsl"
 #include "/lib/materials.glsl"
@@ -23,6 +40,10 @@ uniform vec3 sunPosition;
 uniform vec3 cameraPosition;
 uniform float rainStrength;
 uniform float frameTimeCounter;
+uniform float wetness;
+#ifdef ENTITY
+uniform vec4 entityColor;
+#endif
 
 #ifdef VSH
 #if defined TERRAIN || defined TRANSLUCENT
@@ -63,7 +84,7 @@ void main() {
     }
 #endif
 #endif
-#if defined SKYTEX
+#if defined SKYTEX || defined SKYBASIC
     gl_Position = ftransform();
 #else
     gl_Position = gl_ProjectionMatrix * (gbufferModelView * vec4(curvePlayerPos(playerPos), 1.0));
@@ -92,11 +113,14 @@ layout(location = 0) out vec4 outAlbedo;
 layout(location = 1) out vec4 outNormal;
 layout(location = 2) out vec4 outSpecular;
 layout(location = 3) out vec4 outMaterial;
+#elif defined REALM_SKY
+/* RENDERTARGETS: 7 */
+layout(location = 0) out vec4 outColor;
 #elif defined SKYTEX
 /* RENDERTARGETS: 0,3 */
 layout(location = 0) out vec4 outAlbedo;
 layout(location = 1) out vec4 outMaterial;
-#elif defined TRANSLUCENT
+#elif defined TRANSLUCENT || defined FORWARD_LIT
 /* RENDERTARGETS: 5,6 */
 layout(location = 0) out vec4 outColor;
 layout(location = 1) out vec4 outInfo;
@@ -108,12 +132,22 @@ layout(location = 0) out vec4 outColor;
 layout(location = 0) out vec4 outColor;
 #endif
 
-#if defined TRANSLUCENT || defined PARTICLES || defined WEATHER
+#if defined TRANSLUCENT || defined PARTICLES || defined WEATHER || defined BASIC || defined FORWARD_LIT
+const float BASIC_GLOW = 6.0;  // lightning channels and other near-white untextured light
 #include "/lib/lighting.glsl"
+#include "/lib/fog.glsl"
+
+// forward translucents carry the air in front of them themselves (composite fogs the scene behind to its own depth,
+// then lays these over it): premultiplied colour c of coverage a
+vec3 fogForward(vec3 c, float a, vec3 sun) {
+    vec4 air = airLight(normalize(playerPos), sun, length(playerPos), cameraPosition.y, wetness, rainStrength);
+    return c * air.a + air.rgb * a;
+}
 #endif
 #ifdef TRANSLUCENT
 #include "/lib/weather.glsl"
 #include "/lib/waves.glsl"
+#include "/lib/flow.glsl"
 #endif
 
 // the surface normal with the resource pack's normal map (labPBR: xy in rg, z reconstructed), world space
@@ -134,9 +168,30 @@ vec3 surfaceNormal(vec4 nm) {
 void main() {
 #ifdef DISCARD
     discard;
+#elif defined REALM_SKY
+    // premultiplied over the realm's sky so far; a sprite's black surround (drawn additively by vanilla) covers nothing
+#ifdef SKYBASIC
+    vec4 sky = glcolor;
+#else
+    vec4 sky = glcolor * texture(gtexture, texcoord);
+#endif
+    vec3 sc = srgbToLinear(sky.rgb);
+    float cover = sky.a * smoothstep(0.015, 0.2, max(sky.r, max(sky.g, sky.b)));
+#ifdef SKYBASIC
+    cover = sky.a;
+#endif
+    outColor = vec4(sc * sky.a, cover);
+#else
+#ifdef BASIC
+    vec4 albedo = glcolor;  // untextured: whatever texture Iris left bound is not ours to sample
+    if (albedo.a < 0.004) discard;
 #else
     vec4 albedo = glcolor * texture(gtexture, texcoord);
     if (albedo.a < 0.1) discard;
+#endif
+#ifdef ENTITY
+    albedo.rgb = mix(albedo.rgb, entityColor.rgb, entityColor.a);  // the hurt flash
+#endif
     vec2 lm = clamp((lmcoord - 1.0 / 32.0) * (16.0 / 15.0), 0.0, 1.0);
     vec4 nm = vec4(0.0), sp = vec4(0.0);
 #ifdef PBR_MAPS
@@ -167,36 +222,93 @@ void main() {
     vec3 n = normalize(worldNormal);
     float dist = length(playerPos);
     float a = albedo.a;
+    float foam = 0.0;
+    vec3 wp = playerPos + cameraPosition;
     if (material == MAT_WATER && n.y > 0.5) {
         // open water: more sky seen = a bigger body; storms whip it up
         float openness = smoothstep(0.6, 1.0, lm.y);
-        vec2 wxz = (playerPos + cameraPosition).xz;
+        vec2 wxz = wp.xz;
+        vec2 flow = vec2(0.0);
+#ifdef WATER_FLOW
+        // flowing water: the waves ride the flow, ripples tighten, steep runs break white
+        vec4 fl = waterFlow(playerPos, texcoord, cameraPosition.y);
+        flow = fl.xy;
+        openness *= 1.0 - 0.7 * fl.w;
+        foam = rapidsFoam(wxz, flow, fl.z, frameTimeCounter, dist) * fl.w;
+#endif
         // the live wind sets the heading and size of the waves; rain rings the surface where the sky reaches it
-        n = waveNormal(wxz, frameTimeCounter, openness, waterWind(wxz, rainStrength), vec2(0.0), dist,
+        n = waveNormal(wxz, frameTimeCounter, openness, waterWind(wxz, rainStrength), flow, dist,
                        rainStrength * smoothstep(0.85, 1.0, lm.y));
         a = WATER_ALPHA;
     } else if (material == MAT_WATER) {
         a = WATER_ALPHA;  // falls and the sides of flowing water
+#ifdef WATER_FLOW
+        if (abs(n.y) < 0.3) {
+            // a fall: white water streaming down the face
+            vec2 fw = fallsWater(wp, n, frameTimeCounter, dist);
+            foam = fw.x;
+            vec2 t = normalize(vec2(-n.z, n.x) + vec2(1e-5));
+            n = normalize(n + vec3(t.x, 0.0, t.y) * fw.y);
+        }
+#endif
     }
     vec3 base = srgbToLinear(albedo.rgb);
     vec3 lit = shadeForward(base, n, lm, playerPos, sun, 0.0);
     outColor = vec4(lit * a, a);
-    outInfo = vec4(octEncode(n), float(material == MAT_NONE ? MAT_GLASS : material) / 255.0, lm.y);
+    outInfo = vec4(octEncode(n), float(material == MAT_NONE ? MAT_GLASS : material) / 255.0, packSkyFoam(lm.y, foam));
+#elif defined FORWARD_LIT
+    // a body, a translucent block entity: lit as the deferred pass lights the opaque scene (its own normals, the key
+    // light with its shadow, sky and block light), the air in front of it carried forward. colortex6 says "not water
+    // or glass" here, so a body before a lake is never taken for the lake's surface
+    vec3 sun = worldSunDir(gbufferModelViewInverse, sunPosition);
+    vec3 n = surfaceNormal(nm);
+    vec3 lit = shadeForward(srgbToLinear(albedo.rgb), n, lm, playerPos, sun, 0.0);
+    outColor = vec4(fogForward(lit * albedo.a, albedo.a, sun), albedo.a);
+    outInfo = vec4(octEncode(n), 0.0, 0.0);
 #elif defined WEATHER
     vec3 sun = worldSunDir(gbufferModelViewInverse, sunPosition);
     vec3 c = srgbToLinear(albedo.rgb) * (skyAmbient(vec3(0, 1, 0), sun) * 1.4 + sunRadiance(sun) * 0.15);
     float a = albedo.a * 0.55;
-    outColor = vec4(c * a, a);
+    outColor = vec4(fogForward(c * a, a, sun), a);
+#elif defined BASIC
+    // lines and untextured quads: lit like a thin thing in the air; near-white bright colours (the storm's lightning
+    // channels, glowing outlines) are light, added rather than covering (alpha 0 under the premultiplied blend)
+    vec3 sun = worldSunDir(gbufferModelViewInverse, sunPosition);
+    vec3 base = srgbToLinear(albedo.rgb);
+    float lum = dot(base, vec3(0.2126, 0.7152, 0.0722));
+    float sat = max(base.r, max(base.g, base.b)) - min(base.r, min(base.g, base.b));
+    float glow = smoothstep(0.35, 0.75, lum) * (1.0 - smoothstep(0.35, 0.7, sat));
+    vec3 lit = shadeForward(base, vec3(0, 1, 0), lm, playerPos, sun, 0.0);
+    vec3 c = mix(lit, base * BASIC_GLOW, glow) * albedo.a;
+    float a = albedo.a * (1.0 - glow);
+    outColor = vec4(fogForward(c, a, sun), a);
+#elif defined ADDITIVE
+    // flames, the mod's additive meshes, spider eyes: light only, bright enough for bloom; fog dims it with distance
+    vec3 sun = worldSunDir(gbufferModelViewInverse, sunPosition);
+    vec3 base = srgbToLinear(albedo.rgb);
+    vec3 c = base * albedo.a * EMISSIVE_STRENGTH;
+    outColor = vec4(fogForward(c, 0.0, sun), 0.0);
 #else
-    // particles and the rest: lit forward; full-bright ones (magic, embers, sparks) glow
+    // particles, the mod's smoke meshes and the rest: a thin volume, lit from every side by the sky, by the sun
+    // through it (forward scattering: bright rims looking into the light), by block light (fire under its own smoke);
+    // full-bright ones (magic, embers, sparks) glow
     vec3 sun = worldSunDir(gbufferModelViewInverse, sunPosition);
     vec3 base = srgbToLinear(albedo.rgb);
     float glow = smoothstep(0.92, 1.0, lm.x) * smoothstep(0.4, 0.8, dot(base, vec3(0.33)));
 #ifdef EMISSIVE
     glow = 1.0;
 #endif
-    vec3 c = shadeForward(base, vec3(0, 1, 0), lm, playerPos, sun, glow);
-    outColor = vec4(c * albedo.a, albedo.a);
+    vec3 L = keyLightDir(sun);
+    float vis = keyVisibility(playerPos, L, L, gl_FragCoord.xy) * smoothstep(0.05, 0.35, lm.y);
+    vec3 v = normalize(playerPos);
+    float mu = dot(v, L);
+    // Henyey-Greenstein, g = 0.45 (relative to isotropic = 1), plus an isotropic share (soot scatters both ways)
+    float hg = (1.0 - 0.2025) / pow(max(1.2025 - 0.9 * mu, 1e-3), 1.5);
+    float phase = 0.35 + 0.65 * hg;
+    vec3 sky = (skyAmbient(vec3(0, 1, 0), sun) * 0.7 + skyAmbient(vec3(0, -1, 0), sun) * 0.3) * lm.y * lm.y;
+    vec3 light = keyLightRadiance(sun) * vis * phase * 0.5 + sky + vec3(0.012, 0.012, 0.016) + blockLight(lm.x);
+    vec3 c = base * light + base * glow * 3.0;
+    outColor = vec4(fogForward(c * albedo.a, albedo.a, sun), albedo.a);
 #endif
 #endif
 }

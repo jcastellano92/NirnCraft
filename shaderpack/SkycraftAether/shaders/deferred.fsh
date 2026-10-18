@@ -14,6 +14,9 @@ uniform sampler2D colortex0;
 uniform sampler2D colortex1;
 uniform sampler2D colortex2;
 uniform sampler2D colortex3;
+#ifdef SKYCRAFT_REALM
+uniform sampler2D colortex7;  // the realm's sky (gbuffers_skybasic / skytextured), premultiplied
+#endif
 uniform sampler2D depthtex0;
 uniform mat4 gbufferProjectionInverse;
 uniform mat4 gbufferProjection;
@@ -28,6 +31,11 @@ uniform float viewHeight;
 
 #include "/lib/lighting.glsl"
 #include "/lib/sky.glsl"
+#include "/lib/clouds.glsl"
+#include "/lib/lightning.glsl"
+#include "/lib/celestial.glsl"
+
+float airClock() { return haveAir() ? airTime() : frameTimeCounter; }
 
 in vec2 texcoord;
 
@@ -44,6 +52,7 @@ const vec4 colortex0ClearColor = vec4(0.0, 0.0, 0.0, 0.0);
 const vec4 colortex3ClearColor = vec4(0.0, 0.0, 0.0, 0.0);
 const vec4 colortex5ClearColor = vec4(0.0, 0.0, 0.0, 0.0);
 const vec4 colortex6ClearColor = vec4(0.0, 0.0, 0.0, 0.0);
+const vec4 colortex7ClearColor = vec4(0.0, 0.0, 0.0, 0.0);
 const bool colortex4Clear = false;
 */
 
@@ -90,16 +99,60 @@ void main() {
     vec4 mtl = texture(colortex3, texcoord);
 
     if (d >= 1.0) {
+#ifdef SKYCRAFT_REALM
+        // a realm: its own dome and sprites over its fog colour (the Nether draws none: all fog)
+        vec4 rs = texture(colortex7, texcoord);
+        outColor = vec4(rs.rgb + realmFog() * (1.0 - rs.a), 1.0);
+        return;
+#endif
         // the sky: the atmosphere, the night sky over it, and whatever the vanilla sky drew (the moon)
         vec3 c = skyColor(dir, sun);
+#ifdef WEATHER_SKY
+        // the dome greys to slate under the weather over the camera (a blue sky stays blue over a dust storm)
+        if (haveWeather()) {
+            vec4 wc = weatherSample(weatherField, cameraPosition.xz);
+            int band = clamp(int(floor(weatherTexel(weatherField, ivec2(floor(cameraPosition.xz / 64.0))).a * 4.0)), 0, 3);
+            float over = band == 2 ? 0.1 * wc.b : clamp(smoothstep(0.6, 0.9, wc.r) * 0.8 + wc.b * 0.5, 0.0, 0.85);
+            float lum = dot(c, vec3(0.2126, 0.7152, 0.0722));
+            c = mix(c, vec3(lum) * vec3(0.92, 0.95, 1.0) * mix(1.0, 0.7, wc.g), over);
+        }
+#endif
+        bool modSky = haveModSky();
+        vec4 skyOpt = modSkyOptions();
+        float veil = 0.0;
+        vec4 moonsC = vec4(0.0);
+#ifdef MOD_SKY
+        // Nirn's moons (the vanilla moon is left out: there are two) and the mod's aurora
+        if (modSky) moonsC = modMoons(dir, sun, moons(sun), veil);
+#endif
 #ifdef STARS
-        c += stars(dir, sun, frameTimeCounter, rainStrength);
+        if (skyOpt.r > 0.5) c += stars(dir, sun, frameTimeCounter, rainStrength) * (1.0 - veil) * modNightSky().r;
 #endif
 #ifdef AURORA
-        float cold = smoothstep(0.35, -0.1, temperature) * (1.0 - rainStrength);
-        c += aurora(dir, frameTimeCounter, cold, sun);
+#ifdef MOD_SKY
+        if (modSky) c += modAurora(dir, sun, skySeconds());
+        else
 #endif
-        if (mtl.r > 0.99) c += srgbToLinear(texture(colortex0, texcoord).rgb) * 1.4;
+        {
+            float cold = smoothstep(0.35, -0.1, temperature) * (1.0 - rainStrength);
+            c += aurora(dir, frameTimeCounter, cold, sun);
+        }
+#endif
+        c = c * (1.0 - moonsC.a) + moonsC.rgb;
+        if (mtl.r > 0.99 && !modSky) c += srgbToLinear(texture(colortex0, texcoord).rgb) * 1.4;
+        if (!aetherPresent()) {
+            // no far field to hide it: the sun sets behind the mountains on the horizon (the mod's sun_horizon, from
+            // the camera) instead of shining through them
+            float hs = sunHorizonSin();
+            if (hs > 0.0 && sun.y < hs + 0.01 && dir.y < hs && dot(dir, sun) > 0.99995)
+                c -= sunRadiance(sun) * 18.0 * 1.6 * (1.0 - smoothstep(hs - 0.006, hs, dir.y));
+            c = max(c, vec3(0.0));
+        }
+        // aether draws the clouds (and composite lays them over this sky); without it, the pack's own deck
+        if (!aetherPresent()) {
+            vec4 cl = fallbackClouds(dir, sun, cameraPosition, frameTimeCounter, rainStrength);
+            c = c * (1.0 - cl.a) + cl.rgb;
+        }
         outColor = vec4(c, 1.0);
         return;
     }
@@ -138,8 +191,22 @@ void main() {
     vec3 fr = fresnelSchlick(max(dot(n, v), 0.0), f0) * spec.x * spec.x;
     specular += skyColor(normalize(vec3(r.x, max(r.y, 0.02), r.z)), sun) * fr * lm.y * lm.y;
 #endif
-    vec3 ambient = albedo * (skyAmbient(n, sun) * lm.y * lm.y + vec3(0.012, 0.012, 0.016)) * ao;
-    vec3 torch = albedo * blockLight(lm.x) * mix(0.6, 1.0, ao);
+    vec3 skyAmb = skyAmbient(n, sun);
+#ifdef WEATHER_SKY
+    // under a storm cell or a closed deck the sky light is dimmer (the key light already has the clouds' shadow)
+    if (haveWeather()) {
+        vec4 wr = weatherSample(weatherField, (playerPos + cameraPosition).xz);
+        float shade = clamp(smoothstep(0.62, 0.92, wr.r) * 0.45 + wr.g * 0.35 + wr.b * 0.45, 0.0, 0.85);
+        skyAmb *= 1.0 - 0.35 * shade;
+    }
+#endif
+    vec3 ambient = albedo * ((skyAmb + auroraIrradiance(n)) * lm.y * lm.y + vec3(0.012, 0.012, 0.016)) * ao;
+    vec3 wp = playerPos + cameraPosition;
+    vec3 torch = albedo * blockLightAt(lm.x, wp, cameraPosition, airClock()) * mix(0.6, 1.0, ao);
+    // the mod's point lights (spells, atronachs, burning creatures) and storm channels light what faces them
+    loadAir(cameraPosition);
+    if (gLights > 0) torch += albedo * localLights(playerPos, n, true, cameraPosition);
+    torch += albedo * lightningSurface(playerPos, n, lm.y, outdoorExposure(wp, cameraPosition));
     vec3 emit = vec3(0.0);
     if (spec.w > 0.0) {
         float flicker = 1.0;

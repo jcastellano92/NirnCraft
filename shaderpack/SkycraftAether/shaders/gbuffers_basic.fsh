@@ -1,4 +1,4 @@
 #version 330 compatibility
 #define FSH
-#define SOLID
+#define BASIC
 #include "/lib/gbuffers.glsl"

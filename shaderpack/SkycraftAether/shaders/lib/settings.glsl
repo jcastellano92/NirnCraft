@@ -19,6 +19,9 @@
 #define FOLIAGE_SSS             // sunlight through leaves and grass
 #define SSAO                    // screen-space ambient occlusion
 #define SSAO_SAMPLES 6 // [4 6 8 12]
+#define COLORED_LIGHT           // block light takes the colour of what emits it (the mod's emitter cache, ~26 blocks)
+#define BLOCKLIGHT_FLICKER 1 // [0 1 2] torch and fire light flickers (0 steady, 2 strong)
+#define SUN_HORIZON_TAPS 6 // [0 4 6] without aether's sun map: low sun blocked by distant mountains (terrain taps)
 
 // motion
 #define WAVING_FOLIAGE          // leaves and plants sway in the wind, rooted where they grow
@@ -32,14 +35,27 @@
 #define SSR_STEPS 20 // [10 16 20 32]
 #define SHORE_FOAM              // foam where the water is shallow, lapping with the waves
 #define CAUSTICS                // light patterns under water
+#define WATER_FLOW              // flowing water: waves ride the flow, rapids break white, falls stream white water
+#define FALLS_MIST              // spray and mist where a fall meets the water below
 
 // atmosphere
 #define FOG_LAYERS              // low valley fog, marsh mist and height fog by weather and time of day
+#define MEDIA_STEPS 10 // [0 4 6 10 14 16] the near air march: fog sealed out of houses and caves, dungeon air, halos
+#define HALO_STEPS 8 // [0 6 8 12 16] lamps, torches, fires and spells glow in the fog around them (0: off)
+#define PLUME_STEPS 10 // [0 6 10 16] smoke columns: the Red Mountain volcano (and fires with the option below)
+//#define SMOKE_FIRE_VOLUMES      // fires' smoke as volumes too (the mod draws fire smoke as sprites: one or the other)
+#define LIGHTNING_LIGHT 1 // [0 1] storm channels light the ground, the rain and the clouds (outdoors only)
+//#define LIGHT_OCCLUSION        // the mod's point lights are shadowed by walls (needs -Dskycraft.localLightOcclusion)
 #define VOLUMETRIC_LIGHT        // light shafts through clouds, trees and windows
 #define VL_SAMPLES 16 // [8 12 16 24 32]
 #define STARS                   // stars and the galaxy, turning with the sky
 #define AURORA                  // northern lights in cold northern skies at night
+#define WEATHER_SKY             // the sky greys and the sky light dims under the mod's storm cells and overcast
+#define MOD_SKY                 // Nirn's sky from the mod: Masser and Secunda, the live aurora, the mod's sky options
+#define LUNAR_KEY               // nights lit (and shadowed) by the brighter moon, Masser or Secunda
 #define BLOOM                   // glow around bright lights, lava, fire and magic
+#define EMISSIVE_STRENGTH 4.0 // [2.0 3.0 4.0 6.0] brightness of flames and other added light (the mod's fire meshes)
+#define FALLBACK_CLOUDS 2 // [0 1 2] the pack's own cloud deck when aether's far field is absent: 0 none, 1 flat, 2 self-shadowed
 
 const int shadowMapResolution = 2048; // [1024 2048 3072 4096]
 const float shadowDistance = 128.0; // [64.0 96.0 128.0 192.0 256.0]
