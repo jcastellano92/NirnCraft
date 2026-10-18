@@ -3,8 +3,6 @@
 // seam at the hand-off. A GL compute shader built from the pack's own file evaluates skyColor() for every pixel of a
 // camera; aether renders the same camera over an empty world (all sky). They must agree to float precision.
 //   aether_pack_test [shaderpack/SkycraftAether/shaders/lib/atmosphere.glsl]
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
 
 #include <cmath>
 #include <cstdio>
@@ -16,23 +14,9 @@
 #include "aether/aether.h"
 #include "camera.hpp"
 #include "gl_api.hpp"
+#include "gl_context.hpp"
 
 using namespace aether;
-
-static bool makeContext() {
-    WNDCLASSA wc{};
-    wc.lpfnWndProc = DefWindowProcA;
-    wc.hInstance = GetModuleHandleA(nullptr);
-    wc.lpszClassName = "aether_pack_test";
-    RegisterClassA(&wc);
-    HWND wnd = CreateWindowA("aether_pack_test", "aether", WS_OVERLAPPEDWINDOW, 0, 0, 64, 64, nullptr, nullptr,
-                             wc.hInstance, nullptr);
-    HDC dc = GetDC(wnd);
-    PIXELFORMATDESCRIPTOR pfd{sizeof(pfd), 1, PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL, PFD_TYPE_RGBA, 32};
-    SetPixelFormat(dc, ChoosePixelFormat(dc, &pfd), &pfd);
-    HGLRC rc = wglCreateContext(dc);
-    return rc && wglMakeCurrent(dc, rc);
-}
 
 int main(int argc, char** argv) {
     std::string libPath = argc > 1 ? argv[1] : "shaderpack/SkycraftAether/shaders/lib/atmosphere.glsl";
@@ -43,9 +27,10 @@ int main(int argc, char** argv) {
     }
     std::stringstream lib;
     lib << in.rdbuf();
+    aether_test::GlContext glc;
     GlApi gl;
     std::string err;
-    if (!makeContext() || !gl.load(err)) {
+    if (!glc.create(err) || !gl.load(err)) {
         std::printf("SKIP: %s\n", err.c_str());
         return 0;
     }
@@ -87,10 +72,10 @@ void main() {
     gl.AttachShader(prog, sh);
     gl.LinkProgram(prog);
     // a storage buffer through the minimal loader: use a texture-free path with glBindBufferBase
-    auto genBuffers = reinterpret_cast<void(__stdcall*)(GLsizei, GLuint*)>(wglGetProcAddress("glCreateBuffers"));
-    auto bufStorage = reinterpret_cast<void(__stdcall*)(GLuint, intptr_t, const void*, unsigned)>(wglGetProcAddress("glNamedBufferStorage"));
-    auto bindBase = reinterpret_cast<void(__stdcall*)(GLenum, GLuint, GLuint)>(wglGetProcAddress("glBindBufferBase"));
-    auto getSub = reinterpret_cast<void(__stdcall*)(GLuint, intptr_t, intptr_t, void*)>(wglGetProcAddress("glGetNamedBufferSubData"));
+    auto genBuffers = reinterpret_cast<void(AETHER_GLAPI*)(GLsizei, GLuint*)>(GlApi::proc("glCreateBuffers"));
+    auto bufStorage = reinterpret_cast<void(AETHER_GLAPI*)(GLuint, intptr_t, const void*, unsigned)>(GlApi::proc("glNamedBufferStorage"));
+    auto bindBase = reinterpret_cast<void(AETHER_GLAPI*)(GLenum, GLuint, GLuint)>(GlApi::proc("glBindBufferBase"));
+    auto getSub = reinterpret_cast<void(AETHER_GLAPI*)(GLuint, intptr_t, intptr_t, void*)>(GlApi::proc("glGetNamedBufferSubData"));
     GLuint buf = 0;
     genBuffers(1, &buf);
     bufStorage(buf, intptr_t(W) * H * 16, nullptr, 0x0100 /* GL_DYNAMIC_STORAGE_BIT */);
@@ -105,7 +90,7 @@ void main() {
         float l = std::sqrt(c.sun[0] * c.sun[0] + c.sun[1] * c.sun[1] + c.sun[2] * c.sun[2]);
         float sun[3] = {c.sun[0] / l, c.sun[1] / l, c.sun[2] / l};
         gl.ProgramUniformMatrix4fv(prog, gl.GetUniformLocation(prog, "invVP"), 1, 0, inv);
-        auto u3 = reinterpret_cast<void(__stdcall*)(GLuint, GLint, float, float, float)>(wglGetProcAddress("glProgramUniform3f"));
+        auto u3 = reinterpret_cast<void(AETHER_GLAPI*)(GLuint, GLint, float, float, float)>(GlApi::proc("glProgramUniform3f"));
         u3(prog, gl.GetUniformLocation(prog, "sunDir"), sun[0], sun[1], sun[2]);
         gl.ProgramUniform2f(prog, gl.GetUniformLocation(prog, "size"), float(W), float(H));
         gl.UseProgram(prog);

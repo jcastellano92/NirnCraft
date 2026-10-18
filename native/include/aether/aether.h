@@ -32,7 +32,7 @@ extern "C" {
 #endif
 
 /* (major << 16) | (minor << 8) | patch. Bumped on any ABI change. */
-#define AETHER_ABI_VERSION 0x000800
+#define AETHER_ABI_VERSION 0x000900
 
 typedef struct AetherContext AetherContext;
 
@@ -163,7 +163,8 @@ AETHER_API const char* aether_build_info(void);
 
 AETHER_API AetherStatus aether_create(AetherBackend backend, AetherContext** out);
 AETHER_API void aether_destroy(AetherContext* ctx);
-/* Last error message for this context, static until the next call. */
+/* Last error message for this context, static until the next call. NULL: why this thread's last aether_create
+   failed (e.g. no usable Vulkan device, and why each one was rejected). */
 AETHER_API const char* aether_last_error(AetherContext* ctx);
 
 /* Material palette: ids 1..count (0 is air). Replaces the whole palette. */
@@ -188,8 +189,9 @@ AETHER_API AetherStatus aether_render(AetherContext* ctx, const AetherFrame* fra
 AETHER_API AetherStatus aether_get_stats(AetherContext* ctx, AetherStats* out);
 
 /*
- * Zero-copy game path (Vulkan backend; call on the render thread with the game's OpenGL context current, on the
- * same GPU). aether_gl_attach creates color (RGBA16F linear, premultiplied), normal (RGBA8) and depth (R32F, view
+ * Game path (Vulkan backend; call on the render thread with the game's OpenGL 4.5 context current; zero-copy when
+ * that context is on the same GPU and supports memory objects, else host copies, see aether_info). aether_create
+ * on that thread picks the Vulkan device the context runs on. aether_gl_attach creates color (RGBA16F linear, premultiplied), normal (RGBA8) and depth (R32F, view
  * distance in blocks) images, plus nearDepth (R32F) that the GL side writes with the near field's view distance,
  * all shared with that context; it returns their GL texture names (rows bottom-up, GL convention). Each
  * aether_gl_render queues the frame and a GL-side semaphore wait: GL commands issued after it see the frame,
@@ -230,6 +232,20 @@ typedef struct AetherGlFrameIO {
 } AetherGlFrameIO;
 AETHER_API AetherStatus aether_gl_render_io(AetherContext* ctx, const AetherFrame* frame, const AetherGlFrameIO* io);
 AETHER_API void aether_gl_detach(AetherContext* ctx);
+
+/*
+ * (abi 0.8) What this context runs on, as one line of JSON for logs: backend, device name and type, vendor id,
+ * driver name and version, Vulkan API version, device/driver UUIDs, whether the device was picked because the GL
+ * context current at aether_create runs on it, and after aether_gl_attach the interop mode:
+ *   "zero-copy (win32 handles)" | "zero-copy (opaque fds)"  shared images + semaphores, nothing touches the CPU
+ *   "host-copy"   the driver pair cannot share memory (no EXT_memory_object_{win32,fd} / VK_KHR_external_memory_*,
+ *                 formats not exportable, or the GL context on another GPU): frames are read back and uploaded with
+ *                 glTextureSubImage2D (interopReason says why; hostCopy.waitMs / uploadMs the last frame's CPU cost;
+ *                 the near-depth skip is off, the composite's depth test still orders near over far)
+ * plus the GL renderer / version / window system ("wgl", "egl", "glx") and every Vulkan device seen. Static storage
+ * per context until the next call. Forcing a mode for tests: AETHER_INTEROP=hostcopy|zerocopy in the environment.
+ */
+AETHER_API const char* aether_info(AetherContext* ctx);
 
 /* Offline harness only: load native/data/tamriel_raster.bin and synthesise preview column tiles from it. */
 AETHER_API AetherStatus aether_preview_load_raster(AetherContext* ctx, const char* path);

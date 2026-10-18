@@ -45,12 +45,15 @@ class Backend {
 public:
     virtual ~Backend() = default;
     virtual const char* name() const = 0;
+    // One line of JSON for logs: device, driver, interop mode and the features it was chosen from.
+    virtual std::string info() const { return std::string("{\"backend\":\"") + name() + "\"}"; }
     virtual bool render(const FrameInputs& in, FrameTargets& out, double* gpuMs, std::string& err) = 0;
     // Called from the update thread with a new scene revision: a backend may copy it to the GPU here, off the
     // render thread. Returns false when it could not (the frame then uploads it itself).
     virtual bool stageScene(const PackedScene&) { return false; }
 
-    // Zero-copy game path (render thread, the game's GL context current). Default: unsupported.
+    // Game path (render thread, the game's GL context current): zero-copy through shared memory and semaphores
+    // when the driver pair supports it, else frames copied through host memory. Default: unsupported.
     virtual bool glAttach(uint32_t, uint32_t, GlTargets&, std::string& err) {
         err = "this backend cannot share images with OpenGL (use the Vulkan backend)";
         return false;

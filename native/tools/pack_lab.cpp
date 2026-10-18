@@ -11,7 +11,9 @@
 //   time: 0 sunrise, 0.25 noon, 0.5 sunset, 0.75 midnight; water=1 puts the eye under water
 #define WIN32_LEAN_AND_MEAN
 #define NOMINMAX
+#ifndef _CRT_SECURE_NO_WARNINGS
 #define _CRT_SECURE_NO_WARNINGS
+#endif
 #include <windows.h>
 #include <GL/gl.h>
 

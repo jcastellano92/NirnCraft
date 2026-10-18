@@ -1,8 +1,16 @@
-// The handful of OpenGL entry points the Vulkan<->GL bridge needs (EXT_memory_object(_win32), EXT_semaphore(_win32),
-// DSA textures). Loaded from the caller's current context on the render thread; no GL headers or loader library.
+// The handful of OpenGL entry points the Vulkan<->GL bridge needs (EXT_memory_object + _win32 / _fd,
+// EXT_semaphore + _win32 / _fd, DSA textures). Loaded from the caller's current context on the render thread:
+// wglGetProcAddress on Windows; on Linux eglGetProcAddress or glXGetProcAddressARB, whichever window system owns the
+// current context (GLFW uses GLX on X11/XWayland, EGL on Wayland). No GL headers or loader library.
 #pragma once
 #include <cstdint>
 #include <string>
+
+#if defined(_WIN32)
+#define AETHER_GLAPI __stdcall
+#else
+#define AETHER_GLAPI
+#endif
 
 namespace aether {
 
@@ -29,73 +37,103 @@ constexpr GLenum GL_TEXTURE_2D = 0x0DE1, GL_RGBA8 = 0x8058, GL_RGBA16F = 0x881A,
                  GL_DRAW_FRAMEBUFFER_BINDING = 0x8CA6, GL_DEPTH_ATTACHMENT = 0x8D00, GL_FRAMEBUFFER = 0x8D40,
                  GL_DRAW_FRAMEBUFFER = 0x8CA9, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE = 0x8CD0,
                  GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME = 0x8CD1, GL_TEXTURE = 0x1702,
-                 GL_CLIP_DEPTH_MODE = 0x935D, GL_ZERO_TO_ONE = 0x935F;
+                 GL_CLIP_DEPTH_MODE = 0x935D, GL_ZERO_TO_ONE = 0x935F,
+                 GL_HANDLE_TYPE_OPAQUE_FD_EXT = 0x9586, GL_DRIVER_UUID_EXT = 0x9598, GL_VENDOR = 0x1F00,
+                 GL_EXTENSIONS = 0x1F03, GL_NUM_EXTENSIONS = 0x821D, GL_MAJOR_VERSION = 0x821B,
+                 GL_MINOR_VERSION = 0x821C, GL_HALF_FLOAT = 0x140B, GL_PIXEL_UNPACK_BUFFER = 0x88EC,
+                 GL_PIXEL_UNPACK_BUFFER_BINDING = 0x88EF, GL_UNPACK_ROW_LENGTH = 0x0CF2, GL_UNPACK_SKIP_ROWS = 0x0CF3,
+                 GL_UNPACK_SKIP_PIXELS = 0x0CF4, GL_UNPACK_ALIGNMENT = 0x0CF5, GL_UNPACK_SWAP_BYTES = 0x0CF0,
+                 GL_UNPACK_LSB_FIRST = 0x0CF1;
 
 struct GlApi {
-    const GLubyte*(__stdcall* GetString)(GLenum) = nullptr;
-    GLenum(__stdcall* GetError)() = nullptr;
-    void(__stdcall* Flush)() = nullptr;
-    void(__stdcall* Finish)() = nullptr;
-    void(__stdcall* GetIntegerv)(GLenum, GLint*) = nullptr;
-    void(__stdcall* DeleteTextures)(GLsizei, const GLuint*) = nullptr;
-    void(__stdcall* CreateTextures)(GLenum, GLsizei, GLuint*) = nullptr;
-    void(__stdcall* TextureParameteri)(GLuint, GLenum, GLint) = nullptr;
-    void(__stdcall* GetTextureImage)(GLuint, GLint, GLenum, GLenum, GLsizei, void*) = nullptr;
-    void(__stdcall* ClearTexImage)(GLuint, GLint, GLenum, GLenum, const void*) = nullptr;
-    void(__stdcall* ClearTexSubImage)(GLuint, GLint, GLint, GLint, GLint, GLsizei, GLsizei, GLsizei, GLenum, GLenum,
+    const GLubyte*(AETHER_GLAPI* GetString)(GLenum) = nullptr;
+    GLenum(AETHER_GLAPI* GetError)() = nullptr;
+    void(AETHER_GLAPI* Flush)() = nullptr;
+    void(AETHER_GLAPI* Finish)() = nullptr;
+    void(AETHER_GLAPI* GetIntegerv)(GLenum, GLint*) = nullptr;
+    void(AETHER_GLAPI* DeleteTextures)(GLsizei, const GLuint*) = nullptr;
+    void(AETHER_GLAPI* CreateTextures)(GLenum, GLsizei, GLuint*) = nullptr;
+    void(AETHER_GLAPI* TextureParameteri)(GLuint, GLenum, GLint) = nullptr;
+    void(AETHER_GLAPI* GetTextureImage)(GLuint, GLint, GLenum, GLenum, GLsizei, void*) = nullptr;
+    void(AETHER_GLAPI* ClearTexImage)(GLuint, GLint, GLenum, GLenum, const void*) = nullptr;
+    void(AETHER_GLAPI* ClearTexSubImage)(GLuint, GLint, GLint, GLint, GLint, GLsizei, GLsizei, GLsizei, GLenum, GLenum,
                                       const void*) = nullptr;
-    void(__stdcall* CreateMemoryObjectsEXT)(GLsizei, GLuint*) = nullptr;
-    void(__stdcall* DeleteMemoryObjectsEXT)(GLsizei, const GLuint*) = nullptr;
-    void(__stdcall* MemoryObjectParameterivEXT)(GLuint, GLenum, const GLint*) = nullptr;
-    void(__stdcall* ImportMemoryWin32HandleEXT)(GLuint, GLuint64, GLenum, void*) = nullptr;
-    void(__stdcall* TextureStorageMem2DEXT)(GLuint, GLsizei, GLenum, GLsizei, GLsizei, GLuint, GLuint64) = nullptr;
-    void(__stdcall* GenSemaphoresEXT)(GLsizei, GLuint*) = nullptr;
-    void(__stdcall* DeleteSemaphoresEXT)(GLsizei, const GLuint*) = nullptr;
-    void(__stdcall* ImportSemaphoreWin32HandleEXT)(GLuint, GLenum, void*) = nullptr;
-    void(__stdcall* SignalSemaphoreEXT)(GLuint, GLuint, const GLuint*, GLuint, const GLuint*, const GLenum*) = nullptr;
-    void(__stdcall* WaitSemaphoreEXT)(GLuint, GLuint, const GLuint*, GLuint, const GLuint*, const GLenum*) = nullptr;
-    void(__stdcall* GetUnsignedBytei_vEXT)(GLenum, GLuint, GLubyte*) = nullptr;
+    void(AETHER_GLAPI* CreateMemoryObjectsEXT)(GLsizei, GLuint*) = nullptr;
+    void(AETHER_GLAPI* DeleteMemoryObjectsEXT)(GLsizei, const GLuint*) = nullptr;
+    void(AETHER_GLAPI* MemoryObjectParameterivEXT)(GLuint, GLenum, const GLint*) = nullptr;
+    void(AETHER_GLAPI* ImportMemoryWin32HandleEXT)(GLuint, GLuint64, GLenum, void*) = nullptr;
+    void(AETHER_GLAPI* TextureStorageMem2DEXT)(GLuint, GLsizei, GLenum, GLsizei, GLsizei, GLuint, GLuint64) = nullptr;
+    void(AETHER_GLAPI* GenSemaphoresEXT)(GLsizei, GLuint*) = nullptr;
+    void(AETHER_GLAPI* DeleteSemaphoresEXT)(GLsizei, const GLuint*) = nullptr;
+    void(AETHER_GLAPI* ImportSemaphoreWin32HandleEXT)(GLuint, GLenum, void*) = nullptr;
+    void(AETHER_GLAPI* SignalSemaphoreEXT)(GLuint, GLuint, const GLuint*, GLuint, const GLuint*, const GLenum*) = nullptr;
+    void(AETHER_GLAPI* WaitSemaphoreEXT)(GLuint, GLuint, const GLuint*, GLuint, const GLuint*, const GLenum*) = nullptr;
+    void(AETHER_GLAPI* GetUnsignedBytei_vEXT)(GLenum, GLuint, GLubyte*) = nullptr;
     // near-depth linearisation pass and destination copies
-    GLuint(__stdcall* CreateShader)(GLenum) = nullptr;
-    void(__stdcall* ShaderSource)(GLuint, GLsizei, const char* const*, const GLint*) = nullptr;
-    void(__stdcall* CompileShader)(GLuint) = nullptr;
-    void(__stdcall* GetShaderiv)(GLuint, GLenum, GLint*) = nullptr;
-    void(__stdcall* GetShaderInfoLog)(GLuint, GLsizei, GLsizei*, char*) = nullptr;
-    void(__stdcall* DeleteShader)(GLuint) = nullptr;
-    GLuint(__stdcall* CreateProgram)() = nullptr;
-    void(__stdcall* AttachShader)(GLuint, GLuint) = nullptr;
-    void(__stdcall* LinkProgram)(GLuint) = nullptr;
-    void(__stdcall* GetProgramiv)(GLuint, GLenum, GLint*) = nullptr;
-    void(__stdcall* DeleteProgram)(GLuint) = nullptr;
-    void(__stdcall* UseProgram)(GLuint) = nullptr;
-    GLint(__stdcall* GetUniformLocation)(GLuint, const char*) = nullptr;
-    void(__stdcall* ProgramUniformMatrix4fv)(GLuint, GLint, GLsizei, unsigned char, const float*) = nullptr;
-    void(__stdcall* ProgramUniform2f)(GLuint, GLint, float, float) = nullptr;
-    void(__stdcall* ProgramUniform1i)(GLuint, GLint, GLint) = nullptr;
-    void(__stdcall* ProgramUniform1f)(GLuint, GLint, float) = nullptr;
-    void(__stdcall* BindTextureUnit)(GLuint, GLuint) = nullptr;
-    void(__stdcall* BindImageTexture)(GLuint, GLuint, GLint, unsigned char, GLint, GLenum, GLenum) = nullptr;
-    void(__stdcall* DispatchCompute)(GLuint, GLuint, GLuint) = nullptr;
-    void(__stdcall* MemoryBarrierGL)(unsigned int) = nullptr;  // glMemoryBarrier (MemoryBarrier is a Windows macro)
-    void(__stdcall* CopyImageSubData)(GLuint, GLenum, GLint, GLint, GLint, GLint, GLuint, GLenum, GLint, GLint, GLint,
+    GLuint(AETHER_GLAPI* CreateShader)(GLenum) = nullptr;
+    void(AETHER_GLAPI* ShaderSource)(GLuint, GLsizei, const char* const*, const GLint*) = nullptr;
+    void(AETHER_GLAPI* CompileShader)(GLuint) = nullptr;
+    void(AETHER_GLAPI* GetShaderiv)(GLuint, GLenum, GLint*) = nullptr;
+    void(AETHER_GLAPI* GetShaderInfoLog)(GLuint, GLsizei, GLsizei*, char*) = nullptr;
+    void(AETHER_GLAPI* DeleteShader)(GLuint) = nullptr;
+    GLuint(AETHER_GLAPI* CreateProgram)() = nullptr;
+    void(AETHER_GLAPI* AttachShader)(GLuint, GLuint) = nullptr;
+    void(AETHER_GLAPI* LinkProgram)(GLuint) = nullptr;
+    void(AETHER_GLAPI* GetProgramiv)(GLuint, GLenum, GLint*) = nullptr;
+    void(AETHER_GLAPI* DeleteProgram)(GLuint) = nullptr;
+    void(AETHER_GLAPI* UseProgram)(GLuint) = nullptr;
+    GLint(AETHER_GLAPI* GetUniformLocation)(GLuint, const char*) = nullptr;
+    void(AETHER_GLAPI* ProgramUniformMatrix4fv)(GLuint, GLint, GLsizei, unsigned char, const float*) = nullptr;
+    void(AETHER_GLAPI* ProgramUniform2f)(GLuint, GLint, float, float) = nullptr;
+    void(AETHER_GLAPI* ProgramUniform1i)(GLuint, GLint, GLint) = nullptr;
+    void(AETHER_GLAPI* ProgramUniform1f)(GLuint, GLint, float) = nullptr;
+    void(AETHER_GLAPI* BindTextureUnit)(GLuint, GLuint) = nullptr;
+    void(AETHER_GLAPI* BindImageTexture)(GLuint, GLuint, GLint, unsigned char, GLint, GLenum, GLenum) = nullptr;
+    void(AETHER_GLAPI* DispatchCompute)(GLuint, GLuint, GLuint) = nullptr;
+    void(AETHER_GLAPI* MemoryBarrierGL)(unsigned int) = nullptr;  // glMemoryBarrier (MemoryBarrier is a Windows macro)
+    void(AETHER_GLAPI* CopyImageSubData)(GLuint, GLenum, GLint, GLint, GLint, GLint, GLuint, GLenum, GLint, GLint, GLint,
                                       GLint, GLsizei, GLsizei, GLsizei) = nullptr;
-    void(__stdcall* GetIntegeri_v)(GLenum, GLuint, GLint*) = nullptr;
-    void(__stdcall* ActiveTexture)(GLenum) = nullptr;
-    void(__stdcall* BindTexture)(GLenum, GLuint) = nullptr;
-    void(__stdcall* TextureStorage2D)(GLuint, GLsizei, GLenum, GLsizei, GLsizei) = nullptr;
-    void(__stdcall* CreateSamplers)(GLsizei, GLuint*) = nullptr;
-    void(__stdcall* DeleteSamplers)(GLsizei, const GLuint*) = nullptr;
-    void(__stdcall* SamplerParameteri)(GLuint, GLenum, GLint) = nullptr;
-    void(__stdcall* BindSampler)(GLuint, GLuint) = nullptr;
-    void(__stdcall* TextureSubImage2D)(GLuint, GLint, GLint, GLint, GLsizei, GLsizei, GLenum, GLenum, const void*) = nullptr;
-    void(__stdcall* GetNamedFramebufferAttachmentParameteriv)(GLuint, GLenum, GLenum, GLint*) = nullptr;
-    void(__stdcall* CreateFramebuffers)(GLsizei, GLuint*) = nullptr;
-    void(__stdcall* DeleteFramebuffers)(GLsizei, const GLuint*) = nullptr;
-    void(__stdcall* NamedFramebufferTexture)(GLuint, GLenum, GLuint, GLint) = nullptr;
-    void(__stdcall* BindFramebuffer)(GLenum, GLuint) = nullptr;
+    void(AETHER_GLAPI* GetIntegeri_v)(GLenum, GLuint, GLint*) = nullptr;
+    void(AETHER_GLAPI* ActiveTexture)(GLenum) = nullptr;
+    void(AETHER_GLAPI* BindTexture)(GLenum, GLuint) = nullptr;
+    void(AETHER_GLAPI* TextureStorage2D)(GLuint, GLsizei, GLenum, GLsizei, GLsizei) = nullptr;
+    void(AETHER_GLAPI* CreateSamplers)(GLsizei, GLuint*) = nullptr;
+    void(AETHER_GLAPI* DeleteSamplers)(GLsizei, const GLuint*) = nullptr;
+    void(AETHER_GLAPI* SamplerParameteri)(GLuint, GLenum, GLint) = nullptr;
+    void(AETHER_GLAPI* BindSampler)(GLuint, GLuint) = nullptr;
+    void(AETHER_GLAPI* TextureSubImage2D)(GLuint, GLint, GLint, GLint, GLsizei, GLsizei, GLenum, GLenum, const void*) = nullptr;
+    void(AETHER_GLAPI* GetNamedFramebufferAttachmentParameteriv)(GLuint, GLenum, GLenum, GLint*) = nullptr;
+    void(AETHER_GLAPI* CreateFramebuffers)(GLsizei, GLuint*) = nullptr;
+    void(AETHER_GLAPI* DeleteFramebuffers)(GLsizei, const GLuint*) = nullptr;
+    void(AETHER_GLAPI* NamedFramebufferTexture)(GLuint, GLenum, GLuint, GLint) = nullptr;
+    void(AETHER_GLAPI* BindFramebuffer)(GLenum, GLuint) = nullptr;
+    const GLubyte*(AETHER_GLAPI* GetStringi)(GLenum, GLuint) = nullptr;
+    void(AETHER_GLAPI* GetUnsignedBytevEXT)(GLenum, GLubyte*) = nullptr;
+    void(AETHER_GLAPI* ImportMemoryFdEXT)(GLuint, GLuint64, GLenum, GLint) = nullptr;
+    void(AETHER_GLAPI* ImportSemaphoreFdEXT)(GLuint, GLenum, GLint) = nullptr;
+    void(AETHER_GLAPI* PixelStorei)(GLenum, GLint) = nullptr;
+    void(AETHER_GLAPI* BindBuffer)(GLenum, GLuint) = nullptr;
 
-    // Loads from the current context; false + err names what is missing.
+    // What the context offers (filled by load). Interop needs memoryObject + semaphore and the platform's handle
+    // flavour (win32 on Windows, fd on Linux); without them aether falls back to copying frames through the host.
+    int major = 0, minor = 0;
+    bool memoryObject = false, memoryObjectWin32 = false, memoryObjectFd = false;
+    bool semaphore = false, semaphoreWin32 = false, semaphoreFd = false;
+    std::string extensions;  // space separated, with a leading and trailing space
+
+    // Loads from the current context: false + err when it lacks the GL 4.5 core this bridge needs (the interop
+    // extensions are optional and reported in the flags above).
     bool load(std::string& err);
+    bool hasExtension(const char* name) const;
+    // The context's device / driver UUIDs (EXT_memory_object), false when it cannot tell.
+    bool deviceUuids(uint8_t (*out)[16], int max, int& count) const;
+    bool driverUuid(uint8_t out[16]) const;
+
+    // Whether this thread has a current GL context, and which window system API owns it ("wgl", "egl", "glx").
+    static bool contextCurrent();
+    static const char* windowSystem();
+    // Any GL entry point of the current context (null when unknown).
+    static void* proc(const char* name);
 };
 
 }  // namespace aether

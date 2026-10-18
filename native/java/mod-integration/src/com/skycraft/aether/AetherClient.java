@@ -48,6 +48,7 @@ public final class AetherClient {
     private static final AetherQuality quality = new AetherQuality();
     private static Supplier<WeatherFeed> weather = () -> WEATHER;
     private static boolean failed;
+    private static boolean infoLogged;  // aether_info logged for this context
     private static final AetherNative.Frame frame = new AetherNative.Frame();
     private static final AetherNative.GlFrameIO io = new AetherNative.GlFrameIO();
     private static final int[][] fields = {new int[128 * 128], new int[128 * 128], new int[128 * 128], new int[128 * 128]};
@@ -111,6 +112,12 @@ public final class AetherClient {
                 if (targets != null) targets.close();
                 ctx.setSunMap(sunMap, AetherQuality.SUN_HALF_EXTENT);
                 targets = AetherTargets.create(ctx, w, h, sunMap);
+                // device, driver and interop mode (zero-copy, or host-copy and why) once per context: the first
+                // thing to read in a bug report from an AMD / Deck / Linux machine
+                if (!infoLogged) {
+                    infoLogged = true;
+                    com.skycraft.Skycraft.LOGGER.info("aether: {}", ctx.info());
+                }
             }
             if (mc.level.dimension() != Level.OVERWORLD) {
                 targets.clear();  // the far field is the overworld's; elsewhere the near field stands alone
@@ -273,6 +280,7 @@ public final class AetherClient {
         farField = null;
         targets = null;
         ctx = null;
+        infoLogged = false;
         startedFor = null;
     }
 

@@ -1,20 +1,31 @@
 // Vulkan compute backend for the aether_far kernel.
 //  * Host path (harness, tests): scene in host-visible buffers (BAR when available), outputs read back.
-//  * GL path (game): outputs published into images whose memory is exported to the game's OpenGL context
-//    (VK_KHR_external_memory_win32 <-> GL_EXT_memory_object_win32), ordered by shared semaphores, so the frame never
-//    touches the CPU. Two frame slots: the CPU records frame N+1 while the GPU still runs frame N.
-#include <vulkan/vulkan.h>
+//  * GL path (game), zero-copy: outputs published into images whose memory is exported to the game's OpenGL context
+//    (VK_KHR_external_memory_win32 <-> GL_EXT_memory_object_win32 on Windows, VK_KHR_external_memory_fd <->
+//    GL_EXT_memory_object_fd on Linux), ordered by shared semaphores, so the frame never touches the CPU. Two frame
+//    slots: the CPU records frame N+1 while the GPU still runs frame N.
+//  * GL path, host-copy fallback (no interop extensions, formats not exportable, or the GL context on another GPU):
+//    the same images are local to Vulkan, copied to host memory and uploaded into plain GL textures.
+// Baseline: Vulkan 1.2 + shaderInt64 (the SPIR-V is 1.5 with only the Shader and Int64 capabilities).
+#include "vk_loader.hpp"  // first: VK_NO_PROTOTYPES, the loader is opened at run time
+#if defined(_WIN32)
 #define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
 #include <windows.h>
 #include <vulkan/vulkan_win32.h>
+#else
+#include <unistd.h>
+#endif
 
 #include <algorithm>
 #include <atomic>
+#include <cctype>
 #include <chrono>
 #include <cstdio>
 #include <mutex>
 #include <cstdlib>
 #include <cstring>
+#include <string>
 #include <vector>
 
 #include "aether_cloud_spv.h"
@@ -27,6 +38,138 @@
 
 namespace aether {
 namespace {
+
+// ---- platform shim: the one place the two interop flavours differ -------------------------------------------------
+#if defined(_WIN32)
+using ExtHandle = HANDLE;
+const ExtHandle NO_HANDLE = nullptr;
+constexpr VkExternalMemoryHandleTypeFlagBits MEM_HANDLE = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT;
+constexpr VkExternalSemaphoreHandleTypeFlagBits SEM_HANDLE = VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_WIN32_BIT;
+const char* const MEM_EXT = VK_KHR_EXTERNAL_MEMORY_WIN32_EXTENSION_NAME;
+const char* const SEM_EXT = VK_KHR_EXTERNAL_SEMAPHORE_WIN32_EXTENSION_NAME;
+const char* const INTEROP_NAME = "zero-copy (win32 handles)";
+const char* const GL_INTEROP_EXTS = "GL_EXT_memory_object_win32 + GL_EXT_semaphore_win32";
+const char* const GL_MEM_EXT = "GL_EXT_memory_object_win32";
+const char* const GL_SEM_EXT = "GL_EXT_semaphore_win32";
+void closeHandle(ExtHandle& h) {
+    if (h) CloseHandle(h);
+    h = nullptr;
+}
+bool glHasInterop(const GlApi& gl) { return gl.memoryObjectWin32 && gl.semaphoreWin32; }
+
+struct ExportFns {
+    PFN_vkGetMemoryWin32HandleKHR mem = nullptr;
+    PFN_vkGetSemaphoreWin32HandleKHR sem = nullptr;
+    bool load(VkDevice d) {
+        mem = reinterpret_cast<PFN_vkGetMemoryWin32HandleKHR>(vkGetDeviceProcAddr(d, "vkGetMemoryWin32HandleKHR"));
+        sem = reinterpret_cast<PFN_vkGetSemaphoreWin32HandleKHR>(vkGetDeviceProcAddr(d, "vkGetSemaphoreWin32HandleKHR"));
+        return mem && sem;
+    }
+    bool memory(VkDevice d, VkDeviceMemory m, ExtHandle& out) const {
+        VkMemoryGetWin32HandleInfoKHR hi{VK_STRUCTURE_TYPE_MEMORY_GET_WIN32_HANDLE_INFO_KHR};
+        hi.memory = m;
+        hi.handleType = MEM_HANDLE;
+        return mem(d, &hi, &out) == VK_SUCCESS;
+    }
+    bool semaphore(VkDevice d, VkSemaphore s, ExtHandle& out) const {
+        VkSemaphoreGetWin32HandleInfoKHR hi{VK_STRUCTURE_TYPE_SEMAPHORE_GET_WIN32_HANDLE_INFO_KHR};
+        hi.semaphore = s;
+        hi.handleType = SEM_HANDLE;
+        return sem(d, &hi, &out) == VK_SUCCESS;
+    }
+};
+// GL duplicates nothing: the handle stays ours and is closed when the image goes
+void glImportMemory(const GlApi& gl, GLuint obj, uint64_t size, ExtHandle& h) {
+    gl.ImportMemoryWin32HandleEXT(obj, size, GL_HANDLE_TYPE_OPAQUE_WIN32_EXT, h);
+}
+void glImportSemaphore(const GlApi& gl, GLuint obj, ExtHandle& h) {
+    gl.ImportSemaphoreWin32HandleEXT(obj, GL_HANDLE_TYPE_OPAQUE_WIN32_EXT, h);
+}
+#else
+using ExtHandle = int;
+const ExtHandle NO_HANDLE = -1;
+constexpr VkExternalMemoryHandleTypeFlagBits MEM_HANDLE = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT;
+constexpr VkExternalSemaphoreHandleTypeFlagBits SEM_HANDLE = VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_FD_BIT;
+const char* const MEM_EXT = VK_KHR_EXTERNAL_MEMORY_FD_EXTENSION_NAME;
+const char* const SEM_EXT = VK_KHR_EXTERNAL_SEMAPHORE_FD_EXTENSION_NAME;
+const char* const INTEROP_NAME = "zero-copy (opaque fds)";
+const char* const GL_INTEROP_EXTS = "GL_EXT_memory_object_fd + GL_EXT_semaphore_fd";
+const char* const GL_MEM_EXT = "GL_EXT_memory_object_fd";
+const char* const GL_SEM_EXT = "GL_EXT_semaphore_fd";
+void closeHandle(ExtHandle& h) {
+    if (h >= 0) close(h);
+    h = -1;
+}
+bool glHasInterop(const GlApi& gl) { return gl.memoryObjectFd && gl.semaphoreFd; }
+
+struct ExportFns {
+    PFN_vkGetMemoryFdKHR mem = nullptr;
+    PFN_vkGetSemaphoreFdKHR sem = nullptr;
+    bool load(VkDevice d) {
+        mem = reinterpret_cast<PFN_vkGetMemoryFdKHR>(vkGetDeviceProcAddr(d, "vkGetMemoryFdKHR"));
+        sem = reinterpret_cast<PFN_vkGetSemaphoreFdKHR>(vkGetDeviceProcAddr(d, "vkGetSemaphoreFdKHR"));
+        return mem && sem;
+    }
+    bool memory(VkDevice d, VkDeviceMemory m, ExtHandle& out) const {
+        VkMemoryGetFdInfoKHR hi{VK_STRUCTURE_TYPE_MEMORY_GET_FD_INFO_KHR};
+        hi.memory = m;
+        hi.handleType = MEM_HANDLE;
+        return mem(d, &hi, &out) == VK_SUCCESS;
+    }
+    bool semaphore(VkDevice d, VkSemaphore s, ExtHandle& out) const {
+        VkSemaphoreGetFdInfoKHR hi{VK_STRUCTURE_TYPE_SEMAPHORE_GET_FD_INFO_KHR};
+        hi.semaphore = s;
+        hi.handleType = SEM_HANDLE;
+        return sem(d, &hi, &out) == VK_SUCCESS;
+    }
+};
+// A successful fd import transfers the fd to GL (it must not be closed or reused); a failed one leaves it ours.
+void glImportMemory(const GlApi& gl, GLuint obj, uint64_t size, ExtHandle& h) {
+    gl.ImportMemoryFdEXT(obj, size, GL_HANDLE_TYPE_OPAQUE_FD_EXT, h);
+    if (gl.GetError() == GL_NO_ERROR) h = -1;
+}
+void glImportSemaphore(const GlApi& gl, GLuint obj, ExtHandle& h) {
+    gl.ImportSemaphoreFdEXT(obj, GL_HANDLE_TYPE_OPAQUE_FD_EXT, h);
+    if (gl.GetError() == GL_NO_ERROR) h = -1;
+}
+#endif
+
+enum class Interop { None, ZeroCopy, HostCopy };
+
+std::string jsonEscape(const std::string& s) {
+    std::string o;
+    for (char c : s) {
+        if (c == '"' || c == '\\') o += '\\';
+        if (static_cast<unsigned char>(c) < 0x20) continue;
+        o += c;
+    }
+    return o;
+}
+
+std::string hex16(const uint8_t* u) {
+    static const char* d = "0123456789abcdef";
+    std::string s;
+    for (int i = 0; i < 16; i++) {
+        s += d[u[i] >> 4];
+        s += d[u[i] & 15];
+    }
+    return s;
+}
+
+std::string apiString(uint32_t v) {
+    return std::to_string(VK_API_VERSION_MAJOR(v)) + "." + std::to_string(VK_API_VERSION_MINOR(v)) + "." +
+           std::to_string(VK_API_VERSION_PATCH(v));
+}
+
+const char* typeName(VkPhysicalDeviceType t) {
+    switch (t) {
+        case VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU: return "discrete";
+        case VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU: return "integrated";
+        case VK_PHYSICAL_DEVICE_TYPE_VIRTUAL_GPU: return "virtual";
+        case VK_PHYSICAL_DEVICE_TYPE_CPU: return "cpu";
+        default: return "other";
+    }
+}
 
 constexpr uint32_t BINDINGS = 25;
 constexpr uint32_t SLOTS = 2;
@@ -88,7 +231,8 @@ VKAPI_ATTR VkBool32 VKAPI_CALL onValidation(VkDebugUtilsMessageSeverityFlagBitsE
 
 // Where a buffer lives. The host-visible device-local (BAR) heap is often only 214-256 MB without Resizable BAR, so
 // nothing big may depend on it: frame outputs and the scene are device-local, filled by GPU copies.
-enum class Mem { HostWrite, Readback, DeviceOnly, Staging };
+// HostRead: a readback target only copied into, never bound (no descriptor range limit)
+enum class Mem { HostWrite, Readback, DeviceOnly, Staging, HostRead };
 
 struct Buf {
     VkBuffer buf = VK_NULL_HANDLE;
@@ -102,13 +246,14 @@ struct SharedImage {
     VkImage image = VK_NULL_HANDLE;
     VkDeviceMemory mem = VK_NULL_HANDLE;
     VkImageView view = VK_NULL_HANDLE;
-    HANDLE handle = nullptr;
-    GLuint glMem = 0, glTex = 0;
+    ExtHandle handle = NO_HANDLE;
+    VkDeviceSize size = 0;        // of its (dedicated) allocation: what GL imports
+    GLuint glMem = 0, glTex = 0;  // host-copy: glTex is a plain GL texture, glMem 0
 };
 
 struct SharedSemaphore {
     VkSemaphore sem = VK_NULL_HANDLE;
-    HANDLE handle = nullptr;
+    ExtHandle handle = NO_HANDLE;
     GLuint gl = 0;
 };
 
@@ -138,6 +283,9 @@ struct Slot {
     Buf bufs[BINDINGS];  // only the per-slot bindings are used
     bool farDirty = true, publishDirty = true, ingestDirty = true;
     SharedSemaphore glReady, vkDone;
+    Buf hostOut;            // host-copy: this slot's frame in host memory (colour, normal, depth, sun map)
+    bool hostPending = false;  // hostOut holds a frame not yet uploaded to GL
+    bool hostSun = false;      // ... including the sun map
 };
 
 class VulkanBackend final : public Backend {
@@ -148,10 +296,12 @@ public:
             destroyInterop();
             for (auto& s : slots_) {
                 for (auto& b : s.bufs) release(b);
+                release(s.hostOut);
                 if (s.fence) vkDestroyFence(dev_, s.fence, nullptr);
                 if (s.query) vkDestroyQueryPool(dev_, s.query, nullptr);
             }
             for (auto& b : shared_) release(b);
+            release(sunReadback_);
             release(noiseStaging_);
             if (noiseSampler_) vkDestroySampler(dev_, noiseSampler_, nullptr);
             if (noiseView_) vkDestroyImageView(dev_, noiseView_, nullptr);
@@ -179,13 +329,52 @@ public:
                 vkGetInstanceProcAddr(inst_, "vkDestroyDebugUtilsMessengerEXT"));
             if (destroy) destroy(inst_, messenger_, nullptr);
         }
-        if (inst_) vkDestroyInstance(inst_, nullptr);
+        if (inst_ && vkDestroyInstance) vkDestroyInstance(inst_, nullptr);
     }
 
     const char* name() const override { return deviceName_; }
 
+    std::string info() const override {
+        auto q = [](const std::string& s) { return "\"" + jsonEscape(s) + "\""; };
+        auto b = [](bool v) { return v ? std::string("true") : std::string("false"); };
+        char vendor[16];
+        std::snprintf(vendor, sizeof(vendor), "0x%04x", props_.vendorID);
+        std::string o = "{\"backend\":\"vulkan\",\"device\":" + q(props_.deviceName) + ",\"type\":" +
+                        q(typeName(props_.deviceType)) + ",\"vendor\":\"" + vendor + "\",\"driver\":" + q(driverName_) +
+                        ",\"driverId\":" + std::to_string(driverId_) + ",\"api\":" + q(apiString(props_.apiVersion)) +
+                        ",\"deviceUuid\":" + q(hex16(deviceUuid_)) + ",\"driverUuid\":" + q(hex16(driverUuid_)) +
+                        ",\"pickedForGlContext\":" + b(glMatchedAtCreate_);
+        const char* mode = mode_ == Interop::ZeroCopy ? INTEROP_NAME : mode_ == Interop::HostCopy ? "host-copy" : "not attached";
+        o += ",\"interop\":" + q(mode);
+        if (mode_ == Interop::HostCopy) {
+            o += ",\"interopReason\":" + q(interopWhy_) + ",\"hostCopy\":{\"waitMs\":" + std::to_string(hostWaitMs_) +
+                 ",\"uploadMs\":" + std::to_string(hostUploadMs_) + ",\"nearDepthSkip\":false}";
+        }
+        o += ",\"vkExport\":" + b(interopCapable_);
+        if (!interopCapable_) o += ",\"vkExportReason\":" + q(vkInteropWhy_);
+        o += ",\"dedicatedOnly\":" + b(dedicatedOnly_) + ",\"timestamps\":" + b(timestamps_) +
+             ",\"maxStorageBufferRange\":" + std::to_string(maxStorageRange_);
+        if (glLoaded_) {
+            o += ",\"gl\":{\"renderer\":" + q(glRenderer_) + ",\"version\":" + q(glVersion_) + ",\"vendor\":" + q(glVendor_) +
+                 ",\"winsys\":" + q(glWinsys_) + ",\"memoryObject\":" + b(glHasInterop(gl_)) +
+                 ",\"uuidMatch\":" + b(glUuidMatch_);
+            if (!glDriverUuid_.empty()) o += ",\"driverUuid\":" + q(glDriverUuid_);
+            o += "}";
+        }
+        o += ",\"devices\":[";
+        for (size_t i = 0; i < seen_.size(); i++) {
+            const DeviceSeen& d = seen_[i];
+            o += std::string(i ? "," : "") + "{\"name\":" + q(d.name) + ",\"type\":" + q(d.type) + ",\"api\":" + q(d.api) +
+                 ",\"glContext\":" + b(d.glMatch) + ",\"chosen\":" + b(int(i) == chosen_);
+            if (!d.unfit.empty()) o += ",\"unfit\":" + q(d.unfit);
+            o += "}";
+        }
+        return o + "]}";
+    }
+
     bool init(std::string& err) {
         if (!createInstance(err) || !pickDevice(err) || !createDevice(err)) return false;
+        probeInterop();
         // far kernel: binding 0 uniform, the rest storage buffers
         std::vector<VkDescriptorType> farTypes(BINDINGS, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
         farTypes[B_FRAME] = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
@@ -311,40 +500,51 @@ public:
     // ---- GL interop ------------------------------------------------------------------------------------------
 
     bool glAttach(uint32_t w, uint32_t h, GlTargets& out, std::string& err) override {
-        if (!interopCapable_) return fail(err, "Vulkan device lacks VK_KHR_external_memory_win32/semaphore_win32");
         if (attached_) glDetach();
         if (!gl_.load(err)) return false;
-        // the GL context must live on the same physical GPU as our Vulkan device
-        GLint nUuid = 0;
-        gl_.GetIntegerv(GL_NUM_DEVICE_UUIDS_EXT, &nUuid);
-        bool same = false;
-        for (GLint i = 0; i < nUuid && !same; i++) {
-            GLubyte u[16] = {};
-            gl_.GetUnsignedBytei_vEXT(GL_DEVICE_UUID_EXT, GLuint(i), u);
-            same = std::memcmp(u, deviceUuid_, 16) == 0;
+        glLoaded_ = true;
+        auto str = [&](GLenum e) {
+            const GLubyte* s = gl_.GetString(e);
+            return s ? std::string(reinterpret_cast<const char*>(s)) : std::string("?");
+        };
+        glRenderer_ = str(GL_RENDERER);
+        glVersion_ = str(GL_VERSION);
+        glVendor_ = str(GL_VENDOR);
+        glWinsys_ = GlApi::windowSystem();
+        while (gl_.GetError() != GL_NO_ERROR) {}  // the caller's stale errors are not ours
+        // zero-copy when the driver pair allows it, else host copies; AETHER_INTEROP=hostcopy|zerocopy forces one
+        const char* f = std::getenv("AETHER_INTEROP");
+        std::string force = f ? f : "";
+        {
+            // reported whatever the mode (info): is the GL context on our device at all?
+            uint8_t u[8][16];
+            int n = 0;
+            glUuidMatch_ = false;
+            if (gl_.deviceUuids(u, 8, n))
+                for (int i = 0; i < n; i++) glUuidMatch_ |= std::memcmp(u[i], deviceUuid_, 16) == 0;
         }
-        if (!same) {
-            err = std::string("the OpenGL context (") + reinterpret_cast<const char*>(gl_.GetString(GL_RENDERER)) +
-                  ") is not on the Vulkan device " + deviceName_;
-            return false;
+        std::string why = zeroCopyBlocker(w, h, force != "zerocopy");
+        if (force == "hostcopy") why = "forced by AETHER_INTEROP=hostcopy";
+        if (!why.empty() && force == "zerocopy") return fail(err, ("zero-copy interop unavailable: " + why).c_str());
+        bool ok = false;
+        if (why.empty()) {
+            mode_ = Interop::ZeroCopy;
+            ok = createTargets(w, h, err);
+            if (!ok) {
+                destroyInterop();
+                if (force == "zerocopy") return false;
+                why = "zero-copy import failed (" + err + ")";
+            }
         }
-        const VkFormat fmt[IMAGES] = {VK_FORMAT_R16G16B16A16_SFLOAT, VK_FORMAT_R8G8B8A8_UNORM, VK_FORMAT_R32_SFLOAT,
-                                      VK_FORMAT_R32_SFLOAT};
-        const GLenum glFmt[IMAGES] = {GL_RGBA16F, GL_RGBA8, GL_R32F, GL_R32F};
-        bool ok = true;
-        for (int i = 0; i < IMAGES && ok; i++) ok = createShared(images_[i], fmt[i], glFmt[i], w, h, err);
-        for (auto& s : slots_) ok = ok && createSemaphore(s.glReady, err) && createSemaphore(s.vkDone, err);
         if (!ok) {
-            destroyInterop();
-            return false;
+            mode_ = Interop::HostCopy;
+            if (!createTargets(w, h, err)) {
+                destroyInterop();
+                return false;
+            }
         }
-        // nothing covers anything until the GL side writes the near field's distances
-        float uncovered = 1e30f;
-        gl_.ClearTexImage(images_[IMG_NEAR].glTex, 0, GL_RED, GL_FLOAT, &uncovered);
-        if (gl_.GetError() != GL_NO_ERROR) {
-            destroyInterop();
-            return fail(err, "OpenGL error while importing the shared images");
-        }
+        interopWhy_ = why;
+        if (mode_ == Interop::HostCopy) std::fprintf(stderr, "[aether] OpenGL interop: host copies (%s)\n", why.c_str());
         width_ = w;
         height_ = h;
         firstGlFrame_ = true;
@@ -361,24 +561,31 @@ public:
         if (w != width_ || h != height_) return fail(err, "frame size differs from the attached targets (re-attach)");
         Slot& s = slots_[frameIndex_ % SLOTS];
         if (!waitSlot(s, gpuMs, err)) return false;  // frame N-2: normally long done
+        const bool host = mode_ == Interop::HostCopy;
+        // the near-depth skip reads the near field's distances from the shared image; host copies cannot share it
+        // without stalling GL on the near field, so they march every pixel (the composite's depth test still keeps
+        // whatever is nearer)
+        const bool nearOn = in.wantNearDepth && !host;
         FrameGpu frame = in.frame;
-        if (in.wantNearDepth) frame.dims[2] |= 0x20u;  // FRAME_NEAR_DEPTH: read from the shared image
+        if (nearOn) frame.dims[2] |= 0x20u;  // FRAME_NEAR_DEPTH: read from the shared image
+        else frame.dims[2] &= ~0x20u;
         if (!prepare(s, in, frame, false, err)) return false;
         if (!ensure(s.bufs[B_NEAR], size_t(w) * h * 4, false, Mem::DeviceOnly, err)) return false;
         refreshDescriptors(s);
 
-        if (io && io->nearDepthTex && !linearizeNearDepth(*io, w, h, err)) return false;
+        if (!host && io && io->nearDepthTex && !linearizeNearDepth(*io, w, h, err)) return false;
         if (sunSize_ != sunImageSize_) {
             for (auto& o : slots_)
                 if (!waitSlot(o, nullptr, err)) return false;
             destroyShared(sunImage_);
             sunImageSize_ = 0;
             if (sunSize_) {
-                if (!createShared(sunImage_, VK_FORMAT_R32G32_SFLOAT, GL_RG32F, sunSize_, sunSize_ + 1, err)) return false;
+                if (!createImage(sunImage_, VK_FORMAT_R32G32_SFLOAT, GL_RG32F, sunSize_, sunSize_ + 1, err)) return false;
                 sunImageSize_ = sunSize_;
                 sunImageFresh_ = true;
             }
         }
+        if (host) return hostCopyFrame(s, in, frame, io, gpuMs, err);
 
         // GL releases the shared images to Vulkan (after everything GL queued so far, e.g. last frame's composite)
         GLuint tex[IMAGES + 1];
@@ -399,7 +606,7 @@ public:
         begin(s);
         imageBarriers(s.cmd, true);
         uint32_t pcv[2] = {w, h};
-        if (in.wantNearDepth) {
+        if (nearOn) {
             vkCmdBindPipeline(s.cmd, VK_PIPELINE_BIND_POINT_COMPUTE, ingestPipe_);
             vkCmdBindDescriptorSets(s.cmd, VK_PIPELINE_BIND_POINT_COMPUTE, ingestLayout_, 0, 1, &s.ingestSet, 0, nullptr);
             vkCmdPushConstants(s.cmd, ingestLayout_, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(pcv), pcv);
@@ -420,18 +627,133 @@ public:
 
         // GL commands after this point wait for the Vulkan frame
         gl_.WaitSemaphoreEXT(s.vkDone.gl, 0, nullptr, nTex, tex, layouts);
-        if (io) {
-            // hand the frame to the caller's own textures (e.g. what a shader pack samples via customTexture)
-            const GLuint dst[3] = {io->dstColor, io->dstNormal, io->dstDepth};
-            for (int i = 0; i < 3; i++)
-                if (dst[i])
-                    gl_.CopyImageSubData(images_[i].glTex, GL_TEXTURE_2D, 0, 0, 0, 0, dst[i], GL_TEXTURE_2D, 0, 0, 0, 0,
-                                         GLsizei(w), GLsizei(h), 1);
-            if (io->dstSunMap && sunImage_.glTex)
-                gl_.CopyImageSubData(sunImage_.glTex, GL_TEXTURE_2D, 0, 0, 0, 0, io->dstSunMap, GL_TEXTURE_2D, 0, 0, 0, 0,
-                                     GLsizei(sunSize_), GLsizei(sunSize_ + 1), 1);
-        }
+        copyToCaller(io, w, h);
         return true;
+    }
+
+    // hand the frame to the caller's own textures (e.g. what a shader pack samples via customTexture)
+    void copyToCaller(const GlFrameIO* io, uint32_t w, uint32_t h) {
+        if (!io) return;
+        const GLuint dst[3] = {io->dstColor, io->dstNormal, io->dstDepth};
+        for (int i = 0; i < 3; i++)
+            if (dst[i])
+                gl_.CopyImageSubData(images_[i].glTex, GL_TEXTURE_2D, 0, 0, 0, 0, dst[i], GL_TEXTURE_2D, 0, 0, 0, 0,
+                                     GLsizei(w), GLsizei(h), 1);
+        if (io->dstSunMap && sunImage_.glTex)
+            gl_.CopyImageSubData(sunImage_.glTex, GL_TEXTURE_2D, 0, 0, 0, 0, io->dstSunMap, GL_TEXTURE_2D, 0, 0, 0, 0,
+                                 GLsizei(sunSize_), GLsizei(sunSize_ + 1), 1);
+    }
+
+    // ---- host-copy fallback ----------------------------------------------------------------------------------
+    // The frame is published into Vulkan-local images (the same publish pass, so the GL textures hold exactly what
+    // zero-copy would), copied into the slot's host buffer, and uploaded with glTextureSubImage2D. By default the
+    // CPU waits for this frame's GPU work (no added latency); AETHER_HOSTCOPY_LATENCY=1 uploads the previous
+    // frame instead, so the CPU never waits but the far field lags one frame behind the camera.
+    bool hostCopyFrame(Slot& s, const FrameInputs&, const FrameGpu& frame, const GlFrameIO* io, double* gpuMs,
+                       std::string& err) {
+        uint32_t w = width_, h = height_;
+        size_t px = size_t(w) * h;
+        VkDeviceSize sunBytes = sunDispatchRows_ && sunImage_.glTex ? VkDeviceSize(sunSize_) * (sunSize_ + 1) * 8 : 0;
+        VkDeviceSize bytes = VkDeviceSize(px) * 16 + VkDeviceSize(sunSize_ ? VkDeviceSize(sunSize_) * (sunSize_ + 1) * 8 : 0);
+        if (!ensure(s.hostOut, bytes, false, Mem::HostRead, err)) return false;
+        begin(s);
+        hostImageBarrier(s.cmd, true);
+        recordFar(s, w, h, (frame.dims[2] & 0x1u) != 0);
+        computeBarrier(s.cmd);
+        uint32_t pcv[2] = {w, h};
+        vkCmdBindPipeline(s.cmd, VK_PIPELINE_BIND_POINT_COMPUTE, publishPipe_);
+        vkCmdBindDescriptorSets(s.cmd, VK_PIPELINE_BIND_POINT_COMPUTE, publishLayout_, 0, 1, &s.publishSet, 0, nullptr);
+        vkCmdPushConstants(s.cmd, publishLayout_, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(pcv), pcv);
+        vkCmdDispatch(s.cmd, (w + 7) / 8, (h + 7) / 8, 1);
+        hostImageBarrier(s.cmd, false);
+        const VkDeviceSize texel[3] = {8, 4, 4};
+        VkDeviceSize off = 0;
+        for (int i = 0; i < 3; i++) {
+            VkBufferImageCopy region{};
+            region.bufferOffset = off;
+            region.imageSubresource = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1};
+            region.imageExtent = {w, h, 1};
+            vkCmdCopyImageToBuffer(s.cmd, images_[i].image, VK_IMAGE_LAYOUT_GENERAL, s.hostOut.buf, 1, &region);
+            off += VkDeviceSize(px) * texel[i];
+        }
+        if (sunBytes) {
+            VkBufferCopy rc{0, off, sunBytes};
+            vkCmdCopyBuffer(s.cmd, shared_[B_SUNMAP].buf, s.hostOut.buf, 1, &rc);
+        }
+        VkMemoryBarrier mb{VK_STRUCTURE_TYPE_MEMORY_BARRIER};
+        mb.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+        mb.dstAccessMask = VK_ACCESS_HOST_READ_BIT;
+        vkCmdPipelineBarrier(s.cmd, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_HOST_BIT, 0, 1, &mb, 0, nullptr, 0,
+                             nullptr);
+        if (!submit(s, nullptr, nullptr, err)) return false;
+        s.hostPending = true;
+        s.hostSun = sunBytes != 0;
+        firstGlFrame_ = false;
+        frameIndex_++;
+        const char* lag = std::getenv("AETHER_HOSTCOPY_LATENCY");
+        Slot& up = lag && *lag == '1' ? slots_[frameIndex_ % SLOTS] : s;  // the other slot holds the previous frame
+        if (!up.hostPending) return true;
+        auto t0 = std::chrono::steady_clock::now();
+        if (!waitSlot(up, gpuMs, err)) return false;
+        auto t1 = std::chrono::steady_clock::now();
+        hostUpload(up, w, h);
+        up.hostPending = false;
+        auto t2 = std::chrono::steady_clock::now();
+        hostWaitMs_ = std::chrono::duration<double, std::milli>(t1 - t0).count();
+        hostUploadMs_ = std::chrono::duration<double, std::milli>(t2 - t1).count();
+        copyToCaller(io, w, h);
+        return true;
+    }
+
+    void hostImageBarrier(VkCommandBuffer cmd, bool before) {
+        if (before && firstGlFrame_) {
+            VkImageMemoryBarrier b[IMAGES];
+            for (int i = 0; i < IMAGES; i++) {
+                b[i] = {VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER};
+                b[i].image = images_[i].image;
+                b[i].subresourceRange = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1};
+                b[i].oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+                b[i].newLayout = VK_IMAGE_LAYOUT_GENERAL;
+                b[i].srcQueueFamilyIndex = b[i].dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+                b[i].dstAccessMask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT;
+            }
+            vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, 0, 0, nullptr,
+                                 0, nullptr, IMAGES, b);
+            return;
+        }
+        // before: the previous frame's copies out of the images finish before the publish overwrites them;
+        // after: the publish's writes (and the sun map's) are visible to the copies
+        VkMemoryBarrier mb{VK_STRUCTURE_TYPE_MEMORY_BARRIER};
+        mb.srcAccessMask = before ? VK_ACCESS_TRANSFER_READ_BIT : VK_ACCESS_SHADER_WRITE_BIT;
+        mb.dstAccessMask = before ? VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT : VK_ACCESS_TRANSFER_READ_BIT;
+        vkCmdPipelineBarrier(cmd, before ? VK_PIPELINE_STAGE_TRANSFER_BIT : VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
+                             before ? VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT : VK_PIPELINE_STAGE_TRANSFER_BIT, 0, 1, &mb, 0,
+                             nullptr, 0, nullptr);
+    }
+
+    // Host buffer -> the GL textures. The caller's pixel-unpack state (Minecraft leaves row length / skips set after
+    // its own uploads, and may have a PBO bound) is saved and restored around the uploads.
+    void hostUpload(const Slot& s, uint32_t w, uint32_t h) {
+        const GLenum keys[] = {GL_UNPACK_ROW_LENGTH, GL_UNPACK_SKIP_ROWS, GL_UNPACK_SKIP_PIXELS, GL_UNPACK_ALIGNMENT,
+                               GL_UNPACK_SWAP_BYTES, GL_UNPACK_LSB_FIRST};
+        const GLint want[] = {0, 0, 0, 4, 0, 0};
+        GLint saved[6] = {}, pbo = 0;
+        gl_.GetIntegerv(GL_PIXEL_UNPACK_BUFFER_BINDING, &pbo);
+        for (int i = 0; i < 6; i++) gl_.GetIntegerv(keys[i], &saved[i]);
+        if (pbo) gl_.BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+        for (int i = 0; i < 6; i++)
+            if (saved[i] != want[i]) gl_.PixelStorei(keys[i], want[i]);
+        size_t px = size_t(w) * h;
+        const char* p = static_cast<const char*>(s.hostOut.map);
+        gl_.TextureSubImage2D(images_[IMG_COLOR].glTex, 0, 0, 0, GLsizei(w), GLsizei(h), GL_RGBA, GL_HALF_FLOAT, p);
+        gl_.TextureSubImage2D(images_[IMG_NORMAL].glTex, 0, 0, 0, GLsizei(w), GLsizei(h), GL_RGBA, GL_UNSIGNED_BYTE, p + px * 8);
+        gl_.TextureSubImage2D(images_[IMG_DEPTH].glTex, 0, 0, 0, GLsizei(w), GLsizei(h), GL_RED, GL_FLOAT, p + px * 12);
+        if (s.hostSun && sunImage_.glTex)
+            gl_.TextureSubImage2D(sunImage_.glTex, 0, 0, 0, GLsizei(sunSize_), GLsizei(sunSize_ + 1), GL_RG, GL_FLOAT,
+                                  p + px * 16);
+        for (int i = 0; i < 6; i++)
+            if (saved[i] != want[i]) gl_.PixelStorei(keys[i], saved[i]);
+        if (pbo) gl_.BindBuffer(GL_PIXEL_UNPACK_BUFFER, GLuint(pbo));
     }
 
     bool stageScene(const PackedScene& sc) override {
@@ -449,6 +771,7 @@ public:
         if (dev_) vkDeviceWaitIdle(dev_);
         for (auto& s : slots_) s.inFlight = false;
         destroyInterop();
+        mode_ = Interop::None;
     }
 
 private:
@@ -618,9 +941,10 @@ private:
     // ---- setup ---------------------------------------------------------------------------------------------
 
     bool createInstance(std::string& err) {
+        if (!vkLoadGlobal(err)) return false;
         VkApplicationInfo app{VK_STRUCTURE_TYPE_APPLICATION_INFO};
         app.pApplicationName = "aether_core";
-        app.apiVersion = VK_API_VERSION_1_3;
+        app.apiVersion = VK_API_VERSION_1_2;  // baseline: Pascal-era drivers, Mesa, MoltenVK-free Linux stacks
         VkInstanceCreateInfo ici{VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO};
         ici.pApplicationInfo = &app;
         const char* layers[] = {"VK_LAYER_KHRONOS_validation"};
@@ -633,7 +957,19 @@ private:
             ici.enabledExtensionCount = 1;
             ici.ppEnabledExtensionNames = instExt;
         }
-        if (vkCreateInstance(&ici, nullptr, &inst_) != VK_SUCCESS) return fail(err, "vkCreateInstance failed");
+        VkResult r = vkCreateInstance(&ici, nullptr, &inst_);
+        if (validate && (r == VK_ERROR_LAYER_NOT_PRESENT || r == VK_ERROR_EXTENSION_NOT_PRESENT)) {
+            std::fprintf(stderr, "[vulkan] validation requested but VK_LAYER_KHRONOS_validation is not installed\n");
+            validate = false;
+            ici.enabledLayerCount = ici.enabledExtensionCount = 0;
+            r = vkCreateInstance(&ici, nullptr, &inst_);
+        }
+        if (r != VK_SUCCESS) {
+            inst_ = VK_NULL_HANDLE;
+            err = "vkCreateInstance (Vulkan 1.2) failed: " + std::to_string(int(r));
+            return false;
+        }
+        if (!vkLoadInstance(inst_, err)) return false;
         if (validate) {
             auto create = reinterpret_cast<PFN_vkCreateDebugUtilsMessengerEXT>(
                 vkGetInstanceProcAddr(inst_, "vkCreateDebugUtilsMessengerEXT"));
@@ -647,45 +983,197 @@ private:
         return true;
     }
 
+    // Which device: the one the game's GL context runs on when a context is current (aether_create is called on the
+    // render thread: hybrid laptops, a Deck with lavapipe installed beside RADV, a second GPU), else the best type
+    // (discrete > integrated > virtual > cpu). AETHER_VK_DEVICE=<index or name substring> overrides both.
     bool pickDevice(std::string& err) {
         uint32_t n = 0;
         vkEnumeratePhysicalDevices(inst_, &n, nullptr);
         std::vector<VkPhysicalDevice> devs(n);
         vkEnumeratePhysicalDevices(inst_, &n, devs.data());
+        uint8_t glUuids[8][16];
+        int glCount = 0;
+        if (GlApi::contextCurrent()) {
+            GlApi probe;
+            std::string e;
+            if (probe.load(e)) probe.deviceUuids(glUuids, 8, glCount);
+        }
+        const char* want = std::getenv("AETHER_VK_DEVICE");
         int best = -1, bestScore = -1;
+        std::string reasons;
         for (uint32_t i = 0; i < n; i++) {
-            VkPhysicalDeviceProperties p;
-            vkGetPhysicalDeviceProperties(devs[i], &p);
+            VkPhysicalDeviceIDProperties idp{VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ID_PROPERTIES};
+            VkPhysicalDeviceProperties2 p2{VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2};
+            p2.pNext = &idp;
+            vkGetPhysicalDeviceProperties2(devs[i], &p2);
+            const VkPhysicalDeviceProperties& p = p2.properties;
             VkPhysicalDeviceFeatures f;
             vkGetPhysicalDeviceFeatures(devs[i], &f);
-            if (!f.shaderInt64 || p.apiVersion < VK_API_VERSION_1_3) continue;
-            int score = p.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU ? 2 : 1;
+            bool glMatch = false;
+            for (int k = 0; k < glCount; k++) glMatch |= std::memcmp(glUuids[k], idp.deviceUUID, 16) == 0;
+            std::string why = deviceUnfit(devs[i], p, f);
+            DeviceSeen seen{p.deviceName, typeName(p.deviceType), apiString(p.apiVersion), glMatch, why};
+            seen_.push_back(seen);
+            if (!why.empty()) {
+                reasons += std::string(reasons.empty() ? "" : "; ") + p.deviceName + ": " + why;
+                continue;
+            }
+            int score = p.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU     ? 4
+                        : p.deviceType == VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU ? 3
+                        : p.deviceType == VK_PHYSICAL_DEVICE_TYPE_VIRTUAL_GPU    ? 2
+                        : p.deviceType == VK_PHYSICAL_DEVICE_TYPE_CPU            ? 0
+                                                                                 : 1;
+            if (glMatch) score += 100;
+            if (want && *want) {
+                // an index, or a name substring (parsed by hand: strtol binds to glibc 2.38's __isoc23_strtol)
+                bool digits = true;
+                long idx = 0;
+                for (const char* c = want; *c; c++) {
+                    digits &= *c >= '0' && *c <= '9';
+                    idx = idx * 10 + (*c - '0');
+                }
+                bool named = digits ? idx == long(i) : nameContains(p.deviceName, want);
+                if (named) score += 1000;
+            }
             if (score > bestScore) {
                 bestScore = score;
                 best = int(i);
             }
         }
-        if (best < 0) return fail(err, "no Vulkan 1.3 device with shaderInt64");
+        if (best < 0) return fail(err, ("no usable Vulkan device" + (reasons.empty() ? std::string() : " (" + reasons + ")")).c_str());
         phys_ = devs[size_t(best)];
+        chosen_ = best;
+        glMatchedAtCreate_ = seen_[size_t(best)].glMatch;
+        VkPhysicalDeviceDriverProperties drv{VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DRIVER_PROPERTIES};
         VkPhysicalDeviceIDProperties idp{VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ID_PROPERTIES};
+        idp.pNext = &drv;
         VkPhysicalDeviceProperties2 props2{VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2};
         props2.pNext = &idp;
         vkGetPhysicalDeviceProperties2(phys_, &props2);
+        props_ = props2.properties;
         std::memcpy(deviceUuid_, idp.deviceUUID, VK_UUID_SIZE);
+        std::memcpy(driverUuid_, idp.driverUUID, VK_UUID_SIZE);
+        driverName_ = std::string(drv.driverName) + " " + drv.driverInfo;
+        driverId_ = uint32_t(drv.driverID);
         std::snprintf(deviceName_, sizeof(deviceName_), "vulkan (%s)", props2.properties.deviceName);
         timestampPeriod_ = props2.properties.limits.timestampPeriod;
+        maxStorageRange_ = props2.properties.limits.maxStorageBufferRange;
         uint32_t qn = 0;
         vkGetPhysicalDeviceQueueFamilyProperties(phys_, &qn, nullptr);
         std::vector<VkQueueFamilyProperties> qf(qn);
         vkGetPhysicalDeviceQueueFamilyProperties(phys_, &qn, qf.data());
         family_ = UINT32_MAX;
-        for (uint32_t i = 0; i < qn; i++)
-            if (qf[i].queueFlags & VK_QUEUE_COMPUTE_BIT) {
-                family_ = i;
-                timestamps_ = qf[i].timestampValidBits > 0;
-                break;
+        // a compute-capable family; the graphics one first (it is family 0 everywhere that matters, and the queue
+        // GL interop is best tested against), else a compute-only one
+        for (int pass = 0; pass < 2 && family_ == UINT32_MAX; pass++)
+            for (uint32_t i = 0; i < qn; i++) {
+                bool gfx = (qf[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) != 0;
+                if ((qf[i].queueFlags & VK_QUEUE_COMPUTE_BIT) && (pass == 1 || gfx)) {
+                    family_ = i;
+                    timestamps_ = qf[i].timestampValidBits > 0;
+                    break;
+                }
             }
         return family_ != UINT32_MAX || fail(err, "no compute queue");
+    }
+
+    static bool nameContains(const char* name, const char* sub) {
+        std::string a(name), b(sub);
+        for (auto& c : a) c = char(std::tolower(static_cast<unsigned char>(c)));
+        for (auto& c : b) c = char(std::tolower(static_cast<unsigned char>(c)));
+        return a.find(b) != std::string::npos;
+    }
+
+    // Why a device cannot run the kernels ("" when it can): the Vulkan 1.2 baseline, 64-bit integers in shaders,
+    // a compute queue, and the far kernel's 23 storage buffers in one stage.
+    static std::string deviceUnfit(VkPhysicalDevice d, const VkPhysicalDeviceProperties& p, const VkPhysicalDeviceFeatures& f) {
+        if (p.apiVersion < VK_API_VERSION_1_2) return "Vulkan " + apiString(p.apiVersion) + " < 1.2";
+        if (!f.shaderInt64) return "no shaderInt64";
+        const VkPhysicalDeviceLimits& l = p.limits;
+        if (l.maxPerStageDescriptorStorageBuffers < BINDINGS - 2 || l.maxDescriptorSetStorageBuffers < BINDINGS - 2)
+            return "only " + std::to_string(l.maxPerStageDescriptorStorageBuffers) + " storage buffers per stage";
+        if (l.maxComputeWorkGroupInvocations < 64 || l.maxComputeWorkGroupSize[0] < 8 || l.maxComputeWorkGroupSize[1] < 8)
+            return "compute work groups smaller than 8x8";
+        uint32_t qn = 0;
+        vkGetPhysicalDeviceQueueFamilyProperties(d, &qn, nullptr);
+        std::vector<VkQueueFamilyProperties> qf(qn);
+        vkGetPhysicalDeviceQueueFamilyProperties(d, &qn, qf.data());
+        for (auto& q : qf)
+            if (q.queueFlags & VK_QUEUE_COMPUTE_BIT) return "";
+        return "no compute queue";
+    }
+
+    // What the device can export to GL: the platform's handle type for memory and semaphores, for every format the
+    // bridge shares with the usage it needs, and whether those allocations must be dedicated (AMD's usually are).
+    void probeInterop() {
+        if (!interopCapable_) {
+            if (vkInteropWhy_.empty()) vkInteropWhy_ = "the Vulkan device does not export memory handles";
+            return;
+        }
+        const VkFormat fmts[] = {VK_FORMAT_R16G16B16A16_SFLOAT, VK_FORMAT_R8G8B8A8_UNORM, VK_FORMAT_R32_SFLOAT,
+                                 VK_FORMAT_R32G32_SFLOAT};
+        const char* names[] = {"RGBA16F", "RGBA8", "R32F", "RG32F"};
+        maxExport_ = UINT32_MAX;
+        for (int i = 0; i < 4; i++) {
+            VkPhysicalDeviceExternalImageFormatInfo ext{VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTERNAL_IMAGE_FORMAT_INFO};
+            ext.handleType = MEM_HANDLE;
+            VkPhysicalDeviceImageFormatInfo2 fi{VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_IMAGE_FORMAT_INFO_2};
+            fi.pNext = &ext;
+            fi.format = fmts[i];
+            fi.type = VK_IMAGE_TYPE_2D;
+            fi.tiling = VK_IMAGE_TILING_OPTIMAL;
+            fi.usage = SHARED_USAGE;
+            VkExternalImageFormatProperties ep{VK_STRUCTURE_TYPE_EXTERNAL_IMAGE_FORMAT_PROPERTIES};
+            VkImageFormatProperties2 fp{VK_STRUCTURE_TYPE_IMAGE_FORMAT_PROPERTIES_2};
+            fp.pNext = &ep;
+            VkResult r = vkGetPhysicalDeviceImageFormatProperties2(phys_, &fi, &fp);
+            VkExternalMemoryFeatureFlags feat = ep.externalMemoryProperties.externalMemoryFeatures;
+            if (r != VK_SUCCESS || !(feat & VK_EXTERNAL_MEMORY_FEATURE_EXPORTABLE_BIT)) {
+                interopCapable_ = false;
+                vkInteropWhy_ = std::string(names[i]) + " storage images cannot be exported (" +
+                                (r != VK_SUCCESS ? "format query " + std::to_string(int(r)) : std::string("not exportable")) + ")";
+                return;
+            }
+            if (feat & VK_EXTERNAL_MEMORY_FEATURE_DEDICATED_ONLY_BIT) dedicatedOnly_ = true;
+            maxExport_ = std::min({maxExport_, fp.imageFormatProperties.maxExtent.width, fp.imageFormatProperties.maxExtent.height});
+        }
+        VkPhysicalDeviceExternalSemaphoreInfo si{VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTERNAL_SEMAPHORE_INFO};
+        si.handleType = SEM_HANDLE;
+        VkExternalSemaphoreProperties sp{VK_STRUCTURE_TYPE_EXTERNAL_SEMAPHORE_PROPERTIES};
+        vkGetPhysicalDeviceExternalSemaphoreProperties(phys_, &si, &sp);
+        if (!(sp.externalSemaphoreFeatures & VK_EXTERNAL_SEMAPHORE_FEATURE_EXPORTABLE_BIT)) {
+            interopCapable_ = false;
+            vkInteropWhy_ = "binary semaphores cannot be exported";
+        }
+    }
+
+    // Why zero-copy cannot work with the current GL context ("" when it can).
+    std::string zeroCopyBlocker(uint32_t w, uint32_t h, bool strictDriver) {
+        if (!interopCapable_) return vkInteropWhy_;
+        if (!glHasInterop(gl_)) {
+            std::string missing;
+            for (const char* e : {"GL_EXT_memory_object", "GL_EXT_semaphore", GL_MEM_EXT, GL_SEM_EXT})
+                if (!gl_.hasExtension(e)) missing += std::string(missing.empty() ? "" : ", ") + e;
+            return "the OpenGL context lacks " + (missing.empty() ? std::string(GL_INTEROP_EXTS) : missing);
+        }
+        uint8_t u[8][16];
+        int n = 0;
+        if (!gl_.deviceUuids(u, 8, n)) return "the OpenGL context reports no device UUID";
+        bool same = false;
+        for (int i = 0; i < n; i++) same |= std::memcmp(u[i], deviceUuid_, 16) == 0;
+        if (!same)
+            return "the OpenGL context (" + glRenderer_ + ", device " + hex16(u[0]) + ") is not on the Vulkan device " +
+                   props_.deviceName + " (" + hex16(deviceUuid_) + ")";
+        uint8_t du[16];
+        if (gl_.driverUuid(du)) {
+            glDriverUuid_ = hex16(du);
+            // opaque handles only import into the same driver build (spec: driver and device UUID must match);
+            // AETHER_INTEROP=zerocopy waives this one check, for a stack that reports differing UUIDs yet works
+            if (strictDriver && std::memcmp(du, driverUuid_, 16) != 0)
+                return "GL driver UUID " + glDriverUuid_ + " differs from Vulkan's " + hex16(driverUuid_);
+        }
+        if (w > maxExport_ || h > maxExport_) return "targets larger than the exportable image size";
+        return "";
     }
 
     bool createDevice(std::string& err) {
@@ -700,10 +1188,15 @@ private:
             return false;
         };
         std::vector<const char*> enable;
-        if (has(VK_KHR_EXTERNAL_MEMORY_WIN32_EXTENSION_NAME) && has(VK_KHR_EXTERNAL_SEMAPHORE_WIN32_EXTENSION_NAME)) {
-            enable.push_back(VK_KHR_EXTERNAL_MEMORY_WIN32_EXTENSION_NAME);
-            enable.push_back(VK_KHR_EXTERNAL_SEMAPHORE_WIN32_EXTENSION_NAME);
+        // external memory / semaphores themselves are core in 1.1; only the handle flavour is an extension
+        if (has(MEM_EXT) && has(SEM_EXT)) {
+            enable.push_back(MEM_EXT);
+            enable.push_back(SEM_EXT);
             interopCapable_ = true;
+        } else {
+            vkInteropWhy_ = std::string("the Vulkan device lacks ") +
+                            (!has(MEM_EXT) && !has(SEM_EXT) ? std::string(MEM_EXT) + " and " + SEM_EXT
+                                                            : std::string(has(MEM_EXT) ? SEM_EXT : MEM_EXT));
         }
         float prio = 1.0f;
         VkDeviceQueueCreateInfo qci{VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO};
@@ -720,11 +1213,7 @@ private:
         dci.ppEnabledExtensionNames = enable.data();
         if (vkCreateDevice(phys_, &dci, nullptr, &dev_) != VK_SUCCESS) return fail(err, "vkCreateDevice failed");
         vkGetDeviceQueue(dev_, family_, 0, &queue_);
-        if (interopCapable_) {
-            getMemoryHandle_ = reinterpret_cast<PFN_vkGetMemoryWin32HandleKHR>(vkGetDeviceProcAddr(dev_, "vkGetMemoryWin32HandleKHR"));
-            getSemaphoreHandle_ = reinterpret_cast<PFN_vkGetSemaphoreWin32HandleKHR>(vkGetDeviceProcAddr(dev_, "vkGetSemaphoreWin32HandleKHR"));
-            interopCapable_ = getMemoryHandle_ && getSemaphoreHandle_;
-        }
+        if (interopCapable_) interopCapable_ = export_.load(dev_);
         return true;
     }
 
@@ -820,6 +1309,7 @@ private:
                     if (!waitSlot(o, nullptr, err)) return false;
                 release(shared_[B_SUNMAP]);
                 if (!ensure(shared_[B_SUNMAP], bytes, false, Mem::DeviceOnly, err)) return false;
+                sunFresh_ = true;  // zeroed before first use, like the CPU backend's
                 sunSize_ = S;
                 sharedDirty_ = true;
                 sharedDirtySlots_ = 0;
@@ -870,7 +1360,7 @@ private:
                              : i == B_PREV_CLOUD ? ps.bufs[B_CLOUD]
                              : i == B_PREV_CLOUD_DEPTH ? ps.bufs[B_CLOUD_DEPTH]
                              : perSlot(i) ? s.bufs[i] : (isScene(i) ? sc.bufs[i] : shared_[i]);
-                info[i] = {b.buf, 0, VK_WHOLE_SIZE};
+                info[i] = {b.buf, 0, i == B_FRAME ? uniformRange(b) : storageRange(b)};
                 wr[i] = {VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET};
                 wr[i].dstSet = s.farSet;
                 wr[i].dstBinding = i;
@@ -886,9 +1376,9 @@ private:
             if (sharedDirtySlots_ == (1u << SLOTS) - 1) sharedDirty_ = false;
         }
         if (attached_ && s.publishDirty) {
-            VkDescriptorBufferInfo bi[3] = {{s.bufs[B_COLOR].buf, 0, VK_WHOLE_SIZE},
-                                            {s.bufs[B_NORMAL].buf, 0, VK_WHOLE_SIZE},
-                                            {s.bufs[B_DEPTH].buf, 0, VK_WHOLE_SIZE}};
+            VkDescriptorBufferInfo bi[3] = {{s.bufs[B_COLOR].buf, 0, storageRange(s.bufs[B_COLOR])},
+                                            {s.bufs[B_NORMAL].buf, 0, storageRange(s.bufs[B_NORMAL])},
+                                            {s.bufs[B_DEPTH].buf, 0, storageRange(s.bufs[B_DEPTH])}};
             VkDescriptorImageInfo ii[3];
             VkWriteDescriptorSet wr[6];
             for (uint32_t i = 0; i < 6; i++) {
@@ -910,7 +1400,7 @@ private:
         }
         if (attached_ && s.ingestDirty) {
             VkDescriptorImageInfo ii{VK_NULL_HANDLE, images_[IMG_NEAR].view, VK_IMAGE_LAYOUT_GENERAL};
-            VkDescriptorBufferInfo bi{s.bufs[B_NEAR].buf, 0, VK_WHOLE_SIZE};
+            VkDescriptorBufferInfo bi{s.bufs[B_NEAR].buf, 0, storageRange(s.bufs[B_NEAR])};
             VkWriteDescriptorSet wr[2] = {{VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET}, {VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET}};
             wr[0].dstSet = wr[1].dstSet = s.ingestSet;
             wr[0].dstBinding = 0;
@@ -925,6 +1415,9 @@ private:
             s.ingestDirty = false;
         }
     }
+
+    VkDeviceSize storageRange(const Buf& b) const { return std::min<VkDeviceSize>(b.size, maxStorageRange_); }
+    VkDeviceSize uniformRange(const Buf& b) const { return std::min<VkDeviceSize>(b.size, props_.limits.maxUniformBufferRange); }
 
     void begin(Slot& s) {
         vkResetCommandBuffer(s.cmd, 0);
@@ -942,6 +1435,17 @@ private:
         // the previous frame (other slot) wrote the surfaces this one's cloud pass reads, and will next overwrite
         // ours: order against everything submitted before
         computeBarrier(s.cmd);
+        if (sunFresh_) {
+            // fresh device memory is garbage on most drivers (NVIDIA happens to hand out zeros): the sun map's
+            // parameter row is only partly written, and readers must see the same bytes everywhere
+            vkCmdFillBuffer(s.cmd, shared_[B_SUNMAP].buf, 0, VK_WHOLE_SIZE, 0u);
+            VkMemoryBarrier mb{VK_STRUCTURE_TYPE_MEMORY_BARRIER};
+            mb.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+            mb.dstAccessMask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT;
+            vkCmdPipelineBarrier(s.cmd, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, 0, 1, &mb, 0,
+                                 nullptr, 0, nullptr);
+            sunFresh_ = false;
+        }
         if (s.surfaceFresh) {
             vkCmdFillBuffer(s.cmd, s.bufs[B_SURFACE].buf, 0, VK_WHOLE_SIZE, 0x7149F2CAu);  // 1e30f: no surface yet
             VkMemoryBarrier mb{VK_STRUCTURE_TYPE_MEMORY_BARRIER};
@@ -978,7 +1482,8 @@ private:
     bool submit(Slot& s, VkSemaphore* wait, VkSemaphore* signal, std::string& err) {
         if (s.query) vkCmdWriteTimestamp(s.cmd, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, s.query, 1);
         vkEndCommandBuffer(s.cmd);
-        VkPipelineStageFlags stage = VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
+        // the GL-ready wait blocks every stage that touches the shared images: the passes and the sun map copy
+        VkPipelineStageFlags stage = VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT | VK_PIPELINE_STAGE_TRANSFER_BIT;
         VkSubmitInfo si{VK_STRUCTURE_TYPE_SUBMIT_INFO};
         si.commandBufferCount = 1;
         si.pCommandBuffers = &s.cmd;
@@ -1060,36 +1565,42 @@ private:
             }
             if (acquire) sunImageFresh_ = false;
         }
-        vkCmdPipelineBarrier(cmd, acquire ? VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT : VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT |
-                                                                                   VK_PIPELINE_STAGE_TRANSFER_BIT,
-                             acquire ? VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT | VK_PIPELINE_STAGE_TRANSFER_BIT
-                                     : VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
-                             0, 0, nullptr, 0, nullptr, n, all);
+        // acquire: the first scope must name the stages the GL-ready semaphore wait blocks (compute and transfer, see
+        // submit), so the barrier chains after that wait; TOP_OF_PIPE there chains to nothing and the sun map copy
+        // could start before GL let go of the image (synchronization validation: WRITE_AFTER_WRITE)
+        const VkPipelineStageFlags work = VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT | VK_PIPELINE_STAGE_TRANSFER_BIT;
+        vkCmdPipelineBarrier(cmd, work, acquire ? work : VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, 0, 0, nullptr, 0, nullptr,
+                             n, all);
     }
 
     // The sun map buffer into its shared image (whole image: a few MB, a few microseconds of copy).
     void copySunToImage(VkCommandBuffer cmd) {
+        // the sun pass's buffer writes before the copy reads them, and the previous frame's copy into the same image
+        // before this one overwrites it (the queue ownership round trip through GL does not order two transfer
+        // writes on this queue for the synchronization validator; the compute images get that from the global
+        // compute barrier at the start of every frame)
         VkMemoryBarrier mb{VK_STRUCTURE_TYPE_MEMORY_BARRIER};
-        mb.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
-        mb.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
-        vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, 0, 1, &mb, 0, nullptr,
-                             0, nullptr);
+        mb.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT | VK_ACCESS_TRANSFER_WRITE_BIT;
+        mb.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT | VK_ACCESS_TRANSFER_WRITE_BIT;
+        vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT | VK_PIPELINE_STAGE_TRANSFER_BIT,
+                             VK_PIPELINE_STAGE_TRANSFER_BIT, 0, 1, &mb, 0, nullptr, 0, nullptr);
         VkBufferImageCopy region{};
         region.imageSubresource = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1};
         region.imageExtent = {sunSize_, sunSize_ + 1, 1};
         vkCmdCopyBufferToImage(cmd, shared_[B_SUNMAP].buf, sunImage_.image, VK_IMAGE_LAYOUT_GENERAL, 1, &region);
     }
 
+    bool glUsable() const { return glLoaded_ && GlApi::contextCurrent(); }
+
     void destroyShared(SharedImage& s) {
-        bool glOk = wglGetCurrentContext() != nullptr;
-        if (glOk) {
+        if (glUsable()) {
             if (s.glTex) gl_.DeleteTextures(1, &s.glTex);
             if (s.glMem) gl_.DeleteMemoryObjectsEXT(1, &s.glMem);
         }
         if (s.view) vkDestroyImageView(dev_, s.view, nullptr);
         if (s.image) vkDestroyImage(dev_, s.image, nullptr);
         if (s.mem) vkFreeMemory(dev_, s.mem, nullptr);
-        if (s.handle) CloseHandle(s.handle);
+        closeHandle(s.handle);
         s = {};
     }
 
@@ -1100,7 +1611,7 @@ public:
         for (auto& o : slots_)
             if (!waitSlot(o, nullptr, err)) return false;
         VkDeviceSize bytes = VkDeviceSize(sunSize_) * (sunSize_ + 1) * 8;
-        if (!ensure(sunReadback_, bytes, false, Mem::Readback, err)) return false;
+        if (!ensure(sunReadback_, bytes, false, Mem::HostRead, err)) return false;
         std::lock_guard<std::mutex> scene(sceneMu_);
         if (copies_[0].uploading) vkWaitForFences(dev_, 1, &copies_[0].uploadFence, VK_TRUE, UINT64_MAX);
         copies_[0].uploading = false;
@@ -1142,11 +1653,52 @@ private:
         return UINT32_MAX;
     }
 
-    bool createShared(SharedImage& s, VkFormat fmt, GLenum glFmt, uint32_t w, uint32_t h, std::string& err) {
+    // The attach targets in the current mode: colour, normal, depth, nearDepth (+ semaphores for zero-copy).
+    bool createTargets(uint32_t w, uint32_t h, std::string& err) {
+        const VkFormat fmt[IMAGES] = {VK_FORMAT_R16G16B16A16_SFLOAT, VK_FORMAT_R8G8B8A8_UNORM, VK_FORMAT_R32_SFLOAT,
+                                      VK_FORMAT_R32_SFLOAT};
+        const GLenum glFmt[IMAGES] = {GL_RGBA16F, GL_RGBA8, GL_R32F, GL_R32F};
+        for (int i = 0; i < IMAGES; i++)
+            if (!createImage(images_[i], fmt[i], glFmt[i], w, h, err)) return false;
+        if (mode_ == Interop::ZeroCopy)
+            for (auto& s : slots_)
+                if (!createSemaphore(s.glReady, err) || !createSemaphore(s.vkDone, err)) return false;
+        // nothing covers anything until the GL side writes the near field's distances
+        float uncovered = 1e30f, zero[4] = {};
+        gl_.ClearTexImage(images_[IMG_NEAR].glTex, 0, GL_RED, GL_FLOAT, &uncovered);
+        if (mode_ == Interop::HostCopy) {
+            // the first upload lands a frame late with AETHER_HOSTCOPY_LATENCY: start empty, not undefined
+            gl_.ClearTexImage(images_[IMG_COLOR].glTex, 0, GL_RGBA, GL_FLOAT, zero);
+            gl_.ClearTexImage(images_[IMG_NORMAL].glTex, 0, GL_RGBA, GL_FLOAT, zero);
+            gl_.ClearTexImage(images_[IMG_DEPTH].glTex, 0, GL_RED, GL_FLOAT, &uncovered);
+        }
+        GLenum e = gl_.GetError();
+        if (e != GL_NO_ERROR) {
+            err = "OpenGL error 0x" + hexWord(e) + " while creating the " +
+                  (mode_ == Interop::ZeroCopy ? "shared images" : "host-copy textures");
+            return false;
+        }
+        return true;
+    }
+
+    static std::string hexWord(uint32_t v) {
+        char b[16];
+        std::snprintf(b, sizeof(b), "%x", v);
+        return b;
+    }
+
+    bool createImage(SharedImage& s, VkFormat fmt, GLenum glFmt, uint32_t w, uint32_t h, std::string& err) {
+        return mode_ == Interop::ZeroCopy ? createShared(s, fmt, glFmt, w, h, err) : createLocal(s, fmt, glFmt, w, h, err);
+    }
+
+    static constexpr VkImageUsageFlags SHARED_USAGE = VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT |
+                                                      VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+
+    bool createVkImage(SharedImage& s, VkFormat fmt, uint32_t w, uint32_t h, bool exported, std::string& err) {
         VkExternalMemoryImageCreateInfo ext{VK_STRUCTURE_TYPE_EXTERNAL_MEMORY_IMAGE_CREATE_INFO};
-        ext.handleTypes = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT;
+        ext.handleTypes = MEM_HANDLE;
         VkImageCreateInfo ic{VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO};
-        ic.pNext = &ext;
+        ic.pNext = exported ? &ext : nullptr;
         ic.imageType = VK_IMAGE_TYPE_2D;
         ic.format = fmt;
         ic.extent = {w, h, 1};
@@ -1154,88 +1706,106 @@ private:
         ic.arrayLayers = 1;
         ic.samples = VK_SAMPLE_COUNT_1_BIT;
         ic.tiling = VK_IMAGE_TILING_OPTIMAL;
-        ic.usage = VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT |
-                   VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+        ic.usage = SHARED_USAGE;
         ic.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
         if (vkCreateImage(dev_, &ic, nullptr, &s.image) != VK_SUCCESS) return fail(err, "vkCreateImage (shared)");
-        VkMemoryRequirements req;
-        vkGetImageMemoryRequirements(dev_, s.image, &req);
+        VkImageMemoryRequirementsInfo2 ri{VK_STRUCTURE_TYPE_IMAGE_MEMORY_REQUIREMENTS_INFO_2};
+        ri.image = s.image;
+        VkMemoryDedicatedRequirements dr{VK_STRUCTURE_TYPE_MEMORY_DEDICATED_REQUIREMENTS};
+        VkMemoryRequirements2 req2{VK_STRUCTURE_TYPE_MEMORY_REQUIREMENTS_2};
+        req2.pNext = &dr;
+        vkGetImageMemoryRequirements2(dev_, &ri, &req2);
+        const VkMemoryRequirements& req = req2.memoryRequirements;
+        // exported images are always dedicated allocations: AMD (RADV / radeonsi) needs it to carry the tiling
+        // metadata across, the GL side must be told the same (GL_DEDICATED_MEMORY_OBJECT_EXT), and it is always legal
         VkMemoryDedicatedAllocateInfo ded{VK_STRUCTURE_TYPE_MEMORY_DEDICATED_ALLOCATE_INFO};
         ded.image = s.image;
         VkExportMemoryAllocateInfo exp{VK_STRUCTURE_TYPE_EXPORT_MEMORY_ALLOCATE_INFO};
         exp.pNext = &ded;
-        exp.handleTypes = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT;
+        exp.handleTypes = MEM_HANDLE;
         VkMemoryAllocateInfo ma{VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO};
-        ma.pNext = &exp;
+        ma.pNext = exported ? static_cast<const void*>(&exp) : (dr.requiresDedicatedAllocation || dr.prefersDedicatedAllocation ? &ded : nullptr);
         ma.allocationSize = req.size;
         ma.memoryTypeIndex = memoryType(req.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+        if (ma.memoryTypeIndex == UINT32_MAX) ma.memoryTypeIndex = memoryType(req.memoryTypeBits, 0);
         if (ma.memoryTypeIndex == UINT32_MAX || vkAllocateMemory(dev_, &ma, nullptr, &s.mem) != VK_SUCCESS)
-            return fail(err, "vkAllocateMemory (shared)");
-        vkBindImageMemory(dev_, s.image, s.mem, 0);
-        VkMemoryGetWin32HandleInfoKHR hi{VK_STRUCTURE_TYPE_MEMORY_GET_WIN32_HANDLE_INFO_KHR};
-        hi.memory = s.mem;
-        hi.handleType = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_WIN32_BIT;
-        if (getMemoryHandle_(dev_, &hi, &s.handle) != VK_SUCCESS) return fail(err, "vkGetMemoryWin32HandleKHR");
+            return fail(err, "vkAllocateMemory (shared image)");
+        if (vkBindImageMemory(dev_, s.image, s.mem, 0) != VK_SUCCESS) return fail(err, "vkBindImageMemory (shared)");
+        s.size = req.size;
         VkImageViewCreateInfo vc{VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO};
         vc.image = s.image;
         vc.viewType = VK_IMAGE_VIEW_TYPE_2D;
         vc.format = fmt;
         vc.subresourceRange = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1};
         if (vkCreateImageView(dev_, &vc, nullptr, &s.view) != VK_SUCCESS) return fail(err, "vkCreateImageView");
+        return true;
+    }
 
+    void glTextureParams(GLuint t) {
+        gl_.TextureParameteri(t, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        gl_.TextureParameteri(t, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        gl_.TextureParameteri(t, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        gl_.TextureParameteri(t, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    }
+
+    bool createShared(SharedImage& s, VkFormat fmt, GLenum glFmt, uint32_t w, uint32_t h, std::string& err) {
+        if (!createVkImage(s, fmt, w, h, true, err)) return false;
+        if (!export_.memory(dev_, s.mem, s.handle)) return fail(err, "exporting the image memory failed");
         gl_.CreateMemoryObjectsEXT(1, &s.glMem);
         GLint dedicated = 1;
         gl_.MemoryObjectParameterivEXT(s.glMem, GL_DEDICATED_MEMORY_OBJECT_EXT, &dedicated);
-        gl_.ImportMemoryWin32HandleEXT(s.glMem, req.size, GL_HANDLE_TYPE_OPAQUE_WIN32_EXT, s.handle);
+        glImportMemory(gl_, s.glMem, s.size, s.handle);
         gl_.CreateTextures(GL_TEXTURE_2D, 1, &s.glTex);
         gl_.TextureParameteri(s.glTex, GL_TEXTURE_TILING_EXT, GLint(GL_OPTIMAL_TILING_EXT));
         gl_.TextureStorageMem2DEXT(s.glTex, 1, glFmt, GLsizei(w), GLsizei(h), s.glMem, 0);
-        gl_.TextureParameteri(s.glTex, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        gl_.TextureParameteri(s.glTex, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        gl_.TextureParameteri(s.glTex, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        gl_.TextureParameteri(s.glTex, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTextureParams(s.glTex);
+        GLenum e = gl_.GetError();
+        if (e != GL_NO_ERROR) {
+            err = "OpenGL error 0x" + hexWord(e) + " importing a shared image";
+            return false;
+        }
+        return true;
+    }
+
+    // host-copy: a Vulkan-only image the publish pass writes, and a plain GL texture the frame is uploaded into
+    bool createLocal(SharedImage& s, VkFormat fmt, GLenum glFmt, uint32_t w, uint32_t h, std::string& err) {
+        if (!createVkImage(s, fmt, w, h, false, err)) return false;
+        gl_.CreateTextures(GL_TEXTURE_2D, 1, &s.glTex);
+        gl_.TextureStorage2D(s.glTex, 1, glFmt, GLsizei(w), GLsizei(h));
+        glTextureParams(s.glTex);
         return true;
     }
 
     bool createSemaphore(SharedSemaphore& s, std::string& err) {
         VkExportSemaphoreCreateInfo exp{VK_STRUCTURE_TYPE_EXPORT_SEMAPHORE_CREATE_INFO};
-        exp.handleTypes = VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_WIN32_BIT;
+        exp.handleTypes = SEM_HANDLE;
         VkSemaphoreCreateInfo sc{VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO};
         sc.pNext = &exp;
         if (vkCreateSemaphore(dev_, &sc, nullptr, &s.sem) != VK_SUCCESS) return fail(err, "vkCreateSemaphore (shared)");
-        VkSemaphoreGetWin32HandleInfoKHR hi{VK_STRUCTURE_TYPE_SEMAPHORE_GET_WIN32_HANDLE_INFO_KHR};
-        hi.semaphore = s.sem;
-        hi.handleType = VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_WIN32_BIT;
-        if (getSemaphoreHandle_(dev_, &hi, &s.handle) != VK_SUCCESS) return fail(err, "vkGetSemaphoreWin32HandleKHR");
+        if (!export_.semaphore(dev_, s.sem, s.handle)) return fail(err, "exporting a semaphore failed");
         gl_.GenSemaphoresEXT(1, &s.gl);
-        gl_.ImportSemaphoreWin32HandleEXT(s.gl, GL_HANDLE_TYPE_OPAQUE_WIN32_EXT, s.handle);
+        glImportSemaphore(gl_, s.gl, s.handle);
+        GLenum e = gl_.GetError();
+        if (e != GL_NO_ERROR) {
+            err = "OpenGL error 0x" + hexWord(e) + " importing a semaphore";
+            return false;
+        }
         return true;
     }
 
     void destroyInterop() {
-        if (attached_) {
-            destroyShared(sunImage_);
-            sunImageSize_ = 0;
-        }
-        bool glOk = attached_ && wglGetCurrentContext() != nullptr;
-        for (auto& s : images_) {
-            if (glOk) {
-                if (s.glTex) gl_.DeleteTextures(1, &s.glTex);
-                if (s.glMem) gl_.DeleteMemoryObjectsEXT(1, &s.glMem);
-            }
-            if (s.view) vkDestroyImageView(dev_, s.view, nullptr);
-            if (s.image) vkDestroyImage(dev_, s.image, nullptr);
-            if (s.mem) vkFreeMemory(dev_, s.mem, nullptr);
-            if (s.handle) CloseHandle(s.handle);
-            s = {};
-        }
+        destroyShared(sunImage_);
+        sunImageSize_ = 0;
+        bool glOk = glUsable();
+        for (auto& s : images_) destroyShared(s);
         for (auto& sl : slots_) {
             for (SharedSemaphore* sem : {&sl.glReady, &sl.vkDone}) {
                 if (glOk && sem->gl) gl_.DeleteSemaphoresEXT(1, &sem->gl);
                 if (sem->sem) vkDestroySemaphore(dev_, sem->sem, nullptr);
-                if (sem->handle) CloseHandle(sem->handle);
+                closeHandle(sem->handle);
                 *sem = {};
             }
+            sl.hostPending = false;
         }
         if (glOk) {
             if (linProgram_) gl_.DeleteProgram(linProgram_);
@@ -1258,8 +1828,13 @@ private:
     bool ensure(Buf& b, VkDeviceSize size, bool uniform, Mem kind, std::string& err) {
         size = size < 16 ? 16 : size;
         if (b.buf && b.size >= size && b.kind == kind) return true;
+        // a descriptor can only see maxStorageBufferRange bytes (lavapipe and some mobile-class parts: 128 MB)
+        bool bound = kind != Mem::Staging && kind != Mem::HostRead;
+        VkDeviceSize limit = uniform ? props_.limits.maxUniformBufferRange : maxStorageRange_;
+        if (bound && size > limit) return fail(err, "a frame or scene buffer exceeds this device's descriptor range limit");
         release(b);
         VkDeviceSize alloc = size + size / 4;  // headroom against regrowth every frame
+        if (bound) alloc = std::max(size, std::min(alloc, limit));
         VkBufferCreateInfo bc{VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO};
         bc.size = alloc;
         bc.usage = (uniform ? VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT : VK_BUFFER_USAGE_STORAGE_BUFFER_BIT) |
@@ -1273,7 +1848,7 @@ private:
             type = memoryType(req.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
         } else {
             // small inputs: device-local host-visible (BAR) when it fits; readback: host-cached; staging: system memory
-            uint32_t extra = kind == Mem::Readback ? VK_MEMORY_PROPERTY_HOST_CACHED_BIT
+            uint32_t extra = kind == Mem::Readback || kind == Mem::HostRead ? VK_MEMORY_PROPERTY_HOST_CACHED_BIT
                            : kind == Mem::HostWrite ? VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT : 0u;
             type = memoryType(req.memoryTypeBits, want | extra);
             if (type == UINT32_MAX) type = memoryType(req.memoryTypeBits, want);
@@ -1405,6 +1980,7 @@ private:
     VkShaderModule sunShader_ = VK_NULL_HANDLE;
     uint32_t sunSize_ = 0;          // size of the sun map buffer / image now
     uint32_t sunDispatchRows_ = 0;  // this frame's sun map rows (0: no pass)
+    bool sunFresh_ = false;         // the sun map buffer was (re)allocated: zero it before the next pass
     SharedImage sunImage_;          // the GL-shared sun map image (RG32F, size x size + 1), when attached
     uint32_t sunImageSize_ = 0;
     bool sunImageFresh_ = false;
@@ -1435,10 +2011,31 @@ private:
     const void* noiseUploaded_ = nullptr;
     uint64_t frameIndex_ = 0;
 
+    // device choice and capabilities (for info())
+    struct DeviceSeen {
+        std::string name, type, api;
+        bool glMatch;
+        std::string unfit;
+    };
+    std::vector<DeviceSeen> seen_;
+    int chosen_ = -1;
+    bool glMatchedAtCreate_ = false;
+    VkPhysicalDeviceProperties props_{};
+    uint8_t driverUuid_[VK_UUID_SIZE] = {};
+    std::string driverName_;
+    uint32_t driverId_ = 0;
+    VkDeviceSize maxStorageRange_ = 1ull << 27;
+    uint32_t maxExport_ = 0;
+    bool dedicatedOnly_ = false;
+
     // interop
     bool interopCapable_ = false, attached_ = false, firstGlFrame_ = true;
-    PFN_vkGetMemoryWin32HandleKHR getMemoryHandle_ = nullptr;
-    PFN_vkGetSemaphoreWin32HandleKHR getSemaphoreHandle_ = nullptr;
+    Interop mode_ = Interop::None;
+    std::string interopWhy_, vkInteropWhy_;  // why not zero-copy (empty when it is)
+    ExportFns export_;
+    bool glLoaded_ = false, glUuidMatch_ = false;
+    std::string glRenderer_, glVersion_, glVendor_, glWinsys_, glDriverUuid_;
+    double hostWaitMs_ = 0, hostUploadMs_ = 0;  // host-copy: last frame's CPU wait for the GPU, and upload time
     GlApi gl_;
     SharedImage images_[IMAGES];
     uint32_t width_ = 0, height_ = 0;

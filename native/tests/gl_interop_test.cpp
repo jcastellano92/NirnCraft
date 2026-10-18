@@ -1,16 +1,17 @@
-// Vulkan -> OpenGL zero-copy bridge test: a hidden-window WGL context imports aether_core's shared images; frames
-// rendered through the semaphores must read back from GL matching the host-path render of the same frame (colour
-// to half-float precision, depth exactly). GL also writes the near field's distances into the shared nearDepth
-// image, and the covered pixels must come back empty.
+// Vulkan -> OpenGL bridge test: a hidden GL context (WGL; EGL or GLX on Linux, see gl_context.hpp) imports
+// aether_core's shared images; frames rendered through the semaphores must read back from GL matching the host-path
+// render of the same frame (colour to half-float precision, depth exactly). GL also writes the near field's distances
+// into the shared nearDepth image, and the covered pixels must come back empty. When the driver pair cannot share
+// memory, aether falls back to host copies (AETHER_INTEROP=hostcopy forces it): the same frames must still match;
+// the near-depth skip is off there (every pixel is marched, so the references are the plain renders).
 //   aether_gl_test [native/data]
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
 
 #include <algorithm>
 #include <atomic>
 #include <chrono>
 #include <thread>
 #include <cmath>
+#include <cstdlib>
 #include <cstdio>
 #include <cstring>
 #include <string>
@@ -19,25 +20,10 @@
 #include "aether/aether.h"
 #include "camera.hpp"
 #include "gl_api.hpp"
+#include "gl_context.hpp"
 
 using namespace aether;
 
-static HGLRC makeContext(HDC& dc) {
-    WNDCLASSA wc{};
-    wc.lpfnWndProc = DefWindowProcA;
-    wc.hInstance = GetModuleHandleA(nullptr);
-    wc.lpszClassName = "aether_gl_test";
-    RegisterClassA(&wc);
-    HWND wnd = CreateWindowA("aether_gl_test", "aether", WS_OVERLAPPEDWINDOW, 0, 0, 64, 64, nullptr, nullptr,
-                             wc.hInstance, nullptr);
-    dc = GetDC(wnd);
-    PIXELFORMATDESCRIPTOR pfd{sizeof(pfd), 1, PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER, PFD_TYPE_RGBA, 32};
-    int pf = ChoosePixelFormat(dc, &pfd);
-    SetPixelFormat(dc, pf, &pfd);
-    HGLRC rc = wglCreateContext(dc);
-    wglMakeCurrent(dc, rc);
-    return rc;
-}
 
 struct Compare {
     size_t color = 0, depth = 0;
@@ -68,19 +54,25 @@ static Compare compare(const std::vector<float>& refC, const std::vector<float>&
 
 int main(int argc, char** argv) {
     std::string data = argc > 1 ? argv[1] : "native/data";
-    HDC dc;
-    HGLRC rc = makeContext(dc);
+    aether_test::GlContext glc;
     GlApi gl;
     std::string err;
-    if (!rc || !gl.load(err)) {
+    if (!glc.create(err) || !gl.load(err)) {
         std::printf("SKIP: %s\n", err.c_str());
         return 0;
     }
-    std::printf("GL: %s | %s\n", gl.GetString(GL_RENDERER), gl.GetString(GL_VERSION));
+    std::printf("GL (%s): %s | %s\n", glc.kind, gl.GetString(GL_RENDERER), gl.GetString(GL_VERSION));
+    // a strict driver (Mesa) flags what a lenient one lets pass: no GL error may be left over at any step
+    auto glCheck = [&](const char* where) {
+        GLenum e = gl.GetError();
+        if (e != GL_NO_ERROR) std::printf("  GL error 0x%x after %s\n", e, where);
+        return e == GL_NO_ERROR;
+    };
+    bool glClean = true;
 
     AetherContext* ctx = nullptr;
     if (aether_create(AETHER_BACKEND_VULKAN, &ctx) != AETHER_OK) {
-        std::printf("SKIP: no Vulkan backend\n");
+        std::printf("SKIP: no Vulkan backend (%s)\n", aether_last_error(nullptr));
         return 0;
     }
     if (aether_preview_load_raster(ctx, (data + "/tamriel_raster.bin").c_str()) != AETHER_OK) {
@@ -127,6 +119,13 @@ int main(int argc, char** argv) {
     }
     std::printf("attached: color %u normal %u depth %u nearDepth %u (%ux%u)\n", t.color, t.normal, t.depth,
                 t.nearDepth, t.width, t.height);
+    std::string info = aether_info(ctx);
+    std::printf("info: %s\n", info.c_str());
+    const bool host = info.find("\"interop\":\"host-copy\"") != std::string::npos;
+    std::printf("mode: %s\n", host ? "host-copy" : "zero-copy");
+    glClean &= glCheck("attach");
+    // host copies march every pixel (no near-depth skip): the near-field references are the plain renders
+    std::vector<float> plainColor = refColor, plainDepth = refDepth;
 
     // several frames: exercises both frame slots, the semaphore ping-pong and the queue ownership transfers
     const int FRAMES = 60;
@@ -148,6 +147,8 @@ int main(int argc, char** argv) {
     aether_get_stats(ctx, &st);
     std::printf("%d frames: %.3f ms CPU per aether_gl_render, %.2f ms wall incl. final glFinish, GPU %.2f ms/frame\n",
                 FRAMES, cpuMs, wallMs, st.lastFrameMs);
+    if (host) std::printf("host-copy cost, last frame: %s\n", std::strstr(aether_info(ctx), "\"hostCopy\""));
+    glClean &= glCheck("frames");
     std::printf("GL readback vs host render: %zu colour (worst rel %.1e) and %zu depth pixels differ\n", c1.color,
                 c1.worstRel, c1.depth);
 
@@ -165,6 +166,10 @@ int main(int argc, char** argv) {
         std::printf("FAIL host near render: %s\n", aether_last_error(ctx));
         return 1;
     }
+    if (host) {
+        refColor = plainColor;
+        refDepth = plainDepth;
+    }
     fn.nearDepth = nullptr;  // the GL path reads the shared image
     for (int i = 0; i < 3; i++) aether_gl_render(ctx, &fn);
     gl.Finish();
@@ -172,9 +177,11 @@ int main(int argc, char** argv) {
     gl.GetTextureImage(t.depth, 0, GL_RED, GL_FLOAT, GLsizei(glDepth.size() * 4), glDepth.data());
     Compare c2 = compare(refColor, refDepth, glColor, glDepth, W, H);
     size_t coveredLit = 0;
-    for (uint32_t yy = 0; yy < H; yy++)
-        for (uint32_t xx = 0; xx < W / 2; xx++)
-            coveredLit += glColor[(size_t(yy) * W + xx) * 4 + 3] != 0.0f;
+    if (!host)
+        for (uint32_t yy = 0; yy < H; yy++)
+            for (uint32_t xx = 0; xx < W / 2; xx++)
+                coveredLit += glColor[(size_t(yy) * W + xx) * 4 + 3] != 0.0f;
+    glClean &= glCheck("near depth frames");
     std::printf("near depth from GL: %zu covered pixels drawn; vs host: %zu colour, %zu depth pixels differ\n",
                 coveredLit, c2.color, c2.depth);
     // the game's own depth buffer: GL depth texture -> aether linearises it; plus copies into caller textures
@@ -231,6 +238,7 @@ int main(int argc, char** argv) {
     gl.GetTextureImage(dst[2], 0, GL_RED, GL_FLOAT, GLsizei(glDepth.size() * 4), glDepth.data());
     Compare c4 = compare(refColor, refDepth, glColor, glDepth, W, H);
     std::printf("depth via the bound framebuffer: %zu colour, %zu depth pixels differ from host\n", c4.color, c4.depth);
+    glClean &= glCheck("depth-buffer frames");
     gl.DeleteFramebuffers(1, &fbo);
     // dynamic resolution: the window's depth at twice aether's size, the same left half covered, plus one covered
     // full-resolution column that covers only half of each aether pixel it falls in: that one must not be skipped
@@ -271,7 +279,11 @@ int main(int argc, char** argv) {
     gl.GetTextureImage(sunTex, 0, GL_RG, GL_FLOAT, GLsizei(sunGl.size() * 4), sunGl.data());
     bool sunRead = aether_read_sun_map(ctx, sunDev.data(), uint32_t(sunDev.size())) == AETHER_OK;
     size_t sunOff = 0;
-    for (size_t k = 0; k < sunGl.size(); k++) sunOff += sunGl[k] != sunDev[k];
+    for (size_t k = 0; k < sunGl.size(); k++)
+        if (std::memcmp(&sunGl[k], &sunDev[k], 4) != 0) {  // bit-exact copies (a NaN never equals itself)
+            if (sunOff < 4) std::printf("  sun map value %zu: GL %a, device %a\n", k, sunGl[k], sunDev[k]);
+            sunOff++;
+        }
     bool sunParams = sunGl[size_t(SM) * SM * 2 + 13] == 1.0f;  // the parameter row's valid flag
     std::printf("sun map via GL: %zu of %zu values differ from the device buffer; parameter row %s\n", sunOff,
                 sunGl.size(), sunParams ? "present" : "MISSING");
@@ -281,6 +293,7 @@ int main(int argc, char** argv) {
     gl.DeleteTextures(1, &depthTex);
     gl.DeleteTextures(3, dst);
     GLenum e = gl.GetError();
+    glClean &= e == GL_NO_ERROR;
 
     // streaming flight: a worker streams tiles and rebuilds the clipmap while frames keep coming; staging must keep
     // the multi-megabyte scene uploads off the render thread (a render-thread upload shows as a 10+ ms frame)
@@ -314,7 +327,7 @@ int main(int argc, char** argv) {
             return 1;
         }
         frameMs.push_back(std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count());
-        Sleep(8);  // the rest of a game frame
+        std::this_thread::sleep_for(std::chrono::milliseconds(8));  // the rest of a game frame
     }
     stop = true;
     worker.join();
@@ -324,13 +337,17 @@ int main(int argc, char** argv) {
     std::printf("streaming flight: %d clipmap rebuilds during 240 frames; aether_gl_render CPU median %.2f ms, "
                 "p99 %.2f ms, max %.2f ms\n", rebuilds.load(), sorted[sorted.size() / 2], sorted[sorted.size() * 99 / 100],
                 sorted.back());
-    bool smooth = sorted[sorted.size() * 99 / 100] < 8.0;
+    // host copies wait for the GPU inside the call, so only zero-copy is held to the 8 ms p99 (software drivers set
+    // AETHER_TEST_SLOW=1: they take seconds per frame)
+    const char* slow = std::getenv("AETHER_TEST_SLOW");
+    bool smooth = host || (slow && *slow == '1') || sorted[sorted.size() * 99 / 100] < 8.0;
+    glClean &= glCheck("streaming");
 
     aether_gl_detach(ctx);
+    glClean &= glCheck("detach");
     aether_destroy(ctx);
-    wglMakeCurrent(nullptr, nullptr);
-    wglDeleteContext(rc);
-    bool ok = c1.color == 0 && c1.depth == 0 && c2.color == 0 && c2.depth == 0 && coveredLit == 0 && e == GL_NO_ERROR &&
+    glc.destroy();
+    bool ok = c1.color == 0 && c1.depth == 0 && c2.color == 0 && c2.depth == 0 && coveredLit == 0 && glClean &&
               c3.color == 0 && c3.depth == 0 && c4.color == 0 && c4.depth == 0 && c5.color == 0 && c5.depth == 0 && sunOk &&
               smooth;
     std::printf(ok ? "PASS\n" : "FAIL (gl error 0x%x)\n", e);
