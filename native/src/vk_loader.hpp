@@ -1,0 +1,48 @@
+// The Vulkan loader, opened at run time (vulkan-1.dll / libvulkan.so.1) instead of linked: the library then has no
+// link-time Vulkan dependency, so one libaether_core.so built on an old sysroot loads on every distro, and a machine
+// without a loader gets an aether_create error (the CPU backend still works) instead of a library that will not load.
+// Every entry point the backend calls is a pointer in namespace aether with the usual vk* name.
+#pragma once
+#ifndef VK_NO_PROTOTYPES
+#define VK_NO_PROTOTYPES
+#endif
+#include <vulkan/vulkan.h>
+
+#include <string>
+
+#define AETHER_VK_GLOBAL_FNS(X) X(vkCreateInstance) X(vkEnumerateInstanceExtensionProperties)
+
+#define AETHER_VK_INSTANCE_FNS(X)                                                                                      \
+    X(vkDestroyInstance) X(vkEnumeratePhysicalDevices) X(vkGetPhysicalDeviceFeatures)                                \
+    X(vkGetPhysicalDeviceProperties2) X(vkGetPhysicalDeviceQueueFamilyProperties)                                    \
+    X(vkGetPhysicalDeviceMemoryProperties) X(vkGetPhysicalDeviceImageFormatProperties2)                              \
+    X(vkGetPhysicalDeviceExternalSemaphoreProperties) X(vkEnumerateDeviceExtensionProperties) X(vkCreateDevice)      \
+    X(vkGetDeviceProcAddr) X(vkDestroyDevice) X(vkGetDeviceQueue) X(vkDeviceWaitIdle) X(vkQueueSubmit)               \
+    X(vkAllocateMemory) X(vkFreeMemory) X(vkMapMemory) X(vkUnmapMemory) X(vkCreateBuffer) X(vkDestroyBuffer)          \
+    X(vkGetBufferMemoryRequirements) X(vkBindBufferMemory) X(vkCreateImage) X(vkDestroyImage)                         \
+    X(vkGetImageMemoryRequirements) X(vkGetImageMemoryRequirements2) X(vkBindImageMemory) X(vkCreateImageView)       \
+    X(vkDestroyImageView) X(vkCreateSampler) X(vkDestroySampler) X(vkCreateShaderModule) X(vkDestroyShaderModule)    \
+    X(vkCreateDescriptorSetLayout) X(vkDestroyDescriptorSetLayout) X(vkCreatePipelineLayout)                         \
+    X(vkDestroyPipelineLayout) X(vkCreateComputePipelines) X(vkDestroyPipeline) X(vkCreateDescriptorPool)            \
+    X(vkDestroyDescriptorPool) X(vkAllocateDescriptorSets) X(vkUpdateDescriptorSets) X(vkCreateCommandPool)          \
+    X(vkDestroyCommandPool) X(vkAllocateCommandBuffers) X(vkResetCommandBuffer) X(vkBeginCommandBuffer)              \
+    X(vkEndCommandBuffer) X(vkCreateFence) X(vkDestroyFence) X(vkResetFences) X(vkWaitForFences) X(vkGetFenceStatus) \
+    X(vkCreateSemaphore) X(vkDestroySemaphore) X(vkCreateQueryPool) X(vkDestroyQueryPool) X(vkGetQueryPoolResults)   \
+    X(vkCmdBindPipeline) X(vkCmdBindDescriptorSets) X(vkCmdPushConstants) X(vkCmdDispatch) X(vkCmdPipelineBarrier)   \
+    X(vkCmdCopyBuffer) X(vkCmdCopyBufferToImage) X(vkCmdCopyImageToBuffer) X(vkCmdFillBuffer)                        \
+    X(vkCmdResetQueryPool) X(vkCmdWriteTimestamp)
+
+namespace aether {
+
+#define AETHER_VK_DECLARE(name) extern PFN_##name name;
+extern PFN_vkGetInstanceProcAddr vkGetInstanceProcAddr;
+AETHER_VK_GLOBAL_FNS(AETHER_VK_DECLARE)
+AETHER_VK_INSTANCE_FNS(AETHER_VK_DECLARE)
+#undef AETHER_VK_DECLARE
+
+// Opens the loader and resolves the global entry points (once per process). False + err when there is none.
+bool vkLoadGlobal(std::string& err);
+// Resolves everything else through the instance (loader trampolines: valid for every instance, any thread).
+bool vkLoadInstance(VkInstance instance, std::string& err);
+
+}  // namespace aether

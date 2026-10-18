@@ -25,7 +25,7 @@ import static java.lang.foreign.ValueLayout.JAVA_SHORT;
  * heap access, so Java arrays are passed in place without an off-heap copy; frame rendering is a normal downcall.</p>
  */
 public final class AetherNative {
-    public static final int ABI_VERSION = 0x000700;
+    public static final int ABI_VERSION = 0x000800;
     public static final int BACKEND_CPU = 0, BACKEND_VULKAN = 1;
     public static final int FRAME_CLOUDS = 0x1, FRAME_SHADOWS = 0x2, FRAME_ATMOS = 0x4, FRAME_ACTORS = 0x8,
             FRAME_SKY = 0x10, FRAME_NEAR_DEPTH = 0x20, FRAME_FLAT_NORMALS = 0x40, FRAME_CLOUDS_QUARTER = 0x80,
@@ -40,7 +40,7 @@ public final class AetherNative {
     private final Arena libArena;
     private final MethodHandle abiVersion, buildInfo, create, destroy, lastError, setPalette, uploadTile,
             uploadSection, notifyBlock, setWeather, setCloudNoise, setActors, update, render, getStats,
-            glAttach, glRenderIo, glDetach, previewLoadRaster, previewGenerate, previewHeight, uploadHeights, uploadHeights2, hasTile, uploadStructures, setMaterials, setSunMap;
+            glAttach, glRenderIo, glDetach, info, previewLoadRaster, previewGenerate, previewHeight, uploadHeights, uploadHeights2, hasTile, uploadStructures, setMaterials, setSunMap;
 
     private AetherNative(Path library) {
         libArena = Arena.ofShared();
@@ -67,6 +67,7 @@ public final class AetherNative {
         glAttach = bind(l, lib, "aether_gl_attach", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, JAVA_INT, ADDRESS));
         glRenderIo = bind(l, lib, "aether_gl_render_io", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, ADDRESS));
         glDetach = bind(l, lib, "aether_gl_detach", FunctionDescriptor.ofVoid(ADDRESS));
+        info = bind(l, lib, "aether_info", FunctionDescriptor.of(ADDRESS, ADDRESS));
         previewLoadRaster = bind(l, lib, "aether_preview_load_raster", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS));
         previewGenerate = bind(l, lib, "aether_preview_generate",
                 FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, JAVA_INT, JAVA_INT, JAVA_INT, JAVA_INT));
@@ -120,7 +121,11 @@ public final class AetherNative {
         try (Arena a = Arena.ofConfined()) {
             MemorySegment out = a.allocate(ADDRESS);
             int s = (int) create.invokeExact(backend, out);
-            if (s != 0) throw new IllegalStateException("aether_create(" + backend + ") failed: " + s);
+            if (s != 0) {
+                // no context to ask: aether_last_error(NULL) holds why (e.g. every Vulkan device and its reason)
+                String why = ((MemorySegment) lastError.invokeExact(MemorySegment.NULL)).reinterpret(4096).getString(0);
+                throw new IllegalStateException("aether_create(" + backend + ") failed: " + s + " (" + why + ")");
+            }
             return new Context(out.get(ADDRESS, 0));
         } catch (Throwable t) {
             throw rethrow(t);
@@ -494,6 +499,18 @@ public final class AetherNative {
         public void glDetach() {
             try {
                 glDetach.invokeExact(ptr);
+            } catch (Throwable t) {
+                throw rethrow(t);
+            }
+        }
+
+        /**
+         * One line of JSON for the log (abi 0.8): device, driver, Vulkan version, and after glAttach the interop mode
+         * ("zero-copy (win32 handles)", "zero-copy (opaque fds)" or "host-copy" with interopReason and its cost).
+         */
+        public String info() {
+            try {
+                return ((MemorySegment) info.invokeExact(ptr)).reinterpret(1 << 16).getString(0);
             } catch (Throwable t) {
                 throw rethrow(t);
             }

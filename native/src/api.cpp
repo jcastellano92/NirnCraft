@@ -2,6 +2,7 @@
 #include <cstddef>
 #include <chrono>
 #include <cmath>
+#include <cstdio>
 #include <cstring>
 #include <cstdint>
 #include <memory>
@@ -46,6 +47,7 @@ struct AetherContext {
     FrameTargets targets;
     AetherStats stats{};
     std::string error;
+    std::string info;  // aether_info's last answer
     std::mutex mu;
     uint64_t stagedRevision = UINT64_MAX;
     // the last frame, for temporal cloud reprojection
@@ -68,6 +70,12 @@ struct AetherContext {
 };
 
 namespace {
+
+// why the last aether_create on this thread failed (there is no context to hold the message)
+std::string& createError() {
+    thread_local std::string e;
+    return e;
+}
 
 MaterialGpu toGpu(const AetherMaterial& m) {
     MaterialGpu g{};
@@ -105,8 +113,41 @@ extern "C" {
 
 AETHER_API uint32_t aether_abi_version(void) { return AETHER_ABI_VERSION; }
 
+#define AETHER_STR2(x) #x
+#define AETHER_STR(x) AETHER_STR2(x)
+#if defined(_WIN32)
+#define AETHER_PLATFORM "windows"
+#elif defined(__linux__)
+#define AETHER_PLATFORM "linux"
+#else
+#define AETHER_PLATFORM "unknown"
+#endif
+#if defined(_MSC_VER)
+#define AETHER_COMPILER "msvc " AETHER_STR(_MSC_VER)
+#elif defined(__clang__)
+#define AETHER_COMPILER "clang " __clang_version__
+#elif defined(__GNUC__)
+#define AETHER_COMPILER "gcc " __VERSION__
+#else
+#define AETHER_COMPILER "unknown compiler"
+#endif
+
 AETHER_API const char* aether_build_info(void) {
-    return "aether_core " AETHER_VERSION_STRING " (abi 0.6.0; slang far kernel; " __DATE__ ")";
+    static const std::string s = [] {
+        char abi[32];
+        std::snprintf(abi, sizeof(abi), "%u.%u.%u", (AETHER_ABI_VERSION >> 16) & 255u, (AETHER_ABI_VERSION >> 8) & 255u,
+                      AETHER_ABI_VERSION & 255u);
+        return std::string("aether_core " AETHER_VERSION_STRING " (abi ") + abi +
+               "; slang far kernel; " AETHER_PLATFORM ", " AETHER_COMPILER "; " __DATE__ ")";
+    }();
+    return s.c_str();
+}
+
+AETHER_API const char* aether_info(AetherContext* ctx) {
+    if (!ctx) return "{}";
+    std::lock_guard<std::mutex> lock(ctx->mu);
+    ctx->info = ctx->backend->info();
+    return ctx->info.c_str();
 }
 
 AETHER_API AetherStatus aether_create(AetherBackend backend, AetherContext** out) {
@@ -117,6 +158,7 @@ AETHER_API AetherStatus aether_create(AetherBackend backend, AetherContext** out
         ctx->backend = makeVulkanBackend(err);
         if (!ctx->backend) {
             *out = nullptr;
+            createError() = "Vulkan backend unavailable: " + err;  // aether_last_error(NULL) reports it
             return AETHER_ERR_GPU;
         }
     } else {
@@ -131,7 +173,10 @@ AETHER_API AetherStatus aether_create(AetherBackend backend, AetherContext** out
 
 AETHER_API void aether_destroy(AetherContext* ctx) { delete ctx; }
 
-AETHER_API const char* aether_last_error(AetherContext* ctx) { return ctx ? ctx->error.c_str() : "null context"; }
+AETHER_API const char* aether_last_error(AetherContext* ctx) {
+    if (ctx) return ctx->error.c_str();
+    return createError().empty() ? "null context" : createError().c_str();
+}
 
 AETHER_API AetherStatus aether_set_palette(AetherContext* ctx, const AetherMaterial* m, uint32_t count) {
     if (!ctx || (!m && count)) return AETHER_ERR_ARG;
