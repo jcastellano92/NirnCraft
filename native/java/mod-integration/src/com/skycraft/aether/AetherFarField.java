@@ -63,6 +63,8 @@ final class AetherFarField implements AutoCloseable {
     }
 
     static final int LODS = 7, WINDOW = 2;
+    /** Extra rest between passes (ms) while this machine hosts a busy server (adaptive quality's host-load policy). */
+    static volatile int restMs;
 
     private final AetherNative.Context ctx;
     private final ColumnSource source;
@@ -133,7 +135,7 @@ final class AetherFarField implements AutoCloseable {
                 boolean moved = Double.isNaN(lastX) || Math.abs(x - lastX) > 32 || Math.abs(z - lastZ) > 32;
                 lastX = x;
                 lastZ = z;
-                Thread.sleep(moved || pending ? 5 : 100);
+                Thread.sleep((moved || pending ? 5 : 100) + restMs);
             } catch (InterruptedException e) {
                 return;
             } catch (Throwable t) {

@@ -1,45 +1,61 @@
 package com.skycraft.aether;
 
+import com.skycraft.render.quality.Knob;
+import com.skycraft.render.quality.QualityClient;
+
 /**
- * Keeps aether inside a GPU budget on any hardware by trading what shows least first: the far field's internal
- * resolution (distant terrain is soft anyway; the pack upsamples it), then the cloud pass's resolution, then far
- * terrain's own sun shadows. Measured from aether's GPU timestamps (two frames late), smoothed, with hysteresis and a
- * dwell time, so it settles instead of oscillating. Levels: 0 is everything at full resolution.
- * <p>Budget: skycraft.aether.budgetMs (default 4); the whole frame running under 50 fps also steps down.</p>
+ * aether's side of adaptive quality v2 (com.skycraft.render.quality, docs/ADAPTIVE-QUALITY.md): this frame's knobs
+ * from the quality controller, as aether's render scale (0.4 .. 1 of the window, in 0.05 steps; the pack upsamples),
+ * LOD bias (1 .. 3: far detail coarsens first), cloud-pass resolution (half / quarter), far-terrain shadows and the sun
+ * map's size (1024 / 512 / 256, shadows off), and the fallbacks below the floor: tier 1 renders at 0.33 out to 16 km,
+ * tier 2 turns the far field off (the pack's own sky and cloud deck take over). The controller measures aether's
+ * GPU time (reported by AetherClient each frame) and the whole frame's, and keeps both inside the frame budget.
  */
 final class AetherQuality {
-    /** {render scale, clouds quarter, far shadows} per level. */
-    private static final float[][] LEVELS = {
-            {1.00f, 0, 1}, {0.85f, 0, 1}, {0.72f, 0, 1}, {0.72f, 1, 1}, {0.60f, 1, 1}, {0.50f, 1, 1}, {0.50f, 1, 0}, {0.40f, 1, 0}};
-    static final float BUDGET_MS = Float.parseFloat(System.getProperty("skycraft.aether.budgetMs", "4"));
-    private static final long DWELL_NS = 2_000_000_000L;
-
-    private int level = Integer.getInteger("skycraft.aether.startLevel", 0);
-    private double ema = -1;
-    private int over, under;
-    private long lastChange;
-
-    /** The sun map's size per level (far shadows on the near field): 4 m texels over 4 km, coarser lower down. */
-    private static final int[] SUN_MAP = {1024, 1024, 1024, 1024, 512, 512, 256, 256};
     static final float SUN_HALF_EXTENT = 2048f;
 
-    int sunMapSize() {
-        return SUN_MAP[level];
+    private double[] q = new double[Knob.COUNT];
+    private int tier;
+
+    AetherQuality() {
+        java.util.Arrays.fill(q, 1);
+    }
+
+    /** Takes this frame's knobs (render thread, before the frame is set up). */
+    void begin() {
+        q = QualityClient.knobs();
+        tier = QualityClient.fallbackTier();
+    }
+
+    /** False at fallback tier 2: no far field this frame. */
+    boolean enabled() {
+        return tier < 2;
     }
 
     float scale() {
-        return LEVELS[level][0];
+        return tier >= 1 ? 0.33f : (float) Knob.aetherScale(q[Knob.AETHER_SCALE.ordinal()]);
+    }
+
+    /** The sun map's size (256 while far shadows are off: the near field still reads the map's clouds). */
+    int sunMapSize() {
+        int s = Knob.aetherSunMap(q[Knob.AETHER_SHADOWS.ordinal()]);
+        return s == 0 ? 256 : s;
     }
 
     int flags(int base) {
         int f = base;
-        if (LEVELS[level][1] > 0) f |= AetherNative.FRAME_CLOUDS_QUARTER;
-        if (LEVELS[level][2] == 0) f &= ~AetherNative.FRAME_SHADOWS;
+        if (Knob.AETHER_CLOUDS.snap(q[Knob.AETHER_CLOUDS.ordinal()]) < 1) f |= AetherNative.FRAME_CLOUDS_QUARTER;
+        if (Knob.aetherSunMap(q[Knob.AETHER_SHADOWS.ordinal()]) == 0) f &= ~AetherNative.FRAME_SHADOWS;
         return f;
     }
 
-    int level() {
-        return level;
+    float lodBias() {
+        return (float) Knob.aetherLodBias(q[Knob.AETHER_LOD.ordinal()]);
+    }
+
+    /** How far aether traces (blocks): 40 km, 16 km at fallback tier 1. */
+    float maxDistance() {
+        return tier >= 1 ? 16_000f : 40_000f;
     }
 
     /** aether's render size for a window size (at least 64 x 36). */
@@ -49,34 +65,5 @@ final class AetherQuality {
 
     int height(int h) {
         return Math.max(36, Math.round(h * scale()));
-    }
-
-    /**
-     * One frame's measurements: aether's GPU ms and the game's fps. True when the level changed (the caller resizes
-     * its targets).
-     */
-    boolean update(float gpuMs, int fps, long now) {
-        if (!(gpuMs > 0)) return false;
-        ema = ema < 0 ? gpuMs : ema * 0.94 + gpuMs * 0.06;
-        boolean slowGame = fps > 0 && fps < 50;
-        if (ema > BUDGET_MS * 1.1 || (slowGame && ema > BUDGET_MS * 0.5)) {
-            over++;
-            under = 0;
-        } else if (ema < BUDGET_MS * 0.55 && !slowGame) {
-            under++;
-            over = 0;
-        } else {
-            over = under = 0;
-        }
-        if (now - lastChange < DWELL_NS) return false;
-        int next = level;
-        if (over > 30 && level < LEVELS.length - 1) next = level + 1;
-        else if (under > 180 && level > 0) next = level - 1;
-        if (next == level) return false;
-        level = next;
-        over = under = 0;
-        lastChange = now;
-        ema = -1;  // a new level measures afresh
-        return true;
     }
 }

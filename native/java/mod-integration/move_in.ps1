@@ -4,7 +4,7 @@
 #   .\<aether worktree>\native\java\mod-integration\move_in.ps1 [-Apply] [-Mod <tree>\mod]
 # Every patch inserts text after one anchor that must occur exactly once, and is skipped when its marker is already
 # there, so a second run changes nothing. Coordinate with whoever is editing mod/ before -Apply.
-param([switch]$Apply, [string]$Mod = 'mod')
+param([switch]$Apply, [string]$Mod = 'mod', [switch]$Sources)
 $ErrorActionPreference = 'Stop'
 $glue = $PSScriptRoot
 $native = Split-Path (Split-Path $glue -Parent) -Parent  # ...\native
@@ -14,9 +14,15 @@ $java = "$Mod\src\main\java\com\skycraft"
 $mode = if ($Apply) { 'APPLY' } else { 'dry run' }
 Write-Host "aether move-in ($mode) -> $Mod"
 
-# 1. sources: the glue and the FFM binding (not the probe, the harness or the compile stubs)
+# 1. sources: the glue and the FFM binding (not the probe, the harness or the compile stubs). Since aether moved into
+# the mod (2026-10-18), mod/src/main/java/com/skycraft/aether is the source of truth: once it exists, only the native
+# libraries below are refreshed (copying the staged glue over it once reverted newer mod-side work). -Sources forces it.
 $dst = "$java\aether"
 $files = @(Get-ChildItem "$glue\src\com\skycraft\aether" -Filter *.java) + @(Get-Item "$native\java\src\com\skycraft\aether\AetherNative.java")
+if ((Test-Path "$dst\AetherClient.java") -and -not $Sources) {
+    Write-Host "  sources: $dst is the source of truth (pass -Sources to overwrite it from the staged glue)"
+    $files = @()
+}
 foreach ($f in $files) {
     Write-Host "  copy $($f.Name) -> $dst"
     if ($Apply) {
