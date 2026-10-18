@@ -408,7 +408,13 @@ private:
         }
         gl_.ProgramUniformMatrix4fv(linProgram_, uInvProj_, 1, 0, io.nearInvProjection);
         gl_.ProgramUniform2f(linProgram_, uSize_, float(w), float(h));
-        gl_.ProgramUniform1i(linProgram_, uZeroToOne_, GLint(io.depthZeroToOne));
+        GLint zeroToOne = GLint(io.depthZeroToOne);
+        if (io.depthZeroToOne == 0xFFFFFFFFu) {
+            GLint mode = 0;
+            gl_.GetIntegerv(GL_CLIP_DEPTH_MODE, &mode);
+            zeroToOne = GLenum(mode) == GL_ZERO_TO_ONE ? 1 : 0;
+        }
+        gl_.ProgramUniform1i(linProgram_, uZeroToOne_, zeroToOne);
         gl_.ProgramUniform1i(linProgram_, uReversed_, GLint(io.reversedZ));
         GLint prevProgram = 0, prevActive = 0, prevTex = 0, prevSampler = 0, prevImage = 0;
         gl_.GetIntegerv(GL_CURRENT_PROGRAM, &prevProgram);
@@ -601,7 +607,11 @@ private:
                 current_ = staged_;  // staged off the render thread: just flip
                 staged_ = -1;
             }
-            if (lock.owns_lock() && (current_ < 0 || copies_[current_].revision != sc.revision) &&
+            bool stale = current_ >= 0 && copies_[current_].revision != sc.revision;
+            staleFrames_ = stale ? staleFrames_ + 1 : 0;
+            // a newer scene the update thread could not stage (both copies were busy) is normally staged by its
+            // next call within a frame or two; only upload here for the first scene or when it stays stale
+            if (lock.owns_lock() && (current_ < 0 || (stale && staleFrames_ > 30)) &&
                 (staged_ < 0 || copies_[staged_].revision != sc.revision)) {
                 // not staged (no update thread, or both copies were busy): upload here, once nothing reads it
                 int c = current_ < 0 ? 0 : current_;
@@ -1008,6 +1018,7 @@ private:
     int current_ = -1, staged_ = -1;
     std::mutex sceneMu_;
     uint64_t frameCounter_ = 0;
+    int staleFrames_ = 0;
     std::atomic<uint64_t> completedFrame_{0};
     const void* noiseUploaded_ = nullptr;
     uint64_t frameIndex_ = 0;

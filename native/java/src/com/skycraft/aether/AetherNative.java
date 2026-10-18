@@ -159,14 +159,17 @@ public final class AetherNative {
 
     /** The game's side of a GL frame (see AetherGlFrameIO in aether.h); zero fields are unused. */
     public static final class GlFrameIO {
+        public static final int BOUND_DEPTH = 0xFFFFFFFF, DEPTH_AUTO = 0xFFFFFFFF;
         public int nearDepthTex;
-        public boolean depthZeroToOne, reversedZ;
+        /** 1 = [0,1] clip depth, 0 = [-1,1], DEPTH_AUTO = ask the GL context. */
+        public int depthZeroToOne = DEPTH_AUTO;
+        public boolean reversedZ;
         public final float[] nearInvProjection = new float[16];
         public int dstColor, dstNormal, dstDepth;
 
         void write(MemorySegment s) {
             s.set(JAVA_INT, 0, nearDepthTex);
-            s.set(JAVA_INT, 4, depthZeroToOne ? 1 : 0);
+            s.set(JAVA_INT, 4, depthZeroToOne);
             s.set(JAVA_INT, 8, reversedZ ? 1 : 0);
             s.set(JAVA_INT, 12, 0);
             MemorySegment.copy(nearInvProjection, 0, s, JAVA_FLOAT, 16, 16);

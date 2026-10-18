@@ -205,7 +205,8 @@ AETHER_API AetherStatus aether_gl_render(AetherContext* ctx, const AetherFrame* 
  *                    (e.g. a shader pack's gbuffer target, whose texture the mod never sees). aether linearises it
  *                    into the shared nearDepth image with a small GL compute pass, so covered pixels skip the far
  *                    march (sets AETHER_FRAME_NEAR_DEPTH for the frame). Sky = depth 1 (or 0 when reversedZ).
- *  depthZeroToOne    1 when that depth was written with [0,1] clip depth (glClipControl), 0 for [-1,1]
+ *  depthZeroToOne    1 when that depth was written with [0,1] clip depth (glClipControl), 0 for [-1,1],
+ *                    AETHER_GL_DEPTH_AUTO to read the context's GL_CLIP_DEPTH_MODE
  *  reversedZ         1 when near = 1, far = 0
  *  nearInvProjection inverse of the projection used for that depth, column-major, camera-relative view space
  *  dstColor/Normal/Depth  GL textures (same size and format as the shared ones) that receive copies once the
@@ -213,6 +214,7 @@ AETHER_API AetherStatus aether_gl_render(AetherContext* ctx, const AetherFrame* 
  * aether restores every piece of GL state it touches (program, texture/sampler unit 15, image unit 7).
  */
 #define AETHER_GL_BOUND_DEPTH 0xFFFFFFFFu
+#define AETHER_GL_DEPTH_AUTO 0xFFFFFFFFu
 typedef struct AetherGlFrameIO {
     uint32_t nearDepthTex;
     uint32_t depthZeroToOne;

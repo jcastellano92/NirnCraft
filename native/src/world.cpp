@@ -280,11 +280,24 @@ int World::update(const double centre[3], double budgetMs, double* buildMs) {
             regions_[k] = r;
             dirty_.erase(k);
         }
-        // evict regions far outside the window (keep one ring of slack against thrashing)
+        // evict regions far outside the window (keep one ring of slack against thrashing), and the tiles and
+        // sections behind them two rings out, so memory stays bounded however far the player travels
         for (auto it = regions_.begin(); it != regions_.end();) {
             const Key3& k = it->first;
             int dx = std::abs(k.x - centreRegion[k.lod][0]), dz = std::abs(k.z - centreRegion[k.lod][1]);
             if (k.lod >= lodCount || dx > windowRadius + 1 || dz > windowRadius + 1) it = regions_.erase(it);
+            else ++it;
+        }
+        for (auto it = tiles_.begin(); it != tiles_.end();) {
+            const Key3& k = it->first;
+            int dx = std::abs(k.x - centreRegion[k.lod][0]), dz = std::abs(k.z - centreRegion[k.lod][1]);
+            if (k.lod >= lodCount || dx > windowRadius + 2 || dz > windowRadius + 2) it = tiles_.erase(it);
+            else ++it;
+        }
+        for (auto it = sections_.begin(); it != sections_.end();) {
+            int rx = floorDiv(it->first.x * 16, 256), rz = floorDiv(it->first.z * 16, 256);
+            if (std::abs(rx - centreRegion[0][0]) > windowRadius + 2 || std::abs(rz - centreRegion[0][1]) > windowRadius + 2)
+                it = sections_.erase(it);
             else ++it;
         }
         for (int lod = 0; lod < lodCount; lod++)

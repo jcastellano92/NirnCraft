@@ -85,6 +85,10 @@ public:
     static int regionRows(int lod);  // vertical regions needed to span y -64..640
 
     size_t regionCount() const { return regions_.size(); }
+    size_t tileCount() const {
+        std::lock_guard<std::mutex> lock(mu_);
+        return tiles_.size();
+    }
     uint64_t nodeBytes() const, leafBytes() const, materialBytes() const;
 
 private:
