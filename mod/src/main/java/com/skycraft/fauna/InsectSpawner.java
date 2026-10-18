@@ -69,7 +69,7 @@ public final class InsectSpawner {
         boolean water = level.getFluidState(ground).is(FluidTags.WATER) || nearby(level, ground, 3, s -> s.getFluidState().is(FluidTags.WATER));
         boolean flowers = nearby(level, air, 3, s -> s.is(BlockTags.FLOWERS));
         BlockState below = level.getBlockState(ground);
-        boolean greenery = below.is(BlockTags.DIRT) || below.is(BlockTags.LEAVES) || flowers;
+        boolean greenery = below.is(BlockTags.SUBSTRATE_OVERWORLD) || below.is(BlockTags.LEAVES) || flowers;
 
         EntityType<InsectEntity> type = choose(day, water, flowers, greenery, random);
         if (type == null) return;

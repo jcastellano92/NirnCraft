@@ -115,10 +115,10 @@ public final class LifeSkills {
             // Only natural trees fall (and get replanted): never log cabins, village houses or player builds.
             FellingJob tree = CHAIN_BREAKING.get() ? null : scanNaturalTree(player, level, pos);
             if (tree != null) {
-                if (level.getBlockState(pos.below()).is(BlockTags.DIRT)) {
+                if (level.getBlockState(pos.below()).is(BlockTags.SUBSTRATE_OVERWORLD)) {
                     Block sapling = saplingFor(state);
                     com.skycraft.magic.MagicScheduler.schedule(level.getServer(), 1, ignored263 -> {
-                        if (level.getBlockState(pos).isAir() && level.getBlockState(pos.below()).is(BlockTags.DIRT)) {
+                        if (level.getBlockState(pos).isAir() && level.getBlockState(pos.below()).is(BlockTags.SUBSTRATE_OVERWORLD)) {
                             level.setBlock(pos, sapling.defaultBlockState(), 3);
                         }
                     });
@@ -283,7 +283,7 @@ public final class LifeSkills {
             if (!s.is(BlockTags.LOGS) || PlacedBlocks.isPlayerPlaced(level, logPos)) continue;
 
             // Replant if this log was touching ground dirt
-            if (level.getBlockState(logPos.below()).is(BlockTags.DIRT)) {
+            if (level.getBlockState(logPos.below()).is(BlockTags.SUBSTRATE_OVERWORLD)) {
                 level.setBlock(logPos, saplingFor(s).defaultBlockState(), 3);
             } else {
                 level.setBlock(logPos, Blocks.AIR.defaultBlockState(), 3);

@@ -307,7 +307,7 @@ public final class NpcPlacement {
     }
 
     private static boolean isNaturalGround(BlockState state) {
-        if (state.is(BlockTags.DIRT) || state.is(BlockTags.SAND) || state.is(BlockTags.TERRACOTTA)) return true;
+        if (state.is(BlockTags.SUBSTRATE_OVERWORLD) || state.is(BlockTags.SAND) || state.is(BlockTags.TERRACOTTA)) return true;
         var b = state.getBlock();
         return b == net.minecraft.world.level.block.Blocks.GRASS_BLOCK
                 || b == net.minecraft.world.level.block.Blocks.DIRT_PATH

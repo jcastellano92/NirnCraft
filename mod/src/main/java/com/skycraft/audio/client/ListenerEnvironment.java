@@ -84,7 +84,7 @@ public final class ListenerEnvironment {
             dist += hit.getLocation().distanceTo(eye);
             if (i == 4) roof = true;
             BlockState s = level.getBlockState(hit.getBlockPos());
-            if (!(s.is(BlockTags.LOGS) || s.is(BlockTags.PLANKS) || s.is(BlockTags.WOOL) || s.is(BlockTags.DIRT)
+            if (!(s.is(BlockTags.LOGS) || s.is(BlockTags.PLANKS) || s.is(BlockTags.WOOL) || s.is(BlockTags.SUBSTRATE_OVERWORLD)
                     || s.is(BlockTags.LEAVES) || s.is(BlockTags.WOODEN_STAIRS) || s.is(BlockTags.WOODEN_SLABS))) hard++;
         }
         float enc = hits / (float) RAYS.length;

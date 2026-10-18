@@ -794,7 +794,7 @@ final class Paver {
 
     /** Ground the world generator made: soil, sand, stone, gravel, snow, clay, ash, volcanic rock... */
     static boolean isNaturalGround(BlockState s) {
-        return s.is(BlockTags.DIRT) || s.is(BlockTags.SAND) || s.is(BlockTags.BASE_STONE_OVERWORLD) || s.is(BlockTags.TERRACOTTA)
+        return s.is(BlockTags.SUBSTRATE_OVERWORLD) || s.is(BlockTags.SAND) || s.is(BlockTags.BASE_STONE_OVERWORLD) || s.is(BlockTags.TERRACOTTA)
                 || s.is(Blocks.GRAVEL) || s.is(Blocks.SNOW_BLOCK) || s.is(Blocks.POWDER_SNOW) || s.is(Blocks.CALCITE)
                 || s.is(Blocks.CLAY) || s.is(Blocks.MUD) || s.is(Blocks.PACKED_ICE) || s.is(Blocks.SANDSTONE)
                 || s.is(Blocks.RED_SANDSTONE) || s.is(Blocks.SMOOTH_BASALT) || s.is(Blocks.BASALT)

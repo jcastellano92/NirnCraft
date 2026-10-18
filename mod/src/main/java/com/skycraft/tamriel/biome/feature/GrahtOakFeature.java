@@ -36,7 +36,7 @@ public class GrahtOakFeature extends ConfiguredFeature<NoneFeatureConfiguration>
         if (!com.skycraft.world.PlacementMask.clear(level, cx, cz, 12)) return false;
         int y0 = box.surface(cx, cz);
         BlockState ground = box.get(cx, y0 - 1, cz);
-        if (!ground.is(BlockTags.DIRT) && !ground.is(net.minecraft.world.level.block.Blocks.MUD)) return false;
+        if (!ground.is(BlockTags.SUBSTRATE_OVERWORLD) && !ground.is(net.minecraft.world.level.block.Blocks.MUD)) return false;
         if (y0 > (level.getMaxY() + 1) - 70) return false;
 
         BlockState wood = BiomeBlocks.GRAHT_OAK_WOOD.get().defaultBlockState();

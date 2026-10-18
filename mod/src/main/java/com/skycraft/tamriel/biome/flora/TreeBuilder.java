@@ -380,7 +380,7 @@ final class TreeBuilder {
     }
 
     private static boolean isGround(BlockState s) {
-        return s.is(BlockTags.DIRT) || s.is(BlockTags.SAND) || s.is(Blocks.GRAVEL) || s.is(Blocks.MUD)
+        return s.is(BlockTags.SUBSTRATE_OVERWORLD) || s.is(BlockTags.SAND) || s.is(Blocks.GRAVEL) || s.is(Blocks.MUD)
                 || s.is(Blocks.CLAY) || s.is(BlockTags.SNOW) || s.is(Blocks.MUDDY_MANGROVE_ROOTS);
     }
 

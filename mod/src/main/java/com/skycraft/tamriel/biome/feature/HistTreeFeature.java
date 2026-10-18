@@ -32,7 +32,7 @@ public class HistTreeFeature extends ConfiguredFeature<NoneFeatureConfiguration>
         if (!com.skycraft.world.PlacementMask.clear(ctx.level(), cx, cz, 12)) return false;
         int floor = box.surface(cx, cz);
         BlockState ground = box.get(cx, floor - 1, cz);
-        if (!ground.is(BlockTags.DIRT) && !ground.is(Blocks.MUD) && !ground.is(Blocks.CLAY) && !ground.is(BlockTags.SAND)) {
+        if (!ground.is(BlockTags.SUBSTRATE_OVERWORLD) && !ground.is(Blocks.MUD) && !ground.is(Blocks.CLAY) && !ground.is(BlockTags.SAND)) {
             return false;
         }
         int waterTop = box.surfaceWithWater(cx, cz);

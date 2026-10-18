@@ -165,7 +165,7 @@ public final class RockSweep {
     /** Terrain-like material: stone and its relatives, soil, sand, gravel, ores, loose cobble and the slabs/walls of rock. */
     static boolean member(BlockState s) {
         if (s.isAir()) return false;
-        if (s.is(BlockTags.BASE_STONE_OVERWORLD) || s.is(BlockTags.DIRT) || s.is(BlockTags.SAND) || s.is(BlockTags.TERRACOTTA)
+        if (s.is(BlockTags.BASE_STONE_OVERWORLD) || s.is(BlockTags.SUBSTRATE_OVERWORLD) || s.is(BlockTags.SAND) || s.is(BlockTags.TERRACOTTA)
                 || s.is(net.minecraft.tags.BlockItemTags.COAL_ORES.block()) || s.is(BlockTags.IRON_ORES) || s.is(BlockTags.COPPER_ORES) || s.is(BlockTags.GOLD_ORES)
                 || s.is(net.minecraft.tags.BlockItemTags.REDSTONE_ORES.block()) || s.is(net.minecraft.tags.BlockItemTags.LAPIS_ORES.block()) || s.is(net.minecraft.tags.BlockItemTags.EMERALD_ORES.block()) || s.is(net.minecraft.tags.BlockItemTags.DIAMOND_ORES.block())) {
             return true;

@@ -198,7 +198,7 @@ final class CottageTerrain {
     /** The surface block to put on top of a column that was graded: the natural top when it is soil-like, else grass. */
     static BlockState topFor(ServerLevel level, int x, int top, int z) {
         BlockState nat = level.getBlockState(new BlockPos(x, top, z));
-        if (nat.is(BlockTags.DIRT) || nat.is(Blocks.SAND) || nat.is(Blocks.RED_SAND) || nat.is(Blocks.SNOW_BLOCK) || nat.is(Blocks.GRAVEL)
+        if (nat.is(BlockTags.SUBSTRATE_OVERWORLD) || nat.is(Blocks.SAND) || nat.is(Blocks.RED_SAND) || nat.is(Blocks.SNOW_BLOCK) || nat.is(Blocks.GRAVEL)
                 || nat.is(BlockTags.BASE_STONE_OVERWORLD) || nat.is(Blocks.PODZOL) || nat.is(Blocks.COARSE_DIRT)) {
             if (nat.is(Blocks.DIRT_PATH) || nat.is(Blocks.FARMLAND) || nat.is(Blocks.MUD)) return Blocks.GRASS_BLOCK.defaultBlockState();
             return nat;

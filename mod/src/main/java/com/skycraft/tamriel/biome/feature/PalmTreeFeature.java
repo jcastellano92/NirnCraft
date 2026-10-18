@@ -28,7 +28,7 @@ public class PalmTreeFeature extends ConfiguredFeature<NoneFeatureConfiguration>
         GenBox box = GenBox.of(ctx.level(), ctx.origin());
         int x = ctx.origin().getX(), y = ctx.origin().getY(), z = ctx.origin().getZ();
         BlockState ground = box.get(x, y - 1, z);
-        if (!ground.is(BlockTags.SAND) && !ground.is(BlockTags.DIRT) && !ground.is(BiomeBlocks.DUNE_SAND.get())) return false;
+        if (!ground.is(BlockTags.SAND) && !ground.is(BlockTags.SUBSTRATE_OVERWORLD) && !ground.is(BiomeBlocks.DUNE_SAND.get())) return false;
         if (!GenBox.isSoft(box.get(x, y, z)) || !box.get(x, y, z).getFluidState().isEmpty()) return false;
         if (box.reach(x, z) < 8) return false;
         if (!com.skycraft.world.PlacementMask.clear(ctx.level(), x, z, 6)) return false;

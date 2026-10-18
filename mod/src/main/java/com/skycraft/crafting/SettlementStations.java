@@ -182,7 +182,7 @@ public final class SettlementStations {
             int cy = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, cx, cz);
             BlockPos ground = new BlockPos(cx, cy - 1, cz);
             BlockState current = level.getBlockState(ground);
-            if (current.is(BlockTags.DIRT) || current.is(Blocks.GRASS_BLOCK) || current.is(Blocks.PODZOL)
+            if (current.is(BlockTags.SUBSTRATE_OVERWORLD) || current.is(Blocks.GRASS_BLOCK) || current.is(Blocks.PODZOL)
                     || current.is(Blocks.COARSE_DIRT) || current.is(Blocks.SAND)) {
                 level.setBlock(ground, pathMaterial.defaultBlockState(), 3);
                 BlockPos above = ground.above();

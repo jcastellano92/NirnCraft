@@ -133,7 +133,7 @@ public class RockFeature extends ConfiguredFeature<RockFeature.Config> {
                     double d = (u / rx) * (u / rx) + (fy / ry) * (fy / ry) + (v / rz) * (v / rz);
                     double warp = FloraNoise.value(bx * 0.45 + by * 0.31, bz * 0.45 - by * 0.27, seed) * 0.28;
                     if (d > 1.0 + warp) continue;
-                    if (!GenBox.isSoft(box.get(bx, by, bz)) && !box.get(bx, by, bz).is(net.minecraft.tags.BlockTags.DIRT)
+                    if (!GenBox.isSoft(box.get(bx, by, bz)) && !box.get(bx, by, bz).is(net.minecraft.tags.BlockTags.SUBSTRATE_OVERWORLD)
                             && !box.get(bx, by, bz).is(net.minecraft.tags.BlockTags.SAND)) continue;
                     box.set(bx, by, bz, cfg.stone().getState(box.level, r, p.set(bx, by, bz)));
                     lowest = Math.min(lowest, by);

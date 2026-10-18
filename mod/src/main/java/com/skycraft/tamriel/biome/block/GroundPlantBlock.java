@@ -21,7 +21,7 @@ public final class GroundPlantBlock {
 
     /** Dirt, sand, gravel, mud, clay and moss: anything soft and natural. */
     public static boolean softSoil(BlockState state) {
-        return state.is(BlockTags.DIRT) || state.is(BlockTags.SAND) || state.is(net.minecraft.world.level.block.Blocks.GRAVEL)
+        return state.is(BlockTags.SUBSTRATE_OVERWORLD) || state.is(BlockTags.SAND) || state.is(net.minecraft.world.level.block.Blocks.GRAVEL)
                 || state.is(net.minecraft.world.level.block.Blocks.CLAY) || state.is(BlockTags.SNOW);
     }
 

@@ -297,7 +297,7 @@ public class StreetPaint extends ConfiguredFeature<NoneFeatureConfiguration> {
         }
 
         static boolean natural(BlockState s) {
-            return s.is(BlockTags.DIRT) && !s.is(Blocks.DIRT_PATH) || s.is(Blocks.SAND) || s.is(Blocks.RED_SAND) || s.is(Blocks.SNOW_BLOCK)
+            return s.is(BlockTags.SUBSTRATE_OVERWORLD) && !s.is(Blocks.DIRT_PATH) || s.is(Blocks.SAND) || s.is(Blocks.RED_SAND) || s.is(Blocks.SNOW_BLOCK)
                     || s.is(Blocks.GRAVEL) || s.is(Blocks.FARMLAND) || s.is(Blocks.CLAY);
         }
 

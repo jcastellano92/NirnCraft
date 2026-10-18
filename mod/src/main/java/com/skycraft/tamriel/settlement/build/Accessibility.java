@@ -139,7 +139,7 @@ public final class Accessibility {
                         d++;
                     }
                 }
-                if (k <= 2 && (below.is(BlockTags.DIRT) || below.is(BlockTags.SAND) || below.is(Blocks.GRASS_BLOCK))) {
+                if (k <= 2 && (below.is(BlockTags.SUBSTRATE_OVERWORLD) || below.is(BlockTags.SAND) || below.is(Blocks.GRASS_BLOCK))) {
                     level.setBlock(feet.below(), Blocks.DIRT_PATH.defaultBlockState(), 2);
                 }
             }

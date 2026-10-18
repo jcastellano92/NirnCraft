@@ -49,7 +49,7 @@ public final class FaunaSpawns {
     /** Grass, dirt, podzol, snow, stone or gravel underfoot. */
     static boolean wild(ServerLevelAccessor level, BlockPos pos) {
         BlockState below = level.getBlockState(pos.below());
-        return below.is(BlockTags.ANIMALS_SPAWNABLE_ON) || below.is(BlockTags.GOATS_SPAWNABLE_ON) || below.is(BlockTags.DIRT);
+        return below.is(BlockTags.ANIMALS_SPAWNABLE_ON) || below.is(BlockTags.GOATS_SPAWNABLE_ON) || below.is(BlockTags.SUBSTRATE_OVERWORLD);
     }
 
     /** Wild ground plus sand, gravel and stone of beaches and river banks. */

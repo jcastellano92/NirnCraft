@@ -96,7 +96,7 @@ public class IngredientPlantBlock extends FlowerBlock {
             return false;
         }
         return super.mayPlaceOn(state, level, pos)
-                || state.is(BlockTags.DIRT)
+                || state.is(BlockTags.SUBSTRATE_OVERWORLD)
                 || state.is(BlockTags.SAND)
                 || state.is(Blocks.GRAVEL)
                 || state.is(Blocks.CLAY)
@@ -145,7 +145,7 @@ public class IngredientPlantBlock extends FlowerBlock {
         if (ceilingAllowed) {
             BlockPos above = pos.above();
             BlockState aboveState = level.getBlockState(above);
-            return (aboveState.is(BlockTags.BASE_STONE_OVERWORLD) || aboveState.is(BlockTags.DIRT))
+            return (aboveState.is(BlockTags.BASE_STONE_OVERWORLD) || aboveState.is(BlockTags.SUBSTRATE_OVERWORLD))
                     && aboveState.isFaceSturdy(level, above, net.minecraft.core.Direction.DOWN);
         }
         return false;

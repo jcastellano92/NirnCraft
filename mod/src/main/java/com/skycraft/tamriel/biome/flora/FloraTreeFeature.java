@@ -90,7 +90,7 @@ public class FloraTreeFeature extends ConfiguredFeature<FloraTreeFeature.Config>
     }
 
     static boolean soilOk(int soil, BlockState ground) {
-        if ((soil & TreeSpecies.DIRT) != 0 && (ground.is(BlockTags.DIRT) || ground.is(Blocks.MUD))) return true;
+        if ((soil & TreeSpecies.DIRT) != 0 && (ground.is(BlockTags.SUBSTRATE_OVERWORLD) || ground.is(Blocks.MUD))) return true;
         if ((soil & TreeSpecies.SAND) != 0 && (ground.is(BlockTags.SAND) || ground.is(BiomeBlocks.DUNE_SAND.get())
                 || ground.is(Blocks.GRAVEL) || ground.is(Blocks.CLAY))) return true;
         if ((soil & TreeSpecies.STONE) != 0 && (ground.is(BlockTags.BASE_STONE_OVERWORLD) || ground.is(Blocks.GRAVEL)
