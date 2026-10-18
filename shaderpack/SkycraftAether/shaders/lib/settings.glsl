@@ -50,6 +50,7 @@
 #define VL_SAMPLES 16 // [8 12 16 24 32]
 #define STARS                   // stars and the galaxy, turning with the sky
 #define AURORA                  // northern lights in cold northern skies at night
+#define WEATHER_SKY             // the sky greys and the sky light dims under the mod's storm cells and overcast
 #define MOD_SKY                 // Nirn's sky from the mod: Masser and Secunda, the live aurora, the mod's sky options
 #define LUNAR_KEY               // nights lit (and shadowed) by the brighter moon, Masser or Secunda
 #define BLOOM                   // glow around bright lights, lava, fire and magic

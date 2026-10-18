@@ -68,3 +68,5 @@ option.MOD_SKY=Nirn's sky
 option.MOD_SKY.comment=Masser and Secunda, the live aurora and the sky options from the Skycraft mod.
 option.LUNAR_KEY=Moonlight from Masser and Secunda
 option.LUNAR_KEY.comment=Nights lit and shadowed by the brighter moon (turns the shadow map; renders all shadow casters).
+option.WEATHER_SKY=Weather sky
+option.WEATHER_SKY.comment=The sky greys and the sky light dims under storm cells and overcast (the mod's weather).

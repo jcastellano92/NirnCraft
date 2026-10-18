@@ -72,6 +72,14 @@ vec3 applyMedia(vec3 col, vec3 dir, float t, vec3 sun, vec3 camPos, float wet, f
     float mu = dot(dir, sun);
     vec3 litOut = (skyAmbient(vec3(0, 1, 0), sun) * 1.4 + sunRadiance(sun) * (0.08 + 0.35 * pow(max(mu, 0.0), 6.0)))
                 * bandTint(band);
+#ifdef WEATHER_SKY
+    // the air under a storm cell is lit by a dimmer, greyer sky
+    if (haveWeather()) {
+        vec4 wc = weatherSample(weatherField, camPos.xz);
+        float shade = clamp(smoothstep(0.62, 0.92, wc.r) * 0.45 + wc.g * 0.35 + wc.b * 0.45, 0.0, 0.85);
+        litOut *= 1.0 - 0.45 * shade;
+    }
+#endif
     float T = 1.0;
     vec3 S = vec3(0.0);
 #if MEDIA_STEPS > 0
