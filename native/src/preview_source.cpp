@@ -362,11 +362,42 @@ void PreviewSource::dressRows(Tile& tile, int jBegin, int jEnd) const {
                 density += 0.35 * sm.rain;
                 double f = fbm(x, z, 300, 3, 31) * 0.5 + 0.5;
                 double clump = value(x, z, 9, 33) * 0.5 + 0.5;
-                if (f + 0.25 * clump > 1.15 - density) {
-                    float ht = float((cl == JUNGLE ? 16 : 10) + 5 * clump);
-                    t->canopy[c] = ht;
-                    t->canopyMat[c] = (cl == SK_COLD || cl == SK_TEMPERATE || h > treeLine - 80) ? M_CONIFER
-                                     : cl == JUNGLE || cl == TROPICAL ? M_JUNGLE : M_FOLIAGE;
+                double inside = f + 0.25 * clump - (1.15 - density);  // > 0 in the forest
+                if (inside > 0) {
+                    bool conifer = cl == SK_COLD || cl == SK_TEMPERATE || h > treeLine - 80;
+                    float base = cl == JUNGLE ? 16.0f : conifer ? 12.0f : 10.0f;
+                    // the canopy thins out towards the forest's edge instead of ending in a wall
+                    float edge = float(smoothstep(0.0, 0.12, inside));
+                    float ht = 0.0f;
+                    if (s <= 2.0) {
+                        // fine LODs: single crowns on a jittered 7-block grid (domes, or cones for conifers), ground
+                        // showing between them
+                        int gx = int(std::floor(x / 7.0)), gz = int(std::floor(z / 7.0));
+                        float best = 1e9f, crownR = 0, treeH = 0;
+                        for (int dz = -1; dz <= 1; dz++)
+                            for (int dx = -1; dx <= 1; dx++) {
+                                uint32_t hh = uint32_t(hashI(gx + dx, gz + dz, 71));
+                                double tcx = (gx + dx + 0.15 + 0.7 * double(hh & 1023) / 1023.0) * 7.0;
+                                double tcz = (gz + dz + 0.15 + 0.7 * double((hh >> 10) & 1023) / 1023.0) * 7.0;
+                                float r = 2.2f + 1.6f * float((hh >> 20) & 255) / 255.0f;
+                                float dd = float(std::hypot(x - tcx, z - tcz)) / r;
+                                if (dd < best) {
+                                    best = dd;
+                                    crownR = r;
+                                    treeH = base + 5.0f * float((hh >> 28) & 15) / 15.0f;
+                                }
+                            }
+                        if (best < 1.0f) ht = treeH * (conifer ? 0.45f + 0.55f * (1.0f - best)
+                                                              : 0.55f + 0.45f * std::sqrt(1.0f - best * best));
+                        (void)crownR;
+                    } else {
+                        ht = base + 5.0f * float(clump);
+                    }
+                    ht *= edge;
+                    if (ht >= 1.0f) {
+                        t->canopy[c] = ht;
+                        t->canopyMat[c] = conifer ? M_CONIFER : cl == JUNGLE || cl == TROPICAL ? M_JUNGLE : M_FOLIAGE;
+                    }
                 }
             }
         }

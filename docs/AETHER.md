@@ -109,7 +109,8 @@ The other session's conversion is in progress in the main tree, which also moves
    multiplayer tile stream (bit-identical to single player, 4 MB per full window, cached on both ends) and the
    far-actor feed, and the settlements (every planned city, town and village as building massing with its kit's
    colours, client-side from the baked StreetPlan). `move_in.ps1` makes the hooks; `sandbox_check.ps1` rehearses it.
-3. Far terrain look: a snowline that follows aspect and slope instead of a near-level cut, less boxy forest lumps
-   on slopes, block-exact surface materials (biomes) instead of the raster dressing; SRC GI underground.
+3. Far terrain look: block-exact surface materials (biomes) instead of the raster dressing; forts (250, not in the
+   StreetPlan) and wild landmarks; SRC GI underground. Done: snow follows aspect with a ragged edge, single tree
+   crowns (domes, conifer cones) at the two finest LODs and canopy that thins at forest edges beyond them.
 4. Owner checks in game: the near/far seam at the hand-off distance, curvature strength (planet radius), cloud
    decks against the current shader clouds, and frame time on the 3090.
