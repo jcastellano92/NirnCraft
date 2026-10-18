@@ -160,7 +160,7 @@ float fallsSpray(vec2 uv, vec3 n, float dist) {
 
 // screen-space light shafts: march towards the light's screen position, collecting how much of the way is open sky
 vec3 lightShafts(vec2 uv, vec3 sun, float dist) {
-#ifdef VOLUMETRIC_LIGHT
+#if defined VOLUMETRIC_LIGHT && !defined SKYCRAFT_REALM
     vec3 L = sun.y > -0.05 ? sun : -sun;
     vec3 lightView = mat3(gbufferModelView) * L;
     if (lightView.z > -0.05) return vec3(0.0);  // behind the camera

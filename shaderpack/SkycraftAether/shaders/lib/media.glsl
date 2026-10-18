@@ -122,7 +122,13 @@ vec3 applyMedia(vec3 col, vec3 dir, float t, vec3 sun, vec3 camPos, float wet, f
             vec4 room = gRooms > 0 ? roomMedium(p, camPos, time) : vec4(0.0, 0.0, 0.0, 0.0);
             vec3 tint = sOut + room.a > 1e-7 ? (vec3(sOut) + room.rgb * room.a) / (sOut + room.a) : vec3(1.0);
             float sigma = sOut + room.a;
+#ifdef SKYCRAFT_REALM
+            // a realm's authored fog carries the light of its lamps too (its extinction is the realm fog itself)
+            float realmSigma = fogEnd > fogStart + 1.0 ? 1.0 / (fogEnd - fogStart) : 0.0;
+            S += Th * emit * (tint * (sigma + HALO_AIR) + realmFog() / max(dot(realmFog(), vec3(0.333)), 0.05) * realmSigma * 0.5) * stepLen;
+#else
             S += Th * emit * tint * (sigma + HALO_AIR) * stepLen;
+#endif
             Th *= exp(-sigma * stepLen);
         }
     }

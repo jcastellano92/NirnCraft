@@ -8,6 +8,9 @@
 
 // sun: world direction to the sun; wetness 0..1 (recent rain / marsh); camY, the camera's world height
 float groundFogDensity(vec3 sun, float wetness, float rain) {
+#ifdef SKYCRAFT_REALM
+    return 0.0;
+#endif
     float dawn = 1.0 - smoothstep(0.0, 0.35, abs(sun.y - 0.05));  // morning and evening mists
     float night = smoothstep(0.1, -0.2, sun.y) * 0.4;
     return (0.0035 * dawn + 0.0012 * night + 0.006 * wetness + 0.004 * rain);

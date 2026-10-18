@@ -14,6 +14,9 @@ uniform sampler2D colortex0;
 uniform sampler2D colortex1;
 uniform sampler2D colortex2;
 uniform sampler2D colortex3;
+#ifdef SKYCRAFT_REALM
+uniform sampler2D colortex7;  // the realm's sky (gbuffers_skybasic / skytextured), premultiplied
+#endif
 uniform sampler2D depthtex0;
 uniform mat4 gbufferProjectionInverse;
 uniform mat4 gbufferProjection;
@@ -48,6 +51,7 @@ const vec4 colortex0ClearColor = vec4(0.0, 0.0, 0.0, 0.0);
 const vec4 colortex3ClearColor = vec4(0.0, 0.0, 0.0, 0.0);
 const vec4 colortex5ClearColor = vec4(0.0, 0.0, 0.0, 0.0);
 const vec4 colortex6ClearColor = vec4(0.0, 0.0, 0.0, 0.0);
+const vec4 colortex7ClearColor = vec4(0.0, 0.0, 0.0, 0.0);
 const bool colortex4Clear = false;
 */
 
@@ -94,6 +98,12 @@ void main() {
     vec4 mtl = texture(colortex3, texcoord);
 
     if (d >= 1.0) {
+#ifdef SKYCRAFT_REALM
+        // a realm: its own dome and sprites over its fog colour (the Nether draws none: all fog)
+        vec4 rs = texture(colortex7, texcoord);
+        outColor = vec4(rs.rgb + realmFog() * (1.0 - rs.a), 1.0);
+        return;
+#endif
         // the sky: the atmosphere, the night sky over it, and whatever the vanilla sky drew (the moon)
         vec3 c = skyColor(dir, sun);
 #ifdef STARS

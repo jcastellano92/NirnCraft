@@ -36,7 +36,7 @@ float fallbackCloudDensity(vec2 worldXZ, float time, vec3 wx, int octaves) {
 
 // premultiplied (rgb, alpha) of the deck along a view ray from the camera (world dir); 0 where the ray misses it
 vec4 fallbackClouds(vec3 dir, vec3 sun, vec3 camPos, float time, float rain) {
-#if FALLBACK_CLOUDS > 0
+#if FALLBACK_CLOUDS > 0 && !defined SKYCRAFT_REALM
     float base = fallbackCloudBase(camPos.xz);
     float dy = base - camPos.y;
     if (dir.y * dy <= 0.0 || abs(dir.y) < 0.004) return vec4(0.0);
@@ -77,7 +77,7 @@ vec4 fallbackClouds(vec3 dir, vec3 sun, vec3 camPos, float time, float rain) {
 
 // the deck's shadow on a receiver at world position wp: 1 lit .. 0.25 under the thickest cloud
 float fallbackCloudShadow(vec3 wp, vec3 toLight, float time, float rain) {
-#if FALLBACK_CLOUDS > 0
+#if FALLBACK_CLOUDS > 0 && !defined SKYCRAFT_REALM
     if (toLight.y < 0.03) return 1.0;
     float base = fallbackCloudBase(wp.xz);
     float dy = base - wp.y;

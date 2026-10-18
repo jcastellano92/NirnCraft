@@ -17,6 +17,14 @@
 // subsurface / emission, colortex3 material id / AO / metal. Translucents: colortex5 premultiplied colour,
 // colortex6 normal + material id + sky light.
 #include "/lib/settings.glsl"
+#if defined SKYBASIC && !defined SKYCRAFT_REALM
+#define DISCARD  // the Overworld's sky is deferred.fsh's atmosphere
+#endif
+#if defined SKYBASIC || defined SKYTEX
+#ifdef SKYCRAFT_REALM
+#define REALM_SKY  // a realm's own dome and sprites, as the mod (or vanilla) draws them
+#endif
+#endif
 #include "/lib/common.glsl"
 #include "/lib/curvature.glsl"
 #include "/lib/materials.glsl"
@@ -69,7 +77,7 @@ void main() {
     }
 #endif
 #endif
-#if defined SKYTEX
+#if defined SKYTEX || defined SKYBASIC
     gl_Position = ftransform();
 #else
     gl_Position = gl_ProjectionMatrix * (gbufferModelView * vec4(curvePlayerPos(playerPos), 1.0));
@@ -98,6 +106,9 @@ layout(location = 0) out vec4 outAlbedo;
 layout(location = 1) out vec4 outNormal;
 layout(location = 2) out vec4 outSpecular;
 layout(location = 3) out vec4 outMaterial;
+#elif defined REALM_SKY
+/* RENDERTARGETS: 7 */
+layout(location = 0) out vec4 outColor;
 #elif defined SKYTEX
 /* RENDERTARGETS: 0,3 */
 layout(location = 0) out vec4 outAlbedo;
@@ -150,6 +161,19 @@ vec3 surfaceNormal(vec4 nm) {
 void main() {
 #ifdef DISCARD
     discard;
+#elif defined REALM_SKY
+    // premultiplied over the realm's sky so far; a sprite's black surround (drawn additively by vanilla) covers nothing
+#ifdef SKYBASIC
+    vec4 sky = glcolor;
+#else
+    vec4 sky = glcolor * texture(gtexture, texcoord);
+#endif
+    vec3 sc = srgbToLinear(sky.rgb);
+    float cover = sky.a * smoothstep(0.015, 0.2, max(sky.r, max(sky.g, sky.b)));
+#ifdef SKYBASIC
+    cover = sky.a;
+#endif
+    outColor = vec4(sc * sky.a, cover);
 #else
 #ifdef BASIC
     vec4 albedo = glcolor;  // untextured: whatever texture Iris left bound is not ours to sample

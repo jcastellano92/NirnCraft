@@ -120,7 +120,11 @@ struct SmokePlume { vec2 xz; float y; float height; float radius; float strength
 
 bool haveSmoke() { return textureSize(smokeSourcesTex, 0).x == 32 && textureSize(smokeSourcesTex, 0).y == 4; }
 
+#ifdef SKYCRAFT_REALM
+int smokeCount() { return 0; }
+#else
 int smokeCount() { return haveSmoke() ? min(int(texBytes(smokeSourcesTex, ivec2(31, 3)).r), 24) : 0; }
+#endif
 
 SmokePlume smokePlume(int i) {
     int row = i < 8 ? 0 : 2, slot = i < 8 ? i : i - 8;
@@ -138,6 +142,9 @@ float smokeWind() { return haveSmoke() ? texelFetch(smokeSourcesTex, ivec2(11, 1
 struct Discharge { vec4 state; vec3 p[6]; };  // state: pulse, leader progress, cloud-to-ground, strength / 1.25
 
 int lightningCount() {
+#ifdef SKYCRAFT_REALM
+    return 0;
+#endif
     if (textureSize(lightningTex, 0).x != 32 || textureSize(lightningTex, 0).y != 4) return 0;
     return min(int(texBytes(lightningTex, ivec2(31, 0)).r), 4);
 }
@@ -180,6 +187,9 @@ float dischargePulse(Discharge d) { return d.state.r * mix(0.65, 1.25, d.state.a
 // sine of the terrain's elevation on the sun's side of the sky (east when the sun is east, else west), from the
 // camera, 0 on flat land or without the mod
 float sunHorizonSin() {
+#ifdef SKYCRAFT_REALM
+    return 0.0;
+#endif
     // gated on the mod's other textures: a missing resource may bind a white stand-in, which would read as a 30 degree
     // wall of mountains
     if (!haveAir() || textureSize(sunHorizonTex, 0).x != 1) return 0.0;

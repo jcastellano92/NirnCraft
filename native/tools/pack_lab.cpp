@@ -654,7 +654,8 @@ int main(int argc, char** argv) {
     tex[1] = texture2d(GL_RGBA16_, W, H, GL_RGBA, GL_UNSIGNED_SHORT, normalLm.data());
     tex[2] = texture2d(GL_RGBA8, W, H, GL_RGBA, GL_UNSIGNED_BYTE, specularBuf.data());
     tex[3] = texture2d(GL_RGBA8, W, H, GL_RGBA, GL_UNSIGNED_BYTE, material.data());
-    for (int i = 4; i < 8; i++) tex[i] = texture2d(i == 6 ? GL_RGBA16_ : GL_RGBA16F_, W, H, GL_RGBA, GL_FLOAT, nullptr, i == 4);
+    std::vector<float> zeroes(N * 4, 0.0f);  // Iris clears the translucent and realm-sky buffers to 0
+    for (int i = 4; i < 8; i++) tex[i] = texture2d(i == 6 ? GL_RGBA16_ : GL_RGBA16F_, W, H, GL_RGBA, GL_FLOAT, zeroes.data(), i == 4);
     GLuint alt4 = texture2d(GL_RGBA16F_, W, H, GL_RGBA, GL_FLOAT, nullptr, true), alt0 = texture2d(GL_RGBA16F_, W, H, GL_RGBA, GL_FLOAT, nullptr);
     GLuint d0 = texture2d(GL_DEPTH_COMPONENT32F_, W, H, GL_DEPTH_COMPONENT, GL_FLOAT, depth0.data());
     GLuint d1 = texture2d(GL_DEPTH_COMPONENT32F_, W, H, GL_DEPTH_COMPONENT, GL_FLOAT, depth1.data());
@@ -727,6 +728,10 @@ int main(int argc, char** argv) {
         f1("viewWidth", float(W));
         f1("viewHeight", float(H));
         f1("temperature", float(temp));
+        l = pglGetUniformLocation(pr.id, "fogColor");  // the Deadlands' ember fog (realm=1)
+        if (l >= 0) pglUniform3f(l, float(arg(argc, argv, "fogr", 0.42)), float(arg(argc, argv, "fogg", 0.10)), float(arg(argc, argv, "fogb", 0.06)));
+        f1("fogStart", float(arg(argc, argv, "fogstart", 24)));
+        f1("fogEnd", float(arg(argc, argv, "fogend", 180)));
         l = pglGetUniformLocation(pr.id, "isEyeInWater");
         if (l >= 0) pglUniform1i(l, eyeInWater);
         l = pglGetUniformLocation(pr.id, "eyeBrightnessSmooth");
@@ -755,7 +760,9 @@ int main(int argc, char** argv) {
         glEnd();
         return glGetError() == GL_NO_ERROR;
     };
-    std::string S = PACK + "/";
+    // realm=1: the realm program set (shaders/realm/: no terrestrial sky or haze; a realm's fog colour and range)
+    bool realm = arg(argc, argv, "realm", 0) != 0;
+    std::string S = PACK + (realm ? "/realm/" : "/");
     Program pWater = program(S + "composite.vsh", "tools/pack_lab_water.fsh");
     Program pDeferred = program(S + "deferred.vsh", S + "deferred.fsh");
     Program pComposite = program(S + "composite.vsh", S + "composite.fsh");
@@ -763,7 +770,7 @@ int main(int argc, char** argv) {
     Program pFinal = program(S + "final.vsh", S + "final.fsh");
     if (!pWater.id || !pDeferred.id || !pComposite.id || !pBloom.id || !pFinal.id) return 1;
 
-    samplers = {{"colortex0", tex[0]}, {"colortex1", tex[1]}, {"colortex2", tex[2]}, {"colortex3", tex[3]},
+    samplers = {{"colortex7", tex[7]}, {"colortex0", tex[0]}, {"colortex1", tex[1]}, {"colortex2", tex[2]}, {"colortex3", tex[3]},
                 {"labWater", labWater}, {"aetherColor", aetherColor}, {"aetherDepth", aetherDepth},
                 {"aetherSunMap", aetherSunMap}, {"weatherField", weatherFieldTex}, {"weatherDyn", weatherDynTex},
                 {"fogRadianceTex", fogRadTex}, {"smokeSourcesTex", smokeTex}, {"lightningTex", boltTex},
