@@ -63,28 +63,67 @@ bool traceRegion(RegionGpu r, float3 ro, float3 rd, float t0, float t1, float ep
     uint nodeBase = r.bases.x, leafBase = r.bases.y;
     float t = t0;
     int axis = res.axis;
+    // The descent path of the previous step: a step usually stays inside most of its ancestors, so the next descent
+    // resumes from the deepest one still containing the new voxel instead of the root; and a step inside the same
+    // 4^3 brick reuses its bitmap without touching the tree at all.
+    uint pathPtr[6];
+    uint pathRank[6];
+    pathPtr[0] = r.bases.z;
+    pathRank[0] = 0;
+    int valid = 0;
+    int3 pv = int3(0, 0, 0);
+    int3 brickOf = int3(-1, -1, -1);
+    uint64_t brickBits = 0;
+    uint brickRank = 0;
     for (int it = 0; it < 1024; it++) {
         if (t >= t1) break;
         res.steps++;
         float3 p = ro + rd * t;
         int3 v = clamp(int3(floor(p)), int3(0, 0, 0), int3(255, 255, 255));
-        uint ptr = r.bases.z;
-        uint rank = 0;
-        int size = 256;
         int cell = 0;
-        while (size > 4) {
-            int h = size >> 1;
-            uint mask = nodes[nodeBase + ptr] & 0xFFu;
-            uint c = ((v.x & h) != 0 ? 1u : 0u) | ((v.z & h) != 0 ? 2u : 0u) | ((v.y & h) != 0 ? 4u : 0u);
-            if ((mask & (1u << c)) == 0) { cell = h; break; }
-            uint k = countbits(mask);
-            uint j = countbits(mask & ((1u << c) - 1u));
-            rank += nodes[nodeBase + ptr + 1 + k + j];
-            ptr = nodes[nodeBase + ptr + 1 + j];
-            size = h;
+        uint64_t bits = 0;
+        uint rank = 0;
+        int3 vb = v >> 2;
+        if (vb.x == brickOf.x && vb.y == brickOf.y && vb.z == brickOf.z) {
+            bits = brickBits;
+            rank = brickRank;
+        } else {
+            int lvl = valid;
+            while (lvl > 0) {
+                int sh = 8 - lvl;
+                int3 a = v >> sh, b = pv >> sh;
+                if (a.x == b.x && a.y == b.y && a.z == b.z) break;
+                lvl--;
+            }
+            uint ptr = pathPtr[lvl];
+            rank = pathRank[lvl];
+            int size = 256 >> lvl;
+            while (size > 4) {
+                int h = size >> 1;
+                uint mask = nodes[nodeBase + ptr] & 0xFFu;
+                uint c = ((v.x & h) != 0 ? 1u : 0u) | ((v.z & h) != 0 ? 2u : 0u) | ((v.y & h) != 0 ? 4u : 0u);
+                if ((mask & (1u << c)) == 0) { cell = h; break; }
+                uint k = countbits(mask);
+                uint j = countbits(mask & ((1u << c) - 1u));
+                rank += nodes[nodeBase + ptr + 1 + k + j];
+                ptr = nodes[nodeBase + ptr + 1 + j];
+                size = h;
+                lvl++;
+                if (lvl < 6) {
+                    pathPtr[lvl] = ptr;
+                    pathRank[lvl] = rank;
+                }
+            }
+            valid = min(lvl, 5);
+            pv = v;
+            if (cell == 0) {
+                bits = leaves[leafBase + ptr];
+                brickOf = vb;
+                brickBits = bits;
+                brickRank = rank;
+            }
         }
         if (cell == 0) {
-            uint64_t bits = leaves[leafBase + ptr];
             int3 l = v & 3;
             uint b = uint(l.x + 4 * l.z + 16 * l.y);
             if (((bits >> b) & 1) != 0) {

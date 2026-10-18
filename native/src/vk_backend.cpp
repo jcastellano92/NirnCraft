@@ -68,12 +68,16 @@ VKAPI_ATTR VkBool32 VKAPI_CALL onValidation(VkDebugUtilsMessageSeverityFlagBitsE
     return VK_FALSE;
 }
 
+// Where a buffer lives. The host-visible device-local (BAR) heap is often only 214-256 MB without Resizable BAR, so
+// nothing big may depend on it: frame outputs and the scene are device-local, filled by GPU copies.
+enum class Mem { HostWrite, Readback, DeviceOnly, Staging };
+
 struct Buf {
     VkBuffer buf = VK_NULL_HANDLE;
     VkDeviceMemory mem = VK_NULL_HANDLE;
     void* map = nullptr;
     VkDeviceSize size = 0;
-    bool readback = false;
+    Mem kind = Mem::HostWrite;
 };
 
 struct SharedImage {
@@ -92,7 +96,11 @@ struct SharedSemaphore {
 
 // The scene's six buffers. Two copies: the update thread fills the one no in-flight frame reads, frames flip to it.
 struct SceneCopy {
-    Buf bufs[7];  // bindings 1..6
+    Buf bufs[7];  // bindings 1..6, device-local
+    Buf staging;  // host memory the staging thread writes; a GPU copy moves it into bufs
+    VkCommandBuffer uploadCmd = VK_NULL_HANDLE;
+    VkFence uploadFence = VK_NULL_HANDLE;
+    bool uploading = false;  // a copy was submitted; usable once uploadFence signals
     uint64_t revision = UINT64_MAX;
     std::atomic<uint64_t> lastFrame{0};  // last frame number recorded against this copy
     uint32_t generation = 0;  // bumped when a buffer is reallocated (descriptor sets must be rewritten)
@@ -124,8 +132,12 @@ public:
                 if (s.query) vkDestroyQueryPool(dev_, s.query, nullptr);
             }
             for (auto& b : shared_) release(b);
-            for (auto& c : copies_)
+            for (auto& c : copies_) {
                 for (auto& b : c.bufs) release(b);
+                release(c.staging);
+                if (c.uploadFence) vkDestroyFence(dev_, c.uploadFence, nullptr);
+            }
+            if (uploadPool_) vkDestroyCommandPool(dev_, uploadPool_, nullptr);
             if (pool_) vkDestroyCommandPool(dev_, pool_, nullptr);
             if (dpool_) vkDestroyDescriptorPool(dev_, dpool_, nullptr);
             destroyPipe(farPipe_, farLayout_, farSetLayout_, farShader_);
@@ -198,6 +210,20 @@ public:
             s.publishSet = sets[1];
             s.ingestSet = sets[2];
         }
+        // scene uploads are recorded by whichever thread stages a scene (under sceneMu_): their own pool
+        VkCommandPoolCreateInfo upi{VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO};
+        upi.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+        upi.queueFamilyIndex = family_;
+        if (vkCreateCommandPool(dev_, &upi, nullptr, &uploadPool_) != VK_SUCCESS) return fail(err, "upload pool");
+        for (auto& c : copies_) {
+            VkCommandBufferAllocateInfo cba{VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO};
+            cba.commandPool = uploadPool_;
+            cba.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+            cba.commandBufferCount = 1;
+            if (vkAllocateCommandBuffers(dev_, &cba, &c.uploadCmd) != VK_SUCCESS) return fail(err, "upload command buffer");
+            VkFenceCreateInfo fci{VK_STRUCTURE_TYPE_FENCE_CREATE_INFO};
+            vkCreateFence(dev_, &fci, nullptr, &c.uploadFence);
+        }
         return true;
     }
 
@@ -208,7 +234,7 @@ public:
         size_t px = size_t(w) * h;
         FrameGpu frame = in.frame;
         if (!prepare(s, in, frame, true, err)) return false;
-        if (in.nearDepth && !upload(s.bufs[B_NEAR], in.nearDepth, px * 4, false, true, err)) return false;
+        if (in.nearDepth && !upload(s.bufs[B_NEAR], in.nearDepth, px * 4, false, Mem::HostWrite, err)) return false;
         refreshDescriptors(s);
         begin(s);
         recordFar(s, w, h);
@@ -285,7 +311,7 @@ public:
         FrameGpu frame = in.frame;
         if (in.wantNearDepth) frame.dims[2] |= 0x20u;  // FRAME_NEAR_DEPTH: read from the shared image
         if (!prepare(s, in, frame, false, err)) return false;
-        if (!ensure(s.bufs[B_NEAR], size_t(w) * h * 4, false, false, err)) return false;
+        if (!ensure(s.bufs[B_NEAR], size_t(w) * h * 4, false, Mem::DeviceOnly, err)) return false;
         refreshDescriptors(s);
 
         if (io && io->nearDepthTex && !linearizeNearDepth(*io, w, h, err)) return false;
@@ -338,8 +364,9 @@ public:
         std::lock_guard<std::mutex> lock(sceneMu_);
         int c = current_ == 0 ? 1 : 0;
         if (copies_[c].lastFrame > completedFrame_.load()) return false;  // a frame may still read it
+        if (copies_[c].uploading && vkGetFenceStatus(dev_, copies_[c].uploadFence) != VK_SUCCESS) return false;
         std::string err;
-        if (!uploadScene(copies_[c], sc, err)) return false;
+        if (!uploadScene(copies_[c], sc, false, err)) return false;
         staged_ = c;
         return true;
     }
@@ -603,7 +630,11 @@ private:
             // never block the frame on a stage in progress: keep drawing the current copy until it is done
             std::unique_lock<std::mutex> lock(sceneMu_, std::try_to_lock);
             if (!lock.owns_lock() && current_ < 0) lock.lock();
-            if (lock.owns_lock() && staged_ >= 0 && copies_[staged_].revision == sc.revision) {
+            // the very first frame has nothing else to draw: it waits for a staged upload still in flight
+            if (lock.owns_lock() && current_ < 0 && staged_ >= 0 && copies_[staged_].revision == sc.revision)
+                vkWaitForFences(dev_, 1, &copies_[staged_].uploadFence, VK_TRUE, UINT64_MAX);
+            if (lock.owns_lock() && staged_ >= 0 && copies_[staged_].revision == sc.revision &&
+                vkGetFenceStatus(dev_, copies_[staged_].uploadFence) == VK_SUCCESS) {
                 current_ = staged_;  // staged off the render thread: just flip
                 staged_ = -1;
             }
@@ -617,7 +648,7 @@ private:
                 int c = current_ < 0 ? 0 : current_;
                 for (auto& o : slots_)
                     if (!waitSlot(o, nullptr, err)) return false;
-                if (!uploadScene(copies_[c], sc, err)) return false;
+                if (!uploadScene(copies_[c], sc, true, err)) return false;
                 current_ = c;
                 if (staged_ == c) staged_ = -1;
             }
@@ -625,17 +656,18 @@ private:
         if (in.cloudNoise->data() != noiseUploaded_ || !shared_[B_NOISE].buf) {
             for (auto& o : slots_)
                 if (!waitSlot(o, nullptr, err)) return false;
-            if (!upload(shared_[B_NOISE], in.cloudNoise->data(), in.cloudNoise->size() * 4, false, false, err)) return false;
+            if (!upload(shared_[B_NOISE], in.cloudNoise->data(), in.cloudNoise->size() * 4, false, Mem::HostWrite, err)) return false;
             noiseUploaded_ = in.cloudNoise->data();
         }
-        // host path: outputs in cached system memory (CPU reads from BAR are uncached); GL path: device local
-        bool ok = upload(s.bufs[B_FRAME], &frame, sizeof(FrameGpu), true, false, err) &&
-                  upload(s.bufs[B_PALETTE], in.palette->data(), in.palette->size() * sizeof(MaterialGpu), false, false, err) &&
-                  upload(s.bufs[B_WEATHER], in.weather->data(), in.weather->size() * 4, false, false, err) &&
-                  upload(s.bufs[B_ACTORS], in.actors.data(), in.actors.size() * sizeof(ActorGpu), false, false, err) &&
-                  ensure(s.bufs[B_COLOR], px * 16, false, readback, err) && ensure(s.bufs[B_NORMAL], px * 4, false, readback, err) &&
-                  ensure(s.bufs[B_DEPTH], px * 4, false, readback, err) && ensure(s.bufs[B_COUNTERS], px * 4, false, readback, err) &&
-                  ensure(s.bufs[B_NEAR], 16, false, readback, err);
+        // host path: outputs in cached system memory (CPU reads from BAR are uncached); GL path: device local only
+        Mem outKind = readback ? Mem::Readback : Mem::DeviceOnly;
+        bool ok = upload(s.bufs[B_FRAME], &frame, sizeof(FrameGpu), true, Mem::HostWrite, err) &&
+                  upload(s.bufs[B_PALETTE], in.palette->data(), in.palette->size() * sizeof(MaterialGpu), false, Mem::HostWrite, err) &&
+                  upload(s.bufs[B_WEATHER], in.weather->data(), in.weather->size() * 4, false, Mem::HostWrite, err) &&
+                  upload(s.bufs[B_ACTORS], in.actors.data(), in.actors.size() * sizeof(ActorGpu), false, Mem::HostWrite, err) &&
+                  ensure(s.bufs[B_COLOR], px * 16, false, outKind, err) && ensure(s.bufs[B_NORMAL], px * 4, false, outKind, err) &&
+                  ensure(s.bufs[B_DEPTH], px * 4, false, outKind, err) && ensure(s.bufs[B_COUNTERS], px * 4, false, outKind, err) &&
+                  ensure(s.bufs[B_NEAR], 16, false, readback ? Mem::HostWrite : Mem::DeviceOnly, err);
         return ok;
     }
 
@@ -744,7 +776,10 @@ private:
             si.pSignalSemaphores = signal;
         }
         vkResetFences(dev_, 1, &s.fence);
-        if (vkQueueSubmit(queue_, 1, &si, s.fence) != VK_SUCCESS) return fail(err, "submit failed");
+        {
+            std::lock_guard<std::mutex> q(queueMu_);  // the staging thread submits scene copies to the same queue
+            if (vkQueueSubmit(queue_, 1, &si, s.fence) != VK_SUCCESS) return fail(err, "submit failed");
+        }
         s.inFlight = true;
         s.frameNumber = ++frameCounter_;
         copies_[current_].lastFrame.store(s.frameNumber);  // current_ only changes on this thread
@@ -915,23 +950,30 @@ private:
 
     // (Re)allocates b when too small or in the wrong memory kind. The caller guarantees the GPU is not using it
     // (per-slot buffers: the slot was waited; shared buffers: all slots were waited).
-    bool ensure(Buf& b, VkDeviceSize size, bool uniform, bool readback, std::string& err) {
+    bool ensure(Buf& b, VkDeviceSize size, bool uniform, Mem kind, std::string& err) {
         size = size < 16 ? 16 : size;
-        if (b.buf && b.size >= size && b.readback == readback) return true;
+        if (b.buf && b.size >= size && b.kind == kind) return true;
         release(b);
         VkDeviceSize alloc = size + size / 4;  // headroom against regrowth every frame
         VkBufferCreateInfo bc{VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO};
         bc.size = alloc;
-        bc.usage = uniform ? VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT : VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
+        bc.usage = (uniform ? VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT : VK_BUFFER_USAGE_STORAGE_BUFFER_BIT) |
+                   VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
         if (vkCreateBuffer(dev_, &bc, nullptr, &b.buf) != VK_SUCCESS) return fail(err, "vkCreateBuffer");
         VkMemoryRequirements req;
         vkGetBufferMemoryRequirements(dev_, b.buf, &req);
         uint32_t want = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
-        // inputs: prefer device-local host-visible (resizable BAR); readback: prefer host-cached; else plain host
-        uint32_t extra = readback ? VK_MEMORY_PROPERTY_HOST_CACHED_BIT : VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
-        uint32_t type = memoryType(req.memoryTypeBits, want | extra);
-        if (type == UINT32_MAX) type = memoryType(req.memoryTypeBits, want);
-        if (type == UINT32_MAX) return fail(err, "no host-visible memory type");
+        uint32_t type = UINT32_MAX;
+        if (kind == Mem::DeviceOnly) {
+            type = memoryType(req.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+        } else {
+            // small inputs: device-local host-visible (BAR) when it fits; readback: host-cached; staging: system memory
+            uint32_t extra = kind == Mem::Readback ? VK_MEMORY_PROPERTY_HOST_CACHED_BIT
+                           : kind == Mem::HostWrite ? VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT : 0u;
+            type = memoryType(req.memoryTypeBits, want | extra);
+            if (type == UINT32_MAX) type = memoryType(req.memoryTypeBits, want);
+        }
+        if (type == UINT32_MAX) return fail(err, "no suitable memory type");
         VkMemoryAllocateInfo ma{VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO};
         ma.allocationSize = req.size;
         ma.memoryTypeIndex = type;
@@ -950,9 +992,9 @@ private:
             if (type == UINT32_MAX || vkAllocateMemory(dev_, &ma, nullptr, &b.mem) != VK_SUCCESS) return fail(err, "vkAllocateMemory");
         }
         vkBindBufferMemory(dev_, b.buf, b.mem, 0);
-        vkMapMemory(dev_, b.mem, 0, VK_WHOLE_SIZE, 0, &b.map);
+        if (kind != Mem::DeviceOnly) vkMapMemory(dev_, b.mem, 0, VK_WHOLE_SIZE, 0, &b.map);
         b.size = alloc;
-        b.readback = readback;
+        b.kind = kind;
         // whichever set points at this buffer must be rewritten
         if (&b >= shared_ && &b < shared_ + BINDINGS) {
             sharedDirty_ = true;
@@ -967,27 +1009,62 @@ private:
         return true;
     }
 
-    bool uploadScene(SceneCopy& c, const PackedScene& sc, std::string& err) {
-        VkBuffer before[7];
-        for (int i = 1; i <= 6; i++) before[i] = c.bufs[i].buf;
-        bool ok = upload(c.bufs[1], sc.table.data(), sc.table.size() * 4, false, false, err) &&
-                  upload(c.bufs[2], sc.regions.data(), sc.regions.size() * sizeof(RegionGpu), false, false, err) &&
-                  upload(c.bufs[3], sc.nodes.data(), sc.nodes.size() * 4, false, false, err) &&
-                  upload(c.bufs[4], sc.leaves.data(), sc.leaves.size() * 8, false, false, err) &&
-                  upload(c.bufs[5], sc.runEnd.data(), sc.runEnd.size() * 4, false, false, err) &&
-                  upload(c.bufs[6], sc.runMat.data(), sc.runMat.size() * 4, false, false, err);
-        if (!ok) return false;
+    // Scene arrays -> staging (CPU) -> device-local buffers (GPU copy). The caller holds sceneMu_ and guarantees no
+    // frame reads this copy. wait: block until the copy is done (render-thread fallback).
+    bool uploadScene(SceneCopy& c, const PackedScene& sc, bool wait, std::string& err) {
+        if (c.uploading) vkWaitForFences(dev_, 1, &c.uploadFence, VK_TRUE, UINT64_MAX);
+        c.uploading = false;
+        const void* src[7] = {nullptr, sc.table.data(), sc.regions.data(), sc.nodes.data(), sc.leaves.data(),
+                              sc.runEnd.data(), sc.runMat.data()};
+        VkDeviceSize bytes[7] = {0, sc.table.size() * 4, sc.regions.size() * sizeof(RegionGpu), sc.nodes.size() * 4,
+                                 sc.leaves.size() * 8, sc.runEnd.size() * 4, sc.runMat.size() * 4};
+        VkDeviceSize offset[7] = {}, total = 0;
+        for (int i = 1; i <= 6; i++) {
+            offset[i] = total;
+            total += (bytes[i] + 255) & ~VkDeviceSize(255);
+        }
+        bool realloc = false;
+        for (int i = 1; i <= 6; i++) {
+            VkBuffer before = c.bufs[i].buf;
+            if (!ensure(c.bufs[i], bytes[i], false, Mem::DeviceOnly, err)) return false;
+            realloc |= c.bufs[i].buf != before;
+        }
+        if (realloc) c.generation++;
+        if (!ensure(c.staging, total, false, Mem::Staging, err)) return false;
         for (int i = 1; i <= 6; i++)
-            if (c.bufs[i].buf != before[i]) {
-                c.generation++;
-                break;
-            }
+            if (bytes[i]) std::memcpy(static_cast<char*>(c.staging.map) + offset[i], src[i], size_t(bytes[i]));
+        vkResetCommandBuffer(c.uploadCmd, 0);
+        VkCommandBufferBeginInfo bi{VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO};
+        bi.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+        vkBeginCommandBuffer(c.uploadCmd, &bi);
+        for (int i = 1; i <= 6; i++) {
+            if (!bytes[i]) continue;
+            VkBufferCopy region{offset[i], 0, bytes[i]};
+            vkCmdCopyBuffer(c.uploadCmd, c.staging.buf, c.bufs[i].buf, 1, &region);
+        }
+        // later submissions on this queue (the frames) read what the copies wrote
+        VkMemoryBarrier mb{VK_STRUCTURE_TYPE_MEMORY_BARRIER};
+        mb.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+        mb.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+        vkCmdPipelineBarrier(c.uploadCmd, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, 0, 1, &mb,
+                             0, nullptr, 0, nullptr);
+        vkEndCommandBuffer(c.uploadCmd);
+        VkSubmitInfo si{VK_STRUCTURE_TYPE_SUBMIT_INFO};
+        si.commandBufferCount = 1;
+        si.pCommandBuffers = &c.uploadCmd;
+        vkResetFences(dev_, 1, &c.uploadFence);
+        {
+            std::lock_guard<std::mutex> q(queueMu_);
+            if (vkQueueSubmit(queue_, 1, &si, c.uploadFence) != VK_SUCCESS) return fail(err, "scene upload submit failed");
+        }
+        c.uploading = true;
         c.revision = sc.revision;
+        if (wait) vkWaitForFences(dev_, 1, &c.uploadFence, VK_TRUE, UINT64_MAX);
         return true;
     }
 
-    bool upload(Buf& b, const void* data, size_t bytes, bool uniform, bool readback, std::string& err) {
-        if (!ensure(b, bytes, uniform, readback, err)) return false;
+    bool upload(Buf& b, const void* data, size_t bytes, bool uniform, Mem kind, std::string& err) {
+        if (!ensure(b, bytes, uniform, kind, err)) return false;
         if (bytes) std::memcpy(b.map, data, bytes);
         return true;
     }
@@ -1017,6 +1094,8 @@ private:
     SceneCopy copies_[2];
     int current_ = -1, staged_ = -1;
     std::mutex sceneMu_;
+    std::mutex queueMu_;  // vkQueueSubmit from the render and staging threads
+    VkCommandPool uploadPool_ = VK_NULL_HANDLE;
     uint64_t frameCounter_ = 0;
     int staleFrames_ = 0;
     std::atomic<uint64_t> completedFrame_{0};

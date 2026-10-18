@@ -81,5 +81,9 @@ add_executable(aether_pack_test tests/pack_parity_test.cpp src/gl_api.cpp)
 target_include_directories(aether_pack_test PRIVATE src include)
 target_link_libraries(aether_pack_test PRIVATE aether_core opengl32 gdi32 user32)
 
+add_executable(aether_bench tools/aether_bench.cpp)
+target_include_directories(aether_bench PRIVATE src include)
+target_link_libraries(aether_bench PRIVATE aether_core opengl32 gdi32 user32)
+
 enable_testing()
 add_test(NAME aether_tests COMMAND aether_tests WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
