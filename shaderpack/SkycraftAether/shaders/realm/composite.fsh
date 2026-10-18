@@ -91,7 +91,7 @@ vec3 sceneAt(vec2 uv, vec3 sun, bool marched) {
     }
 #endif
     if (marched && isEyeInWater == 0) {
-        // smoke columns (the volcano; fires with SMOKE_FIRE_VOLUMES) in front of whatever is behind them
+        // smoke columns (the volcano; the strongest fires' columns, SMOKE_FIRE_VOLUMES) in front of whatever is behind them
         vec4 pl = plumesAlong(cameraPosition, dir, fogDist, sun, airClock(), ign(gl_FragCoord.xy, 1.0), rainStrength);
         col = col * pl.a + pl.rgb;
     }

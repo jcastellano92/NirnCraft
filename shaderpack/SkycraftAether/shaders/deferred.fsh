@@ -25,6 +25,7 @@ uniform mat4 gbufferModelViewInverse;
 uniform vec3 sunPosition;
 uniform vec3 cameraPosition;
 uniform float rainStrength;
+uniform float wetness;      // Iris: rain's lingering wetness 0..1
 uniform float frameTimeCounter;
 uniform float temperature;  // Iris: the biome's temperature at the camera (cold: < 0.3)
 uniform float viewWidth;
@@ -172,6 +173,16 @@ void main() {
     vec2 lm = nl.zw;
     vec4 spec = texture(colortex2, texcoord);
     int mat = int(mtl.r * 255.0 + 0.5);
+    // rain: what the sky reaches gets wet, porous surfaces darken, up-facing ones gather a film of water (a mirror
+    // of the sky on paving and rock); never under a roof (the light map) nor on emitters
+    float wet = wetness * smoothstep(0.80, 0.97, lm.y) * (spec.w > 0.0 || mat == MAT_WATER ? 0.0 : 1.0);
+    if (wet > 0.0) {
+        float porous = 1.0 - spec.x;
+        albedo *= mix(1.0, 0.62, wet * porous * (isFoliage(mat) ? 0.4 : 1.0));
+        float film = wet * smoothstep(0.55, 0.95, n.y) * (isFoliage(mat) ? 0.3 : 1.0);
+        spec.x = mix(spec.x, mix(0.7, 0.93, film), max(film, wet * 0.45));
+        spec.y = max(spec.y, 0.02);
+    }
     float ao = mtl.g * screenAO(vp, normalize(mat3(transpose(gbufferModelViewInverse)) * n), gl_FragCoord.xy);
     float metal = mtl.b;
     float dist = length(playerPos);

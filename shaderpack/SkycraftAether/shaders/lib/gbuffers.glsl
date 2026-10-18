@@ -1,6 +1,7 @@
 // Shared geometry program. Each gbuffers_*.vsh/.fsh defines VSH or FSH plus what it draws, then includes this:
 //   SOLID       opaque geometry: writes the G-buffer (deferred.fsh lights it)
-//   TERRAIN     blocks with material ids (block.properties): wind, PBR defaults, emitters
+//   TERRAIN     blocks with material ids (block.properties): wind, PBR defaults, emitters, parallax occlusion
+//               from the labPBR height map up close (POM)
 //   EMISSIVE    always glowing (spider eyes, beacon beams)
 //   TRANSLUCENT water, stained glass, ice: forward-tinted, refracted / reflected in composite.fsh
 //   FORWARD_LIT what Iris draws in the translucent phase, after deferred.fsh has lit the G-buffer (translucent
@@ -50,6 +51,10 @@ uniform vec4 entityColor;
 in vec4 mc_Entity;
 in vec4 at_midBlock;
 #endif
+#if defined TERRAIN && defined SOLID && defined POM && defined PBR_MAPS
+in vec4 mc_midTexCoord;
+out vec4 tileBounds;  // the block face's sprite in the atlas: origin, size (parallax wraps inside it)
+#endif
 in vec4 at_tangent;
 
 out vec2 texcoord;
@@ -73,6 +78,11 @@ void main() {
     worldNormal = normalize(mat3(gbufferModelViewInverse) * (gl_NormalMatrix * gl_Normal));
     worldTangent = vec4(normalize(mat3(gbufferModelViewInverse) * (gl_NormalMatrix * at_tangent.xyz)), at_tangent.w);
     material = MAT_NONE;
+#if defined TERRAIN && defined SOLID && defined POM && defined PBR_MAPS
+    vec2 mid = (gl_TextureMatrix[0] * vec4(mc_midTexCoord.xy, 0.0, 1.0)).xy;
+    vec2 hs = abs(texcoord - mid);
+    tileBounds = vec4(mid - hs, hs * 2.0);
+#endif
 #if defined TERRAIN || defined TRANSLUCENT
     material = materialOf(mc_Entity.x);
 #if defined WAVING_FOLIAGE && defined TERRAIN
@@ -106,6 +116,11 @@ in vec3 playerPos;
 in vec3 worldNormal;
 in vec4 worldTangent;
 flat in int material;
+#if defined TERRAIN && defined SOLID && defined POM && defined PBR_MAPS
+#define PARALLAX
+in vec4 tileBounds;
+#include "/lib/quality.glsl"
+#endif
 
 #if defined SOLID
 /* RENDERTARGETS: 0,1,2,3 */
@@ -165,6 +180,46 @@ vec3 surfaceNormal(vec4 nm) {
     return n;
 }
 
+#ifdef PARALLAX
+vec2 wrapTile(vec2 uv) {
+    return tileBounds.xy + mod(uv - tileBounds.xy, tileBounds.zw);
+}
+
+// parallax occlusion: the labPBR height map (normal map alpha, 1 = top) marched along the view ray inside the block
+// face's sprite, up close only (POM_DISTANCE, fading out; the SSAO knob scales the steps: contact detail goes
+// together). The face's u / v directions come from screen derivatives (no atlas orientation assumed). dx, dy: the
+// texture coordinate's derivatives, taken before any branch
+vec2 parallaxUV(vec3 n, vec2 dx, vec2 dy, vec3 dp1, vec3 dp2) {
+    float dist = length(playerPos);
+    float fade = 1.0 - smoothstep(POM_DISTANCE * 0.6, POM_DISTANCE, dist);
+    if (fade <= 0.0 || isFoliage(material) || tileBounds.z <= 0.0 || tileBounds.w <= 0.0) return texcoord;
+    float q = qualityKnob(2, 0, QUALITY_FALLBACK) * qualityFade(qualityKnob(2, 0, QUALITY_FALLBACK), 0.2);
+    if (q <= 0.0) return texcoord;
+    float h = 1.0 - textureGrad(normals, texcoord, dx, dy).a;  // how deep the surface lies here, 0..1
+    if (h <= 0.003) return texcoord;  // the top of the height field, or no height map
+    vec3 dp2perp = cross(dp2, n), dp1perp = cross(n, dp1);
+    vec3 T = dp2perp * dx.x + dp1perp * dy.x, B = dp2perp * dx.y + dp1perp * dy.y;
+    if (dot(T, T) < 1e-24 || dot(B, B) < 1e-24) return texcoord;
+    vec3 v = normalize(playerPos);
+    float vn = max(-dot(v, n), 0.08);
+    // one block of depth along the ray drifts this far across the face, in this sprite's texture coordinates
+    vec2 drift = vec2(dot(v, normalize(T)), dot(v, normalize(B))) / vn * tileBounds.zw * (POM_DEPTH * fade);
+    int steps = qualityCount(POM_STEPS, q, qualityDither(gl_FragCoord.xy), 2);
+    float layer = 1.0 / float(steps), depth = 0.0, prevDepth = 0.0, prevH = h;
+    for (int i = 0; i < POM_STEPS; i++) {
+        if (i >= steps || depth >= h) break;
+        prevDepth = depth;
+        prevH = h;
+        depth += layer;
+        h = 1.0 - textureGrad(normals, wrapTile(texcoord + drift * depth), dx, dy).a;
+    }
+    // where the ray crossed the surface between the last two layers
+    float over = depth - h, under = prevH - prevDepth;
+    float hit = depth >= h ? mix(prevDepth, depth, under / max(over + under, 1e-5)) : depth;
+    return wrapTile(texcoord + drift * hit);
+}
+#endif
+
 void main() {
 #ifdef DISCARD
     discard;
@@ -185,6 +240,11 @@ void main() {
 #ifdef BASIC
     vec4 albedo = glcolor;  // untextured: whatever texture Iris left bound is not ours to sample
     if (albedo.a < 0.004) discard;
+#elif defined PARALLAX
+    vec2 tdx = dFdx(texcoord), tdy = dFdy(texcoord);
+    vec2 uv = parallaxUV(normalize(worldNormal), tdx, tdy, dFdx(playerPos), dFdy(playerPos));
+    vec4 albedo = glcolor * textureGrad(gtexture, uv, tdx, tdy);
+    if (albedo.a < 0.1) discard;
 #else
     vec4 albedo = glcolor * texture(gtexture, texcoord);
     if (albedo.a < 0.1) discard;
@@ -194,7 +254,10 @@ void main() {
 #endif
     vec2 lm = clamp((lmcoord - 1.0 / 32.0) * (16.0 / 15.0), 0.0, 1.0);
     vec4 nm = vec4(0.0), sp = vec4(0.0);
-#ifdef PBR_MAPS
+#ifdef PARALLAX
+    nm = textureGrad(normals, uv, tdx, tdy);
+    sp = textureGrad(specular, uv, tdx, tdy);
+#elif defined PBR_MAPS
     nm = texture(normals, texcoord);
     sp = texture(specular, texcoord);
 #endif
@@ -216,7 +279,7 @@ void main() {
     outAlbedo = vec4(albedo.rgb, 1.0);
     outNormal = vec4(octEncode(n), lm.x, lm.y);
     outSpecular = vec4(smoothness, f0, def.z, emission);
-    outMaterial = vec4(float(material) / 255.0, ao, lab.z, 0.0);
+    outMaterial = vec4(float(material) / 255.0, ao, haveSpec ? lab.z : (material == MAT_METAL ? 1.0 : 0.0), 0.0);
 #elif defined TRANSLUCENT
     vec3 sun = worldSunDir(gbufferModelViewInverse, sunPosition);
     vec3 n = normalize(worldNormal);

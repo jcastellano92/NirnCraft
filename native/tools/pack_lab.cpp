@@ -17,7 +17,7 @@
 //   sweep=FILE: after the first image, one more per line of FILE ("out.png key=v key=v ...": the q keys above), the
 //   scene rendered once; gputime=N: GPU time of the pack's passes (GL timestamps, median of N runs) per image
 // profile=LOW|MEDIUM|HIGH|ULTRA|ADAPTIVE: shaders.properties' profile applied to settings.glsl; pack=DIR another copy
-// of the pack's shaders/ (a baseline); frames=N frametime=s: N frames (the eye adapting), seedexp=log2 the eye's
+// of the pack's shaders/ (a baseline); opt=NAME, opt=!NAME, opt=NAME=VALUE: one option over it; frames=N frametime=s: N frames (the eye adapting), seedexp=log2 the eye's
 // exposure before them, explog=1 prints it per frame
 // scene=cave [hole=1 torch=0] | window: synthetic rooms around the eye (a rock tunnel with a mouth 12 blocks ahead and
 //   a torch; a timber room with a window in its right wall) with a real shadow map of them, the roof cache, sky and
@@ -482,6 +482,13 @@ int main(int argc, char** argv) {
         std::printf("pack_lab: no profile.%s in shaders.properties\n", profileName.c_str());
         return 2;
     }
+    for (int i = 2; i < argc; i++)  // opt=NAME / opt=!NAME / opt=NAME=VALUE: one option over the profile
+        if (std::strncmp(argv[i], "opt=", 4) == 0) {
+            std::string t = argv[i] + 4;
+            if (t[0] == '!') PROFILE[t.substr(1)] = "!";
+            else if (t.find('=') != std::string::npos) PROFILE[t.substr(0, t.find('='))] = t.substr(t.find('=') + 1);
+            else PROFILE[t] = "";
+        }
     std::string sceneName = sarg(argc, argv, "scene", "");
     const uint32_t W = uint32_t(arg(argc, argv, "w", 1280)), H = uint32_t(arg(argc, argv, "h", 720));
     double x = arg(argc, argv, "x", 0), z = arg(argc, argv, "z", 0), yaw = arg(argc, argv, "yaw", 105),
@@ -920,6 +927,16 @@ int main(int argc, char** argv) {
             ahead(70, 10, -1, p);
             source(1, p[0], p[1], p[2], 1.5, 14 + 18 * 3 + 8, 6, 3);
             sources = 2;
+        }
+        // fires=N: a burning town (Helgen): N fires scattered 60..140 blocks ahead, the mod's FirePlume sizes
+        for (int k = 0, n = std::min(23, int(arg(argc, argv, "fires", 0))); k < n; k++) {
+            double p[3];
+            ahead(60 + 80.0 * ((k * 37) % 23) / 23.0, -40 + 80.0 * ((k * 53) % 19) / 19.0, -1, p);
+            int flame = 2 + (k * 7) % 6, smoke = 1 + (k * 5) % 3;
+            double intensity = 0.8 + 0.1 * (k % 8);
+            double radius = (1.5 + flame * 0.30) * (0.8 + 0.25 * std::min(2.0, intensity)) * 1.3;
+            source(1 + k, p[0], p[1] + flame * 0.8, p[2], intensity, 14 + 18 * smoke + flame * 0.8, radius, smoke);
+            sources = std::max(sources, 2 + k);
         }
         smoke[3 * 32 + 31] = uint32_t(sources);
         smoke[1 * 32 + 11] = rgba8(0, 1, 0.4, 0);  // partial tick, budget, wind

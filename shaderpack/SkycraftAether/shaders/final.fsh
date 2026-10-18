@@ -1,13 +1,23 @@
 #version 330 compatibility
 // The one tonemapper for near and far (aether hands the pack linear HDR, so both pass through here):
 //  * the eye's adapted exposure (lib/exposure.glsl, kept in colortex8 by composite1.fsh) times the EXPOSURE option
+//  * night vision: dim light loses its colour to the rods (lib/grade.glsl)
 //  * the fitted ACES curve (Stephen Hill's RRT + ODT fit, sRGB primaries) for a filmic toe and a highlight roll-off
 //    that keeps colour
+//  * the regional film grade (lib/grade.glsl: a baked LUT per land, blended by where the camera is), eased by
+//    overcast and night
 #include "/lib/settings.glsl"
+#include "/lib/common.glsl"
 #include "/lib/exposure.glsl"
+#include "/lib/weather.glsl"
+#include "/lib/grade.glsl"
 
 uniform sampler2D colortex5;  // the HDR scene with shafts and bloom (composite1.fsh)
 uniform sampler2D colortex8;  // the eye
+uniform vec3 cameraPosition;
+uniform vec3 sunPosition;
+uniform mat4 gbufferModelViewInverse;
+uniform float rainStrength;
 
 in vec2 texcoord;
 
@@ -33,6 +43,16 @@ vec3 linearToSrgb(vec3 c) {
 
 void main() {
     vec3 hdr = texture(colortex5, texcoord).rgb;
-    vec3 c = aces(hdr * exp2(exposureNow(colortex8)) * EXPOSURE);
-    fragColor = vec4(linearToSrgb(c), 1.0);
+#if NIGHT_VISION > 0
+    hdr = nightVision(hdr, float(NIGHT_VISION) * 0.3);
+#endif
+    vec3 c = linearToSrgb(aces(hdr * exp2(exposureNow(colortex8)) * EXPOSURE));
+#if defined REGION_GRADE && !defined SKYCRAFT_REALM
+    // the grade eases off under a closed sky and at night (flat light; the rods' look takes over)
+    vec3 sun = worldSunDir(gbufferModelViewInverse, sunPosition);
+    float night = smoothstep(0.02, -0.15, sun.y);
+    float overcast = max(rainStrength, haveWeather() ? smoothstep(0.55, 0.95, weatherSample(weatherField, cameraPosition.xz).r) : 0.0);
+    c = regionalGrade(c, cameraPosition.xz, GRADE_STRENGTH * (1.0 - 0.5 * night) * (1.0 - 0.35 * overcast));
+#endif
+    fragColor = vec4(c, 1.0);
 }
