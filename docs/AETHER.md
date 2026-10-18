@@ -53,8 +53,12 @@ harness) is labelled "preview" everywhere.
 | Shader pack | All 36 program stages compile (glslang). The pack's GLSL sky matches aether's Slang sky to about 1e-6 relative at three sun angles. |
 | Mod glue | `native/java/mod-integration` compiles against the real Minecraft 26.3 client and NeoForge 26.3.0.90 jars. |
 
-Run everything with `.\native\build.ps1` (builds, then runs `aether_tests`, `aether_gl_test` zero-copy and forced
-host-copy, and `aether_pack_test`; `-Validate` under the validation layers; Linux: `native/build_linux.sh`),
+Run everything with `.\native\build.ps1` (builds, then runs `aether_tests`, `aether_height_test`, `aether_gl_test`
+zero-copy and forced host-copy, and `aether_pack_test`; `-Validate` under the validation layers; Linux:
+`native/build_linux.sh`). `aether_gl_test --context=both` (what both scripts run) repeats the whole GL bridge on a
+second context, an OpenGL 3.3 core forward-compatible profile like the one Minecraft creates, and fails unless it
+lands on the same interop path as the default context (NVIDIA hands out exactly 3.3 there, so a 4.5-only call or an
+extension the driver drops from that profile shows up here, not in game),
 `.\native\java\run_probe.ps1`, `.\native\java\mod-integration\compile_check.ps1` and
 `py -3 -I shaderpack\build_pack.py`. For offline views use `native\build\Release\aether_render.exe` (flags `lod`,
 `dbgweather`, `actors=demo`, `weather=fair|storm|overcast`).
@@ -65,11 +69,11 @@ One code path; the platform differences live in a few shims:
 
 | Concern | Windows | Linux |
 | --- | --- | --- |
-| Library | `aether_core.dll` | `libaether_core.so` (glibc 2.27+, libstdc++ linked in, only `AETHER_API` exported) |
+| Library | `aether_core.dll` | `libaether_core.so` (glibc 2.27+, libstdc++ linked in, only `aether_*` exported via `cmake/aether_core.map`, stripped Release; ~1.6 MB) |
 | Vulkan loader | `vulkan-1.dll`, opened at run time | `libvulkan.so.1`, opened at run time (`src/vk_loader.*`): no link-time Vulkan dependency |
 | GL entry points | `wglGetProcAddress` | `eglGetProcAddress` or `glXGetProcAddressARB`, whichever owns the current context (GLFW: EGL on Wayland, GLX on X11 / XWayland) |
 | Shared memory / semaphores | `VK_KHR_external_{memory,semaphore}_win32` ↔ `GL_EXT_{memory_object,semaphore}_win32` | `..._fd` ↔ `GL_EXT_..._fd` (the fd goes to GL on import) |
-| Build | `native\build.ps1` (MSVC) | `native/build_linux.sh` (GCC 11+ / Clang 14+, CMake 3.20+; fetches pinned Slang and, if missing, Vulkan-Headers) |
+| Build | `native\build.ps1` (MSVC) | `native/build_linux.sh` (GCC 11+ / Clang 14+, CMake 3.20+; fetches pinned Slang and, if missing, Vulkan-Headers; `spirv-val` optional). The shipped `.so` is built with conda-forge's `x86_64-conda-linux-gnu-g++` (glibc 2.28 sysroot) and copied to `native/build-linux/` for `move_in.ps1` |
 
 **Interop is chosen per attach**, and `aether_info` (ABI 0.8) says which and why: zero-copy needs the Vulkan handle
 extensions, every shared format (RGBA16F, RGBA8, R32F, RG32F, optimal tiling, storage + sampled + transfer) exportable
@@ -111,6 +115,15 @@ way: the sun map readback buffer leaked (validation), the GL-ready semaphore wai
 transfer stage the sun map copy runs in (a real race, synchronization validation), two sun map copies wrote the same
 image without a barrier, and the sun map's parameter row was read uninitialised (garbage on lavapipe; NVIDIA happened
 to zero it).
+
+Re-run after the exact-height merge (ABI 0.9, 2026-10-18): Windows RTX 3090 every suite, the GL bridge zero-copy on
+both the default context (4.6 compatibility) and a 3.3 core forward-compatible one (NVIDIA reports `3.3.0`), and
+both host-copy when forced. WSL Ubuntu 24.04, Mesa 25.0.7 lavapipe + llvmpipe, GCC 13.4 (glibc 2.28 sysroot) and
+Clang 18: every suite, EGL and GLX, both contexts on host-copy (llvmpipe hands out 4.5 core for the 3.3 request);
+lavapipe has shaderFloat64 + the RTE / SignedZeroInfNanPreserve float controls, so the exact-height kernel runs on it
+and matches its C++ reference bit for bit; with no Vulkan driver at all the height test reports the CPU path and
+passes. Linux build fixes from the merge: `spirv-val` was looked up only in the Windows SDK's `Bin` (now the SDK or
+PATH, optional on Linux), and the height reference's MSVC-only `/fp:strict` got its GCC / Clang equivalent.
 
 ## 3. How it joins the mod (after the NeoForge 26.3 conversion lands)
 

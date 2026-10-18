@@ -1,10 +1,17 @@
-// A hidden OpenGL 4.5 context for the GL tests, current on the calling thread.
-//  Windows: a hidden window + wglCreateContext (what a Mesa opengl32.dll placed next to the exe also answers).
-//  Linux:   EGL surfaceless (works headless, on Wayland, on gamescope, in WSL with llvmpipe) by default, or GLX with a
-//           pbuffer when AETHER_TEST_GL=glx (X11 / XWayland: what GLFW uses unless it runs on native Wayland).
-// Core profile like Minecraft's (it asks for 3.2 core and drivers hand out their newest core version).
+// A hidden OpenGL context for the GL tests, current on the calling thread, in one of two profiles:
+//  Profile::Default  the widest context the platform hands out:
+//     Windows: a hidden window + wglCreateContext (a compatibility context at the driver's newest version; what a Mesa
+//              opengl32.dll placed next to the exe also answers).
+//     Linux:   a 4.5 core context, EGL surfaceless (works headless, on Wayland, on gamescope, in WSL with llvmpipe) by
+//              default, or GLX with a pbuffer when AETHER_TEST_GL=glx (X11 / XWayland: what GLFW uses unless it runs
+//              on native Wayland).
+//  Profile::Core33   the production context: Minecraft (GLFW) asks for an OpenGL 3.3 core, forward-compatible profile.
+//     Windows: WGL_ARB_create_context(_profile) through a throwaway legacy context. Linux: the same EGL / GLX paths
+//     with 3.3 core + the forward-compatible flag. NVIDIA hands out exactly 3.3 there (4.x functionality only as
+//     extensions); Mesa hands out its newest core version.
 // Libraries are opened at run time: no GL / EGL / X11 development packages are needed to build.
 #pragma once
+#include <cstdint>
 #include <cstdlib>
 #include <cstring>
 #include <string>
@@ -19,20 +26,25 @@
 
 namespace aether_test {
 
+enum class Profile { Default, Core33 };
+
+inline const char* profileName(Profile p) { return p == Profile::Core33 ? "3.3 core" : "default"; }
+
 #if defined(_WIN32)
 
 struct GlContext {
+    HWND wnd = nullptr;
     HDC dc = nullptr;
     HGLRC rc = nullptr;
     const char* kind = "wgl";
-    bool create(std::string& err) {
+    bool create(std::string& err, Profile profile = Profile::Default) {
         WNDCLASSA wc{};
         wc.lpfnWndProc = DefWindowProcA;
         wc.hInstance = GetModuleHandleA(nullptr);
         wc.lpszClassName = "aether_gl_context";
-        RegisterClassA(&wc);
-        HWND wnd = CreateWindowA("aether_gl_context", "aether", WS_OVERLAPPEDWINDOW, 0, 0, 64, 64, nullptr, nullptr,
-                                 wc.hInstance, nullptr);
+        RegisterClassA(&wc);  // fails harmlessly when a previous context registered it
+        wnd = CreateWindowA("aether_gl_context", "aether", WS_OVERLAPPEDWINDOW, 0, 0, 64, 64, nullptr, nullptr,
+                            wc.hInstance, nullptr);
         dc = GetDC(wnd);
         PIXELFORMATDESCRIPTOR pfd{sizeof(pfd), 1, PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER, PFD_TYPE_RGBA, 32};
         int pf = ChoosePixelFormat(dc, &pfd);
@@ -42,12 +54,41 @@ struct GlContext {
             err = "wglCreateContext / wglMakeCurrent failed";
             return false;
         }
+        if (profile == Profile::Default) return true;
+        // the legacy context only exists to reach wglCreateContextAttribsARB
+        kind = "wgl 3.3 core";
+        using GetExts = const char*(WINAPI*)(HDC);
+        using CreateAttribs = HGLRC(WINAPI*)(HDC, HGLRC, const int*);
+        auto getExts = reinterpret_cast<GetExts>(wglGetProcAddress("wglGetExtensionsStringARB"));
+        auto createAttribs = reinterpret_cast<CreateAttribs>(wglGetProcAddress("wglCreateContextAttribsARB"));
+        const char* exts = getExts ? getExts(dc) : nullptr;
+        if (!createAttribs || !exts || !std::strstr(exts, "WGL_ARB_create_context_profile")) {
+            err = "WGL_ARB_create_context_profile missing";
+            return false;
+        }
+        const int attr[] = {0x2091 /*WGL_CONTEXT_MAJOR_VERSION_ARB*/, 3, 0x2092 /*WGL_CONTEXT_MINOR_VERSION_ARB*/, 3,
+                            0x9126 /*WGL_CONTEXT_PROFILE_MASK_ARB*/, 0x1 /*CORE*/,
+                            0x2094 /*WGL_CONTEXT_FLAGS_ARB*/, 0x2 /*FORWARD_COMPATIBLE*/, 0};
+        HGLRC core = createAttribs(dc, nullptr, attr);
+        wglMakeCurrent(nullptr, nullptr);
+        wglDeleteContext(rc);
+        rc = core;
+        if (!rc || !wglMakeCurrent(dc, rc)) {
+            err = "wglCreateContextAttribsARB (OpenGL 3.3 core) failed";
+            return false;
+        }
         return true;
     }
     void destroy() {
         wglMakeCurrent(nullptr, nullptr);
         if (rc) wglDeleteContext(rc);
         rc = nullptr;
+        if (wnd) {
+            ReleaseDC(wnd, dc);
+            DestroyWindow(wnd);
+        }
+        wnd = nullptr;
+        dc = nullptr;
     }
 };
 
@@ -65,14 +106,15 @@ struct GlContext {
     void* xdpy = nullptr;
     unsigned long pbuf = 0;
 
-    bool create(std::string& err) {
+    bool create(std::string& err, Profile profile = Profile::Default) {
         const char* want = std::getenv("AETHER_TEST_GL");
-        if (want && std::strcmp(want, "glx") == 0) return createGlx(err);
-        return createEgl(err);
+        if (want && std::strcmp(want, "glx") == 0) return createGlx(err, profile);
+        return createEgl(err, profile);
     }
 
-    bool createEgl(std::string& err) {
-        kind = "egl";
+    bool createEgl(std::string& err, Profile profile) {
+        const bool core33 = profile == Profile::Core33;
+        kind = core33 ? "egl 3.3 core" : "egl";
         egl = dlopen("libEGL.so.1", RTLD_NOW | RTLD_GLOBAL);
         if (!egl) return fail(err, "libEGL.so.1 not found");
         using GetProc = void* (*)(const char*);
@@ -101,16 +143,20 @@ struct GlContext {
             const int cfgAttr2[] = {0x3040, 0x0008, 0x3038};
             if (!chooseConfig(dpy, cfgAttr2, &cfg, 1, &n) || n < 1) return fail(err, "no EGL config for desktop OpenGL");
         }
-        const int ctxAttr[] = {0x3098 /*EGL_CONTEXT_MAJOR_VERSION*/, 4, 0x30FB /*EGL_CONTEXT_MINOR_VERSION*/, 5,
-                               0x30FD /*EGL_CONTEXT_OPENGL_PROFILE_MASK*/, 1 /*CORE*/, 0x3038};
-        ctx = createContext(dpy, cfg, nullptr, ctxAttr);
-        if (!ctx) return fail(err, "eglCreateContext (OpenGL 4.5 core) failed");
+        // EGL_KHR_create_context: GLFW passes the forward-compatible bit through EGL_CONTEXT_FLAGS_KHR
+        const int ctx45[] = {0x3098 /*EGL_CONTEXT_MAJOR_VERSION*/, 4, 0x30FB /*EGL_CONTEXT_MINOR_VERSION*/, 5,
+                             0x30FD /*EGL_CONTEXT_OPENGL_PROFILE_MASK*/, 1 /*CORE*/, 0x3038};
+        const int ctx33[] = {0x3098, 3, 0x30FB, 3, 0x30FD, 1, 0x30FC /*EGL_CONTEXT_FLAGS_KHR*/, 0x2 /*FORWARD_COMPATIBLE*/,
+                             0x3038};
+        ctx = createContext(dpy, cfg, nullptr, core33 ? ctx33 : ctx45);
+        if (!ctx) return fail(err, core33 ? "eglCreateContext (OpenGL 3.3 core) failed" : "eglCreateContext (OpenGL 4.5 core) failed");
         if (!makeCurrent(dpy, nullptr, nullptr, ctx)) return fail(err, "eglMakeCurrent (surfaceless) failed");
         return true;
     }
 
-    bool createGlx(std::string& err) {
-        kind = "glx";
+    bool createGlx(std::string& err, Profile profile) {
+        const bool core33 = profile == Profile::Core33;
+        kind = core33 ? "glx 3.3 core" : "glx";
         x11 = dlopen("libX11.so.6", RTLD_NOW | RTLD_GLOBAL);
         glx = dlopen("libGLX.so.0", RTLD_NOW | RTLD_GLOBAL);
         if (!glx) glx = dlopen("libGL.so.1", RTLD_NOW | RTLD_GLOBAL);
@@ -132,9 +178,12 @@ struct GlContext {
         if (!cfgs || n < 1) return fail(err, "no GLX pbuffer config");
         using CreateCtx = void* (*)(void*, void*, void*, int, const int*);
         auto createCtx = reinterpret_cast<CreateCtx>(getProc(reinterpret_cast<const unsigned char*>("glXCreateContextAttribsARB")));
-        const int ctxAttr[] = {0x2091 /*MAJOR*/, 4, 0x2092 /*MINOR*/, 5, 0x9126 /*PROFILE_MASK*/, 1 /*CORE*/, 0};
-        ctx = createCtx ? createCtx(xdpy, cfgs[0], nullptr, 1, ctxAttr) : nullptr;
-        if (!ctx) return fail(err, "glXCreateContextAttribsARB (OpenGL 4.5 core) failed");
+        const int ctx45[] = {0x2091 /*MAJOR*/, 4, 0x2092 /*MINOR*/, 5, 0x9126 /*PROFILE_MASK*/, 1 /*CORE*/, 0};
+        const int ctx33[] = {0x2091, 3, 0x2092, 3, 0x9126, 1, 0x2094 /*GLX_CONTEXT_FLAGS_ARB*/, 0x2 /*FORWARD_COMPATIBLE*/, 0};
+        ctx = createCtx ? createCtx(xdpy, cfgs[0], nullptr, 1, core33 ? ctx33 : ctx45) : nullptr;
+        if (!ctx)
+            return fail(err, core33 ? "glXCreateContextAttribsARB (OpenGL 3.3 core) failed"
+                                    : "glXCreateContextAttribsARB (OpenGL 4.5 core) failed");
         const int pbAttr[] = {0x8041 /*GLX_PBUFFER_WIDTH*/, 16, 0x8040 /*GLX_PBUFFER_HEIGHT*/, 16, 0};
         pbuf = createPbuffer(xdpy, cfgs[0], pbAttr);
         if (!makeCurrent(xdpy, pbuf, pbuf, ctx)) return fail(err, "glXMakeContextCurrent failed");
@@ -150,8 +199,11 @@ struct GlContext {
         } else if (glx && xdpy) {
             auto makeCurrent = reinterpret_cast<int (*)(void*, unsigned long, unsigned long, void*)>(dlsym(glx, "glXMakeContextCurrent"));
             auto destroyContext = reinterpret_cast<void (*)(void*, void*)>(dlsym(glx, "glXDestroyContext"));
+            auto destroyPbuffer = reinterpret_cast<void (*)(void*, unsigned long)>(dlsym(glx, "glXDestroyPbuffer"));
             makeCurrent(xdpy, 0, 0, nullptr);
             if (ctx) destroyContext(xdpy, ctx);
+            if (pbuf && destroyPbuffer) destroyPbuffer(xdpy, pbuf);
+            pbuf = 0;
         }
         ctx = nullptr;
     }

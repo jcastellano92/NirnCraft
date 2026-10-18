@@ -30,13 +30,14 @@ if (-not $NoTest) {
     # the exact-height kernel: correctly rounded division, known inputs, Vulkan vs its C++ reference bit for bit
     & (Join-Path $build "$Config\aether_height_test.exe")
     if ($LASTEXITCODE) { throw 'height tests failed' }
-    # the GL bridge, zero-copy (skips cleanly on machines without a GL 4.5 context) ...
-    & (Join-Path $build "$Config\aether_gl_test.exe") (Join-Path $here 'data')
+    # the GL bridge, zero-copy where the driver pair allows it, on two contexts: the default (compatibility) one and
+    # an OpenGL 3.3 core forward-compatible profile like Minecraft's, which must land on the same interop path ...
+    & (Join-Path $build "$Config\aether_gl_test.exe") (Join-Path $here 'data') --context=both
     if ($LASTEXITCODE) { throw 'gl interop test failed' }
     # ... and the host-copy fallback AMD / Mesa / cross-GPU machines may land on, forced here
     $env:AETHER_INTEROP = 'hostcopy'
     try {
-        & (Join-Path $build "$Config\aether_gl_test.exe") (Join-Path $here 'data')
+        & (Join-Path $build "$Config\aether_gl_test.exe") (Join-Path $here 'data') --context=both
         if ($LASTEXITCODE) { throw 'gl host-copy test failed' }
     } finally { Remove-Item Env:AETHER_INTEROP -ErrorAction SilentlyContinue }
     # the shader pack's atmosphere must match aether's, or the near/far hand-off shows a seam
