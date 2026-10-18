@@ -66,9 +66,15 @@ struct CloudColumn {
 
 CloudColumn sampleColumn(float2 worldXZ, float horizontal) {
     CloudColumn c;
+    float farBlend = smoothstep(2200.0, 3600.0, horizontal);
+    if (farBlend >= 1.0) {
+        // beyond the blend the near fields have no weight: sample only the far pair (most cloud samples)
+        c.weather = sampleField(2, worldXZ / 65536.0, false);
+        c.dynamics = sampleField(3, worldXZ / 65536.0, true);
+        return c;
+    }
     c.weather = sampleField(0, worldXZ / 8192.0, false);
     c.dynamics = sampleField(1, worldXZ / 8192.0, true);
-    float farBlend = smoothstep(2200.0, 3600.0, horizontal);
     if (farBlend > 0.0) {
         float4 fw = sampleField(2, worldXZ / 65536.0, false);
         float4 fd = sampleField(3, worldXZ / 65536.0, true);
@@ -180,7 +186,9 @@ float cumulusDensity(float3 p, CloudColumn col, float horizontal, out float h01)
     float turretCrisp = (1.0 - anvilShelf * 0.75) * (0.34 + 0.26 * skyTower);
     float2 windDir = float2(0.8, 0.6);
     float2 terrainFlow = (windOf(dyn) - windDir) * 0.16;
-    for (int i = 0; i < 4; i++) {
+    // detail by distance: the finest octaves are sub-pixel at a half-resolution pixel kilometres away
+    int octaves = horizontal < 1500.0 ? 4 : (horizontal < 6000.0 ? 3 : 2);
+    for (int i = 0; i < octaves; i++) {
         float n = cloudNoiseAt(traceM - float3(windDir.x * wind + terrainFlow.x, 0.0, windDir.y * wind + terrainFlow.y));
         if (i >= 1) n = lerp(n, sqrt(max(n, 0.0)), turretCrisp * 0.35);
         noise += n * persist;
@@ -244,10 +252,10 @@ struct CloudResult {
     float firstHit;
 };
 
-float cloudOpticalDepthTowardsSun(float3 rel, float3 sun, float k2R) {
+float cloudOpticalDepthTowardsSun(float3 rel, float3 sun, float k2R, int steps) {
     float od = 0.0;
     float dist = 32.0;
-    for (int l = 0; l < 4; l++) {
+    for (int l = 0; l < steps; l++) {
         float3 q = rel + sun * dist;
         float3 wp = float3(q.x + float(frame.camInt.x), curvedAltitude(q, k2R), q.z + float(frame.camInt.z));
         float hh;
@@ -301,7 +309,9 @@ CloudResult marchClouds(float3 o, float3 dir, float tLimit, float3 sun, uint2 pi
         if (sigma <= 1e-5) continue;
         if (r.firstHit < 0.0) r.firstHit = ts;
         float tau = sigma * dt * 0.18;
-        float Ts = exp(-cloudOpticalDepthTowardsSun(rel, sun, k2R));
+        // the light march thins with distance too (4 probes near, 2 beyond ~10 km)
+        int lightSteps = ts < 4000.0 ? 4 : (ts < 10000.0 ? 3 : 2);
+        float Ts = exp(-cloudOpticalDepthTowardsSun(rel, sun, k2R, lightSteps));
         float3 light = sunCol * Ts * phase * 0.9 + amb * (0.16 + 0.25 * hh + 0.14 * Ts) * 2.2;
         float a = 1.0 - exp(-tau);
         r.scatter += r.transmittance * a * light * float3(0.95, 0.96, 1.0);

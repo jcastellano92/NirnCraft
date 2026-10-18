@@ -97,18 +97,23 @@ int main(int argc, char** argv) {
     // bring the GPU to its boost clock first: short runs otherwise time the clock ramp
     f.flags = AETHER_FRAME_ATMOS | AETHER_FRAME_SHADOWS;
     for (int i = 0; i < 250; i++) aether_gl_render(ctx, &f);
-    std::printf("%ux%u, camera (%.0f, %.0f, %.0f)\n", W, H, x, y, z);
-    for (const Set& s : sets) {
-        f.flags = s.flags;
-        std::vector<double> gpu;
-        for (int i = 0; i < frames + 3; i++) {
-            aether_gl_render(ctx, &f);
+    std::printf("%ux%u, camera (%.0f, %.0f, %.0f), sets interleaved\n", W, H, x, y, z);
+    const int NS = int(sizeof(sets) / sizeof(sets[0]));
+    std::vector<std::vector<double>> gpu(NS);
+    // interleaved so every set sees the same clocks and background load. A render reports the GPU time of the frame
+    // that finished before it (two behind), so each set renders three frames in a row and keeps the third report.
+    for (int i = 0; i < frames; i++)
+        for (int k = 0; k < NS; k++) {
+            f.flags = sets[k].flags;
+            for (int r = 0; r < 3; r++) aether_gl_render(ctx, &f);
             AetherStats st{};
             aether_get_stats(ctx, &st);
-            if (i >= 3) gpu.push_back(st.lastFrameMs);  // reports the frame that finished (two behind)
+            gpu[k].push_back(st.lastFrameMs);
         }
-        std::sort(gpu.begin(), gpu.end());
-        std::printf("  %-24s GPU median %6.2f ms  (min %.2f, max %.2f)\n", s.name, gpu[gpu.size() / 2], gpu.front(), gpu.back());
+    for (int k = 0; k < NS; k++) {
+        std::sort(gpu[k].begin(), gpu[k].end());
+        std::printf("  %-24s GPU median %6.2f ms  (p10 %.2f, p90 %.2f)\n", sets[k].name, gpu[k][gpu[k].size() / 2],
+                    gpu[k][gpu[k].size() / 10], gpu[k][gpu[k].size() * 9 / 10]);
     }
     aether_gl_detach(ctx);
     aether_destroy(ctx);
