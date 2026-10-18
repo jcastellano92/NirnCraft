@@ -72,12 +72,9 @@ public final class GuideClient {
         CompoundTag mod = SkyData.get(mc.player).module(GuideEvents.MODULE);
         int seq = mod.getInt("last_arrival_seq");
         if (lastSeenArrivalSeq == -1) {
-            // Initialize on first client tick after login; if seqJustTriggered on fresh spawn, show it
+            // First client tick after login/respawn: only remember the counter. Replaying a stored arrival here made
+            // the banner pop up again on every load while a single region had been entered.
             lastSeenArrivalSeq = seq;
-            if (seq == 1 && mc.player.tickCount < 160) {
-                String regionId = mod.getString("last_arrival_region");
-                if (!regionId.isEmpty()) showArrivalBanner(mc, regionId, false);
-            }
         } else if (seq > lastSeenArrivalSeq) {
             lastSeenArrivalSeq = seq;
             String regionId = mod.getString("last_arrival_region");

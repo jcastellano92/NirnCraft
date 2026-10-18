@@ -1,0 +1,243 @@
+{
+  "version": 1,
+  "cameras": {
+    "mine-entry-ladder": {
+      "seed": 1234,
+      "dimension": "minecraft:overworld",
+      "generationInputs": "7adcb7aedc9fa07855b80a4045118f3dc41b633d0ef1c88f8fdb64cda4bc263f",
+      "position": [
+        -245.0,
+        90.0,
+        792.0
+      ],
+      "lookAt": [
+        -198.4915256500244,
+        103.48827993869781,
+        792.0
+      ],
+      "yaw": -90.0,
+      "pitch": -14.316311,
+      "cameraClear": true,
+      "air": "rooms=4 received=22 lights=0 smoke=0",
+      "capturedAt": 1792261799620,
+      "planReference": "atmosphere-scenes.json / embershard_mine / ROOM 0 to entrance TUNNEL",
+      "purpose": "Mine entry landing and ascent ladder",
+      "region": "skyrim/falkreath",
+      "systems": [
+        "structures",
+        "dungeons"
+      ],
+      "review": "visually reviewed",
+      "evidence": "mine_route_scout_01"
+    },
+    "mine-crystal-chamber": {
+      "seed": 1234,
+      "dimension": "minecraft:overworld",
+      "bakeInputs": "7adcb7aedc9fa07855b80a4045118f3dc41b633d0ef1c88f8fdb64cda4bc263f",
+      "generationInputs": "56a22073a0ce2ab2947151b77225c86d8c76c7f657f2bb1923d3a0d0b72a5929",
+      "position": [
+        -275.0,
+        89.0,
+        804.0
+      ],
+      "dayTime": 6000,
+      "gameTime": 630239,
+      "nightVision": false,
+      "weather": "clear",
+      "renderDistance": 12,
+      "readinessPassed": true,
+      "readiness": "native=317/317 radius=10 meshes=true air=true cameraClear=true weather=true LOD=not requested elapsedMs=6297",
+      "screen": "game",
+      "shaders": false,
+      "lookAt": [
+        -275.0,
+        111.18423616886139,
+        760.6301822662354
+      ],
+      "yaw": -180.0,
+      "pitch": -25.36875,
+      "cameraClear": true,
+      "air": "rooms=4 received=22 lights=0 smoke=0",
+      "capturedAt": 1792262539517,
+      "planReference": "atmosphere-scenes.json / embershard_mine / ROOM 3 grand cavern; regenerated -304 736 -161 831",
+      "purpose": "Crystal chamber, waterfall, lantern walkway, smooth mist travel reference",
+      "region": "skyrim/falkreath",
+      "systems": [
+        "caves",
+        "dungeons",
+        "fx"
+      ],
+      "review": "visually reviewed",
+      "evidence": "mine_chamber_geometry_identity"
+    },
+    "helgen-near-smoke": {
+      "seed": 1234,
+      "dimension": "minecraft:overworld",
+      "bakeInputs": "7adcb7aedc9fa07855b80a4045118f3dc41b633d0ef1c88f8fdb64cda4bc263f",
+      "generationInputs": "56a22073a0ce2ab2947151b77225c86d8c76c7f657f2bb1923d3a0d0b72a5929",
+      "position": [
+        -20.0,
+        130.0,
+        1158.0
+      ],
+      "dayTime": 6000,
+      "gameTime": 661321,
+      "nightVision": false,
+      "weather": "clear",
+      "renderDistance": 12,
+      "readinessPassed": true,
+      "readiness": "native=317/317 radius=10 meshes=true air=true cameraClear=true weather=true LOD=not requested elapsedMs=14442",
+      "screen": "game",
+      "shaders": true,
+      "lookAt": [
+        -14.466923594474792,
+        161.82833111286163,
+        1121.1133403778076
+      ],
+      "yaw": -171.46924,
+      "pitch": -39.005356,
+      "cameraClear": true,
+      "air": "rooms=0 received=1 lights=3 smoke=0",
+      "capturedAt": 1792264272054,
+      "planReference": "helgen street/fire anchors: site 13 (-17,133,1138), near view (-20,130,1158)",
+      "purpose": "Close fire origin, rooftop occlusion and connected smoke stress view",
+      "region": "skyrim/falkreath",
+      "systems": [
+        "fx",
+        "weather",
+        "performance"
+      ],
+      "review": "visually reviewed",
+      "evidence": "helgen_bounded_scout_01"
+    },
+    "blackreach-mushroom-dome": {
+      "seed": 1234,
+      "dimension": "minecraft:overworld",
+      "bakeInputs": "7adcb7aedc9fa07855b80a4045118f3dc41b633d0ef1c88f8fdb64cda4bc263f",
+      "generationInputs": "f3901ada5267236d4b89dec1e2faf1d0ece597d45f02eccfa5d08e3bf41afe64",
+      "position": [
+        420.0,
+        -20.0,
+        -975.0
+      ],
+      "cameraClear": true,
+      "dayTime": 6000,
+      "gameTime": 756154,
+      "nightVision": false,
+      "weather": "rain",
+      "renderDistance": 12,
+      "readinessPassed": true,
+      "readiness": "native=317/317 radius=10 meshes=true air=true cameraClear=true weather=true LOD=not requested elapsedMs=3745",
+      "screen": "game",
+      "coreSha256": "14c4ca5d867ddc068bb269b62402c36008e88e0f1309888659a978e9a034cb97",
+      "shaders": false,
+      "lookAt": [
+        420.0,
+        -10.918420672416687,
+        -927.5842123031616
+      ],
+      "yaw": 0.0,
+      "pitch": -8.945625,
+      "air": "rooms=4 received=25 lights=0 smoke=0",
+      "capturedAt": 1792272492995,
+      "planReference": "Blackreach.java SHAPES dome(420,-930), radius110;210 affected chunks freshly regenerated after cooler emissive cap change",
+      "purpose": "Actual cavern scale, mushroom canopy, floor/ceiling and mist handoff",
+      "region": "skyrim/the_pale",
+      "systems": [
+        "caves",
+        "dungeons",
+        "flora",
+        "fx",
+        "performance"
+      ],
+      "review": "visually reviewed",
+      "evidence": "blackreach_cool_generation"
+    },
+    "mine-spell-lane": {
+      "seed": 1234,
+      "dimension": "minecraft:overworld",
+      "bakeInputs": "7adcb7aedc9fa07855b80a4045118f3dc41b633d0ef1c88f8fdb64cda4bc263f",
+      "generationInputs": "f3901ada5267236d4b89dec1e2faf1d0ece597d45f02eccfa5d08e3bf41afe64",
+      "position": [
+        -275.0,
+        89.0,
+        804.0
+      ],
+      "difficulty": "peaceful",
+      "cameraClear": true,
+      "dayTime": 6000,
+      "gameTime": 853686,
+      "nightVision": false,
+      "weather": "storm",
+      "renderDistance": 12,
+      "readinessPassed": true,
+      "readiness": "native=317/317 radius=10 meshes=true air=true cameraClear=true weather=true LOD=not requested elapsedMs=1335",
+      "screen": "game",
+      "coreSha256": "93becf299da287957af8911ff921498b455eb53ee56de09e77fbe9d87c964ac5",
+      "shaders": true,
+      "lookAt": [
+        -275.0,
+        82.11926853656769,
+        756.7587289810181
+      ],
+      "yaw": -180.0,
+      "pitch": 10.203974,
+      "air": "rooms=4 received=21 lights=0 smoke=0",
+      "capturedAt": 1792279014901,
+      "planReference": "Embershard room3 actual lantern walkway, saved columns confirm floor block87, standing88, clear x-275 lane795..804",
+      "purpose": "Grounded spell/staff targets and native NPC movement along actual cave walkway",
+      "region": "skyrim/falkreath",
+      "systems": [
+        "caves",
+        "dungeons",
+        "magic",
+        "fx",
+        "npcs"
+      ],
+      "review": "visually reviewed",
+      "evidence": "mine_spell_grounded_lane"
+    },
+    "dragon-bridge-road-barn": {
+      "seed": 2428247,
+      "dimension": "minecraft:overworld",
+      "bakeInputs": "7adcb7aedc9fa07855b80a4045118f3dc41b633d0ef1c88f8fdb64cda4bc263f",
+      "generationInputs": "f3901ada5267236d4b89dec1e2faf1d0ece597d45f02eccfa5d08e3bf41afe64",
+      "position": [
+        -1951.0,
+        73.0,
+        -1387.0
+      ],
+      "difficulty": "easy",
+      "cameraClear": true,
+      "dayTime": 26385,
+      "gameTime": 46354,
+      "nightVision": false,
+      "weather": "fog",
+      "renderDistance": 12,
+      "readinessPassed": true,
+      "readiness": "native=317/317 radius=10 meshes=true air=true cameraClear=true weather=true LOD=not requested elapsedMs=1225",
+      "screen": "game",
+      "coreSha256": "93becf299da287957af8911ff921498b455eb53ee56de09e77fbe9d87c964ac5",
+      "shaders": false,
+      "lookAt": [
+        -1982.8267946243286,
+        57.94336187839508,
+        -1355.1732053756714
+      ],
+      "yaw": 45.0,
+      "pitch": 20.330875,
+      "air": "rooms=0 received=0 lights=1 smoke=0",
+      "capturedAt": 1792281372813,
+      "planReference": "Road6480 dragon_bridge:karthwasten points18..23, actual1487chunk benchmark world seed2428247, retained MCA hay at(-1955,71..72,-1382) and failed engine route dragon_bridge_hay",
+      "purpose": "Reproduce actual covered road/hay obstruction with a clear local interior camera",
+      "region": "skyrim/haafingar",
+      "systems": [
+        "roads",
+        "structures",
+        "settlements"
+      ],
+      "review": "visually reviewed",
+      "evidence": "dragon_bridge_hay_inside"
+    }
+  }
+}

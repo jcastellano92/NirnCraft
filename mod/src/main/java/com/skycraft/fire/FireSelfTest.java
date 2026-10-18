@@ -35,7 +35,15 @@ public final class FireSelfTest {
         BlockPos base = at.above(0);
         BlockPos fireAt = base.above(2);
         BlockPos vanillaAt = base.above(2).east(3);
-        BlockState oldFire = level.getBlockState(fireAt), oldVanilla = level.getBlockState(vanillaAt);
+        BlockState[] oldFire = new BlockState[4], oldVanilla = new BlockState[4];
+        for (int dy = -1; dy < 4; dy++) {
+            if (level.getBlockEntity(fireAt.above(dy)) != null || level.getBlockEntity(vanillaAt.above(dy)) != null)
+                throw new IllegalArgumentException("Fire selftest needs a spot without block entities");
+            if (dy >= 0) {
+                oldFire[dy] = level.getBlockState(fireAt.above(dy));
+                oldVanilla[dy] = level.getBlockState(vanillaAt.above(dy));
+            }
+        }
         BlockState oldBelow1 = level.getBlockState(fireAt.below()), oldBelow2 = level.getBlockState(vanillaAt.below());
         int sitesBefore = FireSites.all(level).size();
         try {
@@ -71,13 +79,15 @@ public final class FireSelfTest {
         } finally {
             FireSites.douse(level, fireAt);
             for (int dy = 0; dy < 4; dy++) {
-                level.setBlock(fireAt.above(dy), Blocks.AIR.defaultBlockState(), 2);
-                level.setBlock(vanillaAt.above(dy), Blocks.AIR.defaultBlockState(), 2);
+                level.setBlock(fireAt.above(dy), oldFire[dy], 2);
+                level.setBlock(vanillaAt.above(dy), oldVanilla[dy], 2);
             }
-            level.setBlock(fireAt, oldFire, 2);
-            level.setBlock(vanillaAt, oldVanilla, 2);
             level.setBlock(fireAt.below(), oldBelow1, 2);
             level.setBlock(vanillaAt.below(), oldBelow2, 2);
+            boolean restored = true;
+            for (int dy = 0; dy < 4; dy++) restored &= level.getBlockState(fireAt.above(dy)).equals(oldFire[dy])
+                    && level.getBlockState(vanillaAt.above(dy)).equals(oldVanilla[dy]);
+            sink.check("fire test restores both complete columns", restored, "all eight touched block states");
             if (FireSites.all(level).size() != sitesBefore) {
                 // a stray test site would be a leak
                 FireSites.remove(level, fireAt);

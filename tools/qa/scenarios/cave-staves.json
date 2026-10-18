@@ -1,0 +1,87 @@
+{
+  "id": "cave-staves",
+  "region": "skyrim/falkreath",
+  "systems": [
+    "magic",
+    "fx",
+    "caves"
+  ],
+  "conditions": [
+    "staff_item",
+    "emissive_in_fog"
+  ],
+  "camera": "mine-spell-lane",
+  "planReference": "Embershard room3, actual lantern walkway; clear lane from(-275,89,804) toward(-275,90,795)",
+  "scope": "Real held-use client input, staff item use, authoritative target damage and received staff FX. Creative use bypasses charges; not recharge/enchantment acceptance.",
+  "variants": {
+    "flames": {
+      "staff": "staff_of_flames"
+    },
+    "frostbite": {
+      "staff": "staff_of_frostbite"
+    },
+    "sparks": {
+      "staff": "staff_of_sparks"
+    }
+  },
+  "setupCommands": [
+    "skycraft-dev scenario difficulty normal",
+    "gamemode creative @p",
+    "item replace entity @p weapon.mainhand with skycraft:{staff}",
+    "execute as @p at @p run skycraft-dev scenario spawn {run} minecraft:zombie -275 88 798"
+  ],
+  "steps": [
+    {
+      "actions": [
+        "use down"
+      ]
+    },
+    {
+      "waitFor": {
+        "timeoutSeconds": 8,
+        "probeCommands": [
+          "execute as @p at @p run skycraft-dev scenario observe {run}"
+        ],
+        "assertions": [
+          {
+            "file": "world-preview/scenarios/{run}.json",
+            "field": "healthLost",
+            "atLeast": 0.1
+          },
+          {
+            "file": "world-preview/scenarios/{run}.json",
+            "field": "damageFromObserver",
+            "equals": true
+          }
+        ]
+      }
+    },
+    {
+      "actions": [
+        "capture {run}-beam",
+        "use up"
+      ]
+    }
+  ],
+  "assertions": [
+    {
+      "file": "world-preview/scenarios/{run}.json",
+      "field": "healthLost",
+      "atLeast": 0.1
+    },
+    {
+      "file": "world-preview/scenarios/{run}.json",
+      "field": "damageFromObserver",
+      "equals": true
+    }
+  ],
+  "captures": [
+    "{run}-beam"
+  ],
+  "cleanupCommands": [
+    "execute as @p at @p run skycraft-dev scenario cleanup {run}",
+    "gamemode spectator @p",
+    "skycraft-dev scenario difficulty peaceful",
+    "item replace entity @p weapon.mainhand with minecraft:air"
+  ]
+}

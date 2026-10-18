@@ -558,7 +558,7 @@ public final class StoryData {
 
     @Nullable
     static JsonElement read(String path) {
-        try (InputStream in = StoryData.class.getResourceAsStream(path)) {
+        try (InputStream in = com.skycraft.dev.DevResources.open(StoryData.class, path)) {
             if (in == null) return null;
             return JsonParser.parseReader(new InputStreamReader(in, StandardCharsets.UTF_8));
         } catch (Exception e) {

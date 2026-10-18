@@ -287,23 +287,9 @@ public final class SocietyResidents {
             }
         }
 
-        // Pass 3: for generic WORKER / BED / CITIZEN slots, pick next unused non-court resident
-        for (Entry e : candidates) {
-            if (usedIds != null && usedIds.contains(e.id())) continue;
-            if (!isCourtSlot(normJob) && isCourtLeader(e)) continue;
-            if (usedIds != null) usedIds.add(e.id());
-            return e;
-        }
-
-        // Pass 4: any unused resident
-        for (Entry e : candidates) {
-            if (usedIds != null && usedIds.contains(e.id())) continue;
-            if (usedIds != null) usedIds.add(e.id());
-            return e;
-        }
-
-        // Pass 5: deterministic wrap-around if all residents were already used
-        return candidates.get(Math.floorMod(slotIndex, candidates.size()));
+        // Never borrow an unrelated specialist's identity or reuse an already claimed name.
+        // An unmatched slot keeps the ordinary procedural resident identity.
+        return null;
     }
 
     /**

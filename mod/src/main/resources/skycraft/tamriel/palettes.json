@@ -13995,14 +13995,6 @@
           450,
           1400,
           0.55
-        ],
-        "linear": [
-          -387,
-          -413,
-          0.294,
-          -0.956,
-          250,
-          0.5
         ]
       },
       "contexts": {
@@ -14014,10 +14006,6 @@
           {
             "biome": "skycraft:whiterun_plains",
             "weight": 3
-          },
-          {
-            "biome": "skycraft:pale_heath",
-            "weight": 2
           }
         ],
         "upland": [
@@ -14036,10 +14024,6 @@
           {
             "biome": "skycraft:alpine_meadow",
             "weight": 1
-          },
-          {
-            "biome": "skycraft:pale_heath",
-            "weight": 2
           }
         ],
         "marsh": [

@@ -686,8 +686,18 @@ public final class Grammar {
             int sx = res.doorX + offset;
             if (sx > b.bx1 - 1) sx = res.doorX - offset;
             if (sx < b.bx0 + 1) sx = Math.min(b.bx1 - 1, res.doorX + 1);
-            if (!c.recording() && Canvas.open(c.get(sx, 3, dz))) {
+            if (b.use == Use.INN && b.body == Body.RECT) {
+                Props.innFront(c, p, res.doorX, b.bx0, b.bx1, dz, title, kindTitle);
+            } else if (!c.recording() && Canvas.open(c.get(sx, 3, dz))) {
                 Props.shopSign(c, p, b.use.id(), sx, 3, dz, Direction.EAST, title, kindTitle);
+            } else if (!c.recording()) {
+                // the usual spot is taken: hang it anywhere free along the front rather than going without
+                for (int o : new int[]{-1, 2, -2, 3, -3}) {
+                    int x = res.doorX + o;
+                    if (x < b.bx0 + 1 || x > b.bx1 - 1 || !Canvas.open(c.get(x, 3, dz))) continue;
+                    Props.shopSign(c, p, b.use.id(), x, 3, dz, Direction.EAST, title, kindTitle);
+                    break;
+                }
             }
         }
         if (b.banner) {

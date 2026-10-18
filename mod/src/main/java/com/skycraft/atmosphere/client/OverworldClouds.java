@@ -18,8 +18,8 @@ import org.joml.Matrix4f;
  * for {@code minecraft:overworld} with vanilla's own {@link DimensionSpecialEffects.OverworldEffects} and changes only
  * {@link DimensionSpecialEffects#getCloudHeight()}. Vanilla, Embeddium and Oculus/Iris (the {@code cloudHeight}
  * uniform that Complementary's clouds follow) all read the height from there. It is also Skycraft's cloud hook:
- * {@code renderClouds} hands the pass to {@link CloudRenderer}, which declines (vanilla or the shader draws) when
- * a shader pack is active or Skycraft clouds are off.
+ * {@code renderClouds} hands the pass to {@link CloudRenderer}, which suppresses vanilla's mesh when a shader pack
+ * draws volumetric clouds, and declines when Skycraft clouds are off.
  */
 @Mod.EventBusSubscriber(modid = Skycraft.MODID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public final class OverworldClouds {

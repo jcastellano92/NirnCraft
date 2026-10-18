@@ -177,6 +177,15 @@ public final class ShopStock {
             ResourceLocation id = BuiltInRegistries.ITEM.getKey(item);
             if (id != null && ShopTrades.servedAt(id.toString(), gearKey, placeId, ShopType.FOOD)) goods.add(item);
         }
+        // an inn beside hives sells their honey: the place's own produce (see LocalProduce)
+        if (placeId != null && TradeNetwork.localExports(placeId).contains("minecraft:honey_bottle")) {
+            ItemStack honey = new ItemStack(net.minecraft.world.item.Items.HONEY_BOTTLE);
+            honey.setCount(2 + rnd.nextInt(4));
+            add(out, honey);
+            ItemStack comb = new ItemStack(net.minecraft.world.item.Items.HONEYCOMB);
+            comb.setCount(1 + rnd.nextInt(3));
+            add(out, comb);
+        }
         if (goods.isEmpty()) return;
         int entries = 5 + rnd.nextInt(4);
         for (int i = 0; i < entries; i++) {

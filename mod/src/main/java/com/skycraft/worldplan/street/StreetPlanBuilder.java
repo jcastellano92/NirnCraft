@@ -611,7 +611,7 @@ public final class StreetPlanBuilder {
                 for (int i = 0; i < W; i++) {
                     int c = k * W + i;
                     if (target[c] != T_NONE) continue;
-                    if (rp.at(gx0 + i + 0.5, gz0 + k + 0.5, hit) && hit.distance <= hit.halfWidth && hit.span != RoadPlan.TUNNEL) {
+                    if (rp.atAuthored(gx0 + i + 0.5, gz0 + k + 0.5, hit) && hit.distance <= hit.halfWidth && hit.span != RoadPlan.TUNNEL) {
                         target[c] = T_ROAD;
                         if (cost[c] == C_WATER) cost[c] = C_FREE;
                         wet[c] = false;
@@ -1007,7 +1007,7 @@ public final class StreetPlanBuilder {
                 r.edge(nd, targetLine[cell], 1, StreetPlan.PATH, StreetPlan.BEATEN);
             } else if (tg == T_ROAD) {
                 RoadPlan.Hit hit = new RoadPlan.Hit();
-                if (rp.at(px, pz, hit)) {
+                if (rp.atAuthored(px, pz, hit)) {
                     // the node is the road plan vertex itself, so the walk and the road meet in one cell
                     int v = hit.t < 0.5f ? hit.vertex : hit.vertex + 1;
                     int rn = r.node(rp.vx[v], rp.vz[v], (float) Math.floor(rp.vh[v] + 0.002f), StreetPlan.N_ROAD);

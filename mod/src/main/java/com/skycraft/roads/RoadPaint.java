@@ -206,7 +206,10 @@ public class RoadPaint extends Feature<NoneFeatureConfiguration> {
             boolean bridge = span == RoadPlan.BRIDGE;
             boolean tunnel = span == RoadPlan.TUNNEL;
 
-            if (reserved) {
+            // a structure piece's box is much bigger than what it builds (a dungeon portal or a barrow's exterior
+            // reaches 16-24 blocks round its mouth): where the column holds only natural ground the road is carved
+            // as anywhere else, so a trail reaches the door instead of stopping at a wall of rock short of it
+            if (reserved && !naturalColumn(x, z, sy - 1, sy + (tunnel ? 7 : HEADROOM + 1))) {
                 blend(x, z, sy, c, kind, roll, onRoad);
                 return;
             }
@@ -218,11 +221,13 @@ public class RoadPaint extends Feature<NoneFeatureConfiguration> {
             if (tunnel && tunnelColumn(x, z, d, hw, sy, c, kind, roll)) return;
             if (!onRoad) {
                 verge(x, z, d, hw, sy, span, c, kind, roll);
-                // a lantern post just beside the stairs at every 8th row (a landing)
-                if (span == RoadPlan.STAIRS && d <= hw + 1.0f && ((int) Math.floor(hit.along)) % 8 == 0) {
+                // a light just beside the stairs at the landings, standing on real ground: a lamp on maintained roads,
+                // a torch post every second landing on a lane (sometimes burnt out), nothing on a trail's steps
+                int row = (int) Math.floor(hit.along);
+                if (span == RoadPlan.STAIRS && d <= hw + 1.0f && kind <= 2 && row % (kind <= 1 ? 8 : 16) == 0) {
                     BlockState post = kind >= 2 ? RoadStyle.wood(c).fence().defaultBlockState() : wallFor(stoneOf(c).block);
-                    set(x, sy + 1, z, post);
-                    set(x, sy + 2, z, Blocks.LANTERN.defaultBlockState());
+                    BlockState cap = kind <= 1 ? RoadLights.lamp(c == Culture.DUNMER, false) : RoadLights.torch(roll % 10 != 0);
+                    groundedPost(x, z, sy, sy + 1, post, cap);
                 }
                 return;
             }
@@ -299,34 +304,24 @@ public class RoadPaint extends Feature<NoneFeatureConfiguration> {
                     return;
                 }
             }
-            // Periodic cultural roadside furniture (lantern posts & milestones/cairns) on the outer verge
-            if (kind <= 1 && span == RoadPlan.NORMAL && d > hw + 0.45f && d <= hw + 1.15f
+            // Periodic cultural roadside furniture (lantern posts & milestones/cairns) on the outer verge. How much light a
+            // road gets follows what it is worth: highways are lit along their length (densest in the Imperial and
+            // high-elf heartlands), roads on the approaches to towns, lanes only near whoever keeps them up (a farm, a
+            // fort, a settlement), trails not at all
+            if (kind <= 2 && span == RoadPlan.NORMAL && d > hw + 0.45f && d <= hw + 1.15f
                     && Math.abs(groundY - sy) <= 1 && get(x, groundY, z).getFluidState().isEmpty()
-                    && isSupport(get(x, groundY, z))) {
+                    && isSupport(get(x, groundY, z)) && solidBelow(x, z, groundY, 3)) {
                 int arcCell = (int) Math.floor(hit.along);
                 float arcFrac = hit.along - arcCell;
                 // Deterministic single-column anchor along the outer verge
                 if (arcFrac < 0.32f && ((x * 31 + z * 17) & 1) == 0) {
                     Stone st = stoneOf(c);
                     RoadStyle.Wood wood = RoadStyle.wood(c);
-                    int lanternPeriod = kind == 0 ? 36 : 48;
-                    if (arcCell > 8 && arcCell % lanternPeriod == 0 && (kind == 0 || curb(x, z))) {
-                        BlockState baseWall = wallFor(st.block);
-                        BlockState fence = wood.fence().defaultBlockState();
-                        set(x, groundY, z, st.block);
-                        set(x, groundY + 1, z, baseWall);
-                        set(x, groundY + 2, z, fence);
-                        set(x, groundY + 3, z, fence);
-                        set(x, groundY + 4, z, st.slab);
-                        // Hang a lantern toward the road if that neighbour is inside the same chunk
-                        int lx = x - Math.round(hit.dirZ), lz = z + Math.round(hit.dirX);
-                        if ((lx >> 4) == (x >> 4) && (lz >> 4) == (z >> 4) && get(lx, groundY + 3, lz).isAir()) {
-                            set(lx, groundY + 4, lz, wood.trapdoor().defaultBlockState());
-                            set(lx, groundY + 3, lz, Blocks.LANTERN.defaultBlockState().setValue(LanternBlock.HANGING, true));
-                        } else {
-                            set(x, groundY + 4, z, Blocks.LANTERN.defaultBlockState());
-                        }
-                    } else if (arcCell > 12 && arcCell % 72 == 24) {
+                    int lanternPeriod = lampPeriod(kind, c);
+                    boolean lit = kind == 0 || (kind == 1 && curb(x, z)) || (kind == 2 && keptUp(x, z));
+                    if (arcCell > 8 && arcCell % lanternPeriod == 0 && lit) {
+                        lampPost(x, z, groundY, st, wood, kind, c);
+                    } else if (kind <= 1 && arcCell > 12 && arcCell % 72 == 24) {
                         // Cultural roadside milestone / cairn
                         set(x, groundY, z, st.mossy);
                         set(x, groundY + 1, z, st.block);
@@ -335,6 +330,138 @@ public class RoadPaint extends Feature<NoneFeatureConfiguration> {
                     }
                 }
             }
+        }
+
+        /**
+         * A roadside lamp post on the ground block at {@code groundY}: a masonry foot, a fence post, and an arm reaching
+         * over the road's edge with the lantern hanging from it. The arm and the post top are joined explicitly (blocks
+         * written during worldgen never update their shapes). Where the arm cannot be built (chunk edge, something in
+         * the way) the lantern stands on the post's top instead, so it never hangs from nothing.
+         */
+        void lampPost(int x, int z, int groundY, Stone st, RoadStyle.Wood wood, byte kind, Culture c) {
+            for (int y = groundY + 1; y <= groundY + 5; y++) {
+                BlockState s = get(x, y, z);
+                if (!s.isAir() && !clearable(s)) return; // something stands here already: no post
+            }
+            BlockState fence = wood.fence().defaultBlockState();
+            boolean soul = c == Culture.DUNMER;
+            // a maintained road's post has a masonry foot; a lane's is a plain timber post
+            if (kind <= 1) {
+                set(x, groundY, z, st.block);
+                set(x, groundY + 1, z, wallFor(st.block).setValue(WallBlock.UP, true));
+            } else {
+                set(x, groundY + 1, z, fence);
+            }
+            set(x, groundY + 2, z, fence);
+            set(x, groundY + 3, z, fence);
+            // the arm points at the road: the neighbour column nearest the centre line
+            Direction arm = null;
+            float best = hit.distance;
+            for (Direction dir : Direction.Plane.HORIZONTAL) {
+                int nx = x + dir.getStepX(), nz = z + dir.getStepZ();
+                if (!plan.at(nx + 0.5, nz + 0.5, other) || other.distance >= best) continue;
+                best = other.distance;
+                arm = dir;
+            }
+            int ax = arm == null ? x : x + arm.getStepX(), az = arm == null ? z : z + arm.getStepZ();
+            boolean armOk = arm != null && (ax >> 4) == (x >> 4) && (az >> 4) == (z >> 4)
+                    && get(ax, groundY + 3, az).isAir() && get(ax, groundY + 4, az).isAir();
+            if (armOk) {
+                set(x, groundY + 4, z, fence.setValue(fenceSide(arm), true));
+                set(ax, groundY + 4, az, fence.setValue(fenceSide(arm.getOpposite()), true));
+                set(ax, groundY + 3, az, RoadLights.lamp(soul, true));
+                set(x, groundY + 5, z, kind <= 1 ? st.slab : wood.slab().defaultBlockState());
+            } else {
+                set(x, groundY + 4, z, RoadLights.lamp(soul, false));
+            }
+        }
+
+        /**
+         * Blocks between two lamp posts along a road: highways are lit along their whole length, most densely where the
+         * Empire and the high elves pay for it; roads (on town approaches) and lanes (near their keepers) more sparsely.
+         */
+        static int lampPeriod(byte kind, Culture c) {
+            if (kind == 0) {
+                return switch (c) {
+                    case IMPERIAL, ALTMER, BRETON -> 32;
+                    case NORD, DUNMER, ORC, REDGUARD, AKAVIRI -> 40;
+                    default -> 48; // Khajiit, Bosmer, Argonian and the rest light their highways sparingly
+                };
+            }
+            return kind == 1 ? 48 : 56;
+        }
+
+        /**
+         * True near whoever keeps a lane up: a farm or settlement within 60 blocks of its edge, or a fort (the garrison
+         * lights its approach). Elsewhere a lane is nobody's job and goes unlit.
+         */
+        static boolean keptUp(int x, int z) {
+            for (com.skycraft.tamriel.Place p : com.skycraft.tamriel.Places.overlapping(x - 120, z - 120, x + 120, z + 120)) {
+                com.skycraft.tamriel.PlaceType t = p.type();
+                if (!t.isSettlement() && t != com.skycraft.tamriel.PlaceType.FORT) continue;
+                double edge = Math.sqrt(p.distSqr(x, z)) - p.radius();
+                if (edge <= (t == com.skycraft.tamriel.PlaceType.FORT ? 90 : 60)) return true;
+            }
+            return false;
+        }
+
+        /** The connection property of a fence for its side facing {@code d}. */
+        static net.minecraft.world.level.block.state.properties.BooleanProperty fenceSide(Direction d) {
+            return switch (d) {
+                case NORTH -> CrossCollisionBlock.NORTH;
+                case SOUTH -> CrossCollisionBlock.SOUTH;
+                case EAST -> CrossCollisionBlock.EAST;
+                default -> CrossCollisionBlock.WEST;
+            };
+        }
+
+        /** True when the {@code depth} blocks under {@code y} are all solid support (no ledge over a hollow). */
+        boolean solidBelow(int x, int z, int y, int depth) {
+            for (int k = 1; k <= depth; k++) {
+                BlockState s = get(x, y - k, z);
+                if (!isSupport(s)) return false;
+            }
+            return true;
+        }
+
+        /**
+         * A short post with a cap (a lantern) whose top stands at {@code topY}, built up from the real ground of the
+         * column. The ground is searched downwards from {@code topY}; when it is more than three blocks below the top
+         * (a post would hang over a drop) or above the top (the bank is higher), nothing is built at all.
+         */
+        void groundedPost(int x, int z, int sy, int topY, BlockState post, BlockState cap) {
+            int ground = Integer.MIN_VALUE;
+            for (int y = topY + 1; y >= topY - 4; y--) {
+                BlockState s = get(x, y, z);
+                if (isSupport(s) && s.getFluidState().isEmpty()) {
+                    ground = y;
+                    break;
+                }
+            }
+            if (ground == Integer.MIN_VALUE || ground >= topY || topY - ground > 3 || !solidBelow(x, z, ground, 2)) return;
+            for (int y = ground + 1; y <= topY + 1; y++) {
+                BlockState s = get(x, y, z);
+                if (!s.isAir() && !clearable(s)) return;
+            }
+            for (int y = ground + 1; y <= topY; y++) set(x, y, z, post);
+            set(x, topY + 1, z, cap);
+        }
+
+        /**
+         * True when every block of the column from {@code y0} to {@code y1} is natural terrain (rock, soil, sand, snow,
+         * plants, trees, air): nothing a structure built stands there, so a road may be carved through it even inside
+         * a structure piece's box. Water counts as built (a structure's moat or a well is never drained).
+         */
+        boolean naturalColumn(int x, int z, int y0, int y1) {
+            for (int y = Math.max(minY, y0); y <= Math.min(maxY, y1); y++) {
+                BlockState s = get(x, y, z);
+                if (s.isAir()) continue;
+                if (!s.getFluidState().isEmpty()) return false;
+                if (isGround(s) || clearable(s) || s.is(BlockTags.LOGS) || s.is(BlockTags.LEAVES) || s.is(Blocks.SNOW)
+                        || s.is(Blocks.ICE) || s.is(Blocks.BLUE_ICE) || s.is(BlockTags.BASE_STONE_OVERWORLD)) continue;
+                return false;
+            }
+            return true;
         }
 
         /** A column inside a structure piece: only a plain ground top with free air above becomes road. */
@@ -386,13 +513,15 @@ public class RoadPaint extends Feature<NoneFeatureConfiguration> {
                 if (halfStep) set(x, sy + 1, z, stone ? st.slab : wood.slab().defaultBlockState());
                 return;
             }
-            // parapet: wall or fence, connected to the rail columns beside it, a taller post with a lantern every 8
+            // parapet: wall or fence, connected to the rail columns beside it; a taller lamp post at intervals set by the
+            // road's importance (a trail's footbridge goes unlit)
             BlockState r = stone ? wallFor(st.block) : wood.fence().defaultBlockState();
             r = connect(r, x, z);
             set(x, sy + 1, z, r);
-            if (((int) Math.floor(hit.along)) % 8 == 0) {
+            int lampEvery = kind <= 1 ? 8 : kind == 2 ? 16 : 0;
+            if (lampEvery > 0 && ((int) Math.floor(hit.along)) % lampEvery == 0) {
                 set(x, sy + 2, z, stone ? wallFor(st.block) : wood.fence().defaultBlockState());
-                set(x, sy + 3, z, Blocks.LANTERN.defaultBlockState());
+                set(x, sy + 3, z, RoadLights.lamp(c == Culture.DUNMER, false));
             }
         }
 
@@ -551,7 +680,9 @@ public class RoadPaint extends Feature<NoneFeatureConfiguration> {
             float from = plan.varc[plan.spanFrom[span]], len = plan.varc[plan.spanTo[span]] - from;
             float at = hit.along - from;
             boolean portal = at < 2.5f || len - at < 2.5f;
-            int height = kind <= 1 ? 4 : 3;
+            // every bore is tall enough to walk through on a slope (the step between two rows eats a block of the
+            // headroom of the lower one): 4 blocks for lanes and trails, 5 for highways and roads
+            int height = kind <= 1 ? 5 : 4;
             Stone st = stoneOf(c);
             BlockState wall = roll % 5 == 0 ? st.mossy : st.block;
             float reach = hw + (portal ? 2.0f : 1.0f);
@@ -560,6 +691,9 @@ public class RoadPaint extends Feature<NoneFeatureConfiguration> {
             set(x, sy, z, stairFloor(sy, c, kind, RoadStyle.surface(c, kind, roll)));
             int top = height + (portal ? 2 : 1);
             boolean inside = d <= hw;
+            // the lanterns sit in a recess above the ceiling line, one every 8 blocks on the centre line, so nothing
+            // hangs into the bore
+            boolean lamp = inside && ((int) Math.floor(hit.along)) % 8 == 0 && d < 0.8f + (portal ? hw : 0f);
             for (int y = sy + 1; y <= sy + top && y <= maxY; y++) {
                 BlockState s;
                 if (inside) {
@@ -576,11 +710,42 @@ public class RoadPaint extends Feature<NoneFeatureConfiguration> {
                 // the lintel course of the portal frame
                 set(x, sy + height + 2, z, wall);
             }
-            // a lantern every 8 blocks under the ceiling on the centre line; both sides at the portals
-            if (inside && ((int) Math.floor(hit.along)) % 8 == 0 && d < 0.8f + (portal ? hw : 0f)) {
-                set(x, sy + height, z, Blocks.LANTERN.defaultBlockState().setValue(LanternBlock.HANGING, true));
+            if (lamp && kind <= 1 && sy + height + 2 <= maxY) {
+                set(x, sy + height + 2, z, wall);
+                set(x, sy + height + 1, z, RoadLights.lamp(c == Culture.DUNMER, true));
             }
+            // lesser bores are lit by torches on the walls: a lane's tended, a trail's sparse and often burnt out
+            if (kind >= 2 && inside && d > hw - 1.0f) wallTorch(x, z, sy, kind, roll);
             return true;
+        }
+
+        /**
+         * A torch on the bore's wall at an edge column of a lane or trail tunnel: every 10 blocks on a lane, every 14 on a
+         * trail, alternating sides. Nobody tends a trail's torches, so about half of them are found burnt out (and a
+         * lane's one in ten); a passer-by can light one with a use.
+         */
+        void wallTorch(int x, int z, int sy, byte kind, int roll) {
+            int every = kind == 2 ? 10 : 14;
+            int cell = (int) Math.floor(hit.along);
+            if (cell % every != 0) return;
+            // the wall: the neighbour column farthest from the centre line, outside the bore
+            Direction out = null;
+            float far = hit.halfWidth;
+            for (Direction dir : Direction.Plane.HORIZONTAL) {
+                int nx = x + dir.getStepX(), nz = z + dir.getStepZ();
+                float dn = plan.at(nx + 0.5, nz + 0.5, other) ? other.distance : Float.MAX_VALUE;
+                if (dn > far) {
+                    far = dn;
+                    out = dir;
+                }
+            }
+            if (out == null) return;
+            // which side of the road the wall is on; torches alternate between the two
+            float side = hit.dirX * out.getStepZ() - hit.dirZ * out.getStepX();
+            boolean left = side > 0;
+            if (left != ((cell / every) % 2 == 0)) return;
+            boolean lit = kind == 2 ? roll % 10 != 0 : roll % 2 == 0;
+            set(x, sy + 2, z, RoadLights.wallTorch(out.getOpposite(), lit));
         }
 
         // ---------------------------------------------------------------- shared pieces

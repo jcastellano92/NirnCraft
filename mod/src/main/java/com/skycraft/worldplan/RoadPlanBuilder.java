@@ -709,6 +709,10 @@ public final class RoadPlanBuilder {
          * between two dry vertices (checked every block), so no crossing goes unseen.
          */
         List<double[]> withCrossings(List<double[]> pts) {
+            // Hydrology must see the exact geometry that is written to the bake.
+            // Late 1/16-block rounding can otherwise move a dry trail into a stream.
+            pts = pts.stream().map(q -> new double[]{Math.round(q[0]*16)/16.0,
+                    Math.round(q[1]*16)/16.0}).toList();
             List<double[]> out = new ArrayList<>(pts.size() + 8);
             out.add(pts.get(0));
             boolean lastWet = wet(pts.get(0));
@@ -720,6 +724,8 @@ public final class RoadPlanBuilder {
                     for (int k = 1; k < len; k++) {
                         double t = k / len;
                         double[] q = {a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t};
+                        q[0] = Math.round(q[0]*16)/16.0;
+                        q[1] = Math.round(q[1]*16)/16.0;
                         if (wet(q)) {
                             out.add(q);
                             break;
@@ -926,6 +932,14 @@ public final class RoadPlanBuilder {
         float[] g, w, width, near, h;
         boolean[] lakeSea, sb, skip;
         byte[] span;
+        /**
+         * {@code edgeWet[i]}: a block between vertex i and i + 1 is in water. The painter takes the span of the nearer
+         * vertex, so a dry vertex beside a bridge whose edge still dips into the stream must carry the bridge too
+         * ({@link Profile}), or the road runs into the water there and stops.
+         */
+        boolean[] edgeWet;
+        float[] edgeWater, edgeWidth, edgeDepth;
+        boolean[] edgeLakeSea;
 
         Poly(List<double[]> pts) {
             set(pts, null);
@@ -954,6 +968,25 @@ public final class RoadPlanBuilder {
 
         void sampleAll(Run r) {
             for (int i = 0; i < n; i++) sample(r, i);
+            sampleEdges(r);
+        }
+
+        /** Marks the edges that have water on them (checked every block). */
+        void sampleEdges(Run r) {
+            edgeWet = new boolean[n];
+            edgeWater = new float[n]; edgeWidth = new float[n]; edgeDepth = new float[n]; edgeLakeSea = new boolean[n];
+            for (int i = 0; i + 1 < n; i++) {
+                double dx = x[i + 1] - x[i], dz = z[i + 1] - z[i], len = Math.hypot(dx, dz);
+                double ux=dx/len, uz=dz/len;
+                for (int k = 1; k < len && !edgeWet[i]; k++) {
+                    r.terrain.sample((int) Math.floor(x[i] + ux * k), (int) Math.floor(z[i] + uz * k), r.sample, r.col);
+                    edgeWet[i] = !Float.isNaN(r.col.water);
+                    if(edgeWet[i]) {
+                        edgeWater[i]=r.col.water; edgeWidth[i]=r.col.waterWidth;
+                        edgeDepth[i]=r.col.water-r.col.ground; edgeLakeSea[i]=r.col.lake || r.col.sea;
+                    }
+                }
+            }
         }
 
         private void sample(Run r, int i) {
@@ -998,6 +1031,7 @@ public final class RoadPlanBuilder {
                     sb[i] = true;
                 }
             }
+            sampleEdges(r);
         }
     }
 }

@@ -49,6 +49,7 @@ public final class PackSelfTest {
     private static final GameProfile PROFILE_A = new GameProfile(UUID.nameUUIDFromBytes("skycraft-pack-selftest-a".getBytes()), "[PackTestA]");
     private static final GameProfile PROFILE_B = new GameProfile(UUID.nameUUIDFromBytes("skycraft-pack-selftest-b".getBytes()), "[PackTestB]");
     private static final GameProfile PROFILE_C = new GameProfile(UUID.nameUUIDFromBytes("skycraft-pack-selftest-c".getBytes()), "[PackTestC]");
+    private static final ThreadLocal<java.util.Set<UUID>> PRESERVED_DROPS=new ThreadLocal<>();
 
     private PackSelfTest() {}
 
@@ -97,6 +98,11 @@ public final class PackSelfTest {
         ServerLevel level = server.overworld();
         FakePlayer a = new FakePlayer(level, PROFILE_A);
         connect(server, a);
+        var at=OverflowSelfTest.testAnchor(level);
+        a.moveTo(at.getX()+0.5,at.getY()+1,at.getZ()+0.5);
+        var existing=new java.util.HashSet<UUID>();
+        for(var e:level.getEntitiesOfClass(ItemEntity.class,new AABB(a.blockPosition()).inflate(16))) existing.add(e.getUUID());
+        PRESERVED_DROPS.set(existing);
         try {
             roundTrip(server, level, a, c);
             virtualSlots(level, a, c);
@@ -118,6 +124,7 @@ public final class PackSelfTest {
             Pack.clear(a);
             a.containerMenu = a.inventoryMenu;
             sweepDrops(level, a);
+            PRESERVED_DROPS.remove();
         }
         return new Report(c.passed, c.total, c.lines, c.failed);
     }
@@ -129,6 +136,7 @@ public final class PackSelfTest {
 
     private static void sweepDrops(ServerLevel level, ServerPlayer p) {
         for (ItemEntity e : level.getEntitiesOfClass(ItemEntity.class, new AABB(p.blockPosition()).inflate(16))) {
+            if(PRESERVED_DROPS.get()!=null && PRESERVED_DROPS.get().contains(e.getUUID())) continue;
             if (e.getItem().hasTag() && (e.getItem().getTag().contains("pack_test") || e.getItem().getTag().contains("slot_t")
                     || e.getItem().getTag().contains("chest_t"))) e.discard();
             else if (e.getItem().is(Items.ARROW)) e.discard();

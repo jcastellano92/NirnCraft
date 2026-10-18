@@ -265,6 +265,10 @@ committed.
 
 ## Testing tiers
 
+For the packaged Prism client, use the [live world preview guide](LIVE-WORLD-PREVIEW.md).
+`py -3 tools/dev/live_world.py status` checks the existing game/window and world before launching another process.
+The preview supports JSON snapshots, shader reloads, bounded world regeneration and checked bake installation.
+
 | Tier | Command | Speed | What it covers |
 | --- | --- | --- | --- |
 | **Tier 0 — Unit tests** | `cd mod && ./gradlew test` or `tools\qa\qa.ps1 -Unit` | < 5 s | Pure-Java JUnit 5 suite (`mod/src/test/java/com/skycraft/**`): `RoadPlan` / `Profile` / `PlanGround`, `ScenePlan`, `StreetPlan`, `TamrielMap` / `Places` / `Regions` / `Beyond`, `Bake` input hashes, and `WorldSheets`. No Forge or Minecraft server boot. |

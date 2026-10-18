@@ -840,7 +840,7 @@ final class Paver {
     // ------------------------------------------------------------------ features
 
     private static boolean isPostMaterial(BlockState s) {
-        return s.is(Blocks.SPRUCE_FENCE) || s.is(Blocks.STRIPPED_SPRUCE_LOG) || s.is(Blocks.LANTERN)
+        return s.is(Blocks.SPRUCE_FENCE) || s.is(Blocks.STRIPPED_SPRUCE_LOG) || s.is(Blocks.LANTERN) || s.getBlock() instanceof RoadLights.DuskLantern
                 || s.is(Blocks.MOSSY_STONE_BRICKS) || s.is(Blocks.CHISELED_STONE_BRICKS) || s.getBlock() instanceof WallSignBlock;
     }
 
@@ -874,12 +874,12 @@ final class Paver {
         BlockState gs = level.getBlockState(g);
         if (gs.is(Blocks.DIRT_PATH)) return 0; // don't block another road
         BlockPos p1 = g.above(), p2 = p1.above(), p3 = p2.above();
-        if (level.getBlockState(p3).is(Blocks.LANTERN)) return 0; // already built
+        if (level.getBlockState(p3).is(Blocks.LANTERN) || level.getBlockState(p3).getBlock() instanceof RoadLights.DuskLantern) return 0; // already built
         if (!freeFor(level, p1) || !freeFor(level, p2) || !freeFor(level, p3)) return 0;
         BlockState fence = Blocks.SPRUCE_FENCE.defaultBlockState();
         level.setBlock(p1, fence, QUIET);
         level.setBlock(p2, fence, QUIET);
-        level.setBlock(p3, Blocks.LANTERN.defaultBlockState(), QUIET);
+        level.setBlock(p3, RoadLights.lamp(RoadStyle.cultureAt(f.x, f.z) == com.skycraft.tamriel.settlement.Culture.DUNMER, false), QUIET);
         return 3;
     }
 

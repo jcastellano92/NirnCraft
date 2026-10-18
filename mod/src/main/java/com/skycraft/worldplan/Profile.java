@@ -74,15 +74,46 @@ final class Profile {
             t[i] = sum / wsum;
             if (!Float.isNaN(p.near[i]) && p.near[i] + 1f <= p.g[i]) lb[i] = p.near[i] + 1f;
         }
-        // 2b. a bridge's abutments: the dry vertex either side carries the deck onto the bank
+        // Cover every wet edge, including a narrow channel between two dry vertices.
+        // Nearest-vertex span lookup means BOTH endpoints must carry the crossing.
+        if(p.edgeWet!=null && p.edgeWater!=null) for(i=0;i+1<n;i++) {
+            if(!p.edgeWet[i]) continue;
+            byte type=waterKind(span[i])?span[i]:waterKind(span[i+1])?span[i+1]
+                    :!p.edgeLakeSea[i] && trail && p.edgeDepth[i]<=PlanRouter.FORD_DEPTH
+                    && p.s[i+1]-p.s[i]<=PlanRouter.FORD_WIDTH?RoadPlan.FORD
+                    :!p.edgeLakeSea[i] && p.edgeWidth[i]<PlanRouter.CULVERT_WIDTH
+                    && p.s[i+1]-p.s[i]<=10?RoadPlan.CULVERT:RoadPlan.BRIDGE;
+            for(int k=i;k<=i+1;k++) {
+                if(waterKind(span[k])) continue;
+                span[k]=type;
+                if(type==RoadPlan.FORD) t[k]=Math.max(t[k],p.edgeWater[i]-1f);
+                else {
+                    lb[k]=Math.max(lb[k],p.edgeWater[i]+(type==RoadPlan.CULVERT?2f:clearance));
+                    t[k]=Math.max(t[k],lb[k]);
+                }
+            }
+        }
+        // 2b. a crossing's abutments: the dry vertex either side carries the deck onto the bank (a bridge or a culvert), or
+        // the ford, where the edge to it still has water on it (the painter takes the span of the nearer vertex, so a
+        // dry vertex beside the crossing would otherwise leave the last wet blocks as plain road running into the stream)
         for (i = 0; i < n; i++) {
-            if (span[i] != RoadPlan.BRIDGE || Float.isNaN(p.w[i])) continue;
-            float deck = p.w[i] + clearance;
+            if (Float.isNaN(p.w[i])) continue;
+            byte type = span[i];
+            if (type != RoadPlan.BRIDGE && type != RoadPlan.CULVERT && type != RoadPlan.FORD) continue;
             for (int k = i - 1; k <= i + 1; k += 2) {
                 if (k < 0 || k >= n || !Float.isNaN(p.w[k])) continue;
-                span[k] = RoadPlan.BRIDGE;
-                lb[k] = Math.max(lb[k], deck);
-                t[k] = Math.max(t[k], deck);
+                int edge = Math.min(i, k);
+                // a bridge always carries its abutment; the others only where the edge really has water on it
+                if (type != RoadPlan.BRIDGE && (p.edgeWet == null || !p.edgeWet[edge])) continue;
+                if (span[k] != RoadPlan.NORMAL && span[k] != type) continue;
+                span[k] = type;
+                if (type == RoadPlan.FORD) {
+                    t[k] = Math.max(t[k], Math.max(p.g[k], p.w[i] - 1f));
+                } else {
+                    float deck = p.w[i] + (type == RoadPlan.CULVERT ? 2f : clearance);
+                    lb[k] = Math.max(lb[k], deck);
+                    t[k] = Math.max(t[k], deck);
+                }
             }
         }
         // 3. grade-capped fit: mean of the lower and upper envelopes
@@ -145,6 +176,10 @@ final class Profile {
 
     private static boolean dryKind(byte t) {
         return t == RoadPlan.NORMAL || t == RoadPlan.CUT || t == RoadPlan.FILL;
+    }
+
+    private static boolean waterKind(byte t) {
+        return t==RoadPlan.BRIDGE || t==RoadPlan.CULVERT || t==RoadPlan.FORD;
     }
 
     private static float clamp(float v, float lo, float hi) {

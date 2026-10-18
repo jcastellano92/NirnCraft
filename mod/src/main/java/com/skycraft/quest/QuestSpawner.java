@@ -370,16 +370,29 @@ public final class QuestSpawner {
     /** The surface at {@code pos}, or a nearby loaded land column if that's water. */
     private static BlockPos landNear(ServerLevel level, BlockPos pos, RandomSource r) {
         BlockPos first = surface(level, pos.getX(), pos.getZ());
-        if (level.getFluidState(first.below()).isEmpty()) return first;
+        if (level.getFluidState(first.below()).isEmpty() && !roofy(level, first)) return first;
         for (int i = 0; i < 32; i++) {
             int x = pos.getX() + r.nextInt(81) - 40;
             int z = pos.getZ() + r.nextInt(81) - 40;
             BlockPos probe = new BlockPos(x, pos.getY(), z);
             if (!level.isLoaded(probe)) continue;
             BlockPos s = surface(level, x, z);
-            if (level.getFluidState(s.below()).isEmpty()) return s;
+            if (level.getFluidState(s.below()).isEmpty() && !roofy(level, s)) return s;
         }
         return first;
+    }
+
+    /**
+     * Whether the surface at {@code s} is the top of a building (the heightmap sees roofs, beams and awnings as the
+     * ground), so a quest creature or target is never put on somebody's roof or a market awning.
+     */
+    private static boolean roofy(Level level, BlockPos s) {
+        net.minecraft.world.level.block.state.BlockState below = level.getBlockState(s.below());
+        if (below.getBlock() instanceof net.minecraft.world.level.block.StairBlock
+                || below.getBlock() instanceof net.minecraft.world.level.block.SlabBlock
+                || below.getBlock() instanceof net.minecraft.world.level.block.WoolCarpetBlock) return true;
+        return below.is(net.minecraft.tags.BlockTags.PLANKS) || below.is(net.minecraft.tags.BlockTags.LOGS)
+                || below.is(net.minecraft.tags.BlockTags.WOOL) || below.is(net.minecraft.tags.BlockTags.WOODEN_FENCES);
     }
 
     /** A free spot inside the structure that starts in the chunk at {@code pos}. */
@@ -437,7 +450,7 @@ public final class QuestSpawner {
             BlockPos probe = new BlockPos(x, base.getY(), z);
             if (!level.isLoaded(probe)) continue;
             BlockPos s = surface(level, x, z);
-            if (Math.abs(s.getY() - base.getY()) <= 6 && level.getFluidState(s.below()).isEmpty()) return s;
+            if (Math.abs(s.getY() - base.getY()) <= 6 && level.getFluidState(s.below()).isEmpty() && !roofy(level, s)) return s;
         }
         return base;
     }

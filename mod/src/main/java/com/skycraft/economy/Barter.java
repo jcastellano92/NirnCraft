@@ -58,6 +58,8 @@ public final class Barter {
         }
         Shop shop = Shop.of(npc, player);
         sendState(player, npc, shop, Merchants.greeting(npc), true);
+        // the merchant stays put and faces the player while the shop is open; closing it ends the conversation
+        Dialogue.hold(player, npc);
     }
 
     /** Returns the regional/faction attitude price multiplier for {@code player} trading with {@code npc}. */

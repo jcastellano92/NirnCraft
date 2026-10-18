@@ -112,7 +112,7 @@ public final class GuildHalls {
         Props.clutter(c, p, cx - 1, y + 1, deskZ, Direction.NORTH, FurnitureKind.CLUTTER_CANDELABRA);
         Props.clutter(c, p, cx + 1, y + 1, deskZ, Direction.NORTH,
                 theme == Theme.ARCANE || theme == Theme.SACRED ? FurnitureKind.CLUTTER_LEDGER : FurnitureKind.CLUTTER_GOBLETS);
-        Props.throne(c, p, cx, y, r.z1() - 1, Direction.SOUTH);
+        c.keepClear(cx, y, y + 1, r.z1() - 1);
         c.anchor(AnchorType.GUILD_LEADER, cx, y, r.z1() - 1);
         // the colours on the back wall
         int back = r.z1() + 1;

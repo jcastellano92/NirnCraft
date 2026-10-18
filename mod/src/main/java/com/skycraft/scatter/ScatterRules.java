@@ -108,7 +108,7 @@ public final class ScatterRules {
     private ScatterRules() {}
 
     private static JsonObject read(String path) {
-        try (InputStream in = ScatterRules.class.getResourceAsStream(path)) {
+        try (InputStream in = com.skycraft.dev.DevResources.open(ScatterRules.class, path)) {
             if (in == null) return new JsonObject();
             return JsonParser.parseReader(new InputStreamReader(in, StandardCharsets.UTF_8)).getAsJsonObject();
         } catch (Exception e) {

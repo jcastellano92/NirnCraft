@@ -252,9 +252,14 @@ public class DungeonStructure extends Structure {
         long seed = random.nextLong() ^ pl.id().hashCode();
         Direction rolled = Direction.Plane.HORIZONTAL.getRandomDirection(random);
         // Labyrinthian's stair opens towards the city's main street
-        // a dungeon's mouth opens downhill, never into the slope above it
+        // a dungeon's mouth opens towards the trail that leads to it; with no trail, downhill, never into the slope above it
         int h0 = theme.underground() && !theme.hasUndercroft() && special != Special.LABYRINTHIAN ? surface(ctx, pl.x(), pl.z()) : WATER;
-        Direction out = special == Special.LABYRINTHIAN ? Direction.NORTH : h0 != WATER ? downhill(ctx, pl.x(), pl.z(), h0, rolled) : rolled;
+        com.skycraft.worldplan.TrailEnds.Arrival arrival = com.skycraft.worldplan.TrailEnds.of(pl.id());
+        Direction toTrail = arrival == null ? null
+                : Math.abs(arrival.x() - pl.x()) + Math.abs(arrival.z() - pl.z()) < 4 ? null
+                : Direction.getNearest(arrival.x() - pl.x(), 0, arrival.z() - pl.z());
+        Direction out = special == Special.LABYRINTHIAN ? Direction.NORTH : toTrail != null ? toTrail
+                : h0 != WATER ? downhill(ctx, pl.x(), pl.z(), h0, rolled) : rolled;
         int fl = flavor >= 0 ? flavor : randomFlavor(random);
         Kit placeKit = Kit.forCulture(pl.culture());
         Kit k = placeKit != null ? placeKit : regionalKit ? Cultures.kitFor(TamrielMap.region(pl.x(), pl.z()), pl.x(), pl.z()) : kit;
@@ -263,9 +268,11 @@ public class DungeonStructure extends Structure {
         int minY = ctx.heightAccessor().getMinBuildHeight();
         boolean pad = terrainAdaptation() != TerrainAdjustment.NONE;
 
-        // stand on dry land: nudge off water (shore sites keep their spot)
+        // stand on dry land: nudge off water (shore sites keep their spot). A place a trail leads to keeps its spot on
+        // dry ground even where the noise ground sits deep in a cut (the trail ends exactly here)
         int x = pl.x(), z = pl.z();
         int h = surface(ctx, x, z);
+        if (h == WATER && arrival != null && !realWater(ctx, x, z)) h = ground(ctx, x, z);
         if (h == WATER && !theme.coastal()) {
             int[] dry = nearestDry(ctx, x, z, 56);
             if (dry != null) {
@@ -423,6 +430,17 @@ public class DungeonStructure extends Structure {
             if (s.coastDistance > 32 && land < s.elevation - 24) return WATER;
         }
         return land;
+    }
+
+    /** True when (x, z) is really under water (sea, or a map lake or river), not merely a deep cut in the ground. */
+    static boolean realWater(GenerationContext ctx, int x, int z) {
+        ChunkGenerator gen = ctx.chunkGenerator();
+        int land = gen.getBaseHeight(x, z, Heightmap.Types.OCEAN_FLOOR_WG, ctx.heightAccessor(), ctx.randomState());
+        int top = gen.getBaseHeight(x, z, Heightmap.Types.WORLD_SURFACE_WG, ctx.heightAccessor(), ctx.randomState());
+        if (top > land) return true;
+        com.skycraft.tamriel.MapSample s = new com.skycraft.tamriel.MapSample();
+        TamrielMap.sample(x, z, s);
+        return s.inWater() && land < s.waterLevel;
     }
 
     /** The back exit's surface probe: noise heights only (the planner asks for one or two columns). */

@@ -28,10 +28,9 @@ public final class SurvivalDialogue {
     private static void addOptions(ServerPlayer player, LivingEntity npc, List<DialogueOption> out) {
         if (Innkeepers.isInnkeeper(npc)) {
             if (Innkeepers.hasOwnRoom(player, npc)) {
-                out.add(new DialogueOption("survival.rent", Component.translatable("dialogue.skycraft.survival.rent_already"), 95, Innkeepers::rent));
+                out.add(DialogueOption.disabled("survival.rent", Component.translatable("dialogue.skycraft.survival.rent_already"), 95));
             } else if (Innkeepers.isFullyBooked(player, npc)) {
-                out.add(new DialogueOption("survival.rent", Component.translatable("dialogue.skycraft.survival.rent_full")
-                        .withStyle(net.minecraft.ChatFormatting.DARK_GRAY), 95, Innkeepers::rent));
+                out.add(DialogueOption.disabled("survival.rent", Component.translatable("dialogue.skycraft.survival.rent_full"), 95));
             } else {
                 out.add(new DialogueOption("survival.rent", Component.translatable("dialogue.skycraft.survival.rent",
                         SurvivalConfig.ROOM_PRICE.get()), 95, Innkeepers::rent));

@@ -59,7 +59,8 @@ public final class FarFireRenderer {
     private FarFireRenderer() {}
 
     public static String stats() {
-        return "far fire: " + lastSites + " sites, " + lastQuads + " quads, " + String.format(java.util.Locale.ROOT, "%.3f", lastNanos / 1e6) + " ms";
+        return "far fire: " + lastSites + " sites, " + lastQuads + " quads, " + String.format(java.util.Locale.ROOT, "%.3f", lastNanos / 1e6) + " ms"
+                +" sharedSmoke="+ShaderCheck.sharedSmoke()+" volumeSources="+com.skycraft.atmosphere.client.SmokeSourceTexture.activeSources();
     }
 
     public static void render(RenderLevelStageEvent event) {
@@ -119,15 +120,22 @@ public final class FarFireRenderer {
             // ---- smoke (sorted far to near over all sites), then glow and flames (additive, order does not matter)
             boolean smoke = FireConfig.FAR_SMOKE.get();
             if (smoke) {
-                for (int i = 0; i < n; i++) smokeOf(CANDIDATES.get(i), DIST.get(i), cp, time, daylight, maxDist);
+                boolean shared=ShaderCheck.sharedSmoke();
+                for (int i = 0; i < n; i++) {
+                    var site=CANDIDATES.get(i);
+                    if(!shared || site.blast || !com.skycraft.atmosphere.client.SmokeSourceTexture.containsFire(site.x,site.z))
+                        smokeOf(site, DIST.get(i), cp, time, daylight, maxDist);
+                }
                 quads += emitPuffs(m, cp, left, up, maxDist);
             }
-            VertexConsumer glow = BUFFERS.getBuffer(FireRenderTypes.GLOW);
+            var glowType=shaders?FireRenderTypes.GLOW:FireRenderTypes.GLOW_NATIVE;
+            var flameType=shaders?FireRenderTypes.FLAME:FireRenderTypes.FLAME_NATIVE;
+            VertexConsumer glow = BUFFERS.getBuffer(glowType);
             for (int i = 0; i < n; i++) quads += glowOf(glow, m, cp, left, up, CANDIDATES.get(i), DIST.get(i), time, daylight);
-            BUFFERS.endBatch(FireRenderTypes.GLOW);
-            VertexConsumer flame = BUFFERS.getBuffer(FireRenderTypes.FLAME);
+            BUFFERS.endBatch(glowType);
+            VertexConsumer flame = BUFFERS.getBuffer(flameType);
             for (int i = 0; i < n; i++) quads += flamesOf(flame, m, cp, hx, hz, CANDIDATES.get(i), DIST.get(i), time);
-            BUFFERS.endBatch(FireRenderTypes.FLAME);
+            BUFFERS.endBatch(flameType);
         } finally {
             if (!shaders) {
                 RenderSystem.setShaderFogStart(fogStart);
@@ -254,27 +262,31 @@ public final class FarFireRenderer {
         float env = envelope(v, time);
         if (env <= 0.01f) return;
         int smoke = Math.max(1, v.smoke);
-        int n = 5 + 3 * smoke;
+        int n = 12 + 10 * smoke;
         // the column: starts above the flames, rises 20 / 40 / 60 blocks and leans downwind
-        float base = v.height * 0.8f;
-        float rise = 14f + 18f * smoke + v.height * 0.8f;
+        float base = com.skycraft.fire.FirePlume.base(v.height);
+        float rise = com.skycraft.fire.FirePlume.height(v.height,smoke);
         if (v.blast) rise = 10f + v.radius * 3f;
-        float lean = 0.34f;
         double speed = v.blast ? 0.020 : 0.0045 + 0.0012 * smoke;
-        float baseSize = (v.blast ? v.radius * 0.9f : 1.5f + v.height * 0.30f) * (0.8f + 0.25f * Math.min(2f, v.intensity));
+        float plumeRadius=com.skycraft.fire.FirePlume.radius(v.height,v.intensity);
+        float windX=com.skycraft.atmosphere.client.ClientWeather.windX(),windZ=com.skycraft.atmosphere.client.ClientWeather.windZ();
         double tNear = Math.max(1.0, d);
         for (int i = 0; i < n && puffs < MAX_PUFFS; i++) {
             double u = (time * speed + (double) i / n + (v.id * 0.37)) % 1.0;
             if (v.blast) u = Math.min(0.999, (time - v.born) * speed * 1.6 + (double) i / n * 0.35);
             float uf = (float) u;
-            float size = baseSize * (0.7f + 1.9f * uf);
+            float size = v.blast?v.radius*(0.7f+1.9f*uf):plumeRadius*2f*(0.25f+1.6f*Mth.sqrt(uf));
             size = (float) Math.max(size, tNear * 0.011);
-            double x = v.x + lean * uf * rise + Math.sin(time * 0.021 + i * 1.7 + v.id) * size * 0.25;
+            float drift=uf*rise*(0.18f+0.45f*uf);
+            double x = v.x + windX*drift + Math.sin(time * 0.021 + i * 1.7 + v.id) * size * 0.12;
             double y = v.y + base + uf * rise;
-            double z = v.z + 0.12 * uf * rise + Math.cos(time * 0.017 + i * 2.3) * size * 0.25;
+            double z = v.z + windZ*drift + Math.cos(time * 0.017 + i * 2.3) * size * 0.12;
             float fadeIn = Mth.clamp(uf / 0.10f, 0f, 1f);
-            float a = env * fadeIn * (float) Math.pow(1.0 - uf, 0.9) * (0.45f + 0.09f * smoke);
-            if (a <= 0.01f) continue;
+            // Optical alpha scales with slice length. More overlapping slices
+            // form a connected soft column without turning it into a black wall.
+            float sliceAlpha=1f-(float)Math.exp(-0.03f*(0.5f+0.5f*smoke)*Math.min(2f,v.intensity)*rise/n);
+            float a = env * fadeIn * (float) Math.pow(1.0 - uf, 0.9) * sliceAlpha;
+            if (a <= 0.0005f) continue;
             double dx = x - cp.x, dy = y - cp.y, dz = z - cp.z;
             double dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
             int p = puffs++ * 8;
@@ -363,8 +375,32 @@ public final class FarFireRenderer {
         private static long last;
         private static boolean cached;
         private static boolean checked;
+        private static String packName="";
+        private static long packModified=Long.MIN_VALUE;
+        private static boolean shared;
+        private static long nextSharedCheck;
 
         private ShaderCheck() {}
+
+        static boolean sharedSmoke() {
+            if(!shadersActive()) return false;
+            long now=net.minecraft.Util.getMillis();
+            if(now<nextSharedCheck) return shared;
+            nextSharedCheck=now+1000;
+            try {
+                Class<?> iris=Class.forName("net.irisshaders.iris.Iris");
+                String name=(String)iris.getMethod("getCurrentPackName").invoke(null);
+                var path=Minecraft.getInstance().gameDirectory.toPath().resolve("shaderpacks").resolve(name);
+                long modified=java.nio.file.Files.getLastModifiedTime(path).toMillis();
+                if(!name.equals(packName) || modified!=packModified) {
+                    packName=name; packModified=modified; shared=false;
+                    if(java.nio.file.Files.isRegularFile(path)) try(var zip=new java.util.zip.ZipFile(path.toFile())) {
+                        shared=zip.getEntry("shaders/lib/atmospherics/clouds/skycraftDensity.glsl")!=null;
+                    }
+                }
+                return shared;
+            } catch(ReflectiveOperationException | java.io.IOException e) { return false; }
+        }
 
         static boolean shadersActive() {
             if (unavailable) return false;

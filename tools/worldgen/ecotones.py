@@ -83,7 +83,8 @@ SPEC = [
     # --- Skyrim's snow country: tundra -> heath -> snowfield
     ("skyrim/the_pale", "linear", ["skyrim/whiterun"], 0.4, [("pale_heath", 2), ("whiterun_tundra", 1),
                                                               ("alpine_meadow", 1)]),
-    ("skyrim/whiterun", "linear", ["skyrim/the_pale"], 0.25, [("pale_heath", 1)]),
+    # (no snowy heath on Whiterun's own side: the Pale's tundra mix already reaches down to the border, and the
+    # heath put snow patches inside the plains and the city itself)
     ("skyrim/winterhold", "radial", [], 0.3, [("pale_heath", 2), ("snowy_pine_forest", 1)]),
     # --- variety only
     ("summerset/artaeum", "none", [], 0.3, [("summerset_meadow", 1), ("auridon_vineyards", 1)]),

@@ -5,6 +5,11 @@ plugins {
     id 'net.minecraftforge.gradle' version '[6.0.16,6.2)'
 }
 
+// Opt-in fast scratch storage. Keep the default path for existing QA/dev tools.
+if (providers.gradleProperty('skycraftBuildDir').isPresent()) {
+    layout.buildDirectory.set(file(providers.gradleProperty('skycraftBuildDir').get()))
+}
+
 version = mod_version
 group = mod_group_id
 
@@ -75,6 +80,33 @@ tasks.register('mergeLang') {
     }
 }
 sourceSets.main.resources.srcDir(files(mergedLangDir).builtBy('mergeLang'))
+
+// Camera reuse needs the dungeon/terrain builders too: a road-bake hash alone
+// does not change when a cave ceiling or structure painter changes.
+def generationIdentityDir = layout.buildDirectory.dir('generated/generation-identity')
+def generationSources = fileTree('src/main/java/com/skycraft') {
+    include 'tamriel/**', 'worldplan/**', 'dungeons/**', 'roads/**', 'landmarks/**', 'scatter/**', 'worldgen/**'
+    exclude '**/client/**'
+}
+def generationData = fileTree('src/main/resources') {
+    include 'skycraft/tamriel/**', 'skycraft/dungeons/**', 'skycraft/landmarks/**', 'skycraft/scatter/**'
+    include 'skycraft/worldplan/**', 'skycraft/roads/**', 'data/skycraft/worldgen/**'
+}
+tasks.register('generationIdentity') {
+    inputs.files generationSources, generationData
+    outputs.dir generationIdentityDir
+    doLast {
+        def digest = java.security.MessageDigest.getInstance('SHA-256')
+        (generationSources.files + generationData.files).sort { a, b -> a.path <=> b.path }.each { f ->
+            digest.update(project.relativePath(f).replace('\\', '/').getBytes('UTF-8'))
+            digest.update(java.security.MessageDigest.getInstance('SHA-256').digest(f.bytes))
+        }
+        def out = generationIdentityDir.get().file('skycraft/generation-identity.txt').asFile
+        out.parentFile.mkdirs()
+        out.setText('v1:' + digest.digest().encodeHex().toString() + '\n', 'UTF-8')
+    }
+}
+sourceSets.main.resources.srcDir(files(generationIdentityDir).builtBy('generationIdentity'))
 
 repositories {
     mavenCentral()

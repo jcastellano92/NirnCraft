@@ -308,6 +308,58 @@ public final class Props {
         c.sign(x, y, z, hanging, facing, emblem, title, line2, meta);
     }
 
+    /**
+     * An inn's frontage, shared by every inn builder so none comes out bare: the regional 3D sign is hung on the wall
+     * beside the door (trying every free spot along the front) and a second one stands on a lit signpost at the street
+     * edge, where travellers see it from the road. Barrels, a bench and wall torches round it off.
+     *
+     * @param dz the local row just in front of the wall (-1 for a building whose door wall is at z = 0)
+     */
+    public static void innFront(Canvas c, Palette p, int doorX, int minX, int maxX, int dz, Component title, Component subtitle) {
+        if (c.recording()) return;
+        int[] order = {1, -1, 2, -2, 3, -3, 4, -4};
+        boolean hung = false;
+        for (int o : order) {
+            int sx = doorX + o;
+            if (sx < minX + 1 || sx > maxX - 1) continue;
+            if (!Canvas.open(c.get(sx, 3, dz)) || Canvas.open(c.get(sx, 3, dz + 1))) continue;
+            c.set(sx, 3, dz, B.s(Blocks.AIR));
+            shopSign(c, p, "inn", sx, 3, dz, Direction.EAST, title, subtitle);
+            hung = true;
+            break;
+        }
+        // a lit signpost out by the street, on the side away from the bench
+        int px = doorX - 5 >= minX ? doorX - 5 : doorX + 5 <= maxX ? doorX + 5 : Integer.MIN_VALUE;
+        int pz = dz - 1;
+        if (px != Integer.MIN_VALUE && Canvas.open(c.get(px, 1, pz)) && Canvas.open(c.get(px, 3, pz - 1))) {
+            c.setIfOpen(px, 0, pz, p.foundation);
+            c.foundation(px, -1, pz, p.foundation, 3);
+            for (int y = 1; y <= 4; y++) c.set(px, y, pz, B.axis(p.beam, Direction.Axis.Y));
+            c.set(px, 5, pz, p.light);
+            shopSign(c, p, "inn", px, 3, pz - 1, Direction.EAST, title, subtitle);
+        } else if (!hung) {
+            // nowhere to hang it: a sign on the lintel above the door
+            c.set(doorX, 4, dz, B.s(Blocks.AIR));
+            shopSign(c, p, "inn", doorX, 4, dz, Direction.EAST, title, subtitle);
+        }
+        // barrels and a bench on the other side of the door
+        int bx = doorX + 4 <= maxX - 1 ? doorX + 4 : doorX - 4 >= minX + 1 ? doorX - 4 : Integer.MIN_VALUE;
+        if (bx != Integer.MIN_VALUE) {
+            for (int x = bx; x <= bx + 1 && x <= maxX; x++) {
+                if (!Canvas.open(c.get(x, 1, dz))) continue;
+                c.setIfOpen(x, 0, dz, p.foundation);
+                c.foundation(x, -1, dz, p.foundation, 3);
+                c.setIfOpen(x, 1, dz, x == bx ? B.face(B.s(Blocks.BARREL), Direction.UP) : B.stair(p.stairs, Direction.SOUTH, false));
+            }
+        }
+        for (int o : new int[]{-2, 2}) {
+            int tx = doorX + o;
+            if (tx < minX + 1 || tx > maxX - 1) continue;
+            BlockState torch = B.face(B.s(p.light.is(Blocks.SOUL_LANTERN) ? Blocks.SOUL_WALL_TORCH : Blocks.WALL_TORCH), Direction.NORTH);
+            if (Canvas.open(c.get(tx, 2, dz)) && !Canvas.open(c.get(tx, 2, dz + 1))) c.set(tx, 2, dz, torch);
+        }
+    }
+
     private static String tradeEmblem(String useId) {
         if (useId == null) return "\u2726";
         return switch (useId) {

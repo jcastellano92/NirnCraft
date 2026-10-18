@@ -41,7 +41,7 @@ public final class SocietyCensus {
     private SocietyCensus() {}
 
     /** One counted person. */
-    public record Row(String type, String source, String race, String role, boolean sleeping, boolean inBed, boolean outdoors,
+    public record Row(String uuid, String type, String source, String race, String role, boolean sleeping, boolean inBed, boolean outdoors,
                       boolean guard) {}
 
     /** Result of a census. */
@@ -82,6 +82,12 @@ public final class SocietyCensus {
             int n = 0;
             for (Row r : rows) if (!r.guard && !r.source.startsWith("traveler") && !r.source.startsWith("encounter")) n++;
             return n;
+        }
+
+        public java.util.Set<String> residentIds() {
+            java.util.Set<String> ids = new java.util.HashSet<>();
+            for (Row row : rows) if (!row.guard && !row.source.startsWith("traveler") && !row.source.startsWith("encounter")) ids.add(row.uuid);
+            return ids;
         }
 
         public int travellers() {
@@ -131,7 +137,7 @@ public final class SocietyCensus {
             }
             boolean outdoors = level.canSeeSky(e.blockPosition());
             String type = e.getType().builtInRegistryHolder().key().location().getPath();
-            res.rows.add(new Row(type, source, race, role, sleeping, inBed, outdoors, guard));
+            res.rows.add(new Row(e.getUUID().toString(), type, source, race, role, sleeping, inBed, outdoors, guard));
             res.bySource.merge(source, 1, Integer::sum);
             res.byType.merge(type + "/" + role, 1, Integer::sum);
             res.byRace.merge(race, 1, Integer::sum);
@@ -161,6 +167,7 @@ public final class SocietyCensus {
         if (pd.contains(com.skycraft.roads.Travelers.TAG)) return "traveler:" + pd.getCompound(com.skycraft.roads.Travelers.TAG).getString("kind");
         if (Encounters.isTagged(e)) return "encounter";
         if (pd.contains(com.skycraft.quest.QuestSpawner.TAG_QUEST)) return "quest";
+        if (pd.contains(com.skycraft.quest.story.QuestNpcs.TAG)) return "story";
         if (pd.contains(com.skycraft.quest.faction.FactionStaff.TAG)) return "faction-staff";
         if (pd.getBoolean("skycraft_steward")) return "steward";
         if (pd.contains(GatePosts.KEY)) return "gate-post";

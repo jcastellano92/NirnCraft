@@ -19,13 +19,14 @@ final class SkyGeometry {
     static final float R = 100.0F;
     static final int AURORA_BANDS = 4;
     static final int AURORA_KEYS = 6;
-    private static final int AURORA_SEGMENTS = 112;
+    private static final int AURORA_SEGMENTS = 224;
 
     /** Galaxy plane normal in the celestial frame (the frame vanilla rotates the stars in). */
     private static final double[] GALAXY_N = normalize(0.28, 0.42, 0.86);
 
     static VertexBuffer starsA;
     static VertexBuffer starsB;
+    static final VertexBuffer[] starLayers = new VertexBuffer[8];
     static VertexBuffer galaxy;
     static VertexBuffer constellations;
     static VertexBuffer serpent;
@@ -38,8 +39,8 @@ final class SkyGeometry {
     static void ensureBuilt() {
         if (built) return;
         built = true;
-        starsA = upload(buildStars(new Random(0x5EC0DAL), 1700));
-        starsB = upload(buildStars(new Random(0x3A55E1L), 1700));
+        for (int i = 0; i < starLayers.length; i++)
+            starLayers[i] = upload(buildStars(new Random(0x5EC0DAL + i * 71L), 1600));
         galaxy = upload(buildGalaxy());
         constellations = upload(buildConstellations(false));
         serpent = upload(buildConstellations(true));
@@ -65,7 +66,7 @@ final class SkyGeometry {
 
     private static BufferBuilder.RenderedBuffer buildStars(Random r, int count) {
         BufferBuilder bb = Tesselator.getInstance().getBuilder();
-        bb.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+        bb.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
         double[] a = perpendicular(GALAXY_N);
         double[] b = cross(GALAXY_N, a);
         for (int i = 0; i < count; i++) {
@@ -83,16 +84,16 @@ final class SkyGeometry {
                 double rr = Math.sqrt(1 - z * z);
                 d = new double[]{rr * Math.cos(phi), z, rr * Math.sin(phi)};
             }
-            float size = 0.10F + (float) Math.pow(r.nextFloat(), 7) * 0.42F;
-            float alpha = 0.30F + 0.70F * r.nextFloat() * r.nextFloat();
-            if (size > 0.3F) alpha = 1.0F;
+            float size = 0.035F + (float) Math.pow(r.nextFloat(), 9) * 0.16F;
+            float alpha = 0.10F + 0.65F * (float) Math.pow(r.nextFloat(), 4);
             float cr, cg, cb;
             float t = r.nextFloat();
             if (t < 0.22F) { cr = 0.72F; cg = 0.82F; cb = 1.0F; }        // blue-white
             else if (t < 0.70F) { cr = 0.95F; cg = 0.96F; cb = 1.0F; }   // white
             else if (t < 0.90F) { cr = 1.0F; cg = 0.92F; cb = 0.74F; }   // yellow
             else { cr = 1.0F; cg = 0.72F; cb = 0.55F; }                  // orange giant
-            quad(bb, d, size, cr, cg, cb, alpha);
+            // the star sprite is a soft dot filling about a third of its quad: scale the quad to keep the star's size
+            quad(bb, d, size * 2.4F, cr, cg, cb, alpha);
         }
         return bb.end();
     }
@@ -106,6 +107,7 @@ final class SkyGeometry {
             bb.vertex(cx + (u[0] * c[0] + v[0] * c[1]) * size,
                             cy + (u[1] * c[0] + v[1] * c[1]) * size,
                             cz + (u[2] * c[0] + v[2] * c[1]) * size)
+                    .uv((float) (c[0] + 1) * 0.5F, (float) (c[1] + 1) * 0.5F)
                     .color(r, g, b, a).endVertex();
         }
     }
@@ -137,7 +139,7 @@ final class SkyGeometry {
     /** All signs but the Serpent, or the Serpent alone (centred on the celestial equator at angle 0). */
     private static BufferBuilder.RenderedBuffer buildConstellations(boolean serpentOnly) {
         BufferBuilder bb = Tesselator.getInstance().getBuilder();
-        bb.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+        bb.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
         for (Object[] sign : SIGNS) {
             boolean isSerpent = "serpent".equals(sign[0]);
             if (isSerpent != serpentOnly) continue;
@@ -159,8 +161,8 @@ final class SkyGeometry {
                 line(bb, dirs[lines[i]], dirs[lines[i + 1]], 0.07F, 0.62F, 0.72F, 0.95F, 0.16F);
             }
             for (double[] d : dirs) {
-                quad(bb, d, 0.34F, 0.85F, 0.90F, 1.0F, 1.0F);
-                quad(bb, d, 0.85F, 0.55F, 0.65F, 1.0F, 0.10F); // soft glow
+                quad(bb, d, 0.80F, 0.85F, 0.90F, 1.0F, 1.0F);
+                quad(bb, d, 2.1F, 0.55F, 0.65F, 1.0F, 0.12F); // soft glow
             }
         }
         return bb.end();
@@ -180,7 +182,8 @@ final class SkyGeometry {
     }
 
     private static void lineVertex(BufferBuilder bb, double[] p, double[] side, double w, float r, float g, float b, float a) {
-        bb.vertex((p[0] + side[0] * w) * R, (p[1] + side[1] * w) * R, (p[2] + side[2] * w) * R).color(r, g, b, a).endVertex();
+        // the constellation lines share the star sprite's buffer: its centre texel is opaque
+        bb.vertex((p[0] + side[0] * w) * R, (p[1] + side[1] * w) * R, (p[2] + side[2] * w) * R).uv(0.5F, 0.5F).color(r, g, b, a).endVertex();
     }
 
     private static double[] lerp(double[] a, double[] b, double t) {
@@ -223,8 +226,8 @@ final class SkyGeometry {
         double[] b = cross(GALAXY_N, a);
         int seg = 96;
         int rows = 4;
-        double halfWidth = 0.20;  // radians-ish, ~11 degrees each side
-        float repeat = 3.0F;      // texture repeats around the circle (the texture tiles horizontally)
+        double halfWidth = 0.30;  // radians-ish, ~11 degrees each side
+        float repeat = 1.0F;      // texture repeats around the circle (the texture tiles horizontally)
         for (int i = 0; i < seg; i++) {
             for (int j = 0; j < rows; j++) {
                 double[][] pts = {
@@ -293,33 +296,40 @@ final class SkyGeometry {
             BufferBuilder bb = Tesselator.getInstance().getBuilder();
             bb.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
             double kp = Math.PI * 2 * key / AURORA_KEYS;
+            float teal = (float) (0.10 + 0.2 * hue);
             float[][] rowColor = {
-                    {0.25F, 1.0F, 0.55F},                                           // bottom edge (transparent)
-                    {0.30F, 1.0F, 0.50F},                                           // bright green hem
-                    {(float) (0.10 + 0.2 * hue), 0.85F, (float) (0.65 + 0.2 * hue)}, // teal body
-                    {0.55F, 0.30F, 0.95F}                                           // violet fringe (transparent)
+                    {0.25F, 1.0F, 0.55F},                    // bottom edge (transparent)
+                    {0.32F, 1.0F, 0.48F},                    // bright green hem
+                    {0.28F, 0.98F, 0.55F},
+                    {teal, 0.88F, 0.66F},                    // teal body
+                    {0.28F, 0.62F, 0.80F},
+                    {0.45F, 0.38F, 0.90F},                   // violet fringe
+                    {0.55F, 0.30F, 0.95F}                    // top (transparent)
             };
-            float[] rowAlpha = {0.0F, 0.85F, 0.40F, 0.0F};
-            double[] rowFrac = {0.0, 0.10, 0.45, 1.0};
+            float[] rowAlpha = {0.0F, 0.90F, 0.62F, 0.36F, 0.18F, 0.07F, 0.0F};
+            double[] rowFrac = {0.0, 0.05, 0.16, 0.36, 0.60, 0.84, 1.0};
             for (int i = 0; i < AURORA_SEGMENTS; i++) {
-                for (int row = 0; row < 3; row++) {
+                for (int row = 0; row < rowFrac.length - 1; row++) {
                     int[][] pts = {{i, row}, {i, row + 1}, {i + 1, row + 1}, {i + 1, row}};
                     for (int[] p : pts) {
                         double s = (double) p[0] / AURORA_SEGMENTS;
                         double az = center - half + 2 * half * s + foldAmp * Math.sin(foldFreq * s * Math.PI * 2 + foldSpeed * kp);
                         double ends = Math.pow(Math.sin(Math.PI * s), 0.7);
-                        double rays = 0.55;
+                        double rays = 0.62;
                         for (int q = 0; q < 4; q++) {
-                            rays += 0.45 / (q + 1) * Math.sin(rayFreq[q] * s + rayPhase[q] + raySpeed[q] * kp);
+                            rays += 0.30 / (q + 1) * Math.sin(rayFreq[q] * s + rayPhase[q] + raySpeed[q] * kp);
                         }
-                        rays = Math.max(0.05, Math.min(1.0, rays));
-                        double h = height * (0.75 + 0.35 * rays);
+                        rays = Math.max(0.15, Math.min(1.0, rays));
+                        double h = height * (0.78 + 0.30 * rays);
                         double el = baseElev + 0.03 * Math.sin(s * 5 + kp) + h * rowFrac[p[1]];
+                        // the rays stand out at the hem and melt into an even glow higher up (no hairline stripes)
+                        double rayMix = 1.0 - 0.75 * rowFrac[p[1]];
+                        double lit = 1.0 - rayMix * (1.0 - rays);
                         double x = Math.sin(az) * Math.cos(el);
                         double y = Math.sin(el);
                         double z = -Math.cos(az) * Math.cos(el);
                         float[] c = rowColor[p[1]];
-                        float alpha = (float) (rowAlpha[p[1]] * ends * rays);
+                        float alpha = (float) (rowAlpha[p[1]] * ends * lit);
                         bb.vertex(x * R, y * R, z * R).color(c[0], c[1], c[2], alpha).endVertex();
                     }
                 }

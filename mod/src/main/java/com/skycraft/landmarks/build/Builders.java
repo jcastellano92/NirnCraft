@@ -35,6 +35,21 @@ public final class Builders {
             case "dolmen" -> Scenes.dolmen(s);
             case "dig" -> Scenes.dig(s);
             case "beacon" -> Scenes.beacon(s);
+            // trailside and trail's-end vignettes
+            case "adit" -> Trailside.adit(s);
+            case "overlook" -> Trailside.overlook(s);
+            case "treehouse" -> Trailside.treehouse(s);
+            case "frozen" -> Trailside.frozen(s);
+            case "castaway" -> Trailside.castaway(s);
+            case "angler" -> Trailside.angler(s);
+            case "waystone" -> Trailside.waystone(s);
+            case "den" -> Trailside.den(s);
+            case "cabin" -> Trailside.cabin(s);
+            case "alcove" -> Trailside.alcove(s);
+            case "well" -> Trailside.well(s);
+            case "apiary" -> Trailside.apiary(s);
+            case "herbs" -> Trailside.herbs(s);
+            case "watch_post" -> Trailside.watchPost(s);
             // L: formations
             case "rock_arch" -> Formations.rockArch(s);
             case "hoodoos" -> Formations.hoodoos(s);
@@ -86,6 +101,8 @@ public final class Builders {
             "grave", "cairn_token", "bedroll", "lovers_tree", "offering", "pack", "warning", "spring", "remains", "fire_ring", "charms",
             "pilgrim", "hermit", "hunters", "travellers", "smuggler", "ghost_ruin", "ambush", "skirmish", "boat_wreck", "sacrifice",
             "blind", "claim", "dolmen", "dig", "beacon",
+            "adit", "overlook", "treehouse", "frozen", "castaway", "angler", "waystone", "den", "cabin", "alcove", "well", "apiary",
+            "herbs", "watch_post",
             "rock_arch", "hoodoos", "split_boulder", "menhir", "sinkhole", "tower_ruin", "cliff_nests", "petrified_tree", "bone_field",
             "terraces", "geode", "ice_fall", "glass_dune", "columns", "sea_stacks", "mushrooms", "vent", "crater", "statue", "aqueduct",
             "fallen_log", "rune_circle", "spikes", "dry_lake", "drowned_grove", "old_walls", "fins", "butte",

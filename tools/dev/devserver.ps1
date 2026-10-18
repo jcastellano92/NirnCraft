@@ -38,12 +38,32 @@ param(
     [int]$Timeout = 1800,
     [int]$BootTimeout = 1200,
     [string]$Xmx = "",
-    [switch]$Force
+    [switch]$Force,
+    [string]$RuntimeRoot = ""
 )
 $ErrorActionPreference = "Stop"
 $Root = Resolve-Path (Join-Path $PSScriptRoot "..\..")
 $Mod = Join-Path $Root "mod"
 $Dev = Join-Path $Mod "run\devworld"
+if ($RuntimeRoot) {
+    $candidate = [IO.Path]::GetFullPath($RuntimeRoot).TrimEnd('\')
+    $workspacePrefix = ([IO.Path]::GetFullPath((Join-Path $Root 'dist\world-tests\runtimes')).TrimEnd('\') + '\')
+    $nvmePrefix = 'E:\Skycraft-scratch\world-benchmark\'
+    if (-not ($candidate.StartsWith($workspacePrefix,[StringComparison]::OrdinalIgnoreCase) -or
+              $candidate.StartsWith($nvmePrefix,[StringComparison]::OrdinalIgnoreCase))) {
+        throw 'RuntimeRoot must be inside dist\world-tests\runtimes\ or E:\Skycraft-scratch\world-benchmark\.'
+    }
+    $Dev = $candidate
+}
+function Remove-DevChild([string]$Target) {
+    $absolute = [IO.Path]::GetFullPath($Target)
+    $prefix = [IO.Path]::GetFullPath($Dev).TrimEnd('\') + '\'
+    if (-not $absolute.StartsWith($prefix,[StringComparison]::OrdinalIgnoreCase)) { throw "Refused deletion outside dev runtime: $absolute" }
+    if (Test-Path -LiteralPath $absolute) {
+        if ((Get-Item -LiteralPath $absolute).Attributes -band [IO.FileAttributes]::ReparsePoint) { throw "Refused recursive deletion of reparse point: $absolute" }
+        Remove-Item -LiteralPath $absolute -Recurse -Force
+    }
+}
 $Inbox = Join-Path $Dev "inbox"
 $Outbox = Join-Path $Dev "outbox"
 $Log = Join-Path $Dev "server.log"
@@ -54,7 +74,7 @@ New-Item -ItemType Directory -Force $Dev, $Inbox, $Outbox | Out-Null
 if (-not $Xmx) { $Xmx = $(if ($env:SKYCRAFT_SERVER_XMX) { $env:SKYCRAFT_SERVER_XMX } else { "4G" }) }
 $Registry = Join-Path $env:LOCALAPPDATA "skycraft-dev"
 New-Item -ItemType Directory -Force $Registry | Out-Null
-$Key = Join-Path $Registry (("$Root".ToLower() -replace '[^a-z0-9]+', '_').Trim('_') + ".txt")
+$Key = Join-Path $Registry ((("$Root|$Dev").ToLower() -replace '[^a-z0-9]+', '_').Trim('_') + ".txt")
 
 # other dev servers of this machine (any worktree) that are alive: "<pid> <root>" per registry file
 function OtherServers {
@@ -123,7 +143,8 @@ function NewestSource {
 
 function Snapshot-BootClasses {
     $compiled = Join-Path $Mod "build\classes\java\main"
-    Remove-Item -Recurse -Force $BootClasses, $LastClasses -ErrorAction SilentlyContinue
+    Remove-DevChild $BootClasses
+    Remove-DevChild $LastClasses
     if (Test-Path $compiled) {
         Copy-Item -Recurse -Force $compiled $BootClasses
         Copy-Item -Recurse -Force $compiled $LastClasses
@@ -144,6 +165,9 @@ function DeathReport {
 }
 
 function Start-Dev {
+    $preview = @(Get-CimInstance Win32_Process -Filter "Name='javaw.exe' OR Name='java.exe'" -ErrorAction SilentlyContinue |
+        Where-Object { $_.CommandLine -like '*-Dskycraft.autotest=true*' -and $_.CommandLine -like '*-Dskycraft.dev=world-preview*' })
+    if ($preview.Count -gt 0) { Write-Host 'REFUSED: close the disposable Minecraft preview before starting a headless server.'; return $false }
     $r = ReadyInfo
     if ($r) { Write-Host "dev server already running (pid $($r.Pid), port $Port, jdwp 127.0.0.1:$(ActiveJdwpPort), since $($r.Since))"; return $true }
     if (Test-Path $Key) {
@@ -186,7 +210,7 @@ function Start-Dev {
     Write-Host "starting dev server (port $Port, jdwp 127.0.0.1:$JdwpPort, log $Log) ..."
     $env:JAVA_TOOL_OPTIONS = "-Dskycraft.dev=. -Xmx$Xmx"
     try {
-        $p = Start-Process -FilePath "cmd.exe" -ArgumentList "/c .\gradlew.bat runServer --console=plain -I `"$jdwpInit`" -PskycraftRunDir=run/devworld -PskycraftJdwpPort=$JdwpPort `"-Dorg.gradle.jvmargs=-Xmx2G`"" `
+        $p = Start-Process -FilePath "cmd.exe" -ArgumentList "/c .\gradlew.bat runServer --console=plain -I `"$jdwpInit`" `"-PskycraftRunDir=$Dev`" -PskycraftJdwpPort=$JdwpPort `"-Dorg.gradle.jvmargs=-Xmx2G`"" `
             -WorkingDirectory $Mod -RedirectStandardOutput $Log -RedirectStandardError "$Log.err" -PassThru -WindowStyle Hidden
     } finally { Remove-Item Env:JAVA_TOOL_OPTIONS -ErrorAction SilentlyContinue }
     Set-Content $Key "$($p.Id) $Root (booting)" -Encoding ascii
@@ -196,11 +220,6 @@ function Start-Dev {
         if ($r) {
             Set-Content $Key "$($r.Pid) $Root" -Encoding ascii
             Set-Content (Join-Path $Outbox "jdwp.port") "$JdwpPort" -Encoding ascii
-            Snapshot-BootClasses
-            # Warm the idle compile daemon so subsequent 'devserver.ps1 hotswap' calls finish in ~2-4 s
-            Push-Location $Mod
-            try { & .\gradlew.bat compileJava --console=plain "-Dorg.gradle.jvmargs=-Xmx2G" *> $null } catch {}
-            Pop-Location
             Snapshot-BootClasses
             Write-Host ("dev server ready in {0:N0} s (pid {1}, jdwp 127.0.0.1:{2}, -Xmx{3})" -f ((Get-Date) - $t0).TotalSeconds, $r.Pid, $JdwpPort, $Xmx); return $true
         }
@@ -311,7 +330,7 @@ switch ($Action) {
     "reset" {
         # fresh dev world (new road network, new chunks); keeps server.properties
         Stop-Dev
-        Remove-Item -Recurse -Force (Join-Path $Dev "world") -ErrorAction SilentlyContinue
+        Remove-DevChild (Join-Path $Dev "world")
         if (Start-Dev) { exit 0 } else { exit 2 }
     }
     "status" {

@@ -42,6 +42,7 @@ public final class RoadsModule {
     public static void init(IEventBus modBus) {
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, RoadsConfig.SPEC, "skycraft-roads.toml");
         FEATURES.register(modBus);
+        RoadLights.init(modBus);
         RoadMask.install();
         Carriages.register();
     }

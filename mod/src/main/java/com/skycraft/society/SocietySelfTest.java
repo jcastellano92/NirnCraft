@@ -563,7 +563,9 @@ public final class SocietySelfTest {
         SocietyCensus.Result n = SocietyCensus.census(level, r.town, entry.get().radius + 20);
         int before = r.day.residentsPresent();
         int after = n.residentsPresent();
-        r.check("nobody disappears at night", after >= before, before + " residents by day, " + after + " at night");
+        var missing = new java.util.HashSet<>(r.day.residentIds());
+        missing.removeAll(n.residentIds());
+        r.check("nobody disappears at night", missing.isEmpty(), before + " residents by day, " + after + " at night; missing UUIDs=" + missing);
         // a resident who sleeps is in a bed; the few meant to be out (a drunk, a beggar) and the watch are not counted
         int asleep = n.sleepingInBed();
         int out = n.outdoors();
@@ -710,6 +712,19 @@ public final class SocietySelfTest {
         r.check("Whiterun authored residents include canonical Balgruuf, Adrianne, and innkeeper Hulda",
                 hasBalgruuf && hasAdrianne && hasHulda && huldaInnkeeper != null && huldaInnkeeper.name().contains("Hulda"),
                 "Balgruuf=" + hasBalgruuf + ", Adrianne=" + hasAdrianne + ", Hulda=" + (huldaInnkeeper != null ? huldaInnkeeper.name() : "null"));
+
+        java.util.Set<String> claimed = new java.util.HashSet<>();
+        for (var entry : whiterunRes) claimed.add(entry.id());
+        r.check("exhausted authored identities never wrap into a second housing slot",
+                SocietyResidents.matchForSlot("whiterun", "farmer", NpcRole.FARMER, 999, claimed) == null,
+                "all authored identities already claimed");
+        var bard = whiterunRes.stream().filter(e -> e.role() == NpcRole.BARD).findFirst().orElse(null);
+        if (bard != null) {
+            claimed.remove(bard.id());
+            r.check("a farmer slot never borrows an unrelated named bard",
+                    SocietyResidents.matchForSlot("whiterun", "farmer", NpcRole.FARMER, 999, claimed) == null,
+                    "only unclaimed identity is " + bard.name());
+        }
 
         SocietyResidents.Entry sampleEntry = whiterunRes.stream().filter(e -> e.name().contains("Adrianne")).findFirst().orElse(whiterunRes.get(0));
         com.skycraft.society.entity.NpcEntity sampleNpc = Npcs.create(level, new BlockPos(0, 80, 0), sampleEntry.npcRole());

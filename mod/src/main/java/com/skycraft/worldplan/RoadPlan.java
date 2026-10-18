@@ -241,11 +241,20 @@ public final class RoadPlan {
      * false (and {@code out.segment == -1}) when no planned road is that close. Allocation-free; thread-safe.
      */
     public boolean at(double x, double z, Hit out) {
+        return at(x,z,out,true);
+    }
+
+    /** Seed-independent authored geometry, excluding asynchronous Endless Lands tiles. */
+    public boolean atAuthored(double x,double z,Hit out) {
+        return at(x,z,out,false);
+    }
+
+    private boolean at(double x,double z,Hit out,boolean allowTiles) {
         out.clear();
         int ix = (int) Math.floor(x), iz = (int) Math.floor(z);
         int k = bucketOf.get(key(ix >> BUCKET_SHIFT, iz >> BUCKET_SHIFT));
         if (k < 0) {
-            if (this == Holder.PLAN && !com.skycraft.tamriel.TamrielMap.inTamriel(ix, iz)) {
+            if (allowTiles && this == Holder.PLAN && !com.skycraft.tamriel.TamrielMap.inTamriel(ix, iz)) {
                 RoadPlan tp = com.skycraft.worldplan.tile.TilePlanner.roadPlanAt(ix, iz);
                 if (tp != null && tp != this) return tp.at(x, z, out);
             }
@@ -271,7 +280,7 @@ public final class RoadPlan {
             }
         }
         if (bestEdge < 0) {
-            if (this == Holder.PLAN && !com.skycraft.tamriel.TamrielMap.inTamriel(ix, iz)) {
+            if (allowTiles && this == Holder.PLAN && !com.skycraft.tamriel.TamrielMap.inTamriel(ix, iz)) {
                 RoadPlan tp = com.skycraft.worldplan.tile.TilePlanner.roadPlanAt(ix, iz);
                 if (tp != null && tp != this) return tp.at(x, z, out);
             }

@@ -60,6 +60,11 @@ final class Vignettes {
     }
 
     static void candle(Stage s, int dx, int dy, int dz, int count, boolean lit) {
+        // a candle needs something under it: over a gap it drops to the ground of its own column
+        if (s.free(dx, dy - 1, dz)) {
+            int y = s.top(dx, dz);
+            if (y < dy) dy = y;
+        }
         s.set(dx, dy, dz, Blocks.CANDLE.defaultBlockState().setValue(CandleBlock.CANDLES, count).setValue(CandleBlock.LIT, lit));
     }
 

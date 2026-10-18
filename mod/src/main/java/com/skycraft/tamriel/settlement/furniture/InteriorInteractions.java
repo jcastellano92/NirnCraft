@@ -241,6 +241,9 @@ public final class InteriorInteractions {
     public static void onEntityMount(EntityMountEvent event) {
         if (!event.isDismounting()) return;
         Entity mounted = event.getEntityBeingMounted();
+        // Unloading a rider or removing its seat also fires dismount. Do not teleport an
+        // unloading entity or recursively remove the seat from inside its own removal.
+        if (mounted == null || mounted.isRemoved() || event.getEntityMounting().isRemoved()) return;
         if (mounted instanceof ArmorStand stand && stand.getTags().contains(SEAT_TAG)) {
             Entity rider = event.getEntityMounting();
             if (!mounted.level().isClientSide) {

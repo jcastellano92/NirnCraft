@@ -97,11 +97,16 @@ public final class DungeonQa {
                                         IntegerArgumentType.getInteger(c, "y"), IntegerArgumentType.getInteger(c, "z"))))))))
                 .then(Commands.literal("export").then(Commands.argument("ids", StringArgumentType.greedyString())
                         .executes(c -> export(c.getSource(), StringArgumentType.getString(c, "ids")))))
+                .then(Commands.literal("air-survey").then(Commands.argument("ids", StringArgumentType.greedyString())
+                        .executes(c -> airSurvey(c.getSource(), StringArgumentType.getString(c,"ids")))))
                 .then(Commands.literal("view").then(Commands.argument("id", StringArgumentType.word())
                         .executes(c -> view(c.getSource(), StringArgumentType.getString(c, "id"), "boss", 0))
                         .then(Commands.literal("boss").executes(c -> view(c.getSource(), StringArgumentType.getString(c, "id"), "boss", 0)))
                         .then(Commands.literal("start").executes(c -> view(c.getSource(), StringArgumentType.getString(c, "id"), "start", 0)))
                         .then(Commands.literal("entrance").executes(c -> view(c.getSource(), StringArgumentType.getString(c, "id"), "entrance", 0)))
+                        .then(Commands.literal("mouth").executes(c -> view(c.getSource(), StringArgumentType.getString(c,"id"),"mouth",0)))
+                        .then(Commands.literal("hall").executes(c -> view(c.getSource(), StringArgumentType.getString(c,"id"),"hall",0)))
+                        .then(Commands.literal("descent").executes(c -> view(c.getSource(), StringArgumentType.getString(c,"id"),"descent",0)))
                         .then(Commands.literal("feature").then(Commands.argument("name", StringArgumentType.word())
                                 .executes(c -> view(c.getSource(), StringArgumentType.getString(c, "id"),
                                         "feature:" + StringArgumentType.getString(c, "name"), 0))))
@@ -300,6 +305,10 @@ public final class DungeonQa {
         for (StructurePiece sp : pieces) {
             if (!(sp instanceof DungeonPiece dp)) continue;
             if (dp.kind == DungeonPiece.Kind.TUNNEL) entrance = dp;
+            if ((what.equals("hall") || what.equals("descent")) && dp.kind == DungeonPiece.Kind.CORRIDOR) {
+                if ((!what.equals("descent") || Math.abs(dp.floor-dp.aux)>=2)
+                        && (target==null || dp.corridorLength()>target.corridorLength())) target=dp;
+            }
             if (dp.kind != DungeonPiece.Kind.ROOM) continue;
             boolean pick = switch (what) {
                 case "boss" -> dp.role == DungeonPiece.ROLE_BOSS;
@@ -314,13 +323,25 @@ public final class DungeonQa {
         ServerLevel level = src.getServer().overworld();
         double x, y, z;
         float yaw;
-        if ("entrance".equals(what) && entrance != null) {
+        if ("mouth".equals(what) && entrance != null) {
+            int t=Math.max(1,entrance.tunnelLength()-7);
+            x=entrance.frameX(t,0)+0.5; z=entrance.frameZ(t,0)+0.5;
+            y=entrance.tunnelFloor(t)+0.05; yaw=entrance.facing().toYRot();
+        } else if ("entrance".equals(what) && entrance != null) {
             Direction out = entrance.facing();
             int t = entrance.tunnelLength() + 12;
             x = entrance.frameX(t, 0) + 0.5;
             z = entrance.frameZ(t, 0) + 0.5;
             y = entrance.aux + 2;
             yaw = out.getOpposite().toYRot();
+        } else if (target != null && target.kind==DungeonPiece.Kind.CORRIDOR) {
+            BoundingBox b=target.getBoundingBox();
+            boolean axisX=target.dir==0, highEnd=target.aux>target.floor;
+            int k=highEnd?Math.max(0,target.corridorLength()-2):Math.min(1,target.corridorLength()-1);
+            x=axisX?b.minX()+k+0.5:(b.minX()+b.maxX())*0.5+0.5;
+            z=axisX?(b.minZ()+b.maxZ())*0.5+0.5:b.minZ()+k+0.5;
+            y=target.corridorFloor(k)+0.05;
+            yaw=axisX?(highEnd?90:-90):(highEnd?180:0);
         } else if (target != null) {
             BoundingBox b = target.getBoundingBox();
             Direction e = target.dir >= 0 ? Direction.from2DDataValue(target.dir) : Direction.NORTH;
@@ -334,11 +355,48 @@ public final class DungeonQa {
             src.sendFailure(Component.literal("No such room in " + id));
             return 0;
         }
-        player.teleportTo(level, x, y, z, yaw, 15f);
+        player.teleportTo(level, x, y, z, yaw, what.equals("mouth")?-8f:what.equals("hall")?3f:15f);
         player.addEffect(new MobEffectInstance(MobEffects.NIGHT_VISION, 20 * 60, 0, false, false));
         double fx = x, fy = y, fz = z;
         src.sendSuccess(() -> Component.literal(String.format(Locale.ROOT, "%s %s at %.0f %.0f %.0f", id, what, fx, fy, fz)), false);
         return 1;
+    }
+
+    /** Camera selection evidence from the real planner; no demonstration rooms are created. */
+    private static int airSurvey(CommandSourceStack src,String ids) {
+        Job job=new Job(src.getServer(),src,"air-survey");
+        List<Map<String,Object>> result=new ArrayList<>();
+        for(String id:ids.trim().split("\\s+")) {
+            QaSample sample=job.namedSample(id);
+            if(sample==null) continue;
+            var stub=job.stub(sample);
+            if(stub.isEmpty()) continue;
+            List<StructurePiece> pieces=stub.get().getPiecesBuilder().build().pieces();
+            Map<BoundingBox,Set<String>> features=new HashMap<>();
+            job.paint(sample,pieces,features,stub.get().position().getY());
+            int roomIndex=0;
+            for(var piece:pieces) if(piece instanceof DungeonPiece dp) {
+                var b=dp.getBoundingBox(); Map<String,Object> row=new LinkedHashMap<>();
+                row.put("place",id); row.put("kind",dp.kind.name());
+                row.put("room",dp.kind==DungeonPiece.Kind.ROOM?roomIndex++:-1);
+                row.put("box",List.of(b.minX(),b.minY(),b.minZ(),b.maxX(),b.maxY(),b.maxZ()));
+                row.put("floor",dp.floor); row.put("aux",dp.aux); row.put("dir",dp.dir);
+                row.put("theme",dp.theme.id); row.put("features",features.getOrDefault(b,Set.of()));
+                if(dp.has(DungeonPiece.FLAG_GRAND)) {
+                    var choice=com.skycraft.dungeons.world.GrandCavern.choose(job.level,dp);
+                    row.put("profile",choice.profile().id); row.put("shape",choice.shape().id);
+                    row.put("flora",choice.profile().flora.stream().map(f->f.type().name()).toList());
+                }
+                result.add(row);
+            }
+        }
+        Path output=src.getServer().getServerDirectory().toPath().resolve("dungeon_qa/atmosphere-scenes.json");
+        try {
+            Files.createDirectories(output.getParent());
+            Files.writeString(output,new com.google.gson.GsonBuilder().setPrettyPrinting().create().toJson(result));
+        } catch(IOException e) { src.sendFailure(Component.literal(e.toString())); return 0; }
+        src.sendSuccess(()->Component.literal("Dungeon atmosphere survey: "+result.size()+" pieces -> "+output),false);
+        return result.size();
     }
 
     static final class Job {

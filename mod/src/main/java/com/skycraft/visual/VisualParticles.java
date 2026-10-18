@@ -26,6 +26,9 @@ public final class VisualParticles {
     public static final RegistryObject<SimpleParticleType> MARSH_WISP = register("marsh_wisp");
     public static final RegistryObject<SimpleParticleType> DUST_MOTE = register("dust_mote");
 
+    public static final RegistryObject<SimpleParticleType> SPELL_FROST = register("spell_frost");
+    public static final RegistryObject<SimpleParticleType> SPELL_SPARK = register("spell_spark");
+
     private VisualParticles() {}
 
     private static RegistryObject<SimpleParticleType> register(String name) {

@@ -1621,8 +1621,10 @@ S_SLOPES = surface("snow_block", "snow_block", patches=[("powder_snow", 0.45, 0.
                    steep="snowy_stone", steep_under="stone", uw="stone")
 S_ALPINE = surface(GRASS, patches=[("surface", 0.7, MAX, "coarse_dirt"), ("calcite", -0.0125, 0.0125, "stone")],
                    steep="stone", snow=(294, 3))
-S_HIGHLANDS = surface(GRASS, patches=[("surface", 0.35, MAX, "coarse_dirt"), ("gravel", 0.25, MAX, "gravel"),
-                                      ("surface", -0.6, -0.35, "stone")], steep="stone", snow=(254, 4),
+# Whiterun's foothills are this biome: the old thresholds (coarse dirt from 0.35, gravel from 0.25) left more than half of the
+# hill country bare dirt and gravel; now the same gentle share as the tundra beside it, grass everywhere else
+S_HIGHLANDS = surface(GRASS, patches=[("surface", 0.62, MAX, "coarse_dirt"), ("gravel", 0.6, MAX, "gravel"),
+                                      ("surface", -0.78, -0.62, "stone")], steep="stone", snow=(254, 4),
                       rock=(198, "stone", [("gravel", 0.2, MAX, "gravel"), ("surface", 0.5, MAX, "andesite")]))
 S_GRAVEL_COAST = surface("gravel", "gravel", patches=[("surface", 0.3, MAX, "stone"),
                                                      ("patch", 0.65, MAX, "cobblestone")], uw="gravel", steep="stone")

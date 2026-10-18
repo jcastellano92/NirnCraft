@@ -19,6 +19,17 @@ public final class FireRenderTypes extends RenderType {
     static final ResourceLocation FLAME_TEX = new ResourceLocation(Skycraft.MODID, "textures/fire/far_flame.png");
     static final ResourceLocation SMOKE_TEX = new ResourceLocation(Skycraft.MODID, "textures/fire/far_smoke.png");
     static final ResourceLocation GLOW_TEX = new ResourceLocation(Skycraft.MODID, "textures/fire/far_glow.png");
+    private static final TransparencyStateShard SOFT_ADDITIVE = new TransparencyStateShard("skycraft_soft_additive",()->{
+        com.mojang.blaze3d.systems.RenderSystem.enableBlend();
+        com.mojang.blaze3d.systems.RenderSystem.blendFuncSeparate(
+                com.mojang.blaze3d.platform.GlStateManager.SourceFactor.SRC_ALPHA,
+                com.mojang.blaze3d.platform.GlStateManager.DestFactor.ONE,
+                com.mojang.blaze3d.platform.GlStateManager.SourceFactor.ONE,
+                com.mojang.blaze3d.platform.GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+    },()->{
+        com.mojang.blaze3d.systems.RenderSystem.disableBlend();
+        com.mojang.blaze3d.systems.RenderSystem.defaultBlendFunc();
+    });
 
     /** Additive flame sprites. */
     public static final RenderType FLAME = create("skycraft_far_flame", DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.QUADS, 4096,
@@ -54,6 +65,19 @@ public final class FireRenderTypes extends RenderType {
                     .setLightmapState(LIGHTMAP)
                     .setOverlayState(OVERLAY)
                     .createCompositeState(false));
+
+    // Vanilla eyes output straight RGB. Its ONE/ONE blend ignores the feathered
+    // alpha and bright RGB in transparent texels, painting rectangular flares.
+    public static final RenderType FLAME_NATIVE=softAdditive("skycraft_far_flame_native",FLAME_TEX);
+    public static final RenderType GLOW_NATIVE=softAdditive("skycraft_far_glow_native",GLOW_TEX);
+
+    private static RenderType softAdditive(String name,ResourceLocation texture) {
+        return create(name,DefaultVertexFormat.NEW_ENTITY,VertexFormat.Mode.QUADS,4096,false,false,
+                CompositeState.builder().setShaderState(RENDERTYPE_EYES_SHADER)
+                        .setTextureState(new TextureStateShard(texture,true,false))
+                        .setTransparencyState(SOFT_ADDITIVE).setWriteMaskState(COLOR_WRITE)
+                        .setCullState(NO_CULL).setDepthTestState(LEQUAL_DEPTH_TEST).createCompositeState(false));
+    }
 
     private FireRenderTypes(String name, VertexFormat format, VertexFormat.Mode mode, int size, boolean crumbling, boolean sort,
                             Runnable setup, Runnable clear) {

@@ -121,11 +121,11 @@ public final class FastTravelHandler {
             mob.resetFallDistance();
         }
 
-        // Travel takes time, but only when nobody else's clock would be changed under their feet.
+        // Travel takes time (also with others online, unless the server turned travelTimeMultiplayer off).
         int hours = 0;
         int perHour = WorldConfig.BLOCKS_PER_TRAVEL_HOUR.get();
         long online = player.server.getPlayerList().getPlayers().stream().filter(p -> !p.isSpectator()).count();
-        if (perHour > 0 && online <= 1) {
+        if (perHour > 0 && (online <= 1 || WorldConfig.TRAVEL_TIME_MULTIPLAYER.get())) {
             hours = Mth.clamp((int) Math.round(distance / perHour), 1, 72);
             RestManager.advanceTime(player.server, hours * (long) RestManager.TICKS_PER_HOUR);
         }

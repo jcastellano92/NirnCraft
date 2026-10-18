@@ -134,6 +134,15 @@ public final class Locks {
                 com.skycraft.tamriel.settlement.AnchorType.INN_DOOR, false);
     }
 
+    /** Whether the door at {@code pos} (lower half) is a jail's cell door or its cell-block gate (locked unless opened by key or pick). */
+    public static boolean isJailLockDoor(ServerLevel level, BlockPos pos) {
+        if (!(level.getBlockState(pos).getBlock() instanceof DoorBlock) || Jail.isJailDimension(level)) return false;
+        return com.skycraft.tamriel.settlement.SettlementAnchors.hasAnchor(level, pos,
+                com.skycraft.tamriel.settlement.AnchorType.JAIL_DOOR, false)
+                || com.skycraft.tamriel.settlement.SettlementAnchors.hasAnchor(level, pos,
+                com.skycraft.tamriel.settlement.AnchorType.JAIL_GATE, false);
+    }
+
     /**
      * The lock difficulty of the container or door at {@code pos}, or {@link #NOT_LOCKED}. Containers are decided (and
      * remembered) on first use; the decision is a pure function of seed and position, so a HUD look and a click agree.
@@ -148,6 +157,7 @@ public final class Locks {
         Integer stored = data.locks.get(key);
         if (stored != null) return stored;
         if (data.never.contains(key)) return NOT_LOCKED;
+        if (isJailLockDoor(level, pos)) return ADEPT;
         if (PlacedBlocks.isPlayerPlaced(level, pos) || Jail.isJailDimension(level)) return NOT_LOCKED;
 
         BlockEntity be = level.getBlockEntity(pos);

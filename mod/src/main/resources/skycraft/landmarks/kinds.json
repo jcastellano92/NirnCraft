@@ -1082,6 +1082,441 @@
    "clue": "a woodstack and a flint"
   },
   {
+   "id": "m_adit_timber",
+   "tier": "M",
+   "builder": "adit",
+   "radius": 7,
+   "w": {
+    "mountain": 5,
+    "high": 3,
+    "tundra": 2,
+    "volcanic": 2,
+    "ash": 1
+   },
+   "noun": "Adit",
+   "note": "miner",
+   "spread": 14,
+   "needs": [
+    "mountains"
+   ],
+   "purpose": "a drift mine the miners gave up on after the roof came down",
+   "context": "a hillside or mountain face at a trail",
+   "clue": "a chest cart on the rails and a journal"
+  },
+  {
+   "id": "m_adit_dwemer",
+   "tier": "M",
+   "builder": "adit",
+   "radius": 7,
+   "w": {
+    "mountain": 3,
+    "high": 2,
+    "ash": 2,
+    "volcanic": 2,
+    "tundra": 1
+   },
+   "style": "dwemer",
+   "noun": "Excavation",
+   "note": "miner",
+   "spread": 14,
+   "provinces": [
+    "skyrim",
+    "morrowind",
+    "high_rock",
+    "hammerfell",
+    "solstheim"
+   ],
+   "needs": [
+    "mountains"
+   ],
+   "purpose": "a drift mine the miners gave up on after the roof came down",
+   "context": "a hillside or mountain face at a trail",
+   "clue": "a chest cart on the rails and a journal"
+  },
+  {
+   "id": "m_overlook_bench",
+   "tier": "M",
+   "builder": "overlook",
+   "radius": 5,
+   "w": {
+    "mountain": 4,
+    "high": 5,
+    "coast": 3,
+    "tundra": 2,
+    "forest": 2,
+    "plains": 2,
+    "shore": 2,
+    "savanna": 1
+   },
+   "noun": "Overlook",
+   "note": "overlook",
+   "spread": 12,
+   "purpose": "a bench set where the land falls away, for travellers to rest and look",
+   "context": "a ridge, cliff or high bank",
+   "clue": "a satchel and a note left on the bench"
+  },
+  {
+   "id": "m_treehouse_stand",
+   "tier": "M",
+   "builder": "treehouse",
+   "radius": 4,
+   "w": {
+    "forest": 5,
+    "jungle": 3,
+    "marsh": 1
+   },
+   "noun": "Stand",
+   "cast": [
+    "npc:hunter"
+   ],
+   "note": "hunter",
+   "spread": 4,
+   "purpose": "a tree stand or tree house where someone watches or lives",
+   "context": "forest, off a trail",
+   "clue": "a ladder up the trunk and a hunter tally"
+  },
+  {
+   "id": "m_treehouse_hermit",
+   "tier": "M",
+   "builder": "treehouse",
+   "radius": 4,
+   "w": {
+    "forest": 3,
+    "jungle": 3,
+    "crystal": 3,
+    "mushroom": 1
+   },
+   "style": "hermit",
+   "noun": "Perch",
+   "cast": [
+    "npc:apothecary"
+   ],
+   "note": "hermit",
+   "spread": 4,
+   "purpose": "a tree stand or tree house where someone watches or lives",
+   "context": "forest, off a trail",
+   "clue": "a ladder up the trunk and a hunter tally"
+  },
+  {
+   "id": "m_treehouse_lookout",
+   "tier": "M",
+   "builder": "treehouse",
+   "radius": 4,
+   "w": {
+    "forest": 3,
+    "jungle": 2,
+    "plains": 1,
+    "savanna": 1
+   },
+   "style": "lookout",
+   "noun": "Lookout",
+   "spread": 4,
+   "purpose": "a tree stand or tree house where someone watches or lives",
+   "context": "forest, off a trail",
+   "clue": "a ladder up the trunk and a hunter tally"
+  },
+  {
+   "id": "m_frozen_explorer",
+   "tier": "M",
+   "builder": "frozen",
+   "radius": 5,
+   "w": {
+    "tundra": 5,
+    "mountain": 3,
+    "high": 3
+   },
+   "noun": "Camp",
+   "note": "explorer",
+   "spread": 6,
+   "needs": [
+    "cold"
+   ],
+   "purpose": "an explorer who did not come down the mountain",
+   "context": "cold high ground",
+   "clue": "a frozen journal and a signal flag"
+  },
+  {
+   "id": "m_castaway",
+   "tier": "M",
+   "builder": "castaway",
+   "radius": 6,
+   "w": {
+    "coast": 6,
+    "shore": 2
+   },
+   "noun": "Shelter",
+   "note": "castaway",
+   "spread": 6,
+   "needs": [
+    "coast"
+   ],
+   "purpose": "a shelter built by someone cast ashore",
+   "context": "a beach",
+   "clue": "a tally of days and HELP in stones"
+  },
+  {
+   "id": "m_angler",
+   "tier": "M",
+   "builder": "angler",
+   "radius": 6,
+   "w": {
+    "shore": 6,
+    "coast": 3,
+    "marsh": 2,
+    "forest": 1,
+    "plains": 1
+   },
+   "noun": "Jetty",
+   "cast": [
+    "npc:fisher"
+   ],
+   "note": "angler",
+   "spread": 6,
+   "purpose": "a jetty and a bait barrel where someone fishes",
+   "context": "a river bank or lake shore",
+   "clue": "a book of catches"
+  },
+  {
+   "id": "s_waystone",
+   "tier": "S",
+   "builder": "waystone",
+   "radius": 3,
+   "w": {
+    "tundra": 2,
+    "forest": 3,
+    "plains": 3,
+    "marsh": 2,
+    "desert": 2,
+    "savanna": 2,
+    "ash": 2,
+    "volcanic": 1,
+    "jungle": 2,
+    "crystal": 2,
+    "mushroom": 1,
+    "mountain": 3,
+    "coast": 1,
+    "high": 2
+   },
+   "purpose": "a marker stone in the local masonry, naming the way to the nearest place",
+   "context": "a trail",
+   "clue": "a sign with a name, a direction and a distance"
+  },
+  {
+   "id": "m_den_beast",
+   "tier": "M",
+   "builder": "den",
+   "radius": 6,
+   "w": {
+    "forest": 3,
+    "tundra": 4,
+    "mountain": 4,
+    "plains": 1,
+    "savanna": 1,
+    "ash": 1
+   },
+   "noun": "Den",
+   "note": "traveller",
+   "spread": 8,
+   "purpose": "the den of a beast under a rocky overhang",
+   "context": "rough ground away from roads",
+   "clue": "gnawed bones and a victim pack"
+  },
+  {
+   "id": "m_cabin_timber",
+   "tier": "M",
+   "builder": "cabin",
+   "radius": 7,
+   "w": {
+    "forest": 4,
+    "plains": 3,
+    "tundra": 2,
+    "mountain": 2,
+    "savanna": 1,
+    "crystal": 2
+   },
+   "noun": "Cabin",
+   "cast": [
+    "npc:citizen"
+   ],
+   "note": "cabin",
+   "spread": 4,
+   "purpose": "a lone cabin where someone chose to live",
+   "context": "the end of a track, far from towns",
+   "clue": "smoke, a garden and a kept journal"
+  },
+  {
+   "id": "m_cabin_stone",
+   "tier": "M",
+   "builder": "cabin",
+   "radius": 7,
+   "w": {
+    "mountain": 3,
+    "tundra": 3,
+    "coast": 2,
+    "plains": 1,
+    "ash": 1
+   },
+   "style": "stone",
+   "noun": "Cottage",
+   "cast": [
+    "npc:citizen"
+   ],
+   "note": "cabin",
+   "spread": 4,
+   "purpose": "a lone cabin where someone chose to live",
+   "context": "the end of a track, far from towns",
+   "clue": "smoke, a garden and a kept journal"
+  },
+  {
+   "id": "m_cabin_mud",
+   "tier": "M",
+   "builder": "cabin",
+   "radius": 7,
+   "w": {
+    "desert": 4,
+    "savanna": 3,
+    "ash": 3,
+    "plains": 1,
+    "volcanic": 1
+   },
+   "style": "mud",
+   "noun": "Dwelling",
+   "cast": [
+    "npc:citizen"
+   ],
+   "note": "cabin",
+   "spread": 4,
+   "purpose": "a lone cabin where someone chose to live",
+   "context": "the end of a track, far from towns",
+   "clue": "smoke, a garden and a kept journal"
+  },
+  {
+   "id": "m_cabin_stilt",
+   "tier": "M",
+   "builder": "cabin",
+   "radius": 5,
+   "w": {
+    "marsh": 5,
+    "jungle": 3,
+    "shore": 3,
+    "mushroom": 1
+   },
+   "style": "stilt",
+   "noun": "Stilt House",
+   "cast": [
+    "npc:citizen"
+   ],
+   "note": "cabin",
+   "spread": 5,
+   "purpose": "a lone cabin where someone chose to live",
+   "context": "the end of a track, far from towns",
+   "clue": "smoke, a garden and a kept journal"
+  },
+  {
+   "id": "m_alcove_shrine",
+   "tier": "M",
+   "builder": "alcove",
+   "radius": 5,
+   "w": {
+    "mountain": 4,
+    "high": 3,
+    "tundra": 2,
+    "volcanic": 2,
+    "ash": 2,
+    "desert": 2,
+    "forest": 1,
+    "savanna": 1
+   },
+   "noun": "Shrine",
+   "note": "pilgrim",
+   "spread": 10,
+   "purpose": "a shrine cut into the rock at the end of a path",
+   "context": "rock faces and high ground",
+   "clue": "candles, an offering and a note"
+  },
+  {
+   "id": "m_well_rest",
+   "tier": "M",
+   "builder": "well",
+   "radius": 5,
+   "w": {
+    "desert": 5,
+    "savanna": 4,
+    "plains": 1,
+    "ash": 1
+   },
+   "noun": "Well",
+   "cast": [
+    "npc:merchant"
+   ],
+   "note": "traveller",
+   "spread": 4,
+   "purpose": "a well and an awning where travellers wait out the heat",
+   "context": "dry country on a trail",
+   "clue": "a sign asking you to take only what you need"
+  },
+  {
+   "id": "m_apiary",
+   "tier": "M",
+   "builder": "apiary",
+   "radius": 5,
+   "w": {
+    "plains": 4,
+    "forest": 3,
+    "crystal": 3,
+    "savanna": 1
+   },
+   "noun": "Apiary",
+   "note": "beekeeper",
+   "spread": 4,
+   "purpose": "hives kept at the edge of a meadow",
+   "context": "flower meadows near a track",
+   "clue": "hives, a smoker and a keeper book"
+  },
+  {
+   "id": "m_herb_patch",
+   "tier": "M",
+   "builder": "herbs",
+   "radius": 5,
+   "w": {
+    "forest": 3,
+    "marsh": 3,
+    "tundra": 2,
+    "plains": 2,
+    "jungle": 2,
+    "mountain": 1
+   },
+   "noun": "Garden",
+   "cast": [
+    "npc:apothecary"
+   ],
+   "note": "herbalist",
+   "spread": 4,
+   "purpose": "an alchemist patch of herbs",
+   "context": "soil beside a path",
+   "clue": "a brewing stand and a herbalist notes"
+  },
+  {
+   "id": "m_watch_post",
+   "tier": "M",
+   "builder": "watch_post",
+   "radius": 5,
+   "w": {
+    "plains": 3,
+    "forest": 2,
+    "mountain": 3,
+    "tundra": 2,
+    "savanna": 2,
+    "high": 2
+   },
+   "noun": "Watch",
+   "note": "watch",
+   "spread": 5,
+   "purpose": "an old watch post fallen into disuse",
+   "context": "a rise above a trail",
+   "clue": "a cold brazier and the watch log"
+  },
+  {
    "id": "l_rock_arch",
    "tier": "L",
    "builder": "rock_arch",

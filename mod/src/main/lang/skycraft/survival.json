@@ -24,6 +24,8 @@
   "dialogue.skycraft.survival.cure": "Can you cure my diseases? (%s gold)",
   "dialogue.skycraft.survival.food": "What have you got to eat and drink?",
   "dialogue.skycraft.survival.rent": "I'd like a room for the night. (%s gold)",
+  "dialogue.skycraft.survival.rent_already": "I'd like a room for the night. (You already have one here)",
+  "dialogue.skycraft.survival.rent_full": "I'd like a room for the night. (No rooms free)",
   "dialogue.skycraft.survival.rumors": "Heard any rumors?",
   "effect.skycraft.ataxia": "Ataxia",
   "effect.skycraft.ataxia.description": "Lockpicking and Pickpocket are 25% harder.",

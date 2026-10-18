@@ -564,6 +564,7 @@ public final class FestivalCalendar {
             if (f.month() < 1 || f.month() > 12) errors.add(f.id() + ": invalid month " + f.month());
             if (f.day() < 1 || f.day() > 30) errors.add(f.id() + ": invalid day " + f.day());
             if (f.dayOfYear() < 1 || f.dayOfYear() > 360) errors.add(f.id() + ": invalid dayOfYear " + f.dayOfYear());
+            if (f.dayOfYear() != (f.month()-1)*DAYS_PER_MONTH+f.day()) errors.add(f.id()+": month/day disagree with dayOfYear");
             if (f.purpose().isBlank()) errors.add(f.id() + ": missing purpose");
             if (f.needs().isEmpty()) errors.add(f.id() + ": missing needs");
             if (f.why().isEmpty()) errors.add(f.id() + ": missing why");

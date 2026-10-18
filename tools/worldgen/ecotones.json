@@ -743,25 +743,6 @@
    ]
   }
  },
- "skyrim/whiterun": {
-  "share": 0.25,
-  "add": [
-   [
-    "pale_heath",
-    1
-   ]
-  ],
-  "bias": {
-   "linear": [
-    -387,
-    -413,
-    0.294,
-    -0.956,
-    250,
-    0.5
-   ]
-  }
- },
  "skyrim/winterhold": {
   "share": 0.3,
   "add": [

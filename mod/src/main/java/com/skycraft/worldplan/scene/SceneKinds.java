@@ -13,7 +13,10 @@ public final class SceneKinds {
     /** Landmark builder families that are human traces (placed only by scenes). */
     public static final Set<String> LANDMARK_BUILDERS = Set.of("grave", "cairn_token", "bedroll", "offering", "pack", "warning",
             "remains", "fire_ring", "charms", "pilgrim", "hunters", "travellers", "smuggler", "ambush", "skirmish", "boat_wreck",
-            "sacrifice", "blind", "claim", "dig", "beacon");
+            "sacrifice", "blind", "claim", "dig", "beacon",
+            // trailside and trail's-end vignettes
+            "adit", "overlook", "treehouse", "frozen", "castaway", "angler", "waystone", "den", "cabin", "alcove", "well", "apiary",
+            "herbs", "watch_post");
     /** Landmark place variants whose edge is a ruin's edge. */
     public static final Set<String> RUIN_VARIANTS = Set.of("ruin", "dwemer", "altar", "monument", "stones", "black_book_altar");
 

@@ -1,0 +1,20 @@
+gradle.projectsEvaluated {
+    def p = gradle.rootProject
+    def compiled = p.layout.buildDirectory.dir('classes/geographyAudit')
+    def compileAudit = p.tasks.register('compileGeographyAudit', JavaCompile) {
+        dependsOn p.tasks.named('classes')
+        source p.files(new File(p.projectDir, '../tools/qa/GeographyAudit.java'))
+        classpath = p.sourceSets.test.runtimeClasspath
+        destinationDirectory = compiled
+        sourceCompatibility = '17'
+        targetCompatibility = '17'
+        options.encoding = 'UTF-8'
+    }
+    p.tasks.register('geographyAudit', JavaExec) {
+        dependsOn compileAudit
+        classpath = p.files(compiled) + p.sourceSets.test.runtimeClasspath
+        mainClass = 'com.skycraft.qa.GeographyAudit'
+        maxHeapSize = '2G'
+        args new File(p.projectDir, '../dist/world-tests/geography.json').absolutePath
+    }
+}

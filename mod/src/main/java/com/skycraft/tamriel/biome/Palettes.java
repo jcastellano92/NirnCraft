@@ -54,7 +54,7 @@ public final class Palettes {
             synchronized (Palettes.class) {
                 r = raw;
                 if (r == null) {
-                    try (InputStream in = Palettes.class.getResourceAsStream(PATH)) {
+                    try (InputStream in = com.skycraft.dev.DevResources.open(Palettes.class, PATH)) {
                         if (in == null) throw new IllegalStateException("missing " + PATH);
                         r = JsonParser.parseReader(new InputStreamReader(in, StandardCharsets.UTF_8)).getAsJsonObject();
                     } catch (java.io.IOException e) {

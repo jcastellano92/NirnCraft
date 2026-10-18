@@ -452,11 +452,15 @@ def check_level_policy() -> dict[str, Any]:
 
 def check_province_tail(province: str, field_ids: set[str], result: dict[str, Any], errors: list[str]) -> None:
     if province == "skyrim":
-        scenes_rep = check_scenes(field_ids)
+        # These libraries now span Tamriel. Restricting citations to the Skyrim
+        # sheet incorrectly rejected valid foreign encounters and festivals.
+        all_ids = set().union(*(collect_field_ids(json.loads(p.read_text(encoding="utf-8")))
+                                for p in WORLD_DIR.glob("*.json")))
+        scenes_rep = check_scenes(all_ids)
         result["scenes"] = scenes_rep
         errors.extend(scenes_rep["errors"])
 
-        fest_rep = check_festivals(field_ids)
+        fest_rep = check_festivals(all_ids)
         result["festivals"] = fest_rep
         errors.extend(fest_rep["errors"])
 
@@ -472,6 +476,8 @@ def format_markdown(reports: list[dict[str, Any]]) -> str:
         lines.append(f"## Province: `{prov}` ({rep['total_creatures']} creatures)")
         lines.append("")
         dc = rep["diet_counts"]
+        for warning in rep.get("warnings", []):
+            lines.append("COVERAGE GAP: " + warning + ". Runtime spawn tables are not validated by this legacy creature-sheet check.")
         lines.append(
             "Diets: "
             + ", ".join(f"{k}={v}" for k, v in dc.items() if v > 0)
@@ -541,7 +547,7 @@ def main() -> int:
     else:
         for p in sorted(WORLD_DIR.glob("*.json")):
             data = json.loads(p.read_text(encoding="utf-8"))
-            if "creatures" in data or p.stem == "skyrim":
+            if args.all or "creatures" in data or p.stem == "skyrim":
                 paths.append(p)
 
     reports = [check_province(p) for p in paths]

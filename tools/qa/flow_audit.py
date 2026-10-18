@@ -21,6 +21,8 @@ import zlib
 from collections import Counter, defaultdict
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0,HERE)
+import geography
 ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
 RES = os.path.join(ROOT, "mod", "src", "main", "resources")
 SKY = os.path.join(RES, "skycraft")
@@ -120,6 +122,7 @@ class MapGrid:
         self.counts = Counter()
         for r in self.reg_rows:
             self.counts.update(r)
+        self.oracle=geography.load()
 
     def cell_coords(self, x, z):
         cx = int((x - self.min_x) // self.cell)
@@ -130,13 +133,14 @@ class MapGrid:
         cx, cz = self.cell_coords(x, z)
         if 0 <= cx < self.w and 0 <= cz < self.h:
             return self.reg_rows[cz][cx]
-        return None
+        return self.oracle.index_at(x,z) if self.oracle else None
 
     def elev_at(self, x, z):
         cx, cz = self.cell_coords(x, z)
         if 0 <= cx < self.w and 0 <= cz < self.h:
             return self.elev[cz][cx]
-        return 64.0
+        value=self.oracle.elev_at(x,z) if self.oracle else None
+        return value if value is not None else float('nan')
 
     def los_clear(self, x0, y0, z0, x1, y1, z1, steps=8):
         """Check whether the ray from (x0, y0, z0) to (x1, y1, z1) clears intermediate terrain on elevation.png."""
@@ -364,7 +368,9 @@ def main(argv=None):
     regs = [r for r in jload(os.path.join(SKY, "tamriel", "regions.json"), []) if r.get("kind") != "sea"]
     reg_by_idx = {r["index"]: r["id"] for r in regs}
     reg_by_id = {r["id"]: r for r in regs}
-    area_km2 = {r["id"]: max(0.01, grid.counts.get(r["index"], 0) * CELL_KM2) for r in regs}
+    area_km2 = {r["id"]: grid.counts.get(r["index"], 0)*CELL_KM2
+                + (grid.oracle.area(r['id']) if grid.oracle else 0) for r in regs}
+    area_km2 = {rid:area if area>0 else float('nan') for rid,area in area_km2.items()}
 
     # Load places
     p_idx = jload(os.path.join(SKY, "tamriel", "places", "index.json"), [])
@@ -1104,7 +1110,13 @@ def main(argv=None):
             w_share = (why_ok / float(why_tot)) if why_tot else 0.0
             m["F-WHY"] = ("pass" if w_share >= 1.0 else "fail", f"{w_share * 100:.0f}% ({why_ok}/{why_tot})")
 
-        results[rid] = {"km2": round(km2, 2), "metrics": m}
+        if not math.isfinite(km2):
+            for metric in ('F-TRAVEL','F-REWARD-RATE','F-MICRO'):
+                m[metric]=('na','n/a (needs current runtime geography oracle; area unknown)')
+        if not grid.oracle and grid.counts.get(r['index'],0)==0:
+            for metric in ('F-HOOK','F-VISTA','F-WEENIE','F-DETOUR','F-SIGN','F-QUIET','F-LOOP'):
+                m[metric]=('na','n/a (outside authored raster; needs current runtime geography oracle)')
+        results[rid] = {"km2": round(km2, 2) if math.isfinite(km2) else None, "metrics": m}
         for k_flw, (st_code, _val) in m.items():
             status_counts[(k_flw, st_code)] += 1
 

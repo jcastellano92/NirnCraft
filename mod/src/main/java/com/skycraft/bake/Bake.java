@@ -88,6 +88,7 @@ public final class Bake {
         /** Other data files the baked data reads. */
     private static final String[] DATA_FILES = {"/skycraft/roads/named_roads.json", "/skycraft/roads/corridors.json", "/skycraft/scatter/kinds.json",
             "/skycraft/scatter/rules.json", "/skycraft/scatter/loreweb_clues.json", "/skycraft/landmarks/kinds.json",
+            "/skycraft/worldplan/built_places.json",
             "/skycraft/tamriel/styles/akaviri.json", "/skycraft/tamriel/styles/altmer.json", "/skycraft/tamriel/styles/argonian.json",
             "/skycraft/tamriel/styles/atmoran.json", "/skycraft/tamriel/styles/bosmer.json", "/skycraft/tamriel/styles/breton.json",
             "/skycraft/tamriel/styles/dunmer.json", "/skycraft/tamriel/styles/imperial.json", "/skycraft/tamriel/styles/khajiit.json",
@@ -103,6 +104,11 @@ public final class Bake {
     private static volatile String inputs;
 
     private Bake() {}
+
+    /** Development JSON reloads change bake inputs; never keep the old digest. */
+    public static void invalidateInputs() {
+        inputs = null;
+    }
 
     /** Hex SHA-256 of all inputs (cached). */
     public static String inputsHash() {
@@ -142,7 +148,7 @@ public final class Bake {
     }
 
     private static byte[] bytes(String path) {
-        try (InputStream in = Bake.class.getResourceAsStream(path)) {
+        try (InputStream in = com.skycraft.dev.DevResources.open(Bake.class, path)) {
             return in == null ? null : in.readAllBytes();
         } catch (IOException e) {
             return null;
@@ -256,8 +262,12 @@ public final class Bake {
                 byte[] written = decode(Files.readAllBytes(dir.resolve(b.name() + ".bin")), b.name());
                 if (written == null) {
                     bad.add(b.name() + ".bin unreadable after the rebake");
-                } else if (!java.util.Arrays.equals(written, b.compute().run())) {
-                    bad.add(b.name() + ".bin differs from a second live computation (non-deterministic bake)");
+                } else {
+                    byte[] repeated=b.compute().run();
+                    if (!java.util.Arrays.equals(written,repeated)) {
+                        Files.write(dir.resolve(b.name()+".verify-mismatch.raw"),repeated);
+                        bad.add(b.name() + ".bin differs from a second live computation (non-deterministic bake)");
+                    }
                 }
             }
         } catch (IOException | RuntimeException e) {

@@ -59,7 +59,9 @@ public final class CrimeHud {
                 status = line;
             }
         }
-        if (status != null) drawSmall(g, font, status, width / 2, 32, 0.8f, 0xE0 << 24 | color);
+        // the enemy health bar owns the strip right under the compass: keep the bounty line clear of it
+        int statusY = com.skycraft.client.hud.TargetHud.isVisible() ? 62 : 32;
+        if (status != null) drawSmall(g, font, status, width / 2, statusY, 0.8f, 0xE0 << 24 | color);
 
         // ---- Skyrim Sneak Detection Eye
         if (mc.player.isCrouching()) {
@@ -90,6 +92,11 @@ public final class CrimeHud {
                 drawSmall(g, font, prompt, cx, cy, 0.75f, 0xD0E8E2D0);
                 return;
             }
+            if (mc.crosshairPickEntity instanceof net.minecraft.world.entity.decoration.ArmorStand fallen && fallen.isAlive()
+                    && fallen.hasCustomName() && hasGear(fallen)) {
+                drawSmall(g, font, Component.literal("[F] Loot  " + fallen.getCustomName().getString() + "'s Remains"), cx, cy, 0.75f, 0xD0E8E2D0);
+                return;
+            }
             if (mc.crosshairPickEntity instanceof net.minecraft.world.entity.LivingEntity talker && talker.isAlive()
                     && (talker instanceof AbstractVillager || talker instanceof com.skycraft.society.entity.NpcEntity)) {
                 if (mc.player.isShiftKeyDown()) {
@@ -113,6 +120,17 @@ public final class CrimeHud {
                 } else {
                     drawSmall(g, font, Component.literal("Growing  " + block.getName().getString()), cx, cy, 0.75f, 0x80AAAAAA);
                 }
+                return;
+            }
+
+            // a trap the player can disarm (crouch and interact): tripwires, their hooks, dungeon pressure plates
+            boolean wire = block instanceof net.minecraft.world.level.block.TripWireBlock
+                    || (block instanceof net.minecraft.world.level.block.TripWireHookBlock
+                    && bstate.getValue(net.minecraft.world.level.block.TripWireHookBlock.ATTACHED));
+            boolean plate = block instanceof net.minecraft.world.level.block.BasePressurePlateBlock && !mc.level.canSeeSky(bpos.above());
+            if (wire || plate) {
+                String key = mc.player.isShiftKeyDown() ? "[F] Disarm  " : "[Crouch + F] Disarm  ";
+                drawSmall(g, font, Component.literal(key + (wire ? "Tripwire" : "Pressure Plate")), cx, cy, 0.75f, 0xD0E8E2D0);
                 return;
             }
 
@@ -354,6 +372,14 @@ public final class CrimeHud {
 
         drawSmall(g, font, Component.literal(eyeBrackets), cx, cy - 7, 1.0f, color);
         drawSmall(g, font, label, cx, cy + 4, 0.75f, color);
+    }
+
+    /** True when an armour stand (a scene's fallen body) still wears or holds anything. */
+    private static boolean hasGear(net.minecraft.world.entity.decoration.ArmorStand stand) {
+        for (net.minecraft.world.entity.EquipmentSlot slot : net.minecraft.world.entity.EquipmentSlot.values()) {
+            if (!stand.getItemBySlot(slot).isEmpty()) return true;
+        }
+        return false;
     }
 
     private static void drawSmall(GuiGraphics g, Font font, Component text, int x, int y, float scale, int argb) {

@@ -21,7 +21,7 @@ public final class WeatherProfile {
     public static final WeatherProfile SKYRIM_COLD = register("skyrim_cold", Ambient.SNOW, -10_000, true, 3600, 12000,
             WeatherKind.CLEAR, 4, WeatherKind.CLOUDY, 4, WeatherKind.OVERCAST, 2, WeatherKind.SNOW, 3, WeatherKind.BLIZZARD, 1,
             WeatherKind.FOG, 1, WeatherKind.GALE, 1);
-    public static final WeatherProfile SKYRIM_TEMPERATE = register("skyrim_temperate", Ambient.NONE, 190, true, 4800, 14400,
+    public static final WeatherProfile SKYRIM_TEMPERATE = register("skyrim_temperate", Ambient.NONE, 250, true, 4800, 14400,
             WeatherKind.CLEAR, 6, WeatherKind.CLOUDY, 5, WeatherKind.OVERCAST, 2, WeatherKind.FOG, 1, WeatherKind.DRIZZLE, 2,
             WeatherKind.RAIN, 2, WeatherKind.STORM, 1);
     public static final WeatherProfile ASH = register("ash", Ambient.ASH, 10_000, false, 3600, 12000,
@@ -61,19 +61,19 @@ public final class WeatherProfile {
 
     // ---- tuned climates of particular regions (see REGIONS below; regions.json names the broad climate)
     /** Whiterun's open tundra: mostly fair or broken cumulus, the odd shower and summer storm, a breezy plain. */
-    public static final WeatherProfile WHITERUN = register("whiterun", Ambient.NONE, 190, true, 4800, 16800,
+    public static final WeatherProfile WHITERUN = register("whiterun", Ambient.NONE, 250, true, 4800, 16800,
             WeatherKind.CLEAR, 7, WeatherKind.CLOUDY, 6, WeatherKind.OVERCAST, 2, WeatherKind.FOG, 1, WeatherKind.DRIZZLE, 1,
             WeatherKind.RAIN, 2, WeatherKind.STORM, 1, WeatherKind.GALE, 1).mist(0.15f);
     /** Falkreath's pine forests: misty and dappled with broken clouds, frequent gentle rain. */
-    public static final WeatherProfile FALKREATH = register("falkreath", Ambient.NONE, 200, true, 3600, 12000,
+    public static final WeatherProfile FALKREATH = register("falkreath", Ambient.NONE, 250, true, 3600, 12000,
             WeatherKind.CLEAR, 4, WeatherKind.CLOUDY, 5, WeatherKind.OVERCAST, 2, WeatherKind.FOG, 2, WeatherKind.DRIZZLE, 2,
             WeatherKind.RAIN, 2, WeatherKind.STORM, 1).mist(0.35f);
     /** The Rift's golden autumn: bright days, lake mist in the mornings. */
-    public static final WeatherProfile RIFT = register("the_rift", Ambient.NONE, 210, true, 4800, 14400,
+    public static final WeatherProfile RIFT = register("the_rift", Ambient.NONE, 250, true, 4800, 14400,
             WeatherKind.CLEAR, 6, WeatherKind.CLOUDY, 5, WeatherKind.OVERCAST, 2, WeatherKind.FOG, 2, WeatherKind.DRIZZLE, 2,
             WeatherKind.RAIN, 2, WeatherKind.STORM, 1).mist(0.35f);
     /** The Reach's crags: low cloud and mountain drizzle. */
-    public static final WeatherProfile REACH = register("the_reach", Ambient.NONE, 200, true, 3600, 12000,
+    public static final WeatherProfile REACH = register("the_reach", Ambient.NONE, 240, true, 3600, 12000,
             WeatherKind.CLEAR, 4, WeatherKind.CLOUDY, 4, WeatherKind.OVERCAST, 2, WeatherKind.FOG, 2, WeatherKind.DRIZZLE, 3,
             WeatherKind.RAIN, 2, WeatherKind.STORM, 1).mist(0.28f);
     /** Haafingar's cliffs over the Sea of Ghosts: sea fog, rain turning to snow, gales off the water. */

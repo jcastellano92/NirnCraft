@@ -51,7 +51,7 @@ public final class DevReload {
         String target = rawTarget == null ? "" : rawTarget.trim().toLowerCase(Locale.ROOT);
         long t0 = System.nanoTime();
         try {
-            int synced = syncResources();
+            int synced = syncResources() + DevResources.activate();
             List<String> lines = new ArrayList<>();
             switch (target) {
                 case "cityplans" -> lines.add(reloadCityPlans());

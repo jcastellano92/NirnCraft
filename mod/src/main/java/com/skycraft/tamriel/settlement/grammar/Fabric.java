@@ -530,7 +530,7 @@ public final class Fabric {
         int roll = x.r.nextInt(12);
         Spec s;
         Direction face = Direction.SOUTH;
-        boolean urbanCore = z == Zone.CENTRE || z == Zone.NOBLE || z == Zone.GATE || (x.tier >= 2 && Math.hypot(lx, lz) < x.R * 0.65);
+        boolean urbanCore = z == Zone.CENTRE || z == Zone.NOBLE || z == Zone.GATE || (x.tier >= 2 && Math.hypot(lx, lz) < x.R * 0.8);
         if (roll < 4 && !urbanCore) {
             s = plan.at(Archetype.GARDEN, lx, lz, face).size(5 + 2 * x.r.nextInt(2), 5);
             s.variant = Zoning.cropVariant(x);

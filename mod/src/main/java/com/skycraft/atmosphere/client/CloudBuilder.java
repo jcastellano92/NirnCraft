@@ -496,12 +496,12 @@ final class CloudBuilder {
         }
     }
 
-    /** Towering storm clouds: a dark-based column with an anvil spreading downwind; rain or snow falls beneath. */
+    /** Towering storm clouds: a dark-based column with crisp cauliflower turrets and a wide glaciated anvil spreading downwind. */
     private void cumulonimbus() {
-        final int S = 330;
-        int full = job.fancy() ? 42 : 20;
+        final int S = 310;
+        int full = job.fancy() ? 52 : 26;
         double ox = job.driftX(), oz = job.driftZ();
-        float reach = R + 200;
+        float reach = R + 240;
         int i0 = (int) Math.floor((job.camX() - ox - reach) / S), i1 = (int) Math.floor((job.camX() - ox + reach) / S);
         int j0 = (int) Math.floor((job.camZ() - oz - reach) / S), j1 = (int) Math.floor((job.camZ() - oz + reach) / S);
         float H = job.height();
@@ -517,66 +517,70 @@ final class CloudBuilder {
                 if (hd > reach) continue;
                 weather(wx, wz, p);
                 float n = coverage(wsx, wsz, 31);
-                float v = p[CloudClimate.CB] * (0.35f + 0.95f * n);
-                float strength = clamp01((v - hash(seed, 3)) / 0.16f);
+                float v = p[CloudClimate.CB] * (0.38f + 0.95f * n);
+                float strength = clamp01((v - hash(seed, 3) * 0.85f) / 0.16f);
                 if (strength <= 0.01f) continue;
                 nTowers++;
-                float r = (80f + 55f * hash(seed, 4)) * (0.75f + 0.35f * p[CloudClimate.CB]) * (0.6f + 0.4f * strength);
-                float base = H - 28f;
-                float top = H + (240f + 160f * hash(seed, 5)) * (0.55f + 0.45f * p[CloudClimate.CB]) * (0.5f + 0.5f * strength);
+                float r = (88f + 60f * hash(seed, 4)) * (0.78f + 0.35f * p[CloudClimate.CB]) * (0.6f + 0.4f * strength);
+                float base = H - 30f;
+                float top = H + (260f + 175f * hash(seed, 5)) * (0.60f + 0.40f * p[CloudClimate.CB]) * (0.55f + 0.45f * strength);
                 float hgt = top - base;
                 float cy = base + hgt * 0.4f - (float) job.camY();
                 float dist = (float) Math.sqrt(hd * hd + cy * cy);
-                float count = lerp(smooth(300f, 1600f, dist), full, 8f);
-                float[] alb = albedo(p, 0.94f);
-                float shadow = 0.62f + 0.25f * p[CloudClimate.DARK];
-                int levels = 7;
+                float count = lerp(smooth(320f, 1750f, dist), full, 12f);
+                float[] darkAlb = albedo(p, 0.90f);
+                float baseShadow = 0.68f + 0.26f * p[CloudClimate.DARK];
+                int levels = 8;
                 for (int k = 0; k < full && k < count + 1; k++) {
                     float lod = clamp01(count - k);
                     float px, py, pz, rad, squash = 1f;
                     int cell;
                     if (k < levels) {
-                        // the core column, bottom to top, the top level spreading into the anvil
-                        float t = (k + 0.5f) / levels;
-                        py = base + hgt * t * 0.9f;
-                        float lr = r * (1.0f - 0.25f * t);
-                        px = (hash(seed, 100 + k) - 0.5f) * 0.25f * r;
-                        pz = (hash(seed, 110 + k) - 0.5f) * 0.25f * r;
-                        rad = lr * 0.95f;
-                        cell = k == 0 ? C_FLAT : C_PUFF + (k & 3);
-                        if (k == levels - 1) {
-                            rad = r * 1.5f;
-                            px += wdx * r * 0.55f;
-                            pz += wdz * r * 0.55f;
-                            squash = 0.5f;
+                        // Core updraft column, bottom to top, flaring into a wide flat glaciated anvil canopy at the tropopause
+                        float t = (k + 0.4f) / levels;
+                        py = base + hgt * t * 0.92f;
+                        float lr = r * (1.05f - 0.22f * t);
+                        px = (hash(seed, 100 + k) - 0.5f) * 0.22f * r;
+                        pz = (hash(seed, 110 + k) - 0.5f) * 0.22f * r;
+                        rad = lr * 0.96f;
+                        cell = k == 0 ? C_FLAT : (k < 4 ? C_BILLOW : C_PUFF + (k & 3));
+                        if (k >= levels - 2) {
+                            float anvilTier = (k == levels - 1) ? 2.15f : 1.65f;
+                            rad = r * anvilTier;
+                            px += wdx * r * (0.35f + 0.30f * (k - (levels - 2)));
+                            pz += wdz * r * (0.35f + 0.30f * (k - (levels - 2)));
+                            squash = (k == levels - 1) ? 0.32f : 0.44f;
+                            cell = (k == levels - 1) ? C_FLAT : C_PUFF + (k & 3);
                         }
-                    } else if (k < levels + 28) {
+                    } else if (k < levels + 30) {
+                        // Crisp cauliflower cumulus congestus turrets ringing the lower/mid updraft & wide anvil rim
                         int m = k - levels;
                         int level = m % levels;
-                        float t = (level + 0.5f) / levels;
+                        float t = (level + 0.45f) / levels;
                         float a = hash(seed, 200 + m) * 6.2832f;
-                        float lr = r * (1.0f - 0.25f * t);
-                        px = (float) Math.cos(a) * lr * 0.62f;
-                        pz = (float) Math.sin(a) * lr * 0.62f;
-                        py = base + hgt * t * 0.9f + (hash(seed, 300 + m) - 0.5f) * hgt * 0.08f;
-                        rad = lr * (0.42f + 0.15f * hash(seed, 400 + m));
-                        cell = C_PUFF + (m & 3);
-                        if (level == levels - 1) {
-                            px = px * 1.6f + wdx * r * 0.6f;
-                            pz = pz * 1.6f + wdz * r * 0.6f;
-                            squash = 0.55f;
+                        float lr = r * (1.12f - 0.28f * t);
+                        px = (float) Math.cos(a) * lr * (level < 3 ? 0.82f : 0.64f);
+                        pz = (float) Math.sin(a) * lr * (level < 3 ? 0.82f : 0.64f);
+                        py = base + hgt * t * 0.88f + (hash(seed, 300 + m) - 0.5f) * hgt * 0.07f;
+                        rad = lr * (0.45f + 0.18f * hash(seed, 400 + m));
+                        cell = (level < 4 && (m & 1) == 0) ? C_BILLOW : C_PUFF + (m & 3);
+                        if (level >= levels - 2) {
+                            px = px * 1.95f + wdx * r * 0.55f;
+                            pz = pz * 1.95f + wdz * r * 0.55f;
+                            rad *= 1.35f;
+                            squash = 0.36f;
                         }
                     } else {
-                        // anvil overhang drifting downwind
-                        int m = k - levels - 28;
-                        float a = (hash(seed, 500 + m) - 0.5f) * 1.8f;
-                        float along = r * (1.0f + 0.6f * hash(seed, 510 + m));
-                        px = wdx * along + (-wdz) * a * r;
-                        pz = wdz * along + wdx * a * r;
-                        py = base + hgt * 0.92f;
-                        rad = r * (0.55f + 0.2f * hash(seed, 520 + m));
-                        squash = 0.45f;
-                        cell = C_PUFF + (m & 3);
+                        // Wide fibrous glaciated anvil overhang spreading radially and downwind
+                        int m = k - levels - 30;
+                        float a = (hash(seed, 500 + m) - 0.5f) * 2.35f;
+                        float along = r * (0.85f + 1.05f * hash(seed, 510 + m));
+                        px = wdx * along + (-wdz) * a * r * 1.15f;
+                        pz = wdz * along + wdx * a * r * 1.15f;
+                        py = base + hgt * (0.88f + 0.07f * hash(seed, 515 + m));
+                        rad = r * (0.72f + 0.32f * hash(seed, 520 + m));
+                        squash = 0.30f;
+                        cell = (m % 3 == 0) ? C_FLAT : C_PUFF + (m & 3);
                     }
                     float x = dx + px, y = py - (float) job.camY(), z = dz + pz;
                     float d = (float) Math.sqrt(x * x + y * y + z * z);
@@ -584,20 +588,26 @@ final class CloudBuilder {
                     float alpha = 0.98f * strength * lod * near;
                     if (alpha < 0.01f) continue;
                     float vb = clamp01((py - rad * 0.6f * squash - base) / hgt), vt = clamp01((py + rad * 0.6f * squash - base) / hgt);
-                    float facing = facing(px, (py - (base + 0.45f * hgt)) * 0.5f, pz);
-                    float cb = color(alb[0], alb[1], alb[2], vb * vb, facing, shadow, x, y, z, d, alpha, 0, 0, 0);
-                    float ct = color(alb[0], alb[1], alb[2], vt, facing, shadow, x, y, z, d, alpha, 0, 0, 0);
-                    float roll = (hash(seed, 600 + k) - 0.5f) * 0.4f;
-                    billboard(sky, x, y, z, d, rad * 1.8f, rad * 1.8f * squash, roll, cell, hash(seed, 700 + k) < 0.5f, ct, cb);
+                    // Upper cauliflower turrets & glaciated anvil gleam bright white in sunlight while the base stays dark slate
+                    float sunlitTurret = smooth(0.22f, 0.58f, vt) * (1f - 0.45f * smooth(0.82f, 0.98f, p[CloudClimate.ST]));
+                    float ar = lerp(sunlitTurret, darkAlb[0], 0.99f);
+                    float ag = lerp(sunlitTurret, darkAlb[1], 0.99f);
+                    float ab = lerp(sunlitTurret, darkAlb[2], 1.00f);
+                    float localShadow = lerp(sunlitTurret, baseShadow, 0.28f);
+                    float facing = facing(px, (py - (base + 0.42f * hgt)) * 0.55f, pz);
+                    float cb = color(ar, ag, ab, vb * vb, facing, localShadow, x, y, z, d, alpha, 0, 0, 0);
+                    float ct = color(ar, ag, ab, Math.min(1f, vt + 0.15f * sunlitTurret), Math.max(facing, 0.35f * sunlitTurret), localShadow, x, y, z, d, alpha, 0, 0, 0);
+                    float roll = (hash(seed, 600 + k) - 0.5f) * 0.35f * squash;
+                    billboard(sky, x, y, z, d, rad * 1.85f, rad * 1.85f * squash, roll, cell, hash(seed, 700 + k) < 0.5f, ct, cb);
                 }
-                // rain or snow shafts under the storm
+                // Distinct rain or snow shafts under the storm base
                 float precip = Math.max(p[CloudClimate.RAIN], p[CloudClimate.SNOW]);
-                if (job.distant() && precip > 0.12f) {
+                if (job.distant() && precip > 0.10f) {
                     float g = groundAt(wx, wz);
                     boolean snow = p[CloudClimate.SNOW] > p[CloudClimate.RAIN] || g + 40 > p[SL];
-                    float fade = smooth(140f, 320f, hd);
-                    curtain(sky, dx + wdx * r * 0.2f, dz + wdz * r * 0.2f, base + 6f, g - 4f, r * 1.1f,
-                            (0.42f + 0.35f * precip) * strength * fade, snow, p, seed);
+                    float fade = smooth(110f, 280f, hd);
+                    curtain(sky, dx + wdx * r * 0.15f, dz + wdz * r * 0.15f, base + 8f, g - 4f, r * 1.05f,
+                            (0.48f + 0.38f * precip) * strength * fade, snow, p, seed);
                 }
                 if (p[CloudClimate.THUNDER] > 0.15f) {
                     addStorm((float) wx, base, (float) wz, top, r, p[CloudClimate.THUNDER] * strength);
@@ -606,7 +616,7 @@ final class CloudBuilder {
         }
     }
 
-    /** The grey overcast deck: two broad layers of soft sheets with breaks in them. */
+    /** The grey overcast deck: multi-layered rolling dark storm underside with silver-lit crevices and upper sunlit sheets. */
     private void stratus() {
         int[] cells = {96, 192, 384};
         float[] outer = {650f, 1250f, R};
@@ -635,16 +645,36 @@ final class CloudBuilder {
                     if (alpha < 0.02f) continue;
                     float[] alb = albedo(p, 0.9f);
                     float dark = p[CloudClimate.DARK];
+                    float snowW = p[CloudClimate.SNOW];
                     float half = S * (0.95f + 0.45f * hash(seed, 3));
                     float angle = hash(seed, 4) * 6.2832f;
                     int cell = C_SHEET + (hash(seed, 5) < 0.5f ? 0 : 1);
-                    // lower layer: the grey underside you see from the ground
-                    float y = H - 8f + (hash(seed, 6) - 0.5f) * 8f - (float) job.camY();
+                    // Lower layer: dark rolling storm/asperitas underside or soft whiteout snow deck
+                    float y = H - 8f + (hash(seed, 6) - 0.5f) * 10f - (float) job.camY();
                     float d = (float) Math.sqrt(hd * hd + y * y);
-                    float a = alpha * 0.92f * smooth(10f, 60f, Math.abs(y) + hd * 0.05f);
-                    float c = color(alb[0], alb[1], alb[2], 0.1f, -0.2f - 0.4f * dark, 0.3f + 0.4f * dark, dx, y, dz, d, a, 0, 0, 0);
+                    float a = alpha * 0.94f * smooth(10f, 60f, Math.abs(y) + hd * 0.05f);
+                    boolean isCrevice = dark > 0.35f && snowW < 0.2f && hash(seed, 14) > 0.68f;
+                    float underAr = isCrevice ? Math.min(1f, alb[0] * 1.32f) : alb[0] * (1f - 0.28f * dark * (1f - snowW));
+                    float underAg = isCrevice ? Math.min(1f, alb[1] * 1.34f) : alb[1] * (1f - 0.26f * dark * (1f - snowW));
+                    float underAb = isCrevice ? Math.min(1f, alb[2] * 1.38f) : alb[2] * (1f - 0.22f * dark * (1f - snowW));
+                    float c = color(underAr, underAg, underAb, isCrevice ? 0.72f : 0.08f,
+                            isCrevice ? 0.45f : (-0.25f - 0.45f * dark), 0.35f + 0.45f * dark, dx, y, dz, d, a,
+                            isCrevice ? 0.12f * sunI : 0, isCrevice ? 0.13f * sunI : 0, isCrevice ? 0.15f * sunI : 0);
                     sheet(sky, dx, y, dz, d, half, half, angle, cell, c);
-                    // upper layer: lumpy and sunlit, seen from mountain tops and from the air above the deck
+                    // Rolling dark asperitas/mammatus billow pouches under heavy storm decks (ring 0 & 1)
+                    if (ring <= 1 && dark > 0.32f && snowW < 0.25f) {
+                        float by = y - 7f - 6f * hash(seed, 15);
+                        float bd = (float) Math.sqrt(hd * hd + by * by);
+                        float br = S * (0.48f + 0.28f * hash(seed, 16));
+                        float ba = a * (0.65f + 0.30f * dark) * smooth(br * 0.7f, br * 2.2f, bd);
+                        if (ba > 0.02f) {
+                            float ctB = color(underAr * 1.08f, underAg * 1.10f, underAb * 1.12f, 0.38f, 0.15f, 0.55f, dx, by, dz, bd, ba, 0, 0, 0);
+                            float cbB = color(underAr * 0.62f, underAg * 0.64f, underAb * 0.68f, 0.04f, -0.45f, 0.78f, dx, by, dz, bd, ba, 0, 0, 0);
+                            billboard(sky, dx + (hash(seed, 17) - 0.5f) * S * 0.35f, by, dz + (hash(seed, 18) - 0.5f) * S * 0.35f,
+                                    bd, br * 1.55f, br * 0.68f, (hash(seed, 19) - 0.5f) * 0.3f, C_BILLOW, hash(seed, 20) < 0.5f, ctB, cbB);
+                        }
+                    }
+                    // Upper layer: lumpy and sunlit, seen from mountain tops and from the air above the deck
                     if (job.camY() < H - 30f) continue;
                     float y2 = H + 12f + hash(seed, 7) * 10f - (float) job.camY();
                     float d2 = (float) Math.sqrt(hd * hd + y2 * y2);
@@ -694,9 +724,9 @@ final class CloudBuilder {
         }
     }
 
-    /** Grey rain shafts and white snow squalls hanging under distant overcast, densest over the mountains. */
+    /** Distinct grey rain shafts and white snow squalls hanging under dark storm bases, with sunlit atmospheric haze between shafts. */
     private void curtains() {
-        final int S = 260;
+        final int S = 230;
         double ox = job.driftX(), oz = job.driftZ();
         int i0 = (int) Math.floor((job.camX() - ox - R) / S), i1 = (int) Math.floor((job.camX() - ox + R) / S);
         int j0 = (int) Math.floor((job.camZ() - oz - R) / S), j1 = (int) Math.floor((job.camZ() - oz + R) / S);
@@ -708,42 +738,52 @@ final class CloudBuilder {
                 double wx = wsx + ox, wz = wsz + oz;
                 float dx = (float) (wx - job.camX()), dz = (float) (wz - job.camZ());
                 float hd = (float) Math.sqrt(dx * dx + dz * dz);
-                if (hd > R || hd < 120f) continue;
+                if (hd > R || hd < 95f) continue;
                 weather(wx, wz, p);
                 float precip = Math.max(p[CloudClimate.RAIN], p[CloudClimate.SNOW]);
-                if (precip < 0.12f) continue;
+                if (precip < 0.10f) continue;
                 float g = groundAt(wx, wz);
                 boolean snow = p[CloudClimate.SNOW] > p[CloudClimate.RAIN] || g + 40 > p[SL];
-                // squalls gather over high ground
                 float mountain = snow ? smooth(150f, 260f, g) : 0f;
-                float v = precip * (0.55f + 0.5f * mountain) * (0.5f + 0.8f * coverage(wsx, wsz, 61));
-                float strength = clamp01((v - hash(seed, 3) * 0.8f) / 0.2f);
+                float v = precip * (0.58f + 0.5f * mountain) * (0.45f + 0.85f * coverage(wsx, wsz, 61));
+                float strength = clamp01((v - hash(seed, 3) * 0.72f) / 0.2f);
                 if (strength < 0.02f) continue;
-                float width = (60f + 70f * hash(seed, 4)) * (1f - 0.3f * mountain);
-                float alpha = (0.2f + 0.3f * precip + 0.25f * mountain) * (snow ? 1.35f : 1f) * strength * smooth(150f, 380f, hd);
-                curtain(sky, dx, dz, H - 6f, g - 4f, width, alpha, snow, p, seed);
+                float width = (65f + 78f * hash(seed, 4)) * (1f - 0.25f * mountain);
+                float alpha = (0.28f + 0.38f * precip + 0.25f * mountain) * (snow ? 1.35f : 1.15f) * strength * smooth(110f, 320f, hd);
+                curtain(sky, dx, dz, H - 4f, g - 4f, width, alpha, snow, p, seed);
             }
         }
     }
 
-    /** One rain or snow shaft from a cloud base to the ground, leaning downwind. */
+    /** Multi-layered rain or snow shaft from a dark cloud base to the ground, leaning downwind with sunlit mist halo. */
     private void curtain(QuadList list, float dx, float dz, float topY, float bottomY, float halfWidth, float alpha,
                          boolean snow, float[] w, long seed) {
         if (alpha < 0.01f || topY <= bottomY + 8f) return;
         nCurtains++;
         float yTop = topY - (float) job.camY(), yBot = bottomY - (float) job.camY();
-        float lean = (topY - bottomY) * (0.12f + 0.35f * job.wind());
+        float lean = (topY - bottomY) * (0.08f + 0.26f * job.wind());
         float d = (float) Math.sqrt(dx * dx + dz * dz + (yTop + yBot) * (yTop + yBot) * 0.25f);
         float dark = w[CloudClimate.DARK];
-        float ar = snow ? 0.93f : 0.62f - 0.12f * dark, ag = snow ? 0.95f : 0.66f - 0.12f * dark, ab = snow ? 0.98f : 0.72f - 0.1f * dark;
-        float c = color(ar, ag, ab, 0.5f, 0.1f, 0f, dx, (yTop + yBot) * 0.5f, dz, d, alpha, 0, 0, 0);
+        float ar = snow ? 0.94f : 0.54f - 0.14f * dark;
+        float ag = snow ? 0.96f : 0.59f - 0.14f * dark;
+        float ab = snow ? 0.99f : 0.66f - 0.12f * dark;
+        float cTop = color(ar * 0.82f, ag * 0.84f, ab * 0.86f, 0.25f, 0.05f, 0.45f, dx, yTop, dz, d, Math.min(0.92f, alpha * 1.12f), 0, 0, 0);
+        float cBot = color(ar * 1.06f, ag * 1.06f, ab * 1.05f, 0.65f, 0.25f, 0.15f, dx, yBot, dz, d, alpha * 0.88f, 0, 0, 0);
         upright(list, dx, dz, yBot, yTop, d, halfWidth, job.windX() * lean, job.windZ() * lean,
-                snow ? C_SNOW : C_RAIN, hash(seed, 99) < 0.5f, c, c);
+                snow ? C_SNOW : C_RAIN, hash(seed, 99) < 0.5f, cTop, cBot);
+        // Secondary narrower inner rain/snow core shaft for distinct vertical streaking (Ref 3)
+        float innerAlpha = Math.min(0.88f, alpha * 0.72f);
+        if (innerAlpha > 0.03f) {
+            float ox = (hash(seed, 95) - 0.5f) * halfWidth * 0.45f;
+            float oz = (hash(seed, 96) - 0.5f) * halfWidth * 0.45f;
+            upright(list, dx + ox, dz + oz, yBot, yTop, d, halfWidth * 0.58f, job.windX() * lean * 0.85f, job.windZ() * lean * 0.85f,
+                    snow ? C_SNOW : C_RAIN, hash(seed, 97) >= 0.5f, cTop, cBot);
+        }
     }
 
     // ================================================================== ground layer (world-fixed)
 
-    /** Valley fog banks and mist over marshes, lakes and rivers: thickest at dawn, in foggy weather, and over humid swamps. */
+    /** Valley fog banks, swamp mist, and alpine blizzard blowing snow-fog enveloping trees and slopes. */
     private void fogBanks() {
         final int S = 40;
         float reach = Math.min(R, 720f);
@@ -759,43 +799,50 @@ final class CloudBuilder {
                 weather(cx, cz, p);
                 float wet = t[2];
                 float fogW = p[CloudClimate.FOG];
+                float snowW = p[CloudClimate.SNOW];
+                boolean blizzardSlope = snowW > 0.25f && (t[0] + 35f >= p[SL] || snowW > 0.55f);
                 float valley = 0f;
                 if (fogW > 0.35f && wet < 0.3f) {
                     float around = (terrain(cx + 160, cz)[0] + terrain(cx - 160, cz)[0] + terrain(cx, cz + 160)[0] + terrain(cx, cz - 160)[0]) * 0.25f;
                     valley = smooth(4f, 20f, around - t[0]);
                 }
-                float lowland = Math.max(wet, valley);
+                float lowland = Math.max(Math.max(wet, valley), blizzardSlope ? (0.45f + 0.55f * snowW) : 0f);
                 if (lowland < 0.25f) continue;
                 Region reg = TamrielMap.region(cx, cz);
                 boolean swamp = WeatherProfile.of(reg) == WeatherProfile.SWAMP || p[MI] > 0.65f;
                 float mist = p[MI] * (swamp ? Math.max(0.55f, job.mistHour()) : job.mistHour());
-                float amount = clamp01(Math.max(fogW * 0.85f, mist * 1.3f) * lowland);
+                float amount = clamp01(Math.max(Math.max(fogW * 0.85f, mist * 1.3f), blizzardSlope ? snowW * 0.95f : 0f) * lowland);
                 long seed = seed(i, j, 29);
-                float strength = clamp01((amount - hash(seed, 1) * 0.6f) / 0.25f);
+                float strength = clamp01((amount - hash(seed, 1) * (blizzardSlope ? 0.42f : 0.6f)) / 0.25f);
                 if (strength < 0.02f) continue;
-                float base = (t[1] > 0 ? t[1] : t[0]) + 1.5f + hash(seed, 2) * 2.5f;
+                float base = (t[1] > 0 ? t[1] : t[0]) + 1.5f + hash(seed, 2) * (blizzardSlope ? 6.0f : 2.5f);
                 float ox = (hash(seed, 3) - 0.5f) * S * 0.6f, oz = (hash(seed, 4) - 0.5f) * S * 0.6f;
                 float x = dx + ox, z = dz + oz;
                 float y0 = base - (float) job.camY();
-                float hh = 4f + 7f * amount * (0.7f + 0.6f * hash(seed, 5));
+                float hh = (blizzardSlope ? 10f + 18f * snowW : 4f + 7f * amount) * (0.7f + 0.6f * hash(seed, 5));
                 float d = (float) Math.sqrt(x * x + z * z + (y0 + hh) * (y0 + hh));
-                float fade = smooth(14f, 60f, d) * (1f - smooth(reach * 0.8f, reach, hd));
-                float alpha = 0.6f * strength * fade;
+                float fade = smooth(blizzardSlope ? 12f : 14f, blizzardSlope ? 42f : 60f, d) * (1f - smooth(reach * 0.8f, reach, hd));
+                float alpha = (blizzardSlope ? 0.78f : 0.6f) * strength * fade;
                 if (alpha < 0.01f) continue;
                 nFog++;
-                // mist glows with the sky's own colour (gold at dawn, grey under cloud, bioluminescent mossy-teal in Black Marsh/Bitter Coast/Hjaalmarch)
                 float er = job.fogR() * 0.45f, eg = job.fogG() * 0.45f, eb = job.fogB() * 0.45f;
-                if (swamp) {
+                if (blizzardSlope) {
+                    er = 0.24f * sunI;
+                    eg = 0.25f * sunI;
+                    eb = 0.27f * sunI;
+                } else if (swamp) {
                     float bio = 0.14f + 0.18f * moonI;
                     er = lerp(bio, er, 0.22f);
                     eg = lerp(bio, eg, 0.56f);
                     eb = lerp(bio, eb, 0.46f);
                 }
-                float c = color(0.75f, 0.76f, 0.77f, 0.8f, 0.2f, 0.15f, x, y0 + hh, z, d, alpha, er, eg, eb);
-                upright(ground, x, z, y0 - hh * 0.3f, y0 + hh * 1.7f, d, S * (0.75f + 0.4f * hash(seed, 6)), 0, 0, C_FOG,
+                float albR = blizzardSlope ? 0.94f : 0.75f;
+                float albG = blizzardSlope ? 0.96f : 0.76f;
+                float albB = blizzardSlope ? 0.99f : 0.77f;
+                float c = color(albR, albG, albB, 0.85f, 0.25f, 0.12f, x, y0 + hh, z, d, alpha, er, eg, eb);
+                upright(ground, x, z, y0 - hh * 0.35f, y0 + hh * 1.75f, d, S * (0.82f + 0.45f * hash(seed, 6)), 0, 0, C_FOG,
                         hash(seed, 7) < 0.5f, c, c);
-                // from above (a hillside or a peak) the bank reads as a flat white sheet
-                float c2 = color(0.75f, 0.76f, 0.77f, 0.9f, 0.4f, 0.1f, x, y0 + hh, z, d, alpha * 0.7f, er, eg, eb);
+                float c2 = color(albR, albG, albB, 0.92f, 0.4f, 0.1f, x, y0 + hh, z, d, alpha * 0.72f, er, eg, eb);
                 sheet(ground, x, y0 + hh, z, d, S * 0.95f, S * 0.95f, hash(seed, 8) * 6.2832f, C_SHEET, c2);
             }
         }
@@ -868,9 +915,9 @@ final class CloudBuilder {
         }
     }
 
-    /** Low dust and ash haze over deserts and ashlands, and the brown walls of sandstorms and ash storms. */
+    /** Low dust and ash haze over deserts and ashlands, and towering billowy haboob dust walls (Ref 4) / ash walls. */
     private void dustAndAsh() {
-        int[] cells = {120, 240};
+        int[] cells = {110, 220};
         float[] outer = {720f, R};
         float inner = 0f;
         for (int ring = 0; ring < 2; ring++) {
@@ -893,34 +940,50 @@ final class CloudBuilder {
                     float blight = p[CloudClimate.BLIGHT];
                     float ar, ag, ab;
                     if (sand >= ash) {
-                        ar = 0.86f;
-                        ag = 0.72f;
-                        ab = 0.52f;
+                        ar = 0.85f;
+                        ag = 0.66f;
+                        ab = 0.45f;
                     } else {
                         ar = lerp(blight, 0.44f, 0.58f);
                         ag = lerp(blight, 0.39f, 0.31f);
                         ab = lerp(blight, 0.36f, 0.25f);
                     }
                     float x = dx + (hash(seed, 1) - 0.5f) * S * 0.5f, z = dz + (hash(seed, 2) - 0.5f) * S * 0.5f;
-                    // haze: a low brown band on the horizon
-                    if (hd > 90f) {
+                    // Low horizon dust/ash veil
+                    if (hd > 75f) {
                         float y = g + 14f + hash(seed, 3) * 10f - (float) job.camY();
                         float d = (float) Math.sqrt(x * x + y * y + z * z);
-                        float alpha = (0.1f + 0.3f * dusty) * smooth(90f, 260f, hd);
-                        float c = color(ar, ag, ab, 0.6f, 0.2f, 0.1f, x, y, z, d, alpha, 0, 0, 0);
-                        upright(ground, x, z, y - 14f, y + 22f + 30f * dusty, d, S * 0.85f, 0, 0, C_FOG, hash(seed, 4) < 0.5f, c, c);
+                        float alpha = (0.14f + 0.34f * dusty) * smooth(75f, 230f, hd);
+                        float c = color(ar, ag, ab, 0.65f, 0.25f, 0.15f, x, y, z, d, alpha, 0, 0, 0);
+                        upright(ground, x, z, y - 16f, y + 26f + 36f * dusty, d, S * 0.90f, 0, 0, C_FOG, hash(seed, 4) < 0.5f, c, c);
                     }
-                    // storm walls where the storm is raging
-                    float storm = smooth(0.55f, 0.95f, Math.max(sand, ash * 0.95f));
-                    if (storm > 0.03f && hd > 70f) {
-                        float hh = (40f + 55f * hash(seed, 5)) * (0.5f + 0.5f * storm);
+                    // Towering billowy Haboob sandstorm / ash-storm wall rolling across the floor (Ref 4)
+                    float storm = smooth(0.45f, 0.92f, Math.max(sand, ash * 0.95f));
+                    if (storm > 0.03f && hd > 60f) {
+                        float hh = (52f + 68f * hash(seed, 5)) * (0.55f + 0.45f * storm);
                         float y = g - 6f - (float) job.camY();
                         float d = (float) Math.sqrt(x * x + (y + hh) * (y + hh) + z * z);
-                        float alpha = 0.85f * storm * smooth(70f, 220f, hd);
+                        float alpha = 0.92f * storm * smooth(60f, 195f, hd);
                         nWalls++;
-                        float ct = color(ar, ag, ab, 0.9f, 0.3f, 0.25f, x, y + hh, z, d, alpha, 0, 0, 0);
-                        float cb = color(ar * 0.85f, ag * 0.85f, ab * 0.85f, 0.2f, 0.1f, 0.25f, x, y, z, d, alpha, 0, 0, 0);
-                        upright(ground, x, z, y, y + hh * 2f, d, S * 0.95f, 0, 0, C_WALL, hash(seed, 6) < 0.5f, ct, cb);
+                        float ct = color(ar * 1.05f, ag * 1.02f, ab * 0.98f, 0.92f, 0.38f, 0.32f, x, y + hh, z, d, alpha, 0, 0, 0);
+                        float cb = color(ar * 0.68f, ag * 0.64f, ab * 0.60f, 0.15f, -0.15f, 0.48f, x, y, z, d, alpha, 0, 0, 0);
+                        upright(ground, x, z, y, y + hh * 2.05f, d, S * 0.98f, 0, 0, C_WALL, hash(seed, 6) < 0.5f, ct, cb);
+                        // Sculpted cauliflower dust-wall lobes along the leading front and crest of the haboob
+                        for (int lobe = 0; lobe < 2; lobe++) {
+                            float lx = x + (hash(seed, 10 + lobe) - 0.5f) * S * 0.55f;
+                            float lz = z + (hash(seed, 12 + lobe) - 0.5f) * S * 0.55f;
+                            float ly = y + hh * (0.55f + 0.55f * lobe + 0.25f * hash(seed, 14 + lobe));
+                            float lrad = S * (0.48f + 0.24f * hash(seed, 16 + lobe)) * (0.7f + 0.3f * storm);
+                            float ld = (float) Math.sqrt(lx * lx + ly * ly + lz * lz);
+                            float la = alpha * 0.90f * smooth(lrad * 0.7f, lrad * 2.2f, ld);
+                            if (la > 0.02f) {
+                                float lct = color(ar * 1.08f, ag * 1.04f, ab, 0.95f, 0.45f, 0.35f, lx, ly, lz, ld, la, 0, 0, 0);
+                                float lcb = color(ar * 0.62f, ag * 0.58f, ab * 0.54f, 0.12f, -0.2f, 0.55f, lx, ly, lz, ld, la, 0, 0, 0);
+                                billboard(ground, lx, ly, lz, ld, lrad * 1.65f, lrad * 1.25f,
+                                        (hash(seed, 18 + lobe) - 0.5f) * 0.35f, lobe == 0 ? C_BILLOW : C_PUFF + (lobe & 3),
+                                        hash(seed, 20 + lobe) < 0.5f, lct, lcb);
+                            }
+                        }
                     }
                 }
             }

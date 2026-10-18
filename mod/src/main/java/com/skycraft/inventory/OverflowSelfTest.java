@@ -59,10 +59,15 @@ final class OverflowSelfTest {
     private static final GameProfile PROFILE_D = new GameProfile(UUID.nameUUIDFromBytes("skycraft-pack-selftest-d".getBytes()), "[PackTestD]");
     private static final GameProfile PROFILE_E = new GameProfile(UUID.nameUUIDFromBytes("skycraft-pack-selftest-e".getBytes()), "[PackTestE]");
     private static final String TAG = "ovf_t";
+    private static final ThreadLocal<java.util.Set<UUID>> PRESERVED_DROPS=new ThreadLocal<>();
 
     private OverflowSelfTest() {}
 
     static void run(MinecraftServer server, ServerLevel level, FakePlayer a, PackSelfTest.Checks c) {
+        var existing=new java.util.HashSet<UUID>();
+        for(var e:level.getEntitiesOfClass(ItemEntity.class,new AABB(testAnchor(level)).inflate(48))) existing.add(e.getUUID());
+        PRESERVED_DROPS.set(existing);
+        try {
         guarded("bulk store", c, () -> bulkStore(c));
         guarded("container overflow", c, () -> containerOverflow(server, a, c));
         guarded("block entities", c, () -> blockEntities(level, c));
@@ -70,7 +75,16 @@ final class OverflowSelfTest {
         guarded("player file", c, () -> playerFile(server, level, c));
         guarded("facade", c, () -> facade(server, level, a, c));
         guarded("stragglers", c, () -> stragglers(level, a, c));
-        sweep(level);
+        } finally {
+            try { sweep(level,existing); } finally { PRESERVED_DROPS.remove(); }
+        }
+    }
+
+    /** Entity queries only see active chunks. A live operator may be far from
+     * world spawn; keep fixtures in that operator's already-ticking area. */
+    static BlockPos testAnchor(ServerLevel level) {
+        for(var player:level.players()) if(!(player instanceof FakePlayer)) return player.blockPosition();
+        return level.getSharedSpawnPos();
     }
 
     private static void guarded(String what, PackSelfTest.Checks c, Runnable r) {
@@ -92,12 +106,18 @@ final class OverflowSelfTest {
     }
 
     private static void sweep(ServerLevel level) {
-        BlockPos at = level.getSharedSpawnPos();
+        var existing=PRESERVED_DROPS.get();
+        sweep(level,existing==null?java.util.Set.of():existing);
+    }
+
+    private static void sweep(ServerLevel level,java.util.Set<UUID> existing) {
+        BlockPos at = testAnchor(level);
         // bodies first: discarding one spills what it holds as item entities, which are swept next
         for (PlayerCorpseEntity e : level.getEntitiesOfClass(PlayerCorpseEntity.class, new AABB(at).inflate(48))) {
             if (e.ownerName().startsWith("[PackTest")) e.discard();
         }
         for (ItemEntity e : level.getEntitiesOfClass(ItemEntity.class, new AABB(at).inflate(48))) {
+            if(existing.contains(e.getUUID())) continue;
             ItemStack s = e.getItem();
             if ((s.hasTag() && s.getTag().contains(TAG)) || s.is(Items.ARROW) || s.is(Items.IRON_HELMET)) e.discard();
         }
@@ -303,7 +323,7 @@ final class OverflowSelfTest {
     // ------------------------------------------------------------------ 3. block entities
 
     private static void blockEntities(ServerLevel level, PackSelfTest.Checks c) {
-        BlockPos pos = level.getSharedSpawnPos().above(3);
+        BlockPos pos = testAnchor(level).above(3);
         level.getChunkAt(pos); // make sure the chunk is there for the spill
         ChestBlockEntity chest = new ChestBlockEntity(pos, Blocks.CHEST.defaultBlockState());
         chest.setLevel(level);
@@ -383,7 +403,7 @@ final class OverflowSelfTest {
     private static FakePlayer newPlayer(MinecraftServer server, ServerLevel level, GameProfile profile) {
         FakePlayer p = new FakePlayer(level, profile);
         PackSelfTest.connect(server, p);
-        BlockPos at = level.getSharedSpawnPos();
+        BlockPos at = testAnchor(level);
         p.moveTo(at.getX() + 0.5, at.getY() + 1, at.getZ() + 0.5);
         return p;
     }
@@ -609,7 +629,7 @@ final class OverflowSelfTest {
         Pack.clear(a);
 
         // followers: 27 slots and an overflow behind them, weight-limited, persisted with the NPC, never lost
-        BlockPos at = level.getSharedSpawnPos().above(2);
+        BlockPos at = testAnchor(level).above(2);
         net.minecraft.world.entity.LivingEntity npc = net.minecraft.world.entity.EntityType.ZOMBIE.create(level);
         if (npc == null) {
             c.check("follower bags: a test entity", false, "zombie not created");
@@ -657,7 +677,7 @@ final class OverflowSelfTest {
                         && !npc.getPersistentData().contains(com.skycraft.society.Followers.OVERFLOW_KEY), dropped + " dropped");
 
         // restock: the overflow counts as inside the container (a player's things are never wiped)
-        BlockPos cp = level.getSharedSpawnPos().above(5);
+        BlockPos cp = testAnchor(level).above(5);
         ChestBlockEntity chest = new ChestBlockEntity(cp, Blocks.CHEST.defaultBlockState());
         chest.setLevel(level);
         CompoundTag entry = new CompoundTag();

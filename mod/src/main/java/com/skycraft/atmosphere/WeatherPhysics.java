@@ -35,6 +35,8 @@ public final class WeatherPhysics {
 
     /** World-space coverage of the toroidal weather field texture (128 cells * 64 blocks = 8192 blocks). */
     public static final int FIELD_CELL_BLOCKS = 64;
+    public static final int FAR_FIELD_GRID_SIZE = 128;
+    public static final int FAR_FIELD_CELL_BLOCKS = 512;
     public static final int FIELD_GRID_SIZE = 128;
     public static final int FIELD_WORLD_SPAN = FIELD_CELL_BLOCKS * FIELD_GRID_SIZE; // 8192
 
@@ -46,6 +48,7 @@ public final class WeatherPhysics {
 
     private static final ThreadLocal<MapSample> SCRATCH_A = ThreadLocal.withInitial(MapSample::new);
     private static final ThreadLocal<MapSample> SCRATCH_B = ThreadLocal.withInitial(MapSample::new);
+    private static final ThreadLocal<float[]> SCRATCH_FACTORS = ThreadLocal.withInitial(() -> new float[2]);
 
     private WeatherPhysics() {}
 
@@ -79,8 +82,59 @@ public final class WeatherPhysics {
             float curtainDensity,
             float aerosolCode,
             float cloudBaseOffset,
-            float cloudTopBoost
+            float cloudTopBoost,
+            float surfaceHeight,
+            float temperatureC,
+            float relativeHumidity,
+            float dewPointC,
+            float groundFog
     ) {}
+
+    /** A scaled lifting-condensation model: temperatures are Celsius, height is in game blocks. */
+    public record Thermals(float temperatureC, float relativeHumidity, float dewPointC, float condensationHeight, float groundFog) {}
+
+    /** Charge separation requires deep, precipitating convection, not merely a storm label.
+     * Water storms additionally need a plausible supercooled/mixed-phase depth.
+     * Dense turbulent ash can electrify by particle collisions without an ice layer. */
+    public static float electricalActivity(ColumnState column, float chargeDrive) {
+        if (chargeDrive <= 0.05f) return 0f;
+        float depth = 72f + 120f * column.coverage() + 300f * column.stormTower();
+        float deep = smooth(0.48f, 0.82f, column.stormTower()) * smooth(0.55f, 0.84f, column.coverage());
+        float precipitation = smooth(0.28f, 0.68f, column.rainBand());
+        if (column.aerosolCode() > 0.80f) {
+            return clamp01(chargeDrive * deep * precipitation * smooth(0.35f, 0.75f, column.windSpeed()));
+        }
+        float baseAir = column.temperatureC() - Math.max(0f, 232f + column.cloudBaseOffset() - column.surfaceHeight()) * 0.045f;
+        float topAir = baseAir - depth * 0.085f;
+        float mixedPhase = smooth(-28f, -15f, baseAir) * (1f - smooth(-6f, 2f, topAir));
+        return clamp01(chargeDrive * deep * precipitation * mixedPhase);
+    }
+
+    /** Rain and falling snow stop above their cloud source; drifting surface snow
+     * in a blizzard is handled separately by the client. */
+    public static float precipitationAltitudeFactor(ColumnState column, double eyeY) {
+        float top = 232f + column.cloudBaseOffset() + 72f + 120f * column.coverage() + 300f * column.stormTower();
+        return 1f - smooth(top, top + 32f, (float) eyeY);
+    }
+
+    public static Thermals thermals(double z, MapSample s, float moisture, float wetPrecip, float fogDrive, long dayTime) {
+        float solar = solarHeating(dayTime);
+        float surface = Math.max(TamrielMap.SEA_LEVEL, Math.max(s.elevation, Float.isFinite(s.waterLevel) ? s.waterLevel : s.elevation));
+        float temperature = (float) (28.0 - 42.0 * AtmosphereMath.latitudeFactor(z))
+                - (surface - TamrielMap.SEA_LEVEL) * 0.018f + 6f * solar - 4f * (1f - solar) + s.heat * 16f;
+        float humidity = clamp01(0.30f + 0.52f * moisture + 0.07f * s.wetland
+                + 0.12f * (1f - solar) * moisture - 0.08f * solar * (1f - moisture) + 0.10f * wetPrecip);
+        humidity = Math.max(0.16f, Math.min(0.995f, lerp(clamp01(fogDrive), humidity, 0.995f)));
+        // Magnus approximation; using the same moisture parcel for both values makes the
+        // condensation height respond smoothly to daytime drying and nighttime saturation.
+        float gamma = (float) Math.log(humidity) + 17.625f * temperature / (243.04f + temperature);
+        float dewPoint = 243.04f * gamma / (17.625f - gamma);
+        float gap = Math.max(0f, temperature - dewPoint);
+        float condensation = Math.max(6f, Math.min(440f, gap * 45f));
+        // Advected saturated air carries its own moisture over locally dry ground.
+        float fog = (1f - smooth(0.25f, 1.4f, gap)) * smooth(0.45f, 0.85f, Math.max(moisture, fogDrive * 0.9f));
+        return new Thermals(temperature, humidity, dewPoint, surface + condensation, fog);
+    }
 
     /**
      * Computes prevailing wind vector {@code (wx, wz)} at world coordinates {@code (x, z)}, combining Nirn's
@@ -116,7 +170,7 @@ public final class WeatherPhysics {
         }
 
         // Topographic deflection: steep mountain slopes deflect part of the flow along the contour
-        MapSample s = SCRATCH_A.get();
+        MapSample s = SCRATCH_B.get();
         TamrielMap.sample((int) Math.floor(x), (int) Math.floor(z), s);
         if (s.slope > 0.08f && (Math.abs(s.aspectX) > 1e-3f || Math.abs(s.aspectZ) > 1e-3f)) {
             // aspect points downslope; when wind blows steeply upslope, deflect slightly around the ridge
@@ -252,7 +306,7 @@ public final class WeatherPhysics {
      * spiral feeder bands and a hook echo, or into a bowed frontal squall line with trailing wave rain bands.</p>
      */
     public static float frontRainBandAt(WeatherFront front, double px, double pz, double timeSec) {
-        if (front == null || front.expired()) return 0f;
+        if (front == null || front.expired() || front.kind().precip == WeatherKind.Precip.NONE) return 0f;
         float baseEnv = front.intensityAt(px, pz);
         if (baseEnv <= 0.005f) return 0f;
 
@@ -324,6 +378,13 @@ public final class WeatherPhysics {
             float windZ,
             Collection<WeatherFront> fronts
     ) {
+        return evaluate(x, z, timeSec, regionParams, fallbackKind, windX, windZ, fronts, (long) (timeSec * 20.0));
+    }
+
+    /** The animation clock and solar clock are separate: sleeping and /time must change heating without jumping fronts. */
+    public static ColumnState evaluate(double x, double z, double timeSec, float[] regionParams,
+                                       WeatherKind fallbackKind, float windX, float windZ,
+                                       Collection<WeatherFront> fronts, long dayTime) {
         int ix = (int) Math.floor(x);
         int iz = (int) Math.floor(z);
         MapSample s = SCRATCH_A.get();
@@ -337,14 +398,23 @@ public final class WeatherPhysics {
         float wx = wl > 1e-4f ? windX / wl : 0.8f;
         float wz = wl > 1e-4f ? windZ / wl : 0.6f;
         if (wl <= 1e-4f) {
-            float[] wv = new float[2];
+            float[] wv = SCRATCH_FACTORS.get();
             prevailingWind(x, z, -1f, false, wv);
             wx = wv[0];
             wz = wv[1];
+        } else if (s.slope > 0.08f) {
+            float intoSlope = -(wx * s.aspectX + wz * s.aspectZ);
+            if (intoSlope > 0f) {
+                float deflect = Math.min(0.55f, s.slope * 0.7f) * intoSlope;
+                wx += s.aspectX * deflect;
+                wz += s.aspectZ * deflect;
+                float length = (float) Math.sqrt(wx * wx + wz * wz);
+                if (length > 1e-4f) { wx /= length; wz /= length; }
+            }
         }
 
         float moisture = moistureFromSample(ix, iz, s);
-        float[] liftDry = new float[2];
+        float[] liftDry = SCRATCH_FACTORS.get();
         orographicFactors(ix, iz, wx, wz, s, liftDry);
         float orographicLift = liftDry[0] * (0.45f + 0.55f * moisture);
         float leewardDry = liftDry[1];
@@ -399,8 +469,8 @@ public final class WeatherPhysics {
 
         if (domFront != null && frontEnvMax > 0.01f) {
             WeatherKind fk = domFront.kind();
-            st = lerp(frontEnvMax, st, Math.max(fk.clouds, 0.78f));
-            dark = lerp(frontEnvMax, dark, fk == WeatherKind.STORM ? 0.92f : 0.65f);
+            st = lerp(frontEnvMax, st, fk.clouds);
+            dark = lerp(frontEnvMax, dark, fk == WeatherKind.STORM ? 0.92f : fk.clouds * 0.68f);
             gale = lerp(frontEnvMax, gale, fk.wind);
             if (fk == WeatherKind.STORM || fk == WeatherKind.BLIZZARD || fk == WeatherKind.ASH_STORM || fk == WeatherKind.BLIGHT) {
                 cb = Math.max(cb, frontEnvMax * 0.72f + frontBandMax * 0.35f);
@@ -422,52 +492,90 @@ public final class WeatherPhysics {
         float marineLayer = s.coastDistance < 380f ? clamp01(1f - Math.max(0f, s.coastDistance) / 380f) * 0.22f : 0f;
         float wetlandMist = s.wetland * 0.20f;
         float orographicCloud = orographicLift * (0.42f + 0.38f * moisture);
-        float orographicTower = orographicLift * smooth(0.32f, 0.85f, moisture + st * 0.5f) * 0.65f;
+        float orographicTower = orographicLift * smooth(0.32f, 0.85f, moisture + st * 0.5f) * 0.72f;
 
-        // 2. Mesoscale rain-band organization even in regional storms (squall lines drifting with the wind)
+        // 2. Mesoscale rain-band & discrete supercell cumulonimbus cell organization drifting with the wind
         double driftX = x - wx * timeSec * 4.5;
         double driftZ = z - wz * timeSec * 4.5;
         float mesoWave = vnoise(driftX / 520.0, driftZ / 520.0, 401) * 0.6f
                 + vnoise(driftX / 210.0, driftZ / 210.0, 402) * 0.4f;
-        float precipTotal = Math.max(Math.max(rain, snow), Math.max(ash * 0.85f, sand * 0.85f));
-        float regionalBand = precipTotal > 0.08f
-                ? precipTotal * smooth(0.32f, 0.76f, mesoWave + 0.30f * orographicLift - 0.25f * leewardDry)
+        // Discrete cumulonimbus supercell cores (~900..1500m spacing) with downwind anvil spread
+        float cbCellCore = vnoise(driftX / 680.0, driftZ / 680.0, 405) * 0.65f
+                + vnoise(driftX / 260.0, driftZ / 260.0, 406) * 0.35f;
+        float cbAnvilDownwind = vnoise((driftX - wx * 180.0) / 720.0, (driftZ - wz * 180.0) / 720.0, 405) * 0.70f
+                + vnoise((driftX - wx * 140.0) / 310.0, (driftZ - wz * 140.0) / 310.0, 406) * 0.30f;
+        float supercellTower = Math.max(smooth(0.56f, 0.84f, cbCellCore), smooth(0.58f, 0.86f, cbAnvilDownwind) * 0.88f);
+
+        // Distinct sub-cloud rain-shaft cells (~260..480m wide) so rain hangs in visible curtains with sunlit gaps between
+        float shaftCell = smooth(0.36f, 0.74f,
+                vnoise(driftX / 290.0, driftZ / 290.0, 409) * 0.65f
+                        + vnoise(driftX / 135.0, driftZ / 135.0, 410) * 0.35f);
+
+        float wetPrecip = Math.max(rain, snow);
+        float dryPrecip = Math.max(ash, sand);
+        float precipTotal = Math.max(wetPrecip, dryPrecip * 0.85f);
+        float regionalBand = precipTotal > 0.06f
+                ? precipTotal * smooth(0.28f, 0.74f, mesoWave + 0.30f * orographicLift - 0.25f * leewardDry)
                 : 0f;
         float rainBand = clamp01(Math.max(frontBandMax, regionalBand) + orographicLift * precipTotal * 0.35f);
 
         // 3. Orographic precipitation enhancement on windward slopes & rainshadow suppression on leeward slopes
         float drySuppression = (1f - 0.52f * leewardDry * (1f - 0.65f * frontEnvMax) * (1f - 0.70f * clamp01(precipTotal * 1.4f)));
-        float coverage = clamp01((Math.max(cu * 0.78f, st) + marineLayer + wetlandMist + orographicCloud + 0.25f * rainBand) * drySuppression);
-        if (precipTotal > 0.08f) {
-            // Active rain, snow, blizzards, or storms always sustain a thick overcast/cumulonimbus canopy overhead
-            float overcastFloor = clamp01(0.76f + 0.22f * precipTotal);
-            coverage = Math.max(coverage, overcastFloor);
+        boolean isHaboobOnly = (sand > 0.12f || profile == WeatherProfile.ARID || s.dunes > 0.30f) && wetPrecip < 0.08f && ash < 0.12f;
+
+        float solarHeat = solarHeating(dayTime);
+        // Fair-weather thermals settle overnight. Existing frontal rain/snow and windward lift persist.
+        float thermalCycle = 0.58f + 0.42f * solarHeat;
+        cu *= thermalCycle;
+        float convectiveDrive = clamp01(cb * (0.72f + 0.28f * solarHeat)
+                + 0.45f * cu * moisture + 0.55f * orographicLift + 0.40f * rainBand);
+        float cellTower = supercellTower * clamp01(0.35f + 0.85f * convectiveDrive);
+
+        float coverage = clamp01((Math.max(cu * 0.78f, st) + marineLayer + wetlandMist + orographicCloud + 0.28f * rainBand + 0.35f * cellTower) * drySuppression);
+        if (snow > 0.08f) {
+            // Snow & alpine blizzards sustain a full diffused whiteout overcast canopy
+            float snowFloor = clamp01(0.80f + 0.18f * snow);
+            coverage = Math.max(coverage, snowFloor);
+        } else if (rain > 0.08f) {
+            // Rain & thunderstorms have a heavy dark core in squall bands with structured breaks on the flanks
+            float rainFloor = clamp01(0.54f + 0.38f * (0.45f * rain + 0.55f * Math.max(rainBand, shaftCell)));
+            coverage = Math.max(coverage, rainFloor);
         }
-        if (profile == WeatherProfile.ARID || s.dunes > 0.30f) {
-            if (sand < 0.25f && frontEnvMax < 0.2f && precipTotal < 0.1f) {
-                coverage *= (1f - 0.45f * Math.max(0.4f, s.dunes));
-            }
+        if (isHaboobOnly) {
+            // Desert haboobs roll beneath a mostly clear/lightly-clouded blue sky so the towering dust wall contrasts against the sky
+            coverage = Math.min(coverage, 0.18f + 0.22f * supercellTower);
         }
 
-        float stormTower = clamp01(Math.max(cb, orographicTower) + 0.35f * rainBand + 0.25f * dark + 0.22f * snow + s.heat * 0.30f);
+        float stormTower = clamp01(Math.max(cb * (0.45f + 0.55f * supercellTower), Math.max(orographicTower, cellTower))
+                + 0.35f * rainBand + 0.22f * dark + 0.22f * snow + 0.65f * sand + s.heat * 0.30f);
 
-        // 4. Sub-cloud precipitation curtain density: concentrated inside rain bands, storm cores, and windward mountain slopes
+        // 4. Sub-cloud precipitation curtain / haboob / blizzard mist density
         float rawCurtain = 0f;
-        if (precipTotal > 0.05f || orographicLift > 0.38f && moisture > 0.52f && st > 0.45f) {
-            float orographicSquall = orographicLift * moisture * st * 0.55f;
+        if (sand > 0.08f) {
+            // Haboob dust storm wall: billowy front lobes rolling across the desert floor
+            float haboobWave = 0.45f + 0.55f * smooth(0.25f, 0.78f, mesoWave * 0.6f + shaftCell * 0.4f);
+            rawCurtain = sand * haboobWave * (0.65f + 0.35f * Math.max(rainBand, frontBandMax));
+        } else if (snow > 0.06f) {
+            // Alpine blizzard whiteout & blowing snow fog hugging terrain
+            rawCurtain = snow * (0.58f + 0.42f * Math.max(rainBand, shaftCell)) * (1f + 0.35f * orographicLift);
+        } else if (precipTotal > 0.05f || (orographicLift > 0.35f && moisture > 0.50f && (st > 0.40f || cellTower > 0.45f))) {
+            float orographicSquall = orographicLift * moisture * Math.max(st, cellTower) * 0.65f;
             float pDrive = Math.max(precipTotal, orographicSquall);
-            rawCurtain = pDrive * (0.35f + 0.65f * Math.max(rainBand, frontBandMax)) * (1f + 0.40f * orographicLift) * drySuppression;
+            rawCurtain = pDrive * (0.22f + 0.78f * Math.max(shaftCell, Math.max(rainBand, frontBandMax))) * (1f + 0.40f * orographicLift) * drySuppression;
         }
         float curtainDensity = clamp01(rawCurtain);
 
         // 5. Regional aerosol / precipitation type (water rain vs snow/blizzard vs desert haboob vs volcanic ash)
         double lat = AtmosphereMath.latitudeFactor(z);
-        boolean coldSnow = snow > rain || s.elevation + 35f > profile.snowLine || (lat > 0.70 && s.heat < 0.15f);
+        float thermalSnowLine = profile.snowLine + 22.0f * solarHeat - 12.0f * (1.0f - solarHeat) + s.heat * 45.0f;
+        boolean coldSnow = snow > rain || s.elevation + 35f > thermalSnowLine || (lat > 0.70 && s.heat < 0.15f);
         float aerosolCode;
         if (ash > 0.15f || blight > 0.15f || profile == WeatherProfile.VOLCANIC || s.heat > 0.42f) {
-            aerosolCode = lerp(clamp01(Math.max(ash, Math.max(blight, s.heat))), AEROSOL_WATER, AEROSOL_ASH);
-        } else if (sand > 0.15f || profile == WeatherProfile.ARID || s.dunes > 0.30f) {
-            aerosolCode = lerp(clamp01(Math.max(sand, s.dunes)), AEROSOL_WATER, AEROSOL_SAND);
+            // This is a category, not a density: interpolating light ashfall toward water
+            // crosses the snow/sand codes and gives distant ash the wrong material.
+            aerosolCode = AEROSOL_ASH;
+        } else if (sand > 0.12f || profile == WeatherProfile.ARID || s.dunes > 0.30f) {
+            aerosolCode = AEROSOL_SAND;
         } else if (coldSnow) {
             aerosolCode = AEROSOL_SNOW;
         } else {
@@ -475,8 +583,22 @@ public final class WeatherPhysics {
         }
 
         float windSpeed = clamp01(0.22f + 0.65f * gale + 0.18f * orographicLift + (s.coastDistance < 120f ? 0.10f : 0f));
-        float cloudBaseOffset = -26.0f * rainBand - 18.0f * orographicLift + 14.0f * leewardDry;
-        float cloudTopBoost = 190.0f * stormTower + 65.0f * orographicLift;
+        WeatherKind effectiveKind = domFront != null && frontEnvMax >= 0.42f ? domFront.kind() : baseKind;
+        float fogDrive = effectiveKind == WeatherKind.FOG ? 1f : (regionParams != null && regionParams.length > 8 ? regionParams[8] * 0.65f : 0f);
+        Thermals thermals = thermals(z, s, moisture, wetPrecip, fogDrive, dayTime);
+        float surfaceHeight = Math.max(TamrielMap.SEA_LEVEL, Math.max(s.elevation, Float.isFinite(s.waterLevel) ? s.waterLevel : s.elevation));
+        // Surface moisture can change sharply at a river bank. Its dew fog stays
+        // local, while the elevated cloud layer follows a much broader air mass.
+        float airMoisture = clamp01(0.78f + 0.16f * wetPrecip - 0.30f * s.dunes
+                + 0.10f * (vnoise(x / 2400.0, z / 2400.0, 717) - 0.5f));
+        Thermals cloudAir = thermals(z, s, airMoisture, wetPrecip, fogDrive * 0.45f, dayTime);
+        // A condensation level belongs to an air mass, not to every surface column.
+        // Modest terrain lift lets peaks penetrate a bank instead of stretching the
+        // entire deck into cones above each mountain. Ground fog is a separate layer.
+        float cloudBaseOffset = TamrielMap.SEA_LEVEL + (cloudAir.condensationHeight() - surfaceHeight)
+                + Math.min(75f, (surfaceHeight - TamrielMap.SEA_LEVEL) * 0.16f)
+                - 26f * rainBand - 18f * orographicLift - 232f;
+        float cloudTopBoost = 220.0f * stormTower + 65.0f * orographicLift;
 
         return new ColumnState(
                 moisture,
@@ -491,8 +613,19 @@ public final class WeatherPhysics {
                 curtainDensity,
                 aerosolCode,
                 cloudBaseOffset,
-                cloudTopBoost
+                cloudTopBoost,
+                surfaceHeight,
+                thermals.temperatureC(),
+                thermals.relativeHumidity(),
+                thermals.dewPointC(),
+                thermals.groundFog()
         );
+    }
+
+    /** Smooth sunrise/noon/sunset heating, with a cool night; world day ticks wrap safely across long saves. */
+    public static float solarHeating(long dayTime) {
+        double phase = (Math.floorMod(dayTime, 24000L) - 6000L) * (Math.PI * 2.0 / 24000.0);
+        return (float) Math.max(0.0, Math.cos(phase));
     }
 
     /**

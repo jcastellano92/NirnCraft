@@ -177,6 +177,8 @@ def build_prism_package(core_jar_arg):
         import pathlib as _pathlib
         import patch_complementary_clouds as _pcc
         _pcc.patch_shaderpack_zip(_pathlib.Path(shader_zip))
+        import patch_sun_horizon as _psh
+        _psh.patch_zip(_pathlib.Path(shader_zip), _pathlib.Path(shader_zip))
 
     print("\n[4/4] Writing the Prism instance...")
     with open(os.path.join(INST_DIR, "instance.cfg"), "w", encoding="utf-8", newline="\n") as f:

@@ -33,9 +33,9 @@ public final class ScenePlan {
 
     /** Anchor types (keep in step with tools/qa/placement_lint.py). */
     public static final byte ROAD_BEND = 0, CROSSROADS = 1, FORD = 2, BRIDGE_END = 3, FARM = 4, CAMP_SITE = 5, SHRINE_SITE = 6,
-            BATTLE_SITE = 7, RUIN_EDGE = 8, DUNGEON_MOUTH = 9, LOREWEB_CLUE = 10, SETTLEMENT_EDGE = 11;
+            BATTLE_SITE = 7, RUIN_EDGE = 8, DUNGEON_MOUTH = 9, LOREWEB_CLUE = 10, SETTLEMENT_EDGE = 11, TRAIL_SIDE = 12, TRAIL_END = 13;
     public static final String[] ANCHOR_NAMES = {"ROAD_BEND", "CROSSROADS", "FORD", "BRIDGE_END", "FARM", "CAMP_SITE",
-            "SHRINE_SITE", "BATTLE_SITE", "RUIN_EDGE", "DUNGEON_MOUTH", "LOREWEB_CLUE", "SETTLEMENT_EDGE"};
+            "SHRINE_SITE", "BATTLE_SITE", "RUIN_EDGE", "DUNGEON_MOUTH", "LOREWEB_CLUE", "SETTLEMENT_EDGE", "TRAIL_SIDE", "TRAIL_END"};
     /** Special prop kinds. */
     public static final String SIGN = "clue_sign", NOTE = "clue_note", LANDMARK_PREFIX = "lm:";
     /** {@link #pathX} when a scene has no worn path. */

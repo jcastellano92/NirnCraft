@@ -243,9 +243,12 @@ public final class SceneRealiser {
         com.skycraft.landmarks.Kind k = com.skycraft.landmarks.Kinds.byId(id);
         if (k == null) return false;
         LandCtx ctx = LandCtx.of(x, z);
+        // the scene at a trail's end stands on the very pad the plan flattened for the place, so it is pinned (it may
+        // overlap the planned pad) and forced (the trail ends here: it is built even on a steep or wet footing)
+        boolean trailEnd = plan.anchor[s] == ScenePlan.TRAIL_END;
         LandmarkSite site = new LandmarkSite(k.tier(), x >> 4, z >> 4, x, z, k, mix(seed), plan.facing[s] & 3, ctx.region.id(),
-                ctx.province, ctx.base, "", null);
-        return LandmarkBuilder.build(level, site, false, null);
+                ctx.province, ctx.base, "", trailEnd ? "trail_end" : null);
+        return LandmarkBuilder.build(level, site, trailEnd, null);
     }
 
     // ------------------------------------------------------------------ the worn path

@@ -86,6 +86,6 @@ public final class StreetTerrain {
     /** True within a planned road's bed plus its verge: plots keep off it (farm fields, yards, fences, houses). */
     public static boolean roadBed(int x, int z) {
         RoadPlan.Hit h = HIT.get();
-        return RoadPlan.get().at(x + 0.5, z + 0.5, h) && h.distance <= h.halfWidth + ROAD_KEEP_OUT;
+        return RoadPlan.get().atAuthored(x + 0.5, z + 0.5, h) && h.distance <= h.halfWidth + ROAD_KEEP_OUT;
     }
 }

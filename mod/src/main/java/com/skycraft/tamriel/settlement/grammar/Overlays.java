@@ -59,7 +59,7 @@ public final class Overlays {
 
     private static JsonObject read(String id) {
         String path = "/skycraft/tamriel/styles/overlays/" + id + ".json";
-        try (InputStream in = Overlays.class.getResourceAsStream(path)) {
+        try (InputStream in = com.skycraft.dev.DevResources.open(Overlays.class, path)) {
             if (in == null) {
                 Skycraft.LOGGER.warn("No style overlay {}", path);
                 return null;

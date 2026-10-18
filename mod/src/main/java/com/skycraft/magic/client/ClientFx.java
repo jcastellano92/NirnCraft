@@ -56,6 +56,16 @@ public final class ClientFx {
         if (level == null) return;
         Element el = Element.byOrdinal(m.element());
         Entity entity = m.entity() >= 0 ? level.getEntity(m.entity()) : null;
+        if (el == Element.FIRE || el == Element.FROST || el == Element.SHOCK || el == Element.HOLY) {
+            Vec3 source = entity == null ? m.a() : entity.getEyePosition();
+            com.skycraft.atmosphere.client.InteriorAtmosphere.light(source, elementColor(el), 1.5f, 10f, 8);
+            if (m.kind() == MagicFx.BEAM || m.kind() == MagicFx.ARC) {
+                com.skycraft.atmosphere.client.InteriorAtmosphere.light(lerp(m.a(), m.b(), 0.5), elementColor(el), 1.5f, 10f, 8);
+                com.skycraft.atmosphere.client.InteriorAtmosphere.light(m.b(), elementColor(el), 1.8f, 12f, 8);
+            }
+        }
+        if (m.kind() == MagicFx.BURST || m.kind() == MagicFx.LIGHTNING)
+            com.skycraft.atmosphere.client.InteriorAtmosphere.displace(m.a(), Math.max(2f, m.extra()/10f));
         switch (m.kind()) {
             case MagicFx.BEAM -> beam(level, el, m.a(), m.b(), m.extra() == 1);
             case MagicFx.BURST -> burst(level, el, m.a(), m.extra() / 10f);
@@ -120,8 +130,8 @@ public final class ClientFx {
             double y = base.y + R.nextDouble() * height;
             switch (el) {
                 case FIRE -> level.addParticle(ParticleTypes.FLAME, base.x + j(0.5), y, base.z + j(0.5), j(0.02), 0.06, j(0.02));
-                case FROST -> level.addParticle(ParticleTypes.SNOWFLAKE, base.x + j(0.5), y, base.z + j(0.5), j(0.03), 0.02, j(0.03));
-                case SHOCK -> level.addParticle(ParticleTypes.ELECTRIC_SPARK, base.x + j(0.5), y, base.z + j(0.5), j(0.2), j(0.2), j(0.2));
+                case FROST -> level.addParticle(com.skycraft.visual.VisualParticles.SPELL_FROST.get(), base.x + j(0.5), y, base.z + j(0.5), j(0.03), 0.02, j(0.03));
+                case SHOCK -> level.addParticle(com.skycraft.visual.VisualParticles.SPELL_SPARK.get(), base.x + j(0.5), y, base.z + j(0.5), j(0.2), j(0.2), j(0.2));
                 default -> level.addParticle(elementParticle(el), base.x + j(0.5), y, base.z + j(0.5), 0, 0.04, 0);
             }
         }
@@ -208,8 +218,8 @@ public final class ClientFx {
     private static ParticleOptions elementParticle(Element el) {
         return switch (el) {
             case FIRE -> ParticleTypes.FLAME;
-            case FROST -> ParticleTypes.SNOWFLAKE;
-            case SHOCK -> ParticleTypes.ELECTRIC_SPARK;
+            case FROST -> com.skycraft.visual.VisualParticles.SPELL_FROST.get();
+            case SHOCK -> com.skycraft.visual.VisualParticles.SPELL_SPARK.get();
             case HOLY -> dust(0xFFE08A, 1.2f);
             case SOUL -> ParticleTypes.SOUL_FIRE_FLAME;
             case MIND -> ParticleTypes.WITCH;
@@ -266,12 +276,12 @@ public final class ClientFx {
                     double t = R.nextDouble() * 0.35;
                     Vec3 p = a.add(d.scale(t));
                     double speed = len * 0.055 + R.nextDouble() * 0.12;
-                    level.addParticle(ParticleTypes.SNOWFLAKE, p.x + j(0.05), p.y + j(0.05), p.z + j(0.05),
+                    level.addParticle(com.skycraft.visual.VisualParticles.SPELL_FROST.get(), p.x + j(0.05), p.y + j(0.05), p.z + j(0.05),
                             dir.x * speed + j(0.03), dir.y * speed + j(0.03), dir.z * speed + j(0.03));
                 }
                 for (int i = 0; i < 6; i++) {
                     Vec3 p = a.add(d.scale(R.nextDouble()));
-                    level.addParticle(dust(0xCFEFFF, 0.9f), p.x + j(0.12), p.y + j(0.12), p.z + j(0.12), 0, 0, 0);
+                    level.addParticle(com.skycraft.visual.VisualParticles.SPELL_FROST.get(), p.x + j(0.12), p.y + j(0.12), p.z + j(0.12), 0, 0, 0);
                 }
                 if (impact) {
                     for (int i = 0; i < 4; i++) level.addParticle(ParticleTypes.ITEM_SNOWBALL, b.x + j(0.3), b.y + j(0.3), b.z + j(0.3), 0, 0, 0);
@@ -280,7 +290,7 @@ public final class ClientFx {
             }
             case SHOCK -> {
                 arc(level, a, b, 1);
-                if (impact) for (int i = 0; i < 5; i++) level.addParticle(ParticleTypes.ELECTRIC_SPARK, b.x, b.y, b.z, j(0.4), j(0.4), j(0.4));
+                if (impact) for (int i = 0; i < 5; i++) level.addParticle(com.skycraft.visual.VisualParticles.SPELL_SPARK.get(), b.x, b.y, b.z, j(0.4), j(0.4), j(0.4));
             }
             case HOLY -> {
                 int n = (int) (len * 2.5);
@@ -320,9 +330,9 @@ public final class ClientFx {
                 int steps = Math.max(1, (int) (seg.length() / 0.25));
                 for (int k = 0; k < steps; k++) {
                     Vec3 p = prev.add(seg.scale(k / (double) steps));
-                    level.addParticle(dust(0xDDE6FF, 0.7f), p.x, p.y, p.z, 0, 0, 0);
+                    level.addParticle(com.skycraft.visual.VisualParticles.SPELL_SPARK.get(), p.x, p.y, p.z, 0, 0, 0);
                 }
-                if (R.nextInt(2) == 0) level.addParticle(ParticleTypes.ELECTRIC_SPARK, next.x, next.y, next.z, j(0.05), j(0.05), j(0.05));
+                if (R.nextInt(2) == 0) level.addParticle(com.skycraft.visual.VisualParticles.SPELL_SPARK.get(), next.x, next.y, next.z, j(0.05), j(0.05), j(0.05));
                 prev = next;
             }
         }
@@ -342,12 +352,12 @@ public final class ClientFx {
                     if (i % 10 == 0) level.addParticle(ParticleTypes.LAVA, c.x, c.y, c.z, 0, 0, 0);
                 }
                 case FROST -> {
-                    level.addParticle(ParticleTypes.SNOWFLAKE, c.x, c.y, c.z, v.x, v.y, v.z);
+                    level.addParticle(com.skycraft.visual.VisualParticles.SPELL_FROST.get(), c.x, c.y, c.z, v.x, v.y, v.z);
                     if (i % 3 == 0) level.addParticle(ParticleTypes.ITEM_SNOWBALL, c.x + v.x * 4, c.y + v.y * 4, c.z + v.z * 4, 0, 0, 0);
                     if (i % 8 == 0) level.addParticle(ParticleTypes.CLOUD, c.x, c.y, c.z, v.x * 0.4, v.y * 0.4, v.z * 0.4);
                 }
                 case SHOCK -> {
-                    level.addParticle(ParticleTypes.ELECTRIC_SPARK, c.x, c.y, c.z, v.x * 3, v.y * 3, v.z * 3);
+                    level.addParticle(com.skycraft.visual.VisualParticles.SPELL_SPARK.get(), c.x, c.y, c.z, v.x * 3, v.y * 3, v.z * 3);
                     if (i % 4 == 0) level.addParticle(dust(0xDDE6FF, 1.2f), c.x + v.x * 5, c.y + v.y * 5, c.z + v.z * 5, 0, 0, 0);
                 }
                 case NONE -> {
@@ -375,10 +385,10 @@ public final class ClientFx {
             switch (el) {
                 case FROST -> {
                     double tx = -Math.sin(a) * 0.25, tz = Math.cos(a) * 0.25;
-                    level.addParticle(ParticleTypes.SNOWFLAKE, x, c.y + R.nextDouble() * 2.5, z, tx, -0.02, tz);
+                    level.addParticle(com.skycraft.visual.VisualParticles.SPELL_FROST.get(), x, c.y + R.nextDouble() * 2.5, z, tx, -0.02, tz);
                     if (i % 4 == 0) {
                         double r2 = R.nextDouble() * radius;
-                        level.addParticle(ParticleTypes.SNOWFLAKE, c.x + Math.cos(a) * r2, c.y + 3 + R.nextDouble(), c.z + Math.sin(a) * r2, 0, -0.15, 0);
+                        level.addParticle(com.skycraft.visual.VisualParticles.SPELL_FROST.get(), c.x + Math.cos(a) * r2, c.y + 3 + R.nextDouble(), c.z + Math.sin(a) * r2, 0, -0.15, 0);
                     }
                     if (i % 10 == 0) level.addParticle(ParticleTypes.CLOUD, x, c.y + 1.5, z, tx * 0.5, 0, tz * 0.5);
                 }
@@ -451,7 +461,7 @@ public final class ClientFx {
     private static void lightning(ClientLevel level, Vec3 ground) {
         Vec3 top = ground.add(j(3), 24, j(3));
         arc(level, top, ground, 2);
-        for (int i = 0; i < 20; i++) level.addParticle(ParticleTypes.ELECTRIC_SPARK, ground.x, ground.y + 0.2, ground.z, j(0.8), R.nextDouble() * 0.6, j(0.8));
+        for (int i = 0; i < 20; i++) level.addParticle(com.skycraft.visual.VisualParticles.SPELL_SPARK.get(), ground.x, ground.y + 0.2, ground.z, j(0.8), R.nextDouble() * 0.6, j(0.8));
         level.addParticle(ParticleTypes.FLASH, ground.x, ground.y + 1, ground.z, 0, 0, 0);
     }
 
@@ -472,6 +482,8 @@ public final class ClientFx {
     private static void stream(ClientLevel level, Stream s, Entity target) {
         Vec3 to = target.position().add(0, target.getBbHeight() * 0.6, 0);
         Vec3 from = s.from;
+        if (s.element == Element.FIRE || s.element == Element.FROST || s.element == Element.SHOCK)
+            com.skycraft.atmosphere.client.InteriorAtmosphere.light(lerp(from,to,0.5), elementColor(s.element), 1.3f, 10f, 3);
         float progress = s.age / (float) s.duration;
         if (s.element == Element.ARCANE) {
             // Word Wall: glyphs drift out of the wall into the player.
@@ -515,6 +527,7 @@ public final class ClientFx {
         Vec3 mouth = eye.add(look.scale(0.6)).add(0, -0.1, 0);
         switch (shout) {
             case UNRELENTING_FORCE -> {
+                com.skycraft.atmosphere.client.InteriorAtmosphere.displace(mouth.add(look.scale(3)), 3+words*2);
                 double range = 6 + 3 * words;
                 for (double d = 1.5; d <= range; d += 2.2) {
                     Vec3 p = eye.add(look.scale(d));
@@ -527,10 +540,11 @@ public final class ClientFx {
                 cone(level, mouth, look, 5 + 2 * words, 10 * words, ParticleTypes.LAVA, 0.3);
             }
             case FROST_BREATH -> {
-                cone(level, mouth, look, 7 + 2 * words, 70 * words, ParticleTypes.SNOWFLAKE, 0.45);
+                cone(level, mouth, look, 7 + 2 * words, 70 * words, com.skycraft.visual.VisualParticles.SPELL_FROST.get(), 0.45);
                 cone(level, mouth, look, 5 + 2 * words, 15 * words, ParticleTypes.CLOUD, 0.35);
             }
             case WHIRLWIND_SPRINT -> {
+                com.skycraft.atmosphere.client.InteriorAtmosphere.displace(mouth.add(look.scale(2)), 3+words);
                 for (int i = 0; i < 30; i++) level.addParticle(ParticleTypes.CLOUD, e.getX() + j(0.5), e.getY() + R.nextDouble() * 1.8,
                         e.getZ() + j(0.5), -look.x * 0.4, 0, -look.z * 0.4);
             }
@@ -554,7 +568,7 @@ public final class ClientFx {
             case MARKED_FOR_DEATH -> cone(level, mouth, look, 14, 50 * words, dust(0x8A0A0A, 1.4f), 0.25);
             case DISARM -> cone(level, mouth, look, 9, 30 * words, ParticleTypes.CRIT, 0.4);
             case ELEMENTAL_FURY -> {
-                for (int i = 0; i < 40; i++) level.addParticle(ParticleTypes.ELECTRIC_SPARK, e.getX() + j(0.6), e.getY() + 0.6 + R.nextDouble(), e.getZ() + j(0.6), j(0.1), j(0.1), j(0.1));
+                for (int i = 0; i < 40; i++) level.addParticle(com.skycraft.visual.VisualParticles.SPELL_SPARK.get(), e.getX() + j(0.6), e.getY() + 0.6 + R.nextDouble(), e.getZ() + j(0.6), j(0.1), j(0.1), j(0.1));
                 aura(level, Element.SHOCK, e, 3);
             }
             case KYNES_PEACE -> {
@@ -576,7 +590,7 @@ public final class ClientFx {
                 }
             }
             case ICE_FORM -> {
-                cone(level, mouth, look, 12, 60 * words, ParticleTypes.SNOWFLAKE, 0.35);
+                cone(level, mouth, look, 12, 60 * words, com.skycraft.visual.VisualParticles.SPELL_FROST.get(), 0.35);
                 cone(level, mouth, look, 10, 20 * words, dust(0xCFEFFF, 1.6f), 0.3);
             }
             case THROW_VOICE -> {
@@ -635,19 +649,30 @@ public final class ClientFx {
 
     /** Staff/artifact visuals, {@code kind} from {@code ArsenalPackets.Fx}. */
     private static void staff(ClientLevel level, int kind, Vec3 a, Vec3 b) {
+        int color=switch(kind) {
+            case ArsenalPackets.Fx.FIRE_STREAM, ArsenalPackets.Fx.FIRE_BURST -> 0xFF8A30;
+            case ArsenalPackets.Fx.FROST_STREAM, ArsenalPackets.Fx.FROST_BURST -> 0xBFE8FF;
+            case ArsenalPackets.Fx.SHOCK_STREAM, ArsenalPackets.Fx.LIGHTNING_ARC, ArsenalPackets.Fx.MAGNUS_BEAM -> 0xB8D5FF;
+            case ArsenalPackets.Fx.HEAL_BEAM, ArsenalPackets.Fx.SUN_BURST -> 0xFFE08A;
+            default -> 0;
+        };
+        if(color!=0) {
+            com.skycraft.atmosphere.client.InteriorAtmosphere.light(a,color,1.3f,9f,6);
+            com.skycraft.atmosphere.client.InteriorAtmosphere.light(lerp(a,b,0.5),color,1.5f,10f,6);
+        }
         RandomSource r = level.random;
         switch (kind) {
             case ArsenalPackets.Fx.FIRE_STREAM -> staffStream(level, r, a, b, ParticleTypes.FLAME, ParticleTypes.SMOKE);
-            case ArsenalPackets.Fx.FROST_STREAM -> staffStream(level, r, a, b, ParticleTypes.SNOWFLAKE, dust(0.75f, 0.9f, 1f, 1.2f));
+            case ArsenalPackets.Fx.FROST_STREAM -> staffStream(level, r, a, b, com.skycraft.visual.VisualParticles.SPELL_FROST.get(), com.skycraft.visual.VisualParticles.SPELL_FROST.get());
             case ArsenalPackets.Fx.SHOCK_STREAM -> {
-                staffStream(level, r, a, b, ParticleTypes.ELECTRIC_SPARK, dust(0.7f, 0.8f, 1f, 0.9f));
-                staffArc(level, r, a, b, dust(0.85f, 0.9f, 1f, 0.8f), 0.35);
+                staffStream(level, r, a, b, com.skycraft.visual.VisualParticles.SPELL_SPARK.get(), com.skycraft.visual.VisualParticles.SPELL_SPARK.get());
+                staffArc(level, r, a, b, com.skycraft.visual.VisualParticles.SPELL_SPARK.get(), 0.35);
             }
             case ArsenalPackets.Fx.HEAL_BEAM -> staffBeam(level, r, a, b, dust(1f, 0.92f, 0.55f, 1.1f), ParticleTypes.HAPPY_VILLAGER);
             case ArsenalPackets.Fx.MAGNUS_BEAM -> staffBeam(level, r, a, b, dust(0.45f, 0.6f, 1f, 1.3f), ParticleTypes.ENCHANT);
             case ArsenalPackets.Fx.LIGHTNING_ARC -> {
-                staffArc(level, r, a, b, dust(0.8f, 0.85f, 1f, 1.2f), 0.6);
-                staffArc(level, r, a, b, ParticleTypes.ELECTRIC_SPARK, 0.5);
+                staffArc(level, r, a, b, com.skycraft.visual.VisualParticles.SPELL_SPARK.get(), 0.6);
+                staffArc(level, r, a, b, com.skycraft.visual.VisualParticles.SPELL_SPARK.get(), 0.5);
             }
             case ArsenalPackets.Fx.FIRE_BURST -> staffBurst(level, r, a, ParticleTypes.FLAME, 60, 0.35);
             case ArsenalPackets.Fx.SUN_BURST -> {
@@ -655,7 +680,7 @@ public final class ClientFx {
                 staffBurst(level, r, a, ParticleTypes.END_ROD, 25, 0.2);
                 level.addParticle(ParticleTypes.FLASH, a.x, a.y, a.z, 0, 0, 0);
             }
-            case ArsenalPackets.Fx.FROST_BURST -> staffBurst(level, r, a, ParticleTypes.SNOWFLAKE, 20, 0.15);
+            case ArsenalPackets.Fx.FROST_BURST -> staffBurst(level, r, a, com.skycraft.visual.VisualParticles.SPELL_FROST.get(), 20, 0.15);
             case ArsenalPackets.Fx.WARD -> staffWard(level, r, a, b);
             case ArsenalPackets.Fx.SOUL_BURST -> staffBurst(level, r, a, ParticleTypes.SOUL, 20, 0.08);
             default -> {

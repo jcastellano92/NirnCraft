@@ -1,0 +1,567 @@
+{
+  "version": 1,
+  "defaultInputs": [
+    "mod/src/main/resources/**/*",
+    "mod/src/main/java/com/skycraft/**/*.java",
+    "mod/build.gradle",
+    "tools/qa/*.py",
+    "tools/qa/scenarios/**/*.json",
+    "tools/qa/floors.json",
+    "tools/shaders/*.py",
+    "tools/dev/*.py"
+  ],
+  "systems": [
+    {
+      "id": "terrain",
+      "conditions": [
+        "ground_horizon",
+        "mountain_cloud_above_below",
+        "water_coast",
+        "travel_refinement"
+      ],
+      "acceptance": [
+        "Loaded native terrain and reviewed distant silhouettes",
+        "No holes, sudden LOD silhouettes or buried cameras",
+        "Record generation, refinement and frame times separately"
+      ]
+    },
+    {
+      "id": "structures",
+      "conditions": [
+        "entrance_exit",
+        "interior_exterior",
+        "vertical_route"
+      ],
+      "acceptance": [
+        "Real generated structure, reachable doors and usable stairs",
+        "Palette, scale and sightlines suit the region",
+        "No clipped furniture or blocked paths"
+      ]
+    },
+    {
+      "id": "roads",
+      "conditions": [
+        "settlement_gate",
+        "water_crossing",
+        "mountain_grade",
+        "roadside_story"
+      ],
+      "acceptance": [
+        "Walkable continuous route with headroom",
+        "Bridge/ford deck follows actual water",
+        "Signs and destinations agree with route"
+      ]
+    },
+    {
+      "id": "flora",
+      "conditions": [
+        "forest_canopy_understory",
+        "regional_transition",
+        "large_tree_mushroom",
+        "wind_weather"
+      ],
+      "acceptance": [
+        "Species fit ecology and water/height",
+        "Ground contact, density and variation look intentional",
+        "Wind motion preserves roots and branches"
+      ]
+    },
+    {
+      "id": "fauna",
+      "conditions": [
+        "habitat_group",
+        "predator_prey",
+        "shelter_night",
+        "movement_terrain"
+      ],
+      "acceptance": [
+        "Actual entities behave in their habitat",
+        "No persistent collision traps or floating spawns",
+        "Observe behavior over time, not just summons"
+      ]
+    },
+    {
+      "id": "scatter",
+      "conditions": [
+        "near_far_density",
+        "route_clearance",
+        "large_object_grounding"
+      ],
+      "acceptance": [
+        "Props grounded and scaled to region",
+        "Do not block intended paths or doors",
+        "Near/far detail remains coherent"
+      ]
+    },
+    {
+      "id": "npcs",
+      "conditions": [
+        "day_work",
+        "night_rest",
+        "storm_shelter",
+        "combat_navigation",
+        "service_access",
+        "local_navigation"
+      ],
+      "acceptance": [
+        "Actual NPC schedule and path complete",
+        "Doors and services reachable by player and NPC",
+        "No false success from static schedule tables alone"
+      ]
+    },
+    {
+      "id": "settlements",
+      "conditions": [
+        "arrival_orientation",
+        "market_services",
+        "residential_routes",
+        "night_lighting"
+      ],
+      "acceptance": [
+        "Town layout supports actual use and identity",
+        "Routes connect gates, inns, shops and homes",
+        "Check street-level view and plan together"
+      ]
+    },
+    {
+      "id": "weather",
+      "conditions": [
+        "clear_twilight",
+        "rain_roof",
+        "snow_blizzard",
+        "dust_sand_ash",
+        "lightning_cloud_ground",
+        "aurora_moon_stars"
+      ],
+      "acceptance": [
+        "Regional climate permits the selected condition",
+        "Cloud/fog/ground lighting agree",
+        "No outdoor storm leaks into sealed caves/houses",
+        "Travel retains weather continuity"
+      ]
+    },
+    {
+      "id": "dungeons",
+      "conditions": [
+        "entrance_adaptation",
+        "long_corridor_torch",
+        "stairs_descent",
+        "water_feature",
+        "large_chamber",
+        "encounter_reward_loop"
+      ],
+      "acceptance": [
+        "Use actual dungeon plan and route",
+        "Clear camera, readable route, deliberate darkness",
+        "Gameplay route reaches encounter/reward and exit"
+      ]
+    },
+    {
+      "id": "caves",
+      "conditions": [
+        "sealed_darkness",
+        "real_roof_opening",
+        "vast_cavern",
+        "cold_floor_mist",
+        "vegetation_water",
+        "moving_fog_boundary"
+      ],
+      "acceptance": [
+        "Outdoor light only through actual openings",
+        "Mist follows room boundaries without popping",
+        "No global outdoor cloud or lightning flash underground"
+      ]
+    },
+    {
+      "id": "magic",
+      "conditions": [
+        "player_spell_hit",
+        "enemy_spell",
+        "staff_item",
+        "fire_frost_shock_storm",
+        "persistent_impact"
+      ],
+      "acceptance": [
+        "Real gameplay source and packet, damage and impact",
+        "Light and smoke illuminate/occlude with environment",
+        "Performance bounded during multiple effects"
+      ]
+    },
+    {
+      "id": "fx",
+      "conditions": [
+        "torch_soot",
+        "campfire_smoke",
+        "helgen_near_far",
+        "fog_displacement",
+        "emissive_in_fog"
+      ],
+      "acceptance": [
+        "Effect originates at actual source and respects terrain depth",
+        "No solid black smoke wall or detached plume",
+        "Motion and fade remain smooth at volume handoff"
+      ]
+    },
+    {
+      "id": "ui",
+      "conditions": [
+        "hud_world",
+        "map_navigation",
+        "inventory_magic",
+        "service_dialogue",
+        "resolution_scale"
+      ],
+      "acceptance": [
+        "Readable controls, text, focus and clipping",
+        "Actual menu interactions succeed",
+        "World context and visual style remain coherent"
+      ]
+    },
+    {
+      "id": "performance",
+      "conditions": [
+        "clear_baseline",
+        "storm_stress",
+        "city_crowd",
+        "cavern_fx",
+        "travel_chunk_lod"
+      ],
+      "acceptance": [
+        "Fixed camera/settings and shader mode recorded",
+        "Warmup separate, no screenshot encoding during sample",
+        "Median, p95, p99 and stalls with CPU/GPU limits disclosed"
+      ]
+    }
+  ],
+  "checks": [
+    {
+      "id": "spawn-rules",
+      "systems": [
+        "fauna",
+        "npcs"
+      ],
+      "command": [
+        "{python}",
+        "-I",
+        "tools/qa/spawn_audit.py"
+      ],
+      "requireRegex": [
+        "0 errors"
+      ],
+      "artifacts": [
+        "dist/world-tests/spawn-audit.json"
+      ],
+      "timeoutSeconds": 60
+    },
+    {
+      "id": "regional-flow",
+      "systems": [
+        "roads",
+        "npcs",
+        "settlements",
+        "dungeons",
+        "scatter"
+      ],
+      "command": [
+        "{python}",
+        "-I",
+        "tools/qa/flow_gate.py"
+      ],
+      "artifacts": [
+        "dist/world-tests/flow-audit.json"
+      ],
+      "timeoutSeconds": 120
+    },
+    {
+      "id": "data",
+      "systems": [
+        "structures",
+        "flora",
+        "fauna",
+        "scatter",
+        "npcs",
+        "settlements",
+        "magic",
+        "ui"
+      ],
+      "command": [
+        "{python}",
+        "-I",
+        "tools/qa/data_checks.py"
+      ],
+      "requireRegex": [
+        "0 errors"
+      ],
+      "timeoutSeconds": 180
+    },
+    {
+      "id": "assets",
+      "systems": [
+        "structures",
+        "flora",
+        "fauna",
+        "magic",
+        "fx",
+        "ui"
+      ],
+      "command": [
+        "{python}",
+        "-I",
+        "tools/qa/asset_audit.py",
+        "--list",
+        "30"
+      ],
+      "timeoutSeconds": 180
+    },
+    {
+      "id": "layout",
+      "systems": [
+        "terrain",
+        "structures",
+        "settlements",
+        "roads"
+      ],
+      "command": [
+        "{python}",
+        "-I",
+        "tools/qa/layout_lint.py"
+      ],
+      "timeoutSeconds": 180
+    },
+    {
+      "id": "reach",
+      "systems": [
+        "roads",
+        "settlements",
+        "structures",
+        "npcs"
+      ],
+      "command": [
+        "{python}",
+        "-I",
+        "tools/qa/reach_lint.py"
+      ],
+      "timeoutSeconds": 180
+    },
+    {
+      "id": "ecology",
+      "systems": [
+        "flora",
+        "fauna",
+        "weather"
+      ],
+      "command": [
+        "{python}",
+        "-I",
+        "tools/qa/ecology_report.py",
+        "--all"
+      ],
+      "timeoutSeconds": 180
+    },
+    {
+      "id": "worldsheets",
+      "systems": [
+        "terrain",
+        "flora",
+        "fauna",
+        "weather",
+        "settlements",
+        "dungeons",
+        "caves",
+        "scatter"
+      ],
+      "command": [
+        "{python}",
+        "-I",
+        "tools/qa/worldsheet_lint.py"
+      ],
+      "timeoutSeconds": 180
+    },
+    {
+      "id": "menus",
+      "systems": [
+        "ui"
+      ],
+      "command": [
+        "{python}",
+        "-I",
+        "tools/qa/menu_coverage.py"
+      ],
+      "timeoutSeconds": 60
+    },
+    {
+      "id": "shader-contracts",
+      "systems": [
+        "weather",
+        "caves",
+        "fx",
+        "performance"
+      ],
+      "command": [
+        "{python}",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools/shaders",
+        "-p",
+        "test_*.py"
+      ],
+      "timeoutSeconds": 60
+    },
+    {
+      "id": "live-controls",
+      "systems": [
+        "terrain",
+        "performance"
+      ],
+      "command": [
+        "{python}",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools/dev",
+        "-p",
+        "test_*.py"
+      ],
+      "timeoutSeconds": 60
+    },
+    {
+      "id": "camera-contracts",
+      "systems": [
+        "terrain",
+        "structures",
+        "weather",
+        "dungeons",
+        "caves",
+        "ui",
+        "performance"
+      ],
+      "command": [
+        "{python}",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools/qa",
+        "-p",
+        "test_*.py"
+      ],
+      "timeoutSeconds": 60
+    },
+    {
+      "id": "magic-runtime",
+      "tier": "runtime",
+      "systems": [
+        "magic",
+        "fx",
+        "ui"
+      ],
+      "commands": [
+        "execute as @p at @p run skycraft magic selftest"
+      ],
+      "requireRegex": [
+        "selftest OK"
+      ],
+      "failureRegex": "(?m)PROBLEM:|selftest FAILED|\\bFAIL "
+    },
+    {
+      "id": "inventory-runtime",
+      "tier": "runtime",
+      "systems": [
+        "ui"
+      ],
+      "commands": [
+        "execute as @p at @p run skycraft-inventory selftest"
+      ],
+      "requireRegex": [
+        "0 problems"
+      ],
+      "failureRegex": "(?m)\\bFAIL "
+    },
+    {
+      "id": "protection-runtime",
+      "tier": "runtime",
+      "systems": [
+        "structures",
+        "flora",
+        "settlements"
+      ],
+      "commands": [
+        "execute as @p at @p run skycraft-protect selftest"
+      ],
+      "requireRegex": [
+        "0 problems"
+      ],
+      "failureRegex": "(?m)\\bFAIL "
+    },
+    {
+      "id": "calendar-runtime",
+      "tier": "runtime",
+      "systems": [
+        "npcs",
+        "settlements"
+      ],
+      "commands": [
+        "skycraft-calendar selftest"
+      ],
+      "requireRegex": [
+        "\\[PASS\\] skycraft-calendar selftest:"
+      ],
+      "failureRegex": "\\[FAIL\\]"
+    },
+    {
+      "id": "travel-runtime",
+      "tier": "runtime",
+      "systems": [
+        "roads",
+        "settlements",
+        "npcs"
+      ],
+      "commands": [
+        "skycraft-travel selftest"
+      ],
+      "requireRegex": [
+        "Travel selftest: \\d+/\\d+ checks passed, 0 problems"
+      ],
+      "failureRegex": "\\bFAIL\\b"
+    },
+    {
+      "id": "society-runtime",
+      "tier": "runtime",
+      "systems": [
+        "npcs",
+        "settlements",
+        "fauna"
+      ],
+      "commands": [
+        "@timeout 240",
+        "task:society"
+      ],
+      "requireRegex": [
+        "Society selftest: \\d+/\\d+ checks passed, 0 problems"
+      ],
+      "failureRegex": "(?m)\\bFAIL\\b",
+      "timeoutSeconds": 260
+    },
+    {
+      "id": "services-runtime",
+      "tier": "runtime",
+      "systems": [
+        "npcs",
+        "settlements",
+        "ui"
+      ],
+      "commands": [
+        "@timeout 120",
+        "task:trainer"
+      ],
+      "requireRegex": [
+        "Society selftest: \\d+/\\d+ checks passed, 0 problems"
+      ],
+      "failureRegex": "(?m)\\bFAIL\\b",
+      "timeoutSeconds": 140
+    }
+  ]
+}

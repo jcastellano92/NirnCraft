@@ -159,6 +159,7 @@ public final class DevServer {
     public static void onStarted(ServerStartedEvent event) {
         if (!enabled()) return;
         MinecraftServer server = event.getServer();
+        DevResources.clear();
         try {
             Files.createDirectories(dir("inbox"));
             Files.createDirectories(dir("outbox"));
@@ -175,13 +176,23 @@ public final class DevServer {
             ow.getChunkSource().removeRegionTicket(TicketType.START, new ChunkPos(ow.getSharedSpawnPos()), 11, Unit.INSTANCE);
         }
         write("ready", ProcessHandle.current().pid() + "\n" + System.currentTimeMillis() + "\n");
+        write("bake-packaged-inputs", com.skycraft.bake.Bake.inputsHash() + "\n");
+        Path core = Path.of("mods/skycraft-core.jar");
+        if (Files.isRegularFile(core)) {
+            try {
+                write("runtime.json", "{\"coreSha256\":\"" + com.skycraft.bake.Bake.sha(Files.readAllBytes(core))
+                        + "\",\"pid\":" + ProcessHandle.current().pid() + "}");
+            } catch (IOException e) { Skycraft.LOGGER.warn("[dev] could not record preview jar", e); }
+        }
         Skycraft.LOGGER.info("[dev] dev server ready: inbox {}", dir("inbox").toAbsolutePath());
     }
 
     @SubscribeEvent
     public static void onStopping(ServerStoppingEvent event) {
         if (!enabled()) return;
+        DevScenario.clear();
         if (job != null) finish("FAIL", "server stopping");
+        DevResources.clear();
         try {
             Files.deleteIfExists(dir("outbox").resolve("ready"));
         } catch (IOException ignored) {
@@ -208,8 +219,8 @@ public final class DevServer {
         if (ticks % 20 == 0) {
             write("heartbeat", System.currentTimeMillis() + " " + ticks + " " + (job == null ? "-" : job.id)
                     + (DevRegen.active == null ? "" : " regen:" + DevRegen.active.phase) + "\n");
-            if (job == null) poll();
         }
+        if (ticks % 5 == 0 && job == null) poll();
         if (job != null) step(server);
     }
 
@@ -293,7 +304,7 @@ public final class DevServer {
         }
         CommandSourceStack src = server.createCommandSourceStack().withSource(new Capture());
         int r = server.getCommands().performPrefixedCommand(src, cmd);
-        if (r <= 0 && cmd.startsWith("skycraft-dev ")) j.failed = true;
+        if (r <= 0) j.failed = true;
         j.regen = DevRegen.active;
     }
 
@@ -314,6 +325,13 @@ public final class DevServer {
     public static void onCommands(RegisterCommandsEvent event) {
         if (!enabled()) return;
         event.getDispatcher().register(Commands.literal("skycraft-dev").requires(s -> s.hasPermission(4))
+                .then(DevRoute.command())
+                .then(DevScenario.command())
+                .then(Commands.literal("save").executes(c -> {
+                    boolean saved=c.getSource().getServer().saveEverything(true,true,true);
+                    c.getSource().sendSuccess(()->Component.literal("World save completed: "+saved),false);
+                    return saved?1:0;
+                }))
                 .then(Commands.literal("regen")
                         .then(Commands.argument("x1", IntegerArgumentType.integer())
                                 .then(Commands.argument("z1", IntegerArgumentType.integer())
@@ -340,6 +358,12 @@ public final class DevServer {
                             + (DevRegen.last == null ? "-" : DevRegen.last.result) + "; loaded chunks "
                             + c.getSource().getServer().overworld().getChunkSource().getLoadedChunksCount();
                     c.getSource().sendSuccess(() -> Component.literal(s), false);
+                    return 1;
+                }))
+                .then(Commands.literal("bake-status").executes(c -> {
+                    String hash = com.skycraft.bake.Bake.inputsHash();
+                    write("bake-inputs", hash + "\n");
+                    c.getSource().sendSuccess(() -> Component.literal("Runtime bake inputs: " + hash), false);
                     return 1;
                 }))
                 .then(Commands.literal("reload")

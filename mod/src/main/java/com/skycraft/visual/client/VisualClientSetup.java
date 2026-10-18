@@ -30,6 +30,8 @@ public final class VisualClientSetup {
         register(event, VisualParticles.FROST_BREATH, AtmosParticle.Kind.BREATH);
         register(event, VisualParticles.MARSH_WISP, AtmosParticle.Kind.WISP);
         register(event, VisualParticles.DUST_MOTE, AtmosParticle.Kind.MOTE);
+        register(event, VisualParticles.SPELL_FROST, AtmosParticle.Kind.SPELL_FROST);
+        register(event, VisualParticles.SPELL_SPARK, AtmosParticle.Kind.SPELL_SPARK);
     }
 
     private static void register(RegisterParticleProvidersEvent event, RegistryObject<SimpleParticleType> type, AtmosParticle.Kind kind) {

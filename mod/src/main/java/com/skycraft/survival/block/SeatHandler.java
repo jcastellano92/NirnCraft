@@ -102,6 +102,7 @@ public final class SeatHandler {
     public static void onDismountSeat(EntityMountEvent event) {
         if (!event.isDismounting()) return;
         Entity mount = event.getEntityBeingMounted();
+        if (mount == null || mount.isRemoved() || event.getEntityMounting().isRemoved()) return;
         if (mount instanceof ArmorStand stand && stand.getTags().contains(SEAT_TAG)) {
             if (!mount.level().isClientSide) {
                 Entity rider = event.getEntityMounting();

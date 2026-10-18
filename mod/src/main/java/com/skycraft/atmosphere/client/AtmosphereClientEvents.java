@@ -33,6 +33,17 @@ public final class AtmosphereClientEvents {
     private AtmosphereClientEvents() {}
 
     @SubscribeEvent
+    public static void onRenderTick(TickEvent.RenderTickEvent event) {
+        Minecraft mc = Minecraft.getInstance();
+        if (event.phase == TickEvent.Phase.END) { AtmosphereBudget.endFrame(); return; }
+        if (mc.level != null && mc.level.dimension() == net.minecraft.world.level.Level.OVERWORLD) {
+            AtmosphereBudget.beginFrame();
+            SmokeSourceTexture.renderClock(mc.level, event.renderTickTime);
+            LightningFieldTexture.renderUpdate(mc.isPaused() ? mc.getFrameTime() : event.renderTickTime);
+        }
+    }
+
+    @SubscribeEvent
     public static void onClientTick(TickEvent.ClientTickEvent event) {
         if (event.phase != TickEvent.Phase.END) return;
         Minecraft mc = Minecraft.getInstance();
@@ -43,6 +54,13 @@ public final class AtmosphereClientEvents {
             return;
         }
         if (mc.isPaused()) return;
+
+        // ---- shared atmospheric emission and nearby baked block light
+        if (mc.level.dimension() == net.minecraft.world.level.Level.OVERWORLD) {
+            NightSkyState.tick(mc.level, player.getEyePosition());
+            FogRadianceTexture.tick(mc.level, player.getEyePosition());
+            SmokeSourceTexture.tick(mc.level, player.getEyePosition());
+        }
 
         // ---- aurora: continuous world-Z latitude from Atmora (-6500) through Skyrim (-2000) to Cyrodiil (+3500..+6000)
         double pz = player.getZ();

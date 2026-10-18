@@ -1,16 +1,17 @@
 #!/usr/bin/env python3
 """Generates the Skyrim sky textures of the atmosphere module.
 
-  assets/minecraft/textures/environment/moon_phases.png   Masser (replaces the vanilla moon), 8 phases in a 4x2 grid
-  assets/skycraft/textures/environment/secunda_phases.png Secunda, 8 phases in a 4x2 grid (drawn by SkyRenderer)
-  assets/skycraft/textures/environment/masser_halo.png    soft red glow drawn around Masser at night
+  assets/minecraft/textures/environment/moon_phases.png   transparent vanilla moon replacement
+  assets/skycraft/textures/environment/{masser,secunda}_phases.png 16 phases, 4x4, baked by bake_lunar.py
+  assets/skycraft/textures/environment/masser_halo.png    faint shader-off lunar scattering fallback
   assets/skycraft/textures/environment/galaxy.png         horizontally tiling galaxy band
   assets/skycraft/textures/environment/clouds.png         cloud sprite atlas (4x4) for atmosphere.client.CloudRenderer
                                                           (`atmosphere.py clouds` rewrites only this one)
   assets/skycraft/textures/particle/*.png + particles/*.json  atmospheric particle sprites (visual package):
       snowflake, ash_flake, ember, sand_dust, falling_leaf, firefly, frost_breath, marsh_wisp, dust_mote
 
-Phase order follows vanilla: 0 full, 1-3 waning, 4 new, 5-7 waxing. Requires numpy and Pillow.
+Lunar atlases use public NASA LROC/LOLA data with fictional-body tints; see bake_lunar.py and lunar_sources.txt.
+Phase order: 0 full, 4 quarter, 8 new, 12 opposite quarter. Requires numpy and Pillow.
 """
 import json
 import pathlib
@@ -44,29 +45,34 @@ def smoothstep(a, b, x):
     return t * t * (3 - 2 * t)
 
 
-def surface(size, rng, base, dark, bright, craters, maria=0.5):
+def surface(size, rng, base, dark, bright, craters, maria=0.5, strength=1.0):
     """Albedo map of a moon (size x size, unit disc mapped to the square)."""
     n1 = periodic_noise(size, size, rng, 2.2)
     n2 = periodic_noise(size, size, rng, 1.4)
     mare = smoothstep(0.45, 0.7, n1) * maria
     alb = np.ones((size, size, 3)) * np.array(base, float)
     alb = alb * (1 - mare[..., None]) + np.array(dark, float) * mare[..., None]
-    alb *= (0.85 + 0.3 * n2)[..., None]
+    n3 = periodic_noise(size, size, rng, 1.0, low=6.0)   # fine grain: regolith, not a smooth ball
+    alb *= (0.85 + 0.3 * n2)[..., None] * (0.92 + 0.16 * n3)[..., None]
     yy, xx = np.mgrid[0:size, 0:size] / size * 2 - 1
+    relief = (n2 - 0.5) * 0.0008
     for _ in range(craters):
         cx, cy = rng.uniform(-0.9, 0.9, 2)
-        r = rng.uniform(0.03, 0.16) ** 1.2
+        # many small craters, a few big ones, the rims worn and uneven
+        r = (0.012 + rng.random() ** 3 * 0.16) * rng.uniform(0.8, 1.2)
         d = np.sqrt((xx - cx) ** 2 + (yy - cy) ** 2) / r
-        floor = np.clip(1 - d, 0, 1) ** 0.5 * 0.22
-        rim = np.exp(-((d - 1.0) / 0.18) ** 2) * 0.18
+        floor = np.clip(1 - d, 0, 1) ** 0.5 * 0.22 * strength
+        rim = np.exp(-((d - 1.0) / 0.22) ** 2) * 0.18 * strength * (0.5 + 0.5 * n3)
         alb *= (1 - floor)[..., None]
         alb += (rim[..., None] * np.array(bright, float) * 0.6)
-    return np.clip(alb, 0, 255)
+        relief += -r * 0.065 * np.clip(1 - d * d, 0, 1) + r * 0.025 * np.exp(-((d - 1.0) / 0.13) ** 2)
+    return np.clip(alb, 0, 255), relief
 
 
-def moon_phases(cell, radius, albedo, dark_side, rays=False):
+def moon_phases(cell, radius, albedo, dark_side, rays=False, phases=16):
     """4x2 grid of phases; returns RGBA uint8 array."""
-    img = np.zeros((cell * 2, cell * 4, 4))
+    img = np.zeros((cell * (phases // 4), cell * 4, 4))
+    albedo, relief = albedo
     size = albedo.shape[0]
     yy, xx = (np.mgrid[0:cell, 0:cell] + 0.5 - cell / 2) / radius
     rr = np.sqrt(xx ** 2 + yy ** 2)
@@ -76,11 +82,25 @@ def moon_phases(cell, radius, albedo, dark_side, rays=False):
     ix = np.clip(((xx + 1) / 2 * (size - 1)).astype(int), 0, size - 1)
     iy = np.clip(((yy + 1) / 2 * (size - 1)).astype(int), 0, size - 1)
     alb = albedo[iy, ix]
-    for p in range(8):
-        phi = p * np.pi / 4
+    gy, gx = np.gradient(relief, 2.0 / size)
+    normal_x = xx - gx[iy, ix]
+    normal_y = yy - gy[iy, ix]
+    normal_z = z
+    normal_length = np.sqrt(normal_x**2 + normal_y**2 + normal_z**2)
+    for p in range(phases):
+        phi = p * np.pi * 2 / phases
         lx, lz = np.sin(phi), np.cos(phi)
-        lit = xx * lx + z * lz
-        light = smoothstep(-0.06, 0.12, lit) * (0.55 + 0.45 * np.clip(lit, 0, 1) ** 0.5)
+        lit = (normal_x * lx + normal_z * lz) / np.maximum(0.001, normal_length)
+        light = smoothstep(-0.025, 0.055, lit) * (0.24 + 0.76 * np.clip(lit, 0, 1) ** 0.42)
+        # Baked local horizon tests give crater walls real cast shadows near the terminator.
+        base_z = z + relief[iy, ix]
+        for step in (0.002, 0.005, 0.011, 0.024, 0.05):
+            sx = xx + lx * step
+            six = np.clip(((sx + 1) / 2 * (size - 1)).astype(int), 0, size - 1)
+            sz = np.sqrt(np.maximum(0, 1 - sx*sx - yy*yy)) + relief[iy, six]
+            shadow = smoothstep(0.0002, 0.0015, sz - (base_z + lz * step))
+            shadow *= (sx*sx + yy*yy < 1)
+            light *= 1 - shadow * 0.88
         limb = 0.7 + 0.3 * z
         col = alb * (light * limb)[..., None] + np.array(dark_side, float) * (1 - light)[..., None]
         a = mask * 255
@@ -93,60 +113,97 @@ def moon_phases(cell, radius, albedo, dark_side, rays=False):
 
 def masser(rng):
     # Masser is huge in Skyrim's sky: the disc fills almost the whole vanilla moon quad
-    cell, radius = 64, 29.0
-    alb = surface(256, rng, base=(222, 132, 98), dark=(140, 62, 48), bright=(255, 190, 150), craters=55, maria=0.65)
-    return moon_phases(cell, radius, alb, dark_side=(16, 5, 4))
+    cell, radius = 512, 238.0
+    alb = surface(1024, rng, base=(207, 153, 139), dark=(100, 77, 83), bright=(244, 216, 201), craters=390, maria=0.7, strength=0.8)
+    return moon_phases(cell, radius, alb, dark_side=(2, 2, 3))
 
 
 def secunda(rng):
-    cell, radius = 32, 10.5
-    alb = surface(128, rng, base=(232, 236, 242), dark=(168, 172, 186), bright=(255, 255, 255), craters=25, maria=0.4)
-    return moon_phases(cell, radius, alb, dark_side=(6, 6, 8))
+    cell, radius = 256, 117.0
+    alb = surface(512, rng, base=(224, 230, 238), dark=(135, 143, 161), bright=(255, 255, 255), craters=220, maria=0.4, strength=0.75)
+    return moon_phases(cell, radius, alb, dark_side=(1, 2, 3))
 
 
 def halo():
-    s = 128
+    s = 512
     yy, xx = (np.mgrid[0:s, 0:s] + 0.5 - s / 2) / (s / 2)
     r = np.sqrt(xx ** 2 + yy ** 2)
     inner = 0.50  # Masser's rim: its disc fills ~90% of the vanilla moon quad (20 units), the halo quad is 36
-    g = np.exp(-np.clip(r - inner, 0, None) / 0.14) * smoothstep(inner - 0.03, inner + 0.03, r) * (1 - smoothstep(0.8, 1.0, r))
+    d = np.clip(r - inner, 0, None)
+    g = (0.50 * np.exp(-d / 0.06) + 0.50 * np.exp(-d / 0.28)) * smoothstep(inner - 0.10, inner + 0.01, r) * (1 - smoothstep(0.62, 1.0, r))
     img = np.zeros((s, s, 4))
     img[..., 0] = 255
     img[..., 1] = 120
     img[..., 2] = 90
-    img[..., 3] = np.clip(g * 200, 0, 255)
+    img[..., 3] = np.clip(g * 170, 0, 255)
     img[..., :3] *= (img[..., 3:4] > 0)
     return img.astype(np.uint8)
 
 
+def star_dot():
+    """A soft round star sprite (white; the vertex colour tints it). The centre texel is fully opaque, so thin
+    constellation lines can sample it too. Drawn linearly filtered, never as a square."""
+    s = 64
+    yy, xx = (np.mgrid[0:s, 0:s] + 0.5 - s / 2) / (s / 2)
+    r = np.sqrt(xx ** 2 + yy ** 2)
+    a = np.exp(-(r / 0.20) ** 2) * 1.0 + np.exp(-(r / 0.55) ** 2) * 0.22
+    a *= 1 - smoothstep(0.80, 1.0, r)
+    a[(np.abs(xx) < 0.05) & (np.abs(yy) < 0.05)] = 1.0
+    img = np.zeros((s, s, 4))
+    img[..., :3] = 255
+    img[..., 3] = np.clip(a, 0, 1) * 255
+    return img.astype(np.uint8)
+
+
 def galaxy(rng):
-    h, w = 128, 1024
-    v = (np.arange(h) + 0.5) / h
-    n_big = periodic_noise(h, w, rng, 2.0)
-    n_mid = periodic_noise(h, w, rng, 1.5)
-    n_dust = periodic_noise(h, w, rng, 1.7)
-    wobble = (periodic_noise(1, w, rng, 2.0)[0] - 0.5) * 0.18
-    centre = 0.5 + wobble[None, :]
-    width = 0.17 * (0.8 + 0.5 * periodic_noise(1, w, rng, 2.0)[0])[None, :]
-    band = np.exp(-((v[:, None] - centre) / width) ** 2)
-    core = np.exp(-((v[:, None] - centre) / (width * 0.45)) ** 2)
-    lane = 1 - 0.75 * np.exp(-((v[:, None] - centre - 0.03) / (width * 0.18)) ** 2) * smoothstep(0.35, 0.7, n_dust)
-    bright = band * (0.45 + 0.55 * n_big) * (0.6 + 0.4 * n_mid) * lane + 0.35 * core * n_big * lane
-    # resolved stars and knots
-    stars = (rng.random((h, w)) < 0.004 * (0.3 + band)).astype(float) * rng.uniform(0.4, 1.0, (h, w))
-    bright = np.clip(bright * 0.85 + stars * 0.9, 0, 1)
-    edge = smoothstep(0.0, 0.12, v) * smoothstep(0.0, 0.12, 1 - v)
-    bright *= edge[:, None]
-    warm = smoothstep(0.4, 0.8, n_mid) * core
-    rgb = np.empty((h, w, 3))
-    rgb[..., 0] = 185 + 70 * warm
-    rgb[..., 1] = 195 + 40 * warm
-    rgb[..., 2] = 255 - 60 * warm
-    img = np.zeros((h, w, 4))
-    img[..., :3] = rgb
-    img[..., 3] = bright * 255
-    img[..., 3][img[..., 3] < 1.0] = 0
-    return np.clip(img, 0, 255).astype(np.uint8)
+    """Original unresolved stellar disk, asymmetric bulge and absorbing dust lanes.
+
+    Noise frequencies use angular/pixel scale rather than stretching square noise
+    around the whole sky. Brightness is stellar radiance in RGB, not a cloud veil.
+    """
+    h, w = 512, 4096
+    v = (np.arange(h)[:, None] + 0.5) / h
+    u = (np.arange(w)[None, :] + 0.5) / w
+    def angular_noise(falloff, low):
+        f = np.fft.rfft2(rng.standard_normal((h, w)))
+        fy = np.fft.fftfreq(h)[:, None] * h
+        fx = np.fft.rfftfreq(w)[None, :] * h
+        k = np.sqrt(fx*fx + fy*fy)
+        f *= 1 / np.maximum(k, low)**falloff
+        f[0, 0] = 0
+        n = np.fft.irfft2(f, s=(h,w))
+        n = (n-n.mean()) / max(n.std(), 1e-6)
+        return np.clip(n * 0.17 + 0.5, 0, 1)
+    coarse = angular_noise(2.2, 2)
+    clouds = angular_noise(1.7, 7)
+    fine = angular_noise(0.85, 28)
+    longitude = np.arctan2(np.sin((u-0.32)*2*np.pi), np.cos((u-0.32)*2*np.pi))
+    bulge = np.exp(-(longitude/0.44)**2)
+    centre = 0.50 + np.sin(u*2*np.pi)*0.025 + np.sin(u*6*np.pi+1.3)*0.018
+    latitude = v-centre
+    thin_disk = np.exp(-(latitude/(0.11+bulge*0.10))**2)
+    halo = np.exp(-(latitude/0.32)**2) * (0.30+bulge*0.65)
+    stars = (thin_disk*(0.28+coarse*0.65)+halo) * (0.45+clouds*0.9)
+    # Warped, branching absorption lanes split the stellar populations irregularly.
+    lane_centre = 0.012 + (clouds-0.5)*0.08 + np.sin(u*14*np.pi)*0.012
+    dust = np.exp(-((latitude-lane_centre)/0.028)**2) * (0.4+coarse*1.3)
+    dust += np.exp(-((latitude+0.06+(coarse-0.5)*0.09)/0.018)**2) * clouds*0.9
+    # The Great Rift occupies part of the sky; a dark seam around the entire
+    # celestial circle reads as an artificial ink stroke. Foreground stars remain.
+    dust *= 0.15 + 0.85*np.exp(-((longitude+0.20)/1.7)**2)
+    transmission = np.exp(-dust*2.4)
+    radiance = stars * transmission * (0.55+fine*0.75) + thin_disk * (0.03+fine*0.06)
+    probability = 0.002 + 0.025*thin_disk*transmission
+    resolved = (rng.random((h,w)) < probability) * rng.random((h,w))**4
+    radiance = np.clip(radiance*0.55 + resolved*0.65, 0, 1)
+    warm = bulge * thin_disk
+    rgb = np.stack(np.broadcast_arrays(0.77+warm*0.23, 0.83+warm*0.12, 1.0-warm*0.22),axis=-1)
+    rgb *= radiance[...,None]
+    edge = smoothstep(0.0,0.15,v) * (1-smoothstep(0.85,1.0,v))
+    img = np.zeros((h,w,4),np.uint8)
+    img[...,:3] = np.uint8(np.clip(rgb,0,1)**(1/2.2)*255+0.5)
+    img[...,3] = np.uint8(np.broadcast_to(edge,(h,w))*255+0.5)
+    return img
 
 
 # ---------------------------------------------------------------- particles
@@ -441,20 +498,42 @@ def clouds():
     print("wrote", SKY / "weather_field.png")
 
 
+def write_blur_meta(png, clamp=False):
+    """Linear filtering for a sky texture (Minecraft samples textures with NEAREST unless told to blur)."""
+    meta = {"texture": {"blur": True, "clamp": clamp}}
+    png.with_name(png.name + ".mcmeta").write_text(json.dumps(meta, indent=2) + "\n")
+
+
+def sky():
+    rng = np.random.default_rng(1771)
+    SKY.mkdir(parents=True, exist_ok=True)
+    VANILLA.mkdir(parents=True, exist_ok=True)
+    out = [
+        (SKY / "masser_halo.png", halo(), True),
+        (SKY / "galaxy.png", galaxy(rng), False),
+        (SKY / "star.png", star_dot(), True),
+    ]
+    for path, arr, clamp in out:
+        Image.fromarray(arr, "RGBA").save(path)
+        write_blur_meta(path, clamp)
+    # Both renderer paths draw the same smooth-phased celestial bodies. Suppress the duplicate vanilla moon.
+    Image.new("RGBA", (4, 2), (0, 0, 0, 0)).save(VANILLA / "moon_phases.png")
+    import runpy
+    runpy.run_path(str(pathlib.Path(__file__).with_name("bake_lunar.py")), run_name="__main__")
+    print("wrote the sky textures:", ", ".join(o[0].name for o in out))
+
+
 def main():
     import sys
+    if "sky" in sys.argv[1:]:
+        sky()
+        return
     if "clouds" in sys.argv[1:]:
         SKY.mkdir(parents=True, exist_ok=True)
         clouds()
         return
     particles()
-    rng = np.random.default_rng(1771)
-    SKY.mkdir(parents=True, exist_ok=True)
-    VANILLA.mkdir(parents=True, exist_ok=True)
-    Image.fromarray(masser(rng), "RGBA").save(VANILLA / "moon_phases.png")
-    Image.fromarray(secunda(rng), "RGBA").save(SKY / "secunda_phases.png")
-    Image.fromarray(halo(), "RGBA").save(SKY / "masser_halo.png")
-    Image.fromarray(galaxy(rng), "RGBA").save(SKY / "galaxy.png")
+    sky()
     clouds()
     print("wrote", VANILLA / "moon_phases.png", "and", SKY)
 

@@ -14,6 +14,15 @@ explained by its geography, history and people ("world building is king").
 
 ## Where things are
 
+For modular regional testing, evidence, shader comparisons and performance sampling, read
+[WORLD-TESTING.md](WORLD-TESTING.md). `tools/qa/world_test.py` supports individual systems or the whole coverage plan.
+
+For live visual/world iteration, first read [LIVE-WORLD-PREVIEW.md](LIVE-WORLD-PREVIEW.md) and run
+`py -3 tools/dev/live_world.py status`. A disposable Prism preview may already be running; reuse it and preserve the
+owner's normal instance. The guide covers window/process detection, clean launch/close, live updates and bake uploads.
+For all visual tests, follow [VISUAL-TEST-CAMERAS.md](VISUAL-TEST-CAMERAS.md): plan and routes, local scouting in the
+real loaded world, visual review, then saved cameras. Generation changes invalidate saved camera approval.
+
 | What | Where |
 | --- | --- |
 | The mod (Java, resources, lang) | `mod/` (`mod/src/main/java/com/skycraft/<module>`, `mod/src/main/resources/skycraft/`) |

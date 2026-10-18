@@ -694,8 +694,10 @@ public final class StartCottage {
             TicketType.create("skycraft_cottage", Comparator.comparingLong(ChunkPos::toLong), 20 * 240);
 
     private static final class Prep {
+        ServerLevel owner;
         final List<Long> chunks = new ArrayList<>();
         int next;
+        boolean ticketsReleased;
         int stage; // 0 loading, 1 working, 2 done
         long started;
         CottageTerrain.PathReport path;
@@ -709,12 +711,14 @@ public final class StartCottage {
 
     /** Starts the path and cone preparation of this world's cottage (idempotent; nothing when it is already done). */
     public static synchronized void requestPrep(ServerLevel level) {
+        if (PREP != null && PREP.owner != level) PREP = null;
         if (PREP != null) return;
         Site s = site(level);
         if (s == null) return;
         Data d = data(level);
         if (d.prepared) return;
         Prep p = new Prep();
+        p.owner = level;
         p.started = level.getGameTime();
         p.chunks.addAll(chunkList(level, s));
         PREP = p;
@@ -794,6 +798,19 @@ public final class StartCottage {
 
     public static synchronized String report(ServerLevel level) {
         return data(level).report;
+    }
+
+    /** Explicit dev regeneration can release our completed preload instead of
+     * waiting for its four-minute arrival grace period. Active work is retained. */
+    public static synchronized int releaseCompletedPreparation(ServerLevel level) {
+        Prep p=PREP;
+        if(p==null || p.owner!=level || p.stage<2 || p.ticketsReleased) return 0;
+        for(long k:p.chunks) {
+            ChunkPos chunk=new ChunkPos(k);
+            level.getChunkSource().removeRegionTicket(TICKET,chunk,0,chunk);
+        }
+        p.ticketsReleased=true;
+        return p.chunks.size();
     }
 
     /** Server tick: load the chunks (a few per tick, by tickets) and then do the path and the cone. */

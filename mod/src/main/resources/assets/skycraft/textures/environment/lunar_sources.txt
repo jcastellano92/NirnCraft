@@ -1,0 +1,8 @@
+Render smooth lunar phases from public NASA LROC albedo and LOLA topography.
+
+Source: NASA Scientific Visualization Studio, CGI Moon Kit, https://svs.gsfc.nasa.gov/4720/
+Data is public domain: https://svs.gsfc.nasa.gov/help/#frequently-asked-questions
+These are Moon-derived art surfaces, recoloured/reoriented for the fictional bodies;
+they are not Bethesda textures or claims of canonical Masser/Secunda topography.
+
+Credit: NASA's Scientific Visualization Studio. Ernie Wright; LRO LROC and LOLA instrument teams.

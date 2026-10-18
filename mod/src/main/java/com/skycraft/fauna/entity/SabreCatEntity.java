@@ -162,4 +162,10 @@ public class SabreCatEntity extends FaunaAnimal {
             pouncing = false;
         }
     }
+
+    /** Not a day animal: a night hunter: it is up when the deer lie down. */
+    @Override
+    protected boolean sleepsAtNight() {
+        return false;
+    }
 }

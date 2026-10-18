@@ -703,6 +703,8 @@ public final class TradeNetwork {
             out.add("skycraft:swamp_fungal_pod");
         }
 
+        // what the land around the place makes: honey where it keeps hives (same rule the planner uses for its apiary)
+        LocalProduce.addTo(out, p.id(), p.culture());
         if (isPort && !"valenwood".equals(prov)) {
             out.add("skycraft:small_pearl");
             out.add("skycraft:salt_pile");

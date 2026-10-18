@@ -207,7 +207,13 @@ public final class TerrainDensity {
         double vault = vaultedChamberDensity(s, x, y, z, surfaceY);
         double gorge = riverGorgeDensity(s, x, y, z, surfaceY);
 
-        double cave = Math.min(karst, Math.min(vault, gorge));
+        // How deep this block really is: the terrain's own density grows about 0.036 per block below the true surface.
+        // The map's elevation can sit tens of blocks off the real, noise-shaped surface in mountains, and the map's
+        // per-pixel values step at pixel edges, so carving by map depth broke through the surface in big scoops and
+        // boxy cutouts. Carving is faded in with the real depth instead: nothing within ~8 blocks of the surface,
+        // everything from ~18 down.
+        double solid = Mth.clamp((slopedDensity - 0.30) / 0.35, 0.0, 1.0);
+        double cave = Mth.lerp(solid, 1.0, Math.min(karst, Math.min(vault, gorge)));
         double combined = Math.min(slopedDensity, cave);
         return Mth.lerp(mask, combined, Math.max(slopedDensity, 1.0));
     }

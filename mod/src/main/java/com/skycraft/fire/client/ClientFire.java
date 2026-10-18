@@ -156,4 +156,38 @@ public final class ClientFire {
             }
         }
     }
+
+    /** Copies the strongest nearby smoke sources into an atmosphere-owned reusable
+     * buffer (x,y,z,intensity,height,smoke). Uses the same synced/baked sites as flames. */
+    public static int smokeSources(float[] out, int limit, double cx, double cz) {
+        int count = 0;
+        synchronized (SERVER) {
+            if (serverCurrent()) for (View v : SERVER) count = insertSmoke(v, out, limit, count, cx, cz);
+        }
+        synchronized (TEMP) {
+            for (View v : TEMP) count = insertSmoke(v, out, limit, count, cx, cz);
+        }
+        return count;
+    }
+
+    private static int insertSmoke(View v, float[] out, int limit, int count, double cx, double cz) {
+        if (v.smoke <= 0 || v.blast) return count;
+        double distance = Math.hypot(v.x - cx, v.z - cz);
+        if (distance > 30000) return count;
+        double envelope = v.ends > 0 ? Math.min(1, Math.max(0, (v.ends - now()) / v.fade)) : 1;
+        double score = v.intensity * v.smoke * envelope / (500 + distance);
+        int at = count;
+        for (int i = 0; i < count; i++) {
+            int p = i * 6;
+            double prior = out[p + 3] * out[p + 5] / (500 + Math.hypot(out[p] - cx, out[p + 2] - cz));
+            if (score > prior) { at = i; break; }
+        }
+        if (at >= limit || score <= 0) return count;
+        int next = Math.min(limit, count + 1);
+        for (int i = next - 1; i > at; i--) System.arraycopy(out, (i - 1) * 6, out, i * 6, 6);
+        int p = at * 6;
+        out[p] = (float) v.x; out[p + 1] = (float) v.y; out[p + 2] = (float) v.z;
+        out[p + 3] = v.intensity * (float) envelope; out[p + 4] = v.height; out[p + 5] = v.smoke;
+        return next;
+    }
 }

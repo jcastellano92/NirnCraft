@@ -76,14 +76,14 @@ public final class CityPlans {
     private static Holder load() {
         Map<String, CityPlan> plans = new LinkedHashMap<>();
         Map<Integer, String> overlays = new HashMap<>();
-        try (InputStream in = CityPlans.class.getResourceAsStream(ROOT + "index.json")) {
+        try (InputStream in = com.skycraft.dev.DevResources.open(CityPlans.class, ROOT + "index.json")) {
             if (in == null) return new Holder(plans, overlays);
             JsonObject idx = JsonParser.parseReader(new InputStreamReader(in, StandardCharsets.UTF_8)).getAsJsonObject();
             java.util.Set<String> ovl = new TreeSet<>();
             if (idx.has("overlays")) for (JsonElement e : idx.getAsJsonArray("overlays")) ovl.add(e.getAsString());
             for (JsonElement e : idx.getAsJsonArray("plans")) {
                 String id = e.getAsString();
-                try (InputStream pin = CityPlans.class.getResourceAsStream(ROOT + id + ".json")) {
+                try (InputStream pin = com.skycraft.dev.DevResources.open(CityPlans.class, ROOT + id + ".json")) {
                     if (pin == null) {
                         Skycraft.LOGGER.warn("City plan {} listed but missing", id);
                         continue;

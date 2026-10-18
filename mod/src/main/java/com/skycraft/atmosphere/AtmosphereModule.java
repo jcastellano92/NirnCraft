@@ -30,5 +30,6 @@ public final class AtmosphereModule {
     /** Registers this module's packets via {@link com.skycraft.network.SkyNetwork#register}. Called once at startup. */
     public static void registerPackets() {
         com.skycraft.atmosphere.weather.WeatherPackets.register();
+        DungeonAir.register();
     }
 }

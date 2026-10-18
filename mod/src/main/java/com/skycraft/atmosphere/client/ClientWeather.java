@@ -117,6 +117,7 @@ public final class ClientWeather {
     public static float windZ() { return Mth.cos(windDeg * Mth.DEG_TO_RAD); }
     public static WeatherProfile profile() { return profile; }
     public static WeatherKind kind() { return centerKind; }
+    public static int knownRegionCount() { return TABLE.size(); }
     /** The region the player stands in (null before the first update). */
     public static Region region() { return region; }
     /** The synced weather of any region (the server covers every region out to about 1.6 km), or null if unknown. */
@@ -187,7 +188,13 @@ public final class ClientWeather {
                 FRONTS.add(new WeatherFront(f.id, f.x, f.z, f.radius, f.vx, f.vz, f.kind, f.intensity, f.ticksLeft));
             }
         }
-        if (msg.full()) snap = true;
+        if (msg.full() || Boolean.getBoolean("skycraft.autotest")) {
+            snap = true;
+            if (Boolean.getBoolean("skycraft.autotest")) {
+                CloudClimate.snapAll();
+                CloudRenderer.invalidate();
+            }
+        }
     }
 
     @SubscribeEvent
@@ -289,7 +296,7 @@ public final class ClientWeather {
             // Check moving synoptic WeatherFronts covering this sample point
             WeatherFront front = sampleFront(px, pz);
             float frontWeight = front != null && prof != WeatherProfile.NONE ? front.intensityAt(px, pz) : 0f;
-            if (front != null && frontWeight > 0.35f) {
+            if (front != null && frontWeight >= 0.42f) {
                 k = front.kind;
             }
 
@@ -301,7 +308,7 @@ public final class ClientWeather {
                 String rid = r.id();
                 summersetPrismatic = "summerset_isles".equals(r.province())
                         || "summerset".equals(rid) || "auridon".equals(rid) || "arteum".equals(rid);
-                if (front != null && frontWeight > 0.35f) {
+                if (front != null && frontWeight >= 0.42f) {
                     windTargetDeg = front.windDegrees();
                 } else if (spell != null) {
                     windTargetDeg = spell.wind;
@@ -321,14 +328,18 @@ public final class ClientWeather {
                 amount = Mth.lerp(frontWeight, amount, front.kind.amount * Mth.clamp(front.intensity, 0.5f, 1.25f));
             }
             double lat = com.skycraft.atmosphere.AtmosphereMath.latitudeFactor(pz);
-            boolean aboveSnowLine = here.getY() > prof.snowLine || mapElev > prof.snowLine || (lat > 0.72 && mapHeat < 0.15f);
+            boolean polar = lat > 0.72 && mapHeat < 0.15f;
+            // how much of the precipitation falls as snow: 0 well below the snow line, 1 well above it, graded between
+            float snowShare = polar ? 1f : Mth.clamp((Math.max(here.getY(), mapElev) - (prof.snowLine - 30f)) / 60f, 0f, 1f);
+            snowShare = snowShare * snowShare * (3f - 2f * snowShare);
 
             switch (k.precip) {
                 case RAIN -> {
                     if (biomePrecip == Biome.Precipitation.NONE) {
                         // a desert or other dry biome inside a rainy region: no rain here
-                    } else if (aboveSnowLine && biomePrecip == Biome.Precipitation.RAIN) {
-                        target[P.SNOW] += w * amount;
+                    } else if (biomePrecip == Biome.Precipitation.RAIN) {
+                        target[P.SNOW] += w * amount * snowShare;
+                        target[P.VANILLA] += w * amount * (1f - snowShare);
                     } else {
                         target[P.VANILLA] += w * amount;
                     }
@@ -357,7 +368,7 @@ public final class ClientWeather {
             float heatHaze = (prof == WeatherProfile.ARID || dunes > 0.25f) ? 0.08f + 0.10f * dunes : 0f;
 
             float sampleClouds = Mth.clamp(k.clouds * dryAtten + orographic * 0.45f + coastalMist * 0.3f, 0f, 1f);
-            if (k.precip != WeatherKind.Precip.NONE && amount > 0.02f) {
+            if (k.precip != WeatherKind.Precip.NONE && k.precip != WeatherKind.Precip.SAND && amount > 0.02f) {
                 sampleClouds = Math.max(sampleClouds, Mth.clamp(0.78f + 0.18f * amount, 0.78f, 0.98f));
             }
             float sampleFog = Mth.clamp(k.fog + coastalMist + orographic * 0.4f + marshMist + heatHaze, 0f, 1f);
@@ -419,12 +430,23 @@ public final class ClientWeather {
             target[P.CLOUDS] = Math.max(target[P.CLOUDS], Mth.lerp(app * 0.45f, target[P.CLOUDS], approaching.kind.clouds));
             target[P.WIND] = Math.max(target[P.WIND], Mth.lerp(app * 0.5f, target[P.WIND], approaching.kind.wind));
         }
-        // Morning mist (and a little at night) where the climate breeds it, thickest down by the water.
-        float mist = profile.dawnMist * WeatherProfile.mistHour(level.getDayTime());
-        if (mist > 0.01f) {
-            float low = Mth.clamp(1f - Math.max(0, here.getY() - 100) / 120f, 0.25f, 1f);
-            target[P.FOG] = Math.max(target[P.FOG], target[P.FOG] + mist * 0.45f * low * (1f - target[P.FOG]));
-        }
+        // The local precipitation and visibility sample the same world-space band
+        // seen at a distance. A summit above a valley fog layer must remain clear.
+        var column = com.skycraft.atmosphere.WeatherPhysics.evaluate(here.getX(), here.getZ(),
+                level.getGameTime() / 20.0, CloudClimate.snapshot().get(region.id()), kind(), windX(), windZ(), fronts(), level.getDayTime());
+        float bandAmount = Mth.clamp(0.35f + 1.25f * column.curtainDensity(), 0.2f, 1f);
+        target[P.VANILLA] *= bandAmount;
+        target[P.SNOW] *= bandAmount;
+        target[P.ASH] *= bandAmount;
+        target[P.SAND] *= bandAmount;
+        float falling = com.skycraft.atmosphere.WeatherPhysics.precipitationAltitudeFactor(column, player.getEyeY());
+        target[P.VANILLA] *= falling;
+        if (kind() != WeatherKind.BLIZZARD) target[P.SNOW] *= falling;
+        float aboveSurface = Math.max(0f, here.getY() - column.surfaceHeight());
+        float groundLayer = 1f - Mth.clamp((aboveSurface - 6f) / 55f, 0f, 1f);
+        float dewFog = column.groundFog();
+        float aerosolFog = Math.max(target[P.SAND], Math.max(target[P.ASH], target[P.SNOW]));
+        target[P.FOG] = Math.max(target[P.FOG] * Math.max(groundLayer, aerosolFog), dewFog * groundLayer * 0.85f);
         // Under a roof or deep underground the storm is outside: precipitation stays, but no fog indoors.
         if (!level.canSeeSky(here.above()) && level.getBrightness(net.minecraft.world.level.LightLayer.SKY, here) < 6) {
             target[P.FOG] *= 0.15f;
@@ -447,15 +469,22 @@ public final class ClientWeather {
         if (f < 0.02f || !fogApplies(event.getCamera())) return;
         float vanillaFar = event.getFarPlaneDistance();
         float inv = 1f - f;
-        float targetFar = 12f + 200f * inv * (float) Math.sqrt(inv);
+        boolean isHaboob = cur[P.SAND] > 0.15f && cur[P.VANILLA] < 0.05f && cur[P.SNOW] < 0.05f;
+        boolean isBlizzard = cur[P.SNOW] > 0.25f;
+        float targetFar = isHaboob
+                ? (58f + 220f * inv)
+                : (isBlizzard ? (18f + 145f * inv * (float) Math.sqrt(inv)) : (16f + 200f * inv * (float) Math.sqrt(inv)));
         if (event.getMode() == net.minecraft.client.renderer.FogRenderer.FogMode.FOG_SKY) {
-            // swallow the sky dome into the fog colour as the weather thickens
-            float far = Math.min(vanillaFar, Mth.lerp(f, vanillaFar, targetFar * 0.8f));
+            // In desert haboobs, keep the upper sky dome visible above the rolling brown dust wall
+            float skyFogWeight = isHaboob ? f * 0.35f : f;
+            float far = Math.min(vanillaFar, Mth.lerp(skyFogWeight, vanillaFar, targetFar * (isHaboob ? 1.8f : 0.8f)));
             event.setNearPlaneDistance(0f);
             event.setFarPlaneDistance(far);
         } else {
             float far = Math.min(vanillaFar, targetFar);
-            float near = Math.min(event.getNearPlaneDistance(), far * (0.05f + 0.55f * inv * inv));
+            float near = isBlizzard
+                    ? Math.min(event.getNearPlaneDistance(), far * (0.02f + 0.28f * inv))
+                    : Math.min(event.getNearPlaneDistance(), far * (0.08f + 0.55f * inv * inv));
             event.setNearPlaneDistance(near);
             event.setFarPlaneDistance(far);
         }
@@ -479,6 +508,19 @@ public final class ClientWeather {
                 r = Mth.lerp(t, r, cur[P.TINT_R] * light);
                 g = Mth.lerp(t, g, cur[P.TINT_G] * light);
                 b = Mth.lerp(t, b, cur[P.TINT_B] * light);
+            }
+            if (cur[P.SNOW] > 0.20f) {
+                // Alpine blizzard whiteout: soft diffused bright snow mist enveloping trees and slopes
+                float wWhite = Mth.clamp(cur[P.SNOW] * 0.88f, 0f, 0.92f);
+                r = Mth.lerp(wWhite, r, 0.92f * light);
+                g = Mth.lerp(wWhite, g, 0.95f * light);
+                b = Mth.lerp(wWhite, b, 0.99f * light);
+            } else if (cur[P.SAND] > 0.15f) {
+                // Haboob sandstorm horizon glow: warm ochre/tan desert dust
+                float wSand = Mth.clamp(cur[P.SAND] * 0.85f, 0f, 0.90f);
+                r = Mth.lerp(wSand, r, 0.84f * light);
+                g = Mth.lerp(wSand, g, 0.65f * light);
+                b = Mth.lerp(wSand, b, 0.45f * light);
             }
             // Regional & latitude-driven twilight Rayleigh/Mie scattering so horizon fog is never generic
             double camZ = event.getCamera().getPosition().z;

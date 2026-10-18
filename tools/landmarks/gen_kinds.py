@@ -130,6 +130,33 @@ M('m_dig_site', 'dig', '', 10, {'desert': 4, 'savanna': 3, 'plains': 2, 'ash': 2
 M('m_beacon_pyre', 'beacon', '', 5, {'mountain': 3, 'tundra': 2, 'coast': 3, 'plains': 1, 'ash': 1, 'volcanic': 1, 'desert': 1, 'high': 3}, 'Beacon')
 
 
+# ---------------------------------------------------------------- M: trailside and trail's-end places
+# (placed by the scene plan at the end of a trail or along it; the weights are the biome families they suit)
+M('m_adit_timber', 'adit', '', 7, {'mountain': 5, 'high': 3, 'tundra': 2, 'volcanic': 2, 'ash': 1}, 'Adit', note='miner', needs=['mountains'], spread=14)
+M('m_adit_dwemer', 'adit', 'dwemer', 7, {'mountain': 3, 'high': 2, 'ash': 2, 'volcanic': 2, 'tundra': 1}, 'Excavation', note='miner',
+  needs=['mountains'], provinces=['skyrim', 'morrowind', 'high_rock', 'hammerfell', 'solstheim'], spread=14)
+M('m_overlook_bench', 'overlook', '', 5, {'mountain': 4, 'high': 5, 'coast': 3, 'tundra': 2, 'forest': 2, 'plains': 2, 'shore': 2, 'savanna': 1}, 'Overlook',
+  note='overlook', spread=12)
+M('m_treehouse_stand', 'treehouse', '', 4, {'forest': 5, 'jungle': 3, 'marsh': 1}, 'Stand', cast=['npc:hunter'], note='hunter', spread=4)
+M('m_treehouse_hermit', 'treehouse', 'hermit', 4, {'forest': 3, 'jungle': 3, 'crystal': 3, 'mushroom': 1}, 'Perch', cast=['npc:apothecary'], note='hermit', spread=4)
+M('m_treehouse_lookout', 'treehouse', 'lookout', 4, {'forest': 3, 'jungle': 2, 'plains': 1, 'savanna': 1}, 'Lookout', spread=4)
+M('m_frozen_explorer', 'frozen', '', 5, {'tundra': 5, 'mountain': 3, 'high': 3}, 'Camp', note='explorer', needs=['cold'], spread=6)
+M('m_castaway', 'castaway', '', 6, {'coast': 6, 'shore': 2}, 'Shelter', note='castaway', needs=['coast'], spread=6)
+M('m_angler', 'angler', '', 6, {'shore': 6, 'coast': 3, 'marsh': 2, 'forest': 1, 'plains': 1}, 'Jetty', cast=['npc:fisher'], note='angler', spread=6)
+S('s_waystone', 'waystone', '', 3, dict(ALLS, high=2, mountain=3, plains=3, forest=3), sign=False)
+M('m_den_beast', 'den', '', 6, {'forest': 3, 'tundra': 4, 'mountain': 4, 'plains': 1, 'savanna': 1, 'ash': 1}, 'Den', note='traveller', spread=8)
+M('m_cabin_timber', 'cabin', '', 7, {'forest': 4, 'plains': 3, 'tundra': 2, 'mountain': 2, 'savanna': 1, 'crystal': 2}, 'Cabin', cast=['npc:citizen'], note='cabin', spread=4)
+M('m_cabin_stone', 'cabin', 'stone', 7, {'mountain': 3, 'tundra': 3, 'coast': 2, 'plains': 1, 'ash': 1}, 'Cottage', cast=['npc:citizen'], note='cabin', spread=4)
+M('m_cabin_mud', 'cabin', 'mud', 7, {'desert': 4, 'savanna': 3, 'ash': 3, 'plains': 1, 'volcanic': 1}, 'Dwelling', cast=['npc:citizen'], note='cabin', spread=4)
+M('m_cabin_stilt', 'cabin', 'stilt', 5, {'marsh': 5, 'jungle': 3, 'shore': 3, 'mushroom': 1}, 'Stilt House', cast=['npc:citizen'], note='cabin', spread=5)
+M('m_alcove_shrine', 'alcove', '', 5, {'mountain': 4, 'high': 3, 'tundra': 2, 'volcanic': 2, 'ash': 2, 'desert': 2, 'forest': 1, 'savanna': 1}, 'Shrine',
+  note='pilgrim', spread=10)
+M('m_well_rest', 'well', '', 5, {'desert': 5, 'savanna': 4, 'plains': 1, 'ash': 1}, 'Well', cast=['npc:merchant'], note='traveller', spread=4)
+M('m_apiary', 'apiary', '', 5, {'plains': 4, 'forest': 3, 'crystal': 3, 'savanna': 1}, 'Apiary', note='beekeeper', spread=4)
+M('m_herb_patch', 'herbs', '', 5, {'forest': 3, 'marsh': 3, 'tundra': 2, 'plains': 2, 'jungle': 2, 'mountain': 1}, 'Garden', cast=['npc:apothecary'], note='herbalist', spread=4)
+M('m_watch_post', 'watch_post', '', 5, {'plains': 3, 'forest': 2, 'mountain': 3, 'tundra': 2, 'savanna': 2, 'high': 2}, 'Watch', note='watch', spread=5)
+
+
 # ---------------------------------------------------------------- L: formations
 def L(kid, builder, style, radius, w, noun, secret=0.17, **kw):
     kind('L', kid, builder, style, radius, w, noun=noun, secret=secret, **kw)
@@ -234,6 +261,20 @@ WHY = {
     'skirmish': ('a small fight whose dead were never buried', 'near road or border', 'dropped arms of both sides'),
     'smuggler': ('a hidden cache of goods outside the toll roads', 'coast or ravine', 'a marker and a stowed crate'),
     'travellers': ('a pair or group resting where the road crests', 'on or beside a road', 'a pot and two bedrolls'),
+    'adit': ('a drift mine the miners gave up on after the roof came down', 'a hillside or mountain face at a trail', 'a chest cart on the rails and a journal'),
+    'overlook': ('a bench set where the land falls away, for travellers to rest and look', 'a ridge, cliff or high bank', 'a satchel and a note left on the bench'),
+    'treehouse': ('a tree stand or tree house where someone watches or lives', 'forest, off a trail', 'a ladder up the trunk and a hunter tally'),
+    'frozen': ('an explorer who did not come down the mountain', 'cold high ground', 'a frozen journal and a signal flag'),
+    'castaway': ('a shelter built by someone cast ashore', 'a beach', 'a tally of days and HELP in stones'),
+    'angler': ('a jetty and a bait barrel where someone fishes', 'a river bank or lake shore', 'a book of catches'),
+    'waystone': ('a marker stone in the local masonry, naming the way to the nearest place', 'a trail', 'a sign with a name, a direction and a distance'),
+    'den': ('the den of a beast under a rocky overhang', 'rough ground away from roads', 'gnawed bones and a victim pack'),
+    'cabin': ('a lone cabin where someone chose to live', 'the end of a track, far from towns', 'smoke, a garden and a kept journal'),
+    'alcove': ('a shrine cut into the rock at the end of a path', 'rock faces and high ground', 'candles, an offering and a note'),
+    'well': ('a well and an awning where travellers wait out the heat', 'dry country on a trail', 'a sign asking you to take only what you need'),
+    'apiary': ('hives kept at the edge of a meadow', 'flower meadows near a track', 'hives, a smoker and a keeper book'),
+    'herbs': ('an alchemist patch of herbs', 'soil beside a path', 'a brewing stand and a herbalist notes'),
+    'watch_post': ('an old watch post fallen into disuse', 'a rise above a trail', 'a cold brazier and the watch log'),
 }
 WHY_DEFAULT_L = ('a natural formation: the land shaped by water, wind, ice or fire', 'any ground matching its biome', 'a sign names it for travellers')
 

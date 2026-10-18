@@ -1,0 +1,78 @@
+{
+  "id": "cave-navigation",
+  "region": "skyrim/falkreath",
+  "systems": [
+    "npcs",
+    "caves",
+    "dungeons"
+  ],
+  "conditions": [
+    "local_navigation"
+  ],
+  "camera": "mine-spell-lane",
+  "planReference": "Embershard room3, actual lantern walkway; native Skycraft NPC traverses five metres toward observer",
+  "scope": "Actual engine navigation and observed native NPC arrival on a five-metre walkway with a repeatedly requested goal. Explicitly scripted locomotion; not autonomous schedules, combat or door interactions.",
+  "setupCommands": [
+    "gamemode creative @p",
+    "execute as @p at @p run skycraft-dev scenario spawn {run} skycraft:npc -275 89 795 active"
+  ],
+  "steps": [
+    {
+      "waitFor": {
+        "timeoutSeconds": 5,
+        "probeCommands": [
+          "execute as @p at @p run skycraft-dev scenario observe {run}"
+        ],
+        "assertions": [
+          {
+            "file": "world-preview/scenarios/{run}.json",
+            "field": "onGround",
+            "equals": true
+          }
+        ]
+      }
+    },
+    {
+      "commands": [
+        "execute as @p at @p run skycraft-dev scenario move {run} -275 88 800"
+      ]
+    },
+    {
+      "waitFor": {
+        "timeoutSeconds": 20,
+        "probeCommands": [
+          "execute as @p at @p run skycraft-dev scenario observe {run}"
+        ],
+        "assertions": [
+          {
+            "file": "world-preview/scenarios/{run}.json",
+            "field": "goalReached",
+            "equals": true
+          }
+        ],
+        "whilePendingCommands": [
+          "execute as @p at @p run skycraft-dev scenario move {run} -275 88 800"
+        ]
+      }
+    },
+    {
+      "actions": [
+        "capture {run}-arrival"
+      ]
+    }
+  ],
+  "assertions": [
+    {
+      "file": "world-preview/scenarios/{run}.json",
+      "field": "goalReached",
+      "equals": true
+    }
+  ],
+  "captures": [
+    "{run}-arrival"
+  ],
+  "cleanupCommands": [
+    "execute as @p at @p run skycraft-dev scenario cleanup {run}",
+    "gamemode spectator @p"
+  ]
+}

@@ -439,6 +439,10 @@ public final class SiteBuilder {
         t.putBoolean("ShowArms", true);
         t.putBoolean("NoBasePlate", true);
         t.putBoolean("Silent", true);
+        // the fallen have a name, shown on the crosshair when you look at the body
+        String name = com.skycraft.landmarks.Lore.person(site.province(), net.minecraft.util.RandomSource.create(site.seed() ^ (dx * 31L + dz)));
+        t.putString("CustomName", net.minecraft.network.chat.Component.Serializer.toJson(net.minecraft.network.chat.Component.literal(name)));
+        t.putBoolean("CustomNameVisible", false);
         stand.load(t);
         level.addFreshEntity(stand);
     }

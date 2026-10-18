@@ -100,9 +100,16 @@ public class StandingStoneShrineFeature extends Feature<NoneFeatureConfiguration
         Direction side = facing.getClockWise();
         set(level, origin.relative(facing, 2).relative(side, 2), Blocks.CAMPFIRE.defaultBlockState().setValue(CampfireBlock.LIT, false));
         if (random.nextBoolean()) {
-            set(level, origin.relative(facing, 2).relative(side, -2), Blocks.CANDLE.defaultBlockState());
+            candle(level, origin.relative(facing, 2).relative(side, -2));
         }
         scatterMoss(level, random, origin, 3, 6);
+    }
+
+    /** A candle only where something sturdy is under it (never floating in a stone circle). */
+    private static void candle(WorldGenLevel level, BlockPos pos) {
+        BlockPos under = pos.below();
+        if (!level.getBlockState(under).isFaceSturdy(level, under, Direction.UP)) return;
+        set(level, pos, Blocks.CANDLE.defaultBlockState());
     }
 
     private boolean placeGuardians(WorldGenLevel level, RandomSource random, BlockPos origin) {
@@ -140,7 +147,7 @@ public class StandingStoneShrineFeature extends Feature<NoneFeatureConfiguration
             BlockPos c = new BlockPos(origin.getX(), cy, origin.getZ());
             set(level, c, Blocks.MOSSY_COBBLESTONE.defaultBlockState());
             set(level, c.above(), Blocks.COBBLESTONE_WALL.defaultBlockState());
-            if (random.nextBoolean()) set(level, c.above(2), Blocks.CANDLE.defaultBlockState());
+            if (random.nextBoolean()) candle(level, c.above(2));
         }
         // the three stones on their plinths, facing the center
         for (int i = 0; i < 3; i++) {

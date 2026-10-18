@@ -151,6 +151,11 @@ public final class SkyFlocks {
         double x, y, z, xo, yo, zo;
         double vx, vy, vz;
         float yaw, yawO, pitch, pitchO, roll, rollO, flap, flapO, headYaw;
+        /** Perched: head turn / dip last tick (for smooth drawing), the random glance the head holds, ticks left of a peck. */
+        float headYawO, headPitch, headPitchO, glance;
+        int peck;
+        /** Roosting for the night: head tucked back, body fluffed. */
+        boolean sleeping;
         final float orbit, speed, phase, height;
         final int plumage;
         int perchTicks;
@@ -329,8 +334,18 @@ public final class SkyFlocks {
         return null;
     }
 
+    /** Dusk to dawn: the day birds roost, the bats come out. */
+    private static boolean isNight(ClientLevel level) {
+        long t = level.getDayTime() % 24000L;
+        return t > 13000L && t < 23000L;
+    }
+
     private static void step(Flock f, ClientLevel level, LocalPlayer player, RandomSource r) {
         Kind k = f.kind;
+        boolean night = isNight(level);
+        // gulls and hawks have no perch to settle on: they head home at dusk, and the bats go home at dawn
+        if (night && (k == Kind.GULL || k == Kind.HAWK) && f.life > 300) f.life = 300;
+        if (!night && k == Kind.BAT && f.life > 300) f.life = 300;
         f.cx += f.vx;
         f.cz += f.vz;
         if (r.nextInt(160) == 0) {
@@ -363,7 +378,12 @@ public final class SkyFlocks {
                 double playerDistSq = player.distanceToSqr(b.x, b.y, b.z);
                 double flockDist = Math.hypot(f.cx - b.x, f.cz - b.z);
                 BlockPos support = BlockPos.containing(b.perchX, b.perchY - 0.6, b.perchZ);
-                if (playerDistSq < 8.0 * 8.0 || flockDist > 42.0 || b.perchTicks <= 0 || !isPerchSurface(level, support)) {
+                // a roosting bird stays the night: it is only startled by someone right beside it, and its time never runs out
+                if (night) b.perchTicks = Math.max(b.perchTicks, 400);
+                double startle = night ? 4.0 : 8.0;
+                if (playerDistSq < startle * startle || flockDist > (night ? 70.0 : 42.0) || b.perchTicks <= 0
+                        || !isPerchSurface(level, support)) {
+                    b.sleeping = false;
                     // Burst takeoff upward!
                     b.perchTicks = 0;
                     b.seekingPerch = false;
@@ -382,17 +402,43 @@ public final class SkyFlocks {
                     b.pitch += (0f - b.pitch) * 0.25f;
                     b.roll += (0f - b.roll) * 0.25f;
                     b.flap += (0f - b.flap) * 0.3f;
-                    if (r.nextInt(35) == 0) {
-                        b.headYaw = (r.nextFloat() - 0.5f) * 50f;
+                    // watch the player when one is near, else glance about; the body turns once the neck is at its limit
+                    double wdx = player.getX() - b.x, wdz = player.getZ() - b.z;
+                    float want;
+                    boolean asleep = night && Math.hypot(wdx, wdz) > 7.0;
+                    b.sleeping = asleep;
+                    if (asleep) {
+                        // head tucked back over the shoulder, no watching, no pecking
+                        want = b.glance != 0f && Math.abs(b.glance) > 100f ? b.glance : (b.phase > Mth.PI ? 140f : -140f);
+                        b.headYawO = b.headYaw;
+                        b.headYaw += (want - b.headYaw) * 0.05f;
+                        b.headPitchO = b.headPitch;
+                        b.headPitch += (16f - b.headPitch) * 0.05f;
+                        continue;
                     }
-                    b.yaw += b.headYaw * 0.05f;
-                    b.headYaw *= 0.85f;
+                    if (Math.hypot(wdx, wdz) < 28.0) {
+                        float toPlayer = (float) Math.toDegrees(Math.atan2(-wdx, wdz));
+                        want = Mth.wrapDegrees(toPlayer - b.yaw);
+                    } else {
+                        if (r.nextInt(45) == 0) b.glance = (r.nextFloat() - 0.5f) * 110f;
+                        want = b.glance;
+                    }
+                    float head = Mth.clamp(want, -80f, 80f);
+                    b.headYawO = b.headYaw;
+                    b.headYaw += (head - b.headYaw) * 0.2f;
+                    if (Math.abs(want - head) > 1f) b.yaw += (want - head) * 0.08f;
+                    // now and then the head dips: a peck or a preen
+                    if (b.peck > 0) b.peck--;
+                    else if (r.nextInt(70) == 0) b.peck = 10;
+                    b.headPitchO = b.headPitch;
+                    b.headPitch += ((b.peck > 0 ? 38f : 0f) - b.headPitch) * 0.35f;
                     continue;
                 }
             }
 
             // Periodically seek a treetop or roof ridge perch
-            if (k.canPerch && !b.seekingPerch && b.perchCooldown == 0 && r.nextInt(90) == 0) {
+            if (night && k.canPerch && !b.seekingPerch && b.perchTicks == 0 && b.perchCooldown > 20) b.perchCooldown = 20;
+            if (k.canPerch && !b.seekingPerch && b.perchCooldown == 0 && r.nextInt(night ? 12 : 90) == 0) {
                 BlockPos perch = findNearbyPerch(level, b.x, b.z, r);
                 if (perch != null && player.distanceToSqr(perch.getX() + 0.5, perch.getY() + 1.0, perch.getZ() + 0.5) > 100.0) {
                     b.seekingPerch = true;
@@ -412,10 +458,12 @@ public final class SkyFlocks {
                 if (pdist > 28.0 || player.distanceToSqr(b.perchX, b.perchY, b.perchZ) < 64.0) {
                     b.seekingPerch = false;
                     b.perchCooldown = 100;
-                } else if (pdist < 0.75) {
+                } else if (pdist < 1.0) {
                     b.seekingPerch = false;
                     b.perchTicks = 120 + r.nextInt(180); // 6-15 seconds
                     b.vx = b.vy = b.vz = 0;
+                    b.glance = 0f;
+                    b.headYaw = b.headYawO = 0f;
                     continue;
                 } else {
                     double descentSpeed = Math.min(k.maxSpeed * 0.85, Math.max(0.10, pdist * 0.08));
@@ -507,7 +555,7 @@ public final class SkyFlocks {
             int maxGround = Math.max(Math.max(localGround, aheadGround), level.getSeaLevel());
             double minSafeY = b.seekingPerch ? maxGround + 1.2 : maxGround + Math.max(6, k.altMin - 2);
 
-            if (b.y < minSafeY) {
+            if (!b.seekingPerch && b.y < minSafeY) {
                 double deficit = minSafeY - b.y;
                 b.vy = Math.max(b.vy + 0.045 * Math.min(4.0, deficit), 0.12);
                 if (b.y < maxGround + 2.0) {
@@ -551,6 +599,11 @@ public final class SkyFlocks {
                 float targetRoll = Mth.clamp(-deltaYaw * 1.6f, -32f, 32f);
                 b.roll += (targetRoll - b.roll) * 0.2f;
                 float targetPitch = Mth.clamp((float) (-b.vy * 95.0), -28f, 28f);
+                if (b.seekingPerch) {
+                    double pd = Math.sqrt((b.perchX - b.x) * (b.perchX - b.x) + (b.perchY - b.y) * (b.perchY - b.y)
+                            + (b.perchZ - b.z) * (b.perchZ - b.z));
+                    if (pd < 4.0) targetPitch = (float) (-34.0 * (1.0 - pd / 4.0));
+                }
                 b.pitch += (targetPitch - b.pitch) * 0.2f;
             }
 
@@ -561,7 +614,7 @@ public final class SkyFlocks {
             if (gliding) {
                 b.flap += (0.12f - b.flap) * 0.14f;
             } else {
-                float climbBoost = b.vy > 0.04 ? 1.35f : 1.0f;
+                float climbBoost = b.seekingPerch && Math.abs(b.perchY - b.y) < 4.0 ? 1.7f : b.vy > 0.04 ? 1.35f : 1.0f;
                 b.flap += k.flapRate * climbBoost * Mth.TWO_PI;
             }
         }
@@ -633,7 +686,9 @@ public final class SkyFlocks {
                 pose.mulPose(Axis.YP.rotationDegrees(-Mth.rotLerp(partial, b.yawO, b.yaw)));
                 pose.mulPose(Axis.XP.rotationDegrees(Mth.lerp(partial, b.pitchO, b.pitch)));
                 pose.mulPose(Axis.ZP.rotationDegrees(Mth.lerp(partial, b.rollO, b.roll)));
-                drawBird(pose, vc, f.kind, b, Mth.lerp(partial, b.flapO, b.flap), light);
+                // the model's beak points to -z while the heading, pitch and roll above assume +z: turn it to face its way
+                pose.mulPose(Axis.YP.rotationDegrees(180f));
+                drawBird(pose, vc, f.kind, b, Mth.lerp(partial, b.flapO, b.flap), light, partial);
                 pose.popPose();
             }
         }
@@ -646,6 +701,7 @@ public final class SkyFlocks {
             pose.translate(x - c.x, y - c.y, z - c.z);
             pose.mulPose(Axis.YP.rotationDegrees((float) -Math.toDegrees(Math.atan2(-l.dx, l.dz))));
             pose.mulPose(Axis.XP.rotationDegrees(-60f + 120f * t));
+            pose.mulPose(Axis.YP.rotationDegrees(180f)); // the fish's head is at -z
             box(pose, vc, -0.06f, -0.08f, -0.3f, 0.06f, 0.08f, 0.25f, 0.62f, 0.5f, 0.5f, light);
             box(pose, vc, -0.07f, -0.04f, -0.24f, 0.07f, 0.06f, 0.18f, 0.78f, 0.36f, 0.32f, light);
             box(pose, vc, -0.01f, -0.1f, 0.25f, 0.01f, 0.1f, 0.4f, 0.4f, 0.32f, 0.3f, light);
@@ -659,7 +715,7 @@ public final class SkyFlocks {
      * feathers, and two-segment articulated wings (inner arm + outer primary feathers with top/bottom normals) that
      * fold neatly against the body when perched.
      */
-    private static void drawBird(PoseStack pose, VertexConsumer vc, Kind k, Bird b, float flap, int light) {
+    private static void drawBird(PoseStack pose, VertexConsumer vc, Kind k, Bird b, float flap, int light, float partial) {
         float s = k.size;
         boolean perched = b.perchTicks > 0;
 
@@ -683,17 +739,35 @@ public final class SkyFlocks {
             }
         }
 
+        float headYaw = 0f, headDip = 0f;
         if (perched) {
-            pose.mulPose(Axis.XP.rotationDegrees(-24f));
+            // sitting: chest up and tail down (the beak points to -z, so a positive turn about x raises it), breathing
+            pose.translate(0f, Mth.sin((ticks + partial) * (b.sleeping ? 0.12f : 0.25f) + b.phase) * 0.004f * s, 0f);
+            pose.mulPose(Axis.XP.rotationDegrees(b.sleeping ? 12f : 24f));
+            if (b.sleeping) pose.scale(1.0f, 0.9f, 1.0f);
+            headYaw = Mth.lerp(partial, b.headYawO, b.headYaw);
+            headDip = Mth.lerp(partial, b.headPitchO, b.headPitch);
+            // the legs, gripping the perch
+            for (int side = -1; side <= 1; side += 2) {
+                box(pose, vc, side * 0.035f * s - 0.008f * s, -0.12f * s, -0.01f * s, side * 0.035f * s + 0.008f * s, -0.05f * s, 0.02f * s,
+                        k.beakR * 0.8f, k.beakG * 0.8f, k.beakB * 0.8f, light);
+            }
         }
 
         // Sculpted upper torso/mantle & lower breast/belly
         box(pose, vc, -0.075f * s, 0.0f, -0.19f * s, 0.075f * s, 0.068f * s, 0.17f * s, r, g, bl, light);
         box(pose, vc, -0.068f * s, -0.058f * s, -0.17f * s, 0.068f * s, 0.005f * s, 0.14f * s, br, bg, bb, light);
 
-        // Distinct sculpted head + crown + pointed beak for all species
+        // Distinct sculpted head + crown + pointed beak for all species, on a neck pivot so a perched bird turns its head
+        // (towards the player, about the field) and dips it to peck or preen
+        pose.pushPose();
+        pose.translate(0f, 0.03f * s, -0.17f * s);
+        pose.mulPose(Axis.YP.rotationDegrees(-headYaw));
+        pose.mulPose(Axis.XP.rotationDegrees(-headDip));
+        pose.translate(0f, -0.03f * s, 0.17f * s);
         box(pose, vc, -0.055f * s, -0.015f * s, -0.29f * s, 0.055f * s, 0.075f * s, -0.18f * s, r, g, bl, light);
         box(pose, vc, -0.02f * s, 0.0f, -0.36f * s, 0.02f * s, 0.032f * s, -0.29f * s, k.beakR, k.beakG, k.beakB, light);
+        pose.popPose();
 
         // Fanned tail feathers behind the body
         Matrix4f m = pose.last().pose();

@@ -102,7 +102,7 @@ public final class AmbientParticles {
         float wz = ClientWeather.windZ() * windStrength * 0.22f;
 
         // ---- regional precipitation vanilla can't draw (gated by cloud cover so it NEVER precipitates in bright sun)
-        if (weather && !underground && clouds >= 0.56f) {
+        if (weather && clouds >= 0.56f) {
             float cloudGate = Mth.clamp((clouds - 0.56f) / 0.22f, 0f, 1f);
             float snow = ClientWeather.snow() * cloudGate;
             if (snow > 0.02f) precipitation(level, rnd, cam, AtmosParticle.Kind.SNOW, snow * 20f * scale, budget, wx * 1.8f, wz * 1.8f);
@@ -124,7 +124,10 @@ public final class AmbientParticles {
         if (VisualConfig.MARSH_WISPS.get() && overworld && !underground && (swampHere || profile.ambient == WeatherProfile.Ambient.MARSH)) {
             marshWisps(level, rnd, cam, scale, budget, wx, wz);
         }
-        if (VisualConfig.DUST_MOTES.get() && underground) dustMotes(level, rnd, cam, scale, budget);
+        // A dark house is not a dungeon. Authored media bounds select cave dust;
+        // weather still spawns in exposed columns visible through a window/opening.
+        if (VisualConfig.DUST_MOTES.get() && com.skycraft.atmosphere.client.InteriorAtmosphere.profileAt(cam) >= 0)
+            dustMotes(level, rnd, cam, scale, budget);
         if (VisualConfig.EMBERS.get() && lavaCount > 0) embers(level, rnd, scale, budget, wx, wz);
         if (VisualConfig.FROST_BREATH.get()) frostBreath(mc, level, rnd, cam, budget);
     }
@@ -285,7 +288,10 @@ public final class AmbientParticles {
         double y = cam.y + (rnd.nextDouble() - 0.5) * 5;
         double z = cam.z + (rnd.nextDouble() - 0.5) * 12;
         if (!level.getBlockState(POS.set(Mth.floor(x), Mth.floor(y), Mth.floor(z))).isAir()) return;
-        spawn(level, AtmosParticle.Kind.MOTE, x, y, z, 0, 0, 0);
+        int profile = com.skycraft.atmosphere.client.InteriorAtmosphere.profileAt(new Vec3(x,y,z));
+        if (profile < 0) return;
+        AtmosParticle mote = spawn(level, AtmosParticle.Kind.MOTE, x, y, z, 0, 0, 0);
+        if (mote != null) mote.color(profile == 2 ? 0xD4E9FF : profile == 3 ? 0xA5E0CF : 0xD2C7B2);
     }
 
     /** Records up to {@link #MAX_LAVA} lava blocks with air above near the player (every two seconds). */

@@ -430,10 +430,45 @@ public final class Zoning {
         }
         plan.specs.subList(base, plan.specs.size()).clear();
         plan.specs.addAll(best);
+        dedupeCivic(plan);
         clearing(plan, base, R + 6);
         Fabric.decorate(plan, size, R);
         plan.zoned = true;
         if (bestM != null) com.skycraft.Skycraft.LOGGER.debug("Zoned {}: {}", plan.key, bestM);
+    }
+
+    /**
+     * One temple and one hall of the dead per settlement: the layout, the zoning wants and the "what planning left out"
+     * pass can each ask for a temple, so a city could end up with three. The named or fixed one (else the one nearest the
+     * centre) stays; the others become ordinary houses on the same lot.
+     */
+    static void dedupeCivic(Plan plan) {
+        dedupeUse(plan, Use.TEMPLE, Archetype.TEMPLE);
+        dedupeUse(plan, Use.HALL_OF_DEAD, Archetype.HALL_OF_DEAD);
+    }
+
+    private static void dedupeUse(Plan plan, Use civic, Archetype legacy) {
+        List<Spec> found = new ArrayList<>();
+        for (Spec s : plan.specs) {
+            boolean match = s.use >= 0 ? Use.byOrdinal(s.use) == civic : s.kind == legacy;
+            if (match) found.add(s);
+        }
+        if (found.size() <= 1) return;
+        Spec keep = null;
+        double bestD = Double.MAX_VALUE;
+        for (Spec s : found) {
+            boolean pinned = s.has(Spec.FIXED) || !s.name.isEmpty();
+            double d = pinned ? -1.0 : (double) s.x * s.x + (double) s.z * s.z;
+            if (d < bestD) {
+                bestD = d;
+                keep = s;
+            }
+        }
+        for (Spec s : found) {
+            if (s == keep || s.has(Spec.FIXED) || !s.name.isEmpty()) continue;
+            if (s.use >= 0) s.use(Use.HOUSE, Wealth.COMMON);
+            else s.kind = Archetype.HOUSE;
+        }
     }
 
     /** Place variants with a hand-made small layout (inns, mills, estates, strongholds...): the rest are zoned. */
@@ -1557,6 +1592,7 @@ public final class Zoning {
                 default -> -1;
             };
             if (kind < 0 || t == 0 && x.r.nextBoolean()) continue;
+            if (kind == Outdoors.APIARY && x.named && !com.skycraft.economy.LocalProduce.keepsBees(plan.key, plan.culture)) continue;
             if (kind == Outdoors.KWAMA) placedKwama = true;
             Spec camp = outside(x, Archetype.CAMP, 13, 11, Math.min(R + 6, maxOut - 6), Math.min(R + 36, maxOut));
             if (camp != null) camp.variant = kind;
@@ -1708,6 +1744,7 @@ public final class Zoning {
                 default -> -1;
             };
             if (kind < 0) continue;
+            if (kind == Outdoors.APIARY && x.named && !com.skycraft.economy.LocalProduce.keepsBees(plan.key, plan.culture)) continue;
             Spec camp = outside(x, Archetype.CAMP, 11, 9, 9, Math.max(16, plan.radius - 2));
             if (camp != null) {
                 camp.variant = kind;

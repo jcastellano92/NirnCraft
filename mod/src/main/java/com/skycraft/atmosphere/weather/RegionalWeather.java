@@ -8,6 +8,7 @@ import com.skycraft.atmosphere.WeatherPhysics;
 import com.skycraft.network.SkyNetwork;
 import com.skycraft.tamriel.Region;
 import com.skycraft.tamriel.Regions;
+import com.skycraft.tamriel.Places;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -265,6 +266,16 @@ public final class RegionalWeather {
         BlockPos.MutableBlockPos probe = new BlockPos.MutableBlockPos();
         boolean far = ticks % 100 == 0;
         float mist = WeatherProfile.mistHour(ow.getDayTime());
+        // DH can show provinces far beyond loaded chunks. Keep their small regional weather
+        // records alive too; this reads map data and never loads/generates distant terrain.
+        if (far || ticks == 20) {
+            for (Region region : Regions.all()) {
+                var capital = region.capital() == null ? java.util.Optional.<com.skycraft.tamriel.Place>empty() : Places.byId(region.capital());
+                probe.set(capital.map(com.skycraft.tamriel.Place::x).orElse(0), 80,
+                        capital.map(com.skycraft.tamriel.Place::z).orElse(0));
+                touch(ow, data, region, probe, now, mist, changed);
+            }
+        }
         for (ServerPlayer p : ow.players()) {
             for (int[] off : SAMPLES) {
                 probe.set(p.getBlockX() + off[0], p.getBlockY(), p.getBlockZ() + off[1]);
@@ -331,6 +342,10 @@ public final class RegionalWeather {
     /** Gives the region at {@code pos} a spell if it has none, and marks it as seen. */
     private static void touch(ServerLevel ow, Data data, BlockPos pos, long now, float mist, List<WeatherPackets.Entry> changed) {
         Region region = Regions.at(ow, pos);
+        touch(ow, data, region, pos, now, mist, changed);
+    }
+
+    private static void touch(ServerLevel ow, Data data, Region region, BlockPos pos, long now, float mist, List<WeatherPackets.Entry> changed) {
         WeatherProfile profile = WeatherProfile.of(region);
         if (profile == WeatherProfile.NONE) return;
         Spell s = data.spells.get(region.id());

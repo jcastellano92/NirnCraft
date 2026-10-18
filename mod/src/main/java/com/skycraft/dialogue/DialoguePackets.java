@@ -24,7 +24,10 @@ public final class DialoguePackets {
         SkyNetwork.register(CloseDialogue.class, NetworkDirection.PLAY_TO_SERVER, CloseDialogue::encode, CloseDialogue::decode, CloseDialogue::handle);
     }
 
-    public record Line(String id, Component label) {
+    public record Line(String id, Component label, boolean enabled) {
+        public Line(String id, Component label) {
+            this(id, label, true);
+        }
     }
 
     public record OpenDialogue(int entityId, Component npcName, Component greeting, List<Line> lines) {
@@ -36,6 +39,7 @@ public final class DialoguePackets {
             for (Line l : m.lines) {
                 buf.writeUtf(l.id(), 128);
                 buf.writeComponent(l.label());
+                buf.writeBoolean(l.enabled());
             }
         }
 
@@ -45,7 +49,7 @@ public final class DialoguePackets {
             Component greeting = buf.readComponent();
             int n = buf.readVarInt();
             List<Line> lines = new ArrayList<>();
-            for (int i = 0; i < n; i++) lines.add(new Line(buf.readUtf(128), buf.readComponent()));
+            for (int i = 0; i < n; i++) lines.add(new Line(buf.readUtf(128), buf.readComponent(), buf.readBoolean()));
             return new OpenDialogue(id, name, greeting, lines);
         }
 

@@ -31,6 +31,9 @@ import org.jetbrains.annotations.Nullable;
 public abstract class FaunaAnimal extends Animal implements AnimatedCreature {
     protected static final EntityDataAccessor<Integer> VARIANT = SynchedEntityData.defineId(FaunaAnimal.class, EntityDataSerializers.INT);
     protected static final EntityDataAccessor<Boolean> MALE = SynchedEntityData.defineId(FaunaAnimal.class, EntityDataSerializers.BOOLEAN);
+    /** Bedded down for the night (drives the sleep animation on the client). */
+    protected static final EntityDataAccessor<Boolean> RESTING = SynchedEntityData.defineId(FaunaAnimal.class, EntityDataSerializers.BOOLEAN);
+    private boolean restGoalAdded;
 
     protected FaunaAnimal(EntityType<? extends Animal> type, Level level) {
         super(type, level);
@@ -41,6 +44,40 @@ public abstract class FaunaAnimal extends Animal implements AnimatedCreature {
         super.defineSynchedData();
         this.entityData.define(VARIANT, 0);
         this.entityData.define(MALE, false);
+        this.entityData.define(RESTING, false);
+    }
+
+    public boolean isResting() {
+        return this.entityData.get(RESTING);
+    }
+
+    void setResting(boolean resting) {
+        this.entityData.set(RESTING, resting);
+    }
+
+    /** True for day animals that bed down at night; night hunters and water dwellers override it. */
+    protected boolean sleepsAtNight() {
+        return true;
+    }
+
+    @Override
+    public void tick() {
+        super.tick();
+        if (!this.level().isClientSide && !restGoalAdded) {
+            restGoalAdded = true;
+            this.goalSelector.addGoal(0, new RestAtNightGoal(this));
+        }
+    }
+
+    /** A bedded-down animal makes no sound. */
+    @Override
+    public void playAmbientSound() {
+        if (!isResting()) super.playAmbientSound();
+    }
+
+    @Override
+    public boolean animSleeping() {
+        return isResting();
     }
 
     public int getVariant() {

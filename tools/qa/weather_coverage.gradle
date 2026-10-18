@@ -1,0 +1,21 @@
+// Run with: mod/gradlew.bat -p mod -I ../tools/qa/weather_coverage.gradle weatherCoverageAudit
+gradle.projectsEvaluated {
+    def p = gradle.rootProject
+    def compiled = p.layout.buildDirectory.dir('classes/weatherCoverageAudit')
+    def compileAudit = p.tasks.register('compileWeatherCoverageAudit', JavaCompile) {
+        dependsOn p.tasks.named('classes')
+        source p.files(new File(p.projectDir, '../tools/qa/WeatherCoverageAudit.java'))
+        classpath = p.sourceSets.test.runtimeClasspath
+        destinationDirectory = compiled
+        sourceCompatibility = '17'
+        targetCompatibility = '17'
+        options.encoding = 'UTF-8'
+    }
+    p.tasks.register('weatherCoverageAudit', JavaExec) {
+        dependsOn compileAudit
+        classpath = p.files(compiled) + p.sourceSets.test.runtimeClasspath
+        mainClass = 'com.skycraft.qa.WeatherCoverageAudit'
+        maxHeapSize = '2G'
+        args new File(p.projectDir, '../dist/weather-coverage').absolutePath
+    }
+}

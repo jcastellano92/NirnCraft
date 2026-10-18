@@ -30,6 +30,171 @@ import static org.junit.jupiter.api.Assertions.*;
  * </ul>
  */
 class AtmospherePlanTest {
+    private static WeatherPhysics.ColumnState electricalColumn(float tower, float cover, float rain, float temperature, float aerosol, float wind) {
+        return new WeatherPhysics.ColumnState(0.8f, 0.3f, 0, 1, 0, wind, cover, tower, rain,
+                rain, aerosol, -120, 0, 63, temperature, 0.9f, temperature - 2, 0);
+    }
+
+    @Test
+    void electricalStormsNeedDeepPrecipitatingMixedPhaseClouds() {
+        assertTrue(WeatherPhysics.electricalActivity(electricalColumn(1, 0.95f, 0.9f, 12, WeatherPhysics.AEROSOL_WATER, 0.9f), 1) > 0.8f);
+        assertEquals(0f, WeatherPhysics.electricalActivity(electricalColumn(0.2f, 0.95f, 0.9f, 12, WeatherPhysics.AEROSOL_WATER, 0.9f), 1));
+        assertEquals(0f, WeatherPhysics.electricalActivity(electricalColumn(1, 0.95f, 0, 12, WeatherPhysics.AEROSOL_WATER, 0.9f), 1));
+        assertEquals(0f, WeatherPhysics.electricalActivity(electricalColumn(1, 0.95f, 0.9f, -40, WeatherPhysics.AEROSOL_SNOW, 0.9f), 1));
+        assertEquals(0f, WeatherPhysics.electricalActivity(electricalColumn(1, 0.95f, 0.9f, 12, WeatherPhysics.AEROSOL_WATER, 0.9f), 0));
+    }
+
+    @Test
+    void ashElectrificationRequiresDenseTurbulentConvection() {
+        assertTrue(WeatherPhysics.electricalActivity(electricalColumn(1, 0.95f, 0.9f, 60, WeatherPhysics.AEROSOL_ASH, 0.9f), 1) > 0.8f);
+        assertEquals(0f, WeatherPhysics.electricalActivity(electricalColumn(0.1f, 0.6f, 0.3f, 60, WeatherPhysics.AEROSOL_ASH, 0.2f), 1));
+    }
+    @Test
+    void lunarPhasePositionAndVisibleLightAgreeWithTheSun() {
+        assertEquals(1f, AtmosphereMath.moonElevation(Math.PI, 0, false), 0.0001f);
+        assertEquals(-1f, AtmosphereMath.moonElevation(Math.PI, 0.5, false), 0.0001f);
+        assertEquals(0f, AtmosphereMath.visibleMoonIllumination(Math.PI, 0.5, false), 0.0001f);
+        assertEquals(1f, AtmosphereMath.visibleMoonIllumination(Math.PI, 0, false), 0.0001f);
+        assertEquals(0f, AtmosphereMath.moonElevation(Math.PI, 0.25, false), 0.0001f);
+    }
+    @Test
+    void transientAuroraHasNoEmissionWhenInactiveOrOutsideItsLatitudeRange() {
+        float[] state = new float[AuroraMath.VALUES];
+        AuroraMath.sample(1234, 0, 1, 0, state);
+        for (float value : state) assertEquals(0f, value);
+        AuroraMath.sample(1234, 1, 0, 0, state);
+        for (float value : state) assertEquals(0f, value);
+    }
+
+    @Test
+    void transientAuroraAndItsLightFadeContinuouslyAcrossPacketReplacement() {
+        float[] before = new float[AuroraMath.VALUES], after = new float[AuroraMath.VALUES];
+        for (double boundary : new double[]{48, 71, 94, 4800}) {
+            AuroraMath.sample(boundary - 0.001, 0.8f, 1, 0.2f, before);
+            AuroraMath.sample(boundary + 0.001, 0.8f, 1, 0.2f, after);
+            // A new packet may have a new shape only while that packet is dark.
+            for (int i = 0; i < 6; i++) assertEquals(before[i*8+4], after[i*8+4], 0.001f);
+            for (int i = 48; i < 60; i++) assertEquals(before[i], after[i], 0.001f);
+        }
+    }
+
+    @Test
+    void transientAuroraLightingTracksTheSameLiveCurtains() {
+        float[] state = new float[AuroraMath.VALUES];
+        float dimmest = Float.MAX_VALUE, brightest = 0;
+        for (int second = 0; second < 240; second++) {
+            AuroraMath.sample(second, 1, 1, 0, state);
+            float luminance = state[48] + state[49] + state[50];
+            dimmest = Math.min(dimmest, luminance); brightest = Math.max(brightest, luminance);
+            for (float value : state) assertTrue(Float.isFinite(value));
+            assertTrue(state[54] >= 0 && state[55] >= 0 && state[56] >= 0);
+        }
+        assertTrue(brightest > dimmest * 1.5f, "Emission must develop and fade, not remain a uniform night tint");
+    }
+
+    @Test
+    void lunarCyclesAndNightAdaptationAreContinuous() {
+        assertEquals(0, AtmosphereMath.moonCycle(18000, false), 1e-8);
+        assertEquals(1, AtmosphereMath.moonIllumination(0), 1e-8);
+        assertEquals(0, AtmosphereMath.moonIllumination(0.5), 1e-8);
+        assertEquals(AtmosphereMath.moonCycle(18000, true),
+                AtmosphereMath.moonCycle(18000 + 9 * 24000, true), 1e-8);
+        assertNotEquals(AtmosphereMath.moonCycle(18000, true), AtmosphereMath.moonCycle(18000, false));
+        assertTrue(AtmosphereMath.nightSkyVisibility(1, 0, 0) > AtmosphereMath.nightSkyVisibility(1, 1, 0));
+        assertTrue(AtmosphereMath.nightSkyVisibility(1, 0, 0) > AtmosphereMath.nightSkyVisibility(1, 0, 1));
+        assertEquals(0, AtmosphereMath.nightSkyVisibility(0, 0, 0));
+        assertEquals(AtmosphereMath.moonIllumination(AtmosphereMath.moonCycle(18000 - 0.01, false)),
+                AtmosphereMath.moonIllumination(AtmosphereMath.moonCycle(18000 + 0.01, false)), 1e-7);
+    }
+
+    @Test
+    void dewPointControlsFogAndCloudHeight() {
+        var sample = new com.skycraft.tamriel.MapSample();
+        sample.elevation = 72;
+        sample.waterLevel = 72;
+        sample.wetland = 0.9f;
+        var wetNight = WeatherPhysics.thermals(5500, sample, 1f, 0f, 0f, 18000);
+        var wetDay = WeatherPhysics.thermals(5500, sample, 1f, 0f, 0f, 6000);
+        var dryDay = WeatherPhysics.thermals(5500, sample, 0.1f, 0f, 0f, 6000);
+        assertTrue(wetNight.dewPointC() <= wetNight.temperatureC());
+        assertTrue(wetNight.groundFog() > wetDay.groundFog());
+        assertTrue(wetNight.condensationHeight() < wetDay.condensationHeight());
+        assertTrue(wetDay.condensationHeight() < dryDay.condensationHeight());
+        assertEquals(0f, dryDay.groundFog(), 1e-5f);
+        var forcedFog = WeatherPhysics.thermals(5500, sample, 0.9f, 0f, 1f, 6000);
+        assertTrue(forcedFog.condensationHeight() <= 82);
+        var advectedFog = WeatherPhysics.thermals(5500, sample, 0.1f, 0f, 1f, 6000);
+        assertTrue(advectedFog.groundFog() > 0.9f, "Saturated incoming air can fog dry ground during daytime");
+        sample.elevation = 540;
+        sample.waterLevel = Float.NaN;
+        var mountain = WeatherPhysics.thermals(-1000, sample, 0.8f, 1f, 0f, 18000);
+        assertTrue(mountain.condensationHeight() >= 546);
+        assertTrue(Float.isFinite(mountain.temperatureC()));
+        var rainyColumn = WeatherPhysics.evaluate(62, -68, 100, null, WeatherKind.RAIN, 0.8f, 0.6f, List.of(), 6000);
+        float top = 232f + rainyColumn.cloudBaseOffset() + 72f + 120f * rainyColumn.coverage() + 300f * rainyColumn.stormTower();
+        assertEquals(1f, WeatherPhysics.precipitationAltitudeFactor(rainyColumn, top - 1), 1e-5f);
+        assertEquals(0f, WeatherPhysics.precipitationAltitudeFactor(rainyColumn, top + 33), 1e-5f);
+    }
+
+    @Test
+    void everyMappedRegionSupportsWeatherAndContinentScaleField() {
+        java.util.Map<String, int[]> sites = new java.util.HashMap<>();
+        java.util.Set<String> provinces = new java.util.HashSet<>();
+        for (int z = com.skycraft.tamriel.TamrielMap.MIN_Z; z < com.skycraft.tamriel.TamrielMap.MAX_Z; z += 32) {
+            for (int x = com.skycraft.tamriel.TamrielMap.MIN_X; x < com.skycraft.tamriel.TamrielMap.MAX_X; x += 32) {
+                var region = com.skycraft.tamriel.TamrielMap.region(x, z);
+                if (!sites.containsKey(region.id())) sites.put(region.id(), new int[]{x, z});
+                provinces.add(region.province());
+            }
+        }
+        assertTrue(provinces.size() >= 9, "Must cover the continent, not just Skyrim");
+        for (var site : sites.entrySet()) {
+            for (WeatherKind kind : WeatherKind.values()) {
+                for (long solar : new long[]{6000, 18000}) {
+                    var c = WeatherPhysics.evaluate(site.getValue()[0], site.getValue()[1], 100.0, null, kind, 0.8f, 0.6f, List.of(), solar);
+                    assertTrue(Float.isFinite(c.coverage()) && c.coverage() >= 0 && c.coverage() <= 1, site.getKey());
+                    assertTrue(Float.isFinite(c.stormTower()) && c.stormTower() >= 0 && c.stormTower() <= 1, site.getKey());
+                    assertTrue(Float.isFinite(c.curtainDensity()) && c.curtainDensity() >= 0 && c.curtainDensity() <= 1, site.getKey());
+                    assertTrue(Float.isFinite(c.cloudBaseOffset()) && 232f + c.cloudBaseOffset() > 0f, site.getKey());
+                    assertTrue(Float.isFinite(c.dewPointC()) && c.dewPointC() <= c.temperatureC() + 0.001f, site.getKey());
+                }
+            }
+        }
+        int radius = WeatherPhysics.FAR_FIELD_GRID_SIZE * WeatherPhysics.FAR_FIELD_CELL_BLOCKS / 2;
+        assertTrue(radius > com.skycraft.tamriel.TamrielMap.MAX_X - com.skycraft.tamriel.TamrielMap.MIN_X);
+        assertTrue(radius > com.skycraft.tamriel.TamrielMap.MAX_Z - com.skycraft.tamriel.TamrielMap.MIN_Z);
+    }
+
+    @Test
+    void solarClockChangesThermalsWithoutRemovingNighttimeStorms() {
+        assertEquals(1.0f, WeatherPhysics.solarHeating(6000), 1e-5f);
+        assertEquals(0.0f, WeatherPhysics.solarHeating(18000), 1e-5f);
+        assertEquals(WeatherPhysics.solarHeating(-6000), WeatherPhysics.solarHeating(18000), 1e-5f);
+        for (WeatherKind kind : WeatherKind.values()) {
+            for (int[] site : new int[][]{{0, -3400}, {-6800, 4800}, {7100, -400}, {62, -68}}) {
+                var day = WeatherPhysics.evaluate(site[0], site[1], 100.0, null, kind, 0.8f, 0.6f, List.of(), 6000);
+                var night = WeatherPhysics.evaluate(site[0], site[1], 100.0, null, kind, 0.8f, 0.6f, List.of(), 18000);
+                assertTrue(Float.isFinite(day.coverage()) && Float.isFinite(night.coverage()));
+                assertTrue(day.coverage() >= 0 && day.coverage() <= 1);
+                assertTrue(night.coverage() >= 0 && night.coverage() <= 1);
+                if (kind == WeatherKind.STORM || kind == WeatherKind.BLIZZARD) {
+                    assertTrue(night.curtainDensity() > 0.1f, "Frontal storms must continue overnight");
+                }
+                if (kind == WeatherKind.ASHFALL || kind == WeatherKind.ASH_STORM || kind == WeatherKind.BLIGHT) {
+                    assertEquals(WeatherPhysics.AEROSOL_ASH, day.aerosolCode(), "Light ashfall must not turn into snow or sand");
+                    assertEquals(WeatherPhysics.AEROSOL_ASH, night.aerosolCode());
+                }
+            }
+        }
+        var day = WeatherPhysics.evaluate(62, -68, 100.0, null, WeatherKind.CLOUDY, 0.8f, 0.6f, List.of(), 6000);
+        var night = WeatherPhysics.evaluate(62, -68, 100.0, null, WeatherKind.CLOUDY, 0.8f, 0.6f, List.of(), 18000);
+        assertTrue(day.coverage() >= night.coverage(), "Fair-weather thermal clouds should settle at night");
+        var clearFront = new WeatherFront(99, 62, -68, 1200, 0, 0, WeatherKind.CLEAR, 1, 1200);
+        var stormFront = new WeatherFront(99, 62, -68, 1200, 0, 0, WeatherKind.STORM, 1, 1200);
+        var clear = WeatherPhysics.evaluate(62, -68, 100.0, null, WeatherKind.CLEAR, 0.8f, 0.6f, List.of(clearFront), 6000);
+        var storm = WeatherPhysics.evaluate(62, -68, 100.0, null, WeatherKind.CLEAR, 0.8f, 0.6f, List.of(stormFront), 6000);
+        assertTrue(clear.coverage() < storm.coverage(), "A clear front must not acquire the storm overcast floor");
+    }
 
     @Test
     void continuousLatitudeAuroraCurve() {
@@ -89,6 +254,12 @@ class AtmospherePlanTest {
 
     @Test
     void weatherFrontAdvectionFalloffAndPacketSync() {
+        for (WeatherKind kind : WeatherKind.values()) {
+            WeatherFront band = new WeatherFront(7, 1000, -2000, 1200, 0, 0, kind, 1, 400);
+            float density = WeatherPhysics.frontRainBandAt(band, 1000, -2000, 30);
+            if (kind.precip == WeatherKind.Precip.NONE) assertEquals(0f, density, kind.id());
+            else assertTrue(density > 0f, kind.id());
+        }
         WeatherFront front = new WeatherFront(
                 7, 1000.0f, -2000.0f, 1200.0f,
                 0.25f, 0.50f, WeatherKind.BLIZZARD, 0.90f, 400

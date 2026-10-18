@@ -24,6 +24,39 @@ public final class AtmosphereMath {
 
     private AtmosphereMath() {}
 
+    /** Phase fraction, with Masser's full moon centred on the first midnight. */
+    public static double moonCycle(double dayTime, boolean secunda) {
+        double cycle = (dayTime / 24000.0 - 0.75) / (secunda ? 9.0 : 8.0) + (secunda ? 0.375 : 0.0);
+        return cycle - Math.floor(cycle);
+    }
+
+    public static float moonIllumination(double cycle) {
+        return (float) (0.5 + 0.5 * Math.cos(cycle * Math.PI * 2.0));
+    }
+
+    /** The orbit and illumination share the sun's angular frame, including Secunda's inclination. */
+    public static float moonElevation(double solarAngle, double cycle, boolean secunda) {
+        return (float) (-Math.cos(solarAngle + cycle * Math.PI * 2) * (secunda ? Math.cos(Math.toRadians(24)) : 1));
+    }
+
+    public static float visibleMoonIllumination(double solarAngle, double cycle, boolean secunda) {
+        double orbit = solarAngle + cycle * Math.PI * 2;
+        double inclination = secunda ? Math.cos(Math.toRadians(24)) : 1;
+        double illumination = 0.5 + 0.5 * (Math.sin(solarAngle) * Math.sin(orbit)
+                + Math.cos(solarAngle) * Math.cos(orbit) * inclination);
+        double elevation = moonElevation(solarAngle, cycle, secunda);
+        double horizon = Math.max(0, Math.min(1, (elevation + 0.035) / 0.135));
+        horizon = horizon * horizon * (3 - 2 * horizon);
+        return (float) (illumination * horizon);
+    }
+
+    /** Eye adaptation reduces faint stars first; it never turns a moon or a torch off. */
+    public static float nightSkyVisibility(float night, float lunarLight, float localLight) {
+        return Math.max(0f, Math.min(1f, night))
+                * (1f - 0.80f * (float) Math.pow(Math.max(0f, Math.min(1f, lunarLight)), 0.65))
+                * (1f - 0.92f * Math.max(0f, Math.min(1f, localLight)));
+    }
+
     /**
      * Continuous, strictly monotonic normalized latitude factor in {@code [0.0, 1.0]} from world {@code blockZ}:
      * <ul>

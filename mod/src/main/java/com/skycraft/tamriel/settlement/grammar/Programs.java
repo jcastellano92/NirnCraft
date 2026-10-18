@@ -471,6 +471,8 @@ public final class Programs {
     static int counter(Canvas c, Palette p, Room r, AnchorType who) {
         int y = r.y();
         int cz = Math.max(r.z0() + 2, r.z1() - 2);
+        // always leave a free row behind the counter for the keeper to stand on
+        if (cz >= r.z1()) cz = Math.max(r.z0() + 1, r.z1() - 1);
         int cx1 = Math.max(r.x0() + 1, r.x1() - 1);
         for (int x = r.x0() + 1; x <= cx1; x++) Props.counter(c, p, x, y, cz, Direction.NORTH);
         if (r.x1() > cx1) {

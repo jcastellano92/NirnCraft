@@ -350,7 +350,8 @@ public final class RestManager {
             if (m.getTarget() == player || Stealth.isSearchingFor(m, player)) {
                 return true;
             }
-            if (m.hasLineOfSight(player)) {
+            // an unaware hostile only blocks resting when it is practically on top of you and could not miss you
+            if (m.distanceToSqr(player) <= 36.0 && m.hasLineOfSight(player)) {
                 if (player.isCrouching() && Stealth.hiddenFrom(m, player)) {
                     continue;
                 }

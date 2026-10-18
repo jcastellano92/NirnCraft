@@ -220,17 +220,27 @@ public final class Dialogue {
         sendMenu(player, npc, Component.translatable("dialogue.skycraft.menu.prompt"), MENU_MAIN);
     }
 
-    private static void sendMenu(ServerPlayer player, LivingEntity npc, Component greeting, int menu) {
+    /**
+     * Keeps the conversation going while a screen other than the dialogue menu is open (the shop): the NPC stays still and
+     * faces the player. {@link #choose} ends the conversation before it runs an option's action, so an action that opens
+     * such a screen calls this. The screen's close sends {@link DialoguePackets.CloseDialogue}, which ends it for good and
+     * lets the NPC carry on with its day.
+     */
+    public static void hold(ServerPlayer player, LivingEntity npc) {
         TALKING.put(npc.getId(), player.getUUID());
         if (npc instanceof com.skycraft.society.entity.NpcEntity n) {
             n.setConversationPartner(player.getId());
             n.getNavigation().stop();
             n.getLookControl().setLookAt(player, 30.0F, 30.0F);
         }
+    }
+
+    private static void sendMenu(ServerPlayer player, LivingEntity npc, Component greeting, int menu) {
+        hold(player, npc);
         if (menu == MENU_MAIN) MENU.remove(npc.getId());
         else MENU.put(npc.getId(), menu);
         List<DialoguePackets.Line> lines = new ArrayList<>();
-        for (DialogueOption o : visible(collect(player, npc), menu, player, npc)) lines.add(new DialoguePackets.Line(o.id(), o.label()));
+        for (DialogueOption o : visible(collect(player, npc), menu, player, npc)) lines.add(new DialoguePackets.Line(o.id(), o.label(), o.enabled()));
         SkyNetwork.sendToPlayer(player, new DialoguePackets.OpenDialogue(npc.getId(), npc.getDisplayName(), greeting, lines));
     }
 
@@ -274,6 +284,7 @@ public final class Dialogue {
         int currentMenu = MENU.getOrDefault(entityId, MENU_MAIN);
         for (DialogueOption option : visible(collect(player, npc), currentMenu, player, npc)) {
             if (option.id().equals(optionId)) {
+                if (!option.enabled()) return; // a greyed-out line cannot be chosen (the conversation stays as it is)
                 // End conversation first; if the option action opens another dialogue page via Dialogue.open/sendMenu,
                 // sendMenu immediately re-marks TALKING and CONVERSATION_PARTNER. If the action closes dialogue (or opens
                 // barter/rent/quest), the NPC won't be stuck busy for party members.

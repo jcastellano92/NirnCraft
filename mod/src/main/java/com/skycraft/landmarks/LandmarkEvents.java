@@ -65,6 +65,7 @@ public final class LandmarkEvents {
                 if (d <= reach) found(player, level, s);
                 if (!s.kind().cast().isEmpty() && d <= 40) populate(level, s);
             }
+            populatePlanned(level, x, z);
         } catch (RuntimeException e) {
             Skycraft.LOGGER.debug("Skycraft landmarks check failed for {}", player.getName().getString(), e);
         }
@@ -123,6 +124,30 @@ public final class LandmarkEvents {
     }
 
     // ------------------------------------------------------------------ residents
+
+    /**
+     * The residents of the planned scenes (the scene plan places the human vignettes, not the landmark grid): a
+     * cabin's dweller, a hunter at his stand, an angler on his jetty, a priest at a shrine. Each scene is looked at
+     * from its own chunk, once, when a player is within 40 blocks.
+     */
+    private static void populatePlanned(ServerLevel level, int px, int pz) {
+        com.skycraft.worldplan.scene.ScenePlan plan = com.skycraft.worldplan.scene.ScenePlan.get();
+        for (int cx = (px - 48) >> 4; cx <= (px + 48) >> 4; cx++) {
+            for (int cz = (pz - 48) >> 4; cz <= (pz + 48) >> 4; cz++) {
+                for (int s : plan.inChunk(cx, cz)) {
+                    if (plan.x[s] >> 4 != cx || plan.z[s] >> 4 != cz) continue;
+                    String id = plan.kindOf(s);
+                    if (!id.startsWith(com.skycraft.worldplan.scene.ScenePlan.LANDMARK_PREFIX)) continue;
+                    Kind kind = Kinds.byId(id.substring(com.skycraft.worldplan.scene.ScenePlan.LANDMARK_PREFIX.length()));
+                    if (kind == null || kind.cast().isEmpty()) continue;
+                    if (Math.hypot(plan.x[s] - px, plan.z[s] - pz) > 40) continue;
+                    LandmarkSite site = new LandmarkSite(kind.tier(), plan.x[s], plan.z[s], plan.x[s], plan.z[s], kind, 0L,
+                            plan.facing[s] & 3, "", "", "", "", null);
+                    populate(level, site);
+                }
+            }
+        }
+    }
 
     private static final int[][] SPOTS = {{0, 0}, {2, 1}, {-2, 1}, {1, -2}, {-1, 3}, {3, 3}, {-3, -2}, {4, 0}};
 

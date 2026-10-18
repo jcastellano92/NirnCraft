@@ -69,7 +69,7 @@ public final class Styles {
 
     private static JsonObject read(Culture c) {
         String path = "/skycraft/tamriel/styles/" + c.id() + ".json";
-        try (InputStream in = Styles.class.getResourceAsStream(path)) {
+        try (InputStream in = com.skycraft.dev.DevResources.open(Styles.class, path)) {
             if (in == null) {
                 Skycraft.LOGGER.warn("No style sheet {}", path);
                 return new JsonObject();

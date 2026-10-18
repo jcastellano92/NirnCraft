@@ -98,6 +98,53 @@
       "The cart was loaded for market: wool, salt, a small cask of something strong. We were three hours from {place} when the arrows came. I write this with the shaft still in my arm. Do not follow the road.",
       "They took the horses, the coin, and the boots from the dead. Not the cargo. That means they will come back for it with a wagon. Take what you can carry and go.",
       "{name} put himself between the cart and the road. It did not help, but it was a good thing to do. I am leaving this note on his chest so someone knows."
+    ],
+    "miner": [
+      "The timbers groaned all night. {name} says it is only {weather} on the hill, but I have worked {trade} long enough to know a roof that is thinking about falling. We shore up the {dir} gallery at first light.",
+      "Third collapse this month. {other} is on the wrong side of it and we can hear him tapping. Two taps, a pause, two taps. We dig. The lamp oil is low. If this log is found, the vein ran {dir}, not down.",
+      "Day four behind the fall. Water drips from the {dir} wall and we drink it. {other} has stopped answering. I have {item} and a little light. Tell the foreman the adit was sound until it was not.",
+      "Excavation log. The brass wall gave way today and behind it, a hall of Dwemer make, dry and cold and humming faintly. {other} swears the pipes moved. We have tagged {item} and sealed the door. Nobody goes below until the surveyor returns."
+    ],
+    "overlook": [
+      "Sat here an hour and said nothing, which is a record for me. The land runs out {dir} further than any map admits, and {weather} is drifting across it like a slow thought. Worth every blister. - {name}",
+      "Climbed up in {weather} for this view and was rewarded with fog. Stayed anyway. Around noon it tore open like a curtain and I forgot my feet entirely. Carve your name if you like, but look first.",
+      "The bench is old and someone has kept it mended. I do not know who, and I would like to thank them. I leave {item} beneath it as payment. {place} is just visible to the {dir}, small as a coin."
+    ],
+    "explorer": [
+      "Day twelve. Camp on the ice-shelf, three days past the last cairn. {weather} has not let up. Rations fine. Spirits fine. Fingers less so. We go {dir} at first light and hope for a pass.",
+      "Day nineteen. {other} is gone, taken by {cause}. We could not recover him. Cold now. Wrote this with a stub of lead. Ink froze. Going {dir}.",
+      "Day twenty-three. No fire. Fuel out. Can hear nothing. Wrote name here so someone knows. {name}, {trade}. Tired. So tired. The snow looks soft."
+    ],
+    "castaway": [
+      "Day 1. Washed ashore with {item} and the clothes I wore. {weather} all night. Found fresh water in the rocks to the {dir}. Alive. That is all I will say today.",
+      "Day 14. Cut a notch for each sunrise on the driftwood post. Eaten shellfish until I dream of bread. Saw a sail once, far off. I waved until my arms failed. It did not turn.",
+      "Day 31. Stopped counting for a while, then started again, because counting is the only thing that is mine. If you land here, the spring is {dir} of the tall rock. Please take the post with you."
+    ],
+    "angler": [
+      "Catch book. Two pike, one carp the length of my arm, and a boot. The boot is not counted. {weather}, light wind, water dark. Good day. Never fish from the {dir} bank after dusk; I do not say why.",
+      "Slow week. {other} swears the fish bite on the turn of the tide, and the old fools may be right. Three trout, a perch, a lost line. {weather} tomorrow, so I will stay in and mend nets.",
+      "A true angler spits on the first fish and puts it back. I forgot once, and caught nothing till the next moon. I do not believe in luck. I do it anyway. - {name}"
+    ],
+    "cabin": [
+      "Garden is in at last. Turnips, leeks, a row of cabbages the deer will eat. {weather} nearly spoiled the beans, but the hearth dried the seed-box. I talk to the hens now. They are poor conversation and good company.",
+      "Cut wood for the winter and stacked it to the eaves. The chimney draws well when the wind sits in the {dir}. {name} once sat by this fire, a long time ago, and never said where she was going. I left the chair as it was.",
+      "The old ones say a barrow lies a half-day {dir} of here, and that lights walk it in {weather}. I have never gone. A person who lives alone learns what to leave undisturbed.",
+      "Found {item} in the creek bed after the thaw. Very old, very fine, not mine. I have put it on the high shelf. If someone comes for it, they may have it, with my blessing and a bowl of stew."
+    ],
+    "herbalist": [
+      "Gathered at dawn: nightshade by the {dir} wall, moss from the north side of the oaks, a handful of bright flowers that smell of rain. Dry them all in shade. Never sun. Never.",
+      "Avoid the pale caps by the water. They look gentle and they are not. {other} ate one on a dare and slept three days. The red berries are worse, and they are everywhere. Taste nothing you cannot name.",
+      "Good ground, this. Healing moss, thistle, and a stubborn creeping root that knits a wound faster than any priest. Take half of what you find and leave the rest to seed. - {name}, {trade}"
+    ],
+    "beekeeper": [
+      "Six hives, strong. The queens are laying and the clover is out. I check the boxes at midday when the bees are busy. {weather} is a bad omen for the honey, but good for my patience.",
+      "Told the bees of {name}'s passing, as the old custom asks. I knocked on each hive and whispered. They hummed lower for a day. Perhaps they only heard the wind. Perhaps not.",
+      "The best honey comes from the flowers on the {dir} slope, wild and sharp and golden. Do not wear dark wool near the hives. Do not run. Do not shout. They are kinder than most people."
+    ],
+    "watch": [
+      "Watch log, day 1. Post manned, three soldiers, fire laid. Road quiet. {weather}. Orders from {place} are to hold until relieved. Standing watch as ever. - {name}",
+      "Rations short. Two of the lads sent to {place} for word and not returned. The signal fire is laid but there is no one to see it. We keep the post. It is what we do.",
+      "Recall order came today. The garrison is to march at dawn. I am leaving the log, the lamp and {item} for whoever follows. The watch was kept. Let that be written. - {name}, last on the wall."
     ]
   },
   "adj": {

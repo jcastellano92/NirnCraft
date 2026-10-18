@@ -110,7 +110,8 @@ public class DialogueScreen extends Screen {
             if (mouseX >= x - 12 && mouseX <= x + maxW + 4 && mouseY >= Math.max(boxY1, areaTop) && mouseY <= Math.min(boxY2, areaBottom)) {
                 hovered = i;
             }
-            boolean hi = (hovered == i || (hovered < 0 && selected == i));
+            boolean off = !lines.get(i).enabled();
+            boolean hi = !off && (hovered == i || (hovered < 0 && selected == i));
             int curY = boxY1 + 2;
             if (hi) {
                 g.fillGradient(x - 12, boxY1, x + maxW + 4, boxY2, 0x40FFFFFF, 0x10FFFFFF);
@@ -119,7 +120,7 @@ public class DialogueScreen extends Screen {
             }
             int textX = hi ? x + 4 : x;
             int textY = curY;
-            int textColor = hi ? 0xFFFFFFFF : 0xFFA8A090;
+            int textColor = off ? 0xFF5C5850 : hi ? 0xFFFFFFFF : 0xFFA8A090;
             for (FormattedCharSequence lineSeq : wrapped) {
                 g.drawString(font, lineSeq, textX, textY, textColor, true);
                 textY += 11;
@@ -164,8 +165,8 @@ public class DialogueScreen extends Screen {
     @Override
     public boolean mouseClicked(double mx, double my, int button) {
         if (hovered >= 0) {
-            choose(hovered);
-            return true;
+            if (dialogue.lines().get(hovered).enabled()) choose(hovered);
+            return true; // a greyed-out line swallows the click
         }
         return super.mouseClicked(mx, my, button);
     }
@@ -173,10 +174,11 @@ public class DialogueScreen extends Screen {
     @Override
     public boolean keyPressed(int key, int scan, int mods) {
         int n = dialogue.lines().size();
-        if (key == GLFW.GLFW_KEY_UP || key == GLFW.GLFW_KEY_W) selected = (selected + n - 1) % n;
-        else if (key == GLFW.GLFW_KEY_DOWN || key == GLFW.GLFW_KEY_S) selected = (selected + 1) % n;
-        else if (key == GLFW.GLFW_KEY_ENTER || key == GLFW.GLFW_KEY_E) choose(selected);
-        else return super.keyPressed(key, scan, mods);
+        if (key == GLFW.GLFW_KEY_UP || key == GLFW.GLFW_KEY_W) selected = step(selected, -1, n);
+        else if (key == GLFW.GLFW_KEY_DOWN || key == GLFW.GLFW_KEY_S) selected = step(selected, 1, n);
+        else if (key == GLFW.GLFW_KEY_ENTER || key == GLFW.GLFW_KEY_E) {
+            if (selected >= 0 && selected < n && dialogue.lines().get(selected).enabled()) choose(selected);
+        } else return super.keyPressed(key, scan, mods);
         ensureVisible = true;
         return true;
     }
@@ -194,6 +196,16 @@ public class DialogueScreen extends Screen {
         com.skycraft.client.DialogueCamera.stop();
         SkyNetwork.sendToServer(new DialoguePackets.CloseDialogue(dialogue.entityId()));
         super.onClose();
+    }
+
+    /** The next line in a direction that can be chosen (greyed-out lines are skipped). */
+    private int step(int from, int dir, int n) {
+        int i = from;
+        for (int k = 0; k < n; k++) {
+            i = (i + dir + n) % n;
+            if (dialogue.lines().get(i).enabled()) return i;
+        }
+        return from;
     }
 
     private void choose(int index) {

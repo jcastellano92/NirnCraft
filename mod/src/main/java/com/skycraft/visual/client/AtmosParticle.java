@@ -25,7 +25,7 @@ import net.minecraft.world.phys.Vec3;
  * keep to its budget; anything that drifts out of range is removed early.
  */
 public final class AtmosParticle extends TextureSheetParticle {
-    public enum Kind { SNOW, ASH, EMBER, SAND, LEAF, FIREFLY, BREATH, WISP, MOTE }
+    public enum Kind { SNOW, ASH, EMBER, SAND, LEAF, FIREFLY, BREATH, WISP, MOTE, SPELL_FROST, SPELL_SPARK }
 
     /**
      * Translucent particle sheet that tests against solid scene depth ({@code GL_LEQUAL}) so walls and roofs occlude
@@ -139,6 +139,14 @@ public final class AtmosParticle extends TextureSheetParticle {
                 alpha = 0f;
                 setColor(0.80f, 0.86f, 0.82f);
                 hasPhysics = false;
+            }
+            case SPELL_FROST, SPELL_SPARK -> {
+                boolean frost = kind == Kind.SPELL_FROST;
+                lifetime = frost ? 10 + random.nextInt(8) : 3 + random.nextInt(4);
+                quadSize = frost ? 0.07f + random.nextFloat() * 0.06f : 0.045f + random.nextFloat() * 0.035f;
+                alpha = frost ? 0.72f : 0.95f;
+                setColor(frost ? 0.60f : 0.76f, frost ? 0.86f : 0.80f, 1.0f);
+                hasPhysics = true;
             }
             case MOTE -> {
                 lifetime = 120 + random.nextInt(120);
@@ -265,6 +273,12 @@ public final class AtmosParticle extends TextureSheetParticle {
                 roll += spin * 0.05f;
                 alpha = baseAlpha * fadeIn(life, 0.25f) * fadeOut(life, 0.65f);
             }
+            case SPELL_FROST, SPELL_SPARK -> {
+                alpha = baseAlpha * fadeOut(life, 0.25f);
+                quadSize = baseSize * (kind == Kind.SPELL_FROST ? 1f + life * 0.65f : 1f - life * 0.35f);
+                xd *= 0.95; yd *= 0.95; zd *= 0.95;
+                roll += spin * 0.2f;
+            }
             case MOTE -> {
                 xd = xd * 0.95 + (random.nextFloat() - 0.5f) * 0.0016;
                 yd = yd * 0.95 + (random.nextFloat() - 0.5f) * 0.0012 - 0.0002;
@@ -285,7 +299,7 @@ public final class AtmosParticle extends TextureSheetParticle {
 
     @Override
     protected int getLightColor(float partialTick) {
-        if (kind == Kind.EMBER || kind == Kind.FIREFLY) return 0xF000F0;
+        if (kind == Kind.EMBER || kind == Kind.FIREFLY || kind == Kind.SPELL_FROST || kind == Kind.SPELL_SPARK) return 0xF000F0;
         int packed = super.getLightColor(partialTick);
         // dust motes catch a little light even in the dark
         if (kind == Kind.MOTE) return Math.max(packed & 0xFFFF, 0x50) | (packed & 0xFFFF0000);

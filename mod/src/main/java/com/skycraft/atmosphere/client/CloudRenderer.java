@@ -102,13 +102,23 @@ public final class CloudRenderer {
         }
     }
 
+    /**
+     * 1 by day, down to 0.4 at night: the sun drives convection and the daytime breeze, so after dark the sky settles (the
+     * clouds drift and churn more slowly), easing in and out through dusk and dawn.
+     */
+    static float nightCalm(ClientLevel level, float pt) {
+        float sunY = Mth.cos(level.getTimeOfDay(pt) * Mth.TWO_PI);
+        float night = Mth.clamp(0.5F - sunY * 2.0F, 0.0F, 1.0F);
+        return 1.0F - 0.6F * night;
+    }
+
     @SubscribeEvent
     public static void onClientTick(TickEvent.ClientTickEvent event) {
         if (event.phase != TickEvent.Phase.END) return;
         Minecraft mc = Minecraft.getInstance();
         ClientLevel level = mc.level;
         if (level == null || mc.player == null || mc.isPaused()) return;
-        float wind = ClientWeather.active() ? ClientWeather.wind() : 0.3f;
+        float wind = (ClientWeather.active() ? ClientWeather.wind() : 0.3f) * nightCalm(level, 1.0F);
         float low = 0.04f + 0.22f * wind, high = 0.08f + 0.32f * wind;
         driftXO = driftX;
         driftZO = driftZ;
@@ -142,7 +152,29 @@ public final class CloudRenderer {
 
     /** Test hook (visual autotest): flash the next distant storm right away. */
     public static void testLightning() {
-        DistantStorms.force = true;
+        testLightning("cg");
+    }
+
+    public static void testLightning(String mode) {
+        DistantStorms.force(mode);
+    }
+
+    /** Bounded diagnostics for real capture logs; no chunk loading. */
+    public static String atmosphereDiagnostics() {
+        var mc = Minecraft.getInstance();
+        if (mc.level == null || mc.player == null) return AtmosphereBudget.describe();
+        var eye = mc.player.getEyePosition();
+        var look = mc.player.getLookAngle();
+        int x = (int) (eye.x + look.x * 1000), z = (int) (eye.z + look.z * 1000);
+        String region = com.skycraft.tamriel.TamrielMap.region(x, z).id();
+        var c = com.skycraft.atmosphere.WeatherPhysics.evaluate(x, z, mc.level.getGameTime() / 20.0,
+                CloudClimate.snapshot().get(region), ClientWeather.kindOf(region), ClientWeather.windX(), ClientWeather.windZ(),
+                ClientWeather.fronts(), mc.level.getDayTime());
+        return AtmosphereBudget.describe() + " "+WeatherFieldTexture.diagnostics()+" "+FogRadianceTexture.describe()+" ahead_x=" + x + " ahead_z=" + z
+                + " cloud_base=" + (232f + c.cloudBaseOffset()) + " cloud_top="
+                + (304f + c.cloudBaseOffset() + 120f * c.coverage() + 300f * c.stormTower())
+                + " coverage=" + c.coverage() + " tower=" + c.stormTower() + " ground_fog=" + c.groundFog()
+                + DistantStorms.diagnostics();
     }
 
     /** Profiling summary since the last reset: render-thread time per frame, worker time per build, mesh size. */
@@ -196,13 +228,13 @@ public final class CloudRenderer {
     // ================================================================== render
 
     /**
-     * Draws Skycraft's mesh clouds when shaders are off; returns {@code false} when an Oculus/Iris shader pack is
-     * active so the shader pack's 3D volumetric raymarcher (driven by {@link WeatherFieldTexture}) draws the clouds
+     * Draws Skycraft's mesh clouds when shaders are off; claims the pass when an Oculus/Iris shader pack is
+     * active so vanilla's mesh cannot overlap the shader's volumetric raymarcher (driven by {@link WeatherFieldTexture})
      * and 3D rain curtains occluded by Distant Horizons.
      */
     static boolean render(ClientLevel level, float pt, PoseStack pose, double camX, double camY, double camZ, Matrix4f proj) {
         if (!AtmosphereConfig.CLOUDS.get() || level.dimension() != Level.OVERWORLD) return false;
-        if (ShaderCompat.shadersActive()) return false;
+        if (ShaderCompat.shadersActive()) return true;
         renderedThisFrame = true;
         Minecraft mc = Minecraft.getInstance();
         Camera camera = mc.gameRenderer.getMainCamera();
@@ -240,7 +272,7 @@ public final class CloudRenderer {
         anchorZ = r.anchorZ;
         builtDriftX = r.driftX;
         builtDriftZ = r.driftZ;
-        DistantStorms.update(r.storms, r.stormCount);
+        // Electrical candidates are qualified from WeatherPhysics independently of mesh rebuilds.
         buildNanos += r.nanos;
         builds++;
         quads = r.quads;
@@ -285,7 +317,7 @@ public final class CloudRenderer {
         float fog = ClientWeather.active() ? Mth.clamp(ClientWeather.fog() * AtmosphereConfig.WEATHER_FOG_STRENGTH.get().floatValue(), 0f, 1f) : 0f;
         boolean fancy = mc.options.getCloudsType() == CloudStatus.FANCY;
         return new CloudBuilder.Job(camX, camY, camZ, dX, dZ, highX, highZ,
-                ClientWeather.windX(), ClientWeather.windZ(), ClientWeather.active() ? ClientWeather.wind() : 0.3f,
+                ClientWeather.windX(), ClientWeather.windZ(), (ClientWeather.active() ? ClientWeather.wind() : 0.3f) * nightCalm(level, pt),
                 sunX, sunY, 0f, ClientWeather.fogR, ClientWeather.fogG, ClientWeather.fogB, fog,
                 AtmosphereConfig.CLOUD_HEIGHT.get(), AtmosphereConfig.CLOUD_DISTANCE.get(), fancy,
                 AtmosphereConfig.DISTANT_WEATHER.get(), WeatherProfile.mistHour(level.getDayTime()),

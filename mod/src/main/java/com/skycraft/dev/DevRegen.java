@@ -120,6 +120,7 @@ final class DevRegen {
 
     static String start(ServerLevel level, LongArrayList chunks, CommandSourceStack src) {
         if (active != null) return "A regen is already running: " + active.describe();
+        if (!Holders.available()) return "Cannot observe chunk unloading in this runtime; regeneration was not started.";
         DevRegen r = new DevRegen(level, chunks, src);
         if (r.all.isEmpty()) return "No chunks given";
         if (r.all.size() > 4096) return "Area too large: " + r.all.size() + " chunks (max 4096)";
@@ -209,6 +210,8 @@ final class DevRegen {
         switch (phase) {
             case PROBE -> {
                 if (reads.isEmpty()) {
+                    int released=com.skycraft.quest.story.StartCottage.releaseCompletedPreparation(level);
+                    if(released>0) Skycraft.LOGGER.info("[dev] Released {} completed cottage preload tickets before regeneration",released);
                     // /setworldspawn re-adds the spawn-chunk ticket (radius 11) around the new spawn: drop it again
                     level.getChunkSource().removeRegionTicket(TicketType.START, new ChunkPos(level.getSharedSpawnPos()), 11,
                             net.minecraft.util.Unit.INSTANCE);
@@ -259,9 +262,10 @@ final class DevRegen {
                 next(Phase.UNLOAD);
             }
             case UNLOAD -> {
-                if (spent < 1000) return;
+                // Preparation may finish after PROBE; release only its completed, owned tickets.
+                com.skycraft.quest.story.StartCottage.releaseCompletedPreparation(level);
                 LongArrayList pinned = new LongArrayList();
-                for (long c : all) if (Holders.held(map, c, spent)) pinned.add(c);
+                for (long c : all) if (Holders.held(map, c)) pinned.add(c);
                 if (!pinned.isEmpty()) {
                     if (spent > UNLOAD_MS) {
                         fail(pinned.size() + " chunks stay loaded (e.g. " + new ChunkPos(pinned.getLong(0))
@@ -272,7 +276,7 @@ final class DevRegen {
                 for (long c : existing) map.write(new ChunkPos(c), null);
                 map.flushWorker();
                 for (long c : all) {
-                    if (Holders.held(map, c, Long.MAX_VALUE)) {
+                    if (Holders.held(map, c)) {
                         fail("chunk " + new ChunkPos(c) + " was loaded again while deleting");
                         return;
                     }
@@ -322,40 +326,48 @@ final class DevRegen {
         phase = Phase.DONE;
     }
 
-    /** Chunk holder lookups (protected in ChunkMap; dev-only reflection with official names, which the dev run uses). */
+    /** Dev-only lookups in both the official-mapped dev JVM and Forge's SRG packaged JVM. */
     static final class Holders {
-        private static final Method VISIBLE = method("getVisibleChunkIfPresent"), UPDATING = method("getUpdatingChunkIfPresent");
+        private static final Method VISIBLE = method("getVisibleChunkIfPresent", "m_140327_"),
+                UPDATING = method("getUpdatingChunkIfPresent", "m_140174_");
         private static final Field PENDING = field();
 
-        private static Method method(String name) {
-            try {
-                Method m = ChunkMap.class.getDeclaredMethod(name, long.class);
-                m.setAccessible(true);
-                return m;
-            } catch (ReflectiveOperationException | RuntimeException e) {
-                Skycraft.LOGGER.warn("[dev] no ChunkMap.{}: regen waits a fixed time for unloads", name);
-                return null;
+        private static Method method(String official, String runtime) {
+            for (String name : new String[]{official, runtime}) {
+                try {
+                    Method m = ChunkMap.class.getDeclaredMethod(name, long.class);
+                    m.setAccessible(true);
+                    return m;
+                } catch (ReflectiveOperationException | RuntimeException ignored) {}
             }
+            Skycraft.LOGGER.warn("[dev] no ChunkMap.{}: regeneration disabled", official);
+            return null;
         }
 
         private static Field field() {
-            try {
-                Field f = ChunkMap.class.getDeclaredField("pendingUnloads");
-                f.setAccessible(true);
-                return f;
-            } catch (ReflectiveOperationException | RuntimeException e) {
-                return null;
+            for (String name : new String[]{"pendingUnloads", "f_140131_"}) {
+                try {
+                    Field f = ChunkMap.class.getDeclaredField(name);
+                    f.setAccessible(true);
+                    return f;
+                } catch (ReflectiveOperationException | RuntimeException ignored) {}
             }
+            Skycraft.LOGGER.warn("[dev] no ChunkMap.pendingUnloads: regeneration disabled");
+            return null;
         }
 
-        /** True while a holder for the chunk exists (or, without reflection, for the first 20 s). */
-        static boolean held(ChunkMap map, long c, long waitedMs) {
-            if (VISIBLE == null || UPDATING == null) return waitedMs < 20_000;
+        static boolean available() {
+            return VISIBLE != null && UPDATING != null && PENDING != null;
+        }
+
+        /** Never infer completion from elapsed time: saves and all holders must finish. */
+        static boolean held(ChunkMap map, long c) {
+            if (!available()) throw new IllegalStateException("Chunk unload observation unavailable");
             try {
                 if ((ChunkHolder) VISIBLE.invoke(map, c) != null || (ChunkHolder) UPDATING.invoke(map, c) != null) return true;
-                return PENDING != null && ((java.util.Map<?, ?>) PENDING.get(map)).containsKey(c);
+                return ((java.util.Map<?, ?>) PENDING.get(map)).containsKey(c);
             } catch (ReflectiveOperationException e) {
-                return waitedMs < 20_000;
+                throw new IllegalStateException("Cannot observe pending chunk saves; refusing to delete chunks", e);
             }
         }
     }

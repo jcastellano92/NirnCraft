@@ -182,7 +182,7 @@ def analyse_point(cols, x, z):
                 road=is_road(sname), above=names[col[yy + 1]] if yy + 1 < n else 'minecraft:air')
 
 
-def covered_point(cols, x, z, near):
+def covered_point(cols, x, z, near, allow_blocked=False):
     """The walking surface of a column under a cover (gatehouse arch, deck, roof): the solid block within 2 of the
     previous point's surface height {@code near} with two passable cells over it, as analyse_point's dict; else None."""
     cc = cols.column(x, z)
@@ -199,11 +199,13 @@ def covered_point(cols, x, z, near):
         if is_air(nm) or is_soft(nm) or is_leaf(nm) or is_log(nm) or is_water(nm):
             continue
         a1, a2 = names[col[yy + 1]], names[col[yy + 2]]
-        if not ((is_air(a1) or is_soft(a1)) and (is_air(a2) or is_soft(a2))):
+        blocked = not ((is_air(a1) or is_soft(a1)) and (is_air(a2) or is_soft(a2)))
+        if blocked and (not allow_blocked or not is_road(nm)):
             continue
         h = sy + (0.5 if short(nm).endswith('_slab') else 1.0)
         if best is None or abs(h - near) < abs(best['h'] - near):
-            best = dict(sy=sy, name=nm, h=h, tree=False, obstacle=False, water=False, top=nm, road=is_road(nm), above=a1)
+            best = dict(sy=sy, name=nm, h=h, tree=any(is_leaf(a) or is_log(a) for a in (a1,a2)),
+                        obstacle=blocked, water=is_water(a1), top=nm, road=is_road(nm), above=a1)
     return best if best is not None and abs(best['h'] - near) <= 1 else None
 
 
@@ -264,6 +266,7 @@ def main():
     total = dict(roads=0, points=0, gaps=0, runs=0, drops=0, big_drops=0, tree=0, obstacle=0, unbridged=0,
                  crossings=0, unloaded=0, doors=0, loose=0)
     report = []
+    findings = []
     chosen = {}
     for spec in pairs:
         a, _, b = spec.partition(':')
@@ -318,6 +321,10 @@ def main():
             if prev is not None and not prev['water'] and abs(p['h'] - prev['h']) > 1:
                 # a covered passage (a gatehouse arch, a deck or a roof over the road): judge the surface walked under it
                 q = covered_point(cols, int(xs[i]), int(zs[i]), prev['h'])
+                if q is None:
+                    # A road floor with blocked headroom is an obstacle, not a climb onto its roof.
+                    # It still fails the surface gate, with the actual player-level cause.
+                    q = covered_point(cols, int(xs[i]), int(zs[i]), prev['h'], allow_blocked=True)
                 if q is not None:
                     p = q
             gap = (not p['road']) and not p['water']
@@ -343,6 +350,8 @@ def main():
                 d = abs(p['h'] - prev['h'])
                 if d > 1.0:
                     row['drops'] += 1
+                    findings.append(dict(kind='drop', road=rid, point=i, x=int(xs[i]), z=int(zs[i]),
+                                         fromHeight=prev['h'], toHeight=p['h'], surface=p['name']))
                 if d > 3.0:
                     row['big_drops'] += 1
             prev = p
@@ -474,8 +483,18 @@ def main():
         print('  doors %-14s %d nopath %d unconnected %d' % (d['place'], d['doors'], d['nopath'], d['loose']))
     if out_json:
         with open(out_json, 'w') as f:
-            json.dump(dict(total=total, roads=report, doors=door_report), f, indent=1)
+            json.dump(dict(total=total, roads=report, doors=door_report, findings=findings,
+                           limits=['Door connectivity uses a top-down surface grid; covered/multilevel entrances require a 3D route check.']), f, indent=1)
+    if '--gate' in sys.argv:
+        # A gate may not silently accept missing chunks or an empty selection.
+        failures = [key for key in ('gaps', 'drops', 'tree', 'obstacle', 'unbridged', 'unloaded') if total[key]]
+        if not total['roads'] or not total['points']: failures.append('empty corridor selection')
+        # Door observations remain explicit diagnostics until the top-down detector
+        # can distinguish a real disconnection from an entrance below a roof.
+        print(('FAIL road surface: ' + ', '.join(failures)) if failures else 'PASS road surface')
+        return int(bool(failures))
+    return 0
 
 
 if __name__ == '__main__':
-    main()
+    sys.exit(main())

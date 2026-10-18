@@ -164,7 +164,7 @@ public final class Blackreach {
             int under = base + height - (dist > capR - 1.2 ? 1 : 0);
             for (int y = under; y <= top; y++) {
                 boolean skin = y == top || y == under;
-                p.set(x, y, z, skin && p.chance(x, y, z, 1210, 5) ? Blocks.SHROOMLIGHT.defaultBlockState()
+                p.set(x, y, z, skin && p.chance(x, y, z, 1210, 5) ? Blocks.SEA_LANTERN.defaultBlockState()
                         : y == under ? Blocks.WARPED_WART_BLOCK.defaultBlockState() : Blocks.WARPED_WART_BLOCK.defaultBlockState());
             }
             if (dist < 1.5) p.set(x, under - 1, z, Blocks.SEA_LANTERN.defaultBlockState());
@@ -189,7 +189,7 @@ public final class Blackreach {
         }
         if (x == hx && z == hz) {
             p.set(x, base, z, Blocks.BROWN_CARPET.defaultBlockState());
-            p.set(x, base + h - 1, z, Blocks.SHROOMLIGHT.defaultBlockState());
+            p.set(x, base + h - 1, z, Blocks.SEA_LANTERN.defaultBlockState());
             p.spawn(Mobs.falmer(), x + 5, base, z, 90f, null);
             if (p.chance(x, 0, z, 1221, 2)) p.container(x - 1, base, z - 1, Deco.barrel(Direction.UP), Deco.LOOT_MINOR);
         }

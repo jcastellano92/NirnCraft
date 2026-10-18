@@ -57,7 +57,8 @@ public final class DialogueCamera {
         prevEaseProgress = easeProgress;
         if (active) {
             Minecraft mc = Minecraft.getInstance();
-            if (mc.screen instanceof com.skycraft.client.screen.DialogueScreen) {
+            if (mc.screen instanceof com.skycraft.client.screen.DialogueScreen
+                    || mc.screen instanceof com.skycraft.economy.client.BarterScreen) {
                 missingScreenTicks = 0;
             } else {
                 missingScreenTicks++;

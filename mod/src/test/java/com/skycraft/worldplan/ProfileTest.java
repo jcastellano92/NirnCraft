@@ -27,6 +27,20 @@ class ProfileTest {
         return p;
     }
 
+    @Test
+    void wetEdgeBetweenDryVerticesCarriesAContinuousCulvertAndDeckFloor() {
+        var p=dryPoly(4,4,new float[]{65,65,65,65});
+        p.edgeWet=new boolean[]{false,true,false,false};
+        p.edgeWater=new float[]{0,66,0,0}; p.edgeWidth=new float[]{0,3,0,0};
+        p.edgeDepth=new float[]{0,1,0,0}; p.edgeLakeSea=new boolean[4];
+        Profile.run(p,PlanLinks.ROAD,Float.NaN,Float.NaN);
+        for(int i=1;i<=2;i++) {
+            assertEquals(RoadPlan.CULVERT,p.span[i]);
+            assertTrue(p.h[i]>=68);
+        }
+        assertTrue(maxEdgeGrade(p)<=0.125+1e-4);
+    }
+
     private static double maxEdgeGrade(RoadPlanBuilder.Poly p) {
         double max = 0.0;
         for (int i = 0; i + 1 < p.n; i++) {

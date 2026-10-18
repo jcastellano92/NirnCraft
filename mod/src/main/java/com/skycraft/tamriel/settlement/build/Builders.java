@@ -202,9 +202,13 @@ public final class Builders {
                     ? kindTitle
                     : Component.translatable("settlement.skycraft.name." + s.name);
             int sx = Math.min(s.w - 1, doorX + 1);
-            if (f.stilts) c.set(sx, 3, -1, B.s(Blocks.AIR));
-            if (!c.recording()) {
-                Props.shopSign(c, p, kindId, sx, 3, -1, Direction.EAST, title, kindTitle);
+            if (kind == Archetype.INN && !f.stilts) {
+                Props.innFront(c, p, doorX, 0, s.w - 1, -1, title, kindTitle);
+            } else {
+                if (f.stilts) c.set(sx, 3, -1, B.s(Blocks.AIR));
+                if (!c.recording()) {
+                    Props.shopSign(c, p, kindId, sx, 3, -1, Direction.EAST, title, kindTitle);
+                }
             }
         }
     }

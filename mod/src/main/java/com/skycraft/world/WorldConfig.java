@@ -14,6 +14,7 @@ public final class WorldConfig {
     public static final ForgeConfigSpec.BooleanValue DISCOVERY;
     public static final ForgeConfigSpec.BooleanValue FAST_TRAVEL;
     public static final ForgeConfigSpec.IntValue BLOCKS_PER_TRAVEL_HOUR;
+    public static final ForgeConfigSpec.BooleanValue TRAVEL_TIME_MULTIPLAYER;
     public static final ForgeConfigSpec.BooleanValue BED_MENU;
     public static final ForgeConfigSpec.BooleanValue REST_SYNC_MULTIPLAYER;
     public static final ForgeConfigSpec.BooleanValue REST_ALLOW_WAIT;
@@ -36,8 +37,11 @@ public final class WorldConfig {
                 .define("discovery", true);
         FAST_TRAVEL = b.comment("Allow fast travel to discovered locations from the world map.").define("fastTravel", true);
         BLOCKS_PER_TRAVEL_HOUR = b.comment("Fast travel advances the clock by one hour per this many blocks travelled",
-                        "(only while a single player is online; 0 = never advance time).")
+                        "(0 = never advance time; see travelTimeMultiplayer for servers).")
                 .defineInRange("blocksPerTravelHour", 400, 0, 1000000);
+        TRAVEL_TIME_MULTIPLAYER = b.comment("Fast travel also advances the world clock when several players are online (otherwise it only",
+                        "does so for a lone player). Off keeps other players' clocks from jumping when someone travels.")
+                .define("travelTimeMultiplayer", true);
         BED_MENU = b.comment("Right-clicking a bed opens the Skyrim sleep menu at any time of day (sneak + empty hand for vanilla sleeping).")
                 .define("bedMenu", true);
         WELL_RESTED_TICKS = b.comment("Duration of Well Rested after sleeping at least one hour (ticks).")

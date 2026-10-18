@@ -19,12 +19,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 /**
@@ -165,6 +169,11 @@ public final class ScenePlanBuilder {
         final Map<String, Double> share = new LinkedHashMap<>();
         final Map<String, Integer> perSettlement = new LinkedHashMap<>();
         double shoreShare = 0.6;
+        /** The place filters of the structures that build a named place: a place matching none has nothing standing at it. */
+        final List<Set<String>[]> builtFilters = new ArrayList<>();
+        /** The last builder families used along each link (so a trail does not repeat itself). */
+        final Map<Integer, ArrayDeque<String>> recent = new LinkedHashMap<>();
+        List<com.skycraft.landmarks.Kind> trailKinds;
         final int[][] gap = {{1500, 3000}, {1500, 3000}, {2000, 3500}, {3500, 6000}};
         int offset = 7, settlementClear = 150;
         JsonObject clues = new JsonObject();
@@ -255,6 +264,19 @@ public final class ScenePlanBuilder {
             }
             JsonObject c = read("/skycraft/scatter/loreweb_clues.json");
             if (c.has("places")) clues = c.getAsJsonObject("places");
+            JsonObject built = read("/skycraft/worldplan/built_places.json");
+            if (built.has("filters")) {
+                for (JsonElement fe : built.getAsJsonArray("filters")) {
+                    JsonObject fo = fe.getAsJsonObject();
+                    @SuppressWarnings("unchecked")
+                    Set<String>[] f = new Set[2];
+                    f[0] = new HashSet<>();
+                    f[1] = new HashSet<>();
+                    for (JsonElement te : fo.getAsJsonArray("types")) f[0].add(te.getAsString());
+                    if (fo.has("variants")) for (JsonElement ve : fo.getAsJsonArray("variants")) f[1].add(ve.getAsString());
+                    builtFilters.add(f);
+                }
+            }
         }
 
         ScenePlan run(StringBuilder stats) {
@@ -264,6 +286,7 @@ public final class ScenePlanBuilder {
             loreClues();
             for (Place p : all) placeScene(p);
             for (Place p : all) settlementScenes(p);
+            trailEnds();
             waysides();
             borderAndCorridorFill();
             wildernessAndIslandFill();
@@ -346,15 +369,19 @@ public final class ScenePlanBuilder {
          * named place (beyond its radius), every planned road bed and every scene planned so far.
          */
         boolean ok(int x, int z, int r, boolean wet) {
+            return ok(x, z, r, wet, 0.9f);
+        }
+
+        boolean ok(int x, int z, int r, boolean wet, float maxSlope) {
             TamrielMap.sample(x, z, ms);
             if (!wet && (ms.inWater() || ms.coastDistance < 2f)) return false;
             if (ms.coastDistance < -1f) return false;
-            if (ms.slope > 0.9f) return false;
+            if (ms.slope > maxSlope) return false;
             for (int[] d : DIRS) {
                 TamrielMap.sample(x + d[0] * r, z + d[1] * r, probe);
                 if (!wet && (probe.inWater() || probe.coastDistance < 1f)) return false;
             }
-            if (rp.at(x, z, hit) && hit.distance < hit.halfWidth + r + 1.5f) return false;
+            if (rp.atAuthored(x, z, hit) && hit.distance < hit.halfWidth + r + 1.5f) return false;
             for (Place p : Places.overlapping(x - r - 8, z - r - 8, x + r + 8, z + r + 8)) {
                 double need = p.radius() + r + (p.type().isSettlement() ? 6 : 4);
                 if (p.distSqr(x, z) < need * need) return false;
@@ -379,7 +406,7 @@ public final class ScenePlanBuilder {
         boolean propsOffRoads(Layout l, int x, int z) {
             for (int i = 0; i < l.kinds.size(); i++) {
                 int px = x + l.dx.getInt(i), pz = z + l.dz.getInt(i);
-                if (rp.at(px, pz, hit) && hit.distance < hit.halfWidth + 2f + l.r.getInt(i)) return false;
+                if (rp.atAuthored(px, pz, hit) && hit.distance < hit.halfWidth + 2f + l.r.getInt(i)) return false;
             }
             return true;
         }
@@ -446,7 +473,7 @@ public final class ScenePlanBuilder {
                     if (ex * ex + ez * ez < 9) clash = true;
                 }
                 if (clash) continue;
-                if (rp.at(s.x + sx, s.z + sz, hit) && hit.distance < hit.halfWidth + 1.5f) continue;
+                if (rp.atAuthored(s.x + sx, s.z + sz, hit) && hit.distance < hit.halfWidth + 1.5f) continue;
                 s.props.add(ScenePlan.SIGN);
                 s.dx.add(sx);
                 s.dz.add(sz);
@@ -762,8 +789,19 @@ public final class ScenePlanBuilder {
             if (best < 0) return -1;
             tried[bestAnchor]++;
             String key = ScenePlan.ANCHOR_NAMES[bestAnchor];
-            String kind = pickKind(key, h);
-            Layout l = kind == null ? null : layout(kind, h);
+            // a trail's waysides are chosen for where they stand (a cairn on a ridge, a bench at a view, a shrine alcove, a
+            // den, a waystone, a grave...), not rolled from the road tables; a trail may climb, so its slope limit is looser
+            boolean trail = rp.segKind[s] == 3;
+            String kind;
+            Layout l;
+            com.skycraft.landmarks.Kind tk = trail ? pickTrailKind(SIDE_BUILDERS, Math.round(rp.vx[best]), Math.round(rp.vz[best]), h, link) : null;
+            if (tk != null) {
+                kind = ScenePlan.LANDMARK_PREFIX + tk.id();
+                l = trailLayout(tk);
+            } else {
+                kind = pickKind(key, h);
+                l = kind == null ? null : layout(kind, h);
+            }
             if (l == null) return -1;
             // ford and bridge scenes stand on the bank before the crossing
             int u0 = bestAnchor == ScenePlan.FORD || bestAnchor == ScenePlan.BRIDGE_END ? Math.max(a, best - 2) : best;
@@ -781,7 +819,7 @@ public final class ScenePlanBuilder {
                     double nx = -dz * sgn, nz = dx * sgn;
                     double d = hw + offset + l.radius;
                     int x = (int) Math.round(rp.vx[u] + nx * d), z = (int) Math.round(rp.vz[u] + nz * d);
-                    if (!ok(x, z, l.radius, false) || !propsOffRoads(l, x, z)) continue;
+                    if (!ok(x, z, l.radius, false, trail ? 1.8f : 0.9f) || !propsOffRoads(l, x, z)) continue;
                     String road = rp.linkA[link] + "-" + rp.linkB[link];
                     String what = switch (bestAnchor) {
                         case ScenePlan.CROSSROADS -> "a crossroads on the " + RoadPlan.CLASS_NAMES[rp.segKind[s]] + " " + road;
@@ -792,6 +830,7 @@ public final class ScenePlanBuilder {
                     SceneB sc = accept(kind, l, x, z, bestAnchor, "seg:" + s + ":v" + (best - a), "wayside at " + what + purposeOf(l),
                             facingTowards(x, z, rp.vx[u], rp.vz[u]));
                     sc.h = rp.vg[u];
+                    if (tk != null) remember(link, tk.builder());
                     // a worn path from the scene to the road's edge
                     sc.pathX = (int) Math.round(rp.vx[u] + nx * (hw + 0.5));
                     sc.pathZ = (int) Math.round(rp.vz[u] + nz * (hw + 0.5));
@@ -974,6 +1013,176 @@ public final class ScenePlanBuilder {
                     if (!sc.clue.isEmpty()) addSign(sc, false);
                 }
             }
+        }
+
+        // -------------------------------------------------------------- trails: something along the way, something at the end
+
+        /** Builder families a trail's end may lead to: somewhere a person goes on purpose, or a beast lives. */
+        static final Set<String> END_BUILDERS = Set.of("adit", "cabin", "alcove", "treehouse", "overlook", "castaway", "angler",
+                "frozen", "den", "watch_post", "well", "apiary", "herbs", "hermit", "pilgrim", "dolmen", "hunters", "ghost_ruin",
+                "claim", "blind", "waystone");
+        /** Builder families that stand along a trail: small things a walker passes. */
+        static final Set<String> SIDE_BUILDERS = Set.of("cairn_token", "grave", "waystone", "overlook", "bedroll", "fire_ring",
+                "pack", "remains", "offering", "spring", "den", "charms", "lovers_tree", "warning", "frozen", "castaway", "angler",
+                "herbs", "apiary", "well", "watch_post", "travellers", "hunters", "blind", "alcove");
+
+        /** True when a structure builds this named place (a trail to it ends at something), else it is an empty pad. */
+        boolean builtPlace(Place p) {
+            String v = p.variant() == null ? "" : p.variant();
+            String type = p.type().id();
+            for (Set<String>[] f : builtFilters) {
+                if (!f[0].contains(type)) continue;
+                if (f[1].isEmpty() || f[1].contains(v) || (v.isEmpty() && f[0].contains("landmark") && f[1].contains("monument"))) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        /** The named place a road end at (x, z) reaches, or null. */
+        Place placeAt(double x, double z) {
+            Place best = null;
+            double bd = Double.MAX_VALUE;
+            for (Place p : Places.overlapping((int) x - 40, (int) z - 40, (int) x + 40, (int) z + 40)) {
+                double d = p.distSqr((int) x, (int) z), lim = p.radius() + 24.0;
+                if (d <= lim * lim && d < bd) {
+                    bd = d;
+                    best = p;
+                }
+            }
+            return best;
+        }
+
+        void remember(int link, String builder) {
+            ArrayDeque<String> q = recent.computeIfAbsent(link, k -> new ArrayDeque<>());
+            q.addFirst(builder);
+            while (q.size() > 3) q.removeLast();
+        }
+
+        /**
+         * A landmark kind of the given builder families that suits the land at (x, z): its weights are the biome
+         * families, its needs the coast, shore, high ground, mountains or cold of the spot and its provinces the culture,
+         * so a cabin in the marsh is on stilts and one in the desert is mud brick. A family used within the last three
+         * scenes of the link is much less likely, so a trail does not repeat itself.
+         */
+        com.skycraft.landmarks.Kind pickTrailKind(Set<String> builders, int x, int z, long h, int link) {
+            if (trailKinds == null) {
+                trailKinds = new ArrayList<>(com.skycraft.landmarks.Kinds.all());
+                trailKinds.sort(Comparator.comparing(com.skycraft.landmarks.Kind::id));
+            }
+            com.skycraft.landmarks.LandCtx c = com.skycraft.landmarks.LandCtx.of(x, z);
+            ArrayDeque<String> rec = recent.get(link);
+            List<com.skycraft.landmarks.Kind> cand = new ArrayList<>();
+            List<Double> w = new ArrayList<>();
+            double total = 0;
+            for (com.skycraft.landmarks.Kind k : trailKinds) {
+                if ((k.tier() != com.skycraft.landmarks.Tier.S && k.tier() != com.skycraft.landmarks.Tier.M) || !builders.contains(k.builder())) continue;
+                double wt = k.weight(c);
+                if (wt <= 0) continue;
+                if (rec != null && rec.contains(k.builder())) wt *= 0.12;
+                cand.add(k);
+                w.add(wt);
+                total += wt;
+            }
+            if (cand.isEmpty()) return null;
+            double roll = unit(h, 71) * total;
+            for (int i = 0; i < cand.size(); i++) {
+                roll -= w.get(i);
+                if (roll < 0) return cand.get(i);
+            }
+            return cand.get(cand.size() - 1);
+        }
+
+        Layout trailLayout(com.skycraft.landmarks.Kind k) {
+            Layout l = new Layout();
+            l.add(ScenePlan.LANDMARK_PREFIX + k.id(), 0, 0, k.radius());
+            for (List<LmKind> fam : lmByBuilder.values()) {
+                for (LmKind lk : fam) if (lk.id().equals(k.id())) l.purpose = lk.purpose();
+            }
+            return l;
+        }
+
+        /** True when no scene planned so far lies within reach of a scene of footprint {@code r} at (x, z). */
+        boolean clearOfScenes(int x, int z, int r) {
+            int c0x = Math.floorDiv(x - r - 16, GRID), c1x = Math.floorDiv(x + r + 16, GRID);
+            int c0z = Math.floorDiv(z - r - 16, GRID), c1z = Math.floorDiv(z + r + 16, GRID);
+            for (int cx = c0x; cx <= c1x; cx++) {
+                for (int cz = c0z; cz <= c1z; cz++) {
+                    IntArrayList l = grid.get(((long) cx << 32) ^ (cz & 0xFFFFFFFFL));
+                    if (l == null) continue;
+                    for (int i = 0; i < l.size(); i++) {
+                        SceneB q = scenes.get(l.getInt(i));
+                        long dx = q.x - x, dz = q.z - z, need = q.radius + r + 4;
+                        if (dx * dx + dz * dz < need * need) return false;
+                    }
+                }
+            }
+            return true;
+        }
+
+        /**
+         * Every trail leads somewhere. Where a road end reaches a named place nothing is built at (the 1,000 landmarks,
+         * shrines and lookouts without a structure), or a trail simply stops, a vignette that belongs to the land stands
+         * at the end, laid out so the trail meets its front: an adit in a mountain, a shrine alcove in a rock face, a
+         * cabin with someone living in it, a tree stand in the woods, a castaway's shelter on a beach, a den, a bench at
+         * a view, a frozen explorer on a peak... The scene's front is local +z, towards the trail.
+         */
+        void trailEnds() {
+            Set<String> done = new HashSet<>();
+            for (int s = 0; s < rp.segments(); s++) {
+                int a = rp.segStart[s], b = rp.segEnd[s] - 1;
+                if (b - a < 3) continue;
+                for (int end = 0; end < 2; end++) {
+                    int join = end == 0 ? rp.segJoinA[s] : rp.segJoinB[s];
+                    boolean site = join == RoadPlan.JOIN_SITE;
+                    boolean dead = join == RoadPlan.JOIN_NONE && rp.segKind[s] == 3;
+                    if (!site && !dead) continue;
+                    int v = end == 0 ? a : b;
+                    int back = end == 0 ? Math.min(b, a + 5) : Math.max(a, b - 5);
+                    double ex = rp.vx[v], ez = rp.vz[v];
+                    Place p = site ? placeAt(ex, ez) : null;
+                    String ref;
+                    if (site) {
+                        if (p == null || p.type().isSettlement() || builtPlace(p)) continue;
+                        ref = p.id();
+                    } else {
+                        ref = "end:s" + s + ":" + end;
+                    }
+                    if (!done.add(ref)) continue;
+                    trailEnd(s, ex, ez, rp.vx[back], rp.vz[back], p, ref);
+                }
+            }
+        }
+
+        void trailEnd(int s, double ex, double ez, double bx, double bz, Place p, String ref) {
+            double tx = ex - bx, tz = ez - bz, len = Math.hypot(tx, tz);
+            if (len < 1e-3) return;
+            tx /= len;
+            tz /= len;
+            long h = hash(ref, 0x7E4D0L);
+            int link = rp.segLink[s];
+            tried[ScenePlan.TRAIL_END]++;
+            for (int attempt = 0; attempt < 6; attempt++) {
+                com.skycraft.landmarks.Kind k = pickTrailKind(END_BUILDERS, (int) Math.round(ex), (int) Math.round(ez), mix(h + attempt), link);
+                if (k == null) break;
+                int r = k.radius();
+                for (int shift = 0; shift < 5; shift++) {
+                    double lat = shift == 0 ? 0 : (shift % 2 == 1 ? 1 : -1) * 3.0 * ((shift + 1) / 2);
+                    // just beyond the trail's end, its front edge at the end
+                    int x = (int) Math.round(ex + tx * (r + 1) - tz * lat), z = (int) Math.round(ez + tz * (r + 1) + tx * lat);
+                    TamrielMap.sample(x, z, ms);
+                    if (ms.inWater() || ms.coastDistance < -1f || !clearOfScenes(x, z, r)) continue;
+                    Layout l = trailLayout(k);
+                    String what = "the end of the trail " + (p != null ? "to " + p.id() : "at " + ref);
+                    SceneB sc = accept(ScenePlan.LANDMARK_PREFIX + k.id(), l, x, z, ScenePlan.TRAIL_END, ref, what + purposeOf(l),
+                            facingTowards(x, z, bx, bz));
+                    sc.pathX = (int) Math.round(ex);
+                    sc.pathZ = (int) Math.round(ez);
+                    remember(link, k.builder());
+                    return;
+                }
+            }
+            refused[ScenePlan.TRAIL_END]++;
         }
 
         // -------------------------------------------------------------- packing
