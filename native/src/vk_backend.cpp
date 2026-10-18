@@ -515,7 +515,15 @@ public:
         // zero-copy when the driver pair allows it, else host copies; AETHER_INTEROP=hostcopy|zerocopy forces one
         const char* f = std::getenv("AETHER_INTEROP");
         std::string force = f ? f : "";
-        std::string why = zeroCopyBlocker(w, h);
+        {
+            // reported whatever the mode (info): is the GL context on our device at all?
+            uint8_t u[8][16];
+            int n = 0;
+            glUuidMatch_ = false;
+            if (gl_.deviceUuids(u, 8, n))
+                for (int i = 0; i < n; i++) glUuidMatch_ |= std::memcmp(u[i], deviceUuid_, 16) == 0;
+        }
+        std::string why = zeroCopyBlocker(w, h, force != "zerocopy");
         if (force == "hostcopy") why = "forced by AETHER_INTEROP=hostcopy";
         if (!why.empty() && force == "zerocopy") return fail(err, ("zero-copy interop unavailable: " + why).c_str());
         bool ok = false;
@@ -1140,7 +1148,7 @@ private:
     }
 
     // Why zero-copy cannot work with the current GL context ("" when it can).
-    std::string zeroCopyBlocker(uint32_t w, uint32_t h) {
+    std::string zeroCopyBlocker(uint32_t w, uint32_t h, bool strictDriver) {
         if (!interopCapable_) return vkInteropWhy_;
         if (!glHasInterop(gl_)) {
             std::string missing;
@@ -1153,15 +1161,15 @@ private:
         if (!gl_.deviceUuids(u, 8, n)) return "the OpenGL context reports no device UUID";
         bool same = false;
         for (int i = 0; i < n; i++) same |= std::memcmp(u[i], deviceUuid_, 16) == 0;
-        glUuidMatch_ = same;
         if (!same)
             return "the OpenGL context (" + glRenderer_ + ", device " + hex16(u[0]) + ") is not on the Vulkan device " +
                    props_.deviceName + " (" + hex16(deviceUuid_) + ")";
         uint8_t du[16];
         if (gl_.driverUuid(du)) {
             glDriverUuid_ = hex16(du);
-            // opaque handles only import into the same driver build (spec: driver and device UUID must match)
-            if (std::memcmp(du, driverUuid_, 16) != 0)
+            // opaque handles only import into the same driver build (spec: driver and device UUID must match);
+            // AETHER_INTEROP=zerocopy waives this one check, for a stack that reports differing UUIDs yet works
+            if (strictDriver && std::memcmp(du, driverUuid_, 16) != 0)
                 return "GL driver UUID " + glDriverUuid_ + " differs from Vulkan's " + hex16(driverUuid_);
         }
         if (w > maxExport_ || h > maxExport_) return "targets larger than the exportable image size";

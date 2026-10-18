@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Build aether_core for Linux (libaether_core.so) and run its suites.
 #
-#   native/build_linux.sh [--debug] [--no-test] [--software] [--glx] [--hostcopy] [--validate] [--clean]
+#   native/build_linux.sh [--debug] [--no-test] [--software] [--glx] [--hostcopy] [--validate] [--clean] [--allow-skip]
 #
 #   --software   run on Mesa's lavapipe (Vulkan) + llvmpipe (GL) instead of the GPU: a strict, GPU-free conformance
 #                pass (needs mesa-vulkan-drivers' lvp_icd json; slow: minutes)
@@ -33,6 +33,7 @@ TEST=1
 SOFTWARE=0
 CLEAN=0
 VALIDATE=0
+ALLOW_SKIP=0
 for a in "$@"; do
   case "$a" in
     --debug) CONFIG=Debug ;;
@@ -42,6 +43,7 @@ for a in "$@"; do
     --hostcopy) export AETHER_INTEROP=hostcopy ;;
     --validate) VALIDATE=1 ;;
     --clean) CLEAN=1 ;;
+    --allow-skip) ALLOW_SKIP=1 ;;
     -h|--help) sed -n '2,30p' "$0"; exit 0 ;;
     *) echo "unknown option $a" >&2; exit 2 ;;
   esac
@@ -119,9 +121,19 @@ fi
 
 cd "$REPO"
 status=0
+LOG="$BUILD/last_test.log"
 run() {
   echo "== $*"
-  if nice -n 10 "$@"; then echo "-- ok"; else echo "-- FAILED ($?)"; status=1; fi
+  local rc
+  set +e
+  nice -n 10 "$@" 2>&1 | tee "$LOG"
+  rc=${PIPESTATUS[0]}
+  set -e
+  if [ "$rc" != 0 ]; then echo "-- FAILED ($rc)"; status=1
+  # a suite that cannot make its GL context or Vulkan device says SKIP and exits 0: on a target machine that is
+  # the failure worth seeing (headless build boxes: --allow-skip)
+  elif grep -q '^SKIP' "$LOG" && [ "$ALLOW_SKIP" != 1 ]; then echo "-- SKIPPED (counts as a failure; --allow-skip)"; status=1
+  else echo "-- ok"; fi
 }
 run "$BUILD/aether_tests" "$RASTER"
 run "$BUILD/aether_gl_test" "$HERE/data"

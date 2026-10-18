@@ -125,7 +125,8 @@ struct GlContext {
             return fail(err, "libX11 / libGLX lack entry points");
         xdpy = openDisplay(nullptr);
         if (!xdpy) return fail(err, "XOpenDisplay failed (no DISPLAY)");
-        const int fbAttr[] = {0x8011 /*GLX_DRAWABLE_TYPE*/, 0x4 /*GLX_PBUFFER_BIT*/, 0x8014 /*GLX_RENDER_TYPE*/, 0x1, 0};
+        const int fbAttr[] = {0x8010 /*GLX_DRAWABLE_TYPE*/, 0x4 /*GLX_PBUFFER_BIT*/, 0x8011 /*GLX_RENDER_TYPE*/,
+                              0x1 /*GLX_RGBA_BIT*/, 0};
         int n = 0;
         void** cfgs = chooseFb(xdpy, defaultScreen(xdpy), fbAttr, &n);
         if (!cfgs || n < 1) return fail(err, "no GLX pbuffer config");

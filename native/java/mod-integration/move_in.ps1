@@ -34,6 +34,19 @@ if ($Apply) {
     New-Item -ItemType Directory -Force (Split-Path $dllDst -Parent) | Out-Null
     Copy-Item $dll $dllDst -Force
 }
+# the Linux library (Steam Deck, Bazzite ...), when one was built (native/build_linux.sh, on Linux or in WSL) and
+# copied to native\build-linux\libaether_core.so; without it the mod still runs on Linux, aether reports itself off
+$so = "$native\build-linux\libaether_core.so"
+$soDst = "$Mod\src\main\resources\natives\linux-x86_64\libaether_core.so"
+if (Test-Path $so) {
+    Write-Host "  copy libaether_core.so -> $soDst"
+    if ($Apply) {
+        New-Item -ItemType Directory -Force (Split-Path $soDst -Parent) | Out-Null
+        Copy-Item $so $soDst -Force
+    }
+} else {
+    Write-Host "  (no $so: Linux players get no far field until native/build_linux.sh has built one)"
+}
 
 # 3. hooks
 function Patch([string]$file, [string]$anchor, [string]$insert, [string]$marker, [switch]$Before) {
