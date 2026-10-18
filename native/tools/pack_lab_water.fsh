@@ -18,6 +18,7 @@ uniform float frameTimeCounter;
 #include "/lib/lighting.glsl"
 #include "/lib/weather.glsl"
 #include "/lib/waves.glsl"
+#include "/lib/flow.glsl"
 
 in vec2 texcoord;
 
@@ -44,5 +45,5 @@ void main() {
     float a = WATER_ALPHA;
     vec3 lit = shadeForward(srgbToLinear(w.rgb), n, lm, playerPos, sun, 0.0);
     outColor = vec4(lit * a, a);
-    outInfo = vec4(octEncode(n), float(MAT_WATER) / 255.0, lm.y);
+    outInfo = vec4(octEncode(n), float(MAT_WATER) / 255.0, packSkyFoam(lm.y, 0.0));
 }

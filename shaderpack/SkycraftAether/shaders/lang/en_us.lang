@@ -60,3 +60,7 @@ option.PLUME_STEPS=Smoke columns
 option.PLUME_STEPS.comment=The Red Mountain volcano's ash column (and fire smoke volumes with the option below). 0 off.
 option.SMOKE_FIRE_VOLUMES=Fire smoke volumes
 option.SMOKE_FIRE_VOLUMES.comment=Fires' smoke as volumes too. The mod already draws fire smoke as sprites: leave off unless it stops.
+option.WATER_FLOW=Flowing water and falls
+option.WATER_FLOW.comment=Waves ride the flow, steep runs break into rapids foam, falls stream with white water.
+option.FALLS_MIST=Falls spray
+option.FALLS_MIST.comment=Spray and bright mist where a fall meets the water below.

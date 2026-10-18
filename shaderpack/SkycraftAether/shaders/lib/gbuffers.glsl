@@ -129,6 +129,7 @@ vec3 fogForward(vec3 c, float a, vec3 sun) {
 #ifdef TRANSLUCENT
 #include "/lib/weather.glsl"
 #include "/lib/waves.glsl"
+#include "/lib/flow.glsl"
 #endif
 
 // the surface normal with the resource pack's normal map (labPBR: xy in rg, z reconstructed), world space
@@ -187,21 +188,40 @@ void main() {
     vec3 n = normalize(worldNormal);
     float dist = length(playerPos);
     float a = albedo.a;
+    float foam = 0.0;
+    vec3 wp = playerPos + cameraPosition;
     if (material == MAT_WATER && n.y > 0.5) {
         // open water: more sky seen = a bigger body; storms whip it up
         float openness = smoothstep(0.6, 1.0, lm.y);
-        vec2 wxz = (playerPos + cameraPosition).xz;
+        vec2 wxz = wp.xz;
+        vec2 flow = vec2(0.0);
+#ifdef WATER_FLOW
+        // flowing water: the waves ride the flow, ripples tighten, steep runs break white
+        vec4 fl = waterFlow(playerPos, texcoord, cameraPosition.y);
+        flow = fl.xy;
+        openness *= 1.0 - 0.7 * fl.w;
+        foam = rapidsFoam(wxz, flow, fl.z, frameTimeCounter, dist) * fl.w;
+#endif
         // the live wind sets the heading and size of the waves; rain rings the surface where the sky reaches it
-        n = waveNormal(wxz, frameTimeCounter, openness, waterWind(wxz, rainStrength), vec2(0.0), dist,
+        n = waveNormal(wxz, frameTimeCounter, openness, waterWind(wxz, rainStrength), flow, dist,
                        rainStrength * smoothstep(0.85, 1.0, lm.y));
         a = WATER_ALPHA;
     } else if (material == MAT_WATER) {
         a = WATER_ALPHA;  // falls and the sides of flowing water
+#ifdef WATER_FLOW
+        if (abs(n.y) < 0.3) {
+            // a fall: white water streaming down the face
+            vec2 fw = fallsWater(wp, n, frameTimeCounter, dist);
+            foam = fw.x;
+            vec2 t = normalize(vec2(-n.z, n.x) + vec2(1e-5));
+            n = normalize(n + vec3(t.x, 0.0, t.y) * fw.y);
+        }
+#endif
     }
     vec3 base = srgbToLinear(albedo.rgb);
     vec3 lit = shadeForward(base, n, lm, playerPos, sun, 0.0);
     outColor = vec4(lit * a, a);
-    outInfo = vec4(octEncode(n), float(material == MAT_NONE ? MAT_GLASS : material) / 255.0, lm.y);
+    outInfo = vec4(octEncode(n), float(material == MAT_NONE ? MAT_GLASS : material) / 255.0, packSkyFoam(lm.y, foam));
 #elif defined WEATHER
     vec3 sun = worldSunDir(gbufferModelViewInverse, sunPosition);
     vec3 c = srgbToLinear(albedo.rgb) * (skyAmbient(vec3(0, 1, 0), sun) * 1.4 + sunRadiance(sun) * 0.15);

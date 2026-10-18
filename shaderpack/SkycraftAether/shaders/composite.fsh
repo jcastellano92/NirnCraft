@@ -18,6 +18,7 @@
 #include "/lib/aether.glsl"
 #include "/lib/media.glsl"
 #include "/lib/plumes.glsl"
+#include "/lib/flow.glsl"
 
 uniform sampler2D colortex4;
 uniform sampler2D colortex5;
@@ -133,6 +134,30 @@ vec3 reflectionAt(vec3 vp, vec3 rWorld, vec3 sun, float skyLight) {
     return sky;
 }
 
+#if defined WATER_FLOW && defined FALLS_MIST
+// where a fall meets the water below: on a water top, a fall (vertical water) just above on screen and at about the
+// same distance; on a fall, the water top just below. Up to four taps over ~2.5 blocks; 0 elsewhere
+float fallsSpray(vec2 uv, vec3 n, float dist) {
+    bool top = n.y > 0.5;
+    if (!top && abs(n.y) > 0.3) return 0.0;
+    float span = 2.5 * viewHeight / (1.4 * max(dist, 1.0)) / viewHeight;  // ~2.5 blocks in uv
+    float best = 0.0;
+    for (int k = 1; k <= 4; k++) {
+        vec2 q = uv + vec2(0.0, (top ? 1.0 : -1.0) * span * float(k) / 4.0);
+        if (q.y < 0.0 || q.y > 1.0) break;
+        vec4 inf = texture(colortex6, q);
+        if (int(inf.b * 255.0 + 0.5) != MAT_WATER) continue;
+        vec3 nq = octDecode(inf.rg);
+        bool other = top ? abs(nq.y) < 0.3 : nq.y > 0.5;
+        if (!other) continue;
+        float dq = length(viewAt(q, texture(depthtex0, q).r));
+        if (abs(dq - dist) > 3.0) continue;
+        best = max(best, 1.0 - float(k - 1) / 4.0);
+    }
+    return best;
+}
+#endif
+
 // screen-space light shafts: march towards the light's screen position, collecting how much of the way is open sky
 vec3 lightShafts(vec2 uv, vec3 sun, float dist) {
 #ifdef VOLUMETRIC_LIGHT
@@ -184,7 +209,9 @@ void main() {
 
     if (tr.a > 0.001 && d0 < d1 && (mat == MAT_WATER || mat == MAT_GLASS)) {
         vec3 n = octDecode(info.rg);
-        float skyLight = info.a;
+        vec2 skyFoam = unpackSkyFoam(info.a);
+        float skyLight = skyFoam.x;
+        float foam = skyFoam.y;
         // refraction: displace by the surface's slope, but only onto what really lies behind it
         vec2 uvR = texcoord;
 #ifdef REFRACTION
@@ -222,8 +249,22 @@ void main() {
             float shallow = smoothstep(1.4, 0.0, thick);
             vec2 wp = (cameraPosition + mat3(gbufferModelViewInverse) * vp0).xz;
             float lap = 0.5 + 0.5 * sin(frameTimeCounter * 1.3 - thick * 5.0 + valueNoise(wp * 0.3) * 4.0);
-            float foam = shallow * lap * smoothstep(0.35, 0.75, fbm2(wp * 1.5 + frameTimeCounter * 0.2, 3));
-            col = mix(col, skyAmbient(vec3(0, 1, 0), sun) * 1.3 + rad * 0.25, foam * 0.85);
+            float shore = shallow * lap * smoothstep(0.35, 0.75, fbm2(wp * 1.5 + frameTimeCounter * 0.2, 3));
+            col = mix(col, skyAmbient(vec3(0, 1, 0), sun) * 1.3 + rad * 0.25, shore * 0.85);
+#endif
+#ifdef WATER_FLOW
+            // white water of rapids and falls (from gbuffers), and the spray where a fall meets the water below
+            float spray = 0.0;
+#ifdef FALLS_MIST
+            spray = fallsSpray(texcoord, n, dist0);
+#endif
+            float white = clamp(max(foam, spray * 0.85), 0.0, 1.0);
+            if (white > 0.0 || spray > 0.0) {
+                vec3 foamLit = (skyAmbient(vec3(0, 1, 0), sun) * 1.3 + rad * 0.3 * (0.4 + 0.6 * max(dot(n, L), 0.0)))
+                             * mix(0.15, 1.0, skyLight) + vec3(0.012);
+                col = mix(col, foamLit, white * 0.9);
+                col += foamLit * spray * 0.3;  // the bright mist hanging over the pool
+            }
 #endif
         } else {
             // glass and ice (and water seen from below): the tinted surface over what it refracts

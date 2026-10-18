@@ -35,6 +35,8 @@
 #define SSR_STEPS 20 // [10 16 20 32]
 #define SHORE_FOAM              // foam where the water is shallow, lapping with the waves
 #define CAUSTICS                // light patterns under water
+#define WATER_FLOW              // flowing water: waves ride the flow, rapids break white, falls stream white water
+#define FALLS_MIST              // spray and mist where a fall meets the water below
 
 // atmosphere
 #define FOG_LAYERS              // low valley fog, marsh mist and height fog by weather and time of day
