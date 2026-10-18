@@ -34,6 +34,7 @@ uniform float viewHeight;
 #include "/lib/sky.glsl"
 #include "/lib/clouds.glsl"
 #include "/lib/lightning.glsl"
+#include "/lib/celestial.glsl"
 
 float airClock() { return haveAir() ? airTime() : frameTimeCounter; }
 
@@ -107,14 +108,29 @@ void main() {
 #endif
         // the sky: the atmosphere, the night sky over it, and whatever the vanilla sky drew (the moon)
         vec3 c = skyColor(dir, sun);
+        bool modSky = haveModSky();
+        vec4 skyOpt = modSkyOptions();
+        float veil = 0.0;
+        vec4 moonsC = vec4(0.0);
+#ifdef MOD_SKY
+        // Nirn's moons (the vanilla moon is left out: there are two) and the mod's aurora
+        if (modSky) moonsC = modMoons(dir, sun, moons(sun), veil);
+#endif
 #ifdef STARS
-        c += stars(dir, sun, frameTimeCounter, rainStrength);
+        if (skyOpt.r > 0.5) c += stars(dir, sun, frameTimeCounter, rainStrength) * (1.0 - veil) * modNightSky().r;
 #endif
 #ifdef AURORA
-        float cold = smoothstep(0.35, -0.1, temperature) * (1.0 - rainStrength);
-        c += aurora(dir, frameTimeCounter, cold, sun);
+#ifdef MOD_SKY
+        if (modSky) c += modAurora(dir, sun, skySeconds());
+        else
 #endif
-        if (mtl.r > 0.99) c += srgbToLinear(texture(colortex0, texcoord).rgb) * 1.4;
+        {
+            float cold = smoothstep(0.35, -0.1, temperature) * (1.0 - rainStrength);
+            c += aurora(dir, frameTimeCounter, cold, sun);
+        }
+#endif
+        c = c * (1.0 - moonsC.a) + moonsC.rgb;
+        if (mtl.r > 0.99 && !modSky) c += srgbToLinear(texture(colortex0, texcoord).rgb) * 1.4;
         if (!aetherPresent()) {
             // no far field to hide it: the sun sets behind the mountains on the horizon (the mod's sun_horizon, from
             // the camera) instead of shining through them
@@ -166,7 +182,7 @@ void main() {
     vec3 fr = fresnelSchlick(max(dot(n, v), 0.0), f0) * spec.x * spec.x;
     specular += skyColor(normalize(vec3(r.x, max(r.y, 0.02), r.z)), sun) * fr * lm.y * lm.y;
 #endif
-    vec3 ambient = albedo * (skyAmbient(n, sun) * lm.y * lm.y + vec3(0.012, 0.012, 0.016)) * ao;
+    vec3 ambient = albedo * ((skyAmbient(n, sun) + auroraIrradiance(n)) * lm.y * lm.y + vec3(0.012, 0.012, 0.016)) * ao;
     vec3 wp = playerPos + cameraPosition;
     vec3 torch = albedo * blockLightAt(lm.x, wp, cameraPosition, airClock()) * mix(0.6, 1.0, ao);
     // the mod's point lights (spells, atronachs, burning creatures) and storm channels light what faces them

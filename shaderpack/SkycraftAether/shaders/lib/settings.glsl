@@ -50,6 +50,8 @@
 #define VL_SAMPLES 16 // [8 12 16 24 32]
 #define STARS                   // stars and the galaxy, turning with the sky
 #define AURORA                  // northern lights in cold northern skies at night
+#define MOD_SKY                 // Nirn's sky from the mod: Masser and Secunda, the live aurora, the mod's sky options
+#define LUNAR_KEY               // nights lit (and shadowed) by the brighter moon, Masser or Secunda
 #define BLOOM                   // glow around bright lights, lava, fire and magic
 #define EMISSIVE_STRENGTH 4.0 // [2.0 3.0 4.0 6.0] brightness of flames and other added light (the mod's fire meshes)
 #define FALLBACK_CLOUDS 2 // [0 1 2] the pack's own cloud deck when aether's far field is absent: 0 none, 1 flat, 2 self-shadowed

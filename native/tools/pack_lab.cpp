@@ -628,6 +628,25 @@ int main(int argc, char** argv) {
         }
         smoke[3 * 32 + 31] = uint32_t(sources);
         smoke[1 * 32 + 11] = rgba8(0, 1, 0.4, 0);  // partial tick, budget, wind
+        // the mod's sky (moons=1): the clock (day= days; 0.75 puts Masser full and high at midnight), night-sky
+        // state, options, and an aurora (aurora=1: one curtain in the north and its light on the ground)
+        if (arg(argc, argv, "moons", 0) != 0) {
+            smoke[1 * 32 + 1] = uint32_t(std::lround(arg(argc, argv, "day", 0.75) * 24000));
+            smoke[1 * 32 + 13] = 2400;
+            smoke[1 * 32 + 3] = rgba8(1, 0, 1, 1);
+            smoke[1 * 32 + 7] = rgba8(1, 1, 1, arg(argc, argv, "aurora", 0) != 0 ? 1 : 0);
+            if (arg(argc, argv, "aurora", 0) != 0) {
+                smoke[1 * 32 + 15] = rgba8(0, 0, 0, 1);
+                smoke[1 * 32 + 5] = rgba8(0.8, 1, 0.2, 1);
+                int amp = 52000;
+                for (int k = 0; k < 2; k++) {
+                    smoke[1 * 32 + 16 + k * 2] = rgba8(0.5 + k * 0.06, 0.5 / 1.5, (0.22 + k * 0.08) / 1.5, 0.3);
+                    smoke[1 * 32 + 17 + k * 2] = uint32_t(amp & 255) | uint32_t(amp >> 8) << 8 | uint32_t(70 + k * 60) << 16 | 128u << 24;
+                }
+                smoke[1 * 32 + 28] = rgba8(0.15, 0.6, 0.3, 1);
+                for (int k = 29; k < 32; k++) smoke[1 * 32 + k] = rgba8(0.5, 0.5, 0.5, 1);
+            }
+        }
         if (arg(argc, argv, "strike", 0) != 0) {  // a cloud-to-ground discharge ahead, at full strobe
             double g[3];
             ahead(arg(argc, argv, "sdist", 260), arg(argc, argv, "sside", 60), -1, g);
@@ -644,6 +663,20 @@ int main(int argc, char** argv) {
         }
     }
     uint32_t horizon = rgba8(arg(argc, argv, "horizon", 0) / 0.5, 0, 0, 1);
+    // stand-ins for the mod's Masser / Secunda phase atlases (4 x 4 tiles of 16 phases): a cratered grey disc lit
+    // from the side the phase puts the sun on
+    std::vector<uint32_t> phases(256 * 256, 0u);
+    for (int py = 0; py < 256; py++)
+        for (int px = 0; px < 256; px++) {
+            int tile = (py / 64) * 4 + px / 64;
+            double u = (px % 64 + 0.5) / 32.0 - 1, v = (py % 64 + 0.5) / 32.0 - 1, r2 = u * u + v * v;
+            if (r2 >= 1) continue;
+            double nz = std::sqrt(1 - r2), ang = tile / 16.0 * 2 * PI;  // 0 full .. 8 new
+            double lit = std::max(0.0, u * -std::sin(ang) + nz * std::cos(ang)) * 0.9 + 0.02;
+            double crater = 0.85 + 0.15 * std::sin(u * 23) * std::cos(v * 19);
+            phases[py * 256 + px] = rgba8(lit * crater * 0.8, lit * crater * 0.78, lit * crater * 0.76, 1);
+        }
+    GLuint phaseTex = texture2d(GL_RGBA8, 256, 256, GL_RGBA, GL_UNSIGNED_BYTE, phases.data(), true);
     GLuint fogRadTex = texture2d(GL_RGBA8, 128, 128, GL_RGBA, GL_UNSIGNED_BYTE, fogRad.data());
     GLuint smokeTex = texture2d(GL_RGBA8, 32, 4, GL_RGBA, GL_UNSIGNED_BYTE, smoke.data());
     GLuint boltTex = texture2d(GL_RGBA8, 32, 4, GL_RGBA, GL_UNSIGNED_BYTE, bolt.data());
@@ -719,6 +752,10 @@ int main(int argc, char** argv) {
         m4("shadowProjection", shadowP);  // everything lands inside the lit 1x1 stand-in map
         GLint l = pglGetUniformLocation(pr.id, "sunPosition");
         if (l >= 0) pglUniform3f(l, float(sv[0] * 100), float(sv[1] * 100), float(sv[2] * 100));
+        // Iris' shadow light: the sun by day, the vanilla moon opposite it by night
+        double sl = sun[1] > 0 ? 100.0 : -100.0;
+        l = pglGetUniformLocation(pr.id, "shadowLightPosition");
+        if (l >= 0) pglUniform3f(l, float(sv[0] * sl), float(sv[1] * sl), float(sv[2] * sl));
         l = pglGetUniformLocation(pr.id, "cameraPosition");
         if (l >= 0) pglUniform3f(l, float(x), float(y), float(z));
         f1("rainStrength", float(rain));
@@ -774,7 +811,7 @@ int main(int argc, char** argv) {
                 {"labWater", labWater}, {"aetherColor", aetherColor}, {"aetherDepth", aetherDepth},
                 {"aetherSunMap", aetherSunMap}, {"weatherField", weatherFieldTex}, {"weatherDyn", weatherDynTex},
                 {"fogRadianceTex", fogRadTex}, {"smokeSourcesTex", smokeTex}, {"lightningTex", boltTex},
-                {"sunHorizonTex", horizonTex}};
+                {"sunHorizonTex", horizonTex}, {"masserPhases", phaseTex}, {"secundaPhases", phaseTex}};
     bool ok = run(pWater, {{5, tex[5]}, {6, tex[6]}}, false);
     ok = ok && run(pDeferred, {{4, tex[4]}}, true);  // deferred sees the opaque depth only
     samplers["colortex4"] = tex[4];

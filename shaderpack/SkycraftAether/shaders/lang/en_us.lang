@@ -64,3 +64,7 @@ option.WATER_FLOW=Flowing water and falls
 option.WATER_FLOW.comment=Waves ride the flow, steep runs break into rapids foam, falls stream with white water.
 option.FALLS_MIST=Falls spray
 option.FALLS_MIST.comment=Spray and bright mist where a fall meets the water below.
+option.MOD_SKY=Nirn's sky
+option.MOD_SKY.comment=Masser and Secunda, the live aurora and the sky options from the Skycraft mod.
+option.LUNAR_KEY=Moonlight from Masser and Secunda
+option.LUNAR_KEY.comment=Nights lit and shadowed by the brighter moon (turns the shadow map; renders all shadow casters).

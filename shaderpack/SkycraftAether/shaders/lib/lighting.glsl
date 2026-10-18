@@ -10,6 +10,7 @@
 #include "/lib/aether.glsl"
 #include "/lib/clouds.glsl"
 #include "/lib/air.glsl"
+#include "/lib/keylight.glsl"
 
 #ifdef SHADOWS
 uniform sampler2DShadow shadowtex0;
@@ -31,6 +32,7 @@ float sunShadow(vec3 playerPos, vec3 n, vec3 toLight, vec2 px) {
     if (dist > shadowDistance) return 1.0;
     // normal offset grows with distance (texel size) and grazing angle
     vec3 p = playerPos + n * (0.06 + dist * 0.004) * (1.5 - ndl);
+    p = shadowKeyRotation(toLight) * p;  // into the frame the map was rendered in (the moon that lights the night)
     vec4 sp = shadowProjection * (shadowModelView * vec4(p, 1.0));
     vec3 s = distortShadow(sp.xyz / sp.w) * 0.5 + 0.5;
     float texel = 1.0 / float(shadowMapResolution);
@@ -108,11 +110,6 @@ float terrainTransmission(vec3 wp, vec3 toLight) {
 }
 #endif
 
-vec3 keyLightDir(vec3 sun) { return sun.y > -0.05 ? sun : -sun; }
-
-vec3 keyLightRadiance(vec3 sun) {
-    return sun.y > -0.05 ? sunRadiance(sun) : vec3(0.035, 0.05, 0.09) * smoothstep(-0.05, -0.2, sun.y);
-}
 
 // how much of the key light (sun, or moon at night) reaches this point: shadow map, distant terrain, clouds
 float keyVisibility(vec3 playerPos, vec3 n, vec3 toLight, vec2 px) {

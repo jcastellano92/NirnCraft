@@ -2,6 +2,10 @@
 // The sun's shadow map: the same wind as gbuffers (so a swaying plant's shadow sways with it); water casts none.
 #include "/lib/settings.glsl"
 #include "/lib/materials.glsl"
+uniform mat4 gbufferModelViewInverse;
+uniform vec3 sunPosition;
+#include "/lib/common.glsl"
+#include "/lib/keylight.glsl"
 #ifdef WAVING_FOLIAGE
 #include "/lib/wind.glsl"
 #endif
@@ -36,6 +40,8 @@ void main() {
         playerPos += windOffset(playerPos + cameraPosition, frameTimeCounter, rainStrength, material, up);
     }
 #endif
+    // the night's key may be another moon than Iris' shadow light: turn the casters the way receivers are turned
+    playerPos = shadowKeyRotation(keyLightDir(worldSunDir(gbufferModelViewInverse, sunPosition))) * playerPos;
     gl_Position = gl_ProjectionMatrix * (shadowModelView * vec4(playerPos, 1.0));
     gl_Position.xyz = distortShadow(gl_Position.xyz / gl_Position.w) * gl_Position.w;
 }
