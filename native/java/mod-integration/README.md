@@ -42,6 +42,11 @@ clipmap window, 24 in flight per player; the client re-asks after 20 s and cache
 tile's voxel by interval (decoded to the interval's middle, so no height crosses a voxel centre in transit) and
 single player quantises identically: a server-fed far field is bit-identical to the single-player one.
 
+Biome tints (`AetherBiomes`, `AetherTints`): far grass and broadleaf canopy wear the world's own biome grass and
+foliage colours (the generator's biome source and climate, sampled on a 64 x 64 grid per tile), as tinted palette
+entries (`aether_upload_column_heights2`), so the hand-off to the near field shows no hue jump. Single player samples
+them itself; the server sends them with each tile (codec v2: two small rgb planes); both register the same colours.
+
 Far actors (`AetherFarActors`, server): twice a second, per overworld player, the players, dragons, ships and large
 creatures past that entity type's tracking range and within 4 km (nearest 96), with velocities; the client moves them
 on between packets and draws them as impostors.

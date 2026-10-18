@@ -280,11 +280,12 @@ std::unique_ptr<Tile> PreviewSource::makeTile(int lod, int tx, int tz) const {
     return t;
 }
 
-std::unique_ptr<Tile> PreviewSource::dressTile(int lod, int tx, int tz, const float* surface, const float* water) const {
+std::unique_ptr<Tile> PreviewSource::dressTile(int lod, int tx, int tz, const float* surface, const float* water,
+                                              const uint16_t* grassMat, const uint16_t* foliageMat) const {
     auto t = blankTile(lod, tx, tz);
     std::copy(surface, surface + t->surface.size(), t->surface.begin());
     std::copy(water, water + t->water.size(), t->water.begin());
-    dress(*t);
+    dress(*t, grassMat, foliageMat);
     return t;
 }
 
@@ -292,12 +293,12 @@ std::unique_ptr<Tile> PreviewSource::dressTile(int lod, int tx, int tz, const fl
 // shore (a stand-in for the biome surface rules). Slope is the steeper of the map's macro gradient and the tile's own
 // (central differences between neighbouring columns), so cliffs, terraces and ridged peaks in the geometry turn to
 // rock and shed their trees even where the macro raster is gentle.
-void PreviewSource::dress(Tile& tile) const {
+void PreviewSource::dress(Tile& tile, const uint16_t* grassMat, const uint16_t* foliageMat) const {
     // rows in parallel (a tile is ~20 ms of raster sampling on one core); each row writes only its own columns
     unsigned n = std::max(1u, std::min(8u, std::thread::hardware_concurrency() / 2));
     std::atomic<int> nextRow{0};
     auto rows = [&] {
-        for (int j; (j = nextRow.fetch_add(4)) < TILE;) dressRows(tile, j, std::min(j + 4, int(TILE)));
+        for (int j; (j = nextRow.fetch_add(4)) < TILE;) dressRows(tile, j, std::min(j + 4, int(TILE)), grassMat, foliageMat);
     };
     std::vector<std::thread> pool;
     for (unsigned i = 1; i < n; i++) pool.emplace_back(rows);
@@ -305,7 +306,7 @@ void PreviewSource::dress(Tile& tile) const {
     for (auto& th : pool) th.join();
 }
 
-void PreviewSource::dressRows(Tile& tile, int jBegin, int jEnd) const {
+void PreviewSource::dressRows(Tile& tile, int jBegin, int jEnd, const uint16_t* grassMat, const uint16_t* foliageMat) const {
     Tile* t = &tile;
     double s = double(1 << t->lod);
     double x0 = double(t->tx) * TILE * s, z0 = double(t->tz) * TILE * s;
@@ -351,6 +352,10 @@ void PreviewSource::dressRows(Tile& tile, int jBegin, int jEnd) const {
             if (h > snowEdge && slope < 1.4f) top = M_SNOW;
             if (cl == FROZEN && sm.coast < 0) top = M_ICE;
             if (!std::isnan(wl) && wl - h > 1.5f) top = sm.coast < 0 ? M_SAND : M_GRAVEL;
+            // the biome's own grass colour where the game would show a tinted grass block (the near field's tint)
+            if (grassMat && grassMat[c] && (top == M_GRASS || top == M_LUSHGRASS || top == M_COLDGRASS || top == M_MARSHGRASS ||
+                                            top == M_DRYGRASS || top == M_TUNDRA))
+                top = grassMat[c];
             t->top[c] = top;
             t->fill[c] = fill;
 
@@ -396,6 +401,7 @@ void PreviewSource::dressRows(Tile& tile, int jBegin, int jEnd) const {
                     if (ht >= 1.0f) {
                         t->canopy[c] = ht;
                         t->canopyMat[c] = conifer ? M_CONIFER : cl == JUNGLE || cl == TROPICAL ? M_JUNGLE : M_FOLIAGE;
+                        if (!conifer && foliageMat && foliageMat[c]) t->canopyMat[c] = foliageMat[c];  // biome foliage
                     }
                 }
             }

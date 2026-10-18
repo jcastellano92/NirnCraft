@@ -32,7 +32,7 @@ extern "C" {
 #endif
 
 /* (major << 16) | (minor << 8) | patch. Bumped on any ABI change. */
-#define AETHER_ABI_VERSION 0x000500
+#define AETHER_ABI_VERSION 0x000600
 
 typedef struct AetherContext AetherContext;
 
@@ -241,6 +241,12 @@ AETHER_API AetherStatus aether_preview_generate(AetherContext* ctx, int32_t lod,
  */
 AETHER_API AetherStatus aether_upload_column_heights(AetherContext* ctx, int32_t lod, int32_t tileX, int32_t tileZ,
                                                      const float* surface, const float* water);
+/* As aether_upload_column_heights, plus per-column materials (palette ids, 0 = the dressing's own) for grass-family
+ * tops and broadleaf canopy: the biome's tinted grass and foliage, so the far field matches the near field's tints.
+ * grassMat / foliageMat may be NULL. */
+AETHER_API AetherStatus aether_upload_column_heights2(AetherContext* ctx, int32_t lod, int32_t tileX, int32_t tileZ,
+                                                      const float* surface, const float* water, const uint16_t* grassMat,
+                                                      const uint16_t* foliageMat);
 /*
  * Buildings over tile (lod, tileX, tileZ), 256 x 256 columns laid out as in AetherColumnTile: walls stand on the
  * ground up to wallTop[c], the roof above them up to roofTop[c] (roofTop <= the ground, or NaN: no building there).

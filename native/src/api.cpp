@@ -100,7 +100,7 @@ extern "C" {
 AETHER_API uint32_t aether_abi_version(void) { return AETHER_ABI_VERSION; }
 
 AETHER_API const char* aether_build_info(void) {
-    return "aether_core " AETHER_VERSION_STRING " (abi 0.5.0; slang far kernel; " __DATE__ ")";
+    return "aether_core " AETHER_VERSION_STRING " (abi 0.6.0; slang far kernel; " __DATE__ ")";
 }
 
 AETHER_API AetherStatus aether_create(AetherBackend backend, AetherContext** out) {
@@ -450,6 +450,15 @@ AETHER_API AetherStatus aether_upload_column_heights(AetherContext* ctx, int32_t
     if (!ctx || lod < 0 || lod >= MAX_LODS || !surface || !water) return AETHER_ERR_ARG;
     if (!ctx->preview) return ctx->fail(AETHER_ERR_STATE, "no preview raster loaded (it dresses the columns)");
     ctx->world.putTile(ctx->preview->dressTile(lod, tileX, tileZ, surface, water));
+    return AETHER_OK;
+}
+
+AETHER_API AetherStatus aether_upload_column_heights2(AetherContext* ctx, int32_t lod, int32_t tileX, int32_t tileZ,
+                                                      const float* surface, const float* water, const uint16_t* grassMat,
+                                                      const uint16_t* foliageMat) {
+    if (!ctx || lod < 0 || lod >= MAX_LODS || !surface || !water) return AETHER_ERR_ARG;
+    if (!ctx->preview) return ctx->fail(AETHER_ERR_STATE, "no preview raster loaded (it dresses the columns)");
+    ctx->world.putTile(ctx->preview->dressTile(lod, tileX, tileZ, surface, water, grassMat, foliageMat));
     return AETHER_OK;
 }
 

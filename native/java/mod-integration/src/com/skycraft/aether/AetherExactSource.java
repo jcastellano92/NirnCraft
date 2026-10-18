@@ -33,14 +33,29 @@ final class AetherExactSource extends AetherRefiningSource {
 
     private static final int TILE = AetherNative.TILE;
 
+    /** Grass and foliage rgb of one row j of a filled tile's tint grid (AetherBiomes in game). Thread-safe. */
+    interface Tinter {
+        void fillRow(int lod, int tx, int tz, float[] surface, int[] grass, int[] foliage, int j);
+    }
+
     private final TamrielHeight height;
+    private final Tinter biomes;  // null: the dressing's own grass and foliage colours
+    private final AetherTints tints = new AetherTints();
     private final ForkJoinPool pool;
     private final float[] surface = new float[TILE * TILE], water = new float[TILE * TILE];
+    private final int[] grassRgb = new int[AetherTints.GRID * AetherTints.GRID], foliageRgb = new int[grassRgb.length];
+    private final short[] grassMat = new short[TILE * TILE], foliageMat = new short[TILE * TILE];
 
     /** raster: the preview raster aether dresses the columns from (AetherRasterCache.ensure in game). */
     AetherExactSource(TamrielHeight height, Callable<Path> raster, int threads) {
+        this(height, null, raster, threads);
+    }
+
+    /** biomes: the world's biome colours for far grass and foliage, or null. */
+    AetherExactSource(TamrielHeight height, Tinter biomes, Callable<Path> raster, int threads) {
         super(raster);
         this.height = height;
+        this.biomes = biomes;
         pool = new ForkJoinPool(Math.max(1, threads), p -> {
             var t = ForkJoinPool.defaultForkJoinWorkerThreadFactory.newThread(p);
             t.setName("skycraft-aether-columns-" + t.getPoolIndex());
@@ -75,7 +90,7 @@ final class AetherExactSource extends AetherRefiningSource {
     /** The integrated server's exact source, or null when its overworld is not a Tamriel world. */
     static AetherExactSource forServer(MinecraftServer server, Callable<Path> raster) {
         TamrielHeight h = heightOf(server);
-        return h == null ? null : new AetherExactSource(h, raster, defaultThreads());
+        return h == null ? null : new AetherExactSource(h, AetherBiomes.forServer(server), raster, defaultThreads());
     }
 
     /** The terrain height at a block column (what forts and the like stand on). Thread-safe. */
@@ -88,8 +103,15 @@ final class AetherExactSource extends AetherRefiningSource {
     @Override
     Refined refine(AetherNative.Context ctx, int lod, int tx, int tz) {
         fill(lod, tx, tz, surface, water);
+        boolean tinted = tint(lod, tx, tz, surface, grassRgb, foliageRgb);  // (from the surface as computed, as a server does)
         AetherTileCodec.quantize(lod, surface, water);  // as a server would send it: SP and MP far fields match
-        ctx.uploadColumnHeights(lod, tx, tz, surface, water);
+        if (tinted) {
+            tints.materials(grassRgb, foliageRgb, grassMat, foliageMat);
+            tints.flush(ctx);
+            ctx.uploadColumnHeights2(lod, tx, tz, surface, water, grassMat, foliageMat);
+        } else {
+            ctx.uploadColumnHeights(lod, tx, tz, surface, water);
+        }
         return Refined.DONE;
     }
 
@@ -111,6 +133,17 @@ final class AetherExactSource extends AetherRefiningSource {
                 water[j * TILE + i] = waterAt(h, m);
             }
         })).join();
+    }
+
+    /** The biome tint grids of a filled tile (AetherTints.GRID^2 rgb each); false when this source has no biomes. */
+    boolean tint(int lod, int tx, int tz, float[] surface, int[] grass, int[] foliage) {
+        if (biomes == null) return false;
+        int g = AetherTints.GRID;
+        pool.submit(() -> IntStream.range(0, g).parallel().forEach(j -> {
+            // one grid row per task: AetherBiomes.fill over a single row of the grid
+            biomes.fillRow(lod, tx, tz, surface, grass, foliage, j);
+        })).join();
+        return true;
     }
 
     /**

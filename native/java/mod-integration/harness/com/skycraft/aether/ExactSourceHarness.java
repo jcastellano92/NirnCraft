@@ -27,6 +27,20 @@ public final class ExactSourceHarness {
         return HarnessSeed.height(seed);
     }
 
+    /**
+     * Offline stand-in for AetherBiomes (the world's biome source needs a running game): a smooth tint field over the
+     * world, the same for the single-player source and the in-process server, so the tint path is exercised end to end.
+     */
+    static final AetherExactSource.Tinter TINTS = (lod, tx, tz, surface, grass, foliage, j) -> {
+        int s = 1 << lod, step = AetherNative.TILE / AetherTints.GRID;
+        for (int i = 0; i < AetherTints.GRID; i++) {
+            int x = tx * (AetherNative.TILE << lod) + (i * step + step / 2) * s, z = tz * (AetherNative.TILE << lod) + (j * step + step / 2) * s;
+            int r = 70 + (int) (60 * (0.5 + 0.5 * Math.sin(x / 900.0))), b = 50 + (int) (40 * (0.5 + 0.5 * Math.cos(z / 700.0)));
+            grass[j * AetherTints.GRID + i] = r << 16 | 170 << 8 | b;
+            foliage[j * AetherTints.GRID + i] = (r - 20) << 16 | 130 << 8 | b;
+        }
+    };
+
     /** The console: vanilla's bootstrap later re-routes System.out/err into its (here silent) logger. */
     static final java.io.PrintStream OUT = System.out;
 
@@ -72,7 +86,7 @@ public final class ExactSourceHarness {
              AetherNative.Context preview = n.create(AetherNative.BACKEND_VULKAN);
              AetherNative.Context served = n.create(AetherNative.BACKEND_VULKAN)) {
             // exact: the mod's height through AetherExactSource, the client's single-player path
-            AetherExactSource src = new AetherExactSource(height, () -> raster, threads);
+            AetherExactSource src = new AetherExactSource(height, TINTS, () -> raster, threads);
             src.prepare(exact);
             long c0 = System.nanoTime();
             int tiles = 0;
@@ -190,7 +204,8 @@ public final class ExactSourceHarness {
                            double z, int threads) throws Exception {
         Path gameDir = Files.createTempDirectory("aether-harness-client");
         long worldId = AetherTileServer.worldId(12345L);
-        AetherExactSource server = new AetherExactSource(height, () -> null, threads);
+        AetherExactSource server = new AetherExactSource(height, TINTS, () -> null, threads);
+        int[] tg = new int[AetherTints.GRID * AetherTints.GRID], tf = new int[tg.length];
         java.util.ArrayDeque<AetherNet.TileRequest> wire = new java.util.ArrayDeque<>();
         com.skycraft.network.SkyNetwork.toServer = m -> wire.add((AetherNet.TileRequest) m);
         int nCols = AetherNative.TILE * AetherNative.TILE;
@@ -215,8 +230,10 @@ public final class ExactSourceHarness {
                     requests++;
                     if (r.lods().length > AetherNet.MAX_REQUEST) throw new IllegalStateException("request too large");
                     for (int i = 0; i < r.lods().length; i++) {
+                        // as AetherTileServer.tile: fill, tints from that surface, encode
                         server.fill(r.lods()[i], r.txs()[i], r.tzs()[i], s, w);
-                        byte[] b = AetherTileCodec.encode(r.lods()[i], s, w);
+                        server.tint(r.lods()[i], r.txs()[i], r.tzs()[i], s, tg, tf);
+                        byte[] b = AetherTileCodec.encode(r.lods()[i], s, w, tg, tf);
                         bytes += b.length;
                         tiles++;
                         client.accept(new AetherNet.TileData(r.lods()[i], r.txs()[i], r.tzs()[i], b));
@@ -271,6 +288,19 @@ public final class ExactSourceHarness {
             sizes.append(String.format(" l%d %.0fK", lod, lodBytes / 3 / 1024.0));
         }
         AetherTileCodec.decode(0, new byte[] {1, 2, 3}, s2, w2);  // garbage must be refused, not thrown
+        // tint grids round trip exactly
+        int g = AetherTints.GRID * AetherTints.GRID;
+        int[] tg = new int[g], tf = new int[g], tg2 = new int[g], tf2 = new int[g];
+        for (int i = 0; i < g; i++) {
+            tg[i] = (i * 2654435761L % 0xFFFFFF > 0 ? (int) (i * 2654435761L % 0xFFFFFF) : 1);
+            tf[i] = 0x10A040 + i;
+        }
+        src.fill(0, 0, 0, s, w);
+        byte[] tb = AetherTileCodec.encode(0, s, w, tg, tf);
+        if (AetherTileCodec.decode(0, tb, s2, w2, tg2, tf2) != 1 || !Arrays.equals(tg, tg2) || !Arrays.equals(tf, tf2))
+            throw new IllegalStateException("codec: tint grids do not round trip");
+        if (AetherTileCodec.decode(0, AetherTileCodec.encode(0, s, w), s2, w2, tg2, tf2) != 0)
+            throw new IllegalStateException("codec: an untinted tile decodes as tinted");
         OUT.printf("tile codec: round trip within 1/16 voxel; mean %.0f KB per tile (raw 512 KB):%s%n",
                 total / (double) count / 1024, sizes);
         OUT.printf("  a full 7-LOD window (175 tiles) is ~%.1f MB on the wire%n", total / (double) count * 175 / 1e6);

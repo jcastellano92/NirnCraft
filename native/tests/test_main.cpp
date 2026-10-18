@@ -579,6 +579,62 @@ static void testColumnHeights(const char* raster) {
     aether_destroy(ctx);
 }
 
+// Biome tints over the dressing (aether_upload_column_heights2): grass-family tops take the caller's material.
+static void testGrassTint(const char* raster) {
+    std::printf("grass tint\n");
+    AetherContext* ctx = nullptr;
+    aether_create(AETHER_BACKEND_CPU, &ctx);
+    if (aether_preview_load_raster(ctx, raster) != AETHER_OK) {
+        std::printf("  SKIP: no raster\n");
+        aether_destroy(ctx);
+        return;
+    }
+    AetherMaterial red{{0.6f, 0.02f, 0.02f}, 0.9f, 0.0f, AETHER_CLASS_TERRAIN};
+    CHECK(aether_set_materials(ctx, 300, &red, 1) == AETHER_OK);
+    // a temperate lowland with grass (search the raster for one)
+    double x = 0.5, z = 0.5;
+    for (int k = 0; k < 400; k++) {
+        double h = aether_preview_height(ctx, x, z);
+        if (h > 70 && h < 110) break;
+        x = 0.5 + (k % 20) * 731.0;
+        z = 0.5 + (k / 20) * 677.0;
+    }
+    const size_t N = 256 * 256;
+    std::vector<float> surf(N), water(N, NAN);
+    std::vector<uint16_t> grass(N, 300);
+    double frac[2] = {0, 0};
+    for (int pass = 0; pass < 2; pass++) {
+        for (int tz = -1; tz <= 1; tz++)
+            for (int tx = -1; tx <= 1; tx++) {
+                int cx = int(std::floor(x / 256)) + tx, cz = int(std::floor(z / 256)) + tz;
+                for (int j = 0; j < 256; j++)
+                    for (int i = 0; i < 256; i++) surf[size_t(j) * 256 + i] = aether_preview_height(ctx, cx * 256 + i + 0.5, cz * 256 + j + 0.5);
+                CHECK(aether_upload_column_heights2(ctx, 0, cx, cz, surf.data(), water.data(), pass ? grass.data() : nullptr,
+                                                    nullptr) == AETHER_OK);
+            }
+        double h0 = aether_preview_height(ctx, x, z);
+        double centre[3] = {x, h0 + 80, z};
+        aether_update(ctx, centre, 0);
+        AetherFrame f{};
+        for (int i = 0; i < 3; i++) f.cameraPos[i] = centre[i];
+        f.width = f.height = 48;
+        cameraMatrix(0, -89.9, 60, 1.0, f.invViewProj);
+        f.maxDistance = 6000;
+        f.sunDir[1] = 1;
+        f.lodBias = 1;
+        std::vector<float> lin(48 * 48 * 4);
+        AetherFrameOutput o{nullptr, nullptr, nullptr, lin.data()};
+        CHECK(aether_render(ctx, &f, &o) == AETHER_OK);
+        size_t redPx = 0;
+        for (size_t i = 0; i < 48 * 48; i++) redPx += lin[i * 4] > 3 * lin[i * 4 + 1] && lin[i * 4] > 0.01f;
+        frac[pass] = double(redPx) / (48 * 48);
+    }
+    std::printf("  red-tinted pixels: %.0f%% without the override, %.0f%% with it\n", 100 * frac[0], 100 * frac[1]);
+    CHECK(frac[0] < 0.01);
+    CHECK(frac[1] > 0.1);  // the open grass of the view (forest and rock keep their own)
+    aether_destroy(ctx);
+}
+
 static bool parity(const char* raster) {
     std::printf("cpu/vulkan parity (preview terrain)\n");
     AetherContext* cpu = nullptr;
@@ -763,6 +819,7 @@ int main(int argc, char** argv) {
     testActors();
     testNearDepth(argc > 1 ? argv[1] : "native/data/tamriel_raster.bin");
     testColumnHeights(argc > 1 ? argv[1] : "native/data/tamriel_raster.bin");
+    testGrassTint(argc > 1 ? argv[1] : "native/data/tamriel_raster.bin");
     parity(argc > 1 ? argv[1] : "native/data/tamriel_raster.bin");
     std::printf(failures ? "FAILED (%d)\n" : "PASS\n", failures);
     return failures ? 1 : 0;

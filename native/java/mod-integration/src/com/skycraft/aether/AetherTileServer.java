@@ -39,7 +39,7 @@ final class AetherTileServer {
 
     private AetherTileServer(MinecraftServer server, TamrielHeight height) {
         this.server = server;
-        this.columns = new AetherExactSource(height, () -> null, AetherExactSource.defaultThreads());
+        this.columns = new AetherExactSource(height, AetherBiomes.forServer(server), () -> null, AetherExactSource.defaultThreads());
         this.worldId = worldId(server.overworld().getSeed());
         this.cache = server.getWorldPath(LevelResource.DATA).resolve("skycraft_aether").resolve("tiles-v" + AetherTileCodec.VERSION);
         this.jobs = Executors.newSingleThreadExecutor(r -> {
@@ -130,10 +130,12 @@ final class AetherTileServer {
             byte[] b = Files.readAllBytes(f);
             if (b.length <= AetherTileCodec.MAX_BYTES) return b;
         }
-        int n = AetherNative.TILE * AetherNative.TILE;
+        int n = AetherNative.TILE * AetherNative.TILE, g = AetherTints.GRID * AetherTints.GRID;
         float[] surface = new float[n], water = new float[n];
+        int[] grass = new int[g], foliage = new int[g];
         columns.fill(lod, tx, tz, surface, water);
-        byte[] b = AetherTileCodec.encode(lod, surface, water);
+        boolean tinted = columns.tint(lod, tx, tz, surface, grass, foliage);
+        byte[] b = AetherTileCodec.encode(lod, surface, water, tinted ? grass : null, tinted ? foliage : null);
         Files.createDirectories(f.getParent());
         Path tmp = f.resolveSibling(f.getFileName() + ".tmp");
         Files.write(tmp, b);
