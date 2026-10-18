@@ -266,17 +266,13 @@ bool occupiedAt(int lod, float3 p) {
     return ((bits >> b) & 1) != 0;
 }
 
-// Smoothed surface normal: the negated occupancy gradient over a 3x3x3 stencil with a stride of `stride` voxels.
+// Smoothed surface normal: the negated occupancy gradient by central differences (6 taps, stride `stride` voxels).
 float3 smoothNormal(int lod, float3 centre, float stride) {
     float s = float(1 << lod) * stride;
     float3 g = float3(0, 0, 0);
-    for (int dz = -1; dz <= 1; dz++)
-        for (int dy = -1; dy <= 1; dy++)
-            for (int dx = -1; dx <= 1; dx++) {
-                if (dx == 0 && dy == 0 && dz == 0) continue;
-                float3 o = float3(float(dx), float(dy), float(dz));
-                if (occupiedAt(lod, centre + o * s)) g += o / dot(o, o);
-            }
+    g.x = (occupiedAt(lod, centre + float3(s, 0, 0)) ? 1.0 : 0.0) - (occupiedAt(lod, centre - float3(s, 0, 0)) ? 1.0 : 0.0);
+    g.y = (occupiedAt(lod, centre + float3(0, s, 0)) ? 1.0 : 0.0) - (occupiedAt(lod, centre - float3(0, s, 0)) ? 1.0 : 0.0);
+    g.z = (occupiedAt(lod, centre + float3(0, 0, s)) ? 1.0 : 0.0) - (occupiedAt(lod, centre - float3(0, 0, s)) ? 1.0 : 0.0);
     float l = length(g);
     return l > 1e-4 ? -g / l : float3(0, 1, 0);
 }
