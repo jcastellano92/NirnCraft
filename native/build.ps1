@@ -3,8 +3,7 @@
 param([string]$Config = 'Release', [switch]$NoTest)
 $ErrorActionPreference = 'Stop'
 $here = Split-Path -Parent $MyInvocation.MyCommand.Path
-$tc = if ($env:SKYCRAFT_TOOLCHAINS) { $env:SKYCRAFT_TOOLCHAINS } else { Join-Path (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $here))))) 'toolchains' }
-if (-not (Test-Path "$tc\env.ps1")) { $tc = 'F:\Projects\Personal\Skycraft\toolchains' }
+$tc = if ($env:SKYCRAFT_TOOLCHAINS) { $env:SKYCRAFT_TOOLCHAINS } else { 'F:\Projects\Personal\Skycraft\toolchains' }
 . "$tc\env.ps1"
 $build = Join-Path $here 'build'
 if (-not (Test-Path "$build\CMakeCache.txt")) {
@@ -13,11 +12,16 @@ if (-not (Test-Path "$build\CMakeCache.txt")) {
 }
 cmake --build $build --config $Config --parallel | Out-Host
 if ($LASTEXITCODE) { throw 'build failed' }
+$repo = Split-Path -Parent $here
 $raster = Join-Path $here 'data\tamriel_raster.bin'
-if (-not (Test-Path $raster)) { py -3 -I (Join-Path $here 'tools\export_raster.py') (Split-Path -Parent $here) | Out-Host }
+if (-not (Test-Path $raster)) { py -3 -I (Join-Path $here 'tools\export_raster.py') $repo | Out-Host }
+if (-not (Test-Path (Join-Path $here 'data\cloud_noise.bin'))) {
+    py -3 -I (Join-Path $here 'tools\export_cloud_noise.py') $repo | Out-Host
+}
 if (-not $NoTest) {
-    & "$build$Configether_gl_test.exe" (Join-Path $here "data")
-    if ($LASTEXITCODE) { throw "gl interop test failed" }
-    & "$build\$Config\aether_tests.exe" $raster
+    & (Join-Path $build "$Config\aether_tests.exe") $raster
     if ($LASTEXITCODE) { throw 'tests failed' }
+    # the zero-copy GL bridge (skips cleanly on machines without a GL 4.5 + EXT_memory_object_win32 context)
+    & (Join-Path $build "$Config\aether_gl_test.exe") (Join-Path $here 'data')
+    if ($LASTEXITCODE) { throw 'gl interop test failed' }
 }
