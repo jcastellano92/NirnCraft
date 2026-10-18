@@ -217,6 +217,21 @@ int main(int argc, char** argv) {
     gl.GetTextureImage(dst[2], 0, GL_RED, GL_FLOAT, GLsizei(glDepth.size() * 4), glDepth.data());
     Compare c3 = compare(refColor, refDepth, glColor, glDepth, W, H);  // host ref: nearDist, left half at 20
     std::printf("GL depth buffer input + caller copies: %zu colour, %zu depth pixels differ from host\n", c3.color, c3.depth);
+    // the same depth reached only through the bound draw framebuffer (how a shader pack's gbuffer target is read)
+    GLuint fbo = 0;
+    gl.CreateFramebuffers(1, &fbo);
+    gl.NamedFramebufferTexture(fbo, GL_DEPTH_ATTACHMENT, depthTex, 0);
+    gl.BindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
+    AetherGlFrameIO iob = io;
+    iob.nearDepthTex = AETHER_GL_BOUND_DEPTH;
+    for (int i = 0; i < 3; i++) aether_gl_render_io(ctx, &fd, &iob);
+    gl.BindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+    gl.Finish();
+    gl.GetTextureImage(dst[0], 0, GL_RGBA, GL_FLOAT, GLsizei(glColor.size() * 4), glColor.data());
+    gl.GetTextureImage(dst[2], 0, GL_RED, GL_FLOAT, GLsizei(glDepth.size() * 4), glDepth.data());
+    Compare c4 = compare(refColor, refDepth, glColor, glDepth, W, H);
+    std::printf("depth via the bound framebuffer: %zu colour, %zu depth pixels differ from host\n", c4.color, c4.depth);
+    gl.DeleteFramebuffers(1, &fbo);
     gl.DeleteTextures(1, &depthTex);
     gl.DeleteTextures(3, dst);
     GLenum e = gl.GetError();
@@ -270,7 +285,7 @@ int main(int argc, char** argv) {
     wglMakeCurrent(nullptr, nullptr);
     wglDeleteContext(rc);
     bool ok = c1.color == 0 && c1.depth == 0 && c2.color == 0 && c2.depth == 0 && coveredLit == 0 && e == GL_NO_ERROR &&
-              c3.color == 0 && c3.depth == 0 &&
+              c3.color == 0 && c3.depth == 0 && c4.color == 0 && c4.depth == 0 &&
               smooth;
     std::printf(ok ? "PASS\n" : "FAIL (gl error 0x%x)\n", e);
     return ok ? 0 : 1;

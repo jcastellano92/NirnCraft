@@ -25,7 +25,10 @@ constexpr GLenum GL_TEXTURE_2D = 0x0DE1, GL_RGBA8 = 0x8058, GL_RGBA16F = 0x881A,
                  GL_SHADER_IMAGE_ACCESS_BARRIER_BIT = 0x20, GL_TEXTURE_FETCH_BARRIER_BIT = 0x8, GL_ALL_BARRIER_BITS = 0xFFFFFFFF,
                  GL_DEPTH_COMPONENT32F = 0x8CAC, GL_DEPTH_COMPONENT = 0x1902, GL_TEXTURE_BINDING_2D = 0x8069,
                  GL_ACTIVE_TEXTURE = 0x84E0, GL_TEXTURE0 = 0x84C0, GL_IMAGE_BINDING_NAME = 0x8F3A,
-                 GL_TEXTURE_COMPARE_MODE = 0x884C, GL_NONE = 0, GL_SAMPLER_BINDING = 0x8919;
+                 GL_TEXTURE_COMPARE_MODE = 0x884C, GL_NONE = 0, GL_SAMPLER_BINDING = 0x8919,
+                 GL_DRAW_FRAMEBUFFER_BINDING = 0x8CA6, GL_DEPTH_ATTACHMENT = 0x8D00, GL_FRAMEBUFFER = 0x8D40,
+                 GL_DRAW_FRAMEBUFFER = 0x8CA9, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE = 0x8CD0,
+                 GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME = 0x8CD1, GL_TEXTURE = 0x1702;
 
 struct GlApi {
     const GLubyte*(__stdcall* GetString)(GLenum) = nullptr;
@@ -84,6 +87,11 @@ struct GlApi {
     void(__stdcall* SamplerParameteri)(GLuint, GLenum, GLint) = nullptr;
     void(__stdcall* BindSampler)(GLuint, GLuint) = nullptr;
     void(__stdcall* TextureSubImage2D)(GLuint, GLint, GLint, GLint, GLsizei, GLsizei, GLenum, GLenum, const void*) = nullptr;
+    void(__stdcall* GetNamedFramebufferAttachmentParameteriv)(GLuint, GLenum, GLenum, GLint*) = nullptr;
+    void(__stdcall* CreateFramebuffers)(GLsizei, GLuint*) = nullptr;
+    void(__stdcall* DeleteFramebuffers)(GLsizei, const GLuint*) = nullptr;
+    void(__stdcall* NamedFramebufferTexture)(GLuint, GLenum, GLuint, GLint) = nullptr;
+    void(__stdcall* BindFramebuffer)(GLenum, GLuint) = nullptr;
 
     // Loads from the current context; false + err names what is missing.
     bool load(std::string& err);

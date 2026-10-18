@@ -80,6 +80,11 @@ bool GlApi::load(std::string& err) {
     LOAD(SamplerParameteri, "glSamplerParameteri")
     LOAD(BindSampler, "glBindSampler")
     LOAD(TextureSubImage2D, "glTextureSubImage2D")
+    LOAD(GetNamedFramebufferAttachmentParameteriv, "glGetNamedFramebufferAttachmentParameteriv")
+    LOAD(CreateFramebuffers, "glCreateFramebuffers")
+    LOAD(DeleteFramebuffers, "glDeleteFramebuffers")
+    LOAD(NamedFramebufferTexture, "glNamedFramebufferTexture")
+    LOAD(BindFramebuffer, "glBindFramebuffer")
 #undef LOAD
     if (!missing.empty()) {
         err = "OpenGL lacks " + missing + " (needs GL 4.5 + EXT_memory_object_win32 + EXT_semaphore_win32)";

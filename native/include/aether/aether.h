@@ -118,7 +118,8 @@ typedef struct AetherFrame {
  *                      sky); a = coverage (1 on far terrain, cloud opacity elsewhere). The GL image is RGBA16F.
  *  color       RGBA8   the same through the harness tonemapper (c / (1 + c), gamma 2.2), for PNGs
  *  normal      RGBA8   octahedral normal in rg, material class in b, sun visibility (shadows) in a
- *  depth       float   view distance in blocks along the ray (1e30 = no far surface)
+ *  depth       float   view distance in blocks to the nearest thing drawn: far surface, far actor or the first
+ *                      cloud (1e30 = nothing). A composite keeps a near pixel whenever it is nearer than this.
  */
 typedef struct AetherFrameOutput {
     uint32_t* color;
@@ -199,7 +200,9 @@ AETHER_API AetherStatus aether_gl_render(AetherContext* ctx, const AetherFrame* 
 
 /*
  * The game's side of a GL frame (all optional; zero = unused):
- *  nearDepthTex      the rasterised near field's depth texture (same size as the targets). aether linearises it
+ *  nearDepthTex      the rasterised near field's depth texture (same size as the targets), or
+ *                    AETHER_GL_BOUND_DEPTH: the depth attachment of the draw framebuffer bound when aether is called
+ *                    (e.g. a shader pack's gbuffer target, whose texture the mod never sees). aether linearises it
  *                    into the shared nearDepth image with a small GL compute pass, so covered pixels skip the far
  *                    march (sets AETHER_FRAME_NEAR_DEPTH for the frame). Sky = depth 1 (or 0 when reversedZ).
  *  depthZeroToOne    1 when that depth was written with [0,1] clip depth (glClipControl), 0 for [-1,1]
@@ -209,6 +212,7 @@ AETHER_API AetherStatus aether_gl_render(AetherContext* ctx, const AetherFrame* 
  *                    frame is done, e.g. the textures a shader pack samples through customTexture.
  * aether restores every piece of GL state it touches (program, texture/sampler unit 15, image unit 7).
  */
+#define AETHER_GL_BOUND_DEPTH 0xFFFFFFFFu
 typedef struct AetherGlFrameIO {
     uint32_t nearDepthTex;
     uint32_t depthZeroToOne;

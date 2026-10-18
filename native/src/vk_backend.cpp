@@ -358,6 +358,26 @@ private:
 
     // GL state the pass touches is saved and restored: Minecraft's renderer caches its own bindings.
     bool linearizeNearDepth(const GlFrameIO& io, uint32_t w, uint32_t h, std::string& err) {
+        GLuint depthTex = io.nearDepthTex;
+        if (depthTex == 0xFFFFFFFFu) {
+            // the depth attachment of whatever draw framebuffer the game (or a shader pack) has bound right now
+            GLint fbo = 0, type = 0, name = 0;
+            gl_.GetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &fbo);
+            if (fbo != 0) {
+                gl_.GetNamedFramebufferAttachmentParameteriv(GLuint(fbo), GL_DEPTH_ATTACHMENT,
+                                                             GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, &type);
+                if (GLenum(type) == GL_TEXTURE)  // a renderbuffer cannot be sampled
+                    gl_.GetNamedFramebufferAttachmentParameteriv(GLuint(fbo), GL_DEPTH_ATTACHMENT,
+                                                                 GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME, &name);
+            }
+            depthTex = GLuint(name);
+            if (!depthTex) {
+                // nothing to read this frame: mark every pixel uncovered rather than reuse a stale image
+                float uncovered = 1e30f;
+                gl_.ClearTexImage(images_[IMG_NEAR].glTex, 0, GL_RED, GL_FLOAT, &uncovered);
+                return true;
+            }
+        }
         if (!linProgram_) {
             GLuint sh = gl_.CreateShader(GL_COMPUTE_SHADER);
             gl_.ShaderSource(sh, 1, &LINEARIZE_GLSL, nullptr);
@@ -400,7 +420,7 @@ private:
         gl_.ActiveTexture(GLenum(prevActive));
 
         gl_.UseProgram(linProgram_);
-        gl_.BindTextureUnit(15, io.nearDepthTex);
+        gl_.BindTextureUnit(15, depthTex);
         gl_.BindSampler(15, linSampler_);
         gl_.BindImageTexture(7, images_[IMG_NEAR].glTex, 0, 0, 0, GL_WRITE_ONLY, GL_R32F);
         gl_.DispatchCompute((w + 7) / 8, (h + 7) / 8, 1);

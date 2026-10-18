@@ -321,13 +321,17 @@ void farMain(uint3 id : SV_DispatchThreadID) {
         float nd = nearDepth[pix];
         if (nd < frame.params.x) {
             float4 c = float4(0, 0, 0, 0);
+            float cd = 1e30;
             if ((frame.dims.z & FRAME_CLOUDS) != 0) {
                 CloudResult cl = marchClouds(o, dir, nd, sun, id.xy);
-                if (cl.firstHit >= 0.0) c = float4(cl.scatter, 1.0 - cl.transmittance);
+                if (cl.firstHit >= 0.0) {
+                    c = float4(cl.scatter, 1.0 - cl.transmittance);
+                    if (cl.transmittance < 0.99) cd = cl.firstHit;
+                }
             }
             outColor[pix] = c;
             outNormal[pix] = 0;
-            outDepth[pix] = 1e30;
+            outDepth[pix] = cd;
             counters[pix] = 0;
             return;
         }
@@ -416,6 +420,8 @@ void farMain(uint3 id : SV_DispatchThreadID) {
             float3 scatter = cl.scatter * trA + aerialFog(dir, sun) * (1.0 - trA) * (1.0 - cl.transmittance);
             color = color * cl.transmittance + scatter;
             coverage = 1.0 - (1.0 - coverage) * cl.transmittance;
+            // depth = the nearest thing drawn, cloud included: lets a composite keep near geometry in front of it
+            if (cl.transmittance < 0.99) depth = min(depth, cl.firstHit);
         }
     }
     outColor[pix] = float4(color, coverage);
