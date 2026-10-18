@@ -60,25 +60,25 @@ Run everything with `.\native\build.ps1` (builds, then runs `aether_tests`, `aet
 
 ## 3. How it joins the mod (after the NeoForge 26.3 conversion lands)
 
-The other session's conversion is in progress in the main tree, which also moves the pack to Sodium 0.9.2 and Iris
-1.11.7 and drops Distant Horizons. Nothing here touches `mod/` until that conversion is committed. The steps are in
-[`native/java/mod-integration/README.md`](../native/java/mod-integration/README.md). In short:
+The other session's conversion is in progress in the main tree (it also moves the pack to Sodium 0.9.2 and Iris
+1.11.7 and drops Distant Horizons). Nothing here touches `mod/` until it is accepted. Everything is staged in
+[`native/java/mod-integration`](../native/java/mod-integration/README.md):
 
-1. Copy `com.skycraft.aether` into the mod and package `aether_core.dll` under `natives/windows-x86_64/`.
-2. `AetherClient.init(modBus)` hooks `RenderLevelStageEvent.AfterOpaqueBlocks`. It builds the frame from
-   `CameraRenderState` and passes `AETHER_GL_BOUND_DEPTH` for the near field. aether copies the frame into
-   `skycraft:aether/color` and `skycraft:aether/depth`, which the pack declares as `customTexture`s. Iris resolves
-   those through the TextureManager, so no Iris internals or mixins are needed.
-3. Feeds: `WeatherFieldTexture` implements `AetherClient.WeatherFeed`. The far-field worker streams tiles
-   nearest-first and calls `aether_update` off the render thread.
-4. Column sources: v1 is the seed-free raster source, the same on multiplayer clients. The exact single-player
-   source evaluates the server's `tamriel_height` through 26.3's `DensitySampler` once the conversion has ported
-   it; it then switches to the block palette (`AetherPalette.blocks`). Multiplayer exactness needs a server tile
-   packet (later).
+1. `move_in.ps1` (dry run by default, `-Apply` to write) copies `com.skycraft.aether` and `aether_core.dll`
+   (`natives/windows-x86_64/`) into the mod and makes the hooks: `AetherServer.init()` and
+   `AetherClient.init(modBus)` in `Skycraft.java`, `AetherNet.register()` in `SkyNetwork.init`, and
+   `WeatherFieldTexture.copyForAether` (the clouds' weather feed). `sandbox_check.ps1` rehearses exactly that on a
+   copy of the main tree's sources and compiles the whole mod against the conversion's patched 26.3 jar.
+2. Rendering: `AetherClient` hooks `RenderLevelStageEvent.AfterOpaqueBlocks`, builds the frame from
+   `CameraRenderState`, reads the near field's depth from the bound target (`AETHER_GL_BOUND_DEPTH`) and copies the
+   result into `skycraft:aether/color` / `skycraft:aether/depth`, the pack's `customTexture`s (Iris resolves them
+   through the TextureManager: no Iris internals or mixins). Other dimensions blank them.
+3. Terrain: single player evaluates the server's own `tamriel_height` (exact); a multiplayer server streams the same
+   tiles (bit-identical, cached on both ends); either way the seed-free raster stand-in fills the window first.
+   Grass and foliage wear the biome's colours.
+4. On top: every planned settlement (StreetPlan) and fort as building massing, and far actors from the server.
 5. Ship `shaderpack/build/SkycraftAether.zip` in the pack and select it in `iris.properties`. Keep `PLANET_RADIUS`
    and `sunPathRotation` equal on both sides (`AetherClient.planetRadius` / `sunPathRotationDeg`).
-6. Far actors: a server packet with players and large creatures beyond tracking range feeds
-   `aether_set_actors`.
 
 ## 4. Departures from the master plan, and why
 
@@ -102,15 +102,28 @@ The other session's conversion is in progress in the main tree, which also moves
 
 ## 5. Next
 
-1. After the conversion: move the glue in, run the game once, and watch the hand-off seam, curvature, cloud decks
-   and frame time.
-2. Done ahead of the conversion (staged in `native/java/mod-integration`, see its README; compiled against 26.3 and
-   exercised offline by its harness): the exact single-player source (the server's own `tamriel_height`), the
-   multiplayer tile stream (bit-identical to single player, 4 MB per full window, cached on both ends) and the
-   far-actor feed, and the settlements (every planned city, town and village as building massing with its kit's
-   colours, client-side from the baked StreetPlan). `move_in.ps1` makes the hooks; `sandbox_check.ps1` rehearses it.
-3. Far terrain look: block-exact surface materials (biomes) instead of the raster dressing; forts (250, not in the
-   StreetPlan) and wild landmarks; SRC GI underground. Done: snow follows aspect with a ragged edge, single tree
-   crowns (domes, conifer cones) at the two finest LODs and canopy that thins at forest edges beyond them.
-4. Owner checks in game: the near/far seam at the hand-off distance, curvature strength (planet radius), cloud
-   decks against the current shader clouds, and frame time on the 3090.
+1. After the conversion is accepted (server boots, client joins): `move_in.ps1 -Apply` (coordinated with whoever is
+   editing `mod/`), build, ship the pack zip, then the owner's checks below.
+2. Later: block-exact surface materials (the material rules per biome, not the raster dressing), wild landmarks
+   (seeded, not in the plan), per-landmark silhouettes (White-Gold Tower's spire is a rounded tower today), SRC GI
+   underground, a Vulkan-to-Vulkan path for the vanilla Vulkan backend.
+
+### Owner checks in game
+
+Start single player in a Tamriel world with the Skycraft Aether pack, render distance 16-24 chunks:
+
+- **Hand-off seam** at the edge of the render distance: no gap, no double terrain, no colour or brightness jump
+  between the rasterised near field and the far field (the band is `AetherClient.handoffBand`, 24 blocks).
+- **Horizon:** terrain to 30-40 km, curving away (planet radius `AetherClient.planetRadius`); haze and sky like the
+  near field's; nothing popping as you fly (the stand-in fills the window at once, exact tiles replace it within a
+  few seconds, nearest first).
+- **Settlements from afar:** Whiterun's wall ring, towers and Dragonsreach from the plains; Solitude, Markarth,
+  the Imperial City from across their valleys; forts as small grey squares with towers.
+- **Clouds and weather:** the cloud decks, storms and rain shafts move with the weather you see near you.
+- **Night:** moonlight on the far field like the near field's.
+- **Other players** (LAN or a server) beyond entity range: impostors where they are, moving smoothly.
+- **Multiplayer:** on a dedicated server the far field fills in the same (log line `aether far field on (server
+  columns)`); rejoining the same world is instant (tile cache).
+- **Frame time** on the 3090 at 1440p: aether costs about 4-6 ms with clouds; F3 shows the rest as before.
+- **Fallbacks:** in the Nether and End the far field is off; without the DLL or on a GL context aether cannot
+  share, the game runs as before with one log line.
