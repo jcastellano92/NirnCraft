@@ -268,7 +268,11 @@ int main(int argc, char** argv) {
 
     // ---- aether: the scene
     AetherContext* ctx = nullptr;
-    if (aether_create(AETHER_BACKEND_VULKAN, &ctx) != AETHER_OK && aether_create(AETHER_BACKEND_CPU, &ctx) != AETHER_OK) return 1;
+    // a good neighbour on a shared machine: below-normal priority, and aether on its CPU reference backend (bit-exact
+    // with Vulkan, tested) unless gpu=1, so only the pack's few full-screen GL passes touch the GPU
+    SetPriorityClass(GetCurrentProcess(), BELOW_NORMAL_PRIORITY_CLASS);
+    bool gpu = arg(argc, argv, "gpu", 0) != 0;
+    if (gpu ? aether_create(AETHER_BACKEND_VULKAN, &ctx) != AETHER_OK : aether_create(AETHER_BACKEND_CPU, &ctx) != AETHER_OK) return 1;
     if (aether_preview_load_raster(ctx, "data/tamriel_raster.bin") != AETHER_OK) {
         std::printf("pack_lab: %s\n", aether_last_error(ctx));
         return 1;
