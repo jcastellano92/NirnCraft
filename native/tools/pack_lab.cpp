@@ -7,7 +7,8 @@
 // reads and writes the same buffer) in a GL compatibility context, with Iris-style uniforms.
 //
 // usage: pack_lab out.png [x=0 z=0 above=40 yaw=105 pitch=-4 time=0.25 rain=0 water=0 near=256 w=1280 h=720
-//                          clouds=1 temp=0.6 cold=0]
+//                          clouds=1 temp=0.6 cold=0 aether=1]
+//   aether=0: aether's frame absent (1x1 blanks): the pack's fallback cloud deck and plain fog
 //   time: 0 sunrise, 0.25 noon, 0.5 sunset, 0.75 midnight; water=1 puts the eye under water
 #define WIN32_LEAN_AND_MEAN
 #define NOMINMAX
@@ -331,6 +332,7 @@ int main(int argc, char** argv) {
     double ground = aether_preview_height(ctx, x, z);
     double y = std::max(ground, 63.0) + arg(argc, argv, "above", 40);
     if (eyeInWater) y = std::max(ground + 2.0, 60.0);
+    std::printf("pack_lab: camera %.0f %.0f %.0f (ground %.0f)\n", x, y, z, ground);
     for (int lod = 0; lod < 7; lod++) {
         int span = 256 << lod;
         int cx = int(std::floor(x / span)), cz = int(std::floor(z / span));
@@ -513,8 +515,13 @@ int main(int argc, char** argv) {
     GLuint d0 = texture2d(GL_DEPTH_COMPONENT32F_, W, H, GL_DEPTH_COMPONENT, GL_FLOAT, depth0.data());
     GLuint d1 = texture2d(GL_DEPTH_COMPONENT32F_, W, H, GL_DEPTH_COMPONENT, GL_FLOAT, depth1.data());
     GLuint labWater = texture2d(GL_RGBA8, W, H, GL_RGBA, GL_UNSIGNED_BYTE, waterMask.data());
-    GLuint aetherColor = texture2d(GL_RGBA16F_, W, H, GL_RGBA, GL_FLOAT, aColor.data());
-    GLuint aetherDepth = texture2d(GL_R32F_, W, H, GL_RED, GL_FLOAT, aDepth.data());
+    // aether=0: the mod's renderer absent (other dimensions, aether off): 1x1 blanks, as the mod registers them
+    bool aetherOn = arg(argc, argv, "aether", 1) != 0;
+    float zero4[4] = {0, 0, 0, 0};
+    GLuint aetherColor = aetherOn ? texture2d(GL_RGBA16F_, W, H, GL_RGBA, GL_FLOAT, aColor.data())
+                                  : texture2d(GL_RGBA16F_, 1, 1, GL_RGBA, GL_FLOAT, zero4);
+    GLuint aetherDepth = aetherOn ? texture2d(GL_R32F_, W, H, GL_RED, GL_FLOAT, aDepth.data())
+                                  : texture2d(GL_R32F_, 1, 1, GL_RED, GL_FLOAT, zero4);
     GLuint aetherSunMap = haveSunMap ? texture2d(GL_RG32F_, 1024, 1025, GL_RG_, GL_FLOAT, sunMap.data())
                                      : texture2d(GL_RG32F_, 1, 2, GL_RG_, GL_FLOAT, nullptr);
     float one = 1.0f;

@@ -39,3 +39,6 @@ option.AURORA=Aurora
 option.BLOOM=Bloom
 screen.Water=Water
 screen.Materials=Materials
+option.FALLBACK_CLOUDS=Pack clouds (no aether)
+option.FALLBACK_CLOUDS.comment=The pack's own cloud deck when the Skycraft far-field renderer is absent. 0 off, 1 flat, 2 self-shadowed.
+option.EMISSIVE_STRENGTH=Flame brightness

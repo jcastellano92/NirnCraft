@@ -7,6 +7,8 @@
 
 #include "/lib/atmosphere.glsl"
 #include "/lib/noise.glsl"
+#include "/lib/aether.glsl"
+#include "/lib/clouds.glsl"
 
 #ifdef SHADOWS
 uniform sampler2DShadow shadowtex0;
@@ -99,6 +101,10 @@ float keyVisibility(vec3 playerPos, vec3 n, vec3 toLight, vec2 px) {
 #ifdef AETHER_FAR_FIELD
     vec2 far = aetherSun(playerPos);
     vis *= far.x * mix(0.25, 1.0, far.y);
+#endif
+#if FALLBACK_CLOUDS > 0
+    // no aether: the pack's own deck shades the ground
+    if (!aetherPresent() && vis > 0.0) vis *= fallbackCloudShadow(playerPos + cameraPosition, toLight, frameTimeCounter, rainStrength);
 #endif
     return vis;
 }

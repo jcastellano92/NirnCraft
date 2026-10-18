@@ -34,4 +34,21 @@ vec3 applyGroundFog(vec3 c, vec3 dir, vec3 sun, float t, float camY, float wetne
 #endif
 }
 
+// the air between the eye and a point t blocks along dir, as (in-scattered light, transmittance): aerial perspective
+// then the ground fog in front of it, the same as applyAerial + applyGroundFog. For translucents shaded forward
+// (premultiplied colour c, coverage a): c * air.a + air.rgb * a; for additive light (a = 0) just c * air.a
+vec4 airLight(vec3 dir, vec3 sun, float t, float camY, float wetness, float rain) {
+    float ta = aerialTransmittance(t, camY, rain);
+    vec3 rgb = aerialFog(dir, sun) * (1.0 - ta);
+    float tr = 1.0;
+#ifdef FOG_LAYERS
+    float density = groundFogDensity(sun, wetness, rain);
+    tr = exp(-heightFogDepth(camY, dir.y, min(t, 3000.0), density, 64.0, 14.0));
+    float mu = dot(dir, sun);
+    vec3 lit = skyAmbient(vec3(0, 1, 0), sun) * 1.4 + sunRadiance(sun) * (0.08 + 0.35 * pow(max(mu, 0.0), 6.0));
+    rgb = rgb * tr + lit * (1.0 - tr);
+#endif
+    return vec4(rgb, ta * tr);
+}
+
 #endif

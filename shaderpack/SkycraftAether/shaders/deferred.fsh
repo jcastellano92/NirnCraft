@@ -28,6 +28,7 @@ uniform float viewHeight;
 
 #include "/lib/lighting.glsl"
 #include "/lib/sky.glsl"
+#include "/lib/clouds.glsl"
 
 in vec2 texcoord;
 
@@ -100,6 +101,11 @@ void main() {
         c += aurora(dir, frameTimeCounter, cold, sun);
 #endif
         if (mtl.r > 0.99) c += srgbToLinear(texture(colortex0, texcoord).rgb) * 1.4;
+        // aether draws the clouds (and composite lays them over this sky); without it, the pack's own deck
+        if (!aetherPresent()) {
+            vec4 cl = fallbackClouds(dir, sun, cameraPosition, frameTimeCounter, rainStrength);
+            c = c * (1.0 - cl.a) + cl.rgb;
+        }
         outColor = vec4(c, 1.0);
         return;
     }

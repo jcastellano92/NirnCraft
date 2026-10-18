@@ -15,16 +15,13 @@
 #include "/lib/noise.glsl"
 #include "/lib/weather.glsl"
 #include "/lib/waves.glsl"
+#include "/lib/aether.glsl"
 
 uniform sampler2D colortex4;
 uniform sampler2D colortex5;
 uniform sampler2D colortex6;
 uniform sampler2D depthtex0;
 uniform sampler2D depthtex1;
-#ifdef AETHER_FAR_FIELD
-uniform sampler2D aetherColor;  // customTexture (shaders.properties): RGBA16F linear, premultiplied
-uniform sampler2D aetherDepth;  // customTexture: R32F view distance of the nearest thing aether drew
-#endif
 uniform mat4 gbufferProjectionInverse;
 uniform mat4 gbufferProjection;
 uniform mat4 gbufferModelViewInverse;
@@ -45,25 +42,6 @@ in vec2 texcoord;
 /* RENDERTARGETS: 4 */
 layout(location = 0) out vec4 outColor;
 
-#ifdef AETHER_FAR_FIELD
-// aether renders at its own (dynamic) resolution: colour upsampled bilinearly (at scale 1 the texel centres fall on
-// the pixels: exact), depth from the nearest texel (it stays a real distance at edges)
-vec4 aetherColorAt(vec2 uv) {
-    ivec2 sz = textureSize(aetherColor, 0);
-    vec2 p = uv * vec2(sz) - 0.5;
-    ivec2 i = ivec2(floor(p));
-    vec2 f = p - vec2(i);
-    ivec2 m = sz - 1;
-    vec4 a = texelFetch(aetherColor, clamp(i, ivec2(0), m), 0), b = texelFetch(aetherColor, clamp(i + ivec2(1, 0), ivec2(0), m), 0);
-    vec4 c = texelFetch(aetherColor, clamp(i + ivec2(0, 1), ivec2(0), m), 0), d = texelFetch(aetherColor, clamp(i + ivec2(1, 1), ivec2(0), m), 0);
-    return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
-}
-
-float aetherDepthAt(vec2 uv) {
-    ivec2 sz = textureSize(aetherDepth, 0);
-    return texelFetch(aetherDepth, clamp(ivec2(uv * vec2(sz)), ivec2(0), sz - 1), 0).r;
-}
-#endif
 
 vec3 viewAt(vec2 uv, float d) {
     vec4 v = gbufferProjectionInverse * vec4(uv * 2.0 - 1.0, d * 2.0 - 1.0, 1.0);
@@ -86,6 +64,7 @@ vec3 sceneAt(vec2 uv, vec3 sun) {
     if (!sky) col = applyAerial(col, dir, sun, dist, cameraPosition.y, rainStrength);
     float fogDist = dist;
 #ifdef AETHER_FAR_FIELD
+    if (aetherPresent()) {
     vec4 farc = aetherColorAt(uv);
     float farDist = aetherDepthAt(uv);
     vec3 over = col * (1.0 - farc.a) + farc.rgb;
@@ -94,6 +73,7 @@ vec3 sceneAt(vec2 uv, vec3 sun) {
     else if (sky || dist >= farDist) {
         col = over;
         fogDist = min(dist, farDist);
+    }
     }
 #endif
     if (fogDist < 1e29) col = applyGroundFog(col, dir, sun, fogDist, cameraPosition.y, wetness, rainStrength);
@@ -130,7 +110,7 @@ vec3 reflectionAt(vec3 vp, vec3 rWorld, vec3 sun, float skyLight) {
 #ifdef AETHER_FAR_FIELD
     // far terrain mirrored in lakes: where the reflected ray points on screen, if aether drew land there
     vec2 uvF = toScreen(vp + rView * 2000.0);
-    if (all(greaterThan(uvF, vec2(0.0))) && all(lessThan(uvF, vec2(1.0)))) {
+    if (aetherPresent() && all(greaterThan(uvF, vec2(0.0))) && all(lessThan(uvF, vec2(1.0)))) {
         vec4 fc = aetherColorAt(uvF);
         // fade towards the bare sky near the screen's edge, where the mirrored far field runs out
         float edge = smoothstep(0.0, 0.12, min(min(uvF.x, 1.0 - uvF.x), min(uvF.y, 1.0 - uvF.y)));
@@ -237,7 +217,9 @@ void main() {
         col = applyAerial(col, dir, sun, dist0, cameraPosition.y, rainStrength);
     } else {
         col = sceneAt(texcoord, sun);
-        if (tr.a > 0.001 && d0 <= d1) col = col * (1.0 - tr.a) + tr.rgb;  // weather, particles, other translucents
+        // weather, particles, smoke, lines and the rest (shaded and fogged forward, premultiplied; additive light such
+        // as flames and lightning channels carries no coverage)
+        if (max(tr.a, max(tr.r, max(tr.g, tr.b))) > 1e-4) col = col * (1.0 - tr.a) + tr.rgb;
     }
 
     if (isEyeInWater == 1) {
