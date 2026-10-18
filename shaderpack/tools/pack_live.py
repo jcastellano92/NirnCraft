@@ -136,13 +136,15 @@ def launch_and_wait(limit=900):
             raise SystemExit("launch failed: " + out[-800:])
         print("launched; waiting for the world")
     t0 = time.monotonic()
+    gone = 0  # consecutive polls without the game process (one miss happens while Prism hands over)
     while time.monotonic() - t0 < limit:
         st = client_state()
         c = st.get("client", {})
         if c.get("fresh") and st.get("serverReady"):
             print(f"world ready after {time.monotonic() - t0:.0f} s")
             return
-        if not st.get("running") and time.monotonic() - t0 > 60:
+        gone = gone + 1 if not st.get("running") else 0
+        if gone >= 10 and time.monotonic() - t0 > 60:
             raise SystemExit("client exited while loading; see logs/latest.log")
         time.sleep(3)
     raise SystemExit("world not ready in time; client left running for inspection")
@@ -156,6 +158,9 @@ def main():
     ap.add_argument("--weather", default="")
     ap.add_argument("--no-sync", action="store_true")
     ap.add_argument("--off", action="store_true", help="also capture each camera with shaders off")
+    ap.add_argument("--visit", action="append", default=[],
+                    help="extra pose NAME:x,z,heightAboveSurface,yaw,pitch[,weather] (repeatable)")
+    ap.add_argument("--wait", type=int, default=0, help="extra ticks after settle before each visit capture (far tiles)")
     ap.add_argument("--launch", action="store_true", help="start the preview if needed and wait for the world")
     ap.add_argument("--close", action="store_true", help="close the preview cleanly at the end")
     a = ap.parse_args()
@@ -183,6 +188,17 @@ def run(a):
     for e in errs[:40]:
         print("  " + e)
     lines = []
+    shots = []
+    for v in a.visit:
+        name, spec = v.split(":", 1)
+        x, z, h, yaw, pitch, *w = spec.split(",")
+        lines += [f"visit {x} {z} {h} {yaw} {pitch} {w[0] if w else 'clear'}", "settle 1800"]
+        lines += [f"wait {a.wait}"] if a.wait else []
+        lines.append(f"capture {a.tag}-{name}")
+        shots.append(f"{a.tag}-{name}")
+        if a.off:
+            lines += ["shaders off", "settle 600", f"capture {a.tag}-{name}-vanilla", "shaders on", "settle 1200"]
+            shots.append(f"{a.tag}-{name}-vanilla")
     for cam in [c for c in a.cams.split(",") if c]:
         lines += camera_lines(cam, a.weather, a.time)
         lines.append(f"capture {a.tag}-{cam}")
@@ -190,6 +206,9 @@ def run(a):
             lines += ["shaders off", "settle 600", f"capture {a.tag}-{cam}-vanilla", "shaders on", "settle 1200"]
     if lines:
         actions(lines, timeout=1800)
+        for shot in shots:
+            p = SHOTS / f"{shot}.png"
+            print(("ok   " if p.exists() else "MISS ") + str(p))
         for cam in [c for c in a.cams.split(",") if c]:
             for suffix in ("", "-vanilla") if a.off else ("",):
                 p = SHOTS / f"{a.tag}-{cam}{suffix}.png"
