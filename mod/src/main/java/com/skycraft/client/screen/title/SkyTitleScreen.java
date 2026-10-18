@@ -22,7 +22,7 @@ import java.util.List;
 
 /**
  * Authentic Skyrim-themed Main Title Screen:
- * Atmospheric revolving 3D world panorama background showing off the Skycraft world,
+ * The drifting painted Tamriel landscape under smoke ({@link com.skycraft.client.screen.SkyBackdrop}),
  * gold Nordic styling, vertical menu with Continue, New Game, Load, Multiplayer, Settings, and Quit.
  */
 public class SkyTitleScreen extends Screen {
@@ -30,8 +30,6 @@ public class SkyTitleScreen extends Screen {
     private static final int COLOR_HOVER = 0xFFFFFFFF;
     private static final int COLOR_NORMAL = 0xFF9E9689;
     private static final int COLOR_DIM = 0xFF605A50;
-
-    private static final Identifier TITLE_BACKGROUND = Identifier.fromNamespaceAndPath("skycraft", "textures/gui/title_background.png");
 
     private enum MenuItem {
         CONTINUE("menu.skycraft.continue", "Continue Journey"),
@@ -168,19 +166,23 @@ public class SkyTitleScreen extends Screen {
         animTick += 0.5f;
     }
 
+    /**
+     * Like vanilla's title screen: no panorama, blur or menu tint underneath. The Skycraft scene is drawn sharp in
+     * {@link #extractRenderState} instead (this also spares the cube map and the full-screen blur pass every frame).
+     */
+    @Override
+    public void extractBackground(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
+        minecraft.gui.hud.extractDeferredSubtitles();
+    }
+
     @Override
     public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
-        // Draw the cinematic Skycraft Skyrim landscape backdrop
-        com.skycraft.inventory.client.SkyUi.blit(g, TITLE_BACKGROUND, 0, 0, 0, 0, width, height, width, height);
-
-        // Subtle overall atmosphere vignette
-        g.fillGradient(0, 0, width, height, 0x10000000, 0x40000000);
+        // The drifting Skycraft landscape (shared with every other out-of-world menu, see SkyBackdrop)
+        com.skycraft.client.screen.SkyBackdrop.drawScene(g, width, height);
         // Nordic slate gradient behind left menu column for sharp text contrast
         g.fillGradient(0, 0, Math.min(340, width / 2 + 60), height, 0xD0080808, 0x15080808);
-
-        // Drifting smoke across the scene
-        com.skycraft.inventory.client.SkyUi.smoke(g, width, height, (animTick + partialTick * 0.5f) / 10f, 0.8f);
-        g.fillGradient(0, height * 2 / 3, width, height, 0x00000000, 0x90000000);
+        // Drifting smoke across the scene, darkened foot
+        com.skycraft.client.screen.SkyBackdrop.drawAtmosphere(g, width, height, 0.8f);
 
         // Title: large spaced capitals over an ornament
         int titleX = 40;
