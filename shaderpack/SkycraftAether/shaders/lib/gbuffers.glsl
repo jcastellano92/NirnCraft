@@ -3,6 +3,10 @@
 //   TERRAIN     blocks with material ids (block.properties): wind, PBR defaults, emitters
 //   EMISSIVE    always glowing (spider eyes, beacon beams)
 //   TRANSLUCENT water, stained glass, ice: forward-tinted, refracted / reflected in composite.fsh
+//   FORWARD_LIT what Iris draws in the translucent phase, after deferred.fsh has lit the G-buffer (translucent
+//               entities: 26.3 draws avatar bodies so; translucent block entities): lit forward with its own
+//               normals (sun, shadow, sky, block light), premultiplied; an opaque texel looks as an opaque entity
+//   ENTITY      with SOLID or FORWARD_LIT: Iris' entityColor (the hurt / freeze flash) over the texture
 //   PARTICLES   particles and the mod's alpha meshes (fire smoke, atmosphere particles): forward-lit like a thin
 //               volume (sun through it, sky all round), fogged forward (full-bright ones glow: magic, embers)
 //   ADDITIVE    with EMISSIVE: pure added light (the mod's flames and additive meshes, spider eyes), HDR for bloom
@@ -37,6 +41,9 @@ uniform vec3 cameraPosition;
 uniform float rainStrength;
 uniform float frameTimeCounter;
 uniform float wetness;
+#ifdef ENTITY
+uniform vec4 entityColor;
+#endif
 
 #ifdef VSH
 #if defined TERRAIN || defined TRANSLUCENT
@@ -113,7 +120,7 @@ layout(location = 0) out vec4 outColor;
 /* RENDERTARGETS: 0,3 */
 layout(location = 0) out vec4 outAlbedo;
 layout(location = 1) out vec4 outMaterial;
-#elif defined TRANSLUCENT
+#elif defined TRANSLUCENT || defined FORWARD_LIT
 /* RENDERTARGETS: 5,6 */
 layout(location = 0) out vec4 outColor;
 layout(location = 1) out vec4 outInfo;
@@ -125,7 +132,7 @@ layout(location = 0) out vec4 outColor;
 layout(location = 0) out vec4 outColor;
 #endif
 
-#if defined TRANSLUCENT || defined PARTICLES || defined WEATHER || defined BASIC
+#if defined TRANSLUCENT || defined PARTICLES || defined WEATHER || defined BASIC || defined FORWARD_LIT
 const float BASIC_GLOW = 6.0;  // lightning channels and other near-white untextured light
 #include "/lib/lighting.glsl"
 #include "/lib/fog.glsl"
@@ -181,6 +188,9 @@ void main() {
 #else
     vec4 albedo = glcolor * texture(gtexture, texcoord);
     if (albedo.a < 0.1) discard;
+#endif
+#ifdef ENTITY
+    albedo.rgb = mix(albedo.rgb, entityColor.rgb, entityColor.a);  // the hurt flash
 #endif
     vec2 lm = clamp((lmcoord - 1.0 / 32.0) * (16.0 / 15.0), 0.0, 1.0);
     vec4 nm = vec4(0.0), sp = vec4(0.0);
@@ -246,6 +256,15 @@ void main() {
     vec3 lit = shadeForward(base, n, lm, playerPos, sun, 0.0);
     outColor = vec4(lit * a, a);
     outInfo = vec4(octEncode(n), float(material == MAT_NONE ? MAT_GLASS : material) / 255.0, packSkyFoam(lm.y, foam));
+#elif defined FORWARD_LIT
+    // a body, a translucent block entity: lit as the deferred pass lights the opaque scene (its own normals, the key
+    // light with its shadow, sky and block light), the air in front of it carried forward. colortex6 says "not water
+    // or glass" here, so a body before a lake is never taken for the lake's surface
+    vec3 sun = worldSunDir(gbufferModelViewInverse, sunPosition);
+    vec3 n = surfaceNormal(nm);
+    vec3 lit = shadeForward(srgbToLinear(albedo.rgb), n, lm, playerPos, sun, 0.0);
+    outColor = vec4(fogForward(lit * albedo.a, albedo.a, sun), albedo.a);
+    outInfo = vec4(octEncode(n), 0.0, 0.0);
 #elif defined WEATHER
     vec3 sun = worldSunDir(gbufferModelViewInverse, sunPosition);
     vec3 c = srgbToLinear(albedo.rgb) * (skyAmbient(vec3(0, 1, 0), sun) * 1.4 + sunRadiance(sun) * 0.15);

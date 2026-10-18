@@ -108,6 +108,16 @@ void main() {
 #endif
         // the sky: the atmosphere, the night sky over it, and whatever the vanilla sky drew (the moon)
         vec3 c = skyColor(dir, sun);
+#ifdef WEATHER_SKY
+        // the dome greys to slate under the weather over the camera (a blue sky stays blue over a dust storm)
+        if (haveWeather()) {
+            vec4 wc = weatherSample(weatherField, cameraPosition.xz);
+            int band = clamp(int(floor(weatherTexel(weatherField, ivec2(floor(cameraPosition.xz / 64.0))).a * 4.0)), 0, 3);
+            float over = band == 2 ? 0.1 * wc.b : clamp(smoothstep(0.6, 0.9, wc.r) * 0.8 + wc.b * 0.5, 0.0, 0.85);
+            float lum = dot(c, vec3(0.2126, 0.7152, 0.0722));
+            c = mix(c, vec3(lum) * vec3(0.92, 0.95, 1.0) * mix(1.0, 0.7, wc.g), over);
+        }
+#endif
         bool modSky = haveModSky();
         vec4 skyOpt = modSkyOptions();
         float veil = 0.0;
@@ -182,7 +192,16 @@ void main() {
     vec3 fr = fresnelSchlick(max(dot(n, v), 0.0), f0) * spec.x * spec.x;
     specular += skyColor(normalize(vec3(r.x, max(r.y, 0.02), r.z)), sun) * fr * lm.y * lm.y;
 #endif
-    vec3 ambient = albedo * ((skyAmbient(n, sun) + auroraIrradiance(n)) * lm.y * lm.y + vec3(0.012, 0.012, 0.016)) * ao;
+    vec3 skyAmb = skyAmbient(n, sun);
+#ifdef WEATHER_SKY
+    // under a storm cell or a closed deck the sky light is dimmer (the key light already has the clouds' shadow)
+    if (haveWeather()) {
+        vec4 wr = weatherSample(weatherField, (playerPos + cameraPosition).xz);
+        float shade = clamp(smoothstep(0.62, 0.92, wr.r) * 0.45 + wr.g * 0.35 + wr.b * 0.45, 0.0, 0.85);
+        skyAmb *= 1.0 - 0.35 * shade;
+    }
+#endif
+    vec3 ambient = albedo * ((skyAmb + auroraIrradiance(n)) * lm.y * lm.y + vec3(0.012, 0.012, 0.016)) * ao;
     vec3 wp = playerPos + cameraPosition;
     vec3 torch = albedo * blockLightAt(lm.x, wp, cameraPosition, airClock()) * mix(0.6, 1.0, ao);
     // the mod's point lights (spells, atronachs, burning creatures) and storm channels light what faces them
