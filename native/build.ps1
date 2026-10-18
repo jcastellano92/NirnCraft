@@ -24,4 +24,8 @@ if (-not $NoTest) {
     # the zero-copy GL bridge (skips cleanly on machines without a GL 4.5 + EXT_memory_object_win32 context)
     & (Join-Path $build "$Config\aether_gl_test.exe") (Join-Path $here 'data')
     if ($LASTEXITCODE) { throw 'gl interop test failed' }
+    # the shader pack's atmosphere must match aether's, or the near/far hand-off shows a seam
+    $atmo = Join-Path $repo 'shaderpack/SkycraftAether/shaders/lib/atmosphere.glsl'
+    & (Join-Path $build "$Config/aether_pack_test.exe") $atmo
+    if ($LASTEXITCODE) { throw 'pack parity test failed' }
 }

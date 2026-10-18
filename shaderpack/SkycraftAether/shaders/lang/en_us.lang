@@ -1,0 +1,13 @@
+option.EXPOSURE=Exposure
+option.WATER_ALPHA=Water opacity
+option.CURVATURE=Planet curvature
+option.PLANET_RADIUS=Planet radius
+option.PLANET_RADIUS.comment=Blocks. Must match the Skycraft mod's aether planet radius.
+option.AETHER_FAR_FIELD=Aether far field
+option.AETHER_FAR_FIELD.comment=Composite the Skycraft mod's distant terrain, clouds and far actors.
+option.AETHER_HANDOFF_BAND=Near/far hand-off band
+option.SHADOWS=Sun shadows
+option.SHADOW_DISTORT=Shadow distortion
+screen.Atmosphere=Atmosphere
+screen.Aether=Aether far field
+screen.Shadows=Shadows
