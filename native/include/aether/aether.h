@@ -32,7 +32,7 @@ extern "C" {
 #endif
 
 /* (major << 16) | (minor << 8) | patch. Bumped on any ABI change. */
-#define AETHER_ABI_VERSION 0x000700
+#define AETHER_ABI_VERSION 0x000800
 
 typedef struct AetherContext AetherContext;
 
@@ -280,6 +280,42 @@ AETHER_API AetherStatus aether_read_sun_map(AetherContext* ctx, float* out, uint
 AETHER_API int32_t aether_has_tile(AetherContext* ctx, int32_t lod, int32_t tileX, int32_t tileZ);
 /* Offline harness only: preview terrain height at a block column (for camera placement). */
 AETHER_API float aether_preview_height(AetherContext* ctx, double x, double z);
+
+/*
+ * Exact terrain height (shaders/aether_height.slang): the seeded-noise part of the mod's TamrielHeight.height for a
+ * batch of columns, bit-identical to the Java original (see the kernel's header for the argument). Independent of
+ * AetherContext: its own compute device, usable from any one thread at a time (calls on one handle serialise).
+ *  AETHER_BACKEND_VULKAN  the kernel on a Vulkan 1.2 device with shaderFloat64 and the float controls it needs
+ *                         (RTE rounding, denormal and signed-zero/inf/nan preservation for 32 and 64 bit);
+ *                         AETHER_ERR_UNSUPPORTED when there is none
+ *  AETHER_BACKEND_CPU     the same kernel compiled to C++ (reference)
+ * The caller (AetherHeightGpu.java) prepares the noise table and the per-column records; layouts in the kernel.
+ * The caller must still verify results against its own CPU path before trusting a device.
+ */
+typedef struct AetherHeight AetherHeight;
+#define AETHER_HEIGHT_COLUMN_WORDS 40u /* 32-bit words per column record */
+#define AETHER_HEIGHT_LAYER_WORDS 76u  /* 32-bit words per noise layer, after the 8-word header */
+typedef struct AetherHeightTimes {
+    double uploadMs;   /* host copy into staging + the device copy */
+    double kernelMs;   /* device time of the dispatches (timestamps), or the CPU kernel's wall time */
+    double readbackMs; /* the device copy back + host copy out */
+    double totalMs;    /* wall time of the call */
+} AetherHeightTimes;
+AETHER_API AetherStatus aether_height_create(AetherBackend backend, AetherHeight** out);
+AETHER_API void aether_height_destroy(AetherHeight* h);
+AETHER_API const char* aether_height_last_error(AetherHeight* h);
+/* Device description (static until destroy). */
+AETHER_API const char* aether_height_device(AetherHeight* h);
+/* The noise table (8-word header, then AETHER_HEIGHT_LAYER_WORDS per layer). Copied. */
+AETHER_API AetherStatus aether_height_set_noise(AetherHeight* h, const uint32_t* table, uint32_t words);
+/*
+ * count columns, column k at block (x0 + (k % width) * step, z0 + (k / width) * step), records in `columns`
+ * (count * AETHER_HEIGHT_COLUMN_WORDS words). Out: heights[k] (double), flags[k] = 0 when computed here, 1 when the
+ * caller must compute the column itself (a CPU column, or one the kernel could not prove exact). times may be NULL.
+ */
+AETHER_API AetherStatus aether_height_batch(AetherHeight* h, int32_t x0, int32_t z0, int32_t step, uint32_t width,
+                                            uint32_t count, const uint32_t* columns, double* heights, uint32_t* flags,
+                                            AetherHeightTimes* times);
 
 #ifdef __cplusplus
 }

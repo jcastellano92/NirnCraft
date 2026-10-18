@@ -105,6 +105,37 @@ add_executable(aether_bench tools/aether_bench.cpp)
 target_include_directories(aether_bench PRIVATE src include)
 target_link_libraries(aether_bench PRIVATE aether_core opengl32 gdi32 user32)
 
+# Exact terrain height (aether_height.slang): precise floating point, then spv_exact adds the float controls and
+# refuses the build unless every arithmetic instruction is NoContraction and no inexact extended instruction is used.
+add_executable(spv_exact tools/spv_exact.cpp)
+set(HEIGHT_SRC "${CMAKE_SOURCE_DIR}/shaders/aether_height.slang")
+find_program(SPIRV_VAL spirv-val HINTS "${VULKAN_SDK}/Bin" NO_DEFAULT_PATH)
+add_custom_command(
+  OUTPUT "${GEN}/aether_height.spv"
+  COMMAND "${SLANGC}" "${HEIGHT_SRC}" -target spirv -entry heightMain -stage compute -O3 -fp-mode precise
+          -denorm-mode-fp32 preserve -denorm-mode-fp64 preserve -o "${GEN}/aether_height_raw.spv"
+  COMMAND spv_exact "${GEN}/aether_height_raw.spv" "${GEN}/aether_height.spv"
+  COMMAND "${SPIRV_VAL}" --target-env vulkan1.2 "${GEN}/aether_height.spv"
+  DEPENDS "${HEIGHT_SRC}" spv_exact COMMENT "slangc aether_height -> SPIR-V (exact float contract)")
+add_custom_command(
+  OUTPUT "${GEN}/aether_height_spv.h"
+  COMMAND "${CMAKE_COMMAND}" -DIN=${GEN}/aether_height.spv -DOUT=${GEN}/aether_height_spv.h -DNAME=aether_height_spv
+          -P "${CMAKE_SOURCE_DIR}/cmake/embed_spv.cmake"
+  DEPENDS "${GEN}/aether_height.spv" "${CMAKE_SOURCE_DIR}/cmake/embed_spv.cmake")
+add_custom_command(
+  OUTPUT "${GEN}/aether_height_cpu.cpp"
+  COMMAND "${SLANGC}" "${HEIGHT_SRC}" -target cpp -entry heightMain -stage compute -entry divTestMain -stage compute -O3 -fp-mode precise
+          -o "${GEN}/aether_height_cpu.cpp"
+  DEPENDS "${HEIGHT_SRC}" COMMENT "slangc aether_height -> C++ (CPU reference)")
+target_sources(aether_core PRIVATE src/height_engine.cpp "${GEN}/aether_height_cpu.cpp" "${GEN}/aether_height_spv.h")
+# x64 SSE2 scalar arithmetic is IEEE binary32/64; /fp:strict also forbids contraction and keeps the C++ reference's
+# float operations literal
+set_source_files_properties("${GEN}/aether_height_cpu.cpp" PROPERTIES COMPILE_OPTIONS "/fp:strict;/W0")
+
+add_executable(aether_height_test tests/height_test.cpp)
+target_include_directories(aether_height_test PRIVATE include)
+target_link_libraries(aether_height_test PRIVATE aether_core)
+
 enable_testing()
 add_test(NAME aether_tests COMMAND aether_tests WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
 

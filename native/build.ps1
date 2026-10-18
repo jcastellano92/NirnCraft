@@ -21,6 +21,9 @@ if (-not (Test-Path (Join-Path $here 'data\cloud_noise.bin'))) {
 if (-not $NoTest) {
     & (Join-Path $build "$Config\aether_tests.exe") $raster
     if ($LASTEXITCODE) { throw 'tests failed' }
+    # the exact-height kernel: correctly rounded division, known inputs, Vulkan vs its C++ reference bit for bit
+    & (Join-Path $build "$Config\aether_height_test.exe")
+    if ($LASTEXITCODE) { throw 'height tests failed' }
     # the zero-copy GL bridge (skips cleanly on machines without a GL 4.5 + EXT_memory_object_win32 context)
     & (Join-Path $build "$Config\aether_gl_test.exe") (Join-Path $here 'data')
     if ($LASTEXITCODE) { throw 'gl interop test failed' }
