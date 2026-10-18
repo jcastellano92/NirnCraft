@@ -215,16 +215,20 @@ bool GlApi::load(std::string& err) {
     GetIntegerv(GL_MAJOR_VERSION, &major);
     GetIntegerv(GL_MINOR_VERSION, &minor);
     while (GetError() != GL_NO_ERROR) {}
-    if (major < 4 || (major == 4 && minor < 5)) {
-        const GLubyte* v = GetString(GL_VERSION);
-        err = std::string("OpenGL ") + (v ? reinterpret_cast<const char*>(v) : "?") + " is older than 4.5";
-        return false;
-    }
     extensions = " ";
     GLint n = 0;
     GetIntegerv(GL_NUM_EXTENSIONS, &n);
     for (GLint i = 0; i < n; i++)
         if (const GLubyte* e = GetStringi(GL_EXTENSIONS, GLuint(i))) extensions += reinterpret_cast<const char*>(e) + std::string(" ");
+    // what aether uses is 4.5 core, or the same as extensions on an older context: Minecraft asks for a 3.3 core
+    // profile, and drivers expose direct state access and image copies there (NVIDIA, Mesa, AMD)
+    bool core45 = major > 4 || (major == 4 && minor >= 5);
+    if (!core45 && !(hasExtension("GL_ARB_direct_state_access") && hasExtension("GL_ARB_copy_image"))) {
+        const GLubyte* v = GetString(GL_VERSION);
+        err = std::string("OpenGL ") + (v ? reinterpret_cast<const char*>(v) : "?") +
+              " has neither 4.5 nor GL_ARB_direct_state_access + GL_ARB_copy_image";
+        return false;
+    }
     memoryObject = hasExtension("GL_EXT_memory_object") && CreateMemoryObjectsEXT && DeleteMemoryObjectsEXT &&
                    MemoryObjectParameterivEXT && TextureStorageMem2DEXT && GetUnsignedBytei_vEXT;
     memoryObjectWin32 = memoryObject && hasExtension("GL_EXT_memory_object_win32") && ImportMemoryWin32HandleEXT;
