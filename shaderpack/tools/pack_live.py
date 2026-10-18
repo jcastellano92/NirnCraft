@@ -38,7 +38,23 @@ LOG = INSTANCE / "logs/latest.log"
 SHOTS = INSTANCE / "build/autotest-screenshots"
 
 
+DEST_ZIP = INSTANCE / "shaderpacks/SkycraftAether.zip"
+
+
 def sync():
+    """Build this tree's pack (glslang-validated zip, as shipped) and install it the way players get it: when the
+    instance selects SkycraftAether.zip (the modpack default) the zip is replaced; a loose-folder instance gets the
+    folder synced."""
+    iris = INSTANCE / "config/iris.properties"
+    if iris.exists() and "shaderPack=SkycraftAether.zip" in iris.read_text(encoding="utf-8", errors="replace"):
+        r = subprocess.run([sys.executable, "-I", str(HERE.parent / "build_pack.py")], capture_output=True, text=True)
+        if r.returncode:
+            raise SystemExit("pack build failed:\n" + (r.stdout + r.stderr)[-1500:])
+        built = HERE.parent / "build/SkycraftAether.zip"
+        if DEST_ZIP.exists() and filecmp.cmp(built, DEST_ZIP, shallow=False):
+            return 0
+        shutil.copy2(built, DEST_ZIP)
+        return 1
     changed = 0
     for src in PACK.rglob("*"):
         if src.is_dir():
