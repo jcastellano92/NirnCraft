@@ -53,12 +53,23 @@ uniform int aetherReversed;
 void main() {
     ivec2 p = ivec2(gl_GlobalInvocationID.xy);
     if (p.x >= int(aetherSize.x) || p.y >= int(aetherSize.y)) return;
-    float d = texelFetch(aetherNearDepth, p, 0).r;
-    bool sky = aetherReversed != 0 ? d <= 0.0 : d >= 1.0;
-    float z = aetherZeroToOne != 0 ? d : d * 2.0 - 1.0;
-    vec2 ndc = (vec2(p) + 0.5) / aetherSize * 2.0 - 1.0;
-    vec4 v = aetherInvProj * vec4(ndc, z, 1.0);
-    imageStore(aetherNearOut, p, vec4(sky ? 1e30 : length(v.xyz / v.w)));
+    // aether may render below the window's resolution (dynamic scale): an aether pixel takes the farthest of four
+    // samples over its footprint, so it is skipped only where near geometry covers all of it (at scale 1 all four
+    // land on the same texel: the exact depth)
+    ivec2 full = textureSize(aetherNearDepth, 0);
+    vec2 f = vec2(full) / aetherSize;
+    float dist = 0.0;
+    for (int k = 0; k < 4; k++) {
+        vec2 o = vec2(k & 1, k >> 1) * 0.5 + 0.25;
+        ivec2 q = clamp(ivec2((vec2(p) + o) * f), ivec2(0), full - 1);
+        float d = texelFetch(aetherNearDepth, q, 0).r;
+        bool sky = aetherReversed != 0 ? d <= 0.0 : d >= 1.0;
+        float z = aetherZeroToOne != 0 ? d : d * 2.0 - 1.0;
+        vec2 ndc = (vec2(q) + 0.5) / vec2(full) * 2.0 - 1.0;
+        vec4 v = aetherInvProj * vec4(ndc, z, 1.0);
+        dist = max(dist, sky ? 1e30 : length(v.xyz / v.w));
+    }
+    imageStore(aetherNearOut, p, vec4(dist));
 }
 )GLSL";
 

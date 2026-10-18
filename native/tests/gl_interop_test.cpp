@@ -232,6 +232,31 @@ int main(int argc, char** argv) {
     Compare c4 = compare(refColor, refDepth, glColor, glDepth, W, H);
     std::printf("depth via the bound framebuffer: %zu colour, %zu depth pixels differ from host\n", c4.color, c4.depth);
     gl.DeleteFramebuffers(1, &fbo);
+    // dynamic resolution: the window's depth at twice aether's size, the same left half covered, plus one covered
+    // full-resolution column that covers only half of each aether pixel it falls in: that one must not be skipped
+    std::vector<float> depth2(size_t(4) * W * H);
+    for (uint32_t yy = 0; yy < 2 * H; yy++)
+        for (uint32_t xx = 0; xx < 2 * W; xx++) {
+            double nx = (xx + 0.5) / (2 * W) * 2 - 1, ny = (yy + 0.5) / (2 * H) * 2 - 1;
+            double vx = nx / fxp, vy = ny / fy, l = std::sqrt(vx * vx + vy * vy + 1.0);
+            double zv = -20.0 / l;
+            double zn = ((f0 + n0) / (n0 - f0) * zv + 2 * f0 * n0 / (n0 - f0)) / -zv;
+            bool covered = xx < W || xx == W + 9;
+            depth2[size_t(yy) * 2 * W + xx] = covered ? float(zn * 0.5 + 0.5) : 1.0f;
+        }
+    GLuint depthTex2 = 0;
+    gl.CreateTextures(GL_TEXTURE_2D, 1, &depthTex2);
+    gl.TextureStorage2D(depthTex2, 1, GL_DEPTH_COMPONENT32F, GLsizei(2 * W), GLsizei(2 * H));
+    gl.TextureSubImage2D(depthTex2, 0, 0, 0, GLsizei(2 * W), GLsizei(2 * H), GL_DEPTH_COMPONENT, GL_FLOAT, depth2.data());
+    AetherGlFrameIO io2 = io;
+    io2.nearDepthTex = depthTex2;
+    for (int i = 0; i < 3; i++) aether_gl_render_io(ctx, &fd, &io2);
+    gl.Finish();
+    gl.GetTextureImage(dst[0], 0, GL_RGBA, GL_FLOAT, GLsizei(glColor.size() * 4), glColor.data());
+    gl.GetTextureImage(dst[2], 0, GL_RED, GL_FLOAT, GLsizei(glDepth.size() * 4), glDepth.data());
+    Compare c5 = compare(refColor, refDepth, glColor, glDepth, W, H);
+    std::printf("near depth at twice aether's resolution: %zu colour, %zu depth pixels differ from host\n", c5.color, c5.depth);
+    gl.DeleteTextures(1, &depthTex2);
     gl.DeleteTextures(1, &depthTex);
     gl.DeleteTextures(3, dst);
     GLenum e = gl.GetError();
@@ -285,7 +310,7 @@ int main(int argc, char** argv) {
     wglMakeCurrent(nullptr, nullptr);
     wglDeleteContext(rc);
     bool ok = c1.color == 0 && c1.depth == 0 && c2.color == 0 && c2.depth == 0 && coveredLit == 0 && e == GL_NO_ERROR &&
-              c3.color == 0 && c3.depth == 0 && c4.color == 0 && c4.depth == 0 &&
+              c3.color == 0 && c3.depth == 0 && c4.color == 0 && c4.depth == 0 && c5.color == 0 && c5.depth == 0 &&
               smooth;
     std::printf(ok ? "PASS\n" : "FAIL (gl error 0x%x)\n", e);
     return ok ? 0 : 1;

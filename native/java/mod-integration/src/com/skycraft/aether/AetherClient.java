@@ -45,6 +45,7 @@ public final class AetherClient {
     private static AetherFarField farField;
     private static ClientLevel startedFor;  // the level the far field's tiles belong to
     private static final WeatherFeed WEATHER = new AetherWeatherFeed();
+    private static final AetherQuality quality = new AetherQuality();
     private static Supplier<WeatherFeed> weather = () -> WEATHER;
     private static boolean failed;
     private static final AetherNative.Frame frame = new AetherNative.Frame();
@@ -98,7 +99,8 @@ public final class AetherClient {
             // a new world (or server): new tiles, maybe another column source
             if (ctx != null && startedFor != mc.level && mc.level.dimension() == Level.OVERWORLD) stop();
             if (ctx == null && !start(mc)) return;
-            int w = mc.getWindow().getWidth(), h = mc.getWindow().getHeight();
+            // aether's own resolution (dynamic: AetherQuality); the pack upsamples it to the window
+            int w = quality.width(mc.getWindow().getWidth()), h = quality.height(mc.getWindow().getHeight());
             if (targets == null || targets.width() != w || targets.height() != h) {
                 if (targets != null) targets.close();
                 targets = AetherTargets.create(ctx, w, h);
@@ -133,8 +135,8 @@ public final class AetherClient {
             frame.timeSec = (state.gameTime + state.worldPartialTicks) / 20f;
             frame.lodBias = 1f;
             // the pack draws the sky; aether adds far terrain, clouds and far actors over it
-            frame.flags = AetherNative.FRAME_SHADOWS | AetherNative.FRAME_ATMOS | AetherNative.FRAME_CLOUDS
-                    | AetherNative.FRAME_ACTORS;
+            frame.flags = quality.flags(AetherNative.FRAME_SHADOWS | AetherNative.FRAME_ATMOS | AetherNative.FRAME_CLOUDS
+                    | AetherNative.FRAME_ACTORS);
 
             io.nearDepthTex = 0xFFFFFFFF;  // AETHER_GL_BOUND_DEPTH: the bound gbuffer target's depth
             new Matrix4f(cam.projectionMatrix).invert().get(io.nearInvProjection);
@@ -144,6 +146,8 @@ public final class AetherClient {
             io.dstNormal = 0;
             io.dstDepth = targets.depthId();
             ctx.glRender(frame, io);
+            if (quality.update((float) ctx.stats().frameMs(), mc.getFps(), System.nanoTime()))
+                com.skycraft.Skycraft.LOGGER.debug("aether quality level {} (scale {})", quality.level(), quality.scale());
         } catch (Throwable t) {
             disable("aether frame failed", t);
         }
