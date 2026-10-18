@@ -37,12 +37,14 @@ public final class AetherNative {
 
     // struct sizes and offsets (see api.cpp)
     static final long MATERIAL_SIZE = 24, TILE_SIZE = 64, FRAME_SIZE = 144, OUTPUT_SIZE = 32, WEATHER_SIZE = 40,
-            ACTOR_SIZE = 48, STATS_SIZE = 56, GL_TARGETS_SIZE = 24, GL_IO_SIZE = 96;
+            ACTOR_SIZE = 48, STATS_SIZE = 56, GL_TARGETS_SIZE = 24, GL_IO_SIZE = 96, LIGHT_SIZE = 40;
+    /** Far light kinds (AetherLight.kind). */
+    public static final int LIGHT_NIGHT = 0, LIGHT_FIRE = 1, LIGHT_LAVA = 2, LIGHT_MIST = 3;
 
     private final Arena libArena;
     private final MethodHandle abiVersion, buildInfo, create, destroy, lastError, setPalette, uploadTile,
             uploadSection, notifyBlock, setWeather, setCloudNoise, setActors, update, render, getStats,
-            glAttach, glRenderIo, glDetach, info, previewLoadRaster, previewGenerate, previewHeight, uploadHeights, uploadHeights2, hasTile, uploadStructures, setMaterials, setSunMap, setTransitions,
+            glAttach, glRenderIo, glDetach, info, previewLoadRaster, previewGenerate, previewHeight, uploadHeights, uploadHeights2, hasTile, uploadStructures, uploadStructures2, setMaterials, setSunMap, setTransitions, setLightGroup, setLightBudget,
             heightCreate, heightDestroy, heightLastError, heightDevice, heightSetNoise, heightBatch;
 
     private AetherNative(Path library) {
@@ -84,9 +86,13 @@ public final class AetherNative {
                 critical);
         uploadStructures = bind(l, lib, "aether_upload_column_structures",
                 FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, JAVA_INT, JAVA_INT, ADDRESS, ADDRESS, ADDRESS, ADDRESS));
+        uploadStructures2 = bind(l, lib, "aether_upload_column_structures2",
+                FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, JAVA_INT, JAVA_INT, ADDRESS, ADDRESS, ADDRESS, ADDRESS, ADDRESS));
         setSunMap = bind(l, lib, "aether_set_sun_map", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, JAVA_FLOAT));
         setMaterials = bind(l, lib, "aether_set_materials", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, ADDRESS, JAVA_INT));
         setTransitions = bind(l, lib, "aether_set_transitions", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_FLOAT));
+        setLightGroup = bind(l, lib, "aether_set_light_group", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, ADDRESS, JAVA_INT));
+        setLightBudget = bind(l, lib, "aether_set_light_budget", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, JAVA_FLOAT));
         heightCreate = bind(l, lib, "aether_height_create", FunctionDescriptor.of(JAVA_INT, JAVA_INT, ADDRESS));
         heightDestroy = bind(l, lib, "aether_height_destroy", FunctionDescriptor.ofVoid(ADDRESS));
         heightLastError = bind(l, lib, "aether_height_last_error", FunctionDescriptor.of(ADDRESS, ADDRESS));
@@ -365,6 +371,15 @@ public final class AetherNative {
          */
         public void uploadColumnStructures(int lod, int tileX, int tileZ, float[] wallTop, float[] roofTop, short[] wallMat,
                                            short[] roofMat) {
+            uploadColumnStructures(lod, tileX, tileZ, wallTop, roofTop, wallMat, roofMat, null);
+        }
+
+        /**
+         * (abi 0.10) As uploadColumnStructures, plus base (may be null): per column the bottom of the span for what does
+         * not stand on the ground (an arch's deck, a tree's crown, a floating rock); NaN = from the ground.
+         */
+        public void uploadColumnStructures(int lod, int tileX, int tileZ, float[] wallTop, float[] roofTop, short[] wallMat,
+                                           short[] roofMat, float[] base) {
             try (Arena a = Arena.ofConfined()) {
                 if (wallTop == null) {
                     check((int) uploadStructures.invokeExact(ptr, lod, tileX, tileZ, MemorySegment.NULL, MemorySegment.NULL,
@@ -374,8 +389,9 @@ public final class AetherNative {
                 int n = TILE * TILE;
                 if (wallTop.length < n || roofTop.length < n || wallMat.length < n || roofMat.length < n)
                     throw new IllegalArgumentException("structure arrays must hold 256*256 columns");
-                check((int) uploadStructures.invokeExact(ptr, lod, tileX, tileZ, copy(a, wallTop), copy(a, roofTop),
-                        copy(a, wallMat), copy(a, roofMat)), "aether_upload_column_structures");
+                MemorySegment b = base != null ? copy(a, base) : MemorySegment.NULL;
+                check((int) uploadStructures2.invokeExact(ptr, lod, tileX, tileZ, copy(a, wallTop), copy(a, roofTop),
+                        copy(a, wallMat), copy(a, roofMat), b), "aether_upload_column_structures2");
             } catch (Throwable t) {
                 throw rethrow(t);
             }
@@ -500,6 +516,39 @@ public final class AetherNative {
         public void setTransitions(float fadeSeconds) {
             try {
                 check((int) setTransitions.invokeExact(ptr, fadeSeconds), "aether_set_transitions");
+            } catch (Throwable t) {
+                throw rethrow(t);
+            }
+        }
+
+        /**
+         * (abi 0.10) Replaces far-light group `group` (count 0 removes it): per light x, y, z (xyz), radius and intensity
+         * (radiusIntensity), sRGB colour and kind (rgbKind, LIGHT_*). Any thread; copied.
+         */
+        public void setLightGroup(int group, double[] xyz, float[] radiusIntensity, int[] rgbKind, int count) {
+            try (Arena a = Arena.ofConfined()) {
+                MemorySegment s = a.allocate(Math.max(1, count) * LIGHT_SIZE, 8);
+                for (int i = 0; i < count; i++) {
+                    long o = i * LIGHT_SIZE;
+                    s.set(JAVA_DOUBLE, o, xyz[3 * i]);
+                    s.set(JAVA_DOUBLE, o + 8, xyz[3 * i + 1]);
+                    s.set(JAVA_DOUBLE, o + 16, xyz[3 * i + 2]);
+                    s.set(JAVA_FLOAT, o + 24, radiusIntensity[2 * i]);
+                    s.set(JAVA_FLOAT, o + 28, radiusIntensity[2 * i + 1]);
+                    s.set(JAVA_INT, o + 32, rgbKind[2 * i]);
+                    s.set(JAVA_INT, o + 36, rgbKind[2 * i + 1]);
+                }
+                MemorySegment arg = count > 0 ? s : MemorySegment.NULL;
+                check((int) setLightGroup.invokeExact(ptr, group, arg, count), "aether_set_light_group");
+            } catch (Throwable t) {
+                throw rethrow(t);
+            }
+        }
+
+        /** (abi 0.10) At most maxPerFrame far lights a frame (brightest first), merged into clusters beyond clusterDistance. */
+        public void setLightBudget(int maxPerFrame, float clusterDistance) {
+            try {
+                check((int) setLightBudget.invokeExact(ptr, maxPerFrame, clusterDistance), "aether_set_light_budget");
             } catch (Throwable t) {
                 throw rethrow(t);
             }

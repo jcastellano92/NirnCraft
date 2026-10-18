@@ -550,6 +550,61 @@ float3 waterReflection(float3 p, float3 dir, float k, float t, int lod, float3 s
     return sky;
 }
 
+// ---- far lights (lights.cpp packs them after the far actors, then 32 px tile lists) -------------------------------
+
+// Word k (0..11) of record `rec` of the actor buffer, read as an unsigned integer (the tile tables).
+uint actorWord(uint rec, uint k) {
+    ActorGpu a = actors[rec];
+    float v = k < 4u ? a.posYaw[k] : k < 8u ? a.shape[k - 4u] : a.motion[k - 8u];
+    return asuint(v);
+}
+
+// The glow of the far lights over this pixel: each light of the pixel's tile that nothing nearer hides (its distance
+// against the pixel's surface, with a voxel of slack) adds a core about a pixel wide (or its own size up close) and a
+// halo that widens with the haze between it and the camera. Town lights show from dusk to dawn, fires flicker, lava
+// pulses, spray is lit by the sun and sky.
+float3 farLights(uint2 px, float3 o, float3 dir, float surface, float3 sun) {
+    uint L = uint(frame.weatherParams.y);
+    if (L == 0u) return float3(0, 0, 0);
+    uint A = uint(frame.weatherParams.w);
+    uint tilesX = (frame.dims.x + 31u) / 32u, tilesY = (frame.dims.y + 31u) / 32u;
+    uint tile = (px.y / 32u) * tilesX + px.x / 32u;
+    uint tableBase = A + L, indexBase = tableBase + (tilesX * tilesY + 5u) / 6u;
+    uint start = actorWord(tableBase + tile / 6u, (tile % 6u) * 2u);
+    uint count = min(actorWord(tableBase + tile / 6u, (tile % 6u) * 2u + 1u), 64u);
+    float night = smoothstep(0.12, -0.1, sun.y);
+    float day = smoothstep(-0.12, 0.2, sun.y);
+    float pa = max(frame.params.w, 1e-5);
+    float t = frame.sunDir.w;
+    float3 sum = float3(0, 0, 0);
+    for (uint k = 0u; k < count; k++) {
+        uint e = start + k;
+        uint li = actorWord(indexBase + e / 12u, e % 12u);
+        ActorGpu l = actors[A + li];
+        float dist = l.motion.x;
+        float slack = max(3.0, dist * pa * 3.0) + l.motion.w;
+        if (surface < dist - slack) continue;  // terrain, a building or an actor in front of it
+        uint kind = uint(l.shape.w + 0.5);
+        float vis = kind == 0u ? night
+                  : kind == 1u ? (0.1 + 0.9 * night) * (0.82 + 0.18 * sin(t * 11.0 + l.motion.y * 7.0) * sin(t * 4.3 + l.motion.y))
+                  : kind == 2u ? 0.85 + 0.15 * sin(t * 1.3 + l.motion.y)
+                  : day;
+        if (vis <= 0.001) continue;
+        float3 v = l.posYaw.xyz - o;
+        float c = dot(dir, v) / max(length(v), 1e-3);
+        float apx = sqrt(max(0.0, 2.0 * (1.0 - c))) / pa;
+        float sigma = l.posYaw.w, halo = l.motion.z;
+        float T = aerialTransmittance(dist, frame);
+        float q = apx / sigma;
+        float core = exp(-0.5 * q * q);
+        float glow = (1.0 - T) * 0.15 * exp(-apx / halo);
+        float3 rad = l.shape.xyz;
+        if (kind == 3u) rad *= keyLightRadiance(sun) * 0.25 + skyAmbient(float3(0, 1, 0), sun);  // spray: lit, not glowing
+        sum += rad * vis * (core * T + glow);
+    }
+    return sum;
+}
+
 uint cloudDiv() { return (frame.dims.z & FRAME_CLOUDS_QUARTER) != 0 ? 4u : 2u; }
 uint2 cloudDims() { uint d = cloudDiv(); return uint2((frame.dims.x + d - 1) / d, (frame.dims.y + d - 1) / d); }
 
@@ -864,6 +919,8 @@ void farMain(uint3 id : SV_DispatchThreadID) {
     }
     float coverage = tHit >= 0.0 || actorFirst || (frame.dims.z & FRAME_SKY) != 0 ? 1.0 : 0.0;
     float surface = actorFirst ? ah.t : (tHit >= 0.0 ? tHit : 1e30);
+    // far lights, under the cloud deck (clouds in front of the surface veil them with it)
+    color += farLights(id.xy, o, dir, surface, sun);
     if ((frame.dims.z & FRAME_CLOUDS) != 0) {
         // the half-resolution deck, where it starts in front of this pixel's surface
         float4 cl;

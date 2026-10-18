@@ -625,6 +625,86 @@ static void testTransitions() {
     aether_destroy(ctx);
 }
 
+// Far lights: a lantern 600 blocks out glows at night (a bright core at its pixel, nothing far from it), is gone by day,
+// and a wall between it and the camera hides it; fires stay lit by day.
+static void testLights() {
+    std::printf("far lights\n");
+    AetherContext* ctx = nullptr;
+    aether_create(AETHER_BACKEND_CPU, &ctx);
+    std::vector<float> flat(256 * 256, 100.0f), water(256 * 256, NAN);
+    std::vector<uint16_t> top(256 * 256, 2), fill(256 * 256, 3);
+    for (int tz = -2; tz <= 2; tz++)
+        for (int tx = -2; tx <= 2; tx++) {
+            AetherColumnTile t{0, tx, tz, flat.data(), water.data(), top.data(), fill.data(), nullptr, nullptr};
+            aether_upload_column_tile(ctx, &t);
+        }
+    double centre[3] = {0.5, 104.0, 0.5};
+    aether_update(ctx, centre, 0);
+    AetherLight l{{600.5, 103.0, 0.5}, 1.0f, 1.0f, 0x40A0FFu, AETHER_LIGHT_NIGHT};
+    CHECK(aether_set_light_group(ctx, 7, &l, 1) == AETHER_OK);
+    AetherFrame f{};
+    f.cameraPos[0] = 0.5;
+    f.cameraPos[1] = 104.0;
+    f.cameraPos[2] = 0.5;
+    f.width = 65;
+    f.height = 65;
+    f.maxDistance = 2000;
+    f.planetRadius = 0;
+    f.lodBias = 1;
+    f.flags = AETHER_FRAME_ATMOS;
+    std::vector<float> lin(65 * 65 * 4);
+    AetherFrameOutput o{nullptr, nullptr, nullptr, lin.data()};
+    auto lum = [&](int x, int y) {
+        const float* p = &lin[(size_t(y) * 65 + x) * 4];
+        return p[0] + p[1] + p[2];
+    };
+    auto shoot = [&](float sunY) {
+        f.sunDir[0] = 0;
+        f.sunDir[1] = sunY;
+        f.sunDir[2] = std::sqrt(1 - sunY * sunY);
+        cameraMatrix(90, 0, 6, 1.0, f.invViewProj);  // east, level, narrow
+        CHECK(aether_render(ctx, &f, &o) == AETHER_OK);
+    };
+    // where the light falls on screen: the brightest pixel
+    shoot(-0.5f);
+    int bx = 0, by = 0;
+    for (int y = 0; y < 65; y++)
+        for (int x = 0; x < 65; x++)
+            if (lum(x, y) > lum(bx, by)) bx = x, by = y;
+    float nightCore = lum(bx, by), nightFar = lum(std::min(64, bx + 12), by);
+    shoot(0.6f);
+    float dayCore = lum(bx, by) - lum(std::min(64, bx + 12), by);
+    std::printf("  night: core %.3f at (%d, %d), 12 px away %.4f; day: core excess %.4f\n", nightCore, bx, by, nightFar, dayCore);
+    CHECK(std::abs(bx - 32) <= 1 && std::abs(by - 32) <= 3);
+    CHECK(nightCore > 0.2f && nightCore > 20 * nightFar);
+    CHECK(std::abs(dayCore) < 0.01f);
+    // a wall at x 300..303, 40 blocks high, hides it
+    std::vector<float> wall = flat;
+    for (int z = 0; z < 256; z++)
+        for (int x = 44; x < 48; x++) wall[size_t(z) * 256 + x] = 140.0f;
+    AetherColumnTile t{0, 1, 0, wall.data(), water.data(), top.data(), fill.data(), nullptr, nullptr};
+    aether_upload_column_tile(ctx, &t);
+    AetherColumnTile t2{0, 1, -1, wall.data(), water.data(), top.data(), fill.data(), nullptr, nullptr};
+    aether_upload_column_tile(ctx, &t2);
+    aether_update(ctx, centre, 0);
+    shoot(-0.5f);
+    float hidden = lum(bx, by);
+    std::printf("  behind a wall: %.4f\n", hidden);
+    CHECK(hidden < nightCore * 0.05f);
+    // a fire stays lit by day (dimmer against the bright day it is drawn over, but there)
+    l.kind = AETHER_LIGHT_FIRE;
+    l.pos[1] = 160.0;  // above the wall
+    aether_set_light_group(ctx, 7, &l, 1);
+    shoot(0.6f);
+    float fire = 0;
+    for (int y = 0; y < 65; y++)
+        for (int x = 0; x < 65; x++) fire = std::max(fire, lum(x, y));
+    std::printf("  a fire by day: core %.3f\n", fire);
+    CHECK(fire > 0.2f);
+    CHECK(aether_set_light_group(ctx, 7, nullptr, 0) == AETHER_OK);
+    aether_destroy(ctx);
+}
+
 // A dragon's wings beat (its silhouette changes over the beat), fold on the ground, and an impostor marked half
 // transparent covers about half its pixels (the per-pixel dissolve of a tracking-boundary cross-fade).
 static void testActorMotion() {
@@ -902,6 +982,11 @@ static bool parity(const char* raster) {
     double x = 0, z = 0;
     double y = aether_preview_height(cpu, x, z) + 60;
     double centre[3] = {x, y, z};
+    // a row of fires out east (the far-light pass in both builds)
+    std::vector<AetherLight> fires;
+    for (int i = 0; i < 40; i++)
+        fires.push_back(AetherLight{{x + 400.0 + i * 90.0, aether_preview_height(cpu, x + 400.0 + i * 90.0, z + (i % 7 - 3) * 40.0) + 4.0,
+                                     z + (i % 7 - 3) * 40.0}, 1.5f, 2.0f, 0x2080FFu, AETHER_LIGHT_FIRE});
     for (AetherContext* c : {cpu, gpu}) {
         for (int lod = 0; lod < 7; lod++) {
             int span = 256 << lod;
@@ -909,6 +994,7 @@ static bool parity(const char* raster) {
             aether_preview_generate(c, lod, (cx - 2) * span, (cz - 2) * span, (cx + 3) * span, (cz + 3) * span);
         }
         aether_update(c, centre, 0);
+        aether_set_light_group(c, 1, fires.data(), uint32_t(fires.size()));
     }
     const uint32_t W = 320, H = 180;
     AetherFrame f{};
@@ -1009,6 +1095,7 @@ static bool parity(const char* raster) {
         }
         aether_update(fresh, centre, 0);
         aether_set_cloud_noise(fresh, noise.data());
+        aether_set_light_group(fresh, 1, fires.data(), uint32_t(fires.size()));
         aether_set_weather(fresh, &wth);
         std::vector<float> lf(W * H * 4);
         AetherFrameOutput olf{nullptr, nullptr, nullptr, lf.data()};
@@ -1069,6 +1156,7 @@ int main(int argc, char** argv) {
     testActors();
     testActorMotion();
     testTransitions();
+    testLights();
     testNearDepth(argc > 1 ? argv[1] : "native/data/tamriel_raster.bin");
     testColumnHeights(argc > 1 ? argv[1] : "native/data/tamriel_raster.bin");
     testGrassTint(argc > 1 ? argv[1] : "native/data/tamriel_raster.bin");

@@ -159,6 +159,24 @@ typedef struct AetherActor {
 #define AETHER_GAIT_GLIDE 1u
 #define AETHER_GAIT_FLAP 2u
 
+/*
+ * (abi 0.10) A far light: something that glows from kilometres away (a town's lit windows and street lamps at night,
+ * braziers and camp fires, lava), or, for AETHER_LIGHT_MIST, the spray of a waterfall lit by the sun. Drawn by the far
+ * kernel as a glow on top of the far field where nothing nearer hides it, at least a pixel wide whatever the distance,
+ * spreading into a halo through the haze; never inside the near field's radius (the game draws its own lights there).
+ */
+typedef struct AetherLight {
+    double pos[3];        /* world block coordinates */
+    float radius;         /* blocks: the glowing thing's size (a window 1, a brazier 1.5, a lava pool 6, falls mist 12) */
+    float intensity;      /* relative radiance (1 = a lantern) */
+    uint32_t rgb;         /* sRGB colour, r in the low byte */
+    uint32_t kind;        /* AETHER_LIGHT_* */
+} AetherLight;
+#define AETHER_LIGHT_NIGHT 0u  /* windows, lamps: lit from dusk to dawn */
+#define AETHER_LIGHT_FIRE 1u   /* braziers, camp fires: always lit, flickering (they read at night) */
+#define AETHER_LIGHT_LAVA 2u   /* always lit, a slow pulse */
+#define AETHER_LIGHT_MIST 3u   /* spray, lit by the sun and the sky: a white haze by day, faint by night */
+
 typedef struct AetherStats {
     uint32_t regions, regionsDirty;
     uint64_t nodeBytes, leafBytes, materialBytes;
@@ -284,6 +302,13 @@ AETHER_API AetherStatus aether_upload_column_heights2(AetherContext* ctx, int32_
 AETHER_API AetherStatus aether_upload_column_structures(AetherContext* ctx, int32_t lod, int32_t tileX, int32_t tileZ,
                                                         const float* wallTop, const float* roofTop,
                                                         const uint16_t* wallMat, const uint16_t* roofMat);
+/* (abi 0.10) As aether_upload_column_structures, plus base (may be NULL): per column the bottom of the span, for
+ * structures that do not stand on the ground (an arch's deck, a tree's crown, a floating rock: air between the ground and
+ * base); NaN or <= the ground = from the ground. */
+AETHER_API AetherStatus aether_upload_column_structures2(AetherContext* ctx, int32_t lod, int32_t tileX, int32_t tileZ,
+                                                         const float* wallTop, const float* roofTop,
+                                                         const uint16_t* wallMat, const uint16_t* roofMat,
+                                                         const float* base);
 /* Sets palette entries first .. first + count - 1 (first >= 1), growing the palette with grey where it skips ids:
  * colours added over the current palette (building walls and roofs). */
 AETHER_API AetherStatus aether_set_materials(AetherContext* ctx, uint32_t first, const AetherMaterial* materials,
@@ -308,6 +333,14 @@ AETHER_API AetherStatus aether_read_sun_map(AetherContext* ctx, float* out, uint
  * keeps its start, so a tile refined twice in a row dissolves once). 0 (default) swaps at once.
  */
 AETHER_API AetherStatus aether_set_transitions(AetherContext* ctx, float fadeSeconds);
+/*
+ * (abi 0.10) Far lights, in groups (a settlement, the sites of an area, the falls of a region ...): replaces group
+ * `group`'s lights (count 0 removes the group). Any thread; copied. Each frame aether picks the lights in view beyond
+ * the near field (merged into clusters of about a pixel beyond clusterDistance), at most maxPerFrame of them, brightest
+ * first (aether_set_light_budget; defaults 4096 and 6000 blocks).
+ */
+AETHER_API AetherStatus aether_set_light_group(AetherContext* ctx, uint32_t group, const AetherLight* lights, uint32_t count);
+AETHER_API AetherStatus aether_set_light_budget(AetherContext* ctx, uint32_t maxPerFrame, float clusterDistance);
 /* 1 if tile (lod, tileX, tileZ) is resident (uploaded and not evicted), else 0. */
 AETHER_API int32_t aether_has_tile(AetherContext* ctx, int32_t lod, int32_t tileX, int32_t tileZ);
 /* Offline harness only: preview terrain height at a block column (for camera placement). */

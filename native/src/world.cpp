@@ -74,7 +74,8 @@ public:
         if (t.structures) {
             const Structures& st = *t.structures;
             float rt = st.roofTop[c];
-            if (yc < rt) return yc < st.wallTop[c] ? st.wallMat[c] : st.roofMat[c];  // (rt > surf: no NaN gets here)
+            if (yc < rt && (st.base.empty() || yc >= st.base[c]))  // (rt > surf: no NaN gets here)
+                return yc < st.wallTop[c] ? st.wallMat[c] : st.roofMat[c];
         }
         // canopy: crowns over trunk space (the lowest 35 % stays open, so forest edges are not solid walls)
         if (!t.canopy.empty() && t.canopy[c] > 0.0f && yc < surf + t.canopy[c] && yc >= surf + 0.35f * t.canopy[c])

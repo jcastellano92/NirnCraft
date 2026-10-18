@@ -32,9 +32,10 @@ struct Key3Hash {
 };
 
 // Buildings over a tile's columns (dense, TILE^2 each; roofTop <= the surface or NaN = none): walls from the ground
-// up to wallTop, roof up to roofTop.
+// up to wallTop, roof up to roofTop. base (empty, or TILE^2): where the span starts instead of the ground (an arch's
+// deck, a canopy, a floating rock: air below it); -inf = from the ground.
 struct Structures {
-    std::vector<float> wallTop, roofTop;
+    std::vector<float> wallTop, roofTop, base;
     std::vector<uint16_t> wallMat, roofMat;
 };
 

@@ -61,6 +61,7 @@ public final class AetherClient {
     /** Per far actor (entity id): its impostor's opacity, fading out while the client also has the real entity. */
     private static final it.unimi.dsi.fastutil.ints.Int2FloatOpenHashMap actorOpacity = new it.unimi.dsi.fastutil.ints.Int2FloatOpenHashMap();
     private static long actorsFedAt;
+    private static int lightBudget = -1;
     /** Seconds over which an impostor dissolves once the real entity is tracked (and region refinements dissolve). */
     static final float FADE_SECONDS = 0.6f;
 
@@ -164,6 +165,11 @@ public final class AetherClient {
             }
             feedWeather();
             feedActors(mc.level);
+            int budget = quality.lightBudget();
+            if (budget != lightBudget) {
+                lightBudget = budget;
+                ctx.setLightBudget(budget, 6000f);
+            }
 
             frame.x = p.x;
             frame.y = p.y;
@@ -231,7 +237,9 @@ public final class AetherClient {
             int[] noise = AetherPalette.cloudNoiseVolume();
             if (noise != null) ctx.setCloudNoise(noise);
             java.util.function.IntBinaryOperator ground = source instanceof AetherExactSource e ? e::groundAt : null;
-            farField = new AetherFarField(ctx, source, () -> AetherSettlements.create(ground));
+            AetherMaterials mats = new AetherMaterials();  // one id per block across buildings, landmarks and surfaces
+            farField = new AetherFarField(ctx, source, () -> AetherSettlements.create(ground, mats));
+            lightBudget = -1;
             startedFor = mc.level;
             com.skycraft.Skycraft.LOGGER.info("aether far field on ({} columns): {}", source instanceof AetherExactSource
                     ? "exact" : source instanceof AetherServerSource ? "server" : "raster", lib.buildInfo());

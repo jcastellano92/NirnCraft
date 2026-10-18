@@ -71,15 +71,17 @@ public final class SettlementHarness {
         double mid = a.length > 5 ? Double.parseDouble(a[5]) : 45;
         double[][] views = {{2400, 70}, {800, mid}};  // distance from the centre, height over the ground
         int w = 1600, h = 900;
-        int[][] images = new int[3][];
-        int[] buildingPx = new int[1];
+        int[][] images = new int[4][];
+        int[] buildingPx = new int[1], counters = new int[4];
+        double[] ms = new double[3];
         try (AetherNative.Context ctx = n.create(AetherNative.BACKEND_VULKAN);
              AetherNative.Context bare = n.create(AetherNative.BACKEND_VULKAN)) {
             AetherExactSource src = new AetherExactSource(height, () -> raster, 8);
             AetherExactSource src2 = new AetherExactSource(height, () -> raster, 8);
             src.prepare(ctx);
             src2.prepare(bare);
-            AetherSettlements towns = new AetherSettlements(plan, src::groundAt);
+            AetherSettlements towns = new AetherSettlements(plan, src::groundAt, new AetherMaterials());
+            ctx.setTransitions(0f);
             for (int v = 0; v < views.length; v++) {
                 double dist = views[v][0];
                 double cx = px + 0.8 * dist, cz = pz + 0.6 * dist;
@@ -122,6 +124,20 @@ public final class SettlementHarness {
                 ctx.render(f, color, null, null);
                 ctx.render(f, color, null, null);
                 images[v] = color;
+                if (v == 0) {
+                    // the same far view at night: the town's windows, lamps and fires
+                    double ne = Math.toRadians(-18);
+                    f.sunX = (float) (Math.sin(sa) * Math.cos(ne));
+                    f.sunY = (float) Math.sin(ne);
+                    f.sunZ = (float) (-Math.cos(sa) * Math.cos(ne));
+                    int[] night = new int[w * h];
+                    ctx.render(f, night, null, null);
+                    ctx.render(f, night, null, null);
+                    images[3] = night;
+                    f.sunX = (float) (Math.sin(sa) * Math.cos(se));
+                    f.sunY = (float) Math.sin(se);
+                    f.sunZ = (float) (-Math.cos(sa) * Math.cos(se));
+                }
                 if (v == 1) {
                     int[] c2 = new int[w * h];
                     bare.render(f, c2, null, null);
@@ -130,19 +146,30 @@ public final class SettlementHarness {
                     for (int p = 0; p < w * h; p++) if (color[p] != c2[p]) buildingPx[0]++;
                 }
             }
+            counters[0] = towns.captured;
+            counters[1] = towns.profiled;
+            counters[2] = towns.siteShapes;
+            counters[3] = towns.lightCount;
+            ms[0] = towns.captureMs;
+            ms[1] = towns.siteMs;
+            ms[2] = towns.massingMs;
+            for (String why : towns.fallbacks) OUT.println("  profile: " + why);
             src.close();
             src2.close();
         }
         OUT.printf("buildings change %.1f%% of the mid view's pixels%n", 100.0 * buildingPx[0] / (w * h));
+        OUT.printf("landmarks: %d captured from their builders, %d as profiles; %d wild site silhouettes; %d far lights%n",
+                counters[0], counters[1], counters[2], counters[3]);
+        OUT.printf("cost: landmark captures %.0f ms, site silhouettes %.0f ms, settlement massing in all %.0f ms%n", ms[0], ms[1], ms[2]);
         if (buildingPx[0] < w * h / 200) throw new IllegalStateException("no buildings visible in the mid view");
-        BufferedImage img = new BufferedImage(w, h * 3 + 16, BufferedImage.TYPE_INT_RGB);
-        for (int k = 0; k < 3; k++)
+        BufferedImage img = new BufferedImage(w, h * 4 + 24, BufferedImage.TYPE_INT_RGB);
+        for (int k = 0; k < 4; k++)
             for (int p = 0; p < w * h; p++) {
                 int c = images[k][p];
                 img.setRGB(p % w, k * (h + 8) + p / w, (c & 0xFF) << 16 | (c & 0xFF00) | (c >>> 16 & 0xFF));
             }
         Files.createDirectories(out.toAbsolutePath().getParent());
         ImageIO.write(img, "png", out.toFile());
-        OUT.println("wrote " + out + " (far, mid, mid without buildings)");
+        OUT.println("wrote " + out + " (far, mid, mid without buildings, far at night)");
     }
 }
