@@ -32,7 +32,7 @@ extern "C" {
 #endif
 
 /* (major << 16) | (minor << 8) | patch. Bumped on any ABI change. */
-#define AETHER_ABI_VERSION 0x000100
+#define AETHER_ABI_VERSION 0x000200
 
 typedef struct AetherContext AetherContext;
 
@@ -97,25 +97,34 @@ typedef struct AetherFrame {
     float timeSec;              /* animation clock (game ticks / 20) */
     float lodBias;              /* >= 1: voxel size per pixel footprint; 1 = one voxel per pixel */
     uint32_t flags;             /* AETHER_FRAME_* */
+    /* optional (AETHER_FRAME_NEAR_DEPTH, host path): width*height view distances of the near field, row 0 at the
+       top; pixels nearer than nearFieldEnd are covered and skip the far march. The GL path reads them from the
+       shared nearDepth image instead. */
+    const float* nearDepth;
 } AetherFrame;
 
 #define AETHER_FRAME_CLOUDS   0x1u
 #define AETHER_FRAME_SHADOWS  0x2u
 #define AETHER_FRAME_ATMOS    0x4u
 #define AETHER_FRAME_ACTORS   0x8u
+#define AETHER_FRAME_SKY      0x10u   /* draw aether's sky behind misses (harness); in game the pack draws its own */
+#define AETHER_FRAME_NEAR_DEPTH 0x20u /* skip pixels the near field covers (see AetherFrame.nearDepth) */
 #define AETHER_FRAME_DEBUG_LOD 0x100u
 #define AETHER_FRAME_DEBUG_WEATHER 0x200u
 
 /*
  * Frame outputs (any pointer may be NULL to skip). Layout matches the shared G-buffer images:
- *  color   RGBA8   rgb = shaded colour (sRGB) or albedo when AETHER_OUT_GBUFFER, a = coverage
- *  normal  RGBA8   octahedral normal in rg, material class in b, cloud shadow in a
- *  depth   float   view distance in blocks along the ray (INFINITY = sky)
+ *  colorLinear RGBA32F linear HDR radiance, premultiplied over whatever is drawn behind (near field or the pack's
+ *                      sky); a = coverage (1 on far terrain, cloud opacity elsewhere). The GL image is RGBA16F.
+ *  color       RGBA8   the same through the harness tonemapper (c / (1 + c), gamma 2.2), for PNGs
+ *  normal      RGBA8   octahedral normal in rg, material class in b, sun visibility (shadows) in a
+ *  depth       float   view distance in blocks along the ray (1e30 = no far surface)
  */
 typedef struct AetherFrameOutput {
     uint32_t* color;
     uint32_t* normal;
     float* depth;
+    float* colorLinear;
 } AetherFrameOutput;
 
 /* Weather fields exactly as WeatherFieldTexture uploads them (RGBA8, 128 x 128, world-fixed toroidal). */
@@ -175,13 +184,14 @@ AETHER_API AetherStatus aether_get_stats(AetherContext* ctx, AetherStats* out);
 
 /*
  * Zero-copy game path (Vulkan backend; call on the render thread with the game's OpenGL context current, on the
- * same GPU). aether_gl_attach creates color (RGBA8), normal (RGBA8) and depth (R32F, view distance in blocks)
- * images shared with that context and returns their GL texture names (rows bottom-up, GL convention). Each
+ * same GPU). aether_gl_attach creates color (RGBA16F linear, premultiplied), normal (RGBA8) and depth (R32F, view
+ * distance in blocks) images, plus nearDepth (R32F) that the GL side writes with the near field's view distance,
+ * all shared with that context; it returns their GL texture names (rows bottom-up, GL convention). Each
  * aether_gl_render queues the frame and a GL-side semaphore wait: GL commands issued after it see the frame,
  * and the CPU never blocks on the GPU. Re-attach on resize; detach before destroying the GL context.
  */
 typedef struct AetherGlTargets {
-    uint32_t color, normal, depth;
+    uint32_t color, normal, depth, nearDepth;
     uint32_t width, height;
 } AetherGlTargets;
 AETHER_API AetherStatus aether_gl_attach(AetherContext* ctx, uint32_t width, uint32_t height, AetherGlTargets* out);

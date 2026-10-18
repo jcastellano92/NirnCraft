@@ -100,6 +100,7 @@ uint32_t flagsOf(const std::string& s) {
     if (s.find("atmos") != std::string::npos) f |= AETHER_FRAME_ATMOS;
     if (s.find("actors") != std::string::npos) f |= AETHER_FRAME_ACTORS;
     if (s.find("lod") != std::string::npos) f |= AETHER_FRAME_DEBUG_LOD;
+    if (s.find("sky") != std::string::npos) f |= AETHER_FRAME_SKY;
     if (s.find("dbgweather") != std::string::npos) f |= AETHER_FRAME_DEBUG_WEATHER;
     return f;
 }
@@ -174,7 +175,7 @@ int main(int argc, char** argv) {
     f.sunDir[2] = float(-std::cos(sa) * std::cos(se));
     f.timeSec = float(num(a, "time", 0));
     f.lodBias = float(num(a, "bias", 1));
-    f.flags = flagsOf(str(a, "flags", "shadows,atmos,clouds"));
+    f.flags = flagsOf(str(a, "flags", "shadows,atmos,clouds,sky"));
 
     std::vector<uint32_t> color(size_t(w) * h), normal(size_t(w) * h);
     std::vector<float> depth(size_t(w) * h);

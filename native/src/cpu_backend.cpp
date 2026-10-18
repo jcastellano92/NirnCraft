@@ -23,12 +23,13 @@ CpuBuffer<T> view(const std::vector<T>& v) {
 class CpuBackend final : public Backend {
 public:
     const char* name() const override { return "cpu (slang->c++)"; }
+    std::vector<float> dummyDepth_ = std::vector<float>(1, 1e30f);
 
     bool render(const FrameInputs& in, FrameTargets& out, double* ms, std::string&) override {
         auto t0 = std::chrono::steady_clock::now();
         uint32_t w = in.frame.dims[0], h = in.frame.dims[1];
         size_t n = size_t(w) * h;
-        out.color.assign(n, 0);
+        out.color.assign(n * 4, 0.0f);
         out.normal.assign(n, 0);
         out.depth.assign(n, 0.0f);
         out.counters.assign(n, 0);
@@ -43,12 +44,14 @@ public:
         g.runEnd = view(s.runEnd);
         g.runMat = view(s.runMat);
         g.palette = view(*in.palette);
-        g.outColor = view(out.color);
+        g.outColor = {reinterpret_cast<Float4*>(out.color.data()), n};
         g.outNormal = view(out.normal);
         g.outDepth = view(out.depth);
         g.weather = view(*in.weather);
         g.counters = view(out.counters);
         g.cloudNoise = view(*in.cloudNoise);
+        if (in.nearDepth) g.nearDepth = {const_cast<float*>(in.nearDepth), n};
+        else g.nearDepth = view(dummyDepth_);
 
         uint32_t gx = (w + 7) / 8, gy = (h + 7) / 8;
         std::atomic<uint32_t> nextRow{0};

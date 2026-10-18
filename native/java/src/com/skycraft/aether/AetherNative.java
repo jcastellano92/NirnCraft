@@ -25,15 +25,15 @@ import static java.lang.foreign.ValueLayout.JAVA_SHORT;
  * heap access, so Java arrays are passed in place without an off-heap copy; frame rendering is a normal downcall.</p>
  */
 public final class AetherNative {
-    public static final int ABI_VERSION = 0x000100;
+    public static final int ABI_VERSION = 0x000200;
     public static final int BACKEND_CPU = 0, BACKEND_VULKAN = 1;
     public static final int FRAME_CLOUDS = 0x1, FRAME_SHADOWS = 0x2, FRAME_ATMOS = 0x4, FRAME_ACTORS = 0x8,
-            FRAME_DEBUG_LOD = 0x100;
+            FRAME_SKY = 0x10, FRAME_NEAR_DEPTH = 0x20, FRAME_DEBUG_LOD = 0x100;
     public static final int CLASS_TERRAIN = 0, CLASS_FOLIAGE = 1, CLASS_WATER = 2, CLASS_EMISSIVE = 3;
     public static final int TILE = 256;
 
     // struct sizes and offsets (see api.cpp)
-    static final long MATERIAL_SIZE = 24, TILE_SIZE = 64, FRAME_SIZE = 136, OUTPUT_SIZE = 24, WEATHER_SIZE = 40,
+    static final long MATERIAL_SIZE = 24, TILE_SIZE = 64, FRAME_SIZE = 144, OUTPUT_SIZE = 32, WEATHER_SIZE = 40,
             ACTOR_SIZE = 48, STATS_SIZE = 56;
 
     private final Arena libArena;
@@ -126,7 +126,7 @@ public final class AetherNative {
         public int width, height;
         public float nearFieldEnd, maxDistance = 40000, planetRadius = 6_371_000f;
         public float sunX, sunY = 1, sunZ, timeSec, lodBias = 1;
-        public int flags = FRAME_SHADOWS | FRAME_ATMOS | FRAME_CLOUDS;
+        public int flags = FRAME_SHADOWS | FRAME_ATMOS | FRAME_CLOUDS | FRAME_SKY;
 
         void write(MemorySegment s) {
             s.set(JAVA_DOUBLE, 0, x);
@@ -144,6 +144,7 @@ public final class AetherNative {
             s.set(JAVA_FLOAT, 120, timeSec);
             s.set(JAVA_FLOAT, 124, lodBias);
             s.set(JAVA_INT, 128, flags);
+            s.set(ADDRESS, 136, MemorySegment.NULL);  // nearDepth: the game path uses the shared GL image
         }
     }
 
@@ -306,6 +307,7 @@ public final class AetherNative {
             outSeg.set(ADDRESS, 0, color != null ? colorSeg : MemorySegment.NULL);
             outSeg.set(ADDRESS, 8, normal != null ? normalSeg : MemorySegment.NULL);
             outSeg.set(ADDRESS, 16, depth != null ? depthSeg : MemorySegment.NULL);
+            outSeg.set(ADDRESS, 24, MemorySegment.NULL);  // colorLinear: not needed by the harness
             try {
                 check((int) render.invokeExact(ptr, frameSeg, outSeg), "aether_render");
             } catch (Throwable t) {

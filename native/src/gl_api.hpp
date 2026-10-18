@@ -13,7 +13,7 @@ using GLsizei = int;
 using GLuint64 = uint64_t;
 using GLubyte = unsigned char;
 
-constexpr GLenum GL_TEXTURE_2D = 0x0DE1, GL_RGBA8 = 0x8058, GL_R32F = 0x822E, GL_RGBA = 0x1908, GL_RED = 0x1903,
+constexpr GLenum GL_TEXTURE_2D = 0x0DE1, GL_RGBA8 = 0x8058, GL_RGBA16F = 0x881A, GL_R32F = 0x822E, GL_RGBA = 0x1908, GL_RED = 0x1903,
                  GL_UNSIGNED_BYTE = 0x1401, GL_FLOAT = 0x1406, GL_RENDERER = 0x1F01, GL_VERSION = 0x1F02,
                  GL_TEXTURE_MIN_FILTER = 0x2801, GL_TEXTURE_MAG_FILTER = 0x2800, GL_NEAREST = 0x2600,
                  GL_TEXTURE_WRAP_S = 0x2802, GL_TEXTURE_WRAP_T = 0x2803, GL_CLAMP_TO_EDGE = 0x812F,
@@ -31,6 +31,9 @@ struct GlApi {
     void(__stdcall* CreateTextures)(GLenum, GLsizei, GLuint*) = nullptr;
     void(__stdcall* TextureParameteri)(GLuint, GLenum, GLint) = nullptr;
     void(__stdcall* GetTextureImage)(GLuint, GLint, GLenum, GLenum, GLsizei, void*) = nullptr;
+    void(__stdcall* ClearTexImage)(GLuint, GLint, GLenum, GLenum, const void*) = nullptr;
+    void(__stdcall* ClearTexSubImage)(GLuint, GLint, GLint, GLint, GLint, GLsizei, GLsizei, GLsizei, GLenum, GLenum,
+                                      const void*) = nullptr;
     void(__stdcall* CreateMemoryObjectsEXT)(GLsizei, GLuint*) = nullptr;
     void(__stdcall* DeleteMemoryObjectsEXT)(GLsizei, const GLuint*) = nullptr;
     void(__stdcall* MemoryObjectParameterivEXT)(GLuint, GLenum, const GLint*) = nullptr;

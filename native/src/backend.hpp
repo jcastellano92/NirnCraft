@@ -16,16 +16,19 @@ struct FrameInputs {
     const std::vector<MaterialGpu>* palette;
     const std::vector<uint32_t>* weather;
     const std::vector<uint32_t>* cloudNoise;  // 64^3 RGBA8
+    const float* nearDepth = nullptr;         // host path: w*h near-field view distances (null: none)
+    bool wantNearDepth = false;               // caller asked for the near-depth skip (GL path: shared image)
 };
 
 struct FrameTargets {
-    std::vector<uint32_t> color, normal, counters;
+    std::vector<float> color;  // linear RGBA, 4 floats per pixel
+    std::vector<uint32_t> normal, counters;
     std::vector<float> depth;
 };
 
 // GL texture names of the images shared with the caller's OpenGL context (bottom-up rows, GL convention).
 struct GlTargets {
-    uint32_t color = 0, normal = 0, depth = 0;
+    uint32_t color = 0, normal = 0, depth = 0, nearDepth = 0;
     uint32_t width = 0, height = 0;
 };
 

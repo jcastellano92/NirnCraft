@@ -1,8 +1,8 @@
 // Vulkan compute backend for the aether_far kernel.
 //  * Host path (harness, tests): scene in host-visible buffers (BAR when available), outputs read back.
 //  * GL path (game): outputs published into images whose memory is exported to the game's OpenGL context
-//    (VK_KHR_external_memory_win32 <-> GL_EXT_memory_object_win32), ordered by a pair of shared semaphores, so the
-//    frame never touches the CPU.
+//    (VK_KHR_external_memory_win32 <-> GL_EXT_memory_object_win32), ordered by shared semaphores, so the frame never
+//    touches the CPU. Two frame slots: the CPU records frame N+1 while the GPU still runs frame N.
 #include <vulkan/vulkan.h>
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
@@ -15,14 +15,26 @@
 #include <vector>
 
 #include "aether_far_spv.h"      // generated: aether_far_spv[], aether_far_spv_size (bytes)
-#include "aether_publish_spv.h"  // generated: aether_publish_spv[], aether_publish_spv_size
+#include "aether_ingest_spv.h"   // generated
+#include "aether_publish_spv.h"  // generated
 #include "backend.hpp"
 #include "gl_api.hpp"
 
 namespace aether {
 namespace {
 
-constexpr uint32_t BINDINGS = 14;
+constexpr uint32_t BINDINGS = 15;
+constexpr uint32_t SLOTS = 2;
+// far kernel bindings
+constexpr uint32_t B_FRAME = 0, B_PALETTE = 7, B_COLOR = 8, B_NORMAL = 9, B_DEPTH = 10, B_WEATHER = 11,
+                   B_COUNTERS = 12, B_NOISE = 13, B_NEAR = 14;
+// shared images
+constexpr int IMG_COLOR = 0, IMG_NORMAL = 1, IMG_DEPTH = 2, IMG_NEAR = 3, IMAGES = 4;
+
+bool perSlot(uint32_t b) {
+    return b == B_FRAME || b == B_PALETTE || b == B_COLOR || b == B_NORMAL || b == B_DEPTH || b == B_WEATHER ||
+           b == B_COUNTERS || b == B_NEAR;
+}
 
 VKAPI_ATTR VkBool32 VKAPI_CALL onValidation(VkDebugUtilsMessageSeverityFlagBitsEXT sev, VkDebugUtilsMessageTypeFlagsEXT,
                                             const VkDebugUtilsMessengerCallbackDataEXT* d, void*) {
@@ -30,7 +42,6 @@ VKAPI_ATTR VkBool32 VKAPI_CALL onValidation(VkDebugUtilsMessageSeverityFlagBitsE
                  d->pMessage);
     return VK_FALSE;
 }
-constexpr uint32_t OUT_COLOR = 8, OUT_NORMAL = 9, OUT_DEPTH = 10, OUT_COUNTERS = 12;
 
 struct Buf {
     VkBuffer buf = VK_NULL_HANDLE;
@@ -48,22 +59,41 @@ struct SharedImage {
     GLuint glMem = 0, glTex = 0;
 };
 
+struct SharedSemaphore {
+    VkSemaphore sem = VK_NULL_HANDLE;
+    HANDLE handle = nullptr;
+    GLuint gl = 0;
+};
+
+struct Slot {
+    VkCommandBuffer cmd = VK_NULL_HANDLE;
+    VkFence fence = VK_NULL_HANDLE;
+    VkQueryPool query = VK_NULL_HANDLE;
+    bool inFlight = false;
+    VkDescriptorSet farSet = VK_NULL_HANDLE, publishSet = VK_NULL_HANDLE, ingestSet = VK_NULL_HANDLE;
+    Buf bufs[BINDINGS];  // only the per-slot bindings are used
+    bool farDirty = true, publishDirty = true, ingestDirty = true;
+    uint64_t sceneRevision = UINT64_MAX;  // scene buffers this slot's descriptors point at
+    SharedSemaphore glReady, vkDone;
+};
+
 class VulkanBackend final : public Backend {
 public:
     ~VulkanBackend() override {
         if (dev_) {
             vkDeviceWaitIdle(dev_);
             destroyInterop();
-            destroyPublish();
-            for (auto& b : bufs_) release(b);
-            if (fence_) vkDestroyFence(dev_, fence_, nullptr);
-            if (query_) vkDestroyQueryPool(dev_, query_, nullptr);
+            for (auto& s : slots_) {
+                for (auto& b : s.bufs) release(b);
+                if (s.fence) vkDestroyFence(dev_, s.fence, nullptr);
+                if (s.query) vkDestroyQueryPool(dev_, s.query, nullptr);
+            }
+            for (auto& b : shared_) release(b);
             if (pool_) vkDestroyCommandPool(dev_, pool_, nullptr);
             if (dpool_) vkDestroyDescriptorPool(dev_, dpool_, nullptr);
-            if (pipe_) vkDestroyPipeline(dev_, pipe_, nullptr);
-            if (playout_) vkDestroyPipelineLayout(dev_, playout_, nullptr);
-            if (dlayout_) vkDestroyDescriptorSetLayout(dev_, dlayout_, nullptr);
-            if (shader_) vkDestroyShaderModule(dev_, shader_, nullptr);
+            destroyPipe(farPipe_, farLayout_, farSetLayout_, farShader_);
+            destroyPipe(publishPipe_, publishLayout_, publishSetLayout_, publishShader_);
+            destroyPipe(ingestPipe_, ingestLayout_, ingestSetLayout_, ingestShader_);
             vkDestroyDevice(dev_, nullptr);
         }
         if (messenger_) {
@@ -77,6 +107,201 @@ public:
     const char* name() const override { return deviceName_; }
 
     bool init(std::string& err) {
+        if (!createInstance(err) || !pickDevice(err) || !createDevice(err)) return false;
+        // far kernel: binding 0 uniform, the rest storage buffers
+        std::vector<VkDescriptorType> farTypes(BINDINGS, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
+        farTypes[B_FRAME] = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        if (!createPipe(aether_far_spv, aether_far_spv_size, farTypes, 0, farPipe_, farLayout_, farSetLayout_, farShader_, err))
+            return false;
+        std::vector<VkDescriptorType> pubTypes = {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
+                                                  VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
+                                                  VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE};
+        if (!createPipe(aether_publish_spv, aether_publish_spv_size, pubTypes, 8, publishPipe_, publishLayout_,
+                        publishSetLayout_, publishShader_, err))
+            return false;
+        std::vector<VkDescriptorType> ingTypes = {VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER};
+        if (!createPipe(aether_ingest_spv, aether_ingest_spv_size, ingTypes, 8, ingestPipe_, ingestLayout_, ingestSetLayout_,
+                        ingestShader_, err))
+            return false;
+
+        VkDescriptorPoolSize ps[3] = {{VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, SLOTS},
+                                      {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, SLOTS * (BINDINGS - 1 + 3 + 1)},
+                                      {VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, SLOTS * (3 + 1)}};
+        VkDescriptorPoolCreateInfo dp{VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO};
+        dp.maxSets = SLOTS * 3;
+        dp.poolSizeCount = 3;
+        dp.pPoolSizes = ps;
+        if (vkCreateDescriptorPool(dev_, &dp, nullptr, &dpool_) != VK_SUCCESS) return fail(err, "descriptor pool");
+        VkCommandPoolCreateInfo cpi{VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO};
+        cpi.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+        cpi.queueFamilyIndex = family_;
+        if (vkCreateCommandPool(dev_, &cpi, nullptr, &pool_) != VK_SUCCESS) return fail(err, "command pool");
+        for (auto& s : slots_) {
+            VkCommandBufferAllocateInfo cba{VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO};
+            cba.commandPool = pool_;
+            cba.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+            cba.commandBufferCount = 1;
+            if (vkAllocateCommandBuffers(dev_, &cba, &s.cmd) != VK_SUCCESS) return fail(err, "command buffer");
+            VkFenceCreateInfo fci{VK_STRUCTURE_TYPE_FENCE_CREATE_INFO};
+            vkCreateFence(dev_, &fci, nullptr, &s.fence);
+            if (timestamps_) {
+                VkQueryPoolCreateInfo q{VK_STRUCTURE_TYPE_QUERY_POOL_CREATE_INFO};
+                q.queryType = VK_QUERY_TYPE_TIMESTAMP;
+                q.queryCount = 2;
+                vkCreateQueryPool(dev_, &q, nullptr, &s.query);
+            }
+            VkDescriptorSetLayout layouts[3] = {farSetLayout_, publishSetLayout_, ingestSetLayout_};
+            VkDescriptorSet sets[3];
+            VkDescriptorSetAllocateInfo da{VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO};
+            da.descriptorPool = dpool_;
+            da.descriptorSetCount = 3;
+            da.pSetLayouts = layouts;
+            if (vkAllocateDescriptorSets(dev_, &da, sets) != VK_SUCCESS) return fail(err, "descriptor sets");
+            s.farSet = sets[0];
+            s.publishSet = sets[1];
+            s.ingestSet = sets[2];
+        }
+        return true;
+    }
+
+    bool render(const FrameInputs& in, FrameTargets& out, double* gpuMs, std::string& err) override {
+        Slot& s = slots_[0];
+        if (!waitSlot(s, gpuMs, err)) return false;
+        uint32_t w = in.frame.dims[0], h = in.frame.dims[1];
+        size_t px = size_t(w) * h;
+        FrameGpu frame = in.frame;
+        if (!prepare(s, in, frame, true, err)) return false;
+        if (in.nearDepth && !upload(s.bufs[B_NEAR], in.nearDepth, px * 4, false, true, err)) return false;
+        refreshDescriptors(s);
+        begin(s);
+        recordFar(s, w, h);
+        VkMemoryBarrier mb{VK_STRUCTURE_TYPE_MEMORY_BARRIER};
+        mb.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
+        mb.dstAccessMask = VK_ACCESS_HOST_READ_BIT;
+        vkCmdPipelineBarrier(s.cmd, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_HOST_BIT, 0, 1, &mb, 0,
+                             nullptr, 0, nullptr);
+        if (!submit(s, nullptr, nullptr, err) || !waitSlot(s, gpuMs, err)) return false;
+        out.color.resize(px * 4);
+        out.normal.resize(px);
+        out.depth.resize(px);
+        out.counters.resize(px);
+        std::memcpy(out.color.data(), s.bufs[B_COLOR].map, px * 16);
+        std::memcpy(out.normal.data(), s.bufs[B_NORMAL].map, px * 4);
+        std::memcpy(out.depth.data(), s.bufs[B_DEPTH].map, px * 4);
+        std::memcpy(out.counters.data(), s.bufs[B_COUNTERS].map, px * 4);
+        return true;
+    }
+
+    // ---- GL interop ------------------------------------------------------------------------------------------
+
+    bool glAttach(uint32_t w, uint32_t h, GlTargets& out, std::string& err) override {
+        if (!interopCapable_) return fail(err, "Vulkan device lacks VK_KHR_external_memory_win32/semaphore_win32");
+        if (attached_) glDetach();
+        if (!gl_.load(err)) return false;
+        // the GL context must live on the same physical GPU as our Vulkan device
+        GLint nUuid = 0;
+        gl_.GetIntegerv(GL_NUM_DEVICE_UUIDS_EXT, &nUuid);
+        bool same = false;
+        for (GLint i = 0; i < nUuid && !same; i++) {
+            GLubyte u[16] = {};
+            gl_.GetUnsignedBytei_vEXT(GL_DEVICE_UUID_EXT, GLuint(i), u);
+            same = std::memcmp(u, deviceUuid_, 16) == 0;
+        }
+        if (!same) {
+            err = std::string("the OpenGL context (") + reinterpret_cast<const char*>(gl_.GetString(GL_RENDERER)) +
+                  ") is not on the Vulkan device " + deviceName_;
+            return false;
+        }
+        const VkFormat fmt[IMAGES] = {VK_FORMAT_R16G16B16A16_SFLOAT, VK_FORMAT_R8G8B8A8_UNORM, VK_FORMAT_R32_SFLOAT,
+                                      VK_FORMAT_R32_SFLOAT};
+        const GLenum glFmt[IMAGES] = {GL_RGBA16F, GL_RGBA8, GL_R32F, GL_R32F};
+        bool ok = true;
+        for (int i = 0; i < IMAGES && ok; i++) ok = createShared(images_[i], fmt[i], glFmt[i], w, h, err);
+        for (auto& s : slots_) ok = ok && createSemaphore(s.glReady, err) && createSemaphore(s.vkDone, err);
+        if (!ok) {
+            destroyInterop();
+            return false;
+        }
+        // nothing covers anything until the GL side writes the near field's distances
+        float uncovered = 1e30f;
+        gl_.ClearTexImage(images_[IMG_NEAR].glTex, 0, GL_RED, GL_FLOAT, &uncovered);
+        if (gl_.GetError() != GL_NO_ERROR) {
+            destroyInterop();
+            return fail(err, "OpenGL error while importing the shared images");
+        }
+        width_ = w;
+        height_ = h;
+        firstGlFrame_ = true;
+        attached_ = true;
+        frameIndex_ = 0;
+        for (auto& s : slots_) s.publishDirty = s.ingestDirty = true;
+        out = {images_[IMG_COLOR].glTex, images_[IMG_NORMAL].glTex, images_[IMG_DEPTH].glTex, images_[IMG_NEAR].glTex, w, h};
+        return true;
+    }
+
+    bool glRender(const FrameInputs& in, double* gpuMs, std::string& err) override {
+        if (!attached_) return fail(err, "aether_gl_attach first");
+        uint32_t w = in.frame.dims[0], h = in.frame.dims[1];
+        if (w != width_ || h != height_) return fail(err, "frame size differs from the attached targets (re-attach)");
+        Slot& s = slots_[frameIndex_ % SLOTS];
+        if (!waitSlot(s, gpuMs, err)) return false;  // frame N-2: normally long done
+        FrameGpu frame = in.frame;
+        if (in.wantNearDepth) frame.dims[2] |= 0x20u;  // FRAME_NEAR_DEPTH: read from the shared image
+        if (!prepare(s, in, frame, false, err)) return false;
+        if (!ensure(s.bufs[B_NEAR], size_t(w) * h * 4, false, false, err)) return false;
+        refreshDescriptors(s);
+
+        // GL releases the shared images to Vulkan (after everything GL queued so far, e.g. last frame's composite)
+        GLuint tex[IMAGES];
+        GLenum layouts[IMAGES];
+        for (int i = 0; i < IMAGES; i++) {
+            tex[i] = images_[i].glTex;
+            layouts[i] = GL_LAYOUT_GENERAL_EXT;
+        }
+        gl_.SignalSemaphoreEXT(s.glReady.gl, 0, nullptr, IMAGES, tex, layouts);
+        gl_.Flush();
+
+        begin(s);
+        imageBarriers(s.cmd, true);
+        uint32_t pcv[2] = {w, h};
+        if (in.wantNearDepth) {
+            vkCmdBindPipeline(s.cmd, VK_PIPELINE_BIND_POINT_COMPUTE, ingestPipe_);
+            vkCmdBindDescriptorSets(s.cmd, VK_PIPELINE_BIND_POINT_COMPUTE, ingestLayout_, 0, 1, &s.ingestSet, 0, nullptr);
+            vkCmdPushConstants(s.cmd, ingestLayout_, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(pcv), pcv);
+            vkCmdDispatch(s.cmd, (w + 7) / 8, (h + 7) / 8, 1);
+            computeBarrier(s.cmd);
+        }
+        recordFar(s, w, h);
+        computeBarrier(s.cmd);
+        vkCmdBindPipeline(s.cmd, VK_PIPELINE_BIND_POINT_COMPUTE, publishPipe_);
+        vkCmdBindDescriptorSets(s.cmd, VK_PIPELINE_BIND_POINT_COMPUTE, publishLayout_, 0, 1, &s.publishSet, 0, nullptr);
+        vkCmdPushConstants(s.cmd, publishLayout_, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(pcv), pcv);
+        vkCmdDispatch(s.cmd, (w + 7) / 8, (h + 7) / 8, 1);
+        imageBarriers(s.cmd, false);
+        if (!submit(s, &s.glReady.sem, &s.vkDone.sem, err)) return false;
+        firstGlFrame_ = false;
+        frameIndex_++;
+
+        // GL commands after this point wait for the Vulkan frame
+        gl_.WaitSemaphoreEXT(s.vkDone.gl, 0, nullptr, IMAGES, tex, layouts);
+        return true;
+    }
+
+    void glDetach() override {
+        if (dev_) vkDeviceWaitIdle(dev_);
+        for (auto& s : slots_) s.inFlight = false;
+        destroyInterop();
+    }
+
+private:
+    static bool fail(std::string& err, const char* m) {
+        err = m;
+        return false;
+    }
+
+    // ---- setup ---------------------------------------------------------------------------------------------
+
+    bool createInstance(std::string& err) {
         VkApplicationInfo app{VK_STRUCTURE_TYPE_APPLICATION_INFO};
         app.pApplicationName = "aether_core";
         app.apiVersion = VK_API_VERSION_1_3;
@@ -103,6 +328,10 @@ public:
             if (create) create(inst_, &mi, nullptr, &messenger_);
             std::fprintf(stderr, "[vulkan] validation %s\n", messenger_ ? "on" : "requested but unavailable");
         }
+        return true;
+    }
+
+    bool pickDevice(std::string& err) {
         uint32_t n = 0;
         vkEnumeratePhysicalDevices(inst_, &n, nullptr);
         std::vector<VkPhysicalDevice> devs(n);
@@ -127,10 +356,8 @@ public:
         props2.pNext = &idp;
         vkGetPhysicalDeviceProperties2(phys_, &props2);
         std::memcpy(deviceUuid_, idp.deviceUUID, VK_UUID_SIZE);
-        const VkPhysicalDeviceProperties& props = props2.properties;
-        std::snprintf(deviceName_, sizeof(deviceName_), "vulkan (%s)", props.deviceName);
-        timestampPeriod_ = props.limits.timestampPeriod;
-
+        std::snprintf(deviceName_, sizeof(deviceName_), "vulkan (%s)", props2.properties.deviceName);
+        timestampPeriod_ = props2.properties.limits.timestampPeriod;
         uint32_t qn = 0;
         vkGetPhysicalDeviceQueueFamilyProperties(phys_, &qn, nullptr);
         std::vector<VkQueueFamilyProperties> qf(qn);
@@ -142,8 +369,10 @@ public:
                 timestamps_ = qf[i].timestampValidBits > 0;
                 break;
             }
-        if (family_ == UINT32_MAX) return fail(err, "no compute queue");
+        return family_ != UINT32_MAX || fail(err, "no compute queue");
+    }
 
+    bool createDevice(std::string& err) {
         // interop extensions are optional: without them the host path still works
         uint32_t en = 0;
         vkEnumerateDeviceExtensionProperties(phys_, nullptr, &en, nullptr);
@@ -160,7 +389,6 @@ public:
             enable.push_back(VK_KHR_EXTERNAL_SEMAPHORE_WIN32_EXTENSION_NAME);
             interopCapable_ = true;
         }
-
         float prio = 1.0f;
         VkDeviceQueueCreateInfo qci{VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO};
         qci.queueFamilyIndex = family_;
@@ -181,244 +409,178 @@ public:
             getSemaphoreHandle_ = reinterpret_cast<PFN_vkGetSemaphoreWin32HandleKHR>(vkGetDeviceProcAddr(dev_, "vkGetSemaphoreWin32HandleKHR"));
             interopCapable_ = getMemoryHandle_ && getSemaphoreHandle_;
         }
+        return true;
+    }
 
+    bool createPipe(const uint32_t* code, size_t bytes, const std::vector<VkDescriptorType>& types, uint32_t pushBytes,
+                    VkPipeline& pipe, VkPipelineLayout& layout, VkDescriptorSetLayout& setLayout, VkShaderModule& module,
+                    std::string& err) {
         VkShaderModuleCreateInfo smci{VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO};
-        smci.codeSize = aether_far_spv_size;
-        smci.pCode = aether_far_spv;
-        if (vkCreateShaderModule(dev_, &smci, nullptr, &shader_) != VK_SUCCESS) return fail(err, "shader module");
-
-        VkDescriptorSetLayoutBinding b[BINDINGS];
-        for (uint32_t i = 0; i < BINDINGS; i++) {
-            b[i] = {};
-            b[i].binding = i;
-            b[i].descriptorType = i == 0 ? VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER : VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-            b[i].descriptorCount = 1;
-            b[i].stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
-        }
+        smci.codeSize = bytes;
+        smci.pCode = code;
+        if (vkCreateShaderModule(dev_, &smci, nullptr, &module) != VK_SUCCESS) return fail(err, "shader module");
+        std::vector<VkDescriptorSetLayoutBinding> b(types.size());
+        for (uint32_t i = 0; i < types.size(); i++) b[i] = {i, types[i], 1, VK_SHADER_STAGE_COMPUTE_BIT, nullptr};
         VkDescriptorSetLayoutCreateInfo dl{VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO};
-        dl.bindingCount = BINDINGS;
-        dl.pBindings = b;
-        if (vkCreateDescriptorSetLayout(dev_, &dl, nullptr, &dlayout_) != VK_SUCCESS) return fail(err, "set layout");
+        dl.bindingCount = uint32_t(b.size());
+        dl.pBindings = b.data();
+        if (vkCreateDescriptorSetLayout(dev_, &dl, nullptr, &setLayout) != VK_SUCCESS) return fail(err, "set layout");
+        VkPushConstantRange pr{VK_SHADER_STAGE_COMPUTE_BIT, 0, pushBytes};
         VkPipelineLayoutCreateInfo pl{VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO};
         pl.setLayoutCount = 1;
-        pl.pSetLayouts = &dlayout_;
-        if (vkCreatePipelineLayout(dev_, &pl, nullptr, &playout_) != VK_SUCCESS) return fail(err, "pipeline layout");
+        pl.pSetLayouts = &setLayout;
+        pl.pushConstantRangeCount = pushBytes ? 1 : 0;
+        pl.pPushConstantRanges = pushBytes ? &pr : nullptr;
+        if (vkCreatePipelineLayout(dev_, &pl, nullptr, &layout) != VK_SUCCESS) return fail(err, "pipeline layout");
         VkComputePipelineCreateInfo cp{VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO};
         cp.stage = {VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO};
         cp.stage.stage = VK_SHADER_STAGE_COMPUTE_BIT;
-        cp.stage.module = shader_;
+        cp.stage.module = module;
         cp.stage.pName = "main";
-        cp.layout = playout_;
-        if (vkCreateComputePipelines(dev_, VK_NULL_HANDLE, 1, &cp, nullptr, &pipe_) != VK_SUCCESS) return fail(err, "pipeline");
-
-        VkDescriptorPoolSize ps[3] = {{VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1},
-                                      {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, BINDINGS - 1 + 3},
-                                      {VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 3}};
-        VkDescriptorPoolCreateInfo dp{VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO};
-        dp.maxSets = 2;
-        dp.poolSizeCount = 3;
-        dp.pPoolSizes = ps;
-        if (vkCreateDescriptorPool(dev_, &dp, nullptr, &dpool_) != VK_SUCCESS) return fail(err, "descriptor pool");
-        VkDescriptorSetAllocateInfo da{VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO};
-        da.descriptorPool = dpool_;
-        da.descriptorSetCount = 1;
-        da.pSetLayouts = &dlayout_;
-        if (vkAllocateDescriptorSets(dev_, &da, &set_) != VK_SUCCESS) return fail(err, "descriptor set");
-
-        VkCommandPoolCreateInfo cpi{VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO};
-        cpi.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-        cpi.queueFamilyIndex = family_;
-        if (vkCreateCommandPool(dev_, &cpi, nullptr, &pool_) != VK_SUCCESS) return fail(err, "command pool");
-        VkCommandBufferAllocateInfo cba{VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO};
-        cba.commandPool = pool_;
-        cba.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-        cba.commandBufferCount = 1;
-        if (vkAllocateCommandBuffers(dev_, &cba, &cmd_) != VK_SUCCESS) return fail(err, "command buffer");
-        VkFenceCreateInfo fci{VK_STRUCTURE_TYPE_FENCE_CREATE_INFO};
-        vkCreateFence(dev_, &fci, nullptr, &fence_);
-        if (timestamps_) {
-            VkQueryPoolCreateInfo q{VK_STRUCTURE_TYPE_QUERY_POOL_CREATE_INFO};
-            q.queryType = VK_QUERY_TYPE_TIMESTAMP;
-            q.queryCount = 2;
-            vkCreateQueryPool(dev_, &q, nullptr, &query_);
-        }
-        bufs_.resize(BINDINGS);
+        cp.layout = layout;
+        if (vkCreateComputePipelines(dev_, VK_NULL_HANDLE, 1, &cp, nullptr, &pipe) != VK_SUCCESS) return fail(err, "pipeline");
         return true;
     }
 
-    bool render(const FrameInputs& in, FrameTargets& out, double* gpuMs, std::string& err) override {
-        if (!finishInFlight(gpuMs, err)) return false;
-        uint32_t w = in.frame.dims[0], h = in.frame.dims[1];
+    void destroyPipe(VkPipeline& p, VkPipelineLayout& l, VkDescriptorSetLayout& s, VkShaderModule& m) {
+        if (p) vkDestroyPipeline(dev_, p, nullptr);
+        if (l) vkDestroyPipelineLayout(dev_, l, nullptr);
+        if (s) vkDestroyDescriptorSetLayout(dev_, s, nullptr);
+        if (m) vkDestroyShaderModule(dev_, m, nullptr);
+        p = VK_NULL_HANDLE;
+        l = VK_NULL_HANDLE;
+        s = VK_NULL_HANDLE;
+        m = VK_NULL_HANDLE;
+    }
+
+    // ---- per frame -------------------------------------------------------------------------------------------
+
+    bool prepare(Slot& s, const FrameInputs& in, const FrameGpu& frame, bool readback, std::string& err) {
+        uint32_t w = frame.dims[0], h = frame.dims[1];
         size_t px = size_t(w) * h;
-        if (!prepare(in, true, err)) return false;
-        begin();
-        recordFar(w, h);
-        VkMemoryBarrier mb{VK_STRUCTURE_TYPE_MEMORY_BARRIER};
-        mb.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
-        mb.dstAccessMask = VK_ACCESS_HOST_READ_BIT;
-        vkCmdPipelineBarrier(cmd_, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_HOST_BIT, 0, 1, &mb, 0,
-                             nullptr, 0, nullptr);
-        if (!submit(nullptr, nullptr, err)) return false;
-        if (!finishInFlight(gpuMs, err)) return false;
-        out.color.resize(px);
-        out.normal.resize(px);
-        out.depth.resize(px);
-        out.counters.resize(px);
-        std::memcpy(out.color.data(), bufs_[OUT_COLOR].map, px * 4);
-        std::memcpy(out.normal.data(), bufs_[OUT_NORMAL].map, px * 4);
-        std::memcpy(out.depth.data(), bufs_[OUT_DEPTH].map, px * 4);
-        std::memcpy(out.counters.data(), bufs_[OUT_COUNTERS].map, px * 4);
-        return true;
-    }
-
-    // ---- GL interop ------------------------------------------------------------------------------------------
-
-    bool glAttach(uint32_t w, uint32_t h, GlTargets& out, std::string& err) override {
-        if (!interopCapable_) return fail(err, "Vulkan device lacks VK_KHR_external_memory_win32/semaphore_win32");
-        if (attached_) glDetach();
-        if (!gl_.load(err)) return false;
-        // the GL context must live on the same physical GPU as our Vulkan device
-        GLint nUuid = 0;
-        gl_.GetIntegerv(GL_NUM_DEVICE_UUIDS_EXT, &nUuid);
-        bool same = false;
-        for (GLint i = 0; i < nUuid && !same; i++) {
-            GLubyte u[16] = {};
-            gl_.GetUnsignedBytei_vEXT(GL_DEVICE_UUID_EXT, GLuint(i), u);
-            same = std::memcmp(u, deviceUuid_, 16) == 0;
+        const PackedScene& sc = *in.scene;
+        if (sc.revision != sceneRevision_) {
+            // the scene buffers are shared by both slots: nothing may still be reading them
+            for (auto& o : slots_)
+                if (!waitSlot(o, nullptr, err)) return false;
+            bool ok = upload(shared_[1], sc.table.data(), sc.table.size() * 4, false, false, err) &&
+                      upload(shared_[2], sc.regions.data(), sc.regions.size() * sizeof(RegionGpu), false, false, err) &&
+                      upload(shared_[3], sc.nodes.data(), sc.nodes.size() * 4, false, false, err) &&
+                      upload(shared_[4], sc.leaves.data(), sc.leaves.size() * 8, false, false, err) &&
+                      upload(shared_[5], sc.runEnd.data(), sc.runEnd.size() * 4, false, false, err) &&
+                      upload(shared_[6], sc.runMat.data(), sc.runMat.size() * 4, false, false, err);
+            if (!ok) return false;
+            sceneRevision_ = sc.revision;
         }
-        if (!same) {
-            err = std::string("the OpenGL context (") + reinterpret_cast<const char*>(gl_.GetString(GL_RENDERER)) +
-                  ") is not on the Vulkan device " + deviceName_;
-            return false;
-        }
-        if (!createPublishPipeline(err)) return false;
-        const VkFormat fmt[3] = {VK_FORMAT_R8G8B8A8_UNORM, VK_FORMAT_R8G8B8A8_UNORM, VK_FORMAT_R32_SFLOAT};
-        const GLenum glFmt[3] = {GL_RGBA8, GL_RGBA8, GL_R32F};
-        for (int i = 0; i < 3; i++)
-            if (!createShared(images_[i], fmt[i], glFmt[i], w, h, err)) {
-                destroyInterop();
-                return false;
-            }
-        if (!createSemaphore(glReady_, glReadyHandle_, glReadyGl_, err) || !createSemaphore(vkDone_, vkDoneHandle_, vkDoneGl_, err)) {
-            destroyInterop();
-            return false;
-        }
-        if (gl_.GetError() != GL_NO_ERROR) {
-            destroyInterop();
-            return fail(err, "OpenGL error while importing the shared images");
-        }
-        width_ = w;
-        height_ = h;
-        firstGlFrame_ = true;
-        attached_ = true;
-        publishDirty_ = true;
-        out = {images_[0].glTex, images_[1].glTex, images_[2].glTex, w, h};
-        return true;
-    }
-
-    bool glRender(const FrameInputs& in, double* gpuMs, std::string& err) override {
-        if (!attached_) return fail(err, "aether_gl_attach first");
-        uint32_t w = in.frame.dims[0], h = in.frame.dims[1];
-        if (w != width_ || h != height_) return fail(err, "frame size differs from the attached targets (re-attach)");
-        if (!finishInFlight(gpuMs, err)) return false;
-        if (!prepare(in, false, err)) return false;
-        if (publishDirty_) writePublishDescriptors();
-
-        // GL releases the textures to Vulkan
-        GLuint tex[3] = {images_[0].glTex, images_[1].glTex, images_[2].glTex};
-        GLenum layouts[3] = {GL_LAYOUT_GENERAL_EXT, GL_LAYOUT_GENERAL_EXT, GL_LAYOUT_GENERAL_EXT};
-        gl_.SignalSemaphoreEXT(glReadyGl_, 0, nullptr, 3, tex, layouts);
-        gl_.Flush();
-
-        begin();
-        imageBarriers(true);
-        recordFar(w, h);
-        VkMemoryBarrier mb{VK_STRUCTURE_TYPE_MEMORY_BARRIER};
-        mb.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
-        mb.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
-        vkCmdPipelineBarrier(cmd_, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, 0, 1, &mb,
-                             0, nullptr, 0, nullptr);
-        vkCmdBindPipeline(cmd_, VK_PIPELINE_BIND_POINT_COMPUTE, publishPipe_);
-        vkCmdBindDescriptorSets(cmd_, VK_PIPELINE_BIND_POINT_COMPUTE, publishLayout_, 0, 1, &publishSet_, 0, nullptr);
-        uint32_t pcv[2] = {w, h};
-        vkCmdPushConstants(cmd_, publishLayout_, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(pcv), pcv);
-        vkCmdDispatch(cmd_, (w + 7) / 8, (h + 7) / 8, 1);
-        imageBarriers(false);
-        if (!submit(&glReady_, &vkDone_, err)) return false;
-        firstGlFrame_ = false;
-
-        // GL commands after this point wait for the Vulkan frame
-        gl_.WaitSemaphoreEXT(vkDoneGl_, 0, nullptr, 3, tex, layouts);
-        return true;
-    }
-
-    void glDetach() override {
-        if (dev_) vkDeviceWaitIdle(dev_);
-        inFlight_ = false;
-        destroyInterop();
-    }
-
-private:
-    static bool fail(std::string& err, const char* m) {
-        err = m;
-        return false;
-    }
-
-    bool prepare(const FrameInputs& in, bool readback, std::string& err) {
-        uint32_t w = in.frame.dims[0], h = in.frame.dims[1];
-        size_t px = size_t(w) * h;
-        const PackedScene& s = *in.scene;
-        bool sceneChanged = s.revision != sceneRevision_;
-        bool ok = true;
-        ok &= upload(0, &in.frame, sizeof(FrameGpu), true, err);
-        if (sceneChanged) {
-            ok &= upload(1, s.table.data(), s.table.size() * 4, false, err);
-            ok &= upload(2, s.regions.data(), s.regions.size() * sizeof(RegionGpu), false, err);
-            ok &= upload(3, s.nodes.data(), s.nodes.size() * 4, false, err);
-            ok &= upload(4, s.leaves.data(), s.leaves.size() * 8, false, err);
-            ok &= upload(5, s.runEnd.data(), s.runEnd.size() * 4, false, err);
-            ok &= upload(6, s.runMat.data(), s.runMat.size() * 4, false, err);
-        }
-        ok &= upload(7, in.palette->data(), in.palette->size() * sizeof(MaterialGpu), false, err);
-        // host path: outputs in cached system memory (CPU reads from BAR are uncached); GL path: device local
-        ok &= ensure(OUT_COLOR, px * 4, false, err, readback) && ensure(OUT_NORMAL, px * 4, false, err, readback) &&
-              ensure(OUT_DEPTH, px * 4, false, err, readback);
-        ok &= upload(11, in.weather->data(), in.weather->size() * 4, false, err);
-        ok &= ensure(OUT_COUNTERS, px * 4, false, err, readback);
-        if (in.cloudNoise->data() != noiseUploaded_ || !bufs_[13].buf) {
-            ok &= upload(13, in.cloudNoise->data(), in.cloudNoise->size() * 4, false, err);
+        if (in.cloudNoise->data() != noiseUploaded_ || !shared_[B_NOISE].buf) {
+            for (auto& o : slots_)
+                if (!waitSlot(o, nullptr, err)) return false;
+            if (!upload(shared_[B_NOISE], in.cloudNoise->data(), in.cloudNoise->size() * 4, false, false, err)) return false;
             noiseUploaded_ = in.cloudNoise->data();
         }
-        if (!ok) return false;
-        sceneRevision_ = s.revision;
-        if (descriptorsDirty_) writeDescriptors();
-        return true;
+        // host path: outputs in cached system memory (CPU reads from BAR are uncached); GL path: device local
+        bool ok = upload(s.bufs[B_FRAME], &frame, sizeof(FrameGpu), true, false, err) &&
+                  upload(s.bufs[B_PALETTE], in.palette->data(), in.palette->size() * sizeof(MaterialGpu), false, false, err) &&
+                  upload(s.bufs[B_WEATHER], in.weather->data(), in.weather->size() * 4, false, false, err) &&
+                  ensure(s.bufs[B_COLOR], px * 16, false, readback, err) && ensure(s.bufs[B_NORMAL], px * 4, false, readback, err) &&
+                  ensure(s.bufs[B_DEPTH], px * 4, false, readback, err) && ensure(s.bufs[B_COUNTERS], px * 4, false, readback, err) &&
+                  ensure(s.bufs[B_NEAR], 16, false, readback, err);
+        return ok;
     }
 
-    void begin() {
-        vkResetCommandBuffer(cmd_, 0);
-        VkCommandBufferBeginInfo bi{VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO};
-        bi.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-        vkBeginCommandBuffer(cmd_, &bi);
-        if (query_) {
-            vkCmdResetQueryPool(cmd_, query_, 0, 2);
-            vkCmdWriteTimestamp(cmd_, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, query_, 0);
+    void refreshDescriptors(Slot& s) {
+        if (s.farDirty || s.sceneRevision != sceneRevision_ || sharedDirty_) {
+            VkDescriptorBufferInfo info[BINDINGS];
+            VkWriteDescriptorSet wr[BINDINGS];
+            for (uint32_t i = 0; i < BINDINGS; i++) {
+                const Buf& b = perSlot(i) ? s.bufs[i] : shared_[i];
+                info[i] = {b.buf, 0, VK_WHOLE_SIZE};
+                wr[i] = {VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET};
+                wr[i].dstSet = s.farSet;
+                wr[i].dstBinding = i;
+                wr[i].descriptorCount = 1;
+                wr[i].descriptorType = i == B_FRAME ? VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER : VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+                wr[i].pBufferInfo = &info[i];
+            }
+            vkUpdateDescriptorSets(dev_, BINDINGS, wr, 0, nullptr);
+            s.farDirty = false;
+            s.sceneRevision = sceneRevision_;
+            sharedDirtySlots_ |= 1u << uint32_t(&s - slots_);
+            if (sharedDirtySlots_ == (1u << SLOTS) - 1) sharedDirty_ = false;
+        }
+        if (attached_ && s.publishDirty) {
+            VkDescriptorBufferInfo bi[3] = {{s.bufs[B_COLOR].buf, 0, VK_WHOLE_SIZE},
+                                            {s.bufs[B_NORMAL].buf, 0, VK_WHOLE_SIZE},
+                                            {s.bufs[B_DEPTH].buf, 0, VK_WHOLE_SIZE}};
+            VkDescriptorImageInfo ii[3];
+            VkWriteDescriptorSet wr[6];
+            for (uint32_t i = 0; i < 6; i++) {
+                wr[i] = {VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET};
+                wr[i].dstSet = s.publishSet;
+                wr[i].dstBinding = i;
+                wr[i].descriptorCount = 1;
+                if (i < 3) {
+                    wr[i].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+                    wr[i].pBufferInfo = &bi[i];
+                } else {
+                    ii[i - 3] = {VK_NULL_HANDLE, images_[i - 3].view, VK_IMAGE_LAYOUT_GENERAL};
+                    wr[i].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+                    wr[i].pImageInfo = &ii[i - 3];
+                }
+            }
+            vkUpdateDescriptorSets(dev_, 6, wr, 0, nullptr);
+            s.publishDirty = false;
+        }
+        if (attached_ && s.ingestDirty) {
+            VkDescriptorImageInfo ii{VK_NULL_HANDLE, images_[IMG_NEAR].view, VK_IMAGE_LAYOUT_GENERAL};
+            VkDescriptorBufferInfo bi{s.bufs[B_NEAR].buf, 0, VK_WHOLE_SIZE};
+            VkWriteDescriptorSet wr[2] = {{VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET}, {VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET}};
+            wr[0].dstSet = wr[1].dstSet = s.ingestSet;
+            wr[0].dstBinding = 0;
+            wr[0].descriptorCount = 1;
+            wr[0].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+            wr[0].pImageInfo = &ii;
+            wr[1].dstBinding = 1;
+            wr[1].descriptorCount = 1;
+            wr[1].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+            wr[1].pBufferInfo = &bi;
+            vkUpdateDescriptorSets(dev_, 2, wr, 0, nullptr);
+            s.ingestDirty = false;
         }
     }
 
-    void recordFar(uint32_t w, uint32_t h) {
-        vkCmdBindPipeline(cmd_, VK_PIPELINE_BIND_POINT_COMPUTE, pipe_);
-        vkCmdBindDescriptorSets(cmd_, VK_PIPELINE_BIND_POINT_COMPUTE, playout_, 0, 1, &set_, 0, nullptr);
-        vkCmdDispatch(cmd_, (w + 7) / 8, (h + 7) / 8, 1);
+    void begin(Slot& s) {
+        vkResetCommandBuffer(s.cmd, 0);
+        VkCommandBufferBeginInfo bi{VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO};
+        bi.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+        vkBeginCommandBuffer(s.cmd, &bi);
+        if (s.query) {
+            vkCmdResetQueryPool(s.cmd, s.query, 0, 2);
+            vkCmdWriteTimestamp(s.cmd, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, s.query, 0);
+        }
     }
 
-    bool submit(VkSemaphore* wait, VkSemaphore* signal, std::string& err) {
-        if (query_) vkCmdWriteTimestamp(cmd_, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, query_, 1);
-        vkEndCommandBuffer(cmd_);
+    void recordFar(Slot& s, uint32_t w, uint32_t h) {
+        vkCmdBindPipeline(s.cmd, VK_PIPELINE_BIND_POINT_COMPUTE, farPipe_);
+        vkCmdBindDescriptorSets(s.cmd, VK_PIPELINE_BIND_POINT_COMPUTE, farLayout_, 0, 1, &s.farSet, 0, nullptr);
+        vkCmdDispatch(s.cmd, (w + 7) / 8, (h + 7) / 8, 1);
+    }
+
+    static void computeBarrier(VkCommandBuffer cmd) {
+        VkMemoryBarrier mb{VK_STRUCTURE_TYPE_MEMORY_BARRIER};
+        mb.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
+        mb.dstAccessMask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT;
+        vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, 0, 1, &mb, 0,
+                             nullptr, 0, nullptr);
+    }
+
+    bool submit(Slot& s, VkSemaphore* wait, VkSemaphore* signal, std::string& err) {
+        if (s.query) vkCmdWriteTimestamp(s.cmd, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, s.query, 1);
+        vkEndCommandBuffer(s.cmd);
         VkPipelineStageFlags stage = VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT;
         VkSubmitInfo si{VK_STRUCTURE_TYPE_SUBMIT_INFO};
         si.commandBufferCount = 1;
-        si.pCommandBuffers = &cmd_;
+        si.pCommandBuffers = &s.cmd;
         if (wait) {
             si.waitSemaphoreCount = 1;
             si.pWaitSemaphores = wait;
@@ -428,52 +590,56 @@ private:
             si.signalSemaphoreCount = 1;
             si.pSignalSemaphores = signal;
         }
-        vkResetFences(dev_, 1, &fence_);
-        if (vkQueueSubmit(queue_, 1, &si, fence_) != VK_SUCCESS) return fail(err, "submit failed");
-        inFlight_ = true;
+        vkResetFences(dev_, 1, &s.fence);
+        if (vkQueueSubmit(queue_, 1, &si, s.fence) != VK_SUCCESS) return fail(err, "submit failed");
+        s.inFlight = true;
         return true;
     }
 
-    // Waits for the previous submission (frame resources are single-buffered) and reports its GPU time.
-    bool finishInFlight(double* gpuMs, std::string& err) {
-        if (!inFlight_) return true;
-        if (vkWaitForFences(dev_, 1, &fence_, VK_TRUE, 10'000'000'000ull) != VK_SUCCESS) return fail(err, "GPU timeout/device lost");
-        inFlight_ = false;
-        if (query_ && gpuMs) {
+    // Waits for the slot's previous submission and reports its GPU time.
+    bool waitSlot(Slot& s, double* gpuMs, std::string& err) {
+        if (!s.inFlight) return true;
+        if (vkWaitForFences(dev_, 1, &s.fence, VK_TRUE, 10'000'000'000ull) != VK_SUCCESS) return fail(err, "GPU timeout/device lost");
+        s.inFlight = false;
+        if (s.query && gpuMs) {
             uint64_t ts[2] = {};
-            vkGetQueryPoolResults(dev_, query_, 0, 2, sizeof(ts), ts, 8, VK_QUERY_RESULT_64_BIT | VK_QUERY_RESULT_WAIT_BIT);
+            vkGetQueryPoolResults(dev_, s.query, 0, 2, sizeof(ts), ts, 8, VK_QUERY_RESULT_64_BIT | VK_QUERY_RESULT_WAIT_BIT);
             *gpuMs = double(ts[1] - ts[0]) * timestampPeriod_ / 1e6;
         }
         return true;
     }
 
     // acquire: from GL (external queue family) for writing; release: back to GL.
-    void imageBarriers(bool acquire) {
-        VkImageMemoryBarrier b[3];
-        for (int i = 0; i < 3; i++) {
+    void imageBarriers(VkCommandBuffer cmd, bool acquire) {
+        VkImageMemoryBarrier b[IMAGES];
+        for (int i = 0; i < IMAGES; i++) {
             b[i] = {VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER};
             b[i].image = images_[i].image;
             b[i].subresourceRange = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1};
             if (acquire) {
-                b[i].oldLayout = firstGlFrame_ ? VK_IMAGE_LAYOUT_UNDEFINED : VK_IMAGE_LAYOUT_GENERAL;
+                // nearDepth was cleared by GL at attach: keep its contents even on the first frame
+                bool undefined = firstGlFrame_ && i != IMG_NEAR;
+                b[i].oldLayout = undefined ? VK_IMAGE_LAYOUT_UNDEFINED : VK_IMAGE_LAYOUT_GENERAL;
                 b[i].newLayout = VK_IMAGE_LAYOUT_GENERAL;
-                b[i].srcQueueFamilyIndex = firstGlFrame_ ? VK_QUEUE_FAMILY_IGNORED : VK_QUEUE_FAMILY_EXTERNAL;
-                b[i].dstQueueFamilyIndex = firstGlFrame_ ? VK_QUEUE_FAMILY_IGNORED : family_;
+                b[i].srcQueueFamilyIndex = undefined ? VK_QUEUE_FAMILY_IGNORED : VK_QUEUE_FAMILY_EXTERNAL;
+                b[i].dstQueueFamilyIndex = undefined ? VK_QUEUE_FAMILY_IGNORED : family_;
                 b[i].srcAccessMask = 0;
-                b[i].dstAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
+                b[i].dstAccessMask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT;
             } else {
                 b[i].oldLayout = VK_IMAGE_LAYOUT_GENERAL;
                 b[i].newLayout = VK_IMAGE_LAYOUT_GENERAL;
                 b[i].srcQueueFamilyIndex = family_;
                 b[i].dstQueueFamilyIndex = VK_QUEUE_FAMILY_EXTERNAL;
-                b[i].srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
+                b[i].srcAccessMask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT;
                 b[i].dstAccessMask = 0;
             }
         }
-        vkCmdPipelineBarrier(cmd_, acquire ? VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT : VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
+        vkCmdPipelineBarrier(cmd, acquire ? VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT : VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
                              acquire ? VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT : VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, 0, 0,
-                             nullptr, 0, nullptr, 3, b);
+                             nullptr, 0, nullptr, IMAGES, b);
     }
+
+    // ---- resources -------------------------------------------------------------------------------------------
 
     uint32_t memoryType(uint32_t bits, VkMemoryPropertyFlags need) {
         VkPhysicalDeviceMemoryProperties mp;
@@ -538,83 +704,19 @@ private:
         return true;
     }
 
-    bool createSemaphore(VkSemaphore& sem, HANDLE& handle, GLuint& glSem, std::string& err) {
+    bool createSemaphore(SharedSemaphore& s, std::string& err) {
         VkExportSemaphoreCreateInfo exp{VK_STRUCTURE_TYPE_EXPORT_SEMAPHORE_CREATE_INFO};
         exp.handleTypes = VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_WIN32_BIT;
         VkSemaphoreCreateInfo sc{VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO};
         sc.pNext = &exp;
-        if (vkCreateSemaphore(dev_, &sc, nullptr, &sem) != VK_SUCCESS) return fail(err, "vkCreateSemaphore (shared)");
+        if (vkCreateSemaphore(dev_, &sc, nullptr, &s.sem) != VK_SUCCESS) return fail(err, "vkCreateSemaphore (shared)");
         VkSemaphoreGetWin32HandleInfoKHR hi{VK_STRUCTURE_TYPE_SEMAPHORE_GET_WIN32_HANDLE_INFO_KHR};
-        hi.semaphore = sem;
+        hi.semaphore = s.sem;
         hi.handleType = VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_OPAQUE_WIN32_BIT;
-        if (getSemaphoreHandle_(dev_, &hi, &handle) != VK_SUCCESS) return fail(err, "vkGetSemaphoreWin32HandleKHR");
-        gl_.GenSemaphoresEXT(1, &glSem);
-        gl_.ImportSemaphoreWin32HandleEXT(glSem, GL_HANDLE_TYPE_OPAQUE_WIN32_EXT, handle);
+        if (getSemaphoreHandle_(dev_, &hi, &s.handle) != VK_SUCCESS) return fail(err, "vkGetSemaphoreWin32HandleKHR");
+        gl_.GenSemaphoresEXT(1, &s.gl);
+        gl_.ImportSemaphoreWin32HandleEXT(s.gl, GL_HANDLE_TYPE_OPAQUE_WIN32_EXT, s.handle);
         return true;
-    }
-
-    bool createPublishPipeline(std::string& err) {
-        if (publishPipe_) return true;
-        VkShaderModuleCreateInfo smci{VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO};
-        smci.codeSize = aether_publish_spv_size;
-        smci.pCode = aether_publish_spv;
-        if (vkCreateShaderModule(dev_, &smci, nullptr, &publishShader_) != VK_SUCCESS) return fail(err, "publish shader");
-        VkDescriptorSetLayoutBinding b[6];
-        for (uint32_t i = 0; i < 6; i++) {
-            b[i] = {};
-            b[i].binding = i;
-            b[i].descriptorType = i < 3 ? VK_DESCRIPTOR_TYPE_STORAGE_BUFFER : VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
-            b[i].descriptorCount = 1;
-            b[i].stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
-        }
-        VkDescriptorSetLayoutCreateInfo dl{VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO};
-        dl.bindingCount = 6;
-        dl.pBindings = b;
-        if (vkCreateDescriptorSetLayout(dev_, &dl, nullptr, &publishSetLayout_) != VK_SUCCESS) return fail(err, "publish set layout");
-        VkPushConstantRange pr{VK_SHADER_STAGE_COMPUTE_BIT, 0, 8};
-        VkPipelineLayoutCreateInfo pl{VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO};
-        pl.setLayoutCount = 1;
-        pl.pSetLayouts = &publishSetLayout_;
-        pl.pushConstantRangeCount = 1;
-        pl.pPushConstantRanges = &pr;
-        if (vkCreatePipelineLayout(dev_, &pl, nullptr, &publishLayout_) != VK_SUCCESS) return fail(err, "publish layout");
-        VkComputePipelineCreateInfo cp{VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO};
-        cp.stage = {VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO};
-        cp.stage.stage = VK_SHADER_STAGE_COMPUTE_BIT;
-        cp.stage.module = publishShader_;
-        cp.stage.pName = "main";
-        cp.layout = publishLayout_;
-        if (vkCreateComputePipelines(dev_, VK_NULL_HANDLE, 1, &cp, nullptr, &publishPipe_) != VK_SUCCESS) return fail(err, "publish pipeline");
-        VkDescriptorSetAllocateInfo da{VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO};
-        da.descriptorPool = dpool_;
-        da.descriptorSetCount = 1;
-        da.pSetLayouts = &publishSetLayout_;
-        if (vkAllocateDescriptorSets(dev_, &da, &publishSet_) != VK_SUCCESS) return fail(err, "publish descriptor set");
-        return true;
-    }
-
-    void writePublishDescriptors() {
-        VkDescriptorBufferInfo bi[3] = {{bufs_[OUT_COLOR].buf, 0, VK_WHOLE_SIZE},
-                                        {bufs_[OUT_NORMAL].buf, 0, VK_WHOLE_SIZE},
-                                        {bufs_[OUT_DEPTH].buf, 0, VK_WHOLE_SIZE}};
-        VkDescriptorImageInfo ii[3];
-        VkWriteDescriptorSet wr[6];
-        for (uint32_t i = 0; i < 6; i++) {
-            wr[i] = {VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET};
-            wr[i].dstSet = publishSet_;
-            wr[i].dstBinding = i;
-            wr[i].descriptorCount = 1;
-            if (i < 3) {
-                wr[i].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-                wr[i].pBufferInfo = &bi[i];
-            } else {
-                ii[i - 3] = {VK_NULL_HANDLE, images_[i - 3].view, VK_IMAGE_LAYOUT_GENERAL};
-                wr[i].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
-                wr[i].pImageInfo = &ii[i - 3];
-            }
-        }
-        vkUpdateDescriptorSets(dev_, 6, wr, 0, nullptr);
-        publishDirty_ = false;
     }
 
     void destroyInterop() {
@@ -630,17 +732,14 @@ private:
             if (s.handle) CloseHandle(s.handle);
             s = {};
         }
-        if (glOk) {
-            if (glReadyGl_) gl_.DeleteSemaphoresEXT(1, &glReadyGl_);
-            if (vkDoneGl_) gl_.DeleteSemaphoresEXT(1, &vkDoneGl_);
+        for (auto& sl : slots_) {
+            for (SharedSemaphore* sem : {&sl.glReady, &sl.vkDone}) {
+                if (glOk && sem->gl) gl_.DeleteSemaphoresEXT(1, &sem->gl);
+                if (sem->sem) vkDestroySemaphore(dev_, sem->sem, nullptr);
+                if (sem->handle) CloseHandle(sem->handle);
+                *sem = {};
+            }
         }
-        if (glReady_) vkDestroySemaphore(dev_, glReady_, nullptr);
-        if (vkDone_) vkDestroySemaphore(dev_, vkDone_, nullptr);
-        if (glReadyHandle_) CloseHandle(glReadyHandle_);
-        if (vkDoneHandle_) CloseHandle(vkDoneHandle_);
-        glReady_ = vkDone_ = VK_NULL_HANDLE;
-        glReadyHandle_ = vkDoneHandle_ = nullptr;
-        glReadyGl_ = vkDoneGl_ = 0;
         attached_ = false;
     }
 
@@ -651,15 +750,11 @@ private:
         b = {};
     }
 
-    bool ensure(uint32_t i, VkDeviceSize size, bool uniform, std::string& err, bool readback = false) {
+    // (Re)allocates b when too small or in the wrong memory kind. The caller guarantees the GPU is not using it
+    // (per-slot buffers: the slot was waited; shared buffers: all slots were waited).
+    bool ensure(Buf& b, VkDeviceSize size, bool uniform, bool readback, std::string& err) {
         size = size < 16 ? 16 : size;
-        Buf& b = bufs_[i];
-        if (b.size >= size && b.readback == readback) return true;
-        if (inFlight_) {
-            double ignored;
-            if (!finishInFlight(&ignored, err)) return false;
-        }
-        vkDeviceWaitIdle(dev_);
+        if (b.buf && b.size >= size && b.readback == readback) return true;
         release(b);
         VkDeviceSize alloc = size + size / 4;  // headroom against regrowth every frame
         VkBufferCreateInfo bc{VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO};
@@ -695,31 +790,24 @@ private:
         vkMapMemory(dev_, b.mem, 0, VK_WHOLE_SIZE, 0, &b.map);
         b.size = alloc;
         b.readback = readback;
-        descriptorsDirty_ = true;
-        if (i == OUT_COLOR || i == OUT_NORMAL || i == OUT_DEPTH) publishDirty_ = true;
-        return true;
-    }
-
-    bool upload(uint32_t i, const void* data, size_t bytes, bool uniform, std::string& err) {
-        if (!ensure(i, bytes, uniform, err)) return false;
-        if (bytes) std::memcpy(bufs_[i].map, data, bytes);
-        return true;
-    }
-
-    void writeDescriptors() {
-        VkDescriptorBufferInfo info[BINDINGS];
-        VkWriteDescriptorSet wr[BINDINGS];
-        for (uint32_t i = 0; i < BINDINGS; i++) {
-            info[i] = {bufs_[i].buf, 0, VK_WHOLE_SIZE};
-            wr[i] = {VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET};
-            wr[i].dstSet = set_;
-            wr[i].dstBinding = i;
-            wr[i].descriptorCount = 1;
-            wr[i].descriptorType = i == 0 ? VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER : VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-            wr[i].pBufferInfo = &info[i];
+        // whichever set points at this buffer must be rewritten
+        if (&b >= shared_ && &b < shared_ + BINDINGS) {
+            sharedDirty_ = true;
+            sharedDirtySlots_ = 0;
         }
-        vkUpdateDescriptorSets(dev_, BINDINGS, wr, 0, nullptr);
-        descriptorsDirty_ = false;
+        for (auto& s : slots_)
+            if (&b >= s.bufs && &b < s.bufs + BINDINGS) {
+                s.farDirty = true;
+                if (&b == &s.bufs[B_COLOR] || &b == &s.bufs[B_NORMAL] || &b == &s.bufs[B_DEPTH]) s.publishDirty = true;
+                if (&b == &s.bufs[B_NEAR]) s.ingestDirty = true;
+            }
+        return true;
+    }
+
+    bool upload(Buf& b, const void* data, size_t bytes, bool uniform, bool readback, std::string& err) {
+        if (!ensure(b, bytes, uniform, readback, err)) return false;
+        if (bytes) std::memcpy(b.map, data, bytes);
+        return true;
     }
 
     VkInstance inst_ = VK_NULL_HANDLE;
@@ -729,48 +817,32 @@ private:
     VkQueue queue_ = VK_NULL_HANDLE;
     uint32_t family_ = 0;
     uint8_t deviceUuid_[VK_UUID_SIZE] = {};
-    VkShaderModule shader_ = VK_NULL_HANDLE;
-    VkDescriptorSetLayout dlayout_ = VK_NULL_HANDLE;
-    VkPipelineLayout playout_ = VK_NULL_HANDLE;
-    VkPipeline pipe_ = VK_NULL_HANDLE;
-    VkDescriptorPool dpool_ = VK_NULL_HANDLE;
-    VkDescriptorSet set_ = VK_NULL_HANDLE;
-    VkCommandPool pool_ = VK_NULL_HANDLE;
-    VkCommandBuffer cmd_ = VK_NULL_HANDLE;
-    VkFence fence_ = VK_NULL_HANDLE;
-    VkQueryPool query_ = VK_NULL_HANDLE;
-    bool timestamps_ = false, inFlight_ = false;
+    char deviceName_[300] = "vulkan";
+    bool timestamps_ = false;
     float timestampPeriod_ = 1.0f;
-    std::vector<Buf> bufs_;
-    bool descriptorsDirty_ = true;
+
+    VkShaderModule farShader_ = VK_NULL_HANDLE, publishShader_ = VK_NULL_HANDLE, ingestShader_ = VK_NULL_HANDLE;
+    VkDescriptorSetLayout farSetLayout_ = VK_NULL_HANDLE, publishSetLayout_ = VK_NULL_HANDLE, ingestSetLayout_ = VK_NULL_HANDLE;
+    VkPipelineLayout farLayout_ = VK_NULL_HANDLE, publishLayout_ = VK_NULL_HANDLE, ingestLayout_ = VK_NULL_HANDLE;
+    VkPipeline farPipe_ = VK_NULL_HANDLE, publishPipe_ = VK_NULL_HANDLE, ingestPipe_ = VK_NULL_HANDLE;
+    VkDescriptorPool dpool_ = VK_NULL_HANDLE;
+    VkCommandPool pool_ = VK_NULL_HANDLE;
+
+    Slot slots_[SLOTS];
+    Buf shared_[BINDINGS];  // only the scene (1-6) and noise (13) bindings are used
+    bool sharedDirty_ = true;
+    uint32_t sharedDirtySlots_ = 0;
     uint64_t sceneRevision_ = UINT64_MAX;
     const void* noiseUploaded_ = nullptr;
-    char deviceName_[300] = "vulkan";
+    uint64_t frameIndex_ = 0;
 
     // interop
-    bool interopCapable_ = false, attached_ = false, firstGlFrame_ = true, publishDirty_ = true;
+    bool interopCapable_ = false, attached_ = false, firstGlFrame_ = true;
     PFN_vkGetMemoryWin32HandleKHR getMemoryHandle_ = nullptr;
     PFN_vkGetSemaphoreWin32HandleKHR getSemaphoreHandle_ = nullptr;
     GlApi gl_;
-    SharedImage images_[3];
-    VkSemaphore glReady_ = VK_NULL_HANDLE, vkDone_ = VK_NULL_HANDLE;
-    HANDLE glReadyHandle_ = nullptr, vkDoneHandle_ = nullptr;
-    GLuint glReadyGl_ = 0, vkDoneGl_ = 0;
-    VkShaderModule publishShader_ = VK_NULL_HANDLE;
-    VkDescriptorSetLayout publishSetLayout_ = VK_NULL_HANDLE;
-    VkPipelineLayout publishLayout_ = VK_NULL_HANDLE;
-    VkPipeline publishPipe_ = VK_NULL_HANDLE;
-    VkDescriptorSet publishSet_ = VK_NULL_HANDLE;
+    SharedImage images_[IMAGES];
     uint32_t width_ = 0, height_ = 0;
-
-public:
-    void destroyPublish() {
-        if (publishPipe_) vkDestroyPipeline(dev_, publishPipe_, nullptr);
-        if (publishLayout_) vkDestroyPipelineLayout(dev_, publishLayout_, nullptr);
-        if (publishSetLayout_) vkDestroyDescriptorSetLayout(dev_, publishSetLayout_, nullptr);
-        if (publishShader_) vkDestroyShaderModule(dev_, publishShader_, nullptr);
-        publishPipe_ = VK_NULL_HANDLE;
-    }
 };
 
 }  // namespace

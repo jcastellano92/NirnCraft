@@ -41,13 +41,23 @@ add_custom_command(
           -P "${CMAKE_SOURCE_DIR}/cmake/embed_spv.cmake"
   DEPENDS "${GEN}/aether_publish.spv" "${CMAKE_SOURCE_DIR}/cmake/embed_spv.cmake")
 add_custom_command(
+  OUTPUT "${GEN}/aether_ingest.spv"
+  COMMAND "${SLANGC}" "${CMAKE_SOURCE_DIR}/shaders/aether_ingest.slang" -target spirv -entry ingestMain -stage compute -O3
+          -o "${GEN}/aether_ingest.spv"
+  DEPENDS "${CMAKE_SOURCE_DIR}/shaders/aether_ingest.slang" COMMENT "slangc aether_ingest -> SPIR-V")
+add_custom_command(
+  OUTPUT "${GEN}/aether_ingest_spv.h"
+  COMMAND "${CMAKE_COMMAND}" -DIN=${GEN}/aether_ingest.spv -DOUT=${GEN}/aether_ingest_spv.h -DNAME=aether_ingest_spv
+          -P "${CMAKE_SOURCE_DIR}/cmake/embed_spv.cmake"
+  DEPENDS "${GEN}/aether_ingest.spv" "${CMAKE_SOURCE_DIR}/cmake/embed_spv.cmake")
+add_custom_command(
   OUTPUT "${GEN}/aether_far_cpu.cpp"
   COMMAND "${SLANGC}" "${KERNEL_SRC}" -target cpp -entry farMain -stage compute -O3 -o "${GEN}/aether_far_cpu.cpp"
   DEPENDS ${KERNEL_DEPS} COMMENT "slangc aether_far -> C++ (CPU reference)")
 
 add_library(aether_core SHARED
   src/api.cpp src/svdag.cpp src/world.cpp src/preview_source.cpp src/cpu_backend.cpp src/vk_backend.cpp src/gl_api.cpp
-  "${GEN}/aether_far_cpu.cpp" "${GEN}/aether_far_spv.h" "${GEN}/aether_publish_spv.h")
+  "${GEN}/aether_far_cpu.cpp" "${GEN}/aether_far_spv.h" "${GEN}/aether_publish_spv.h" "${GEN}/aether_ingest_spv.h")
 target_include_directories(aether_core PUBLIC include PRIVATE src "${GEN}" "${SLANG_ROOT}/include" "${VULKAN_SDK}/Include")
 target_compile_definitions(aether_core PRIVATE AETHER_BUILD AETHER_VERSION_STRING="${PROJECT_VERSION}")
 target_link_libraries(aether_core PRIVATE "${VULKAN_SDK}/Lib/vulkan-1.lib" opengl32)

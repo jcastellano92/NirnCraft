@@ -36,6 +36,8 @@ bool GlApi::load(std::string& err) {
     LOAD(CreateTextures, "glCreateTextures")
     LOAD(TextureParameteri, "glTextureParameteri")
     LOAD(GetTextureImage, "glGetTextureImage")
+    LOAD(ClearTexImage, "glClearTexImage")
+    LOAD(ClearTexSubImage, "glClearTexSubImage")
     LOAD(CreateMemoryObjectsEXT, "glCreateMemoryObjectsEXT")
     LOAD(DeleteMemoryObjectsEXT, "glDeleteMemoryObjectsEXT")
     LOAD(MemoryObjectParameterivEXT, "glMemoryObjectParameterivEXT")

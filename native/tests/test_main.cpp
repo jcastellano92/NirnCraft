@@ -253,6 +253,65 @@ static void testFourZones() {
     aether_destroy(ctx);
 }
 
+// Pixels the near field covers skip the far march entirely; the rest render exactly as without near depth.
+static void testNearDepth(const char* raster) {
+    std::printf("near-depth skip\n");
+    AetherContext* ctx = nullptr;
+    aether_create(AETHER_BACKEND_CPU, &ctx);
+    if (aether_preview_load_raster(ctx, raster) != AETHER_OK) {
+        std::printf("  SKIP: no raster\n");
+        aether_destroy(ctx);
+        return;
+    }
+    double x = 0, z = 0, y = aether_preview_height(ctx, x, z) + 60;
+    for (int lod = 0; lod < 4; lod++) {
+        int span = 256 << lod;
+        aether_preview_generate(ctx, lod, -2 * span, -2 * span, 3 * span, 3 * span);
+    }
+    double centre[3] = {x, y, z};
+    aether_update(ctx, centre, 0);
+    const uint32_t W = 128, H = 72;
+    AetherFrame f{};
+    f.cameraPos[0] = x;
+    f.cameraPos[1] = y;
+    f.cameraPos[2] = z;
+    cameraMatrix(105, -3, 70, double(W) / H, f.invViewProj);
+    f.width = W;
+    f.height = H;
+    f.nearFieldEnd = 96;
+    f.maxDistance = 8000;
+    f.sunDir[1] = 1;
+    f.lodBias = 1;
+    f.flags = AETHER_FRAME_ATMOS;
+    std::vector<float> base(W * H * 4), with(W * H * 4), nearDist(W * H);
+    for (uint32_t py = 0; py < H; py++)
+        for (uint32_t px = 0; px < W; px++) nearDist[py * W + px] = px < W / 2 ? 20.0f : 1e30f;  // left half covered
+    AetherFrameOutput o1{nullptr, nullptr, nullptr, base.data()};
+    CHECK(aether_render(ctx, &f, &o1) == AETHER_OK);
+    AetherStats s1{};
+    aether_get_stats(ctx, &s1);
+    f.flags |= AETHER_FRAME_NEAR_DEPTH;
+    f.nearDepth = nearDist.data();
+    AetherFrameOutput o2{nullptr, nullptr, nullptr, with.data()};
+    CHECK(aether_render(ctx, &f, &o2) == AETHER_OK);
+    AetherStats s2{};
+    aether_get_stats(ctx, &s2);
+    size_t leftNonZero = 0, rightDiff = 0;
+    for (uint32_t py = 0; py < H; py++)
+        for (uint32_t px = 0; px < W; px++) {
+            const float* a = &base[(py * W + px) * 4];
+            const float* b = &with[(py * W + px) * 4];
+            if (px < W / 2) leftNonZero += (b[0] != 0 || b[1] != 0 || b[2] != 0 || b[3] != 0);
+            else rightDiff += std::memcmp(a, b, 16) != 0;
+        }
+    std::printf("  covered half: %zu non-empty px; open half: %zu px differ; ray steps %llu -> %llu\n", leftNonZero,
+                rightDiff, (unsigned long long)s1.raySteps, (unsigned long long)s2.raySteps);
+    CHECK(leftNonZero == 0);
+    CHECK(rightDiff == 0);
+    CHECK(s2.raySteps * 10 < s1.raySteps * 7);
+    aether_destroy(ctx);
+}
+
 static bool parity(const char* raster) {
     std::printf("cpu/vulkan parity (preview terrain)\n");
     AetherContext* cpu = nullptr;
@@ -293,7 +352,7 @@ static bool parity(const char* raster) {
     f.sunDir[1] = 0.6f;
     f.sunDir[2] = -0.3f;
     f.lodBias = 1;
-    f.flags = AETHER_FRAME_SHADOWS | AETHER_FRAME_ATMOS;
+    f.flags = AETHER_FRAME_SHADOWS | AETHER_FRAME_ATMOS | AETHER_FRAME_SKY;
     std::vector<float> dc(W * H), dg(W * H);
     std::vector<uint32_t> cc(W * H), cg(W * H);
     AetherFrameOutput oc{cc.data(), nullptr, dc.data()}, og{cg.data(), nullptr, dg.data()};
@@ -334,6 +393,7 @@ int main(int argc, char** argv) {
     testAbi();
     testStreamingGap();
     testFourZones();
+    testNearDepth(argc > 1 ? argv[1] : "native/data/tamriel_raster.bin");
     parity(argc > 1 ? argv[1] : "native/data/tamriel_raster.bin");
     std::printf(failures ? "FAILED (%d)\n" : "PASS\n", failures);
     return failures ? 1 : 0;

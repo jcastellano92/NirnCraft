@@ -23,9 +23,10 @@ using namespace aether;
 // The Java binding (com.skycraft.aether.AetherNative) declares these layouts by hand; any change is an ABI bump.
 static_assert(sizeof(AetherMaterial) == 24);
 static_assert(sizeof(AetherColumnTile) == 64 && offsetof(AetherColumnTile, surface) == 16);
-static_assert(sizeof(AetherFrame) == 136 && offsetof(AetherFrame, invViewProj) == 24 && offsetof(AetherFrame, width) == 88 &&
-              offsetof(AetherFrame, sunDir) == 108 && offsetof(AetherFrame, flags) == 128);
-static_assert(sizeof(AetherFrameOutput) == 24);
+static_assert(sizeof(AetherFrame) == 144 && offsetof(AetherFrame, invViewProj) == 24 && offsetof(AetherFrame, width) == 88 &&
+              offsetof(AetherFrame, sunDir) == 108 && offsetof(AetherFrame, flags) == 128 &&
+              offsetof(AetherFrame, nearDepth) == 136);
+static_assert(sizeof(AetherFrameOutput) == 32 && offsetof(AetherFrameOutput, colorLinear) == 24);
 static_assert(sizeof(AetherWeather) == 40 && offsetof(AetherWeather, rainFactor) == 32);
 static_assert(sizeof(AetherActor) == 48 && offsetof(AetherActor, kind) == 36);
 static_assert(sizeof(AetherStats) == 56 && offsetof(AetherStats, nodeBytes) == 8 && offsetof(AetherStats, raySteps) == 48);
@@ -89,7 +90,7 @@ extern "C" {
 AETHER_API uint32_t aether_abi_version(void) { return AETHER_ABI_VERSION; }
 
 AETHER_API const char* aether_build_info(void) {
-    return "aether_core " AETHER_VERSION_STRING " (abi 0.1.0; slang far kernel; " __DATE__ ")";
+    return "aether_core " AETHER_VERSION_STRING " (abi 0.2.0; slang far kernel; " __DATE__ ")";
 }
 
 AETHER_API AetherStatus aether_create(AetherBackend backend, AetherContext** out) {
@@ -203,7 +204,22 @@ AETHER_API AetherStatus aether_render(AetherContext* ctx, const AetherFrame* f, 
     std::string err;
     if (!ctx->backend->render(in, ctx->targets, &ms, err)) return ctx->fail(AETHER_ERR_GPU, err);
     size_t n = size_t(f->width) * f->height;
-    if (out->color) std::memcpy(out->color, ctx->targets.color.data(), n * 4);
+    if (out->colorLinear) std::memcpy(out->colorLinear, ctx->targets.color.data(), n * 16);
+    if (out->color) {
+        // harness tonemapper (the game composite tonemaps near and far together instead)
+        const float* c = ctx->targets.color.data();
+        for (size_t i = 0; i < n; i++) {
+            uint32_t px = 0;
+            for (int k = 0; k < 3; k++) {
+                float v = c[4 * i + k];
+                v = v / (1.0f + v);
+                v = std::pow(std::fmin(std::fmax(v, 0.0f), 1.0f), 1.0f / 2.2f);
+                px |= uint32_t(v * 255.0f + 0.5f) << (8 * k);
+            }
+            px |= uint32_t(std::fmin(std::fmax(c[4 * i + 3], 0.0f), 1.0f) * 255.0f + 0.5f) << 24;
+            out->color[i] = px;
+        }
+    }
     if (out->normal) std::memcpy(out->normal, ctx->targets.normal.data(), n * 4);
     if (out->depth) std::memcpy(out->depth, ctx->targets.depth.data(), n * 4);
     uint64_t steps = 0;
@@ -219,7 +235,7 @@ AETHER_API AetherStatus aether_gl_attach(AetherContext* ctx, uint32_t w, uint32_
     GlTargets t;
     std::string err;
     if (!ctx->backend->glAttach(w, h, t, err)) return ctx->fail(AETHER_ERR_UNSUPPORTED, err);
-    *out = AetherGlTargets{t.color, t.normal, t.depth, t.width, t.height};
+    *out = AetherGlTargets{t.color, t.normal, t.depth, t.nearDepth, t.width, t.height};
     return AETHER_OK;
 }
 
@@ -273,6 +289,9 @@ static AetherStatus buildInputs(AetherContext* ctx, const AetherFrame* f, FrameI
     in.palette = &ctx->palette;
     in.weather = &ctx->weather;
     in.cloudNoise = &ctx->cloudNoise;
+    in.wantNearDepth = (f->flags & AETHER_FRAME_NEAR_DEPTH) != 0;
+    in.nearDepth = in.wantNearDepth ? f->nearDepth : nullptr;
+    if ((f->flags & AETHER_FRAME_NEAR_DEPTH) && !f->nearDepth) g.dims[2] &= ~AETHER_FRAME_NEAR_DEPTH;  // GL path sets it back
     return AETHER_OK;
 }
 

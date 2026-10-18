@@ -19,12 +19,13 @@
 [[vk::binding(5, 0)]] StructuredBuffer<uint> runEnd;
 [[vk::binding(6, 0)]] StructuredBuffer<uint> runMat;
 [[vk::binding(7, 0)]] StructuredBuffer<MaterialGpu> palette;
-[[vk::binding(8, 0)]] RWStructuredBuffer<uint> outColor;
+[[vk::binding(8, 0)]] RWStructuredBuffer<float4> outColor;  // linear HDR, premultiplied; a = coverage
 [[vk::binding(9, 0)]] RWStructuredBuffer<uint> outNormal;
 [[vk::binding(10, 0)]] RWStructuredBuffer<float> outDepth;
 [[vk::binding(11, 0)]] StructuredBuffer<uint> weather;
 [[vk::binding(12, 0)]] RWStructuredBuffer<uint> counters;
 [[vk::binding(13, 0)]] StructuredBuffer<uint> cloudNoise;
+[[vk::binding(14, 0)]] StructuredBuffer<float> nearDepth;  // view distance of the near field per pixel (row 0 top)
 
 #include "aether_clouds.slang"
 
@@ -309,10 +310,28 @@ void farMain(uint3 id : SV_DispatchThreadID) {
     float3 o = frame.camFrac.xyz;
     TraceResult res;
     res.t = 0; res.mat = 0; res.axis = -1; res.lod = 0; res.steps = 0;
+    float3 sun = frame.sunDir.xyz;
+
+    // the rasterised near field already covers this pixel: only the air in front of it (cloud, if the camera is up
+    // in the deck) is ours. In tunnels and towns that skips most of the screen.
+    if ((frame.dims.z & FRAME_NEAR_DEPTH) != 0) {
+        float nd = nearDepth[pix];
+        if (nd < frame.params.x) {
+            float4 c = float4(0, 0, 0, 0);
+            if ((frame.dims.z & FRAME_CLOUDS) != 0) {
+                CloudResult cl = marchClouds(o, dir, nd, sun, id.xy);
+                if (cl.firstHit >= 0.0) c = float4(cl.scatter, 1.0 - cl.transmittance);
+            }
+            outColor[pix] = c;
+            outNormal[pix] = 0;
+            outDepth[pix] = 1e30;
+            counters[pix] = 0;
+            return;
+        }
+    }
     float tHit = traceView(o, dir, frame.params.x, frame.params.y, res);
 
-    float3 sun = frame.sunDir.xyz;
-    float3 color;
+    float3 color = float3(0, 0, 0);
     float3 n = float3(0, 1, 0);
     uint cls = 0;
     float depth = 1e30;
@@ -364,10 +383,10 @@ void farMain(uint3 id : SV_DispatchThreadID) {
             float3 probe = float3(wpos.x, 520.0, wpos.z);
             color.r = cumulusDensity(probe, dbg, length(p.xz), hdbg) > 0.0 ? 1.0 : 0.0;
         }
-    } else {
+    } else if ((frame.dims.z & FRAME_SKY) != 0) {
         color = skyColor(dir, sun);
     }
-    float coverage = tHit >= 0.0 ? 1.0 : 0.0;
+    float coverage = tHit >= 0.0 || (frame.dims.z & FRAME_SKY) != 0 ? 1.0 : 0.0;
     if ((frame.dims.z & FRAME_CLOUDS) != 0) {
         CloudResult cl = marchClouds(o, dir, tHit >= 0.0 ? tHit : frame.params.y, sun, id.xy);
         if (cl.firstHit >= 0.0) {
@@ -379,7 +398,7 @@ void farMain(uint3 id : SV_DispatchThreadID) {
             coverage = 1.0 - (1.0 - coverage) * cl.transmittance;
         }
     }
-    outColor[pix] = packColor(color, coverage);
+    outColor[pix] = float4(color, coverage);
     outNormal[pix] = packNormal(n, cls, sunVis);
     outDepth[pix] = depth;
     counters[pix] = res.steps;  // per-pixel step count (summed on the host; no atomics so the C++ target matches)

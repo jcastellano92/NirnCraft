@@ -39,6 +39,10 @@ static_assert(sizeof(RegionGpu) == 48);
 static_assert(sizeof(MaterialGpu) == 32);
 static_assert(sizeof(FrameGpu) == 64 + 16 * 6 + 32 * MAX_LODS);
 
+struct Float4 {
+    float v[4];
+};
+
 // Slang's C++ target: StructuredBuffer<T> is { T* data; size_t count; }, ConstantBuffer<T> is T*.
 template <typename T>
 struct CpuBuffer {
@@ -56,12 +60,13 @@ struct FarGlobals {
     CpuBuffer<uint32_t> runEnd;
     CpuBuffer<uint32_t> runMat;
     CpuBuffer<MaterialGpu> palette;
-    CpuBuffer<uint32_t> outColor;
+    CpuBuffer<Float4> outColor;
     CpuBuffer<uint32_t> outNormal;
     CpuBuffer<float> outDepth;
     CpuBuffer<uint32_t> weather;
     CpuBuffer<uint32_t> counters;
     CpuBuffer<uint32_t> cloudNoise;
+    CpuBuffer<float> nearDepth;
 };
 
 }  // namespace aether
