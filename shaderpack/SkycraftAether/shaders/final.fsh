@@ -1,9 +1,13 @@
 #version 330 compatibility
-// The one tonemapper for near and far (aether hands the pack linear HDR, so both pass through here): the fitted ACES
-// curve (Stephen Hill's RRT + ODT fit, sRGB primaries) for a filmic toe and a highlight roll-off that keeps colour.
+// The one tonemapper for near and far (aether hands the pack linear HDR, so both pass through here):
+//  * the eye's adapted exposure (lib/exposure.glsl, kept in colortex8 by composite1.fsh) times the EXPOSURE option
+//  * the fitted ACES curve (Stephen Hill's RRT + ODT fit, sRGB primaries) for a filmic toe and a highlight roll-off
+//    that keeps colour
 #include "/lib/settings.glsl"
+#include "/lib/exposure.glsl"
 
-uniform sampler2D colortex0;
+uniform sampler2D colortex5;  // the HDR scene with shafts and bloom (composite1.fsh)
+uniform sampler2D colortex8;  // the eye
 
 in vec2 texcoord;
 
@@ -28,6 +32,7 @@ vec3 linearToSrgb(vec3 c) {
 }
 
 void main() {
-    vec3 c = aces(texture(colortex0, texcoord).rgb * EXPOSURE * 0.8);
+    vec3 hdr = texture(colortex5, texcoord).rgb;
+    vec3 c = aces(hdr * exp2(exposureNow(colortex8)) * EXPOSURE);
     fragColor = vec4(linearToSrgb(c), 1.0);
 }

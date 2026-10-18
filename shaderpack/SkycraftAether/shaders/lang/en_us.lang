@@ -76,3 +76,5 @@ option.QUALITY_FALLBACK=Counts without the mod
 option.QUALITY_FALLBACK.comment=Share of each effect's samples used when the mod's controller is absent (0.65 is about HIGH on the Adaptive profile).
 profile.ADAPTIVE=Adaptive
 profile.ADAPTIVE.comment=The mod tunes every effect to this machine (ULTRA's ceilings, HIGH's maps). The fixed tiers are ceilings it scales down from.
+option.AUTO_EXPOSURE=Eye adaptation
+option.AUTO_EXPOSURE.comment=The exposure follows the scene like an eye: caves and nights open up, a cave mouth's daylight blows out, walking out squints for a second.

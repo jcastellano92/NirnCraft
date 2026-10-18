@@ -117,15 +117,64 @@ std::string readFile(const std::string& p) {
     return s.str();
 }
 
+// profile=NAME: shaders.properties' profile.NAME applied to settings.glsl, as Iris does (and pack_lab_validate.py):
+// option -> value ("" for a switch turned on, "!" for off)
+std::map<std::string, std::string> PROFILE;
+
+bool loadProfile(const std::string& name) {
+    std::string props = readFile(PACK + "/shaders.properties"), joined;
+    for (size_t i = 0; i < props.size(); i++) {
+        if (props[i] == '\\' && i + 1 < props.size() && (props[i + 1] == '\n' || props[i + 1] == '\r')) {
+            while (i + 1 < props.size() && (props[i + 1] == '\n' || props[i + 1] == '\r')) i++;
+            joined += ' ';
+        } else {
+            joined += props[i];
+        }
+    }
+    std::istringstream in(joined);
+    std::string line;
+    while (std::getline(in, line)) {
+        std::smatch m;
+        if (!std::regex_match(line, m, std::regex(R"(^\s*profile\.(\w+)\s*=\s*(.*?)\s*$)")) || m[1].str() != name) continue;
+        std::istringstream toks(m[2].str());
+        std::string t;
+        while (toks >> t) {
+            if (t[0] == '!') PROFILE[t.substr(1)] = "!";
+            else if (t.find('=') != std::string::npos) PROFILE[t.substr(0, t.find('='))] = t.substr(t.find('=') + 1);
+            else PROFILE[t] = "";
+        }
+        return true;
+    }
+    return false;
+}
+
+std::string applyProfile(const std::string& line) {
+    std::smatch m;
+    if (std::regex_match(line, m, std::regex(R"(^(\s*)(//\s*)?#define\s+(\w+)(\s+(\S+))?(.*)$)"))) {
+        auto it = PROFILE.find(m[3].str());
+        if (it == PROFILE.end()) return line;
+        if (it->second == "!") return "// #define " + m[3].str() + m[6].str();
+        if (it->second.empty()) return "#define " + m[3].str() + (m[5].matched ? " " + m[5].str() : "") + m[6].str();
+        return "#define " + m[3].str() + " " + it->second + m[6].str();
+    }
+    if (std::regex_match(line, m, std::regex(R"(^(\s*const\s+\w+\s+(\w+)\s*=\s*)([^;]+)(;.*)$)"))) {
+        auto it = PROFILE.find(m[2].str());
+        if (it != PROFILE.end() && !it->second.empty() && it->second != "!") return m[1].str() + it->second + m[4].str();
+    }
+    return line;
+}
+
 std::string resolve(const std::string& path, int depth = 0) {
     std::string src = readFile(path), out;
     if (src.empty()) std::printf("pack_lab: cannot read %s\n", path.c_str());
+    bool settings = !PROFILE.empty() && path.size() >= 13 && path.substr(path.size() - 13) == "settings.glsl";
     std::istringstream in(src);
     std::string line;
     std::regex inc(R"(^\s*#include\s+"([^"]+)\"\s*$)");
     std::smatch m;
     while (std::getline(in, line)) {
         if (!line.empty() && line.back() == '\r') line.pop_back();
+        if (settings) line = applyProfile(line);
         if (depth < 16 && std::regex_match(line, m, inc)) {
             std::string p = m[1].str();
             std::string target = p[0] == '/' ? PACK + p : path.substr(0, path.find_last_of("/\\") + 1) + p;
@@ -204,6 +253,103 @@ double arg(int argc, char** argv, const char* k, double d) {
     for (int i = 2; i < argc; i++)
         if (std::strncmp(argv[i], k, n) == 0 && argv[i][n] == '=') return std::atof(argv[i] + n + 1);
     return d;
+}
+
+std::string sarg(int argc, char** argv, const char* k, const char* d) {
+    size_t n = std::strlen(k);
+    for (int i = 2; i < argc; i++)
+        if (std::strncmp(argv[i], k, n) == 0 && argv[i][n] == '=') return argv[i] + n + 1;
+    return d;
+}
+
+// a constant of settings.glsl as the active profile sets it (shadowMapResolution, shadowDistance)
+double settingConst(const char* name, double d) {
+    std::istringstream in(readFile(PACK + "/lib/settings.glsl"));
+    std::string line;
+    std::smatch m;
+    while (std::getline(in, line)) {
+        if (!line.empty() && line.back() == '\r') line.pop_back();
+        line = applyProfile(line);
+        if (std::regex_match(line, m, std::regex(R"(^\s*const\s+\w+\s+(\w+)\s*=\s*([^;]+);.*$)")) && m[1].str() == name)
+            return std::atof(m[2].str().c_str());
+    }
+    return d;
+}
+
+// synthetic geometry (scene=cave|window): boxes in the camera's frame, x along its heading, y across to its right,
+// z up from the eye; openings are where the sky reaches in (the sky light falls off from them, a block per level)
+struct Box { double lo[3], hi[3]; double alb[3]; };
+
+// nearest entry of a local-frame ray into a box: t and the face's local normal axis (sign in the value); -1 if none
+double boxHit(const Box& b, const double o[3], const double d[3], int& face) {
+    double t0 = -1e30, t1 = 1e30;
+    face = 0;
+    for (int k = 0; k < 3; k++) {
+        if (std::abs(d[k]) < 1e-12) {
+            if (o[k] < b.lo[k] || o[k] > b.hi[k]) return -1;
+            continue;
+        }
+        double a = (b.lo[k] - o[k]) / d[k], c = (b.hi[k] - o[k]) / d[k];
+        int f = d[k] > 0 ? -(k + 1) : (k + 1);  // entering through the lo face faces -axis
+        if (a > c) std::swap(a, c);
+        if (a > t0) { t0 = a; face = f; }
+        t1 = std::min(t1, c);
+    }
+    if (t0 > t1 || t1 <= 0) return -1;
+    return t0 > 0 ? t0 : -1;  // from inside a box: no hit (the eye is never inside a solid)
+}
+
+double boxDistance(const Box& b, const double p[3]) {
+    double s = 0;
+    for (int k = 0; k < 3; k++) {
+        double e = std::max(std::max(b.lo[k] - p[k], 0.0), p[k] - b.hi[k]);
+        s += e * e;
+    }
+    return std::sqrt(s);
+}
+
+void sceneBoxes(const std::string& scene, bool hole, std::vector<Box>& solid, std::vector<Box>& open,
+                std::vector<std::array<double, 6>>& torches) {
+    auto add = [&](double a0, double a1, double s0, double s1, double h0, double h1, double r, double g, double b) {
+        solid.push_back({{a0, s0, h0}, {a1, s1, h1}, {r, g, b}});
+    };
+    const double F = -1.62;  // the floor under the eye
+    if (scene == "cave") {
+        // a rock tunnel 12 wide and 5 high running back 20 blocks behind the eye; its mouth 12 ahead (5 x 4), a
+        // ceiling hole 3 x 3 four blocks ahead with hole=1, and a torch on the left wall
+        const double r = 0.16, g = 0.15, b = 0.14, top = 3.4;
+        add(-21, 13, -7, 7, F - 1, F, r, g, b);
+        if (hole) {
+            add(-21, 2, -7, 7, top, top + 2, r, g, b);
+            add(5, 13, -7, 7, top, top + 2, r, g, b);
+            add(2, 5, -7, -1.5, top, top + 2, r, g, b);
+            add(2, 5, 1.5, 7, top, top + 2, r, g, b);
+            open.push_back({{2, -1.5, top}, {5, 1.5, top + 2}, {0, 0, 0}});
+        } else {
+            add(-21, 13, -7, 7, top, top + 2, r, g, b);
+        }
+        add(-21, 12, -7, -6, F, top, r, g, b);
+        add(-21, 12, 6, 7, F, top, r, g, b);
+        add(-21, -20, -6, 6, F, top, r, g, b);
+        add(12, 13, -7, -2.5, F, top, r, g, b);
+        add(12, 13, 2.5, 7, F, top, r, g, b);
+        add(12, 13, -2.5, 2.5, 2.4, top, r, g, b);
+        open.push_back({{12, -2.5, F}, {13, 2.5, 2.4}, {0, 0, 0}});
+        torches.push_back({-4, -5.5, 0.6, 1.0, 0.69, 0.44});
+    } else if (scene == "window") {
+        // a timber room 10 x 10, 4.5 high; a window 2.5 wide and 1.6 high in the right-hand wall, 1..3.5 ahead
+        const double r = 0.20, g = 0.12, b = 0.06, top = 2.9;
+        add(-3.5, 7.5, -5.5, 5.5, F - 1, F, 0.14, 0.09, 0.05);
+        add(-3.5, 7.5, -5.5, 5.5, top, top + 1, r, g, b);
+        add(-3.5, -3, -5, 5, F, top, r, g, b);
+        add(7, 7.5, -5, 5, F, top, r, g, b);
+        add(-3.5, 7.5, -5.5, -5, F, top, r, g, b);
+        add(-3.5, 1, 5, 5.5, F, top, r, g, b);
+        add(3.5, 7.5, 5, 5.5, F, top, r, g, b);
+        add(1, 3.5, 5, 5.5, F, 0.0, r, g, b);
+        add(1, 3.5, 5, 5.5, 1.6, top, r, g, b);
+        open.push_back({{1, 5, 0.0}, {3.5, 5.5, 1.6}, {0, 0, 0}});
+    }
 }
 
 // the mod's qualityKnobs texture (16x1 RGBA8, r the low byte; lib/quality.glsl) from q / q* keys; false when none given
@@ -325,6 +471,12 @@ int main(int argc, char** argv) {
     }
     const char* outPng = argv[1];
     PACK = "../shaderpack/SkycraftAether/shaders";  // run from native/
+    std::string profileName = sarg(argc, argv, "profile", "");
+    if (!profileName.empty() && !loadProfile(profileName)) {
+        std::printf("pack_lab: no profile.%s in shaders.properties\n", profileName.c_str());
+        return 2;
+    }
+    std::string sceneName = sarg(argc, argv, "scene", "");
     const uint32_t W = uint32_t(arg(argc, argv, "w", 1280)), H = uint32_t(arg(argc, argv, "h", 720));
     double x = arg(argc, argv, "x", 0), z = arg(argc, argv, "z", 0), yaw = arg(argc, argv, "yaw", 105),
            pitch = arg(argc, argv, "pitch", -4), timeOfDay = arg(argc, argv, "time", 0.25), rain = arg(argc, argv, "rain", 0),
@@ -365,7 +517,7 @@ int main(int argc, char** argv) {
     }
     lap("raster");
     double ground = aether_preview_height(ctx, x, z);
-    double y = std::max(ground, 63.0) + arg(argc, argv, "above", 40);
+    double y = std::max(ground, 63.0) + arg(argc, argv, "above", sceneName.empty() ? 40 : 1.62);
     if (eyeInWater) y = std::max(ground + 2.0, 60.0);
     std::printf("pack_lab: camera %.0f %.0f %.0f (ground %.0f)\n", x, y, z, ground);
     for (int lod = 0; lod < 7; lod++) {
@@ -507,6 +659,61 @@ int main(int argc, char** argv) {
         ahead(22, -8, -1, c.p); c.c[0] = 1.0; c.c[1] = 0.44; c.c[2] = 0.16;   // lava light (0xFF7028)
         lamps = {a, b, c};
     }
+    // scene=cave|window: synthetic rooms around the eye (sceneBoxes), with their torches as lamps
+    std::vector<Box> solids, openings;
+    std::vector<std::array<double, 6>> torches;
+    if (!sceneName.empty()) {
+        sceneBoxes(sceneName, arg(argc, argv, "hole", 0) != 0, solids, openings, torches);
+        if (solids.empty()) {
+            std::printf("pack_lab: unknown scene %s (cave, window)\n", sceneName.c_str());
+            return 2;
+        }
+        if (arg(argc, argv, "torch", 1) != 0)
+            for (auto& t : torches) {
+                Lamp l;
+                for (int k = 0; k < 3; k++) {
+                    l.p[k] = (k == 0 ? x : k == 1 ? y : z) + fwd[k] * t[0] + side[k] * t[1];
+                    l.c[k] = t[3 + k];
+                }
+                l.p[1] = y + t[2];
+                lamps.push_back(l);
+            }
+    }
+    auto toLocal = [&](const double v[3], double out[3]) {  // a camera-relative world vector into the scene's frame
+        out[0] = v[0] * fwd[0] + v[2] * fwd[2];
+        out[1] = v[0] * side[0] + v[2] * side[2];
+        out[2] = v[1];
+    };
+    // the nearest solid along a camera-relative ray: distance, world normal and albedo (false when none)
+    auto sceneHit = [&](const double o[3], const double d[3], double& t, double nWorld[3], double alb[3]) {
+        double ol[3], dl[3];
+        toLocal(o, ol);
+        toLocal(d, dl);
+        t = 1e30;
+        int bestFace = 0;
+        for (auto& b : solids) {
+            int face;
+            double h = boxHit(b, ol, dl, face);
+            if (h > 0 && h < t) {
+                t = h;
+                bestFace = face;
+                for (int k = 0; k < 3; k++) alb[k] = b.alb[k];
+            }
+        }
+        if (t >= 1e29) return false;
+        double nl[3] = {0, 0, 0};
+        nl[std::abs(bestFace) - 1] = bestFace > 0 ? 1 : -1;
+        for (int k = 0; k < 3; k++) nWorld[k] = fwd[k] * nl[0] + side[k] * nl[1] + (k == 1 ? nl[2] : 0.0);
+        return true;
+    };
+    // Minecraft's sky light inside: 15 at an opening, one level less per block from it
+    auto sceneSky = [&](const double rel[3]) {
+        if (openings.empty()) return 1.0;
+        double pl[3], best = 1e30;
+        toLocal(rel, pl);
+        for (auto& o : openings) best = std::min(best, boxDistance(o, pl));
+        return std::max(0.0, 1.0 - best / 15.0);
+    };
     auto lampLight = [&](const double w[3], double rgb[3]) {  // Minecraft-like: falls 1/15 per block
         double best = 0;
         rgb[0] = rgb[1] = rgb[2] = 0;
@@ -574,6 +781,33 @@ int main(int argc, char** argv) {
         nearPx += nearBed;
         for (int k = 0; k < 4; k++) aColor[g * 4 + k] = farLin[i * 4 + k];
         aDepth[g] = farDepth[i];
+        if (!solids.empty()) {
+            double d[3], o[3] = {0, 0, 0}, t, nw[3], alb[3];
+            rayOf(i, d);
+            if (sceneHit(o, d, t, nw, alb) && t < (nearBed ? bd : 1e30) && t < (nearSurf ? sd : 1e30)) {
+                for (int k = 0; k < 3; k++) albedo[g * 4 + k] = srgb(float(alb[k]));
+                float s2 = float(std::abs(nw[0]) + std::abs(nw[1]) + std::abs(nw[2]));
+                float qx = float(nw[0]) / s2, qz = float(nw[2]) / s2;
+                if (nw[1] < 0) {
+                    float ox = (1 - std::abs(qz)) * (qx >= 0 ? 1.0f : -1.0f), oz = (1 - std::abs(qx)) * (qz >= 0 ? 1.0f : -1.0f);
+                    qx = ox;
+                    qz = oz;
+                }
+                normalLm[g * 4 + 0] = uint16_t(std::lround((qx * 0.5 + 0.5) * 65535));
+                normalLm[g * 4 + 1] = uint16_t(std::lround((qz * 0.5 + 0.5) * 65535));
+                double rel[3] = {d[0] * t + nw[0] * 0.5, d[1] * t + nw[1] * 0.5, d[2] * t + nw[2] * 0.5}, w[3], rgb[3];
+                for (int k = 0; k < 3; k++) w[k] = (k == 0 ? x : k == 1 ? y : z) + rel[k];
+                normalLm[g * 4 + 2] = uint16_t(std::lround(lampLight(w, rgb) * 65535));
+                normalLm[g * 4 + 3] = uint16_t(std::lround(sceneSky(rel) * 65535));
+                specularBuf[g * 4 + 0] = uint8_t(0.2 * 255);
+                specularBuf[g * 4 + 1] = uint8_t(0.03 * 255);
+                specularBuf[g * 4 + 2] = 0;
+                specularBuf[g * 4 + 3] = 0;
+                material[g * 4 + 0] = 0;
+                depth1[g] = depth0[g] = ndcDepth(i, float(t));
+                waterMask[g * 4 + 3] = 0;
+            }
+        }
     }
     std::printf("pack_lab: %zu near px (%zu water), sun map %s\n", nearPx, waterPx, haveSunMap ? "on" : "off");
     if (arg(argc, argv, "dump", 0) != 0) {  // the G-buffer the pack receives: albedo and normals
@@ -611,6 +845,23 @@ int main(int argc, char** argv) {
             for (int i = 0; i < 64 * 64; i++) {
                 int px = i % 64, pz = i / 64;
                 fogRad[pz * 128 + px] = (fogRad[pz * 128 + px] & 255u) | (roofY & 255u) << 8 | (roofY >> 8 & 255u) << 16 | 255u << 24;
+            }
+        }
+        if (!solids.empty()) {  // the scene's ceilings in the roof cache (2-block columns): no outdoor air under them
+            for (int i = 0; i < 64 * 64; i++) {
+                int tx = i % 64, tz = i / 64;
+                int cxw = int(std::floor(x / 2)) - 32, czw = int(std::floor(z / 2)) - 32;
+                int wx = cxw + ((tx - cxw) % 64 + 64) % 64, wz = czw + ((tz - czw) % 64 + 64) % 64;
+                double rel[3] = {wx * 2 + 1.0 - x, 0, wz * 2 + 1.0 - z}, pl[3];
+                toLocal(rel, pl);
+                double roof = 1e30;
+                for (auto& b : solids)
+                    if (pl[0] >= b.lo[0] && pl[0] <= b.hi[0] && pl[1] >= b.lo[1] && pl[1] <= b.hi[1] && b.lo[2] > 0)
+                        roof = std::min(roof, y + b.lo[2]);
+                if (roof < 1e29) {
+                    uint32_t roofY = uint32_t(int(std::floor(roof)) + 64);
+                    fogRad[tz * 128 + tx] = (fogRad[tz * 128 + tx] & 255u) | (roofY & 255u) << 8 | (roofY >> 8 & 255u) << 16 | 255u << 24;
+                }
             }
         }
         double ox = std::floor(x / 256) * 256, oy = std::floor(y / 256) * 256, oz = std::floor(z / 256) * 256;
@@ -722,14 +973,20 @@ int main(int argc, char** argv) {
     GLuint qualityTex = haveKnobs ? texture2d(GL_RGBA8, 16, 1, GL_RGBA, GL_UNSIGNED_BYTE, knobTexels)
                                   : texture2d(GL_RGBA8, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, &knobTexels[0]);
 
-    GLuint tex[8];
+    GLuint tex[4];
     tex[0] = texture2d(GL_RGBA8, W, H, GL_RGBA, GL_UNSIGNED_BYTE, albedo.data());
     tex[1] = texture2d(GL_RGBA16_, W, H, GL_RGBA, GL_UNSIGNED_SHORT, normalLm.data());
     tex[2] = texture2d(GL_RGBA8, W, H, GL_RGBA, GL_UNSIGNED_BYTE, specularBuf.data());
     tex[3] = texture2d(GL_RGBA8, W, H, GL_RGBA, GL_UNSIGNED_BYTE, material.data());
-    std::vector<float> zeroes(N * 4, 0.0f);  // Iris clears the translucent and realm-sky buffers to 0
-    for (int i = 4; i < 8; i++) tex[i] = texture2d(i == 6 ? GL_RGBA16_ : GL_RGBA16F_, W, H, GL_RGBA, GL_FLOAT, zeroes.data(), i == 4);
-    GLuint alt4 = texture2d(GL_RGBA16F_, W, H, GL_RGBA, GL_FLOAT, nullptr, true), alt0 = texture2d(GL_RGBA16F_, W, H, GL_RGBA, GL_FLOAT, nullptr);
+    // colortex4..8 as Iris keeps them: two halves each (a pass writes one half, then the buffer flips), HDR and linear;
+    // colortex8 is the pack's persistent exposure (R32F, clear = false)
+    std::vector<float> zeroes(N * 4, 0.0f);
+    GLuint ct[9][2] = {};
+    int cur[9] = {};
+    for (int i = 4; i <= 8; i++)
+        for (int k = 0; k < 2; k++)
+            ct[i][k] = i == 8 ? texture2d(GL_R32F_, W, H, GL_RED, GL_FLOAT, zeroes.data())
+                              : texture2d(i == 6 ? GL_RGBA16_ : GL_RGBA16F_, W, H, GL_RGBA, GL_FLOAT, zeroes.data(), i != 6);
     GLuint d0 = texture2d(GL_DEPTH_COMPONENT32F_, W, H, GL_DEPTH_COMPONENT, GL_FLOAT, depth0.data());
     GLuint d1 = texture2d(GL_DEPTH_COMPONENT32F_, W, H, GL_DEPTH_COMPONENT, GL_FLOAT, depth1.data());
     GLuint labWater = texture2d(GL_RGBA8, W, H, GL_RGBA, GL_UNSIGNED_BYTE, waterMask.data());
@@ -742,8 +999,55 @@ int main(int argc, char** argv) {
                                   : texture2d(GL_R32F_, 1, 1, GL_RED, GL_FLOAT, zero4);
     GLuint aetherSunMap = haveSunMap ? texture2d(GL_RG32F_, 1024, 1025, GL_RG_, GL_FLOAT, sunMap.data())
                                      : texture2d(GL_RG32F_, 1, 2, GL_RG_, GL_FLOAT, nullptr);
+    // the shadow map: a lit 1x1 stand-in, or with a scene a real one of the scene's solids along Iris' shadow light
+    // (the pack's own distortion and depth packing: lib/lighting.glsl distortShadow), so shafts and sun patches come
+    // from real occlusion
+    float identity[16] = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
+    float shadowMV[16], shadowP[16] = {1e-4f, 0, 0, 0, 0, 1e-4f, 0, 0, 0, 0, 1e-4f, 0, 0, 0, 0, 1};
+    std::memcpy(shadowMV, identity, sizeof(identity));
     float one = 1.0f;
-    GLuint shadowTex = texture2d(GL_DEPTH_COMPONENT32F_, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &one);
+    GLuint shadowTex;
+    if (!solids.empty()) {
+        int res = int(settingConst("shadowMapResolution", 2048));
+        double D = settingConst("shadowDistance", 128), distort = 0.85;
+        double Ls[3] = {sun[0], sun[1], sun[2]};
+        if (sun[1] <= 0) for (double& v : Ls) v = -v;  // Iris' shadow light: the vanilla moon by night
+        double rs[3] = {-Ls[2], 0, Ls[0]}, rl = std::sqrt(rs[0] * rs[0] + rs[2] * rs[2]);
+        if (rl < 1e-6) { rs[0] = 1; rs[2] = 0; rl = 1; }
+        for (double& v : rs) v /= rl;
+        double us[3] = {Ls[1] * rs[2] - Ls[2] * rs[1], Ls[2] * rs[0] - Ls[0] * rs[2], Ls[0] * rs[1] - Ls[1] * rs[0]};
+        for (int c = 0; c < 3; c++) {  // rows: right, up, towards the light
+            shadowMV[c * 4 + 0] = float(rs[c]);
+            shadowMV[c * 4 + 1] = float(us[c]);
+            shadowMV[c * 4 + 2] = float(Ls[c]);
+            shadowMV[c * 4 + 3] = 0;
+        }
+        shadowMV[12] = shadowMV[13] = shadowMV[14] = 0;
+        shadowMV[15] = 1;
+        std::memset(shadowP, 0, sizeof(shadowP));
+        shadowP[0] = shadowP[5] = float(1.0 / D);
+        shadowP[10] = float(-1.0 / 256.0);
+        shadowP[15] = 1;
+        std::vector<float> sm(size_t(res) * res, 1.0f);
+        for (int j = 0; j < res; j++)
+            for (int i = 0; i < res; i++) {
+                double dx = (i + 0.5) / res * 2 - 1, dy = (j + 0.5) / res * 2 - 1, dl = std::sqrt(dx * dx + dy * dy);
+                double k = (1 - distort) / std::max(1e-6, 1 - dl * distort);  // undo distortShadow
+                double vx = dx * k * D, vy = dy * k * D;
+                double o[3], dir[3], t, nw[3], alb[3];
+                for (int c = 0; c < 3; c++) {
+                    o[c] = rs[c] * vx + us[c] * vy + Ls[c] * 256.0;
+                    dir[c] = -Ls[c];
+                }
+                if (std::abs(vx) > D * 4 || std::abs(vy) > D * 4 || !sceneHit(o, dir, t, nw, alb)) continue;
+                double ndcZ = -(256.0 - t) / 256.0;
+                sm[size_t(j) * res + i] = float(ndcZ * 0.25 * 0.5 + 0.5);
+            }
+        shadowTex = texture2d(GL_DEPTH_COMPONENT32F_, res, res, GL_DEPTH_COMPONENT, GL_FLOAT, sm.data());
+        std::printf("pack_lab: scene %s, %zu solids, shadow map %d over %.0f blocks\n", sceneName.c_str(), solids.size(), res, D);
+    } else {
+        shadowTex = texture2d(GL_DEPTH_COMPONENT32F_, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &one);
+    }
     glBindTexture(GL_TEXTURE_2D, shadowTex);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE_, GL_COMPARE_REF_TO_TEXTURE_);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -752,14 +1056,26 @@ int main(int argc, char** argv) {
     // the weather grids aether got, as the mod's weather_field / weather_dynamics textures (RGBA8, r in the low byte)
     GLuint weatherFieldTex = texture2d(GL_RGBA8, 128, 128, GL_RGBA, GL_UNSIGNED_BYTE, fld.data());
     GLuint weatherDynTex = texture2d(GL_RGBA8, 128, 128, GL_RGBA, GL_UNSIGNED_BYTE, dyn.data());
+    // the pack's own baked textures (shaderpack/tools/bake_grades.py writes raw copies for the lab: w, h, RGBA8)
+    auto packImage = [&](const char* name) {
+        std::ifstream f(std::string("../shaderpack/build/lab/") + name, std::ios::binary);
+        uint32_t wh[2] = {0, 0};
+        if (f.read(reinterpret_cast<char*>(wh), 8) && wh[0] > 0 && wh[0] <= 8192 && wh[1] > 0 && wh[1] <= 8192) {
+            std::vector<uint32_t> px(size_t(wh[0]) * wh[1]);
+            if (f.read(reinterpret_cast<char*>(px.data()), px.size() * 4))
+                return texture2d(GL_RGBA8, int(wh[0]), int(wh[1]), GL_RGBA, GL_UNSIGNED_BYTE, px.data());
+        }
+        std::printf("pack_lab: no %s (run shaderpack/tools/bake_grades.py)\n", name);
+        uint32_t blank = 0;
+        return texture2d(GL_RGBA8, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, &blank);
+    };
+    GLuint gradeLutTex = packImage("grade_lut.rgba"), gradeMapTex = packImage("grade_map.rgba");
 
     float fV[16], fP[16], fiV[16], fiP[16];
     toFloat(V, fV);
     toFloat(P, fP);
     toFloat(iV, fiV);
     toFloat(iP, fiP);
-    float identity[16] = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
-    float shadowP[16] = {1e-4f, 0, 0, 0, 0, 1e-4f, 0, 0, 0, 0, 1e-4f, 0, 0, 0, 0, 1};
     double sv[3] = {V.m[0] * sun[0] + V.m[4] * sun[1] + V.m[8] * sun[2], V.m[1] * sun[0] + V.m[5] * sun[1] + V.m[9] * sun[2],
                     V.m[2] * sun[0] + V.m[6] * sun[1] + V.m[10] * sun[2]};
     GLuint fbo;
@@ -767,8 +1083,34 @@ int main(int argc, char** argv) {
 
     // one screen pass: binds samplers by name, sets the uniforms Iris would, renders into RENDERTARGETS
     std::map<std::string, GLuint> samplers;
-    auto run = [&](const Program& pr, const std::map<int, GLuint>& targetTex, bool deferredDepth) {
+    double frameDt = arg(argc, argv, "frametime", 1.0 / 60.0);
+    // the eye's light-map brightness (Iris eyeBrightnessSmooth): a scene's own at the eye, else outdoors in daylight
+    int eyeBlock = 0, eyeSky = 240;
+    if (!solids.empty()) {
+        double o[3] = {0, 0, 0}, w[3] = {x, y, z}, rgb[3];
+        eyeSky = int(std::lround(sceneSky(o) * 240));
+        eyeBlock = int(std::lround(lampLight(w, rgb) * 240));
+    }
+    // a screen pass: binds samplers by name, sets the uniforms Iris would, renders into the other half of every
+    // RENDERTARGETS buffer and flips it (final: into the output image)
+    auto clearTex = [&](GLuint t) {
+        pglBindFramebuffer(GL_FRAMEBUFFER_, fbo);
+        pglFramebufferTexture2D(GL_FRAMEBUFFER_, GL_COLOR_ATTACHMENT0_, GL_TEXTURE_2D, t, 0);
+        for (int k = 1; k < 8; k++) pglFramebufferTexture2D(GL_FRAMEBUFFER_, GLenum(GL_COLOR_ATTACHMENT0_ + k), GL_TEXTURE_2D, 0, 0);
+        GLenum b0 = GL_COLOR_ATTACHMENT0_;
+        pglDrawBuffers(1, &b0);
+        glClearColor(0, 0, 0, 0);
+        glClear(GL_COLOR_BUFFER_BIT);
+    };
+    auto run = [&](const Program& pr, bool deferredDepth, bool toScreen) {
         if (!pr.id) return false;
+        std::map<int, GLuint> targetTex;
+        for (int t : pr.targets) {
+            if (toScreen) targetTex[t] = outTex;
+            else if (t >= 4 && t <= 8) targetTex[t] = ct[t][1 - cur[t]];
+            else { std::printf("pack_lab: a pass writes colortex%d (not modelled)\n", t); return false; }
+        }
+        for (int i = 4; i <= 8; i++) samplers["colortex" + std::to_string(i)] = ct[i][cur[i]];
         pglUseProgram(pr.id);
         int unit = 0;
         auto bindS = [&](const char* name, GLuint t) {
@@ -788,8 +1130,8 @@ int main(int argc, char** argv) {
         m4("gbufferModelViewInverse", fiV);
         m4("gbufferProjection", fP);
         m4("gbufferProjectionInverse", fiP);
-        m4("shadowModelView", identity);
-        m4("shadowProjection", shadowP);  // everything lands inside the lit 1x1 stand-in map
+        m4("shadowModelView", shadowMV);
+        m4("shadowProjection", shadowP);  // the scene's map, or everything inside the lit 1x1 stand-in
         GLint l = pglGetUniformLocation(pr.id, "sunPosition");
         if (l >= 0) pglUniform3f(l, float(sv[0] * 100), float(sv[1] * 100), float(sv[2] * 100));
         // Iris' shadow light: the sun by day, the vanilla moon opposite it by night
@@ -804,6 +1146,7 @@ int main(int argc, char** argv) {
         f1("far", float(nearR + 16));
         f1("viewWidth", float(W));
         f1("viewHeight", float(H));
+        f1("frameTime", float(frameDt));
         f1("temperature", float(temp));
         l = pglGetUniformLocation(pr.id, "fogColor");  // the Deadlands' ember fog (realm=1)
         if (l >= 0) pglUniform3f(l, float(arg(argc, argv, "fogr", 0.42)), float(arg(argc, argv, "fogg", 0.10)), float(arg(argc, argv, "fogb", 0.06)));
@@ -812,7 +1155,7 @@ int main(int argc, char** argv) {
         l = pglGetUniformLocation(pr.id, "isEyeInWater");
         if (l >= 0) pglUniform1i(l, eyeInWater);
         l = pglGetUniformLocation(pr.id, "eyeBrightnessSmooth");
-        if (l >= 0) pglUniform2i(l, 0, 240);
+        if (l >= 0) pglUniform2i(l, eyeBlock, eyeSky);
         pglBindFramebuffer(GL_FRAMEBUFFER_, fbo);
         std::vector<GLenum> bufs;
         for (size_t k = 0; k < pr.targets.size(); k++) {
@@ -835,6 +1178,14 @@ int main(int argc, char** argv) {
         glTexCoord2f(1, 1); glVertex2f(1, 1);
         glTexCoord2f(0, 1); glVertex2f(-1, 1);
         glEnd();
+        if (!toScreen)
+            for (int t : pr.targets) {
+                cur[t] = 1 - cur[t];
+                if (t == 4) {  // colortex4 is sampled with mipmaps after composite only (see passes)
+                    glBindTexture(GL_TEXTURE_2D, ct[4][cur[4]]);
+                    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+                }
+            }
         return glGetError() == GL_NO_ERROR;
     };
     // realm=1: the realm program set (shaders/realm/: no terrestrial sky or haze; a realm's fog colour and range)
@@ -847,32 +1198,43 @@ int main(int argc, char** argv) {
     Program pFinal = program(S + "final.vsh", S + "final.fsh");
     if (!pWater.id || !pDeferred.id || !pComposite.id || !pBloom.id || !pFinal.id) return 1;
 
-    samplers = {{"colortex7", tex[7]}, {"colortex0", tex[0]}, {"colortex1", tex[1]}, {"colortex2", tex[2]}, {"colortex3", tex[3]},
+    samplers = {{"colortex0", tex[0]}, {"colortex1", tex[1]}, {"colortex2", tex[2]}, {"colortex3", tex[3]},
                 {"labWater", labWater}, {"aetherColor", aetherColor}, {"aetherDepth", aetherDepth},
                 {"aetherSunMap", aetherSunMap}, {"weatherField", weatherFieldTex}, {"weatherDyn", weatherDynTex},
                 {"fogRadianceTex", fogRadTex}, {"smokeSourcesTex", smokeTex}, {"lightningTex", boltTex},
                 {"sunHorizonTex", horizonTex}, {"masserPhases", phaseTex}, {"secundaPhases", phaseTex},
-                {"qualityKnobs", qualityTex}};
-    // the pack's passes, as Iris runs them (the lab's water pass first); every run starts from the same inputs
+                {"qualityKnobs", qualityTex}, {"gradeLut", gradeLutTex}, {"gradeMap", gradeMapTex}};
+    // seedexp=v: the eye already adapted to v (log2 of the exposure), as after a walk from another scene
+    if (arg(argc, argv, "seedexp", -999) > -999) {
+        std::vector<float> seed(N, float(arg(argc, argv, "seedexp", 0) + 64.0));
+        for (int k = 0; k < 2; k++) {
+            glBindTexture(GL_TEXTURE_2D, ct[8][k]);
+            glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, W, H, GL_RED, GL_FLOAT, seed.data());
+        }
+    }
+    GLuint deferredOut = 0, compositeOut = 0;
+    // one frame of the pack's passes, as Iris runs them (the lab's water pass first) from the same inputs; Iris
+    // clears colortex5..7 every frame, colortex4 and the exposure (colortex8) persist
     auto passes = [&]() {
-        samplers["colortex0"] = tex[0];
-        samplers.erase("colortex4");
-        samplers.erase("colortex5");
-        samplers.erase("colortex6");
-        bool good = run(pWater, {{5, tex[5]}, {6, tex[6]}}, false);
-        good = good && run(pDeferred, {{4, tex[4]}}, true);  // deferred sees the opaque depth only
-        samplers["colortex4"] = tex[4];
-        samplers["colortex5"] = tex[5];
-        samplers["colortex6"] = tex[6];
-        good = good && run(pComposite, {{4, alt4}}, false);  // reads colortex4, writes its other half (Iris flips)
-        glBindTexture(GL_TEXTURE_2D, alt4);
+        for (int i = 5; i <= 7; i++) for (int k = 0; k < 2; k++) clearTex(ct[i][k]);
+        bool good = run(pWater, false, false);
+        good = good && run(pDeferred, true, false);  // deferred sees the opaque depth only
+        deferredOut = ct[4][cur[4]];
+        good = good && run(pComposite, false, false);
+        compositeOut = ct[4][cur[4]];
+        glBindTexture(GL_TEXTURE_2D, compositeOut);  // composite1 declares colortex4MipmapEnabled
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR_);
         pglGenerateMipmap(GL_TEXTURE_2D);
-        samplers["colortex4"] = alt4;
-        good = good && run(pBloom, {{0, alt0}}, false);
-        samplers["colortex0"] = alt0;
-        good = good && run(pFinal, {{0, outTex}}, false);
+        good = good && run(pBloom, false, false);
+        good = good && run(pFinal, false, true);
         return good;
+    };
+    // the eye's exposure the pack keeps (colortex8 texel 0: log2 + 64, 0 before the first frame)
+    auto exposureNow = [&]() {
+        std::vector<float> e(N);
+        glBindTexture(GL_TEXTURE_2D, ct[8][cur[8]]);
+        glGetTexImage(GL_TEXTURE_2D, 0, GL_RED, GL_FLOAT, e.data());
+        return e[0] > 1.0f ? double(e[0]) - 64.0 : -999.0;
     };
     // gputime=N: GPU time of the passes (timestamps around them), median of N runs after a warm-up
     double gt = arg(argc, argv, "gputime", 0);
@@ -899,14 +1261,23 @@ int main(int argc, char** argv) {
         }
         return good;
     };
+    // frames=N: N frames frametime= apart (the eye adapting; explog=1 prints the exposure each frame)
+    int frames = std::max(1, int(arg(argc, argv, "frames", 1)));
+    bool explog = arg(argc, argv, "explog", 0) != 0;
+    bool ok = true;
+    for (int f = 0; f < frames - 1 && ok; f++) {
+        ok = passes();
+        if (explog) std::printf("pack_lab: frame %d t %.3f s exposure log2 %.3f\n", f, (f + 1) * frameDt, exposureNow());
+    }
     double passMs = -1;
-    bool ok = timedPasses(passMs);
+    ok = ok && timedPasses(passMs);
     if (passMs >= 0) std::printf("pack_lab: passes %.3f ms (median of %d)\n", passMs, timeRuns);
+    std::printf("pack_lab: exposure log2 %.3f (x%.3f)\n", exposureNow(), std::exp2(exposureNow()));
     if (arg(argc, argv, "probe", 0) != 0) {  // HDR after deferred and composite at a few screen points (x, y from top)
         std::vector<float> hd(N * 4), hc(N * 4);
-        glBindTexture(GL_TEXTURE_2D, tex[4]);
+        glBindTexture(GL_TEXTURE_2D, deferredOut);
         glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_FLOAT, hd.data());
-        glBindTexture(GL_TEXTURE_2D, alt4);
+        glBindTexture(GL_TEXTURE_2D, compositeOut);
         glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_FLOAT, hc.data());
         std::vector<std::array<double, 2>> pts = {{0.5, 0.85}, {0.2, 0.7}, {0.5, 0.5}, {0.5, 0.15}, {0.9, 0.42}};
         double ppx = arg(argc, argv, "px", -1), ppy = arg(argc, argv, "py", -1);  // one exact pixel (from the top)

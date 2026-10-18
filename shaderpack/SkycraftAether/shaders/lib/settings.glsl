@@ -6,6 +6,7 @@
 #define AETHER_FAR_FIELD        // composite aether's far field (needs the Skycraft mod's aether renderer)
 #define AETHER_HANDOFF_BAND 24.0 // [8.0 16.0 24.0 32.0 48.0] blocks over which near hands over to far
 #define EXPOSURE 1.0 // [0.6 0.8 1.0 1.2 1.4 1.7 2.0]
+#define AUTO_EXPOSURE           // the eye adapts: dark caves and nights opened up, the bright outside of a cave blown out
 
 // adaptive quality (lib/quality.glsl, docs/ADAPTIVE-QUALITY.md): the mod measures this machine and scales the counts
 // below at runtime (they are ceilings). The ADAPTIVE profile (these defaults) carries ULTRA's ceilings and, without the
