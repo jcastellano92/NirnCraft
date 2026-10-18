@@ -21,14 +21,14 @@ public class HarradaBlock extends GroundPlantBlock.Short {
     }
 
     @Override
-    public void entityInside(BlockState state, Level level, BlockPos pos, Entity entity) {
-        if (!(entity instanceof LivingEntity living) || entity.getType() == EntityType.ITEM) return;
+    public void entityInside(BlockState state, Level level, BlockPos pos, Entity entity, net.minecraft.world.entity.InsideBlockEffectApplier effectApplier, boolean isPrecise) {
+        if (!(entity instanceof LivingEntity living) || entity.getType() == net.minecraft.world.entity.EntityTypes.ITEM) return;
         if (living.fireImmune()) return;
         entity.makeStuckInBlock(state, new Vec3(0.75, 0.6, 0.75));
-        if (!level.isClientSide && (entity.xOld != entity.getX() || entity.zOld != entity.getZ())) {
+        if (!level.isClientSide() && (entity.xOld != entity.getX() || entity.zOld != entity.getZ())) {
             double dx = Math.abs(entity.getX() - entity.xOld);
             double dz = Math.abs(entity.getZ() - entity.zOld);
-            if (dx >= 0.003 || dz >= 0.003) entity.hurt(level.damageSources().sweetBerryBush(), 1.0f);
+            if (dx >= 0.003 || dz >= 0.003) com.skycraft.platform.Effects.hurt(entity, level.damageSources().sweetBerryBush(), 1.0f);
         }
     }
 }

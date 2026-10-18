@@ -2,7 +2,7 @@ plugins {
     id 'eclipse'
     id 'idea'
     id 'maven-publish'
-    id 'net.minecraftforge.gradle' version '[6.0.16,6.2)'
+    id 'net.neoforged.moddev' version '2.0.148'
 }
 
 // Opt-in fast scratch storage. Keep the default path for existing QA/dev tools.
@@ -17,39 +17,59 @@ base {
     archivesName = mod_id
 }
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+java.toolchain.languageVersion = JavaLanguageVersion.of(25)
 
 println "Java: ${System.getProperty 'java.version'}, JVM: ${System.getProperty 'java.vm.version'} (${System.getProperty 'java.vendor'}), Arch: ${System.getProperty 'os.arch'}"
 
-minecraft {
-    mappings channel: mapping_channel, version: mapping_version
-    copyIdeResources = true
-
+neoForge {
+    version = neo_version
     runs {
         configureEach {
-            // tools/dev/devserver.ps1 runs its persistent dev server in run/devworld (-PskycraftRunDir=run/devworld)
-            workingDirectory project.file(project.findProperty('skycraftRunDir') ?: 'run')
-            property 'forge.logging.markers', 'REGISTRIES'
-            property 'forge.logging.console.level', 'debug'
-            mods {
-                "${mod_id}" {
-                    source sourceSets.main
-                }
+            gameDirectory = project.file(project.findProperty('skycraftRunDir') ?: 'run/26.3')
+            systemProperty 'forge.logging.markers', 'REGISTRIES'
+            if (project.findProperty('skycraftDevDir')) {
+                systemProperty 'skycraft.dev', project.file(project.property('skycraftDevDir')).absolutePath
             }
+            logLevel = org.slf4j.event.Level.DEBUG
         }
         client {
-            property 'forge.enabledGameTestNamespaces', mod_id
+            client()
         }
         server {
-            property 'forge.enabledGameTestNamespaces', mod_id
-            args '--nogui'
+            server()
+            programArgument '--nogui'
         }
         gameTestServer {
-            property 'forge.enabledGameTestNamespaces', mod_id
+            type = 'gameTestServer'
         }
         data {
-            workingDirectory project.file('run-data')
-            args '--mod', mod_id, '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
+            clientData()
+            gameDirectory = project.file('run-data/26.3')
+            programArguments.addAll '--mod', mod_id, '--all', '--output', file('src/generated/resources/').absolutePath, '--existing', file('src/main/resources/').absolutePath
+        }
+    }
+    mods { skycraft { sourceSet(sourceSets.main) } }
+    unitTest {
+        // Real FML bootstrap and registry ownership, supplied by this exact NeoForge userdev artifact.
+        enable()
+        testedMod = mods.skycraft
+    }
+}
+
+// MDG 2.0.148 hardcodes the JUnit cwd relative to the project, independent of buildDirectory.
+// Configure its public DirectoryProperty and follow its afterEvaluate working-directory assignment.
+def nativeJunitDirectory = layout.buildDirectory.dir('minecraft-junit')
+tasks.named('prepareNeoForgeTestFiles').configure {
+    gameDirectory.set(nativeJunitDirectory)
+}
+afterEvaluate {
+    tasks.named('test', Test).configure {
+        workingDir(nativeJunitDirectory.get().asFile)
+        def nativeTestTemp = nativeJunitDirectory.get().dir('tmp').asFile
+        systemProperty 'java.io.tmpdir', nativeTestTemp.absolutePath
+        doFirst { testTask ->
+            java.nio.file.Files.createDirectories(testTask.workingDir.toPath())
+            java.nio.file.Files.createDirectories(nativeTestTemp.toPath())
         }
     }
 }
@@ -113,8 +133,8 @@ repositories {
 }
 
 dependencies {
-    minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
+    testImplementation "net.neoforged:testframework:${neo_version}"
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
@@ -131,14 +151,14 @@ tasks.named('test', Test).configure {
 tasks.named('processResources', ProcessResources).configure {
     var replaceProperties = [
             minecraft_version: minecraft_version, minecraft_version_range: minecraft_version_range,
-            forge_version: forge_version, forge_version_range: forge_version_range,
+            neo_version: neo_version, neo_version_range: neo_version_range,
             loader_version_range: loader_version_range,
             mod_id: mod_id, mod_name: mod_name, mod_license: mod_license, mod_version: mod_version,
             mod_authors: mod_authors, mod_description: mod_description,
     ]
     inputs.properties replaceProperties
 
-    filesMatching(['META-INF/mods.toml', 'pack.mcmeta']) {
+    filesMatching(['META-INF/neoforge.mods.toml', 'pack.mcmeta']) {
         expand replaceProperties + [project: project]
     }
 }
@@ -157,12 +177,12 @@ tasks.named('jar', Jar).configure {
     // reproducible jars: the modpack only changes when the code does
     preserveFileTimestamps = false
     reproducibleFileOrder = true
-    finalizedBy 'reobfJar'
+    // Minecraft26.3 is unobfuscated; ModDevGradle builds the runtime jar directly.
 }
 
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
-    options.compilerArgs += ['-Xmaxerrs', '2000']
+    options.compilerArgs += ['-Xmaxerrs', '10000']
 }
 
 eclipse {

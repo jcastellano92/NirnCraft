@@ -13,18 +13,18 @@ import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.Difficulty;
-import net.minecraft.world.item.ArmorItem;
+import net.minecraft.world.item.equipment.ArmorType;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.WorldDataConfiguration;
 import net.minecraft.world.level.levelgen.WorldOptions;
 import net.minecraft.world.level.levelgen.presets.WorldPresets;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -40,7 +40,7 @@ import java.util.function.Consumer;
  * (with a weapon and the set's shield), photographs them from the front, the side and the back, then lays out every
  * weapon on stands and quits. Screenshots go to {@code build/armstest-screenshots/}. Does nothing in normal play.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
 public final class ArmsAutotest {
     private static final boolean ENABLED = Files.exists(Paths.get("skycraft-armstest.txt")) || "1".equals(System.getenv("SKYCRAFT_ARMSTEST"));
     private static final Path OUT = Paths.get("build", "armstest-screenshots");
@@ -71,17 +71,23 @@ public final class ArmsAutotest {
         return BuiltInRegistries.ITEM.getKey(item).toString();
     }
 
+    private static String stack(Item item) {
+        return "{id:\"" + id(item) + "\",count:1}";
+    }
+
     private static String stand(double dx, double dz, float yaw, SkyArmorMaterial set, Item main) {
         StringBuilder sb = new StringBuilder("summon armor_stand ~").append(dx).append(" ~ ~").append(dz)
-                .append(" {ShowArms:1b,NoBasePlate:1b,NoGravity:1b,Invulnerable:1b,Rotation:[").append(yaw).append("f,0f],ArmorItems:[");
-        ArmorItem.Type[] order = {ArmorItem.Type.BOOTS, ArmorItem.Type.LEGGINGS, ArmorItem.Type.CHESTPLATE, ArmorItem.Type.HELMET};
+                .append(" {ShowArms:1b,NoBasePlate:1b,NoGravity:1b,Invulnerable:1b,Rotation:[").append(yaw).append("f,0f],equipment:{");
+        ArmorType[] order = {ArmorType.BOOTS, ArmorType.LEGGINGS, ArmorType.CHESTPLATE, ArmorType.HELMET};
+        String[] slots = {"feet", "legs", "chest", "head"};
         for (int i = 0; i < order.length; i++) {
             if (i > 0) sb.append(',');
-            sb.append("{id:\"").append(id(CraftingItems.armor(set, order[i]))).append("\",Count:1b}");
+            sb.append(slots[i]).append(':').append(stack(CraftingItems.armor(set, order[i])));
         }
-        sb.append("],HandItems:[{id:\"").append(id(main)).append("\",Count:1b},");
+        sb.append(",mainhand:").append(stack(main));
         Item shield = CraftingItems.shield(set);
-        sb.append(shield != null ? "{id:\"" + id(shield) + "\",Count:1b}" : "{}").append("],Pose:{RightArm:[-20f,0f,10f],LeftArm:[-30f,0f,-10f]}}");
+        if (shield != null) sb.append(",offhand:").append(stack(shield));
+        sb.append("},Pose:{RightArm:[-20f,0f,10f],LeftArm:[-30f,0f,-10f]}}");
         return sb.toString();
     }
 
@@ -89,12 +95,12 @@ public final class ArmsAutotest {
         built = true;
         step(80, mc -> {
             com.skycraft.network.SkyNetwork.sendToServer(new CorePackets.ChooseRace(com.skycraft.core.Race.NORD.id()));
-            mc.setScreen(null);
-            mc.options.hideGui = true;
+            mc.gui.setScreen(null);
+            com.skycraft.client.autotest.ReviewWorlds.hudHidden(mc,true);
         });
-        cmd(2, "gamerule doDaylightCycle false");
-        cmd(2, "gamerule doMobSpawning false");
-        cmd(2, "gamerule doWeatherCycle false");
+        cmd(2, "gamerule advance_time false");
+        cmd(2, "gamerule spawn_mobs false");
+        cmd(2, "gamerule advance_weather false");
         cmd(2, "weather clear");
         cmd(2, "time set 6000");
         cmd(2, "gamemode creative");
@@ -126,8 +132,8 @@ public final class ArmsAutotest {
                 WeaponType main = tier.has(WeaponType.GREATSWORD) ? WeaponType.GREATSWORD : WeaponType.SWORD;
                 WeaponType off = tier.has(WeaponType.WAR_AXE) ? WeaponType.WAR_AXE : WeaponType.DAGGER;
                 String cmd = "summon armor_stand ~" + (-3.75 + k * 1.5) + " ~-0.6 ~4.5 {ShowArms:1b,NoBasePlate:1b,NoGravity:1b,Rotation:[150f,0f],"
-                        + "HandItems:[{id:\"" + id(CraftingItems.weaponItem(tier, main)) + "\",Count:1b},{id:\""
-                        + id(CraftingItems.weaponItem(tier, off)) + "\",Count:1b}]}";
+                        + "equipment:{mainhand:" + stack(CraftingItems.weaponItem(tier, main)) + ",offhand:"
+                        + stack(CraftingItems.weaponItem(tier, off)) + "}}";
                 cmd(2, cmd);
             }
             step(40, mc -> shot(mc, String.format("weapons_%02d", b)));
@@ -139,32 +145,24 @@ public final class ArmsAutotest {
     }
 
     private static void shot(Minecraft mc, String name) {
-        try {
-            Files.createDirectories(OUT);
-            NativeImage img = Screenshot.takeScreenshot(mc.getMainRenderTarget());
-            File out = OUT.resolve(name + ".png").toFile();
-            img.writeToFile(out);
-            img.close();
-            Skycraft.LOGGER.info("Arms autotest: saved {}", out.getAbsolutePath());
-        } catch (Exception e) {
-            Skycraft.LOGGER.warn("Arms autotest: screenshot {} failed", name, e);
-        }
+        com.skycraft.client.autotest.ReviewCaptures.capture(mc, OUT, name,
+                output -> Skycraft.LOGGER.info("Arms autotest: saved {}", output.toAbsolutePath()));
     }
 
     @SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent event) {
-        if (!ENABLED || event.phase != TickEvent.Phase.END) return;
+    public static void onClientTick(net.neoforged.neoforge.client.event.ClientTickEvent.Post event) {
+        if (!ENABLED) return;
+        if (com.skycraft.client.autotest.ReviewCaptures.pending() > 0) return;
         Minecraft mc = Minecraft.getInstance();
         if (mc.level == null) {
-            if (mc.screen instanceof net.minecraft.client.gui.screens.AccessibilityOnboardingScreen) mc.setScreen(new TitleScreen());
-            if (!worldRequested && (mc.screen instanceof TitleScreen || mc.screen instanceof com.skycraft.client.screen.title.SkyTitleScreen)) {
+            if (mc.gui.screen() instanceof net.minecraft.client.gui.screens.AccessibilityOnboardingScreen) mc.gui.setScreen(new TitleScreen());
+            if (!worldRequested && (mc.gui.screen() instanceof TitleScreen || mc.gui.screen() instanceof com.skycraft.client.screen.title.SkyTitleScreen)) {
                 worldRequested = true;
                 String name = "armstest-" + System.currentTimeMillis();
-                GameRules rules = new GameRules();
-                LevelSettings settings = new LevelSettings(name, GameType.CREATIVE, false, Difficulty.PEACEFUL, true, rules,
+                LevelSettings settings = com.skycraft.client.autotest.ReviewWorlds.settings(name,  GameType.CREATIVE,  false,  Difficulty.PEACEFUL,  true, 
                         WorldDataConfiguration.DEFAULT);
-                mc.createWorldOpenFlows().createFreshLevel(name, settings, new WorldOptions(20261010L, false, false),
-                        access -> access.registryOrThrow(Registries.WORLD_PRESET).getHolderOrThrow(WorldPresets.FLAT).value().createWorldDimensions());
+                com.skycraft.client.autotest.ReviewWorlds.create(mc, name,  settings,  new WorldOptions(20261010L, false, false), 
+                        access -> access.lookupOrThrow(Registries.WORLD_PRESET).getOrThrow(WorldPresets.FLAT).value().createWorldDimensions(), mc.gui.screen());
             }
             return;
         }

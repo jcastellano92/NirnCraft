@@ -35,12 +35,12 @@ public class Party {
 
     public CompoundTag save() {
         CompoundTag t = new CompoundTag();
-        t.putUUID("id", id);
-        t.putUUID("leader", leader);
+        t.store("id", net.minecraft.core.UUIDUtil.CODEC,  id);
+        t.store("leader", net.minecraft.core.UUIDUtil.CODEC,  leader);
         ListTag list = new ListTag();
         members.forEach((uuid, name) -> {
             CompoundTag m = new CompoundTag();
-            m.putUUID("uuid", uuid);
+            m.store("uuid", net.minecraft.core.UUIDUtil.CODEC,  uuid);
             m.putString("name", name);
             list.add(m);
         });
@@ -49,10 +49,10 @@ public class Party {
     }
 
     public static Party load(CompoundTag t) {
-        Party p = new Party(t.getUUID("id"), t.getUUID("leader"));
-        for (Tag tag : t.getList("members", Tag.TAG_COMPOUND)) {
+        Party p = new Party(t.read("id", net.minecraft.core.UUIDUtil.CODEC).orElseThrow(), t.read("leader", net.minecraft.core.UUIDUtil.CODEC).orElseThrow());
+        for (Tag tag : t.getListOrEmpty("members")) {
             CompoundTag m = (CompoundTag) tag;
-            p.members.put(m.getUUID("uuid"), m.getString("name"));
+            p.members.put(m.read("uuid", net.minecraft.core.UUIDUtil.CODEC).orElseThrow(), m.getStringOr("name",""));
         }
         return p;
     }

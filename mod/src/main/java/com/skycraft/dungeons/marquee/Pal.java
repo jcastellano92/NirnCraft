@@ -105,7 +105,7 @@ final class Pal {
         BlockState s = CACHE.get(text);
         if (s != null) return s;
         try {
-            s = BlockStateParser.parseForBlock(BuiltInRegistries.BLOCK.asLookup(), text, false).blockState();
+            s = BlockStateParser.parseForBlock(BuiltInRegistries.BLOCK, text, false).blockState();
         } catch (Exception e) {
             Skycraft.LOGGER.warn("Skycraft marquee: bad block {}", text);
             s = Blocks.STONE_BRICKS.defaultBlockState();

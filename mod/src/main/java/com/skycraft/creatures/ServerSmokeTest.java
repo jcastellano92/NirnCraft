@@ -2,10 +2,10 @@ package com.skycraft.creatures;
 
 import com.skycraft.Skycraft;
 import net.minecraft.server.MinecraftServer;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.server.ServerStartedEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+
+import net.neoforged.neoforge.event.server.ServerStartedEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
@@ -18,7 +18,7 @@ import java.util.Deque;
  * directory, its lines run as console commands once the server has started, one per tick ({@code wait <ticks>} lines
  * pause). Lets automated tests summon creatures, make them fight and stop the server without a console.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class ServerSmokeTest {
     private static final String FILE = "skycraft-smoketest.txt";
     private static Deque<String> queue;
@@ -28,7 +28,8 @@ public final class ServerSmokeTest {
 
     @SubscribeEvent
     public static void onStarted(ServerStartedEvent event) {
-        File f = new File(event.getServer().getServerDirectory(), FILE);
+        if (event.getServer().overworld() == null) return;
+        File f = event.getServer().getServerDirectory().resolve(FILE).toFile();
         if (!f.exists()) return;
         try {
             queue = new ArrayDeque<>(Files.readAllLines(f.toPath(), StandardCharsets.UTF_8));
@@ -39,8 +40,8 @@ public final class ServerSmokeTest {
     }
 
     @SubscribeEvent
-    public static void onTick(TickEvent.ServerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || queue == null) return;
+    public static void onTick(net.neoforged.neoforge.event.tick.ServerTickEvent.Post event) {
+        if (!(event instanceof net.neoforged.neoforge.event.tick.ServerTickEvent.Post) || queue == null) return;
         if (wait > 0) {
             wait--;
             return;

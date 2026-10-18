@@ -4,32 +4,31 @@ import com.skycraft.network.SkyNetwork;
 import com.skycraft.sailing.client.SailingClientEvents;
 import com.skycraft.sailing.client.VoyageOverlay;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.network.NetworkDirection;
-import net.minecraftforge.network.NetworkEvent;
+import net.neoforged.api.distmarker.Dist;
+import com.skycraft.platform.Sides;
+import net.minecraft.network.protocol.PacketFlow;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-import java.util.function.Supplier;
 
 /** Sailing packets: helm input, sail trim, crash reports, the shipwright's bench and the voyage screen. */
 public final class SailingPackets {
     private SailingPackets() {}
 
     static void register() {
-        SkyNetwork.register(ShipControl.class, NetworkDirection.PLAY_TO_SERVER, ShipControl::encode, ShipControl::decode, ShipControl::handle);
-        SkyNetwork.register(SailTrim.class, NetworkDirection.PLAY_TO_SERVER, SailTrim::encode, SailTrim::decode, SailTrim::handle);
-        SkyNetwork.register(ShipCrash.class, NetworkDirection.PLAY_TO_SERVER, ShipCrash::encode, ShipCrash::decode, ShipCrash::handle);
-        SkyNetwork.register(OpenShipwright.class, NetworkDirection.PLAY_TO_CLIENT, OpenShipwright::encode, OpenShipwright::decode, OpenShipwright::handle);
-        SkyNetwork.register(BuildShip.class, NetworkDirection.PLAY_TO_SERVER, BuildShip::encode, BuildShip::decode, BuildShip::handle);
-        SkyNetwork.register(VoyageStart.class, NetworkDirection.PLAY_TO_CLIENT, VoyageStart::encode, VoyageStart::decode, VoyageStart::handle);
-        SkyNetwork.register(DeckReport.class, NetworkDirection.PLAY_TO_SERVER, DeckReport::encode, DeckReport::decode, DeckReport::handle);
-        SkyNetwork.register(DeckSync.class, NetworkDirection.PLAY_TO_CLIENT, DeckSync::encode, DeckSync::decode, DeckSync::handle);
+        SkyNetwork.register(ShipControl.class, PacketFlow.SERVERBOUND, ShipControl::encode, ShipControl::decode, ShipControl::handle);
+        SkyNetwork.register(SailTrim.class, PacketFlow.SERVERBOUND, SailTrim::encode, SailTrim::decode, SailTrim::handle);
+        SkyNetwork.register(ShipCrash.class, PacketFlow.SERVERBOUND, ShipCrash::encode, ShipCrash::decode, ShipCrash::handle);
+        SkyNetwork.register(OpenShipwright.class, PacketFlow.CLIENTBOUND, OpenShipwright::encode, OpenShipwright::decode, OpenShipwright::handle);
+        SkyNetwork.register(BuildShip.class, PacketFlow.SERVERBOUND, BuildShip::encode, BuildShip::decode, BuildShip::handle);
+        SkyNetwork.register(VoyageStart.class, PacketFlow.CLIENTBOUND, VoyageStart::encode, VoyageStart::decode, VoyageStart::handle);
+        SkyNetwork.register(DeckReport.class, PacketFlow.SERVERBOUND, DeckReport::encode, DeckReport::decode, DeckReport::handle);
+        SkyNetwork.register(DeckSync.class, PacketFlow.CLIENTBOUND, DeckSync::encode, DeckSync::decode, DeckSync::handle);
     }
 
     /** The ship the sender is aboard, if it is {@code id}. */
@@ -41,38 +40,37 @@ public final class SailingPackets {
 
     /** Helm input bits (oars and rudder) from the helmsman, so everyone sees the oars and rudder move. */
     public record ShipControl(int entity, int bits) {
-        static void encode(ShipControl m, FriendlyByteBuf buf) {
+        static void encode(ShipControl m, RegistryFriendlyByteBuf buf) {
             buf.writeVarInt(m.entity);
             buf.writeByte(m.bits);
         }
 
-        static ShipControl decode(FriendlyByteBuf buf) {
+        static ShipControl decode(RegistryFriendlyByteBuf buf) {
             return new ShipControl(buf.readVarInt(), buf.readByte());
         }
 
-        static void handle(ShipControl m, Supplier<NetworkEvent.Context> ctx) {
-            ServerPlayer player = ctx.get().getSender();
+        static void handle(ShipControl m, IPayloadContext ctx) {
+            ServerPlayer player = SkyNetwork.sender(ctx);
             if (player != null) {
                 ShipEntity ship = shipOf(player, m.entity);
                 if (ship != null && ship.getControllingPassenger() == player) ship.setSyncedInput(m.bits);
             }
-            ctx.get().setPacketHandled(true);
         }
     }
 
     /** Any crew member raises (+1) or lowers (-1) the sail. */
     public record SailTrim(int entity, int delta) {
-        static void encode(SailTrim m, FriendlyByteBuf buf) {
+        static void encode(SailTrim m, RegistryFriendlyByteBuf buf) {
             buf.writeVarInt(m.entity);
             buf.writeByte(m.delta);
         }
 
-        static SailTrim decode(FriendlyByteBuf buf) {
+        static SailTrim decode(RegistryFriendlyByteBuf buf) {
             return new SailTrim(buf.readVarInt(), buf.readByte());
         }
 
-        static void handle(SailTrim m, Supplier<NetworkEvent.Context> ctx) {
-            ServerPlayer player = ctx.get().getSender();
+        static void handle(SailTrim m, IPayloadContext ctx) {
+            ServerPlayer player = SkyNetwork.sender(ctx);
             if (player != null) {
                 ShipEntity ship = shipOf(player, m.entity);
                 if (ship != null && ship.shipType.hasSail() && ship.getSinking() == 0) {
@@ -85,90 +83,85 @@ public final class SailingPackets {
                     }
                 }
             }
-            ctx.get().setPacketHandled(true);
         }
     }
 
     /** The helmsman's client ran the ship into something hard; the server applies the (bounded) damage. */
     public record ShipCrash(int entity, float speed) {
-        static void encode(ShipCrash m, FriendlyByteBuf buf) {
+        static void encode(ShipCrash m, RegistryFriendlyByteBuf buf) {
             buf.writeVarInt(m.entity);
             buf.writeFloat(m.speed);
         }
 
-        static ShipCrash decode(FriendlyByteBuf buf) {
+        static ShipCrash decode(RegistryFriendlyByteBuf buf) {
             return new ShipCrash(buf.readVarInt(), buf.readFloat());
         }
 
-        static void handle(ShipCrash m, Supplier<NetworkEvent.Context> ctx) {
-            ServerPlayer player = ctx.get().getSender();
+        static void handle(ShipCrash m, IPayloadContext ctx) {
+            ServerPlayer player = SkyNetwork.sender(ctx);
             if (player != null && Float.isFinite(m.speed)) {
                 ShipEntity ship = shipOf(player, m.entity);
                 if (ship != null) ship.reportedCrash(player, Math.max(0f, m.speed));
             }
-            ctx.get().setPacketHandled(true);
         }
     }
 
     /** Opens the shipwright's bench screen. */
     public record OpenShipwright(BlockPos pos) {
-        static void encode(OpenShipwright m, FriendlyByteBuf buf) {
+        static void encode(OpenShipwright m, RegistryFriendlyByteBuf buf) {
             buf.writeBlockPos(m.pos);
         }
 
-        static OpenShipwright decode(FriendlyByteBuf buf) {
+        static OpenShipwright decode(RegistryFriendlyByteBuf buf) {
             return new OpenShipwright(buf.readBlockPos());
         }
 
-        static void handle(OpenShipwright m, Supplier<NetworkEvent.Context> ctx) {
-            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> SailingClientEvents.openShipwright(m.pos));
-            ctx.get().setPacketHandled(true);
+        static void handle(OpenShipwright m, IPayloadContext ctx) {
+            Sides.runOn(Dist.CLIENT, () -> () -> SailingClientEvents.openShipwright(m.pos));
         }
     }
 
     /** Build a ship at the bench. */
     public record BuildShip(int type, BlockPos bench) {
-        static void encode(BuildShip m, FriendlyByteBuf buf) {
+        static void encode(BuildShip m, RegistryFriendlyByteBuf buf) {
             buf.writeVarInt(m.type);
             buf.writeBlockPos(m.bench);
         }
 
-        static BuildShip decode(FriendlyByteBuf buf) {
+        static BuildShip decode(RegistryFriendlyByteBuf buf) {
             return new BuildShip(buf.readVarInt(), buf.readBlockPos());
         }
 
-        static void handle(BuildShip m, Supplier<NetworkEvent.Context> ctx) {
-            ServerPlayer player = ctx.get().getSender();
+        static void handle(BuildShip m, IPayloadContext ctx) {
+            ServerPlayer player = SkyNetwork.sender(ctx);
             if (player != null && m.type >= 0 && m.type < ShipType.VALUES.length) {
                 Shipwright.build(player, ShipType.VALUES[m.type], m.bench);
             }
-            ctx.get().setPacketHandled(true);
         }
     }
 
     /** Start the voyage screen: sailing from one port to another, taking {@code hours}. */
     public record VoyageStart(Component from, Component to, Component ship, int hours, boolean expedition) {
-        static void encode(VoyageStart m, FriendlyByteBuf buf) {
-            buf.writeComponent(m.from);
-            buf.writeComponent(m.to);
-            buf.writeComponent(m.ship);
+        static void encode(VoyageStart m, RegistryFriendlyByteBuf buf) {
+            net.minecraft.network.chat.ComponentSerialization.STREAM_CODEC.encode(buf, m.from);
+            net.minecraft.network.chat.ComponentSerialization.STREAM_CODEC.encode(buf, m.to);
+            net.minecraft.network.chat.ComponentSerialization.STREAM_CODEC.encode(buf, m.ship);
             buf.writeVarInt(m.hours);
             buf.writeBoolean(m.expedition);
         }
 
-        static VoyageStart decode(FriendlyByteBuf buf) {
-            return new VoyageStart(buf.readComponent(), buf.readComponent(), buf.readComponent(), buf.readVarInt(), buf.readBoolean());
+        static VoyageStart decode(RegistryFriendlyByteBuf buf) {
+            return new VoyageStart(net.minecraft.network.chat.ComponentSerialization.STREAM_CODEC.decode(buf), net.minecraft.network.chat.ComponentSerialization.STREAM_CODEC.decode(buf), net.minecraft.network.chat.ComponentSerialization.STREAM_CODEC.decode(buf), buf.readVarInt(), buf.readBoolean());
         }
 
-        static void handle(VoyageStart m, Supplier<NetworkEvent.Context> ctx) {
-            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> VoyageOverlay.start(m.from, m.to, m.ship, m.hours, m.expedition));
-            ctx.get().setPacketHandled(true);
+        static void handle(VoyageStart m, IPayloadContext ctx) {
+            Sides.runOn(Dist.CLIENT, () -> () -> VoyageOverlay.start(m.from, m.to, m.ship, m.hours, m.expedition));
         }
     }
 
     /** The sender's own position on a ship's deck (ship-local), or {@code ship = -1} when it left the deck. */
     public record DeckReport(int ship, float lx, float ly, float lz, float yaw, float headYaw) {
-        static void encode(DeckReport m, FriendlyByteBuf buf) {
+        static void encode(DeckReport m, RegistryFriendlyByteBuf buf) {
             buf.writeVarInt(m.ship + 1);
             if (m.ship < 0) return;
             buf.writeFloat(m.lx);
@@ -178,18 +171,17 @@ public final class SailingPackets {
             buf.writeFloat(m.headYaw);
         }
 
-        static DeckReport decode(FriendlyByteBuf buf) {
+        static DeckReport decode(RegistryFriendlyByteBuf buf) {
             int ship = buf.readVarInt() - 1;
             if (ship < 0) return new DeckReport(-1, 0, 0, 0, 0, 0);
             return new DeckReport(ship, buf.readFloat(), buf.readFloat(), buf.readFloat(), buf.readFloat(), buf.readFloat());
         }
 
-        static void handle(DeckReport m, Supplier<NetworkEvent.Context> ctx) {
-            ServerPlayer player = ctx.get().getSender();
+        static void handle(DeckReport m, IPayloadContext ctx) {
+            ServerPlayer player = SkyNetwork.sender(ctx);
             if (player != null && Float.isFinite(m.yaw) && Float.isFinite(m.headYaw)) {
                 DeckPhysics.report(player, m.ship, m.lx, m.ly, m.lz, m.yaw, m.headYaw);
             }
-            ctx.get().setPacketHandled(true);
         }
     }
 
@@ -200,7 +192,7 @@ public final class SailingPackets {
     public record DeckSync(int ship, java.util.List<Entry> entries) {
         public record Entry(int entity, float lx, float ly, float lz, float yaw, float headYaw) {}
 
-        static void encode(DeckSync m, FriendlyByteBuf buf) {
+        static void encode(DeckSync m, RegistryFriendlyByteBuf buf) {
             buf.writeVarInt(m.ship);
             buf.writeVarInt(m.entries.size());
             for (Entry e : m.entries) {
@@ -213,7 +205,7 @@ public final class SailingPackets {
             }
         }
 
-        static DeckSync decode(FriendlyByteBuf buf) {
+        static DeckSync decode(RegistryFriendlyByteBuf buf) {
             int ship = buf.readVarInt();
             int n = Math.min(buf.readVarInt(), 256);
             java.util.List<Entry> list = new java.util.ArrayList<>(n);
@@ -223,9 +215,8 @@ public final class SailingPackets {
             return new DeckSync(ship, list);
         }
 
-        static void handle(DeckSync m, Supplier<NetworkEvent.Context> ctx) {
-            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> com.skycraft.sailing.client.DeckClient.onSync(m));
-            ctx.get().setPacketHandled(true);
+        static void handle(DeckSync m, IPayloadContext ctx) {
+            Sides.runOn(Dist.CLIENT, () -> () -> com.skycraft.sailing.client.DeckClient.onSync(m));
         }
     }
 }

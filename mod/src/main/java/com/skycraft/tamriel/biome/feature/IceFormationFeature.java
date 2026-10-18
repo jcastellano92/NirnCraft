@@ -4,12 +4,12 @@ import com.mojang.serialization.Codec;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
-import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
+import com.skycraft.worldgen.ConfiguredFeature;
+import com.skycraft.worldgen.FeaturePlaceContext;
+import com.skycraft.worldgen.NoneFeatureConfiguration;
 
 /** Ice caves: icicles of packed and blue ice hanging from the ceiling, and stubby ice stalagmites under them. */
-public class IceFormationFeature extends Feature<NoneFeatureConfiguration> {
+public class IceFormationFeature extends ConfiguredFeature<NoneFeatureConfiguration> {
     public IceFormationFeature(Codec<NoneFeatureConfiguration> codec) {
         super(codec);
     }

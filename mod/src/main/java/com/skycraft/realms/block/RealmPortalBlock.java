@@ -69,9 +69,9 @@ public class RealmPortalBlock extends Block {
     }
 
     @Override
-    public void entityInside(BlockState state, Level level, BlockPos pos, Entity entity) {
-        if (level.isClientSide || !(entity instanceof ServerPlayer player)) return;
-        if (player.isPassenger() || player.isVehicle() || !player.canChangeDimensions()) return;
+    public void entityInside(BlockState state, Level level, BlockPos pos, Entity entity, net.minecraft.world.entity.InsideBlockEffectApplier effectApplier, boolean isPrecise) {
+        if (level.isClientSide() || !(entity instanceof ServerPlayer player)) return;
+        if (player.isPassenger() || player.isVehicle() || !player.canUsePortal(false)) return;
         RealmTravel.usePortal(player, realm, state.getValue(RETURN), pos);
     }
 
@@ -90,7 +90,7 @@ public class RealmPortalBlock extends Block {
     }
 
     @Override
-    public ItemStack getCloneItemStack(BlockGetter level, BlockPos pos, BlockState state) {
+    public ItemStack getCloneItemStack(net.minecraft.world.level.LevelReader level, BlockPos pos, BlockState state, boolean includeData) {
         return ItemStack.EMPTY;
     }
 }

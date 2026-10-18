@@ -24,7 +24,7 @@ final class DecorBase {
         int yy = y;
         for (int i = 0; i < 8 && !DecorKit.open(k.get(x, yy, z)); i++) yy++;
         for (int i = 0; i < 64; i++, yy--) {
-            if (yy <= k.level.getMinBuildHeight() + 1) return NONE;
+            if (yy <= k.level.getMinY() + 1) return NONE;
             BlockState below = k.get(x, yy - 1, z);
             if (!DecorKit.open(below)) return yy;
         }

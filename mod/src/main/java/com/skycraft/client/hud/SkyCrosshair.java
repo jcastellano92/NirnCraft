@@ -5,46 +5,47 @@ import com.skycraft.Skycraft;
 import com.skycraft.visual.VisualConfig;
 import net.minecraft.client.AttackIndicatorStatus;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.level.GameType;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RenderGuiOverlayEvent;
-import net.minecraftforge.client.gui.overlay.ForgeGui;
-import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.RenderGuiLayerEvent;
+import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 /**
  * Skyrim's small bracket crosshair in place of vanilla's cross: the brackets close in over a creature and warm to
  * red over an enemy; hidden while sneaking (the {@link SneakEye} takes its place) and during the kill cam. Vanilla's
  * crosshair stays for the debug screen and spectators, and when the option is off.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
 public final class SkyCrosshair {
-    private static final ResourceLocation TEXTURE = new ResourceLocation(Skycraft.MODID, "textures/gui/hud/crosshair.png");
+    private static final Identifier TEXTURE = Identifier.fromNamespaceAndPath(Skycraft.MODID, "textures/gui/hud/crosshair.png");
 
     private SkyCrosshair() {}
 
     private static boolean ours(Minecraft mc) {
         if (!VisualConfig.SKY_CROSSHAIR.get() || mc.player == null) return false;
-        if (mc.options.renderDebug || !mc.options.getCameraType().isFirstPerson()) return false;
+        if (mc.getDebugOverlay().showDebugScreen() || !mc.options.getCameraType().isFirstPerson()) return false;
         return mc.gameMode == null || mc.gameMode.getPlayerMode() != GameType.SPECTATOR;
     }
 
     @SubscribeEvent
-    public static void hideVanilla(RenderGuiOverlayEvent.Pre event) {
-        if (event.getOverlay().id().equals(VanillaGuiOverlay.CROSSHAIR.id()) && ours(Minecraft.getInstance())) {
+    public static void hideVanilla(RenderGuiLayerEvent.Pre event) {
+        if (event.getName().equals(VanillaGuiLayers.CROSSHAIR) && ours(Minecraft.getInstance())) {
             event.setCanceled(true);
         }
     }
 
-    public static void render(ForgeGui gui, GuiGraphics g, float partialTick, int width, int height) {
+    public static void render(GuiGraphicsExtractor g, net.minecraft.client.DeltaTracker delta) {
+        float partialTick = delta.getGameTimeDeltaPartialTick(false);
+        int width = g.guiWidth(), height = g.guiHeight();
         Minecraft mc = Minecraft.getInstance();
-        if (mc.options.hideGui || mc.screen != null || !ours(mc)) return;
+        if (mc.gui.hud.isHidden() || mc.gui.screen() != null || !ours(mc)) return;
         if (mc.player.isCrouching() || com.skycraft.arsenal.client.KillCamClient.active()) return;
         int cx = width / 2;
         int cy = height / 2;
@@ -56,12 +57,9 @@ public final class SkyCrosshair {
             b = 0.62f;
         }
         int u = onCreature ? 32 : 0;
-        RenderSystem.enableBlend();
-        RenderSystem.setShaderColor(0f, 0f, 0f, 0.5f);
-        g.blit(TEXTURE, cx - 8 + 1, cy - 8 + 1, 16, 16, u, 0, 32, 32, 64, 32);
-        RenderSystem.setShaderColor(r, gr, b, 0.9f);
-        g.blit(TEXTURE, cx - 8, cy - 8, 16, 16, u, 0, 32, 32, 64, 32);
-        RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
+        
+        com.skycraft.inventory.client.SkyUi.blit(g, TEXTURE, cx - 8 + 1, cy - 8 + 1, 16, 16, u, 0, 32, 32, 64, 32, net.minecraft.util.ARGB.colorFromFloat(0.5f, 0f, 0f, 0f));
+        com.skycraft.inventory.client.SkyUi.blit(g, TEXTURE, cx - 8, cy - 8, 16, 16, u, 0, 32, 32, 64, 32, net.minecraft.util.ARGB.colorFromFloat(0.9f, r, gr, b));
 
         // vanilla's attack-strength indicator, as a thin bar under the brackets
         if (mc.options.attackIndicator().get() == AttackIndicatorStatus.CROSSHAIR) {

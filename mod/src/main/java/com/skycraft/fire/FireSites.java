@@ -68,18 +68,17 @@ public final class FireSites {
 
         public static Data load(CompoundTag tag) {
             Data d = new Data();
-            d.nextId = Math.max(1, tag.getInt("next"));
-            ListTag list = tag.getList("sites", Tag.TAG_COMPOUND);
+            d.nextId = Math.max(1, tag.getIntOr("next",0));
+            ListTag list = tag.getListOrEmpty("sites");
             for (int i = 0; i < list.size(); i++) {
-                CompoundTag t = list.getCompound(i);
-                Site s = new Site(t.getInt("id"), t.getInt("x"), t.getInt("y"), t.getInt("z"), t.getFloat("i"), t.getInt("h"),
-                        t.getInt("s"), t.getInt("f"), 0L);
+                CompoundTag t = list.getCompoundOrEmpty(i);
+                Site s = new Site(t.getIntOr("id",0), t.getIntOr("x",0), t.getIntOr("y",0), t.getIntOr("z",0), t.getFloatOr("i",0F), t.getIntOr("h",0),
+                        t.getIntOr("s",0), t.getIntOr("f",0), 0L);
                 d.sites.put(BlockPos.asLong(s.x, s.y, s.z), s);
             }
             return d;
         }
 
-        @Override
         public CompoundTag save(CompoundTag tag) {
             ListTag list = new ListTag();
             for (Site s : sites.values()) {
@@ -110,7 +109,7 @@ public final class FireSites {
     private FireSites() {}
 
     public static Data data(ServerLevel level) {
-        return CACHE.computeIfAbsent(level, l -> l.getDataStorage().computeIfAbsent(Data::load, Data::new, Data.NAME));
+        return CACHE.computeIfAbsent(level, l -> com.skycraft.platform.SavedDataTypes.get(l, Data.NAME, Data::load, Data::new, value263 -> value263.save(new net.minecraft.nbt.CompoundTag())));
     }
 
     // ------------------------------------------------------------------ API

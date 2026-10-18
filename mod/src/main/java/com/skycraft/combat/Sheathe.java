@@ -17,7 +17,7 @@ public final class Sheathe {
 
     public static boolean isSheathed(Player player) {
         if (player == null) return true;
-        return SkyData.get(player).module("combat").getBoolean("sheathed");
+        return SkyData.get(player).module("combat").getBooleanOr("sheathed",false);
     }
 
     /** Changes the state; the server sends it to the owner and every tracking player (appearance sync). */
@@ -31,7 +31,7 @@ public final class Sheathe {
             }
         }
         PlayerData data = SkyData.get(player);
-        if (data.module("combat").getBoolean("sheathed") == sheathed) return;
+        if (data.module("combat").getBooleanOr("sheathed",false) == sheathed) return;
         data.module("combat").putBoolean("sheathed", sheathed);
         data.markAppearanceDirty();
     }
@@ -39,10 +39,10 @@ public final class Sheathe {
     public static void toggle(Player player) {
         boolean now = !isSheathed(player);
         setSheathed(player, now);
-        if (!player.level().isClientSide && player instanceof net.minecraft.server.level.ServerPlayer sp) {
+        if (!player.level().isClientSide() && player instanceof net.minecraft.server.level.ServerPlayer sp) {
             Notifier.message(sp, Component.translatable(now ? "message.skycraft.sheathed" : "message.skycraft.drawn"));
             player.level().playSound(null, player.blockPosition(),
-                    now ? SoundEvents.ARMOR_EQUIP_LEATHER : SoundEvents.ARMOR_EQUIP_IRON,
+                    now ? SoundEvents.ARMOR_EQUIP_LEATHER.value() : SoundEvents.ARMOR_EQUIP_IRON.value(),
                     SoundSource.PLAYERS, 0.8f, 1.2f);
         }
     }

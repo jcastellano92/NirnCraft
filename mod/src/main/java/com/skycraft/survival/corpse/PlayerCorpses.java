@@ -8,14 +8,14 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.living.LivingDropsEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+
+import net.neoforged.neoforge.event.entity.living.LivingDropsEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -29,7 +29,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * took out what they keep). A body that would lie in lava or the void is placed on the nearest safe ground instead:
  * above the death point, or where the player last stood safely. The "Your Corpse" map marker follows the body.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class PlayerCorpses {
     private record SafeKey(net.minecraft.resources.ResourceKey<net.minecraft.world.level.Level> dim, UUID id) {}
 
@@ -39,8 +39,8 @@ public final class PlayerCorpses {
     private PlayerCorpses() {}
 
     @SubscribeEvent
-    public static void onTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer player)) return;
+    public static void onTick(net.neoforged.neoforge.event.tick.PlayerTickEvent.Post event) {
+        if (!(event instanceof net.neoforged.neoforge.event.tick.PlayerTickEvent.Post) || !(event.getEntity() instanceof ServerPlayer player)) return;
         if (player.tickCount % 20 != 0 || !player.onGround() || player.isInLava() || player.isSpectator()) return;
         LAST_SAFE.put(new SafeKey(player.level().dimension(), player.getUUID()), player.blockPosition());
     }
@@ -104,18 +104,18 @@ public final class PlayerCorpses {
             if (hasCargo) spillAsEntities(player, cargo, event.getDrops());
             return;
         }
-        ServerLevel level = player.serverLevel();
-        if (level.getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY)) {
+        ServerLevel level = player.level();
+        if (level.getGameRules().get(GameRules.KEEP_INVENTORY)) {
             if (hasCargo) for (net.minecraft.world.item.ItemStack s : cargo) com.skycraft.inventory.Pack.add(player, s);
             return;
         }
-        PlayerCorpseEntity corpse = SurvivalRegistry.PLAYER_CORPSE.get().create(level);
+        PlayerCorpseEntity corpse = SurvivalRegistry.PLAYER_CORPSE.get().create(level, net.minecraft.world.entity.EntitySpawnReason.EVENT);
         if (corpse == null) {
             if (hasCargo) spillAsEntities(player, cargo, event.getDrops());
             return;
         }
 
-        BlockPos lastSafe = LAST_SAFE.getOrDefault(new SafeKey(level.dimension(), player.getUUID()), level.getSharedSpawnPos());
+        BlockPos lastSafe = LAST_SAFE.getOrDefault(new SafeKey(level.dimension(), player.getUUID()), level.getRespawnData().pos());
         BlockPos at = safeSpot(level, player.blockPosition(), lastSafe);
         corpse.setOwner(player, at.equals(player.blockPosition()) ? lastSafe : at);
 
@@ -140,7 +140,7 @@ public final class PlayerCorpses {
         }
         if (stored.isEmpty() && !corpse.hasItems()) return;
         float yaw = player.yBodyRot;
-        corpse.moveTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, yaw, 0);
+        corpse.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, yaw, 0);
         if (!level.noCollision(corpse)) corpse.setCentered(false);
         if (lava(level, at.below())) corpse.setNoGravity(true); // hovers over the lava it was pulled out of
         if (!level.addFreshEntity(corpse)) {
@@ -165,9 +165,9 @@ public final class PlayerCorpses {
      * death point; otherwise {@code fallback}.
      */
     public static BlockPos safeSpot(ServerLevel level, BlockPos pos, BlockPos fallback) {
-        if (pos.getY() < level.getMinBuildHeight() + 1) {
+        if (pos.getY() < level.getMinY() + 1) {
             int top = level.getHeight(Heightmap.Types.MOTION_BLOCKING, pos.getX(), pos.getZ());
-            if (top > level.getMinBuildHeight() + 1 && level.isLoaded(pos)) {
+            if (top > level.getMinY() + 1 && level.isLoaded(pos)) {
                 BlockPos up = new BlockPos(pos.getX(), top, pos.getZ());
                 if (!lava(level, up) && !lava(level, up.below())) return up;
             }
@@ -175,7 +175,7 @@ public final class PlayerCorpses {
         }
         if (lava(level, pos) || lava(level, pos.below())) {
             BlockPos.MutableBlockPos p = pos.mutable();
-            for (int i = 0; i < 64 && p.getY() < level.getMaxBuildHeight() - 2; i++) {
+            for (int i = 0; i < 64 && p.getY() < (level.getMaxY()+1) - 2; i++) {
                 p.move(0, 1, 0);
                 if (!lava(level, p) && level.getBlockState(p).getCollisionShape(level, p).isEmpty()
                         && level.getBlockState(p.above()).getCollisionShape(level, p.above()).isEmpty()) {

@@ -14,31 +14,31 @@ public interface HitEffect {
     void apply(Mob attacker, LivingEntity victim);
 
     static HitEffect slow(int ticks, int amp) {
-        return (a, v) -> v.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, ticks, amp), a);
+        return (a, v) -> v.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.SLOWNESS), ticks, amp), a);
     }
 
     static HitEffect poison(int ticks, int amp) {
-        return (a, v) -> v.addEffect(new MobEffectInstance(MobEffects.POISON, ticks, amp), a);
+        return (a, v) -> v.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.POISON), ticks, amp), a);
     }
 
     static HitEffect weakness(int ticks) {
-        return (a, v) -> v.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, ticks, 0), a);
+        return (a, v) -> v.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.WEAKNESS), ticks, 0), a);
     }
 
     static HitEffect blind(int ticks) {
-        return (a, v) -> v.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, ticks, 0), a);
+        return (a, v) -> v.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.BLINDNESS), ticks, 0), a);
     }
 
     /** Frostbite: slows and chills (powder-snow freezing). */
     static HitEffect frost(int ticks) {
         return (a, v) -> {
-            v.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, ticks, 1), a);
+            v.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.SLOWNESS), ticks, 1), a);
             if (v.canFreeze()) v.setTicksFrozen(Math.min(v.getTicksRequiredToFreeze() + 80, v.getTicksFrozen() + ticks / 2));
         };
     }
 
     static HitEffect burn(int seconds) {
-        return (a, v) -> v.setSecondsOnFire(seconds);
+        return (a, v) -> v.igniteForSeconds(seconds);
     }
 
     /** Extra shock damage (a spell damage type: wards and magic resistance apply). */
@@ -49,7 +49,7 @@ public interface HitEffect {
     /** Extra fire damage. */
     static HitEffect fire(float damage) {
         return (a, v) -> {
-            if (CombatHandler.secondaryHurt(v, MagicDamage.source(a.level(), MagicDamage.FIRE, null, a), damage)) v.setSecondsOnFire(3);
+            if (CombatHandler.secondaryHurt(v, MagicDamage.source(a.level(), MagicDamage.FIRE, null, a), damage)) v.igniteForSeconds(3);
         };
     }
 
@@ -57,7 +57,7 @@ public interface HitEffect {
     static HitEffect chill(float damage) {
         return (a, v) -> {
             CombatHandler.secondaryHurt(v, MagicDamage.source(a.level(), MagicDamage.FROST, null, a), damage);
-            v.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 60, 0), a);
+            v.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.SLOWNESS), 60, 0), a);
         };
     }
 
@@ -68,7 +68,7 @@ public interface HitEffect {
             if (d.lengthSqr() < 1.0E-4) d = Vec3.directionFromRotation(0, a.getYRot());
             d = d.normalize().scale(strength * (1.0 - v.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.KNOCKBACK_RESISTANCE)));
             v.setDeltaMovement(v.getDeltaMovement().add(d.x, up, d.z));
-            v.hurtMarked = true;
+            v.syncVelocity = true;
         };
     }
 

@@ -359,14 +359,14 @@ public final class Signposts {
     /** Returns true if {@code sign} at {@code pos} is a directional signpost. */
     public static boolean isDirectionalSign(Level level, BlockPos pos, SignBlockEntity sign) {
         if (NoticeBoards.isNoticeBoardSign(level, pos, sign)) return false;
-        if ( inspectText(sign.getFrontText()) || inspectText(sign.getBackText())) return true;
+        if ( inspectText(sign.getText(net.minecraft.world.level.block.entity.SignTextSlot.FRONT)) || inspectText(sign.getText(net.minecraft.world.level.block.entity.SignTextSlot.BACK))) return true;
         return false;
     }
 
     private static boolean inspectText(SignText text) {
         if (text == null) return false;
         for (int i = 0; i < 4; i++) {
-            Component msg = text.getMessage(i, false);
+            Component msg = text.getMessages(false).get(i);
             if (msg.getContents() instanceof TranslatableContents tc) {
                 String k = tc.getKey();
                 if (k.startsWith("signpost.skycraft.") || k.startsWith("settlement.skycraft.sign.dir.")
@@ -432,17 +432,17 @@ public final class Signposts {
         for (BlockPos pos : BlockPos.betweenClosed(center.offset(-10, -3, -10), center.offset(10, 4, 10))) {
             BlockEntity be = level.getBlockEntity(pos);
             if (!(be instanceof SignBlockEntity sign)) continue;
-            if (!isBlankSign(sign.getFrontText())) continue;
+            if (!isBlankSign(sign.getText(net.minecraft.world.level.block.entity.SignTextSlot.FRONT))) continue;
             Readout r = computeAt(pos.getX(), pos.getZ());
             List<Component[]> faces = buildSignFaces(r);
             if (faces.isEmpty()) continue;
             Component[] lines = faces.get(0);
-            SignText text = new SignText();
-            for (int i = 0; i < 4; i++) text = text.setMessage(i, lines[i]);
-            CompoundTag tag = sign.saveWithoutMetadata();
-            SignText.DIRECT_CODEC.encodeStart(NbtOps.INSTANCE, text).result().ifPresent(t -> tag.put("front_text", t));
+            SignText text = SignText.EMPTY;
+            for (int i = 0; i < 4; i++) text = text.asMutable().setLine(i, lines[i]).asImmutable();
+            CompoundTag tag = sign.saveWithoutMetadata(level.registryAccess());
+            SignText.CODEC.encodeStart(NbtOps.INSTANCE, text).result().ifPresent(t -> tag.put("front_text", t));
             tag.putBoolean("is_waxed", true);
-            sign.load(tag);
+            com.skycraft.worldgen.WorldgenData.load(sign, tag, level.registryAccess());
             sign.setChanged();
             level.sendBlockUpdated(pos, sign.getBlockState(), sign.getBlockState(), 3);
         }
@@ -451,7 +451,7 @@ public final class Signposts {
     private static boolean isBlankSign(SignText text) {
         if (text == null) return false;
         for (int i = 0; i < 4; i++) {
-            if (!text.getMessage(i, false).getString().trim().isEmpty()) return false;
+            if (!text.getMessages(false).get(i).getString().trim().isEmpty()) return false;
         }
         return true;
     }

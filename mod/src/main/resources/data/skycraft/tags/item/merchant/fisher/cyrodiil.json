@@ -1,0 +1,29 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "skycraft:cyrodilic_spadetail",
+      "required": false
+    },
+    {
+      "id": "skycraft:niben_eel",
+      "required": false
+    },
+    {
+      "id": "skycraft:rumare_bass",
+      "required": false
+    },
+    {
+      "id": "skycraft:colovian_trout",
+      "required": false
+    },
+    {
+      "id": "skycraft:gold_coast_snapper",
+      "required": false
+    },
+    {
+      "id": "skycraft:abecean_longfin",
+      "required": false
+    }
+  ]
+}

@@ -26,7 +26,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
@@ -58,21 +58,25 @@ public class SkyArrow extends AbstractArrow {
     }
 
     public SkyArrow(Level level, LivingEntity shooter, ItemStack ammo) {
-        super(ArsenalEntities.SKY_ARROW.get(), shooter, level);
+        this(level, shooter, ammo, null);
+    }
+
+    public SkyArrow(Level level, LivingEntity shooter, ItemStack ammo, @Nullable ItemStack weapon) {
+        super(ArsenalEntities.SKY_ARROW.get(), shooter, level, ammo.copyWithCount(1), weapon);
         setAmmo(ammo);
     }
 
     public SkyArrow(Level level, double x, double y, double z, ItemStack ammo) {
-        super(ArsenalEntities.SKY_ARROW.get(), x, y, z, level);
+        super(ArsenalEntities.SKY_ARROW.get(), x, y, z, level, ammo.copyWithCount(1), null);
         setAmmo(ammo);
     }
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        this.entityData.define(AMMO, ItemStack.EMPTY);
-        this.entityData.define(FROM_CROSSBOW, false);
-        this.entityData.define(EXTINGUISHED, false);
+    protected void defineSynchedData(net.minecraft.network.syncher.SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(AMMO, ItemStack.EMPTY);
+        builder.define(FROM_CROSSBOW, false);
+        builder.define(EXTINGUISHED, false);
     }
 
     public void setAmmo(ItemStack stack) {
@@ -87,11 +91,10 @@ public class SkyArrow extends AbstractArrow {
 
     public void setFromCrossbow(boolean fromCrossbow) {
         this.entityData.set(FROM_CROSSBOW, fromCrossbow);
-        setShotFromCrossbow(fromCrossbow);
     }
 
     public boolean isFromCrossbow() {
-        return this.entityData.get(FROM_CROSSBOW) || shotFromCrossbow();
+        return this.entityData.get(FROM_CROSSBOW) || (getWeaponItem() != null && getWeaponItem().getItem() instanceof net.minecraft.world.item.CrossbowItem);
     }
 
     public void setExtinguished(boolean extinguished) {
@@ -115,14 +118,14 @@ public class SkyArrow extends AbstractArrow {
     /** Safe accessor for protected AbstractArrow.inGround across packages. */
     public static boolean isArrowInGround(AbstractArrow arrow) {
         if (arrow == null) return false;
-        if (arrow instanceof SkyArrow sky) return sky.inGround;
+        if (arrow instanceof SkyArrow sky) return sky.isInGround();
         return arrow.onGround() || (arrow.getDeltaMovement().lengthSqr() < 1.0e-4 && !arrow.isInWater() && !arrow.isNoGravity());
     }
 
     /** Safe mutator for protected AbstractArrow.inGround across packages. */
     public static void setArrowInGround(AbstractArrow arrow, boolean value) {
         if (arrow instanceof SkyArrow sky) {
-            sky.inGround = value;
+            sky.setInGround(value);
         } else if (arrow != null) {
             arrow.setOnGround(value);
         }
@@ -176,6 +179,9 @@ public class SkyArrow extends AbstractArrow {
     }
 
     @Override
+    protected ItemStack getDefaultPickupItem() { return new ItemStack(Items.ARROW); }
+
+    @Override
     protected ItemStack getPickupItem() {
         ItemStack stack = ammo().copy();
         if (stack.isEmpty()) return new ItemStack(Items.ARROW);
@@ -200,19 +206,9 @@ public class SkyArrow extends AbstractArrow {
     }
 
     @Override
-    public InteractionResult interact(Player player, InteractionHand hand) {
-        if (ArsenalEvents.tryPickupArrow(player, this)) {
-            return InteractionResult.sidedSuccess(level().isClientSide);
-        }
-        return super.interact(player, hand);
-    }
-
-    @Override
-    public InteractionResult interactAt(Player player, Vec3 vec, InteractionHand hand) {
-        if (ArsenalEvents.tryPickupArrow(player, this)) {
-            return InteractionResult.sidedSuccess(level().isClientSide);
-        }
-        return super.interactAt(player, vec, hand);
+    public InteractionResult interact(Player player, InteractionHand hand, Vec3 hit) {
+        if (ArsenalEvents.tryPickupArrow(player, this)) return com.skycraft.platform.Interactions.sidedSuccess(level().isClientSide());
+        return super.interact(player, hand, hit);
     }
 
     @Override
@@ -225,7 +221,7 @@ public class SkyArrow extends AbstractArrow {
         if (elem == ArrowKind.Element.FIRE && !isExtinguished() && isInWater()) {
             setExtinguished(true);
             clearFire();
-            if (!level().isClientSide && level() instanceof ServerLevel sl) {
+            if (!level().isClientSide() && level() instanceof ServerLevel sl) {
                 clearDynamicLight();
                 sl.playSound(null, blockPosition(), SoundEvents.FIRE_EXTINGUISH, SoundSource.BLOCKS, 0.7f, 1.2f + random.nextFloat() * 0.3f);
                 sl.sendParticles(ParticleTypes.CLOUD, getX(), getY(), getZ(), 8, 0.15, 0.15, 0.15, 0.04);
@@ -234,7 +230,7 @@ public class SkyArrow extends AbstractArrow {
         }
 
         // Water buoyancy: once slowed by water drag, wooden-shafted arrows float up to the surface and bob gently
-        if (isInWater() && !inGround) {
+        if (isInWater() && !isInGround()) {
             Vec3 m = getDeltaMovement();
             double horizSq = m.x * m.x + m.z * m.z;
             if (horizSq < 0.04) {
@@ -249,7 +245,7 @@ public class SkyArrow extends AbstractArrow {
                 }
                 setDeltaMovement(m.x * 0.82, vy, m.z * 0.82);
             }
-        } else if (!inGround && !isNoGravity() && ! getPersistentData().contains("skycraft_slow_time")) {
+        } else if (!isInGround() && !isNoGravity() && ! getPersistentData().contains("skycraft_slow_time")) {
             // Bow vs. Crossbow ballistic gravity adjustment (vanilla AbstractArrow subtracts 0.05 each tick)
             flightTicks++;
             float targetGravity;
@@ -264,7 +260,7 @@ public class SkyArrow extends AbstractArrow {
             if (level().dimension() == Level.OVERWORLD && level().canSeeSky(blockPosition())) {
                 float windStrength = 0f;
                 float wx = 0f, wz = 0f;
-                if (!level().isClientSide && level() instanceof ServerLevel sl) {
+                if (!level().isClientSide() && level() instanceof ServerLevel sl) {
                     com.skycraft.atmosphere.weather.WeatherKind wk = com.skycraft.atmosphere.weather.RegionalWeather.kindAt(sl, blockPosition());
                     int wDeg = com.skycraft.atmosphere.weather.RegionalWeather.windAt(sl, blockPosition());
                     if (wk != null && wDeg >= 0) {
@@ -273,7 +269,7 @@ public class SkyArrow extends AbstractArrow {
                         wx = -net.minecraft.util.Mth.sin(rad);
                         wz = net.minecraft.util.Mth.cos(rad);
                     }
-                } else if (level().isClientSide) {
+                } else if (level().isClientSide()) {
                     windStrength = com.skycraft.atmosphere.client.ClientWeather.wind();
                     wx = com.skycraft.atmosphere.client.ClientWeather.windX();
                     wz = com.skycraft.atmosphere.client.ClientWeather.windZ();
@@ -294,7 +290,7 @@ public class SkyArrow extends AbstractArrow {
         }
 
         // Server-side dynamic illumination for elemental arrows in flight and briefly after sticking
-        if (!level().isClientSide) {
+        if (!level().isClientSide()) {
             int lightLevel = switch (elem) {
                 case FIRE -> isExtinguished() ? 0 : 13;
                 case SHOCK -> 9;
@@ -302,7 +298,7 @@ public class SkyArrow extends AbstractArrow {
                 default -> 0;
             };
             if (lightLevel > 0) {
-                if (inGround) {
+                if (isInGround()) {
                     groundedLightTicks++;
                     if (groundedLightTicks <= 80) {
                         updateDynamicLight(lightLevel);
@@ -325,7 +321,7 @@ public class SkyArrow extends AbstractArrow {
             trailWx = com.skycraft.atmosphere.client.ClientWeather.windX() * ws * 0.035f;
             trailWz = com.skycraft.atmosphere.client.ClientWeather.windZ() * ws * 0.035f;
         }
-        if (inGround) {
+        if (isInGround()) {
             if (elem == ArrowKind.Element.FIRE && !isExtinguished() && inGroundTime < 80 && random.nextInt(3) == 0) {
                 level().addParticle(ParticleTypes.SMALL_FLAME, getX(), getY() + 0.05, getZ(), trailWx * 0.5, 0.015, trailWz * 0.5);
                 level().addParticle(ParticleTypes.SMOKE, getX(), getY() + 0.08, getZ(), trailWx, 0.02, trailWz);
@@ -383,7 +379,7 @@ public class SkyArrow extends AbstractArrow {
     }
 
     public void clearDynamicLight() {
-        if (lastLightPos != null && !level().isClientSide && level().isLoaded(lastLightPos)) {
+        if (lastLightPos != null && !level().isClientSide() && level().isLoaded(lastLightPos)) {
             BlockState state = level().getBlockState(lastLightPos);
             if (state.is(Blocks.LIGHT)) {
                 boolean water = state.getValue(LightBlock.WATERLOGGED);
@@ -405,7 +401,7 @@ public class SkyArrow extends AbstractArrow {
         super.onHitEntity(result);
         // If the hit was canceled or bounced off an invulnerable/blocking target (vanilla reverses velocity by -0.1),
         // discard the arrow cleanly instead of leaving a duplicated/unpickable bounced arrow on the ground.
-        if (!level().isClientSide && !isRemoved() && getDeltaMovement().dot(preHitVel) < 0) {
+        if (!level().isClientSide() && !isRemoved() && getDeltaMovement().dot(preHitVel) < 0) {
             clearDynamicLight();
             discard();
         }
@@ -417,7 +413,7 @@ public class SkyArrow extends AbstractArrow {
         switch (element()) {
             case FIRE -> {
                 if (!isExtinguished() && !isInWater()) {
-                    target.setSecondsOnFire(6);
+                    target.igniteForSeconds(6);
                     if (level() instanceof ServerLevel sl) {
                         sl.sendParticles(ParticleTypes.FLAME, target.getX(), target.getY() + target.getBbHeight() * 0.5,
                                 target.getZ(), 14, 0.25, 0.35, 0.25, 0.06);
@@ -427,7 +423,7 @@ public class SkyArrow extends AbstractArrow {
                 }
             }
             case FROST -> {
-                target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 100, 2));
+                target.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.SLOWNESS), 100, 2));
                 target.setTicksFrozen(Math.max(target.getTicksFrozen(), target.getTicksRequiredToFreeze() + 100));
                 if (level() instanceof ServerLevel sl) {
                     sl.sendParticles(ParticleTypes.SNOWFLAKE, target.getX(), target.getY() + target.getBbHeight() * 0.5,
@@ -438,8 +434,8 @@ public class SkyArrow extends AbstractArrow {
                 }
             }
             case SHOCK -> {
-                if (random.nextFloat() < 0.15f && !target.getType().is(com.skycraft.combat.CombatHandler.BOSSES)) {
-                    target.addEffect(new MobEffectInstance(ModEffects.STAGGER.get(), 15, 0, false, false));
+                if (random.nextFloat() < 0.15f && !target.getType().builtInRegistryHolder().is(com.skycraft.combat.CombatHandler.BOSSES)) {
+                    target.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(ModEffects.STAGGER.get()), 15, 0, false, false));
                 }
             }
             case EXPLOSIVE -> explode();
@@ -451,7 +447,7 @@ public class SkyArrow extends AbstractArrow {
     @Override
     protected void onHitBlock(BlockHitResult result) {
         super.onHitBlock(result);
-        if (level().isClientSide) return;
+        if (level().isClientSide()) return;
 
         ArrowKind.Element elem = element();
         if (elem == ArrowKind.Element.EXPLOSIVE) {
@@ -486,8 +482,8 @@ public class SkyArrow extends AbstractArrow {
         float breakChance = breakChanceFor(kind(), getOwner());
         if (random.nextFloat() < breakChance) {
             if (level() instanceof ServerLevel sl) {
-                sl.playSound(null, blockPosition(), SoundEvents.ITEM_BREAK, SoundSource.PLAYERS, 0.5f, 1.2f + random.nextFloat() * 0.3f);
-                sl.sendParticles(new ItemParticleOption(ParticleTypes.ITEM, pickupStack()), getX(), getY(), getZ(), 6, 0.1, 0.1, 0.1, 0.05);
+                sl.playSound(null, blockPosition(), SoundEvents.ITEM_BREAK.value(), SoundSource.PLAYERS, 0.5f, 1.2f + random.nextFloat() * 0.3f);
+                sl.sendParticles(new ItemParticleOption(ParticleTypes.ITEM, net.minecraft.world.item.ItemStackTemplate.fromStack( pickupStack())), getX(), getY(), getZ(), 6, 0.1, 0.1, 0.1, 0.05);
             }
             clearDynamicLight();
             discard();
@@ -495,27 +491,33 @@ public class SkyArrow extends AbstractArrow {
     }
 
     private void explode() {
-        if (level().isClientSide || isRemoved()) return;
+        if (level().isClientSide() || isRemoved()) return;
         clearDynamicLight();
         level().explode(this, getX(), getY(), getZ(), 1.6f, Level.ExplosionInteraction.NONE);
         discard();
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag tag) {
-        super.addAdditionalSaveData(tag);
+    public void addAdditionalSaveData(net.minecraft.world.level.storage.ValueOutput output263) {
+        super.addAdditionalSaveData(output263);
+        net.minecraft.nbt.CompoundTag tag = new net.minecraft.nbt.CompoundTag();
+        
         ItemStack ammo = ammo();
-        if (!ammo.isEmpty()) tag.put("ammo", ammo.save(new CompoundTag()));
+        if (!ammo.isEmpty()) tag.put("ammo", com.skycraft.inventory.ItemData.save(ammo));
         tag.putBoolean("from_crossbow", isFromCrossbow());
         tag.putBoolean("extinguished", isExtinguished());
+    
+        output263.store(tag);
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag tag) {
-        super.readAdditionalSaveData(tag);
-        if (tag.contains("ammo")) setAmmo(ItemStack.of(tag.getCompound("ammo")));
-        if (tag.contains("from_crossbow")) setFromCrossbow(tag.getBoolean("from_crossbow"));
-        if (tag.contains("extinguished")) setExtinguished(tag.getBoolean("extinguished"));
+    public void readAdditionalSaveData(net.minecraft.world.level.storage.ValueInput input263) {
+        super.readAdditionalSaveData(input263);
+        net.minecraft.nbt.CompoundTag tag = com.skycraft.platform.ValueTags.read(input263 , "ammo", "from_crossbow", "extinguished");
+        
+        if (tag.contains("ammo")) setAmmo(com.skycraft.inventory.ItemData.parse(tag.getCompoundOrEmpty("ammo")));
+        if (tag.contains("from_crossbow")) setFromCrossbow(tag.getBooleanOr("from_crossbow",false));
+        if (tag.contains("extinguished")) setExtinguished(tag.getBooleanOr("extinguished",false));
     }
 }
 

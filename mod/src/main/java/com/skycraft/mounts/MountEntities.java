@@ -10,10 +10,10 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobCategory;
-import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.registries.DeferredRegister;
+import java.util.function.Supplier;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
@@ -32,14 +32,14 @@ public final class MountEntities {
     private static final Map<EntityType<?>, CreatureSpec> SPECS = Collections.synchronizedMap(new IdentityHashMap<>());
     private static final Map<EntityType<?>, MountKind> KINDS = Collections.synchronizedMap(new IdentityHashMap<>());
     /** Mount kind of each beast type, by registry id. */
-    public static final Map<MountKind, RegistryObject<EntityType<MountBeast>>> BY_KIND = new LinkedHashMap<>();
+    public static final Map<MountKind, Supplier<EntityType<MountBeast>>> BY_KIND = new LinkedHashMap<>();
 
-    public static final RegistryObject<EntityType<MountBeast>> SENCHE = register(MountKind.SENCHE, sencheSpec());
-    public static final RegistryObject<EntityType<MountBeast>> GIANT_WOLF = register(MountKind.GIANT_WOLF, wolfSpec());
-    public static final RegistryObject<EntityType<MountBeast>> INDRIK = register(MountKind.INDRIK, indrikSpec());
-    public static final RegistryObject<EntityType<MountBeast>> MAMMOTH = register(MountKind.MAMMOTH, mammothSpec());
-    public static final RegistryObject<EntityType<MountBeast>> AKAVIRI_TIGER = register(MountKind.AKAVIRI_TIGER, tigerSpec());
-    public static final RegistryObject<EntityType<MountBeast>> REALM_GRAZER = register(MountKind.REALM_GRAZER, grazerSpec());
+    public static final Supplier<EntityType<MountBeast>> SENCHE = register(MountKind.SENCHE, sencheSpec());
+    public static final Supplier<EntityType<MountBeast>> GIANT_WOLF = register(MountKind.GIANT_WOLF, wolfSpec());
+    public static final Supplier<EntityType<MountBeast>> INDRIK = register(MountKind.INDRIK, indrikSpec());
+    public static final Supplier<EntityType<MountBeast>> MAMMOTH = register(MountKind.MAMMOTH, mammothSpec());
+    public static final Supplier<EntityType<MountBeast>> AKAVIRI_TIGER = register(MountKind.AKAVIRI_TIGER, tigerSpec());
+    public static final Supplier<EntityType<MountBeast>> REALM_GRAZER = register(MountKind.REALM_GRAZER, grazerSpec());
 
     private MountEntities() {}
 
@@ -48,11 +48,11 @@ public final class MountEntities {
         modBus.addListener(MountEntities::onAttributes);
     }
 
-    private static RegistryObject<EntityType<MountBeast>> register(MountKind kind, CreatureSpec spec) {
+    private static Supplier<EntityType<MountBeast>> register(MountKind kind, CreatureSpec spec) {
         spec.variants = 3; // bare, saddled, barded
-        RegistryObject<EntityType<MountBeast>> type = ENTITIES.register(spec.id, () -> {
+        Supplier<EntityType<MountBeast>> type = ENTITIES.register(spec.id, () -> {
             EntityType<MountBeast> t = EntityType.Builder.<MountBeast>of(MountBeast::new, MobCategory.CREATURE)
-                    .sized(spec.width, spec.height).clientTrackingRange(10).build(Skycraft.MODID + ":" + spec.id);
+                    .sized(spec.width, spec.height).clientTrackingRange(10).build(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.ENTITY_TYPE, net.minecraft.resources.Identifier.parse(Skycraft.MODID + ":" + spec.id)));
             SPECS.put(t, spec);
             KINDS.put(t, kind);
             return t;
@@ -75,12 +75,12 @@ public final class MountEntities {
 
     @Nullable
     public static EntityType<MountBeast> type(MountKind kind) {
-        RegistryObject<EntityType<MountBeast>> ro = BY_KIND.get(kind);
+        Supplier<EntityType<MountBeast>> ro = BY_KIND.get(kind);
         return ro == null ? null : ro.get();
     }
 
     private static void onAttributes(EntityAttributeCreationEvent event) {
-        for (RegistryObject<EntityType<MountBeast>> ro : BY_KIND.values()) {
+        for (Supplier<EntityType<MountBeast>> ro : BY_KIND.values()) {
             event.put(ro.get(), spec(ro.get()).attributes().build());
         }
     }

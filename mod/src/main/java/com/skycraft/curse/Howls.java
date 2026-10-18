@@ -17,7 +17,7 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.animal.Wolf;
+import net.minecraft.world.entity.animal.wolf.Wolf;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.ai.util.DefaultRandomPos;
 import net.minecraft.world.phys.Vec3;
@@ -40,9 +40,9 @@ public final class Howls {
 
     static void howl(ServerPlayer player, String id) {
         if (!CursePowers.hasAbility(player, id) || !CursePowers.ready(player, id)) return;
-        ServerLevel level = player.serverLevel();
+        ServerLevel level = player.level();
         CursePackets.anim(player, CurseAnims.Anim.HOWL);
-        level.playSound(null, player.blockPosition(), SoundEvents.WOLF_HOWL, SoundSource.PLAYERS, 2.0f, 0.5f);
+        level.playSound(null, player.blockPosition(), com.skycraft.audio.AudioSounds.creature("wolf", "howl"), SoundSource.PLAYERS, 2.0f, 0.5f);
         level.sendParticles(ParticleTypes.SONIC_BOOM, player.getX(), player.getEyeY(), player.getZ(), 1, 0, 0, 0, 0);
         switch (id) {
             case CursePowers.HOWL_OF_TERROR -> {
@@ -51,7 +51,7 @@ public final class Howls {
             }
             case CursePowers.HOWL_PREDATOR -> {
                 for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(64), e -> e != player && e.isAlive())) {
-                    e.addEffect(new MobEffectInstance(MobEffects.GLOWING, 20 * 30, 0, false, false));
+                    e.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.GLOWING), 20 * 30, 0, false, false));
                 }
                 Notifier.message(player, Component.translatable("curse.skycraft.howl.predator"));
             }
@@ -63,7 +63,7 @@ public final class Howls {
                         AttributeInstance atk = m.getAttribute(Attributes.ATTACK_DAMAGE);
                         if (atk != null) atk.setBaseValue(Math.max(atk.getBaseValue(), 6));
                         m.setHealth(m.getMaxHealth());
-                        if (m instanceof Wolf w) w.setCollarColor(net.minecraft.world.item.DyeColor.LIGHT_BLUE);
+                        if (m instanceof Wolf w) w.setComponent(net.minecraft.core.component.DataComponents.WOLF_COLLAR, net.minecraft.world.item.DyeColor.LIGHT_BLUE);
                     });
                     if (wolf != null) level.sendParticles(ParticleTypes.SNOWFLAKE, wolf.getX(), wolf.getY() + 0.5, wolf.getZ(), 20, 0.4, 0.4, 0.4, 0.02);
                 }
@@ -90,7 +90,7 @@ public final class Howls {
         if (!(source.level() instanceof ServerLevel level)) return;
         long until = level.getGameTime() + ticks;
         for (Mob mob : level.getEntitiesOfClass(Mob.class, source.getBoundingBox().inflate(radius), m -> m != source && m.isAlive()
-                && !m.getType().is(CombatHandler.BOSSES) && Summons.ownerOf(m) == null)) {
+                && !m.getType().builtInRegistryHolder().is(CombatHandler.BOSSES) && Summons.ownerOf(m) == null)) {
             if (!strong && mob.getMaxHealth() > 120) continue;
             if (mob.getTarget() == source) mob.setTarget(null);
             if (mob instanceof NpcEntity npc && source instanceof Player p) npc.setFearedPlayer(p.getUUID());

@@ -68,3 +68,6 @@ tools/worldgen/preview_places*.png
 
 # offline QA renders (large); small contact sheets are copied to docs/screens/
 tools/qa/out/
+
+# multi-agent claims, leases, queue (docs/world/VISUAL-TARGETS-WORKFLOW.md)
+.work/

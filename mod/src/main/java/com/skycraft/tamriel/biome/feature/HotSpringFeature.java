@@ -4,15 +4,15 @@ import com.mojang.serialization.Codec;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
-import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
+import com.skycraft.worldgen.ConfiguredFeature;
+import com.skycraft.worldgen.FeaturePlaceContext;
+import com.skycraft.worldgen.NoneFeatureConfiguration;
 
 /**
  * Eastmarch's hot springs: a shallow, roughly oval pool sunk into flat ground, rimmed with pale calcite, diorite and
  * tuff, with a vent of glowing rock at the bottom (the biome tints the water a sulphurous teal).
  */
-public class HotSpringFeature extends Feature<NoneFeatureConfiguration> {
+public class HotSpringFeature extends ConfiguredFeature<NoneFeatureConfiguration> {
     public HotSpringFeature(Codec<NoneFeatureConfiguration> codec) {
         super(codec);
     }

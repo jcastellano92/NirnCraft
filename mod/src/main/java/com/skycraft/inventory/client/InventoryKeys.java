@@ -3,8 +3,7 @@ package com.skycraft.inventory.client;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.skycraft.client.SkyKeys;
 import net.minecraft.client.KeyMapping;
-import net.minecraftforge.client.settings.KeyConflictContext;
-import org.lwjgl.glfw.GLFW;
+import net.neoforged.neoforge.client.settings.KeyConflictContext;
 
 /**
  * Key bindings owned by the inventory module. FAVORITES defaults to R (the owner's layout; the quest journal took Q);
@@ -12,7 +11,7 @@ import org.lwjgl.glfw.GLFW;
  */
 public final class InventoryKeys {
     public static final KeyMapping FAVORITES = new KeyMapping("key.skycraft.favorites", KeyConflictContext.IN_GAME,
-            InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_R, SkyKeys.CATEGORY);
+            InputConstants.Type.KEYBOARD, com.mojang.blaze3d.platform.InputConstants.KEY_R, SkyKeys.CATEGORY);
 
     private InventoryKeys() {}
 }

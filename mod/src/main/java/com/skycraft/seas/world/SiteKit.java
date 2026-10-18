@@ -4,7 +4,7 @@ import com.skycraft.Skycraft;
 import com.skycraft.seas.SeasRegistry;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.WorldGenLevel;
@@ -40,8 +40,8 @@ public final class SiteKit {
         this.cz = (chunkZ << 4) + 8;
     }
 
-    public static ResourceLocation loot(String path) {
-        return new ResourceLocation(Skycraft.MODID, path);
+    public static Identifier loot(String path) {
+        return Identifier.fromNamespaceAndPath(Skycraft.MODID, path);
     }
 
     /** Whether a column may be written (the decorated chunk and its eight neighbours). */
@@ -82,7 +82,7 @@ public final class SiteKit {
 
     /** Places a block; waterloggable blocks take the water already there. */
     public void set(int x, int y, int z, BlockState state) {
-        if (!ok(x, z) || y <= level.getMinBuildHeight() || y >= level.getMaxBuildHeight() - 1) return;
+        if (!ok(x, z) || y <= level.getMinY() || y >= (level.getMaxY()+1) - 1) return;
         m.set(x, y, z);
         if (state.hasProperty(BlockStateProperties.WATERLOGGED)) {
             state = state.setValue(BlockStateProperties.WATERLOGGED, level.getFluidState(m).is(FluidTags.WATER) || isWaterBlock(level.getBlockState(m)));
@@ -92,7 +92,7 @@ public final class SiteKit {
 
     /** Places a block forcing the waterlogging state (air pockets: false). */
     public void setDry(int x, int y, int z, BlockState state) {
-        if (!ok(x, z) || y <= level.getMinBuildHeight() || y >= level.getMaxBuildHeight() - 1) return;
+        if (!ok(x, z) || y <= level.getMinY() || y >= (level.getMaxY()+1) - 1) return;
         if (state.hasProperty(BlockStateProperties.WATERLOGGED)) state = state.setValue(BlockStateProperties.WATERLOGGED, false);
         level.setBlock(m.set(x, y, z), state, 2);
     }
@@ -135,21 +135,21 @@ public final class SiteKit {
 
     // ------------------------------------------------------------------ containers, markers
 
-    public void chest(int x, int y, int z, Direction facing, ResourceLocation table) {
+    public void chest(int x, int y, int z, Direction facing, Identifier table) {
         if (!ok(x, z)) return;
         set(x, y, z, Blocks.CHEST.defaultBlockState().setValue(ChestBlock.FACING, facing));
         lootAt(x, y, z, table);
     }
 
-    public void barrel(int x, int y, int z, ResourceLocation table) {
+    public void barrel(int x, int y, int z, Identifier table) {
         if (!ok(x, z)) return;
         set(x, y, z, Blocks.BARREL.defaultBlockState().setValue(BlockStateProperties.FACING, Direction.UP));
         lootAt(x, y, z, table);
     }
 
-    private void lootAt(int x, int y, int z, ResourceLocation table) {
+    private void lootAt(int x, int y, int z, Identifier table) {
         BlockEntity be = level.getBlockEntity(m.set(x, y, z));
-        if (be instanceof RandomizableContainerBlockEntity c) c.setLootTable(table, r.nextLong());
+        if (be instanceof RandomizableContainerBlockEntity c) c.setLootTable(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.LOOT_TABLE, table), r.nextLong());
     }
 
     /** Leaves a lair marker; fill it with {@link LairMarkerBlockEntity#creature} / {@link LairMarkerBlockEntity#npc}. */

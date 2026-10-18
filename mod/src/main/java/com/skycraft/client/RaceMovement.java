@@ -6,23 +6,24 @@ import com.skycraft.core.SkyData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 /**
  * Wall-climbing for the races that climb (Tsaesci, Tang Mo, Imga): against a wall, holding jump climbs it like a
  * ladder and sneaking clings to it. Player movement is the client's, so this runs here; the server resets fall
  * distance while a climber hangs on a wall ({@code vitals.RacePassives}).
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
 public final class RaceMovement {
     private RaceMovement() {}
 
     @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || !(event.player instanceof LocalPlayer player)) return;
+    public static void onPlayerTick(ClientTickEvent.Post event) {
+        LocalPlayer player = Minecraft.getInstance().player;
+        if (player == null) return;
         if (!player.horizontalCollision || player.getAbilities().flying || player.isPassenger() || player.isInWater()) return;
         Race race = SkyData.get(player).getRace();
         if (race == null || !race.climbs()) return;

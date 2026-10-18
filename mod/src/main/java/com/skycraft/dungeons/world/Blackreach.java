@@ -188,7 +188,7 @@ public final class Blackreach {
                     : Blocks.AIR.defaultBlockState());
         }
         if (x == hx && z == hz) {
-            p.set(x, base, z, Blocks.BROWN_CARPET.defaultBlockState());
+            p.set(x, base, z, com.skycraft.worldgen.VanillaBlocks.BROWN_CARPET.defaultBlockState());
             p.set(x, base + h - 1, z, Blocks.SEA_LANTERN.defaultBlockState());
             p.spawn(Mobs.falmer(), x + 5, base, z, 90f, null);
             if (p.chance(x, 0, z, 1221, 2)) p.container(x - 1, base, z - 1, Deco.barrel(Direction.UP), Deco.LOOT_MINOR);
@@ -198,10 +198,10 @@ public final class Blackreach {
     /** A Dwemer street corner: a paved square, bronze lamp posts, a broken wall and an automaton on watch. */
     private static void dwemer(Painter p, int x, int z, int dx, int dz, int base, int sx, int sz) {
         if (Math.abs(dx) > 5 || Math.abs(dz) > 5) return;
-        p.set(x, base - 1, z, (dx + dz) % 3 == 0 ? Blocks.WAXED_CUT_COPPER.defaultBlockState() : Blocks.POLISHED_BLACKSTONE_BRICKS.defaultBlockState());
+        p.set(x, base - 1, z, (dx + dz) % 3 == 0 ? com.skycraft.worldgen.VanillaBlocks.WAXED_CUT_COPPER.defaultBlockState() : Blocks.POLISHED_BLACKSTONE_BRICKS.defaultBlockState());
         if (Math.abs(dx) == 5 && dz > -3) {
             int h = 2 + (int) Math.floorMod(sx * 31 + dz * 7, 4);
-            for (int dy = 0; dy < h; dy++) p.set(x, base + dy, z, dy == h - 1 ? Blocks.WAXED_COPPER_BLOCK.defaultBlockState()
+            for (int dy = 0; dy < h; dy++) p.set(x, base + dy, z, dy == h - 1 ? com.skycraft.worldgen.VanillaBlocks.WAXED_COPPER_BLOCK.defaultBlockState()
                     : Blocks.POLISHED_BLACKSTONE_BRICKS.defaultBlockState());
         }
         if (Math.abs(dx) == 3 && Math.abs(dz) == 3) {
@@ -231,15 +231,15 @@ public final class Blackreach {
                     if (door) s = Blocks.AIR.defaultBlockState();
                     else if (y == base - 1) s = Blocks.POLISHED_BLACKSTONE_BRICKS.defaultBlockState();
                     else if (shell) s = (y - base) % 8 == 4 ? Blocks.OCHRE_FROGLIGHT.defaultBlockState()
-                            : (y - base) % 8 == 0 ? Blocks.GILDED_BLACKSTONE.defaultBlockState() : Blocks.WAXED_EXPOSED_CUT_COPPER.defaultBlockState();
-                    else s = (y - base) % 12 == 11 ? Blocks.WAXED_CUT_COPPER.defaultBlockState() : Blocks.AIR.defaultBlockState();
+                            : (y - base) % 8 == 0 ? Blocks.GILDED_BLACKSTONE.defaultBlockState() : com.skycraft.worldgen.VanillaBlocks.WAXED_EXPOSED_CUT_COPPER.defaultBlockState();
+                    else s = (y - base) % 12 == 11 ? com.skycraft.worldgen.VanillaBlocks.WAXED_CUT_COPPER.defaultBlockState() : Blocks.AIR.defaultBlockState();
                     p.set(x, y, z, s);
                 }
                 // the orb
                 double od = Math.sqrt((x - tx) * (x - tx) + (z - tz) * (z - tz));
                 if (od <= 3) for (int y = top + 1; y <= top + 6; y++) {
                     double s3 = Math.sqrt(od * od + Math.pow(y - (top + 3.5), 2));
-                    if (s3 <= 3) p.set(x, y, z, s3 < 2 ? Blocks.SEA_LANTERN.defaultBlockState() : Blocks.LIGHT_BLUE_STAINED_GLASS.defaultBlockState());
+                    if (s3 <= 3) p.set(x, y, z, s3 < 2 ? Blocks.SEA_LANTERN.defaultBlockState() : com.skycraft.worldgen.VanillaBlocks.LIGHT_BLUE_STAINED_GLASS.defaultBlockState());
                 }
             }
         }

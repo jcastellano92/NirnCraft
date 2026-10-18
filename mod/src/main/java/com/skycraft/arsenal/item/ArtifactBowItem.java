@@ -3,7 +3,7 @@ package com.skycraft.arsenal.item;
 import com.skycraft.crafting.SmithingTier;
 import com.skycraft.crafting.item.SkyBowItem;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
@@ -31,8 +31,8 @@ public class ArtifactBowItem extends SkyBowItem implements ArtifactItem {
     }
 
     @Override
-    public AbstractArrow customArrow(AbstractArrow arrow) {
-        AbstractArrow result = super.customArrow(arrow);
+    public AbstractArrow customArrow(AbstractArrow arrow, ItemStack projectileStack, ItemStack weaponStack) {
+        AbstractArrow result = super.customArrow(arrow, projectileStack, weaponStack);
         result.getPersistentData().putString(ARROW_TAG, id);
         return result;
     }
@@ -43,17 +43,14 @@ public class ArtifactBowItem extends SkyBowItem implements ArtifactItem {
     }
 
     @Override
-    public boolean isEnchantable(ItemStack stack) {
-        return false;
-    }
+    public boolean isPrimaryItemFor(ItemStack stack, net.minecraft.core.Holder<net.minecraft.world.item.enchantment.Enchantment> enchantment) { return false; }
 
     @Override
-    public boolean isBookEnchantable(ItemStack stack, ItemStack book) {
-        return false;
-    }
+    public boolean supportsEnchantment(ItemStack stack, net.minecraft.core.Holder<net.minecraft.world.item.enchantment.Enchantment> enchantment) { return false; }
+
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
+    public void appendHoverText(ItemStack stack, net.minecraft.world.item.Item.TooltipContext context263, net.minecraft.world.item.component.TooltipDisplay display263, java.util.function.Consumer<Component> tooltip, TooltipFlag flag) {
         ArtifactItem.tooltip(id, tooltip);
     }
 }

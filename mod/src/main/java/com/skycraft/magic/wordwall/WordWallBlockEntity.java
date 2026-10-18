@@ -59,13 +59,13 @@ public class WordWallBlockEntity extends BlockEntity {
     }
 
     @Override
-    public void load(CompoundTag tag) {
-        super.load(tag);
-        this.shout = tag.getString("shout");
+    protected void loadAdditional(net.minecraft.world.level.storage.ValueInput tag) {
+        super.loadAdditional(tag);
+        this.shout = tag.getStringOr("shout", "");
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag) {
+    protected void saveAdditional(net.minecraft.world.level.storage.ValueOutput tag) {
         super.saveAdditional(tag);
         tag.putString("shout", shout);
     }
@@ -84,7 +84,7 @@ public class WordWallBlockEntity extends BlockEntity {
         AABB area = new AABB(pos).inflate(3.0);
         for (ServerPlayer p : server.getEntitiesOfClass(ServerPlayer.class, area, pl -> pl.isAlive() && !pl.isSpectator())) {
             if (p.distanceToSqr(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5) <= 3.5 * 3.5) {
-                WordWalls.teach(p, server, pos, be.shout(level.random), false);
+                WordWalls.teach(p, server, pos, be.shout(level.getRandom()), false);
             }
         }
     }

@@ -18,7 +18,7 @@ import net.minecraft.core.QuartPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelHeightAccessor;
@@ -121,20 +121,20 @@ public final class DensityAudit {
         this.generator = level.getChunkSource().getGenerator();
         this.biomes = generator.getBiomeSource();
         this.randomState = level.getChunkSource().randomState();
-        this.templates = level.getStructureManager();
+        this.templates = level.getStructureTemplateManager();
         this.structureState = level.getChunkSource().getGeneratorState();
         this.height = level;
         this.seed = level.getSeed();
         this.progress = progress;
-        Registry<PlacedFeature> placed = access.registryOrThrow(Registries.PLACED_FEATURE);
-        placed.holders().forEach(h -> {
-            String id = h.key().location().toString();
+        Registry<PlacedFeature> placed = access.lookupOrThrow(Registries.PLACED_FEATURE);
+        placed.listElements().forEach(h -> {
+            String id = h.key().identifier().toString();
             double rate = perChunk(h.value());
             if (SITE_FEATURES.containsKey(id)) {
                 siteFeatures.add(h);
                 siteAccept.add(SITE_FEATURES.get(id));
                 siteRate.add(rate);
-            } else if (h.key().location().getNamespace().equals(Skycraft.MODID)) {
+            } else if (h.key().identifier().getNamespace().equals(Skycraft.MODID)) {
                 for (String f : FORAGE) {
                     if (id.contains(f)) {
                         forage.add(h);
@@ -307,9 +307,9 @@ public final class DensityAudit {
             out.add(new Poi(p.x(), p.z(), c, "place:" + p.type().id()));
         }
         // random-spread structure sets (cached per start chunk across areas)
-        Registry<StructureSet> sets = access.registryOrThrow(Registries.STRUCTURE_SET);
+        Registry<StructureSet> sets = access.lookupOrThrow(Registries.STRUCTURE_SET);
         List<Poi> structures = new ArrayList<>();
-        sets.holders().forEach(set -> {
+        sets.listElements().forEach(set -> {
             if (!(set.value().placement() instanceof RandomSpreadStructurePlacement rs)) return;
             int spacing = rs.spacing();
             int c0x = Math.floorDiv(x0 >> 4, spacing), c1x = Math.floorDiv(x1 >> 4, spacing);
@@ -319,7 +319,7 @@ public final class DensityAudit {
                     ChunkPos chunk = rs.getPotentialStructureChunk(seed, cx * spacing, cz * spacing);
                     int bx = chunk.getMiddleBlockX(), bz = chunk.getMiddleBlockZ();
                     if (bx < x0 || bx > x1 || bz < z0 || bz > z1) continue;
-                    long key = chunk.toLong() * 31 + set.key().location().hashCode();
+                    long key = chunk.pack() * 31 + set.key().identifier().hashCode();
                     List<Poi> found = structureCache.computeIfAbsent(key, k -> startAt(set, rs, chunk));
                     structures.addAll(found);
                 }
@@ -357,11 +357,11 @@ public final class DensityAudit {
     /** The biome of the 64-block grid cell holding (x, z), sampled at its centre. */
     private Holder<Biome> biomeCell(int x, int z) {
         int gx = x >> 6, gz = z >> 6;
-        return biomeGrid.computeIfAbsent(ChunkPos.asLong(gx, gz), k -> biomeAt((gx << 6) + 32, (gz << 6) + 32, true));
+        return biomeGrid.computeIfAbsent(ChunkPos.pack(gx, gz), k -> biomeAt((gx << 6) + 32, (gz << 6) + 32, true));
     }
 
     private List<Poi> featureBlock(int gx, int gz) {
-        return featureCache.computeIfAbsent(ChunkPos.asLong(gx, gz), k -> {
+        return featureCache.computeIfAbsent(ChunkPos.pack(gx, gz), k -> {
             List<Poi> out = new ArrayList<>(2);
             Holder<Biome> biome = biomeCell(gx << 6, gz << 6);
             for (int cx = gx << 2; cx < (gx << 2) + 4; cx++) {
@@ -374,7 +374,7 @@ public final class DensityAudit {
                         if (MinorSitesHash.unit(h, 0) >= p) continue;
                         int bx = (cx << 4) + (int) (MinorSitesHash.unit(h, 1) * 16), bz = (cz << 4) + (int) (MinorSitesHash.unit(h, 2) * 16);
                         if (water(bx, bz)) continue;
-                        out.add(new Poi(bx, bz, Cat.FEATURE, f.unwrapKey().map(r -> r.location().getPath()).orElse("feature")));
+                        out.add(new Poi(bx, bz, Cat.FEATURE, f.unwrapKey().map(r -> r.identifier().getPath()).orElse("feature")));
                     }
                 }
             }
@@ -394,10 +394,10 @@ public final class DensityAudit {
     /** The start a random-spread set makes in {@code chunk}, if any (vanilla's weighted try-in-turn selection). */
     private List<Poi> startAt(Holder<StructureSet> set, RandomSpreadStructurePlacement rs, ChunkPos chunk) {
         try {
-            if (!rs.isStructureChunk(structureState, chunk.x, chunk.z)) return List.of();
+            if (!rs.isStructureChunk(structureState, chunk.x(), chunk.z())) return List.of();
             List<StructureSet.StructureSelectionEntry> entries = new ArrayList<>(set.value().structures());
             WorldgenRandom pick = new WorldgenRandom(new LegacyRandomSource(0L));
-            pick.setLargeFeatureSeed(seed, chunk.x, chunk.z);
+            pick.setLargeFeatureSeed(seed, chunk.x(), chunk.z());
             int total = 0;
             for (var e : entries) total += e.weight();
             while (!entries.isEmpty()) {
@@ -420,7 +420,7 @@ public final class DensityAudit {
                     try {
                         // vanilla jigsaw templates cache their palettes in a plain HashMap: retry when two threads race
                         stub = structure.findValidGenerationPoint(new Structure.GenerationContext(access, generator, biomes,
-                                randomState, templates, seed, chunk, height, structure.biomes()::contains));
+                                randomState.createClimateSampler(net.minecraft.world.level.levelgen.densityfunction.SamplerContext.EMPTY_UNCACHED), randomState, templates, seed, chunk, height, structure.biomes()::contains));
                         break;
                     } catch (java.util.ConcurrentModificationException e) {
                         Thread.onSpinWait();
@@ -431,7 +431,7 @@ public final class DensityAudit {
                     Holder<Structure> h = entry.structure();
                     if (h.is(LocationTags.IGNORED_LANDMARKS) || hidden(h)) return List.of();
                     Cat cat = h.is(LocationTags.TOWNS) ? Cat.SETTLEMENT : h.is(LocationTags.DUNGEONS) ? Cat.DUNGEON : Cat.LANDMARK;
-                    String id = h.unwrapKey().map(k -> k.location().getPath()).orElse("?");
+                    String id = h.unwrapKey().map(k -> k.identifier().getPath()).orElse("?");
                     return List.of(new Poi(pos.getX(), pos.getZ(), cat, id));
                 }
                 entries.remove(entry);
@@ -449,7 +449,7 @@ public final class DensityAudit {
      * portals, pillager outposts) are not Skyrim content; they still generate, but the audit judges Skycraft's own.
      */
     private static boolean hidden(Holder<Structure> h) {
-        return h.unwrapKey().map(k -> k.location().getNamespace().equals("minecraft")).orElse(false);
+        return h.unwrapKey().map(k -> k.identifier().getNamespace().equals("minecraft")).orElse(false);
     }
 
     private boolean water(int x, int z) {
@@ -462,7 +462,7 @@ public final class DensityAudit {
 
     private Holder<Biome> biomeAt(int x, int z, boolean surface) {
         int y = surface ? Math.max(generator.getSeaLevel(), (int) TamrielMap.elevation(x, z)) : generator.getSeaLevel();
-        return biomes.getNoiseBiome(QuartPos.fromBlock(x), QuartPos.fromBlock(y), QuartPos.fromBlock(z), randomState.sampler());
+        return biomes.createResolver(randomState.createClimateSampler(net.minecraft.world.level.levelgen.densityfunction.SamplerContext.EMPTY_UNCACHED)).getNoiseBiome(QuartPos.fromBlock(x), QuartPos.fromBlock(y), QuartPos.fromBlock(z));
     }
 
     /** Expected forage patches per chunk in a biome. */
@@ -666,7 +666,7 @@ public final class DensityAudit {
         }
     }
 
-    public ResourceLocation dimension() {
-        return level.dimension().location();
+    public Identifier dimension() {
+        return level.dimension().identifier();
     }
 }

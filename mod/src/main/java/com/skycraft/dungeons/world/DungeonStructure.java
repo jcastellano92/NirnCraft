@@ -39,7 +39,7 @@ import java.util.Optional;
  * created and painted chunk by chunk. Named places and site lists skip the biome check: the map decides.</p>
  */
 public class DungeonStructure extends Structure {
-    public static final Codec<DungeonStructure> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+    public static final com.mojang.serialization.MapCodec<DungeonStructure> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
             settingsCodec(instance),
             Theme.CODEC.fieldOf("theme").forGetter(s -> s.theme),
             Kit.CODEC.optionalFieldOf("kit", Kit.NONE).forGetter(s -> s.kit),
@@ -139,7 +139,7 @@ public class DungeonStructure extends Structure {
         int param = theme == Theme.PRINCE_SHRINE ? random.nextInt(SiteParams.Prince.VALUES.length) : 0;
         Site site = new Site(theme, k, special, fl, param);
         int sea = ctx.chunkGenerator().getSeaLevel();
-        int minY = ctx.heightAccessor().getMinBuildHeight();
+        int minY = ctx.heightAccessor().getMinY();
         boolean pad = terrainAdaptation() != TerrainAdjustment.NONE;
 
         if (!theme.underground() || theme.hasUndercroft()) {
@@ -257,7 +257,7 @@ public class DungeonStructure extends Structure {
         com.skycraft.worldplan.TrailEnds.Arrival arrival = com.skycraft.worldplan.TrailEnds.of(pl.id());
         Direction toTrail = arrival == null ? null
                 : Math.abs(arrival.x() - pl.x()) + Math.abs(arrival.z() - pl.z()) < 4 ? null
-                : Direction.getNearest(arrival.x() - pl.x(), 0, arrival.z() - pl.z());
+                : Direction.getApproximateNearest(arrival.x() - pl.x(), 0, arrival.z() - pl.z());
         Direction out = special == Special.LABYRINTHIAN ? Direction.NORTH : toTrail != null ? toTrail
                 : h0 != WATER ? downhill(ctx, pl.x(), pl.z(), h0, rolled) : rolled;
         int fl = flavor >= 0 ? flavor : randomFlavor(random);
@@ -265,7 +265,7 @@ public class DungeonStructure extends Structure {
         Kit k = placeKit != null ? placeKit : regionalKit ? Cultures.kitFor(TamrielMap.region(pl.x(), pl.z()), pl.x(), pl.z()) : kit;
         Site site = new Site(theme, k, special, fl, SiteParams.forPlace(theme, pl), pl.id());
         int sea = ctx.chunkGenerator().getSeaLevel();
-        int minY = ctx.heightAccessor().getMinBuildHeight();
+        int minY = ctx.heightAccessor().getMinY();
         boolean pad = terrainAdaptation() != TerrainAdjustment.NONE;
 
         // stand on dry land: nudge off water (shore sites keep their spot). A place a trail leads to keeps its spot on
@@ -349,8 +349,8 @@ public class DungeonStructure extends Structure {
                                          int x, int y, int z, Direction facing, long seed) {
         Site wonderSite = new Site(Theme.LANDMARK, baseSite.kit(), baseSite.special(), baseSite.flavor(), wonder.ordinal(), baseSite.place());
         int r = 34;
-        int minY = ctx.heightAccessor().getMinBuildHeight() + 2;
-        int maxY = ctx.heightAccessor().getMaxBuildHeight() - 2;
+        int minY = ctx.heightAccessor().getMinY() + 2;
+        int maxY = (ctx.heightAccessor().getMaxY() + 1) - 2;
         int lo = Math.max(minY, y - 20);
         int hi = Math.max(lo + 24, Math.min(maxY, y + 156));
         BoundingBox box = new BoundingBox(x - r, lo, z - r, x + r, hi, z + r);
@@ -387,7 +387,7 @@ public class DungeonStructure extends Structure {
 
     private Optional<GenerationStub> siteStart(GenerationContext ctx) {
         ChunkPos cp = ctx.chunkPos();
-        int i = Sites.indexAt(sites, cp.x, cp.z);
+        int i = Sites.indexAt(sites, cp.x(), cp.z());
         if (i < 0) return Optional.empty();
         Site site = new Site(theme, kit, special, Math.max(0, flavor), 0);
         long seed = ctx.random().nextLong();

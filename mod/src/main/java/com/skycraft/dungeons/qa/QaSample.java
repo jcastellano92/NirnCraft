@@ -2,7 +2,7 @@ package com.skycraft.dungeons.qa;
 
 import com.skycraft.dungeons.world.DungeonStructure;
 import com.skycraft.dungeons.world.Theme;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import javax.annotation.Nullable;
 
@@ -10,7 +10,7 @@ import javax.annotation.Nullable;
  * One dungeon to analyse: a dungeon structure and the chunk its start is tried in (a named place's chunk, or a random
  * chunk for the random sites). The analyzer plans it through the structure's own {@code findGenerationPoint}.
  */
-public record QaSample(String label, String category, ResourceLocation structureId, DungeonStructure structure, int x, int z,
+public record QaSample(String label, String category, Identifier structureId, DungeonStructure structure, int x, int z,
                        @Nullable String placeId) {
     public Theme theme() {
         return structure.theme;

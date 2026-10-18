@@ -15,7 +15,7 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -29,11 +29,11 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.event.server.ServerStoppedEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.server.ServerStoppedEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -52,9 +52,9 @@ import java.util.UUID;
  * {@code .engaged {uuid, name}}; NPC {@code social.spouse} / {@code social.engaged} (player UUIDs); the registry
  * remembers the spouse too, so a death while the player is away is reported when they log in.</p>
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class Marriage {
-    public static final ResourceLocation AMULET = new ResourceLocation(Skycraft.MODID, "amulet_of_mara");
+    public static final Identifier AMULET = Identifier.fromNamespaceAndPath(Skycraft.MODID, "amulet_of_mara");
     public static final int AMULET_PRICE = 200;
     public static final String BUFF = "lovers_comfort";
     private static final String MODULE = "society";
@@ -77,11 +77,11 @@ public final class Marriage {
     }
 
     public static boolean isSpouse(NpcEntity npc) {
-        return npc.social().hasUUID("spouse");
+        return npc.social().read("spouse", net.minecraft.core.UUIDUtil.CODEC).isPresent();
     }
 
     public static boolean isSpouseOf(NpcEntity npc, Player player) {
-        return npc.social().hasUUID("spouse") && npc.social().getUUID("spouse").equals(player.getUUID());
+        return npc.social().read("spouse", net.minecraft.core.UUIDUtil.CODEC).isPresent() && npc.social().read("spouse", net.minecraft.core.UUIDUtil.CODEC).orElseThrow().equals(player.getUUID());
     }
 
     private static CompoundTag data(Player player) {
@@ -90,18 +90,18 @@ public final class Marriage {
 
     @Nullable
     public static UUID spouseOf(Player player) {
-        CompoundTag s = data(player).getCompound("spouse");
-        return s.hasUUID("uuid") ? s.getUUID("uuid") : null;
+        CompoundTag s = data(player).getCompoundOrEmpty("spouse");
+        return s.read("uuid", net.minecraft.core.UUIDUtil.CODEC).isPresent() ? s.read("uuid", net.minecraft.core.UUIDUtil.CODEC).orElseThrow() : null;
     }
 
     private static boolean engagedTo(Player player, NpcEntity npc) {
-        CompoundTag e = data(player).getCompound("engaged");
-        return e.hasUUID("uuid") && e.getUUID("uuid").equals(npc.getUUID());
+        CompoundTag e = data(player).getCompoundOrEmpty("engaged");
+        return e.read("uuid", net.minecraft.core.UUIDUtil.CODEC).isPresent() && e.read("uuid", net.minecraft.core.UUIDUtil.CODEC).orElseThrow().equals(npc.getUUID());
     }
 
     private static boolean free(Player player) {
         CompoundTag d = data(player);
-        return !d.getCompound("spouse").hasUUID("uuid") && !d.getCompound("engaged").hasUUID("uuid");
+        return !d.getCompoundOrEmpty("spouse").read("uuid", net.minecraft.core.UUIDUtil.CODEC).isPresent() && !d.getCompoundOrEmpty("engaged").read("uuid", net.minecraft.core.UUIDUtil.CODEC).isPresent();
     }
 
     // ------------------------------------------------------------------ dialogue
@@ -114,9 +114,9 @@ public final class Marriage {
                     (p, n) -> Dialogue.open(p, n, Component.translatable("society.skycraft.say.mara_about"))));
             out.add(new DialogueOption("society.mara_buy", Component.translatable("dialogue.skycraft.society.mara_buy", AMULET_PRICE), 301,
                     Marriage::buyAmulet));
-            CompoundTag e = data(player).getCompound("engaged");
-            if (e.hasUUID("uuid")) {
-                out.add(new DialogueOption("society.wed", Component.translatable("dialogue.skycraft.society.wed", e.getString("name")), 290,
+            CompoundTag e = data(player).getCompoundOrEmpty("engaged");
+            if (e.read("uuid", net.minecraft.core.UUIDUtil.CODEC).isPresent()) {
+                out.add(new DialogueOption("society.wed", Component.translatable("dialogue.skycraft.society.wed", e.getStringOr("name","")), 290,
                         Marriage::wedAtTemple));
             }
         }
@@ -133,13 +133,13 @@ public final class Marriage {
             }));
             return;
         }
-        if (role.marriageable() && !isSpouse(npc) && !npc.social().hasUUID("engaged") && wearsAmulet(player) && free(player)) {
+        if (role.marriageable() && !isSpouse(npc) && !npc.social().read("engaged", net.minecraft.core.UUIDUtil.CODEC).isPresent() && wearsAmulet(player) && free(player)) {
             out.add(new DialogueOption("society.propose", Component.translatable("dialogue.skycraft.society.propose"), 280, Marriage::propose));
         }
     }
 
     private static void buyAmulet(ServerPlayer player, LivingEntity priest) {
-        Item amulet = BuiltInRegistries.ITEM.get(AMULET);
+        Item amulet = BuiltInRegistries.ITEM.getValue(AMULET);
         if (amulet == Items.AIR) return;
         if (!Currency.take(player, AMULET_PRICE)) {
             Dialogue.open(player, priest, Component.translatable("society.skycraft.say.mara_no_gold"));
@@ -156,10 +156,10 @@ public final class Marriage {
             Dialogue.open(player, npc, Component.translatable("society.skycraft.say.propose.refuse." + player.getRandom().nextInt(3)));
             return;
         }
-        npc.social().putUUID("engaged", player.getUUID());
+        npc.social().store("engaged", net.minecraft.core.UUIDUtil.CODEC,  player.getUUID());
         npc.setPersistenceRequired();
         CompoundTag e = new CompoundTag();
-        e.putUUID("uuid", npc.getUUID());
+        e.store("uuid", net.minecraft.core.UUIDUtil.CODEC,  npc.getUUID());
         e.putString("name", npc.getDisplayName().getString());
         data(player).put("engaged", e);
         SkyData.get(player).markDirty();
@@ -168,7 +168,7 @@ public final class Marriage {
                 : npc.level() instanceof ServerLevel sl ? Workplaces.anchor(sl, npc.blockPosition(), Workplaces.Kind.TEMPLE, 160) : null;
         if (temple != null) {
             npc.setDestination(temple);
-            npc.restrictTo(temple, 6); // waits at the temple (see the routine) until the wedding
+            npc.setHomeTo(temple, 6); // waits at the temple (see the routine) until the wedding
             Dialogue.open(player, npc, Component.translatable("society.skycraft.say.propose.accept_temple." + player.getRandom().nextInt(2)));
         } else {
             Dialogue.open(player, npc, Component.translatable("society.skycraft.say.propose.accept_here"));
@@ -193,10 +193,10 @@ public final class Marriage {
 
     private static void wedAtTemple(ServerPlayer player, LivingEntity priestEntity) {
         if (!(priestEntity instanceof NpcEntity priest)) return;
-        CompoundTag e = data(player).getCompound("engaged");
-        if (!e.hasUUID("uuid") || !(player.serverLevel().getEntity(e.getUUID("uuid")) instanceof NpcEntity fiance)
+        CompoundTag e = data(player).getCompoundOrEmpty("engaged");
+        if (!e.read("uuid", net.minecraft.core.UUIDUtil.CODEC).isPresent() || !(player.level().getEntity(e.read("uuid", net.minecraft.core.UUIDUtil.CODEC).orElseThrow()) instanceof NpcEntity fiance)
                 || fiance.distanceToSqr(priest) > 24 * 24) {
-            Dialogue.open(player, priest, Component.translatable("society.skycraft.say.wed_bring", e.getString("name")));
+            Dialogue.open(player, priest, Component.translatable("society.skycraft.say.wed_bring", e.getStringOr("name","")));
             return;
         }
         Dialogue.endConversation(player, priest.getId());
@@ -233,8 +233,8 @@ public final class Marriage {
     }
 
     @SubscribeEvent
-    public static void onServerTick(TickEvent.ServerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || WEDDINGS.isEmpty()) return;
+    public static void onServerTick(net.neoforged.neoforge.event.tick.ServerTickEvent.Post event) {
+        if (!(event instanceof net.neoforged.neoforge.event.tick.ServerTickEvent.Post) || WEDDINGS.isEmpty()) return;
         for (Iterator<Wedding> it = WEDDINGS.iterator(); it.hasNext(); ) {
             Wedding w = it.next();
             if (w.player.isRemoved() || !w.spouse.isAlive() || !w.officiant.isAlive() || w.player.distanceToSqr(w.spouse) > 32 * 32) {
@@ -244,7 +244,7 @@ public final class Marriage {
             long now = w.player.level().getGameTime();
             if (now < w.next) continue;
             w.next = now + 70;
-            ServerLevel level = w.player.serverLevel();
+            ServerLevel level = w.player.level();
             w.spouse.getLookControl().setLookAt(w.player, 30f, 30f);
             if (w.step < 4) {
                 boolean selfWed = w.officiant == w.spouse;
@@ -269,7 +269,7 @@ public final class Marriage {
 
     private static void marry(ServerPlayer player, NpcEntity npc) {
         npc.social().remove("engaged");
-        npc.social().putUUID("spouse", player.getUUID());
+        npc.social().store("spouse", net.minecraft.core.UUIDUtil.CODEC,  player.getUUID());
         if (npc.getHome() != null) npc.setHome(npc.getHome(), 16);
         else npc.setHome(npc.blockPosition(), 16);
         npc.social().putString("spouse_name", player.getName().getString());
@@ -279,14 +279,14 @@ public final class Marriage {
         CompoundTag d = data(player);
         d.remove("engaged");
         CompoundTag s = new CompoundTag();
-        s.putUUID("uuid", npc.getUUID());
+        s.store("uuid", net.minecraft.core.UUIDUtil.CODEC,  npc.getUUID());
         s.putString("name", npc.getDisplayName().getString());
-        s.putLong("since", player.level().getDayTime() / DAY);
-        s.putLong("gold_day", player.level().getDayTime() / DAY);
+        s.putLong("since", player.level().getDefaultClockTime() / DAY);
+        s.putLong("gold_day", player.level().getDefaultClockTime() / DAY);
         d.put("spouse", s);
         pd.markDirty();
         pd.addStat("married", 1);
-        NpcRegistry registry = NpcRegistry.get(player.server);
+        NpcRegistry registry = NpcRegistry.get(player.level().getServer());
         NpcRegistry.onSettled(npc);
         registry.setSpouse(npc.getUUID(), player.getUUID());
         Relationships.adjust(npc, player, 100);
@@ -305,7 +305,7 @@ public final class Marriage {
                     (p, n) -> {
                         BlockPos h = ownedHouse(p);
                         if (h != null && n instanceof NpcEntity s) {
-                            moveHome(s, p.serverLevel(), h);
+                            moveHome(s, p.level(), h);
                             Dialogue.open(p, n, Component.translatable("society.skycraft.say.spouse_moved"));
                         }
                     }));
@@ -313,7 +313,7 @@ public final class Marriage {
         out.add(new DialogueOption("society.spouse_live_here", Component.translatable("dialogue.skycraft.society.spouse_live_here"), 141,
                 (p, n) -> {
                     if (n instanceof NpcEntity s) {
-                        moveHome(s, p.serverLevel(), s.blockPosition());
+                        moveHome(s, p.level(), s.blockPosition());
                         Dialogue.open(p, n, Component.translatable("society.skycraft.say.spouse_settled"));
                     }
                 }));
@@ -324,13 +324,13 @@ public final class Marriage {
                         Dialogue.open(p, n, Component.translatable("society.skycraft.say.spouse_follow"));
                     }));
         }
-        long day = player.level().getDayTime() / DAY;
-        CompoundTag s = data(player).getCompound("spouse");
-        if (s.getLong("gold_day") < day) {
+        long day = player.level().getDefaultClockTime() / DAY;
+        CompoundTag s = data(player).getCompoundOrEmpty("spouse");
+        if (s.getLongOr("gold_day",0L) < day) {
             out.add(new DialogueOption("society.spouse_gold", Component.translatable("dialogue.skycraft.society.spouse_gold"), 143,
                     Marriage::collectEarnings));
         }
-        if (s.getLong("meal_day") < day + 1) {
+        if (s.getLongOr("meal_day",0L) < day + 1) {
             out.add(new DialogueOption("society.spouse_meal", Component.translatable("dialogue.skycraft.society.spouse_meal"), 144,
                     Marriage::homeMeal));
         }
@@ -363,7 +363,7 @@ public final class Marriage {
         npc.setWorkplace(null);
         npc.setInn(null);
         npc.setDestination(null);
-        NpcRegistry.get(level.getServer()).setHome(npc.getUUID(), home, level.dimension().location().toString());
+        NpcRegistry.get(level.getServer()).setHome(npc.getUUID(), home, level.dimension().identifier().toString());
         if (Followers.isFollower(npc) && npc.level() instanceof ServerLevel) {
             UUID owner = Followers.getOwnerId(npc);
             ServerPlayer p = owner == null ? null : level.getServer().getPlayerList().getPlayer(owner);
@@ -373,10 +373,10 @@ public final class Marriage {
 
     private static void collectEarnings(ServerPlayer player, LivingEntity entity) {
         if (!(entity instanceof NpcEntity npc) || !isSpouseOf(npc, player)) return;
-        long day = player.level().getDayTime() / DAY;
+        long day = player.level().getDefaultClockTime() / DAY;
         CompoundTag d = data(player);
-        CompoundTag s = d.getCompound("spouse");
-        if (s.getLong("gold_day") >= day) return;
+        CompoundTag s = d.getCompoundOrEmpty("spouse");
+        if (s.getLongOr("gold_day",0L) >= day) return;
         boolean trade = npc.getPersistentData().contains(com.skycraft.economy.Shop.KEY) || npc.getPersistentData().contains(Npcs.PROFESSION_KEY);
         int gold = SocietyConfig.SPOUSE_DAILY_GOLD.get();
         if (!trade) gold /= 2;
@@ -389,20 +389,20 @@ public final class Marriage {
 
     private static void homeMeal(ServerPlayer player, LivingEntity entity) {
         if (!(entity instanceof NpcEntity npc) || !isSpouseOf(npc, player)) return;
-        long day = player.level().getDayTime() / DAY;
+        long day = player.level().getDefaultClockTime() / DAY;
         CompoundTag d = data(player);
-        CompoundTag s = d.getCompound("spouse");
-        if (s.getLong("meal_day") >= day + 1) return;
+        CompoundTag s = d.getCompoundOrEmpty("spouse");
+        if (s.getLongOr("meal_day",0L) >= day + 1) return;
         s.putLong("meal_day", day + 1);
         d.put("spouse", s);
         SkyData.get(player).markDirty();
         Item[] dishes = {Items.RABBIT_STEW, Items.BEETROOT_SOUP, Items.MUSHROOM_STEW, Items.COOKED_SALMON, Items.PUMPKIN_PIE};
         ItemStack meal = new ItemStack(dishes[player.getRandom().nextInt(dishes.length)]);
-        meal.setHoverName(Component.translatable("society.skycraft.item.home_meal"));
+        meal.set(net.minecraft.core.component.DataComponents.CUSTOM_NAME, Component.translatable("society.skycraft.item.home_meal"));
         Relationships.give(player, meal);
         Buffs.apply(player, BUFF, 20 * 60 * 8);
-        player.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 20 * 20, 0));
-        player.addEffect(new MobEffectInstance(MobEffects.LUCK, 20 * 60 * 8, 0));
+        player.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.REGENERATION), 20 * 20, 0));
+        player.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.LUCK), 20 * 60 * 8, 0));
         Notifier.message(player, Component.translatable("society.skycraft.lovers_comfort"));
         Dialogue.open(player, npc, Component.translatable("society.skycraft.say.spouse_meal." + player.getRandom().nextInt(3)));
     }
@@ -411,12 +411,12 @@ public final class Marriage {
 
     /** A spouse died: the player is widowed (now, or when they next log in). */
     static void onSpouseDeath(NpcEntity npc) {
-        if (!npc.social().hasUUID("spouse") || !(npc.level() instanceof ServerLevel level)) return;
-        UUID playerId = npc.social().getUUID("spouse");
+        if (!npc.social().read("spouse", net.minecraft.core.UUIDUtil.CODEC).isPresent() || !(npc.level() instanceof ServerLevel level)) return;
+        UUID playerId = npc.social().read("spouse", net.minecraft.core.UUIDUtil.CODEC).orElseThrow();
         ServerPlayer player = level.getServer().getPlayerList().getPlayer(playerId);
         if (player != null) widow(player, npc.getDisplayName());
-        if (npc.social().hasUUID("engaged")) {
-            ServerPlayer p = level.getServer().getPlayerList().getPlayer(npc.social().getUUID("engaged"));
+        if (npc.social().read("engaged", net.minecraft.core.UUIDUtil.CODEC).isPresent()) {
+            ServerPlayer p = level.getServer().getPlayerList().getPlayer(npc.social().read("engaged", net.minecraft.core.UUIDUtil.CODEC).orElseThrow());
             if (p != null) {
                 data(p).remove("engaged");
                 SkyData.get(p).markDirty();
@@ -426,7 +426,7 @@ public final class Marriage {
 
     private static void widow(ServerPlayer player, Component name) {
         CompoundTag d = data(player);
-        if (!d.getCompound("spouse").hasUUID("uuid")) return;
+        if (!d.getCompoundOrEmpty("spouse").read("uuid", net.minecraft.core.UUIDUtil.CODEC).isPresent()) return;
         d.remove("spouse");
         SkyData.get(player).markDirty();
         Notifier.title(player, Component.translatable("society.skycraft.widowed.title"), Component.translatable("society.skycraft.widowed", name));
@@ -435,14 +435,14 @@ public final class Marriage {
     @SubscribeEvent
     public static void onLogin(PlayerEvent.PlayerLoggedInEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
-        MinecraftServer server = player.getServer();
+        MinecraftServer server = player.level().getServer();
         if (server == null) return;
         UUID spouse = spouseOf(player);
         if (spouse != null && NpcRegistry.get(server).isDead(spouse)) {
-            widow(player, Component.literal(data(player).getCompound("spouse").getString("name")));
+            widow(player, Component.literal(data(player).getCompoundOrEmpty("spouse").getStringOr("name","")));
         }
-        CompoundTag e = data(player).getCompound("engaged");
-        if (e.hasUUID("uuid") && NpcRegistry.get(server).isDead(e.getUUID("uuid"))) {
+        CompoundTag e = data(player).getCompoundOrEmpty("engaged");
+        if (e.read("uuid", net.minecraft.core.UUIDUtil.CODEC).isPresent() && NpcRegistry.get(server).isDead(e.read("uuid", net.minecraft.core.UUIDUtil.CODEC).orElseThrow())) {
             data(player).remove("engaged");
             SkyData.get(player).markDirty();
         }

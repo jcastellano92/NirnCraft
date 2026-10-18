@@ -1,0 +1,34 @@
+{
+  "type": "skycraft:ground_cover",
+  "config": {
+    "entries": [
+      {
+        "state": "minecraft:short_grass",
+        "weight": 3
+      },
+      {
+        "state": "minecraft:fern",
+        "weight": 4
+      },
+      {
+        "state": {
+          "id": "minecraft:large_fern",
+          "properties": {
+            "half": "lower"
+          }
+        },
+        "weight": 2
+      }
+    ],
+    "scale": 18,
+    "patchiness": 0.7,
+    "cluster": {
+      "type": "minecraft:uniform",
+      "min_inclusive": 2,
+      "max_inclusive": 5
+    },
+    "spread": 2,
+    "salt": 482,
+    "near_water": false
+  }
+}

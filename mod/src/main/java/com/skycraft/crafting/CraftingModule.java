@@ -2,7 +2,7 @@ package com.skycraft.crafting;
 
 import com.skycraft.crafting.arcane.ArcaneModule;
 import com.skycraft.crafting.menu.CraftingMenus;
-import net.minecraftforge.eventbus.api.IEventBus;
+import net.neoforged.bus.api.IEventBus;
 
 /**
  * Ores, ingots, Skyrim weapon & armor tiers, the forge, tempering, enchanting, alchemy and soul gems.

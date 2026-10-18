@@ -52,7 +52,7 @@ public final class SettlementCrowd {
         if (pd.contains(Travelers.TAG) || Encounters.isTagged(e)) return true;
         if (e instanceof NpcEntity n) {
             NpcRole r = n.role();
-            return r == NpcRole.COURIER && !e.getPersistentData().getBoolean("skycraft_steward")
+            return r == NpcRole.COURIER && !e.getPersistentData().getBooleanOr("skycraft_steward",false)
                     || r == NpcRole.ADVENTURER || r == NpcRole.CARAVAN_TRADER;
         }
         return false;
@@ -62,7 +62,7 @@ public final class SettlementCrowd {
     private static boolean isSettler(NpcEntity n) {
         var pd = n.getPersistentData();
         if (Followers.isFollower(n) || Marriage.isSpouse(n) || pd.contains(com.skycraft.quest.QuestSpawner.TAG_QUEST)) return false;
-        return pd.contains(Housing.SLOT_KEY) || pd.getBoolean("skycraft_settler") || com.skycraft.survival.inn.Innkeepers.isInnkeeper(n);
+        return pd.contains(Housing.SLOT_KEY) || pd.getBooleanOr("skycraft_settler",false) || com.skycraft.survival.inn.Innkeepers.isInnkeeper(n);
     }
 
     /** True if the settlement around {@code pos} already holds as many settlers as its plan has slots. */
@@ -78,8 +78,8 @@ public final class SettlementCrowd {
 
     private static List<NpcEntity> around(ServerLevel level, SettlementAnchors.Entry e) {
         int r = e.radius + 12;
-        return level.getEntitiesOfClass(NpcEntity.class, new AABB(e.x - r, level.getMinBuildHeight(), e.z - r, e.x + r,
-                level.getMaxBuildHeight(), e.z + r), n -> n.isAlive() && n.distanceToSqr(e.x, n.getY(), e.z) <= (double) r * r);
+        return level.getEntitiesOfClass(NpcEntity.class, new AABB(e.x - r, level.getMinY(), e.z - r, e.x + r,
+                (level.getMaxY()+1), e.z + r), n -> n.isAlive() && n.distanceToSqr(e.x, n.getY(), e.z) <= (double) r * r);
     }
 
     /** Dedupes and trims one settlement (at most once per {@link #INTERVAL} ticks). Returns how many people it removed. */
@@ -106,7 +106,7 @@ public final class SettlementCrowd {
                 if (remove(level, n)) removed++;
                 continue;
             }
-            String slot = n.getPersistentData().getString(Housing.SLOT_KEY);
+            String slot = n.getPersistentData().getStringOr(Housing.SLOT_KEY, "");
             if (slot.isEmpty()) continue;
             int hash = slot.indexOf('#');
             if (hash >= 0) {
@@ -199,7 +199,7 @@ public final class SettlementCrowd {
                 pd.putLong(AWAKE_SINCE, now);
                 continue;
             }
-            if (now - pd.getLong(AWAKE_SINCE) < BEDTIME_GRACE) continue;
+            if (now - pd.getLongOr(AWAKE_SINCE, 0L) < BEDTIME_GRACE) continue;
             if (level.getNearestPlayer(n, 8) != null) continue; // not in front of someone's nose
             if (NpcPlacement.putToBed(n, n.getBed())) pd.remove(AWAKE_SINCE);
         }
@@ -212,11 +212,11 @@ public final class SettlementCrowd {
 
     /** Removes a person nobody is talking to (with a puff if a player could see it). */
     private static boolean remove(ServerLevel level, NpcEntity n) {
-        if (n.isBusy() || n.isConversing() || Followers.isFollower(n) || n.getTags().contains("skycraft_keep")) return false;
+        if (n.isBusy() || n.isConversing() || Followers.isFollower(n) || n.entityTags().contains("skycraft_keep")) return false;
         // story people, quest people, guild staff and stewards are somebody's content: never trimmed here
         var pd = n.getPersistentData();
         if (pd.contains(com.skycraft.quest.story.QuestNpcs.TAG) || pd.contains(com.skycraft.quest.QuestSpawner.TAG_QUEST)
-                || pd.contains(com.skycraft.quest.faction.FactionStaff.TAG) || pd.getBoolean("skycraft_steward")
+                || pd.contains(com.skycraft.quest.faction.FactionStaff.TAG) || pd.getBooleanOr("skycraft_steward",false)
                 || Marriage.isSpouse(n)) return false;
         if (level.getNearestPlayer(n, 6) != null) return false;
         if (level.getNearestPlayer(n, 40) != null) {

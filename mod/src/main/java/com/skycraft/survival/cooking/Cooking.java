@@ -28,8 +28,8 @@ public final class Cooking {
                 ItemStack shown = cost.display().get();
                 cost.removeFrom(player.getInventory(), cost.count(), -1);
                 // milk buckets, honey bottles... give their container back
-                if (!shown.isEmpty() && shown.hasCraftingRemainingItem()) {
-                    ItemStack rest = shown.getCraftingRemainingItem();
+                if (!shown.isEmpty() && shown.getItem().getCraftingRemainder(shown) != null) {
+                    ItemStack rest = shown.getItem().getCraftingRemainder(shown).create();
                     for (int i = 0; i < cost.count() && !rest.isEmpty(); i++) give(player, rest.copy());
                 }
             }
@@ -57,6 +57,6 @@ public final class Cooking {
     }
 
     private static void give(ServerPlayer player, ItemStack stack) {
-        if (!ActionHandler.addToBags(player, stack) && !stack.isEmpty()) player.drop(stack, false);
+        if (!ActionHandler.addToBags(player, stack) && !stack.isEmpty()) player.drop(stack, false, net.minecraft.util.Prediction.SERVER_ONLY);
     }
 }

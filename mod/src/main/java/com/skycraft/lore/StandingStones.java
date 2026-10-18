@@ -32,15 +32,15 @@ import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.monster.Zombie;
+import net.minecraft.world.entity.monster.zombie.Zombie;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 
@@ -54,7 +54,7 @@ import java.util.UUID;
  * {@code power_<sign>} (game time the power is ready again), {@code applied_magicka}/{@code applied_carry}
  * (what this module currently adds to {@code module("bonus")}, so it can be removed exactly when switching).</p>
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class StandingStones {
     public static final String MODULE = "lore";
     public static final String KEY = "stone";
@@ -63,8 +63,8 @@ public final class StandingStones {
 
     private static final String APPLIED_MAGICKA = "applied_magicka";
     private static final String APPLIED_CARRY = "applied_carry";
-    private static final UUID LORD_ARMOR = UUID.fromString("8c3f2a71-5d4e-4b9a-9e21-7a0c1d2e3f01");
-    private static final UUID STEED_SPEED = UUID.fromString("8c3f2a71-5d4e-4b9a-9e21-7a0c1d2e3f02");
+    private static final net.minecraft.resources.Identifier LORD_ARMOR = net.minecraft.resources.Identifier.fromNamespaceAndPath("skycraft", "lore/lord_armor");
+    private static final net.minecraft.resources.Identifier STEED_SPEED = net.minecraft.resources.Identifier.fromNamespaceAndPath("skycraft", "lore/steed_speed");
     private static final int DAY = 24000;
 
     private StandingStones() {}
@@ -73,7 +73,7 @@ public final class StandingStones {
 
     @Nullable
     public static StandingStone current(Player player) {
-        return StandingStone.byId(SkyData.get(player).module(MODULE).getString(KEY));
+        return StandingStone.byId(SkyData.get(player).module(MODULE).getStringOr(KEY, ""));
     }
 
     /** Skill XP multiplier (registered with {@code Progression.registerXpModifier}). */
@@ -94,8 +94,8 @@ public final class StandingStones {
     public static void activate(ServerPlayer player, StandingStone sign, BlockPos base) {
         PlayerData data = SkyData.get(player);
         CompoundTag tag = data.module(MODULE);
-        ServerLevel level = player.serverLevel();
-        StandingStone old = StandingStone.byId(tag.getString(KEY));
+        ServerLevel level = player.level();
+        StandingStone old = StandingStone.byId(tag.getStringOr(KEY, ""));
         if (old == sign) {
             Notifier.message(player, Component.translatable("message.skycraft.lore.stone_already", sign.stoneName()));
             level.playSound(null, base, SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.BLOCKS, 1f, 0.7f);
@@ -118,7 +118,7 @@ public final class StandingStones {
 
     private static void effects(ServerLevel level, BlockPos base, StandingStone sign, ServerPlayer player) {
         Vector3f color = new Vector3f((sign.color >> 16 & 255) / 255f, (sign.color >> 8 & 255) / 255f, (sign.color & 255) / 255f);
-        DustParticleOptions dust = new DustParticleOptions(color, 1.6f);
+        DustParticleOptions dust = new DustParticleOptions(net.minecraft.util.ARGB.colorFromFloat(1f, (color).x(), (color).y(), (color).z()), 1.6f);
         double x = base.getX() + 0.5;
         double z = base.getZ() + 0.5;
         // a beam of light from the stone into the sky
@@ -151,14 +151,14 @@ public final class StandingStones {
         changed |= syncBonus(data, tag, "carry", APPLIED_CARRY, s == StandingStone.STEED ? 100f : 0f);
 
         modifier(player, Attributes.ARMOR, LORD_ARMOR, "Skycraft Lord Stone",
-                s == StandingStone.LORD ? 4.0 : 0.0, AttributeModifier.Operation.ADDITION);
+                s == StandingStone.LORD ? 4.0 : 0.0, AttributeModifier.Operation.ADD_VALUE);
         double steed = 0;
         if (s == StandingStone.STEED) {
             steed = 0.05;
             // "Worn armor weighs nothing": cancel the heavy-armor slowdown the core applies.
             if (!Perks.has(player, "heavy_armor.conditioning")) steed += 0.025 * ArmorClass.countHeavy(player);
         }
-        modifier(player, Attributes.MOVEMENT_SPEED, STEED_SPEED, "Skycraft Steed Stone", steed, AttributeModifier.Operation.MULTIPLY_TOTAL);
+        modifier(player, Attributes.MOVEMENT_SPEED, STEED_SPEED, "Skycraft Steed Stone", steed, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 
         if (changed) {
             data.markDirty();
@@ -168,26 +168,26 @@ public final class StandingStones {
 
     /** Adds/removes exactly what this module contributed to a shared {@code module("bonus")} value. */
     private static boolean syncBonus(PlayerData data, CompoundTag tag, String key, String appliedKey, float desired) {
-        float applied = tag.getFloat(appliedKey);
+        float applied = tag.getFloatOr(appliedKey, 0f);
         if (applied == desired) return false;
         CompoundTag bonus = data.module("bonus");
-        bonus.putFloat(key, bonus.getFloat(key) - applied + desired);
+        bonus.putFloat(key, bonus.getFloatOr(key, 0f) - applied + desired);
         tag.putFloat(appliedKey, desired);
         return true;
     }
 
-    private static void modifier(ServerPlayer player, Attribute attribute, UUID id, String name, double amount, AttributeModifier.Operation op) {
+    private static void modifier(ServerPlayer player, net.minecraft.core.Holder<Attribute> attribute, net.minecraft.resources.Identifier id, String name, double amount, AttributeModifier.Operation op) {
         AttributeInstance inst = player.getAttribute(attribute);
         if (inst == null) return;
         AttributeModifier existing = inst.getModifier(id);
-        if (existing != null && existing.getAmount() == amount) return;
+        if (existing != null && existing.amount() == amount) return;
         if (existing != null) inst.removeModifier(id);
-        if (amount != 0) inst.addTransientModifier(new AttributeModifier(id, name, amount, op));
+        if (amount != 0) inst.addTransientModifier(new AttributeModifier(id, amount, op));
     }
 
     @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer player)) return;
+    public static void onPlayerTick(net.neoforged.neoforge.event.tick.PlayerTickEvent.Post event) {
+        if (!(event instanceof net.neoforged.neoforge.event.tick.PlayerTickEvent.Post) || !(event.getEntity() instanceof ServerPlayer player)) return;
         long now = player.level().getGameTime();
         if (now % 20 == 7) refresh(player);
         if (now % 5 != 0 || !player.isAlive()) return;
@@ -233,7 +233,7 @@ public final class StandingStones {
 
     /** The Lord resists magic, the Atronach absorbs some of it, the Apprentice is vulnerable to it. */
     @SubscribeEvent(priority = EventPriority.LOW)
-    public static void onHurt(LivingHurtEvent event) {
+    public static void onHurt(com.skycraft.combat.BeforeArmorDamageEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
         StandingStone s = current(player);
         if (s == null || !MagicDamage.isWardable(event.getSource())) return;
@@ -280,7 +280,7 @@ public final class StandingStones {
         CompoundTag tag = data.module(MODULE);
         String key = "power_" + s.id();
         long now = player.level().getGameTime();
-        long ready = tag.getLong(key);
+        long ready = tag.getLongOr(key, 0L);
         if (now < ready) {
             String hours = com.skycraft.SkyConfig.formatTicks(ready - now);
             Notifier.message(player, Component.translatable("message.skycraft.lore.power_cooldown", s.powerName(), hours));
@@ -302,7 +302,7 @@ public final class StandingStones {
 
     /** The Ritual: two corpses claw their way up and fight for you for a minute. */
     private static boolean ritual(ServerPlayer player) {
-        ServerLevel level = player.serverLevel();
+        ServerLevel level = player.level();
         long until = level.getGameTime() + 20 * 60;
         Vec3 look = player.getViewVector(1f).multiply(1, 0, 1);
         if (look.lengthSqr() < 1e-4) look = new Vec3(0, 0, 1);
@@ -310,17 +310,17 @@ public final class StandingStones {
         Vec3 side = new Vec3(-look.z, 0, look.x);
         int spawned = 0;
         for (int i = 0; i < 2; i++) {
-            Zombie zombie = EntityType.ZOMBIE.create(level);
+            Zombie zombie = net.minecraft.world.entity.EntityTypes.ZOMBIE.create(level, net.minecraft.world.entity.EntitySpawnReason.EVENT);
             if (zombie == null) continue;
             Vec3 pos = player.position().add(look.scale(2)).add(side.scale(i == 0 ? -1.3 : 1.3));
-            zombie.moveTo(pos.x, player.getY(), pos.z, player.getYRot(), 0f);
-            if (!level.noCollision(zombie)) zombie.moveTo(player.getX(), player.getY(), player.getZ(), player.getYRot(), 0f);
+            zombie.snapTo(pos.x, player.getY(), pos.z, player.getYRot(), 0f);
+            if (!level.noCollision(zombie)) zombie.snapTo(player.getX(), player.getY(), player.getZ(), player.getYRot(), 0f);
             zombie.setBaby(false);
             zombie.setCanPickUpLoot(false);
-            zombie.addEffect(new MobEffectInstance(MobEffects.FIRE_RESISTANCE, 20 * 90, 0, false, false));
+            zombie.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.FIRE_RESISTANCE), 20 * 90, 0, false, false));
             zombie.addTag(Summons.TAG);
             CompoundTag pd = zombie.getPersistentData();
-            pd.putUUID(Summons.OWNER, player.getUUID());
+            pd.store(Summons.OWNER, net.minecraft.core.UUIDUtil.CODEC,  player.getUUID());
             pd.putLong(Summons.UNTIL, until);
             pd.putString(Summons.KIND, "ritual");
             zombie.setPersistenceRequired();
@@ -343,12 +343,12 @@ public final class StandingStones {
             Notifier.message(player, Component.translatable("message.skycraft.lore.serpent_no_target"));
             return false;
         }
-        ServerLevel level = player.serverLevel();
-        target.addEffect(new MobEffectInstance(ModEffects.PARALYSIS.get(), 20 * 5, 0), player);
-        target.addEffect(new MobEffectInstance(MobEffects.POISON, 20 * 10, 1), player);
-        target.hurt(player.damageSources().indirectMagic(player, player), 5f);
+        ServerLevel level = player.level();
+        target.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(ModEffects.PARALYSIS.get()), 20 * 5, 0), player);
+        target.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.POISON), 20 * 10, 1), player);
+        com.skycraft.platform.Effects.hurt(target, player.damageSources().indirectMagic(player, player), 5f);
         if (target instanceof Mob mob) mob.setTarget(null);
-        DustParticleOptions venom = new DustParticleOptions(new Vector3f(0.35f, 0.95f, 0.55f), 1.2f);
+        DustParticleOptions venom = new DustParticleOptions(net.minecraft.util.ARGB.colorFromFloat(1f, 0.35f, 0.95f, 0.55f), 1.2f);
         Vec3 from = player.getEyePosition().add(0, -0.3, 0);
         Vec3 to = target.position().add(0, target.getBbHeight() * 0.6, 0);
         Vec3 delta = to.subtract(from);
@@ -364,18 +364,18 @@ public final class StandingStones {
 
     /** The Shadow: a minute of invisibility, and enemies lose track of you. */
     private static boolean shadow(ServerPlayer player) {
-        player.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, 20 * 60, 0, false, false, true));
+        player.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.INVISIBILITY), 20 * 60, 0, false, false, true));
         for (Mob mob : player.level().getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(16), m -> m.getTarget() == player)) {
             mob.setTarget(null);
         }
-        player.serverLevel().sendParticles(ParticleTypes.LARGE_SMOKE, player.getX(), player.getY() + 1, player.getZ(), 30, 0.4, 0.7, 0.4, 0.02);
+        player.level().sendParticles(ParticleTypes.LARGE_SMOKE, player.getX(), player.getY() + 1, player.getZ(), 30, 0.4, 0.7, 0.4, 0.02);
         return true;
     }
 
     /** The Tower: for two minutes, the next lock you try opens by itself (honoured by the crime module's locks). */
     private static boolean tower(ServerPlayer player) {
         Buffs.apply(player, TOWER_BUFF, 20 * 120);
-        player.serverLevel().sendParticles(ParticleTypes.ENCHANT, player.getX(), player.getY() + 1.2, player.getZ(), 50, 0.5, 0.6, 0.5, 0.6);
+        player.level().sendParticles(ParticleTypes.ENCHANT, player.getX(), player.getY() + 1.2, player.getZ(), 50, 0.5, 0.6, 0.5, 0.6);
         Notifier.message(player, Component.translatable("message.skycraft.lore.tower_ready"));
         return true;
     }

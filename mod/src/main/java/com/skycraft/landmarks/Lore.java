@@ -186,16 +186,7 @@ public final class Lore {
 
     /** A written book (vanilla item: readable anywhere) holding {@code text} on one page. */
     public static ItemStack book(String title, String author, String... pages) {
-        ItemStack stack = new ItemStack(Items.WRITTEN_BOOK);
-        CompoundTag tag = stack.getOrCreateTag();
-        tag.putString("title", title.length() > 32 ? title.substring(0, 32) : title);
-        tag.putString("author", author);
-        ListTag list = new ListTag();
-        for (String p : pages) list.add(StringTag.valueOf(Component.Serializer.toJson(Component.literal(p))));
-        tag.put("pages", list);
-        tag.putBoolean("resolved", true);
-        tag.putBoolean(com.skycraft.lore.place.StoryReader.STORY_TAG, true);
-        return stack;
+        return com.skycraft.worldgen.AuthoredBooks.create(title, author, java.util.Arrays.stream(pages).map(p -> (Component) Component.literal(p)).toList());
     }
 
     // ------------------------------------------------------------------ place names

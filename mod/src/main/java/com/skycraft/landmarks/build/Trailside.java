@@ -6,7 +6,7 @@ import com.skycraft.tamriel.Place;
 import com.skycraft.tamriel.Places;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -25,7 +25,8 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.block.state.properties.RailShape;
 import net.minecraft.world.level.block.state.properties.SlabType;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 
 import java.util.Locale;
 import java.util.Optional;
@@ -70,7 +71,7 @@ final class Trailside {
     }
 
     private static Block block(String id, Block fallback) {
-        Block b = ForgeRegistries.BLOCKS.getValue(new ResourceLocation(id));
+        Block b = BuiltInRegistries.BLOCK.getValue(Identifier.parse(id));
         return b == null || b == Blocks.AIR ? fallback : b;
     }
 
@@ -146,8 +147,8 @@ final class Trailside {
             }
         }
         // timber (or bronze) sets at the mouth and halfway in
-        BlockState post = dwemer ? Blocks.WAXED_OXIDIZED_CUT_COPPER.defaultBlockState() : log(s, Direction.Axis.Y);
-        BlockState beam = dwemer ? Blocks.WAXED_WEATHERED_CUT_COPPER.defaultBlockState() : log(s, Direction.Axis.X);
+        BlockState post = dwemer ? com.skycraft.worldgen.VanillaBlocks.WAXED_OXIDIZED_CUT_COPPER.defaultBlockState() : log(s, Direction.Axis.Y);
+        BlockState beam = dwemer ? com.skycraft.worldgen.VanillaBlocks.WAXED_WEATHERED_CUT_COPPER.defaultBlockState() : log(s, Direction.Axis.X);
         for (int dz : new int[]{1, -2}) {
             for (int dy = 0; dy <= 2; dy++) {
                 s.set(-2, g + dy, dz, post);
@@ -177,7 +178,7 @@ final class Trailside {
             s.set(0, g, dz, Blocks.RAIL.defaultBlockState().setValue(RailBlock.SHAPE, RailShape.NORTH_SOUTH));
         }
         cart(s, 0, g, 0, "explore/miner");
-        s.set(-1, g + 2, 1, dwemer ? Blocks.CHAIN.defaultBlockState() : hanging());
+        s.set(-1, g + 2, 1, dwemer ? com.skycraft.worldgen.VanillaBlocks.CHAIN.defaultBlockState() : hanging());
         if (dwemer) s.set(-1, g + 1, 1, hanging());
         // the yard: a spoil heap with ore, the barrel with the last entry, a dropped pick, a warning
         s.set(-3, g, 4, Blocks.GRAVEL);
@@ -197,8 +198,9 @@ final class Trailside {
         BlockPos p = s.b.at(dx, dy, dz);
         if (!s.b.writable(p)) return;
         try {
-            var cart = new net.minecraft.world.entity.vehicle.MinecartChest(s.level.getLevel(), p.getX() + 0.5, p.getY(), p.getZ() + 0.5);
-            cart.setLootTable(new ResourceLocation("skycraft", table), s.seed);
+            var cart = new net.minecraft.world.entity.vehicle.minecart.MinecartChest(net.minecraft.world.entity.EntityTypes.CHEST_MINECART, s.level.getLevel());
+            cart.setPos( p.getX() + 0.5, p.getY(), p.getZ() + 0.5);
+            cart.setLootTable(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.LOOT_TABLE, Identifier.fromNamespaceAndPath("skycraft", table)), s.seed);
             s.level.addFreshEntity(cart);
         } catch (RuntimeException e) {
             s.barrel(dx, dy, dz, table);
@@ -330,7 +332,7 @@ final class Trailside {
                 BlockPos c = s.chest(1, p + 1, -1, Direction.WEST, "explore/hunter");
                 s.put(c, note(s, "hunter", "Tally from the Stand"));
                 s.lying(1, p + 1, 1, worn(Items.BOW, 0.4));
-                s.set(-1, p + 1, 1, Blocks.BROWN_CARPET);
+                s.set(-1, p + 1, 1, com.skycraft.worldgen.VanillaBlocks.BROWN_CARPET);
             }
         }
         s.dress(2, s.top(2, 2), 2);
@@ -344,16 +346,16 @@ final class Trailside {
         int g = s.top(0, 0);
         // the tent: one side still standing, the other fallen under the snow
         for (int dz = -1; dz <= 2; dz++) {
-            s.set(-3, s.top(-3, dz), dz, Blocks.WHITE_WOOL);
-            if (dz <= 0) s.set(-2, g + 1, dz, Blocks.WHITE_WOOL);
-            s.set(-2, s.top(-2, dz), dz, dz <= 0 ? Blocks.AIR.defaultBlockState() : Blocks.WHITE_CARPET.defaultBlockState());
+            s.set(-3, s.top(-3, dz), dz, com.skycraft.worldgen.VanillaBlocks.WHITE_WOOL);
+            if (dz <= 0) s.set(-2, g + 1, dz, com.skycraft.worldgen.VanillaBlocks.WHITE_WOOL);
+            s.set(-2, s.top(-2, dz), dz, dz <= 0 ? Blocks.AIR.defaultBlockState() : com.skycraft.worldgen.VanillaBlocks.WHITE_CARPET.defaultBlockState());
         }
         s.set(-2, g, -2, s.wood.fence());
         s.set(-2, g + 1, -2, s.wood.fence());
         // the explorer, curled by the fire that went out
         s.set(1, g, 0, Blocks.BONE_BLOCK.defaultBlockState().setValue(BlockStateProperties.AXIS, Direction.Axis.X));
         s.b.skull(2, g, 0);
-        s.set(1, g, 1, Blocks.BROWN_CARPET);
+        s.set(1, g, 1, com.skycraft.worldgen.VanillaBlocks.BROWN_CARPET);
         s.set(2, g, -2, Blocks.CAMPFIRE.defaultBlockState().setValue(CampfireBlock.LIT, false));
         Vignettes.ring(s, 2, -2, 1, true);
         s.set(2, g, -2, Blocks.CAMPFIRE.defaultBlockState().setValue(CampfireBlock.LIT, false));
@@ -393,7 +395,7 @@ final class Trailside {
             s.set(dx, g + 1, -2, slab(Blocks.OAK_SLAB, SlabType.TOP));
             s.set(dx, g, -3, slab(Blocks.OAK_SLAB, SlabType.BOTTOM));
         }
-        Vignettes.bed(s, -1, g, -2, Direction.EAST, Blocks.WHITE_BED);
+        Vignettes.bed(s, -1, g, -2, Direction.EAST, com.skycraft.worldgen.VanillaBlocks.WHITE_BED);
         // the overturned boat beside it
         for (int dz = 1; dz <= 4; dz++) {
             for (int dx = 3; dx <= 4; dx++) s.set(dx, s.top(dx, dz), dz, slab(s.wood.slab(), SlabType.TOP));
@@ -556,8 +558,8 @@ final class Trailside {
         s.b.skull(0, g, -2);
         s.lying(1, g, 0, new ItemStack(Items.BONE));
         s.lying(-2, g, 1, new ItemStack(Items.LEATHER));
-        s.set(-1, g, 1, Blocks.BROWN_CARPET);
-        s.set(0, g, 0, s.snowy ? Blocks.WHITE_CARPET : Blocks.MOSS_CARPET);
+        s.set(-1, g, 1, com.skycraft.worldgen.VanillaBlocks.BROWN_CARPET);
+        s.set(0, g, 0, s.snowy ? com.skycraft.worldgen.VanillaBlocks.WHITE_CARPET : Blocks.MOSS_CARPET);
         // a victim's pack half buried in the back
         BlockPos c = s.chest(2, g, -1, Direction.WEST, "explore/cache");
         if (s.chance(7, 0.5)) s.put(c, note(s, "traveller", "Torn Pages"));
@@ -665,7 +667,7 @@ final class Trailside {
                 int x = -5 + i % 3, z = -1 + i / 3;
                 if (!s.dry(x, z)) continue;
                 int y = s.top(x, z);
-                s.set(x, y - 1, z, Blocks.FARMLAND.defaultBlockState().setValue(net.minecraft.world.level.block.FarmBlock.MOISTURE, 7));
+                s.set(x, y - 1, z, Blocks.FARMLAND.defaultBlockState().setValue(net.minecraft.world.level.block.FarmlandBlock.MOISTURE, 7));
                 s.set(x, y, z, crop);
             }
         }
@@ -756,7 +758,7 @@ final class Trailside {
         s.set(0, g + 3, 0, log(s, Direction.Axis.X));
         s.set(-1, g + 3, 0, log(s, Direction.Axis.X));
         s.set(1, g + 3, 0, log(s, Direction.Axis.X));
-        s.set(0, g + 2, 0, Blocks.CHAIN);
+        s.set(0, g + 2, 0, com.skycraft.worldgen.VanillaBlocks.CHAIN);
         // an awning on poles for the heat of the day
         for (int[] c : new int[][]{{2, 2}, {4, 2}, {2, 4}, {4, 4}}) {
             s.set(c[0], g, c[1], s.wood.fence());

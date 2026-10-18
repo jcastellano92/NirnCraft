@@ -12,18 +12,18 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.event.level.BlockEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.neoforge.event.level.BlockEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 /**
  * The homestead's own rules: founding (placing the drafting table), building, build mode (picking up stations and
  * containers) and who may use doors, containers, crafting stations and beds. Breaking and placing by strangers is
  * refused first by {@code com.skycraft.protect} and the dig module; this handler adds the homestead-specific limits.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class HomesteadEvents {
     private HomesteadEvents() {}
 
@@ -33,7 +33,7 @@ public final class HomesteadEvents {
 
         BlockPos pos = event.getPos();
         Level level = player.level();
-        HomesteadData data = HomesteadData.get(player.server);
+        HomesteadData data = HomesteadData.get(player.level().getServer());
         BlockState placedState = event.getPlacedBlock();
 
         // 1. Placing the Drafting Table establishing a claim
@@ -85,13 +85,13 @@ public final class HomesteadEvents {
     }
 
     @SubscribeEvent(priority = EventPriority.HIGH)
-    public static void onBlockBreak(BlockEvent.BreakEvent event) {
+    public static void onBlockBreak(net.neoforged.neoforge.event.level.block.BreakBlockEvent event) {
         Player player = event.getPlayer();
         if (player.level().isClientSide() || !(player instanceof ServerPlayer sp)) return;
 
         BlockPos pos = event.getPos();
         Level level = sp.level();
-        HomesteadData data = HomesteadData.get(sp.server);
+        HomesteadData data = HomesteadData.get(sp.level().getServer());
         BlockState state = event.getState();
 
         // 1. Breaking the Drafting Table
@@ -110,7 +110,7 @@ public final class HomesteadEvents {
             }
             if (claim != null) {
                 data.removeClaimAt(level, pos);
-                HomesteadDiscovery.forget(sp.server, claim);
+                HomesteadDiscovery.forget(sp.level().getServer(), claim);
                 Notifier.message(sp, Component.translatable("message.skycraft.homestead.dismantled"));
             }
             return;
@@ -151,7 +151,7 @@ public final class HomesteadEvents {
         if (!(event.getEntity() instanceof ServerPlayer sp)) return;
 
         BlockPos clicked = event.getPos();
-        HomesteadData data = HomesteadData.get(sp.server);
+        HomesteadData data = HomesteadData.get(sp.level().getServer());
         HomesteadClaim claim = data.getClaimHorizontal(level, clicked);
         if (claim == null) return;
 
@@ -175,7 +175,7 @@ public final class HomesteadEvents {
             event.setCanceled(true);
             if (event.getHand() == InteractionHand.MAIN_HAND) {
                 int now = claim.cycleOverride(pos);
-                HomesteadData.get(sp.server).setDirty();
+                HomesteadData.get(sp.level().getServer()).setDirty();
                 String who = now < 0 ? "default" : now == HomesteadClaim.PERM_OWNER ? "owner" : now == HomesteadClaim.PERM_PARTY ? "party" : "public";
                 Notifier.message(sp, Component.translatable("message.skycraft.homestead.access_set",
                         Component.translatable("homestead.skycraft.access." + kind.name().toLowerCase(java.util.Locale.ROOT)),

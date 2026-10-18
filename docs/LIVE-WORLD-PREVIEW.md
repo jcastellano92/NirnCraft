@@ -1,5 +1,8 @@
 # Live Minecraft world preview
 
+For the exact Minecraft 26.3 / NeoForge / Java 25 preparation and launch boundary, start with
+[NATIVE-26.3-PREVIEW.md](NATIVE-26.3-PREVIEW.md). The preserved Forge preview is not selected by current live controls.
+
 For camera planning, scouting, approval and reuse across every mod system, follow
 [VISUAL-TEST-CAMERAS.md](VISUAL-TEST-CAMERAS.md). `camera X Y Z TARGET_X TARGET_Y TARGET_Z` checks loaded collision
 geometry; `camera-plan` scouts 27 nearby poses once. Captures include JSON receipts, and saved camera approval is
@@ -7,7 +10,7 @@ invalidated by seed/dimension/generation changes. Reject captures made inside te
 
 This is the operating guide for future AI sessions and the owner. Run from the repository root
 `F:\Projects\Personal\Skycraft\Skycraft`, not its parent folder. The owner has authorized visual testing and live
-updates in the disposable **Skycraft-autotest** Prism instance. Preserve the normal **Skycraft** instance and its saves.
+updates in the disposable **Skycraft-26.3-autotest** Prism instance. Preserve the normal **Skycraft** instance and its saves.
 
 ## Check before launching anything
 
@@ -24,6 +27,14 @@ arguments contain authentication information.
 
 The client may already be running. Reuse it. Never launch a second game or a separate headless server just to edit
 the same preview. While a command waits, give the owner progress updates; do not silently wait for minutes.
+
+Mutating `live_world.py` calls and imported `live_actions`/`submit` calls share a nonblocking OS lock at
+`<Prism data directory>/.skycraft-live.lock`, across both allowlisted native instances. The lock covers readiness
+and busy checks through action/job acknowledgement, so competing cooperative callers cannot overwrite a live
+batch. Contention reports only a sanitized tool label and PID; `status`, `storage` and `profile` remain available.
+The file persists, but the OS releases ownership after exit, process death or reboot. Never delete it or force a
+PID-based unlock. Existing heartbeat/queue checks still apply after a timeout or crash. Raw file writers and
+launchers do not participate; a launch call's lock ends after the request, rather than owning the client lifetime.
 
 ## Lifecycle
 
@@ -119,9 +130,17 @@ under `build/autotest-performance/`. Use `ui map|journal|inventory|magic|skills|
 for actual in-world menu frames without closing the screen before capture.
 
 For code updates, cleanly close, then `install-core PATH_TO_BUILT_JAR`, then launch. The installer backs up
-the existing disposable jar. It carries verified runtime bakes only if the current jar matches its runtime
-receipt and every changed entry is in explicitly allowed preview/render paths. Other changes install the
-new jar's own bakes; runtime verification/rebake may be required. It never edits the owner's instance.
+the existing disposable jar. It verifies the installed core against its runtime receipt and verifies all four
+bake headers against the bundle manifest before preserving bakes. A stale installed bundle can be replaced
+by a verified new bundle. It refuses when neither bundle is valid. It never edits the owner's instance.
+
+To prepare a rebuilt core while the preview is still running, use `stage-core BUILT_JAR RUNTIME_BAKE_FOLDER NEW_JAR`.
+The folder is normally the disposable game's `skycraft-bake` directory after `/skycraft-bake refresh` completes.
+Staging requires identical bake-validator bytecode and packaged bake inputs in the old/new cores, matching runtime
+core identity, and a complete matching bundle. It writes a new jar and receipt without changing the running game.
+Then cleanly close, install the staged jar, verify the installed SHA256 against its receipt, and launch. If inputs
+changed, produce and verify matching bakes first; staging must not bypass that guard. Check every command's exit
+status before proceeding: PowerShell can continue after a failed Python command unless explicitly checked.
 
 ```powershell
 py -3 tools/dev/live_world.py shader
@@ -129,7 +148,8 @@ py -3 tools/dev/live_world.py capture torch_hall
 py -3 tools/dev/live_world.py actions dist/weather-review/dungeons/capture-actions.txt
 ```
 
-This patches the installed Complementary zip directly from source and requests a shader reload in the running
+This operation is gated until the customized Complementary integration has passed native 26.3 acceptance.
+After that gate it patches the installed Complementary zip from source and requests a shader reload in the running
 client, waiting for its acknowledgement. It refuses a busy capture queue. This does not rebuild the mod or restart
 Minecraft. Check `latest.log` for shader compile errors and inspect actual frames after each material change.
 

@@ -43,7 +43,7 @@ public final class Stables {
     public static boolean isStableMaster(LivingEntity npc) {
         if (npc == null || !npc.isAlive()) return false;
         if (com.skycraft.roads.Carriages.isCarriageDriver(npc)) return false;
-        if (npc.getPersistentData().getBoolean("skycraft_stable_master")) return true;
+        if (npc.getPersistentData().getBooleanOr("skycraft_stable_master",false)) return true;
         String desc = npc.getType().getDescriptionId().toLowerCase(java.util.Locale.ROOT);
         if (desc.contains("stable") || desc.contains("hostler")) return true;
         if (npc.hasCustomName()) {

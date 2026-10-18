@@ -1,5 +1,6 @@
 package com.skycraft.tamriel.settlement.furniture;
 
+import net.minecraft.resources.ResourceKey;
 import com.skycraft.Skycraft;
 import com.skycraft.tamriel.Regions;
 import com.skycraft.tamriel.settlement.Culture;
@@ -36,17 +37,19 @@ import net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
+import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.registries.DeferredRegister;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import java.util.function.Supplier;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Locale;
@@ -57,9 +60,9 @@ import java.util.Locale;
  */
 public final class FurnitureBlocks {
     public static final DeferredRegister<Block> BLOCKS =
-            DeferredRegister.create(ForgeRegistries.BLOCKS, Skycraft.MODID);
+            DeferredRegister.create(Registries.BLOCK, Skycraft.MODID);
     public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES =
-            DeferredRegister.create(ForgeRegistries.BLOCK_ENTITY_TYPES, Skycraft.MODID);
+            DeferredRegister.create(Registries.BLOCK_ENTITY_TYPE, Skycraft.MODID);
 
     public enum ShapeCat implements StringRepresentable {
         SEAT("seat"),
@@ -151,28 +154,28 @@ public final class FurnitureBlocks {
         }
     }
 
-    public static final RegistryObject<Block> SKY_FURNITURE = BLOCKS.register("sky_furniture",
-            () -> new FurnitureBlock(BlockBehaviour.Properties.of()
+    public static final net.neoforged.neoforge.registries.DeferredHolder<Block, Block> SKY_FURNITURE = BLOCKS.register("sky_furniture",
+            key -> new FurnitureBlock(BlockBehaviour.Properties.of().setId(ResourceKey.create(Registries.BLOCK, key))
                     .mapColor(MapColor.WOOD)
                     .strength(2.0f, 3.0f)
                     .sound(SoundType.WOOD)
                     .noOcclusion()
                     .lightLevel(state -> state.getValue(FurnitureBlock.SHAPE) == ShapeCat.CLUTTER ? 10 : 0)));
 
-    public static final RegistryObject<Block> SKY_FURNITURE_CONTAINER = BLOCKS.register("sky_furniture_container",
-            () -> new FurnitureContainerBlock(BlockBehaviour.Properties.of()
+    public static final net.neoforged.neoforge.registries.DeferredHolder<Block, Block> SKY_FURNITURE_CONTAINER = BLOCKS.register("sky_furniture_container",
+            key -> new FurnitureContainerBlock(BlockBehaviour.Properties.of().setId(ResourceKey.create(Registries.BLOCK, key))
                     .mapColor(MapColor.WOOD)
                     .strength(2.5f, 3.5f)
                     .sound(SoundType.WOOD)
                     .noOcclusion()));
 
-    public static final RegistryObject<BlockEntityType<FurnitureBlockEntity>> SKY_FURNITURE_BE =
+    public static final Supplier<BlockEntityType<FurnitureBlockEntity>> SKY_FURNITURE_BE =
             BLOCK_ENTITIES.register("sky_furniture", () ->
-                    BlockEntityType.Builder.of(FurnitureBlockEntity::new, SKY_FURNITURE.get()).build(null));
+                    new BlockEntityType<>(FurnitureBlockEntity::new, SKY_FURNITURE.get()));
 
-    public static final RegistryObject<BlockEntityType<FurnitureContainerBlockEntity>> SKY_FURNITURE_CONTAINER_BE =
+    public static final Supplier<BlockEntityType<FurnitureContainerBlockEntity>> SKY_FURNITURE_CONTAINER_BE =
             BLOCK_ENTITIES.register("sky_furniture_container", () ->
-                    BlockEntityType.Builder.of(FurnitureContainerBlockEntity::new, SKY_FURNITURE_CONTAINER.get()).build(null));
+                    new BlockEntityType<>(FurnitureContainerBlockEntity::new, SKY_FURNITURE_CONTAINER.get()));
 
     private FurnitureBlocks() {}
 
@@ -184,13 +187,13 @@ public final class FurnitureBlocks {
     public static BlockState stateFor(FurnitureKind kind, Direction facing) {
         Direction horiz = facing.getAxis().isHorizontal() ? facing : Direction.NORTH;
         if (kind.container) {
-            if (!SKY_FURNITURE_CONTAINER.isPresent()) {
+            if (!SKY_FURNITURE_CONTAINER.isBound()) {
                 return net.minecraft.world.level.block.Blocks.BARREL.defaultBlockState();
             }
             return SKY_FURNITURE_CONTAINER.get().defaultBlockState()
                     .setValue(FurnitureContainerBlock.FACING, horiz);
         }
-        if (!SKY_FURNITURE.isPresent()) {
+        if (!SKY_FURNITURE.isBound()) {
             return net.minecraft.world.level.block.Blocks.OAK_STAIRS.defaultBlockState();
         }
         return SKY_FURNITURE.get().defaultBlockState()
@@ -230,7 +233,9 @@ public final class FurnitureBlocks {
     // ------------------------------------------------------------------ Blocks
 
     public static final class FurnitureBlock extends BaseEntityBlock {
-        public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
+
+
+        public static final EnumProperty<Direction> FACING = HorizontalDirectionalBlock.FACING;
         public static final EnumProperty<ShapeCat> SHAPE = EnumProperty.create("shape", ShapeCat.class);
 
         private static final VoxelShape SEAT_COLLISION = Block.box(2.0, 0.0, 2.0, 14.0, 8.5, 14.0);
@@ -276,7 +281,7 @@ public final class FurnitureBlocks {
 
         @Override
         public RenderShape getRenderShape(BlockState state) {
-            return RenderShape.ENTITYBLOCK_ANIMATED;
+            return RenderShape.INVISIBLE;
         }
 
         @Override
@@ -316,7 +321,9 @@ public final class FurnitureBlocks {
     }
 
     public static final class FurnitureContainerBlock extends BaseEntityBlock {
-        public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
+
+
+        public static final EnumProperty<Direction> FACING = HorizontalDirectionalBlock.FACING;
         private static final VoxelShape CONTAINER_SHAPE = Block.box(1.0, 0.0, 1.0, 15.0, 16.0, 15.0);
 
         public FurnitureContainerBlock(Properties props) {
@@ -347,7 +354,7 @@ public final class FurnitureBlocks {
 
         @Override
         public RenderShape getRenderShape(BlockState state) {
-            return RenderShape.ENTITYBLOCK_ANIMATED;
+            return RenderShape.INVISIBLE;
         }
 
         @Override
@@ -361,8 +368,17 @@ public final class FurnitureBlocks {
         }
 
         @Override
-        public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
-            if (level.isClientSide) {
+    protected InteractionResult useItemOn(net.minecraft.world.item.ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+        return use(state, level, pos, player, hand, hit);
+    }
+
+    @Override
+    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+        return use(state, level, pos, player, InteractionHand.MAIN_HAND, hit);
+    }
+
+    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+            if (level.isClientSide()) {
                 return InteractionResult.SUCCESS;
             }
             if (level.getBlockEntity(pos) instanceof FurnitureContainerBlockEntity containerBe) {
@@ -426,7 +442,7 @@ public final class FurnitureBlocks {
         public void setEmpty(boolean empty) {
             this.empty = empty;
             this.setChanged();
-            if (this.level != null && !this.level.isClientSide) {
+            if (this.level != null && !this.level.isClientSide()) {
                 this.level.sendBlockUpdated(this.worldPosition, this.getBlockState(), this.getBlockState(), 3);
             }
         }
@@ -436,7 +452,7 @@ public final class FurnitureBlocks {
         }
 
         @Override
-        protected void saveAdditional(CompoundTag tag) {
+        protected void saveAdditional(net.minecraft.world.level.storage.ValueOutput tag) {
             super.saveAdditional(tag);
             tag.putString("Kind", kind.id);
             if (!cultureId.isEmpty()) tag.putString("Culture", cultureId);
@@ -445,17 +461,17 @@ public final class FurnitureBlocks {
         }
 
         @Override
-        public void load(CompoundTag tag) {
-            super.load(tag);
-            if (tag.contains("Kind")) this.kind = FurnitureKind.byId(tag.getString("Kind"));
-            this.cultureId = tag.getString("Culture");
-            this.empty = tag.getBoolean("Empty");
-            this.variant = tag.getInt("Variant");
+        protected void loadAdditional(net.minecraft.world.level.storage.ValueInput tag) {
+            super.loadAdditional(tag);
+            if (tag.getString("Kind").isPresent()) this.kind = FurnitureKind.byId(tag.getStringOr("Kind", ""));
+            this.cultureId = tag.getStringOr("Culture", "");
+            this.empty = tag.getBooleanOr("Empty", false);
+            this.variant = tag.getIntOr("Variant", 0);
         }
 
         @Override
-        public CompoundTag getUpdateTag() {
-            return this.saveWithoutMetadata();
+        public CompoundTag getUpdateTag(net.minecraft.core.HolderLookup.Provider registries) {
+            return this.saveWithoutMetadata(registries);
         }
 
         @Nullable
@@ -495,7 +511,7 @@ public final class FurnitureBlocks {
         }
 
         @Override
-        protected void saveAdditional(CompoundTag tag) {
+        protected void saveAdditional(net.minecraft.world.level.storage.ValueOutput tag) {
             super.saveAdditional(tag);
             if (!this.trySaveLootTable(tag)) {
                 ContainerHelper.saveAllItems(tag, this.items);
@@ -506,18 +522,18 @@ public final class FurnitureBlocks {
         }
 
         @Override
-        public void load(CompoundTag tag) {
-            super.load(tag);
+        protected void loadAdditional(net.minecraft.world.level.storage.ValueInput tag) {
+            super.loadAdditional(tag);
             this.items = NonNullList.withSize(this.getContainerSize(), ItemStack.EMPTY);
             if (!this.tryLoadLootTable(tag)) {
                 ContainerHelper.loadAllItems(tag, this.items);
             }
-            if (tag.contains("Kind")) {
-                FurnitureKind k = FurnitureKind.byId(tag.getString("Kind"));
+            if (tag.getString("Kind").isPresent()) {
+                FurnitureKind k = FurnitureKind.byId(tag.getStringOr("Kind", ""));
                 if (k.container) this.kind = k;
             }
-            this.cultureId = tag.getString("Culture");
-            this.variant = tag.getInt("Variant");
+            this.cultureId = tag.getStringOr("Culture", "");
+            this.variant = tag.getIntOr("Variant", 0);
         }
 
         @Override
@@ -546,7 +562,7 @@ public final class FurnitureBlocks {
         }
 
         @Override
-        public CompoundTag getUpdateTag() {
+        public CompoundTag getUpdateTag(net.minecraft.core.HolderLookup.Provider registries) {
             CompoundTag tag = new CompoundTag();
             tag.putString("Kind", kind.id);
             if (!cultureId.isEmpty()) tag.putString("Culture", cultureId);

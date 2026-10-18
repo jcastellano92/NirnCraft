@@ -8,7 +8,6 @@ import com.skycraft.tamriel.settlement.build.Canvas;
 import com.skycraft.tamriel.settlement.plan.Spec;
 import net.minecraft.core.Direction;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.world.level.block.AbstractGlassBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.IronBarsBlock;
@@ -87,11 +86,11 @@ public final class Charring {
             return (above && h < (severity >= 2 ? 90 : 55)) ? AIR : s;
         }
         // glass blocks and panes (iron bars stay)
-        if (b instanceof AbstractGlassBlock || (b instanceof IronBarsBlock && !s.is(Blocks.IRON_BARS))) {
+        if (s.is(net.neoforged.neoforge.common.Tags.Blocks.GLASS_BLOCKS) || (b instanceof IronBarsBlock && !s.is(Blocks.IRON_BARS))) {
             return (above && h < 86) ? AIR : s;
         }
         if (s.is(Blocks.HAY_BLOCK) || s.is(Blocks.BAMBOO_MOSAIC_STAIRS) || s.is(Blocks.BAMBOO_MOSAIC_SLAB) || s.is(Blocks.BAMBOO_MOSAIC)) {
-            return (above && h < 70) ? AIR : (h < 85 ? B.id("skycraft:ash_block", Blocks.GRAY_CONCRETE_POWDER) : s);
+            return (above && h < 70) ? AIR : (h < 85 ? B.id("skycraft:ash_block", com.skycraft.worldgen.VanillaBlocks.GRAY_CONCRETE_POWDER) : s);
         }
         if (s.is(Blocks.LANTERN) || s.is(Blocks.SOUL_LANTERN) || s.is(Blocks.TORCH) || s.is(Blocks.WALL_TORCH)) {
             return (above && severity >= 2 && h < 60) ? AIR : s;

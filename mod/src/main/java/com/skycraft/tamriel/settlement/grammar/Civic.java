@@ -81,7 +81,7 @@ final class Civic {
                 if (r > 0.3 && c.chance(x, 1, z, 63, 3)) c.set(x, g + 1, z, B.s(Blocks.LILY_PAD));
             } else if (r <= 1.0) {
                 c.set(x, g, z, c.chance(x, 0, z, 65, 2) ? B.s(Blocks.GRASS_BLOCK) : B.s(Blocks.MOSS_BLOCK));
-                if (c.chance(x, 2, z, 67, 3)) c.set(x, g + 1, z, B.s(c.chance(x, 5, z, 79, 3) ? Blocks.FERN : Blocks.GRASS));
+                if (c.chance(x, 2, z, 67, 3)) c.set(x, g + 1, z, B.s(c.chance(x, 5, z, 79, 3) ? Blocks.FERN : com.skycraft.worldgen.VanillaBlocks.GRASS));
                 else if (c.chance(x, 3, z, 69, 6)) c.set(x, g + 1, z, B.s(Blocks.SUGAR_CANE));
                 else if (c.chance(x, 4, z, 71, 5)) c.set(x, g + 1, z, B.s(Blocks.BLUE_ORCHID));
             }
@@ -255,7 +255,7 @@ final class Civic {
             }
             if (Math.min(w, d) - inset * 2 <= 2) {
                 c.set(w / 2, y + 1, d / 2, p.fence);
-                c.set(w / 2, y + 2, d / 2, B.s(Blocks.LIGHTNING_ROD));
+                c.set(w / 2, y + 2, d / 2, B.s(com.skycraft.worldgen.VanillaBlocks.LIGHTNING_ROD));
                 break;
             }
         }
@@ -279,7 +279,7 @@ final class Civic {
         c.set(1, g + h, 1, southBanner);
         c.set(1, g + h, -1, northBanner);
         c.set(0, g + h - 1, 1, southBanner);
-        c.set(0, g + h + 1, 0, B.s(Blocks.LIGHTNING_ROD));
+        c.set(0, g + h + 1, 0, B.s(com.skycraft.worldgen.VanillaBlocks.LIGHTNING_ROD));
     }
 
     // ------------------------------------------------------------------ trees

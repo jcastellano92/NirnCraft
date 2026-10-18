@@ -15,8 +15,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.MobSpawnType;
-import net.minecraft.world.entity.MobType;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.control.LookControl;
 import net.minecraft.world.entity.ai.control.MoveControl;
@@ -50,7 +49,7 @@ public class SkyBeast extends Animal implements SkyCreature {
         super(type, level);
         CreatureSpec s = spec();
         this.xpReward = s.xp;
-        this.setMaxUpStep(s.stepHeight);
+        this.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.STEP_HEIGHT).setBaseValue(s.stepHeight);
         MoveControl move = CreatureCore.moveControl(this, s);
         if (move != null) this.moveControl = move;
         LookControl look = CreatureCore.lookControl(this, s);
@@ -70,10 +69,10 @@ public class SkyBeast extends Animal implements SkyCreature {
     }
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        this.entityData.define(VARIANT, 0);
-        this.entityData.define(DORMANT, false);
+    protected void defineSynchedData(net.minecraft.network.syncher.SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(VARIANT, 0);
+        builder.define(DORMANT, false);
     }
 
     @Override
@@ -85,7 +84,7 @@ public class SkyBeast extends Animal implements SkyCreature {
     public void setDormant(boolean dormant) {
         boolean was = isDormant();
         this.entityData.set(DORMANT, dormant);
-        if (was && !dormant && !this.level().isClientSide) {
+        if (was && !dormant && !this.level().isClientSide()) {
             CreatureAnims.play(this, com.skycraft.creatures.entity.anim.AnimSlot.EMERGE);
             emergeTicks = 30;
         }
@@ -97,8 +96,8 @@ public class SkyBeast extends Animal implements SkyCreature {
     }
 
     @Override
-    protected void customServerAiStep() {
-        super.customServerAiStep();
+    protected void customServerAiStep(net.minecraft.server.level.ServerLevel serverLevel263) {
+        super.customServerAiStep(serverLevel263);
         if (this.tickCount == 2 && pendingEmerge) {
             pendingEmerge = false;
             CreatureAnims.play(this, com.skycraft.creatures.entity.anim.AnimSlot.EMERGE);
@@ -158,15 +157,15 @@ public class SkyBeast extends Animal implements SkyCreature {
 
     @Override
     @Nullable
-    public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, MobSpawnType reason,
-                                        @Nullable SpawnGroupData data, @Nullable CompoundTag tag) {
+    public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, EntitySpawnReason reason,
+                                        @Nullable SpawnGroupData data) {
         if (data == null) data = new AgeableMob.AgeableMobGroupData(false); // never spawn as babies
-        data = super.finalizeSpawn(level, difficulty, reason, data, tag);
+        data = super.finalizeSpawn(level, difficulty, reason, data);
         if (!variantChosen && spec().variantPicker != null) setVariant(spec().variantPicker.pick(level, this.blockPosition(), this.getRandom()));
         CreatureCore.applyVariantPower(this, spec(), getVariant());
-        if (spec().ambush > 0 && reason == MobSpawnType.NATURAL && this.getRandom().nextFloat() < spec().dormantChance) {
+        if (spec().ambush > 0 && reason == EntitySpawnReason.NATURAL && this.getRandom().nextFloat() < spec().dormantChance) {
             this.entityData.set(DORMANT, true);
-        } else if (spec().emergeOnSpawn && (reason == MobSpawnType.NATURAL || reason == MobSpawnType.MOB_SUMMONED)) {
+        } else if (spec().emergeOnSpawn && (reason == EntitySpawnReason.NATURAL || reason == EntitySpawnReason.MOB_SUMMONED)) {
             pendingEmerge = true;
         }
         return data;
@@ -187,12 +186,12 @@ public class SkyBeast extends Animal implements SkyCreature {
     // ------------------------------------------------------------------ combat & body
 
     @Override
-    public boolean hurt(DamageSource source, float amount) {
+    public boolean hurtServer(net.minecraft.server.level.ServerLevel serverLevel263, DamageSource source, float amount) {
         if (source.is(DamageTypeTags.IS_FIRE)) lastFireHurt = this.tickCount;
-        if (isDormant() && !this.level().isClientSide) setDormant(false);
+        if (isDormant() && !this.level().isClientSide()) setDormant(false);
         float mult = CreatureCore.damageMultiplier(spec(), source);
         if (mult <= 0) return false;
-        return super.hurt(source, amount * mult);
+        return super.hurtServer(serverLevel263, source, amount * mult);
     }
 
     @Override
@@ -211,12 +210,12 @@ public class SkyBeast extends Animal implements SkyCreature {
     }
 
     @Override
-    public MobType getMobType() {
-        return spec().undead ? MobType.UNDEAD : spec().move == CreatureSpec.Move.SWIM ? MobType.WATER : super.getMobType();
+    public boolean isInvertedHealAndHarm() {
+        return spec().undead || super.isInvertedHealAndHarm();
     }
 
     @Override
-    public boolean causeFallDamage(float distance, float multiplier, DamageSource source) {
+    public boolean causeFallDamage(double distance, float multiplier, DamageSource source) {
         if (spec().move != CreatureSpec.Move.WALK) return false;
         return super.causeFallDamage(distance, multiplier, source);
     }
@@ -229,7 +228,7 @@ public class SkyBeast extends Animal implements SkyCreature {
     @Override
     public void aiStep() {
         super.aiStep();
-        if (this.level().isClientSide) {
+        if (this.level().isClientSide()) {
             if (spec().clientTick != null) spec().clientTick.accept(this);
         } else {
             CreatureCore.serverTick(this, spec(), lastFireHurt);
@@ -253,7 +252,7 @@ public class SkyBeast extends Animal implements SkyCreature {
     }
 
     @Override
-    public int getExperienceReward() {
+    protected int getBaseExperienceReward(net.minecraft.server.level.ServerLevel level263) {
         return spec().xp;
     }
 
@@ -269,7 +268,7 @@ public class SkyBeast extends Animal implements SkyCreature {
     }
 
     @Override
-    public boolean doHurtTarget(net.minecraft.world.entity.Entity target) {
+    public boolean doHurtTarget(net.minecraft.server.level.ServerLevel level263, net.minecraft.world.entity.Entity target) {
         // beasts have no vanilla melee: their moves strike through the attack goal
         return target instanceof net.minecraft.world.entity.LivingEntity living
                 && com.skycraft.creatures.spec.Attacks.strike(this, living, 1f);
@@ -322,22 +321,28 @@ public class SkyBeast extends Animal implements SkyCreature {
     @Override
     public void die(DamageSource source) {
         super.die(source);
-        if (!this.level().isClientSide && spec().onDeath != null) spec().onDeath.accept(this);
+        if (!this.level().isClientSide() && spec().onDeath != null) spec().onDeath.accept(this);
     }
 
     // ------------------------------------------------------------------ save
 
     @Override
-    public void addAdditionalSaveData(CompoundTag tag) {
-        super.addAdditionalSaveData(tag);
+    public void addAdditionalSaveData(net.minecraft.world.level.storage.ValueOutput output263) {
+        super.addAdditionalSaveData(output263);
+        net.minecraft.nbt.CompoundTag tag = new net.minecraft.nbt.CompoundTag();
+        
         tag.putInt("Variant", getVariant());
         if (isDormant()) tag.putBoolean("Dormant", true);
+    
+        output263.store(tag);
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag tag) {
-        super.readAdditionalSaveData(tag);
-        if (tag.contains("Variant")) setVariant(tag.getInt("Variant"));
-        this.entityData.set(DORMANT, tag.getBoolean("Dormant"));
+    public void readAdditionalSaveData(net.minecraft.world.level.storage.ValueInput input263) {
+        super.readAdditionalSaveData(input263);
+        net.minecraft.nbt.CompoundTag tag = com.skycraft.platform.ValueTags.read(input263 , "Variant", "Dormant");
+        
+        if (tag.contains("Variant")) setVariant(tag.getIntOr("Variant",0));
+        this.entityData.set(DORMANT, tag.getBooleanOr("Dormant",false));
     }
 }

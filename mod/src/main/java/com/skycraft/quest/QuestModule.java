@@ -1,8 +1,8 @@
 package com.skycraft.quest;
 
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.config.ModConfig;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.ModLoadingContext;
+import net.neoforged.fml.config.ModConfig;
 
 /**
  * Parties, quests, radiant bounties, factions (Companions, College, Thieves Guild, Dark Brotherhood, Legion,
@@ -17,7 +17,8 @@ public final class QuestModule {
     /** Registers this module's DeferredRegisters and mod-bus listeners. Called from the mod constructor. */
     public static void init(IEventBus modBus) {
         QuestItems.init(modBus);
-        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, QuestConfig.SPEC, "skycraft-quest.toml");
+        com.skycraft.quest.story.StartCottage.register(modBus);
+        com.skycraft.Skycraft.config(ModConfig.Type.LOCAL, QuestConfig.SPEC, "skycraft-quest.toml");
         QuestDialogue.register();
         com.skycraft.quest.faction.FactionDialogue.register();
     }

@@ -255,7 +255,8 @@ public final class RestLogic {
         c.eq(startBlock(SLEEP, true, all, 2, true, true, false) == Block.MODE_DISABLED, "allowSleepSkip off");
         c.eq(startBlock(SLEEP, true, some, 2, false, true, true) == Block.NONE && personal(2, false),
                 "sync off in multiplayer: personal skip, nobody else needed");
-        c.eq(startBlock(SLEEP, true, some, 1, false, true, true) == Block.NONE && !personal(1, false), "sync off alone: normal");
+        c.eq(startBlock(SLEEP, true, new Tally(1, 1, true), 1, false, true, true) == Block.NONE
+                && !personal(1, false), "sync off alone: normal");
         c.eq(startBlock(JAIL, true, all, 1, true, true, true) == Block.JAIL, "jail sleep is not a world skip");
 
         // need recovery: bed refills 240 in 120 s, bedroll and waiting slower

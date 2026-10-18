@@ -14,21 +14,21 @@ import com.skycraft.mounts.MountView;
 import com.skycraft.network.SkyNetwork;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.animal.horse.AbstractHorse;
+import net.minecraft.world.entity.animal.equine.AbstractHorse;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RenderGuiEvent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.RenderGuiEvent;
+
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 /**
  * The target card: look at a horse, camel, guar or beast (within {@link MountInspect#RANGE} blocks, further with Wild
@@ -37,7 +37,7 @@ import net.minecraftforge.fml.common.Mod;
  * seconds while you keep looking, so a level gained shows up); the server decides what the answer contains, which is
  * why the card needs no persistent data of its own.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
 public final class MountCardOverlay {
     private static final int REFRESH_TICKS = 40;
     private static final int ASK_GAP = 10;
@@ -92,11 +92,11 @@ public final class MountCardOverlay {
     }
 
     @SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent event) {
-        if (event.phase != TickEvent.Phase.END) return;
+    public static void onClientTick(net.neoforged.neoforge.client.event.ClientTickEvent.Post event) {
+        
         tick++;
         Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null || mc.level == null || mc.screen != null || mc.player.isPassenger()) {
+        if (mc.player == null || mc.level == null || mc.gui.screen() != null || mc.player.isPassenger()) {
             target = -1;
             return;
         }
@@ -145,16 +145,16 @@ public final class MountCardOverlay {
     @SubscribeEvent
     public static void render(RenderGuiEvent.Post event) {
         Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null || mc.options.hideGui || mc.screen != null || card == null || target < 0 || cardEntity != target) return;
+        if (mc.player == null || mc.gui.hud.isHidden() || mc.gui.screen() != null || card == null || target < 0 || cardEntity != target) return;
         if (tick - cardAt > REFRESH_TICKS * 3) return;
         silentEntity = -1;
-        GuiGraphics g = event.getGuiGraphics();
+        GuiGraphicsExtractor g = event.getGuiGraphics();
         Font font = mc.font;
         int w = mc.getWindow().getGuiScaledWidth(), h = mc.getWindow().getGuiScaledHeight();
         draw(g, font, card, w, h);
     }
 
-    private static void draw(GuiGraphics g, Font font, MountView v, int screenW, int screenH) {
+    private static void draw(GuiGraphicsExtractor g, Font font, MountView v, int screenW, int screenH) {
         MountKind kind = v.kind();
         int cardW = 150;
         int lines = v.known() ? 6 : 2;
@@ -164,10 +164,10 @@ public final class MountCardOverlay {
         g.fill(x, y, x + cardW, y + cardH, 0x90000000);
         g.fill(x, y, x + 1, y + cardH, 0xC0C8BC9A);
         int tx = x + 6, ty = y + 4;
-        g.drawString(font, SkyUi.ellipsize(font, MountViewText.name(v).getString(), cardW - 12), tx, ty, SkyUi.GOLD, true);
+        g.text(font, SkyUi.ellipsize(font, MountViewText.name(v).getString(), cardW - 12), tx, ty, SkyUi.GOLD, true);
         ty += 10;
         if (!v.known()) {
-            g.drawString(font, Component.translatable("mounts.skycraft.card.plain"), tx, ty, SkyUi.DIM, false);
+            g.text(font, Component.translatable("mounts.skycraft.card.plain"), tx, ty, SkyUi.DIM, false);
             return;
         }
         // owner and level
@@ -181,13 +181,13 @@ public final class MountCardOverlay {
                 ? Component.translatable("mounts.skycraft.card.level", (int) v.level())
                 : v.owner() != 0 ? MountViewText.levelWord(v.level()) : Component.empty();
         String head = who.getString() + (lvl.getString().isEmpty() ? "" : "  -  " + lvl.getString());
-        g.drawString(font, SkyUi.ellipsize(font, head, cardW - 12), tx, ty, SkyUi.TEXT, false);
+        g.text(font, SkyUi.ellipsize(font, head, cardW - 12), tx, ty, SkyUi.TEXT, false);
         ty += 10;
         if (v.detail() == 0) {
             // no Horse Sense: only a sense of it
-            g.drawString(font, SkyUi.ellipsize(font, MountViewText.vague(v).getString(), cardW - 12), tx, ty, SkyUi.TEXT, false);
+            g.text(font, SkyUi.ellipsize(font, MountViewText.vague(v).getString(), cardW - 12), tx, ty, SkyUi.TEXT, false);
             ty += 10;
-            g.drawString(font, Component.translatable("mounts.skycraft.card.no_sense"), tx, ty, SkyUi.DIM, false);
+            g.text(font, Component.translatable("mounts.skycraft.card.no_sense"), tx, ty, SkyUi.DIM, false);
             ty += 10;
         } else {
             int[][] rows = {{MountProfile.SPEED, MountProfile.STAMINA}, {MountProfile.HEALTH, MountProfile.JUMP}, {MountProfile.CARRY, MountProfile.TEMPER}};
@@ -197,8 +197,8 @@ public final class MountCardOverlay {
                     int cx = tx + c * 72;
                     String label = MountViewText.label(kind, stat).getString();
                     String grade = MountViewText.grade(v, stat).getString();
-                    g.drawString(font, SkyUi.ellipsize(font, label, 36), cx, ty, SkyUi.DIM, false);
-                    g.drawString(font, SkyUi.ellipsize(font, grade, 36), cx + 36, ty, MountViewText.color(v, stat), false);
+                    g.text(font, SkyUi.ellipsize(font, label, 36), cx, ty, SkyUi.DIM, false);
+                    g.text(font, SkyUi.ellipsize(font, grade, 36), cx + 36, ty, MountViewText.color(v, stat), false);
                 }
                 ty += 10;
             }
@@ -207,9 +207,9 @@ public final class MountCardOverlay {
         String tack = v.saddle().isEmpty()
                 ? Component.translatable("mounts.skycraft.card.unsaddled").getString()
                 : Component.translatable("mounts.skycraft.saddle." + v.saddle()).getString() + (v.armor() > 0 ? "  +" + v.armor() + " armour" : "");
-        g.drawString(font, SkyUi.ellipsize(font, tack, cardW - 12 - 30), tx, ty, SkyUi.TEXT, false);
+        g.text(font, SkyUi.ellipsize(font, tack, cardW - 12 - 30), tx, ty, SkyUi.TEXT, false);
         String hp = Math.round(v.health()) + "/" + Math.round(v.maxHealth());
         float frac = v.maxHealth() <= 0 ? 1f : Mth.clamp(v.health() / v.maxHealth(), 0f, 1f);
-        g.drawString(font, hp, x + cardW - 6 - font.width(hp), ty, frac < 0.35f ? SkyUi.BAD : SkyUi.TEXT, false);
+        g.text(font, hp, x + cardW - 6 - font.width(hp), ty, frac < 0.35f ? SkyUi.BAD : SkyUi.TEXT, false);
     }
 }

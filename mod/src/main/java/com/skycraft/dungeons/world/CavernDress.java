@@ -10,7 +10,7 @@ import com.skycraft.dungeons.world.cavern.CavernProfile.Pal;
 import com.skycraft.dungeons.world.cavern.CavernShape;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LecternBlock;
@@ -980,10 +980,10 @@ final class CavernDress {
     }
 
     private static void carpet(CavernGen g, int x, int z) {
-        if (g.free(x, z)) g.p.set(x, g.walk(x, z), z, Blocks.BROWN_CARPET.defaultBlockState());
+        if (g.free(x, z)) g.p.set(x, g.walk(x, z), z, com.skycraft.worldgen.VanillaBlocks.BROWN_CARPET.defaultBlockState());
     }
 
-    private static void put(CavernGen g, int x, int z, BlockState s, ResourceLocation loot) {
+    private static void put(CavernGen g, int x, int z, BlockState s, Identifier loot) {
         if (!g.free(x, z)) return;
         g.p.container(x, g.walk(x, z), z, s, loot);
     }
@@ -996,7 +996,7 @@ final class CavernDress {
         int x = spot[0], y = spot[1], z = spot[2];
         com.skycraft.tamriel.Region reg = com.skycraft.tamriel.TamrielMap.region(g.cx, g.cz);
         String prov = reg != null ? reg.province() : "skyrim";
-        ResourceLocation loot = g.prof.lootMinor != null ? g.prof.lootMinor : Deco.LOOT_MINOR;
+        Identifier loot = g.prof.lootMinor != null ? g.prof.lootMinor : Deco.LOOT_MINOR;
 
         switch (prov) {
             case "morrowind" -> {
@@ -1137,7 +1137,7 @@ final class CavernDress {
         setPiece(g);
         culturalSanctuary(g);
         // the platform: a chest, the lore on a lectern and a guardian
-        ResourceLocation platLoot = prof.lootPlatform != null ? prof.lootPlatform
+        Identifier platLoot = prof.lootPlatform != null ? prof.lootPlatform
                 : room.piece.theme == Theme.MINE ? Deco.LOOT_MINE : Deco.LOOT_COMMON;
         p.container(g.cx, g.floor, g.cz, Deco.chest(Direction.NORTH), platLoot);
         p.set(g.cx + 2, g.floor, g.cz + 2, Deco.candle(Blocks.CANDLE, 3, true));
@@ -1152,7 +1152,7 @@ final class CavernDress {
             int[] s = spotNear(g, g.humpTheta[k], 0.74, 0.86, 40 + k);
             if (s == null) continue;
             Direction face = BarrowRooms.towardCenter(room, s[0], s[2]);
-            ResourceLocation loot = k == 0 ? (prof.lootRelic != null ? prof.lootRelic : Story.relicTable(room.theme(), 1))
+            Identifier loot = k == 0 ? (prof.lootRelic != null ? prof.lootRelic : Story.relicTable(room.theme(), 1))
                     : (prof.lootMinor != null ? prof.lootMinor : Deco.LOOT_MINOR);
             p.container(s[0], s[1], s[2], Deco.chest(face), loot);
             p.set(s[0] + face.getClockWise().getStepX(), s[1], s[2] + face.getClockWise().getStepZ(), g.lantern());

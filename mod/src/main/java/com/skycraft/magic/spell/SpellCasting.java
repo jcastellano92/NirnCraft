@@ -90,7 +90,7 @@ public final class SpellCasting {
         if (last != null && now - last < 20) return;
         LAST_FAIL.put(p.getUUID(), now);
         Notifier.message(p, Component.translatable("message.skycraft.not_enough_magicka"));
-        p.playNotifySound(com.skycraft.audio.AudioSounds.spell("fizzle"), SoundSource.PLAYERS, 0.7f, 1.0f);
+        com.skycraft.magic.MagicFx.soundToPlayer(p, com.skycraft.audio.AudioSounds.spell("fizzle"), SoundSource.PLAYERS, 0.7f, 1.0f);
     }
 
     /** The spell equipped in a hand; an empty left hand falls back to the right hand's spell. */
@@ -108,7 +108,7 @@ public final class SpellCasting {
     /** A hand's cast key was pressed. */
     public static void start(ServerPlayer p, int hand) {
         if (hand != LEFT && hand != RIGHT) return;
-        if (!p.isAlive() || p.isSpectator() || p.hasEffect(ModEffects.PARALYSIS.get())) return;
+        if (!p.isAlive() || p.isSpectator() || p.hasEffect(com.skycraft.platform.Effects.holder(ModEffects.PARALYSIS.get()))) return;
         if (com.skycraft.combat.Sheathe.isSheathed(p)) {
             com.skycraft.combat.Sheathe.setSheathed(p, false);
             return;
@@ -124,7 +124,7 @@ public final class SpellCasting {
             Notifier.message(p, Component.translatable("message.skycraft.no_spell", Component.keybind("key.skycraft.magic_menu")));
             return;
         }
-        if (spell.hostile && p.hasEffect(MagicRegistry.ETHEREAL.get())) {
+        if (spell.hostile && p.hasEffect(com.skycraft.platform.Effects.holder(MagicRegistry.ETHEREAL.get()))) {
             Notifier.message(p, Component.translatable("message.skycraft.ethereal_no_attack"));
             return;
         }
@@ -206,7 +206,7 @@ public final class SpellCasting {
     public static void tick(ServerPlayer p) {
         Active[] hands = ACTIVE.get(p.getUUID());
         if (hands == null || hands[0] == null && hands[1] == null) return;
-        if (!p.isAlive() || p.isSpectator() || p.hasEffect(ModEffects.PARALYSIS.get())) {
+        if (!p.isAlive() || p.isSpectator() || p.hasEffect(com.skycraft.platform.Effects.holder(ModEffects.PARALYSIS.get()))) {
             stop(p);
             return;
         }
@@ -312,13 +312,13 @@ public final class SpellCasting {
         if (dual) next[other] = now + CAST_COOLDOWN;
         if (result == Spell.Result.EFFECT) SpellEffects.xp(p, spell);
         if (dual) {
-            p.swing(InteractionHand.MAIN_HAND, true);
-            p.swing(InteractionHand.OFF_HAND, true);
+            p.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
+            p.swing(InteractionHand.OFF_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
             MagicFx.send(p, MagicFx.BURST, spell.element, p.position(), p.position(), p.getId(), 2);
             MagicFx.sound(p, SoundEvents.EVOKER_CAST_SPELL, 0.7f, 1.4f);
         } else {
-            if (a.hand == RIGHT) p.swing(InteractionHand.MAIN_HAND, true);
-            if (a.hand == LEFT) p.swing(InteractionHand.OFF_HAND, true);
+            if (a.hand == RIGHT) p.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
+            if (a.hand == LEFT) p.swing(InteractionHand.OFF_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
         }
         SkyData.get(p).addStat("spells_cast", 1);
     }

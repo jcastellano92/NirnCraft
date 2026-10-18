@@ -3,11 +3,10 @@ package com.skycraft.inventory;
 import com.skycraft.Skycraft;
 import com.skycraft.core.SkyData;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.CompoundContainer;
 import net.minecraft.world.Container;
@@ -23,17 +22,9 @@ import net.minecraft.world.level.block.entity.DispenserBlockEntity;
 import net.minecraft.world.level.block.entity.HopperBlockEntity;
 import net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity;
 import net.minecraft.world.level.block.entity.ShulkerBoxBlockEntity;
-import net.minecraftforge.common.capabilities.AutoRegisterCapability;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.CapabilityManager;
-import net.minecraftforge.common.capabilities.CapabilityToken;
-import net.minecraftforge.common.capabilities.ICapabilitySerializable;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.event.AttachCapabilitiesEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
-import org.jetbrains.annotations.NotNull;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.util.ObfuscationReflectionHelper;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
@@ -43,12 +34,12 @@ import java.util.List;
 /**
  * The overflow of block containers (docs/INVENTORY.md "Containers"): Skyrim has no slots in a chest, only a (here
  * unlimited, engineering-capped) list of things. Vanilla chests keep their 27/54 slots (hoppers, comparators and every
- * non-Skyrim reader see only those) and get a {@link BulkStore} behind them as a Forge block-entity capability:
+ * non-Skyrim reader see only those) and get a {@link BulkStore} behind them as a persistent block-entity attachment:
  * what the slots cannot hold when the Skyrim container screen stores into the chest goes there, and the screen lists
  * and takes it like any other row.
  *
  * <ul>
- *     <li><b>Persistence.</b> The capability is serialised by Forge into the block entity's NBT ({@code ForgeCaps}), so it
+ *     <li><b>Persistence.</b> The attachment is serialized by NeoForge with the block entity, so it
  *     is saved with the chunk, survives restarts, travels with {@code /clone} and structure saves, and is marked
  *     changed ({@code setChanged}) whenever it changes.</li>
  *     <li><b>Which containers.</b> {@link #eligible}: every {@code RandomizableContainerBlockEntity} (chests, trapped
@@ -66,10 +57,29 @@ import java.util.List;
  *     comparator sees as much as it can and the overflow is only non-empty while the slots are really full.</li>
  * </ul>
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class ContainerOverflow {
-    public static final Capability<Holder> CAP = CapabilityManager.get(new CapabilityToken<>() {});
-    private static final ResourceLocation KEY = new ResourceLocation(Skycraft.MODID, "overflow");
+    private static final net.neoforged.neoforge.registries.DeferredRegister<net.neoforged.neoforge.attachment.AttachmentType<?>> TYPES =
+            net.neoforged.neoforge.registries.DeferredRegister.create(net.neoforged.neoforge.registries.NeoForgeRegistries.ATTACHMENT_TYPES, Skycraft.MODID);
+    private static final java.util.function.Supplier<net.neoforged.neoforge.attachment.AttachmentType<Holder>> DATA = TYPES.register("overflow", () ->
+            net.neoforged.neoforge.attachment.AttachmentType.builder(holder -> new Holder((BlockEntity) holder))
+                    .serialize(new net.neoforged.neoforge.attachment.IAttachmentSerializer<Holder>() {
+                        @Override
+                        public Holder read(net.neoforged.neoforge.attachment.IAttachmentHolder owner, net.minecraft.world.level.storage.ValueInput input) {
+                            Holder holder = new Holder((BlockEntity) owner);
+                            holder.store.load(input.read("data", CompoundTag.CODEC).orElseGet(CompoundTag::new));
+                            return holder;
+                        }
+                        @Override
+                        public boolean write(Holder holder, net.minecraft.world.level.storage.ValueOutput output) {
+                            if (holder.store.isEmpty()) return false;
+                            output.store("data", CompoundTag.CODEC, holder.store.save());
+                            return true;
+                        }
+                    }).build());
+    private static final java.util.Map<net.minecraft.server.level.ServerLevel, java.util.ArrayDeque<RemovalCheck>> CHECKS = new java.util.IdentityHashMap<>();
+    private record RemovalCheck(java.lang.ref.WeakReference<Holder> holder, long revision) {}
+    private static final Identifier KEY = Identifier.fromNamespaceAndPath(Skycraft.MODID, "overflow");
 
     /** Engineering caps of a container's overflow (the same as the player's pack, so a whole pack fits in one chest). */
     public static final int MAX_ENTRIES = Pack.MAX_ENTRIES;
@@ -79,14 +89,16 @@ public final class ContainerOverflow {
     public static final int CORPSE_PER_ENTRY = 50_000_000;
     /** Client requests name a container's overflow entry n as the menu slot id {@code SLOT_BASE + n}. */
     public static final int SLOT_BASE = 10_000;
-    /** Item entities one spill makes before the rest goes to the nearest player's pack. */
-    private static final int SPILL_ENTITIES = 2048;
     /** SkyData module of the ender chest's overflow (not synced to the client with the rest of the player's data). */
     public static final String ENDER_MODULE = "ender_pack";
 
     private ContainerOverflow() {}
 
-    // ------------------------------------------------------------------ the capability
+    public static void init(net.neoforged.bus.api.IEventBus modBus) {
+        TYPES.register(modBus);
+    }
+
+    // ------------------------------------------------------------------ the attachment
 
     /** True for the block entities that get an overflow. */
     public static boolean eligible(BlockEntity be) {
@@ -94,115 +106,121 @@ public final class ContainerOverflow {
                 && !(be instanceof HopperBlockEntity) && !(be instanceof DispenserBlockEntity) && !(be instanceof ShulkerBoxBlockEntity);
     }
 
-    @SubscribeEvent
-    public static void attach(AttachCapabilitiesEvent<BlockEntity> event) {
-        BlockEntity be = event.getObject();
-        if (!eligible(be)) return;
-        Holder holder = new Holder(be);
-        event.addCapability(KEY, holder);
-        event.addListener(holder::onInvalidate);
-    }
-
-    /** The overflow store of a block entity, or null when it has none (not eligible, or its caps were invalidated). */
+    /** The attachment is created only for eligible containers and remains saved with its block entity. */
     @Nullable
     public static BulkStore store(@Nullable BlockEntity be) {
-        if (be == null) return null;
-        Holder h = be.getCapability(CAP).orElse(null);
-        return h == null ? null : h.store;
+        if (be == null || !eligible(be) || be.isRemoved()) return null;
+        Holder holder = be.getData(DATA.get());
+        schedule(holder, false);
+        return holder.store;
     }
 
-    @AutoRegisterCapability
-    public static final class Holder implements ICapabilitySerializable<CompoundTag> {
+    public static final class Holder {
         final BulkStore store;
         private final BlockEntity be;
-        private final LazyOptional<Holder> optional = LazyOptional.of(() -> this);
-        /** The chunk is unloading (the block entity is saved with it): not a destruction. */
-        private boolean unloading;
-        private boolean spilled;
+        private boolean unloading, spilled, queued;
+        private long revision;
 
         Holder(BlockEntity be) {
             this.be = be;
             this.store = new BulkStore(MAX_ENTRIES, MAX_PER_ENTRY, this::changed);
         }
 
-        public BulkStore store() {
-            return store;
-        }
+        public BulkStore store() { return store; }
 
         private void changed() {
             Level level = be.getLevel();
-            if (level != null && !level.isClientSide && !be.isRemoved()) be.setChanged();
+            if (level != null && !level.isClientSide() && !be.isRemoved()) be.setChanged();
+            schedule(this, false);
         }
 
-        @Override
-        public @NotNull <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, @Nullable Direction side) {
-            return CAP.orEmpty(cap, optional);
-        }
-
-        @Override
-        public CompoundTag serializeNBT() {
-            // an empty overflow (nearly every chest) writes an empty tag: no weight in the chunk
-            return store.isEmpty() ? new CompoundTag() : store.save();
-        }
-
-        @Override
-        public void deserializeNBT(CompoundTag nbt) {
-            store.load(nbt);
-        }
-
-        /**
-         * Called whenever the block entity's capabilities are invalidated: {@code onChunkUnloaded} first (the entity is
-         * not removed yet: remember the chunk is going away), then {@code setRemoved} either way. Destruction is
-         * {@code setRemoved} alone.
-         */
-        void onInvalidate() {
-            optional.invalidate();
-            Level level = be.getLevel();
-            if (level == null || level.isClientSide) return;
-            if (!be.isRemoved()) {
-                unloading = true;
-                return;
-            }
+        private void removed() {
             if (unloading || spilled || store.isEmpty()) return;
+            Level level = be.getLevel();
+            if (!(level instanceof net.minecraft.server.level.ServerLevel server)) return;
             spilled = true;
-            spill(level, be.getBlockPos(), store);
+            spill(server, be.getBlockPos(), store);
         }
+    }
+
+    private static void schedule(Holder holder, boolean priority) {
+        if (!(holder.be.getLevel() instanceof net.minecraft.server.level.ServerLevel level)) return;
+        if (holder.store.isEmpty() || holder.unloading || holder.spilled) {
+            holder.queued = false;
+            holder.revision++;
+            return;
+        }
+        if (holder.queued && !priority) return;
+        holder.queued = true;
+        var checks = CHECKS.computeIfAbsent(level, ignored -> new java.util.ArrayDeque<>());
+        var check = new RemovalCheck(new java.lang.ref.WeakReference<>(holder), ++holder.revision);
+        if (priority) checks.addFirst(check); else checks.addLast(check);
+    }
+
+    /** Queue an immediate confirmation after block removal; the event can precede the actual removal. */
+    @SubscribeEvent(priority = net.neoforged.bus.api.EventPriority.LOWEST, receiveCanceled = true)
+    public static void drops(net.neoforged.neoforge.event.level.BlockDropsEvent event) {
+        BlockEntity be = event.getBlockEntity();
+        if (be != null) {
+            Holder holder = be.getExistingDataOrNull(DATA.get());
+            if (holder != null) schedule(holder, true);
+        }
+    }
+
+    @SubscribeEvent
+    public static void chunkLoad(net.neoforged.neoforge.event.level.ChunkEvent.Load event) {
+        if (event.getLevel().isClientSide() || !(event.getChunk() instanceof net.minecraft.world.level.chunk.LevelChunk chunk)) return;
+        for (BlockEntity be : chunk.getBlockEntities().values()) {
+            Holder holder = be.getExistingDataOrNull(DATA.get());
+            if (holder != null) { holder.unloading = false; schedule(holder, false); }
+        }
+    }
+
+    /** Invalidate checks before vanilla marks unloaded block entities removed; unloading never spills cargo. */
+    @SubscribeEvent
+    public static void chunkUnload(net.neoforged.neoforge.event.level.ChunkEvent.Unload event) {
+        if (event.getLevel().isClientSide() || !(event.getChunk() instanceof net.minecraft.world.level.chunk.LevelChunk chunk)) return;
+        for (BlockEntity be : chunk.getBlockEntities().values()) markUnloading(be);
+    }
+
+    /** The chunk lifecycle marks retained attachments before vanilla calls setRemoved on their block entities. */
+    static void markUnloading(BlockEntity be) {
+        Holder holder = be.getExistingDataOrNull(DATA.get());
+        if (holder != null) { holder.unloading = true; holder.queued = false; holder.revision++; }
+    }
+
+    @SubscribeEvent
+    public static void levelUnload(net.neoforged.neoforge.event.level.LevelEvent.Unload event) {
+        if (event.getLevel() instanceof net.minecraft.server.level.ServerLevel level) CHECKS.remove(level);
+    }
+
+    /** Public events also cover replacement/fire paths without access transformers or block-entity mixins. */
+    @SubscribeEvent
+    public static void removalTick(net.neoforged.neoforge.event.tick.LevelTickEvent.Post event) {
+        if (!(event.getLevel() instanceof net.minecraft.server.level.ServerLevel level)) return;
+        var checks = CHECKS.get(level);
+        if (checks == null) return;
+        int visits = Math.min(256, checks.size());
+        for (int i = 0; i < visits; i++) {
+            var check = checks.removeFirst();
+            Holder holder = check.holder().get();
+            if (holder == null || !holder.queued || holder.revision != check.revision()) continue;
+            holder.queued = false;
+            if (holder.be.isRemoved()) holder.removed();
+            else schedule(holder, false);
+        }
+        if (checks.isEmpty()) CHECKS.remove(level);
     }
 
     // ------------------------------------------------------------------ spilling
 
     /**
      * Spills a store at {@code pos} as persistent item entities (no despawn; not part of the player-drop cap of
-     * {@link ItemPersistence}, which would release them). The store is emptied. Past {@value #SPILL_ENTITIES} entities
-     * the rest goes to the nearest player's pack when there is one (a chest of a million nails is not a million-stack
-     * item storm) and is spawned anyway when nobody is near: nothing is deleted.
+     * {@link ItemPersistence}, which would release them). Large spills retain their undelivered bulk counts in
+     * dimension SavedData; bounded delivery resumes in loaded chunks without expanding millions of stacks.
      */
     public static int spill(Level level, BlockPos pos, BulkStore store) {
-        if (level.isClientSide || store.isEmpty()) return 0;
-        List<ItemStack> stacks = new ArrayList<>();
-        for (ItemStack all : store.entries()) {
-            if (!all.isEmpty()) stacks.addAll(BulkStore.splitToStacks(all));
-        }
-        store.clear();
-        double x = pos.getX() + 0.5;
-        double y = pos.getY() + 0.5;
-        double z = pos.getZ() + 0.5;
-        int n = 0;
-        for (ItemStack s : stacks) {
-            if (n >= SPILL_ENTITIES) {
-                Player near = level.getNearestPlayer(x, y, z, 16.0, false);
-                if (near != null) {
-                    Pack.giveOrDrop(near, s);
-                    continue;
-                }
-            }
-            ItemEntity e = new ItemEntity(level, x, y, z, s);
-            e.setDeltaMovement((level.random.nextDouble() - 0.5) * 0.2, 0.15, (level.random.nextDouble() - 0.5) * 0.2);
-            e.setUnlimitedLifetime();
-            level.addFreshEntity(e);
-            n++;
-        }
-        return stacks.size();
+        return level instanceof net.minecraft.server.level.ServerLevel server ? DeferredSpills.spill(server, pos, store) : 0;
     }
 
     // ------------------------------------------------------------------ finding the overflow of an open menu
@@ -274,8 +292,8 @@ public final class ContainerOverflow {
     public static BulkStore enderStore(ServerPlayer player) {
         com.skycraft.core.PlayerData data = SkyData.get(player);
         CompoundTag m = data.module(ENDER_MODULE);
-        if (!m.contains(BulkStore.LIST, Tag.TAG_LIST)) m.put(BulkStore.LIST, new ListTag());
-        return new BulkStore(m.getList(BulkStore.LIST, Tag.TAG_COMPOUND), MAX_ENTRIES, MAX_PER_ENTRY, data::markDirty);
+        if (!com.skycraft.platform.NbtData.hasType(m, BulkStore.LIST, Tag.TAG_LIST)) m.put(BulkStore.LIST, new ListTag());
+        return new BulkStore(m.getListOrEmpty(BulkStore.LIST), MAX_ENTRIES, MAX_PER_ENTRY, data::markDirty);
     }
 
     // ------------------------------------------------------------------ double chests
@@ -286,7 +304,7 @@ public final class ContainerOverflow {
 
     /**
      * The two block entities of a double chest's {@code CompoundContainer}. The fields are private (no access
-     * transformers): read through {@link ObfuscationReflectionHelper} (SRG {@code f_18910_}/{@code f_18911_}); when
+     * transformers): read through {@link ObfuscationReflectionHelper} (official {@code container1}/{@code container2}); when
      * that is not possible, the block entities around the player are searched with the public {@code contains}.
      */
     @Nullable
@@ -294,8 +312,8 @@ public final class ContainerOverflow {
         if (!reflectionFailed) {
             try {
                 if (first == null) {
-                    first = ObfuscationReflectionHelper.findField(CompoundContainer.class, "f_18910_");
-                    second = ObfuscationReflectionHelper.findField(CompoundContainer.class, "f_18911_");
+                    first = ObfuscationReflectionHelper.findField(CompoundContainer.class, "container1");
+                    second = ObfuscationReflectionHelper.findField(CompoundContainer.class, "container2");
                 }
                 if (first.get(cc) instanceof BlockEntity a && second.get(cc) instanceof BlockEntity b) return new BlockEntity[]{a, b};
                 return null;
@@ -376,7 +394,7 @@ public final class ContainerOverflow {
         int size = container.getContainerSize();
         for (int i = 0; i < size && !stack.isEmpty(); i++) {
             ItemStack s = container.getItem(i);
-            if (s.isEmpty() || !ItemStack.isSameItemSameTags(s, stack)) continue;
+            if (s.isEmpty() || !ItemStack.isSameItemSameComponents(s, stack)) continue;
             int limit = Math.min(s.getMaxStackSize(), container.getMaxStackSize());
             int move = Math.min(limit - s.getCount(), stack.getCount());
             if (move <= 0) continue;

@@ -10,16 +10,16 @@ import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.HumanoidMobRenderer;
 import net.minecraft.client.renderer.entity.layers.HumanoidArmorLayer;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 /**
  * Renders society NPCs: their composited race/outfit skin ({@link NpcSkins}, cached per look), race features (ears,
  * tails, horns, tusks), vanilla armor and held items. Children are drawn at their smaller scale; Altmer stand a little
  * taller and Bosmer a little shorter. NPCs without a look yet use the old per-role skins.
  */
-public class NpcRenderer extends HumanoidMobRenderer<NpcEntity, NpcModel> {
+public class NpcRenderer extends HumanoidMobRenderer<NpcEntity, net.minecraft.client.renderer.entity.state.AvatarRenderState, NpcModel> {
     /** Old per-role skins; roles added later fall back to a similar one. */
-    private static final ResourceLocation[][] TEXTURES = new ResourceLocation[NpcRole.VALUES.length][NpcRole.SKINS];
+    private static final Identifier[][] TEXTURES = new Identifier[NpcRole.VALUES.length][NpcRole.SKINS];
 
     static {
         for (NpcRole role : NpcRole.VALUES) {
@@ -32,7 +32,7 @@ public class NpcRenderer extends HumanoidMobRenderer<NpcEntity, NpcModel> {
                 default -> role.id;
             };
             for (int i = 0; i < NpcRole.SKINS; i++) {
-                TEXTURES[role.ordinal()][i] = new ResourceLocation(Skycraft.MODID, "textures/entity/society/" + id + "_" + i + ".png");
+                TEXTURES[role.ordinal()][i] = Identifier.fromNamespaceAndPath(Skycraft.MODID, "textures/entity/society/" + id + "_" + i + ".png");
             }
         }
     }
@@ -40,35 +40,42 @@ public class NpcRenderer extends HumanoidMobRenderer<NpcEntity, NpcModel> {
     public NpcRenderer(EntityRendererProvider.Context context) {
         super(context, new NpcModel(context.bakeLayer(SocietyClient.NPC_LAYER)), 0.5f);
         this.addLayer(new HumanoidArmorLayer<>(this,
-                new HumanoidModel<>(context.bakeLayer(ModelLayers.PLAYER_INNER_ARMOR)),
-                new HumanoidModel<>(context.bakeLayer(ModelLayers.PLAYER_OUTER_ARMOR)),
-                context.getModelManager()));
+                net.minecraft.client.renderer.entity.ArmorModelSet.bake(ModelLayers.PLAYER_ARMOR, context.getModelSet(),
+                        part -> new net.minecraft.client.model.player.PlayerModel(part, false)), context.getEquipmentRenderer()));
         this.addLayer(new RaceFeatureLayer<>(this, context.bakeLayer(SocietyClient.RACE_FEATURES_LAYER), NpcRenderer::features));
     }
 
-    private static RaceFeatureLayer.Features features(NpcEntity npc) {
-        int look = npc.getLook();
-        return look < 0 ? null : RaceFeatureLayer.Features.of(look);
+    private static RaceFeatureLayer.Features features(net.minecraft.client.renderer.entity.state.AvatarRenderState state) {
+        NpcRenderData npc = NpcRenderData.get(state);
+        return npc == null || npc.look() < 0 ? null : RaceFeatureLayer.Features.of(npc.look());
     }
 
     @Override
-    public ResourceLocation getTextureLocation(NpcEntity entity) {
-        ResourceLocation skin = NpcSkins.get(entity.getLook());
-        if (skin != null) return skin;
-        return TEXTURES[entity.role().ordinal()][Math.floorMod(entity.getSkin(), NpcRole.SKINS)];
+    public net.minecraft.client.renderer.entity.state.AvatarRenderState createRenderState() {
+        return new net.minecraft.client.renderer.entity.state.AvatarRenderState();
     }
 
     @Override
-    protected void scale(NpcEntity entity, PoseStack poseStack, float partialTick) {
-        float s = entity.getScale();
-        int look = entity.getLook();
-        // race height (core.Race.scale), sub-people and sex
-        if (look >= 0 && !entity.isChild()) s *= NpcLook.bodyScale(look);
-        if (s != 1.0f) poseStack.scale(s, s, s);
-        // aftermath poses sit lower: on the ground, on the knees, bent over a patient
-        if (entity.isHuddled()) poseStack.translate(0.0f, 0.62f, 0.0f);
-        else if (entity.isKneeling()) poseStack.translate(0.0f, 0.34f, 0.0f);
-        else if (entity.isTending()) poseStack.translate(0.0f, 0.12f, 0.0f);
-        this.shadowRadius = 0.5f * entity.getScale();
+    public void extractRenderState(NpcEntity entity, net.minecraft.client.renderer.entity.state.AvatarRenderState state, float partialTick) {
+        super.extractRenderState(entity, state, partialTick);
+        state.setRenderData(NpcRenderData.KEY, NpcRenderData.extract(entity));
+        if (entity.getLook() >= 0 && !entity.isChild()) state.scale *= NpcLook.bodyScale(entity.getLook());
+    }
+
+    @Override
+    public Identifier getTextureLocation(net.minecraft.client.renderer.entity.state.AvatarRenderState state) {
+        NpcRenderData npc = NpcRenderData.get(state);
+        if (npc == null) return TEXTURES[0][0];
+        Identifier skin = NpcSkins.get(npc.look());
+        return skin != null ? skin : TEXTURES[npc.role()][Math.floorMod(npc.skin(), NpcRole.SKINS)];
+    }
+
+    @Override
+    protected void scale(net.minecraft.client.renderer.entity.state.AvatarRenderState state, PoseStack pose) {
+        NpcRenderData npc = NpcRenderData.get(state);
+        if (npc == null) return;
+        if (npc.isHuddled()) pose.translate(0, 0.62f, 0);
+        else if (npc.isKneeling()) pose.translate(0, 0.34f, 0);
+        else if (npc.isTending()) pose.translate(0, 0.12f, 0);
     }
 }

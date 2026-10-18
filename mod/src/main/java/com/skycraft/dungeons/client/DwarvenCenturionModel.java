@@ -1,7 +1,7 @@
 package com.skycraft.dungeons.client;
 
 import com.skycraft.dungeons.entity.DwarvenCenturion;
-import net.minecraft.client.model.HierarchicalModel;
+import com.skycraft.client.PoseEntityModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.CubeListBuilder;
@@ -14,7 +14,7 @@ import net.minecraft.util.Mth;
  * Dwarven centurion: a towering steam golem — boiler chest, exhaust stacks, a grilled helm, a hammer fist and a
  * blade forearm. Built at 1x and rendered at 1.75x. Texture 128x64.
  */
-public class DwarvenCenturionModel extends HierarchicalModel<DwarvenCenturion> {
+public class DwarvenCenturionModel extends PoseEntityModel<DwarvenCenturion> {
     private final ModelPart root;
     private final ModelPart torso;
     private final ModelPart head;
@@ -24,6 +24,7 @@ public class DwarvenCenturionModel extends HierarchicalModel<DwarvenCenturion> {
     private final ModelPart legLeft;
 
     public DwarvenCenturionModel(ModelPart root) {
+        super(root);
         this.root = root;
         this.torso = root.getChild("torso");
         this.head = torso.getChild("head");
@@ -64,11 +65,6 @@ public class DwarvenCenturionModel extends HierarchicalModel<DwarvenCenturion> {
         left.addOrReplaceChild("blade", CubeListBuilder.create().texOffs(80, 20).addBox(-0.5f, 0.0f, -2.0f, 1, 10, 4),
                 PartPose.offset(3.0f, 12.0f, 0.0f));
         return LayerDefinition.create(mesh, 128, 64);
-    }
-
-    @Override
-    public ModelPart root() {
-        return root;
     }
 
     @Override

@@ -1,0 +1,29 @@
+{
+  "type": "skycraft:ground_cover",
+  "config": {
+    "entries": [
+      {
+        "state": "minecraft:dandelion",
+        "weight": 3
+      },
+      {
+        "state": "minecraft:cornflower",
+        "weight": 2
+      },
+      {
+        "state": "minecraft:poppy",
+        "weight": 1
+      }
+    ],
+    "scale": 28,
+    "patchiness": 0.85,
+    "cluster": {
+      "type": "minecraft:uniform",
+      "min_inclusive": 3,
+      "max_inclusive": 8
+    },
+    "spread": 3,
+    "salt": 6988,
+    "near_water": false
+  }
+}

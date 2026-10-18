@@ -347,7 +347,7 @@ final class SoulCairnSites {
                 sum += h;
             }
             if (min < 56 || max - min > 5) return Optional.empty(); // not in a rift, not on a slope
-            int variant = (int) Math.floorMod(RealmSites.hash(ctx.seed(), ctx.chunkPos().x, ctx.chunkPos().z), 3L);
+            int variant = (int) Math.floorMod(RealmSites.hash(ctx.seed(), ctx.chunkPos().x(), ctx.chunkPos().z()), 3L);
             return Optional.of(new RealmSites.Start(x, sum / 5, z, variant, ctx.random().nextInt(4)));
         }
 

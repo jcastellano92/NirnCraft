@@ -19,12 +19,12 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.animal.horse.Horse;
+import net.minecraft.world.entity.animal.equine.Horse;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraftforge.common.util.FakePlayer;
-import net.minecraftforge.common.util.FakePlayerFactory;
+import net.neoforged.neoforge.common.util.FakePlayer;
+import net.neoforged.neoforge.common.util.FakePlayerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -149,9 +149,9 @@ public final class MountsSelfTest {
         c.check("the legends keep their own tack", !MountGear.accepts(MountKind.SHADOWMERE, SaddleType.PLAIN) && MountGear.fixedTack(MountKind.ARVAK), "");
         c.check("draught breeds carry more than ponies", MountGear.baseCarry(MountKind.COLOVIAN_PAINT) > MountGear.baseCarry(MountKind.WINDHELM_PINTO), "");
 
-        BlockPos spawn = level.getSharedSpawnPos();
+        BlockPos spawn = level.getRespawnData().pos();
         BlockPos at = Mounts.safeSpot(level, new BlockPos(spawn.getX(), level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING, spawn.getX(), spawn.getZ()), spawn.getZ()));
-        fp.moveTo(at.getX() + 3.5, at.getY(), at.getZ() + 0.5);
+        fp.snapTo(at.getX() + 3.5, at.getY(), at.getZ() + 0.5);
         fp.getInventory().clearContent();
 
         // ---- a mount in a plain saddle, then a pack saddle
@@ -165,7 +165,7 @@ public final class MountsSelfTest {
         MountGear.Result r = MountGear.equipSaddle(fp, bay, kind, packStack);
         c.check("a pack saddle replaces the plain one", r == MountGear.Result.OK && MountGear.saddle(bay) == SaddleType.PACK && bay.isSaddled(), r.name());
         c.check("the old saddle came back to the bags and the new one was used up",
-                count(fp.getInventory().items, Items.SADDLE) == 1 && count(fp.getInventory().items, SaddleType.PACK.item()) == 0, "");
+                count(fp.getInventory().getNonEquipmentItems(), Items.SADDLE) == 1 && count(fp.getInventory().getNonEquipmentItems(), SaddleType.PACK.item()) == 0, "");
         MountStats born = MountStats.of(bay, kind);
         c.check("the pack saddle sets speed, bags, carry and stamina (on top of the individual's own)",
                 Math.abs(bay.getAttributeValue(Attributes.MOVEMENT_SPEED) - baseSpeed * (1 + SaddleType.PACK.speedMod) * born.speedMult()) < 1e-5
@@ -190,10 +190,10 @@ public final class MountsSelfTest {
         ItemStack ebony = find(fp, MountItems.EBONY_BARDING.get());
         MountGear.equipBarding(fp, bay, kind, ebony);
         c.check("ebony barding is stronger and the leather came back",
-                bay.getAttributeValue(Attributes.ARMOR) > armorLeather && count(fp.getInventory().items, MountItems.LEATHER_BARDING.get()) == 1, "armour " + bay.getAttributeValue(Attributes.ARMOR));
+                bay.getAttributeValue(Attributes.ARMOR) > armorLeather && count(fp.getInventory().getNonEquipmentItems(), MountItems.LEATHER_BARDING.get()) == 1, "armour " + bay.getAttributeValue(Attributes.ARMOR));
         MountGear.unequipBarding(fp, bay, kind, true);
         c.check("taking the barding off restores the mount", Math.abs(bay.getAttributeValue(Attributes.ARMOR) - armor0) < 1e-6
-                && Math.abs(bay.getMaxHealth() - hp0) < 1e-6 && count(fp.getInventory().items, MountItems.EBONY_BARDING.get()) == 1, "");
+                && Math.abs(bay.getMaxHealth() - hp0) < 1e-6 && count(fp.getInventory().getNonEquipmentItems(), MountItems.EBONY_BARDING.get()) == 1, "");
 
         // ---- weight-limited saddlebags: fill to the brim, shrink the saddle, nothing is lost
         fp.getInventory().clearContent();
@@ -216,10 +216,10 @@ public final class MountsSelfTest {
             boolean ok = menu.equipFrom(fp, menu.getSlot(54 + 27));
             float cap2 = bag.capacity();
             int inBag = count(java.util.stream.IntStream.range(Saddlebags.GEAR, 54).mapToObj(bag::getItem).toList(), Items.COBBLESTONE);
-            int inPack = count(fp.getInventory().items, Items.COBBLESTONE);
+            int inPack = count(fp.getInventory().getNonEquipmentItems(), Items.COBBLESTONE);
             c.check("a smaller saddle spills the surplus into the bags, nothing is destroyed",
                     ok && cap2 < cap && bag.cargoWeight() <= cap2 + 0.01f && inBag + inPack == before && inPack > 0
-                            && count(fp.getInventory().items, SaddleType.PACK.item()) == 1,
+                            && count(fp.getInventory().getNonEquipmentItems(), SaddleType.PACK.item()) == 1,
                     "cap " + cap + "->" + cap2 + ", bag " + inBag + " + pack " + inPack + " of " + before);
             // unequipping through the menu slot (what the Skyrim screen's Take does)
             Slot saddleSlot = menu.getSlot(0);
@@ -227,7 +227,7 @@ public final class MountsSelfTest {
             int inBag3 = count(java.util.stream.IntStream.range(Saddlebags.GEAR, 54).mapToObj(bag::getItem).toList(), Items.COBBLESTONE);
             c.check("taking the saddle off the mount empties the bags into yours, items kept",
                     taken.getItem() == Items.SADDLE && MountGear.saddle(bay) == null && inBag3 == 0
-                            && count(fp.getInventory().items, Items.COBBLESTONE) == before, "bag " + inBag3 + ", pack " + count(fp.getInventory().items, Items.COBBLESTONE));
+                            && count(fp.getInventory().getNonEquipmentItems(), Items.COBBLESTONE) == before, "bag " + inBag3 + ", pack " + count(fp.getInventory().getNonEquipmentItems(), Items.COBBLESTONE));
         } else {
             c.check("cobblestone has a weight to test the bags with", false, "unit weight 0");
         }
@@ -244,12 +244,12 @@ public final class MountsSelfTest {
         d.setStamina(own);
         bay.getPersistentData().remove(MountStamina.TAG);
         float carry0 = CarryWeight.capacity(fp);
-        fp.startRiding(bay, true);
+        fp.startRiding(bay, true, true);
         c.check("the rider steers the mount", bay.getControllingPassenger() == fp, "");
         MountStamina.tick(fp);
         c.check("taking the reins parks the rider's stamina and shows the mount's full bar",
-                MountStamina.swapped(fp) && Math.abs(d.getStamina() - d.maxStamina()) < 0.5f && Mounts.data(fp).getFloat(MountStamina.PARKED) == own,
-                "bar " + d.getStamina() + "/" + d.maxStamina() + " parked " + Mounts.data(fp).getFloat(MountStamina.PARKED));
+                MountStamina.swapped(fp) && Math.abs(d.getStamina() - d.maxStamina()) < 0.5f && Mounts.data(fp).getFloatOr(MountStamina.PARKED, 0f) == own,
+                "bar " + d.getStamina() + "/" + d.maxStamina() + " parked " + Mounts.data(fp).getFloatOr(MountStamina.PARKED, 0f));
         c.check("the mount takes weight off its rider", Math.abs(CarryWeight.capacity(fp) - carry0 - MountGear.carryKg(bay, kind)) < 0.01f,
                 carry0 + " -> " + CarryWeight.capacity(fp));
         MountStamina.setGallop(fp, true);
@@ -258,7 +258,7 @@ public final class MountsSelfTest {
             bay.setPos(x + 0.3 * i, bay.getY(), bay.getZ());
             MountStamina.tick(fp);
         }
-        float pts = bay.getPersistentData().getFloat(MountStamina.TAG);
+        float pts = bay.getPersistentData().getFloatOr(MountStamina.TAG, 0f);
         int max = MountGear.maxStamina(bay, kind);
         c.check("galloping drains the bar, which is the mount's", pts < max - 10 && Math.abs(d.getStamina() / d.maxStamina() - pts / max) < 0.02f,
                 "mount " + pts + "/" + max + ", bar " + d.getStamina() + "/" + d.maxStamina());
@@ -266,10 +266,10 @@ public final class MountsSelfTest {
         fp.stopRiding();
         MountStamina.tick(fp);
         c.check("getting off gives the rider's own value back exactly and the mount keeps its own",
-                !MountStamina.swapped(fp) && d.getStamina() == own && Math.abs(bay.getPersistentData().getFloat(MountStamina.TAG) - pts) < 0.001f,
-                "bar " + d.getStamina() + " (was " + own + "), mount " + bay.getPersistentData().getFloat(MountStamina.TAG));
+                !MountStamina.swapped(fp) && d.getStamina() == own && Math.abs(bay.getPersistentData().getFloatOr(MountStamina.TAG, 0f) - pts) < 0.001f,
+                "bar " + d.getStamina() + " (was " + own + "), mount " + bay.getPersistentData().getFloatOr(MountStamina.TAG, 0f));
         // again, leaving the way a logout does, and a death
-        fp.startRiding(bay, true);
+        fp.startRiding(bay, true, true);
         MountStamina.tick(fp);
         float shown = d.getStamina();
         MountStamina.leave(fp);
@@ -283,9 +283,9 @@ public final class MountsSelfTest {
 
         // ---- taming: only wild, only from a sneak, with a saddle the breed takes
         fp.getInventory().clearContent();
-        Horse wild = EntityType.HORSE.create(level);
+        Horse wild = net.minecraft.world.entity.EntityTypes.HORSE.create(level, net.minecraft.world.entity.EntitySpawnReason.EVENT);
         HorseBreed.WHITERUN_BAY.apply(wild);
-        wild.moveTo(at.getX() + 6.5, at.getY(), at.getZ() + 0.5);
+        wild.snapTo(at.getX() + 6.5, at.getY(), at.getZ() + 0.5);
         level.addFreshEntity(wild);
         spawned.add(wild);
         fp.getInventory().add(SaddleType.WAR.stack());
@@ -303,10 +303,10 @@ public final class MountsSelfTest {
         WildHorseTaming.abort(fp);
         fp.stopRiding();
         c.check("an interrupted breaking returns the saddle, leaves the beast bare and gives it its mind back",
-                count(fp.getInventory().items, SaddleType.WAR.item()) == 1 && !wild.isSaddled() && MountGear.saddle(wild) == null && !wild.isNoAi(), "");
-        Horse wildPony = EntityType.HORSE.create(level);
+                count(fp.getInventory().getNonEquipmentItems(), SaddleType.WAR.item()) == 1 && !wild.isSaddled() && MountGear.saddle(wild) == null && !wild.isNoAi(), "");
+        Horse wildPony = net.minecraft.world.entity.EntityTypes.HORSE.create(level, net.minecraft.world.entity.EntitySpawnReason.EVENT);
         HorseBreed.WINDHELM_PINTO.apply(wildPony);
-        wildPony.moveTo(at.getX() + 8.5, at.getY(), at.getZ() + 0.5);
+        wildPony.snapTo(at.getX() + 8.5, at.getY(), at.getZ() + 0.5);
         level.addFreshEntity(wildPony);
         spawned.add(wildPony);
         ItemStack again = find(fp, SaddleType.WAR.item());
@@ -326,8 +326,8 @@ public final class MountsSelfTest {
     }
 
     private static Mob zombie(ServerLevel level, BlockPos at, List<Mob> spawned) {
-        Mob z = EntityType.ZOMBIE.create(level);
-        z.moveTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5);
+        Mob z = net.minecraft.world.entity.EntityTypes.ZOMBIE.create(level, net.minecraft.world.entity.EntitySpawnReason.EVENT);
+        z.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5);
         level.addFreshEntity(z);
         spawned.add(z);
         return z;
@@ -361,7 +361,7 @@ public final class MountsSelfTest {
                     continue;
                 }
                 made++;
-                m.hurt(m.damageSources().generic(), m.getHealth() * 10 + 100);
+                com.skycraft.platform.Effects.hurt(m, m.damageSources().generic(), m.getHealth() * 10 + 100);
                 boolean ok = m.isAlive() && MountCompanion.isDowned(m) && m.getHealth() > 0 && m.getHealth() <= 1.01f && m.isInvulnerable() && m.isNoAi();
                 if (!ok) bad.add(k.id);
             }
@@ -373,26 +373,26 @@ public final class MountsSelfTest {
             Mob zomb = zombie(level, at.west(9), spawned);
             zomb.setTarget(horse);
             c.check("a hostile takes an owned standing mount as a target (control)", zomb.getTarget() == horse, "");
-            fp.startRiding(horse, true);
+            fp.startRiding(horse, true, true);
             float max = horse.getMaxHealth();
-            horse.hurt(horse.damageSources().generic(), max * 4);
+            com.skycraft.platform.Effects.hurt(horse, horse.damageSources().generic(), max * 4);
             c.check("damage past its health: downed, not dead, health a sliver", horse.isAlive() && MountCompanion.isDowned(horse)
                     && horse.getHealth() > 0 && horse.getHealth() <= 1.01f, "health " + horse.getHealth() + " of " + max);
-            c.check("the rider is thrown off and nobody can mount it", fp.getVehicle() != horse && !fp.startRiding(horse, true) && fp.getVehicle() != horse, "");
+            c.check("the rider is thrown off and nobody can mount it", fp.getVehicle() != horse && !fp.startRiding(horse, true, true) && fp.getVehicle() != horse, "");
             c.check("hostiles that were after it drop it", zomb.getTarget() != horse, "target " + zomb.getTarget());
             zomb.setTarget(horse);
             c.check("a downed mount cannot be taken as a target again", zomb.getTarget() != horse, "");
             float hp = horse.getHealth();
-            boolean hit = horse.hurt(horse.damageSources().generic(), 6f);
-            boolean voidHit = horse.hurt(horse.damageSources().fellOutOfWorld(), 4f);
-            boolean mobHit = horse.hurt(zomb.damageSources().mobAttack(zomb), 6f);
+            boolean hit = com.skycraft.platform.Effects.hurt(horse, horse.damageSources().generic(), 6f);
+            boolean voidHit = com.skycraft.platform.Effects.hurt(horse, horse.damageSources().fellOutOfWorld(), 4f);
+            boolean mobHit = com.skycraft.platform.Effects.hurt(horse, zomb.damageSources().mobAttack(zomb), 6f);
             c.check("aimed blows, void and mobs do nothing to it", !hit && !voidHit && !mobHit && horse.getHealth() == hp && horse.isAlive(), "health " + horse.getHealth());
             horse.die(horse.damageSources().generic());
             c.check("a death called on it is refused too", horse.isAlive() && MountCompanion.isDowned(horse), "");
             c.check("the mounts record it as down: no death cooldown was set", !Mounts.data(fp).contains("cooldown"), "");
 
             // ---- no revival while the fight goes on, revival after calm and a rest
-            long t0 = horse.getPersistentData().getLong(MountCompanion.DOWNED);
+            long t0 = horse.getPersistentData().getLongOr(MountCompanion.DOWNED, 0L);
             Vitals.markInCombat(fp);
             boolean riseInCombat = MountCompanion.tryRise(horse, fp, t0 + 1000);
             c.check("it does not rise while its owner is in combat", !riseInCombat && MountCompanion.isDowned(horse), "");
@@ -405,23 +405,23 @@ public final class MountsSelfTest {
             c.check("calm for 8 s and nobody after it: it rises at about 35% health, as it was",
                     rose && !MountCompanion.isDowned(horse) && horse.getHealth() >= max * 0.34f && !horse.isInvulnerable() && !horse.isNoAi() && !horse.isSilent(),
                     "health " + horse.getHealth() + "/" + max);
-            c.check("it must rest before it can be ridden again", MountCompanion.resting(horse, t0 + 1000) && !fp.startRiding(horse, true), "");
+            c.check("it must rest before it can be ridden again", MountCompanion.resting(horse, t0 + 1000) && !fp.startRiding(horse, true, true), "");
             c.check("an owner who has left (none, offline) does not hold it down", MountCompanion.calm(horse, null), "");
 
             // ---- the void and persistence
             Mob second = mount(level, fp, MountKind.COLOVIAN_PAINT, at.west(3).south(6), spawned);
-            second.hurt(second.damageSources().generic(), 1000f);
-            second.setPos(second.getX(), level.getMinBuildHeight() - 20, second.getZ());
+            com.skycraft.platform.Effects.hurt(second, second.damageSources().generic(), 1000f);
+            second.setPos(second.getX(), level.getMinY() - 20, second.getZ());
             MountCompanion.tickDowned(second, fp, level.getGameTime());
             c.check("a downed mount that falls out of the world is put back beside its owner, still down",
-                    second.getY() >= level.getMinBuildHeight() && MountCompanion.isDowned(second) && second.isAlive(), "y " + second.getY());
+                    second.getY() >= level.getMinY() && MountCompanion.isDowned(second) && second.isAlive(), "y " + second.getY());
             net.minecraft.nbt.CompoundTag nbt = new net.minecraft.nbt.CompoundTag();
-            second.saveWithoutId(nbt);
-            Horse copy = EntityType.HORSE.create(level);
-            copy.load(nbt);
+            nbt = com.skycraft.platform.EntityData.saveWithoutId(second);
+            Horse copy = net.minecraft.world.entity.EntityTypes.HORSE.create(level, net.minecraft.world.entity.EntitySpawnReason.EVENT);
+            com.skycraft.platform.EntityData.load(copy, nbt);
             c.check("downed state survives a save and load", MountCompanion.isDowned(copy) && copy.isInvulnerable() && copy.isNoAi() && copy.isSilent()
-                    && copy.getPersistentData().getLong(MountCompanion.DOWNED) == second.getPersistentData().getLong(MountCompanion.DOWNED), "");
-            Mounts.data(fp).putUUID("uuid", copy.getUUID());
+                    && copy.getPersistentData().getLongOr(MountCompanion.DOWNED, 0L) == second.getPersistentData().getLongOr(MountCompanion.DOWNED, 0L), "");
+            Mounts.data(fp).store("uuid", net.minecraft.core.UUIDUtil.CODEC,  copy.getUUID());
             MountCompanion.resolveLoaded(copy, fp);
             boolean keptWithOwner = MountCompanion.isDowned(copy);
             MountCompanion.resolveLoaded(copy, null);
@@ -430,8 +430,8 @@ public final class MountsSelfTest {
                             && copy.getHealth() >= copy.getMaxHealth() * 0.34f, "");
             Mounts.data(fp).remove("uuid");
             Mob third = mount(level, fp, MountKind.CYRODILIC_BAY, at.west(3).south(9), spawned);
-            third.hurt(third.damageSources().generic(), 1000f);
-            Mounts.data(fp).putUUID("uuid", third.getUUID());
+            com.skycraft.platform.Effects.hurt(third, third.damageSources().generic(), 1000f);
+            Mounts.data(fp).store("uuid", net.minecraft.core.UUIDUtil.CODEC,  third.getUUID());
             MountCompanion.onLogout(fp);
             Mounts.data(fp).remove("uuid");
             c.check("a logout while it is down gets it up again, standing and normal", !MountCompanion.isDowned(third) && !third.isInvulnerable() && !third.isNoAi(), "");
@@ -441,7 +441,7 @@ public final class MountsSelfTest {
             fourth.die(fourth.damageSources().generic());
             c.check("a death event on a standing mount lays it down instead", fourth.isAlive() && MountCompanion.isDowned(fourth), "");
             Mob fifth = mount(level, fp, MountKind.AURIDON_WHITE, at.east(3).south(9), spawned);
-            fifth.hurt(fifth.damageSources().genericKill(), Float.MAX_VALUE);
+            com.skycraft.platform.Effects.hurt(fifth, fifth.damageSources().genericKill(), Float.MAX_VALUE);
             c.check("an explicit kill (the /kill source) still removes a mount", !fifth.isAlive(), "");
 
             // ---- companion combat
@@ -506,7 +506,7 @@ public final class MountsSelfTest {
         // pick-foe is about the owner's fight; a ridden mount's own goals do not run (helping() is null)
         net.minecraft.world.entity.ai.goal.Goal foeGoal = null;
         for (var g : MountCompanion.companionGoals(tiger)) if (g instanceof MountCompanion.FoeGoal) foeGoal = g;
-        fp.startRiding(tiger, true);
+        fp.startRiding(tiger, true, true);
         boolean idle = true;
         if (foeGoal != null) {
             tiger.setTarget(null);
@@ -533,9 +533,9 @@ public final class MountsSelfTest {
     }
 
     private static Horse wildHorse(ServerLevel level, HorseBreed breed, BlockPos at, List<Mob> spawned) {
-        Horse h = EntityType.HORSE.create(level);
+        Horse h = net.minecraft.world.entity.EntityTypes.HORSE.create(level, net.minecraft.world.entity.EntitySpawnReason.EVENT);
         breed.apply(h);
-        h.moveTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5);
+        h.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5);
         level.addFreshEntity(h);
         spawned.add(h);
         return h;
@@ -602,7 +602,7 @@ public final class MountsSelfTest {
         Horse mount = horse(level, fp, k, at.south(4), spawned);
         var rec = Mounts.data(fp);
         rec.putString("active", k.id);
-        rec.putUUID("uuid", mount.getUUID());
+        rec.store("uuid", net.minecraft.core.UUIDUtil.CODEC,  mount.getUUID());
         MountStats before = MountStats.of(mount, k);
         for (int i = 0; i < 40; i++) MountGrowth.ride(fp, mount, k, 0.0, false, true);
         for (int i = 0; i < 3000; i++) MountGrowth.ride(fp, mount, k, 0.5, true, false);
@@ -647,9 +647,9 @@ public final class MountsSelfTest {
 
         // ---- persistence: entity NBT and the record
         net.minecraft.nbt.CompoundTag saved = new net.minecraft.nbt.CompoundTag();
-        mount.saveWithoutId(saved);
-        Horse copy = EntityType.HORSE.create(level);
-        copy.load(saved);
+        saved = com.skycraft.platform.EntityData.saveWithoutId(mount);
+        Horse copy = net.minecraft.world.entity.EntityTypes.HORSE.create(level, net.minecraft.world.entity.EntitySpawnReason.EVENT);
+        com.skycraft.platform.EntityData.load(copy, saved);
         c.check("the stats survive the entity's save and load", Mounts.kindOf(copy) == k && sameStats(MountStats.of(copy, k), MountStats.of(mount, k)), "");
         MountStats via = MountStats.fromTag(k, MountStats.of(mount, k).toTag());
         c.check("the stats survive their own tag round trip", sameStats(via, MountStats.of(mount, k)), "");
@@ -657,7 +657,7 @@ public final class MountsSelfTest {
         // ---- inspection: what a viewer may know, and who may ask
         pd.setPerkRank("riding.horse_sense", 0);
         pd.setPerkRank("riding.wild_eye", 0);
-        fp.moveTo(at.getX() + 0.5, at.getY(), at.getZ() + 4.5);
+        fp.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 4.5);
         MountView own = MountInspect.viewOf(fp, mount, k);
         boolean hidden = true;
         for (float v : own.value()) hidden &= v == MountView.HIDDEN;
@@ -688,17 +688,17 @@ public final class MountsSelfTest {
                 && java.util.Arrays.equals(back.gradeLo(), own.gradeLo()) && java.util.Arrays.equals(back.value(), own.value())
                 && java.util.Arrays.equals(back.caps(), own.caps()) && back.trust() == own.trust() && back.saddle().equals(own.saddle()), "");
         // who may ask
-        fp.moveTo(mount.getX() + 3, mount.getY(), mount.getZ());
+        fp.snapTo(mount.getX() + 3, mount.getY(), mount.getZ());
         boolean near = MountInspect.allowed(fp, mount);
-        fp.moveTo(mount.getX() + 12, mount.getY(), mount.getZ());
+        fp.snapTo(mount.getX() + 12, mount.getY(), mount.getZ());
         boolean mid = MountInspect.allowed(fp, mount);
         pd.setPerkRank("riding.wild_eye", 1);
         boolean midEye = MountInspect.allowed(fp, mount);
-        fp.moveTo(mount.getX() + 40, mount.getY(), mount.getZ());
+        fp.snapTo(mount.getX() + 40, mount.getY(), mount.getZ());
         boolean far = MountInspect.allowed(fp, mount);
         pd.setPerkRank("riding.wild_eye", 0);
         c.check("the server answers a look only in range (6 blocks, 16 with Wild Eye)", near && !mid && midEye && !far, near + " " + mid + " " + midEye + " " + far);
-        fp.moveTo(at.getX() + 3.5, at.getY(), at.getZ() + 0.5);
+        fp.snapTo(at.getX() + 3.5, at.getY(), at.getZ() + 0.5);
 
         // ---- the stable: price by grade and level, stock by week, trade-in, training
         MountStats poor = MountStats.roll(k, 1L, 0f, false), fine = MountStats.roll(k, 1L, 0f, false);
@@ -792,12 +792,12 @@ public final class MountsSelfTest {
         net.minecraft.nbt.ListTag bags = new net.minecraft.nbt.ListTag();
         net.minecraft.nbt.CompoundTag slot = new net.minecraft.nbt.CompoundTag();
         slot.putByte("Slot", (byte) 0);
-        new ItemStack(Items.COBBLESTONE, 10).save(slot);
+        com.skycraft.platform.ItemTags.saveInto(new ItemStack(Items.COBBLESTONE, 10), slot);
         bags.add(slot);
         rec.put("bags", bags);
         c.check("a bought mount is the active one, with its own stats in the record", Mounts.active(fp) == first && MountGrowth.recorded(fp, first) != null
                 && MountStats.stored(m1) && Mounts.stable(fp).size() == 1, "");
-        int cobble0 = count(fp.getInventory().items, Items.COBBLESTONE);
+        int cobble0 = count(fp.getInventory().getNonEquipmentItems(), Items.COBBLESTONE);
         com.skycraft.inventory.BulkStore ovRec = Saddlebags.overflowOf(fp);
         ovRec.add(new ItemStack(Items.IRON_INGOT, 100));
         ovRec.add(bagItem(950, 0.01f, 40));
@@ -807,7 +807,7 @@ public final class MountsSelfTest {
                 m1.isRemoved() && Mounts.active(fp) == MountKind.CYRODILIC_BAY && Mounts.stable(fp).size() == 1 && Mounts.stable(fp).get(0) == MountKind.CYRODILIC_BAY
                         && MountGrowth.recorded(fp, first) == null, "");
         c.check("its saddlebag items went to the player's inventory, and the record's bags are empty",
-                count(fp.getInventory().items, Items.COBBLESTONE) == cobble0 + 10 && rec.getList("bags", 10).isEmpty(), "");
+                count(fp.getInventory().getNonEquipmentItems(), Items.COBBLESTONE) == cobble0 + 10 && rec.getListOrEmpty("bags").isEmpty(), "");
         c.check("its saddlebag overflow (rows beyond the slots) went to the player too, nothing lost, the record's overflow is empty",
                 com.skycraft.inventory.Inv.count(fp, Items.IRON_INGOT) == 100 && bagKind(fp, 950) == 40 && Saddlebags.overflowOf(fp).isEmpty(),
                 com.skycraft.inventory.Inv.count(fp, Items.IRON_INGOT) + " ingots, " + bagKind(fp, 950) + " sticks");
@@ -817,7 +817,7 @@ public final class MountsSelfTest {
         Mob m3 = Mounts.grant(fp, MountKind.WINDHELM_PINTO, at.west(12), null, true);
         spawned.add(m3);
         c.check("a breed that will not take the war saddle gets a plain one, and the war saddle comes back to the bags",
-                MountGear.saddle(m3) == SaddleType.PLAIN && count(fp.getInventory().items, SaddleType.WAR.item()) == 1, "");
+                MountGear.saddle(m3) == SaddleType.PLAIN && count(fp.getInventory().getNonEquipmentItems(), SaddleType.WAR.item()) == 1, "");
 
         // ---- taming a wild one retires the bought one the same way
         Horse wild = wildHorse(level, HorseBreed.RIFTEN_CHESTNUT, at.east(10), spawned);
@@ -857,7 +857,7 @@ public final class MountsSelfTest {
         int sold = Mounts.sell(fp, "skyrim/selftest:0:0");
         c.check("selling returns the bags and tack first, then pays by grade and level; the stable is empty",
                 sold == worth && worth > 0 && pd.getGold() == goldBefore + worth && Mounts.active(fp) == null && Mounts.stable(fp).isEmpty()
-                        && count(fp.getInventory().items, Items.COBBLESTONE) == 10 && count(fp.getInventory().items, Items.SADDLE) >= 1, "paid " + sold);
+                        && count(fp.getInventory().getNonEquipmentItems(), Items.COBBLESTONE) == 10 && count(fp.getInventory().getNonEquipmentItems(), Items.SADDLE) >= 1, "paid " + sold);
         c.check("selling returns the overflow rows to the player as well, the record's overflow is empty",
                 com.skycraft.inventory.Inv.count(fp, Items.IRON_INGOT) == 100 && bagKind(fp, 951) == 12 && Saddlebags.overflowOf(fp).isEmpty(),
                 com.skycraft.inventory.Inv.count(fp, Items.IRON_INGOT) + " ingots, " + bagKind(fp, 951) + " sticks");
@@ -891,7 +891,7 @@ public final class MountsSelfTest {
         net.minecraft.nbt.CompoundTag live = MountToken.capture(animal, pk);
         java.util.UUID animalId = MountToken.id(live);
         MountStats expected = MountToken.stats(live);
-        float hp = live.getFloat("hp");
+        float hp = live.getFloatOr("hp",0F);
         c.check("the animal carries its own id and stats; the record's token is a copy of what the entity is",
                 MountStats.stored(animal) && MountToken.idOf(animal).equals(animalId) && expected.level() >= 5
                         && sameStats(MountToken.stats(MountGrowth.tokenOf(fp, pk)), MountStats.of(animal, pk)), "level " + expected.level());
@@ -903,15 +903,15 @@ public final class MountsSelfTest {
         try {
             java.io.ByteArrayOutputStream out = new java.io.ByteArrayOutputStream();
             net.minecraft.nbt.NbtIo.writeCompressed(wrapped, out);
-            back = net.minecraft.nbt.NbtIo.readCompressed(new java.io.ByteArrayInputStream(out.toByteArray()));
+            back = net.minecraft.nbt.NbtIo.readCompressed(new java.io.ByteArrayInputStream(out.toByteArray()), net.minecraft.nbt.NbtAccounter.create(256L * 1024 * 1024));
         } catch (java.io.IOException e) {
             back = new net.minecraft.nbt.CompoundTag();
         }
-        net.minecraft.nbt.CompoundTag revived = back.getCompound("t");
+        net.minecraft.nbt.CompoundTag revived = back.getCompoundOrEmpty("t");
         c.check("a token survives an NBT round trip: id, kind, stats, level, trust, name, coat, health",
                 MountToken.id(revived).equals(animalId) && MountToken.kind(revived) == pk && sameStats(MountToken.stats(revived), expected)
-                        && MountToken.name(revived).equals("Biscuit") && revived.getInt("coat") == live.getInt("coat")
-                        && Math.abs(revived.getFloat("hp") - hp) < 1e-4f, "");
+                        && MountToken.name(revived).equals("Biscuit") && revived.getIntOr("coat",0) == live.getIntOr("coat",0)
+                        && Math.abs(revived.getFloatOr("hp",0F) - hp) < 1e-4f, "");
 
         // sold to a stable: the token leaves the seller and the entity, and is in that stable's stock
         int worth = Mounts.tradeInValue(fp);
@@ -922,18 +922,18 @@ public final class MountsSelfTest {
         net.minecraft.nbt.CompoundTag sold = held.size() == 1 ? held.get(0) : null;
         c.check("selling removes the token from the seller's record and the entity, and the stable holds that individual",
                 paid == worth && worth > 0 && animal.isRemoved() && MountGrowth.tokenOf(fp, pk) == null && Mounts.active(fp) == null
-                        && !rec.hasUUID("uuid") && !rec.getCompound(MountGrowth.RECORDS).contains(pk.id)
+                        && !rec.read("uuid", net.minecraft.core.UUIDUtil.CODEC).isPresent() && !rec.getCompoundOrEmpty(MountGrowth.RECORDS).contains(pk.id)
                         && sold != null && MountToken.id(sold).equals(animalId) && sameStats(MountToken.stats(sold), expected)
                         && MountToken.name(sold).equals("Biscuit") && SkyData.get(fp).getGold() == gold + worth, "paid " + paid);
         c.check("the sold animal's tack is not sold with it: the saddle it wore is back with the seller",
-                count(fp.getInventory().items, Items.SADDLE) >= 1 && sold != null && !sold.contains("saddle"), "");
+                count(fp.getInventory().getNonEquipmentItems(), Items.SADDLE) >= 1 && sold != null && !sold.contains("saddle"), "");
 
         // another player buys it from that stable's master
         GameProfile otherProfile = new GameProfile(UUID.nameUUIDFromBytes("skycraft-mounts-selftest-2".getBytes()), "[MountsTest2]");
         FakePlayer buyer = FakePlayerFactory.get(level, otherProfile);
-        buyer.moveTo(at.getX() + 0.5, at.getY(), at.getZ() - 14.5);
-        net.minecraft.world.entity.npc.Villager npc = EntityType.VILLAGER.create(level);
-        npc.moveTo(buyer.getX() + 1, buyer.getY(), buyer.getZ());
+        buyer.snapTo(at.getX() + 0.5, at.getY(), at.getZ() - 14.5);
+        net.minecraft.world.entity.npc.villager.Villager npc = net.minecraft.world.entity.EntityTypes.VILLAGER.create(level, net.minecraft.world.entity.EntitySpawnReason.EVENT);
+        npc.snapTo(buyer.getX() + 1, buyer.getY(), buyer.getZ());
         npc.getPersistentData().putBoolean("skycraft_stable_master", true);
         npc.getPersistentData().putString(StableUi.KEY, stableKey);
         level.addFreshEntity(npc);
@@ -955,7 +955,7 @@ public final class MountsSelfTest {
         c.check("the buyer gets that very animal: id, stats, level, trust, name, coat, health",
                 bought instanceof Mob bm2 && Mounts.active(buyer) == pk && got != null && sameStats(got, expected) && MountToken.idOf(bought).equals(animalId)
                         && bought.hasCustomName() && "Biscuit".equals(bought.getCustomName().getString())
-                        && MountToken.capture(bm2, pk).getInt("coat") == live.getInt("coat")
+                        && MountToken.capture(bm2, pk).getIntOr("coat",0) == live.getIntOr("coat",0)
                         && Math.abs(bm2.getHealth() / bm2.getMaxHealth() - Math.max(0.5f, hp)) < 0.06f, got == null ? "no mount" : "level " + got.level());
         c.check("it is gone from the stable, and the buyer paid its price", store.stockOf(stableKey).isEmpty() && !store.holds(animalId)
                 && SkyData.get(buyer).getGold() == 100000L - price, "gold " + SkyData.get(buyer).getGold());
@@ -963,7 +963,7 @@ public final class MountsSelfTest {
         UUID firstEntity = bought == null ? null : bought.getUUID();
         StableUi.handle(buyer, buy);
         FakePlayer third = FakePlayerFactory.get(level, new GameProfile(UUID.nameUUIDFromBytes("skycraft-mounts-selftest-3".getBytes()), "[MountsTest3]"));
-        third.moveTo(buyer.getX(), buyer.getY(), buyer.getZ() + 1);
+        third.snapTo(buyer.getX(), buyer.getY(), buyer.getZ() + 1);
         SkyData.get(third).setGold(100000L);
         StableUi.handle(third, buy);
         c.check("a second click or a second buyer cannot get it again: one animal, one holder",
@@ -973,7 +973,7 @@ public final class MountsSelfTest {
         // the buyer's record holds the token of the active mount only
         c.check("the buyer's record holds the token of the active mount and nothing else",
                 MountGrowth.tokenOf(buyer, pk) != null && MountToken.id(MountGrowth.tokenOf(buyer, pk)).equals(animalId)
-                        && buyerRec.getCompound(MountGrowth.RECORDS).getAllKeys().size() == 1, "");
+                        && buyerRec.getCompoundOrEmpty(MountGrowth.RECORDS).keySet().size() == 1, "");
 
         // a stable keeps twelve; the oldest overflow quietly leaves for the pool, and every token is in one place
         java.util.List<UUID> ids = new ArrayList<>();
@@ -1030,13 +1030,13 @@ public final class MountsSelfTest {
     /** A distinct, light stick: the bag tests' unit of cargo ({@code mbt} = which kind, {@code kg} = weight of one). */
     private static ItemStack bagItem(int kindId, float kg, int count) {
         ItemStack s = new ItemStack(Items.STICK, count);
-        s.getOrCreateTag().putInt("mbt", kindId);
-        s.getTag().putFloat(ItemWeights.WEIGHT_NBT, kg);
+        com.skycraft.inventory.ItemData.updateCustom(s, customData263 -> customData263.putInt("mbt", kindId));
+        com.skycraft.inventory.ItemData.updateCustom(s, customData263 -> customData263.putFloat(ItemWeights.WEIGHT_NBT, kg));
         return s;
     }
 
     private static boolean isBagKind(ItemStack s, int kindId) {
-        return s.is(Items.STICK) && s.hasTag() && s.getTag().contains("mbt") && s.getTag().getInt("mbt") == kindId;
+        return s.is(Items.STICK) && com.skycraft.inventory.ItemData.hasCustom(s) && com.skycraft.inventory.ItemData.custom(s).contains("mbt") && com.skycraft.inventory.ItemData.custom(s).getIntOr("mbt",0) == kindId;
     }
 
     /** How many of a bag-test kind the player carries (slots, offhand, pack). */
@@ -1046,12 +1046,12 @@ public final class MountsSelfTest {
 
     /** Every bag-test stick: carried, in the bag's slots and in its overflow. */
     private static long allSticks(FakePlayer fp, Saddlebags.Bag bag) {
-        long n = com.skycraft.inventory.Inv.count(fp, s -> s.is(Items.STICK) && s.hasTag() && s.getTag().contains("mbt"));
+        long n = com.skycraft.inventory.Inv.count(fp, s -> s.is(Items.STICK) && com.skycraft.inventory.ItemData.hasCustom(s) && com.skycraft.inventory.ItemData.custom(s).contains("mbt"));
         for (int i = Saddlebags.GEAR; i < 54; i++) {
             ItemStack s = bag.getItem(i);
-            if (s.is(Items.STICK) && s.hasTag() && s.getTag().contains("mbt")) n += s.getCount();
+            if (s.is(Items.STICK) && com.skycraft.inventory.ItemData.hasCustom(s) && com.skycraft.inventory.ItemData.custom(s).contains("mbt")) n += s.getCount();
         }
-        for (ItemStack s : bag.overflow().entries()) if (s.is(Items.STICK) && s.hasTag() && s.getTag().contains("mbt")) n += s.getCount();
+        for (ItemStack s : bag.overflow().entries()) if (s.is(Items.STICK) && com.skycraft.inventory.ItemData.hasCustom(s) && com.skycraft.inventory.ItemData.custom(s).contains("mbt")) n += s.getCount();
         return n;
     }
 
@@ -1113,7 +1113,7 @@ public final class MountsSelfTest {
             wrap.put("m", saved);
             net.minecraft.nbt.NbtIo.writeCompressed(wrap, bos);
             back = com.skycraft.inventory.BulkStore.loaded(net.minecraft.nbt.NbtIo.readCompressed(
-                    new java.io.ByteArrayInputStream(bos.toByteArray())).getCompound("m"),
+                    new java.io.ByteArrayInputStream(bos.toByteArray()), net.minecraft.nbt.NbtAccounter.create(256L * 1024 * 1024)).getCompoundOrEmpty("m"),
                     com.skycraft.inventory.ContainerOverflow.MAX_ENTRIES, com.skycraft.inventory.ContainerOverflow.MAX_PER_ENTRY, null);
         } catch (java.io.IOException e) {
             c.check("bag overflow: NBT round trip", false, e.toString());
@@ -1122,7 +1122,7 @@ public final class MountsSelfTest {
                 back != null && back.sameAs(snap) && back.size() == snap.size() && snap.size() > 0, back == null ? "no read" : back.size() + " rows");
         net.minecraft.nbt.CompoundTag syncTag = com.skycraft.network.CorePackets.SyncData.of(SkyData.get(fp)).tag();
         c.check("bag overflow: the overflow is server data, not in the player data sync",
-                !syncTag.getCompound("modules").contains(Saddlebags.OVERFLOW_MODULE), "");
+                !syncTag.getCompoundOrEmpty("modules").contains(Saddlebags.OVERFLOW_MODULE), "");
         menu.removed(fp);
         fp.containerMenu = fp.inventoryMenu; // closed for real: the new bag reads the record, not the old menu
         Saddlebags.Bag again = new Saddlebags.Bag(fp, bay, kind);
@@ -1169,13 +1169,13 @@ public final class MountsSelfTest {
         long inBags = 0;
         for (ItemStack s : Saddlebags.overflowOf(fp).entries()) inBags += s.getCount();
         for (int i = 0; i < 54 - Saddlebags.GEAR; i++) {
-            net.minecraft.nbt.ListTag l = Mounts.data(fp).getList("bags", 10);
-            if (i < l.size()) inBags += ItemStack.of(l.getCompound(i)).getCount();
+            net.minecraft.nbt.ListTag l = Mounts.data(fp).getListOrEmpty("bags");
+            if (i < l.size()) inBags += com.skycraft.inventory.ItemData.parse(l.getCompoundOrEmpty(i)).getCount();
         }
         Saddlebags.emptyToPlayer(fp);
         long carriedAfter = com.skycraft.inventory.Inv.count(fp, s -> s.is(Items.STICK));
         c.check("bag overflow: emptying the bags hands over slots and overflow rows (with their int counts) to the player",
-                carriedAfter == carriedBefore + inBags && Saddlebags.overflowOf(fp).isEmpty() && Mounts.data(fp).getList("bags", 10).isEmpty(),
+                carriedAfter == carriedBefore + inBags && Saddlebags.overflowOf(fp).isEmpty() && Mounts.data(fp).getListOrEmpty("bags").isEmpty(),
                 carriedBefore + " + " + inBags + " = " + carriedAfter);
         fp.containerMenu = fp.inventoryMenu;
         fp.getInventory().clearContent();
@@ -1189,7 +1189,7 @@ public final class MountsSelfTest {
     }
 
     private static ItemStack find(FakePlayer fp, net.minecraft.world.item.Item item) {
-        for (ItemStack s : fp.getInventory().items) if (s.is(item)) return s;
+        for (ItemStack s : fp.getInventory().getNonEquipmentItems()) if (s.is(item)) return s;
         return ItemStack.EMPTY;
     }
 }

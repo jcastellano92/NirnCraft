@@ -1,0 +1,46 @@
+{
+  "type": "skycraft:ground_cover",
+  "config": {
+    "entries": [
+      {
+        "state": "minecraft:poppy",
+        "weight": 2
+      },
+      {
+        "state": "minecraft:dandelion",
+        "weight": 2
+      },
+      {
+        "state": "minecraft:oxeye_daisy",
+        "weight": 2
+      },
+      {
+        "state": "minecraft:red_tulip",
+        "weight": 1
+      },
+      {
+        "state": "minecraft:white_tulip",
+        "weight": 1
+      },
+      {
+        "state": {
+          "id": "minecraft:sunflower",
+          "properties": {
+            "half": "lower"
+          }
+        },
+        "weight": 1
+      }
+    ],
+    "scale": 28,
+    "patchiness": 0.85,
+    "cluster": {
+      "type": "minecraft:uniform",
+      "min_inclusive": 3,
+      "max_inclusive": 8
+    },
+    "spread": 3,
+    "salt": 1546,
+    "near_water": false
+  }
+}

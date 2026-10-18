@@ -35,7 +35,7 @@ public final class StationCrafting {
             recipe.consume(player.getInventory());
             ItemStack result = recipe.resultStack();
             ActionHandler.addToBags(player, result);
-            if (!result.isEmpty()) player.drop(result, false);
+            if (!result.isEmpty()) player.drop(result, false, net.minecraft.util.Prediction.SERVER_ONLY);
             made++;
         }
         if (made == 0) {
@@ -62,7 +62,7 @@ public final class StationCrafting {
     private static SoundEvent sound(StationType station) {
         return switch (station) {
             case SMELTER -> SoundEvents.BLASTFURNACE_FIRE_CRACKLE;
-            case TANNING_RACK -> SoundEvents.ARMOR_EQUIP_LEATHER;
+            case TANNING_RACK -> SoundEvents.ARMOR_EQUIP_LEATHER.value();
             default -> SoundEvents.ANVIL_USE;
         };
     }

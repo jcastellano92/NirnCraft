@@ -45,9 +45,9 @@ public final class Lycanthropy {
     /** Being seen changing shape is a crime (Skyrim's 1000 gold bounty). */
     public static final int TRANSFORM_BOUNTY = 1000;
 
-    static final UUID SPEED = UUID.fromString("0b6f2b8e-3c52-4c0f-9a1e-6f1a7c2b5d01");
-    static final UUID ARMOR = UUID.fromString("0b6f2b8e-3c52-4c0f-9a1e-6f1a7c2b5d02");
-    static final UUID KNOCKBACK = UUID.fromString("0b6f2b8e-3c52-4c0f-9a1e-6f1a7c2b5d03");
+    static final net.minecraft.resources.Identifier SPEED = net.minecraft.resources.Identifier.fromNamespaceAndPath("skycraft", "modifier_0b6f2b8e-3c52-4c0f-9a1e-6f1a7c2b5d01");
+    static final net.minecraft.resources.Identifier ARMOR = net.minecraft.resources.Identifier.fromNamespaceAndPath("skycraft", "modifier_0b6f2b8e-3c52-4c0f-9a1e-6f1a7c2b5d02");
+    static final net.minecraft.resources.Identifier KNOCKBACK = net.minecraft.resources.Identifier.fromNamespaceAndPath("skycraft", "modifier_0b6f2b8e-3c52-4c0f-9a1e-6f1a7c2b5d03");
     /** Persistent-data flag on a corpse someone already fed on. */
     public static final String FED_TAG = "skycraft_fed_on";
 
@@ -57,12 +57,12 @@ public final class Lycanthropy {
     static boolean infect(ServerPlayer player) {
         if (player.isCreative() || player.isSpectator()) return false;
         CompoundTag t = Curses.tag(player);
-        if (t.getBoolean(Curses.WEREWOLF) || t.getBoolean(Curses.VAMPIRE) || t.getLong(Curses.SANIES_LUPINUS) > 0) return false;
+        if (t.getBooleanOr(Curses.WEREWOLF, false) || t.getBooleanOr(Curses.VAMPIRE, false) || t.getLongOr(Curses.SANIES_LUPINUS, 0L) > 0) return false;
         com.skycraft.core.Race race = SkyData.get(player).getRace();
         if ((race == com.skycraft.core.Race.ARGONIAN || race == com.skycraft.core.Race.BOSMER) && player.getRandom().nextBoolean()) return false;
         t.putLong(Curses.SANIES_LUPINUS, Math.max(1, player.level().getGameTime()));
         t.putInt(Curses.LUPINUS_DAYS, 0);
-        player.addEffect(new MobEffectInstance(CurseRegistry.SANIES_LUPINUS.get(), MobEffectInstance.INFINITE_DURATION, 0, false, false, true));
+        player.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(CurseRegistry.SANIES_LUPINUS.get()), MobEffectInstance.INFINITE_DURATION, 0, false, false, true));
         Curses.dirty(player);
         Notifier.message(player, Component.translatable("message.skycraft.survival.contracted", CurseRegistry.SANIES_LUPINUS.get().getDisplayName()));
         return true;
@@ -71,9 +71,9 @@ public final class Lycanthropy {
     /** Once a second for all players: advances Sanies Lupinus incubation (3 days until full lycanthropy). */
     static void tickDisease(ServerPlayer player, long now) {
         CompoundTag t = Curses.tag(player);
-        long lup = t.getLong(Curses.SANIES_LUPINUS);
+        long lup = t.getLongOr(Curses.SANIES_LUPINUS, 0L);
         if (lup <= 0) return;
-        if (!player.hasEffect(CurseRegistry.SANIES_LUPINUS.get())) {
+        if (!player.hasEffect(com.skycraft.platform.Effects.holder(CurseRegistry.SANIES_LUPINUS.get()))) {
             t.remove(Curses.SANIES_LUPINUS);
             t.remove(Curses.LUPINUS_DAYS);
             Curses.dirty(player);
@@ -81,7 +81,7 @@ public final class Lycanthropy {
             Curses.grantBeastBlood(player);
         } else {
             int days = (int) ((now - lup) / DAY);
-            if (days > t.getInt(Curses.LUPINUS_DAYS)) {
+            if (days > t.getIntOr(Curses.LUPINUS_DAYS, 0)) {
                 t.putInt(Curses.LUPINUS_DAYS, days);
                 Curses.dirty(player);
                 Notifier.message(player, Component.translatable("curse.skycraft.sanies_lupinus.day" + Math.min(2, days)));
@@ -94,8 +94,8 @@ public final class Lycanthropy {
         if (!Curses.isWerewolf(player) || Curses.transformed(player) || !player.isAlive()) return false;
         CompoundTag t = Curses.tag(player);
         long now = player.level().getGameTime();
-        if (!player.isCreative() && now < t.getLong(Curses.BEAST_READY)) {
-            String hours = com.skycraft.SkyConfig.formatTicks(t.getLong(Curses.BEAST_READY) - now);
+        if (!player.isCreative() && now < t.getLongOr(Curses.BEAST_READY, 0L)) {
+            String hours = com.skycraft.SkyConfig.formatTicks(t.getLongOr(Curses.BEAST_READY, 0L) - now);
             Notifier.message(player, Component.translatable("message.skycraft.power_cooldown", CursePowers.name(CursePowers.BEAST_FORM), hours));
             return false;
         }
@@ -110,12 +110,12 @@ public final class Lycanthropy {
         player.setHealth(player.getMaxHealth());
         PlayerData data = SkyData.get(player);
         data.setStamina(data.maxStamina());
-        player.addEffect(new MobEffectInstance(MobEffects.NIGHT_VISION, duration + 100, 0, false, false, false));
+        player.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.NIGHT_VISION), duration + 100, 0, false, false, false));
         data.addStat("beast_form", 1);
         CursePackets.sync(player);
         CursePackets.anim(player, CurseAnims.Anim.TRANSFORM);
-        ServerLevel level = player.serverLevel();
-        level.playSound(null, player.blockPosition(), SoundEvents.WOLF_HOWL, SoundSource.PLAYERS, 1.4f, 0.55f);
+        ServerLevel level = player.level();
+        level.playSound(null, player.blockPosition(), com.skycraft.audio.AudioSounds.creature("wolf", "howl"), SoundSource.PLAYERS, 1.4f, 0.55f);
         level.playSound(null, player.blockPosition(), SoundEvents.RAVAGER_ROAR, SoundSource.PLAYERS, 0.6f, 1.3f);
         level.sendParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE, player.getX(), player.getY() + 1, player.getZ(), 10, 0.4, 0.6, 0.4, 0.01);
         Notifier.send(player, NotifyKind.MESSAGE, Component.translatable("curse.skycraft.beast.transformed"), Component.empty());
@@ -126,50 +126,50 @@ public final class Lycanthropy {
     /** Back to the player's own form ({@code natural}: the time ran out, not death or logout). */
     static void revert(ServerPlayer player, boolean natural) {
         CompoundTag t = Curses.tag(player);
-        if (Form.byId(t.getString(Curses.FORM)) != Form.BEAST) return;
+        if (Form.byId(t.getStringOr(Curses.FORM, "")) != Form.BEAST) return;
         t.remove(Curses.FORM);
         t.remove(Curses.FORM_UNTIL);
         Curses.dirty(player);
         applyAttributes(player, false);
         Vampirism.refreshBonuses(player);
-        player.removeEffect(MobEffects.NIGHT_VISION);
+        player.removeEffect(com.skycraft.platform.Effects.holder(MobEffects.NIGHT_VISION));
         CursePackets.sync(player);
         CurseEvents.noFall(player, 100);
         if (natural && player.isAlive()) {
             CursePackets.anim(player, CurseAnims.Anim.TRANSFORM);
-            player.level().playSound(null, player.blockPosition(), SoundEvents.WOLF_WHINE, SoundSource.PLAYERS, 1f, 0.6f);
+            player.level().playSound(null, player.blockPosition(), SoundEvents.WOLF_SOUNDS.get(net.minecraft.world.entity.animal.wolf.WolfSoundVariants.SoundSet.CLASSIC).adultSounds().whineSound().value(), SoundSource.PLAYERS, 1f, 0.6f);
             Notifier.message(player, Component.translatable("curse.skycraft.beast.reverted"));
         }
     }
 
     static void applyAttributes(ServerPlayer player, boolean on) {
         modifier(player.getAttribute(Attributes.MOVEMENT_SPEED), SPEED, "Skycraft Beast Form speed", on ? 0.3 : 0,
-                AttributeModifier.Operation.MULTIPLY_TOTAL);
+                AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
         double armor = on ? (CursePerks.has(player, CursePerks.THICK_HIDE) ? 10 : 6) : 0;
-        modifier(player.getAttribute(Attributes.ARMOR), ARMOR, "Skycraft Beast Form hide", armor, AttributeModifier.Operation.ADDITION);
+        modifier(player.getAttribute(Attributes.ARMOR), ARMOR, "Skycraft Beast Form hide", armor, AttributeModifier.Operation.ADD_VALUE);
         modifier(player.getAttribute(Attributes.KNOCKBACK_RESISTANCE), KNOCKBACK, "Skycraft Beast Form", on ? 0.5 : 0,
-                AttributeModifier.Operation.ADDITION);
+                AttributeModifier.Operation.ADD_VALUE);
     }
 
-    static void modifier(AttributeInstance inst, UUID id, String name, double amount, AttributeModifier.Operation op) {
+    static void modifier(AttributeInstance inst, net.minecraft.resources.Identifier id, String name, double amount, AttributeModifier.Operation op) {
         if (inst == null) return;
         AttributeModifier existing = inst.getModifier(id);
-        if (existing != null && existing.getAmount() == amount) return;
+        if (existing != null && existing.amount() == amount) return;
         if (existing != null) inst.removeModifier(id);
-        if (amount != 0) inst.addTransientModifier(new AttributeModifier(id, name, amount, op));
+        if (amount != 0) inst.addTransientModifier(new AttributeModifier(id, amount, op));
     }
 
     /** Once a second while transformed. */
     static void tick(ServerPlayer player, long now) {
         CompoundTag t = Curses.tag(player);
-        if (now >= t.getLong(Curses.FORM_UNTIL)) {
+        if (now >= t.getLongOr(Curses.FORM_UNTIL, 0L)) {
             revert(player, true);
             return;
         }
         // transient modifiers don't survive a dimension change or respawn: keep them in place
         applyAttributes(player, true);
         if (player.tickCount % 200 == 0 && player.getRandom().nextInt(3) == 0) {
-            player.level().playSound(null, player.blockPosition(), SoundEvents.WOLF_GROWL, SoundSource.PLAYERS, 0.8f, 0.6f);
+            player.level().playSound(null, player.blockPosition(), SoundEvents.WOLF_SOUNDS.get(net.minecraft.world.entity.animal.wolf.WolfSoundVariants.SoundSet.CLASSIC).adultSounds().growlSound().value(), SoundSource.PLAYERS, 0.8f, 0.6f);
         }
     }
 
@@ -181,12 +181,12 @@ public final class Lycanthropy {
      */
     static boolean feed(ServerPlayer player, CorpseEntity corpse) {
         if (Curses.form(player) != Form.BEAST || corpse.isRemoved() || player.distanceToSqr(corpse) > 4 * 4) return false;
-        if (corpse.getPersistentData().getBoolean(FED_TAG)) {
+        if (corpse.getPersistentData().getBooleanOr(FED_TAG, false)) {
             Notifier.message(player, Component.translatable("curse.skycraft.beast.already_fed"));
             return true;
         }
-        String bodyType = corpse.saveWithoutId(new CompoundTag()).getString("BodyType");
-        Entity probe = EntityType.byString(bodyType).map(type -> type == EntityType.PLAYER ? null : type.create(player.level())).orElse(null);
+        String bodyType = com.skycraft.platform.EntityData.saveWithoutId(corpse).getStringOr("BodyType","");
+        Entity probe = com.skycraft.platform.EntityData.type(bodyType).map(type -> type == net.minecraft.world.entity.EntityTypes.PLAYER ? null : type.create(player.level(), net.minecraft.world.entity.EntitySpawnReason.EVENT)).orElse(null);
         boolean person = "minecraft:player".equals(bodyType) || CurseCombat.isPerson(probe);
         boolean undead = probe != null && CurseCombat.isUndead(probe);
         if (probe != null) probe.discard();
@@ -196,17 +196,17 @@ public final class Lycanthropy {
         }
         corpse.getPersistentData().putBoolean(FED_TAG, true);
         CompoundTag t = Curses.tag(player);
-        t.putLong(Curses.FORM_UNTIL, t.getLong(Curses.FORM_UNTIL) + FEED_EXTENSION);
+        t.putLong(Curses.FORM_UNTIL, t.getLongOr(Curses.FORM_UNTIL, 0L) + FEED_EXTENSION);
         float heal = player.getMaxHealth() * (CursePerks.has(player, CursePerks.GORGING) ? 0.5f : 0.25f);
         player.heal(heal);
-        player.addEffect(new MobEffectInstance(MobEffects.NIGHT_VISION, (int) (t.getLong(Curses.FORM_UNTIL) - player.level().getGameTime()) + 100, 0, false, false, false));
+        player.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.NIGHT_VISION), (int) (t.getLongOr(Curses.FORM_UNTIL, 0L) - player.level().getGameTime()) + 100, 0, false, false, false));
         CursePerks.addFeed(player, CursePerks.Tree.WEREWOLF);
         Curses.dirty(player);
         CursePackets.anim(player, CurseAnims.Anim.FEED);
-        ServerLevel level = player.serverLevel();
-        level.playSound(null, corpse.blockPosition(), SoundEvents.GENERIC_EAT, SoundSource.PLAYERS, 1f, 0.6f);
-        level.playSound(null, corpse.blockPosition(), SoundEvents.WOLF_GROWL, SoundSource.PLAYERS, 0.8f, 0.5f);
-        level.sendParticles(new DustParticleOptions(new Vector3f(0.5f, 0.03f, 0.03f), 1.3f), corpse.getX(), corpse.getY() + 0.4,
+        ServerLevel level = player.level();
+        level.playSound(null, corpse.blockPosition(), SoundEvents.GENERIC_EAT.value(), SoundSource.PLAYERS, 1f, 0.6f);
+        level.playSound(null, corpse.blockPosition(), SoundEvents.WOLF_SOUNDS.get(net.minecraft.world.entity.animal.wolf.WolfSoundVariants.SoundSet.CLASSIC).adultSounds().growlSound().value(), SoundSource.PLAYERS, 0.8f, 0.5f);
+        level.sendParticles(new DustParticleOptions(net.minecraft.util.ARGB.colorFromFloat(1f, 0.5f, 0.03f, 0.03f), 1.3f), corpse.getX(), corpse.getY() + 0.4,
                 corpse.getZ(), 24, 0.35, 0.15, 0.35, 0.02);
         Notifier.message(player, Component.translatable("curse.skycraft.beast.fed"));
         // feeding on a person in front of witnesses: on top of everything else, a crime

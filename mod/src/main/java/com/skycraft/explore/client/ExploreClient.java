@@ -8,7 +8,7 @@ public final class ExploreClient {
     private ExploreClient() {}
 
     public static void openTreasureMap(ItemStack stack) {
-        if (stack.getTag() == null) return;
-        Minecraft.getInstance().setScreen(new TreasureMapScreen(stack.getTag().copy(), stack.getHoverName()));
+        if (com.skycraft.inventory.ItemData.custom(stack) == null) return;
+        Minecraft.getInstance().gui.setScreen(new TreasureMapScreen(com.skycraft.inventory.ItemData.custom(stack).copy(), stack.getHoverName()));
     }
 }

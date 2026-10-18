@@ -11,12 +11,12 @@ import net.minecraft.stats.Stats;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.item.UseAnim;
+import net.minecraft.world.item.ItemUseAnimation;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
@@ -106,7 +106,7 @@ public class InstrumentItem extends Item {
     }
 
     @Override
-    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+    public InteractionResult use(Level level, Player player, InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
         RandomSource r = player.getRandom();
         // Map player look pitch (-90..90) onto the cultural scale index so looking up/down bends the phrase
@@ -115,7 +115,7 @@ public class InstrumentItem extends Item {
         int secondIdx = Math.min(scale.length - 1, baseIdx + (r.nextBoolean() ? 2 : 1));
         int thirdIdx = Math.max(0, Math.min(scale.length - 1, baseIdx + (r.nextBoolean() ? 4 : -1)));
 
-        if (!level.isClientSide) {
+        if (!level.isClientSide()) {
             playNote(level, player.getX(), player.getY() + 1.0, player.getZ(), scale[baseIdx], 0);
             if (pose != Pose.HORN) {
                 playNote(level, player.getX(), player.getY() + 1.0, player.getZ(), scale[secondIdx], 1);
@@ -131,20 +131,20 @@ public class InstrumentItem extends Item {
             }
         }
 
-        player.swing(hand, true);
-        player.getCooldowns().addCooldown(this, pose == Pose.HORN ? 28 : 14);
+        player.swing(hand, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
+        player.getCooldowns().addCooldown(player.getItemInHand(hand), pose == Pose.HORN ? 28 : 14);
         player.awardStat(Stats.ITEM_USED.get(this));
-        return InteractionResultHolder.sidedSuccess(stack, level.isClientSide());
+        return com.skycraft.platform.Interactions.sidedSuccess(level.isClientSide()).heldItemTransformedTo(stack);
     }
 
     @Override
-    public UseAnim getUseAnimation(ItemStack stack) {
-        return pose == Pose.HORN || pose == Pose.FLUTE ? UseAnim.TOOT_HORN : UseAnim.BOW;
+    public ItemUseAnimation getUseAnimation(ItemStack stack) {
+        return pose == Pose.HORN || pose == Pose.FLUTE ? ItemUseAnimation.TOOT_HORN : ItemUseAnimation.BOW;
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
-        tooltip.add(Component.translatable(getDescriptionId() + ".desc")
+    public void appendHoverText(ItemStack stack, net.minecraft.world.item.Item.TooltipContext context263, net.minecraft.world.item.component.TooltipDisplay display263, java.util.function.Consumer<Component> tooltip, TooltipFlag flag) {
+        tooltip.accept(Component.translatable(getDescriptionId() + ".desc")
                 .withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
     }
 }

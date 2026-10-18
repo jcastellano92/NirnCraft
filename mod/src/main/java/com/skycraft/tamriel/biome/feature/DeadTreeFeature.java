@@ -6,15 +6,15 @@ import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.RotatedPillarBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
-import net.minecraft.world.level.levelgen.feature.configurations.BlockStateConfiguration;
+import com.skycraft.worldgen.ConfiguredFeature;
+import com.skycraft.worldgen.FeaturePlaceContext;
+import com.skycraft.worldgen.BlockStateConfiguration;
 
 /**
  * Dead, leafless trees: Hjaalmarch's drowned snags, the charred trunks of the ashlands, bleached acacias in the desert.
  * A bare trunk with a few crooked, sometimes broken, branches.
  */
-public class DeadTreeFeature extends Feature<BlockStateConfiguration> {
+public class DeadTreeFeature extends ConfiguredFeature<BlockStateConfiguration> {
     public DeadTreeFeature(Codec<BlockStateConfiguration> codec) {
         super(codec);
     }

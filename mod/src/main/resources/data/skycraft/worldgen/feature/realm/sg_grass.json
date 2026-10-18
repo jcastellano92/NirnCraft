@@ -1,0 +1,44 @@
+{
+  "type": "skycraft:random_patch",
+  "config": {
+    "tries": 48,
+    "xz_spread": 7,
+    "y_spread": 3,
+    "feature": {
+      "feature": {
+        "type": "minecraft:simple_block",
+        "to_place": {
+          "type": "minecraft:weighted",
+          "entries": [
+            {
+              "data": "minecraft:short_grass",
+              "weight": 8
+            },
+            {
+              "data": "minecraft:fern",
+              "weight": 1
+            }
+          ]
+        }
+      },
+      "placement": [
+        {
+          "type": "minecraft:block_predicate_filter",
+          "predicate": {
+            "type": "minecraft:all_of",
+            "predicates": [
+              {
+                "type": "minecraft:matching_blocks",
+                "blocks": "minecraft:air"
+              },
+              {
+                "type": "minecraft:would_survive",
+                "state": "minecraft:short_grass"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

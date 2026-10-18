@@ -2,24 +2,23 @@ package com.skycraft.fire.client;
 
 import com.skycraft.Skycraft;
 import net.minecraft.client.Minecraft;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
-import net.minecraftforge.client.event.RenderLevelStageEvent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
+import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
+
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 /** Forge-bus client events of the fire module: the far fire draw, the ambience tick, clean-up on logout. */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
 public final class FireClientEvents {
     private FireClientEvents() {}
 
     /** After particles (and so after translucent terrain): the far fire sprites, smoke and glow. */
     @SubscribeEvent
-    public static void onRenderStage(RenderLevelStageEvent event) {
-        if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_PARTICLES) return;
+    public static void onExtract(net.neoforged.neoforge.client.event.ExtractLevelRenderStateEvent event) {
         try {
-            FarFireRenderer.render(event);
+            FarFireRenderer.extract(event);
         } catch (RuntimeException e) {
             // never let a decoration break the frame; the next frame tries again
             if (!failed) {
@@ -29,11 +28,13 @@ public final class FireClientEvents {
         }
     }
 
+    @SubscribeEvent public static void onSubmit(net.neoforged.neoforge.client.event.SubmitCustomGeometryEvent event){FarFireRenderer.submit(event);}
+
     private static boolean failed;
 
     @SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent event) {
-        if (event.phase != TickEvent.Phase.END) return;
+    public static void onClientTick(net.neoforged.neoforge.client.event.ClientTickEvent.Post event) {
+        if (!(event instanceof net.neoforged.neoforge.client.event.ClientTickEvent.Post)) return;
         Minecraft mc = Minecraft.getInstance();
         if (mc.level == null || mc.player == null || mc.isPaused()) return;
         ClientFire.tick();

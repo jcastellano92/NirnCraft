@@ -43,7 +43,7 @@ public final class HitSquads {
         if (!SocietyConfig.HIT_SQUADS.get()) return;
         CompoundTag t = Cosmetics.persistedTag(player);
         RandomSource r = player.getRandom();
-        int left = t.contains(TIMER) ? t.getInt(TIMER) : interval(r);
+        int left = t.contains(TIMER) ? t.getIntOr(TIMER, 0) : interval(r);
         if (--left > 0) {
             t.putInt(TIMER, left);
             return;
@@ -68,7 +68,7 @@ public final class HitSquads {
      */
     @Nullable
     public static String send(ServerPlayer player, @Nullable String forced) {
-        ServerLevel level = player.serverLevel();
+        ServerLevel level = player.level();
         if (player.isCreative() || player.isSpectator() || !Crimes.canCommitCrime(player)) return null;
         if (level.dimension() != Level.OVERWORLD || level.getDifficulty() == Difficulty.PEACEFUL) return null;
         if (forced == null && Encounters.hunted(player)) return null;
@@ -119,7 +119,7 @@ public final class HitSquads {
             spawned++;
         }
         if (spawned > 0) {
-            Skycraft.LOGGER.debug("Skycraft society: {} hit squad ({}) sent after {}", faction, spawned, player.getGameProfile().getName());
+            Skycraft.LOGGER.debug("Skycraft society: {} hit squad ({}) sent after {}", faction, spawned, player.getGameProfile().name());
             return faction;
         }
         return null;

@@ -759,7 +759,7 @@ public final class Interiors {
             }
         }
         // aisle carpet
-        for (int z = r.z0(); z <= r.z1() - 3; z++) c.setIfOpen(r.cx(), y, z, hallOfDead ? B.s(Blocks.GRAY_CARPET) : p.carpet);
+        for (int z = r.z0(); z <= r.z1() - 3; z++) c.setIfOpen(r.cx(), y, z, hallOfDead ? B.s(com.skycraft.worldgen.VanillaBlocks.GRAY_CARPET) : p.carpet);
         Props.lantern(c, p, r.cx(), r.ceil() - 1, r.cz(), true);
         if (hallOfDead) {
             // ossuary shelves with skulls and an urn

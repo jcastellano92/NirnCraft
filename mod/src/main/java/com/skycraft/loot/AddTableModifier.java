@@ -7,7 +7,7 @@ import com.skycraft.Skycraft;
 import com.skycraft.world.LocationTags;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -18,12 +18,12 @@ import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
-import net.minecraftforge.common.loot.IGlobalLootModifier;
-import net.minecraftforge.common.loot.LootModifier;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.neoforge.common.loot.IGlobalLootModifier;
+import net.neoforged.neoforge.common.loot.LootModifier;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.registries.DeferredRegister;
+import net.minecraft.core.registries.BuiltInRegistries;
+import java.util.function.Supplier;
 
 import java.util.function.Supplier;
 
@@ -35,23 +35,23 @@ import java.util.function.Supplier;
  * <pre>{ "type": "skycraft:add_table", "conditions": [], "table": "skycraft:chests/gold", "prefix": "chests/", "chance": 0.8 }</pre>
  */
 public class AddTableModifier extends LootModifier {
-    public static final DeferredRegister<Codec<? extends IGlobalLootModifier>> SERIALIZERS =
-            DeferredRegister.create(ForgeRegistries.Keys.GLOBAL_LOOT_MODIFIER_SERIALIZERS, Skycraft.MODID);
+    public static final DeferredRegister<com.mojang.serialization.MapCodec<? extends IGlobalLootModifier>> SERIALIZERS =
+            DeferredRegister.create(net.neoforged.neoforge.registries.NeoForgeRegistries.Keys.GLOBAL_LOOT_MODIFIER_SERIALIZERS, Skycraft.MODID);
 
-    public static final Supplier<Codec<AddTableModifier>> CODEC = Suppliers.memoize(() -> RecordCodecBuilder.create(inst -> codecStart(inst)
-            .and(ResourceLocation.CODEC.fieldOf("table").forGetter(m -> m.table))
+    public static final Supplier<com.mojang.serialization.MapCodec<AddTableModifier>> CODEC = Suppliers.memoize(() -> RecordCodecBuilder.mapCodec(inst -> codecStart(inst)
+            .and(Identifier.CODEC.fieldOf("table").forGetter(m -> m.table))
             .and(Codec.STRING.optionalFieldOf("prefix", "chests/").forGetter(m -> m.prefix))
             .and(Codec.FLOAT.optionalFieldOf("chance", 1f).forGetter(m -> m.chance))
             .apply(inst, AddTableModifier::new)));
 
-    public static final RegistryObject<Codec<AddTableModifier>> ADD_TABLE = SERIALIZERS.register("add_table", CODEC);
+    public static final Supplier<com.mojang.serialization.MapCodec<AddTableModifier>> ADD_TABLE = SERIALIZERS.register("add_table", CODEC);
 
-    private final ResourceLocation table;
+    private final Identifier table;
     private final String prefix;
     private final float chance;
 
-    public AddTableModifier(LootItemCondition[] conditions, ResourceLocation table, String prefix, float chance) {
-        super(conditions);
+    public AddTableModifier(java.util.Optional<net.minecraft.core.Holder<LootItemCondition>> conditions, int priority, Identifier table, String prefix, float chance) {
+        super(conditions, priority);
         this.table = table;
         this.prefix = prefix;
         this.chance = chance;
@@ -62,13 +62,13 @@ public class AddTableModifier extends LootModifier {
     }
 
     /** The one modifier (of the 11 rolling into the same chest) that is allowed to add lore books. */
-    private static final ResourceLocation LORE_TABLE = new ResourceLocation(Skycraft.MODID, "chests/lore_books");
+    private static final Identifier LORE_TABLE = Identifier.fromNamespaceAndPath(Skycraft.MODID, "chests/lore_books");
     /** Lore books per dungeon chest on average. */
     private static final float DUNGEON_LORE = 0.6f;
 
     @Override
     protected ObjectArrayList<ItemStack> doApply(ObjectArrayList<ItemStack> generatedLoot, LootContext context) {
-        ResourceLocation id = context.getQueriedLootTableId();
+        Identifier id = context.getQueriedLootTableId();
         if (id == null || id.equals(table) || !id.getPath().startsWith(prefix)) return generatedLoot;
         boolean village = inVillage(id, context);
 
@@ -82,7 +82,7 @@ public class AddTableModifier extends LootModifier {
         }
         int before = generatedLoot.size();
         if (context.getRandom().nextFloat() <= chance) {
-            LootTable extra = context.getResolver().getLootTable(table);
+            LootTable extra = com.skycraft.platform.LootTables.get(context.getLevel(), table);
             extra.getRandomItemsRaw(context, generatedLoot::add);
         }
         // dungeon chests elsewhere: top the lore table's chance up to ~DUNGEON_LORE books per chest
@@ -100,7 +100,7 @@ public class AddTableModifier extends LootModifier {
     }
 
     /** A chest in a dungeon: by loot table name, or because it stands inside a {@code #skycraft:dungeons} structure. */
-    private static boolean dungeonChest(ResourceLocation id, LootContext context) {
+    private static boolean dungeonChest(Identifier id, LootContext context) {
         String path = id.getPath();
         if (path.contains("dungeon") || path.contains("stronghold") || path.contains("pyramid") || path.contains("barrow")
                 || path.contains("temple") || path.contains("ruin") || path.contains("fort") || path.contains("crypt")
@@ -111,16 +111,16 @@ public class AddTableModifier extends LootModifier {
     }
 
     /** A chest in a town: by loot table name, or because it stands inside a {@code #skycraft:towns} structure. */
-    private static boolean inVillage(ResourceLocation id, LootContext context) {
+    private static boolean inVillage(Identifier id, LootContext context) {
         return id.getPath().contains("village") || id.getPath().contains("farm") || inStructure(context, LocationTags.TOWNS);
     }
 
     private static boolean inStructure(LootContext context, TagKey<Structure> tag) {
-        Vec3 origin = context.getParamOrNull(LootContextParams.ORIGIN);
+        Vec3 origin = context.getOptional(LootContextParams.ORIGIN);
         return origin != null && LocationTags.pieceAt(context.getLevel(), BlockPos.containing(origin), tag);
     }
 
-    private static void sanitize(ObjectArrayList<ItemStack> loot, ResourceLocation id, boolean village) {
+    private static void sanitize(ObjectArrayList<ItemStack> loot, Identifier id, boolean village) {
         loot.removeIf(stack -> {
             Item item = stack.getItem();
             if (item == Items.REDSTONE || item == Items.LAPIS_LAZULI || item == Items.EMERALD
@@ -128,7 +128,7 @@ public class AddTableModifier extends LootModifier {
                 return true;
             }
             if (village) {
-                ResourceLocation key = ForgeRegistries.ITEMS.getKey(item);
+                Identifier key = BuiltInRegistries.ITEM.getKey(item);
                 if (key != null && key.getNamespace().equals(Skycraft.MODID)) {
                     String p = key.getPath();
                     if (p.startsWith("elven_") || p.startsWith("glass_") || p.startsWith("ebony_")
@@ -142,7 +142,7 @@ public class AddTableModifier extends LootModifier {
     }
 
     @Override
-    public Codec<? extends IGlobalLootModifier> codec() {
+    public com.mojang.serialization.MapCodec<? extends IGlobalLootModifier> codec() {
         return CODEC.get();
     }
 }

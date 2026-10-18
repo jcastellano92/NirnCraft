@@ -30,7 +30,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.util.FakePlayer;
+import net.neoforged.neoforge.common.util.FakePlayer;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.EnumSet;
@@ -124,7 +124,7 @@ public final class MountCompanion {
     // ------------------------------------------------------------------ facts
 
     public static boolean isDowned(@Nullable Entity e) {
-        return e instanceof Mob && !e.level().isClientSide && e.getPersistentData().contains(DOWNED);
+        return e instanceof Mob && !e.level().isClientSide() && e.getPersistentData().contains(DOWNED);
     }
 
     /** An owned mount of ours (a Skycraft mount kind with a player owner): the only thing this layer touches. */
@@ -139,7 +139,7 @@ public final class MountCompanion {
         // the self-test's fake rider is not in the player list
         ServerPlayer test = TEST_OWNER;
         if (test != null && id != null && id.equals(test.getUUID()) && test.level() == mount.level()) return test;
-        if (id == null || mount.level().getServer() == null || mount.level().isClientSide) return null;
+        if (id == null || mount.level().getServer() == null || mount.level().isClientSide()) return null;
         ServerPlayer p = mount.level().getServer().getPlayerList().getPlayer(id);
         return p != null && p.level() == mount.level() && p.isAlive() ? p : null;
     }
@@ -157,13 +157,13 @@ public final class MountCompanion {
 
     /** Lays the mount down. Returns false when it already is (or is not a companion). */
     public static boolean down(Mob mob, long now, @Nullable Player owner) {
-        if (isDowned(mob) || mob.level().isClientSide) return false;
+        if (isDowned(mob) || mob.level().isClientSide()) return false;
         CompoundTag t = mob.getPersistentData();
         t.putLong(DOWNED, Math.max(1, now));
         t.putInt(PREV, (mob.isInvulnerable() ? 1 : 0) | (mob.isSilent() ? 2 : 0) | (mob.isNoAi() ? 4 : 0));
         mob.ejectPassengers();
         mob.setHealth(Math.min(1f, mob.getMaxHealth()));
-        mob.setInvulnerable(true);
+        mob.setPermanentlyInvulnerable(true);
         mob.setSilent(true);
         mob.setNoAi(true);
         mob.setTarget(null);
@@ -181,7 +181,7 @@ public final class MountCompanion {
         MountKind kind = Mounts.kindOf(mob);
         if (owner instanceof ServerPlayer sp && real(sp)) {
             Notifier.message(sp, Component.translatable("mounts.skycraft.downed", kind != null ? kind.displayName() : mob.getName()));
-            sp.level().playSound(null, sp.blockPosition(), SoundEvents.NOTE_BLOCK_BASS.get(), SoundSource.NEUTRAL, 0.6f, 0.6f);
+            sp.level().playSound(null, sp.blockPosition(), SoundEvents.NOTE_BLOCK_BASS.value(), SoundSource.NEUTRAL, 0.6f, 0.6f);
         }
         sync(mob, true, owner);
         return true;
@@ -197,7 +197,7 @@ public final class MountCompanion {
 
     private static SoundEvent whimper(Mob mob) {
         MountKind k = Mounts.kindOf(mob);
-        if (k != null && k.backing == MountKind.Backing.BEAST && k != MountKind.INDRIK) return SoundEvents.WOLF_WHINE;
+        if (k != null && k.backing == MountKind.Backing.BEAST && k != MountKind.INDRIK) return SoundEvents.WOLF_SOUNDS.get(net.minecraft.world.entity.animal.wolf.WolfSoundVariants.SoundSet.CLASSIC).adultSounds().whineSound().value();
         if (k == MountKind.ARVAK) return SoundEvents.SKELETON_HORSE_AMBIENT;
         return SoundEvents.HORSE_BREATHE;
     }
@@ -211,10 +211,10 @@ public final class MountCompanion {
     public static boolean rise(Mob mob, long now, @Nullable Player owner, boolean announce) {
         if (!isDowned(mob)) return false;
         CompoundTag t = mob.getPersistentData();
-        int prev = t.getInt(PREV);
+        int prev = t.getIntOr(PREV, 0);
         t.remove(DOWNED);
         t.remove(PREV);
-        mob.setInvulnerable((prev & 1) != 0);
+        mob.setPermanentlyInvulnerable((prev & 1) != 0);
         mob.setSilent((prev & 2) != 0);
         mob.setNoAi((prev & 4) != 0);
         mob.setHealth(Math.max(mob.getHealth(), mob.getMaxHealth() * RISE_FRACTION));
@@ -236,13 +236,13 @@ public final class MountCompanion {
         MountKind k = Mounts.kindOf(mob);
         if (k == MountKind.ARVAK) return SoundEvents.SKELETON_HORSE_AMBIENT;
         if (k == MountKind.MAMMOTH) return SoundEvents.RAVAGER_AMBIENT;
-        if (k != null && k.backing == MountKind.Backing.BEAST && k != MountKind.INDRIK) return SoundEvents.WOLF_GROWL;
+        if (k != null && k.backing == MountKind.Backing.BEAST && k != MountKind.INDRIK) return SoundEvents.WOLF_SOUNDS.get(net.minecraft.world.entity.animal.wolf.WolfSoundVariants.SoundSet.CLASSIC).adultSounds().growlSound().value();
         return SoundEvents.HORSE_AMBIENT;
     }
 
     /** True while the mount is still resting from a fall (it has just risen). */
     public static boolean resting(Entity mount, long now) {
-        return mount.getPersistentData().contains(REST) && now < mount.getPersistentData().getLong(REST);
+        return mount.getPersistentData().contains(REST) && now < mount.getPersistentData().getLongOr(REST, 0L);
     }
 
     // ------------------------------------------------------------------ the downed tick
@@ -260,7 +260,7 @@ public final class MountCompanion {
             mob.move(MoverType.SELF, new Vec3(0, -0.4, 0));
         }
         ServerLevel level = (ServerLevel) mob.level();
-        if (mob.getY() < level.getMinBuildHeight() - 8) rescue(mob, owner);
+        if (mob.getY() < level.getMinY() - 8) rescue(mob, owner);
         if (mob.tickCount % 80 == 17) mob.level().playSound(null, mob.blockPosition(), whimper(mob), SoundSource.NEUTRAL, 0.5f, 0.5f);
         if (mob.tickCount % 10 != 3) return false;
         clearAggro(mob);
@@ -270,7 +270,7 @@ public final class MountCompanion {
     /** Rises the mount when it has lain long enough and the area is calm. */
     static boolean tryRise(Mob mob, @Nullable Player owner, long now) {
         if (!isDowned(mob)) return false;
-        long since = mob.getPersistentData().getLong(DOWNED);
+        long since = mob.getPersistentData().getLongOr(DOWNED, 0L);
         if (now - since < MIN_DOWN_TICKS || !calm(mob, owner)) return false;
         if (owner != null && owner.level() == mob.level() && mob.distanceTo(owner) > FAR) rescue(mob, owner);
         return rise(mob, now, owner, true);
@@ -283,10 +283,10 @@ public final class MountCompanion {
         if (owner != null && owner.level() == level) {
             near = owner.blockPosition();
         } else {
-            BlockPos s = level.getSharedSpawnPos();
+            BlockPos s = level.getRespawnData().pos();
             int x = mob.getBlockX(), z = mob.getBlockZ();
             near = new BlockPos(x, level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z), z);
-            if (near.getY() <= level.getMinBuildHeight()) near = s;
+            if (near.getY() <= level.getMinY()) near = s;
         }
         BlockPos at = Mounts.safeSpot(level, near);
         mob.teleportTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5);
@@ -342,7 +342,7 @@ public final class MountCompanion {
         if (!(mount instanceof Mob mob) || !isDowned(mob)) return false;
         long now = player.level().getGameTime();
         if (calm(mob, player) && mount.level() == player.level()) {
-            if (mob.distanceTo(player) > FAR || mob.getY() < ((ServerLevel) mob.level()).getMinBuildHeight()) rescue(mob, player);
+            if (mob.distanceTo(player) > FAR || mob.getY() < ((ServerLevel) mob.level()).getMinY()) rescue(mob, player);
             return !rise(mob, now, player, true);
         }
         MountKind kind = Mounts.kindOf(mob);
@@ -366,7 +366,7 @@ public final class MountCompanion {
     // ------------------------------------------------------------------ stance
 
     public static boolean stays(@Nullable Player owner) {
-        return owner != null && Mounts.data(owner).getBoolean(STAY);
+        return owner != null && Mounts.data(owner).getBooleanOr(STAY, false);
     }
 
     /** Sneak plus the call key: follow into fights or hold. True when there was a mount close by to tell. */
@@ -419,8 +419,8 @@ public final class MountCompanion {
     /** The stat system's multiplier of a mount's blows (1 when it writes none). */
     public static float power(Entity mob) {
         CompoundTag t = mob.getPersistentData();
-        float m = t.contains(POWER) ? Mth.clamp(t.getFloat(POWER), 0.25f, 4f) : 1f;
-        if (t.contains(LEVEL)) m *= 1f + 0.04f * Math.max(0, t.getInt(LEVEL) - 1);
+        float m = t.contains(POWER) ? Mth.clamp(t.getFloatOr(POWER, 0f), 0.25f, 4f) : 1f;
+        if (t.contains(LEVEL)) m *= 1f + 0.04f * Math.max(0, t.getIntOr(LEVEL, 0) - 1);
         return m;
     }
 
@@ -435,7 +435,7 @@ public final class MountCompanion {
     static boolean validFoe(Mob mob, Player owner, @Nullable LivingEntity e) {
         if (e == null || e == mob || e == owner || !e.isAlive() || e instanceof Player || isDowned(e)) return false;
         if (Mounts.isMount(e) && Mounts.ownerOf(e) != null) return false;
-        if (e instanceof OwnableEntity o && owner.getUUID().equals(o.getOwnerUUID())) return false;
+        if (e instanceof OwnableEntity o && owner.getUUID().equals(com.skycraft.platform.EntityData.ownerId(o))) return false;
         if (Mounts.isFriend(mob, e)) return false;
         if (e.distanceToSqr(owner) > CHASE * CHASE) return false;
         return e instanceof Enemy || e instanceof Mob m && m.getTarget() == owner;
@@ -601,10 +601,10 @@ public final class MountCompanion {
             if (cooldown > 0) return;
             cooldown = profile.cooldown();
             float dmg = kickDamage(mob, profile);
-            mob.swing(net.minecraft.world.InteractionHand.MAIN_HAND);
-            if (t.hurt(mob.damageSources().mobAttack(mob), dmg)) {
+            mob.swing(net.minecraft.world.InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, false);
+            if (com.skycraft.platform.Effects.hurt(t, mob.damageSources().mobAttack(mob), dmg)) {
                 double kb = profile.knock();
-                t.knockback(kb, Mth.sin(mob.getYRot() * Mth.DEG_TO_RAD), -Mth.cos(mob.getYRot() * Mth.DEG_TO_RAD));
+                t.knockback(kb, Mth.sin(mob.getYRot() * Mth.DEG_TO_RAD), -Mth.cos(mob.getYRot() * Mth.DEG_TO_RAD), mob.damageSources().mobAttack(mob), dmg);
                 mob.setLastHurtMob(t);
             }
             mob.level().playSound(null, mob.blockPosition(), SoundEvents.HORSE_ANGRY, SoundSource.NEUTRAL, 0.8f, 1.0f);

@@ -41,7 +41,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * {@link #findGenerationPoint} reads noise heights only; the plan is built lazily in the stub's piece builder.
  */
 public class SettlementStructure extends Structure {
-    public static final Codec<SettlementStructure> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+    public static final com.mojang.serialization.MapCodec<SettlementStructure> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
             settingsCodec(instance),
             Codec.STRING.optionalFieldOf("culture", "auto").forGetter(s -> s.culture),
             Codec.STRING.fieldOf("size").forGetter(s -> s.size.name().toLowerCase(Locale.ROOT)),
@@ -217,8 +217,8 @@ public class SettlementStructure extends Structure {
         Culture c = Culture.of(culture.equals("auto") ? region.culture() : culture);
         String hint = (culture.equals("auto") ? region.culture() : culture) + " " + region.id();
         int style = c == Culture.NORD ? Layouts.nordStyle(region.id()) : c == Culture.DUNMER ? Culture.dunmerStyle(hint) : 0;
-        long seed = ctx.seed() ^ cp.toLong() * 0x5DEECE66DL ^ size.ordinal();
-        String key = "gen:" + cp.x + "," + cp.z;
+        long seed = ctx.seed() ^ cp.pack() * 0x5DEECE66DL ^ size.ordinal();
+        String key = "gen:" + cp.x() + "," + cp.z();
         Direction back = Direction.from2DDataValue((int) Math.floorMod(seed >>> 7, 4));
         return Optional.of(new GenerationStub(new BlockPos(x, h, z), builder -> {
             Plan plan = new Plan(key, x, z, R, c, style, seed, t, back);
@@ -237,11 +237,11 @@ public class SettlementStructure extends Structure {
         ChunkPos cp = ctx.chunkPos();
         int x = cp.getMiddleBlockX(), z = cp.getMiddleBlockZ();
         Terrain t = new Terrain(ctx);
-        long seed = ctx.seed() ^ cp.toLong() * 0x2545F4914F6CDD1DL ^ 0x517EL;
+        long seed = ctx.seed() ^ cp.pack() * 0x2545F4914F6CDD1DL ^ 0x517EL;
         com.skycraft.tamriel.settlement.grammar.Sites.Choice choice = com.skycraft.tamriel.settlement.grammar.Sites.choose(seed, x, z, t);
         if (choice == null) return Optional.empty();
         int h = t.land(x, z);
-        String key = "site:" + cp.x + "," + cp.z;
+        String key = "site:" + cp.x() + "," + cp.z();
         return Optional.of(new GenerationStub(new BlockPos(x, h, z), builder -> {
             Plan plan = new Plan(key, x, z, Layouts.Size.SITE.radius(), choice.culture(), choice.style(), seed, t, choice.back());
             com.skycraft.tamriel.settlement.grammar.Sites.layout(plan, choice.kind());

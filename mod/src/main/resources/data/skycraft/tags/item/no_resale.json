@@ -1,0 +1,14 @@
+{
+  "replace": false,
+  "values": [
+    "#skycraft:artifacts",
+    {
+      "id": "skycraft:house_key",
+      "required": false
+    },
+    {
+      "id": "skycraft:monster_trophy",
+      "required": false
+    }
+  ]
+}

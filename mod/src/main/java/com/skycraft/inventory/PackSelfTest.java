@@ -12,7 +12,7 @@ import net.minecraft.nbt.NbtIo;
 import net.minecraft.network.Connection;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.PacketFlow;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -26,7 +26,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.AABB;
-import net.minecraftforge.common.util.FakePlayer;
+import net.neoforged.neoforge.common.util.FakePlayer;
 import io.netty.buffer.Unpooled;
 
 import java.io.ByteArrayInputStream;
@@ -94,16 +94,82 @@ public final class PackSelfTest {
     }
 
     public static Report run(MinecraftServer server) {
-        Checks c = new Checks();
+        Checks checks = new Checks();
+        ServerLevel level = server.overworld();
+        if (level == null) {
+            checks.check("fixture: actual overworld exists", false, "data-only server has no playable level");
+            return new Report(checks.passed, checks.total, checks.lines, checks.failed);
+        }
+        try (FixtureArea area = new FixtureArea(level)) {
+            area.awaitReady();
+            checks.check("fixture: actual entity area is loaded and ticking", true, "49 chunks; prior forced states restored afterward");
+            return runReady(server, checks);
+        } catch (RuntimeException failure) {
+            Skycraft.LOGGER.error("Inventory fixture readiness/cleanup failed", failure);
+            checks.check("fixture: native world readiness and cleanup", false, failure.toString());
+            return new Report(checks.passed, checks.total, checks.lines, checks.failed);
+        }
+    }
+
+    /** A headless dev server deliberately drops spawn tickets. FULL terrain alone does not expose entity queries. */
+    private static final class FixtureArea implements AutoCloseable {
+        private static final int RADIUS = 3;
+        private final ServerLevel level;
+        private final net.minecraft.world.level.ChunkPos center;
+        private final List<net.minecraft.world.level.ChunkPos> chunks;
+        private final List<net.minecraft.world.level.ChunkPos> newlyForced = new ArrayList<>();
+        private final long deadline = System.nanoTime() + java.util.concurrent.TimeUnit.SECONDS.toNanos(30);
+
+        FixtureArea(ServerLevel level) {
+            this.level = level;
+            center = net.minecraft.world.level.ChunkPos.containing(OverflowSelfTest.testAnchor(level));
+            chunks = net.minecraft.world.level.ChunkPos.rangeClosed(center, RADIUS).toList();
+            try {
+                for (var pos : chunks) {
+                    if (!level.getForceLoadedChunks().contains(pos.pack())) {
+                        // Record ownership before native loading, which can throw after inserting the ticket.
+                        newlyForced.add(pos);
+                        level.setChunkForced(pos.x(), pos.z(), true);
+                    }
+                }
+            } catch (RuntimeException | Error failure) {
+                close();
+                throw failure;
+            }
+        }
+
+        private boolean ready() {
+            for (var pos : chunks) if (!level.areEntitiesActuallyLoadedAndTicking(pos)) return false;
+            return true;
+        }
+
+        void awaitReady() {
+            // These are the same genuine public native stages used during normal load/teleport.
+            // waitForEntities processes actual storage completions; no synthetic ticks or fixed sleep.
+            level.getChunkSource().tick(() -> System.nanoTime() < deadline, false);
+            level.waitForEntities(center, RADIUS);
+            level.getServer().managedBlock(() -> ready() || System.nanoTime() >= deadline);
+            if (!ready()) throw new IllegalStateException("Inventory fixture chunks did not become entity-ready: " + level.gatherChunkSourceStats());
+        }
+
+        @Override public void close() {
+            for (var pos : newlyForced) level.setChunkForced(pos.x(), pos.z(), false);
+            newlyForced.clear();
+        }
+    }
+
+    private static Report runReady(MinecraftServer server, Checks c) {
         ServerLevel level = server.overworld();
         FakePlayer a = new FakePlayer(level, PROFILE_A);
         connect(server, a);
         var at=OverflowSelfTest.testAnchor(level);
-        a.moveTo(at.getX()+0.5,at.getY()+1,at.getZ()+0.5);
+        a.snapTo(at.getX()+0.5,at.getY()+1,at.getZ()+0.5);
         var existing=new java.util.HashSet<UUID>();
         for(var e:level.getEntitiesOfClass(ItemEntity.class,new AABB(a.blockPosition()).inflate(16))) existing.add(e.getUUID());
         PRESERVED_DROPS.set(existing);
         try {
+            NativeComponentChecks.run(level, c);
+            com.skycraft.combat.DamageStageChecks.run(level, c);
             roundTrip(server, level, a, c);
             virtualSlots(level, a, c);
             containerTake(a, c);
@@ -129,16 +195,35 @@ public final class PackSelfTest {
         return new Report(c.passed, c.total, c.lines, c.failed);
     }
 
-    /** A fake player has no connection: give it one that queues packets, so every handler may message it. */
+    /** Records the actual listener boundary after PacketDistributor chooses recipients; no fake channel negotiation. */
+    public static final class RecordingPacketListener extends ServerGamePacketListenerImpl {
+        public int packets;
+        public RecordingPacketListener(MinecraftServer server, ServerPlayer player) {
+            super(server, new Connection(PacketFlow.SERVERBOUND), player,
+                    net.minecraft.server.network.CommonListenerCookie.createInitial(player.getGameProfile(), false));
+        }
+        @Override public void send(net.minecraft.network.protocol.Packet<?> packet) { packets++; }
+        @Override public void send(net.minecraft.network.protocol.Packet<?> packet, io.netty.channel.ChannelFutureListener listener) { packets++; }
+        @Override public boolean hasChannel(Identifier payloadId) { return false; }
+    }
+
+    /** Preserve NeoForge FakePlayer's native no-op listener; other isolated fixtures get a recording endpoint. */
     public static void connect(MinecraftServer server, ServerPlayer fake) {
-        if (fake.connection == null) new ServerGamePacketListenerImpl(server, new Connection(PacketFlow.SERVERBOUND), fake);
+        if (fake.connection == null) new RecordingPacketListener(server, fake);
+    }
+
+    /** Uses native ServerPlayer.openMenu; NeoForge FakePlayer deliberately refuses all menus in 26.3. */
+    public static ServerPlayer menuPlayer(MinecraftServer server, ServerLevel level, GameProfile profile) {
+        ServerPlayer player = new ServerPlayer(server, level, profile, net.minecraft.server.level.ClientInformation.createDefault());
+        connect(server, player);
+        return player;
     }
 
     private static void sweepDrops(ServerLevel level, ServerPlayer p) {
         for (ItemEntity e : level.getEntitiesOfClass(ItemEntity.class, new AABB(p.blockPosition()).inflate(16))) {
             if(PRESERVED_DROPS.get()!=null && PRESERVED_DROPS.get().contains(e.getUUID())) continue;
-            if (e.getItem().hasTag() && (e.getItem().getTag().contains("pack_test") || e.getItem().getTag().contains("slot_t")
-                    || e.getItem().getTag().contains("chest_t"))) e.discard();
+            if (com.skycraft.inventory.ItemData.hasCustom(e.getItem()) && (com.skycraft.inventory.ItemData.custom(e.getItem()).contains("pack_test") || com.skycraft.inventory.ItemData.custom(e.getItem()).contains("slot_t")
+                    || com.skycraft.inventory.ItemData.custom(e.getItem()).contains("chest_t"))) e.discard();
             else if (e.getItem().is(Items.ARROW)) e.discard();
         }
     }
@@ -156,7 +241,7 @@ public final class PackSelfTest {
 
     private static void add(Map<String, Integer> m, ItemStack s) {
         if (s.isEmpty()) return;
-        m.merge(BuiltInRegistries.ITEM.getKey(s.getItem()) + "|" + s.getTag(), s.getCount(), Integer::sum);
+        m.merge(BuiltInRegistries.ITEM.getKey(s.getItem()) + "|" + com.skycraft.inventory.ItemData.custom(s), s.getCount(), Integer::sum);
     }
 
     private static long total(Map<String, Integer> m) {
@@ -182,7 +267,7 @@ public final class PackSelfTest {
     private static ItemStack distinct(int i, String tag) {
         Item[] kinds = {Items.IRON_SWORD, Items.DIAMOND_PICKAXE, Items.BOW, Items.SHIELD, Items.LEATHER_HELMET, Items.POTION};
         ItemStack s = new ItemStack(kinds[i % kinds.length]);
-        s.getOrCreateTag().putInt(tag, i); // a different NBT each: like 300 differently enchanted weapons, never merged
+        com.skycraft.inventory.ItemData.updateCustom(s, customData263 -> customData263.putInt(tag, i)); // a different NBT each: like 300 differently enchanted weapons, never merged
         return s;
     }
 
@@ -218,21 +303,21 @@ public final class PackSelfTest {
 
         // the real player save/load path (capability data included), through compressed NBT bytes
         CompoundTag tag = new CompoundTag();
-        a.saveWithoutId(tag);
+        tag.merge(com.skycraft.platform.EntityData.saveWithoutId(a));
         CompoundTag back;
         try {
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
             NbtIo.writeCompressed(tag, bos);
-            back = NbtIo.readCompressed(new ByteArrayInputStream(bos.toByteArray()));
-            c.check("pack: the player's NBT is " + bos.size() + " bytes compressed", bos.size() > 0 && tag.contains("ForgeCaps"),
-                    "ForgeCaps present: " + tag.contains("ForgeCaps"));
+            back = NbtIo.readCompressed(new ByteArrayInputStream(bos.toByteArray()), net.minecraft.nbt.NbtAccounter.create(268435456L));
+            c.check("pack: the player's NBT is " + bos.size() + " bytes compressed", bos.size() > 0 && tag.contains("neoforge:attachments"),
+                    "NeoForge attachments present: " + tag.contains("neoforge:attachments"));
         } catch (IOException e) {
             c.check("pack: player NBT serialises", false, e.toString());
             return;
         }
         FakePlayer b = new FakePlayer(level, PROFILE_B);
         connect(server, b);
-        b.load(back);
+        com.skycraft.platform.EntityData.load(b, back);
         Map<String, Integer> after = snapshot(b);
         c.check("pack: save and reload through Player#saveWithoutId / Entity#load keeps every count", before.equals(after), diff(before, after));
         c.check("pack: the reloaded pack weighs the same", Math.abs(CarryWeight.current(b) - have) < 0.01f,
@@ -244,7 +329,7 @@ public final class PackSelfTest {
         FakePlayer m = new FakePlayer(level, PROFILE_C);
         List<InventoryPackets.PackSync> packets = Pack.syncPackets(a);
         for (InventoryPackets.PackSync p : packets) {
-            FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
+            net.minecraft.network.RegistryFriendlyByteBuf buf = new net.minecraft.network.RegistryFriendlyByteBuf(Unpooled.buffer(), a.registryAccess());
             InventoryPackets.PackSync.encode(p, buf);
             InventoryPackets.PackSync q = InventoryPackets.PackSync.decode(buf);
             Pack.applyClientSync(m, q.start(), q.total(), q.rows());
@@ -288,7 +373,7 @@ public final class PackSelfTest {
         c.check("virtual: arrows and a quest letter overflow into the pack", Pack.count(a, Items.ARROW) == 300 && Pack.size(a) == 2,
                 Pack.size(a) + " entries");
         int arrowIndex = Pack.find(a, s -> s.is(Items.ARROW));
-        ResourceLocation arrowId = BuiltInRegistries.ITEM.getKey(Items.ARROW);
+        Identifier arrowId = BuiltInRegistries.ITEM.getKey(Items.ARROW);
         Map<String, Integer> before = snapshot(a);
 
         InventoryActions.handle(a, InventoryPackets.InvAction.DROP_ONE, Pack.VIRTUAL_BASE + arrowIndex, arrowId);
@@ -296,7 +381,7 @@ public final class PackSelfTest {
         sweepDrops(level, a);
 
         int letterIndex = Pack.find(a, s -> QuestItems.isQuestItem(s));
-        ResourceLocation letterId = BuiltInRegistries.ITEM.getKey(QuestItems.COURIER_LETTER.get());
+        Identifier letterId = BuiltInRegistries.ITEM.getKey(QuestItems.COURIER_LETTER.get());
         InventoryActions.handle(a, InventoryPackets.InvAction.DROP_ALL, Pack.VIRTUAL_BASE + letterIndex, letterId);
         c.check("virtual: a quest item in the pack is not dropped", Pack.find(a, s -> QuestItems.isQuestItem(s)) >= 0, "still in the pack");
 
@@ -401,7 +486,7 @@ public final class PackSelfTest {
                 Pack.size(a) + " pack entries, " + diff(before, snapshot(a)));
 
         // and one entry back into the container from the pack (a virtual slot id)
-        int idx = Pack.find(a, s -> s.hasTag() && s.getTag().contains("chest_t"));
+        int idx = Pack.find(a, s -> com.skycraft.inventory.ItemData.hasCustom(s) && com.skycraft.inventory.ItemData.custom(s).contains("chest_t"));
         int packBefore = Pack.size(a);
         ActionHandler.handleContainerStore(a, 77, Pack.VIRTUAL_BASE + idx, false);
         int stored = 0;
@@ -418,15 +503,15 @@ public final class PackSelfTest {
         a.getInventory().clearContent();
         Pack.clear(a);
         Inventory inv = a.getInventory();
-        inv.selected = 0;
+        inv.setSelectedSlot(0);
 
         // 1. 1H weapon equip right / equip left / toggle unequip
         ItemStack ironSword = new ItemStack(Items.IRON_SWORD);
         ItemStack steelDagger = new ItemStack(Items.STONE_SWORD);
         inv.setItem(10, ironSword);
         inv.setItem(11, steelDagger);
-        ResourceLocation ironId = BuiltInRegistries.ITEM.getKey(Items.IRON_SWORD);
-        ResourceLocation daggerId = BuiltInRegistries.ITEM.getKey(Items.STONE_SWORD);
+        Identifier ironId = BuiltInRegistries.ITEM.getKey(Items.IRON_SWORD);
+        Identifier daggerId = BuiltInRegistries.ITEM.getKey(Items.STONE_SWORD);
 
         InventoryActions.handle(a, InventoryPackets.InvAction.EQUIP, 10, ironId);
         c.check("r6: LMB equips 1H weapon to right hand", a.getMainHandItem().is(Items.IRON_SWORD), a.getMainHandItem().toString());
@@ -443,22 +528,22 @@ public final class PackSelfTest {
                 "remaining beef=" + inv.getItem(12).getCount());
 
         // 3. Applying poison to equipped weapon coats it and shrinks the poison
-        ItemStack harmPotion = net.minecraft.world.item.alchemy.PotionUtils.setPotion(new ItemStack(Items.SPLASH_POTION), net.minecraft.world.item.alchemy.Potions.HARMING);
+        ItemStack harmPotion = net.minecraft.world.item.alchemy.PotionContents.createItemStack(Items.SPLASH_POTION, net.minecraft.world.item.alchemy.Potions.HARMING);
         inv.setItem(13, harmPotion);
         InventoryActions.handle(a, InventoryPackets.InvAction.APPLY_POISON, 13, BuiltInRegistries.ITEM.getKey(Items.SPLASH_POTION));
-        CompoundTag pTag = a.getMainHandItem().getTag() != null ? a.getMainHandItem().getTag().getCompound(com.skycraft.crafting.arcane.ArcaneEvents.WEAPON_POISON) : null;
+        CompoundTag pTag = com.skycraft.inventory.ItemData.custom(a.getMainHandItem()) != null ? com.skycraft.inventory.ItemData.custom(a.getMainHandItem()).getCompoundOrEmpty(com.skycraft.crafting.arcane.ArcaneEvents.WEAPON_POISON) : null;
         c.check("r6: applying harming potion coats right-hand weapon with hits and clean display name",
-                pTag != null && pTag.getInt(com.skycraft.crafting.arcane.ArcaneEvents.POISON_HITS) > 0
+                pTag != null && pTag.getIntOr(com.skycraft.crafting.arcane.ArcaneEvents.POISON_HITS, 0) > 0
                         && !com.skycraft.crafting.arcane.ArcaneEvents.poisonDisplayName(pTag).startsWith("{"),
-                pTag != null ? com.skycraft.crafting.arcane.ArcaneEvents.poisonDisplayName(pTag) + " (" + pTag.getInt(com.skycraft.crafting.arcane.ArcaneEvents.POISON_HITS) + ")" : "null");
+                pTag != null ? com.skycraft.crafting.arcane.ArcaneEvents.poisonDisplayName(pTag) + " (" + pTag.getIntOr(com.skycraft.crafting.arcane.ArcaneEvents.POISON_HITS, 0) + ")" : "null");
 
         // 4. Bound weapon saves displaced weapon and restores it on expiry
         ItemStack boundSword = new ItemStack(com.skycraft.magic.MagicRegistry.BOUND_SWORD.get());
         com.skycraft.magic.Hands.equipBound(a, boundSword, false);
         c.check("r6: conjuring bound sword places it in right hand and stows iron sword",
                 com.skycraft.magic.bound.BoundWeapons.isBound(a.getMainHandItem()), a.getMainHandItem().toString());
-        CompoundTag bTag = a.getMainHandItem().getTag() != null ? a.getMainHandItem().getTag().copy() : new CompoundTag();
-        inv.setItem(inv.selected, ItemStack.EMPTY);
+        CompoundTag bTag = com.skycraft.inventory.ItemData.custom(a.getMainHandItem()) != null ? com.skycraft.inventory.ItemData.custom(a.getMainHandItem()).copy() : new CompoundTag();
+        inv.setItem(inv.getSelectedSlot(), ItemStack.EMPTY);
         com.skycraft.magic.Hands.restoreAfterBound(a, bTag);
         c.check("r6: bound weapon expiry restores displaced iron sword to right hand",
                 a.getMainHandItem().is(Items.IRON_SWORD), a.getMainHandItem().toString());

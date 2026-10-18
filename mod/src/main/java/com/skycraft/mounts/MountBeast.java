@@ -83,7 +83,7 @@ public class MountBeast extends SkyBeast implements PlayerRideableJumping {
     @Override
     public InteractionResult mobInteract(Player player, InteractionHand hand) {
         if (hand != InteractionHand.MAIN_HAND) return InteractionResult.PASS;
-        if (this.level().isClientSide) return InteractionResult.SUCCESS;
+        if (this.level().isClientSide()) return InteractionResult.SUCCESS;
         if (!(player instanceof ServerPlayer sp)) return InteractionResult.PASS;
         return Mounts.interact(sp, this, player.getItemInHand(hand)) ? InteractionResult.CONSUME : InteractionResult.PASS;
     }
@@ -106,12 +106,12 @@ public class MountBeast extends SkyBeast implements PlayerRideableJumping {
         this.setRot(player.getYRot(), player.getXRot() * 0.5f);
         this.yRotO = this.yBodyRot = this.yHeadRot = this.getYRot();
         this.setTarget(null);
-        if (this.isControlledByLocalInstance() && this.onGround()) {
+        if (this.isLocalInstanceAuthoritative() && this.onGround()) {
             if (jumpPending > 0) {
                 double v = jump() * jumpPending;
                 Vec3 m = this.getDeltaMovement();
                 this.setDeltaMovement(m.x, v, m.z);
-                this.hasImpulse = true;
+                this.needsSync = true;
                 if (input.z > 0) {
                     float sin = Mth.sin(this.getYRot() * Mth.DEG_TO_RAD), cos = Mth.cos(this.getYRot() * Mth.DEG_TO_RAD);
                     this.setDeltaMovement(this.getDeltaMovement().add(-0.4 * sin * jumpPending, 0, 0.4 * cos * jumpPending));
@@ -134,9 +134,9 @@ public class MountBeast extends SkyBeast implements PlayerRideableJumping {
     }
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        this.entityData.define(JUMP_MULT, 1f);
+    protected void defineSynchedData(net.minecraft.network.syncher.SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(JUMP_MULT, 1f);
     }
 
     @Override
@@ -153,7 +153,11 @@ public class MountBeast extends SkyBeast implements PlayerRideableJumping {
     }
 
     @Override
-    public double getPassengersRidingOffset() {
+    protected Vec3 getPassengerAttachmentPoint(Entity passenger, net.minecraft.world.entity.EntityDimensions dimensions, float scale) {
+        return new Vec3(0, passengerRidingOffset263(), 0);
+    }
+
+    private double passengerRidingOffset263() {
         return this.getBbHeight() * switch (kind()) {
             case MAMMOTH -> 0.92;
             case INDRIK -> 0.68;
@@ -195,9 +199,9 @@ public class MountBeast extends SkyBeast implements PlayerRideableJumping {
     }
 
     @Override
-    public boolean causeFallDamage(float distance, float multiplier, DamageSource source) {
+    public boolean causeFallDamage(double distance, float multiplier, DamageSource source) {
         // beasts land like horses: the first few blocks are free, for them and the rider
-        float d = distance - 3f;
+        double d = distance - 3f;
         if (d <= 0) return false;
         boolean hurt = super.causeFallDamage(d, multiplier * 0.5f, source);
         for (Entity e : this.getIndirectPassengers()) e.causeFallDamage(d, multiplier * 0.5f, source);
@@ -213,10 +217,10 @@ public class MountBeast extends SkyBeast implements PlayerRideableJumping {
     }
 
     @Override
-    public boolean hurt(DamageSource source, float amount) {
+    public boolean hurtServer(net.minecraft.server.level.ServerLevel serverLevel263, DamageSource source, float amount) {
         Entity by = source.getEntity();
         if (by != null && (this.hasPassenger(by) || by instanceof Player p && Mounts.isOwner(p, this))) return false;
-        return super.hurt(source, amount);
+        return super.hurtServer(serverLevel263, source, amount);
     }
 
     /** Ready to strike beside its rider; consumes the cooldown. */
@@ -227,8 +231,8 @@ public class MountBeast extends SkyBeast implements PlayerRideableJumping {
     }
 
     @Override
-    protected void customServerAiStep() {
-        super.customServerAiStep();
+    protected void customServerAiStep(net.minecraft.server.level.ServerLevel serverLevel263) {
+        super.customServerAiStep(serverLevel263);
         if (assistCooldown > 0) assistCooldown--;
     }
 
@@ -243,8 +247,11 @@ public class MountBeast extends SkyBeast implements PlayerRideableJumping {
     }
 
     @Override
-    public boolean canBeLeashed(Player player) {
-        return !this.isVehicle() && (Mounts.ownerOf(this) == null || Mounts.isOwner(player, this));
+    public boolean canBeLeashed() { return !this.isVehicle(); }
+
+    @Override
+    public boolean canHaveALeashAttachedTo(Entity holder) {
+        return super.canHaveALeashAttachedTo(holder) && (Mounts.ownerOf(this) == null || holder instanceof Player player && Mounts.isOwner(player, this));
     }
 
     @Nullable

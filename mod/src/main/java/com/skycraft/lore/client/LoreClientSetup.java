@@ -6,27 +6,25 @@ import com.skycraft.client.SkyKeys;
 import com.skycraft.lore.LoreBookItem;
 import com.skycraft.lore.LoreModule;
 import net.minecraft.client.KeyMapping;
-import net.minecraft.client.renderer.item.ItemProperties;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
-import net.minecraftforge.client.event.RegisterGuiOverlaysEvent;
-import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
-import net.minecraftforge.client.settings.KeyConflictContext;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-import org.lwjgl.glfw.GLFW;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.AddClientReloadListenersEvent;
+import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
+import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
+import net.neoforged.neoforge.client.settings.KeyConflictContext;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 
 /** Mod-bus client registration for the lore module: stone power key, HUD banner, book cover models, text reload. */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
 public final class LoreClientSetup {
     /** Uses the active Standing Stone's once-a-day power. Owned by the lore module. */
     public static final KeyMapping STONE_POWER = new KeyMapping("key.skycraft.stone_power", KeyConflictContext.IN_GAME,
-            InputConstants.Type.KEYSYM, InputConstants.UNKNOWN.getValue(), SkyKeys.CATEGORY);
+            InputConstants.Type.KEYBOARD, InputConstants.UNKNOWN.getValue(), SkyKeys.CATEGORY);
 
-    public static final ResourceLocation COVER = new ResourceLocation(Skycraft.MODID, "cover");
+    public static final Identifier COVER = Identifier.fromNamespaceAndPath(Skycraft.MODID, "cover");
 
     private LoreClientSetup() {}
 
@@ -36,19 +34,15 @@ public final class LoreClientSetup {
     }
 
     @SubscribeEvent
-    public static void overlays(RegisterGuiOverlaysEvent event) {
-        event.registerAboveAll("lore_stone", StoneHud::render);
-        event.registerAboveAll("lore_read_prompt", ReadPrompt::render);
+    public static void overlays(RegisterGuiLayersEvent event) {
+        event.registerAboveAll(net.minecraft.resources.Identifier.fromNamespaceAndPath("skycraft", "lore_stone"), StoneHud::render);
+        event.registerAboveAll(net.minecraft.resources.Identifier.fromNamespaceAndPath("skycraft", "lore_read_prompt"), ReadPrompt::render);
     }
 
     @SubscribeEvent
-    public static void reloadListeners(RegisterClientReloadListenersEvent event) {
-        event.registerReloadListener((ResourceManagerReloadListener) manager -> BookTexts.clear());
+    public static void reloadListeners(AddClientReloadListenersEvent event) {
+        event.addListener(Identifier.fromNamespaceAndPath("skycraft","book_texts"),(ResourceManagerReloadListener)manager->BookTexts.clear());
     }
 
-    @SubscribeEvent
-    public static void clientSetup(FMLClientSetupEvent event) {
-        event.enqueueWork(() -> ItemProperties.register(LoreModule.BOOK.get(), COVER,
-                (stack, level, entity, seed) -> LoreBookItem.coverOf(stack) / 10f + 0.01f));
-    }
+
 }

@@ -190,12 +190,10 @@ public final class FerryRoutes {
                 final Port tPort = toPort;
                 final Route fRoute = ferryRoute;
                 Component destName = offer.displayName();
-                if (!Prewarm.isReady(player.serverLevel(), offer.x(), offer.z())
-                        && Prewarm.start(player, offer.x(), offer.z(), destName,
-                        () -> completeSail(player, fPort, tPort, fRoute, offer))) {
-                    return true;
-                }
-                return completeSail(player, fPort, tPort, fRoute, offer);
+                Prewarm.Result result = Prewarm.request(player, offer.x(), offer.z(), destName,
+                        () -> completeSail(player, fPort, tPort, fRoute, offer));
+                if (result == Prewarm.Result.READY) return completeSail(player, fPort, tPort, fRoute, offer);
+                return result == Prewarm.Result.STARTED;
             }
         }
         return TravelNetworks.travel(player, fromId, toId, TravelMode.BOAT);

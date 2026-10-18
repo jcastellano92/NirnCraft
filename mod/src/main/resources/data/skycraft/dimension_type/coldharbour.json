@@ -1,10 +1,7 @@
 {
   "ambient_light": 0.1,
-  "bed_works": false,
   "coordinate_scale": 1.0,
-  "effects": "skycraft:coldharbour",
   "has_ceiling": false,
-  "has_raids": false,
   "has_skylight": true,
   "height": 256,
   "infiniburn": "#skycraft:infiniburn_realms",
@@ -13,14 +10,33 @@
   "monster_spawn_block_light_limit": 0,
   "monster_spawn_light_level": {
     "type": "minecraft:uniform",
-    "value": {
-      "min_inclusive": 0,
-      "max_inclusive": 15
-    }
+    "min_inclusive": 0,
+    "max_inclusive": 15
   },
-  "natural": false,
-  "piglin_safe": false,
-  "respawn_anchor_works": false,
-  "ultrawarm": true,
-  "fixed_time": 17000
+  "attributes": {
+    "minecraft:gameplay/bed_rule": {
+      "can_sleep": "never",
+      "can_set_spawn": "never",
+      "destroy_on_use": true
+    },
+    "minecraft:gameplay/can_start_raid": false,
+    "minecraft:gameplay/piglins_zombify": true,
+    "minecraft:gameplay/respawn_anchor_works": false,
+    "minecraft:gameplay/water_evaporates": true,
+    "neoforge:custom_skybox": "skycraft:coldharbour",
+    "neoforge:custom_clouds": "skycraft:coldharbour",
+    "neoforge:custom_weather_effects": "skycraft:coldharbour",
+    "minecraft:gameplay/fast_lava": true,
+    "minecraft:visual/default_dripstone_particle": {
+      "type": "minecraft:dripping_dripstone_lava"
+    },
+    "minecraft:gameplay/nether_portal_spawns_piglin": false
+  },
+  "has_ender_dragon_fight": false,
+  "default_clock": "skycraft:fixed/coldharbour",
+  "timelines": [
+    "skycraft:fixed/coldharbour/day",
+    "skycraft:fixed/coldharbour/moon"
+  ],
+  "has_fixed_time": true
 }

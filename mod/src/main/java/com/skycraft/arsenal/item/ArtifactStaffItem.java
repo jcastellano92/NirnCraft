@@ -25,9 +25,9 @@ public class ArtifactStaffItem extends StaffItem implements ArtifactItem {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
-        super.appendHoverText(stack, level, tooltip, flag);
-        tooltip.add(Component.translatable("lore.skycraft.artifact." + kind.id).withStyle(net.minecraft.ChatFormatting.DARK_GRAY,
+    public void appendHoverText(ItemStack stack, net.minecraft.world.item.Item.TooltipContext context263, net.minecraft.world.item.component.TooltipDisplay display263, java.util.function.Consumer<Component> tooltip, TooltipFlag flag) {
+        super.appendHoverText(stack, context263, display263, tooltip, flag);
+        tooltip.accept(Component.translatable("lore.skycraft.artifact." + kind.id).withStyle(net.minecraft.ChatFormatting.DARK_GRAY,
                 net.minecraft.ChatFormatting.ITALIC));
     }
 }

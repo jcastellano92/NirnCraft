@@ -6,15 +6,15 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SnowLayerBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
-import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
+import com.skycraft.worldgen.ConfiguredFeature;
+import com.skycraft.worldgen.FeaturePlaceContext;
+import com.skycraft.worldgen.NoneFeatureConfiguration;
 
 /**
  * Red Mountain's lava vents: a cone of volcanic rock with glowing cracks around a crater of lava, ringed with ash
  * drifts. One in four is a huge vent (radius up to 12) centred on the chunk.
  */
-public class LavaVentFeature extends Feature<NoneFeatureConfiguration> {
+public class LavaVentFeature extends ConfiguredFeature<NoneFeatureConfiguration> {
     public LavaVentFeature(Codec<NoneFeatureConfiguration> codec) {
         super(codec);
     }

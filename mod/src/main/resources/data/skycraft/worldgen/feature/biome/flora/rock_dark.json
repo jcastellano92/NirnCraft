@@ -1,0 +1,46 @@
+{
+  "type": "skycraft:flora_rock",
+  "config": {
+    "stone": {
+      "type": "minecraft:weighted",
+      "entries": [
+        {
+          "data": "minecraft:deepslate",
+          "weight": 3
+        },
+        {
+          "data": "minecraft:cobbled_deepslate",
+          "weight": 2
+        },
+        {
+          "data": "minecraft:mossy_cobblestone",
+          "weight": 3
+        },
+        {
+          "data": "minecraft:tuff",
+          "weight": 2
+        }
+      ]
+    },
+    "moss_chance": 0.4,
+    "size": {
+      "type": "minecraft:uniform",
+      "min_inclusive": 1,
+      "max_inclusive": 3
+    },
+    "style": "mixed",
+    "moss": {
+      "type": "minecraft:weighted",
+      "entries": [
+        {
+          "data": "minecraft:moss_block",
+          "weight": 3
+        },
+        {
+          "data": "minecraft:mossy_cobblestone",
+          "weight": 3
+        }
+      ]
+    }
+  }
+}

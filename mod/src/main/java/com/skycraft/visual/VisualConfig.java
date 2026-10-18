@@ -1,34 +1,34 @@
 package com.skycraft.visual;
 
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 /** Client presentation settings: {@code config/skycraft-visual-client.toml}. Every feature can be turned off. */
 public final class VisualConfig {
-    public static final ForgeConfigSpec CLIENT_SPEC;
+    public static final ModConfigSpec CLIENT_SPEC;
 
-    public static final ForgeConfigSpec.BooleanValue PARTICLES;
-    public static final ForgeConfigSpec.IntValue PARTICLE_BUDGET;
-    public static final ForgeConfigSpec.IntValue PARTICLE_RANGE;
-    public static final ForgeConfigSpec.BooleanValue FROST_BREATH;
-    public static final ForgeConfigSpec.BooleanValue DRIFTING_SNOW;
-    public static final ForgeConfigSpec.BooleanValue FALLING_LEAVES;
-    public static final ForgeConfigSpec.BooleanValue FIREFLIES;
-    public static final ForgeConfigSpec.BooleanValue ASH;
-    public static final ForgeConfigSpec.BooleanValue EMBERS;
-    public static final ForgeConfigSpec.BooleanValue SAND;
-    public static final ForgeConfigSpec.BooleanValue MARSH_WISPS;
-    public static final ForgeConfigSpec.BooleanValue DUST_MOTES;
+    public static final ModConfigSpec.BooleanValue PARTICLES;
+    public static final ModConfigSpec.IntValue PARTICLE_BUDGET;
+    public static final ModConfigSpec.IntValue PARTICLE_RANGE;
+    public static final ModConfigSpec.BooleanValue FROST_BREATH;
+    public static final ModConfigSpec.BooleanValue DRIFTING_SNOW;
+    public static final ModConfigSpec.BooleanValue FALLING_LEAVES;
+    public static final ModConfigSpec.BooleanValue FIREFLIES;
+    public static final ModConfigSpec.BooleanValue ASH;
+    public static final ModConfigSpec.BooleanValue EMBERS;
+    public static final ModConfigSpec.BooleanValue SAND;
+    public static final ModConfigSpec.BooleanValue MARSH_WISPS;
+    public static final ModConfigSpec.BooleanValue DUST_MOTES;
 
-    public static final ForgeConfigSpec.BooleanValue TARGET_BAR;
-    public static final ForgeConfigSpec.BooleanValue SKY_CROSSHAIR;
-    public static final ForgeConfigSpec.BooleanValue STYLED_BOSS_BAR;
-    public static final ForgeConfigSpec.BooleanValue STYLED_BANNERS;
+    public static final ModConfigSpec.BooleanValue TARGET_BAR;
+    public static final ModConfigSpec.BooleanValue SKY_CROSSHAIR;
+    public static final ModConfigSpec.BooleanValue STYLED_BOSS_BAR;
+    public static final ModConfigSpec.BooleanValue STYLED_BANNERS;
 
-    public static final ForgeConfigSpec.BooleanValue LOADING_SCREEN;
-    public static final ForgeConfigSpec.BooleanValue SKIN_VANILLA_SCREENS;
+    public static final ModConfigSpec.BooleanValue LOADING_SCREEN;
+    public static final ModConfigSpec.BooleanValue SKIN_VANILLA_SCREENS;
 
     static {
-        ForgeConfigSpec.Builder b = new ForgeConfigSpec.Builder();
+        ModConfigSpec.Builder b = new ModConfigSpec.Builder();
         b.comment("Atmospheric particles. They also follow Video Settings > Particles (Decreased halves them, Minimal turns them off).")
                 .push("particles");
         PARTICLES = b.comment("Master switch for every atmospheric particle below.").define("enabled", true);

@@ -197,26 +197,22 @@ abstract class MachineProfile {
 
         @Override
         boolean acceptsAt(Cell c, ItemStack stack) {
-            if (c.role() == Role.FUEL) return AbstractFurnaceBlockEntity.isFuel(stack);
+            if (c.role() == Role.FUEL) return stack.has(net.minecraft.core.component.DataComponents.COOKING_FUEL);
             if (c.role() == Role.INPUT && mc.level != null) {
-                Container one = new SimpleContainer(stack);
-                return mc.level.getRecipeManager().getRecipeFor(castType(recipeType), one, mc.level).isPresent();
+                var allowed=recipeType==RecipeType.BLASTING?net.minecraft.world.item.crafting.RecipePropertySet.BLAST_FURNACE_INPUT:
+                    recipeType==RecipeType.SMOKING?net.minecraft.world.item.crafting.RecipePropertySet.SMOKER_INPUT:net.minecraft.world.item.crafting.RecipePropertySet.FURNACE_INPUT;
+                return mc.level.recipeAccess().propertySet(allowed).test(stack);
             }
             return false;
-        }
-
-        @SuppressWarnings("unchecked")
-        private static RecipeType<Recipe<Container>> castType(RecipeType<?> t) {
-            return (RecipeType<Recipe<Container>>) t;
         }
 
         @Override
         List<Meter> meters() {
             List<Meter> m = new ArrayList<>();
             m.add(new Meter(Component.translatable("inventory.skycraft.machine.meter.fuel"),
-                    furnace.isLit() ? Math.min(1f, furnace.getLitProgress() / 13f) : 0f, 0xE0802A));
+                    furnace.isLit() ? Math.min(1f, furnace.getLitProgress()) : 0f, 0xE0802A));
             m.add(new Meter(Component.translatable("inventory.skycraft.machine.meter.progress"),
-                    Math.min(1f, furnace.getBurnProgress() / 24f), 0xD8C060));
+                    Math.min(1f, furnace.getBurnProgress()), 0xD8C060));
             return m;
         }
     }
@@ -305,9 +301,9 @@ abstract class MachineProfile {
         List<Choice> choices() {
             List<Choice> out = new ArrayList<>();
             if (mc.level == null) return out;
-            List<StonecutterRecipe> recipes = cutter.getRecipes();
+            var recipes = cutter.getVisibleRecipes().entries();
             for (int i = 0; i < recipes.size(); i++) {
-                ItemStack r = recipes.get(i).getResultItem(mc.level.registryAccess());
+                ItemStack r = recipes.get(i).recipe().optionDisplay().resolveForFirstStack(net.minecraft.world.item.crafting.display.SlotDisplayContext.fromLevel(mc.level));
                 out.add(new Choice(r, r.getHoverName(), r.getCount() > 1 ? Component.literal("x" + r.getCount()) : Component.empty(),
                         i == cutter.getSelectedRecipeIndex(), true));
             }
@@ -335,13 +331,13 @@ abstract class MachineProfile {
         List<Choice> choices() {
             List<Choice> out = new ArrayList<>();
             String color = "white";
-            if (menu.getSlot(1).getItem().getItem() instanceof DyeItem dye) color = dye.getDyeColor().getName();
+            if (menu.getSlot(1).getItem().getItem() instanceof DyeItem dye) color = menu.getSlot(1).getItem().getOrDefault(net.minecraft.core.component.DataComponents.DYE,net.minecraft.world.item.DyeColor.WHITE).getName();
             ItemStack banner = menu.getSlot(0).getItem();
-            ItemStack icon = banner.isEmpty() ? new ItemStack(Items.WHITE_BANNER) : one(banner);
+            ItemStack icon = banner.isEmpty() ? new ItemStack(Items.BANNER.pick(net.minecraft.world.item.DyeColor.WHITE)) : one(banner);
             List<Holder<BannerPattern>> patterns = loom.getSelectablePatterns();
             for (int i = 0; i < patterns.size(); i++) {
-                String hash = patterns.get(i).value().getHashname();
-                out.add(new Choice(icon, Component.translatable("block.minecraft.banner." + hash + "." + color), Component.empty(),
+                String translation = patterns.get(i).value().translationKey();
+                out.add(new Choice(icon, Component.translatable(translation + "." + color), Component.empty(),
                         i == loom.getSelectedBannerPatternIndex(), true));
             }
             return out;
@@ -377,8 +373,8 @@ abstract class MachineProfile {
                     out.add(new Choice(icon, Component.translatable("inventory.skycraft.machine.enchant.none"), Component.empty(), false, false));
                     continue;
                 }
-                Enchantment e = table.enchantClue[i] >= 0 ? Enchantment.byId(table.enchantClue[i]) : null;
-                Component label = e != null ? e.getFullname(table.levelClue[i]) : Component.translatable("inventory.skycraft.machine.enchant.unknown");
+                Holder<Enchantment> e = table.enchantClue[i] >= 0 && mc.level!=null ? mc.level.registryAccess().lookupOrThrow(net.minecraft.core.registries.Registries.ENCHANTMENT).get(table.enchantClue[i]).orElse(null) : null;
+                Component label = e != null ? Enchantment.getFullname(e,table.levelClue[i]) : Component.translatable("inventory.skycraft.machine.enchant.unknown");
                 boolean ok = creative || (p != null && p.experienceLevel >= cost && lapis >= i + 1);
                 out.add(new Choice(icon, label, Component.translatable("inventory.skycraft.machine.enchant.cost", cost, i + 1), false, ok));
             }
@@ -390,8 +386,8 @@ abstract class MachineProfile {
 
     static final class Beacon extends Fixed {
         private final BeaconMenu beacon;
-        private MobEffect primary;
-        private MobEffect secondary;
+        private Holder<MobEffect> primary;
+        private Holder<MobEffect> secondary;
         private boolean seeded;
 
         Beacon(BeaconMenu menu) {
@@ -407,19 +403,19 @@ abstract class MachineProfile {
         }
 
         /** Effects the vanilla screen offered: the first {@code min(levels, 3)} tiers as primary powers. */
-        private List<MobEffect> primaries() {
-            List<MobEffect> out = new ArrayList<>();
+        private List<Holder<MobEffect>> primaries() {
+            List<Holder<MobEffect>> out = new ArrayList<>();
             int tiers = Math.min(beacon.getLevels(), 3);
             for (int t = 0; t < tiers; t++) {
-                for (MobEffect e : BeaconBlockEntity.BEACON_EFFECTS[t]) out.add(e);
+                for (Holder<MobEffect> e : BeaconBlockEntity.BEACON_EFFECTS.get(t)) out.add(e);
             }
             return out;
         }
 
-        private List<MobEffect> secondaries() {
-            List<MobEffect> out = new ArrayList<>();
+        private List<Holder<MobEffect>> secondaries() {
+            List<Holder<MobEffect>> out = new ArrayList<>();
             if (beacon.getLevels() >= 4 && primary != null) {
-                out.add(BeaconBlockEntity.BEACON_EFFECTS[3][0]);
+                out.add(BeaconBlockEntity.BEACON_EFFECTS.get(3).get(0));
                 out.add(primary);
             }
             return out;
@@ -435,12 +431,12 @@ abstract class MachineProfile {
             seed();
             List<Choice> out = new ArrayList<>();
             ItemStack icon = new ItemStack(Items.BEACON);
-            for (MobEffect e : primaries()) {
-                out.add(new Choice(icon, Component.translatable("inventory.skycraft.machine.beacon.primary", e.getDisplayName()),
+            for (Holder<MobEffect> e : primaries()) {
+                out.add(new Choice(icon, Component.translatable("inventory.skycraft.machine.beacon.primary", e.value().getDisplayName()),
                         Component.empty(), e == primary, true));
             }
-            for (MobEffect e : secondaries()) {
-                out.add(new Choice(icon, Component.translatable("inventory.skycraft.machine.beacon.secondary", e.getDisplayName()),
+            for (Holder<MobEffect> e : secondaries()) {
+                out.add(new Choice(icon, Component.translatable("inventory.skycraft.machine.beacon.secondary", e.value().getDisplayName()),
                         Component.empty(), e == secondary, true));
             }
             boolean ready = beacon.hasPayment() && primary != null;
@@ -453,14 +449,14 @@ abstract class MachineProfile {
         @Override
         void choose(int index) {
             seed();
-            List<MobEffect> p = primaries();
-            List<MobEffect> s = secondaries();
+            List<Holder<MobEffect>> p = primaries();
+            List<Holder<MobEffect>> s = secondaries();
             if (index < p.size()) {
                 primary = p.get(index);
                 // a secondary that no longer fits the primary is dropped (vanilla: the buttons are rebuilt)
                 if (secondary != null && !secondaries().contains(secondary)) secondary = null;
             } else if (index < p.size() + s.size()) {
-                MobEffect e = s.get(index - p.size());
+                Holder<MobEffect> e = s.get(index - p.size());
                 secondary = secondary == e ? null : e;
             } else if (primary != null && beacon.hasPayment() && mc.getConnection() != null) {
                 mc.getConnection().send(new net.minecraft.network.protocol.game.ServerboundSetBeaconPacket(

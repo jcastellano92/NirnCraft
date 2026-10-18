@@ -16,7 +16,7 @@ import net.minecraft.world.level.block.VineBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -43,7 +43,7 @@ final class CottageTerrain {
     static boolean isCanopy(BlockState s) {
         if (s.isAir()) return false;
         if (s.getBlock() instanceof LeavesBlock || s.is(BlockTags.LEAVES) || s.is(BlockTags.LOGS) || s.getBlock() instanceof VineBlock) return true;
-        var key = ForgeRegistries.BLOCKS.getKey(s.getBlock());
+        var key = BuiltInRegistries.BLOCK.getKey(s.getBlock());
         if (key == null) return false;
         String p = key.getPath();
         return p.contains("leaves") || p.endsWith("_log") || p.endsWith("_wood") || p.contains("vine") || p.contains("mushroom_block")
@@ -69,7 +69,7 @@ final class CottageTerrain {
     /** True when a view ray is stopped by this block (leaves, logs, stone...); glass and plants are see-through. */
     static boolean blocksView(ServerLevel level, BlockPos pos, BlockState s) {
         if (s.isAir() || !s.getFluidState().isEmpty()) return false;
-        if (s.getBlock() instanceof net.minecraft.world.level.block.IronBarsBlock || s.getBlock() instanceof net.minecraft.world.level.block.AbstractGlassBlock) return false;
+        if (s.getBlock() instanceof net.minecraft.world.level.block.IronBarsBlock || s.getBlock() instanceof net.minecraft.world.level.block.TransparentBlock) return false;
         if (s.getBlock() instanceof LeavesBlock || s.is(BlockTags.LEAVES)) return true;
         return !s.getCollisionShape(level, pos).isEmpty() && !(s.getBlock() instanceof net.minecraft.world.level.block.DoorBlock)
                 && !(s.getBlock() instanceof net.minecraft.world.level.block.TrapDoorBlock)
@@ -87,7 +87,7 @@ final class CottageTerrain {
     static int groundTop(ServerLevel level, int x, int z) {
         if (!loaded(level, x, z)) return NO_GROUND;
         int y = level.getHeight(Heightmap.Types.WORLD_SURFACE, x, z) - 1;
-        int min = level.getMinBuildHeight();
+        int min = level.getMinY();
         BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos();
         while (y > min) {
             p.set(x, y, z);
@@ -282,7 +282,7 @@ final class CottageTerrain {
                 for (int k = 1; k <= reach + 1 && !solid; k++) {
                     BlockPos p = new BlockPos(c.getX(), s.floorY() - k, c.getZ());
                     BlockState st = level.getBlockState(p);
-                    solid = !st.isAir() && st.getFluidState().isEmpty() && !isCanopy(st) && st.isSolidRender(level, p);
+                    solid = !st.isAir() && st.getFluidState().isEmpty() && !isCanopy(st) && st.isSolidRender();
                     if (st.is(BlockTags.LOGS) || st.getBlock() instanceof LeavesBlock) break;
                 }
                 if (solid) ok++;
@@ -363,7 +363,7 @@ final class CottageTerrain {
         int x0 = st.getX(), z0 = st.getZ(), x1 = goal[0], z1 = goal[1];
         int minX = Math.min(x0, x1) - 24, maxX = Math.max(x0, x1) + 24, minZ = Math.min(z0, z1) - 24, maxZ = Math.max(z0, z1) + 24;
         for (int cx = minX >> 4; cx <= maxX >> 4; cx++) {
-            for (int cz = minZ >> 4; cz <= maxZ >> 4; cz++) set.add(net.minecraft.world.level.ChunkPos.asLong(cx, cz));
+            for (int cz = minZ >> 4; cz <= maxZ >> 4; cz++) set.add(net.minecraft.world.level.ChunkPos.pack(cx, cz));
         }
         return set;
     }
@@ -521,7 +521,7 @@ final class CottageTerrain {
             int dx = cells.get(i + 1)[0] - cells.get(i)[0], dz = cells.get(i + 1)[1] - cells.get(i)[1];
             if (dx != 0 && dz != 0) continue;
             int lowI = dh > 0 ? i : i + 1, highI = dh > 0 ? i + 1 : i;
-            Direction up = Direction.fromDelta(cells.get(highI)[0] - cells.get(lowI)[0], 0, cells.get(highI)[1] - cells.get(lowI)[1]);
+            Direction up = Direction.getNearest(cells.get(highI)[0] - cells.get(lowI)[0], 0, cells.get(highI)[1] - cells.get(lowI)[1], null);
             if (up == null) continue;
             BlockPos at = new BlockPos(cells.get(lowI)[0], p[lowI] + 1, cells.get(lowI)[1]);
             if (level.getBlockState(at).isAir()) {
@@ -560,7 +560,7 @@ final class CottageTerrain {
                     airGaps++;
                     break;
                 }
-                if (below.isSolidRender(level, new BlockPos(x, p[i] - k, z))) break;
+                if (below.isSolidRender()) break;
             }
         }
         double gap = roadGap(gx, gz);
@@ -755,7 +755,7 @@ final class CottageTerrain {
         java.util.Set<Long> set = new java.util.HashSet<>(chunks);
         return com.skycraft.world.RockSweep.sweep(level, minCx * 16, minCz * 16, maxCx * 16 + 15, maxCz * 16 + 15, 0,
                 minCx * 16, minCz * 16, maxCx * 16 + 15, maxCz * 16 + 15, 48,
-                (cx, cz) -> set.contains(net.minecraft.world.level.ChunkPos.asLong(cx, cz)) && level.getChunkSource().getChunkNow(cx, cz) != null,
+                (cx, cz) -> set.contains(net.minecraft.world.level.ChunkPos.pack(cx, cz)) && level.getChunkSource().getChunkNow(cx, cz) != null,
                 p -> com.skycraft.dig.PlacedBlocks.isPlayerPlaced(level, p));
     }
 

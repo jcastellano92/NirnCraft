@@ -1,0 +1,868 @@
+{
+  "block/ore_rates/singular.json": {
+    "registry": "block",
+    "legacy_id": "forge:ore_rates/singular",
+    "native_id": "c:ore_rates/singular",
+    "native_defaults": [
+      "minecraft:ancient_debris",
+      "minecraft:coal_ore",
+      "minecraft:deepslate_coal_ore",
+      "minecraft:deepslate_diamond_ore",
+      "minecraft:deepslate_emerald_ore",
+      "minecraft:deepslate_gold_ore",
+      "minecraft:deepslate_iron_ore",
+      "minecraft:diamond_ore",
+      "minecraft:emerald_ore",
+      "minecraft:gold_ore",
+      "minecraft:iron_ore",
+      "minecraft:nether_quartz_ore"
+    ]
+  },
+  "block/ores/corundum.json": {
+    "registry": "block",
+    "legacy_id": "forge:ores/corundum",
+    "native_id": "c:ores/corundum",
+    "native_defaults": []
+  },
+  "block/ores/ebony.json": {
+    "registry": "block",
+    "legacy_id": "forge:ores/ebony",
+    "native_id": "c:ores/ebony",
+    "native_defaults": []
+  },
+  "block/ores/malachite.json": {
+    "registry": "block",
+    "legacy_id": "forge:ores/malachite",
+    "native_id": "c:ores/malachite",
+    "native_defaults": []
+  },
+  "block/ores/moonstone.json": {
+    "registry": "block",
+    "legacy_id": "forge:ores/moonstone",
+    "native_id": "c:ores/moonstone",
+    "native_defaults": []
+  },
+  "block/ores/orichalcum.json": {
+    "registry": "block",
+    "legacy_id": "forge:ores/orichalcum",
+    "native_id": "c:ores/orichalcum",
+    "native_defaults": []
+  },
+  "block/ores/quicksilver.json": {
+    "registry": "block",
+    "legacy_id": "forge:ores/quicksilver",
+    "native_id": "c:ores/quicksilver",
+    "native_defaults": []
+  },
+  "block/ores/silver.json": {
+    "registry": "block",
+    "legacy_id": "forge:ores/silver",
+    "native_id": "c:ores/silver",
+    "native_defaults": []
+  },
+  "block/ores.json": {
+    "registry": "block",
+    "legacy_id": "forge:ores",
+    "native_id": "c:ores",
+    "native_defaults": [
+      "#minecraft:ores",
+      "#c:ores/coal",
+      "#c:ores/copper",
+      "#c:ores/diamond",
+      "#c:ores/emerald",
+      "#c:ores/gold",
+      "#c:ores/iron",
+      "#c:ores/lapis",
+      "#c:ores/netherite_scrap",
+      "#c:ores/redstone",
+      "#c:ores/quartz"
+    ]
+  },
+  "block/ores_in_ground/deepslate.json": {
+    "registry": "block",
+    "legacy_id": "forge:ores_in_ground/deepslate",
+    "native_id": "c:ores_in_ground/deepslate",
+    "native_defaults": [
+      "minecraft:deepslate_coal_ore",
+      "minecraft:deepslate_copper_ore",
+      "minecraft:deepslate_diamond_ore",
+      "minecraft:deepslate_emerald_ore",
+      "minecraft:deepslate_gold_ore",
+      "minecraft:deepslate_iron_ore",
+      "minecraft:deepslate_lapis_ore",
+      "minecraft:deepslate_redstone_ore"
+    ]
+  },
+  "block/ores_in_ground/stone.json": {
+    "registry": "block",
+    "legacy_id": "forge:ores_in_ground/stone",
+    "native_id": "c:ores_in_ground/stone",
+    "native_defaults": [
+      "minecraft:coal_ore",
+      "minecraft:copper_ore",
+      "minecraft:diamond_ore",
+      "minecraft:emerald_ore",
+      "minecraft:gold_ore",
+      "minecraft:iron_ore",
+      "minecraft:lapis_ore",
+      "minecraft:redstone_ore"
+    ]
+  },
+  "entity_type/bosses.json": {
+    "registry": "entity_type",
+    "legacy_id": "forge:bosses",
+    "native_id": "c:bosses",
+    "native_defaults": [
+      "minecraft:ender_dragon",
+      "minecraft:wither"
+    ]
+  },
+  "item/armors/boots.json": {
+    "registry": "item",
+    "legacy_id": "forge:armors/boots",
+    "native_id": "minecraft:foot_armor",
+    "native_defaults": [
+      "minecraft:leather_boots",
+      "minecraft:copper_boots",
+      "minecraft:chainmail_boots",
+      "minecraft:golden_boots",
+      "minecraft:iron_boots",
+      "minecraft:diamond_boots",
+      "minecraft:netherite_boots"
+    ]
+  },
+  "item/armors/chestplates.json": {
+    "registry": "item",
+    "legacy_id": "forge:armors/chestplates",
+    "native_id": "minecraft:chest_armor",
+    "native_defaults": [
+      "minecraft:leather_chestplate",
+      "minecraft:copper_chestplate",
+      "minecraft:chainmail_chestplate",
+      "minecraft:golden_chestplate",
+      "minecraft:iron_chestplate",
+      "minecraft:diamond_chestplate",
+      "minecraft:netherite_chestplate"
+    ]
+  },
+  "item/armors/helmets.json": {
+    "registry": "item",
+    "legacy_id": "forge:armors/helmets",
+    "native_id": "minecraft:head_armor",
+    "native_defaults": [
+      "minecraft:leather_helmet",
+      "minecraft:copper_helmet",
+      "minecraft:chainmail_helmet",
+      "minecraft:golden_helmet",
+      "minecraft:iron_helmet",
+      "minecraft:diamond_helmet",
+      "minecraft:netherite_helmet",
+      "minecraft:turtle_helmet"
+    ]
+  },
+  "item/armors/leggings.json": {
+    "registry": "item",
+    "legacy_id": "forge:armors/leggings",
+    "native_id": "minecraft:leg_armor",
+    "native_defaults": [
+      "minecraft:leather_leggings",
+      "minecraft:copper_leggings",
+      "minecraft:chainmail_leggings",
+      "minecraft:golden_leggings",
+      "minecraft:iron_leggings",
+      "minecraft:diamond_leggings",
+      "minecraft:netherite_leggings"
+    ]
+  },
+  "item/gems/garnet.json": {
+    "registry": "item",
+    "legacy_id": "forge:gems/garnet",
+    "native_id": "c:gems/garnet",
+    "native_defaults": []
+  },
+  "item/gems/ruby.json": {
+    "registry": "item",
+    "legacy_id": "forge:gems/ruby",
+    "native_id": "c:gems/ruby",
+    "native_defaults": []
+  },
+  "item/gems/sapphire.json": {
+    "registry": "item",
+    "legacy_id": "forge:gems/sapphire",
+    "native_id": "c:gems/sapphire",
+    "native_defaults": []
+  },
+  "item/gems.json": {
+    "registry": "item",
+    "legacy_id": "forge:gems",
+    "native_id": "c:gems",
+    "native_defaults": [
+      "#c:gems/amethyst",
+      "#c:gems/diamond",
+      "#c:gems/emerald",
+      "#c:gems/lapis",
+      "#c:gems/prismarine",
+      "#c:gems/quartz"
+    ]
+  },
+  "item/ingots/corundum.json": {
+    "registry": "item",
+    "legacy_id": "forge:ingots/corundum",
+    "native_id": "c:ingots/corundum",
+    "native_defaults": []
+  },
+  "item/ingots/dwarven_metal.json": {
+    "registry": "item",
+    "legacy_id": "forge:ingots/dwarven_metal",
+    "native_id": "c:ingots/dwarven_metal",
+    "native_defaults": []
+  },
+  "item/ingots/ebony.json": {
+    "registry": "item",
+    "legacy_id": "forge:ingots/ebony",
+    "native_id": "c:ingots/ebony",
+    "native_defaults": []
+  },
+  "item/ingots/malachite.json": {
+    "registry": "item",
+    "legacy_id": "forge:ingots/malachite",
+    "native_id": "c:ingots/malachite",
+    "native_defaults": []
+  },
+  "item/ingots/moonstone.json": {
+    "registry": "item",
+    "legacy_id": "forge:ingots/moonstone",
+    "native_id": "c:ingots/moonstone",
+    "native_defaults": []
+  },
+  "item/ingots/orichalcum.json": {
+    "registry": "item",
+    "legacy_id": "forge:ingots/orichalcum",
+    "native_id": "c:ingots/orichalcum",
+    "native_defaults": []
+  },
+  "item/ingots/quicksilver.json": {
+    "registry": "item",
+    "legacy_id": "forge:ingots/quicksilver",
+    "native_id": "c:ingots/quicksilver",
+    "native_defaults": []
+  },
+  "item/ingots/silver.json": {
+    "registry": "item",
+    "legacy_id": "forge:ingots/silver",
+    "native_id": "c:ingots/silver",
+    "native_defaults": []
+  },
+  "item/ingots/steel.json": {
+    "registry": "item",
+    "legacy_id": "forge:ingots/steel",
+    "native_id": "c:ingots/steel",
+    "native_defaults": []
+  },
+  "item/ingots.json": {
+    "registry": "item",
+    "legacy_id": "forge:ingots",
+    "native_id": "c:ingots",
+    "native_defaults": [
+      "#c:ingots/copper",
+      "#c:ingots/gold",
+      "#c:ingots/iron",
+      "#c:ingots/netherite"
+    ]
+  },
+  "item/ores/corundum.json": {
+    "registry": "item",
+    "legacy_id": "forge:ores/corundum",
+    "native_id": "c:ores/corundum",
+    "native_defaults": []
+  },
+  "item/ores/ebony.json": {
+    "registry": "item",
+    "legacy_id": "forge:ores/ebony",
+    "native_id": "c:ores/ebony",
+    "native_defaults": []
+  },
+  "item/ores/malachite.json": {
+    "registry": "item",
+    "legacy_id": "forge:ores/malachite",
+    "native_id": "c:ores/malachite",
+    "native_defaults": []
+  },
+  "item/ores/moonstone.json": {
+    "registry": "item",
+    "legacy_id": "forge:ores/moonstone",
+    "native_id": "c:ores/moonstone",
+    "native_defaults": []
+  },
+  "item/ores/orichalcum.json": {
+    "registry": "item",
+    "legacy_id": "forge:ores/orichalcum",
+    "native_id": "c:ores/orichalcum",
+    "native_defaults": []
+  },
+  "item/ores/quicksilver.json": {
+    "registry": "item",
+    "legacy_id": "forge:ores/quicksilver",
+    "native_id": "c:ores/quicksilver",
+    "native_defaults": []
+  },
+  "item/ores/silver.json": {
+    "registry": "item",
+    "legacy_id": "forge:ores/silver",
+    "native_id": "c:ores/silver",
+    "native_defaults": []
+  },
+  "item/ores.json": {
+    "registry": "item",
+    "legacy_id": "forge:ores",
+    "native_id": "c:ores",
+    "native_defaults": [
+      "#minecraft:ores",
+      "#c:ores/coal",
+      "#c:ores/copper",
+      "#c:ores/diamond",
+      "#c:ores/emerald",
+      "#c:ores/gold",
+      "#c:ores/iron",
+      "#c:ores/lapis",
+      "#c:ores/netherite_scrap",
+      "#c:ores/redstone",
+      "#c:ores/quartz"
+    ]
+  },
+  "item/ores_in_ground/deepslate.json": {
+    "registry": "item",
+    "legacy_id": "forge:ores_in_ground/deepslate",
+    "native_id": "c:ores_in_ground/deepslate",
+    "native_defaults": [
+      "minecraft:deepslate_coal_ore",
+      "minecraft:deepslate_copper_ore",
+      "minecraft:deepslate_diamond_ore",
+      "minecraft:deepslate_emerald_ore",
+      "minecraft:deepslate_gold_ore",
+      "minecraft:deepslate_iron_ore",
+      "minecraft:deepslate_lapis_ore",
+      "minecraft:deepslate_redstone_ore"
+    ]
+  },
+  "item/ores_in_ground/stone.json": {
+    "registry": "item",
+    "legacy_id": "forge:ores_in_ground/stone",
+    "native_id": "c:ores_in_ground/stone",
+    "native_defaults": [
+      "minecraft:coal_ore",
+      "minecraft:copper_ore",
+      "minecraft:diamond_ore",
+      "minecraft:emerald_ore",
+      "minecraft:gold_ore",
+      "minecraft:iron_ore",
+      "minecraft:lapis_ore",
+      "minecraft:redstone_ore"
+    ]
+  },
+  "item/raw_fishes.json": {
+    "registry": "item",
+    "legacy_id": "forge:raw_fishes",
+    "native_id": "c:foods/raw_fish",
+    "native_defaults": [
+      "minecraft:cod",
+      "minecraft:salmon",
+      "minecraft:tropical_fish",
+      "minecraft:pufferfish"
+    ]
+  },
+  "item/raw_materials/corundum.json": {
+    "registry": "item",
+    "legacy_id": "forge:raw_materials/corundum",
+    "native_id": "c:raw_materials/corundum",
+    "native_defaults": []
+  },
+  "item/raw_materials/ebony.json": {
+    "registry": "item",
+    "legacy_id": "forge:raw_materials/ebony",
+    "native_id": "c:raw_materials/ebony",
+    "native_defaults": []
+  },
+  "item/raw_materials/malachite.json": {
+    "registry": "item",
+    "legacy_id": "forge:raw_materials/malachite",
+    "native_id": "c:raw_materials/malachite",
+    "native_defaults": []
+  },
+  "item/raw_materials/moonstone.json": {
+    "registry": "item",
+    "legacy_id": "forge:raw_materials/moonstone",
+    "native_id": "c:raw_materials/moonstone",
+    "native_defaults": []
+  },
+  "item/raw_materials/orichalcum.json": {
+    "registry": "item",
+    "legacy_id": "forge:raw_materials/orichalcum",
+    "native_id": "c:raw_materials/orichalcum",
+    "native_defaults": []
+  },
+  "item/raw_materials/quicksilver.json": {
+    "registry": "item",
+    "legacy_id": "forge:raw_materials/quicksilver",
+    "native_id": "c:raw_materials/quicksilver",
+    "native_defaults": []
+  },
+  "item/raw_materials/silver.json": {
+    "registry": "item",
+    "legacy_id": "forge:raw_materials/silver",
+    "native_id": "c:raw_materials/silver",
+    "native_defaults": []
+  },
+  "item/raw_materials.json": {
+    "registry": "item",
+    "legacy_id": "forge:raw_materials",
+    "native_id": "c:raw_materials",
+    "native_defaults": [
+      "#c:raw_materials/copper",
+      "#c:raw_materials/gold",
+      "#c:raw_materials/iron"
+    ]
+  },
+  "item/tools/axes.json": {
+    "registry": "item",
+    "legacy_id": "forge:tools/axes",
+    "native_id": "minecraft:axes",
+    "native_defaults": [
+      "minecraft:diamond_axe",
+      "minecraft:stone_axe",
+      "minecraft:golden_axe",
+      "minecraft:netherite_axe",
+      "minecraft:wooden_axe",
+      "minecraft:iron_axe",
+      "minecraft:copper_axe"
+    ]
+  },
+  "item/tools/bows.json": {
+    "registry": "item",
+    "legacy_id": "forge:tools/bows",
+    "native_id": "c:tools/bow",
+    "native_defaults": [
+      "minecraft:bow"
+    ]
+  },
+  "item/tools/crossbows.json": {
+    "registry": "item",
+    "legacy_id": "forge:tools/crossbows",
+    "native_id": "c:tools/crossbow",
+    "native_defaults": [
+      "minecraft:crossbow"
+    ]
+  },
+  "item/tools/maces.json": {
+    "registry": "item",
+    "legacy_id": "forge:tools/maces",
+    "native_id": "c:tools/mace",
+    "native_defaults": [
+      "minecraft:mace"
+    ]
+  },
+  "item/tools/shields.json": {
+    "registry": "item",
+    "legacy_id": "forge:tools/shields",
+    "native_id": "c:tools/shield",
+    "native_defaults": [
+      "minecraft:shield"
+    ]
+  },
+  "item/tools/swords.json": {
+    "registry": "item",
+    "legacy_id": "forge:tools/swords",
+    "native_id": "minecraft:swords",
+    "native_defaults": [
+      "minecraft:diamond_sword",
+      "minecraft:stone_sword",
+      "minecraft:golden_sword",
+      "minecraft:netherite_sword",
+      "minecraft:wooden_sword",
+      "minecraft:iron_sword",
+      "minecraft:copper_sword"
+    ]
+  },
+  "worldgen/biome/is_cave.json": {
+    "registry": "worldgen/biome",
+    "legacy_id": "forge:is_cave",
+    "native_id": "c:is_cave",
+    "native_defaults": [
+      "minecraft:lush_caves",
+      "minecraft:dripstone_caves",
+      "minecraft:sulfur_caves",
+      "minecraft:deep_dark"
+    ]
+  },
+  "worldgen/biome/is_cold/overworld.json": {
+    "registry": "worldgen/biome",
+    "legacy_id": "forge:is_cold/overworld",
+    "native_id": "c:is_cold/overworld",
+    "native_defaults": [
+      "minecraft:taiga",
+      "minecraft:old_growth_pine_taiga",
+      "minecraft:old_growth_spruce_taiga",
+      "minecraft:windswept_hills",
+      "minecraft:windswept_gravelly_hills",
+      "minecraft:windswept_forest",
+      "minecraft:snowy_plains",
+      "minecraft:ice_spikes",
+      "minecraft:grove",
+      "minecraft:snowy_slopes",
+      "minecraft:jagged_peaks",
+      "minecraft:frozen_peaks",
+      "minecraft:stony_shore",
+      "minecraft:snowy_beach",
+      "minecraft:snowy_taiga",
+      "minecraft:frozen_river",
+      "minecraft:cold_ocean",
+      "minecraft:frozen_ocean",
+      "minecraft:deep_cold_ocean",
+      "minecraft:deep_frozen_ocean"
+    ]
+  },
+  "worldgen/biome/is_cold.json": {
+    "registry": "worldgen/biome",
+    "legacy_id": "forge:is_cold",
+    "native_id": "c:is_cold",
+    "native_defaults": [
+      "#c:is_cold/overworld",
+      "#c:is_cold/nether",
+      "#c:is_cold/end"
+    ]
+  },
+  "worldgen/biome/is_coniferous.json": {
+    "registry": "worldgen/biome",
+    "legacy_id": "forge:is_coniferous",
+    "native_id": "c:is_tree/coniferous",
+    "native_defaults": [
+      "#c:is_taiga",
+      "minecraft:grove"
+    ]
+  },
+  "worldgen/biome/is_dead.json": {
+    "registry": "worldgen/biome",
+    "legacy_id": "forge:is_dead",
+    "native_id": "c:is_dead",
+    "native_defaults": []
+  },
+  "worldgen/biome/is_dense/overworld.json": {
+    "registry": "worldgen/biome",
+    "legacy_id": "forge:is_dense/overworld",
+    "native_id": "c:is_dense_vegetation/overworld",
+    "native_defaults": [
+      "minecraft:dark_forest",
+      "minecraft:old_growth_birch_forest",
+      "minecraft:old_growth_spruce_taiga",
+      "minecraft:jungle",
+      "minecraft:bamboo_jungle",
+      "minecraft:mangrove_swamp"
+    ]
+  },
+  "worldgen/biome/is_dense.json": {
+    "registry": "worldgen/biome",
+    "legacy_id": "forge:is_dense",
+    "native_id": "c:is_dense_vegetation",
+    "native_defaults": [
+      "#c:is_dense_vegetation/overworld",
+      "#c:is_dense_vegetation/nether",
+      "#c:is_dense_vegetation/end"
+    ]
+  },
+  "worldgen/biome/is_desert.json": {
+    "registry": "worldgen/biome",
+    "legacy_id": "forge:is_desert",
+    "native_id": "c:is_desert",
+    "native_defaults": [
+      "minecraft:desert"
+    ]
+  },
+  "worldgen/biome/is_dry/overworld.json": {
+    "registry": "worldgen/biome",
+    "legacy_id": "forge:is_dry/overworld",
+    "native_id": "c:is_dry/overworld",
+    "native_defaults": [
+      "minecraft:desert",
+      "minecraft:badlands",
+      "minecraft:wooded_badlands",
+      "minecraft:eroded_badlands",
+      "minecraft:savanna",
+      "minecraft:savanna_plateau",
+      "minecraft:windswept_savanna"
+    ]
+  },
+  "worldgen/biome/is_dry.json": {
+    "registry": "worldgen/biome",
+    "legacy_id": "forge:is_dry",
+    "native_id": "c:is_dry",
+    "native_defaults": [
+      "#c:is_dry/overworld",
+      "#c:is_dry/nether",
+      "#c:is_dry/end"
+    ]
+  },
+  "worldgen/biome/is_hot/overworld.json": {
+    "registry": "worldgen/biome",
+    "legacy_id": "forge:is_hot/overworld",
+    "native_id": "c:is_hot/overworld",
+    "native_defaults": [
+      "minecraft:jungle",
+      "minecraft:bamboo_jungle",
+      "minecraft:sparse_jungle",
+      "minecraft:desert",
+      "minecraft:badlands",
+      "minecraft:wooded_badlands",
+      "minecraft:eroded_badlands",
+      "minecraft:savanna",
+      "minecraft:savanna_plateau",
+      "minecraft:windswept_savanna",
+      "minecraft:stony_peaks",
+      "minecraft:mushroom_fields",
+      "minecraft:warm_ocean"
+    ]
+  },
+  "worldgen/biome/is_hot.json": {
+    "registry": "worldgen/biome",
+    "legacy_id": "forge:is_hot",
+    "native_id": "c:is_hot",
+    "native_defaults": [
+      "#c:is_hot/overworld",
+      "#c:is_hot/nether",
+      "#c:is_hot/end"
+    ]
+  },
+  "worldgen/biome/is_lush.json": {
+    "registry": "worldgen/biome",
+    "legacy_id": "forge:is_lush",
+    "native_id": "c:is_lush",
+    "native_defaults": [
+      "minecraft:lush_caves"
+    ]
+  },
+  "worldgen/biome/is_magical.json": {
+    "registry": "worldgen/biome",
+    "legacy_id": "forge:is_magical",
+    "native_id": "c:is_magical",
+    "native_defaults": []
+  },
+  "worldgen/biome/is_mountain.json": {
+    "registry": "worldgen/biome",
+    "legacy_id": "forge:is_mountain",
+    "native_id": "c:is_mountain",
+    "native_defaults": [
+      "#minecraft:is_mountain",
+      "#c:is_mountain/peak",
+      "#c:is_mountain/slope"
+    ]
+  },
+  "worldgen/biome/is_mushroom.json": {
+    "registry": "worldgen/biome",
+    "legacy_id": "forge:is_mushroom",
+    "native_id": "c:is_mushroom",
+    "native_defaults": [
+      "minecraft:mushroom_fields"
+    ]
+  },
+  "worldgen/biome/is_peak.json": {
+    "registry": "worldgen/biome",
+    "legacy_id": "forge:is_peak",
+    "native_id": "c:is_mountain/peak",
+    "native_defaults": [
+      "minecraft:jagged_peaks",
+      "minecraft:frozen_peaks",
+      "minecraft:stony_peaks"
+    ]
+  },
+  "worldgen/biome/is_plains.json": {
+    "registry": "worldgen/biome",
+    "legacy_id": "forge:is_plains",
+    "native_id": "c:is_plains",
+    "native_defaults": [
+      "minecraft:plains",
+      "minecraft:sunflower_plains"
+    ]
+  },
+  "worldgen/biome/is_plateau.json": {
+    "registry": "worldgen/biome",
+    "legacy_id": "forge:is_plateau",
+    "native_id": "c:is_plateau",
+    "native_defaults": [
+      "minecraft:wooded_badlands",
+      "minecraft:savanna_plateau",
+      "minecraft:cherry_grove",
+      "minecraft:meadow"
+    ]
+  },
+  "worldgen/biome/is_rare.json": {
+    "registry": "worldgen/biome",
+    "legacy_id": "forge:is_rare",
+    "native_id": "c:is_rare",
+    "native_defaults": [
+      "minecraft:sunflower_plains",
+      "minecraft:flower_forest",
+      "minecraft:old_growth_birch_forest",
+      "minecraft:old_growth_spruce_taiga",
+      "minecraft:bamboo_jungle",
+      "minecraft:sparse_jungle",
+      "minecraft:eroded_badlands",
+      "minecraft:savanna_plateau",
+      "minecraft:windswept_savanna",
+      "minecraft:ice_spikes",
+      "minecraft:windswept_gravelly_hills",
+      "minecraft:pale_garden",
+      "minecraft:mushroom_fields",
+      "minecraft:deep_dark"
+    ]
+  },
+  "worldgen/biome/is_sandy.json": {
+    "registry": "worldgen/biome",
+    "legacy_id": "forge:is_sandy",
+    "native_id": "c:is_sandy",
+    "native_defaults": [
+      "minecraft:desert",
+      "minecraft:badlands",
+      "minecraft:wooded_badlands",
+      "minecraft:eroded_badlands",
+      "minecraft:beach"
+    ]
+  },
+  "worldgen/biome/is_slope.json": {
+    "registry": "worldgen/biome",
+    "legacy_id": "forge:is_slope",
+    "native_id": "c:is_mountain/slope",
+    "native_defaults": [
+      "minecraft:snowy_slopes",
+      "minecraft:meadow",
+      "minecraft:grove",
+      "minecraft:cherry_grove"
+    ]
+  },
+  "worldgen/biome/is_snowy.json": {
+    "registry": "worldgen/biome",
+    "legacy_id": "forge:is_snowy",
+    "native_id": "c:is_snowy",
+    "native_defaults": [
+      "minecraft:snowy_beach",
+      "minecraft:snowy_plains",
+      "minecraft:ice_spikes",
+      "minecraft:snowy_taiga",
+      "minecraft:grove",
+      "minecraft:snowy_slopes",
+      "minecraft:jagged_peaks",
+      "minecraft:frozen_peaks"
+    ]
+  },
+  "worldgen/biome/is_sparse/overworld.json": {
+    "registry": "worldgen/biome",
+    "legacy_id": "forge:is_sparse/overworld",
+    "native_id": "c:is_sparse_vegetation/overworld",
+    "native_defaults": [
+      "minecraft:wooded_badlands",
+      "minecraft:savanna",
+      "minecraft:savanna_plateau",
+      "minecraft:sparse_jungle",
+      "minecraft:windswept_savanna",
+      "minecraft:windswept_forest",
+      "minecraft:windswept_hills",
+      "minecraft:windswept_gravelly_hills",
+      "minecraft:snowy_slopes",
+      "minecraft:jagged_peaks",
+      "minecraft:frozen_peaks"
+    ]
+  },
+  "worldgen/biome/is_sparse.json": {
+    "registry": "worldgen/biome",
+    "legacy_id": "forge:is_sparse",
+    "native_id": "c:is_sparse_vegetation",
+    "native_defaults": [
+      "#c:is_sparse_vegetation/overworld",
+      "#c:is_sparse_vegetation/nether",
+      "#c:is_sparse_vegetation/end"
+    ]
+  },
+  "worldgen/biome/is_spooky.json": {
+    "registry": "worldgen/biome",
+    "legacy_id": "forge:is_spooky",
+    "native_id": "c:is_spooky",
+    "native_defaults": [
+      "minecraft:dark_forest",
+      "minecraft:pale_garden",
+      "minecraft:deep_dark"
+    ]
+  },
+  "worldgen/biome/is_swamp.json": {
+    "registry": "worldgen/biome",
+    "legacy_id": "forge:is_swamp",
+    "native_id": "c:is_swamp",
+    "native_defaults": [
+      "minecraft:swamp",
+      "minecraft:mangrove_swamp"
+    ]
+  },
+  "worldgen/biome/is_underground.json": {
+    "registry": "worldgen/biome",
+    "legacy_id": "forge:is_underground",
+    "native_id": "c:is_underground",
+    "native_defaults": [
+      "#c:is_cave"
+    ]
+  },
+  "worldgen/biome/is_wasteland.json": {
+    "registry": "worldgen/biome",
+    "legacy_id": "forge:is_wasteland",
+    "native_id": "c:is_wasteland",
+    "native_defaults": []
+  },
+  "worldgen/biome/is_water.json": {
+    "registry": "worldgen/biome",
+    "legacy_id": "forge:is_water",
+    "native_id": "c:is_aquatic",
+    "native_defaults": [
+      "#c:is_ocean",
+      "#c:is_river"
+    ]
+  },
+  "worldgen/biome/is_wet/overworld.json": {
+    "registry": "worldgen/biome",
+    "legacy_id": "forge:is_wet/overworld",
+    "native_id": "c:is_wet/overworld",
+    "native_defaults": [
+      "minecraft:swamp",
+      "minecraft:mangrove_swamp",
+      "minecraft:jungle",
+      "minecraft:bamboo_jungle",
+      "minecraft:sparse_jungle",
+      "minecraft:beach",
+      "minecraft:lush_caves",
+      "minecraft:dripstone_caves",
+      "minecraft:sulfur_caves"
+    ]
+  },
+  "worldgen/biome/is_wet.json": {
+    "registry": "worldgen/biome",
+    "legacy_id": "forge:is_wet",
+    "native_id": "c:is_wet",
+    "native_defaults": [
+      "#c:is_wet/overworld",
+      "#c:is_wet/nether",
+      "#c:is_wet/end"
+    ]
+  },
+  "item/crops.json": {
+    "registry": "item",
+    "legacy_id": "forge:crops",
+    "native_id": "c:crops",
+    "native_defaults": [
+      "#c:crops/beetroot",
+      "#c:crops/cactus",
+      "#c:crops/carrot",
+      "#c:crops/cocoa_bean",
+      "#c:crops/melon",
+      "#c:crops/nether_wart",
+      "#c:crops/potato",
+      "#c:crops/pumpkin",
+      "#c:crops/sugar_cane",
+      "#c:crops/wheat"
+    ]
+  }
+}

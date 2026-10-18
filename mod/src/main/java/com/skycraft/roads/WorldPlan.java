@@ -13,7 +13,7 @@ import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.ChunkPos;
@@ -58,7 +58,7 @@ final class WorldPlan {
     /** Trail destinations closer than this to a planned destination are part of it (no trail of their own). */
     private static final int MERGE = 48;
 
-    private record Site(Holder<Structure> structure, ResourceLocation id, long chunk, int x, int y, int z, int radius,
+    private record Site(Holder<Structure> structure, Identifier id, long chunk, int x, int y, int z, int radius,
                         boolean town) {
     }
 
@@ -116,7 +116,7 @@ final class WorldPlan {
     static Settlement registerPlace(ServerLevel level, RoadsData data, Place p, boolean town) {
         Settlement s = data.byPlace(p.id());
         if (s != null) return s;
-        long key = ChunkPos.asLong(p.x() >> 4, p.z() >> 4);
+        long key = ChunkPos.pack(p.x() >> 4, p.z() >> 4);
         s = data.settlementByKey.get(key);
         if (s != null) {
             s.placeId = p.id();
@@ -339,7 +339,7 @@ final class WorldPlan {
         int cx0 = x >> 4, cz0 = z >> 4;
         for (int dx = -r; dx <= r; dx++) {
             for (int dz = -r; dz <= r; dz++) {
-                LongArrayList entries = data.chunkIndex.get(ChunkPos.asLong(cx0 + dx, cz0 + dz));
+                LongArrayList entries = data.chunkIndex.get(ChunkPos.pack(cx0 + dx, cz0 + dz));
                 if (entries == null) continue;
                 for (int k = 0; k < entries.size(); k++) {
                     long e = entries.getLong(k);
@@ -377,13 +377,13 @@ final class WorldPlan {
         long best = Long.MIN_VALUE;
         double bestD = Double.MAX_VALUE;
         List<net.minecraft.core.BlockPos> anchors = new ArrayList<>();
-        anchors.add(level.getSharedSpawnPos()); // where new players arrive
+        anchors.add(level.getRespawnData().pos()); // where new players arrive
         for (ServerPlayer player : level.players()) anchors.add(player.blockPosition());
         for (net.minecraft.core.BlockPos anchor : anchors) {
             int px = anchor.getX() >> SCAN_SHIFT, pz = anchor.getZ() >> SCAN_SHIFT;
             for (int dx = -r; dx <= r; dx++) {
                 for (int dz = -r; dz <= r; dz++) {
-                    long key = ChunkPos.asLong(px + dx, pz + dz);
+                    long key = ChunkPos.pack(px + dx, pz + dz);
                     if (data.scanned.contains(key)) continue;
                     double d = dx * dx + dz * dz;
                     if (d > (r + 0.5) * (r + 0.5) || d >= bestD) continue;
@@ -399,13 +399,13 @@ final class WorldPlan {
         RandomState random = level.getChunkSource().randomState();
         ChunkGeneratorStructureState state = level.getChunkSource().getGeneratorState();
         RegistryAccess access = level.registryAccess();
-        StructureTemplateManager templates = level.getServer().getStructureManager();
+        StructureTemplateManager templates = level.getServer().getStructureTemplateManager();
         RoadNetwork.submit(() -> {
             List<Site> sites = new ArrayList<>();
             try {
                 sites = predict(region, generator, random, state, access, templates, level);
             } catch (Throwable t) {
-                Skycraft.LOGGER.warn("Skycraft roads: predicting the sites of region {} failed", new ChunkPos(region), t);
+                Skycraft.LOGGER.warn("Skycraft roads: predicting the sites of region {} failed", ChunkPos.unpack(region), t);
             }
             SCANS.add(new Scan(region, sites));
         });
@@ -420,7 +420,7 @@ final class WorldPlan {
         boolean any = false;
         for (StructureSet.StructureSelectionEntry e : set.structures()) {
             Optional<ResourceKey<Structure>> key = e.structure().unwrapKey();
-            if (key.isEmpty() || !Skycraft.MODID.equals(key.get().location().getNamespace())) return false;
+            if (key.isEmpty() || !Skycraft.MODID.equals(key.get().identifier().getNamespace())) return false;
             any |= destination(e.structure());
         }
         return any;
@@ -450,8 +450,8 @@ final class WorldPlan {
                 for (int gz = Math.floorDiv(cz0, spacing); gz <= Math.floorDiv(cz0 + span - 1, spacing); gz++) {
                     if (Thread.currentThread().isInterrupted()) return out;
                     ChunkPos pot = placement.getPotentialStructureChunk(seed, gx * spacing, gz * spacing);
-                    if (pot.x < cx0 || pot.x >= cx0 + span || pot.z < cz0 || pot.z >= cz0 + span) continue;
-                    if (!placement.isStructureChunk(state, pot.x, pot.z)) continue;
+                    if (pot.x() < cx0 || pot.x() >= cx0 + span || pot.z() < cz0 || pot.z() >= cz0 + span) continue;
+                    if (!placement.isStructureChunk(state, pot.x(), pot.z())) continue;
                     Site site = pick(set, pot, seed, generator, random, access, templates, level);
                     if (site != null && destination(site.structure())) out.add(site);
                 }
@@ -466,7 +466,7 @@ final class WorldPlan {
         List<StructureSet.StructureSelectionEntry> entries = new ArrayList<>(set.structures());
         if (entries.size() == 1) return tryAt(entries.get(0).structure(), pot, seed, generator, random, access, templates, level);
         WorldgenRandom r = new WorldgenRandom(new LegacyRandomSource(0L));
-        r.setLargeFeatureSeed(seed, pot.x, pot.z);
+        r.setLargeFeatureSeed(seed, pot.x(), pot.z());
         int total = 0;
         for (StructureSet.StructureSelectionEntry e : entries) total += e.weight();
         while (!entries.isEmpty()) {
@@ -490,7 +490,7 @@ final class WorldPlan {
     private static Site tryAt(Holder<Structure> holder, ChunkPos pot, long seed, ChunkGenerator generator, RandomState random,
                               RegistryAccess access, StructureTemplateManager templates, ServerLevel level) {
         Structure structure = holder.value();
-        Structure.GenerationContext ctx = new Structure.GenerationContext(access, generator, generator.getBiomeSource(),
+        Structure.GenerationContext ctx = new Structure.GenerationContext(access, generator, generator.getBiomeSource(), random.createClimateSampler(net.minecraft.world.level.levelgen.densityfunction.SamplerContext.EMPTY_UNCACHED), 
                 random, templates, seed, pot, level, structure.biomes()::contains);
         Optional<Structure.GenerationStub> stub;
         try {
@@ -502,9 +502,9 @@ final class WorldPlan {
         boolean town = holder.is(LocationTags.TOWNS);
         int radius = structure instanceof SettlementStructure ss ? ss.size.radius() : 24;
         var pos = stub.get().position();
-        ResourceLocation id = holder.unwrapKey().map(ResourceKey::location).orElse(null);
+        Identifier id = holder.unwrapKey().map(ResourceKey::identifier).orElse(null);
         if (id == null) return null;
-        return new Site(holder, id, pot.toLong(), pos.getX(), pos.getY(), pos.getZ(), radius, town);
+        return new Site(holder, id, pot.pack(), pos.getX(), pos.getY(), pos.getZ(), radius, town);
     }
 
     private static void applyScan(ServerLevel level, RoadsData data, Scan scan) {
@@ -515,7 +515,7 @@ final class WorldPlan {
         for (Site site : scan.sites()) {
             if (data.settlementByKey.containsKey(site.chunk())) continue;
             if (plannedAt(data, site.x(), site.z()) != null) continue;
-            ChunkPos start = new ChunkPos(site.chunk());
+            ChunkPos start = ChunkPos.unpack(site.chunk());
             String loc = SettlementNames.locationId(Level.OVERWORLD, site.id(), start);
             String name = SettlementNames.name(Level.OVERWORLD, site.structure(), site.id(), loc);
             int r = site.radius();
@@ -534,7 +534,7 @@ final class WorldPlan {
         predictedDungeons += dungeons;
         scannedRegions++;
         if (towns + dungeons > 0) {
-            Skycraft.LOGGER.debug("Skycraft roads: region {} predicts {} generic towns and {} dungeons", new ChunkPos(scan.region()), towns, dungeons);
+            Skycraft.LOGGER.debug("Skycraft roads: region {} predicts {} generic towns and {} dungeons", ChunkPos.unpack(scan.region()), towns, dungeons);
         }
     }
 

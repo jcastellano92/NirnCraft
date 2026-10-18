@@ -4,11 +4,11 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.BiomeTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.biome.Biome;
-import net.minecraftforge.common.Tags;
+import net.neoforged.neoforge.common.Tags;
 
 import java.util.Locale;
 import java.util.Map;
@@ -21,7 +21,6 @@ import java.util.concurrent.ConcurrentHashMap;
 public enum BiomeFamily {
     OCEAN, BEACH, RIVER, SWAMP, DESERT, JUNGLE, ASH, FROZEN, MOUNTAIN, FOREST, PLAINS;
 
-    private static final Map<ResourceKey<Biome>, BiomeFamily> CACHE = new ConcurrentHashMap<>();
     private static final TagKey<Biome> SPAWNS_SWAMP = tag("skycraft", "spawns/swamp");
     private static final TagKey<Biome> SPAWNS_COAST = tag("skycraft", "spawns/coast");
     private static final TagKey<Biome> SPAWNS_RIVER = tag("skycraft", "spawns/river");
@@ -41,18 +40,13 @@ public enum BiomeFamily {
     }
 
     private static TagKey<Biome> tag(String ns, String path) {
-        return TagKey.create(Registries.BIOME, new ResourceLocation(ns, path));
+        return TagKey.create(Registries.BIOME, Identifier.fromNamespaceAndPath(ns, path));
     }
 
-    public static BiomeFamily of(Holder<Biome> biome, BlockPos pos) {
-        ResourceKey<Biome> key = biome.unwrapKey().orElse(null);
-        if (key != null) {
-            BiomeFamily cached = CACHE.get(key);
-            if (cached != null) return cached;
-        }
-        BiomeFamily f = resolve(biome, key == null ? "" : key.location().getPath(), pos);
-        if (key != null) CACHE.put(key, f);
-        return f;
+    public static BiomeFamily of(Holder<Biome> biome, BlockPos pos, int seaLevel) {
+        // Temperature depends on altitude; never reuse the first sampled position across an entire biome/world.
+        var key = biome.unwrapKey().orElse(null);
+        return resolve(biome, key == null ? "" : key.identifier().getPath(), pos, seaLevel);
     }
 
     private static boolean has(String name, String... words) {
@@ -62,7 +56,7 @@ public enum BiomeFamily {
         return false;
     }
 
-    private static BiomeFamily resolve(Holder<Biome> b, String name, BlockPos pos) {
+    private static BiomeFamily resolve(Holder<Biome> b, String name, BlockPos pos, int seaLevel) {
         if (b.is(BiomeTags.IS_OCEAN) || has(name, "ocean", "sea_of", "deep_sea")) return OCEAN;
         if (b.is(BiomeTags.IS_RIVER) || b.is(SPAWNS_RIVER) || has(name, "river")) return RIVER;
         if (b.is(BiomeTags.IS_BEACH) || b.is(SPAWNS_COAST) || has(name, "beach", "coast", "shore")) return BEACH;
@@ -72,7 +66,7 @@ public enum BiomeFamily {
                 || has(name, "desert", "dune", "badland", "canyon", "alikr", "sand")) return DESERT;
         if (b.is(BiomeTags.IS_JUNGLE) || b.is(SPAWNS_JUNGLE) || has(name, "jungle", "rainforest", "hist", "tropical", "pellitine")) return JUNGLE;
         if (b.is(Tags.Biomes.IS_SNOWY) || b.is(SPAWNS_COLD) || has(name, "snow", "glacier", "ice", "frozen", "tundra", "frost", "pale")
-                || b.value().coldEnoughToSnow(pos)) return FROZEN;
+                || b.value().coldEnoughToSnow(pos, seaLevel)) return FROZEN;
         if (b.is(BiomeTags.IS_MOUNTAIN) || b.is(SPAWNS_MOUNTAIN) || has(name, "peak", "mountain", "crag", "highland", "cliff")) return MOUNTAIN;
         if (b.is(BiomeTags.IS_FOREST) || b.is(BiomeTags.IS_TAIGA) || b.is(SPAWNS_FOREST)
                 || has(name, "forest", "wood", "grove", "taiga", "pine", "birch", "weald", "graht")) return FOREST;

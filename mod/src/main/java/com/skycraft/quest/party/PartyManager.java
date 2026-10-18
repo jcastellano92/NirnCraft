@@ -20,7 +20,7 @@ public class PartyManager extends SavedData {
     private final Map<UUID, UUID> byPlayer = new HashMap<>();
 
     public static PartyManager get(MinecraftServer server) {
-        return server.overworld().getDataStorage().computeIfAbsent(PartyManager::load, PartyManager::new, NAME);
+        return com.skycraft.platform.SavedDataTypes.get(server.overworld(), NAME, PartyManager::load, PartyManager::new, value263 -> value263.save(new net.minecraft.nbt.CompoundTag()));
     }
 
     @Nullable
@@ -77,7 +77,7 @@ public class PartyManager extends SavedData {
 
     public static PartyManager load(CompoundTag tag) {
         PartyManager m = new PartyManager();
-        ListTag list = tag.getList("parties", Tag.TAG_COMPOUND);
+        ListTag list = tag.getListOrEmpty("parties");
         for (Tag t : list) {
             try {
                 Party p = Party.load((CompoundTag) t);
@@ -92,7 +92,6 @@ public class PartyManager extends SavedData {
         return m;
     }
 
-    @Override
     public CompoundTag save(CompoundTag tag) {
         ListTag list = new ListTag();
         for (Party p : parties.values()) list.add(p.save());

@@ -43,7 +43,7 @@ public final class Bounty {
 
     public static CompoundTag state(Player player) {
         CompoundTag state = SkyData.get(player).module(MODULE);
-        if (state.getInt("hold_ids") < 2 && !player.level().isClientSide) migrateHoldIds(player, state);
+        if (state.getIntOr("hold_ids",0) < 2 && !player.level().isClientSide()) migrateHoldIds(player, state);
         return state;
     }
 
@@ -54,40 +54,40 @@ public final class Bounty {
     private static void migrateHoldIds(Player player, CompoundTag state) {
         state.putInt("hold_ids", 2);
         for (String key : new String[]{"bounty", "violent"}) {
-            if (!state.contains(key, Tag.TAG_COMPOUND)) continue;
-            CompoundTag old = state.getCompound(key);
+            if (!com.skycraft.platform.NbtData.hasType(state, key, Tag.TAG_COMPOUND)) continue;
+            CompoundTag old = state.getCompoundOrEmpty(key);
             CompoundTag moved = new CompoundTag();
-            for (String hold : old.getAllKeys()) {
+            for (String hold : old.keySet()) {
                 String id = Holds.migrate(hold);
-                if (key.equals("bounty")) moved.putInt(id, moved.getInt(id) + old.getInt(hold));
-                else moved.putBoolean(id, moved.getBoolean(id) || old.getBoolean(hold));
+                if (key.equals("bounty")) moved.putInt(id, moved.getIntOr(id, 0) + old.getIntOr(hold, 0));
+                else moved.putBoolean(id, moved.getBooleanOr(id, false) || old.getBooleanOr(hold, false));
             }
             state.put(key, moved);
         }
-        for (String k : new java.util.ArrayList<>(state.getAllKeys())) {
+        for (String k : new java.util.ArrayList<>(state.keySet())) {
             if (!k.startsWith("persuade_")) continue;
             String id = Holds.migrate(k.substring("persuade_".length()));
-            int v = state.getInt(k);
+            int v = state.getIntOr(k, 0);
             state.remove(k);
             state.putInt("persuade_" + id, v);
         }
-        if (state.contains("jail", Tag.TAG_COMPOUND)) {
-            CompoundTag jail = state.getCompound("jail");
-            jail.putString("hold", Holds.migrate(jail.getString("hold")));
+        if (com.skycraft.platform.NbtData.hasType(state, "jail", Tag.TAG_COMPOUND)) {
+            CompoundTag jail = state.getCompoundOrEmpty("jail");
+            jail.putString("hold", Holds.migrate(jail.getStringOr("hold","")));
         }
         SkyData.get(player).markDirty();
     }
 
     private static CompoundTag bounties(Player player) {
         CompoundTag state = state(player);
-        if (!state.contains("bounty", Tag.TAG_COMPOUND)) state.put("bounty", new CompoundTag());
-        return state.getCompound("bounty");
+        if (!com.skycraft.platform.NbtData.hasType(state, "bounty", Tag.TAG_COMPOUND)) state.put("bounty", new CompoundTag());
+        return state.getCompoundOrEmpty("bounty");
     }
 
     /** Bounty in one hold (0 if none). */
     public static int get(Player player, String hold) {
         CompoundTag state = state(player);
-        return state.contains("bounty", Tag.TAG_COMPOUND) ? state.getCompound("bounty").getInt(hold) : 0;
+        return com.skycraft.platform.NbtData.hasType(state, "bounty", Tag.TAG_COMPOUND) ? state.getCompoundOrEmpty("bounty").getIntOr(hold, 0) : 0;
     }
 
     /** Bounty in the hold the player is standing in. */
@@ -106,10 +106,10 @@ public final class Bounty {
     public static Map<String, Integer> all(Player player) {
         Map<String, Integer> out = new LinkedHashMap<>();
         CompoundTag state = state(player);
-        if (!state.contains("bounty", Tag.TAG_COMPOUND)) return out;
-        CompoundTag b = state.getCompound("bounty");
-        for (String k : b.getAllKeys()) {
-            int v = b.getInt(k);
+        if (!com.skycraft.platform.NbtData.hasType(state, "bounty", Tag.TAG_COMPOUND)) return out;
+        CompoundTag b = state.getCompoundOrEmpty("bounty");
+        for (String k : b.keySet()) {
+            int v = b.getIntOr(k, 0);
             if (v > 0) out.put(k, v);
         }
         return out;
@@ -122,7 +122,7 @@ public final class Bounty {
         if (amount <= 0) {
             b.remove(hold);
             CompoundTag state = state(player);
-            if (state.contains("violent", Tag.TAG_COMPOUND)) state.getCompound("violent").remove(hold);
+            if (com.skycraft.platform.NbtData.hasType(state, "violent", Tag.TAG_COMPOUND)) state.getCompoundOrEmpty("violent").remove(hold);
             state.remove("persuade_" + hold);
         } else {
             b.putInt(hold, amount);
@@ -157,25 +157,25 @@ public final class Bounty {
     /** Whether the hold's bounty includes a murder (persuasion can't talk you out of those). */
     public static boolean violent(Player player, String hold) {
         CompoundTag state = state(player);
-        return state.contains("violent", Tag.TAG_COMPOUND) && state.getCompound("violent").getBoolean(hold);
+        return com.skycraft.platform.NbtData.hasType(state, "violent", Tag.TAG_COMPOUND) && state.getCompoundOrEmpty("violent").getBooleanOr(hold, false);
     }
 
     static void markViolent(Player player, String hold) {
         CompoundTag state = state(player);
-        if (!state.contains("violent", Tag.TAG_COMPOUND)) state.put("violent", new CompoundTag());
-        state.getCompound("violent").putBoolean(hold, true);
+        if (!com.skycraft.platform.NbtData.hasType(state, "violent", Tag.TAG_COMPOUND)) state.put("violent", new CompoundTag());
+        state.getCompoundOrEmpty("violent").putBoolean(hold, true);
         SkyData.get(player).markDirty();
     }
 
     // ------------------------------------------------------------------ counters
 
     public static int count(Player player, String key) {
-        return state(player).getInt(key);
+        return state(player).getIntOr(key, 0);
     }
 
     public static void increment(Player player, String key, int amount) {
         CompoundTag state = state(player);
-        state.putInt(key, state.getInt(key) + amount);
+        state.putInt(key, state.getIntOr(key, 0) + amount);
         SkyData.get(player).markDirty();
     }
 
@@ -183,13 +183,13 @@ public final class Bounty {
 
     /** Guards attack on sight until this game time (resisting arrest, fresh assault). */
     public static boolean isHostile(Player player) {
-        return state(player).getLong("hostile_until") > player.level().getGameTime();
+        return state(player).getLongOr("hostile_until",0L) > player.level().getGameTime();
     }
 
     public static void makeHostile(Player player, int ticks) {
         CompoundTag state = state(player);
         long until = player.level().getGameTime() + ticks;
-        if (state.getLong("hostile_until") < until) state.putLong("hostile_until", until);
+        if (state.getLongOr("hostile_until",0L) < until) state.putLong("hostile_until", until);
         SkyData.get(player).markDirty();
     }
 
@@ -203,12 +203,12 @@ public final class Bounty {
 
     /** Whether the stack is stolen goods. A quest item never is, even one that carries the tag: it is never confiscated. */
     public static boolean isStolen(net.minecraft.world.item.ItemStack stack) {
-        return !stack.isEmpty() && stack.getTag() != null && stack.getTag().getBoolean(STOLEN_TAG)
+        return !stack.isEmpty() && com.skycraft.inventory.ItemData.custom(stack) != null && com.skycraft.inventory.ItemData.custom(stack).getBooleanOr(STOLEN_TAG, false)
                 && !com.skycraft.quest.QuestItems.isQuestItem(stack);
     }
 
     public static void markStolen(net.minecraft.world.item.ItemStack stack) {
-        if (!stack.isEmpty() && !com.skycraft.quest.QuestItems.isQuestItem(stack)) stack.getOrCreateTag().putBoolean(STOLEN_TAG, true);
+        if (!stack.isEmpty() && !com.skycraft.quest.QuestItems.isQuestItem(stack)) com.skycraft.inventory.ItemData.updateCustom(stack, customData263 -> customData263.putBoolean(STOLEN_TAG, true));
     }
 
     /** Removes every stolen item from the player's inventory. Returns how many items were taken. */

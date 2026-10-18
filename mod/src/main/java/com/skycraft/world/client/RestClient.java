@@ -10,23 +10,21 @@ import com.skycraft.world.WorldPackets;
 import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.PauseScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
-import net.minecraftforge.client.event.InputEvent;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
+import net.neoforged.neoforge.client.event.InputEvent;
 import net.minecraft.client.gui.screens.InBedChatScreen;
-import net.minecraftforge.client.event.RenderGuiOverlayEvent;
-import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
-import net.minecraftforge.client.event.ScreenEvent;
-import net.minecraftforge.client.event.ViewportEvent;
-import net.minecraftforge.client.gui.overlay.ForgeGui;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import org.lwjgl.glfw.GLFW;
+import net.neoforged.neoforge.client.event.RenderGuiLayerEvent;
+import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
+import net.neoforged.neoforge.client.event.ScreenEvent;
+import net.neoforged.neoforge.client.event.ViewportEvent;
+
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -40,7 +38,7 @@ import java.util.Map;
  * (the initiator, once everybody rests); any movement key, Escape or the wait key's "stand up" cancels; the wait key
  * opens {@link RestScreen} to change between sleeping and waiting.</p>
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
 public final class RestClient {
     private static int phase;
     private static int mode;
@@ -80,22 +78,22 @@ public final class RestClient {
         cancelSent = false;
         if (phase == 0) {
             restoreCamera();
-            if (mc.screen instanceof RestScreen rs) {
+            if (mc.gui.screen() instanceof RestScreen rs) {
                 rs.closeFromServer();
             }
             return;
         }
         hint = null;
         if (mc.player == null) return;
-        if (mc.screen instanceof InBedChatScreen) mc.setScreen(null);
+        if (mc.gui.screen() instanceof InBedChatScreen) mc.gui.setScreen(null);
         if (!was) {
             prevMove = movementDown(mc);
         }
         if (mode != RestLogic.JAIL) {
-            if (mc.screen instanceof RestScreen rs) {
+            if (mc.gui.screen() instanceof RestScreen rs) {
                 rs.onServerState();
             } else {
-                mc.setScreen(new RestScreen(mode == RestLogic.SLEEP));
+                mc.gui.setScreen(new RestScreen(mode == RestLogic.SLEEP));
             }
         }
     }
@@ -179,7 +177,7 @@ public final class RestClient {
      * Sleeping is triggered by right-clicking a bed you may use.
      */
     public static void onWaitKey(Minecraft mc) {
-        if (mc.player == null || mc.screen != null) return;
+        if (mc.player == null || mc.gui.screen() != null) return;
         if (phase != 0) {
             sendCancel();
             return;
@@ -210,14 +208,14 @@ public final class RestClient {
     @SubscribeEvent
     public static void onKey(InputEvent.Key event) {
         Minecraft mc = Minecraft.getInstance();
-        if (phase != 1 || mc.screen != null || mc.player == null || mc.level == null || event.getAction() != GLFW.GLFW_PRESS) return;
+        if (phase != 1 || mc.gui.screen() != null || mc.player == null || mc.level == null || event.getAction() != com.mojang.blaze3d.platform.InputConstants.PRESS) return;
         boolean can = (flags & WorldPackets.RestState.F_SKIP_OFF) == 0;
         switch (event.getKey()) {
-            case GLFW.GLFW_KEY_LEFT -> chosen = Math.max(1, chosen - 1);
-            case GLFW.GLFW_KEY_RIGHT -> chosen = Math.min(24, chosen + 1);
-            case GLFW.GLFW_KEY_UP -> chosen = RestLogic.hoursUntil(mc.level.getDayTime(), 6);
-            case GLFW.GLFW_KEY_DOWN -> chosen = RestLogic.hoursUntil(mc.level.getDayTime(), 18);
-            case GLFW.GLFW_KEY_ENTER, GLFW.GLFW_KEY_KP_ENTER -> {
+            case com.mojang.blaze3d.platform.InputConstants.KEY_LEFT -> chosen = Math.max(1, chosen - 1);
+            case com.mojang.blaze3d.platform.InputConstants.KEY_RIGHT -> chosen = Math.min(24, chosen + 1);
+            case com.mojang.blaze3d.platform.InputConstants.KEY_UP -> chosen = RestLogic.hoursUntil(mc.level.getDefaultClockTime(), 6);
+            case com.mojang.blaze3d.platform.InputConstants.KEY_DOWN -> chosen = RestLogic.hoursUntil(mc.level.getDefaultClockTime(), 18);
+            case com.mojang.blaze3d.platform.InputConstants.KEY_RETURN, com.mojang.blaze3d.platform.InputConstants.KEY_NUMPADENTER -> {
                 if (can) start();
             }
             default -> {
@@ -228,8 +226,8 @@ public final class RestClient {
     @SubscribeEvent
     public static void onScroll(InputEvent.MouseScrollingEvent event) {
         Minecraft mc = Minecraft.getInstance();
-        if (phase != 1 || mc.screen != null || mc.player == null) return;
-        chosen = Mth.clamp(chosen + (event.getScrollDelta() > 0 ? 1 : -1), 1, 24);
+        if (phase != 1 || mc.gui.screen() != null || mc.player == null) return;
+        chosen = Mth.clamp(chosen + (event.getScrollDeltaY() > 0 ? 1 : -1), 1, 24);
         event.setCanceled(true);
     }
 
@@ -243,8 +241,7 @@ public final class RestClient {
     }
 
     @SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent event) {
-        if (event.phase != TickEvent.Phase.END) return;
+    public static void onClientTick(net.neoforged.neoforge.client.event.ClientTickEvent.Post event) {
         Minecraft mc = Minecraft.getInstance();
         prevZoom = zoom;
         float target = phase == 2 ? 1f : 0f;
@@ -261,7 +258,7 @@ public final class RestClient {
             return;
         }
         if (cameraTaken && phase == 0) restoreCamera();
-        if (phase != 0 && mc.screen == null) {
+        if (phase != 0 && mc.gui.screen() == null) {
             boolean move = movementDown(mc);
             if (move && !prevMove) sendCancel();
             prevMove = move;
@@ -281,7 +278,7 @@ public final class RestClient {
         float z = Mth.lerp((float) event.getPartialTick(), prevZoom, zoom);
         if (z <= 0.001f) return;
         float ease = 0.5f - 0.5f * Mth.cos(z * (float) Math.PI);
-        event.setFOV(event.getFOV() * (1.0 - 0.28 * ease * (0.4 + 0.6 * Mth.clamp(eased, 0f, 1f))));
+        event.setFOV((float)(event.getFOV() * (1.0 - 0.28 * ease * (0.4 + 0.6 * Mth.clamp(eased, 0f, 1f)))));
     }
 
     // ------------------------------------------------------------------ vanilla sleeping chrome
@@ -297,33 +294,35 @@ public final class RestClient {
     }
 
     @SubscribeEvent
-    public static void onOverlay(RenderGuiOverlayEvent.Pre event) {
-        if (phase != 0 && event.getOverlay().id().equals(VanillaGuiOverlay.SLEEP_FADE.id())) event.setCanceled(true);
+    public static void onOverlay(RenderGuiLayerEvent.Pre event) {
+        if (phase != 0 && event.getName().equals(VanillaGuiLayers.SLEEP_OVERLAY)) event.setCanceled(true);
     }
 
     // ------------------------------------------------------------------ HUD
 
-    public static void render(ForgeGui gui, GuiGraphics g, float partialTick, int width, int height) {
+    public static void render(GuiGraphicsExtractor g, net.minecraft.client.DeltaTracker delta) {
+        float partialTick = delta.getGameTimeDeltaPartialTick(false);
+        int width = g.guiWidth(), height = g.guiHeight();
         Minecraft mc = Minecraft.getInstance();
-        if (mc.options.hideGui || mc.player == null || mc.level == null) return;
+        if (mc.gui.hud.isHidden() || mc.player == null || mc.level == null) return;
         Font font = mc.font;
         float z = Mth.lerp(partialTick, prevZoom, zoom);
         if (z > 0.01f) vignette(g, width, height, z);
 
         if (phase == 0) {
-            if (hint != null && mc.screen == null && !mc.player.isSpectator()) {
+            if (hint != null && mc.gui.screen() == null && !mc.player.isSpectator()) {
                 Component line = Component.translatable("world.skycraft.rest.hint", hint.who(),
                         SkyKeys.WAIT.getTranslatedKeyMessage(), hint.resting(), hint.required());
                 int y = HudStack.reserve(HudStack.Zone.BOTTOM_CENTER, HudStack.BC_REST, 12, height);
                 int w = font.width(line);
                 int x = (width - w) / 2;
                 g.fill(x - 5, y - 2, x + w + 5, y + 10, 0x90100C08);
-                g.drawString(font, line, x, y, 0xFFE8C060, true);
+                g.text(font, line, x, y, 0xFFE8C060, true);
             }
             return;
         }
-        if (mc.screen instanceof RestScreen) return;
-        long dayTime = mc.level.getDayTime();
+        if (mc.gui.screen() instanceof RestScreen) return;
+        long dayTime = mc.level.getDefaultClockTime();
         boolean jail = mode == RestLogic.JAIL;
         if (phase == 2) {
             int panelH = 36;
@@ -332,11 +331,11 @@ public final class RestClient {
             int x = (width - bw) / 2;
             Component label = jail ? Component.translatable("world.skycraft.rest.passing_jail")
                     : Component.translatable("world.skycraft.rest.passing", Math.min(hours, (int) (hours * (long) progress / 1000L)), hours);
-            g.drawCenteredString(font, label, width / 2, y, 0xFFF5EBC8);
-            g.drawCenteredString(font, SkyrimCalendar.time(dayTime), width / 2, y + 11, 0xFFE8C060);
+            g.centeredText(font, label, width / 2, y, 0xFFF5EBC8);
+            g.centeredText(font, SkyrimCalendar.time(dayTime), width / 2, y + 11, 0xFFE8C060);
             g.fill(x, y + 24, x + bw, y + 28, 0xA0000000);
             g.fill(x, y + 24, x + (int) (bw * Mth.clamp(progress / 1000f, 0f, 1f)), y + 28, 0xFFC8A850);
-            g.drawCenteredString(font, Component.translatable("world.skycraft.rest.cancel_hint"), width / 2, y + 31, 0xFFA89F86);
+            g.centeredText(font, Component.translatable("world.skycraft.rest.cancel_hint"), width / 2, y + 31, 0xFFA89F86);
             return;
         }
         // phase 1: the time panel
@@ -349,26 +348,26 @@ public final class RestClient {
         g.fillGradient(x, y - 2, x + w, y + panelH, 0xB0100C08, 0xB0201810);
         g.fill(x, y - 2, x + w, y - 1, 0xFF8A7F66);
         Component title = Component.translatable(mode == RestLogic.SLEEP ? "world.skycraft.rest.state.sleep" : "world.skycraft.rest.state.wait");
-        g.drawCenteredString(font, title, width / 2, y + 1, 0xFFF5EBC8);
+        g.centeredText(font, title, width / 2, y + 1, 0xFFF5EBC8);
         if (skipOff) {
-            g.drawCenteredString(font, Component.translatable("world.skycraft.rest.recovering"), width / 2, y + 12, 0xFFA89F86);
-            g.drawCenteredString(font, Component.translatable("world.skycraft.rest.skip_off"), width / 2, y + 23, 0xFFA89F86);
+            g.centeredText(font, Component.translatable("world.skycraft.rest.recovering"), width / 2, y + 12, 0xFFA89F86);
+            g.centeredText(font, Component.translatable("world.skycraft.rest.skip_off"), width / 2, y + 23, 0xFFA89F86);
         } else {
             Component pick = Component.translatable(chosen == 1 ? "world.skycraft.rest.pick.hour" : "world.skycraft.rest.pick.hours", chosen,
                     SkyrimCalendar.time(dayTime + chosen * 1000L));
-            g.drawCenteredString(font, pick, width / 2, y + 12, 0xFFE8C060);
+            g.centeredText(font, pick, width / 2, y + 12, 0xFFE8C060);
             Component action;
             if (canStart()) action = Component.translatable("world.skycraft.rest.controls");
             else if ((flags & WorldPackets.RestState.F_INITIATOR) == 0 && resting >= required && required > 0)
                 action = Component.translatable("world.skycraft.rest.chooses", initiator);
             else action = Component.translatable("world.skycraft.rest.waiting_others", resting, required);
-            g.drawCenteredString(font, action, width / 2, y + 23, canStart() ? 0xFFD0C8B0 : 0xFFA89F86);
+            g.centeredText(font, action, width / 2, y + 23, canStart() ? 0xFFD0C8B0 : 0xFFA89F86);
         }
-        g.drawCenteredString(font, Component.translatable("world.skycraft.rest.stand_hint", SkyKeys.WAIT.getTranslatedKeyMessage()),
+        g.centeredText(font, Component.translatable("world.skycraft.rest.stand_hint", SkyKeys.WAIT.getTranslatedKeyMessage()),
                 width / 2, y + 34, 0xFF8A7F66);
     }
 
-    private static void vignette(GuiGraphics g, int w, int h, float z) {
+    private static void vignette(GuiGraphicsExtractor g, int w, int h, float z) {
         int a = (int) (0xB0 * Mth.clamp(z, 0f, 1f));
         int edge = a << 24;
         int bandW = (int) (w * 0.22f), bandH = (int) (h * 0.22f);

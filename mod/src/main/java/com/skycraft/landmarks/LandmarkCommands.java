@@ -13,9 +13,9 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -44,7 +44,7 @@ import java.util.TreeMap;
  *     <li>{@code sample <x> <z> <half> <count> <name>}: generates real sites of an area and writes a list for the renderer.</li>
  * </ul>
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class LandmarkCommands {
     private static final List<String> FAMILIES = List.of("auto", "tundra", "forest", "plains", "marsh", "desert", "savanna", "ash",
             "volcanic", "jungle", "crystal", "mushroom", "mountain");
@@ -57,7 +57,7 @@ public final class LandmarkCommands {
     }
 
     static void register(CommandDispatcher<CommandSourceStack> d) {
-        d.register(Commands.literal("skycraft-landmarks").requires(s -> s.hasPermission(2))
+        d.register(Commands.literal("skycraft-landmarks").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
                 .then(Commands.literal("list")
                         .executes(c -> list(c, null))
                         .then(Commands.argument("tier", StringArgumentType.word())
@@ -319,7 +319,7 @@ public final class LandmarkCommands {
                     ok ? "built" : "REFUSED"));
         }
         try {
-            Path dir = c.getSource().getServer().getServerDirectory().toPath().resolve("skycraft-landmarks");
+            Path dir = c.getSource().getServer().getServerDirectory().resolve("skycraft-landmarks");
             Files.createDirectories(dir);
             Files.writeString(dir.resolve("sample_" + name + ".json"), arr.toString(), StandardCharsets.UTF_8);
         } catch (java.io.IOException e) {

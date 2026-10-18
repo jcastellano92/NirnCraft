@@ -3,28 +3,11 @@
   "temperature": 0.7,
   "downfall": 0.9,
   "effects": {
-    "sky_color": 4872792,
-    "fog_color": 3424826,
-    "water_color": 3033652,
-    "water_fog_color": 924176,
-    "mood_sound": {
-      "sound": "minecraft:ambient.cave",
-      "tick_delay": 6000,
-      "block_search_extent": 8,
-      "offset": 2.0
-    },
-    "grass_color": 4020786,
-    "foliage_color": 3099178,
-    "particle": {
-      "options": {
-        "type": "minecraft:mycelium"
-      },
-      "probability": 0.02
-    }
+    "water_color": "#2e4a34",
+    "grass_color": "#3d5a32",
+    "foliage_color": "#2f4a2a"
   },
-  "spawners": {},
-  "spawn_costs": {},
-  "carvers": {},
+  "carvers": [],
   "features": [
     [],
     [],
@@ -43,5 +26,36 @@
       "skycraft:realm/si_lilypads"
     ],
     []
-  ]
+  ],
+  "attributes": {
+    "minecraft:visual/sky_color": "#4a5a58",
+    "minecraft:visual/fog_color": "#34423a",
+    "minecraft:visual/water_fog_color": "#0e1a10",
+    "minecraft:audio/ambient_sounds": {
+      "mood": {
+        "sound": "minecraft:ambient.cave",
+        "tick_delay": 6000,
+        "block_search_extent": 8,
+        "offset": 2.0
+      }
+    },
+    "minecraft:visual/ambient_particles": {
+      "modifier": "append",
+      "argument": [
+        {
+          "probability": 0.02,
+          "particle": {
+            "type": "minecraft:mycelium"
+          }
+        }
+      ]
+    },
+    "minecraft:gameplay/natural_mob_spawns": {
+      "modifier": "overlay",
+      "argument": {
+        "spawns_by_category": {},
+        "spawn_costs": {}
+      }
+    }
+  }
 }

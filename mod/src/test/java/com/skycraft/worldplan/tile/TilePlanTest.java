@@ -25,6 +25,10 @@ import static org.junit.jupiter.api.Assertions.*;
  * {@link TileSheetGenerator}). Runs without booting a Minecraft server.
  */
 class TilePlanTest {
+    private TilePlanner.ToolPreview preview;
+    @org.junit.jupiter.api.BeforeEach void previewDormantPlanner() { preview=TilePlanner.previewForTools(); }
+    @org.junit.jupiter.api.AfterEach void closeDormantPreview() { preview.close(); }
+
 
     private static final long TEST_SEED = 0x534B594352414654L;
 

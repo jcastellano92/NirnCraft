@@ -19,7 +19,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.DoorBlock;
 import net.minecraft.world.phys.AABB;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.fml.common.Mod;
 
 import java.util.HashMap;
 import java.util.List;
@@ -43,7 +43,7 @@ import java.util.UUID;
  *     reported.</li>
  * </ul>
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 final class JailVisitors {
     private JailVisitors() {}
 
@@ -113,7 +113,7 @@ final class JailVisitors {
         if (!Jail.isRecentEscapee(player)) {
             return;
         }
-        ServerLevel level = player.serverLevel();
+        ServerLevel level = player.level();
         Zone zone = zoneAt(level, player.getX(), player.getY(), player.getZ());
         if (zone == Zone.OUTSIDE) {
             return;
@@ -160,9 +160,9 @@ final class JailVisitors {
         boolean witnessed = Crimes.findGuardWitness(rescuer) != null;
         if (prisoner != null && !prisoner.getUUID().equals(rescuer.getUUID()) && Jail.isJailed(prisoner)) {
             helped = true;
-            CompoundTag j = Bounty.state(prisoner).getCompound("jail");
+            CompoundTag j = Bounty.state(prisoner).getCompoundOrEmpty("jail");
             j.putBoolean("freed", true);
-            if (witnessed) j.putInt("remaining", Math.min(Jail.MAX_SECONDS, j.getInt("remaining") + FREED_SENTENCE_SECONDS));
+            if (witnessed) j.putInt("remaining", Math.min(Jail.MAX_SECONDS, j.getIntOr("remaining",0) + FREED_SENTENCE_SECONDS));
             SkyData.get(prisoner).markDirty();
             Notifier.message(prisoner, Component.translatable("crime.skycraft.jail.freed_by", rescuer.getDisplayName()));
             Notifier.message(rescuer, Component.translatable("crime.skycraft.jail.freed_player", prisoner.getDisplayName()));

@@ -22,11 +22,11 @@ import net.minecraft.world.level.block.BedBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.phys.AABB;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.LogicalSide;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.registries.ForgeRegistries;
+
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.LogicalSide;
+import net.neoforged.fml.common.Mod;
+import net.minecraft.core.registries.BuiltInRegistries;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -43,7 +43,7 @@ import java.util.Optional;
  * <p>Option field: for {@code body} anchors {@code l} = lootable, {@code f} = face down; for {@code haul} anchors
  * {@code dx,dz} = where the load is carried to.</p>
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class AftermathPopulation {
     /** The spawned-anchor ledger (saved with the overworld). */
     public static final class Ledger extends SavedData {
@@ -52,11 +52,10 @@ public final class AftermathPopulation {
 
         public static Ledger load(CompoundTag tag) {
             Ledger l = new Ledger();
-            for (long v : tag.getLongArray("done")) l.done.add(v);
+            for (long v : tag.getLongArray("done").orElseGet(() -> new long[0])) l.done.add(v);
             return l;
         }
 
-        @Override
         public CompoundTag save(CompoundTag tag) {
             tag.putLongArray("done", done.toLongArray());
             return tag;
@@ -71,13 +70,13 @@ public final class AftermathPopulation {
 
     public static Ledger ledger(ServerLevel level) {
         ServerLevel overworld = level.getServer().overworld();
-        return overworld.getDataStorage().computeIfAbsent(Ledger::load, Ledger::new, Ledger.NAME);
+        return com.skycraft.platform.SavedDataTypes.get(overworld, Ledger.NAME, Ledger::load, Ledger::new, value263 -> value263.save(new net.minecraft.nbt.CompoundTag()));
     }
 
     @SubscribeEvent
-    public static void onLevelTick(TickEvent.LevelTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || event.side != LogicalSide.SERVER) return;
-        if (!(event.level instanceof ServerLevel level) || level.dimension() != Level.OVERWORLD) return;
+    public static void onLevelTick(net.neoforged.neoforge.event.tick.LevelTickEvent.Post event) {
+        if (!(event instanceof net.neoforged.neoforge.event.tick.LevelTickEvent.Post)) return;
+        if (!(event.getLevel() instanceof ServerLevel level) || level.dimension() != Level.OVERWORLD) return;
         long t = level.getGameTime();
         try {
             if (t % 100 == 41) FireAnchors.scan(level, false);
@@ -117,8 +116,8 @@ public final class AftermathPopulation {
     /** Removes every tableau actor and body within {@code radius} of {@code center} and forgets the ledger entries of the settlement. */
     public static int clear(ServerLevel level, SettlementAnchors.Entry e) {
         int n = 0;
-        AABB box = new AABB(e.x - e.radius - 40, level.getMinBuildHeight(), e.z - e.radius - 40, e.x + e.radius + 40,
-                level.getMaxBuildHeight(), e.z + e.radius + 40);
+        AABB box = new AABB(e.x - e.radius - 40, level.getMinY(), e.z - e.radius - 40, e.x + e.radius + 40,
+                (level.getMaxY()+1), e.z + e.radius + 40);
         for (Entity en : level.getEntitiesOfClass(Entity.class, box, x -> x.getPersistentData().contains(Tableau.KEY))) {
             en.discard();
             n++;
@@ -164,14 +163,14 @@ public final class AftermathPopulation {
         NpcEntity npc = Npcs.create(level, pos, role);
         if (npc == null) return false;
         npc.setPersistenceRequired();
-        npc.moveTo(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5, yaw, 0f);
+        npc.snapTo(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5, yaw, 0f);
         npc.setYHeadRot(yaw);
         npc.getPersistentData().putString(Tableau.KEY, pose.id);
         npc.getPersistentData().putBoolean(HelgenFolk.BARKS, true);
         npc.getPersistentData().putLong(Tableau.AT_KEY, a.pos().asLong());
         npc.setPoseFlags(pose.flags);
         if (!pose.item.isEmpty()) {
-            var item = ForgeRegistries.ITEMS.getValue(new net.minecraft.resources.ResourceLocation(pose.item));
+            var item = BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.parse(pose.item));
             if (item != null) {
                 if (pose == Tableau.Pose.HAUL) npc.getPersistentData().putString("skycraft_tableau_item", pose.item);
                 else npc.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(item));
@@ -202,7 +201,7 @@ public final class AftermathPopulation {
             }
         }
         if (pose.frozen) npc.setNoAi(true);
-        else if (pose == Tableau.Pose.GUARD) npc.restrictTo(pos, 5);
+        else if (pose == Tableau.Pose.GUARD) npc.setHomeTo(pos, 5);
         return level.addFreshEntity(npc);
     }
 
@@ -248,8 +247,8 @@ public final class AftermathPopulation {
 
     /** The tableau actors and bodies of a settlement (loaded chunks only), by pose id. */
     public static List<Entity> actors(ServerLevel level, SettlementAnchors.Entry e) {
-        AABB box = new AABB(e.x - e.radius - 40, level.getMinBuildHeight(), e.z - e.radius - 40, e.x + e.radius + 40,
-                level.getMaxBuildHeight(), e.z + e.radius + 40);
+        AABB box = new AABB(e.x - e.radius - 40, level.getMinY(), e.z - e.radius - 40, e.x + e.radius + 40,
+                (level.getMaxY()+1), e.z + e.radius + 40);
         return new ArrayList<>(level.getEntitiesOfClass(Entity.class, box, x -> x.getPersistentData().contains(Tableau.KEY)));
     }
 

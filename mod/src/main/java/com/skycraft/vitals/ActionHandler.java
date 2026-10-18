@@ -74,8 +74,8 @@ public final class ActionHandler {
     private static void handleShieldBash(ServerPlayer player) {
         if (!Vitals.consumeStamina(player, 15f, false)) return;
         LAST_BASH.put(player.getUUID(), player.level().getGameTime());
-        net.minecraft.server.level.ServerLevel level = player.serverLevel();
-        level.playSound(null, player.blockPosition(), net.minecraft.sounds.SoundEvents.SHIELD_BLOCK, net.minecraft.sounds.SoundSource.PLAYERS, 1.0f, 0.9f);
+        net.minecraft.server.level.ServerLevel level = player.level();
+        level.playSound(null, player.blockPosition(), net.minecraft.sounds.SoundEvents.SHIELD_BLOCK.value(), net.minecraft.sounds.SoundSource.PLAYERS, 1.0f, 0.9f);
         net.minecraft.world.phys.Vec3 look = player.getViewVector(1.0f);
         net.minecraft.world.phys.AABB box = player.getBoundingBox().expandTowards(look.scale(3.0)).inflate(1.0);
         for (net.minecraft.world.entity.LivingEntity target : level.getEntitiesOfClass(net.minecraft.world.entity.LivingEntity.class, box, e -> e != player && e.isAlive())) {
@@ -83,14 +83,14 @@ public final class ActionHandler {
                 float bashDmg = 4.0f + (com.skycraft.perk.Perks.has(player, "block.deadly_bash") ? 6.0f : 0f);
                 // A bash is not a weapon swing: no swing stamina, multipliers or weapon XP.
                 com.skycraft.combat.CombatHandler.secondaryHurt(target, player.damageSources().playerAttack(player), bashDmg);
-                target.knockback(0.6, -look.x, -look.z);
+                target.knockback(0.6, -look.x, -look.z, player.damageSources().playerAttack(player), bashDmg);
                 break;
             }
         }
     }
 
     private static void handleTakeWorldItem(ServerPlayer player, int entityId) {
-        net.minecraft.world.entity.Entity entity = player.serverLevel().getEntity(entityId);
+        net.minecraft.world.entity.Entity entity = player.level().getEntity(entityId);
         if (!(entity instanceof net.minecraft.world.entity.item.ItemEntity itemEntity) || !itemEntity.isAlive()) return;
         if (player.distanceToSqr(itemEntity) > 25.0) return; // within 5 blocks
 
@@ -98,10 +98,10 @@ public final class ActionHandler {
         ItemStack template = itemEntity.getItem().copy();
         takeOneWorldItem(player, itemEntity);
         if (template.isEmpty()) return;
-        for (net.minecraft.world.entity.item.ItemEntity other : player.serverLevel().getEntitiesOfClass(
+        for (net.minecraft.world.entity.item.ItemEntity other : player.level().getEntitiesOfClass(
                 net.minecraft.world.entity.item.ItemEntity.class, itemEntity.getBoundingBox().inflate(1.5),
                 e -> e != itemEntity && e.isAlive() && player.distanceToSqr(e) <= 25.0
-                        && ItemStack.isSameItemSameTags(e.getItem(), template))) {
+                        && ItemStack.isSameItemSameComponents(e.getItem(), template))) {
             takeOneWorldItem(player, other);
         }
     }
@@ -114,7 +114,7 @@ public final class ActionHandler {
         long coinVal = com.skycraft.core.Currency.valueOf(stack);
         if (coinVal > 0) {
             com.skycraft.core.Currency.give(player, coinVal);
-            player.serverLevel().playSound(null, player.blockPosition(), SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 0.6f, 1.2f);
+            player.level().playSound(null, player.blockPosition(), SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 0.6f, 1.2f);
             itemEntity.discard();
             return;
         }
@@ -137,7 +137,7 @@ public final class ActionHandler {
         addToBags(player, stack);
 
         if (stack.getCount() < origCount) {
-            player.serverLevel().playSound(null, player.blockPosition(), SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 0.5f, 1.1f);
+            player.level().playSound(null, player.blockPosition(), SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 0.5f, 1.1f);
             if (stack.isEmpty()) {
                 itemEntity.discard();
             } else {
@@ -172,12 +172,12 @@ public final class ActionHandler {
         }
 
         net.minecraft.world.entity.player.Inventory inv = player.getInventory();
-        int activeSlot = inv.selected;
+        int activeSlot = inv.getSelectedSlot();
 
         // 1. Try to merge into existing matching stacks in storage (9..35)
         for (int i = 9; i < 36; i++) {
             ItemStack inSlot = inv.getItem(i);
-            if (ItemStack.isSameItemSameTags(inSlot, stack)) {
+            if (ItemStack.isSameItemSameComponents(inSlot, stack)) {
                 int space = inSlot.getMaxStackSize() - inSlot.getCount();
                 if (space > 0) {
                     int move = Math.min(space, stack.getCount());
@@ -192,7 +192,7 @@ public final class ActionHandler {
         for (int i = 0; i < 9; i++) {
             if (i == activeSlot) continue;
             ItemStack inSlot = inv.getItem(i);
-            if (ItemStack.isSameItemSameTags(inSlot, stack)) {
+            if (ItemStack.isSameItemSameComponents(inSlot, stack)) {
                 int space = inSlot.getMaxStackSize() - inSlot.getCount();
                 if (space > 0) {
                     int move = Math.min(space, stack.getCount());
@@ -224,7 +224,7 @@ public final class ActionHandler {
         if (!Perks.has(player, "athletics.dodge_roll")) return;
         if (Vitals.consumeStamina(player, 15f, false)) {
             LAST_DODGE.put(player.getUUID(), player.level().getGameTime());
-            player.invulnerableTime = 12; // ~0.6s i-frames
+            player.setInvulnerableTime(12); // ~0.6s i-frames
             player.level().playSound(null, player.blockPosition(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 0.8f, 1.4f);
             Progression.addSkillXp(player, Skill.ATHLETICS, 1.5f);
         }
@@ -287,7 +287,7 @@ public final class ActionHandler {
         }
         PlayerData data = SkyData.get(player);
         long now = player.level().getGameTime();
-        long next = data.module("unstuck").getLong("cooldown");
+        long next = data.module("unstuck").getLongOr("cooldown",0L);
         if (now < next) {
             long sec = (next - now) / 20;
             Notifier.message(player, Component.translatable("message.skycraft.unstuck_cooldown", sec));
@@ -306,7 +306,7 @@ public final class ActionHandler {
 
     public static boolean isPowerAttacking(Player player) {
         Long until = POWER_ATTACK_ARMED.get(player.getUUID());
-        return (until != null && until >= player.level().getGameTime()) || (player.isSprinting() && player.swinging);
+        return (until != null && until >= player.level().getGameTime()) || (player.isSprinting() && player.isSwinging());
     }
 
     public static boolean isClimbing(Player player) {
@@ -400,7 +400,7 @@ public final class ActionHandler {
         boolean any = false;
         for (int i = 0; i < containerSlotCount; i++) {
             Slot s = menu.getSlot(i);
-            if (s.hasItem() && ItemStack.isSameItemSameTags(s.getItem(), template)) any |= takeSlot(player, s);
+            if (s.hasItem() && ItemStack.isSameItemSameComponents(s.getItem(), template)) any |= takeSlot(player, s);
         }
         if (store != null) any |= takeOverflow(player, store, template);
         long took = before - containerCount(menu, containerSlotCount, template) - overflowCount(store, template);
@@ -412,7 +412,7 @@ public final class ActionHandler {
         int n = 0;
         for (int i = 0; i < containerSlotCount; i++) {
             ItemStack s = menu.getSlot(i).getItem();
-            if (!s.isEmpty() && ItemStack.isSameItemSameTags(s, template)) n += s.getCount();
+            if (!s.isEmpty() && ItemStack.isSameItemSameComponents(s, template)) n += s.getCount();
         }
         return n;
     }
@@ -502,7 +502,7 @@ public final class ActionHandler {
             if (!template.isEmpty()) {
                 for (int i = containerSlotCount; i < menu.slots.size(); i++) {
                     Slot pSlot = menu.getSlot(i);
-                    if (!pSlot.hasItem() || !ItemStack.isSameItemSameTags(pSlot.getItem(), template)) continue;
+                    if (!pSlot.hasItem() || !ItemStack.isSameItemSameComponents(pSlot.getItem(), template)) continue;
                     // the held / off hand stack only when it is the very slot that was clicked
                     boolean hand = pSlot.getItem() == player.getMainHandItem() || pSlot.getItem() == player.getOffhandItem();
                     if (hand && i != slotIndex) continue;
@@ -559,7 +559,7 @@ public final class ActionHandler {
         // 1. Merge into matching existing stacks in container
         for (int i = 0; i < containerSlotCount && !stack.isEmpty(); i++) {
             Slot s = menu.getSlot(i);
-            if (s.hasItem() && ItemStack.isSameItemSameTags(s.getItem(), stack)) s.safeInsert(stack);
+            if (s.hasItem() && ItemStack.isSameItemSameComponents(s.getItem(), stack)) s.safeInsert(stack);
         }
         // 2. Put into empty container slots
         for (int i = 0; i < containerSlotCount && !stack.isEmpty(); i++) {

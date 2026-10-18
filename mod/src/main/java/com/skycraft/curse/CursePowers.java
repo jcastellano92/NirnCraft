@@ -65,9 +65,9 @@ public final class CursePowers {
     public static List<String> powers(Player player) {
         List<String> out = new ArrayList<>();
         CompoundTag t = Curses.tag(player);
-        if (t.getBoolean(Curses.WEREWOLF)) out.add(BEAST_FORM);
-        if (t.getBoolean(Curses.VAMPIRE)) {
-            if (t.getBoolean(Curses.LORD)) out.add(VAMPIRE_LORD);
+        if (t.getBooleanOr(Curses.WEREWOLF, false)) out.add(BEAST_FORM);
+        if (t.getBooleanOr(Curses.VAMPIRE, false)) {
+            if (t.getBooleanOr(Curses.LORD, false)) out.add(VAMPIRE_LORD);
             out.add(VAMPIRES_SIGHT);
             out.add(VAMPIRES_SERVANT);
             if (Curses.stage(player) >= 3) out.add(EMBRACE_OF_SHADOWS);
@@ -128,14 +128,14 @@ public final class CursePowers {
 
     /** Game time at which the power is ready again. */
     public static long readyAt(Player player, String id) {
-        if (id.equals(BEAST_FORM)) return Curses.tag(player).getLong(Curses.BEAST_READY);
-        return Curses.tag(player).getCompound(Curses.COOLDOWNS).getLong(id);
+        if (id.equals(BEAST_FORM)) return Curses.tag(player).getLongOr(Curses.BEAST_READY, 0L);
+        return Curses.tag(player).getCompoundOrEmpty(Curses.COOLDOWNS).getLongOr(id, 0L);
     }
 
     public static long readyAt(PlayerData data, String id) {
         CompoundTag t = data.module(Curses.MODULE);
-        if (id.equals(BEAST_FORM)) return t.getLong(Curses.BEAST_READY);
-        return t.getCompound(Curses.COOLDOWNS).getLong(id);
+        if (id.equals(BEAST_FORM)) return t.getLongOr(Curses.BEAST_READY, 0L);
+        return t.getCompoundOrEmpty(Curses.COOLDOWNS).getLongOr(id, 0L);
     }
 
     static boolean ready(ServerPlayer player, String id) {
@@ -151,7 +151,7 @@ public final class CursePowers {
     static void startCooldown(ServerPlayer player, String id) {
         if (id.equals(BEAST_FORM)) return; // Lycanthropy stores its own
         CompoundTag t = Curses.tag(player);
-        CompoundTag cd = t.getCompound(Curses.COOLDOWNS);
+        CompoundTag cd = t.getCompoundOrEmpty(Curses.COOLDOWNS);
         cd.putLong(id, player.level().getGameTime() + cooldown(id));
         t.put(Curses.COOLDOWNS, cd);
         Curses.dirty(player);
@@ -183,7 +183,7 @@ public final class CursePowers {
     }
 
     static String selected(Player player, String key, String fallback) {
-        String id = Curses.tag(player).getString(key);
+        String id = Curses.tag(player).getStringOr(key, "");
         return id.isEmpty() || !hasAbility(player, id) ? fallback : id;
     }
 
@@ -204,13 +204,13 @@ public final class CursePowers {
 
     private static boolean toggleSight(ServerPlayer player) {
         CompoundTag t = Curses.tag(player);
-        boolean on = !t.getBoolean(Curses.SIGHT);
+        boolean on = !t.getBooleanOr(Curses.SIGHT, false);
         if (on) {
             t.putBoolean(Curses.SIGHT, true);
-            player.addEffect(new MobEffectInstance(MobEffects.NIGHT_VISION, 20 * 30, 0, false, false, false));
+            player.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.NIGHT_VISION), 20 * 30, 0, false, false, false));
         } else {
             t.remove(Curses.SIGHT);
-            player.removeEffect(MobEffects.NIGHT_VISION);
+            player.removeEffect(com.skycraft.platform.Effects.holder(MobEffects.NIGHT_VISION));
         }
         Curses.dirty(player);
         CursePackets.sync(player);
@@ -228,7 +228,7 @@ public final class CursePowers {
             AttributeInstance atk = mob.getAttribute(Attributes.ATTACK_DAMAGE);
             if (atk != null) atk.setBaseValue(atk.getBaseValue() * (1 + 0.2 * stage));
             mob.setHealth(mob.getMaxHealth());
-            mob.addEffect(new MobEffectInstance(MobEffects.FIRE_RESISTANCE, 20 * 60, 0, false, false));
+            mob.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.FIRE_RESISTANCE), 20 * 60, 0, false, false));
         });
         if (thrall == null) return false;
         player.level().playSound(null, thrall.blockPosition(), SoundEvents.ZOMBIE_VILLAGER_CURE, SoundSource.PLAYERS, 0.8f, 0.5f);
@@ -238,8 +238,8 @@ public final class CursePowers {
     /** Embrace of Shadows: invisible, seeing in the dark; longer at stage 4. */
     private static boolean embrace(ServerPlayer player) {
         int secs = Curses.stage(player) >= 4 ? 240 : 180;
-        player.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, 20 * secs, 0, false, false, true));
-        player.addEffect(new MobEffectInstance(MobEffects.NIGHT_VISION, 20 * secs, 0, false, false, false));
+        player.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.INVISIBILITY), 20 * secs, 0, false, false, true));
+        player.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.NIGHT_VISION), 20 * secs, 0, false, false, false));
         player.level().playSound(null, player.blockPosition(), SoundEvents.ILLUSIONER_MIRROR_MOVE, SoundSource.PLAYERS, 0.8f, 0.6f);
         CursePackets.anim(player, CurseAnims.Anim.CAST);
         return true;

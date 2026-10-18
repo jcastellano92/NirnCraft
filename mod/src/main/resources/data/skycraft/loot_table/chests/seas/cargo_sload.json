@@ -1,0 +1,73 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": {
+        "type": "minecraft:uniform",
+        "min": 3,
+        "max": 6
+      },
+      "entries": [
+        {
+          "type": "minecraft:loot_table",
+          "weight": 4,
+          "value": "skycraft:chests/soul_gems"
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:slime_ball",
+          "weight": 4,
+          "modifier": {
+            "count": {
+              "type": "minecraft:uniform",
+              "min": 2,
+              "max": 6
+            },
+            "type": "minecraft:set_count"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:void_salts",
+          "weight": 2
+        },
+        {
+          "type": "minecraft:loot_table",
+          "weight": 1,
+          "value": "skycraft:chests/spell_tomes"
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:bone",
+          "weight": 3,
+          "modifier": {
+            "count": {
+              "type": "minecraft:uniform",
+              "min": 2,
+              "max": 5
+            },
+            "type": "minecraft:set_count"
+          }
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:book",
+          "weight": 1,
+          "modifier": {
+            "tag": "{book:\"seas_sload_tablet\",skycraft_value:25}",
+            "type": "minecraft:set_custom_data"
+          }
+        }
+      ],
+      "condition": {
+        "chance": 0.4,
+        "type": "minecraft:random_chance"
+      }
+    }
+  ]
+}

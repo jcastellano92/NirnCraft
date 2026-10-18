@@ -59,14 +59,15 @@ public class StaffBolt extends ThrowableProjectile {
     }
 
     public StaffBolt(Level level, LivingEntity owner, Kind kind, float power) {
-        super(ArsenalEntities.STAFF_BOLT.get(), owner, level);
+        super(ArsenalEntities.STAFF_BOLT.get(), owner.getX(), owner.getEyeY() - 0.1, owner.getZ(), level);
+        setOwner(owner);
         this.entityData.set(KIND, (byte) kind.ordinal());
         this.power = power;
     }
 
     @Override
-    protected void defineSynchedData() {
-        this.entityData.define(KIND, (byte) 0);
+    protected void defineSynchedData(net.minecraft.network.syncher.SynchedEntityData.Builder builder) {
+        builder.define(KIND, (byte) 0);
     }
 
     public Kind kind() {
@@ -83,7 +84,7 @@ public class StaffBolt extends ThrowableProjectile {
     }
 
     @Override
-    protected float getGravity() {
+    protected double getDefaultGravity() {
         return 0f;
     }
 
@@ -91,7 +92,7 @@ public class StaffBolt extends ThrowableProjectile {
     public void tick() {
         super.tick();
         Kind kind = kind();
-        if (level().isClientSide) {
+        if (level().isClientSide()) {
             trail(kind);
             return;
         }
@@ -123,7 +124,7 @@ public class StaffBolt extends ThrowableProjectile {
     @Override
     protected void onHitEntity(EntityHitResult result) {
         super.onHitEntity(result);
-        if (level().isClientSide) return;
+        if (level().isClientSide()) return;
         ServerPlayer caster = caster();
         if (caster != null) {
             LivingEntity target = result.getEntity() instanceof LivingEntity l ? l : null;
@@ -135,10 +136,10 @@ public class StaffBolt extends ThrowableProjectile {
     @Override
     protected void onHitBlock(BlockHitResult result) {
         super.onHitBlock(result);
-        if (level().isClientSide) return;
+        if (level().isClientSide()) return;
         ServerPlayer caster = caster();
         if (caster != null && !kind().piercing) {
-            Vec3 pos = result.getLocation().add(Vec3.atLowerCornerOf(result.getDirection().getNormal()).scale(0.25));
+            Vec3 pos = result.getLocation().add(Vec3.atLowerCornerOf(result.getDirection().getUnitVec3i()).scale(0.25));
             StaffEffects.impact(this, caster, kind(), null, pos);
         }
         discard();
@@ -150,25 +151,31 @@ public class StaffBolt extends ThrowableProjectile {
     }
 
     @Override
-    protected void addAdditionalSaveData(CompoundTag tag) {
-        super.addAdditionalSaveData(tag);
+    protected void addAdditionalSaveData(net.minecraft.world.level.storage.ValueOutput output263) {
+        super.addAdditionalSaveData(output263);
+        net.minecraft.nbt.CompoundTag tag = new net.minecraft.nbt.CompoundTag();
+        
         tag.putByte("kind", this.entityData.get(KIND));
         tag.putFloat("power", power);
         tag.putInt("life", life);
+    
+        output263.store(tag);
     }
 
     @Override
-    protected void readAdditionalSaveData(CompoundTag tag) {
-        super.readAdditionalSaveData(tag);
-        this.entityData.set(KIND, tag.getByte("kind"));
-        this.power = tag.contains("power") ? tag.getFloat("power") : 1f;
-        this.life = tag.getInt("life");
+    protected void readAdditionalSaveData(net.minecraft.world.level.storage.ValueInput input263) {
+        super.readAdditionalSaveData(input263);
+        net.minecraft.nbt.CompoundTag tag = com.skycraft.platform.ValueTags.read(input263 , "kind", "power", "life");
+        
+        this.entityData.set(KIND, tag.getByteOr("kind",(byte)0));
+        this.power = tag.contains("power") ? tag.getFloatOr("power",0F) : 1f;
+        this.life = tag.getIntOr("life",0);
     }
 
     // ------------------------------------------------------------------ client trail
 
     private static DustParticleOptions dust(float r, float g, float b, float size) {
-        return new DustParticleOptions(new Vector3f(r, g, b), size);
+        return new DustParticleOptions(net.minecraft.util.ARGB.colorFromFloat(1f, r, g, b), size);
     }
 
     private static double j(RandomSource r, double s) {

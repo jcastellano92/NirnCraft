@@ -50,7 +50,7 @@ public final class Towers {
             fr.set(fwd, 0, lat0 + 1, hide);
             fr.set(fwd, 1, lat0 + 1, hide);
             fr.set(fwd, 2, lat0, hide);
-            fr.set(fwd, 0, lat0, fwd < fwd0 ? Blocks.RED_CARPET.defaultBlockState() : Blocks.AIR.defaultBlockState());
+            fr.set(fwd, 0, lat0, fwd < fwd0 ? com.skycraft.worldgen.VanillaBlocks.RED_CARPET.defaultBlockState() : Blocks.AIR.defaultBlockState());
         }
     }
 
@@ -106,7 +106,7 @@ public final class Towers {
         fr.set(r, 2, 0, Blocks.CHISELED_STONE_BRICKS);
         fr.set(r + 1, 2, -1, Deco.wallTorch(false, fr.f));
         // the camp at its foot
-        tent(fr, 6, -5, Blocks.BROWN_WOOL.defaultBlockState());
+        tent(fr, 6, -5, com.skycraft.worldgen.VanillaBlocks.BROWN_WOOL.defaultBlockState());
         fr.set(6, 0, 3, Deco.campfire(false, true));
         fr.set(7, 0, 5, Deco.pillar(Blocks.STRIPPED_SPRUCE_LOG, fr.r.getAxis()));
         fr.container(-r + 1, 7, r - 1, Deco.chest(fr.r.getOpposite()), Deco.LOOT_COMMON);
@@ -183,7 +183,7 @@ public final class Towers {
                         continue;
                     }
                     if (window) {
-                        p.set(x, fr.base + dy, z, crystal ? Blocks.LIGHT_BLUE_STAINED_GLASS.defaultBlockState() : Blocks.PURPLE_STAINED_GLASS.defaultBlockState());
+                        p.set(x, fr.base + dy, z, crystal ? com.skycraft.worldgen.VanillaBlocks.LIGHT_BLUE_STAINED_GLASS.defaultBlockState() : com.skycraft.worldgen.VanillaBlocks.PURPLE_STAINED_GLASS.defaultBlockState());
                         continue;
                     }
                     p.set(x, fr.base + dy, z, crystal && dy > 8 && Math.floorMod(fw * 3 + lt + dy, 5) == 0
@@ -196,7 +196,7 @@ public final class Towers {
             // spire
             int capH = (int) Math.round((4.2 - d) * (crystal ? 3.2 : 2.0));
             for (int dy = 1; dy <= capH; dy++) {
-                p.set(x, fr.base + h + dy, z, crystal ? (dy % 2 == 0 ? Blocks.AMETHYST_BLOCK.defaultBlockState() : Blocks.PURPLE_STAINED_GLASS.defaultBlockState())
+                p.set(x, fr.base + h + dy, z, crystal ? (dy % 2 == 0 ? Blocks.AMETHYST_BLOCK.defaultBlockState() : com.skycraft.worldgen.VanillaBlocks.PURPLE_STAINED_GLASS.defaultBlockState())
                         : pal.trim);
             }
         });
@@ -213,7 +213,7 @@ public final class Towers {
         fr.container(2, 9, -1, Deco.chest(fr.f.getOpposite()), Deco.LOOT_COMMON);
         fr.set(0, 17, 0, crystal ? Blocks.AMETHYST_BLOCK.defaultBlockState() : Blocks.CRYING_OBSIDIAN.defaultBlockState());
         for (Direction d : Direction.Plane.HORIZONTAL) {
-            fr.set(d.getStepZ() * -2, 17, d.getStepX() * 2, Deco.candle(crystal ? Blocks.LIGHT_BLUE_CANDLE : Blocks.PURPLE_CANDLE, 3, true));
+            fr.set(d.getStepZ() * -2, 17, d.getStepX() * 2, Deco.candle(crystal ? com.skycraft.worldgen.VanillaBlocks.LIGHT_BLUE_CANDLE : com.skycraft.worldgen.VanillaBlocks.PURPLE_CANDLE, 3, true));
         }
         fr.container(2, 17, 1, Deco.chest(fr.f.getOpposite()), Deco.LOOT_BOSS);
         fr.set(0, 7, 0, pal.light.is(Blocks.SHROOMLIGHT) ? Deco.lantern(true, true) : pal.light);
@@ -241,7 +241,7 @@ public final class Towers {
             for (int dy = bottom; dy <= -1; dy++) {
                 int y = fr.base + dy;
                 boolean open = dy <= bottom + 4 && (fw == 0 || lt == 0); // arches into the cavern at the bottom
-                if (wall && !open) p.set(x, y, z, dy % 6 == 0 ? Blocks.OCHRE_FROGLIGHT.defaultBlockState() : Blocks.WAXED_CUT_COPPER.defaultBlockState());
+                if (wall && !open) p.set(x, y, z, dy % 6 == 0 ? Blocks.OCHRE_FROGLIGHT.defaultBlockState() : com.skycraft.worldgen.VanillaBlocks.WAXED_CUT_COPPER.defaultBlockState());
                 else if (dy == bottom - 1) p.set(x, y, z, Blocks.POLISHED_BLACKSTONE.defaultBlockState());
                 else p.air(x, y, z);
             }
@@ -255,15 +255,15 @@ public final class Towers {
                 int y = fr.base + dy;
                 if (wall && !(door && dy <= 2)) {
                     p.set(x, y, z, dy == 0 || dy == 7 ? Blocks.POLISHED_BLACKSTONE_BRICKS.defaultBlockState()
-                            : dy == 4 ? Blocks.GILDED_BLACKSTONE.defaultBlockState() : Blocks.WAXED_EXPOSED_CUT_COPPER.defaultBlockState());
+                            : dy == 4 ? Blocks.GILDED_BLACKSTONE.defaultBlockState() : com.skycraft.worldgen.VanillaBlocks.WAXED_EXPOSED_CUT_COPPER.defaultBlockState());
                 } else if (!wall) {
                     boolean shaft = Math.abs(fw) <= 1 && Math.abs(lt) <= 1;
-                    if (dy == 0 && !shaft && !(Math.abs(fw) == 2 || Math.abs(lt) == 2)) p.set(x, y - 1, z, Blocks.WAXED_CUT_COPPER.defaultBlockState());
+                    if (dy == 0 && !shaft && !(Math.abs(fw) == 2 || Math.abs(lt) == 2)) p.set(x, y - 1, z, com.skycraft.worldgen.VanillaBlocks.WAXED_CUT_COPPER.defaultBlockState());
                     if (!(dy == 0 && (Math.abs(fw) == 2 || Math.abs(lt) == 2))) p.air(x, y, z);
                 }
             }
             int roof = 8 + Math.max(0, 4 - Math.max(Math.abs(fw), Math.abs(lt)));
-            for (int dy = 8; dy <= roof; dy++) p.set(x, fr.base + dy, z, dy == roof ? Blocks.WAXED_COPPER_BLOCK.defaultBlockState() : Blocks.WAXED_WEATHERED_CUT_COPPER.defaultBlockState());
+            for (int dy = 8; dy <= roof; dy++) p.set(x, fr.base + dy, z, dy == roof ? com.skycraft.worldgen.VanillaBlocks.WAXED_COPPER_BLOCK.defaultBlockState() : com.skycraft.worldgen.VanillaBlocks.WAXED_WEATHERED_CUT_COPPER.defaultBlockState());
         });
         // railings round the shaft and the lift's gears
         for (int i = -2; i <= 2; i++) {
@@ -274,7 +274,7 @@ public final class Towers {
         }
         fr.set(0, 0, -2, Blocks.AIR.defaultBlockState());
         for (int s : new int[]{-4, 4}) {
-            for (int dy = 0; dy <= 7; dy++) fr.set(-4, dy, s, dy % 2 == 0 ? DwemerRooms.rod() : Blocks.WAXED_COPPER_BLOCK.defaultBlockState());
+            for (int dy = 0; dy <= 7; dy++) fr.set(-4, dy, s, dy % 2 == 0 ? DwemerRooms.rod() : com.skycraft.worldgen.VanillaBlocks.WAXED_COPPER_BLOCK.defaultBlockState());
             fr.set(3, 3, s, Blocks.OCHRE_FROGLIGHT);
         }
         fr.set(4, 1, 3, Deco.wallLever(fr.f.getOpposite()));

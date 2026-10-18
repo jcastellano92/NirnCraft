@@ -13,6 +13,7 @@
 #include "/lib/pbr.glsl"
 #include "/lib/fog.glsl"
 #include "/lib/noise.glsl"
+#include "/lib/weather.glsl"
 #include "/lib/waves.glsl"
 
 uniform sampler2D colortex4;
@@ -209,13 +210,17 @@ void main() {
 #endif
             vec3 v = -dir;
             vec3 r = reflect(dir, n);
+            // at grazing angles a wave can tilt the mirror ray below the horizon; it would then "find" the bed under
+            // the water. Keep it skimming upwards (aether does the same for far water)
+            r = normalize(vec3(r.x, max(r.y, 0.01), r.z));
             vec3 refl = reflectionAt(vp0, r, sun, skyLight);
             float fres = 0.02 + 0.98 * pow(1.0 - max(dot(n, v), 0.0), 5.0);
             col = mix(body, refl, fres);
             // the sun on the waves
             vec3 L = sun.y > -0.05 ? sun : -sun;
             vec3 rad = sun.y > -0.05 ? sunRadiance(sun) : vec3(0.035, 0.05, 0.09);
-            float rough = waveRoughness(smoothstep(0.6, 1.0, skyLight), rainStrength, dist0);
+            vec2 wxz0 = (cameraPosition + mat3(gbufferModelViewInverse) * vp0).xz;
+            float rough = waveRoughness(smoothstep(0.6, 1.0, skyLight), waterWind(wxz0, rainStrength), dist0);
             col += rad * ggxSpecular(n, v, L, rough, vec3(0.02)) * max(dot(n, L), 0.0) * skyLight;
 #ifdef SHORE_FOAM
             // foam in the shallows, lapping in and out with the swell

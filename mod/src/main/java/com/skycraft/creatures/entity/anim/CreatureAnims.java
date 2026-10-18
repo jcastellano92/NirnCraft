@@ -22,7 +22,7 @@ public final class CreatureAnims {
 
     /** Server side: plays a one-shot animation for everyone tracking the creature. */
     public static void play(Entity entity, AnimSlot slot) {
-        if (!entity.level().isClientSide) {
+        if (!entity.level().isClientSide()) {
             entity.level().broadcastEntityEvent(entity, (byte) (AnimSlot.EVENT_BASE + slot.ordinal()));
         }
     }

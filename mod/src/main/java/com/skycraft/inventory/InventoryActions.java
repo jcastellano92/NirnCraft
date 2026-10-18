@@ -5,8 +5,8 @@ import com.skycraft.core.Notifier;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.protocol.game.ClientboundSetCarriedItemPacket;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.network.protocol.game.ClientboundSetHeldSlotPacket;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -15,11 +15,10 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.Equipable;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.UseAnim;
+import net.minecraft.world.item.ItemUseAnimation;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
-import net.minecraftforge.event.ForgeEventFactory;
+import net.neoforged.neoforge.event.EventHooks;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -34,7 +33,7 @@ public final class InventoryActions {
 
     private InventoryActions() {}
 
-    static void handle(ServerPlayer player, int action, int slot, ResourceLocation itemId) {
+    static void handle(ServerPlayer player, int action, int slot, Identifier itemId) {
         if (!player.isAlive() || player.isSpectator()) return;
         // only while no other container is open (the Skyrim screen is not a container screen)
         if (player.containerMenu != player.inventoryMenu) return;
@@ -166,29 +165,29 @@ public final class InventoryActions {
     public static int equipState(net.minecraft.world.entity.player.Player player, Inventory inv, int slot, ItemStack stack) {
         if (isArmorSlot(slot)) return EQ_WORN;
         if (slot == OFFHAND) return EQ_LEFT;
-        if (slot == inv.selected) return EQ_RIGHT;
+        if (slot == inv.getSelectedSlot()) return EQ_RIGHT;
         return isWornJewelry(player, stack) ? EQ_WORN : EQ_NONE;
     }
 
     /** Jewellery counts as worn when its item id is the one in the apparel module (any stack of it, slot or pack). */
     public static boolean isWornJewelry(net.minecraft.world.entity.player.Player player, ItemStack stack) {
         if (stack.isEmpty() || !com.skycraft.economy.ItemCategory.isJewelry(stack)) return false;
-        ResourceLocation key = BuiltInRegistries.ITEM.getKey(stack.getItem());
+        Identifier key = BuiltInRegistries.ITEM.getKey(stack.getItem());
         String id = key != null ? key.toString() : "";
         CompoundTag apparel = com.skycraft.core.SkyData.get(player).module("apparel");
-        return id.equals(apparel.getString("necklace")) || id.equals(apparel.getString("ring")) || id.equals(apparel.getString("circlet"));
+        return id.equals(apparel.getStringOr("necklace", "")) || id.equals(apparel.getStringOr("ring", "")) || id.equals(apparel.getStringOr("circlet", ""));
     }
 
     /** Armor slot / offhand / the selected hotbar slot. */
     public static boolean isEquipped(Inventory inv, int slot) {
-        return isArmorSlot(slot) || slot == OFFHAND || slot == inv.selected;
+        return isArmorSlot(slot) || slot == OFFHAND || slot == inv.getSelectedSlot();
     }
 
     /** The armor or offhand slot an item goes to, or null for "hold it in the right hand". */
     @Nullable
     public static EquipmentSlot equipSlotFor(ItemStack stack) {
         if (com.skycraft.economy.ItemCategory.isJewelry(stack)) {
-            ResourceLocation key = BuiltInRegistries.ITEM.getKey(stack.getItem());
+            Identifier key = BuiltInRegistries.ITEM.getKey(stack.getItem());
             if (key != null) {
                 String path = key.getPath();
                 if (path.contains("circlet")) return EquipmentSlot.HEAD;
@@ -196,14 +195,9 @@ public final class InventoryActions {
                 if (path.contains("ring")) return EquipmentSlot.OFFHAND;
             }
         }
-        EquipmentSlot forge = stack.getEquipmentSlot();
-        if (forge != null && forge != EquipmentSlot.MAINHAND) return forge;
-        Equipable eq = null;
-        if (stack.getItem() instanceof Equipable e) eq = e;
-        else if (stack.getItem() instanceof BlockItem bi && bi.getBlock() instanceof Equipable e) eq = e;
-        if (eq == null) return null;
-        EquipmentSlot s = eq.getEquipmentSlot();
-        return s == EquipmentSlot.MAINHAND ? null : s;
+        EquipmentSlot slot = EquipmentData.slot(stack);
+        if (slot != null && slot != EquipmentSlot.MAINHAND) return slot;
+        return stack.has(net.minecraft.core.component.DataComponents.BLOCKS_ATTACKS) ? EquipmentSlot.OFFHAND : null;
     }
 
     private static int armorIndex(EquipmentSlot slot) {
@@ -223,13 +217,13 @@ public final class InventoryActions {
     }
 
     private static void select(ServerPlayer player, int hotbarSlot) {
-        if (player.getInventory().selected == hotbarSlot) return;
-        player.getInventory().selected = hotbarSlot;
-        player.connection.send(new ClientboundSetCarriedItemPacket(hotbarSlot));
+        if (player.getInventory().getSelectedSlot() == hotbarSlot) return;
+        player.getInventory().setSelectedSlot(hotbarSlot);
+        player.connection.send(new ClientboundSetHeldSlotPacket(hotbarSlot));
     }
 
     private static boolean bound(ServerPlayer player, ItemStack stack) {
-        return !player.isCreative() && EnchantmentHelper.hasBindingCurse(stack);
+        return !player.isCreative() && EnchantmentHelper.has(stack, net.minecraft.world.item.enchantment.EnchantmentEffectComponents.PREVENT_ARMOR_CHANGE);
     }
 
     private static void message(ServerPlayer player, String key) {
@@ -241,9 +235,9 @@ public final class InventoryActions {
     private static boolean isUsableEquipment(ItemStack stack) {
         if (com.skycraft.economy.ItemCategory.isJewelry(stack)) return true;
         EquipmentSlot slot = equipSlotFor(stack);
-        if (slot != null && slot.getType() == EquipmentSlot.Type.ARMOR) return true;
+        if (slot != null && slot.getType() == EquipmentSlot.Type.HUMANOID_ARMOR) return true;
         net.minecraft.world.item.Item it = stack.getItem();
-        if (it instanceof net.minecraft.world.item.SwordItem || it instanceof net.minecraft.world.item.DiggerItem
+        if (stack.has(net.minecraft.core.component.DataComponents.WEAPON) || stack.has(net.minecraft.core.component.DataComponents.TOOL)
                 || it instanceof net.minecraft.world.item.ProjectileWeaponItem || it instanceof net.minecraft.world.item.ShieldItem
                 || it instanceof net.minecraft.world.item.TridentItem || it instanceof net.minecraft.world.item.FishingRodItem
                 || it instanceof net.minecraft.world.item.ShearsItem) {
@@ -277,12 +271,12 @@ public final class InventoryActions {
         if (!isUsableEquipment(stack)) return;
 
         if (com.skycraft.economy.ItemCategory.isJewelry(stack)) {
-            ResourceLocation key = BuiltInRegistries.ITEM.getKey(stack.getItem());
+            Identifier key = BuiltInRegistries.ITEM.getKey(stack.getItem());
             String path = key != null ? key.getPath() : "";
             String kind = path.contains("circlet") ? "circlet" : path.contains("ring") ? "ring" : "necklace";
             com.skycraft.core.PlayerData data = com.skycraft.core.SkyData.get(player);
             CompoundTag apparel = data.module("apparel");
-            String curWorn = apparel.getString(kind);
+            String curWorn = apparel.getStringOr(kind, "");
             String thisId = key != null ? key.toString() : "";
             if (thisId.equals(curWorn)) {
                 apparel.remove(kind);
@@ -295,11 +289,11 @@ public final class InventoryActions {
         }
 
         EquipmentSlot target = equipSlotFor(stack);
-        if (target != null && target.getType() == EquipmentSlot.Type.ARMOR) {
+        if (target != null && target.getType() == EquipmentSlot.Type.HUMANOID_ARMOR) {
             wear(player, inv, slot, stack, target);
         } else if (target == EquipmentSlot.OFFHAND) {
             equipLeft(player, inv, slot, stack);
-        } else if (slot == inv.selected) {
+        } else if (slot == inv.getSelectedSlot()) {
             unequip(player, inv, slot, stack);
         } else {
             holdRight(player, inv, slot, stack);
@@ -309,13 +303,13 @@ public final class InventoryActions {
     /** Finds another stack matching {@code template} outside {@code excludeSlot} (and outside armor/hands), materializing from Pack if needed. */
     private static int findExtraCopy(ServerPlayer player, Inventory inv, ItemStack template, int excludeSlot) {
         for (int i = 0; i < Inventory.INVENTORY_SIZE; i++) {
-            if (i == excludeSlot || i == inv.selected) continue;
+            if (i == excludeSlot || i == inv.getSelectedSlot()) continue;
             ItemStack s = inv.getItem(i);
-            if (!s.isEmpty() && ItemStack.isSameItemSameTags(s, template)) return i;
+            if (!s.isEmpty() && ItemStack.isSameItemSameComponents(s, template)) return i;
         }
-        int pIdx = Pack.find(player, s -> ItemStack.isSameItemSameTags(s, template));
+        int pIdx = Pack.find(player, s -> ItemStack.isSameItemSameComponents(s, template));
         if (pIdx >= 0) {
-            ResourceLocation id = BuiltInRegistries.ITEM.getKey(template.getItem());
+            Identifier id = BuiltInRegistries.ITEM.getKey(template.getItem());
             return Pack.materialize(player, pIdx, id);
         }
         return -1;
@@ -325,7 +319,7 @@ public final class InventoryActions {
         com.skycraft.magic.MagicData.tag(player).remove(com.skycraft.magic.Hands.FROM_RIGHT_ITEM);
         com.skycraft.magic.MagicData.tag(player).remove(com.skycraft.magic.Hands.FROM_LEFT_ITEM);
         inv.setItem(OFFHAND, ItemStack.EMPTY);
-        int sel = inv.selected;
+        int sel = inv.getSelectedSlot();
         ItemStack held = inv.getItem(sel);
         if (com.skycraft.magic.bound.BoundWeapons.isBound(held)) {
             inv.setItem(sel, ItemStack.EMPTY);
@@ -365,7 +359,7 @@ public final class InventoryActions {
     /** Moves an item into the right hand (selected hotbar slot), keeping the hotbar tidy. */
     private static void holdRight(ServerPlayer player, Inventory inv, int slot, ItemStack stack) {
         com.skycraft.magic.MagicData.tag(player).remove(com.skycraft.magic.Hands.FROM_RIGHT_ITEM);
-        int sel = inv.selected;
+        int sel = inv.getSelectedSlot();
         ItemStack held = inv.getItem(sel);
         if (com.skycraft.magic.bound.BoundWeapons.isBound(held)) {
             inv.setItem(sel, ItemStack.EMPTY);
@@ -420,12 +414,12 @@ public final class InventoryActions {
         }
         if (isArmorSlot(slot)) return;
         EquipmentSlot target = equipSlotFor(stack);
-        if (target != null && target.getType() == EquipmentSlot.Type.ARMOR) return; // armor can't be held
+        if (target != null && target.getType() == EquipmentSlot.Type.HUMANOID_ARMOR) return; // armor can't be held
         if (com.skycraft.magic.Hands.twoHanded(stack) || com.skycraft.mounts.MountItems.isSaddle(stack)) return;
 
         // If right-clicking the item currently in the right hand, check if we have a second copy to dual-wield
-        if (slot == inv.selected) {
-            int extraSlot = findExtraCopy(player, inv, stack, inv.selected);
+        if (slot == inv.getSelectedSlot()) {
+            int extraSlot = findExtraCopy(player, inv, stack, inv.getSelectedSlot());
             if (extraSlot >= 0) {
                 slot = extraSlot;
                 stack = inv.getItem(extraSlot);
@@ -435,13 +429,13 @@ public final class InventoryActions {
         }
 
         // If the right hand holds a two-handed weapon, stow it (or dismiss it if bound) before equipping the left hand
-        ItemStack main = inv.getItem(inv.selected);
+        ItemStack main = inv.getItem(inv.getSelectedSlot());
         if (com.skycraft.magic.Hands.twoHanded(main)) {
             if (com.skycraft.magic.bound.BoundWeapons.isBound(main)) {
                 com.skycraft.magic.MagicData.tag(player).remove(com.skycraft.magic.Hands.FROM_RIGHT_ITEM);
-                inv.setItem(inv.selected, ItemStack.EMPTY);
+                inv.setItem(inv.getSelectedSlot(), ItemStack.EMPTY);
             } else {
-                unequip(player, inv, inv.selected, main);
+                unequip(player, inv, inv.getSelectedSlot(), main);
             }
         }
 
@@ -470,11 +464,11 @@ public final class InventoryActions {
         if (com.skycraft.magic.bound.BoundWeapons.isBound(stack)) {
             if (isArmorSlot(slot)) {
                 com.skycraft.magic.MagicData.tag(player).remove("prev_chest_armor");
-                EquipmentSlot eqSlot = EquipmentSlot.byTypeAndIndex(EquipmentSlot.Type.ARMOR, slot - ARMOR_START);
+                EquipmentSlot eqSlot = Inventory.EQUIPMENT_SLOT_MAPPING.get(slot);
                 player.setItemSlot(eqSlot, ItemStack.EMPTY);
             } else {
                 if (slot == OFFHAND) com.skycraft.magic.MagicData.tag(player).remove(com.skycraft.magic.Hands.FROM_LEFT_ITEM);
-                else if (slot == inv.selected) com.skycraft.magic.MagicData.tag(player).remove(com.skycraft.magic.Hands.FROM_RIGHT_ITEM);
+                else if (slot == inv.getSelectedSlot()) com.skycraft.magic.MagicData.tag(player).remove(com.skycraft.magic.Hands.FROM_RIGHT_ITEM);
                 inv.setItem(slot, ItemStack.EMPTY);
             }
             player.level().playSound(null, player.blockPosition(), SoundEvents.ILLUSIONER_MIRROR_MOVE, SoundSource.PLAYERS, 0.6f, 0.7f);
@@ -488,10 +482,10 @@ public final class InventoryActions {
         }
         if (slot == OFFHAND) {
             com.skycraft.magic.MagicData.tag(player).remove(com.skycraft.magic.Hands.FROM_LEFT_ITEM);
-        } else if (slot == inv.selected) {
+        } else if (slot == inv.getSelectedSlot()) {
             com.skycraft.magic.MagicData.tag(player).remove(com.skycraft.magic.Hands.FROM_RIGHT_ITEM);
         }
-        if (slot == inv.selected && Inventory.isHotbarSlot(slot)) {
+        if (slot == inv.getSelectedSlot() && Inventory.isHotbarSlot(slot)) {
             // put the weapon away into the backpack; with a full backpack, just switch to an empty hand
             for (int i = Inventory.getSelectionSize(); i < Inventory.INVENTORY_SIZE; i++) {
                 if (inv.getItem(i).isEmpty()) {
@@ -512,7 +506,7 @@ public final class InventoryActions {
         }
         int free = freeSlot(inv);
         if (isArmorSlot(slot)) {
-            EquipmentSlot eqSlot = EquipmentSlot.byTypeAndIndex(EquipmentSlot.Type.ARMOR, slot - ARMOR_START);
+            EquipmentSlot eqSlot = Inventory.EQUIPMENT_SLOT_MAPPING.get(slot);
             player.setItemSlot(eqSlot, ItemStack.EMPTY);
         } else {
             inv.setItem(slot, ItemStack.EMPTY);
@@ -526,13 +520,13 @@ public final class InventoryActions {
     private static void use(ServerPlayer player, Inventory inv, int slot, ItemStack stack) {
         if (!InvCategory.isConsumable(stack)) return;
         com.skycraft.crafting.arcane.alchemy.Ingredients.Ingredient ing = com.skycraft.crafting.arcane.alchemy.Ingredients.get(stack);
-        if (ing != null && !stack.isEdible()) {
+        if (ing != null && !stack.has(net.minecraft.core.component.DataComponents.FOOD)) {
             com.skycraft.crafting.arcane.alchemy.Alchemy.discoverByTasting(player, ing);
             if (!player.getAbilities().instabuild) {
                 stack.shrink(1);
             }
             player.level().playSound(null, player.getX(), player.getY(), player.getZ(),
-                    SoundEvents.GENERIC_EAT, SoundSource.PLAYERS, 0.7f, 0.9f + player.getRandom().nextFloat() * 0.2f);
+                    SoundEvents.GENERIC_EAT.value(), SoundSource.PLAYERS, 0.7f, 0.9f + player.getRandom().nextFloat() * 0.2f);
             if (stack.isEmpty()) {
                 inv.setItem(slot, ItemStack.EMPTY);
             }
@@ -540,9 +534,9 @@ public final class InventoryActions {
         }
         if (stack.getItem() instanceof net.minecraft.world.item.SplashPotionItem
                 || stack.getItem() instanceof net.minecraft.world.item.LingeringPotionItem) {
-            for (net.minecraft.world.effect.MobEffectInstance effect : net.minecraft.world.item.alchemy.PotionUtils.getMobEffects(stack)) {
-                if (effect.getEffect().isInstantenous()) {
-                    effect.getEffect().applyInstantenousEffect(player, player, player, effect.getAmplifier(), 1.0);
+            for (net.minecraft.world.effect.MobEffectInstance effect : com.skycraft.platform.ArcaneData.effects(stack)) {
+                if (effect.getEffect().value().isInstantaneous()) {
+                    effect.getEffect().value().applyInstantaneousEffect(player.level(), player, player, player, effect.getAmplifier(), 1.0);
                 } else {
                     player.addEffect(new net.minecraft.world.effect.MobEffectInstance(effect));
                 }
@@ -554,22 +548,22 @@ public final class InventoryActions {
                 inv.setItem(slot, ItemStack.EMPTY);
             }
             player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.GENERIC_DRINK,
-                    SoundSource.PLAYERS, 0.5f, player.level().random.nextFloat() * 0.1f + 0.9f);
+                    SoundSource.PLAYERS, 0.5f, player.level().getRandom().nextFloat() * 0.1f + 0.9f);
             return;
         }
-        if (stack.isEdible()) {
-            FoodProperties food = stack.getFoodProperties(player);
+        if (stack.has(net.minecraft.core.component.DataComponents.FOOD)) {
+            FoodProperties food = stack.get(net.minecraft.core.component.DataComponents.FOOD);
             if (food != null && !player.canEat(food.canAlwaysEat())) {
                 message(player, "not_hungry");
                 return;
             }
         }
-        boolean drink = stack.getUseAnimation() == UseAnim.DRINK;
+        boolean drink = stack.getUseAnimation() == ItemUseAnimation.DRINK;
         ItemStack before = stack.copy();
         // Same sequence as LivingEntity#completeUsingItem, so food/potion effects, advancements and
         // LivingEntityUseItemEvent.Finish listeners (Skyrim food healing) all run.
-        ItemStack result = stack.finishUsingItem(player.level(), player);
-        result = ForgeEventFactory.onItemUseFinish(player, before, 0, result);
+        ItemStack result = com.skycraft.platform.ItemUse.finish(stack, player);
+        result = EventHooks.onItemUseFinish(player, before, 0, result);
         if (result != stack) {
             if (stack.isEmpty()) {
                 inv.setItem(slot, result);
@@ -581,12 +575,12 @@ public final class InventoryActions {
         }
         if (drink) {
             player.level().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.GENERIC_DRINK,
-                    SoundSource.PLAYERS, 0.5f, player.level().random.nextFloat() * 0.1f + 0.9f);
+                    SoundSource.PLAYERS, 0.5f, player.level().getRandom().nextFloat() * 0.1f + 0.9f);
         }
     }
 
     /** Reads a book, spell tome, or skill book directly without disturbing the player's equipped weapons. */
-    private static void read(ServerPlayer player, Inventory inv, int slot, ItemStack stack, ResourceLocation itemId) {
+    private static void read(ServerPlayer player, Inventory inv, int slot, ItemStack stack, Identifier itemId) {
         if (!InvCategory.isReadable(stack)) return;
         if (stack.getItem() instanceof com.skycraft.magic.spell.SpellTomeItem tome) {
             tome.readStack(player, stack);
@@ -604,12 +598,12 @@ public final class InventoryActions {
         if (stack.getItem() instanceof com.skycraft.guide.HandbookItem) {
             return;
         }
-        if (slot != inv.selected) {
+        if (slot != inv.getSelectedSlot()) {
             if (isArmorSlot(slot)) return;
             if (slot == OFFHAND) {
-                ItemStack held = inv.getItem(inv.selected);
+                ItemStack held = inv.getItem(inv.getSelectedSlot());
                 inv.setItem(OFFHAND, held);
-                inv.setItem(inv.selected, stack);
+                inv.setItem(inv.getSelectedSlot(), stack);
             } else {
                 holdRight(player, inv, slot, stack);
             }
@@ -641,9 +635,9 @@ public final class InventoryActions {
         // "drop all" drops the whole row of the list: every unequipped stack of this exact item
         ItemStack template = stack.copy();
         for (int i = 0; i < Inventory.INVENTORY_SIZE; i++) {
-            if (i == inv.selected) continue;
+            if (i == inv.getSelectedSlot()) continue;
             ItemStack s = inv.getItem(i);
-            if (!s.isEmpty() && !com.skycraft.quest.QuestItems.isQuestItem(s) && ItemStack.isSameItemSameTags(s, template)) {
+            if (!s.isEmpty() && !com.skycraft.quest.QuestItems.isQuestItem(s) && ItemStack.isSameItemSameComponents(s, template)) {
                 toss(player, inv, inv.removeItem(i, s.getCount()));
             }
         }
@@ -653,7 +647,7 @@ public final class InventoryActions {
 
     private static void toss(ServerPlayer player, Inventory inv, ItemStack stack) {
         if (stack.isEmpty()) return;
-        ItemEntity entity = player.drop(stack, true);
+        ItemEntity entity = player.drop(stack, true, net.minecraft.util.Prediction.SERVER_ONLY);
         if (entity == null) {
             // a mod cancelled the toss: don't let the item vanish
             Pack.giveOrDrop(player, stack);
@@ -673,7 +667,7 @@ public final class InventoryActions {
         ItemStack template = stack.copy();
         for (int i = 0; i < inv.getContainerSize(); i++) {
             ItemStack s = inv.getItem(i);
-            if (s.isEmpty() || !ItemStack.isSameItemSameTags(s, template)) continue;
+            if (s.isEmpty() || !ItemStack.isSameItemSameComponents(s, template)) continue;
             setFavorite(s, fav);
             inv.setChanged();
         }
@@ -682,10 +676,10 @@ public final class InventoryActions {
 
     static void setFavorite(ItemStack stack, boolean fav) {
         if (fav) {
-            stack.getOrCreateTag().putBoolean(InvCategory.FAVORITE_NBT, true);
+            com.skycraft.inventory.ItemData.updateCustom(stack, customData263 -> customData263.putBoolean(InvCategory.FAVORITE_NBT, true));
         } else {
-            CompoundTag tag = stack.getTag();
-            if (tag != null) stack.removeTagKey(InvCategory.FAVORITE_NBT);
+            CompoundTag tag = com.skycraft.inventory.ItemData.custom(stack);
+            if (tag != null) com.skycraft.inventory.ItemData.updateCustom(stack, customData263 -> customData263.remove(InvCategory.FAVORITE_NBT));
         }
     }
 }

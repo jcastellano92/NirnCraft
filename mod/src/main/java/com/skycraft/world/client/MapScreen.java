@@ -1,6 +1,5 @@
 package com.skycraft.world.client;
 
-import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.math.Axis;
@@ -22,7 +21,7 @@ import com.skycraft.world.SkyrimCalendar;
 import com.skycraft.world.WorldData;
 import com.skycraft.world.WorldPackets;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.texture.DynamicTexture;
@@ -31,12 +30,12 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-import org.lwjgl.glfw.GLFW;
+import com.mojang.blaze3d.platform.InputConstants;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -55,9 +54,9 @@ import java.util.Set;
  * <p>Other realms (Oblivion, Sovngarde) show their discovered locations on blank parchment.</p>
  */
 public class MapScreen extends Screen {
-    private static final ResourceLocation PARCHMENT = new ResourceLocation(Skycraft.MODID, "textures/gui/map_parchment.png");
-    private static final ResourceLocation ICONS = new ResourceLocation(Skycraft.MODID, "textures/gui/map_icons.png");
-    private static final ResourceLocation FOG = new ResourceLocation(Skycraft.MODID, "map_fog");
+    private static final Identifier PARCHMENT = Identifier.fromNamespaceAndPath(Skycraft.MODID, "textures/gui/map_parchment.png");
+    private static final Identifier ICONS = Identifier.fromNamespaceAndPath(Skycraft.MODID, "textures/gui/map_icons.png");
+    private static final Identifier FOG = Identifier.fromNamespaceAndPath(Skycraft.MODID, "map_fog");
     /** GUI pixels per block. */
     private static final double MIN_SCALE = 1.0 / 160.0;
     private static final double MAX_SCALE = 2.0;
@@ -141,18 +140,17 @@ public class MapScreen extends Screen {
         updateButtons();
         if (minecraft == null || pendingTravel != null || pendingMember != null) return;
         // keyboard / controller (mapped to keys) panning
-        long window = minecraft.getWindow().getWindow();
         double step = 10 / scale;
-        if (down(window, GLFW.GLFW_KEY_A) || down(window, GLFW.GLFW_KEY_LEFT)) centerX -= step;
-        if (down(window, GLFW.GLFW_KEY_D) || down(window, GLFW.GLFW_KEY_RIGHT)) centerX += step;
-        if (down(window, GLFW.GLFW_KEY_W) || down(window, GLFW.GLFW_KEY_UP)) centerZ -= step;
-        if (down(window, GLFW.GLFW_KEY_S) || down(window, GLFW.GLFW_KEY_DOWN)) centerZ += step;
-        if (down(window, GLFW.GLFW_KEY_Q) || down(window, GLFW.GLFW_KEY_PAGE_DOWN)) zoom(1 / 1.06, midX(), midY());
-        if (down(window, GLFW.GLFW_KEY_E) || down(window, GLFW.GLFW_KEY_PAGE_UP)) zoom(1.06, midX(), midY());
+        if (down(InputConstants.KEY_A) || down(InputConstants.KEY_LEFT)) centerX -= step;
+        if (down(InputConstants.KEY_D) || down(InputConstants.KEY_RIGHT)) centerX += step;
+        if (down(InputConstants.KEY_W) || down(InputConstants.KEY_UP)) centerZ -= step;
+        if (down(InputConstants.KEY_S) || down(InputConstants.KEY_DOWN)) centerZ += step;
+        if (down(InputConstants.KEY_Q) || down(InputConstants.KEY_PAGEDOWN)) zoom(1 / 1.06, midX(), midY());
+        if (down(InputConstants.KEY_E) || down(InputConstants.KEY_PAGEUP)) zoom(1.06, midX(), midY());
     }
 
-    private static boolean down(long window, int key) {
-        return InputConstants.isKeyDown(window, key);
+    private static boolean down(int key) {
+        return InputConstants.isKeyDown(key);
     }
 
     @Override
@@ -174,7 +172,7 @@ public class MapScreen extends Screen {
             return;
         }
         if (pendingTravel != null) {
-            SkyNetwork.sendToServer(new WorldPackets.FastTravel(pendingTravel.getString("id")));
+            SkyNetwork.sendToServer(new WorldPackets.FastTravel(pendingTravel.getStringOr("id", "")));
             pendingTravel = null;
             onClose();
         }
@@ -188,7 +186,7 @@ public class MapScreen extends Screen {
      */
     public interface Layer {
         /** Draws the layer; returns tooltip lines for what is under the mouse, or null. */
-        List<Component> draw(GuiGraphics g, MapScreen map, int mouseX, int mouseY);
+        List<Component> draw(GuiGraphicsExtractor g, MapScreen map, int mouseX, int mouseY);
     }
 
     public static final List<Layer> LAYERS = new java.util.concurrent.CopyOnWriteArrayList<>();
@@ -243,8 +241,10 @@ public class MapScreen extends Screen {
     // ------------------------------------------------------------------ input
 
     @Override
-    public boolean mouseClicked(double mx, double my, int button) {
-        if (super.mouseClicked(mx, my, button)) return true;
+    public boolean mouseClicked(net.minecraft.client.input.MouseButtonEvent event, boolean doubleClick) {
+        double mx = event.x(), my = event.y();
+        int button = com.skycraft.client.screen.UiInput.actionButton(event.button());
+        if (super.mouseClicked(event, doubleClick)) return true;
         if (pendingTravel != null || pendingMember != null) {
             cancelTravel();
             return true;
@@ -266,18 +266,22 @@ public class MapScreen extends Screen {
     }
 
     @Override
-    public boolean mouseDragged(double mx, double my, int button, double dx, double dy) {
+    public boolean mouseDragged(net.minecraft.client.input.MouseButtonEvent event, double dx, double dy) {
+        double mx = event.x(), my = event.y();
+        int button = com.skycraft.client.screen.UiInput.actionButton(event.button());
         if (pressedOnMap && button == 0) {
             centerX -= dx / scale;
             centerZ -= dy / scale;
             dragDistance += Math.abs(dx) + Math.abs(dy);
             return true;
         }
-        return super.mouseDragged(mx, my, button, dx, dy);
+        return super.mouseDragged(event, dx, dy);
     }
 
     @Override
-    public boolean mouseReleased(double mx, double my, int button) {
+    public boolean mouseReleased(net.minecraft.client.input.MouseButtonEvent event) {
+        double mx = event.x(), my = event.y();
+        int button = com.skycraft.client.screen.UiInput.actionButton(event.button());
         if (button == 0 && pressedOnMap) {
             pressedOnMap = false;
             if (dragDistance >= 4) return true;
@@ -300,7 +304,7 @@ public class MapScreen extends Screen {
             }
             return true;
         }
-        return super.mouseReleased(mx, my, button);
+        return super.mouseReleased(event);
     }
 
     private int playerY() {
@@ -329,7 +333,7 @@ public class MapScreen extends Screen {
     }
 
     @Override
-    public boolean mouseScrolled(double mx, double my, double delta) {
+    public boolean mouseScrolled(double mx, double my, double horizontal, double delta) {
         zoom(Math.pow(1.25, delta), onMap(mx, my) ? mx : midX(), onMap(mx, my) ? my : midY());
         return true;
     }
@@ -344,50 +348,51 @@ public class MapScreen extends Screen {
     }
 
     @Override
-    public boolean keyPressed(int key, int scan, int mods) {
+    public boolean keyPressed(net.minecraft.client.input.KeyEvent event) {
+        int key = event.key(), scan = event.keycode(), mods = event.modifiers();
         if (pendingTravel != null || pendingMember != null) {
-            if (key == GLFW.GLFW_KEY_ENTER || key == GLFW.GLFW_KEY_KP_ENTER) {
+            if (key == InputConstants.KEY_RETURN || key == InputConstants.KEY_NUMPADENTER) {
                 confirmTravel();
                 return true;
             }
-            if (key == GLFW.GLFW_KEY_ESCAPE) {
+            if (key == InputConstants.KEY_ESCAPE) {
                 cancelTravel();
                 return true;
             }
         }
-        if (SkyKeys.MAP.matches(key, scan)) {
+        if (SkyKeys.MAP.matches(event)) {
             onClose();
             return true;
         }
-        if (key == GLFW.GLFW_KEY_SPACE || key == GLFW.GLFW_KEY_C) {
+        if (key == InputConstants.KEY_SPACE || key == InputConstants.KEY_C) {
             centerOnPlayer();
             return true;
         }
-        if (key == GLFW.GLFW_KEY_L) {
+        if (key == InputConstants.KEY_L) {
             showLegend = !showLegend;
             return true;
         }
-        if (key == GLFW.GLFW_KEY_EQUAL || key == GLFW.GLFW_KEY_KP_ADD) {
+        if (key == InputConstants.KEY_EQUALS || key == InputConstants.KEY_ADD) {
             zoom(1.5, midX(), midY());
             return true;
         }
-        if (key == GLFW.GLFW_KEY_MINUS || key == GLFW.GLFW_KEY_KP_SUBTRACT) {
+        if (key == InputConstants.KEY_MINUS || key == org.lwjgl.sdl.SDLScancode.SDL_SCANCODE_KP_MINUS) {
             zoom(1 / 1.5, midX(), midY());
             return true;
         }
-        if (key == GLFW.GLFW_KEY_F && customWaypoint != null) {
+        if (key == InputConstants.KEY_F && customWaypoint != null) {
             centerX = customWaypoint.getX();
             centerZ = customWaypoint.getZ();
             return true;
         }
-        return super.keyPressed(key, scan, mods);
+        return super.keyPressed(event);
     }
 
     // ------------------------------------------------------------------ rendering
 
     @Override
-    public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        renderBackground(g);
+    public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
+
         if (minecraft == null || minecraft.player == null || minecraft.level == null) return;
         Level level = minecraft.level;
         Player player = minecraft.player;
@@ -400,7 +405,7 @@ public class MapScreen extends Screen {
         g.fill(left - 5, top - 5, right + 5, bottom + 5, 0xFF1E140A);
         g.fill(left - 3, top - 3, right + 3, bottom + 3, 0xFF6B5030);
         g.fill(left - 1, top - 1, right + 1, bottom + 1, 0xFF2A1D10);
-        g.blit(PARCHMENT, left, top, right - left, bottom - top, 0f, 0f, 256, 256, 256, 256);
+        com.skycraft.inventory.client.SkyUi.blit(g, PARCHMENT, left, top, right - left, bottom - top, 0f, 0f, 256, 256, 256, 256);
 
         g.enableScissor(left, top, right, bottom);
         if (overworld) {
@@ -431,8 +436,8 @@ public class MapScreen extends Screen {
         if (showLegend) drawLegend(g);
 
         if (pendingTravel != null || pendingMember != null) drawTravelDialog(g, player);
-        super.render(g, mouseX, mouseY, partialTick);
-        if (tooltip != null && pendingTravel == null && pendingMember == null) g.renderComponentTooltip(font, tooltip, mouseX, mouseY);
+        super.extractRenderState(g, mouseX, mouseY, partialTick);
+        if (tooltip != null && pendingTravel == null && pendingMember == null) g.setComponentTooltipForNextFrame(font, tooltip, mouseX, mouseY);
     }
 
     // ------------------------------------------------------------------ terrain tiles
@@ -441,10 +446,9 @@ public class MapScreen extends Screen {
      * Draws the painted map: every coarser level that is ready (so there is always something under a tile that is
      * still being painted), then the level matching the zoom. Only the target level and the overview are requested.
      */
-    private void drawTiles(GuiGraphics g) {
+    private void drawTiles(GuiGraphicsExtractor g) {
         int target = MapTiles.lodFor(1 / scale);
-        RenderSystem.enableBlend();
-        RenderSystem.defaultBlendFunc();
+        
         for (int lod = 0; lod <= target; lod++) {
             int tb = MapTiles.tileBlocks(lod);
             int tx0 = Math.floorDiv(Mth.floor(worldX(left)), tb);
@@ -456,29 +460,24 @@ public class MapScreen extends Screen {
             float size = (float) (tb * scale);
             for (int tz = tz0; tz <= tz1; tz++) {
                 for (int tx = tx0; tx <= tx1; tx++) {
-                    ResourceLocation tex = request ? MapTiles.get(lod, tx, tz) : MapTiles.ready(lod, tx, tz) ? MapTiles.get(lod, tx, tz) : null;
+                    Identifier tex = request ? MapTiles.get(lod, tx, tz) : MapTiles.ready(lod, tx, tz) ? MapTiles.get(lod, tx, tz) : null;
                     if (tex == null) continue;
-                    g.pose().pushPose();
-                    g.pose().translate((float) screenX((double) tx * tb), (float) screenY((double) tz * tb), 0);
+                    g.pose().pushMatrix();
+                    g.pose().translate((float) screenX((double) tx * tb), (float) screenY((double) tz * tb));
                     // a hair larger so neighbouring tiles never leave a seam
                     float s = (size + 0.35f) / MapTiles.SIZE;
-                    g.pose().scale(s, s, 1f);
-                    g.blit(tex, 0, 0, 0f, 0f, MapTiles.SIZE, MapTiles.SIZE, MapTiles.SIZE, MapTiles.SIZE);
-                    g.pose().popPose();
+                    g.pose().scale(s, s);
+                    com.skycraft.inventory.client.SkyUi.blit(g, tex, 0, 0, 0f, 0f, MapTiles.SIZE, MapTiles.SIZE, MapTiles.SIZE, MapTiles.SIZE);
+                    g.pose().popMatrix();
                 }
             }
         }
     }
 
     /** The parchment's fibres and stains over the painted map (multiplied, so the colours stay). */
-    private void drawPaperGrain(GuiGraphics g) {
-        RenderSystem.enableBlend();
-        RenderSystem.blendFunc(com.mojang.blaze3d.platform.GlStateManager.SourceFactor.DST_COLOR,
-                com.mojang.blaze3d.platform.GlStateManager.DestFactor.ZERO);
-        g.setColor(1.22f, 1.22f, 1.3f, 1f);
-        g.blit(PARCHMENT, left, top, right - left, bottom - top, 0f, 0f, right - left, bottom - top, 256, 256);
-        g.setColor(1f, 1f, 1f, 1f);
-        RenderSystem.defaultBlendFunc();
+    private void drawPaperGrain(GuiGraphicsExtractor g) {
+        
+        g.blit(com.skycraft.client.UiPipelines.MAP_GRAIN,PARCHMENT,left,top,0f,0f,right-left,bottom-top,right-left,bottom-top,256,256,-1);
     }
 
     // ------------------------------------------------------------------ fog of war
@@ -498,7 +497,7 @@ public class MapScreen extends Screen {
         }
     }
 
-    private void drawFog(GuiGraphics g) {
+    private void drawFog(GuiGraphicsExtractor g) {
         double vx0 = worldX(left), vx1 = worldX(right), vz0 = worldZ(top), vz1 = worldZ(bottom);
         double span = Math.max(vx1 - vx0, vz1 - vz0) * 1.6;
         int level = 0;
@@ -508,14 +507,13 @@ public class MapScreen extends Screen {
                 && vx0 >= Fog.x0 && vz0 >= Fog.z0 && vx1 <= Fog.x0 + (long) Fog.w * Fog.cell && vz1 <= Fog.z0 + (long) Fog.h * Fog.cell;
         if (!inside || Fog.version != ExploredMap.version()) rebuildFog(level, cell, (vx0 + vx1) / 2, (vz0 + vz1) / 2, span);
         if (Fog.texture == null) return;
-        RenderSystem.enableBlend();
-        RenderSystem.defaultBlendFunc();
-        g.pose().pushPose();
-        g.pose().translate((float) screenX(Fog.x0), (float) screenY(Fog.z0), 0);
+        
+        g.pose().pushMatrix();
+        g.pose().translate((float) screenX(Fog.x0), (float) screenY(Fog.z0));
         float s = (float) (Fog.cell * scale);
-        g.pose().scale(s, s, 1f);
-        g.blit(FOG, 0, 0, 0f, 0f, Fog.w, Fog.h, Fog.w, Fog.h);
-        g.pose().popPose();
+        g.pose().scale(s, s);
+        com.skycraft.inventory.client.SkyUi.blit(g, FOG, 0, 0, 0f, 0f, Fog.w, Fog.h, Fog.w, Fog.h);
+        g.pose().popMatrix();
     }
 
     private void rebuildFog(int level, int cell, double cx, double cz, double span) {
@@ -524,8 +522,7 @@ public class MapScreen extends Screen {
         int z0 = Math.floorDiv((int) Math.floor(cz - n * cell / 2.0), cell) * cell;
         if (Fog.texture == null || Fog.w != n || Fog.h != n) {
             Fog.release();
-            Fog.texture = new DynamicTexture(n, n, false);
-            Fog.texture.setFilter(true, false);
+            Fog.texture = new com.skycraft.client.UiDynamicTexture("Skycraft map exploration",n,n,false,true);
             minecraft.getTextureManager().register(FOG, Fog.texture);
         }
         NativeImage img = Fog.texture.getPixels();
@@ -542,7 +539,7 @@ public class MapScreen extends Screen {
                 } else {
                     alpha = charted(wx + cell / 2, wz + cell / 2) ? 150 : 255;
                 }
-                img.setPixelRGBA(i, j, alpha << 24 | abgrRgb);
+                img.setPixelABGR(i, j, alpha << 24 | abgrRgb);
             }
         }
         Fog.texture.upload();
@@ -569,7 +566,7 @@ public class MapScreen extends Screen {
 
     // ------------------------------------------------------------------ names
 
-    private void drawProvinceAndRegionNames(GuiGraphics g) {
+    private void drawProvinceAndRegionNames(GuiGraphicsExtractor g) {
         // province names: large spaced capitals when zoomed out
         if (scale < 1 / 10.0) {
             float a = (float) Mth.clamp((1 / 10.0 - scale) / (1 / 10.0 - 1 / 18.0), 0, 1);
@@ -591,17 +588,17 @@ public class MapScreen extends Screen {
         }
     }
 
-    private void drawLabel(GuiGraphics g, Component text, int wx, int wz, float textScale, int color) {
+    private void drawLabel(GuiGraphicsExtractor g, Component text, int wx, int wz, float textScale, int color) {
         if ((color >>> 24) < 8) return;
         double sx = screenX(wx);
         double sy = screenY(wz);
         int w = font.width(text);
         if (sx + w * textScale < left || sx - w * textScale > right || sy < top - 20 || sy > bottom + 20) return;
-        g.pose().pushPose();
-        g.pose().translate((float) sx, (float) sy, 0);
-        g.pose().scale(textScale, textScale, 1f);
-        g.drawString(font, text, -w / 2, -4, color, false);
-        g.pose().popPose();
+        g.pose().pushMatrix();
+        g.pose().translate((float) sx, (float) sy);
+        g.pose().scale(textScale, textScale);
+        g.text(font, text, -w / 2, -4, color, false);
+        g.pose().popMatrix();
     }
 
     private static Component spaced(String s) {
@@ -614,7 +611,7 @@ public class MapScreen extends Screen {
         return Component.literal(sb.toString());
     }
 
-    private void drawGrid(GuiGraphics g) {
+    private void drawGrid(GuiGraphicsExtractor g) {
         int spacing = 16;
         while (spacing * scale < 70 && spacing < (1 << 24)) spacing *= 2;
         double wx0 = worldX(left), wx1 = worldX(right);
@@ -635,45 +632,53 @@ public class MapScreen extends Screen {
         }
     }
 
-    private void drawSmall(GuiGraphics g, String text, int x, int y, int color) {
+    private void drawSmall(GuiGraphicsExtractor g, String text, int x, int y, int color) {
         drawScaled(g, Component.literal(text), x, y, 0.6f, color);
     }
 
-    private void drawScaled(GuiGraphics g, Component text, float x, float y, float s, int color) {
-        g.pose().pushPose();
-        g.pose().translate(x, y, 0);
-        g.pose().scale(s, s, 1f);
-        g.drawString(font, text, 0, 0, color, false);
-        g.pose().popPose();
+    private void drawScaled(GuiGraphicsExtractor g, Component text, float x, float y, float s, int color) {
+        g.pose().pushMatrix();
+        g.pose().translate(x, y);
+        g.pose().scale(s, s);
+        g.text(font, text, 0, 0, color, false);
+        g.pose().popMatrix();
     }
 
     // ------------------------------------------------------------------ places and locations
 
-    private void drawIcon(GuiGraphics g, int index, float cx, float cy, float size) {
+    private void drawIcon(GuiGraphicsExtractor g, int index, float cx, float cy, float size) {
         int u = (index % 8) * 16;
         int v = (index / 8) * 16;
-        g.pose().pushPose();
-        g.pose().translate(cx - size / 2, cy - size / 2, 0);
-        g.pose().scale(size / 16f, size / 16f, 1f);
-        g.blit(ICONS, 0, 0, (float) u, (float) v, 16, 16, 128, 64);
-        g.pose().popPose();
+        g.pose().pushMatrix();
+        g.pose().translate(cx - size / 2, cy - size / 2);
+        g.pose().scale(size / 16f, size / 16f);
+        com.skycraft.inventory.client.SkyUi.blit(g, ICONS, 0, 0, (float) u, (float) v, 16, 16, 128, 64);
+        g.pose().popMatrix();
     }
+    private void drawIcon(GuiGraphicsExtractor g,int index,float cx,float cy,float size,int color) {
+        g.pose().pushMatrix();
+        g.pose().translate(cx-size/2,cy-size/2);
+        g.pose().scale(size/16,size/16);
+        com.skycraft.inventory.client.SkyUi.blit(g,ICONS,0,0,(index%8)*16f,(index/8)*16f,16,16,128,64,color);
+        g.pose().popMatrix();
+    }
+
 
     /** Every pin to draw: discovered and rumored locations, plus the capitals and cities everyone knows. */
     private List<Pin> pins(Level level, Player player) {
-        ListTag list = SkyData.get(player).module(WorldData.MODULE).getList("discovered", Tag.TAG_COMPOUND);
-        String dim = level.dimension().location().toString();
+        ListTag list = SkyData.get(player).module(WorldData.MODULE).getListOrEmpty("discovered");
+        String dim = level.dimension().identifier().toString();
         List<Pin> out = new ArrayList<>();
         Set<String> listed = new HashSet<>();
         for (int i = 0; i < list.size(); i++) {
-            CompoundTag loc = list.getCompound(i);
-            if (!loc.getString("dim").equals(dim)) continue;
-            if (loc.getBoolean("hidden")) continue; // a stranger's homestead not yet discovered: a point on the compass only
-            LocationKind kind = LocationKind.byId(loc.getString("type"));
+            CompoundTag loc = list.getCompoundOrEmpty(i);
+            if (!loc.getStringOr("dim", "").equals(dim)) continue;
+            if (loc.getBooleanOr("hidden", false)) continue; // a stranger's homestead not yet discovered: a point on the compass only
+            LocationKind kind = LocationKind.byId(loc.getStringOr("type", ""));
             Place place = WorldData.place(loc).orElse(null);
             if (place != null) listed.add(place.id());
-            out.add(new Pin(loc.getInt("x"), loc.getInt("z"), kind.icon, priority(place, kind), WorldData.displayName(loc), kind,
-                    loc.getBoolean("known"), loc.getBoolean("cleared"), loc, place));
+            out.add(new Pin(loc.getIntOr("x", 0), loc.getIntOr("z", 0), kind.icon, priority(place, kind), WorldData.displayName(loc), kind,
+                    loc.getBooleanOr("known", false), loc.getBooleanOr("cleared", false), loc, place));
         }
         if (level.dimension() == Level.OVERWORLD) {
             for (Place p : Places.all()) {
@@ -707,14 +712,13 @@ public class MapScreen extends Screen {
         };
     }
 
-    private void drawPins(GuiGraphics g, Level level, Player player, int mouseX, int mouseY) {
+    private void drawPins(GuiGraphicsExtractor g, Level level, Player player, int mouseX, int mouseY) {
         List<Pin> pins = pins(level, player);
         List<float[]> drawn = new ArrayList<>();
         double best = 9 * 9;
         Pin hovered = null;
         float iconSize = scale < 1 / 30.0 ? 11f : scale < 1 / 8.0 ? 13f : 16f;
-        RenderSystem.enableBlend();
-        RenderSystem.defaultBlendFunc();
+        
         for (Pin pin : pins) {
             if (scale < minScale(pin.priority())) continue;
             float sx = (float) screenX(pin.x() + 0.5);
@@ -729,11 +733,7 @@ public class MapScreen extends Screen {
             }
             if (crowded) continue;
             drawn.add(new float[]{sx, sy});
-            if (pin.known()) {
-                g.setColor(0.42f, 0.36f, 0.3f, 0.9f); // heard of: a dark silhouette until discovered
-            }
-            drawIcon(g, pin.known() && pin.place() == null ? LocationKind.UNKNOWN_ICON : pin.icon(), sx, sy, iconSize);
-            g.setColor(1f, 1f, 1f, 1f);
+            drawIcon(g,pin.known()&&pin.place()==null?LocationKind.UNKNOWN_ICON:pin.icon(),sx,sy,iconSize,pin.known()?0xe66b5c4d:-1);
             if (showName(pin)) {
                 Component name = pin.name();
                 float ts = pin.priority() >= 4 ? 0.75f : 0.62f;
@@ -746,7 +746,7 @@ public class MapScreen extends Screen {
                 hovered = pin;
             }
         }
-        RenderSystem.disableBlend();
+        
         if (hovered != null) {
             hoveredPin = hovered;
             int sx = (int) Math.round(screenX(hovered.x() + 0.5));
@@ -778,7 +778,7 @@ public class MapScreen extends Screen {
         }
         // the place's one-line lore description (places of the provinces, lang key place.skycraft.<id>.desc)
         String descKey = pin.place() != null ? "place.skycraft." + pin.place().id() + ".desc" : null;
-        if (descKey != null && net.minecraft.client.resources.language.I18n.exists(descKey)) {
+        if (descKey != null && net.minecraft.locale.Language.getInstance().has(descKey)) {
             for (String line : wrapWords(net.minecraft.client.resources.language.I18n.get(descKey), 46)) {
                 lines.add(Component.literal(line).withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
             }
@@ -814,42 +814,41 @@ public class MapScreen extends Screen {
         return out;
     }
 
-    private void drawQuestMarkers(GuiGraphics g, Level level, int mouseX, int mouseY) {
-        ListTag markers = SkyData.get(minecraft.player).module("quest").getList("markers", Tag.TAG_COMPOUND);
+    private void drawQuestMarkers(GuiGraphicsExtractor g, Level level, int mouseX, int mouseY) {
+        ListTag markers = SkyData.get(minecraft.player).module("quest").getListOrEmpty("markers");
         if (markers.isEmpty()) return;
-        String dim = level.dimension().location().toString();
-        RenderSystem.enableBlend();
-        RenderSystem.defaultBlendFunc();
+        String dim = level.dimension().identifier().toString();
+        
         for (int i = 0; i < markers.size(); i++) {
-            CompoundTag m = markers.getCompound(i);
-            String mdim = m.getString("dim");
+            CompoundTag m = markers.getCompoundOrEmpty(i);
+            String mdim = m.getStringOr("dim", "");
             if (!mdim.isEmpty() && !mdim.equals(dim)) continue;
-            int sx = (int) Math.round(screenX(m.getDouble("x")));
-            int sy = (int) Math.round(screenY(m.getDouble("z")));
+            int sx = (int) Math.round(screenX(m.getDoubleOr("x", 0d)));
+            int sy = (int) Math.round(screenY(m.getDoubleOr("z", 0d)));
             // pin markers that are off-map to the edge, like Skyrim does
             int cx = Mth.clamp(sx, left + 8, right - 8);
             int cy = Mth.clamp(sy, top + 14, bottom - 8);
             drawIcon(g, LocationKind.QUEST_ICON, cx, cy - 6, 16f);
             if (Math.abs(mouseX - cx) <= 7 && Math.abs(mouseY - (cy - 6)) <= 7) {
                 List<Component> lines = new ArrayList<>();
-                lines.add(Component.literal(m.getString("label")).withStyle(ChatFormatting.YELLOW));
+                lines.add(Component.literal(m.getStringOr("label", "")).withStyle(ChatFormatting.YELLOW));
                 lines.add(Component.translatable("world.skycraft.map.quest").withStyle(ChatFormatting.GRAY));
                 tooltip = lines;
                 hoveredPin = null;
             }
         }
-        RenderSystem.disableBlend();
+        
     }
 
-    private void drawCustomWaypoint(GuiGraphics g, Player player, int mouseX, int mouseY) {
+    private void drawCustomWaypoint(GuiGraphicsExtractor g, Player player, int mouseX, int mouseY) {
         if (customWaypoint == null) return;
         int sx = (int) Math.round(screenX(customWaypoint.getX() + 0.5));
         int sy = (int) Math.round(screenY(customWaypoint.getZ() + 0.5));
         int cx = Mth.clamp(sx, left + 8, right - 8);
         int cy = Mth.clamp(sy, top + 8, bottom - 8);
-        RenderSystem.enableBlend();
+        
         drawIcon(g, LocationKind.CUSTOM_ICON, cx, cy - 7, 14f);
-        RenderSystem.disableBlend();
+        
         if (Math.abs(mouseX - cx) <= 7 && Math.abs(mouseY - (cy - 7)) <= 7 && onMap(mouseX, mouseY)) {
             double dx = customWaypoint.getX() - player.getX();
             double dz = customWaypoint.getZ() - player.getZ();
@@ -863,7 +862,7 @@ public class MapScreen extends Screen {
         }
     }
 
-    private void drawPlayers(GuiGraphics g, Level level, Player self, float partialTick, int mouseX, int mouseY) {
+    private void drawPlayers(GuiGraphicsExtractor g, Level level, Player self, float partialTick, int mouseX, int mouseY) {
         for (Player other : level.players()) {
             if (other == self || other.isSpectator() || ClientQuestData.isMember(other.getUUID())) continue;
             int sx = (int) Math.round(screenX(other.getX()));
@@ -882,21 +881,21 @@ public class MapScreen extends Screen {
         float sx = (float) screenX(x);
         float sy = (float) screenY(z);
         float yaw = self.getViewYRot(partialTick);
-        g.pose().pushPose();
-        g.pose().translate(sx, sy, 0);
-        g.pose().mulPose(Axis.ZP.rotationDegrees(yaw + 180f));
+        g.pose().pushMatrix();
+        g.pose().translate(sx, sy);
+        g.pose().rotate((yaw + 180f) * Mth.DEG_TO_RAD);
         arrow(g, 0xFF1E140A, 1);
         arrow(g, 0xFFC8282A, 0);
-        g.pose().popPose();
+        g.pose().popMatrix();
     }
 
     /**
      * Party members (synced by the server, so visible at any distance) as green diamonds with their names;
      * members off the visible map are pinned to its edge with an arrow pointing towards them. Click to fast travel.
      */
-    private void drawPartyMembers(GuiGraphics g, Level level, Player self, int mouseX, int mouseY) {
+    private void drawPartyMembers(GuiGraphicsExtractor g, Level level, Player self, int mouseX, int mouseY) {
         if (!ClientQuestData.inParty()) return;
-        String dim = level.dimension().location().toString();
+        String dim = level.dimension().identifier().toString();
         int color = 0xFF000000 | ClientQuestData.PARTY_COLOR;
         for (ClientQuestData.Member m : ClientQuestData.members()) {
             if (!m.online() || m.id().equals(self.getUUID()) || !m.dim().equals(dim)) continue;
@@ -908,12 +907,12 @@ public class MapScreen extends Screen {
             boolean pinned = cx != (int) Math.round(sx) || cy != (int) Math.round(sy);
             if (pinned) {
                 float angle = (float) Math.atan2(sy - cy, sx - cx);
-                g.pose().pushPose();
-                g.pose().translate(cx, cy, 0);
-                g.pose().mulPose(Axis.ZP.rotation(angle));
+                g.pose().pushMatrix();
+                g.pose().translate(cx, cy);
+                g.pose().rotate(angle);
                 for (int i = 0; i < 4; i++) g.fill(7 + i, -3 + i, 8 + i, 4 - i, 0xFF1E140A);
                 for (int i = 0; i < 3; i++) g.fill(7 + i, -2 + i, 8 + i, 3 - i, color);
-                g.pose().popPose();
+                g.pose().popMatrix();
             }
             diamond(g, cx, cy, 5, 0xFF1E140A);
             diamond(g, cx, cy, 4, color);
@@ -933,7 +932,7 @@ public class MapScreen extends Screen {
         }
     }
 
-    private static void diamond(GuiGraphics g, int cx, int cy, int r, int color) {
+    private static void diamond(GuiGraphicsExtractor g, int cx, int cy, int r, int color) {
         for (int dy = -r; dy <= r; dy++) {
             int w = r - Math.abs(dy);
             g.fill(cx - w, cy + dy, cx + w + 1, cy + dy + 1, color);
@@ -941,7 +940,7 @@ public class MapScreen extends Screen {
     }
 
     /** Upward arrow with a notched tail (tip at y = -7), {@code grow} pixels bigger for the outline. */
-    private static void arrow(GuiGraphics g, int color, int grow) {
+    private static void arrow(GuiGraphicsExtractor g, int color, int grow) {
         for (int y = -7 - grow; y <= 5 + grow; y++) {
             int half = (y + 7) / 2 + grow;
             int notch = y - 1 - grow;
@@ -954,14 +953,14 @@ public class MapScreen extends Screen {
         }
     }
 
-    private static void outline(GuiGraphics g, int x0, int y0, int x1, int y1, int color) {
+    private static void outline(GuiGraphicsExtractor g, int x0, int y0, int x1, int y1, int color) {
         g.fill(x0, y0, x1, y0 + 1, color);
         g.fill(x0, y1 - 1, x1, y1, color);
         g.fill(x0, y0, x0 + 1, y1, color);
         g.fill(x1 - 1, y0, x1, y1, color);
     }
 
-    private void drawVignette(GuiGraphics g) {
+    private void drawVignette(GuiGraphicsExtractor g) {
         int edge = 14;
         for (int i = 0; i < edge; i++) {
             int a = (int) (90 * (1f - i / (float) edge));
@@ -975,7 +974,7 @@ public class MapScreen extends Screen {
 
     // ------------------------------------------------------------------ header, footer, legend
 
-    private void drawHeader(GuiGraphics g, Level level, Player player) {
+    private void drawHeader(GuiGraphicsExtractor g, Level level, Player player) {
         Component region;
         if (level.dimension() == Level.OVERWORLD) {
             Region r = Regions.at(level, player.blockPosition());
@@ -985,22 +984,22 @@ public class MapScreen extends Screen {
         } else if (level.dimension() == Level.END) {
             region = Component.translatable("world.skycraft.realm.sovngarde.name");
         } else {
-            String dim = level.dimension().location().getPath();
+            String dim = level.dimension().identifier().getPath();
             region = Component.translatableWithFallback("region.skycraft.dimension." + dim, dim);
         }
         float s = width < 520 ? 1.15f : 1.4f;
-        g.pose().pushPose();
-        g.pose().translate(width / 2f, 5, 0);
-        g.pose().scale(s, s, 1f);
-        g.drawCenteredString(font, region, 0, 0, 0xFFF5EBC8);
-        g.pose().popPose();
-        long dayTime = level.getDayTime();
+        g.pose().pushMatrix();
+        g.pose().translate(width / 2f, 5);
+        g.pose().scale(s, s);
+        g.centeredText(font, region, 0, 0, 0xFFF5EBC8);
+        g.pose().popMatrix();
+        long dayTime = level.getDefaultClockTime();
         Component when = SkyrimCalendar.date(dayTime).copy().append("   ").append(SkyrimCalendar.time(dayTime));
         float ws = 0.72f;
         drawScaled(g, when, width / 2f - font.width(when) * ws / 2f, 5 + 9 * s + 2, ws, 0xFFBDB59E);
     }
 
-    private void drawFooter(GuiGraphics g, Level level, int mouseX, int mouseY) {
+    private void drawFooter(GuiGraphicsExtractor g, Level level, int mouseX, int mouseY) {
         float s = 0.7f;
         Component help = Component.translatable("world.skycraft.map.help_short");
         drawScaled(g, help, left, bottom + 5, s, 0xFF8A7F66);
@@ -1022,7 +1021,7 @@ public class MapScreen extends Screen {
             LocationKind.WORD_WALL, LocationKind.DRAGON_MOUND, LocationKind.DAEDRIC_SHRINE, LocationKind.CAMP,
             LocationKind.TOWER, LocationKind.LANDMARK};
 
-    private void drawLegend(GuiGraphics g) {
+    private void drawLegend(GuiGraphicsExtractor g) {
         int rows = (LEGEND.length + 2 + 1) / 2;
         int rowH = 11;
         int colW = Math.min(110, (right - left - 16) / 2);
@@ -1033,7 +1032,7 @@ public class MapScreen extends Screen {
         g.fill(x0, y0, x0 + w, y0 + h, 0xE0E8D8B4);
         outline(g, x0, y0, x0 + w, y0 + h, 0xFF6B5030);
         drawScaled(g, Component.translatable("world.skycraft.map.legend"), x0 + 5, y0 + 4, 0.8f, 0xFF000000 | INK);
-        RenderSystem.enableBlend();
+        
         int i = 0;
         for (LocationKind k : LEGEND) {
             int cx = x0 + 5 + (i % 2) * colW;
@@ -1050,10 +1049,10 @@ public class MapScreen extends Screen {
             drawIcon(g, extra[k], cx + 5, cy + 4, 10f);
             drawScaled(g, Component.translatable(keys[k]), cx + 13, cy + 1, 0.7f, 0xFF000000 | INK);
         }
-        RenderSystem.disableBlend();
+        
     }
 
-    private void drawTravelDialog(GuiGraphics g, Player player) {
+    private void drawTravelDialog(GuiGraphicsExtractor g, Player player) {
         int cx = width / 2;
         int cy = height / 2;
         g.fill(cx - 120, cy - 34, cx + 120, cy + 38, 0xE0100C08);
@@ -1067,12 +1066,12 @@ public class MapScreen extends Screen {
             dz = pos.z - player.getZ();
         } else {
             name = WorldData.displayName(pendingTravel);
-            dx = pendingTravel.getInt("x") - player.getX();
-            dz = pendingTravel.getInt("z") - player.getZ();
+            dx = pendingTravel.getIntOr("x", 0) - player.getX();
+            dz = pendingTravel.getIntOr("z", 0) - player.getZ();
         }
         Component q = Component.translatable("world.skycraft.map.travel_confirm", name);
-        g.drawCenteredString(font, q, cx, cy - 22, 0xFFF5EBC8);
-        g.drawCenteredString(font, Component.translatable("world.skycraft.map.distance", (int) Math.sqrt(dx * dx + dz * dz)),
+        g.centeredText(font, q, cx, cy - 22, 0xFFF5EBC8);
+        g.centeredText(font, Component.translatable("world.skycraft.map.distance", (int) Math.sqrt(dx * dx + dz * dz)),
                 cx, cy - 8, 0xFFA89F86);
     }
 }

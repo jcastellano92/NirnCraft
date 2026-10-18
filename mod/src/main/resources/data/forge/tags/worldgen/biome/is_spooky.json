@@ -4,6 +4,9 @@
     "skycraft:deep_mire",
     "skycraft:haunted_wood",
     "skycraft:rivenspire",
-    "skycraft:shadowfen"
+    "skycraft:shadowfen",
+    "minecraft:dark_forest",
+    "minecraft:pale_garden",
+    "minecraft:deep_dark"
   ]
 }

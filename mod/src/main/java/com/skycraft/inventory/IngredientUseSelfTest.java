@@ -40,7 +40,7 @@ public final class IngredientUseSelfTest {
             problems.add("alchemy use: " + (Alchemy.announcedTotal() - announcedBefore) + " messages for " + Integer.bitCount(learned) + " learned effects");
         }
         boolean applied = false;
-        for (var effect : ing.effects()) if (player.hasEffect(effect.mobEffect())) applied = true;
+        for (var effect : ing.effects()) if (player.hasEffect(com.skycraft.platform.Effects.holder(effect.mobEffect()))) applied = true;
         if (!applied) problems.add("alchemy use: no effect of the ingredient is active after eating");
         return problems;
     }

@@ -574,7 +574,10 @@ public final class AetherNative {
             if (ioSeg == null) ioSeg = frameArena.allocate(GL_IO_SIZE, 8);
             if (io != null) io.write(ioSeg);
             try {
-                check((int) glRenderIo.invokeExact(ptr, frameSeg, io != null ? ioSeg : MemorySegment.NULL), "aether_gl_render_io");
+                // a typed local: a conditional passed straight to invokeExact is typed Object (its target), and the
+                // exact-type check then fails on every frame
+                MemorySegment ioArg = io != null ? ioSeg : MemorySegment.NULL;
+                check((int) glRenderIo.invokeExact(ptr, frameSeg, ioArg), "aether_gl_render_io");
             } catch (Throwable t) {
                 throw rethrow(t);
             }

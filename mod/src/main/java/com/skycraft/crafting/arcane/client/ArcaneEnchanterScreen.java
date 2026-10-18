@@ -8,7 +8,7 @@ import com.skycraft.crafting.arcane.item.SoulGemItem;
 import com.skycraft.network.SkyNetwork;
 import com.skycraft.perk.Perks;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.BlockPos;
@@ -132,7 +132,7 @@ public class ArcaneEnchanterScreen extends Screen {
                 int i = n < inv.getContainerSize() ? n : com.skycraft.inventory.Pack.VIRTUAL_BASE + (n - inv.getContainerSize());
                 ItemStack s = com.skycraft.inventory.Pack.stackAt(p, i);
                 if (!(s.getItem() instanceof SoulGemItem) || SoulGemItem.getSoul(s) <= 0) continue;
-                gems.add(new ArcaneList.Entry<>(String.valueOf(i), s, s.getItem().getDescription(), SoulGemItem.soulName(SoulGemItem.getSoul(s)), i));
+                gems.add(new ArcaneList.Entry<>(String.valueOf(i), s, s.getItem().getName(s), SoulGemItem.soulName(SoulGemItem.getSoul(s)), i));
             }
             gems.sort(Comparator.comparingInt(e -> SoulGemItem.getSoul(e.icon())));
             gemList.setEntries(gems);
@@ -145,8 +145,8 @@ public class ArcaneEnchanterScreen extends Screen {
                 for (Enchantment e : Enchanting.applicable(p, target)) {
                     String id = Enchanting.id(e);
                     if (id == null) continue;
-                    Component label = soul > 0 ? e.getFullname(Enchanting.resultLevel(p, e, soul)).copy().withStyle(ChatFormatting.WHITE)
-                            : Component.translatable(e.getDescriptionId());
+                    Component label = soul > 0 ? Enchantment.getFullname(com.skycraft.platform.EnchantmentsAccess.holder(e),Enchanting.resultLevel(p,e,soul)).copy().withStyle(ChatFormatting.WHITE)
+                            : e.description();
                     Component sub = Component.translatable("screen.skycraft.enchanter.max_level", e.getMaxLevel());
                     if (Enchanting.perkBonus(p, e) > 1.0) sub = Component.translatable("screen.skycraft.enchanter.perk_bonus", e.getMaxLevel());
                     enchs.add(new ArcaneList.Entry<>(id, ItemStack.EMPTY, label, sub, e));
@@ -202,8 +202,10 @@ public class ArcaneEnchanterScreen extends Screen {
     // ------------------------------------------------------------------ input
 
     @Override
-    public boolean mouseClicked(double mx, double my, int button) {
-        if (super.mouseClicked(mx, my, button)) return true;
+    public boolean mouseClicked(net.minecraft.client.input.MouseButtonEvent event, boolean doubleClick) {
+        double mx = event.x(), my = event.y();
+        int button = com.skycraft.client.screen.UiInput.actionButton(event.button());
+        if (super.mouseClicked(event, doubleClick)) return true;
         if (button != 0) return false;
         boolean hit;
         if (tab == 0) {
@@ -216,48 +218,49 @@ public class ArcaneEnchanterScreen extends Screen {
     }
 
     @Override
-    public boolean mouseScrolled(double mx, double my, double delta) {
+    public boolean mouseScrolled(double mx, double my, double horizontal, double delta) {
         if (tab == 0) return disList.scroll(mx, my, delta);
         return itemList.scroll(mx, my, delta) || enchList.scroll(mx, my, delta) || gemList.scroll(mx, my, delta);
     }
 
     @Override
-    public boolean keyPressed(int key, int scan, int mods) {
-        if (minecraft != null && minecraft.options.keyInventory.matches(key, scan)) {
+    public boolean keyPressed(net.minecraft.client.input.KeyEvent event) {
+        int key = event.key(), scan = event.keycode(), mods = event.modifiers();
+        if (minecraft != null && minecraft.options.keyInventory.matches(event)) {
             onClose();
             return true;
         }
-        return super.keyPressed(key, scan, mods);
+        return super.keyPressed(event);
     }
 
     // ------------------------------------------------------------------ rendering
 
     @Override
-    public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        renderBackground(g);
+    public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
+
         ArcaneUi.panel(g, left, top, pw, ph, ArcaneUi.MAGIC);
-        g.drawCenteredString(font, title, left + pw / 2, top + 7, ArcaneUi.GOLD);
+        g.centeredText(font, title, left + pw / 2, top + 7, ArcaneUi.GOLD);
         com.skycraft.inventory.client.SkyUi.carryLine(g, font, left + pw / 2 + font.width(title) / 2 + 10, top + 7, left + pw - 12);
         ArcaneUi.divider(g, left + 12, top + 40, pw - 24);
 
         Player p = player();
         int skill = SkyData.get(p).getSkill(Skill.ENCHANTING);
         Component skillLine = Component.translatable("screen.skycraft.enchanter.skill", skill, Perks.rank(p, "enchanting.enchanter"));
-        g.drawString(font, skillLine, left + 12, top + ph - 22, ArcaneUi.MUTED, false);
+        g.text(font, skillLine, left + 12, top + ph - 22, ArcaneUi.MUTED, false);
 
         if (tab == 0) renderDisenchant(g, mouseX, mouseY, p);
         else renderEnchant(g, mouseX, mouseY, p);
 
-        super.render(g, mouseX, mouseY, partialTick);
+        super.extractRenderState(g, mouseX, mouseY, partialTick);
 
         ArcaneList<?>[] lists = tab == 0 ? new ArcaneList<?>[]{disList} : new ArcaneList<?>[]{itemList, gemList};
         for (ArcaneList<?> l : lists) {
             ArcaneList.Entry<?> e = l.hoveredEntry();
-            if (e != null && !e.icon().isEmpty()) g.renderTooltip(font, e.icon(), mouseX, mouseY);
+            if (e != null && !e.icon().isEmpty()) g.setTooltipForNextFrame(font, e.icon(), mouseX, mouseY);
         }
     }
 
-    private void renderDisenchant(GuiGraphics g, int mouseX, int mouseY, Player p) {
+    private void renderDisenchant(GuiGraphicsExtractor g, int mouseX, int mouseY, Player p) {
         disList.render(g, font, mouseX, mouseY, Component.translatable("screen.skycraft.enchanter.nothing_to_disenchant"));
         int x = disList.x + disList.w + 12;
         int y = disList.y;
@@ -268,26 +271,26 @@ public class ArcaneEnchanterScreen extends Screen {
             return;
         }
         ItemStack s = com.skycraft.inventory.Pack.stackAt(p, slot);
-        g.renderItem(s, x, y);
-        g.drawString(font, s.getHoverName(), x + 20, y + 4, ArcaneUi.TEXT, false);
+        g.item(s, x, y);
+        g.text(font, s.getHoverName(), x + 20, y + 4, ArcaneUi.TEXT, false);
         int ly = y + 24;
-        g.drawString(font, Component.translatable("screen.skycraft.enchanter.will_learn"), x, ly, ArcaneUi.GOLD, false);
+        g.text(font, Component.translatable("screen.skycraft.enchanter.will_learn"), x, ly, ArcaneUi.GOLD, false);
         ly += 12;
-        for (Map.Entry<Enchantment, Integer> e : EnchantmentHelper.getEnchantments(s).entrySet()) {
-            Enchantment ench = e.getKey();
-            boolean known = Enchanting.knows(p, ench) || ench.isCurse();
-            Component name = Component.translatable(ench.getDescriptionId());
+        for (var e : s.getOrDefault(net.minecraft.core.component.DataComponents.ENCHANTMENTS,net.minecraft.world.item.enchantment.ItemEnchantments.EMPTY).entrySet()) {
+            Enchantment ench=e.getKey().value();
+            boolean known = Enchanting.knows(p, ench) || e.getKey().is(net.minecraft.tags.EnchantmentTags.CURSE);
+            Component name = ench.description();
             Component line = known
                     ? Component.translatable("screen.skycraft.enchanter.known", name).withStyle(ChatFormatting.DARK_GRAY)
                     : Component.translatable("screen.skycraft.enchanter.new", name).withStyle(ChatFormatting.LIGHT_PURPLE);
-            g.drawString(font, line, x + 6, ly, 0xFFFFFFFF, false);
+            g.text(font, line, x + 6, ly, 0xFFFFFFFF, false);
             ly += 11;
         }
         ly += 6;
         drawWrapped(g, Component.translatable("screen.skycraft.enchanter.destroy_warning"), x, ly, w, ArcaneUi.BAD);
     }
 
-    private void renderEnchant(GuiGraphics g, int mouseX, int mouseY, Player p) {
+    private void renderEnchant(GuiGraphicsExtractor g, int mouseX, int mouseY, Player p) {
         itemList.render(g, font, mouseX, mouseY, Component.translatable("screen.skycraft.enchanter.no_items"));
         enchList.render(g, font, mouseX, mouseY, Component.translatable(itemList.selected() == null
                 ? "screen.skycraft.enchanter.pick_item" : "screen.skycraft.enchanter.no_enchantments"));
@@ -303,18 +306,18 @@ public class ArcaneEnchanterScreen extends Screen {
             int resLvl = Enchanting.resultLevel(p, ench, soul);
             result = Component.translatable("screen.skycraft.enchanter.result",
                     com.skycraft.loot.affix.ItemAffixes.previewEnchantedName(s, ench, resLvl),
-                    ench.getFullname(resLvl));
+                    Enchantment.getFullname(com.skycraft.platform.EnchantmentsAccess.holder(ench),resLvl));
         } else {
             result = Component.translatable("screen.skycraft.enchanter.choose_all");
         }
-        g.drawString(font, result, left + 12, y, ArcaneUi.TEXT, false);
-        g.drawString(font, Component.translatable("screen.skycraft.enchanter.known_total", Enchanting.known(p).size()),
+        g.text(font, result, left + 12, y, ArcaneUi.TEXT, false);
+        g.text(font, Component.translatable("screen.skycraft.enchanter.known_total", Enchanting.known(p).size()),
                 left + 12, y + 12, ArcaneUi.MUTED, false);
     }
 
-    private void drawWrapped(GuiGraphics g, Component text, int x, int y, int w, int color) {
+    private void drawWrapped(GuiGraphicsExtractor g, Component text, int x, int y, int w, int color) {
         for (var line : font.split(text, Math.max(40, w))) {
-            g.drawString(font, line, x, y, color, false);
+            g.text(font, line, x, y, color, false);
             y += 10;
         }
     }

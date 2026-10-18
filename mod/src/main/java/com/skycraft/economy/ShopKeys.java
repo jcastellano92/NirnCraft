@@ -59,8 +59,8 @@ public final class ShopKeys {
 
     /** The shop types the NPC's building says it sells; empty when unknown (use the NPC's own pools then). */
     public static List<ShopType> buildingPools(LivingEntity npc) {
-        CompoundTag shop = npc.getPersistentData().getCompound(Shop.KEY);
-        if (shop.contains(BUILDING_POOLS, Tag.TAG_LIST)) return read(shop.getList(BUILDING_POOLS, Tag.TAG_STRING));
+        CompoundTag shop = npc.getPersistentData().getCompoundOrEmpty(Shop.KEY);
+        if (com.skycraft.platform.NbtData.hasType(shop, BUILDING_POOLS, Tag.TAG_LIST)) return read(shop.getListOrEmpty(BUILDING_POOLS));
         Info i = resolve(npc);
         return i == null ? List.of() : i.pools();
     }
@@ -68,7 +68,7 @@ public final class ShopKeys {
     private static List<ShopType> read(ListTag list) {
         List<ShopType> out = new ArrayList<>();
         for (int i = 0; i < list.size(); i++) {
-            ShopType t = ShopType.byId(list.getString(i));
+            ShopType t = ShopType.byId(list.getStringOr(i, ""));
             if (t != null && !out.contains(t)) out.add(t);
         }
         return out;
@@ -81,16 +81,16 @@ public final class ShopKeys {
     @Nullable
     public static Info resolve(LivingEntity npc) {
         CompoundTag pd = npc.getPersistentData();
-        CompoundTag shop = pd.getCompound(Shop.KEY);
-        if (shop.contains(KEY, Tag.TAG_STRING) && !shop.getString(KEY).isEmpty()) {
-            return new Info(shop.getString(KEY), read(shop.getList(BUILDING_POOLS, Tag.TAG_STRING)), shop.getBoolean(INN));
+        CompoundTag shop = pd.getCompoundOrEmpty(Shop.KEY);
+        if (com.skycraft.platform.NbtData.hasType(shop, KEY, Tag.TAG_STRING) && !shop.getStringOr(KEY, "").isEmpty()) {
+            return new Info(shop.getStringOr(KEY, ""), read(shop.getListOrEmpty(BUILDING_POOLS)), shop.getBooleanOr(INN, false));
         }
         if (!(npc.level() instanceof ServerLevel level) || level.dimension() != Level.OVERWORLD) return null;
         Info info = derive(level, npc, pd);
         if (info == null) return null;
         // cache (the tag exists for every merchant that has pools; a villager has none, so create it)
-        if (!pd.contains(Shop.KEY, Tag.TAG_COMPOUND)) pd.put(Shop.KEY, shop);
-        CompoundTag target = pd.getCompound(Shop.KEY);
+        if (!com.skycraft.platform.NbtData.hasType(pd, Shop.KEY, Tag.TAG_COMPOUND)) pd.put(Shop.KEY, shop);
+        CompoundTag target = pd.getCompoundOrEmpty(Shop.KEY);
         target.putString(KEY, info.key());
         ListTag pools = new ListTag();
         for (ShopType t : info.pools()) pools.add(StringTag.valueOf(t.id()));
@@ -103,7 +103,7 @@ public final class ShopKeys {
     private static Info derive(ServerLevel level, LivingEntity npc, CompoundTag pd) {
         SettlementAnchors.Entry entry = null;
         Anchor mine = null;
-        String slot = pd.getString(Housing.SLOT_KEY);
+        String slot = pd.getStringOr(Housing.SLOT_KEY, "");
         int hash = slot.lastIndexOf('#');
         if (hash > 0) {
             Optional<SettlementAnchors.Entry> e = SettlementAnchors.find(level, slot.substring(0, hash));
@@ -121,7 +121,7 @@ public final class ShopKeys {
             }
         }
         if (mine == null) {
-            BlockPos ref = pd.contains(Housing.WORK_KEY) ? BlockPos.of(pd.getLong(Housing.WORK_KEY)) : npc.blockPosition();
+            BlockPos ref = pd.contains(Housing.WORK_KEY) ? BlockPos.of(pd.getLongOr(Housing.WORK_KEY, 0L)) : npc.blockPosition();
             Optional<SettlementAnchors.Entry> e = SettlementAnchors.near(level, ref, 16);
             if (e.isEmpty()) return null;
             entry = e.get();

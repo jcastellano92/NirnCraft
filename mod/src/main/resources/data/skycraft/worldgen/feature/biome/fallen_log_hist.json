@@ -1,0 +1,11 @@
+{
+  "type": "skycraft:fallen_log",
+  "config": {
+    "state": {
+      "id": "skycraft:hist_log",
+      "properties": {
+        "axis": "x"
+      }
+    }
+  }
+}

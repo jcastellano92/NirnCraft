@@ -24,20 +24,20 @@ public final class StoryDialogue {
     private StoryDialogue() {}
 
     public static void addOptions(ServerPlayer player, LivingEntity npc, List<DialogueOption> out) {
-        MinecraftServer server = player.server;
+        MinecraftServer server = player.level().getServer();
         for (Quests.Ref ref : Quests.active(server, player.getUUID())) {
             Quest q = ref.quest();
             Objective o = q.current();
             if (o == null || o.type != Objective.Type.TALK_TO || !o.data.contains(Story.CHOICES) || !QuestDialogue.matchesNpc(o, npc)) continue;
-            ListTag list = o.data.getList(Story.CHOICES, Tag.TAG_COMPOUND);
+            ListTag list = o.data.getListOrEmpty(Story.CHOICES);
             for (int j = 0; j < list.size(); j++) {
-                CompoundTag c = list.getCompound(j);
-                String only = c.getString("npc");
+                CompoundTag c = list.getCompoundOrEmpty(j);
+                String only = c.getStringOr("npc","");
                 if (!only.isEmpty() && !QuestNpcs.matches(npc, only)) continue;
                 String questId = q.id;
                 int choice = j;
                 out.add(new DialogueOption("story.choice." + questId + "." + j,
-                        QuestDialogue.questLabel(Quest.readComponent(c.getString("label"))), 90 + j,
+                        QuestDialogue.questLabel(Quest.readComponent(c.getStringOr("label",""))), 90 + j,
                         (pl, n) -> choose(pl, n, questId, choice)));
             }
         }
@@ -59,19 +59,19 @@ public final class StoryDialogue {
     }
 
     private static void choose(ServerPlayer player, LivingEntity npc, String questId, int choice) {
-        Quests.Ref ref = Quests.find(player.server, player.getUUID(), questId);
+        Quests.Ref ref = Quests.find(player.level().getServer(), player.getUUID(), questId);
         if (ref == null || !ref.quest().isActive()) return;
         Quest q = ref.quest();
         Objective o = q.current();
         if (o == null || o.type != Objective.Type.TALK_TO || !QuestDialogue.matchesNpc(o, npc)) return;
-        ListTag list = o.data.getList(Story.CHOICES, Tag.TAG_COMPOUND);
+        ListTag list = o.data.getListOrEmpty(Story.CHOICES);
         if (choice < 0 || choice >= list.size()) return;
-        CompoundTag c = list.getCompound(choice);
-        String only = c.getString("npc");
+        CompoundTag c = list.getCompoundOrEmpty(choice);
+        String only = c.getStringOr("npc","");
         if (!only.isEmpty() && !QuestNpcs.matches(npc, only)) return;
         // the choice's consequences first, so the next step already sees its flags
-        Story.runActions(player.server, ref.key(), q, c.getString("actions"), player);
-        Quests.completeObjective(player.server, ref.key(), q, o, player);
-        Dialogue.open(player, npc, Quest.readComponent(c.getString("reply")));
+        Story.runActions(player.level().getServer(), ref.key(), q, c.getStringOr("actions",""), player);
+        Quests.completeObjective(player.level().getServer(), ref.key(), q, o, player);
+        Dialogue.open(player, npc, Quest.readComponent(c.getStringOr("reply","")));
     }
 }

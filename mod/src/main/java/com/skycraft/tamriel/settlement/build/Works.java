@@ -9,7 +9,7 @@ import net.minecraft.world.level.block.BellBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CropBlock;
-import net.minecraft.world.level.block.FarmBlock;
+import net.minecraft.world.level.block.FarmlandBlock;
 import net.minecraft.world.level.block.LayeredCauldronBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BellAttachType;
@@ -63,7 +63,7 @@ public final class Works {
         if (s.floor != Spec.UNSET && s.floor2 != Spec.UNSET && s.floor != s.floor2) {
             int f1 = s.floor, f2 = s.floor2;
             double len = Math.max(1.0, Math.hypot(ddx, ddz));
-            Direction upDir = f2 > f1 ? Direction.getNearest(ddx, 0, ddz) : Direction.getNearest(-ddx, 0, -ddz);
+            Direction upDir = f2 > f1 ? Direction.getApproximateNearest(ddx, 0, ddz) : Direction.getApproximateNearest(-ddx, 0, -ddz);
             BlockState stairBlock = B.stair(major ? p.cityWallStairs : p.stairs, upDir, false);
             line(c, s, half, (x, z, t, side) -> {
                 int g = c.wground(x, z);
@@ -136,7 +136,7 @@ public final class Works {
                     int nx = x + sx * k, nz = z + sz * k;
                     if (nx < c.clipMinX() || nx > c.clipMaxX() || nz < c.clipMinZ() || nz > c.clipMaxZ()) continue;
                     if (c.wground(nx, nz) != g + 1) continue;
-                    Direction up = Direction.getNearest(sx * k, 0, sz * k);
+                    Direction up = Direction.getApproximateNearest(sx * k, 0, sz * k);
                     if (c.wget(x, g + 1, z).isAir()) c.wset(x, g + 1, z, B.stair(major ? p.trim : p.stairs, up, false));
                     break;
                 }
@@ -216,8 +216,8 @@ public final class Works {
             c.set(q[0], 3, q[1], p.fence);
         }
         for (int x = x0; x <= x0 + 2; x++) for (int z = z0; z <= z0 + 2; z++) c.set(x, 4, z, B.slab(p.roofSlab, false));
-        c.set(x0 + 1, 3, z0 + 1, B.s(Blocks.CHAIN));
-        c.set(x0 + 1, 2, z0 + 1, B.s(Blocks.CHAIN));
+        c.set(x0 + 1, 3, z0 + 1, B.s(com.skycraft.worldgen.VanillaBlocks.CHAIN));
+        c.set(x0 + 1, 2, z0 + 1, B.s(com.skycraft.worldgen.VanillaBlocks.CHAIN));
     }
 
     public static void statue(Canvas c, Palette p, int cx, int cz) {
@@ -232,7 +232,7 @@ public final class Works {
         c.set(cx, 6, cz, B.s(Blocks.STONE));
         c.set(cx + 1, 5, cz, B.s(Blocks.IRON_BARS));
         c.set(cx + 1, 6, cz, B.s(Blocks.IRON_BARS));
-        c.set(cx + 1, 7, cz, B.s(Blocks.LIGHTNING_ROD));
+        c.set(cx + 1, 7, cz, B.s(com.skycraft.worldgen.VanillaBlocks.LIGHTNING_ROD));
     }
 
     public static void lamp(Canvas c, Palette p, int x, int y, int z) {
@@ -261,14 +261,14 @@ public final class Works {
 
         int kind = Math.floorMod(s.variant + c.roll(0, 0, 0, 5, 6), 6);
         BlockState clothA = switch (kind) {
-            case 0 -> B.s(Blocks.RED_WOOL);
-            case 1 -> B.s(Blocks.YELLOW_WOOL);
-            case 2 -> B.s(Blocks.ORANGE_WOOL);
-            case 3 -> B.s(Blocks.GREEN_WOOL);
-            case 4 -> B.s(Blocks.BLUE_WOOL);
+            case 0 -> B.s(com.skycraft.worldgen.VanillaBlocks.RED_WOOL);
+            case 1 -> B.s(com.skycraft.worldgen.VanillaBlocks.YELLOW_WOOL);
+            case 2 -> B.s(com.skycraft.worldgen.VanillaBlocks.ORANGE_WOOL);
+            case 3 -> B.s(com.skycraft.worldgen.VanillaBlocks.GREEN_WOOL);
+            case 4 -> B.s(com.skycraft.worldgen.VanillaBlocks.BLUE_WOOL);
             default -> p.accent;
         };
-        BlockState clothB = B.s(Blocks.WHITE_WOOL);
+        BlockState clothB = B.s(com.skycraft.worldgen.VanillaBlocks.WHITE_WOOL);
 
         // Striped canopy supported directly by the 4 corner posts (no unsupported overhangs)
         for (int x = 0; x < w; x++) {
@@ -314,7 +314,7 @@ public final class Works {
                 if (w - 2 > 1) Props.pot(c, w - 2, 2, d - 1, 17);
             }
             case 4 -> { // Textiles & Tailoring
-                c.set(1, 2, 0, B.s(Blocks.WHITE_CARPET));
+                c.set(1, 2, 0, B.s(com.skycraft.worldgen.VanillaBlocks.WHITE_CARPET));
                 if (w - 2 > 1) c.set(w - 2, 2, d - 1, B.face(B.s(Blocks.LOOM), Direction.NORTH));
             }
             default -> { // Curiosities & Pottery
@@ -354,11 +354,11 @@ public final class Works {
                 if (paddy) {
                     c.set(x, 0, z, B.s(v == 9 ? Blocks.MUD : Blocks.SAND));
                 } else if (ashBed) {
-                    c.set(x, 0, z, B.s(v == 8 ? Blocks.FARMLAND : Blocks.PODZOL).trySetValue(FarmBlock.MOISTURE, 7));
+                    c.set(x, 0, z, B.s(v == 8 ? Blocks.FARMLAND : Blocks.PODZOL).trySetValue(FarmlandBlock.MOISTURE, 7));
                 } else if (bushOrFlower) {
                     c.set(x, 0, z, B.s(Blocks.PODZOL));
                 } else {
-                    c.set(x, 0, z, B.s(Blocks.FARMLAND).setValue(FarmBlock.MOISTURE, 7));
+                    c.set(x, 0, z, B.s(Blocks.FARMLAND).setValue(FarmlandBlock.MOISTURE, 7));
                 }
                 placeCropPlant(c, p, x, z, v, crop);
             }
@@ -458,7 +458,7 @@ public final class Works {
                 int rv = gardenRowVariant(s.variant, x);
                 Block crop = crop(rv);
                 boolean podzolSoil = rv >= 9 && rv != 18 && rv != 19;
-                c.set(x, 0, z, podzolSoil ? B.s(Blocks.PODZOL) : B.s(Blocks.FARMLAND).setValue(FarmBlock.MOISTURE, 7));
+                c.set(x, 0, z, podzolSoil ? B.s(Blocks.PODZOL) : B.s(Blocks.FARMLAND).setValue(FarmlandBlock.MOISTURE, 7));
                 placeCropPlant(c, p, x, z, rv, crop);
             }
         }

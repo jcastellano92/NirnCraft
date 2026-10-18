@@ -5,6 +5,8 @@
     "skycraft:eastmarch_volcanic_tundra",
     "skycraft:warm_steppe",
     "skycraft:whiterun_plains",
-    "skycraft:whiterun_tundra"
+    "skycraft:whiterun_tundra",
+    "minecraft:plains",
+    "minecraft:sunflower_plains"
   ]
 }

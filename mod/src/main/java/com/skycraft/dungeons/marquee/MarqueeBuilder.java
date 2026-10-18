@@ -14,7 +14,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -629,7 +629,7 @@ public final class MarqueeBuilder {
             int u = c.get(0).getAsInt(), v = c.get(1).getAsInt();
             int rel = c.size() > 2 ? c.get(2).getAsInt() : ground(u, v);
             Direction face = facing(u, v, op);
-            ResourceLocation table = new ResourceLocation(op.get("table").getAsString());
+            Identifier table = Identifier.parse(op.get("table").getAsString());
             p.container(wx(u, v), floor + rel, wz(u, v), op.has("barrel") && op.get("barrel").getAsBoolean() ? Deco.barrel(face) : Deco.chest(face), table);
             if (op.has("capstone") && op.get("capstone").getAsBoolean()) p.feature("capstone:relic");
             else p.feature("reward:cache");
@@ -691,16 +691,7 @@ public final class MarqueeBuilder {
     }
 
     static ItemStack book(MarqueePlans.Book b) {
-        ItemStack stack = new ItemStack(Items.WRITTEN_BOOK);
-        CompoundTag tag = stack.getOrCreateTag();
-        tag.putString("title", b.title());
-        tag.putString("author", b.author());
-        ListTag list = new ListTag();
-        for (String page : b.pages()) list.add(StringTag.valueOf(Component.Serializer.toJson(Component.literal(page))));
-        tag.put("pages", list);
-        tag.putBoolean("resolved", true);
-        tag.putBoolean(com.skycraft.lore.place.StoryReader.STORY_TAG, true);
-        return stack;
+        return com.skycraft.worldgen.AuthoredBooks.create(b.title(), b.author(), b.pages().stream().map(p -> (Component) Component.literal(p)).toList());
     }
 
 }

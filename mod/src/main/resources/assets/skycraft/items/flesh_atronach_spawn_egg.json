@@ -1,0 +1,16 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "skycraft:item/flesh_atronach_spawn_egg",
+    "tints": [
+      {
+        "type": "minecraft:constant",
+        "value": 12885136
+      },
+      {
+        "type": "minecraft:constant",
+        "value": 16729800
+      }
+    ]
+  }
+}

@@ -10,7 +10,7 @@ import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
@@ -19,7 +19,7 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobType;
+
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -29,14 +29,14 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.BonemealableBlock;
 import net.minecraft.world.level.block.CropBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.living.LivingChangeTargetEvent;
-import net.minecraftforge.event.entity.living.LivingFallEvent;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.registries.ForgeRegistries;
+
+import net.neoforged.neoforge.event.entity.living.LivingChangeTargetEvent;
+import net.neoforged.neoforge.event.entity.living.LivingFallEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
+import net.minecraft.core.registries.BuiltInRegistries;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 
@@ -55,11 +55,11 @@ import java.util.UUID;
  * </ul>
  * State: {@code data.module("lore")} key {@code allmaker} (stone id).
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class AllMakerStones {
     public static final String KEY = "allmaker";
-    private static final UUID EARTH_KNOCKBACK = UUID.fromString("8c3f2a71-5d4e-4b9a-9e21-7a0c1d2e3f11");
-    private static final UUID WIND_SPEED = UUID.fromString("8c3f2a71-5d4e-4b9a-9e21-7a0c1d2e3f12");
+    private static final net.minecraft.resources.Identifier EARTH_KNOCKBACK = net.minecraft.resources.Identifier.fromNamespaceAndPath("skycraft", "lore/earth_knockback");
+    private static final net.minecraft.resources.Identifier WIND_SPEED = net.minecraft.resources.Identifier.fromNamespaceAndPath("skycraft", "lore/wind_speed");
     /** Beasts the Beast Stone calms (by entity id path), besides vanilla animals. */
     private static final Set<String> BEASTS = Set.of("wolf", "bear", "sabre_cat", "horker", "mudcrab", "skeever", "elk", "deer",
             "mammoth", "polar_bear", "fox", "frostbite_spider", "slaughterfish");
@@ -68,14 +68,14 @@ public final class AllMakerStones {
 
     @Nullable
     public static AllMakerStone current(Player player) {
-        return AllMakerStone.byId(SkyData.get(player).module(StandingStones.MODULE).getString(KEY));
+        return AllMakerStone.byId(SkyData.get(player).module(StandingStones.MODULE).getStringOr(KEY, ""));
     }
 
     public static void activate(ServerPlayer player, AllMakerStone stone, BlockPos base) {
         PlayerData data = SkyData.get(player);
         CompoundTag tag = data.module(StandingStones.MODULE);
-        AllMakerStone old = AllMakerStone.byId(tag.getString(KEY));
-        ServerLevel level = player.serverLevel();
+        AllMakerStone old = AllMakerStone.byId(tag.getStringOr(KEY, ""));
+        ServerLevel level = player.level();
         if (old == stone) {
             Notifier.message(player, Component.translatable("message.skycraft.lore.stone_already", stone.stoneName()));
             return;
@@ -85,7 +85,7 @@ public final class AllMakerStones {
         data.markDirty();
         refresh(player);
         Vector3f color = new Vector3f((stone.color >> 16 & 255) / 255f, (stone.color >> 8 & 255) / 255f, (stone.color & 255) / 255f);
-        DustParticleOptions dust = new DustParticleOptions(color, 1.6f);
+        DustParticleOptions dust = new DustParticleOptions(net.minecraft.util.ARGB.colorFromFloat(1f, (color).x(), (color).y(), (color).z()), 1.6f);
         for (int i = 0; i < 48; i++) {
             level.sendParticles(dust, base.getX() + 0.5, base.getY() + 1.8 + i * 0.5, base.getZ() + 0.5, 2, 0.08, 0.15, 0.08, 0);
         }
@@ -99,31 +99,31 @@ public final class AllMakerStones {
     public static void refresh(ServerPlayer player) {
         AllMakerStone s = current(player);
         modifier(player, Attributes.KNOCKBACK_RESISTANCE, EARTH_KNOCKBACK, "Skycraft Earth Stone", s == AllMakerStone.EARTH ? 0.3 : 0.0,
-                AttributeModifier.Operation.ADDITION);
+                AttributeModifier.Operation.ADD_VALUE);
         modifier(player, Attributes.MOVEMENT_SPEED, WIND_SPEED, "Skycraft Wind Stone", s == AllMakerStone.WIND ? 0.06 : 0.0,
-                AttributeModifier.Operation.MULTIPLY_TOTAL);
+                AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
     }
 
-    private static void modifier(ServerPlayer player, net.minecraft.world.entity.ai.attributes.Attribute attribute, UUID id, String name,
+    private static void modifier(ServerPlayer player, net.minecraft.core.Holder<net.minecraft.world.entity.ai.attributes.Attribute> attribute, net.minecraft.resources.Identifier id, String name,
                                  double amount, AttributeModifier.Operation op) {
         AttributeInstance inst = player.getAttribute(attribute);
         if (inst == null) return;
         AttributeModifier existing = inst.getModifier(id);
-        if (existing != null && existing.getAmount() == amount) return;
+        if (existing != null && existing.amount() == amount) return;
         if (existing != null) inst.removeModifier(id);
-        if (amount != 0) inst.addTransientModifier(new AttributeModifier(id, name, amount, op));
+        if (amount != 0) inst.addTransientModifier(new AttributeModifier(id, amount, op));
     }
 
     @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer player)) return;
+    public static void onPlayerTick(net.neoforged.neoforge.event.tick.PlayerTickEvent.Post event) {
+        if (!(event instanceof net.neoforged.neoforge.event.tick.PlayerTickEvent.Post) || !(event.getEntity() instanceof ServerPlayer player)) return;
         long now = player.level().getGameTime();
         if (now % 20 != 11) return;
         refresh(player);
         AllMakerStone s = current(player);
         if (s == AllMakerStone.WATER && player.isInWater()) {
-            player.addEffect(new MobEffectInstance(MobEffects.WATER_BREATHING, 60, 0, true, false, true));
-            player.addEffect(new MobEffectInstance(MobEffects.DOLPHINS_GRACE, 60, 0, true, false, true));
+            player.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.WATER_BREATHING), 60, 0, true, false, true));
+            player.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.DOLPHINS_GRACE), 60, 0, true, false, true));
         } else if (s == AllMakerStone.TREE && now % 100 == 11) {
             growAround(player);
         }
@@ -131,28 +131,28 @@ public final class AllMakerStones {
 
     /** Tree Stone: a few growth ticks for plants near the player. */
     private static void growAround(ServerPlayer player) {
-        ServerLevel level = player.serverLevel();
+        ServerLevel level = player.level();
         BlockPos center = player.blockPosition();
         for (int i = 0; i < 6; i++) {
-            BlockPos p = center.offset(level.random.nextInt(11) - 5, level.random.nextInt(5) - 2, level.random.nextInt(11) - 5);
+            BlockPos p = center.offset(level.getRandom().nextInt(11) - 5, level.getRandom().nextInt(5) - 2, level.getRandom().nextInt(11) - 5);
             BlockState state = level.getBlockState(p);
             Block b = state.getBlock();
             if ((b instanceof CropBlock || b instanceof net.minecraft.world.level.block.SaplingBlock)
-                    && b instanceof BonemealableBlock bm && bm.isValidBonemealTarget(level, p, state, false)) {
-                bm.performBonemeal(level, level.random, p, state);
+                    && b instanceof BonemealableBlock bm && bm.isValidBonemealTarget(level, p, state, net.minecraft.world.level.block.BonemealSource.MOB)) {
+                bm.performBonemeal(level, level.getRandom(), p, state, net.minecraft.world.level.block.BonemealSource.MOB);
                 level.sendParticles(ParticleTypes.HAPPY_VILLAGER, p.getX() + 0.5, p.getY() + 0.6, p.getZ() + 0.5, 3, 0.25, 0.2, 0.25, 0);
             }
         }
     }
 
     @SubscribeEvent(priority = EventPriority.LOW)
-    public static void onHurt(LivingHurtEvent event) {
+    public static void onHurt(com.skycraft.combat.BeforeArmorDamageEvent event) {
         Entity attacker = event.getSource().getEntity();
         // Sun: searing the undead
         if (attacker instanceof ServerPlayer player && current(player) == AllMakerStone.SUN
-                && event.getEntity().getMobType() == MobType.UNDEAD && !MagicDamage.isWardable(event.getSource())) {
+                && event.getEntity().getType().builtInRegistryHolder().is(net.minecraft.tags.EntityTypeTags.UNDEAD) && !MagicDamage.isWardable(event.getSource())) {
             event.setAmount(event.getAmount() * 1.33f);
-            event.getEntity().setSecondsOnFire(3);
+            event.getEntity().igniteForSeconds(3);
         }
         // Earth: hardened against blows and arrows
         if (event.getEntity() instanceof ServerPlayer player && current(player) == AllMakerStone.EARTH
@@ -172,7 +172,7 @@ public final class AllMakerStones {
     /** Beast: beasts don't pick a fight with you (unless you've hurt them). */
     @SubscribeEvent
     public static void onTarget(LivingChangeTargetEvent event) {
-        if (!(event.getNewTarget() instanceof ServerPlayer player) || current(player) != AllMakerStone.BEAST) return;
+        if (!(event.getNewAboutToBeSetTarget() instanceof ServerPlayer player) || current(player) != AllMakerStone.BEAST) return;
         LivingEntity mob = event.getEntity();
         if (mob.getLastHurtByMob() == player) return;
         if (isBeast(mob)) event.setCanceled(true);
@@ -181,7 +181,7 @@ public final class AllMakerStones {
     private static boolean isBeast(LivingEntity e) {
         if (e instanceof Animal) return true;
         if (!(e instanceof Mob)) return false;
-        ResourceLocation id = ForgeRegistries.ENTITY_TYPES.getKey(e.getType());
+        Identifier id = BuiltInRegistries.ENTITY_TYPE.getKey(e.getType());
         return id != null && BEASTS.contains(id.getPath());
     }
 }

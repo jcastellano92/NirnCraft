@@ -1,8 +1,25 @@
 {
   "pack": {
-    "description": "Skycraft Core resources",
-    "pack_format": 15,
-    "forge:resource_pack_format": 15,
-    "forge:data_pack_format": 15
+    "description": "Skycraft Core resources and data for Minecraft 26.3",
+    "min_format": [
+      97,
+      1
+    ],
+    "max_format": [
+      121,
+      0
+    ]
+  },
+  "filter": {
+    "block": [
+      {
+        "namespace": "minecraft",
+        "path": "recipe/enchanting_table[.]json"
+      },
+      {
+        "namespace": "minecraft",
+        "path": "advancement/recipes/decorations/enchanting_table[.]json"
+      }
+    ]
   }
 }

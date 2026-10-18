@@ -4,12 +4,18 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
+import com.skycraft.inventory.ItemData;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -31,18 +37,18 @@ import java.util.Map;
  * (enchantment id) and {@code lvl}.
  */
 public class SigilStoneItem extends Item {
-    private record Roll(Enchantment ench, int level, int weight) {}
+    private record Roll(ResourceKey<Enchantment> ench, int level, int weight) {}
 
     private static final Roll[] POOL = {
             new Roll(Enchantments.FIRE_ASPECT, 2, 10), new Roll(Enchantments.SHARPNESS, 3, 10),
             new Roll(Enchantments.SMITE, 4, 6), new Roll(Enchantments.KNOCKBACK, 2, 5),
-            new Roll(Enchantments.MOB_LOOTING, 2, 4), new Roll(Enchantments.POWER_ARROWS, 3, 6),
-            new Roll(Enchantments.FLAMING_ARROWS, 1, 5), new Roll(Enchantments.ALL_DAMAGE_PROTECTION, 3, 10),
+            new Roll(Enchantments.LOOTING, 2, 4), new Roll(Enchantments.POWER, 3, 6),
+            new Roll(Enchantments.FLAME, 1, 5), new Roll(Enchantments.PROTECTION, 3, 10),
             new Roll(Enchantments.FIRE_PROTECTION, 4, 8), new Roll(Enchantments.BLAST_PROTECTION, 3, 5),
-            new Roll(Enchantments.PROJECTILE_PROTECTION, 3, 5), new Roll(Enchantments.FALL_PROTECTION, 4, 5),
+            new Roll(Enchantments.PROJECTILE_PROTECTION, 3, 5), new Roll(Enchantments.FEATHER_FALLING, 4, 5),
             new Roll(Enchantments.THORNS, 2, 4), new Roll(Enchantments.RESPIRATION, 3, 3),
-            new Roll(Enchantments.BLOCK_EFFICIENCY, 4, 5), new Roll(Enchantments.UNBREAKING, 3, 7),
-            new Roll(Enchantments.BLOCK_FORTUNE, 2, 3)};
+            new Roll(Enchantments.EFFICIENCY, 4, 5), new Roll(Enchantments.UNBREAKING, 3, 7),
+            new Roll(Enchantments.FORTUNE, 2, 3)};
 
     public SigilStoneItem(Properties properties) {
         super(properties.stacksTo(16).rarity(Rarity.RARE).fireResistant());
@@ -66,26 +72,28 @@ public class SigilStoneItem extends Item {
         return stack;
     }
 
-    public static void set(ItemStack stack, Enchantment ench, int level) {
+    public static void set(ItemStack stack, ResourceKey<Enchantment> ench, int level) {
         CompoundTag sigil = new CompoundTag();
-        ResourceLocation id = BuiltInRegistries.ENCHANTMENT.getKey(ench);
+        Identifier id = ench.identifier();
         sigil.putString("ench", id == null ? "minecraft:sharpness" : id.toString());
         sigil.putInt("lvl", level);
-        stack.getOrCreateTag().put("sigil", sigil);
-        stack.getOrCreateTag().putInt("skycraft_value", 150 + level * 60);
+        ItemData.updateCustom(stack, data -> {
+            data.put("sigil", sigil);
+            data.putInt("skycraft_value", 150 + level * 60);
+        });
     }
 
     @Nullable
-    public static Enchantment enchantment(ItemStack stack) {
-        CompoundTag tag = stack.getTag();
+    public static Holder<Enchantment> enchantment(ItemStack stack, HolderLookup.Provider registries) {
+        CompoundTag tag = ItemData.custom(stack);
         if (tag == null || !tag.contains("sigil")) return null;
-        ResourceLocation id = ResourceLocation.tryParse(tag.getCompound("sigil").getString("ench"));
-        return id == null ? null : BuiltInRegistries.ENCHANTMENT.get(id);
+        Identifier id = Identifier.tryParse(tag.getCompoundOrEmpty("sigil").getStringOr("ench", ""));
+        return id == null || registries == null ? null : registries.lookupOrThrow(Registries.ENCHANTMENT).get(ResourceKey.create(Registries.ENCHANTMENT, id)).orElse(null);
     }
 
     public static int level(ItemStack stack) {
-        CompoundTag tag = stack.getTag();
-        return tag == null ? 0 : Math.max(1, tag.getCompound("sigil").getInt("lvl"));
+        CompoundTag tag = ItemData.custom(stack);
+        return tag == null ? 0 : Math.max(1, tag.getCompoundOrEmpty("sigil").getIntOr("lvl", 0));
     }
 
     @Override
@@ -94,45 +102,44 @@ public class SigilStoneItem extends Item {
     }
 
     @Override
-    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+    public InteractionResult use(Level level, Player player, InteractionHand hand) {
         ItemStack stone = player.getItemInHand(hand);
-        if (hand != InteractionHand.MAIN_HAND) return InteractionResultHolder.pass(stone);
-        Enchantment ench = enchantment(stone);
+        if (hand != InteractionHand.MAIN_HAND) return InteractionResult.PASS;
+        Holder<Enchantment> ench = enchantment(stone, level.registryAccess());
         ItemStack target = player.getOffhandItem();
         if (ench == null || target.isEmpty()) {
             if (player instanceof net.minecraft.server.level.ServerPlayer sp) {
                 com.skycraft.core.Notifier.message(sp, Component.translatable("realm.skycraft.sigil.hint"));
             }
-            return InteractionResultHolder.fail(stone);
+            return InteractionResult.FAIL;
         }
         int lvl = level(stone);
-        Map<Enchantment, Integer> current = EnchantmentHelper.getEnchantments(target);
-        boolean compatible = ench.canEnchant(target) && EnchantmentHelper.isEnchantmentCompatible(
+        ItemEnchantments current = EnchantmentHelper.getEnchantmentsForCrafting(target);
+        boolean compatible = ench.value().canEnchant(target) && EnchantmentHelper.isEnchantmentCompatible(
                 current.keySet().stream().filter(e -> e != ench).toList(), ench);
-        if (!compatible || current.getOrDefault(ench, 0) >= lvl) {
+        if (!compatible || current.getLevel(ench) >= lvl) {
             if (player instanceof net.minecraft.server.level.ServerPlayer sp) {
                 com.skycraft.core.Notifier.message(sp, Component.translatable("realm.skycraft.sigil.cannot", target.getHoverName()));
             }
-            return InteractionResultHolder.fail(stone);
+            return InteractionResult.FAIL;
         }
-        if (!level.isClientSide) {
-            current.put(ench, lvl);
-            EnchantmentHelper.setEnchantments(current, target);
+        if (!level.isClientSide()) {
+            EnchantmentHelper.updateEnchantments(target, mutable -> mutable.set(ench, lvl));
             if (!player.getAbilities().instabuild) stone.shrink(1);
             level.playSound(null, player.blockPosition(), SoundEvents.ENCHANTMENT_TABLE_USE, SoundSource.PLAYERS, 1f, 0.7f);
             level.playSound(null, player.blockPosition(), SoundEvents.FIRECHARGE_USE, SoundSource.PLAYERS, 0.6f, 0.8f);
             if (player instanceof net.minecraft.server.level.ServerPlayer sp) {
-                com.skycraft.core.Notifier.message(sp, Component.translatable("realm.skycraft.sigil.bound", ench.getFullname(lvl),
+                com.skycraft.core.Notifier.message(sp, Component.translatable("realm.skycraft.sigil.bound", Enchantment.getFullname(ench, lvl),
                         target.getHoverName()));
             }
         }
-        return InteractionResultHolder.sidedSuccess(stone, level.isClientSide);
+        return InteractionResult.SUCCESS;
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
-        Enchantment ench = enchantment(stack);
-        if (ench != null) tooltip.add(ench.getFullname(level(stack)).copy().withStyle(ChatFormatting.GOLD));
-        tooltip.add(Component.translatable("realm.skycraft.sigil.tooltip").withStyle(ChatFormatting.GRAY));
+    public void appendHoverText(ItemStack stack, TooltipContext context, net.minecraft.world.item.component.TooltipDisplay display, java.util.function.Consumer<Component> tooltip, TooltipFlag flag) {
+        Holder<Enchantment> ench = enchantment(stack, context.registries());
+        if (ench != null) tooltip.accept(Enchantment.getFullname(ench, level(stack)).copy().withStyle(ChatFormatting.GOLD));
+        tooltip.accept(Component.translatable("realm.skycraft.sigil.tooltip").withStyle(ChatFormatting.GRAY));
     }
 }

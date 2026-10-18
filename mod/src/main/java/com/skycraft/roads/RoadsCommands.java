@@ -12,9 +12,9 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.util.Arrays;
 
@@ -22,14 +22,14 @@ import java.util.Arrays;
  * {@code /skycraft-roads info | stats | render [x0 z0 x1 z1 blocksPerPixel] | export-inns | export | replan | repave | nearest |
  * traveler [kind]} (operators only).
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class RoadsCommands {
     private RoadsCommands() {}
 
     @SubscribeEvent
     public static void register(RegisterCommandsEvent event) {
         CommandDispatcher<CommandSourceStack> d = event.getDispatcher();
-        d.register(Commands.literal("skycraft-roads").requires(s -> s.hasPermission(2))
+        d.register(Commands.literal("skycraft-roads").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
                 .then(Commands.literal("info").executes(RoadsCommands::info))
                 .then(Commands.literal("replan").executes(RoadsCommands::replan))
                 .then(Commands.literal("repave").executes(RoadsCommands::repave))
@@ -97,7 +97,7 @@ public final class RoadsCommands {
     private static int render(CommandContext<CommandSourceStack> c, int x0, int z0, int x1, int z1, int bpp) {
         RoadsData data = RoadsData.get(overworld(c));
         NetworkRender.Snapshot snap = NetworkRender.snapshot(data);
-        java.io.File file = c.getSource().getServer().getFile("skycraft-roads.png");
+        java.io.File file = c.getSource().getServer().getFile("skycraft-roads.png").toFile();
         CommandSourceStack source = c.getSource();
         Thread t = new Thread(() -> {
             try {
@@ -143,7 +143,7 @@ public final class RoadsCommands {
                 int rgb = s.getMapColor(level, pos).col;
                 if (Paver.isRoadMaterial(s) && !Paver.isNaturalGround(s) || s.is(net.minecraft.world.level.block.Blocks.DIRT_PATH)) {
                     road++;
-                    String id = String.valueOf(net.minecraftforge.registries.ForgeRegistries.BLOCKS.getKey(s.getBlock()));
+                    String id = String.valueOf(net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(s.getBlock()));
                     blocks.merge(id, 1, Integer::sum);
                     rgb = ((rgb >> 1) & 0x7F7F7F) | 0x800000; // tinted red
                 }
@@ -154,7 +154,7 @@ public final class RoadsCommands {
                 img.setRGB(dx, dz, rgb);
             }
         }
-        java.io.File file = c.getSource().getServer().getFile("skycraft-roads-blocks.png");
+        java.io.File file = c.getSource().getServer().getFile("skycraft-roads-blocks.png").toFile();
         try {
             javax.imageio.ImageIO.write(img, "png", file);
         } catch (java.io.IOException e) {
@@ -175,7 +175,7 @@ public final class RoadsCommands {
 
     private static int exportInns(CommandContext<CommandSourceStack> c) {
         RoadsData data = RoadsData.get(overworld(c));
-        java.io.File file = c.getSource().getServer().getFile("skycraft-roadside-inns.json");
+        java.io.File file = c.getSource().getServer().getFile("skycraft-roadside-inns.json").toFile();
         try {
             int n = InnSites.export(data, file);
             c.getSource().sendSuccess(() -> Component.translatable("command.skycraft.roads.export_inns", n, file.getAbsolutePath()), false);
@@ -189,7 +189,7 @@ public final class RoadsCommands {
     /** The planned network (roads, settlements, gates) as skycraft-roads-export.json, for tools/qa/reach_lint.py --export. */
     private static int exportNetwork(CommandContext<CommandSourceStack> c) {
         RoadsData data = RoadsData.get(overworld(c));
-        java.io.File file = c.getSource().getServer().getFile("skycraft-roads-export.json");
+        java.io.File file = c.getSource().getServer().getFile("skycraft-roads-export.json").toFile();
         try {
             int n = RoadExport.write(data, file);
             c.getSource().sendSuccess(() -> Component.translatable("command.skycraft.roads.export", n, file.getAbsolutePath()), false);

@@ -10,16 +10,16 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.KelpBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
-import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
+import com.skycraft.worldgen.ConfiguredFeature;
+import com.skycraft.worldgen.FeaturePlaceContext;
+import com.skycraft.worldgen.NoneFeatureConfiguration;
 
 /**
  * The living sea bed, by the warmth of the water: kelp forests (tall swaying groves over mossy boulders) in the cold
  * and temperate seas, coral reefs in the warm ones (the Inner Sea, Topal Bay, the Eltheric, Thras), and pearl beds of
  * kollops in Morrowind's waters and the warm shallows. Placed by {@code skycraft:seas_sea_gardens}.
  */
-public class SeaGardenFeature extends Feature<NoneFeatureConfiguration> {
+public class SeaGardenFeature extends ConfiguredFeature<NoneFeatureConfiguration> {
     /** Sites placed since start (logged by the developer smoke test). */
     public static final java.util.concurrent.atomic.AtomicInteger PLACED = new java.util.concurrent.atomic.AtomicInteger();
 

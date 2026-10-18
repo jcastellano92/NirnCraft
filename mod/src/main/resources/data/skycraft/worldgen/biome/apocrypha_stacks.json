@@ -3,26 +3,9 @@
   "temperature": 0.5,
   "downfall": 0.0,
   "effects": {
-    "sky_color": 925716,
-    "fog_color": 794132,
-    "water_color": 659980,
-    "water_fog_color": 264198,
-    "mood_sound": {
-      "sound": "minecraft:ambient.cave",
-      "tick_delay": 6000,
-      "block_search_extent": 8,
-      "offset": 2.0
-    },
-    "particle": {
-      "options": {
-        "type": "minecraft:enchant"
-      },
-      "probability": 0.01
-    }
+    "water_color": "#0a120c"
   },
-  "spawners": {},
-  "spawn_costs": {},
-  "carvers": {},
+  "carvers": [],
   "features": [
     [],
     [],
@@ -40,5 +23,36 @@
     [],
     [],
     []
-  ]
+  ],
+  "attributes": {
+    "minecraft:visual/sky_color": "#0e2014",
+    "minecraft:visual/fog_color": "#0c1e14",
+    "minecraft:visual/water_fog_color": "#040806",
+    "minecraft:audio/ambient_sounds": {
+      "mood": {
+        "sound": "minecraft:ambient.cave",
+        "tick_delay": 6000,
+        "block_search_extent": 8,
+        "offset": 2.0
+      }
+    },
+    "minecraft:visual/ambient_particles": {
+      "modifier": "append",
+      "argument": [
+        {
+          "probability": 0.01,
+          "particle": {
+            "type": "minecraft:enchant"
+          }
+        }
+      ]
+    },
+    "minecraft:gameplay/natural_mob_spawns": {
+      "modifier": "overlay",
+      "argument": {
+        "spawns_by_category": {},
+        "spawn_costs": {}
+      }
+    }
+  }
 }

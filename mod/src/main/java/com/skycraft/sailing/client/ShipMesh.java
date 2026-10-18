@@ -197,8 +197,8 @@ public final class ShipMesh {
             float nx = d[i + 20], ny = d[i + 21], nz = d[i + 22];
             for (int k = 0; k < 4; k++) {
                 int j = i + k * 5;
-                vc.vertex(pm, d[j], d[j + 1], d[j + 2]).color(r, g, b, a).uv(d[j + 3], d[j + 4]).overlayCoords(overlay)
-                        .uv2(light).normal(nm, nx, ny, nz).endVertex();
+                vc.addVertex(pm, d[j], d[j + 1], d[j + 2]).setColor(r, g, b, a).setUv(d[j + 3], d[j + 4]).setOverlay(overlay)
+                        .setLight(light).setNormal(pose, nx, ny, nz);
             }
         }
     }

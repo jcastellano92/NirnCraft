@@ -105,7 +105,7 @@ public final class ScenePlan {
             }
             for (int cx = x0 >> 4; cx <= x1 >> 4; cx++) {
                 for (int cz = z0 >> 4; cz <= z1 >> 4; cz++) {
-                    tmp.computeIfAbsent(ChunkPos.asLong(cx, cz), k -> new IntArrayList(2)).add(s);
+                    tmp.computeIfAbsent(ChunkPos.pack(cx, cz), k -> new IntArrayList(2)).add(s);
                 }
             }
         }
@@ -123,7 +123,7 @@ public final class ScenePlan {
 
     /** Scenes whose footprint (props and path) reaches chunk (cx, cz); an empty array when none. Do not modify. */
     public int[] inChunk(int cx, int cz) {
-        int[] a = byChunk.get(ChunkPos.asLong(cx, cz));
+        int[] a = byChunk.get(ChunkPos.pack(cx, cz));
         return a == null ? NONE : a;
     }
 

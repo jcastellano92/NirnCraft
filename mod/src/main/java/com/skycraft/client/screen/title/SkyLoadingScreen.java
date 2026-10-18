@@ -8,33 +8,32 @@ import com.skycraft.Skycraft;
 import com.skycraft.client.screen.ScreenFields;
 import com.skycraft.inventory.client.SkyUi;
 import com.skycraft.visual.VisualConfig;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.ConnectScreen;
-import net.minecraft.client.gui.screens.GenericDirtMessageScreen;
+import net.minecraft.client.gui.screens.GenericMessageScreen;
 import net.minecraft.client.gui.screens.LevelLoadingScreen;
 import net.minecraft.client.gui.screens.ProgressScreen;
-import net.minecraft.client.gui.screens.ReceivingLevelScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.progress.StoringChunkProgressListener;
+import net.minecraft.resources.Identifier;
+import net.minecraft.client.multiplayer.LevelLoadTracker;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.ScreenEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.ScreenEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,14 +46,14 @@ import java.util.List;
  * scene carries a lore tip or a Skycraft hint ({@code loading.skycraft.tip.N} in {@code lang/skycraft/ui.json}).
  * Real chunk progress is shown while a singleplayer world prepares its spawn area.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
 public final class SkyLoadingScreen {
     /** Number of {@code loading.skycraft.tip.N} keys in ui.json. */
     private static final int TIP_COUNT = 48;
     private static final int VIGNETTES = 7;
     private static final long SCENE_MS = 9000;
     private static final long FADE_MS = 900;
-    private static final ResourceLocation[] VIGNETTE = new ResourceLocation[VIGNETTES];
+    private static final Identifier[] VIGNETTE = new Identifier[VIGNETTES];
     private static final String[] ARTIFACT_IDS = {
             "skycraft:daedric_helmet", "skycraft:dragonbone_sword", "skycraft:dragonscale_helmet", "skycraft:ebony_blade",
             "skycraft:dwarven_helmet", "skycraft:amulet_of_talos", "skycraft:daedric_greatsword", "skycraft:dragonbone_bow",
@@ -79,15 +78,15 @@ public final class SkyLoadingScreen {
     private static List<FormattedCharSequence> cachedLines = List.of();
 
     static {
-        for (int i = 0; i < VIGNETTES; i++) VIGNETTE[i] = new ResourceLocation(Skycraft.MODID, "textures/gui/loading/vignette_" + i + ".png");
+        for (int i = 0; i < VIGNETTES; i++) VIGNETTE[i] = Identifier.fromNamespaceAndPath(Skycraft.MODID, "textures/gui/loading/vignette_" + i + ".png");
     }
 
     private SkyLoadingScreen() {}
 
     public static boolean isLoadingScreen(Screen screen) {
-        return screen instanceof ReceivingLevelScreen || screen instanceof LevelLoadingScreen
+        return screen instanceof LevelLoadingScreen
                 || screen instanceof ProgressScreen || screen instanceof ConnectScreen
-                || screen != null && screen.getClass() == GenericDirtMessageScreen.class;
+                || screen != null && screen.getClass() == GenericMessageScreen.class;
     }
 
     private static boolean enabled() {
@@ -108,7 +107,7 @@ public final class SkyLoadingScreen {
 
     @SubscribeEvent
     public static void onMouseClick(ScreenEvent.MouseButtonPressed.Pre event) {
-        if (isLoadingScreen(event.getScreen()) && event.getButton() == 0 && isArtifactScene()) {
+        if (isLoadingScreen(event.getScreen()) && event.getButton() == com.mojang.blaze3d.platform.InputConstants.MOUSE_BUTTON_LEFT && isArtifactScene()) {
             dragging = true;
             lastMouseX = event.getMouseX();
             lastMouseY = event.getMouseY();
@@ -117,7 +116,7 @@ public final class SkyLoadingScreen {
 
     @SubscribeEvent
     public static void onMouseRelease(ScreenEvent.MouseButtonReleased.Pre event) {
-        if (event.getButton() == 0) dragging = false;
+        if (event.getButton() == com.mojang.blaze3d.platform.InputConstants.MOUSE_BUTTON_LEFT) dragging = false;
     }
 
     @SubscribeEvent
@@ -149,7 +148,7 @@ public final class SkyLoadingScreen {
         rotY = r.nextFloat() * 360f;
     }
 
-    private static void render(Screen screen, GuiGraphics g, int mouseX, int mouseY) {
+    private static void render(Screen screen, GuiGraphicsExtractor g, int mouseX, int mouseY) {
         Minecraft mc = Minecraft.getInstance();
         long now = Util.getMillis();
         if (session < 0 || now - lastFrame > 2500) startSession();
@@ -190,7 +189,7 @@ public final class SkyLoadingScreen {
         SkyUi.ornament(g, width / 2, tipTop - 8, Math.min(90, colW / 2), SkyUi.fade(0xFFC8BC9A, 0.8f * textFade));
         for (int i = 0; i < lines.size(); i++) {
             FormattedCharSequence line = lines.get(i);
-            g.drawString(font, line, (width - font.width(line)) / 2, tipTop + i * lineH, SkyUi.fade(0xFFD8D0BC, textFade), true);
+            g.text(font, line, (width - font.width(line)) / 2, tipTop + i * lineH, SkyUi.fade(0xFFD8D0BC, textFade), true);
         }
 
         drawProgress(screen, g, font, width, height, seconds);
@@ -210,22 +209,20 @@ public final class SkyLoadingScreen {
         return cachedLines;
     }
 
-    private static void drawVignette(GuiGraphics g, int width, int height, int index, float t, float fade) {
+    private static void drawVignette(GuiGraphicsExtractor g, int width, int height, int index, float t, float fade) {
         float cover = Math.max(width / 640f, height / 360f);
         float zoom = cover * (1.04f + 0.08f * t);
         float panX = (t - 0.5f) * 14f * ((index & 1) == 0 ? 1 : -1);
-        RenderSystem.enableBlend();
-        RenderSystem.setShaderColor(0.62f * fade, 0.62f * fade, 0.62f * fade, 1f);
-        PoseStack pose = g.pose();
-        pose.pushPose();
-        pose.translate(width / 2f + panX, height / 2f, 0);
-        pose.scale(zoom, zoom, 1f);
-        g.blit(VIGNETTE[index], -320, -180, 640, 360, 0, 0, 640, 360, 640, 360);
-        pose.popPose();
-        RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
+        
+        g.pose().pushMatrix();
+        g.pose().translate(width / 2f + panX, height / 2f);
+        g.pose().scale(zoom, zoom);
+        SkyUi.blit(g, VIGNETTE[index], -320, -180, 640, 360, 0, 0, 640, 360, 640, 360,
+                net.minecraft.util.ARGB.colorFromFloat(1f, 0.62f * fade, 0.62f * fade, 0.62f * fade));
+        g.pose().popMatrix();
     }
 
-    private static void drawArtifact(Minecraft mc, GuiGraphics g, int width, int height, float fade, float dt) {
+    private static void drawArtifact(Minecraft mc, GuiGraphicsExtractor g, int width, int height, float fade, float dt) {
         if (!dragging) {
             rotY += velY * dt;
             rotX += velX * dt;
@@ -243,26 +240,15 @@ public final class SkyLoadingScreen {
             int w = (int) (scale * 0.12f * i);
             g.fill(cx - w, cy + (int) (scale * 0.5f), cx + w, cy + (int) (scale * 0.5f) + 2, (int) (fade * 10) << 24 | 0xE8D8B0);
         }
-        PoseStack pose = g.pose();
-        pose.pushPose();
-        pose.translate(cx, cy, 150.0);
-        pose.scale(scale, -scale, scale);
-        pose.mulPose(Axis.XP.rotationDegrees(rotX));
-        pose.mulPose(Axis.YP.rotationDegrees(rotY));
-        Lighting.setupFor3DItems();
-        RenderSystem.setShaderColor(fade, fade, fade, 1f);
-        mc.getItemRenderer().renderStatic(stack, ItemDisplayContext.FIXED, 0xF000F0, OverlayTexture.NO_OVERLAY, pose, g.bufferSource(), mc.level, 0);
-        g.flush();
-        RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
-        Lighting.setupForFlatItems();
-        pose.popPose();
+        com.skycraft.inventory.client.SkyItemRender.extract(g,stack,cx,cy,scale,rotX,rotY,net.minecraft.util.ARGB.colorFromFloat(1f,fade,fade,fade));
+
     }
 
     private static ItemStack artifact() {
         if (artifacts == null) {
             List<ItemStack> list = new ArrayList<>();
             for (String id : ARTIFACT_IDS) {
-                Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(id));
+                Item item = BuiltInRegistries.ITEM.getValue(Identifier.parse(id));
                 if (item != null && item != Items.AIR) list.add(new ItemStack(item));
             }
             if (list.isEmpty()) {
@@ -275,12 +261,12 @@ public final class SkyLoadingScreen {
     }
 
     /** Real progress where vanilla has it, otherwise a slow ease that never claims to be done. */
-    private static void drawProgress(Screen screen, GuiGraphics g, Font font, int width, int height, float seconds) {
+    private static void drawProgress(Screen screen, GuiGraphicsExtractor g, Font font, int width, int height, float seconds) {
         float real = -1f;
         Component status = null;
         if (screen instanceof LevelLoadingScreen lls) {
-            StoringChunkProgressListener listener = ScreenFields.first(lls, LevelLoadingScreen.class, StoringChunkProgressListener.class);
-            if (listener != null) real = Mth.clamp(listener.getProgress() / 100f, 0f, 1f);
+            LevelLoadTracker tracker = ScreenFields.first(lls, LevelLoadingScreen.class, LevelLoadTracker.class);
+            if (tracker != null && tracker.hasProgress()) real = Mth.clamp(tracker.serverProgress(), 0f, 1f);
             status = Component.translatable("loading.skycraft.status.world");
         } else if (screen instanceof ProgressScreen ps) {
             Component header = ScreenFields.component(ps, ProgressScreen.class, 0);
@@ -300,16 +286,16 @@ public final class SkyLoadingScreen {
         SkyUi.ornateBar(g, x, y, barW, 2, displayedProgress, 0xE8C060, 0.85f, false, false);
         if (status != null && !status.getString().isEmpty()) {
             String s = SkyUi.ellipsize(font, SkyUi.caps(status), (int) ((width / 2f - barW / 2f - 40) / 0.6f));
-            g.pose().pushPose();
-            g.pose().translate(8, height - 12, 0);
-            g.pose().scale(0.6f, 0.6f, 1f);
-            g.drawString(font, s, 0, 0, 0x90A09880, false);
-            g.pose().popPose();
+            g.pose().pushMatrix();
+            g.pose().translate(8, height - 12);
+            g.pose().scale(0.6f, 0.6f);
+            g.text(font, s, 0, 0, 0x90A09880, false);
+            g.pose().popMatrix();
         }
     }
 
     /** Vanilla buttons on these screens (e.g. "Cancel" while connecting) keep working; draw them in our style. */
-    private static void drawButtons(Screen screen, GuiGraphics g, Font font, int mouseX, int mouseY) {
+    private static void drawButtons(Screen screen, GuiGraphicsExtractor g, Font font, int mouseX, int mouseY) {
         for (GuiEventListener child : screen.children()) {
             if (child instanceof AbstractButton b && b.visible) {
                 boolean hover = SkyUi.inside(mouseX, mouseY, b.getX(), b.getY(), b.getX() + b.getWidth(), b.getY() + b.getHeight());

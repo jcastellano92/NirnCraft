@@ -64,8 +64,8 @@ public final class Progression {
         if (useValue <= 0 || player.isCreative() || player.isSpectator()) return;
         PlayerData data = SkyData.get(player);
         float mult = (float) (double) SkyConfig.SKILL_XP_RATE.get();
-        if (player.hasEffect(ModEffects.WELL_RESTED.get())) mult *= 1.10f;
-        if (player.hasEffect(ModEffects.LOVERS_COMFORT.get())) mult *= 1.15f;
+        if (player.hasEffect(com.skycraft.platform.Effects.holder(ModEffects.WELL_RESTED.get()))) mult *= 1.10f;
+        if (player.hasEffect(com.skycraft.platform.Effects.holder(ModEffects.LOVERS_COMFORT.get()))) mult *= 1.15f;
         for (XpModifier modifier : MODIFIERS) mult *= modifier.multiplier(player, skill);
         float gained = useValue * skill.useMult * mult;
         addRawSkillXp(player, data, skill, gained);
@@ -108,9 +108,9 @@ public final class Progression {
         player.level().playSound(null, player.blockPosition(), com.skycraft.world.WorldSounds.UI_SKILL_UP.get(), SoundSource.PLAYERS, 0.85f, 1.0f);
         data.addStat("skill_increases", 1);
         float baseCharXp = newLevel * (float) (double) SkyConfig.LEVEL_XP_RATE.get();
-        com.skycraft.quest.party.Party party = player.server == null ? null : com.skycraft.quest.party.Parties.partyOf(player);
+        com.skycraft.quest.party.Party party = player.level().getServer() == null ? null : com.skycraft.quest.party.Parties.partyOf(player);
         if (party != null && party.members.size() > 1) {
-            java.util.List<ServerPlayer> online = com.skycraft.quest.party.Parties.onlineMembers(player.server, party);
+            java.util.List<ServerPlayer> online = com.skycraft.quest.party.Parties.onlineMembers(player.level().getServer(), party);
             float factor = partyXpFactor(online.size());
             addCharacterXp(player, data, baseCharXp * factor);
             float teammateShare = baseCharXp * 0.35f * factor;

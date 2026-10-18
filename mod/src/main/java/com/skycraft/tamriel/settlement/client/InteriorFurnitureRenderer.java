@@ -1,165 +1,65 @@
 package com.skycraft.tamriel.settlement.client;
-
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
-import com.skycraft.Skycraft;
-import com.skycraft.tamriel.settlement.Culture;
 import com.skycraft.tamriel.settlement.furniture.FurnitureBlocks;
-import com.skycraft.tamriel.settlement.furniture.FurnitureBlocks.FurnitureBlock;
-import com.skycraft.tamriel.settlement.furniture.FurnitureBlocks.FurnitureBlockEntity;
-import com.skycraft.tamriel.settlement.furniture.FurnitureBlocks.FurnitureContainerBlock;
-import com.skycraft.tamriel.settlement.furniture.FurnitureBlocks.FurnitureContainerBlockEntity;
-import net.minecraft.client.renderer.LevelRenderer;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
-import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
-import net.minecraft.core.BlockPos;
+import com.skycraft.tamriel.settlement.furniture.FurnitureBlocks.*;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.blockentity.*;
+import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
+import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.core.Direction;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.ChiseledBookShelfBlock;
-import net.minecraft.world.level.block.HorizontalDirectionalBlock;
-import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraft.world.level.block.entity.ChiseledBookShelfBlockEntity;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.EntityRenderersEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-
+import net.minecraft.world.level.block.*;
+import net.minecraft.world.level.block.entity.*;
+import net.minecraft.world.phys.Vec3;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import static com.skycraft.tamriel.settlement.client.ShopSignModels.*;
 
-/**
- * BlockEntityRenderers for custom 3D interior furniture ({@link FurnitureBlockEntity}),
- * custom 3D storage furniture ({@link FurnitureContainerBlockEntity}), and 3D protruding
- * leather-bound tomes on occupied slots of {@link ChiseledBookShelfBlockEntity}.
- */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+/** Authored furniture and occupied bookshelf geometry on native extracted block entity states. */
+@EventBusSubscriber(modid="skycraft",value=Dist.CLIENT)
 public final class InteriorFurnitureRenderer {
-    private static final ShopSignMesh[] BOOK_SLOT_MESHES = new ShopSignMesh[6];
-
-    private InteriorFurnitureRenderer() {}
-
-    @SubscribeEvent
-    public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
-        event.registerBlockEntityRenderer(FurnitureBlocks.SKY_FURNITURE_BE.get(), FurnitureBER::new);
-        event.registerBlockEntityRenderer(FurnitureBlocks.SKY_FURNITURE_CONTAINER_BE.get(), FurnitureContainerBER::new);
-        event.registerBlockEntityRenderer(BlockEntityType.CHISELED_BOOKSHELF, ChiseledBookshelfBER::new);
+    private static final ShopSignMesh[] BOOK_SLOT_MESHES=new ShopSignMesh[6];
+    public static class State extends BlockEntityRenderState { Direction facing;ShopSignMesh[] meshes; }
+    @SubscribeEvent public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
+        event.registerBlockEntityRenderer(FurnitureBlocks.SKY_FURNITURE_BE.get(),FurnitureBER::new);
+        event.registerBlockEntityRenderer(FurnitureBlocks.SKY_FURNITURE_CONTAINER_BE.get(),FurnitureContainerBER::new);
+        event.registerBlockEntityRenderer(BlockEntityTypes.CHISELED_BOOKSHELF,ChiseledBookshelfBER::new);
     }
-
-    public static final class FurnitureBER implements BlockEntityRenderer<FurnitureBlockEntity> {
-        public FurnitureBER(BlockEntityRendererProvider.Context ctx) {}
-
-        @Override
-        public void render(
-                FurnitureBlockEntity be, float partialTick, PoseStack poseStack,
-                MultiBufferSource bufferSource, int packedLight, int packedOverlay
-        ) {
-            Level level = be.getLevel();
-            BlockPos pos = be.getBlockPos();
-            int light = packedLight;
-            if (level != null) {
-                light = Math.max(packedLight, LevelRenderer.getLightColor(level, pos));
-            }
-
-            BlockState state = be.getBlockState();
-            Direction facing = state.hasProperty(FurnitureBlock.FACING)
-                    ? state.getValue(FurnitureBlock.FACING)
-                    : Direction.SOUTH;
-            Culture culture = be.culture();
-            ShopSignMesh mesh = InteriorFurnitureModels.get(culture, be.kind(), be.isEmpty());
-            VertexConsumer vc = bufferSource.getBuffer(RenderType.entityCutoutNoCull(ShopSignRenderer.ATLAS));
-
-            poseStack.pushPose();
-            poseStack.translate(0.5f, 0.5f, 0.5f);
-            poseStack.mulPose(Axis.YP.rotationDegrees(-facing.toYRot()));
-            mesh.render(poseStack, vc, light);
-            poseStack.popPose();
+    private abstract static class MeshRenderer<T extends BlockEntity> implements BlockEntityRenderer<T,State> {
+        @Override public State createRenderState(){return new State();}
+        protected abstract ShopSignMesh[] meshes(T be);
+        @Override public void extractRenderState(T be,State state,float partial,Vec3 camera,ModelFeatureRenderer.CrumblingOverlay breaking) {
+            BlockEntityRenderer.super.extractRenderState(be,state,partial,camera,breaking);
+            var block=be.getBlockState();
+            state.facing=block.hasProperty(HorizontalDirectionalBlock.FACING)?block.getValue(HorizontalDirectionalBlock.FACING):Direction.SOUTH;
+            state.meshes=meshes(be);
+        }
+        @Override public void submit(State state,PoseStack pose,SubmitNodeCollector collector,CameraRenderState camera) {
+            if(state.meshes==null||state.meshes.length==0)return;
+            pose.pushPose();pose.translate(.5,.5,.5);pose.rotateDegrees(Axis.YP,-state.facing.toYRot());
+            for(ShopSignMesh mesh:state.meshes) collector.submitCustomGeometry(pose,RenderTypes.entityCutout(ShopSignRenderer.ATLAS),(p,v)->mesh.render(p,v,state.lightCoords));
+            pose.popPose();
         }
     }
-
-    public static final class FurnitureContainerBER implements BlockEntityRenderer<FurnitureContainerBlockEntity> {
-        public FurnitureContainerBER(BlockEntityRendererProvider.Context ctx) {}
-
-        @Override
-        public void render(
-                FurnitureContainerBlockEntity be, float partialTick, PoseStack poseStack,
-                MultiBufferSource bufferSource, int packedLight, int packedOverlay
-        ) {
-            Level level = be.getLevel();
-            BlockPos pos = be.getBlockPos();
-            int light = packedLight;
-            if (level != null) {
-                light = Math.max(packedLight, LevelRenderer.getLightColor(level, pos));
-            }
-
-            BlockState state = be.getBlockState();
-            Direction facing = state.hasProperty(FurnitureContainerBlock.FACING)
-                    ? state.getValue(FurnitureContainerBlock.FACING)
-                    : Direction.SOUTH;
-            Culture culture = be.culture();
-            ShopSignMesh mesh = InteriorFurnitureModels.get(culture, be.kind(), false);
-            VertexConsumer vc = bufferSource.getBuffer(RenderType.entityCutoutNoCull(ShopSignRenderer.ATLAS));
-
-            poseStack.pushPose();
-            poseStack.translate(0.5f, 0.5f, 0.5f);
-            poseStack.mulPose(Axis.YP.rotationDegrees(-facing.toYRot()));
-            mesh.render(poseStack, vc, light);
-            poseStack.popPose();
-        }
+    public static final class FurnitureBER extends MeshRenderer<FurnitureBlockEntity> {
+        public FurnitureBER(BlockEntityRendererProvider.Context ctx){}
+        @Override protected ShopSignMesh[] meshes(FurnitureBlockEntity be){return new ShopSignMesh[]{InteriorFurnitureModels.get(be.culture(),be.kind(),be.isEmpty())};}
     }
-
-    /**
-     * Renders 3D protruding leather-bound book spines with gold/silver binding bands
-     * for each occupied slot on a {@link ChiseledBookShelfBlockEntity}. When a player
-     * grabs a book off the shelf, that slot becomes unoccupied and the 3D book disappears.
-     */
-    public static final class ChiseledBookshelfBER implements BlockEntityRenderer<ChiseledBookShelfBlockEntity> {
-        public ChiseledBookshelfBER(BlockEntityRendererProvider.Context ctx) {}
-
-        @Override
-        public void render(
-                ChiseledBookShelfBlockEntity be, float partialTick, PoseStack poseStack,
-                MultiBufferSource bufferSource, int packedLight, int packedOverlay
-        ) {
-            BlockState state = be.getBlockState();
-            if (!(state.getBlock() instanceof ChiseledBookShelfBlock)) return;
-
-            boolean anyOccupied = false;
-            for (int i = 0; i < 6; i++) {
-                var prop = ChiseledBookShelfBlock.SLOT_OCCUPIED_PROPERTIES.get(i);
-                if (state.hasProperty(prop) && state.getValue(prop)) {
-                    anyOccupied = true;
-                    break;
-                }
-            }
-            if (!anyOccupied) return;
-
-            Level level = be.getLevel();
-            BlockPos pos = be.getBlockPos();
-            int light = packedLight;
-            if (level != null) {
-                light = Math.max(packedLight, LevelRenderer.getLightColor(level, pos));
-            }
-
-            Direction facing = state.hasProperty(HorizontalDirectionalBlock.FACING)
-                    ? state.getValue(HorizontalDirectionalBlock.FACING)
-                    : Direction.SOUTH;
-            VertexConsumer vc = bufferSource.getBuffer(RenderType.entityCutoutNoCull(ShopSignRenderer.ATLAS));
-
-            poseStack.pushPose();
-            poseStack.translate(0.5f, 0.5f, 0.5f);
-            poseStack.mulPose(Axis.YP.rotationDegrees(-facing.toYRot()));
-            for (int i = 0; i < 6; i++) {
-                var prop = ChiseledBookShelfBlock.SLOT_OCCUPIED_PROPERTIES.get(i);
-                if (state.hasProperty(prop) && state.getValue(prop)) {
-                    getSlotMesh(i).render(poseStack, vc, light);
-                }
-            }
-            poseStack.popPose();
+    public static final class FurnitureContainerBER extends MeshRenderer<FurnitureContainerBlockEntity> {
+        public FurnitureContainerBER(BlockEntityRendererProvider.Context ctx){}
+        @Override protected ShopSignMesh[] meshes(FurnitureContainerBlockEntity be){return new ShopSignMesh[]{InteriorFurnitureModels.get(be.culture(),be.kind(),false)};}
+    }
+    public static final class ChiseledBookshelfBER extends MeshRenderer<ChiseledBookShelfBlockEntity> {
+        public ChiseledBookshelfBER(BlockEntityRendererProvider.Context ctx){}
+        @Override protected ShopSignMesh[] meshes(ChiseledBookShelfBlockEntity be){
+            var block=be.getBlockState();var list=new java.util.ArrayList<ShopSignMesh>(6);
+            for(int i=0;i<6;i++){var property=ChiseledBookShelfBlock.SLOT_OCCUPIED_PROPERTIES.get(i);if(block.hasProperty(property)&&block.getValue(property))list.add(getSlotMesh(i));}
+            return list.toArray(ShopSignMesh[]::new);
         }
-
         private static synchronized ShopSignMesh getSlotMesh(int slot) {
             if (BOOK_SLOT_MESHES[slot] != null) return BOOK_SLOT_MESHES[slot];
             ShopSignMesh m = new ShopSignMesh();

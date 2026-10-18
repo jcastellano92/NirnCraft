@@ -1,12 +1,13 @@
 package com.skycraft.scatter;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.Property;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Locale;
@@ -25,7 +26,7 @@ public final class Terrain {
 
     /** Classifies a surface block by its registry path (works for Skycraft's own ground blocks too). */
     public static Ground ground(BlockState s) {
-        ResourceLocation key = ForgeRegistries.BLOCKS.getKey(s.getBlock());
+        Identifier key = BuiltInRegistries.BLOCK.getKey(s.getBlock());
         String p = key == null ? "" : key.getPath();
         if (p.contains("snow") || p.contains("ice") || p.contains("frost")) return Ground.SNOW;
         if (p.contains("ash") || p.contains("volcanic") || p.contains("basalt") || p.contains("blackstone")
@@ -61,7 +62,7 @@ public final class Terrain {
         public static RockSet of(Ground g, BlockState surface) {
             return switch (g) {
                 case SAND -> {
-                    ResourceLocation k = ForgeRegistries.BLOCKS.getKey(surface.getBlock());
+                    Identifier k = BuiltInRegistries.BLOCK.getKey(surface.getBlock());
                     yield k != null && k.getPath().contains("red") ? RED_SAND : SAND;
                 }
                 case SNOW -> COLD;
@@ -85,8 +86,8 @@ public final class Terrain {
 
     @Nullable
     public static Block lookup(String id) {
-        ResourceLocation rl = id.indexOf(':') < 0 ? new ResourceLocation("minecraft", id) : new ResourceLocation(id);
-        return ForgeRegistries.BLOCKS.containsKey(rl) ? ForgeRegistries.BLOCKS.getValue(rl) : null;
+        Identifier rl = id.indexOf(':') < 0 ? Identifier.fromNamespaceAndPath("minecraft", id) : Identifier.parse(id);
+        return BuiltInRegistries.BLOCK.containsKey(rl) ? BuiltInRegistries.BLOCK.getValue(rl) : null;
     }
 
     /** Applies {@code "axis=x,half=top"} style properties; unknown names and values are ignored. */

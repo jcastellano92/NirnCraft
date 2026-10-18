@@ -3,15 +3,15 @@ package com.skycraft.client.screen.title;
 import com.mojang.blaze3d.platform.Window;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractSliderButton;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
-import net.minecraft.client.gui.screens.LanguageSelectScreen;
+import net.minecraft.client.gui.screens.options.LanguageSelectScreen;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.screens.SoundOptionsScreen;
-import net.minecraft.client.gui.screens.VideoSettingsScreen;
-import net.minecraft.client.gui.screens.controls.ControlsScreen;
+import net.minecraft.client.gui.screens.options.SoundOptionsScreen;
+import net.minecraft.client.gui.screens.options.VideoSettingsScreen;
+import net.minecraft.client.gui.screens.options.controls.ControlsScreen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundSource;
@@ -140,19 +140,19 @@ public class SkyOptionsScreen extends Screen {
         // 1. Video Settings
         addRenderableWidget(Button.builder(
                 Component.literal("Video Settings..."),
-                btn -> minecraft.setScreen(new VideoSettingsScreen(this, options))
+                btn -> minecraft.gui.setScreen(new VideoSettingsScreen(this,minecraft,options))
         ).bounds(rightX, startY, colW, itemH).build());
 
         // 2. Controls & Key Binds
         addRenderableWidget(Button.builder(
                 Component.literal("Controls & Binds..."),
-                btn -> minecraft.setScreen(new ControlsScreen(this, options))
+                btn -> minecraft.gui.setScreen(new ControlsScreen(this, options))
         ).bounds(rightX, startY + spacing, colW, itemH).build());
 
         // 3. Audio & Sounds
         addRenderableWidget(Button.builder(
                 Component.literal("Audio Settings..."),
-                btn -> minecraft.setScreen(new SoundOptionsScreen(this, options))
+                btn -> minecraft.gui.setScreen(new SoundOptionsScreen(this, options))
         ).bounds(rightX, startY + spacing * 2, colW, itemH).build());
 
         // 4. Fullscreen Toggle
@@ -160,9 +160,9 @@ public class SkyOptionsScreen extends Screen {
                 .create(rightX, startY + spacing * 3, colW, itemH, Component.literal("Fullscreen"), (btn, val) -> {
                     options.fullscreen().set(val);
                     Window window = minecraft.getWindow();
-                    if (window.isFullscreen() != val) {
-                        window.toggleFullScreen();
-                        options.fullscreen().set(window.isFullscreen());
+                    if (window.isWindowFullscreen() != val) {
+                        window.setFullscreen(val);
+                        options.fullscreen().set(window.isWindowFullscreen());
                     }
                 });
         addRenderableWidget(fsBtn);
@@ -170,7 +170,7 @@ public class SkyOptionsScreen extends Screen {
         // 5. Language
         addRenderableWidget(Button.builder(
                 Component.literal("Language..."),
-                btn -> minecraft.setScreen(new LanguageSelectScreen(this, options, minecraft.getLanguageManager()))
+                btn -> minecraft.gui.setScreen(new LanguageSelectScreen(this, options, minecraft.getLanguageManager()))
         ).bounds(rightX, startY + spacing * 4, colW, itemH).build());
 
         // --- Bottom: Done Button ---
@@ -183,7 +183,7 @@ public class SkyOptionsScreen extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+    public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
         // Deep Nordic slate background
         g.fillGradient(0, 0, width, height, 0xFF080808, 0xFF141210);
 
@@ -191,16 +191,16 @@ public class SkyOptionsScreen extends Screen {
         int startY = Math.max(40, height / 5);
 
         // Header
-        g.drawCenteredString(font, "SETTINGS", cx, startY - 26, GOLD_COLOR);
+        g.centeredText(font, "SETTINGS", cx, startY - 26, GOLD_COLOR);
         g.fill(cx - 100, startY - 14, cx + 100, startY - 13, 0x80E8C060);
 
-        super.render(g, mouseX, mouseY, partialTick);
+        super.extractRenderState(g, mouseX, mouseY, partialTick);
     }
 
     @Override
     public void onClose() {
         options.save();
-        minecraft.setScreen(lastScreen);
+        minecraft.gui.setScreen(lastScreen);
     }
 }
 

@@ -21,7 +21,7 @@ public final class SurvivalData extends SavedData {
     private final Int2ObjectOpenHashMap<Inn> inns = new Int2ObjectOpenHashMap<>();
 
     public static SurvivalData get(ServerLevel overworld) {
-        return overworld.getDataStorage().computeIfAbsent(SurvivalData::load, SurvivalData::new, NAME);
+        return com.skycraft.platform.SavedDataTypes.get(overworld, NAME, SurvivalData::load, SurvivalData::new, value263 -> value263.save(new net.minecraft.nbt.CompoundTag()));
     }
 
     public SurvivalData() {
@@ -31,7 +31,6 @@ public final class SurvivalData extends SavedData {
         return inns.computeIfAbsent(settlementId, k -> new Inn());
     }
 
-    @Override
     public CompoundTag save(CompoundTag tag) {
         ListTag list = new ListTag();
         inns.forEach((id, inn) -> {
@@ -47,12 +46,12 @@ public final class SurvivalData extends SavedData {
 
     public static SurvivalData load(CompoundTag tag) {
         SurvivalData data = new SurvivalData();
-        ListTag list = tag.getList("inns", Tag.TAG_COMPOUND);
+        ListTag list = tag.getListOrEmpty("inns");
         for (int i = 0; i < list.size(); i++) {
-            CompoundTag t = list.getCompound(i);
-            Inn inn = data.inn(t.getInt("id"));
-            inn.spawned = t.getBoolean("spawned");
-            inn.lastSeen = t.getLong("seen");
+            CompoundTag t = list.getCompoundOrEmpty(i);
+            Inn inn = data.inn(t.getIntOr("id",0));
+            inn.spawned = t.getBooleanOr("spawned",false);
+            inn.lastSeen = t.getLongOr("seen",0L);
         }
         return data;
     }

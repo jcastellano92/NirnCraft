@@ -5,16 +5,16 @@ import com.skycraft.core.PlayerData;
 import com.skycraft.core.SkyData;
 import com.skycraft.network.SkyNetwork;
 import com.skycraft.roads.client.RoadsClient;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.network.NetworkDirection;
-import net.minecraftforge.network.NetworkEvent;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import com.skycraft.platform.Sides;
+import net.neoforged.fml.common.Mod;
+import net.minecraft.network.protocol.PacketFlow;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -22,10 +22,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.function.Supplier;
 
 /** Roads packets: nearby undiscovered settlements for the compass (compass source {@code "roads"}). */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class RoadsPackets {
     private static final int MAX_MARKERS = 12;
     /** Hash of the last marker list sent to each player, to skip identical updates. */
@@ -34,9 +33,9 @@ public final class RoadsPackets {
     private RoadsPackets() {}
 
     static void register() {
-        SkyNetwork.register(SettlementMarkers.class, NetworkDirection.PLAY_TO_CLIENT, SettlementMarkers::encode,
+        SkyNetwork.register(SettlementMarkers.class, PacketFlow.CLIENTBOUND, SettlementMarkers::encode,
                 SettlementMarkers::decode, SettlementMarkers::handle);
-        SkyNetwork.register(NetworkLines.class, NetworkDirection.PLAY_TO_CLIENT, NetworkLines::encode,
+        SkyNetwork.register(NetworkLines.class, PacketFlow.CLIENTBOUND, NetworkLines::encode,
                 NetworkLines::decode, NetworkLines::handle);
     }
 
@@ -61,7 +60,7 @@ public final class RoadsPackets {
      * (and the roads planned since) are added to it.
      */
     public record NetworkLines(int part, List<Line> lines) {
-        static void encode(NetworkLines m, FriendlyByteBuf buf) {
+        static void encode(NetworkLines m, RegistryFriendlyByteBuf buf) {
             buf.writeVarInt(m.part);
             buf.writeVarInt(m.lines.size());
             for (Line l : m.lines) {
@@ -80,7 +79,7 @@ public final class RoadsPackets {
             }
         }
 
-        static NetworkLines decode(FriendlyByteBuf buf) {
+        static NetworkLines decode(RegistryFriendlyByteBuf buf) {
             int part = buf.readVarInt();
             int count = Math.min(buf.readVarInt(), LINES_PER_PACKET * 2);
             List<Line> lines = new ArrayList<>(count);
@@ -101,9 +100,8 @@ public final class RoadsPackets {
             return new NetworkLines(part, lines);
         }
 
-        static void handle(NetworkLines m, Supplier<NetworkEvent.Context> ctx) {
-            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> RoadsClient.setNetwork(m.part, m.lines));
-            ctx.get().setPacketHandled(true);
+        static void handle(NetworkLines m, IPayloadContext ctx) {
+            Sides.runOn(Dist.CLIENT, () -> () -> RoadsClient.setNetwork(m.part, m.lines));
         }
     }
 
@@ -198,7 +196,7 @@ public final class RoadsPackets {
     @SubscribeEvent
     public static void onLogin(PlayerEvent.PlayerLoggedInEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
-        ServerLevel overworld = player.server.overworld();
+        ServerLevel overworld = player.level().getServer().overworld();
         sendNetwork(player, RoadsData.get(overworld));
     }
 
@@ -207,7 +205,7 @@ public final class RoadsPackets {
 
     /** The full list of settlement markers the client should show (replaces the previous list). */
     public record SettlementMarkers(int range, List<Entry> entries) {
-        static void encode(SettlementMarkers m, FriendlyByteBuf buf) {
+        static void encode(SettlementMarkers m, RegistryFriendlyByteBuf buf) {
             buf.writeVarInt(m.range);
             buf.writeVarInt(m.entries.size());
             for (Entry e : m.entries) {
@@ -218,7 +216,7 @@ public final class RoadsPackets {
             }
         }
 
-        static SettlementMarkers decode(FriendlyByteBuf buf) {
+        static SettlementMarkers decode(RegistryFriendlyByteBuf buf) {
             int range = buf.readVarInt();
             int n = Math.min(buf.readVarInt(), 64);
             List<Entry> list = new ArrayList<>(n);
@@ -226,9 +224,8 @@ public final class RoadsPackets {
             return new SettlementMarkers(range, list);
         }
 
-        static void handle(SettlementMarkers m, Supplier<NetworkEvent.Context> ctx) {
-            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> RoadsClient.setMarkers(m.range, m.entries));
-            ctx.get().setPacketHandled(true);
+        static void handle(SettlementMarkers m, IPayloadContext ctx) {
+            Sides.runOn(Dist.CLIENT, () -> () -> RoadsClient.setMarkers(m.range, m.entries));
         }
     }
 

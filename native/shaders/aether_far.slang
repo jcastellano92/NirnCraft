@@ -388,26 +388,56 @@ float traceShadow(float3 p, float3 dir, int lod) {
     return 1.0;
 }
 
-// Far water continues the shader pack's waves (shaderpack lib/waves.glsl, waveField at its default 12 waves, open
-// water): the same seeds, spectrum, drag and footprint fade, so the long swell runs on across the near/far hand-off
-// until it shrinks under a few pixels. What is no longer drawn becomes the glint's roughness (farWaterAlpha).
+// Far water continues the shader pack's waves (shaderpack lib/waves.glsl waveField at its default 12 waves, open
+// water): the same wind-aligned spread table, spectrum, wave-group envelope, drag and footprint fade, so the swell runs
+// on across the near/far hand-off until it shrinks under a few pixels. The wind (heading, windiness) comes from the
+// same weather columns as the pack's lib/weather.glsl waterWind. What is no longer drawn becomes the glint's
+// roughness (farWaterAlpha).
 static const int FAR_WAVES = 12;
+static const float WAVE_SPREAD[16] = { 0.0, 0.35, -0.42, 0.6, -0.7, 0.18, -0.25, 0.85, -0.9, 0.5, -0.55, 0.05,
+                                       0.95, -0.38, 0.72, -0.8 };
 
 float waterFootprint(float dist) { return 0.02 + dist * 0.0013; }
 
-float3 farWaveNormal(float2 p, float time, float storm, float dist) {
-    float wl = 26.0;
+// the pack's lib/noise.glsl hash12 / valueNoise, so the wave-group envelope matches across the hand-off
+float packHash12(float2 p) {
+    float3 p3 = frac(float3(p.x, p.y, p.x) * 0.1031);
+    p3 += dot(p3, p3.yzx + 33.33);
+    return frac((p3.x + p3.y) * p3.z);
+}
+
+float packValueNoise(float2 p) {
+    float2 i = floor(p), f = frac(p);
+    float2 u = f * f * (3.0 - 2.0 * f);
+    float a = packHash12(i), b = packHash12(i + float2(1, 0)), c = packHash12(i + float2(0, 1)), d = packHash12(i + float2(1, 1));
+    return lerp(lerp(a, b, u.x), lerp(c, d, u.x), u.y);
+}
+
+// (heading radians, windiness 0..1) over far water: lib/weather.glsl waterWind
+float2 farWaterWind(float2 worldXZ, float horizontal) {
+    CloudColumn c = sampleColumn(worldXZ, horizontal);
+    float windiness = saturate(0.18 + 0.5 * c.weather.g + 0.35 * c.weather.b + 0.15 * c.weather.r + 0.25 * frame.weatherParams.x);
+    return float2(c.dynamics.b * 6.2831853, windiness);
+}
+
+float farWaveLongest(float windiness) { return 26.0 * (0.6 + 0.8 * windiness); }
+float farWaveAmp(float windiness) { return 0.07 * (0.35 + 1.9 * windiness); }
+
+float3 farWaveNormal(float2 p, float time, float2 wind, float dist) {
+    float wl = farWaveLongest(wind.y);
     float decay = pow(0.7 / wl, 1.0 / float(FAR_WAVES - 1));
-    float amp = 0.07 * (1.0 + 1.6 * storm);
+    float amp = farWaveAmp(wind.y) * (0.55 + 0.9 * (packValueNoise(p / 170.0 + time * 0.015) * 0.65 +
+                                                     packValueNoise(p / 61.0 - time * 0.03) * 0.35));
     float foot = waterFootprint(dist);
     float2 g = float2(0, 0);
-    float seed = 0.7;
     for (int i = 0; i < FAR_WAVES; i++) {
         float fade = smoothstep(3.0 * foot, 8.0 * foot, wl);
         if (fade <= 0.0) break;
-        float2 d = float2(sin(seed), cos(seed));
+        float spread = 0.25 + 0.75 * float(i) / float(FAR_WAVES - 1);
+        float ang = wind.x + WAVE_SPREAD[i] * spread * 1.5707963;
+        float2 d = float2(cos(ang), sin(ang));
         float kk = 6.2831853 / wl;
-        float x = dot(d, p) * kk + time * sqrt(9.81 * kk);
+        float x = dot(d, p) * kk - time * sqrt(9.81 * kk);
         float e = exp(sin(x) - 1.0);
         float de = e * cos(x);
         float a = amp * fade;
@@ -415,24 +445,23 @@ float3 farWaveNormal(float2 p, float time, float storm, float dist) {
         p -= d * de * a * 0.38 * 6.0;
         wl *= decay;
         amp *= decay;
-        seed += 1232.399963;
     }
     return normalize(float3(-g.x, 1.0, -g.y));
 }
 
 // GGX-like alpha of the glint: the rms slope of the waves too small to draw at this distance (lib/waves.glsl
 // waveRoughness with openness 1)
-float farWaterAlpha(float storm, float dist) {
+float farWaterAlpha(float windiness, float dist) {
     float foot = waterFootprint(dist);
-    float wl = 26.0;
+    float wl = farWaveLongest(windiness);
     float decay = pow(0.7 / wl, 1.0 / float(FAR_WAVES - 1));
-    float slope = 0.07 * (1.0 + 1.6 * storm) * 6.2831853 / wl * 0.6;
+    float slope = farWaveAmp(windiness) * 6.2831853 / wl * 0.6;
     float lost = 0.0;
     for (int i = 0; i < FAR_WAVES; i++) {
         lost += 1.0 - smoothstep(3.0 * foot, 8.0 * foot, wl);
         wl *= decay;
     }
-    float alpha = sqrt(0.00005 + 2.0 * slope * slope * lost) + storm * 0.03;
+    float alpha = sqrt(0.00005 + 2.0 * slope * slope * lost) + windiness * windiness * 0.03;
     return clamp(alpha, 0.005, 0.36);
 }
 
@@ -471,7 +500,7 @@ float3 waterReflection(float3 p, float3 dir, float k, float t, int lod, float3 s
     int lodCount = int(frame.dims.w);
     int l = min(lod + 1, lodCount - 1);
     float s = float(1 << lod);
-    float3 o = p + float3(0, 1.01 * s, 0);
+    float3 o = p + float3(0, 1.01 * float(1 << l), 0);  // clear the trace LOD's (coarser) voxel, not only the hit's
     float tr = 0;
     float maxT = 12000.0;
     for (int seg = 0; seg < 48; seg++) {
@@ -481,6 +510,8 @@ float3 waterReflection(float3 p, float3 dir, float k, float t, int lod, float3 s
         int hit = traceLod(l, o + r * tr, r, len, rr, uncExit);
         if (hit == TRACE_HIT) {
             MaterialGpu m = palette[rr.mat];
+            // a grazing reflection that skims back into the water sees the water's own sky, not a dark "top"
+            if (uint(m.emisClass.y) == 2u) return sky;
             float3 n = float3(0, 1, 0);  // shaded as tops: soft and cheap at reflection scale
             float3 c = m.albedoRough.rgb * (keyLightRadiance(sun) * saturate(dot(n, keyLightDir(sun))) * 0.8 + skyAmbient(n, sun));
             return applyAerial(c, r, sun, tr + rr.t, frame);
@@ -777,9 +808,13 @@ void farMain(uint3 id : SV_DispatchThreadID) {
         if ((frame.dims.z & FRAME_DEBUG_LOD) != 0) albedo = lodTint(res.lod);
         float3 reflection = float3(0, 0, 0);
         if (cls == 2u) {
-            if (n.y > 0.5) n = farWaveNormal(p.xz + float2(frame.camInt.xz), frame.sunDir.w, frame.weatherParams.x, tHit);
-            m.albedoRough.a = farWaterAlpha(frame.weatherParams.x, tHit);
-            reflection = waterReflection(p, dir, k, tHit, res.lod, sun, n.y > 0.5 ? n : float3(0, 1, 0));
+            float2 wxz = p.xz + float2(frame.camInt.xz);
+            float2 wind = farWaterWind(wxz, length(p.xz));
+            // far water is a level sheet: a side face is only the step where its quantised level changes between
+            // LODs (seen edge-on near the horizon it drew a dark seam), so every water hit is shaded as the surface
+            n = farWaveNormal(wxz, frame.sunDir.w, wind, tHit);
+            m.albedoRough.a = farWaterAlpha(wind.y, tHit);
+            reflection = waterReflection(p, dir, k, tHit, res.lod, sun, n);
         }
         color = shadeSurface(albedo, m, n, dir, sun, sunVis, cls, ao, reflection);
         depth = tHit;

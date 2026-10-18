@@ -10,8 +10,8 @@ import com.skycraft.inventory.ValueDensity;
 import com.skycraft.inventory.Pack;
 import com.skycraft.network.CorePackets;
 import com.skycraft.network.SkyNetwork;
-import net.minecraft.Util;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.util.Util;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
@@ -22,20 +22,18 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.npc.Villager;
+import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ChestMenu;
-import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.Slot;
-import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ShieldItem;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
-import org.lwjgl.glfw.GLFW;
+import com.mojang.blaze3d.platform.InputConstants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -88,7 +86,7 @@ public class SkyrimContainerScreen extends AbstractContainerScreen<AbstractConta
     }
 
     public SkyrimContainerScreen(AbstractContainerMenu menu, Inventory playerInventory, Component title) {
-        super(menu, playerInventory, title);
+        super(menu, playerInventory, title,380,220);
         // the server sends this container's overflow right after the open packet: drop any copy of an earlier menu
         ContainerOverflowClient.clear();
         // chests, barrels, ender chests, corpses: ChestMenu rows; shulker boxes, hoppers, dispensers/droppers: the slots
@@ -115,8 +113,8 @@ public class SkyrimContainerScreen extends AbstractContainerScreen<AbstractConta
         // Sneaking through a screen is com.skycraft.client.SneakKeeper's job (it works for every screen).
         // an empty-handed sneak-use opens a mount's menu on its stat sheet
         this.showSheet = bag && com.skycraft.mounts.client.MountClientState.takeOpenOnSheet();
-        this.imageWidth = 380;
-        this.imageHeight = 220;
+
+
     }
 
     private boolean checkIsOwned() {
@@ -145,8 +143,8 @@ public class SkyrimContainerScreen extends AbstractContainerScreen<AbstractConta
     }
 
     private List<ContainerEntry> getCurrentEntries() {
-        java.util.Map<String, List<Slot>> groups = new java.util.LinkedHashMap<>();
-        java.util.Map<String, ItemStack> repStacks = new java.util.LinkedHashMap<>();
+        java.util.Map<ItemRowKey, List<Slot>> groups = new java.util.LinkedHashMap<>();
+        java.util.Map<ItemRowKey, ItemStack> repStacks = new java.util.LinkedHashMap<>();
         int start = viewMode == 0 ? 0 : containerSlotCount;
         int end = viewMode == 0 ? containerSlotCount : menu.slots.size();
 
@@ -154,7 +152,7 @@ public class SkyrimContainerScreen extends AbstractContainerScreen<AbstractConta
             Slot slot = menu.getSlot(i);
             if (slot.hasItem()) {
                 ItemStack stack = slot.getItem();
-                String key = stack.getItem().getDescriptionId() + ":" + (stack.getTag() != null ? stack.getTag().toString() : "");
+                ItemRowKey key = ItemRowKey.of(stack);
                 groups.computeIfAbsent(key, k -> {
                     repStacks.put(k, stack.copy());
                     return new ArrayList<>();
@@ -163,14 +161,14 @@ public class SkyrimContainerScreen extends AbstractContainerScreen<AbstractConta
         }
 
         // My Items tab: the overflow pack (inventory.Pack) joins the same rows as the slots
-        java.util.Map<String, Integer> packIndex = new java.util.HashMap<>();
-        java.util.Map<String, Integer> packCount = new java.util.HashMap<>();
+        java.util.Map<ItemRowKey, Integer> packIndex = new java.util.HashMap<>();
+        java.util.Map<ItemRowKey, Integer> packCount = new java.util.HashMap<>();
         if (viewMode == 1 && net.minecraft.client.Minecraft.getInstance().player != null) {
             List<ItemStack> packed = Pack.entries(net.minecraft.client.Minecraft.getInstance().player);
             for (int i = 0; i < packed.size(); i++) {
                 ItemStack stack = packed.get(i);
                 if (stack.isEmpty()) continue;
-                String key = stack.getItem().getDescriptionId() + ":" + (stack.getTag() != null ? stack.getTag().toString() : "");
+                ItemRowKey key = ItemRowKey.of(stack);
                 if (!groups.containsKey(key)) {
                     groups.put(key, new ArrayList<>());
                     repStacks.put(key, stack.copy());
@@ -181,13 +179,13 @@ public class SkyrimContainerScreen extends AbstractContainerScreen<AbstractConta
         }
 
         // Container tab: the container's own overflow (inventory.ContainerOverflow) joins the same rows as the slots
-        java.util.Map<String, Integer> overflowIndex = new java.util.HashMap<>();
+        java.util.Map<ItemRowKey, Integer> overflowIndex = new java.util.HashMap<>();
         if (viewMode == 0) {
             List<ItemStack> over = ContainerOverflowClient.entries(menu.containerId);
             for (int i = 0; i < over.size(); i++) {
                 ItemStack stack = over.get(i);
                 if (stack.isEmpty()) continue;
-                String key = stack.getItem().getDescriptionId() + ":" + (stack.getTag() != null ? stack.getTag().toString() : "");
+                ItemRowKey key = ItemRowKey.of(stack);
                 if (!groups.containsKey(key)) {
                     groups.put(key, new ArrayList<>());
                     repStacks.put(key, stack.copy());
@@ -198,7 +196,7 @@ public class SkyrimContainerScreen extends AbstractContainerScreen<AbstractConta
         }
 
         List<ContainerEntry> list = new ArrayList<>();
-        for (java.util.Map.Entry<String, List<Slot>> e : groups.entrySet()) {
+        for (java.util.Map.Entry<ItemRowKey, List<Slot>> e : groups.entrySet()) {
             ItemStack rep = repStacks.get(e.getKey());
             int totalCount = packCount.getOrDefault(e.getKey(), 0);
             float totalWeight = ItemWeights.getStack(rep) / Math.max(1, rep.getCount()) * totalCount;
@@ -237,18 +235,18 @@ public class SkyrimContainerScreen extends AbstractContainerScreen<AbstractConta
     }
 
     @Override
-    protected void renderBg(GuiGraphics g, float partialTick, int mouseX, int mouseY) {
+    public void extractBackground(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
         // Suppress vanilla texture rendering; full custom Skyrim panel drawn in render()
     }
 
     @Override
-    protected void renderLabels(GuiGraphics g, int mouseX, int mouseY) {
+    protected void extractLabels(GuiGraphicsExtractor g, int mouseX, int mouseY) {
         // Suppress vanilla container/inventory labels
     }
 
     @Override
-    public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        renderBackground(g);
+    public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
+
 
         int px = leftPos;
         int py = topPos;
@@ -261,14 +259,14 @@ public class SkyrimContainerScreen extends AbstractContainerScreen<AbstractConta
         // Header: Title and ownership tag
         int headerY = py + 8;
         Component displayTitle = viewMode == 0 ? this.title : Component.translatable("inventory.skycraft.my_items");
-        g.drawString(font, displayTitle, px + 12, headerY, SkyUi.TEXT, false);
+        g.text(font, displayTitle, px + 12, headerY, SkyUi.TEXT, false);
 
         if (viewMode == 0 && isOwned) {
             boolean detected = com.skycraft.client.ClientState.has(com.skycraft.network.CorePackets.SyncVitals.DETECTED);
             int stealX = px + 16 + font.width(displayTitle);
             String warn = "Taking is STEALING. Status: " + (detected ? "[DETECTED]" : "[HIDDEN]");
             int warnColor = detected ? SkyUi.STOLEN : 0xFF55FF55;
-            g.drawString(font, warn, stealX, headerY, warnColor, false);
+            g.text(font, warn, stealX, headerY, warnColor, false);
         }
         if (viewMode == 0 && isBag) {
             // saddlebag load against what the saddle in slot 0 allows (the mount's bag scale rides in the title)
@@ -279,15 +277,15 @@ public class SkyrimContainerScreen extends AbstractContainerScreen<AbstractConta
             com.skycraft.mounts.SaddleType worn = com.skycraft.mounts.SaddleType.of(menu.getSlot(0).getItem());
             float cap = worn == null ? 0f : worn.bagKg * bagScale;
             String loadText = ItemWeights.format(load) + " / " + ItemWeights.format(cap) + " kg";
-            g.drawString(font, loadText, px + 16 + font.width(displayTitle), headerY, load > cap + 0.05f ? SkyUi.STOLEN : SkyUi.GOLD, false);
+            g.text(font, loadText, px + 16 + font.width(displayTitle), headerY, load > cap + 0.05f ? SkyUi.STOLEN : SkyUi.GOLD, false);
         }
 
         // View toggle tabs (Container vs My Items)
         String tabContainer = "[1] Container";
         String tabPlayer = "[2] My Items";
         int tabX = px + pw - font.width(tabContainer) - font.width(tabPlayer) - 24;
-        g.drawString(font, tabContainer, tabX, headerY, viewMode == 0 ? SkyUi.GOLD : SkyUi.DIM, false);
-        g.drawString(font, tabPlayer, tabX + font.width(tabContainer) + 12, headerY, viewMode == 1 ? SkyUi.GOLD : SkyUi.DIM, false);
+        g.text(font, tabContainer, tabX, headerY, viewMode == 0 ? SkyUi.GOLD : SkyUi.DIM, false);
+        g.text(font, tabPlayer, tabX + font.width(tabContainer) + 12, headerY, viewMode == 1 ? SkyUi.GOLD : SkyUi.DIM, false);
 
         SkyUi.hline(g, px + 8, px + pw - 8, py + 22, 0x80);
 
@@ -347,14 +345,14 @@ public class SkyrimContainerScreen extends AbstractContainerScreen<AbstractConta
             if (hov) hoverSort = i;
             if (hov && i == SORT_VW) vwTooltipAt = new int[]{mouseX, mouseY};
             boolean active = sortMode == i;
-            g.drawString(font, hs[i], hx[i], headerRowY, active ? SkyUi.LINE : hov ? SkyUi.TEXT : SkyUi.HEADER, false);
+            g.text(font, hs[i], hx[i], headerRowY, active ? SkyUi.LINE : hov ? SkyUi.TEXT : SkyUi.HEADER, false);
             if (active) SkyUi.triangle(g, hx[i] - 5, headerRowY + 2, !sortDescending, SkyUi.LINE);
         }
         SkyUi.hline(g, listX, listX + listW, headerRowY + 11, 0x80);
 
         if (entries.isEmpty()) {
             Component emptyText = Component.translatable("inventory.skycraft.empty_container");
-            g.drawString(font, emptyText, listX + 8, listY + 12, SkyUi.DIM, false);
+            g.text(font, emptyText, listX + 8, listY + 12, SkyUi.DIM, false);
         } else {
             for (int i = 0; i < maxVisible; i++) {
                 int idx = scrollOffset + i;
@@ -374,7 +372,7 @@ public class SkyrimContainerScreen extends AbstractContainerScreen<AbstractConta
                 }
 
                 // Render item icon
-                g.renderItem(entry.stack(), listX + 2, rowY + 1);
+                g.item(entry.stack(), listX + 2, rowY + 1);
 
                 // Name and count
                 String name = entry.stack().getHoverName().getString();
@@ -386,17 +384,17 @@ public class SkyrimContainerScreen extends AbstractContainerScreen<AbstractConta
                 }
                 String ellipsized = SkyUi.ellipsize(font, name, Math.max(20, nameRoom));
                 int nameColor = (viewMode == 0 && isOwned) ? SkyUi.STOLEN : (isSelected ? SkyUi.BRIGHT : (isHovered ? SkyUi.TEXT : SkyUi.DIM));
-                g.drawString(font, ellipsized, listX + 22, rowY + 5, nameColor, false);
+                g.text(font, ellipsized, listX + 22, rowY + 5, nameColor, false);
 
                 // Weight, Value and gold per weight
                 String wtStr = ItemWeights.format(entry.totalWeight());
                 String valStr = entry.value() + "g";
-                g.drawString(font, valStr, valRight - font.width(valStr), rowY + 5, SkyUi.GOLD, false);
-                g.drawString(font, wtStr, wtRight - font.width(wtStr), rowY + 5, SkyUi.DIM, false);
+                g.text(font, valStr, valRight - font.width(valStr), rowY + 5, SkyUi.GOLD, false);
+                g.text(font, wtStr, wtRight - font.width(wtStr), rowY + 5, SkyUi.DIM, false);
                 if (showVw) {
                     float ratio = ValueDensity.of(entry.stack());
                     String vwStr = ValueDensity.format(ratio);
-                    g.drawString(font, vwStr, vwRight - font.width(vwStr), rowY + 5, ratio < 0f ? SkyUi.DIM : 0xFF98B888, false);
+                    g.text(font, vwStr, vwRight - font.width(vwStr), rowY + 5, ratio < 0f ? SkyUi.DIM : 0xFF98B888, false);
                 }
             }
         }
@@ -422,11 +420,11 @@ public class SkyrimContainerScreen extends AbstractContainerScreen<AbstractConta
 
             int infoY = detY + previewH + 4;
             String selName = SkyUi.ellipsize(font, selStack.getHoverName().getString(), detW);
-            g.drawString(font, selName, cx - font.width(selName) / 2, infoY, SkyUi.BRIGHT, false);
+            g.text(font, selName, cx - font.width(selName) / 2, infoY, SkyUi.BRIGHT, false);
             infoY += 12;
 
             String kind = SkyUi.ellipsize(font, kindLine(selStack).getString(), detW);
-            g.drawString(font, kind, cx - font.width(kind) / 2, infoY, SkyUi.DIM, false);
+            g.text(font, kind, cx - font.width(kind) / 2, infoY, SkyUi.DIM, false);
             infoY += 12;
 
             SkyUi.divider(g, cx, infoY, detW / 2 - 6);
@@ -436,41 +434,41 @@ public class SkyrimContainerScreen extends AbstractContainerScreen<AbstractConta
             double dmg = damage(selStack);
             double arm = armor(selStack);
             if (arm > 0) {
-                g.drawString(font, "ARMOR", detX, infoY, SkyUi.HEADER, false);
-                g.drawString(font, String.valueOf((int) arm), detX + 50, infoY, SkyUi.BRIGHT, false);
+                g.text(font, "ARMOR", detX, infoY, SkyUi.HEADER, false);
+                g.text(font, String.valueOf((int) arm), detX + 50, infoY, SkyUi.BRIGHT, false);
                 infoY += 11;
             } else if (dmg > 1) {
-                g.drawString(font, "DAMAGE", detX, infoY, SkyUi.HEADER, false);
-                g.drawString(font, String.valueOf((int) dmg), detX + 50, infoY, SkyUi.BRIGHT, false);
+                g.text(font, "DAMAGE", detX, infoY, SkyUi.HEADER, false);
+                g.text(font, String.valueOf((int) dmg), detX + 50, infoY, SkyUi.BRIGHT, false);
                 infoY += 11;
             }
 
-            g.drawString(font, "WEIGHT", detX, infoY, SkyUi.HEADER, false);
-            g.drawString(font, ItemWeights.format(sel.totalWeight()), detX + 50, infoY, SkyUi.BRIGHT, false);
+            g.text(font, "WEIGHT", detX, infoY, SkyUi.HEADER, false);
+            g.text(font, ItemWeights.format(sel.totalWeight()), detX + 50, infoY, SkyUi.BRIGHT, false);
             infoY += 11;
 
             com.skycraft.mounts.SaddleType saddle = com.skycraft.mounts.SaddleType.of(selStack);
             if (saddle != null) {
-                g.drawString(font, "CARRY", detX, infoY, SkyUi.HEADER, false);
-                g.drawString(font, "+" + ItemWeights.format(saddle.carryKg), detX + 50, infoY, SkyUi.BRIGHT, false);
+                g.text(font, "CARRY", detX, infoY, SkyUi.HEADER, false);
+                g.text(font, "+" + ItemWeights.format(saddle.carryKg), detX + 50, infoY, SkyUi.BRIGHT, false);
                 infoY += 11;
-                g.drawString(font, "BAGS", detX, infoY, SkyUi.HEADER, false);
-                g.drawString(font, ItemWeights.format(saddle.bagKg * bagScale) + " kg", detX + 50, infoY, SkyUi.BRIGHT, false);
+                g.text(font, "BAGS", detX, infoY, SkyUi.HEADER, false);
+                g.text(font, ItemWeights.format(saddle.bagKg * bagScale) + " kg", detX + 50, infoY, SkyUi.BRIGHT, false);
                 infoY += 11;
-                g.drawString(font, "STAMINA", detX, infoY, SkyUi.HEADER, false);
-                g.drawString(font, "x" + saddle.staminaMult, detX + 50, infoY, SkyUi.BRIGHT, false);
+                g.text(font, "STAMINA", detX, infoY, SkyUi.HEADER, false);
+                g.text(font, "x" + saddle.staminaMult, detX + 50, infoY, SkyUi.BRIGHT, false);
                 infoY += 11;
             }
 
-            g.drawString(font, "VALUE", detX, infoY, SkyUi.HEADER, false);
-            g.drawString(font, String.valueOf(sel.value()), detX + 50, infoY, SkyUi.GOLD, false);
+            g.text(font, "VALUE", detX, infoY, SkyUi.HEADER, false);
+            g.text(font, String.valueOf(sel.value()), detX + 50, infoY, SkyUi.GOLD, false);
             infoY += 11;
 
             // gold per weight: higher is worth carrying
             float ratio = ValueDensity.of(selStack);
             String vwLabel = SkyUi.caps(Component.translatable("inventory.skycraft.column.vw"));
-            g.drawString(font, vwLabel, detX, infoY, SkyUi.HEADER, false);
-            g.drawString(font, ValueDensity.format(ratio), detX + 50, infoY, ratio < 0f ? SkyUi.DIM : 0xFFB8E0A0, false);
+            g.text(font, vwLabel, detX, infoY, SkyUi.HEADER, false);
+            g.text(font, ValueDensity.format(ratio), detX + 50, infoY, ratio < 0f ? SkyUi.DIM : 0xFFB8E0A0, false);
         }
 
         // what you carry against what you can carry (the container tab is the one you take from)
@@ -486,31 +484,31 @@ public class SkyrimContainerScreen extends AbstractContainerScreen<AbstractConta
             ContainerEntry cur = entries.get(selectedIndex);
             if (viewMode == 0 && cur.isGearSlot()) actionHint = "[F] Unequip";
             else if (viewMode == 1 && (com.skycraft.mounts.SaddleType.of(cur.stack()) != null
-                    || cur.stack().getItem() instanceof net.minecraft.world.item.HorseArmorItem
+                    || com.skycraft.inventory.EquipmentData.slot(cur.stack()) == EquipmentSlot.BODY
                     || cur.stack().is(com.skycraft.mounts.MountItems.BEAST_BARDING.get()))) actionHint = "[F] Equip";
         }
         int actionColor = (viewMode == 0 && isOwned) ? SkyUi.STOLEN : SkyUi.GOLD;
-        g.drawString(font, actionHint, px + 12, bottomY, actionColor, false);
+        g.text(font, actionHint, px + 12, bottomY, actionColor, false);
 
         int allX = px + 12 + font.width(actionHint) + 16;
         String allHint = isBag ? (viewMode == 0 ? "[R] All" : "[R] Store All") : viewMode == 0 ? "[R] Take All" : "[R] Store All";
-        g.drawString(font, allHint, allX, bottomY, SkyUi.GOLD, false);
+        g.text(font, allHint, allX, bottomY, SkyUi.GOLD, false);
 
         int spaceX = allX + font.width(allHint) + 16;
         String spaceHint = isBag ? "[Space] Tab" : "[Space] Switch Tab";
-        g.drawString(font, spaceHint, spaceX, bottomY, SkyUi.DIM, false);
+        g.text(font, spaceHint, spaceX, bottomY, SkyUi.DIM, false);
 
         int closeX = px + pw - font.width("[Tab/Esc] Close") - 12;
-        g.drawString(font, "[Tab/Esc] Close", closeX, bottomY, SkyUi.DIM, false);
+        g.text(font, "[Tab/Esc] Close", closeX, bottomY, SkyUi.DIM, false);
 
         if (isBag) {
             // a mount's stat sheet (com.skycraft.mounts.client.MountSheetPanel) covers the body of the screen
             statsHintX = spaceX + font.width(spaceHint) + 12;
-            g.drawString(font, "[3] Stats", statsHintX, bottomY, sheetUp() ? SkyUi.GOLD : SkyUi.DIM, false);
+            g.text(font, "[3] Stats", statsHintX, bottomY, sheetUp() ? SkyUi.GOLD : SkyUi.DIM, false);
             if (sheetUp()) com.skycraft.mounts.client.MountSheetPanel.draw(g, font, px + 4, py + 24, pw - 8, ph - 52);
         }
         if (vwTooltipAt != null && !sheetUp()) {
-            g.renderTooltip(font, Component.translatable("inventory.skycraft.column.vw.tooltip"), vwTooltipAt[0], vwTooltipAt[1]);
+            g.setTooltipForNextFrame(font, Component.translatable("inventory.skycraft.column.vw.tooltip"), vwTooltipAt[0], vwTooltipAt[1]);
         }
     }
 
@@ -524,43 +522,31 @@ public class SkyrimContainerScreen extends AbstractContainerScreen<AbstractConta
         return statsHintX;
     }
 
-    static void renderPreview(GuiGraphics g, ItemStack stack, int cx, int cy, float scale) {
+    static void renderPreview(GuiGraphicsExtractor g, ItemStack stack, int cx, int cy, float scale) {
         float t = (Util.getMillis() % 1_000_000L) / 1000f;
         float angle = (float) Math.sin(t * 0.8) * 30f;
-        g.pose().pushPose();
-        g.pose().translate(cx, cy, 200);
-        g.pose().mulPose(Axis.YP.rotationDegrees(angle));
-        g.pose().scale(scale, scale, scale);
-        g.pose().translate(0, 0, -150);
-        g.renderItem(stack, -8, -8);
-        g.pose().popPose();
+        SkyUi.item3d(g, stack, cx, cy, scale * 16f, 0f, angle);
+
     }
 
     static double damage(ItemStack stack) {
-        try {
-            var mods = stack.getAttributeModifiers(EquipmentSlot.MAINHAND);
-            double sum = 0;
-            boolean any = false;
-            for (AttributeModifier m : mods.get(Attributes.ATTACK_DAMAGE)) {
-                if (m.getOperation() == AttributeModifier.Operation.ADDITION) {
-                    sum += m.getAmount();
-                    any = true;
-                }
+        double[] result = {0.0, 0.0};
+        stack.forEachModifier(EquipmentSlot.MAINHAND, (attribute, modifier) -> {
+            if (attribute.equals(Attributes.ATTACK_DAMAGE)
+                    && modifier.operation() == AttributeModifier.Operation.ADD_VALUE) {
+                result[0] += modifier.amount();
+                result[1] = 1;
             }
-            return any ? 1 + sum : 0;
-        } catch (Exception ex) {
-            return 0;
-        }
+        });
+        return result[1] != 0 ? 1 + result[0] : 0;
     }
 
     static double armor(ItemStack stack) {
-        if (stack.getItem() instanceof net.minecraft.world.item.HorseArmorItem horse) return horse.getProtection();
-        if (!(stack.getItem() instanceof ArmorItem armor)) return 0;
-        return armor.getDefense();
+        return com.skycraft.inventory.EquipmentData.defense(stack);
     }
 
     static Component kindLine(ItemStack stack) {
-        if (stack.getItem() instanceof ArmorItem) {
+        if (com.skycraft.inventory.EquipmentData.isArmor(stack)) {
             return Component.translatable(ArmorClass.isHeavy(stack) ? "inventory.skycraft.heavy_armor" : "inventory.skycraft.light_armor");
         }
         if (stack.getItem() instanceof ShieldItem) return Component.translatable("inventory.skycraft.shield");
@@ -568,7 +554,7 @@ public class SkyrimContainerScreen extends AbstractContainerScreen<AbstractConta
         if (wc != WeaponClass.OTHER && wc != WeaponClass.UNARMED) {
             return Component.translatable("inventory.skycraft.weapon." + wc.name().toLowerCase(Locale.ROOT));
         }
-        return stack.getItem().getDescription();
+        return stack.getItem().getName(stack);
     }
 
     private void takeOrStoreSelected() {
@@ -607,7 +593,9 @@ public class SkyrimContainerScreen extends AbstractContainerScreen<AbstractConta
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    public boolean mouseClicked(net.minecraft.client.input.MouseButtonEvent event, boolean doubleClick) {
+        double mouseX = event.x(), mouseY = event.y();
+        int button = com.skycraft.client.screen.UiInput.actionButton(event.button());
         if (button == 0 && isBag) {
             int tx = px3Tab();
             if (SkyUi.inside((int) mouseX, (int) mouseY, tx, topPos + imageHeight - 24,tx + font.width("[3] Stats"), topPos + imageHeight - 10)) {
@@ -651,7 +639,7 @@ public class SkyrimContainerScreen extends AbstractContainerScreen<AbstractConta
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
+    public boolean mouseScrolled(double mouseX, double mouseY, double horizontal, double delta) {
         if (delta > 0) {
             scrollOffset = Math.max(0, scrollOffset - 1);
             return true;
@@ -661,12 +649,13 @@ public class SkyrimContainerScreen extends AbstractContainerScreen<AbstractConta
             scrollOffset = Math.min(maxOffset, scrollOffset + 1);
             return true;
         }
-        return super.mouseScrolled(mouseX, mouseY, delta);
+        return super.mouseScrolled(mouseX, mouseY, horizontal, delta);
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (isBag && keyCode == GLFW.GLFW_KEY_3) {
+    public boolean keyPressed(net.minecraft.client.input.KeyEvent event) {
+        int keyCode = event.key(), scanCode = event.keycode(), modifiers = event.modifiers();
+        if (isBag && keyCode == InputConstants.KEY_3) {
             // a mount's menu: key 3 is its stat sheet (com.skycraft.mounts.client)
             viewMode = 0;
             showSheet = true;
@@ -675,56 +664,56 @@ public class SkyrimContainerScreen extends AbstractContainerScreen<AbstractConta
         if (sheetUp()) {
             // the sheet covers the list: it takes the keys that would act on the hidden rows
             switch (keyCode) {
-                case GLFW.GLFW_KEY_F, GLFW.GLFW_KEY_E, GLFW.GLFW_KEY_R, GLFW.GLFW_KEY_UP, GLFW.GLFW_KEY_W, GLFW.GLFW_KEY_DOWN, GLFW.GLFW_KEY_S -> {
+                case InputConstants.KEY_F, InputConstants.KEY_E, InputConstants.KEY_R, InputConstants.KEY_UP, InputConstants.KEY_W, InputConstants.KEY_DOWN, InputConstants.KEY_S -> {
                     return true;
                 }
-                case GLFW.GLFW_KEY_SPACE, GLFW.GLFW_KEY_1 -> {
+                case InputConstants.KEY_SPACE, InputConstants.KEY_1 -> {
                     showSheet = false;
                     return true;
                 }
-                case GLFW.GLFW_KEY_2 -> showSheet = false;
+                case InputConstants.KEY_2 -> showSheet = false;
                 default -> {
                 }
             }
         }
         switch (keyCode) {
-            case GLFW.GLFW_KEY_F, GLFW.GLFW_KEY_E -> {
+            case InputConstants.KEY_F, InputConstants.KEY_E -> {
                 takeOrStoreSelected();
                 return true;
             }
-            case GLFW.GLFW_KEY_R -> {
+            case InputConstants.KEY_R -> {
                 takeOrStoreAll();
                 return true;
             }
-            case GLFW.GLFW_KEY_SPACE -> {
+            case InputConstants.KEY_SPACE -> {
                 viewMode = 1 - viewMode;
                 selectedIndex = 0;
                 scrollOffset = 0;
                 return true;
             }
-            case GLFW.GLFW_KEY_1 -> {
+            case InputConstants.KEY_1 -> {
                 viewMode = 0;
                 selectedIndex = 0;
                 scrollOffset = 0;
                 return true;
             }
-            case GLFW.GLFW_KEY_2 -> {
+            case InputConstants.KEY_2 -> {
                 viewMode = 1;
                 selectedIndex = 0;
                 scrollOffset = 0;
                 return true;
             }
-            case GLFW.GLFW_KEY_3, GLFW.GLFW_KEY_4, GLFW.GLFW_KEY_5, GLFW.GLFW_KEY_6, GLFW.GLFW_KEY_7, GLFW.GLFW_KEY_8, GLFW.GLFW_KEY_9 -> {
+            case InputConstants.KEY_3, InputConstants.KEY_4, InputConstants.KEY_5, InputConstants.KEY_6, InputConstants.KEY_7, InputConstants.KEY_8, InputConstants.KEY_9 -> {
                 return true;
             }
-            case GLFW.GLFW_KEY_UP, GLFW.GLFW_KEY_W -> {
+            case InputConstants.KEY_UP, InputConstants.KEY_W -> {
                 if (selectedIndex > 0) {
                     selectedIndex--;
                     if (selectedIndex < scrollOffset) scrollOffset = selectedIndex;
                 }
                 return true;
             }
-            case GLFW.GLFW_KEY_DOWN, GLFW.GLFW_KEY_S -> {
+            case InputConstants.KEY_DOWN, InputConstants.KEY_S -> {
                 List<ContainerEntry> entries = getCurrentEntries();
                 if (selectedIndex < entries.size() - 1) {
                     selectedIndex++;
@@ -733,12 +722,12 @@ public class SkyrimContainerScreen extends AbstractContainerScreen<AbstractConta
                 }
                 return true;
             }
-            case GLFW.GLFW_KEY_TAB, GLFW.GLFW_KEY_ESCAPE -> {
+            case InputConstants.KEY_TAB, InputConstants.KEY_ESCAPE -> {
                 onClose();
                 return true;
             }
         }
-        return super.keyPressed(keyCode, scanCode, modifiers);
+        return super.keyPressed(event);
     }
 
     @Override

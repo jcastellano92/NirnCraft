@@ -7,7 +7,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.levelgen.structure.Structure;
@@ -35,25 +35,25 @@ public final class LocationTags {
     private LocationTags() {}
 
     private static TagKey<Structure> tag(String path) {
-        return TagKey.create(Registries.STRUCTURE, new ResourceLocation(Skycraft.MODID, path));
+        return TagKey.create(Registries.STRUCTURE, Identifier.fromNamespaceAndPath(Skycraft.MODID, path));
     }
 
     /** The registry holder of a structure, if it is registered. */
     public static Optional<Holder.Reference<Structure>> holder(RegistryAccess access, Structure structure) {
-        Registry<Structure> registry = access.registryOrThrow(Registries.STRUCTURE);
-        return registry.getResourceKey(structure).flatMap(registry::getHolder);
+        Registry<Structure> registry = access.lookupOrThrow(Registries.STRUCTURE);
+        return registry.getResourceKey(structure).flatMap(registry::get);
     }
 
     /** The registry holder of a structure id, if it is registered. */
-    public static Optional<Holder.Reference<Structure>> holder(RegistryAccess access, ResourceLocation id) {
-        return access.registryOrThrow(Registries.STRUCTURE).getHolder(ResourceKey.create(Registries.STRUCTURE, id));
+    public static Optional<Holder.Reference<Structure>> holder(RegistryAccess access, Identifier id) {
+        return access.lookupOrThrow(Registries.STRUCTURE).get(ResourceKey.create(Registries.STRUCTURE, id));
     }
 
     public static boolean is(RegistryAccess access, Structure structure, TagKey<Structure> tag) {
         return holder(access, structure).map(h -> h.is(tag)).orElse(false);
     }
 
-    public static boolean is(RegistryAccess access, ResourceLocation id, TagKey<Structure> tag) {
+    public static boolean is(RegistryAccess access, Identifier id, TagKey<Structure> tag) {
         return holder(access, id).map(h -> h.is(tag)).orElse(false);
     }
 

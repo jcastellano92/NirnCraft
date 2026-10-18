@@ -49,7 +49,7 @@ public final class Settlers {
     /** Called every 5 seconds per player. */
     static void tick(ServerPlayer player) {
         if (!SocietyConfig.POPULATE_SETTLEMENTS.get() || player.isSpectator()) return;
-        ServerLevel level = player.serverLevel();
+        ServerLevel level = player.level();
         if (level.dimension() != Level.OVERWORLD) return;
         Settlement s;
         try {
@@ -260,7 +260,7 @@ public final class Settlers {
         npc.setHome(anchor, radius);
         if (bed != null) claimBed(npc, bed);
         if (!level.addFreshEntity(npc)) return null;
-        NpcRegistry.get(level.getServer()).setHome(npc.getUUID(), anchor, level.dimension().location().toString());
+        NpcRegistry.get(level.getServer()).setHome(npc.getUUID(), anchor, level.dimension().identifier().toString());
         return npc;
     }
 
@@ -342,7 +342,7 @@ public final class Settlers {
         if (state.hasProperty(net.minecraft.world.level.block.BedBlock.PART)
                 && state.getValue(net.minecraft.world.level.block.BedBlock.PART) == net.minecraft.world.level.block.state.properties.BedPart.HEAD
                 && !level.getPoiManager().exists(best, h -> h.is(PoiTypes.HOME))) {
-            net.minecraft.core.registries.BuiltInRegistries.POINT_OF_INTEREST_TYPE.getHolder(PoiTypes.HOME)
+            net.minecraft.core.registries.BuiltInRegistries.POINT_OF_INTEREST_TYPE.get(PoiTypes.HOME)
                     .ifPresent(h -> level.getPoiManager().add(bedPos, h));
         }
         return best.immutable();
@@ -352,7 +352,7 @@ public final class Settlers {
      * A bed for a settler villager (merchants, smiths, farmers...): claims one and sets the villager's HOME memory so
      * the vanilla schedule sends it to sleep there. Called every ~2 s per villager by {@link SettlerVillagers}.
      */
-    static void homeForVillager(net.minecraft.world.entity.npc.Villager v) {
+    static void homeForVillager(net.minecraft.world.entity.npc.villager.Villager v) {
         if (!(v.level() instanceof ServerLevel level) || level.dimension() != Level.OVERWORLD) return;
         var brain = v.getBrain();
         var home = net.minecraft.world.entity.ai.memory.MemoryModuleType.HOME;
@@ -398,7 +398,7 @@ public final class Settlers {
             if (state.hasProperty(net.minecraft.world.level.block.BedBlock.PART)
                     && state.getValue(net.minecraft.world.level.block.BedBlock.PART) == net.minecraft.world.level.block.state.properties.BedPart.HEAD
                     && !level.getPoiManager().exists(bed, h -> h.is(PoiTypes.HOME))) {
-                net.minecraft.core.registries.BuiltInRegistries.POINT_OF_INTEREST_TYPE.getHolder(PoiTypes.HOME)
+                net.minecraft.core.registries.BuiltInRegistries.POINT_OF_INTEREST_TYPE.get(PoiTypes.HOME)
                         .ifPresent(h -> level.getPoiManager().add(bed, h));
             }
         }
@@ -414,7 +414,7 @@ public final class Settlers {
     }
 
     /** Gives a settler villager that bed (its HOME memory, which the vanilla schedule sleeps in). */
-    public static boolean assignBed(net.minecraft.world.entity.npc.Villager v, BlockPos bed) {
+    public static boolean assignBed(net.minecraft.world.entity.npc.villager.Villager v, BlockPos bed) {
         if (!(v.level() instanceof ServerLevel level) || !reserveBed(level, bed, v.getUUID())) return false;
         v.getBrain().setMemory(net.minecraft.world.entity.ai.memory.MemoryModuleType.HOME, net.minecraft.core.GlobalPos.of(level.dimension(), bed));
         return true;
@@ -440,26 +440,25 @@ public final class Settlers {
         final Map<Long, UUID> beds = new HashMap<>();
 
         static Data get(ServerLevel level) {
-            return level.getDataStorage().computeIfAbsent(Data::load, Data::new, NAME);
+            return com.skycraft.platform.SavedDataTypes.get(level, NAME, Data::load, Data::new, value263 -> value263.save(new net.minecraft.nbt.CompoundTag()));
         }
 
         static Data load(CompoundTag tag) {
             Data d = new Data();
-            ListTag list = tag.getList("populated", Tag.TAG_LONG);
+            ListTag list = tag.getListOrEmpty("populated");
             for (int i = 0; i < list.size(); i++) {
-                if (list.get(i) instanceof LongTag l) d.populated.add(l.getAsLong());
+                if (list.get(i) instanceof LongTag l) d.populated.add(l.value());
             }
-            ListTag seats = tag.getList("seats", Tag.TAG_STRING);
-            for (int i = 0; i < seats.size(); i++) d.seats.add(seats.getString(i));
-            ListTag beds = tag.getList("beds", Tag.TAG_COMPOUND);
+            ListTag seats = tag.getListOrEmpty("seats");
+            for (int i = 0; i < seats.size(); i++) d.seats.add(seats.getStringOr(i, ""));
+            ListTag beds = tag.getListOrEmpty("beds");
             for (int i = 0; i < beds.size(); i++) {
-                CompoundTag b = beds.getCompound(i);
-                if (b.hasUUID("npc")) d.beds.put(b.getLong("pos"), b.getUUID("npc"));
+                CompoundTag b = beds.getCompoundOrEmpty(i);
+                if (b.read("npc", net.minecraft.core.UUIDUtil.CODEC).isPresent()) d.beds.put(b.getLongOr("pos",0L), b.read("npc", net.minecraft.core.UUIDUtil.CODEC).orElseThrow());
             }
             return d;
         }
 
-        @Override
         public CompoundTag save(CompoundTag tag) {
             ListTag list = new ListTag();
             for (long k : populated) list.add(LongTag.valueOf(k));
@@ -471,7 +470,7 @@ public final class Settlers {
             beds.forEach((pos, npc) -> {
                 CompoundTag b = new CompoundTag();
                 b.putLong("pos", pos);
-                b.putUUID("npc", npc);
+                b.store("npc", net.minecraft.core.UUIDUtil.CODEC,  npc);
                 bedList.add(b);
             });
             tag.put("beds", bedList);

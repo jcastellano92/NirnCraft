@@ -6,12 +6,12 @@ import com.skycraft.inventory.InventoryActions;
 import com.skycraft.inventory.ItemWeights;
 import com.skycraft.inventory.Pack;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.UseAnim;
+import net.minecraft.world.item.ItemUseAnimation;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,7 +37,7 @@ public final class InvEntry {
     public final boolean favorite;
     public final boolean stolen;
     public final String name;
-    public final ResourceLocation itemId;
+    public final Identifier itemId;
 
     private InvEntry(ItemStack first, int slot, int equip) {
         this.stack = first.copy();
@@ -69,7 +69,7 @@ public final class InvEntry {
 
     /** True if this row is the same item, NBT and equip state as {@code other} (to keep the selection across rebuilds). */
     public boolean sameAs(InvEntry other) {
-        return other != null && other.equip == equip && ItemStack.isSameItemSameTags(other.stack, stack);
+        return other != null && other.equip == equip && ItemStack.isSameItemSameComponents(other.stack, stack);
     }
 
     // ------------------------------------------------------------------ what can be done with it
@@ -83,12 +83,12 @@ public final class InvEntry {
     }
 
     public boolean drink() {
-        return stack.getUseAnimation() == UseAnim.DRINK || stack.getItem() instanceof net.minecraft.world.item.PotionItem;
+        return stack.getUseAnimation() == ItemUseAnimation.DRINK || stack.getItem() instanceof net.minecraft.world.item.PotionItem;
     }
 
     public boolean isArmor() {
         EquipmentSlot slot = InventoryActions.equipSlotFor(stack);
-        return slot != null && slot.getType() == EquipmentSlot.Type.ARMOR;
+        return slot != null && slot.getType() == EquipmentSlot.Type.HUMANOID_ARMOR;
     }
 
     /**
@@ -99,7 +99,7 @@ public final class InvEntry {
         if (isArmor()) return true;
         if (com.skycraft.economy.ItemCategory.isJewelry(stack)) return true;
         net.minecraft.world.item.Item it = stack.getItem();
-        if (it instanceof net.minecraft.world.item.SwordItem || it instanceof net.minecraft.world.item.DiggerItem
+        if (stack.has(net.minecraft.core.component.DataComponents.WEAPON) || stack.has(net.minecraft.core.component.DataComponents.TOOL)
                 || it instanceof net.minecraft.world.item.ProjectileWeaponItem || it instanceof net.minecraft.world.item.ShieldItem
                 || it instanceof net.minecraft.world.item.TridentItem || it instanceof net.minecraft.world.item.FishingRodItem
                 || it instanceof net.minecraft.world.item.ShearsItem) {
@@ -128,19 +128,19 @@ public final class InvEntry {
         for (int i = 0; i < size; i++) {
             ItemStack s = inv.getItem(i);
             if (s.isEmpty()) continue;
-            int equip = InventoryActions.isArmorSlot(i) ? WORN : i == InventoryActions.OFFHAND ? LEFT : i == inv.selected ? RIGHT : NONE;
+            int equip = InventoryActions.isArmorSlot(i) ? WORN : i == InventoryActions.OFFHAND ? LEFT : i == inv.getSelectedSlot() ? RIGHT : NONE;
             if (equip == NONE && com.skycraft.economy.ItemCategory.isJewelry(s)) {
                 net.minecraft.nbt.CompoundTag apparel = com.skycraft.core.SkyData.get(player).module("apparel");
-                net.minecraft.resources.ResourceLocation key = net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(s.getItem());
+                net.minecraft.resources.Identifier key = net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(s.getItem());
                 String itemId = key != null ? key.toString() : "";
-                if (itemId.equals(apparel.getString("necklace")) || itemId.equals(apparel.getString("ring")) || itemId.equals(apparel.getString("circlet"))) {
+                if (itemId.equals(apparel.getStringOr("necklace","")) || itemId.equals(apparel.getStringOr("ring","")) || itemId.equals(apparel.getStringOr("circlet",""))) {
                     equip = WORN;
                 }
             }
             if (equip == NONE) {
                 InvEntry merged = null;
                 for (InvEntry e : out) {
-                    if (e.equip == NONE && ItemStack.isSameItemSameTags(e.stack, s)) {
+                    if (e.equip == NONE && ItemStack.isSameItemSameComponents(e.stack, s)) {
                         merged = e;
                         break;
                     }
@@ -163,7 +163,7 @@ public final class InvEntry {
             InvEntry merged = null;
             if (equip == NONE) {
                 for (InvEntry e : out) {
-                    if (e.equip == NONE && ItemStack.isSameItemSameTags(e.stack, s)) {
+                    if (e.equip == NONE && ItemStack.isSameItemSameComponents(e.stack, s)) {
                         merged = e;
                         break;
                     }

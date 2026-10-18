@@ -10,7 +10,7 @@ public final class ArcaneClientHandlers {
     public static void openStation(int kind, BlockPos pos) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null) return;
-        if (kind == 0) mc.setScreen(new ArcaneEnchanterScreen(pos));
-        else mc.setScreen(new AlchemyScreen(pos));
+        if (kind == 0) mc.gui.setScreen(new ArcaneEnchanterScreen(pos));
+        else mc.gui.setScreen(new AlchemyScreen(pos));
     }
 }

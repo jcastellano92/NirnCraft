@@ -3,7 +3,7 @@ package com.skycraft.audio.client;
 import net.minecraft.core.Holder;
 import net.minecraft.tags.BiomeTags;
 import net.minecraft.world.level.biome.Biome;
-import net.minecraftforge.common.Tags;
+import net.neoforged.neoforge.common.Tags;
 
 import java.util.HashMap;
 import java.util.Locale;
@@ -161,7 +161,7 @@ final class Soundscapes {
     }
 
     static String id(Holder<Biome> b) {
-        return b.unwrapKey().map(k -> k.location().getPath()).orElse("").toLowerCase(Locale.ROOT);
+        return b.unwrapKey().map(k -> k.identifier().getPath()).orElse("").toLowerCase(Locale.ROOT);
     }
 
     static Cave cave(String id) {
@@ -202,11 +202,11 @@ final class Soundscapes {
         else if (id.contains("crystal")) w[F.CRYSTAL.ordinal()] = 1;
         else if (b.is(BiomeTags.IS_FOREST) || b.is(BiomeTags.IS_TAIGA) || has(id, FOREST_WORDS)) {
             w[F.FOREST.ordinal()] = 1;
-            if (b.is(BiomeTags.IS_TAIGA) || b.is(Tags.Biomes.IS_CONIFEROUS)) w[F.PINE.ordinal()] = 1;
+            if (b.is(BiomeTags.IS_TAIGA) || b.is(Tags.Biomes.IS_CONIFEROUS_TREE)) w[F.PINE.ordinal()] = 1;
         } else w[F.PLAINS.ordinal()] = 1;
         if (b.is(Tags.Biomes.IS_SNOWY) || has(id, SNOW_WORDS)) w[F.SNOWY.ordinal()] = 1;
         if (id.contains("glacier")) w[F.GLACIER.ordinal()] = 1;
-        if (b.is(BiomeTags.IS_MOUNTAIN) || b.is(Tags.Biomes.IS_PEAK) || b.is(Tags.Biomes.IS_SLOPE)) w[F.MOUNTAIN.ordinal()] = 1;
+        if (b.is(BiomeTags.IS_MOUNTAIN) || b.is(Tags.Biomes.IS_MOUNTAIN_PEAK) || b.is(Tags.Biomes.IS_MOUNTAIN_SLOPE)) w[F.MOUNTAIN.ordinal()] = 1;
         return w;
     }
 }

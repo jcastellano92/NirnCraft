@@ -12,9 +12,9 @@ import com.skycraft.tamriel.terrain.Hydrology;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.WorldGenLevel;
-import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
-import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
+import com.skycraft.worldgen.ConfiguredFeature;
+import com.skycraft.worldgen.FeaturePlaceContext;
+import com.skycraft.worldgen.NoneFeatureConfiguration;
 
 /**
  * Builds the river site (fishing hut, mill, ford, ferry, toll post, overlook, the cave behind a waterfall, sunken
@@ -23,7 +23,7 @@ import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConf
  * gentle slope, clear of places, spaced apart), so this is a table lookup per chunk. Like the minor sites it only
  * writes inside the 3x3 chunks of the feature, and it gives way to the minor-site grid and to surface structures.
  */
-public class RiverSiteFeature extends Feature<NoneFeatureConfiguration> {
+public class RiverSiteFeature extends ConfiguredFeature<NoneFeatureConfiguration> {
     public RiverSiteFeature(Codec<NoneFeatureConfiguration> codec) {
         super(codec);
     }
@@ -50,8 +50,8 @@ public class RiverSiteFeature extends Feature<NoneFeatureConfiguration> {
     @Override
     public boolean place(FeaturePlaceContext<NoneFeatureConfiguration> ctx) {
         WorldGenLevel level = ctx.level();
-        ChunkPos chunk = new ChunkPos(ctx.origin());
-        Hydrology.Site s = Hydrology.get().siteInChunk(chunk.x, chunk.z);
+        ChunkPos chunk = ChunkPos.containing(ctx.origin());
+        Hydrology.Site s = Hydrology.get().siteInChunk(chunk.x(), chunk.z());
         if (s == null) return false;
         long seed = level.getSeed();
         boolean secret = s.kind().equals("fall_secret");

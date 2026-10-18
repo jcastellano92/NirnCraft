@@ -1,0 +1,14 @@
+{
+  "layers": {
+    "humanoid": [
+      {
+        "texture": "skycraft:bosmer"
+      }
+    ],
+    "humanoid_leggings": [
+      {
+        "texture": "skycraft:bosmer"
+      }
+    ]
+  }
+}

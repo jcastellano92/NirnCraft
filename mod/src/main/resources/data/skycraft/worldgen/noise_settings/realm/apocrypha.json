@@ -1,31 +1,21 @@
 {
   "sea_level": 52,
   "disable_mob_generation": true,
-  "aquifers_enabled": false,
-  "ore_veins_enabled": false,
   "legacy_random_source": false,
-  "default_block": {
-    "Name": "skycraft:apocrypha_stone"
-  },
+  "default_block": "skycraft:apocrypha_stone",
   "default_fluid": {
-    "Name": "minecraft:water",
-    "Properties": {
+    "id": "minecraft:water",
+    "properties": {
       "level": "0"
     }
   },
   "noise": {
     "min_y": 0,
-    "height": 256,
-    "size_horizontal": 1,
-    "size_vertical": 2
+    "height": 256
   },
   "noise_router": {
-    "barrier": 0.0,
-    "fluid_level_floodedness": 0.0,
-    "fluid_level_spread": 0.0,
-    "lava": 0.0,
     "temperature": {
-      "type": "minecraft:shifted_noise",
+      "type": "minecraft:noise",
       "noise": "minecraft:temperature",
       "shift_x": "minecraft:shift_x",
       "shift_y": 0.0,
@@ -34,7 +24,7 @@
       "y_scale": 0.0
     },
     "vegetation": {
-      "type": "minecraft:shifted_noise",
+      "type": "minecraft:noise",
       "noise": "minecraft:vegetation",
       "shift_x": "minecraft:shift_x",
       "shift_y": 0.0,
@@ -46,121 +36,108 @@
     "erosion": "skycraft:realm/apocrypha/feature",
     "depth": {
       "type": "minecraft:mul",
-      "argument1": 0.0078125,
-      "argument2": {
+      "left": 0.0078125,
+      "right": {
         "type": "minecraft:add",
-        "argument1": "skycraft:realm/apocrypha/height",
-        "argument2": {
+        "left": "skycraft:realm/apocrypha/height",
+        "right": {
           "type": "minecraft:mul",
-          "argument1": -1.0,
-          "argument2": "minecraft:y"
+          "left": -1.0,
+          "right": "minecraft:y"
         }
       }
     },
     "ridges": "skycraft:realm/apocrypha/jag",
-    "initial_density_without_jaggedness": {
-      "type": "minecraft:add",
-      "argument1": 0.25,
-      "argument2": {
-        "type": "minecraft:mul",
-        "argument1": 0.125,
-        "argument2": {
-          "type": "minecraft:add",
-          "argument1": "skycraft:realm/apocrypha/height",
-          "argument2": {
-            "type": "minecraft:mul",
-            "argument1": -1.0,
-            "argument2": "minecraft:y"
-          }
-        }
-      }
-    },
     "final_density": {
       "type": "minecraft:squeeze",
-      "argument": {
+      "input": {
         "type": "minecraft:mul",
-        "argument1": 0.64,
-        "argument2": {
+        "left": 0.64,
+        "right": {
           "type": "minecraft:interpolated",
-          "argument": {
+          "input": {
             "type": "minecraft:min",
-            "argument1": {
+            "left": {
               "type": "minecraft:max",
-              "argument1": {
+              "left": {
                 "type": "minecraft:max",
-                "argument1": {
+                "left": {
                   "type": "minecraft:mul",
-                  "argument1": 0.125,
-                  "argument2": {
+                  "left": 0.125,
+                  "right": {
                     "type": "minecraft:add",
-                    "argument1": "skycraft:realm/apocrypha/height",
-                    "argument2": {
+                    "left": "skycraft:realm/apocrypha/height",
+                    "right": {
                       "type": "minecraft:mul",
-                      "argument1": -1.0,
-                      "argument2": "minecraft:y"
+                      "left": -1.0,
+                      "right": "minecraft:y"
                     }
                   }
                 },
-                "argument2": {
+                "right": {
                   "type": "minecraft:mul",
-                  "argument1": 4.0,
-                  "argument2": {
+                  "left": 4.0,
+                  "right": {
                     "type": "minecraft:add",
-                    "argument1": {
+                    "left": {
                       "type": "minecraft:mul",
-                      "argument1": {
+                      "left": {
                         "type": "minecraft:min",
-                        "argument1": {
-                          "type": "minecraft:y_clamped_gradient",
-                          "from_y": 86,
-                          "to_y": 118.0,
+                        "left": {
+                          "type": "minecraft:gradient",
                           "from_value": 0.0,
-                          "to_value": 1.0
+                          "to_value": 1.0,
+                          "axis": "y",
+                          "from_coordinate": 86,
+                          "to_coordinate": 118.0
                         },
-                        "argument2": {
-                          "type": "minecraft:y_clamped_gradient",
-                          "from_y": 118.0,
-                          "to_y": 150,
+                        "right": {
+                          "type": "minecraft:gradient",
                           "from_value": 1.0,
-                          "to_value": 0.0
+                          "to_value": 0.0,
+                          "axis": "y",
+                          "from_coordinate": 118.0,
+                          "to_coordinate": 150
                         }
                       },
-                      "argument2": {
+                      "right": {
                         "type": "minecraft:noise",
                         "noise": "skycraft:realm/float",
                         "xz_scale": 0.9,
                         "y_scale": 4.0
                       }
                     },
-                    "argument2": -0.58
+                    "right": -0.58
                   }
                 }
               },
-              "argument2": {
-                "type": "minecraft:y_clamped_gradient",
-                "from_y": 0,
-                "to_y": 4,
+              "right": {
+                "type": "minecraft:gradient",
                 "from_value": 1.0,
-                "to_value": -1.0
+                "to_value": -1.0,
+                "axis": "y",
+                "from_coordinate": 0,
+                "to_coordinate": 4
               }
             },
-            "argument2": {
-              "type": "minecraft:y_clamped_gradient",
-              "from_y": 232,
-              "to_y": 252,
+            "right": {
+              "type": "minecraft:gradient",
               "from_value": 1.0,
-              "to_value": -1.0
+              "to_value": -1.0,
+              "axis": "y",
+              "from_coordinate": 232,
+              "to_coordinate": 252
             }
-          }
+          },
+          "cell_size_xz": 4,
+          "cell_size_y": 8
         }
       }
     },
-    "vein_toggle": 0.0,
-    "vein_ridged": 0.0,
-    "vein_gap": 0.0
+    "chunk_surface_level": "skycraft:realm/apocrypha/height"
   },
   "spawn_target": [],
-  "surface_rule": {
+  "material_rule": {
     "type": "minecraft:sequence",
     "sequence": [
       {
@@ -177,9 +154,7 @@
         },
         "then_run": {
           "type": "minecraft:block",
-          "result_state": {
-            "Name": "minecraft:bedrock"
-          }
+          "result_state": "minecraft:bedrock"
         }
       },
       {
@@ -216,9 +191,7 @@
                     },
                     "then_run": {
                       "type": "minecraft:block",
-                      "result_state": {
-                        "Name": "skycraft:black_page_block"
-                      }
+                      "result_state": "skycraft:black_page_block"
                     }
                   },
                   {
@@ -231,16 +204,12 @@
                     },
                     "then_run": {
                       "type": "minecraft:block",
-                      "result_state": {
-                        "Name": "skycraft:apocrypha_glyph_stone"
-                      }
+                      "result_state": "skycraft:apocrypha_glyph_stone"
                     }
                   },
                   {
                     "type": "minecraft:block",
-                    "result_state": {
-                      "Name": "skycraft:page_block"
-                    }
+                    "result_state": "skycraft:page_block"
                   }
                 ]
               }
@@ -256,9 +225,7 @@
               },
               "then_run": {
                 "type": "minecraft:block",
-                "result_state": {
-                  "Name": "skycraft:black_page_block"
-                }
+                "result_state": "skycraft:black_page_block"
               }
             }
           ]
@@ -297,16 +264,12 @@
                     },
                     "then_run": {
                       "type": "minecraft:block",
-                      "result_state": {
-                        "Name": "skycraft:apocrypha_tentacle"
-                      }
+                      "result_state": "skycraft:apocrypha_tentacle"
                     }
                   },
                   {
                     "type": "minecraft:block",
-                    "result_state": {
-                      "Name": "skycraft:apocrypha_stone"
-                    }
+                    "result_state": "skycraft:apocrypha_stone"
                   }
                 ]
               }
@@ -322,9 +285,7 @@
               },
               "then_run": {
                 "type": "minecraft:block",
-                "result_state": {
-                  "Name": "skycraft:apocrypha_stone"
-                }
+                "result_state": "skycraft:apocrypha_stone"
               }
             }
           ]
@@ -355,9 +316,7 @@
                   },
                   "then_run": {
                     "type": "minecraft:block",
-                    "result_state": {
-                      "Name": "skycraft:black_page_block"
-                    }
+                    "result_state": "skycraft:black_page_block"
                   }
                 },
                 {
@@ -370,16 +329,12 @@
                   },
                   "then_run": {
                     "type": "minecraft:block",
-                    "result_state": {
-                      "Name": "minecraft:mud"
-                    }
+                    "result_state": "minecraft:mud"
                   }
                 },
                 {
                   "type": "minecraft:block",
-                  "result_state": {
-                    "Name": "skycraft:apocrypha_stone"
-                  }
+                  "result_state": "skycraft:apocrypha_stone"
                 }
               ]
             }
@@ -395,9 +350,7 @@
             },
             "then_run": {
               "type": "minecraft:block",
-              "result_state": {
-                "Name": "skycraft:apocrypha_stone"
-              }
+              "result_state": "skycraft:apocrypha_stone"
             }
           }
         ]

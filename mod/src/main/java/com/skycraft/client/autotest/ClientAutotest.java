@@ -1,6 +1,5 @@
 package com.skycraft.client.autotest;
 
-import com.mojang.blaze3d.platform.NativeImage;
 import com.skycraft.Skycraft;
 import com.skycraft.client.screen.HubScreen;
 import com.skycraft.client.screen.RaceScreen;
@@ -11,18 +10,15 @@ import com.skycraft.magic.client.MagicMenuScreen;
 import com.skycraft.quest.client.JournalScreen;
 import com.skycraft.world.client.MapScreen;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.Screenshot;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RenderGuiOverlayEvent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import javax.imageio.ImageIO;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.nio.file.Files;
@@ -40,7 +36,7 @@ import java.util.List;
  * - Captures screenshots, saves to disk and prints downscaled base64 JPEG markers for CI
  * - Gracefully exits client when complete.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
 public final class ClientAutotest {
     static {
         Path propFile = Paths.get("skycraft_autotest.properties");
@@ -80,6 +76,8 @@ public final class ClientAutotest {
      */
     private static final String AUTO_WORLD = System.getProperty("skycraft.autotest.world", "");
     private static boolean autoWorldStarted;
+    private static final String AUTO_SERVER = System.getProperty("skycraft.autotest.server", "").trim();
+    private static boolean autoServerStarted;
 
     private static void openAutoWorld(Minecraft mc) {
         autoWorldStarted = true;
@@ -92,12 +90,11 @@ public final class ClientAutotest {
                 }
             }
             Skycraft.LOGGER.info("Autotest: creating creative world {}", AUTO_WORLD);
-            net.minecraft.world.level.LevelSettings settings = new net.minecraft.world.level.LevelSettings(AUTO_WORLD,
+            net.minecraft.world.level.LevelSettings settings = ReviewWorlds.settings(AUTO_WORLD,
                     net.minecraft.world.level.GameType.CREATIVE, false, net.minecraft.world.Difficulty.PEACEFUL, true,
-                    new net.minecraft.world.level.GameRules(), net.minecraft.world.level.WorldDataConfiguration.DEFAULT);
-            mc.createWorldOpenFlows().createFreshLevel(AUTO_WORLD, settings, new net.minecraft.world.level.levelgen.WorldOptions(1234L, true, false),
-                    access -> access.registryOrThrow(net.minecraft.core.registries.Registries.WORLD_PRESET)
-                            .getHolderOrThrow(net.minecraft.world.level.levelgen.presets.WorldPresets.NORMAL).value().createWorldDimensions());
+                    net.minecraft.world.level.WorldDataConfiguration.DEFAULT);
+            ReviewWorlds.create(mc, AUTO_WORLD, settings, new net.minecraft.world.level.levelgen.WorldOptions(1234L, true, false),
+                    ReviewWorlds::normal, mc.gui.screen());
         } catch (Exception e) {
             Skycraft.LOGGER.error("Autotest: could not open world {}", AUTO_WORLD, e);
         }
@@ -117,9 +114,9 @@ public final class ClientAutotest {
 
     private static void createFlowTick(Minecraft mc) {
         createTicks++;
-        net.minecraft.client.gui.screens.Screen s = mc.screen;
+        net.minecraft.client.gui.screens.Screen s = mc.gui.screen();
         if (s instanceof net.minecraft.client.gui.screens.AccessibilityOnboardingScreen) {
-            mc.setScreen(new net.minecraft.client.gui.screens.TitleScreen());
+            mc.gui.setScreen(new net.minecraft.client.gui.screens.TitleScreen());
             return;
         }
         if (createStage == 0 && (s instanceof net.minecraft.client.gui.screens.TitleScreen
@@ -133,16 +130,16 @@ public final class ClientAutotest {
                 // Continue an existing save, as the title screen's Continue does
                 Skycraft.LOGGER.info("Autotest: loading saved world {}", LOAD_WORLD);
                 createStage = 2;
-                mc.createWorldOpenFlows().loadLevel(s, LOAD_WORLD);
+                ReviewWorlds.open(mc,LOAD_WORLD,s);
                 return;
             }
             Skycraft.LOGGER.info("Autotest: New Game from the title screen ({})", s.getClass().getSimpleName());
-            net.minecraft.client.gui.screens.worldselection.CreateWorldScreen.openFresh(mc, s);
+            net.minecraft.client.gui.screens.worldselection.CreateWorldScreen.openFresh(mc,()->mc.gui.setScreen(s));
         } else if (createStage == 1 && s instanceof com.skycraft.client.screen.title.SkyCreateWorldScreen && createTicks > 40) {
             createStage = 2;
             createTicks = 0;
             captureAndSave(mc, "00_create_world_screen");
-            s.keyPressed(org.lwjgl.glfw.GLFW.GLFW_KEY_ENTER, 0, 0);
+            s.keyPressed(new net.minecraft.client.input.KeyEvent(com.mojang.blaze3d.platform.InputConstants.KEY_RETURN,0,0));
         } else if (createStage >= 2) {
             String name = s == null ? "none" : s.getClass().getName();
             if (!name.equals(lastScreen)) {
@@ -176,23 +173,24 @@ public final class ClientAutotest {
     private static int burstRemaining;
     private static String burstName;
     private static String liveLastAction = "", liveError = "";
+    private static String remoteCommandSubmitted = "";
+    private static int remoteCommandSubmissions;
     private static int liveSettleUntil, liveSettleStable;
     private static final WorldReadiness READINESS = new WorldReadiness();
     private static String liveCapture;
     private static java.util.concurrent.CompletableFuture<Integer> liveCommand;
     private static long liveCommandDeadline;
-    private static final java.util.concurrent.ExecutorService CAPTURE_WRITER =
-            java.util.concurrent.Executors.newSingleThreadExecutor(r -> {
-                Thread t = new Thread(r, "Skycraft QA screenshot writer");
-                t.setDaemon(true);
-                return t;
-            });
 
     /** Short real-frame bursts avoid missing a return stroke while PNG/JPEG encoding blocks the render thread. */
     @SubscribeEvent
-    public static void onCaptureFrame(TickEvent.RenderTickEvent event) {
+    public static void onCaptureFramePre(net.neoforged.neoforge.client.event.RenderFrameEvent.Pre event) { onCaptureFrame(event); }
+
+    @SubscribeEvent
+    public static void onCaptureFramePost(net.neoforged.neoforge.client.event.RenderFrameEvent.Post event) { onCaptureFrame(event); }
+
+    private static void onCaptureFrame(net.neoforged.neoforge.client.event.RenderFrameEvent event) {
         if (!ENABLED) return;
-        if(event.phase==TickEvent.Phase.START) { FrameProbe.startFrame(); return; }
+        if(event instanceof net.neoforged.neoforge.client.event.RenderFrameEvent.Pre) { FrameProbe.startFrame(); return; }
         Minecraft mc = Minecraft.getInstance();
         FrameProbe.endFrame(mc);
         if(liveCapture!=null) {
@@ -203,12 +201,9 @@ public final class ClientAutotest {
             Skycraft.LOGGER.info("Autotest live: captured {}",tag);
         }
         if(burstRemaining<=0) return;
-        NativeImage image = Screenshot.takeScreenshot(mc.getMainRenderTarget());
-        String tag = burstName + "_" + String.format(java.util.Locale.ROOT, "%02d", 72 - burstRemaining--);
-        CAPTURE_WRITER.execute(() -> {
-            try (image) { image.writeToFile(SCREENSHOT_DIR.resolve(tag + ".png")); }
-            catch (Exception e) { Skycraft.LOGGER.warn("Autotest burst capture failed: {}", tag, e); }
-        });
+        String tag=burstName+"_"+String.format(java.util.Locale.ROOT,"%02d",72-burstRemaining--);
+        ReviewCaptures.capture(mc,SCREENSHOT_DIR,tag,VisualCamera.captureReceipt(mc),null);
+
     }
 
     private static void liveTick(Minecraft mc) {
@@ -221,14 +216,19 @@ public final class ClientAutotest {
             var status = new com.google.gson.JsonObject();
             status.addProperty("pid", ProcessHandle.current().pid());
             status.addProperty("updated", System.currentTimeMillis());
-            status.addProperty("worldLoaded", mc.level != null && mc.getSingleplayerServer() != null);
-            status.addProperty("screen", mc.screen == null ? "game" : mc.screen.getClass().getSimpleName());
+            status.addProperty("worldLoaded", mc.level != null && mc.player != null && QaTransport.connected(mc));
+            QaTransport.describe(mc, status);
+            status.addProperty("remoteQaOperatorReady", QaTransport.remote(mc) && QaTransport.operatorReady(mc));
+            status.addProperty("remoteCommandSubmitted", remoteCommandSubmitted);
+            status.addProperty("remoteCommandSubmissions", remoteCommandSubmissions);
+            status.addProperty("remoteCommandAcknowledged", false);
+            status.addProperty("screen", mc.gui.screen() == null ? "game" : mc.gui.screen().getClass().getSimpleName());
             status.addProperty("queued", LIVE_ACTIONS.size());
             status.addProperty("waitTicks", Math.max(0, liveWait));
             status.addProperty("burstFrames", burstRemaining);
             status.addProperty("settling", liveSettleUntil > 0);
             status.addProperty("readiness", READINESS.describe());
-            status.addProperty("commandPending", liveCommand != null || liveCapture != null || FrameProbe.active() || CameraTravel.active());
+            status.addProperty("commandPending", liveCommand != null || liveCapture != null || burstRemaining>0 || ReviewCaptures.pending()>0 || FrameProbe.active() || CameraTravel.active());
             status.addProperty("controlVersion", liveModified);
             status.addProperty("lastAction", liveLastAction);
             status.addProperty("error", liveError);
@@ -241,12 +241,14 @@ public final class ClientAutotest {
             } catch (Exception ignored) {}
         }
         if (!liveStarted) {
+            // The dedicated QA controller grants op after login; never silently run privileged setup before that.
+            if (QaTransport.remote(mc) && !QaTransport.operatorReady(mc)) return;
             liveStarted = true;
-            mc.setScreen(null);
+            mc.gui.setScreen(null);
             serverCommand(mc, "gamemode spectator @p");
-            serverCommand(mc, "gamerule doDaylightCycle false");
-            serverCommand(mc, "gamerule doWeatherCycle false");
-            serverCommand(mc, "gamerule sendCommandFeedback false");
+            serverCommand(mc, "gamerule advance_time false");
+            serverCommand(mc, "gamerule advance_weather false");
+            serverCommand(mc, "gamerule send_command_feedback false");
             serverCommand(mc, "execute as @p at @p run skycraft-quest intro skip");
             com.skycraft.network.SkyNetwork.sendToServer(new com.skycraft.network.CorePackets.ChooseRace(com.skycraft.core.Race.NORD.id()));
             Skycraft.LOGGER.info("Autotest live: ready; control file {}", LIVE_FILE.toAbsolutePath());
@@ -277,7 +279,8 @@ public final class ClientAutotest {
             mc.options.keyJump.setDown(false); mc.options.keyShift.setDown(false);
             mc.player.setDeltaMovement(net.minecraft.world.phys.Vec3.ZERO);
         }
-        if(liveCapture!=null || FrameProbe.active()) return;
+        if(burstRemaining>0){if(liveWait>0)liveWait--;return;}
+        if(liveCapture!=null || ReviewCaptures.pending()>0 || FrameProbe.active()) return;
         if(CameraTravel.active()) {
             try { CameraTravel.tick(mc); }
             catch(RuntimeException e) {
@@ -341,13 +344,23 @@ public final class ClientAutotest {
                 Class<?> apiClass = Class.forName("net.irisshaders.iris.api.v0.IrisApi");
                 Object api = apiClass.getMethod("getInstance").invoke(null);
                 Object config = apiClass.getMethod("getConfig").invoke(api);
-                Class.forName("net.irisshaders.iris.api.v0.IrisApiConfig")
-                        .getMethod("setShadersEnabledAndApply", boolean.class).invoke(config, enabled);
+                boolean previous = Boolean.TRUE.equals(apiClass.getMethod("isShaderPackInUse").invoke(api));
+                if (previous != enabled) {
+                    Class.forName("net.irisshaders.iris.api.v0.IrisApiConfig")
+                            .getMethod("setShadersEnabledAndApply", boolean.class).invoke(config, enabled);
+                }
                 boolean actual = Boolean.TRUE.equals(apiClass.getMethod("isShaderPackInUse").invoke(api));
                 if (actual != enabled) throw new IllegalStateException("Shader mode did not apply; inspect the shader compilation log");
                 liveSettleUntil = tick + 1200;
                 liveSettleStable = 0;
                 READINESS.begin(mc,0);
+            } else if (action.equals("rebuild")) {
+                mc.levelExtractor.allChanged();
+                liveSettleUntil = tick + 1200;
+                liveSettleStable = 0;
+                READINESS.begin(mc,0);
+            } else if (action.equals("texture-probe")) {
+                com.skycraft.atmosphere.client.CloudRenderer.requestTextureProbe();
             } else if (action.equals("flash")) {
                 com.skycraft.atmosphere.client.CloudRenderer.testLightning();
             } else if (action.startsWith("flash ")) {
@@ -355,7 +368,7 @@ public final class ClientAutotest {
                 com.skycraft.atmosphere.client.CloudRenderer.testLightning(mode);
                 burstName = "lightning_" + mode + "_" + mc.level.getGameTime();
                 burstRemaining = 72;
-                mc.options.hideGui = true;
+                com.skycraft.client.autotest.ReviewWorlds.hudHidden(mc, true);
                 liveWait = 30;
             } else if(action.equals("cast start") || action.equals("cast stop")) {
                 liveCastUntil=action.equals("cast start")?tick+200:0;
@@ -393,20 +406,28 @@ public final class ClientAutotest {
                 READINESS.begin(mc,args.length>1?Math.max(1,Math.min(256,Integer.parseInt(args[1]))):0);
             } else if (action.startsWith("command ")) {
                 var server = mc.getSingleplayerServer();
-                if (server == null) throw new IllegalStateException("No integrated server");
-                String name = mc.player.getGameProfile().getName();
+                String name = mc.player.getGameProfile().name();
                 String command = action.substring(8).replace("@p", name);
-                var completion = new java.util.concurrent.CompletableFuture<Integer>();
-                liveCommand = completion;
-                liveCommandDeadline = System.currentTimeMillis() + 600_000L;
-                server.execute(() -> {
-                    try { completion.complete(server.getCommands().performPrefixedCommand(server.createCommandSourceStack(), command)); }
-                    catch (Exception e) { completion.completeExceptionally(e); }
-                });
+                if (server == null) {
+                    if (!QaTransport.remote(mc) || !QaTransport.operatorReady(mc))
+                        throw new IllegalStateException("Remote QA command requires a connected TCP player granted op by the dedicated server");
+                    mc.player.connection.sendCommand(command);
+                    remoteCommandSubmitted = command;
+                    remoteCommandSubmissions++;
+                    Skycraft.LOGGER.info("Autotest live: remote command submitted without result acknowledgement; verify the dedicated server receipt: {}", command);
+                } else {
+                    var completion = new java.util.concurrent.CompletableFuture<Integer>();
+                    liveCommand = completion;
+                    liveCommandDeadline = System.currentTimeMillis() + 600_000L;
+                    server.execute(() -> {
+                        try { server.getCommands().performPrefixedCommand(server.createCommandSourceStack().withCallback((success,result)->completion.complete(success?result:0)),command); }
+                        catch (Exception e) { completion.completeExceptionally(e); }
+                    });
+                }
             } else if(action.startsWith("camera-travel ")) {
                 CameraTravel.begin(mc,action.substring(14));
             } else if(action.startsWith("ui ")) {
-                mc.setScreen(switch(action.substring(3).trim()) {
+                mc.gui.setScreen(switch(action.substring(3).trim()) {
                     case "map" -> new MapScreen();
                     case "journal" -> new JournalScreen();
                     case "inventory" -> new SkyrimInventoryScreen();
@@ -423,11 +444,24 @@ public final class ClientAutotest {
             } else if (action.equals("identity")) {
                 Files.createDirectories(Paths.get("world-preview"));
                 Files.writeString(Paths.get("world-preview/camera-identity.json"),VisualCamera.identity(mc).toString());
+            } else if (action.equals("transport")) {
+                var receipt = new com.google.gson.JsonObject();
+                QaTransport.describe(mc, receipt);
+                if (!AUTO_SERVER.isEmpty() && !QaTransport.remote(mc))
+                    throw new IllegalStateException("Requested TCP QA is not connected through a real remote connection");
+                receipt.addProperty("pid", ProcessHandle.current().pid());
+                receipt.addProperty("updated", System.currentTimeMillis());
+                receipt.addProperty("requestedServer", AUTO_SERVER);
+                receipt.addProperty("payloadCodecAcceptance", false);
+                receipt.add("network", com.skycraft.network.SkyNetwork.diagnostics());
+                Files.createDirectories(Paths.get("world-preview"));
+                Files.writeString(Paths.get("world-preview/transport-receipt.json"),receipt.toString());
             } else if (action.startsWith("front ")) {
                 String[] v = action.substring(6).trim().split("\\s+");
                 var kind = com.skycraft.atmosphere.weather.WeatherKind.byId(v[3]);
                 if (kind == null) throw new IllegalArgumentException("Unknown front weather");
                 var server = mc.getSingleplayerServer();
+                if (server == null) throw new IllegalStateException("QA fronts require the integrated server; use the dedicated server command inbox for remote tests");
                 server.execute(() -> com.skycraft.atmosphere.weather.RegionalWeather.addFront(server,
                         new com.skycraft.atmosphere.WeatherFront(1_000_000, Float.parseFloat(v[0]), Float.parseFloat(v[1]),
                                 Float.parseFloat(v[2]), v.length > 4 ? Float.parseFloat(v[4]) : 0f,
@@ -442,7 +476,7 @@ public final class ClientAutotest {
                     throw new IllegalStateException("Camera intersects terrain; choose a clear pose before capture");
                 boolean ui=action.startsWith("capture-ui ");
                 String tag = action.substring(ui?11:8).replaceAll("[^A-Za-z0-9_-]", "_");
-                if(!ui) { mc.setScreen(null); mc.options.hideGui = true; }
+                if(!ui) { mc.gui.setScreen(null); com.skycraft.client.autotest.ReviewWorlds.hudHidden(mc, true); }
                 liveCapture = tag;
                 mc.mouseHandler.releaseMouse();
             } else if (action.equals("stop")) {
@@ -469,8 +503,13 @@ public final class ClientAutotest {
 
     private static void serverCommand(Minecraft mc, String command) {
         var server = mc.getSingleplayerServer();
-        if (server == null || mc.player == null) return;
-        String name = mc.player.getGameProfile().getName();
+        if (mc.player == null) return;
+        String name = mc.player.getGameProfile().name();
+        if (server == null) {
+            if (QaTransport.remote(mc) && QaTransport.operatorReady(mc))
+                mc.player.connection.sendCommand(command.replace("@p", name));
+            return;
+        }
         server.execute(() -> server.getCommands().performPrefixedCommand(server.createCommandSourceStack(),
                 command.replace("@p", name)));
     }
@@ -482,7 +521,7 @@ public final class ClientAutotest {
     private static void tourTeleport(Minecraft mc, int x, int z, int up, float yaw, float pitch, String weather) {
         var server = mc.getSingleplayerServer();
         if (server == null || mc.player == null) return;
-        String name = mc.player.getGameProfile().getName();
+        String name = mc.player.getGameProfile().name();
         String wKind = (weather == null || weather.isBlank()) ? "clear" : weather.trim();
         server.execute(() -> {
             var level = server.overworld();
@@ -512,9 +551,9 @@ public final class ClientAutotest {
         switch (s) {
             case 0 -> {
                 com.skycraft.network.SkyNetwork.sendToServer(new com.skycraft.network.CorePackets.ChooseRace(com.skycraft.core.Race.NORD.id()));
-                mc.setScreen(null);
-                serverCommand(mc, "gamerule doDaylightCycle false");
-                serverCommand(mc, "gamerule doMobSpawning false");
+                mc.gui.setScreen(null);
+                serverCommand(mc, "gamerule advance_time false");
+                serverCommand(mc, "gamerule spawn_mobs false");
                 serverCommand(mc, "time set 5000");
                 serverCommand(mc, "weather clear 1000000");
                 serverCommand(mc, "execute as @p at @p run skycraft-weather set clear 600");
@@ -522,10 +561,10 @@ public final class ClientAutotest {
                 tourWait = 120;
             }
             case 1 -> captureAndSave(mc, "t00_spawn_hud");
-            case 2 -> mc.setScreen(new MapScreen());
+            case 2 -> mc.gui.setScreen(new MapScreen());
             case 3 -> {
                 captureAndSave(mc, "t01_map_screen");
-                mc.setScreen(null);
+                mc.gui.setScreen(null);
                 serverCommand(mc, "gamemode spectator @p");
             }
             default -> tourSpotTick(mc, spots);
@@ -567,7 +606,7 @@ public final class ClientAutotest {
         long used = (rt.totalMemory() - rt.freeMemory()) >> 20;
         Skycraft.LOGGER.info("Autotest perf: {} shaders={} skySeesShaders={} fps_now={} fps_avg={} fps_min={} samples={} heap={}MB/{}MB | {}",
                 shot, irisShaders(), skySeesShaders(), mc.getFps(), fpsCount == 0 ? 0 : fpsSum / fpsCount, fpsCount == 0 ? 0 : fpsMin, fpsCount,
-                used, rt.maxMemory() >> 20, mc.fpsString);
+                used, rt.maxMemory() >> 20, mc.getFps()+" fps");
         Skycraft.LOGGER.info("Autotest weather: {} kind={} rain={} snow={} sand={} ash={} regions={}", shot,
                 com.skycraft.atmosphere.client.ClientWeather.kind().id(),
                 com.skycraft.atmosphere.client.ClientWeather.rain(), com.skycraft.atmosphere.client.ClientWeather.snow(),
@@ -578,7 +617,7 @@ public final class ClientAutotest {
         Skycraft.LOGGER.info("Autotest interior: {} {} pos={} yaw={} pitch={} night_vision={}",shot,
                 com.skycraft.atmosphere.client.InteriorAtmosphere.describe(),mc.player.position(),
                 mc.player.getYRot(),mc.player.getXRot(),
-                mc.player.hasEffect(net.minecraft.world.effect.MobEffects.NIGHT_VISION));
+                mc.player.hasEffect(com.skycraft.platform.Effects.holder(net.minecraft.world.effect.MobEffects.NIGHT_VISION)));
     }
 
     /** What the Skycraft sky renderer believes (it skips its extra sky while a shader pack is active). */
@@ -710,9 +749,9 @@ public final class ClientAutotest {
         tourWait = 40;
         if (s == 0) {
             com.skycraft.network.SkyNetwork.sendToServer(new com.skycraft.network.CorePackets.ChooseRace(com.skycraft.core.Race.NORD.id()));
-            mc.setScreen(null);
-            serverCommand(mc, "gamerule doDaylightCycle false");
-            serverCommand(mc, "gamerule doMobSpawning false");
+            mc.gui.setScreen(null);
+            serverCommand(mc, "gamerule advance_time false");
+            serverCommand(mc, "gamerule spawn_mobs false");
             serverCommand(mc, "time set 6000");
             serverCommand(mc, "gamemode spectator @p");
             tourWait = 60;
@@ -726,8 +765,8 @@ public final class ClientAutotest {
         }
         String cmd = cmds[i].trim().replace('+', ' ');
         // no pause menu (a window without focus opens it and stops the integrated server), no HUD or chat in the shot
-        mc.setScreen(null);
-        mc.options.hideGui = true;
+        mc.gui.setScreen(null);
+        com.skycraft.client.autotest.ReviewWorlds.hudHidden(mc, true);
         if ((s - 1) % 2 == 0) {
             serverCommand(mc, "execute as @p at @p run " + cmd);
             tourWait = TOUR_WAIT;
@@ -739,16 +778,27 @@ public final class ClientAutotest {
     }
 
     @SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent event) {
-        if (!ENABLED || event.phase != TickEvent.Phase.END) return;
+    public static void onClientTick(net.neoforged.neoforge.client.event.ClientTickEvent.Post event) {
+        if(ReviewCaptures.pending()>0 && !LIVE)return;
+        if (!ENABLED) return;
         Minecraft mc = Minecraft.getInstance();
+        if (mc.level == null && !AUTO_SERVER.isEmpty()) {
+            // Keep failed TCP diagnostics on their real connection screen; never fall back to an integrated world.
+            if (!autoServerStarted && (mc.gui.screen() instanceof net.minecraft.client.gui.screens.TitleScreen
+                    || mc.gui.screen() instanceof com.skycraft.client.screen.title.SkyTitleScreen)) {
+                autoServerStarted = true;
+                try { QaTransport.connect(mc, mc.gui.screen(), AUTO_SERVER); }
+                catch (RuntimeException failure) { Skycraft.LOGGER.error("Autotest: could not connect to loopback QA server {}", AUTO_SERVER, failure); }
+            }
+            return;
+        }
         if (mc.level == null && CREATE_FLOW) {
             createFlowTick(mc);
             return;
         }
         if (mc.level == null && !AUTO_WORLD.isEmpty() && !autoWorldStarted
-                && (mc.screen instanceof net.minecraft.client.gui.screens.TitleScreen
-                || mc.screen instanceof com.skycraft.client.screen.title.SkyTitleScreen)) {
+                && (mc.gui.screen() instanceof net.minecraft.client.gui.screens.TitleScreen
+                || mc.gui.screen() instanceof com.skycraft.client.screen.title.SkyTitleScreen)) {
             openAutoWorld(mc);
             return;
         }
@@ -804,59 +854,59 @@ public final class ClientAutotest {
         switch (currentStep) {
             case 0 -> {
                 Skycraft.LOGGER.info("Autotest [1/10]: Opening Character Creator (RaceScreen)");
-                mc.setScreen(new RaceScreen());
+                mc.gui.setScreen(new RaceScreen());
             }
             case 1 -> {
                 captureAndSave(mc, "01_race_screen");
-                mc.setScreen(null);
+                mc.gui.setScreen(null);
             }
             case 2 -> {
                 Skycraft.LOGGER.info("Autotest [2/10]: Opening Skills Screen");
-                mc.setScreen(new SkillsScreen());
+                mc.gui.setScreen(new SkillsScreen());
             }
             case 3 -> {
                 captureAndSave(mc, "02_skills_screen");
-                mc.setScreen(null);
+                mc.gui.setScreen(null);
             }
             case 4 -> {
                 Skycraft.LOGGER.info("Autotest [3/10]: Opening Menu Hub (Tab)");
-                mc.setScreen(new HubScreen());
+                mc.gui.setScreen(new HubScreen());
             }
             case 5 -> {
                 captureAndSave(mc, "03_hub_screen");
-                mc.setScreen(null);
+                mc.gui.setScreen(null);
             }
             case 6 -> {
                 Skycraft.LOGGER.info("Autotest [4/10]: Opening Skyrim Inventory");
-                mc.setScreen(new SkyrimInventoryScreen());
+                mc.gui.setScreen(new SkyrimInventoryScreen());
             }
             case 7 -> {
                 captureAndSave(mc, "04_inventory_screen");
-                mc.setScreen(null);
+                mc.gui.setScreen(null);
             }
             case 8 -> {
                 Skycraft.LOGGER.info("Autotest [5/10]: Opening Magic Menu");
-                mc.setScreen(new MagicMenuScreen());
+                mc.gui.setScreen(new MagicMenuScreen());
             }
             case 9 -> {
                 captureAndSave(mc, "05_magic_screen");
-                mc.setScreen(null);
+                mc.gui.setScreen(null);
             }
             case 10 -> {
                 Skycraft.LOGGER.info("Autotest [6/10]: Opening Quest Journal");
-                mc.setScreen(new JournalScreen());
+                mc.gui.setScreen(new JournalScreen());
             }
             case 11 -> {
                 captureAndSave(mc, "06_journal_screen");
-                mc.setScreen(null);
+                mc.gui.setScreen(null);
             }
             case 12 -> {
                 Skycraft.LOGGER.info("Autotest [7/10]: Opening Skyrim Map");
-                mc.setScreen(new MapScreen());
+                mc.gui.setScreen(new MapScreen());
             }
             case 13 -> {
                 captureAndSave(mc, "07_map_screen");
-                mc.setScreen(null);
+                mc.gui.setScreen(null);
             }
             case 14 -> {
                 Skycraft.LOGGER.info("Autotest [8/10]: Summoning Skycraft Entities in view");
@@ -870,31 +920,31 @@ public final class ClientAutotest {
             // magic & skills workstream: the new constellations, the Mysticism tab, spellmaking and staff enchanting
             case 16 -> {
                 SkillsScreen.preselect(com.skycraft.core.Skill.MYSTICISM);
-                mc.setScreen(new SkillsScreen());
+                mc.gui.setScreen(new SkillsScreen());
             }
             case 17 -> {
                 captureAndSave(mc, "09_skills_mysticism");
-                mc.setScreen(null);
+                mc.gui.setScreen(null);
             }
-            case 18 -> mc.setScreen(new com.skycraft.magic.client.SpellmakingScreen(mc.player.blockPosition()).withEffects(
+            case 18 -> mc.gui.setScreen(new com.skycraft.magic.client.SpellmakingScreen(mc.player.blockPosition()).withEffects(
                     com.skycraft.magic.spell.spellmaking.SpellEffectType.FIRE_DAMAGE, com.skycraft.magic.spell.spellmaking.SpellEffectType.SOUL_TRAP,
                     com.skycraft.magic.spell.spellmaking.SpellEffectType.TURN_UNDEAD, com.skycraft.magic.spell.spellmaking.SpellEffectType.SHIELD));
             case 19 -> {
                 captureAndSave(mc, "10_spellmaking_screen");
-                mc.setScreen(null);
+                mc.gui.setScreen(null);
             }
-            case 20 -> mc.setScreen(new com.skycraft.arsenal.client.StaffEnchanterScreen(mc.player.blockPosition()));
+            case 20 -> mc.gui.setScreen(new com.skycraft.arsenal.client.StaffEnchanterScreen(mc.player.blockPosition()));
             case 21 -> {
                 captureAndSave(mc, "11_staff_enchanter_screen");
-                mc.setScreen(null);
+                mc.gui.setScreen(null);
             }
             case 22 -> {
                 com.skycraft.magic.client.MagicMenuScreen.preselect(com.skycraft.magic.spell.School.MYSTICISM);
-                mc.setScreen(new MagicMenuScreen());
+                mc.gui.setScreen(new MagicMenuScreen());
             }
             case 23 -> {
                 captureAndSave(mc, "12_magic_mysticism");
-                mc.setScreen(null);
+                mc.gui.setScreen(null);
             }
             case 24 -> {
                 Skycraft.LOGGER.info("=== Skycraft Autotest: Completed successfully! Closing client. ===");
@@ -903,41 +953,22 @@ public final class ClientAutotest {
         }
     }
 
-    public static void captureAndSave(Minecraft mc, String name) {
-        try {
-            NativeImage img = Screenshot.takeScreenshot(mc.getMainRenderTarget());
-            File outFile = SCREENSHOT_DIR.resolve(name + ".png").toFile();
-            img.writeToFile(outFile);
-            VisualCamera.receipt(mc,name,SCREENSHOT_DIR);
-
-            // The live driver reads real PNGs. CI thumbnails are unnecessary
-            // extra encoding and megabytes of base64 in long development logs.
-            if(LIVE) { img.close(); return; }
-
-            // Downscale to JPEG and log as base64 markers for CI log inspection
-            byte[] bytes = img.asByteArray();
-            img.close();
-
-            BufferedImage src = ImageIO.read(new ByteArrayInputStream(bytes));
-            if (src != null) {
-                int thumbW = 400;
-                int thumbH = (int) (src.getHeight() * (400.0 / src.getWidth()));
-                BufferedImage thumb = new BufferedImage(thumbW, thumbH, BufferedImage.TYPE_INT_RGB);
-                Graphics2D g = thumb.createGraphics();
-                g.drawImage(src.getScaledInstance(thumbW, thumbH, Image.SCALE_SMOOTH), 0, 0, null);
-                g.dispose();
-
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                ImageIO.write(thumb, "jpg", baos);
-                String b64 = Base64.getEncoder().encodeToString(baos.toByteArray());
-
-                System.out.println("=== SCREENSHOT_START:" + name + " ===");
-                System.out.println(b64);
-                System.out.println("=== SCREENSHOT_END:" + name + " ===");
-            }
-        } catch (Exception e) {
-            Skycraft.LOGGER.warn("Autotest could not capture screenshot for {}", name, e);
-        }
+    public static void captureAndSave(Minecraft mc,String name){
+        ReviewCaptures.capture(mc,SCREENSHOT_DIR,name,VisualCamera.captureReceipt(mc),LIVE?null:path->{
+            try{
+                BufferedImage src=ImageIO.read(path.toFile());
+                if(src==null)throw new java.io.IOException("Unreadable completed screenshot "+path);
+                int thumbW=400,thumbH=(int)(src.getHeight()*(400.0/src.getWidth()));
+                BufferedImage thumb=new BufferedImage(thumbW,thumbH,BufferedImage.TYPE_INT_RGB);
+                Graphics2D graphics=thumb.createGraphics();
+                graphics.drawImage(src.getScaledInstance(thumbW,thumbH,Image.SCALE_SMOOTH),0,0,null);graphics.dispose();
+                ByteArrayOutputStream encoded=new ByteArrayOutputStream();ImageIO.write(thumb,"jpg",encoded);
+                System.out.println("=== SCREENSHOT_START:"+name+" ===");
+                System.out.println(Base64.getEncoder().encodeToString(encoded.toByteArray()));
+                System.out.println("=== SCREENSHOT_END:"+name+" ===");
+            }catch(java.io.IOException failure){throw new java.io.UncheckedIOException(failure);}
+        }).whenComplete((path,failure)->{
+            if(failure!=null)mc.execute(()->{liveError="Capture failed: "+name+": "+failure;LIVE_ACTIONS.clear();});
+        });
     }
 }
-

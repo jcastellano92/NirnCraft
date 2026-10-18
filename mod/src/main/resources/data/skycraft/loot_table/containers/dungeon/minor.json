@@ -1,0 +1,103 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:septim",
+          "weight": 50,
+          "modifier": {
+            "min": 2,
+            "max": 8,
+            "growth": 0.04,
+            "type": "skycraft:scaled_gold"
+          }
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 50
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:sugar",
+          "weight": 30,
+          "modifier": [
+            {
+              "tag": "skycraft:loot/ingredients",
+              "type": "skycraft:regional_tag"
+            },
+            {
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 1,
+                "max": 2
+              },
+              "type": "minecraft:set_count"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:loot_table",
+          "weight": 12,
+          "value": "skycraft:parts/potions"
+        },
+        {
+          "type": "minecraft:loot_table",
+          "weight": 7,
+          "value": "skycraft:parts/lockpicks"
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:arrow",
+          "weight": 9,
+          "modifier": [
+            {
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 6,
+                "max": 14
+              },
+              "type": "minecraft:set_count"
+            },
+            {
+              "kind": "arrow",
+              "type": "skycraft:leveled_gear"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:loot_table",
+          "weight": 4,
+          "value": "skycraft:parts/gems"
+        },
+        {
+          "type": "minecraft:loot_table",
+          "weight": 4,
+          "value": "skycraft:parts/soul_gems"
+        },
+        {
+          "type": "minecraft:loot_table",
+          "weight": 10,
+          "value": "skycraft:parts/food"
+        },
+        {
+          "type": "minecraft:loot_table",
+          "weight": 4,
+          "value": "skycraft:parts/lore_note"
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 20
+        }
+      ]
+    }
+  ],
+  "random_sequence": "skycraft:containers/dungeon/minor"
+}

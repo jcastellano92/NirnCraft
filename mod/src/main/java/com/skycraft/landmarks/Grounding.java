@@ -128,7 +128,7 @@ public final class Grounding {
             for (int dz = -radius; dz <= radius; dz++) {
                 if (dx * dx + dz * dz > radius * radius) continue;
                 int x = b.cx + dx, z = b.cz + dz;
-                if (!b.writable(p.set(x, level.getMinBuildHeight() + 8, z))) continue;
+                if (!b.writable(p.set(x, level.getMinY() + 8, z))) continue;
                 int g = b.groundAt(x, z);
                 if (!level.getFluidState(p.set(x, g, z)).isEmpty() || !level.getFluidState(p.set(x, g + 1, z)).isEmpty()) {
                     f.wet++;
@@ -169,15 +169,15 @@ public final class Grounding {
                 double d = Math.sqrt((double) dx * dx + dz * dz);
                 if (d > reach) continue;
                 int x = b.cx + dx, z = b.cz + dz;
-                if (!b.writable(p.set(x, level.getMinBuildHeight() + 8, z))) continue;
+                if (!b.writable(p.set(x, level.getMinY() + 8, z))) continue;
                 int target = d <= radius ? baseTop : baseTop - (int) Math.ceil(d - radius);
                 int g = b.groundAt(x, z);
                 if (g >= target) continue;
                 if (!level.getFluidState(p.set(x, g, z)).isEmpty() || !level.getFluidState(p.set(x, g + 1, z)).isEmpty()) continue;
                 BlockState top = level.getBlockState(p.set(x, g, z));
                 BlockState sub = level.getBlockState(p.set(x, g - 1, z));
-                if (!top.isSolidRender(level, p.set(x, g, z))) top = Blocks.DIRT.defaultBlockState();
-                if (!sub.isSolidRender(level, p.set(x, g - 1, z)) || sub.is(BlockTags.LOGS) || sub.is(BlockTags.LEAVES)) {
+                if (!top.isSolidRender()) top = Blocks.DIRT.defaultBlockState();
+                if (!sub.isSolidRender() || sub.is(BlockTags.LOGS) || sub.is(BlockTags.LEAVES)) {
                     sub = top.is(Blocks.GRASS_BLOCK) || top.is(Blocks.PODZOL) || top.is(Blocks.MYCELIUM) ? Blocks.DIRT.defaultBlockState() : top;
                 }
                 // a grass top over a column that is mostly sub: top block only at the new surface
@@ -262,8 +262,8 @@ public final class Grounding {
                 maxH = Math.max(maxH, h);
             }
         }
-        int yLo = Math.max(level.getMinBuildHeight(), minH - 12);
-        int yHi = Math.min(level.getMaxBuildHeight(), maxH + 2);
+        int yLo = Math.max(level.getMinY(), minH - 12);
+        int yHi = Math.min((level.getMaxY() + 1), maxH + 2);
         int hgt = yHi - yLo;
         if (hgt <= 0) return List.of();
         // 0 air, 1 carried and unsupported yet, 2 carried and supported, 4 soft (plants, snow layers, leaves: no support, no gap)
@@ -402,7 +402,7 @@ public final class Grounding {
                     long f = part.feet.getLong(i);
                     int gap = part.gaps.getInt(i);
                     BlockState foot = level.getBlockState(BlockPos.of(f));
-                    BlockState pillar = foot.isSolidRender(level, BlockPos.of(f)) && !foot.is(BlockTags.LEAVES) && !foot.is(BlockTags.LOGS)
+                    BlockState pillar = foot.isSolidRender() && !foot.is(BlockTags.LEAVES) && !foot.is(BlockTags.LOGS)
                             && foot.getFluidState().isEmpty() ? foot : fallback;
                     for (int k = 1; k <= gap; k++) {
                         p.set(BlockPos.getX(f), BlockPos.getY(f) - k, BlockPos.getZ(f));

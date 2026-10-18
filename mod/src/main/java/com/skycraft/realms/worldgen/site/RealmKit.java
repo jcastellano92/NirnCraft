@@ -52,7 +52,7 @@ final class RealmKit {
     }
 
     static BlockState chain(Direction.Axis axis) {
-        return Blocks.CHAIN.defaultBlockState().setValue(ChainBlock.AXIS, axis);
+        return com.skycraft.worldgen.VanillaBlocks.CHAIN.defaultBlockState().setValue(ChainBlock.AXIS, axis);
     }
 
     static BlockState skull(Block skull, int rotation) {

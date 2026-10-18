@@ -8,19 +8,19 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.MobSpawnType;
-import net.minecraft.world.entity.npc.AbstractVillager;
-import net.minecraft.world.entity.npc.Villager;
-import net.minecraft.world.entity.npc.VillagerProfession;
-import net.minecraft.world.entity.npc.WanderingTrader;
+import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.world.entity.npc.villager.AbstractVillager;
+import net.minecraft.world.entity.npc.villager.Villager;
+import net.minecraft.world.entity.npc.villager.VillagerProfession;
+import net.minecraft.world.entity.npc.wanderingtrader.WanderingTrader;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.EntityJoinLevelEvent;
-import net.minecraftforge.event.server.ServerStoppedEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.registries.ForgeRegistries;
+
+import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
+import net.neoforged.neoforge.event.server.ServerStoppedEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
+import net.minecraft.core.registries.BuiltInRegistries;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -36,7 +36,7 @@ import java.util.Set;
  * Names, persistent data (shops, tags from other modules) and position are kept. Conversions are capped per area,
  * so a breeding farm can't flood a town.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class VillagerConversion {
     private static final int MAX_NEARBY = 28;
 
@@ -51,16 +51,16 @@ public final class VillagerConversion {
     @SubscribeEvent(priority = EventPriority.HIGH)
     public static void onJoin(EntityJoinLevelEvent event) {
         Entity e = event.getEntity();
-        if (event.getLevel().isClientSide || !(e instanceof AbstractVillager v) || !(event.getLevel() instanceof ServerLevel level)) return;
+        if (event.getLevel().isClientSide() || !(e instanceof AbstractVillager v) || !(event.getLevel() instanceof ServerLevel level)) return;
         if (!(v instanceof Villager) && !(v instanceof WanderingTrader)) return; // other mods' villager subclasses keep their own logic
-        if (v.getPersistentData().getBoolean("skycraft_stable_master")) return;
+        if (v.getPersistentData().getBooleanOr("skycraft_stable_master",false)) return;
         if (!SocietyConfig.CONVERT_VILLAGERS.get()) return;
         // decide the caps here: only cancel when conversion is certain, otherwise the villager joins unchanged
         // (convert() re-checks, so a bail there can only happen on a chunk unloading within the tick)
         if (PENDING.size() > 256) return;
         BlockPos at = v.blockPosition();
         if (level.getEntitiesOfClass(NpcEntity.class, new net.minecraft.world.phys.AABB(at).inflate(48), n -> true).size() >= MAX_NEARBY) return;
-        if (!(v instanceof WanderingTrader) && v.getPersistentData().isEmpty() && v.getTags().isEmpty()
+        if (!(v instanceof WanderingTrader) && v.getPersistentData().isEmpty() && v.entityTags().isEmpty()
                 && SettlementCrowd.settlementFull(level, at)) return;
         event.setCanceled(true);
         NpcRole role;
@@ -68,21 +68,21 @@ public final class VillagerConversion {
         int lvl = 2;
         boolean trader = v instanceof WanderingTrader;
         if (v instanceof Villager villager) {
-            VillagerProfession p = villager.getVillagerData().getProfession();
-            lvl = villager.getVillagerData().getLevel();
+            net.minecraft.resources.ResourceKey<VillagerProfession> p = villager.getVillagerData().profession().unwrapKey().orElseThrow();
+            lvl = villager.getVillagerData().level();
             role = villager.isBaby() ? NpcRole.CHILD : roleFor(p);
-            var key = ForgeRegistries.VILLAGER_PROFESSIONS.getKey(p);
+            var key = p.identifier();
             if (key != null && p != VillagerProfession.NONE && p != VillagerProfession.NITWIT) profession = key.toString();
         } else {
             role = NpcRole.CARAVAN_TRADER;
         }
         if (com.skycraft.survival.inn.Innkeepers.isInnkeeper(v)) role = NpcRole.INNKEEPER;
         PENDING.add(new Pending(level, v.position(), v.getYRot(), role, profession, lvl, v.getCustomName(),
-                v.getPersistentData().copy(), Set.copyOf(v.getTags()), v.isPersistenceRequired() || v.hasCustomName(), trader));
+                v.getPersistentData().copy(), Set.copyOf(v.entityTags()), v.isPersistenceRequired() || v.hasCustomName(), trader));
     }
 
     /** The trade a villager profession becomes. */
-    public static NpcRole roleFor(VillagerProfession p) {
+    public static NpcRole roleFor(net.minecraft.resources.ResourceKey<VillagerProfession> p) {
         if (p == VillagerProfession.ARMORER || p == VillagerProfession.WEAPONSMITH || p == VillagerProfession.TOOLSMITH) return NpcRole.BLACKSMITH;
         if (p == VillagerProfession.CLERIC) return NpcRole.APOTHECARY;
         if (p == VillagerProfession.LIBRARIAN) return NpcRole.SCHOLAR;
@@ -96,8 +96,8 @@ public final class VillagerConversion {
     }
 
     @SubscribeEvent
-    public static void onServerTick(TickEvent.ServerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || PENDING.isEmpty()) return;
+    public static void onServerTick(net.neoforged.neoforge.event.tick.ServerTickEvent.Post event) {
+        if (!(event instanceof net.neoforged.neoforge.event.tick.ServerTickEvent.Post) || PENDING.isEmpty()) return;
         List<Pending> batch = new ArrayList<>(PENDING);
         PENDING.clear();
         for (Pending p : batch) {
@@ -122,14 +122,14 @@ public final class VillagerConversion {
         if (nearby >= MAX_NEARBY) return;
         // a settlement that already holds as many people as its housing plan has slots takes no strangers
         if (!p.trader() && p.persistent().isEmpty() && p.tags().isEmpty() && SettlementCrowd.settlementFull(level, pos)) return;
-        NpcEntity npc = NpcEntities.typeFor(p.role()).create(level);
+        NpcEntity npc = NpcEntities.typeFor(p.role()).create(level, net.minecraft.world.entity.EntitySpawnReason.STRUCTURE);
         if (npc == null) return;
-        npc.moveTo(p.pos().x, p.pos().y, p.pos().z, p.yaw(), 0f);
+        npc.snapTo(p.pos().x, p.pos().y, p.pos().z, p.yaw(), 0f);
         npc.setYHeadRot(p.yaw());
         npc.setRole(p.role());
         // keep what other modules stored (innkeeper tags, shops, quest markers), minus vanilla-only bits
         CompoundTag pd = npc.getPersistentData();
-        for (String k : p.persistent().getAllKeys()) pd.put(k, p.persistent().get(k).copy());
+        for (String k : p.persistent().keySet()) pd.put(k, p.persistent().get(k).copy());
         if (p.profession() != null && !pd.contains(Npcs.PROFESSION_KEY)) pd.putString(Npcs.PROFESSION_KEY, p.profession());
         if (p.profession() != null && !pd.contains(Shop.KEY)) {
             // the villager's experience becomes the shop's level
@@ -139,13 +139,13 @@ public final class VillagerConversion {
         }
         for (String t : p.tags()) npc.addTag(t);
         if (p.name() != null) npc.setCustomName(p.name());
-        npc.finalizeSpawn(level, level.getCurrentDifficultyAt(pos), MobSpawnType.CONVERSION, null, null);
+        npc.finalizeSpawn(level, level.getCurrentDifficultyAt(pos), EntitySpawnReason.CONVERSION, null);
         // a profession-only shop entry needs its pools now that the role is known
-        CompoundTag shop = pd.getCompound(Shop.KEY);
+        CompoundTag shop = pd.getCompoundOrEmpty(Shop.KEY);
         if (!shop.contains("pools")) {
             pd.remove(Shop.KEY);
             Npcs.setupTrade(npc, p.role(), npc.getRandom());
-            if (pd.contains(Shop.KEY)) pd.getCompound(Shop.KEY).putInt("level", Math.max(1, Math.min(5, p.level5())));
+            if (pd.contains(Shop.KEY)) pd.getCompoundOrEmpty(Shop.KEY).putInt("level", Math.max(1, Math.min(5, p.level5())));
         }
         if (p.trader()) {
             // caravans move on after a while, like the wandering traders they replace

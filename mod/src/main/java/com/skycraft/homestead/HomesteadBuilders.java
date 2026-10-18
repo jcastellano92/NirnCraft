@@ -20,9 +20,9 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -34,7 +34,7 @@ import java.util.Optional;
  * then, and wherever a recorded settlement has no builder, the first player to come near gets one at the market
  * square: a mason's trade (the mason's stock, with the regional layer), tagged {@value HomesteadDialogue#TAG}.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class HomesteadBuilders {
     private static final int INTERVAL = 100;
     private static final long RECHECK_TICKS = 1200;
@@ -43,11 +43,11 @@ public final class HomesteadBuilders {
     private HomesteadBuilders() {}
 
     @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer player) || player.isSpectator()) return;
+    public static void onPlayerTick(net.neoforged.neoforge.event.tick.PlayerTickEvent.Post event) {
+        if (!(event instanceof net.neoforged.neoforge.event.tick.PlayerTickEvent.Post) || !(event.getEntity() instanceof ServerPlayer player) || player.isSpectator()) return;
         if ((player.tickCount + player.getId()) % INTERVAL != 0 || player.level().dimension() != Level.OVERWORLD) return;
         try {
-            ensureBuilder(player.serverLevel(), player.blockPosition());
+            ensureBuilder(player.level(), player.blockPosition());
         } catch (RuntimeException e) {
             Skycraft.LOGGER.debug("Skycraft builder check failed", e);
         }
@@ -63,9 +63,9 @@ public final class HomesteadBuilders {
         Long last = CHECKED.get(e.key);
         if (last != null && now - last < RECHECK_TICKS && now >= last) return false;
         CHECKED.put(e.key, now);
-        AABB box = new AABB(e.x - e.radius - 16, level.getMinBuildHeight(), e.z - e.radius - 16,
-                e.x + e.radius + 16, level.getMaxBuildHeight(), e.z + e.radius + 16);
-        if (!level.getEntitiesOfClass(NpcEntity.class, box, n -> n.isAlive() && n.getPersistentData().getBoolean(HomesteadDialogue.TAG)).isEmpty()) {
+        AABB box = new AABB(e.x - e.radius - 16, level.getMinY(), e.z - e.radius - 16,
+                e.x + e.radius + 16, (level.getMaxY()+1), e.z + e.radius + 16);
+        if (!level.getEntitiesOfClass(NpcEntity.class, box, n -> n.isAlive() && n.getPersistentData().getBooleanOr(HomesteadDialogue.TAG, false)).isEmpty()) {
             return false;
         }
         BlockPos at = spot(level, e);

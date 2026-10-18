@@ -11,7 +11,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.decoration.HangingEntity;
-import net.minecraft.world.entity.npc.AbstractVillager;
+import net.minecraft.world.entity.npc.villager.AbstractVillager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.level.Explosion;
@@ -21,27 +21,27 @@ import net.minecraft.world.level.block.piston.PistonStructureResolver;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.EntityHitResult;
-import net.minecraftforge.event.entity.EntityMobGriefingEvent;
-import net.minecraftforge.event.entity.ProjectileImpactEvent;
-import net.minecraftforge.event.entity.living.LivingDestroyBlockEvent;
-import net.minecraftforge.event.entity.player.AttackEntityEvent;
-import net.minecraftforge.event.entity.player.BonemealEvent;
-import net.minecraftforge.event.entity.player.FillBucketEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.event.level.BlockEvent;
-import net.minecraftforge.event.level.ExplosionEvent;
-import net.minecraftforge.event.level.PistonEvent;
-import net.minecraftforge.event.server.ServerStoppedEvent;
-import net.minecraftforge.eventbus.api.Event;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.entity.EntityMobGriefingEvent;
+import net.neoforged.neoforge.event.entity.ProjectileImpactEvent;
+import net.neoforged.neoforge.event.entity.living.LivingDestroyBlockEvent;
+import net.neoforged.neoforge.event.entity.player.AttackEntityEvent;
+import net.neoforged.neoforge.event.entity.player.BonemealEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.neoforge.event.level.BlockEvent;
+import net.neoforged.neoforge.event.level.ExplosionEvent;
+import net.neoforged.neoforge.event.level.PistonEvent;
+import net.neoforged.neoforge.event.server.ServerStoppedEvent;
+import net.neoforged.bus.api.Event;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraftforge.common.util.FakePlayer;
-import net.minecraftforge.event.TickEvent;
+import net.neoforged.neoforge.common.util.FakePlayer;
+
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -56,18 +56,18 @@ import java.util.UUID;
  * explosions, mobs, fire, fluids, pistons, tools and decor entities. Handlers are cheap: a claim lookup (a handful
  * of homesteads) and, for the few block classes that need it, a cached footprint query.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class ProtectEvents {
     /** Fire blocks scripted scenes keep burning ({@code skycraft:persistent_fire}, added by the Helgen scene). */
     public static final net.minecraft.tags.TagKey<net.minecraft.world.level.block.Block> PERSISTENT_FIRE = net.minecraft.tags.TagKey.create(
-            net.minecraft.core.registries.Registries.BLOCK, new net.minecraft.resources.ResourceLocation(Skycraft.MODID, "persistent_fire"));
+            net.minecraft.core.registries.Registries.BLOCK, net.minecraft.resources.Identifier.fromNamespaceAndPath(Skycraft.MODID, "persistent_fire"));
 
     private ProtectEvents() {}
 
     // ------------------------------------------------------------------ players: breaking and placing
 
     @SubscribeEvent(priority = EventPriority.HIGH)
-    public static void onBlockBreak(BlockEvent.BreakEvent event) {
+    public static void onBlockBreak(net.neoforged.neoforge.event.level.block.BreakBlockEvent event) {
         if (!(event.getLevel() instanceof ServerLevel level) || !(event.getPlayer() instanceof ServerPlayer player)) return;
         Protect.Decision d = Protect.checkBreak(player, level, event.getPos(), event.getState());
         if (d.allowed()) return;
@@ -89,15 +89,15 @@ public final class ProtectEvents {
 
     /** Keeps each client's picture of the claims around it (and of whether the rules apply to it) current. */
     @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer player) || player.tickCount % 40 != 7) return;
+    public static void onPlayerTick(net.neoforged.neoforge.event.tick.PlayerTickEvent.Post event) {
+        if (!(event instanceof net.neoforged.neoforge.event.tick.PlayerTickEvent.Post) || !(event.getEntity() instanceof ServerPlayer player) || player.tickCount % 40 != 7) return;
         if (player instanceof FakePlayer || player.connection == null) return;
         boolean enabled = Protect.enabled();
         boolean bypass = Protect.bypassed(player);
-        ServerLevel level = player.serverLevel();
+        ServerLevel level = player.level();
         List<ProtectPackets.ClaimView> views = new ArrayList<>();
         if (enabled && !bypass) {
-            String dim = level.dimension().location().toString();
+            String dim = level.dimension().identifier().toString();
             for (HomesteadClaim c : HomesteadData.get(level.getServer()).allClaims()) {
                 if (!dim.equals(c.getDimension())) continue;
                 BlockPos at = c.getCenter();
@@ -150,7 +150,8 @@ public final class ProtectEvents {
     @SubscribeEvent(priority = EventPriority.HIGH)
     public static void onBonemeal(BonemealEvent event) {
         if (!ProtectConfig.TOOL_ACTIONS_OFF.get() || !Protect.enabled()) return;
-        if (!(event.getEntity() instanceof ServerPlayer player) || !(event.getLevel() instanceof ServerLevel level)) return;
+        if (!(event.getPlayer() instanceof ServerPlayer player)) return;
+        ServerLevel level = player.level();
         if (Protect.bypassed(player) || Protect.mayBuildAt(player, level, event.getPos())) return;
         event.setCanceled(true);
         Protect.hint(player, "message.skycraft.protect.break");
@@ -158,23 +159,35 @@ public final class ProtectEvents {
 
     /** Buckets: no pouring water or lava outside a homestead; no scooping out a town's well or fountain. */
     @SubscribeEvent(priority = EventPriority.HIGH)
-    public static void onBucket(FillBucketEvent event) {
-        if (!ProtectConfig.FLUIDS_OFF.get() || !Protect.enabled()) return;
-        if (!(event.getEntity() instanceof ServerPlayer player) || !(event.getLevel() instanceof ServerLevel level)) return;
-        if (Protect.bypassed(player) || !(event.getTarget() instanceof BlockHitResult hit)) return;
-        BlockPos clicked = hit.getBlockPos();
-        BlockPos target = clicked.relative(hit.getDirection());
-        boolean pouring = event.getEmptyBucket().getItem() instanceof BucketItem bucket && bucket.getFluid() != Fluids.EMPTY;
-        if (pouring) {
-            if (Protect.mayBuildAt(player, level, target) || Protect.mayBuildAt(player, level, clicked)) return;
+    public static void onBucket(PlayerInteractEvent.RightClickItem event) {
+        if (denyBucket(event.getEntity(), event.getItemStack())) {
+            event.setCancellationResult(net.minecraft.world.InteractionResult.FAIL);
             event.setCanceled(true);
-            Protect.hint(player, "message.skycraft.protect.fluid");
-            return;
         }
-        // scooping a source: fine in the wild, not out of a settlement's well, a road's ditch or a structure's pool
-        if (Protect.mayBuildAt(player, level, clicked) || !Footprints.at(level, clicked).built()) return;
-        event.setCanceled(true);
-        Protect.hint(player, "message.skycraft.protect.break");
+    }
+
+    @SubscribeEvent(priority = EventPriority.HIGH)
+    public static void onBucketBlock(PlayerInteractEvent.RightClickBlock event) {
+        if (denyBucket(event.getEntity(), event.getItemStack())) event.setUseItem(net.minecraft.util.TriState.FALSE);
+    }
+
+    private static boolean denyBucket(Player actor, net.minecraft.world.item.ItemStack item) {
+        if (!ProtectConfig.FLUIDS_OFF.get() || !Protect.enabled() || !(actor instanceof ServerPlayer player)
+                || !(item.getItem() instanceof BucketItem bucket) || Protect.bypassed(player)) return false;
+        ServerLevel level = player.level();
+        Vec3 start = player.getEyePosition();
+        BlockHitResult hit = level.clip(new net.minecraft.world.level.ClipContext(start,
+                start.add(player.getViewVector(1f).scale(player.blockInteractionRange())),
+                net.minecraft.world.level.ClipContext.Block.OUTLINE, bucket.getFluidContext(), player));
+        if (hit.getType() != net.minecraft.world.phys.HitResult.Type.BLOCK) return false;
+        BlockPos clicked = hit.getBlockPos(); BlockPos target = clicked.relative(hit.getDirection());
+        boolean pouring = bucket.getFluidContext() != net.minecraft.world.level.ClipContext.Fluid.SOURCE_ONLY;
+        if (pouring) {
+            if (Protect.mayBuildAt(player, level, target) || Protect.mayBuildAt(player, level, clicked)) return false;
+            Protect.hint(player, "message.skycraft.protect.fluid"); return true;
+        }
+        if (Protect.mayBuildAt(player, level, clicked) || !Footprints.at(level, clicked).built()) return false;
+        Protect.hint(player, "message.skycraft.protect.break"); return true;
     }
 
     // ------------------------------------------------------------------ decor entities
@@ -184,7 +197,7 @@ public final class ProtectEvents {
         if (!ProtectConfig.PROTECT_ENTITIES.get() || !Protect.enabled()) return;
         Entity target = event.getTarget();
         if (!isDecor(target) || !(event.getEntity() instanceof ServerPlayer player)) return;
-        if (Protect.bypassed(player) || Protect.mayBuildAt(player, player.serverLevel(), target.blockPosition())) return;
+        if (Protect.bypassed(player) || Protect.mayBuildAt(player, player.level(), target.blockPosition())) return;
         event.setCanceled(true);
         Protect.hint(player, "message.skycraft.protect.break");
     }
@@ -198,7 +211,7 @@ public final class ProtectEvents {
         if (!(hit.getEntity().level() instanceof ServerLevel level)) return;
         if (Protect.bypassed(shooter instanceof Player p ? p : null)) return;
         if (shooter instanceof Player p && Protect.mayBuildAt(p, level, hit.getEntity().blockPosition())) return;
-        event.setImpactResult(ProjectileImpactEvent.ImpactResult.SKIP_ENTITY);
+        event.setCanceled(true);
     }
 
     private static boolean isDecor(Entity e) {
@@ -231,15 +244,15 @@ public final class ProtectEvents {
     @SubscribeEvent(priority = EventPriority.HIGH)
     public static void onMobGriefing(EntityMobGriefingEvent event) {
         Entity e = event.getEntity();
-        if (!ProtectConfig.GRIEFING_OFF.get() || !Protect.enabled() || e == null || e.level().isClientSide) return;
+        if (!ProtectConfig.GRIEFING_OFF.get() || !Protect.enabled() || e == null || e.level().isClientSide()) return;
         if (isTownsperson(e)) return;
-        event.setResult(Event.Result.DENY);
+        event.setCanGrief(false);
     }
 
     /** The wither's and the dragon's block breaking. */
     @SubscribeEvent(priority = EventPriority.HIGH)
     public static void onLivingDestroyBlock(LivingDestroyBlockEvent event) {
-        if (!ProtectConfig.GRIEFING_OFF.get() || !Protect.enabled() || event.getEntity().level().isClientSide) return;
+        if (!ProtectConfig.GRIEFING_OFF.get() || !Protect.enabled() || event.getEntity().level().isClientSide()) return;
         if (isTownsperson(event.getEntity())) return;
         event.setCanceled(true);
     }

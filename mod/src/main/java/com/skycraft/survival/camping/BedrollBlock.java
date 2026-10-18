@@ -17,7 +17,7 @@ import org.jetbrains.annotations.Nullable;
  * bed, but it never becomes your respawn point (see {@code CampingEvents}), and you wake up only Rested, not Well
  * Rested ({@code SurvivalMode#onRest}). Rendered from a plain block model (no bed block entity).
  */
-public class BedrollBlock extends BedBlock {
+public class BedrollBlock extends BedBlock implements net.minecraft.world.level.block.EntityBlock {
     private static final VoxelShape SHAPE = Block.box(0, 0, 0, 16, 3, 16);
 
     public BedrollBlock(Properties props) {

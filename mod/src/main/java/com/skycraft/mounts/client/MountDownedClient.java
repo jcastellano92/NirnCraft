@@ -9,13 +9,13 @@ import net.minecraft.client.resources.language.I18n;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
-import net.minecraftforge.client.event.RenderLivingEvent;
-import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
+import net.neoforged.neoforge.client.event.RenderLivingEvent;
+import net.neoforged.neoforge.event.entity.EntityLeaveLevelEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.util.List;
 import java.util.Set;
@@ -26,7 +26,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * degrees about its length and lowered to the ground ({@link RenderLivingEvent}). The owner's own downed mount also
  * shows on the compass.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
 public final class MountDownedClient {
     private static final Set<Integer> DOWN = ConcurrentHashMap.newKeySet();
     private static volatile int markerEntity = -1;
@@ -49,26 +49,19 @@ public final class MountDownedClient {
         }
     }
 
-    @SubscribeEvent(priority = EventPriority.LOWEST)
-    public static void pre(RenderLivingEvent.Pre<?, ?> event) {
-        LivingEntity e = event.getEntity();
-        if (DOWN.isEmpty() || !DOWN.contains(e.getId())) return;
-        PoseStack ps = event.getPoseStack();
-        ps.pushPose();
-        // the renderer turns the model by (180 - body yaw) afterwards: roll about the mount's own length in that frame,
-        // so it lies on its side whichever way it faces, and set it down on the ground
-        float a = 180f - Mth.rotLerp(event.getPartialTick(), e.yBodyRotO, e.yBodyRot);
-        ps.translate(0, e.getBbWidth() * 0.5, 0);
-        ps.mulPose(Axis.YP.rotationDegrees(a));
-        ps.translate(e.getBbHeight() * 0.5, 0, 0);
-        ps.mulPose(Axis.ZP.rotationDegrees(90f));
-        ps.mulPose(Axis.YP.rotationDegrees(-a));
+    private static final net.minecraft.util.context.ContextKey<Boolean> DOWNED=new net.minecraft.util.context.ContextKey<>(net.minecraft.resources.Identifier.fromNamespaceAndPath("skycraft","mount_downed"));
+    private static final net.minecraft.util.context.ContextKey<Boolean> PUSHED=new net.minecraft.util.context.ContextKey<>(net.minecraft.resources.Identifier.fromNamespaceAndPath("skycraft","mount_downed_pushed"));
+    public static void extract(LivingEntity entity,net.minecraft.client.renderer.entity.state.LivingEntityRenderState state){state.setRenderData(DOWNED,DOWN.contains(entity.getId()));state.setRenderData(PUSHED,false);}
+    @SubscribeEvent(priority=EventPriority.LOWEST)
+    public static void pre(RenderLivingEvent.Pre<?,?,?> event){
+        var state=event.getRenderState();if(event.isCanceled()||!Boolean.TRUE.equals(state.getRenderData(DOWNED)))return;
+        PoseStack pose=event.getPoseStack();pose.pushPose();state.setRenderData(PUSHED,true);
+        float angle=180-state.bodyRot;pose.translate(0,state.boundingBoxWidth*.5,0);pose.rotateDegrees(Axis.YP,angle);
+        pose.translate(state.boundingBoxHeight*.5,0,0);pose.rotateDegrees(Axis.ZP,90);pose.rotateDegrees(Axis.YP,-angle);
     }
-
-    @SubscribeEvent(priority = EventPriority.LOWEST)
-    public static void post(RenderLivingEvent.Post<?, ?> event) {
-        if (DOWN.isEmpty() || !DOWN.contains(event.getEntity().getId())) return;
-        event.getPoseStack().popPose();
+    @SubscribeEvent(priority=EventPriority.LOWEST)
+    public static void post(RenderLivingEvent.Post<?,?,?> event){
+        if(Boolean.TRUE.equals(event.getRenderState().getRenderData(PUSHED))){event.getPoseStack().popPose();event.getRenderState().setRenderData(PUSHED,false);}
     }
 
     @SubscribeEvent

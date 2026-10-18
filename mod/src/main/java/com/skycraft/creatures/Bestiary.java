@@ -16,12 +16,12 @@ import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.SpawnPlacements;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraftforge.common.ForgeSpawnEggItem;
-import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
-import net.minecraftforge.event.entity.SpawnPlacementRegisterEvent;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.RegistryObject;
+import net.minecraft.world.item.SpawnEggItem;
+import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
+import net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.registries.DeferredRegister;
+import java.util.function.Supplier;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -46,69 +46,69 @@ public final class Bestiary {
     private static final Map<EntityType<?>, CreatureSpec> SPECS = Collections.synchronizedMap(new IdentityHashMap<>());
     private static final Map<String, CreatureSpec> BY_ID = new LinkedHashMap<>();
     /** Every bestiary creature type, in registration order. */
-    public static final List<RegistryObject<? extends EntityType<? extends Mob>>> ALL = new ArrayList<>();
+    public static final List<Supplier<? extends EntityType<? extends Mob>>> ALL = new ArrayList<>();
 
-    public static final RegistryObject<EntityType<CreatureBolt>> BOLT = ENTITIES.register("creature_bolt",
+    public static final Supplier<EntityType<CreatureBolt>> BOLT = ENTITIES.register("creature_bolt",
             () -> EntityType.Builder.<CreatureBolt>of(CreatureBolt::new, MobCategory.MISC).sized(0.4f, 0.4f)
-                    .clientTrackingRange(6).updateInterval(2).build(Skycraft.MODID + ":creature_bolt"));
+                    .clientTrackingRange(6).updateInterval(2).build(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.ENTITY_TYPE, net.minecraft.resources.Identifier.parse(Skycraft.MODID + ":creature_bolt"))));
 
     // ---------------------------------------------------------------- Skyrim wildlife
-    public static final RegistryObject<EntityType<SkyBeast>> WOLF = beast(BestiarySpecs.wolf());
+    public static final Supplier<EntityType<SkyBeast>> WOLF = beast(BestiarySpecs.wolf());
 
     // ---------------------------------------------------------------- Skyrim creatures
-    public static final RegistryObject<EntityType<SkyMonster>> CHAURUS = monster(BestiarySpecs.chaurus());
-    public static final RegistryObject<EntityType<SkyMonster>> CHAURUS_HUNTER = monster(BestiarySpecs.chaurusHunter());
-    public static final RegistryObject<EntityType<SkyMonster>> RIEKLING = monster(BestiarySpecs.riekling());
-    public static final RegistryObject<EntityType<SkyMonster>> ASH_SPAWN = monster(BestiarySpecs.ashSpawn());
+    public static final Supplier<EntityType<SkyMonster>> CHAURUS = monster(BestiarySpecs.chaurus());
+    public static final Supplier<EntityType<SkyMonster>> CHAURUS_HUNTER = monster(BestiarySpecs.chaurusHunter());
+    public static final Supplier<EntityType<SkyMonster>> RIEKLING = monster(BestiarySpecs.riekling());
+    public static final Supplier<EntityType<SkyMonster>> ASH_SPAWN = monster(BestiarySpecs.ashSpawn());
     // gargoyle and death_hound are registered by com.skycraft.curse (statue gargoyles, vampire hounds)
-    public static final RegistryObject<EntityType<SkyMonster>> WISP = monster(BestiarySpecs.wisp());
-    public static final RegistryObject<EntityType<SkyMonster>> WILL_O_WISP = monster(BestiarySpecs.willOWisp());
-    public static final RegistryObject<EntityType<SkyMonster>> DWARVEN_BALLISTA = monster(BestiarySpecs.dwarvenBallista());
-    public static final RegistryObject<EntityType<DragonPriestEntity>> DRAGON_PRIEST = register(BestiarySpecs.dragonPriest(), DragonPriestEntity::new);
+    public static final Supplier<EntityType<SkyMonster>> WISP = monster(BestiarySpecs.wisp());
+    public static final Supplier<EntityType<SkyMonster>> WILL_O_WISP = monster(BestiarySpecs.willOWisp());
+    public static final Supplier<EntityType<SkyMonster>> DWARVEN_BALLISTA = monster(BestiarySpecs.dwarvenBallista());
+    public static final Supplier<EntityType<DragonPriestEntity>> DRAGON_PRIEST = register(BestiarySpecs.dragonPriest(), DragonPriestEntity::new);
 
     // ---------------------------------------------------------------- daedra (conjurable: see the class doc)
-    public static final RegistryObject<EntityType<SkyMonster>> DREMORA = monster(BestiarySpecs.dremora());
-    public static final RegistryObject<EntityType<SkyMonster>> FLAME_ATRONACH = monster(BestiarySpecs.flameAtronach());
-    public static final RegistryObject<EntityType<SkyMonster>> FROST_ATRONACH = monster(BestiarySpecs.frostAtronach());
-    public static final RegistryObject<EntityType<SkyMonster>> STORM_ATRONACH = monster(BestiarySpecs.stormAtronach());
-    public static final RegistryObject<EntityType<SkyMonster>> SCAMP = monster(BestiarySpecs.scamp());
-    public static final RegistryObject<EntityType<SkyMonster>> IMP = monster(BestiarySpecs.imp());
+    public static final Supplier<EntityType<SkyMonster>> DREMORA = monster(BestiarySpecs.dremora());
+    public static final Supplier<EntityType<SkyMonster>> FLAME_ATRONACH = monster(BestiarySpecs.flameAtronach());
+    public static final Supplier<EntityType<SkyMonster>> FROST_ATRONACH = monster(BestiarySpecs.frostAtronach());
+    public static final Supplier<EntityType<SkyMonster>> STORM_ATRONACH = monster(BestiarySpecs.stormAtronach());
+    public static final Supplier<EntityType<SkyMonster>> SCAMP = monster(BestiarySpecs.scamp());
+    public static final Supplier<EntityType<SkyMonster>> IMP = monster(BestiarySpecs.imp());
 
     // ---------------------------------------------------------------- Morrowind
-    public static final RegistryObject<EntityType<SkyMonster>> CLIFF_RACER = monster(BestiarySpecs.cliffRacer());
-    public static final RegistryObject<EntityType<GuarEntity>> GUAR = register(BestiarySpecs.guar(), GuarEntity::new);
-    public static final RegistryObject<EntityType<SkyBeast>> KAGOUTI = beast(BestiarySpecs.kagouti());
-    public static final RegistryObject<EntityType<SkyBeast>> ALIT = beast(BestiarySpecs.alit());
-    public static final RegistryObject<EntityType<SkyBeast>> NIX_HOUND = beast(BestiarySpecs.nixHound());
-    public static final RegistryObject<EntityType<SkyBeast>> NETCH = beast(BestiarySpecs.netch());
-    public static final RegistryObject<EntityType<SiltStriderEntity>> SILT_STRIDER = register(BestiarySpecs.siltStrider(), SiltStriderEntity::new);
+    public static final Supplier<EntityType<SkyMonster>> CLIFF_RACER = monster(BestiarySpecs.cliffRacer());
+    public static final Supplier<EntityType<GuarEntity>> GUAR = register(BestiarySpecs.guar(), GuarEntity::new);
+    public static final Supplier<EntityType<SkyBeast>> KAGOUTI = beast(BestiarySpecs.kagouti());
+    public static final Supplier<EntityType<SkyBeast>> ALIT = beast(BestiarySpecs.alit());
+    public static final Supplier<EntityType<SkyBeast>> NIX_HOUND = beast(BestiarySpecs.nixHound());
+    public static final Supplier<EntityType<SkyBeast>> NETCH = beast(BestiarySpecs.netch());
+    public static final Supplier<EntityType<SiltStriderEntity>> SILT_STRIDER = register(BestiarySpecs.siltStrider(), SiltStriderEntity::new);
 
     // ---------------------------------------------------------------- Cyrodiil, Black Marsh, Elsweyr
-    public static final RegistryObject<EntityType<SkyMonster>> MINOTAUR = monster(BestiarySpecs.minotaur());
-    public static final RegistryObject<EntityType<SkyMonster>> OGRE = monster(BestiarySpecs.ogre());
-    public static final RegistryObject<EntityType<SkyMonster>> LAND_DREUGH = monster(BestiarySpecs.landDreugh());
-    public static final RegistryObject<EntityType<SkyMonster>> WAMASU = monster(BestiarySpecs.wamasu());
-    public static final RegistryObject<EntityType<SkyMonster>> SWAMP_LEVIATHAN = monster(BestiarySpecs.swampLeviathan());
-    public static final RegistryObject<EntityType<SkyBeast>> HACKWING = beast(BestiarySpecs.hackwing());
-    public static final RegistryObject<EntityType<SkyBeast>> SENCHE_TIGER = beast(BestiarySpecs.sencheTiger());
-    public static final RegistryObject<EntityType<SkyBeast>> ALFIQ = beast(BestiarySpecs.alfiq());
+    public static final Supplier<EntityType<SkyMonster>> MINOTAUR = monster(BestiarySpecs.minotaur());
+    public static final Supplier<EntityType<SkyMonster>> OGRE = monster(BestiarySpecs.ogre());
+    public static final Supplier<EntityType<SkyMonster>> LAND_DREUGH = monster(BestiarySpecs.landDreugh());
+    public static final Supplier<EntityType<SkyMonster>> WAMASU = monster(BestiarySpecs.wamasu());
+    public static final Supplier<EntityType<SkyMonster>> SWAMP_LEVIATHAN = monster(BestiarySpecs.swampLeviathan());
+    public static final Supplier<EntityType<SkyBeast>> HACKWING = beast(BestiarySpecs.hackwing());
+    public static final Supplier<EntityType<SkyBeast>> SENCHE_TIGER = beast(BestiarySpecs.sencheTiger());
+    public static final Supplier<EntityType<SkyBeast>> ALFIQ = beast(BestiarySpecs.alfiq());
 
     // ---------------------------------------------------------------- Hammerfell, High Rock, Valenwood, Summerset, the seas
-    public static final RegistryObject<EntityType<SandSerpentEntity>> SAND_SERPENT = register(BestiarySpecs.sandSerpent(), SandSerpentEntity::new);
-    public static final RegistryObject<EntityType<SkyMonster>> GIANT_SCORPION = monster(BestiarySpecs.giantScorpion());
-    public static final RegistryObject<EntityType<SkyMonster>> HARPY = monster(BestiarySpecs.harpy());
-    public static final RegistryObject<EntityType<SkyBeast>> INDRIK = beast(BestiarySpecs.indrik());
-    public static final RegistryObject<EntityType<SkyMonster>> SEA_SERPENT = monster(BestiarySpecs.seaSerpent());
-    public static final RegistryObject<EntityType<SkyBeast>> ECHATERE = beast(BestiarySpecs.echatere());
-    public static final RegistryObject<EntityType<SkyBeast>> DURZOG = beast(BestiarySpecs.durzog());
+    public static final Supplier<EntityType<SandSerpentEntity>> SAND_SERPENT = register(BestiarySpecs.sandSerpent(), SandSerpentEntity::new);
+    public static final Supplier<EntityType<SkyMonster>> GIANT_SCORPION = monster(BestiarySpecs.giantScorpion());
+    public static final Supplier<EntityType<SkyMonster>> HARPY = monster(BestiarySpecs.harpy());
+    public static final Supplier<EntityType<SkyBeast>> INDRIK = beast(BestiarySpecs.indrik());
+    public static final Supplier<EntityType<SkyMonster>> SEA_SERPENT = monster(BestiarySpecs.seaSerpent());
+    public static final Supplier<EntityType<SkyBeast>> ECHATERE = beast(BestiarySpecs.echatere());
+    public static final Supplier<EntityType<SkyBeast>> DURZOG = beast(BestiarySpecs.durzog());
 
     // ---------------------------------------------------------------- the foreign lands and the endless realms
-    public static final RegistryObject<EntityType<SkyMonster>> FROST_GIANT = monster(BestiarySpecs.frostGiant());
-    public static final RegistryObject<EntityType<SkyMonster>> KAMAL = monster(BestiarySpecs.kamal());
-    public static final RegistryObject<EntityType<SkyMonster>> TSAESCI = monster(BestiarySpecs.tsaesci());
-    public static final RegistryObject<EntityType<SkyBeast>> REALM_STALKER = beast(BestiarySpecs.realmStalker());
-    public static final RegistryObject<EntityType<SkyBeast>> REALM_GRAZER = beast(BestiarySpecs.realmGrazer());
-    public static final RegistryObject<EntityType<SkyMonster>> REALM_WYRM = monster(BestiarySpecs.realmWyrm());
+    public static final Supplier<EntityType<SkyMonster>> FROST_GIANT = monster(BestiarySpecs.frostGiant());
+    public static final Supplier<EntityType<SkyMonster>> KAMAL = monster(BestiarySpecs.kamal());
+    public static final Supplier<EntityType<SkyMonster>> TSAESCI = monster(BestiarySpecs.tsaesci());
+    public static final Supplier<EntityType<SkyBeast>> REALM_STALKER = beast(BestiarySpecs.realmStalker());
+    public static final Supplier<EntityType<SkyBeast>> REALM_GRAZER = beast(BestiarySpecs.realmGrazer());
+    public static final Supplier<EntityType<SkyMonster>> REALM_WYRM = monster(BestiarySpecs.realmWyrm());
 
     private Bestiary() {}
 
@@ -121,25 +121,26 @@ public final class Bestiary {
 
     // ---------------------------------------------------------------- registration helpers
 
-    public static RegistryObject<EntityType<SkyBeast>> beast(CreatureSpec spec) {
+    public static Supplier<EntityType<SkyBeast>> beast(CreatureSpec spec) {
         return register(spec, SkyBeast::new);
     }
 
-    public static RegistryObject<EntityType<SkyMonster>> monster(CreatureSpec spec) {
+    public static Supplier<EntityType<SkyMonster>> monster(CreatureSpec spec) {
         return register(spec, SkyMonster::new);
     }
 
-    public static <T extends Mob> RegistryObject<EntityType<T>> register(CreatureSpec spec, EntityType.EntityFactory<T> factory) {
+    public static <T extends Mob> Supplier<EntityType<T>> register(CreatureSpec spec, EntityType.EntityFactory<T> factory) {
         if (BY_ID.put(spec.id, spec) != null) throw new IllegalStateException("Duplicate bestiary id " + spec.id);
-        RegistryObject<EntityType<T>> type = ENTITIES.register(spec.id, () -> {
+        Supplier<EntityType<T>> type = ENTITIES.register(spec.id, () -> {
             EntityType.Builder<T> b = EntityType.Builder.of(factory, spec.category).sized(spec.width, spec.height)
                     .clientTrackingRange(spec.trackingRange);
+            if (spec.category == MobCategory.MONSTER) b.notInPeaceful();
             if (spec.fireImmune) b.fireImmune();
-            EntityType<T> t = b.build(Skycraft.MODID + ":" + spec.id);
+            EntityType<T> t = b.build(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.ENTITY_TYPE, net.minecraft.resources.Identifier.parse(Skycraft.MODID + ":" + spec.id)));
             SPECS.put(t, spec);
             return t;
         });
-        ITEMS.register(spec.id + "_spawn_egg", () -> new ForgeSpawnEggItem(type, spec.eggBg, spec.eggFg, new Item.Properties()));
+        ITEMS.register(spec.id + "_spawn_egg", () -> new SpawnEggItem(com.skycraft.platform.SkyProperties.item(spec.id + "_spawn_egg").spawnEgg(type.get())));
         ALL.add(type);
         return type;
     }
@@ -157,21 +158,21 @@ public final class Bestiary {
 
     @SuppressWarnings("unchecked")
     private static void onAttributes(EntityAttributeCreationEvent event) {
-        for (RegistryObject<? extends EntityType<? extends Mob>> ro : ALL) {
+        for (Supplier<? extends EntityType<? extends Mob>> ro : ALL) {
             EntityType<? extends Mob> type = ro.get();
             event.put((EntityType<? extends net.minecraft.world.entity.LivingEntity>) type, spec(type).attributes().build());
         }
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    private static void onSpawnPlacements(SpawnPlacementRegisterEvent event) {
-        for (RegistryObject<? extends EntityType<? extends Mob>> ro : ALL) {
+    private static void onSpawnPlacements(RegisterSpawnPlacementsEvent event) {
+        for (Supplier<? extends EntityType<? extends Mob>> ro : ALL) {
             EntityType type = ro.get();
             CreatureSpec s = spec(type);
-            SpawnPlacements.Type place = switch (s.move) {
-                case SWIM -> SpawnPlacements.Type.IN_WATER;
-                case FLY, HOVER -> SpawnPlacements.Type.NO_RESTRICTIONS;
-                default -> SpawnPlacements.Type.ON_GROUND;
+            net.minecraft.world.entity.SpawnPlacementType place = switch (s.move) {
+                case SWIM -> net.minecraft.world.entity.SpawnPlacementTypes.IN_WATER;
+                case FLY, HOVER -> net.minecraft.world.entity.SpawnPlacementTypes.NO_RESTRICTIONS;
+                default -> net.minecraft.world.entity.SpawnPlacementTypes.ON_GROUND;
             };
             // Natural spawning is done by the region spawner (RegionSpawner), which checks its own rules: vanilla's
             // biome spawning (e.g. a biome JSON listing a bestiary creature) only gets the light/ground basics.
@@ -179,7 +180,7 @@ public final class Bestiary {
                     (t, level, reason, pos, random) -> s.temper != CreatureSpec.Temper.HOSTILE
                             || net.minecraft.world.entity.monster.Monster.isDarkEnoughToSpawn((net.minecraft.world.level.ServerLevelAccessor) level, pos, random)
                             || s.move != CreatureSpec.Move.WALK,
-                    SpawnPlacementRegisterEvent.Operation.REPLACE);
+                    RegisterSpawnPlacementsEvent.Operation.REPLACE);
         }
     }
 }

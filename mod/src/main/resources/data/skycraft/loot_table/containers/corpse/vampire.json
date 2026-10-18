@@ -1,0 +1,59 @@
+{
+  "type": "minecraft:entity",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:septim",
+          "weight": 1,
+          "modifier": {
+            "min": 5,
+            "max": 30,
+            "growth": 0.04,
+            "type": "skycraft:scaled_gold"
+          }
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:loot_table",
+          "weight": 3,
+          "value": "skycraft:parts/potions"
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:book",
+          "weight": 1,
+          "modifier": {
+            "schools": [
+              "destruction",
+              "conjuration",
+              "illusion"
+            ],
+            "type": "skycraft:leveled_tome"
+          }
+        },
+        {
+          "type": "minecraft:loot_table",
+          "weight": 2,
+          "value": "skycraft:parts/gems"
+        },
+        {
+          "type": "minecraft:loot_table",
+          "weight": 1,
+          "value": "skycraft:parts/soul_gems"
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 5
+        }
+      ]
+    }
+  ],
+  "random_sequence": "skycraft:containers/corpse/vampire"
+}

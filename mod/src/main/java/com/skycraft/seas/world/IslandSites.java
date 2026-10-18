@@ -3,7 +3,7 @@ package com.skycraft.seas.world;
 import com.skycraft.tamriel.Region;
 import com.skycraft.tamriel.TamrielMap;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.BedBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -36,7 +36,7 @@ final class IslandSites {
         return b.defaultBlockState();
     }
 
-    private static ResourceLocation loot(String name) {
+    private static Identifier loot(String name) {
         return SiteKit.loot("chests/seas/" + name);
     }
 
@@ -132,7 +132,7 @@ final class IslandSites {
                 for (int dz = -rr - 1; dz <= rr + 1; dz++)
                     if (dx * dx + dz * dz <= (rr + 1) * (rr + 1) + 1) k.set(x + dx, top + dy, z + dz, p.roofBlock());
         }
-        k.set(x, top + 7, z, s(Blocks.LIGHTNING_ROD));
+        k.set(x, top + 7, z, s(com.skycraft.worldgen.VanillaBlocks.LIGHTNING_ROD));
     }
 
     private static BlockState door(String culture, Direction face, DoubleBlockHalf half) {
@@ -147,7 +147,7 @@ final class IslandSites {
     }
 
     /** A one-room cottage: walls, a pitched roof, door, window, bed, table, chest, barrel and a light. */
-    static void cottage(SiteKit k, int x, int y, int z, CoastPalette p, Direction face, String culture, ResourceLocation chest) {
+    static void cottage(SiteKit k, int x, int y, int z, CoastPalette p, Direction face, String culture, Identifier chest) {
         Direction side = face.getClockWise();
         int len = 4, wid = 3; // half sizes along face / side
         for (int a = -len; a <= len; a++) {
@@ -181,8 +181,8 @@ final class IslandSites {
         k.set(dx, y + 2, dz, door(culture, face, DoubleBlockHalf.UPPER));
         // furnishing
         int bx = x - face.getStepX() * (len - 2) + side.getStepX() * (wid - 1), bz = z - face.getStepZ() * (len - 2) + side.getStepZ() * (wid - 1);
-        k.set(bx, y + 1, bz, s(Blocks.RED_BED).setValue(BedBlock.FACING, face.getOpposite()).setValue(BedBlock.PART, BedPart.HEAD));
-        k.set(bx + face.getStepX(), y + 1, bz + face.getStepZ(), s(Blocks.RED_BED).setValue(BedBlock.FACING, face.getOpposite()).setValue(BedBlock.PART, BedPart.FOOT));
+        k.set(bx, y + 1, bz, s(com.skycraft.worldgen.VanillaBlocks.RED_BED).setValue(BedBlock.FACING, face.getOpposite()).setValue(BedBlock.PART, BedPart.HEAD));
+        k.set(bx + face.getStepX(), y + 1, bz + face.getStepZ(), s(com.skycraft.worldgen.VanillaBlocks.RED_BED).setValue(BedBlock.FACING, face.getOpposite()).setValue(BedBlock.PART, BedPart.FOOT));
         int cx = x - face.getStepX() * (len - 1) - side.getStepX() * (wid - 1), cz = z - face.getStepZ() * (len - 1) - side.getStepZ() * (wid - 1);
         k.chest(cx, y + 1, cz, face, chest);
         k.barrel(cx + face.getStepX(), y + 1, cz + face.getStepZ(), SiteKit.loot("chests/harbor_supplies"));
@@ -199,7 +199,7 @@ final class IslandSites {
         // two lean-to tents of patched sailcloth
         for (int t = -1; t <= 1; t += 2) {
             int tx = x + side.getStepX() * 4 * t, tz = z + side.getStepZ() * 4 * t;
-            BlockState cloth = t < 0 ? s(Blocks.BLACK_WOOL) : s(Blocks.GRAY_WOOL);
+            BlockState cloth = t < 0 ? s(com.skycraft.worldgen.VanillaBlocks.BLACK_WOOL) : s(com.skycraft.worldgen.VanillaBlocks.GRAY_WOOL);
             for (int a = -1; a <= 1; a++) {
                 for (int l = -2; l <= 2; l++) {
                     int h = 2 - Math.abs(l);
@@ -287,7 +287,7 @@ final class IslandSites {
             if (roll < 2) k.set(wx, top - 1, wz, s(Blocks.CALCITE));
             else if (roll == 2) k.set(wx, top, wz, s(Blocks.HAY_BLOCK));
             else if (roll == 3) k.set(wx, top, wz, s(Blocks.DEAD_BUSH));
-            else k.set(wx, top - 1, wz, s(Blocks.WHITE_CONCRETE_POWDER));
+            else k.set(wx, top - 1, wz, s(com.skycraft.worldgen.VanillaBlocks.WHITE_CONCRETE_POWDER));
         }
         int nx = x + k.nextInt(-2, 2), nz = z + k.nextInt(-2, 2);
         int ny = k.surface(nx, nz);
@@ -377,7 +377,7 @@ final class IslandSites {
             int y = k.floor(wx, wz);
             if (k.water(wx, y, wz) && k.depth(wx, wz) > 1) continue;
             if (i < 2) k.barrel(wx, y, wz, SiteKit.loot("chests/flotsam"));
-            else k.set(wx, y, wz, s(Blocks.WHITE_WOOL));
+            else k.set(wx, y, wz, s(com.skycraft.worldgen.VanillaBlocks.WHITE_WOOL));
         }
         LairMarkerBlockEntity m = k.marker(x + side.getStepX() * 3, k.floor(x, z) + 1, z + side.getStepZ() * 3);
         if (m != null) m.creature("skycraft:mudcrab", 2 + k.r.nextInt(2), 4);

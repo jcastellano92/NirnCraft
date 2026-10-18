@@ -13,10 +13,10 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.util.List;
 import java.util.Map;
@@ -26,14 +26,14 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Carry weight and encumbrance (contract 19).
  *
- * <p>Capacity is {@code baseCapacity (300) + 5 * Stamina level-ups + data.module("bonus").getFloat("carry")}. The
+ * <p>Capacity is {@code baseCapacity (300) + 5 * Stamina level-ups + data.module("bonus").getFloatOr("carry", 0f)}. The
  * server checks every 10 ticks; when a player carries more than they can, they walk slower, cannot sprint and get
  * Skyrim's "You are carrying too much to be able to run." The state is sent to the owning client for the HUD and
  * to stop client-side sprinting.</p>
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class CarryWeight {
-    private static final UUID SPEED_MOD = UUID.fromString("8c2b6e1a-4f3d-4b9e-a7c5-1d2e3f4a5b61");
+    private static final net.minecraft.resources.Identifier SPEED_MOD = net.minecraft.resources.Identifier.fromNamespaceAndPath("skycraft", "encumbrance_8c2b6e1a-4f3d-4b9e-a7c5-1d2e3f4a5b61");
     private static final int CHECK_INTERVAL = 10;
     private static final int MESSAGE_COOLDOWN = 100;
 
@@ -72,7 +72,7 @@ public final class CarryWeight {
                 + PERK_BEAST * data.getPerkRank("athletics.beast_of_burden");
         // the mount you steer carries part of the load (kind and saddle: com.skycraft.mounts.MountGear)
         return new CapacityParts((float) base, (float) (perStamina * data.getStaminaPoints()), raceBonus(data.getRace()), perks,
-                data.module("bonus").getFloat("carry"), com.skycraft.mounts.MountGear.carryBonus(player));
+                data.module("bonus").getFloatOr("carry", 0f), com.skycraft.mounts.MountGear.carryBonus(player));
     }
 
     /** Carry weight per rank of the Athletics carry perks. */
@@ -108,9 +108,10 @@ public final class CarryWeight {
     public static float current(Player player) {
         Inventory inv = player.getInventory();
         float sum = 0f;
-        sum += sum(inv.items);
-        sum += sum(inv.armor);
-        sum += sum(inv.offhand);
+        for (int i = 0; i < inv.getContainerSize(); i++) {
+            ItemStack stack = inv.getItem(i);
+            if (!stack.isEmpty()) sum += ItemWeights.getStack(stack);
+        }
         sum += Pack.weight(player); // the overflow pack weighs exactly like slots do: weight is the only limit
         return sum;
     }
@@ -126,7 +127,7 @@ public final class CarryWeight {
     /** True if carry weight is enabled and the player carries more than their capacity (creative/spectator never are). */
     public static boolean isOverencumbered(Player player) {
         if (player == null || player.isCreative() || player.isSpectator()) return false;
-        if (!player.level().isClientSide) {
+        if (!player.level().isClientSide()) {
             State s = STATES.get(player.getUUID());
             if (s != null && s.current >= 0) return enabled() && s.current > s.capacity;
             return enabled() && current(player) > capacity(player);
@@ -164,7 +165,7 @@ public final class CarryWeight {
 
     /** Lowers the jump of a player too loaded down to leap (both sides: the client moves itself). */
     @SubscribeEvent
-    public static void onJump(net.minecraftforge.event.entity.living.LivingEvent.LivingJumpEvent event) {
+    public static void onJump(net.neoforged.neoforge.event.entity.living.LivingEvent.LivingJumpEvent event) {
         if (!(event.getEntity() instanceof Player player)) return;
         float factor = speedFactor(player);
         if (factor >= JUMP_LIMIT) return;
@@ -175,7 +176,7 @@ public final class CarryWeight {
     /** {@link #speedFactor(float, float)} of a player (1.0 for creative/spectator or with carry weight off). */
     public static float speedFactor(Player player) {
         if (player == null || player.isCreative() || player.isSpectator() || !enabled()) return 1f;
-        if (!player.level().isClientSide) {
+        if (!player.level().isClientSide()) {
             State s = STATES.get(player.getUUID());
             if (s != null && s.current >= 0) return speedFactor(s.current, s.capacity);
         }
@@ -189,7 +190,7 @@ public final class CarryWeight {
     public static float overweightRatio(Player player) {
         if (player == null || player.isCreative() || player.isSpectator() || !enabled()) return 0f;
         float cur, cap;
-        State s = player.level().isClientSide ? null : STATES.get(player.getUUID());
+        State s = player.level().isClientSide() ? null : STATES.get(player.getUUID());
         if (s != null && s.current >= 0) {
             cur = s.current;
             cap = s.capacity;
@@ -205,7 +206,7 @@ public final class CarryWeight {
         return safe(InventoryConfig.CARRY_WEIGHT, true);
     }
 
-    private static double safe(net.minecraftforge.common.ForgeConfigSpec.DoubleValue v, double fallback) {
+    private static double safe(net.neoforged.neoforge.common.ModConfigSpec.DoubleValue v, double fallback) {
         try {
             return v.get();
         } catch (IllegalStateException e) { // config not loaded yet
@@ -213,7 +214,7 @@ public final class CarryWeight {
         }
     }
 
-    private static boolean safe(net.minecraftforge.common.ForgeConfigSpec.BooleanValue v, boolean fallback) {
+    private static boolean safe(net.neoforged.neoforge.common.ModConfigSpec.BooleanValue v, boolean fallback) {
         try {
             return v.get();
         } catch (IllegalStateException e) {
@@ -224,8 +225,8 @@ public final class CarryWeight {
     // ------------------------------------------------------------------ ticking
 
     @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer player)) return;
+    public static void onPlayerTick(net.neoforged.neoforge.event.tick.PlayerTickEvent.Post event) {
+        if (!(event instanceof net.neoforged.neoforge.event.tick.PlayerTickEvent.Post) || !(event.getEntity() instanceof ServerPlayer player)) return;
         State state = STATES.computeIfAbsent(player.getUUID(), k -> new State());
         long now = player.level().getGameTime();
 
@@ -278,9 +279,9 @@ public final class CarryWeight {
         double penalty = speedModifier(factor);
         AttributeModifier existing = speed.getModifier(SPEED_MOD);
         if (penalty < 0) {
-            if (existing != null && existing.getAmount() == penalty) return;
+            if (existing != null && existing.amount() == penalty) return;
             if (existing != null) speed.removeModifier(SPEED_MOD);
-            speed.addTransientModifier(new AttributeModifier(SPEED_MOD, "Skycraft over-encumbered", penalty, AttributeModifier.Operation.MULTIPLY_TOTAL));
+            speed.addTransientModifier(new AttributeModifier(SPEED_MOD, penalty, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
         } else if (existing != null) {
             speed.removeModifier(SPEED_MOD);
         }

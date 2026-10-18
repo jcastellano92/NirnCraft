@@ -4,21 +4,21 @@ import com.skycraft.Skycraft;
 import com.skycraft.network.SkyNetwork;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.npc.AbstractVillager;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.minecraft.world.entity.npc.villager.AbstractVillager;
+
+import net.neoforged.neoforge.event.entity.EntityLeaveLevelEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -37,10 +37,10 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * <p>"Goodbye" (always last) ends the conversation. Only the player an NPC is talking to can pick its lines; the
  * conversation also ends when that player logs out or walks more than 8 blocks away, or the NPC dies/unloads.</p>
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class Dialogue {
-    public static final TagKey<EntityType<?>> TALKERS = TagKey.create(Registries.ENTITY_TYPE, new ResourceLocation(Skycraft.MODID, "talkers"));
-    public static final TagKey<EntityType<?>> NO_DIALOGUE = TagKey.create(Registries.ENTITY_TYPE, new ResourceLocation(Skycraft.MODID, "no_dialogue"));
+    public static final TagKey<EntityType<?>> TALKERS = TagKey.create(Registries.ENTITY_TYPE, Identifier.fromNamespaceAndPath(Skycraft.MODID, "talkers"));
+    public static final TagKey<EntityType<?>> NO_DIALOGUE = TagKey.create(Registries.ENTITY_TYPE, Identifier.fromNamespaceAndPath(Skycraft.MODID, "no_dialogue"));
 
     @FunctionalInterface
     public interface DialogueProvider {
@@ -64,8 +64,8 @@ public final class Dialogue {
     }
 
     public static boolean canTalk(LivingEntity entity) {
-        if (entity.getType().is(NO_DIALOGUE) || !entity.isAlive()) return false;
-        return entity instanceof AbstractVillager || entity.getType().is(TALKERS);
+        if (entity.getType().builtInRegistryHolder().is(NO_DIALOGUE) || !entity.isAlive()) return false;
+        return entity instanceof AbstractVillager || entity.getType().builtInRegistryHolder().is(TALKERS);
     }
 
     /** Most lines on the main menu (Goodbye and the submenu entries count). Tuning knob. */
@@ -199,7 +199,7 @@ public final class Dialogue {
             }
         }
         return !com.skycraft.quest.story.QuestNpcs.idOf(npc).isEmpty() || com.skycraft.survival.inn.Innkeepers.isInnkeeper(npc)
-                || npc.getPersistentData().getBoolean("skycraft_steward");
+                || npc.getPersistentData().getBooleanOr("skycraft_steward",false);
     }
 
     /** Ordinary folk only offer to put you to work now and then (about one in three), so quests mean something. */
@@ -252,7 +252,7 @@ public final class Dialogue {
     public static void open(ServerPlayer player, LivingEntity npc, Component greeting) {
         UUID partner = TALKING.get(npc.getId());
         if (partner != null && !partner.equals(player.getUUID())) {
-            ServerPlayer currentPartner = player.server.getPlayerList().getPlayer(partner);
+            ServerPlayer currentPartner = player.level().getServer().getPlayerList().getPlayer(partner);
             if (currentPartner != null && currentPartner.isAlive() && currentPartner.distanceToSqr(npc) <= 64) {
                 com.skycraft.core.Notifier.message(player, Component.translatable("society.skycraft.busy"));
                 return;
@@ -264,6 +264,7 @@ public final class Dialogue {
     }
 
     public static void endConversation(ServerPlayer player, int entityId) {
+        com.skycraft.economy.Barter.close(player, entityId);
         UUID partner = TALKING.get(entityId);
         if (partner != null && partner.equals(player.getUUID())) {
             TALKING.remove(entityId);
@@ -310,7 +311,7 @@ public final class Dialogue {
     /** NPC died, unloaded or changed dimension: whoever talked to it is done. */
     @SubscribeEvent
     public static void onLeave(EntityLeaveLevelEvent event) {
-        if (!event.getLevel().isClientSide) {
+        if (!event.getLevel().isClientSide()) {
             TALKING.remove(event.getEntity().getId());
             MENU.remove(event.getEntity().getId());
         }
@@ -318,8 +319,8 @@ public final class Dialogue {
 
     /** Once a second: conversations whose player walked away (> 8 blocks) or is gone end. */
     @SubscribeEvent
-    public static void onServerTick(TickEvent.ServerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || TALKING.isEmpty() || event.getServer().getTickCount() % 20 != 0) return;
+    public static void onServerTick(net.neoforged.neoforge.event.tick.ServerTickEvent.Post event) {
+        if (!(event instanceof net.neoforged.neoforge.event.tick.ServerTickEvent.Post) || TALKING.isEmpty() || event.getServer().getTickCount() % 20 != 0) return;
         var players = event.getServer().getPlayerList();
         TALKING.entrySet().removeIf(e -> {
             ServerPlayer p = players.getPlayer(e.getValue());
@@ -339,7 +340,7 @@ public final class Dialogue {
         if (event.getEntity() instanceof ServerPlayer player) {
             UUID current = TALKING.get(npc.getId());
             if (current != null && !current.equals(player.getUUID())) {
-                ServerPlayer sp = player.server.getPlayerList().getPlayer(current);
+                ServerPlayer sp = player.level().getServer().getPlayerList().getPlayer(current);
                 if (sp != null && sp.isAlive() && sp.distanceToSqr(npc) <= 64) {
                     com.skycraft.core.Notifier.message(player, Component.translatable("society.skycraft.busy"));
                     event.setCancellationResult(InteractionResult.SUCCESS);

@@ -9,7 +9,7 @@ import com.skycraft.crafting.arcane.alchemy.Ingredients;
 import com.skycraft.network.SkyNetwork;
 import com.skycraft.perk.Perks;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.BlockPos;
@@ -172,8 +172,10 @@ public class AlchemyScreen extends Screen {
     // ------------------------------------------------------------------ input
 
     @Override
-    public boolean mouseClicked(double mx, double my, int button) {
-        if (super.mouseClicked(mx, my, button)) return true;
+    public boolean mouseClicked(net.minecraft.client.input.MouseButtonEvent event, boolean doubleClick) {
+        double mx = event.x(), my = event.y();
+        int button = com.skycraft.client.screen.UiInput.actionButton(event.button());
+        if (super.mouseClicked(event, doubleClick)) return true;
         if (button != 0) return false;
         ArcaneList.Entry<Ingredients.Ingredient> e = list.click(mx, my);
         if (e == null) return false;
@@ -186,26 +188,27 @@ public class AlchemyScreen extends Screen {
     }
 
     @Override
-    public boolean mouseScrolled(double mx, double my, double delta) {
+    public boolean mouseScrolled(double mx, double my, double horizontal, double delta) {
         return list.scroll(mx, my, delta);
     }
 
     @Override
-    public boolean keyPressed(int key, int scan, int mods) {
-        if (minecraft != null && minecraft.options.keyInventory.matches(key, scan)) {
+    public boolean keyPressed(net.minecraft.client.input.KeyEvent event) {
+        int key = event.key(), scan = event.keycode(), mods = event.modifiers();
+        if (minecraft != null && minecraft.options.keyInventory.matches(event)) {
             onClose();
             return true;
         }
-        return super.keyPressed(key, scan, mods);
+        return super.keyPressed(event);
     }
 
     // ------------------------------------------------------------------ rendering
 
     @Override
-    public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        renderBackground(g);
+    public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
+
         ArcaneUi.panel(g, left, top, pw, ph, ArcaneUi.GOOD);
-        g.drawCenteredString(font, title, left + pw / 2, top + 7, ArcaneUi.GOLD);
+        g.centeredText(font, title, left + pw / 2, top + 7, ArcaneUi.GOLD);
         com.skycraft.inventory.client.SkyUi.carryLine(g, font, left + pw / 2 + font.width(title) / 2 + 10, top + 7, left + pw - 12);
         Player p = player();
 
@@ -218,12 +221,12 @@ public class AlchemyScreen extends Screen {
         int x = list.x + list.w + 12;
         int w = left + pw - 12 - x;
         int y = top + 26;
-        g.drawString(font, Component.translatable("screen.skycraft.alchemy.chosen"), x, y, ArcaneUi.GOLD, false);
+        g.text(font, Component.translatable("screen.skycraft.alchemy.chosen"), x, y, ArcaneUi.GOLD, false);
         y += 12;
         List<Ingredients.Ingredient> ings = chosenIngredients();
         if (ings.isEmpty()) {
             for (var line : font.split(Component.translatable("screen.skycraft.alchemy.help"), Math.max(40, w))) {
-                g.drawString(font, line, x, y, ArcaneUi.MUTED, false);
+                g.text(font, line, x, y, ArcaneUi.MUTED, false);
                 y += 10;
             }
         }
@@ -232,8 +235,8 @@ public class AlchemyScreen extends Screen {
             Integer slot = slotOf.get(ing.id());
             if (slot == null) continue;
             ItemStack s = com.skycraft.inventory.Pack.stackAt(p, slot);
-            g.renderItem(s, x, y);
-            g.drawString(font, s.getHoverName(), x + 18, y + 4, ArcaneUi.TEXT, false);
+            g.item(s, x, y);
+            g.text(font, s.getHoverName(), x + 18, y + 4, ArcaneUi.TEXT, false);
             y += 17;
             int colW = Math.max(60, w / 2);
             for (int i = 0; i < 4; i++) {
@@ -243,7 +246,7 @@ public class AlchemyScreen extends Screen {
                 boolean known = Alchemy.knows(p, ing, i);
                 Component name = known ? eff.displayName() : Component.literal("?");
                 int color = !known ? ArcaneUi.MUTED : shared.contains(eff) ? (eff.positive ? ArcaneUi.GOOD : ArcaneUi.BAD) : 0xFFB0A890;
-                g.drawString(font, font.plainSubstrByWidth(name.getString(), colW - 8), ex, ey, color, false);
+                g.text(font, font.plainSubstrByWidth(name.getString(), colW - 8), ex, ey, color, false);
             }
             y += 22;
         }
@@ -255,10 +258,10 @@ public class AlchemyScreen extends Screen {
         }
 
         int skill = SkyData.get(p).getSkill(Skill.ALCHEMY);
-        g.drawString(font, Component.translatable("screen.skycraft.alchemy.skill", skill, Perks.rank(p, "alchemy.alchemist")),
+        g.text(font, Component.translatable("screen.skycraft.alchemy.skill", skill, Perks.rank(p, "alchemy.alchemist")),
                 left + 12, top + ph - 22, ArcaneUi.MUTED, false);
 
-        super.render(g, mouseX, mouseY, partialTick);
+        super.extractRenderState(g, mouseX, mouseY, partialTick);
 
         ArcaneList.Entry<Ingredients.Ingredient> hover = list.hoveredEntry();
         if (hover != null) {
@@ -268,13 +271,13 @@ public class AlchemyScreen extends Screen {
                 tip.add(Alchemy.knows(p, hover.value(), i) ? hover.value().effects()[i].coloredName()
                         : Component.translatable("screen.skycraft.alchemy.unknown").withStyle(ChatFormatting.DARK_GRAY));
             }
-            g.renderComponentTooltip(font, tip, mouseX, mouseY);
+            g.setComponentTooltipForNextFrame(font, tip, mouseX, mouseY);
         }
     }
 
-    private void renderResult(GuiGraphics g, Player p, List<Ingredients.Ingredient> ings, List<AlchemyEffect> shared, int x, int y, int w) {
+    private void renderResult(GuiGraphicsExtractor g, Player p, List<Ingredients.Ingredient> ings, List<AlchemyEffect> shared, int x, int y, int w) {
         if (shared.isEmpty()) {
-            g.drawString(font, Component.translatable("screen.skycraft.alchemy.no_match"), x, y + 2, ArcaneUi.BAD, false);
+            g.text(font, Component.translatable("screen.skycraft.alchemy.no_match"), x, y + 2, ArcaneUi.BAD, false);
             return;
         }
         Alchemy.Brew brew = Alchemy.brew(p, ings);
@@ -282,7 +285,7 @@ public class AlchemyScreen extends Screen {
         Component header = mainKnown
                 ? Component.translatable(brew.poison() ? "item.skycraft.poison_of" : "item.skycraft.potion_of", brew.main().displayName())
                 : Component.translatable("screen.skycraft.alchemy.unknown_result");
-        g.drawString(font, header, x, y + 2, brew.poison() ? ArcaneUi.BAD : ArcaneUi.GOOD, false);
+        g.text(font, header, x, y + 2, brew.poison() ? ArcaneUi.BAD : ArcaneUi.GOOD, false);
         y += 14;
         for (Alchemy.BrewEffect e : brew.effects()) {
             Component line;
@@ -293,11 +296,11 @@ public class AlchemyScreen extends Screen {
             } else {
                 line = Component.translatable("screen.skycraft.alchemy.unknown_effect");
             }
-            g.drawString(font, line, x + 6, y, e.effect().positive ? ArcaneUi.GOOD : ArcaneUi.BAD, false);
+            g.text(font, line, x + 6, y, e.effect().positive ? ArcaneUi.GOOD : ArcaneUi.BAD, false);
             y += 10;
         }
         if (mainKnown) {
-            g.drawString(font, Component.translatable("screen.skycraft.alchemy.value", brew.value()), x, y + 3, ArcaneUi.GOLD, false);
+            g.text(font, Component.translatable("screen.skycraft.alchemy.value", brew.value()), x, y + 3, ArcaneUi.GOLD, false);
         }
     }
 
@@ -311,7 +314,7 @@ public class AlchemyScreen extends Screen {
         return known >= 2;
     }
 
-    private void drawBadge(GuiGraphics g, String id, int number) {
+    private void drawBadge(GuiGraphicsExtractor g, String id, int number) {
         List<ArcaneList.Entry<Ingredients.Ingredient>> entries = list.entries();
         for (int i = 0; i < entries.size(); i++) {
             if (!entries.get(i).key().equals(id)) continue;
@@ -319,7 +322,7 @@ public class AlchemyScreen extends Screen {
             if (ry < 0) return;
             int bx = list.x + list.w - 14;
             g.fill(bx, ry + 5, bx + 10, ry + 15, 0xFFE8C060);
-            g.drawCenteredString(font, String.valueOf(number), bx + 5, ry + 6, 0xFF201810);
+            g.centeredText(font, String.valueOf(number), bx + 5, ry + 6, 0xFF201810);
             return;
         }
     }

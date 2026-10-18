@@ -9,7 +9,7 @@ import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.entity.PartEntity;
+import net.neoforged.neoforge.entity.PartEntity;
 
 /**
  * One extra hit box along a long hull (bow and stern sections), like the ender dragon's parts: clicking or hitting it
@@ -28,15 +28,19 @@ public class ShipPart extends PartEntity<ShipEntity> {
     }
 
     @Override
-    protected void defineSynchedData() {
+    protected void defineSynchedData(net.minecraft.network.syncher.SynchedEntityData.Builder builder) {
     }
 
     @Override
-    protected void readAdditionalSaveData(CompoundTag tag) {
+    protected void readAdditionalSaveData(net.minecraft.world.level.storage.ValueInput input263) {
+        net.minecraft.nbt.CompoundTag tag = com.skycraft.platform.ValueTags.read(input263);
     }
 
     @Override
-    protected void addAdditionalSaveData(CompoundTag tag) {
+    protected void addAdditionalSaveData(net.minecraft.world.level.storage.ValueOutput output263) {
+        net.minecraft.nbt.CompoundTag tag = new net.minecraft.nbt.CompoundTag();
+    
+        output263.store(tag);
     }
 
     @Override
@@ -45,13 +49,13 @@ public class ShipPart extends PartEntity<ShipEntity> {
     }
 
     @Override
-    public boolean hurt(DamageSource source, float amount) {
-        return !isInvulnerableTo(source) && getParent().hurt(source, amount);
+    public boolean hurtServer(net.minecraft.server.level.ServerLevel level, DamageSource source, float amount) {
+        return !isInvulnerableToBase(source) && com.skycraft.platform.Effects.hurt(getParent(), source, amount);
     }
 
     @Override
-    public InteractionResult interact(Player player, InteractionHand hand) {
-        return getParent().interact(player, hand);
+    public InteractionResult interact(Player player, InteractionHand hand, net.minecraft.world.phys.Vec3 hit) {
+        return getParent().interact(player, hand, hit);
     }
 
     @Override

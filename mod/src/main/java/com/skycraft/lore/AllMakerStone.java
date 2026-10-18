@@ -8,7 +8,7 @@ import java.util.Locale;
 /**
  * The six All-Maker stones of Solstheim, sacred to the Skaal. Freed from Miraak's shell, each grants a blessing
  * that sits beside (never replaces) the birthsign of the Standing Stones; only one All-Maker blessing at a time.
- * The active one is {@code data.module("lore").getString("allmaker")}.
+ * The active one is {@code data.module("lore").getStringOr("allmaker","")}.
  */
 public enum AllMakerStone {
     BEAST(0xC89058),

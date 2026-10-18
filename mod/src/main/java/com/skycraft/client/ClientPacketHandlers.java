@@ -49,9 +49,9 @@ public final class ClientPacketHandlers {
         Minecraft mc = Minecraft.getInstance();
         switch (screen) {
             case CorePackets.OpenScreen.RACE -> {
-                if (mc.screen == null) mc.setScreen(new RaceScreen());
+                if (mc.gui.screen() == null) mc.gui.setScreen(new RaceScreen());
             }
-            case CorePackets.OpenScreen.LEVEL_UP, CorePackets.OpenScreen.SKILLS -> mc.setScreen(new SkillsScreen());
+            case CorePackets.OpenScreen.LEVEL_UP, CorePackets.OpenScreen.SKILLS -> mc.gui.setScreen(new SkillsScreen());
             default -> {
             }
         }

@@ -3,7 +3,7 @@ package com.skycraft.dungeons.qa;
 import com.skycraft.economy.ItemValues;
 import com.skycraft.tamriel.TamrielMap;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.LootParams;
@@ -24,11 +24,11 @@ final class QaLoot {
     static final int ROLLS = 40;
     private final Map<String, Double> cache = new HashMap<>();
 
-    double expected(ServerLevel level, ResourceLocation table, BlockPos pos) {
+    double expected(ServerLevel level, Identifier table, BlockPos pos) {
         String key = table + "@" + TamrielMap.region(pos.getX(), pos.getZ()).id();
         Double v = cache.get(key);
         if (v != null) return v;
-        LootTable lt = level.getServer().getLootData().getLootTable(table);
+        LootTable lt = level.getServer().reloadableRegistries().getLootTable(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.LOOT_TABLE, table));
         double sum = 0;
         if (lt != LootTable.EMPTY) {
             for (int i = 0; i < ROLLS; i++) {

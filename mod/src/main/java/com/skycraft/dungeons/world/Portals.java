@@ -275,12 +275,12 @@ public final class Portals {
         int at = T + 1;
         for (int s : new int[]{-3, 3}) {
             for (int dy = 0; dy <= 12; dy++) {
-                BlockState st = dy < 6 ? pal.trim : dy % 2 == 0 ? Blocks.AMETHYST_BLOCK.defaultBlockState() : Blocks.PURPLE_STAINED_GLASS.defaultBlockState();
+                BlockState st = dy < 6 ? pal.trim : dy % 2 == 0 ? Blocks.AMETHYST_BLOCK.defaultBlockState() : com.skycraft.worldgen.VanillaBlocks.PURPLE_STAINED_GLASS.defaultBlockState();
                 f.set(at, y + dy, s, st);
             }
             f.set(at, y + 13, s, Blocks.END_ROD.defaultBlockState());
         }
-        for (int lat = -2; lat <= 2; lat++) f.set(at, y + 6, lat, Blocks.LIGHT_BLUE_STAINED_GLASS.defaultBlockState());
+        for (int lat = -2; lat <= 2; lat++) f.set(at, y + 6, lat, com.skycraft.worldgen.VanillaBlocks.LIGHT_BLUE_STAINED_GLASS.defaultBlockState());
         f.set(at, y + 7, 0, Blocks.AMETHYST_CLUSTER.defaultBlockState());
     }
 
@@ -328,7 +328,7 @@ public final class Portals {
             f.set(gt + 1, y, s, Blocks.LANTERN.defaultBlockState());
         }
         for (int lat = -4; lat <= 4; lat++) {
-            f.set(gt, y + 4, lat, Blocks.RED_WOOL.defaultBlockState());
+            f.set(gt, y + 4, lat, com.skycraft.worldgen.VanillaBlocks.RED_WOOL.defaultBlockState());
             f.set(gt, y + 6, lat, Math.abs(lat) == 4 ? Deco.stair(Blocks.DEEPSLATE_TILE_STAIRS, lat < 0 ? c.right() : c.right().getOpposite(), false)
                     : Blocks.DEEPSLATE_TILE_SLAB.defaultBlockState());
         }
@@ -463,7 +463,7 @@ public final class Portals {
             for (int lat = -4; lat <= 4; lat++) {
                 f.clear(t, y, lat, y + 8);
                 boolean border = Math.abs(lat) == 4 || t == T + 6;
-                f.set(t, y - 1, lat, border ? Blocks.WAXED_CUT_COPPER.defaultBlockState() : Blocks.POLISHED_BLACKSTONE_BRICKS.defaultBlockState());
+                f.set(t, y - 1, lat, border ? com.skycraft.worldgen.VanillaBlocks.WAXED_CUT_COPPER.defaultBlockState() : Blocks.POLISHED_BLACKSTONE_BRICKS.defaultBlockState());
                 f.foundation(t, y - 2, lat, Blocks.POLISHED_BLACKSTONE.defaultBlockState());
             }
         }
@@ -476,16 +476,16 @@ public final class Portals {
                     continue;
                 }
                 BlockState s;
-                if (a >= 2 && yy <= y + 4) s = a == 3 ? Blocks.WAXED_COPPER_BLOCK.defaultBlockState() : Blocks.WAXED_EXPOSED_CUT_COPPER.defaultBlockState();
+                if (a >= 2 && yy <= y + 4) s = a == 3 ? com.skycraft.worldgen.VanillaBlocks.WAXED_COPPER_BLOCK.defaultBlockState() : com.skycraft.worldgen.VanillaBlocks.WAXED_EXPOSED_CUT_COPPER.defaultBlockState();
                 else if (yy == y + 3) s = Blocks.GILDED_BLACKSTONE.defaultBlockState();
-                else if (yy == y + 5) s = a <= 2 ? Blocks.WAXED_WEATHERED_CUT_COPPER.defaultBlockState() : Deco.slab(Blocks.WAXED_CUT_COPPER_SLAB, false);
-                else if (yy == y + 6) s = a == 0 ? Blocks.OCHRE_FROGLIGHT.defaultBlockState() : a == 1 ? Deco.slab(Blocks.WAXED_CUT_COPPER_SLAB, false) : Blocks.AIR.defaultBlockState();
+                else if (yy == y + 5) s = a <= 2 ? com.skycraft.worldgen.VanillaBlocks.WAXED_WEATHERED_CUT_COPPER.defaultBlockState() : Deco.slab(com.skycraft.worldgen.VanillaBlocks.WAXED_CUT_COPPER_SLAB, false);
+                else if (yy == y + 6) s = a == 0 ? Blocks.OCHRE_FROGLIGHT.defaultBlockState() : a == 1 ? Deco.slab(com.skycraft.worldgen.VanillaBlocks.WAXED_CUT_COPPER_SLAB, false) : Blocks.AIR.defaultBlockState();
                 else s = Blocks.POLISHED_BLACKSTONE_BRICKS.defaultBlockState();
                 f.set(at, yy, lat, s);
             }
         }
         for (int s : new int[]{-3, 3}) {
-            f.set(at, y + 5, s, Blocks.WAXED_COPPER_BLOCK.defaultBlockState());
+            f.set(at, y + 5, s, com.skycraft.worldgen.VanillaBlocks.WAXED_COPPER_BLOCK.defaultBlockState());
             f.set(at, y + 6, s, DwemerRooms.rod());
             f.set(at, y + 7, s, DwemerRooms.rod());
             f.set(at + 1, y + 2, s, Deco.lantern(false, false));
@@ -498,7 +498,7 @@ public final class Portals {
             f.set(T + 4, y, s, Deco.trapdoor(Blocks.IRON_TRAPDOOR, right, false, false));
         }
         // a broken pipe column
-        f.set(T + 6, y, -2, Blocks.WAXED_EXPOSED_COPPER.defaultBlockState());
+        f.set(T + 6, y, -2, com.skycraft.worldgen.VanillaBlocks.WAXED_EXPOSED_COPPER.defaultBlockState());
         f.set(T + 6, y + 1, -2, DwemerRooms.rod());
         p.spawn(Mobs.DWARVEN_SPIDER, f.x(T + 3, 0), y, f.z(T + 3, 0), Painter.yaw(c.facing()), null);
         descent(f, c, 1, c.tunnelLength() + 6);
@@ -542,7 +542,7 @@ public final class Portals {
         Painter p = f.p();
         switch (c.theme) {
             case VAMPIRE_LAIR -> {
-                f.set(T + 2, y, -2, Deco.candle(Blocks.RED_CANDLE, 3, true));
+                f.set(T + 2, y, -2, Deco.candle(com.skycraft.worldgen.VanillaBlocks.RED_CANDLE, 3, true));
                 f.set(T + 2, y, 2, Deco.skull(Blocks.SKELETON_SKULL, 0));
             }
             case NECROMANCER_LAIR -> {
@@ -554,7 +554,7 @@ public final class Portals {
             }
             case HAGRAVEN_LAIR -> {
                 f.set(T + 2, y, -2, Deco.pillar(Blocks.BONE_BLOCK, Direction.Axis.Y));
-                f.set(T + 2, y + 1, -2, Blocks.WHITE_CARPET.defaultBlockState());
+                f.set(T + 2, y + 1, -2, com.skycraft.worldgen.VanillaBlocks.WHITE_CARPET.defaultBlockState());
                 f.set(T + 3, y, 2, Blocks.MANGROVE_ROOTS.defaultBlockState());
             }
             default -> {

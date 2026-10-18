@@ -12,7 +12,7 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.BiomeTags;
@@ -24,31 +24,31 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.TamableAnimal;
-import net.minecraft.world.entity.npc.AbstractVillager;
-import net.minecraft.world.entity.npc.WanderingTrader;
+import net.minecraft.world.entity.npc.villager.AbstractVillager;
+import net.minecraft.world.entity.npc.wanderingtrader.WanderingTrader;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ClipContext;
-import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.EntityJoinLevelEvent;
-import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.registries.ForgeRegistries;
+
+import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
+import net.neoforged.neoforge.event.entity.EntityLeaveLevelEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
+import net.minecraft.core.registries.BuiltInRegistries;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -67,18 +67,18 @@ import java.util.UUID;
  * optional {@code hunt} player, {@code intro} bark, {@code summon} flag) and is despawned by this class once no
  * player is around (or, for summons, when its time is up). Only tagged mobs are ever removed.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class Encounters {
     public static final String TAG = "skycraft_encounter";
     private static final int DESPAWN_FAR = 128;
     private static final long LIFETIME = 20 * 60 * 20L;
 
-    static final ResourceLocation GUARD = new ResourceLocation(Skycraft.MODID, "guard");
-    static final ResourceLocation BANDIT = new ResourceLocation(Skycraft.MODID, "bandit");
-    static final ResourceLocation GIANT = new ResourceLocation(Skycraft.MODID, "giant");
-    static final ResourceLocation DRAGON = new ResourceLocation(Skycraft.MODID, "dragon");
-    static final ResourceLocation DEER = new ResourceLocation(Skycraft.MODID, "deer");
-    static final ResourceLocation ELK = new ResourceLocation(Skycraft.MODID, "elk");
+    static final Identifier GUARD = Identifier.fromNamespaceAndPath(Skycraft.MODID, "guard");
+    static final Identifier BANDIT = Identifier.fromNamespaceAndPath(Skycraft.MODID, "bandit");
+    static final Identifier GIANT = Identifier.fromNamespaceAndPath(Skycraft.MODID, "giant");
+    static final Identifier DRAGON = Identifier.fromNamespaceAndPath(Skycraft.MODID, "dragon");
+    static final Identifier DEER = Identifier.fromNamespaceAndPath(Skycraft.MODID, "deer");
+    static final Identifier ELK = Identifier.fromNamespaceAndPath(Skycraft.MODID, "elk");
 
     public enum Kind {
         HUNTER, BARD, THIEF, IMPERIAL_ESCORT, STORMCLOAK_ESCORT, THALMOR_ESCORT, MAGE_VS_NECROMANCER, ADVENTURERS_VS_BANDITS,
@@ -111,13 +111,13 @@ public final class Encounters {
     // ------------------------------------------------------------------ tagging
 
     public static boolean isTagged(Entity e) {
-        return e.getPersistentData().contains(TAG, Tag.TAG_COMPOUND);
+        return com.skycraft.platform.NbtData.hasType(e.getPersistentData(), TAG, Tag.TAG_COMPOUND);
     }
 
     @Nullable
     static CompoundTag tag(Entity e) {
         CompoundTag pd = e.getPersistentData();
-        return pd.contains(TAG, Tag.TAG_COMPOUND) ? pd.getCompound(TAG) : null;
+        return com.skycraft.platform.NbtData.hasType(pd, TAG, Tag.TAG_COMPOUND) ? pd.getCompoundOrEmpty(TAG) : null;
     }
 
     /** Marks a mob as temporary: despawned when no player is near, or after {@code until} when nobody watches. */
@@ -138,7 +138,7 @@ public final class Encounters {
     /** Non-NPC hunters (bandits sent after the player) are steered towards their prey by this class. */
     static void tagHunt(Mob mob, UUID player) {
         CompoundTag t = tag(mob);
-        if (t != null) t.putUUID("hunt", player);
+        if (t != null) t.store("hunt", net.minecraft.core.UUIDUtil.CODEC,  player);
     }
 
     static void tagIntro(Mob mob, String barkCategory) {
@@ -150,20 +150,20 @@ public final class Encounters {
 
     @SubscribeEvent
     public static void onJoin(EntityJoinLevelEvent event) {
-        if (event.getLevel().isClientSide || !(event.getEntity() instanceof Mob mob) || !isTagged(mob)) return;
+        if (event.getLevel().isClientSide() || !(event.getEntity() instanceof Mob mob) || !isTagged(mob)) return;
         TRACKED.put(mob.getUUID(), mob);
     }
 
     @SubscribeEvent
     public static void onLeave(EntityLeaveLevelEvent event) {
-        if (event.getLevel().isClientSide) return;
+        if (event.getLevel().isClientSide()) return;
         TRACKED.remove(event.getEntity().getUUID(), event.getEntity());
     }
 
     /** Naming or leashing an encounter mob adopts it: it is no longer despawned. */
     @SubscribeEvent
     public static void onInteract(PlayerInteractEvent.EntityInteract event) {
-        if (event.getLevel().isClientSide) return;
+        if (event.getLevel().isClientSide()) return;
         Entity target = event.getTarget();
         if (!isTagged(target)) return;
         if (event.getItemStack().is(Items.NAME_TAG) || event.getItemStack().is(Items.LEAD)) {
@@ -177,8 +177,8 @@ public final class Encounters {
     }
 
     @SubscribeEvent
-    public static void onLevelTick(TickEvent.LevelTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || !(event.level instanceof ServerLevel level) || TRACKED.isEmpty()) return;
+    public static void onLevelTick(net.neoforged.neoforge.event.tick.LevelTickEvent.Post event) {
+        if (!(event instanceof net.neoforged.neoforge.event.tick.LevelTickEvent.Post) || !(event.getLevel() instanceof ServerLevel level) || TRACKED.isEmpty()) return;
         long time = level.getGameTime();
         if (time % 20 == 7) steer(level);
         if (time % 100 == 13) despawnPass(level);
@@ -193,12 +193,12 @@ public final class Encounters {
             if (t.contains("intro")) {
                 Player near = level.getNearestPlayer(mob, 10);
                 if (near != null && !near.isSpectator()) {
-                    Barks.sayLineNow(mob, t.getString("intro"), near.getDisplayName());
+                    Barks.sayLineNow(mob, t.getStringOr("intro",""), near.getDisplayName());
                     t.remove("intro");
                 }
             }
-            if (mob instanceof NpcEntity || !t.hasUUID("hunt") || mob.getTarget() != null) continue;
-            Player prey = level.getPlayerByUUID(t.getUUID("hunt"));
+            if (mob instanceof NpcEntity || !t.read("hunt", net.minecraft.core.UUIDUtil.CODEC).isPresent() || mob.getTarget() != null) continue;
+            Player prey = level.getPlayerByUUID(t.read("hunt", net.minecraft.core.UUIDUtil.CODEC).orElseThrow());
             if (prey == null || prey.isCreative() || prey.isSpectator() || !prey.isAlive()) continue;
             double d = mob.distanceToSqr(prey);
             if (d > 160 * 160) continue;
@@ -223,13 +223,13 @@ public final class Encounters {
                 mob.getPersistentData().remove(TAG);
                 continue;
             }
-            long until = t.getLong("until");
-            long skirmishUntil = t.getLong("skirmish_until");
+            long until = t.getLongOr("until",0L);
+            long skirmishUntil = t.getLongOr("skirmish_until",0L);
             if (skirmishUntil > 0 && now > skirmishUntil) {
                 gone.add(mob);
                 continue;
             }
-            if (t.getBoolean("summon")) {
+            if (t.getBooleanOr("summon",false)) {
                 if (now > until) gone.add(mob);
                 continue;
             }
@@ -237,7 +237,7 @@ public final class Encounters {
             else if (now > until && level.getNearestPlayer(mob, 48) == null) gone.add(mob);
         }
         for (Mob mob : gone) {
-            if (mob.getTags().contains("skycraft_keep")) continue;
+            if (mob.entityTags().contains("skycraft_keep")) continue;
             if (mob.level() instanceof ServerLevel sl && level.getNearestPlayer(mob, 48) != null) {
                 sl.sendParticles(ParticleTypes.POOF, mob.getX(), mob.getY() + 0.8, mob.getZ(), 8, 0.3, 0.5, 0.3, 0.02);
             }
@@ -251,8 +251,8 @@ public final class Encounters {
         for (Mob m : TRACKED.values()) {
             if (m.isRemoved() || m.level() != player.level() || m.distanceToSqr(player) > 128 * 128) continue;
             CompoundTag t = tag(m);
-            if (t == null || t.getBoolean("summon")) continue;
-            groups.add(t.getInt("group"));
+            if (t == null || t.getBooleanOr("summon",false)) continue;
+            groups.add(t.getIntOr("group",0));
         }
         return groups.size();
     }
@@ -264,7 +264,7 @@ public final class Encounters {
             if (m.isRemoved()) continue;
             if (m instanceof NpcEntity n && id.equals(n.getHuntTarget())) return true;
             CompoundTag t = tag(m);
-            if (t != null && t.hasUUID("hunt") && id.equals(t.getUUID("hunt"))) return true;
+            if (t != null && t.read("hunt", net.minecraft.core.UUIDUtil.CODEC).isPresent() && id.equals(t.read("hunt", net.minecraft.core.UUIDUtil.CODEC).orElseThrow())) return true;
         }
         return false;
     }
@@ -283,7 +283,7 @@ public final class Encounters {
         NEXT.put(id, SocietyConfig.between(SocietyConfig.ENCOUNTER_MIN_SECONDS.get(), SocietyConfig.ENCOUNTER_MAX_SECONDS.get(), random));
         try {
             if (wilderness(player)) {
-                com.skycraft.tamriel.Region region = com.skycraft.tamriel.Regions.at(player.serverLevel(), player.blockPosition());
+                com.skycraft.tamriel.Region region = com.skycraft.tamriel.Regions.at(player.level(), player.blockPosition());
                 boolean hasStateScene = com.skycraft.creatures.spawn.WildScenes.eligibleFor(player, region).stream()
                         .anyMatch(com.skycraft.creatures.spawn.WildScenes.Scene::isPoliticalOrStateFiltered);
                 if (random.nextInt(hasStateScene ? 2 : 3) == 0) {
@@ -299,7 +299,7 @@ public final class Encounters {
     /** Whether the player stands somewhere encounters may happen (overworld wilderness, under the sky). */
     static boolean wilderness(ServerPlayer player) {
         if (player.isSpectator() || player.level().dimension() != Level.OVERWORLD) return false;
-        ServerLevel level = player.serverLevel();
+        ServerLevel level = player.level();
         int surface = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, player.getBlockX(), player.getBlockZ());
         if (surface - player.getBlockY() > 8) return false; // underground
         if (inSettlement(level, player.getBlockX(), player.getBlockZ())) return false;
@@ -323,9 +323,9 @@ public final class Encounters {
      */
     @Nullable
     public static Kind trySpawn(ServerPlayer player, @Nullable Kind forced) {
-        ServerLevel level = player.serverLevel();
+        ServerLevel level = player.level();
         if (forced == null) {
-            if (!level.getGameRules().getBoolean(GameRules.RULE_DOMOBSPAWNING) || !wilderness(player)) return null;
+            if (!level.getGameRules().get(GameRules.SPAWN_MOBS) || !wilderness(player)) return null;
             if (groupsNear(player) >= SocietyConfig.ENCOUNTER_CAP.get()) return null;
         }
         Kind kind = forced != null ? forced : pick(player);
@@ -356,13 +356,13 @@ public final class Encounters {
         };
     }
 
-    static boolean exists(ResourceLocation id) {
-        return ForgeRegistries.ENTITY_TYPES.containsKey(id);
+    static boolean exists(Identifier id) {
+        return BuiltInRegistries.ENTITY_TYPE.containsKey(id);
     }
 
     @Nullable
     private static Kind pick(ServerPlayer player) {
-        ServerLevel level = player.serverLevel();
+        ServerLevel level = player.level();
         BlockPos pos = player.blockPosition();
         Holder<Biome> biome = level.getBiome(pos);
         com.skycraft.tamriel.Region region = com.skycraft.tamriel.Regions.at(level, pos);
@@ -372,11 +372,11 @@ public final class Encounters {
                 || "falkreath".equals(hold) || "the_rift".equals(hold);
         boolean mountain = biome.is(BiomeTags.IS_MOUNTAIN) || biome.is(BiomeTags.IS_HILL)
                 || "the_reach".equals(hold) || "western_reach".equals(hold) || "wrothgar".equals(hold);
-        boolean snowy = biome.value().coldEnoughToSnow(pos)
+        boolean snowy = biome.value().coldEnoughToSnow(pos, level.getSeaLevel())
                 || "winterhold".equals(hold) || "the_pale".equals(hold) || "eastmarch".equals(hold);
         boolean night = Npcs.isNight(level);
         int lvl = SkyData.get(player).getLevel();
-        long lastLetter = Cosmetics.persistedTag(player).getLong("skycraft_letter_time");
+        long lastLetter = Cosmetics.persistedTag(player).getLongOr("skycraft_letter_time",0L);
 
         boolean imperialPolity = Reputation.IMPERIAL_LEGION.equals(ruling)
                 || Reputation.ELDER_COUNCIL.equals(ruling)
@@ -538,17 +538,17 @@ public final class Encounters {
 
         @Nullable
         Mob mob(EntityType<?> type, BlockPos pos) {
-            Entity e = type.create(level);
+            Entity e = type.create(level, net.minecraft.world.entity.EntitySpawnReason.STRUCTURE);
             if (!(e instanceof Mob mob)) return null;
-            mob.moveTo(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5, random.nextFloat() * 360f, 0f);
-            mob.finalizeSpawn(level, level.getCurrentDifficultyAt(pos), MobSpawnType.EVENT, null, null);
+            mob.snapTo(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5, random.nextFloat() * 360f, 0f);
+            mob.finalizeSpawn(level, level.getCurrentDifficultyAt(pos), EntitySpawnReason.EVENT, null);
             mark(mob, until, id);
             return level.addFreshEntity(mob) ? mob : null;
         }
 
         @Nullable
-        Mob mob(ResourceLocation id, BlockPos pos) {
-            EntityType<?> type = ForgeRegistries.ENTITY_TYPES.getValue(id);
+        Mob mob(Identifier id, BlockPos pos) {
+            EntityType<?> type = BuiltInRegistries.ENTITY_TYPE.getValue(id);
             return type == null || !exists(id) ? null : mob(type, pos);
         }
 
@@ -556,7 +556,7 @@ public final class Encounters {
         Mob prey(int radius) {
             BlockPos p = near(level, center.offset(random.nextInt(9) - 4, 0, random.nextInt(9) - 4), radius, random);
             Mob deer = exists(DEER) ? mob(DEER, p) : exists(ELK) ? mob(ELK, p) : null;
-            return deer != null ? deer : mob(EntityType.RABBIT, p);
+            return deer != null ? deer : mob(net.minecraft.world.entity.EntityTypes.RABBIT, p);
         }
     }
 
@@ -590,7 +590,7 @@ public final class Encounters {
                 for (int i = 0; i < 2; i++) {
                     Mob guard = g.mob(GUARD, near(g.level, g.center.offset(i * 2 - 1, 0, 3), 3, g.random));
                     if (guard == null) continue;
-                    if (guard instanceof PathfinderMob pm) pm.clearRestriction();
+                    if (guard instanceof PathfinderMob pm) pm.clearHome();
                     guard.setTarget(thief);
                     if (i == 0) tagIntro(guard, "guard_chase");
                 }
@@ -652,7 +652,7 @@ public final class Encounters {
                 int n = 2 + g.random.nextInt(2);
                 boolean any = prey != null;
                 for (int i = 0; i < n; i++) {
-                    Mob wolf = g.mob(EntityType.WOLF, near(g.level, g.center.offset(-8, 0, -8), 3, g.random));
+                    Mob wolf = g.mob(net.minecraft.world.entity.EntityTypes.WOLF, near(g.level, g.center.offset(-8, 0, -8), 3, g.random));
                     if (wolf == null) continue;
                     any = true;
                     if (prey != null) wolf.setTarget(prey);
@@ -683,7 +683,7 @@ public final class Encounters {
             case STRANDED_MERCHANT -> {
                 NpcEntity wt = g.npc(NpcRole.MERCHANT, g.center);
                 if (wt == null) return false;
-                wt.restrictTo(g.center, 5);
+                wt.setHomeTo(g.center, 5);
                 String merchantName = wt.getCustomName() != null ? wt.getCustomName().getString()
                         : NpcNames.generate(NpcNames.raceFor(NpcRole.INNKEEPER, g.random), g.random.nextBoolean(), g.random);
                 wt.setCustomName(Component.translatable("society.skycraft.title.stranded_merchant", merchantName));
@@ -695,8 +695,8 @@ public final class Encounters {
                 shop.putInt("level", 2);
                 wt.getPersistentData().put("skycraft_shop", shop);
                 tagIntro(wt, "cart");
-                Mob mule = g.mob(EntityType.MULE, near(g.level, g.center, 3, g.random));
-                if (mule instanceof PathfinderMob pm) pm.restrictTo(g.center, 4);
+                Mob mule = g.mob(net.minecraft.world.entity.EntityTypes.MULE, near(g.level, g.center, 3, g.random));
+                if (mule instanceof PathfinderMob pm) pm.setHomeTo(g.center, 4);
                 return true;
             }
             case DRAGON -> {

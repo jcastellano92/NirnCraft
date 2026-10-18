@@ -33,7 +33,7 @@ public final class MainQuest {
     private MainQuest() {}
 
     public static int stage(PlayerData data) {
-        return data.module("quest").getInt(STAGE);
+        return data.module("quest").getIntOr(STAGE, 0);
     }
 
     /** Called every few seconds per player: migrates old saves, renames Alduin. Story quests start in {@link Story#tickPlayer}. */
@@ -51,7 +51,7 @@ public final class MainQuest {
 
     /** Quests of the old five-stage main quest become progress in the story questline. */
     private static void migrateLegacy(ServerPlayer player, PlayerData data) {
-        List<Quest> mine = QuestStore.get(player.server).quests(Quests.personalKey(player.getUUID()));
+        List<Quest> mine = QuestStore.get(player.level().getServer()).quests(Quests.personalKey(player.getUUID()));
         boolean legacy = false;
         for (Quest q : mine) if (q.isMain() && q.kind.startsWith("main_") && !q.extra.contains(Story.DEF)) legacy = true;
         if (!legacy) return;
@@ -59,7 +59,7 @@ public final class MainQuest {
         mine.removeIf(q -> q.isMain() && q.kind.startsWith("main_") && !q.extra.contains(Story.DEF));
         Story.setFlag(data, "helgen_arrived", true); // an old character isn't carted off to Helgen
         markBefore(player, old >= FINAL_STAGE + 1 ? Integer.MAX_VALUE : old);
-        Quests.changed(player.server, Quests.personalKey(player.getUUID()));
+        Quests.changed(player.level().getServer(), Quests.personalKey(player.getUUID()));
     }
 
     /** Marks every main story quest of a stage lower than {@code stage} as done (migration, admin jumps). */
@@ -99,7 +99,7 @@ public final class MainQuest {
         data.markDirty();
         Notifier.title(player, Component.translatable("quest.skycraft.main.victory_title"), Component.translatable("quest.skycraft.main.victory_sub"));
         Component victoryMsg = Component.translatable("quest.skycraft.main.victory_broadcast", player.getDisplayName());
-        for (ServerPlayer sp : player.server.getPlayerList().getPlayers()) {
+        for (ServerPlayer sp : player.level().getServer().getPlayerList().getPlayers()) {
             if (sp != player) Notifier.message(sp, victoryMsg);
         }
     }

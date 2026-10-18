@@ -29,7 +29,7 @@ final class FrameProbe {
         initial.addProperty("frameLimit",mc.options.framerateLimit().get());
         initial.addProperty("vsync",mc.options.enableVsync().get());
         initial.addProperty("width",mc.getWindow().getWidth()); initial.addProperty("height",mc.getWindow().getHeight());
-        initial.addProperty("renderer",org.lwjgl.opengl.GL11.glGetString(org.lwjgl.opengl.GL11.GL_RENDERER));
+        initial.addProperty("renderer",com.mojang.blaze3d.systems.RenderSystem.getDevice().getDeviceInfo().toString());
         initial.addProperty("gpuTimerScope","Atmosphere diagnostics use whole-frame GPU timer; not isolated cloud cost");
     }
     static void startFrame() { if(active()) frameStart=System.nanoTime(); }
@@ -39,7 +39,7 @@ final class FrameProbe {
         if(previous==0) { previous=now; return; }
         intervals[count]=(now-previous)*1e-6; previous=now;
         renderCpu[count]=(now-frameStart)*1e-6;
-        server[count]=mc.getSingleplayerServer()==null?0:mc.getSingleplayerServer().getAverageTickTime();
+        server[count]=mc.getSingleplayerServer()==null?0:mc.getSingleplayerServer().getAverageTickTimeNanos()*1e-6;
         if(!mc.isWindowActive()) unfocused++;
         if(++count<intervals.length) return;
         try {

@@ -105,14 +105,14 @@ public final class SetPieces {
             int bx = room.cx + c[0] * Math.max(2, room.halfX() - 2), bz = room.cz + c[1] * Math.max(2, room.halfZ() - 2);
             if (room.onLane(bx, bz) || room.nearDoor(bx, bz, 1) || !room.interior(bx, bz)) continue;
             for (int y = room.floor; y <= Math.min(room.floor + 3, top - 1); y++) {
-                p.set(bx, y, bz, y == room.floor + 1 ? Blocks.OCHRE_FROGLIGHT.defaultBlockState() : Blocks.WAXED_COPPER_BLOCK.defaultBlockState());
+                p.set(bx, y, bz, y == room.floor + 1 ? Blocks.OCHRE_FROGLIGHT.defaultBlockState() : com.skycraft.worldgen.VanillaBlocks.WAXED_COPPER_BLOCK.defaultBlockState());
             }
             for (int y = room.floor + 4; y < room.maxY; y++) p.set(bx, y, bz, DwemerRooms.rod());
         }
         // the pipe gallery: copper mains across the roof
         for (int x = room.minX + 1; x < room.maxX; x++) {
             for (int z : new int[]{room.cz - 2, room.cz + 2}) {
-                if (room.height >= 6 && !room.nearDoor(x, z, 0)) p.set(x, top, z, Blocks.WAXED_CUT_COPPER.defaultBlockState());
+                if (room.height >= 6 && !room.nearDoor(x, z, 0)) p.set(x, top, z, com.skycraft.worldgen.VanillaBlocks.WAXED_CUT_COPPER.defaultBlockState());
             }
         }
         // gears in the walls (grindstones), steam vents in the floor
@@ -249,12 +249,12 @@ public final class SetPieces {
             int[] s = NaturalRooms.edgeSpot(p, room, 950 + i);
             if (s == null) continue;
             for (int dy = 0; dy <= 2; dy++) p.set(s[0], room.floor + dy, s[1], dy == 2 ? Blocks.IRON_BARS.defaultBlockState() : Blocks.IRON_BARS.defaultBlockState());
-            p.set(s[0], room.floor + 3, s[1], Blocks.CHAIN.defaultBlockState());
+            p.set(s[0], room.floor + 3, s[1], com.skycraft.worldgen.VanillaBlocks.CHAIN.defaultBlockState());
         }
         int[] a = NaturalRooms.spot(p, room, 955);
         if (a != null) {
             p.set(a[0], room.floor - 1, a[1], Blocks.REDSTONE_BLOCK.defaultBlockState());
-            p.set(a[0], room.floor, a[1], Deco.candle(Blocks.RED_CANDLE, 4, true));
+            p.set(a[0], room.floor, a[1], Deco.candle(com.skycraft.worldgen.VanillaBlocks.RED_CANDLE, 4, true));
         }
         p.feature("setpiece:blood_pool");
     }
@@ -268,7 +268,7 @@ public final class SetPieces {
             int x = c[0] + (int) Math.round(Math.cos(a) * 2), z = c[1] + (int) Math.round(Math.sin(a) * 2);
             if (room.onLane(x, z) || !NaturalRooms.inside(p, room, x, z, 0.9)) continue;
             p.set(x, room.floor - 1, z, Blocks.SOUL_SOIL.defaultBlockState());
-            p.set(x, room.floor, z, i % 2 == 0 ? Blocks.SOUL_FIRE.defaultBlockState() : Deco.candle(Blocks.BLACK_CANDLE, 3, true));
+            p.set(x, room.floor, z, i % 2 == 0 ? Blocks.SOUL_FIRE.defaultBlockState() : Deco.candle(com.skycraft.worldgen.VanillaBlocks.BLACK_CANDLE, 3, true));
         }
         p.set(c[0], room.floor, c[1], Deco.pillar(Blocks.BONE_BLOCK, Direction.Axis.X));
         p.feature("setpiece:ritual_circle");
@@ -284,7 +284,7 @@ public final class SetPieces {
         for (Direction d : Direction.Plane.HORIZONTAL) {
             int x = c[0] + d.getStepX(), z = c[1] + d.getStepZ();
             if (room.onLane(x, z) || !NaturalRooms.inside(p, room, x, z, 0.9)) continue;
-            p.set(x, room.floor, z, d.getAxis() == Direction.Axis.X ? Blocks.SWEET_BERRY_BUSH.defaultBlockState() : Deco.candle(Blocks.BROWN_CANDLE, 2, true));
+            p.set(x, room.floor, z, d.getAxis() == Direction.Axis.X ? Blocks.SWEET_BERRY_BUSH.defaultBlockState() : Deco.candle(com.skycraft.worldgen.VanillaBlocks.BROWN_CANDLE, 2, true));
         }
         p.feature("setpiece:briar_altar");
     }

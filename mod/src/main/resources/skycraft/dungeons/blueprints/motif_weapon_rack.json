@@ -21,6 +21,6 @@
  "key": {
   "I": "minecraft:iron_bars",
   "g": "minecraft:grindstone[face=floor,facing=north]",
-  "c": "minecraft:chain[axis=y]"
+  "c": "minecraft:iron_chain[axis=y]"
  }
 }

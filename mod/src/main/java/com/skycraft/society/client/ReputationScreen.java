@@ -6,7 +6,7 @@ import com.skycraft.society.Cosmetic;
 import com.skycraft.society.Reputation;
 import com.skycraft.society.SocietyPackets;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.nbt.CompoundTag;
@@ -44,7 +44,7 @@ public class ReputationScreen extends Screen {
         Minecraft mc = Minecraft.getInstance();
         available.clear();
         if (mc.player != null) {
-            CompoundTag factions = SkyData.get(mc.player).module("quest").getCompound("factions");
+            CompoundTag factions = SkyData.get(mc.player).module("quest").getCompoundOrEmpty("factions");
             for (Cosmetic c : Cosmetic.VALUES) if (factions.contains(c.faction)) available.add(c);
             chosen = ClientCosmetics.get(mc.player.getUUID());
         }
@@ -79,8 +79,8 @@ public class ReputationScreen extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        renderBackground(g);
+    public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
+
         // parchment panel
         g.fill(x0 - 4, y0 - 4, x1 + 4, y1 + 4, 0xC0000000);
         g.fill(x0 - 3, y0 - 3, x1 + 3, y1 + 3, 0xFF2A1E10);
@@ -88,12 +88,12 @@ public class ReputationScreen extends Screen {
         g.fillGradient(x0, y0, x1, y1, 0xFFEEE0BC, 0xFFDCC796);
         g.fillGradient(x0, y0, x1, y0 + 6, 0x40704C20, 0x00704C20);
 
-        g.pose().pushPose();
-        g.pose().translate(width / 2f, y0 + 8, 0);
-        g.pose().scale(1.3f, 1.3f, 1f);
+        g.pose().pushMatrix();
+        g.pose().translate(width / 2f, y0 + 8);
+        g.pose().scale(1.3f, 1.3f);
         Component title = this.title;
-        g.drawString(font, title, -font.width(title) / 2, 0, INK, false);
-        g.pose().popPose();
+        g.text(font, title, -font.width(title) / 2, 0, INK, false);
+        g.pose().popMatrix();
         g.fill(x0 + 20, y0 + 24, x1 - 20, y0 + 25, 0x906E5638);
 
         Minecraft mc = Minecraft.getInstance();
@@ -104,7 +104,7 @@ public class ReputationScreen extends Screen {
             String f = Reputation.FACTIONS[i];
             int value = mc.player == null ? 0 : Reputation.get(mc.player, f);
             int y = y0 + 32 + i * rowH;
-            g.drawString(font, Reputation.factionName(f), x0 + 12, y + (rowH - 8) / 2, INK, false);
+            g.text(font, Reputation.factionName(f), x0 + 12, y + (rowH - 8) / 2, INK, false);
             // bar: -100 .. +100 with a mark at neutral
             int by = y + rowH / 2 - 3;
             g.fill(barX - 1, by - 1, barX + barW + 1, by + 7, 0xFF5A4630);
@@ -118,17 +118,17 @@ public class ReputationScreen extends Screen {
             g.fill(mid, by - 2, mid + 1, by + 8, INK);
             int hostileAt = barX + Math.round(Reputation.fraction(-40) * barW);
             g.fill(hostileAt, by, hostileAt + 1, by + 6, 0x80802020);
-            g.drawString(font, tier.displayName(), barX + barW + 8, y + (rowH - 8) / 2, darker(tier.color), false);
+            g.text(font, tier.displayName(), barX + barW + 8, y + (rowH - 8) / 2, darker(tier.color), false);
             if (mouseX >= x0 + 8 && mouseX <= x1 - 8 && mouseY >= y && mouseY < y + rowH) {
                 hover = Component.translatable("society.skycraft.screen.value", Reputation.factionName(f), value);
                 g.fill(x0 + 8, y, x1 - 8, y + rowH, 0x20A07A3A);
             }
         }
         g.fill(x0 + 20, y1 - 36, x1 - 20, y1 - 35, 0x906E5638);
-        super.render(g, mouseX, mouseY, partialTick);
-        if (hover != null) g.renderTooltip(font, hover, mouseX, mouseY);
+        super.extractRenderState(g, mouseX, mouseY, partialTick);
+        if (hover != null) g.setTooltipForNextFrame(font, hover, mouseX, mouseY);
         if (regalia != null && regalia.isHovered()) {
-            g.renderTooltip(font, Component.translatable("society.skycraft.screen.regalia_hint"), mouseX, mouseY);
+            g.setTooltipForNextFrame(font, Component.translatable("society.skycraft.screen.regalia_hint"), mouseX, mouseY);
         }
     }
 
@@ -140,11 +140,12 @@ public class ReputationScreen extends Screen {
     }
 
     @Override
-    public boolean keyPressed(int key, int scan, int mods) {
-        if (SocietyClient.REPUTATION.matches(key, scan)) {
+    public boolean keyPressed(net.minecraft.client.input.KeyEvent event) {
+        int key = event.key(), scan = event.keycode(), mods = event.modifiers();
+        if (SocietyClient.REPUTATION.matches(event)) {
             onClose();
             return true;
         }
-        return super.keyPressed(key, scan, mods);
+        return super.keyPressed(event);
     }
 }

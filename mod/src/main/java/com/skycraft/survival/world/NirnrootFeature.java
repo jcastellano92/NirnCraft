@@ -10,14 +10,14 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
-import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
+import com.skycraft.worldgen.ConfiguredFeature;
+import com.skycraft.worldgen.FeaturePlaceContext;
+import com.skycraft.worldgen.NoneFeatureConfiguration;
 
 /**
  * Generates patches of Nirnroot along shorelines, riverbanks, and swamp waters.
  */
-public class NirnrootFeature extends Feature<NoneFeatureConfiguration> {
+public class NirnrootFeature extends ConfiguredFeature<NoneFeatureConfiguration> {
     public NirnrootFeature(Codec<NoneFeatureConfiguration> codec) {
         super(codec);
     }

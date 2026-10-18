@@ -16,6 +16,7 @@ uniform float rainStrength;
 uniform float frameTimeCounter;
 
 #include "/lib/lighting.glsl"
+#include "/lib/weather.glsl"
 #include "/lib/waves.glsl"
 
 in vec2 texcoord;
@@ -38,7 +39,8 @@ void main() {
     vec2 lm = vec2(0.0, 1.0);
     float dist = length(playerPos);
     float openness = smoothstep(0.6, 1.0, lm.y);
-    vec3 n = waveNormal((playerPos + cameraPosition).xz, frameTimeCounter, openness, rainStrength, vec2(0.0), dist);
+    vec2 wxz = (playerPos + cameraPosition).xz;
+    vec3 n = waveNormal(wxz, frameTimeCounter, openness, waterWind(wxz, rainStrength), vec2(0.0), dist, rainStrength);
     float a = WATER_ALPHA;
     vec3 lit = shadeForward(srgbToLinear(w.rgb), n, lm, playerPos, sun, 0.0);
     outColor = vec4(lit * a, a);

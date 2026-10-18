@@ -24,20 +24,20 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.EntityTeleportEvent;
-import net.minecraftforge.event.entity.item.ItemTossEvent;
-import net.minecraftforge.event.entity.living.LivingAttackEvent;
-import net.minecraftforge.event.entity.living.LivingChangeTargetEvent;
-import net.minecraftforge.event.entity.living.LivingDropsEvent;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.event.server.ServerStartedEvent;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.event.level.BlockEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+
+import net.neoforged.neoforge.event.entity.EntityTeleportEvent;
+import net.neoforged.neoforge.event.entity.item.ItemTossEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.neoforge.event.entity.living.LivingChangeTargetEvent;
+import net.neoforged.neoforge.event.entity.living.LivingDropsEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.server.ServerStartedEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.neoforge.event.level.BlockEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -53,7 +53,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * trigger, the cutscene (the dragon itself is drawn by the client for that player only), the key, the one-way door, the
  * players hidden from each other, and the guards that keep a player in the cottage until the key is used.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class IntroFlow {
     static final String MODULE = "intro";
     private static final String STATE = "state";
@@ -88,7 +88,7 @@ public final class IntroFlow {
     @Nullable
     private static IntroState stored(PlayerData d) {
         CompoundTag t = d.module(MODULE);
-        return t.contains(STATE) ? IntroState.byName(t.getString(STATE)) : null;
+        return t.contains(STATE) ? IntroState.byName(t.getStringOr(STATE, "")) : null;
     }
 
     /** True while this player is inside the opening (hidden, locked in). */
@@ -120,7 +120,7 @@ public final class IntroFlow {
                 RUNS.put(p.getUUID(), r);
             }
             r.state = st;
-            r.since = p.serverLevel().getGameTime();
+            r.since = p.level().getGameTime();
             if (st == IntroState.LOADING) r.clientLoaded = false;
         }
         boolean hide = st.inIntro() && QuestConfig.INTRO_HIDE_PLAYERS.get();
@@ -134,7 +134,7 @@ public final class IntroFlow {
 
     private static void sendState(ServerPlayer p, IntroState st) {
         int[] h = StartCottage.helgen();
-        float progress = StartCottage.prepProgress(p.serverLevel());
+        float progress = StartCottage.prepProgress(p.level());
         // the chunks the client must have before the screen lifts: 8 around the cottage and the whole town (its radius + 16)
         send(p, new IntroPackets.State(st.ordinal(), progress, h[0] >> 4, h[1] >> 4, StartCottage.townRadius() + 16, 8,
                 QuestConfig.INTRO_LOADING_SECONDS.get()));
@@ -188,7 +188,7 @@ public final class IntroFlow {
         StartCottage.Site site = StartCottage.ensure(level);
         if (site == null) return false;
         Vec3 w = site.wake();
-        p.moveTo(w.x, w.y + 0.05, w.z, site.yaw(), 8f);
+        p.snapTo(w.x, w.y + 0.05, w.z, site.yaw(), 8f);
         p.fallDistance = 0f;
         p.setDeltaMovement(Vec3.ZERO);
         return true;
@@ -197,6 +197,7 @@ public final class IntroFlow {
     /** Builds the cottage while the world loads (behind the loading screen), so no player ever waits for it on joining. */
     @SubscribeEvent
     public static void onServerStarted(ServerStartedEvent event) {
+        if (event.getServer().overworld() == null) return;
         if (!QuestConfig.INTRO.get()) return;
         try {
             StartCottage.prebuild(event.getServer().overworld());
@@ -246,7 +247,7 @@ public final class IntroFlow {
             if (st == IntroState.LEFT) {
                 markLeft(p);
             } else {
-                ServerLevel level = p.serverLevel();
+                ServerLevel level = p.level();
                 StartCottage.Site site = null;
                 try {
                     site = StartCottage.ensure(level);
@@ -289,7 +290,7 @@ public final class IntroFlow {
     private static boolean migrate(ServerPlayer p, PlayerData d) {
         if (QuestConfig.INTRO_EXISTING_SAVES.get() != QuestConfig.IntroMigration.REPLAY_IF_UNFINISHED) return false;
         if (!QuestConfig.MAIN_QUEST.get()) return false;
-        if (!d.module("core").getBoolean("spawn_placed")) return false; // a brand-new character takes the first-join path
+        if (!d.module("core").getBooleanOr("spawn_placed",false)) return false; // a brand-new character takes the first-join path
         if (Story.completed(d, "main_unbound") || Story.hasFlag(d, "helgen_arrived") || Story.hasFlag(d, "left_cottage")) return false;
         return true;
     }
@@ -310,8 +311,8 @@ public final class IntroFlow {
     }
 
     @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer p)) return;
+    public static void onPlayerTick(net.neoforged.neoforge.event.tick.PlayerTickEvent.Post event) {
+        if (!(event instanceof net.neoforged.neoforge.event.tick.PlayerTickEvent.Post) || !(event.getEntity() instanceof ServerPlayer p)) return;
         Run r = RUNS.get(p.getUUID());
         if (r == null) return;
         try {
@@ -322,7 +323,7 @@ public final class IntroFlow {
     }
 
     private static void tick(ServerPlayer p, Run r) {
-        ServerLevel level = p.serverLevel();
+        ServerLevel level = p.level();
         long now = level.getGameTime();
         PlayerData data = SkyData.get(p);
         switch (r.state) {
@@ -375,11 +376,11 @@ public final class IntroFlow {
     private static void guard(ServerPlayer p, Run r, long now) {
         if (!lockOn() || now - r.lastGuard < 20) return;
         r.lastGuard = now;
-        ServerLevel level = p.serverLevel();
+        ServerLevel level = p.level();
         StartCottage.Site site = level.dimension() == Level.OVERWORLD ? StartCottage.site(level) : null;
         boolean away = site == null || p.position().distanceToSqr(site.centre()) > 14 * 14;
         if (away && !p.isCreative() && !p.isSpectator()) {
-            ServerLevel over = p.server.overworld();
+            ServerLevel over = p.level().getServer().overworld();
             StartCottage.Site s = StartCottage.site(over);
             if (s == null) return;
             Vec3 w = s.wake();
@@ -397,7 +398,7 @@ public final class IntroFlow {
     private static final double[][] BURN_OFFSETS = {{22, -22}, {-26, -26}, {30, 30}, {-14, -10}, {-30, -8}, {-12, -30}, {4, -44}, {-6, 20}, {14, 8}, {-40, 14}, {38, -4}, {-2, -6}};
 
     private static void startCutscene(ServerPlayer p, Run r, StartCottage.Site site) {
-        ServerLevel level = p.serverLevel();
+        ServerLevel level = p.level();
         Vec3 spot = site.windowSpot();
         r.lock = spot;
         r.cutStart = level.getGameTime();
@@ -453,7 +454,7 @@ public final class IntroFlow {
                 Component.translatable("quest.skycraft.intro2.title").withStyle(ChatFormatting.GOLD)));
         p.connection.send(new net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket(
                 Component.translatable("quest.skycraft.intro2.subtitle").withStyle(ChatFormatting.GRAY)));
-        Scenes.journal(p.server, p);
+        Scenes.journal(p.level().getServer(), p);
         Notifier.message(p, Component.translatable("quest.skycraft.intro2.key").withStyle(ChatFormatting.YELLOW));
         p.level().playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 0.6f, 0.8f);
     }
@@ -465,8 +466,8 @@ public final class IntroFlow {
     // ------------------------------------------------------------------ the key and the door
 
     private static boolean isKey(ItemStack s, UUID owner) {
-        return !s.isEmpty() && s.is(QuestItems.COTTAGE_KEY.get()) && s.getTag() != null && s.getTag().hasUUID("owner")
-                && owner.equals(s.getTag().getUUID("owner"));
+        return !s.isEmpty() && s.is(QuestItems.COTTAGE_KEY.get()) && com.skycraft.inventory.ItemData.custom(s) != null && com.skycraft.inventory.ItemData.custom(s).read("owner", net.minecraft.core.UUIDUtil.CODEC).isPresent()
+                && owner.equals(com.skycraft.inventory.ItemData.custom(s).read("owner", net.minecraft.core.UUIDUtil.CODEC).orElseThrow());
     }
 
     private static boolean hasKey(ServerPlayer p) {
@@ -494,7 +495,7 @@ public final class IntroFlow {
             return;
         }
         if (!StartCottage.isDoor(level, event.getPos())) return;
-        if (p.isCreative() && p.hasPermissions(2)) return;
+        if (p.isCreative() && p.permissions().hasPermission(net.minecraft.server.permissions.Permissions.COMMANDS_GAMEMASTER)) return;
         event.setCanceled(true);
         event.setCancellationResult(InteractionResult.FAIL);
         if (event.getHand() != InteractionHand.MAIN_HAND) return;
@@ -551,7 +552,7 @@ public final class IntroFlow {
     }
 
     @SubscribeEvent
-    public static void onBreak(BlockEvent.BreakEvent event) {
+    public static void onBreak(net.neoforged.neoforge.event.level.block.BreakBlockEvent event) {
         if (event.getPlayer() instanceof ServerPlayer p && lockOn() && inIntro(p) && !p.isCreative()) event.setCanceled(true);
     }
 
@@ -561,7 +562,7 @@ public final class IntroFlow {
     }
 
     @SubscribeEvent(priority = EventPriority.HIGH)
-    public static void onHurt(LivingHurtEvent event) {
+    public static void onHurt(com.skycraft.combat.BeforeArmorDamageEvent event) {
         if (event.getEntity() instanceof ServerPlayer p && inIntro(p) && !event.getSource().is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
             event.setCanceled(true);
         }
@@ -570,11 +571,11 @@ public final class IntroFlow {
     /** Players in the opening can't be targeted: not by mobs, not by other players. */
     @SubscribeEvent
     public static void onTarget(LivingChangeTargetEvent event) {
-        if (event.getNewTarget() instanceof ServerPlayer p && inIntro(p)) event.setCanceled(true);
+        if (event.getNewAboutToBeSetTarget() instanceof ServerPlayer p && inIntro(p)) event.setCanceled(true);
     }
 
     @SubscribeEvent
-    public static void onAttack(LivingAttackEvent event) {
+    public static void onAttack(LivingIncomingDamageEvent event) {
         if (event.getEntity() instanceof ServerPlayer victim && event.getSource().getEntity() instanceof ServerPlayer attacker
                 && victim != attacker && (inIntro(victim) || inIntro(attacker))) {
             event.setCanceled(true);
@@ -598,7 +599,7 @@ public final class IntroFlow {
 
     /** Sets a player's opening back to the start (they wake in the cottage again); true when it could be done. */
     public static boolean restart(ServerPlayer p) {
-        ServerLevel level = p.server.overworld();
+        ServerLevel level = p.level().getServer().overworld();
         StartCottage.Site site = StartCottage.ensure(level);
         if (site == null) return false;
         removeKeys(p);
@@ -649,7 +650,7 @@ public final class IntroFlow {
 
     static boolean testUseDoor(ServerPlayer p) {
         if (state(p) != IntroState.KEY_GIVEN || !hasKey(p)) return false;
-        leave(p, p.serverLevel());
+        leave(p, p.level());
         return true;
     }
 

@@ -6,9 +6,9 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.valueproviders.IntProvider;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
-import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
+import com.skycraft.worldgen.ConfiguredFeature;
+import com.skycraft.worldgen.FeaturePlaceContext;
+import com.skycraft.worldgen.FeatureConfiguration;
 
 /**
  * Morrowind's giant mushrooms. Three styles:
@@ -18,13 +18,13 @@ import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfigur
  *     <li>{@code cave}: a glowing cave mushroom (Blackreach), sized to the cave's headroom.</li>
  * </ul>
  */
-public class GiantMushroomFeature extends Feature<GiantMushroomFeature.Config> {
+public class GiantMushroomFeature extends ConfiguredFeature<GiantMushroomFeature.Config> {
     public record Config(BlockState stem, BlockState cap, String style, IntProvider height) implements FeatureConfiguration {
         public static final Codec<Config> CODEC = RecordCodecBuilder.create(i -> i.group(
                 BlockState.CODEC.fieldOf("stem").forGetter(Config::stem),
                 BlockState.CODEC.fieldOf("cap").forGetter(Config::cap),
                 Codec.STRING.fieldOf("style").forGetter(Config::style),
-                IntProvider.codec(3, 64).fieldOf("height").forGetter(Config::height)
+                net.minecraft.util.valueproviders.IntProviders.codec(3, 64).fieldOf("height").forGetter(Config::height)
         ).apply(i, Config::new));
     }
 
@@ -40,7 +40,7 @@ public class GiantMushroomFeature extends Feature<GiantMushroomFeature.Config> {
         int x = ctx.origin().getX(), z = ctx.origin().getZ();
         int y = ctx.origin().getY();
         BlockState below = box.get(x, y - 1, z);
-        if (!below.isSolidRender(ctx.level(), ctx.origin().below()) || !GenBox.isSoft(box.get(x, y, z))) return false;
+        if (!below.isSolidRender() || !GenBox.isSoft(box.get(x, y, z))) return false;
         if (!com.skycraft.world.PlacementMask.clear(ctx.level(), x, z, 8)) return false;
         int height = cfg.height().sample(random);
         return switch (cfg.style()) {

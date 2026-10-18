@@ -57,9 +57,9 @@ public final class SafeSpawn {
     @Nullable
     private static BlockPos column(ServerLevel level, LevelChunk chunk, int x, int z) {
         int top = chunk.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x & 15, z & 15);
-        if (top <= level.getMinBuildHeight() + 1 || top >= level.getMaxBuildHeight() - 3) return null;
+        if (top <= level.getMinY() + 1 || top >= (level.getMaxY()+1) - 3) return null;
         // the heightmap gives the first free block above the top non-leaf block; settle on the first sound floor
-        for (int y = top; y >= Math.max(level.getMinBuildHeight() + 2, top - 6); y--) {
+        for (int y = top; y >= Math.max(level.getMinY() + 2, top - 6); y--) {
             BlockPos feet = new BlockPos(x, y, z);
             if (isSafe(level, feet)) return feet;
         }

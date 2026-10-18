@@ -27,7 +27,7 @@ public class QuestStore extends SavedData {
     private final Map<String, UUID> designatedGivers = new HashMap<>();
 
     public static QuestStore get(MinecraftServer server) {
-        return server.overworld().getDataStorage().computeIfAbsent(QuestStore::load, QuestStore::new, NAME);
+        return com.skycraft.platform.SavedDataTypes.get(server.overworld(), NAME, QuestStore::load, QuestStore::new, value263 -> value263.save(new net.minecraft.nbt.CompoundTag()));
     }
 
     @Nullable
@@ -93,30 +93,29 @@ public class QuestStore extends SavedData {
 
     public static QuestStore load(CompoundTag tag) {
         QuestStore store = new QuestStore();
-        CompoundTag owners = tag.getCompound("owners");
-        for (String owner : owners.getAllKeys()) {
+        CompoundTag owners = tag.getCompoundOrEmpty("owners");
+        for (String owner : owners.keySet()) {
             List<Quest> list = new ArrayList<>();
-            for (Tag t : owners.getList(owner, Tag.TAG_COMPOUND)) list.add(Quest.load((CompoundTag) t));
+            for (Tag t : owners.getListOrEmpty(owner)) list.add(Quest.load((CompoundTag) t));
             store.quests.put(owner, list);
         }
-        CompoundTag pend = tag.getCompound("pending");
-        for (String key : pend.getAllKeys()) {
+        CompoundTag pend = tag.getCompoundOrEmpty("pending");
+        for (String key : pend.keySet()) {
             try {
-                store.pending.put(UUID.fromString(key), pend.getList(key, Tag.TAG_COMPOUND).copy());
+                store.pending.put(UUID.fromString(key), pend.getListOrEmpty(key).copy());
             } catch (IllegalArgumentException ignored) {
             }
         }
-        CompoundTag givers = tag.getCompound("designated_givers");
-        for (String qId : givers.getAllKeys()) {
+        CompoundTag givers = tag.getCompoundOrEmpty("designated_givers");
+        for (String qId : givers.keySet()) {
             try {
-                store.designatedGivers.put(qId, UUID.fromString(givers.getString(qId)));
+                store.designatedGivers.put(qId, UUID.fromString(givers.getStringOr(qId, "")));
             } catch (IllegalArgumentException ignored) {
             }
         }
         return store;
     }
 
-    @Override
     public CompoundTag save(CompoundTag tag) {
         CompoundTag owners = new CompoundTag();
         quests.forEach((owner, list) -> {

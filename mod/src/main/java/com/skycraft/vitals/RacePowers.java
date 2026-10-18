@@ -16,7 +16,7 @@ import com.skycraft.network.SkyNetwork;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -28,13 +28,12 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobCategory;
-import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.ambient.AmbientCreature;
-import net.minecraft.world.entity.animal.AbstractGolem;
+import net.minecraft.world.entity.animal.golem.AbstractGolem;
 import net.minecraft.world.entity.animal.Animal;
-import net.minecraft.world.entity.animal.WaterAnimal;
+import net.minecraft.world.entity.animal.fish.WaterAnimal;
 import net.minecraft.world.entity.monster.Enemy;
-import net.minecraft.world.entity.monster.Spider;
+import net.minecraft.world.entity.monster.spider.Spider;
 import net.minecraft.world.entity.npc.Npc;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -76,15 +75,15 @@ public final class RacePowers {
                 int hits = forEachEnemy(player, 16, mob -> {
                     calm(mob, now, 20 * 30);
                     Illusion.applyFear(player.position(), mob, 20 * 30);
-                    mob.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 20 * 30, 1));
-                    mob.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 20 * 30, 1));
+                    mob.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.SLOWNESS), 20 * 30, 1));
+                    mob.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.WEAKNESS), 20 * 30, 1));
                     push(player, mob, 1.2);
                 });
                 if (hits == 0) {
                     notifyNoTargets(player, race);
                     return;
                 }
-                MagicFx.sendNear(player.serverLevel(), player.position(), 48, MagicFx.RING, Element.FROST,
+                MagicFx.sendNear(player.level(), player.position(), 48, MagicFx.RING, Element.FROST,
                         player.position().add(0, 0.2, 0), player.position(), player.getId(), 120);
                 sound = SoundEvents.RAVAGER_ROAR;
             }
@@ -92,14 +91,14 @@ public final class RacePowers {
                 // Voice of the Emperor: calms nearby hostiles for 60 seconds
                 int hits = forEachEnemy(player, 16, mob -> {
                     calm(mob, now, 20 * 60);
-                    mob.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 20 * 60, 1));
+                    mob.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.SLOWNESS), 20 * 60, 1));
                     MagicFx.send(mob, MagicFx.AURA, Element.HOLY, mob.position(), mob.position(), mob.getId(), 1);
                 });
                 if (hits == 0) {
                     notifyNoTargets(player, race);
                     return;
                 }
-                MagicFx.sendNear(player.serverLevel(), player.position(), 48, MagicFx.RING, Element.HOLY,
+                MagicFx.sendNear(player.level(), player.position(), 48, MagicFx.RING, Element.HOLY,
                         player.position().add(0, 0.2, 0), player.position(), player.getId(), 120);
             }
             case BRETON -> {
@@ -125,23 +124,23 @@ public final class RacePowers {
                 int recruited = 0;
                 for (Mob mob : beasts) {
                     calm(mob, now, 20 * seconds);
-                    mob.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 20 * seconds, 1));
+                    mob.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.REGENERATION), 20 * seconds, 1));
                     if (recruited < 3) {
                         Summons.makeAlly(mob, player, allyUntil);
-                        mob.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, 20 * seconds, 0));
+                        mob.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.STRENGTH), 20 * seconds, 0));
                         MagicFx.send(mob, MagicFx.AURA, Element.NATURE, mob.position(), mob.position(), mob.getId(), 2);
                         recruited++;
                     }
                 }
-                MagicFx.sendNear(player.serverLevel(), player.position(), 48, MagicFx.RING, Element.NATURE,
+                MagicFx.sendNear(player.level(), player.position(), 48, MagicFx.RING, Element.NATURE,
                         player.position().add(0, 0.2, 0), player.position(), player.getId(), 140);
-                player.level().playSound(null, player.blockPosition(), SoundEvents.WOLF_HOWL, SoundSource.PLAYERS, 0.6f, 1.2f);
+                player.level().playSound(null, player.blockPosition(), com.skycraft.audio.AudioSounds.creature("wolf", "howl"), SoundSource.PLAYERS, 0.6f, 1.2f);
                 sound = SoundEvents.AMETHYST_BLOCK_CHIME;
             }
             case DUNMER -> {
                 // Ancestor's Wrath: surrounds the Dunmer in a fiery cloak for 60 seconds
                 Buffs.apply(player, "fire_cloak", 20 * seconds);
-                player.addEffect(new MobEffectInstance(MagicRegistry.FLAME_CLOAK.get(), 20 * seconds, 0, false, true, true));
+                player.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MagicRegistry.FLAME_CLOAK.get()), 20 * seconds, 0, false, true, true));
                 MagicFx.send(player, MagicFx.AURA, Element.FIRE, player.position(), player.position(), player.getId(), 3);
                 sound = SoundEvents.BLAZE_SHOOT;
             }
@@ -162,8 +161,8 @@ public final class RacePowers {
                 forEachEnemy(player, 16, mob -> calm(mob, now, 20 * 5));
             }
             case REACHMAN -> {
-                self(player, MobEffects.DAMAGE_BOOST, seconds, 0);
-                self(player, MobEffects.DAMAGE_RESISTANCE, seconds, 0);
+                self(player, MobEffects.STRENGTH, seconds, 0);
+                self(player, MobEffects.RESISTANCE, seconds, 0);
                 self(player, MobEffects.REGENERATION, seconds, 0);
                 self(player, MobEffects.ABSORPTION, seconds, 1);
                 sound = SoundEvents.WARDEN_HEARTBEAT;
@@ -176,24 +175,24 @@ public final class RacePowers {
             case LILMOTHIIT -> {
                 forEachEnemy(player, 16, mob -> calm(mob, now, 20 * 20));
                 self(player, MobEffects.INVISIBILITY, 20, 0);
-                self(player, MobEffects.MOVEMENT_SPEED, 20, 1);
+                self(player, MobEffects.SPEED, 20, 1);
                 sound = SoundEvents.FOX_SCREECH;
             }
             case IMGA -> {
                 forEachEnemy(player, 12, mob -> {
-                    mob.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 20 * 30, 1));
-                    mob.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 20 * 30, 0));
+                    mob.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.WEAKNESS), 20 * 30, 1));
+                    mob.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.SLOWNESS), 20 * 30, 0));
                     push(player, mob, 0.6);
                 });
-                self(player, MobEffects.DAMAGE_BOOST, 30, 0);
-                self(player, MobEffects.DAMAGE_RESISTANCE, 30, 0);
+                self(player, MobEffects.STRENGTH, 30, 0);
+                self(player, MobEffects.RESISTANCE, 30, 0);
                 sound = SoundEvents.RAVAGER_STUNNED;
             }
             case TSAESCI -> {
                 int hits = forEachEnemy(player, 12, mob -> {
                     mob.setTarget(null);
-                    mob.addEffect(new MobEffectInstance(com.skycraft.registry.ModEffects.PARALYSIS.get(), 20 * 6, 0));
-                    mob.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 20 * 20, 0));
+                    mob.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(com.skycraft.registry.ModEffects.PARALYSIS.get()), 20 * 6, 0));
+                    mob.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.WEAKNESS), 20 * 20, 0));
                 });
                 if (hits == 0) {
                     notifyNoTargets(player, race);
@@ -205,7 +204,7 @@ public final class RacePowers {
                 int hits = forEachEnemy(player, 10, mob -> {
                     calm(mob, now, 20 * 10);
                     Illusion.applyFear(player.position(), mob, 20 * 10);
-                    mob.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 20 * 30, 1));
+                    mob.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.WEAKNESS), 20 * 30, 1));
                     push(player, mob, 1.8);
                     com.skycraft.combat.CombatHandler.secondaryHurt(mob, player.damageSources().mobAttack(player), 4f);
                 });
@@ -216,23 +215,23 @@ public final class RacePowers {
                 sound = SoundEvents.RAVAGER_ROAR;
             }
             case TANG_MO -> {
-                self(player, MobEffects.DIG_SPEED, seconds, 1);
-                self(player, MobEffects.DAMAGE_BOOST, seconds, 0);
-                self(player, MobEffects.MOVEMENT_SPEED, seconds, 0);
+                self(player, MobEffects.HASTE, seconds, 1);
+                self(player, MobEffects.STRENGTH, seconds, 0);
+                self(player, MobEffects.SPEED, seconds, 0);
             }
             case ATMORAN -> {
                 // the Voice is ready again at once (syncs immediately to client HUD via SkyData)
                 com.skycraft.magic.MagicData.setShoutCooldown(player, now, 0);
-                self(player, MobEffects.DAMAGE_RESISTANCE, seconds, 0);
+                self(player, MobEffects.RESISTANCE, seconds, 0);
                 sound = SoundEvents.ELDER_GUARDIAN_AMBIENT;
             }
             case FALMER -> {
                 for (Mob mob : player.level().getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(16),
-                        m -> m.getMobType() == MobType.UNDEAD && !Targeting.isFriendly(player, m))) {
-                    mob.setSecondsOnFire(5);
+                        m -> com.skycraft.platform.Effects.isUndead(m) && !Targeting.isFriendly(player, m))) {
+                    mob.igniteForSeconds(5);
                     com.skycraft.combat.CombatHandler.secondaryHurt(mob, player.damageSources().indirectMagic(player, player), 8f);
                 }
-                forEachEnemy(player, 16, mob -> mob.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 20 * 8, 0)));
+                forEachEnemy(player, 16, mob -> mob.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.BLINDNESS), 20 * 8, 0)));
                 self(player, MobEffects.REGENERATION, 10, 1);
                 sound = SoundEvents.BEACON_ACTIVATE;
             }
@@ -247,15 +246,15 @@ public final class RacePowers {
             case AYLEID -> {
                 data.setMagicka(data.maxMagicka());
                 forEachEnemy(player, 16, mob -> {
-                    mob.addEffect(new MobEffectInstance(MobEffects.GLOWING, 20 * 30, 0));
-                    mob.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 20 * 4, 0));
+                    mob.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.GLOWING), 20 * 30, 0));
+                    mob.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.BLINDNESS), 20 * 4, 0));
                 });
                 self(player, MobEffects.NIGHT_VISION, seconds, 0);
                 sound = SoundEvents.BEACON_POWER_SELECT;
             }
             case KOTHRINGI -> {
-                self(player, MobEffects.DAMAGE_RESISTANCE, seconds, 1);
-                forEachEnemy(player, 8, mob -> mob.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 20 * 8, 0)));
+                self(player, MobEffects.RESISTANCE, seconds, 1);
+                forEachEnemy(player, 8, mob -> mob.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.BLINDNESS), 20 * 8, 0)));
                 sound = SoundEvents.AMETHYST_BLOCK_CHIME;
             }
         }
@@ -265,7 +264,7 @@ public final class RacePowers {
     }
 
     private static void notifyNoTargets(ServerPlayer player, Race race) {
-        player.playNotifySound(SoundEvents.FIRE_EXTINGUISH, SoundSource.PLAYERS, 0.5f, 1.4f);
+        com.skycraft.magic.MagicFx.soundToPlayer(player, SoundEvents.FIRE_EXTINGUISH, SoundSource.PLAYERS, 0.5f, 1.4f);
         Notifier.message(player, Component.translatable("message.skycraft.power_no_targets", race.powerName()));
     }
 
@@ -294,8 +293,8 @@ public final class RacePowers {
         return existingOwner == null || existingOwner.equals(player.getUUID());
     }
 
-    private static void self(ServerPlayer player, MobEffect effect, int seconds, int amplifier) {
-        player.addEffect(new MobEffectInstance(effect, 20 * seconds, amplifier, false, false, true));
+    private static void self(ServerPlayer player, net.minecraft.core.Holder<MobEffect> effect, int seconds, int amplifier) {
+        player.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(effect), 20 * seconds, amplifier, false, false, true));
     }
 
     private static void push(ServerPlayer player, Mob mob, double strength) {
@@ -303,7 +302,7 @@ public final class RacePowers {
         if (away.lengthSqr() < 1e-4) return;
         away = away.normalize().scale(strength);
         mob.push(away.x, 0.3, away.z);
-        mob.hurtMarked = true;
+        mob.syncVelocity = true;
     }
 
     private static int forEachEnemy(ServerPlayer player, double radius, Consumer<Mob> action) {
@@ -318,11 +317,11 @@ public final class RacePowers {
 
     /** Animals and wild beasts (vanilla animals, spiders, Skycraft fauna & wild creatures), not people, undead, dragons or constructs. */
     public static boolean isBeast(Mob mob) {
-        if (mob.getMobType() == MobType.UNDEAD
+        if (com.skycraft.platform.Effects.isUndead(mob)
                 || mob instanceof com.skycraft.dungeons.entity.Automaton
                 || mob instanceof AbstractGolem
                 || mob instanceof Npc
-                || mob.getType().is(com.skycraft.combat.CombatHandler.BOSSES)) {
+                || mob.getType().builtInRegistryHolder().is(com.skycraft.combat.CombatHandler.BOSSES)) {
             return false;
         }
         if (mob instanceof Animal || mob instanceof WaterAnimal || mob instanceof AmbientCreature || mob instanceof Spider) {
@@ -338,7 +337,7 @@ public final class RacePowers {
         if (cls.startsWith("com.skycraft.fauna.") || cls.startsWith("com.skycraft.seas.")) {
             return true;
         }
-        ResourceLocation key = BuiltInRegistries.ENTITY_TYPE.getKey(mob.getType());
+        Identifier key = BuiltInRegistries.ENTITY_TYPE.getKey(mob.getType());
         if (key != null) {
             String path = key.getPath();
             return path.contains("wolf") || path.contains("bear") || path.contains("sabre") || path.contains("cat")
@@ -361,7 +360,7 @@ public final class RacePowers {
 
     /** Whether {@code mob} is calmed (by a racial power) at game time {@code now}. */
     public static boolean calmed(Entity mob, long now) {
-        return mob.getPersistentData().getLong(CALM_KEY) > now;
+        return mob.getPersistentData().getLongOr(CALM_KEY, 0L) > now;
     }
 
     /** Ends a calm (the mob was attacked). */
@@ -372,11 +371,11 @@ public final class RacePowers {
     /** Dunmer "Ancestor's Wrath" fire cloak tick, called from the combat handler each second. */
     public static void tickFireCloak(ServerPlayer player) {
         if (!Buffs.active(player, "fire_cloak")) return;
-        player.serverLevel().sendParticles(ParticleTypes.FLAME,
+        player.level().sendParticles(ParticleTypes.FLAME,
                 player.getX(), player.getY() + 0.9, player.getZ(), 10, 0.55, 0.45, 0.55, 0.02);
         for (Mob mob : player.level().getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(3.5),
                 m -> m.isAlive() && (m instanceof Enemy || m.getTarget() == player) && !Targeting.isFriendly(player, m))) {
-            mob.setSecondsOnFire(3);
+            mob.igniteForSeconds(3);
             com.skycraft.combat.CombatHandler.secondaryHurt(mob, player.damageSources().indirectMagic(player, player), 2f);
         }
     }

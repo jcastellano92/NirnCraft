@@ -2,16 +2,16 @@ package com.skycraft.crafting;
 
 import com.google.common.base.Suppliers;
 import com.skycraft.Skycraft;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.world.item.ArmorItem;
-import net.minecraft.world.item.ArmorMaterial;
+import net.minecraft.world.item.equipment.ArmorType;
+import net.minecraft.world.item.equipment.ArmorMaterial;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -31,7 +31,7 @@ import java.util.function.Supplier;
  * <p>The constants are generated from {@code tools/textures/gear_catalogue.py} by {@code tools/textures/gear.py}
  * (Skyrim armour ratings converted to armour points); edit the catalogue, not the block between the markers.</p>
  */
-public enum SkyArmorMaterial implements ArmorMaterial {
+public enum SkyArmorMaterial  {
     // id, heavy, defense {helmet, chest, gauntlets, boots}, durability mult, enchantability, toughness, knockback,
     // shield armour (0 = no shield), perk, temper perk, forge category, rarity, fire resistant, main material,
     // extra forge costs, model style, equip sound, leveled-list level, main material per piece (null = default)
@@ -110,7 +110,7 @@ public enum SkyArmorMaterial implements ArmorMaterial {
     public final int minLevel;
     @Nullable
     private final int[] counts;
-    private final ResourceLocation mainId;
+    private final Identifier mainId;
     private final List<SmithingTier.Material> extras;
     private final Supplier<Item> main;
     private final Supplier<Ingredient> repair = Suppliers.memoize(() -> Ingredient.of(material()));
@@ -135,15 +135,15 @@ public enum SkyArmorMaterial implements ArmorMaterial {
         this.sound = sound;
         this.minLevel = minLevel;
         this.counts = counts;
-        this.mainId = new ResourceLocation(main);
+        this.mainId = Identifier.parse(main);
         this.extras = SmithingTier.Material.parse(extras);
         this.main = Suppliers.memoize(() -> {
-            Item item = ForgeRegistries.ITEMS.getValue(mainId);
+            Item item = BuiltInRegistries.ITEM.getValue(mainId);
             return item == null ? Items.LEATHER : item;
         });
     }
 
-    public static int index(ArmorItem.Type type) {
+    public static int index(ArmorType type) {
         return switch (type) {
             case HELMET -> 0;
             case CHESTPLATE -> 1;
@@ -153,7 +153,7 @@ public enum SkyArmorMaterial implements ArmorMaterial {
     }
 
     /** Value multiplier per piece relative to the cuirass. */
-    public static float valueMult(ArmorItem.Type type) {
+    public static float valueMult(ArmorType type) {
         return switch (index(type)) {
             case 0 -> 0.5f;
             case 1 -> 1.0f;
@@ -163,7 +163,7 @@ public enum SkyArmorMaterial implements ArmorMaterial {
     }
 
     /** Item id suffix per piece: helmet, chestplate, leggings (the gauntlets), boots. */
-    public static String pieceName(ArmorItem.Type type) {
+    public static String pieceName(ArmorType type) {
         return switch (index(type)) {
             case 0 -> "helmet";
             case 1 -> "chestplate";
@@ -172,7 +172,7 @@ public enum SkyArmorMaterial implements ArmorMaterial {
         };
     }
 
-    public String itemId(ArmorItem.Type type) {
+    public String itemId(ArmorType type) {
         return id + "_" + pieceName(type);
     }
 
@@ -200,8 +200,24 @@ public enum SkyArmorMaterial implements ArmorMaterial {
         return (heavy ? new int[]{3, 5, 4, 2} : new int[]{2, 4, 3, 2})[piece];
     }
 
-    @Override
-    public int getDurabilityForType(ArmorItem.Type type) {
+    /** Real equipment components preserve the material's complete defense, durability and sound profile. */
+    public ArmorMaterial vanilla() { return nativeMaterial.get(); }
+
+    private final Supplier<ArmorMaterial> nativeMaterial = Suppliers.memoize(this::buildNativeMaterial);
+
+    private ArmorMaterial buildNativeMaterial() {
+        java.util.Map<ArmorType, Integer> values = new java.util.EnumMap<>(ArmorType.class);
+        for (ArmorType type : new ArmorType[]{ArmorType.HELMET, ArmorType.CHESTPLATE, ArmorType.LEGGINGS, ArmorType.BOOTS}) {
+            values.put(type, getDefenseForType(type));
+        }
+        return new ArmorMaterial(durability, java.util.Map.copyOf(values), enchantment, getEquipSound(), toughness, knockback,
+                net.minecraft.tags.TagKey.create(net.minecraft.core.registries.Registries.ITEM,
+                        Identifier.fromNamespaceAndPath(Skycraft.MODID, "repair_armor/" + id)),
+                net.minecraft.resources.ResourceKey.create(net.minecraft.world.item.equipment.EquipmentAssets.ROOT_ID,
+                        Identifier.fromNamespaceAndPath(Skycraft.MODID, id)));
+    }
+
+    public int getDurabilityForType(ArmorType type) {
         return HEALTH[index(type)] * durability;
     }
 
@@ -210,18 +226,15 @@ public enum SkyArmorMaterial implements ArmorMaterial {
         return 120 + 18 * durability;
     }
 
-    @Override
-    public int getDefenseForType(ArmorItem.Type type) {
+    public int getDefenseForType(ArmorType type) {
         return defense[index(type)];
     }
 
-    @Override
     public int getEnchantmentValue() {
         return enchantment;
     }
 
-    @Override
-    public SoundEvent getEquipSound() {
+    public net.minecraft.core.Holder<SoundEvent> getEquipSound() {
         return switch (sound) {
             case "chain" -> SoundEvents.ARMOR_EQUIP_CHAIN;
             case "iron" -> SoundEvents.ARMOR_EQUIP_IRON;
@@ -232,22 +245,18 @@ public enum SkyArmorMaterial implements ArmorMaterial {
         };
     }
 
-    @Override
     public Ingredient getRepairIngredient() {
         return repair.get();
     }
 
-    @Override
     public String getName() {
         return Skycraft.MODID + ":" + id;
     }
 
-    @Override
     public float getToughness() {
         return toughness;
     }
 
-    @Override
     public float getKnockbackResistance() {
         return knockback;
     }

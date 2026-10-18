@@ -11,7 +11,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.BlockTags;
@@ -31,8 +31,8 @@ import net.minecraft.world.level.block.SugarCaneBlock;
 import net.minecraft.world.level.block.VineBlock;
 import net.minecraft.world.level.block.WebBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.Tags;
-import net.minecraftforge.common.util.FakePlayer;
+import net.neoforged.neoforge.common.Tags;
+import net.neoforged.neoforge.common.util.FakePlayer;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
@@ -61,7 +61,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public final class Protect {
     /** Blocks a player may place anywhere: camping gear and the drafting table that founds a homestead. */
     public static final TagKey<Block> PLACEABLE_ANYWHERE =
-            TagKey.create(Registries.BLOCK, new ResourceLocation(Skycraft.MODID, "placeable_anywhere"));
+            TagKey.create(Registries.BLOCK, Identifier.fromNamespaceAndPath(Skycraft.MODID, "placeable_anywhere"));
 
     /** An answer and why (a short code, also shown by {@code /skycraft-protect check}). */
     public record Decision(boolean allowed, String reason) {

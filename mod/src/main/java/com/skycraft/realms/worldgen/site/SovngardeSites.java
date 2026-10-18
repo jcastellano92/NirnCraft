@@ -358,12 +358,12 @@ final class SovngardeSites {
                 }
                 // banners of the honoured: red wool strips on the walls
                 for (int z = zN + 4; z <= zS - 4; z += 5) {
-                    d.box(s * (HW - 1), f + 5, z + 2, s * (HW - 1), f + 8, z + 2, Blocks.RED_WOOL.defaultBlockState());
-                    d.set(s * (HW - 1), f + 9, z + 2, Blocks.YELLOW_WOOL.defaultBlockState());
+                    d.box(s * (HW - 1), f + 5, z + 2, s * (HW - 1), f + 8, z + 2, com.skycraft.worldgen.VanillaBlocks.RED_WOOL.defaultBlockState());
+                    d.set(s * (HW - 1), f + 9, z + 2, com.skycraft.worldgen.VanillaBlocks.YELLOW_WOOL.defaultBlockState());
                 }
             }
             // chandeliers on chains from the roof beams
-            BlockState chain = Blocks.CHAIN.defaultBlockState().setValue(ChainBlock.AXIS, Direction.Axis.Y);
+            BlockState chain = com.skycraft.worldgen.VanillaBlocks.CHAIN.defaultBlockState().setValue(ChainBlock.AXIS, Direction.Axis.Y);
             for (int z = zN + 8; z <= zS - 6; z += 9) {
                 for (int y = wallTop + 5; y <= wallTop + HW; y++) d.set(0, y, z, chain);
                 d.set(0, wallTop + 4, z, Blocks.LANTERN.defaultBlockState().setValue(LanternBlock.HANGING, true));

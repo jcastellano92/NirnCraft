@@ -15,7 +15,7 @@ import com.skycraft.world.WorldData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
@@ -26,10 +26,11 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.SkullBlockEntity;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 
 import java.util.Arrays;
 import java.util.Locale;
@@ -40,7 +41,7 @@ import java.util.Locale;
  * the residents of scenes (a pilgrim, a hermit and her goats, hunters), spawned on the server thread the first time
  * a player comes near, because NPCs register with the townsfolk registry and so cannot be made during worldgen.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class LandmarkEvents {
     private static final int INTERVAL = 40;
     private static final float[] XP = {1.0f, 2.0f, 4.0f, 8.0f};
@@ -48,12 +49,12 @@ public final class LandmarkEvents {
     private LandmarkEvents() {}
 
     @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer player)) return;
+    public static void onPlayerTick(PlayerTickEvent.Post event) {
+        if (!(event.getEntity() instanceof ServerPlayer player)) return;
         if (player.isSpectator() || player.level().dimension() != Level.OVERWORLD) return;
         if ((player.tickCount + (player.getId() & 31) + 7) % INTERVAL != 0) return;
         try {
-            ServerLevel level = player.serverLevel();
+            ServerLevel level = player.level();
             int x = player.getBlockX(), z = player.getBlockZ();
             for (LandmarkSite s : Landmarks.within(level.getSeed(), x, z, 80)) {
                 double d = Math.sqrt(s.distSqr(x, z));
@@ -76,7 +77,7 @@ public final class LandmarkEvents {
     private static void found(ServerPlayer player, ServerLevel level, LandmarkSite s) {
         PlayerData data = SkyData.get(player);
         CompoundTag mod = data.module("landmarks");
-        long[] found = mod.getLongArray("found");
+        long[] found = mod.getLongArray("found").orElseGet(() -> new long[0]);
         long key = s.key();
         for (long k : found) if (k == key) return;
         if (!built(level, s)) return;
@@ -104,7 +105,7 @@ public final class LandmarkEvents {
         loc.putInt("x", s.x());
         loc.putInt("y", y);
         loc.putInt("z", s.z());
-        loc.putString("dim", level.dimension().location().toString());
+        loc.putString("dim", level.dimension().identifier().toString());
         loc.putInt("ax", s.x());
         loc.putInt("ay", y);
         loc.putInt("az", s.z());
@@ -182,12 +183,12 @@ public final class LandmarkEvents {
             npc.setPersistenceRequired();
             if (level.addFreshEntity(npc)) npc.setHome(spot, 4);
         } else if (cast.startsWith("mob:")) {
-            ResourceLocation id = ResourceLocation.tryParse(cast.substring(4));
-            EntityType<?> type = id == null ? null : ForgeRegistries.ENTITY_TYPES.getValue(id);
+            Identifier id = Identifier.tryParse(cast.substring(4));
+            EntityType<?> type = id == null ? null : BuiltInRegistries.ENTITY_TYPE.getValue(id);
             if (type == null) return;
-            Entity e = type.create(level);
+            Entity e = type.create(level, net.minecraft.world.entity.EntitySpawnReason.STRUCTURE);
             if (!(e instanceof Mob mob)) return;
-            mob.moveTo(spot.getX() + 0.5, spot.getY(), spot.getZ() + 0.5, level.random.nextFloat() * 360f, 0);
+            mob.snapTo(spot.getX() + 0.5, spot.getY(), spot.getZ() + 0.5, level.getRandom().nextFloat() * 360f, 0);
             mob.setPersistenceRequired();
             level.addFreshEntity(mob);
         }

@@ -26,15 +26,15 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
+import java.util.function.BooleanSupplier;
 
 /**
  * Seed-dependent 4,096 x 4,096 block tile planner and off-thread cache for Endless Lands beyond the authored map
  * (pipeline stage P7, see {@code docs/WORLDGEN-PIPELINE.md} section 7).
  *
- * <p><b>Off-thread contract:</b> chunk generation and runtime queries call {@link #getIfReady(int, int)}, which never
- * blocks the server thread. If a tile is not yet in memory, {@link #ensurePlannedAsync(long, int, int)} schedules the
- * tile and its cardinal neighbours on the background daemon pool. Explicit commands, pregen, and unit tests call
- * {@link #planSync(long, int, int)}.</p>
+ * <p>Endless Lands are dormant under the outer-ocean policy. Runtime {@link #getIfReady(int, int)} returns null even
+ * for a previously saved or cached plan and schedules no expansion work. Explicit commands and tests may inspect
+ * the preserved planner using {@link #planSync(long, int, int)} and a thread-confined {@link #previewForTools()} scope.</p>
  *
  * <p><b>Boundary seam contract:</b> crossing points on any tile edge are computed by a pure function of
  * {@code (worldSeed, isHorizontal, borderLineCoord, spanIndex)} via {@link #computeEdgePoints}, so two adjacent tiles
@@ -61,11 +61,53 @@ public final class TilePlanner {
             "Wayshrine", "Standing Stone", "Beacon", "Altar", "Sanctum", "Obelisk"
     };
 
-    private static volatile long activeWorldSeed = 0L;
-    private static final ConcurrentHashMap<Long, TilePlan> CACHE = new ConcurrentHashMap<>();
-    private static final ConcurrentHashMap<Long, CompletableFuture<TilePlan>> IN_FLIGHT = new ConcurrentHashMap<>();
-    private static volatile BiConsumer<Long, TilePlan> persistenceSink;
-    private static volatile PersistentLoader persistenceLoader;
+    /** Session identity is independent of seed: two saves may legitimately share a seed. */
+    private static final class Session {
+        final long seed;
+        final Object owner;
+        final PersistentLoader loader;
+        final SessionSink sink;
+        final Runnable beforeDetach;
+        final BooleanSupplier ownerThread;
+        volatile boolean closing;
+        final ConcurrentHashMap<Long, TilePlan> cache = new ConcurrentHashMap<>();
+        final ConcurrentHashMap<Long, CompletableFuture<TilePlan>> pending = new ConcurrentHashMap<>();
+
+        Session(long seed, Object owner, PersistentLoader loader, SessionSink sink, Runnable beforeDetach,
+                BooleanSupplier ownerThread) {
+            this.seed = seed;
+            this.owner = owner;
+            this.loader = loader;
+            this.sink = sink;
+            this.beforeDetach = beforeDetach;
+            this.ownerThread = ownerThread;
+        }
+    }
+
+    private static volatile Session activeSession;
+    private static final ThreadLocal<Integer> TOOL_PREVIEW = ThreadLocal.withInitial(() -> 0);
+
+    /** Explicit thread-confined inspection of dormant expansion plans; never enables runtime world generation. */
+    public static final class ToolPreview implements AutoCloseable {
+        private final Thread thread = Thread.currentThread();
+        private final int depth = TOOL_PREVIEW.get();
+        private boolean closed;
+        private ToolPreview() { TOOL_PREVIEW.set(depth + 1); }
+        @Override public void close() {
+            if (closed) return;
+            if (Thread.currentThread() != thread || TOOL_PREVIEW.get() != depth + 1)
+                throw new IllegalStateException("Tile tool preview must close on its original thread in scope order");
+            if (depth == 0) TOOL_PREVIEW.remove(); else TOOL_PREVIEW.set(depth);
+            closed = true;
+        }
+    }
+
+    public static ToolPreview previewForTools() { return new ToolPreview(); }
+
+    @FunctionalInterface
+    interface SessionSink {
+        void accept(Object token, long key, TilePlan plan);
+    }
 
     @FunctionalInterface
     public interface PersistentLoader {
@@ -85,54 +127,167 @@ public final class TilePlanner {
     private TilePlanner() {
     }
 
-    /** Sets the active world seed for runtime queries; clears in-memory cache if the seed changed. */
+    /** Selects a seed for standalone planning. Runtime worlds use {@link #attach}. */
     public static synchronized void setWorldSeed(long worldSeed) {
-        if (activeWorldSeed != worldSeed) {
-            activeWorldSeed = worldSeed;
-            CACHE.clear();
-            IN_FLIGHT.clear();
+        Session old = activeSession;
+        if (old == null || old.seed != worldSeed) {
+            replaceSession(new Session(worldSeed, null, null, null, null, null));
         }
     }
 
     public static long getWorldSeed() {
-        return activeWorldSeed;
-    }
-
-    /** Installs optional persistence callbacks backed by {@link TilePlanData}. */
-    public static void setPersistence(PersistentLoader loader, BiConsumer<Long, TilePlan> sink) {
-        persistenceLoader = loader;
-        persistenceSink = sink;
-    }
-
-    /** Clears all in-memory and in-flight tile plans (for testing and world unload). */
-    public static void clearCache() {
-        CACHE.clear();
-        IN_FLIGHT.clear();
-    }
-
-    /** True when tile {@code (tileX, tileZ)} is already planned and resident in memory. */
-    public static boolean isCached(int tileX, int tileZ) {
-        return CACHE.containsKey(TilePlan.key(tileX, tileZ));
+        Session session = activeSession;
+        return session == null ? 0L : session.seed;
     }
 
     /**
-     * Non-blocking lookup used by runtime worldgen queries outside the authored Tamriel map.
+     * An immutable generation prerequisite tied to its original save and cache epoch. This is groundwork for
+     * first-consumer integration; optional render/lookahead queries continue using {@link #getIfReady}.
+     */
+    public static final class GenerationSnapshot {
+        private final Session session;
+        private final TilePlan tile;
+
+        private GenerationSnapshot(Session session, TilePlan tile) {
+            this.session = session;
+            this.tile = tile;
+        }
+
+        public long worldSeed() { return session.seed; }
+        public boolean isCurrent() { return session == activeSession && !session.closing; }
+
+        /** A stale prerequisite cannot silently become a query against the next world's plan. */
+        public TilePlan tile() {
+            if (!isCurrent()) throw new java.util.concurrent.CancellationException("Stale tile generation prerequisite");
+            return tile;
+        }
+    }
+
+    /**
+     * Required worker-side tile resolution: never returns pending-as-absent and never joins a queued planner job.
+     * A cold tile is loaded from immutable saved bytes or computed directly on this caller. A duplicate pure
+     * computation is intentional when the background pool is occupied: this avoids a worldgen/pool wait cycle.
+     * Publication still uses the original session and owning-thread SavedData queue.
+     *
+     * <p>Not installed as a default lookup: all first consumers, density memoisation and locate preflight must be
+     * integrated together. Calling on the owning server thread fails fast, even for a resident tile; this API
+     * must not introduce an unpredictable cold solve into a tick or a player-facing exception path.</p>
+     */
+    public static GenerationSnapshot requireTileForWorker(long worldSeed, int tileX, int tileZ) {
+        Session session = activeSession;
+        if (session == null || session.closing || session.seed != worldSeed) {
+            throw new java.util.concurrent.CancellationException("Missing or stale tile generation session");
+        }
+        if (session.ownerThread == null) throw new IllegalStateException("Tile generation prerequisite has no owner-thread binding");
+        if (session.ownerThread.getAsBoolean()) throw new IllegalStateException("Required tile resolution must run on a worldgen worker");
+        TilePlan tile = getOrCompute(session, tileX, tileZ);
+        GenerationSnapshot snapshot = new GenerationSnapshot(session, tile);
+        snapshot.tile(); // Completion may have raced with detach while reading immutable saved bytes.
+        return snapshot;
+    }
+
+    /** Atomically attaches standalone test/tool callbacks to a particular owner. */
+    public static synchronized void attach(long seed, Object owner, PersistentLoader loader,
+                                           BiConsumer<Long, TilePlan> sink) {
+        attachQueued(seed, owner, loader, guardedSink(sink), null);
+    }
+
+    /** Runtime persistence receives its immutable token before serialization, never the next world's callbacks. */
+    static synchronized void attachQueued(long seed, Object owner, PersistentLoader loader,
+                                           SessionSink sink, Runnable beforeDetach) {
+        attachQueued(seed, owner, loader, sink, beforeDetach, null);
+    }
+
+    static synchronized void attachQueued(long seed, Object owner, PersistentLoader loader,
+                                           SessionSink sink, Runnable beforeDetach, BooleanSupplier ownerThread) {
+        if (owner == null) throw new IllegalArgumentException("Missing tile-plan save owner");
+        Session old = activeSession;
+        if (old != null && !old.closing && old.owner == owner && old.seed == seed) return;
+        replaceSession(new Session(seed, owner, loader, sink, beforeDetach, ownerThread));
+    }
+
+    private static SessionSink guardedSink(BiConsumer<Long, TilePlan> sink) {
+        return sink == null ? null : (token, key, plan) -> publish(token, () -> sink.accept(key, plan));
+    }
+
+    /** Installs standalone test/tool persistence callbacks as a fresh session. */
+    public static synchronized void setPersistence(PersistentLoader loader, BiConsumer<Long, TilePlan> sink) {
+        replaceSession(new Session(getWorldSeed(), null, loader, guardedSink(sink), null, null));
+    }
+
+    static synchronized Object tokenFor(Object owner) {
+        Session session = activeSession;
+        return session != null && !session.closing && session.owner == owner ? session : null;
+    }
+
+    /** Queue insertion and stop share one short lock. No serialization/server waits happen under it. */
+    static synchronized boolean enqueuePublication(Object token, Runnable enqueue) {
+        Session session = activeSession;
+        if (session == null || session != token || session.closing) return false;
+        enqueue.run();
+        return true;
+    }
+
+    /** Only owning-thread queue drains call this; closing still permits bytes already accepted before stop. */
+    static synchronized boolean publish(Object token, Runnable publication) {
+        if (activeSession == null || activeSession != token) return false;
+        publication.run();
+        return true;
+    }
+
+    private static void replaceSession(Session next) {
+        Session old = activeSession;
+        activeSession = next;
+        if (old != null) {
+            old.pending.values().forEach(f -> f.cancel(false));
+            old.pending.clear();
+            old.cache.clear();
+        }
+    }
+
+    /** Drain completed owning-thread publications, then invalidate work; never wait for planner workers. */
+    public static synchronized void detach() {
+        Session session = activeSession;
+        if (session == null) return;
+        session.closing = true;
+        try {
+            if (session.beforeDetach != null) session.beforeDetach.run();
+        } finally {
+            replaceSession(null);
+        }
+    }
+
+    /** Clears cached plans and invalidates outstanding work without changing the selected save. */
+    public static synchronized void clearCache() {
+        Session old = activeSession;
+        replaceSession(old == null ? null : new Session(old.seed, old.owner, old.loader, old.sink, old.beforeDetach, old.ownerThread));
+    }
+
+    public static boolean isCached(int tileX, int tileZ) {
+        Session session = activeSession;
+        return session != null && session.cache.containsKey(TilePlan.key(tileX, tileZ));
+    }
+
+    /**
+     * Runtime expansion is dormant: normal queries return no tile, even when historical saved plans are cached.
+     * Within an explicit {@link #previewForTools()} scope this retains the old non-blocking tool behavior.
      * If the tile containing {@code (blockX, blockZ)} is cached, returns it immediately; otherwise schedules
      * off-thread planning for the tile and its 4 cardinal neighbours and returns {@code null}.
      */
     public static TilePlan getIfReady(int blockX, int blockZ) {
-        long seed = activeWorldSeed;
-        if (seed == 0L) {
+        if (!com.skycraft.tamriel.terrain.Beyond.ENDLESS_LANDS_ENABLED && TOOL_PREVIEW.get() == 0) return null;
+        Session session = activeSession;
+        if (session == null || session.closing) {
             return null;
         }
         int tx = TilePlan.tileCoord(blockX);
         int tz = TilePlan.tileCoord(blockZ);
         long k = TilePlan.key(tx, tz);
-        TilePlan plan = CACHE.get(k);
-        if (plan != null && plan.worldSeed() == seed) {
+        TilePlan plan = session.cache.get(k);
+        if (plan != null) {
             return plan;
         }
-        ensurePlannedAsync(seed, tx, tz);
+        ensurePlannedAsync(session, tx, tz);
         return null;
     }
 
@@ -173,74 +328,80 @@ public final class TilePlanner {
      * Schedules asynchronous off-thread planning for {@code (tileX, tileZ)} and its 4 cardinal neighbours.
      * Returns immediately (`0 ms` server stall) with the future for the centre tile.
      */
-    public static CompletableFuture<TilePlan> ensurePlannedAsync(long worldSeed, int tileX, int tileZ) {
-        CompletableFuture<TilePlan> center = submitSingleAsync(worldSeed, tileX, tileZ);
-        submitSingleAsync(worldSeed, tileX - 1, tileZ);
-        submitSingleAsync(worldSeed, tileX + 1, tileZ);
-        submitSingleAsync(worldSeed, tileX, tileZ - 1);
-        submitSingleAsync(worldSeed, tileX, tileZ + 1);
+    public static synchronized CompletableFuture<TilePlan> ensurePlannedAsync(long worldSeed, int tileX, int tileZ) {
+        Session session = activeSession;
+        if (session == null) {
+            setWorldSeed(worldSeed);
+            session = activeSession;
+        }
+        if (session.seed != worldSeed) return CompletableFuture.failedFuture(new java.util.concurrent.CancellationException("Stale tile seed"));
+        return ensurePlannedAsync(session, tileX, tileZ);
+    }
+
+    private static CompletableFuture<TilePlan> ensurePlannedAsync(Session session, int tileX, int tileZ) {
+        CompletableFuture<TilePlan> center = submitSingleAsync(session, tileX, tileZ);
+        submitSingleAsync(session, tileX - 1, tileZ);
+        submitSingleAsync(session, tileX + 1, tileZ);
+        submitSingleAsync(session, tileX, tileZ - 1);
+        submitSingleAsync(session, tileX, tileZ + 1);
         return center;
     }
 
-    private static CompletableFuture<TilePlan> submitSingleAsync(long worldSeed, int tileX, int tileZ) {
-        if (isEntirelyInsideTamriel(tileX, tileZ)) {
-            return CompletableFuture.completedFuture(null);
-        }
-        long k = TilePlan.key(tileX, tileZ);
-        TilePlan existing = CACHE.get(k);
-        if (existing != null && existing.worldSeed() == worldSeed) {
-            return CompletableFuture.completedFuture(existing);
-        }
-        return IN_FLIGHT.computeIfAbsent(k, key -> CompletableFuture.supplyAsync(() -> {
+    private static synchronized CompletableFuture<TilePlan> submitSingleAsync(Session session, int tileX, int tileZ) {
+        if (session != activeSession || session.closing) return CompletableFuture.failedFuture(new java.util.concurrent.CancellationException("Stale tile session"));
+        if (isEntirelyInsideTamriel(tileX, tileZ)) return CompletableFuture.completedFuture(null);
+        long key = TilePlan.key(tileX, tileZ);
+        TilePlan existing = session.cache.get(key);
+        if (existing != null) return CompletableFuture.completedFuture(existing);
+        CompletableFuture<TilePlan> pending = session.pending.get(key);
+        if (pending != null) return pending;
+        CompletableFuture<TilePlan> future = new CompletableFuture<>();
+        session.pending.put(key, future);
+        POOL.execute(() -> {
             try {
-                return getOrCompute(worldSeed, tileX, tileZ);
+                if (!future.isCancelled()) future.complete(getOrCompute(session, tileX, tileZ));
+            } catch (Throwable failure) {
+                future.completeExceptionally(failure);
             } finally {
-                IN_FLIGHT.remove(key);
+                session.pending.remove(key, future);
             }
-        }, POOL));
+        });
+        return future;
     }
 
-    /**
-     * Synchronously plans (or retrieves from memory / {@link TilePlanData}) the tile {@code (tileX, tileZ)}.
-     */
+    /** Synchronous planning is for explicit developer tools, never a server-thread generation prerequisite. */
     public static TilePlan planSync(long worldSeed, int tileX, int tileZ) {
-        setWorldSeed(worldSeed);
-        long k = TilePlan.key(tileX, tileZ);
-        TilePlan existing = CACHE.get(k);
-        if (existing != null && existing.worldSeed() == worldSeed) {
-            return existing;
+        Session session;
+        synchronized (TilePlanner.class) {
+            setWorldSeed(worldSeed);
+            session = activeSession;
         }
-        CompletableFuture<TilePlan> fut = IN_FLIGHT.get(k);
-        if (fut != null) {
-            return fut.join();
-        }
-        return getOrCompute(worldSeed, tileX, tileZ);
+        if (isEntirelyInsideTamriel(tileX, tileZ)) return getOrCompute(session, tileX, tileZ);
+        return submitSingleAsync(session, tileX, tileZ).join();
     }
 
-    private static TilePlan getOrCompute(long worldSeed, int tileX, int tileZ) {
-        long k = TilePlan.key(tileX, tileZ);
-        TilePlan existing = CACHE.get(k);
-        if (existing != null && existing.worldSeed() == worldSeed) {
-            return existing;
+    private static TilePlan getOrCompute(Session session, int tileX, int tileZ) {
+        if (session != activeSession || session.closing) throw new java.util.concurrent.CancellationException("Stale tile session");
+        long key = TilePlan.key(tileX, tileZ);
+        TilePlan existing = session.cache.get(key);
+        if (existing != null) return existing;
+        TilePlan loaded = session.loader == null ? null : session.loader.load(session.seed, tileX, tileZ);
+        if (session != activeSession || session.closing) throw new java.util.concurrent.CancellationException("Stale tile session");
+        long start = System.nanoTime();
+        TilePlan built = loaded == null ? buildTilePlan(session.seed, tileX, tileZ) : loaded;
+        if (built.worldSeed() != session.seed || built.tileX() != tileX || built.tileZ() != tileZ) {
+            throw new IllegalStateException("Persistent tile identity mismatch");
         }
-        PersistentLoader loader = persistenceLoader;
-        if (loader != null) {
-            TilePlan loaded = loader.load(worldSeed, tileX, tileZ);
-            if (loaded != null) {
-                CACHE.put(k, loaded);
-                return loaded;
-            }
+        // Runtime sinks serialize without holding the session lock, then enqueue with their original token.
+        if (session != activeSession || session.closing) throw new java.util.concurrent.CancellationException("Stale tile session");
+        if (loaded == null && session.sink != null) session.sink.accept(session, key, built);
+        synchronized (TilePlanner.class) {
+            if (session != activeSession || session.closing) throw new java.util.concurrent.CancellationException("Stale tile session");
+            session.cache.put(key, built);
         }
-        long t0 = System.nanoTime();
-        TilePlan built = buildTilePlan(worldSeed, tileX, tileZ);
-        CACHE.put(k, built);
-        BiConsumer<Long, TilePlan> sink = persistenceSink;
-        if (sink != null) {
-            sink.accept(k, built);
-        }
-        long elapsedMs = (System.nanoTime() - t0) / 1_000_000L;
-        Skycraft.LOGGER.debug("[tileplan] planned tile ({}, {}) in {} ms: {} places, {} segments, {} scenes",
-                tileX, tileZ, elapsedMs, built.places().size(), built.roadPlan().segments(), built.scenePlan().scenes());
+        if (loaded == null) Skycraft.LOGGER.debug("[tileplan] planned tile ({}, {}) in {} ms: {} places, {} segments, {} scenes",
+                tileX, tileZ, (System.nanoTime() - start) / 1_000_000L,
+                built.places().size(), built.roadPlan().segments(), built.scenePlan().scenes());
         return built;
     }
 

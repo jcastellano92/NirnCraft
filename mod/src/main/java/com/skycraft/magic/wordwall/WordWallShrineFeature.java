@@ -5,7 +5,7 @@ import com.skycraft.Skycraft;
 import com.skycraft.magic.MagicRegistry;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.WorldGenLevel;
@@ -18,16 +18,16 @@ import net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.SlabType;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
-import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
+import com.skycraft.worldgen.ConfiguredFeature;
+import com.skycraft.worldgen.FeaturePlaceContext;
+import com.skycraft.worldgen.NoneFeatureConfiguration;
 
 /**
  * A small ruined Nordic shrine: a stone platform with steps, a curved wall of weathered stone bricks and, at its
  * heart, a Word Wall. A chest ({@code skycraft:chests/word_wall}) holds gold, spell tomes and a soul gem.
  */
-public class WordWallShrineFeature extends Feature<NoneFeatureConfiguration> {
-    public static final ResourceLocation LOOT = new ResourceLocation(Skycraft.MODID, "chests/word_wall");
+public class WordWallShrineFeature extends ConfiguredFeature<NoneFeatureConfiguration> {
+    public static final Identifier LOOT = Identifier.fromNamespaceAndPath(Skycraft.MODID, "chests/word_wall");
 
     public WordWallShrineFeature(Codec<NoneFeatureConfiguration> codec) {
         super(codec);
@@ -120,7 +120,7 @@ public class WordWallShrineFeature extends Feature<NoneFeatureConfiguration> {
         int side = random.nextBoolean() ? 2 : -2;
         BlockPos chest = at(origin, right, back, side, 1, 2);
         set(level, chest, Blocks.CHEST.defaultBlockState().setValue(ChestBlock.FACING, front));
-        if (level.getBlockEntity(chest) instanceof RandomizableContainerBlockEntity container) container.setLootTable(LOOT, random.nextLong());
+        if (level.getBlockEntity(chest) instanceof RandomizableContainerBlockEntity container) container.setLootTable(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.LOOT_TABLE, LOOT), random.nextLong());
 
         // Cold braziers at the foot of the steps.
         for (int lx : new int[]{-3, 3}) {

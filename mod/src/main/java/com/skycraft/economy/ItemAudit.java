@@ -11,15 +11,15 @@ import com.skycraft.crafting.arcane.enchant.Enchanting;
 import com.skycraft.inventory.InvCategory;
 import com.skycraft.inventory.ItemWeights;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraftforge.event.server.ServerStartedEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.neoforge.event.server.ServerStartedEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 import java.io.File;
 import java.io.Writer;
@@ -35,7 +35,7 @@ import java.util.Set;
  * inventory category, alchemy effects, how many enchantments fit it at the Arcane Enchanter, its tempering kind and
  * the merchants that may stock it. Nothing happens on ordinary servers.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class ItemAudit {
     private static final String REQUEST = "skycraft-item-audit.request";
     private static final String OUTPUT = "skycraft-item-audit.json";
@@ -44,7 +44,7 @@ public final class ItemAudit {
 
     @SubscribeEvent
     public static void onStarted(ServerStartedEvent event) {
-        File dir = event.getServer().getServerDirectory();
+        File dir = event.getServer().getServerDirectory().toFile();
         if (!new File(dir, REQUEST).exists()) return;
         try {
             JsonObject root = dump();
@@ -61,8 +61,8 @@ public final class ItemAudit {
     static JsonObject dump() {
         Map<Item, Set<ShopType>> merchants = ShopStock.candidates();
         JsonObject items = new JsonObject();
-        for (Map.Entry<net.minecraft.resources.ResourceKey<Item>, Item> e : ForgeRegistries.ITEMS.getEntries()) {
-            ResourceLocation id = e.getKey().location();
+        for (Map.Entry<net.minecraft.resources.ResourceKey<Item>, Item> e : BuiltInRegistries.ITEM.entrySet()) {
+            Identifier id = e.getKey().identifier();
             if (!id.getNamespace().equals(Skycraft.MODID)) continue;
             Item item = e.getValue();
             ItemStack stack = new ItemStack(item);
@@ -84,7 +84,8 @@ public final class ItemAudit {
             }
             int fits = 0;
             if (Enchanting.canEnchantItem(null, stack)) {
-                for (Enchantment ench : ForgeRegistries.ENCHANTMENTS) if (!ench.isCurse() && Enchanting.fits(stack, ench)) fits++;
+                for (var ench : com.skycraft.inventory.ItemData.currentRegistries().lookupOrThrow(net.minecraft.core.registries.Registries.ENCHANTMENT).listElements().toList())
+                    if (!ench.is(net.minecraft.tags.EnchantmentTags.CURSE) && Enchanting.fits(stack, ench.value())) fits++;
             }
             o.addProperty("enchantments", fits);
             o.addProperty("temper", Tempering.kind(stack).name());
@@ -92,7 +93,7 @@ public final class ItemAudit {
             for (ShopType t : merchants.getOrDefault(item, Set.of())) sold.add(t.id());
             o.add("merchants", sold);
             JsonArray tags = new JsonArray();
-            stack.getTags().forEach(t -> tags.add(t.location().toString()));
+            stack.tags().forEach(t -> tags.add(t.location().toString()));
             o.add("tags", tags);
             items.add(id.getPath(), o);
         }
@@ -121,9 +122,9 @@ public final class ItemAudit {
         for (Object[] town : TOWNS) {
             JsonObject byType = new JsonObject();
             for (ShopType type : ShopType.values()) {
-                net.minecraft.world.entity.npc.Villager v = new net.minecraft.world.entity.npc.Villager(net.minecraft.world.entity.EntityType.VILLAGER, level);
+                net.minecraft.world.entity.npc.villager.Villager v = new net.minecraft.world.entity.npc.villager.Villager(net.minecraft.world.entity.EntityTypes.VILLAGER, level);
                 v.setPos((Integer) town[1] + 0.5, 80, (Integer) town[2] + 0.5);
-                v.setVillagerData(v.getVillagerData().setLevel(3));
+                v.setVillagerData(v.getVillagerData().withLevel(3));
                 net.minecraft.nbt.CompoundTag shop = new net.minecraft.nbt.CompoundTag();
                 net.minecraft.nbt.ListTag pools = new net.minecraft.nbt.ListTag();
                 pools.add(net.minecraft.nbt.StringTag.valueOf(type.id()));

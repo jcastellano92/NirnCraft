@@ -2,7 +2,7 @@ package com.skycraft.creatures;
 
 import com.skycraft.Skycraft;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EntityType;
 
@@ -20,6 +20,6 @@ public final class CreatureTags {
     private CreatureTags() {}
 
     private static TagKey<EntityType<?>> tag(String path) {
-        return TagKey.create(Registries.ENTITY_TYPE, new ResourceLocation(Skycraft.MODID, path));
+        return TagKey.create(Registries.ENTITY_TYPE, Identifier.fromNamespaceAndPath(Skycraft.MODID, path));
     }
 }

@@ -7,7 +7,7 @@ import com.skycraft.network.SkyNetwork;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.ItemStack;
@@ -64,16 +64,16 @@ public final class ClientInventoryHandlers {
     }
 
     /** The server moved a book into the right hand: use it the vanilla way so its screen / logic runs. */
-    public static void useHeld(ResourceLocation item) {
+    public static void useHeld(Identifier item) {
         Minecraft mc = Minecraft.getInstance();
         LocalPlayer player = mc.player;
         if (player == null || mc.gameMode == null) return;
-        if (mc.screen instanceof SkyrimInventoryScreen || mc.screen instanceof FavoritesScreen) mc.setScreen(null);
-        if (mc.screen != null) return;
+        if (mc.gui.screen() instanceof SkyrimInventoryScreen || mc.gui.screen() instanceof FavoritesScreen) mc.gui.setScreen(null);
+        if (mc.gui.screen() != null) return;
         ItemStack main = player.getMainHandItem();
         if (main.isEmpty() || !BuiltInRegistries.ITEM.getKey(main.getItem()).equals(item)) return;
         InteractionResult result = mc.gameMode.useItem(player, InteractionHand.MAIN_HAND);
-        if (result.shouldSwing()) player.swing(InteractionHand.MAIN_HAND);
+        if (result instanceof net.minecraft.world.InteractionResult.Success success && success.swingSource()==net.minecraft.world.InteractionResult.SwingSource.PREDICTED) player.swing(InteractionHand.MAIN_HAND,player.getItemInHand(InteractionHand.MAIN_HAND).getAttackAnimation(),false);
     }
 
     /** Sends an inventory action for a row (its first slot). */
@@ -112,10 +112,10 @@ public final class ClientInventoryHandlers {
         if (entry.readable() && entry.equip != InvEntry.WORN) {
             Minecraft mc = Minecraft.getInstance();
             if (entry.stack.getItem() instanceof com.skycraft.guide.HandbookItem) {
-                net.minecraft.client.gui.screens.Screen ret = mc.screen instanceof SkyrimInventoryScreen ? mc.screen : null;
+                net.minecraft.client.gui.screens.Screen ret = mc.gui.screen() instanceof SkyrimInventoryScreen ? mc.gui.screen() : null;
                 mc.getSoundManager().play(net.minecraft.client.resources.sounds.SimpleSoundInstance.forUI(
                         net.minecraft.sounds.SoundEvents.BOOK_PAGE_TURN, 1.0f, 1.0f));
-                mc.setScreen(new com.skycraft.guide.client.HandbookScreen(ret));
+                mc.gui.setScreen(new com.skycraft.guide.client.HandbookScreen(ret));
                 return true;
             }
             if (entry.stack.getItem() instanceof com.skycraft.magic.spell.SpellTomeItem
@@ -123,9 +123,9 @@ public final class ClientInventoryHandlers {
                 send(InventoryPackets.InvAction.READ, entry);
                 return false;
             }
-            pendingReturnScreen = mc.screen instanceof SkyrimInventoryScreen ? mc.screen : null;
+            pendingReturnScreen = mc.gui.screen() instanceof SkyrimInventoryScreen ? mc.gui.screen() : null;
             if (!(entry.stack.getItem() instanceof com.skycraft.lore.LoreBookItem)) {
-                mc.setScreen(null);
+                mc.gui.setScreen(null);
             }
             send(InventoryPackets.InvAction.READ, entry);
             return true;

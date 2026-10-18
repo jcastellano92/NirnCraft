@@ -1,5 +1,9 @@
 package com.skycraft.arsenal;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
@@ -28,19 +32,17 @@ import net.minecraft.util.GsonHelper;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.functions.LootItemConditionalFunction;
-import net.minecraft.world.level.storage.loot.functions.LootItemFunctionType;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.neoforge.registries.DeferredRegister;
+import java.util.function.Supplier;
 
 import java.util.Locale;
 
@@ -61,11 +63,11 @@ import java.util.Locale;
  * {@link #regional} and {@link #outfit} give the other provinces their own gear.</p>
  */
 public class LeveledGear extends LootItemConditionalFunction {
-    public static final DeferredRegister<LootItemFunctionType> FUNCTIONS = DeferredRegister.create(Registries.LOOT_FUNCTION_TYPE, Skycraft.MODID);
-    public static final RegistryObject<LootItemFunctionType> LEVELED_GEAR = FUNCTIONS.register("leveled_gear",
-            () -> new LootItemFunctionType(new Serializer()));
-    public static final RegistryObject<LootItemFunctionType> LEGENDARY_ITEM = FUNCTIONS.register("legendary_item",
-            () -> new LootItemFunctionType(new com.skycraft.combat.LegendaryItemFunction.Serializer()));
+    public static final DeferredRegister<MapCodec<? extends net.minecraft.world.level.storage.loot.functions.LootItemFunction>> FUNCTIONS = DeferredRegister.create(Registries.LOOT_FUNCTION_TYPE, Skycraft.MODID);
+    public static final Supplier<MapCodec<? extends LootItemConditionalFunction>> LEVELED_GEAR = FUNCTIONS.register("leveled_gear",
+            () -> LeveledGear.MAP_CODEC);
+    public static final Supplier<MapCodec<? extends LootItemConditionalFunction>> LEGENDARY_ITEM = FUNCTIONS.register("legendary_item",
+            () -> com.skycraft.combat.LegendaryItemFunction.MAP_CODEC);
 
     public enum Kind { WEAPON, ARMOR, BOW, ARROW, SHIELD }
 
@@ -76,7 +78,7 @@ public class LeveledGear extends LootItemConditionalFunction {
     private final float enchantChance;
     private final float qualityChance;
 
-    protected LeveledGear(LootItemCondition[] conditions, Kind kind, float enchantChance, float qualityChance) {
+    protected LeveledGear(java.util.Optional<net.minecraft.core.Holder<LootItemCondition>> conditions, Kind kind, float enchantChance, float qualityChance) {
         super(conditions);
         this.kind = kind;
         this.enchantChance = enchantChance;
@@ -84,7 +86,7 @@ public class LeveledGear extends LootItemConditionalFunction {
     }
 
     @Override
-    public LootItemFunctionType getType() {
+    public MapCodec<? extends LootItemConditionalFunction> codec() {
         return LEVELED_GEAR.get();
     }
 
@@ -101,8 +103,8 @@ public class LeveledGear extends LootItemConditionalFunction {
         decorate(out, level, random, enchantChance, qualityChance);
         com.skycraft.loot.affix.ItemAffixes.applyFromContext(out, context, qualityChance);
         if ((kind == Kind.WEAPON || kind == Kind.BOW)
-                && context.getParamOrNull(LootContextParams.DAMAGE_SOURCE) == null
-                && !(context.getParamOrNull(LootContextParams.THIS_ENTITY) instanceof net.minecraft.world.entity.Mob)
+                && context.getOptional(LootContextParams.DAMAGE_SOURCE) == null
+                && !(context.getOptional(LootContextParams.THIS_ENTITY) instanceof net.minecraft.world.entity.Mob)
                 && random.nextFloat() < 0.12f) {
             com.skycraft.crafting.arcane.ArcaneEvents.applyRandomWildernessPoison(out, level, random);
         }
@@ -238,7 +240,7 @@ public class LeveledGear extends LootItemConditionalFunction {
     }
 
     public static ItemStack armor(int level, RandomSource random) {
-        ArmorItem.Type piece = CraftingItems.ARMOR_TYPES[random.nextInt(CraftingItems.ARMOR_TYPES.length)];
+        net.minecraft.world.item.equipment.ArmorType piece = CraftingItems.ARMOR_TYPES[random.nextInt(CraftingItems.ARMOR_TYPES.length)];
         return new ItemStack(CraftingItems.armor(com.skycraft.loot.LootTiers.armor(level, random.nextBoolean(), random), piece));
     }
 
@@ -298,7 +300,7 @@ public class LeveledGear extends LootItemConditionalFunction {
                     && !(item instanceof ArtifactItem);
             case BOW -> (item instanceof SkyBowItem || item instanceof com.skycraft.arsenal.item.SkyCrossbowItem)
                     && !(item instanceof ArtifactItem);
-            case ARMOR -> item instanceof ArmorItem && !(item instanceof ArtifactItem);
+            case ARMOR -> com.skycraft.inventory.EquipmentData.isArmor(new ItemStack(item)) && !(item instanceof ArtifactItem);
             case SHIELD -> item instanceof SkyShieldItem;
             case ARROW -> item instanceof SkyArrowItem;
         };
@@ -318,10 +320,10 @@ public class LeveledGear extends LootItemConditionalFunction {
         boolean archer = random.nextFloat() < (style == Outfit.DRAUGR ? 0.25f : 0.33f);
         if (style == Outfit.DRAUGR) {
             equip(mob, EquipmentSlot.MAINHAND, archer ? ancientNord(WeaponType.BOW) : ancientNord(MELEE[1 + random.nextInt(MELEE.length - 1)]), dropChance);
-            for (ArmorItem.Type piece : CraftingItems.ARMOR_TYPES) {
-                if (piece != ArmorItem.Type.HELMET && random.nextFloat() < 0.4f) {
+            for (net.minecraft.world.item.equipment.ArmorType piece : CraftingItems.ARMOR_TYPES) {
+                if (piece != net.minecraft.world.item.equipment.ArmorType.HELMET && random.nextFloat() < 0.4f) {
                     equip(mob, piece.getSlot(), new ItemStack(CraftingItems.armor(SkyArmorMaterial.ANCIENT_NORD, piece)), dropChance);
-                } else if (piece == ArmorItem.Type.HELMET && random.nextFloat() < 0.25f) {
+                } else if (piece == net.minecraft.world.item.equipment.ArmorType.HELMET && random.nextFloat() < 0.25f) {
                     equip(mob, piece.getSlot(), new ItemStack(CraftingItems.armor(SkyArmorMaterial.ANCIENT_NORD, piece)), dropChance);
                 }
             }
@@ -335,12 +337,12 @@ public class LeveledGear extends LootItemConditionalFunction {
             if (!twoHanded) equip(mob, EquipmentSlot.OFFHAND, regional(key, Kind.SHIELD, level, random), dropChance);
         }
         float wear = style == Outfit.SOLDIER ? 0.9f : 0.5f;
-        for (ArmorItem.Type piece : CraftingItems.ARMOR_TYPES) {
+        for (net.minecraft.world.item.equipment.ArmorType piece : CraftingItems.ARMOR_TYPES) {
             if (random.nextFloat() > wear) continue;
             ItemStack stack = ItemStack.EMPTY;
             for (int attempt = 0; attempt < 8 && stack.isEmpty(); attempt++) {
                 ItemStack candidate = regional(key, Kind.ARMOR, level, random);
-                if (candidate.getItem() instanceof ArmorItem a && a.getType() == piece) stack = candidate;
+                if (com.skycraft.inventory.EquipmentData.isArmor(candidate) && com.skycraft.inventory.EquipmentData.armorType(candidate) == piece) stack = candidate;
             }
             if (stack.isEmpty()) {
                 stack = new ItemStack(CraftingItems.armor(com.skycraft.loot.LootTiers.armor(level, random.nextBoolean(), random), piece));
@@ -365,7 +367,7 @@ public class LeveledGear extends LootItemConditionalFunction {
 
     /** A creature's level: its Skycraft level, else the middle of its region's level band, else 1. */
     public static int npcLevel(net.minecraft.world.entity.Mob mob) {
-        int lvl = mob.getPersistentData().getInt("skycraft_level");
+        int lvl = mob.getPersistentData().getIntOr("skycraft_level",0);
         if (lvl > 0) return lvl;
         com.skycraft.tamriel.Region region = com.skycraft.economy.EconomyLoot.regionAt(mob.level(), mob.blockPosition());
         if (region == null) return 1;
@@ -417,39 +419,16 @@ public class LeveledGear extends LootItemConditionalFunction {
     public static void enchantLeveled(ItemStack stack, int level, RandomSource random) {
         int cost = Math.max(1, Math.min(30, 4 + level / 2 + random.nextInt(6)));
         java.util.List<net.minecraft.world.item.enchantment.EnchantmentInstance> options =
-                EnchantmentHelper.selectEnchantment(random, stack, cost, false);
+                EnchantmentHelper.selectEnchantment(random, stack, cost, com.skycraft.inventory.ItemData.currentRegistries().lookupOrThrow(Registries.ENCHANTMENT).listElements().filter(h -> h.is(net.minecraft.tags.EnchantmentTags.IN_ENCHANTING_TABLE)).map(h -> (net.minecraft.core.Holder<net.minecraft.world.item.enchantment.Enchantment>)h));
         if (options.isEmpty()) return;
         int extra = level >= 36 && options.size() > 1 && random.nextFloat() < 0.15f ? 2 : 1;
         for (int i = 0; i < extra; i++) {
-            net.minecraft.world.item.enchantment.Enchantment e = options.get(i).enchantment;
-            stack.enchant(e, com.skycraft.loot.LootLevels.enchantLevel(level, e.getMaxLevel(), random));
+            var e = options.get(i).enchantment();
+            stack.enchant(e, com.skycraft.loot.LootLevels.enchantLevel(level, e.value().getMaxLevel(), random));
         }
     }
 
     // ------------------------------------------------------------------ JSON
 
-    public static class Serializer extends LootItemConditionalFunction.Serializer<LeveledGear> {
-        @Override
-        public void serialize(JsonObject json, LeveledGear fn, JsonSerializationContext ctx) {
-            super.serialize(json, fn, ctx);
-            json.addProperty("kind", fn.kind.name().toLowerCase(Locale.ROOT));
-            if (fn.enchantChance > 0) json.addProperty("enchant_chance", fn.enchantChance);
-            if (fn.qualityChance > 0) json.addProperty("quality_chance", fn.qualityChance);
-        }
-
-        @Override
-        public LeveledGear deserialize(JsonObject json, JsonDeserializationContext ctx, LootItemCondition[] conditions) {
-            String kindName = GsonHelper.getAsString(json, "kind", "weapon").toUpperCase(Locale.ROOT);
-            Kind kind;
-            try {
-                kind = Kind.valueOf(kindName);
-            } catch (IllegalArgumentException e) {
-                throw new com.google.gson.JsonSyntaxException("Unknown leveled_gear kind '" + kindName.toLowerCase(Locale.ROOT)
-                        + "' (expected weapon, armor, bow, arrow or shield)");
-            }
-            float enchant = GsonHelper.getAsFloat(json, "enchant_chance", 0f);
-            float quality = GsonHelper.getAsFloat(json, "quality_chance", 0f);
-            return new LeveledGear(conditions, kind, enchant, quality);
-        }
-    }
+    public static final MapCodec<LeveledGear> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> commonFields(i).and(i.group(com.skycraft.platform.SkyCodecs.enumNames(Kind.class).optionalFieldOf("kind", Kind.WEAPON).forGetter(f -> f.kind), Codec.FLOAT.optionalFieldOf("enchant_chance", 0f).forGetter(f -> f.enchantChance), Codec.FLOAT.optionalFieldOf("quality_chance", 0f).forGetter(f -> f.qualityChance))).apply(i, LeveledGear::new));
 }

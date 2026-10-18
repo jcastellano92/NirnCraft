@@ -2,13 +2,15 @@ package com.skycraft.scatter;
 
 import com.skycraft.Skycraft;
 import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegistryObject;
+import com.mojang.serialization.MapCodec;
+import com.skycraft.worldgen.NoneFeatureConfiguration;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.ModLoadingContext;
+import net.neoforged.fml.config.ModConfig;
+import net.neoforged.neoforge.registries.DeferredRegister;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import java.util.function.Supplier;
 
 /**
  * Scatter: debris, leavings and natural formations that make sense for where they stand. Near settlements there is
@@ -19,14 +21,14 @@ import net.minecraftforge.registries.RegistryObject;
  * {@link Discoveries}.
  */
 public final class ScatterModule {
-    public static final DeferredRegister<Feature<?>> FEATURES = DeferredRegister.create(ForgeRegistries.FEATURES, Skycraft.MODID);
-    public static final RegistryObject<Feature<NoneFeatureConfiguration>> SCATTER = FEATURES.register("scatter",
-            () -> new ScatterFeature(NoneFeatureConfiguration.CODEC));
+    public static final DeferredRegister<MapCodec<? extends Feature>> FEATURES = DeferredRegister.create(Registries.FEATURE_TYPE, Skycraft.MODID);
+    public static final Supplier<MapCodec<? extends Feature>> SCATTER = FEATURES.register("scatter",
+            () -> new ScatterFeature(NoneFeatureConfiguration.CODEC).codec());
 
     private ScatterModule() {}
 
     public static void init(IEventBus modBus) {
-        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, ScatterConfig.SPEC, "skycraft-scatter.toml");
+        com.skycraft.Skycraft.config(ModConfig.Type.LOCAL, ScatterConfig.SPEC, "skycraft-scatter.toml");
         FEATURES.register(modBus);
     }
 }

@@ -61,9 +61,19 @@ public final class Shouting {
 
     private Shouting() {}
 
+    private static void setWeather(ServerLevel level, int clearTicks, int rainTicks, boolean rain, boolean thunder) {
+        var weather = level.getWeatherData();
+        weather.setClearWeatherTime(clearTicks);
+        weather.setRainTime(rainTicks);
+        weather.setThunderTime(rainTicks);
+        weather.setRaining(rain);
+        weather.setThundering(thunder);
+    }
+
+
     /** Handles the Voice slot activation (Z key): executes equipped shout or power. */
     public static void executeVoice(ServerPlayer p, int requested) {
-        if (!p.isAlive() || p.isSpectator() || p.hasEffect(ModEffects.PARALYSIS.get())) return;
+        if (!p.isAlive() || p.isSpectator() || p.hasEffect(com.skycraft.platform.Effects.holder(ModEffects.PARALYSIS.get()))) return;
         String voice = MagicData.selectedVoice(p);
         // curse module: howls and Vampire Lord powers while transformed, curse powers in the Voice slot
         if (com.skycraft.curse.CursePowers.onVoice(p, voice)) return;
@@ -87,7 +97,7 @@ public final class Shouting {
     }
 
     public static void shout(ServerPlayer p, String shoutId, int requested) {
-        if (!p.isAlive() || p.isSpectator() || p.hasEffect(ModEffects.PARALYSIS.get())) return;
+        if (!p.isAlive() || p.isSpectator() || p.hasEffect(com.skycraft.platform.Effects.holder(ModEffects.PARALYSIS.get()))) return;
         Shout shout = Shout.byId(shoutId);
         if (shout == null) {
             Notifier.message(p, Component.translatable("message.skycraft.no_shout", Component.keybind("key.skycraft.magic_menu")));
@@ -103,7 +113,7 @@ public final class Shouting {
         long now = p.level().getGameTime();
         if (!p.isCreative() && now < MagicData.shoutReadyAt(p)) {
             Notifier.message(p, Component.translatable("message.skycraft.voice_not_ready"));
-            p.playNotifySound(SoundEvents.PLAYER_ATTACK_NODAMAGE, SoundSource.PLAYERS, 0.8f, 0.6f);
+            com.skycraft.magic.MagicFx.soundToPlayer(p, SoundEvents.PLAYER_ATTACK_NODAMAGE, SoundSource.PLAYERS, 0.8f, 0.6f);
             return;
         }
         if (!perform(p, shout, words)) return;
@@ -111,13 +121,13 @@ public final class Shouting {
         long cooldown = Math.round(shout.cooldownSeconds(words) * 20L * cooldownMultiplier(p, shout));
         if (!p.isCreative()) MagicData.setShoutCooldown(p, now + cooldown, cooldown);
         SkyNetwork.sendToTracking(p, new MagicPackets.ShoutFx(p.getId(), shout.ordinal(), words));
-        ServerLevel level = p.serverLevel();
+        ServerLevel level = p.level();
         // the Thu'um: the words actually shouted (one, two or all three)
         net.minecraft.sounds.SoundEvent shoutSound = com.skycraft.audio.AudioSounds.shout(shout, words);
         com.skycraft.core.Race voiceRace = SkyData.get(p).getRace();
         level.playSound(null, p.getX(), p.getY(), p.getZ(), shoutSound, SoundSource.PLAYERS, 1.4f + 0.3f * words,
                 voiceRace == null ? 1.0f : voiceRace.voicePitch);
-        p.swing(InteractionHand.MAIN_HAND, true);
+        p.swing(InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
         SkyData.get(p).addStat("shouts", 1);
         com.skycraft.quest.story.StoryEvents.onShout(p, shout.id(), words); // "shout X at Y" quest steps
     }
@@ -129,14 +139,14 @@ public final class Shouting {
     public static float cooldownMultiplier(ServerPlayer p, Shout shout) {
         float m = 1f;
         if (com.skycraft.core.Buffs.active(p, "blessing_talos")) m *= 0.8f;
-        if (shout != Shout.DRAGON_ASPECT && p.hasEffect(MagicRegistry.DRAGON_ASPECT.get())) m *= 0.75f;
+        if (shout != Shout.DRAGON_ASPECT && p.hasEffect(com.skycraft.platform.Effects.holder(MagicRegistry.DRAGON_ASPECT.get()))) m *= 0.75f;
         com.skycraft.core.Race race = com.skycraft.core.SkyData.get(p).getRace();
         if (race != null) m *= race.shoutCooldown(); // Atmorans: the Thu'um comes easier
         return m;
     }
 
     private static boolean perform(ServerPlayer p, Shout shout, int w) {
-        ServerLevel level = p.serverLevel();
+        ServerLevel level = p.level();
         long now = level.getGameTime();
         switch (shout) {
             case UNRELENTING_FORCE -> unrelentingForce(p, w);
@@ -153,7 +163,7 @@ public final class Shouting {
                 level.playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.ELYTRA_FLYING, SoundSource.PLAYERS, 0.5f, 1.8f);
             }
             case BECOME_ETHEREAL -> {
-                p.addEffect(new MobEffectInstance(MagicRegistry.ETHEREAL.get(), new int[]{8, 13, 18}[w - 1] * 20, 0, false, true, true));
+                p.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MagicRegistry.ETHEREAL.get()), new int[]{8, 13, 18}[w - 1] * 20, 0, false, true, true));
                 level.playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.ILLUSIONER_PREPARE_MIRROR, SoundSource.PLAYERS, 1f, 0.7f);
             }
             case CLEAR_SKIES -> {
@@ -161,14 +171,14 @@ public final class Shouting {
                     Notifier.message(p, Component.translatable("message.skycraft.no_sky"));
                     return false;
                 }
-                level.setWeatherParameters(6000 + 6000 * w, 0, false, false);
+                setWeather(level, 6000 + 6000 * w, 0, false, false);
                 ShoutHooks.clearSkies(level, p, w, 6000 + 6000 * w);
                 level.playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.BEACON_ACTIVATE, SoundSource.WEATHER, 1f, 1.4f);
             }
             case AURA_WHISPER -> {
                 int duration = new int[]{10, 15, 20}[w - 1] * 20;
                 for (LivingEntity e : Targeting.around(p, p.position(), new int[]{32, 48, 64}[w - 1], e -> e != p)) {
-                    e.addEffect(new MobEffectInstance(MobEffects.GLOWING, duration, 0, false, false));
+                    e.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.GLOWING), duration, 0, false, false));
                 }
             }
             case SLOW_TIME -> {
@@ -210,12 +220,12 @@ public final class Shouting {
             }
             case MARKED_FOR_DEATH -> {
                 for (LivingEntity e : Targeting.cone(p, 14, 0.8, e -> Targeting.canHarm(p, e))) {
-                    e.addEffect(new MobEffectInstance(MagicRegistry.MARKED_FOR_DEATH.get(), 60 * 20, w - 1));
+                    e.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MagicRegistry.MARKED_FOR_DEATH.get()), 60 * 20, w - 1));
                     Vitals.markInCombat(p);
                 }
             }
             case DISARM -> disarm(p, w);
-            case ELEMENTAL_FURY -> p.addEffect(new MobEffectInstance(MobEffects.DIG_SPEED, new int[]{15, 20, 25}[w - 1] * 20, w, false, true, true));
+            case ELEMENTAL_FURY -> p.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.HASTE), new int[]{15, 20, 25}[w - 1] * 20, w, false, true, true));
             case KYNES_PEACE -> {
                 int duration = new int[]{60, 90, 120}[w - 1] * 20;
                 for (LivingEntity e : Targeting.around(p, p.position(), new int[]{20, 30, 40}[w - 1], e -> e instanceof Animal)) {
@@ -228,8 +238,8 @@ public final class Shouting {
                         e -> e instanceof Animal && !(e instanceof TamableAnimal t && t.isTame()) && !Summons.isSummon(e))) {
                     Mob mob = (Mob) e;
                     if (mob instanceof NeutralMob neutral) neutral.stopBeingAngry();
-                    e.removeEffect(MagicRegistry.FEAR.get());
-                    e.removeEffect(MagicRegistry.CALM.get());
+                    e.removeEffect(com.skycraft.platform.Effects.holder(MagicRegistry.FEAR.get()));
+                    e.removeEffect(com.skycraft.platform.Effects.holder(MagicRegistry.CALM.get()));
                     Summons.makeAlly(mob, p, until);
                     MagicFx.send(e, MagicFx.AURA, Element.NATURE, e.position(), e.position(), e.getId(), 0);
                 }
@@ -240,7 +250,7 @@ public final class Shouting {
                     return false;
                 }
                 int duration = new int[]{30, 45, 60}[w - 1] * 20;
-                level.setWeatherParameters(0, duration + 1200, true, true);
+                setWeather(level, 0, duration + 1200, true, true);
                 ShoutHooks.stormCall(level, p, w, duration);
                 MagicScheduler.area(p, p.position(), true, 32, duration, 50, "storm_call", (lvl, owner, area) -> {
                     if (owner == null || area.age == 0) return;
@@ -248,29 +258,29 @@ public final class Shouting {
                             e -> Targeting.canHarm(owner, e) && (e instanceof Enemy || e instanceof Mob m && m.getTarget() == owner)
                                     && lvl.canSeeSky(e.blockPosition())));
                     if (targets.isEmpty()) return;
-                    LivingEntity t = targets.get(lvl.random.nextInt(targets.size()));
-                    LightningBolt bolt = EntityType.LIGHTNING_BOLT.create(lvl);
+                    LivingEntity t = targets.get(lvl.getRandom().nextInt(targets.size()));
+                    LightningBolt bolt = net.minecraft.world.entity.EntityTypes.LIGHTNING_BOLT.create(lvl, net.minecraft.world.entity.EntitySpawnReason.TRIGGERED);
                     if (bolt != null) {
-                        bolt.moveTo(Vec3.atBottomCenterOf(t.blockPosition()));
+                        bolt.snapTo(Vec3.atBottomCenterOf(t.blockPosition()));
                         bolt.setVisualOnly(true);
                         lvl.addFreshEntity(bolt);
                     }
-                    t.invulnerableTime = 0;
-                    t.hurt(MagicDamage.source(lvl, MagicDamage.SHOCK, null, owner), 12f);
-                    t.setSecondsOnFire(3);
+                    t.setInvulnerableTime(0);
+                    com.skycraft.platform.Effects.hurt(t, MagicDamage.source(lvl, MagicDamage.SHOCK, null, owner), 12f);
+                    t.igniteForSeconds(3);
                     MagicFx.burst(lvl, t.position().add(0, 1, 0), Element.SHOCK, 1.5f);
                 });
             }
             case DRAGONREND -> {
                 boolean rent = false;
                 for (LivingEntity e : Targeting.cone(p, 40, 0.85, e -> e != p)) {
-                    if (e.getType().is(MagicRegistry.DRAGONS)) {
+                    if (e.getType().builtInRegistryHolder().is(MagicRegistry.DRAGONS)) {
                         e.getPersistentData().putLong(DRAGONREND, now + 20 * 30);
-                        e.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 20 * 30, 1));
+                        e.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.SLOWNESS), 20 * 30, 1));
                         MagicFx.send(e, MagicFx.AURA, Element.SOUL, e.position(), e.position(), e.getId(), 3);
                         rent = true;
                     } else if (Targeting.canHarm(p, e)) {
-                        e.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 60, 1));
+                        e.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.SLOWNESS), 60, 1));
                     }
                 }
                 if (rent) Notifier.message(p, Component.translatable("message.skycraft.dragonrend"));
@@ -294,16 +304,16 @@ public final class Shouting {
             if (e instanceof LivingEntity living) {
                 if (!Targeting.canHarm(p, living) || !p.hasLineOfSight(living)) continue;
                 if (damage > 0) {
-                    living.invulnerableTime = 0;
-                    living.hurt(MagicDamage.source(p.level(), MagicDamage.SPELL, null, p), damage);
+                    living.setInvulnerableTime(0);
+                    com.skycraft.platform.Effects.hurt(living, MagicDamage.source(p.level(), MagicDamage.SPELL, null, p), damage);
                 }
                 CombatHandler.stagger(p, living, 20 * w);
                 living.push(dir.x * strength, 0.25 + 0.2 * w, dir.z * strength);
-                living.hurtMarked = true;
+                living.syncVelocity = true;
                 Vitals.markInCombat(p);
             } else if (e instanceof Projectile || e instanceof net.minecraft.world.entity.item.ItemEntity) {
                 e.setDeltaMovement(dir.scale(strength));
-                e.hurtMarked = true;
+                e.syncVelocity = true;
             }
         }
     }
@@ -312,10 +322,10 @@ public final class Shouting {
         double range = new double[]{7, 9, 11}[w - 1];
         float damage = new float[]{10f, 14f, 18f}[w - 1];
         for (LivingEntity e : Targeting.cone(p, range, 0.7, e -> Targeting.canHarm(p, e))) {
-            e.invulnerableTime = 0;
-            if (e.hurt(SpellEffects.damage(p, element, null), damage)) {
+            e.setInvulnerableTime(0);
+            if (com.skycraft.platform.Effects.hurt(e, SpellEffects.damage(p, element, null), damage)) {
                 SpellEffects.applyElement(p, element, e, damage, false);
-                if (element == Element.FIRE) e.setSecondsOnFire(4 + 2 * w);
+                if (element == Element.FIRE) e.igniteForSeconds(4 + 2 * w);
                 Vitals.markInCombat(p);
             }
         }
@@ -326,14 +336,14 @@ public final class Shouting {
     private static void disarm(ServerPlayer p, int w) {
         float limit = new float[]{30f, 60f, Float.MAX_VALUE}[w - 1];
         for (LivingEntity e : Targeting.cone(p, 9, 0.7, e -> Targeting.canHarm(p, e))) {
-            if (e.getType().is(CombatHandler.BOSSES) || e.getMaxHealth() > limit) continue;
+            if (e.getType().builtInRegistryHolder().is(CombatHandler.BOSSES) || e.getMaxHealth() > limit) continue;
             ItemStack held = e.getMainHandItem();
             if (held.isEmpty()) continue;
             if (e instanceof Player other) {
                 other.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
-                if (!BoundWeapons.isBound(held)) other.drop(held, true, false);
+                if (!BoundWeapons.isBound(held)) other.drop(held, true, net.minecraft.util.Prediction.SERVER_ONLY);
             } else if (e instanceof Mob mob) {
-                if (!Summons.isSummon(mob)) mob.spawnAtLocation(held.copy());
+                if (!Summons.isSummon(mob)) mob.spawnAtLocation((ServerLevel) mob.level(), held.copy());
                 mob.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
             }
             Vitals.markInCombat(p);
@@ -350,15 +360,15 @@ public final class Shouting {
             } else {
                 double speed = 1.45;
                 p.setDeltaMovement(sprint.dir.x * speed, Math.max(p.getDeltaMovement().y, 0.02), sprint.dir.z * speed);
-                p.hurtMarked = true;
+                p.syncVelocity = true;
                 p.fallDistance = 0;
                 SPRINTS.put(p.getUUID(), new Sprint(sprint.dir, sprint.ticksLeft - 1));
-                p.serverLevel().sendParticles(ParticleTypes.CLOUD, p.getX(), p.getY() + 0.8, p.getZ(), 3, 0.3, 0.4, 0.3, 0.02);
+                p.level().sendParticles(ParticleTypes.CLOUD, p.getX(), p.getY() + 0.8, p.getZ(), 3, 0.3, 0.4, 0.3, 0.02);
             }
         }
-        if (p.tickCount % 5 == 0 && p.hasEffect(MagicRegistry.ETHEREAL.get())) {
-            p.serverLevel().sendParticles(ParticleTypes.END_ROD, p.getX(), p.getY() + 1, p.getZ(), 2, 0.3, 0.6, 0.3, 0.005);
-            p.serverLevel().sendParticles(ParticleTypes.WHITE_ASH, p.getX(), p.getY() + 1, p.getZ(), 4, 0.35, 0.7, 0.35, 0.0);
+        if (p.tickCount % 5 == 0 && p.hasEffect(com.skycraft.platform.Effects.holder(MagicRegistry.ETHEREAL.get()))) {
+            p.level().sendParticles(ParticleTypes.END_ROD, p.getX(), p.getY() + 1, p.getZ(), 2, 0.3, 0.6, 0.3, 0.005);
+            p.level().sendParticles(ParticleTypes.WHITE_ASH, p.getX(), p.getY() + 1, p.getZ(), 4, 0.35, 0.7, 0.35, 0.0);
         }
     }
 
@@ -386,7 +396,7 @@ public final class Shouting {
         if (MagicData.selectedShout(p).isEmpty()) MagicData.setSelectedShout(p, shout.id());
         Notifier.title(p, Component.translatable("notify.skycraft.word_unlocked"), shout.wordWithTranslation(unlocked));
         MagicFx.send(p, MagicFx.AURA, Element.SOUL, p.position(), p.position(), p.getId(), 4);
-        p.level().playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.SOUL_ESCAPE, SoundSource.PLAYERS, 1.5f, 0.6f);
+        p.level().playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.SOUL_ESCAPE.value(), SoundSource.PLAYERS, 1.5f, 0.6f);
         p.level().playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.BEACON_POWER_SELECT, SoundSource.PLAYERS, 1f, 0.8f);
     }
 }

@@ -14,7 +14,7 @@ ROOT=Path(__file__).resolve().parents[2]
 
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--source',type=Path,default=ROOT/'mod/run/devworld/world')
+    parser.add_argument('--source',type=Path,default=ROOT/'mod/run/devworld-26.3/world')
     parser.add_argument('--runs',type=int,default=2)
     args=parser.parse_args()
     if not 1<=args.runs<=4:raise ValueError('Use1..4 pairs')

@@ -3,9 +3,9 @@ package com.skycraft.seas.world;
 import com.mojang.serialization.Codec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
-import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
+import com.skycraft.worldgen.ConfiguredFeature;
+import com.skycraft.worldgen.FeaturePlaceContext;
+import com.skycraft.worldgen.NoneFeatureConfiguration;
 
 /**
  * Sites on the shore itself ({@link IslandSites}): lighthouses on headlands, wrecks cast up on beaches, smugglers'
@@ -13,7 +13,7 @@ import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConf
  * horkers basking on cold beaches, the odd pirate camp. The buildings follow the region's culture. Placed in the coast
  * biomes by {@code skycraft:seas_coast_sites}.
  */
-public class CoastSiteFeature extends Feature<NoneFeatureConfiguration> {
+public class CoastSiteFeature extends ConfiguredFeature<NoneFeatureConfiguration> {
     public enum Kind { LIGHTHOUSE, WRECK_BEACH, SMUGGLER_CAVE, ROOKERY, HERMIT, WHALE_BONES, HORKERS, PIRATE_CAMP }
 
     /** Sites placed since start (logged by the developer smoke test). */

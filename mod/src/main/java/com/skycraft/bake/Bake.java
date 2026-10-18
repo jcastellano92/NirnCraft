@@ -8,9 +8,9 @@ import com.skycraft.Skycraft;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
-import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -36,7 +36,7 @@ import java.util.zip.InflaterInputStream;
  * the bake. Regenerate with {@code tools/bake/bake.ps1} or {@code /skycraft-bake write}; check with
  * {@code /skycraft-bake check} or {@code qa.ps1 -Bake}.</p>
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class Bake {
     /** Bump to drop every existing bake. */
     private static final int FORMAT = 1;
@@ -279,7 +279,7 @@ public final class Bake {
     @SubscribeEvent
     public static void onCommands(RegisterCommandsEvent event) {
         CommandDispatcher<CommandSourceStack> d = event.getDispatcher();
-        d.register(Commands.literal("skycraft-bake").requires(s -> s.hasPermission(4))
+        d.register(Commands.literal("skycraft-bake").requires(s -> s.permissions().hasPermission(net.minecraft.server.permissions.Permissions.COMMANDS_OWNER))
                 .then(Commands.literal("refresh").executes(c -> {
                     List<String> bad = refresh(Path.of("skycraft-bake"));
                     String msg = bad == null ? "Bake is up to date." : bad.isEmpty()

@@ -10,7 +10,7 @@ import net.minecraft.world.level.block.DoorBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.util.FakePlayerFactory;
+import net.neoforged.neoforge.common.util.FakePlayerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -115,7 +115,7 @@ final class IntroSelftest {
 
     private static char glyph(BlockState s) {
         if (s.isAir()) return '.';
-        var key = net.minecraftforge.registries.ForgeRegistries.BLOCKS.getKey(s.getBlock());
+        var key = net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(s.getBlock());
         String p = key == null ? "?" : key.getPath();
         if (p.contains("glass_pane")) return 'G';
         if (p.contains("door") && !p.contains("trap")) return 'D';
@@ -220,7 +220,7 @@ final class IntroSelftest {
         info.add("npc poses: " + npcs + " NPCs loaded, " + actors + " aftermath actors, no stray crouch");
 
         // the pose bits do clear: a survivor released from its tableau stands up (renders upright)
-        BlockPos at = level.getSharedSpawnPos();
+        BlockPos at = level.getRespawnData().pos();
         level.getChunk(at.getX() >> 4, at.getZ() >> 4);
         com.skycraft.society.entity.NpcEntity npc = com.skycraft.society.Npcs.create(level, at, com.skycraft.society.NpcRole.CITIZEN);
         if (npc != null) {
@@ -258,7 +258,7 @@ final class IntroSelftest {
             if (IntroFlow.state(fake) != IntroState.JOINED) pr.add("first join state is " + IntroFlow.state(fake) + ", not JOINED");
             if (fake.position().distanceToSqr(site.centre()) > 5 * 5) pr.add("first join did not place the player in the cottage: " + fake.position());
             if (!IntroFlow.testHidden(fake)) pr.add("a player in the opening is not hidden");
-            if (fake.getRespawnPosition() == null || fake.getRespawnPosition().distSqr(site.bed()) > 4) pr.add("the cottage bed is not the respawn point");
+            if (fake.getRespawnConfig() == null || fake.getRespawnConfig().respawnData().pos().distSqr(site.bed()) > 4) pr.add("the cottage bed is not the respawn point");
             // character made -> loading
             SkyData.get(fake).setRace(Race.NORD);
             IntroFlow.testTick(fake);

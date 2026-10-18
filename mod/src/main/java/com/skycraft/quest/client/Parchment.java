@@ -1,6 +1,6 @@
 package com.skycraft.quest.client;
 
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 
 /** Drawing helpers for the Skyrim journal look: an aged parchment page with inked rules. */
 public final class Parchment {
@@ -14,7 +14,7 @@ public final class Parchment {
 
     private Parchment() {}
 
-    public static void page(GuiGraphics g, int x0, int y0, int x1, int y1) {
+    public static void page(GuiGraphicsExtractor g, int x0, int y0, int x1, int y1) {
         g.fill(x0 - 4, y0 - 4, x1 + 4, y1 + 4, 0xC0000000);
         g.fill(x0 - 3, y0 - 3, x1 + 3, y1 + 3, 0xFF2A1E10);
         g.fill(x0 - 2, y0 - 2, x1 + 2, y1 + 2, 0xFF7A5E36);
@@ -35,18 +35,18 @@ public final class Parchment {
     }
 
     /** A horizontal inked rule with a small diamond in the middle. */
-    public static void rule(GuiGraphics g, int x0, int x1, int y) {
+    public static void rule(GuiGraphicsExtractor g, int x0, int x1, int y) {
         g.fill(x0, y, x1, y + 1, 0x906E5638);
         int cx = (x0 + x1) / 2;
         g.fill(cx - 2, y - 1, cx + 3, y + 2, 0xFF6E5638);
     }
 
-    public static void vrule(GuiGraphics g, int x, int y0, int y1) {
+    public static void vrule(GuiGraphicsExtractor g, int x, int y0, int y1) {
         g.fill(x, y0, x + 1, y1, 0x906E5638);
     }
 
     /** Checkbox, ticked when done. */
-    public static void checkbox(GuiGraphics g, int x, int y, boolean done, boolean failed) {
+    public static void checkbox(GuiGraphicsExtractor g, int x, int y, boolean done, boolean failed) {
         g.fill(x, y, x + 7, y + 7, INK_LIGHT);
         g.fill(x + 1, y + 1, x + 6, y + 6, 0xFFEFE3C2);
         if (failed) {
@@ -65,7 +65,7 @@ public final class Parchment {
     }
 
     /** Quest icons: main quest (dragon seal), faction (banner), bounty (crossed blades), misc (dot). */
-    public static void icon(GuiGraphics g, int x, int y, com.skycraft.quest.Quest.Category cat, int factionColor) {
+    public static void icon(GuiGraphicsExtractor g, int x, int y, com.skycraft.quest.Quest.Category cat, int factionColor) {
         switch (cat) {
             case MAIN -> {
                 // golden seal with a red center
@@ -97,7 +97,7 @@ public final class Parchment {
         }
     }
 
-    public static void bar(GuiGraphics g, int x, int y, int w, float fill, int color) {
+    public static void bar(GuiGraphicsExtractor g, int x, int y, int w, float fill, int color) {
         g.fill(x - 1, y - 1, x + w + 1, y + 4, INK_LIGHT);
         g.fill(x, y, x + w, y + 3, 0xFFCBB68A);
         g.fill(x, y, x + (int) (w * Math.max(0, Math.min(1, fill))), y + 3, color);

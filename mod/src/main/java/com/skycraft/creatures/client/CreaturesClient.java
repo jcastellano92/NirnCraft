@@ -14,29 +14,29 @@ import com.skycraft.creatures.entity.ForswornEntity;
 import com.skycraft.creatures.entity.NecromancerEntity;
 import com.skycraft.creatures.entity.VampireEntity;
 import net.minecraft.client.model.geom.ModelLayerLocation;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.EntityRenderersEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.minecraft.resources.Identifier;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.EntityRenderersEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 /** Mod-bus client registration for the creatures module: model layers and entity renderers. */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
 public final class CreaturesClient {
     public static final ModelLayerLocation HUMANOID = layer("humanoid");
 
-    private static final ResourceLocation[] BANDIT = textures("bandit/bandit_", BanditEntity.SKINS);
-    private static final ResourceLocation BANDIT_CHIEF = tex("bandit/bandit_chief");
-    private static final ResourceLocation[] DRAUGR = textures("draugr/draugr_", DraugrEntity.SKINS);
-    private static final ResourceLocation DEATHLORD = tex("draugr/draugr_deathlord");
-    private static final ResourceLocation DRAUGR_EYES = tex("draugr/draugr_eyes");
-    private static final ResourceLocation[] GUARD = new ResourceLocation[GuardProfiles.count()];
-    private static final ResourceLocation[] FORSWORN = textures("society/forsworn_", ForswornEntity.SKINS);
-    private static final ResourceLocation[] NECROMANCER = textures("society/necromancer_", NecromancerEntity.SKINS);
-    private static final ResourceLocation[] VAMPIRE = textures("society/vampire_", VampireEntity.SKINS);
-    private static final ResourceLocation FALMER = tex("creatures/falmer");
-    private static final ResourceLocation VAMPIRE_EYES = tex("creatures/vampire_eyes");
-    private static final ResourceLocation COSTUME_DRAUGR = BestiaryClient.tex("costume_draugr");
+    private static final Identifier[] BANDIT = textures("bandit/bandit_", BanditEntity.SKINS);
+    private static final Identifier BANDIT_CHIEF = tex("bandit/bandit_chief");
+    private static final Identifier[] DRAUGR = textures("draugr/draugr_", DraugrEntity.SKINS);
+    private static final Identifier DEATHLORD = tex("draugr/draugr_deathlord");
+    private static final Identifier DRAUGR_EYES = tex("draugr/draugr_eyes");
+    private static final Identifier[] GUARD = new Identifier[GuardProfiles.count()];
+    private static final Identifier[] FORSWORN = textures("society/forsworn_", ForswornEntity.SKINS);
+    private static final Identifier[] NECROMANCER = textures("society/necromancer_", NecromancerEntity.SKINS);
+    private static final Identifier[] VAMPIRE = textures("society/vampire_", VampireEntity.SKINS);
+    private static final Identifier FALMER = tex("creatures/falmer");
+    private static final Identifier VAMPIRE_EYES = tex("creatures/vampire_eyes");
+    private static final Identifier COSTUME_DRAUGR = BestiaryClient.tex("costume_draugr");
     /** Draugr costume pieces toggled by rank (0 restless .. 4 overlord). */
     private static final java.util.List<String> DRAUGR_PIECES = java.util.List.of("hood", "helm_iron", "helm_horned", "helm_scourge",
             "helm_overlord", "mantle", "pauldron_right", "pauldron_left");
@@ -60,15 +60,15 @@ public final class CreaturesClient {
     private CreaturesClient() {}
 
     private static ModelLayerLocation layer(String name) {
-        return new ModelLayerLocation(new ResourceLocation(Skycraft.MODID, name), "main");
+        return new ModelLayerLocation(Identifier.fromNamespaceAndPath(Skycraft.MODID, name), "main");
     }
 
-    private static ResourceLocation tex(String path) {
-        return new ResourceLocation(Skycraft.MODID, "textures/entity/" + path + ".png");
+    private static Identifier tex(String path) {
+        return Identifier.fromNamespaceAndPath(Skycraft.MODID, "textures/entity/" + path + ".png");
     }
 
-    private static ResourceLocation[] textures(String prefix, int count) {
-        ResourceLocation[] out = new ResourceLocation[count];
+    private static Identifier[] textures(String prefix, int count) {
+        Identifier[] out = new Identifier[count];
         for (int i = 0; i < count; i++) out[i] = tex(prefix + i);
         return out;
     }

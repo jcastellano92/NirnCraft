@@ -10,23 +10,23 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.Screenshot;
 import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.DeathScreen;
-import net.minecraft.client.gui.screens.GenericDirtMessageScreen;
+import net.minecraft.client.gui.screens.GenericMessageScreen;
 import net.minecraft.client.gui.screens.LevelLoadingScreen;
 import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.monster.Zombie;
-import net.minecraft.world.level.GameRules;
+import net.minecraft.world.entity.monster.zombie.Zombie;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.WorldDataConfiguration;
 import net.minecraft.world.level.levelgen.WorldOptions;
 import net.minecraft.world.level.levelgen.presets.WorldPresets;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -43,7 +43,7 @@ import java.util.function.Consumer;
  * restyled menus, saving screenshots to {@code build/visualtest-screenshots/} under the game directory, and quits.
  * Does nothing in normal play.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
 public final class VisualAutotest {
     /** {@code -Dskycraft.visualtest=clouds} (e.g. through JAVA_TOOL_OPTIONS) runs the cloud and distant-weather tour instead. */
     private static final String MODE = System.getProperty("skycraft.visualtest", "");
@@ -69,10 +69,10 @@ public final class VisualAutotest {
     private static void defaultSteps() {
         step(100, mc -> {
             com.skycraft.network.SkyNetwork.sendToServer(new CorePackets.ChooseRace(com.skycraft.core.Race.NORD.id()));
-            mc.setScreen(null);
+            mc.gui.setScreen(null);
         });
-        cmd(2, "gamerule doDaylightCycle false");
-        cmd(2, "gamerule doMobSpawning false");
+        cmd(2, "gamerule advance_time false");
+        cmd(2, "gamerule spawn_mobs false");
         cmd(2, "effect give @s minecraft:resistance 99999 255 true");
         cmd(2, "give @s skycraft:daedric_helmet");
         cmd(2, "give @s skycraft:dragonbone_sword");
@@ -109,24 +109,24 @@ public final class VisualAutotest {
         step(90, mc -> mc.options.keyShift.setDown(true));
         step(30, mc -> shot(mc, "24_sneak_eye"));
         step(2, mc -> mc.options.keyShift.setDown(false));
-        step(10, mc -> mc.setScreen(new GenericDirtMessageScreen(Component.translatable("menu.savingLevel"))));
+        step(10, mc -> mc.gui.setScreen(new GenericMessageScreen(Component.translatable("menu.savingLevel"))));
         step(40, mc -> shot(mc, "30_loading_screen_a"));
         step(200, mc -> shot(mc, "31_loading_screen_b"));
-        step(2, mc -> mc.setScreen(new SkyPauseScreen()));
+        step(2, mc -> mc.gui.setScreen(new SkyPauseScreen()));
         step(30, mc -> shot(mc, "32_pause"));
-        step(2, mc -> mc.setScreen(new ConfirmScreen(b -> mc.setScreen(null), Component.literal("Quit to Main Menu?"), Component.literal("Any unsaved progress will be saved."))));
+        step(2, mc -> mc.gui.setScreen(new ConfirmScreen(b -> mc.gui.setScreen(null), Component.literal("Quit to Main Menu?"), Component.literal("Any unsaved progress will be saved."))));
         step(30, mc -> shot(mc, "33_confirm"));
-        step(2, mc -> mc.setScreen(new DeathScreen(Component.literal("Zombie was slain by Dovahkiin's own folly"), false)));
+        step(2, mc -> mc.gui.setScreen(new DeathScreen(Component.literal("Zombie was slain by Dovahkiin's own folly"), false,mc.player)));
         step(80, mc -> shot(mc, "34_death"));
-        step(2, mc -> mc.setScreen(new com.skycraft.inventory.client.SkyrimInventoryScreen()));
+        step(2, mc -> mc.gui.setScreen(new com.skycraft.inventory.client.SkyrimInventoryScreen()));
         step(30, mc -> shot(mc, "35_inventory"));
         step(2, mc -> {
-            if (mc.screen != null) mc.screen.keyPressed(org.lwjgl.glfw.GLFW.GLFW_KEY_X, 0, 0);
+            if (mc.gui.screen() != null) mc.gui.screen().keyPressed(new net.minecraft.client.input.KeyEvent(com.mojang.blaze3d.platform.InputConstants.KEY_X,0,0));
         });
         step(40, mc -> shot(mc, "35b_inventory_inspect"));
-        step(2, mc -> mc.setScreen(new com.skycraft.client.screen.RaceScreen()));
+        step(2, mc -> mc.gui.setScreen(new com.skycraft.client.screen.RaceScreen()));
         step(40, mc -> shot(mc, "36_race"));
-        step(2, mc -> mc.setScreen(null));
+        step(2, mc -> mc.gui.setScreen(null));
         step(20, mc -> {
             Skycraft.LOGGER.info("Visual autotest finished; screenshots in {}", OUT.toAbsolutePath());
             mc.stop();
@@ -153,7 +153,7 @@ public final class VisualAutotest {
 
     static void look(Minecraft mc, float yaw, float pitch) {
         if (mc.player == null) return;
-        mc.setScreen(null);
+        mc.gui.setScreen(null);
         mc.player.setYRot(yaw);
         mc.player.setXRot(pitch);
         mc.player.yRotO = yaw;
@@ -182,40 +182,37 @@ public final class VisualAutotest {
         Zombie z = zombie(mc);
         if (z != null && mc.gameMode != null && mc.player != null) {
             mc.gameMode.attack(mc.player, z);
-            mc.player.swing(net.minecraft.world.InteractionHand.MAIN_HAND);
+            mc.player.swing(net.minecraft.world.InteractionHand.MAIN_HAND, net.minecraft.world.item.component.SwingAnimation.DEFAULT, false);
         }
     }
 
     static void shot(Minecraft mc, String name) {
         try {
             Files.createDirectories(OUT);
-            NativeImage img = Screenshot.takeScreenshot(mc.getMainRenderTarget());
-            File out = OUT.resolve(name + ".png").toFile();
-            img.writeToFile(out);
-            img.close();
-            Skycraft.LOGGER.info("Visual autotest: saved {}", out.getAbsolutePath());
+            com.skycraft.client.autotest.ReviewCaptures.capture(mc,OUT,name,null,null);
         } catch (Exception e) {
             Skycraft.LOGGER.warn("Visual autotest: screenshot {} failed", name, e);
         }
     }
 
     @SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent event) {
-        if (!ENABLED || event.phase != TickEvent.Phase.END) return;
+    public static void onClientTick(net.neoforged.neoforge.client.event.ClientTickEvent.Post event) {
+        if (!ENABLED) return;
         Minecraft mc = Minecraft.getInstance();
+        if(com.skycraft.client.autotest.ReviewCaptures.pending()>0)return;
         if (mc.level == null) {
-            if (mc.screen instanceof LevelLoadingScreen && !loadingShot && ++loadingTicks > 30) {
+            if (mc.gui.screen() instanceof LevelLoadingScreen && !loadingShot && ++loadingTicks > 30) {
                 loadingShot = true;
                 shot(mc, "00_world_loading");
             }
-            if (mc.screen instanceof net.minecraft.client.gui.screens.AccessibilityOnboardingScreen) mc.setScreen(new TitleScreen());
-            if (!worldRequested && (mc.screen instanceof TitleScreen || mc.screen instanceof com.skycraft.client.screen.title.SkyTitleScreen)) {
+            if (mc.gui.screen() instanceof net.minecraft.client.gui.screens.AccessibilityOnboardingScreen) mc.gui.setScreen(new TitleScreen());
+            if (!worldRequested && (mc.gui.screen() instanceof TitleScreen || mc.gui.screen() instanceof com.skycraft.client.screen.title.SkyTitleScreen)) {
                 worldRequested = true;
                 String name = "visualtest-" + System.currentTimeMillis();
-                LevelSettings settings = new LevelSettings(name, GameType.SURVIVAL, false, Difficulty.EASY, true,
-                        new GameRules(), WorldDataConfiguration.DEFAULT);
-                mc.createWorldOpenFlows().createFreshLevel(name, settings, new WorldOptions(20261010L, false, false),
-                        WorldPresets::createNormalWorldDimensions);
+                LevelSettings settings = com.skycraft.client.autotest.ReviewWorlds.settings(name, GameType.SURVIVAL, false, Difficulty.EASY, true,
+                        WorldDataConfiguration.DEFAULT);
+                com.skycraft.client.autotest.ReviewWorlds.create(mc,name, settings, new WorldOptions(20261010L, false, false),
+                        com.skycraft.client.autotest.ReviewWorlds::normal,mc.gui.screen());
             }
             return;
         }

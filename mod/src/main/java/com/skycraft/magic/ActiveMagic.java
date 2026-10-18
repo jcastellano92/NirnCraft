@@ -76,9 +76,9 @@ public final class ActiveMagic {
         Inventory inv = p.getInventory();
         for (int i = 0; i < inv.getContainerSize(); i++) {
             ItemStack s = inv.getItem(i);
-            if (!BoundWeapons.isBound(s) || s.getTag() == null) continue;
-            CompoundTag t = s.getTag();
-            add(out, s.getHoverName(), (int) (t.getLong(BoundWeapons.UNTIL) - now), t.getInt(BoundWeapons.DURATION), 0xB890E8);
+            if (!BoundWeapons.isBound(s) || com.skycraft.inventory.ItemData.custom(s) == null) continue;
+            CompoundTag t = com.skycraft.inventory.ItemData.custom(s);
+            add(out, s.getHoverName(), (int) (t.getLongOr(BoundWeapons.UNTIL, 0L) - now), t.getIntOr(BoundWeapons.DURATION, 0), 0xB890E8);
         }
         long candle = Candlelight.until(p);
         if (candle > now) add(out, spellName("candlelight"), (int) (candle - now), 0, 0xFFE8A0);
@@ -119,7 +119,7 @@ public final class ActiveMagic {
             List<Summon> found = new ArrayList<>();
             for (Mob m : Summons.summonsOf(p)) {
                 CompoundTag pd = m.getPersistentData();
-                if (pd.contains(Summons.UNTIL)) found.add(new Summon(m.getDisplayName(), pd.getLong(Summons.UNTIL) + com.skycraft.world.RestManager.skippedTicks())); // live time -> game time
+                if (pd.contains(Summons.UNTIL)) found.add(new Summon(m.getDisplayName(), pd.getLongOr(Summons.UNTIL, 0L) + com.skycraft.world.RestManager.skippedTicks())); // live time -> game time
             }
             if (found.isEmpty()) SUMMONS.remove(p.getUUID());
             else SUMMONS.put(p.getUUID(), found);

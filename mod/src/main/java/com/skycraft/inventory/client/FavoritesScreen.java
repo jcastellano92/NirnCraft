@@ -2,7 +2,7 @@ package com.skycraft.inventory.client;
 
 import com.skycraft.core.SkyData;
 import com.skycraft.inventory.InvCategory;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.nbt.CompoundTag;
@@ -10,7 +10,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
 import com.skycraft.magic.client.MagicFavorites;
-import org.lwjgl.glfw.GLFW;
+import com.mojang.blaze3d.platform.InputConstants;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -71,7 +71,7 @@ public class FavoritesScreen extends Screen {
         if (minecraft == null || minecraft.player == null) return 0;
         CompoundTag magic = SkyData.get(minecraft.player).module("magic");
         int n = 0;
-        for (String key : MAGIC_KEYS) if (!magic.getString(key).isEmpty() && !"none".equals(magic.getString(key))) n++;
+        for (String key : MAGIC_KEYS) if (!magic.getStringOr(key, "").isEmpty() && !"none".equals(magic.getStringOr(key, ""))) n++;
         return n;
     }
 
@@ -160,7 +160,7 @@ public class FavoritesScreen extends Screen {
     // ------------------------------------------------------------------ rendering
 
     @Override
-    public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+    public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
         g.fillGradient(0, 0, width, height, 0x60000000, 0x90000000);
         SkyUi.panel(g, px, py, px + pw, py + ph);
         int cx = px + pw / 2;
@@ -172,7 +172,7 @@ public class FavoritesScreen extends Screen {
         if (minecraft != null && minecraft.player != null) {
             CompoundTag magic = SkyData.get(minecraft.player).module("magic");
             for (int i = 0; i < MAGIC_KEYS.length; i++) {
-                String id = magic.getString(MAGIC_KEYS[i]);
+                String id = magic.getStringOr(MAGIC_KEYS[i], "");
                 if (id.isEmpty() || "none".equals(id)) continue; // "none": a hand deliberately left empty
                 boolean shout = i == 2;
                 drawMagicLine(g, Component.translatable("inventory.skycraft.favorites." + MAGIC_LABELS[i]),
@@ -186,7 +186,7 @@ public class FavoritesScreen extends Screen {
             List<net.minecraft.util.FormattedCharSequence> lines = font.split(Component.translatable("magic.skycraft.favorites_empty"), pw - 20);
             int ly = listTop + 6;
             for (var line : lines) {
-                g.drawString(font, line, cx - font.width(line) / 2, ly, SkyUi.DIM, false);
+                g.text(font, line, cx - font.width(line) / 2, ly, SkyUi.DIM, false);
                 ly += 10;
             }
         } else {
@@ -210,18 +210,18 @@ public class FavoritesScreen extends Screen {
                 else if (equip == InvEntry.LEFT) SkyUi.diamondOutline(g, px + 7, mid, 2, SkyUi.LEFT_HAND);
                 if (row.item != null) {
                     InvEntry e = row.item;
-                    g.renderItem(e.icon, px + 12, ry + 1);
-                    g.renderItemDecorations(font, e.icon, px + 12, ry + 1);
+                    g.item(e.icon, px + 12, ry + 1);
+                    g.itemDecorations(font, e.icon, px + 12, ry + 1);
                     String badge = e.equip == InvEntry.RIGHT ? " [R]" : e.equip == InvEntry.LEFT ? " [L]" : e.equip == InvEntry.WORN ? " [W]" : "";
                     String count = e.count() > 1 ? " (" + e.count() + ")" : "";
                     String name = SkyUi.ellipsize(font, e.name, pw - 40 - font.width(count) - font.width(badge));
-                    g.drawString(font, name, px + 32, ry + 5, e.stolen ? SkyUi.STOLEN : sel ? SkyUi.BRIGHT : SkyUi.TEXT, false);
+                    g.text(font, name, px + 32, ry + 5, e.stolen ? SkyUi.STOLEN : sel ? SkyUi.BRIGHT : SkyUi.TEXT, false);
                     int nx = px + 32 + font.width(name);
                     if (!badge.isEmpty()) {
-                        g.drawString(font, badge, nx, ry + 5, e.equip == InvEntry.LEFT ? SkyUi.LEFT_HAND : SkyUi.GOLD, false);
+                        g.text(font, badge, nx, ry + 5, e.equip == InvEntry.LEFT ? SkyUi.LEFT_HAND : SkyUi.GOLD, false);
                         nx += font.width(badge);
                     }
-                    if (!count.isEmpty()) g.drawString(font, count, nx, ry + 5, SkyUi.DIM, false);
+                    if (!count.isEmpty()) g.text(font, count, nx, ry + 5, SkyUi.DIM, false);
                 } else {
                     // a favorite spell / shout / power: its school-colored gem, name, L/R/LR/Z badge, and (spells) the magicka cost
                     MagicFavorites.Fav f = row.magic;
@@ -235,12 +235,12 @@ public class FavoritesScreen extends Screen {
                             + (f.spell().isConcentration() ? "/s" : "") : "";
                     String name = SkyUi.ellipsize(font, f.name().getString(),
                             pw - 40 - font.width(badge) - (cost.isEmpty() ? 0 : font.width(cost) + 8));
-                    g.drawString(font, name, px + 32, ry + 5, sel ? SkyUi.BRIGHT : SkyUi.TEXT, false);
+                    g.text(font, name, px + 32, ry + 5, sel ? SkyUi.BRIGHT : SkyUi.TEXT, false);
                     if (!badge.isEmpty()) {
                         int bCol = eq == 2 ? SkyUi.LEFT_HAND : SkyUi.GOLD;
-                        g.drawString(font, badge, px + 32 + font.width(name), ry + 5, bCol, false);
+                        g.text(font, badge, px + 32 + font.width(name), ry + 5, bCol, false);
                     }
-                    if (!cost.isEmpty()) g.drawString(font, cost, px + pw - 8 - font.width(cost), ry + 5, 0xFF7FB2FF, false);
+                    if (!cost.isEmpty()) g.text(font, cost, px + pw - 8 - font.width(cost), ry + 5, 0xFF7FB2FF, false);
                 }
             }
             if (entries.size() > rows) {
@@ -253,8 +253,8 @@ public class FavoritesScreen extends Screen {
         }
 
         String hint = SkyUi.ellipsize(font, Component.translatable("inventory.skycraft.favorites.hint").getString(), pw - 8);
-        g.drawString(font, hint, cx - font.width(hint) / 2, py + ph - 12, 0xFF7A766C, false);
-        super.render(g, mouseX, mouseY, partialTick);
+        g.text(font, hint, cx - font.width(hint) / 2, py + ph - 12, 0xFF7A766C, false);
+        super.extractRenderState(g, mouseX, mouseY, partialTick);
     }
 
     /** A spell's name; spells made at a Spellmaking Altar carry their own name in their id. */
@@ -263,67 +263,70 @@ public class FavoritesScreen extends Screen {
         return spell != null ? spell.displayName() : Component.translatable("spell.skycraft." + id);
     }
 
-    private void drawMagicLine(GuiGraphics g, Component label, Component value, int color, int y) {
+    private void drawMagicLine(GuiGraphicsExtractor g, Component label, Component value, int color, int y) {
         String l = SkyUi.caps(label) + "  ";
         String v = SkyUi.ellipsize(font, value.getString(), pw - 16 - font.width(l));
         int total = font.width(l) + font.width(v);
         int x = px + pw / 2 - total / 2;
-        g.drawString(font, l, x, y, SkyUi.HEADER, false);
-        g.drawString(font, v, x + font.width(l), y, color, false);
+        g.text(font, l, x, y, SkyUi.HEADER, false);
+        g.text(font, v, x + font.width(l), y, color, false);
     }
 
     // ------------------------------------------------------------------ input
 
     @Override
-    public boolean keyPressed(int key, int scan, int mods) {
-        if (key == GLFW.GLFW_KEY_W || key == GLFW.GLFW_KEY_UP) {
+    public boolean keyPressed(net.minecraft.client.input.KeyEvent event) {
+        int key = event.key(), scan = event.keycode(), mods = event.modifiers();
+        if (key == InputConstants.KEY_W || key == InputConstants.KEY_UP) {
             select(selected - 1);
             return true;
         }
-        if (key == GLFW.GLFW_KEY_S || key == GLFW.GLFW_KEY_DOWN) {
+        if (key == InputConstants.KEY_S || key == InputConstants.KEY_DOWN) {
             select(selected + 1);
             return true;
         }
-        if (key == GLFW.GLFW_KEY_E || key == GLFW.GLFW_KEY_ENTER || key == GLFW.GLFW_KEY_KP_ENTER) {
+        if (key == InputConstants.KEY_E || key == InputConstants.KEY_RETURN || key == InputConstants.KEY_NUMPADENTER) {
             choose(false);
             return true;
         }
-        if (key == GLFW.GLFW_KEY_Q) {
+        if (key == InputConstants.KEY_Q) {
             choose(true);
             return true;
         }
-        if (key >= GLFW.GLFW_KEY_1 && key <= GLFW.GLFW_KEY_8) {
-            int idx = key - GLFW.GLFW_KEY_1;
+        if (key >= InputConstants.KEY_1 && key <= InputConstants.KEY_8) {
+            int idx = key - InputConstants.KEY_1;
             if (idx >= 0 && idx < entries.size()) {
                 select(idx);
                 choose(false);
                 return true;
             }
         }
-        if (key == GLFW.GLFW_KEY_TAB || InventoryKeys.FAVORITES.matches(key, scan)) {
+        if (key == InputConstants.KEY_TAB || InventoryKeys.FAVORITES.matches(event)) {
             onClose();
             return true;
         }
-        return super.keyPressed(key, scan, mods);
+        return super.keyPressed(event);
     }
 
     @Override
-    public boolean mouseClicked(double mx, double my, int button) {
+    public boolean mouseClicked(net.minecraft.client.input.MouseButtonEvent event, boolean doubleClick) {
+        double mx = event.x(), my = event.y();
+        int button = com.skycraft.client.screen.UiInput.actionButton(event.button());
         if (hoverRow >= 0 && hoverRow < entries.size()
-                && (button == GLFW.GLFW_MOUSE_BUTTON_LEFT || button == GLFW.GLFW_MOUSE_BUTTON_RIGHT)) {
+                && (button == 0 || button == 1)) {
             select(hoverRow);
-            choose(button == GLFW.GLFW_MOUSE_BUTTON_RIGHT);
+            choose(button == 1);
             return true;
         }
         if (!SkyUi.inside(mx, my, px, py, px + pw, py + ph)) {
             onClose();
             return true;
         }
-        return super.mouseClicked(mx, my, button);
+        return super.mouseClicked(event, doubleClick);
     }
 
     @Override
-    public boolean mouseScrolled(double mx, double my, double delta) {
+    public boolean mouseScrolled(double mx, double my, double horizontal, double delta) {
         if (delta > 0) select(selected - 1);
         else if (delta < 0) select(selected + 1);
         return true;

@@ -67,7 +67,7 @@ public final class Hydrology {
             int c0z = Math.floorDiv((int) (f.z - REACH - f.hw - 20), GRID), c1z = Math.floorDiv((int) (f.z + REACH + f.hw + 20), GRID);
             for (int cx = c0x; cx <= c1x; cx++) {
                 for (int cz = c0z; cz <= c1z; cz++) {
-                    tmp.computeIfAbsent(ChunkPos.asLong(cx, cz), k -> new ArrayList<>()).add(i);
+                    tmp.computeIfAbsent(ChunkPos.pack(cx, cz), k -> new ArrayList<>()).add(i);
                 }
             }
         }
@@ -76,7 +76,7 @@ public final class Hydrology {
             for (int i = 0; i < a.length; i++) a[i] = e.getValue().get(i);
             fallGrid.put(e.getLongKey(), a);
         }
-        for (Site s : sites) siteByChunk.putIfAbsent(ChunkPos.asLong(s.chunkX(), s.chunkZ()), s);
+        for (Site s : sites) siteByChunk.putIfAbsent(ChunkPos.pack(s.chunkX(), s.chunkZ()), s);
     }
 
     public static Hydrology get() {
@@ -152,13 +152,13 @@ public final class Hydrology {
     /** The river site whose centre lies in chunk (cx, cz), or null. */
     @Nullable
     public Site siteInChunk(int cx, int cz) {
-        return siteByChunk.get(ChunkPos.asLong(cx, cz));
+        return siteByChunk.get(ChunkPos.pack(cx, cz));
     }
 
     /** Waterfalls whose influence covers the block, as indices into {@link #falls()} (null when none). */
     @Nullable
     private int[] near(int x, int z) {
-        return fallGrid.get(ChunkPos.asLong(Math.floorDiv(x, GRID), Math.floorDiv(z, GRID)));
+        return fallGrid.get(ChunkPos.pack(Math.floorDiv(x, GRID), Math.floorDiv(z, GRID)));
     }
 
     /** The nearest waterfall within {@code radius} blocks of (x, z), or null. */

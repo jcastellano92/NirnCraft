@@ -8,7 +8,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -23,14 +23,14 @@ import net.minecraft.world.level.Level;
  * vanilla respawn would go, but a death does not honour it. {@link #setOwned} is a home: a bed the player slept in and
  * is allowed to use, or a house they bought.</p>
  */
-@net.minecraftforge.fml.common.Mod.EventBusSubscriber(modid = com.skycraft.Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = com.skycraft.Skycraft.MODID)
 public final class RespawnPoints {
     private RespawnPoints() {}
 
     /** Walking into a town (or to its gate) puts it on the player's list of places to come back to. */
-    @net.minecraftforge.eventbus.api.SubscribeEvent
-    public static void onPlayerTick(net.minecraftforge.event.TickEvent.PlayerTickEvent event) {
-        if (event.phase != net.minecraftforge.event.TickEvent.Phase.END || !(event.player instanceof ServerPlayer player)) return;
+    @net.neoforged.bus.api.SubscribeEvent
+    public static void onPlayerTick(net.neoforged.neoforge.event.tick.PlayerTickEvent.Post event) {
+        if (!(event instanceof net.neoforged.neoforge.event.tick.PlayerTickEvent.Post) || !(event.getEntity() instanceof ServerPlayer player)) return;
         if (player.isSpectator() || (player.tickCount + player.getId()) % 40 != 5) return;
         try {
             noteVisit(player);
@@ -54,7 +54,7 @@ public final class RespawnPoints {
         CompoundTag tag = data.module("respawn");
         if (!owned && home(player) != null && !pos.equals(home(player))) {
             // a provisional place to wake never replaces a home the player has: it is only remembered as one
-            long[] old = tag.getLongArray("provisional");
+            long[] old = tag.getLongArray("provisional").orElseGet(() -> new long[0]);
             if (java.util.Arrays.stream(old).noneMatch(l -> l == pos.asLong())) { // each place only once
                 long[] arr = java.util.Arrays.copyOf(old, old.length + 1);
                 arr[old.length] = pos.asLong();
@@ -63,15 +63,15 @@ public final class RespawnPoints {
             }
             return;
         }
-        player.setRespawnPosition(dim, pos, player.getYRot(), true, false);
-        tag.putString("dim", dim.location().toString());
+        player.setRespawnPosition(new ServerPlayer.RespawnConfig(net.minecraft.world.level.storage.LevelData.RespawnData.of(dim, pos, player.getYRot(), player.getXRot()), true), false);
+        tag.putString("dim", dim.identifier().toString());
         tag.putInt("x", pos.getX());
         tag.putInt("y", pos.getY());
         tag.putInt("z", pos.getZ());
         tag.putBoolean("earned", owned);
         // the beds that are only ever places to wake: sleeping in them later does not make them a home either
         long key = pos.asLong();
-        long[] old = tag.getLongArray("provisional");
+        long[] old = tag.getLongArray("provisional").orElseGet(() -> new long[0]);
         java.util.List<Long> list = new java.util.ArrayList<>();
         for (long l : old) if (l != key) list.add(l);
         if (!owned) list.add(key);
@@ -84,7 +84,7 @@ public final class RespawnPoints {
     /** True if {@code pos} was only ever set as a provisional place to wake (the start cottage's bed). */
     public static boolean isProvisional(ServerPlayer player, BlockPos pos) {
         long key = pos.asLong();
-        for (long l : SkyData.get(player).module("respawn").getLongArray("provisional")) if (l == key) return true;
+        for (long l : SkyData.get(player).module("respawn").getLongArray("provisional").orElseGet(() -> new long[0])) if (l == key) return true;
         return false;
     }
 
@@ -97,10 +97,10 @@ public final class RespawnPoints {
     @javax.annotation.Nullable
     public static BlockPos home(ServerPlayer player) {
         CompoundTag tag = SkyData.get(player).module("respawn");
-        if (!tag.getBoolean("earned") || !tag.contains("x")) return null;
-        String dim = tag.getString("dim");
-        if (!dim.isEmpty() && !dim.equals(Level.OVERWORLD.location().toString())) return null;
-        BlockPos pos = new BlockPos(tag.getInt("x"), tag.getInt("y"), tag.getInt("z"));
+        if (!tag.getBooleanOr("earned",false) || !tag.contains("x")) return null;
+        String dim = tag.getStringOr("dim","");
+        if (!dim.isEmpty() && !dim.equals(Level.OVERWORLD.identifier().toString())) return null;
+        BlockPos pos = new BlockPos(tag.getIntOr("x",0), tag.getIntOr("y",0), tag.getIntOr("z",0));
         return isProvisional(player, pos) ? null : pos;
     }
 
@@ -108,9 +108,9 @@ public final class RespawnPoints {
 
     /** Place ids of the settlements this player has walked into (their own record, independent of the map). */
     public static java.util.Set<String> visitedTowns(ServerPlayer player) {
-        net.minecraft.nbt.ListTag list = SkyData.get(player).module("respawn").getList("towns", net.minecraft.nbt.Tag.TAG_STRING);
+        net.minecraft.nbt.ListTag list = SkyData.get(player).module("respawn").getListOrEmpty("towns");
         java.util.Set<String> out = new java.util.LinkedHashSet<>();
-        for (int i = 0; i < list.size(); i++) out.add(list.getString(i));
+        for (int i = 0; i < list.size(); i++) out.add(list.getStringOr(i, ""));
         return out;
     }
 
@@ -119,16 +119,16 @@ public final class RespawnPoints {
      * thirty blocks of one of its gates). Cheap: one place-list lookup. Returns true when a new town was added.
      */
     public static boolean noteVisit(ServerPlayer player) {
-        ServerLevel level = player.serverLevel();
+        ServerLevel level = player.level();
         if (level.dimension() != Level.OVERWORLD) return false;
         int px = player.getBlockX(), pz = player.getBlockZ();
         boolean added = false;
         CompoundTag tag = SkyData.get(player).module("respawn");
-        net.minecraft.nbt.ListTag list = tag.getList("towns", net.minecraft.nbt.Tag.TAG_STRING);
+        net.minecraft.nbt.ListTag list = tag.getListOrEmpty("towns");
         for (com.skycraft.tamriel.Place p : com.skycraft.tamriel.Places.overlapping(px - 160, pz - 160, px + 160, pz + 160)) {
             if (!p.type().isSettlement() || "homestead".equals(p.variant())) continue;
             boolean known = false;
-            for (int i = 0; i < list.size() && !known; i++) known = list.getString(i).equals(p.id());
+            for (int i = 0; i < list.size() && !known; i++) known = list.getStringOr(i, "").equals(p.id());
             if (known) continue;
             int reach;
             try {
@@ -161,30 +161,30 @@ public final class RespawnPoints {
 
     public static boolean teleportToRestPoint(ServerPlayer player) {
         CompoundTag tag = SkyData.get(player).module("respawn");
-        MinecraftServer server = player.getServer();
+        MinecraftServer server = player.level().getServer();
         if (server == null) return false;
 
         ServerLevel targetLevel = null;
         BlockPos targetPos = null;
 
         if (tag.contains("dim") && tag.contains("x")) {
-            ResourceLocation dimId = new ResourceLocation(tag.getString("dim"));
+            Identifier dimId = Identifier.parse(tag.getStringOr("dim",""));
             ResourceKey<Level> key = ResourceKey.create(Registries.DIMENSION, dimId);
             targetLevel = server.getLevel(key);
             if (targetLevel != null) {
-                targetPos = new BlockPos(tag.getInt("x"), tag.getInt("y"), tag.getInt("z"));
+                targetPos = new BlockPos(tag.getIntOr("x",0), tag.getIntOr("y",0), tag.getIntOr("z",0));
             }
         }
 
         if (targetLevel == null || targetPos == null) {
-            ResourceKey<Level> respawnDim = player.getRespawnDimension();
+            ResourceKey<Level> respawnDim = ServerPlayer.RespawnConfig.getDimensionOrDefault(player.getRespawnConfig());
             targetLevel = server.getLevel(respawnDim);
             if (targetLevel == null) targetLevel = server.overworld();
-            targetPos = player.getRespawnPosition();
-            if (targetPos == null) targetPos = targetLevel.getSharedSpawnPos();
+            targetPos = player.getRespawnConfig() == null ? null : player.getRespawnConfig().respawnData().pos();
+            if (targetPos == null) targetPos = targetLevel.getRespawnData().pos();
         }
 
-        player.teleportTo(targetLevel, targetPos.getX() + 0.5, targetPos.getY() + 0.1, targetPos.getZ() + 0.5, player.getYRot(), player.getXRot());
+        player.teleportTo(targetLevel, targetPos.getX() + 0.5, targetPos.getY() + 0.1, targetPos.getZ() + 0.5, java.util.Set.of(), player.getYRot(), player.getXRot(), true);
         Notifier.message(player, Component.translatable("message.skycraft.unstuck_success"));
         return true;
     }

@@ -21,7 +21,7 @@ import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -60,7 +60,7 @@ public class GiantEntity extends Monster implements AnimatedCreature {
     public GiantEntity(EntityType<? extends GiantEntity> type, Level level) {
         super(type, level);
         this.xpReward = 40;
-        this.setMaxUpStep(1.5f);
+        this.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.STEP_HEIGHT).setBaseValue(1.5f);
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -78,9 +78,9 @@ public class GiantEntity extends Monster implements AnimatedCreature {
         this.goalSelector.addGoal(0, new FloatGoal(this));
         this.goalSelector.addGoal(2, new MeleeAttackGoal(this, 1.1D, true) {
             @Override
-            protected double getAttackReachSqr(LivingEntity target) {
+            protected boolean canPerformAttack(LivingEntity target) {
                 double reach = 3.6 + target.getBbWidth() * 0.5;
-                return reach * reach;
+                return this.isTimeToAttack() && GiantEntity.this.distanceToSqr(target) <= reach * reach && GiantEntity.this.getSensing().hasLineOfSight(target);
             }
         });
         this.goalSelector.addGoal(5, new MoveTowardsRestrictionGoal(this, 0.8D));
@@ -92,9 +92,9 @@ public class GiantEntity extends Monster implements AnimatedCreature {
 
     @Override
     @Nullable
-    public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, MobSpawnType reason,
-                                        @Nullable SpawnGroupData data, @Nullable CompoundTag tag) {
-        data = super.finalizeSpawn(level, difficulty, reason, data, tag);
+    public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, EntitySpawnReason reason,
+                                        @Nullable SpawnGroupData data) {
+        data = super.finalizeSpawn(level, difficulty, reason, data);
         initialize();
         // Giants keep near where they appeared. Their camps (campfire and all) are the skycraft:giant_camp structure;
         // a roaming giant never builds one.
@@ -111,12 +111,12 @@ public class GiantEntity extends Monster implements AnimatedCreature {
 
     public void setHome(BlockPos pos) {
         this.home = pos.immutable();
-        this.restrictTo(this.home, 20);
+        this.setHomeTo(this.home, 20);
     }
 
     @Override
-    protected void customServerAiStep() {
-        super.customServerAiStep();
+    protected void customServerAiStep(net.minecraft.server.level.ServerLevel serverLevel263) {
+        super.customServerAiStep(serverLevel263);
         if (!initialized) initialize();
         if (warnTicks > 0) warnTicks--;
         LivingEntity target = this.getTarget();
@@ -159,30 +159,26 @@ public class GiantEntity extends Monster implements AnimatedCreature {
 
     /** Club hits launch the target into the sky. */
     @Override
-    public boolean doHurtTarget(Entity target) {
+    public boolean doHurtTarget(net.minecraft.server.level.ServerLevel serverLevel263, Entity target) {
         if (this.tickCount - lastSmash < SMASH_COOLDOWN) return false;
         lastSmash = this.tickCount;
-        boolean hit = super.doHurtTarget(target);
+        boolean hit = super.doHurtTarget(serverLevel263, target);
         if (hit && target instanceof LivingEntity living) {
             double dx = target.getX() - this.getX();
             double dz = target.getZ() - this.getZ();
             double len = Math.max(0.01, Math.sqrt(dx * dx + dz * dz));
             living.setDeltaMovement(dx / len * 0.6, 1.45, dz / len * 0.6);
-            living.hurtMarked = true;
+            living.syncVelocity = true;
             this.playSound(SoundEvents.IRON_GOLEM_ATTACK, 1.5f, 0.6f);
         }
         return hit;
     }
 
     @Override
-    public boolean isPreventingPlayerRest(Player player) {
+    public boolean isPreventingPlayerRest(net.minecraft.server.level.ServerLevel serverLevel263, Player player) {
         return this.getTarget() == player;
     }
 
-    @Override
-    protected boolean shouldDespawnInPeaceful() {
-        return false;
-    }
 
     @Override
     public float getVoicePitch() {
@@ -215,17 +211,23 @@ public class GiantEntity extends Monster implements AnimatedCreature {
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag tag) {
-        super.addAdditionalSaveData(tag);
-        if (home != null) tag.put("Home", NbtUtils.writeBlockPos(home));
+    public void addAdditionalSaveData(net.minecraft.world.level.storage.ValueOutput output263) {
+        super.addAdditionalSaveData(output263);
+        net.minecraft.nbt.CompoundTag tag = new net.minecraft.nbt.CompoundTag();
+        
+        if (home != null) tag.put("Home", com.skycraft.platform.NbtPositions.write(home));
         tag.putBoolean("SkycraftInit", initialized);
+    
+        output263.store(tag);
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag tag) {
-        super.readAdditionalSaveData(tag);
-        if (tag.contains("Home")) setHome(NbtUtils.readBlockPos(tag.getCompound("Home")));
-        initialized = tag.getBoolean("SkycraftInit");
+    public void readAdditionalSaveData(net.minecraft.world.level.storage.ValueInput input263) {
+        super.readAdditionalSaveData(input263);
+        net.minecraft.nbt.CompoundTag tag = com.skycraft.platform.ValueTags.read(input263 , "Home", "SkycraftInit");
+        
+        if (tag.contains("Home")) setHome(com.skycraft.platform.NbtPositions.read(tag.getCompoundOrEmpty("Home")));
+        initialized = tag.getBooleanOr("SkycraftInit",false);
     }
 
     // ------------------------------------------------------------------ animation (rig models)
@@ -244,8 +246,9 @@ public class GiantEntity extends Monster implements AnimatedCreature {
 
     /** Every melee swing plays an attack animation (alternating blows). */
     @Override
-    public void swing(net.minecraft.world.InteractionHand hand) {
-        super.swing(hand);
-        if (!this.level().isClientSide) CreatureAnims.play(this, this.getRandom().nextInt(3) == 0 ? AnimSlot.ATTACK2 : AnimSlot.ATTACK);
+    public boolean swing(net.minecraft.world.InteractionHand hand, net.minecraft.world.item.component.SwingAnimation animation263, boolean updateSelf263) {
+        boolean swung263 = super.swing(hand, animation263, updateSelf263);
+        if (!this.level().isClientSide()) CreatureAnims.play(this, this.getRandom().nextInt(3) == 0 ? AnimSlot.ATTACK2 : AnimSlot.ATTACK);
+        return swung263;
     }
 }

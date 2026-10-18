@@ -301,9 +301,12 @@ class AtmospherePlanTest {
                 List.of(new WeatherPackets.Entry("vvardenfell", (byte) WeatherKind.ASH_STORM.ordinal(), (short) 215)),
                 List.of(front, ashFront)
         );
-        FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
-        WeatherPackets.Sync.encode(original, buf);
-        WeatherPackets.Sync decoded = WeatherPackets.Sync.decode(buf);
+        net.minecraft.network.RegistryFriendlyByteBuf buf = new net.minecraft.network.RegistryFriendlyByteBuf(Unpooled.buffer(), net.minecraft.core.RegistryAccess.EMPTY);
+        WeatherPackets.Sync decoded;
+        try {
+            WeatherPackets.Sync.encode(original, buf);
+            decoded = WeatherPackets.Sync.decode(buf);
+        } finally { buf.release(); }
 
         assertTrue(decoded.full());
         assertEquals(1, decoded.entries().size());

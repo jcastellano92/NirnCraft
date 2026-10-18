@@ -5,7 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.skycraft.Skycraft;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.tags.TagKey;
@@ -13,7 +13,7 @@ import net.minecraft.util.GsonHelper;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.biome.Biome;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -45,7 +45,7 @@ import java.util.Set;
  * entry: when the weighted pick lands on it the attempt ends quietly (no spawn, no cooldown). That is the data-side
  * knob for peaceful stretches: the more quiet weight a table carries, the fewer of its attempts become encounters.
  */
-public final class SpawnTables extends SimpleJsonResourceReloadListener {
+public final class SpawnTables extends SimpleJsonResourceReloadListener<JsonElement> {
     public enum Kind { HOSTILE, WILDLIFE }
 
     /** DAWN (first light) and DUSK are slices of DAY; DAY itself is any daylight. */
@@ -80,12 +80,12 @@ public final class SpawnTables extends SimpleJsonResourceReloadListener {
                         Where where) {}
 
     public record Rule(Set<String> provinces, Set<String> regions, EnumSet<BiomeFamily> families,
-                       List<TagKey<Biome>> biomeTags, Set<ResourceLocation> biomeIds, List<Group> groups) {}
+                       List<TagKey<Biome>> biomeTags, Set<Identifier> biomeIds, List<Group> groups) {}
 
     private static volatile List<Rule> RULES = List.of();
 
     public SpawnTables() {
-        super(new com.google.gson.Gson(), "region_spawns");
+        super(net.minecraft.util.ExtraCodecs.JSON, net.minecraft.resources.FileToIdConverter.json("region_spawns"));
     }
 
     public static List<Rule> rules() {
@@ -93,7 +93,7 @@ public final class SpawnTables extends SimpleJsonResourceReloadListener {
     }
 
     @Override
-    protected void apply(Map<ResourceLocation, JsonElement> files, ResourceManager manager, ProfilerFiller profiler) {
+    protected void apply(Map<Identifier, JsonElement> files, ResourceManager manager, ProfilerFiller profiler) {
         List<Rule> out = new ArrayList<>();
         files.forEach((id, json) -> {
             try {
@@ -121,10 +121,10 @@ public final class SpawnTables extends SimpleJsonResourceReloadListener {
         EnumSet<BiomeFamily> fams = EnumSet.noneOf(BiomeFamily.class);
         for (String f : strings(o, "families")) fams.add(BiomeFamily.byId(f));
         List<TagKey<Biome>> tags = new ArrayList<>();
-        Set<ResourceLocation> ids = new java.util.HashSet<>();
+        Set<Identifier> ids = new java.util.HashSet<>();
         for (String b : strings(o, "biomes")) {
-            if (b.startsWith("#")) tags.add(TagKey.create(Registries.BIOME, new ResourceLocation(b.substring(1))));
-            else ids.add(new ResourceLocation(b));
+            if (b.startsWith("#")) tags.add(TagKey.create(Registries.BIOME, Identifier.parse(b.substring(1))));
+            else ids.add(Identifier.parse(b));
         }
         List<Group> groups = new ArrayList<>();
         for (JsonElement e : GsonHelper.getAsJsonArray(o, "groups", new JsonArray())) {
@@ -164,9 +164,9 @@ public final class SpawnTables extends SimpleJsonResourceReloadListener {
     }
 
     private static Optional<Member> member(JsonObject m) {
-        ResourceLocation id = new ResourceLocation(GsonHelper.getAsString(m, "entity"));
-        EntityType<?> type = ForgeRegistries.ENTITY_TYPES.getValue(id);
-        if (type == null || !ForgeRegistries.ENTITY_TYPES.containsKey(id)) return Optional.empty();
+        Identifier id = Identifier.parse(GsonHelper.getAsString(m, "entity"));
+        EntityType<?> type = BuiltInRegistries.ENTITY_TYPE.getValue(id);
+        if (type == null || !BuiltInRegistries.ENTITY_TYPE.containsKey(id)) return Optional.empty();
         int[] count = range(m, "count", 1, 1);
         return Optional.of(new Member(type, count[0], Math.max(count[0], count[1])));
     }

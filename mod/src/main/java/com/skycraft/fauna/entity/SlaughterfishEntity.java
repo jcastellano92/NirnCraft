@@ -21,7 +21,7 @@ import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.ai.navigation.WaterBoundPathNavigation;
-import net.minecraft.world.entity.animal.WaterAnimal;
+import net.minecraft.world.entity.animal.fish.WaterAnimal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
@@ -54,7 +54,7 @@ public class SlaughterfishEntity extends WaterAnimal implements AnimatedCreature
         this.goalSelector.addGoal(1, new MeleeAttackGoal(this, 1.4, true));
         this.goalSelector.addGoal(4, new RandomSwimmingGoal(this, 1.0, 10));
         this.targetSelector.addGoal(1, new HurtByTargetGoal(this));
-        this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, 10, true, false, this::canBite));
+        this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, 10, true, false, (target263, targetLevel263) -> this.canBite(target263)));
     }
 
     private boolean canBite(LivingEntity target) {
@@ -81,7 +81,7 @@ public class SlaughterfishEntity extends WaterAnimal implements AnimatedCreature
             this.setDeltaMovement(this.getDeltaMovement().add((this.random.nextFloat() * 2f - 1f) * 0.05f, 0.4,
                     (this.random.nextFloat() * 2f - 1f) * 0.05f));
             this.setOnGround(false);
-            this.hasImpulse = true;
+            this.needsSync = true;
             this.playSound(SoundEvents.COD_FLOP, this.getSoundVolume(), this.getVoicePitch());
         }
         super.aiStep();
@@ -134,9 +134,10 @@ public class SlaughterfishEntity extends WaterAnimal implements AnimatedCreature
 
     /** Every melee swing plays an attack animation (alternating blows). */
     @Override
-    public void swing(net.minecraft.world.InteractionHand hand) {
-        super.swing(hand);
-        if (!this.level().isClientSide) CreatureAnims.play(this, AnimSlot.ATTACK);
+    public boolean swing(net.minecraft.world.InteractionHand hand, net.minecraft.world.item.component.SwingAnimation animation263, boolean updateSelf263) {
+        boolean swung263 = super.swing(hand, animation263, updateSelf263);
+        if (!this.level().isClientSide()) CreatureAnims.play(this, AnimSlot.ATTACK);
+        return swung263;
     }
 
     @Override

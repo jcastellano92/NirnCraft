@@ -12,8 +12,6 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.storage.LevelResource;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -28,7 +26,6 @@ import java.nio.file.Path;
  * Kept on the client (the server never needs it) in {@code <game dir>/skycraft/explored/<world>/<dimension>.bin},
  * with coarser copies of the set for the zoomed-out map.
  */
-@OnlyIn(Dist.CLIENT)
 public final class ExploredMap {
     public static final int CELL_SHIFT = 6;
     /** Coarser levels: level k has cells of {@code 64 << k} blocks. */
@@ -56,7 +53,7 @@ public final class ExploredMap {
     }
 
     public static boolean explored(int level, int cx, int cz) {
-        return CELLS[level].contains(ChunkPos.asLong(cx, cz));
+        return CELLS[level].contains(ChunkPos.pack(cx, cz));
     }
 
     /** Client tick: reveal around the player, around discovered locations, and save now and then. */
@@ -99,26 +96,26 @@ public final class ExploredMap {
     }
 
     private static void add(int cx, int cz) {
-        if (!CELLS[0].add(ChunkPos.asLong(cx, cz))) return;
-        for (int k = 1; k < LEVELS; k++) CELLS[k].add(ChunkPos.asLong(cx >> k, cz >> k));
+        if (!CELLS[0].add(ChunkPos.pack(cx, cz))) return;
+        for (int k = 1; k < LEVELS; k++) CELLS[k].add(ChunkPos.pack(cx >> k, cz >> k));
         dirty = true;
         version++;
     }
 
     private static void revealLocations(Minecraft mc) {
-        ListTag list = SkyData.get(mc.player).module(WorldData.MODULE).getList("discovered", Tag.TAG_COMPOUND);
-        String dim = mc.level.dimension().location().toString();
+        ListTag list = SkyData.get(mc.player).module(WorldData.MODULE).getListOrEmpty("discovered");
+        String dim = mc.level.dimension().identifier().toString();
         long stamp = list.size() * 31L + dim.hashCode();
         for (int i = 0; i < list.size(); i++) {
-            CompoundTag loc = list.getCompound(i);
-            stamp = stamp * 31 + loc.getInt("x") * 7919L + loc.getInt("z") + (loc.getBoolean("known") ? 1 : 0);
+            CompoundTag loc = list.getCompoundOrEmpty(i);
+            stamp = stamp * 31 + loc.getIntOr("x",0) * 7919L + loc.getIntOr("z",0) + (loc.getBooleanOr("known",false) ? 1 : 0);
         }
         if (stamp == locationsStamp) return;
         locationsStamp = stamp;
         for (int i = 0; i < list.size(); i++) {
-            CompoundTag loc = list.getCompound(i);
-            if (!loc.getString("dim").equals(dim) || loc.getBoolean("known")) continue;
-            revealCircle(loc.getInt("x"), loc.getInt("z"), LOCATION_REVEAL);
+            CompoundTag loc = list.getCompoundOrEmpty(i);
+            if (!loc.getStringOr("dim","").equals(dim) || loc.getBooleanOr("known",false)) continue;
+            revealCircle(loc.getIntOr("x",0), loc.getIntOr("z",0), LOCATION_REVEAL);
         }
     }
 
@@ -133,7 +130,7 @@ public final class ExploredMap {
             ServerData server = mc.getCurrentServer();
             world = "mp_" + (server != null ? server.ip : "unknown");
         }
-        return sanitize(world) + "/" + sanitize(mc.level.dimension().location().toString());
+        return sanitize(world) + "/" + sanitize(mc.level.dimension().identifier().toString());
     }
 
     private static String sanitize(String s) {

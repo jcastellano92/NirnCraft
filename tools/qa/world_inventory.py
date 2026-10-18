@@ -1,5 +1,6 @@
 """Build real regional scouting inputs from loaded content indices and the authored raster."""
 import json
+import importlib.util
 from pathlib import Path
 from collections import Counter
 import numpy as np
@@ -12,17 +13,27 @@ TAM=ROOT/'mod/src/main/resources/skycraft/tamriel'
 def read(path): return json.loads(path.read_text(encoding='utf-8-sig'))
 
 
-def biomes(palette,palettes,seen=None):
+def resolved_palette(palette,palettes,seen=None):
     seen=set() if seen is None else seen
-    if palette in seen or palette not in palettes: return set()
+    if palette in seen or palette not in palettes: return {'contexts': {}, 'micro': []}
     seen.add(palette); row=palettes[palette]
-    result={v['biome'] for values in row.get('contexts',{}).values() for v in values}
-    result.update(m['biome'] for m in row.get('micro',[]) if m.get('biome'))
-    return result|biomes(row.get('fallback'),palettes,seen)
+    parent=resolved_palette(row.get('fallback'),palettes,seen)
+    return {'contexts': {**parent['contexts'], **row.get('contexts', {})},
+            'micro': row.get('micro', parent['micro'])}
+
+
+def biomes(palette,palettes,seen=None):
+    effective=resolved_palette(palette,palettes,seen)
+    result={v['biome'] for values in effective['contexts'].values() for v in values}
+    result.update(m['biome'] for m in effective['micro'] if m.get('biome'))
+    return result
 
 
 def inventory():
-    regions=read(TAM/'regions.json')
+    loader=importlib.util.spec_from_file_location('inventory_regions',Path(__file__).with_name('world_regions.py'))
+    registry=importlib.util.module_from_spec(loader);loader.loader.exec_module(registry)
+    all_regions=registry.registry(ROOT)
+    regions=[r for r in all_regions if r['kind']=='authored_region']
     palettes=read(TAM/'palettes.json')['palettes']
     raster=np.asarray(Image.open(TAM/'regions.png'))
     elevation=np.asarray(Image.open(TAM/'elevation.png')).astype(np.float32)/32-64
@@ -51,12 +62,22 @@ def inventory():
             candidates.append({'type':'regional_raster_sample','xz':[meta['min_x']+(col+.5)*meta['cell'],
                 meta['min_z']+(row+.5)*meta['cell']],'estimatedMacroHeight':float(elevation[row,col]),
                 'source':'skycraft/tamriel/regions.png','status':'unloaded scout candidate, not a camera height'})
-        rows.append({'id':region['id'],'province':region['province'],'weatherProfile':region['weather'],
+        rows.append({'id':region['id'],'province':region['province'],'dimension':region['dimension'],
+                     'kind':region['kind'],'weatherProfile':region['weather'],
                      'terrain':region.get('terrain',{}),'placeTypes':dict(counts),'places':len(owned),
                      'biomes':sorted(biomes(region['palette'],palettes)),
-                     'microRules':len(palettes.get(region['palette'],{}).get('micro',[])),
+                     'microRules':len(resolved_palette(region['palette'],palettes)['micro']),
                      'candidates':candidates,'rasterCells':len(xs),
                      'visualStatus':'not established by inventory'})
+    for region in all_regions:
+        if region['kind']=='authored_region': continue
+        if region['kind']=='procedural_archetype':
+            rows.append({**region,'candidates':[], 'biomes':sorted(biomes(region['palette'],palettes)),
+                         'microRules':len(resolved_palette(region['palette'],palettes)['micro']),
+                         'visualStatus':'not established by inventory'})
+            continue
+        rows.append({**region,'candidates':[], 'visualStatus':'not established by inventory',
+                     'scouting':'Use actual RealmLayout/realm site or jail cell plan; no raster/Overworld weather inference.'})
     out=ROOT/'dist/world-tests/inventory.json'; out.parent.mkdir(parents=True,exist_ok=True)
     out.write_text(json.dumps({'regions':rows,'places':len(places),
         'note':'Authored data inventory; not runtime generation, collision, navigation or visual acceptance.'},indent=2)+'\n',encoding='utf-8')

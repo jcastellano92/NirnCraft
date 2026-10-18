@@ -73,13 +73,13 @@ public final class Sacred {
     /** A candle in the sign's colour. */
     static Block candle(StandingStone s) {
         return switch (s) {
-            case WARRIOR, RITUAL -> Blocks.RED_CANDLE;
-            case MAGE, TOWER -> Blocks.LIGHT_BLUE_CANDLE;
-            case THIEF, SERPENT -> Blocks.LIME_CANDLE;
-            case LADY, LOVER -> Blocks.PINK_CANDLE;
-            case LORD, STEED -> Blocks.ORANGE_CANDLE;
-            case ATRONACH, SHADOW -> Blocks.PURPLE_CANDLE;
-            case APPRENTICE -> Blocks.CYAN_CANDLE;
+            case WARRIOR, RITUAL -> com.skycraft.worldgen.VanillaBlocks.RED_CANDLE;
+            case MAGE, TOWER -> com.skycraft.worldgen.VanillaBlocks.LIGHT_BLUE_CANDLE;
+            case THIEF, SERPENT -> com.skycraft.worldgen.VanillaBlocks.LIME_CANDLE;
+            case LADY, LOVER -> com.skycraft.worldgen.VanillaBlocks.PINK_CANDLE;
+            case LORD, STEED -> com.skycraft.worldgen.VanillaBlocks.ORANGE_CANDLE;
+            case ATRONACH, SHADOW -> com.skycraft.worldgen.VanillaBlocks.PURPLE_CANDLE;
+            case APPRENTICE -> com.skycraft.worldgen.VanillaBlocks.CYAN_CANDLE;
         };
     }
 
@@ -149,7 +149,7 @@ public final class Sacred {
                 });
                 stoneDy = 0;
                 fr.set(0, -1, 0, Blocks.POLISHED_BLACKSTONE);
-                for (int[] cc : new int[][]{{2, 2}, {-2, 2}, {2, -2}, {-2, -2}}) fr.set(cc[0], 0, cc[1], Deco.candle(Blocks.BLACK_CANDLE, 3, true));
+                for (int[] cc : new int[][]{{2, 2}, {-2, 2}, {2, -2}, {-2, -2}}) fr.set(cc[0], 0, cc[1], Deco.candle(com.skycraft.worldgen.VanillaBlocks.BLACK_CANDLE, 3, true));
             }
             case LOVER -> {
                 // a ring of flowers
@@ -278,7 +278,7 @@ public final class Sacred {
             fr.set(0, 0, lt, Blocks.CHISELED_STONE_BRICKS);
             fr.set(0, 1, lt, Deco.campfire(false, true));
         }
-        fr.container(-3, 0, 2, Deco.chest(fr.f), new net.minecraft.resources.ResourceLocation(com.skycraft.Skycraft.MODID, "chests/word_wall"));
+        fr.container(-3, 0, 2, Deco.chest(fr.f), net.minecraft.resources.Identifier.fromNamespaceAndPath(com.skycraft.Skycraft.MODID, "chests/word_wall"));
         fr.p.spawnDormant(Mobs.draugr(), fr.x(1, -2), fr.base, fr.z(1, -2), Painter.yaw(fr.f));
         fr.p.spawnDormant(Mobs.draugr(), fr.x(1, 2), fr.base, fr.z(1, 2), Painter.yaw(fr.f));
     }

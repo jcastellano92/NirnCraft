@@ -16,16 +16,16 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.OwnableEntity;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.monster.Slime;
+import net.minecraft.world.entity.monster.cubemob.Slime;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.event.entity.living.LivingDeathEvent;
-import net.minecraftforge.event.entity.living.LivingDropsEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
+import net.neoforged.neoforge.event.entity.living.LivingDropsEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -42,7 +42,7 @@ import java.util.WeakHashMap;
  * up items), nothing more: equipment that didn't drop stays on the lying body but can't be taken. Bodies are capped
  * per area ({@value #MAX_NEARBY} within {@value #CAP_RADIUS} blocks; the oldest unused ones go first).</p>
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class CorpseEvents {
     /** The vanilla death animation (falling over) lasts 20 ticks; the body appears right after. */
     private static final int APPEAR_DELAY = 19;
@@ -62,7 +62,7 @@ public final class CorpseEvents {
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onDeath(LivingDeathEvent event) {
         LivingEntity dead = event.getEntity();
-        if (event.isCanceled() || dead.level().isClientSide || !(dead instanceof Mob)) return;
+        if (event.isCanceled() || dead.level().isClientSide() || !(dead instanceof Mob)) return;
         ItemStack[] worn = new ItemStack[WORN.length];
         for (int i = 0; i < WORN.length; i++) worn[i] = dead.getItemBySlot(WORN[i]);
         WORN_AT_DEATH.put(dead, worn);
@@ -77,7 +77,7 @@ public final class CorpseEvents {
         List<ItemStack> arrows = takeArrows(dead);
 
         boolean corpseAllowed = CreaturesConfig.CORPSES.get() && dead instanceof Mob && !(dead instanceof Slime)
-                && !dead.getType().is(CreatureTags.NO_CORPSE)
+                && !dead.getType().builtInRegistryHolder().is(CreatureTags.NO_CORPSE)
                 && (dead.getBbHeight() >= 0.35f || dead instanceof SkeeverEntity)
                 && !Summons.isSummon(dead) && killedByPlayer(event);
         if (!corpseAllowed) {
@@ -85,7 +85,7 @@ public final class CorpseEvents {
             return;
         }
 
-        CorpseEntity corpse = ModEntities.CORPSE.get().create(level);
+        CorpseEntity corpse = ModEntities.CORPSE.get().create(level, net.minecraft.world.entity.EntitySpawnReason.EVENT);
         if (corpse == null) return;
 
         // Exactly what the creature dropped goes into the body; dropped equipment goes back on the lying body.
@@ -107,10 +107,10 @@ public final class CorpseEvents {
         event.getDrops().removeAll(stored);
         // What an armed NPC had on is exactly what lies on (and can be taken from) its body: equipment that missed its
         // drop chance used to stay on the model but could not be looted.
-        if (worn != null && wearsOwnGear(dead) && level.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT)) {
+        if (worn != null && wearsOwnGear(dead) && level.getGameRules().get(GameRules.MOB_DROPS)) {
             for (int i = 0; i < worn.length; i++) {
                 ItemStack w = worn[i];
-                if (w == null || w.isEmpty() || net.minecraft.world.item.enchantment.EnchantmentHelper.hasVanishingCurse(w)) continue;
+                if (w == null || w.isEmpty() || net.minecraft.world.item.enchantment.EnchantmentHelper.has(w, net.minecraft.world.item.enchantment.EnchantmentEffectComponents.PREVENT_EQUIPMENT_DROP)) continue;
                 corpse.addWorn(i, w.copy()); // false (ignored) when that slot already holds the dropped item
             }
         }
@@ -119,7 +119,7 @@ public final class CorpseEvents {
             if (!rest.isEmpty()) event.getDrops().add(new ItemEntity(level, dead.getX(), dead.getY() + 0.5, dead.getZ(), rest));
         }
         // Townspeople's clothes aren't equipment: generated, but only when mobs drop loot at all.
-        if (level.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT)) corpse.addClothes(dead);
+        if (level.getGameRules().get(GameRules.MOB_DROPS)) corpse.addClothes(dead);
 
         corpse.setBody(dead);
 
@@ -133,9 +133,9 @@ public final class CorpseEvents {
         double a = Math.toRadians(180.0 - yaw);
         double half = dead.getBbHeight() * 0.5;
         Vec3 center = dead.position().add(-Mth.cos((float) a) * half, 0, Mth.sin((float) a) * half);
-        corpse.moveTo(center.x, dead.getY(), center.z, yaw, 0);
+        corpse.snapTo(center.x, dead.getY(), center.z, yaw, 0);
         if (!level.noCollision(corpse)) {
-            corpse.moveTo(dead.getX(), dead.getY(), dead.getZ(), yaw, 0);
+            corpse.snapTo(dead.getX(), dead.getY(), dead.getZ(), yaw, 0);
             corpse.setCentered(false);
         }
         corpse.setAppearDelay(0);
@@ -152,7 +152,7 @@ public final class CorpseEvents {
         }
         // not the same object (another mod copied the drop): the same item from that slot
         for (int i = 0; i < worn.length; i++) {
-            if (worn[i] != null && !worn[i].isEmpty() && ItemStack.isSameItemSameTags(worn[i], stack)) return i;
+            if (worn[i] != null && !worn[i].isEmpty() && ItemStack.isSameItemSameComponents(worn[i], stack)) return i;
         }
         return -1;
     }
@@ -162,9 +162,9 @@ public final class CorpseEvents {
         return dead instanceof com.skycraft.creatures.entity.SkyHumanoid
                 || dead instanceof com.skycraft.society.entity.NpcEntity
                 || dead instanceof com.skycraft.creatures.entity.GuardEntity
-                || dead instanceof net.minecraft.world.entity.monster.AbstractSkeleton
-                || dead instanceof net.minecraft.world.entity.monster.Zombie
-                || dead instanceof net.minecraft.world.entity.monster.AbstractIllager;
+                || dead instanceof net.minecraft.world.entity.monster.skeleton.AbstractSkeleton
+                || dead instanceof net.minecraft.world.entity.monster.zombie.Zombie
+                || dead instanceof net.minecraft.world.entity.monster.illager.AbstractIllager;
     }
 
     /**
@@ -195,10 +195,10 @@ public final class CorpseEvents {
     private static List<ItemStack> takeArrows(LivingEntity dead) {
         List<ItemStack> out = new ArrayList<>();
         CompoundTag data = dead.getPersistentData();
-        if (!data.contains(ARROWS_KEY, Tag.TAG_LIST)) return out;
-        ListTag list = data.getList(ARROWS_KEY, Tag.TAG_COMPOUND);
+        if (!com.skycraft.platform.NbtData.hasType(data, ARROWS_KEY, Tag.TAG_LIST)) return out;
+        ListTag list = data.getListOrEmpty(ARROWS_KEY);
         for (int i = 0; i < list.size(); i++) {
-            ItemStack stack = ItemStack.of(list.getCompound(i));
+            ItemStack stack = com.skycraft.inventory.ItemData.parse(list.getCompoundOrEmpty(i));
             if (!stack.isEmpty()) out.add(stack);
         }
         data.remove(ARROWS_KEY);

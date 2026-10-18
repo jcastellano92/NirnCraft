@@ -15,23 +15,23 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.util.Locale;
 
 /**
  * {@code /skycraft-sailing ports | build <port> | tp <port> | voyage <port> | ship <type> | wind} (operators only).
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class SailingCommands {
     private SailingCommands() {}
 
     @SubscribeEvent
     public static void register(RegisterCommandsEvent event) {
         CommandDispatcher<CommandSourceStack> d = event.getDispatcher();
-        d.register(Commands.literal("skycraft-sailing").requires(s -> s.hasPermission(2))
+        d.register(Commands.literal("skycraft-sailing").requires(s -> s.permissions().hasPermission(net.minecraft.server.permissions.Permissions.COMMANDS_GAMEMASTER))
                 .then(Commands.literal("ports").executes(SailingCommands::ports))
                 .then(Commands.literal("build").then(port().executes(c -> build(c, false))))
                 .then(Commands.literal("tp").then(port().executes(c -> build(c, true))))
@@ -93,8 +93,7 @@ public final class SailingCommands {
         c.getSource().sendSuccess(() -> Component.literal(msg), true);
         if (teleport) {
             ServerPlayer p = c.getSource().getPlayerOrException();
-            p.teleportTo(level, dock.arrival.getX() + 0.5, dock.arrival.getY(), dock.arrival.getZ() + 0.5,
-                    DockBuilder.yawOf(PortSites.of(port).toLand().getOpposite()), 0f);
+            p.teleportTo(level, dock.arrival.getX() + 0.5, dock.arrival.getY(), dock.arrival.getZ() + 0.5, java.util.Set.of(), DockBuilder.yawOf(PortSites.of(port).toLand().getOpposite()), 0f, false);
         }
         return 1;
     }
@@ -117,7 +116,7 @@ public final class SailingCommands {
     private static int ship(CommandContext<CommandSourceStack> c) throws CommandSyntaxException {
         ServerPlayer p = c.getSource().getPlayerOrException();
         ShipType type = ShipType.byId(StringArgumentType.getString(c, "type"));
-        ServerLevel level = p.serverLevel();
+        ServerLevel level = p.level();
         Vec3 look = Vec3.directionFromRotation(0, p.getYRot());
         for (int dist = 4; dist <= 40; dist++) {
             for (int lat = 0; lat <= 12; lat++) {
@@ -125,9 +124,9 @@ public final class SailingCommands {
                     double x = p.getX() + look.x * dist - look.z * lat * sgn, z = p.getZ() + look.z * dist + look.x * lat * sgn;
                     BlockPos col = BlockPos.containing(x, 62, z);
                     if (!level.getFluidState(col).is(FluidTags.WATER) || !level.getBlockState(col.above()).isAir()) continue;
-                    ShipEntity ship = SailingRegistry.type(type).create(level);
+                    ShipEntity ship = SailingRegistry.type(type).create(level, net.minecraft.world.entity.EntitySpawnReason.EVENT);
                     if (ship == null) return 0;
-                    ship.moveTo(x, 62 + 0.889 - type.draft, z, p.getYRot(), 0f);
+                    ship.snapTo(x, 62 + 0.889 - type.draft, z, p.getYRot(), 0f);
                     if (!level.noCollision(ship, ship.getBoundingBox().deflate(0.05)) || !ShipItem.roomFor(level, ship)) continue;
                     ship.initNew(p);
                     level.addFreshEntity(ship);
@@ -162,7 +161,7 @@ public final class SailingCommands {
     /** Debug: places a sea wreck and flotsam on the nearest open water deep enough, and shows the player the spot. */
     private static int wreck(CommandContext<CommandSourceStack> c) throws CommandSyntaxException {
         ServerPlayer p = c.getSource().getPlayerOrException();
-        ServerLevel level = p.serverLevel();
+        ServerLevel level = p.level();
         for (int r = 12; r <= 160; r += 4) {
             for (int i = 0; i < 24; i++) {
                 double a = i * Math.PI / 12;
@@ -174,13 +173,13 @@ public final class SailingCommands {
                 BlockPos at = new BlockPos(x, floor, z);
                 var random = level.getRandom();
                 var gen = level.getChunkSource().getGenerator();
-                boolean wreck = SailingRegistry.SEA_WRECK.get().place(net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration.INSTANCE,
+                boolean wreck = new com.skycraft.sailing.world.SeaWreckFeature(com.skycraft.worldgen.NoneFeatureConfiguration.CODEC).place(com.skycraft.worldgen.NoneFeatureConfiguration.INSTANCE,
                         level, gen, random, at);
-                boolean flotsam = SailingRegistry.FLOTSAM.get().place(net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration.INSTANCE,
+                boolean flotsam = new com.skycraft.sailing.world.FlotsamFeature(com.skycraft.worldgen.NoneFeatureConfiguration.CODEC).place(com.skycraft.worldgen.NoneFeatureConfiguration.INSTANCE,
                         level, gen, random, new BlockPos(x + 6, 63, z + 6));
                 double vx = x - Math.cos(a) * 9, vz = z - Math.sin(a) * 9;
                 float yaw = (float) Math.toDegrees(Math.atan2(-(x - vx), z - vz));
-                p.teleportTo(level, vx, 70, vz, yaw, 45f);
+                p.teleportTo(level, vx, 70, vz, java.util.Set.of(), yaw, 45f, false);
                 String msg = "Wreck " + (wreck ? "placed" : "failed") + ", flotsam " + (flotsam ? "placed" : "failed") + " at " + x + " " + floor + " " + z;
                 c.getSource().sendSuccess(() -> Component.literal(msg), false);
                 return 1;
@@ -192,7 +191,7 @@ public final class SailingCommands {
 
     private static int wind(CommandContext<CommandSourceStack> c) throws CommandSyntaxException {
         ServerPlayer p = c.getSource().getPlayerOrException();
-        float[] w = SeaWind.at(p.serverLevel(), p.getX(), p.getZ());
+        float[] w = SeaWind.at(p.level(), p.getX(), p.getZ());
         String msg = String.format(Locale.ROOT, "Wind towards %.0f deg, strength %.2f", Mth.wrapDegrees(w[0]), w[1]);
         c.getSource().sendSuccess(() -> Component.literal(msg), false);
         return 1;

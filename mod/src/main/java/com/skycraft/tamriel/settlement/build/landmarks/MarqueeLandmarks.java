@@ -128,7 +128,7 @@ public final class MarqueeLandmarks {
             return;
         }
         String col = s.name.isEmpty() ? "purple" : s.name;
-        BlockState stem = B.s(Blocks.MUSHROOM_STEM), cap = colour(col, "wool", Blocks.PURPLE_WOOL), spot = B.s(Blocks.WHITE_WOOL);
+        BlockState stem = B.s(Blocks.MUSHROOM_STEM), cap = colour(col, "wool", com.skycraft.worldgen.VanillaBlocks.PURPLE_WOOL), spot = B.s(com.skycraft.worldgen.VanillaBlocks.WHITE_WOOL);
         BlockState glow = B.s(Blocks.SHROOMLIGHT);
         int stemH = (int) (h * 0.62);
         double capR = Math.min(s.w, s.d) / 2.0 - 0.5;
@@ -210,11 +210,11 @@ public final class MarqueeLandmarks {
         // left arm down along the cloak, right arm raised holding the lantern
         box(c, cx - 3, sh - 4, cz, cx - 3, sh, cz, cloak);
         box(c, cx + 3, sh, cz, cx + 3, sh + 6, cz, cloak);
-        c.set(cx + 3, sh + 7, cz, B.s(Blocks.CHAIN));
+        c.set(cx + 3, sh + 7, cz, B.s(com.skycraft.worldgen.VanillaBlocks.CHAIN));
         c.set(cx + 3, sh + 8, cz, p.light.hasProperty(net.minecraft.world.level.block.LanternBlock.HANGING)
                 ? p.light.setValue(net.minecraft.world.level.block.LanternBlock.HANGING, true) : B.s(Blocks.SEA_LANTERN));
-        c.set(cx + 3, sh + 9, cz, B.s(Blocks.CHAIN));
-        c.set(cx + 3, sh + 10, cz, B.s(Blocks.LIGHTNING_ROD));
+        c.set(cx + 3, sh + 9, cz, B.s(com.skycraft.worldgen.VanillaBlocks.CHAIN));
+        c.set(cx + 3, sh + 10, cz, B.s(com.skycraft.worldgen.VanillaBlocks.LIGHTNING_ROD));
     }
 
     // ------------------------------------------------------------------ Orsinium: the Great Gate-Hammer
@@ -259,13 +259,13 @@ public final class MarqueeLandmarks {
         box(c, cx - 8, h - 5, cz - 2, cx + 8, h - 2, cz + 2, dark);
         for (int x = cx - 8; x <= cx + 8; x += 4) {
             c.set(x, h, cz, B.s(Blocks.IRON_BARS));
-            c.set(x, h + 0, cz - 3, B.s(Blocks.CHAIN));
+            c.set(x, h + 0, cz - 3, B.s(com.skycraft.worldgen.VanillaBlocks.CHAIN));
         }
         // trophies and banners on the piers
         for (int side = 0; side < 2; side++) {
             int bx = side == 0 ? pier : w - pier - 1;
             for (int y = 4; y < lintelY - 1; y += 3) {
-                c.set(side == 0 ? bx : bx, y, 0, B.s(Blocks.RED_WOOL));
+                c.set(side == 0 ? bx : bx, y, 0, B.s(com.skycraft.worldgen.VanillaBlocks.RED_WOOL));
                 Props.lantern(c, p, side == 0 ? 1 : w - 2, y + 1, 0, false);
             }
             c.set(side == 0 ? 1 : w - 2, lintelY + 5, 1, B.s(Blocks.SKELETON_SKULL));
@@ -412,7 +412,7 @@ public final class MarqueeLandmarks {
                 if (edge || k == spireH - 1) c.set(x, towerH + 1 + k, z, k > spireH - 5 ? B.s(Blocks.SNOW_BLOCK) : p.roofFull);
             }
         }
-        c.set(cx, h + 1, (tz0 + tz1) / 2, B.s(Blocks.LIGHTNING_ROD));
+        c.set(cx, h + 1, (tz0 + tz1) / 2, B.s(com.skycraft.worldgen.VanillaBlocks.LIGHTNING_ROD));
         // door and steps
         for (int y = 1; y <= 3; y++) for (int x = cx - 1; x <= cx + 1; x++) c.air(x, y, 1);
         c.entrance(cx, 1, 1, p.door, Direction.SOUTH);
@@ -462,7 +462,7 @@ public final class MarqueeLandmarks {
             for (int y = 1; y <= 7; y++) {
                 c.set(tx, y, tz, y % 3 == 0 ? B.s(Blocks.CARVED_PUMPKIN) : y == 7 ? B.s(Blocks.BONE_BLOCK) : B.s(Blocks.STRIPPED_SPRUCE_LOG));
             }
-            c.set(tx, 8, tz, B.s(Blocks.WHITE_BANNER));
+            c.set(tx, 8, tz, B.s(com.skycraft.worldgen.VanillaBlocks.WHITE_BANNER));
         }
     }
 
@@ -473,7 +473,7 @@ public final class MarqueeLandmarks {
         if (c.recording()) return;
         int cx = (s.w - 1) / 2, cz = (s.d - 1) / 2, h = Math.max(16, s.h);
         pave(c, p, s.w, s.d, h + 2);
-        BlockState gold = B.s(Blocks.GOLD_BLOCK), copper = B.s(Blocks.WAXED_COPPER_BLOCK), marble = p.cityWall;
+        BlockState gold = B.s(Blocks.GOLD_BLOCK), copper = B.s(com.skycraft.worldgen.VanillaBlocks.WAXED_COPPER_BLOCK), marble = p.cityWall;
         double R = Math.min(s.w, s.d) / 2.0 - 2;
         Landmarks.disc(c, cx, 1, cz, R - 1, marble);
         Landmarks.ring(c, cx, 2, cz, R - 1, 1.1, p.cityWall2);
@@ -581,7 +581,7 @@ public final class MarqueeLandmarks {
             c.set(cx, fh - 2 + (int) Math.round(Math.sin(a) * 3), cz + (int) Math.round(Math.cos(a) * 3), B.s(Blocks.DARK_OAK_PLANKS));
         }
         c.set(cx, fh - 2, cz, B.s(Blocks.IRON_BLOCK));
-        for (int y = 2; y < fh - 4; y++) c.set(cx, y, cz, B.s(Blocks.CHAIN));
+        for (int y = 2; y < fh - 4; y++) c.set(cx, y, cz, B.s(com.skycraft.worldgen.VanillaBlocks.CHAIN));
         c.set(cx, 1, cz, B.s(Blocks.BARREL));
         // the spoil heap and a lamp
         for (int dx = -5; dx <= 5; dx++) for (int dz = -2; dz <= 2; dz++) {
@@ -615,7 +615,7 @@ public final class MarqueeLandmarks {
             c.set(cx + (int) Math.round(Math.cos(a) * 5.4), h - 3, cz + (int) Math.round(Math.sin(a) * 5.4), p.cityWall);
         }
         Landmarks.cone(c, cx, h - 4, cz, 4, 6, p.roofFull);
-        c.set(cx, h + 3, cz, B.s(Blocks.LIGHTNING_ROD));
+        c.set(cx, h + 3, cz, B.s(com.skycraft.worldgen.VanillaBlocks.LIGHTNING_ROD));
         for (int y = 1; y < h - 6; y++) c.set(cx, y, cz + 2, B.face(B.s(Blocks.LADDER), Direction.NORTH));
         c.air(cx, 1, cz - 4);
         c.air(cx, 2, cz - 4);
@@ -625,7 +625,7 @@ public final class MarqueeLandmarks {
             if (x % 2 == 0) {
                 c.set(x, 1, cz, B.axis(B.s(Blocks.OAK_LOG), Direction.Axis.X));
             } else {
-                c.set(x, 1, cz, B.axis(B.s(Blocks.CHAIN), Direction.Axis.X));
+                c.set(x, 1, cz, B.axis(B.s(com.skycraft.worldgen.VanillaBlocks.CHAIN), Direction.Axis.X));
             }
             if (x % 6 == 2) c.set(x, 2, cz, B.s(Blocks.LANTERN));
         }
@@ -640,7 +640,7 @@ public final class MarqueeLandmarks {
         if (c.recording()) return;
         int w = s.w, d = s.d, h = Math.min(7, Math.max(5, s.h));
         String col = s.name.isEmpty() ? "red" : s.name;
-        BlockState a1 = colour(col, "wool", Blocks.RED_WOOL), a2 = B.s(Blocks.WHITE_WOOL);
+        BlockState a1 = colour(col, "wool", com.skycraft.worldgen.VanillaBlocks.RED_WOOL), a2 = B.s(com.skycraft.worldgen.VanillaBlocks.WHITE_WOOL);
         c.clearPlants(0, 1, 0, w - 1, h + 1, d - 1);
         for (int x = 0; x < w; x++) for (int z = 0; z < d; z++) {
             c.set(x, 0, z, (x + z) % 4 == 0 ? p.plaza2 : p.plaza);
@@ -703,7 +703,7 @@ public final class MarqueeLandmarks {
         int cx = (s.w - 1) / 2, cz = (s.d - 1) / 2, h = Math.max(12, s.h);
         double R = Math.min(s.w, s.d) / 2.0 - 1;
         c.clearPlants(0, 1, 0, s.w - 1, h + 1, s.d - 1);
-        BlockState glass = p.glass, rib = B.s(Blocks.WAXED_OXIDIZED_COPPER), curb = p.cityWall;
+        BlockState glass = p.glass, rib = B.s(com.skycraft.worldgen.VanillaBlocks.WAXED_OXIDIZED_COPPER), curb = p.cityWall;
         for (int dx = -(int) R; dx <= R; dx++) for (int dz = -(int) R; dz <= R; dz++) {
             double dist = Math.sqrt(dx * dx + dz * dz);
             if (dist > R + 0.3) continue;
@@ -788,7 +788,7 @@ public final class MarqueeLandmarks {
             }
         }
         c.set(cx, h + 1, cz, core);
-        c.set(cx, h + 2, cz, B.s(Blocks.LIGHTNING_ROD));
+        c.set(cx, h + 2, cz, B.s(com.skycraft.worldgen.VanillaBlocks.LIGHTNING_ROD));
     }
 
     /**
@@ -809,7 +809,7 @@ public final class MarqueeLandmarks {
         int[][] pylons = {{cx - off, cz - off}, {cx + off, cz - off}, {cx - off, cz + off}, {cx + off, cz + off}};
         for (int[] py : pylons) {
             for (int y = 1; y <= 20; y++) {
-                c.set(py[0], y, py[1], y <= 4 ? B.s(Blocks.WAXED_COPPER_BLOCK) : B.s(Blocks.CHAIN));
+                c.set(py[0], y, py[1], y <= 4 ? B.s(com.skycraft.worldgen.VanillaBlocks.WAXED_COPPER_BLOCK) : B.s(com.skycraft.worldgen.VanillaBlocks.CHAIN));
             }
         }
         // Suspended volcanic meteor (y = 14..h-2)
@@ -857,7 +857,7 @@ public final class MarqueeLandmarks {
         pave(c, p, s.w, s.d, h);
         double R = Math.min(s.w, s.d) / 2.0 - 2.0;
         BlockState dark = B.s(Blocks.POLISHED_BLACKSTONE_BRICKS);
-        BlockState brass = B.s(Blocks.WAXED_COPPER_BLOCK);
+        BlockState brass = B.s(com.skycraft.worldgen.VanillaBlocks.WAXED_COPPER_BLOCK);
         BlockState bone = B.s(Blocks.BONE_BLOCK);
         BlockState glow = B.s(Blocks.SEA_LANTERN);
         // Central stepped Dwemer-volcanic keep
@@ -884,10 +884,10 @@ public final class MarqueeLandmarks {
             }
         }
         for (int i = -off + 1; i <= off - 1; i++) {
-            c.set(cx + i, 16, cz - off, B.s(Blocks.LIGHT_BLUE_STAINED_GLASS));
-            c.set(cx + i, 16, cz + off, B.s(Blocks.LIGHT_BLUE_STAINED_GLASS));
-            c.set(cx - off, 16, cz + i, B.s(Blocks.LIGHT_BLUE_STAINED_GLASS));
-            c.set(cx + off, 16, cz + i, B.s(Blocks.LIGHT_BLUE_STAINED_GLASS));
+            c.set(cx + i, 16, cz - off, B.s(com.skycraft.worldgen.VanillaBlocks.LIGHT_BLUE_STAINED_GLASS));
+            c.set(cx + i, 16, cz + off, B.s(com.skycraft.worldgen.VanillaBlocks.LIGHT_BLUE_STAINED_GLASS));
+            c.set(cx - off, 16, cz + i, B.s(com.skycraft.worldgen.VanillaBlocks.LIGHT_BLUE_STAINED_GLASS));
+            c.set(cx + off, 16, cz + i, B.s(com.skycraft.worldgen.VanillaBlocks.LIGHT_BLUE_STAINED_GLASS));
         }
     }
 

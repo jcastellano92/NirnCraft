@@ -1,7 +1,7 @@
 {
   "type": "skycraft:add_table",
-  "conditions": [],
   "table": "skycraft:chests/skill_books",
   "prefix": "chests/",
-  "chance": 0.12
+  "chance": 0.12,
+  "priority": 14
 }

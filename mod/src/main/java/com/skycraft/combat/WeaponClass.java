@@ -3,14 +3,12 @@ package com.skycraft.combat;
 import com.skycraft.Skycraft;
 import com.skycraft.core.Skill;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
-import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.CrossbowItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.SwordItem;
 import net.minecraft.world.item.TridentItem;
 
 /** Skyrim weapon families, resolved from item tags with a vanilla-class fallback. */
@@ -37,7 +35,7 @@ public enum WeaponClass {
     }
 
     private static TagKey<Item> tag(String name) {
-        return TagKey.create(Registries.ITEM, new ResourceLocation(Skycraft.MODID, name));
+        return TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath(Skycraft.MODID, name));
     }
 
     public boolean twoHanded() {
@@ -55,8 +53,8 @@ public enum WeaponClass {
         if (stack.is(MACES)) return MACE;
         if (stack.is(WAR_AXES)) return WAR_AXE;
         if (stack.getItem() instanceof BowItem || stack.getItem() instanceof CrossbowItem) return BOW;
-        if (stack.getItem() instanceof SwordItem) return SWORD;
-        if (stack.getItem() instanceof AxeItem) return WAR_AXE;
+        if (stack.is(net.minecraft.tags.ItemTags.SWORDS)) return SWORD;
+        if (stack.is(net.minecraft.tags.ItemTags.AXES)) return WAR_AXE;
         if (stack.getItem() instanceof TridentItem) return SWORD;
         return OTHER;
     }

@@ -93,16 +93,16 @@ public final class Targeting {
         if (owner == null) owner = com.skycraft.society.Followers.getOwnerId(e);
         if (owner == null && e instanceof com.skycraft.society.entity.NpcEntity npc) owner = npc.getLeader();
         if (owner != null && owner.equals(caster.getUUID())) return true;
-        if (e instanceof TamableAnimal tame && caster.getUUID().equals(tame.getOwnerUUID())) return true;
+        if (e instanceof TamableAnimal tame && tame.getOwnerReference() != null && caster.getUUID().equals(tame.getOwnerReference().getUUID())) return true;
         if (caster.isAlliedTo(e)) return true;
         if (caster instanceof ServerPlayer sp) {
             if (e instanceof ServerPlayer other && sameParty(sp, other)) return true;
             if (owner != null) {
-                ServerPlayer ownerPlayer = sp.server.getPlayerList().getPlayer(owner);
+                ServerPlayer ownerPlayer = sp.level().getServer().getPlayerList().getPlayer(owner);
                 if (ownerPlayer != null && sameParty(sp, ownerPlayer)) return true;
             }
-            if (e instanceof TamableAnimal tame && tame.getOwnerUUID() != null) {
-                ServerPlayer ownerPlayer = sp.server.getPlayerList().getPlayer(tame.getOwnerUUID());
+            if (e instanceof TamableAnimal tame && tame.getOwnerReference() != null) {
+                ServerPlayer ownerPlayer = sp.level().getServer().getPlayerList().getPlayer(tame.getOwnerReference().getUUID());
                 if (ownerPlayer != null && sameParty(sp, ownerPlayer)) return true;
             }
         }
@@ -165,7 +165,7 @@ public final class Targeting {
     public static boolean sameParty(ServerPlayer a, ServerPlayer b) {
         if (a == b) return true;
         try {
-            return Parties.sameParty(a.server, a, b);
+            return Parties.sameParty(a.level().getServer(), a, b);
         } catch (RuntimeException e) {
             return false;
         }
@@ -177,7 +177,7 @@ public final class Targeting {
         if (isFriendly(caster, living) || living.isInvulnerable()) return false;
         if (living instanceof Player other) {
             // PvP: only when the server allows it (and teams permit); party members are friendly (above).
-            if (other.isCreative() || !caster.server.isPvpAllowed() || !caster.canHarmPlayer(other)) return false;
+            if (other.isCreative() || !caster.level().getGameRules().get(net.minecraft.world.level.gamerules.GameRules.PVP) || !caster.canHarmPlayer(other)) return false;
         }
         return true;
     }
@@ -225,8 +225,8 @@ public final class Targeting {
     /** Hurts without vanilla knockback (beams and auras shouldn't shove things around 4 times a second). */
     public static boolean hurtNoKnockback(LivingEntity target, DamageSource source, float amount) {
         Vec3 motion = target.getDeltaMovement();
-        target.invulnerableTime = 0;
-        boolean hurt = target.hurt(source, amount);
+        target.setInvulnerableTime(0);
+        boolean hurt = com.skycraft.platform.Effects.hurt(target, source, amount);
         target.setDeltaMovement(motion);
         return hurt;
     }

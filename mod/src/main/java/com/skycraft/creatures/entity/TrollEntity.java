@@ -17,7 +17,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
@@ -30,7 +30,7 @@ import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.monster.Monster;
-import net.minecraft.world.entity.npc.AbstractVillager;
+import net.minecraft.world.entity.npc.villager.AbstractVillager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
@@ -49,7 +49,7 @@ public class TrollEntity extends Monster implements AnimatedCreature, Ranked {
     public TrollEntity(EntityType<? extends TrollEntity> type, Level level) {
         super(type, level);
         this.xpReward = 20;
-        this.setMaxUpStep(1.0f);
+        this.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.STEP_HEIGHT).setBaseValue(1.0f);
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -64,9 +64,9 @@ public class TrollEntity extends Monster implements AnimatedCreature, Ranked {
     }
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        this.entityData.define(FROST, false);
+    protected void defineSynchedData(net.minecraft.network.syncher.SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(FROST, false);
     }
 
     @Override
@@ -93,10 +93,10 @@ public class TrollEntity extends Monster implements AnimatedCreature, Ranked {
 
     @Override
     @Nullable
-    public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, MobSpawnType reason,
-                                        @Nullable SpawnGroupData data, @Nullable CompoundTag tag) {
-        data = super.finalizeSpawn(level, difficulty, reason, data, tag);
-        initialize(level.getBiome(this.blockPosition()).value().coldEnoughToSnow(this.blockPosition()));
+    public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, EntitySpawnReason reason,
+                                        @Nullable SpawnGroupData data) {
+        data = super.finalizeSpawn(level, difficulty, reason, data);
+        initialize(level.getBiome(this.blockPosition()).value().coldEnoughToSnow(this.blockPosition(), level.getSeaLevel()));
         return data;
     }
 
@@ -116,10 +116,10 @@ public class TrollEntity extends Monster implements AnimatedCreature, Ranked {
     @Override
     public void aiStep() {
         super.aiStep();
-        if (this.level().isClientSide) return;
+        if (this.level().isClientSide()) return;
         if (!initialized) {
             BlockPos pos = this.blockPosition();
-            initialize(this.level().getBiome(pos).value().coldEnoughToSnow(pos));
+            initialize(this.level().getBiome(pos).value().coldEnoughToSnow(pos, this.level().getSeaLevel()));
         }
         // Troll regeneration: fast, but fire stops it.
         if (this.tickCount % 20 == 0 && this.isAlive() && this.getHealth() < this.getMaxHealth()
@@ -129,20 +129,20 @@ public class TrollEntity extends Monster implements AnimatedCreature, Ranked {
     }
 
     @Override
-    public boolean hurt(DamageSource source, float amount) {
+    public boolean hurtServer(net.minecraft.server.level.ServerLevel serverLevel263, DamageSource source, float amount) {
         if (source.is(DamageTypeTags.IS_FIRE)) {
             lastFireHurt = this.tickCount;
             amount *= 1.5f; // trolls fear fire
         }
-        return super.hurt(source, amount);
+        return super.hurtServer(serverLevel263, source, amount);
     }
 
     @Override
-    public boolean doHurtTarget(Entity target) {
-        boolean hit = super.doHurtTarget(target);
+    public boolean doHurtTarget(net.minecraft.server.level.ServerLevel serverLevel263, Entity target) {
+        boolean hit = super.doHurtTarget(serverLevel263, target);
         if (hit && target instanceof LivingEntity living) {
             living.setDeltaMovement(living.getDeltaMovement().add(0, 0.25, 0));
-            living.hurtMarked = true;
+            living.syncVelocity = true;
         }
         return hit;
     }
@@ -186,7 +186,7 @@ public class TrollEntity extends Monster implements AnimatedCreature, Ranked {
 
     @Override
     public void setTarget(@Nullable LivingEntity target) {
-        if (target != null && this.getTarget() == null && !this.level().isClientSide) {
+        if (target != null && this.getTarget() == null && !this.level().isClientSide()) {
             this.playSound(com.skycraft.audio.AudioSounds.creature("troll", "roar"), 1.5f, 1.0f);
             CreatureAnims.play(this, AnimSlot.ROAR);
         }
@@ -194,17 +194,23 @@ public class TrollEntity extends Monster implements AnimatedCreature, Ranked {
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag tag) {
-        super.addAdditionalSaveData(tag);
+    public void addAdditionalSaveData(net.minecraft.world.level.storage.ValueOutput output263) {
+        super.addAdditionalSaveData(output263);
+        net.minecraft.nbt.CompoundTag tag = new net.minecraft.nbt.CompoundTag();
+        
         tag.putBoolean("Frost", isFrost());
         tag.putBoolean("SkycraftInit", initialized);
+    
+        output263.store(tag);
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag tag) {
-        super.readAdditionalSaveData(tag);
-        setFrost(tag.getBoolean("Frost"));
-        initialized = tag.getBoolean("SkycraftInit");
+    public void readAdditionalSaveData(net.minecraft.world.level.storage.ValueInput input263) {
+        super.readAdditionalSaveData(input263);
+        net.minecraft.nbt.CompoundTag tag = com.skycraft.platform.ValueTags.read(input263 , "Frost", "SkycraftInit");
+        
+        setFrost(tag.getBooleanOr("Frost",false));
+        initialized = tag.getBooleanOr("SkycraftInit",false);
     }
 
     // ------------------------------------------------------------------ animation (rig models)
@@ -223,9 +229,10 @@ public class TrollEntity extends Monster implements AnimatedCreature, Ranked {
 
     /** Every melee swing plays an attack animation (alternating blows). */
     @Override
-    public void swing(net.minecraft.world.InteractionHand hand) {
-        super.swing(hand);
-        if (!this.level().isClientSide) CreatureAnims.play(this, this.getRandom().nextInt(3) == 0 ? AnimSlot.ATTACK2 : AnimSlot.ATTACK);
+    public boolean swing(net.minecraft.world.InteractionHand hand, net.minecraft.world.item.component.SwingAnimation animation263, boolean updateSelf263) {
+        boolean swung263 = super.swing(hand, animation263, updateSelf263);
+        if (!this.level().isClientSide()) CreatureAnims.play(this, this.getRandom().nextInt(3) == 0 ? AnimSlot.ATTACK2 : AnimSlot.ATTACK);
+        return swung263;
     }
 
     @Override

@@ -89,7 +89,10 @@ doors allowed; it does not prove a live NPC completed a schedule or door interac
 
 Foreign-region flow audits consume `geography.py refresh`, a headless Java survey of the actual map
 at128-block spacing. Its input/data digest invalidates on map changes. Raster geography stays exact;
-foreign area is explicitly sampled and procedural endless realms are outside that fixed-region audit.
+foreign area is explicitly sampled. Procedural Endless Lands are dormant under the ocean-loop policy.
+The active QA registry has 117 buckets:83 authored regions, one outer-ocean travel bucket,32 realm roles
+and jail. The outer-ocean bucket requires actual distant open-sea coordinates; a coast screenshot cannot
+stand in for it. Validate X/Z seams, diagonal crossings, boats/passengers and destination readiness separately.
 Missing/stale geography produces unavailable metrics, never an invented0.01km2 land area.
 
 

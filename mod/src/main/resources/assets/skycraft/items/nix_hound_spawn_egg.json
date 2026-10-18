@@ -1,0 +1,16 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "skycraft:item/nix_hound_spawn_egg",
+    "tints": [
+      {
+        "type": "minecraft:constant",
+        "value": 4862024
+      },
+      {
+        "type": "minecraft:constant",
+        "value": 13152416
+      }
+    ]
+  }
+}

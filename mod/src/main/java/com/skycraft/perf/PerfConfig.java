@@ -1,23 +1,23 @@
 package com.skycraft.perf;
 
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 /** Server config {@code skycraft-perf-server.toml}: the pre-generator and baked data switches. */
 public final class PerfConfig {
-    public static final ForgeConfigSpec SPEC;
-    public static final ForgeConfigSpec.BooleanValue AUTO;
-    public static final ForgeConfigSpec.BooleanValue AUTO_INTEGRATED;
-    public static final ForgeConfigSpec.IntValue AUTO_RADIUS;
-    public static final ForgeConfigSpec.BooleanValue AUTO_ROADS;
-    public static final ForgeConfigSpec.IntValue ROAD_RADIUS;
-    public static final ForgeConfigSpec.BooleanValue PAUSE_WITH_PLAYERS;
-    public static final ForgeConfigSpec.IntValue AHEAD_CHUNKS;
-    public static final ForgeConfigSpec.IntValue MAX_IN_FLIGHT;
-    public static final ForgeConfigSpec.DoubleValue MAX_TICK_MS;
-    public static final ForgeConfigSpec.BooleanValue USE_BAKED;
+    public static final ModConfigSpec SPEC;
+    public static final ModConfigSpec.BooleanValue AUTO;
+    public static final ModConfigSpec.BooleanValue AUTO_INTEGRATED;
+    public static final ModConfigSpec.IntValue AUTO_RADIUS;
+    public static final ModConfigSpec.BooleanValue AUTO_ROADS;
+    public static final ModConfigSpec.IntValue ROAD_RADIUS;
+    public static final ModConfigSpec.BooleanValue PAUSE_WITH_PLAYERS;
+    public static final ModConfigSpec.IntValue AHEAD_CHUNKS;
+    public static final ModConfigSpec.IntValue MAX_IN_FLIGHT;
+    public static final ModConfigSpec.DoubleValue MAX_TICK_MS;
+    public static final ModConfigSpec.BooleanValue USE_BAKED;
 
     static {
-        ForgeConfigSpec.Builder b = new ForgeConfigSpec.Builder();
+        ModConfigSpec.Builder b = new ModConfigSpec.Builder();
         b.comment("Background pre-generation of full chunks around spawn and along the roads (/skycraft-pregen).",
                 "It only generates ordinary chunks; Distant Horizons builds its LODs from them like from any explored chunk.")
                 .push("pregen");
@@ -50,7 +50,7 @@ public final class PerfConfig {
     private PerfConfig() {}
 
     /** Config values are only readable once the server config loaded; fall back to defaults before that. */
-    static <T> T get(ForgeConfigSpec.ConfigValue<T> v) {
+    static <T> T get(ModConfigSpec.ConfigValue<T> v) {
         try {
             return v.get();
         } catch (IllegalStateException e) {

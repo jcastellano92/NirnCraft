@@ -2,9 +2,9 @@ package com.skycraft.atmosphere.client;
 
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.blaze3d.vertex.VertexBuffer;
-import com.mojang.blaze3d.vertex.VertexFormat;
+import com.skycraft.render.client.CpuMesh;
+import com.skycraft.render.client.WorldMesh;
+import com.mojang.renderpearl.api.pipeline.PrimitiveTopology;
 
 import java.util.Random;
 
@@ -24,27 +24,35 @@ final class SkyGeometry {
     /** Galaxy plane normal in the celestial frame (the frame vanilla rotates the stars in). */
     private static final double[] GALAXY_N = normalize(0.28, 0.42, 0.86);
 
-    static VertexBuffer starsA;
-    static VertexBuffer starsB;
-    static final VertexBuffer[] starLayers = new VertexBuffer[8];
-    static VertexBuffer galaxy;
-    static VertexBuffer constellations;
-    static VertexBuffer serpent;
-    static VertexBuffer veil;
-    static final VertexBuffer[][] AURORA = new VertexBuffer[AURORA_BANDS][AURORA_KEYS];
+    static WorldMesh starsA;
+    static WorldMesh starsB;
+    static final WorldMesh[] starLayers = new WorldMesh[8];
+    static WorldMesh galaxy;
+    static WorldMesh constellations;
+    static WorldMesh serpent;
+    static WorldMesh veil;
+    static final WorldMesh[] moonPhases = new WorldMesh[16];
+    static WorldMesh halo;
+    static final WorldMesh[][] AURORA = new WorldMesh[AURORA_BANDS][AURORA_KEYS];
     private static boolean built;
+    private static long meshVertexBytes;
 
     private SkyGeometry() {}
 
     static void ensureBuilt() {
         if (built) return;
-        built = true;
+        try {
         for (int i = 0; i < starLayers.length; i++)
             starLayers[i] = upload(buildStars(new Random(0x5EC0DAL + i * 71L), 1600));
         galaxy = upload(buildGalaxy());
         constellations = upload(buildConstellations(false));
         serpent = upload(buildConstellations(true));
         veil = upload(buildVeil());
+        for (int phase = 0; phase < moonPhases.length; phase++) {
+            float u0 = (phase % 4) / 4f, v0 = (phase / 4) / 4f;
+            moonPhases[phase] = upload(buildLunarQuad(u0, v0, u0 + .25f, v0 + .25f));
+        }
+        halo = upload(buildLunarQuad(0f, 0f, 1f, 1f));
         Random r = new Random(0xA0C0BAL);
         for (int b = 0; b < AURORA_BANDS; b++) {
             AuroraBand band = new AuroraBand(r, b);
@@ -52,21 +60,67 @@ final class SkyGeometry {
                 AURORA[b][k] = upload(band.build(k));
             }
         }
+        built = true;
+        } catch (RuntimeException | Error failure) {
+            // A failed upload must not leave earlier meshes allocated on the next attempt.
+            close();
+            throw failure;
+        }
     }
 
-    private static VertexBuffer upload(BufferBuilder.RenderedBuffer rendered) {
-        VertexBuffer vb = new VertexBuffer(VertexBuffer.Usage.STATIC);
-        vb.bind();
-        vb.upload(rendered);
-        VertexBuffer.unbind();
-        return vb;
+    static void close() {
+        for(int i=0;i<starLayers.length;i++) {
+            if(starLayers[i]!=null) starLayers[i].close();
+            starLayers[i]=null;
+        }
+        for(int b=0;b<AURORA_BANDS;b++) for(int k=0;k<AURORA_KEYS;k++) {
+            if(AURORA[b][k]!=null) AURORA[b][k].close();
+            AURORA[b][k]=null;
+        }
+        for(var buffer:new WorldMesh[]{galaxy,constellations,serpent,veil}) if(buffer!=null) buffer.close();
+        galaxy=constellations=serpent=veil=null;
+        for (int i = 0; i < moonPhases.length; i++) {
+            if (moonPhases[i] != null) moonPhases[i].close();
+            moonPhases[i] = null;
+        }
+        if (halo != null) halo.close();
+        halo = null;
+        built=false;meshVertexBytes=0;
+    }
+
+    static String diagnostics() {
+        int valid=0;
+        for(var buffer:starLayers) if(buffer!=null && !buffer.isClosed()) valid++;
+        for(var band:AURORA) for(var buffer:band) if(buffer!=null && !buffer.isClosed()) valid++;
+        for(var buffer:new WorldMesh[]{galaxy,constellations,serpent,veil}) if(buffer!=null && !buffer.isClosed()) valid++;
+        return "native_sky_built="+built+" native_sky_buffers="+valid+" native_sky_vertex_bytes="+meshVertexBytes
+                +" native_sky_tex_stride="+(galaxy==null?-1:galaxy.format().getVertexSize())
+                +" native_sky_color_stride="+(veil==null?-1:veil.format().getVertexSize());
+    }
+
+    private static WorldMesh upload(CpuMesh rendered) {
+        WorldMesh mesh = new WorldMesh(rendered);
+        meshVertexBytes += mesh.vertexBytes();
+        return mesh;
+    }
+
+    /** Unit X/Z moon quad; per-body scale leaves its original y=-100 orbital plane unchanged. */
+    private static CpuMesh buildLunarQuad(float u0, float v0, float u1, float v1) {
+        try (var builder = CpuMesh.builder(PrimitiveTopology.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR)) {
+            var bb = builder.vertices();
+            bb.addVertex(-1f, -100f, 1f).setUv(u1, v1).setColor(1f, 1f, 1f, 1f);
+            bb.addVertex(1f, -100f, 1f).setUv(u0, v1).setColor(1f, 1f, 1f, 1f);
+            bb.addVertex(1f, -100f, -1f).setUv(u0, v0).setColor(1f, 1f, 1f, 1f);
+            bb.addVertex(-1f, -100f, -1f).setUv(u1, v0).setColor(1f, 1f, 1f, 1f);
+            return builder.build();
+        }
     }
 
     // ------------------------------------------------------------------ stars
 
-    private static BufferBuilder.RenderedBuffer buildStars(Random r, int count) {
-        BufferBuilder bb = Tesselator.getInstance().getBuilder();
-        bb.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+    private static CpuMesh buildStars(Random r, int count) {
+        try (var nativeBuilder = CpuMesh.builder(PrimitiveTopology.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR)) {
+        BufferBuilder bb = nativeBuilder.vertices();
         double[] a = perpendicular(GALAXY_N);
         double[] b = cross(GALAXY_N, a);
         for (int i = 0; i < count; i++) {
@@ -95,7 +149,9 @@ final class SkyGeometry {
             // the star sprite is a soft dot filling about a third of its quad: scale the quad to keep the star's size
             quad(bb, d, size * 2.4F, cr, cg, cb, alpha);
         }
-        return bb.end();
+        return nativeBuilder.build();
+    
+        }
     }
 
     private static void quad(BufferBuilder bb, double[] d, float size, float r, float g, float b, float a) {
@@ -104,11 +160,9 @@ final class SkyGeometry {
         double cx = d[0] * R, cy = d[1] * R, cz = d[2] * R;
         double[][] corners = {{-1, -1}, {1, -1}, {1, 1}, {-1, 1}};
         for (double[] c : corners) {
-            bb.vertex(cx + (u[0] * c[0] + v[0] * c[1]) * size,
-                            cy + (u[1] * c[0] + v[1] * c[1]) * size,
-                            cz + (u[2] * c[0] + v[2] * c[1]) * size)
-                    .uv((float) (c[0] + 1) * 0.5F, (float) (c[1] + 1) * 0.5F)
-                    .color(r, g, b, a).endVertex();
+            bb.addVertex((float) (cx + (u[0] * c[0] + v[0] * c[1]) * size), (float) (cy + (u[1] * c[0] + v[1] * c[1]) * size), (float) (cz + (u[2] * c[0] + v[2] * c[1]) * size))
+                    .setUv((float) (c[0] + 1) * 0.5F, (float) (c[1] + 1) * 0.5F)
+                    .setColor(r, g, b, a);
         }
     }
 
@@ -137,9 +191,9 @@ final class SkyGeometry {
     private static final float SIGN_UNIT = 1.9F;
 
     /** All signs but the Serpent, or the Serpent alone (centred on the celestial equator at angle 0). */
-    private static BufferBuilder.RenderedBuffer buildConstellations(boolean serpentOnly) {
-        BufferBuilder bb = Tesselator.getInstance().getBuilder();
-        bb.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+    private static CpuMesh buildConstellations(boolean serpentOnly) {
+        try (var nativeBuilder = CpuMesh.builder(PrimitiveTopology.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR)) {
+        BufferBuilder bb = nativeBuilder.vertices();
         for (Object[] sign : SIGNS) {
             boolean isSerpent = "serpent".equals(sign[0]);
             if (isSerpent != serpentOnly) continue;
@@ -165,7 +219,9 @@ final class SkyGeometry {
                 quad(bb, d, 2.1F, 0.55F, 0.65F, 1.0F, 0.12F); // soft glow
             }
         }
-        return bb.end();
+        return nativeBuilder.build();
+    
+        }
     }
 
     /** A thin quad along the sky sphere between two directions (trimmed so it doesn't run through the stars). */
@@ -183,7 +239,7 @@ final class SkyGeometry {
 
     private static void lineVertex(BufferBuilder bb, double[] p, double[] side, double w, float r, float g, float b, float a) {
         // the constellation lines share the star sprite's buffer: its centre texel is opaque
-        bb.vertex((p[0] + side[0] * w) * R, (p[1] + side[1] * w) * R, (p[2] + side[2] * w) * R).uv(0.5F, 0.5F).color(r, g, b, a).endVertex();
+        bb.addVertex((float) ((p[0] + side[0] * w) * R), (float) ((p[1] + side[1] * w) * R), (float) ((p[2] + side[2] * w) * R)).setUv(0.5F, 0.5F).setColor(r, g, b, a);
     }
 
     private static double[] lerp(double[] a, double[] b, double t) {
@@ -193,9 +249,9 @@ final class SkyGeometry {
     // ------------------------------------------------------------------ overcast veil
 
     /** A dome over the camera (down to 25 degrees below the horizon), white; tinted and faded at draw time. */
-    private static BufferBuilder.RenderedBuffer buildVeil() {
-        BufferBuilder bb = Tesselator.getInstance().getBuilder();
-        bb.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+    private static CpuMesh buildVeil() {
+        try (var nativeBuilder = CpuMesh.builder(PrimitiveTopology.QUADS, DefaultVertexFormat.POSITION_COLOR)) {
+        BufferBuilder bb = nativeBuilder.vertices();
         int seg = 32;
         double[] elev = {-25, -5, 8, 25, 50, 90};
         float[] alpha = {1.0F, 1.0F, 0.95F, 0.85F, 0.8F, 0.8F};
@@ -209,19 +265,21 @@ final class SkyGeometry {
                 veilVertex(bb, a1, e0, alpha[j]);
             }
         }
-        return bb.end();
+        return nativeBuilder.build();
+    
+        }
     }
 
     private static void veilVertex(BufferBuilder bb, double az, double el, float a) {
         double r = R * 0.9;
-        bb.vertex(Math.sin(az) * Math.cos(el) * r, Math.sin(el) * r, Math.cos(az) * Math.cos(el) * r).color(1.0F, 1.0F, 1.0F, a).endVertex();
+        bb.addVertex((float) (Math.sin(az) * Math.cos(el) * r), (float) (Math.sin(el) * r), (float) (Math.cos(az) * Math.cos(el) * r)).setColor(1.0F, 1.0F, 1.0F, a);
     }
 
     // ------------------------------------------------------------------ galaxy
 
-    private static BufferBuilder.RenderedBuffer buildGalaxy() {
-        BufferBuilder bb = Tesselator.getInstance().getBuilder();
-        bb.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+    private static CpuMesh buildGalaxy() {
+        try (var nativeBuilder = CpuMesh.builder(PrimitiveTopology.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR)) {
+        BufferBuilder bb = nativeBuilder.vertices();
         double[] a = perpendicular(GALAXY_N);
         double[] b = cross(GALAXY_N, a);
         int seg = 96;
@@ -239,14 +297,16 @@ final class SkyGeometry {
                     double[] d = normalize(a[0] * Math.cos(th) + b[0] * Math.sin(th) + GALAXY_N[0] * w,
                             a[1] * Math.cos(th) + b[1] * Math.sin(th) + GALAXY_N[1] * w,
                             a[2] * Math.cos(th) + b[2] * Math.sin(th) + GALAXY_N[2] * w);
-                    bb.vertex(d[0] * R, d[1] * R, d[2] * R)
-                            .uv((float) (p[0] / seg) * repeat, (float) (p[1] / rows))
-                            .color(1.0F, 1.0F, 1.0F, 1.0F)
-                            .endVertex();
+                    bb.addVertex((float) (d[0] * R), (float) (d[1] * R), (float) (d[2] * R))
+                            .setUv((float) (p[0] / seg) * repeat, (float) (p[1] / rows))
+                            .setColor(1.0F, 1.0F, 1.0F, 1.0F)
+                            ;
                 }
             }
         }
-        return bb.end();
+        return nativeBuilder.build();
+    
+        }
     }
 
     // ------------------------------------------------------------------ aurora
@@ -292,9 +352,9 @@ final class SkyGeometry {
             }
         }
 
-        BufferBuilder.RenderedBuffer build(int key) {
-            BufferBuilder bb = Tesselator.getInstance().getBuilder();
-            bb.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+        CpuMesh build(int key) {
+            try (var nativeBuilder = CpuMesh.builder(PrimitiveTopology.QUADS, DefaultVertexFormat.POSITION_COLOR)) {
+        BufferBuilder bb = nativeBuilder.vertices();
             double kp = Math.PI * 2 * key / AURORA_KEYS;
             float teal = (float) (0.10 + 0.2 * hue);
             float[][] rowColor = {
@@ -330,12 +390,14 @@ final class SkyGeometry {
                         double z = -Math.cos(az) * Math.cos(el);
                         float[] c = rowColor[p[1]];
                         float alpha = (float) (rowAlpha[p[1]] * ends * lit);
-                        bb.vertex(x * R, y * R, z * R).color(c[0], c[1], c[2], alpha).endVertex();
+                        bb.addVertex((float) (x * R), (float) (y * R), (float) (z * R)).setColor(c[0], c[1], c[2], alpha);
                     }
                 }
             }
-            return bb.end();
+            return nativeBuilder.build();
+        
         }
+    }
     }
 
     // ------------------------------------------------------------------ math

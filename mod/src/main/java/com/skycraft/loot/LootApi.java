@@ -2,7 +2,7 @@ package com.skycraft.loot;
 
 import com.skycraft.Skycraft;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
@@ -27,8 +27,8 @@ public final class LootApi {
     private LootApi() {}
 
     /** Rolls a chest-type table as if {@code player} opened a container at {@code pos} (player may be null). */
-    public static List<ItemStack> roll(ServerLevel level, ResourceLocation table, BlockPos pos, @Nullable ServerPlayer player) {
-        LootTable t = level.getServer().getLootData().getLootTable(table);
+    public static List<ItemStack> roll(ServerLevel level, Identifier table, BlockPos pos, @Nullable ServerPlayer player) {
+        LootTable t = com.skycraft.platform.LootTables.get(level, table);
         LootParams.Builder b = new LootParams.Builder(level).withParameter(LootContextParams.ORIGIN, Vec3.atCenterOf(pos));
         if (player != null) b.withParameter(LootContextParams.THIS_ENTITY, player).withLuck(player.getLuck());
         return t.getRandomItems(b.create(LootContextParamSets.CHEST));
@@ -36,6 +36,6 @@ public final class LootApi {
 
     /** A quest reward of a tier ({@code minor}, {@code standard}, {@code major}, {@code legendary}). */
     public static List<ItemStack> questReward(ServerPlayer player, String tier) {
-        return roll(player.serverLevel(), new ResourceLocation(Skycraft.MODID, "containers/reward/" + tier), player.blockPosition(), player);
+        return roll(player.level(), Identifier.fromNamespaceAndPath(Skycraft.MODID, "containers/reward/" + tier), player.blockPosition(), player);
     }
 }

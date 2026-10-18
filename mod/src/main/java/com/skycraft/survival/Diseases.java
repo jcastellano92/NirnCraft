@@ -4,15 +4,15 @@ import com.skycraft.core.Notifier;
 import com.skycraft.core.Race;
 import com.skycraft.core.SkyData;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegistryObject;
+import net.minecraft.core.registries.BuiltInRegistries;
+import java.util.function.Supplier;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,7 +38,7 @@ import java.util.Map;
  */
 public final class Diseases {
     /** Every disease, in display order. */
-    public static final List<RegistryObject<MobEffect>> ALL = List.of(
+    public static final List<Supplier<MobEffect>> ALL = List.of(
             SurvivalEffects.ATAXIA, SurvivalEffects.BONE_BREAK_FEVER, SurvivalEffects.BRAIN_ROT, SurvivalEffects.RATTLES,
             SurvivalEffects.ROCKJOINT, SurvivalEffects.WITBANE, SurvivalEffects.SWAMP_ROT, SurvivalEffects.COLLYWOBBLES,
             SurvivalEffects.GREENSPORE, SurvivalEffects.DROOPS);
@@ -47,7 +47,7 @@ public final class Diseases {
      * Which diseases a creature can pass on, by entity type id (namespace-wide entries end with ":*"). Skyrim's wolves
      * are vanilla wolves; cave/snow bears, snowy sabre cats and frost trolls are variants of one entity type each.
      */
-    private static final Map<String, List<RegistryObject<MobEffect>>> CARRIERS = Map.ofEntries(
+    private static final Map<String, List<Supplier<MobEffect>>> CARRIERS = Map.ofEntries(
             Map.entry("skycraft:skeever", List.of(SurvivalEffects.ATAXIA, SurvivalEffects.RATTLES, SurvivalEffects.WITBANE)),
             Map.entry("minecraft:wolf", List.of(SurvivalEffects.ROCKJOINT)),
             Map.entry("skycraft:bear", List.of(SurvivalEffects.ROCKJOINT, SurvivalEffects.BONE_BREAK_FEVER)),
@@ -67,35 +67,35 @@ public final class Diseases {
     private Diseases() {}
 
     public static boolean isDisease(MobEffect effect) {
-        for (RegistryObject<MobEffect> d : ALL) {
-            if (d.isPresent() && d.get() == effect) return true;
+        for (Supplier<MobEffect> d : ALL) {
+            if (d.get() == effect) return true;
         }
-        if (com.skycraft.curse.CurseRegistry.SANGUINARE.isPresent() && com.skycraft.curse.CurseRegistry.SANGUINARE.get() == effect) return true;
-        if (com.skycraft.curse.CurseRegistry.SANIES_LUPINUS.isPresent() && com.skycraft.curse.CurseRegistry.SANIES_LUPINUS.get() == effect) return true;
+        if (com.skycraft.curse.CurseRegistry.SANGUINARE.get() == effect) return true;
+        if (com.skycraft.curse.CurseRegistry.SANIES_LUPINUS.get() == effect) return true;
         return false;
     }
 
     /** The diseases the entity currently suffers from. */
     public static List<MobEffect> active(LivingEntity entity) {
         List<MobEffect> out = new ArrayList<>();
-        for (RegistryObject<MobEffect> d : ALL) {
-            if (entity.hasEffect(d.get())) out.add(d.get());
+        for (Supplier<MobEffect> d : ALL) {
+            if (entity.hasEffect(com.skycraft.platform.Effects.holder(d.get()))) out.add(d.get());
         }
-        if (com.skycraft.curse.CurseRegistry.SANGUINARE.isPresent() && entity.hasEffect(com.skycraft.curse.CurseRegistry.SANGUINARE.get())) {
+        if (entity.hasEffect(com.skycraft.platform.Effects.holder(com.skycraft.curse.CurseRegistry.SANGUINARE.get()))) {
             out.add(com.skycraft.curse.CurseRegistry.SANGUINARE.get());
         }
-        if (com.skycraft.curse.CurseRegistry.SANIES_LUPINUS.isPresent() && entity.hasEffect(com.skycraft.curse.CurseRegistry.SANIES_LUPINUS.get())) {
+        if (entity.hasEffect(com.skycraft.platform.Effects.holder(com.skycraft.curse.CurseRegistry.SANIES_LUPINUS.get()))) {
             out.add(com.skycraft.curse.CurseRegistry.SANIES_LUPINUS.get());
         }
         return out;
     }
 
     public static boolean hasAny(LivingEntity entity) {
-        for (RegistryObject<MobEffect> d : ALL) {
-            if (entity.hasEffect(d.get())) return true;
+        for (Supplier<MobEffect> d : ALL) {
+            if (entity.hasEffect(com.skycraft.platform.Effects.holder(d.get()))) return true;
         }
-        if (com.skycraft.curse.CurseRegistry.SANGUINARE.isPresent() && entity.hasEffect(com.skycraft.curse.CurseRegistry.SANGUINARE.get())) return true;
-        if (com.skycraft.curse.CurseRegistry.SANIES_LUPINUS.isPresent() && entity.hasEffect(com.skycraft.curse.CurseRegistry.SANIES_LUPINUS.get())) return true;
+        if (entity.hasEffect(com.skycraft.platform.Effects.holder(com.skycraft.curse.CurseRegistry.SANGUINARE.get()))) return true;
+        if (entity.hasEffect(com.skycraft.platform.Effects.holder(com.skycraft.curse.CurseRegistry.SANIES_LUPINUS.get()))) return true;
         if (entity instanceof Player p && (com.skycraft.curse.Curses.hasSanguinare(p) || com.skycraft.curse.Curses.hasSaniesLupinus(p))) return true;
         return false;
     }
@@ -106,8 +106,8 @@ public final class Diseases {
      */
     public static int cureAll(LivingEntity entity) {
         int cured = 0;
-        for (RegistryObject<MobEffect> d : ALL) {
-            if (entity.removeEffect(d.get())) cured++;
+        for (Supplier<MobEffect> d : ALL) {
+            if (entity.removeEffect(com.skycraft.platform.Effects.holder(d.get()))) cured++;
         }
         // Sanguinare Vampiris and Sanies Lupinus (curse module) are cured like any disease until they turn their carrier
         if (com.skycraft.curse.Curses.cureSanguinare(entity)) cured++;
@@ -121,12 +121,12 @@ public final class Diseases {
 
     /** An infinite, particle-less disease instance. */
     public static MobEffectInstance instance(MobEffect disease) {
-        return new MobEffectInstance(disease, MobEffectInstance.INFINITE_DURATION, 0, false, false, true);
+        return new MobEffectInstance(com.skycraft.platform.Effects.holder(disease), MobEffectInstance.INFINITE_DURATION, 0, false, false, true);
     }
 
     /** Gives the entity a disease. Returns false if it already had it. */
     public static boolean infect(LivingEntity entity, MobEffect disease) {
-        if (entity.hasEffect(disease)) return false;
+        if (entity.hasEffect(com.skycraft.platform.Effects.holder(disease))) return false;
         // vampires and werewolves never catch diseases (curse module)
         if (com.skycraft.curse.Curses.immuneToDisease(entity)) return false;
         entity.addEffect(instance(disease));
@@ -140,10 +140,10 @@ public final class Diseases {
     }
 
     /** The diseases an attacker can carry (empty if none). */
-    public static List<RegistryObject<MobEffect>> carriedBy(Entity attacker) {
-        ResourceLocation id = ForgeRegistries.ENTITY_TYPES.getKey(attacker.getType());
+    public static List<Supplier<MobEffect>> carriedBy(Entity attacker) {
+        Identifier id = BuiltInRegistries.ENTITY_TYPE.getKey(attacker.getType());
         if (id == null) return List.of();
-        List<RegistryObject<MobEffect>> list = CARRIERS.get(id.toString());
+        List<Supplier<MobEffect>> list = CARRIERS.get(id.toString());
         if (list == null) list = CARRIERS.get(id.getNamespace() + ":*");
         return list == null ? List.of() : list;
     }

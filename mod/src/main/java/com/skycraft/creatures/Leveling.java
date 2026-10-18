@@ -16,9 +16,9 @@ import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.event.entity.EntityJoinLevelEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import com.skycraft.tamriel.Place;
 import com.skycraft.tamriel.PlaceType;
@@ -27,7 +27,7 @@ import com.skycraft.tamriel.Region;
 import com.skycraft.tamriel.Regions;
 import com.skycraft.tamriel.TamrielMap;
 import net.minecraft.tags.BiomeTags;
-import net.minecraftforge.common.Tags;
+import net.neoforged.neoforge.common.Tags;
 
 import java.util.UUID;
 
@@ -36,12 +36,12 @@ import java.util.UUID;
  * joins the world (persistent data {@code skycraft_level}), with more health (+6%/level, max +300%) and damage
  * (+4%/level, max +200%). Creatures of this module also get a rank name ("Bandit Thug", "Draugr Wight").
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class Leveling {
     /** Persistent-data key holding a creature's level (other modules may read it). */
     public static final String LEVEL_KEY = "skycraft_level";
-    private static final UUID HEALTH_MOD = UUID.fromString("5b0c2a4e-1f6d-4c1e-9b8e-3a5d1c7e2f01");
-    private static final UUID DAMAGE_MOD = UUID.fromString("5b0c2a4e-1f6d-4c1e-9b8e-3a5d1c7e2f02");
+    private static final net.minecraft.resources.Identifier HEALTH_MOD = net.minecraft.resources.Identifier.fromNamespaceAndPath("skycraft", "modifier_5b0c2a4e-1f6d-4c1e-9b8e-3a5d1c7e2f01");
+    private static final net.minecraft.resources.Identifier DAMAGE_MOD = net.minecraft.resources.Identifier.fromNamespaceAndPath("skycraft", "modifier_5b0c2a4e-1f6d-4c1e-9b8e-3a5d1c7e2f02");
 
     private Leveling() {}
 
@@ -61,7 +61,7 @@ public final class Leveling {
         double t;
         if (level.dimension() != net.minecraft.world.level.Level.OVERWORLD) {
             // realms: deeper in (farther from their entry point) is deadlier
-            net.minecraft.core.BlockPos spawn = level.getSharedSpawnPos();
+            net.minecraft.core.BlockPos spawn = level.getRespawnData().pos();
             double dx = pos.getX() - spawn.getX();
             double dz = pos.getZ() - spawn.getZ();
             t = Math.sqrt(dx * dx + dz * dz) / (BAND_REACH * 1.5);
@@ -104,7 +104,7 @@ public final class Leveling {
 
     /** The creature's level, or 0 if it isn't leveled. */
     public static int levelOf(Entity entity) {
-        return entity.getPersistentData().getInt(LEVEL_KEY);
+        return entity.getPersistentData().getIntOr(LEVEL_KEY, 0);
     }
 
     /**
@@ -125,12 +125,12 @@ public final class Leveling {
 
     @SubscribeEvent
     public static void onJoin(EntityJoinLevelEvent event) {
-        if (event.getLevel().isClientSide || !(event.getEntity() instanceof Mob mob) || !(mob instanceof Enemy)) return;
+        if (event.getLevel().isClientSide() || !(event.getEntity() instanceof Mob mob) || !(mob instanceof Enemy)) return;
         CompoundTag data = mob.getPersistentData();
         if (data.contains(LEVEL_KEY)) return;
         // Player summons (conjured zombies, atronachs, dremora) and charmed allies keep the stats their spell gave them.
         if (Summons.isCompanion(mob)) return;
-        if (mob.getType().is(CombatHandler.BOSSES) || mob instanceof EnderDragon || mob instanceof WitherBoss) return;
+        if (mob.getType().builtInRegistryHolder().is(CombatHandler.BOSSES) || mob instanceof EnderDragon || mob instanceof WitherBoss) return;
         if (!CreaturesConfig.LEVELED_ENEMIES.get()) return;
 
         Player nearest = event.getLevel().getNearestPlayer(mob, 128);
@@ -159,9 +159,9 @@ public final class Leveling {
         if (mob instanceof Ranked ranked) ranked.onLevelApplied(level);
     }
 
-    private static void modify(AttributeInstance attribute, UUID id, String name, double amount) {
+    private static void modify(AttributeInstance attribute, net.minecraft.resources.Identifier id, String name, double amount) {
         if (attribute == null) return;
         if (attribute.getModifier(id) != null) attribute.removeModifier(id);
-        if (amount > 0) attribute.addPermanentModifier(new AttributeModifier(id, name, amount, AttributeModifier.Operation.MULTIPLY_BASE));
+        if (amount > 0) attribute.addPermanentModifier(new AttributeModifier(id, amount, AttributeModifier.Operation.ADD_MULTIPLIED_BASE));
     }
 }

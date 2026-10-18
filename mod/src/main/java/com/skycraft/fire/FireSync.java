@@ -4,12 +4,12 @@ import com.skycraft.Skycraft;
 import com.skycraft.network.SkyNetwork;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.event.server.ServerStoppingEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.LogicalSide;
-import net.minecraftforge.fml.common.Mod;
+
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.server.ServerStoppingEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.LogicalSide;
+import net.neoforged.fml.common.Mod;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -24,7 +24,7 @@ import java.util.UUID;
  * nearby sites would differ. At most one packet per player every few seconds; the list is capped at 400 sites
  * (nearest first), a few KB.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class FireSync {
     private static final int MAX_SITES = 400;
     private static final int MOVE_RESEND = 160;
@@ -62,8 +62,8 @@ public final class FireSync {
     }
 
     @SubscribeEvent
-    public static void onLevelTick(TickEvent.LevelTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || event.side != LogicalSide.SERVER || !(event.level instanceof ServerLevel level)) return;
+    public static void onLevelTick(net.neoforged.neoforge.event.tick.LevelTickEvent.Post event) {
+        if (!(event instanceof net.neoforged.neoforge.event.tick.LevelTickEvent.Post) || !(event.getLevel() instanceof ServerLevel level)) return;
         long t = level.getGameTime();
         if (t % 20 != 7) return;
         try {
@@ -79,7 +79,7 @@ public final class FireSync {
 
     /** Sends the list now when it changed (or when {@code force}). */
     public static void send(ServerPlayer p, ServerLevel level, FireSites.Data data, boolean force) {
-        String dim = level.dimension().location().toString();
+        String dim = level.dimension().identifier().toString();
         Sent last = SENT.get(p.getUUID());
         int px = p.getBlockX(), pz = p.getBlockZ();
         boolean moved = last == null || Math.abs(px - last.x) > MOVE_RESEND || Math.abs(pz - last.z) > MOVE_RESEND;
@@ -102,7 +102,7 @@ public final class FireSync {
             }));
             near = new ArrayList<>(near.subList(0, MAX_SITES));
         }
-        SkyNetwork.sendToPlayer(p, new FirePackets.SyncSites(level.dimension().location(), near));
+        SkyNetwork.sendToPlayer(p, new FirePackets.SyncSites(level.dimension().identifier(), near));
         SENT.put(p.getUUID(), new Sent(data.version(), px, pz, dim));
     }
 }

@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:random_selector",
+  "features": [
+    {
+      "feature": "skycraft:biome/huge_brown_mushroom_any",
+      "chance": 0.5
+    }
+  ],
+  "default": "skycraft:biome/huge_red_mushroom_any"
+}

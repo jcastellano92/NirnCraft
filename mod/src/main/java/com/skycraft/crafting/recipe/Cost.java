@@ -25,7 +25,7 @@ public record Cost(Predicate<ItemStack> test, Supplier<ItemStack> display, int c
     }
 
     public static Cost tag(TagKey<Item> tag, Supplier<? extends ItemLike> fallback, int count) {
-        return new Cost(stack -> stack.is(tag), () -> BuiltInRegistries.ITEM.getTag(tag)
+        return new Cost(stack -> stack.is(tag), () -> BuiltInRegistries.ITEM.get(tag)
                 .flatMap(set -> set.stream().findFirst())
                 .map(holder -> new ItemStack(holder.value()))
                 .orElseGet(() -> new ItemStack(fallback.get())), count);
@@ -33,8 +33,7 @@ public record Cost(Predicate<ItemStack> test, Supplier<ItemStack> display, int c
 
     public static Cost ingredient(Ingredient ingredient, int count) {
         return new Cost(ingredient, () -> {
-            ItemStack[] items = ingredient.getItems();
-            return items.length == 0 ? ItemStack.EMPTY : items[0].copy();
+            return ingredient.items().findFirst().map(ItemStack::new).orElse(ItemStack.EMPTY);
         }, count);
     }
 

@@ -14,7 +14,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -25,7 +25,14 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.tags.EnchantmentTags;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.item.enchantment.ItemEnchantments;
+import com.skycraft.platform.EnchantmentsAccess;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -38,7 +45,7 @@ import java.util.Set;
 /**
  * Skyrim enchanting at the Arcane Enchanter: disenchanting destroys an item and teaches its enchantments; enchanting
  * binds a known enchantment into an unenchanted item, powered by a filled soul gem. Known enchantments are stored in
- * {@code data.module("arcane").getCompound("known_enchants")} (enchantment id -> 1). Items enchanted here carry the
+ * {@code data.module("arcane").getCompoundOrEmpty("known_enchants")} (enchantment id -> 1). Items enchanted here carry the
  * int NBT {@code skycraft_enchants} (number of enchantments added), which the Extra Effect perk uses.
  *
  * <p>Calculation methods are shared by the client screen (preview) and the server (authoritative).</p>
@@ -53,46 +60,50 @@ public final class Enchanting {
 
     @Nullable
     public static String id(Enchantment ench) {
-        ResourceLocation key = ForgeRegistries.ENCHANTMENTS.getKey(ench);
+        Identifier key = EnchantmentsAccess.id(ench);
         return key == null ? null : key.toString();
     }
 
     public static boolean knows(Player player, Enchantment ench) {
         String id = id(ench);
-        return id != null && SkyData.get(player).module(ArcaneModule.DATA).getCompound(KNOWN).contains(id);
+        return id != null && SkyData.get(player).module(ArcaneModule.DATA).getCompoundOrEmpty(KNOWN).contains(id);
     }
 
     /** All known enchantments, in registry order. */
     public static List<Enchantment> known(Player player) {
-        CompoundTag tag = SkyData.get(player).module(ArcaneModule.DATA).getCompound(KNOWN);
+        CompoundTag tag = SkyData.get(player).module(ArcaneModule.DATA).getCompoundOrEmpty(KNOWN);
         List<Enchantment> out = new ArrayList<>();
-        for (Map.Entry<ResourceLocation, Enchantment> e : sortedEnchantments()) {
+        for (Map.Entry<Identifier, Enchantment> e : sortedEnchantments(player)) {
             if (tag.contains(e.getKey().toString())) out.add(e.getValue());
         }
         return out;
     }
 
-    /** The enchantment registry sorted by id, built once (the registry is frozen after loading; the screen asks every frame). */
-    private static List<Map.Entry<ResourceLocation, Enchantment>> sortedEnchantments() {
-        List<Map.Entry<ResourceLocation, Enchantment>> cached = sortedEnchantments;
-        if (cached != null) return cached;
-        List<Map.Entry<ResourceLocation, Enchantment>> list = new ArrayList<>();
-        for (Map.Entry<ResourceKey<Enchantment>, Enchantment> e : ForgeRegistries.ENCHANTMENTS.getEntries()) {
-            list.add(Map.entry(e.getKey().location(), e.getValue()));
-        }
-        list.sort((a, b) -> a.getKey().toString().compareTo(b.getKey().toString()));
-        sortedEnchantments = cached = List.copyOf(list);
-        return cached;
+    /** Cache only the current registry snapshot; reload and level-unload events discard it. */
+    private static synchronized List<Map.Entry<Identifier, Enchantment>> sortedEnchantments(Player player) {
+        var registry = player.registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
+        if (registry == sortedRegistry && sortedEnchantments != null) return sortedEnchantments;
+        List<Map.Entry<Identifier, Enchantment>> list = new ArrayList<>();
+        registry.listElements().forEach(entry -> list.add(Map.entry(entry.key().identifier(), entry.value())));
+        list.sort(Map.Entry.comparingByKey(java.util.Comparator.comparing(Identifier::toString)));
+        sortedRegistry = registry;
+        return sortedEnchantments = List.copyOf(list);
     }
 
-    private static volatile List<Map.Entry<ResourceLocation, Enchantment>> sortedEnchantments;
+    private static HolderLookup.RegistryLookup<Enchantment> sortedRegistry;
+    private static List<Map.Entry<Identifier, Enchantment>> sortedEnchantments;
+
+    public static synchronized void clearRegistryCache() {
+        sortedRegistry = null;
+        sortedEnchantments = null;
+    }
 
     private static void learn(ServerPlayer player, Enchantment ench) {
         String id = id(ench);
         if (id == null) return;
         PlayerData data = SkyData.get(player);
         CompoundTag module = data.module(ArcaneModule.DATA);
-        CompoundTag known = module.getCompound(KNOWN);
+        CompoundTag known = module.getCompoundOrEmpty(KNOWN);
         known.putInt(id, 1);
         module.put(KNOWN, known);
         data.markDirty();
@@ -104,8 +115,9 @@ public final class Enchanting {
     public static List<Enchantment> unknownEnchantments(Player player, ItemStack stack) {
         List<Enchantment> out = new ArrayList<>();
         if (stack.isEmpty()) return out;
-        for (Enchantment ench : EnchantmentHelper.getEnchantments(stack).keySet()) {
-            if (!ench.isCurse() && !knows(player, ench)) out.add(ench);
+        for (Holder<Enchantment> holder : EnchantmentHelper.getEnchantmentsForCrafting(stack).keySet()) {
+            Enchantment ench = holder.value();
+            if (!holder.is(EnchantmentTags.CURSE) && !knows(player, ench)) out.add(ench);
         }
         return out;
     }
@@ -126,13 +138,13 @@ public final class Enchanting {
             Notifier.message(player, Component.translatable("message.skycraft.arcane.nothing_to_learn"));
             return;
         }
-        Map<Enchantment, Integer> all = EnchantmentHelper.getEnchantments(stack);
+        ItemEnchantments all = EnchantmentHelper.getEnchantmentsForCrafting(stack);
         float use = 0.2f;
         for (Enchantment ench : learnable) {
             learn(player, ench);
-            int weight = ench.getRarity().getWeight();
-            use += 0.1f * all.getOrDefault(ench, 1) * (1f + (10 - weight) / 10f);
-            Notifier.message(player, Component.translatable("message.skycraft.arcane.learned_enchantment", Component.translatable(ench.getDescriptionId())));
+            int weight = ench.getWeight();
+            use += 0.1f * all.getLevel(EnchantmentsAccess.holder(ench, player.registryAccess())) * (1f + (10 - weight) / 10f);
+            Notifier.message(player, Component.translatable("message.skycraft.arcane.learned_enchantment", ench.description()));
         }
         Component name = stack.getHoverName();
         stack.shrink(1);
@@ -150,24 +162,25 @@ public final class Enchanting {
         if (stack.isEmpty() || stack.is(Items.BOOK) || stack.is(Items.ENCHANTED_BOOK)) return false;
         if (com.skycraft.economy.ItemCategory.isJewelry(stack)) {
             if (!stack.isEnchanted()) return true;
-            CompoundTag tag = stack.getTag();
-            return tag != null && tag.getInt(MARK) == 1 && EnchantmentHelper.getEnchantments(stack).size() == 1
+            CompoundTag tag = com.skycraft.inventory.ItemData.custom(stack);
+            return tag != null && tag.getIntOr(MARK, 0) == 1 && EnchantmentHelper.getEnchantmentsForCrafting(stack).size() == 1
                     && Perks.has(player, "enchanting.extra_effect");
         }
         if (stack.isEnchantable()) return true;
-        if (!stack.isDamageableItem() && !stack.getItem().isEnchantable(stack)) return false;
-        CompoundTag tag = stack.getTag();
-        return tag != null && tag.getInt(MARK) == 1 && EnchantmentHelper.getEnchantments(stack).size() == 1
+        if (!stack.isDamageableItem() && !stack.has(DataComponents.ENCHANTABLE)) return false;
+        CompoundTag tag = com.skycraft.inventory.ItemData.custom(stack);
+        return tag != null && tag.getIntOr(MARK, 0) == 1 && EnchantmentHelper.getEnchantmentsForCrafting(stack).size() == 1
                 && Perks.has(player, "enchanting.extra_effect");
     }
 
     /** Whether the enchantment can be bound into the item (known, applicable and compatible). */
     public static boolean canApply(Player player, ItemStack stack, Enchantment ench) {
-        if (ench.isCurse() || !knows(player, ench)) return false;
+        Holder<Enchantment> selected = EnchantmentsAccess.holder(ench, player.registryAccess());
+        if (selected.is(EnchantmentTags.CURSE) || !knows(player, ench)) return false;
         if (!fits(stack, ench)) return false;
-        Set<Enchantment> existing = EnchantmentHelper.getEnchantments(stack).keySet();
-        for (Enchantment other : existing) {
-            if (other == ench || !other.isCompatibleWith(ench)) return false;
+        Set<Holder<Enchantment>> existing = EnchantmentHelper.getEnchantmentsForCrafting(stack).keySet();
+        for (Holder<Enchantment> other : existing) {
+            if (other.equals(selected) || !Enchantment.areCompatible(other, selected)) return false;
         }
         return true;
     }
@@ -181,24 +194,19 @@ public final class Enchanting {
     public static boolean fits(ItemStack stack, Enchantment ench) {
         if (ench.canEnchant(stack) || isJewelryEnchant(stack, ench)) return true;
         if (stack.getItem() instanceof net.minecraft.world.item.ShieldItem) {
-            var cat = ench.category;
-            return cat == net.minecraft.world.item.enchantment.EnchantmentCategory.ARMOR
-                    || cat == net.minecraft.world.item.enchantment.EnchantmentCategory.ARMOR_CHEST
-                    || cat == net.minecraft.world.item.enchantment.EnchantmentCategory.WEARABLE;
+            return targetsArmor(ench, EquipmentSlot.CHEST);
         }
         return false;
     }
 
     private static boolean isJewelryEnchant(ItemStack stack, Enchantment ench) {
         if (!com.skycraft.economy.ItemCategory.isJewelry(stack)) return false;
-        var cat = ench.category;
-        return cat == net.minecraft.world.item.enchantment.EnchantmentCategory.ARMOR
-                || cat == net.minecraft.world.item.enchantment.EnchantmentCategory.ARMOR_HEAD
-                || cat == net.minecraft.world.item.enchantment.EnchantmentCategory.ARMOR_CHEST
-                || cat == net.minecraft.world.item.enchantment.EnchantmentCategory.ARMOR_LEGS
-                || cat == net.minecraft.world.item.enchantment.EnchantmentCategory.ARMOR_FEET
-                || cat == net.minecraft.world.item.enchantment.EnchantmentCategory.WEARABLE
-                || cat == net.minecraft.world.item.enchantment.EnchantmentCategory.VANISHABLE;
+        return targetsArmor(ench, EquipmentSlot.HEAD) || targetsArmor(ench, EquipmentSlot.CHEST)
+                || targetsArmor(ench, EquipmentSlot.LEGS) || targetsArmor(ench, EquipmentSlot.FEET);
+    }
+
+    private static boolean targetsArmor(Enchantment ench, EquipmentSlot slot) {
+        return ench.definition().slots().stream().anyMatch(group -> group.test(slot));
     }
 
     public static List<Enchantment> applicable(Player player, ItemStack stack) {
@@ -283,8 +291,8 @@ public final class Enchanting {
         itemSlot = resolved[0];
         gemSlot = resolved[1];
         if (itemSlot < 0 || itemSlot >= inv.getContainerSize() || gemSlot < 0 || gemSlot >= inv.getContainerSize() || itemSlot == gemSlot) return;
-        ResourceLocation rl = ResourceLocation.tryParse(enchantId);
-        Enchantment ench = rl == null ? null : ForgeRegistries.ENCHANTMENTS.getValue(rl);
+        Identifier rl = Identifier.tryParse(enchantId);
+        Enchantment ench = rl == null ? null : EnchantmentsAccess.lookup(rl, player.registryAccess());
         ItemStack stack = inv.getItem(itemSlot);
         ItemStack gem = inv.getItem(gemSlot);
         if (ench == null || !(gem.getItem() instanceof SoulGemItem)) return;
@@ -305,11 +313,11 @@ public final class Enchanting {
             target = stack.split(1);
             com.skycraft.loot.affix.ItemAffixes.copyAffixes(stack, target);
         }
-        Map<Enchantment, Integer> map = new LinkedHashMap<>(EnchantmentHelper.getEnchantments(target));
-        map.put(ench, level);
-        EnchantmentHelper.setEnchantments(map, target);
-        CompoundTag tag = target.getOrCreateTag();
-        tag.putInt(MARK, tag.getInt(MARK) + 1);
+        Holder<Enchantment> holder = EnchantmentsAccess.holder(ench, player.registryAccess());
+        EnchantmentHelper.updateEnchantments(target, mutable -> mutable.set(holder, level));
+        CompoundTag tag = com.skycraft.inventory.ItemData.customOrEmpty(target);
+        tag.putInt(MARK, tag.getIntOr(MARK, 0) + 1);
+        com.skycraft.inventory.ItemData.setCustom(target, tag);
         com.skycraft.loot.affix.ItemAffixes.onEnchant(target, ench, level, soul * 10);
         if (split) com.skycraft.inventory.Pack.giveOrDrop(player, target);
 
@@ -320,6 +328,6 @@ public final class Enchanting {
         player.level().playSound(null, pos, SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.BLOCKS, 0.8f, 1f);
         Progression.addSkillXp(player, Skill.ENCHANTING, enchantXp(soul, level));
         SkyData.get(player).addStat("items_enchanted", 1);
-        Notifier.message(player, Component.translatable("message.skycraft.arcane.enchanted", target.getHoverName(), ench.getFullname(level)));
+        Notifier.message(player, Component.translatable("message.skycraft.arcane.enchanted", target.getHoverName(), Enchantment.getFullname(holder, level)));
     }
 }

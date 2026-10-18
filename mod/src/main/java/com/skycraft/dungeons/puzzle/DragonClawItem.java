@@ -20,10 +20,10 @@ public class DragonClawItem extends Item {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> lines, TooltipFlag flag) {
-        lines.add(Component.translatable("item.skycraft.dragon_claw.palm",
+    public void appendHoverText(ItemStack stack, Item.TooltipContext context, net.minecraft.world.item.component.TooltipDisplay display, java.util.function.Consumer<Component> lines, TooltipFlag flag) {
+        lines.accept(Component.translatable("item.skycraft.dragon_claw.palm",
                 claw.symbol(0).displayName(), claw.symbol(1).displayName(), claw.symbol(2).displayName())
                 .withStyle(ChatFormatting.GRAY));
-        lines.add(Component.translatable("item.skycraft.dragon_claw.hint").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
+        lines.accept(Component.translatable("item.skycraft.dragon_claw.hint").withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
     }
 }

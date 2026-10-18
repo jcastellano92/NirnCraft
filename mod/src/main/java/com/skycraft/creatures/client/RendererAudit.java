@@ -6,11 +6,11 @@ import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.NoopRenderer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +21,7 @@ import java.util.List;
  * ("Entity types without a visible renderer: ...") instead of leaving it to a playtest. Intentionally invisible
  * projectiles are expected in the list.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
 public final class RendererAudit {
     private static boolean done;
 
@@ -35,14 +35,14 @@ public final class RendererAudit {
         if (mc.level == null) return;
         List<String> missing = new ArrayList<>();
         List<String> noop = new ArrayList<>();
-        for (EntityType<?> type : ForgeRegistries.ENTITY_TYPES) {
-            var key = ForgeRegistries.ENTITY_TYPES.getKey(type);
+        for (EntityType<?> type : BuiltInRegistries.ENTITY_TYPE) {
+            var key = BuiltInRegistries.ENTITY_TYPE.getKey(type);
             if (key == null || !Skycraft.MODID.equals(key.getNamespace())) continue;
             Entity probe = null;
             try {
-                probe = type.create(mc.level);
+                probe = type.create(mc.level,net.minecraft.world.entity.EntitySpawnReason.LOAD);
                 if (probe == null) continue;
-                EntityRenderer<? super Entity> r = mc.getEntityRenderDispatcher().getRenderer(probe);
+                EntityRenderer<? super Entity,?> r = mc.getEntityRenderDispatcher().getRenderer(probe);
                 if (r == null) missing.add(key.getPath());
                 else if (r instanceof NoopRenderer) noop.add(key.getPath());
             } catch (Throwable t) {

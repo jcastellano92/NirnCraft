@@ -16,8 +16,7 @@ import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.MobSpawnType;
-import net.minecraft.world.entity.MobType;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -29,7 +28,7 @@ import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.monster.Monster;
-import net.minecraft.world.entity.npc.AbstractVillager;
+import net.minecraft.world.entity.npc.villager.AbstractVillager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
@@ -59,9 +58,9 @@ public class GargoyleEntity extends CurseMonster {
     }
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        this.entityData.define(DORMANT, false);
+    protected void defineSynchedData(net.minecraft.network.syncher.SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(DORMANT, false);
     }
 
     public boolean isDormant() {
@@ -83,17 +82,17 @@ public class GargoyleEntity extends CurseMonster {
         this.targetSelector.addGoal(1, new HurtByTargetGoal(this));
         this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, true));
         this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, NpcEntity.class, 10, true, false,
-                e -> e instanceof NpcEntity npc && npc.role() != com.skycraft.society.NpcRole.VAMPIRE));
+                (e, targetLevel263) -> e instanceof NpcEntity npc && npc.role() != com.skycraft.society.NpcRole.VAMPIRE));
         this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, AbstractVillager.class, true));
     }
 
     @Override
     @Nullable
-    public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, MobSpawnType reason,
-                                        @Nullable SpawnGroupData data, @Nullable CompoundTag tag) {
-        data = super.finalizeSpawn(level, difficulty, reason, data, tag);
+    public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, EntitySpawnReason reason,
+                                        @Nullable SpawnGroupData data) {
+        data = super.finalizeSpawn(level, difficulty, reason, data);
         // the guardians of a lair wait as statues
-        if (reason == MobSpawnType.STRUCTURE || reason == MobSpawnType.CHUNK_GENERATION) {
+        if (reason == EntitySpawnReason.STRUCTURE || reason == EntitySpawnReason.CHUNK_GENERATION) {
             setDormant(true);
             this.setPersistenceRequired();
         }
@@ -103,7 +102,7 @@ public class GargoyleEntity extends CurseMonster {
     @Override
     public void tick() {
         super.tick();
-        if (this.level().isClientSide || !isDormant() || this.tickCount % 10 != 0) return;
+        if (this.level().isClientSide() || !isDormant() || this.tickCount % 10 != 0) return;
         Player near = this.level().getNearestPlayer(this, 7);
         if (near != null && !near.isCreative() && !near.isSpectator() && !Curses.isVampire(near)) awaken(near);
     }
@@ -121,24 +120,24 @@ public class GargoyleEntity extends CurseMonster {
     }
 
     @Override
-    public boolean hurt(DamageSource source, float amount) {
-        if (isDormant() && !this.level().isClientSide && source.getEntity() != null) awaken(source.getEntity());
+    public boolean hurtServer(net.minecraft.server.level.ServerLevel serverLevel263, DamageSource source, float amount) {
+        if (isDormant() && !this.level().isClientSide() && source.getEntity() != null) awaken(source.getEntity());
         // stone: arrows barely scratch it
-        if (source.getDirectEntity() instanceof net.minecraft.world.entity.projectile.AbstractArrow) amount *= 0.5f;
-        return super.hurt(source, amount);
+        if (source.getDirectEntity() instanceof net.minecraft.world.entity.projectile.arrow.AbstractArrow) amount *= 0.5f;
+        return super.hurtServer(serverLevel263, source, amount);
     }
 
     @Override
-    public boolean doHurtTarget(Entity target) {
+    public boolean doHurtTarget(net.minecraft.server.level.ServerLevel serverLevel263, Entity target) {
         playAnim(CurseAnims.Anim.ATTACK);
-        boolean hit = super.doHurtTarget(target);
+        boolean hit = super.doHurtTarget(serverLevel263, target);
         if (hit) this.heal(2f);
         return hit;
     }
 
     @Override
-    public MobType getMobType() {
-        return MobType.UNDEAD;
+    public boolean isInvertedHealAndHarm() {
+        return true;
     }
 
     @Override
@@ -147,7 +146,7 @@ public class GargoyleEntity extends CurseMonster {
     }
 
     @Override
-    public boolean causeFallDamage(float distance, float multiplier, DamageSource source) {
+    public boolean causeFallDamage(double distance, float multiplier, DamageSource source) {
         return false;
     }
 
@@ -172,14 +171,20 @@ public class GargoyleEntity extends CurseMonster {
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag tag) {
-        super.addAdditionalSaveData(tag);
+    public void addAdditionalSaveData(net.minecraft.world.level.storage.ValueOutput output263) {
+        super.addAdditionalSaveData(output263);
+        net.minecraft.nbt.CompoundTag tag = new net.minecraft.nbt.CompoundTag();
+        
         tag.putBoolean("Dormant", isDormant());
+    
+        output263.store(tag);
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag tag) {
-        super.readAdditionalSaveData(tag);
-        setDormant(tag.getBoolean("Dormant"));
+    public void readAdditionalSaveData(net.minecraft.world.level.storage.ValueInput input263) {
+        super.readAdditionalSaveData(input263);
+        net.minecraft.nbt.CompoundTag tag = com.skycraft.platform.ValueTags.read(input263 , "Dormant");
+        
+        setDormant(tag.getBooleanOr("Dormant",false));
     }
 }

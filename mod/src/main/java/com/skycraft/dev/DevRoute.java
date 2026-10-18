@@ -43,12 +43,12 @@ final class DevRoute {
                 if(level.getChunkSource().getChunkNow(x,z)==null) {
                     src.sendFailure(Component.literal("Route NOT_READY: load the full search square (radius "+(search+8)+") first.")); return 0;
                 }
-        var mob=EntityType.VILLAGER.create(level);
+        var mob=net.minecraft.world.entity.EntityTypes.VILLAGER.create(level, net.minecraft.world.entity.EntitySpawnReason.EVENT);
         if(mob==null) return 0;
         mob.setPos(start.getX()+0.5,start.getY(),start.getZ()+0.5); mob.setOnGround(true);
         mob.getAttribute(Attributes.FOLLOW_RANGE).setBaseValue(search);
         var nav=(GroundPathNavigation)mob.getNavigation();
-        nav.setCanOpenDoors(true); nav.setCanPassDoors(true);
+        nav.setCanOpenDoors(true); nav.getNodeEvaluator().setCanPassDoors(true);
         nav.setMaxVisitedNodesMultiplier(4f);
         long began=System.nanoTime();
         var path=nav.createPath(end,0);
@@ -60,7 +60,7 @@ final class DevRoute {
             var n=path.getNode(i); nodes.add(List.of(n.x,n.y,n.z));
         }
         Map<String,Object> report=new LinkedHashMap<>();
-        report.put("tag",tag); report.put("dimension",level.dimension().location().toString());
+        report.put("tag",tag); report.put("dimension",level.dimension().identifier().toString());
         report.put("seed",level.getSeed()); report.put("bakeInputs",com.skycraft.bake.Bake.inputsHash());
         report.put("start",List.of(start.getX(),start.getY(),start.getZ()));
         report.put("end",List.of(end.getX(),end.getY(),end.getZ()));

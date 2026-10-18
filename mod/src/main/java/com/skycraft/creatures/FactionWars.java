@@ -13,10 +13,10 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.AABB;
-import net.minecraftforge.event.entity.living.LivingEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.neoforge.event.entity.living.LivingEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -34,7 +34,7 @@ import java.util.Map;
  * {@code minHealthFraction} drops the war target and cools off, and engages at most {@code maxEngagements} times.
  * Guards, crime and player stealth are untouched (guards keep their own threat logic).
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class FactionWars {
     private static final String T_UNTIL = "sky_war_until";
     private static final String T_COUNT = "sky_war_count";
@@ -103,7 +103,7 @@ public final class FactionWars {
         }
         Integer g = TYPE_GROUP.get(e.getType());
         if (g == null) {
-            var key = ForgeRegistries.ENTITY_TYPES.getKey(e.getType());
+            var key = BuiltInRegistries.ENTITY_TYPE.getKey(e.getType());
             Integer found = key == null ? null : ID_GROUP.get(key.toString());
             g = found == null ? -1 : found;
             TYPE_GROUP.put(e.getType(), g);
@@ -112,7 +112,7 @@ public final class FactionWars {
     }
 
     @SubscribeEvent
-    public static void onLivingTick(LivingEvent.LivingTickEvent event) {
+    public static void onLivingTick(net.neoforged.neoforge.event.tick.EntityTickEvent.Pre event) {
         if (!(event.getEntity() instanceof Mob mob) || mob.level().isClientSide() || !mob.isAlive()) return;
         if ((mob.tickCount + mob.getId()) % 20 != 0) return;
         if (!CreaturesConfig.FACTION_WARS.get()) return;
@@ -125,7 +125,7 @@ public final class FactionWars {
         LivingEntity current = mob.getTarget();
         if (current != null) {
             // Break off a war we started once hurt; never touch a player target.
-            if (weak && !(current instanceof Player) && data.getBoolean(T_WAR)) {
+            if (weak && !(current instanceof Player) && data.getBooleanOr(T_WAR, false)) {
                 mob.setTarget(null);
                 data.putBoolean(T_WAR, false);
                 data.putLong(T_UNTIL, now + cooldown);
@@ -134,7 +134,7 @@ public final class FactionWars {
         }
         data.putBoolean(T_WAR, false);
         if (weak || mob.isPassenger() || (mob instanceof SkyCreature c && c.isDormant())) return;
-        if (now < data.getLong(T_UNTIL) || data.getInt(T_COUNT) >= maxEngagements) return;
+        if (now < data.getLongOr(T_UNTIL, 0L) || data.getIntOr(T_COUNT, 0) >= maxEngagements) return;
         // Wars are fought where someone can watch: nothing to simulate with no player near.
         if (mob.level().getNearestPlayer(mob, 64.0) == null) return;
         double r = CreaturesConfig.WAR_RADIUS.get();
@@ -155,7 +155,7 @@ public final class FactionWars {
         if (best != null) {
             mob.setTarget(best);
             data.putBoolean(T_WAR, true);
-            data.putInt(T_COUNT, data.getInt(T_COUNT) + 1);
+            data.putInt(T_COUNT, data.getIntOr(T_COUNT, 0) + 1);
             data.putLong(T_UNTIL, now + cooldown);
         }
     }

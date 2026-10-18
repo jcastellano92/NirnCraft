@@ -9,9 +9,9 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.util.EnumSet;
 import java.util.List;
@@ -22,7 +22,7 @@ import java.util.Set;
 /**
  * Dev and diagnostic command {@code /skycraft-travel} for inspecting travel networks, routes, coverage, and selftests.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class TravelCommand {
     private TravelCommand() {}
 
@@ -33,7 +33,7 @@ public final class TravelCommand {
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(Commands.literal("skycraft-travel")
-                .requires(src -> src.hasPermission(2))
+                .requires(src -> src.permissions().hasPermission(net.minecraft.server.permissions.Permissions.COMMANDS_GAMEMASTER))
                 .executes(TravelCommand::summary)
                 .then(Commands.literal("list")
                         .executes(TravelCommand::summary)

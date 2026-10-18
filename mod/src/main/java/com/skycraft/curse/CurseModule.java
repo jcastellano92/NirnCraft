@@ -4,14 +4,14 @@ import com.skycraft.curse.entity.DeathHoundEntity;
 import com.skycraft.curse.entity.GargoyleEntity;
 import com.skycraft.curse.entity.VampireLordEntity;
 import com.skycraft.curse.entity.WerewolfEntity;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.SpawnPlacements;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
-import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
-import net.minecraftforge.event.entity.SpawnPlacementRegisterEvent;
-import net.minecraftforge.eventbus.api.IEventBus;
+import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
+import net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent;
+import net.neoforged.bus.api.IEventBus;
 
 /**
  * Skycraft's own vampirism and lycanthropy (replacing the Vampirism and Werewolves mods).
@@ -46,18 +46,18 @@ public final class CurseModule {
         event.put(CurseRegistry.GARGOYLE.get(), GargoyleEntity.createAttributes().build());
     }
 
-    private static void onSpawnPlacements(SpawnPlacementRegisterEvent event) {
-        SpawnPlacementRegisterEvent.Operation op = SpawnPlacementRegisterEvent.Operation.REPLACE;
+    private static void onSpawnPlacements(RegisterSpawnPlacementsEvent event) {
+        RegisterSpawnPlacementsEvent.Operation op = RegisterSpawnPlacementsEvent.Operation.REPLACE;
         // werewolves come by WildWerewolves, quests and Hircine; Vampire Lords and gargoyles live in lairs
-        event.register(CurseRegistry.WEREWOLF.get(), SpawnPlacements.Type.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
-                (type, level, reason, pos, random) -> reason != MobSpawnType.NATURAL && reason != MobSpawnType.CHUNK_GENERATION
+        event.register(CurseRegistry.WEREWOLF.get(), net.minecraft.world.entity.SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                (type, level, reason, pos, random) -> reason != EntitySpawnReason.NATURAL && reason != EntitySpawnReason.CHUNK_GENERATION
                         && Monster.checkAnyLightMonsterSpawnRules(type, level, reason, pos, random), op);
-        event.register(CurseRegistry.VAMPIRE_LORD.get(), SpawnPlacements.Type.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
-                (type, level, reason, pos, random) -> reason != MobSpawnType.NATURAL, op);
-        event.register(CurseRegistry.GARGOYLE.get(), SpawnPlacements.Type.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
-                (type, level, reason, pos, random) -> reason != MobSpawnType.NATURAL, op);
+        event.register(CurseRegistry.VAMPIRE_LORD.get(), net.minecraft.world.entity.SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                (type, level, reason, pos, random) -> reason != EntitySpawnReason.NATURAL, op);
+        event.register(CurseRegistry.GARGOYLE.get(), net.minecraft.world.entity.SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                (type, level, reason, pos, random) -> reason != EntitySpawnReason.NATURAL, op);
         // death hounds run with the vampires of the night
-        event.register(CurseRegistry.DEATH_HOUND.get(), SpawnPlacements.Type.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+        event.register(CurseRegistry.DEATH_HOUND.get(), net.minecraft.world.entity.SpawnPlacementTypes.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
                 (type, level, reason, pos, random) -> Monster.checkMonsterSpawnRules(type, level, reason, pos, random)
                         && level.getEntitiesOfClass(Monster.class, new AABB(pos).inflate(64), e -> e.getType() == type).size() < 2, op);
     }

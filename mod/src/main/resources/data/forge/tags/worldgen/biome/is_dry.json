@@ -21,6 +21,9 @@
     "skycraft:stonefalls",
     "skycraft:vvardenfell_ashlands",
     "skycraft:warm_steppe",
-    "skycraft:yokudan_desert"
+    "skycraft:yokudan_desert",
+    "#c:is_dry/overworld",
+    "#c:is_dry/nether",
+    "#c:is_dry/end"
   ]
 }

@@ -15,7 +15,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -24,7 +24,6 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LightBlock;
@@ -65,7 +64,7 @@ public final class AlterationSpells {
         level.setBlock(at, Blocks.LIGHT.defaultBlockState().setValue(LightBlock.LEVEL, 15).setValue(LightBlock.WATERLOGGED, water), 3);
         CompoundTag pd = caster.getPersistentData();
         pd.putLong(MAGELIGHT_POS, at.asLong());
-        pd.putString(MAGELIGHT_DIM, level.dimension().location().toString());
+        pd.putString(MAGELIGHT_DIM, level.dimension().identifier().toString());
         int duration = SpellMath.alterationDuration(caster, spell);
         pd.putLong(MAGELIGHT_UNTIL, level.getGameTime() + duration);
         MagicFx.burst(level, Vec3.atCenterOf(at), Element.ARCANE, 0.8f);
@@ -86,14 +85,14 @@ public final class AlterationSpells {
     public static void tickMagelight(ServerPlayer p) {
         CompoundTag pd = p.getPersistentData();
         if (!pd.contains(MAGELIGHT_POS)) return;
-        if (pd.getLong(MAGELIGHT_UNTIL) <= p.level().getGameTime()) {
+        if (pd.getLongOr(MAGELIGHT_UNTIL, 0L) <= p.level().getGameTime()) {
             removeMagelight(p);
             return;
         }
-        if (pd.getString(MAGELIGHT_DIM).equals(p.level().dimension().location().toString())) {
-            BlockPos at = BlockPos.of(pd.getLong(MAGELIGHT_POS));
-            p.serverLevel().sendParticles(ParticleTypes.END_ROD, at.getX() + 0.5, at.getY() + 0.5, at.getZ() + 0.5, 2, 0.15, 0.15, 0.15, 0.01);
-            p.serverLevel().sendParticles(ParticleTypes.GLOW, at.getX() + 0.5, at.getY() + 0.5, at.getZ() + 0.5, 1, 0.2, 0.2, 0.2, 0.0);
+        if (pd.getStringOr(MAGELIGHT_DIM, "").equals(p.level().dimension().identifier().toString())) {
+            BlockPos at = BlockPos.of(pd.getLongOr(MAGELIGHT_POS, 0L));
+            p.level().sendParticles(ParticleTypes.END_ROD, at.getX() + 0.5, at.getY() + 0.5, at.getZ() + 0.5, 2, 0.15, 0.15, 0.15, 0.01);
+            p.level().sendParticles(ParticleTypes.GLOW, at.getX() + 0.5, at.getY() + 0.5, at.getZ() + 0.5, 1, 0.2, 0.2, 0.2, 0.0);
         }
     }
 
@@ -101,12 +100,12 @@ public final class AlterationSpells {
     public static void removeMagelight(ServerPlayer p) {
         CompoundTag pd = p.getPersistentData();
         if (!pd.contains(MAGELIGHT_POS)) return;
-        BlockPos pos = BlockPos.of(pd.getLong(MAGELIGHT_POS));
-        ServerLevel level = p.serverLevel();
-        MinecraftServer server = p.getServer();
-        String dim = pd.getString(MAGELIGHT_DIM);
-        if (server != null && !dim.equals(level.dimension().location().toString())) {
-            ResourceLocation id = ResourceLocation.tryParse(dim);
+        BlockPos pos = BlockPos.of(pd.getLongOr(MAGELIGHT_POS, 0L));
+        ServerLevel level = p.level();
+        MinecraftServer server = p.level().getServer();
+        String dim = pd.getStringOr(MAGELIGHT_DIM, "");
+        if (server != null && !dim.equals(level.dimension().identifier().toString())) {
+            Identifier id = Identifier.tryParse(dim);
             ServerLevel other = id == null ? null : server.getLevel(ResourceKey.create(Registries.DIMENSION, id));
             if (other != null) level = other;
         }
@@ -124,7 +123,7 @@ public final class AlterationSpells {
     /** Game time the caster's Magelight goes out (0 if none), for the HUD countdown. */
     public static long magelightUntil(ServerPlayer p) {
         CompoundTag pd = p.getPersistentData();
-        return pd.contains(MAGELIGHT_POS) ? pd.getLong(MAGELIGHT_UNTIL) : 0L;
+        return pd.contains(MAGELIGHT_POS) ? pd.getLongOr(MAGELIGHT_UNTIL, 0L) : 0L;
     }
 
     // ================================================================== detection
@@ -134,8 +133,8 @@ public final class AlterationSpells {
         int duration = SpellMath.alterationDuration(p, spell);
         com.skycraft.magic.ActiveMagic.note(p, spell, duration);
         int found = 0;
-        for (LivingEntity e : Targeting.around(p, p.position(), spell.radius, e -> e != p && e.getMobType() == MobType.UNDEAD)) {
-            e.addEffect(new MobEffectInstance(MobEffects.GLOWING, duration, 0, false, false));
+        for (LivingEntity e : Targeting.around(p, p.position(), spell.radius, e -> e != p && com.skycraft.platform.Effects.isUndead(e))) {
+            e.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.GLOWING), duration, 0, false, false));
             found++;
         }
         MagicFx.send(p, MagicFx.AURA, Element.SOUL, p.position(), p.position(), p.getId(), 4);
@@ -156,7 +155,7 @@ public final class AlterationSpells {
             Notifier.message(p, Component.translatable("message.skycraft.too_weak"));
             return Spell.Result.FAILED;
         }
-        p.hurt(p.damageSources().magic(), spell.magnitude);
+        com.skycraft.platform.Effects.hurt(p, p.damageSources().magic(), spell.magnitude);
         data.setMagicka(Math.min(data.maxMagicka(), data.getMagicka() + spell.magnitude * CombatHandler.SKYRIM_SCALE));
         MagicFx.send(p, MagicFx.AURA, Element.ARCANE, p.position(), p.position(), p.getId(), 1);
         SpellSounds.play(p, SpellSounds.Slot.ABSORB, 1f, 0.6f);
@@ -172,7 +171,7 @@ public final class AlterationSpells {
         level.sendParticles(ParticleTypes.ASH, pos.x, pos.y, pos.z, 30, 0.4, 0.6, 0.4, 0.02);
         SpellSounds.impact(level, pos, Element.NATURE, 1f);
         if (target == null || target instanceof ArmorStand || !Targeting.canHarm(caster, target)
-                || target.getType().is(CombatHandler.BOSSES)) return;
+                || target.getType().builtInRegistryHolder().is(CombatHandler.BOSSES)) return;
         float limit = 60f * (spell.dual ? 1.5f : 1f);
         if (!(target instanceof ServerPlayer) && target.getMaxHealth() > limit) {
             Notifier.message(caster, Component.translatable("message.skycraft.illusion_too_strong", target.getDisplayName()));
@@ -180,8 +179,8 @@ public final class AlterationSpells {
         }
         int ticks = SpellMath.alterationDuration(caster, spell) * (spell.dual ? 3 : 2) / 2;
         if (target instanceof ServerPlayer) ticks = Math.min(ticks, 60);
-        target.addEffect(new MobEffectInstance(MagicRegistry.ASH_SHELL.get(), ticks, 0));
-        target.addEffect(new MobEffectInstance(ModEffects.PARALYSIS.get(), ticks, 0));
+        target.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MagicRegistry.ASH_SHELL.get()), ticks, 0));
+        target.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(ModEffects.PARALYSIS.get()), ticks, 0));
         if (target instanceof Mob mob) mob.setTarget(null);
         target.setDeltaMovement(0, Math.min(0, target.getDeltaMovement().y), 0);
         MagicFx.send(target, MagicFx.AURA, Element.NATURE, target.position(), target.position(), target.getId(), 3);
@@ -193,10 +192,10 @@ public final class AlterationSpells {
 
     /** Dragonhide: 80% of physical damage is ignored for 30 seconds. */
     public static Spell.Result dragonhide(ServerPlayer p, Spell spell, int tick) {
-        boolean wasActive = p.hasEffect(MagicRegistry.DRAGONHIDE.get());
-        p.addEffect(new MobEffectInstance(MagicRegistry.DRAGONHIDE.get(), SpellMath.alterationDuration(p, spell), 0, false, true, true));
+        boolean wasActive = p.hasEffect(com.skycraft.platform.Effects.holder(MagicRegistry.DRAGONHIDE.get()));
+        p.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MagicRegistry.DRAGONHIDE.get()), SpellMath.alterationDuration(p, spell), 0, false, true, true));
         MagicFx.send(p, MagicFx.AURA, Element.NATURE, p.position(), p.position(), p.getId(), 4);
-        MagicFx.sendNear(p.serverLevel(), p.position(), 48, MagicFx.RING, Element.NATURE, p.position().add(0, 0.2, 0), p.position(), p.getId(), 25);
+        MagicFx.sendNear(p.level(), p.position(), 48, MagicFx.RING, Element.NATURE, p.position().add(0, 0.2, 0), p.position(), p.getId(), 25);
         MagicFx.sound(p, SoundEvents.ENDER_DRAGON_GROWL, 0.4f, 1.6f);
         MagicFx.sound(p, SoundEvents.ANVIL_LAND, 0.3f, 0.6f);
         return SpellEffects.buffResult(p, wasActive);

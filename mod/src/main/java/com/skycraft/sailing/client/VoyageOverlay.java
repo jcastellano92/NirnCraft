@@ -1,13 +1,12 @@
 package com.skycraft.sailing.client;
 
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.client.gui.overlay.ForgeGui;
 
 /**
  * The voyage screen, Skyrim's travel fade dressed for the sea: the view fades into a dusk seascape where a ship
@@ -65,7 +64,9 @@ public final class VoyageOverlay {
         return Math.min(1f, el / (float) FADE_IN);
     }
 
-    public static void render(ForgeGui gui, GuiGraphics g, float partial, int width, int height) {
+    public static void render(GuiGraphicsExtractor g, net.minecraft.client.DeltaTracker delta) {
+        float partial = delta.getGameTimeDeltaPartialTick(false);
+        int width = g.guiWidth(), height = g.guiHeight();
         if (start < 0) return;
         long now = Util.getMillis();
         float a = alpha(now);
@@ -118,12 +119,12 @@ public final class VoyageOverlay {
 
         Font font = Minecraft.getInstance().font;
         int ta = Math.max(4, (int) (sa * 255)) << 24;
-        g.pose().pushPose();
-        g.pose().translate(width / 2f, height * 0.16f, 0);
-        g.pose().scale(1.6f, 1.6f, 1f);
-        g.drawCenteredString(font, title, 0, 0, ta | 0xF0E6CC);
-        g.pose().popPose();
-        g.drawCenteredString(font, subtitle, width / 2, (int) (height * 0.16f) + 20, ta | 0xC8BC9C);
+        g.pose().pushMatrix();
+        g.pose().translate(width / 2f,  height * 0.16f);
+        g.pose().scale(1.6f,  1.6f);
+        g.centeredText(font, title, 0, 0, ta | 0xF0E6CC);
+        g.pose().popMatrix();
+        g.centeredText(font, subtitle, width / 2, (int) (height * 0.16f) + 20, ta | 0xC8BC9C);
         // route line with the ship's progress
         int ly = (int) (height * 0.86f);
         int lx0 = width / 2 - 90, lx1 = width / 2 + 90;
@@ -131,17 +132,17 @@ public final class VoyageOverlay {
         float prog = Mth.clamp((now - start) / (float) Math.max(MIN_SHOW, arrived < 0 ? MIN_SHOW + 2000 : arrived - start + 900), 0f, 1f);
         int dot = lx0 + (int) ((lx1 - lx0) * prog);
         g.fill(dot - 2, ly - 2, dot + 3, ly + 3, ta | 0xF0E6CC);
-        g.drawString(font, from, lx0 - font.width(from) - 6, ly - 4, ta | 0xA89C80, false);
-        g.drawString(font, to, lx1 + 6, ly - 4, ta | 0xA89C80, false);
-        if (!time.getString().isEmpty()) g.drawCenteredString(font, time, width / 2, ly + 8, ta | 0xA89C80);
+        g.text(font, from, lx0 - font.width(from) - 6, ly - 4, ta | 0xA89C80, false);
+        g.text(font, to, lx1 + 6, ly - 4, ta | 0xA89C80, false);
+        if (!time.getString().isEmpty()) g.centeredText(font, time, width / 2, ly + 8, ta | 0xA89C80);
     }
 
     /** A cog in silhouette: hull, castles, mast and a filled sail. */
-    private static void drawShip(GuiGraphics g, int x, int y, float rock, float a) {
+    private static void drawShip(GuiGraphicsExtractor g, int x, int y, float rock, float a) {
         int hull = argb(a, 0x1A120C), sail = argb(a, 0xD8C8A8), sailShade = argb(a, 0xB8A888), mast = argb(a, 0x22180F);
-        g.pose().pushPose();
-        g.pose().translate(x, y, 0);
-        g.pose().mulPose(com.mojang.math.Axis.ZP.rotation(rock));
+        g.pose().pushMatrix();
+        g.pose().translate(x,  y);
+        g.pose().rotate(rock);
         // hull: rows narrowing to the keel, castles at both ends
         for (int r = 0; r < 9; r++) {
             int half = 34 - r * 2 - (r > 5 ? (r - 5) * 3 : 0);
@@ -157,7 +158,7 @@ public final class VoyageOverlay {
             g.fill(-17 + bulge, -54 + r, 19 + bulge, -53 + r, r % 9 < 2 ? sailShade : sail);
         }
         g.fill(-2, -64, 10, -61, argb(a, 0xA02820)); // pennant
-        g.pose().popPose();
+        g.pose().popMatrix();
     }
 
     private static int argb(float a, int rgb) {

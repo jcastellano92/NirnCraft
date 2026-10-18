@@ -117,7 +117,7 @@ public final class FortRooms {
                 if (roll == 0) p.set(cx, room.floor, cz, Deco.skull(Blocks.SKELETON_SKULL, Deco.skullRotation(side.getOpposite())));
                 else if (roll == 1) p.set(cx, room.floor, cz, Blocks.BONE_BLOCK.defaultBlockState());
                 else if (roll == 2) p.set(cx, room.floor + 2, cz, Deco.chain(Direction.Axis.Y));
-                else if (roll == 3) p.set(cx, room.floor, cz, Blocks.WHITE_CARPET.defaultBlockState());
+                else if (roll == 3) p.set(cx, room.floor, cz, com.skycraft.worldgen.VanillaBlocks.WHITE_CARPET.defaultBlockState());
             }
         }
     }
@@ -154,7 +154,7 @@ public final class FortRooms {
         for (int x = room.minX + 1; x < room.maxX; x += 2) {
             for (int z : new int[]{room.minZ + 1, room.maxZ - 2}) {
                 if (room.nearDoor(x, z, 1) || room.nearDoor(x, z + 1, 1) || room.onLane(x, z) || room.onLane(x, z + 1)) continue;
-                BlockState wool = p.chance(x, 0, z, 73, 2) ? Blocks.BROWN_CARPET.defaultBlockState() : Blocks.RED_CARPET.defaultBlockState();
+                BlockState wool = p.chance(x, 0, z, 73, 2) ? com.skycraft.worldgen.VanillaBlocks.BROWN_CARPET.defaultBlockState() : com.skycraft.worldgen.VanillaBlocks.RED_CARPET.defaultBlockState();
                 p.set(x, room.floor, z, wool);
                 p.set(x, room.floor, z + 1, wool);
             }
@@ -217,7 +217,7 @@ public final class FortRooms {
             for (int s : new int[]{-2, 2}) {
                 int x = room.localX(side, half - 1, s), z = room.localZ(side, half - 1, s);
                 if (!room.interior(x, z)) continue;
-                p.set(x, room.floor + 1, z, Blocks.BLUE_WOOL.defaultBlockState());
+                p.set(x, room.floor + 1, z, com.skycraft.worldgen.VanillaBlocks.BLUE_WOOL.defaultBlockState());
                 p.set(x, room.floor + 2, z, Blocks.GOLD_BLOCK.defaultBlockState());
             }
         }
@@ -241,7 +241,7 @@ public final class FortRooms {
             for (int s : new int[]{-2, 0, 2}) {
                 int x = room.localX(side, half - 1, s), z = room.localZ(side, half - 1, s);
                 if (!room.interior(x, z) || room.nearDoor(x, z, 1)) continue;
-                p.set(x, room.floor + 2, z, s == 0 ? Blocks.GOLD_BLOCK.defaultBlockState() : Blocks.BLUE_WOOL.defaultBlockState());
+                p.set(x, room.floor + 2, z, s == 0 ? Blocks.GOLD_BLOCK.defaultBlockState() : com.skycraft.worldgen.VanillaBlocks.BLUE_WOOL.defaultBlockState());
             }
         }
     }
@@ -257,7 +257,7 @@ public final class FortRooms {
                 if (!room.interior(x, z) || room.onLane(x, z) || room.nearDoor(x, z, 1)) continue;
                 p.set(x, room.floor, z, Blocks.DEEPSLATE_TILES.defaultBlockState());
                 p.set(x, room.floor + 1, z, p.chance(x, room.floor, z, 76, 2)
-                        ? Deco.candle(Blocks.BLUE_CANDLE, 3, true)
+                        ? Deco.candle(com.skycraft.worldgen.VanillaBlocks.BLUE_CANDLE, 3, true)
                         : Deco.skull(Blocks.SKELETON_SKULL, p.roll(x, 0, z, 77, 16)));
             }
         }
@@ -280,7 +280,7 @@ public final class FortRooms {
             p.set(room.localX(f, halfF - 1, s), room.floor + 1, room.localZ(f, halfF - 1, s), Deco.lantern(false, false));
         }
         for (int fwd = -2; fwd <= halfF - 2; fwd++) {
-            p.set(room.localX(f, fwd, 0), room.floor, room.localZ(f, fwd, 0), Blocks.RED_CARPET.defaultBlockState());
+            p.set(room.localX(f, fwd, 0), room.floor, room.localZ(f, fwd, 0), com.skycraft.worldgen.VanillaBlocks.RED_CARPET.defaultBlockState());
         }
         p.container(room.localX(f, halfF - 1, 3), room.floor, room.localZ(f, halfF - 1, 3), Deco.chest(back), Deco.LOOT_BOSS);
         p.container(room.localX(f, halfF - 1, -3), room.floor, room.localZ(f, halfF - 1, -3), Deco.chest(back), Deco.LOOT_COMMON);

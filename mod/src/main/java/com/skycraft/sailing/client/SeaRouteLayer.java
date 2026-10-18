@@ -13,9 +13,9 @@ import com.skycraft.sailing.SeaRoutes;
 import com.skycraft.world.client.MapScreen;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,11 +26,11 @@ import java.util.List;
  * course. Hovering a port lists where its ships sail.
  */
 public class SeaRouteLayer implements MapScreen.Layer {
-    private static final ResourceLocation ICONS = new ResourceLocation(Skycraft.MODID, "textures/gui/sailing_icons.png");
+    private static final Identifier ICONS = Identifier.fromNamespaceAndPath(Skycraft.MODID, "textures/gui/sailing_icons.png");
     private static final int ROUTE = 0x2E5A7A, ROUTE_EXPEDITION = 0x7A3A2E;
 
     @Override
-    public List<Component> draw(GuiGraphics g, MapScreen map, int mouseX, int mouseY) {
+    public List<Component> draw(GuiGraphicsExtractor g, MapScreen map, int mouseX, int mouseY) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null || !SeaRoutes.sitesReady()) return null;
         PlayerData data = SkyData.get(mc.player);
@@ -44,8 +44,6 @@ public class SeaRouteLayer implements MapScreen.Layer {
             dotted(g, map, path, color, Math.max(1, (int) Math.round(Math.min(2.0, scale * 40))));
         }
         // ports
-        RenderSystem.enableBlend();
-        RenderSystem.defaultBlendFunc();
         float size = scale < 1 / 30.0 ? 9f : scale < 1 / 8.0 ? 11f : 13f;
         Port hovered = null;
         double best = 8 * 8;
@@ -54,23 +52,21 @@ public class SeaRouteLayer implements MapScreen.Layer {
             float sx = (float) map.toScreenX(s.pierX() + 0.5), sy = (float) map.toScreenY(s.pierZ() + 0.5);
             boolean known = Harbors.knows(data, p.id());
             if (!known && scale < 1 / 60.0) continue;
-            if (!known) g.setColor(0.45f, 0.4f, 0.35f, 0.85f);
             int icon = p.isLanding() ? 1 : 0;
-            g.pose().pushPose();
-            g.pose().translate(sx - size / 2, sy - size / 2, 0);
-            g.pose().scale(size / 16f, size / 16f, 1f);
-            g.blit(ICONS, 0, 0, icon * 16f, 0f, 16, 16, 64, 16);
-            g.pose().popPose();
-            g.setColor(1f, 1f, 1f, 1f);
+            g.pose().pushMatrix();
+            g.pose().translate(sx-size/2,sy-size/2);
+            g.pose().scale(size/16f,size/16f);
+            com.skycraft.inventory.client.SkyUi.blit(g,ICONS,0,0,icon*16f,0f,16,16,64,16,known?-1:0xd9736659);
+            g.pose().popMatrix();
             if (known && scale >= 1 / 24.0) {
                 Component name = p.name();
                 float ts = 0.55f;
                 int w = (int) (map.mapFont().width(name) * ts);
-                g.pose().pushPose();
-                g.pose().translate(sx - w / 2f, sy + size / 2f + 1, 0);
-                g.pose().scale(ts, ts, 1f);
-                g.drawString(map.mapFont(), name, 0, 0, 0xE0203848, false);
-                g.pose().popPose();
+                g.pose().pushMatrix();
+                g.pose().translate(sx-w/2f,sy+size/2f+1);
+                g.pose().scale(ts,ts);
+                g.text(map.mapFont(), name, 0, 0, 0xE0203848, false);
+                g.pose().popMatrix();
             }
             double d = (mouseX - sx) * (double) (mouseX - sx) + (mouseY - sy) * (double) (mouseY - sy);
             if (d < best) {
@@ -78,7 +74,6 @@ public class SeaRouteLayer implements MapScreen.Layer {
                 hovered = p;
             }
         }
-        RenderSystem.disableBlend();
         if (hovered == null) return null;
         List<Component> tip = new ArrayList<>();
         tip.add(hovered.name().copy().withStyle(ChatFormatting.GOLD));
@@ -92,7 +87,7 @@ public class SeaRouteLayer implements MapScreen.Layer {
         return tip;
     }
 
-    private static void dotted(GuiGraphics g, MapScreen map, SeaRoutes.Path path, int color, int dot) {
+    private static void dotted(GuiGraphicsExtractor g, MapScreen map, SeaRoutes.Path path, int color, int dot) {
         float[] xs = path.xs(), zs = path.zs();
         float carry = 0;
         for (int i = 0; i + 1 < xs.length; i++) {

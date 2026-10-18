@@ -2,9 +2,9 @@ package com.skycraft.magic.client;
 
 import com.skycraft.core.HudStack;
 import com.skycraft.magic.MagicPackets;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -51,15 +51,15 @@ public final class ActiveEffectsHud {
         return com.skycraft.magic.ActiveMagic.format(seconds);
     }
 
-    public static void render(GuiGraphics g, Font font, LocalPlayer player, int width, int height) {
+    public static void render(GuiGraphicsExtractor g, Font font, LocalPlayer player, int width, int height) {
         long now = Util.getMillis();
         List<Item> items = new ArrayList<>(synced.size() + 4);
         for (Item i : synced) if (i.endMs > now) items.add(i);
         for (MobEffectInstance e : player.getActiveEffects()) {
-            if (!e.getEffect().isBeneficial() || !e.showIcon() || e.isInfiniteDuration()) continue;
+            if (!e.getEffect().value().isBeneficial() || !e.showIcon() || e.isInfiniteDuration()) continue;
             int d = e.getDuration();
             if (d <= 0 || d > MAX_TICKS) continue;
-            items.add(new Item(e.getEffect().getDisplayName(), now + d * 50L, 0xFF000000 | e.getEffect().getColor()));
+            items.add(new Item(e.getEffect().value().getDisplayName(), now + d * 50L, 0xFF000000 | e.getEffect().value().getColor()));
         }
         if (items.isEmpty()) return;
         items.sort(Comparator.comparingLong(Item::endMs));
@@ -76,8 +76,8 @@ public final class ActiveEffectsHud {
             int timeW = font.width(time);
             String name = com.skycraft.magic.client.MagicUi.ellipsize(font, it.name.getString(), 130);
             int ry = y + i * ROW;
-            g.drawString(font, time, right - timeW, ry, timeColor, true);
-            g.drawString(font, name, right - timeW - 5 - font.width(name), ry, warn ? 0xFFFFC8B0 : 0xFFC8C2B0, true);
+            g.text(font, time, right - timeW, ry, timeColor, true);
+            g.text(font, name, right - timeW - 5 - font.width(name), ry, warn ? 0xFFFFC8B0 : 0xFFC8C2B0, true);
             // a tiny swatch of the effect's color before the name
             int sx = right - timeW - 5 - font.width(name) - 6;
             g.fill(sx, ry + 2, sx + 3, ry + 7, 0xFF000000 | it.rgb);

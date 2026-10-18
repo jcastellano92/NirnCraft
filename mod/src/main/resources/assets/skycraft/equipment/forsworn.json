@@ -1,0 +1,14 @@
+{
+  "layers": {
+    "humanoid": [
+      {
+        "texture": "skycraft:forsworn"
+      }
+    ],
+    "humanoid_leggings": [
+      {
+        "texture": "skycraft:forsworn"
+      }
+    ]
+  }
+}

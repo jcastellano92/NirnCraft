@@ -6,8 +6,8 @@
       "predicate": {
         "type": "minecraft:would_survive",
         "state": {
-          "Name": "minecraft:dead_bush",
-          "Properties": {
+          "id": "minecraft:dead_bush",
+          "properties": {
             "stage": "0"
           }
         }

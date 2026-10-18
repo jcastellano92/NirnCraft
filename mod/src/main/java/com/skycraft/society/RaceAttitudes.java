@@ -165,10 +165,10 @@ public final class RaceAttitudes {
         if (npc != null) {
             var tag = npc.getPersistentData();
             if (tag.contains(TAG_REGION_OVERRIDE)) {
-                regionId = tag.getString(TAG_REGION_OVERRIDE);
+                regionId = tag.getStringOr(TAG_REGION_OVERRIDE, "");
             }
             if (tag.contains(TAG_SETTLEMENT_OVERRIDE)) {
-                settlementId = tag.getString(TAG_SETTLEMENT_OVERRIDE);
+                settlementId = tag.getStringOr(TAG_SETTLEMENT_OVERRIDE, "");
             }
             if (regionId.isBlank()) {
                 Region reg = Regions.at(npc.getBlockX(), npc.getBlockZ());
@@ -204,7 +204,7 @@ public final class RaceAttitudes {
     ) {
         Race playerRace = player != null ? SkyData.get(player).getRace() : Race.NORD;
         ToIntFunction<String> repLookup = f -> player != null ? Reputation.get(player, f) : 0;
-        boolean orcFlag = player != null && player.getPersistentData().getBoolean("SkycraftOrcBloodKin");
+        boolean orcFlag = player != null && player.getPersistentData().getBooleanOr("SkycraftOrcBloodKin",false);
         return evaluateInternal(regionId, settlementId, npcRole, npcRace, playerRace, repLookup, orcFlag);
     }
 

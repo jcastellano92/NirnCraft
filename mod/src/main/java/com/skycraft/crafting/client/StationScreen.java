@@ -12,7 +12,7 @@ import com.skycraft.crafting.recipe.Cost;
 import com.skycraft.crafting.recipe.SmithingRecipe;
 import com.skycraft.crafting.recipe.SmithingRecipes;
 import com.skycraft.network.SkyNetwork;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -21,7 +21,7 @@ import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
-import org.lwjgl.glfw.GLFW;
+import com.mojang.blaze3d.platform.InputConstants;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -63,7 +63,7 @@ public class StationScreen extends AbstractContainerScreen<StationMenu> {
     private int catX, catW, listX, listY, listW, listH, detX, detW;
 
     public StationScreen(StationMenu menu, Inventory inventory, Component title) {
-        super(menu, inventory, title);
+        super(menu, inventory, title, Math.min(net.minecraft.client.Minecraft.getInstance().getWindow().getGuiScaledWidth() - 16, 430), Math.min(net.minecraft.client.Minecraft.getInstance().getWindow().getGuiScaledHeight() - 16, 250));
         this.type = menu.type;
         this.categories = new ArrayList<>(SmithingRecipes.forStation(type).keySet());
         this.category = Mth.clamp(LAST_CATEGORY.getOrDefault(type, 0), 0, Math.max(0, categories.size() - 1));
@@ -73,8 +73,8 @@ public class StationScreen extends AbstractContainerScreen<StationMenu> {
 
     @Override
     protected void init() {
-        imageWidth = Math.min(width - 16, 430);
-        imageHeight = Math.min(height - 16, 250);
+
+
         super.init();
         boolean temper = type.tempering();
         catX = leftPos + 6;
@@ -152,14 +152,16 @@ public class StationScreen extends AbstractContainerScreen<StationMenu> {
             if (selectedSlot >= 0) SkyNetwork.sendToServer(new CraftingPackets.Temper(selectedSlot));
         } else {
             SmithingRecipe r = selectedRecipe();
-            if (r != null) SkyNetwork.sendToServer(new CraftingPackets.Craft(r.id(), Screen.hasShiftDown() ? StationCrafting.MAX_BATCH : 1));
+            if (r != null) SkyNetwork.sendToServer(new CraftingPackets.Craft(r.id(), com.skycraft.client.screen.UiInput.shiftDown() ? StationCrafting.MAX_BATCH : 1));
         }
     }
 
     // ------------------------------------------------------------------ input
 
     @Override
-    public boolean mouseClicked(double mx, double my, int button) {
+    public boolean mouseClicked(net.minecraft.client.input.MouseButtonEvent event, boolean doubleClick) {
+        double mx = event.x(), my = event.y();
+        int button = com.skycraft.client.screen.UiInput.actionButton(event.button());
         if (button == 0) {
             if (!type.tempering()) {
                 int first = catFirst();
@@ -189,11 +191,11 @@ public class StationScreen extends AbstractContainerScreen<StationMenu> {
                 return true;
             }
         }
-        return super.mouseClicked(mx, my, button);
+        return super.mouseClicked(event, doubleClick);
     }
 
     @Override
-    public boolean mouseScrolled(double mx, double my, double delta) {
+    public boolean mouseScrolled(double mx, double my, double horizontal, double delta) {
         int size = type.tempering() ? temperSlots.size() : recipes.size();
         if (inside(mx, my, listX, listY, listW, listH)) {
             scroll = Mth.clamp(scroll - (int) Math.signum(delta), 0, Math.max(0, size - visibleRows()));
@@ -207,14 +209,15 @@ public class StationScreen extends AbstractContainerScreen<StationMenu> {
             refresh();
             return true;
         }
-        return super.mouseScrolled(mx, my, delta);
+        return super.mouseScrolled(mx, my, horizontal, delta);
     }
 
     @Override
-    public boolean keyPressed(int key, int scan, int mods) {
+    public boolean keyPressed(net.minecraft.client.input.KeyEvent event) {
+        int key = event.key(), scan = event.keycode(), mods = event.modifiers();
         int size = type.tempering() ? temperSlots.size() : recipes.size();
-        if (size > 0 && (key == GLFW.GLFW_KEY_UP || key == GLFW.GLFW_KEY_DOWN)) {
-            int dir = key == GLFW.GLFW_KEY_UP ? -1 : 1;
+        if (size > 0 && (key == InputConstants.KEY_UP || key == InputConstants.KEY_DOWN)) {
+            int dir = key == InputConstants.KEY_UP ? -1 : 1;
             if (type.tempering()) {
                 int idx = Mth.clamp(temperSlots.indexOf(selectedSlot) + dir, 0, size - 1);
                 selectedSlot = temperSlots.get(idx);
@@ -226,11 +229,11 @@ public class StationScreen extends AbstractContainerScreen<StationMenu> {
             refresh();
             return true;
         }
-        if (key == GLFW.GLFW_KEY_ENTER && action.active) {
+        if (key == InputConstants.KEY_RETURN && action.active) {
             act();
             return true;
         }
-        return super.keyPressed(key, scan, mods);
+        return super.keyPressed(event);
     }
 
     private void ensureVisible(int idx) {
@@ -245,20 +248,20 @@ public class StationScreen extends AbstractContainerScreen<StationMenu> {
     // ------------------------------------------------------------------ rendering
 
     @Override
-    public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        renderBackground(g);
+    public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
+
         hoveredStack = ItemStack.EMPTY;
-        super.render(g, mouseX, mouseY, partialTick);
-        if (!hoveredStack.isEmpty()) g.renderTooltip(font, hoveredStack, mouseX, mouseY);
+        super.extractRenderState(g, mouseX, mouseY, partialTick);
+        if (!hoveredStack.isEmpty()) g.setTooltipForNextFrame(font, hoveredStack, mouseX, mouseY);
     }
 
     @Override
-    protected void renderLabels(GuiGraphics g, int mouseX, int mouseY) {
+    protected void extractLabels(GuiGraphicsExtractor g, int mouseX, int mouseY) {
         // everything is drawn in renderBg
     }
 
     @Override
-    protected void renderBg(GuiGraphics g, float partialTick, int mouseX, int mouseY) {
+    public void extractBackground(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
         int x0 = leftPos, y0 = topPos, x1 = leftPos + imageWidth, y1 = topPos + imageHeight;
         g.fill(x0, y0, x1, y1, PANEL);
         frame(g, x0, y0, x1, y1, BORDER);
@@ -280,12 +283,12 @@ public class StationScreen extends AbstractContainerScreen<StationMenu> {
         };
 
         // Title and station subtitle
-        g.drawCenteredString(font, title, (x0 + x1) / 2, y0 + 6, TEXT);
-        g.drawString(font, subtitle, x0 + 10, y0 + 6, accentColor, false);
+        g.centeredText(font, title, (x0 + x1) / 2, y0 + 6, TEXT);
+        g.text(font, subtitle, x0 + 10, y0 + 6, accentColor, false);
 
         // Smithing skill badge on the top right
         String skillText = "Smithing " + data().getSkill(Skill.SMITHING);
-        g.drawString(font, skillText, x1 - 10 - font.width(skillText), y0 + 6, GOLD, false);
+        g.text(font, skillText, x1 - 10 - font.width(skillText), y0 + 6, GOLD, false);
         // what you carry (crafted gear and bought materials weigh something)
         com.skycraft.inventory.client.SkyUi.carryLine(g, font, (x0 + x1) / 2 + font.width(title) / 2 + 10, y0 + 6,
                 x1 - 10 - font.width(skillText) - 14);
@@ -309,7 +312,7 @@ public class StationScreen extends AbstractContainerScreen<StationMenu> {
         }
     }
 
-    private void renderCategories(GuiGraphics g, int mx, int my) {
+    private void renderCategories(GuiGraphicsExtractor g, int mx, int my) {
         int first = catFirst();
         for (int i = first; i < categories.size(); i++) {
             int y = listY + (i - first) * CAT_ROW;
@@ -320,14 +323,14 @@ public class StationScreen extends AbstractContainerScreen<StationMenu> {
             else if (hover) g.fill(catX, y, catX + catW, y + CAT_ROW - 1, 0x28F0E6C8);
             if (sel) g.fill(catX, y, catX + 2, y + CAT_ROW - 1, GOLD);
             Component name = Component.translatable("category.skycraft.smithing." + categories.get(i));
-            g.drawString(font, fit(name.getString(), catW - 8), catX + 5, y + 2, sel ? TEXT : hover ? TEXT : DIM, false);
+            g.text(font, fit(name.getString(), catW - 8), catX + 5, y + 2, sel ? TEXT : hover ? TEXT : DIM, false);
         }
     }
 
-    private void renderRecipeList(GuiGraphics g, int mx, int my) {
+    private void renderRecipeList(GuiGraphicsExtractor g, int mx, int my) {
         Inventory inv = minecraft.player.getInventory();
         if (recipes.isEmpty()) {
-            g.drawString(font, Component.translatable("screen.skycraft.smithing.no_recipes"), listX + 4, listY + 4, GREY, false);
+            g.text(font, Component.translatable("screen.skycraft.smithing.no_recipes"), listX + 4, listY + 4, GREY, false);
             return;
         }
         g.enableScissor(listX, listY, listX + listW, listY + listH);
@@ -339,17 +342,17 @@ public class StationScreen extends AbstractContainerScreen<StationMenu> {
             if (i == selected) g.fill(listX, y, listX + listW, y + ROW, 0x50C8A050);
             else if (hover) g.fill(listX, y, listX + listW, y + ROW, 0x28F0E6C8);
             ItemStack stack = r.resultStack();
-            g.renderItem(stack, listX + 2, y + 1);
-            g.renderItemDecorations(font, stack, listX + 2, y + 1);
+            g.item(stack, listX + 2, y + 1);
+            g.itemDecorations(font, stack, listX + 2, y + 1);
             int color = !perkOk(r) ? GREY : r.hasMaterials(inv) ? TEXT : DIM;
-            g.drawString(font, fit(stack.getHoverName().getString(), listW - 26), listX + 22, y + 5, color, false);
+            g.text(font, fit(stack.getHoverName().getString(), listW - 26), listX + 22, y + 5, color, false);
             if (hover && mx < listX + 19) hoveredStack = stack;
         }
         g.disableScissor();
         scrollbar(g, recipes.size());
     }
 
-    private void renderRecipeDetails(GuiGraphics g, int mx, int my) {
+    private void renderRecipeDetails(GuiGraphicsExtractor g, int mx, int my) {
         SmithingRecipe r = selectedRecipe();
         if (r == null) return;
         Inventory inv = minecraft.player.getInventory();
@@ -361,21 +364,21 @@ public class StationScreen extends AbstractContainerScreen<StationMenu> {
         List<FormattedCharSequence> nameLines = font.split(result.getHoverName(), textW);
         int ly = y + (nameLines.size() > 1 ? 4 : 8);
         for (FormattedCharSequence line : nameLines.subList(0, Math.min(2, nameLines.size()))) {
-            g.drawString(font, line, textX, ly, TEXT, false);
+            g.text(font, line, textX, ly, TEXT, false);
             ly += 10;
         }
-        if (r.count() > 1) g.drawString(font, "x" + r.count(), textX, ly, DIM, false);
+        if (r.count() > 1) g.text(font, "x" + r.count(), textX, ly, DIM, false);
         y += 38;
         if (r.perk() != null) {
             boolean ok = perkOk(r);
             Component line = Component.translatable("screen.skycraft.smithing.requires", Tempering.perkName(r.perk()));
             for (FormattedCharSequence seq : font.split(line, detW - 4)) {
-                g.drawString(font, seq, detX + 2, y, ok ? GOOD : BAD, false);
+                g.text(font, seq, detX + 2, y, ok ? GOOD : BAD, false);
                 y += 10;
             }
             y += 2;
         }
-        g.drawString(font, Component.translatable("screen.skycraft.smithing.materials"), detX + 2, y, GOLD, false);
+        g.text(font, Component.translatable("screen.skycraft.smithing.materials"), detX + 2, y, GOLD, false);
         y += 11;
         for (Cost cost : r.costs()) {
             int have = cost.countIn(inv, -1);
@@ -383,29 +386,29 @@ public class StationScreen extends AbstractContainerScreen<StationMenu> {
         }
         int hintY = topPos + imageHeight - 40;
         if (y < hintY && r.station() != StationType.GRINDSTONE) {
-            g.drawCenteredString(font, Component.translatable("screen.skycraft.smithing.shift_hint", StationCrafting.MAX_BATCH), detX + detW / 2, hintY, GREY);
+            g.centeredText(font, Component.translatable("screen.skycraft.smithing.shift_hint", StationCrafting.MAX_BATCH), detX + detW / 2, hintY, GREY);
         }
     }
 
-    private int costLine(GuiGraphics g, Cost cost, int have, int x, int y, int mx, int my) {
+    private int costLine(GuiGraphicsExtractor g, Cost cost, int have, int x, int y, int mx, int my) {
         ItemStack icon = cost.display().get();
-        g.renderItem(icon, x, y);
+        g.item(icon, x, y);
         if (inside(mx, my, x, y, 16, 16)) hoveredStack = icon;
         String count = have + "/" + cost.count();
         int countW = font.width(count);
-        g.drawString(font, fit(icon.getHoverName().getString(), detW - countW - 30), x + 20, y + 4, DIM, false);
-        g.drawString(font, count, detX + detW - 4 - countW, y + 4, have >= cost.count() ? GOOD : BAD, false);
+        g.text(font, fit(icon.getHoverName().getString(), detW - countW - 30), x + 20, y + 4, DIM, false);
+        g.text(font, count, detX + detW - 4 - countW, y + 4, have >= cost.count() ? GOOD : BAD, false);
         return y + 18;
     }
 
-    private void renderTemperList(GuiGraphics g, int mx, int my) {
+    private void renderTemperList(GuiGraphicsExtractor g, int mx, int my) {
         Inventory inv = minecraft.player.getInventory();
         if (temperSlots.isEmpty()) {
             List<FormattedCharSequence> lines = font.split(Component.translatable(type == StationType.GRINDSTONE
                     ? "screen.skycraft.smithing.no_weapons" : "screen.skycraft.smithing.no_armor"), listW - 8);
             int y = listY + 4;
             for (FormattedCharSequence line : lines) {
-                g.drawString(font, line, listX + 4, y, GREY, false);
+                g.text(font, line, listX + 4, y, GREY, false);
                 y += 10;
             }
             return;
@@ -419,20 +422,20 @@ public class StationScreen extends AbstractContainerScreen<StationMenu> {
             boolean hover = inside(mx, my, listX, y, listW, ROW) && my < listY + listH;
             if (slot == selectedSlot) g.fill(listX, y, listX + listW, y + ROW, 0x50C8A050);
             else if (hover) g.fill(listX, y, listX + listW, y + ROW, 0x28F0E6C8);
-            g.renderItem(stack, listX + 2, y + 1);
+            g.item(stack, listX + 2, y + 1);
             int quality = Tempering.quality(stack);
             String q = quality > 0 ? Tempering.qualityName(quality).getString() : "";
             int qW = font.width(q);
             if (slot >= 36 && slot < com.skycraft.inventory.Pack.VIRTUAL_BASE) g.fill(listX + 1, y + 1, listX + 3, y + 3, GOLD); // equipped marker
-            g.drawString(font, fit(stack.getHoverName().getString(), listW - 28 - qW), listX + 22, y + 5, TEXT, false);
-            if (quality > 0) g.drawString(font, q, listX + listW - 4 - qW, y + 5, GOLD, false);
+            g.text(font, fit(stack.getHoverName().getString(), listW - 28 - qW), listX + 22, y + 5, TEXT, false);
+            if (quality > 0) g.text(font, q, listX + listW - 4 - qW, y + 5, GOLD, false);
             if (hover && mx < listX + 19) hoveredStack = stack;
         }
         g.disableScissor();
         scrollbar(g, temperSlots.size());
     }
 
-    private void renderTemperDetails(GuiGraphics g, int mx, int my) {
+    private void renderTemperDetails(GuiGraphicsExtractor g, int mx, int my) {
         if (selectedSlot < 0) return;
         Inventory inv = minecraft.player.getInventory();
         ItemStack stack = com.skycraft.inventory.Pack.stackAt(minecraft.player, selectedSlot);
@@ -443,59 +446,59 @@ public class StationScreen extends AbstractContainerScreen<StationMenu> {
         List<FormattedCharSequence> nameLines = font.split(stack.getHoverName(), detW - 42);
         int ly = y + 4;
         for (FormattedCharSequence line : nameLines.subList(0, Math.min(2, nameLines.size()))) {
-            g.drawString(font, line, textX, ly, TEXT, false);
+            g.text(font, line, textX, ly, TEXT, false);
             ly += 10;
         }
         int quality = Tempering.quality(stack);
-        g.drawString(font, quality > 0 ? Tempering.qualityName(quality) : Component.translatable("quality.skycraft.0"), textX, ly, GOLD, false);
+        g.text(font, quality > 0 ? Tempering.qualityName(quality) : Component.translatable("quality.skycraft.0"), textX, ly, GOLD, false);
         y += 40;
 
         Tempering.Check check = Tempering.check(minecraft.player, type, stack, selectedSlot);
         int max = Tempering.maxQuality(minecraft.player, stack);
-        g.drawString(font, Component.translatable("screen.skycraft.smithing.skill_cap",
+        g.text(font, Component.translatable("screen.skycraft.smithing.skill_cap",
                 max > 0 ? Tempering.qualityName(max) : Component.translatable("quality.skycraft.0"),
                 data().getSkill(Skill.SMITHING)), detX + 2, y, DIM, false);
         y += 12;
         if (check.ok()) {
             Component next = Tempering.qualityName(quality + check.gain());
-            g.drawString(font, Component.translatable("screen.skycraft.smithing.next_quality", next), detX + 2, y, GOOD, false);
+            g.text(font, Component.translatable("screen.skycraft.smithing.next_quality", next), detX + 2, y, GOOD, false);
             y += 12;
         }
         String perk = Tempering.temperPerk(stack);
         boolean hasPerk = data().hasPerk(perk);
         for (FormattedCharSequence seq : font.split(Component.translatable(hasPerk ? "screen.skycraft.smithing.perk_double" : "screen.skycraft.smithing.perk_hint",
                 Tempering.perkName(perk)), detW - 4)) {
-            g.drawString(font, seq, detX + 2, y, hasPerk ? GOOD : GREY, false);
+            g.text(font, seq, detX + 2, y, hasPerk ? GOOD : GREY, false);
             y += 10;
         }
         y += 4;
         Cost cost = Tempering.material(stack);
         if (cost != null) {
-            g.drawString(font, Component.translatable("screen.skycraft.smithing.materials"), detX + 2, y, GOLD, false);
+            g.text(font, Component.translatable("screen.skycraft.smithing.materials"), detX + 2, y, GOLD, false);
             y += 11;
             y = costLine(g, cost, cost.countIn(inv, selectedSlot), detX + 2, y, mx, my);
         }
         if (!check.ok() && check.reason() != null) {
             for (FormattedCharSequence seq : font.split(check.reason(), detW - 4)) {
                 if (y > topPos + imageHeight - 40) break;
-                g.drawString(font, seq, detX + 2, y + 2, BAD, false);
+                g.text(font, seq, detX + 2, y + 2, BAD, false);
                 y += 10;
             }
         }
     }
 
-    private void bigItem(GuiGraphics g, ItemStack stack, int x, int y, int mx, int my) {
+    private void bigItem(GuiGraphicsExtractor g, ItemStack stack, int x, int y, int mx, int my) {
         g.fill(x, y, x + 34, y + 34, INSET);
         frame(g, x, y, x + 34, y + 34, 0x808A7F66);
-        g.pose().pushPose();
-        g.pose().translate(x + 1, y + 1, 0);
-        g.pose().scale(2f, 2f, 1f);
-        g.renderItem(stack, 0, 0);
-        g.pose().popPose();
+        g.pose().pushMatrix();
+        g.pose().translate(x + 1, y + 1);
+        g.pose().scale(2f, 2f);
+        g.item(stack, 0, 0);
+        g.pose().popMatrix();
         if (inside(mx, my, x, y, 34, 34)) hoveredStack = stack;
     }
 
-    private void scrollbar(GuiGraphics g, int size) {
+    private void scrollbar(GuiGraphicsExtractor g, int size) {
         int rows = visibleRows();
         if (size <= rows) return;
         int x = listX + listW - 3;
@@ -505,7 +508,7 @@ public class StationScreen extends AbstractContainerScreen<StationMenu> {
         g.fill(x, barY, x + 2, barY + barH, BORDER);
     }
 
-    private static void frame(GuiGraphics g, int x0, int y0, int x1, int y1, int color) {
+    private static void frame(GuiGraphicsExtractor g, int x0, int y0, int x1, int y1, int color) {
         g.fill(x0, y0, x1, y0 + 1, color);
         g.fill(x0, y1 - 1, x1, y1, color);
         g.fill(x0, y0, x0 + 1, y1, color);

@@ -56,7 +56,7 @@ public final class SettlementPreview {
         int y0 = hs.isEmpty() ? level.getSeaLevel() : hs.get(hs.size() / 10) - 4;
         for (int x = x0; x <= x1; x++) for (int z = z0; z <= z1; z++) y1 = Math.max(y1, level.getHeight(Heightmap.Types.WORLD_SURFACE, x, z));
         y1 = Math.min(y1, y0 + 90);
-        y0 = Math.max(level.getMinBuildHeight(), y0);
+        y0 = Math.max(level.getMinY(), y0);
         int dx = x1 - x0 + 1, dz = z1 - z0 + 1, dy = y1 - y0 + 1;
         int w = (dx + dz) * k + 2 * k, h = (dx + dz) * k / 2 + dy * k + 2 * k;
         BufferedImage img = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);

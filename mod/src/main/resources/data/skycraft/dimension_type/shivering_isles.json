@@ -1,10 +1,7 @@
 {
   "ambient_light": 0.05,
-  "bed_works": false,
   "coordinate_scale": 1.0,
-  "effects": "skycraft:shivering_isles",
   "has_ceiling": false,
-  "has_raids": false,
   "has_skylight": true,
   "height": 256,
   "infiniburn": "#minecraft:infiniburn_overworld",
@@ -13,13 +10,27 @@
   "monster_spawn_block_light_limit": 0,
   "monster_spawn_light_level": {
     "type": "minecraft:uniform",
-    "value": {
-      "min_inclusive": 0,
-      "max_inclusive": 7
-    }
+    "min_inclusive": 0,
+    "max_inclusive": 7
   },
-  "natural": false,
-  "piglin_safe": false,
-  "respawn_anchor_works": false,
-  "ultrawarm": false
+  "attributes": {
+    "minecraft:gameplay/bed_rule": {
+      "can_sleep": "never",
+      "can_set_spawn": "never",
+      "destroy_on_use": true
+    },
+    "minecraft:gameplay/can_start_raid": false,
+    "minecraft:gameplay/piglins_zombify": true,
+    "minecraft:gameplay/respawn_anchor_works": false,
+    "minecraft:gameplay/water_evaporates": false,
+    "minecraft:gameplay/fast_lava": false,
+    "minecraft:visual/default_dripstone_particle": {
+      "type": "minecraft:dripping_dripstone_water"
+    },
+    "minecraft:gameplay/nether_portal_spawns_piglin": false
+  },
+  "has_ender_dragon_fight": false,
+  "default_clock": "minecraft:overworld",
+  "timelines": "#minecraft:in_overworld",
+  "has_fixed_time": false
 }

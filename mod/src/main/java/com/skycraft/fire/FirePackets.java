@@ -2,30 +2,29 @@ package com.skycraft.fire;
 
 import com.skycraft.fire.client.FireClientPackets;
 import com.skycraft.network.SkyNetwork;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.network.NetworkDirection;
-import net.minecraftforge.network.NetworkEvent;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.resources.Identifier;
+import net.neoforged.api.distmarker.Dist;
+import com.skycraft.platform.Sides;
+import net.minecraft.network.protocol.PacketFlow;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Supplier;
 
 /** Network messages of the fire module (registered in this fixed order, after every older module's). */
 public final class FirePackets {
     private FirePackets() {}
 
     public static void register() {
-        SkyNetwork.register(SyncSites.class, NetworkDirection.PLAY_TO_CLIENT, SyncSites::encode, SyncSites::decode, SyncSites::handle);
-        SkyNetwork.register(Burst.class, NetworkDirection.PLAY_TO_CLIENT, Burst::encode, Burst::decode, Burst::handle);
+        SkyNetwork.register(SyncSites.class, PacketFlow.CLIENTBOUND, SyncSites::encode, SyncSites::decode, SyncSites::handle);
+        SkyNetwork.register(Burst.class, PacketFlow.CLIENTBOUND, Burst::encode, Burst::decode, Burst::handle);
     }
 
     /** S2C: the full list of fire sites around the player in {@code dimension} (replaces the client's server sites). */
-    public record SyncSites(ResourceLocation dimension, List<FireSites.Site> sites) {
-        static void encode(SyncSites m, FriendlyByteBuf buf) {
-            buf.writeResourceLocation(m.dimension);
+    public record SyncSites(Identifier dimension, List<FireSites.Site> sites) {
+        static void encode(SyncSites m, RegistryFriendlyByteBuf buf) {
+            buf.writeIdentifier(m.dimension);
             buf.writeVarInt(m.sites.size());
             for (FireSites.Site s : m.sites) {
                 buf.writeVarInt(s.id());
@@ -41,8 +40,8 @@ public final class FirePackets {
             }
         }
 
-        static SyncSites decode(FriendlyByteBuf buf) {
-            ResourceLocation dim = buf.readResourceLocation();
+        static SyncSites decode(RegistryFriendlyByteBuf buf) {
+            Identifier dim = buf.readIdentifier();
             int n = buf.readVarInt();
             List<FireSites.Site> out = new ArrayList<>(Math.min(n, 1024));
             for (int i = 0; i < n && i < 4096; i++) {
@@ -56,15 +55,14 @@ public final class FirePackets {
             return new SyncSites(dim, out);
         }
 
-        static void handle(SyncSites m, Supplier<NetworkEvent.Context> ctx) {
-            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> FireClientPackets.sync(m.dimension, m.sites));
-            ctx.get().setPacketHandled(true);
+        static void handle(SyncSites m, IPayloadContext ctx) {
+            Sides.runOn(Dist.CLIENT, () -> () -> FireClientPackets.sync(m.dimension, m.sites));
         }
     }
 
     /** S2C: a one-off blast of fire at a position. */
     public record Burst(double x, double y, double z, float intensity, int radius) {
-        static void encode(Burst m, FriendlyByteBuf buf) {
+        static void encode(Burst m, RegistryFriendlyByteBuf buf) {
             buf.writeDouble(m.x);
             buf.writeDouble(m.y);
             buf.writeDouble(m.z);
@@ -72,13 +70,12 @@ public final class FirePackets {
             buf.writeVarInt(m.radius);
         }
 
-        static Burst decode(FriendlyByteBuf buf) {
+        static Burst decode(RegistryFriendlyByteBuf buf) {
             return new Burst(buf.readDouble(), buf.readDouble(), buf.readDouble(), buf.readFloat(), buf.readVarInt());
         }
 
-        static void handle(Burst m, Supplier<NetworkEvent.Context> ctx) {
-            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> FireClientPackets.burst(m.x, m.y, m.z, m.intensity, m.radius));
-            ctx.get().setPacketHandled(true);
+        static void handle(Burst m, IPayloadContext ctx) {
+            Sides.runOn(Dist.CLIENT, () -> () -> FireClientPackets.burst(m.x, m.y, m.z, m.intensity, m.radius));
         }
     }
 }

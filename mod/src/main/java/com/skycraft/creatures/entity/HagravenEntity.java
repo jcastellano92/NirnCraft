@@ -8,7 +8,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.monster.Monster;
-import net.minecraft.world.entity.projectile.SmallFireball;
+import net.minecraft.world.entity.projectile.hurtingprojectile.SmallFireball;
 import net.minecraft.world.level.Level;
 
 /** {@code skycraft:hagraven}: monstrous bird-witches of Reach folklore that sacrifice humanity for dark magic. */
@@ -40,8 +40,8 @@ public class HagravenEntity extends SkyHumanoid {
     }
 
     @Override
-    protected void customServerAiStep() {
-        super.customServerAiStep();
+    protected void customServerAiStep(net.minecraft.server.level.ServerLevel serverLevel263) {
+        super.customServerAiStep(serverLevel263);
         LivingEntity target = this.getTarget();
         if (target == null || !target.isAlive()) return;
 
@@ -51,7 +51,7 @@ public class HagravenEntity extends SkyHumanoid {
             double dx = target.getX() - this.getX();
             double dy = target.getY(0.5) - this.getY(0.5);
             double dz = target.getZ() - this.getZ();
-            SmallFireball fireball = new SmallFireball(this.level(), this, dx, dy, dz);
+            SmallFireball fireball = new SmallFireball(this.level(), this, new net.minecraft.world.phys.Vec3(dx, dy, dz));
             fireball.setPosRaw(this.getX(), this.getEyeY() - 0.1, this.getZ());
             this.level().addFreshEntity(fireball);
             this.playSound(SoundEvents.BLAZE_SHOOT, 1.0f, 0.9f);

@@ -56,8 +56,8 @@ public final class StaffEnchanting {
         int best = -1, bestSoul = 0;
         for (int i = 0; i < inv.getContainerSize(); i++) {
             ItemStack s = inv.getItem(i);
-            if (!s.is(ArsenalTags.SOUL_GEMS) || s.getTag() == null) continue;
-            int soul = s.getTag().getInt("soul");
+            if (!s.is(ArsenalTags.SOUL_GEMS) || com.skycraft.inventory.ItemData.custom(s) == null) continue;
+            int soul = com.skycraft.inventory.ItemData.custom(s).getIntOr("soul",0);
             if (soul > bestSoul) {
                 bestSoul = soul;
                 best = i;
@@ -66,8 +66,8 @@ public final class StaffEnchanting {
         java.util.List<ItemStack> packed = com.skycraft.inventory.Pack.entries(player);
         for (int i = 0; i < packed.size(); i++) {
             ItemStack s = packed.get(i);
-            if (s.isEmpty() || !s.is(ArsenalTags.SOUL_GEMS) || s.getTag() == null) continue;
-            int soul = s.getTag().getInt("soul");
+            if (s.isEmpty() || !s.is(ArsenalTags.SOUL_GEMS) || com.skycraft.inventory.ItemData.custom(s) == null) continue;
+            int soul = com.skycraft.inventory.ItemData.custom(s).getIntOr("soul",0);
             if (soul > bestSoul) {
                 bestSoul = soul;
                 best = com.skycraft.inventory.Pack.VIRTUAL_BASE + i;
@@ -79,7 +79,7 @@ public final class StaffEnchanting {
     public static int soulAt(Player player, int slot) {
         if (slot < 0) return 0;
         ItemStack s = com.skycraft.inventory.Pack.stackAt(player, slot);
-        return s.getTag() == null ? 0 : s.getTag().getInt("soul");
+        return com.skycraft.inventory.ItemData.custom(s) == null ? 0 : com.skycraft.inventory.ItemData.custom(s).getIntOr("soul",0);
     }
 
     /** Charges a staff gets from a soul of size 1 (petty) .. 5 (grand/black), plus Enchanting skill. */
@@ -121,12 +121,12 @@ public final class StaffEnchanting {
         gemSlot = resolved[1];
         int soul = soulAt(player, gemSlot);
         ItemStack gem = inv.getItem(gemSlot);
-        String gemId = String.valueOf(net.minecraftforge.registries.ForgeRegistries.ITEMS.getKey(gem.getItem()));
+        String gemId = String.valueOf(net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(gem.getItem()));
         if (gemId.endsWith(":azuras_star") || gemId.endsWith(":black_star")) {
             // the reusable stars are emptied, not used up
-            gem.getOrCreateTag().remove("soul");
-            gem.getOrCreateTag().remove("skycraft_value");
-            if (gem.getOrCreateTag().isEmpty()) gem.setTag(null);
+            com.skycraft.inventory.ItemData.updateCustom(gem, customData263 -> customData263.remove("soul"));
+            com.skycraft.inventory.ItemData.updateCustom(gem, customData263 -> customData263.remove("skycraft_value"));
+            if (com.skycraft.inventory.ItemData.customOrEmpty(gem).isEmpty()) com.skycraft.inventory.ItemData.setCustom(gem, null);
         } else {
             gem.shrink(1);
         }
@@ -140,8 +140,8 @@ public final class StaffEnchanting {
         Progression.addSkillXp(player, Skill.ENCHANTING, 0.6f + 0.15f * soul);
         SkyData.get(player).addStat("staves_enchanted", 1);
         Vec3 c = Vec3.atCenterOf(pos).add(0, 0.7, 0);
-        MagicFx.sendNear(player.serverLevel(), c, 48, MagicFx.STREAM, spell.element, c, c, player.getId(), 40);
-        SpellSounds.world(player.serverLevel(), c, SpellSounds.Slot.STAFF_ENCHANT, 1f, 0.8f);
+        MagicFx.sendNear(player.level(), c, 48, MagicFx.STREAM, spell.element, c, c, player.getId(), 40);
+        SpellSounds.world(player.level(), c, SpellSounds.Slot.STAFF_ENCHANT, 1f, 0.8f);
         Notifier.title(player, Component.translatable("staff_enchanter.skycraft.made"), staff.getHoverName());
     }
 }

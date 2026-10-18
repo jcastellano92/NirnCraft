@@ -17,10 +17,10 @@ import net.minecraft.world.level.biome.Climate;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.RandomState;
-import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
+
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -38,7 +38,7 @@ import java.util.function.Consumer;
  * </ul>
  * Reports also go to the log and to {@code skycraft-perf/} in the server folder.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class PerfCommands {
     private static Recording manual;
 
@@ -47,7 +47,7 @@ public final class PerfCommands {
     @SubscribeEvent
     public static void register(RegisterCommandsEvent event) {
         CommandDispatcher<CommandSourceStack> d = event.getDispatcher();
-        d.register(Commands.literal("skycraft-perf").requires(s -> s.hasPermission(2))
+        d.register(Commands.literal("skycraft-perf").requires(s -> s.permissions().hasPermission(net.minecraft.server.permissions.Permissions.COMMANDS_GAMEMASTER))
                 .then(Commands.literal("bench")
                         .executes(c -> bench(c.getSource(), 5))
                         .then(Commands.argument("radius", IntegerArgumentType.integer(1, 32))
@@ -63,8 +63,8 @@ public final class PerfCommands {
     }
 
     @SubscribeEvent
-    public static void onServerTick(TickEvent.ServerTickEvent event) {
-        if (event.phase == TickEvent.Phase.END) ChunkBench.tick();
+    public static void onServerTick(net.neoforged.neoforge.event.tick.ServerTickEvent.Post event) {
+        if (event instanceof net.neoforged.neoforge.event.tick.ServerTickEvent.Post) ChunkBench.tick();
     }
 
     /** Thread-safe feedback to a command source (messages are delivered on the server thread). */
@@ -107,7 +107,7 @@ public final class PerfCommands {
             return 0;
         }
         Consumer<String> out = feedback(src);
-        Path dir = src.getServer().getServerDirectory().toPath().resolve("skycraft-perf");
+        Path dir = src.getServer().getServerDirectory().resolve("skycraft-perf");
         Thread t = new Thread(() -> {
             Path jfr = Profiling.stop(rec, dir, "manual-" + System.currentTimeMillis());
             if (jfr == null) return;
@@ -135,7 +135,7 @@ public final class PerfCommands {
         ChunkGenerator gen = level.getChunkSource().getGenerator();
         RandomState rs = level.getChunkSource().randomState();
         BiomeSource biomes = gen.getBiomeSource();
-        Climate.Sampler sampler = rs.sampler();
+        net.minecraft.world.level.biome.BiomeResolver resolver = biomes.createCachingResolver(rs);
         Random rnd = new Random(42);
         int n = 200_000;
         int[] xs = new int[n], zs = new int[n];
@@ -156,16 +156,16 @@ public final class PerfCommands {
         }
         double map = (System.nanoTime() - t0) / (double) n;
         int nb = 20_000;
-        for (int i = 0; i < nb; i++) sink += biomes.getNoiseBiome(xs[i] >> 2, 16, zs[i] >> 2, sampler).hashCode();
+        for (int i = 0; i < nb; i++) sink += resolver.getNoiseBiome(xs[i] >> 2, 16, zs[i] >> 2).hashCode();
         t0 = System.nanoTime();
-        for (int i = nb; i < 2 * nb; i++) sink += biomes.getNoiseBiome(xs[i] >> 2, 16, zs[i] >> 2, sampler).hashCode();
+        for (int i = nb; i < 2 * nb; i++) sink += resolver.getNoiseBiome(xs[i] >> 2, 16, zs[i] >> 2).hashCode();
         double biome = (System.nanoTime() - t0) / (double) nb / 1000.0;
         // a chunk's worth of quarts (4x4 columns x 112 cells) at one spot: the column cache at work
         t0 = System.nanoTime();
         int qx0 = xs[7] >> 2, qz0 = zs[7] >> 2;
         for (int qx = 0; qx < 4; qx++) {
             for (int qz = 0; qz < 4; qz++) {
-                for (int qy = -16; qy < 96; qy++) sink += biomes.getNoiseBiome(qx0 + qx, qy, qz0 + qz, sampler).hashCode();
+                for (int qy = -16; qy < 96; qy++) sink += resolver.getNoiseBiome(qx0 + qx, qy, qz0 + qz).hashCode();
             }
         }
         double chunkBiomes = (System.nanoTime() - t0) / 1e6;

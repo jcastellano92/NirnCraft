@@ -20,7 +20,7 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
@@ -33,11 +33,11 @@ import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.phys.AABB;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.living.LivingDeathEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.util.HashMap;
 import java.util.List;
@@ -51,7 +51,7 @@ import java.util.UUID;
  * The "Entering Whiterun Hold" / "CYRODIIL" banners at region and province borders are drawn by the client
  * ({@code world.client.RegionBanner}). Every player discovers individually (multiplayer-first).
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class Discovery {
     private static final int CHECK_INTERVAL = 40;
     private static final Map<UUID, String> LAST_HOLD = new HashMap<>();
@@ -65,7 +65,7 @@ public final class Discovery {
      */
     @javax.annotation.Nullable
     public static Component revealNear(ServerPlayer player, BlockPos center, int radius) {
-        ServerLevel level = player.serverLevel();
+        ServerLevel level = player.level();
         PlayerData data = SkyData.get(player);
 
         if (level.dimension() == Level.OVERWORLD) {
@@ -89,7 +89,7 @@ public final class Discovery {
             }
         }
 
-        Registry<Structure> registry = level.registryAccess().registryOrThrow(Registries.STRUCTURE);
+        Registry<Structure> registry = level.registryAccess().lookupOrThrow(Registries.STRUCTURE);
 
         int chunkRadius = Math.max(1, radius / 16);
         int cx = center.getX() >> 4;
@@ -97,7 +97,7 @@ public final class Discovery {
 
         StructureStart nearest = null;
         double nearestDistSq = Double.MAX_VALUE;
-        ResourceLocation nearestKey = null;
+        Identifier nearestKey = null;
         LocationKind nearestKind = null;
 
         for (int dx = -chunkRadius; dx <= chunkRadius; dx += 2) {
@@ -108,12 +108,12 @@ public final class Discovery {
                     Structure s = entry.getKey();
                     StructureStart start = entry.getValue();
                     if (start == null || !start.isValid()) continue;
-                    ResourceLocation key = registry.getKey(s);
+                    Identifier key = registry.getKey(s);
                     if (key == null) continue;
                     if (placeOf(level, key, start) != null) continue; // named places are revealed above
                     LocationKind kind = LocationTags.classify(level, s);
                     if (kind == null) continue;
-                    String id = level.dimension().location() + "|" + key + "|" + start.getChunkPos().x + "," + start.getChunkPos().z;
+                    String id = level.dimension().identifier() + "|" + key + "|" + start.getChunkPos().x() + "," + start.getChunkPos().z();
                     if (WorldData.find(data, id) != null) continue;
 
                     BlockPos sCenter = start.getBoundingBox().getCenter();
@@ -129,7 +129,7 @@ public final class Discovery {
         }
 
         if (nearest != null && nearestKey != null && nearestKind != null) {
-            String id = level.dimension().location() + "|" + nearestKey + "|" + nearest.getChunkPos().x + "," + nearest.getChunkPos().z;
+            String id = level.dimension().identifier() + "|" + nearestKey + "|" + nearest.getChunkPos().x() + "," + nearest.getChunkPos().z();
             String name = LocationNames.generate(id, nearestKind, nearestKey.getPath());
             BlockPos sCenter = nearest.getBoundingBox().getCenter();
             BoundingBox box = nearest.getBoundingBox();
@@ -141,7 +141,7 @@ public final class Discovery {
             loc.putInt("x", sCenter.getX());
             loc.putInt("y", sCenter.getY());
             loc.putInt("z", sCenter.getZ());
-            loc.putString("dim", level.dimension().location().toString());
+            loc.putString("dim", level.dimension().identifier().toString());
             loc.putInt("ax", sCenter.getX());
             loc.putInt("ay", sCenter.getY());
             loc.putInt("az", sCenter.getZ());
@@ -163,7 +163,7 @@ public final class Discovery {
     public static boolean revealPlace(ServerPlayer player, Place place) {
         PlayerData data = SkyData.get(player);
         if (WorldData.find(data, WorldData.placeLocId(place.id())) != null) return false;
-        CompoundTag loc = placeEntry(player.serverLevel(), place, null);
+        CompoundTag loc = placeEntry(player.level(), place, null);
         loc.putBoolean("known", true);
         WorldData.discovered(data).add(loc);
         data.markDirty();
@@ -171,8 +171,8 @@ public final class Discovery {
     }
 
     @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer player)) return;
+    public static void onPlayerTick(PlayerTickEvent.Post event) {
+        if (!(event.getEntity() instanceof ServerPlayer player)) return;
         if (player.isSpectator()) return;
         // spread the work of many players over different ticks
         if ((player.tickCount + (player.getId() & 31)) % CHECK_INTERVAL != 0) return;
@@ -196,29 +196,29 @@ public final class Discovery {
     private static void compactOnce(ServerPlayer player) {
         PlayerData data = SkyData.get(player);
         CompoundTag root = WorldData.root(data);
-        int version = root.getInt("compacted");
+        int version = root.getIntOr("compacted", 0);
         if (version >= 2) return;
         root.putInt("compacted", 2);
         if (version < 1 && WorldConfig.DISCOVERY.get()) {
-            Registry<Structure> registry = player.serverLevel().registryAccess().registryOrThrow(Registries.STRUCTURE);
+            Registry<Structure> registry = player.level().registryAccess().lookupOrThrow(Registries.STRUCTURE);
             ListTag list = WorldData.discovered(data);
             for (int i = list.size() - 1; i >= 0; i--) {
-                CompoundTag loc = list.getCompound(i);
-                String structure = loc.getString("structure");
+                CompoundTag loc = list.getCompoundOrEmpty(i);
+                String structure = loc.getStringOr("structure", "");
                 loc.remove("structure");
                 loc.remove("t");
-                ResourceLocation id = ResourceLocation.tryParse(structure);
+                Identifier id = Identifier.tryParse(structure);
                 if (id == null) continue;
-                boolean ignored = registry.getHolder(net.minecraft.resources.ResourceKey.create(Registries.STRUCTURE, id))
+                boolean ignored = registry.get(net.minecraft.resources.ResourceKey.create(Registries.STRUCTURE, id))
                         .map(h -> h.is(LocationTags.IGNORED_LANDMARKS)).orElse(false);
                 if (ignored) list.remove(i);
             }
         }
-        ListTag holds = root.getList("holds", Tag.TAG_STRING);
+        ListTag holds = root.getListOrEmpty("holds");
         ListTag migrated = new ListTag();
         java.util.Set<String> seen = new java.util.HashSet<>();
         for (int i = 0; i < holds.size(); i++) {
-            String id = Holds.migrate(holds.getString(i));
+            String id = Holds.migrate(holds.getStringOr(i, ""));
             if (seen.add(id)) migrated.add(StringTag.valueOf(id));
         }
         root.put("holds", migrated);
@@ -229,7 +229,7 @@ public final class Discovery {
     // ------------------------------------------------------------------ named places
 
     private static void checkPlaces(ServerPlayer player) {
-        ServerLevel level = player.serverLevel();
+        ServerLevel level = player.level();
         if (level.dimension() != Level.OVERWORLD) return;
         int x = player.getBlockX();
         int z = player.getBlockZ();
@@ -239,7 +239,7 @@ public final class Discovery {
             if (p.distSqr(x, z) > r * r) continue;
             CompoundTag existing = WorldData.find(data, WorldData.placeLocId(p.id()));
             if (existing != null) {
-                if (!existing.getBoolean("known")) continue;
+                if (!existing.getBooleanOr("known", false)) continue;
                 existing.remove("known");
                 existing.putInt("ax", player.getBlockX());
                 existing.putInt("ay", player.getBlockY());
@@ -279,7 +279,7 @@ public final class Discovery {
         loc.putInt("x", p.x());
         loc.putInt("y", y);
         loc.putInt("z", p.z());
-        loc.putString("dim", level.dimension().location().toString());
+        loc.putString("dim", level.dimension().identifier().toString());
         BlockPos at = discoverer != null ? discoverer.blockPosition() : new BlockPos(p.x(), y, p.z());
         loc.putInt("ax", at.getX());
         loc.putInt("ay", at.getY());
@@ -289,7 +289,7 @@ public final class Discovery {
 
     /** The named place a {@code skycraft:*} structure start builds (its start chunk holds the place's anchor), if any. */
     @javax.annotation.Nullable
-    private static Place placeOf(ServerLevel level, ResourceLocation key, StructureStart start) {
+    private static Place placeOf(ServerLevel level, Identifier key, StructureStart start) {
         if (level.dimension() != Level.OVERWORLD || !Skycraft.MODID.equals(key.getNamespace())) return null;
         List<Place> places = Places.inChunk(start.getChunkPos());
         return places.isEmpty() ? null : places.get(0);
@@ -304,15 +304,15 @@ public final class Discovery {
         StructureManager structures = level.structureManager();
         Map<Structure, LongSet> refs = structures.getAllStructuresAt(pos);
         if (refs.isEmpty()) return;
-        Registry<Structure> registry = level.registryAccess().registryOrThrow(Registries.STRUCTURE);
+        Registry<Structure> registry = level.registryAccess().lookupOrThrow(Registries.STRUCTURE);
         PlayerData data = SkyData.get(player);
         for (Structure structure : refs.keySet()) {
-            ResourceLocation key = registry.getKey(structure);
+            Identifier key = registry.getKey(structure);
             if (key == null) continue;
             LocationKind kind = LocationTags.classify(level, structure);
             if (kind == null) continue;
             StructureStart start = kind.insidePieces
-                    ? structures.getStructureWithPieceAt(pos, structure)
+                    ? structures.getStructureWithPieceAt(pos, h -> h.value() == structure)
                     : structures.getStructureAt(pos, structure);
             if (start == null || !start.isValid()) continue;
             Place place = placeOf(level, key, start);
@@ -323,26 +323,26 @@ public final class Discovery {
                     loc = placeEntry(level, place, player);
                     WorldData.discovered(data).add(loc);
                     announce(player, data, place);
-                } else if (loc.getBoolean("known")) {
+                } else if (loc.getBooleanOr("known", false)) {
                     loc.remove("known");
                     announce(player, data, place);
                 }
                 BoundingBox box = start.getBoundingBox();
                 int[] b = {box.minX(), box.minY(), box.minZ(), box.maxX(), box.maxY(), box.maxZ()};
-                if (!java.util.Arrays.equals(loc.getIntArray("box"), b)) {
+                if (!java.util.Arrays.equals(loc.getIntArray("box").orElseGet(() -> new int[0]), b)) {
                     loc.putIntArray("box", b);
                     data.markDirty();
                 }
                 continue;
             }
-            String id = level.dimension().location() + "|" + key + "|" + start.getChunkPos().x + "," + start.getChunkPos().z;
+            String id = level.dimension().identifier() + "|" + key + "|" + start.getChunkPos().x() + "," + start.getChunkPos().z();
             CompoundTag existing = WorldData.find(data, id);
             if (existing != null) {
-                if (existing.getBoolean("known")) {
+                if (existing.getBooleanOr("known", false)) {
                     existing.remove("known");
                     data.addStat("locations_discovered", 1);
                     data.markDirty();
-                    String name = existing.getString("name");
+                    String name = existing.getStringOr("name", "");
                     Notifier.send(player, NotifyKind.LOCATION_DISCOVERED, Component.literal(name), kind.displayName());
                     SkyNetwork.sendToPlayer(player, new WorldPackets.Cue(WorldPackets.Cue.DISCOVERY));
                     com.skycraft.explore.ExploreEvents.onDiscovered(player);
@@ -351,14 +351,14 @@ public final class Discovery {
             }
             // the same place under another structure id (overlapping starts): only right on top of a discovered one
             BlockPos center = start.getBoundingBox().getCenter();
-            if (WorldData.hasDiscoveredNear(data, level.dimension().location().toString(), center.getX(), center.getZ(), 16)) {
+            if (WorldData.hasDiscoveredNear(data, level.dimension().identifier().toString(), center.getX(), center.getZ(), 16)) {
                 continue;
             }
             discover(player, data, id, kind, key, start.getBoundingBox());
         }
     }
 
-    private static void discover(ServerPlayer player, PlayerData data, String id, LocationKind kind, ResourceLocation key, BoundingBox box) {
+    private static void discover(ServerPlayer player, PlayerData data, String id, LocationKind kind, Identifier key, BoundingBox box) {
         String name = LocationNames.generate(id, kind, key.getPath());
         BlockPos center = box.getCenter();
         CompoundTag loc = new CompoundTag();
@@ -368,7 +368,7 @@ public final class Discovery {
         loc.putInt("x", center.getX());
         loc.putInt("y", kind.underground() ? player.getBlockY() : center.getY());
         loc.putInt("z", center.getZ());
-        loc.putString("dim", player.level().dimension().location().toString());
+        loc.putString("dim", player.level().dimension().identifier().toString());
         loc.putInt("ax", player.getBlockX());
         loc.putInt("ay", player.getBlockY());
         loc.putInt("az", player.getBlockZ());
@@ -387,18 +387,18 @@ public final class Discovery {
     @SubscribeEvent
     public static void onDeath(LivingDeathEvent event) {
         LivingEntity victim = event.getEntity();
-        if (victim.level().isClientSide || !(victim instanceof Enemy)) return;
+        if (victim.level().isClientSide() || !(victim instanceof Enemy)) return;
         ServerLevel level = (ServerLevel) victim.level();
-        String dim = level.dimension().location().toString();
+        String dim = level.dimension().identifier().toString();
         // everyone nearby who discovered the place shares the clear (party play)
         for (ServerPlayer player : level.players()) {
             if (player.distanceToSqr(victim) > 64 * 64) continue;
             PlayerData data = SkyData.get(player);
             ListTag list = WorldData.discovered(data);
             for (int i = 0; i < list.size(); i++) {
-                CompoundTag loc = list.getCompound(i);
-                if (loc.getBoolean("cleared") || loc.getBoolean("known") || !loc.getString("dim").equals(dim)) continue;
-                LocationKind kind = LocationKind.byId(loc.getString("type"));
+                CompoundTag loc = list.getCompoundOrEmpty(i);
+                if (loc.getBooleanOr("cleared", false) || loc.getBooleanOr("known", false) || !loc.getStringOr("dim", "").equals(dim)) continue;
+                LocationKind kind = LocationKind.byId(loc.getStringOr("type", ""));
                 if (!kind.clearable || !WorldData.inBox(loc, victim.getX(), victim.getY(), victim.getZ(), 6)) continue;
                 if (hostilesRemain(level, loc, victim)) continue;
                 loc.putBoolean("cleared", true);
@@ -410,7 +410,7 @@ public final class Discovery {
     }
 
     private static boolean hostilesRemain(ServerLevel level, CompoundTag loc, LivingEntity victim) {
-        int[] b = loc.getIntArray("box");
+        int[] b = loc.getIntArray("box").orElseGet(() -> new int[0]);
         AABB box = new AABB(b[0] - 4, b[1] - 4, b[2] - 4, b[3] + 5, b[4] + 5, b[5] + 5);
         AABB near = victim.getBoundingBox().inflate(48);
         AABB search = box.intersect(near);
@@ -456,7 +456,7 @@ public final class Discovery {
     }
 
     private static void realm(ServerPlayer player, PlayerData data, CompoundTag root, String flag, String name) {
-        if (!root.getBoolean(flag)) {
+        if (!root.getBooleanOr(flag, false)) {
             root.putBoolean(flag, true);
             data.markDirty();
             Notifier.title(player, Component.translatable("world.skycraft.realm." + name), Component.translatable("world.skycraft.realm." + name + ".sub"));

@@ -1,37 +1,37 @@
 package com.skycraft.world;
 
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 /**
  * World module settings: {@code config/skycraft-world-common.toml} (server rules) and
  * {@code config/skycraft-world-client.toml} (music & atmosphere, per player).
  */
 public final class WorldConfig {
-    public static final ForgeConfigSpec COMMON_SPEC;
-    public static final ForgeConfigSpec CLIENT_SPEC;
+    public static final ModConfigSpec COMMON_SPEC;
+    public static final ModConfigSpec CLIENT_SPEC;
 
     // common
-    public static final ForgeConfigSpec.BooleanValue DISCOVERY;
-    public static final ForgeConfigSpec.BooleanValue FAST_TRAVEL;
-    public static final ForgeConfigSpec.IntValue BLOCKS_PER_TRAVEL_HOUR;
-    public static final ForgeConfigSpec.BooleanValue TRAVEL_TIME_MULTIPLAYER;
-    public static final ForgeConfigSpec.BooleanValue BED_MENU;
-    public static final ForgeConfigSpec.BooleanValue REST_SYNC_MULTIPLAYER;
-    public static final ForgeConfigSpec.BooleanValue REST_ALLOW_WAIT;
-    public static final ForgeConfigSpec.BooleanValue REST_ALLOW_SLEEP_SKIP;
-    public static final ForgeConfigSpec.IntValue REST_AFK_SECONDS;
-    public static final ForgeConfigSpec.IntValue REST_FULL_RECHARGE_SECONDS;
-    public static final ForgeConfigSpec.IntValue REST_BEDROLL_PERCENT;
-    public static final ForgeConfigSpec.IntValue REST_MAX_SKIP_SECONDS;
-    public static final ForgeConfigSpec.IntValue WELL_RESTED_TICKS;
+    public static final ModConfigSpec.BooleanValue DISCOVERY;
+    public static final ModConfigSpec.BooleanValue FAST_TRAVEL;
+    public static final ModConfigSpec.IntValue BLOCKS_PER_TRAVEL_HOUR;
+    public static final ModConfigSpec.BooleanValue TRAVEL_TIME_MULTIPLAYER;
+    public static final ModConfigSpec.BooleanValue BED_MENU;
+    public static final ModConfigSpec.BooleanValue REST_SYNC_MULTIPLAYER;
+    public static final ModConfigSpec.BooleanValue REST_ALLOW_WAIT;
+    public static final ModConfigSpec.BooleanValue REST_ALLOW_SLEEP_SKIP;
+    public static final ModConfigSpec.IntValue REST_AFK_SECONDS;
+    public static final ModConfigSpec.IntValue REST_FULL_RECHARGE_SECONDS;
+    public static final ModConfigSpec.IntValue REST_BEDROLL_PERCENT;
+    public static final ModConfigSpec.IntValue REST_MAX_SKIP_SECONDS;
+    public static final ModConfigSpec.IntValue WELL_RESTED_TICKS;
 
     // client
-    public static final ForgeConfigSpec.BooleanValue MUSIC;
-    public static final ForgeConfigSpec.BooleanValue REALM_FOG;
-    public static final ForgeConfigSpec.IntValue COMPASS_RANGE;
+    public static final ModConfigSpec.BooleanValue MUSIC;
+    public static final ModConfigSpec.BooleanValue REALM_FOG;
+    public static final ModConfigSpec.IntValue COMPASS_RANGE;
 
     static {
-        ForgeConfigSpec.Builder b = new ForgeConfigSpec.Builder();
+        ModConfigSpec.Builder b = new ModConfigSpec.Builder();
         b.push("world");
         DISCOVERY = b.comment("Announce structures as Skyrim locations (\"DISCOVERED: Bleakwind Barrow\") and track them per player.")
                 .define("discovery", true);
@@ -66,7 +66,7 @@ public final class WorldConfig {
         b.pop();
         COMMON_SPEC = b.build();
 
-        ForgeConfigSpec.Builder c = new ForgeConfigSpec.Builder();
+        ModConfigSpec.Builder c = new ModConfigSpec.Builder();
         c.push("atmosphere");
         MUSIC = c.comment("Play the Skycraft situational soundtrack (exploration, towns, dungeons, combat...) instead of vanilla music.")
                 .define("music", true);

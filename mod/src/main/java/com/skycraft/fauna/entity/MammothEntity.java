@@ -2,7 +2,7 @@ package com.skycraft.fauna.entity;
 
 import com.skycraft.Skycraft;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.damagesource.DamageSource;
@@ -22,7 +22,7 @@ import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Comparator;
@@ -34,7 +34,7 @@ import java.util.List;
  * leader, or to a giant (the giants' herds), and the whole herd retaliates when one is attacked.
  */
 public class MammothEntity extends FaunaAnimal {
-    private static final ResourceLocation GIANT_ID = new ResourceLocation(Skycraft.MODID, "giant");
+    private static final Identifier GIANT_ID = Identifier.fromNamespaceAndPath(Skycraft.MODID, "giant");
     @Nullable
     private static EntityType<?> giantType;
     private static boolean giantLookedUp;
@@ -42,7 +42,7 @@ public class MammothEntity extends FaunaAnimal {
     public MammothEntity(EntityType<? extends MammothEntity> type, Level level) {
         super(type, level);
         this.xpReward = 15;
-        this.setMaxUpStep(1.0f);
+        this.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.STEP_HEIGHT).setBaseValue(1.0f);
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -61,7 +61,7 @@ public class MammothEntity extends FaunaAnimal {
     /** Animals never despawn; a roaming giant's herd does (unless someone leashed or named one). */
     @Override
     public boolean removeWhenFarAway(double distanceToClosestPlayer) {
-        return this.getTags().contains(HERD_TAG) && !this.isLeashed() && !this.hasCustomName();
+        return this.entityTags().contains(HERD_TAG) && !this.isLeashed() && !this.hasCustomName();
     }
 
     /** The creatures module's giant type, if registered. */
@@ -69,7 +69,7 @@ public class MammothEntity extends FaunaAnimal {
     public static EntityType<?> giantType() {
         if (!giantLookedUp) {
             giantLookedUp = true;
-            giantType = ForgeRegistries.ENTITY_TYPES.containsKey(GIANT_ID) ? ForgeRegistries.ENTITY_TYPES.getValue(GIANT_ID) : null;
+            giantType = BuiltInRegistries.ENTITY_TYPE.containsKey(GIANT_ID) ? BuiltInRegistries.ENTITY_TYPE.getValue(GIANT_ID) : null;
         }
         return giantType;
     }
@@ -86,8 +86,8 @@ public class MammothEntity extends FaunaAnimal {
     }
 
     @Override
-    public boolean doHurtTarget(Entity target) {
-        boolean hit = super.doHurtTarget(target);
+    public boolean doHurtTarget(net.minecraft.server.level.ServerLevel serverLevel263, Entity target) {
+        boolean hit = super.doHurtTarget(serverLevel263, target);
         if (hit) target.setDeltaMovement(target.getDeltaMovement().add(0, 0.45, 0)); // tossed by the tusks
         return hit;
     }

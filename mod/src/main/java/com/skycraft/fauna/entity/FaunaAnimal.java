@@ -14,7 +14,7 @@ import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.player.Player;
@@ -40,11 +40,11 @@ public abstract class FaunaAnimal extends Animal implements AnimatedCreature {
     }
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        this.entityData.define(VARIANT, 0);
-        this.entityData.define(MALE, false);
-        this.entityData.define(RESTING, false);
+    protected void defineSynchedData(net.minecraft.network.syncher.SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(VARIANT, 0);
+        builder.define(MALE, false);
+        builder.define(RESTING, false);
     }
 
     public boolean isResting() {
@@ -63,7 +63,7 @@ public abstract class FaunaAnimal extends Animal implements AnimatedCreature {
     @Override
     public void tick() {
         super.tick();
-        if (!this.level().isClientSide && !restGoalAdded) {
+        if (!this.level().isClientSide() && !restGoalAdded) {
             restGoalAdded = true;
             this.goalSelector.addGoal(0, new RestAtNightGoal(this));
         }
@@ -97,17 +97,23 @@ public abstract class FaunaAnimal extends Animal implements AnimatedCreature {
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag tag) {
-        super.addAdditionalSaveData(tag);
+    public void addAdditionalSaveData(net.minecraft.world.level.storage.ValueOutput output263) {
+        super.addAdditionalSaveData(output263);
+        net.minecraft.nbt.CompoundTag tag = new net.minecraft.nbt.CompoundTag();
+        
         tag.putInt("Variant", getVariant());
         tag.putBoolean("Male", isMale());
+    
+        output263.store(tag);
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag tag) {
-        super.readAdditionalSaveData(tag);
-        setVariant(tag.getInt("Variant"));
-        setMale(tag.getBoolean("Male"));
+    public void readAdditionalSaveData(net.minecraft.world.level.storage.ValueInput input263) {
+        super.readAdditionalSaveData(input263);
+        net.minecraft.nbt.CompoundTag tag = com.skycraft.platform.ValueTags.read(input263 , "Variant", "Male");
+        
+        setVariant(tag.getIntOr("Variant",0));
+        setMale(tag.getBooleanOr("Male",false));
     }
 
     /** Picks the variant for a freshly spawned animal (e.g. snowy sabre cat in cold biomes). */
@@ -122,12 +128,12 @@ public abstract class FaunaAnimal extends Animal implements AnimatedCreature {
 
     @Override
     @Nullable
-    public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, MobSpawnType reason,
-                                        @Nullable SpawnGroupData data, @Nullable CompoundTag tag) {
+    public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, EntitySpawnReason reason,
+                                        @Nullable SpawnGroupData data) {
         setMale(this.random.nextBoolean());
         setVariant(chooseVariant(level, blockPosition()));
         if (data == null) data = new AgeableMob.AgeableMobGroupData(false); // wild beasts never spawn as babies
-        return super.finalizeSpawn(level, difficulty, reason, data, tag);
+        return super.finalizeSpawn(level, difficulty, reason, data);
     }
 
     /** Predators and territorial beasts leave players alone on Peaceful, in creative/spectator, and in starter/town calm zones unless provoked. */
@@ -170,9 +176,10 @@ public abstract class FaunaAnimal extends Animal implements AnimatedCreature {
 
     /** Every melee swing plays an attack animation (alternating blows). */
     @Override
-    public void swing(net.minecraft.world.InteractionHand hand) {
-        super.swing(hand);
-        if (!this.level().isClientSide) CreatureAnims.play(this, this.getRandom().nextInt(3) == 0 ? AnimSlot.ATTACK2 : AnimSlot.ATTACK);
+    public boolean swing(net.minecraft.world.InteractionHand hand, net.minecraft.world.item.component.SwingAnimation animation263, boolean updateSelf263) {
+        boolean swung263 = super.swing(hand, animation263, updateSelf263);
+        if (!this.level().isClientSide()) CreatureAnims.play(this, this.getRandom().nextInt(3) == 0 ? AnimSlot.ATTACK2 : AnimSlot.ATTACK);
+        return swung263;
     }
 
     @Override

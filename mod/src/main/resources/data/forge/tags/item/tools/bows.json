@@ -1,0 +1,32 @@
+{
+  "replace": false,
+  "values": [
+    "skycraft:iron_bow",
+    "skycraft:steel_bow",
+    "skycraft:orcish_bow",
+    "skycraft:dwarven_bow",
+    "skycraft:elven_bow",
+    "skycraft:glass_bow",
+    "skycraft:ebony_bow",
+    "skycraft:daedric_bow",
+    "skycraft:dragonbone_bow",
+    "skycraft:silver_bow",
+    "skycraft:ancient_nord_bow",
+    "skycraft:forsworn_bow",
+    "skycraft:imperial_bow",
+    "skycraft:falmer_bow",
+    "skycraft:nordic_bow",
+    "skycraft:skyforge_bow",
+    "skycraft:akaviri_bow",
+    "skycraft:stalhrim_bow",
+    "skycraft:chitin_bow",
+    "skycraft:redguard_bow",
+    "skycraft:yokudan_bow",
+    "skycraft:khajiit_bow",
+    "skycraft:bosmer_bow",
+    "skycraft:breton_bow",
+    "skycraft:argonian_bow",
+    "skycraft:maormer_bow",
+    "minecraft:bow"
+  ]
+}

@@ -3,43 +3,9 @@
   "temperature": 0.3,
   "downfall": 0.5,
   "effects": {
-    "sky_color": 7907327,
-    "fog_color": 5990776,
-    "water_color": 4025241,
-    "water_fog_color": 329011,
-    "mood_sound": {
-      "sound": "minecraft:ambient.cave",
-      "tick_delay": 6000,
-      "block_search_extent": 8,
-      "offset": 2.0
-    }
+    "water_color": "#3d6b99"
   },
-  "spawners": {
-    "monster": [],
-    "creature": [],
-    "ambient": [
-      {
-        "type": "minecraft:bat",
-        "weight": 10,
-        "minCount": 8,
-        "maxCount": 8
-      }
-    ],
-    "axolotls": [],
-    "underground_water_creature": [
-      {
-        "type": "minecraft:glow_squid",
-        "weight": 10,
-        "minCount": 4,
-        "maxCount": 6
-      }
-    ],
-    "water_creature": [],
-    "water_ambient": [],
-    "misc": []
-  },
-  "spawn_costs": {},
-  "carvers": {},
+  "carvers": [],
   "features": [
     [],
     [
@@ -97,5 +63,50 @@
     [
       "minecraft:freeze_top_layer"
     ]
-  ]
+  ],
+  "attributes": {
+    "minecraft:visual/sky_color": "#78a7ff",
+    "minecraft:visual/fog_color": "#5b6978",
+    "minecraft:visual/water_fog_color": "#050533",
+    "minecraft:audio/ambient_sounds": {
+      "mood": {
+        "sound": "minecraft:ambient.cave",
+        "tick_delay": 6000,
+        "block_search_extent": 8,
+        "offset": 2.0
+      }
+    },
+    "minecraft:gameplay/natural_mob_spawns": {
+      "modifier": "overlay",
+      "argument": {
+        "spawns_by_category": {
+          "monster": [],
+          "creature": [],
+          "ambient": [
+            {
+              "type": "minecraft:bat",
+              "weight": 10,
+              "count": 8
+            }
+          ],
+          "axolotls": [],
+          "underground_water_creature": [
+            {
+              "type": "minecraft:glow_squid",
+              "weight": 10,
+              "count": {
+                "type": "minecraft:uniform",
+                "min_inclusive": 4,
+                "max_inclusive": 6
+              }
+            }
+          ],
+          "water_creature": [],
+          "water_ambient": [],
+          "misc": []
+        },
+        "spawn_costs": {}
+      }
+    }
+  }
 }

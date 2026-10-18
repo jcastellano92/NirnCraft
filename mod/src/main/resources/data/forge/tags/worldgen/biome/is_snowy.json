@@ -15,6 +15,14 @@
     "skycraft:snowy_slopes",
     "skycraft:solstheim_pine_forest",
     "skycraft:throat_of_the_world",
-    "skycraft:winterhold_glacier"
+    "skycraft:winterhold_glacier",
+    "minecraft:snowy_beach",
+    "minecraft:snowy_plains",
+    "minecraft:ice_spikes",
+    "minecraft:snowy_taiga",
+    "minecraft:grove",
+    "minecraft:snowy_slopes",
+    "minecraft:jagged_peaks",
+    "minecraft:frozen_peaks"
   ]
 }

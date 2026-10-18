@@ -24,9 +24,9 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.util.List;
 import java.util.Locale;
@@ -41,14 +41,14 @@ import java.util.TreeMap;
  * fire sites, burnt blocks, bodies, huddled, workers, aid props), {@code respawn <place>} and {@code clear <place>}
  * (the tableau people of a settlement), {@code selftest}.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class FireCommands {
     private FireCommands() {}
 
     @SubscribeEvent
     public static void onRegister(RegisterCommandsEvent event) {
         CommandDispatcher<CommandSourceStack> d = event.getDispatcher();
-        d.register(Commands.literal("skycraft-fire").requires(s -> s.hasPermission(2))
+        d.register(Commands.literal("skycraft-fire").requires(s -> s.permissions().hasPermission(net.minecraft.server.permissions.Permissions.COMMANDS_GAMEMASTER))
                 .then(Commands.literal("stats").executes(ctx -> stats(ctx.getSource())))
                 .then(Commands.literal("list").executes(ctx -> list(ctx.getSource(), 20))
                         .then(Commands.argument("n", IntegerArgumentType.integer(1, 500)).executes(ctx -> list(ctx.getSource(),
@@ -207,7 +207,7 @@ public final class FireCommands {
                 for (int si = 0; si < sections.length; si++) {
                     LevelChunkSection sec = sections[si];
                     if (sec == null || sec.hasOnlyAir()) continue;
-                    if (!sec.maybeHas(st -> st.getBlock().builtInRegistryHolder().key().location().getNamespace().equals(Skycraft.MODID))) continue;
+                    if (!sec.maybeHas(st -> st.getBlock().builtInRegistryHolder().key().identifier().getNamespace().equals(Skycraft.MODID))) continue;
                     for (int x = 0; x < 16; x++) {
                         for (int y = 0; y < 16; y++) {
                             for (int z = 0; z < 16; z++) {
@@ -220,7 +220,7 @@ public final class FireCommands {
                                 if (dx * dx + dz * dz > (long) r * r) continue;
                                 blocks.merge(key.getPath(), 1, Integer::sum);
                                 if (com.skycraft.fire.aftermath.Supports.needsFloor(st)) {
-                                    int wy = chunk.getMinBuildHeight() + si * 16 + y;
+                                    int wy = chunk.getMinY() + si * 16 + y;
                                     BlockPos at = new BlockPos(wx, wy, wz);
                                     if (!com.skycraft.fire.aftermath.Supports.holds(chunk.getBlockState(at.below()))) {
                                         floating++;

@@ -1,0 +1,11 @@
+{
+  "type": "skycraft:dead_tree",
+  "config": {
+    "state": {
+      "id": "minecraft:dark_oak_log",
+      "properties": {
+        "axis": "y"
+      }
+    }
+  }
+}

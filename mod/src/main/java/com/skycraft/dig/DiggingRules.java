@@ -9,22 +9,20 @@ import com.skycraft.perk.Perks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.PickaxeItem;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.Tags;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.event.level.BlockEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.common.Tags;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.level.BlockEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -39,7 +37,7 @@ import java.util.UUID;
  * </ul>
  * Ores need a pickaxe, logs need an axe. Player-placed blocks and {@code skycraft:always_breakable} are always fine.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class DiggingRules {
     public static final TagKey<Block> SOFT = tag("soft_terrain");
     public static final TagKey<Block> HARD = tag("hard_terrain");
@@ -51,7 +49,7 @@ public final class DiggingRules {
     private DiggingRules() {}
 
     private static TagKey<Block> tag(String name) {
-        return TagKey.create(Registries.BLOCK, new ResourceLocation(Skycraft.MODID, name));
+        return TagKey.create(Registries.BLOCK, Identifier.fromNamespaceAndPath(Skycraft.MODID, name));
     }
 
     /** Returns the translation key of the reason the player can't break this block, or null if allowed. */
@@ -62,8 +60,8 @@ public final class DiggingRules {
         boolean wildPlant = com.skycraft.protect.Protect.isAmbientPlant(state) || com.skycraft.survival.Harvesting.isHarvestable(state);
         if (wildPlant && !PlacedBlocks.isPlayerPlaced(player.level(), pos)) return null;
         boolean ownGround = false;
-        if (player instanceof ServerPlayer sp && sp.getServer() != null) {
-            com.skycraft.homestead.HomesteadClaim claim = com.skycraft.homestead.HomesteadData.get(sp.getServer()).getClaimHorizontal(sp.level(), pos);
+        if (player instanceof ServerPlayer sp && sp.level().getServer() != null) {
+            com.skycraft.homestead.HomesteadClaim claim = com.skycraft.homestead.HomesteadData.get(sp.level().getServer()).getClaimHorizontal(sp.level(), pos);
             if (claim != null) {
                 if (!claim.canBuild(sp)) return "message.skycraft.homestead.no_build_permission";
                 if (pos.getY() < claim.getCenter().getY() - claim.getMinDepth()) return "message.skycraft.homestead.depth_limit";
@@ -86,8 +84,8 @@ public final class DiggingRules {
             return null;
         }
         if (SkyConfig.REQUIRE_CORRECT_TOOL.get()) {
-            if (state.is(Tags.Blocks.ORES) && !(tool.getItem() instanceof PickaxeItem)) return "message.skycraft.need_pickaxe";
-            if (state.is(BlockTags.LOGS) && !(tool.getItem() instanceof AxeItem)) return "message.skycraft.need_axe";
+            if (state.is(Tags.Blocks.ORES) && !(tool.is(net.minecraft.tags.ItemTags.PICKAXES))) return "message.skycraft.need_pickaxe";
+            if (state.is(BlockTags.LOGS) && !(tool.is(net.minecraft.tags.ItemTags.AXES))) return "message.skycraft.need_axe";
         }
         if (!SkyConfig.RESTRICT_DIGGING.get()) return null;
         // your own homestead is yours to dig: the Mining perks only gate the wilderness (world protection, docs/FEATURES.md)
@@ -120,7 +118,7 @@ public final class DiggingRules {
     }
 
     @SubscribeEvent(priority = EventPriority.HIGH)
-    public static void onBreak(BlockEvent.BreakEvent event) {
+    public static void onBreak(net.neoforged.neoforge.event.level.block.BreakBlockEvent event) {
         Player player = event.getPlayer();
         String reason = denyReason(player, event.getState(), event.getPos());
         if (reason != null) {
@@ -133,7 +131,7 @@ public final class DiggingRules {
 
     @SubscribeEvent
     public static void onPlace(BlockEvent.EntityPlaceEvent event) {
-        if (event.getEntity() instanceof Player player && !player.level().isClientSide) {
+        if (event.getEntity() instanceof Player player && !player.level().isClientSide()) {
             if (event instanceof BlockEvent.EntityMultiPlaceEvent multi) {
                 // Beds, doors, tall plants: every part counts as placed.
                 for (var snapshot : multi.getReplacedBlockSnapshots()) PlacedBlocks.mark(player.level(), snapshot.getPos(), true);
@@ -145,7 +143,7 @@ public final class DiggingRules {
 
     /** Called client-and-server side when a player starts hitting a forbidden block, so they learn why. */
     @SubscribeEvent
-    public static void onLeftClick(net.minecraftforge.event.entity.player.PlayerInteractEvent.LeftClickBlock event) {
+    public static void onLeftClick(net.neoforged.neoforge.event.entity.player.PlayerInteractEvent.LeftClickBlock event) {
         if (event.getEntity() instanceof ServerPlayer sp) {
             String reason = denyReason(sp, sp.level().getBlockState(event.getPos()), event.getPos());
             if (reason != null) warn(sp, reason);

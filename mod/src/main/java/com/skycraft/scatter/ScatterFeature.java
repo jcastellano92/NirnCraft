@@ -4,9 +4,9 @@ import com.mojang.serialization.Codec;
 import com.skycraft.Skycraft;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.WorldGenLevel;
-import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
-import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
+import com.skycraft.worldgen.ConfiguredFeature;
+import com.skycraft.worldgen.FeaturePlaceContext;
+import com.skycraft.worldgen.NoneFeatureConfiguration;
 
 /**
  * Scatters the clutter of the decorated chunk: the discovery whose centre is in it (if any), the planned scenes that
@@ -14,7 +14,7 @@ import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConf
  * Placed once per chunk (count 1) in every overworld biome at the last decoration step, after the trees and plants,
  * like {@code skycraft:minor_site}. See {@link Scatter}.
  */
-public class ScatterFeature extends Feature<NoneFeatureConfiguration> {
+public class ScatterFeature extends ConfiguredFeature<NoneFeatureConfiguration> {
     public ScatterFeature(Codec<NoneFeatureConfiguration> codec) {
         super(codec);
     }
@@ -22,7 +22,7 @@ public class ScatterFeature extends Feature<NoneFeatureConfiguration> {
     @Override
     public boolean place(FeaturePlaceContext<NoneFeatureConfiguration> ctx) {
         WorldGenLevel level = ctx.level();
-        ChunkPos chunk = new ChunkPos(ctx.origin());
+        ChunkPos chunk = ChunkPos.containing(ctx.origin());
         boolean any = false;
         long t0 = System.nanoTime();
         try {

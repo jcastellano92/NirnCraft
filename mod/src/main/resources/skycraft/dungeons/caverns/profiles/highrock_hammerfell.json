@@ -203,7 +203,7 @@
     "type": "plant",
     "block": [
      "minecraft:fern",
-     "minecraft:grass",
+     "minecraft:short_grass",
      "minecraft:brown_mushroom"
     ],
     "density": 90
@@ -349,7 +349,7 @@
    {
     "type": "hang",
     "block": [
-     "minecraft:chain"
+     "minecraft:iron_chain"
     ],
     "density": 8,
     "len": [
@@ -739,7 +739,7 @@
     "type": "plant",
     "block": [
      "minecraft:fern",
-     "minecraft:grass",
+     "minecraft:short_grass",
      "minecraft:dead_bush"
     ],
     "density": 50

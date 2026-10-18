@@ -15,7 +15,6 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.PotionItem;
 import net.minecraft.world.item.TippedArrowItem;
 import net.minecraft.world.item.alchemy.Potion;
-import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import org.jetbrains.annotations.Nullable;
@@ -46,12 +45,12 @@ public final class Shop {
     /** How long player-sold items stay on the public shop shelf before clearing (10 minutes or 2 restock periods). */
     public static final long SOLD_TTL_TICKS = 10L * 60L * 20L;
 
-    private static final Potion[] SHOP_POTIONS = {
+    private static final List<net.minecraft.core.Holder<Potion>> SHOP_POTIONS = List.of(
             Potions.HEALING, Potions.HEALING, Potions.STRONG_HEALING, Potions.REGENERATION, Potions.LONG_REGENERATION,
             Potions.SWIFTNESS, Potions.LONG_SWIFTNESS, Potions.STRENGTH, Potions.FIRE_RESISTANCE, Potions.LONG_FIRE_RESISTANCE,
             Potions.NIGHT_VISION, Potions.WATER_BREATHING, Potions.INVISIBILITY, Potions.LEAPING, Potions.SLOW_FALLING,
             Potions.POISON, Potions.HARMING, Potions.WEAKNESS, Potions.SLOWNESS, Potions.STRONG_STRENGTH
-    };
+    );
 
     private final LivingEntity npc;
     private final ShopBook.Record rec;
@@ -69,7 +68,7 @@ public final class Shop {
      * signs agree. Works on both sides.
      */
     public static boolean isOpen(net.minecraft.world.level.Level level) {
-        long t = level.getDayTime() % 24000L;
+        long t = level.getDefaultClockTime() % 24000L;
         return t >= 2000L && t < 14000L;
     }
 
@@ -116,7 +115,7 @@ public final class Shop {
 
     static long today(net.minecraft.world.level.Level level) {
         // day time advances when sleeping; game time keeps going even with the daylight cycle off
-        return Math.max(level.getDayTime(), level.getGameTime()) / 24000L;
+        return Math.max(level.getDefaultClockTime(), level.getGameTime()) / 24000L;
     }
 
     /**
@@ -150,21 +149,21 @@ public final class Shop {
     /** Takes over (once) what an NPC of an older save carried in its own persistent data. */
     private void migrateLegacy(boolean created) {
         CompoundTag root = npc.getPersistentData();
-        if (!root.contains(KEY, Tag.TAG_COMPOUND)) return;
-        CompoundTag old = root.getCompound(KEY);
-        boolean legacy = old.contains("stock", Tag.TAG_LIST) || old.contains("restock_day") || old.contains("gold") || old.contains("invested");
+        if (!com.skycraft.platform.NbtData.hasType(root, KEY, Tag.TAG_COMPOUND)) return;
+        CompoundTag old = root.getCompoundOrEmpty(KEY);
+        boolean legacy = com.skycraft.platform.NbtData.hasType(old, "stock", Tag.TAG_LIST) || old.contains("restock_day") || old.contains("gold") || old.contains("invested");
         if (!legacy) return;
-        if (old.getBoolean("invested") && !rec.invested) rec.invested = true;
+        if (old.getBooleanOr("invested",false) && !rec.invested) rec.invested = true;
         if (created && old.contains("restock_day")) {
-            long day = old.getLong("restock_day");
+            long day = old.getLongOr("restock_day",0L);
             rec.period = Math.floorDiv(day, (long) RESTOCK_DAYS);
-            rec.gold = old.getInt("gold");
-            ListTag list = old.getList("stock", Tag.TAG_COMPOUND);
+            rec.gold = old.getIntOr("gold",0);
+            ListTag list = old.getListOrEmpty("stock");
             for (int i = 0; i < list.size(); i++) {
-                ItemStack s = ItemStack.of(list.getCompound(i));
+                ItemStack s = com.skycraft.inventory.ItemData.parse(list.getCompoundOrEmpty(i));
                 if (!s.isEmpty()) rec.stock.add(s);
             }
-            if (old.contains("mt_used", Tag.TAG_COMPOUND)) rec.mtUsed = old.getCompound("mt_used").copy();
+            if (com.skycraft.platform.NbtData.hasType(old, "mt_used", Tag.TAG_COMPOUND)) rec.mtUsed = old.getCompoundOrEmpty("mt_used").copy();
             rec.dirty();
         }
         old.remove("stock");
@@ -233,13 +232,13 @@ public final class Shop {
 
     private int masterTraderLeft(Player player) {
         if (!Perks.has(player, "speech.master_trader")) return 0;
-        return Math.max(0, MASTER_TRADER_BONUS - rec.mtUsed.getInt(player.getStringUUID()));
+        return Math.max(0, MASTER_TRADER_BONUS - rec.mtUsed.getIntOr(player.getStringUUID(), 0));
     }
 
     /** The shop pays {@code amount} to the player (Master Trader bonus first). Caller checked {@link #available}. */
     public void pay(Player player, int amount) {
         int bonus = Math.min(amount, masterTraderLeft(player));
-        if (bonus > 0) rec.mtUsed.putInt(player.getStringUUID(), rec.mtUsed.getInt(player.getStringUUID()) + bonus);
+        if (bonus > 0) rec.mtUsed.putInt(player.getStringUUID(), rec.mtUsed.getIntOr(player.getStringUUID(), 0) + bonus);
         rec.gold = Math.max(0, rec.gold - (amount - bonus));
     }
 
@@ -298,7 +297,7 @@ public final class Shop {
         int rem = n;
         for (var it = rec.soldBatches.iterator(); it.hasNext() && rem > 0; ) {
             ShopBook.SoldBatch b = it.next();
-            if (ItemStack.isSameItemSameTags(b.one, key)) {
+            if (ItemStack.isSameItemSameComponents(b.one, key)) {
                 int take = Math.min(rem, b.count);
                 b.count -= take;
                 rem -= take;
@@ -328,7 +327,7 @@ public final class Shop {
             ItemStack oldest = rec.sold.get(0);
             if (!oldest.isEmpty()) {
                 rec.stock.take(oldest, oldest.getCount());
-                rec.soldBatches.removeIf(b -> ItemStack.isSameItemSameTags(b.one, oldest));
+                rec.soldBatches.removeIf(b -> ItemStack.isSameItemSameComponents(b.one, oldest));
             }
             rec.sold.take(0, Integer.MAX_VALUE);
         }
@@ -353,7 +352,7 @@ public final class Shop {
     // ------------------------------------------------------------------ restock
 
     public void restockIfDue() {
-        long dt = npc.level().getDayTime();
+        long dt = npc.level().getDefaultClockTime();
         long period = Math.floorDiv(today(npc.level()), (long) RESTOCK_DAYS);
         if (rec.lastDayTime != Long.MIN_VALUE && dt - rec.lastDayTime >= 24000L * RESTOCK_DAYS && period == rec.period) {
             period = rec.period + Math.floorDiv(dt - rec.lastDayTime, 24000L * RESTOCK_DAYS);
@@ -428,7 +427,7 @@ public final class Shop {
     /** Specialty goods the shop bought from {@code player} but never resells: they wait on that player's buy-back list. */
     public void keep(UUID player, ItemStack one, int count, int unit, long gameTime) {
         for (ShopBook.Kept k : rec.kept) {
-            if (k.player.equals(player) && k.unit == unit && ItemStack.isSameItemSameTags(k.one, one)) {
+            if (k.player.equals(player) && k.unit == unit && ItemStack.isSameItemSameComponents(k.one, one)) {
                 k.count += count;
                 rec.dirty();
                 return;
@@ -487,18 +486,18 @@ public final class Shop {
     static ItemStack makeStock(Item item, RandomSource rnd, int level, ShopType trade) {
         if (item == Items.AIR) return ItemStack.EMPTY;
         if (item == Items.ENCHANTED_BOOK) {
-            ItemStack book = EnchantmentHelper.enchantItem(rnd, new ItemStack(Items.BOOK), 5 + 5 * level, false);
+            ItemStack book = StockEnchantments.enchant(rnd, new ItemStack(Items.BOOK), 5 + 5 * level);
             return book.is(Items.ENCHANTED_BOOK) ? book : ItemStack.EMPTY;
         }
         ItemStack stack = new ItemStack(item);
         if (item == Items.POTION || item == Items.SPLASH_POTION) {
             stack = EconomyLoot.skyrimPotion(item == Items.SPLASH_POTION, 4 + 8 * level, rnd);
         } else if (item instanceof PotionItem || item instanceof TippedArrowItem) {
-            PotionUtils.setPotion(stack, SHOP_POTIONS[rnd.nextInt(SHOP_POTIONS.length)]);
-        } else if (level >= 3 && stack.isEnchantable() && stack.getMaxStackSize() == 1 && !(item instanceof net.minecraft.world.item.DiggerItem)
+            stack.set(net.minecraft.core.component.DataComponents.POTION_CONTENTS, new net.minecraft.world.item.alchemy.PotionContents(SHOP_POTIONS.get(rnd.nextInt(SHOP_POTIONS.size()))));
+        } else if (level >= 3 && stack.isEnchantable() && stack.getMaxStackSize() == 1 && !(ItemCategory.isDigger(stack))
                 && rnd.nextFloat() < 0.12f * (level - 2)) {
             // Skyrim shops sell some enchanted gear at higher levels
-            stack = EnchantmentHelper.enchantItem(rnd, stack, 5 + 4 * level, false);
+            stack = StockEnchantments.enchant(rnd, stack, 5 + 4 * level);
         }
         int max = stack.getMaxStackSize();
         if (max > 1) {

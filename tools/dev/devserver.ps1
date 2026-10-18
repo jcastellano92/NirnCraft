@@ -2,7 +2,7 @@
 Persistent headless dev server with a command inbox: boot once, then run commands in seconds instead of booting a
 fresh server per check.
 
-  tools\dev\devserver.ps1 start                 # boot (gradle runServer in mod\run\devworld; returns when ready)
+  tools\dev\devserver.ps1 start                 # prepare exact26.3 MDG launch, then Java25 in mod\run\devworld-26.3
   tools\dev\devserver.ps1 hotswap               # compileJava + JDWP RedefineClasses (<15s; falls back to restart on schema change)
   tools\dev\devserver.ps1 run "cmd a|cmd b" -Wait   # run lines one after another, print their output, exit 0/1
   tools\dev\devserver.ps1 run "..."             # queue only; prints the job id (then: wait <id>)
@@ -19,9 +19,9 @@ Other useful lines: skypop <place>, skycraft-roads export, skycraft-dungeon-qa e
 Robustness: one job at a time (the server takes the oldest inbox file); per-job timeout (server side @timeout, client
 side -Timeout); 'run' auto-starts the server when it is down and prefers JDWP hotswap over restart when Java files under
 mod\src\main\java are newer than the last sync (-NoRestart to skip); a dead server is reported with its crash report and log tail.
-World: mod\run\devworld\world (seed 2428247, Nirn), port: -Port, else $env:SKYCRAFT_DEV_PORT, else derived from the
+World: mod\run\devworld-26.3\world (seed 2428247, Nirn), port: -Port, else $env:SKYCRAFT_DEV_PORT, else derived from the
 worktree path (25700-25989); JDWP port: -JdwpPort, else $env:SKYCRAFT_JDWP_PORT, else Port + 1000 (127.0.0.1:<jdwpPort>).
-Full job output: mod\run\devworld\outbox\<id>.out (the console shows command feedback,
+Full job output: mod\run\devworld-26.3\outbox\<id>.out (the console shows command feedback,
 tagged log lines like [bake]/[dev]/[roadplan] and errors; -All shows every captured log line).
 Memory: the server JVM gets -Xmx (default 4G; -Xmx 6G or $env:SKYCRAFT_SERVER_XMX). ONE dev server per machine: start
 refuses while another worktree's dev server runs or boots (registry in %LOCALAPPDATA%\skycraft-dev; stop that one, or
@@ -44,14 +44,20 @@ param(
 $ErrorActionPreference = "Stop"
 $Root = Resolve-Path (Join-Path $PSScriptRoot "..\..")
 $Mod = Join-Path $Root "mod"
-$Dev = Join-Path $Mod "run\devworld"
+$Dev = Join-Path $Mod "run\devworld-26.3"
+$Scratch = if ($env:SKYCRAFT_263_SCRATCH) { [IO.Path]::GetFullPath($env:SKYCRAFT_263_SCRATCH) } else { 'E:\Skycraft-scratch\migration-26.3' }
+$Compiled = Join-Path $Scratch 'build\classes\java\main'
+$JavaRoot = if ($env:SKYCRAFT_JAVA25_HOME) { $env:SKYCRAFT_JAVA25_HOME } else { (Get-Content -LiteralPath 'E:\Skycraft-scratch\toolchains\java25-location.txt' -Raw).Trim() }
+$JavaExe = [IO.Path]::GetFullPath((Join-Path $JavaRoot 'bin\java.exe'))
 if ($RuntimeRoot) {
     $candidate = [IO.Path]::GetFullPath($RuntimeRoot).TrimEnd('\')
     $workspacePrefix = ([IO.Path]::GetFullPath((Join-Path $Root 'dist\world-tests\runtimes')).TrimEnd('\') + '\')
     $nvmePrefix = 'E:\Skycraft-scratch\world-benchmark\'
+    $nativePrefix = [IO.Path]::GetFullPath((Join-Path $Scratch 'runtime')).TrimEnd('\') + '\'
     if (-not ($candidate.StartsWith($workspacePrefix,[StringComparison]::OrdinalIgnoreCase) -or
-              $candidate.StartsWith($nvmePrefix,[StringComparison]::OrdinalIgnoreCase))) {
-        throw 'RuntimeRoot must be inside dist\world-tests\runtimes\ or E:\Skycraft-scratch\world-benchmark\.'
+              $candidate.StartsWith($nvmePrefix,[StringComparison]::OrdinalIgnoreCase) -or
+              $candidate.StartsWith($nativePrefix,[StringComparison]::OrdinalIgnoreCase))) {
+        throw 'RuntimeRoot must be inside dist\world-tests\runtimes\, E:\Skycraft-scratch\world-benchmark\, or the native scratch runtime directory.'
     }
     $Dev = $candidate
 }
@@ -69,6 +75,7 @@ $Outbox = Join-Path $Dev "outbox"
 $Log = Join-Path $Dev "server.log"
 $BootClasses = Join-Path $Dev "classes-boot"
 $LastClasses = Join-Path $Dev "classes-last"
+$LaunchFile = Join-Path $Dev 'native-launch.json'
 New-Item -ItemType Directory -Force $Dev, $Inbox, $Outbox | Out-Null
 
 if (-not $Xmx) { $Xmx = $(if ($env:SKYCRAFT_SERVER_XMX) { $env:SKYCRAFT_SERVER_XMX } else { "4G" }) }
@@ -106,13 +113,50 @@ function ActiveJdwpPort {
     return $JdwpPort
 }
 
+# Inspect only the selected process. Never print full launcher/authentication command lines.
+function NativeProcess([int]$ServerPid) {
+    $p = Get-CimInstance Win32_Process -Filter "ProcessId=$ServerPid" -ErrorAction SilentlyContinue
+    if (-not $p -or -not $p.ExecutablePath -or -not $p.CommandLine) { return $null }
+    if (-not $p.ExecutablePath.Equals($JavaExe,[StringComparison]::OrdinalIgnoreCase)) { return $null }
+    $line = $p.CommandLine.Replace('\\','\').Replace('/','\').ToLowerInvariant()
+    $control = ('-Dskycraft.dev=' + $Dev).Replace('/','\').ToLowerInvariant()
+    $program = (Join-Path $Dev 'native-launch\serverRunProgramArgs.txt').Replace('/','\').ToLowerInvariant()
+    if (-not $line.Contains($control) -or -not $line.Contains($program) -or
+        -not $line.Contains('net.neoforged.devlaunch.main')) { return $null }
+    return $p
+}
+
+function NativeDevelopmentServers {
+    Get-CimInstance Win32_Process -Filter "Name='java.exe' OR Name='javaw.exe'" -ErrorAction SilentlyContinue |
+        Where-Object { $_.CommandLine -match 'net\.neoforged\.devlaunch\.Main' -and $_.CommandLine -match 'serverRunProgramArgs\.txt' } |
+        ForEach-Object { [pscustomobject]@{ Pid=$_.ProcessId; Executable=$_.ExecutablePath } }
+}
+
+function RunningInfo {
+    foreach ($name in @('ready','launch.pid')) {
+        $path = Join-Path $Outbox $name
+        if (-not (Test-Path -LiteralPath $path)) { continue }
+        $lines = @(Get-Content -LiteralPath $path)
+        if ($lines.Count -lt 2) { continue }
+        $serverId = 0
+        if (-not [int]::TryParse($lines[0], [ref]$serverId)) { continue }
+        $p = NativeProcess $serverId
+        if ($p) { return [pscustomobject]@{ Pid=$serverId; Since=[DateTimeOffset]::FromUnixTimeMilliseconds([long]$lines[1]).LocalDateTime; Ready=($name -eq 'ready') } }
+        if (Get-Process -Id $serverId -ErrorAction SilentlyContinue) { throw "Runtime receipt refers to live unverified PID $serverId. Refusing native control or world replacement." }
+    }
+    return $null
+}
+
 function ReadyInfo {
     $f = Join-Path $Outbox "ready"
     if (-not (Test-Path $f)) { return $null }
     $l = @(Get-Content $f)
     if ($l.Count -lt 2) { return $null }
-    $p = Get-Process -Id ([int]$l[0]) -ErrorAction SilentlyContinue
-    if (-not $p) { return $null }
+    $p = NativeProcess ([int]$l[0])
+    if (-not $p) {
+        if (Get-Process -Id ([int]$l[0]) -ErrorAction SilentlyContinue) { throw 'Ready receipt points to a live process with a different native runtime identity.' }
+        return $null
+    }
     return [pscustomobject]@{ Pid = [int]$l[0]; Since = [DateTimeOffset]::FromUnixTimeMilliseconds([long]$l[1]).LocalDateTime }
 }
 
@@ -122,7 +166,7 @@ function LastSyncTime($r) {
     if (Test-Path $sf) {
         try {
             $dt = [DateTimeOffset]::FromUnixTimeMilliseconds([long](Get-Content $sf -TotalCount 1).Trim()).LocalDateTime
-            if ($dt -gt $r.Since) { return $dt }
+            return $dt
         } catch {}
     }
     return $r.Since
@@ -135,21 +179,28 @@ function HeartbeatAge {
     return ([DateTimeOffset]::Now.ToUnixTimeMilliseconds() - $ms) / 1000.0
 }
 
+function SourceInputs {
+    foreach ($relative in @('src\main','src\generated\resources')) {
+        $path = Join-Path $Mod $relative
+        if (Test-Path -LiteralPath $path) { Get-ChildItem -LiteralPath $path -Recurse -File }
+    }
+    Get-Item (Join-Path $Mod 'build.gradle'),(Join-Path $Mod 'settings.gradle'),(Join-Path $Mod 'gradle.properties') -ErrorAction SilentlyContinue
+}
+
 function NewestSource {
-    $src = Join-Path $Mod "src\main\java"
-    $n = Get-ChildItem $src -Recurse -File -ErrorAction SilentlyContinue | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+    $n = SourceInputs |
+        Sort-Object LastWriteTime -Descending | Select-Object -First 1
     if ($n) { return $n } else { return $null }
 }
 
-function Snapshot-BootClasses {
-    $compiled = Join-Path $Mod "build\classes\java\main"
+function Snapshot-BootClasses([long]$SyncMilliseconds) {
     Remove-DevChild $BootClasses
     Remove-DevChild $LastClasses
-    if (Test-Path $compiled) {
-        Copy-Item -Recurse -Force $compiled $BootClasses
-        Copy-Item -Recurse -Force $compiled $LastClasses
+    if (Test-Path $Compiled) {
+        Copy-Item -Recurse -Force $Compiled $BootClasses
+        Copy-Item -Recurse -Force $Compiled $LastClasses
     }
-    Set-Content (Join-Path $Outbox "code-sync") ([DateTimeOffset]::Now.ToUnixTimeMilliseconds().ToString()) -Encoding ascii
+    Set-Content (Join-Path $Outbox "code-sync") "$SyncMilliseconds" -Encoding ascii
 }
 
 function DeathReport {
@@ -170,11 +221,18 @@ function Start-Dev {
     if ($preview.Count -gt 0) { Write-Host 'REFUSED: close the disposable Minecraft preview before starting a headless server.'; return $false }
     $r = ReadyInfo
     if ($r) { Write-Host "dev server already running (pid $($r.Pid), port $Port, jdwp 127.0.0.1:$(ActiveJdwpPort), since $($r.Since))"; return $true }
+    $booting = RunningInfo
+    if ($booting) { Write-Host "native dev server is still booting (pid $($booting.Pid)); wait for readiness"; return $false }
     if (Test-Path $Key) {
         $l = (Get-Content $Key -TotalCount 1) -split ' ', 2
         if (Get-Process -Id ([int]$l[0]) -ErrorAction SilentlyContinue) { Write-Host "this worktree's dev server is still booting (pid $($l[0])); wait for it"; return $false }
     }
     $others = @(OtherServers)
+    $unregistered = @(NativeDevelopmentServers)
+    if ($unregistered.Count -gt 0 -and -not $Force) {
+        Write-Host "REFUSED: an existing native development server is running (PID $($unregistered.Pid -join ', ')). Stop it through its owning controller first."
+        return $false
+    }
     if ($others.Count -gt 0 -and -not $Force) {
         Write-Host "REFUSED: another dev server runs on this machine (out-of-memory risk): $($others -join '; ')"
         Write-Host "  stop it (tools\dev\devserver.ps1 stop in that worktree) or pass -Force"
@@ -183,36 +241,38 @@ function Start-Dev {
     Set-Content (Join-Path $Dev "eula.txt") "eula=true" -Encoding ascii
     $props = Join-Path $Dev "server.properties"
     $lines = @()
-    if (Test-Path $props) { $lines = @(Get-Content $props | Where-Object { $_ -notmatch '^(server-port|online-mode|max-tick-time|level-name)=' }) }
+    if (Test-Path $props) { $lines = @(Get-Content $props | Where-Object { $_ -notmatch '^(server-port|online-mode|max-tick-time|level-name|pause-when-empty-seconds)=' }) }
     else { $lines = @("level-seed=2428247", "view-distance=4", "simulation-distance=4", "spawn-protection=0", "motd=Skycraft dev server") }
-    $lines += "server-port=$Port", "online-mode=false", "max-tick-time=-1", "level-name=world"
+    $lines += "server-port=$Port", "online-mode=false", "max-tick-time=-1", "level-name=world", 'pause-when-empty-seconds=-1'
     Set-Content $props $lines -Encoding ascii
     # dev-only world datapack: skycraft:scratch = the overworld's generator in a second dimension (never shipped)
     $dp = Join-Path $Dev "world\datapacks\skycraft-dev"
     New-Item -ItemType Directory -Force (Join-Path $dp "data\skycraft\dimension") | Out-Null
-    Set-Content (Join-Path $dp "pack.mcmeta") '{"pack":{"pack_format":15,"description":"Skycraft dev server: scratch dimension"}}' -Encoding ascii
+    Set-Content (Join-Path $dp "pack.mcmeta") '{"pack":{"min_format":[121,0],"max_format":[121,0],"description":"Skycraft dev server: scratch dimension"}}' -Encoding ascii
     Set-Content (Join-Path $dp "data\skycraft\dimension\scratch.json") '{"type":"minecraft:overworld","generator":{"type":"minecraft:noise","settings":"skycraft:tamriel","biome_source":{"type":"skycraft:tamriel"}}}' -Encoding ascii
-    # Gradle init script that attaches the JDWP agent ONLY to the runServer JavaExec JVM (never to the Gradle wrapper or daemon)
-    $jdwpInit = Join-Path $Dev "jdwp.init.gradle"
-    $initLines = @(
-        "allprojects { p ->",
-        "    p.tasks.matching { it.name == 'runServer' }.configureEach {",
-        "        if (p.hasProperty('skycraftJdwpPort')) {",
-        "            jvmArgs(`"-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=127.0.0.1:`${p.property('skycraftJdwpPort')}`")",
-        "        }",
-        "    }",
-        "}"
-    )
-    Set-Content $jdwpInit $initLines -Encoding ascii
+    # MDG's public standalone-launch tasks compile resources/classes and supply the exact native classpath.
+    $prepareLog = Join-Path $Dev 'native-prepare.log'
+    $prepareStarted = [DateTimeOffset]::Now.ToUnixTimeMilliseconds()
+    & py -3 -I (Join-Path $PSScriptRoot 'native_server_263.py') --runtime $Dev --control $Dev --jdwp $JdwpPort --xmx $Xmx --output $LaunchFile *> $prepareLog
+    if ($LASTEXITCODE -ne 0) { Write-Host "Native server preparation failed; see $prepareLog"; Get-Content -LiteralPath $prepareLog -Tail 20 | ForEach-Object { Write-Host $_ }; return $false }
+    $launch = Get-Content -LiteralPath $LaunchFile -Raw | ConvertFrom-Json
+    if ($launch.minecraft -ne '26.3' -or $launch.neoforge -ne '26.3.0.90' -or $launch.javaVersion -ne 25 -or
+        -not $launch.java.Equals($JavaExe,[StringComparison]::OrdinalIgnoreCase)) { throw 'Native launch manifest does not match the selected exact platform.' }
     Remove-Item (Join-Path $Outbox "ready"), (Join-Path $Outbox "heartbeat"), (Join-Path $Outbox "jdwp.port"), (Join-Path $Outbox "code-sync") -ErrorAction SilentlyContinue
     Get-ChildItem $Inbox -File -ErrorAction SilentlyContinue | Remove-Item -Force
+    # Snapshot exactly the bytecode prepared for this boot. Edits during generation remain stale until a later sync.
+    Snapshot-BootClasses $prepareStarted
     $t0 = Get-Date
     Write-Host "starting dev server (port $Port, jdwp 127.0.0.1:$JdwpPort, log $Log) ..."
-    $env:JAVA_TOOL_OPTIONS = "-Dskycraft.dev=. -Xmx$Xmx"
+    # Every generated argument uses forward-slash paths, so Windows quoting needs no trailing-backslash rewrite.
+    $nativeArgs = @($launch.args | ForEach-Object { '"' + $_.Replace('"','\"') + '"' }) -join ' '
+    $oldOptions = $env:JAVA_TOOL_OPTIONS; $oldJdkOptions = $env:JDK_JAVA_OPTIONS; $oldLegacyOptions = $env:_JAVA_OPTIONS
     try {
-        $p = Start-Process -FilePath "cmd.exe" -ArgumentList "/c .\gradlew.bat runServer --console=plain -I `"$jdwpInit`" `"-PskycraftRunDir=$Dev`" -PskycraftJdwpPort=$JdwpPort `"-Dorg.gradle.jvmargs=-Xmx2G`"" `
-            -WorkingDirectory $Mod -RedirectStandardOutput $Log -RedirectStandardError "$Log.err" -PassThru -WindowStyle Hidden
-    } finally { Remove-Item Env:JAVA_TOOL_OPTIONS -ErrorAction SilentlyContinue }
+        Remove-Item Env:JAVA_TOOL_OPTIONS, Env:JDK_JAVA_OPTIONS, Env:_JAVA_OPTIONS -ErrorAction SilentlyContinue
+        $p = Start-Process -FilePath $JavaExe -ArgumentList $nativeArgs -WorkingDirectory $Dev `
+            -RedirectStandardOutput $Log -RedirectStandardError "$Log.err" -PassThru -WindowStyle Hidden
+    } finally { $env:JAVA_TOOL_OPTIONS=$oldOptions; $env:JDK_JAVA_OPTIONS=$oldJdkOptions; $env:_JAVA_OPTIONS=$oldLegacyOptions }
+    Set-Content (Join-Path $Outbox 'launch.pid') @("$($p.Id)", "$([DateTimeOffset]::Now.ToUnixTimeMilliseconds())") -Encoding ascii
     Set-Content $Key "$($p.Id) $Root (booting)" -Encoding ascii
     while ($true) {
         Start-Sleep -Milliseconds 500
@@ -220,7 +280,6 @@ function Start-Dev {
         if ($r) {
             Set-Content $Key "$($r.Pid) $Root" -Encoding ascii
             Set-Content (Join-Path $Outbox "jdwp.port") "$JdwpPort" -Encoding ascii
-            Snapshot-BootClasses
             Write-Host ("dev server ready in {0:N0} s (pid {1}, jdwp 127.0.0.1:{2}, -Xmx{3})" -f ((Get-Date) - $t0).TotalSeconds, $r.Pid, $JdwpPort, $Xmx); return $true
         }
         if ($p.HasExited) {
@@ -233,12 +292,24 @@ function Start-Dev {
 }
 
 function Stop-Dev {
-    $r = ReadyInfo
-    if (-not $r) { Write-Host "dev server not running"; return }
-    $id = Submit "stop"
-    $proc = Get-Process -Id $r.Pid -ErrorAction SilentlyContinue
-    if ($proc -and -not $proc.WaitForExit(90000)) { Stop-Process -Id $r.Pid -Force -ErrorAction SilentlyContinue; Write-Host "killed pid $($r.Pid)" }
-    Remove-Item (Join-Path $Outbox "ready"), (Join-Path $Outbox "jdwp.port"), (Join-Path $Outbox "code-sync"), $Key -ErrorAction SilentlyContinue
+    $r = RunningInfo
+    if (-not $r) { Write-Host "native dev server not running"; return }
+    if ($r.Ready -and (HeartbeatAge) -lt 5) {
+        $id = Submit "stop"
+        $until = (Get-Date).AddSeconds(5)
+        while ((NativeProcess $r.Pid) -and (Get-Date) -lt $until) { Start-Sleep -Milliseconds 200 }
+    }
+    if (NativeProcess $r.Pid) {
+        $stopScratch = Join-Path $Dev ('orderly-stop-' + $r.Pid + '-' + (Get-Date -Format 'yyyyMMdd-HHmmss-fff'))
+        & py -3 -I (Join-Path $PSScriptRoot 'stop_native_server.py') --pid $r.Pid --java $JavaExe --runtime $Dev --control $Dev --scratch $stopScratch | ForEach-Object { Write-Host $_ }
+        if ($LASTEXITCODE -ne 0) { throw 'Public native stop request failed; server and world were left intact.' }
+    }
+    $until = (Get-Date).AddSeconds(90)
+    while (NativeProcess $r.Pid) {
+        if ((Get-Date) -gt $until) { throw 'Orderly stop exceeded its deadline; server remains running. Inspect save logs before taking another action.' }
+        Start-Sleep -Milliseconds 300
+    }
+    Remove-Item (Join-Path $Outbox "ready"), (Join-Path $Outbox "jdwp.port"), (Join-Path $Outbox "code-sync"), (Join-Path $Outbox 'launch.pid'), $Key -ErrorAction SilentlyContinue
     Write-Host "dev server stopped"
 }
 
@@ -251,10 +322,16 @@ function Invoke-Hotswap {
     $ht0 = Get-Date
     $syncMs = [DateTimeOffset]::Now.ToUnixTimeMilliseconds()
     $clog = Join-Path $Dev "hotswap-compile.log"
-    Push-Location $Mod
-    & .\gradlew.bat compileJava --console=plain "-Dorg.gradle.jvmargs=-Xmx2G" *> $clog
+    $sync = LastSyncTime $r
+    $changedResources = SourceInputs |
+        Where-Object { $_.Extension -ne '.java' -and $_.LastWriteTime -gt $sync } | Select-Object -First 1
+    if ($changedResources) {
+        Write-Host 'Resources changed: restarting with freshly prepared native resources.'
+        Stop-Dev
+        return (Start-Dev)
+    }
+    & py -3 -I (Join-Path $PSScriptRoot 'build_263.py') compileJava *> $clog
     $crc = $LASTEXITCODE
-    Pop-Location
     if ($crc -ne 0) {
         Write-Host "HOTSWAP FAILED: compileJava failed (server left running; see $clog):"
         Select-String -Path $clog -Pattern "\.java:\d+: error:" | Select-Object -First 15 | ForEach-Object { Write-Host "  $($_.Line.Trim())" }
@@ -262,7 +339,7 @@ function Invoke-Hotswap {
     }
     $activeJdwp = ActiveJdwpPort
     $hsOut = @(& py -3 -I (Join-Path $PSScriptRoot "hotswap.py") --host 127.0.0.1 --port $activeJdwp `
-        --classes (Join-Path $Mod "build\classes\java\main") --boot $BootClasses --last $LastClasses 2>&1)
+        --classes $Compiled --boot $BootClasses --last $LastClasses 2>&1)
     $hsrc = $LASTEXITCODE
     $elapsed = ((Get-Date) - $ht0).TotalSeconds
     if ($hsrc -eq 0) {
@@ -330,12 +407,17 @@ switch ($Action) {
     "reset" {
         # fresh dev world (new road network, new chunks); keeps server.properties
         Stop-Dev
+        if (@(NativeDevelopmentServers).Count -gt 0) { throw 'Refused world reset while another native development server is running.' }
         Remove-DevChild (Join-Path $Dev "world")
         if (Start-Dev) { exit 0 } else { exit 2 }
     }
     "status" {
         $r = ReadyInfo
-        if (-not $r) { Write-Host "dev server: not running (port $Port)"; exit 1 }
+        if (-not $r) {
+            $booting = RunningInfo
+            if ($booting) { Write-Host "native dev server: booting (pid $($booting.Pid), port $Port, runtime $Dev)"; exit 2 }
+            Write-Host "native dev server: not running (port $Port, runtime $Dev)"; exit 1
+        }
         $hb = Get-Content (Join-Path $Outbox "heartbeat") -ErrorAction SilentlyContinue
         $n = NewestSource
         $sync = LastSyncTime $r

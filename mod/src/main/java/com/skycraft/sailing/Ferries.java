@@ -27,10 +27,10 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.server.ServerStoppedEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+
+import net.neoforged.neoforge.event.server.ServerStoppedEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -48,7 +48,7 @@ import java.util.UUID;
  * pier, then moves the buyer, party members standing nearby (they sail free), mounts and followers onto the pier
  * head, and advances the clock by the time at sea (single player only, like carriages).</p>
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class Ferries {
     /** Ticks between buying passage and stepping ashore at the earliest (the screen is dark meanwhile). */
     private static final int MIN_DELAY = 50;
@@ -71,7 +71,7 @@ public final class Ferries {
     }
 
     public static boolean isHarbormaster(LivingEntity npc) {
-        return npc != null && npc.isAlive() && !npc.getPersistentData().getString(Harbors.KEEPER_TAG).isEmpty();
+        return npc != null && npc.isAlive() && !npc.getPersistentData().getStringOr(Harbors.KEEPER_TAG, "").isEmpty();
     }
 
     /** The fare of a route: fixed in ports.json / travel network, or base + distance (expeditions start higher). */
@@ -94,7 +94,7 @@ public final class Ferries {
 
     private static void addOptions(ServerPlayer player, LivingEntity npc, List<DialogueOption> out) {
         if (!isHarbormaster(npc)) return;
-        String portId = npc.getPersistentData().getString(Harbors.KEEPER_TAG);
+        String portId = npc.getPersistentData().getStringOr(Harbors.KEEPER_TAG, "");
         Port port = Ports.byId(portId).orElse(null);
         if (port == null) return;
         Harbors.discover(player, port);
@@ -204,7 +204,7 @@ public final class Ferries {
         travellers.add(buyer.getUUID());
         Party party = Parties.partyOf(buyer);
         if (party != null) {
-            for (ServerPlayer m : Parties.onlineMembers(buyer.server, party)) {
+            for (ServerPlayer m : Parties.onlineMembers(buyer.level().getServer(), party)) {
                 if (m == buyer || m.level() != buyer.level() || m.distanceToSqr(buyer) > PARTY_RANGE * PARTY_RANGE) continue;
                 if (Vitals.inCombat(m) || isTravelling(m.getUUID())) continue;
                 travellers.add(m.getUUID());
@@ -213,21 +213,22 @@ public final class Ferries {
         int hours = hours(route);
         Component ship = route.ship() != null ? route.ship() : Component.translatable("sailing.skycraft.ship.generic");
         for (UUID id : travellers) {
-            ServerPlayer p = buyer.server.getPlayerList().getPlayer(id);
+            ServerPlayer p = buyer.level().getServer().getPlayerList().getPlayer(id);
             if (p == null) continue;
             SkyNetwork.sendToPlayer(p, new SailingPackets.VoyageStart(from.name(), dest.name(), ship, hours, route.expedition()));
             if (p != buyer) Notifier.message(p, Component.translatable("sailing.skycraft.party_sails", buyer.getDisplayName(), dest.name()));
         }
         buyer.level().playSound(null, buyer.blockPosition(), SoundEvents.BELL_BLOCK, SoundSource.NEUTRAL, 0.6f, 0.6f);
         PENDING.add(new Voyage(buyer.getUUID(), travellers, dest.id(), hours, buyer.level().getGameTime()));
-        Harbors.requestChunks(buyer.server.overworld(), dest);
+        Harbors.requestChunks(buyer.level().getServer().overworld(), dest);
     }
 
     @SubscribeEvent
-    public static void onServerTick(TickEvent.ServerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || PENDING.isEmpty()) return;
+    public static void onServerTick(net.neoforged.neoforge.event.tick.ServerTickEvent.Post event) {
+        if (!(event instanceof net.neoforged.neoforge.event.tick.ServerTickEvent.Post) || PENDING.isEmpty()) return;
         MinecraftServer server = event.getServer();
         ServerLevel level = server.overworld();
+        if (level == null) return;
         long now = level.getGameTime();
         for (Iterator<Voyage> it = PENDING.iterator(); it.hasNext(); ) {
             Voyage v = it.next();
@@ -266,17 +267,17 @@ public final class Ferries {
             anyone = true;
             Entity vehicle = p.getVehicle();
             if (vehicle instanceof ShipEntity) vehicle = null; // nobody tows their own ship along
-            List<Mob> followers = p.serverLevel().getEntitiesOfClass(Mob.class, p.getBoundingBox().inflate(16),
+            List<Mob> followers = p.level().getEntitiesOfClass(Mob.class, p.getBoundingBox().inflate(16),
                     m -> m.isAlive() && !m.isPassenger() && FastTravelHandler.isFollower(m, p));
             double ox = arrival.getX() + 0.5 + (i % 3 - 1) * 0.9, oz = arrival.getZ() + 0.5 + (i / 3) * 0.9;
             i++;
             p.stopRiding();
-            p.teleportTo(level, ox, arrival.getY(), oz, yaw, 0f);
+            p.teleportTo(level, ox, arrival.getY(), oz, java.util.Set.of(), yaw, 0f, false);
             p.resetFallDistance();
             if (vehicle != null && vehicle.isAlive() && vehicle.level() == level) {
                 vehicle.teleportTo(ox, arrival.getY(), oz);
                 vehicle.resetFallDistance();
-                p.startRiding(vehicle, true);
+                p.startRiding(vehicle, true, true);
             }
             int k = 0;
             for (Mob mob : followers) {

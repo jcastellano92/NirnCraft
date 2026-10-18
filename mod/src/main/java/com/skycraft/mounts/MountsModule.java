@@ -1,6 +1,6 @@
 package com.skycraft.mounts;
 
-import net.minecraftforge.eventbus.api.IEventBus;
+import net.neoforged.bus.api.IEventBus;
 
 /**
  * Mounts of Nirn: every province rides something of its own.

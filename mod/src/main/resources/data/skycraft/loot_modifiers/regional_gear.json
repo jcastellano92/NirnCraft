@@ -1,7 +1,7 @@
 {
   "type": "skycraft:add_table",
-  "conditions": [],
   "table": "skycraft:gear/regional",
   "prefix": "chests/",
-  "chance": 0.35
+  "chance": 0.35,
+  "priority": 10
 }

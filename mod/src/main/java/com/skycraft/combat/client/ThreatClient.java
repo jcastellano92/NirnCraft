@@ -7,11 +7,11 @@ import com.skycraft.combat.Threats;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
+
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,7 +24,7 @@ import java.util.Map;
  * entity when this client has it loaded, otherwise the last position the server sent; it goes away when the server
  * drops it, when the entity dies here, and on logout, respawn and dimension change.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
 public final class ThreatClient {
     private static final String SOURCE = "threat";
     private static final int ENEMY_COLOR = 0xD03030;
@@ -42,8 +42,8 @@ public final class ThreatClient {
     }
 
     @SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || ENTRIES.isEmpty()) return;
+    public static void onClientTick(net.neoforged.neoforge.client.event.ClientTickEvent.Post event) {
+        if (ENTRIES.isEmpty()) return;
         Minecraft mc = Minecraft.getInstance();
         if (mc.level == null || mc.player == null) {
             clear();

@@ -1,12 +1,13 @@
 package com.skycraft.tamriel.biome.flora;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.levelgen.placement.PlacementContext;
 import net.minecraft.world.level.levelgen.placement.PlacementModifier;
-import net.minecraft.world.level.levelgen.placement.PlacementModifierType;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,8 +21,8 @@ import java.util.stream.Stream;
  * functions of the world seed and position, so neighbouring chunks agree on them: groves, clearings and forest edges
  * run across chunk borders, trees never crowd, and no grid shows.
  */
-public class ScatterPlacement extends PlacementModifier {
-    public static final Codec<ScatterPlacement> CODEC = RecordCodecBuilder.create(i -> i.group(
+public class ScatterPlacement implements PlacementModifier {
+    public static final MapCodec<ScatterPlacement> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
             Codec.intRange(2, 48).fieldOf("spacing").forGetter(p -> p.spacing),
             Codec.floatRange(0f, 1.5f).optionalFieldOf("min_distance", 0.8f).forGetter(p -> p.minDistance),
             Codec.floatRange(0f, 1f).fieldOf("density").forGetter(p -> p.density),
@@ -41,7 +42,6 @@ public class ScatterPlacement extends PlacementModifier {
         this.field = field;
     }
 
-    @Override
     public Stream<BlockPos> getPositions(PlacementContext ctx, RandomSource random, BlockPos origin) {
         long worldSeed = ctx.getLevel().getSeed();
         long seed = field.seed(worldSeed) ^ 0x7F4A7C15L * spacing;
@@ -80,13 +80,15 @@ public class ScatterPlacement extends PlacementModifier {
         return out.stream();
     }
 
+    @Override public void modify(PlacementContext context, RandomSource random, BlockPos origin, java.util.function.Consumer<BlockPos> output) {
+        getPositions(context, random, origin).forEach(output);
+    }
+
     private boolean alive(long worldSeed, long seed, int h, int x, int z) {
         double p = floor + (density - floor) * field.sample(worldSeed, x, z);
         return FloraNoise.unit01(h * 0x5BD1E995 ^ 0x68E31DA4) < p;
     }
 
     @Override
-    public PlacementModifierType<?> type() {
-        return Flora.SCATTER.get();
-    }
+    public MapCodec<? extends net.minecraft.world.level.levelgen.placement.PlacementModifier> codec() { return CODEC; }
 }

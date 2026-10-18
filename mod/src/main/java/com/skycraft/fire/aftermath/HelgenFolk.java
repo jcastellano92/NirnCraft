@@ -37,8 +37,8 @@ public final class HelgenFolk {
     /** True if this Helgen NPC is a shopkeeper (either the salvage cart or an actual merchant in Helgen). */
     public static boolean isHelgenMerchant(LivingEntity npc) {
         var pd = npc.getPersistentData();
-        if (pd.getBoolean(CART)) return true;
-        if (!inHelgen(npc) || pd.getBoolean(BARKS) || pd.contains(Tableau.KEY)) return false;
+        if (pd.getBooleanOr(CART, false)) return true;
+        if (!inHelgen(npc) || pd.getBooleanOr(BARKS, false) || pd.contains(Tableau.KEY)) return false;
         if (npc instanceof NpcEntity n && (n.role() == NpcRole.CITIZEN || n.role() == NpcRole.BEGGAR)) return false;
         return com.skycraft.economy.Merchants.isMerchant(npc);
     }
@@ -47,7 +47,7 @@ public final class HelgenFolk {
     public static boolean isHelgenEventNpc(@org.jetbrains.annotations.Nullable ServerPlayer player, LivingEntity npc) {
         if (!QuestNpcs.idOf(npc).isEmpty() || hasActiveArrest(player, npc)) return false;
         var pd = npc.getPersistentData();
-        return pd.getBoolean(BARKS) || pd.contains(Tableau.KEY) || pd.getBoolean(CART) || inHelgen(npc);
+        return pd.getBooleanOr(BARKS, false) || pd.contains(Tableau.KEY) || pd.getBooleanOr(CART, false) || inHelgen(npc);
     }
 
     /** True if this guard in Helgen needs to confront/arrest the player for an active bounty. */
@@ -66,9 +66,9 @@ public final class HelgenFolk {
     public static boolean barkOnly(@org.jetbrains.annotations.Nullable ServerPlayer player, LivingEntity npc) {
         var pd = npc.getPersistentData();
         if (isHelgenMerchant(npc) || !QuestNpcs.idOf(npc).isEmpty() || hasActiveArrest(player, npc)) return false;
-        if (pd.getBoolean(BARKS) || pd.contains(Tableau.KEY)) return true;
+        if (pd.getBooleanOr(BARKS, false) || pd.contains(Tableau.KEY)) return true;
         return inHelgen(npc) && (npc instanceof NpcEntity || npc instanceof GuardEntity
-                || npc instanceof net.minecraft.world.entity.npc.AbstractVillager);
+                || npc instanceof net.minecraft.world.entity.npc.villager.AbstractVillager);
     }
 
     /** Whether the menu of this person is cut down to a few options (the cart merchant, the named story people here, or an arresting guard). */
@@ -101,7 +101,7 @@ public final class HelgenFolk {
         var rnd = npc.getRandom();
         Tableau.Pose pose = Tableau.poseOf(npc);
         String group = pose != null && !pose.lines.isEmpty() ? pose.lines : byRole(npc);
-        long time = npc.level().getDayTime() % 24000L;
+        long time = npc.level().getDefaultClockTime() % 24000L;
         boolean night = time >= 13000L && time < 23000L;
         boolean armed = !com.skycraft.combat.Sheathe.isSheathed(player) && !player.getMainHandItem().isEmpty();
         if (armed && rnd.nextInt(3) == 0) group = "wary";

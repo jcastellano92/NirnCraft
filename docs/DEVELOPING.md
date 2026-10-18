@@ -1,6 +1,9 @@
 # Developing Skycraft Core
 
-Skycraft Core (`mod/`) is a **Forge 1.20.1 (47.3.x)** mod, **official Mojang mappings**, **Java 17**.
+Skycraft Core (`mod/`) targets **Minecraft 26.3 / NeoForge 26.3.0.90 / Java 25**, with official Mojang mappings.
+Use [NATIVE-26.3-PREVIEW.md](NATIVE-26.3-PREVIEW.md) for the current build/runtime controls and
+[SERVER-26.3.md](SERVER-26.3.md) for full server packaging and release gates. Older Forge examples below are
+historical implementation notes; they must not select a legacy build, launcher, cache or world.
 Builds and tests run locally. GitHub Actions is disabled in the repository settings; pushes do not run CI.
 
 ## Architecture
@@ -465,6 +468,8 @@ it as a release asset; players unzip it into `saves/` or a dedicated server's wo
 worldgen data is unchanged, so regenerate it per release.
 
 ## Release build (always includes an up-to-date bake)
-`tools\build_release.ps1` builds, re-bakes, rebuilds, creates `dist/Skycraft-client-instance.zip` and runs the QA
-server + bake check. Use it for every build you hand to a player: the bake's hash covers the computing classes'
-bytecode, so any code change makes an old bake stale (it then silently falls back to computing at runtime).
+`tools\build_release.ps1` runs the isolated Java 25 build/tests, verifies or refreshes bakes in a new native QA
+world, builds both `Skycraft-26.3-client-instance.zip` and `Skycraft-26.3-server.zip`, and runs the full installed
+server gate. Outputs go to a fresh timestamped release directory under `dist` (or `-OutputDir`); existing worlds
+and archives are preserved. Client visuals and a real full-pack multiplayer connection remain separate gates.
+The bake hash covers declared computing classes and data, so changes to those inputs invalidate older plans.

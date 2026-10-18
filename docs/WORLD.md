@@ -102,11 +102,11 @@ There are **7,546 named places**, each at its real position and linked to its re
 * **Atmora** lies to the north (frozen), **Akavir** to the east (Tsaesci jungles, Kamal snowfields, the Tang Mo
   islands, the Ka Po' Tun steppe), **Yokuda** to the west (desert and a sunken archipelago), and **Pyandonea** and
   **Thras** to the south-west (jungle isles and coral).
-* **Endless lands (P7).** Beyond the `28,160 × 21,504` fixed Tamriel raster (`|x| > 14,080` or `|z| > 10,752`), the
-  world never ends. Every **4,096 × 4,096** tile is deterministically generated from `(worldSeed, tileX, tileZ)` in
-  under 50 ms (`TilePlanner`, `TileSheetGenerator`), producing a full 11-layer causal `WorldSheets` model, terrain
-  heightfield, hydrology, `1–3` settlements, `8–15` dungeons, road network, and a 3-quest regional story arc. Operators
-  can inspect or teleport to tiles with `/skycraft-world tile <tx> <tz>` and `/skycraft-world tp-tile <tx> <tz>`.
+* **Outer ocean and world loop.** Beyond Tamriel and the fixed foreign lands, new terrain stays ocean.
+  Far-ocean travel wraps to the opposite east/west or north/south edge, including diagonal crossings.
+  The default seam is 29,360,128 blocks from the origin; `skycraft-ocean-server.toml` controls the travel
+  distance. Destination chunks are prewarmed asynchronously. Existing saved chunks are preserved; this
+  policy does not erase previously explored land. The former Endless Lands planner is dormant.
 
 ## Travel
 

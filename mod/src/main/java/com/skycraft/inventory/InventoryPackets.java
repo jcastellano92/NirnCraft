@@ -3,93 +3,90 @@ package com.skycraft.inventory;
 import com.skycraft.inventory.client.ClientInventoryHandlers;
 import com.skycraft.network.SkyNetwork;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.network.NetworkDirection;
-import net.minecraftforge.network.NetworkEvent;
+import net.neoforged.api.distmarker.Dist;
+import com.skycraft.platform.Sides;
+import net.minecraft.network.protocol.PacketFlow;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Supplier;
 
 /** Network messages of the inventory module (registered in this fixed order by {@link InventoryModule#registerPackets()}). */
 public final class InventoryPackets {
     private InventoryPackets() {}
 
     static void register() {
-        SkyNetwork.register(SyncWeights.class, NetworkDirection.PLAY_TO_CLIENT, SyncWeights::encode, SyncWeights::decode, SyncWeights::handle);
-        SkyNetwork.register(CarryState.class, NetworkDirection.PLAY_TO_CLIENT, CarryState::encode, CarryState::decode, CarryState::handle);
-        SkyNetwork.register(InvAction.class, NetworkDirection.PLAY_TO_SERVER, InvAction::encode, InvAction::decode, InvAction::handle);
-        SkyNetwork.register(UseHeld.class, NetworkDirection.PLAY_TO_CLIENT, UseHeld::encode, UseHeld::decode, UseHeld::handle);
-        SkyNetwork.register(PackSync.class, NetworkDirection.PLAY_TO_CLIENT, PackSync::encode, PackSync::decode, PackSync::handle);
-        SkyNetwork.register(ContainerOverflowSync.class, NetworkDirection.PLAY_TO_CLIENT, ContainerOverflowSync::encode,
+        SkyNetwork.register(SyncWeights.class, PacketFlow.CLIENTBOUND, SyncWeights::encode, SyncWeights::decode, SyncWeights::handle);
+        SkyNetwork.register(CarryState.class, PacketFlow.CLIENTBOUND, CarryState::encode, CarryState::decode, CarryState::handle);
+        SkyNetwork.register(InvAction.class, PacketFlow.SERVERBOUND, InvAction::encode, InvAction::decode, InvAction::handle);
+        SkyNetwork.register(UseHeld.class, PacketFlow.CLIENTBOUND, UseHeld::encode, UseHeld::decode, UseHeld::handle);
+        SkyNetwork.register(PackSync.class, PacketFlow.CLIENTBOUND, PackSync::encode, PackSync::decode, PackSync::handle);
+        SkyNetwork.register(ContainerOverflowSync.class, PacketFlow.CLIENTBOUND, ContainerOverflowSync::encode,
                 ContainerOverflowSync::decode, ContainerOverflowSync::handle);
-        SkyNetwork.register(MachineAction.class, NetworkDirection.PLAY_TO_SERVER, MachineAction::encode, MachineAction::decode,
+        SkyNetwork.register(MachineAction.class, PacketFlow.SERVERBOUND, MachineAction::encode, MachineAction::decode,
                 MachineAction::handle);
     }
 
     // ------------------------------------------------------------------ S2C
 
     /** The server's item weight table (item ids and tag ids, tags in priority order). */
-    public record SyncWeights(Map<ResourceLocation, Float> items, Map<ResourceLocation, Float> tags) {
+    public record SyncWeights(Map<Identifier, Float> items, Map<Identifier, Float> tags) {
         public static SyncWeights current() {
             return new SyncWeights(ItemWeights.itemTable(), ItemWeights.tagTable());
         }
 
-        static void encode(SyncWeights m, FriendlyByteBuf buf) {
+        static void encode(SyncWeights m, RegistryFriendlyByteBuf buf) {
             buf.writeVarInt(m.items.size());
             m.items.forEach((k, v) -> {
-                buf.writeResourceLocation(k);
+                buf.writeIdentifier(k);
                 buf.writeFloat(v);
             });
             buf.writeVarInt(m.tags.size());
             m.tags.forEach((k, v) -> {
-                buf.writeResourceLocation(k);
+                buf.writeIdentifier(k);
                 buf.writeFloat(v);
             });
         }
 
-        static SyncWeights decode(FriendlyByteBuf buf) {
+        static SyncWeights decode(RegistryFriendlyByteBuf buf) {
             int n = buf.readVarInt();
-            Map<ResourceLocation, Float> items = new HashMap<>();
-            for (int i = 0; i < n; i++) items.put(buf.readResourceLocation(), buf.readFloat());
+            Map<Identifier, Float> items = new HashMap<>();
+            for (int i = 0; i < n; i++) items.put(buf.readIdentifier(), buf.readFloat());
             int t = buf.readVarInt();
-            Map<ResourceLocation, Float> tags = new LinkedHashMap<>();
-            for (int i = 0; i < t; i++) tags.put(buf.readResourceLocation(), buf.readFloat());
+            Map<Identifier, Float> tags = new LinkedHashMap<>();
+            for (int i = 0; i < t; i++) tags.put(buf.readIdentifier(), buf.readFloat());
             return new SyncWeights(items, tags);
         }
 
-        static void handle(SyncWeights m, Supplier<NetworkEvent.Context> ctx) {
+        static void handle(SyncWeights m, IPayloadContext ctx) {
             // common code; on an integrated server the table is shared and identical anyway
             ItemWeights.setTable(m.items, m.tags);
-            ctx.get().setPacketHandled(true);
         }
     }
 
     /** The player's carry weight as the server sees it. */
     public record CarryState(float current, float capacity, boolean enabled, boolean over) {
-        static void encode(CarryState m, FriendlyByteBuf buf) {
+        static void encode(CarryState m, RegistryFriendlyByteBuf buf) {
             buf.writeFloat(m.current);
             buf.writeFloat(m.capacity);
             buf.writeByte((m.enabled ? 1 : 0) | (m.over ? 2 : 0));
         }
 
-        static CarryState decode(FriendlyByteBuf buf) {
+        static CarryState decode(RegistryFriendlyByteBuf buf) {
             float cur = buf.readFloat();
             float cap = buf.readFloat();
             byte flags = buf.readByte();
             return new CarryState(cur, cap, (flags & 1) != 0, (flags & 2) != 0);
         }
 
-        static void handle(CarryState m, Supplier<NetworkEvent.Context> ctx) {
-            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> ClientInventoryHandlers.carryState(m.current, m.capacity, m.enabled, m.over));
-            ctx.get().setPacketHandled(true);
+        static void handle(CarryState m, IPayloadContext ctx) {
+            Sides.runOn(Dist.CLIENT, () -> () -> ClientInventoryHandlers.carryState(m.current, m.capacity, m.enabled, m.over));
         }
     }
 
@@ -97,18 +94,17 @@ public final class InventoryPackets {
      * After a "Read" action moved a book into the main hand, asks the client to use it the vanilla way (so written books,
      * spell tomes, skill books and modded books open their screens / run their logic normally).
      */
-    public record UseHeld(ResourceLocation item) {
-        static void encode(UseHeld m, FriendlyByteBuf buf) {
-            buf.writeResourceLocation(m.item);
+    public record UseHeld(Identifier item) {
+        static void encode(UseHeld m, RegistryFriendlyByteBuf buf) {
+            buf.writeIdentifier(m.item);
         }
 
-        static UseHeld decode(FriendlyByteBuf buf) {
-            return new UseHeld(buf.readResourceLocation());
+        static UseHeld decode(RegistryFriendlyByteBuf buf) {
+            return new UseHeld(buf.readIdentifier());
         }
 
-        static void handle(UseHeld m, Supplier<NetworkEvent.Context> ctx) {
-            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> ClientInventoryHandlers.useHeld(m.item));
-            ctx.get().setPacketHandled(true);
+        static void handle(UseHeld m, IPayloadContext ctx) {
+            Sides.runOn(Dist.CLIENT, () -> () -> ClientInventoryHandlers.useHeld(m.item));
         }
     }
 
@@ -119,7 +115,7 @@ public final class InventoryPackets {
     public record PackSync(int start, int total, List<Row> rows) {
         public record Row(CompoundTag key, int count) {}
 
-        static void encode(PackSync m, FriendlyByteBuf buf) {
+        static void encode(PackSync m, RegistryFriendlyByteBuf buf) {
             buf.writeVarInt(m.start);
             buf.writeVarInt(m.total);
             buf.writeVarInt(m.rows.size());
@@ -129,7 +125,7 @@ public final class InventoryPackets {
             }
         }
 
-        static PackSync decode(FriendlyByteBuf buf) {
+        static PackSync decode(RegistryFriendlyByteBuf buf) {
             int start = buf.readVarInt();
             int total = buf.readVarInt();
             int n = Math.min(buf.readVarInt(), Pack.MAX_ENTRIES);
@@ -141,9 +137,8 @@ public final class InventoryPackets {
             return new PackSync(start, total, rows);
         }
 
-        static void handle(PackSync m, Supplier<NetworkEvent.Context> ctx) {
-            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> ClientInventoryHandlers.packSync(m));
-            ctx.get().setPacketHandled(true);
+        static void handle(PackSync m, IPayloadContext ctx) {
+            Sides.runOn(Dist.CLIENT, () -> () -> ClientInventoryHandlers.packSync(m));
         }
     }
 
@@ -154,7 +149,7 @@ public final class InventoryPackets {
      * requests is {@link ContainerOverflow#SLOT_BASE} + its index.
      */
     public record ContainerOverflowSync(int containerId, int start, int total, List<PackSync.Row> rows) {
-        static void encode(ContainerOverflowSync m, FriendlyByteBuf buf) {
+        static void encode(ContainerOverflowSync m, RegistryFriendlyByteBuf buf) {
             buf.writeVarInt(m.containerId);
             buf.writeVarInt(m.start);
             buf.writeVarInt(m.total);
@@ -165,7 +160,7 @@ public final class InventoryPackets {
             }
         }
 
-        static ContainerOverflowSync decode(FriendlyByteBuf buf) {
+        static ContainerOverflowSync decode(RegistryFriendlyByteBuf buf) {
             int id = buf.readVarInt();
             int start = buf.readVarInt();
             int total = buf.readVarInt();
@@ -178,9 +173,8 @@ public final class InventoryPackets {
             return new ContainerOverflowSync(id, start, total, rows);
         }
 
-        static void handle(ContainerOverflowSync m, Supplier<NetworkEvent.Context> ctx) {
-            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> ClientInventoryHandlers.containerOverflow(m));
-            ctx.get().setPacketHandled(true);
+        static void handle(ContainerOverflowSync m, IPayloadContext ctx) {
+            Sides.runOn(Dist.CLIENT, () -> () -> ClientInventoryHandlers.containerOverflow(m));
         }
     }
 
@@ -191,7 +185,7 @@ public final class InventoryPackets {
      * 0-35 main, 36-39 armor, 40 offhand; {@link Pack#VIRTUAL_BASE} + n names pack entry n). {@code item} must match
      * the slot's current item or the request is ignored.
      */
-    public record InvAction(int action, int slot, ResourceLocation item) {
+    public record InvAction(int action, int slot, Identifier item) {
         /** Toggle: equip to the right hand / armor slot, or unequip if already equipped. */
         public static final int EQUIP = 0;
         /** Toggle: equip to / unequip from the left hand (offhand). */
@@ -206,20 +200,19 @@ public final class InventoryPackets {
         /** Apply a poison / harming potion to the equipped weapon. */
         public static final int APPLY_POISON = 7;
 
-        static void encode(InvAction m, FriendlyByteBuf buf) {
+        static void encode(InvAction m, RegistryFriendlyByteBuf buf) {
             buf.writeVarInt(m.action);
             buf.writeVarInt(m.slot);
-            buf.writeResourceLocation(m.item);
+            buf.writeIdentifier(m.item);
         }
 
-        static InvAction decode(FriendlyByteBuf buf) {
-            return new InvAction(buf.readVarInt(), buf.readVarInt(), buf.readResourceLocation());
+        static InvAction decode(RegistryFriendlyByteBuf buf) {
+            return new InvAction(buf.readVarInt(), buf.readVarInt(), buf.readIdentifier());
         }
 
-        static void handle(InvAction m, Supplier<NetworkEvent.Context> ctx) {
-            ServerPlayer player = ctx.get().getSender();
+        static void handle(InvAction m, IPayloadContext ctx) {
+            ServerPlayer player = SkyNetwork.sender(ctx);
             if (player != null) InventoryActions.handle(player, m.action, m.slot, m.item);
-            ctx.get().setPacketHandled(true);
         }
     }
 
@@ -238,21 +231,20 @@ public final class InventoryPackets {
         /** Put one item of player stack {@code a} into machine slot {@code b}. */
         public static final int PLACE_ONE = 3;
 
-        static void encode(MachineAction m, FriendlyByteBuf buf) {
+        static void encode(MachineAction m, RegistryFriendlyByteBuf buf) {
             buf.writeVarInt(m.containerId);
             buf.writeByte(m.kind);
             buf.writeVarInt(m.a);
             buf.writeVarInt(m.b + 1);
         }
 
-        static MachineAction decode(FriendlyByteBuf buf) {
+        static MachineAction decode(RegistryFriendlyByteBuf buf) {
             return new MachineAction(buf.readVarInt(), buf.readByte(), buf.readVarInt(), buf.readVarInt() - 1);
         }
 
-        static void handle(MachineAction m, Supplier<NetworkEvent.Context> ctx) {
-            ServerPlayer player = ctx.get().getSender();
+        static void handle(MachineAction m, IPayloadContext ctx) {
+            ServerPlayer player = SkyNetwork.sender(ctx);
             if (player != null) MachineActions.handle(player, m.containerId, m.kind, m.a, m.b);
-            ctx.get().setPacketHandled(true);
         }
     }
 }

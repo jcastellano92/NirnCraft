@@ -1,6 +1,6 @@
-"""Builds dist/Skycraft-client-instance.zip (Prism Launcher / MultiMC) locally, without packwiz.
+"""Builds dist/Skycraft-26.3-client-instance.zip (Prism Launcher / MultiMC) locally, without packwiz.
 
-Usage: python3 tools/build_prism_instance.py [--core-jar PATH]
+Usage: python3 tools/build_prism_instance.py [--core-jar PATH] [--output-zip PATH]
 
 * The instance is built from the committed pack state: every file listed in pack/index.toml (configs, defaultconfigs,
   mod metadata). Each indexed file's hash is checked against the index first, so a stale index fails the build
@@ -21,23 +21,23 @@ import urllib.parse
 import urllib.request
 import zipfile
 from concurrent.futures import ThreadPoolExecutor
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from validate_pack import TARGET, validate_core_jar, validate_pack
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 PACK_DIR = os.path.join(ROOT, "pack")
 DIST_DIR = os.path.join(ROOT, "dist")
 CACHE_DIR = os.path.join(DIST_DIR, ".cache")
-WORK_DIR = os.path.join(DIST_DIR, "tmp_prism_build")
-INST_DIR = os.path.join(WORK_DIR, "Skycraft")
+WORK_DIR = os.path.join(DIST_DIR, "tmp_prism_26.3_build")
+INST_DIR = os.path.join(WORK_DIR, TARGET["instanceName"])
 MC_DIR = os.path.join(INST_DIR, ".minecraft")
-OUT_ZIP = os.path.join(DIST_DIR, "Skycraft-client-instance.zip")
+OUT_ZIP = os.path.join(DIST_DIR, "Skycraft-26.3-client-instance.zip")
 
-MC_VERSION = "1.20.1"
-FORGE_VERSION = "47.4.10"
-# Heap comes from Min/MaxMemAlloc (Prism adds -Xms/-Xmx itself). -Dessential.autoUpdate=false keeps the Essential
-# loader from replacing the pinned Essential version (read by Essential Loader stage2 as "<mod slug>.autoUpdate").
-JVM_ARGS = ("-XX:+UseG1GC -XX:+ParallelRefProcEnabled -XX:MaxGCPauseMillis=200 -XX:+UnlockExperimentalVMOptions "
-            "-XX:+DisableExplicitGC -XX:G1NewSizePercent=30 -XX:G1MaxNewSizePercent=40 -XX:G1HeapRegionSize=8M "
-            "-Dessential.autoUpdate=false")
+MC_VERSION = TARGET["minecraft"]
+NEOFORGE_VERSION = TARGET["neoforge"]
+# Java 25 defaults provide the baseline; benchmark extra collector flags separately.
+# Heap comes from Min/MaxMemAlloc (Prism adds -Xms/-Xmx itself).
+JVM_ARGS = "-XX:+UseG1GC -XX:MaxGCPauseMillis=200"
 
 HEADERS = {"User-Agent": "skycraft-pack-tools/1.0 (+https://github.com/jcastellano92/Skycraft)"}
 
@@ -112,9 +112,18 @@ def read_index():
     return index["files"]
 
 
-def build_prism_package(core_jar_arg):
+def build_prism_package(core_jar_arg, output_zip=None):
     print("=== Building the Skycraft instance for Prism Launcher ===")
+    output_zip = os.path.abspath(output_zip or OUT_ZIP)
+    try:
+        inside_work = os.path.commonpath((WORK_DIR, output_zip)) == WORK_DIR
+    except ValueError:  # A candidate on the NVMe may be on a different Windows drive.
+        inside_work = False
+    if inside_work:
+        raise ValueError("Output archive must be outside the disposable build directory")
     core_jar = find_core_jar(core_jar_arg)
+    validate_pack(PACK_DIR)
+    validate_core_jar(core_jar)
     entries = read_index()
 
     if os.path.exists(WORK_DIR):
@@ -171,21 +180,14 @@ def build_prism_package(core_jar_arg):
             print("  -", f)
         sys.exit(1)
 
-    shader_zip = os.path.join(MC_DIR, "shaderpacks", "ComplementaryReimagined_r5.9.3.zip")
-    if os.path.isfile(shader_zip):
-        sys.path.insert(0, os.path.join(ROOT, "tools", "shaders"))
-        import pathlib as _pathlib
-        import patch_complementary_clouds as _pcc
-        _pcc.patch_shaderpack_zip(_pathlib.Path(shader_zip))
-        import patch_sun_horizon as _psh
-        _psh.patch_zip(_pathlib.Path(shader_zip), _pathlib.Path(shader_zip))
-
     print("\n[4/4] Writing the Prism instance...")
     with open(os.path.join(INST_DIR, "instance.cfg"), "w", encoding="utf-8", newline="\n") as f:
         f.write(f"""InstanceType=OneSix
-name=Skycraft
+name={TARGET['instanceName']}
 iconKey=default
-notes=Skycraft: The Elder Scrolls V Skyrim total conversion for Minecraft {MC_VERSION} Forge {FORGE_VERSION}
+notes=Skycraft migration: Minecraft {MC_VERSION}, NeoForge {NEOFORGE_VERSION}, Java 25. Separate from the preserved Forge instance. Custom shaders and Distant Horizons await integration acceptance.
+OverrideJavaLocation=false
+JavaVersion=25
 OverrideJavaArgs=true
 JvmArgs={JVM_ARGS}
 OverrideMemory=true
@@ -196,25 +198,28 @@ MaxMemAlloc=6144
         f.write(f"""{{
   "components": [
     {{"uid": "net.minecraft", "version": "{MC_VERSION}", "important": true}},
-    {{"uid": "net.minecraftforge", "version": "{FORGE_VERSION}"}}
+    {{"uid": "net.neoforged", "version": "{NEOFORGE_VERSION}"}}
   ],
   "formatVersion": 1
 }}
 """)
 
-    if os.path.exists(OUT_ZIP):
-        os.remove(OUT_ZIP)
-    with zipfile.ZipFile(OUT_ZIP, "w", zipfile.ZIP_DEFLATED) as zf:
+    os.makedirs(os.path.dirname(output_zip), exist_ok=True)
+    partial_zip = output_zip + ".partial"
+    with zipfile.ZipFile(partial_zip, "w", zipfile.ZIP_DEFLATED) as zf:
         for root, _, files in os.walk(INST_DIR):
             for f in files:
                 full = os.path.join(root, f)
                 zf.write(full, os.path.relpath(full, WORK_DIR))
+    os.replace(partial_zip, output_zip)
     shutil.rmtree(WORK_DIR, ignore_errors=True)
-    print(f"\nDone: {OUT_ZIP} ({os.path.getsize(OUT_ZIP) / (1024 * 1024):.1f} MB)")
+    print(f"\nDone: {output_zip} ({os.path.getsize(output_zip) / (1024 * 1024):.1f} MB)")
     print("In Prism Launcher: Add Instance -> Import -> choose this zip.")
 
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--core-jar", help="Skycraft Core jar (default: newest jar in mod/build/libs)")
-    build_prism_package(ap.parse_args().core_jar)
+    ap.add_argument("--output-zip", help="Candidate archive path (default: dist/Skycraft-26.3-client-instance.zip)")
+    args = ap.parse_args()
+    build_prism_package(args.core_jar, args.output_zip)

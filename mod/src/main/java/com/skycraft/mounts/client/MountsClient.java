@@ -3,17 +3,17 @@ package com.skycraft.mounts.client;
 import com.skycraft.Skycraft;
 import com.skycraft.creatures.client.BestiaryClient;
 import com.skycraft.mounts.MountEntities;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.EntityRenderersEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.EntityRenderersEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 /**
  * Renderers of the ridden beasts: the bestiary's rig models with the mounts' skins
  * ({@code textures/entity/creatures/<name>.png}; variant 0 bare, 1 saddled, 2 barded, painted by
  * {@code tools/textures/mounts.py}).
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
 public final class MountsClient {
     private MountsClient() {}
 

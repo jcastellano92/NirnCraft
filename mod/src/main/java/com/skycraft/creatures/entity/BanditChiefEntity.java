@@ -33,8 +33,7 @@ public class BanditChiefEntity extends BanditEntity {
             "Vald the Reaver", "Hakir Iron-Fist", "Malkor Ruthless", "Bandit Chief"
     };
 
-    private final ServerBossEvent bossEvent = new ServerBossEvent(Component.translatable("entity.skycraft.bandit_chief"),
-            BossEvent.BossBarColor.RED, BossEvent.BossBarOverlay.NOTCHED_6);
+    private final ServerBossEvent bossEvent = new ServerBossEvent(java.util.UUID.randomUUID(), Component.translatable("entity.skycraft.bandit_chief"), BossEvent.BossBarColor.RED, BossEvent.BossBarOverlay.NOTCHED_6);
 
     public BanditChiefEntity(EntityType<? extends BanditChiefEntity> type, Level level) {
         super(type, level);
@@ -97,14 +96,16 @@ public class BanditChiefEntity extends BanditEntity {
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag tag) {
-        super.readAdditionalSaveData(tag);
+    public void readAdditionalSaveData(net.minecraft.world.level.storage.ValueInput input263) {
+        super.readAdditionalSaveData(input263);
+        net.minecraft.nbt.CompoundTag tag = com.skycraft.platform.ValueTags.read(input263);
+        
         if (this.hasCustomName()) this.bossEvent.setName(this.getDisplayName());
     }
 
     @Override
-    protected void customServerAiStep() {
-        super.customServerAiStep();
+    protected void customServerAiStep(net.minecraft.server.level.ServerLevel serverLevel263) {
+        super.customServerAiStep(serverLevel263);
         this.bossEvent.setProgress(this.getHealth() / this.getMaxHealth());
         if (this.tickCount % 20 == 0 && this.level() instanceof net.minecraft.server.level.ServerLevel sl) {
             double rangeSq = 48.0 * 48.0;
@@ -122,18 +123,18 @@ public class BanditChiefEntity extends BanditEntity {
 
     /** Two-handed blows knock the target back hard. */
     @Override
-    public boolean doHurtTarget(Entity target) {
-        boolean hit = super.doHurtTarget(target);
+    public boolean doHurtTarget(net.minecraft.server.level.ServerLevel serverLevel263, Entity target) {
+        boolean hit = super.doHurtTarget(serverLevel263, target);
         if (hit && target instanceof LivingEntity living) {
-            living.knockback(0.6, this.getX() - target.getX(), this.getZ() - target.getZ());
-            living.hurtMarked = true;
+            living.knockback(0.6, this.getX() - target.getX(), this.getZ() - target.getZ(), this.damageSources().mobAttack(this), (float)this.getAttributeValue(Attributes.ATTACK_DAMAGE));
+            living.syncVelocity = true;
         }
         return hit;
     }
 
     @Override
-    protected void dropCustomDeathLoot(DamageSource source, int looting, boolean recentlyHit) {
-        super.dropCustomDeathLoot(source, looting, recentlyHit);
+    protected void dropCustomDeathLoot(net.minecraft.server.level.ServerLevel lootLevel263, DamageSource source, boolean recentlyHit) {
+        super.dropCustomDeathLoot(lootLevel263, source, recentlyHit);
         if (this.level() instanceof ServerLevel sl) {
             int lvl = Leveling.levelOf(this);
             if (lvl <= 0) lvl = Leveling.regionLevel(sl, this.blockPosition());
@@ -142,7 +143,7 @@ public class BanditChiefEntity extends BanditEntity {
             ItemStack leg = LeveledGear.roll(kind, lvl, this.random);
             if (leg.isEmpty()) leg = new ItemStack(Items.IRON_SWORD);
             LegendaryItem.apply(leg, lvl, this.random, kind == LeveledGear.Kind.ARMOR);
-            this.spawnAtLocation(leg);
+            this.spawnAtLocation(lootLevel263, leg);
         }
     }
 

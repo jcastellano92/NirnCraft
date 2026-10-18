@@ -9,7 +9,8 @@
     "type": "skycraft:places",
     "salt": 718274518,
     "types": [
-      "fort"
+      "fort",
+      "dungeon_fixed"
     ],
     "variants": [
       "akaviri_fort"

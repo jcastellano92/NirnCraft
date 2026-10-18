@@ -9,8 +9,8 @@ import com.skycraft.quest.party.Party;
 import com.skycraft.quest.party.PartyManager;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.animal.horse.AbstractHorse;
-import net.minecraft.world.entity.animal.horse.Horse;
+import net.minecraft.world.entity.animal.equine.AbstractHorse;
+import net.minecraft.world.entity.animal.equine.Horse;
 import net.minecraft.world.entity.player.Player;
 
 /**
@@ -61,8 +61,8 @@ public final class HorseManager {
 
     public static boolean isSameFactionOrParty(Player a, Player b) {
         // Party check
-        if (a.getServer() != null) {
-            PartyManager pm = PartyManager.get(a.getServer());
+        if (a.level().getServer() != null) {
+            PartyManager pm = PartyManager.get(a.level().getServer());
             Party pa = pm.partyOf(a.getUUID());
             if (pa != null && pa.has(b.getUUID())) return true;
         }

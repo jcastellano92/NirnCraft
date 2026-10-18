@@ -24,7 +24,7 @@ import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.registries.RegistryObject;
+import java.util.function.Supplier;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -49,35 +49,35 @@ public final class RealmCreatures {
     private RealmCreatures() {}
 
     // ---------------------------------------------------------------- the Deadlands
-    public static final RegistryObject<EntityType<SkyMonster>> CLANNFEAR = Bestiary.monster(clannfear());
-    public static final RegistryObject<EntityType<SkyMonster>> DAEDROTH = Bestiary.monster(daedroth());
-    public static final RegistryObject<EntityType<SkyMonster>> SPIDER_DAEDRA = Bestiary.monster(spiderDaedra());
+    public static final Supplier<EntityType<SkyMonster>> CLANNFEAR = Bestiary.monster(clannfear());
+    public static final Supplier<EntityType<SkyMonster>> DAEDROTH = Bestiary.monster(daedroth());
+    public static final Supplier<EntityType<SkyMonster>> SPIDER_DAEDRA = Bestiary.monster(spiderDaedra());
 
     // ---------------------------------------------------------------- the Shivering Isles
-    public static final RegistryObject<EntityType<SkyMonster>> GRUMMITE = Bestiary.monster(grummite());
-    public static final RegistryObject<EntityType<SkyMonster>> BALIWOG = Bestiary.monster(baliwog());
-    public static final RegistryObject<EntityType<SkyMonster>> GNARL = Bestiary.monster(gnarl());
-    public static final RegistryObject<EntityType<SkyMonster>> ELYTRA = Bestiary.monster(elytra());
-    public static final RegistryObject<EntityType<SkyMonster>> FLESH_ATRONACH = Bestiary.monster(fleshAtronach());
+    public static final Supplier<EntityType<SkyMonster>> GRUMMITE = Bestiary.monster(grummite());
+    public static final Supplier<EntityType<SkyMonster>> BALIWOG = Bestiary.monster(baliwog());
+    public static final Supplier<EntityType<SkyMonster>> GNARL = Bestiary.monster(gnarl());
+    public static final Supplier<EntityType<SkyMonster>> ELYTRA = Bestiary.monster(elytra());
+    public static final Supplier<EntityType<SkyMonster>> FLESH_ATRONACH = Bestiary.monster(fleshAtronach());
 
     // ---------------------------------------------------------------- Apocrypha
-    public static final RegistryObject<EntityType<SkyMonster>> SEEKER = Bestiary.monster(seeker());
-    public static final RegistryObject<EntityType<SkyMonster>> LURKER = Bestiary.monster(lurker());
+    public static final Supplier<EntityType<SkyMonster>> SEEKER = Bestiary.monster(seeker());
+    public static final Supplier<EntityType<SkyMonster>> LURKER = Bestiary.monster(lurker());
 
     // ---------------------------------------------------------------- the Soul Cairn
-    public static final RegistryObject<EntityType<SkyMonster>> KEEPER = Bestiary.monster(keeper());
-    public static final RegistryObject<EntityType<SkyMonster>> BONEMAN = Bestiary.monster(boneman());
-    public static final RegistryObject<EntityType<SkyMonster>> MISTMAN = Bestiary.monster(mistman());
-    public static final RegistryObject<EntityType<SkyMonster>> WRATHMAN = Bestiary.monster(wrathman());
-    public static final RegistryObject<EntityType<RealmSpirit>> WANDERING_SOUL = Bestiary.register(wanderingSoul(), RealmSpirit::new);
+    public static final Supplier<EntityType<SkyMonster>> KEEPER = Bestiary.monster(keeper());
+    public static final Supplier<EntityType<SkyMonster>> BONEMAN = Bestiary.monster(boneman());
+    public static final Supplier<EntityType<SkyMonster>> MISTMAN = Bestiary.monster(mistman());
+    public static final Supplier<EntityType<SkyMonster>> WRATHMAN = Bestiary.monster(wrathman());
+    public static final Supplier<EntityType<RealmSpirit>> WANDERING_SOUL = Bestiary.register(wanderingSoul(), RealmSpirit::new);
 
     // ---------------------------------------------------------------- Sovngarde
-    public static final RegistryObject<EntityType<RealmSpirit>> SOVNGARDE_HERO = Bestiary.register(sovngardeHero(), RealmSpirit::new);
-    public static final RegistryObject<EntityType<RealmSpirit>> TSUN = Bestiary.register(tsun(), RealmSpirit::new);
+    public static final Supplier<EntityType<RealmSpirit>> SOVNGARDE_HERO = Bestiary.register(sovngardeHero(), RealmSpirit::new);
+    public static final Supplier<EntityType<RealmSpirit>> TSUN = Bestiary.register(tsun(), RealmSpirit::new);
 
     // ---------------------------------------------------------------- Coldharbour, and the First Dragonborn
-    public static final RegistryObject<EntityType<SkyMonster>> HARVESTER = Bestiary.monster(harvester());
-    public static final RegistryObject<EntityType<SkyMonster>> MIRAAK = Bestiary.monster(miraak());
+    public static final Supplier<EntityType<SkyMonster>> HARVESTER = Bestiary.monster(harvester());
+    public static final Supplier<EntityType<SkyMonster>> MIRAAK = Bestiary.monster(miraak());
 
     /** Every registered realm creature id (namespace {@code skycraft}). */
     public static final List<String> IDS = List.of("clannfear", "daedroth", "spider_daedra", "grummite", "baliwog", "gnarl",
@@ -171,7 +171,7 @@ public final class RealmCreatures {
                     }
                     sl.sendParticles(ParticleTypes.SCULK_SOUL, to.x, to.y, to.z, 6, 0.3, 0.4, 0.3, 0.02);
                 }
-                if (target.hurt(MagicDamage.source(mob.level(), MagicDamage.SPELL, null, mob), damage)) {
+                if (com.skycraft.platform.Effects.hurt(target, MagicDamage.source(mob.level(), MagicDamage.SPELL, null, mob), damage)) {
                     mob.heal(damage * healShare);
                 }
                 mob.playSound(com.skycraft.audio.AudioSounds.spell("conjure"), 1.0f, 0.6f);

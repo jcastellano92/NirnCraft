@@ -50,10 +50,8 @@ public record FoodSpec(int nutrition, float saturation, boolean drink, boolean f
     }
 
     public FoodProperties properties(boolean meat) {
-        FoodProperties.Builder b = new FoodProperties.Builder().nutrition(nutrition).saturationMod(saturation);
-        if (meat) b.meat();
-        if (drink) b.alwaysEat();
-        if (fast) b.fast();
+        FoodProperties.Builder b = new FoodProperties.Builder().nutrition(nutrition).saturationModifier(saturation);
+        if (drink) b.alwaysEdible();
         return b.build();
     }
 

@@ -3,20 +3,20 @@ package com.skycraft.economy;
 import com.skycraft.Skycraft;
 import com.skycraft.network.SkyNetwork;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.event.AddReloadListenerEvent;
-import net.minecraftforge.event.OnDatapackSyncEvent;
-import net.minecraftforge.event.TagsUpdatedEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.AddServerReloadListenersEvent;
+import net.neoforged.neoforge.event.OnDatapackSyncEvent;
+import net.neoforged.neoforge.event.TagsUpdatedEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 /** Forge-bus events of the economy: loading and syncing item values. */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class EconomyEvents {
     private EconomyEvents() {}
 
     @SubscribeEvent
-    public static void onAddReloadListeners(AddReloadListenerEvent event) {
-        event.addListener(new ItemValues.Loader());
+    public static void onAddReloadListeners(AddServerReloadListenersEvent event) {
+        event.addListener(net.minecraft.resources.Identifier.fromNamespaceAndPath(Skycraft.MODID, "item_values"), new ItemValues.Loader());
     }
 
     /** Fired when a player joins (player set) and after /reload (player null = everyone). */

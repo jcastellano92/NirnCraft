@@ -8,22 +8,29 @@ import com.skycraft.tamriel.TamrielMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
 import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
-import net.minecraftforge.event.level.LevelEvent;
+import net.neoforged.neoforge.event.level.LevelEvent;
 
 /** New Tamriel worlds start where Skyrim does: on the road outside Helgen. */
 public final class TamrielSpawn {
     public static final ResourceKey<NoiseGeneratorSettings> TAMRIEL_SETTINGS =
-            ResourceKey.create(Registries.NOISE_SETTINGS, new ResourceLocation(Skycraft.MODID, "tamriel"));
+            ResourceKey.create(Registries.NOISE_SETTINGS, Identifier.fromNamespaceAndPath(Skycraft.MODID, "tamriel"));
     private static final int HELGEN_X = -24, HELGEN_Z = 1143;
 
     private TamrielSpawn() {}
+
+    /** The generator is available before levels, so startup can warm only Tamriel plans. */
+    public static boolean isTamriel(net.minecraft.server.MinecraftServer server) {
+        var stem = server.getWorldGenSettings().dimensions().dimensions().get(net.minecraft.world.level.dimension.LevelStem.OVERWORLD);
+        return stem != null && stem.generator() instanceof NoiseBasedChunkGenerator generator
+                && generator.generatorSettings().is(TAMRIEL_SETTINGS);
+    }
 
     public static boolean isTamriel(ServerLevel level) {
         ChunkGenerator gen = level.getChunkSource().getGenerator();
@@ -42,7 +49,7 @@ public final class TamrielSpawn {
         }
         // just outside the town, on the north road towards Riverwood
         BlockPos spawn = findDry(level, cx, cz - radius - 16);
-        event.getSettings().setSpawn(spawn, 0f);
+        event.getSettings().setSpawn(net.minecraft.world.level.storage.LevelData.RespawnData.of(level.dimension(), spawn, 0f, 0f));
         event.setCanceled(true);
         Skycraft.LOGGER.info("Tamriel world spawn set near Helgen at {}", spawn);
     }

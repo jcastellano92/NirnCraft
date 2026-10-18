@@ -24,7 +24,7 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.event.entity.living.LivingDropsEvent;
+import net.neoforged.neoforge.event.entity.living.LivingDropsEvent;
 
 import java.util.List;
 import java.util.Map;
@@ -68,18 +68,18 @@ public final class Bosses {
     public static void apply(Entity e, CompoundTag spec) {
         if (!(e instanceof Mob mob)) return;
         if (spec.contains("gear")) {
-            CompoundTag gear = spec.getCompound("gear");
-            for (String slot : gear.getAllKeys()) {
+            CompoundTag gear = spec.getCompoundOrEmpty("gear");
+            for (String slot : gear.keySet()) {
                 EquipmentSlot s = SLOTS.get(slot);
-                Item item = Story.item(gear.getString(slot));
+                Item item = Story.item(gear.getStringOr(slot, ""));
                 if (s == null || item == null) continue;
                 mob.setItemSlot(s, new ItemStack(item));
                 mob.setDropChance(s, 0.0f);
             }
         }
-        if (spec.contains("drop")) mob.getPersistentData().putString(DROP, spec.getString("drop"));
+        if (spec.contains("drop")) mob.getPersistentData().putString(DROP, spec.getStringOr("drop",""));
         if (spec.contains("level")) {
-            int level = spec.getInt("level");
+            int level = spec.getIntOr("level",0);
             if (mob.level() instanceof ServerLevel sl) {
                 Player near = sl.getNearestPlayer(mob.getX(), mob.getY(), mob.getZ(), 96, false);
                 if (near != null) level = Math.max(level, SkyData.get(near).getLevel() + 2);
@@ -106,7 +106,7 @@ public final class Bosses {
         if (json.has("weapon")) spec.putString("weapon", json.get("weapon").getAsString());
         if (json.has("glow") && json.get("glow").getAsBoolean()) spec.putBoolean("glow", true);
         extraSpec(json, spec);
-        ServerLevel level = p.serverLevel();
+        ServerLevel level = p.level();
         double a = p.getRandom().nextDouble() * Math.PI * 2;
         BlockPos at = QuestSpawner.surface(level, p.getBlockX() + (int) (Math.cos(a) * 7), p.getBlockZ() + (int) (Math.sin(a) * 7));
         QuestSpawner.spawnLoose(level, key, q, spec, at);
@@ -116,7 +116,7 @@ public final class Bosses {
 
     /** A quest boss with a drop spec leaves it on death (for the killer, or the nearest player). */
     static void onDrops(LivingDropsEvent event) {
-        String drop = event.getEntity().getPersistentData().getString(DROP);
+        String drop = event.getEntity().getPersistentData().getStringOr(DROP, "");
         if (drop.isEmpty() || !(event.getEntity().level() instanceof ServerLevel level)) return;
         ServerPlayer p = Quests.asPlayer(level.getServer(), event.getSource().getEntity());
         if (p == null && level.getNearestPlayer(event.getEntity(), 64) instanceof ServerPlayer sp) p = sp;

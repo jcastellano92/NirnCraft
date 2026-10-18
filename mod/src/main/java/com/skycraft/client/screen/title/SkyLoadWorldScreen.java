@@ -1,7 +1,7 @@
 package com.skycraft.client.screen.title;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.Screen;
@@ -10,7 +10,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.LevelSummary;
-import org.lwjgl.glfw.GLFW;
+import com.mojang.blaze3d.platform.InputConstants;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -124,7 +124,7 @@ public class SkyLoadWorldScreen extends Screen {
     private void loadSelected() {
         if (selectedIndex >= 0 && selectedIndex < saves.size()) {
             LevelSummary summary = saves.get(selectedIndex);
-            Minecraft.getInstance().createWorldOpenFlows().loadLevel(this, summary.getLevelId());
+            Minecraft.getInstance().createWorldOpenFlows().openWorld(summary.getLevelId(), () -> Minecraft.getInstance().gui.setScreen(this));
         }
     }
 
@@ -132,7 +132,7 @@ public class SkyLoadWorldScreen extends Screen {
         if (selectedIndex < 0 || selectedIndex >= saves.size()) return;
         LevelSummary summary = saves.get(selectedIndex);
         Minecraft mc = Minecraft.getInstance();
-        mc.setScreen(new ConfirmScreen(
+        mc.gui.setScreen(new ConfirmScreen(
                 confirm -> {
                     if (confirm) {
                         // Close the access afterwards so its session lock is released.
@@ -142,9 +142,9 @@ public class SkyLoadWorldScreen extends Screen {
                             e.printStackTrace();
                         }
                         refreshSaves();
-                        mc.setScreen(this);
+                        mc.gui.setScreen(this);
                     } else {
-                        mc.setScreen(this);
+                        mc.gui.setScreen(this);
                     }
                 },
                 Component.literal("Delete Adventure?"),
@@ -155,14 +155,14 @@ public class SkyLoadWorldScreen extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+    public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
         // Deep Nordic slate background
         g.fillGradient(0, 0, width, height, 0xFF080808, 0xFF141210);
 
         int cx = width / 2;
 
         // Header
-        g.drawCenteredString(font, "LOAD ADVENTURE", cx, 14, GOLD_COLOR);
+        g.centeredText(font, "LOAD ADVENTURE", cx, 14, GOLD_COLOR);
         g.fill(cx - 100, 26, cx + 100, 27, 0x80E8C060);
 
         // List bounds
@@ -173,9 +173,9 @@ public class SkyLoadWorldScreen extends Screen {
         int itemH = 34;
 
         if (loading) {
-            g.drawCenteredString(font, "Searching archives...", cx, height / 2, DIM_COLOR);
+            g.centeredText(font, "Searching archives...", cx, height / 2, DIM_COLOR);
         } else if (saves.isEmpty()) {
-            g.drawCenteredString(font, "No adventures recorded.", cx, height / 2, DIM_COLOR);
+            g.centeredText(font, "No adventures recorded.", cx, height / 2, DIM_COLOR);
         } else {
             int totalH = saves.size() * itemH;
             maxScroll = Math.max(0, totalH - listH);
@@ -198,11 +198,11 @@ public class SkyLoadWorldScreen extends Screen {
                 }
 
                 // World Name
-                g.drawString(font, s.getLevelName(), listX + 8, itemY + 4, isSel ? BRIGHT_COLOR : TEXT_COLOR, isSel);
+                g.text(font, s.getLevelName(), listX + 8, itemY + 4, isSel ? BRIGHT_COLOR : TEXT_COLOR, isSel);
 
                 // Date and ID
                 String dateStr = DATE_FORMAT.format(new Date(s.getLastPlayed()));
-                g.drawString(font, dateStr + " • " + s.getLevelId(), listX + 8, itemY + 16, DIM_COLOR, false);
+                g.text(font, dateStr + " • " + s.getLevelId(), listX + 8, itemY + 16, DIM_COLOR, false);
             }
 
             g.disableScissor();
@@ -215,11 +215,13 @@ public class SkyLoadWorldScreen extends Screen {
             }
         }
 
-        super.render(g, mouseX, mouseY, partialTick);
+        super.extractRenderState(g, mouseX, mouseY, partialTick);
     }
 
     @Override
-    public boolean mouseClicked(double mx, double my, int button) {
+    public boolean mouseClicked(net.minecraft.client.input.MouseButtonEvent event, boolean doubleClick) {
+        double mx = event.x(), my = event.y();
+        int button = com.skycraft.client.screen.UiInput.actionButton(event.button());
         if (button == 0 && !saves.isEmpty()) {
             int cx = width / 2;
             int listX = cx - 140;
@@ -242,44 +244,45 @@ public class SkyLoadWorldScreen extends Screen {
                 }
             }
         }
-        return super.mouseClicked(mx, my, button);
+        return super.mouseClicked(event, doubleClick);
     }
 
     @Override
-    public boolean mouseScrolled(double mx, double my, double delta) {
+    public boolean mouseScrolled(double mx, double my, double horizontal, double delta) {
         if (maxScroll > 0) {
             scrollOffset = Mth.clamp(scrollOffset - (float) delta * 20f, 0, maxScroll);
             return true;
         }
-        return super.mouseScrolled(mx, my, delta);
+        return super.mouseScrolled(mx, my, horizontal, delta);
     }
 
     @Override
-    public boolean keyPressed(int key, int scan, int mods) {
-        if (key == GLFW.GLFW_KEY_UP || key == GLFW.GLFW_KEY_W) {
+    public boolean keyPressed(net.minecraft.client.input.KeyEvent event) {
+        int key = event.key(), scan = event.keycode(), mods = event.modifiers();
+        if (key == InputConstants.KEY_UP || key == InputConstants.KEY_W) {
             if (!saves.isEmpty()) {
                 selectedIndex = Math.max(0, selectedIndex - 1);
                 updateButtonState();
                 return true;
             }
         }
-        if (key == GLFW.GLFW_KEY_DOWN || key == GLFW.GLFW_KEY_S) {
+        if (key == InputConstants.KEY_DOWN || key == InputConstants.KEY_S) {
             if (!saves.isEmpty()) {
                 selectedIndex = Math.min(saves.size() - 1, selectedIndex + 1);
                 updateButtonState();
                 return true;
             }
         }
-        if (key == GLFW.GLFW_KEY_ENTER || key == GLFW.GLFW_KEY_SPACE) {
+        if (key == InputConstants.KEY_RETURN || key == InputConstants.KEY_SPACE) {
             loadSelected();
             return true;
         }
-        return super.keyPressed(key, scan, mods);
+        return super.keyPressed(event);
     }
 
     @Override
     public void onClose() {
-        Minecraft.getInstance().setScreen(lastScreen);
+        Minecraft.getInstance().gui.setScreen(lastScreen);
     }
 }
 

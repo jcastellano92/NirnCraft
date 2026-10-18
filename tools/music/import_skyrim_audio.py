@@ -59,7 +59,7 @@ REPO = HERE.parents[1]
 sys.path.insert(0, str(HERE))
 import sound_catalog  # noqa: E402  (the list of Skycraft sound events)
 
-PACK_FORMAT = 15  # Minecraft 1.20.1
+PACK_FORMAT = [97, 1]  # Minecraft 26.3 client resources
 PACK_DESCRIPTION = "Skycraft \u2013 Personal Skyrim audio (personal use only, do not share)"
 ZIP_NAME = "skycraft_personal_skyrim_audio.zip"
 AUDIO_EXT = (".xwm", ".wav", ".fuz")
@@ -1205,7 +1205,7 @@ def run(args) -> int:
             print("error: no file could be converted", file=sys.stderr)
             return 1
 
-        mcmeta = {"pack": {"pack_format": PACK_FORMAT, "description": PACK_DESCRIPTION}}
+        mcmeta = {"pack": {"min_format": PACK_FORMAT, "max_format": PACK_FORMAT, "description": PACK_DESCRIPTION}}
         out_zip.parent.mkdir(parents=True, exist_ok=True)
         part = out_zip.with_name(out_zip.name + ".part")
         with zipfile.ZipFile(part, "w", compression=zipfile.ZIP_DEFLATED) as z:

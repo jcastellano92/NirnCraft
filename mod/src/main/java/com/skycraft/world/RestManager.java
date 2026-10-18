@@ -29,7 +29,7 @@ import net.minecraft.world.entity.Marker;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BedBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -37,21 +37,22 @@ import net.minecraft.world.level.block.state.properties.BedPart;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.level.saveddata.SavedData;
-import net.minecraftforge.eventbus.api.Event;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.living.LivingChangeTargetEvent;
-import net.minecraftforge.event.entity.living.MobSpawnEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.event.entity.player.SleepingTimeCheckEvent;
-import net.minecraftforge.event.server.ServerStartedEvent;
-import net.minecraftforge.event.server.ServerStoppingEvent;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.server.ServerLifecycleHooks;
+
+import net.neoforged.neoforge.event.tick.ServerTickEvent;
+import net.neoforged.neoforge.event.entity.living.LivingChangeTargetEvent;
+import net.neoforged.neoforge.event.entity.living.MobSpawnEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.entity.player.CanContinueSleepingEvent;
+import net.neoforged.neoforge.event.entity.living.FinalizeSpawnEvent;
+import net.neoforged.neoforge.event.server.ServerStartedEvent;
+import net.neoforged.neoforge.event.server.ServerStoppingEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.neoforge.server.ServerLifecycleHooks;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -79,7 +80,7 @@ import java.util.UUID;
  *     <li><b>Jail</b>: sleeping off a sentence is a personal fast-forward of the same kind ({@link #beginJail}).</li>
  * </ul>
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class RestManager {
     public static final int TICKS_PER_HOUR = RestLogic.TICKS_PER_HOUR;
     public static final String SEAT_TAG = "skycraft_rest_seat";
@@ -164,7 +165,7 @@ public final class RestManager {
         if (player.isShiftKeyDown() || player.isSpectator() || !WorldConfig.BED_MENU.get()) return;
         BlockState state = level.getBlockState(event.getPos());
         if (!(state.getBlock() instanceof BedBlock)) return;
-        if (!BedBlock.canSetSpawn(level)) return; // Oblivion and Sovngarde: beds behave (explode) like vanilla
+        if (!level.environmentAttributes().getValue(net.minecraft.world.attribute.EnvironmentAttributes.BED_RULE, event.getPos()).canSetSpawn(level)) return; // Oblivion and Sovngarde: beds behave (explode) like vanilla
 
         BlockPos pos = event.getPos();
         if (state.hasProperty(BedBlock.OCCUPIED) && state.getValue(BedBlock.OCCUPIED)) {
@@ -187,11 +188,11 @@ public final class RestManager {
 
     /** Ensure vanilla sleeping (e.g. shift-clicking a bed) also checks bed ownership and occupancy. */
     @SubscribeEvent(priority = EventPriority.HIGH)
-    public static void onPlayerSleepInBed(net.minecraftforge.event.entity.player.PlayerSleepInBedEvent event) {
+    public static void onPlayerSleepInBed(net.neoforged.neoforge.event.entity.player.CanPlayerSleepEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) {
             BlockPos pos = event.getPos();
             if (com.skycraft.crime.Ownership.isOwnedByOther(player, player.level(), pos)) {
-                event.setResult(Player.BedSleepingProblem.OTHER_PROBLEM);
+                event.setProblem(Player.BedSleepingProblem.OTHER_PROBLEM);
                 Notifier.message(player, Component.translatable("world.skycraft.rest.bed_owned"));
             }
         }
@@ -206,7 +207,7 @@ public final class RestManager {
                 if (mode == RestLogic.SLEEP || mode == RestLogic.WAIT) enter(player, mode, null, KEY_REACH);
             }
             case WorldPackets.Rest.START -> startSkip(player, Mth.clamp(hours, 1, 24));
-            case WorldPackets.Rest.CANCEL -> cancel(player.server, player.getUUID(), null);
+            case WorldPackets.Rest.CANCEL -> cancel(player.level().getServer(), player.getUUID(), null);
             default -> {
             }
         }
@@ -260,13 +261,13 @@ public final class RestManager {
         if (old != null) {
             if (old.mode == mode && java.util.Objects.equals(old.bed, head)) return true;
             if (skipOf(player.getUUID()) != null) return false; // no switching while time passes
-            endSession(player.server, player.getUUID());
+            endSession(player.level().getServer(), player.getUUID());
         }
         if (!begin(player, mode, head, false)) {
             Notifier.message(player, Component.translatable("world.skycraft.rest.busy"));
             return false;
         }
-        syncGroup(player.server, player.level().dimension());
+        syncGroup(player.level().getServer(), player.level().dimension());
         return true;
     }
 
@@ -298,11 +299,11 @@ public final class RestManager {
                     || !(player.level().getBlockState(bed).getBlock() instanceof BedBlock)) {
                 return Component.translatable("world.skycraft.rest.no_bed");
             }
-            if (!BedBlock.canSetSpawn(player.level())) return Component.translatable("world.skycraft.rest.no_bed");
+            if (!player.level().environmentAttributes().getValue(net.minecraft.world.attribute.EnvironmentAttributes.BED_RULE, player.blockPosition()).canSetSpawn(player.level())) return Component.translatable("world.skycraft.rest.no_bed");
             BlockState state = player.level().getBlockState(bed);
             if (state.hasProperty(BedBlock.OCCUPIED) && state.getValue(BedBlock.OCCUPIED)) {
                 if (com.skycraft.survival.inn.Innkeepers.roomHere(player) != null
-                        && com.skycraft.crime.Ownership.isInnBed(player.serverLevel(), bed)) {
+                        && com.skycraft.crime.Ownership.isInnBed(player.level(), bed)) {
                     for (net.minecraft.world.entity.LivingEntity sleeper : player.level().getEntitiesOfClass(
                             net.minecraft.world.entity.LivingEntity.class,
                             new net.minecraft.world.phys.AABB(bed).inflate(3.0),
@@ -372,8 +373,8 @@ public final class RestManager {
     // ------------------------------------------------------------------ sessions
 
     private static boolean begin(ServerPlayer player, int mode, @Nullable BlockPos head, boolean jail) {
-        ServerLevel level = player.serverLevel();
-        Session s = new Session(mode, head, level.dimension(), player.server.getTickCount(), jail);
+        ServerLevel level = player.level();
+        Session s = new Session(mode, head, level.dimension(), player.level().getServer().getTickCount(), jail);
         s.stand = new Vec3(player.getX(), player.getY(), player.getZ());
         s.anchor = s.stand;
         if (mode != RestLogic.WAIT && head != null && level.getBlockState(head).getBlock() instanceof BedBlock) {
@@ -397,7 +398,7 @@ public final class RestManager {
         SESSIONS.put(player.getUUID(), s);
         SurvivalMode.setRestState(player.getUUID(), restLevel(mode));
         ACTIVITY.put(player.getUUID(), new Activity(player.getX(), player.getY(), player.getZ(), player.getYRot(), player.getXRot(),
-                player.server.getTickCount()));
+                player.level().getServer().getTickCount()));
         return true;
     }
 
@@ -461,7 +462,7 @@ public final class RestManager {
 
     private static String nameOf(MinecraftServer server, @Nullable UUID id) {
         ServerPlayer p = id == null ? null : server.getPlayerList().getPlayer(id);
-        return p == null ? "" : p.getGameProfile().getName();
+        return p == null ? "" : p.getGameProfile().name();
     }
 
     /** Recomputes the dimension's group and tells every resting player their state. */
@@ -501,7 +502,7 @@ public final class RestManager {
             }
             int progress = k == null || k.total <= 0 ? 0 : (int) (k.done * 1000 / k.total);
             SkyNetwork.sendToPlayer(p, new WorldPackets.RestState(k != null ? 2 : 1, mode, flags, k != null ? k.hours : 0,
-                    progress, resting, required, personal || s.jail ? p.getGameProfile().getName() : iniName));
+                    progress, resting, required, personal || s.jail ? p.getGameProfile().name() : iniName));
         }
     }
 
@@ -510,7 +511,7 @@ public final class RestManager {
     private static void startSkip(ServerPlayer player, int hours) {
         UUID id = player.getUUID();
         Session s = SESSIONS.get(id);
-        MinecraftServer server = player.server;
+        MinecraftServer server = player.level().getServer();
         if (s == null || s.jail || skipOf(id) != null) return;
         // nobody's timers jump under a cutscene, a loading cover or a conversation
         if (RestGate.blocked(player) || anyBlocked(server, s.dim)) {
@@ -571,7 +572,7 @@ public final class RestManager {
             Notifier.message(player, Component.translatable("world.skycraft.rest.gated"));
             return true;
         }
-        ServerLevel level = player.serverLevel();
+        ServerLevel level = player.level();
         if (!level.isLoaded(clicked) || !(level.getBlockState(clicked).getBlock() instanceof BedBlock)
                 || player.isPassenger() || player.isSleeping()
                 || player.distanceToSqr(clicked.getX() + 0.5, clicked.getY() + 0.5, clicked.getZ() + 0.5) > CLICK_REACH * CLICK_REACH) {
@@ -582,7 +583,7 @@ public final class RestManager {
         members.add(id);
         SKIPS.add(new Skip(id, null, members, 0, 1000L, 140, false, false, done));
         SurvivalMode.setRestState(id, 2);
-        syncGroup(player.server, level.dimension());
+        syncGroup(player.level().getServer(), level.dimension());
         return true;
     }
 
@@ -786,7 +787,7 @@ public final class RestManager {
     /** Moves the world clock forward (the overworld's clock drives every dimension) and syncs it right away. */
     public static void advanceTime(MinecraftServer server, long ticks) {
         ServerLevel overworld = server.overworld();
-        overworld.setDayTime(overworld.getDayTime() + ticks);
+        overworld.dimensionType().defaultClock().ifPresent(clock -> server.clockManager().setTotalTicks(clock, overworld.getDefaultClockTime() + ticks));
         // game time too: every deadline stored as "game time + n" (cooldowns, rooms, hostile pacing, scheduled ticks and
         // commands) then runs out exactly as if the skipped time had been waited
         var data = server.getWorldData().overworldData();
@@ -796,10 +797,7 @@ public final class RestManager {
             ruleData.skipped = skippedTicks;
             ruleData.setDirty();
         }
-        for (ServerLevel level : server.getAllLevels()) {
-            server.getPlayerList().broadcastAll(new ClientboundSetTimePacket(level.getGameTime(), level.getDayTime(),
-                    level.getGameRules().getBoolean(GameRules.RULE_DAYLIGHT)), level.dimension());
-        }
+        server.getPlayerList().broadcastAll(server.clockManager().createFullSyncPacket());
     }
 
     /** Restores the resting player in proportion to the hours rested; sleeping also sets spawn and Well Rested. */
@@ -813,7 +811,9 @@ public final class RestManager {
         if (!sleep) return;
         player.resetStat(Stats.CUSTOM.get(Stats.TIME_SINCE_REST));
         if (bed != null && player.level().getBlockState(bed).getBlock() instanceof BedBlock) {
-            boolean same = bed.equals(player.getRespawnPosition()) && player.level().dimension() == player.getRespawnDimension();
+            var respawn = player.getRespawnConfig();
+            boolean same = respawn != null && bed.equals(respawn.respawnData().pos())
+                    && player.level().dimension() == net.minecraft.server.level.ServerPlayer.RespawnConfig.getDimensionOrDefault(respawn);
             // a home is a bed slept in and usable: not the intro cottage's provisional bed, not somebody else's (combat.RespawnPoints)
             if (!com.skycraft.combat.RespawnPoints.isProvisional(player, bed)
                     && !com.skycraft.crime.Ownership.isOwnedByOther(player, player.level(), bed)) {
@@ -823,7 +823,7 @@ public final class RestManager {
         }
         int ticks = WorldConfig.WELL_RESTED_TICKS.get();
         if (hours >= 1 && ticks > 0) {
-            player.addEffect(new MobEffectInstance(ModEffects.WELL_RESTED.get(), ticks, 0, false, false, true));
+            player.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(ModEffects.WELL_RESTED.get()), ticks, 0, false, false, true));
             Notifier.message(player, Component.translatable("world.skycraft.rest.well_rested"));
         }
     }
@@ -831,10 +831,9 @@ public final class RestManager {
     // ------------------------------------------------------------------ housekeeping
 
     @SubscribeEvent
-    public static void onServerTick(TickEvent.ServerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END) return;
+    public static void onServerTick(ServerTickEvent.Post event) {
         MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
-        if (server == null) return;
+        if (server == null || server.overworld() == null) return;
         int tick = server.getTickCount();
         if (tick % 10 == 1) guardSleepRule(server);
         if (!SESSIONS.isEmpty()) {
@@ -997,7 +996,7 @@ public final class RestManager {
     @SubscribeEvent
     public static void onLogout(PlayerEvent.PlayerLoggedOutEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer p)) return;
-        depart(p.server, p.getUUID());
+        depart(p.level().getServer(), p.getUUID());
         ACTIVITY.remove(p.getUUID());
         HINTS.remove(p.getUUID());
     }
@@ -1007,7 +1006,7 @@ public final class RestManager {
     public static void onLogin(PlayerEvent.PlayerLoggedInEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer p)) return;
         Entity v = p.getVehicle();
-        if (v instanceof Marker && v.getTags().contains(SEAT_TAG)) {
+        if (v instanceof Marker && v.entityTags().contains(SEAT_TAG)) {
             p.stopRiding();
             v.discard();
         }
@@ -1015,16 +1014,16 @@ public final class RestManager {
 
     @SubscribeEvent
     public static void onChangedDimension(PlayerEvent.PlayerChangedDimensionEvent event) {
-        if (event.getEntity() instanceof ServerPlayer p) depart(p.server, p.getUUID());
+        if (event.getEntity() instanceof ServerPlayer p) depart(p.level().getServer(), p.getUUID());
     }
 
     // ------------------------------------------------------------------ vanilla sleeping state
 
     /** Resting players sleep in the day too: the vanilla "you can only sleep at night" stop does not apply to them. */
     @SubscribeEvent
-    public static void onSleepingTimeCheck(SleepingTimeCheckEvent event) {
+    public static void onSleepingTimeCheck(CanContinueSleepingEvent event) {
         Session s = SESSIONS.get(event.getEntity().getUUID());
-        if (s != null && s.mode != RestLogic.WAIT) event.setResult(Event.Result.ALLOW);
+        if (s != null && s.mode != RestLogic.WAIT) event.setContinueSleeping(true);
     }
 
     /**
@@ -1033,18 +1032,19 @@ public final class RestManager {
      * out of reach and put back afterwards; a marker in the world data restores it after a crash.
      */
     private static void guardSleepRule(MinecraftServer server) {
+        if (server.overworld() == null) return;
         boolean need = false;
         for (Session s : SESSIONS.values()) if (s.mode != RestLogic.WAIT) need = true;
         if (!need && !ruleRaised) return;
         RuleData data = RuleData.get(server);
-        GameRules.IntegerValue rule = server.getGameRules().getRule(GameRules.RULE_PLAYERS_SLEEPING_PERCENTAGE);
+        GameRules rules = server.getGameRules();
         if (need && data.original < 0) {
-            data.original = rule.get();
+            data.original = rules.get(GameRules.PLAYERS_SLEEPING_PERCENTAGE);
             data.setDirty();
-            rule.set(1000, server);
+            rules.set(GameRules.PLAYERS_SLEEPING_PERCENTAGE, 1000, server);
             ruleRaised = true;
         } else if (!need && data.original >= 0) {
-            rule.set(data.original, server);
+            rules.set(GameRules.PLAYERS_SLEEPING_PERCENTAGE, data.original, server);
             data.original = -1;
             data.setDirty();
             ruleRaised = false;
@@ -1057,11 +1057,12 @@ public final class RestManager {
 
     @SubscribeEvent
     public static void onServerStarted(ServerStartedEvent event) {
+        if (event.getServer().overworld() == null) return;
         RuleData data = RuleData.get(event.getServer());
         ruleData = data;
         skippedTicks = data.skipped;
         if (data.original >= 0) { // the server died while somebody lay in a bed
-            event.getServer().getGameRules().getRule(GameRules.RULE_PLAYERS_SLEEPING_PERCENTAGE).set(data.original, event.getServer());
+            event.getServer().getGameRules().set(GameRules.PLAYERS_SLEEPING_PERCENTAGE, data.original, event.getServer());
             data.original = -1;
             data.setDirty();
         }
@@ -1084,17 +1085,15 @@ public final class RestManager {
         long skipped;
 
         static RuleData get(MinecraftServer server) {
-            return server.overworld().getDataStorage().computeIfAbsent(RuleData::load, RuleData::new, "skycraft_rest_rule");
+            return com.skycraft.platform.SavedDataTypes.get(server.overworld(), "skycraft_rest_rule", RuleData::load, RuleData::new, d -> d.save(new CompoundTag()));
         }
 
         static RuleData load(CompoundTag tag) {
             RuleData d = new RuleData();
-            d.original = tag.contains("original") ? tag.getInt("original") : -1;
-            d.skipped = tag.getLong("skipped");
+            d.original = tag.contains("original") ? tag.getIntOr("original", 0) : -1;
+            d.skipped = tag.getLongOr("skipped", 0L);
             return d;
         }
-
-        @Override
         public CompoundTag save(CompoundTag tag) {
             tag.putInt("original", original);
             tag.putLong("skipped", skipped);
@@ -1121,7 +1120,7 @@ public final class RestManager {
     /** Blocks around a resting player in which no hostile appears (a whole dimension while a skip runs). */
     private static final double SPAWN_BLOCK_RADIUS = 96;
 
-    private static boolean blockedType(MobSpawnType t) {
+    private static boolean blockedType(EntitySpawnReason t) {
         return switch (t) {
             // never SPAWNER, CHUNK_GENERATION or STRUCTURE: dungeon spawners and world generation are world content
             case NATURAL, PATROL, EVENT, REINFORCEMENT, TRIGGERED, JOCKEY -> true;
@@ -1132,11 +1131,11 @@ public final class RestManager {
     @SubscribeEvent
     public static void onSpawnPosition(MobSpawnEvent.PositionCheck event) {
         if (SESSIONS.isEmpty() || !(event.getEntity() instanceof Enemy) || !blockedType(event.getSpawnType())) return;
-        if (spawnsBlocked(event.getLevel().getLevel(), event.getX(), event.getY(), event.getZ())) event.setResult(Event.Result.DENY);
+        if (spawnsBlocked(event.getLevel().getLevel(), event.getX(), event.getY(), event.getZ())) event.setResult(MobSpawnEvent.PositionCheck.Result.FAIL);
     }
 
     @SubscribeEvent
-    public static void onFinalizeSpawn(MobSpawnEvent.FinalizeSpawn event) {
+    public static void onFinalizeSpawn(FinalizeSpawnEvent event) {
         if (SESSIONS.isEmpty() || !(event.getEntity() instanceof Enemy) || !blockedType(event.getSpawnType())) return;
         if (spawnsBlocked(event.getLevel().getLevel(), event.getX(), event.getY(), event.getZ())) event.setSpawnCancelled(true);
     }
@@ -1154,7 +1153,7 @@ public final class RestManager {
         for (UUID m : k.members) {
             ServerPlayer p = server.getPlayerList().getPlayer(m);
             if (p == null) continue;
-            for (Mob mob : p.serverLevel().getEntitiesOfClass(Mob.class, p.getBoundingBox().inflate(64), x -> x.isAlive() && x.getTarget() == p)) {
+            for (Mob mob : p.level().getEntitiesOfClass(Mob.class, p.getBoundingBox().inflate(64), x -> x.isAlive() && x.getTarget() == p)) {
                 k.paused.put(mob.getUUID(), m);
                 mob.setTarget(null);
                 mob.getNavigation().stop();
@@ -1168,7 +1167,7 @@ public final class RestManager {
         for (Map.Entry<UUID, UUID> e : k.paused.entrySet()) {
             ServerPlayer p = server.getPlayerList().getPlayer(e.getValue());
             if (p == null || !p.isAlive() || p.isSpectator() || p.isCreative()) continue;
-            Entity ent = p.serverLevel().getEntity(e.getKey());
+            Entity ent = p.level().getEntity(e.getKey());
             if (ent instanceof Mob mob && mob.isAlive() && mob.getTarget() == null && mob.distanceToSqr(p) < 96 * 96) mob.setTarget(p);
         }
         k.paused.clear();
@@ -1177,11 +1176,11 @@ public final class RestManager {
     /** While a skip runs, the hunters it paused do not pick the resting player up again. */
     @SubscribeEvent
     public static void onChangeTarget(LivingChangeTargetEvent event) {
-        if (SKIPS.isEmpty() || event.getNewTarget() == null) return;
+        if (SKIPS.isEmpty() || event.getNewAboutToBeSetTarget() == null) return;
         UUID mob = event.getEntity().getUUID();
         for (Skip k : SKIPS) {
             UUID who = k.paused.get(mob);
-            if (who != null && event.getNewTarget().getUUID().equals(who)) {
+            if (who != null && event.getNewAboutToBeSetTarget().getUUID().equals(who)) {
                 event.setCanceled(true);
                 return;
             }
@@ -1218,19 +1217,19 @@ public final class RestManager {
     public static List<String> selfTestWorld(MinecraftServer server, int[] checks) {
         List<String> fails = new ArrayList<>();
         ServerLevel level = server.overworld();
-        BlockPos at = level.getSharedSpawnPos();
+        BlockPos at = level.getRespawnData().pos();
         if (!level.isLoaded(at)) return fails; // nothing loaded to test with
-        net.minecraft.world.entity.monster.Zombie z = EntityType.ZOMBIE.create(level);
-        ServerPlayer fake = net.minecraftforge.common.util.FakePlayerFactory.getMinecraft(level);
+        net.minecraft.world.entity.monster.zombie.Zombie z = net.minecraft.world.entity.EntityTypes.ZOMBIE.create(level, net.minecraft.world.entity.EntitySpawnReason.STRUCTURE);
+        ServerPlayer fake = net.neoforged.neoforge.common.util.FakePlayerFactory.getMinecraft(level);
         if (z == null || fake == null) return fails;
-        z.moveTo(at.getX() + 0.5, at.getY() + 2, at.getZ() + 0.5, 0f, 0f);
+        z.snapTo(at.getX() + 0.5, at.getY() + 2, at.getZ() + 0.5, 0f, 0f);
         z.setNoAi(true); // stays where it is during the check
         level.addFreshEntity(z);
         z.setTarget(fake);
-        long game0 = level.getGameTime(), day0 = level.getDayTime(), skipped0 = skippedTicks;
+        long game0 = level.getGameTime(), day0 = level.getDefaultClockTime(), skipped0 = skippedTicks;
         try {
             checks[0] += 6;
-            long zombies = level.getEntities(EntityType.ZOMBIE, e -> true).size();
+            long zombies = level.getEntities(net.minecraft.world.entity.EntityTypes.ZOMBIE, e -> true).size();
             List<UUID> members = new ArrayList<>();
             members.add(fake.getUUID());
             Skip k = new Skip(fake.getUUID(), level.dimension(), members, 8, 8000L, 140, true, true, null);
@@ -1244,7 +1243,7 @@ public final class RestManager {
             RestSim.shortenEffects(fake, 8000);
             z.checkDespawn(); // what the time jump might have triggered
             if (z.isRemoved() || level.getEntity(z.getUUID()) == null) fails.add("rest: an existing hostile survives a simulated skip");
-            long after = level.getEntities(EntityType.ZOMBIE, e -> true).size();
+            long after = level.getEntities(net.minecraft.world.entity.EntityTypes.ZOMBIE, e -> true).size();
             if (after != zombies) fails.add("rest: hostile count unchanged by a skip (" + zombies + " -> " + after + ")");
             if (liveTime(level) != game0 - skipped0) fails.add("rest: live time does not include skipped ticks");
             for (Map.Entry<UUID, UUID> e : k.paused.entrySet()) {
@@ -1256,7 +1255,7 @@ public final class RestManager {
             z.discard();
             var data = server.getWorldData().overworldData();
             data.setGameTime(game0);
-            level.setDayTime(day0);
+            level.dimensionType().defaultClock().ifPresent(clock -> server.clockManager().setTotalTicks(clock, day0));
             skippedTicks = skipped0;
             if (ruleData != null) {
                 ruleData.skipped = skipped0;

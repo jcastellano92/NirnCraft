@@ -14,11 +14,11 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
+
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -33,7 +33,7 @@ import java.util.Set;
  * against this client's view of the ship, with their walking animated from their motion on deck rather than the
  * ship's.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
 public final class DeckClient {
     /** Someone aboard, placed from {@link SailingPackets.DeckSync}. */
     private static final class Binding {
@@ -54,7 +54,7 @@ public final class DeckClient {
     private static int reportedShip = -1;
 
     static {
-        DeckPhysics.jumpInput = p -> p instanceof LocalPlayer lp && lp.input != null && lp.input.jumping;
+        DeckPhysics.jumpInput = p -> p instanceof LocalPlayer lp && lp.input != null && lp.input.keyPresses.jump();
     }
 
     private DeckClient() {}
@@ -81,9 +81,14 @@ public final class DeckClient {
     }
 
     @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (!(event.player instanceof LocalPlayer player) || !player.level().isClientSide) return;
-        if (event.phase == TickEvent.Phase.START) {
+    public static void onPlayerTickPre(net.neoforged.neoforge.event.tick.PlayerTickEvent.Pre event) { onPlayerTick(event); }
+
+    @SubscribeEvent
+    public static void onPlayerTickPost(net.neoforged.neoforge.event.tick.PlayerTickEvent.Post event) { onPlayerTick(event); }
+
+    private static void onPlayerTick(net.neoforged.neoforge.event.tick.PlayerTickEvent event) {
+        if (!(event.getEntity() instanceof LocalPlayer player) || !player.level().isClientSide()) return;
+        if (event instanceof net.neoforged.neoforge.event.tick.PlayerTickEvent.Pre) {
             // sneaking on a deck: vanilla's edge guard looks for world blocks under the feet and would freeze the walker
             if (player.isShiftKeyDown() && DeckPhysics.onDeck(player)) player.setOnGround(false);
             return;
@@ -92,7 +97,12 @@ public final class DeckClient {
     }
 
     @SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent event) {
+    public static void onClientTickPre(net.neoforged.neoforge.client.event.ClientTickEvent.Pre event) { onClientTick(event); }
+
+    @SubscribeEvent
+    public static void onClientTickPost(net.neoforged.neoforge.client.event.ClientTickEvent.Post event) { onClientTick(event); }
+
+    private static void onClientTick(net.neoforged.neoforge.client.event.ClientTickEvent event) {
         Minecraft mc = Minecraft.getInstance();
         ClientLevel level = mc.level;
         if (level == null) {
@@ -101,7 +111,7 @@ public final class DeckClient {
             return;
         }
         if (mc.isPaused()) return;
-        if (event.phase == TickEvent.Phase.START) {
+        if (event instanceof net.neoforged.neoforge.client.event.ClientTickEvent.Pre) {
             preShift(level);
             return;
         }
@@ -144,7 +154,7 @@ public final class DeckClient {
             Vec3 predicted = ship.toWorld(b.cx + (b.tx - b.cx) * 0.5, b.cy + (b.ty - b.cy) * 0.5, b.cz + (b.tz - b.cz) * 0.5,
                     ship.getX() + dx, ship.getY() + dy, ship.getZ() + dz, ship.getYRot() + dyaw);
             e.setPos(e.getX() + dx, e.getY() + dy, e.getZ() + dz);
-            e.lerpTo(predicted.x, predicted.y, predicted.z, ship.getYRot() + dyaw + b.cyaw, e.getXRot(), 1, false);
+            e.getInterpolation().interpolateTo(net.minecraft.world.entity.PositionPath.of(predicted),ship.getYRot()+dyaw+b.cyaw,e.getXRot(),true);
         }
     }
 
@@ -219,7 +229,7 @@ public final class DeckClient {
     }
 
     private static void footsteps(LocalPlayer player) {
-        double d = player.walkDist - player.walkDistO;
+        double d = Math.hypot(player.getX()-player.xo,player.getZ()-player.zo);
         if (d <= 0 || !DeckPhysics.stepSound(player, d * 1.6)) return;
         player.level().playLocalSound(player.getX(), player.getY(), player.getZ(), SoundEvents.WOOD_STEP, SoundSource.PLAYERS,
                 0.35f, 0.9f + player.getRandom().nextFloat() * 0.2f, false);

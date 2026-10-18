@@ -494,7 +494,7 @@ public final class Programs {
         int y = r.y();
         int cz = counter(c, p, r, AnchorType.JEWELER);
         int cx1 = Math.max(r.x0() + 1, r.x1() - 1);
-        BlockState[] wares = {B.s(Blocks.AMETHYST_CLUSTER), B.s(Blocks.DECORATED_POT), B.s(Blocks.CHAIN), B.s(Blocks.SMALL_AMETHYST_BUD)};
+        BlockState[] wares = {B.s(Blocks.AMETHYST_CLUSTER), B.s(Blocks.DECORATED_POT), B.s(com.skycraft.worldgen.VanillaBlocks.CHAIN), B.s(Blocks.SMALL_AMETHYST_BUD)};
         for (int x = r.x0() + 1; x <= cx1; x += 2) c.set(x, y + 1, cz, wares[c.roll(x, y, cz, 41, wares.length)]);
         // Locked glass display cases along the side walls
         for (int z = r.z0() + 1; z < cz - 1; z += 2) {
@@ -568,7 +568,7 @@ public final class Programs {
         c.set(r.x0(), y, r.z1(), B.face(B.s(Blocks.SMOKER), Direction.NORTH));
         c.set(r.x1(), y, r.z1(), B.s(Blocks.WATER_CAULDRON).setValue(LayeredCauldronBlock.LEVEL, 3));
         c.set(Math.max(r.x0() + 1, r.cx() - 1), y, r.z1(), B.axis(B.s(Blocks.STRIPPED_OAK_LOG), Direction.Axis.Y));
-        c.set(Math.max(r.x0() + 1, r.cx() - 1), y + 1, r.z1(), B.s(Blocks.CHAIN));
+        c.set(Math.max(r.x0() + 1, r.cx() - 1), y + 1, r.z1(), B.s(com.skycraft.worldgen.VanillaBlocks.CHAIN));
         for (int z = r.z0(); z < cz - 1; z++) {
             if (r.x1() == doorX && z == r.z0()) continue;
             c.set(r.x1(), y, z, c.chance(r.x1(), y, z, 47, 2) ? B.s(Blocks.PACKED_ICE) : B.face(B.s(Blocks.BARREL), Direction.UP));
@@ -591,7 +591,7 @@ public final class Programs {
             Props.weaponRack(c, p, r.x1(), y, r.z0() + 1, Direction.WEST);
         }
         Props.barrel(c, Math.min(r.x1() - 1, r.cx() + 2), y, r.z1(), "store");
-        c.set(r.x1(), y, r.z0(), B.s(Blocks.WHITE_WOOL));
+        c.set(r.x1(), y, r.z0(), B.s(com.skycraft.worldgen.VanillaBlocks.WHITE_WOOL));
     }
 
     static void tannery(Canvas c, Palette p, Room r, int doorX) {
@@ -701,7 +701,7 @@ public final class Programs {
             if ((x - r.x0()) % 3 == 0) continue;
             c.set(x, y, r.z0() - 1, B.face(p.gate, Direction.NORTH));
             c.air(x, y + 1, r.z0() - 1);
-            Outdoors.animal(c, x, y, sz, c.chance(x, y, sz, 5, 3) ? EntityType.DONKEY : EntityType.HORSE);
+            Outdoors.animal(c, x, y, sz, c.chance(x, y, sz, 5, 3) ? net.minecraft.world.entity.EntityTypes.DONKEY : net.minecraft.world.entity.EntityTypes.HORSE);
         }
         Props.chest(c, r.x1(), y, r.z1(), Direction.WEST, "farm");
         c.bed(r.x0(), y, r.z1() - 1, p.bed, Direction.SOUTH);
@@ -863,7 +863,7 @@ public final class Programs {
         int cx = b.doorX, cy = b.wallTop() + 2, z = b.bz0 - 1;
         c.set(cx, cy, z, B.axis(p.beam, Direction.Axis.Z));
         c.set(cx, cy, z - 1, B.axis(p.beam, Direction.Axis.Z));
-        BlockState sail = B.s(Blocks.WHITE_WOOL);
+        BlockState sail = B.s(com.skycraft.worldgen.VanillaBlocks.WHITE_WOOL);
         for (int k = 1; k <= 5; k++) {
             c.set(cx + k, cy + k, z - 1, B.axis(p.beam, Direction.Axis.Y));
             c.set(cx - k, cy - k, z - 1, B.axis(p.beam, Direction.Axis.Y));
@@ -896,7 +896,7 @@ public final class Programs {
             switch (b.use) {
                 case TANNERY -> c.set(inner, 1, z, z % 2 == 0 ? Props.tanningRack() : B.s(Blocks.AIR));
                 case FLETCHER -> c.set(inner, 1, z, z == res.az1 ? B.s(Blocks.TARGET) : B.s(Blocks.HAY_BLOCK));
-                case BUTCHER -> c.set(inner, 1, z, z % 2 == 0 ? B.s(Blocks.CHAIN) : B.face(B.s(Blocks.BARREL), Direction.UP));
+                case BUTCHER -> c.set(inner, 1, z, z % 2 == 0 ? B.s(com.skycraft.worldgen.VanillaBlocks.CHAIN) : B.face(B.s(Blocks.BARREL), Direction.UP));
                 default -> {
                     BlockState log = B.axis(B.s(Blocks.SPRUCE_LOG), Direction.Axis.Z);
                     c.set(inner, 1, z, log);

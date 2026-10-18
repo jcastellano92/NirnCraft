@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "skycraft:fishing_bait",
+    "skycraft:fishing_bait",
+    "skycraft:torchbug_thorax"
+  ],
+  "result": {
+    "count": 2,
+    "id": "skycraft:glow_bait"
+  }
+}

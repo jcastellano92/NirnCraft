@@ -90,14 +90,14 @@ public final class Discoveries {
     /** Every second per player: build clues nearby, hint at them, start a hidden quest when its clue is reached. */
     static void tick(ServerPlayer p) {
         if (p.level().dimension() != Level.OVERWORLD || SkyData.get(p).getRace() == null) return;
-        ServerLevel level = p.serverLevel();
+        ServerLevel level = p.level();
         Clues clues = null;
         for (Find f : finds()) {
             StoryData.QuestDef def = f.def();
             int[] at = f.at();
             double dx = p.getX() - at[0], dz = p.getZ() - at[1];
             if (dx * dx + dz * dz > BUILD * BUILD) continue;
-            if (clues == null) clues = Clues.get(p.server);
+            if (clues == null) clues = Clues.get(p.level().getServer());
             BlockPos clue = clues.pos(def.id);
             if (clue == null) {
                 if (!level.hasChunk(at[0] >> 4, at[1] >> 4)) continue;
@@ -124,7 +124,7 @@ public final class Discoveries {
     /** A player used a block: the clue of a hidden quest within two blocks of it starts that quest. */
     static boolean onUse(ServerPlayer p, BlockPos used) {
         if (p.level().dimension() != Level.OVERWORLD) return false;
-        Clues clues = Clues.get(p.server);
+        Clues clues = Clues.get(p.level().getServer());
         for (Find f : finds()) {
             StoryData.QuestDef def = f.def();
             double dx = used.getX() - f.at()[0], dz = used.getZ() - f.at()[1];
@@ -252,7 +252,7 @@ public final class Discoveries {
         private final Map<String, Long> pos = new HashMap<>();
 
         static Clues get(MinecraftServer server) {
-            return server.overworld().getDataStorage().computeIfAbsent(Clues::load, Clues::new, NAME);
+            return com.skycraft.platform.SavedDataTypes.get(server.overworld(), NAME, Clues::load, Clues::new, value263 -> value263.save(new net.minecraft.nbt.CompoundTag()));
         }
 
         @Nullable
@@ -268,11 +268,10 @@ public final class Discoveries {
 
         static Clues load(CompoundTag tag) {
             Clues c = new Clues();
-            for (String k : tag.getAllKeys()) c.pos.put(k, tag.getLong(k));
+            for (String k : tag.keySet()) c.pos.put(k, tag.getLongOr(k, 0L));
             return c;
         }
 
-        @Override
         public CompoundTag save(CompoundTag tag) {
             for (Map.Entry<String, Long> e : pos.entrySet()) tag.putLong(e.getKey(), e.getValue());
             return tag;

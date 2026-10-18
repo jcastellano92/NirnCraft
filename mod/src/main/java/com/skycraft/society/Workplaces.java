@@ -7,7 +7,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.LongArrayTag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.ai.village.poi.PoiManager;
 import net.minecraft.world.entity.ai.village.poi.PoiType;
@@ -96,11 +96,11 @@ public final class Workplaces {
     @Nullable
     public static BlockPos leisureFor(ServerLevel level, net.minecraft.world.entity.Entity who, BlockPos home) {
         CompoundTag pd = who.getPersistentData();
-        if (pd.contains(LEISURE_KEY)) return BlockPos.of(pd.getLong(LEISURE_KEY));
+        if (pd.contains(LEISURE_KEY)) return BlockPos.of(pd.getLongOr(LEISURE_KEY, 0L));
         long id = who.getUUID().getLeastSignificantBits();
         BlockPos centre;
         if (pd.contains(PLAZA_KEY)) { // the housing plan chose this person's plaza (or none: chores indoors)
-            long v = pd.getLong(PLAZA_KEY);
+            long v = pd.getLongOr(PLAZA_KEY, 0L);
             if (v == Long.MIN_VALUE) return null;
             centre = BlockPos.of(v);
         } else {
@@ -166,7 +166,7 @@ public final class Workplaces {
         BlockPos cached = npc.getWorkplace();
         if (cached != null) return cached;
         if (npc.getPersistentData().contains(Housing.WORK_KEY)) {
-            BlockPos assigned = BlockPos.of(npc.getPersistentData().getLong(Housing.WORK_KEY));
+            BlockPos assigned = BlockPos.of(npc.getPersistentData().getLongOr(Housing.WORK_KEY, 0L));
             npc.setWorkplace(assigned);
             return assigned;
         }
@@ -272,7 +272,7 @@ public final class Workplaces {
                 LevelChunk chunk = level.getChunkSource().getChunkNow(cx + dx, cz + dz);
                 if (chunk == null) continue;
                 for (Map.Entry<BlockPos, BlockEntity> e : chunk.getBlockEntities().entrySet()) {
-                    ResourceLocation id = BuiltInRegistries.BLOCK.getKey(e.getValue().getBlockState().getBlock());
+                    Identifier id = BuiltInRegistries.BLOCK.getKey(e.getValue().getBlockState().getBlock());
                     if (!"skycraft".equals(id.getNamespace()) && !id.getPath().equals("lectern")) continue;
                     String path = id.getPath();
                     boolean match = false;
@@ -303,7 +303,7 @@ public final class Workplaces {
         private final Map<Kind, LongArrayList> byKind = new EnumMap<>(Kind.class);
 
         static Anchors get(ServerLevel level) {
-            return level.getDataStorage().computeIfAbsent(Anchors::load, Anchors::new, NAME);
+            return com.skycraft.platform.SavedDataTypes.get(level, NAME, Anchors::load, Anchors::new, value263 -> value263.save(new net.minecraft.nbt.CompoundTag()));
         }
 
         void add(Kind kind, BlockPos pos) {
@@ -354,12 +354,11 @@ public final class Workplaces {
         static Anchors load(CompoundTag tag) {
             Anchors a = new Anchors();
             for (Kind k : Kind.values()) {
-                if (tag.contains(k.id)) a.byKind.put(k, new LongArrayList(tag.getLongArray(k.id)));
+                if (tag.contains(k.id)) a.byKind.put(k, new LongArrayList(tag.getLongArray(k.id).orElseGet(() -> new long[0])));
             }
             return a;
         }
 
-        @Override
         public CompoundTag save(CompoundTag tag) {
             byKind.forEach((k, list) -> tag.put(k.id, new LongArrayTag(list.toLongArray())));
             return tag;

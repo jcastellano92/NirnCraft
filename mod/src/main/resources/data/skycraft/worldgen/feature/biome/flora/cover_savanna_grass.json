@@ -1,0 +1,30 @@
+{
+  "type": "skycraft:ground_cover",
+  "config": {
+    "entries": [
+      {
+        "state": "minecraft:short_grass",
+        "weight": 6
+      },
+      {
+        "state": {
+          "id": "minecraft:tall_grass",
+          "properties": {
+            "half": "lower"
+          }
+        },
+        "weight": 5
+      }
+    ],
+    "scale": 24,
+    "patchiness": 0.5,
+    "cluster": {
+      "type": "minecraft:uniform",
+      "min_inclusive": 3,
+      "max_inclusive": 7
+    },
+    "spread": 2,
+    "salt": 4436,
+    "near_water": false
+  }
+}

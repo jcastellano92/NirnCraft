@@ -18,15 +18,15 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.util.DefaultRandomPos;
-import net.minecraft.world.entity.monster.EnderMan;
+import net.minecraft.world.entity.monster.Enderman;
 import net.minecraft.world.entity.monster.Enemy;
-import net.minecraft.world.entity.npc.AbstractVillager;
+import net.minecraft.world.entity.npc.villager.AbstractVillager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -39,7 +39,7 @@ import java.util.Map;
  * hostiles, and three or more hostiles raise a town alarm (all guards converge, bell, message) that clears after
  * {@code alarmClearSeconds} without hostiles. State is a small per-settlement-cell map, server side only.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class GuardProtection {
     private static final int ALARM_THRESHOLD = 3;
     private static final int CELL = 96;
@@ -54,8 +54,8 @@ public final class GuardProtection {
     private GuardProtection() {}
 
     @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer player)) return;
+    public static void onPlayerTick(net.neoforged.neoforge.event.tick.PlayerTickEvent.Post event) {
+        if (!(event instanceof net.neoforged.neoforge.event.tick.PlayerTickEvent.Post) || !(event.getEntity() instanceof ServerPlayer player)) return;
         if (player.tickCount % 20 != 7 || player.isSpectator()) return;
         try {
             scan(player);
@@ -87,7 +87,7 @@ public final class GuardProtection {
     }
 
     private static void scan(ServerPlayer player) {
-        ServerLevel level = player.serverLevel();
+        ServerLevel level = player.level();
         double r = CreaturesConfig.GUARD_ALERT_RADIUS.get();
         AABB box = player.getBoundingBox().inflate(r * 1.5, 20, r * 1.5);
         List<GuardEntity> guards = level.getEntitiesOfClass(GuardEntity.class, box, Mob::isAlive);
@@ -109,7 +109,7 @@ public final class GuardProtection {
         }
         cx /= guards.size();
         cz /= guards.size();
-        String key = level.dimension().location() + ":" + Mth.floor(cx / CELL) + ":" + Mth.floor(cz / CELL);
+        String key = level.dimension().identifier() + ":" + Mth.floor(cx / CELL) + ":" + Mth.floor(cz / CELL);
         Alarm alarm = ALARMS.get(key);
         boolean alarmed = alarm != null;
         double reach = alarmed ? r * 1.5 : r;
@@ -161,7 +161,7 @@ public final class GuardProtection {
                 double d2 = g.distanceToSqr(t);
                 if (d2 > reach * reach) continue;
                 boolean attacker = attacksProtected(t);
-                if (!attacker && (t instanceof GiantEntity || t instanceof EnderMan)) continue;
+                if (!attacker && (t instanceof GiantEntity || t instanceof Enderman)) continue;
                 double score = d2 - (attacker ? (t.getTarget() instanceof Player ? 9000 : 6000) : 0);
                 if (score < bestScore) {
                     bestScore = score;

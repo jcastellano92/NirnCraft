@@ -1,7 +1,7 @@
 package com.skycraft.dungeons.world;
 
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -191,7 +191,7 @@ public final class Frame {
         p.spawn(s.id(), x(fwd, lat), base + dy, z(fwd, lat), Painter.yaw(look), s.label());
     }
 
-    public void container(int fwd, int dy, int lat, BlockState state, ResourceLocation loot) {
+    public void container(int fwd, int dy, int lat, BlockState state, Identifier loot) {
         p.container(x(fwd, lat), base + dy, z(fwd, lat), state, loot);
     }
 

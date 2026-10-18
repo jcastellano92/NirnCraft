@@ -1,0 +1,130 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": {
+        "type": "minecraft:uniform",
+        "min": 2,
+        "max": 4
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:septim",
+          "weight": 10,
+          "modifier": {
+            "count": {
+              "type": "minecraft:uniform",
+              "min": 10,
+              "max": 60
+            },
+            "type": "minecraft:set_count"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:amethyst_shard",
+          "weight": 8,
+          "modifier": {
+            "count": {
+              "type": "minecraft:uniform",
+              "min": 1,
+              "max": 4
+            },
+            "type": "minecraft:set_count"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:void_salts",
+          "weight": 3
+        },
+        {
+          "type": "minecraft:loot_table",
+          "weight": 5,
+          "value": "skycraft:chests/soul_gems"
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:book",
+          "weight": 4,
+          "modifier": {
+            "type": "skycraft:leveled_tome"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:potion",
+          "weight": 4,
+          "modifier": {
+            "poison": false,
+            "type": "skycraft:skyrim_potion"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:flawless_sapphire",
+          "weight": 1
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:book",
+          "weight": 40,
+          "modifier": {
+            "tag": "{book:\"explore_note_monolith_riddle\",skycraft_value:2}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 60
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:treasure_map",
+          "weight": 15,
+          "modifier": {
+            "type": "skycraft:explore_treasure_map"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:book",
+          "weight": 20,
+          "modifier": {
+            "type": "skycraft:explore_lead"
+          }
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 65
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:loot_table",
+          "weight": 8,
+          "value": "skycraft:chests/skill_books"
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 92
+        }
+      ]
+    }
+  ],
+  "random_sequence": "skycraft:explore/monolith"
+}

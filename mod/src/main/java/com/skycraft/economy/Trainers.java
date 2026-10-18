@@ -11,9 +11,9 @@ import com.skycraft.skills.Progression;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.npc.Villager;
-import net.minecraft.world.entity.npc.VillagerProfession;
-import net.minecraft.world.entity.npc.WanderingTrader;
+import net.minecraft.world.entity.npc.villager.Villager;
+import net.minecraft.world.entity.npc.villager.VillagerProfession;
+import net.minecraft.world.entity.npc.wanderingtrader.WanderingTrader;
 
 /**
  * Skyrim skill trainers. Villagers train the skill of their trade; the trainer's mastery depends on their level
@@ -34,7 +34,7 @@ public final class Trainers {
         if (npc instanceof WanderingTrader || Merchants.isCaravan(npc)) return pick(npc, Skill.PICKPOCKET, Skill.LOCKPICKING, Skill.SPEECH);
         if (npc.isBaby()) return null;
         // villagers and Skycraft townsfolk (whose trade maps to a profession, see Merchants#profession)
-        VillagerProfession p = Merchants.profession(npc);
+        net.minecraft.resources.ResourceKey<VillagerProfession> p = Merchants.profession(npc);
         if (p == null) return null;
         if (p == VillagerProfession.WEAPONSMITH) return pick(npc, Skill.ONE_HANDED, Skill.TWO_HANDED);
         if (p == VillagerProfession.ARMORER) return pick(npc, Skill.HEAVY_ARMOR, Skill.BLOCK);

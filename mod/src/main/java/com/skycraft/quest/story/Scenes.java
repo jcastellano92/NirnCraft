@@ -53,26 +53,26 @@ public final class Scenes {
      * {@link #tick}; the entity is removed when it has crossed.
      */
     public static void flyby(ServerPlayer p, String entityType) {
-        ServerLevel level = p.serverLevel();
+        ServerLevel level = p.level();
         Entity e = com.skycraft.quest.QuestSpawner.create(level, entityType);
         if (e == null) return;
-        double ang = level.random.nextDouble() * Math.PI * 2;
+        double ang = level.getRandom().nextDouble() * Math.PI * 2;
         Vec3 dir = new Vec3(Math.cos(ang), 0, Math.sin(ang));
         Vec3 side = new Vec3(-dir.z, 0, dir.x).scale(18);
         Vec3 c = p.position().add(side).add(0, 22, 0);
         Vec3 from = c.subtract(dir.scale(75));
         Vec3 to = c.add(dir.scale(75));
         if (e instanceof Mob mob) mob.setNoAi(true);
-        e.setInvulnerable(true);
+        e.setPermanentlyInvulnerable(true);
         e.setSilent(true);
         e.setNoGravity(true);
         float yaw = (float) Math.toDegrees(Math.atan2(to.z - from.z, to.x - from.x)) - 90f;
-        e.moveTo(from.x, from.y, from.z, yaw, 0f);
+        e.snapTo(from.x, from.y, from.z, yaw, 0f);
         if (!level.addFreshEntity(e)) return;
         long now = level.getGameTime();
         FLYBYS.add(new Flyby(e.getUUID(), level, from, to, now, now + 20 * 7));
         // the far roar as it appears, the near roar and the shake as it passes (see tick)
-        p.playNotifySound(com.skycraft.audio.AudioSounds.dragon("alduin", "roar"), SoundSource.HOSTILE, 1.4f, 0.8f);
+        com.skycraft.magic.MagicFx.soundToPlayer(p, com.skycraft.audio.AudioSounds.dragon("alduin", "roar"), SoundSource.HOSTILE, 1.4f, 0.8f);
         shake(p, 8);
         INTRO.add(new Beat(p.getUUID(), now + 20 * 3, 10));
         INTRO.add(new Beat(p.getUUID(), now + 20 * 7 + 10, 11));
@@ -92,13 +92,13 @@ public final class Scenes {
      * a pointer to Riverwood; 10-20 s later the dragon flyby ({@link #flyby}). Per player, nothing blocks the quest.
      */
     public static void intro(ServerPlayer p, String entityType) {
-        long now = p.serverLevel().getGameTime();
+        long now = p.level().getGameTime();
         // v2 (Tamriel worlds): the cottage opening is a per-player state machine, see IntroFlow; this action only
         // marks it played. The legacy road-side opening below stays for worlds without a cottage site.
-        if (StartCottage.site(p.serverLevel()) != null) return;
+        if (StartCottage.site(p.level()) != null) return;
         int fade = LINE_TICKS * NARRATION_LINES;
-        p.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.BLINDNESS, 70, 0, false, false, false));
-        p.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.MOVEMENT_SLOWDOWN, fade, 6, false, false, false));
+        p.addEffect(new net.minecraft.world.effect.MobEffectInstance(com.skycraft.platform.Effects.holder(net.minecraft.world.effect.MobEffects.BLINDNESS), 70, 0, false, false, false));
+        p.addEffect(new net.minecraft.world.effect.MobEffectInstance(com.skycraft.platform.Effects.holder(net.minecraft.world.effect.MobEffects.SLOWNESS), fade, 6, false, false, false));
         for (int i = 0; i < NARRATION_LINES; i++) INTRO.add(new Beat(p.getUUID(), now + 20 + (long) i * LINE_TICKS, i));
         long after = now + 20 + fade;
         INTRO.add(new Beat(p.getUUID(), after, 4));
@@ -141,9 +141,9 @@ public final class Scenes {
         }
         for (Burn b : smolder) {
             for (ServerPlayer w : near) {
-                level.sendParticles(w, ParticleTypes.CAMPFIRE_SIGNAL_SMOKE, true, b.x(), b.y() + 1, b.z(), 0, 0, 1, 0, 0.08);
-                level.sendParticles(w, ParticleTypes.LARGE_SMOKE, true, b.x(), b.y() + 2, b.z(), 1, 1.0, 0.5, 1.0, 0.01);
-                if (level.random.nextInt(3) == 0) level.sendParticles(w, ParticleTypes.FLAME, true, b.x(), b.y() + 1, b.z(), 2, 0.8, 0.3, 0.8, 0.01);
+                level.sendParticles(w, ParticleTypes.CAMPFIRE_SIGNAL_SMOKE, true, false, b.x(), b.y() + 1, b.z(), 0, 0, 1, 0, 0.08);
+                level.sendParticles(w, ParticleTypes.LARGE_SMOKE, true, false, b.x(), b.y() + 2, b.z(), 1, 1.0, 0.5, 1.0, 0.01);
+                if (level.getRandom().nextInt(3) == 0) level.sendParticles(w, ParticleTypes.FLAME, true, false, b.x(), b.y() + 1, b.z(), 2, 0.8, 0.3, 0.8, 0.01);
             }
         }
     }
@@ -155,7 +155,7 @@ public final class Scenes {
 
     /** A short camera shake: vanilla hurt-tilt packets (no damage), one every 3 ticks. */
     private static void shake(ServerPlayer p, int pulses) {
-        long now = p.serverLevel().getGameTime();
+        long now = p.level().getGameTime();
         for (int i = 0; i < pulses; i++) INTRO.add(new Beat(p.getUUID(), now + (long) i * 3, 20));
     }
 
@@ -170,13 +170,13 @@ public final class Scenes {
             case 4 -> {
                 com.skycraft.core.Notifier.message(p, Component.translatable("quest.skycraft.intro.guard").withStyle(ChatFormatting.WHITE));
                 com.skycraft.core.Notifier.message(p, Component.translatable("quest.skycraft.intro.pointer").withStyle(ChatFormatting.YELLOW));
-                p.removeEffect(net.minecraft.world.effect.MobEffects.MOVEMENT_SLOWDOWN);
+                p.removeEffect(com.skycraft.platform.Effects.holder(net.minecraft.world.effect.MobEffects.SLOWNESS));
             }
             case 5 -> flyby(p, introType);
             case 10 -> {
-                p.serverLevel().playSound(null, p.getX(), p.getY() + 20, p.getZ(),
+                p.level().playSound(null, p.getX(), p.getY() + 20, p.getZ(),
                         com.skycraft.audio.AudioSounds.dragon("alduin", "roar"), SoundSource.HOSTILE, 4f, 0.9f);
-                p.serverLevel().playSound(null, p.getX(), p.getY() + 20, p.getZ(), SoundEvents.ENDER_DRAGON_GROWL, SoundSource.HOSTILE, 2f, 0.7f);
+                p.level().playSound(null, p.getX(), p.getY() + 20, p.getZ(), SoundEvents.ENDER_DRAGON_GROWL, SoundSource.HOSTILE, 2f, 0.7f);
                 shake(p, 14);
                 scare(p);
             }
@@ -196,7 +196,7 @@ public final class Scenes {
 
     /** NPCs within 40 blocks run from the player's spot (they are looking up at the thing, not at them). */
     private static void scare(ServerPlayer p) {
-        for (com.skycraft.society.entity.NpcEntity n : p.serverLevel().getEntitiesOfClass(
+        for (com.skycraft.society.entity.NpcEntity n : p.level().getEntitiesOfClass(
                 com.skycraft.society.entity.NpcEntity.class, p.getBoundingBox().inflate(40))) {
             Vec3 away = n.position().subtract(p.position());
             away = away.lengthSqr() < 1e-3 ? new Vec3(1, 0, 0) : away.normalize();
@@ -246,13 +246,14 @@ public final class Scenes {
             return;
         }
         if (e instanceof Mob mob) mob.setNoAi(true);
-        e.setInvulnerable(true);
+        e.setPermanentlyInvulnerable(true);
         long now = level.getGameTime();
         CIRCLES.add(new Circle(e.getUUID(), level, center, radius, height, now, now + ticks));
         level.playSound(null, center.x, center.y, center.z, SoundEvents.ENDER_DRAGON_GROWL, SoundSource.HOSTILE, 2.5f, 0.8f);
     }
 
     public static void tick(MinecraftServer server) {
+        if (server.overworld() == null) return;
         long now = server.overworld().getGameTime();
         tickAttacks(server);
         if (!LINES.isEmpty()) {
@@ -294,7 +295,7 @@ public final class Scenes {
                 }
                 double k = (t - f.start()) / (double) (f.end() - f.start());
                 Vec3 at = f.from().lerp(f.to(), k);
-                e.moveTo(at.x, at.y, at.z, e.getYRot(), 0f);
+                e.snapTo(at.x, at.y, at.z, e.getYRot(), 0f);
             }
         }
         if (!CIRCLES.isEmpty()) {
@@ -321,7 +322,7 @@ public final class Scenes {
                 double nx = c.center().x + Math.cos(angle + 0.05) * c.radius();
                 double nz = c.center().z + Math.sin(angle + 0.05) * c.radius();
                 float yaw = (float) Math.toDegrees(Math.atan2(nz - z, nx - x)) - 90f;
-                e.moveTo(x, y, z, yaw, 0f);
+                e.snapTo(x, y, z, yaw, 0f);
                 e.setYHeadRot(yaw);
                 if ((t - c.start()) % 60 == 30) {
                     c.level().playSound(null, x, y, z, SoundEvents.ENDER_DRAGON_FLAP, SoundSource.HOSTILE, 1.2f, 0.7f);

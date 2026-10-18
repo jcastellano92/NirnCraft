@@ -15,10 +15,10 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Pose;
-import net.minecraft.world.entity.npc.AbstractVillager;
+import net.minecraft.world.entity.npc.villager.AbstractVillager;
 import net.minecraft.world.phys.AABB;
-import net.minecraftforge.common.util.FakePlayer;
-import net.minecraftforge.common.util.FakePlayerFactory;
+import net.neoforged.neoforge.common.util.FakePlayer;
+import net.neoforged.neoforge.common.util.FakePlayerFactory;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -113,8 +113,8 @@ public final class SocietyCensus {
     /** Counts the people within {@code radius} blocks (horizontal) of the place, in loaded chunks only. */
     public static Result census(ServerLevel level, Place place, int radius) {
         Result res = new Result();
-        AABB box = new AABB(place.x() - radius, level.getMinBuildHeight(), place.z() - radius, place.x() + radius,
-                level.getMaxBuildHeight(), place.z() + radius);
+        AABB box = new AABB(place.x() - radius, level.getMinY(), place.z() - radius, place.x() + radius,
+                (level.getMaxY()+1), place.z() + radius);
         long r2 = (long) radius * radius;
         Map<Long, Integer> bedUse = new HashMap<>();
         for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, box,
@@ -136,13 +136,13 @@ public final class SocietyCensus {
                 }
             }
             boolean outdoors = level.canSeeSky(e.blockPosition());
-            String type = e.getType().builtInRegistryHolder().key().location().getPath();
+            String type = e.getType().builtInRegistryHolder().key().identifier().getPath();
             res.rows.add(new Row(e.getUUID().toString(), type, source, race, role, sleeping, inBed, outdoors, guard));
             res.bySource.merge(source, 1, Integer::sum);
             res.byType.merge(type + "/" + role, 1, Integer::sum);
             res.byRace.merge(race, 1, Integer::sum);
             if (!sleeping && !guard && e instanceof NpcEntity an) {
-                String job = e.getPersistentData().getString(Housing.JOB_KEY);
+                String job = e.getPersistentData().getStringOr(Housing.JOB_KEY, "");
                 res.awake.merge(an.role().id + "/" + job + "/" + an.activity.name().toLowerCase() + (an.getBed() != null ? "+bed" : "-nobed")
                         + (outdoors ? "/out" : "/in"), 1, Integer::sum);
             }
@@ -164,16 +164,16 @@ public final class SocietyCensus {
     /** Which spawn path made this person (persistent-data markers other modules leave on their spawns). */
     public static String source(Entity e) {
         CompoundTag pd = e.getPersistentData();
-        if (pd.contains(com.skycraft.roads.Travelers.TAG)) return "traveler:" + pd.getCompound(com.skycraft.roads.Travelers.TAG).getString("kind");
+        if (pd.contains(com.skycraft.roads.Travelers.TAG)) return "traveler:" + pd.getCompoundOrEmpty(com.skycraft.roads.Travelers.TAG).getStringOr("kind","");
         if (Encounters.isTagged(e)) return "encounter";
         if (pd.contains(com.skycraft.quest.QuestSpawner.TAG_QUEST)) return "quest";
         if (pd.contains(com.skycraft.quest.story.QuestNpcs.TAG)) return "story";
         if (pd.contains(com.skycraft.quest.faction.FactionStaff.TAG)) return "faction-staff";
-        if (pd.getBoolean("skycraft_steward")) return "steward";
+        if (pd.getBooleanOr("skycraft_steward",false)) return "steward";
         if (pd.contains(GatePosts.KEY)) return "gate-post";
         if (pd.contains(GuardWatch.PATROL_KEY)) return "patrol";
         if (pd.contains(Housing.JOB_KEY)) return "housing";
-        if (pd.getBoolean("skycraft_settler")) return "settler-unadopted";
+        if (pd.getBooleanOr("skycraft_settler",false)) return "settler-unadopted";
         if (e instanceof GuardEntity g) return g.getHome() != null ? "guard-spawner" : "guard";
         if (e instanceof LivingEntity l && com.skycraft.survival.inn.Innkeepers.isInnkeeper(l)) return "innkeeper";
         return "other";
@@ -214,8 +214,8 @@ public final class SocietyCensus {
      */
     public static int repopulate(ServerLevel level, Place place, int radius) {
         int removed = 0;
-        AABB box = new AABB(place.x() - radius, level.getMinBuildHeight(), place.z() - radius, place.x() + radius,
-                level.getMaxBuildHeight(), place.z() + radius);
+        AABB box = new AABB(place.x() - radius, level.getMinY(), place.z() - radius, place.x() + radius,
+                (level.getMaxY()+1), place.z() + radius);
         for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, box,
                 x -> x instanceof NpcEntity || x instanceof AbstractVillager || x instanceof GuardEntity)) {
             var pd = e.getPersistentData();

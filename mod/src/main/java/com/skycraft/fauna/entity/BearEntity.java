@@ -71,7 +71,7 @@ public class BearEntity extends FaunaAnimal {
         this.goalSelector.addGoal(7, new RandomLookAroundGoal(this));
         this.targetSelector.addGoal(1, new HurtByTargetGoal(this).setAlertOthers());
         this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, 10, true, false,
-                p -> {
+                (p, targetLevel263) -> {
                     if (!canAttackPlayers(p)) return false;
                     // Once engaged or provoked, maintain pursuit up to full follow range (28 blocks)
                     if (this.getTarget() == p || this.getLastHurtByMob() == p) {
@@ -82,12 +82,12 @@ public class BearEntity extends FaunaAnimal {
                 }));
         this.targetSelector.addGoal(3, new com.skycraft.creatures.ai.SmartPartyTargetGoal(this));
         this.targetSelector.addGoal(4, new NearestAttackableTargetGoal<>(this, net.minecraft.world.entity.animal.Animal.class, 60, true, false,
-                e -> e instanceof DeerEntity || e instanceof ElkEntity));
+                (e, targetLevel263) -> e instanceof DeerEntity || e instanceof ElkEntity));
     }
 
     @Override
     public void setTarget(@Nullable LivingEntity target) {
-        if (target != null && getTarget() == null && !this.level().isClientSide) {
+        if (target != null && getTarget() == null && !this.level().isClientSide()) {
             playSound(com.skycraft.audio.AudioSounds.creature("bear", "roar"), 1.2f, 1.0f); // the warning roar before the charge
         }
         super.setTarget(target);

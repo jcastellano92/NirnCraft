@@ -11,7 +11,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.network.NetworkHooks;
+
 
 /**
  * Menu of the drafting table. Like the cooking pot it has no slots of its own: hidden mirror slots keep the client's
@@ -38,7 +38,7 @@ public class HomesteadMenu extends AbstractContainerMenu {
 
     public static void open(ServerPlayer player, HomesteadClaim claim, BlockPos pos) {
         CompoundTag state = Hearthfire.state(player, claim);
-        NetworkHooks.openScreen(player,
+        player.openMenu(
                 new SimpleMenuProvider((id, inv, p) -> new HomesteadMenu(id, inv, pos, state), claim.displayName()),
                 buf -> {
                     buf.writeBlockPos(pos);
@@ -48,15 +48,15 @@ public class HomesteadMenu extends AbstractContainerMenu {
 
     // legacy accessors used by the permission buttons
     public int doorPerm() {
-        return state.getInt("door");
+        return state.getIntOr("door",0);
     }
 
     public int containerPerm() {
-        return state.getInt("container");
+        return state.getIntOr("container",0);
     }
 
     public int buildPerm() {
-        return state.getInt("build");
+        return state.getIntOr("build",0);
     }
 
     @Override

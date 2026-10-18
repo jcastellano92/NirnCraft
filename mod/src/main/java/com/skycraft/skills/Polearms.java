@@ -19,12 +19,11 @@ import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.ForgeMod;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.util.UUID;
 
@@ -33,9 +32,9 @@ import java.util.UUID;
  * One- and Two-Handed (Lancer is its "Armsman"); the rest lives here: Long Reach, Impale (bleeding), Set Against
  * Charge, Sweeping Arc (halberds and glaives), Phalanx, Pinning Strike (spears) and Skewer.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class Polearms {
-    private static final UUID REACH_ID = UUID.fromString("7d4a3c1e-5b2f-4e8a-9c6d-1f0e2a3b4c5e");
+    private static final net.minecraft.resources.Identifier REACH_ID = net.minecraft.resources.Identifier.parse("skycraft:modifier_7d4a3c1e-5b2f-4e8a-9c6d-1f0e2a3b4c5e");
     private static final ThreadLocal<Boolean> SWEEPING = ThreadLocal.withInitial(() -> false);
 
     private Polearms() {}
@@ -46,20 +45,20 @@ public final class Polearms {
 
     /** Long Reach: +0.5 blocks with a polearm in hand. */
     @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer p) || p.tickCount % 10 != 0) return;
-        AttributeInstance reach = p.getAttribute(ForgeMod.ENTITY_REACH.get());
+    public static void onPlayerTick(net.neoforged.neoforge.event.tick.PlayerTickEvent.Post event) {
+        if (!(event instanceof net.neoforged.neoforge.event.tick.PlayerTickEvent.Post) || !(event.getEntity() instanceof ServerPlayer p) || p.tickCount % 10 != 0) return;
+        AttributeInstance reach = p.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.ENTITY_INTERACTION_RANGE);
         if (reach == null) return;
         boolean want = isPolearm(p.getMainHandItem()) && Perks.has(p, "polearm.long_reach");
         boolean has = reach.getModifier(REACH_ID) != null;
-        if (want && !has) reach.addTransientModifier(new AttributeModifier(REACH_ID, "Long Reach", 0.5, AttributeModifier.Operation.ADDITION));
+        if (want && !has) reach.addTransientModifier(new AttributeModifier(REACH_ID, 0.5, AttributeModifier.Operation.ADD_VALUE));
         else if (!want && has) reach.removeModifier(REACH_ID);
     }
 
     @SubscribeEvent(priority = EventPriority.LOW)
-    public static void onHurt(LivingHurtEvent event) {
+    public static void onHurt(com.skycraft.combat.BeforeArmorDamageEvent event) {
         LivingEntity victim = event.getEntity();
-        if (victim.level().isClientSide) return;
+        if (victim.level().isClientSide()) return;
         // Phalanx: a polearm held out in front turns aside a fifth of melee blows from the front.
         if (victim instanceof ServerPlayer vp && isPolearm(vp.getMainHandItem()) && Perks.has(vp, "polearm.phalanx")
                 && event.getSource().getDirectEntity() instanceof LivingEntity melee) {
@@ -72,7 +71,7 @@ public final class Polearms {
         PlayerData data = SkyData.get(p);
         var rnd = p.getRandom();
         float amount = event.getAmount();
-        boolean boss = victim.getType().is(CombatHandler.BOSSES);
+        boolean boss = victim.getType().builtInRegistryHolder().is(CombatHandler.BOSSES);
 
         // Set Against Charge: +50% against something running at you.
         if (Perks.has(data, "polearm.set_against_charge")) {
@@ -82,15 +81,15 @@ public final class Polearms {
         // Impale: 10% per rank to make the target bleed.
         int impale = Perks.rank(data, "polearm.impale");
         if (impale > 0 && rnd.nextFloat() < 0.1f * impale) {
-            victim.addEffect(new MobEffectInstance(ModEffects.BLEEDING.get(), 100, 0));
+            victim.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(ModEffects.BLEEDING.get()), 100, 0));
         }
         // Pinning Strike: spears pin the target in place for a moment.
         if (polearm.kind == PolearmKind.SPEAR && Perks.has(data, "polearm.pinning_strike") && !boss) {
-            victim.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 40, 3));
+            victim.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.SLOWNESS), 40, 3));
         }
         // Skewer: 15% to paralyze for two seconds.
         if (Perks.has(data, "polearm.skewer") && !boss && rnd.nextFloat() < 0.15f) {
-            victim.addEffect(new MobEffectInstance(ModEffects.PARALYSIS.get(), 40));
+            victim.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(ModEffects.PARALYSIS.get()), 40));
             Notifier.message(p, Component.translatable("message.skycraft.skewered"));
         }
         event.setAmount(amount);
@@ -101,7 +100,7 @@ public final class Polearms {
             try {
                 int n = 0;
                 for (LivingEntity e : Targeting.cone(p, 3.5 + polearm.kind.reach, 0.5, e -> e != victim && Targeting.canHarm(p, e))) {
-                    e.hurt(p.damageSources().playerAttack(p), amount * 0.5f);
+                    com.skycraft.platform.Effects.hurt(e, p.damageSources().playerAttack(p), amount * 0.5f);
                     if (++n >= 2) break;
                 }
             } finally {

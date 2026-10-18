@@ -1,11 +1,12 @@
 package com.skycraft.tamriel.settlement.grammar;
 
 import com.skycraft.tamriel.settlement.build.B;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -32,8 +33,8 @@ public final class Materials {
     }
 
     static boolean exists(String id) {
-        ResourceLocation rl = ResourceLocation.tryParse(id);
-        return rl != null && ForgeRegistries.BLOCKS.containsKey(rl) && ForgeRegistries.BLOCKS.getValue(rl) != Blocks.AIR;
+        Identifier rl = Identifier.tryParse(id);
+        return rl != null && BuiltInRegistries.BLOCK.containsKey(rl) && BuiltInRegistries.BLOCK.getValue(rl) != Blocks.AIR;
     }
 
     static String ns(String name) {
@@ -100,19 +101,19 @@ public final class Materials {
 
     /** Dyed blocks of a colour ({@code "red"}, {@code "light_blue"}...). */
     public static BlockState wool(String color) {
-        return B.id("minecraft:" + color + "_wool", Blocks.WHITE_WOOL);
+        return B.id("minecraft:" + color + "_wool", com.skycraft.worldgen.VanillaBlocks.WHITE_WOOL);
     }
 
     public static BlockState carpet(String color) {
-        return B.id("minecraft:" + color + "_carpet", Blocks.WHITE_CARPET);
+        return B.id("minecraft:" + color + "_carpet", com.skycraft.worldgen.VanillaBlocks.WHITE_CARPET);
     }
 
     public static BlockState bed(String color) {
-        return B.id("minecraft:" + color + "_bed", Blocks.WHITE_BED);
+        return B.id("minecraft:" + color + "_bed", com.skycraft.worldgen.VanillaBlocks.WHITE_BED);
     }
 
     public static BlockState banner(String color) {
-        return B.id("minecraft:" + color + "_wall_banner", Blocks.WHITE_WALL_BANNER);
+        return B.id("minecraft:" + color + "_wall_banner", com.skycraft.worldgen.VanillaBlocks.WHITE_WALL_BANNER);
     }
 
     public static BlockState terracotta(String color) {
@@ -125,7 +126,7 @@ public final class Materials {
 
     /** The colour name of a dyed block ("red" for red wool), or {@code fallback}. */
     public static String colorOf(BlockState s, String fallback) {
-        ResourceLocation id = ForgeRegistries.BLOCKS.getKey(s.getBlock());
+        Identifier id = BuiltInRegistries.BLOCK.getKey(s.getBlock());
         if (id == null) return fallback;
         String p = id.getPath();
         for (String suffix : new String[]{"_wool", "_carpet", "_terracotta", "_bed", "_concrete"}) {

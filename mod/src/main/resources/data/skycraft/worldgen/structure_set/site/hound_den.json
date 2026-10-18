@@ -1,0 +1,18 @@
+{
+  "structures": [
+    {
+      "structure": "skycraft:site/hound_den",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "skycraft:places",
+    "salt": 718274533,
+    "types": [
+      "dungeon_fixed"
+    ],
+    "variants": [
+      "hound_den"
+    ]
+  }
+}

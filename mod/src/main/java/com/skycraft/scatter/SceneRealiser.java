@@ -23,7 +23,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ChunkPos;
@@ -37,7 +37,8 @@ import net.minecraft.world.level.block.entity.SignBlockEntity;
 import net.minecraft.world.level.block.entity.SignText;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.core.Direction;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -60,8 +61,8 @@ public final class SceneRealiser {
     /** Builds this chunk's share of every scene that reaches it. Returns the number of props built. */
     static int generate(WorldGenLevel level, ChunkPos cp) {
         if (ScatterConfig.density() <= 0) return 0;
-        ScenePlan plan = ScenePlan.get();
-        int[] ids = plan.inChunk(cp.x, cp.z);
+        ScenePlan plan = ScenePlan.planFor(cp.getMiddleBlockX(), cp.getMiddleBlockZ());
+        int[] ids = plan.inChunk(cp.x(), cp.z());
         if (ids.length == 0) return 0;
         int built = 0;
         for (int s : ids) {
@@ -79,7 +80,7 @@ public final class SceneRealiser {
         int built = 0, touched = 0;
         for (int p = plan.propOff[s]; p < plan.propOff[s + 1]; p++) {
             int px = plan.x[s] + plan.propDx[p], pz = plan.z[s] + plan.propDz[p];
-            if (px >> 4 != cp.x || pz >> 4 != cp.z) continue;
+            if (px >> 4 != cp.x() || pz >> 4 != cp.z()) continue;
             touched++;
             RandomSource rnd = RandomSource.create(mix(seed + p * 0xC2B2AE3D27D4EB4FL));
             String kind = plan.propKindOf(p);
@@ -110,7 +111,7 @@ public final class SceneRealiser {
     /** A builder helper centred on (x, z) with the culture's palette (ground lookups, safe writes, containers). */
     private static SiteBuilder builder(WorldGenLevel level, ChunkPos cp, int x, int z, int facing, RandomSource rnd) {
         Info info = ZoneModel.at(level.getSeed(), x, z);
-        MinorSites.Site fake = new MinorSites.Site(cp.x, cp.z, x, z, SiteKind.ABANDONED_CAMP, rnd.nextLong(), facing & 3, null,
+        MinorSites.Site fake = new MinorSites.Site(cp.x(), cp.z(), x, z, SiteKind.ABANDONED_CAMP, rnd.nextLong(), facing & 3, null,
                 info.regionId(), info.province());
         return new SiteBuilder(level, rnd, fake, Palette.of(info.province(), info.archetype()));
     }
@@ -140,14 +141,14 @@ public final class SceneRealiser {
         BlockEntity be = level.getBlockEntity(p);
         if (!(be instanceof SignBlockEntity sign)) return true;
         Component[] lines = lines(plan, s, b, rnd);
-        SignText front = new SignText(), back = new SignText();
-        for (int i = 0; i < 4; i++) front = front.setMessage(i, lines[i]);
-        for (int i = 0; i < 4; i++) back = back.setMessage(i, lines[4 + i]);
-        CompoundTag tag = sign.saveWithoutMetadata();
-        SignText.DIRECT_CODEC.encodeStart(NbtOps.INSTANCE, front).result().ifPresent(t -> tag.put("front_text", t));
-        SignText.DIRECT_CODEC.encodeStart(NbtOps.INSTANCE, back).result().ifPresent(t -> tag.put("back_text", t));
+        SignText front = SignText.EMPTY, back = SignText.EMPTY;
+        for (int i = 0; i < 4; i++) front = front.asMutable().setLine(i, lines[i]).asImmutable();
+        for (int i = 0; i < 4; i++) back = back.asMutable().setLine(i, lines[4 + i]).asImmutable();
+        CompoundTag tag = sign.saveWithoutMetadata(level.registryAccess());
+        SignText.CODEC.encodeStart(NbtOps.INSTANCE, front).result().ifPresent(t -> tag.put("front_text", t));
+        SignText.CODEC.encodeStart(NbtOps.INSTANCE, back).result().ifPresent(t -> tag.put("back_text", t));
         tag.putBoolean("is_waxed", true);
-        sign.load(tag);
+        com.skycraft.worldgen.WorldgenData.load(sign, tag, level.registryAccess());
         // right-click / [F] reads the whole clue in the reading screen (the sign's own lines are small and split in two)
         StringBuilder text = new StringBuilder();
         boolean prose = !plan.clue[s].startsWith("@");
@@ -212,9 +213,9 @@ public final class SceneRealiser {
     }
 
     private static Block signFor(Block planks) {
-        ResourceLocation id = ForgeRegistries.BLOCKS.getKey(planks);
+        Identifier id = BuiltInRegistries.BLOCK.getKey(planks);
         if (id != null && id.getPath().endsWith("_planks")) {
-            Block b = ForgeRegistries.BLOCKS.getValue(new ResourceLocation(id.getNamespace(), id.getPath().replace("_planks", "_sign")));
+            Block b = BuiltInRegistries.BLOCK.getValue(Identifier.fromNamespaceAndPath(id.getNamespace(), id.getPath().replace("_planks", "_sign")));
             if (b instanceof StandingSignBlock) return b;
         }
         return Blocks.SPRUCE_SIGN;
@@ -270,7 +271,7 @@ public final class SceneRealiser {
         SiteBuilder b = null;
         for (int i = start; i <= len; i++) {
             int px = (int) Math.floor(x0 + ux * i), pz = (int) Math.floor(z0 + uz * i);
-            if (px >> 4 != cp.x || pz >> 4 != cp.z) continue;
+            if (px >> 4 != cp.x() || pz >> 4 != cp.z()) continue;
             if (roads.at(px + 0.5, pz + 0.5, hit) && hit.distance <= hit.halfWidth + 0.5f) break; // the road itself
             if (b == null) b = builder(level, cp, px, pz, plan.facing[s], RandomSource.create(s));
             int g = b.groundAt(px, pz);

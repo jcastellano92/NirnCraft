@@ -11,16 +11,16 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 /**
  * Client tick work of the atmosphere module: smoothly updates the continuous world-Z latitude aurora factor, and
  * plays the level-up fanfare when the synced character level goes up.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
 public final class AtmosphereClientEvents {
     /** Ignore level changes this soon after the player object appears (initial capability sync on login/respawn). */
     private static final int SETTLE_TICKS = 100;
@@ -29,25 +29,46 @@ public final class AtmosphereClientEvents {
     private static int lastLevel = -1;
     private static int ticksSinceJoin;
     private static float coldTarget;
+    private static net.minecraft.client.multiplayer.ClientLevel mediaLevel;
 
     private AtmosphereClientEvents() {}
 
     @SubscribeEvent
-    public static void onRenderTick(TickEvent.RenderTickEvent event) {
+    public static void onRenderTick(net.neoforged.neoforge.client.event.RenderFrameEvent.Pre event) {
         Minecraft mc = Minecraft.getInstance();
-        if (event.phase == TickEvent.Phase.END) { AtmosphereBudget.endFrame(); return; }
-        if (mc.level != null && mc.level.dimension() == net.minecraft.world.level.Level.OVERWORLD) {
-            AtmosphereBudget.beginFrame();
-            SmokeSourceTexture.renderClock(mc.level, event.renderTickTime);
-            LightningFieldTexture.renderUpdate(mc.isPaused() ? mc.getFrameTime() : event.renderTickTime);
+        if (mc.level != null) {
+            try (var uploadState = TextureUploadState.preserve()) {
+                FogRadianceTexture.renderClock(event.getPartialTick().getGameTimeDeltaPartialTick(false));
+                if (mc.level.dimension() == net.minecraft.world.level.Level.OVERWORLD) {
+                    AtmosphereBudget.beginFrame();
+                    SmokeSourceTexture.renderClock(mc.level, event.getPartialTick().getGameTimeDeltaPartialTick(false));
+                    LightningFieldTexture.renderUpdate(event.getPartialTick().getGameTimeDeltaPartialTick(false));
+                }
+            }
         }
     }
 
     @SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent event) {
-        if (event.phase != TickEvent.Phase.END) return;
+    public static void afterRenderTick(net.neoforged.neoforge.client.event.RenderFrameEvent.Post event) {
+        AtmosphereBudget.endFrame();
+    }
+
+    @SubscribeEvent
+    public static void closeBudgetOnLogout(net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent.LoggingOut event) {
+        AtmosphereBudget.close();
+    }
+
+    @SubscribeEvent
+    public static void closeBudgetOnStopping(net.neoforged.neoforge.client.event.lifecycle.ClientStoppingEvent event) {
+        AtmosphereBudget.close();
+    }
+
+    @SubscribeEvent
+    public static void onClientTick(net.neoforged.neoforge.client.event.ClientTickEvent.Post event) {
+        if (!(event instanceof net.neoforged.neoforge.client.event.ClientTickEvent.Post)) return;
         Minecraft mc = Minecraft.getInstance();
         Player player = mc.player;
+        if(mediaLevel!=mc.level) { mediaLevel=mc.level;FogRadianceTexture.clearLocalState(); }
         if (player == null || mc.level == null) {
             trackedPlayer = null;
             lastLevel = -1;
@@ -55,11 +76,19 @@ public final class AtmosphereClientEvents {
         }
         if (mc.isPaused()) return;
 
+        var media=com.skycraft.atmosphere.DimensionMediaPolicy.of(mc.level.dimension().identifier().toString());
+        try (var uploadState = TextureUploadState.preserve()) {
+        if(media.localMedia()) {
+            if(LocalOcclusionTexture.enabled() && ShaderCompat.shadersActive()) LocalOcclusionTexture.tick(mc.level,player.getEyePosition());
+            FogRadianceTexture.tick(mc.level,player.getEyePosition());
+        }
+
         // ---- shared atmospheric emission and nearby baked block light
         if (mc.level.dimension() == net.minecraft.world.level.Level.OVERWORLD) {
             NightSkyState.tick(mc.level, player.getEyePosition());
-            FogRadianceTexture.tick(mc.level, player.getEyePosition());
             SmokeSourceTexture.tick(mc.level, player.getEyePosition());
+        }
+
         }
 
         // ---- aurora: continuous world-Z latitude from Atmora (-6500) through Skyrim (-2000) to Cyrodiil (+3500..+6000)

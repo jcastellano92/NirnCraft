@@ -91,7 +91,8 @@ public final class GearArmorModels {
             for (String name : PARTS) {
                 CubeListBuilder cubes = CubeListBuilder.create();
                 if (base.has(name)) addBase(cubes, name, base.get(name).getAsFloat());
-                parts.put(name, root.addOrReplaceChild(name, cubes, pose(name)));
+                PartDefinition parent = name.equals("hat") ? parts.get("head") : root;
+                parts.put(name, parent.addOrReplaceChild(name, cubes, pose(name)));
             }
             JsonArray extra = def.has("cubes") ? def.getAsJsonArray("cubes") : new JsonArray();
             int n = 0;

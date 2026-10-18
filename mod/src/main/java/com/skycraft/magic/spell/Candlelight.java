@@ -6,7 +6,7 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -31,7 +31,7 @@ public final class Candlelight {
     public static Spell.Result cast(ServerPlayer p, Spell spell, int tick) {
         // Trains Alteration only when it lights up somewhere dark and isn't just a refresh (no free XP spam).
         boolean wasActive = active(p);
-        boolean dark = p.serverLevel().getMaxLocalRawBrightness(BlockPos.containing(p.getEyePosition())) < 8;
+        boolean dark = p.level().getMaxLocalRawBrightness(BlockPos.containing(p.getEyePosition())) < 8;
         p.getPersistentData().putLong(UNTIL, p.level().getGameTime() + SpellMath.alterationDuration(p, spell));
         MagicFx.sound(p, SoundEvents.AMETHYST_BLOCK_CHIME, 1f, 1.8f);
         MagicFx.sound(p, SoundEvents.BEACON_POWER_SELECT, 0.3f, 2f);
@@ -42,7 +42,7 @@ public final class Candlelight {
     /** A light of {@code ticks} (made spells). Returns true if it lit somewhere dark that wasn't lit by one already. */
     public static boolean light(ServerPlayer p, int ticks) {
         boolean wasActive = active(p);
-        boolean dark = p.serverLevel().getMaxLocalRawBrightness(BlockPos.containing(p.getEyePosition())) < 8;
+        boolean dark = p.level().getMaxLocalRawBrightness(BlockPos.containing(p.getEyePosition())) < 8;
         p.getPersistentData().putLong(UNTIL, p.level().getGameTime() + ticks);
         update(p);
         return dark && !wasActive;
@@ -50,11 +50,11 @@ public final class Candlelight {
 
     /** Game time the light goes out (0 if none), for the HUD countdown. */
     public static long until(ServerPlayer p) {
-        return p.getPersistentData().getLong(UNTIL);
+        return p.getPersistentData().getLongOr(UNTIL, 0L);
     }
 
     public static boolean active(ServerPlayer p) {
-        return p.getPersistentData().getLong(UNTIL) > p.level().getGameTime();
+        return p.getPersistentData().getLongOr(UNTIL, 0L) > p.level().getGameTime();
     }
 
     /** Called every 2 ticks for every player. */
@@ -66,16 +66,16 @@ public final class Candlelight {
 
     private static void update(ServerPlayer p) {
         CompoundTag pd = p.getPersistentData();
-        long until = pd.getLong(UNTIL);
+        long until = pd.getLongOr(UNTIL, 0L);
         boolean alive = p.isAlive() && !p.isSpectator() && until > p.level().getGameTime();
         if (!alive) {
             remove(p);
             pd.remove(UNTIL);
             return;
         }
-        ServerLevel level = p.serverLevel();
-        BlockPos old = pd.contains(POS) ? BlockPos.of(pd.getLong(POS)) : null;
-        boolean sameDim = pd.getString(DIM).equals(level.dimension().location().toString());
+        ServerLevel level = p.level();
+        BlockPos old = pd.contains(POS) ? BlockPos.of(pd.getLongOr(POS, 0L)) : null;
+        boolean sameDim = pd.getStringOr(DIM, "").equals(level.dimension().identifier().toString());
         if (old != null && !sameDim) {
             remove(p);
             old = null;
@@ -98,9 +98,9 @@ public final class Candlelight {
             level.setBlock(target, Blocks.LIGHT.defaultBlockState().setValue(LightBlock.LEVEL, 15).setValue(LightBlock.WATERLOGGED, water), 3);
             if (old != null && !old.equals(target)) clear(level, old);
             pd.putLong(POS, target.asLong());
-            pd.putString(DIM, level.dimension().location().toString());
+            pd.putString(DIM, level.dimension().identifier().toString());
         }
-        BlockPos orb = pd.contains(POS) ? BlockPos.of(pd.getLong(POS)) : null;
+        BlockPos orb = pd.contains(POS) ? BlockPos.of(pd.getLongOr(POS, 0L)) : null;
         if (orb != null && p.tickCount % 4 == 0) {
             level.sendParticles(ParticleTypes.END_ROD, orb.getX() + 0.5, orb.getY() + 0.5, orb.getZ() + 0.5, 1, 0.08, 0.08, 0.08, 0.0);
             if (p.tickCount % 12 == 0) level.sendParticles(ParticleTypes.GLOW, orb.getX() + 0.5, orb.getY() + 0.5, orb.getZ() + 0.5, 1, 0.15, 0.15, 0.15, 0.0);
@@ -126,12 +126,12 @@ public final class Candlelight {
     public static void remove(ServerPlayer p) {
         CompoundTag pd = p.getPersistentData();
         if (!pd.contains(POS)) return;
-        BlockPos pos = BlockPos.of(pd.getLong(POS));
-        MinecraftServer server = p.getServer();
-        ServerLevel level = p.serverLevel();
-        String dim = pd.getString(DIM);
-        if (server != null && !dim.isEmpty() && !dim.equals(level.dimension().location().toString())) {
-            ResourceLocation id = ResourceLocation.tryParse(dim);
+        BlockPos pos = BlockPos.of(pd.getLongOr(POS, 0L));
+        MinecraftServer server = p.level().getServer();
+        ServerLevel level = p.level();
+        String dim = pd.getStringOr(DIM, "");
+        if (server != null && !dim.isEmpty() && !dim.equals(level.dimension().identifier().toString())) {
+            Identifier id = Identifier.tryParse(dim);
             ServerLevel other = id == null ? null : server.getLevel(ResourceKey.create(Registries.DIMENSION, id));
             if (other != null) level = other;
         }

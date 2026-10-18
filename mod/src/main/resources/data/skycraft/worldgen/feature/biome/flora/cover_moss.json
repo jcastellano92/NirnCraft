@@ -1,0 +1,21 @@
+{
+  "type": "skycraft:ground_cover",
+  "config": {
+    "entries": [
+      {
+        "state": "minecraft:moss_carpet",
+        "weight": 1
+      }
+    ],
+    "scale": 24,
+    "patchiness": 0.6,
+    "cluster": {
+      "type": "minecraft:uniform",
+      "min_inclusive": 3,
+      "max_inclusive": 8
+    },
+    "spread": 3,
+    "salt": 6375,
+    "near_water": false
+  }
+}

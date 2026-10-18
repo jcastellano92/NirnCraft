@@ -1,0 +1,14 @@
+{
+  "layers": {
+    "humanoid": [
+      {
+        "texture": "skycraft:nightingale"
+      }
+    ],
+    "humanoid_leggings": [
+      {
+        "texture": "skycraft:nightingale"
+      }
+    ]
+  }
+}

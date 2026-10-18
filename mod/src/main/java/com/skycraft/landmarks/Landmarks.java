@@ -111,7 +111,7 @@ public final class Landmarks {
     public static LandmarkSite at(long seed, Tier tier, int cellX, int cellZ) {
         Cache c = cache(seed);
         ConcurrentHashMap<Long, Optional<LandmarkSite>> map = c.tiers[tier.ordinal()];
-        long key = ChunkPos.asLong(cellX, cellZ);
+        long key = ChunkPos.pack(cellX, cellZ);
         Optional<LandmarkSite> hit = map.get(key);
         if (hit != null) return hit.orElse(null);
         LandmarkSite site = compute(seed, tier, cellX, cellZ);

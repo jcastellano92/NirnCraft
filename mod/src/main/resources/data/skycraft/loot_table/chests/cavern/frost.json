@@ -1,0 +1,79 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:loot_table",
+          "weight": 1,
+          "value": "skycraft:chests/gold"
+        }
+      ]
+    },
+    {
+      "rolls": {
+        "type": "minecraft:uniform",
+        "min": 1,
+        "max": 2
+      },
+      "entries": [
+        {
+          "type": "minecraft:loot_table",
+          "weight": 3,
+          "value": "skycraft:chests/smithing_materials"
+        },
+        {
+          "type": "minecraft:loot_table",
+          "weight": 2,
+          "value": "skycraft:chests/skyrim_food"
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:packed_ice",
+          "weight": 1,
+          "modifier": {
+            "count": {
+              "type": "minecraft:uniform",
+              "min": 2,
+              "max": 5
+            },
+            "type": "minecraft:set_count"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:snowball",
+          "weight": 2,
+          "modifier": {
+            "count": {
+              "type": "minecraft:uniform",
+              "min": 4,
+              "max": 12
+            },
+            "type": "minecraft:set_count"
+          }
+        },
+        {
+          "type": "minecraft:loot_table",
+          "weight": 1,
+          "value": "skycraft:chests/soul_gems"
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:iron_ingot",
+          "weight": 2,
+          "modifier": {
+            "count": {
+              "type": "minecraft:uniform",
+              "min": 2,
+              "max": 5
+            },
+            "type": "minecraft:set_count"
+          }
+        }
+      ]
+    }
+  ],
+  "random_sequence": "skycraft:chests/cavern/frost"
+}

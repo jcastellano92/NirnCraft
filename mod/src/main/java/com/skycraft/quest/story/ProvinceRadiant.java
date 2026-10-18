@@ -24,8 +24,8 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.npc.Villager;
-import net.minecraft.world.entity.npc.VillagerProfession;
+import net.minecraft.world.entity.npc.villager.Villager;
+import net.minecraft.world.entity.npc.villager.VillagerProfession;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
@@ -56,7 +56,7 @@ public final class ProvinceRadiant {
                     QuestDialogue.questLabel(Component.translatable("dialogue.skycraft.story.local_work", r.name())), 305,
                     (pl, n) -> QuestDialogue.offer(pl, n, "province", () -> local(pl, n))));
         }
-        boolean chartist = npc instanceof Villager v && v.getVillagerData().getProfession() == VillagerProfession.CARTOGRAPHER
+        boolean chartist = npc instanceof Villager v && v.getVillagerData().profession().unwrapKey().orElseThrow() == VillagerProfession.CARTOGRAPHER
                 || npc instanceof NpcEntity ne && (ne.role() == NpcRole.ADVENTURER || ne.role() == NpcRole.COURIER);
         if (chartist && SkyData.get(player).getLevel() >= 8) {
             out.add(new DialogueOption("story.uncharted",
@@ -76,7 +76,7 @@ public final class ProvinceRadiant {
         q.giver = npc.getUUID();
         q.giverName = npc.getDisplayName();
         q.giverPos = npc.blockPosition();
-        q.giverDim = npc.level().dimension().location().toString();
+        q.giverDim = npc.level().dimension().identifier().toString();
         q.hold = Regions.at(npc.level(), npc.blockPosition()).id();
         return q;
     }
@@ -88,7 +88,7 @@ public final class ProvinceRadiant {
 
     private static Objective returnTo(LivingEntity npc, String topic) {
         return new Objective(Objective.Type.TALK_TO, tr("quest.skycraft.obj.return", npc.getDisplayName()))
-                .npc(npc.getUUID()).at(npc.blockPosition(), npc.level().dimension().location().toString(), 0)
+                .npc(npc.getUUID()).at(npc.blockPosition(), npc.level().dimension().identifier().toString(), 0)
                 .topic(tr(topic), tr("quest.skycraft.reply.thanks")).label(npc.getDisplayName().getString());
     }
 
@@ -119,7 +119,7 @@ public final class ProvinceRadiant {
     }
 
     private static String dim(Level level) {
-        return level.dimension().location().toString();
+        return level.dimension().identifier().toString();
     }
 
     // ------------------------------------------------------------------ local work
@@ -127,7 +127,7 @@ public final class ProvinceRadiant {
     /** What the people of this province need done. */
     @Nullable
     public static RadiantQuests.Offer local(ServerPlayer p, LivingEntity npc) {
-        ServerLevel level = p.serverLevel();
+        ServerLevel level = p.level();
         RandomSource r = p.getRandom();
         Region region = Regions.at(level, npc.blockPosition());
         String culture = switch (region.culture()) {
@@ -150,7 +150,7 @@ public final class ProvinceRadiant {
 
     /** Creatures or outlaws threatening the land. */
     private static RadiantQuests.Offer cull(ServerPlayer p, LivingEntity npc, Region region, String culture, RandomSource r) {
-        ServerLevel level = p.serverLevel();
+        ServerLevel level = p.level();
         BlockPos spot = spotNear(level, p, r, region.province());
         Component dir = Names.direction(npc.blockPosition(), spot);
         String foe;
@@ -180,7 +180,7 @@ public final class ProvinceRadiant {
 
     /** Something precious to bring back from a guarded place. */
     private static RadiantQuests.Offer relic(ServerPlayer p, LivingEntity npc, Region region, String culture, RandomSource r) {
-        ServerLevel level = p.serverLevel();
+        ServerLevel level = p.level();
         BlockPos spot = Locate.dungeon(level, p.blockPosition(), r);
         if (spot == null || TamrielMap.inTamriel(spot.getX(), spot.getZ()) && !region.province().equals(TamrielMap.region(spot.getX(), spot.getZ()).province())) {
             spot = spotNear(level, p, r, region.province());
@@ -212,7 +212,7 @@ public final class ProvinceRadiant {
     private static RadiantQuests.Offer delivery(ServerPlayer p, LivingEntity npc, Region region, String culture, RandomSource r) {
         Place to = otherSettlement(region, npc.blockPosition(), r);
         if (to == null) return null;
-        ServerLevel level = p.serverLevel();
+        ServerLevel level = p.level();
         BlockPos at = new BlockPos(to.x(), Locate.surfaceY(level, to.x(), to.z()), to.z());
         int dist = (int) Locate.horizontalDist(at, npc.blockPosition());
         long gold = Mth.clamp(120 + dist / 10, 120, 900);
@@ -232,7 +232,7 @@ public final class ProvinceRadiant {
     /** "Chart the shore beyond the sea": the nearest foreign or generated land, paid by the distance. */
     @Nullable
     public static RadiantQuests.Offer expedition(ServerPlayer p, LivingEntity npc) {
-        ServerLevel level = p.serverLevel();
+        ServerLevel level = p.level();
         if (level.dimension() != Level.OVERWORLD) return null;
         RandomSource r = p.getRandom();
         BlockPos from = npc.blockPosition();
@@ -274,13 +274,13 @@ public final class ProvinceRadiant {
      * vantage points and whatever lairs there), paid by how far it lies from Whiterun.
      */
     public static void tickPlayer(ServerPlayer p) {
-        ServerLevel level = p.serverLevel();
+        ServerLevel level = p.level();
         if (level.dimension() != Level.OVERWORLD || SkyData.get(p).getRace() == null) return;
         Region region = Regions.at(level, p.blockPosition());
         if (!FOREIGN.contains(region.province()) || "sea".equals(region.kind())) return;
         String flag = "charted_" + region.id().replace('/', '_');
         if (Story.hasFlag(SkyData.get(p), flag) || !Quests.canTakeMore(p)) return;
-        for (Quests.Ref ref : Quests.active(p.server, p.getUUID())) if (flag.equals(ref.quest().extra.getString("survey"))) return;
+        for (Quests.Ref ref : Quests.active(p.level().getServer(), p.getUUID())) if (flag.equals(ref.quest().extra.getStringOr("survey",""))) return;
         RandomSource r = p.getRandom();
         List<BlockPos> points = new ArrayList<>();
         for (int i = 0; i < 40 && points.size() < 3; i++) {

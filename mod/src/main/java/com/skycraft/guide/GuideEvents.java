@@ -21,10 +21,10 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 /**
  * Server-side events for the guide module:
@@ -37,7 +37,7 @@ import net.minecraftforge.fml.common.Mod;
  *   state to {@link com.skycraft.guide.client.GuideClient} for the region banner subtitle and musical sting.</li>
  * </ul>
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class GuideEvents {
     public static final String MODULE = "guide";
 
@@ -48,7 +48,7 @@ public final class GuideEvents {
         if (!(event.getEntity() instanceof ServerPlayer player) || !GuideConfig.GIVE_HANDBOOK.get()) return;
         PlayerData data = SkyData.get(player);
         CompoundTag tag = data.module(MODULE);
-        if (tag.getBoolean("handbook_given")) return;
+        if (tag.getBooleanOr("handbook_given",false)) return;
         tag.putBoolean("handbook_given", true);
         data.markDirty();
         ItemStack book = new ItemStack(GuideModule.HANDBOOK.get());
@@ -57,8 +57,8 @@ public final class GuideEvents {
     }
 
     @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer player)) return;
+    public static void onPlayerTick(net.neoforged.neoforge.event.tick.PlayerTickEvent.Post event) {
+        if (!(event instanceof net.neoforged.neoforge.event.tick.PlayerTickEvent.Post) || !(event.getEntity() instanceof ServerPlayer player)) return;
         if ((player.tickCount + player.getId()) % 20 != 0) return;
         if (player.tickCount < 60 || player.level().dimension() != Level.OVERWORLD) return;
         if (IntroFlow.inIntro(player)) return;
@@ -79,9 +79,9 @@ public final class GuideEvents {
     }
 
     public static boolean hasArrived(PlayerData data, String regionId) {
-        ListTag list = data.module(MODULE).getList("arrived_regions", Tag.TAG_STRING);
+        ListTag list = data.module(MODULE).getListOrEmpty("arrived_regions");
         for (int i = 0; i < list.size(); i++) {
-            if (list.getString(i).equals(regionId)) return true;
+            if (list.getStringOr(i, "").equals(regionId)) return true;
         }
         return false;
     }
@@ -89,10 +89,10 @@ public final class GuideEvents {
     /** Triggers the MS19 arrival moment for {@code region}: narrator card, rumour hook, capital map pin, and client banner sync. */
     public static void triggerArrival(ServerPlayer player, PlayerData data, Region region) {
         CompoundTag mod = data.module(MODULE);
-        ListTag arrived = mod.getList("arrived_regions", Tag.TAG_STRING);
+        ListTag arrived = mod.getListOrEmpty("arrived_regions");
         boolean already = false;
         for (int i = 0; i < arrived.size(); i++) {
-            if (arrived.getString(i).equals(region.id())) {
+            if (arrived.getStringOr(i, "").equals(region.id())) {
                 already = true;
                 break;
             }
@@ -107,13 +107,13 @@ public final class GuideEvents {
         // Record arrival state for GuideClient (region banner subtitle + music sting)
         mod.putString("last_arrival_region", region.id());
         mod.putString("last_arrival_key", key);
-        mod.putInt("last_arrival_seq", mod.getInt("last_arrival_seq") + 1);
+        mod.putInt("last_arrival_seq", mod.getIntOr("last_arrival_seq",0) + 1);
 
         // Queue rumour entry in the player's guide data
-        ListTag rumours = mod.getList("rumours", Tag.TAG_STRING);
+        ListTag rumours = mod.getListOrEmpty("rumours");
         boolean hasRumour = false;
         for (int i = 0; i < rumours.size(); i++) {
-            if (rumours.getString(i).equals(rumourKey)) {
+            if (rumours.getStringOr(i, "").equals(rumourKey)) {
                 hasRumour = true;
                 break;
             }

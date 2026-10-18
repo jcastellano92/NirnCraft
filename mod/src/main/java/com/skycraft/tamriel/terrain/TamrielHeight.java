@@ -6,8 +6,11 @@ import com.skycraft.tamriel.MapSample;
 import com.skycraft.tamriel.TamrielMap;
 import com.skycraft.worldplan.PlanGround;
 import com.skycraft.worldplan.RoadPlan;
-import net.minecraft.util.KeyDispatchDataCodec;
-import net.minecraft.world.level.levelgen.DensityFunction;
+import net.minecraft.util.Interval;
+import net.minecraft.world.level.levelgen.densityfunction.*;
+import com.skycraft.worldgen.WorldNoise;
+import com.skycraft.worldgen.WorldDensitySampler;
+import net.minecraft.world.level.levelgen.densityfunction.DensityFunction;
 
 /**
  * Density function {@code skycraft:tamriel_height}: the terrain surface height of a column in blocks. The map gives
@@ -21,24 +24,23 @@ import net.minecraft.world.level.levelgen.DensityFunction;
  * </ul>
  * 2D: wrap it in {@code minecraft:cache_2d}. Thread-safe; the noises are immutable once wired by the noise router.
  */
-public record TamrielHeight(DensityFunction.NoiseHolder hills, DensityFunction.NoiseHolder detail,
-                            DensityFunction.NoiseHolder ridges, DensityFunction.NoiseHolder dunes)
+public record TamrielHeight(WorldNoise hills, WorldNoise detail,
+                            WorldNoise ridges, WorldNoise dunes)
         implements DensityFunction {
 
     public static final MapCodec<TamrielHeight> DATA_CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
-            NoiseHolder.CODEC.fieldOf("hills").forGetter(TamrielHeight::hills),
-            NoiseHolder.CODEC.fieldOf("detail").forGetter(TamrielHeight::detail),
-            NoiseHolder.CODEC.fieldOf("ridges").forGetter(TamrielHeight::ridges),
-            NoiseHolder.CODEC.fieldOf("dunes").forGetter(TamrielHeight::dunes)
+            WorldNoise.CODEC.fieldOf("hills").forGetter(TamrielHeight::hills),
+            WorldNoise.CODEC.fieldOf("detail").forGetter(TamrielHeight::detail),
+            WorldNoise.CODEC.fieldOf("ridges").forGetter(TamrielHeight::ridges),
+            WorldNoise.CODEC.fieldOf("dunes").forGetter(TamrielHeight::dunes)
     ).apply(i, TamrielHeight::new));
-    public static final KeyDispatchDataCodec<TamrielHeight> CODEC = KeyDispatchDataCodec.of(DATA_CODEC);
+    public static final MapCodec<TamrielHeight> CODEC = DATA_CODEC;
 
     /** Highest surface the terrain may reach (the noise fills up to y 575; the world top is y 639). */
     public static final double MAX_SURFACE = 568;
 
-    @Override
-    public double compute(FunctionContext ctx) {
-        int x = ctx.blockX(), z = ctx.blockZ();
+    public double compute(int blockX, int blockY, int blockZ) {
+        int x = blockX, z = blockZ;
         // per-thread column memo (perf): cache_2d keeps one column, the biome fill and structure probes alternate
         Object owner = hills.noise() != null ? hills.noise() : this;
         com.skycraft.perf.ColumnCache.Table t = com.skycraft.perf.ColumnCache.table();
@@ -74,7 +76,7 @@ public record TamrielHeight(DensityFunction.NoiseHolder hills, DensityFunction.N
         float wBed = 0f, wPad = 0f, wPlot = 0f;
         PlanGround.Bed pb = null;
         if (PlanGround.enabled()) {
-            PlanGround g = PlanGround.get();
+            PlanGround g = PlanGround.getAt(x, z);
             pb = PlanGround.scratch();
             boolean inWater = s.inWater();
             // channel columns (river, stream, lake) are never raised or cut by a road, except by a ford: culverts stay
@@ -194,29 +196,29 @@ public record TamrielHeight(DensityFunction.NoiseHolder hills, DensityFunction.N
         return Math.min(h, MAX_SURFACE);
     }
 
-    @Override
-    public void fillArray(double[] values, ContextProvider provider) {
-        provider.fillAllDirectly(values, this);
-    }
 
-    @Override
-    public DensityFunction mapAll(Visitor visitor) {
-        return visitor.apply(new TamrielHeight(visitor.visitNoise(hills), visitor.visitNoise(detail),
-                visitor.visitNoise(ridges), visitor.visitNoise(dunes)));
-    }
 
-    @Override
+
+
     public double minValue() {
         return -64;
     }
 
-    @Override
     public double maxValue() {
         return MAX_SURFACE;
     }
 
+    @Override public DensitySampler compileSampler(CompileContext context) {
+        var bound = new TamrielHeight(hills.bind(context), detail.bind(context), ridges.bind(context), dunes.bind(context));
+        return (WorldDensitySampler) (sampling, x, y, z) -> (float) bound.compute(x, y, z);
+    }
+
+    @Override public DensityFunction rewriteChildren(DfRewriteRule rule) { return this; }
+    @Override public Interval range() { return Interval.of((float) minValue(), (float) maxValue()); }
+    @Override public int domainAxes() { return DensityFunction.AXIS_X | DensityFunction.AXIS_Z; }
+
     @Override
-    public KeyDispatchDataCodec<? extends DensityFunction> codec() {
+    public MapCodec<? extends DensityFunction> codec() {
         return CODEC;
     }
 }

@@ -49,10 +49,10 @@ public final class HomesteadDialogue {
     public static boolean isBuilder(LivingEntity npc) {
         if (npc == null || !npc.isAlive()) return false;
         CompoundTag pd = npc.getPersistentData();
-        if (pd.getBoolean(TAG) || "builder".equals(pd.getString("skycraft_trade"))) return true;
-        ListTag pools = pd.getCompound("skycraft_shop").getList("pools", Tag.TAG_STRING);
-        for (int i = 0; i < pools.size(); i++) if ("builder".equals(pools.getString(i))) return true;
-        if (pd.getBoolean("skycraft_steward") && npc.level() instanceof ServerLevel level) {
+        if (pd.getBooleanOr(TAG, false) || "builder".equals(pd.getStringOr("skycraft_trade",""))) return true;
+        ListTag pools = pd.getCompoundOrEmpty("skycraft_shop").getListOrEmpty("pools");
+        for (int i = 0; i < pools.size(); i++) if ("builder".equals(pools.getStringOr(i, ""))) return true;
+        if (pd.getBooleanOr("skycraft_steward",false) && npc.level() instanceof ServerLevel level) {
             // the steward of a capital, a city or a large town (tier 0 and 1); not the village's
             return com.skycraft.tamriel.settlement.SettlementPopulation.tierAt(level, npc.blockPosition()) <= 1;
         }
@@ -61,7 +61,7 @@ public final class HomesteadDialogue {
 
     private static void addOptions(ServerPlayer player, LivingEntity npc, List<DialogueOption> out) {
         if (player.level().dimension() != Level.OVERWORLD || !isBuilder(npc)) return;
-        HomesteadClaim own = HomesteadData.get(player.server).getClaim(player.getUUID());
+        HomesteadClaim own = HomesteadData.get(player.level().getServer()).getClaim(player.getUUID());
         int price = SurvivalConfig.CLAIM_PRICE_DRAFTING_TABLE.get();
         if (own == null) {
             out.add(new DialogueOption("homestead.found",
@@ -84,7 +84,7 @@ public final class HomesteadDialogue {
 
     private static void sellTable(ServerPlayer player, LivingEntity npc, int price) {
         net.minecraft.world.item.Item table = com.skycraft.crafting.CraftingBlocks.DRAFTING_TABLE.get().asItem();
-        if (HomesteadData.get(player.server).getClaim(player.getUUID()) != null) {
+        if (HomesteadData.get(player.level().getServer()).getClaim(player.getUUID()) != null) {
             Dialogue.open(player, npc, Component.translatable("dialogue.skycraft.homestead.have_claim"));
             return;
         }
@@ -102,7 +102,7 @@ public final class HomesteadDialogue {
 
     /** Marks the nearest unclaimed open plots on the player's map (as places heard of: a point on the compass). */
     private static void showLand(ServerPlayer player, LivingEntity npc) {
-        HomesteadData data = HomesteadData.get(player.server);
+        HomesteadData data = HomesteadData.get(player.level().getServer());
         var pdata = SkyData.get(player);
         int x = player.getBlockX(), z = player.getBlockZ();
         List<Place> plots = new ArrayList<>();
@@ -132,7 +132,7 @@ public final class HomesteadDialogue {
     }
 
     private static void about(ServerPlayer player, LivingEntity npc) {
-        HomesteadClaim c = HomesteadData.get(player.server).getClaim(player.getUUID());
+        HomesteadClaim c = HomesteadData.get(player.level().getServer()).getClaim(player.getUUID());
         if (c == null) return;
         Dialogue.open(player, npc, Component.translatable("dialogue.skycraft.homestead.about", c.plainName(), c.getRadius(), c.getBuilt().size()));
     }

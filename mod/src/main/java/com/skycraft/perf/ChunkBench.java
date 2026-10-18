@@ -5,12 +5,12 @@ import com.skycraft.tamriel.MapSample;
 import com.skycraft.tamriel.Places;
 import com.skycraft.tamriel.TamrielMap;
 import jdk.jfr.Recording;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.TicketType;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.chunk.ChunkStatus;
+import net.minecraft.world.level.chunk.status.ChunkStatus;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -34,14 +34,14 @@ import java.util.function.Consumer;
  * the measured areas; {@link Profiling} turns it into a per-stage breakdown and the Skycraft hot spots.
  *
  * <p>Areas: Whiterun (Skyrim tundra, a capital), the Throat of the World (peaks), Skingrad (Cyrodiil, a city),
- * Balmora (Vvardenfell) and a generated realm far beyond Tamriel. Run it on a fresh world: chunks that already exist
+ * Balmora (Vvardenfell) and the outer ocean beyond the fixed lands. Run it on a fresh world: chunks that already exist
  * are loaded, not generated ({@code tools/bake/bench.ps1} deletes the world first).</p>
  */
 public final class ChunkBench {
     public record Area(String name, int x, int z) {
     }
 
-    private static final TicketType<ChunkPos> TICKET = TicketType.create("skycraft_bench", Comparator.comparingLong(ChunkPos::toLong));
+    private static final java.util.function.Supplier<TicketType> TICKET = com.skycraft.perf.PerfTickets.BENCH;
     private static volatile ChunkBench running;
 
     private final ServerLevel level;
@@ -96,6 +96,8 @@ public final class ChunkBench {
 
     /** The first column of solid land far beyond Tamriel on a fixed search grid. */
     static Area realm() {
+        if (!com.skycraft.tamriel.terrain.Beyond.ENDLESS_LANDS_ENABLED)
+            return new Area("outer_ocean", 61440, 40960);
         MapSample s = new MapSample();
         for (int k = 0; k < 2000; k++) {
             int x = 40960 + (k % 40) * 1024, z = 36864 + (k / 40) * 1024;
@@ -106,7 +108,7 @@ public final class ChunkBench {
     }
 
     static int workers() {
-        ExecutorService ex = Util.backgroundExecutor();
+        java.util.concurrent.Executor ex = Util.backgroundExecutor();
         return ex instanceof ForkJoinPool fj ? fj.getParallelism() : Math.max(1, Runtime.getRuntime().availableProcessors() - 1);
     }
 
@@ -166,12 +168,12 @@ public final class ChunkBench {
         for (int dx = -r; dx <= r; dx++) {
             for (int dz = -r; dz <= r; dz++) {
                 ChunkPos pos = new ChunkPos(cx + dx, cz + dz);
-                cache.addRegionTicket(TICKET, pos, 0, pos);
+                cache.addTicketWithRadius(TICKET.get(),  pos,  0);
                 held.add(pos);
             }
         }
         for (ChunkPos pos : held) {
-            cache.getChunkFuture(pos.x, pos.z, ChunkStatus.FULL, true).whenComplete((res, err) -> done.incrementAndGet());
+            cache.getChunkFuture(pos.x(), pos.z(), ChunkStatus.FULL, true).whenComplete((res, err) -> done.incrementAndGet());
         }
     }
 
@@ -183,7 +185,7 @@ public final class ChunkBench {
     private void hashArea(Area a) {
         long areaHash = 1125899906842597L;
         for (ChunkPos pos : held) {
-            net.minecraft.world.level.chunk.LevelChunk c = level.getChunkSource().getChunkNow(pos.x, pos.z);
+            net.minecraft.world.level.chunk.LevelChunk c = level.getChunkSource().getChunkNow(pos.x(), pos.z());
             long h = 1125899906842597L;
             if (c != null) {
                 for (net.minecraft.world.level.chunk.LevelChunkSection s : c.getSections()) {
@@ -200,7 +202,7 @@ public final class ChunkBench {
                     }
                 }
             }
-            hashes.add(a.name() + " " + pos.x + " " + pos.z + " " + Long.toHexString(h));
+            hashes.add(a.name() + " " + pos.x() + " " + pos.z() + " " + Long.toHexString(h));
             areaHash = areaHash * 31 + h;
         }
         line(String.format(Locale.ROOT, "area %s block hash %016x", a.name(), areaHash));
@@ -208,7 +210,7 @@ public final class ChunkBench {
 
     private void release() {
         ServerChunkCache cache = level.getChunkSource();
-        for (ChunkPos pos : held) cache.removeRegionTicket(TICKET, pos, 0, pos);
+        for (ChunkPos pos : held) cache.removeTicketWithRadius(TICKET.get(),  pos,  0);
         held.clear();
     }
 
@@ -224,7 +226,7 @@ public final class ChunkBench {
             line(String.format(Locale.ROOT, "TOTAL: %d chunks in %.2f s = %.2f chunks/s (%.2f per worker, %.1f ms worker-time per chunk)",
                     measuredChunks, s, measuredChunks / s, measuredChunks / s / workers(), s * 1000 * workers() / measuredChunks));
         }
-        Path dir = level.getServer().getServerDirectory().toPath().resolve("skycraft-perf");
+        Path dir = level.getServer().getServerDirectory().resolve("skycraft-perf");
         String stamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss"));
         Recording rec = recording;
         int chunks = measuredChunks;

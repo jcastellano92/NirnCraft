@@ -6,7 +6,8 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
+import com.skycraft.inventory.ItemData;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -32,13 +33,15 @@ public class BlackBookItem extends Item {
 
     public static ItemStack of(Item item, int chapter) {
         ItemStack s = new ItemStack(item);
-        s.getOrCreateTag().putInt("chapter", Math.max(0, Math.min(RealmLayout.APOCRYPHA_CHAPTERS, chapter)));
-        s.getOrCreateTag().putInt("skycraft_value", 500);
+        ItemData.updateCustom(s, tag -> {
+            tag.putInt("chapter", Math.max(0, Math.min(RealmLayout.APOCRYPHA_CHAPTERS, chapter)));
+            tag.putInt("skycraft_value", 500);
+        });
         return s;
     }
 
     public static int chapter(ItemStack stack) {
-        return stack.getTag() == null ? 1 : Math.max(0, Math.min(RealmLayout.APOCRYPHA_CHAPTERS, stack.getTag().getInt("chapter")));
+        return !ItemData.hasCustom(stack) ? 1 : Math.max(0, Math.min(RealmLayout.APOCRYPHA_CHAPTERS, ItemData.customOrEmpty(stack).getIntOr("chapter", 0)));
     }
 
     @Override
@@ -53,14 +56,14 @@ public class BlackBookItem extends Item {
     }
 
     @Override
-    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+    public InteractionResult use(Level level, Player player, InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
-        if (!level.isClientSide && player instanceof ServerPlayer sp) RealmTravel.readBlackBookItem(sp, chapter(stack));
-        return InteractionResultHolder.sidedSuccess(stack, level.isClientSide);
+        if (!level.isClientSide() && player instanceof ServerPlayer sp) RealmTravel.readBlackBookItem(sp, chapter(stack));
+        return InteractionResult.SUCCESS;
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
-        tooltip.add(Component.translatable("item.skycraft.black_book.tooltip").withStyle(ChatFormatting.DARK_GREEN));
+    public void appendHoverText(ItemStack stack, TooltipContext context, net.minecraft.world.item.component.TooltipDisplay display, java.util.function.Consumer<Component> tooltip, TooltipFlag flag) {
+        tooltip.accept(Component.translatable("item.skycraft.black_book.tooltip").withStyle(ChatFormatting.DARK_GREEN));
     }
 }

@@ -59,8 +59,8 @@ public final class LegendaryItem {
     public static ItemStack generate(LootContext context) {
         RandomSource random = context.getRandom();
         ServerLevel level = context.getLevel();
-        Vec3 origin = context.getParamOrNull(LootContextParams.ORIGIN);
-        BlockPos pos = origin != null ? BlockPos.containing(origin) : level.getSharedSpawnPos();
+        Vec3 origin = context.getOptional(LootContextParams.ORIGIN);
+        BlockPos pos = origin != null ? BlockPos.containing(origin) : level.getRespawnData().pos();
         int regLevel = Leveling.regionLevel(level, pos);
         int playerLevel = LeveledGear.levelOf(context);
         int effLevel = Math.max(regLevel, playerLevel);
@@ -82,25 +82,26 @@ public final class LegendaryItem {
         }
         Prefix prefix = matching.get(random.nextInt(matching.size()));
 
-        CompoundTag leg = stack.getOrCreateTagElement("skycraft_legendary");
+        CompoundTag leg = com.skycraft.platform.ItemTags.childOrEmpty(stack, "skycraft_legendary");
         leg.putString("prefix", prefix.name());
         leg.putString("title", prefix.displayName);
         leg.putString("desc", prefix.description);
-        stack.getOrCreateTag().putBoolean("skycraft_is_legendary", true);
+        com.skycraft.platform.ItemTags.setChild(stack, "skycraft_legendary", leg);
+        com.skycraft.inventory.ItemData.updateCustom(stack, customData263 -> customData263.putBoolean("skycraft_is_legendary", true));
 
         Component customName = Component.literal("★ " + prefix.displayName + " " + stack.getHoverName().getString())
                 .withStyle(ChatFormatting.GOLD);
-        stack.setHoverName(customName);
+        stack.set(net.minecraft.core.component.DataComponents.CUSTOM_NAME, customName);
 
         return stack;
     }
 
     public static Prefix getPrefix(ItemStack stack) {
-        if (stack == null || !stack.hasTag()) return null;
-        CompoundTag tag = stack.getTagElement("skycraft_legendary");
+        if (stack == null || !com.skycraft.inventory.ItemData.hasCustom(stack)) return null;
+        CompoundTag tag = com.skycraft.platform.ItemTags.child(stack, "skycraft_legendary");
         if (tag == null || !tag.contains("prefix")) return null;
         try {
-            return Prefix.valueOf(tag.getString("prefix"));
+            return Prefix.valueOf(tag.getStringOr("prefix",""));
         } catch (IllegalArgumentException e) {
             return null;
         }

@@ -1,7 +1,7 @@
 package com.skycraft.magic.client;
 
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
@@ -26,13 +26,13 @@ public final class MagicUi {
 
     private MagicUi() {}
 
-    public static void panel(GuiGraphics g, int x1, int y1, int x2, int y2) {
+    public static void panel(GuiGraphicsExtractor g, int x1, int y1, int x2, int y2) {
         g.fillGradient(x1, y1, x2, y2, 0x90000000, 0xA8000000);
         hline(g, x1, x2, y1, 0x70);
         hline(g, x1, x2, y2 - 1, 0x70);
     }
 
-    public static void hline(GuiGraphics g, int x1, int x2, int y, int alpha) {
+    public static void hline(GuiGraphicsExtractor g, int x1, int x2, int y, int alpha) {
         int w = x2 - x1;
         if (w <= 0) return;
         int fade = Math.min(24, w / 4);
@@ -45,7 +45,7 @@ public final class MagicUi {
         g.fill(x1 + fade, y, x2 - fade, y + 1, alpha << 24 | rgb);
     }
 
-    public static void diamond(GuiGraphics g, int cx, int cy, int r, int color) {
+    public static void diamond(GuiGraphicsExtractor g, int cx, int cy, int r, int color) {
         for (int i = -r; i <= r; i++) {
             int w = r - Math.abs(i);
             g.fill(cx - w, cy + i, cx + w + 1, cy + i + 1, color);
@@ -56,9 +56,9 @@ public final class MagicUi {
         return c.getString().toUpperCase(Locale.ROOT);
     }
 
-    public static void capsCentered(GuiGraphics g, Font font, Component c, int cx, int y, int color) {
+    public static void capsCentered(GuiGraphicsExtractor g, Font font, Component c, int cx, int y, int color) {
         String s = caps(c);
-        g.drawString(font, s, cx - font.width(s) / 2, y, color, false);
+        g.text(font, s, cx - font.width(s) / 2, y, color, false);
     }
 
     public static String ellipsize(Font font, String s, int width) {
@@ -81,19 +81,19 @@ public final class MagicUi {
         }
 
         @Override
-        public void onPress() {
+        public void onPress(net.minecraft.client.input.InputWithModifiers input) {
             onPress.run();
         }
 
         @Override
-        protected void renderWidget(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+        protected void extractContents(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
             Font font = net.minecraft.client.Minecraft.getInstance().font;
             boolean hot = active && (isHoveredOrFocused());
             g.fill(getX(), getY(), getX() + width, getY() + height, hot ? 0x60302A20 : 0x40000000);
             hline(g, getX(), getX() + width, getY() + height - 1, hot ? 0xD0 : 0x50);
             String s = caps(getMessage());
             int color = !active ? DIM : hot ? BRIGHT : TEXT;
-            g.drawString(font, s, getX() + (width - font.width(s)) / 2, getY() + (height - 8) / 2, color, false);
+            g.text(font, s, getX() + (width - font.width(s)) / 2, getY() + (height - 8) / 2, color, false);
             if (hot) {
                 diamond(g, getX() + 4, getY() + height / 2, 2, GOLD);
                 diamond(g, getX() + width - 5, getY() + height / 2, 2, GOLD);

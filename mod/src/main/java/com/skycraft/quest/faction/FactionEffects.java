@@ -17,21 +17,21 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.living.LivingDeathEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.registries.ForgeRegistries;
+
+import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -47,7 +47,7 @@ import java.util.UUID;
  *
  * <p>State in {@code module("quest")}: {@code faction_expelled} (faction id -> true; cleared by penance at a hall).</p>
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class FactionEffects {
     private static final String EXPELLED = "faction_expelled";
     /** Story flag: the player has prayed at a shrine of Talos. */
@@ -64,12 +64,12 @@ public final class FactionEffects {
     // ------------------------------------------------------------------ expulsion
 
     public static boolean expelled(PlayerData data, Faction f) {
-        return data.module("quest").getCompound(EXPELLED).getBoolean(f.id);
+        return data.module("quest").getCompoundOrEmpty(EXPELLED).getBooleanOr(f.id, false);
     }
 
     public static void markExpelled(PlayerData data, Faction f) {
         CompoundTag mod = data.module("quest");
-        CompoundTag t = mod.getCompound(EXPELLED);
+        CompoundTag t = mod.getCompoundOrEmpty(EXPELLED);
         t.putBoolean(f.id, true);
         mod.put(EXPELLED, t);
         data.markDirty();
@@ -78,7 +78,7 @@ public final class FactionEffects {
     /** Penance paid: the faction will take the player back. */
     public static void forgive(PlayerData data, Faction f) {
         CompoundTag mod = data.module("quest");
-        CompoundTag t = mod.getCompound(EXPELLED);
+        CompoundTag t = mod.getCompoundOrEmpty(EXPELLED);
         t.remove(f.id);
         mod.put(EXPELLED, t);
         data.markDirty();
@@ -112,8 +112,8 @@ public final class FactionEffects {
 
     /** Every five seconds per player: birthright and Way of the Voice memberships, pending blessings. */
     @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer p)) return;
+    public static void onPlayerTick(net.neoforged.neoforge.event.tick.PlayerTickEvent.Post event) {
+        if (!(event instanceof net.neoforged.neoforge.event.tick.PlayerTickEvent.Post) || !(event.getEntity() instanceof ServerPlayer p)) return;
         Pending pending = PENDING.get(p.getUUID());
         if (pending != null && p.level().getGameTime() >= pending.at()) {
             PENDING.remove(p.getUUID());
@@ -123,14 +123,14 @@ public final class FactionEffects {
         PlayerData data = SkyData.get(p);
         if (data.getRace() == null) return;
         if (data.getRace() == Race.ORSIMER && !Factions.isMember(data, Faction.ORC_STRONGHOLDS) && !expelled(data, Faction.ORC_STRONGHOLDS)
-                && !data.module("quest").getBoolean("orc_blood_kin")) {
+                && !data.module("quest").getBooleanOr("orc_blood_kin",false)) {
             data.module("quest").putBoolean("orc_blood_kin", true);
             data.markDirty();
             Factions.join(p, Faction.ORC_STRONGHOLDS);
             Notifier.message(p, Component.translatable("faction.skycraft.orc_strongholds.birthright").withStyle(ChatFormatting.GOLD));
         }
         if (!Factions.isMember(data, Faction.GREYBEARDS) && !expelled(data, Faction.GREYBEARDS)
-                && Story.completed(data, "main_way_of_the_voice") && !data.module("quest").getBoolean("greybeards_joined")) {
+                && Story.completed(data, "main_way_of_the_voice") && !data.module("quest").getBooleanOr("greybeards_joined",false)) {
             data.module("quest").putBoolean("greybeards_joined", true);
             data.markDirty();
             Factions.join(p, Faction.GREYBEARDS);
@@ -147,7 +147,7 @@ public final class FactionEffects {
     public static void onRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
         if (event.isCanceled() || !(event.getEntity() instanceof ServerPlayer p) || p.isSpectator()) return;
         BlockState state = event.getLevel().getBlockState(event.getPos());
-        ResourceLocation id = BuiltInRegistries.BLOCK.getKey(state.getBlock());
+        Identifier id = BuiltInRegistries.BLOCK.getKey(state.getBlock());
         if (!Skycraft.MODID.equals(id.getNamespace()) || !id.getPath().startsWith("shrine_of_")) return;
         String divine = id.getPath().substring("shrine_of_".length());
         PlayerData data = SkyData.get(p);
@@ -185,12 +185,12 @@ public final class FactionEffects {
 
     /** Doubles the blessing a faithful member of the Imperial Cult (or a Knight of the Nine) just received. */
     static void lengthenBlessing(ServerPlayer p, String divine) {
-        MobEffect effect = ForgeRegistries.MOB_EFFECTS.getValue(new ResourceLocation(Skycraft.MODID, "blessing_" + divine));
+        MobEffect effect = BuiltInRegistries.MOB_EFFECT.getValue(Identifier.fromNamespaceAndPath(Skycraft.MODID, "blessing_" + divine));
         if (effect == null) return;
-        MobEffectInstance cur = p.getEffect(effect);
+        MobEffectInstance cur = p.getEffect(com.skycraft.platform.Effects.holder(effect));
         if (cur == null || cur.getDuration() <= 0) return;
         int ticks = cur.getDuration() * 2;
-        p.addEffect(new MobEffectInstance(effect, ticks, cur.getAmplifier(), false, false, true));
+        p.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(effect), ticks, cur.getAmplifier(), false, false, true));
         Buffs.apply(p, "blessing_" + divine, ticks);
         Notifier.message(p, Component.translatable("faction.skycraft.imperial_cult.blessing").withStyle(ChatFormatting.GOLD));
     }
@@ -199,8 +199,8 @@ public final class FactionEffects {
     @SubscribeEvent
     public static void onDeath(LivingDeathEvent event) {
         LivingEntity victim = event.getEntity();
-        if (victim.level().isClientSide || !(event.getSource().getEntity() instanceof ServerPlayer killer)) return;
-        String fid = victim.getPersistentData().getString(FactionStaff.TAG);
+        if (victim.level().isClientSide() || !(event.getSource().getEntity() instanceof ServerPlayer killer)) return;
+        String fid = victim.getPersistentData().getStringOr(FactionStaff.TAG, "");
         Faction f = fid.isEmpty() ? null : Faction.byId(fid);
         if (f == null && victim instanceof NpcEntity n && n.role() == NpcRole.THALMOR) f = Faction.THALMOR;
         if (f == null) return;

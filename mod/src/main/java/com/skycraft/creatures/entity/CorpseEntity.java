@@ -62,7 +62,7 @@ public class CorpseEntity extends Entity {
     private static final double MAX_DRAG_DISTANCE = 8.0;
 
     private static final EntityDataAccessor<String> BODY_TYPE = SynchedEntityData.defineId(CorpseEntity.class, EntityDataSerializers.STRING);
-    private static final EntityDataAccessor<CompoundTag> BODY = SynchedEntityData.defineId(CorpseEntity.class, EntityDataSerializers.COMPOUND_TAG);
+    private static final EntityDataAccessor<CompoundTag> BODY = SynchedEntityData.defineId(CorpseEntity.class, com.skycraft.creatures.ModEntities.CORPSE_BODY_SERIALIZER);
     private static final EntityDataAccessor<Float> BODY_HEIGHT = SynchedEntityData.defineId(CorpseEntity.class, EntityDataSerializers.FLOAT);
     private static final EntityDataAccessor<Integer> APPEAR_TICKS = SynchedEntityData.defineId(CorpseEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Boolean> CENTERED = SynchedEntityData.defineId(CorpseEntity.class, EntityDataSerializers.BOOLEAN);
@@ -99,26 +99,20 @@ public class CorpseEntity extends Entity {
     @Nullable
     private Entity renderDummy;
     private boolean dummyFailed;
-    private int lerpSteps;
-    private double lerpX;
-    private double lerpY;
-    private double lerpZ;
-    private float lerpYRot;
 
     public CorpseEntity(EntityType<? extends CorpseEntity> type, Level level) {
         super(type, level);
-        this.setMaxUpStep(0.5f);
     }
 
     @Override
-    protected void defineSynchedData() {
-        this.entityData.define(BODY_TYPE, "");
-        this.entityData.define(BODY, new CompoundTag());
-        this.entityData.define(BODY_HEIGHT, 1.8f);
-        this.entityData.define(APPEAR_TICKS, 0);
-        this.entityData.define(CENTERED, true);
-        this.entityData.define(DRAGGER, -1);
-        this.entityData.define(ROLL, 0.0f);
+    protected void defineSynchedData(net.minecraft.network.syncher.SynchedEntityData.Builder builder) {
+        builder.define(BODY_TYPE, "");
+        builder.define(BODY, new CompoundTag());
+        builder.define(BODY_HEIGHT, 1.8f);
+        builder.define(APPEAR_TICKS, 0);
+        builder.define(CENTERED, true);
+        builder.define(DRAGGER, -1);
+        builder.define(ROLL, 0.0f);
     }
 
     // ------------------------------------------------------------------ setup (server)
@@ -131,7 +125,7 @@ public class CorpseEntity extends Entity {
         String typeId = EntityType.getKey(dead.getType()).toString();
         CompoundTag body;
         try {
-            body = dead.saveWithoutId(new CompoundTag());
+            body = com.skycraft.platform.EntityData.saveWithoutId(dead);
             for (String key : STRIP) body.remove(key);
             body.putFloat("Health", 1.0f);
             showWorn(body);
@@ -186,25 +180,28 @@ public class CorpseEntity extends Entity {
     public void addClothes(LivingEntity dead) {
         if (dead instanceof com.skycraft.society.entity.NpcEntity npc) {
             generateNpcClothes(npc);
-        } else if (dead instanceof net.minecraft.world.entity.npc.AbstractVillager) {
+        } else if (dead instanceof net.minecraft.world.entity.npc.villager.AbstractVillager) {
             generateVillagerClothes();
         }
     }
 
-    /** Writes the worn loot items into the body's equipment NBT (ArmorItems: feet..head, HandItems: main, off). */
+    /** Native equipment maps keep the authored feet-to-offhand loot slots visible. */
+    private static final net.minecraft.world.entity.EquipmentSlot[] WORN_EQUIPMENT = {
+            net.minecraft.world.entity.EquipmentSlot.FEET, net.minecraft.world.entity.EquipmentSlot.LEGS,
+            net.minecraft.world.entity.EquipmentSlot.CHEST, net.minecraft.world.entity.EquipmentSlot.HEAD,
+            net.minecraft.world.entity.EquipmentSlot.MAINHAND, net.minecraft.world.entity.EquipmentSlot.OFFHAND };
+
     private void showWorn(CompoundTag body) {
         if (wornMask == 0) return;
-        ListTag armor = body.getList("ArmorItems", Tag.TAG_COMPOUND);
-        ListTag hands = body.getList("HandItems", Tag.TAG_COMPOUND);
-        if (armor.size() < 4 || hands.size() < 2) return; // not an equipment-wearing creature
+        CompoundTag equipment = body.getCompoundOrEmpty("equipment");
         for (int i = 0; i < WORN_SLOTS; i++) {
             if ((wornMask & (1 << i)) == 0) continue;
-            CompoundTag item = loot.getItem(i).save(new CompoundTag());
-            if (i < 4) armor.set(i, item);
-            else hands.set(i - 4, item);
+            ItemStack stack = loot.getItem(i);
+            String slot = WORN_EQUIPMENT[i].getSerializedName();
+            if (stack.isEmpty()) equipment.remove(slot);
+            else equipment.put(slot, com.skycraft.inventory.ItemData.save(stack, registryAccess()));
         }
-        body.put("ArmorItems", armor);
-        body.put("HandItems", hands);
+        body.put("equipment", equipment);
     }
 
     private void generateNpcClothes(com.skycraft.society.entity.NpcEntity npc) {
@@ -339,10 +336,8 @@ public class CorpseEntity extends Entity {
 
     private static ItemStack createClothingPiece(net.minecraft.world.item.Item item, int color, String name) {
         ItemStack stack = new ItemStack(item);
-        if (item instanceof net.minecraft.world.item.DyeableLeatherItem dyeable) {
-            dyeable.setColor(stack, color);
-        }
-        stack.setHoverName(Component.literal(name));
+        stack.set(net.minecraft.core.component.DataComponents.DYED_COLOR, new net.minecraft.world.item.component.DyedItemColor(color));
+        stack.set(net.minecraft.core.component.DataComponents.CUSTOM_NAME, Component.literal(name));
         return stack;
     }
 
@@ -354,7 +349,7 @@ public class CorpseEntity extends Entity {
             if (existing.isEmpty()) {
                 loot.setItemQuietly(i, stack);
                 return ItemStack.EMPTY;
-            } else if (ItemStack.isSameItemSameTags(existing, stack)) {
+            } else if (ItemStack.isSameItemSameComponents(existing, stack)) {
                 int space = existing.getMaxStackSize() - existing.getCount();
                 if (space > 0) {
                     int add = Math.min(space, stack.getCount());
@@ -374,26 +369,22 @@ public class CorpseEntity extends Entity {
      * only the slots that hold what the body is shown wearing are linked.
      */
     private void syncEquipmentAppearance() {
-        if (this.level().isClientSide || wornMask == 0) return;
+        if (this.level().isClientSide() || wornMask == 0) return;
         CompoundTag body = this.entityData.get(BODY).copy();
         if (body.isEmpty()) return;
-        ListTag armor = body.getList("ArmorItems", Tag.TAG_COMPOUND);
-        ListTag hands = body.getList("HandItems", Tag.TAG_COMPOUND);
+        CompoundTag equipment = body.getCompoundOrEmpty("equipment");
         boolean changed = false;
         for (int i = 0; i < WORN_SLOTS; i++) {
             if ((wornMask & (1 << i)) == 0) continue;
-            ListTag list = i < 4 ? armor : hands;
-            int index = i < 4 ? i : i - 4;
-            if (index >= list.size()) continue;
-            ItemStack shown = ItemStack.of(list.getCompound(index));
+            String slot = WORN_EQUIPMENT[i].getSerializedName();
+            ItemStack shown = com.skycraft.inventory.ItemData.parse(equipment.getCompoundOrEmpty(slot), registryAccess());
             if (ItemStack.isSameItem(loot.getItem(i), shown)) continue;
-            list.set(index, new CompoundTag());
+            equipment.remove(slot);
             wornMask &= ~(1 << i);
             changed = true;
         }
         if (changed) {
-            body.put("ArmorItems", armor);
-            body.put("HandItems", hands);
+            body.put("equipment", equipment);
             this.entityData.set(BODY, body);
         }
     }
@@ -455,8 +446,7 @@ public class CorpseEntity extends Entity {
     @Override
     public void tick() {
         super.tick();
-        if (this.level().isClientSide) {
-            tickLerp();
+        if (this.level().isClientSide()) {
             return;
         }
         Player dragger = getDragger();
@@ -549,61 +539,47 @@ public class CorpseEntity extends Entity {
         this.entityData.set(DRAGGER, player.getId());
         this.setCentered(true);
         this.dragTicks = 0;
-        this.setMaxUpStep(1.0f);
-        this.playSound(SoundEvents.ARMOR_EQUIP_LEATHER, 0.8f, 0.6f);
+        this.playSound(SoundEvents.ARMOR_EQUIP_LEATHER.value(), 0.8f, 0.6f);
     }
 
     public void stopDragging() {
         if (!isDragged()) return;
         this.entityData.set(DRAGGER, -1);
         this.dragTicks = 0;
-        this.setMaxUpStep(0.5f);
         this.setDeltaMovement(this.getDeltaMovement().multiply(0.3, 1.0, 0.3));
     }
 
-    /** Client: smooth movement between the server's position updates. */
-    private void tickLerp() {
-        if (lerpSteps <= 0) return;
-        double x = this.getX() + (lerpX - this.getX()) / lerpSteps;
-        double y = this.getY() + (lerpY - this.getY()) / lerpSteps;
-        double z = this.getZ() + (lerpZ - this.getZ()) / lerpSteps;
-        float yaw = this.getYRot() + Mth.wrapDegrees(lerpYRot - this.getYRot()) / lerpSteps;
-        lerpSteps--;
-        this.setPos(x, y, z);
-        this.setYRot(yaw);
+    /** Position updates use the native interpolation tracker on both sides. */
+    @Override
+    protected net.minecraft.world.entity.InterpolationHandler createInterpolationHandler() {
+        return net.minecraft.world.entity.SteppedInterpolationHandler.create(this);
     }
 
     @Override
-    public void lerpTo(double x, double y, double z, float yRot, float xRot, int steps, boolean teleport) {
-        this.lerpX = x;
-        this.lerpY = y;
-        this.lerpZ = z;
-        this.lerpYRot = yRot;
-        this.lerpSteps = teleport ? 1 : Math.max(steps, 3);
-    }
+    public float maxUpStep() { return isDragged() ? 1.0f : 0.5f; }
 
     // ------------------------------------------------------------------ interaction
 
     @Override
-    public InteractionResult interact(Player player, InteractionHand hand) {
+    public InteractionResult interact(Player player, InteractionHand hand, Vec3 hit) {
         if (hand != InteractionHand.MAIN_HAND) return InteractionResult.PASS;
         if (player.isShiftKeyDown() && this.entityData.get(DRAGGER) == player.getId()) {
-            if (!this.level().isClientSide) stopDragging();
-            return InteractionResult.sidedSuccess(this.level().isClientSide);
+            if (!this.level().isClientSide()) stopDragging();
+            return com.skycraft.platform.Interactions.sidedSuccess(this.level().isClientSide());
         }
         if (locked) {
             if (player instanceof ServerPlayer sp) {
                 com.skycraft.core.Notifier.message(sp, Component.translatable("fire.skycraft.body.nothing"));
             }
-            return InteractionResult.sidedSuccess(this.level().isClientSide);
+            return com.skycraft.platform.Interactions.sidedSuccess(this.level().isClientSide());
         }
-        if (!this.level().isClientSide) {
+        if (!this.level().isClientSide()) {
             looted = true;
             player.openMenu(new SimpleMenuProvider((id, inventory, p) -> ChestMenu.threeRows(id, inventory, loot), this.getDisplayName()));
-            this.playSound(SoundEvents.ARMOR_EQUIP_LEATHER, 0.6f, 0.9f);
+            this.playSound(SoundEvents.ARMOR_EQUIP_LEATHER.value(), 0.6f, 0.9f);
             if (player instanceof ServerPlayer sp) clearOwnMarker(sp);
         }
-        return InteractionResult.sidedSuccess(this.level().isClientSide);
+        return com.skycraft.platform.Interactions.sidedSuccess(this.level().isClientSide());
     }
 
     /**
@@ -618,7 +594,7 @@ public class CorpseEntity extends Entity {
         ListTag list = com.skycraft.world.WorldData.discovered(data);
         boolean removed = false;
         for (int i = list.size() - 1; i >= 0; i--) {
-            if (id.equals(list.getCompound(i).getString("id"))) {
+            if (id.equals(list.getCompoundOrEmpty(i).getStringOr("id",""))) {
                 list.remove(i);
                 removed = true;
             }
@@ -645,14 +621,14 @@ public class CorpseEntity extends Entity {
     }
 
     @Override
-    public boolean canBeCollidedWith() {
+    public boolean canBeCollidedWith(@Nullable Entity other) {
         return false;
     }
 
     /** Punching a body shoves it; a sneaking creative-mode player removes it. */
     @Override
     public boolean skipAttackInteraction(Entity attacker) {
-        if (!this.level().isClientSide && attacker instanceof Player p) {
+        if (!this.level().isClientSide() && attacker instanceof Player p) {
             if (p.isCreative() && p.isShiftKeyDown()) this.discard();
             else knock(p.position(), 0.35);
         }
@@ -661,8 +637,8 @@ public class CorpseEntity extends Entity {
 
     /** Bodies take no damage, but hits and blasts shove them around (explosions also push them directly). */
     @Override
-    public boolean hurt(DamageSource source, float amount) {
-        if (!this.level().isClientSide && !this.isRemoved() && !isDragged()) {
+    public boolean hurtServer(net.minecraft.server.level.ServerLevel serverLevel263, DamageSource source, float amount) {
+        if (!this.level().isClientSide() && !this.isRemoved() && !isDragged()) {
             Vec3 from = source.getSourcePosition();
             if (from != null) knock(from, 0.2 + Math.min(amount, 12.0f) * 0.04);
         }
@@ -676,7 +652,7 @@ public class CorpseEntity extends Entity {
         double weight = Math.max(0.5, Math.sqrt(bodyWidth * bodyWidth * getBodyHeight()));
         double s = strength / weight;
         this.setDeltaMovement(this.getDeltaMovement().add(dir.x * s, 0.1 + s * 0.4, dir.z * s));
-        this.hasImpulse = true;
+        this.needsSync = true;
         setRoll(getRoll() + (this.random.nextFloat() - 0.5f) * 40.0f);
         this.setYRot(this.getYRot() + (this.random.nextFloat() - 0.5f) * 30.0f);
     }
@@ -695,18 +671,18 @@ public class CorpseEntity extends Entity {
         String typeId = this.entityData.get(BODY_TYPE);
         if (typeId.isEmpty()) return null; // data not synced yet
         try {
-            Optional<EntityType<?>> type = EntityType.byString(typeId);
+            Optional<EntityType<?>> type = com.skycraft.platform.EntityData.type(typeId);
             if (type.isEmpty()) {
                 dummyFailed = true;
                 return null;
             }
-            Entity e = type.get().create(this.level());
+            Entity e = type.get().create(this.level(), net.minecraft.world.entity.EntitySpawnReason.EVENT);
             if (e == null) {
                 dummyFailed = true;
                 return null;
             }
             CompoundTag tag = this.entityData.get(BODY).copy();
-            if (!tag.isEmpty()) e.load(tag);
+            if (!tag.isEmpty()) com.skycraft.platform.EntityData.load(e, tag);
             e.setPos(this.getX(), this.getY(), this.getZ());
             e.setYRot(180f);
             e.yRotO = 180f;
@@ -733,7 +709,6 @@ public class CorpseEntity extends Entity {
      * The lying body is much bigger than the corpse's own box (it reaches about one body height away, and a dragon's
      * wings and tail much further): cull with a box around all of it.
      */
-    @Override
     public AABB getBoundingBoxForCulling() {
         double reach = Math.max(1.0, getBodyHeight());
         if (DRAGON_TYPE.equals(this.entityData.get(BODY_TYPE))) return this.getBoundingBox().inflate(9.0, 4.0, 9.0);
@@ -758,7 +733,7 @@ public class CorpseEntity extends Entity {
             if (stack.isEmpty()) continue;
             CompoundTag t = new CompoundTag();
             t.putByte("Slot", (byte) i);
-            stack.save(t);
+            com.skycraft.platform.ItemTags.saveInto(stack, t);
             items.add(t);
         }
         return items;
@@ -766,14 +741,15 @@ public class CorpseEntity extends Entity {
 
     private static void loadItems(Container container, ListTag items) {
         for (int i = 0; i < items.size(); i++) {
-            CompoundTag t = items.getCompound(i);
-            int slot = t.getByte("Slot") & 255;
-            if (slot < container.getContainerSize()) container.setItem(slot, ItemStack.of(t));
+            CompoundTag t = items.getCompoundOrEmpty(i);
+            int slot = t.getByteOr("Slot",(byte)0) & 255;
+            if (slot < container.getContainerSize()) container.setItem(slot, com.skycraft.inventory.ItemData.parse(t));
         }
     }
 
     @Override
-    protected void addAdditionalSaveData(CompoundTag tag) {
+    protected void addAdditionalSaveData(net.minecraft.world.level.storage.ValueOutput output263) {
+        net.minecraft.nbt.CompoundTag tag = new net.minecraft.nbt.CompoundTag();
         tag.put("Loot", saveItems(loot));
         if (!bulk.isEmpty()) tag.put("Bulk", bulk.save());
         tag.putByte("Worn", (byte) wornMask);
@@ -788,32 +764,35 @@ public class CorpseEntity extends Entity {
         tag.putInt("EmptyTicks", emptyTicks);
         if (persistent) tag.putBoolean("Persistent", true);
         if (locked) tag.putBoolean("Locked", true);
+    
+        output263.store(tag);
     }
 
     @Override
-    protected void readAdditionalSaveData(CompoundTag tag) {
+    protected void readAdditionalSaveData(net.minecraft.world.level.storage.ValueInput input263) {
+        net.minecraft.nbt.CompoundTag tag = com.skycraft.platform.ValueTags.read(input263 , "Loot", "Bulk", "Worn", "Looted", "Copies", "BodyType", "Body", "BodyHeight", "BodyWidth", "Centered", "Roll", "Age", "EmptyTicks", "Persistent", "Locked");
         // (Bodies saved by older versions also had per-player copies, "Copies"/"Finished": dropped, the base loot stays.)
         loot.quiet = true;
-        loadItems(loot, tag.getList("Loot", Tag.TAG_COMPOUND));
+        loadItems(loot, tag.getListOrEmpty("Loot"));
         loot.quiet = false;
-        bulk.load(tag.getCompound("Bulk"));
-        wornMask = tag.getByte("Worn") & ((1 << WORN_SLOTS) - 1);
-        looted = tag.getBoolean("Looted") || tag.contains("Copies", Tag.TAG_LIST) && !tag.getList("Copies", Tag.TAG_COMPOUND).isEmpty();
-        this.entityData.set(BODY_TYPE, tag.getString("BodyType"));
-        this.entityData.set(BODY, tag.getCompound("Body"));
-        if (tag.contains("BodyHeight")) this.entityData.set(BODY_HEIGHT, tag.getFloat("BodyHeight"));
-        if (tag.contains("BodyWidth")) bodyWidth = tag.getFloat("BodyWidth");
-        if (tag.contains("Centered")) setCentered(tag.getBoolean("Centered"));
-        setRoll(tag.getFloat("Roll"));
-        age = tag.getInt("Age");
-        emptyTicks = tag.getInt("EmptyTicks");
-        persistent = tag.getBoolean("Persistent");
-        locked = tag.getBoolean("Locked");
+        bulk.load(tag.getCompoundOrEmpty("Bulk"));
+        wornMask = tag.getByteOr("Worn",(byte)0) & ((1 << WORN_SLOTS) - 1);
+        looted = tag.getBooleanOr("Looted",false) || com.skycraft.platform.NbtData.hasType(tag, "Copies", Tag.TAG_LIST) && !tag.getListOrEmpty("Copies").isEmpty();
+        this.entityData.set(BODY_TYPE, tag.getStringOr("BodyType",""));
+        this.entityData.set(BODY, tag.getCompoundOrEmpty("Body"));
+        if (tag.contains("BodyHeight")) this.entityData.set(BODY_HEIGHT, tag.getFloatOr("BodyHeight",0F));
+        if (tag.contains("BodyWidth")) bodyWidth = tag.getFloatOr("BodyWidth",0F);
+        if (tag.contains("Centered")) setCentered(tag.getBooleanOr("Centered",false));
+        setRoll(tag.getFloatOr("Roll",0F));
+        age = tag.getIntOr("Age",0);
+        emptyTicks = tag.getIntOr("EmptyTicks",0);
+        persistent = tag.getBooleanOr("Persistent",false);
+        locked = tag.getBooleanOr("Locked",false);
     }
 
     @Override
-    public Packet<ClientGamePacketListener> getAddEntityPacket() {
-        return new ClientboundAddEntityPacket(this);
+    public Packet<ClientGamePacketListener> getAddEntityPacket(net.minecraft.server.level.ServerEntity tracker) {
+        return new ClientboundAddEntityPacket(this, tracker);
     }
 
     /** The body's inventory, shared by all looters; valid while the corpse exists and the looter is close. */
@@ -856,12 +835,12 @@ public class CorpseEntity extends Entity {
         }
 
         @Override
-        public void startOpen(Player player) {
+        public void startOpen(net.minecraft.world.entity.ContainerUser player) {
             openers++;
         }
 
         @Override
-        public void stopOpen(Player player) {
+        public void stopOpen(net.minecraft.world.entity.ContainerUser player) {
             openers = Math.max(0, openers - 1);
         }
     }

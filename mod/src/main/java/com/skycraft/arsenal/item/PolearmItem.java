@@ -1,66 +1,62 @@
 package com.skycraft.arsenal.item;
 
-import com.google.common.base.Suppliers;
-import com.google.common.collect.ImmutableMultimap;
-import com.google.common.collect.Multimap;
 import com.skycraft.crafting.SmithingTier;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.SwordItem;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemInstance;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.entity.EquipmentSlotGroup;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.item.component.ItemAttributeModifiers;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.common.ForgeMod;
-import net.minecraftforge.common.ToolAction;
-import net.minecraftforge.common.ToolActions;
+import net.neoforged.neoforge.common.ItemAbility;
+import net.neoforged.neoforge.common.ItemAbilities;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.UUID;
-import java.util.function.Supplier;
 
 /**
  * A spear, halberd or glaive. A sword-like tiered weapon with extra reach (Forge's entity reach attribute; Better
  * Combat's own movesets add their range on top). Tagged {@code #skycraft:polearms}, so hits train the Polearms skill.
  */
-public class PolearmItem extends SwordItem {
-    private static final UUID REACH_ID = UUID.fromString("7d4a3c1e-5b2f-4e8a-9c6d-1f0e2a3b4c5d");
+public class PolearmItem extends Item {
+    private static final Identifier REACH_ID = Identifier.fromNamespaceAndPath("skycraft", "polearm_reach");
 
     public final SmithingTier smithingTier;
     public final PolearmKind kind;
-    private final Supplier<Multimap<Attribute, AttributeModifier>> mainHand;
 
     public PolearmItem(SmithingTier tier, PolearmKind kind, Properties props) {
-        super(tier, kind.damage, kind.speed, props);
+        super(properties(tier, kind, props));
         this.smithingTier = tier;
         this.kind = kind;
-        // Built lazily: Forge's reach attribute may not be registered yet when items are constructed.
-        this.mainHand = Suppliers.memoize(() -> {
-            ImmutableMultimap.Builder<Attribute, AttributeModifier> b = ImmutableMultimap.builder();
-            b.putAll(super.getDefaultAttributeModifiers(EquipmentSlot.MAINHAND));
-            b.put(ForgeMod.ENTITY_REACH.get(), new AttributeModifier(REACH_ID, "Polearm reach", kind.reach, AttributeModifier.Operation.ADDITION));
-            return b.build();
-        });
+    }
+
+    private static Properties properties(SmithingTier tier, PolearmKind kind, Properties props) {
+        props.sword(tier.vanilla(), kind.damage, kind.speed).repairable(tier.material())
+                .durability(Math.max(1, Math.round(tier.getUses() * kind.durabilityMult)));
+        return props.attributes(ItemAttributeModifiers.builder()
+                .add(Attributes.ATTACK_DAMAGE, new AttributeModifier(Item.BASE_ATTACK_DAMAGE_ID,
+                        kind.damage + tier.vanilla().attackDamageBonus(), AttributeModifier.Operation.ADD_VALUE), EquipmentSlotGroup.MAINHAND)
+                .add(Attributes.ATTACK_SPEED, new AttributeModifier(Item.BASE_ATTACK_SPEED_ID,
+                        kind.speed, AttributeModifier.Operation.ADD_VALUE), EquipmentSlotGroup.MAINHAND)
+                .add(Attributes.ENTITY_INTERACTION_RANGE, new AttributeModifier(REACH_ID,
+                        kind.reach, AttributeModifier.Operation.ADD_VALUE), EquipmentSlotGroup.MAINHAND).build());
     }
 
     @Override
-    @SuppressWarnings("deprecation")
-    public Multimap<Attribute, AttributeModifier> getDefaultAttributeModifiers(EquipmentSlot slot) {
-        return slot == EquipmentSlot.MAINHAND ? mainHand.get() : super.getDefaultAttributeModifiers(slot);
-    }
-
-    @Override
-    public boolean canPerformAction(ItemStack stack, ToolAction toolAction) {
-        if (toolAction == ToolActions.SWORD_SWEEP && !kind.sweeps()) return false;
+    public boolean canPerformAction(ItemInstance stack, ItemAbility toolAction) {
+        if (toolAction == ItemAbilities.SWORD_SWEEP) return kind.sweeps();
         return super.canPerformAction(stack, toolAction);
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
-        tooltip.add(Component.translatable("tooltip.skycraft.polearm." + kind.id()).withStyle(net.minecraft.ChatFormatting.GRAY));
-        tooltip.add(Component.translatable(kind.twoHanded ? "tooltip.skycraft.polearm.two_handed" : "tooltip.skycraft.polearm.one_handed")
+    public void appendHoverText(ItemStack stack, net.minecraft.world.item.Item.TooltipContext context263, net.minecraft.world.item.component.TooltipDisplay display263, java.util.function.Consumer<Component> tooltip, TooltipFlag flag) {
+        tooltip.accept(Component.translatable("tooltip.skycraft.polearm." + kind.id()).withStyle(net.minecraft.ChatFormatting.GRAY));
+        tooltip.accept(Component.translatable(kind.twoHanded ? "tooltip.skycraft.polearm.two_handed" : "tooltip.skycraft.polearm.one_handed")
                 .withStyle(net.minecraft.ChatFormatting.DARK_GRAY));
     }
 }

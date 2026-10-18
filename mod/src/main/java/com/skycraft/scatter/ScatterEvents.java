@@ -11,9 +11,9 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.util.Arrays;
 
@@ -22,20 +22,20 @@ import java.util.Arrays;
  * experience, like the minor sites of the explore module). Only players in the overworld are checked, every two
  * seconds.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class ScatterEvents {
     private static final int INTERVAL = 40;
 
     private ScatterEvents() {}
 
     @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer player)) return;
+    public static void onPlayerTick(PlayerTickEvent.Post event) {
+        if (!(event.getEntity() instanceof ServerPlayer player)) return;
         if (player.isSpectator() || player.level().dimension() != Level.OVERWORLD) return;
         if ((player.tickCount + (player.getId() & 31) + 11) % INTERVAL != 0) return;
         if (!ScatterConfig.discoveries()) return;
         try {
-            ServerLevel level = player.serverLevel();
+            ServerLevel level = player.level();
             int x = player.getBlockX(), z = player.getBlockZ();
             for (Discoveries.Find f : Discoveries.within(level.getSeed(), x, z, 48)) {
                 int reach = f.type() == Discoveries.Type.HIDDEN_STASH ? 7 : f.type().radius + 6;
@@ -52,7 +52,7 @@ public final class ScatterEvents {
         if (level.getChunkSource().getChunkNow(f.chunkX(), f.chunkZ()) == null) return;
         PlayerData data = SkyData.get(player);
         CompoundTag mod = data.module("scatter");
-        long[] found = mod.getLongArray("found");
+        long[] found = mod.getLongArray("found").orElseGet(() -> new long[0]);
         long key = f.key() ^ ((long) f.type().ordinal() << 56);
         for (long k : found) if (k == key) return;
         long[] grown = Arrays.copyOf(found, found.length + 1);

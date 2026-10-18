@@ -73,13 +73,13 @@ public final class NpcPlacement {
                 || b instanceof net.minecraft.world.level.block.CraftingTableBlock
                 || b instanceof net.minecraft.world.level.block.SmithingTableBlock
                 || b instanceof net.minecraft.world.level.block.CartographyTableBlock
-                || b instanceof net.minecraft.world.level.block.FletchingTableBlock
+                || b == net.minecraft.world.level.block.Blocks.FLETCHING_TABLE
                 || b instanceof net.minecraft.world.level.block.LoomBlock
                 || b instanceof net.minecraft.world.level.block.StonecutterBlock
                 || b instanceof net.minecraft.world.level.block.GrindstoneBlock
                 || b instanceof net.minecraft.world.level.block.AnvilBlock
                 || b instanceof net.minecraft.world.level.block.LecternBlock
-                || b instanceof net.minecraft.world.level.block.EnchantmentTableBlock
+                || b instanceof net.minecraft.world.level.block.EnchantingTableBlock
                 || b instanceof net.minecraft.world.level.block.BrewingStandBlock
                 || b instanceof net.minecraft.world.level.block.AbstractCauldronBlock
                 || b instanceof net.minecraft.world.level.block.AbstractFurnaceBlock
@@ -162,7 +162,7 @@ public final class NpcPlacement {
     public static BlockPos anchorFor(NpcEntity npc, Activity activity) {
         BlockPos home = npc.getHome();
         if (home == null) return null;
-        if ("survivor".equals(npc.getPersistentData().getString(Housing.JOB_KEY))
+        if ("survivor".equals(npc.getPersistentData().getStringOr(Housing.JOB_KEY, ""))
                 || (com.skycraft.fire.aftermath.HelgenFolk.inHelgen(npc) && !com.skycraft.fire.aftermath.HelgenFolk.isHelgenMerchant(npc) && npc.role().civilian)) {
             BlockPos l = Workplaces.leisureFor(npc);
             return l != null && (!npc.level().isLoaded(l) || !isFireHazard(npc.level(), l)) ? l : home;
@@ -265,7 +265,7 @@ public final class NpcPlacement {
     public static void moveTo(NpcEntity npc, BlockPos spot) {
         npc.getNavigation().stop();
         npc.setDeltaMovement(net.minecraft.world.phys.Vec3.ZERO);
-        npc.moveTo(spot.getX() + 0.5, spot.getY(), spot.getZ() + 0.5, npc.getYRot(), 0f);
+        npc.snapTo(spot.getX() + 0.5, spot.getY(), spot.getZ() + 0.5, npc.getYRot(), 0f);
         npc.setYHeadRot(npc.getYRot());
     }
 
@@ -294,7 +294,7 @@ public final class NpcPlacement {
                             AABB at = new AABB(p.getX() + 0.5 - w, p.getY(), p.getZ() + 0.5 - w, p.getX() + 0.5 + w, p.getY() + h, p.getZ() + 0.5 + w);
                             if (!level.noCollision(npc, at)) continue;
                             if (pass == 0 && !level.getEntitiesOfClass(net.minecraft.world.entity.LivingEntity.class, at.inflate(0.35, 0.1, 0.35),
-                                    e -> e != npc && e.isAlive() && (e instanceof NpcEntity || e instanceof net.minecraft.world.entity.npc.AbstractVillager)).isEmpty()) {
+                                    e -> e != npc && e.isAlive() && (e instanceof NpcEntity || e instanceof net.minecraft.world.entity.npc.villager.AbstractVillager)).isEmpty()) {
                                 continue;
                             }
                             return p;

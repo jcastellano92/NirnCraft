@@ -1,0 +1,18 @@
+{
+  "type": "skycraft:dungeon",
+  "theme": "cave",
+  "kit": "bosmer",
+  "flavor": 6,
+  "place": {
+    "types": [
+      "dungeon_fixed"
+    ],
+    "variants": [
+      "root_hollow"
+    ]
+  },
+  "biomes": "#skycraft:dungeons/anywhere",
+  "step": "underground_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none"
+}

@@ -1,5 +1,9 @@
 package com.skycraft.economy;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+
 import com.google.gson.JsonArray;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonElement;
@@ -22,7 +26,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.RandomSource;
@@ -33,14 +37,12 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.functions.LootItemConditionalFunction;
-import net.minecraft.world.level.storage.loot.functions.LootItemFunctionType;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
-import net.minecraft.world.level.storage.loot.predicates.LootItemConditionType;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.registries.DeferredRegister;
+import java.util.function.Supplier;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -64,17 +66,17 @@ import java.util.Set;
  * </ul>
  */
 public final class EconomyLoot {
-    public static final DeferredRegister<LootItemFunctionType> FUNCTIONS = DeferredRegister.create(Registries.LOOT_FUNCTION_TYPE, Skycraft.MODID);
-    public static final DeferredRegister<LootItemConditionType> CONDITIONS = DeferredRegister.create(Registries.LOOT_CONDITION_TYPE, Skycraft.MODID);
+    public static final DeferredRegister<MapCodec<? extends net.minecraft.world.level.storage.loot.functions.LootItemFunction>> FUNCTIONS = DeferredRegister.create(Registries.LOOT_FUNCTION_TYPE, Skycraft.MODID);
+    public static final DeferredRegister<MapCodec<? extends LootItemCondition>> CONDITIONS = DeferredRegister.create(Registries.LOOT_CONDITION_TYPE, Skycraft.MODID);
 
-    public static final RegistryObject<LootItemConditionType> REGION = CONDITIONS.register("region",
-            () -> new LootItemConditionType(new RegionCondition.Serializer()));
-    public static final RegistryObject<LootItemFunctionType> REGIONAL_TAG = FUNCTIONS.register("regional_tag",
-            () -> new LootItemFunctionType(new RegionalTag.Serializer()));
-    public static final RegistryObject<LootItemFunctionType> LEVELED_TOME = FUNCTIONS.register("leveled_tome",
-            () -> new LootItemFunctionType(new LeveledTome.Serializer()));
-    public static final RegistryObject<LootItemFunctionType> SKYRIM_POTION = FUNCTIONS.register("skyrim_potion",
-            () -> new LootItemFunctionType(new SkyrimPotion.Serializer()));
+    public static final Supplier<MapCodec<? extends LootItemCondition>> REGION = CONDITIONS.register("region",
+            () -> RegionCondition.MAP_CODEC);
+    public static final Supplier<MapCodec<? extends LootItemConditionalFunction>> REGIONAL_TAG = FUNCTIONS.register("regional_tag",
+            () -> RegionalTag.MAP_CODEC);
+    public static final Supplier<MapCodec<? extends LootItemConditionalFunction>> LEVELED_TOME = FUNCTIONS.register("leveled_tome",
+            () -> LeveledTome.MAP_CODEC);
+    public static final Supplier<MapCodec<? extends LootItemConditionalFunction>> SKYRIM_POTION = FUNCTIONS.register("skyrim_potion",
+            () -> SkyrimPotion.MAP_CODEC);
 
     private EconomyLoot() {}
 
@@ -88,9 +90,9 @@ public final class EconomyLoot {
     /** The region the loot is generated in (null without an origin or region data). */
     @Nullable
     public static Region regionOf(LootContext context) {
-        Vec3 origin = context.getParamOrNull(LootContextParams.ORIGIN);
-        if (origin == null && context.getParamOrNull(LootContextParams.THIS_ENTITY) != null) {
-            origin = context.getParamOrNull(LootContextParams.THIS_ENTITY).position();
+        Vec3 origin = context.getOptional(LootContextParams.ORIGIN);
+        if (origin == null && context.getOptional(LootContextParams.THIS_ENTITY) != null) {
+            origin = context.getOptional(LootContextParams.THIS_ENTITY).position();
         }
         return origin == null ? null : regionAt(context.getLevel(), BlockPos.containing(origin));
     }
@@ -105,7 +107,7 @@ public final class EconomyLoot {
     }
 
     public static TagKey<Item> itemTag(String id) {
-        return TagKey.create(Registries.ITEM, new ResourceLocation(id));
+        return TagKey.create(Registries.ITEM, Identifier.parse(id));
     }
 
     /** A random item of {@code #<base>/<key>}, else of {@code #<base>/skyrim}; null if both are empty. */
@@ -160,7 +162,7 @@ public final class EconomyLoot {
         int total = 0;
         for (Spell spell : Spells.all()) {
             if (!schools.isEmpty() && !schools.contains(spell.school)) continue;
-            RegistryObject<Item> ro = MagicRegistry.TOMES.get(spell.id);
+            Supplier<Item> ro = MagicRegistry.TOMES.get(spell.id);
             if (ro == null) continue;
             boolean ok;
             if (vendor) {
@@ -237,7 +239,7 @@ public final class EconomyLoot {
         }
 
         @Override
-        public LootItemConditionType getType() {
+        public MapCodec<? extends LootItemCondition> codec() {
             return REGION.get();
         }
 
@@ -249,19 +251,7 @@ public final class EconomyLoot {
                     || regions.contains(region.id());
         }
 
-        public static class Serializer implements net.minecraft.world.level.storage.loot.Serializer<RegionCondition> {
-            @Override
-            public void serialize(JsonObject json, RegionCondition c, JsonSerializationContext ctx) {
-                json.add("provinces", array(c.provinces));
-                json.add("gear_keys", array(c.gearKeys));
-                json.add("regions", array(c.regions));
-            }
-
-            @Override
-            public RegionCondition deserialize(JsonObject json, JsonDeserializationContext ctx) {
-                return new RegionCondition(strings(json, "provinces"), strings(json, "gear_keys"), strings(json, "regions"));
-            }
-        }
+        public static final MapCodec<RegionCondition> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> i.group(Codec.STRING.listOf().xmap(v -> (Set<String>) new LinkedHashSet<>(v.stream().map(s -> s.toLowerCase(Locale.ROOT)).toList()), v -> new java.util.ArrayList<>(v)).optionalFieldOf("provinces", Set.of()).forGetter(f -> f.provinces), Codec.STRING.listOf().xmap(v -> (Set<String>) new LinkedHashSet<>(v.stream().map(s -> s.toLowerCase(Locale.ROOT)).toList()), v -> new java.util.ArrayList<>(v)).optionalFieldOf("gear_keys", Set.of()).forGetter(f -> f.gearKeys), Codec.STRING.listOf().xmap(v -> (Set<String>) new LinkedHashSet<>(v.stream().map(s -> s.toLowerCase(Locale.ROOT)).toList()), v -> new java.util.ArrayList<>(v)).optionalFieldOf("regions", Set.of()).forGetter(f -> f.regions)).apply(i, RegionCondition::new));
     }
 
     private static JsonArray array(Set<String> values) {
@@ -283,13 +273,13 @@ public final class EconomyLoot {
     public static final class RegionalTag extends LootItemConditionalFunction {
         private final String tag;
 
-        RegionalTag(LootItemCondition[] conditions, String tag) {
+        RegionalTag(java.util.Optional<net.minecraft.core.Holder<LootItemCondition>> conditions, String tag) {
             super(conditions);
             this.tag = tag;
         }
 
         @Override
-        public LootItemFunctionType getType() {
+        public MapCodec<? extends LootItemConditionalFunction> codec() {
             return REGIONAL_TAG.get();
         }
 
@@ -297,22 +287,11 @@ public final class EconomyLoot {
         protected ItemStack run(ItemStack stack, LootContext context) {
             Item item = randomRegional(tag, RegionalGear.gearKey(regionOf(context)), context.getRandom());
             if (item == null) return stack;
-            ItemStack out = new ItemStack(item, Math.max(1, Math.min(item.getMaxStackSize(), stack.getCount())));
+            ItemStack out = new ItemStack(item, Math.max(1, Math.min(item.getMaxStackSize(new ItemStack(item)), stack.getCount())));
             return out;
         }
 
-        public static class Serializer extends LootItemConditionalFunction.Serializer<RegionalTag> {
-            @Override
-            public void serialize(JsonObject json, RegionalTag fn, JsonSerializationContext ctx) {
-                super.serialize(json, fn, ctx);
-                json.addProperty("tag", fn.tag);
-            }
-
-            @Override
-            public RegionalTag deserialize(JsonObject json, JsonDeserializationContext ctx, LootItemCondition[] conditions) {
-                return new RegionalTag(conditions, GsonHelper.getAsString(json, "tag"));
-            }
-        }
+        public static final MapCodec<RegionalTag> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> commonFields(i).and(Codec.STRING.fieldOf("tag").forGetter(f -> f.tag)).apply(i, RegionalTag::new));
     }
 
     // ================================================================== function: skycraft:leveled_tome
@@ -320,13 +299,13 @@ public final class EconomyLoot {
     public static final class LeveledTome extends LootItemConditionalFunction {
         private final Set<School> schools;
 
-        LeveledTome(LootItemCondition[] conditions, Set<School> schools) {
+        LeveledTome(java.util.Optional<net.minecraft.core.Holder<LootItemCondition>> conditions, Set<School> schools) {
             super(conditions);
             this.schools = schools;
         }
 
         @Override
-        public LootItemFunctionType getType() {
+        public MapCodec<? extends LootItemConditionalFunction> codec() {
             return LEVELED_TOME.get();
         }
 
@@ -336,28 +315,7 @@ public final class EconomyLoot {
             return out.isEmpty() ? stack : out;
         }
 
-        public static class Serializer extends LootItemConditionalFunction.Serializer<LeveledTome> {
-            @Override
-            public void serialize(JsonObject json, LeveledTome fn, JsonSerializationContext ctx) {
-                super.serialize(json, fn, ctx);
-                Set<String> ids = new LinkedHashSet<>();
-                for (School s : fn.schools) ids.add(s.name().toLowerCase(Locale.ROOT));
-                if (!ids.isEmpty()) json.add("schools", array(ids));
-            }
-
-            @Override
-            public LeveledTome deserialize(JsonObject json, JsonDeserializationContext ctx, LootItemCondition[] conditions) {
-                Set<School> schools = EnumSet.noneOf(School.class);
-                for (String id : strings(json, "schools")) {
-                    try {
-                        schools.add(School.valueOf(id.toUpperCase(Locale.ROOT)));
-                    } catch (IllegalArgumentException e) {
-                        throw new com.google.gson.JsonSyntaxException("Unknown school '" + id + "'");
-                    }
-                }
-                return new LeveledTome(conditions, schools);
-            }
-        }
+        public static final MapCodec<LeveledTome> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> commonFields(i).and(com.skycraft.platform.SkyCodecs.enumNames(School.class).listOf().xmap(v -> (Set<School>) new java.util.HashSet<>(v), v -> new java.util.ArrayList<>(v)).optionalFieldOf("schools", Set.of()).forGetter(f -> f.schools)).apply(i, LeveledTome::new));
     }
 
     // ================================================================== function: skycraft:skyrim_potion
@@ -365,13 +323,13 @@ public final class EconomyLoot {
     public static final class SkyrimPotion extends LootItemConditionalFunction {
         private final boolean poison;
 
-        SkyrimPotion(LootItemCondition[] conditions, boolean poison) {
+        SkyrimPotion(java.util.Optional<net.minecraft.core.Holder<LootItemCondition>> conditions, boolean poison) {
             super(conditions);
             this.poison = poison;
         }
 
         @Override
-        public LootItemFunctionType getType() {
+        public MapCodec<? extends LootItemConditionalFunction> codec() {
             return SKYRIM_POTION.get();
         }
 
@@ -382,17 +340,6 @@ public final class EconomyLoot {
             return out;
         }
 
-        public static class Serializer extends LootItemConditionalFunction.Serializer<SkyrimPotion> {
-            @Override
-            public void serialize(JsonObject json, SkyrimPotion fn, JsonSerializationContext ctx) {
-                super.serialize(json, fn, ctx);
-                json.addProperty("poison", fn.poison);
-            }
-
-            @Override
-            public SkyrimPotion deserialize(JsonObject json, JsonDeserializationContext ctx, LootItemCondition[] conditions) {
-                return new SkyrimPotion(conditions, GsonHelper.getAsBoolean(json, "poison", false));
-            }
-        }
+        public static final MapCodec<SkyrimPotion> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> commonFields(i).and(Codec.BOOL.optionalFieldOf("poison", false).forGetter(f -> f.poison)).apply(i, SkyrimPotion::new));
     }
 }

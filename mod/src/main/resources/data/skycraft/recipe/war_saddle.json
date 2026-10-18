@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "L": "minecraft:leather",
+    "S": "minecraft:saddle",
+    "I": "skycraft:steel_ingot"
+  },
+  "pattern": [
+    "III",
+    "LSL"
+  ],
+  "result": {
+    "id": "skycraft:war_saddle"
+  }
+}

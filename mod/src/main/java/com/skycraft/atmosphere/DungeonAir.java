@@ -5,27 +5,26 @@ import com.skycraft.dungeons.world.CaveRoster;
 import com.skycraft.dungeons.world.DungeonPiece;
 import com.skycraft.dungeons.world.Theme;
 import com.skycraft.network.SkyNetwork;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.chunk.LevelChunk;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.level.ChunkEvent;
-import net.minecraftforge.event.level.LevelEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.network.NetworkDirection;
-import net.minecraftforge.network.NetworkEvent;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+import net.neoforged.neoforge.event.level.ChunkEvent;
+import net.neoforged.neoforge.event.level.LevelEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import com.skycraft.platform.Sides;
+import net.neoforged.fml.common.Mod;
+import net.minecraft.network.protocol.PacketFlow;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Supplier;
 
 /** Atmosphere follows actual saved dungeon pieces, never the darkness under an arbitrary roof.
  * Chunk lifecycle supplies the index; player updates only look up metadata, without loading chunks. */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class DungeonAir {
     public record Volume(int x0, int y0, int z0, int x1, int y1, int z1, int floor, int style) {
         public double distanceSquared(double x, double y, double z) {
@@ -63,14 +62,14 @@ public final class DungeonAir {
             volumes.add(new Volume(b.minX(), b.minY(), b.minZ(), b.maxX()+1, b.maxY()+1, b.maxZ()+1, dp.floor, style));
         }
         if (!volumes.isEmpty())
-            INDEX.computeIfAbsent(level, k -> new ConcurrentHashMap<>()).put(chunk.getPos().toLong(), List.copyOf(volumes));
+            INDEX.computeIfAbsent(level, k -> new ConcurrentHashMap<>()).put(chunk.getPos().pack(), List.copyOf(volumes));
     }
 
     @SubscribeEvent
     public static void unloaded(ChunkEvent.Unload event) {
         if (event.getLevel() instanceof ServerLevel level) {
             var index = INDEX.get(level);
-            if (index != null) index.remove(event.getChunk().getPos().toLong());
+            if (index != null) index.remove(event.getChunk().getPos().pack());
         }
     }
 
@@ -80,26 +79,26 @@ public final class DungeonAir {
     }
 
     @SubscribeEvent
-    public static void logout(net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedOutEvent event) {
+    public static void logout(net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerLoggedOutEvent event) {
         SENT.remove(event.getEntity().getUUID());
     }
 
     @SubscribeEvent
-    public static void playerTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer player)
+    public static void playerTick(PlayerTickEvent.Post event) {
+        if (!(event.getEntity() instanceof ServerPlayer player)
                 || (player.tickCount + player.getId()) % 10 != 0) return;
         sync(player, false);
     }
 
     /** Explicit capture handshake; runs on the server thread and never requests terrain. */
     public static void sync(ServerPlayer player, boolean force) {
-        var index = INDEX.get(player.serverLevel());
+        var index = INDEX.get(player.level());
         List<Volume> nearby = new ArrayList<>();
         if (index != null) {
-            int cx = player.chunkPosition().x, cz = player.chunkPosition().z;
+            int cx = player.chunkPosition().x(), cz = player.chunkPosition().z();
             // Structure starts are at most eight chunks from their pieces. Metadata only.
             for (int z = cz-16; z <= cz+16; z++) for (int x = cx-16; x <= cx+16; x++) {
-                var list = index.get(net.minecraft.world.level.ChunkPos.asLong(x, z));
+                var list = index.get(net.minecraft.world.level.ChunkPos.pack(x, z));
                 if (list != null) for (var v : list)
                     if (v.distanceSquared(player.getX(), player.getEyeY(), player.getZ()) < 160*160) nearby.add(v);
             }
@@ -107,18 +106,18 @@ public final class DungeonAir {
         nearby = new ArrayList<>(VolumeBlend.mergeAligned(nearby));
         nearby.sort(Comparator.comparingDouble(v -> v.distanceSquared(player.getX(), player.getEyeY(), player.getZ())));
         if (nearby.size() > 32) nearby = new ArrayList<>(nearby.subList(0, 32));
-        int hash = Objects.hash(player.level().dimension().location(), nearby);
-        var sent = new Sent(hash, player.chunkPosition().x, player.chunkPosition().z);
+        int hash = Objects.hash(player.level().dimension().identifier(), nearby);
+        var sent = new Sent(hash, player.chunkPosition().x(), player.chunkPosition().z());
         if (force || !Objects.equals(SENT.put(player.getUUID(), sent), sent))
-            SkyNetwork.sendToPlayer(player, new Sync(player.level().dimension().location().toString(), nearby,
+            SkyNetwork.sendToPlayer(player, new Sync(player.level().dimension().identifier().toString(), nearby,
                     sent.chunkX, sent.chunkZ));
     }
 
     public static void register() {
-        SkyNetwork.register(Sync.class, NetworkDirection.PLAY_TO_CLIENT, Sync::encode, Sync::decode, Sync::handle);
+        SkyNetwork.register(Sync.class, PacketFlow.CLIENTBOUND, Sync::encode, Sync::decode, Sync::handle);
     }
     public record Sync(String dimension, List<Volume> volumes, int chunkX, int chunkZ) {
-        static void encode(Sync m, FriendlyByteBuf b) {
+        static void encode(Sync m, RegistryFriendlyByteBuf b) {
             b.writeUtf(m.dimension, 128); b.writeInt(m.chunkX); b.writeInt(m.chunkZ); b.writeVarInt(m.volumes.size());
             for (var v : m.volumes) {
                 b.writeInt(v.x0); b.writeInt(v.y0); b.writeInt(v.z0);
@@ -126,7 +125,7 @@ public final class DungeonAir {
                 b.writeInt(v.floor); b.writeByte(v.style);
             }
         }
-        static Sync decode(FriendlyByteBuf b) {
+        static Sync decode(RegistryFriendlyByteBuf b) {
             String dimension = b.readUtf(128); int x=b.readInt(), z=b.readInt(), count = b.readVarInt();
             if (count < 0 || count > 32) throw new IllegalArgumentException("Dungeon atmosphere volume count");
             List<Volume> volumes = new ArrayList<>(count);
@@ -134,9 +133,8 @@ public final class DungeonAir {
                     b.readInt(), b.readInt(), b.readInt(), b.readInt(), b.readUnsignedByte()));
             return new Sync(dimension, List.copyOf(volumes), x, z);
         }
-        static void handle(Sync m, Supplier<NetworkEvent.Context> ctx) {
-            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> com.skycraft.atmosphere.client.InteriorAtmosphere.receive(m));
-            ctx.get().setPacketHandled(true);
+        static void handle(Sync m, IPayloadContext ctx) {
+            Sides.runOn(Dist.CLIENT, () -> () -> com.skycraft.atmosphere.client.InteriorAtmosphere.receive(m));
         }
     }
 }

@@ -16,22 +16,22 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 /**
  * {@code /skycraft-protect} (operators): {@code status}, {@code bypass} (toggle for yourself), {@code check [x y z]}
  * (what the rules say about a block, and why) and {@code selftest}.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class ProtectCommands {
     private ProtectCommands() {}
 
     @SubscribeEvent
     public static void registerProtectCommands(RegisterCommandsEvent event) {
         CommandDispatcher<CommandSourceStack> d = event.getDispatcher();
-        d.register(Commands.literal("skycraft-protect").requires(s -> s.hasPermission(2))
+        d.register(Commands.literal("skycraft-protect").requires(s -> s.permissions().hasPermission(net.minecraft.server.permissions.Permissions.COMMANDS_GAMEMASTER))
                 .then(Commands.literal("status").executes(ProtectCommands::status))
                 .then(Commands.literal("bypass").executes(ProtectCommands::bypass))
                 .then(Commands.literal("check").executes(c -> check(c, null))
@@ -83,7 +83,7 @@ public final class ProtectCommands {
         out(src, claim == null ? "Homestead: none" : "Homestead: " + claim.getOwnerName() + "'s"
                 + (player != null ? (claim.canBuild(player) ? " (you may build)" : " (you may not build)") : ""));
         out(src, "Footprint: " + Footprints.at(level, pos) + (Footprints.inStructure(level, pos, 1) ? " (inside a structure piece)" : ""));
-        out(src, "Class: " + (Protect.isAmbientPlant(state) ? "plant" : state.is(net.minecraftforge.common.Tags.Blocks.ORES) ? "ore"
+        out(src, "Class: " + (Protect.isAmbientPlant(state) ? "plant" : state.is(net.neoforged.neoforge.common.Tags.Blocks.ORES) ? "ore"
                 : Protect.isTree(state) ? "tree" : Protect.isTerrain(state) ? "terrain" : "built/other")
                 + (com.skycraft.dig.PlacedBlocks.isPlayerPlaced(level, pos) ? ", player-placed" : ""));
         Protect.Decision b = Protect.checkBreak(player, level, pos, state);

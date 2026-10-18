@@ -1,0 +1,31 @@
+{
+  "replace": false,
+  "values": [
+    "skycraft:corundum_ore",
+    "skycraft:orichalcum_ore",
+    "skycraft:moonstone_ore",
+    "skycraft:malachite_ore",
+    "skycraft:quicksilver_ore",
+    "skycraft:ebony_ore",
+    "skycraft:silver_ore",
+    "skycraft:deepslate_corundum_ore",
+    "skycraft:deepslate_orichalcum_ore",
+    "skycraft:deepslate_moonstone_ore",
+    "skycraft:deepslate_malachite_ore",
+    "skycraft:deepslate_quicksilver_ore",
+    "skycraft:deepslate_ebony_ore",
+    "skycraft:deepslate_silver_ore",
+    "minecraft:ancient_debris",
+    "minecraft:coal_ore",
+    "minecraft:deepslate_coal_ore",
+    "minecraft:deepslate_diamond_ore",
+    "minecraft:deepslate_emerald_ore",
+    "minecraft:deepslate_gold_ore",
+    "minecraft:deepslate_iron_ore",
+    "minecraft:diamond_ore",
+    "minecraft:emerald_ore",
+    "minecraft:gold_ore",
+    "minecraft:iron_ore",
+    "minecraft:nether_quartz_ore"
+  ]
+}

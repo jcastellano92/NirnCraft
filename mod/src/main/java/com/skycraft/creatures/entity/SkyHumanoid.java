@@ -19,7 +19,7 @@ import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
@@ -32,7 +32,7 @@ import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.RangedAttackMob;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.ItemStack;
@@ -57,9 +57,9 @@ public abstract class SkyHumanoid extends Monster implements AnimatedCreature, R
     }
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        this.entityData.define(SKIN, 0);
+    protected void defineSynchedData(net.minecraft.network.syncher.SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(SKIN, 0);
     }
 
     @Override
@@ -70,7 +70,7 @@ public abstract class SkyHumanoid extends Monster implements AnimatedCreature, R
         this.goalSelector.addGoal(8, new RandomLookAroundGoal(this));
         this.targetSelector.addGoal(1, new HurtByTargetGoal(this).setAlertOthers());
         this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, 10, false, false,
-                p -> !(p instanceof Player pl) || detects(pl)));
+                (p, targetLevel263) -> !(p instanceof Player pl) || detects(pl)));
         this.targetSelector.addGoal(3, new com.skycraft.creatures.ai.SmartPartyTargetGoal(this));
     }
 
@@ -101,9 +101,9 @@ public abstract class SkyHumanoid extends Monster implements AnimatedCreature, R
 
     @Override
     @Nullable
-    public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, MobSpawnType reason,
-                                        @Nullable SpawnGroupData data, @Nullable CompoundTag tag) {
-        data = super.finalizeSpawn(level, difficulty, reason, data, tag);
+    public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, EntitySpawnReason reason,
+                                        @Nullable SpawnGroupData data) {
+        data = super.finalizeSpawn(level, difficulty, reason, data);
         initialize(level.getRandom(), difficulty);
         return data;
     }
@@ -115,14 +115,14 @@ public abstract class SkyHumanoid extends Monster implements AnimatedCreature, R
     @Override
     public void tick() {
         super.tick();
-        if (!this.level().isClientSide && !initialized) {
-            initialize(this.getRandom(), this.level().getCurrentDifficultyAt(this.blockPosition()));
+        if (!this.level().isClientSide() && !initialized) {
+            initialize(this.getRandom(), ((net.minecraft.server.level.ServerLevel) this.level()).getCurrentDifficultyAt(this.blockPosition()));
         }
     }
 
     @Override
-    protected void customServerAiStep() {
-        super.customServerAiStep();
+    protected void customServerAiStep(net.minecraft.server.level.ServerLevel serverLevel263) {
+        super.customServerAiStep(serverLevel263);
         LivingEntity target = this.getTarget();
         if (target instanceof Player player) {
             if (player.isCreative() || player.isSpectator() || !player.isAlive()) {
@@ -177,7 +177,7 @@ public abstract class SkyHumanoid extends Monster implements AnimatedCreature, R
 
     /** Swaps between the bow and the melee goal depending on the weapon in hand. */
     public void reassessWeaponGoal() {
-        if (this.level() == null || this.level().isClientSide || bowGoal == null || meleeGoal == null) return;
+        if (this.level() == null || this.level().isClientSide() || bowGoal == null || meleeGoal == null) return;
         this.goalSelector.removeGoal(this.meleeGoal);
         this.goalSelector.removeGoal(this.bowGoal);
         if (isArcher()) {
@@ -191,15 +191,15 @@ public abstract class SkyHumanoid extends Monster implements AnimatedCreature, R
     @Override
     public void setItemSlot(EquipmentSlot slot, ItemStack stack) {
         super.setItemSlot(slot, stack);
-        if (slot == EquipmentSlot.MAINHAND && this.level() != null && !this.level().isClientSide) reassessWeaponGoal();
+        if (slot == EquipmentSlot.MAINHAND && this.level() != null && !this.level().isClientSide()) reassessWeaponGoal();
     }
 
     @Override
     public void performRangedAttack(LivingEntity target, float velocity) {
         ItemStack bow = this.getMainHandItem();
         ItemStack ammo = this.getProjectile(bow);
-        AbstractArrow arrow = ProjectileUtil.getMobArrow(this, ammo, velocity);
-        if (bow.getItem() instanceof BowItem bowItem) arrow = bowItem.customArrow(arrow);
+        AbstractArrow arrow = ProjectileUtil.getMobArrow(this, ammo, velocity, bow);
+        if (bow.getItem() instanceof BowItem bowItem) arrow = bowItem.customArrow(arrow, ammo, bow);
         double dx = target.getX() - this.getX();
         double dy = target.getY(0.3333333333333333D) - arrow.getY();
         double dz = target.getZ() - this.getZ();
@@ -212,17 +212,23 @@ public abstract class SkyHumanoid extends Monster implements AnimatedCreature, R
     // ------------------------------------------------------------------ save
 
     @Override
-    public void addAdditionalSaveData(CompoundTag tag) {
-        super.addAdditionalSaveData(tag);
+    public void addAdditionalSaveData(net.minecraft.world.level.storage.ValueOutput output263) {
+        super.addAdditionalSaveData(output263);
+        net.minecraft.nbt.CompoundTag tag = new net.minecraft.nbt.CompoundTag();
+        
         tag.putInt("Skin", getSkin());
         tag.putBoolean("SkycraftInit", initialized);
+    
+        output263.store(tag);
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag tag) {
-        super.readAdditionalSaveData(tag);
-        setSkin(tag.getInt("Skin"));
-        initialized = tag.getBoolean("SkycraftInit");
+    public void readAdditionalSaveData(net.minecraft.world.level.storage.ValueInput input263) {
+        super.readAdditionalSaveData(input263);
+        net.minecraft.nbt.CompoundTag tag = com.skycraft.platform.ValueTags.read(input263 , "Skin", "SkycraftInit");
+        
+        setSkin(tag.getIntOr("Skin",0));
+        initialized = tag.getBooleanOr("SkycraftInit",false);
         reassessWeaponGoal();
     }
 
@@ -242,8 +248,9 @@ public abstract class SkyHumanoid extends Monster implements AnimatedCreature, R
 
     /** Every melee swing plays an attack animation (alternating blows). */
     @Override
-    public void swing(net.minecraft.world.InteractionHand hand) {
-        super.swing(hand);
-        if (!this.level().isClientSide) CreatureAnims.play(this, this.getRandom().nextInt(3) == 0 ? AnimSlot.ATTACK2 : AnimSlot.ATTACK);
+    public boolean swing(net.minecraft.world.InteractionHand hand, net.minecraft.world.item.component.SwingAnimation animation263, boolean updateSelf263) {
+        boolean swung263 = super.swing(hand, animation263, updateSelf263);
+        if (!this.level().isClientSide()) CreatureAnims.play(this, this.getRandom().nextInt(3) == 0 ? AnimSlot.ATTACK2 : AnimSlot.ATTACK);
+        return swung263;
     }
 }

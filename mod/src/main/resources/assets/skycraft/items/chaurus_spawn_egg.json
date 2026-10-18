@@ -1,0 +1,16 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "skycraft:item/chaurus_spawn_egg",
+    "tints": [
+      {
+        "type": "minecraft:constant",
+        "value": 3815968
+      },
+      {
+        "type": "minecraft:constant",
+        "value": 11569722
+      }
+    ]
+  }
+}

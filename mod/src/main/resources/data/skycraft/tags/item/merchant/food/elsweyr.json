@@ -1,0 +1,26 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "skycraft:moon_sugar",
+      "required": false
+    },
+    {
+      "id": "skycraft:skooma",
+      "required": false
+    },
+    "minecraft:sugar",
+    {
+      "id": "skycraft:elsweyr_fondue",
+      "required": false
+    },
+    {
+      "id": "skycraft:spiced_wine",
+      "required": false
+    },
+    {
+      "id": "skycraft:honey_nut_treat",
+      "required": false
+    }
+  ]
+}

@@ -1,0 +1,60 @@
+{
+  "type": "skycraft:random_patch",
+  "config": {
+    "tries": 48,
+    "xz_spread": 7,
+    "y_spread": 3,
+    "feature": {
+      "feature": {
+        "type": "minecraft:simple_block",
+        "to_place": {
+          "type": "minecraft:weighted",
+          "entries": [
+            {
+              "data": "skycraft:mania_bloom",
+              "weight": 4
+            },
+            {
+              "data": "minecraft:allium",
+              "weight": 2
+            },
+            {
+              "data": "minecraft:pink_tulip",
+              "weight": 2
+            },
+            {
+              "data": "minecraft:cornflower",
+              "weight": 2
+            },
+            {
+              "data": "minecraft:orange_tulip",
+              "weight": 2
+            },
+            {
+              "data": "minecraft:blue_orchid",
+              "weight": 1
+            }
+          ]
+        }
+      },
+      "placement": [
+        {
+          "type": "minecraft:block_predicate_filter",
+          "predicate": {
+            "type": "minecraft:all_of",
+            "predicates": [
+              {
+                "type": "minecraft:matching_blocks",
+                "blocks": "minecraft:air"
+              },
+              {
+                "type": "minecraft:would_survive",
+                "state": "minecraft:allium"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

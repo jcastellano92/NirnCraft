@@ -325,7 +325,7 @@ final class Formations {
                 for (int dy = 1; dy <= 3; dy++) {
                     int sx = lx + (int) Math.round(Math.cos(la) * 1), sz = lz + (int) Math.round(Math.sin(la) * 1);
                     if (s.solidAt(sx, y - dy, sz)) {
-                        s.set(sx, y - dy, sz, Blocks.WHITE_TERRACOTTA);
+                        s.set(sx, y - dy, sz, com.skycraft.worldgen.VanillaBlocks.WHITE_TERRACOTTA);
                         break;
                     }
                 }
@@ -463,7 +463,7 @@ final class Formations {
                     // platform body down to the ground
                     for (int yy = y - 3; yy <= y; yy++) {
                         if (yy > g - 3 && !s.solidAt(x, yy, z) || yy == y) s.set(x, yy, z, yy == y ? (d > R - 1.6 ? rim.defaultBlockState() : Blocks.WATER.defaultBlockState())
-                                : (s.chance(x * 3 + yy + z, 0.2) ? Blocks.YELLOW_TERRACOTTA.defaultBlockState() : rim.defaultBlockState()));
+                                : (s.chance(x * 3 + yy + z, 0.2) ? com.skycraft.worldgen.VanillaBlocks.YELLOW_TERRACOTTA.defaultBlockState() : rim.defaultBlockState()));
                     }
                     if (d <= R - 1.6) {
                         s.set(x, y - 1, z, s.chance(x * 5 + z, 0.1) ? Blocks.MAGMA_BLOCK.defaultBlockState() : Blocks.CLAY.defaultBlockState());
@@ -576,7 +576,7 @@ final class Formations {
         double a = s.r.nextDouble() * Math.PI;
         double ux = Math.cos(a), uz = Math.sin(a);
         double L = 14 + s.size * 5;
-        Block shard = s.chance(1, 0.5) ? Blocks.TINTED_GLASS : Blocks.BLACK_STAINED_GLASS;
+        Block shard = s.chance(1, 0.5) ? Blocks.TINTED_GLASS : com.skycraft.worldgen.VanillaBlocks.BLACK_STAINED_GLASS;
         for (int dx = -20; dx <= 20; dx++) {
             for (int dz = -20; dz <= 20; dz++) {
                 if (!s.within(dx, dz)) continue;
@@ -654,7 +654,7 @@ final class Formations {
                 // a small arch notch at the foot
                 for (int dy = 0; dy <= 2; dy++) s.air(cx, g + 1 + dy, cz);
             }
-            s.set(cx, g + h + 1, cz, s.chance(i + 4, 0.5) ? Blocks.WHITE_TERRACOTTA.defaultBlockState() : s.rock.cap().state(3));
+            s.set(cx, g + h + 1, cz, s.chance(i + 4, 0.5) ? com.skycraft.worldgen.VanillaBlocks.WHITE_TERRACOTTA.defaultBlockState() : s.rock.cap().state(3));
         }
         s.rubbleRing(0, 0, 16, 18);
         for (int i = 0; i < 6; i++) s.lying(s.vary(60 + i, -14, 14), 1, s.vary(80 + i, -14, 14), new ItemStack(Items.FEATHER));

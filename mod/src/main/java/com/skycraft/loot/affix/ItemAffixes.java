@@ -27,19 +27,17 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.CrossbowItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.ShieldItem;
-import net.minecraft.world.item.TieredItem;
 import net.minecraft.world.item.TridentItem;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
@@ -47,7 +45,7 @@ import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.InputStream;
@@ -376,18 +374,22 @@ public final class ItemAffixes {
         if (stack == null || stack.isEmpty() || stack.getMaxStackSize() != 1) return false;
         Item item = stack.getItem();
         if (item == Items.AIR || item instanceof ArtifactItem) return false;
-        if (stack.getTag() != null && stack.getTag().contains("skycraft_collectible")) return false;
+        if (com.skycraft.inventory.ItemData.custom(stack) != null && com.skycraft.inventory.ItemData.custom(stack).contains("skycraft_collectible")) return false;
         return item instanceof SkyMeleeItem
                 || item instanceof SkyAxeItem
                 || item instanceof SkyBowItem
                 || item instanceof SkyCrossbowItem
                 || item instanceof PolearmItem
-                || item instanceof ArmorItem
+                || com.skycraft.inventory.EquipmentData.isArmor(stack)
                 || item instanceof ShieldItem
                 || item instanceof SkyShieldItem
                 || item instanceof StaffItem
                 || item instanceof EnchantedStaffItem
-                || item instanceof TieredItem
+                || stack.is(net.minecraft.tags.ItemTags.SWORDS)
+                || stack.is(net.minecraft.tags.ItemTags.AXES)
+                || stack.is(net.minecraft.tags.ItemTags.PICKAXES)
+                || stack.is(net.minecraft.tags.ItemTags.SHOVELS)
+                || stack.is(net.minecraft.tags.ItemTags.HOES)
                 || item instanceof BowItem
                 || item instanceof CrossbowItem
                 || item instanceof TridentItem;
@@ -421,7 +423,7 @@ public final class ItemAffixes {
     }
 
     public static String inferCulture(ItemStack stack, String regionId) {
-        ResourceLocation key = ForgeRegistries.ITEMS.getKey(stack.getItem());
+        Identifier key = BuiltInRegistries.ITEM.getKey(stack.getItem());
         String path = key != null ? key.getPath().toLowerCase(Locale.ROOT) : "";
         if (path.contains("dwarven") || path.contains("dwemer")) return "dwemer";
         if (path.contains("orcish") || path.contains("orichalcum")) return "orc";
@@ -465,8 +467,8 @@ public final class ItemAffixes {
         Region region = EconomyLoot.regionOf(context);
         String regionId = region != null ? region.id() : "skyrim/whiterun";
         String sourceKind;
-        if (context.getParamOrNull(LootContextParams.DAMAGE_SOURCE) != null
-                || context.getParamOrNull(LootContextParams.THIS_ENTITY) instanceof Mob) {
+        if (context.getOptional(LootContextParams.DAMAGE_SOURCE) != null
+                || context.getOptional(LootContextParams.THIS_ENTITY) instanceof Mob) {
             sourceKind = "corpse";
         } else if (qualityChance >= 0.32f) {
             sourceKind = "boss";
@@ -478,7 +480,7 @@ public final class ItemAffixes {
         if (!places.isEmpty()) {
             placeId = places.get(0).id();
         } else {
-            Vec3 origin = context.getParamOrNull(LootContextParams.ORIGIN);
+            Vec3 origin = context.getOptional(LootContextParams.ORIGIN);
             if (origin != null) {
                 BlockPos pos = BlockPos.containing(origin);
                 placeId = regionId + "@" + (pos.getX() >> 4) + "," + (pos.getZ() >> 4);
@@ -529,11 +531,11 @@ public final class ItemAffixes {
             maker = rollMaker(normRegion, culture, random);
         }
 
-        CompoundTag affix = stack.getOrCreateTagElement(TAG);
-        if (!affix.contains("base_name", Tag.TAG_STRING)) {
-            affix.putString("base_name", stack.getItem().getDescription().getString());
+        CompoundTag affix = com.skycraft.platform.ItemTags.childOrEmpty(stack, TAG);
+        if (!com.skycraft.platform.NbtData.hasType(affix, "base_name", Tag.TAG_STRING)) {
+            affix.putString("base_name", Component.translatable(stack.getItem().getDescriptionId()).getString());
         }
-        if (!affix.contains("base_value", Tag.TAG_ANY_NUMERIC)) {
+        if (!com.skycraft.platform.NbtData.hasType(affix, "base_value", com.skycraft.platform.NbtData.ANY_NUMERIC)) {
             affix.putInt("base_value", Math.max(1, ItemValues.base(stack.getItem())));
         }
         affix.putString("quality", quality.id());
@@ -559,6 +561,7 @@ public final class ItemAffixes {
             assignPrimaryEnchantToTag(stack, affix, lootLevel);
         }
 
+        com.skycraft.platform.ItemTags.setChild(stack, TAG, affix);
         recomputeMultipliersAndRefresh(stack);
     }
 
@@ -571,14 +574,14 @@ public final class ItemAffixes {
         if (!isAffixable(stack)) return;
         String normRegion = normalizeRegion(regionId);
         String culture = inferCulture(stack, normRegion);
-        CompoundTag affix = stack.getOrCreateTagElement(TAG);
-        if (!affix.contains("base_name", Tag.TAG_STRING)) {
-            affix.putString("base_name", stack.getItem().getDescription().getString());
+        CompoundTag affix = com.skycraft.platform.ItemTags.childOrEmpty(stack, TAG);
+        if (!com.skycraft.platform.NbtData.hasType(affix, "base_name", Tag.TAG_STRING)) {
+            affix.putString("base_name", Component.translatable(stack.getItem().getDescriptionId()).getString());
         }
-        if (!affix.contains("base_value", Tag.TAG_ANY_NUMERIC)) {
+        if (!com.skycraft.platform.NbtData.hasType(affix, "base_value", com.skycraft.platform.NbtData.ANY_NUMERIC)) {
             affix.putInt("base_value", Math.max(1, ItemValues.base(stack.getItem())));
         }
-        if (!affix.contains("quality", Tag.TAG_STRING)) {
+        if (!com.skycraft.platform.NbtData.hasType(affix, "quality", Tag.TAG_STRING)) {
             affix.putString("quality", "well_made");
             affix.putString("quality_label", "well_made");
         }
@@ -586,6 +589,7 @@ public final class ItemAffixes {
         affix.putString("region", normRegion);
         affix.putString("source", "boss");
         assignStoriedToTag(affix, normRegion, placeId, slotIndex);
+        com.skycraft.platform.ItemTags.setChild(stack, TAG, affix);
         recomputeMultipliersAndRefresh(stack);
     }
 
@@ -698,7 +702,7 @@ public final class ItemAffixes {
 
     public static EnchantFamilyDef resolveEnchantFamily(Enchantment ench) {
         ensureLoaded();
-        ResourceLocation rl = ForgeRegistries.ENCHANTMENTS.getKey(ench);
+        Identifier rl = com.skycraft.platform.EnchantmentsAccess.id(ench);
         String fullId = rl != null ? rl.toString().toLowerCase(Locale.ROOT) : "";
         String path = rl != null ? rl.getPath().toLowerCase(Locale.ROOT) : "";
         for (EnchantFamilyDef fam : ENCHANT_FAMILIES.values()) {
@@ -739,13 +743,13 @@ public final class ItemAffixes {
     }
 
     private static void assignPrimaryEnchantToTag(ItemStack stack, CompoundTag affix, int contextLevel) {
-        Map<Enchantment, Integer> map = EnchantmentHelper.getEnchantments(stack);
+        var map = stack.getEnchantments();
         if (map.isEmpty()) return;
         Enchantment bestEnch = null;
         int bestLvl = 0;
-        for (Map.Entry<Enchantment, Integer> e : map.entrySet()) {
+        for (var e : map.entrySet()) {
             if (bestEnch == null || e.getValue() > bestLvl) {
-                bestEnch = e.getKey();
+                bestEnch = e.getKey().value();
                 bestLvl = e.getValue();
             }
         }
@@ -760,9 +764,9 @@ public final class ItemAffixes {
     /** Copies affix NBT from {@code source} to {@code target} (e.g. when splitting a stack or binding a staff). */
     public static void copyAffixes(ItemStack source, ItemStack target) {
         if (source == null || target == null || source.isEmpty() || target.isEmpty()) return;
-        CompoundTag srcTag = source.getTag();
-        if (srcTag != null && srcTag.contains(TAG, Tag.TAG_COMPOUND)) {
-            target.getOrCreateTag().put(TAG, srcTag.getCompound(TAG).copy());
+        CompoundTag srcTag = com.skycraft.inventory.ItemData.custom(source);
+        if (srcTag != null && com.skycraft.platform.NbtData.hasType(srcTag, TAG, Tag.TAG_COMPOUND)) {
+            com.skycraft.inventory.ItemData.updateCustom(target, customData263 -> customData263.put(TAG, srcTag.getCompoundOrEmpty(TAG).copy()));
             recomputeMultipliersAndRefresh(target);
         }
     }
@@ -783,14 +787,14 @@ public final class ItemAffixes {
     public static void onEnchant(ItemStack stack, Enchantment ench, int enchLevel, int contextLevel) {
         ensureLoaded();
         if (stack == null || stack.isEmpty()) return;
-        CompoundTag affix = stack.getOrCreateTagElement(TAG);
-        if (!affix.contains("base_name", Tag.TAG_STRING)) {
-            affix.putString("base_name", stack.getItem().getDescription().getString());
+        CompoundTag affix = com.skycraft.platform.ItemTags.childOrEmpty(stack, TAG);
+        if (!com.skycraft.platform.NbtData.hasType(affix, "base_name", Tag.TAG_STRING)) {
+            affix.putString("base_name", Component.translatable(stack.getItem().getDescriptionId()).getString());
         }
-        if (!affix.contains("base_value", Tag.TAG_ANY_NUMERIC)) {
+        if (!com.skycraft.platform.NbtData.hasType(affix, "base_value", com.skycraft.platform.NbtData.ANY_NUMERIC)) {
             affix.putInt("base_value", Math.max(1, ItemValues.base(stack.getItem())));
         }
-        if (!affix.contains("quality", Tag.TAG_STRING)) {
+        if (!com.skycraft.platform.NbtData.hasType(affix, "quality", Tag.TAG_STRING)) {
             affix.putString("quality", defaultQualityId);
             affix.putString("quality_label", defaultQualityId);
         }
@@ -798,6 +802,7 @@ public final class ItemAffixes {
         int tier = computeEnchantTier(ench, enchLevel, contextLevel);
         affix.putString("enchant_family", fam.id());
         affix.putInt("enchant_tier", tier);
+        com.skycraft.platform.ItemTags.setChild(stack, TAG, affix);
         recomputeMultipliersAndRefresh(stack);
     }
 
@@ -812,13 +817,13 @@ public final class ItemAffixes {
     // ------------------------------------------------------------------ multipliers, value & display name
 
     private static void recomputeMultipliersAndRefresh(ItemStack stack) {
-        CompoundTag tag = stack.getTag();
-        if (tag == null || !tag.contains(TAG, Tag.TAG_COMPOUND)) return;
-        CompoundTag affix = tag.getCompound(TAG);
+        CompoundTag tag = com.skycraft.inventory.ItemData.custom(stack);
+        if (tag == null || !com.skycraft.platform.NbtData.hasType(tag, TAG, Tag.TAG_COMPOUND)) return;
+        CompoundTag affix = tag.getCompoundOrEmpty(TAG);
 
-        QualityDef q = QUALITIES.getOrDefault(affix.getString("quality"), QUALITIES.get(defaultQualityId));
-        MakerDef m = affix.contains("maker", Tag.TAG_STRING) ? MAKERS.get(affix.getString("maker")) : null;
-        StoriedDef st = affix.contains("storied", Tag.TAG_STRING) ? STORIED_BY_ID.get(affix.getString("storied")) : null;
+        QualityDef q = QUALITIES.getOrDefault(affix.getStringOr("quality",""), QUALITIES.get(defaultQualityId));
+        MakerDef m = com.skycraft.platform.NbtData.hasType(affix, "maker", Tag.TAG_STRING) ? MAKERS.get(affix.getStringOr("maker","")) : null;
+        StoriedDef st = com.skycraft.platform.NbtData.hasType(affix, "storied", Tag.TAG_STRING) ? STORIED_BY_ID.get(affix.getStringOr("storied","")) : null;
 
         float dmg = q != null ? q.damageMult() : 1.0f;
         float arm = q != null ? q.armorMult() : 1.0f;
@@ -843,8 +848,8 @@ public final class ItemAffixes {
         affix.putFloat("durability_mult", dur);
         affix.putFloat("value_mult", val);
 
-        int baseValue = affix.contains("base_value", Tag.TAG_ANY_NUMERIC)
-                ? affix.getInt("base_value")
+        int baseValue = com.skycraft.platform.NbtData.hasType(affix, "base_value", com.skycraft.platform.NbtData.ANY_NUMERIC)
+                ? affix.getIntOr("base_value",0)
                 : Math.max(1, ItemValues.base(stack.getItem()));
         if (Math.abs(val - 1.0f) > 0.001f) {
             tag.putInt(ItemValues.VALUE_NBT, Math.max(1, Math.round(baseValue * val)));
@@ -852,25 +857,27 @@ public final class ItemAffixes {
             tag.remove(ItemValues.VALUE_NBT);
         }
 
+        tag.put(TAG, affix);
+        com.skycraft.inventory.ItemData.setCustom(stack, tag);
         String displayName = buildDisplayName(stack, affix);
-        String baseName = affix.getString("base_name");
+        String baseName = affix.getStringOr("base_name","");
         if (!displayName.isEmpty() && !displayName.equals(baseName)) {
-            stack.setHoverName(Component.literal(displayName));
+            stack.set(net.minecraft.core.component.DataComponents.CUSTOM_NAME, Component.literal(displayName));
         }
     }
 
     public static String buildDisplayName(ItemStack stack, CompoundTag affix) {
         ensureLoaded();
-        String baseName = affix.contains("base_name", Tag.TAG_STRING)
-                ? affix.getString("base_name")
-                : stack.getItem().getDescription().getString();
+        String baseName = com.skycraft.platform.NbtData.hasType(affix, "base_name", Tag.TAG_STRING)
+                ? affix.getStringOr("base_name","")
+                : Component.translatable(stack.getItem().getDescriptionId()).getString();
 
         StringBuilder sb = new StringBuilder();
-        StoriedDef st = affix.contains("storied", Tag.TAG_STRING) ? STORIED_BY_ID.get(affix.getString("storied")) : null;
-        EpithetDef ep = affix.contains("epithet", Tag.TAG_STRING) ? EPITHETS_BY_ID.get(affix.getString("epithet")) : null;
-        MakerDef maker = affix.contains("maker", Tag.TAG_STRING) ? MAKERS.get(affix.getString("maker")) : null;
-        String qId = affix.getString("quality");
-        String qLabelId = affix.getString("quality_label");
+        StoriedDef st = com.skycraft.platform.NbtData.hasType(affix, "storied", Tag.TAG_STRING) ? STORIED_BY_ID.get(affix.getStringOr("storied","")) : null;
+        EpithetDef ep = com.skycraft.platform.NbtData.hasType(affix, "epithet", Tag.TAG_STRING) ? EPITHETS_BY_ID.get(affix.getStringOr("epithet","")) : null;
+        MakerDef maker = com.skycraft.platform.NbtData.hasType(affix, "maker", Tag.TAG_STRING) ? MAKERS.get(affix.getStringOr("maker","")) : null;
+        String qId = affix.getStringOr("quality","");
+        String qLabelId = affix.getStringOr("quality_label","");
 
         if (st != null) {
             sb.append(st.prefix()).append(' ');
@@ -908,10 +915,10 @@ public final class ItemAffixes {
     }
 
     public static String enchantSuffixDisplay(CompoundTag affix) {
-        if (!affix.contains("enchant_family", Tag.TAG_STRING)) return "";
-        EnchantFamilyDef fam = ENCHANT_FAMILIES.get(affix.getString("enchant_family"));
+        if (!com.skycraft.platform.NbtData.hasType(affix, "enchant_family", Tag.TAG_STRING)) return "";
+        EnchantFamilyDef fam = ENCHANT_FAMILIES.get(affix.getStringOr("enchant_family",""));
         if (fam == null || fam.tiers().isEmpty()) return "";
-        int tier = Mth.clamp(affix.getInt("enchant_tier"), 1, fam.tiers().size());
+        int tier = Mth.clamp(affix.getIntOr("enchant_tier",0), 1, fam.tiers().size());
         return fam.tiers().get(tier - 1);
     }
 
@@ -919,35 +926,35 @@ public final class ItemAffixes {
 
     public static boolean hasAffixes(ItemStack stack) {
         if (stack == null || stack.isEmpty()) return false;
-        CompoundTag tag = stack.getTag();
-        return tag != null && tag.contains(TAG, Tag.TAG_COMPOUND);
+        CompoundTag tag = com.skycraft.inventory.ItemData.custom(stack);
+        return tag != null && com.skycraft.platform.NbtData.hasType(tag, TAG, Tag.TAG_COMPOUND);
     }
 
     @Nullable
     public static String qualityId(ItemStack stack) {
         if (!hasAffixes(stack)) return null;
-        String q = stack.getTag().getCompound(TAG).getString("quality");
+        String q = com.skycraft.inventory.ItemData.custom(stack).getCompoundOrEmpty(TAG).getStringOr("quality","");
         return q.isEmpty() ? null : q;
     }
 
     @Nullable
     public static String qualityLabelId(ItemStack stack) {
         if (!hasAffixes(stack)) return null;
-        String q = stack.getTag().getCompound(TAG).getString("quality_label");
+        String q = com.skycraft.inventory.ItemData.custom(stack).getCompoundOrEmpty(TAG).getStringOr("quality_label","");
         return q.isEmpty() ? qualityId(stack) : q;
     }
 
     @Nullable
     public static String makerId(ItemStack stack) {
         if (!hasAffixes(stack)) return null;
-        String m = stack.getTag().getCompound(TAG).getString("maker");
+        String m = com.skycraft.inventory.ItemData.custom(stack).getCompoundOrEmpty(TAG).getStringOr("maker","");
         return m.isEmpty() ? null : m;
     }
 
     @Nullable
     public static String storiedId(ItemStack stack) {
         if (!hasAffixes(stack)) return null;
-        String s = stack.getTag().getCompound(TAG).getString("storied");
+        String s = com.skycraft.inventory.ItemData.custom(stack).getCompoundOrEmpty(TAG).getStringOr("storied","");
         return s.isEmpty() ? null : s;
     }
 
@@ -962,36 +969,36 @@ public final class ItemAffixes {
 
     public static float damageMultiplier(ItemStack stack) {
         if (!hasAffixes(stack)) return 1.0f;
-        CompoundTag affix = stack.getTag().getCompound(TAG);
-        return affix.contains("damage_mult", Tag.TAG_ANY_NUMERIC) ? affix.getFloat("damage_mult") : 1.0f;
+        CompoundTag affix = com.skycraft.inventory.ItemData.custom(stack).getCompoundOrEmpty(TAG);
+        return com.skycraft.platform.NbtData.hasType(affix, "damage_mult", com.skycraft.platform.NbtData.ANY_NUMERIC) ? affix.getFloatOr("damage_mult",0F) : 1.0f;
     }
 
     public static float armorMultiplier(ItemStack stack) {
         if (!hasAffixes(stack)) return 1.0f;
-        CompoundTag affix = stack.getTag().getCompound(TAG);
-        return affix.contains("armor_mult", Tag.TAG_ANY_NUMERIC) ? affix.getFloat("armor_mult") : 1.0f;
+        CompoundTag affix = com.skycraft.inventory.ItemData.custom(stack).getCompoundOrEmpty(TAG);
+        return com.skycraft.platform.NbtData.hasType(affix, "armor_mult", com.skycraft.platform.NbtData.ANY_NUMERIC) ? affix.getFloatOr("armor_mult",0F) : 1.0f;
     }
 
     public static float durabilityMultiplier(ItemStack stack) {
         if (!hasAffixes(stack)) return 1.0f;
-        CompoundTag affix = stack.getTag().getCompound(TAG);
-        return affix.contains("durability_mult", Tag.TAG_ANY_NUMERIC) ? affix.getFloat("durability_mult") : 1.0f;
+        CompoundTag affix = com.skycraft.inventory.ItemData.custom(stack).getCompoundOrEmpty(TAG);
+        return com.skycraft.platform.NbtData.hasType(affix, "durability_mult", com.skycraft.platform.NbtData.ANY_NUMERIC) ? affix.getFloatOr("durability_mult",0F) : 1.0f;
     }
 
     public static float valueMultiplier(ItemStack stack) {
         if (!hasAffixes(stack)) return 1.0f;
-        CompoundTag affix = stack.getTag().getCompound(TAG);
-        return affix.contains("value_mult", Tag.TAG_ANY_NUMERIC) ? affix.getFloat("value_mult") : 1.0f;
+        CompoundTag affix = com.skycraft.inventory.ItemData.custom(stack).getCompoundOrEmpty(TAG);
+        return com.skycraft.platform.NbtData.hasType(affix, "value_mult", com.skycraft.platform.NbtData.ANY_NUMERIC) ? affix.getFloatOr("value_mult",0F) : 1.0f;
     }
 
     /** Appends condition, maker craft lore, and storied provenance lines to the item tooltip. */
     public static void appendTooltip(ItemStack stack, List<Component> tooltip) {
         ensureLoaded();
         if (!hasAffixes(stack)) return;
-        CompoundTag affix = stack.getTag().getCompound(TAG);
+        CompoundTag affix = com.skycraft.inventory.ItemData.custom(stack).getCompoundOrEmpty(TAG);
 
-        String qId = affix.getString("quality");
-        String qLabel = affix.getString("quality_label");
+        String qId = affix.getStringOr("quality","");
+        String qLabel = affix.getStringOr("quality_label","");
         QualityDef qDef = QUALITIES.get(qId);
         SynonymDef synDef = ALL_SYNONYMS.get(qLabel);
         if (qDef != null && !qId.equals(defaultQualityId)) {
@@ -1003,8 +1010,8 @@ public final class ItemAffixes {
                     .withStyle(ChatFormatting.DARK_GRAY));
         }
 
-        if (affix.contains("maker", Tag.TAG_STRING)) {
-            MakerDef m = MAKERS.get(affix.getString("maker"));
+        if (com.skycraft.platform.NbtData.hasType(affix, "maker", Tag.TAG_STRING)) {
+            MakerDef m = MAKERS.get(affix.getStringOr("maker",""));
             if (m != null) {
                 tooltip.add(Component.translatable("tooltip.skycraft.affix.maker_line",
                         Component.translatable(m.langKey()).withStyle(ChatFormatting.YELLOW))
@@ -1013,8 +1020,8 @@ public final class ItemAffixes {
             }
         }
 
-        if (affix.contains("storied", Tag.TAG_STRING)) {
-            StoriedDef st = STORIED_BY_ID.get(affix.getString("storied"));
+        if (com.skycraft.platform.NbtData.hasType(affix, "storied", Tag.TAG_STRING)) {
+            StoriedDef st = STORIED_BY_ID.get(affix.getStringOr("storied",""));
             if (st != null) {
                 tooltip.add(Component.translatable("tooltip.skycraft.affix.storied_line",
                         Component.translatable(st.langProvKey()).withStyle(ChatFormatting.GOLD, ChatFormatting.ITALIC))
@@ -1059,7 +1066,7 @@ public final class ItemAffixes {
 
         // 2. Deterministic & unique storied items check
         resetWorldStoried();
-        Item swordItem = ForgeRegistries.ITEMS.getValue(new ResourceLocation(Skycraft.MODID, "iron_sword"));
+        Item swordItem = BuiltInRegistries.ITEM.getValue(Identifier.fromNamespaceAndPath(Skycraft.MODID, "iron_sword"));
         if (swordItem == null || swordItem == Items.AIR) swordItem = Items.IRON_SWORD;
 
         ItemStack detA = new ItemStack(swordItem);
@@ -1087,8 +1094,8 @@ public final class ItemAffixes {
 
         // 3. Survival across tempering & enchanting
         ItemStack craftTest = new ItemStack(swordItem);
-        CompoundTag affix = craftTest.getOrCreateTagElement(TAG);
-        affix.putString("base_name", craftTest.getItem().getDescription().getString());
+        CompoundTag affix = com.skycraft.platform.ItemTags.childOrEmpty(craftTest, TAG);
+        affix.putString("base_name", Component.translatable(craftTest.getItem().getDescriptionId()).getString());
         affix.putInt("base_value", Math.max(1, ItemValues.base(craftTest.getItem())));
         affix.putString("quality", "well_made");
         affix.putString("quality_label", "honed");
@@ -1096,6 +1103,7 @@ public final class ItemAffixes {
         affix.putString("region", "skyrim/whiterun");
         affix.putString("source", "boss");
         affix.putString("maker", "skyforge");
+        com.skycraft.platform.ItemTags.setChild(craftTest, TAG, affix);
         recomputeMultipliersAndRefresh(craftTest);
 
         String preTemperName = craftTest.getHoverName().getString();
@@ -1108,8 +1116,9 @@ public final class ItemAffixes {
             problems.add("tempering lost custom affix name: " + craftTest.getHoverName().getString() + " != " + preTemperName);
         }
 
-        craftTest.enchant(Enchantments.FIRE_ASPECT, 2);
-        onEnchant(craftTest, Enchantments.FIRE_ASPECT, 2, 30);
+        var fireAspect = com.skycraft.platform.EnchantmentsAccess.holder(Enchantments.FIRE_ASPECT);
+        craftTest.enchant(fireAspect, 2);
+        onEnchant(craftTest, fireAspect.value(), 2, 30);
         if (!"well_made".equals(qualityId(craftTest)) || !"skyforge".equals(makerId(craftTest))) {
             problems.add("enchanting lost quality or maker NBT");
         }

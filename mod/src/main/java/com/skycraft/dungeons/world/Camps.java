@@ -51,9 +51,9 @@ public final class Camps {
             fr.set(fw, 1, lt, Blocks.SPRUCE_FENCE);
             if (fr.chance(fw, lt, 822, 3)) fr.set(fw, 2, lt, Blocks.SPRUCE_FENCE);
         }
-        Towers.tent(fr, -3, -5, Blocks.BROWN_WOOL.defaultBlockState());
-        Towers.tent(fr, -3, 5, Blocks.WHITE_WOOL.defaultBlockState());
-        Towers.tent(fr, -7, 0, Blocks.BROWN_WOOL.defaultBlockState());
+        Towers.tent(fr, -3, -5, com.skycraft.worldgen.VanillaBlocks.BROWN_WOOL.defaultBlockState());
+        Towers.tent(fr, -3, 5, com.skycraft.worldgen.VanillaBlocks.WHITE_WOOL.defaultBlockState());
+        Towers.tent(fr, -7, 0, com.skycraft.worldgen.VanillaBlocks.BROWN_WOOL.defaultBlockState());
         fire(fr, 1, 0);
         // a lookout platform on stilts
         lookout(fr, 5, -7);
@@ -104,8 +104,8 @@ public final class Camps {
         fr.set(-2, 0, 7, Blocks.CHISELED_STONE_BRICKS);
         fr.set(-2, 1, 7, Deco.skull(Blocks.SKELETON_SKULL, Deco.skullRotation(fr.r.getOpposite())));
         fr.set(-1, 0, 7, Blocks.CAULDRON);
-        fr.set(-3, 0, 7, Deco.candle(Blocks.BROWN_CANDLE, 3, true));
-        fr.set(-2, 0, 8, Blocks.WHITE_CARPET);
+        fr.set(-3, 0, 7, Deco.candle(com.skycraft.worldgen.VanillaBlocks.BROWN_CANDLE, 3, true));
+        fr.set(-2, 0, 8, com.skycraft.worldgen.VanillaBlocks.WHITE_CARPET);
         lookout(fr, 4, -8);
         fr.container(-8, 0, 2, Deco.chest(fr.f), Deco.LOOT_COMMON);
         fr.container(-2, 0, 6, Deco.barrel(Direction.UP), Deco.LOOT_ALCHEMY);
@@ -124,12 +124,12 @@ public final class Camps {
                 int d = Math.max(Math.abs(dfw), Math.abs(dlt));
                 boolean door = dfw == 2 && dlt == 0;
                 if (d == 2 && !door) {
-                    fr.set(fw0 + dfw, 0, lt0 + dlt, Blocks.BROWN_WOOL);
-                    fr.set(fw0 + dfw, 1, lt0 + dlt, (dfw + dlt) % 2 == 0 ? Blocks.BROWN_WOOL.defaultBlockState() : Blocks.WHITE_WOOL.defaultBlockState());
+                    fr.set(fw0 + dfw, 0, lt0 + dlt, com.skycraft.worldgen.VanillaBlocks.BROWN_WOOL);
+                    fr.set(fw0 + dfw, 1, lt0 + dlt, (dfw + dlt) % 2 == 0 ? com.skycraft.worldgen.VanillaBlocks.BROWN_WOOL.defaultBlockState() : com.skycraft.worldgen.VanillaBlocks.WHITE_WOOL.defaultBlockState());
                 } else if (d == 1) {
-                    fr.set(fw0 + dfw, 2, lt0 + dlt, Blocks.BROWN_WOOL);
+                    fr.set(fw0 + dfw, 2, lt0 + dlt, com.skycraft.worldgen.VanillaBlocks.BROWN_WOOL);
                 }
-                if (d <= 1) fr.set(fw0 + dfw, 0, lt0 + dlt, Blocks.BROWN_CARPET);
+                if (d <= 1) fr.set(fw0 + dfw, 0, lt0 + dlt, com.skycraft.worldgen.VanillaBlocks.BROWN_CARPET);
             }
         }
         fr.set(fw0, 3, lt0, Blocks.SPRUCE_FENCE);
@@ -140,9 +140,9 @@ public final class Camps {
 
     private static void military(Frame fr, DungeonPiece c) {
         boolean imperial = c.flavor % 2 == 0;
-        BlockState cloth = (imperial ? Blocks.RED_WOOL : Blocks.BLUE_WOOL).defaultBlockState();
-        BlockState canvas = Blocks.WHITE_WOOL.defaultBlockState();
-        BlockState banner = (imperial ? Blocks.RED_BANNER : Blocks.BLUE_BANNER).defaultBlockState();
+        BlockState cloth = (imperial ? com.skycraft.worldgen.VanillaBlocks.RED_WOOL : com.skycraft.worldgen.VanillaBlocks.BLUE_WOOL).defaultBlockState();
+        BlockState canvas = com.skycraft.worldgen.VanillaBlocks.WHITE_WOOL.defaultBlockState();
+        BlockState banner = (imperial ? com.skycraft.worldgen.VanillaBlocks.RED_BANNER : com.skycraft.worldgen.VanillaBlocks.BLUE_BANNER).defaultBlockState();
         ground(fr, 15, 840);
         // the command tent at the back: a big pavilion with the war table
         fr.columns(-12, -4, -6, 4, (fw, lt, x, z) -> {
@@ -240,8 +240,8 @@ public final class Camps {
         });
         fr.gableRoof(fw0 - hf - 1, lt0 - hl - 1, fw0 + hf + 1, lt0 + hl + 1, 4, true, Blocks.SPRUCE_STAIRS, Blocks.SPRUCE_SLAB,
                 Blocks.SPRUCE_PLANKS.defaultBlockState());
-        fr.set(fw0 - hf + 1, 0, lt0 - hl + 1, Blocks.RED_CARPET);
-        fr.set(fw0 - hf + 1, 0, lt0 - hl + 2, Blocks.RED_CARPET);
+        fr.set(fw0 - hf + 1, 0, lt0 - hl + 1, com.skycraft.worldgen.VanillaBlocks.RED_CARPET);
+        fr.set(fw0 - hf + 1, 0, lt0 - hl + 2, com.skycraft.worldgen.VanillaBlocks.RED_CARPET);
         fr.container(fw0 - hf + 1, 0, lt0 + hl - 1, Deco.chest(fr.f), Deco.LOOT_MINOR);
         if (!small) {
             fr.set(fw0, 0, lt0 + hl - 1, Blocks.SPRUCE_FENCE);

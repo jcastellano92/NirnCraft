@@ -18,6 +18,8 @@
     "skycraft:skyrim_river",
     "skycraft:temperate_ocean",
     "skycraft:warm_ocean",
-    "skycraft:warm_river"
+    "skycraft:warm_river",
+    "#c:is_ocean",
+    "#c:is_river"
   ]
 }

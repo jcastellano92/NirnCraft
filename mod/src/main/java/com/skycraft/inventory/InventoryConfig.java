@@ -1,30 +1,30 @@
 package com.skycraft.inventory;
 
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 /**
  * Inventory module settings: {@code config/skycraft-inventory-common.toml} (server rules: carry weight, persistent
  * drops) and {@code config/skycraft-inventory-client.toml} (per player: inventory screen, HUD).
  */
 public final class InventoryConfig {
-    public static final ForgeConfigSpec COMMON_SPEC;
-    public static final ForgeConfigSpec CLIENT_SPEC;
+    public static final ModConfigSpec COMMON_SPEC;
+    public static final ModConfigSpec CLIENT_SPEC;
 
     // common
-    public static final ForgeConfigSpec.BooleanValue CARRY_WEIGHT;
-    public static final ForgeConfigSpec.DoubleValue BASE_CAPACITY;
-    public static final ForgeConfigSpec.DoubleValue CAPACITY_PER_STAMINA;
-    public static final ForgeConfigSpec.DoubleValue ENCUMBERED_SPEED_PENALTY;
-    public static final ForgeConfigSpec.BooleanValue PERSISTENT_DROPS;
-    public static final ForgeConfigSpec.IntValue PERSISTENT_CAP;
+    public static final ModConfigSpec.BooleanValue CARRY_WEIGHT;
+    public static final ModConfigSpec.DoubleValue BASE_CAPACITY;
+    public static final ModConfigSpec.DoubleValue CAPACITY_PER_STAMINA;
+    public static final ModConfigSpec.DoubleValue ENCUMBERED_SPEED_PENALTY;
+    public static final ModConfigSpec.BooleanValue PERSISTENT_DROPS;
+    public static final ModConfigSpec.IntValue PERSISTENT_CAP;
 
     // client
-    public static final ForgeConfigSpec.BooleanValue REPLACE_INVENTORY;
-    public static final ForgeConfigSpec.BooleanValue CARRY_HUD;
-    public static final ForgeConfigSpec.DoubleValue CARRY_HUD_THRESHOLD;
+    public static final ModConfigSpec.BooleanValue REPLACE_INVENTORY;
+    public static final ModConfigSpec.BooleanValue CARRY_HUD;
+    public static final ModConfigSpec.DoubleValue CARRY_HUD_THRESHOLD;
 
     static {
-        ForgeConfigSpec.Builder b = new ForgeConfigSpec.Builder();
+        ModConfigSpec.Builder b = new ModConfigSpec.Builder();
         b.push("carryWeight");
         CARRY_WEIGHT = b.comment("Skyrim carry weight: items weigh something and carrying more than your capacity makes you",
                         "walk slowly and unable to run (data/<ns>/skycraft_weights/*.json).")
@@ -48,7 +48,7 @@ public final class InventoryConfig {
         b.pop();
         COMMON_SPEC = b.build();
 
-        ForgeConfigSpec.Builder c = new ForgeConfigSpec.Builder();
+        ModConfigSpec.Builder c = new ModConfigSpec.Builder();
         c.push("inventory");
         REPLACE_INVENTORY = c.comment("Open the Skyrim inventory instead of the vanilla survival inventory.",
                         "The vanilla inventory (crafting grid, armor slots) stays reachable with the C key or the Crafting button.")

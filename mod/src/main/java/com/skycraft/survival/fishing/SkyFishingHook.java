@@ -7,7 +7,7 @@ import com.skycraft.perk.Perks;
 import com.skycraft.skills.Progression;
 import com.skycraft.survival.SurvivalConfig;
 import com.skycraft.survival.SurvivalPackets;
-import net.minecraft.advancements.CriteriaTriggers;
+import net.minecraft.advancements.triggers.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -26,8 +26,8 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MoverType;
-import net.minecraft.world.entity.animal.AbstractFish;
-import net.minecraft.world.entity.animal.WaterAnimal;
+import net.minecraft.world.entity.animal.fish.AbstractFish;
+import net.minecraft.world.entity.animal.fish.WaterAnimal;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.FishingHook;
@@ -37,9 +37,9 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.ToolActions;
-import net.minecraftforge.event.entity.player.ItemFishedEvent;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.common.ItemAbilities;
+import net.neoforged.neoforge.event.entity.player.ItemFishedEvent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -93,7 +93,7 @@ public class SkyFishingHook extends FishingHook {
         float sinYaw = Mth.sin(-yaw * Mth.DEG_TO_RAD - (float) Math.PI);
         float cosPitch = -Mth.cos(-pitch * Mth.DEG_TO_RAD);
         float sinPitch = Mth.sin(-pitch * Mth.DEG_TO_RAD);
-        this.moveTo(player.getX() - sinYaw * 0.3, player.getEyeY(), player.getZ() - cosYaw * 0.3, yaw, pitch);
+        this.snapTo(player.getX() - sinYaw * 0.3, player.getEyeY(), player.getZ() - cosYaw * 0.3, yaw, pitch);
         Vec3 dir = new Vec3(-sinYaw, Mth.clamp(-(sinPitch / cosPitch), -5.0f, 5.0f), -cosYaw);
         double len = dir.length();
         dir = dir.multiply(0.6 / len + this.random.triangle(0.5, 0.0103365), 0.6 / len + this.random.triangle(0.5, 0.0103365),
@@ -106,9 +106,9 @@ public class SkyFishingHook extends FishingHook {
     }
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        this.entityData.define(BITING, false);
+    protected void defineSynchedData(net.minecraft.network.syncher.SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(BITING, false);
     }
 
     @Override
@@ -130,7 +130,7 @@ public class SkyFishingHook extends FishingHook {
             this.discard();
             return;
         }
-        if (!this.level().isClientSide && shouldStop(player)) return;
+        if (!this.level().isClientSide() && shouldStop(player)) return;
         if (this.onGround()) {
             if (++life >= 1200) {
                 this.discard();
@@ -163,7 +163,7 @@ public class SkyFishingHook extends FishingHook {
         } else if (state == State.HOOKED) {
             Entity hooked = this.getHookedIn();
             if (hooked == null || hooked.isRemoved() || hooked.level().dimension() != this.level().dimension()) {
-                if (!this.level().isClientSide) this.discard();
+                if (!this.level().isClientSide()) this.discard();
                 return;
             }
             this.setPos(hooked.getX(), hooked.getY(0.8), hooked.getZ());
@@ -178,8 +178,8 @@ public class SkyFishingHook extends FishingHook {
                 if (this.entityData.get(BITING)) {
                     this.setDeltaMovement(this.getDeltaMovement().add(0, -0.1 * this.random.nextFloat() * this.random.nextFloat(), 0));
                 }
-                if (!this.level().isClientSide) fish(pos);
-            } else if (!this.level().isClientSide && phase != Phase.WAIT) {
+                if (!this.level().isClientSide()) fish(pos);
+            } else if (!this.level().isClientSide() && phase != Phase.WAIT) {
                 if (++outOfWaterTicks > 30) {
                     escape(player, (byte) 0);
                 }
@@ -194,8 +194,8 @@ public class SkyFishingHook extends FishingHook {
     }
 
     private boolean shouldStop(Player player) {
-        boolean main = player.getMainHandItem().canPerformAction(ToolActions.FISHING_ROD_CAST);
-        boolean off = player.getOffhandItem().canPerformAction(ToolActions.FISHING_ROD_CAST);
+        boolean main = player.getMainHandItem().canPerformAction(ItemAbilities.FISHING_ROD_CAST);
+        boolean off = player.getOffhandItem().canPerformAction(ItemAbilities.FISHING_ROD_CAST);
         if (!player.isRemoved() && player.isAlive() && (main || off) && this.distanceToSqr(player) <= 1024.0) return false;
         this.discard();
         return true;
@@ -259,7 +259,7 @@ public class SkyFishingHook extends FishingHook {
         if (approachingFish == null && (phase != Phase.WAIT || timer <= 85)) {
             List<WaterAnimal> nearby = level.getEntitiesOfClass(WaterAnimal.class, this.getBoundingBox().inflate(14.0, 6.0, 14.0),
                     e -> e instanceof AbstractFish && e.isAlive() && e.isInWater()
-                            && !e.getPersistentData().getBoolean("skycraft_hook_target"));
+                            && !e.getPersistentData().getBooleanOr("skycraft_hook_target",false));
             if (!nearby.isEmpty()) {
                 approachingFish = nearby.get(0);
                 approachingFish.getPersistentData().putBoolean("skycraft_hook_target", true);
@@ -275,10 +275,10 @@ public class SkyFishingHook extends FishingHook {
                     sz = this.getZ() + Mth.cos(approachAngle) * 1.2;
                     sy = this.getY() - 0.25;
                 }
-                Mob decoy = (this.random.nextBoolean() ? EntityType.SALMON : EntityType.COD).create(level);
+                Mob decoy = (this.random.nextBoolean() ? net.minecraft.world.entity.EntityTypes.SALMON : net.minecraft.world.entity.EntityTypes.COD).create(level, net.minecraft.world.entity.EntitySpawnReason.EVENT);
                 if (decoy != null) {
-                    decoy.moveTo(sx, sy, sz, this.random.nextFloat() * 360f, 0f);
-                    decoy.setInvulnerable(true);
+                    decoy.snapTo(sx, sy, sz, this.random.nextFloat() * 360f, 0f);
+                    decoy.setPermanentlyInvulnerable(true);
                     decoy.setPersistenceRequired();
                     decoy.getPersistentData().putBoolean("skycraft_hook_decoy", true);
                     decoy.getPersistentData().putBoolean("skycraft_hook_target", true);
@@ -339,7 +339,7 @@ public class SkyFishingHook extends FishingHook {
 
     @Override
     public void remove(RemovalReason reason) {
-        if (!this.level().isClientSide) {
+        if (!this.level().isClientSide()) {
             releaseApproachingFish(false);
         }
         super.remove(reason);
@@ -394,20 +394,20 @@ public class SkyFishingHook extends FishingHook {
 
     /** Completes the Stardew-style catch bar minigame reported by the client. */
     public void completeMinigame(ServerPlayer player, boolean caught) {
-        if (this.level().isClientSide || phase != Phase.BITE || species == null) return;
-        InteractionHand hand = player.getMainHandItem().canPerformAction(ToolActions.FISHING_ROD_CAST)
+        if (this.level().isClientSide() || phase != Phase.BITE || species == null) return;
+        InteractionHand hand = player.getMainHandItem().canPerformAction(ItemAbilities.FISHING_ROD_CAST)
                 ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND;
         ItemStack rod = player.getItemInHand(hand);
         if (caught) {
             int damage = land(player, rod);
             if (this.onGround()) damage = Math.max(damage, 2);
-            if (!rod.isEmpty()) rod.hurtAndBreak(damage, player, p -> p.broadcastBreakEvent(hand));
+            if (!rod.isEmpty()) rod.hurtAndBreak(damage, player, hand);
             this.level().playSound(null, player.getX(), player.getY(), player.getZ(),
                     SoundEvents.FISHING_BOBBER_RETRIEVE, SoundSource.NEUTRAL, 1.0f, 1.0f);
             this.discard();
         } else {
             escape(player, (byte) 0);
-            if (!rod.isEmpty()) rod.hurtAndBreak(1, player, p -> p.broadcastBreakEvent(hand));
+            if (!rod.isEmpty()) rod.hurtAndBreak(1, player, hand);
             this.discard();
         }
     }
@@ -444,7 +444,7 @@ public class SkyFishingHook extends FishingHook {
     @Override
     public int retrieve(ItemStack rod) {
         Player player = this.getPlayerOwner();
-        if (this.level().isClientSide || player == null) return 0;
+        if (this.level().isClientSide() || player == null) return 0;
         int damage = 0;
         Entity hooked = this.getHookedIn();
         if (hooked != null) {
@@ -478,12 +478,12 @@ public class SkyFishingHook extends FishingHook {
 
     private int land(ServerPlayer player, ItemStack rod) {
         releaseApproachingFish(true);
-        ServerLevel level = player.serverLevel();
+        ServerLevel level = player.level();
         ItemStack fish = Fishing.catchOf(species, this.random, false);
         List<ItemStack> drops = new ArrayList<>();
         if (!fish.isEmpty()) drops.add(fish);
         ItemFishedEvent event = new ItemFishedEvent(drops, this.onGround() ? 2 : 1, this);
-        MinecraftForge.EVENT_BUS.post(event);
+        NeoForge.EVENT_BUS.post(event);
         if (event.isCanceled()) return event.getRodDamage();
         CriteriaTriggers.FISHING_ROD_HOOKED.trigger(player, rod, this, drops);
         for (ItemStack stack : drops) {
@@ -499,7 +499,7 @@ public class SkyFishingHook extends FishingHook {
         FishStock.get(level).take(level, this.blockPosition());
         if (species.rarity() > 0) Progression.addSkillXp(player, Skill.FISHING, 6f * species.rarity());
         SkyNetwork.sendToPlayer(player, new SurvivalPackets.Bite((byte) 0, (short) 0, (short) 0, (short) 0, (short) 0, (byte) 1,
-                fish.isEmpty() ? "" : fish.getDescriptionId()));
+                fish.isEmpty() ? "" : fish.getItem().getDescriptionId()));
         this.entityData.set(BITING, false);
         return event.getRodDamage();
     }

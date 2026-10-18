@@ -263,6 +263,7 @@ public final class Landmarks {
         BlockState[] stone = {B.s(Blocks.STONE), B.s(Blocks.ANDESITE), B.s(Blocks.STONE), B.s(Blocks.DIORITE), B.s(Blocks.COBBLESTONE)};
         for (int x = -2; x < s.w + 2; x++) {
             for (int z = -2; z < s.d + 2; z++) {
+                if (!c.touches(x, z, x, z)) continue;
                 double ang = Math.atan2(z - cz, x - cx);
                 double rr = r * (0.9 + 0.1 * Math.sin(ang * 5 + s.x)) + 1.5 * Math.sin(ang * 11);
                 double dist = Math.hypot(x - cx, z - cz);
@@ -305,8 +306,8 @@ public final class Landmarks {
         for (int y = 3; y <= 13; y += 5) {
             for (int i = 0; i < 8; i++) {
                 double ang = i * Math.PI / 4;
-                c.set(cx + (int) Math.round(Math.cos(ang) * hr), y, cz + (int) Math.round(Math.sin(ang) * hr), B.s(Blocks.BLUE_STAINED_GLASS));
-                c.set(cx + (int) Math.round(Math.cos(ang) * hr), y + 1, cz + (int) Math.round(Math.sin(ang) * hr), B.s(Blocks.BLUE_STAINED_GLASS));
+                c.set(cx + (int) Math.round(Math.cos(ang) * hr), y, cz + (int) Math.round(Math.sin(ang) * hr), B.s(com.skycraft.worldgen.VanillaBlocks.BLUE_STAINED_GLASS));
+                c.set(cx + (int) Math.round(Math.cos(ang) * hr), y + 1, cz + (int) Math.round(Math.sin(ang) * hr), B.s(com.skycraft.worldgen.VanillaBlocks.BLUE_STAINED_GLASS));
             }
         }
         Shells.dome(c, p, cx, 17, cz, hr, roof);
@@ -319,10 +320,10 @@ public final class Landmarks {
             int tx = cx + t[0], tz = cz + t[1];
             hollowCylinder(c, tx, 1, 24, tz, 3, wall, B.s(Blocks.SPRUCE_PLANKS));
             cone(c, tx, 25, tz, 4, 8, roof);
-            for (int y = 6; y <= 20; y += 7) c.set(tx, y, tz - 3, B.s(Blocks.BLUE_STAINED_GLASS));
+            for (int y = 6; y <= 20; y += 7) c.set(tx, y, tz - 3, B.s(com.skycraft.worldgen.VanillaBlocks.BLUE_STAINED_GLASS));
             c.entrance(tx, 1, tz - 3, B.s(Blocks.DARK_OAK_DOOR), Direction.SOUTH);
             for (int y = 1; y <= 24; y++) c.set(tx, y, tz + 2, B.face(B.s(Blocks.LADDER), Direction.NORTH));
-            c.bed(tx - 1, 1, tz, B.s(Blocks.BLUE_BED), Direction.WEST);
+            c.bed(tx - 1, 1, tz, B.s(com.skycraft.worldgen.VanillaBlocks.BLUE_BED), Direction.WEST);
             c.anchor(AnchorType.BED, tx - 1, 1, tz);
             Props.chest(c, tx + 1, 1, tz, Direction.WEST, "palace");
         }
@@ -350,7 +351,7 @@ public final class Landmarks {
     /** The White-Gold Tower: a pale round tower banded in gold, buttressed at its foot, crowned by a needle spire. */
     static void whiteGold(Canvas c, Palette p, Spec s) {
         int cx = (s.w - 1) / 2, cz = (s.d - 1) / 2;
-        BlockState wall = B.s(Blocks.SMOOTH_QUARTZ), band = B.s(Blocks.HONEYCOMB_BLOCK), glass = B.s(Blocks.LIGHT_BLUE_STAINED_GLASS);
+        BlockState wall = B.s(Blocks.SMOOTH_QUARTZ), band = B.s(Blocks.HONEYCOMB_BLOCK), glass = B.s(com.skycraft.worldgen.VanillaBlocks.LIGHT_BLUE_STAINED_GLASS);
         int shaft = Math.max(60, s.h - 50);
         double r0 = Math.min(s.w, s.d) / 2.0 - 3;
         if (!c.recording()) c.clear(0, 1, 0, s.w - 1, 12, s.d - 1);
@@ -386,7 +387,7 @@ public final class Landmarks {
             ring(c, cx, shaft + 1 + k, cz, Math.max(0.6, r), 1.3, k % 10 == 0 ? band : wall);
             if (r < 1.2) c.set(cx, shaft + 1 + k, cz, band);
         }
-        c.set(cx, s.h + 1, cz, B.s(Blocks.LIGHTNING_ROD));
+        c.set(cx, s.h + 1, cz, B.s(com.skycraft.worldgen.VanillaBlocks.LIGHTNING_ROD));
         // the Elder Council's hall at the foot
         c.entrance(cx, 1, (int) (cz - r0), B.s(Blocks.BIRCH_DOOR), Direction.SOUTH);
         disc(c, cx, 1, cz, 3, B.slab(B.s(Blocks.QUARTZ_SLAB), true));
@@ -610,7 +611,7 @@ public final class Landmarks {
 
     static void crystalTower(Canvas c, Palette p, Spec s) {
         int cx = (s.w - 1) / 2, cz = (s.d - 1) / 2;
-        BlockState glass = B.s(Blocks.LIGHT_BLUE_STAINED_GLASS), crystal = B.s(Blocks.AMETHYST_BLOCK), quartz = B.s(Blocks.QUARTZ_BRICKS);
+        BlockState glass = B.s(com.skycraft.worldgen.VanillaBlocks.LIGHT_BLUE_STAINED_GLASS), crystal = B.s(Blocks.AMETHYST_BLOCK), quartz = B.s(Blocks.QUARTZ_BRICKS);
         int h = s.h;
         double r0 = Math.min(s.w, s.d) / 2.0 - 1;
         for (int y = 0; y <= h; y++) {
@@ -729,11 +730,11 @@ public final class Landmarks {
                     c.air(x, y, 0);
                     continue;
                 }
-                c.set(x, y, 0, pillar ? B.s(Blocks.WAXED_OXIDIZED_CUT_COPPER) : y > keepH ? B.s(Blocks.CHISELED_SANDSTONE) : B.s(Blocks.CUT_SANDSTONE));
+                c.set(x, y, 0, pillar ? B.s(com.skycraft.worldgen.VanillaBlocks.WAXED_OXIDIZED_CUT_COPPER) : y > keepH ? B.s(Blocks.CHISELED_SANDSTONE) : B.s(Blocks.CUT_SANDSTONE));
             }
         }
         for (int k = 0; k < 4; k++) for (int x = cx - 8 + k * 2; x <= cx + 8 - k * 2; x++) c.set(x, keepH + 7 + k, 0, B.s(Blocks.CUT_SANDSTONE));
-        for (int x = cx - 2; x <= cx + 2; x++) c.set(x, 7, 0, B.s(Blocks.WAXED_CUT_COPPER));
+        for (int x = cx - 2; x <= cx + 2; x++) c.set(x, 7, 0, B.s(com.skycraft.worldgen.VanillaBlocks.WAXED_CUT_COPPER));
         Interiors.palace(c, p, new Room(kx0 + 1, 1, kx0 + keepW - 2, keepD - 1, 1, keepH), null, cx, true, false);
         cliffFalls(c, p, w, h);
     }
@@ -828,8 +829,8 @@ public final class Landmarks {
         blue.roof = B.s(Blocks.DARK_PRISMARINE_STAIRS);
         blue.roofSlab = B.s(Blocks.DARK_PRISMARINE_SLAB);
         blue.roofFull = B.s(Blocks.DARK_PRISMARINE);
-        blue.accent = B.s(Blocks.BLUE_WOOL);
-        blue.carpet = B.s(Blocks.BLUE_CARPET);
+        blue.accent = B.s(com.skycraft.worldgen.VanillaBlocks.BLUE_WOOL);
+        blue.carpet = B.s(com.skycraft.worldgen.VanillaBlocks.BLUE_CARPET);
         blue.wall = B.s(Blocks.CALCITE);
         blue.wallLow = B.s(Blocks.POLISHED_DIORITE);
         Spec palace = new Spec(Archetype.PALACE);

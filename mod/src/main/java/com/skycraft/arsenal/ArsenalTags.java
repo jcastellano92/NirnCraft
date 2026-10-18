@@ -2,7 +2,7 @@ package com.skycraft.arsenal;
 
 import com.skycraft.Skycraft;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
@@ -24,10 +24,10 @@ public final class ArsenalTags {
     private ArsenalTags() {}
 
     private static TagKey<Item> item(String name) {
-        return TagKey.create(Registries.ITEM, new ResourceLocation(Skycraft.MODID, name));
+        return TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath(Skycraft.MODID, name));
     }
 
     private static TagKey<EntityType<?>> entity(String name) {
-        return TagKey.create(Registries.ENTITY_TYPE, new ResourceLocation(Skycraft.MODID, name));
+        return TagKey.create(Registries.ENTITY_TYPE, Identifier.fromNamespaceAndPath(Skycraft.MODID, name));
     }
 }

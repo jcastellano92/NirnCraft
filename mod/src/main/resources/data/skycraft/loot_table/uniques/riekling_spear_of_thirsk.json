@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:stick",
+          "weight": 1,
+          "modifier": {
+            "id": "riekling_spear_of_thirsk",
+            "type": "skycraft:unique"
+          }
+        }
+      ]
+    }
+  ],
+  "random_sequence": "skycraft:uniques/riekling_spear_of_thirsk"
+}

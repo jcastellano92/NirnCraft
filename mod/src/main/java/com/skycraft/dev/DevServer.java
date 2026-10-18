@@ -13,12 +13,12 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.TicketType;
 import net.minecraft.util.Unit;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.server.ServerStartedEvent;
-import net.minecraftforge.event.server.ServerStoppingEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
+
+import net.neoforged.neoforge.event.server.ServerStartedEvent;
+import net.neoforged.neoforge.event.server.ServerStoppingEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.LogEvent;
@@ -57,7 +57,7 @@ import java.util.stream.Stream;
  * writes {@code outbox/ready} (pid) once started and {@code outbox/heartbeat} every second, and drops the spawn-chunk
  * ticket so regen areas can unload (set {@code -Dskycraft.dev.keepSpawn=true} to keep it).
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class DevServer {
     static final String DIR = System.getProperty("skycraft.dev");
     private static final ConcurrentLinkedQueue<String> CAPTURED = new ConcurrentLinkedQueue<>();
@@ -159,6 +159,7 @@ public final class DevServer {
     public static void onStarted(ServerStartedEvent event) {
         if (!enabled()) return;
         MinecraftServer server = event.getServer();
+        if (server.overworld() == null) return;
         DevResources.clear();
         try {
             Files.createDirectories(dir("inbox"));
@@ -173,7 +174,7 @@ public final class DevServer {
         }
         if (!Boolean.getBoolean("skycraft.dev.keepSpawn")) {
             ServerLevel ow = server.overworld();
-            ow.getChunkSource().removeRegionTicket(TicketType.START, new ChunkPos(ow.getSharedSpawnPos()), 11, Unit.INSTANCE);
+            ow.getChunkSource().removeTicketWithRadius(TicketType.PLAYER_SPAWN,  ChunkPos.containing(ow.getRespawnData().pos()), 3);
         }
         write("ready", ProcessHandle.current().pid() + "\n" + System.currentTimeMillis() + "\n");
         write("bake-packaged-inputs", com.skycraft.bake.Bake.inputsHash() + "\n");
@@ -211,9 +212,10 @@ public final class DevServer {
     }
 
     @SubscribeEvent
-    public static void onTick(TickEvent.ServerTickEvent event) {
-        if (!enabled() || event.phase != TickEvent.Phase.END) return;
+    public static void onTick(net.neoforged.neoforge.event.tick.ServerTickEvent.Post event) {
+        if (!enabled() || !(event instanceof net.neoforged.neoforge.event.tick.ServerTickEvent.Post)) return;
         MinecraftServer server = event.getServer();
+        if (server.overworld() == null) return;
         ticks++;
         if (DevRegen.active != null) DevRegen.active.tick();
         if (ticks % 20 == 0) {
@@ -258,7 +260,27 @@ public final class DevServer {
             return;
         }
         if (j.waitFor.equals("idle")) {
-            if (server.overworld().getChunkSource().getPendingTasksCount() > 0 || server.overworld().getChunkSource().chunkMap.hasWork()) return;
+            // ChunkMap.hasWork also means ordinary resident chunks/tickets, so it never
+            // becomes false around a player or /forceload. Wait for actual queued work
+            // and requested forced/player-view chunk futures, not world residency.
+            for (ServerLevel idleLevel : server.getAllLevels()) {
+                var source = idleLevel.getChunkSource();
+                if (source.getPendingTasksCount() > 0 || source.getLightEngine().hasLightWork()) return;
+                var requested = new java.util.HashSet<Long>();
+                for (long packed : idleLevel.getForceLoadedChunks()) requested.add(packed);
+                for (var player : idleLevel.players()) {
+                    if (player.isFakePlayer()) continue;
+                    for (var pos : ChunkPos.rangeClosed(player.chunkPosition(), server.getPlayerList().getViewDistance() + 1).toList()) {
+                        if (player.getChunkTrackingView().contains(pos)) requested.add(pos.pack());
+                    }
+                }
+                for (long packed : requested) {
+                    var holder = source.chunkMap.getUpdatingChunkIfPresent(packed);
+                    if (holder == null || !holder.getFullChunkFuture().getNow(net.minecraft.server.level.ChunkHolder.UNLOADED_LEVEL_CHUNK).isSuccess()
+                            || !holder.getSendSyncFuture().isDone() || !idleLevel.areEntitiesLoaded(packed)) return;
+                    for (var generation : holder.getAllFutures()) if (!generation.getSecond().isDone()) return;
+                }
+            }
             j.waitFor = "";
         }
         if (j.regen != null) {
@@ -302,9 +324,8 @@ public final class DevServer {
             server.halt(false);
             return;
         }
-        CommandSourceStack src = server.createCommandSourceStack().withSource(new Capture());
-        int r = server.getCommands().performPrefixedCommand(src, cmd);
-        if (r <= 0) j.failed = true;
+        CommandSourceStack src = server.createCommandSourceStack().withSource(new Capture()).withCallback((success, result) -> { if (!success || result <= 0) j.failed = true; });
+        server.getCommands().performPrefixedCommand(src, cmd);
         j.regen = DevRegen.active;
     }
 
@@ -324,9 +345,14 @@ public final class DevServer {
     @SubscribeEvent
     public static void onCommands(RegisterCommandsEvent event) {
         if (!enabled()) return;
-        event.getDispatcher().register(Commands.literal("skycraft-dev").requires(s -> s.hasPermission(4))
+        event.getDispatcher().register(Commands.literal("skycraft-dev").requires(s -> s.permissions().hasPermission(net.minecraft.server.permissions.Permissions.COMMANDS_OWNER))
                 .then(DevRoute.command())
                 .then(DevScenario.command())
+                .then(Commands.literal("network").executes(c -> {
+                    String report = com.skycraft.network.SkyNetwork.diagnostics().toString();
+                    c.getSource().sendSuccess(() -> Component.literal(report), false);
+                    return 1;
+                }))
                 .then(Commands.literal("save").executes(c -> {
                     boolean saved=c.getSource().getServer().saveEverything(true,true,true);
                     c.getSource().sendSuccess(()->Component.literal("World save completed: "+saved),false);

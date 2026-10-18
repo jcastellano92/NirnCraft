@@ -25,7 +25,7 @@ public final class DragonWorldData extends SavedData {
 
     public static DragonWorldData get(ServerLevel level) {
         ServerLevel overworld = level.getServer().overworld();
-        return overworld.getDataStorage().computeIfAbsent(DragonWorldData::load, DragonWorldData::new, NAME);
+        return com.skycraft.platform.SavedDataTypes.get(overworld, NAME, DragonWorldData::load, DragonWorldData::new, value263 -> value263.save(new net.minecraft.nbt.CompoundTag()));
     }
 
     public boolean isRaised(String mound) {
@@ -57,15 +57,14 @@ public final class DragonWorldData extends SavedData {
 
     private static DragonWorldData load(CompoundTag tag) {
         DragonWorldData d = new DragonWorldData();
-        ListTag raised = tag.getList("Raised", Tag.TAG_STRING);
-        for (int i = 0; i < raised.size(); i++) d.raisedMounds.add(raised.getString(i));
-        CompoundTag lairs = tag.getCompound("Lairs");
-        for (String k : lairs.getAllKeys()) d.lairReady.put(k, lairs.getLong(k));
-        d.paarthurnaxDead = tag.getBoolean("PaarthurnaxDead");
+        ListTag raised = tag.getListOrEmpty("Raised");
+        for (int i = 0; i < raised.size(); i++) d.raisedMounds.add(raised.getStringOr(i, ""));
+        CompoundTag lairs = tag.getCompoundOrEmpty("Lairs");
+        for (String k : lairs.keySet()) d.lairReady.put(k, lairs.getLongOr(k, 0L));
+        d.paarthurnaxDead = tag.getBooleanOr("PaarthurnaxDead",false);
         return d;
     }
 
-    @Override
     public CompoundTag save(CompoundTag tag) {
         ListTag raised = new ListTag();
         for (String m : raisedMounds) raised.add(StringTag.valueOf(m));

@@ -1,4 +1,4 @@
-// pack_lab: the Skycraft Aether shader pack's screen passes (deferred, composite, composite1, final) run offline on a
+﻿// pack_lab: the Skycraft Aether shader pack's screen passes (deferred, composite, composite1, final) run offline on a
 // scene aether renders, so lighting, water, fog, sky, shafts and bloom can be judged without Minecraft.
 //
 // aether provides the G-buffer within a near radius (albedo, normal, depth, the bed under water), its own lit far
@@ -15,6 +15,7 @@
 #include <windows.h>
 #include <GL/gl.h>
 
+#include <array>
 #include <chrono>
 #include <cmath>
 #include <cstdio>
@@ -523,6 +524,9 @@ int main(int argc, char** argv) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     GLuint outTex = texture2d(GL_RGBA8, W, H, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+    // the weather grids aether got, as the mod's weather_field / weather_dynamics textures (RGBA8, r in the low byte)
+    GLuint weatherFieldTex = texture2d(GL_RGBA8, 128, 128, GL_RGBA, GL_UNSIGNED_BYTE, fld.data());
+    GLuint weatherDynTex = texture2d(GL_RGBA8, 128, 128, GL_RGBA, GL_UNSIGNED_BYTE, dyn.data());
 
     float fV[16], fP[16], fiV[16], fiP[16];
     toFloat(V, fV);
@@ -610,7 +614,7 @@ int main(int argc, char** argv) {
 
     samplers = {{"colortex0", tex[0]}, {"colortex1", tex[1]}, {"colortex2", tex[2]}, {"colortex3", tex[3]},
                 {"labWater", labWater}, {"aetherColor", aetherColor}, {"aetherDepth", aetherDepth},
-                {"aetherSunMap", aetherSunMap}};
+                {"aetherSunMap", aetherSunMap}, {"weatherField", weatherFieldTex}, {"weatherDyn", weatherDynTex}};
     bool ok = run(pWater, {{5, tex[5]}, {6, tex[6]}}, false);
     ok = ok && run(pDeferred, {{4, tex[4]}}, true);  // deferred sees the opaque depth only
     samplers["colortex4"] = tex[4];
@@ -630,7 +634,16 @@ int main(int argc, char** argv) {
         glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_FLOAT, hd.data());
         glBindTexture(GL_TEXTURE_2D, alt4);
         glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_FLOAT, hc.data());
-        const double pts[][2] = {{0.5, 0.85}, {0.2, 0.7}, {0.5, 0.5}, {0.5, 0.15}, {0.9, 0.42}};
+        std::vector<std::array<double, 2>> pts = {{0.5, 0.85}, {0.2, 0.7}, {0.5, 0.5}, {0.5, 0.15}, {0.9, 0.42}};
+        double ppx = arg(argc, argv, "px", -1), ppy = arg(argc, argv, "py", -1);  // one exact pixel (from the top)
+        if (ppx >= 0 && ppy >= 0) {
+            pts = {{(ppx + 0.5) / W, (ppy + 0.5) / H}};
+            size_t i = size_t(ppy) * W + size_t(ppx);
+            std::printf("pixel %d,%d: aether far %.3f %.3f %.3f a %.3f depth %.1f | bed %.1f surf %.1f cls bed %u surf %u | water px %d\n",
+                        int(ppx), int(ppy), farLin[i * 4], farLin[i * 4 + 1], farLin[i * 4 + 2], farLin[i * 4 + 3], farDepth[i],
+                        bedDepth[i], surfDepth[i], bedNormal[i] >> 16 & 255, surfNormal[i] >> 16 & 255,
+                        int(waterMask[row(i) * 4 + 3] > 0));
+        }
         for (auto& p : pts) {
             size_t i = size_t(p[1] * H) * W + size_t(p[0] * W), g = row(i);
             std::printf("probe (%.2f,%.2f) albedo %.3f %.3f %.3f  deferred %.3f %.3f %.3f  composite %.3f %.3f %.3f  dist %.0f\n",

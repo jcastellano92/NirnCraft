@@ -30,16 +30,16 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.ChiseledBookShelfBlock;
 import net.minecraft.world.level.block.entity.ChiseledBookShelfBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 /**
  * Browsing and taking books from bookshelves ({@link Blocks#BOOKSHELF} and {@link Blocks#CHISELED_BOOKSHELF}).
  * On chiseled bookshelves, each occupied slot holds a visible 3D tome that can be grabbed directly off the shelf.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class LoreEvents {
     private static final String SHELVES = "shelves";
     private static final int MAX_REMEMBERED = 256;
@@ -66,7 +66,7 @@ public final class LoreEvents {
                 return;
             }
             event.setCanceled(true);
-            event.setCancellationResult(InteractionResult.sidedSuccess(level.isClientSide));
+            event.setCancellationResult(com.skycraft.platform.Interactions.sidedSuccess(level.isClientSide()));
             if (!(level instanceof ServerLevel sl) || !(player instanceof ServerPlayer sp)) return;
 
             var prop = ChiseledBookShelfBlock.SLOT_OCCUPIED_PROPERTIES.get(occupiedSlot);
@@ -84,16 +84,16 @@ public final class LoreEvents {
 
         if (!state.is(Blocks.BOOKSHELF)) return;
         event.setCanceled(true);
-        event.setCancellationResult(InteractionResult.sidedSuccess(level.isClientSide));
+        event.setCancellationResult(com.skycraft.platform.Interactions.sidedSuccess(level.isClientSide()));
         if (!(level instanceof ServerLevel sl) || !(player instanceof ServerPlayer sp)) return;
         sl.playSound(null, pos, SoundEvents.BOOK_PAGE_TURN, SoundSource.BLOCKS, 1f, 0.9f);
 
         PlayerData data = SkyData.get(sp);
         CompoundTag module = data.module(StandingStones.MODULE);
-        ListTag shelves = module.getList(SHELVES, Tag.TAG_STRING);
-        String key = sl.dimension().location() + "@" + pos.asLong();
+        ListTag shelves = module.getListOrEmpty(SHELVES);
+        String key = sl.dimension().identifier() + "@" + pos.asLong();
         for (int i = 0; i < shelves.size(); i++) {
-            if (shelves.getString(i).equals(key)) {
+            if (shelves.getStringOr(i, "").equals(key)) {
                 Notifier.message(sp, Component.translatable("message.skycraft.lore.shelf_searched"));
                 return;
             }
@@ -103,7 +103,7 @@ public final class LoreEvents {
         module.put(SHELVES, shelves);
         data.markDirty();
 
-        if (PlacedBlocks.isPlayerPlaced(sl, pos) || sl.random.nextFloat() > FIND_CHANCE) {
+        if (PlacedBlocks.isPlayerPlaced(sl, pos) || sl.getRandom().nextFloat() > FIND_CHANCE) {
             Notifier.message(sp, Component.translatable("message.skycraft.lore.shelf_nothing"));
             return;
         }
@@ -123,7 +123,7 @@ public final class LoreEvents {
 
     private static void giveShelfBook(ServerLevel sl, BlockPos pos, ServerPlayer sp) {
         String province = com.skycraft.tamriel.Regions.at(sl, pos).province();
-        LoreBooks.Book book = LoreBooks.randomFor(sl.random, province, b -> !b.category().isSheet());
+        LoreBooks.Book book = LoreBooks.randomFor(sl.getRandom(), province, b -> !b.category().isSheet());
         if (book == null) return;
         ItemStack stack = LoreBookItem.create(book);
         if (Ownership.isOwnedByOther(sp, sl, pos)) {
@@ -134,6 +134,6 @@ public final class LoreEvents {
             }
         }
         Notifier.message(sp, Component.translatable("message.skycraft.lore.shelf_found", book.title()));
-        if (!ActionHandler.addToBags(sp, stack)) sp.drop(stack, false);
+        if (!ActionHandler.addToBags(sp, stack)) sp.drop(stack, false, net.minecraft.util.Prediction.SERVER_ONLY);
     }
 }

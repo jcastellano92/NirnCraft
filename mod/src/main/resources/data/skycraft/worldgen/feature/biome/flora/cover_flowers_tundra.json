@@ -1,0 +1,33 @@
+{
+  "type": "skycraft:ground_cover",
+  "config": {
+    "entries": [
+      {
+        "state": "minecraft:azure_bluet",
+        "weight": 3
+      },
+      {
+        "state": "minecraft:oxeye_daisy",
+        "weight": 2
+      },
+      {
+        "state": "minecraft:cornflower",
+        "weight": 2
+      },
+      {
+        "state": "minecraft:dandelion",
+        "weight": 1
+      }
+    ],
+    "scale": 28,
+    "patchiness": 0.85,
+    "cluster": {
+      "type": "minecraft:uniform",
+      "min_inclusive": 3,
+      "max_inclusive": 8
+    },
+    "spread": 3,
+    "salt": 2561,
+    "near_water": false
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:smelting",
+  "category": "misc",
+  "group": "silver_ingot",
+  "ingredient": [
+    "skycraft:silver_ore",
+    "skycraft:deepslate_silver_ore"
+  ],
+  "result": {
+    "id": "skycraft:silver_ingot"
+  },
+  "experience": 0.7,
+  "cookingtime": 200
+}

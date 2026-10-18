@@ -658,13 +658,9 @@ public final class TravelNetworks {
      * {@code intervention}, {@code wayshrine}, {@code foot}).
      */
     public static boolean prewarmTo(ServerPlayer player, int destX, int destZ, Component destName, Runnable onReady) {
-        ServerLevel level = player.serverLevel();
-        if (!Prewarm.isReady(level, destX, destZ)
-                && Prewarm.start(player, destX, destZ, destName, onReady)) {
-            return true;
-        }
-        onReady.run();
-        return true;
+        Prewarm.Result result = Prewarm.request(player, destX, destZ, destName, onReady);
+        if (result == Prewarm.Result.READY) onReady.run();
+        return result == Prewarm.Result.READY || result == Prewarm.Result.STARTED;
     }
 
     /**
@@ -672,7 +668,8 @@ public final class TravelNetworks {
      * Preserves existing carriage, strider, and ferry visuals and the "Travelling to..." prewarm.
      */
     public static boolean travel(ServerPlayer player, String fromIdOrPlace, String toIdOrPlace, @Nullable TravelMode preferredMode) {
-        if (player == null || !player.isAlive() || player.level().dimension() != Level.OVERWORLD) return false;
+        if (player == null || !player.isAlive() || player.level().dimension() != Level.OVERWORLD
+                || Prewarm.busy(player.getUUID())) return false;
         if (Vitals.inCombat(player)) {
             Notifier.message(player, Component.translatable("world.skycraft.travel.combat"));
             return false;
@@ -703,6 +700,10 @@ public final class TravelNetworks {
         TravelNode dest = offer.destination();
         TravelMode mode = offer.mode();
         int fee = offer.fee();
+        if (fee > 0 && !Currency.canAfford(player, fee)) {
+            Notifier.message(player, Component.translatable("travel.skycraft.no_gold", fee));
+            return false;
+        }
 
         // For sea ports with a Route in Ports, prewarm the destination chunk and delegate to Ferries
         if (mode == TravelMode.BOAT) {
@@ -711,14 +712,11 @@ public final class TravelNetworks {
             if (fromPort != null && toPort != null) {
                 for (Route r : Ports.routesFrom(fromPort.id())) {
                     if (r.other(fromPort.id()).equals(toPort.id())) {
-                        if (fee > 0 && !Currency.take(player, fee)) {
-                            Notifier.message(player, Component.translatable("travel.skycraft.no_gold", fee));
-                            return false;
-                        }
                         final Port fp = fromPort;
                         final Port tp = toPort;
                         final Route fr = r;
                         return prewarmTo(player, dest.x(), dest.z(), dest.displayName(), () -> {
+                            if (!takeFare(player, fee)) return;
                             Ferries.start(player, fp, tp, fr);
                             onArrival(player, dest, mode);
                         });
@@ -727,18 +725,22 @@ public final class TravelNetworks {
             }
         }
 
-        if (fee > 0 && !Currency.take(player, fee)) {
-            Notifier.message(player, Component.translatable("travel.skycraft.no_gold", fee));
-            player.level().playSound(null, player.blockPosition(), SoundEvents.VILLAGER_NO, SoundSource.NEUTRAL, 0.8f, 1.0f);
-            return false;
-        }
+        return prewarmTo(player, dest.x(), dest.z(), dest.displayName(), () -> {
+            if (!takeFare(player, fee)) return;
+            playDepartureScene(player, mode);
+            completeRide(player, origin, dest, mode);
+        });
+    }
 
-        playDepartureScene(player, mode);
-        return prewarmTo(player, dest.x(), dest.z(), dest.displayName(), () -> completeRide(player, origin, dest, mode));
+    private static boolean takeFare(ServerPlayer player, int fee) {
+        if (fee <= 0 || Currency.take(player, fee)) return true;
+        Notifier.message(player, Component.translatable("travel.skycraft.no_gold", fee));
+        player.level().playSound(null, player.blockPosition(), SoundEvents.VILLAGER_NO, SoundSource.NEUTRAL, 0.8f, 1.0f);
+        return false;
     }
 
     private static void playDepartureScene(ServerPlayer player, TravelMode mode) {
-        ServerLevel level = player.serverLevel();
+        ServerLevel level = player.level();
         BlockPos pos = player.blockPosition();
         switch (mode) {
             case BOAT, RIVER_BOAT, BARGE ->
@@ -765,7 +767,7 @@ public final class TravelNetworks {
 
     private static void completeRide(ServerPlayer player, TravelNode origin, TravelNode dest, TravelMode mode) {
         if (!player.isAlive()) return;
-        ServerLevel level = player.serverLevel();
+        ServerLevel level = player.level();
         BlockPos targetPos = resolveArrivalPos(level, dest, mode);
 
         Entity vehicle = player.getVehicle();
@@ -775,14 +777,14 @@ public final class TravelNetworks {
         double distance = Math.hypot(dest.x() - origin.x(), dest.z() - origin.z());
 
         player.stopRiding();
-        player.teleportTo(level, targetPos.getX() + 0.5, targetPos.getY(), targetPos.getZ() + 0.5,
-                player.getYRot(), player.getXRot());
+        player.teleportTo(level, targetPos.getX() + 0.5, targetPos.getY(), targetPos.getZ() + 0.5, java.util.Set.of(),
+                player.getYRot(), player.getXRot(), true);
         player.resetFallDistance();
 
         if (vehicle != null && vehicle.isAlive() && mode.isRoad()) {
             vehicle.teleportTo(targetPos.getX() + 0.5, targetPos.getY(), targetPos.getZ() + 0.5);
             vehicle.resetFallDistance();
-            player.startRiding(vehicle, true);
+            player.startRiding(vehicle, true, true);
         }
 
         int i = 0;
@@ -799,10 +801,10 @@ public final class TravelNetworks {
         if (mode != TravelMode.GUILD_GUIDE && mode != TravelMode.PROPYLON
                 && mode != TravelMode.INTERVENTION && mode != TravelMode.LIFT) {
             int perHour = WorldConfig.BLOCKS_PER_TRAVEL_HOUR.get();
-            long online = player.server.getPlayerList().getPlayers().stream().filter(p -> !p.isSpectator()).count();
+            long online = player.level().getServer().getPlayerList().getPlayers().stream().filter(p -> !p.isSpectator()).count();
             if (perHour > 0 && online <= 1) {
                 hours = Mth.clamp((int) Math.round(distance / perHour), 1, 72);
-                RestManager.advanceTime(player.server, hours * (long) RestManager.TICKS_PER_HOUR);
+                RestManager.advanceTime(player.level().getServer(), hours * (long) RestManager.TICKS_PER_HOUR);
             }
         }
 
@@ -873,10 +875,10 @@ public final class TravelNetworks {
                 ? WorldData.placeLocId(node.place())
                 : "travel|" + node.id();
         CompoundTag existing = WorldData.find(data, locId);
-        if (existing != null && !existing.getBoolean("known")) {
+        if (existing != null && !existing.getBooleanOr("known",false)) {
             return false;
         }
-        ServerLevel level = player.serverLevel();
+        ServerLevel level = player.level();
         int y = level.hasChunk(node.x() >> 4, node.z() >> 4)
                 ? level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, node.x(), node.z())
                 : Math.max(level.getSeaLevel() + 1, (int) TamrielMap.elevation(node.x(), node.z()));
@@ -899,7 +901,7 @@ public final class TravelNetworks {
             loc.putInt("x", node.x());
             loc.putInt("y", y);
             loc.putInt("z", node.z());
-            loc.putString("dim", level.dimension().location().toString());
+            loc.putString("dim", level.dimension().identifier().toString());
             loc.putInt("ax", player.getBlockX());
             loc.putInt("ay", player.getBlockY());
             loc.putInt("az", player.getBlockZ());
@@ -919,8 +921,8 @@ public final class TravelNetworks {
     public static void refreshMinorBlessing(ServerPlayer player, TravelNode node) {
         if (player == null || !player.isAlive()) return;
         int durationTicks = 20 * 60 * 10; // 10 minutes
-        player.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 20 * 12, 0, true, false, true));
-        player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, durationTicks, 0, true, false, true));
+        player.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.REGENERATION), 20 * 12, 0, true, false, true));
+        player.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.SPEED), durationTicks, 0, true, false, true));
         String blessingName = node.blessing() != null
                 ? node.blessing().substring(0, 1).toUpperCase(Locale.ROOT) + node.blessing().substring(1)
                 : "the Wayshrine";

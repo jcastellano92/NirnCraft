@@ -48,7 +48,7 @@ public final class OrphanSweep {
         int x1 = Math.max(wx1, tx1 - margin), x2 = Math.min(wx2, tx2 + margin);
         int z1 = Math.max(wz1, tz1 - margin), z2 = Math.min(wz2, tz2 + margin);
         if (x1 > x2 || z1 > z2) return 0;
-        int minY = level.getMinBuildHeight() + 1, maxY = level.getMaxBuildHeight() - 2;
+        int minY = level.getMinY() + 1, maxY = (level.getMaxY() + 1) - 2;
         Long2ByteOpenHashMap veg = new Long2ByteOpenHashMap();
         BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos();
         for (int x = x1; x <= x2; x++) {
@@ -160,7 +160,7 @@ public final class OrphanSweep {
 
     /** Ground a trunk may stand on: any solid block that is not itself vegetation. */
     private static boolean isGround(BlockState s) {
-        return !s.isAir() && s.blocksMotion() && !s.is(BlockTags.LEAVES) && !s.is(BlockTags.LOGS);
+        return !s.isAir() && s.isSolid() && !s.is(BlockTags.LEAVES) && !s.is(BlockTags.LOGS);
     }
 
     /** True if some member of the component touches a block that a builder placed (planks, bricks, stairs...). */
@@ -175,7 +175,7 @@ public final class OrphanSweep {
                 long n = BlockPos.offset(k, d);
                 if (veg.containsKey(n)) continue;
                 BlockState s = level.getBlockState(p.set(BlockPos.getX(n), BlockPos.getY(n), BlockPos.getZ(n)));
-                if (s.isAir() || !s.blocksMotion()) continue;
+                if (s.isAir() || !s.isSolid()) continue;
                 String path = BuiltInRegistries.BLOCK.getKey(s.getBlock()).getPath();
                 for (String b : BUILT) if (path.contains(b)) return true;
             }

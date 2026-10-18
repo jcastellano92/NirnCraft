@@ -3,49 +3,9 @@
   "temperature": 0.8,
   "downfall": 0.65,
   "effects": {
-    "sky_color": 7907327,
-    "fog_color": 9217240,
-    "water_color": 3906273,
-    "water_fog_color": 329011,
-    "particle": {
-      "options": {
-        "type": "minecraft:end_rod"
-      },
-      "probability": 0.002
-    },
-    "mood_sound": {
-      "sound": "minecraft:ambient.cave",
-      "tick_delay": 6000,
-      "block_search_extent": 8,
-      "offset": 2.0
-    }
+    "water_color": "#3b9ae1"
   },
-  "spawners": {
-    "monster": [],
-    "creature": [],
-    "ambient": [
-      {
-        "type": "minecraft:bat",
-        "weight": 10,
-        "minCount": 8,
-        "maxCount": 8
-      }
-    ],
-    "axolotls": [],
-    "underground_water_creature": [
-      {
-        "type": "minecraft:glow_squid",
-        "weight": 10,
-        "minCount": 4,
-        "maxCount": 6
-      }
-    ],
-    "water_creature": [],
-    "water_ambient": [],
-    "misc": []
-  },
-  "spawn_costs": {},
-  "carvers": {},
+  "carvers": [],
   "features": [
     [],
     [
@@ -101,5 +61,61 @@
     [
       "minecraft:freeze_top_layer"
     ]
-  ]
+  ],
+  "attributes": {
+    "minecraft:visual/sky_color": "#78a7ff",
+    "minecraft:visual/fog_color": "#8ca4d8",
+    "minecraft:visual/water_fog_color": "#050533",
+    "minecraft:audio/ambient_sounds": {
+      "mood": {
+        "sound": "minecraft:ambient.cave",
+        "tick_delay": 6000,
+        "block_search_extent": 8,
+        "offset": 2.0
+      }
+    },
+    "minecraft:visual/ambient_particles": {
+      "modifier": "append",
+      "argument": [
+        {
+          "probability": 0.002,
+          "particle": {
+            "type": "minecraft:end_rod"
+          }
+        }
+      ]
+    },
+    "minecraft:gameplay/natural_mob_spawns": {
+      "modifier": "overlay",
+      "argument": {
+        "spawns_by_category": {
+          "monster": [],
+          "creature": [],
+          "ambient": [
+            {
+              "type": "minecraft:bat",
+              "weight": 10,
+              "count": 8
+            }
+          ],
+          "axolotls": [],
+          "underground_water_creature": [
+            {
+              "type": "minecraft:glow_squid",
+              "weight": 10,
+              "count": {
+                "type": "minecraft:uniform",
+                "min_inclusive": 4,
+                "max_inclusive": 6
+              }
+            }
+          ],
+          "water_creature": [],
+          "water_ambient": [],
+          "misc": []
+        },
+        "spawn_costs": {}
+      }
+    }
+  }
 }

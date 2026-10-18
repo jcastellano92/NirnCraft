@@ -35,23 +35,23 @@ public final class SailingData extends SavedData {
 
         CompoundTag save() {
             CompoundTag t = new CompoundTag();
-            t.put("arrival", NbtUtils.writeBlockPos(arrival));
-            t.put("keeper", NbtUtils.writeBlockPos(keeper));
+            t.put("arrival", com.skycraft.platform.NbtPositions.write(arrival));
+            t.put("keeper", com.skycraft.platform.NbtPositions.write(keeper));
             t.putBoolean("adopted", adopted);
-            if (harbormaster != null) t.putUUID("harbormaster", harbormaster);
-            if (ferry != null) t.putUUID("ferry", ferry);
+            if (harbormaster != null) t.store("harbormaster", net.minecraft.core.UUIDUtil.CODEC,  harbormaster);
+            if (ferry != null) t.store("ferry", net.minecraft.core.UUIDUtil.CODEC,  ferry);
             t.putLong("keeperSeen", keeperSeen);
             return t;
         }
 
         static Dock load(CompoundTag t) {
             Dock d = new Dock();
-            d.arrival = NbtUtils.readBlockPos(t.getCompound("arrival"));
-            d.keeper = NbtUtils.readBlockPos(t.getCompound("keeper"));
-            d.adopted = t.getBoolean("adopted");
-            d.harbormaster = t.hasUUID("harbormaster") ? t.getUUID("harbormaster") : null;
-            d.ferry = t.hasUUID("ferry") ? t.getUUID("ferry") : null;
-            d.keeperSeen = t.getLong("keeperSeen");
+            d.arrival = com.skycraft.platform.NbtPositions.read(t.getCompoundOrEmpty("arrival"));
+            d.keeper = com.skycraft.platform.NbtPositions.read(t.getCompoundOrEmpty("keeper"));
+            d.adopted = t.getBooleanOr("adopted",false);
+            d.harbormaster = t.read("harbormaster", net.minecraft.core.UUIDUtil.CODEC).isPresent() ? t.read("harbormaster", net.minecraft.core.UUIDUtil.CODEC).orElseThrow() : null;
+            d.ferry = t.read("ferry", net.minecraft.core.UUIDUtil.CODEC).isPresent() ? t.read("ferry", net.minecraft.core.UUIDUtil.CODEC).orElseThrow() : null;
+            d.keeperSeen = t.getLongOr("keeperSeen",0L);
             return d;
         }
     }
@@ -61,7 +61,7 @@ public final class SailingData extends SavedData {
     final Map<String, BlockPos> external = new HashMap<>();
 
     public static SailingData get(MinecraftServer server) {
-        return server.overworld().getDataStorage().computeIfAbsent(SailingData::load, SailingData::new, NAME);
+        return com.skycraft.platform.SavedDataTypes.get(server.overworld(), NAME, SailingData::load, SailingData::new, value263 -> value263.save(new net.minecraft.nbt.CompoundTag()));
     }
 
     @Nullable
@@ -76,20 +76,19 @@ public final class SailingData extends SavedData {
 
     static SailingData load(CompoundTag tag) {
         SailingData data = new SailingData();
-        CompoundTag docks = tag.getCompound("docks");
-        for (String id : docks.getAllKeys()) data.docks.put(id, Dock.load(docks.getCompound(id)));
-        CompoundTag ext = tag.getCompound("external");
-        for (String id : ext.getAllKeys()) data.external.put(id, NbtUtils.readBlockPos(ext.getCompound(id)));
+        CompoundTag docks = tag.getCompoundOrEmpty("docks");
+        for (String id : docks.keySet()) data.docks.put(id, Dock.load(docks.getCompoundOrEmpty(id)));
+        CompoundTag ext = tag.getCompoundOrEmpty("external");
+        for (String id : ext.keySet()) data.external.put(id, com.skycraft.platform.NbtPositions.read(ext.getCompoundOrEmpty(id)));
         return data;
     }
 
-    @Override
     public CompoundTag save(CompoundTag tag) {
         CompoundTag docks = new CompoundTag();
         this.docks.forEach((id, d) -> docks.put(id, d.save()));
         tag.put("docks", docks);
         CompoundTag ext = new CompoundTag();
-        external.forEach((id, p) -> ext.put(id, NbtUtils.writeBlockPos(p)));
+        external.forEach((id, p) -> ext.put(id, com.skycraft.platform.NbtPositions.write(p)));
         tag.put("external", ext);
         return tag;
     }

@@ -6,7 +6,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
@@ -145,14 +145,14 @@ public final class Homesteads {
 
     /** Every homestead {@code player} owns (one per player today; a list for the future). */
     public static List<Residence> residencesOf(ServerPlayer player) {
-        return residencesOf(player.server, player.getUUID());
+        return residencesOf(player.level().getServer(), player.getUUID());
     }
 
     public static List<Residence> residencesOf(MinecraftServer server, UUID player) {
         List<Residence> out = new ArrayList<>();
         HomesteadClaim claim = HomesteadData.get(server).getClaim(player);
         if (claim == null) return out;
-        ResourceKey<Level> dim = ResourceKey.create(Registries.DIMENSION, new ResourceLocation(claim.getDimension()));
+        ResourceKey<Level> dim = ResourceKey.create(Registries.DIMENSION, Identifier.parse(claim.getDimension()));
         BlockPos entrance = claim.getBuilt().contains("small_house")
                 ? HomesteadBuilder.frame(claim).at(0, 0, -1) : claim.getCenter();
         out.add(new Residence(claim.getOwnerId(), claim.displayName(), claim.getPlot(), dim, claim.getCenter(), entrance,

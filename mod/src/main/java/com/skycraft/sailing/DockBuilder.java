@@ -4,7 +4,7 @@ import com.skycraft.Skycraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
@@ -43,8 +43,8 @@ import java.util.List;
 public final class DockBuilder {
     /** Deck height: one block above the sea's surface block (y 62). */
     static final int DECK_Y = 63;
-    private static final ResourceLocation CAMP_LOOT = new ResourceLocation(Skycraft.MODID, "chests/landing_camp");
-    private static final ResourceLocation HARBOR_LOOT = new ResourceLocation(Skycraft.MODID, "chests/harbor_supplies");
+    private static final Identifier CAMP_LOOT = Identifier.fromNamespaceAndPath(Skycraft.MODID, "chests/landing_camp");
+    private static final Identifier HARBOR_LOOT = Identifier.fromNamespaceAndPath(Skycraft.MODID, "chests/harbor_supplies");
 
     /** What was built: the pier head arrival spot, where the keeper stands, and a berth for the moored ship. */
     public record Result(BlockPos arrival, BlockPos keeper, @Nullable Vec3 berth, float berthYaw, boolean adopted) {
@@ -62,51 +62,51 @@ public final class DockBuilder {
             case "imperial" -> new Palette(Blocks.OAK_PLANKS.defaultBlockState(), Blocks.STRIPPED_OAK_LOG.defaultBlockState(),
                     Blocks.STONE_BRICKS.defaultBlockState(), Blocks.OAK_LOG.defaultBlockState(), Blocks.DARK_OAK_STAIRS.defaultBlockState(),
                     Blocks.DARK_OAK_SLAB.defaultBlockState(), Blocks.STONE_BRICKS.defaultBlockState(), Blocks.OAK_DOOR.defaultBlockState(),
-                    Blocks.RED_WOOL.defaultBlockState(), Blocks.OAK_FENCE.defaultBlockState());
+                    com.skycraft.worldgen.VanillaBlocks.RED_WOOL.defaultBlockState(), Blocks.OAK_FENCE.defaultBlockState());
             case "dunmer" -> new Palette(Blocks.DARK_OAK_PLANKS.defaultBlockState(), Blocks.DARK_OAK_LOG.defaultBlockState(),
                     Blocks.MUD_BRICKS.defaultBlockState(), Blocks.PACKED_MUD.defaultBlockState(), Blocks.MUD_BRICK_STAIRS.defaultBlockState(),
                     Blocks.MUD_BRICK_SLAB.defaultBlockState(), Blocks.PACKED_MUD.defaultBlockState(), Blocks.DARK_OAK_DOOR.defaultBlockState(),
-                    Blocks.BROWN_WOOL.defaultBlockState(), Blocks.DARK_OAK_FENCE.defaultBlockState());
+                    com.skycraft.worldgen.VanillaBlocks.BROWN_WOOL.defaultBlockState(), Blocks.DARK_OAK_FENCE.defaultBlockState());
             case "argonian" -> new Palette(Blocks.MANGROVE_PLANKS.defaultBlockState(), Blocks.MANGROVE_LOG.defaultBlockState(),
                     Blocks.MANGROVE_PLANKS.defaultBlockState(), Blocks.MANGROVE_LOG.defaultBlockState(), Blocks.MANGROVE_STAIRS.defaultBlockState(),
                     Blocks.MANGROVE_SLAB.defaultBlockState(), Blocks.MUD_BRICKS.defaultBlockState(), Blocks.MANGROVE_DOOR.defaultBlockState(),
-                    Blocks.GREEN_WOOL.defaultBlockState(), Blocks.MANGROVE_FENCE.defaultBlockState());
+                    com.skycraft.worldgen.VanillaBlocks.GREEN_WOOL.defaultBlockState(), Blocks.MANGROVE_FENCE.defaultBlockState());
             case "khajiit" -> new Palette(Blocks.ACACIA_PLANKS.defaultBlockState(), Blocks.ACACIA_LOG.defaultBlockState(),
                     Blocks.SMOOTH_SANDSTONE.defaultBlockState(), Blocks.CUT_SANDSTONE.defaultBlockState(), Blocks.ACACIA_STAIRS.defaultBlockState(),
                     Blocks.ACACIA_SLAB.defaultBlockState(), Blocks.SANDSTONE.defaultBlockState(), Blocks.ACACIA_DOOR.defaultBlockState(),
-                    Blocks.ORANGE_WOOL.defaultBlockState(), Blocks.ACACIA_FENCE.defaultBlockState());
+                    com.skycraft.worldgen.VanillaBlocks.ORANGE_WOOL.defaultBlockState(), Blocks.ACACIA_FENCE.defaultBlockState());
             case "redguard" -> new Palette(Blocks.ACACIA_PLANKS.defaultBlockState(), Blocks.STRIPPED_ACACIA_LOG.defaultBlockState(),
                     Blocks.SMOOTH_SANDSTONE.defaultBlockState(), Blocks.CHISELED_SANDSTONE.defaultBlockState(), Blocks.SANDSTONE_STAIRS.defaultBlockState(),
                     Blocks.SANDSTONE_SLAB.defaultBlockState(), Blocks.SANDSTONE.defaultBlockState(), Blocks.ACACIA_DOOR.defaultBlockState(),
-                    Blocks.YELLOW_WOOL.defaultBlockState(), Blocks.ACACIA_FENCE.defaultBlockState());
+                    com.skycraft.worldgen.VanillaBlocks.YELLOW_WOOL.defaultBlockState(), Blocks.ACACIA_FENCE.defaultBlockState());
             case "breton" -> new Palette(Blocks.OAK_PLANKS.defaultBlockState(), Blocks.OAK_LOG.defaultBlockState(),
                     Blocks.COBBLESTONE.defaultBlockState(), Blocks.OAK_LOG.defaultBlockState(), Blocks.SPRUCE_STAIRS.defaultBlockState(),
                     Blocks.SPRUCE_SLAB.defaultBlockState(), Blocks.COBBLESTONE.defaultBlockState(), Blocks.SPRUCE_DOOR.defaultBlockState(),
-                    Blocks.BLUE_WOOL.defaultBlockState(), Blocks.OAK_FENCE.defaultBlockState());
+                    com.skycraft.worldgen.VanillaBlocks.BLUE_WOOL.defaultBlockState(), Blocks.OAK_FENCE.defaultBlockState());
             case "bosmer" -> new Palette(Blocks.JUNGLE_PLANKS.defaultBlockState(), Blocks.JUNGLE_LOG.defaultBlockState(),
                     Blocks.JUNGLE_PLANKS.defaultBlockState(), Blocks.JUNGLE_LOG.defaultBlockState(), Blocks.JUNGLE_STAIRS.defaultBlockState(),
                     Blocks.JUNGLE_SLAB.defaultBlockState(), Blocks.MOSSY_COBBLESTONE.defaultBlockState(), Blocks.JUNGLE_DOOR.defaultBlockState(),
-                    Blocks.LIME_WOOL.defaultBlockState(), Blocks.JUNGLE_FENCE.defaultBlockState());
+                    com.skycraft.worldgen.VanillaBlocks.LIME_WOOL.defaultBlockState(), Blocks.JUNGLE_FENCE.defaultBlockState());
             case "altmer" -> new Palette(Blocks.BIRCH_PLANKS.defaultBlockState(), Blocks.STRIPPED_BIRCH_LOG.defaultBlockState(),
                     Blocks.CALCITE.defaultBlockState(), Blocks.QUARTZ_PILLAR.defaultBlockState(), Blocks.BIRCH_STAIRS.defaultBlockState(),
                     Blocks.BIRCH_SLAB.defaultBlockState(), Blocks.SMOOTH_QUARTZ.defaultBlockState(), Blocks.BIRCH_DOOR.defaultBlockState(),
-                    Blocks.YELLOW_WOOL.defaultBlockState(), Blocks.BIRCH_FENCE.defaultBlockState());
+                    com.skycraft.worldgen.VanillaBlocks.YELLOW_WOOL.defaultBlockState(), Blocks.BIRCH_FENCE.defaultBlockState());
             case "akaviri" -> new Palette(Blocks.BAMBOO_PLANKS.defaultBlockState(), Blocks.STRIPPED_CHERRY_LOG.defaultBlockState(),
                     Blocks.CHERRY_PLANKS.defaultBlockState(), Blocks.CHERRY_LOG.defaultBlockState(), Blocks.CHERRY_STAIRS.defaultBlockState(),
                     Blocks.CHERRY_SLAB.defaultBlockState(), Blocks.STONE_BRICKS.defaultBlockState(), Blocks.CHERRY_DOOR.defaultBlockState(),
-                    Blocks.RED_WOOL.defaultBlockState(), Blocks.BAMBOO_FENCE.defaultBlockState());
+                    com.skycraft.worldgen.VanillaBlocks.RED_WOOL.defaultBlockState(), Blocks.BAMBOO_FENCE.defaultBlockState());
             case "yokudan" -> new Palette(Blocks.ACACIA_PLANKS.defaultBlockState(), Blocks.ACACIA_LOG.defaultBlockState(),
                     Blocks.SANDSTONE.defaultBlockState(), Blocks.CUT_SANDSTONE.defaultBlockState(), Blocks.SANDSTONE_STAIRS.defaultBlockState(),
                     Blocks.SANDSTONE_SLAB.defaultBlockState(), Blocks.SANDSTONE.defaultBlockState(), Blocks.ACACIA_DOOR.defaultBlockState(),
-                    Blocks.WHITE_WOOL.defaultBlockState(), Blocks.ACACIA_FENCE.defaultBlockState());
+                    com.skycraft.worldgen.VanillaBlocks.WHITE_WOOL.defaultBlockState(), Blocks.ACACIA_FENCE.defaultBlockState());
             case "maormer", "coral" -> new Palette(Blocks.BIRCH_PLANKS.defaultBlockState(), Blocks.STRIPPED_BIRCH_LOG.defaultBlockState(),
                     Blocks.PRISMARINE_BRICKS.defaultBlockState(), Blocks.PRISMARINE.defaultBlockState(), Blocks.PRISMARINE_BRICK_STAIRS.defaultBlockState(),
                     Blocks.PRISMARINE_BRICK_SLAB.defaultBlockState(), Blocks.PRISMARINE.defaultBlockState(), Blocks.BIRCH_DOOR.defaultBlockState(),
-                    Blocks.CYAN_WOOL.defaultBlockState(), Blocks.BIRCH_FENCE.defaultBlockState());
+                    com.skycraft.worldgen.VanillaBlocks.CYAN_WOOL.defaultBlockState(), Blocks.BIRCH_FENCE.defaultBlockState());
             default -> new Palette(Blocks.SPRUCE_PLANKS.defaultBlockState(), Blocks.SPRUCE_LOG.defaultBlockState(),
                     Blocks.SPRUCE_PLANKS.defaultBlockState(), Blocks.STRIPPED_SPRUCE_LOG.defaultBlockState(), Blocks.SPRUCE_STAIRS.defaultBlockState(),
                     Blocks.SPRUCE_SLAB.defaultBlockState(), Blocks.COBBLESTONE.defaultBlockState(), Blocks.SPRUCE_DOOR.defaultBlockState(),
-                    Blocks.WHITE_WOOL.defaultBlockState(), Blocks.SPRUCE_FENCE.defaultBlockState());
+                    com.skycraft.worldgen.VanillaBlocks.WHITE_WOOL.defaultBlockState(), Blocks.SPRUCE_FENCE.defaultBlockState());
         };
     }
 
@@ -142,7 +142,7 @@ public final class DockBuilder {
     private static int ground(ServerLevel level, int x, int z) {
         int y = level.getHeight(Heightmap.Types.OCEAN_FLOOR, x, z) - 1;
         BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos(x, y, z);
-        while (p.getY() > level.getMinBuildHeight() && (level.getBlockState(p).is(BlockTags.ICE) || !level.getFluidState(p).isEmpty())) {
+        while (p.getY() > level.getMinY() && (level.getBlockState(p).is(BlockTags.ICE) || !level.getFluidState(p).isEmpty())) {
             p.move(0, -1, 0);
         }
         return p.getY();
@@ -309,7 +309,7 @@ public final class DockBuilder {
             set(level, f.at(length - 1, DECK_Y + 1, -(2 + head) + 1), Blocks.BARREL.defaultBlockState());
             set(level, f.at(length - 2, DECK_Y + 1, -(2 + head) + 1), Blocks.BARREL.defaultBlockState());
             set(level, f.at(length - 1, DECK_Y + 2, -(2 + head) + 1), Blocks.BARREL.defaultBlockState());
-            set(level, f.at(length - 1, DECK_Y + 1, (2 + head) - 1), Blocks.CHAIN.defaultBlockState());
+            set(level, f.at(length - 1, DECK_Y + 1, (2 + head) - 1), com.skycraft.worldgen.VanillaBlocks.CHAIN.defaultBlockState());
             set(level, f.at(length - 3, DECK_Y + 1, (2 + head) - 1), p.fence());
             set(level, f.at(length - 3, DECK_Y + 2, (2 + head) - 1), Blocks.LANTERN.defaultBlockState());
         }
@@ -534,8 +534,8 @@ public final class DockBuilder {
             clearIfSolid(level, f.at(a, y, l0 + 1));
             fillDown(level, f.at(a, y - 1, l0 + 1), Blocks.DIRT.defaultBlockState(), 3);
         }
-        set(level, f.at(a0 - 2, y, l0 + 1), Blocks.BROWN_CARPET.defaultBlockState());
-        set(level, f.at(a0 - 3, y, l0 + 1), Blocks.BROWN_CARPET.defaultBlockState());
+        set(level, f.at(a0 - 2, y, l0 + 1), com.skycraft.worldgen.VanillaBlocks.BROWN_CARPET.defaultBlockState());
+        set(level, f.at(a0 - 3, y, l0 + 1), com.skycraft.worldgen.VanillaBlocks.BROWN_CARPET.defaultBlockState());
     }
 
     // ------------------------------------------------------------------ block helpers
@@ -567,7 +567,7 @@ public final class DockBuilder {
     /** A post driven down through the water to the bed. */
     private static void sinkPost(ServerLevel level, BlockPos start, BlockState post) {
         BlockPos.MutableBlockPos p = start.mutable();
-        for (int i = 0; i < 40 && p.getY() > level.getMinBuildHeight(); i++) {
+        for (int i = 0; i < 40 && p.getY() > level.getMinY(); i++) {
             BlockState s = level.getBlockState(p);
             if (!s.isAir() && !s.liquid() && !s.canBeReplaced()) return;
             level.setBlock(p, post, Block.UPDATE_CLIENTS);
@@ -585,16 +585,16 @@ public final class DockBuilder {
         set(level, pos, Blocks.SPRUCE_SIGN.defaultBlockState().setValue(StandingSignBlock.ROTATION, rot));
         BlockEntity be = level.getBlockEntity(pos);
         if (be instanceof SignBlockEntity sign) {
-            SignText text = new SignText().setMessage(1, name).setMessage(2, Component.translatable("sailing.skycraft.sign.docks"));
-            sign.setText(text, true);
-            sign.setText(text, false);
+            SignText text = SignText.EMPTY.asMutable().setLine(1, name).setLine(2, Component.translatable("sailing.skycraft.sign.docks")).asImmutable();
+            sign.setText(text, net.minecraft.world.level.block.entity.SignTextSlot.FRONT);
+            sign.setText(text, net.minecraft.world.level.block.entity.SignTextSlot.BACK);
             sign.setWaxed(true);
             sign.setChanged();
         }
     }
 
-    private static void loot(ServerLevel level, BlockPos pos, ResourceLocation table) {
+    private static void loot(ServerLevel level, BlockPos pos, Identifier table) {
         BlockEntity be = level.getBlockEntity(pos);
-        if (be instanceof RandomizableContainerBlockEntity c) c.setLootTable(table, level.getRandom().nextLong());
+        if (be instanceof RandomizableContainerBlockEntity c) c.setLootTable(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.LOOT_TABLE, table), level.getRandom().nextLong());
     }
 }

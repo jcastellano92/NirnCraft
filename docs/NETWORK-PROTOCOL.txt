@@ -1,0 +1,17 @@
+Skycraft wire protocol maintenance
+
+SkyNetwork accepts only exact protocol equality on both sides. The identity includes the mod version,
+WireProtocol.SCHEMA, SHA-256 of ordered packet registrations and their count. Registration IDs remain ordered.
+
+Increment WireProtocol.SCHEMA whenever an existing packet changes field order/type, encoding, units or meaning.
+Do this even if the packet class name and mod_version are unchanged. Keep the change reason beside the revision.
+Class-name hashes alone cannot detect these changes; the reviewed OpenDialogue.enabled change demonstrated that.
+
+WireProtocolTest checks matching builds and refusal identities for changed schemas, versions and registrations,
+including legacy identities. A unit identity test does not substitute for a dedicated multiplayer handshake test.
+For packet changes, also run actual encode/decode round trips and matching/mismatching client/server builds.
+
+Full player persistence still includes bulk modules. Owner sync excludes pack/ender_pack/saddlebags before copying
+and lists present exclusions in omitted so the client retains separate mirrors. Do not change this persistence
+or omission contract to reduce packet size. PlayerDataSyncTest checks payload equivalence, source independence,
+client retention and allocation reduction.

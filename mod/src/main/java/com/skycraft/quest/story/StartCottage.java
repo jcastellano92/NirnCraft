@@ -127,27 +127,26 @@ public final class StartCottage {
 
         static Data load(CompoundTag t) {
             Data d = new Data();
-            d.pathCells = t.getInt("pathCells");
-            d.pathBreaks = t.getInt("pathBreaks");
-            d.pathGaps = t.getInt("pathGaps");
-            d.unsupported = t.contains("unsupported") ? t.getInt("unsupported") : -1;
-            d.cleared = t.getInt("cleared");
-            d.pathBuilt = t.getBoolean("pathBuilt");
-            d.pathJoins = t.getBoolean("pathJoins");
-            d.version = t.getInt("version");
-            d.ox = t.getInt("ox");
-            d.oz = t.getInt("oz");
-            d.floorY = t.getInt("floorY");
-            d.fx = t.getInt("fx");
-            d.fz = t.getInt("fz");
-            d.built = t.getBoolean("built");
-            d.prepared = t.getBoolean("prepared");
-            d.visibility = t.contains("visibility") ? t.getFloat("visibility") : -1f;
-            d.report = t.getString("report");
+            d.pathCells = t.getIntOr("pathCells",0);
+            d.pathBreaks = t.getIntOr("pathBreaks",0);
+            d.pathGaps = t.getIntOr("pathGaps",0);
+            d.unsupported = t.contains("unsupported") ? t.getIntOr("unsupported",0) : -1;
+            d.cleared = t.getIntOr("cleared",0);
+            d.pathBuilt = t.getBooleanOr("pathBuilt",false);
+            d.pathJoins = t.getBooleanOr("pathJoins",false);
+            d.version = t.getIntOr("version",0);
+            d.ox = t.getIntOr("ox",0);
+            d.oz = t.getIntOr("oz",0);
+            d.floorY = t.getIntOr("floorY",0);
+            d.fx = t.getIntOr("fx",0);
+            d.fz = t.getIntOr("fz",0);
+            d.built = t.getBooleanOr("built",false);
+            d.prepared = t.getBooleanOr("prepared",false);
+            d.visibility = t.contains("visibility") ? t.getFloatOr("visibility",0F) : -1f;
+            d.report = t.getStringOr("report","");
             return d;
         }
 
-        @Override
         public CompoundTag save(CompoundTag t) {
             t.putInt("version", version);
             t.putInt("ox", ox);
@@ -171,7 +170,7 @@ public final class StartCottage {
     }
 
     private static Data data(ServerLevel level) {
-        return level.getServer().overworld().getDataStorage().computeIfAbsent(Data::load, Data::new, DATA);
+        return com.skycraft.platform.SavedDataTypes.get(level.getServer().overworld(), DATA, Data::load, Data::new, value263 -> value263.save(new net.minecraft.nbt.CompoundTag()));
     }
 
     private static final Map<Long, Optional2> CACHE = new HashMap<>();
@@ -412,12 +411,12 @@ public final class StartCottage {
         for (int l = -14; l <= 18; l += 8) {
             for (int d = -14; d <= 16; d += 8) {
                 BlockPos p = s.at(l, d, 0);
-                if (seen.add(ChunkPos.asLong(p.getX() >> 4, p.getZ() >> 4))) level.getChunk(p.getX() >> 4, p.getZ() >> 4);
+                if (seen.add(ChunkPos.pack(p.getX() >> 4, p.getZ() >> 4))) level.getChunk(p.getX() >> 4, p.getZ() >> 4);
             }
         }
         for (int[] c : new int[][]{{-14, -14}, {18, -14}, {-14, 16}, {18, 16}}) {
             BlockPos p = s.at(c[0], c[1], 0);
-            if (seen.add(ChunkPos.asLong(p.getX() >> 4, p.getZ() >> 4))) level.getChunk(p.getX() >> 4, p.getZ() >> 4);
+            if (seen.add(ChunkPos.pack(p.getX() >> 4, p.getZ() >> 4))) level.getChunk(p.getX() >> 4, p.getZ() >> 4);
         }
     }
 
@@ -512,8 +511,8 @@ public final class StartCottage {
         BlockState planks = Blocks.SPRUCE_PLANKS.defaultBlockState();
         BlockState cobble = Blocks.COBBLESTONE.defaultBlockState();
         BlockState air = Blocks.AIR.defaultBlockState();
-        Direction dirF = Direction.fromDelta(s.fx(), 0, s.fz());
-        Direction dirR = Direction.fromDelta(-s.fz(), 0, s.fx());
+        Direction dirF = Direction.getNearest(s.fx(), 0, s.fz(), null);
+        Direction dirR = Direction.getNearest(-s.fz(), 0, s.fx(), null);
         Direction back = dirF.getOpposite();
         Direction.Axis alongL = dirR.getAxis(), alongD = dirF.getAxis();
 
@@ -608,12 +607,12 @@ public final class StartCottage {
             }
         }
         // inside: bed under the west window, table with a lantern, hearth side with shelves, carpet, a hanging lantern
-        BlockState bedFoot = Blocks.RED_BED.defaultBlockState().setValue(BedBlock.FACING, back).setValue(BedBlock.PART, BedPart.FOOT);
+        BlockState bedFoot = com.skycraft.worldgen.VanillaBlocks.RED_BED.defaultBlockState().setValue(BedBlock.FACING, back).setValue(BedBlock.PART, BedPart.FOOT);
         BlockPos foot = s.bed();
         put(level, foot, bedFoot);
         put(level, foot.relative(back), bedFoot.setValue(BedBlock.PART, BedPart.HEAD));
         for (int l = 3; l <= 5; l++) {
-            for (int d = 2; d <= 4; d++) put(level, s.at(l, d, y0 + 1), Blocks.RED_CARPET.defaultBlockState());
+            for (int d = 2; d <= 4; d++) put(level, s.at(l, d, y0 + 1), com.skycraft.worldgen.VanillaBlocks.RED_CARPET.defaultBlockState());
         }
         put(level, s.at(5, 5, y0 + 1), Blocks.SPRUCE_FENCE.defaultBlockState());
         put(level, s.at(5, 5, y0 + 2), Blocks.SPRUCE_PRESSURE_PLATE.defaultBlockState());
@@ -690,8 +689,15 @@ public final class StartCottage {
 
     // ------------------------------------------------------------------ preparation (path, sight cone) as chunks load
 
-    private static final TicketType<ChunkPos> TICKET =
-            TicketType.create("skycraft_cottage", Comparator.comparingLong(ChunkPos::toLong), 20 * 240);
+    private static final net.neoforged.neoforge.registries.DeferredRegister<TicketType> TICKET_TYPES =
+            net.neoforged.neoforge.registries.DeferredRegister.create(net.minecraft.core.registries.Registries.TICKET_TYPE, "skycraft");
+    private static final java.util.function.Supplier<TicketType> TICKET = TICKET_TYPES.register("cottage",
+            () -> new TicketType(20 * 240, TicketType.FLAG_LOADING));
+
+    /** Native tickets are registry entries and retain the original four-minute loading timeout. */
+    public static void register(net.neoforged.bus.api.IEventBus modBus) {
+        TICKET_TYPES.register(modBus);
+    }
 
     private static final class Prep {
         ServerLevel owner;
@@ -762,7 +768,7 @@ public final class StartCottage {
                 double hxd = cx * 16 + 8 - s.helgenX(), hzd = cz * 16 + 8 - s.helgenZ();
                 boolean town = Math.sqrt(hxd * hxd + hzd * hzd) <= hr + 20;
                 boolean cone = vl < 24 || (vx * ux + vz * uz > 0 && Math.acos(Mth.clamp((vx * ux + vz * uz) / vl, -1, 1)) <= half + 12.0 / Math.max(12, vl));
-                if (town || cone) set.add(ChunkPos.asLong(cx, cz));
+                if (town || cone) set.add(ChunkPos.pack(cx, cz));
             }
         }
         try {
@@ -806,8 +812,8 @@ public final class StartCottage {
         Prep p=PREP;
         if(p==null || p.owner!=level || p.stage<2 || p.ticketsReleased) return 0;
         for(long k:p.chunks) {
-            ChunkPos chunk=new ChunkPos(k);
-            level.getChunkSource().removeRegionTicket(TICKET,chunk,0,chunk);
+            ChunkPos chunk=ChunkPos.unpack(k);
+            level.getChunkSource().removeTicketWithRadius(TICKET.get(),chunk,0);
         }
         p.ticketsReleased=true;
         return p.chunks.size();
@@ -828,8 +834,8 @@ public final class StartCottage {
             int asked = 0;
             while (p.next < p.chunks.size() && asked < 6) {
                 long k = p.chunks.get(p.next++);
-                ChunkPos cp = new ChunkPos(k);
-                level.getChunkSource().addRegionTicket(TICKET, cp, 0, cp);
+                ChunkPos cp = ChunkPos.unpack(k);
+                level.getChunkSource().addTicketWithRadius(TICKET.get(), cp, 0);
                 asked++;
             }
             int loaded = 0;
@@ -847,8 +853,8 @@ public final class StartCottage {
         }
         // stage 1: keep the tickets alive and do the work in one tick
         for (long k : p.chunks) {
-            ChunkPos cp = new ChunkPos(k);
-            level.getChunkSource().addRegionTicket(TICKET, cp, 0, cp);
+            ChunkPos cp = ChunkPos.unpack(k);
+            level.getChunkSource().addTicketWithRadius(TICKET.get(), cp, 0);
         }
         Data d = data(level);
         try {
@@ -889,24 +895,24 @@ public final class StartCottage {
 
     /** Puts the player in the cottage (beside the bed, facing the window) and makes the bed their respawn point. */
     public static boolean wake(ServerPlayer p) {
-        Site site = ensure(p.serverLevel());
+        Site site = ensure(p.level());
         if (site == null) return false;
         Vec3 w = site.wake();
         if (p.position().distanceToSqr(w) > 14 * 14) {
-            moveTo(p, p.serverLevel(), w.x, w.y + 0.05, w.z, site.yaw(), 8f);
+            moveTo(p, p.level(), w.x, w.y + 0.05, w.z, site.yaw(), 8f);
             p.fallDistance = 0f;
             p.setDeltaMovement(Vec3.ZERO);
         } else {
             p.setYRot(site.yaw());
         }
         // the cottage bed is where a first death returns you, until a real bed is claimed
-        com.skycraft.combat.RespawnPoints.set(p, p.serverLevel().dimension(), site.bed());
+        com.skycraft.combat.RespawnPoints.set(p, p.level().dimension(), site.bed());
         return true;
     }
 
     /** Teleports a player (a stand-in without a connection is moved directly). */
     static void moveTo(ServerPlayer p, ServerLevel level, double x, double y, double z, float yaw, float pitch) {
-        p.teleportTo(level, x, y, z, yaw, pitch);
+        p.teleportTo(level, x, y, z, java.util.Set.of(), yaw, pitch, false);
         if (p.level() == level && p.position().distanceToSqr(x, y, z) > 1.0) p.setPos(x, y, z);
     }
 
@@ -967,7 +973,7 @@ public final class StartCottage {
             for (int l = 1; l <= 7; l++) {
                 for (int d = 1; d <= 5; d++) {
                     BlockState st = level.getBlockState(s.at(l, d, s.floorY() + y));
-                    if (st.isSolidRender(level, s.at(l, d, s.floorY() + y)) && !st.is(Blocks.BOOKSHELF)
+                    if (st.isSolidRender() && !st.is(Blocks.BOOKSHELF)
                             && !st.is(Blocks.BARREL) && !st.is(Blocks.CRAFTING_TABLE) && !st.is(Blocks.FURNACE)) return false;
                 }
             }

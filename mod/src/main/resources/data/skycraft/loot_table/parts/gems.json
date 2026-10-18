@@ -1,0 +1,106 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:amethyst_shard",
+          "weight": 30
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:garnet",
+          "weight": 26
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:small_pearl",
+          "weight": 10
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:ruby",
+          "weight": 14,
+          "condition": {
+            "min": 6,
+            "max": 999,
+            "type": "skycraft:loot_level"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:sapphire",
+          "weight": 9,
+          "condition": {
+            "min": 12,
+            "max": 999,
+            "type": "skycraft:loot_level"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:emerald",
+          "weight": 7,
+          "condition": {
+            "min": 9,
+            "max": 999,
+            "type": "skycraft:loot_level"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:diamond",
+          "weight": 4,
+          "condition": {
+            "min": 18,
+            "max": 999,
+            "type": "skycraft:loot_level"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:flawless_garnet",
+          "weight": 6,
+          "condition": {
+            "min": 9,
+            "max": 999,
+            "type": "skycraft:loot_level"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:flawless_ruby",
+          "weight": 4,
+          "condition": {
+            "min": 18,
+            "max": 999,
+            "type": "skycraft:loot_level"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:flawless_sapphire",
+          "weight": 3,
+          "condition": {
+            "min": 22,
+            "max": 999,
+            "type": "skycraft:loot_level"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:flawless_diamond",
+          "weight": 1,
+          "condition": {
+            "min": 27,
+            "max": 999,
+            "type": "skycraft:loot_level"
+          }
+        }
+      ]
+    }
+  ],
+  "random_sequence": "skycraft:parts/gems"
+}

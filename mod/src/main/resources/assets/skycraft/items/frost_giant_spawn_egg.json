@@ -1,0 +1,16 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "skycraft:item/frost_giant_spawn_egg",
+    "tints": [
+      {
+        "type": "minecraft:constant",
+        "value": 10535136
+      },
+      {
+        "type": "minecraft:constant",
+        "value": 3820122
+      }
+    ]
+  }
+}

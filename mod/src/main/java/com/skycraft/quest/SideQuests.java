@@ -48,7 +48,7 @@ public final class SideQuests {
 
     public static RadiantQuests.Offer goldenClawOffer(ServerPlayer player, LivingEntity giver) {
         ServerLevel level = (ServerLevel) player.level();
-        String dim = level.dimension().location().toString();
+        String dim = level.dimension().identifier().toString();
         BlockPos at = player.blockPosition();
         BlockPos dungeon = com.skycraft.tamriel.Places.byId("bleak_falls_barrow")
                 .filter(p -> level.dimension() == net.minecraft.world.level.Level.OVERWORLD && p.distSqr(at.getX(), at.getZ()) < 4000L * 4000L)
@@ -95,7 +95,7 @@ public final class SideQuests {
 
     public static RadiantQuests.Offer timeOfNeedOffer(ServerPlayer player, LivingEntity giver) {
         ServerLevel level = (ServerLevel) player.level();
-        String dim = level.dimension().location().toString();
+        String dim = level.dimension().identifier().toString();
         BlockPos at = player.blockPosition();
         BlockPos den = Locate.randomSpot(level, player.getRandom(), at, 250, 500);
 
@@ -119,8 +119,8 @@ public final class SideQuests {
                 .spawn(Spawn.of("skycraft:bandit", 4).name(lit("Alik'r Warrior")).build());
 
         ItemStack scimitar = new ItemStack(Items.IRON_SWORD);
-        scimitar.setHoverName(tr("item.skycraft.reward.alikr_scimitar"));
-        scimitar.enchant(Enchantments.SHARPNESS, 2);
+        scimitar.set(net.minecraft.core.component.DataComponents.CUSTOM_NAME, tr("item.skycraft.reward.alikr_scimitar"));
+        scimitar.enchant(com.skycraft.platform.EnchantmentsAccess.holder(Enchantments.SHARPNESS), 2);
 
         q.add(o1).add(o2).add(o3).reward(500, scimitar);
         return new RadiantQuests.Offer(q, tr("dialogue.skycraft.quest.pitch_time_of_need"));
@@ -137,7 +137,7 @@ public final class SideQuests {
 
     public static RadiantQuests.Offer wakingNightmareOffer(ServerPlayer player, LivingEntity giver) {
         ServerLevel level = (ServerLevel) player.level();
-        String dim = level.dimension().location().toString();
+        String dim = level.dimension().identifier().toString();
         BlockPos at = player.blockPosition();
         BlockPos temple = Locate.randomSpot(level, player.getRandom(), at, 300, 600);
 
@@ -177,7 +177,7 @@ public final class SideQuests {
 
     public static RadiantQuests.Offer forswornOffer(ServerPlayer player, LivingEntity giver) {
         ServerLevel level = (ServerLevel) player.level();
-        String dim = level.dimension().location().toString();
+        String dim = level.dimension().identifier().toString();
         BlockPos at = player.blockPosition();
         BlockPos ruins = Locate.randomSpot(level, player.getRandom(), at, 250, 500);
 
@@ -204,8 +204,8 @@ public final class SideQuests {
                 .filter("any").topic(tr("dialogue.skycraft.quest.madanach_breakout"), tr("dialogue.skycraft.quest.madanach_reward"));
 
         ItemStack armorReward = new ItemStack(Items.CHAINMAIL_CHESTPLATE);
-        armorReward.setHoverName(tr("item.skycraft.reward.armor_old_gods"));
-        armorReward.enchant(Enchantments.PROJECTILE_PROTECTION, 3);
+        armorReward.set(net.minecraft.core.component.DataComponents.CUSTOM_NAME, tr("item.skycraft.reward.armor_old_gods"));
+        armorReward.enchant(com.skycraft.platform.EnchantmentsAccess.holder(Enchantments.PROJECTILE_PROTECTION), 3);
 
         q.add(o1).add(o2).add(o3).add(o4).reward(1000, armorReward);
         return new RadiantQuests.Offer(q, tr("dialogue.skycraft.quest.pitch_forsworn"));
@@ -223,7 +223,7 @@ public final class SideQuests {
     public static void addSideQuestTopics(ServerPlayer player, LivingEntity npc, List<DialogueOption> out) {
         PlayerData data = SkyData.get(player);
         if (data.getLevel() < 1 || !QuestDialogue.canOfferQuest(player, npc)) return;
-        String holdBase = Holds.base(Holds.holdAt(player.serverLevel(), npc.blockPosition()));
+        String holdBase = Holds.base(Holds.holdAt(player.level(), npc.blockPosition()));
 
         // The Golden Claw — offered strictly by the designated Riverwood merchant during shop hours
         if (!hasSideQuest(player, "side_golden_claw")) {
@@ -235,7 +235,7 @@ public final class SideQuests {
                             <= (long) (p.radius() + 48) * (p.radius() + 48))
                     .orElse(false);
             if (isMerchant && openHours && inRiverwood) {
-                QuestStore qs = QuestStore.get(player.server);
+                QuestStore qs = QuestStore.get(player.level().getServer());
                 java.util.UUID designated = qs.getDesignatedGiver("side_golden_claw");
                 if (designated == null) {
                     qs.setDesignatedGiver("side_golden_claw", npc.getUUID());
@@ -287,7 +287,7 @@ public final class SideQuests {
     }
 
     public static boolean hasSideQuest(ServerPlayer player, String questId) {
-        return Quests.find(player.server, player.getUUID(), questId) != null;
+        return Quests.find(player.level().getServer(), player.getUUID(), questId) != null;
     }
 }
 

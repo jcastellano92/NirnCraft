@@ -11,9 +11,9 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
-import net.minecraft.world.entity.animal.IronGolem;
+import net.minecraft.world.entity.animal.golem.IronGolem;
 import net.minecraft.world.entity.monster.Monster;
-import net.minecraft.world.entity.npc.AbstractVillager;
+import net.minecraft.world.entity.npc.villager.AbstractVillager;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -56,7 +56,7 @@ public class BanditEntity extends SkyHumanoid implements Ranked {
     @Override
     protected void equip(RandomSource random, DifficultyInstance difficulty) {
         // economy workstream: leveled, province-appropriate gear (Chitin in Morrowind, Ra Gada in Hammerfell...)
-        if (!this.level().isClientSide) {
+        if (!this.level().isClientSide()) {
             com.skycraft.arsenal.LeveledGear.outfit(this, com.skycraft.arsenal.LeveledGear.Outfit.BANDIT, random, 0.06f);
             return;
         }

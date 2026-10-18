@@ -59,7 +59,7 @@ public final class Landmarks {
         fr.set(len + 2, 5, 0, Blocks.DARK_OAK_FENCE);
         for (int dy = 2; dy <= 8; dy++) fr.set(1, dy, 0, Deco.pillar(Blocks.SPRUCE_LOG, Direction.Axis.Y));
         for (int lt = -3; lt <= 3; lt++) fr.set(1, 7, lt, Deco.pillar(Blocks.STRIPPED_SPRUCE_LOG, fr.r.getAxis()));
-        for (int lt = -3; lt <= 2; lt++) for (int dy = 4; dy <= 6; dy++) if (fr.chance(lt, dy, 863, 3) || dy == 6) fr.set(1, dy, lt + 1, Blocks.WHITE_WOOL);
+        for (int lt = -3; lt <= 2; lt++) for (int dy = 4; dy <= 6; dy++) if (fr.chance(lt, dy, 863, 3) || dy == 6) fr.set(1, dy, lt + 1, com.skycraft.worldgen.VanillaBlocks.WHITE_WOOL);
         // cargo strewn about
         fr.container(-3, 0, 0, Deco.chest(fr.f), Deco.LOOT_COMMON);
         fr.container(4, 0, -1, Deco.barrel(Direction.UP), Deco.LOOT_MINOR);
@@ -129,7 +129,7 @@ public final class Landmarks {
         });
         // offerings at the roots, hanging glow
         fr.container(-4, 0, 3, Deco.chest(fr.f), Deco.LOOT_ALCHEMY);
-        fr.set(3, 0, -3, Deco.candle(Blocks.GREEN_CANDLE, 3, true));
+        fr.set(3, 0, -3, Deco.candle(com.skycraft.worldgen.VanillaBlocks.GREEN_CANDLE, 3, true));
         fr.set(-1, 10, 3, Blocks.SHROOMLIGHT);
         fr.set(-1, 10, -3, Blocks.SHROOMLIGHT);
         fr.spawn(Mobs.spriggan(), 4, 0, 4, fr.f, null);
@@ -226,8 +226,8 @@ public final class Landmarks {
                     if (Math.abs(fw) + Math.abs(lt) <= 2 - dy) fr.set(fw, dy, lt, fr.chance(fw, lt + dy * 7, 891, 2) ? Blocks.COBBLESTONE : Blocks.MOSSY_COBBLESTONE);
                 }
                 for (int dy = 3; dy <= 6; dy++) fr.set(0, dy, 0, Blocks.SPRUCE_FENCE);
-                fr.set(0, 6, 1, Blocks.WHITE_WOOL);
-                fr.set(0, 5, 1, Blocks.WHITE_WOOL);
+                fr.set(0, 6, 1, com.skycraft.worldgen.VanillaBlocks.WHITE_WOOL);
+                fr.set(0, 5, 1, com.skycraft.worldgen.VanillaBlocks.WHITE_WOOL);
                 if (style == SiteParams.Style.PASS) {
                     for (int fw = -9; fw <= 9; fw += 3) fr.set(fw, 0, 3, Blocks.COBBLESTONE_WALL);
                 }
@@ -247,7 +247,7 @@ public final class Landmarks {
                 });
                 fr.set(-3, 0, 0, Blocks.LILY_PAD);
                 Camps.fire(fr, 4, 2);
-                Towers.tent(fr, 6, -2, Blocks.BROWN_WOOL.defaultBlockState());
+                Towers.tent(fr, 6, -2, com.skycraft.worldgen.VanillaBlocks.BROWN_WOOL.defaultBlockState());
                 fr.container(7, 0, 2, Deco.barrel(Direction.UP), Deco.LOOT_MINOR);
             }
             case DWEMER, BRIDGE -> {
@@ -256,10 +256,10 @@ public final class Landmarks {
                 for (int fw = -6; fw <= 6; fw += 4) {
                     for (int lt : new int[]{-4, 4}) {
                         int h = 3 + fr.roll(fw, lt, 893, 5);
-                        for (int dy = 0; dy < h; dy++) fr.set(fw, dy, lt, dy == h - 1 ? Blocks.WAXED_COPPER_BLOCK.defaultBlockState() : Blocks.WAXED_CUT_COPPER.defaultBlockState());
+                        for (int dy = 0; dy < h; dy++) fr.set(fw, dy, lt, dy == h - 1 ? com.skycraft.worldgen.VanillaBlocks.WAXED_COPPER_BLOCK.defaultBlockState() : com.skycraft.worldgen.VanillaBlocks.WAXED_CUT_COPPER.defaultBlockState());
                     }
                 }
-                for (int fw = -5; fw <= 5; fw++) fr.set(fw, -1, 0, Blocks.WAXED_EXPOSED_CUT_COPPER);
+                for (int fw = -5; fw <= 5; fw++) fr.set(fw, -1, 0, com.skycraft.worldgen.VanillaBlocks.WAXED_EXPOSED_CUT_COPPER);
                 fr.set(0, 0, 0, Blocks.OCHRE_FROGLIGHT);
                 fr.spawn(Mobs.DWARVEN_SPIDER, 2, 0, 2, fr.f, null);
                 if (style == SiteParams.Style.BRIDGE) fr.spawn(Mobs.falmer(), -2, 0, -2, fr.f, null);
@@ -372,9 +372,9 @@ public final class Landmarks {
                 for (int dy = 0; dy <= top; dy++) {
                     if (gate && dy <= 4 && r > 6.0) continue;
                     if (dy == 20 || dy == 36 || dy == top) {
-                        p.set(x, fr.base + dy, z, (dy % 16 == 0) ? Blocks.WAXED_CUT_COPPER.defaultBlockState() : Blocks.POLISHED_BLACKSTONE_BRICKS.defaultBlockState());
+                        p.set(x, fr.base + dy, z, (dy % 16 == 0) ? com.skycraft.worldgen.VanillaBlocks.WAXED_CUT_COPPER.defaultBlockState() : Blocks.POLISHED_BLACKSTONE_BRICKS.defaultBlockState());
                     } else if (wall) {
-                        BlockState bs = (dy % 6 == 0) ? Blocks.WAXED_COPPER_BLOCK.defaultBlockState()
+                        BlockState bs = (dy % 6 == 0) ? com.skycraft.worldgen.VanillaBlocks.WAXED_COPPER_BLOCK.defaultBlockState()
                                 : (dy % 9 == 4) ? Blocks.OCHRE_FROGLIGHT.defaultBlockState()
                                 : Blocks.POLISHED_BLACKSTONE_BRICKS.defaultBlockState();
                         p.set(x, fr.base + dy, z, bs);
@@ -386,7 +386,7 @@ public final class Landmarks {
         for (int fw = -21; fw <= 21; fw++) {
             if (Math.abs(fw) < 10) continue;
             for (int lt = -3; lt <= 3; lt++) {
-                fr.set(fw, 0, lt, Math.abs(lt) == 3 ? Blocks.WAXED_CUT_COPPER : Blocks.POLISHED_BLACKSTONE_BRICKS);
+                fr.set(fw, 0, lt, Math.abs(lt) == 3 ? com.skycraft.worldgen.VanillaBlocks.WAXED_CUT_COPPER : Blocks.POLISHED_BLACKSTONE_BRICKS);
                 if (Math.abs(lt) == 3 && Math.abs(fw) % 3 == 0) {
                     fr.set(fw, 1, lt, Blocks.POLISHED_BLACKSTONE_BRICK_WALL);
                     fr.set(fw, 2, lt, Blocks.SOUL_LANTERN);
@@ -410,7 +410,7 @@ public final class Landmarks {
                 for (int dy = 0; dy <= 24; dy++) {
                     BlockState bs = (df == 0 && dl == 0)
                             ? (dy >= 21 ? Blocks.SEA_LANTERN.defaultBlockState() : Deco.pillar(Blocks.BONE_BLOCK, Direction.Axis.Y))
-                            : (dy < 16 && (df == 0 || dl == 0)) ? Blocks.WAXED_CUT_COPPER.defaultBlockState() : null;
+                            : (dy < 16 && (df == 0 || dl == 0)) ? com.skycraft.worldgen.VanillaBlocks.WAXED_CUT_COPPER.defaultBlockState() : null;
                     if (bs != null) fr.set(pfw + df, dy, plt + dl, bs);
                 }
             }
@@ -421,8 +421,8 @@ public final class Landmarks {
             for (int s = 2; s <= 10; s++) {
                 int bfw = a[0] + (b[0] - a[0]) * s / 12;
                 int blt = a[1] + (b[1] - a[1]) * s / 12;
-                fr.set(bfw, 19, blt, Blocks.LIGHT_BLUE_STAINED_GLASS);
-                fr.set(bfw, 20, blt, Blocks.CYAN_STAINED_GLASS_PANE);
+                fr.set(bfw, 19, blt, com.skycraft.worldgen.VanillaBlocks.LIGHT_BLUE_STAINED_GLASS);
+                fr.set(bfw, 20, blt, com.skycraft.worldgen.VanillaBlocks.CYAN_STAINED_GLASS_PANE);
             }
         }
         fr.container(3, 1, 3, Deco.chest(fr.f), Deco.LOOT_BOSS);
@@ -466,11 +466,11 @@ public final class Landmarks {
                     if (ring || rib) {
                         bs = (dy % 8 == 0) ? Blocks.SEA_LANTERN.defaultBlockState() : Deco.pillar(Blocks.QUARTZ_PILLAR, Direction.Axis.Y);
                     } else if (dy > 96) {
-                        bs = Blocks.WHITE_STAINED_GLASS.defaultBlockState();
+                        bs = com.skycraft.worldgen.VanillaBlocks.WHITE_STAINED_GLASS.defaultBlockState();
                     } else if (dy > 52) {
-                        bs = ((dy + fw + lt) & 1) == 0 ? Blocks.LIGHT_BLUE_STAINED_GLASS.defaultBlockState() : Blocks.WHITE_STAINED_GLASS.defaultBlockState();
+                        bs = ((dy + fw + lt) & 1) == 0 ? com.skycraft.worldgen.VanillaBlocks.LIGHT_BLUE_STAINED_GLASS.defaultBlockState() : com.skycraft.worldgen.VanillaBlocks.WHITE_STAINED_GLASS.defaultBlockState();
                     } else {
-                        bs = ((dy + fw) & 1) == 0 ? Blocks.CYAN_STAINED_GLASS.defaultBlockState() : Blocks.CALCITE.defaultBlockState();
+                        bs = ((dy + fw) & 1) == 0 ? com.skycraft.worldgen.VanillaBlocks.CYAN_STAINED_GLASS.defaultBlockState() : Blocks.CALCITE.defaultBlockState();
                     }
                     p.set(x, fr.base + dy, z, bs);
                 } else if (dy % 16 == 1 && r < maxR - 1.5) {
@@ -489,7 +489,7 @@ public final class Landmarks {
             int olt = (int) Math.round(Math.sin(ang) * 25);
             for (int dy = 1; dy <= 12; dy++) {
                 fr.set(ofw, dy, olt, dy == 12 ? Blocks.SEA_LANTERN.defaultBlockState()
-                        : dy >= 9 ? Blocks.LIGHT_BLUE_STAINED_GLASS.defaultBlockState()
+                        : dy >= 9 ? com.skycraft.worldgen.VanillaBlocks.LIGHT_BLUE_STAINED_GLASS.defaultBlockState()
                         : Deco.pillar(Blocks.QUARTZ_PILLAR, Direction.Axis.Y));
             }
         }
@@ -509,13 +509,13 @@ public final class Landmarks {
             default -> Deco.pillar(Blocks.JUNGLE_LOG, Direction.Axis.Y);
         };
         BlockState leafMain = switch (style) {
-            case FALINESTI_AUTUMN -> Blocks.YELLOW_TERRACOTTA.defaultBlockState();
+            case FALINESTI_AUTUMN -> com.skycraft.worldgen.VanillaBlocks.YELLOW_TERRACOTTA.defaultBlockState();
             case FALINESTI_WINTER -> Blocks.SNOW_BLOCK.defaultBlockState();
             case FALINESTI_SPRING -> Blocks.CHERRY_LEAVES.defaultBlockState().setValue(LeavesBlock.PERSISTENT, true);
             default -> Blocks.JUNGLE_LEAVES.defaultBlockState().setValue(LeavesBlock.PERSISTENT, true);
         };
         BlockState leafAccent = switch (style) {
-            case FALINESTI_AUTUMN -> Blocks.ORANGE_TERRACOTTA.defaultBlockState();
+            case FALINESTI_AUTUMN -> com.skycraft.worldgen.VanillaBlocks.ORANGE_TERRACOTTA.defaultBlockState();
             case FALINESTI_WINTER -> Blocks.PACKED_ICE.defaultBlockState();
             case FALINESTI_SPRING -> Blocks.FLOWERING_AZALEA_LEAVES.defaultBlockState().setValue(LeavesBlock.PERSISTENT, true);
             default -> Blocks.AZALEA_LEAVES.defaultBlockState().setValue(LeavesBlock.PERSISTENT, true);
@@ -606,7 +606,7 @@ public final class Landmarks {
                     if (r >= maxR - 1.1) {
                         BlockState bs = (dy % 10 == 0) ? Blocks.GOLD_BLOCK.defaultBlockState()
                                 : (dy % 5 == 0) ? Blocks.SEA_LANTERN.defaultBlockState()
-                                : (Math.abs(fw) <= 1 || Math.abs(lt) <= 1) ? Blocks.LIGHT_BLUE_STAINED_GLASS.defaultBlockState()
+                                : (Math.abs(fw) <= 1 || Math.abs(lt) <= 1) ? com.skycraft.worldgen.VanillaBlocks.LIGHT_BLUE_STAINED_GLASS.defaultBlockState()
                                 : Deco.pillar(Blocks.QUARTZ_PILLAR, Direction.Axis.Y);
                         if (!(dy <= 4 && (Math.abs(fw) <= 1 || Math.abs(lt) <= 1))) {
                             p.set(x, fr.base + dy, z, bs);
@@ -649,7 +649,7 @@ public final class Landmarks {
             p.clear(x, fr.base, z, fr.base + 72);
             // Temple canton plaza deck at base
             if (r <= 20) {
-                p.set(x, fr.base - 1, z, r > 18 ? Blocks.WAXED_CUT_COPPER.defaultBlockState() : Blocks.SMOOTH_SANDSTONE.defaultBlockState());
+                p.set(x, fr.base - 1, z, r > 18 ? com.skycraft.worldgen.VanillaBlocks.WAXED_CUT_COPPER.defaultBlockState() : Blocks.SMOOTH_SANDSTONE.defaultBlockState());
                 p.foundation(x, fr.base - 2, z, Blocks.SANDSTONE.defaultBlockState(), 12);
             }
             // Levitating asteroid body (dy = 18..58)
@@ -675,7 +675,7 @@ public final class Landmarks {
         int[][] anchors = {{10, 10}, {-10, 10}, {10, -10}, {-10, -10}};
         for (int[] a : anchors) {
             for (int dy = 0; dy <= 24; dy++) {
-                fr.set(a[0], dy, a[1], dy < 4 ? Blocks.WAXED_COPPER_BLOCK.defaultBlockState() : Blocks.CHAIN.defaultBlockState());
+                fr.set(a[0], dy, a[1], dy < 4 ? com.skycraft.worldgen.VanillaBlocks.WAXED_COPPER_BLOCK.defaultBlockState() : com.skycraft.worldgen.VanillaBlocks.CHAIN.defaultBlockState());
             }
         }
         fr.set(0, 37, 0, Blocks.SOUL_LANTERN);
@@ -750,7 +750,7 @@ public final class Landmarks {
                 if (dy > 38 && spiral > 0.55) continue;
                 if (r <= maxR && r >= maxR - 1.3) {
                     BlockState bs = (dy % 5 == 0) ? Blocks.RAW_GOLD_BLOCK.defaultBlockState()
-                            : (dy % 3 == 0) ? Blocks.WAXED_COPPER_BLOCK.defaultBlockState()
+                            : (dy % 3 == 0) ? com.skycraft.worldgen.VanillaBlocks.WAXED_COPPER_BLOCK.defaultBlockState()
                             : Blocks.CUT_RED_SANDSTONE.defaultBlockState();
                     p.set(x, fr.base + dy, z, bs);
                 } else if (r <= 1.5 && dy <= 76) {
@@ -848,7 +848,7 @@ public final class Landmarks {
             // Hist-sap inner lagoon (r <= 11)
             if (r >= 4.5 && r <= 11.5) {
                 p.set(x, fr.base - 2, z, Blocks.SHROOMLIGHT.defaultBlockState());
-                p.set(x, fr.base - 1, z, Blocks.ORANGE_STAINED_GLASS.defaultBlockState());
+                p.set(x, fr.base - 1, z, com.skycraft.worldgen.VanillaBlocks.ORANGE_STAINED_GLASS.defaultBlockState());
             } else {
                 p.set(x, fr.base - 1, z, Blocks.MUD_BRICKS.defaultBlockState());
                 p.foundation(x, fr.base - 2, z, Blocks.MUD.defaultBlockState(), 14);

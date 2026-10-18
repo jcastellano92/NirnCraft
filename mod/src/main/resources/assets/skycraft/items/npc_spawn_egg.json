@@ -1,0 +1,16 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "skycraft:item/npc_spawn_egg",
+    "tints": [
+      {
+        "type": "minecraft:constant",
+        "value": 9071172
+      },
+      {
+        "type": "minecraft:constant",
+        "value": 14207136
+      }
+    ]
+  }
+}

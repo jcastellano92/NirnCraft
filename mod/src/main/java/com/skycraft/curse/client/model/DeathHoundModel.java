@@ -8,7 +8,7 @@ import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.world.entity.LivingEntity;
 
 import static com.skycraft.curse.client.model.Keys.anim;
@@ -19,7 +19,7 @@ import static com.skycraft.curse.client.model.Keys.rot;
 /** The death hound: a gaunt, long-legged undead dog with a narrow skull, a snapping jaw and a whip tail. Texture 64x32. */
 public class DeathHoundModel<T extends LivingEntity> extends BeastModel<T> {
     public DeathHoundModel(ModelPart root) {
-        super(root, RenderType::entityCutoutNoCull);
+        super(root, net.minecraft.client.renderer.rendertype.RenderTypes::entityCutout);
     }
 
     public static LayerDefinition createLayer() {

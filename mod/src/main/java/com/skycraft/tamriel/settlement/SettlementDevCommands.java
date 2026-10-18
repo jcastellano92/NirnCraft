@@ -31,9 +31,9 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.Structure;
-import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -60,7 +60,7 @@ import java.util.Locale;
  *   <li>{@code /skysettle render <x1> <z1> <x2> <z2> <name>}: isometric and top-down images of any built area.</li>
  * </ul>
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class SettlementDevCommands {
     private SettlementDevCommands() {}
 
@@ -69,7 +69,7 @@ public final class SettlementDevCommands {
     @SubscribeEvent
     public static void onRegister(RegisterCommandsEvent event) {
         CommandDispatcher<CommandSourceStack> d = event.getDispatcher();
-        d.register(Commands.literal("skysettle").requires(s -> s.hasPermission(2))
+        d.register(Commands.literal("skysettle").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
                 .then(Commands.literal("gallery").then(Commands.argument("culture", StringArgumentType.word())
                         .executes(c -> gallery(c, 0, "all"))
                         .then(Commands.argument("style", IntegerArgumentType.integer(0, 15))
@@ -111,7 +111,7 @@ public final class SettlementDevCommands {
      * comments) on the console once the server has started, then stops the server.
      */
     @SubscribeEvent
-    public static void onStarted(net.minecraftforge.event.server.ServerStartedEvent event) {
+    public static void onStarted(net.neoforged.neoforge.event.server.ServerStartedEvent event) {
         String path = System.getProperty("skycraft.settle.script", "");
         if (path.isEmpty()) return;
         var server = event.getServer();
@@ -145,8 +145,8 @@ public final class SettlementDevCommands {
 
     static Structure.GenerationContext context(ServerLevel level, int x, int z) {
         ChunkGenerator gen = level.getChunkSource().getGenerator();
-        return new Structure.GenerationContext(level.registryAccess(), gen, gen.getBiomeSource(), level.getChunkSource().randomState(),
-                level.getStructureManager(), level.getSeed(), new ChunkPos(x >> 4, z >> 4), level, b -> true);
+        return new Structure.GenerationContext(level.registryAccess(), gen, gen.getBiomeSource(), level.getChunkSource().randomState().createClimateSampler(net.minecraft.world.level.levelgen.densityfunction.SamplerContext.EMPTY_UNCACHED),  level.getChunkSource().randomState(),
+                level.getStructureTemplateManager(), level.getSeed(), new ChunkPos(x >> 4, z >> 4), level, b -> true);
     }
 
     /** Paints the pieces chunk by chunk through {@link SettlementPiece#postProcess}, like world generation does. */
@@ -158,7 +158,7 @@ public final class SettlementDevCommands {
             for (int cx = b.minX() >> 4; cx <= b.maxX() >> 4; cx++) {
                 for (int cz = b.minZ() >> 4; cz <= b.maxZ() >> 4; cz++) {
                     level.getChunk(cx, cz);
-                    BoundingBox chunk = new BoundingBox(cx << 4, level.getMinBuildHeight(), cz << 4, (cx << 4) + 15, level.getMaxBuildHeight() - 1, (cz << 4) + 15);
+                    BoundingBox chunk = new BoundingBox(cx << 4, level.getMinY(), cz << 4, (cx << 4) + 15, (level.getMaxY() + 1) - 1, (cz << 4) + 15);
                     p.postProcess(level, level.structureManager(), gen, rnd, chunk, new ChunkPos(cx, cz), BlockPos.ZERO);
                 }
             }
@@ -265,7 +265,7 @@ public final class SettlementDevCommands {
     static Plan planGeneric(ServerLevel level, Culture cul, int style, Layouts.Size sz, int x, int z, boolean legacy) {
         Structure.GenerationContext ctx = context(level, x, z);
         int radius = legacy ? legacyRadius(sz) : sz.radius();
-        long seed = level.getSeed() ^ ChunkPos.asLong(x >> 4, z >> 4) * 0x5DEECE66DL ^ sz.ordinal();
+        long seed = level.getSeed() ^ ChunkPos.pack(x >> 4, z >> 4) * 0x5DEECE66DL ^ sz.ordinal();
         Direction back = Direction.from2DDataValue((int) Math.floorMod(seed >>> 7, 4));
         Plan plan = new Plan("gen:" + (x >> 4) + "," + (z >> 4), x, z, radius, cul, style, seed, new Terrain(ctx, radius > 60 ? 16 : 8), back);
         if (legacy) Layouts.generic(plan, sz, "", Layouts.Names.NONE);

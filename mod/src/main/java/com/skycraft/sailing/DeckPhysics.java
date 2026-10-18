@@ -4,22 +4,19 @@ import com.skycraft.sailing.ShipDeck.Box;
 import com.skycraft.sailing.ShipDeck.Deck;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.animal.WaterAnimal;
+import net.minecraft.world.entity.animal.fish.WaterAnimal;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 import org.jetbrains.annotations.Nullable;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -79,14 +76,11 @@ public final class DeckPhysics {
     private static final Side CLIENT = new Side();
     private static final Side SERVER = new Side();
     private static final Map<UUID, Report> REPORTS = new HashMap<>();
-    @Nullable
-    private static Field aboveGround;
-    private static boolean aboveGroundTried;
 
     private DeckPhysics() {}
 
     private static Side side(Level level) {
-        return level.isClientSide ? CLIENT : SERVER;
+        return level.isClientSide() ? CLIENT : SERVER;
     }
 
     static void track(ShipEntity ship) {
@@ -209,7 +203,7 @@ public final class DeckPhysics {
         if (out.supported) {
             e.setOnGround(true);
             if (e.fallDistance > 0) {
-                if (!e.level().isClientSide && !(e instanceof Player) && e.fallDistance > 3.0f && !r.supported) {
+                if (!e.level().isClientSide() && !(e instanceof Player) && e.fallDistance > 3.0f && !r.supported) {
                     e.causeFallDamage(e.fallDistance, 1.0f, e.damageSources().fall());
                 }
                 e.resetFallDistance();
@@ -241,7 +235,7 @@ public final class DeckPhysics {
         double vlx = v[0] * cs + v[2] * sn, vlz = -v[0] * sn + v[2] * cs, vly = v[1];
         double prevLy = r.ship == s ? r.prevLy : Double.NaN;
         boolean grounded = r.supported || e.onGround();
-        float step = e.getStepHeight();
+        float step = e.maxUpStep();
         boolean changed = false;
 
         for (int pass = 0; pass < 3; pass++) {
@@ -402,7 +396,7 @@ public final class DeckPhysics {
     public static void endTick(Level level, @Nullable Set<Entity> bound) {
         Side side = side(level);
         if (side.ships.isEmpty()) return;
-        boolean client = level.isClientSide;
+        boolean client = level.isClientSide();
         Map<Entity, List<ShipEntity>> todo = new LinkedHashMap<>();
         for (ShipEntity s : List.copyOf(side.ships)) {
             if (s.level() != level || s.isRemoved()) continue;
@@ -508,7 +502,7 @@ public final class DeckPhysics {
      * the server's ship), everyone else's own position.
      */
     public static Vec3 combatPos(LivingEntity e) {
-        if (e instanceof Player p && !e.level().isClientSide) {
+        if (e instanceof Player p && !e.level().isClientSide()) {
             Report r = reportOf(p);
             if (r != null && e.level().getEntity(r.ship()) instanceof ShipEntity s) return s.toWorld(r.lx(), r.ly(), r.lz());
         }
@@ -518,7 +512,7 @@ public final class DeckPhysics {
     /** The ship a player (by its report) or any other entity (by the physics) stands on, server side. */
     @Nullable
     public static ShipEntity deckShip(Entity e) {
-        if (e instanceof Player p && !e.level().isClientSide) {
+        if (e instanceof Player p && !e.level().isClientSide()) {
             Report r = reportOf(p);
             return r != null && e.level().getEntity(r.ship()) instanceof ShipEntity s ? s : null;
         }
@@ -533,26 +527,7 @@ public final class DeckPhysics {
     static void serverPlayerTick(ServerPlayer player) {
         Report r = reportOf(player);
         if (r == null || player.isPassenger()) return;
-        Field f = aboveGroundField();
-        if (f == null) return;
-        try {
-            f.setInt(player.connection, 0);
-        } catch (IllegalAccessException ignored) {
-            // leave it: the server may allow flight anyway
-        }
-    }
-
-    @Nullable
-    private static Field aboveGroundField() {
-        if (!aboveGroundTried) {
-            aboveGroundTried = true;
-            try {
-                aboveGround = ObfuscationReflectionHelper.findField(ServerGamePacketListenerImpl.class, "f_9737_"); // aboveGroundTickCount
-            } catch (RuntimeException e) {
-                com.skycraft.Skycraft.LOGGER.warn("Sailing: cannot reach the flight-kick counter; set allow-flight=true for walkable decks on dedicated servers");
-            }
-        }
-        return aboveGround;
+        player.connection.resetFlyingTicks();
     }
 
     /** Server: the deck positions of everyone aboard a ship (crew from the physics, players from their reports). */

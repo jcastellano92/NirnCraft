@@ -13,7 +13,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
@@ -24,7 +24,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.item.Items;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -142,15 +142,15 @@ public final class Quests {
     }
 
     public static boolean canTakeMore(ServerPlayer player) {
-        return activeSideQuests(player.server, keyForNew(player.server, player.getUUID())) < QuestConfig.MAX_ACTIVE_QUESTS.get();
+        return activeSideQuests(player.level().getServer(), keyForNew(player.level().getServer(), player.getUUID())) < QuestConfig.MAX_ACTIVE_QUESTS.get();
     }
 
     // ------------------------------------------------------------------ lifecycle
 
     /** Starts a quest for the player (their party's if they're in one). */
     public static boolean start(ServerPlayer player, Quest q) {
-        String key = q.isMain() ? personalKey(player.getUUID()) : keyForNew(player.server, player.getUUID());
-        return start(player.server, key, q, player);
+        String key = q.isMain() ? personalKey(player.getUUID()) : keyForNew(player.level().getServer(), player.getUUID());
+        return start(player.level().getServer(), key, q, player);
     }
 
     public static boolean start(MinecraftServer server, String key, Quest q, @Nullable ServerPlayer starter) {
@@ -167,7 +167,7 @@ public final class Quests {
         Objective first = q.current();
         if (first != null) begin(server, key, q, first);
         if (starter != null) {
-            for (Tag t : q.extra.getList("give_on_start", Tag.TAG_COMPOUND)) give(starter, ItemStack.of((CompoundTag) t));
+            for (Tag t : q.extra.getListOrEmpty("give_on_start")) give(starter, com.skycraft.inventory.ItemData.parse((CompoundTag) t));
         }
         Component sub = first != null ? first.text : Component.empty();
         for (ServerPlayer m : onlineMembers(server, key)) Notifier.send(m, NotifyKind.QUEST_STARTED, q.title, sub);
@@ -245,7 +245,7 @@ public final class Quests {
         float factor = com.skycraft.skills.Progression.partyXpFactor(partySize);
         // Each party member gets full items and nearly full gold/XP (scaled by partyXpFactor, never halved)
         Quest paid = q;
-        if (shared && !q.extra.getBoolean(PER_PLAYER)) {
+        if (shared && !q.extra.getBooleanOr(PER_PLAYER, false)) {
             paid = Quest.load(q.save());
             paid.rewardGold = Math.max(1L, Math.round(q.rewardGold * factor));
         }
@@ -295,19 +295,19 @@ public final class Quests {
 
     /** Player gives up a side quest (main quest can't be abandoned). */
     public static void abandon(ServerPlayer player, String questId) {
-        Ref ref = find(player.server, player.getUUID(), questId);
+        Ref ref = find(player.level().getServer(), player.getUUID(), questId);
         if (ref == null || !ref.quest().isActive() || ref.quest().isMain()) return;
-        fail(player.server, ref.key(), ref.quest(), Component.translatable("quest.skycraft.abandoned", player.getDisplayName()));
+        fail(player.level().getServer(), ref.key(), ref.quest(), Component.translatable("quest.skycraft.abandoned", player.getDisplayName()));
     }
 
     /** Share a personal active side quest with the player's party. */
     public static void shareWithParty(ServerPlayer player, String questId) {
-        Party party = PartyManager.get(player.server).partyOf(player.getUUID());
+        Party party = PartyManager.get(player.level().getServer()).partyOf(player.getUUID());
         if (party == null) {
             Notifier.message(player, Component.translatable("party.skycraft.no_party"));
             return;
         }
-        QuestStore store = QuestStore.get(player.server);
+        QuestStore store = QuestStore.get(player.level().getServer());
         String pKey = personalKey(player.getUUID());
         Quest q = store.find(pKey, questId);
         if (q == null || !q.isActive() || q.isMain()) return;
@@ -316,13 +316,13 @@ public final class Quests {
         // Move from personal list to party list
         store.quests(pKey).remove(q);
         if (store.find(ptKey, q.id) != null) q.id = newId(store, ptKey);
-        recordAcceptedBy(player.server, ptKey, q);
+        recordAcceptedBy(player.level().getServer(), ptKey, q);
         store.quests(ptKey).add(q);
-        for (ServerPlayer m : onlineMembers(player.server, ptKey)) {
+        for (ServerPlayer m : onlineMembers(player.level().getServer(), ptKey)) {
             Notifier.message(m, Component.translatable("quest.skycraft.shared_with_party", player.getDisplayName(), q.title));
         }
-        changed(player.server, pKey);
-        changed(player.server, ptKey);
+        changed(player.level().getServer(), pKey);
+        changed(player.level().getServer(), ptKey);
     }
 
     // ------------------------------------------------------------------ rewards
@@ -356,12 +356,12 @@ public final class Quests {
 
     /** Delivers rewards of shared quests completed while the player was offline. */
     public static void deliverPending(ServerPlayer player) {
-        ListTag list = QuestStore.get(player.server).takePending(player.getUUID());
+        ListTag list = QuestStore.get(player.level().getServer()).takePending(player.getUUID());
         if (list == null) return;
         for (Tag t : list) {
             CompoundTag c = (CompoundTag) t;
-            int partySize = c.contains("partySize") ? c.getInt("partySize") : (c.getBoolean("shared") ? 2 : 1);
-            grantRewards(player, Quest.load(c.getCompound("quest")), c.getBoolean("shared"), partySize);
+            int partySize = c.contains("partySize") ? c.getIntOr("partySize",0) : (c.getBooleanOr("shared",false) ? 2 : 1);
+            grantRewards(player, Quest.load(c.getCompoundOrEmpty("quest")), c.getBooleanOr("shared",false), partySize);
         }
     }
 
@@ -396,10 +396,10 @@ public final class Quests {
     public static ServerPlayer asPlayer(MinecraftServer server, @Nullable Entity e) {
         if (e == null) return null;
         if (e instanceof ServerPlayer sp) return sp;
-        if (e instanceof OwnableEntity own && own.getOwnerUUID() != null) return server.getPlayerList().getPlayer(own.getOwnerUUID());
+        if (e instanceof OwnableEntity own && own.getOwnerReference() != null) return server.getPlayerList().getPlayer(own.getOwnerReference().getUUID());
         CompoundTag pd = e.getPersistentData();
         for (String k : SUMMON_OWNER_KEYS) {
-            if (pd.hasUUID(k)) return server.getPlayerList().getPlayer(pd.getUUID(k));
+            if (pd.read(k, net.minecraft.core.UUIDUtil.CODEC).isPresent()) return server.getPlayerList().getPlayer(pd.read(k, net.minecraft.core.UUIDUtil.CODEC).orElseThrow());
         }
         return null;
     }
@@ -485,7 +485,7 @@ public final class Quests {
     }
 
     public static void sync(ServerPlayer player) {
-        MinecraftServer server = player.server;
+        MinecraftServer server = player.level().getServer();
         QuestStore store = QuestStore.get(server);
         ListTag list = new ListTag();
         for (String key : keysOf(server, player.getUUID())) {
@@ -494,10 +494,10 @@ public final class Quests {
                 CompoundTag t = q.save();
                 t.putBoolean("shared", shared);
                 // the client doesn't need spawn specs
-                ListTag objs = t.getList("objectives", Tag.TAG_COMPOUND);
+                ListTag objs = t.getListOrEmpty("objectives");
                 for (int i = 0; i < objs.size(); i++) {
-                    objs.getCompound(i).remove("spawns");
-                    objs.getCompound(i).remove("spawnedIds");
+                    objs.getCompoundOrEmpty(i).remove("spawns");
+                    objs.getCompoundOrEmpty(i).remove("spawnedIds");
                 }
                 list.add(t);
             }
@@ -517,7 +517,7 @@ public final class Quests {
     /** Keeps {@code module("quest").markers} (read by the world map) in sync with the current objectives. */
     public static void updateMarkers(ServerPlayer player) {
         ListTag markers = new ListTag();
-        for (Ref ref : active(player.server, player.getUUID())) {
+        for (Ref ref : active(player.level().getServer(), player.getUUID())) {
             Quest q = ref.quest();
             Objective o = q.current();
             if (o == null) continue;
@@ -536,7 +536,7 @@ public final class Quests {
         }
         PlayerData data = SkyData.get(player);
         CompoundTag mod = data.module("quest");
-        if (!markers.equals(mod.getList("markers", Tag.TAG_COMPOUND))) {
+        if (!markers.equals(mod.getListOrEmpty("markers"))) {
             mod.put("markers", markers);
             data.markDirty();
         }

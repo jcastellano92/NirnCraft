@@ -18,7 +18,7 @@ public final class Settlement {
     private static final int MAX_HALF_EXTENT = 240;
 
     public final int id;
-    /** Start chunk ({@code ChunkPos.toLong()}): unique per structure start. */
+    /** Start chunk ({@code ChunkPos.pack()}): unique per structure start. */
     public final long key;
     public final int x;
     public final int z;
@@ -139,13 +139,13 @@ public final class Settlement {
     }
 
     static Settlement load(CompoundTag t) {
-        int[] p = t.getIntArray("pos");
-        int[] b = t.getIntArray("box");
+        int[] p = t.getIntArray("pos").orElseGet(() -> new int[0]);
+        int[] b = t.getIntArray("box").orElseGet(() -> new int[0]);
         if (p.length < 3 || b.length < 4) return null;
-        Settlement s = new Settlement(t.getInt("id"), t.getLong("key"), p[0], p[1], p[2], b[0], b[1], b[2], b[3],
-                t.getString("name"), t.getString("structure"), t.getString("loc"), t.getBoolean("yres"));
-        s.town = !t.getBoolean("dest");
-        s.placeId = t.getString("place");
+        Settlement s = new Settlement(t.getIntOr("id", 0), t.getLongOr("key", 0L), p[0], p[1], p[2], b[0], b[1], b[2], b[3],
+                t.getStringOr("name", ""), t.getStringOr("structure", ""), t.getStringOr("loc", ""), t.getBooleanOr("yres", false));
+        s.town = !t.getBooleanOr("dest", false);
+        s.placeId = t.getStringOr("place", "");
         return s;
     }
 }

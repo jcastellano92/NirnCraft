@@ -1,12 +1,13 @@
 package com.skycraft.dungeons.world;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.skycraft.dungeons.DungeonsRegistry;
 import net.minecraft.core.Vec3i;
 import net.minecraft.world.level.chunk.ChunkGeneratorStructureState;
 import net.minecraft.world.level.levelgen.structure.placement.StructurePlacement;
-import net.minecraft.world.level.levelgen.structure.placement.StructurePlacementType;
+
 
 import java.util.Optional;
 
@@ -17,26 +18,27 @@ import java.util.Optional;
  *
  * <pre>{@code "placement": {"type": "skycraft:sites", "salt": 3, "sites": "seven_thousand_steps"}}</pre>
  */
-public class SitesPlacement extends StructurePlacement {
-    public static final Codec<SitesPlacement> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+public class SitesPlacement implements StructurePlacement {
+    public static final MapCodec<SitesPlacement> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
             Codec.INT.optionalFieldOf("salt", 0).forGetter(SitesPlacement::salt),
             Codec.STRING.fieldOf("sites").forGetter(p -> p.sites)
     ).apply(instance, SitesPlacement::new));
 
     private final String sites;
 
+    private final int salt;
+    public int salt() { return salt; }
+
     public SitesPlacement(int salt, String sites) {
-        super(Vec3i.ZERO, FrequencyReductionMethod.DEFAULT, 1.0f, salt, Optional.empty());
+        this.salt = salt;
         this.sites = sites;
     }
 
     @Override
-    protected boolean isPlacementChunk(ChunkGeneratorStructureState state, int chunkX, int chunkZ) {
+    public boolean isStructureChunk(ChunkGeneratorStructureState state, int chunkX, int chunkZ) {
         return Sites.indexAt(sites, chunkX, chunkZ) >= 0;
     }
 
     @Override
-    public StructurePlacementType<?> type() {
-        return DungeonsRegistry.SITES_PLACEMENT.get();
-    }
+    public MapCodec<? extends StructurePlacement> codec() { return CODEC; }
 }

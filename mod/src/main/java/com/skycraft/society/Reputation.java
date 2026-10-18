@@ -30,7 +30,7 @@ import java.util.Map;
 
 /**
  * Per-player standing with Tamriel's factions (cross-module contract 23): {@code data.module("society")
- * .getCompound("reputation")} maps faction id -> int in -100..100 (absent = 0). Synced to the owning client with the
+ * .getCompoundOrEmpty("reputation")} maps faction id -> int in -100..100 (absent = 0). Synced to the owning client with the
  * rest of the player data, so the reputation screen reads it directly.
  *
  * <p>Backed by {@code /skycraft/society/factions.json}, which maps every province, region, and major settlement
@@ -265,19 +265,19 @@ public final class Reputation {
     /** The reputation compound (read-only use on the client is fine). */
     public static CompoundTag tag(PlayerData data) {
         CompoundTag mod = data.module(MODULE);
-        if (!mod.contains(KEY, Tag.TAG_COMPOUND)) mod.put(KEY, new CompoundTag());
-        return mod.getCompound(KEY);
+        if (!com.skycraft.platform.NbtData.hasType(mod, KEY, Tag.TAG_COMPOUND)) mod.put(KEY, new CompoundTag());
+        return mod.getCompoundOrEmpty(KEY);
     }
 
     public static int get(Player player, String faction) {
         if (player == null || faction == null || faction.isBlank()) return 0;
         String f = faction.trim().toLowerCase(Locale.ROOT);
         CompoundTag mod = SkyData.get(player).module(MODULE);
-        if (!mod.contains(KEY, Tag.TAG_COMPOUND)) return 0;
-        CompoundTag rep = mod.getCompound(KEY);
-        if (rep.contains(f, Tag.TAG_INT)) return rep.getInt(f);
+        if (!com.skycraft.platform.NbtData.hasType(mod, KEY, Tag.TAG_COMPOUND)) return 0;
+        CompoundTag rep = mod.getCompoundOrEmpty(KEY);
+        if (com.skycraft.platform.NbtData.hasType(rep, f, Tag.TAG_INT)) return rep.getIntOr(f, 0);
         String alias = ALIAS_PAIRS.get(f);
-        return alias != null && rep.contains(alias, Tag.TAG_INT) ? rep.getInt(alias) : 0;
+        return alias != null && com.skycraft.platform.NbtData.hasType(rep, alias, Tag.TAG_INT) ? rep.getIntOr(alias, 0) : 0;
     }
 
     public static boolean hostile(Player player, String faction) {
@@ -432,7 +432,7 @@ public final class Reputation {
         Race race = SkyData.get(player).getRace();
         if (race == Race.ORSIMER) return true;
         if (get(player, ORC_BLOOD_KIN) >= 15 || get(player, ORC_STRONGHOLDS) >= 15) return true;
-        return player.getPersistentData().getBoolean("SkycraftOrcBloodKin");
+        return player.getPersistentData().getBooleanOr("SkycraftOrcBloodKin",false);
     }
 
     private static Snapshot snapshot() {

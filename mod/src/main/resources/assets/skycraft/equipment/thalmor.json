@@ -1,0 +1,14 @@
+{
+  "layers": {
+    "humanoid": [
+      {
+        "texture": "skycraft:thalmor"
+      }
+    ],
+    "humanoid_leggings": [
+      {
+        "texture": "skycraft:thalmor"
+      }
+    ]
+  }
+}

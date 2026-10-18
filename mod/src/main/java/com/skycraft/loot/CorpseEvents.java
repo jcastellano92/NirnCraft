@@ -5,9 +5,9 @@ import com.skycraft.creatures.entity.CorpseEntity;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraftforge.event.entity.EntityJoinLevelEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.util.Map;
 import java.util.WeakHashMap;
@@ -19,7 +19,7 @@ import java.util.WeakHashMap;
  * fall (or active slow-motion kill-cam) so client rendering smoothly topples the dying creature over instead of
  * snapping instantaneously to a flat horizontal pose.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class CorpseEvents {
     /** Vanilla death fall duration in ticks. */
     public static final int DEATH_FALL_TICKS = 20;
@@ -39,7 +39,7 @@ public final class CorpseEvents {
      * {@code 0.0} is upright at the moment of the killing blow and {@code 1.0} is lying flat on the ground.
      */
     public static float getDeathFallProgress(LivingEntity dummy, float partialTick, boolean killCamActive, float killCamProgress) {
-        if (dummy.isAddedToWorld() || dummy.level() == null) return 1.0f;
+        if (dummy.level() instanceof net.minecraft.server.level.ServerLevel server263 && server263.getEntity(dummy.getUUID()) == dummy || dummy.level() == null) return 1.0f;
         if (killCamActive) {
             // During a slow-motion kill-cam, stretch the death fall across the first 75% of the camera orbit
             float t = Mth.clamp(killCamProgress / 0.75f, 0.0f, 1.0f);

@@ -12,9 +12,9 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.util.Collection;
 import java.util.List;
@@ -25,7 +25,7 @@ import java.util.StringJoiner;
  * {@code set <hunger|fatigue|cold> <value> [players]} and {@code reset [players]} change them (testing);
  * {@code fish} lists what could bite in the water you look at.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class SurvivalCommand {
     private SurvivalCommand() {}
 
@@ -39,7 +39,7 @@ public final class SurvivalCommand {
                     .then(Commands.argument("players", EntityArgument.players())
                             .executes(c -> set(c, meter, EntityArgument.getPlayers(c, "players"))))));
         }
-        d.register(Commands.literal("skycraft-survival").requires(s -> s.hasPermission(2))
+        d.register(Commands.literal("skycraft-survival").requires(s -> s.permissions().hasPermission(net.minecraft.server.permissions.Permissions.COMMANDS_GAMEMASTER))
                 .then(Commands.literal("info").executes(SurvivalCommand::info))
                 .then(set)
                 .then(Commands.literal("reset").executes(c -> reset(c, List.of(c.getSource().getPlayerOrException())))
@@ -85,7 +85,7 @@ public final class SurvivalCommand {
         if (!p.level().getFluidState(pos).isEmpty() || !p.level().getFluidState(pos.below()).isEmpty()) {
             if (p.level().getFluidState(pos).isEmpty()) pos = pos.below();
         }
-        Fishing.Waters w = Fishing.waters(p.serverLevel(), pos);
+        Fishing.Waters w = Fishing.waters(p.level(), pos);
         StringJoiner names = new StringJoiner(", ");
         for (FishSpecies s : FishSpecies.all()) {
             if (Fishing.canBite(s, w)) names.add(s.id());

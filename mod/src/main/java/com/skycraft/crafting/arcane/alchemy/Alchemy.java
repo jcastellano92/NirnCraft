@@ -24,7 +24,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.alchemy.PotionUtils;
+import com.skycraft.platform.ArcaneData;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -37,7 +37,7 @@ import java.util.Set;
 /**
  * Skyrim alchemy: 2-3 different ingredients are combined at an Alchemy Lab; every effect shared by at least two of
  * them goes into the result. The most valuable effect decides whether it is a potion (drinkable) or a poison
- * (splash). Known effects are stored per ingredient in {@code data.module("arcane").getCompound("alchemy_known")}
+ * (splash). Known effects are stored per ingredient in {@code data.module("arcane").getCompoundOrEmpty("alchemy_known")}
  * (item id -> bitmask of known effect indices 0..3).
  *
  * <p>Calculation methods are shared by the client screen (preview) and the server (authoritative).</p>
@@ -53,7 +53,7 @@ public final class Alchemy {
     // ------------------------------------------------------------------ knowledge
 
     public static int knownMask(Player player, Ingredients.Ingredient ing) {
-        return SkyData.get(player).module(ArcaneModule.DATA).getCompound(KNOWN).getInt(ing.id());
+        return SkyData.get(player).module(ArcaneModule.DATA).getCompoundOrEmpty(KNOWN).getIntOr(ing.id(), 0);
     }
 
     public static boolean knows(Player player, Ingredients.Ingredient ing, int index) {
@@ -64,8 +64,8 @@ public final class Alchemy {
     public static int learn(ServerPlayer player, Ingredients.Ingredient ing, int mask) {
         PlayerData data = SkyData.get(player);
         CompoundTag module = data.module(ArcaneModule.DATA);
-        CompoundTag known = module.getCompound(KNOWN);
-        int old = known.getInt(ing.id());
+        CompoundTag known = module.getCompoundOrEmpty(KNOWN);
+        int old = known.getIntOr(ing.id(), 0);
         int now = old | (mask & 0xF);
         if (now == old) return 0;
         known.putInt(ing.id(), now);
@@ -150,7 +150,7 @@ public final class Alchemy {
         float s = strength(player, effect);
         int amp = effect.amplifier(1f + (s - 1f) * TASTE_POTENCY);
         int ticks = effect.instant() ? 1 : Math.max(200, Math.round(effect.durationTicks(s) * TASTE_POTENCY));
-        return new MobEffectInstance(effect.mobEffect(), ticks, amp);
+        return new MobEffectInstance(com.skycraft.platform.Effects.holder(effect.mobEffect()), ticks, amp);
     }
 
     /**
@@ -160,10 +160,10 @@ public final class Alchemy {
      */
     public static MobEffectInstance applyTaste(ServerPlayer player, AlchemyEffect effect) {
         MobEffectInstance inst = tasteInstance(player, effect);
-        MobEffect mob = inst.getEffect();
-        if (mob.isInstantenous()) {
+        MobEffect mob = inst.getEffect().value();
+        if (mob.isInstantaneous()) {
             if (effect == AlchemyEffect.DAMAGE_HEALTH && player.getHealth() <= 6f * (1 << inst.getAmplifier()) + 1f) return null;
-            mob.applyInstantenousEffect(player, player, player, inst.getAmplifier(), 1.0);
+            mob.applyInstantaneousEffect(player.level(), player, player, player, inst.getAmplifier(), 1.0);
         } else {
             player.addEffect(inst);
         }
@@ -228,7 +228,7 @@ public final class Alchemy {
         }
 
         public MobEffectInstance toInstance() {
-            return new MobEffectInstance(effect.mobEffect(), duration(), amplifier());
+            return new MobEffectInstance(com.skycraft.platform.Effects.holder(effect.mobEffect()), duration(), amplifier());
         }
     }
 
@@ -293,13 +293,13 @@ public final class Alchemy {
         ItemStack stack = new ItemStack(brew.poison() ? Items.SPLASH_POTION : Items.POTION);
         List<MobEffectInstance> instances = new ArrayList<>();
         for (BrewEffect e : brew.effects()) instances.add(e.toInstance());
-        PotionUtils.setCustomEffects(stack, instances);
-        CompoundTag tag = stack.getOrCreateTag();
-        tag.putInt("CustomPotionColor", PotionUtils.getColor(instances));
+        stack.set(net.minecraft.core.component.DataComponents.POTION_CONTENTS, new net.minecraft.world.item.alchemy.PotionContents(java.util.Optional.empty(), java.util.Optional.of(ArcaneData.color(instances)), List.copyOf(instances), java.util.Optional.empty()));
+        CompoundTag tag = com.skycraft.inventory.ItemData.customOrEmpty(stack);
         tag.putInt(VALUE_TAG, brew.value());
         tag.putBoolean(ALCHEMY_TAG, true);
         if (brew.poison()) tag.putBoolean(POISON_TAG, true);
-        stack.setHoverName(Component.translatable(brew.poison() ? "item.skycraft.poison_of" : "item.skycraft.potion_of",
+        com.skycraft.inventory.ItemData.setCustom(stack, tag);
+        stack.set(net.minecraft.core.component.DataComponents.CUSTOM_NAME, Component.translatable(brew.poison() ? "item.skycraft.poison_of" : "item.skycraft.potion_of",
                 brew.main().displayName()).withStyle(s -> s.withItalic(false)));
         return stack;
     }
@@ -367,7 +367,7 @@ public final class Alchemy {
         }
         stack.shrink(1);
         inv.setChanged();
-        player.level().playSound(null, player.blockPosition(), SoundEvents.GENERIC_EAT, SoundSource.PLAYERS, 0.8f, 1f);
+        player.level().playSound(null, player.blockPosition(), SoundEvents.GENERIC_EAT.value(), SoundSource.PLAYERS, 0.8f, 1f);
         discoverByTasting(player, ing);
     }
 }

@@ -27,7 +27,7 @@ public record LandmarkSite(Tier tier, int cellX, int cellZ, int x, int z, Kind k
 
     /** Stable key for "found" sets and resident spawns. */
     public long key() {
-        return H.mix(ChunkPos.asLong(cellX, cellZ) ^ ((tier.ordinal() + 1) * 0x9E3779B97F4A7C15L));
+        return H.mix(ChunkPos.pack(cellX, cellZ) ^ ((tier.ordinal() + 1) * 0x9E3779B97F4A7C15L));
     }
 
     public Direction direction() {

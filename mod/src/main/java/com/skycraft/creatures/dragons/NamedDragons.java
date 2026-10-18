@@ -9,7 +9,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
@@ -42,10 +42,10 @@ public final class NamedDragons {
     /** A dragon of the given variant at {@code pos} (not yet added to the level). */
     @Nullable
     public static DragonEntity create(ServerLevel level, BlockPos pos, int variant, @Nullable String nameKey) {
-        DragonEntity d = ModEntities.DRAGON.get().create(level);
+        DragonEntity d = ModEntities.DRAGON.get().create(level, net.minecraft.world.entity.EntitySpawnReason.EVENT);
         if (d == null) return null;
-        d.moveTo(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5, level.getRandom().nextFloat() * 360f, 0);
-        d.finalizeSpawn(level, level.getCurrentDifficultyAt(pos), MobSpawnType.EVENT, null, null);
+        d.snapTo(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5, level.getRandom().nextFloat() * 360f, 0);
+        d.finalizeSpawn(level, level.getCurrentDifficultyAt(pos), EntitySpawnReason.EVENT, null);
         if (nameKey != null) d.setCustomName(Component.translatable(nameKey));
         d.applyVariant(variant);
         return d;

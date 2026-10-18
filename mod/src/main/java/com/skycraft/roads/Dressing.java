@@ -88,7 +88,7 @@ final class Dressing {
             int side = rnd.nextBoolean() ? 1 : -1;
             int off = OFFSET[kind];
             int x = (int) Math.round(x0 + r[0] * off * side), z = (int) Math.round(z0 + r[1] * off * side);
-            Direction out = Direction.getNearest((float) (r[0] * side), 0, (float) (r[1] * side));
+            Direction out = Direction.getApproximateNearest((float) (r[0] * side), 0, (float) (r[1] * side));
             // the whole footprint (3 outwards, 2 along) must be clear of towns, other roads and other features
             boolean ok = true;
             Direction along = out.getClockWise();

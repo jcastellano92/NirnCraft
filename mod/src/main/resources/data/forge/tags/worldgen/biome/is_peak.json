@@ -2,6 +2,9 @@
   "replace": false,
   "values": [
     "skycraft:snowy_slopes",
-    "skycraft:throat_of_the_world"
+    "skycraft:throat_of_the_world",
+    "minecraft:jagged_peaks",
+    "minecraft:frozen_peaks",
+    "minecraft:stony_peaks"
   ]
 }

@@ -1,0 +1,35 @@
+{
+  "type": "minecraft:entity",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:loot_table",
+          "weight": 1,
+          "value": "skycraft:containers/corpse/soldier"
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:bread",
+          "weight": 1
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:apple",
+          "weight": 1
+        }
+      ],
+      "condition": {
+        "chance": 0.2,
+        "type": "minecraft:random_chance"
+      }
+    }
+  ],
+  "random_sequence": "skycraft:entities/guard"
+}

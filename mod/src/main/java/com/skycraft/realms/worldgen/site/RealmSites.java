@@ -71,7 +71,7 @@ public final class RealmSites {
     /** True when (x, z) lies in the context's start chunk. */
     public static boolean inChunk(Structure.GenerationContext ctx, int x, int z) {
         ChunkPos c = ctx.chunkPos();
-        return (x >> 4) == c.x && (z >> 4) == c.z;
+        return (x >> 4) == c.x() && (z >> 4) == c.z();
     }
 
     /** A box around an origin: {@code r} sideways, from {@code below} under to {@code above} over it. */

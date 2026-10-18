@@ -1,30 +1,30 @@
 package com.skycraft.sailing;
 
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 /** Sailing configuration: config/skycraft-sailing.toml (COMMON, server-authoritative). */
 public final class SailingConfig {
-    public static final ForgeConfigSpec SPEC;
+    public static final ModConfigSpec SPEC;
 
     // ------------------------------------------------------------------ ports and ferries
-    public static final ForgeConfigSpec.BooleanValue PORTS;
-    public static final ForgeConfigSpec.BooleanValue FERRIES;
-    public static final ForgeConfigSpec.IntValue FERRY_BASE_FARE;
-    public static final ForgeConfigSpec.IntValue FERRY_BLOCKS_PER_SEPTIM;
-    public static final ForgeConfigSpec.IntValue EXPEDITION_BASE_FARE;
-    public static final ForgeConfigSpec.IntValue SEA_BLOCKS_PER_HOUR;
-    public static final ForgeConfigSpec.BooleanValue MOORED_SHIPS;
+    public static final ModConfigSpec.BooleanValue PORTS;
+    public static final ModConfigSpec.BooleanValue FERRIES;
+    public static final ModConfigSpec.IntValue FERRY_BASE_FARE;
+    public static final ModConfigSpec.IntValue FERRY_BLOCKS_PER_SEPTIM;
+    public static final ModConfigSpec.IntValue EXPEDITION_BASE_FARE;
+    public static final ModConfigSpec.IntValue SEA_BLOCKS_PER_HOUR;
+    public static final ModConfigSpec.BooleanValue MOORED_SHIPS;
 
     // ------------------------------------------------------------------ ships
-    public static final ForgeConfigSpec.DoubleValue WIND_STRENGTH;
-    public static final ForgeConfigSpec.BooleanValue STORM_DAMAGE;
-    public static final ForgeConfigSpec.DoubleValue COLLISION_DAMAGE;
-    public static final ForgeConfigSpec.IntValue ROWBOAT_PRICE;
-    public static final ForgeConfigSpec.IntValue LONGSHIP_PRICE;
-    public static final ForgeConfigSpec.IntValue COG_PRICE;
+    public static final ModConfigSpec.DoubleValue WIND_STRENGTH;
+    public static final ModConfigSpec.BooleanValue STORM_DAMAGE;
+    public static final ModConfigSpec.DoubleValue COLLISION_DAMAGE;
+    public static final ModConfigSpec.IntValue ROWBOAT_PRICE;
+    public static final ModConfigSpec.IntValue LONGSHIP_PRICE;
+    public static final ModConfigSpec.IntValue COG_PRICE;
 
     static {
-        ForgeConfigSpec.Builder b = new ForgeConfigSpec.Builder();
+        ModConfigSpec.Builder b = new ModConfigSpec.Builder();
         b.push("ports");
         PORTS = b.comment("Build a pier with a harbormaster at every port of skycraft/tamriel/ports.json when a player first comes near",
                         "(a settlement's own dock is adopted instead when one is found).")

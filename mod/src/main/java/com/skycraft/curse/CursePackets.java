@@ -2,16 +2,15 @@ package com.skycraft.curse;
 
 import com.skycraft.creatures.entity.CorpseEntity;
 import com.skycraft.network.SkyNetwork;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.network.NetworkDirection;
-import net.minecraftforge.network.NetworkEvent;
+import net.neoforged.api.distmarker.Dist;
+import com.skycraft.platform.Sides;
+import net.minecraft.network.protocol.PacketFlow;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-import java.util.function.Supplier;
 
 /**
  * Network messages of the curse module. S2C: {@link Sync} (form, vampire stage and flags of a player, to everyone
@@ -23,11 +22,11 @@ public final class CursePackets {
     private CursePackets() {}
 
     static void register() {
-        SkyNetwork.register(Sync.class, NetworkDirection.PLAY_TO_CLIENT, Sync::encode, Sync::decode, Sync::handle);
-        SkyNetwork.register(Anim.class, NetworkDirection.PLAY_TO_CLIENT, Anim::encode, Anim::decode, Anim::handle);
-        SkyNetwork.register(Action.class, NetworkDirection.PLAY_TO_SERVER, Action::encode, Action::decode, Action::handle);
-        SkyNetwork.register(Select.class, NetworkDirection.PLAY_TO_SERVER, Select::encode, Select::decode, Select::handle);
-        SkyNetwork.register(Unlock.class, NetworkDirection.PLAY_TO_SERVER, Unlock::encode, Unlock::decode, Unlock::handle);
+        SkyNetwork.register(Sync.class, PacketFlow.CLIENTBOUND, Sync::encode, Sync::decode, Sync::handle);
+        SkyNetwork.register(Anim.class, PacketFlow.CLIENTBOUND, Anim::encode, Anim::decode, Anim::handle);
+        SkyNetwork.register(Action.class, PacketFlow.SERVERBOUND, Action::encode, Action::decode, Action::handle);
+        SkyNetwork.register(Select.class, PacketFlow.SERVERBOUND, Select::encode, Select::decode, Select::handle);
+        SkyNetwork.register(Unlock.class, PacketFlow.SERVERBOUND, Unlock::encode, Unlock::decode, Unlock::handle);
     }
 
     // ------------------------------------------------------------------ helpers (server)
@@ -58,45 +57,43 @@ public final class CursePackets {
         static Sync of(ServerPlayer p) {
             var t = Curses.tag(p);
             int flags = 0;
-            if (t.getBoolean(Curses.WEREWOLF)) flags |= WEREWOLF;
+            if (t.getBooleanOr(Curses.WEREWOLF, false)) flags |= WEREWOLF;
             if (Vampirism.inSun(p)) flags |= IN_SUN;
-            if (t.getBoolean(Curses.LORD)) flags |= LORD;
-            if (t.getBoolean(Curses.SIGHT)) flags |= SIGHT;
-            if (t.getLong(Curses.SANGUINARE) > 0) flags |= SANGUINARE;
+            if (t.getBooleanOr(Curses.LORD, false)) flags |= LORD;
+            if (t.getBooleanOr(Curses.SIGHT, false)) flags |= SIGHT;
+            if (t.getLongOr(Curses.SANGUINARE, 0L) > 0) flags |= SANGUINARE;
             return new Sync(p.getId(), (byte) Curses.form(p).ordinal(), (byte) Curses.stage(p), (byte) flags);
         }
 
-        static void encode(Sync m, FriendlyByteBuf buf) {
+        static void encode(Sync m, RegistryFriendlyByteBuf buf) {
             buf.writeVarInt(m.entityId);
             buf.writeByte(m.form);
             buf.writeByte(m.stage);
             buf.writeByte(m.flags);
         }
 
-        static Sync decode(FriendlyByteBuf buf) {
+        static Sync decode(RegistryFriendlyByteBuf buf) {
             return new Sync(buf.readVarInt(), buf.readByte(), buf.readByte(), buf.readByte());
         }
 
-        static void handle(Sync m, Supplier<NetworkEvent.Context> ctx) {
+        static void handle(Sync m, IPayloadContext ctx) {
             Curses.ClientView.put(m.entityId, m.form, m.stage, m.flags);
-            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> com.skycraft.curse.client.CurseClient.onSync(m.entityId, m.form));
-            ctx.get().setPacketHandled(true);
+            Sides.runOn(Dist.CLIENT, () -> () -> com.skycraft.curse.client.CurseClient.onSync(m.entityId, m.form));
         }
     }
 
     public record Anim(int entityId, byte anim) {
-        static void encode(Anim m, FriendlyByteBuf buf) {
+        static void encode(Anim m, RegistryFriendlyByteBuf buf) {
             buf.writeVarInt(m.entityId);
             buf.writeByte(m.anim);
         }
 
-        static Anim decode(FriendlyByteBuf buf) {
+        static Anim decode(RegistryFriendlyByteBuf buf) {
             return new Anim(buf.readVarInt(), buf.readByte());
         }
 
-        static void handle(Anim m, Supplier<NetworkEvent.Context> ctx) {
-            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> com.skycraft.curse.client.CurseClient.onAnim(m.entityId, m.anim));
-            ctx.get().setPacketHandled(true);
+        static void handle(Anim m, IPayloadContext ctx) {
+            Sides.runOn(Dist.CLIENT, () -> () -> com.skycraft.curse.client.CurseClient.onAnim(m.entityId, m.anim));
         }
     }
 
@@ -116,17 +113,17 @@ public final class CursePackets {
             return new Action(action, -1);
         }
 
-        static void encode(Action m, FriendlyByteBuf buf) {
+        static void encode(Action m, RegistryFriendlyByteBuf buf) {
             buf.writeByte(m.action);
             buf.writeVarInt(m.target);
         }
 
-        static Action decode(FriendlyByteBuf buf) {
+        static Action decode(RegistryFriendlyByteBuf buf) {
             return new Action(buf.readByte(), buf.readVarInt());
         }
 
-        static void handle(Action m, Supplier<NetworkEvent.Context> ctx) {
-            ServerPlayer player = ctx.get().getSender();
+        static void handle(Action m, IPayloadContext ctx) {
+            ServerPlayer player = SkyNetwork.sender(ctx);
             if (player != null && player.isAlive() && !player.isSpectator()) {
                 switch (m.action) {
                     case PRIMARY -> {
@@ -153,39 +150,36 @@ public final class CursePackets {
                     }
                 }
             }
-            ctx.get().setPacketHandled(true);
         }
     }
 
     public record Select(String id) {
-        static void encode(Select m, FriendlyByteBuf buf) {
+        static void encode(Select m, RegistryFriendlyByteBuf buf) {
             buf.writeUtf(m.id, 64);
         }
 
-        static Select decode(FriendlyByteBuf buf) {
+        static Select decode(RegistryFriendlyByteBuf buf) {
             return new Select(buf.readUtf(64));
         }
 
-        static void handle(Select m, Supplier<NetworkEvent.Context> ctx) {
-            ServerPlayer player = ctx.get().getSender();
+        static void handle(Select m, IPayloadContext ctx) {
+            ServerPlayer player = SkyNetwork.sender(ctx);
             if (player != null) CursePowers.select(player, m.id);
-            ctx.get().setPacketHandled(true);
         }
     }
 
     public record Unlock(String id) {
-        static void encode(Unlock m, FriendlyByteBuf buf) {
+        static void encode(Unlock m, RegistryFriendlyByteBuf buf) {
             buf.writeUtf(m.id, 64);
         }
 
-        static Unlock decode(FriendlyByteBuf buf) {
+        static Unlock decode(RegistryFriendlyByteBuf buf) {
             return new Unlock(buf.readUtf(64));
         }
 
-        static void handle(Unlock m, Supplier<NetworkEvent.Context> ctx) {
-            ServerPlayer player = ctx.get().getSender();
+        static void handle(Unlock m, IPayloadContext ctx) {
+            ServerPlayer player = SkyNetwork.sender(ctx);
             if (player != null) CursePerks.unlock(player, m.id);
-            ctx.get().setPacketHandled(true);
         }
     }
 }

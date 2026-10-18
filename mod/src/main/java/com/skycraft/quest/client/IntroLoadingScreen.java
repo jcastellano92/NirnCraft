@@ -4,7 +4,7 @@ import com.skycraft.network.SkyNetwork;
 import com.skycraft.quest.story.IntroPackets;
 import com.skycraft.quest.story.IntroState;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
@@ -95,7 +95,7 @@ final class IntroLoadingScreen extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+    public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
         long now = System.currentTimeMillis();
         float fadeIn = Mth.clamp((now - since) / 400f, 0f, 1f);
         float fadeOut = fadeStart < 0 ? 0f : Mth.clamp((now - fadeStart) / 900f, 0f, 1f);

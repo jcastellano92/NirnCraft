@@ -1,10 +1,10 @@
 package com.skycraft.crafting.arcane.alchemy;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
@@ -34,7 +34,7 @@ public final class Ingredients {
         /** The item, or {@code null} if it isn't registered (e.g. an optional mod is absent). */
         @Nullable
         public Item item() {
-            Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(id));
+            Item item = BuiltInRegistries.ITEM.getValue(Identifier.parse(id));
             return item == null || item == Items.AIR ? null : item;
         }
     }
@@ -253,7 +253,7 @@ public final class Ingredients {
 
     @Nullable
     public static Ingredient get(Item item) {
-        ResourceLocation key = ForgeRegistries.ITEMS.getKey(item);
+        Identifier key = BuiltInRegistries.ITEM.getKey(item);
         return key == null ? null : BY_ID.get(key.toString());
     }
 

@@ -7,6 +7,11 @@
     "skycraft:craglorn",
     "skycraft:elsweyr_canyons",
     "skycraft:elsweyr_dunes",
-    "skycraft:yokudan_desert"
+    "skycraft:yokudan_desert",
+    "minecraft:desert",
+    "minecraft:badlands",
+    "minecraft:wooded_badlands",
+    "minecraft:eroded_badlands",
+    "minecraft:beach"
   ]
 }

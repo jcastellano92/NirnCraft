@@ -15,11 +15,11 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.TicketType;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.saveddata.SavedData;
-import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
+
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.ModList;
+import net.neoforged.fml.common.Mod;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -41,9 +41,9 @@ import java.util.UUID;
  * (elytra, mounts, ships: vanilla's own loading needs the CPU) and by a small in-flight cap, so it never causes
  * "Can't keep up". {@code /skycraft-pregen start <blocks> [now]} runs a spiral around spawn on demand.</p>
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class Pregen {
-    private static final TicketType<ChunkPos> TICKET = TicketType.create("skycraft_pregen", Comparator.comparingLong(ChunkPos::toLong));
+    private static final java.util.function.Supplier<TicketType> TICKET = com.skycraft.perf.PerfTickets.PREGEN;
     private static final String DATA = "skycraft_pregen";
     private static final int MAX_LAST = 6;
     /** Players faster than this (blocks/s) pause everything. */
@@ -60,16 +60,15 @@ public final class Pregen {
 
         static Data load(CompoundTag tag) {
             Data d = new Data();
-            d.spawnIndex = Math.max(0, tag.getLong("spawn") - 8);
-            ListTag l = tag.getList("last", Tag.TAG_COMPOUND);
+            d.spawnIndex = Math.max(0, tag.getLongOr("spawn",0L) - 8);
+            ListTag l = tag.getListOrEmpty("last");
             for (int i = 0; i < l.size() && i < MAX_LAST; i++) {
-                CompoundTag t = l.getCompound(i);
-                d.last.add(new long[]{t.getInt("x"), t.getInt("z"), Math.max(0, t.getLong("i") - 8)});
+                CompoundTag t = l.getCompoundOrEmpty(i);
+                d.last.add(new long[]{t.getIntOr("x",0), t.getIntOr("z",0), Math.max(0, t.getLongOr("i",0L) - 8)});
             }
             return d;
         }
 
-        @Override
         public CompoundTag save(CompoundTag tag) {
             tag.putLong("spawn", spawnIndex);
             ListTag l = new ListTag();
@@ -134,14 +133,14 @@ public final class Pregen {
     }
 
     private static Data data(ServerLevel level) {
-        return level.getDataStorage().computeIfAbsent(Data::load, Data::new, DATA);
+        return com.skycraft.platform.SavedDataTypes.get(level, DATA, Data::load, Data::new, value263 -> value263.save(new net.minecraft.nbt.CompoundTag()));
     }
 
     // ------------------------------------------------------------------------------------------------ tick
 
     @SubscribeEvent
-    public static void onTick(TickEvent.ServerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END) return;
+    public static void onTick(net.neoforged.neoforge.event.tick.ServerTickEvent.Post event) {
+        if (!(event instanceof net.neoforged.neoforge.event.tick.ServerTickEvent.Post)) return;
         MinecraftServer server = event.getServer();
         ServerLevel level = server.overworld();
         if (level == null) return;
@@ -158,9 +157,9 @@ public final class Pregen {
             why = "starting up";
             return;
         }
-        if (server.getAverageTickTime() > PerfConfig.get(PerfConfig.MAX_TICK_MS)) {
+        if (server.getCurrentSmoothedTickTime() > PerfConfig.get(PerfConfig.MAX_TICK_MS)) {
             pausedTicks++;
-            why = "paused: server tick time " + Math.round(server.getAverageTickTime()) + " ms";
+            why = "paused: server tick time " + Math.round(server.getCurrentSmoothedTickTime()) + " ms";
             return;
         }
         boolean anyFast = false;
@@ -179,7 +178,7 @@ public final class Pregen {
         for (int i = 0; i < budget; i++) {
             ChunkPos next = null;
             if (manual && (players == 0 || manualNow || !PerfConfig.get(PerfConfig.PAUSE_WITH_PLAYERS))) {
-                next = nextSpiral(level, level.getSharedSpawnPos().getX() >> 4, level.getSharedSpawnPos().getZ() >> 4,
+                next = nextSpiral(level, level.getRespawnData().pos().getX() >> 4, level.getRespawnData().pos().getZ() >> 4,
                         manualRadiusChunks, true, d);
                 if (next == null && manualIndex >= cellsFor(manualRadiusChunks)) {
                     Skycraft.LOGGER.info("[pregen] manual pre-generation finished ({} chunks this session)", generated);
@@ -193,7 +192,7 @@ public final class Pregen {
                 next = nextAhead(server, level);
                 if (next == null && (players == 0 || !PerfConfig.get(PerfConfig.PAUSE_WITH_PLAYERS))) {
                     int r = Math.max(0, PerfConfig.get(PerfConfig.AUTO_RADIUS)) >> 4;
-                    next = nextSpiral(level, level.getSharedSpawnPos().getX() >> 4, level.getSharedSpawnPos().getZ() >> 4, r, false, d);
+                    next = nextSpiral(level, level.getRespawnData().pos().getX() >> 4, level.getRespawnData().pos().getZ() >> 4, r, false, d);
                     if (next == null) next = nextLast(level, d, r / 2);
                 }
             }
@@ -220,12 +219,12 @@ public final class Pregen {
     }
 
     private static void request(ServerLevel level, ChunkPos pos, long tick) {
-        if (level.getChunkSource().getChunkNow(pos.x, pos.z) != null) {
-            DONE.add(pos.toLong());
+        if (level.getChunkSource().getChunkNow(pos.x(), pos.z()) != null) {
+            DONE.add(pos.pack());
             return;
         }
-        level.getChunkSource().addRegionTicket(TICKET, pos, 0, pos);
-        IN_FLIGHT.put(pos.toLong(), new Flight(pos, tick));
+        level.getChunkSource().addTicketWithRadius(TICKET.get(),  pos,  0);
+        IN_FLIGHT.put(pos.pack(), new Flight(pos, tick));
     }
 
     private static void collect(ServerLevel level, long tick) {
@@ -233,11 +232,11 @@ public final class Pregen {
         var it = IN_FLIGHT.values().iterator();
         while (it.hasNext()) {
             Flight f = it.next();
-            boolean ready = level.getChunkSource().getChunkNow(f.pos().x, f.pos().z) != null;
+            boolean ready = level.getChunkSource().getChunkNow(f.pos().x(), f.pos().z()) != null;
             if (ready || tick - f.since() > TIMEOUT_TICKS) {
-                level.getChunkSource().removeRegionTicket(TICKET, f.pos(), 0, f.pos());
+                level.getChunkSource().removeTicketWithRadius(TICKET.get(),  f.pos(),  0);
                 if (ready) generated++;
-                DONE.add(f.pos().toLong());
+                DONE.add(f.pos().pack());
                 it.remove();
             }
         }
@@ -248,13 +247,13 @@ public final class Pregen {
     private static void releaseAll(MinecraftServer server) {
         ServerLevel level = server.overworld();
         if (level != null) {
-            for (Flight f : IN_FLIGHT.values()) level.getChunkSource().removeRegionTicket(TICKET, f.pos(), 0, f.pos());
+            for (Flight f : IN_FLIGHT.values()) level.getChunkSource().removeTicketWithRadius(TICKET.get(),  f.pos(),  0);
         }
         IN_FLIGHT.clear();
     }
 
     @SubscribeEvent
-    public static void onStopping(net.minecraftforge.event.server.ServerStoppingEvent event) {
+    public static void onStopping(net.neoforged.neoforge.event.server.ServerStoppingEvent event) {
         releaseAll(event.getServer());
         ServerLevel level = event.getServer().overworld();
         if (level != null) data(level).setDirty();
@@ -274,9 +273,9 @@ public final class Pregen {
             else d.spawnIndex++;
             int[] o = spiral(idx);
             ChunkPos p = new ChunkPos(cx + o[0], cz + o[1]);
-            if (DONE.contains(p.toLong()) || IN_FLIGHT.containsKey(p.toLong())) continue;
-            if (level.getChunkSource().getChunkNow(p.x, p.z) != null) {
-                DONE.add(p.toLong());
+            if (DONE.contains(p.pack()) || IN_FLIGHT.containsKey(p.pack())) continue;
+            if (level.getChunkSource().getChunkNow(p.x(), p.z()) != null) {
+                DONE.add(p.pack());
                 continue;
             }
             d.setDirty();
@@ -291,9 +290,9 @@ public final class Pregen {
             for (int guard = 0; guard < 512 && p[2] < cellsFor(radius); guard++) {
                 int[] o = spiral(p[2]++);
                 ChunkPos c = new ChunkPos((int) p[0] + o[0], (int) p[1] + o[1]);
-                if (DONE.contains(c.toLong()) || IN_FLIGHT.containsKey(c.toLong())) continue;
-                if (level.getChunkSource().getChunkNow(c.x, c.z) != null) {
-                    DONE.add(c.toLong());
+                if (DONE.contains(c.pack()) || IN_FLIGHT.containsKey(c.pack())) continue;
+                if (level.getChunkSource().getChunkNow(c.x(), c.z()) != null) {
+                    DONE.add(c.pack());
                     continue;
                 }
                 d.setDirty();
@@ -327,14 +326,14 @@ public final class Pregen {
                 double cos = ux == 0 && uz == 0 ? 1 : (o[0] * ux + o[1] * uz) / dist;
                 double score = dist * (1 + w * (1 - cos) * 0.5) + (cos < -0.2 ? w * 4 : 0);
                 if (score >= bestScore) continue;
-                long key = ChunkPos.asLong(pcx + o[0], pcz + o[1]);
+                long key = ChunkPos.pack(pcx + o[0], pcz + o[1]);
                 if (DONE.contains(key) || IN_FLIGHT.containsKey(key)) continue;
                 bestScore = score;
                 best = new ChunkPos(pcx + o[0], pcz + o[1]);
             }
         }
-        if (best != null && level.getChunkSource().getChunkNow(best.x, best.z) != null) {
-            DONE.add(best.toLong());
+        if (best != null && level.getChunkSource().getChunkNow(best.x(), best.z()) != null) {
+            DONE.add(best.pack());
             return null;
         }
         return best;
@@ -377,7 +376,7 @@ public final class Pregen {
 
     @SubscribeEvent
     public static void onCommands(RegisterCommandsEvent event) {
-        event.getDispatcher().register(Commands.literal("skycraft-pregen").requires(s -> s.hasPermission(2))
+        event.getDispatcher().register(Commands.literal("skycraft-pregen").requires(s -> s.permissions().hasPermission(net.minecraft.server.permissions.Permissions.COMMANDS_GAMEMASTER))
                 .then(Commands.literal("start")
                         .then(Commands.argument("radius", IntegerArgumentType.integer(16, 30000))
                                 .executes(c -> start(c.getSource().getServer(), IntegerArgumentType.getInteger(c, "radius"), false, c.getSource()))
@@ -398,7 +397,7 @@ public final class Pregen {
                     String msg = String.format("pregen: %s | manual %s | spawn spiral %d/%d chunks | %d generated this session, %d in flight, %d tick(s) paused | %d remembered position(s) | avg tick %.1f ms",
                             why, manualIndex < 0 ? "idle" : manualIndex + "/" + cellsFor(manualRadiusChunks),
                             d.spawnIndex, cellsFor(Math.max(0, PerfConfig.get(PerfConfig.AUTO_RADIUS)) >> 4),
-                            generated, IN_FLIGHT.size(), pausedTicks, d.last.size(), s.getAverageTickTime());
+                            generated, IN_FLIGHT.size(), pausedTicks, d.last.size(), s.getCurrentSmoothedTickTime());
                     c.getSource().sendSuccess(() -> Component.literal(msg), false);
                     return 1;
                 })));

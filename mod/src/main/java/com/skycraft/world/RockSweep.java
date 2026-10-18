@@ -52,7 +52,7 @@ public final class RockSweep {
         int x1 = Math.max(wx1, tx1 - margin), x2 = Math.min(wx2, tx2 + margin);
         int z1 = Math.max(wz1, tz1 - margin), z2 = Math.min(wz2, tz2 + margin);
         if (x1 > x2 || z1 > z2) return 0;
-        int minY = level.getMinBuildHeight() + 2, maxY = level.getMaxBuildHeight() - 2;
+        int minY = level.getMinY() + 2, maxY = (level.getMaxY() + 1) - 2;
         LongOpenHashSet seen = new LongOpenHashSet();
         LongArrayList doomed = new LongArrayList();
         LongArrayList comp = new LongArrayList();
@@ -71,7 +71,7 @@ public final class RockSweep {
                     if (seen.contains(key)) continue;
                     // only blocks with nothing solid under them can start a floating component
                     BlockState below = level.getBlockState(q.set(x, y - 1, z));
-                    if (below.blocksMotion() || !below.getFluidState().isEmpty()) continue;
+                    if (below.isSolid() || !below.getFluidState().isEmpty()) continue;
                     comp.clear();
                     queue.clear();
                     seen.add(key);
@@ -97,7 +97,7 @@ public final class RockSweep {
                         for (Direction d : Direction.values()) {
                             BlockState ns = level.getBlockState(q.set(bx + d.getStepX(), by + d.getStepY(), bz + d.getStepZ()));
                             if (member(ns)) continue; // handled by the 26-neighbourhood below
-                            if (ns.isAir() || !ns.blocksMotion()) continue;
+                            if (ns.isAir() || !ns.isSolid()) continue;
                             // another solid block touches it: a log, a wall, planks, a built block: held (or built on)
                             if (!ns.is(BlockTags.LEAVES)) {
                                 grounded = true;
@@ -166,8 +166,8 @@ public final class RockSweep {
     static boolean member(BlockState s) {
         if (s.isAir()) return false;
         if (s.is(BlockTags.BASE_STONE_OVERWORLD) || s.is(BlockTags.DIRT) || s.is(BlockTags.SAND) || s.is(BlockTags.TERRACOTTA)
-                || s.is(BlockTags.COAL_ORES) || s.is(BlockTags.IRON_ORES) || s.is(BlockTags.COPPER_ORES) || s.is(BlockTags.GOLD_ORES)
-                || s.is(BlockTags.REDSTONE_ORES) || s.is(BlockTags.LAPIS_ORES) || s.is(BlockTags.EMERALD_ORES) || s.is(BlockTags.DIAMOND_ORES)) {
+                || s.is(net.minecraft.tags.BlockItemTags.COAL_ORES.block()) || s.is(BlockTags.IRON_ORES) || s.is(BlockTags.COPPER_ORES) || s.is(BlockTags.GOLD_ORES)
+                || s.is(net.minecraft.tags.BlockItemTags.REDSTONE_ORES.block()) || s.is(net.minecraft.tags.BlockItemTags.LAPIS_ORES.block()) || s.is(net.minecraft.tags.BlockItemTags.EMERALD_ORES.block()) || s.is(net.minecraft.tags.BlockItemTags.DIAMOND_ORES.block())) {
             return true;
         }
         Block b = s.getBlock();

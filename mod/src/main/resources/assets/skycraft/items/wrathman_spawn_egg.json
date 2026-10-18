@@ -1,0 +1,16 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "skycraft:item/wrathman_spawn_egg",
+    "tints": [
+      {
+        "type": "minecraft:constant",
+        "value": 2235432
+      },
+      {
+        "type": "minecraft:constant",
+        "value": 16724590
+      }
+    ]
+  }
+}

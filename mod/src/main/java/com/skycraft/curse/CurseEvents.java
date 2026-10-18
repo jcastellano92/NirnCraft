@@ -25,21 +25,20 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.ButtonBlock;
 import net.minecraft.world.level.block.LeverBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.living.LivingChangeTargetEvent;
-import net.minecraftforge.event.entity.living.LivingDeathEvent;
-import net.minecraftforge.event.entity.living.LivingFallEvent;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.event.entity.living.MobEffectEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.event.level.BlockEvent;
-import net.minecraftforge.event.server.ServerStoppedEvent;
-import net.minecraftforge.eventbus.api.Event;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
+
+import net.neoforged.neoforge.event.entity.living.LivingChangeTargetEvent;
+import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
+import net.neoforged.neoforge.event.entity.living.LivingFallEvent;
+import net.neoforged.neoforge.event.entity.living.MobEffectEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.neoforge.event.level.BlockEvent;
+import net.neoforged.neoforge.event.server.ServerStoppedEvent;
+import net.neoforged.bus.api.Event;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -50,7 +49,7 @@ import java.util.UUID;
  * (sleepers, corpses, bites), what a beast can't do (items, blocks, mining), the end of transformations on death and
  * logout, tracking sync, and who attacks whom (vampires leave vampires alone, everyone hunts the shunned).
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class CurseEvents {
     private static final String NO_FALL = "skycraft_curse_nofall";
     private static final Map<String, Long> THROTTLE = new HashMap<>();
@@ -76,8 +75,8 @@ public final class CurseEvents {
     // ------------------------------------------------------------------ ticking
 
     @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer player)) return;
+    public static void onPlayerTick(net.neoforged.neoforge.event.tick.PlayerTickEvent.Post event) {
+        if (!(event instanceof net.neoforged.neoforge.event.tick.PlayerTickEvent.Post) || !(event.getEntity() instanceof ServerPlayer player)) return;
         if ((player.tickCount + player.getId()) % 20 != 0) return;
         long now = player.level().getGameTime();
         Vampirism.tick(player, now);
@@ -89,8 +88,9 @@ public final class CurseEvents {
     }
 
     @SubscribeEvent
-    public static void onServerTick(TickEvent.ServerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END) return;
+    public static void onServerTick(net.neoforged.neoforge.event.tick.ServerTickEvent.Post event) {
+        if (!(event instanceof net.neoforged.neoforge.event.tick.ServerTickEvent.Post)) return;
+        if (event.getServer().overworld() == null) return;
         Howls.tick(event.getServer());
         VampireLord.tickBats(event.getServer().overworld().getGameTime());
         WildWerewolves.tick(event.getServer());
@@ -115,9 +115,9 @@ public final class CurseEvents {
     // ------------------------------------------------------------------ combat
 
     @SubscribeEvent(priority = EventPriority.LOW)
-    public static void onHurt(LivingHurtEvent event) {
+    public static void onHurt(com.skycraft.combat.BeforeArmorDamageEvent event) {
         LivingEntity victim = event.getEntity();
-        if (victim.level().isClientSide) return;
+        if (victim.level().isClientSide()) return;
         Entity attacker = event.getSource().getEntity();
         if (victim instanceof ServerPlayer player) {
             float mult = Vampirism.damageTaken(player, event.getSource());
@@ -144,7 +144,7 @@ public final class CurseEvents {
 
     @SubscribeEvent
     public static void onDeath(LivingDeathEvent event) {
-        if (event.getEntity().level().isClientSide) return;
+        if (event.getEntity().level().isClientSide()) return;
         if (event.getEntity() instanceof ServerPlayer player) {
             // transformations end with death: the body that respawns is the player's own
             if (Curses.form(player) == Form.BEAST) Lycanthropy.revert(player, false);
@@ -159,7 +159,16 @@ public final class CurseEvents {
     public static void onFall(LivingFallEvent event) {
         if (!(event.getEntity() instanceof Player player)) return;
         if (Curses.form(player) == Form.LORD
-                || player.getPersistentData().getLong(NO_FALL) > player.level().getGameTime()) {
+                || player.getPersistentData().getLongOr(NO_FALL, 0L) > player.level().getGameTime()) {
+            event.setCanceled(true);
+        }
+    }
+
+    /** Milk clears ordinary effects while Skyrim disease markers keep their authored cures. */
+    @SubscribeEvent
+    public static void onEffectRemoved(MobEffectEvent.Remove event) {
+        if (event.getEffect().value() instanceof CurseRegistry.CurseEffect
+                && com.skycraft.platform.ItemUse.consuming(event.getEntity()).is(net.minecraft.world.item.Items.MILK_BUCKET)) {
             event.setCanceled(true);
         }
     }
@@ -167,13 +176,13 @@ public final class CurseEvents {
     /** Werewolves can't rest well; vampires shrug off poison. */
     @SubscribeEvent
     public static void onEffectApplicable(MobEffectEvent.Applicable event) {
-        if (!(event.getEntity() instanceof Player player) || player.level().isClientSide) return;
-        MobEffect effect = event.getEffectInstance().getEffect();
+        if (!(event.getEntity() instanceof Player player) || player.level().isClientSide()) return;
+        MobEffect effect = event.getEffectInstance().getEffect().value();
         if (effect == ModEffects.WELL_RESTED.get() && Curses.isWerewolf(player)) {
-            event.setResult(Event.Result.DENY);
+            event.setResult(MobEffectEvent.Applicable.Result.DO_NOT_APPLY);
             if (player instanceof ServerPlayer sp) com.skycraft.core.Notifier.message(sp, net.minecraft.network.chat.Component.translatable("curse.skycraft.beast.no_rest"));
-        } else if (effect == MobEffects.POISON && Curses.isVampire(player)) {
-            event.setResult(Event.Result.DENY);
+        } else if (effect == MobEffects.POISON.value() && Curses.isVampire(player)) {
+            event.setResult(MobEffectEvent.Applicable.Result.DO_NOT_APPLY);
         }
     }
 
@@ -183,12 +192,12 @@ public final class CurseEvents {
      */
     @SubscribeEvent
     public static void onTarget(LivingChangeTargetEvent event) {
-        if (!(event.getEntity() instanceof Mob mob) || mob.level().isClientSide) return;
-        if (Howls.feared(mob) && event.getNewTarget() != null) {
+        if (!(event.getEntity() instanceof Mob mob) || mob.level().isClientSide()) return;
+        if (Howls.feared(mob) && event.getNewAboutToBeSetTarget() != null) {
             event.setCanceled(true);
             return;
         }
-        if (!(event.getNewTarget() instanceof Player player)) return;
+        if (!(event.getNewAboutToBeSetTarget() instanceof Player player)) return;
         if (mob.getLastHurtByMob() == player) return;
         boolean kin = carriesSanguinare(mob) || mob instanceof GargoyleEntity;
         if (kin && Curses.isVampire(player)) event.setCanceled(true);
@@ -210,7 +219,7 @@ public final class CurseEvents {
         event.setCanceled(true);
         event.setCancellationResult(InteractionResult.SUCCESS);
         // the client asks for the feeding; the server validates it (CursePackets.Action)
-        if (feed && player.level().isClientSide && event.getHand() == net.minecraft.world.InteractionHand.MAIN_HAND) {
+        if (feed && player.level().isClientSide() && event.getHand() == net.minecraft.world.InteractionHand.MAIN_HAND) {
             SkyNetwork.sendToServer(new CursePackets.Action(CursePackets.Action.FEED, target.getId()));
         }
     }
@@ -230,7 +239,7 @@ public final class CurseEvents {
         // a beast still opens doors and gates
         if (state.is(BlockTags.DOORS) || state.is(BlockTags.TRAPDOORS) || state.is(BlockTags.FENCE_GATES)
                 || state.getBlock() instanceof ButtonBlock || state.getBlock() instanceof LeverBlock) {
-            event.setUseItem(Event.Result.DENY);
+            event.setUseItem(net.minecraft.util.TriState.FALSE);
             return;
         }
         event.setCanceled(true);
@@ -243,7 +252,7 @@ public final class CurseEvents {
     }
 
     @SubscribeEvent
-    public static void onBreak(BlockEvent.BreakEvent event) {
+    public static void onBreak(net.neoforged.neoforge.event.level.block.BreakBlockEvent event) {
         if (event.getPlayer() != null && Curses.transformed(event.getPlayer())) event.setCanceled(true);
     }
 

@@ -3,7 +3,7 @@ package com.skycraft.dungeons.world;
 import com.skycraft.Skycraft;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LecternBlock;
@@ -23,7 +23,7 @@ import java.util.List;
  * </ul>
  */
 public final class Story {
-    public static final ResourceLocation LOOT_CACHE = new ResourceLocation(Skycraft.MODID, "chests/dungeon_cache");
+    public static final Identifier LOOT_CACHE = Identifier.fromNamespaceAndPath(Skycraft.MODID, "chests/dungeon_cache");
 
     /** Journal texts per theme (keys in the dungeons lang file). */
     private static final int BARROW = 5, DWEMER = 3, CAVE = 4, MINE = 2, LAIR = 1, FORT = 2, RUIN = 2;
@@ -107,7 +107,7 @@ public final class Story {
                 be.setLootTable(null, 0L);
                 if (!onLectern) be.setItem(13, journal(p, room));
                 be.setItem(11, new ItemStack(Blocks.TORCH, 2 + p.roll(bx, y, bz, 612, 4)));
-                net.minecraft.world.item.Item coin = net.minecraftforge.registries.ForgeRegistries.ITEMS.getValue(new ResourceLocation(Skycraft.MODID, "septim"));
+                net.minecraft.world.item.Item coin = net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(Identifier.fromNamespaceAndPath(Skycraft.MODID, "septim"));
                 if (coin != null && coin != net.minecraft.world.item.Items.AIR) be.setItem(15, new ItemStack(coin, 5 + p.roll(bx, y, bz, 613, 20)));
             }
             int lx = bx + face.getStepX(), lz = bz + face.getStepZ();
@@ -159,7 +159,7 @@ public final class Story {
     // ------------------------------------------------------------------ the cache
 
     /** The side branch's strongbox: a relic table of the dungeon's own kind two times in three, the common cache otherwise. */
-    static ResourceLocation relicTable(Theme theme, int roll) {
+    static Identifier relicTable(Theme theme, int roll) {
         if (roll == 0) return LOOT_CACHE;
         String id = switch (theme) {
             case MINE -> "mine";
@@ -169,7 +169,7 @@ public final class Story {
             case RUIN, FORT -> "ruin";
             default -> "cave";
         };
-        return new ResourceLocation(Skycraft.MODID, "chests/relic_" + id);
+        return Identifier.fromNamespaceAndPath(Skycraft.MODID, "chests/relic_" + id);
     }
 
     static void cache(Painter p, Room room) {

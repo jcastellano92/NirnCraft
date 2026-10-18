@@ -6,15 +6,15 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LightningRodBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
-import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
+import com.skycraft.worldgen.ConfiguredFeature;
+import com.skycraft.worldgen.FeaturePlaceContext;
+import com.skycraft.worldgen.NoneFeatureConfiguration;
 
 /**
  * Old Dwemer pipework in the caverns: bronze pipes running along the cave floor with junction collars, rising into
  * the rock where they meet a wall, sometimes climbing to the ceiling.
  */
-public class DwemerPipeFeature extends Feature<NoneFeatureConfiguration> {
+public class DwemerPipeFeature extends ConfiguredFeature<NoneFeatureConfiguration> {
     public DwemerPipeFeature(Codec<NoneFeatureConfiguration> codec) {
         super(codec);
     }
@@ -26,9 +26,9 @@ public class DwemerPipeFeature extends Feature<NoneFeatureConfiguration> {
         int x = ctx.origin().getX(), y = ctx.origin().getY(), z = ctx.origin().getZ();
         if (!box.get(x, y, z).isAir() || box.get(x, y - 1, z).isAir()) return false;
         Direction dir = Direction.Plane.HORIZONTAL.getRandomDirection(random);
-        BlockState pipe = Blocks.LIGHTNING_ROD.defaultBlockState().setValue(LightningRodBlock.FACING, dir);
-        BlockState collar = random.nextBoolean() ? Blocks.WAXED_CUT_COPPER.defaultBlockState()
-                : Blocks.WAXED_EXPOSED_CUT_COPPER.defaultBlockState();
+        BlockState pipe = com.skycraft.worldgen.VanillaBlocks.LIGHTNING_ROD.defaultBlockState().setValue(LightningRodBlock.FACING, dir);
+        BlockState collar = random.nextBoolean() ? com.skycraft.worldgen.VanillaBlocks.WAXED_CUT_COPPER.defaultBlockState()
+                : com.skycraft.worldgen.VanillaBlocks.WAXED_EXPOSED_CUT_COPPER.defaultBlockState();
         int len = 6 + random.nextInt(12);
         int placed = 0;
         for (int s = 0; s < len; s++) {
@@ -46,7 +46,7 @@ public class DwemerPipeFeature extends Feature<NoneFeatureConfiguration> {
         // a riser to the ceiling
         if (placed > 3 && random.nextInt(3) == 0) {
             int rx = x + dir.getStepX() * (placed / 2), rz = z + dir.getStepZ() * (placed / 2);
-            BlockState riser = Blocks.LIGHTNING_ROD.defaultBlockState().setValue(LightningRodBlock.FACING, Direction.UP);
+            BlockState riser = com.skycraft.worldgen.VanillaBlocks.LIGHTNING_ROD.defaultBlockState().setValue(LightningRodBlock.FACING, Direction.UP);
             for (int dy = 1; dy < 16; dy++) {
                 if (!box.get(rx, y + dy, rz).isAir()) break;
                 box.set(rx, y + dy, rz, riser);

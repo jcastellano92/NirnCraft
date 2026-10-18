@@ -1,5 +1,11 @@
 # Start here
 
+**Current platform: Minecraft 26.3, NeoForge 26.3.0.90, Java 25.** Follow
+[NATIVE-26.3-PREVIEW.md](NATIVE-26.3-PREVIEW.md) for the current build, persistent dev server and isolated client controls.
+Historical Forge 1.20.1 / Java 17 descriptions below remain project history. Preserve those older instances and worlds;
+the native port's full build, server and visual acceptance gates must pass independently. Multiplayer uses normal
+Minecraft server lists and LAN; Essential/e4mc are disabled.
+
 **If you are a new session, read this first.** It takes five minutes and tells you what Skycraft is, where everything
 lives, where the work stands, what to run next and the rules you must keep.
 
@@ -41,7 +47,13 @@ real loaded world, visual review, then saved cameras. Generation changes invalid
 | Reference data from the owner's game installs | `.reference/` (gitignored; facts only; never committed) & `F:\daggerfall-js-source-main\daggerfall-js-source-main` |
 | Release output | `dist/` (built by `tools/build_release.ps1`; not committed) |
 
-## Current state (2026-10-15)
+## Current geography policy (2026-10-18)
+
+The owner replaced Endless Lands expansion with distant ocean and opposite-edge overworld travel.
+Tamriel and all fixed foreign lands remain. The old tile planner is retained for explicit tools and old
+data, but runtime generation does not use it. See [TAMRIEL.md](TAMRIEL.md) section 3.
+
+## Historical foundation state (2026-10-15)
 
 * Branch `tamriel-overhaul` tracks `origin/tamriel-overhaul`. GitHub Actions is disabled; builds and tests run locally.
 * **Foundation Complete (`P1`–`P7` & `R0`–`R15a`, commit `7b3d95f8`):**

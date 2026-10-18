@@ -13,12 +13,19 @@ ROOT = Path(__file__).resolve().parent.parent
 MAIN = ROOT / "mod" / "src" / "main"
 DATA = MAIN / "resources" / "data" / "skycraft"
 JAVA = MAIN / "java" / "com" / "skycraft"
-TAGS = DATA / "tags" / "items"
-LOOT = DATA / "loot_tables"
+TAGS = DATA / "tags" / "item"
+LOOT = DATA / "loot_table"
 SK = "skycraft:"
 
 
 def write(path, obj):
+    import sys
+    from pathlib import Path
+    native_tools263 = str(Path(__file__).resolve().parents[0])
+    if native_tools263 not in sys.path: sys.path.insert(0, native_tools263)
+    from data_format_263 import prepare
+    path, obj = prepare(path, obj)
+    path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     with open(path, "w", encoding="utf-8", newline="\n") as f:
         json.dump(obj, f, indent=2)
@@ -557,7 +564,7 @@ def forage_modifiers():
     loot("forage/trama_root", table("block", [pool([item(SK + "trama_root", 1, [count(1, 2)])])], "forage/trama_root"))
     loot("forage/saltrice", table("block", [pool([item(SK + "saltrice", 1, [count(1, 3)])])], "forage/saltrice"))
 
-    glm = MAIN / "resources" / "data" / "forge" / "loot_modifiers" / "global_loot_modifiers.json"
+    glm = MAIN / "resources" / "data" / "neoforge" / "loot_modifiers" / "global_loot_modifiers.json"
     data = json.loads(glm.read_text(encoding="utf-8"))
     for e in entries:
         if e not in data["entries"]:

@@ -77,5 +77,6 @@
   "skycraft.configuration.styledBanners": "Ornate Banners",
   "skycraft.configuration.menus": "Menus",
   "skycraft.configuration.loadingScreen": "Skyrim Loading Screen",
-  "skycraft.configuration.skinVanillaScreens": "Restyle Vanilla Screens"
+  "skycraft.configuration.skinVanillaScreens": "Restyle Vanilla Screens",
+  "key.category.skycraft.controls": "Skycraft"
 }

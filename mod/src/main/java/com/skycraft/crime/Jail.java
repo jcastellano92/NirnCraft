@@ -25,7 +25,7 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -55,13 +55,13 @@ import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.phys.AABB;
-import net.minecraftforge.event.entity.living.LivingDropsEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.event.level.BlockEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.entity.living.LivingDropsEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.neoforge.event.level.BlockEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -95,9 +95,9 @@ import java.util.UUID;
  * <p>State while jailed: {@code crime.jail = {hold, bounty, remaining (seconds), served, site ("hold" | "dim"),
  * place, cell, rdim, rx, ry, rz, ryaw, rpitch}}.</p>
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class Jail {
-    public static final ResourceKey<Level> JAIL = ResourceKey.create(Registries.DIMENSION, new ResourceLocation(Skycraft.MODID, "jail"));
+    public static final ResourceKey<Level> JAIL = ResourceKey.create(Registries.DIMENSION, Identifier.fromNamespaceAndPath(Skycraft.MODID, "jail"));
     public static final int SECONDS_PER_100 = 30;
     public static final int MIN_SECONDS = 30;
     public static final int MAX_SECONDS = 600;
@@ -128,12 +128,12 @@ public final class Jail {
     }
 
     public static boolean isJailed(Player player) {
-        return Bounty.state(player).contains("jail", Tag.TAG_COMPOUND);
+        return com.skycraft.platform.NbtData.hasType(Bounty.state(player), "jail", Tag.TAG_COMPOUND);
     }
 
     /** Seconds of sentence left (0 when not jailed). Works on both sides. */
     public static int remaining(Player player) {
-        return isJailed(player) ? Bounty.state(player).getCompound("jail").getInt("remaining") : 0;
+        return isJailed(player) ? Bounty.state(player).getCompoundOrEmpty("jail").getIntOr("remaining",0) : 0;
     }
 
     public static int sentenceSeconds(int bounty) {
@@ -244,7 +244,7 @@ public final class Jail {
         if (entry.isEmpty()) return null;
         Set<BlockPos> npcCells = new HashSet<>();
         for (Anchor a : entry.get().anchors(AnchorType.JAIL_PRISONER)) npcCells.add(a.pos());
-        JailData jd = JailData.get(player.server);
+        JailData jd = JailData.get(player.level().getServer());
         int n = entry.get().anchors(AnchorType.JAIL_CELL).size();
         for (int cell = 0; cell < n; cell++) {
             Site s = holdSite(overworld, place, cell);
@@ -259,10 +259,10 @@ public final class Jail {
     /** The player's current site from their jail state (null if their hold jail is gone). */
     @Nullable
     static Site siteOf(ServerPlayer player) {
-        CompoundTag j = Bounty.state(player).getCompound("jail");
-        if ("hold".equals(j.getString("site"))) return holdSite(player.server.overworld(), j.getString("place"), j.getInt("cell"));
-        ServerLevel jail = player.server.getLevel(JAIL);
-        return jail == null ? null : dimensionSite(player.server, jail, player.getUUID());
+        CompoundTag j = Bounty.state(player).getCompoundOrEmpty("jail");
+        if ("hold".equals(j.getStringOr("site",""))) return holdSite(player.level().getServer().overworld(), j.getStringOr("place",""), j.getIntOr("cell",0));
+        ServerLevel jail = player.level().getServer().getLevel(JAIL);
+        return jail == null ? null : dimensionSite(player.level().getServer(), jail, player.getUUID());
     }
 
     /** Whether a block lies inside a hold jail or the jail dimension (no theft or ownership there; jail keys work). */
@@ -273,7 +273,7 @@ public final class Jail {
         if (e.isEmpty()) return false;
         Anchor min = e.get().first(AnchorType.JAIL_MIN), max = e.get().first(AnchorType.JAIL_MAX);
         if (min == null || max == null) return false;
-        return new AABB(min.pos(), max.pos()).inflate(0.5).contains(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5);
+        return AABB.encapsulatingFullBlocks(min.pos(), max.pos()).inflate(0.5).contains(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5);
     }
 
     // ------------------------------------------------------------------ going to jail
@@ -300,7 +300,7 @@ public final class Jail {
 
     private static void send(ServerPlayer player, String hold, int bounty, @Nullable String forcedPlace) {
         if (isJailed(player) || JailLoading.isLoading(player)) return;
-        MinecraftServer server = player.getServer();
+        MinecraftServer server = player.level().getServer();
         if (server == null) return;
         ServerLevel overworld = server.overworld();
         // a jail that exists serves the arrest; one that is not generated yet is generated first, with the prisoner
@@ -318,10 +318,10 @@ public final class Jail {
 
     /** The fallback: the prisoner's own cell block in the jail dimension. */
     static void sendToDimension(ServerPlayer player, String hold, int bounty, @Nullable String forcedPlace) {
-        MinecraftServer server = player.server;
+        MinecraftServer server = player.level().getServer();
         ServerLevel jail = server.getLevel(JAIL);
         if (jail == null) {
-            Skycraft.LOGGER.error("Jail dimension {} is missing and no hold jail is known; the arrest is dropped", JAIL.location());
+            Skycraft.LOGGER.error("Jail dimension {} is missing and no hold jail is known; the arrest is dropped", JAIL.identifier());
             return;
         }
         startSentence(player, hold, bounty, forcedPlace, dimensionSite(server, jail, player.getUUID()));
@@ -329,7 +329,7 @@ public final class Jail {
 
     /** Puts the player in the cell of {@code site}: the sentence, the confiscation, the cell. */
     static void startSentence(ServerPlayer player, String hold, int bounty, @Nullable String forcedPlace, Site site) {
-        MinecraftServer server = player.server;
+        MinecraftServer server = player.level().getServer();
         PlayerData data = SkyData.get(player);
         CompoundTag j = new CompoundTag();
         j.putString("hold", hold);
@@ -339,7 +339,7 @@ public final class Jail {
         j.putString("site", site.hold() ? "hold" : "dim");
         j.putString("place", site.hold() ? site.place() : forcedPlace == null ? "" : forcedPlace);
         j.putInt("cell", site.cell());
-        j.putString("rdim", player.level().dimension().location().toString());
+        j.putString("rdim", player.level().dimension().identifier().toString());
         j.putDouble("rx", player.getX());
         j.putDouble("ry", player.getY());
         j.putDouble("rz", player.getZ());
@@ -361,14 +361,14 @@ public final class Jail {
         Notifier.title(player, Component.translatable("crime.skycraft.jail.title"),
                 Component.translatable("crime.skycraft.jail.sentence", formatTime(sentenceSeconds(bounty))));
         if (site.hold()) Notifier.message(player, Component.translatable("crime.skycraft.jail.taken_to", where));
-        JailEvidence.noteBounty(player.server, JailEvidence.jailKey(site), bounty); // the goods' lock before the cell is made ready
+        JailEvidence.noteBounty(player.level().getServer(), JailEvidence.jailKey(site), bounty); // the goods' lock before the cell is made ready
         teleportToCell(player, site);
 
         // Move possessions to the jail's stores (nothing is ever deleted): stolen goods to the shared confiscated goods,
         // the rest to the prisoner's own evidence. Quest items and up to 2 lockpicks (if skilled) stay.
         String jail = JailEvidence.jailKey(site);
         recoverKeys(player); // a key from an earlier escape is the jail's property, not an item to confiscate
-        JailEvidence.noteBounty(player.server, jail, bounty);
+        JailEvidence.noteBounty(player.level().getServer(), jail, bounty);
         var inv = player.getInventory();
         int lockpickCount = 0;
         for (int i = 0; i < inv.getContainerSize(); i++) {
@@ -407,8 +407,8 @@ public final class Jail {
         }
         if (site.mine()) {
             ItemStack pick = new ItemStack(Items.IRON_PICKAXE);
-            pick.setHoverName(Component.translatable("item.skycraft.reward.cidhna_pickaxe"));
-            pick.getOrCreateTag().putBoolean(TOOL_TAG, true);
+            pick.set(net.minecraft.core.component.DataComponents.CUSTOM_NAME, Component.translatable("item.skycraft.reward.cidhna_pickaxe"));
+            com.skycraft.inventory.ItemData.updateCustom(pick, customData263 -> customData263.putBoolean(TOOL_TAG, true));
             com.skycraft.inventory.Pack.giveOrDrop(player, pick);
             Notifier.message(player, Component.translatable("crime.skycraft.jail.mine_labour", LABOUR_SECONDS));
         }
@@ -439,7 +439,7 @@ public final class Jail {
         ServerLevel level = s.level();
         level.getChunk(s.stand());
         SettlementAnchors.find(level, s.place()).ifPresent(e -> JailEvidence.migrateHold(level, e));
-        JailEvidence.ensureHold(level, s, JailEvidence.stores(player.server, s.place()).tier);
+        JailEvidence.ensureHold(level, s, JailEvidence.stores(player.level().getServer(), s.place()).tier);
         lockDoor(level, s.door(), Locks.APPRENTICE);
         lockDoor(level, s.gate(), Locks.ADEPT);
     }
@@ -473,15 +473,15 @@ public final class Jail {
         if (site.hold()) {
             prepareHoldCell(player, site);
             BlockPos s = site.stand();
-            player.teleportTo(site.level(), s.getX() + 0.5, s.getY(), s.getZ() + 0.5, player.getYRot(), 0f);
+            player.teleportTo(site.level(),  s.getX() + 0.5,  s.getY(),  s.getZ() + 0.5, java.util.Set.of(),  player.getYRot(),  0f, true);
             return;
         }
         ServerLevel jail = site.level();
         int slot = site.cell();
         BlockPos origin = cellOrigin(slot);
-        JailData data = JailData.get(player.server);
+        JailData data = JailData.get(player.level().getServer());
         boolean fresh = !data.built.contains(slot);
-        int tier = JailEvidence.stores(player.server, JailEvidence.DIM).tier;
+        int tier = JailEvidence.stores(player.level().getServer(), JailEvidence.DIM).tier;
         // an older cell block's per-cell chest goes into the stores before anything is rebuilt around it
         JailEvidence.migrateDim(jail, slot);
         // the partition wall beside the evidence room is always stone; air there means the cell block is gone
@@ -495,7 +495,7 @@ public final class Jail {
         // every sentence starts with the room's door and the cell door locked again
         if (jail.getBlockState(origin.offset(2, 1, 3)).getBlock() instanceof DoorBlock) lockDoor(jail, origin.offset(2, 1, 3), tier);
         if (jail.getBlockState(origin.offset(5, 1, 4)).getBlock() instanceof DoorBlock) lockDoor(jail, origin.offset(5, 1, 4), Locks.MASTER);
-        player.teleportTo(jail, origin.getX() + 7.5, CELL_Y + 1, origin.getZ() + 4.5, 90f, 0f);
+        player.teleportTo(jail,  origin.getX() + 7.5,  CELL_Y + 1,  origin.getZ() + 4.5, java.util.Set.of(),  90f,  0f, true);
     }
 
     static BlockPos cellOrigin(int slot) {
@@ -567,7 +567,7 @@ public final class Jail {
 
         // Spawn prisoners in Cells 2 and 3 (once per cell block; tagged so they can be told apart)
         try {
-            var prisoner1 = net.minecraft.world.entity.EntityType.VILLAGER.create(level);
+            var prisoner1 = net.minecraft.world.entity.EntityTypes.VILLAGER.create(level, net.minecraft.world.entity.EntitySpawnReason.EVENT);
             if (prisoner1 != null) {
                 prisoner1.setCustomName(Component.translatable("crime.skycraft.jail.npc.outlaw"));
                 prisoner1.setCustomNameVisible(true);
@@ -576,7 +576,7 @@ public final class Jail {
                 prisoner1.setPersistenceRequired();
                 level.addFreshEntity(prisoner1);
             }
-            var prisoner2 = net.minecraft.world.entity.EntityType.VILLAGER.create(level);
+            var prisoner2 = net.minecraft.world.entity.EntityTypes.VILLAGER.create(level, net.minecraft.world.entity.EntitySpawnReason.EVENT);
             if (prisoner2 != null) {
                 prisoner2.setCustomName(Component.translatable("crime.skycraft.jail.npc.thief"));
                 prisoner2.setCustomNameVisible(true);
@@ -610,8 +610,8 @@ public final class Jail {
         // Bed inside cell
         BlockPos head = o.offset(9, 1, bedZ);
         BlockPos foot = o.offset(9, 1, bedZ + 1);
-        level.setBlock(head, Blocks.RED_BED.defaultBlockState().setValue(BedBlock.FACING, Direction.SOUTH).setValue(BedBlock.PART, BedPart.HEAD), 2);
-        level.setBlock(foot, Blocks.RED_BED.defaultBlockState().setValue(BedBlock.FACING, Direction.SOUTH).setValue(BedBlock.PART, BedPart.FOOT), 2);
+        level.setBlock(head, com.skycraft.worldgen.VanillaBlocks.RED_BED.defaultBlockState().setValue(BedBlock.FACING, Direction.SOUTH).setValue(BedBlock.PART, BedPart.HEAD), 2);
+        level.setBlock(foot, com.skycraft.worldgen.VanillaBlocks.RED_BED.defaultBlockState().setValue(BedBlock.FACING, Direction.SOUTH).setValue(BedBlock.PART, BedPart.FOOT), 2);
 
         // Cell furnishings
         level.setBlock(o.offset(9, 1, doorZ + 2), Blocks.CAULDRON.defaultBlockState(), 2);
@@ -623,22 +623,22 @@ public final class Jail {
     /** Every second. */
     static void tick(ServerPlayer player) {
         if (!isJailed(player)) return;
-        CompoundTag j = Bounty.state(player).getCompound("jail");
+        CompoundTag j = Bounty.state(player).getCompoundOrEmpty("jail");
         Site site = siteOf(player);
         if (site == null) {
             // the hold jail is gone (or the dimension is missing): serve in the jail dimension instead
-            ServerLevel jail = player.server.getLevel(JAIL);
+            ServerLevel jail = player.level().getServer().getLevel(JAIL);
             if (jail == null) return;
             j.putString("site", "dim");
             SkyData.get(player).markDirty();
-            if (player.isAlive()) teleportToCell(player, dimensionSite(player.server, jail, player.getUUID()));
+            if (player.isAlive()) teleportToCell(player, dimensionSite(player.level().getServer(), jail, player.getUUID()));
             return;
         }
         boolean inside = site.hold() ? site.contains(player.level(), player.getX(), player.getY(), player.getZ()) : isJailDimension(player.level());
         if (!inside) {
             if (!player.isAlive()) return;
             if (player.isCreative() || player.isSpectator()) {
-                String hold = j.getString("hold");
+                String hold = j.getStringOr("hold","");
                 freeCell(player, site);
                 Bounty.state(player).remove("jail");
                 SkyData.get(player).markDirty();
@@ -669,8 +669,8 @@ public final class Jail {
      * ({@code remaining} 0): the prisoner is not released by the clock, only by sleeping in the bed (or escaping).
      */
     static boolean serveSecond(CompoundTag j) {
-        j.putInt("served", j.getInt("served") + 1);
-        int before = j.getInt("remaining");
+        j.putInt("served", j.getIntOr("served",0) + 1);
+        int before = j.getIntOr("remaining",0);
         if (before <= 0) return false;
         j.putInt("remaining", before - 1);
         return before == 1;
@@ -682,9 +682,9 @@ public final class Jail {
      */
     public static void passTime(ServerPlayer player, int seconds) {
         if (seconds <= 0 || !isJailed(player)) return;
-        CompoundTag j = Bounty.state(player).getCompound("jail");
-        int before = j.getInt("remaining");
-        j.putInt("served", j.getInt("served") + seconds);
+        CompoundTag j = Bounty.state(player).getCompoundOrEmpty("jail");
+        int before = j.getIntOr("remaining",0);
+        j.putInt("served", j.getIntOr("served",0) + seconds);
         if (before > 0) {
             j.putInt("remaining", Math.max(0, before - seconds));
             if (before - seconds <= 0) {
@@ -696,7 +696,7 @@ public final class Jail {
 
     /** Whether the prisoner may sleep to be released: the first minute is over, or the sentence is served. */
     static boolean maySleep(CompoundTag j) {
-        return j.getInt("served") >= 60 || j.getInt("remaining") <= 0;
+        return j.getIntOr("served",0) >= 60 || j.getIntOr("remaining",0) <= 0;
     }
 
     /** Forgets a player's jail bookkeeping (logout). */
@@ -748,12 +748,12 @@ public final class Jail {
         if (guard instanceof Mob mob) mob.getNavigation().stop();
         ServerLevel level = site.level();
         BlockPos s = site.stand();
-        player.teleportTo(level, s.getX() + 0.5, s.getY(), s.getZ() + 0.5, player.getYRot(), 0f);
+        player.teleportTo(level,  s.getX() + 0.5,  s.getY(),  s.getZ() + 0.5, java.util.Set.of(),  player.getYRot(),  0f, true);
         BlockPos door = site.door();
         int tier = Locks.lockLevel(level, door);
         lockDoor(level, door, tier == Locks.NOT_LOCKED ? Locks.APPRENTICE : tier);
-        CompoundTag j = Bounty.state(player).getCompound("jail");
-        j.putInt("remaining", Math.min(MAX_SECONDS, j.getInt("remaining") + DRAGGED_BACK_SECONDS));
+        CompoundTag j = Bounty.state(player).getCompoundOrEmpty("jail");
+        j.putInt("remaining", Math.min(MAX_SECONDS, j.getIntOr("remaining",0) + DRAGGED_BACK_SECONDS));
         SkyData.get(player).markDirty();
         Notifier.message(player, Component.translatable("crime.skycraft.jail.dragged_back", guard.getDisplayName(), DRAGGED_BACK_SECONDS));
         level.playSound(null, s, SoundEvents.IRON_DOOR_CLOSE, SoundSource.BLOCKS, 1f, 1f);
@@ -780,7 +780,7 @@ public final class Jail {
     private static void freeCell(ServerPlayer player, Site site) {
         removeTools(player);
         if (!site.hold()) return;
-        JailData jd = JailData.get(player.server);
+        JailData jd = JailData.get(player.level().getServer());
         if (player.getUUID().equals(jd.occupied.get(site.key()))) {
             jd.occupied.remove(site.key());
             jd.setDirty();
@@ -792,19 +792,19 @@ public final class Jail {
         var inv = player.getInventory();
         for (int i = 0; i < inv.getContainerSize(); i++) {
             ItemStack s = inv.getItem(i);
-            if (!s.isEmpty() && s.getTag() != null && s.getTag().getBoolean(TOOL_TAG)) inv.setItem(i, ItemStack.EMPTY);
+            if (!s.isEmpty() && com.skycraft.inventory.ItemData.custom(s) != null && com.skycraft.inventory.ItemData.custom(s).getBooleanOr(TOOL_TAG, false)) inv.setItem(i, ItemStack.EMPTY);
         }
-        com.skycraft.inventory.Pack.remove(player, s -> s.getTag() != null && s.getTag().getBoolean(TOOL_TAG), Integer.MAX_VALUE);
+        com.skycraft.inventory.Pack.remove(player, s -> com.skycraft.inventory.ItemData.custom(s) != null && com.skycraft.inventory.ItemData.custom(s).getBooleanOr(TOOL_TAG, false), Integer.MAX_VALUE);
     }
 
     static void release(ServerPlayer player, boolean slept) {
         CompoundTag state = Bounty.state(player);
-        if (!state.contains("jail", Tag.TAG_COMPOUND)) return;
+        if (!com.skycraft.platform.NbtData.hasType(state, "jail", Tag.TAG_COMPOUND)) return;
         Site site = siteOf(player);
-        CompoundTag j = state.getCompound("jail");
+        CompoundTag j = state.getCompoundOrEmpty("jail");
         state.remove("jail");
-        String hold = j.getString("hold");
-        int bounty = Math.max(j.getInt("bounty"), 1);
+        String hold = j.getStringOr("hold","");
+        int bounty = Math.max(j.getIntOr("bounty",0), 1);
         Bounty.clear(player, hold);
 
         // Their own things come back from the evidence (the stolen goods stay in the jail's confiscated goods)
@@ -832,7 +832,7 @@ public final class Jail {
 
     /** True for 1 in-game day (24,000 ticks) after a prisoner breaks out of jail; after a day they may freely visit again. */
     public static boolean isRecentEscapee(Player player) {
-        long until = Bounty.state(player).getLong("escaped_until");
+        long until = Bounty.state(player).getLongOr("escaped_until",0L);
         return until > 0 && player.level().getGameTime() < until;
     }
 
@@ -841,11 +841,11 @@ public final class Jail {
      * hurried along with them: a single-player world, or the only player online.
      */
     private static void passDays(ServerPlayer player, int days) {
-        MinecraftServer server = player.server;
+        MinecraftServer server = player.level().getServer();
         boolean alone = server.getPlayerList().getPlayerCount() <= 1;
         if (!alone) return;
         ServerLevel overworld = server.overworld();
-        overworld.setDayTime(overworld.getDayTime() + 24000L * days);
+        com.skycraft.platform.WorldTime.set(overworld, overworld.getDefaultClockTime() + 24000L * days);
         Notifier.message(player, Component.translatable("crime.skycraft.jail.days", days));
     }
 
@@ -861,9 +861,9 @@ public final class Jail {
             }
         }
         Site site = siteOf(player);
-        CompoundTag j = Bounty.state(player).getCompound("jail");
-        String hold = j.getString("hold");
-        String place = j.getString("place");
+        CompoundTag j = Bounty.state(player).getCompoundOrEmpty("jail");
+        String hold = j.getStringOr("hold","");
+        String place = j.getStringOr("place","");
         Bounty.state(player).remove("jail");
         Bounty.state(player).putLong("escaped_until", player.level().getGameTime() + 24000L);
         SkyData.get(player).markDirty();
@@ -892,7 +892,7 @@ public final class Jail {
 
     /** Public lookup for where a party member traveling to a jailed prisoner should arrive (outside the jail in town). */
     public static Exit outsideFor(ServerPlayer prisoner) {
-        return outside(prisoner.server, Bounty.state(prisoner).getCompound("jail"), siteOf(prisoner));
+        return outside(prisoner.level().getServer(), Bounty.state(prisoner).getCompoundOrEmpty("jail"), siteOf(prisoner));
     }
 
     /**
@@ -912,9 +912,9 @@ public final class Jail {
             int topY = site.level().getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, cx, outZ);
             return new Exit(site.level(), ensureOutdoor(site.level(), new BlockPos(cx, topY, outZ)));
         }
-        BlockPos from = BlockPos.containing(j.getDouble("rx"), j.getDouble("ry"), j.getDouble("rz"));
-        String place = j.getString("place");
-        if (place.isEmpty()) place = jailPlaceFor(overworld, j.getString("hold"), from);
+        BlockPos from = BlockPos.containing(j.getDoubleOr("rx",0D), j.getDoubleOr("ry",0D), j.getDoubleOr("rz",0D));
+        String place = j.getStringOr("place","");
+        if (place.isEmpty()) place = jailPlaceFor(overworld, j.getStringOr("hold",""), from);
         if (place != null) {
             Optional<SettlementAnchors.Entry> entry = SettlementAnchors.find(overworld, place);
             if (entry.isPresent()) {
@@ -929,7 +929,7 @@ public final class Jail {
                 return new Exit(overworld, ensureOutdoor(overworld, center));
             }
         }
-        return new Exit(overworld, ensureOutdoor(overworld, overworld.getSharedSpawnPos()));
+        return new Exit(overworld, ensureOutdoor(overworld, overworld.getRespawnData().pos()));
     }
 
     private static BlockPos ensureOutdoor(ServerLevel level, BlockPos base) {
@@ -949,9 +949,9 @@ public final class Jail {
     }
 
     private static void teleportOutside(ServerPlayer player, CompoundTag j, @Nullable Site site) {
-        Exit out = outside(player.server, j, site);
+        Exit out = outside(player.level().getServer(), j, site);
         BlockPos p = out.pos();
-        player.teleportTo(out.level(), p.getX() + 0.5, p.getY(), p.getZ() + 0.5, player.getYRot(), 0f);
+        player.teleportTo(out.level(),  p.getX() + 0.5,  p.getY(),  p.getZ() + 0.5, java.util.Set.of(),  player.getYRot(),  0f, true);
     }
 
     /** Skyrim: time in jail erodes skill progress. Picks {@code times} skills weighted by level and resets their progress. */
@@ -1008,8 +1008,8 @@ public final class Jail {
             if (here && state.getBlock() instanceof BedBlock) {
                 event.setCanceled(true);
                 event.setCancellationResult(InteractionResult.FAIL);
-                CompoundTag j = Bounty.state(player).getCompound("jail");
-                int served = j.getInt("served");
+                CompoundTag j = Bounty.state(player).getCompoundOrEmpty("jail");
+                int served = j.getIntOr("served",0);
                 if (!maySleep(j)) {
                     Notifier.message(player, Component.translatable("crime.skycraft.jail.too_soon", 60 - served));
                 } else if (!com.skycraft.world.RestManager.beginJail(player, pos, () -> release(player, true))) {
@@ -1079,7 +1079,7 @@ public final class Jail {
     }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
-    public static void onBreak(BlockEvent.BreakEvent event) {
+    public static void onBreak(net.neoforged.neoforge.event.level.block.BreakBlockEvent event) {
         Player p = event.getPlayer();
         if (p.isCreative()) return;
         if (isJail(event.getLevel())) {
@@ -1092,7 +1092,7 @@ public final class Jail {
         Site site = siteOf(player);
         if (site == null || !site.mine() || !site.contains(player.level(), event.getPos())) return;
         BlockState st = event.getState();
-        ResourceLocation id = BuiltInRegistries.BLOCK.getKey(st.getBlock());
+        Identifier id = BuiltInRegistries.BLOCK.getKey(st.getBlock());
         if (!id.getPath().endsWith("_ore")) return;
         String key = event.getPos().asLong() + "";
         long now = player.level().getGameTime();
@@ -1103,8 +1103,8 @@ public final class Jail {
         }
         WORKED.put(key, now + 20L * 120);
         if (WORKED.size() > 512) WORKED.values().removeIf(t -> t < now);
-        CompoundTag j = Bounty.state(player).getCompound("jail");
-        int left = Math.max(1, j.getInt("remaining") - LABOUR_SECONDS);
+        CompoundTag j = Bounty.state(player).getCompoundOrEmpty("jail");
+        int left = Math.max(1, j.getIntOr("remaining",0) - LABOUR_SECONDS);
         j.putInt("remaining", left);
         SkyData.get(player).markDirty();
         player.level().playSound(null, event.getPos(), SoundEvents.STONE_BREAK, SoundSource.BLOCKS, 1f, 0.8f);
@@ -1136,7 +1136,7 @@ public final class Jail {
         String jail = JailEvidence.jailKey(site);
         for (ItemEntity drop : event.getDrops()) {
             ItemStack s = drop.getItem().copy();
-            if (s.getTag() != null && s.getTag().getBoolean(TOOL_TAG)) continue;
+            if (com.skycraft.inventory.ItemData.custom(s) != null && com.skycraft.inventory.ItemData.custom(s).getBooleanOr(TOOL_TAG, false)) continue;
             if (s.is(CrimeItems.JAIL_KEY.get())) continue; // the jail's own
             JailEvidence.confiscate(player, jail, s);
         }
@@ -1187,7 +1187,7 @@ public final class Jail {
         }
 
         static JailData get(MinecraftServer server) {
-            return server.overworld().getDataStorage().computeIfAbsent(JailData::load, JailData::new, NAME);
+            return com.skycraft.platform.SavedDataTypes.get(server.overworld(), NAME, JailData::load, JailData::new, value263 -> value263.save(new net.minecraft.nbt.CompoundTag()));
         }
 
         int slotFor(UUID player) {
@@ -1202,22 +1202,22 @@ public final class Jail {
 
         static JailData load(CompoundTag tag) {
             JailData data = new JailData();
-            data.next = tag.getInt("next");
-            CompoundTag slots = tag.getCompound("slots");
-            for (String k : slots.getAllKeys()) {
+            data.next = tag.getIntOr("next",0);
+            CompoundTag slots = tag.getCompoundOrEmpty("slots");
+            for (String k : slots.keySet()) {
                 try {
-                    data.slots.put(UUID.fromString(k), slots.getInt(k));
+                    data.slots.put(UUID.fromString(k), slots.getIntOr(k, 0));
                 } catch (IllegalArgumentException ignored) {
                     // corrupt entry
                 }
             }
-            for (int b : tag.getIntArray("built")) data.built.add(b);
-            CompoundTag held = tag.getCompound("held");
-            for (String k : held.getAllKeys()) {
+            for (int b : tag.getIntArray("built").orElseGet(() -> new int[0])) data.built.add(b);
+            CompoundTag held = tag.getCompoundOrEmpty("held");
+            for (String k : held.keySet()) {
                 try {
                     List<ItemStack> items = new ArrayList<>();
-                    for (Tag t : held.getList(k, Tag.TAG_COMPOUND)) {
-                        ItemStack s = ItemStack.of((CompoundTag) t);
+                    for (Tag t : held.getListOrEmpty(k)) {
+                        ItemStack s = com.skycraft.inventory.ItemData.parse((CompoundTag) t);
                         if (!s.isEmpty()) items.add(s);
                     }
                     if (!items.isEmpty()) data.held.put(UUID.fromString(k), items);
@@ -1225,36 +1225,35 @@ public final class Jail {
                     // corrupt entry
                 }
             }
-            readCells(tag.getCompound("occupied"), data.occupied);
-            readCells(tag.getCompound("chest_owner"), data.chestOwner);
-            CompoundTag st = tag.getCompound("stores");
-            for (String k : st.getAllKeys()) data.stores.put(k, JailEvidence.Stores.load(st.getCompound(k), data::setDirty));
+            readCells(tag.getCompoundOrEmpty("occupied"), data.occupied);
+            readCells(tag.getCompoundOrEmpty("chest_owner"), data.chestOwner);
+            CompoundTag st = tag.getCompoundOrEmpty("stores");
+            for (String k : st.keySet()) data.stores.put(k, JailEvidence.Stores.load(st.getCompoundOrEmpty(k), data::setDirty));
             return data;
         }
 
         private static void readCells(CompoundTag t, Map<String, UUID> into) {
-            for (String k : t.getAllKeys()) {
-                if (t.hasUUID(k)) into.put(k, t.getUUID(k));
+            for (String k : t.keySet()) {
+                if (t.read(k, net.minecraft.core.UUIDUtil.CODEC).isPresent()) into.put(k, t.read(k, net.minecraft.core.UUIDUtil.CODEC).orElseThrow());
             }
         }
 
         private static CompoundTag writeCells(Map<String, UUID> from) {
             CompoundTag t = new CompoundTag();
-            from.forEach(t::putUUID);
+            from.forEach((key, uuid) -> t.store(key, net.minecraft.core.UUIDUtil.CODEC, uuid));
             return t;
         }
 
-        @Override
         public CompoundTag save(CompoundTag tag) {
             tag.putInt("next", next);
             CompoundTag s = new CompoundTag();
             slots.forEach((k, v) -> s.putInt(k.toString(), v));
             tag.put("slots", s);
-            tag.put("built", new IntArrayTag(new ArrayList<>(built)));
+            tag.put("built", new IntArrayTag(built.stream().mapToInt(Integer::intValue).toArray()));
             CompoundTag h = new CompoundTag();
             held.forEach((k, items) -> {
                 ListTag list = new ListTag();
-                for (ItemStack item : items) if (!item.isEmpty()) list.add(item.save(new CompoundTag()));
+                for (ItemStack item : items) if (!item.isEmpty()) list.add(com.skycraft.inventory.ItemData.save(item));
                 if (!list.isEmpty()) h.put(k.toString(), list);
             });
             tag.put("held", h);

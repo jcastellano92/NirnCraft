@@ -4,7 +4,7 @@ import com.mojang.authlib.GameProfile;
 import com.skycraft.client.SkyKeys;
 import com.skycraft.network.SkyNetwork;
 import com.skycraft.quest.QuestPackets;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.ClientPacketListener;
@@ -64,11 +64,11 @@ public class PartyScreen extends Screen {
         if (connection == null) return out;
         for (PlayerInfo info : connection.getOnlinePlayers()) {
             GameProfile profile = info.getProfile();
-            UUID id = profile.getId();
+            UUID id = profile.id();
             if (id == null || id.equals(self()) || ClientQuestData.isMember(id)) continue;
             Player p = minecraft.level == null ? null : minecraft.level.getPlayerByUUID(id);
             double dist = p == null ? Double.MAX_VALUE : p.distanceTo(minecraft.player);
-            out.add(new Candidate(id, profile.getName(), dist));
+            out.add(new Candidate(id, profile.name(), dist));
         }
         out.sort(Comparator.comparingDouble(Candidate::distance).thenComparing(Candidate::name, String.CASE_INSENSITIVE_ORDER));
         return out;
@@ -109,7 +109,7 @@ public class PartyScreen extends Screen {
                     String name = m.name();
                     boolean isLead = id.equals(ClientQuestData.leader());
                     addRenderableWidget(Button.builder(Component.translatable("party.skycraft.button.travel"),
-                                    b -> minecraft.setScreen(new PartyTravelScreen(id, name, isLead, this)))
+                                    b -> minecraft.gui.setScreen(new PartyTravelScreen(id, name, isLead, this)))
                             .bounds(x1 - 148, y - 3, 44, 14).build());
                 }
                 if (leader && !m.id().equals(self())) {
@@ -180,27 +180,28 @@ public class PartyScreen extends Screen {
     }
 
     @Override
-    public boolean keyPressed(int key, int scan, int mods) {
-        if (SkyKeys.PARTY.matches(key, scan)) {
+    public boolean keyPressed(net.minecraft.client.input.KeyEvent event) {
+        int key = event.key(), scan = event.keycode(), mods = event.modifiers();
+        if (SkyKeys.PARTY.matches(event)) {
             onClose();
             return true;
         }
-        return super.keyPressed(key, scan, mods);
+        return super.keyPressed(event);
     }
 
     @Override
-    public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        renderBackground(g);
+    public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
+
         Parchment.page(g, x0, y0, x1, y1);
         boolean inParty = ClientQuestData.inParty();
         Component title = inParty
                 ? Component.translatable("party.skycraft.screen.title_size", members.size(), ClientQuestData.maxSize())
                 : Component.translatable("party.skycraft.screen.title");
-        g.pose().pushPose();
-        g.pose().translate((x0 + x1) / 2f, y0 + 9, 0);
-        g.pose().scale(1.3f, 1.3f, 1f);
-        g.drawCenteredString(font, title, 0, 0, 0xFF3A2814);
-        g.pose().popPose();
+        g.pose().pushMatrix();
+        g.pose().translate((x0 + x1) / 2f, y0 + 9);
+        g.pose().scale(1.3f, 1.3f);
+        g.centeredText(font, title, 0, 0, 0xFF3A2814);
+        g.pose().popMatrix();
         Parchment.rule(g, x0 + 10, x1 - 10, y0 + 23);
 
         int x = x0 + 14;
@@ -212,45 +213,45 @@ public class PartyScreen extends Screen {
                 ClientQuestData.Member now = m;
                 for (ClientQuestData.Member l : live) if (l.id().equals(m.id())) now = l;
                 String name = (m.id().equals(leader) ? "★ " : "") + m.name();
-                g.drawString(font, font.plainSubstrByWidth(name, 96), x, y, now.online() ? Parchment.INK : Parchment.INK_FADED, false);
+                g.text(font, font.plainSubstrByWidth(name, 96), x, y, now.online() ? Parchment.INK : Parchment.INK_FADED, false);
                 if (now.online()) {
                     float fill = now.maxHealth() > 0 ? now.health() / now.maxHealth() : 0;
                     Parchment.bar(g, x + 100, y + 2, 70, fill, 0xFFB0262A);
                 } else {
-                    g.drawString(font, Component.translatable("party.skycraft.offline"), x + 100, y, Parchment.INK_FADED, false);
+                    g.text(font, Component.translatable("party.skycraft.offline"), x + 100, y, Parchment.INK_FADED, false);
                 }
                 y += ROW;
             }
         } else {
-            g.drawString(font, Component.translatable("party.skycraft.screen.no_party"), x + 100, membersY + 4, Parchment.INK_LIGHT, false);
+            g.text(font, Component.translatable("party.skycraft.screen.no_party"), x + 100, membersY + 4, Parchment.INK_LIGHT, false);
         }
 
         if (!invites.isEmpty()) {
-            g.drawString(font, Component.translatable("party.skycraft.screen.invites"), x, invitesY, Parchment.RED, false);
+            g.text(font, Component.translatable("party.skycraft.screen.invites"), x, invitesY, Parchment.RED, false);
             int y = invitesY + 12;
             for (ClientQuestData.Invite i : invites) {
-                g.drawString(font, Component.translatable("party.skycraft.screen.invite_from", i.from()), x, y, Parchment.INK, false);
+                g.text(font, Component.translatable("party.skycraft.screen.invite_from", i.from()), x, y, Parchment.INK, false);
                 y += ROW;
             }
         }
 
-        g.drawString(font, Component.translatable("party.skycraft.screen.players"), x, playersY, Parchment.RED, false);
+        g.text(font, Component.translatable("party.skycraft.screen.players"), x, playersY, Parchment.RED, false);
         int y = playersY + 12;
         if (candidates.isEmpty()) {
-            g.drawString(font, Component.translatable("party.skycraft.screen.nobody"), x, y, Parchment.INK_FADED, false);
+            g.text(font, Component.translatable("party.skycraft.screen.nobody"), x, y, Parchment.INK_FADED, false);
         }
         int from = page * PAGE_SIZE;
         for (int i = from; i < Math.min(candidates.size(), from + PAGE_SIZE); i++) {
             Candidate c = candidates.get(i);
-            g.drawString(font, font.plainSubstrByWidth(c.name(), 120), x, y, Parchment.INK, false);
+            g.text(font, font.plainSubstrByWidth(c.name(), 120), x, y, Parchment.INK, false);
             Component where = c.distance() < 1e6 ? Component.translatable("party.skycraft.screen.nearby", (int) c.distance())
                     : Component.translatable("party.skycraft.screen.online");
-            g.drawString(font, where, x + 126, y, Parchment.INK_LIGHT, false);
+            g.text(font, where, x + 126, y, Parchment.INK_LIGHT, false);
             y += ROW;
         }
         if (inParty && !isLeader()) {
-            g.drawString(font, Component.translatable("party.skycraft.screen.leader_invites"), x, y1 - 20, Parchment.INK_FADED, false);
+            g.text(font, Component.translatable("party.skycraft.screen.leader_invites"), x, y1 - 20, Parchment.INK_FADED, false);
         }
-        super.render(g, mouseX, mouseY, partialTick);
+        super.extractRenderState(g, mouseX, mouseY, partialTick);
     }
 }

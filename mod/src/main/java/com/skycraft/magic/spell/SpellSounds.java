@@ -35,7 +35,7 @@ public final class SpellSounds {
         set(Slot.CAST_SHOCK, () -> SoundEvents.FIREWORK_ROCKET_TWINKLE);
         set(Slot.CAST_HOLY, () -> SoundEvents.AMETHYST_BLOCK_CHIME);
         set(Slot.CAST_MIND, () -> SoundEvents.ILLUSIONER_CAST_SPELL);
-        set(Slot.CAST_SOUL, () -> SoundEvents.SOUL_ESCAPE);
+        set(Slot.CAST_SOUL, () -> SoundEvents.SOUL_ESCAPE.value());
         set(Slot.CAST_CONJURE, () -> SoundEvents.EVOKER_PREPARE_SUMMON);
         set(Slot.CAST_NATURE, () -> SoundEvents.EVOKER_CAST_SPELL);
         set(Slot.CAST_ARCANE, () -> SoundEvents.ENCHANTMENT_TABLE_USE);
@@ -49,7 +49,7 @@ public final class SpellSounds {
         set(Slot.IMPACT_SHOCK, () -> SoundEvents.LIGHTNING_BOLT_IMPACT);
         set(Slot.IMPACT_HOLY, () -> SoundEvents.AMETHYST_BLOCK_BREAK);
         set(Slot.IMPACT_MIND, () -> SoundEvents.ILLUSIONER_MIRROR_MOVE);
-        set(Slot.IMPACT_SOUL, () -> SoundEvents.SOUL_ESCAPE);
+        set(Slot.IMPACT_SOUL, () -> SoundEvents.SOUL_ESCAPE.value());
         set(Slot.IMPACT_ARCANE, () -> SoundEvents.AMETHYST_CLUSTER_BREAK);
         set(Slot.CHARGE, () -> SoundEvents.BEACON_AMBIENT);
         set(Slot.DUAL_CAST, () -> SoundEvents.EVOKER_CAST_SPELL);
@@ -61,7 +61,7 @@ public final class SpellSounds {
         set(Slot.TELEPORT, () -> SoundEvents.ENDERMAN_TELEPORT);
         set(Slot.LEVITATE, () -> SoundEvents.ELYTRA_FLYING);
         set(Slot.DISPEL, () -> SoundEvents.BEACON_DEACTIVATE);
-        set(Slot.REFLECT, () -> SoundEvents.SHIELD_BLOCK);
+        set(Slot.REFLECT, () -> SoundEvents.SHIELD_BLOCK.value());
         set(Slot.ABSORB, () -> SoundEvents.BEACON_POWER_SELECT);
         set(Slot.SPELLMAKING, () -> SoundEvents.ENCHANTMENT_TABLE_USE);
         set(Slot.STAFF_ENCHANT, () -> SoundEvents.ENCHANTMENT_TABLE_USE);
@@ -135,7 +135,7 @@ public final class SpellSounds {
 
     /** An impact anyone nearby hears. */
     public static void impact(ServerLevel level, Vec3 pos, Element element, float volume) {
-        float pitch = element == Element.SHOCK ? 1.7f : 1.0f + level.random.nextFloat() * 0.2f;
+        float pitch = element == Element.SHOCK ? 1.7f : 1.0f + level.getRandom().nextFloat() * 0.2f;
         MagicFx.worldSound(level, pos, get(impactSlot(element)), SoundSource.PLAYERS, element == Element.SHOCK ? volume * 0.5f : volume, pitch);
     }
 

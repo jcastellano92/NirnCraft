@@ -28,7 +28,7 @@ RES = os.path.join(ROOT, "mod", "src", "main", "resources")
 SKY = os.path.join(RES, "skycraft")
 LANG = os.path.join(ROOT, "mod", "src", "main", "lang", "skycraft")
 BP = os.path.join(SKY, "dungeons", "blueprints")
-LOOT = os.path.join(RES, "data", "skycraft", "loot_tables", "chests")
+LOOT = os.path.join(RES, "data", "skycraft", "loot_table", "chests")
 IDENT = os.path.join(SKY, "dungeons", "identity", "skyrim.json")
 
 # ---------------------------------------------------------------------------------------------------- families
@@ -815,6 +815,13 @@ def main():
     files[idx_path] = dumps(idx)
     changed = 0
     for path, text in files.items():
+        import sys
+        from pathlib import Path
+        native_tools263 = str(Path(__file__).resolve().parents[1])
+        if native_tools263 not in sys.path: sys.path.insert(0, native_tools263)
+        from data_format_263 import prepare
+        path, value263 = prepare(path, json.loads(text))
+        text = dumps(value263)
         old = open(path, encoding="utf8").read() if os.path.exists(path) else None
         if old != text:
             changed += 1

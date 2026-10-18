@@ -22,7 +22,7 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.state.BlockState;
@@ -64,11 +64,11 @@ public final class Attacks {
     /** A melee blow scaled by {@code mult} of the creature's attack damage, with knockback and effects. */
     public static boolean strike(Mob mob, LivingEntity target, float mult, HitEffect... effects) {
         float dmg = (float) mob.getAttributeValue(Attributes.ATTACK_DAMAGE) * mult;
-        boolean hit = target.hurt(mob.damageSources().mobAttack(mob), dmg);
+        boolean hit = com.skycraft.platform.Effects.hurt(target, mob.damageSources().mobAttack(mob), dmg);
         if (hit) {
             double kb = mob.getAttributeValue(Attributes.ATTACK_KNOCKBACK);
             if (kb > 0) {
-                target.knockback(kb * 0.5, Mth.sin(mob.getYRot() * Mth.DEG_TO_RAD), -Mth.cos(mob.getYRot() * Mth.DEG_TO_RAD));
+                target.knockback(kb * 0.5, Mth.sin(mob.getYRot() * Mth.DEG_TO_RAD), -Mth.cos(mob.getYRot() * Mth.DEG_TO_RAD), mob.damageSources().mobAttack(mob), dmg);
             }
             mob.setLastHurtMob(target);
             for (HitEffect e : effects) e.apply(mob, target);
@@ -142,7 +142,7 @@ public final class Attacks {
                     if (len > 1.0E-4) h = h.scale(Math.min(power, len * 0.2) / len);
                     mob.setDeltaMovement(h.x, 0.42 + power * 0.08, h.z);
                     mob.getPersistentData().putBoolean("skycraft_pounce", true);
-                } else if (t > windup && mob.getPersistentData().getBoolean("skycraft_pounce")) {
+                } else if (t > windup && mob.getPersistentData().getBooleanOr("skycraft_pounce",false)) {
                     if (mob.getBoundingBox().inflate(0.5).intersects(target.getBoundingBox())) {
                         mob.getPersistentData().remove("skycraft_pounce");
                         strike(mob, target, mult, effects);
@@ -181,9 +181,9 @@ public final class Attacks {
                         mob.playSound(SoundEvents.RAVAGER_ROAR, 1.0f, 1.2f);
                     }
                 }
-                if (t > windup && pd.getBoolean("skycraft_charging")) {
-                    double cx = pd.getDouble("skycraft_cx");
-                    double cz = pd.getDouble("skycraft_cz");
+                if (t > windup && pd.getBooleanOr("skycraft_charging",false)) {
+                    double cx = pd.getDoubleOr("skycraft_cx",0D);
+                    double cz = pd.getDoubleOr("skycraft_cz",0D);
                     Vec3 v = mob.getDeltaMovement();
                     mob.setDeltaMovement(cx * speed, v.y, cz * speed);
                     mob.setYRot((float) (Mth.atan2(cz, cx) * Mth.RAD_TO_DEG) - 90f);
@@ -227,7 +227,7 @@ public final class Attacks {
                     if (e.distanceToSqr(mob) > (r + 1) * (r + 1)) continue;
                     if (strike(mob, e, mult, effects)) {
                         e.setDeltaMovement(e.getDeltaMovement().add(0, up, 0));
-                        e.hurtMarked = true;
+                        e.syncVelocity = true;
                     }
                 }
                 if (mob.level() instanceof ServerLevel sl) {
@@ -330,16 +330,16 @@ public final class Attacks {
                     if (perp > 0.8 + along * 0.3) continue;
                     switch (kind) {
                         case FROST -> {
-                            e.hurt(element(mob, MagicDamage.FROST), damagePerTick * 4);
-                            e.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 60, 1), mob);
+                            com.skycraft.platform.Effects.hurt(e, element(mob, MagicDamage.FROST), damagePerTick * 4);
+                            e.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.SLOWNESS), 60, 1), mob);
                         }
-                        case SHOCK -> e.hurt(element(mob, MagicDamage.SHOCK), damagePerTick * 4);
+                        case SHOCK -> com.skycraft.platform.Effects.hurt(e, element(mob, MagicDamage.SHOCK), damagePerTick * 4);
                         case POISON -> {
-                            e.hurt(mob.damageSources().mobAttack(mob), damagePerTick * 2);
-                            e.addEffect(new MobEffectInstance(MobEffects.POISON, 80, 1), mob);
+                            com.skycraft.platform.Effects.hurt(e, mob.damageSources().mobAttack(mob), damagePerTick * 2);
+                            e.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.POISON), 80, 1), mob);
                         }
                         default -> {
-                            if (e.hurt(element(mob, MagicDamage.FIRE), damagePerTick * 4)) e.setSecondsOnFire(4);
+                            if (com.skycraft.platform.Effects.hurt(e, element(mob, MagicDamage.FIRE), damagePerTick * 4)) e.igniteForSeconds(4);
                         }
                     }
                 }
@@ -371,15 +371,15 @@ public final class Attacks {
             protected void perform(Mob mob, LivingEntity target) {
                 if (!(mob.level() instanceof ServerLevel sl)) return;
                 for (int i = 0; i < count; i++) {
-                    Mob m = type.get().create(sl);
+                    Mob m = type.get().create(sl, net.minecraft.world.entity.EntitySpawnReason.EVENT);
                     if (m == null) return;
                     double ang = mob.getRandom().nextDouble() * Math.PI * 2;
                     double x = mob.getX() + Math.cos(ang) * 2.5;
                     double z = mob.getZ() + Math.sin(ang) * 2.5;
                     int y = sl.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Mth.floor(x), Mth.floor(z));
                     if (Math.abs(y - mob.getY()) > 4) y = Mth.floor(mob.getY());
-                    m.moveTo(x, y, z, mob.getYRot(), 0);
-                    m.finalizeSpawn(sl, sl.getCurrentDifficultyAt(BlockPos.containing(x, y, z)), MobSpawnType.MOB_SUMMONED, null, null);
+                    m.snapTo(x, y, z, mob.getYRot(), 0);
+                    m.finalizeSpawn(sl, sl.getCurrentDifficultyAt(BlockPos.containing(x, y, z)), EntitySpawnReason.MOB_SUMMONED, null);
                     m.setTarget(target);
                     m.addTag("skycraft.summoned_by_creature");
                     sl.addFreshEntity(m);
@@ -408,7 +408,7 @@ public final class Attacks {
                     if (!sl.isLoaded(col)) continue;
                     int y = sl.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, col.getX(), col.getZ());
                     if (Math.abs(y - target.getY()) > 5) continue;
-                    if (!sl.noCollision(mob, mob.getType().getAABB(x, y, z))) continue;
+                    if (!sl.noCollision(mob, mob.getType().getDimensions().makeBoundingBox(new net.minecraft.world.phys.Vec3(x, y, z)))) continue;
                     sl.sendParticles(ParticleTypes.PORTAL, mob.getX(), mob.getY() + 1, mob.getZ(), 30, 0.4, 0.8, 0.4, 0.3);
                     mob.teleportTo(x, y, z);
                     sl.sendParticles(ParticleTypes.REVERSE_PORTAL, x, y + 1, z, 30, 0.4, 0.8, 0.4, 0.1);
@@ -436,8 +436,8 @@ public final class Attacks {
                     if (e.getType() == mob.getType() && e instanceof Mob kin && kin.getTarget() == null) {
                         kin.setTarget(target);
                     } else if (e instanceof Player p && validVictim(mob, p)) {
-                        p.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, ticks, 0), mob);
-                        p.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, ticks, 0), mob);
+                        p.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.SLOWNESS), ticks, 0), mob);
+                        p.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.WEAKNESS), ticks, 0), mob);
                     }
                 }
             }
@@ -466,11 +466,11 @@ public final class Attacks {
                     Vec3 to = e.position().subtract(mob.position());
                     double len = to.length();
                     if (len > range || len < 1.0E-3 || to.normalize().dot(dir) < 0.6) continue;
-                    e.hurt(element(mob, MagicDamage.SPELL), damage);
+                    com.skycraft.platform.Effects.hurt(e, element(mob, MagicDamage.SPELL), damage);
                     double kb = force * (1 - e.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE)) * (1.2 - len / range * 0.5);
                     Vec3 push = to.normalize().scale(kb);
                     e.setDeltaMovement(e.getDeltaMovement().add(push.x, 0.4 + kb * 0.15, push.z));
-                    e.hurtMarked = true;
+                    e.syncVelocity = true;
                 }
             }
         };

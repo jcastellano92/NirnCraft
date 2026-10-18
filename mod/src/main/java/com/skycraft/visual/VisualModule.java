@@ -1,8 +1,8 @@
 package com.skycraft.visual;
 
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.config.ModConfig;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.ModLoadingContext;
+import net.neoforged.fml.config.ModConfig;
 
 /**
  * Skyrim's look and feel in Skycraft's own code: atmospheric particles (frost breath, drifting snow, falling leaves,
@@ -15,6 +15,6 @@ public final class VisualModule {
 
     public static void init(IEventBus modBus) {
         VisualParticles.init(modBus);
-        ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, VisualConfig.CLIENT_SPEC, "skycraft-visual-client.toml");
+        com.skycraft.Skycraft.config(ModConfig.Type.CLIENT, VisualConfig.CLIENT_SPEC, "skycraft-visual-client.toml");
     }
 }

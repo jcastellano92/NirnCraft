@@ -7,7 +7,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.player.Player;
@@ -36,7 +36,7 @@ public class CollectibleItem extends Item {
 
     @Nullable
     public static Collectibles.Entry entry(ItemStack stack) {
-        return stack.hasTag() && stack.getTag().contains(Collectibles.NBT) ? Collectibles.entry(stack.getTag().getString(Collectibles.NBT)) : null;
+        return com.skycraft.inventory.ItemData.hasCustom(stack) && com.skycraft.inventory.ItemData.custom(stack).contains(Collectibles.NBT) ? Collectibles.entry(com.skycraft.inventory.ItemData.custom(stack).getStringOr(Collectibles.NBT, "")) : null;
     }
 
     @Override
@@ -60,32 +60,32 @@ public class CollectibleItem extends Item {
     }
 
     @Override
-    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+    public InteractionResult use(Level level, Player player, InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
-        if (kind != Kind.SCROLL) return InteractionResultHolder.pass(stack);
-        if (!level.isClientSide && player instanceof ServerPlayer sp) {
+        if (kind != Kind.SCROLL) return InteractionResult.PASS;
+        if (!level.isClientSide() && player instanceof ServerPlayer sp) {
             // only Moth Priests read an Elder Scroll unharmed: the hero glimpses the past and goes blind for a while
-            sp.addEffect(new MobEffectInstance(MobEffects.BLINDNESS, 20 * 20, 0));
-            sp.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 20 * 8, 0));
+            sp.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.BLINDNESS), 20 * 20, 0));
+            sp.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.NAUSEA), 20 * 8, 0));
             Notifier.message(sp, Component.translatable("message.skycraft.loot.elder_scroll_read").withStyle(ChatFormatting.LIGHT_PURPLE));
             level.playSound(null, player.blockPosition(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 0.8f, 0.6f);
-            sp.getCooldowns().addCooldown(this, 20 * 30);
+            sp.getCooldowns().addCooldown(sp.getItemInHand(hand), 20 * 30);
         }
-        return InteractionResultHolder.sidedSuccess(stack, level.isClientSide);
+        return com.skycraft.platform.Interactions.sidedSuccess(level.isClientSide()).heldItemTransformedTo(stack);
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
+    public void appendHoverText(ItemStack stack, net.minecraft.world.item.Item.TooltipContext context263, net.minecraft.world.item.component.TooltipDisplay display263, java.util.function.Consumer<Component> tooltip, TooltipFlag flag) {
         if (kind == Kind.CROWN) {
-            tooltip.add(Component.translatable("tooltip.skycraft.loot.crown_of_barenziah").withStyle(ChatFormatting.GOLD));
+            tooltip.accept(Component.translatable("tooltip.skycraft.loot.crown_of_barenziah").withStyle(ChatFormatting.GOLD));
             return;
         }
         Collectibles.Entry e = entry(stack);
         if (e == null) return;
         Collectibles.Collection c = Collectibles.get(e.collection());
-        if (c != null) tooltip.add(Component.translatable("tooltip.skycraft.loot.part_of", c.name()).withStyle(ChatFormatting.GRAY));
+        if (c != null) tooltip.accept(Component.translatable("tooltip.skycraft.loot.part_of", c.name()).withStyle(ChatFormatting.GRAY));
         if (kind == Kind.TREASURE || kind == Kind.SCROLL) {
-            tooltip.add(Component.translatable("collectible.skycraft." + e.collection() + "." + e.id() + ".desc")
+            tooltip.accept(Component.translatable("collectible.skycraft." + e.collection() + "." + e.id() + ".desc")
                     .withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC));
         }
     }

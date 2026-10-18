@@ -138,7 +138,7 @@ public final class SettlementStations {
         if (!isFreeSpot(level, pos)) return;
         BlockState state = block.defaultBlockState();
         if (state.hasProperty(HorizontalDirectionalBlock.FACING)) {
-            state = state.setValue(HorizontalDirectionalBlock.FACING, Direction.Plane.HORIZONTAL.getRandomDirection(level.random));
+            state = state.setValue(HorizontalDirectionalBlock.FACING, Direction.Plane.HORIZONTAL.getRandomDirection(level.getRandom()));
         }
         level.setBlock(pos, state, 3);
         Ownership.setOwner(level, pos, "settlement:" + s.id + ":" + role, Component.literal(s.name + " " + roleTitle));
@@ -231,7 +231,7 @@ public final class SettlementStations {
                     if (exclude.contains(p) || exclude.contains(p.above())) continue;
                     if (isFreeSpot(level, p) && isFreeSpot(level, p.above())) {
                         BlockState floor = level.getBlockState(p.below());
-                        if (floor.isSolidRender(level, p.below()) && !level.canSeeSky(p)) {
+                        if (floor.isSolidRender() && !level.canSeeSky(p)) {
                             if (!buildTable) return p;
                             if (!isFreeSpot(level, p.above(2))) continue;
                             level.setBlock(p, Blocks.SPRUCE_FENCE.defaultBlockState(), 3);
@@ -261,7 +261,7 @@ public final class SettlementStations {
                 int z = origin.getZ() + dz;
                 int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
                 BlockPos p = new BlockPos(x, y, z);
-                if (isFreeSpot(level, p) && level.getBlockState(p.below()).isSolidRender(level, p.below())) {
+                if (isFreeSpot(level, p) && level.getBlockState(p.below()).isSolidRender()) {
                     return p;
                 }
             }
@@ -310,7 +310,7 @@ public final class SettlementStations {
 
         // clutter never despawns, so keep it bounded even if a settlement is ever populated again
         int existing = level.getEntitiesOfClass(ItemEntity.class, new net.minecraft.world.phys.AABB(center).inflate(48),
-                e -> e.getPersistentData().getBoolean(CLUTTER_TAG)).size();
+                e -> e.getPersistentData().getBooleanOr(CLUTTER_TAG, false)).size();
         int budget = MAX_CLUTTER - existing;
 
         Set<BlockPos> usedSurfaces = new HashSet<>();

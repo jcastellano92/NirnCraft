@@ -60,13 +60,13 @@ public final class Sites {
         int[][] arr = pts.toArray(new int[0][]);
         Map<Long, Integer> byChunk = new HashMap<>();
         // every waypoint but the last starts a stretch
-        for (int i = 0; i + 1 < arr.length; i++) byChunk.putIfAbsent(ChunkPos.asLong(arr[i][0] >> 4, arr[i][1] >> 4), i);
+        for (int i = 0; i + 1 < arr.length; i++) byChunk.putIfAbsent(ChunkPos.pack(arr[i][0] >> 4, arr[i][1] >> 4), i);
         LISTS.put(id, new List2(arr, byChunk, true));
     }
 
     private static void tiles(String id, int[][] tileOrigins) {
         Map<Long, Integer> byChunk = new HashMap<>();
-        for (int i = 0; i < tileOrigins.length; i++) byChunk.put(ChunkPos.asLong(tileOrigins[i][0] >> 4, tileOrigins[i][1] >> 4), i);
+        for (int i = 0; i < tileOrigins.length; i++) byChunk.put(ChunkPos.pack(tileOrigins[i][0] >> 4, tileOrigins[i][1] >> 4), i);
         LISTS.put(id, new List2(tileOrigins, byChunk, false));
     }
 
@@ -74,7 +74,7 @@ public final class Sites {
     public static int indexAt(String id, int cx, int cz) {
         List2 l = LISTS.get(id);
         if (l == null) return -1;
-        return l.byChunk().getOrDefault(ChunkPos.asLong(cx, cz), -1);
+        return l.byChunk().getOrDefault(ChunkPos.pack(cx, cz), -1);
     }
 
     public static int[] point(String id, int i) {

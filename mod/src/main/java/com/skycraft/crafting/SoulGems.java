@@ -7,7 +7,7 @@ import com.skycraft.crafting.arcane.item.SoulGemItem;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -28,7 +28,7 @@ import net.minecraft.world.item.ItemStack;
  * have black souls that only fit black soul gems.</p>
  */
 public final class SoulGems {
-    public static final TagKey<EntityType<?>> BLACK_SOULS = TagKey.create(Registries.ENTITY_TYPE, new ResourceLocation(Skycraft.MODID, "black_souls"));
+    public static final TagKey<EntityType<?>> BLACK_SOULS = TagKey.create(Registries.ENTITY_TYPE, Identifier.fromNamespaceAndPath(Skycraft.MODID, "black_souls"));
 
     public static final int PETTY = 1;
     public static final int LESSER = 2;
@@ -40,7 +40,7 @@ public final class SoulGems {
     private SoulGems() {}
 
     public static boolean isBlackSoul(LivingEntity entity) {
-        return entity instanceof Player || entity.getType().is(BLACK_SOULS);
+        return entity instanceof Player || entity.getType().builtInRegistryHolder().is(BLACK_SOULS);
     }
 
     /** Creature tiers: {@code #skycraft:souls/petty} .. {@code #skycraft:souls/grand} fix a creature's soul size. */
@@ -48,7 +48,7 @@ public final class SoulGems {
             soulTag("petty"), soulTag("lesser"), soulTag("common"), soulTag("greater"), soulTag("grand"));
 
     private static TagKey<EntityType<?>> soulTag(String size) {
-        return TagKey.create(Registries.ENTITY_TYPE, new ResourceLocation(Skycraft.MODID, "souls/" + size));
+        return TagKey.create(Registries.ENTITY_TYPE, Identifier.fromNamespaceAndPath(Skycraft.MODID, "souls/" + size));
     }
 
     /**
@@ -59,7 +59,7 @@ public final class SoulGems {
     public static int soulSize(LivingEntity entity) {
         if (isBlackSoul(entity)) return BLACK;
         for (int i = 0; i < SOUL_TIERS.size(); i++) {
-            if (entity.getType().is(SOUL_TIERS.get(i))) return PETTY + i;
+            if (entity.getType().builtInRegistryHolder().is(SOUL_TIERS.get(i))) return PETTY + i;
         }
         var attr = entity.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH);
         float hp = attr != null ? (float) attr.getBaseValue() : entity.getMaxHealth();
@@ -119,7 +119,7 @@ public final class SoulGems {
         if (player.level() instanceof ServerLevel level) {
             level.sendParticles(ParticleTypes.SOUL, victim.getX(), victim.getY() + victim.getBbHeight() * 0.5, victim.getZ(),
                     16, 0.3, 0.4, 0.3, 0.04);
-            level.playSound(null, victim.blockPosition(), SoundEvents.SOUL_ESCAPE, SoundSource.PLAYERS, 1.2f, 0.7f);
+            level.playSound(null, victim.blockPosition(), SoundEvents.SOUL_ESCAPE.value(), SoundSource.PLAYERS, 1.2f, 0.7f);
         }
         SkyData.get(player).addStat("souls_trapped", 1);
         Notifier.message(player, Component.translatable("message.skycraft.arcane.soul_captured", SoulGemItem.soulName(soul)));

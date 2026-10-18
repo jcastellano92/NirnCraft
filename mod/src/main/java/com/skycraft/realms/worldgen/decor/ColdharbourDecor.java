@@ -42,7 +42,7 @@ final class ColdharbourDecor {
     }
 
     static BlockState chain() {
-        return Blocks.CHAIN.defaultBlockState().setValue(ChainBlock.AXIS, Direction.Axis.Y);
+        return com.skycraft.worldgen.VanillaBlocks.CHAIN.defaultBlockState().setValue(ChainBlock.AXIS, Direction.Axis.Y);
     }
 
     // ------------------------------------------------------------------ chain pylons

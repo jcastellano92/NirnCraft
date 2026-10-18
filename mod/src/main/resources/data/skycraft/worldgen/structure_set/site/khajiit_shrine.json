@@ -1,0 +1,18 @@
+{
+  "structures": [
+    {
+      "structure": "skycraft:site/khajiit_shrine",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "skycraft:places",
+    "salt": 718274535,
+    "types": [
+      "dungeon_fixed"
+    ],
+    "variants": [
+      "khajiit_shrine"
+    ]
+  }
+}

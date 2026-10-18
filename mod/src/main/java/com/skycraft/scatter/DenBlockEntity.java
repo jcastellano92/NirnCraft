@@ -14,7 +14,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -67,7 +67,7 @@ public class DenBlockEntity extends BlockEntity {
         if (nearest == null) return;
 
         List<Mob> residents = serverLevel.getEntitiesOfClass(Mob.class, new AABB(pos).inflate(56.0),
-                m -> m.isAlive() && m.getPersistentData().getLong(DEN_POS_TAG) == pos.asLong());
+                m -> m.isAlive() && m.getPersistentData().getLongOr(DEN_POS_TAG, 0L) == pos.asLong());
 
         if (!be.populated || (residents.isEmpty() && gameTime - be.lastSpawnTick >= RESPAWN_COOLDOWN_TICKS)) {
             // Never activate a den that ended up near a settlement calm zone or traveled road
@@ -88,19 +88,19 @@ public class DenBlockEntity extends BlockEntity {
 
         // Release home restriction during active combat so predators never drop chase mid-fight;
         // re-assert home tether and diurnal/nocturnal rest cycle when out of combat.
-        boolean isDay = serverLevel.isDay();
+        boolean isDay = serverLevel.isBrightOutside();
         for (Mob mob : residents) {
             if (mob.getTarget() != null && mob.getTarget().isAlive()) {
-                if (mob.hasRestriction()) {
-                    mob.clearRestriction();
+                if (mob.hasHome()) {
+                    mob.clearHome();
                 }
                 continue;
             }
-            if (!mob.hasRestriction()) {
-                mob.restrictTo(pos, HOME_RADIUS);
+            if (!mob.hasHome()) {
+                mob.setHomeTo(pos, HOME_RADIUS);
             }
             if ((gameTime % 100L == (pos.asLong() & 19L))) {
-                boolean nocturnal = mob.getPersistentData().getBoolean(DEN_NOCTURNAL_TAG);
+                boolean nocturnal = mob.getPersistentData().getBooleanOr(DEN_NOCTURNAL_TAG, false);
                 boolean shouldRest = nocturnal ? isDay : !isDay;
                 if (shouldRest && mob.blockPosition().distSqr(pos) > 36.0) {
                     mob.getNavigation().moveTo(pos.getX() + 0.5, pos.getY() + 1.0, pos.getZ() + 0.5, 0.9);
@@ -119,14 +119,14 @@ public class DenBlockEntity extends BlockEntity {
         int spawned = 0;
 
         for (int i = 0; i < count; i++) {
-            Mob mob = choice.type.create(level);
+            Mob mob = choice.type.create(level, net.minecraft.world.entity.EntitySpawnReason.STRUCTURE);
             if (mob == null) continue;
 
             BlockPos spawnPos = findSafeSpawnPos(level, pos, mob, random, i);
-            mob.moveTo(spawnPos.getX() + 0.5, spawnPos.getY(), spawnPos.getZ() + 0.5, random.nextFloat() * 360.0f, 0.0f);
-            mob.finalizeSpawn(level, level.getCurrentDifficultyAt(spawnPos), MobSpawnType.STRUCTURE, null, null);
+            mob.snapTo(spawnPos.getX() + 0.5, spawnPos.getY(), spawnPos.getZ() + 0.5, random.nextFloat() * 360.0f, 0.0f);
+            mob.finalizeSpawn(level, level.getCurrentDifficultyAt(spawnPos), EntitySpawnReason.STRUCTURE, null);
             mob.setPersistenceRequired();
-            mob.restrictTo(pos, HOME_RADIUS);
+            mob.setHomeTo(pos, HOME_RADIUS);
             mob.getPersistentData().putLong(DEN_POS_TAG, pos.asLong());
             mob.getPersistentData().putBoolean(DEN_NOCTURNAL_TAG, choice.nocturnal);
 
@@ -247,7 +247,7 @@ public class DenBlockEntity extends BlockEntity {
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag) {
+    protected void saveAdditional(net.minecraft.world.level.storage.ValueOutput tag) {
         super.saveAdditional(tag);
         tag.putBoolean("Populated", this.populated);
         tag.putLong("LastSpawnTick", this.lastSpawnTick);
@@ -257,10 +257,10 @@ public class DenBlockEntity extends BlockEntity {
     }
 
     @Override
-    public void load(CompoundTag tag) {
-        super.load(tag);
-        this.populated = tag.getBoolean("Populated");
-        this.lastSpawnTick = tag.getLong("LastSpawnTick");
-        this.denSpecies = tag.getString("DenSpecies");
+    protected void loadAdditional(net.minecraft.world.level.storage.ValueInput tag) {
+        super.loadAdditional(tag);
+        this.populated = tag.getBooleanOr("Populated", false);
+        this.lastSpawnTick = tag.getLongOr("LastSpawnTick", 0L);
+        this.denSpecies = tag.getStringOr("DenSpecies", "");
     }
 }

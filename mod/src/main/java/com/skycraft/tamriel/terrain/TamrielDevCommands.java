@@ -24,7 +24,7 @@ import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.RandomState;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.event.RegisterCommandsEvent;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -56,7 +56,7 @@ public final class TamrielDevCommands {
 
     public static void register(RegisterCommandsEvent event) {
         CommandDispatcher<CommandSourceStack> d = event.getDispatcher();
-        d.register(Commands.literal("skycraft-tamriel").requires(s -> s.hasPermission(2))
+        d.register(Commands.literal("skycraft-tamriel").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
                 .then(Commands.literal("where").executes(c -> {
                     Vec3 p = c.getSource().getPosition();
                     return describe(c.getSource(), (int) Math.floor(p.x), (int) Math.floor(p.z));
@@ -79,7 +79,7 @@ public final class TamrielDevCommands {
                                 .then(Commands.argument("z", IntegerArgumentType.integer())
                                         .then(Commands.argument("chunks", IntegerArgumentType.integer(1, 16))
                                                 .executes(TamrielDevCommands::chunkBench))))));
-        d.register(Commands.literal("skycraft-locate").requires(s -> s.hasPermission(2))
+        d.register(Commands.literal("skycraft-locate").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
                 .then(Commands.argument("place", StringArgumentType.greedyString())
                         .suggests((c, b) -> SharedSuggestionProvider.suggest(
                                 Places.all().stream().map(Place::id), b))
@@ -140,7 +140,7 @@ public final class TamrielDevCommands {
             ServerLevel level = src.getServer().overworld();
             level.getChunk(p.x() >> 4, p.z() >> 4);  // generate it, so the ground height is real
             int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, p.x(), p.z());
-            player.teleportTo(level, p.x() + 0.5, y + 0.1, p.z() + 0.5, player.getYRot(), player.getXRot());
+            player.teleportTo(level, p.x() + 0.5, y + 0.1, p.z() + 0.5, java.util.Set.of(),  player.getYRot(), player.getXRot(), true);
         }
         return 1;
     }
@@ -186,7 +186,7 @@ public final class TamrielDevCommands {
         MinecraftServer server = level.getServer();
         ChunkGenerator gen = level.getChunkSource().getGenerator();
         RandomState rs = level.getChunkSource().randomState();
-        File dir = server.getServerDirectory().toPath().resolve("skycraft-heightmaps").toFile();
+        File dir = server.getServerDirectory().resolve("skycraft-heightmaps").toFile();
         src.sendSuccess(() -> Component.literal("Rendering " + size + "x" + size + " heightmap..."), false);
         Thread t = new Thread(() -> {
             try {

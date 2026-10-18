@@ -12,12 +12,12 @@ import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -33,8 +33,8 @@ import java.util.function.Function;
  * a lighter shade). Tails sway, the serpent tail slithers as its owner walks. Used for townsfolk and for players
  * (from their chosen race and look). Texture: {@code tools/textures/races.py} (FEATURE_BOXES).
  */
-public class RaceFeatureLayer<T extends LivingEntity, M extends HumanoidModel<T>> extends RenderLayer<T, M> {
-    private static final ResourceLocation TEXTURE = new ResourceLocation(Skycraft.MODID, "textures/entity/society/npc/features.png");
+public class RaceFeatureLayer<S extends net.minecraft.client.renderer.entity.state.HumanoidRenderState, M extends HumanoidModel<S>> extends RenderLayer<S, M> {
+    private static final Identifier TEXTURE = Identifier.fromNamespaceAndPath(Skycraft.MODID, "textures/entity/society/npc/features.png");
     private static final int BONE = 0xE8E0C8;
 
     // feature bits
@@ -55,19 +55,22 @@ public class RaceFeatureLayer<T extends LivingEntity, M extends HumanoidModel<T>
         }
     }
 
-    private final Function<T, Features> features;
+    private final Function<S, Features> features;
     private final ModelPart head;
     private final ModelPart body;
+    private final com.skycraft.client.CapturedPartModel headModel, bodyModel;
     private final ModelPart elfEarL, elfEarR, catEarL, catEarR, foxEarL, foxEarR, roundEarL, roundEarR;
     private final ModelPart hornL, hornR, hornL2, hornR2, tuskL, tuskR, fangL, fangR, hood, muzzle;
     private final ModelPart tail, tailTip, scaleTail, scaleTailTip, foxTail, foxTip, monkeyTail, monkey2, monkey3;
     private final ModelPart snake1, snake2, snake3, armL, armR;
 
-    public RaceFeatureLayer(RenderLayerParent<T, M> parent, ModelPart root, Function<T, Features> features) {
+    public RaceFeatureLayer(RenderLayerParent<S, M> parent, ModelPart root, Function<S, Features> features) {
         super(parent);
         this.features = features;
         this.head = root.getChild("head");
         this.body = root.getChild("body");
+        this.headModel = new com.skycraft.client.CapturedPartModel(head);
+        this.bodyModel = new com.skycraft.client.CapturedPartModel(body);
         this.elfEarL = head.getChild("elf_ear_l");
         this.elfEarR = head.getChild("elf_ear_r");
         this.catEarL = head.getChild("cat_ear_l");
@@ -195,33 +198,32 @@ public class RaceFeatureLayer<T extends LivingEntity, M extends HumanoidModel<T>
     }
 
     @Override
-    public void render(PoseStack poseStack, MultiBufferSource buffer, int light, T entity, float limbSwing, float limbSwingAmount,
-                       float partialTick, float ageInTicks, float netHeadYaw, float headPitch) {
-        if (entity.isInvisible()) return;
+    public void submit(PoseStack poseStack, SubmitNodeCollector buffer, int light, S entity, float netHeadYaw, float headPitch) {
+        if (entity.isInvisible) return;
+        float limbSwing = entity.walkAnimationPos, limbSwingAmount = entity.walkAnimationSpeed, ageInTicks = entity.ageInTicks;
         Features f = features.apply(entity);
         if (f == null) return;
         Race race = f.race();
         int parts = parts(race, f.variant());
         if (parts == 0) return;
         M parent = this.getParentModel();
-        head.copyFrom(parent.head);
-        body.copyFrom(parent.body);
+        head.loadPose(parent.head.storePose());
+        body.loadPose(parent.body.storePose());
         // a helmet hides the ears, horns and hood
-        boolean helmet = !entity.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.HEAD).isEmpty();
+        boolean helmet = !entity.headEquipment.isEmpty();
         head.visible = !helmet;
         animate(parent, limbSwing, limbSwingAmount, ageInTicks);
 
-        VertexConsumer vc = buffer.getBuffer(RenderType.entityCutoutNoCull(TEXTURE));
         int overlay = LivingEntityRenderer.getOverlayCoords(entity, 0.0F);
         // pass 1: skin, fur and scales
         show(parts & ~BONE_PARTS & ~MUZZLE, false);
         foxTip.visible = false;
-        draw(poseStack, vc, light, overlay, f.tint(), true);
+        draw(poseStack, buffer, light, overlay, f.tint(), true);
         // pass 2: bone (tusks, horns, fangs)
         if ((parts & BONE_PARTS) != 0) {
             show(parts & BONE_PARTS, true);
             int bone = race == Race.ARGONIAN ? scale(BONE, 0.8f, 0.78f, 0.7f) : BONE;
-            draw(poseStack, vc, light, overlay, bone, false);
+            draw(poseStack, buffer, light, overlay, bone, false);
         }
         // pass 3: the light parts (fox tail tip, muzzles)
         if ((parts & (FOX_TAIL | MUZZLE)) != 0) {
@@ -232,16 +234,16 @@ public class RaceFeatureLayer<T extends LivingEntity, M extends HumanoidModel<T>
                 foxTail.skipDraw = true; // only its tip
             }
             int light2 = race == Race.IMGA ? mix(f.tint(), 0x7A6E66, 0.55f) : mix(f.tint(), 0xF6EEE0, 0.8f);
-            draw(poseStack, vc, light, overlay, light2, (parts & FOX_TAIL) != 0);
+            draw(poseStack, buffer, light, overlay, light2, (parts & FOX_TAIL) != 0);
             foxTail.skipDraw = false;
         }
         head.visible = true;
     }
 
-    private void draw(PoseStack poseStack, VertexConsumer vc, int light, int overlay, int rgb, boolean withBody) {
-        float r = (rgb >> 16 & 255) / 255f, g = (rgb >> 8 & 255) / 255f, b = (rgb & 255) / 255f;
-        head.render(poseStack, vc, light, overlay, r, g, b, 1.0F);
-        if (withBody) body.render(poseStack, vc, light, overlay, r, g, b, 1.0F);
+    private void draw(PoseStack pose, SubmitNodeCollector collector, int light, int overlay, int rgb, boolean withBody) {
+        var type = RenderTypes.entityCutout(TEXTURE);
+        headModel.submit(collector, pose, type, light, overlay, 0xFF000000 | rgb);
+        if (withBody) bodyModel.submit(collector, pose, type, light, overlay, 0xFF000000 | rgb);
     }
 
     /** Tails sway when idle and swing with the stride; the serpent tail slithers; the second arms swing. */
@@ -299,8 +301,8 @@ public class RaceFeatureLayer<T extends LivingEntity, M extends HumanoidModel<T>
 
     /** Features of a player from their chosen race and look (see {@code client.RaceSkins}). */
     @Nullable
-    public static Features forPlayer(Player player) {
-        int look = com.skycraft.client.RaceSkins.getEffectiveLook(player);
-        return look < 0 ? null : Features.of(look);
+    public static Features forPlayer(net.minecraft.client.renderer.entity.state.AvatarRenderState state) {
+        Integer look = state.getRenderData(com.skycraft.client.RaceSkins.LOOK);
+        return look == null || look < 0 ? null : Features.of(look);
     }
 }

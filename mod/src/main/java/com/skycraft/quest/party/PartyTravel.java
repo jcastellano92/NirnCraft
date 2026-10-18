@@ -30,14 +30,14 @@ public final class PartyTravel {
     }
 
     private static boolean jailed(ServerPlayer p) {
-        return p.level().dimension().location().equals(FastTravelHandler.JAIL)
+        return p.level().dimension().identifier().equals(FastTravelHandler.JAIL)
                 || com.skycraft.crime.Jail.isJailed(p)
                 || com.skycraft.crime.Jail.isLoadingJail(p);
     }
 
     /** Validates and performs travel of {@code player} to the party member {@code targetId}. */
     public static boolean travel(ServerPlayer player, UUID targetId) {
-        MinecraftServer server = player.server;
+        MinecraftServer server = player.level().getServer();
         if (!WorldConfig.FAST_TRAVEL.get()) {
             fail(player, "disabled");
             return false;
@@ -83,7 +83,7 @@ public final class PartyTravel {
                 : List.of();
 
         player.stopRiding();
-        player.teleportTo(to, spot.getX() + 0.5, spot.getY(), spot.getZ() + 0.5, target.getYRot(), 0f);
+        player.teleportTo(to, spot.getX() + 0.5, spot.getY(), spot.getZ() + 0.5, java.util.Set.of(), target.getYRot(), 0f, false);
         player.resetFallDistance();
         int i = 0;
         for (Mob mob : followers) {
@@ -124,7 +124,7 @@ public final class PartyTravel {
      */
     @Nullable
     public static ServerPlayer promptTarget(ServerPlayer player) {
-        MinecraftServer server = player.server;
+        MinecraftServer server = player.level().getServer();
         Party party = PartyManager.get(server).partyOf(player.getUUID());
         if (party == null) return null;
         if (!party.leader.equals(player.getUUID())) {
@@ -150,8 +150,8 @@ public final class PartyTravel {
     public static void sendPrompt(ServerPlayer player) {
         ServerPlayer target = promptTarget(player);
         if (target == null || jailed(player)) return;
-        Party party = PartyManager.get(player.server).partyOf(player.getUUID());
+        Party party = PartyManager.get(player.level().getServer()).partyOf(player.getUUID());
         boolean leader = party != null && party.leader.equals(target.getUUID());
-        SkyNetwork.sendToPlayer(player, new QuestPackets.PartyTravelPrompt(target.getUUID(), target.getGameProfile().getName(), leader));
+        SkyNetwork.sendToPlayer(player, new QuestPackets.PartyTravelPrompt(target.getUUID(), target.getGameProfile().name(), leader));
     }
 }

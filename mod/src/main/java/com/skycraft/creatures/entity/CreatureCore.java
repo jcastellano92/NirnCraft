@@ -63,7 +63,7 @@ public final class CreatureCore {
                 FlyingPathNavigation nav = new FlyingPathNavigation(mob, level);
                 nav.setCanOpenDoors(false);
                 nav.setCanFloat(true);
-                nav.setCanPassDoors(true);
+                nav.getNodeEvaluator().setCanPassDoors(true);
                 return nav;
             }
             case SWIM -> {
@@ -102,7 +102,7 @@ public final class CreatureCore {
                 float range = spec.aggroRange;
                 float keepRange = Math.max(range * 1.8f, 28f);
                 goals.target(2, new NearestAttackableTargetGoal<>(mob, Player.class, 10, true, false,
-                        e -> {
+                        (e, targetLevel263) -> {
                             if (Summons.isCompanion(mob) || mob.level().getDifficulty() == Difficulty.PEACEFUL) return false;
                             if (mob.getTarget() == e || mob.getLastHurtByMob() == e) {
                                 return e.distanceToSqr(mob) <= (double) keepRange * keepRange;
@@ -115,7 +115,7 @@ public final class CreatureCore {
             goals.target(3, new com.skycraft.creatures.ai.SmartPartyTargetGoal(mob));
             if (spec.prey != null) {
                 goals.target(4, new NearestAttackableTargetGoal<>(mob, LivingEntity.class, 40, true, false,
-                        e -> !Summons.isCompanion(mob) && spec.prey.test(e)));
+                        (e, targetLevel263) -> !Summons.isCompanion(mob) && spec.prey.test(e)));
             }
         }
     }
@@ -144,7 +144,7 @@ public final class CreatureCore {
                 && !(spec.fireStopsRegen && (mob.isOnFire() || mob.tickCount - lastFireHurt < 100))) {
             mob.heal(spec.regen);
         }
-        if (spec.poisonMult == 0 && mob.hasEffect(MobEffects.POISON)) mob.removeEffect(MobEffects.POISON);
+        if (spec.poisonMult == 0 && mob.hasEffect(com.skycraft.platform.Effects.holder(MobEffects.POISON))) mob.removeEffect(com.skycraft.platform.Effects.holder(MobEffects.POISON));
         if (spec.serverTick != null) spec.serverTick.accept(mob);
     }
 
@@ -189,7 +189,7 @@ public final class CreatureCore {
 
     /** Region-spawned, unnamed, unleashed creatures may despawn. */
     public static boolean mayDespawn(Mob mob, CreatureSpec spec) {
-        return !spec.persistent && mob.getTags().contains(SkyCreature.REGION_SPAWN_TAG) && !mob.hasCustomName() && !mob.isLeashed()
+        return !spec.persistent && mob.entityTags().contains(SkyCreature.REGION_SPAWN_TAG) && !mob.hasCustomName() && !mob.isLeashed()
                 && !Summons.isCompanion(mob);
     }
 }

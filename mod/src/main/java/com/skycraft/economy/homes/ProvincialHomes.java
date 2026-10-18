@@ -21,14 +21,14 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.phys.AABB;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.living.LivingDeathEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+
+import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
@@ -45,7 +45,7 @@ import java.util.UUID;
  *     College of Winterhold member of rank 2, or the story flag {@code telvanni_honour}).</li>
  * </ul>
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class ProvincialHomes {
     public static final String HAUNTED = "benirus_manor";
     public static final String TELVANNI = "uvirith_spire";
@@ -57,15 +57,15 @@ public final class ProvincialHomes {
     // ------------------------------------------------------------------ building
 
     @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer player) || player.tickCount % 40 != 11) return;
+    public static void onPlayerTick(net.neoforged.neoforge.event.tick.PlayerTickEvent.Post event) {
+        if (!(event instanceof net.neoforged.neoforge.event.tick.PlayerTickEvent.Post) || !(event.getEntity() instanceof ServerPlayer player) || player.tickCount % 40 != 11) return;
         if (!(player.level() instanceof ServerLevel level) || level.dimension() != Level.OVERWORLD) return;
         for (HousePlots.Plot plot : HousePlots.PLOTS) {
             Optional<Place> place = Places.byId(plot.place());
             if (place.isEmpty() || place.get().distSqr(player.getBlockX(), player.getBlockZ()) > 260L * 260L) continue;
             Data data = Data.get(level);
             CompoundTag home = data.home(plot.id());
-            if (!home.getBoolean("built")) tryBuild(level, data, plot);
+            if (!home.getBooleanOr("built",false)) tryBuild(level, data, plot);
             if (plot.id().equals(HAUNTED)) haunt(level, player, data);
         }
     }
@@ -90,13 +90,13 @@ public final class ProvincialHomes {
     @Nullable
     public static BlockPos bed(ServerLevel level, String houseId) {
         CompoundTag home = Data.get(level).home(houseId);
-        return home.getBoolean("built") ? BlockPos.of(home.getLong("bed")) : null;
+        return home.getBooleanOr("built",false) ? BlockPos.of(home.getLongOr("bed",0L)) : null;
     }
 
     @Nullable
     public static BlockPos door(ServerLevel level, String houseId) {
         CompoundTag home = Data.get(level).home(houseId);
-        return home.getBoolean("built") ? BlockPos.of(home.getLong("door")) : null;
+        return home.getBooleanOr("built",false) ? BlockPos.of(home.getLongOr("door",0L)) : null;
     }
 
     public static boolean isProvincial(String houseId) {
@@ -149,43 +149,43 @@ public final class ProvincialHomes {
 
     static void haunt(ServerLevel level, ServerPlayer player, Data data) {
         CompoundTag home = data.home(HAUNTED);
-        if (home.getBoolean("cleansed") || !home.getBoolean("built")) return;
+        if (home.getBooleanOr("cleansed",false) || !home.getBooleanOr("built",false)) return;
         UUID owner = Houses.HousesData.get(level.getServer()).getOwner(HAUNTED);
         if (owner == null || !owner.equals(player.getUUID())) return;
-        long time = level.getDayTime() % 24000L;
+        long time = level.getDefaultClockTime() % 24000L;
         if (time < 13000 || time > 23000) return;
         Optional<SettlementAnchors.HouseSite> site = Houses.site(level, HAUNTED);
         if (site.isEmpty() || !site.get().contains(player.blockPosition())) return;
-        AABB box = new AABB(site.get().min(), site.get().max().offset(1, 1, 1)).inflate(4);
-        if (!level.getEntitiesOfClass(Mob.class, box, m -> m.getTags().contains(HAUNT_TAG)).isEmpty()) return;
-        int left = HAUNT_KILLS - home.getInt("laid");
+        AABB box = AABB.encapsulatingFullBlocks(site.get().min(), site.get().max()).inflate(4);
+        if (!level.getEntitiesOfClass(Mob.class, box, m -> m.entityTags().contains(HAUNT_TAG)).isEmpty()) return;
+        int left = HAUNT_KILLS - home.getIntOr("laid",0);
         int n = Math.min(2, left);
         BlockPos bed = bed(level, HAUNTED);
         for (int i = 0; i < n; i++) {
-            Mob m = ModEntities.DRAUGR.get().create(level);
+            Mob m = ModEntities.DRAUGR.get().create(level, net.minecraft.world.entity.EntitySpawnReason.STRUCTURE);
             if (m == null) return;
             BlockPos at = bed != null ? bed.offset(i == 0 ? -2 : 2, 0, -1) : site.get().center();
-            m.moveTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, level.random.nextFloat() * 360f, 0f);
-            m.finalizeSpawn(level, level.getCurrentDifficultyAt(at), MobSpawnType.EVENT, null, null);
+            m.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, level.getRandom().nextFloat() * 360f, 0f);
+            m.finalizeSpawn(level, level.getCurrentDifficultyAt(at), EntitySpawnReason.EVENT, null);
             m.addTag(HAUNT_TAG);
             m.setCustomName(Component.translatable("entity.skycraft.restless_benirus"));
             m.setTarget(player);
             level.addFreshEntity(m);
         }
-        level.playSound(null, player.blockPosition(), SoundEvents.SOUL_ESCAPE, SoundSource.HOSTILE, 1.5f, 0.6f);
+        level.playSound(null, player.blockPosition(), SoundEvents.SOUL_ESCAPE.value(), SoundSource.HOSTILE, 1.5f, 0.6f);
         Notifier.message(player, Component.translatable("economy.skycraft.home.haunt_rises"));
     }
 
     @SubscribeEvent
     public static void onDeath(LivingDeathEvent event) {
         LivingEntity e = event.getEntity();
-        if (!e.getTags().contains(HAUNT_TAG) || !(e.level() instanceof ServerLevel level)) return;
+        if (!e.entityTags().contains(HAUNT_TAG) || !(e.level() instanceof ServerLevel level)) return;
         Data data = Data.get(level);
         CompoundTag home = data.home(HAUNTED);
-        int laid = home.getInt("laid") + 1;
+        int laid = home.getIntOr("laid",0) + 1;
         home.putInt("laid", laid);
         data.setDirty();
-        if (laid >= HAUNT_KILLS && !home.getBoolean("cleansed")) {
+        if (laid >= HAUNT_KILLS && !home.getBooleanOr("cleansed",false)) {
             home.putBoolean("cleansed", true);
             UUID owner = Houses.HousesData.get(level.getServer()).getOwner(HAUNTED);
             ServerPlayer p = owner == null ? null : level.getServer().getPlayerList().getPlayer(owner);
@@ -206,16 +206,14 @@ public final class ProvincialHomes {
         }
 
         static Data get(ServerLevel level) {
-            return level.getServer().overworld().getDataStorage().computeIfAbsent(
-                    t -> new Data(t.getCompound("homes")), () -> new Data(new CompoundTag()), "skycraft_provincial_homes");
+            return com.skycraft.platform.SavedDataTypes.get(level.getServer().overworld(), "skycraft_provincial_homes", t -> new Data(t.getCompoundOrEmpty("homes")), () -> new Data(new CompoundTag()), value263 -> value263.save(new net.minecraft.nbt.CompoundTag()));
         }
 
         CompoundTag home(String id) {
             if (!homes.contains(id)) homes.put(id, new CompoundTag());
-            return homes.getCompound(id);
+            return homes.getCompoundOrEmpty(id);
         }
 
-        @Override
         public CompoundTag save(CompoundTag out) {
             out.put("homes", homes);
             return out;

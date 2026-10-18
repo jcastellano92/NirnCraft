@@ -6,7 +6,7 @@ import com.skycraft.explore.ExploreRegistry;
 import com.skycraft.survival.Divine;
 import com.skycraft.survival.SurvivalRegistry;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.item.DyeColor;
@@ -15,7 +15,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CandleBlock;
 import net.minecraft.world.level.block.LanternBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -57,8 +57,8 @@ public final class Shrines {
     @SuppressWarnings("unchecked")
     @Nullable
     static Mob spawnById(SiteBuilder b, String id, int dx, int dz, boolean dormant) {
-        EntityType<?> type = ForgeRegistries.ENTITY_TYPES.getValue(new ResourceLocation(id));
-        if (type == null || type == EntityType.PIG) return null;
+        EntityType<?> type = BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.parse(id));
+        if (type == null || type == net.minecraft.world.entity.EntityTypes.PIG) return null;
         Mob mob;
         try {
             mob = b.spawn((EntityType<? extends Mob>) type, dx, dz);
@@ -139,19 +139,19 @@ public final class Shrines {
     /** A wall banner facing a local direction (rotated by {@link SiteBuilder#set}). */
     static BlockState wallBanner(DyeColor color, Direction localFacing) {
         Block wall = switch (color) {
-            case YELLOW -> Blocks.YELLOW_WALL_BANNER;
-            case GRAY -> Blocks.GRAY_WALL_BANNER;
-            case PINK -> Blocks.PINK_WALL_BANNER;
-            case PURPLE -> Blocks.PURPLE_WALL_BANNER;
-            case LIGHT_BLUE -> Blocks.LIGHT_BLUE_WALL_BANNER;
-            case RED -> Blocks.RED_WALL_BANNER;
-            case WHITE -> Blocks.WHITE_WALL_BANNER;
-            case BLUE -> Blocks.BLUE_WALL_BANNER;
-            case ORANGE -> Blocks.ORANGE_WALL_BANNER;
-            case GREEN -> Blocks.GREEN_WALL_BANNER;
-            case CYAN -> Blocks.CYAN_WALL_BANNER;
-            case BLACK -> Blocks.BLACK_WALL_BANNER;
-            default -> Blocks.BROWN_WALL_BANNER;
+            case YELLOW -> com.skycraft.worldgen.VanillaBlocks.YELLOW_WALL_BANNER;
+            case GRAY -> com.skycraft.worldgen.VanillaBlocks.GRAY_WALL_BANNER;
+            case PINK -> com.skycraft.worldgen.VanillaBlocks.PINK_WALL_BANNER;
+            case PURPLE -> com.skycraft.worldgen.VanillaBlocks.PURPLE_WALL_BANNER;
+            case LIGHT_BLUE -> com.skycraft.worldgen.VanillaBlocks.LIGHT_BLUE_WALL_BANNER;
+            case RED -> com.skycraft.worldgen.VanillaBlocks.RED_WALL_BANNER;
+            case WHITE -> com.skycraft.worldgen.VanillaBlocks.WHITE_WALL_BANNER;
+            case BLUE -> com.skycraft.worldgen.VanillaBlocks.BLUE_WALL_BANNER;
+            case ORANGE -> com.skycraft.worldgen.VanillaBlocks.ORANGE_WALL_BANNER;
+            case GREEN -> com.skycraft.worldgen.VanillaBlocks.GREEN_WALL_BANNER;
+            case CYAN -> com.skycraft.worldgen.VanillaBlocks.CYAN_WALL_BANNER;
+            case BLACK -> com.skycraft.worldgen.VanillaBlocks.BLACK_WALL_BANNER;
+            default -> com.skycraft.worldgen.VanillaBlocks.BROWN_WALL_BANNER;
         };
         return wall.defaultBlockState().setValue(net.minecraft.world.level.block.WallBannerBlock.FACING, localFacing);
     }
@@ -281,7 +281,7 @@ public final class Shrines {
             }
         }
         b.set(0, 5, 0, b.pal.brickSlab().defaultBlockState());
-        b.set(0, 6, 0, Blocks.LIGHTNING_ROD);
+        b.set(0, 6, 0, com.skycraft.worldgen.VanillaBlocks.LIGHTNING_ROD);
         // the altar: an ancestor's urn, candles, a lantern
         b.set(0, 0, -1, Blocks.CHISELED_SANDSTONE);
         b.set(0, 1, -1, Blocks.DECORATED_POT);
@@ -308,7 +308,7 @@ public final class Shrines {
         }
         for (int h = 3; h < 9; h++) b.set(0, h, 0, h % 3 == 1 ? Blocks.CHISELED_SANDSTONE.defaultBlockState() : body);
         b.set(0, 9, 0, Blocks.GOLD_BLOCK);
-        b.set(0, 10, 0, Blocks.LIGHTNING_ROD);
+        b.set(0, 10, 0, com.skycraft.worldgen.VanillaBlocks.LIGHTNING_ROD);
         // the buried offering beneath the dais
         b.chest(0, -2, 2, Direction.SOUTH, ExploreLoot.table("yokudan"));
         b.set(2, 0, 2, Blocks.DEAD_BUSH);

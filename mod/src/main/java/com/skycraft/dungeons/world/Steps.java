@@ -73,7 +73,7 @@ public final class Steps {
                     p.set(sx, y + 1, sz, Blocks.CHISELED_STONE_BRICKS.defaultBlockState());
                     p.set(sx, y + 2, sz, Deco.slab(Blocks.STONE_BRICK_SLAB, false));
                     int cx = sx + face.getOpposite().getStepX(), cz = sz + face.getOpposite().getStepZ();
-                    if (p.ownsColumn(cx, cz)) p.setIfOpen(cx, p.surfaceAt(cx, cz), cz, Deco.candle(Blocks.WHITE_CANDLE, 2, true));
+                    if (p.ownsColumn(cx, cz)) p.setIfOpen(cx, p.surfaceAt(cx, cz), cz, Deco.candle(com.skycraft.worldgen.VanillaBlocks.WHITE_CANDLE, 2, true));
                 }
             }
         }

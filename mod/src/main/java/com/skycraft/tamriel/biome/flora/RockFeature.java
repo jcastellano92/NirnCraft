@@ -9,9 +9,9 @@ import net.minecraft.util.StringRepresentable;
 import net.minecraft.util.valueproviders.IntProvider;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
-import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
+import com.skycraft.worldgen.ConfiguredFeature;
+import com.skycraft.worldgen.FeaturePlaceContext;
+import com.skycraft.worldgen.FeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.stateproviders.BlockStateProvider;
 
 import java.util.Optional;
@@ -22,7 +22,7 @@ import java.util.Optional;
  * or lichen ({@code moss}, {@code moss_chance}). Shapes: {@code boulder}, {@code slab} (a tilted plate),
  * {@code standing} (a leaning standing stone), {@code rubble} (a spill of small stones) or {@code mixed}.
  */
-public class RockFeature extends Feature<RockFeature.Config> {
+public class RockFeature extends ConfiguredFeature<RockFeature.Config> {
     public enum Style implements StringRepresentable {
         BOULDER("boulder"), SLAB("slab"), STANDING("standing"), RUBBLE("rubble"), MIXED("mixed");
         public static final Codec<Style> CODEC = StringRepresentable.fromEnum(Style::values);
@@ -41,10 +41,10 @@ public class RockFeature extends Feature<RockFeature.Config> {
     public record Config(BlockStateProvider stone, Optional<BlockStateProvider> moss, float mossChance, IntProvider size,
                          Style style) implements FeatureConfiguration {
         public static final Codec<Config> CODEC = RecordCodecBuilder.create(i -> i.group(
-                BlockStateProvider.CODEC.fieldOf("stone").forGetter(Config::stone),
-                BlockStateProvider.CODEC.optionalFieldOf("moss").forGetter(Config::moss),
+                BlockStateProvider.DIRECT_CODEC.fieldOf("stone").forGetter(Config::stone),
+                BlockStateProvider.DIRECT_CODEC.optionalFieldOf("moss").forGetter(Config::moss),
                 Codec.floatRange(0f, 1f).optionalFieldOf("moss_chance", 0f).forGetter(Config::mossChance),
-                IntProvider.codec(1, 6).fieldOf("size").forGetter(Config::size),
+                net.minecraft.util.valueproviders.IntProviders.codec(1, 6).fieldOf("size").forGetter(Config::size),
                 Style.CODEC.optionalFieldOf("style", Style.MIXED).forGetter(Config::style)
         ).apply(i, Config::new));
     }
@@ -135,19 +135,19 @@ public class RockFeature extends Feature<RockFeature.Config> {
                     if (d > 1.0 + warp) continue;
                     if (!GenBox.isSoft(box.get(bx, by, bz)) && !box.get(bx, by, bz).is(net.minecraft.tags.BlockTags.DIRT)
                             && !box.get(bx, by, bz).is(net.minecraft.tags.BlockTags.SAND)) continue;
-                    box.set(bx, by, bz, cfg.stone().getState(r, p.set(bx, by, bz)));
+                    box.set(bx, by, bz, cfg.stone().getState(box.level, r, p.set(bx, by, bz)));
                     lowest = Math.min(lowest, by);
                     highest = Math.max(highest, by);
                 }
                 if (lowest == Integer.MAX_VALUE) continue;
                 // no overhang hanging in the air: fill down to the ground
                 for (int fy = lowest - 1, n = 0; n < 4 && GenBox.isSoft(box.get(bx, fy, bz)); fy--, n++) {
-                    box.set(bx, fy, bz, cfg.stone().getState(r, p.set(bx, fy, bz)));
+                    box.set(bx, fy, bz, cfg.stone().getState(box.level, r, p.set(bx, fy, bz)));
                 }
                 // moss and lichen on the upper faces
                 if (cfg.moss().isPresent() && r.nextFloat() < cfg.mossChance() && box.get(bx, highest + 1, bz).isAir()) {
                     if (r.nextInt(3) == 0) box.set(bx, highest + 1, bz, Blocks.MOSS_CARPET.defaultBlockState());
-                    else box.set(bx, highest, bz, cfg.moss().get().getState(r, p.set(bx, highest, bz)));
+                    else box.set(bx, highest, bz, cfg.moss().get().getState(box.level, r, p.set(bx, highest, bz)));
                 }
             }
         }

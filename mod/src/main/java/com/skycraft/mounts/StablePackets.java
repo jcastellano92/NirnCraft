@@ -2,18 +2,17 @@ package com.skycraft.mounts;
 
 import com.skycraft.mounts.client.StableClient;
 import com.skycraft.network.SkyNetwork;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.network.NetworkDirection;
-import net.minecraftforge.network.NetworkEvent;
+import net.neoforged.api.distmarker.Dist;
+import com.skycraft.platform.Sides;
+import net.minecraft.network.protocol.PacketFlow;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Supplier;
 
 /** The stable master's screen: the state the server sends ({@link State}) and what the player asks of it ({@link Action}). */
 public final class StablePackets {
@@ -23,13 +22,13 @@ public final class StablePackets {
     private StablePackets() {}
 
     static void register() {
-        SkyNetwork.register(State.class, NetworkDirection.PLAY_TO_CLIENT, State::encode, State::decode, State::handle);
-        SkyNetwork.register(Action.class, NetworkDirection.PLAY_TO_SERVER, Action::encode, Action::decode, Action::handle);
+        SkyNetwork.register(State.class, PacketFlow.CLIENTBOUND, State::encode, State::decode, State::handle);
+        SkyNetwork.register(Action.class, PacketFlow.SERVERBOUND, Action::encode, Action::decode, Action::handle);
     }
 
     /** One animal for sale: its view, its price (before the trade-in) and whether your tack fits it. */
     public record Offer(String id, MountView view, int price, boolean saddleFits, boolean bardingFits) {
-        void write(FriendlyByteBuf b) {
+        void write(RegistryFriendlyByteBuf b) {
             b.writeUtf(id, 40);
             view.write(b);
             b.writeVarInt(price);
@@ -37,14 +36,14 @@ public final class StablePackets {
             b.writeBoolean(bardingFits);
         }
 
-        static Offer read(FriendlyByteBuf b) {
+        static Offer read(RegistryFriendlyByteBuf b) {
             return new Offer(b.readUtf(40), MountView.read(b), b.readVarInt(), b.readBoolean(), b.readBoolean());
         }
     }
 
     /** One line of the Train tab. {@code state}: 0 can be trained, 1 at its cap, 2 weekly limit used, 3 maxed. */
     public record TrainRow(byte stat, int fee, byte state, byte points, byte cap) {
-        void write(FriendlyByteBuf b) {
+        void write(RegistryFriendlyByteBuf b) {
             b.writeByte(stat);
             b.writeVarInt(fee);
             b.writeByte(state);
@@ -52,7 +51,7 @@ public final class StablePackets {
             b.writeByte(cap);
         }
 
-        static TrainRow read(FriendlyByteBuf b) {
+        static TrainRow read(RegistryFriendlyByteBuf b) {
             return new TrainRow(b.readByte(), b.readVarInt(), b.readByte(), b.readByte(), b.readByte());
         }
     }
@@ -63,12 +62,12 @@ public final class StablePackets {
      */
     public record State(int npcId, Component stableName, boolean open, long gold, Component message, @Nullable MountView own,
                         int tradeIn, boolean canSell, int sessionsLeft, List<Offer> offers, List<TrainRow> train) {
-        static void encode(State m, FriendlyByteBuf b) {
+        static void encode(State m, RegistryFriendlyByteBuf b) {
             b.writeVarInt(m.npcId);
-            b.writeComponent(m.stableName);
+            net.minecraft.network.chat.ComponentSerialization.STREAM_CODEC.encode(b, m.stableName);
             b.writeBoolean(m.open);
             b.writeVarLong(m.gold);
-            b.writeComponent(m.message);
+            net.minecraft.network.chat.ComponentSerialization.STREAM_CODEC.encode(b, m.message);
             b.writeBoolean(m.own != null);
             if (m.own != null) m.own.write(b);
             b.writeVarInt(m.tradeIn);
@@ -82,12 +81,12 @@ public final class StablePackets {
             for (int i = 0; i < t; i++) m.train.get(i).write(b);
         }
 
-        static State decode(FriendlyByteBuf b) {
+        static State decode(RegistryFriendlyByteBuf b) {
             int npc = b.readVarInt();
-            Component name = b.readComponent();
+            Component name = net.minecraft.network.chat.ComponentSerialization.STREAM_CODEC.decode(b);
             boolean open = b.readBoolean();
             long gold = b.readVarLong();
-            Component msg = b.readComponent();
+            Component msg = net.minecraft.network.chat.ComponentSerialization.STREAM_CODEC.decode(b);
             MountView own = b.readBoolean() ? MountView.read(b) : null;
             int tradeIn = b.readVarInt();
             boolean canSell = b.readBoolean();
@@ -101,9 +100,8 @@ public final class StablePackets {
             return new State(npc, name, open, gold, msg, own, tradeIn, canSell, sessions, offers, train);
         }
 
-        static void handle(State m, Supplier<NetworkEvent.Context> ctx) {
-            ctx.get().enqueueWork(() -> DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> StableClient.handle(m)));
-            ctx.get().setPacketHandled(true);
+        static void handle(State m, IPayloadContext ctx) {
+            ctx.enqueueWork(() -> Sides.runOn(Dist.CLIENT, () -> () -> StableClient.handle(m)));
         }
     }
 
@@ -115,21 +113,20 @@ public final class StablePackets {
      * client's figure is stale.
      */
     public record Action(int npcId, byte op, String arg, int expected) {
-        static void encode(Action m, FriendlyByteBuf b) {
+        static void encode(Action m, RegistryFriendlyByteBuf b) {
             b.writeVarInt(m.npcId);
             b.writeByte(m.op);
             b.writeUtf(m.arg, 40);
             b.writeInt(m.expected);
         }
 
-        static Action decode(FriendlyByteBuf b) {
+        static Action decode(RegistryFriendlyByteBuf b) {
             return new Action(b.readVarInt(), b.readByte(), b.readUtf(40), b.readInt());
         }
 
-        static void handle(Action m, Supplier<NetworkEvent.Context> ctx) {
-            ServerPlayer p = ctx.get().getSender();
+        static void handle(Action m, IPayloadContext ctx) {
+            ServerPlayer p = SkyNetwork.sender(ctx);
             if (p != null) StableUi.handle(p, m);
-            ctx.get().setPacketHandled(true);
         }
     }
 }

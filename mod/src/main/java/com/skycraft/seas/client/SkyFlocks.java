@@ -14,12 +14,13 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.LevelRenderer;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import com.skycraft.client.CapturedGeometry;
+import net.minecraft.util.LightCoordsUtil;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
@@ -31,12 +32,12 @@ import net.minecraft.world.level.block.StairBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
-import net.minecraftforge.client.event.RenderLevelStageEvent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
+import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
+
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 
@@ -52,9 +53,9 @@ import java.util.Optional;
  * ravens gathering over barrows and pines at dusk; bats darting at night; and in the rivers of the north, salmon leaping
  * upstream.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
 public final class SkyFlocks {
-    private static final ResourceLocation WHITE = new ResourceLocation("minecraft", "textures/misc/white.png");
+    private static final Identifier WHITE = Identifier.fromNamespaceAndPath("minecraft", "textures/misc/white.png");
 
     enum Kind {
         // Back RGB, Belly RGB, Wing RGB, Wingtip/Underwing RGB, Beak RGB, flapRate, size, altMin, altSpan, maxSpeed, canPerch
@@ -209,8 +210,7 @@ public final class SkyFlocks {
     // ------------------------------------------------------------------ simulation
 
     @SubscribeEvent
-    public static void onTick(TickEvent.ClientTickEvent event) {
-        if (event.phase != TickEvent.Phase.END) return;
+    public static void onTick(net.neoforged.neoforge.client.event.ClientTickEvent.Post event) {
         Minecraft mc = Minecraft.getInstance();
         ClientLevel level = mc.level;
         LocalPlayer player = mc.player;
@@ -233,8 +233,8 @@ public final class SkyFlocks {
         if (level.dimension() != net.minecraft.world.level.Level.OVERWORLD || FLOCKS.size() >= 6) return;
         BlockPos at = player.blockPosition();
         var biome = level.getBiome(at);
-        String path = biome.unwrapKey().map(k -> k.location().getPath()).orElse("");
-        long time = level.getDayTime() % 24000L;
+        String path = biome.unwrapKey().map(k -> k.identifier().getPath()).orElse("");
+        long time = level.getDefaultClockTime() % 24000L;
         boolean day = time < 12500 || time > 23200;
         boolean dusk = time > 11500 && time < 14000;
         if (level.isRaining() && r.nextBoolean()) return;
@@ -310,7 +310,7 @@ public final class SkyFlocks {
         int bx = Mth.floor(x), bz = Mth.floor(z);
         if (!level.hasChunk(bx >> 4, bz >> 4)) return fallback;
         int g = level.getHeight(Heightmap.Types.MOTION_BLOCKING, bx, bz);
-        return g <= level.getMinBuildHeight() ? fallback : g;
+        return g <= level.getMinY() ? fallback : g;
     }
 
     private static boolean isPerchSurface(ClientLevel level, BlockPos pos) {
@@ -336,7 +336,7 @@ public final class SkyFlocks {
 
     /** Dusk to dawn: the day birds roost, the bats come out. */
     private static boolean isNight(ClientLevel level) {
-        long t = level.getDayTime() % 24000L;
+        long t = level.getDefaultClockTime() % 24000L;
         return t > 13000L && t < 23000L;
     }
 
@@ -642,13 +642,13 @@ public final class SkyFlocks {
             }
         }
         if (ticks % 7 != 0 || LEAPS.size() >= 6) return;
-        long time = level.getDayTime() % 24000L;
+        long time = level.getDefaultClockTime() % 24000L;
         if (time > 12500) return;
         for (int i = 0; i < 2; i++) {
             int x = Mth.floor(player.getX()) + r.nextInt(41) - 20, z = Mth.floor(player.getZ()) + r.nextInt(41) - 20;
             BlockPos col = new BlockPos(x, 0, z);
             if (!level.hasChunkAt(col)) continue;
-            String path = level.getBiome(new BlockPos(x, 62, z)).unwrapKey().map(k -> k.location().getPath()).orElse("");
+            String path = level.getBiome(new BlockPos(x, 62, z)).unwrapKey().map(k -> k.identifier().getPath()).orElse("");
             if (!path.contains("river")) continue;
             int top = level.getHeight(Heightmap.Types.WORLD_SURFACE, x, z);
             BlockPos w = new BlockPos(x, top - 1, z);
@@ -664,30 +664,24 @@ public final class SkyFlocks {
 
     // ------------------------------------------------------------------ drawing
 
-    @SubscribeEvent
-    public static void onRender(RenderLevelStageEvent event) {
-        if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_PARTICLES || FLOCKS.isEmpty() && LEAPS.isEmpty()) return;
-        Minecraft mc = Minecraft.getInstance();
-        ClientLevel level = mc.level;
-        if (level == null) return;
-        float partial = event.getPartialTick();
-        Camera cam = event.getCamera();
-        Vec3 c = cam.getPosition();
-        PoseStack pose = event.getPoseStack();
-        MultiBufferSource.BufferSource buffers = mc.renderBuffers().bufferSource();
-        VertexConsumer vc = buffers.getBuffer(RenderType.entityCutoutNoCull(WHITE));
+    private static final net.minecraft.util.context.ContextKey<CapturedGeometry> GEOMETRY=new net.minecraft.util.context.ContextKey<>(Identifier.fromNamespaceAndPath("skycraft","flock_geometry"));
+    @SubscribeEvent public static void extract(net.neoforged.neoforge.client.event.ExtractLevelRenderStateEvent event) {
+        if(FLOCKS.isEmpty()&&LEAPS.isEmpty())return;
+        ClientLevel level=event.getLevel();float partial=event.getDeltaTracker().getGameTimeDeltaPartialTick(false);
+        Vec3 c=event.getCamera().position();PoseStack pose=new PoseStack();
+        CapturedGeometry.Builder vertices=new CapturedGeometry.Builder();VertexConsumer vc=vertices;
         for (Flock f : FLOCKS) {
             for (Bird b : f.birds) {
                 double x = Mth.lerp(partial, b.xo, b.x), y = Mth.lerp(partial, b.yo, b.y), z = Mth.lerp(partial, b.zo, b.z);
                 if ((x - c.x) * (x - c.x) + (z - c.z) * (z - c.z) > 155 * 155) continue;
-                int light = LevelRenderer.getLightColor(level, BlockPos.containing(x, y, z));
+                int light = LightCoordsUtil.getLightCoords(level, BlockPos.containing(x, y, z));
                 pose.pushPose();
                 pose.translate(x - c.x, y - c.y, z - c.z);
-                pose.mulPose(Axis.YP.rotationDegrees(-Mth.rotLerp(partial, b.yawO, b.yaw)));
-                pose.mulPose(Axis.XP.rotationDegrees(Mth.lerp(partial, b.pitchO, b.pitch)));
-                pose.mulPose(Axis.ZP.rotationDegrees(Mth.lerp(partial, b.rollO, b.roll)));
+                pose.rotateDegrees(Axis.YP, -Mth.rotLerp(partial, b.yawO, b.yaw));
+                pose.rotateDegrees(Axis.XP, Mth.lerp(partial, b.pitchO, b.pitch));
+                pose.rotateDegrees(Axis.ZP, Mth.lerp(partial, b.rollO, b.roll));
                 // the model's beak points to -z while the heading, pitch and roll above assume +z: turn it to face its way
-                pose.mulPose(Axis.YP.rotationDegrees(180f));
+                pose.rotateDegrees(Axis.YP, 180f);
                 drawBird(pose, vc, f.kind, b, Mth.lerp(partial, b.flapO, b.flap), light, partial);
                 pose.popPose();
             }
@@ -696,18 +690,22 @@ public final class SkyFlocks {
             float t = (l.age + partial) / l.len;
             double x = l.x + l.dx * l.age, z = l.z + l.dz * l.age;
             double y = l.y + Math.sin(t * Math.PI) * 1.1;
-            int light = LevelRenderer.getLightColor(level, BlockPos.containing(x, y, z));
+            int light = LightCoordsUtil.getLightCoords(level, BlockPos.containing(x, y, z));
             pose.pushPose();
             pose.translate(x - c.x, y - c.y, z - c.z);
-            pose.mulPose(Axis.YP.rotationDegrees((float) -Math.toDegrees(Math.atan2(-l.dx, l.dz))));
-            pose.mulPose(Axis.XP.rotationDegrees(-60f + 120f * t));
-            pose.mulPose(Axis.YP.rotationDegrees(180f)); // the fish's head is at -z
+            pose.rotateDegrees(Axis.YP, (float) -Math.toDegrees(Math.atan2(-l.dx, l.dz)));
+            pose.rotateDegrees(Axis.XP, -60f + 120f * t);
+            pose.rotateDegrees(Axis.YP, 180f); // the fish's head is at -z
             box(pose, vc, -0.06f, -0.08f, -0.3f, 0.06f, 0.08f, 0.25f, 0.62f, 0.5f, 0.5f, light);
             box(pose, vc, -0.07f, -0.04f, -0.24f, 0.07f, 0.06f, 0.18f, 0.78f, 0.36f, 0.32f, light);
             box(pose, vc, -0.01f, -0.1f, 0.25f, 0.01f, 0.1f, 0.4f, 0.4f, 0.32f, 0.3f, light);
             pose.popPose();
         }
-        buffers.endBatch(RenderType.entityCutoutNoCull(WHITE));
+        event.getRenderState().setRenderData(GEOMETRY,vertices.build());
+    }
+    @SubscribeEvent public static void submit(net.neoforged.neoforge.client.event.SubmitCustomGeometryEvent event) {
+        CapturedGeometry geometry=event.getLevelRenderState().getRenderData(GEOMETRY);
+        if(geometry!=null)geometry.submit(event.getPoseStack(),event.getSubmitNodeCollector(),net.minecraft.client.renderer.rendertype.RenderTypes.entityCutout(WHITE));
     }
 
     /**
@@ -743,7 +741,7 @@ public final class SkyFlocks {
         if (perched) {
             // sitting: chest up and tail down (the beak points to -z, so a positive turn about x raises it), breathing
             pose.translate(0f, Mth.sin((ticks + partial) * (b.sleeping ? 0.12f : 0.25f) + b.phase) * 0.004f * s, 0f);
-            pose.mulPose(Axis.XP.rotationDegrees(b.sleeping ? 12f : 24f));
+            pose.rotateDegrees(Axis.XP, b.sleeping ? 12f : 24f);
             if (b.sleeping) pose.scale(1.0f, 0.9f, 1.0f);
             headYaw = Mth.lerp(partial, b.headYawO, b.headYaw);
             headDip = Mth.lerp(partial, b.headPitchO, b.headPitch);
@@ -762,8 +760,8 @@ public final class SkyFlocks {
         // (towards the player, about the field) and dips it to peck or preen
         pose.pushPose();
         pose.translate(0f, 0.03f * s, -0.17f * s);
-        pose.mulPose(Axis.YP.rotationDegrees(-headYaw));
-        pose.mulPose(Axis.XP.rotationDegrees(-headDip));
+        pose.rotateDegrees(Axis.YP, -headYaw);
+        pose.rotateDegrees(Axis.XP, -headDip);
         pose.translate(0f, -0.03f * s, 0.17f * s);
         box(pose, vc, -0.055f * s, -0.015f * s, -0.29f * s, 0.055f * s, 0.075f * s, -0.18f * s, r, g, bl, light);
         box(pose, vc, -0.02f * s, 0.0f, -0.36f * s, 0.02f * s, 0.032f * s, -0.29f * s, k.beakR, k.beakG, k.beakB, light);
@@ -801,7 +799,7 @@ public final class SkyFlocks {
         for (int side = -1; side <= 1; side += 2) {
             pose.pushPose();
             pose.translate(side * 0.065f * s, 0.035f * s, -0.04f * s);
-            pose.mulPose(Axis.ZP.rotationDegrees(side * innerAngle));
+            pose.rotateDegrees(Axis.ZP, side * innerAngle);
 
             Matrix4f m1 = pose.last().pose();
             Matrix3f n1 = pose.last().normal();
@@ -817,7 +815,7 @@ public final class SkyFlocks {
 
             // Outer primary wing segment articulated at the wrist joint
             pose.translate(xInner, camber * 0.5f, -0.01f * s);
-            pose.mulPose(Axis.ZP.rotationDegrees(side * outerAngle));
+            pose.rotateDegrees(Axis.ZP, side * outerAngle);
             Matrix4f m2 = pose.last().pose();
             Matrix3f n2 = pose.last().normal();
             float xOuter = side * outerSpan;
@@ -836,23 +834,23 @@ public final class SkyFlocks {
                                         float x2, float y2, float z2, float x3, float y3, float z3,
                                         float tr, float tg, float tb, float br, float bg, float bb, int light) {
         // Dorsal upward-facing quad
-        vc.vertex(m, x0, y0, z0).color(tr, tg, tb, 1f).uv(0, 0).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(n, 0, 1, 0).endVertex();
-        vc.vertex(m, x1, y1, z1).color(tr, tg, tb, 1f).uv(1, 0).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(n, 0, 1, 0).endVertex();
-        vc.vertex(m, x2, y2, z2).color(tr, tg, tb, 1f).uv(1, 1).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(n, 0, 1, 0).endVertex();
-        vc.vertex(m, x3, y3, z3).color(tr, tg, tb, 1f).uv(0, 1).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(n, 0, 1, 0).endVertex();
+        vc.addVertex(m, x0, y0, z0).setColor(tr, tg, tb, 1f).setUv(0, 0).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(n.m10(),n.m11(),n.m12());
+        vc.addVertex(m, x1, y1, z1).setColor(tr, tg, tb, 1f).setUv(1, 0).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(n.m10(),n.m11(),n.m12());
+        vc.addVertex(m, x2, y2, z2).setColor(tr, tg, tb, 1f).setUv(1, 1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(n.m10(),n.m11(),n.m12());
+        vc.addVertex(m, x3, y3, z3).setColor(tr, tg, tb, 1f).setUv(0, 1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(n.m10(),n.m11(),n.m12());
         // Ventral downward-facing quad (slightly offset & lit for shader visibility from below)
-        vc.vertex(m, x3, y3 - 0.002f, z3).color(br, bg, bb, 1f).uv(0, 1).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(n, 0, -1, 0).endVertex();
-        vc.vertex(m, x2, y2 - 0.002f, z2).color(br, bg, bb, 1f).uv(1, 1).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(n, 0, -1, 0).endVertex();
-        vc.vertex(m, x1, y1 - 0.002f, z1).color(br, bg, bb, 1f).uv(1, 0).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(n, 0, -1, 0).endVertex();
-        vc.vertex(m, x0, y0 - 0.002f, z0).color(br, bg, bb, 1f).uv(0, 0).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(n, 0, -1, 0).endVertex();
+        vc.addVertex(m, x3, y3 - 0.002f, z3).setColor(br, bg, bb, 1f).setUv(0, 1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(-n.m10(),-n.m11(),-n.m12());
+        vc.addVertex(m, x2, y2 - 0.002f, z2).setColor(br, bg, bb, 1f).setUv(1, 1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(-n.m10(),-n.m11(),-n.m12());
+        vc.addVertex(m, x1, y1 - 0.002f, z1).setColor(br, bg, bb, 1f).setUv(1, 0).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(-n.m10(),-n.m11(),-n.m12());
+        vc.addVertex(m, x0, y0 - 0.002f, z0).setColor(br, bg, bb, 1f).setUv(0, 0).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(-n.m10(),-n.m11(),-n.m12());
     }
 
     private static void quad(VertexConsumer vc, Matrix4f m, Matrix3f n, float x0, float y0, float z0, float x1, float y1, float z1,
                              float x2, float y2, float z2, float x3, float y3, float z3, float r, float g, float b, int light) {
-        vc.vertex(m, x0, y0, z0).color(r, g, b, 1f).uv(0, 0).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(n, 0, 1, 0).endVertex();
-        vc.vertex(m, x1, y1, z1).color(r, g, b, 1f).uv(1, 0).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(n, 0, 1, 0).endVertex();
-        vc.vertex(m, x2, y2, z2).color(r, g, b, 1f).uv(1, 1).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(n, 0, 1, 0).endVertex();
-        vc.vertex(m, x3, y3, z3).color(r, g, b, 1f).uv(0, 1).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(light).normal(n, 0, 1, 0).endVertex();
+        vc.addVertex(m, x0, y0, z0).setColor(r, g, b, 1f).setUv(0, 0).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(n.m10(),n.m11(),n.m12());
+        vc.addVertex(m, x1, y1, z1).setColor(r, g, b, 1f).setUv(1, 0).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(n.m10(),n.m11(),n.m12());
+        vc.addVertex(m, x2, y2, z2).setColor(r, g, b, 1f).setUv(1, 1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(n.m10(),n.m11(),n.m12());
+        vc.addVertex(m, x3, y3, z3).setColor(r, g, b, 1f).setUv(0, 1).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(n.m10(),n.m11(),n.m12());
     }
 
     private static void box(PoseStack pose, VertexConsumer vc, float x0, float y0, float z0, float x1, float y1, float z1,

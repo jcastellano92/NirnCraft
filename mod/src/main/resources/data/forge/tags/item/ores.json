@@ -1,0 +1,23 @@
+{
+  "replace": false,
+  "values": [
+    "#forge:ores/corundum",
+    "#forge:ores/orichalcum",
+    "#forge:ores/moonstone",
+    "#forge:ores/malachite",
+    "#forge:ores/quicksilver",
+    "#forge:ores/ebony",
+    "#forge:ores/silver",
+    "#minecraft:ores",
+    "#c:ores/coal",
+    "#c:ores/copper",
+    "#c:ores/diamond",
+    "#c:ores/emerald",
+    "#c:ores/gold",
+    "#c:ores/iron",
+    "#c:ores/lapis",
+    "#c:ores/netherite_scrap",
+    "#c:ores/redstone",
+    "#c:ores/quartz"
+  ]
+}

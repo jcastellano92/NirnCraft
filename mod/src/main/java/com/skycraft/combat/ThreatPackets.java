@@ -1,15 +1,14 @@
 package com.skycraft.combat;
 
 import com.skycraft.network.SkyNetwork;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.network.NetworkDirection;
-import net.minecraftforge.network.NetworkEvent;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.neoforged.api.distmarker.Dist;
+import com.skycraft.platform.Sides;
+import net.minecraft.network.protocol.PacketFlow;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Supplier;
 
 /** The hostile-awareness compass feed ({@link Threats}): compact deltas, server to the owning client only. */
 public final class ThreatPackets {
@@ -19,7 +18,7 @@ public final class ThreatPackets {
     private ThreatPackets() {}
 
     public static void register() {
-        SkyNetwork.register(Sync.class, NetworkDirection.PLAY_TO_CLIENT, Sync::encode, Sync::decode, Sync::handle);
+        SkyNetwork.register(Sync.class, PacketFlow.CLIENTBOUND, Sync::encode, Sync::decode, Sync::handle);
     }
 
     /**
@@ -36,7 +35,7 @@ public final class ThreatPackets {
      * @param removed entity ids no longer tracked
      */
     public record Sync(boolean reset, List<Entry> upserts, int[] removed) {
-        static void encode(Sync m, FriendlyByteBuf buf) {
+        static void encode(Sync m, RegistryFriendlyByteBuf buf) {
             buf.writeBoolean(m.reset);
             int n = Math.min(LIMIT, m.upserts.size());
             buf.writeVarInt(n);
@@ -53,7 +52,7 @@ public final class ThreatPackets {
             for (int i = 0; i < r; i++) buf.writeVarInt(m.removed[i]);
         }
 
-        static Sync decode(FriendlyByteBuf buf) {
+        static Sync decode(RegistryFriendlyByteBuf buf) {
             boolean reset = buf.readBoolean();
             int n = Math.min(LIMIT, buf.readVarInt());
             List<Entry> up = new ArrayList<>(n);
@@ -64,9 +63,8 @@ public final class ThreatPackets {
             return new Sync(reset, up, removed);
         }
 
-        static void handle(Sync m, Supplier<NetworkEvent.Context> ctx) {
-            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> com.skycraft.combat.client.ThreatClient.onSync(m));
-            ctx.get().setPacketHandled(true);
+        static void handle(Sync m, IPayloadContext ctx) {
+            Sides.runOn(Dist.CLIENT, () -> () -> com.skycraft.combat.client.ThreatClient.onSync(m));
         }
     }
 }

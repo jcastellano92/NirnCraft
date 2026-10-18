@@ -129,7 +129,7 @@ public final class CursePerks {
     // ------------------------------------------------------------------ ranks and points (both sides)
 
     public static int rank(Player player, String id) {
-        return Curses.tag(player).getCompound("perks").getInt(id);
+        return Curses.tag(player).getCompoundOrEmpty("perks").getIntOr(id, 0);
     }
 
     public static boolean has(Player player, String id) {
@@ -137,7 +137,7 @@ public final class CursePerks {
     }
 
     public static int feeds(Player player, Tree tree) {
-        return Curses.tag(player).getInt(tree.feedsKey());
+        return Curses.tag(player).getIntOr(tree.feedsKey(), 0);
     }
 
     /** Feedings needed for the {@code n}-th perk point of a tree (1-based): 2, 5, 9, 14, 20, ... */
@@ -154,9 +154,9 @@ public final class CursePerks {
     }
 
     public static int spent(Player player, Tree tree) {
-        CompoundTag perks = Curses.tag(player).getCompound("perks");
+        CompoundTag perks = Curses.tag(player).getCompoundOrEmpty("perks");
         int total = 0;
-        for (CursePerk p : of(tree)) total += perks.getInt(p.id());
+        for (CursePerk p : of(tree)) total += perks.getIntOr(p.id(), 0);
         return total;
     }
 
@@ -183,7 +183,7 @@ public final class CursePerks {
     static void addFeed(ServerPlayer player, Tree tree) {
         CompoundTag t = Curses.tag(player);
         int before = earned(player, tree);
-        t.putInt(tree.feedsKey(), t.getInt(tree.feedsKey()) + 1);
+        t.putInt(tree.feedsKey(), t.getIntOr(tree.feedsKey(), 0) + 1);
         Curses.dirty(player);
         if (earned(player, tree) > before) {
             Notifier.send(player, NotifyKind.MESSAGE, Component.translatable("curse.skycraft.perk.earned", tree.displayName()), Component.empty());
@@ -198,8 +198,8 @@ public final class CursePerks {
         if (available(player, perk.tree()) <= 0 && !player.isCreative()) return;
         if (!canUnlock(player, perk)) return;
         CompoundTag t = Curses.tag(player);
-        CompoundTag perks = t.getCompound("perks");
-        perks.putInt(id, perks.getInt(id) + 1);
+        CompoundTag perks = t.getCompoundOrEmpty("perks");
+        perks.putInt(id, perks.getIntOr(id, 0) + 1);
         t.put("perks", perks);
         Curses.dirty(player);
         Vampirism.refreshBonuses(player);

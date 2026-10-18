@@ -6,8 +6,8 @@ import com.skycraft.realms.RealmBlocks;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.renderer.ItemBlockRenderTypes;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.util.context.ContextKey;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.particles.ParticleOptions;
@@ -17,13 +17,13 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.material.FogType;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RegisterDimensionSpecialEffectsEvent;
-import net.minecraftforge.client.event.ViewportEvent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.RegisterCustomEnvironmentEffectRendererEvent;
+import net.neoforged.neoforge.client.event.ViewportEvent;
+
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 
 /**
  * Client side of the realms: their dimension effects (sky, light), fog that closes in or opens up with the biome
@@ -34,31 +34,32 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 public final class RealmsClient {
     private RealmsClient() {}
 
-    @Mod.EventBusSubscriber(modid = Skycraft.MODID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+    @net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
     public static final class ModEvents {
         private ModEvents() {}
 
         @SubscribeEvent
-        public static void effects(RegisterDimensionSpecialEffectsEvent event) {
-            for (Realm r : Realm.values()) event.register(r.effects(), new RealmEffects(r));
+        public static void effects(RegisterCustomEnvironmentEffectRendererEvent event) {
+            for(Realm realm:Realm.values())if(realm!=Realm.SHIVERING_ISLES){
+                var effects=new RealmEffects(realm);
+                event.registerSkyboxRenderer(realm.effects(),effects);
+                event.registerCloudRenderer(realm.effects(),effects);
+                event.registerWeatherEffectRenderer(realm.effects(),effects);
+            }
         }
+        @SubscribeEvent public static void pipelines(net.neoforged.neoforge.client.event.RegisterRenderPipelinesEvent event) {
+            RealmSky.register(event); RealmLightmap.register(event);
+        }
+    }
 
-        @SuppressWarnings("deprecation")
-        @SubscribeEvent
-        public static void setup(FMLClientSetupEvent event) {
-            event.enqueueWork(() -> {
-                RenderType cutout = RenderType.cutout(), translucent = RenderType.translucent();
-                for (var b : new net.minecraftforge.registries.RegistryObject[]{RealmBlocks.BLOODGRASS, RealmBlocks.HARRADA,
-                        RealmBlocks.MANIA_BLOOM, RealmBlocks.DEMENTIA_BULB, RealmBlocks.DAEDRIC_SPIKE, RealmBlocks.SIGIL_FLAME,
-                        RealmBlocks.MADNESS_DOOR, RealmBlocks.BLACK_BOOK, RealmBlocks.SOUL_GEM_CLUSTER, RealmBlocks.SIGIL_STONE}) {
-                    ItemBlockRenderTypes.setRenderLayer((net.minecraft.world.level.block.Block) b.get(), cutout);
-                }
-                for (var b : new net.minecraftforge.registries.RegistryObject[]{RealmBlocks.OBLIVION_PORTAL, RealmBlocks.VALOR_PORTAL,
-                        RealmBlocks.SOUL_PORTAL, RealmBlocks.COLDHARBOUR_PORTAL}) {
-                    ItemBlockRenderTypes.setRenderLayer((net.minecraft.world.level.block.Block) b.get(), translucent);
-                }
-            });
-        }
+    record Frame(Realm realm,RealmSky.Scene sky,boolean updateLightmap) {}
+    static final ContextKey<Frame> FRAME=new ContextKey<>(net.minecraft.resources.Identifier.fromNamespaceAndPath("skycraft","realm_frame"));
+    private static RealmSky.Scene pendingSky,preparedSky;
+    private static Realm extractedRealm;
+    private static void clearRenderResources(){
+        if(pendingSky!=null)pendingSky.close();
+        if(preparedSky!=null && preparedSky!=pendingSky)preparedSky.close();
+        pendingSky=preparedSky=null; RealmLightmap.clear();
     }
 
     // ------------------------------------------------------------------ fog
@@ -66,23 +67,56 @@ public final class RealmsClient {
     private static float fogNear = -1, fogFar = -1;
     /** 0..1: how strongly Alduin's soul-mist is gathered (Sovngarde, while the World-Eater lives nearby). */
     private static float alduinMist;
+    private static ClientLevel fogLevel;
 
-    @Mod.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
+    /** Last authored distance-fog range, shared with local emitter scattering without duplicating extinction. */
+    public static float[] localMediaRange(ClientLevel level) {
+        return level==fogLevel && fogFar>=0?new float[]{Math.max(0,fogNear),fogFar}:new float[]{0,0};
+    }
+
+    @net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
     public static final class ForgeEvents {
         private ForgeEvents() {}
+
+        @SubscribeEvent public static void extract(net.neoforged.neoforge.client.event.ExtractLevelRenderStateEvent event) {
+            Realm realm=Realm.of(event.getLevel());
+            var light=Minecraft.getInstance().gameRenderer.gameRenderState().lightmapRenderState;
+            if(extractedRealm!=realm){light.needsUpdate=true;extractedRealm=realm;}
+            if(pendingSky!=null && pendingSky!=preparedSky)pendingSky.close();
+            pendingSky=null;
+            if(realm==null || realm==Realm.SHIVERING_ISLES){event.getRenderState().setRenderData(FRAME,null);return;}
+            var mc=Minecraft.getInstance();var camera=event.getCamera();
+            boolean visible=camera.getFluidInCamera()==FogType.NONE && (mc.player==null ||
+                (!mc.player.hasEffect(net.minecraft.world.effect.MobEffects.BLINDNESS) && !mc.player.hasEffect(net.minecraft.world.effect.MobEffects.DARKNESS)));
+            if(visible)pendingSky=RealmSky.extract(realm,(event.getLevel().getGameTime()+event.getDeltaTracker().getGameTimeDeltaPartialTick(false))*0.05,
+                event.getRenderState().cameraRenderState.fogData.color);
+            event.getRenderState().setRenderData(FRAME,new Frame(realm,pendingSky,mc.gameRenderer.gameRenderState().lightmapRenderState.needsUpdate));
+        }
+        @SubscribeEvent public static void prepare(net.neoforged.neoforge.client.event.PrepareRenderBuffersEvent event) {
+            var frame=event.getLevelRenderState().getRenderData(FRAME);
+            var next=frame==null?null:frame.sky();
+            if(preparedSky!=next){if(preparedSky!=null)preparedSky.close();preparedSky=next;}
+            if(next!=null)next.prepare();
+            if(frame!=null && frame.updateLightmap())RealmLightmap.apply(frame);
+            else if(frame==null)RealmLightmap.clear();
+        }
+        @SubscribeEvent public static void logout(net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent.LoggingOut event){
+            clearRenderResources();extractedRealm=null;fogLevel=null;fogNear=fogFar=-1;alduinMist=0;
+        }
 
         @SubscribeEvent
         public static void fog(ViewportEvent.RenderFog event) {
             Minecraft mc = Minecraft.getInstance();
             ClientLevel level = mc.level;
             Realm realm = Realm.of(level);
-            if (realm == null || event.getMode() != net.minecraft.client.renderer.FogRenderer.FogMode.FOG_TERRAIN) return;
+            if (realm == null) return;
+            if(fogLevel!=level) { fogLevel=level;fogNear=fogFar=-1; }
             Camera cam = event.getCamera();
             if (cam.getFluidInCamera() != FogType.NONE) return;
             if (mc.player != null && (mc.player.hasEffect(net.minecraft.world.effect.MobEffects.BLINDNESS)
                     || mc.player.hasEffect(net.minecraft.world.effect.MobEffects.DARKNESS))) return;
             float far = event.getFarPlaneDistance();
-            float[] want = target(realm, level, cam.getBlockPosition(), far);
+            float[] want = target(realm, level, cam.blockPosition(), far);
             if (fogFar < 0) {
                 fogNear = want[0];
                 fogFar = want[1];
@@ -92,33 +126,35 @@ public final class RealmsClient {
             fogFar = Mth.lerp(0.02f, fogFar, want[1]);
             event.setNearPlaneDistance(fogNear);
             event.setFarPlaneDistance(Math.min(far, fogFar));
-            event.setCanceled(true);
+
         }
 
         @SubscribeEvent
-        public static void tick(TickEvent.ClientTickEvent event) {
-            if (event.phase != TickEvent.Phase.END) return;
+        public static void tick(net.neoforged.neoforge.client.event.ClientTickEvent.Post event) {
+            
             Minecraft mc = Minecraft.getInstance();
             if (mc.level == null || mc.player == null || mc.isPaused()) {
                 fogFar = -1;
+                if(mc.level==null) fogLevel=null;
                 return;
             }
             Realm realm = Realm.of(mc.level);
             if (realm == null) {
                 fogFar = -1;
+                fogLevel=null;
                 alduinMist = 0;
                 return;
             }
             boolean alduin = realm == Realm.SOVNGARDE && !mc.level.getEntitiesOfClass(EnderDragon.class,
                     mc.player.getBoundingBox().inflate(220)).isEmpty();
             alduinMist = Mth.clamp(alduinMist + (alduin ? 0.01f : -0.02f), 0f, 1f);
-            if (mc.options.particles().get() != net.minecraft.client.ParticleStatus.MINIMAL) particles(realm, mc);
+            if (mc.options.particles().get() != net.minecraft.server.level.ParticleStatus.MINIMAL) particles(realm, mc);
         }
     }
 
     private static String biomeOf(ClientLevel level, BlockPos pos) {
         Holder<Biome> b = level.getBiome(pos);
-        return b.unwrapKey().map(k -> k.location().getPath()).orElse("");
+        return b.unwrapKey().map(k -> k.identifier().getPath()).orElse("");
     }
 
     /** {near, far} fog distances for where the camera is. */
@@ -178,7 +214,7 @@ public final class RealmsClient {
 
     private static void particles(Realm realm, Minecraft mc) {
         ClientLevel level = mc.level;
-        RandomSource r = level.random;
+        RandomSource r = level.getRandom();
         double px = mc.player.getX(), py = mc.player.getY(), pz = mc.player.getZ();
         switch (realm) {
             case DEADLANDS -> {

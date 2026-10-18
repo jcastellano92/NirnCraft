@@ -29,6 +29,8 @@ SLOPE = 1.0 / 28.0  # density per block below the surface
 
 def write(rel, obj):
     path = os.path.join(DATA, rel)
+    from format_263 import prepare
+    path, obj = prepare(path, obj)
     os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, "w", encoding="utf-8", newline="\n") as f:
         json.dump(obj, f, indent=2)
@@ -321,6 +323,7 @@ def main():
 
     write("minecraft/dimension_type/overworld.json", {
         "ambient_light": 0.0, "bed_works": True, "coordinate_scale": 1.0, "effects": "minecraft:overworld",
+        "attributes": {"minecraft:visual/cloud_height": 330.0},
         "has_ceiling": False, "has_raids": True, "has_skylight": True, "height": HEIGHT,
         "infiniburn": "#minecraft:infiniburn_overworld", "logical_height": HEIGHT, "min_y": MIN_Y,
         "monster_spawn_block_light_limit": 0,

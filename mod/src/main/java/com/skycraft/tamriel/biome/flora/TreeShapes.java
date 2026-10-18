@@ -804,7 +804,7 @@ final class TreeShapes {
      */
     static int ground(GenBox box, int x, int z, int hintY) {
         if (x < box.minX || x > box.maxX || z < box.minZ || z > box.maxZ) return Integer.MIN_VALUE;
-        int top = (x >> 4) == box.center.x && (z >> 4) == box.center.z
+        int top = (x >> 4) == box.center.x() && (z >> 4) == box.center.z()
                 ? box.level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z) : hintY + 5;
         // down through water and plants to the floor
         for (int y = top; y >= top - 14; y--) {
@@ -868,7 +868,7 @@ final class TreeShapes {
             int x = Mth.floor(g.x + 0.5 + Math.cos(a) * d), z = Mth.floor(g.z + 0.5 + Math.sin(a) * d);
             int y = ground(g.b.box, x, z, g.y);
             if (y == Integer.MIN_VALUE || Math.abs(y - g.y) > 3) continue;
-            if (!g.b.box.get(x, y - 1, z).is(BlockTags.BAMBOO_PLANTABLE_ON)) continue;
+            if (!g.b.box.get(x, y - 1, z).is(BlockTags.SUPPORTS_BAMBOO)) continue;
             int h = (int) (g.height() * (1.1 - 0.5 * d / rad));
             for (int k = 0; k < h; k++) {
                 BambooLeaves lv = k >= h - 2 ? BambooLeaves.LARGE : k == h - 3 ? BambooLeaves.SMALL : BambooLeaves.NONE;

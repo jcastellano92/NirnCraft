@@ -96,7 +96,7 @@ public final class Brush {
             BlockState n = s;
             for (Direction d : Direction.Plane.HORIZONTAL) {
                 BlockPos np = p.relative(d);
-                n = n.updateShape(d, b.level.getBlockState(np), b.level, p, np);
+                n = n.updateShape(b.level, b.level, p, d, np, b.level.getBlockState(np), b.level.getRandom());
             }
             if (n != s && b.writable(p)) b.level.setBlock(p, n, 2);
         }

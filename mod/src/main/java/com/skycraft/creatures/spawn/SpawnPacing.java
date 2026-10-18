@@ -9,9 +9,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -23,7 +23,7 @@ import java.util.UUID;
  * the wilderness encounters): calm zones around the world spawn and settlements, safer roads, a per-player cooldown
  * between hostile events with a grace period after (re)spawning, and no bosses or bandit camps near the start.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class SpawnPacing {
     /** Entity ids (skycraft namespace) never placed near the start or at very low player levels. */
     private static final Set<String> START_BANNED = Set.of(
@@ -51,7 +51,7 @@ public final class SpawnPacing {
      */
     public static double distFromStart(Level level, double x, double z) {
         if (level.dimension() != Level.OVERWORLD) return Double.MAX_VALUE;
-        BlockPos s = level.getSharedSpawnPos();
+        BlockPos s = level.getRespawnData().pos();
         double dSpawn = Math.hypot(x - s.getX(), z - s.getZ());
         double dCottage = Math.hypot(x - (-223.0), z - 1791.0);
         double dHelgen = Math.hypot(x - (-152.0), z - 1696.0);
@@ -72,7 +72,7 @@ public final class SpawnPacing {
     /** True inside the initial walk corridor from the Start Cottage (-223, 1791) to Helgen (-152, 1696). */
     public static boolean inStarterSafeCorridor(Level level, double x, double z) {
         if (level.dimension() != Level.OVERWORLD) return false;
-        BlockPos s = level.getSharedSpawnPos();
+        BlockPos s = level.getRespawnData().pos();
         if (Math.hypot(x - s.getX(), z - s.getZ()) < 96.0) return true;
         return distToSegment(x, z, -223.0, 1791.0, -152.0, 1696.0) < 96.0;
     }
@@ -82,7 +82,7 @@ public final class SpawnPacing {
         int r = CreaturesConfig.CALM_RADIUS.get();
         if (r <= 0 || level.dimension() != Level.OVERWORLD) return false;
         if (inStarterSafeCorridor(level, pos.getX(), pos.getZ())) return true;
-        BlockPos s = level.getSharedSpawnPos();
+        BlockPos s = level.getRespawnData().pos();
         if (Math.hypot(pos.getX() - s.getX(), pos.getZ() - s.getZ()) < r) return true;
         if (Math.hypot(pos.getX() - (-223.0), pos.getZ() - 1791.0) < r) return true;
         for (Place p : Places.overlapping(pos.getX() - r, pos.getZ() - r, pos.getX() + r, pos.getZ() + r)) {
@@ -142,14 +142,14 @@ public final class SpawnPacing {
     }
 
     private static void quiet(net.minecraft.world.entity.player.Player player) {
-        if (player.level().isClientSide) return;
+        if (player.level().isClientSide()) return;
         QUIET_UNTIL.put(player.getUUID(), player.level().getGameTime() + CreaturesConfig.GRACE_SECONDS.get() * 20L);
     }
 
     /** True when a hostile event near this player may happen now (not in the grace period, cooldown over). */
     public static boolean hostileReady(ServerPlayer player) {
         // nobody is hunted while they or the world around them rest (world/RestManager)
-        if (com.skycraft.world.RestManager.spawnsBlocked(player.serverLevel(), player.getX(), player.getY(), player.getZ())) return false;
+        if (com.skycraft.world.RestManager.spawnsBlocked(player.level(), player.getX(), player.getY(), player.getZ())) return false;
         long now = player.level().getGameTime();
         if (now < QUIET_UNTIL.getOrDefault(player.getUUID(), 0L)) return false;
         Long last = LAST_HOSTILE.get(player.getUUID());

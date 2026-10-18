@@ -8,7 +8,7 @@ import com.skycraft.vitals.ActionHandler;
 import com.skycraft.vitals.Vitals;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.BiomeTags;
@@ -20,19 +20,18 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.structure.Structure;
-import net.minecraftforge.event.AttachCapabilitiesEvent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.player.EntityItemPickupEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+import net.neoforged.neoforge.event.entity.player.ItemEntityPickupEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-/** Capability lifecycle (attach, death copy, sync on login/respawn/dimension change), first spawn and race prompt. */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+/** Attachment lifecycle (death copy, login/respawn/dimension sync), first spawn and race prompt. */
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class PlayerDataEvents {
     /** How long a raceless player is protected while the race menu is pending (5 minutes). */
     private static final int RACE_PROTECTION_TICKS = 20 * 60 * 5;
@@ -51,6 +50,16 @@ public final class PlayerDataEvents {
 
     private PlayerDataEvents() {}
 
+    private static void configureStepHeight(Player player) {
+        var attribute = player.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.STEP_HEIGHT);
+        if (attribute != null) attribute.setBaseValue(1.0625);
+    }
+
+    private static BlockPos respawnPosition(ServerPlayer player) {
+        var config = player.getRespawnConfig();
+        return config == null ? null : config.respawnData().pos();
+    }
+
     /** True while this player's post-respawn grace (no hostile aggro, the creatures grace period) is running. */
     public static boolean inRespawnGrace(Player player) {
         Long until = RESPAWN_GRACE_UNTIL.get(player.getUUID());
@@ -58,18 +67,8 @@ public final class PlayerDataEvents {
     }
 
     @SubscribeEvent
-    public static void attach(AttachCapabilitiesEvent<Entity> event) {
-        if (event.getObject() instanceof Player) {
-            SkyData.Provider provider = new SkyData.Provider();
-            event.addCapability(SkyData.KEY, provider);
-            event.addListener(provider::invalidate);
-        }
-    }
-
-    @SubscribeEvent
     public static void clone(PlayerEvent.Clone event) {
         Player original = event.getOriginal();
-        original.reviveCaps();
         PlayerData old = SkyData.get(original);
         PlayerData now = SkyData.get(event.getEntity());
         now.copyFrom(old);
@@ -78,23 +77,22 @@ public final class PlayerDataEvents {
             now.setStamina(now.maxStamina());
         }
         if (event.isWasDeath()) DEATH_POS.put(event.getEntity().getUUID(), original.blockPosition());
-        event.getEntity().setMaxUpStep(1.0625f);
-        original.invalidateCaps();
+        configureStepHeight(event.getEntity());
     }
 
     @SubscribeEvent
     public static void login(PlayerEvent.PlayerLoggedInEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) {
-            player.setMaxUpStep(1.0625f);
+            configureStepHeight(player);
             // A Skycraft invisibility spell doesn't survive a relog; potions, Embrace of Shadows etc. are left alone.
-            if (player.getPersistentData().getBoolean(SPELL_INVISIBILITY)) {
+            if (player.getPersistentData().getBooleanOr(SPELL_INVISIBILITY, false)) {
                 player.getPersistentData().remove(SPELL_INVISIBILITY);
-                player.removeEffect(net.minecraft.world.effect.MobEffects.INVISIBILITY);
+                player.removeEffect(com.skycraft.platform.Effects.holder(net.minecraft.world.effect.MobEffects.INVISIBILITY));
             }
             fullSync(player);
             PlayerData data = SkyData.get(player);
-            if (data.getRace() == null) RACE_PROMPT_START.put(player.getUUID(), player.server.getTickCount());
-            if (!data.module("core").getBoolean("spawn_placed")) {
+            if (data.getRace() == null) RACE_PROMPT_START.put(player.getUUID(), player.level().getServer().getTickCount());
+            if (!data.module("core").getBooleanOr("spawn_placed", false)) {
                 data.module("core").putBoolean("spawn_placed", true);
                 com.skycraft.combat.Sheathe.setSheathed(player, true);
                 data.markDirty();
@@ -111,15 +109,16 @@ public final class PlayerDataEvents {
      * (docs/TAMRIEL.md). Only the spawn chunk is loaded; the safe spot is searched inside it.
      */
     private static void placeAtStart(ServerPlayer player) {
-        ServerLevel level = player.serverLevel();
+        ServerLevel level = player.level();
         if (level.dimension() != Level.OVERWORLD) return;
-        BlockPos target = level.getSharedSpawnPos();
+        BlockPos target = level.getRespawnData().pos();
         LevelChunk chunk = level.getChunk(target.getX() >> 4, target.getZ() >> 4);
 
         BlockPos safe = SafeSpawn.find(level, target, 24);
         if (safe == null) safe = findSafeSpot(level, chunk, target);
         if (safe != null) {
-            player.teleportTo(level, safe.getX() + 0.5, safe.getY() + 0.05, safe.getZ() + 0.5, player.getYRot(), player.getXRot());
+            player.teleportTo(level, safe.getX() + 0.5, safe.getY() + 0.05, safe.getZ() + 0.5,
+                java.util.Set.of(), player.getYRot(), player.getXRot(), false);
             player.fallDistance = 0f;
             player.setDeltaMovement(0, 0, 0);
         }
@@ -136,8 +135,8 @@ public final class PlayerDataEvents {
                     int x = target.getX() + dx;
                     int z = target.getZ() + dz;
                     if (x < minX || x > minX + 15 || z < minZ || z > minZ + 15) continue;
-                    int topY = Math.min(level.getMaxBuildHeight() - 3, chunk.getHeight(Heightmap.Types.MOTION_BLOCKING, x & 15, z & 15) + 2);
-                    for (int y = topY; y >= Math.max(level.getMinBuildHeight() + 2, 60); y--) {
+                    int topY = Math.min((level.getMaxY() + 1) - 3, chunk.getHeight(Heightmap.Types.MOTION_BLOCKING, x & 15, z & 15) + 2);
+                    for (int y = topY; y >= Math.max(level.getMinY() + 2, 60); y--) {
                         safe.set(x, y, z);
                         BlockPos below = safe.below();
                         boolean groundSolid = chunk.getBlockState(below).isFaceSturdy(level, below, net.minecraft.core.Direction.UP)
@@ -157,24 +156,25 @@ public final class PlayerDataEvents {
      * home), vanilla's is cleared so the respawn goes to the world spawn and {@link #placeRespawn} then moves you to
      * the nearest town you have discovered.
      */
-    @SubscribeEvent(priority = net.minecraftforge.eventbus.api.EventPriority.LOWEST)
-    public static void onPlayerDeath(net.minecraftforge.event.entity.living.LivingDeathEvent event) {
+    @SubscribeEvent(priority = net.neoforged.bus.api.EventPriority.LOWEST)
+    public static void onPlayerDeath(net.neoforged.neoforge.event.entity.living.LivingDeathEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer player) || event.isCanceled()) return;
         BlockPos home = com.skycraft.combat.RespawnPoints.home(player);
         if (home != null) {
             // vanilla moves its respawn to any bed you slept in, somebody else's included: the home is the record
-            if (!home.equals(player.getRespawnPosition()) || player.getRespawnDimension() != Level.OVERWORLD) {
-                player.setRespawnPosition(Level.OVERWORLD, home, player.getYRot(), true, false);
+            if (!home.equals(respawnPosition(player)) || ServerPlayer.RespawnConfig.getDimensionOrDefault(player.getRespawnConfig()) != Level.OVERWORLD) {
+                player.setRespawnPosition(new ServerPlayer.RespawnConfig(
+                        net.minecraft.world.level.storage.LevelData.RespawnData.of(Level.OVERWORLD, home, player.getYRot(), 0f), true), false);
             }
-        } else if (player.getRespawnPosition() != null) {
-            player.setRespawnPosition(player.getRespawnDimension(), null, 0f, false, false);
+        } else if (respawnPosition(player) != null) {
+            player.setRespawnPosition(null, false);
         }
     }
 
     @SubscribeEvent
     public static void respawn(PlayerEvent.PlayerRespawnEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) {
-            player.setMaxUpStep(1.0625f);
+            configureStepHeight(player);
             fullSync(player);
             // refreshAttributes only clamps down; a fresh body after death starts at full (Skyrim) health.
             if (!event.isEndConquered()) player.setHealth(player.getMaxHealth());
@@ -204,9 +204,9 @@ public final class PlayerDataEvents {
         java.util.Map<String, com.skycraft.tamriel.Place> candidates = new java.util.LinkedHashMap<>();
         net.minecraft.nbt.ListTag list = com.skycraft.world.WorldData.discovered(SkyData.get(player));
         for (int i = 0; i < list.size(); i++) {
-            net.minecraft.nbt.CompoundTag loc = list.getCompound(i);
-            if (loc.getBoolean("known") || !level.dimension().location().toString().equals(
-                    loc.getString("dim").isEmpty() ? "minecraft:overworld" : loc.getString("dim"))) continue;
+            net.minecraft.nbt.CompoundTag loc = list.getCompoundOrEmpty(i);
+            if (loc.getBooleanOr("known", false) || !level.dimension().identifier().toString().equals(
+                    loc.getStringOr("dim", "").isEmpty() ? "minecraft:overworld" : loc.getStringOr("dim", ""))) continue;
             java.util.Optional<com.skycraft.tamriel.Place> place = com.skycraft.world.WorldData.place(loc);
             if (place.isPresent() && place.get().type().isSettlement()) candidates.put(place.get().id(), place.get());
         }
@@ -227,7 +227,7 @@ public final class PlayerDataEvents {
 
     /** Where in a settlement a respawning player appears: the market square, else a gate, else the inn, else its centre. */
     public static BlockPos restSpot(ServerLevel level, com.skycraft.tamriel.Place p) {
-        BlockPos at = new BlockPos(p.x(), level.getSharedSpawnPos().getY(), p.z());
+        BlockPos at = new BlockPos(p.x(), level.getRespawnData().pos().getY(), p.z());
         var e = com.skycraft.tamriel.settlement.SettlementAnchors.find(level, p.id());
         if (e.isPresent()) {
             com.skycraft.tamriel.settlement.Anchor a = e.get().first(com.skycraft.tamriel.settlement.AnchorType.MEETING);
@@ -242,16 +242,16 @@ public final class PlayerDataEvents {
     }
 
     private static void placeRespawn(ServerPlayer player, @javax.annotation.Nullable BlockPos died) {
-        ServerLevel level = player.serverLevel();
+        ServerLevel level = player.level();
         if (level.dimension() != Level.OVERWORLD) return;
         BlockPos here = player.blockPosition();
         // a bed counts only when it is a home (slept in and usable, a bought house): the intro cottage's bed never is
         BlockPos home = com.skycraft.combat.RespawnPoints.home(player);
-        boolean hasBed = home != null && player.getRespawnPosition() != null && player.getRespawnDimension() == Level.OVERWORLD
+        boolean hasBed = home != null && respawnPosition(player) != null && ServerPlayer.RespawnConfig.getDimensionOrDefault(player.getRespawnConfig()) == Level.OVERWORLD
                 && here.distSqr(home) <= 24 * 24; // vanilla could not use the bed (gone, blocked): treat as having none
         BlockPos target = here;
         if (!hasBed) {
-            target = level.getSharedSpawnPos();
+            target = level.getRespawnData().pos();
             BlockPos from = died != null ? died : here;
             if (SkyConfig.RESPAWN_MODE.get() == SkyConfig.RespawnMode.VISITED_SETTLEMENT) {
                 BlockPos town = nearestVisitedSettlement(player, level, from);
@@ -265,7 +265,7 @@ public final class PlayerDataEvents {
         if (quiet > 0 && (safe == null || hostileNear(level, safe, quiet))) {
             // a bandit camp or wanderer at the spot: try the settlement/spawn ring further out for a hostile-free place
             BlockPos fallback = null;
-            BlockPos[] centres = {target, level.getSharedSpawnPos(), here};
+            BlockPos[] centres = {target, level.getRespawnData().pos(), here};
             int loads = 6; // forced chunk loads allowed for the whole search; the rest only reads loaded chunks
             outer:
             for (BlockPos c : centres) {
@@ -285,7 +285,8 @@ public final class PlayerDataEvents {
             if (fallback != null) safe = fallback;
         }
         if (safe == null) return;
-        player.teleportTo(level, safe.getX() + 0.5, safe.getY() + 0.05, safe.getZ() + 0.5, player.getYRot(), player.getXRot());
+        player.teleportTo(level, safe.getX() + 0.5, safe.getY() + 0.05, safe.getZ() + 0.5,
+                java.util.Set.of(), player.getYRot(), player.getXRot(), false);
         player.fallDistance = 0f;
         player.setDeltaMovement(0, 0, 0);
     }
@@ -326,7 +327,7 @@ public final class PlayerDataEvents {
         PlayerData data = SkyData.get(player);
         Vitals.refreshAttributes(player);
         data.consumeDirty();
-        data.setLastFullSync(player.server.getTickCount());
+        data.setLastFullSync(player.level().getServer().getTickCount());
         SkyNetwork.sendToPlayer(player, CorePackets.SyncData.of(data));
     }
 
@@ -337,30 +338,30 @@ public final class PlayerDataEvents {
     public static boolean isRacePending(Player player) {
         if (!(player instanceof ServerPlayer sp) || SkyData.get(player).getRace() != null || !SkyConfig.PROMPT_RACE.get()) return false;
         Integer start = RACE_PROMPT_START.get(player.getUUID());
-        if (start == null || sp.server.getTickCount() - start > RACE_PROTECTION_TICKS) return false;
+        if (start == null || sp.level().getServer().getTickCount() - start > RACE_PROTECTION_TICKS) return false;
         return !com.skycraft.crime.Jail.isJailed(sp);
     }
 
     /** Until a race is chosen, periodically re-open the race menu (the first time shortly after joining). */
     @SubscribeEvent
-    public static void tick(TickEvent.PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer player)) return;
+    public static void tick(PlayerTickEvent.Post event) {
+        if (!(event.getEntity() instanceof ServerPlayer player)) return;
         // Auto-clear corpse marker on map and compass when player reaches within 6 blocks of their corpse
         if (player.tickCount % 20 == 0) {
             PlayerData data = SkyData.get(player);
             net.minecraft.nbt.ListTag discovered = com.skycraft.world.WorldData.discovered(data);
             boolean removedCorpse = false;
-            String curDim = player.level().dimension().location().toString();
+            String curDim = player.level().dimension().identifier().toString();
             for (int i = discovered.size() - 1; i >= 0; i--) {
-                net.minecraft.nbt.CompoundTag loc = discovered.getCompound(i);
-                String name = loc.getString("name");
-                String id = loc.getString("id");
+                net.minecraft.nbt.CompoundTag loc = discovered.getCompoundOrEmpty(i);
+                String name = loc.getStringOr("name", "");
+                String id = loc.getStringOr("id", "");
                 if ("Your Corpse".equals(name) || id.startsWith("corpse|")) {
-                    String dim = loc.getString("dim");
+                    String dim = loc.getStringOr("dim", "");
                     if (curDim.equals(dim)) {
-                        double cx = loc.getInt("x");
-                        double cy = loc.getInt("y");
-                        double cz = loc.getInt("z");
+                        double cx = loc.getIntOr("x", 0);
+                        double cy = loc.getIntOr("y", 0);
+                        double cz = loc.getIntOr("z", 0);
                         if (player.distanceToSqr(cx + 0.5, cy + 0.5, cz + 0.5) <= 36.0) {
                             discovered.remove(i);
                             removedCorpse = true;
@@ -381,7 +382,7 @@ public final class PlayerDataEvents {
             if (player.tickCount % 200 == 0) RACE_PROMPT_START.remove(player.getUUID());
             return;
         }
-        RACE_PROMPT_START.putIfAbsent(player.getUUID(), player.server.getTickCount());
+        RACE_PROMPT_START.putIfAbsent(player.getUUID(), player.level().getServer().getTickCount());
         if (!com.skycraft.crime.Jail.isJailed(player) && player.tickCount % 600 == 60) {
             SkyNetwork.sendToPlayer(player, new CorePackets.OpenScreen(CorePackets.OpenScreen.RACE));
         }
@@ -389,7 +390,7 @@ public final class PlayerDataEvents {
 
     /** Invulnerable while the race menu is pending (never against /kill or the void). */
     @SubscribeEvent
-    public static void onHurt(net.minecraftforge.event.entity.living.LivingHurtEvent event) {
+    public static void onHurt(net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent event) {
         if (event.getEntity() instanceof Player player && !event.getSource().is(DamageTypeTags.BYPASSES_INVULNERABILITY)
                 && isRacePending(player)) {
             event.setCanceled(true);
@@ -406,13 +407,13 @@ public final class PlayerDataEvents {
 
     /** Mobs ignore a player whose race menu is pending. Stealth targeting rules live in combat/Stealth. */
     @SubscribeEvent
-    public static void onTarget(net.minecraftforge.event.entity.living.LivingChangeTargetEvent event) {
-        if (event.getNewTarget() instanceof Player player && isRacePending(player)) {
+    public static void onTarget(net.neoforged.neoforge.event.entity.living.LivingChangeTargetEvent event) {
+        if (event.getNewAboutToBeSetTarget() instanceof Player player && isRacePending(player)) {
             event.setCanceled(true);
         }
         // respawn grace: hostile mobs (bandit camps included) do not pick the player as a target; one the player
         // struck first may still fight back
-        if (event.getNewTarget() instanceof ServerPlayer sp && event.getEntity() instanceof net.minecraft.world.entity.monster.Enemy
+        if (event.getNewAboutToBeSetTarget() instanceof ServerPlayer sp && event.getEntity() instanceof net.minecraft.world.entity.monster.Enemy
                 && inRespawnGrace(sp) && event.getEntity().getLastHurtByMob() != sp) {
             event.setCanceled(true);
         }
@@ -423,7 +424,7 @@ public final class PlayerDataEvents {
      * Note: this cancels every pickup, which makes crime/Theft.onPickup's own pickup cancelling redundant.
      */
     @SubscribeEvent
-    public static void pickup(EntityItemPickupEvent event) {
-        event.setCanceled(true);
+    public static void pickup(ItemEntityPickupEvent.Pre event) {
+        event.setCanPickup(net.minecraft.util.TriState.FALSE);
     }
 }

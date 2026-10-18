@@ -14,7 +14,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -31,21 +31,20 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.alchemy.PotionUtils;
+import com.skycraft.platform.ArcaneData;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.event.entity.living.LivingDeathEvent;
-import net.minecraftforge.event.entity.living.LivingDropsEvent;
-import net.minecraftforge.event.entity.living.LivingEntityUseItemEvent;
-import net.minecraftforge.event.entity.living.LivingEvent;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
+import net.neoforged.neoforge.event.entity.living.LivingDropsEvent;
+import net.neoforged.neoforge.event.entity.living.LivingEntityUseItemEvent;
+import net.neoforged.neoforge.event.entity.living.LivingEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 import java.util.List;
 import java.util.Locale;
@@ -55,7 +54,7 @@ import java.util.function.Supplier;
  * Forge-bus handlers of the arcane module: learning ingredient effects by eating, Snakeblood and the
  * resist/weakness/fortify alchemy effects, weapon poisons, Soul Siphon and the creature drops of alchemy salts.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class ArcaneEvents {
     /** Weapon NBT holding an applied poison: {Effects: [MobEffectInstance...], Hits: int, MaxHits: int, Name: json}. */
     public static final String WEAPON_POISON = "skycraft_weapon_poison";
@@ -64,10 +63,10 @@ public final class ArcaneEvents {
     public static final String POISON_NAME = "Name";
 
     public static String poisonDisplayName(CompoundTag poisonTag) {
-        String raw = poisonTag.getString(POISON_NAME);
+        String raw = poisonTag.getStringOr(POISON_NAME, "");
         if (raw.isEmpty()) return Component.translatable("tooltip.skycraft.alchemy.poison").getString();
         try {
-            Component parsed = Component.Serializer.fromJson(raw);
+            Component parsed = ArcaneData.readComponent(raw);
             if (parsed != null) return parsed.getString();
         } catch (Exception ignored) {
         }
@@ -76,13 +75,24 @@ public final class ArcaneEvents {
 
     private ArcaneEvents() {}
 
+    @SubscribeEvent
+    public static void onLevelUnload(net.neoforged.neoforge.event.level.LevelEvent.Unload event) {
+        com.skycraft.crafting.arcane.enchant.Enchanting.clearRegistryCache();
+    }
+
+    @SubscribeEvent
+    public static void onTagsUpdated(net.neoforged.neoforge.event.TagsUpdatedEvent event) {
+        com.skycraft.crafting.arcane.enchant.Enchanting.clearRegistryCache();
+    }
+
+
     // ------------------------------------------------------------------ learning by eating
 
     @SubscribeEvent
     public static void onEat(LivingEntityUseItemEvent.Finish event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
         ItemStack used = event.getItem();
-        if (!used.isEdible()) return;
+        if (!used.has(net.minecraft.core.component.DataComponents.FOOD)) return;
         Ingredients.Ingredient ing = Ingredients.get(used);
         if (ing != null) Alchemy.discoverByTasting(player, ing);
     }
@@ -90,7 +100,7 @@ public final class ArcaneEvents {
     @SubscribeEvent
     public static void onRightClickIngredient(PlayerInteractEvent.RightClickItem event) {
         ItemStack stack = event.getItemStack();
-        if (stack.isEdible()) return;
+        if (stack.has(net.minecraft.core.component.DataComponents.FOOD)) return;
         Ingredients.Ingredient ing = Ingredients.get(stack);
         if (ing != null) {
             Player player = event.getEntity();
@@ -100,7 +110,7 @@ public final class ArcaneEvents {
                     stack.shrink(1);
                 }
             }
-            player.playSound(SoundEvents.GENERIC_EAT, 0.7f, 0.9f + player.getRandom().nextFloat() * 0.2f);
+            player.playSound(SoundEvents.GENERIC_EAT.value(), 0.7f, 0.9f + player.getRandom().nextFloat() * 0.2f);
             event.setCancellationResult(InteractionResult.SUCCESS);
             event.setCanceled(true);
         }
@@ -111,9 +121,9 @@ public final class ArcaneEvents {
     // ------------------------------------------------------------------ damage: resistances, weaknesses, fortify, poisons
 
     @SubscribeEvent(priority = EventPriority.LOW)
-    public static void onHurt(LivingHurtEvent event) {
+    public static void onHurt(com.skycraft.combat.BeforeArmorDamageEvent event) {
         LivingEntity target = event.getEntity();
-        if (target.level().isClientSide) return;
+        if (target.level().isClientSide()) return;
         DamageSource source = event.getSource();
         float amount = event.getAmount();
         String msg = source.getMsgId().toLowerCase(Locale.ROOT);
@@ -128,7 +138,7 @@ public final class ArcaneEvents {
         if (source.is(DamageTypes.LIGHTNING_BOLT) || msg.contains("shock") || msg.contains("lightning")) {
             amount *= resist(target, ArcaneEffects.RESIST_SHOCK) * weakness(target, ArcaneEffects.WEAKNESS_TO_SHOCK);
         }
-        boolean poison = msg.contains("poison") || (source.is(DamageTypes.MAGIC) && target.hasEffect(MobEffects.POISON));
+        boolean poison = msg.contains("poison") || (source.is(DamageTypes.MAGIC) && target.hasEffect(com.skycraft.platform.Effects.holder(MobEffects.POISON)));
         if (poison) {
             amount *= resist(target, ArcaneEffects.RESIST_POISON) * weakness(target, ArcaneEffects.WEAKNESS_TO_POISON);
             if (target instanceof Player p && Perks.has(p, "alchemy.snakeblood")) amount *= 0.5f;
@@ -158,12 +168,12 @@ public final class ArcaneEvents {
     }
 
     private static float resist(LivingEntity e, Supplier<MobEffect> effect) {
-        MobEffectInstance inst = e.getEffect(effect.get());
+        MobEffectInstance inst = e.getEffect(com.skycraft.platform.Effects.holder(effect.get()));
         return inst == null ? 1f : Math.max(0f, 1f - 0.2f * (inst.getAmplifier() + 1));
     }
 
     private static float weakness(LivingEntity e, Supplier<MobEffect> effect) {
-        MobEffectInstance inst = e.getEffect(effect.get());
+        MobEffectInstance inst = e.getEffect(com.skycraft.platform.Effects.holder(effect.get()));
         return inst == null ? 1f : 1f + 0.25f * (inst.getAmplifier() + 1);
     }
 
@@ -173,10 +183,10 @@ public final class ArcaneEvents {
     /** True if {@code stack} is a potion or poison with at least one harmful effect that can be coated onto a weapon. */
     public static boolean isApplicablePoison(ItemStack stack) {
         if (stack.isEmpty() || !(stack.getItem() instanceof net.minecraft.world.item.PotionItem)) return false;
-        CompoundTag tag = stack.getTag();
-        if (tag != null && tag.getBoolean(Alchemy.POISON_TAG)) return true;
-        for (MobEffectInstance inst : PotionUtils.getMobEffects(stack)) {
-            if (!inst.getEffect().isBeneficial()) return true;
+        CompoundTag tag = com.skycraft.inventory.ItemData.custom(stack);
+        if (tag != null && tag.getBooleanOr(Alchemy.POISON_TAG, false)) return true;
+        for (MobEffectInstance inst : ArcaneData.effects(stack)) {
+            if (!inst.getEffect().value().isBeneficial()) return true;
         }
         return false;
     }
@@ -217,23 +227,23 @@ public final class ArcaneEvents {
     }
 
     private static boolean coatWeapon(Player player, ItemStack poisonStack, ItemStack weapon) {
-        List<MobEffectInstance> all = PotionUtils.getMobEffects(poisonStack);
+        List<MobEffectInstance> all = ArcaneData.effects(poisonStack);
         if (all.isEmpty()) return false;
         ListTag list = new ListTag();
         for (MobEffectInstance inst : all) {
-            if (!inst.getEffect().isBeneficial()) list.add(inst.save(new CompoundTag()));
+            if (!inst.getEffect().value().isBeneficial()) list.add(ArcaneData.saveEffect(inst, player.registryAccess()));
         }
         if (list.isEmpty()) {
-            for (MobEffectInstance inst : all) list.add(inst.save(new CompoundTag()));
+            for (MobEffectInstance inst : all) list.add(ArcaneData.saveEffect(inst, player.registryAccess()));
         }
         int maxHits = Perks.has(player, "alchemy.concentrated_poison") ? CONCENTRATED_POISON_HITS : DEFAULT_POISON_HITS;
         CompoundTag poison = new CompoundTag();
         poison.put("Effects", list);
         poison.putInt("Hits", maxHits);
         poison.putInt("MaxHits", maxHits);
-        poison.putInt("Color", PotionUtils.getColor(all));
-        poison.putString("Name", Component.Serializer.toJson(poisonStack.getHoverName()));
-        weapon.getOrCreateTag().put(WEAPON_POISON, poison);
+        poison.putInt("Color", ArcaneData.color(all));
+        poison.putString("Name", ArcaneData.writeComponent(poisonStack.getHoverName(), player.registryAccess()));
+        com.skycraft.inventory.ItemData.updateCustom(weapon, customData263 -> customData263.put(WEAPON_POISON, poison));
         player.level().playSound(null, player.blockPosition(), SoundEvents.BOTTLE_EMPTY, SoundSource.PLAYERS, 0.8f, 1f);
         if (player instanceof ServerPlayer sp) {
             Notifier.message(sp, Component.translatable("message.skycraft.alchemy.weapon_poisoned", weapon.getHoverName()));
@@ -250,24 +260,24 @@ public final class ArcaneEvents {
         int color;
         switch (random.nextInt(4)) {
             case 0 -> {
-                effect = new MobEffectInstance(MobEffects.HARM, 1, Math.min(1, amp));
+                effect = new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.INSTANT_DAMAGE), 1, Math.min(1, amp));
                 name = Component.translatable("item.skycraft.poison_of",
                         com.skycraft.crafting.arcane.alchemy.AlchemyEffect.DAMAGE_HEALTH.displayName());
                 color = 0x8A1828;
             }
             case 1 -> {
-                effect = new MobEffectInstance(MobEffects.POISON, (8 + amp * 4) * 20, amp);
+                effect = new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.POISON), (8 + amp * 4) * 20, amp);
                 name = Component.translatable("item.skycraft.poison_of", Component.translatable("effect.minecraft.poison"));
                 color = 0x4E9331;
             }
             case 2 -> {
-                effect = new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, (10 + amp * 5) * 20, amp);
+                effect = new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.SLOWNESS), (10 + amp * 5) * 20, amp);
                 name = Component.translatable("item.skycraft.poison_of",
                         com.skycraft.crafting.arcane.alchemy.AlchemyEffect.SLOW.displayName());
                 color = 0x5A6C81;
             }
             default -> {
-                effect = new MobEffectInstance(ArcaneEffects.DAMAGE_STAMINA.get(), 1, amp);
+                effect = new MobEffectInstance(com.skycraft.platform.Effects.holder(ArcaneEffects.DAMAGE_STAMINA.get()), 1, amp);
                 name = Component.translatable("item.skycraft.poison_of",
                         com.skycraft.crafting.arcane.alchemy.AlchemyEffect.DAMAGE_STAMINA.displayName());
                 color = 0x589838;
@@ -276,50 +286,51 @@ public final class ArcaneEvents {
         int maxHits = DEFAULT_POISON_HITS;
         int hits = 2 + random.nextInt(maxHits - 1);
         ListTag list = new ListTag();
-        list.add(effect.save(new CompoundTag()));
+        list.add(ArcaneData.saveEffect(effect));
         CompoundTag poison = new CompoundTag();
         poison.put("Effects", list);
         poison.putInt("Hits", hits);
         poison.putInt("MaxHits", maxHits);
         poison.putInt("Color", color);
-        poison.putString("Name", Component.Serializer.toJson(name));
-        weapon.getOrCreateTag().put(WEAPON_POISON, poison);
+        poison.putString("Name", ArcaneData.writeComponent(name));
+        com.skycraft.inventory.ItemData.updateCustom(weapon, customData263 -> customData263.put(WEAPON_POISON, poison));
     }
 
     /** Applies a poison coated on the attacker's weapon (main hand, else offhand); returns extra instant damage. */
     private static float applyWeaponPoison(ServerPlayer player, LivingEntity target) {
         ItemStack weapon = player.getMainHandItem();
-        CompoundTag tag = weapon.getTag();
-        if (tag == null || !tag.contains(WEAPON_POISON, Tag.TAG_COMPOUND)) {
+        CompoundTag tag = com.skycraft.inventory.ItemData.custom(weapon);
+        if (tag == null || !com.skycraft.platform.NbtData.hasType(tag, WEAPON_POISON, Tag.TAG_COMPOUND)) {
             weapon = player.getOffhandItem();
-            tag = weapon.getTag();
-            if (tag == null || !tag.contains(WEAPON_POISON, Tag.TAG_COMPOUND)) return 0f;
+            tag = com.skycraft.inventory.ItemData.custom(weapon);
+            if (tag == null || !com.skycraft.platform.NbtData.hasType(tag, WEAPON_POISON, Tag.TAG_COMPOUND)) return 0f;
         }
-        CompoundTag poison = tag.getCompound(WEAPON_POISON);
+        CompoundTag poison = tag.getCompoundOrEmpty(WEAPON_POISON);
         float extra = 0f;
-        ListTag effects = poison.getList("Effects", Tag.TAG_COMPOUND);
+        ListTag effects = poison.getListOrEmpty("Effects");
         for (int i = 0; i < effects.size(); i++) {
-            MobEffectInstance inst = MobEffectInstance.load(effects.getCompound(i));
+            MobEffectInstance inst = ArcaneData.loadEffect(effects.getCompoundOrEmpty(i), player.registryAccess());
             if (inst == null) continue;
-            MobEffect effect = inst.getEffect();
-            if (effect == MobEffects.HARM) {
+            MobEffect effect = inst.getEffect().value();
+            if (effect == MobEffects.INSTANT_DAMAGE.value()) {
                 // instant damage can't re-enter hurt() while the target is already being hurt: add it to this hit
                 extra += 6 << Math.min(inst.getAmplifier(), 3);
-            } else if (effect.isInstantenous()) {
-                effect.applyInstantenousEffect(player, player, target, inst.getAmplifier(), 1.0);
+            } else if (effect.isInstantaneous()) {
+                effect.applyInstantaneousEffect(player.level(), player, player, target, inst.getAmplifier(), 1.0);
             } else {
                 target.addEffect(new MobEffectInstance(inst), player);
             }
         }
-        int hits = poison.getInt("Hits") - 1;
+        int hits = poison.getIntOr("Hits", 0) - 1;
         if (hits <= 0) {
             tag.remove(WEAPON_POISON);
-            if (tag.isEmpty()) weapon.setTag(null);
+            if (tag.isEmpty()) com.skycraft.inventory.ItemData.setCustom(weapon, null);
             Notifier.message(player, Component.translatable("message.skycraft.alchemy.poison_worn_off"));
         } else {
             poison.putInt("Hits", hits);
             tag.put(WEAPON_POISON, poison);
         }
+        com.skycraft.inventory.ItemData.setCustom(weapon, tag);
         return extra;
     }
 
@@ -334,7 +345,7 @@ public final class ArcaneEvents {
         if (!canReceivePoison(weapon)) return;
         event.setCanceled(true);
         event.setCancellationResult(InteractionResult.SUCCESS);
-        if (player.level().isClientSide) return;
+        if (player.level().isClientSide()) return;
 
         if (coatWeapon(player, poisonStack, weapon) && !player.isCreative()) {
             boolean giveBottle = poisonStack.is(net.minecraft.world.item.Items.POTION);
@@ -368,8 +379,8 @@ public final class ArcaneEvents {
      * (or the player dies) the next check takes the bonus back.
      */
     @SubscribeEvent
-    public static void onPlayerTick(net.minecraftforge.event.TickEvent.PlayerTickEvent event) {
-        if (event.phase != net.minecraftforge.event.TickEvent.Phase.END || !(event.player instanceof ServerPlayer player)) return;
+    public static void onPlayerTick(net.neoforged.neoforge.event.tick.PlayerTickEvent.Post event) {
+        if (!(event.getEntity() instanceof ServerPlayer player)) return;
         if (player.tickCount % 10 != 3) return;
         float[] want = {
                 FORTIFY_STEP * ArcaneEffects.level(player, ArcaneEffects.FORTIFY_MAGICKA),
@@ -378,13 +389,13 @@ public final class ArcaneEvents {
         };
         com.skycraft.core.PlayerData data = com.skycraft.core.SkyData.get(player);
         CompoundTag module = data.module(ArcaneModule.DATA);
-        CompoundTag applied = module.getCompound(APPLIED_FORTIFY);
+        CompoundTag applied = module.getCompoundOrEmpty(APPLIED_FORTIFY);
         CompoundTag bonus = data.module("bonus");
         boolean changed = false;
         for (int i = 0; i < FORTIFY_KEYS.length; i++) {
-            float diff = want[i] - applied.getFloat(FORTIFY_KEYS[i]);
+            float diff = want[i] - applied.getFloatOr(FORTIFY_KEYS[i], 0f);
             if (diff == 0f) continue;
-            bonus.putFloat(FORTIFY_KEYS[i], bonus.getFloat(FORTIFY_KEYS[i]) + diff);
+            bonus.putFloat(FORTIFY_KEYS[i], bonus.getFloatOr(FORTIFY_KEYS[i], 0f) + diff);
             applied.putFloat(FORTIFY_KEYS[i], want[i]);
             changed = true;
         }
@@ -403,7 +414,7 @@ public final class ArcaneEvents {
     @SubscribeEvent
     public static void onDeath(LivingDeathEvent event) {
         LivingEntity victim = event.getEntity();
-        if (victim.level().isClientSide) return;
+        if (victim.level().isClientSide()) return;
         DamageSource source = event.getSource();
         if (!(source.getEntity() instanceof ServerPlayer player) || source.getDirectEntity() != player) return;
         if (!Perks.has(player, "enchanting.soul_siphon") || SoulGems.isBlackSoul(victim)) return;
@@ -420,21 +431,21 @@ public final class ArcaneEvents {
     public static void onDrops(LivingDropsEvent event) {
         LivingEntity entity = event.getEntity();
         Level level = entity.level();
-        if (level.isClientSide || !event.isRecentlyHit()) return;
+        if (level.isClientSide() || !event.isRecentlyHit()) return;
         RandomSource r = entity.getRandom();
         EntityType<?> type = entity.getType();
-        float bonus = 0.05f * event.getLootingLevel();
-        if (type == EntityType.BLAZE) drop(event, ArcaneRegistry.FIRE_SALTS.get(), 0.35f + bonus, r);
-        else if (type == EntityType.MAGMA_CUBE) drop(event, ArcaneRegistry.FIRE_SALTS.get(), 0.10f + bonus, r);
-        else if (type == EntityType.STRAY) drop(event, ArcaneRegistry.FROST_SALTS.get(), 0.40f + bonus, r);
-        else if (type == EntityType.ENDERMAN) drop(event, ArcaneRegistry.VOID_SALTS.get(), 0.20f + bonus, r);
-        else if (type == EntityType.WITHER_SKELETON) drop(event, ArcaneRegistry.VOID_SALTS.get(), 0.12f + bonus, r);
-        else if (type == EntityType.POLAR_BEAR) drop(event, ArcaneRegistry.BEAR_CLAWS.get(), 0.60f + bonus, r);
-        else if (type == EntityType.PARROT) drop(event, ArcaneRegistry.HAWK_FEATHER.get(), 0.50f + bonus, r);
-        else if (type == EntityType.CHICKEN) drop(event, ArcaneRegistry.HAWK_FEATHER.get(), 0.06f + bonus, r);
-        else if (type == EntityType.WITCH) drop(event, ArcaneRegistry.SALT_PILE.get(), 0.30f + bonus, r);
+        float bonus = event.getSource().getEntity() instanceof LivingEntity attacker ? 0.05f * net.minecraft.world.item.enchantment.EnchantmentHelper.getEnchantmentLevel(com.skycraft.platform.EnchantmentsAccess.holder(net.minecraft.world.item.enchantment.Enchantments.LOOTING, entity.registryAccess()), attacker) : 0f;
+        if (type == net.minecraft.world.entity.EntityTypes.BLAZE) drop(event, ArcaneRegistry.FIRE_SALTS.get(), 0.35f + bonus, r);
+        else if (type == net.minecraft.world.entity.EntityTypes.MAGMA_CUBE) drop(event, ArcaneRegistry.FIRE_SALTS.get(), 0.10f + bonus, r);
+        else if (type == net.minecraft.world.entity.EntityTypes.STRAY) drop(event, ArcaneRegistry.FROST_SALTS.get(), 0.40f + bonus, r);
+        else if (type == net.minecraft.world.entity.EntityTypes.ENDERMAN) drop(event, ArcaneRegistry.VOID_SALTS.get(), 0.20f + bonus, r);
+        else if (type == net.minecraft.world.entity.EntityTypes.WITHER_SKELETON) drop(event, ArcaneRegistry.VOID_SALTS.get(), 0.12f + bonus, r);
+        else if (type == net.minecraft.world.entity.EntityTypes.POLAR_BEAR) drop(event, ArcaneRegistry.BEAR_CLAWS.get(), 0.60f + bonus, r);
+        else if (type == net.minecraft.world.entity.EntityTypes.PARROT) drop(event, ArcaneRegistry.HAWK_FEATHER.get(), 0.50f + bonus, r);
+        else if (type == net.minecraft.world.entity.EntityTypes.CHICKEN) drop(event, ArcaneRegistry.HAWK_FEATHER.get(), 0.06f + bonus, r);
+        else if (type == net.minecraft.world.entity.EntityTypes.WITCH) drop(event, ArcaneRegistry.SALT_PILE.get(), 0.30f + bonus, r);
         else {
-            ResourceLocation key = ForgeRegistries.ENTITY_TYPES.getKey(type);
+            Identifier key = BuiltInRegistries.ENTITY_TYPE.getKey(type);
             // Skycraft's vampires (and their lords) leave vampire dust (curse module)
             if (key != null && key.getNamespace().equals("skycraft") && key.getPath().startsWith("vampire")) {
                 drop(event, ArcaneRegistry.VAMPIRE_DUST.get(), 0.50f + bonus, r);

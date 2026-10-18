@@ -4,14 +4,14 @@ import com.skycraft.explore.MinorSites;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.decoration.ItemFrame;
 import net.minecraft.world.item.DyeColor;
@@ -95,7 +95,7 @@ public final class SiteBuilder {
 
     public boolean writable(BlockPos p) {
         return Math.abs((p.getX() >> 4) - chunkX) <= 1 && Math.abs((p.getZ() >> 4) - chunkZ) <= 1
-                && p.getY() > level.getMinBuildHeight() && p.getY() < level.getMaxBuildHeight();
+                && p.getY() > level.getMinY() && p.getY() < (level.getMaxY()+1);
     }
 
     // ------------------------------------------------------------------ terrain
@@ -107,7 +107,7 @@ public final class SiteBuilder {
                 level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z)
         ) - 1;
         BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos(x, top, z);
-        int floor = level.getMinBuildHeight() + 4;
+        int floor = level.getMinY() + 4;
         while (p.getY() > floor) {
             BlockState s = level.getBlockState(p);
             if (!s.getFluidState().isEmpty()) return p.getY(); // water: the caller checks with waterAt
@@ -233,7 +233,7 @@ public final class SiteBuilder {
     /** Solid natural footing: a full block, not water, not a tree. */
     public boolean solidGround(BlockPos p) {
         BlockState s = level.getBlockState(p);
-        return s.isSolidRender(level, p) && s.getFluidState().isEmpty() && !s.is(BlockTags.LOGS) && !s.is(BlockTags.LEAVES);
+        return s.isSolidRender() && s.getFluidState().isEmpty() && !s.is(BlockTags.LOGS) && !s.is(BlockTags.LEAVES);
     }
 
     /** A pillar of {@code state} from just below local (dx, dy, dz) down to the ground (foundations, stilts). */
@@ -241,7 +241,7 @@ public final class SiteBuilder {
         BlockPos p = at(dx, dy - 1, dz);
         for (int d = 0; d < 24 && writable(p); d++) {
             BlockState s = level.getBlockState(p);
-            if (s.isSolidRender(level, p) && s.getFluidState().isEmpty() && !s.is(BlockTags.LOGS) && !s.is(BlockTags.LEAVES)) break;
+            if (s.isSolidRender() && s.getFluidState().isEmpty() && !s.is(BlockTags.LOGS) && !s.is(BlockTags.LEAVES)) break;
             if (!wet && !s.getFluidState().isEmpty()) break;
             level.setBlock(p, state, 2);
             p = p.below();
@@ -336,23 +336,23 @@ public final class SiteBuilder {
     }
 
     /** A loot chest; returns its position. */
-    public BlockPos chest(int dx, int dy, int dz, Direction local, ResourceLocation loot) {
+    public BlockPos chest(int dx, int dy, int dz, Direction local, Identifier loot) {
         BlockPos p = at(dx, dy, dz);
         if (!supportContainer(dx, dy, dz)) return p;
         put(p, Blocks.CHEST.defaultBlockState().setValue(ChestBlock.FACING, dir(local)));
         if (writable(p)) {
-            RandomizableContainerBlockEntity.setLootTable(level, r, p, loot);
+            com.skycraft.worldgen.WorldgenData.setLootTable(level, r, p, loot);
             if (mainChest == null) mainChest = p;
         }
         return p;
     }
 
-    public BlockPos barrel(int dx, int dy, int dz, @Nullable ResourceLocation loot) {
+    public BlockPos barrel(int dx, int dy, int dz, @Nullable Identifier loot) {
         BlockPos p = at(dx, dy, dz);
         if (!supportContainer(dx, dy, dz)) return p;
         put(p, Blocks.BARREL.defaultBlockState().setValue(BarrelBlock.FACING, Direction.UP));
         if (loot != null && writable(p)) {
-            RandomizableContainerBlockEntity.setLootTable(level, r, p, loot);
+            com.skycraft.worldgen.WorldgenData.setLootTable(level, r, p, loot);
             if (mainChest == null) mainChest = p;
         }
         return p;
@@ -384,7 +384,7 @@ public final class SiteBuilder {
     }
 
     public void banner(int dx, int dy, int dz, DyeColor color) {
-        put(at(dx, dy, dz), BannerBlock.byColor(color).defaultBlockState().setValue(BannerBlock.ROTATION, r.nextInt(16)));
+        put(at(dx, dy, dz), net.minecraft.core.registries.BuiltInRegistries.BLOCK.getOptional(net.minecraft.resources.Identifier.withDefaultNamespace(color.getName() + "_banner")).orElseThrow().defaultBlockState().setValue(BannerBlock.ROTATION, r.nextInt(16)));
     }
 
     /** Playtest 3: loose skulls read as "random heads for no reason"; surface sites use bones instead. */
@@ -402,11 +402,10 @@ public final class SiteBuilder {
         BlockPos p = at(dx, dy, dz);
         if (!writable(p) || stack.isEmpty()) return;
         ItemFrame frame = new ItemFrame(level.getLevel(), p, Direction.UP);
-        CompoundTag t = new CompoundTag();
-        frame.saveWithoutId(t);
+        CompoundTag t = com.skycraft.platform.EntityData.saveWithoutId(frame);
         ItemStack one = stack.copy();
         one.setCount(1);
-        t.put("Item", one.save(new CompoundTag()));
+        t.put("Item", com.skycraft.inventory.ItemData.save(one, level.registryAccess()));
         t.putByte("ItemRotation", (byte) r.nextInt(8));
         t.putBoolean("Fixed", true);
         t.putBoolean("Invisible", true);
@@ -414,7 +413,7 @@ public final class SiteBuilder {
         net.minecraft.nbt.ListTag tags = new net.minecraft.nbt.ListTag();
         tags.add(net.minecraft.nbt.StringTag.valueOf("skycraft_clutter"));
         t.put("Tags", tags);
-        frame.load(t);
+        com.skycraft.platform.EntityData.load(frame, t);
         level.addFreshEntity(frame);
     }
 
@@ -424,26 +423,25 @@ public final class SiteBuilder {
         int gy = groundAt(p.getX(), p.getZ()) + 1;
         BlockPos at = new BlockPos(p.getX(), gy, p.getZ());
         if (!writable(at)) return;
-        ArmorStand stand = EntityType.ARMOR_STAND.create(level.getLevel());
+        ArmorStand stand = net.minecraft.world.entity.EntityTypes.ARMOR_STAND.create(level.getLevel(), net.minecraft.world.entity.EntitySpawnReason.STRUCTURE);
         if (stand == null) return;
-        stand.moveTo(at.getX() + 0.5, gy, at.getZ() + 0.5, yaw, 0);
-        CompoundTag t = new CompoundTag();
-        stand.saveWithoutId(t);
-        net.minecraft.nbt.ListTag armor = new net.minecraft.nbt.ListTag();
-        for (ItemStack s : new ItemStack[]{feet, legs, chest, head}) armor.add(s.save(new CompoundTag()));
-        net.minecraft.nbt.ListTag hands = new net.minecraft.nbt.ListTag();
-        hands.add(hand.save(new CompoundTag()));
-        hands.add(ItemStack.EMPTY.save(new CompoundTag()));
-        t.put("ArmorItems", armor);
-        t.put("HandItems", hands);
+        stand.snapTo(at.getX() + 0.5, gy, at.getZ() + 0.5, yaw, 0);
+        CompoundTag t = com.skycraft.platform.EntityData.saveWithoutId(stand);
+        stand.setItemSlot(net.minecraft.world.entity.EquipmentSlot.FEET, feet);
+        stand.setItemSlot(net.minecraft.world.entity.EquipmentSlot.LEGS, legs);
+        stand.setItemSlot(net.minecraft.world.entity.EquipmentSlot.CHEST, chest);
+        stand.setItemSlot(net.minecraft.world.entity.EquipmentSlot.HEAD, head);
+        stand.setItemSlot(net.minecraft.world.entity.EquipmentSlot.MAINHAND, hand);
+        // Refresh the native saved equipment before adding the original pose flags.
+        t = com.skycraft.platform.EntityData.saveWithoutId(stand);
         t.putBoolean("ShowArms", true);
         t.putBoolean("NoBasePlate", true);
         t.putBoolean("Silent", true);
         // the fallen have a name, shown on the crosshair when you look at the body
         String name = com.skycraft.landmarks.Lore.person(site.province(), net.minecraft.util.RandomSource.create(site.seed() ^ (dx * 31L + dz)));
-        t.putString("CustomName", net.minecraft.network.chat.Component.Serializer.toJson(net.minecraft.network.chat.Component.literal(name)));
+        t.store("CustomName", net.minecraft.network.chat.ComponentSerialization.CODEC, net.minecraft.network.chat.Component.literal(name));
         t.putBoolean("CustomNameVisible", false);
-        stand.load(t);
+        com.skycraft.platform.EntityData.load(stand, t);
         level.addFreshEntity(stand);
     }
 
@@ -452,11 +450,11 @@ public final class SiteBuilder {
     public Mob spawn(EntityType<? extends Mob> type, int dx, int dz) {
         BlockPos col = at(dx, 0, dz);
         if (!writable(col)) return null;
-        Mob mob = type.create(level.getLevel());
+        Mob mob = type.create(level.getLevel(), net.minecraft.world.entity.EntitySpawnReason.STRUCTURE);
         if (mob == null) return null;
         int gy = groundAt(col.getX(), col.getZ()) + 1;
-        mob.moveTo(col.getX() + 0.5, gy, col.getZ() + 0.5, r.nextFloat() * 360f, 0);
-        mob.finalizeSpawn(level, level.getCurrentDifficultyAt(col), MobSpawnType.STRUCTURE, null, null);
+        mob.snapTo(col.getX() + 0.5, gy, col.getZ() + 0.5, r.nextFloat() * 360f, 0);
+        mob.finalizeSpawn(level, level.getCurrentDifficultyAt(col), EntitySpawnReason.STRUCTURE, null);
         mob.setPersistenceRequired();
         level.addFreshEntityWithPassengers(mob);
         return mob;

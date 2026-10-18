@@ -6,12 +6,12 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -214,23 +214,22 @@ public final class LegendaryUniques {
     public static ItemStack create(String id) {
         Unique u = ALL.get(id);
         if (u == null) return ItemStack.EMPTY;
-        Item base = ForgeRegistries.ITEMS.getValue(new ResourceLocation(u.base));
+        Item base = BuiltInRegistries.ITEM.getValue(Identifier.parse(u.base));
         if (base == null || base == Items.AIR) return ItemStack.EMPTY;
         ItemStack s = new ItemStack(base);
         for (Map.Entry<String, Integer> e : u.enchants.entrySet()) {
-            Enchantment ench = ForgeRegistries.ENCHANTMENTS.getValue(new ResourceLocation(e.getKey()));
-            if (ench != null) s.enchant(ench, e.getValue());
+            Enchantment ench = com.skycraft.platform.EnchantmentsAccess.lookup(Identifier.parse(e.getKey()));
+            if (ench != null) s.enchant(com.skycraft.platform.EnchantmentsAccess.holder(ench), e.getValue());
         }
-        s.setHoverName(Component.translatable("unique.skycraft." + id).withStyle(ChatFormatting.GOLD).withStyle(s2 -> s2.withItalic(false)));
-        CompoundTag display = s.getOrCreateTagElement("display");
-        ListTag lore = new ListTag();
-        lore.add(StringTag.valueOf(Component.Serializer.toJson(Component.translatable("unique.skycraft." + id + ".lore")
-                .withStyle(ChatFormatting.DARK_PURPLE, ChatFormatting.ITALIC))));
-        display.put("Lore", lore);
-        CompoundTag tag = s.getOrCreateTag();
+        s.set(net.minecraft.core.component.DataComponents.CUSTOM_NAME, Component.translatable("unique.skycraft." + id).withStyle(ChatFormatting.GOLD).withStyle(s2 -> s2.withItalic(false)));
+        s.set(net.minecraft.core.component.DataComponents.LORE, new net.minecraft.world.item.component.ItemLore(
+                java.util.List.of(Component.translatable("unique.skycraft." + id + ".lore")
+                        .withStyle(ChatFormatting.DARK_PURPLE, ChatFormatting.ITALIC))));
+        CompoundTag tag = com.skycraft.inventory.ItemData.customOrEmpty(s);
         tag.putString(Collectibles.NBT, COLLECTION + "/" + id);
         tag.putInt(ItemValues.VALUE_NBT, u.value);
         if (u.quality > 0) tag.putInt(ItemValues.QUALITY_NBT, u.quality);
+        com.skycraft.inventory.ItemData.setCustom(s, tag);
         return s;
     }
 

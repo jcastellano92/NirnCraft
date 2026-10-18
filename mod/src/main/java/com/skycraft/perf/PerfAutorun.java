@@ -3,9 +3,9 @@ package com.skycraft.perf;
 import com.skycraft.Skycraft;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.MinecraftServer;
-import net.minecraftforge.event.server.ServerStartedEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.server.ServerStartedEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -23,7 +23,7 @@ import java.util.function.BiConsumer;
  * <p>Other modules add tasks with {@link #register}. Each task gets the server and a callback to run when it's done
  * (on any thread).</p>
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class PerfAutorun {
     private static final Map<String, BiConsumer<Task, Runnable>> TASKS = new HashMap<>();
 
@@ -92,7 +92,7 @@ public final class PerfAutorun {
     @SubscribeEvent
     public static void onStarted(ServerStartedEvent event) {
         String spec = spec();
-        if (spec == null) return;
+        if (spec == null || event.getServer().overworld() == null) return;
         Deque<String> queue = new ArrayDeque<>();
         for (String s : spec.split(",")) if (!s.isBlank()) queue.add(s.trim());
         Skycraft.LOGGER.info("[autorun] tasks: {}", queue);

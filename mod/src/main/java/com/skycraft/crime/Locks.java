@@ -17,7 +17,7 @@ import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -35,10 +35,10 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.event.level.BlockEvent;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.neoforged.neoforge.event.level.BlockEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
 import net.minecraft.world.level.block.DoorBlock;
 import net.minecraft.world.level.block.TrapDoorBlock;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
@@ -46,8 +46,8 @@ import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.LootTable;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.fml.common.Mod;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -67,7 +67,7 @@ import java.util.UUID;
  * <p>The sweet spot and pick breaking live on the server: the client only reports the pick angle while turning, and
  * the server answers how far the lock turns, whether the pick broke and whether the lock opened.</p>
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class Locks {
     public static final int NOT_LOCKED = -1;
     public static final int NOVICE = 0, APPRENTICE = 1, ADEPT = 2, EXPERT = 3, MASTER = 4;
@@ -108,7 +108,7 @@ public final class Locks {
     // ------------------------------------------------------------------ lock decisions
 
     static String key(Level level, BlockPos pos) {
-        return level.dimension().location() + "|" + pos.getX() + "|" + pos.getY() + "|" + pos.getZ();
+        return level.dimension().identifier() + "|" + pos.getX() + "|" + pos.getY() + "|" + pos.getZ();
     }
 
     public static BlockPos normalizePos(Level level, BlockPos pos) {
@@ -122,7 +122,7 @@ public final class Locks {
     /** Whether the block entity still has loot to generate (or is a Lootr container). */
     static boolean isCandidate(Level level, BlockPos pos, BlockEntity be) {
         if (be == null) return false;
-        ResourceLocation id = ForgeRegistries.BLOCKS.getKey(level.getBlockState(pos).getBlock());
+        Identifier id = BuiltInRegistries.BLOCK.getKey(level.getBlockState(pos).getBlock());
         if (id != null && id.getNamespace().equals("lootr")) return true;
         return be instanceof RandomizableContainerBlockEntity && Theft.lootTable(be) != null;
     }
@@ -268,7 +268,7 @@ public final class Locks {
     }
 
     private static int decide(ServerLevel level, BlockPos pos) {
-        long h = level.getSeed() ^ pos.asLong() * 0x9E3779B97F4A7C15L ^ level.dimension().location().hashCode() * 0xC2B2AE3D27D4EB4FL;
+        long h = level.getSeed() ^ pos.asLong() * 0x9E3779B97F4A7C15L ^ level.dimension().identifier().hashCode() * 0xC2B2AE3D27D4EB4FL;
         h = mix(h);
         if (Math.floorMod(h, 100) >= LOCK_CHANCE) return NOT_LOCKED;
         int[] weights;
@@ -318,9 +318,9 @@ public final class Locks {
     private static void migrateUnlocked(Player player, LockData data) {
         CompoundTag state = Bounty.state(player);
         if (!state.contains("unlocked")) return;
-        ListTag list = state.getList("unlocked", Tag.TAG_STRING);
+        ListTag list = state.getListOrEmpty("unlocked");
         for (int i = 0; i < list.size(); i++) {
-            data.unlocked.computeIfAbsent(list.getString(i), k -> new HashSet<>()).add(player.getUUID());
+            data.unlocked.computeIfAbsent(list.getStringOr(i, ""), k -> new HashSet<>()).add(player.getUUID());
         }
         state.remove("unlocked");
         SkyData.get(player).markDirty();
@@ -371,7 +371,7 @@ public final class Locks {
     @SubscribeEvent(priority = EventPriority.HIGH)
     public static void onRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
         if (event.isCanceled()) return;
-        if (event.getLevel().isClientSide) return;
+        if (event.getLevel().isClientSide()) return;
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
         if (!(event.getLevel() instanceof ServerLevel level)) return;
         BlockPos pos = normalizePos(level, event.getPos());
@@ -425,7 +425,7 @@ public final class Locks {
     }
 
     @SubscribeEvent(priority = EventPriority.HIGH)
-    public static void onBreak(BlockEvent.BreakEvent event) {
+    public static void onBreak(net.neoforged.neoforge.event.level.block.BreakBlockEvent event) {
         if (!(event.getPlayer() instanceof ServerPlayer player) || !(event.getLevel() instanceof ServerLevel level)) return;
         BlockPos pos = normalizePos(level, event.getPos());
         BlockState state = level.getBlockState(pos);
@@ -439,7 +439,7 @@ public final class Locks {
 
     /** Forget the decision for containers that are actually broken, so a new chest placed there isn't locked. */
     @SubscribeEvent(priority = EventPriority.LOWEST)
-    public static void onBroken(BlockEvent.BreakEvent event) {
+    public static void onBroken(net.neoforged.neoforge.event.level.block.BreakBlockEvent event) {
         if (event.isCanceled() || !(event.getLevel() instanceof ServerLevel level)) return;
         if (level.getBlockEntity(event.getPos()) == null) return;
         LockData data = LockData.get(level.getServer());
@@ -486,7 +486,7 @@ public final class Locks {
             reply(player, RESULT_CLOSE, 0);
             return;
         }
-        ServerLevel level = player.serverLevel();
+        ServerLevel level = player.level();
         BlockState state = level.getBlockState(s.pos);
         boolean isDoor = state.getBlock() instanceof DoorBlock || state.getBlock() instanceof TrapDoorBlock;
         if (level.dimension() != s.dim || player.distanceToSqr(Vec3.atCenterOf(s.pos)) > 49
@@ -514,7 +514,7 @@ public final class Locks {
             if (s.strain >= breakTicks(player)) {
                 s.strain = 0;
                 consumePick(player);
-                level.playSound(null, s.pos, SoundEvents.ITEM_BREAK, SoundSource.PLAYERS, 0.9f, 1.3f);
+                level.playSound(null, s.pos, SoundEvents.ITEM_BREAK.value(), SoundSource.PLAYERS, 0.9f, 1.3f);
                 int left = countPicks(player);
                 reply(player, RESULT_BROKEN, left);
                 if (left <= 0) {
@@ -584,14 +584,14 @@ public final class Locks {
             level.playSound(null, s.pos, state.getValue(TrapDoorBlock.OPEN) ? SoundEvents.WOODEN_TRAPDOOR_OPEN : SoundEvents.WOODEN_TRAPDOOR_CLOSE, SoundSource.BLOCKS, 1f, 1f);
         } else {
             BlockHitResult hit = new BlockHitResult(Vec3.atCenterOf(s.pos), Direction.UP, s.pos, false);
-            state.use(level, player, InteractionHand.MAIN_HAND, hit);
+            state.useWithoutItem(level, player, hit);
         }
     }
 
     private static void rollLockBonus(ServerPlayer player, ServerLevel level, BlockPos pos, int difficulty) {
         int tierIdx = Math.max(0, Math.min(MASTER, difficulty));
-        ResourceLocation loc = new ResourceLocation(Skycraft.MODID, "chests/lock_bonus/" + TIERS[tierIdx]);
-        LootTable lootTable = level.getServer().getLootData().getLootTable(loc);
+        Identifier loc = Identifier.fromNamespaceAndPath(Skycraft.MODID, "chests/lock_bonus/" + TIERS[tierIdx]);
+        LootTable lootTable = com.skycraft.platform.LootTables.get(level, loc);
         LootParams params = new LootParams.Builder(level)
                 .withParameter(LootContextParams.ORIGIN, Vec3.atCenterOf(pos))
                 .withParameter(LootContextParams.THIS_ENTITY, player)
@@ -601,7 +601,7 @@ public final class Locks {
         for (ItemStack stack : bonusItems) {
             if (!stack.isEmpty()) {
                 if (!ActionHandler.addToBags(player, stack)) {
-                    player.drop(stack, false);
+                    player.drop(stack, false, net.minecraft.util.Prediction.SERVER_ONLY);
                 }
             }
         }
@@ -623,30 +623,29 @@ public final class Locks {
         final Set<String> never = new HashSet<>();
 
         static LockData get(MinecraftServer server) {
-            return server.overworld().getDataStorage().computeIfAbsent(LockData::load, LockData::new, NAME);
+            return com.skycraft.platform.SavedDataTypes.get(server.overworld(), NAME, LockData::load, LockData::new, value263 -> value263.save(new net.minecraft.nbt.CompoundTag()));
         }
 
         static LockData load(CompoundTag tag) {
             LockData data = new LockData();
-            CompoundTag locks = tag.getCompound("locks");
-            for (String k : locks.getAllKeys()) data.locks.put(k, locks.getInt(k));
-            CompoundTag unlocked = tag.getCompound("unlocked");
-            for (String k : unlocked.getAllKeys()) {
+            CompoundTag locks = tag.getCompoundOrEmpty("locks");
+            for (String k : locks.keySet()) data.locks.put(k, locks.getIntOr(k, 0));
+            CompoundTag unlocked = tag.getCompoundOrEmpty("unlocked");
+            for (String k : unlocked.keySet()) {
                 Set<UUID> who = new HashSet<>();
-                for (Tag t : unlocked.getList(k, Tag.TAG_INT_ARRAY)) {
+                for (Tag t : unlocked.getListOrEmpty(k)) {
                     try {
-                        who.add(NbtUtils.loadUUID(t));
+                        who.add(net.minecraft.core.UUIDUtil.CODEC.parse(net.minecraft.nbt.NbtOps.INSTANCE, t).getOrThrow());
                     } catch (IllegalArgumentException ignored) {
                         // corrupt entry
                     }
                 }
                 if (!who.isEmpty()) data.unlocked.put(k, who);
             }
-            for (Tag t : tag.getList("never", Tag.TAG_STRING)) data.never.add(t.getAsString());
+            for (Tag t : tag.getListOrEmpty("never")) data.never.add(t.asString().orElse(""));
             return data;
         }
 
-        @Override
         public CompoundTag save(CompoundTag tag) {
             ListTag never = new ListTag();
             for (String k : this.never) never.add(net.minecraft.nbt.StringTag.valueOf(k));
@@ -657,7 +656,7 @@ public final class Locks {
             CompoundTag unlocked = new CompoundTag();
             this.unlocked.forEach((k, who) -> {
                 ListTag list = new ListTag();
-                for (UUID u : who) list.add(NbtUtils.createUUID(u));
+                for (UUID u : who) list.add(net.minecraft.core.UUIDUtil.CODEC.encodeStart(net.minecraft.nbt.NbtOps.INSTANCE, u).getOrThrow());
                 if (!list.isEmpty()) unlocked.put(k, list);
             });
             tag.put("unlocked", unlocked);

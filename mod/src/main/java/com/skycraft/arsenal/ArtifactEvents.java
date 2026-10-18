@@ -15,7 +15,7 @@ import com.skycraft.registry.ModEffects;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -29,31 +29,31 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.living.LivingAttackEvent;
-import net.minecraftforge.event.entity.living.LivingDeathEvent;
-import net.minecraftforge.event.entity.living.LivingEntityUseItemEvent;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.event.entity.player.AttackEntityEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.registries.ForgeRegistries;
+
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
+import net.neoforged.neoforge.event.entity.living.LivingEntityUseItemEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.neoforge.event.entity.player.AttackEntityEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 import java.util.Map;
 import java.util.WeakHashMap;
 
 /** The powers of the named artifacts. Everything is decided on the server. */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class ArtifactEvents {
     /** Victim persistent data: Mace of Molag Bal's soul trap window (game time) and the wielder. */
     public static final String SOUL_TRAP_UNTIL = "skycraft_molag_trap_until";
     public static final String SOUL_TRAP_BY = "skycraft_molag_trap_by";
-    private static final ResourceLocation MAGIC_SOUL_TRAP = new ResourceLocation(Skycraft.MODID, "soul_trap");
+    private static final Identifier MAGIC_SOUL_TRAP = Identifier.fromNamespaceAndPath(Skycraft.MODID, "soul_trap");
     private static final Map<Player, Long> LAST_BLADE = new WeakHashMap<>();
 
     private ArtifactEvents() {}
@@ -65,15 +65,15 @@ public final class ArtifactEvents {
     // ------------------------------------------------------------------ hits
 
     @SubscribeEvent
-    public static void onHurt(LivingHurtEvent event) {
+    public static void onHurt(com.skycraft.combat.BeforeArmorDamageEvent event) {
         LivingEntity target = event.getEntity();
-        if (target.level().isClientSide || !(target.level() instanceof ServerLevel level)) return;
+        if (target.level().isClientSide() || !(target.level() instanceof ServerLevel level)) return;
         DamageSource source = event.getSource();
         Entity direct = source.getDirectEntity();
         float amount = event.getAmount();
 
         if (direct instanceof AbstractArrow arrow) {
-            String id = arrow.getPersistentData().getString(ArtifactBowItem.ARROW_TAG);
+            String id = arrow.getPersistentData().getStringOr(ArtifactBowItem.ARROW_TAG, "");
             if (!id.isEmpty()) event.setAmount(arrowPower(id, arrow, target, level, amount));
             return;
         }
@@ -81,24 +81,24 @@ public final class ArtifactEvents {
         String id = artifactOf(attacker.getMainHandItem());
         if (id == null) return;
         var random = attacker.getRandom();
-        boolean boss = target.getType().is(CombatHandler.BOSSES);
+        boolean boss = target.getType().builtInRegistryHolder().is(CombatHandler.BOSSES);
         Vec3 mid = target.position().add(0, target.getBbHeight() * 0.6, 0);
 
         switch (id) {
             case "dawnbreaker" -> {
                 if (!target.fireImmune()) {
                     amount += 2f;
-                    target.setSecondsOnFire(3);
+                    target.igniteForSeconds(3);
                 }
-                if (target.getType().is(ArsenalTags.UNDEAD)) amount += 2f;
+                if (target.getType().builtInRegistryHolder().is(ArsenalTags.UNDEAD)) amount += 2f;
                 level.sendParticles(ParticleTypes.FLAME, mid.x, mid.y, mid.z, 10, 0.25, 0.4, 0.25, 0.03);
             }
             case "chillrend" -> {
                 amount += 2f;
-                target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 60, 1));
+                target.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.SLOWNESS), 60, 1));
                 target.setTicksFrozen(Math.max(target.getTicksFrozen(), target.getTicksRequiredToFreeze() + 40));
                 if (!boss && random.nextFloat() < 0.15f) {
-                    target.addEffect(new MobEffectInstance(ModEffects.PARALYSIS.get(), 40, 0));
+                    target.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(ModEffects.PARALYSIS.get()), 40, 0));
                     level.sendParticles(ParticleTypes.ENCHANTED_HIT, mid.x, mid.y, mid.z, 12, 0.3, 0.4, 0.3, 0.1);
                 }
                 level.sendParticles(ParticleTypes.SNOWFLAKE, mid.x, mid.y, mid.z, 14, 0.3, 0.4, 0.3, 0.05);
@@ -115,7 +115,7 @@ public final class ArtifactEvents {
             }
             case "dragonbane" -> {
                 amount += 1.5f;
-                if (target.getType().is(ArsenalTags.DRAGONS)) amount *= 2.5f;
+                if (target.getType().builtInRegistryHolder().is(ArsenalTags.DRAGONS)) amount *= 2.5f;
                 level.sendParticles(ParticleTypes.ELECTRIC_SPARK, mid.x, mid.y, mid.z, 10, 0.3, 0.4, 0.3, 0.15);
             }
             case "volendrung" -> {
@@ -125,7 +125,7 @@ public final class ArtifactEvents {
                     drained = Math.min(vd.getStamina(), 25f);
                     vd.setStamina(vd.getStamina() - drained);
                 } else {
-                    target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 60, 0));
+                    target.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.WEAKNESS), 60, 0));
                 }
                 if (attacker instanceof Player p) {
                     PlayerData d = SkyData.get(p);
@@ -143,18 +143,18 @@ public final class ArtifactEvents {
                     vd.setMagicka(vd.getMagicka() - 15f);
                     vd.setStamina(vd.getStamina() - 15f);
                 } else {
-                    target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 80, 0));
-                    target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 40, 0));
+                    target.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.WEAKNESS), 80, 0));
+                    target.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.SLOWNESS), 40, 0));
                 }
                 if (attacker instanceof ServerPlayer sp) {
                     CompoundTag pd = target.getPersistentData();
                     pd.putLong(SOUL_TRAP_UNTIL, level.getGameTime() + 60);
-                    pd.putUUID(SOUL_TRAP_BY, sp.getUUID());
+                    pd.store(SOUL_TRAP_BY, net.minecraft.core.UUIDUtil.CODEC,  sp.getUUID());
                 }
                 level.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, mid.x, mid.y, mid.z, 8, 0.3, 0.4, 0.3, 0.02);
             }
             case "wuuthrad" -> {
-                if (target.getType().is(CombatHandler.MONSTERS)) amount *= 1.2f;
+                if (target.getType().builtInRegistryHolder().is(CombatHandler.MONSTERS)) amount *= 1.2f;
                 if (target instanceof Player victim) {
                     Race race = SkyData.get(victim).getRace();
                     if (race == Race.ALTMER || race == Race.BOSMER || race == Race.DUNMER) amount *= 1.5f;
@@ -173,9 +173,9 @@ public final class ArtifactEvents {
         Vec3 mid = target.position().add(0, target.getBbHeight() * 0.6, 0);
         switch (id) {
             case "auriels_bow" -> {
-                if (target.getType().is(ArsenalTags.UNDEAD)) {
+                if (target.getType().builtInRegistryHolder().is(ArsenalTags.UNDEAD)) {
                     amount *= 2f;
-                    target.setSecondsOnFire(5);
+                    target.igniteForSeconds(5);
                 } else {
                     amount += 1.5f;
                 }
@@ -183,7 +183,7 @@ public final class ArtifactEvents {
             }
             case "nightingale_bow" -> {
                 amount += 2f;
-                target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 60, 1));
+                target.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.SLOWNESS), 60, 1));
                 if (target instanceof Player p) {
                     PlayerData d = SkyData.get(p);
                     d.setMagicka(d.getMagicka() - 10f);
@@ -207,10 +207,10 @@ public final class ArtifactEvents {
 
         // Mace of Molag Bal: soul trap for 3 seconds after each hit
         CompoundTag pd = victim.getPersistentData();
-        if (pd.contains(SOUL_TRAP_UNTIL) && level.getGameTime() <= pd.getLong(SOUL_TRAP_UNTIL) && pd.hasUUID(SOUL_TRAP_BY)) {
-            MobEffect magicTrap = ForgeRegistries.MOB_EFFECTS.getValue(MAGIC_SOUL_TRAP);
-            boolean magicWillCapture = magicTrap != null && victim.hasEffect(magicTrap);
-            if (!magicWillCapture && level.getPlayerByUUID(pd.getUUID(SOUL_TRAP_BY)) instanceof ServerPlayer owner) {
+        if (pd.contains(SOUL_TRAP_UNTIL) && level.getGameTime() <= pd.getLongOr(SOUL_TRAP_UNTIL, 0L) && pd.read(SOUL_TRAP_BY, net.minecraft.core.UUIDUtil.CODEC).isPresent()) {
+            MobEffect magicTrap = BuiltInRegistries.MOB_EFFECT.getValue(MAGIC_SOUL_TRAP);
+            boolean magicWillCapture = magicTrap != null && victim.hasEffect(com.skycraft.platform.Effects.holder(magicTrap));
+            if (!magicWillCapture && level.getPlayerByUUID(pd.read(SOUL_TRAP_BY, net.minecraft.core.UUIDUtil.CODEC).orElseThrow()) instanceof ServerPlayer owner) {
                 SoulGems.tryCaptureSoul(owner, victim);
             }
             pd.remove(SOUL_TRAP_UNTIL);
@@ -218,17 +218,17 @@ public final class ArtifactEvents {
 
         // Dawnbreaker: undead may explode in a burst of Meridia's light
         if (source.getEntity() instanceof LivingEntity killer && source.getDirectEntity() == killer
-                && ArtifactItem.is(killer.getMainHandItem(), "dawnbreaker") && victim.getType().is(ArsenalTags.UNDEAD)
+                && ArtifactItem.is(killer.getMainHandItem(), "dawnbreaker") && victim.getType().builtInRegistryHolder().is(ArsenalTags.UNDEAD)
                 && killer.getRandom().nextFloat() < 0.3f) {
             Vec3 pos = victim.position().add(0, victim.getBbHeight() * 0.5, 0);
             ArsenalPackets.Fx.send(level, ArsenalPackets.Fx.SUN_BURST, pos, pos);
             ArsenalPackets.Fx.send(level, ArsenalPackets.Fx.FIRE_BURST, pos, pos);
-            level.playSound(null, victim.blockPosition(), SoundEvents.GENERIC_EXPLODE, SoundSource.PLAYERS, 0.8f, 1.5f);
+            level.playSound(null, victim.blockPosition(), SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 0.8f, 1.5f);
             level.playSound(null, victim.blockPosition(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 1f, 1.4f);
             for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, new AABB(pos, pos).inflate(6),
-                    e -> e != victim && e != killer && e.isAlive() && e.getType().is(ArsenalTags.UNDEAD))) {
-                e.hurt(StaffEffects.fire(level, null, killer), 8f);
-                e.setSecondsOnFire(5);
+                    e -> e != victim && e != killer && e.isAlive() && e.getType().builtInRegistryHolder().is(ArsenalTags.UNDEAD))) {
+                com.skycraft.platform.Effects.hurt(e, StaffEffects.fire(level, null, killer), 8f);
+                e.igniteForSeconds(5);
             }
             if (killer instanceof ServerPlayer sp) Notifier.message(sp, Component.translatable("message.skycraft.arsenal.meridia"));
         }
@@ -266,17 +266,17 @@ public final class ArtifactEvents {
         LivingEntity user = event.getEntity();
         if ("zephyr".equals(id) && user.tickCount % 3 == 0) {
             event.setDuration(event.getDuration() - 1);
-        } else if ("bow_of_shadows".equals(id) && !user.level().isClientSide && user.tickCount % 10 == 0) {
-            user.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, 30, 0, false, false));
+        } else if ("bow_of_shadows".equals(id) && !user.level().isClientSide() && user.tickCount % 10 == 0) {
+            user.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.INVISIBILITY), 30, 0, false, false));
         }
     }
 
     // ------------------------------------------------------------------ Spellbreaker
 
     /** Blocking with Spellbreaker raises a ward that stops spells and magical damage from the front. */
-    @SubscribeEvent(priority = EventPriority.HIGH)
-    public static void onAttacked(LivingAttackEvent event) {
-        if (!(event.getEntity() instanceof Player player) || player.level().isClientSide) return;
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    public static void onAttacked(LivingIncomingDamageEvent event) {
+        if (!(event.getEntity() instanceof Player player) || player.level().isClientSide()) return;
         if (!player.isBlocking() || !(player.getUseItem().getItem() instanceof SpellbreakerItem)) return;
         DamageSource source = event.getSource();
         if (!magical(source)) return;
@@ -303,14 +303,14 @@ public final class ArtifactEvents {
         if (source.is(DamageTypeTags.IS_FIRE) && source.getEntity() != null) return true;
         if (source.is(DamageTypeTags.IS_FREEZING) && source.getEntity() != null) return true;
         return source.typeHolder().unwrapKey()
-                .map(k -> k.location().getNamespace().equals(Skycraft.MODID) && k.location().getPath().endsWith("spell"))
+                .map(k -> k.identifier().getNamespace().equals(Skycraft.MODID) && k.identifier().getPath().endsWith("spell"))
                 .orElse(false);
     }
 
     /** Ward shimmer while Spellbreaker is raised. */
     @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer player) || player.tickCount % 8 != 0) return;
+    public static void onPlayerTick(net.neoforged.neoforge.event.tick.PlayerTickEvent.Post event) {
+        if (!(event instanceof net.neoforged.neoforge.event.tick.PlayerTickEvent.Post) || !(event.getEntity() instanceof ServerPlayer player) || player.tickCount % 8 != 0) return;
         if (player.isBlocking() && player.getUseItem().getItem() instanceof SpellbreakerItem && player.level() instanceof ServerLevel level) {
             Vec3 front = player.getEyePosition().add(player.getViewVector(1f).scale(0.8)).add(0, -0.3, 0);
             level.sendParticles(ParticleTypes.ENCHANT, front.x, front.y, front.z, 6, 0.4, 0.4, 0.4, 0.2);

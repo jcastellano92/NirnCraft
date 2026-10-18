@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:book",
+          "weight": 1,
+          "modifier": {
+            "type": "skycraft:leveled_tome"
+          }
+        }
+      ]
+    }
+  ],
+  "random_sequence": "skycraft:chests/spell_tomes"
+}

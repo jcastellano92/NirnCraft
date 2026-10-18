@@ -41,8 +41,7 @@ public class DraugrDeathlordEntity extends DraugrEntity {
             "Mikrul Gauldurson", "Sigdis Gauldurson", "Kvenel the Tongue", "Olaf One-Eye", "Draugr Overlord"
     };
 
-    private final ServerBossEvent bossEvent = new ServerBossEvent(Component.translatable("entity.skycraft.draugr_deathlord"),
-            BossEvent.BossBarColor.BLUE, BossEvent.BossBarOverlay.NOTCHED_10);
+    private final ServerBossEvent bossEvent = new ServerBossEvent(java.util.UUID.randomUUID(), Component.translatable("entity.skycraft.draugr_deathlord"), BossEvent.BossBarColor.BLUE, BossEvent.BossBarOverlay.NOTCHED_10);
     private int shoutCooldown = 120;
     private int shoutWindup = -1;
     private int breathCooldown = 240;
@@ -86,8 +85,8 @@ public class DraugrDeathlordEntity extends DraugrEntity {
     }
 
     @Override
-    protected void dropCustomDeathLoot(DamageSource source, int looting, boolean recentlyHit) {
-        super.dropCustomDeathLoot(source, looting, recentlyHit);
+    protected void dropCustomDeathLoot(net.minecraft.server.level.ServerLevel lootLevel263, DamageSource source, boolean recentlyHit) {
+        super.dropCustomDeathLoot(lootLevel263, source, recentlyHit);
         if (this.level() instanceof ServerLevel sl) {
             int lvl = Leveling.levelOf(this);
             if (lvl <= 0) lvl = Leveling.regionLevel(sl, this.blockPosition());
@@ -96,7 +95,7 @@ public class DraugrDeathlordEntity extends DraugrEntity {
             ItemStack leg = LeveledGear.roll(kind, lvl, this.random);
             if (leg.isEmpty()) leg = new ItemStack(Items.IRON_SWORD);
             LegendaryItem.apply(leg, lvl, this.random, kind == LeveledGear.Kind.ARMOR);
-            this.spawnAtLocation(leg);
+            this.spawnAtLocation(lootLevel263, leg);
         }
     }
 
@@ -129,16 +128,18 @@ public class DraugrDeathlordEntity extends DraugrEntity {
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag tag) {
-        super.readAdditionalSaveData(tag);
+    public void readAdditionalSaveData(net.minecraft.world.level.storage.ValueInput input263) {
+        super.readAdditionalSaveData(input263);
+        net.minecraft.nbt.CompoundTag tag = com.skycraft.platform.ValueTags.read(input263);
+        
         if (this.hasCustomName()) this.bossEvent.setName(this.getDisplayName());
     }
 
     // ------------------------------------------------------------------ shouts
 
     @Override
-    protected void customServerAiStep() {
-        super.customServerAiStep();
+    protected void customServerAiStep(net.minecraft.server.level.ServerLevel serverLevel263) {
+        super.customServerAiStep(serverLevel263);
         this.bossEvent.setProgress(this.getHealth() / this.getMaxHealth());
         if (this.tickCount % 20 == 0 && this.level() instanceof ServerLevel sl) {
             double rangeSq = 48.0 * 48.0;
@@ -213,10 +214,10 @@ public class DraugrDeathlordEntity extends DraugrEntity {
             Vec3 flat = new Vec3(to.x, 0, to.z);
             flat = flat.lengthSqr() < 1.0E-4 ? look : flat.normalize();
             if (dist > 1.5 && flat.dot(look) < 0.5) continue;
-            e.hurt(this.damageSources().mobAttack(this), 4.0f);
+            com.skycraft.platform.Effects.hurt(e, this.damageSources().mobAttack(this), 4.0f);
             double strength = 2.4 * (1.0 - dist / 12.0);
             e.setDeltaMovement(e.getDeltaMovement().add(flat.x * strength, 0.6, flat.z * strength));
-            e.hurtMarked = true;
+            e.syncVelocity = true;
             CombatHandler.stagger(this, e, 40);
         }
     }
@@ -242,8 +243,8 @@ public class DraugrDeathlordEntity extends DraugrEntity {
             if (along < 0 || along > 10) continue;
             double perp = to.subtract(dir.scale(along)).length();
             if (perp > 0.8 + along * 0.25) continue;
-            e.hurt(this.damageSources().indirectMagic(this, this), 1.5f);
-            e.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 60, 1), this);
+            com.skycraft.platform.Effects.hurt(e, this.damageSources().indirectMagic(this, this), 1.5f);
+            e.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.SLOWNESS), 60, 1), this);
             if (e.canFreeze()) e.setTicksFrozen(Math.min(e.getTicksRequiredToFreeze() + 60, e.getTicksFrozen() + 12));
         }
     }

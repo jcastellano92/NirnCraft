@@ -3,12 +3,12 @@ package com.skycraft.guide;
 import com.skycraft.Skycraft;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Rarity;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.ModLoadingContext;
+import net.neoforged.fml.config.ModConfig;
+import net.neoforged.neoforge.registries.DeferredRegister;
+import net.minecraft.core.registries.BuiltInRegistries;
+import java.util.function.Supplier;
 
 /**
  * Onboarding: the Traveler's Handbook and the tutorial hints.
@@ -23,17 +23,17 @@ import net.minecraftforge.registries.RegistryObject;
  * </ul>
  */
 public final class GuideModule {
-    public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, Skycraft.MODID);
+    public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(BuiltInRegistries.ITEM, Skycraft.MODID);
 
-    public static final RegistryObject<Item> HANDBOOK = ITEMS.register("travelers_handbook",
-            () -> new HandbookItem(new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON)));
+    public static final Supplier<Item> HANDBOOK = ITEMS.register("travelers_handbook",
+            () -> new HandbookItem(com.skycraft.platform.SkyProperties.item("travelers_handbook").stacksTo(1).rarity(Rarity.UNCOMMON)));
 
     private GuideModule() {}
 
     /** Registers this module's DeferredRegisters and configs. Called from the mod constructor. */
     public static void init(IEventBus modBus) {
         ITEMS.register(modBus);
-        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, GuideConfig.COMMON_SPEC, "skycraft-guide-common.toml");
-        ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, GuideConfig.CLIENT_SPEC, "skycraft-guide-client.toml");
+        com.skycraft.Skycraft.config(ModConfig.Type.LOCAL, GuideConfig.COMMON_SPEC, "skycraft-guide-common.toml");
+        com.skycraft.Skycraft.config(ModConfig.Type.CLIENT, GuideConfig.CLIENT_SPEC, "skycraft-guide-client.toml");
     }
 }

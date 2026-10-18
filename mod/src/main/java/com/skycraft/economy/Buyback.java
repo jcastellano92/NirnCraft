@@ -25,7 +25,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * </ul>
  * </p>
  */
-@net.minecraftforge.fml.common.Mod.EventBusSubscriber(modid = com.skycraft.Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = com.skycraft.Skycraft.MODID)
 public final class Buyback {
     /** 30 minutes of game time. */
     public static final long TTL_TICKS = 30L * 60L * 20L;
@@ -85,7 +85,7 @@ public final class Buyback {
             synchronized (list) {
                 for (Entry e : list) {
                     if (rem <= 0) break;
-                    if (!e.held() && ItemStack.isSameItemSameTags(e.inStock, inStockKey)) {
+                    if (!e.held() && ItemStack.isSameItemSameComponents(e.inStock, inStockKey)) {
                         int room = Math.max(0, e.count - e.shelfExpiredCount);
                         int add = Math.min(rem, room);
                         if (add > 0) {
@@ -110,7 +110,7 @@ public final class Buyback {
                 .computeIfAbsent(shop.key(), k -> new ArrayList<>());
         synchronized (list) {
             for (Entry e : list) {
-                if (e.unit == unit && ItemStack.isSameItemSameTags(e.original, original)) {
+                if (e.unit == unit && ItemStack.isSameItemSameComponents(e.original, original)) {
                     e.count += count;
                     return;
                 }
@@ -177,8 +177,8 @@ public final class Buyback {
         return at != null && now(player) - at < NO_XP_TICKS;
     }
 
-    @net.minecraftforge.eventbus.api.SubscribeEvent
-    public static void onLogout(net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedOutEvent event) {
+    @net.neoforged.bus.api.SubscribeEvent
+    public static void onLogout(net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerLoggedOutEvent event) {
         // a relog inside the 30 minutes keeps the list (game time counts on); only what has run out is dropped
         UUID id = event.getEntity().getUUID();
         long t = event.getEntity().level().getGameTime();

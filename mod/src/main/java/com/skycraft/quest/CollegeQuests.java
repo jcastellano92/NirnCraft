@@ -35,7 +35,7 @@ public final class CollegeQuests {
     // ------------------------------------------------------------------ 1. Destruction
     public static RadiantQuests.Offer destructionOffer(ServerPlayer player, LivingEntity giver) {
         ServerLevel level = (ServerLevel) player.level();
-        String dim = level.dimension().location().toString();
+        String dim = level.dimension().identifier().toString();
         BlockPos at = player.blockPosition();
         BlockPos ruin = Locate.randomSpot(level, player.getRandom(), at, 220, 480);
 
@@ -73,7 +73,7 @@ public final class CollegeQuests {
     // ------------------------------------------------------------------ 2. Restoration
     public static RadiantQuests.Offer restorationOffer(ServerPlayer player, LivingEntity giver) {
         ServerLevel level = (ServerLevel) player.level();
-        String dim = level.dimension().location().toString();
+        String dim = level.dimension().identifier().toString();
         BlockPos at = player.blockPosition();
         BlockPos crypt = Locate.dungeon(level, at, player.getRandom());
         if (crypt == null) crypt = Locate.randomSpot(level, player.getRandom(), at, 200, 450);
@@ -112,7 +112,7 @@ public final class CollegeQuests {
     // ------------------------------------------------------------------ 3. Alteration
     public static RadiantQuests.Offer alterationOffer(ServerPlayer player, LivingEntity giver) {
         ServerLevel level = (ServerLevel) player.level();
-        String dim = level.dimension().location().toString();
+        String dim = level.dimension().identifier().toString();
         BlockPos at = player.blockPosition();
         BlockPos fracture = Locate.randomSpot(level, player.getRandom(), at, 240, 500);
 
@@ -150,7 +150,7 @@ public final class CollegeQuests {
     // ------------------------------------------------------------------ 4. Conjuration
     public static RadiantQuests.Offer conjurationOffer(ServerPlayer player, LivingEntity giver) {
         ServerLevel level = (ServerLevel) player.level();
-        String dim = level.dimension().location().toString();
+        String dim = level.dimension().identifier().toString();
         BlockPos at = player.blockPosition();
         BlockPos circle = Locate.randomSpot(level, player.getRandom(), at, 220, 460);
 
@@ -188,7 +188,7 @@ public final class CollegeQuests {
     // ------------------------------------------------------------------ 5. Illusion
     public static RadiantQuests.Offer illusionOffer(ServerPlayer player, LivingEntity giver) {
         ServerLevel level = (ServerLevel) player.level();
-        String dim = level.dimension().location().toString();
+        String dim = level.dimension().identifier().toString();
         BlockPos at = player.blockPosition();
         BlockPos lair = Locate.randomSpot(level, player.getRandom(), at, 230, 480);
 

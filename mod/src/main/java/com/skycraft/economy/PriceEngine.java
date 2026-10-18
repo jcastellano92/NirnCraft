@@ -7,7 +7,7 @@ import com.skycraft.tamriel.Places;
 import com.skycraft.tamriel.Region;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -107,7 +107,7 @@ public final class PriceEngine {
     /** Computes the supply-and-demand price multiplier for {@code stack} at world position {@code pos}. */
     public static float supplyMultiplier(@Nullable Level world, @Nullable BlockPos pos, ItemStack stack) {
         if (stack == null || stack.isEmpty()) return 1.0f;
-        ResourceLocation id = BuiltInRegistries.ITEM.getKey(stack.getItem());
+        Identifier id = BuiltInRegistries.ITEM.getKey(stack.getItem());
         if (id == null) return 1.0f;
         String province = "skyrim";
         String placeId = null;
@@ -134,7 +134,7 @@ public final class PriceEngine {
     /** Regional base value of {@code stack} with explicit {@code baseValue} in {@code province} / {@code placeId}. */
     public static int regionalValue(String province, @Nullable String placeId, ItemStack stack, int baseValue) {
         if (baseValue <= 0 || stack == null || stack.isEmpty()) return Math.max(0, baseValue);
-        ResourceLocation id = BuiltInRegistries.ITEM.getKey(stack.getItem());
+        Identifier id = BuiltInRegistries.ITEM.getKey(stack.getItem());
         if (id == null) return baseValue;
         float mult = supplyMultiplier(placeId, province, id.toString());
         return Math.max(1, Math.round(baseValue * mult));

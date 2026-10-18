@@ -32,7 +32,7 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -52,7 +52,7 @@ import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -95,24 +95,24 @@ public final class Story {
     // ------------------------------------------------------------------ player state
 
     public static boolean completed(PlayerData d, String questId) {
-        return d.module("quest").getCompound(DONE).getInt(questId) > 0;
+        return d.module("quest").getCompoundOrEmpty(DONE).getIntOr(questId, 0) > 0;
     }
 
     private static void markCompleted(PlayerData d, String questId) {
         CompoundTag mod = d.module("quest");
-        CompoundTag done = mod.getCompound(DONE);
-        done.putInt(questId, done.getInt(questId) + 1);
+        CompoundTag done = mod.getCompoundOrEmpty(DONE);
+        done.putInt(questId, done.getIntOr(questId, 0) + 1);
         mod.put(DONE, done);
         d.markDirty();
     }
 
     public static boolean hasFlag(PlayerData d, String flag) {
-        return d.module("quest").getCompound(FLAGS).getBoolean(flag);
+        return d.module("quest").getCompoundOrEmpty(FLAGS).getBooleanOr(flag, false);
     }
 
     public static void setFlag(PlayerData d, String flag, boolean value) {
         CompoundTag mod = d.module("quest");
-        CompoundTag flags = mod.getCompound(FLAGS);
+        CompoundTag flags = mod.getCompoundOrEmpty(FLAGS);
         if (value) flags.putBoolean(flag, true);
         else flags.remove(flag);
         mod.put(FLAGS, flags);
@@ -150,7 +150,7 @@ public final class Story {
             case "quest":
                 return completed(d, arg);
             case "active":
-                return Quests.find(p.server, p.getUUID(), arg) != null && Quests.find(p.server, p.getUUID(), arg).quest().isActive();
+                return Quests.find(p.level().getServer(), p.getUUID(), arg) != null && Quests.find(p.level().getServer(), p.getUUID(), arg).quest().isActive();
             case "flag":
                 return hasFlag(d, arg);
             case "level":
@@ -187,7 +187,7 @@ public final class Story {
             case "false":
                 return false;
             case "dragonborn":
-                return MagicData.tag(p).getBoolean("dragonborn");
+                return MagicData.tag(p).getBooleanOr("dragonborn",false);
             case "souls":
                 return MagicData.dragonSouls(p) >= parseInt(arg, 1);
             case "night":
@@ -202,24 +202,24 @@ public final class Story {
                 return countRelic(p, arg) > 0;
             case "discover": {
                 CompoundTag loc = WorldData.find(d, WorldData.placeLocId(arg));
-                return loc != null && !loc.getBoolean("known");
+                return loc != null && !loc.getBooleanOr("known",false);
             }
             case "region":
                 return Holds.migrate(arg).equals(Holds.holdAt(p.level(), p.blockPosition()));
             case "province":
                 return arg.equals(Regions.at(p.level(), p.blockPosition()).province());
             case "dim":
-                return p.level().dimension().location().toString().equals(arg);
+                return p.level().dimension().identifier().toString().equals(arg);
             case "end_dragon_slain": {
-                ServerLevel end = p.server.getLevel(Level.END);
+                ServerLevel end = p.level().getServer().getLevel(Level.END);
                 return end != null && end.getDragonFight() != null && end.getDragonFight().hasPreviouslyKilledDragon();
             }
             case "enemy_forts":
-                return CivilWar.enemyFort(p.server, arg, p.getRandom()) != null;
+                return CivilWar.enemyFort(p.level().getServer(), arg, p.getRandom()) != null;
             case "entity":
                 return entityTypeExists(arg);
             case "mod":
-                return net.minecraftforge.fml.ModList.get().isLoaded(arg);
+                return net.neoforged.fml.ModList.get().isLoaded(arg);
             case "curse":
                 // curse:vampire | curse:werewolf | curse:vampire_lord | curse:sanguinare (curse module)
                 return switch (arg) {
@@ -232,7 +232,7 @@ public final class Story {
             case "control": {
                 // control:<region>:<side>
                 int c = arg.lastIndexOf(':');
-                return c > 0 && CivilWar.controller(p.server, arg.substring(0, c)).equals(arg.substring(c + 1));
+                return c > 0 && CivilWar.controller(p.level().getServer(), arg.substring(0, c)).equals(arg.substring(c + 1));
             }
             case "true":
                 return true;
@@ -258,7 +258,7 @@ public final class Story {
     /** The player's (or their party's) running copy of a story quest, or null. */
     @Nullable
     public static Quests.Ref activeRef(ServerPlayer p, String questId) {
-        for (Quests.Ref r : Quests.active(p.server, p.getUUID())) if (r.quest().id.equals(questId)) return r;
+        for (Quests.Ref r : Quests.active(p.level().getServer(), p.getUUID())) if (r.quest().id.equals(questId)) return r;
         return null;
     }
 
@@ -276,7 +276,7 @@ public final class Story {
     public static boolean start(ServerPlayer starter, StoryData.QuestDef def) {
         Quest q = build(starter, def);
         if (q == null) return false;
-        MinecraftServer server = starter.server;
+        MinecraftServer server = starter.level().getServer();
         String key = def.isMain() ? Quests.personalKey(starter.getUUID()) : Quests.keyForNew(server, starter.getUUID());
         // one copy per owner: a finished one with the same id leaves the history
         QuestStore.get(server).quests(key).removeIf(old -> old.id.equals(q.id) && !old.isActive());
@@ -299,7 +299,7 @@ public final class Story {
     private static void setMainStage(ServerPlayer p, int stage) {
         PlayerData d = SkyData.get(p);
         CompoundTag mod = d.module("quest");
-        if (mod.getInt(MainQuest.STAGE) < stage) {
+        if (mod.getIntOr(MainQuest.STAGE, 0) < stage) {
             mod.putInt(MainQuest.STAGE, stage);
             d.markDirty();
         }
@@ -310,10 +310,10 @@ public final class Story {
     /** Builds the quest for {@code starter}; null if a dynamic part (a fort to attack...) can't be resolved. */
     @Nullable
     public static Quest build(ServerPlayer starter, StoryData.QuestDef def) {
-        ServerLevel level = starter.server.overworld();
+        ServerLevel level = starter.level().getServer().overworld();
         CompoundTag vars = new CompoundTag();
         for (Map.Entry<String, String> v : def.vars.entrySet()) {
-            String value = resolveVar(starter.server, v.getValue(), vars, starter.getRandom());
+            String value = resolveVar(starter.level().getServer(), v.getValue(), vars, starter.getRandom());
             if (value == null) return null;
             vars.putString(v.getKey(), value);
         }
@@ -324,12 +324,12 @@ public final class Story {
         if (!def.giver.isEmpty()) {
             StoryData.NpcDef giver = StoryData.npc(def.giver);
             if (giver != null) q.giverName = giver.name.c();
-            BlockPos a = QuestNpcs.anchor(starter.server, def.giver);
+            BlockPos a = QuestNpcs.anchor(starter.level().getServer(), def.giver);
             if (a != null) q.giverPos = a;
         }
         q.hold = !def.region.isEmpty() ? def.region : Holds.holdAt(starter.level(), starter.blockPosition());
         for (int i = 0; i < def.objectives.size(); i++) {
-            Objective o = objective(starter.server, level, def, i, def.objectives.get(i), vars);
+            Objective o = objective(starter.level().getServer(), level, def, i, def.objectives.get(i), vars);
             if (o == null) return null;
             q.add(o);
         }
@@ -378,7 +378,7 @@ public final class Story {
     static String sub(CompoundTag vars, String s) {
         if (s == null || s.indexOf('@') < 0) return s;
         String out = s;
-        for (String k : vars.getAllKeys()) out = out.replace("@" + k, vars.getString(k));
+        for (String k : vars.keySet()) out = out.replace("@" + k, vars.getStringOr(k, ""));
         return out;
     }
 
@@ -520,7 +520,7 @@ public final class Story {
         for (int j = 0; j < od.spawns.size(); j++) {
             CompoundTag spec = spawnSpec(def, idx, j, od.spawns.get(j));
             o.spawn(spec);
-            if (!spec.getBoolean("decor")) count += Math.max(1, spec.getInt("count"));
+            if (!spec.getBooleanOr("decor",false)) count += Math.max(1, spec.getIntOr("count",0));
         }
         if (o.type == Objective.Type.CLEAR_AREA) o.count(od.count > 1 ? od.count : Math.max(1, count));
         if (!od.placement.isEmpty()) o.placement(od.placement);
@@ -548,7 +548,7 @@ public final class Story {
             return r != null ? r.name().c() : Component.literal(od.relic);
         }
         Item item = item(od.item);
-        return item != null ? item.getDescription() : Component.literal(od.item);
+        return item != null ? new ItemStack(item).getHoverName() : Component.literal(od.item);
     }
 
     private static Component spawnName(StoryData.QuestDef def, int idx, StoryData.ObjDef od) {
@@ -601,13 +601,13 @@ public final class Story {
         ItemStack s = stack(StoryData.str(o, "item", ""));
         if (s.isEmpty()) return s;
         if (o.has("count")) s.setCount(Math.max(1, Math.min(s.getMaxStackSize(), o.get("count").getAsInt())));
-        if (o.has("color")) s.getOrCreateTagElement("display").putInt("color", Integer.parseInt(o.get("color").getAsString().replace("#", ""), 16));
-        if (o.has("name")) s.setHoverName(Component.translatableWithFallback(nameKey, o.get("name").getAsString()));
+        if (o.has("color")) s.set(net.minecraft.core.component.DataComponents.DYED_COLOR, new net.minecraft.world.item.component.DyedItemColor(Integer.parseInt(o.get("color").getAsString().replace("#", ""), 16)));
+        if (o.has("name")) s.set(net.minecraft.core.component.DataComponents.CUSTOM_NAME, Component.translatableWithFallback(nameKey, o.get("name").getAsString()));
         if (o.has("enchant")) {
             for (Map.Entry<String, JsonElement> en : o.getAsJsonObject("enchant").entrySet()) {
-                ResourceLocation id = ResourceLocation.tryParse(en.getKey().contains(":") ? en.getKey() : "minecraft:" + en.getKey());
-                Enchantment ench = id == null ? null : ForgeRegistries.ENCHANTMENTS.getValue(id);
-                if (ench != null) s.enchant(ench, en.getValue().getAsInt());
+                Identifier id = Identifier.tryParse(en.getKey().contains(":") ? en.getKey() : "minecraft:" + en.getKey());
+                Enchantment ench = id == null ? null : com.skycraft.platform.EnchantmentsAccess.lookup(id);
+                if (ench != null) s.enchant(com.skycraft.platform.EnchantmentsAccess.holder(ench), en.getValue().getAsInt());
             }
         }
         return s;
@@ -627,13 +627,13 @@ public final class Story {
         if (id.startsWith("unique:")) return com.skycraft.loot.LegendaryUniques.create(id.substring(7));
         Item item = item(id);
         if (item == null) return ItemStack.EMPTY;
-        return new ItemStack(item, Math.max(1, Math.min(item.getMaxStackSize(), count)));
+        return new ItemStack(item, Math.max(1, Math.min(new ItemStack(item).getMaxStackSize(), count)));
     }
 
     @Nullable
     static Item item(String id) {
-        ResourceLocation rl = ResourceLocation.tryParse(id);
-        Item item = rl == null ? null : ForgeRegistries.ITEMS.getValue(rl);
+        Identifier rl = Identifier.tryParse(id);
+        Item item = rl == null ? null : BuiltInRegistries.ITEM.getValue(rl);
         return item == null || item == Items.AIR ? null : item;
     }
 
@@ -641,11 +641,14 @@ public final class Story {
 
     public static ItemStack relicStack(String id) {
         ItemStack s = new ItemStack(QuestItems.QUEST_RELIC.get());
-        CompoundTag tag = s.getOrCreateTag();
+        CompoundTag tag = com.skycraft.inventory.ItemData.customOrEmpty(s);
         tag.putString(QuestItems.RELIC_TAG, id);
         tag.putBoolean("skycraft_quest", true);
         StoryData.RelicDef def = StoryData.relic(id);
-        if (def != null && def.icon() > 0) tag.putInt("CustomModelData", def.icon());
+        if (def != null && def.icon() > 0) s.set(net.minecraft.core.component.DataComponents.CUSTOM_MODEL_DATA,
+                new net.minecraft.world.item.component.CustomModelData(java.util.List.of((float) def.icon()),
+                        java.util.List.of(), java.util.List.of(), java.util.List.of()));
+        com.skycraft.inventory.ItemData.setCustom(s, tag);
         return s;
     }
 
@@ -654,7 +657,7 @@ public final class Story {
     }
 
     public static boolean isRelic(ItemStack s, String id) {
-        return s.is(QuestItems.QUEST_RELIC.get()) && s.getTag() != null && id.equals(s.getTag().getString(QuestItems.RELIC_TAG));
+        return s.is(QuestItems.QUEST_RELIC.get()) && com.skycraft.inventory.ItemData.custom(s) != null && id.equals(com.skycraft.inventory.ItemData.custom(s).getStringOr(QuestItems.RELIC_TAG, ""));
     }
 
     public static void removeRelic(Player p, String id, int amount) {
@@ -664,14 +667,14 @@ public final class Story {
     // ------------------------------------------------------------------ journal
 
     public static void addJournal(Quest q, Component entry) {
-        ListTag list = q.extra.getList(JOURNAL, Tag.TAG_STRING);
+        ListTag list = q.extra.getListOrEmpty(JOURNAL);
         list.add(StringTag.valueOf(Quest.writeComponent(entry)));
         q.extra.put(JOURNAL, list);
     }
 
     @Nullable
     public static StoryData.QuestDef defOf(Quest q) {
-        String id = q.extra.getString(DEF);
+        String id = q.extra.getStringOr(DEF, "");
         return id.isEmpty() ? null : StoryData.quest(id);
     }
 
@@ -686,7 +689,7 @@ public final class Story {
         o.data.putLong(BEGIN, now);
         long skip = 24000L * QuestConfig.SKIP_DAYS.get();
         o.data.putLong(SKIP_AT, skip > 0 ? now + skip : 0);
-        String npc = o.data.getString(NPC);
+        String npc = o.data.getStringOr(NPC, "");
         if (!npc.isEmpty() && (o.type == Objective.Type.TALK_TO || o.type == Objective.Type.FETCH)) {
             String first = npc.split("\\|")[0];
             BlockPos at = QuestNpcs.lastPos(server, first);
@@ -711,7 +714,7 @@ public final class Story {
 
     /** An objective was completed: journal entry, and party members on the same main quest step complete it too. */
     public static void onObjectiveCompleted(MinecraftServer server, String key, Quest q, Objective o, @Nullable ServerPlayer actor) {
-        if (o.data.contains(JOURNAL)) addJournal(q, Quest.readComponent(o.data.getString(JOURNAL)));
+        if (o.data.contains(JOURNAL)) addJournal(q, Quest.readComponent(o.data.getStringOr(JOURNAL, "")));
         if (linking || !q.isMain() || !q.extra.contains(DEF) || !key.startsWith("p:")) return;
         int idx = q.objectives.indexOf(o);
         UUID owner;
@@ -772,7 +775,7 @@ public final class Story {
         StoryData.QuestDef def = defOf(q);
         if (def == null) return;
         if (!def.outro.isEmpty()) addJournal(q, def.outro.c());
-        if (!def.onComplete.isEmpty()) runActions(server, key, q, sub(q.extra.getCompound(VARS), def.onComplete), null);
+        if (!def.onComplete.isEmpty()) runActions(server, key, q, sub(q.extra.getCompoundOrEmpty(VARS), def.onComplete), null);
         for (ServerPlayer m : Quests.onlineMembers(server, key)) tickPlayer(m);
     }
 
@@ -782,25 +785,25 @@ public final class Story {
         if (def == null) return;
         PlayerData d = SkyData.get(p);
         markCompleted(d, def.id);
-        CompoundTag r = q.extra.getCompound(REWARDS);
-        for (Tag t : r.getList("flags", Tag.TAG_STRING)) setFlag(d, t.getAsString(), true);
-        if (r.getInt("perks") > 0) {
-            d.setPerkPoints(d.getPerkPoints() + r.getInt("perks"));
-            Notifier.message(p, Component.translatable("story.skycraft.reward.perks", r.getInt("perks")).withStyle(ChatFormatting.GOLD));
+        CompoundTag r = q.extra.getCompoundOrEmpty(REWARDS);
+        for (Tag t : r.getListOrEmpty("flags")) setFlag(d, ((net.minecraft.nbt.StringTag) t).value(), true);
+        if (r.getIntOr("perks",0) > 0) {
+            d.setPerkPoints(d.getPerkPoints() + r.getIntOr("perks",0));
+            Notifier.message(p, Component.translatable("story.skycraft.reward.perks", r.getIntOr("perks",0)).withStyle(ChatFormatting.GOLD));
         }
-        if (r.getInt("souls") > 0) {
-            MagicData.setDragonSouls(p, MagicData.dragonSouls(p) + r.getInt("souls"));
-            Notifier.message(p, Component.translatable("story.skycraft.reward.souls", r.getInt("souls")).withStyle(ChatFormatting.GOLD));
+        if (r.getIntOr("souls",0) > 0) {
+            MagicData.setDragonSouls(p, MagicData.dragonSouls(p) + r.getIntOr("souls",0));
+            Notifier.message(p, Component.translatable("story.skycraft.reward.souls", r.getIntOr("souls",0)).withStyle(ChatFormatting.GOLD));
         }
-        for (Tag t : r.getList("words", Tag.TAG_STRING)) teachWords(p, t.getAsString());
+        for (Tag t : r.getListOrEmpty("words")) teachWords(p, ((net.minecraft.nbt.StringTag) t).value());
         // loot tiers roll for each rewarded player at their own loot level; a unique is everyone's own copy
-        if (!r.getString("loot").isEmpty()) Bosses.giveLoot(p, r.getString("loot"));
-        if (!r.getString("unique").isEmpty()) Bosses.giveUnique(p, r.getString("unique"));
-        if (!r.getString("house").isEmpty()) grantHouse(p, r.getString("house"));
-        if (!r.getString("title").isEmpty()) {
-            d.module("quest").putString("title", r.getString("title"));
+        if (!r.getStringOr("loot", "").isEmpty()) Bosses.giveLoot(p, r.getStringOr("loot",""));
+        if (!r.getStringOr("unique", "").isEmpty()) Bosses.giveUnique(p, r.getStringOr("unique",""));
+        if (!r.getStringOr("house", "").isEmpty()) grantHouse(p, r.getStringOr("house",""));
+        if (!r.getStringOr("title", "").isEmpty()) {
+            d.module("quest").putString("title", r.getStringOr("title",""));
             Notifier.message(p, Component.translatable("story.skycraft.reward.title",
-                    Component.translatable("story.skycraft.title." + r.getString("title"))).withStyle(ChatFormatting.GOLD));
+                    Component.translatable("story.skycraft.title." + r.getStringOr("title",""))).withStyle(ChatFormatting.GOLD));
         }
         // the coarse main-quest stage rises when the next stage's first quest starts (see start) and at the very end
         d.markDirty();
@@ -812,10 +815,10 @@ public final class Story {
         if (def == null) return;
         PlayerData d = SkyData.get(p);
         markCompleted(d, def.id);
-        CompoundTag r = q.extra.getCompound(REWARDS);
-        for (Tag t : r.getList("flags", Tag.TAG_STRING)) setFlag(d, t.getAsString(), true);
-        for (Tag t : r.getList("words", Tag.TAG_STRING)) teachWords(p, t.getAsString());
-        if (r.getInt("stage") > 0) setMainStage(p, r.getInt("stage"));
+        CompoundTag r = q.extra.getCompoundOrEmpty(REWARDS);
+        for (Tag t : r.getListOrEmpty("flags")) setFlag(d, ((net.minecraft.nbt.StringTag) t).value(), true);
+        for (Tag t : r.getListOrEmpty("words")) teachWords(p, ((net.minecraft.nbt.StringTag) t).value());
+        if (r.getIntOr("stage",0) > 0) setMainStage(p, r.getIntOr("stage",0));
     }
 
     /** {@code shout:learned[:unlocked]}, e.g. {@code unrelenting_force:2:2}. Never lowers what the player knows. */
@@ -847,7 +850,7 @@ public final class Story {
         if (com.skycraft.economy.Houses.isHouseOwner(p, house)) return;
         long before = Currency.balance(p);
         Currency.give(p, house.cost());
-        if (!com.skycraft.economy.Houses.purchaseHouse(p, p.serverLevel(), house, null)) {
+        if (!com.skycraft.economy.Houses.purchaseHouse(p, p.level(), house, null)) {
             // already somebody's: the gold stays as the reward
             Notifier.message(p, Component.translatable("story.skycraft.reward.house_gold", house.name(), house.cost()));
             return;
@@ -869,7 +872,7 @@ public final class Story {
         if (actions == null || actions.isEmpty()) return;
         List<ServerPlayer> online = Quests.onlineMembers(server, key);
         ServerPlayer receiver = actor != null ? actor : online.isEmpty() ? null : online.get(0);
-        CompoundTag vars = q.extra.getCompound(VARS);
+        CompoundTag vars = q.extra.getCompoundOrEmpty(VARS);
         for (String raw : actions.split(";")) {
             String a = sub(vars, raw.trim());
             if (a.isEmpty()) continue;
@@ -939,12 +942,12 @@ public final class Story {
             case "effect" -> {
                 // effect:<id>:<seconds>[:<amplifier>], the id in the minecraft namespace or written ns/path
                 String[] p = arg.split(":");
-                ResourceLocation id = ResourceLocation.tryParse(p[0].contains("/") ? p[0].replaceFirst("/", ":") : "minecraft:" + p[0]);
-                MobEffect effect = id == null ? null : ForgeRegistries.MOB_EFFECTS.getValue(id);
+                Identifier id = Identifier.tryParse(p[0].contains("/") ? p[0].replaceFirst("/", ":") : "minecraft:" + p[0]);
+                MobEffect effect = id == null ? null : BuiltInRegistries.MOB_EFFECT.getValue(id);
                 if (effect == null) return;
                 int secs = p.length > 1 ? parseInt(p[1], 10) : 10;
                 int amp = p.length > 2 ? parseInt(p[2], 0) : 0;
-                for (ServerPlayer m : audience(online, receiver)) m.addEffect(new MobEffectInstance(effect, secs * 20, amp));
+                for (ServerPlayer m : audience(online, receiver)) m.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(effect), secs * 20, amp));
             }
             case "control" -> {
                 int c = arg.lastIndexOf(':');
@@ -982,7 +985,7 @@ public final class Story {
             case "absorb_soul" -> {
                 // the first dragon's soul, for whoever wasn't close enough when it died (absorption needs 64 blocks)
                 for (ServerPlayer m : audience(online, receiver)) {
-                    if (MagicData.tag(m).getBoolean("dragonborn")) continue;
+                    if (MagicData.tag(m).getBooleanOr("dragonborn",false)) continue;
                     MagicData.tag(m).putBoolean("dragonborn", true);
                     MagicData.setDragonSouls(m, MagicData.dragonSouls(m) + 1);
                     teachWords(m, "unrelenting_force:1:1");
@@ -1064,24 +1067,24 @@ public final class Story {
 
     /** Teleports a player to the surface at x/z in the overworld (loads the chunk). */
     static void teleportTo(ServerPlayer p, int x, int z) {
-        ServerLevel level = p.server.overworld();
+        ServerLevel level = p.level().getServer().overworld();
         level.getChunk(x >> 4, z >> 4);
         int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
-        p.teleportTo(level, x + 0.5, y + 0.1, z + 0.5, p.getYRot(), p.getXRot());
+        p.teleportTo(level, x + 0.5, y + 0.1, z + 0.5, java.util.Set.of(), p.getYRot(), p.getXRot(), false);
     }
 
     /** A dragon circles overhead for half a minute and leaves ({@code type:name}). */
     static void flyover(ServerPlayer p, String spec) {
         String[] parts = spec.split(":", 3);
         String type = parts.length >= 2 ? parts[0] + ":" + parts[1] : "skycraft:dragon";
-        Entity e = QuestSpawner.create(p.serverLevel(), type);
+        Entity e = QuestSpawner.create(p.level(), type);
         if (e == null) return;
         Vec3 c = p.position();
-        e.moveTo(c.x, c.y + 40, c.z, 0, 0);
+        e.snapTo(c.x, c.y + 40, c.z, 0, 0);
         if (parts.length == 3) e.setCustomName(Component.translatableWithFallback("story.skycraft.npc." + parts[2].toLowerCase(Locale.ROOT),
                 Character.toUpperCase(parts[2].charAt(0)) + parts[2].substring(1)));
         if (e instanceof LivingEntity le) le.setSilent(false);
-        if (!p.serverLevel().addFreshEntity(e)) return;
+        if (!p.level().addFreshEntity(e)) return;
         Scenes.circle(e, c, 36, 30, 20 * 30);
     }
 
@@ -1094,7 +1097,7 @@ public final class Story {
         Optional<QuestPlaces.Spot> spot = QuestPlaces.find("helgen");
         if (spot.isEmpty()) return;
         teleportTo(p, spot.get().x() + 6, spot.get().z() + 30);
-        p.addEffect(new MobEffectInstance(net.minecraft.world.effect.MobEffects.BLINDNESS, 60, 0));
+        p.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(net.minecraft.world.effect.MobEffects.BLINDNESS), 60, 0));
     }
 
     // ------------------------------------------------------------------ testing and recovery
@@ -1104,7 +1107,7 @@ public final class Story {
      * Skipped objectives hand out their relics and items so later steps work. Stage past the end completes it.
      */
     public static boolean jumpTo(ServerPlayer p, String questId, int stage) {
-        MinecraftServer server = p.server;
+        MinecraftServer server = p.level().getServer();
         Quests.Ref ref = activeRef(p, questId);
         if (ref == null) {
             StoryData.QuestDef def = StoryData.quest(questId);
@@ -1125,7 +1128,7 @@ public final class Story {
                         runActions(server, ref.key(), q, t, p);
                     }
                 }
-                if (o.type == Objective.Type.RETRIEVE && o.data.contains(RELIC)) runActions(server, ref.key(), q, "relic:" + o.data.getString(RELIC), p);
+                if (o.type == Objective.Type.RETRIEVE && o.data.contains(RELIC)) runActions(server, ref.key(), q, "relic:" + o.data.getStringOr(RELIC, ""), p);
             } else if (i >= stage && o.done) {
                 o.done = false;
                 o.progress = 0;
@@ -1145,19 +1148,19 @@ public final class Story {
 
     /** "Skip this step": allowed once the objective has been current for the configured number of days. */
     public static boolean skip(ServerPlayer p, String questId) {
-        Quests.Ref ref = Quests.find(p.server, p.getUUID(), questId);
+        Quests.Ref ref = Quests.find(p.level().getServer(), p.getUUID(), questId);
         if (ref == null || !ref.quest().isActive()) return false;
         Objective o = ref.quest().current();
         if (o == null) return false;
-        long at = o.data.getLong(SKIP_AT);
-        if (at <= 0 || p.server.overworld().getGameTime() < at) {
+        long at = o.data.getLongOr(SKIP_AT, 0L);
+        if (at <= 0 || p.level().getServer().overworld().getGameTime() < at) {
             Notifier.message(p, Component.translatable("story.skycraft.skip.not_yet"));
             return false;
         }
         Notifier.message(p, Component.translatable("story.skycraft.skip.done", o.text).withStyle(ChatFormatting.GRAY));
-        if (o.data.contains(RELIC) && (o.type == Objective.Type.FETCH)) removeRelic(p, o.data.getString(RELIC), 1);
-        if (o.type == Objective.Type.RETRIEVE && o.data.contains(RELIC)) runActions(p.server, ref.key(), ref.quest(), "relic:" + o.data.getString(RELIC), p);
-        Quests.completeObjective(p.server, ref.key(), ref.quest(), o, p);
+        if (o.data.contains(RELIC) && (o.type == Objective.Type.FETCH)) removeRelic(p, o.data.getStringOr(RELIC, ""), 1);
+        if (o.type == Objective.Type.RETRIEVE && o.data.contains(RELIC)) runActions(p.level().getServer(), ref.key(), ref.quest(), "relic:" + o.data.getStringOr(RELIC, ""), p);
+        Quests.completeObjective(p.level().getServer(), ref.key(), ref.quest(), o, p);
         return true;
     }
 
@@ -1165,8 +1168,8 @@ public final class Story {
 
     /** Hook from the magic module: a player shouted. Completes "shout X (here)" objectives of their quests. */
     public static void onShout(ServerPlayer p, String shoutId) {
-        MinecraftServer server = p.server;
-        String dim = p.level().dimension().location().toString();
+        MinecraftServer server = p.level().getServer();
+        String dim = p.level().dimension().identifier().toString();
         for (Quests.Ref ref : Quests.active(server, p.getUUID())) {
             Objective o = ref.quest().current();
             if (o == null || o.type != Objective.Type.CONDITION || !o.target.equals("shout:" + shoutId)) continue;
@@ -1188,7 +1191,7 @@ public final class Story {
 
     /** Spawn-time condition of a spawn spec ({@code "if": "flag:helgen_ralof"}): any online owner meets it. */
     public static boolean spawnAllowed(MinecraftServer server, String key, CompoundTag spec) {
-        String cond = spec.getString("if");
+        String cond = spec.getStringOr("if","");
         if (cond.isEmpty()) return true;
         for (ServerPlayer m : Quests.onlineMembers(server, key)) if (test(m, cond)) return true;
         return false;
@@ -1210,6 +1213,6 @@ public final class Story {
     }
 
     static boolean entityTypeExists(String id) {
-        return EntityType.byString(id).isPresent();
+        return com.skycraft.worldgen.RegistryTypes.entity(id).isPresent();
     }
 }

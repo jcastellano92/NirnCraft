@@ -1,0 +1,17 @@
+{
+  "type": "skycraft:dungeon",
+  "theme": "ruin",
+  "kit": "ice",
+  "place": {
+    "types": [
+      "dungeon_fixed"
+    ],
+    "variants": [
+      "kamal_ice_vault"
+    ]
+  },
+  "biomes": "#skycraft:dungeons/anywhere",
+  "step": "underground_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none"
+}

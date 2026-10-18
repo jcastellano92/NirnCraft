@@ -319,7 +319,7 @@ public final class Style {
             case "pane" -> B.s(Blocks.GLASS_PANE);
             case "bars" -> B.s(Blocks.IRON_BARS);
             case "fence" -> p.fence;
-            case "tinted" -> B.s(Blocks.BROWN_STAINED_GLASS_PANE);
+            case "tinted" -> B.s(com.skycraft.worldgen.VanillaBlocks.BROWN_STAINED_GLASS_PANE);
             default -> null;
         };
     }

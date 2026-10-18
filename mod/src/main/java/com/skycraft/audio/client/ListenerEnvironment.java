@@ -64,8 +64,8 @@ public final class ListenerEnvironment {
             return;
         }
         if (++ticks % 20 != 0) return;
-        Camera camera = mc.gameRenderer.getMainCamera();
-        Vec3 eye = camera.isInitialized() ? camera.getPosition() : mc.player.getEyePosition();
+        Camera camera = mc.gameRenderer.mainCamera();
+        Vec3 eye = camera.isInitialized() ? camera.position() : mc.player.getEyePosition();
         Level level = mc.level;
         BlockPos at = BlockPos.containing(eye);
 

@@ -11,15 +11,15 @@ import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.MobSpawnType;
-import net.minecraft.world.level.GameRules;
+import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Predicate;
@@ -30,7 +30,7 @@ import java.util.function.Predicate;
  * through meadows and forests and luna moths visit flowers. No insects in the cold, the rain, or underground.
  * Insects remove themselves when no player is within 64 blocks (see {@link InsectEntity#tick()}).
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class InsectSpawner {
     public static final int CAP = 6;
     public static final int RADIUS = 40;
@@ -39,14 +39,14 @@ public final class InsectSpawner {
     private InsectSpawner() {}
 
     @SubscribeEvent
-    public static void onLevelTick(TickEvent.LevelTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || !(event.level instanceof ServerLevel level)) return;
+    public static void onLevelTick(net.neoforged.neoforge.event.tick.LevelTickEvent.Post event) {
+        if (!(event instanceof net.neoforged.neoforge.event.tick.LevelTickEvent.Post) || !(event.getLevel() instanceof ServerLevel level)) return;
         if (!level.dimensionType().hasSkyLight() || level.getGameTime() % INTERVAL != 0) return;
-        if (!level.getGameRules().getBoolean(GameRules.RULE_DOMOBSPAWNING)) return;
+        if (!level.getGameRules().get(net.minecraft.world.level.gamerules.GameRules.SPAWN_MOBS)) return;
         for (ServerPlayer player : level.players()) {
             if (player.isSpectator()) continue;
             int count = level.getEntitiesOfClass(InsectEntity.class, player.getBoundingBox().inflate(RADIUS)).size();
-            if (count < CAP && level.random.nextInt(3) != 0) trySpawn(level, player, level.random);
+            if (count < CAP && level.getRandom().nextInt(3) != 0) trySpawn(level, player, level.getRandom());
         }
     }
 
@@ -65,7 +65,7 @@ public final class InsectSpawner {
         Holder<Biome> biome = level.getBiome(air);
         if (biome.value().getBaseTemperature() < 0.2f) return;
 
-        boolean day = level.isDay();
+        boolean day = level.isBrightOutside();
         boolean water = level.getFluidState(ground).is(FluidTags.WATER) || nearby(level, ground, 3, s -> s.getFluidState().is(FluidTags.WATER));
         boolean flowers = nearby(level, air, 3, s -> s.is(BlockTags.FLOWERS));
         BlockState below = level.getBlockState(ground);
@@ -76,11 +76,11 @@ public final class InsectSpawner {
         int y = surface + 1 + random.nextInt(2);
         BlockPos pos = new BlockPos(x, y, z);
         if (!level.isEmptyBlock(pos)) return;
-        InsectEntity insect = type.create(level);
+        InsectEntity insect = type.create(level, net.minecraft.world.entity.EntitySpawnReason.EVENT);
         if (insect == null) return;
-        insect.moveTo(x + 0.5, y + 0.2, z + 0.5, random.nextFloat() * 360f, 0f);
+        insect.snapTo(x + 0.5, y + 0.2, z + 0.5, random.nextFloat() * 360f, 0f);
         insect.setHome(air);
-        insect.finalizeSpawn(level, level.getCurrentDifficultyAt(pos), MobSpawnType.NATURAL, null, null);
+        insect.finalizeSpawn(level, level.getCurrentDifficultyAt(pos), EntitySpawnReason.NATURAL, null);
         level.addFreshEntity(insect);
     }
 

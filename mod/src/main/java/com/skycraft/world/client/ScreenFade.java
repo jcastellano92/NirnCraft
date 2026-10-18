@@ -1,10 +1,9 @@
 package com.skycraft.world.client;
 
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
-import net.minecraftforge.client.gui.overlay.ForgeGui;
 
 /** Fade-to-black overlay shown while time passes (waiting, sleeping, fast travel). */
 public final class ScreenFade {
@@ -24,7 +23,9 @@ public final class ScreenFade {
         return start >= 0 && Util.getMillis() - start < duration;
     }
 
-    public static void render(ForgeGui gui, GuiGraphics g, float partialTick, int width, int height) {
+    public static void render(GuiGraphicsExtractor g, net.minecraft.client.DeltaTracker delta) {
+        float partialTick = delta.getGameTimeDeltaPartialTick(false);
+        int width = g.guiWidth(), height = g.guiHeight();
         if (start < 0) return;
         float t = (Util.getMillis() - start) / (float) duration;
         if (t >= 1f) {
@@ -41,11 +42,11 @@ public final class ScreenFade {
         if (a > 40 && !text.getString().isEmpty()) {
             int ta = Math.max(4, a) << 24;
             var font = Minecraft.getInstance().font;
-            g.pose().pushPose();
-            g.pose().translate(width / 2f, height / 2f - 6, 0);
-            g.pose().scale(1.5f, 1.5f, 1f);
-            g.drawCenteredString(font, text, 0, 0, ta | 0xE8DFC8);
-            g.pose().popPose();
+            g.pose().pushMatrix();
+            g.pose().translate(width / 2f,  height / 2f - 6);
+            g.pose().scale(1.5f,  1.5f);
+            g.centeredText(font, text, 0, 0, ta | 0xE8DFC8);
+            g.pose().popMatrix();
         }
     }
 }

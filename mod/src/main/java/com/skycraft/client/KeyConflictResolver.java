@@ -1,15 +1,14 @@
 package com.skycraft.client;
 
-import com.mojang.blaze3d.platform.InputConstants;
 import com.skycraft.Skycraft;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.loading.FMLPaths;
-import org.lwjgl.glfw.GLFW;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.loading.FMLPaths;
+import com.mojang.blaze3d.platform.InputConstants;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -30,15 +29,15 @@ import java.util.Set;
  * </ul>
  * Options are saved (and the client-info packet sent) only if a binding actually changed.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
 public final class KeyConflictResolver {
     private static final int[] FALLBACKS = {
-            GLFW.GLFW_KEY_G, GLFW.GLFW_KEY_J, GLFW.GLFW_KEY_K, GLFW.GLFW_KEY_N, GLFW.GLFW_KEY_O,
-            GLFW.GLFW_KEY_P, GLFW.GLFW_KEY_U, GLFW.GLFW_KEY_I, GLFW.GLFW_KEY_Y, GLFW.GLFW_KEY_Z, GLFW.GLFW_KEY_X,
-            GLFW.GLFW_KEY_B, GLFW.GLFW_KEY_V, GLFW.GLFW_KEY_R, GLFW.GLFW_KEY_C, GLFW.GLFW_KEY_COMMA, GLFW.GLFW_KEY_PERIOD,
-            GLFW.GLFW_KEY_SEMICOLON, GLFW.GLFW_KEY_APOSTROPHE, GLFW.GLFW_KEY_LEFT_BRACKET, GLFW.GLFW_KEY_RIGHT_BRACKET,
-            GLFW.GLFW_KEY_BACKSLASH, GLFW.GLFW_KEY_MINUS, GLFW.GLFW_KEY_EQUAL, GLFW.GLFW_KEY_CAPS_LOCK,
-            GLFW.GLFW_KEY_KP_0, GLFW.GLFW_KEY_KP_1, GLFW.GLFW_KEY_KP_2, GLFW.GLFW_KEY_KP_3
+            InputConstants.KEY_G, InputConstants.KEY_J, InputConstants.KEY_K, InputConstants.KEY_N, InputConstants.KEY_O,
+            InputConstants.KEY_P, InputConstants.KEY_U, InputConstants.KEY_I, InputConstants.KEY_Y, InputConstants.KEY_Z, InputConstants.KEY_X,
+            InputConstants.KEY_B, InputConstants.KEY_V, InputConstants.KEY_R, InputConstants.KEY_C, InputConstants.KEY_COMMA, InputConstants.KEY_PERIOD,
+            InputConstants.KEY_SEMICOLON, InputConstants.KEY_APOSTROPHE, InputConstants.KEY_LBRACKET, InputConstants.KEY_RBRACKET,
+            InputConstants.KEY_BACKSLASH, InputConstants.KEY_MINUS, InputConstants.KEY_EQUALS, InputConstants.KEY_CAPSLOCK,
+            InputConstants.KEY_NUMPAD0, InputConstants.KEY_NUMPAD1, InputConstants.KEY_NUMPAD2, InputConstants.KEY_NUMPAD3
     };
     /** Vanilla keys Skyrim controls don't use (Q drop is Favorites, F swap is Interact). */
     private static final Set<String> UNBIND_ON_FIRST_LAUNCH = Set.of("key.drop", "key.swapoffhand", "key.advancements");
@@ -52,10 +51,10 @@ public final class KeyConflictResolver {
      * their previous default move to the new one: {name, previous key, new key}.
      */
     private static final Object[][] LAYOUT_V2 = {
-            {"key.skycraft.favorites", GLFW.GLFW_KEY_Q, GLFW.GLFW_KEY_R},
-            {"key.skycraft.journal", GLFW.GLFW_KEY_J, GLFW.GLFW_KEY_Q},
-            {"key.skycraft.sail_up", GLFW.GLFW_KEY_R, GLFW.GLFW_KEY_EQUAL},
-            {"key.skycraft.sail_down", GLFW.GLFW_KEY_V, GLFW.GLFW_KEY_MINUS},
+            {"key.skycraft.favorites", InputConstants.KEY_Q, InputConstants.KEY_R},
+            {"key.skycraft.journal", InputConstants.KEY_J, InputConstants.KEY_Q},
+            {"key.skycraft.sail_up", InputConstants.KEY_R, InputConstants.KEY_EQUALS},
+            {"key.skycraft.sail_down", InputConstants.KEY_V, InputConstants.KEY_MINUS},
     };
     /** Essential's keys that sit on Skycraft's (chat peek on Z, emote wheel on R, friends on H, zoom on C): unbound once. */
     private static final Set<String> ESSENTIAL_KEYS = Set.of("keybind.name.chat_peek", "keybind.name.emote_wheel",
@@ -66,8 +65,8 @@ public final class KeyConflictResolver {
     private KeyConflictResolver() {}
 
     @SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || done) return;
+    public static void onClientTick(ClientTickEvent.Post event) {
+        if (done) return;
         Minecraft mc = Minecraft.getInstance();
         if (mc.options == null) return;
         done = true;
@@ -174,7 +173,7 @@ public final class KeyConflictResolver {
             if (!conflicts(ours, ours.getKey(), all)) continue;
             Set<Integer> used = usedKeys(all, ours);
             for (int code : FALLBACKS) {
-                InputConstants.Key candidate = InputConstants.Type.KEYSYM.getOrCreate(code);
+                InputConstants.Key candidate = InputConstants.Type.KEYBOARD.getOrCreate(code);
                 if (used.contains(code) || conflicts(ours, candidate, all)) continue;
                 Skycraft.LOGGER.info("Rebinding {} from {} to {} to avoid a key conflict", ours.getName(),
                         ours.getKey().getName(), candidate.getName());
@@ -197,13 +196,13 @@ public final class KeyConflictResolver {
         for (Object[] row : LAYOUT_V2) {
             for (KeyMapping k : all) {
                 if (!k.getName().equals(row[0]) || k.isUnbound()) continue;
-                if (k.getKey().getType() == InputConstants.Type.KEYSYM && k.getKey().getValue() == (Integer) row[1]) {
+                if (k.getKey().getType() == InputConstants.Type.KEYBOARD && k.getKey().getValue() == (Integer) row[1]) {
                     moves.put(k, (Integer) row[2]);
                 }
             }
         }
         for (var e : moves.entrySet()) {
-            InputConstants.Key to = InputConstants.Type.KEYSYM.getOrCreate(e.getValue());
+            InputConstants.Key to = InputConstants.Type.KEYBOARD.getOrCreate(e.getValue());
             Skycraft.LOGGER.info("Key layout v2: {} moves from {} to {}", e.getKey().getName(), e.getKey().getKey().getName(), to.getName());
             e.getKey().setKey(to);
             changed = true;
@@ -245,7 +244,7 @@ public final class KeyConflictResolver {
     private static Set<Integer> usedKeys(KeyMapping[] all, KeyMapping self) {
         Set<Integer> used = new HashSet<>();
         for (KeyMapping k : all) {
-            if (k != self && !k.isUnbound() && k.getKey().getType() == InputConstants.Type.KEYSYM) used.add(k.getKey().getValue());
+            if (k != self && !k.isUnbound() && k.getKey().getType() == InputConstants.Type.KEYBOARD) used.add(k.getKey().getValue());
         }
         return used;
     }

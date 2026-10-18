@@ -13,28 +13,28 @@ import com.skycraft.network.SkyNetwork;
 import com.skycraft.perk.Perks;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.PauseScreen;
-import net.minecraft.client.player.Input;
+import net.minecraft.client.player.ClientInput;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.ComputeFovModifierEvent;
-import net.minecraftforge.client.event.CustomizeGuiOverlayEvent;
-import net.minecraftforge.client.event.MovementInputUpdateEvent;
-import net.minecraftforge.client.event.RenderGuiOverlayEvent;
-import net.minecraftforge.client.event.ScreenEvent;
-import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.ComputeFovModifierEvent;
+import net.neoforged.neoforge.client.event.CustomizeGuiOverlayEvent;
+import net.neoforged.neoforge.client.event.MovementInputUpdateEvent;
+import net.neoforged.neoforge.client.event.RenderGuiLayerEvent;
+import net.neoforged.neoforge.client.event.ScreenEvent;
+import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
-import net.minecraftforge.client.event.RenderHandEvent;
-import net.minecraftforge.client.event.InputEvent;
+import net.neoforged.neoforge.client.event.RenderHandEvent;
+import net.neoforged.neoforge.client.event.InputEvent;
 
 /** Forge-bus client events for the core: keys, sprint exhaustion, climbing, dodge, sheathing, hiding vanilla HUD bars, bow zoom. */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
 public final class ClientEvents {
     private static boolean wasBlocking;
     private static boolean unsheathedOnUse;
@@ -57,17 +57,16 @@ public final class ClientEvents {
     }
 
     @SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent event) {
-        if (event.phase != TickEvent.Phase.END) return;
+    public static void onClientTick(ClientTickEvent.Post event) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null) return;
 
         while (SkyKeys.HUB.consumeClick()) {
-            if (mc.screen == null) mc.setScreen(new com.skycraft.client.screen.HubScreen());
+            if (mc.gui.screen() == null) mc.gui.setScreen(new com.skycraft.client.screen.HubScreen());
         }
         while (SkyKeys.SKILLS.consumeClick()) {
-            if (SkyData.get(mc.player).getRace() == null) mc.setScreen(new RaceScreen());
-            else mc.setScreen(new SkillsScreen());
+            if (SkyData.get(mc.player).getRace() == null) mc.gui.setScreen(new RaceScreen());
+            else mc.gui.setScreen(new SkillsScreen());
         }
         // SHOUT key is handled by MagicClientEvents with charge levels & Shouting.executeVoice
         while (SkyKeys.SHEATHE.consumeClick()) {
@@ -90,8 +89,8 @@ public final class ClientEvents {
                 dodgeRollTicks = 12;
                 Vec3 look = mc.player.getViewVector(1.0f);
                 Vec3 horiz = new Vec3(look.x, 0, look.z).normalize();
-                float fwd = mc.player.input.jumping ? 0 : (mc.player.input.up ? 1 : (mc.player.input.down ? -1 : 0));
-                float strafe = mc.player.input.left ? 1 : (mc.player.input.right ? -1 : 0);
+                float fwd = mc.player.input.keyPresses.jump() ? 0 : (mc.player.input.keyPresses.forward() ? 1 : (mc.player.input.keyPresses.backward() ? -1 : 0));
+                float strafe = mc.player.input.keyPresses.left() ? 1 : (mc.player.input.keyPresses.right() ? -1 : 0);
                 Vec3 move;
                 if (fwd == 0 && strafe == 0) {
                     move = horiz.scale(0.7);
@@ -105,7 +104,7 @@ public final class ClientEvents {
 
         // Smooth step assist over blocks without constant jumping
         if (mc.player.maxUpStep() < 1.0625f) {
-            mc.player.setMaxUpStep(1.0625f);
+            mc.player.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.STEP_HEIGHT).setBaseValue(1.0625);
         }
 
         // BotW / AC-style wall climbing & sticking:
@@ -239,7 +238,7 @@ public final class ClientEvents {
                 && WeaponClass.of(main).skill == Skill.ONE_HANDED
                 && WeaponClass.of(off).skill == Skill.ONE_HANDED;
         boolean rmbBlock = !com.skycraft.combat.Sheathe.isSheathed(mc.player) && !unsheathedOnUse
-                && mc.options.keyUse.isDown() && mc.screen == null && !dual
+                && mc.options.keyUse.isDown() && mc.gui.screen() == null && !dual
                 && (mc.hitResult == null || mc.hitResult.getType() == net.minecraft.world.phys.HitResult.Type.MISS)
                 && (off.getItem() instanceof net.minecraft.world.item.ShieldItem || off.isEmpty() || WeaponClass.of(main).twoHanded());
         boolean blocking = rmbBlock;
@@ -287,19 +286,18 @@ public final class ClientEvents {
     @SubscribeEvent
     public static void onMovementInput(MovementInputUpdateEvent event) {
         if (!(event.getEntity() instanceof net.minecraft.client.player.LocalPlayer player)) return;
-        Input input = event.getInput();
+        SkyMovementInput input = SkyMovementInput.prepare(event);
         if (player.isUsingItem() && !player.isPassenger()) {
             var useItem = player.getUseItem().getItem();
             boolean rangedUse = useItem instanceof BowItem || useItem instanceof net.minecraft.world.item.CrossbowItem;
             boolean rangerActive = rangedUse && Perks.has(player, "archery.ranger");
             boolean blockRunnerActive = (player.isBlocking() || wasBlocking) && Perks.has(player, "block.block_runner");
             if (rangerActive || blockRunnerActive) {
-                input.forwardImpulse *= 5.0f;
-                input.leftImpulse *= 5.0f;
+                input.scaleMovement(5.0f);
             }
         }
         if (cannotSprint(player)) {
-            if (input.forwardImpulse > 0.79f) input.forwardImpulse = 0.79f;
+            input.limitForward(0.79f);
         }
     }
 
@@ -307,7 +305,7 @@ public final class ClientEvents {
     @SubscribeEvent
     public static void onAttackInput(InputEvent.InteractionKeyMappingTriggered event) {
         Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null || mc.screen != null) return;
+        if (mc.player == null || mc.gui.screen() != null) return;
         ItemStack mainItem = mc.player.getMainHandItem();
         ItemStack offItem = mc.player.getOffhandItem();
         WeaponClass mainWc = WeaponClass.of(mainItem);
@@ -317,7 +315,7 @@ public final class ClientEvents {
                 boolean holdingCombatItem = mainItem.getItem() instanceof BowItem
                         || mainItem.getItem() instanceof net.minecraft.world.item.CrossbowItem
                         || mainItem.getItem() instanceof com.skycraft.arsenal.item.StaffItem
-                        || (mainWc != WeaponClass.OTHER && mainWc != WeaponClass.UNARMED && !(mainItem.getItem() instanceof net.minecraft.world.item.DiggerItem));
+                        || (mainWc != WeaponClass.OTHER && mainWc != WeaponClass.UNARMED && !mainItem.has(net.minecraft.core.component.DataComponents.TOOL));
                 boolean hasRightSpell = mainItem.isEmpty() && !com.skycraft.magic.MagicData.selectedSpell(mc.player).isEmpty();
                 boolean hittingBlockWithTool = mc.hitResult != null
                         && mc.hitResult.getType() == net.minecraft.world.phys.HitResult.Type.BLOCK
@@ -344,9 +342,9 @@ public final class ClientEvents {
                     interactableTarget = hitEnt instanceof com.skycraft.arsenal.entity.SkyArrow
                             || hitEnt instanceof com.skycraft.creatures.entity.CorpseEntity
                             || hitEnt instanceof net.minecraft.world.entity.npc.Npc
-                            || hitEnt instanceof net.minecraft.world.entity.animal.horse.AbstractHorse
-                            || hitEnt instanceof net.minecraft.world.entity.vehicle.Boat
-                            || hitEnt instanceof net.minecraft.world.entity.vehicle.AbstractMinecart;
+                            || hitEnt instanceof net.minecraft.world.entity.animal.equine.AbstractHorse
+                            || hitEnt instanceof net.minecraft.world.entity.vehicle.boat.Boat
+                            || hitEnt instanceof net.minecraft.world.entity.vehicle.minecart.AbstractMinecart;
                 } else if (mc.hitResult instanceof net.minecraft.world.phys.BlockHitResult bhr
                         && mc.hitResult.getType() == net.minecraft.world.phys.HitResult.Type.BLOCK && mc.level != null) {
                     var state = mc.level.getBlockState(bhr.getBlockPos());
@@ -380,7 +378,7 @@ public final class ClientEvents {
             // Single shield equipped: shield bash instead of unarmed punch!
             event.setCanceled(true);
             shieldBashTicks = 10;
-            mc.player.swing(net.minecraft.world.InteractionHand.OFF_HAND, false);
+            mc.player.swing(net.minecraft.world.InteractionHand.OFF_HAND,mc.player.getOffhandItem().getAttackAnimation(),false);
             SkyNetwork.sendToServer(new CorePackets.Action(CorePackets.Action.SHIELD_BASH, 0));
             return;
         }
@@ -392,7 +390,7 @@ public final class ClientEvents {
         if (mainItem.isEmpty() && offItem.isEmpty()) {
             if (punchLeftNext) {
                 event.setCanceled(true);
-                mc.player.swing(net.minecraft.world.InteractionHand.OFF_HAND, false);
+                mc.player.swing(net.minecraft.world.InteractionHand.OFF_HAND,mc.player.getOffhandItem().getAttackAnimation(),false);
                 offhandFistSwing = 1.0f;
                 prevOffhandFistSwing = 1.0f;
                 // Attack raycast or hit entity with offhand punch
@@ -428,10 +426,10 @@ public final class ClientEvents {
             if (player.tickCount <= 10) return;
             try {
                 var poseStack = event.getPoseStack();
-                var buffer = event.getMultiBufferSource();
+                var buffer = event.getSubmitNodeCollector();
                 int light = event.getPackedLight();
                 float pt = event.getPartialTick();
-                var renderer = (net.minecraft.client.renderer.entity.player.PlayerRenderer) mc.getEntityRenderDispatcher().getRenderer(player);
+                var renderer = (net.minecraft.client.renderer.entity.player.AvatarRenderer<?>) mc.getEntityRenderDispatcher().getRenderer(player);
 
                 // 1. Render Left Fist (Offhand)
                 poseStack.pushPose();
@@ -443,29 +441,30 @@ public final class ClientEvents {
 
                 // Lowered and wider stance so fists sit cleanly at lower corners
                 poseStack.translate(-(lf2 + 0.52F), lf3 - 0.50F + (wasBlocking ? 0.16F : 0F), lf4 - 0.60F);
-                poseStack.mulPose(com.mojang.math.Axis.YP.rotationDegrees(-20.0F));
+                poseStack.rotateDegrees(com.mojang.math.Axis.YP, -20.0F);
                 if (wasBlocking) {
                     poseStack.translate(0.10F, 0.12F, -0.08F);
-                    poseStack.mulPose(com.mojang.math.Axis.ZP.rotationDegrees(-20.0F));
-                    poseStack.mulPose(com.mojang.math.Axis.XP.rotationDegrees(25.0F));
+                    poseStack.rotateDegrees(com.mojang.math.Axis.ZP, -20.0F);
+                    poseStack.rotateDegrees(com.mojang.math.Axis.XP, 25.0F);
                 }
                 float lf5 = net.minecraft.util.Mth.sin(leftSwing * leftSwing * (float) Math.PI);
                 float lf6 = net.minecraft.util.Mth.sin(lf1 * (float) Math.PI);
-                poseStack.mulPose(com.mojang.math.Axis.YP.rotationDegrees(-lf6 * 45.0F));
-                poseStack.mulPose(com.mojang.math.Axis.ZP.rotationDegrees(lf5 * -15.0F));
+                poseStack.rotateDegrees(com.mojang.math.Axis.YP, -lf6 * 45.0F);
+                poseStack.rotateDegrees(com.mojang.math.Axis.ZP, lf5 * -15.0F);
                 poseStack.translate(0.9F, 3.4F, 3.3F);
-                poseStack.mulPose(com.mojang.math.Axis.ZP.rotationDegrees(-120.0F));
-                poseStack.mulPose(com.mojang.math.Axis.XP.rotationDegrees(200.0F));
-                poseStack.mulPose(com.mojang.math.Axis.YP.rotationDegrees(135.0F));
+                poseStack.rotateDegrees(com.mojang.math.Axis.ZP, -120.0F);
+                poseStack.rotateDegrees(com.mojang.math.Axis.XP, 200.0F);
+                poseStack.rotateDegrees(com.mojang.math.Axis.YP, 135.0F);
                 poseStack.translate(-5.4F, 0.0F, 0.0F);
                 try {
-                    renderer.renderLeftHand(poseStack, buffer, light, player);
+                    renderer.renderLeftHand(poseStack, buffer, light, event.getPlayerState().avatarRenderState.skin.body().texturePath(),
+                            event.getPlayerState().avatarRenderState.showLeftSleeve);
                 } catch (Throwable ignored) {}
                 poseStack.popPose();
 
                 // 2. Render Right Fist (Main hand)
                 poseStack.pushPose();
-                float rightSwing = player.getAttackAnim(pt);
+                float rightSwing = player.getSwingAnimation(pt);
                 float rf1 = net.minecraft.util.Mth.sqrt(rightSwing);
                 float rf2 = 0.25F * net.minecraft.util.Mth.sin(rf1 * (float) Math.PI);
                 float rf3 = 0.35F * net.minecraft.util.Mth.sin(rf1 * ((float) Math.PI * 2F));
@@ -473,23 +472,24 @@ public final class ClientEvents {
 
                 // Lowered and wider stance so fists sit cleanly at lower corners
                 poseStack.translate(rf2 + 0.52F, rf3 - 0.50F + (wasBlocking ? 0.16F : 0F), rf4 - 0.60F);
-                poseStack.mulPose(com.mojang.math.Axis.YP.rotationDegrees(20.0F));
+                poseStack.rotateDegrees(com.mojang.math.Axis.YP, 20.0F);
                 if (wasBlocking) {
                     poseStack.translate(-0.10F, 0.12F, -0.08F);
-                    poseStack.mulPose(com.mojang.math.Axis.ZP.rotationDegrees(20.0F));
-                    poseStack.mulPose(com.mojang.math.Axis.XP.rotationDegrees(25.0F));
+                    poseStack.rotateDegrees(com.mojang.math.Axis.ZP, 20.0F);
+                    poseStack.rotateDegrees(com.mojang.math.Axis.XP, 25.0F);
                 }
                 float rf5 = net.minecraft.util.Mth.sin(rightSwing * rightSwing * (float) Math.PI);
                 float rf6 = net.minecraft.util.Mth.sin(rf1 * (float) Math.PI);
-                poseStack.mulPose(com.mojang.math.Axis.YP.rotationDegrees(rf6 * 45.0F));
-                poseStack.mulPose(com.mojang.math.Axis.ZP.rotationDegrees(rf5 * 15.0F));
+                poseStack.rotateDegrees(com.mojang.math.Axis.YP, rf6 * 45.0F);
+                poseStack.rotateDegrees(com.mojang.math.Axis.ZP, rf5 * 15.0F);
                 poseStack.translate(-0.9F, 3.4F, 3.3F);
-                poseStack.mulPose(com.mojang.math.Axis.ZP.rotationDegrees(120.0F));
-                poseStack.mulPose(com.mojang.math.Axis.XP.rotationDegrees(200.0F));
-                poseStack.mulPose(com.mojang.math.Axis.YP.rotationDegrees(-135.0F));
+                poseStack.rotateDegrees(com.mojang.math.Axis.ZP, 120.0F);
+                poseStack.rotateDegrees(com.mojang.math.Axis.XP, 200.0F);
+                poseStack.rotateDegrees(com.mojang.math.Axis.YP, -135.0F);
                 poseStack.translate(5.4F, 0.0F, 0.0F);
                 try {
-                    renderer.renderRightHand(poseStack, buffer, light, player);
+                    renderer.renderRightHand(poseStack, buffer, light, event.getPlayerState().avatarRenderState.skin.body().texturePath(),
+                            event.getPlayerState().avatarRenderState.showRightSleeve);
                 } catch (Throwable ignored) {}
                 poseStack.popPose();
             } catch (Throwable ignored) {}
@@ -503,11 +503,11 @@ public final class ClientEvents {
     }
 
     @SubscribeEvent
-    public static void hideVanillaBars(RenderGuiOverlayEvent.Pre event) {
-        var id = event.getOverlay().id();
-        if (id.equals(VanillaGuiOverlay.PLAYER_HEALTH.id()) || id.equals(VanillaGuiOverlay.FOOD_LEVEL.id())
-                || id.equals(VanillaGuiOverlay.ARMOR_LEVEL.id()) || id.equals(VanillaGuiOverlay.EXPERIENCE_BAR.id())
-                || id.equals(VanillaGuiOverlay.HOTBAR.id())) {
+    public static void hideVanillaBars(RenderGuiLayerEvent.Pre event) {
+        var id = event.getName();
+        if (id.equals(VanillaGuiLayers.PLAYER_HEALTH) || id.equals(VanillaGuiLayers.FOOD_LEVEL)
+                || id.equals(VanillaGuiLayers.ARMOR_LEVEL) || id.equals(VanillaGuiLayers.CONTEXTUAL_INFO_BAR)
+                || id.equals(VanillaGuiLayers.HOTBAR)) {
             event.setCanceled(true);
         }
     }
@@ -540,131 +540,102 @@ public final class ClientEvents {
         }
     }
 
-    /**
-     * Third-person player animations: sheathed relaxed arms, spell-casting gestures, wall-climbing hand-over-hand reach,
-     * dodge-roll somersault, power-attack overhead windup & lunge, and shield-bash thrust.
-     */
-    @SubscribeEvent
-    public static void onRenderPlayerPre(net.minecraftforge.client.event.RenderLivingEvent.Pre<?, ?> event) {
-        pushedPlayerPose = false;
-        if (!(event.getEntity() instanceof net.minecraft.world.entity.player.Player player)) return;
-        if (!(event.getRenderer().getModel() instanceof net.minecraft.client.model.PlayerModel<?> playerModel)) return;
+    private record Animation(boolean climbing, int roll, int bash, int power, float bodyYaw, float age) {}
+    private static final net.minecraft.util.context.ContextKey<Animation> ANIMATION = new net.minecraft.util.context.ContextKey<>(
+            net.minecraft.resources.Identifier.fromNamespaceAndPath(Skycraft.MODID, "player_animation"));
+    private static final net.minecraft.util.context.ContextKey<Boolean> POSE_PUSHED = new net.minecraft.util.context.ContextKey<>(
+            net.minecraft.resources.Identifier.fromNamespaceAndPath(Skycraft.MODID, "player_pose_pushed"));
 
-        Minecraft mc = Minecraft.getInstance();
-        boolean isLocal = player == mc.player;
-        float pt = event.getPartialTick();
-        var poseStack = event.getPoseStack();
-
-        // 1. Sheathed relaxed stance: lower arms to sides when weapons are stowed
+    /** Extract mutable gameplay data once; rendering consumes only this frame's state. */
+    public static void extractAnimations(net.minecraft.world.entity.player.Player player,
+                                         net.minecraft.client.renderer.entity.state.AvatarRenderState state) {
+        boolean local = player == Minecraft.getInstance().player;
         if (com.skycraft.arsenal.Sheathe.isSheathed(player)) {
-            playerModel.rightArmPose = net.minecraft.client.model.HumanoidModel.ArmPose.EMPTY;
-            playerModel.leftArmPose = net.minecraft.client.model.HumanoidModel.ArmPose.EMPTY;
+            state.rightArmPose = net.minecraft.client.model.HumanoidModel.ArmPose.EMPTY;
+            state.leftArmPose = net.minecraft.client.model.HumanoidModel.ArmPose.EMPTY;
         }
-
-        // 2. Spell-casting gestures (left, right, or dual/two-handed channeling)
-        if (isLocal && com.skycraft.magic.client.MagicClientEvents.isCasting()) {
-            boolean leftCast = com.skycraft.magic.client.MagicClientEvents.isCasting(com.skycraft.magic.spell.SpellCasting.LEFT);
-            boolean rightCast = com.skycraft.magic.client.MagicClientEvents.isCasting(com.skycraft.magic.spell.SpellCasting.RIGHT);
-            String spellId = com.skycraft.magic.MagicData.selectedSpell(player);
-            com.skycraft.magic.spell.Spell spell = com.skycraft.magic.spell.Spells.byId(spellId);
-            boolean twoHandChannel = (leftCast && rightCast) || (spell != null && (
-                    spell.school == com.skycraft.magic.spell.School.RESTORATION
-                            || spell.school == com.skycraft.magic.spell.School.ALTERATION
-                            || spell.school == com.skycraft.magic.spell.School.CONJURATION));
-            if (twoHandChannel) {
-                playerModel.rightArmPose = net.minecraft.client.model.HumanoidModel.ArmPose.BOW_AND_ARROW;
-                playerModel.leftArmPose = net.minecraft.client.model.HumanoidModel.ArmPose.BOW_AND_ARROW;
-            } else {
-                if (rightCast) playerModel.rightArmPose = net.minecraft.client.model.HumanoidModel.ArmPose.BOW_AND_ARROW;
-                if (leftCast) playerModel.leftArmPose = net.minecraft.client.model.HumanoidModel.ArmPose.BOW_AND_ARROW;
-            }
+        if (local && com.skycraft.magic.client.MagicClientEvents.isCasting()) {
+            boolean left = com.skycraft.magic.client.MagicClientEvents.isCasting(com.skycraft.magic.spell.SpellCasting.LEFT);
+            boolean right = com.skycraft.magic.client.MagicClientEvents.isCasting(com.skycraft.magic.spell.SpellCasting.RIGHT);
+            var spell = com.skycraft.magic.spell.Spells.byId(com.skycraft.magic.MagicData.selectedSpell(player));
+            boolean both = left && right || spell != null && (spell.school == com.skycraft.magic.spell.School.RESTORATION
+                    || spell.school == com.skycraft.magic.spell.School.ALTERATION
+                    || spell.school == com.skycraft.magic.spell.School.CONJURATION);
+            if (both || right) state.rightArmPose = net.minecraft.client.model.HumanoidModel.ArmPose.BOW_AND_ARROW;
+            if (both || left) state.leftArmPose = net.minecraft.client.model.HumanoidModel.ArmPose.BOW_AND_ARROW;
         }
-
-        // 3. Wall climbing: alternating overhead reach + slight lean into the wall
-        boolean climbing = (isLocal && isWallClinging) || com.skycraft.vitals.ActionHandler.isClimbing(player);
+        boolean climbing = local && isWallClinging || com.skycraft.vitals.ActionHandler.isClimbing(player);
+        int roll = local ? dodgeRollTicks : com.skycraft.vitals.ActionHandler.isDodgeRolling(player) ? 6 : 0;
+        int bash = local ? shieldBashTicks : com.skycraft.vitals.ActionHandler.isShieldBashing(player) ? 5 : 0;
+        int power = local ? powerAttackTicks : com.skycraft.vitals.ActionHandler.isPowerAttacking(player) ? 5 : 0;
         if (climbing) {
-            boolean rightReach = ((player.tickCount / 6) & 1) == 0;
-            playerModel.rightArmPose = rightReach
-                    ? net.minecraft.client.model.HumanoidModel.ArmPose.THROW_SPEAR
+            boolean right = (player.tickCount / 6 & 1) == 0;
+            state.rightArmPose = right ? net.minecraft.client.model.HumanoidModel.ArmPose.THROW_TRIDENT
                     : net.minecraft.client.model.HumanoidModel.ArmPose.SPYGLASS;
-            playerModel.leftArmPose = rightReach
-                    ? net.minecraft.client.model.HumanoidModel.ArmPose.SPYGLASS
-                    : net.minecraft.client.model.HumanoidModel.ArmPose.THROW_SPEAR;
-            poseStack.pushPose();
-            pushedPlayerPose = true;
-            float bob = net.minecraft.util.Mth.sin((player.tickCount + pt) * 0.55F) * 0.05F;
-            poseStack.translate(0.0F, bob, 0.0F);
-            return;
+            state.leftArmPose = right ? net.minecraft.client.model.HumanoidModel.ArmPose.SPYGLASS
+                    : net.minecraft.client.model.HumanoidModel.ArmPose.THROW_TRIDENT;
+        } else if (roll > 0) {
+            state.isCrouching = true;
+        } else if (bash > 0) {
+            state.leftArmPose = net.minecraft.client.model.HumanoidModel.ArmPose.CROSSBOW_HOLD;
+        } else if (power > 0) {
+            if ((10f - power + state.partialTick) / 10f < 0.45f)
+                state.rightArmPose = net.minecraft.client.model.HumanoidModel.ArmPose.THROW_TRIDENT;
+        } else if (local && wasBlocking) {
+            if (player.getOffhandItem().getItem() instanceof net.minecraft.world.item.ShieldItem)
+                state.leftArmPose = net.minecraft.client.model.HumanoidModel.ArmPose.BLOCK;
+            else state.rightArmPose = net.minecraft.client.model.HumanoidModel.ArmPose.BLOCK;
         }
+        state.setRenderData(ANIMATION, new Animation(climbing, roll, bash, power, state.bodyRot, player.tickCount + state.partialTick));
+    }
 
-        // 4. Dodge roll: compact tucked crouch + 360-degree forward somersault
-        int rollRem = isLocal ? dodgeRollTicks : (com.skycraft.vitals.ActionHandler.isDodgeRolling(player) ? 6 : 0);
-        if (rollRem > 0) {
-            playerModel.crouching = true;
-            float progress = 1.0F - ((rollRem - pt) / 12.0F);
-            progress = net.minecraft.util.Mth.clamp(progress, 0.0F, 1.0F);
-            poseStack.pushPose();
-            pushedPlayerPose = true;
-            float bodyYaw = net.minecraft.util.Mth.rotLerp(pt, player.yBodyRotO, player.yBodyRot);
-            poseStack.translate(0.0F, 0.80F, 0.0F);
-            poseStack.mulPose(com.mojang.math.Axis.YP.rotationDegrees(-bodyYaw));
-            poseStack.mulPose(com.mojang.math.Axis.XP.rotationDegrees(progress * 360.0F));
-            poseStack.mulPose(com.mojang.math.Axis.YP.rotationDegrees(bodyYaw));
-            poseStack.translate(0.0F, -0.80F, 0.0F);
-            return;
-        }
-
-        // 5. Shield bash: forward shield lunge
-        int bashRem = isLocal ? shieldBashTicks : (com.skycraft.vitals.ActionHandler.isShieldBashing(player) ? 5 : 0);
-        if (bashRem > 0) {
-            playerModel.leftArmPose = net.minecraft.client.model.HumanoidModel.ArmPose.CROSSBOW_HOLD;
-            float thrust = net.minecraft.util.Mth.sin(((10.0F - bashRem + pt) / 10.0F) * (float) Math.PI);
-            poseStack.pushPose();
-            pushedPlayerPose = true;
-            double yawRad = Math.toRadians(net.minecraft.util.Mth.rotLerp(pt, player.yBodyRotO, player.yBodyRot));
-            poseStack.translate(-Math.sin(yawRad) * 0.32 * thrust, 0.0, Math.cos(yawRad) * 0.32 * thrust);
-            return;
-        }
-
-        // 6. Power-attack windup & cleave lunge
-        int pwrRem = isLocal ? powerAttackTicks : (com.skycraft.vitals.ActionHandler.isPowerAttacking(player) ? 5 : 0);
-        if (pwrRem > 0) {
-            float progress = (10.0F - pwrRem + pt) / 10.0F;
-            if (progress < 0.45F) {
-                playerModel.rightArmPose = net.minecraft.client.model.HumanoidModel.ArmPose.THROW_SPEAR;
-            }
-            float lunge = net.minecraft.util.Mth.sin(progress * (float) Math.PI);
-            poseStack.pushPose();
-            pushedPlayerPose = true;
-            double yawRad = Math.toRadians(net.minecraft.util.Mth.rotLerp(pt, player.yBodyRotO, player.yBodyRot));
-            poseStack.translate(-Math.sin(yawRad) * 0.25 * lunge, 0.06 * lunge, Math.cos(yawRad) * 0.25 * lunge);
-            return;
-        }
-
-        // 7. Weapon blocking stance
-        if (isLocal && wasBlocking) {
-            if (player.getOffhandItem().getItem() instanceof net.minecraft.world.item.ShieldItem) {
-                playerModel.leftArmPose = net.minecraft.client.model.HumanoidModel.ArmPose.BLOCK;
-            } else {
-                playerModel.rightArmPose = net.minecraft.client.model.HumanoidModel.ArmPose.BLOCK;
-            }
+    @SubscribeEvent
+    public static void onRenderPlayerPre(net.neoforged.neoforge.client.event.RenderLivingEvent.Pre<?, ?, ?> event) {
+        var state = event.getRenderState();
+        state.setRenderData(POSE_PUSHED, false);
+        Animation animation = state.getRenderData(ANIMATION);
+        if (animation == null) return;
+        float partial = event.getPartialTick();
+        var pose = event.getPoseStack();
+        if (animation.climbing()) {
+            pose.pushPose();
+            state.setRenderData(POSE_PUSHED, true);
+            pose.translate(0f, net.minecraft.util.Mth.sin(animation.age() * 0.55f) * 0.05f, 0f);
+        } else if (animation.roll() > 0) {
+            float progress = net.minecraft.util.Mth.clamp(1f - (animation.roll() - partial) / 12f, 0f, 1f);
+            pose.pushPose();
+            state.setRenderData(POSE_PUSHED, true);
+            pose.translate(0f, 0.8f, 0f);
+            pose.rotateDegrees(com.mojang.math.Axis.YP, -animation.bodyYaw());
+            pose.rotateDegrees(com.mojang.math.Axis.XP, progress * 360f);
+            pose.rotateDegrees(com.mojang.math.Axis.YP, animation.bodyYaw());
+            pose.translate(0f, -0.8f, 0f);
+        } else if (animation.bash() > 0 || animation.power() > 0) {
+            boolean bash = animation.bash() > 0;
+            float progress = (10f - (bash ? animation.bash() : animation.power()) + partial) / 10f;
+            float thrust = net.minecraft.util.Mth.sin(progress * (float) Math.PI);
+            double yaw = Math.toRadians(animation.bodyYaw());
+            double distance = bash ? 0.32 : 0.25;
+            pose.pushPose();
+            state.setRenderData(POSE_PUSHED, true);
+            pose.translate(-Math.sin(yaw) * distance * thrust, bash ? 0 : 0.06 * thrust, Math.cos(yaw) * distance * thrust);
         }
     }
 
     @SubscribeEvent
-    public static void onRenderPlayerPost(net.minecraftforge.client.event.RenderLivingEvent.Post<?, ?> event) {
-        if (pushedPlayerPose && event.getEntity() instanceof net.minecraft.world.entity.player.Player) {
+    public static void onRenderPlayerPost(net.neoforged.neoforge.client.event.RenderLivingEvent.Post<?, ?, ?> event) {
+        if (Boolean.TRUE.equals(event.getRenderState().getRenderData(POSE_PUSHED))) {
             event.getPoseStack().popPose();
-            pushedPlayerPose = false;
+            event.getRenderState().setRenderData(POSE_PUSHED, false);
         }
     }
 
     /** No vanilla tutorials/toasts: clear toasts on every HUD render. */
     @SubscribeEvent
-    public static void clearToasts(net.minecraftforge.client.event.RenderGuiEvent.Post event) {
+    public static void clearToasts(net.neoforged.neoforge.client.event.RenderGuiEvent.Post event) {
         Minecraft mc = Minecraft.getInstance();
-        if (mc.getToasts() != null) {
-            mc.getToasts().clear();
+        if (mc.gui.toastManager() != null) {
+            mc.gui.toastManager().clear();
         }
     }
 
@@ -715,13 +686,13 @@ public final class ClientEvents {
                     if (f.getType() == it.unimi.dsi.fastutil.booleans.BooleanConsumer.class) {
                         f.setAccessible(true);
                         it.unimi.dsi.fastutil.booleans.BooleanConsumer callback = (it.unimi.dsi.fastutil.booleans.BooleanConsumer) f.get(screen);
-                        Minecraft.getInstance().tell(() -> callback.accept(true));
+                        Minecraft.getInstance().execute(() -> callback.accept(true));
                         return true;
                     }
                     if (f.getType() == net.minecraft.client.gui.screens.BackupConfirmScreen.Listener.class) {
                         f.setAccessible(true);
                         net.minecraft.client.gui.screens.BackupConfirmScreen.Listener listener = (net.minecraft.client.gui.screens.BackupConfirmScreen.Listener) f.get(screen);
-                        Minecraft.getInstance().tell(() -> listener.proceed(false, false));
+                        Minecraft.getInstance().execute(() -> listener.proceed(false, false));
                         return true;
                     }
                 } catch (ReflectiveOperationException | RuntimeException e) {

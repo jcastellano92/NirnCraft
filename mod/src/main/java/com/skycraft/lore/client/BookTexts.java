@@ -5,7 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.skycraft.Skycraft;
 import net.minecraft.client.Minecraft;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.util.GsonHelper;
 import org.jetbrains.annotations.Nullable;
@@ -42,7 +42,7 @@ public final class BookTexts {
     }
 
     private static Optional<Text> load(String id) {
-        ResourceLocation location = new ResourceLocation(Skycraft.MODID, "lore/books/" + id + ".json");
+        Identifier location = Identifier.fromNamespaceAndPath(Skycraft.MODID, "lore/books/" + id + ".json");
         Optional<Resource> resource = Minecraft.getInstance().getResourceManager().getResource(location);
         if (resource.isEmpty()) {
             // a place readable: its text lives in the place lore data (and the language file)

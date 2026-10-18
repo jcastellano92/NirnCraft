@@ -7,16 +7,16 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.Screenshot;
 import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.world.Difficulty;
-import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.WorldDataConfiguration;
 import net.minecraft.world.level.levelgen.WorldOptions;
 import net.minecraft.world.level.levelgen.presets.WorldPresets;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -34,7 +34,7 @@ import java.util.function.Consumer;
  * Nirn, and quits. A comma list in the file (or {@code -Dskycraft.realmtest.only=deadlands,sovngarde}) limits the tour.
  * Does nothing in normal play.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
 public final class RealmAutotest {
     private static final Path FLAG = Paths.get("skycraft-realmtest.txt");
     private static final boolean ENABLED = Files.exists(FLAG) || "1".equals(System.getenv("SKYCRAFT_REALMTEST"))
@@ -73,10 +73,10 @@ public final class RealmAutotest {
     static {
         step(100, mc -> {
             com.skycraft.network.SkyNetwork.sendToServer(new CorePackets.ChooseRace(com.skycraft.core.Race.NORD.id()));
-            mc.setScreen(null);
+            mc.gui.setScreen(null);
         });
-        cmd(2, "gamerule doDaylightCycle false");
-        cmd(2, "gamerule doMobSpawning false");
+        cmd(2, "gamerule advance_time false");
+        cmd(2, "gamerule spawn_mobs false");
         cmd(2, "time set 6000");
         cmd(2, "effect give @s minecraft:resistance 99999 255 true");
         cmd(2, "effect give @s minecraft:fire_resistance 99999 0 true");
@@ -179,15 +179,15 @@ public final class RealmAutotest {
 
     /** Closes whatever opened meanwhile (the character creator re-opens until the race sticks). */
     private static void clearScreen(Minecraft mc) {
-        if (mc.screen != null) {
+        if (mc.gui.screen() != null) {
             com.skycraft.network.SkyNetwork.sendToServer(new CorePackets.ChooseRace(com.skycraft.core.Race.NORD.id()));
-            mc.setScreen(null);
+            mc.gui.setScreen(null);
         }
     }
 
     private static void look(Minecraft mc, float yaw, float pitch) {
         if (mc.player == null) return;
-        mc.setScreen(null);
+        mc.gui.setScreen(null);
         mc.player.setYRot(yaw);
         mc.player.setXRot(pitch);
         mc.player.yRotO = yaw;
@@ -195,31 +195,23 @@ public final class RealmAutotest {
     }
 
     private static void shot(Minecraft mc, String name) {
-        try {
-            Files.createDirectories(OUT);
-            NativeImage img = Screenshot.takeScreenshot(mc.getMainRenderTarget());
-            File out = OUT.resolve(name + ".png").toFile();
-            img.writeToFile(out);
-            img.close();
-            Skycraft.LOGGER.info("Realm autotest: saved {}", out.getAbsolutePath());
-        } catch (Exception e) {
-            Skycraft.LOGGER.warn("Realm autotest: screenshot {} failed", name, e);
-        }
+        com.skycraft.client.autotest.ReviewCaptures.capture(mc, OUT, name,
+                output -> Skycraft.LOGGER.info("Realm autotest: saved {}", output.toAbsolutePath()));
     }
 
     @SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent event) {
-        if (!ENABLED || event.phase != TickEvent.Phase.END) return;
+    public static void onClientTick(net.neoforged.neoforge.client.event.ClientTickEvent.Post event) {
+        if (!ENABLED) return;
+        if (com.skycraft.client.autotest.ReviewCaptures.pending() > 0) return;
         Minecraft mc = Minecraft.getInstance();
         if (mc.level == null) {
-            if (mc.screen instanceof net.minecraft.client.gui.screens.AccessibilityOnboardingScreen) mc.setScreen(new TitleScreen());
-            if (!worldRequested && (mc.screen instanceof TitleScreen || mc.screen instanceof com.skycraft.client.screen.title.SkyTitleScreen)) {
+            if (mc.gui.screen() instanceof net.minecraft.client.gui.screens.AccessibilityOnboardingScreen) mc.gui.setScreen(new TitleScreen());
+            if (!worldRequested && (mc.gui.screen() instanceof TitleScreen || mc.gui.screen() instanceof com.skycraft.client.screen.title.SkyTitleScreen)) {
                 worldRequested = true;
                 String name = "realmtest-" + System.currentTimeMillis();
-                LevelSettings settings = new LevelSettings(name, GameType.CREATIVE, false, Difficulty.PEACEFUL, true,
-                        new GameRules(), WorldDataConfiguration.DEFAULT);
-                mc.createWorldOpenFlows().createFreshLevel(name, settings, new WorldOptions(20261011L, true, false),
-                        WorldPresets::createNormalWorldDimensions);
+                LevelSettings settings = com.skycraft.client.autotest.ReviewWorlds.settings(name,  GameType.CREATIVE,  false,  Difficulty.PEACEFUL,  true,  WorldDataConfiguration.DEFAULT);
+                com.skycraft.client.autotest.ReviewWorlds.create(mc, name,  settings,  new WorldOptions(20261011L, true, false), 
+                        com.skycraft.client.autotest.ReviewWorlds::normal, mc.gui.screen());
             }
             return;
         }

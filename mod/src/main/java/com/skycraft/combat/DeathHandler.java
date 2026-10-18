@@ -14,7 +14,7 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
@@ -23,15 +23,15 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.GameRules;
-import net.minecraftforge.event.entity.living.LivingDeathEvent;
-import net.minecraftforge.event.entity.player.ItemTooltipEvent;
-import net.minecraftforge.event.entity.living.LivingDropsEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.event.entity.player.PlayerWakeUpEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.minecraft.world.level.gamerules.GameRules;
+import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
+import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
+import net.neoforged.neoforge.event.entity.living.LivingDropsEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerWakeUpEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -43,11 +43,11 @@ import java.util.UUID;
 /**
  * Handles Skyrim player death rules, kept equipment and quest items, respawn points, and legendary item tooltips.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class DeathHandler {
-    private static final TagKey<Item> JEWELRY = TagKey.create(Registries.ITEM, new ResourceLocation(Skycraft.MODID, "jewelry"));
-    private static final TagKey<Item> SOUL_GEMS = TagKey.create(Registries.ITEM, new ResourceLocation(Skycraft.MODID, "soul_gems"));
-    private static final TagKey<Item> GEMS = TagKey.create(Registries.ITEM, new ResourceLocation(Skycraft.MODID, "merchant/gems"));
+    private static final TagKey<Item> JEWELRY = TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath(Skycraft.MODID, "jewelry"));
+    private static final TagKey<Item> SOUL_GEMS = TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath(Skycraft.MODID, "soul_gems"));
+    private static final TagKey<Item> GEMS = TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath(Skycraft.MODID, "merchant/gems"));
 
     private DeathHandler() {}
 
@@ -61,7 +61,7 @@ public final class DeathHandler {
     public static void onDeath(LivingDeathEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
         // With keepInventory nothing drops and vanilla restores the whole inventory: keeping items would dupe them.
-        if (player.level().getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY) || player.isSpectator()) {
+        if (player.level().getGameRules().get(GameRules.KEEP_INVENTORY) || player.isSpectator()) {
             PENDING.put(player.getUUID(), new ListTag());
             return;
         }
@@ -76,7 +76,7 @@ public final class DeathHandler {
                     && (mode != SkyConfig.DeathDrops.EVERYTHING || QuestItems.isQuestItem(stack))) {
                 CompoundTag entry = new CompoundTag();
                 entry.putString("slot", slot.getName());
-                entry.put("item", stack.save(new CompoundTag()));
+                entry.put("item", com.skycraft.inventory.ItemData.save(stack));
                 list.add(entry);
             }
         }
@@ -85,7 +85,7 @@ public final class DeathHandler {
         // food, potions...) too: only gold and valuables are lost
         Inventory inv = player.getInventory();
         for (int i = 0; i < Inventory.INVENTORY_SIZE; i++) {
-            if (i == inv.selected) continue; // main hand already saved above
+            if (i == inv.getSelectedSlot()) continue; // main hand already saved above
             ItemStack stack = inv.getItem(i);
             if (stack.isEmpty() || com.skycraft.magic.bound.BoundWeapons.isBound(stack)) continue; // conjured: never kept
             boolean keep = QuestItems.isQuestItem(stack)
@@ -93,7 +93,7 @@ public final class DeathHandler {
             if (keep) {
                 CompoundTag entry = new CompoundTag();
                 entry.putInt("inv_slot", i);
-                entry.put("item", stack.save(new CompoundTag()));
+                entry.put("item", com.skycraft.inventory.ItemData.save(stack));
                 list.add(entry);
             }
         }
@@ -133,7 +133,7 @@ public final class DeathHandler {
         corpseLoc.putInt("x", player.getBlockX());
         corpseLoc.putInt("y", player.getBlockY());
         corpseLoc.putInt("z", player.getBlockZ());
-        corpseLoc.putString("dim", player.level().dimension().location().toString());
+        corpseLoc.putString("dim", player.level().dimension().identifier().toString());
         corpseLoc.putLong("t", player.level().getGameTime());
         corpseLoc.putInt("ax", player.getBlockX());
         corpseLoc.putInt("ay", player.getBlockY());
@@ -144,7 +144,7 @@ public final class DeathHandler {
 
         ListTag discovered = com.skycraft.world.WorldData.discovered(data);
         for (int i = discovered.size() - 1; i >= 0; i--) {
-            if (discovered.getCompound(i).getString("name").equals("Your Corpse")) {
+            if (discovered.getCompoundOrEmpty(i).getStringOr("name","").equals("Your Corpse")) {
                 discovered.remove(i);
             }
         }
@@ -162,8 +162,8 @@ public final class DeathHandler {
         String corpseId = "corpse|" + player.getStringUUID();
         ListTag discovered = com.skycraft.world.WorldData.discovered(data);
         for (int i = 0; i < discovered.size(); i++) {
-            CompoundTag loc = discovered.getCompound(i);
-            if (!corpseId.equals(loc.getString("id"))) continue;
+            CompoundTag loc = discovered.getCompoundOrEmpty(i);
+            if (!corpseId.equals(loc.getStringOr("id",""))) continue;
             loc.putInt("x", pos.getX());
             loc.putInt("y", pos.getY());
             loc.putInt("z", pos.getZ());
@@ -185,12 +185,12 @@ public final class DeathHandler {
         dropGold(player, event);
         dropPack(player, event);
         CompoundTag keptTag = SkyData.get(player).module("death_kept");
-        if (!keptTag.contains("items", Tag.TAG_LIST)) return;
+        if (!com.skycraft.platform.NbtData.hasType(keptTag, "items", Tag.TAG_LIST)) return;
 
-        ListTag list = keptTag.getList("items", Tag.TAG_COMPOUND);
+        ListTag list = keptTag.getListOrEmpty("items");
         List<ItemStack> toKeep = new ArrayList<>();
         int[] removed = new int[list.size()];
-        for (int i = 0; i < list.size(); i++) toKeep.add(ItemStack.of(list.getCompound(i).getCompound("item")));
+        for (int i = 0; i < list.size(); i++) toKeep.add(com.skycraft.inventory.ItemData.parse(list.getCompoundOrEmpty(i).getCompoundOrEmpty("item")));
 
         // Pass 1: identical stacks (item, tags and count).
         for (int k = 0; k < toKeep.size(); k++) {
@@ -211,7 +211,7 @@ public final class DeathHandler {
             for (Iterator<ItemEntity> it = event.getDrops().iterator(); it.hasNext() && remaining > 0 && !keep.isEmpty(); ) {
                 ItemEntity drop = it.next();
                 ItemStack dropStack = drop.getItem();
-                if (!ItemStack.isSameItemSameTags(dropStack, keep)) continue;
+                if (!ItemStack.isSameItemSameComponents(dropStack, keep)) continue;
                 int take = Math.min(remaining, dropStack.getCount());
                 remaining -= take;
                 removed[k] += take;
@@ -230,10 +230,10 @@ public final class DeathHandler {
         ListTag confirmed = new ListTag();
         for (int k = 0; k < toKeep.size(); k++) {
             if (removed[k] <= 0) continue;
-            CompoundTag entry = list.getCompound(k).copy();
+            CompoundTag entry = list.getCompoundOrEmpty(k).copy();
             ItemStack stack = toKeep.get(k).copy();
             stack.setCount(removed[k]);
-            entry.put("item", stack.save(new CompoundTag()));
+            entry.put("item", com.skycraft.inventory.ItemData.save(stack));
             confirmed.add(entry);
         }
         keptTag.put("items", confirmed);
@@ -246,7 +246,7 @@ public final class DeathHandler {
      * What stays is part of the player data and comes back with the clone.
      */
     private static void dropPack(ServerPlayer player, LivingDropsEvent event) {
-        if (player.isSpectator() || player.level().getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY)) return;
+        if (player.isSpectator() || player.level().getGameRules().get(GameRules.KEEP_INVENTORY)) return;
         SkyConfig.DeathDrops mode = SkyConfig.DEATH_DROPS.get();
         // whole entries (int counts) go to the player corpse next to the slots' drops, never as thousands of max-size
         // item entities (survival/corpse/PlayerCorpses; with corpses off they fall as entities like before)
@@ -262,7 +262,7 @@ public final class DeathHandler {
 
     /** A share of the gold wallet falls to the corpse as coins (configurable, 0 disables). */
     private static void dropGold(ServerPlayer player, LivingDropsEvent event) {
-        if (player.isSpectator() || player.level().getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY)) return;
+        if (player.isSpectator() || player.level().getGameRules().get(GameRules.KEEP_INVENTORY)) return;
         double pct = SkyConfig.DEATH_GOLD_DROP_PERCENT.get();
         PlayerData data = SkyData.get(player);
         long lose = (long) (data.getGold() * pct / 100.0);
@@ -285,26 +285,26 @@ public final class DeathHandler {
         data.setLastCombatTick(-100000L);
 
         CompoundTag keptTag = data.module("death_kept");
-        if (!keptTag.contains("items", Tag.TAG_LIST)) return;
+        if (!com.skycraft.platform.NbtData.hasType(keptTag, "items", Tag.TAG_LIST)) return;
         // keepInventory: vanilla already restored everything (onDeath records nothing then; this guards old saves).
         // Not confirmed: the drops never reached us (another mod took them), so the items are wherever they went.
-        if (newPlayer.level().getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY) || !keptTag.getBoolean("confirmed")) {
+        if (newPlayer.level().getGameRules().get(GameRules.KEEP_INVENTORY) || !keptTag.getBooleanOr("confirmed",false)) {
             keptTag.remove("items");
             keptTag.remove("confirmed");
             data.markDirty();
             return;
         }
 
-        ListTag list = keptTag.getList("items", Tag.TAG_COMPOUND);
+        ListTag list = keptTag.getListOrEmpty("items");
         for (int i = 0; i < list.size(); i++) {
-            CompoundTag entry = list.getCompound(i);
-            ItemStack stack = ItemStack.of(entry.getCompound("item"));
+            CompoundTag entry = list.getCompoundOrEmpty(i);
+            ItemStack stack = com.skycraft.inventory.ItemData.parse(entry.getCompoundOrEmpty("item"));
             if (stack.isEmpty() || com.skycraft.magic.bound.BoundWeapons.isBound(stack)) continue;
             if (entry.contains("slot")) {
-                EquipmentSlot slot = EquipmentSlot.byName(entry.getString("slot"));
+                EquipmentSlot slot = EquipmentSlot.byName(entry.getStringOr("slot",""));
                 newPlayer.setItemSlot(slot, stack);
             } else if (entry.contains("inv_slot")) {
-                int slot = entry.getInt("inv_slot");
+                int slot = entry.getIntOr("inv_slot",0);
                 if (slot >= 0 && slot < newPlayer.getInventory().getContainerSize()
                         && newPlayer.getInventory().getItem(slot).isEmpty()) {
                     newPlayer.getInventory().setItem(slot, stack);

@@ -1,20 +1,11 @@
 package com.skycraft.visual.client;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.blaze3d.vertex.VertexFormat;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleProvider;
-import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.client.particle.SpriteSet;
-import net.minecraft.client.particle.TextureSheetParticle;
-import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.client.renderer.texture.TextureAtlas;
-import net.minecraft.client.renderer.texture.TextureManager;
+import net.minecraft.client.particle.SingleQuadParticle;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
@@ -24,38 +15,8 @@ import net.minecraft.world.phys.Vec3;
  * rising, wind-blown, wandering, expanding) and look. {@link #live} counts the particles alive so the spawner can
  * keep to its budget; anything that drifts out of range is removed early.
  */
-public final class AtmosParticle extends TextureSheetParticle {
+public final class AtmosParticle extends SingleQuadParticle {
     public enum Kind { SNOW, ASH, EMBER, SAND, LEAF, FIREFLY, BREATH, WISP, MOTE, SPELL_FROST, SPELL_SPARK }
-
-    /**
-     * Translucent particle sheet that tests against solid scene depth ({@code GL_LEQUAL}) so walls and roofs occlude
-     * particles, but does NOT write particle quad depths into {@code depthtex0} ({@code depthMask(false)}). Writing
-     * near-camera depth into the sky dome causes deferred screen-space ambient occlusion (SSAO) and TAA in shaders to
-     * paint dithered grey circular halos and trails behind falling particles.
-     */
-    private static final ParticleRenderType NO_DEPTH_WRITE_TRANSLUCENT = new ParticleRenderType() {
-        @Override
-        public void begin(BufferBuilder builder, TextureManager textureManager) {
-            RenderSystem.enableDepthTest();
-            RenderSystem.depthMask(false);
-            RenderSystem.setShader(GameRenderer::getParticleShader);
-            RenderSystem.setShaderTexture(0, TextureAtlas.LOCATION_PARTICLES);
-            RenderSystem.enableBlend();
-            RenderSystem.defaultBlendFunc();
-            builder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.PARTICLE);
-        }
-
-        @Override
-        public void end(Tesselator tesselator) {
-            tesselator.end();
-            RenderSystem.depthMask(true);
-        }
-
-        @Override
-        public String toString() {
-            return "SKYCRAFT_NO_DEPTH_WRITE_TRANSLUCENT";
-        }
-    };
 
     /** Particles of this class currently alive (reset when the level changes, see {@link AmbientParticles}). */
     static int live;
@@ -65,13 +26,13 @@ public final class AtmosParticle extends TextureSheetParticle {
     private final Kind kind;
     private final SpriteSet sprites;
     private float baseAlpha;
-    private final float baseSize;
+    private float baseSize;
     private final float phase;
     private final float spin;
     private float windX, windZ;
 
     AtmosParticle(ClientLevel level, double x, double y, double z, double vx, double vy, double vz, Kind kind, SpriteSet sprites) {
-        super(level, x, y, z);
+        super(level, x, y, z, sprites.first());
         this.kind = kind;
         this.sprites = sprites;
         this.xd = vx;
@@ -160,7 +121,7 @@ public final class AtmosParticle extends TextureSheetParticle {
         this.baseSize = quadSize;
         this.roll = random.nextFloat() * Mth.TWO_PI;
         this.oRoll = roll;
-        pickSprite(sprites);
+        setSprite(sprites.get(this.random));
         live++;
     }
 
@@ -183,6 +144,7 @@ public final class AtmosParticle extends TextureSheetParticle {
     }
 
     AtmosParticle size(float scale) {
+        baseSize *= scale;
         quadSize *= scale;
         return this;
     }
@@ -203,7 +165,7 @@ public final class AtmosParticle extends TextureSheetParticle {
             remove();
             return;
         }
-        Vec3 cam = Minecraft.getInstance().gameRenderer.getMainCamera().getPosition();
+        Vec3 cam = Minecraft.getInstance().gameRenderer.mainCamera().position();
         double dx = x - cam.x, dy = y - cam.y, dz = z - cam.z;
         if (dx * dx + dy * dy + dz * dz > maxDistSqr) {
             remove();
@@ -298,23 +260,23 @@ public final class AtmosParticle extends TextureSheetParticle {
     }
 
     @Override
-    protected int getLightColor(float partialTick) {
+    protected int getLightCoords(float partialTick) {
         if (kind == Kind.EMBER || kind == Kind.FIREFLY || kind == Kind.SPELL_FROST || kind == Kind.SPELL_SPARK) return 0xF000F0;
-        int packed = super.getLightColor(partialTick);
+        int packed = super.getLightCoords(partialTick);
         // dust motes catch a little light even in the dark
         if (kind == Kind.MOTE) return Math.max(packed & 0xFFFF, 0x50) | (packed & 0xFFFF0000);
         return packed;
     }
 
     @Override
-    public ParticleRenderType getRenderType() {
-        return NO_DEPTH_WRITE_TRANSLUCENT;
+    protected SingleQuadParticle.Layer getLayer() {
+        return AtmosParticlePipeline.LAYER;
     }
 
     /** Provider for {@code /particle} and server-side spawns: default motion of the kind, no wind. */
     public record Provider(Kind kind, SpriteSet sprites) implements ParticleProvider<SimpleParticleType> {
         @Override
-        public Particle createParticle(SimpleParticleType type, ClientLevel level, double x, double y, double z, double vx, double vy, double vz) {
+        public SingleQuadParticle createParticle(SimpleParticleType type, ClientLevel level, double x, double y, double z, double vx, double vy, double vz, net.minecraft.util.RandomSource random) {
             return new AtmosParticle(level, x, y, z, vx, vy, vz, kind, sprites);
         }
     }

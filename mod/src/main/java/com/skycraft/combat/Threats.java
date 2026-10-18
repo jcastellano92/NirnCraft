@@ -12,12 +12,12 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.util.FakePlayer;
-import net.minecraftforge.common.util.FakePlayerFactory;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.common.util.FakePlayer;
+import net.neoforged.neoforge.common.util.FakePlayerFactory;
+
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -36,7 +36,7 @@ import java.util.UUID;
  * {@link #EXIT} blocks away, dead, or has been neither hunting nor searching for {@link #GRACE} ticks, so a mob
  * that flips its target for a moment does not make its marker flicker.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class Threats {
     public static final int COMBAT = 1;
     public static final int SEARCH = 2;
@@ -76,8 +76,8 @@ public final class Threats {
     // ------------------------------------------------------------------ events
 
     @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer player)) return;
+    public static void onPlayerTick(net.neoforged.neoforge.event.tick.PlayerTickEvent.Post event) {
+        if (!(event instanceof net.neoforged.neoforge.event.tick.PlayerTickEvent.Post) || !(event.getEntity() instanceof ServerPlayer player)) return;
         if (player instanceof FakePlayer || player.connection == null) return;
         if ((player.tickCount + player.getId()) % INTERVAL != 0) return;
         ThreatPackets.Sync delta = update(player, player.level().getGameTime());
@@ -112,7 +112,7 @@ public final class Threats {
      */
     public static ThreatPackets.Sync update(ServerPlayer player, long now) {
         State st = STATES.computeIfAbsent(player.getUUID(), k -> new State());
-        ServerLevel level = player.serverLevel();
+        ServerLevel level = player.level();
         boolean reset = false;
         if (st.dim != null && st.dim != level.dimension()) {
             st.entries.clear();
@@ -213,11 +213,11 @@ public final class Threats {
     public static void selfTest(ServerLevel level, List<String> info, List<String> problems) {
         ServerPlayer fake = FakePlayerFactory.get(level, new GameProfile(
                 UUID.nameUUIDFromBytes("skycraft-threat-selftest".getBytes()), "[ThreatSelftest]"));
-        BlockPos base = level.getSharedSpawnPos();
+        BlockPos base = level.getRespawnData().pos();
         level.getChunk(base.getX() >> 4, base.getZ() >> 4);
         double px = base.getX() + 0.5, pz = base.getZ() + 0.5;
         double py = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.WORLD_SURFACE, base.getX(), base.getZ()) + 1;
-        fake.moveTo(px, py, pz);
+        fake.snapTo(px, py, pz);
         STATES.remove(fake.getUUID());
         List<Mob> spawned = new ArrayList<>();
         long t = 10_000;
@@ -282,8 +282,8 @@ public final class Threats {
     }
 
     private static Mob spawn(ServerLevel level, List<Mob> out, double x, double y, double z) {
-        Mob m = (Mob) EntityType.ZOMBIE.create(level);
-        m.moveTo(x, y, z, 0f, 0f);
+        Mob m = (Mob) net.minecraft.world.entity.EntityTypes.ZOMBIE.create(level, net.minecraft.world.entity.EntitySpawnReason.EVENT);
+        m.snapTo(x, y, z, 0f, 0f);
         m.setNoAi(true);
         m.setSilent(true);
         m.setPersistenceRequired();

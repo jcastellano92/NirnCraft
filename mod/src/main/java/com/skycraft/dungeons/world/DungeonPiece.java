@@ -94,24 +94,24 @@ public class DungeonPiece extends StructurePiece {
 
     public DungeonPiece(StructurePieceSerializationContext context, CompoundTag tag) {
         super(DungeonsRegistry.DUNGEON_PIECE.get(), tag);
-        this.theme = Theme.byOrdinal(tag.getInt("Theme"));
-        this.kit = Kit.byOrdinal(tag.getInt("Kit"));
-        this.special = Special.byOrdinal(tag.getInt("Special"));
-        this.param = tag.getInt("Param");
+        this.theme = Theme.byOrdinal(tag.getIntOr("Theme", 0));
+        this.kit = Kit.byOrdinal(tag.getIntOr("Kit", 0));
+        this.special = Special.byOrdinal(tag.getIntOr("Special", 0));
+        this.param = tag.getIntOr("Param", 0);
         Kind[] kinds = Kind.values();
-        int k = tag.getInt("Kind");
+        int k = tag.getIntOr("Kind", 0);
         this.kind = k >= 0 && k < kinds.length ? kinds[k] : Kind.ROOM;
-        this.seed = tag.getLong("Seed");
-        this.floor = tag.getInt("Floor");
-        this.aux = tag.getInt("Aux");
-        this.dir = tag.getInt("Dir");
-        this.extra = tag.getInt("Extra");
-        this.role = tag.getInt("Role");
-        this.doors = tag.getInt("Doors");
-        this.variant = tag.getInt("Variant");
-        this.flavor = tag.getInt("Flavor");
-        this.flags = tag.getInt("Flags");
-        this.place = tag.getString("Place");
+        this.seed = tag.getLongOr("Seed", 0L);
+        this.floor = tag.getIntOr("Floor", 0);
+        this.aux = tag.getIntOr("Aux", 0);
+        this.dir = tag.getIntOr("Dir", 0);
+        this.extra = tag.getIntOr("Extra", 0);
+        this.role = tag.getIntOr("Role", 0);
+        this.doors = tag.getIntOr("Doors", 0);
+        this.variant = tag.getIntOr("Variant", 0);
+        this.flavor = tag.getIntOr("Flavor", 0);
+        this.flags = tag.getIntOr("Flags", 0);
+        this.place = tag.getStringOr("Place", "");
     }
 
     @Override

@@ -7,7 +7,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -16,19 +16,18 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.monster.Skeleton;
+import net.minecraft.world.entity.monster.skeleton.Skeleton;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BowItem;
-import net.minecraft.world.item.DyeableLeatherItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -69,13 +68,13 @@ public final class Npcs {
     /** Creates, positions and outfits an NPC without adding it to the level (callers tag it, then add it). */
     @Nullable
     public static NpcEntity create(ServerLevel level, BlockPos pos, NpcRole role) {
-        NpcEntity npc = NpcEntities.typeFor(role).create(level);
+        NpcEntity npc = NpcEntities.typeFor(role).create(level, net.minecraft.world.entity.EntitySpawnReason.STRUCTURE);
         if (npc == null) return null;
         float yaw = level.getRandom().nextFloat() * 360f;
-        npc.moveTo(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5, yaw, 0f);
+        npc.snapTo(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5, yaw, 0f);
         npc.setYHeadRot(yaw);
         npc.setRole(role);
-        npc.finalizeSpawn(level, level.getCurrentDifficultyAt(pos), MobSpawnType.EVENT, null, null);
+        npc.finalizeSpawn(level, level.getCurrentDifficultyAt(pos), EntitySpawnReason.EVENT, null);
         return npc;
     }
 
@@ -149,7 +148,7 @@ public final class Npcs {
         if (profession != null && !pd.contains(PROFESSION_KEY)) pd.putString(PROFESSION_KEY, profession);
         String[] pools = switch (role) {
             case BLACKSMITH -> new String[]{"blacksmith"};
-            case MERCHANT -> "minecraft:fletcher".equals(pd.getString(PROFESSION_KEY)) ? new String[]{"general", "fletcher"} : new String[]{"general"};
+            case MERCHANT -> "minecraft:fletcher".equals(pd.getStringOr(PROFESSION_KEY, "")) ? new String[]{"general", "fletcher"} : new String[]{"general"};
             case APOTHECARY -> new String[]{"apothecary"};
             case FISHER -> new String[]{"food", "fisher"};
             case BUTCHER -> new String[]{"food", "hunter"};
@@ -276,7 +275,7 @@ public final class Npcs {
         npc.setHealth(npc.getMaxHealth());
     }
 
-    private static void base(LivingEntity e, net.minecraft.world.entity.ai.attributes.Attribute attribute, double value) {
+    private static void base(LivingEntity e, net.minecraft.core.Holder<net.minecraft.world.entity.ai.attributes.Attribute> attribute, double value) {
         AttributeInstance inst = e.getAttribute(attribute);
         if (inst != null) inst.setBaseValue(value);
     }
@@ -291,7 +290,7 @@ public final class Npcs {
 
     /** A registered item by id (e.g. a Skycraft smithing item), or the vanilla fallback. */
     public static ItemStack item(String id, Item fallback) {
-        Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(id));
+        Item item = BuiltInRegistries.ITEM.getValue(Identifier.parse(id));
         return new ItemStack(item == null || item == Items.AIR ? fallback : item);
     }
 
@@ -302,18 +301,18 @@ public final class Npcs {
 
     private static ItemStack dyed(Item item, int color) {
         ItemStack s = new ItemStack(item);
-        if (item instanceof DyeableLeatherItem dyeable) dyeable.setColor(s, color);
+        if (com.skycraft.inventory.EquipmentData.armorMaterial(s) == net.minecraft.world.item.equipment.ArmorMaterials.LEATHER) s.set(net.minecraft.core.component.DataComponents.DYED_COLOR, new net.minecraft.world.item.component.DyedItemColor(color));
         return s;
     }
 
     // ------------------------------------------------------------------ hostility
 
     public static boolean isMember(Player player, String faction) {
-        return SkyData.get(player).module("quest").getCompound("factions").contains(faction);
+        return SkyData.get(player).module("quest").getCompoundOrEmpty("factions").contains(faction);
     }
 
     public static boolean isNight(Level level) {
-        long time = level.getDayTime() % 24000L;
+        long time = level.getDefaultClockTime() % 24000L;
         return time >= 13000 && time <= 23000;
     }
 
@@ -361,11 +360,11 @@ public final class Npcs {
             if (!level.isLoaded(new BlockPos(x, necro.getBlockY(), z))) continue;
             int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z);
             if (Math.abs(y - necro.getBlockY()) > 4) y = necro.getBlockY();
-            Skeleton skeleton = EntityType.SKELETON.create(level);
+            Skeleton skeleton = net.minecraft.world.entity.EntityTypes.SKELETON.create(level, net.minecraft.world.entity.EntitySpawnReason.STRUCTURE);
             if (skeleton == null) continue;
             BlockPos pos = new BlockPos(x, y, z);
-            skeleton.moveTo(x + 0.5, y, z + 0.5, necro.getRandom().nextFloat() * 360f, 0f);
-            skeleton.finalizeSpawn(level, level.getCurrentDifficultyAt(pos), MobSpawnType.MOB_SUMMONED, null, null);
+            skeleton.snapTo(x + 0.5, y, z + 0.5, necro.getRandom().nextFloat() * 360f, 0f);
+            skeleton.finalizeSpawn(level, level.getCurrentDifficultyAt(pos), EntitySpawnReason.MOB_SUMMONED, null);
             skeleton.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.LEATHER_HELMET)); // keeps them alive in daylight
             skeleton.setDropChance(EquipmentSlot.HEAD, 0f);
             skeleton.setDropChance(EquipmentSlot.MAINHAND, 0f);
@@ -387,7 +386,7 @@ public final class Npcs {
 
     /** Persistent data helper used by several classes: a sub-compound created on demand. */
     static CompoundTag sub(CompoundTag root, String key) {
-        if (!root.contains(key, net.minecraft.nbt.Tag.TAG_COMPOUND)) root.put(key, new CompoundTag());
-        return root.getCompound(key);
+        if (!com.skycraft.platform.NbtData.hasType(root, key, net.minecraft.nbt.Tag.TAG_COMPOUND)) root.put(key, new CompoundTag());
+        return root.getCompoundOrEmpty(key);
     }
 }

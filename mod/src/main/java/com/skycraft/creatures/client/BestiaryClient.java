@@ -10,14 +10,14 @@ import com.skycraft.creatures.entity.anim.AnimatedCreature;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.NoopRenderer;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.EntityRenderersEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.EntityRenderersEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -30,28 +30,28 @@ import java.util.function.Supplier;
  * ({@link Defs}), and a {@link RigRenderer} per entity type with its textures
  * ({@code textures/entity/creatures/<name>[_variant].png}, glow layers {@code _glow}).
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
 public final class BestiaryClient {
     private static final Map<String, ModelLayerLocation> LAYERS = new HashMap<>();
 
     private BestiaryClient() {}
 
     public static ModelLayerLocation layer(String def) {
-        return LAYERS.computeIfAbsent(def, n -> new ModelLayerLocation(new ResourceLocation(Skycraft.MODID, "rig/" + n), "main"));
+        return LAYERS.computeIfAbsent(def, n -> new ModelLayerLocation(Identifier.fromNamespaceAndPath(Skycraft.MODID, "rig/" + n), "main"));
     }
 
-    public static ResourceLocation tex(String name) {
-        return new ResourceLocation(Skycraft.MODID, "textures/entity/creatures/" + name + ".png");
+    public static Identifier tex(String name) {
+        return Identifier.fromNamespaceAndPath(Skycraft.MODID, "textures/entity/creatures/" + name + ".png");
     }
 
     /** Variant textures: index = variant, clamped. */
-    public static ResourceLocation[] texs(String... names) {
-        ResourceLocation[] out = new ResourceLocation[names.length];
+    public static Identifier[] texs(String... names) {
+        Identifier[] out = new Identifier[names.length];
         for (int i = 0; i < names.length; i++) out[i] = tex(names[i]);
         return out;
     }
 
-    public static <T extends Mob> Function<T, ResourceLocation> byVariant(ResourceLocation[] textures) {
+    public static <T extends Mob> Function<T, Identifier> byVariant(Identifier[] textures) {
         return e -> textures[Math.floorMod(e instanceof AnimatedCreature ac ? ac.animVariant() : 0, textures.length)];
     }
 
@@ -64,7 +64,7 @@ public final class BestiaryClient {
 
     /** Registers a rig renderer: {@code def} names the model, {@code textures} the variant skins. */
     static <T extends Mob> void reg(EntityRenderersEvent.RegisterRenderers event, Supplier<? extends EntityType<T>> type,
-                                                       String def, float shadow, Function<T, ResourceLocation> texture,
+                                                       String def, float shadow, Function<T, Identifier> texture,
                                                        Consumer<RigRenderer<T>> config) {
         event.registerEntityRenderer(type.get(), (EntityRendererProvider.Context ctx) -> {
             RigRenderer<T> r = new RigRenderer<>(ctx, layer(def), Defs.get(def), shadow, texture);
@@ -90,8 +90,8 @@ public final class BestiaryClient {
             event.registerEntityRenderer(type.get(), NoopRenderer::new);
             return;
         }
-        ResourceLocation[] t = texs(variants == null || variants.length == 0 ? new String[]{def} : variants);
-        ResourceLocation[] g = glow == null ? null : texs(glow);
+        Identifier[] t = texs(variants == null || variants.length == 0 ? new String[]{def} : variants);
+        Identifier[] g = glow == null ? null : texs(glow);
         reg(event, type, def, shadow, byVariant(t), r -> {
             r.scale(scale);
             if (g != null) r.glow(e -> g[Math.floorMod(e instanceof AnimatedCreature ac ? ac.animVariant() : 0, g.length)]);
@@ -116,7 +116,7 @@ public final class BestiaryClient {
      */
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void overrides(EntityRenderersEvent.RegisterRenderers event) {
-        event.registerEntityRenderer(EntityType.ENDER_DRAGON, AlduinRenderer::new);
+        event.registerEntityRenderer(net.minecraft.world.entity.EntityTypes.ENDER_DRAGON, AlduinRenderer::new);
         rig(event, com.skycraft.dungeons.DungeonsRegistry.DWARVEN_SPIDER, "dwarven_spider", 0.5f, 1.0f, null, v("dwarven_spider_glow"), r -> {});
         rig(event, com.skycraft.dungeons.DungeonsRegistry.DWARVEN_SPHERE, "dwarven_sphere", 0.5f, 1.0f, null, v("dwarven_sphere_glow"),
                 r -> r.withExtra((m, sphere, swing, amount, age, yaw, pitch) -> {

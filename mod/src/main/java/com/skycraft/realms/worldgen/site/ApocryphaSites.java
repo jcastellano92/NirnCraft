@@ -78,7 +78,7 @@ final class ApocryphaSites {
     }
 
     static BlockState candle(long h) {
-        Block c = (h & 1) == 0 ? Blocks.BLACK_CANDLE : Blocks.GREEN_CANDLE;
+        Block c = (h & 1) == 0 ? com.skycraft.worldgen.VanillaBlocks.BLACK_CANDLE : com.skycraft.worldgen.VanillaBlocks.GREEN_CANDLE;
         return RealmKit.candles(c, 1 + (int) (h >>> 1 & 3), true);
     }
 
@@ -88,7 +88,7 @@ final class ApocryphaSites {
         @Override
         public Optional<RealmSites.Start> locate(Structure.GenerationContext ctx) {
             int cells = RealmLayout.AP_SPACING / 16;
-            int cx = Math.floorDiv(ctx.chunkPos().x, cells), cz = Math.floorDiv(ctx.chunkPos().z, cells);
+            int cx = Math.floorDiv(ctx.chunkPos().x(), cells), cz = Math.floorDiv(ctx.chunkPos().z(), cells);
             int kind = cx == 0 && cz == 0 ? SUMMIT : cz == 0 && cx >= 1 && cx <= RealmLayout.APOCRYPHA_CHAPTERS ? PATH : LOST;
             return Optional.of(new RealmSites.Start(RealmLayout.chapterX(cx), T, RealmLayout.chapterZ(cz), kind, 2));
         }
@@ -141,8 +141,8 @@ final class ApocryphaSites {
         }
         // the way out, behind the arrival spot
         book(d, cx, T + 1, cz + 5, Direction.NORTH, BlackBookBlock.Mode.EXIT);
-        d.set(cx - 1, T + 1, cz + 5, RealmKit.candles(Blocks.BLACK_CANDLE, 3, true));
-        d.set(cx + 1, T + 1, cz + 5, RealmKit.candles(Blocks.BLACK_CANDLE, 2, true));
+        d.set(cx - 1, T + 1, cz + 5, RealmKit.candles(com.skycraft.worldgen.VanillaBlocks.BLACK_CANDLE, 3, true));
+        d.set(cx + 1, T + 1, cz + 5, RealmKit.candles(com.skycraft.worldgen.VanillaBlocks.BLACK_CANDLE, 2, true));
         // tentacles coiled about the pillar
         for (int i = 0; i < 3; i++) {
             double a = 0.9 + i * 2.1 + (seed & 7) * 0.05;
@@ -298,7 +298,7 @@ final class ApocryphaSites {
         d.box(ex - 3, ey + 1, ez - 5, ex + 3, ey + 1, ez - 3, st(RealmBlocks.APOCRYPHA_STONE));
         book(d, ex - 2, ey + 2, ez - 4, Direction.SOUTH, BlackBookBlock.Mode.NEXT);
         book(d, ex + 2, ey + 2, ez - 4, Direction.SOUTH, BlackBookBlock.Mode.EXIT);
-        d.set(ex, ey + 2, ez - 4, RealmKit.candles(Blocks.GREEN_CANDLE, 4, true));
+        d.set(ex, ey + 2, ez - 4, RealmKit.candles(com.skycraft.worldgen.VanillaBlocks.GREEN_CANDLE, 4, true));
         p.container(ex, ey + 1, ez - 6, Draw.chest(Direction.SOUTH), RealmLoot.APOCRYPHA_CHAPTER);
         for (int s = -1; s <= 1; s += 2) obelisk(d, ex + 6 * s, ey, ez - 2, 6);
         stacks(d, ex, ey, ez, e[3], RealmSites.hash(piece.seed, last, 29), 4);
@@ -411,8 +411,8 @@ final class ApocryphaSites {
 
         // ---- the way out behind the arrival spot, the Summit's hoard at the north rim
         book(d, cx, T + 1, cz + 6, Direction.NORTH, BlackBookBlock.Mode.EXIT);
-        d.set(cx - 1, T + 1, cz + 6, RealmKit.candles(Blocks.BLACK_CANDLE, 3, true));
-        d.set(cx + 1, T + 1, cz + 6, RealmKit.candles(Blocks.BLACK_CANDLE, 2, true));
+        d.set(cx - 1, T + 1, cz + 6, RealmKit.candles(com.skycraft.worldgen.VanillaBlocks.BLACK_CANDLE, 3, true));
+        d.set(cx + 1, T + 1, cz + 6, RealmKit.candles(com.skycraft.worldgen.VanillaBlocks.BLACK_CANDLE, 2, true));
         p.container(cx - 3, T + 1, cz - ARENA_R + 3, Draw.chest(Direction.SOUTH), RealmLoot.APOCRYPHA_SUMMIT);
         p.container(cx + 3, T + 1, cz - ARENA_R + 3, Draw.chest(Direction.SOUTH), RealmLoot.APOCRYPHA_SUMMIT);
         obelisk(d, cx - ARENA_R + 3, T, cz, 5);

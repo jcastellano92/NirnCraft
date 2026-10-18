@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:random_selector",
+  "features": [
+    {
+      "feature": "minecraft:jungle_tree",
+      "chance": 0.3
+    }
+  ],
+  "default": "minecraft:jungle_bush"
+}

@@ -21,11 +21,11 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.phys.AABB;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.server.ServerStartedEvent;
-import net.minecraftforge.event.server.ServerStoppedEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+
+import net.neoforged.neoforge.event.server.ServerStartedEvent;
+import net.neoforged.neoforge.event.server.ServerStoppedEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Comparator;
@@ -43,11 +43,14 @@ import java.util.Optional;
  * <p>Other modules may register their own dock for a port with {@link #registerDock}: e.g. a coastal settlement that
  * builds its own harbour. A pier is then never built there; the harbormaster stands on the registered spot.</p>
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class Harbors {
     public static final String KEEPER_TAG = "skycraft_harbormaster";
     public static final String MODULE = "sailing";
-    private static final TicketType<ChunkPos> TICKET = TicketType.create("skycraft_port", Comparator.comparingLong(ChunkPos::toLong), 400);
+    private static final net.neoforged.neoforge.registries.DeferredRegister<TicketType> TICKETS =
+            net.neoforged.neoforge.registries.DeferredRegister.create(net.minecraft.core.registries.Registries.TICKET_TYPE, Skycraft.MODID);
+    private static final java.util.function.Supplier<TicketType> TICKET = TICKETS.register("port", () -> new TicketType(400, TicketType.FLAG_LOADING));
+    public static void register(net.neoforged.bus.api.IEventBus bus) { TICKETS.register(bus); }
     private static final int BUILD_RANGE = 176;
     private static final int DISCOVER_RANGE = 40;
 
@@ -79,6 +82,7 @@ public final class Harbors {
 
     @SubscribeEvent
     public static void onServerStarted(ServerStartedEvent event) {
+        if (event.getServer().overworld() == null) return;
         SeaRoutes.warmUp();
     }
 
@@ -90,8 +94,8 @@ public final class Harbors {
     }
 
     @SubscribeEvent
-    public static void onServerTick(TickEvent.ServerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || ++ticks % 40 != 0) return;
+    public static void onServerTick(net.neoforged.neoforge.event.tick.ServerTickEvent.Post event) {
+        if (!(event instanceof net.neoforged.neoforge.event.tick.ServerTickEvent.Post) || ++ticks % 40 != 0) return;
         if (!SailingConfig.PORTS.get()) return;
         ServerLevel level = event.getServer().overworld();
         if (level == null || level.players().isEmpty() || !SeaRoutes.sitesReady()) return;
@@ -143,7 +147,7 @@ public final class Harbors {
         for (int cx = fp[0] >> 4; cx <= fp[2] >> 4; cx++) {
             for (int cz = fp[1] >> 4; cz <= fp[3] >> 4; cz++) {
                 ChunkPos cp = new ChunkPos(cx, cz);
-                level.getChunkSource().addRegionTicket(TICKET, cp, 1, cp);
+                level.getChunkSource().addTicketWithRadius(TICKET.get(), cp, 1);
                 if (!level.hasChunk(cx, cz)) all = false;
             }
         }
@@ -201,7 +205,7 @@ public final class Harbors {
         Entity keeper = dock.harbormaster != null ? level.getEntity(dock.harbormaster) : null;
         if (keeper == null || !keeper.isAlive()) {
             List<Mob> found = level.getEntitiesOfClass(Mob.class, new AABB(dock.keeper).inflate(32),
-                    m -> m.isAlive() && port.id().equals(m.getPersistentData().getString(KEEPER_TAG)));
+                    m -> m.isAlive() && port.id().equals(m.getPersistentData().getStringOr(KEEPER_TAG, "")));
             keeper = found.isEmpty() ? null : found.get(0);
             if (keeper != null) {
                 dock.harbormaster = keeper.getUUID();
@@ -237,9 +241,9 @@ public final class Harbors {
     }
 
     private static void moorFerry(ServerLevel level, Port port, SailingData.Dock dock, DockBuilder.Result result) {
-        ShipEntity ship = SailingRegistry.type(port.ferry()).create(level);
+        ShipEntity ship = SailingRegistry.type(port.ferry()).create(level, net.minecraft.world.entity.EntitySpawnReason.EVENT);
         if (ship == null || result.berth() == null) return;
-        ship.moveTo(result.berth().x, result.berth().y, result.berth().z, result.berthYaw(), 0f);
+        ship.snapTo(result.berth().x, result.berth().y, result.berth().z, result.berthYaw(), 0f);
         ship.initNew(null);
         ship.setMoored(true, port.id());
         ship.setSail(ShipEntity.SAIL_FURLED);
@@ -253,15 +257,15 @@ public final class Harbors {
     // ------------------------------------------------------------------ discovery
 
     public static boolean knows(PlayerData data, String port) {
-        ListTag list = data.module(MODULE).getList("ports", Tag.TAG_STRING);
-        for (int i = 0; i < list.size(); i++) if (list.getString(i).equals(port)) return true;
+        ListTag list = data.module(MODULE).getListOrEmpty("ports");
+        for (int i = 0; i < list.size(); i++) if (list.getStringOr(i, "").equals(port)) return true;
         return false;
     }
 
     static void discover(ServerPlayer player, Port port) {
         PlayerData data = SkyData.get(player);
         if (knows(data, port.id())) return;
-        ListTag list = data.module(MODULE).getList("ports", Tag.TAG_STRING);
+        ListTag list = data.module(MODULE).getListOrEmpty("ports");
         list.add(StringTag.valueOf(port.id()));
         data.module(MODULE).put("ports", list);
         data.markDirty();

@@ -1,0 +1,82 @@
+{
+  "realm/detail.json": {
+    "firstOctave": -5,
+    "amplitudes": [
+      1.0,
+      0.5
+    ]
+  },
+  "realm/float.json": {
+    "firstOctave": -5,
+    "amplitudes": [
+      1.0,
+      0.5,
+      0.2
+    ]
+  },
+  "realm/jag.json": {
+    "firstOctave": -5,
+    "amplitudes": [
+      1.0,
+      0.6,
+      0.3
+    ]
+  },
+  "realm/large.json": {
+    "firstOctave": -9,
+    "amplitudes": [
+      1.0,
+      0.55,
+      0.3
+    ]
+  },
+  "realm/mid.json": {
+    "firstOctave": -7,
+    "amplitudes": [
+      1.0,
+      0.5,
+      0.25
+    ]
+  },
+  "tamriel_detail.json": {
+    "firstOctave": -6,
+    "amplitudes": [
+      1.0,
+      0.5,
+      0.25
+    ]
+  },
+  "tamriel_dunes.json": {
+    "firstOctave": -5,
+    "amplitudes": [
+      1.0,
+      0.3
+    ]
+  },
+  "tamriel_hills.json": {
+    "firstOctave": -8,
+    "amplitudes": [
+      1.0,
+      0.6,
+      0.35,
+      0.18
+    ]
+  },
+  "tamriel_overhang.json": {
+    "firstOctave": -5,
+    "amplitudes": [
+      1.0,
+      0.5,
+      0.25
+    ]
+  },
+  "tamriel_ridges.json": {
+    "firstOctave": -7,
+    "amplitudes": [
+      1.0,
+      0.45,
+      0.22,
+      0.1
+    ]
+  }
+}

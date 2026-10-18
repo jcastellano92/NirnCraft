@@ -1,0 +1,14 @@
+{
+  "layers": {
+    "humanoid": [
+      {
+        "texture": "skycraft:fur"
+      }
+    ],
+    "humanoid_leggings": [
+      {
+        "texture": "skycraft:fur"
+      }
+    ]
+  }
+}

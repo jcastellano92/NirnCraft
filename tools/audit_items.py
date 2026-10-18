@@ -238,7 +238,7 @@ def resolve_tag(tag, seen=None):
     seen.add(tag)
     ns, _, path = tag.partition(":")
     out = set()
-    for f in DATA.glob(f"{ns}/tags/items/{path}.json"):
+    for f in DATA.glob(f"{ns}/tags/item/{path}.json"):
         for v in json.loads(f.read_text(encoding="utf-8")).get("values", []):
             v = v if isinstance(v, str) else v.get("id")
             if v.startswith("#"):

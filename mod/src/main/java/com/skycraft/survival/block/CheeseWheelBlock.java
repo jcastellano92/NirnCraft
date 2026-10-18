@@ -41,6 +41,11 @@ public class CheeseWheelBlock extends Block {
     }
 
     @Override
+    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+        return useItemOn(net.minecraft.world.item.ItemStack.EMPTY, state, level, pos, player, InteractionHand.MAIN_HAND, hit);
+    }
+
+    @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(WEDGES);
     }
@@ -54,20 +59,20 @@ public class CheeseWheelBlock extends Block {
 
     @Override
     @SuppressWarnings("deprecation")
-    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
-        if (level.isClientSide) {
+    public InteractionResult useItemOn(net.minecraft.world.item.ItemStack held263, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+        if (level.isClientSide()) {
             return InteractionResult.SUCCESS;
         }
         int wedges = state.getValue(WEDGES);
         if (player.isShiftKeyDown() && player.canEat(false)) {
             player.getFoodData().eat(2, 0.3f);
-            level.playSound(null, pos, SoundEvents.GENERIC_EAT, SoundSource.PLAYERS, 0.8f, 1.0f);
+            level.playSound(null, pos, SoundEvents.GENERIC_EAT.value(), SoundSource.PLAYERS, 0.8f, 1.0f);
             level.gameEvent(player, GameEvent.EAT, pos);
         } else {
             ItemStack wedge = new ItemStack(SurvivalRegistry.GOAT_CHEESE_WEDGE.get());
             if (player instanceof ServerPlayer sp) {
                 if (!ActionHandler.addToBags(sp, wedge)) {
-                    sp.drop(wedge, false);
+                    sp.drop(wedge, false, net.minecraft.util.Prediction.SERVER_ONLY);
                 }
             } else {
                 Block.popResource(level, pos, wedge);

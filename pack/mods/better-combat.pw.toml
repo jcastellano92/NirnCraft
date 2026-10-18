@@ -1,13 +1,16 @@
 name = "Better Combat"
-filename = "bettercombat-forge-1.9.0+1.20.1.jar"
+filename = "bettercombat-neoforge-3.2.2+26.3.jar"
 side = "both"
 
 [download]
-url = "https://cdn.modrinth.com/data/5sy6g3kz/versions/rnhiaw3t/bettercombat-forge-1.9.0%2B1.20.1.jar"
+url = "https://cdn.modrinth.com/data/5sy6g3kz/versions/RbEnSa47/bettercombat-neoforge-3.2.2%2B26.3.jar"
 hash-format = "sha512"
-hash = "0778902ce693ae56afd9a928e0629470095dff0324c6856fc45ee51a8efcfa622cc22edaa07ed40814d3b13851d62b27d144e9858e5209a6cf70fd3651f081e8"
+hash = "2ad3584995acc8bc7693942a150d674a9147651c2103f6d8225eb61203c04cd19c8cd8f0fdf530ff6ddd6fc7c061f5d80ecd1df225b84390675d78b69fcb4843"
 
-[update]
 [update.modrinth]
 mod-id = "5sy6g3kz"
-version = "rnhiaw3t"
+version = "RbEnSa47"
+
+[skycraft]
+minecraft = "26.3"
+loader = "neoforge"

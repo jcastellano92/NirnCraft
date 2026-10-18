@@ -1,0 +1,14 @@
+{
+  "replace": false,
+  "values": [
+    "skycraft:guard",
+    {
+      "id": "guardvillagers:guard",
+      "required": false
+    },
+    {
+      "id": "#skycraft:society_talkers",
+      "required": false
+    }
+  ]
+}

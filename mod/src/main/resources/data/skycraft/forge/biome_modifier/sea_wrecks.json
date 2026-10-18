@@ -1,6 +1,0 @@
-{
-  "type": "forge:add_features",
-  "biomes": "#minecraft:is_ocean",
-  "features": "skycraft:sea_wreck",
-  "step": "surface_structures"
-}

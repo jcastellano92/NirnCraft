@@ -9,11 +9,11 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.InputStream;
@@ -86,7 +86,7 @@ public final class Uniques {
                     UniqueSite u = new UniqueSite(uid, SiteKind.byId(kindStr),
                             ux, uz, uitem, Collections.unmodifiableMap(ench),
                             o.has("note") && !o.get("note").isJsonNull() ? o.get("note").getAsString() : null);
-                    long cell = net.minecraft.world.level.ChunkPos.asLong(Math.floorDiv(u.x(), MinorSites.CELL), Math.floorDiv(u.z(), MinorSites.CELL));
+                    long cell = net.minecraft.world.level.ChunkPos.pack(Math.floorDiv(u.x(), MinorSites.CELL), Math.floorDiv(u.z(), MinorSites.CELL));
                     if (byCell.putIfAbsent(cell, u) != null) {
                         Skycraft.LOGGER.debug("Unique {} shares a minor-site cell with another unique; skipped", u.id());
                         continue;
@@ -106,7 +106,7 @@ public final class Uniques {
 
     @Nullable
     public static UniqueSite forCell(int cellX, int cellZ) {
-        return BY_CELL.get(net.minecraft.world.level.ChunkPos.asLong(cellX, cellZ));
+        return BY_CELL.get(net.minecraft.world.level.ChunkPos.pack(cellX, cellZ));
     }
 
     @Nullable
@@ -122,26 +122,24 @@ public final class Uniques {
     public static ItemStack stack(String id) {
         UniqueSite u = BY_ID.get(id);
         if (u == null) return ItemStack.EMPTY;
-        Item item = ForgeRegistries.ITEMS.getValue(ResourceLocation.tryParse(u.item()));
+        Item item = BuiltInRegistries.ITEM.getValue(Identifier.tryParse(u.item()));
         if (item == null || item == net.minecraft.world.item.Items.AIR) {
             Skycraft.LOGGER.warn("Unique {}: unknown base item {}", id, u.item());
             return ItemStack.EMPTY;
         }
         ItemStack stack = new ItemStack(item);
-        stack.setHoverName(Component.translatable("explore.skycraft.unique." + id)
+        stack.set(net.minecraft.core.component.DataComponents.CUSTOM_NAME, Component.translatable("explore.skycraft.unique." + id)
                 .withStyle(s -> s.withColor(ChatFormatting.GOLD).withItalic(false)));
-        CompoundTag display = stack.getOrCreateTagElement("display");
-        ListTag lore = new ListTag();
-        lore.add(StringTag.valueOf(Component.Serializer.toJson(Component.translatable("explore.skycraft.unique." + id + ".lore")
-                .withStyle(s -> s.withColor(ChatFormatting.DARK_AQUA).withItalic(true)))));
-        lore.add(StringTag.valueOf(Component.Serializer.toJson(Component.translatable("explore.skycraft.unique.tag")
-                .withStyle(s -> s.withColor(ChatFormatting.GRAY).withItalic(false)))));
-        display.put("Lore", lore);
+        stack.set(net.minecraft.core.component.DataComponents.LORE, new net.minecraft.world.item.component.ItemLore(
+                java.util.List.of(Component.translatable("explore.skycraft.unique." + id + ".lore")
+                                .withStyle(s -> s.withColor(ChatFormatting.DARK_AQUA).withItalic(true)),
+                        Component.translatable("explore.skycraft.unique.tag")
+                                .withStyle(s -> s.withColor(ChatFormatting.GRAY).withItalic(false)))));
         for (Map.Entry<String, Integer> e : u.enchant().entrySet()) {
-            Enchantment ench = ForgeRegistries.ENCHANTMENTS.getValue(ResourceLocation.tryParse(e.getKey()));
-            if (ench != null) stack.enchant(ench, e.getValue());
+            Enchantment ench = com.skycraft.platform.EnchantmentsAccess.lookup(Identifier.tryParse(e.getKey()));
+            if (ench != null) stack.enchant(com.skycraft.platform.EnchantmentsAccess.holder(ench), e.getValue());
         }
-        stack.getOrCreateTag().putString(TAG, id);
+        com.skycraft.inventory.ItemData.updateCustom(stack, customData263 -> customData263.putString(TAG, id));
         return stack;
     }
 }

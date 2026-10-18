@@ -54,7 +54,7 @@ public class IceWraithEntity extends Monster implements AnimatedCreature {
     @Override
     public void aiStep() {
         super.aiStep();
-        if (this.level().isClientSide) {
+        if (this.level().isClientSide()) {
             // Frost trail particles
             Vec3 pos = this.position().add((this.random.nextDouble() - 0.5) * 0.4, this.getBbHeight() * 0.5, (this.random.nextDouble() - 0.5) * 0.4);
             this.level().addParticle(ParticleTypes.SNOWFLAKE, pos.x, pos.y, pos.z, 0, -0.02, 0);
@@ -62,10 +62,10 @@ public class IceWraithEntity extends Monster implements AnimatedCreature {
     }
 
     @Override
-    public boolean doHurtTarget(Entity target) {
-        boolean hit = super.doHurtTarget(target);
+    public boolean doHurtTarget(net.minecraft.server.level.ServerLevel serverLevel263, Entity target) {
+        boolean hit = super.doHurtTarget(serverLevel263, target);
         if (hit && target instanceof LivingEntity living) {
-            living.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 80, 1), this);
+            living.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.SLOWNESS), 80, 1), this);
             if (living.canFreeze()) {
                 living.setTicksFrozen(Math.min(living.getTicksRequiredToFreeze() + 100, living.getTicksFrozen() + 60));
             }
@@ -105,9 +105,10 @@ public class IceWraithEntity extends Monster implements AnimatedCreature {
 
     /** Every melee swing plays an attack animation (alternating blows). */
     @Override
-    public void swing(net.minecraft.world.InteractionHand hand) {
-        super.swing(hand);
-        if (!this.level().isClientSide) CreatureAnims.play(this, this.getRandom().nextInt(3) == 0 ? AnimSlot.ATTACK2 : AnimSlot.ATTACK);
+    public boolean swing(net.minecraft.world.InteractionHand hand, net.minecraft.world.item.component.SwingAnimation animation263, boolean updateSelf263) {
+        boolean swung263 = super.swing(hand, animation263, updateSelf263);
+        if (!this.level().isClientSide()) CreatureAnims.play(this, this.getRandom().nextInt(3) == 0 ? AnimSlot.ATTACK2 : AnimSlot.ATTACK);
+        return swung263;
     }
 
     /** Ice wraiths always slither through the air. */

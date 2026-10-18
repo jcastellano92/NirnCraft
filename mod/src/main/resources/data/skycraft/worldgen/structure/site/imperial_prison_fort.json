@@ -1,0 +1,17 @@
+{
+  "type": "skycraft:dungeon",
+  "theme": "fort",
+  "kit": "imperial",
+  "place": {
+    "types": [
+      "dungeon_fixed"
+    ],
+    "variants": [
+      "imperial_prison_fort"
+    ]
+  },
+  "biomes": "#skycraft:dungeons/anywhere",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none"
+}

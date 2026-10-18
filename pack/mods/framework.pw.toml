@@ -1,9 +1,12 @@
-name = "Framework (Forge)"
-filename = "framework-forge-1.20.1-0.8.0-signed.jar"
+name = "Framework"
+filename = "framework-neoforge-0.13.27+26.3-signed.jar"
 side = "both"
 
 [download]
-url = "https://github.com/MrCrayfish/Framework/releases/download/v1.20.1-0.8.0/framework-forge-1.20.1-0.8.0-signed.jar"
-hash-format = "sha512"
-hash = "489320e5e5496a569b5c05e5b0b37c6a688f7d2166f42f88588fe433664a035d2ea8a6d270b32aa26a1018302c9066b88b39104507919800954b58d20ff850d7"
+url = "https://github.com/MrCrayfish/Framework/releases/download/v0.13.27%2B26.3/framework-neoforge-0.13.27%2B26.3-signed.jar"
+hash-format = "sha256"
+hash = "1d18809e402156b3ff4244baa9a156c6b7e957b3452cc09b7e550753fdcc8183"
 
+[skycraft]
+minecraft = "26.3"
+loader = "neoforge"

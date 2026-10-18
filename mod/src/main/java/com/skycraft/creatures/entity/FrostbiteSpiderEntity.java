@@ -11,7 +11,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.monster.Monster;
-import net.minecraft.world.entity.monster.Spider;
+import net.minecraft.world.entity.monster.spider.Spider;
 import net.minecraft.world.level.Level;
 
 /** {@code skycraft:frostbite_spider}: large arachnids infesting Skyrim's caves and frozen passes. */
@@ -40,12 +40,12 @@ public class FrostbiteSpiderEntity extends Spider implements AnimatedCreature {
     }
 
     @Override
-    public boolean doHurtTarget(Entity target) {
-        boolean hit = super.doHurtTarget(target);
+    public boolean doHurtTarget(net.minecraft.server.level.ServerLevel serverLevel263, Entity target) {
+        boolean hit = super.doHurtTarget(serverLevel263, target);
         if (hit && target instanceof LivingEntity living) {
             // Frostbite bite slows and poisons
-            living.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 100, 1), this);
-            living.addEffect(new MobEffectInstance(MobEffects.POISON, 80, 0), this);
+            living.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.SLOWNESS), 100, 1), this);
+            living.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.POISON), 80, 0), this);
             if (living.canFreeze()) {
                 living.setTicksFrozen(Math.min(living.getTicksRequiredToFreeze() + 80, living.getTicksFrozen() + 30));
             }
@@ -91,9 +91,10 @@ public class FrostbiteSpiderEntity extends Spider implements AnimatedCreature {
 
     /** Every melee swing plays an attack animation (alternating blows). */
     @Override
-    public void swing(net.minecraft.world.InteractionHand hand) {
-        super.swing(hand);
-        if (!this.level().isClientSide) CreatureAnims.play(this, AnimSlot.ATTACK);
+    public boolean swing(net.minecraft.world.InteractionHand hand, net.minecraft.world.item.component.SwingAnimation animation263, boolean updateSelf263) {
+        boolean swung263 = super.swing(hand, animation263, updateSelf263);
+        if (!this.level().isClientSide()) CreatureAnims.play(this, AnimSlot.ATTACK);
+        return swung263;
     }
 
     @Override
@@ -102,9 +103,9 @@ public class FrostbiteSpiderEntity extends Spider implements AnimatedCreature {
     }
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        this.entityData.define(GIANT, false);
+    protected void defineSynchedData(net.minecraft.network.syncher.SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(GIANT, false);
     }
 
     /** Giant frostbite spiders: twice the size, lurking in the deepest caves and nests. */
@@ -115,7 +116,7 @@ public class FrostbiteSpiderEntity extends Spider implements AnimatedCreature {
     public void setGiant(boolean giant) {
         this.entityData.set(GIANT, giant);
         this.refreshDimensions();
-        if (giant && !this.level().isClientSide) {
+        if (giant && !this.level().isClientSide()) {
             var hp = this.getAttribute(Attributes.MAX_HEALTH);
             if (hp != null) hp.setBaseValue(90.0);
             var dmg = this.getAttribute(Attributes.ATTACK_DAMAGE);
@@ -129,19 +130,18 @@ public class FrostbiteSpiderEntity extends Spider implements AnimatedCreature {
     @org.jetbrains.annotations.Nullable
     public net.minecraft.world.entity.SpawnGroupData finalizeSpawn(net.minecraft.world.level.ServerLevelAccessor level,
                                                                    net.minecraft.world.DifficultyInstance difficulty,
-                                                                   net.minecraft.world.entity.MobSpawnType reason,
-                                                                   @org.jetbrains.annotations.Nullable net.minecraft.world.entity.SpawnGroupData data,
-                                                                   @org.jetbrains.annotations.Nullable net.minecraft.nbt.CompoundTag tag) {
-        data = super.finalizeSpawn(level, difficulty, reason, data, tag);
+                                                                   net.minecraft.world.entity.EntitySpawnReason reason,
+                                                                   @org.jetbrains.annotations.Nullable net.minecraft.world.entity.SpawnGroupData data) {
+        data = super.finalizeSpawn(level, difficulty, reason, data);
         // vanilla spiders may roll Invisibility from their effect group on hard: a Skycraft spider is always seen
-        this.removeEffect(net.minecraft.world.effect.MobEffects.INVISIBILITY);
+        this.removeEffect(com.skycraft.platform.Effects.holder(net.minecraft.world.effect.MobEffects.INVISIBILITY));
         if (this.random.nextInt(12) == 0) setGiant(true);
         return data;
     }
 
     @Override
-    public net.minecraft.world.entity.EntityDimensions getDimensions(net.minecraft.world.entity.Pose pose) {
-        net.minecraft.world.entity.EntityDimensions d = super.getDimensions(pose);
+    protected net.minecraft.world.entity.EntityDimensions getDefaultDimensions(net.minecraft.world.entity.Pose pose) {
+        net.minecraft.world.entity.EntityDimensions d = super.getDefaultDimensions(pose);
         return isGiant() ? d.scale(2.0f) : d;
     }
 
@@ -157,15 +157,21 @@ public class FrostbiteSpiderEntity extends Spider implements AnimatedCreature {
     }
 
     @Override
-    public void addAdditionalSaveData(net.minecraft.nbt.CompoundTag tag) {
-        super.addAdditionalSaveData(tag);
+    public void addAdditionalSaveData(net.minecraft.world.level.storage.ValueOutput output263) {
+        super.addAdditionalSaveData(output263);
+        net.minecraft.nbt.CompoundTag tag = new net.minecraft.nbt.CompoundTag();
+        
         tag.putBoolean("Giant", isGiant());
+    
+        output263.store(tag);
     }
 
     @Override
-    public void readAdditionalSaveData(net.minecraft.nbt.CompoundTag tag) {
-        super.readAdditionalSaveData(tag);
-        this.entityData.set(GIANT, tag.getBoolean("Giant"));
+    public void readAdditionalSaveData(net.minecraft.world.level.storage.ValueInput input263) {
+        super.readAdditionalSaveData(input263);
+        net.minecraft.nbt.CompoundTag tag = com.skycraft.platform.ValueTags.read(input263 , "Giant");
+        
+        this.entityData.set(GIANT, tag.getBooleanOr("Giant",false));
         this.refreshDimensions();
     }
 }

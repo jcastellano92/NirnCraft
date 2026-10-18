@@ -15,15 +15,16 @@ import java.util.concurrent.ConcurrentHashMap;
  * <ul>
  *   <li>The fixed foreign lands, placed in their lore directions and shaped by fixed noise: Atmora (north), Akavir and
  *       the Tang Mo isles (east), Yokuda and the Sunken Isles (west), Pyandonea and Thras (south-west).</li>
- *   <li>Endless lands: a grid of {@value #SUPER}-block super-cells, each holding an ocean, an archipelago or a
- *       continent with a realm archetype, a generated name and a few generated regions
- *       ({@code realm/x<cx>_z<cz>/<n>}).</li>
+ *   <li>Beyond the fixed world, only open ocean. The former Endless Lands generator and saved-region lookup
+ *       remain available to explicit tools and old data; they are not runtime geography.</li>
  * </ul>
  *
  * Everything is deterministic and independent of the world seed. {@link #sample} is allocation-free; generated
  * {@link Region} objects are created on demand and cached.
  */
 public final class Beyond {
+    /** Hard geography policy: dormant procedural realms are not active world coverage. */
+    public static final boolean ENDLESS_LANDS_ENABLED = false;
     public static final int SUPER = 12288;
     /** Super-cells overlapping this box stay ocean: it holds Tamriel and the fixed foreign lands. */
     private static final int CORE_MIN_X = -27000, CORE_MAX_X = 26000, CORE_MIN_Z = -18500, CORE_MAX_Z = 26500;
@@ -141,6 +142,11 @@ public final class Beyond {
         return false;
     }
 
+    /** Authored raster and the complete fixed foreign influence envelopes, including their coastal seas. */
+    public static boolean fixedWorldFootprint(int x, int z) {
+        return TamrielMap.inTamriel(x, z) || nearForeign(x, z);
+    }
+
     /**
      * Inside the raster near a foreign land: overrides {@code out} with the foreign land where it reaches further than
      * Tamriel's sea (union of the two).
@@ -164,6 +170,15 @@ public final class Beyond {
 
     /** Fills {@code out} for a column outside the raster. */
     public static void sample(int x, int z, MapSample out) {
+        sample(x,z,out,ENDLESS_LANDS_ENABLED);
+    }
+
+    /** Dormant historical generator for explicit offline tools; never used by normal world generation. */
+    public static void sampleEndlessForTools(int x, int z, MapSample out) {
+        sample(x,z,out,true);
+    }
+
+    private static void sample(int x, int z, MapSample out, boolean endlessPreview) {
         out.clear();
         // distance to the raster's sea, continued outward so the sea floor joins up at the raster edge
         double ex = MapNoise.clamp(x, TamrielMap.MIN_X + 48, TamrielMap.MAX_X - 49);
@@ -192,7 +207,7 @@ public final class Beyond {
         }
         // the endless lands
         int cx = Math.floorDiv(x, SUPER), cz = Math.floorDiv(z, SUPER);
-        if (!coreCell(cx, cz)) {
+        if (endlessPreview && !coreCell(cx, cz)) {
             int h = MapNoise.hash(cx, cz, 7001);
             int type = Math.floorMod(h, 100);
             if (type >= 30) {

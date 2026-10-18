@@ -15,8 +15,11 @@ import java.nio.file.Path;
 final class VisualCamera {
     static JsonObject identity(Minecraft mc) {
         var data=new JsonObject();
-        data.addProperty("seed",mc.getSingleplayerServer().overworld().getSeed());
-        data.addProperty("dimension",mc.level.dimension().location().toString());
+        var server=mc.getSingleplayerServer();
+        data.addProperty("seedKnown",server!=null);
+        if(server!=null)data.addProperty("seed",server.overworld().getSeed());
+        QaTransport.describe(mc,data);
+        data.addProperty("dimension",mc.level.dimension().identifier().toString());
         data.addProperty("bakeInputs",com.skycraft.bake.Bake.inputsHash());
         try(var in=VisualCamera.class.getResourceAsStream("/skycraft/generation-identity.txt")) {
             if(in==null) throw new IllegalStateException("Missing generated geometry identity; rebuild processResources");
@@ -29,17 +32,27 @@ final class VisualCamera {
 
     static JsonObject context(Minecraft mc) {
         var data=identity(mc);
+        mc.level.getBiome(mc.player.blockPosition()).unwrapKey().ifPresent(key ->
+                data.addProperty("biomeId",key.identifier().toString()));
+        if(mc.level.dimension().equals(net.minecraft.world.level.Level.OVERWORLD)) {
+            var region=com.skycraft.tamriel.TamrielMap.region(mc.player.getBlockX(),mc.player.getBlockZ());
+            if(region!=null) {
+                data.addProperty("regionId",region.id());
+                if(region.palette().startsWith("realm_"))
+                    data.addProperty("regionArchetype",region.palette().substring(6));
+            }
+        }
         data.add("position",vector(mc.player.position()));
-        data.addProperty("difficulty",mc.level.getDifficulty().getKey());
+        data.addProperty("difficulty",mc.level.getDifficulty().getSerializedName());
         data.addProperty("cameraClear",mc.level.noCollision(mc.player,mc.player.getBoundingBox()));
-        data.addProperty("dayTime",mc.level.getDayTime());
+        data.addProperty("dayTime",mc.level.getDefaultClockTime());
         data.addProperty("gameTime",mc.level.getGameTime());
-        data.addProperty("nightVision",mc.player.hasEffect(net.minecraft.world.effect.MobEffects.NIGHT_VISION));
+        data.addProperty("nightVision",mc.player.hasEffect(com.skycraft.platform.Effects.holder(net.minecraft.world.effect.MobEffects.NIGHT_VISION)));
         data.addProperty("weather",com.skycraft.atmosphere.client.ClientWeather.kind().id());
         data.addProperty("renderDistance",mc.options.getEffectiveRenderDistance());
         data.addProperty("readinessPassed",ClientAutotest.readinessPassed(mc));
         data.addProperty("readiness",ClientAutotest.readinessDescription());
-        data.addProperty("screen",mc.screen==null?"game":mc.screen.getClass().getSimpleName());
+        data.addProperty("screen",mc.gui.screen()==null?"game":mc.gui.screen().getClass().getSimpleName());
         try {
             var runtime=com.google.gson.JsonParser.parseString(Files.readString(Path.of("world-preview/outbox/runtime.json"))).getAsJsonObject();
             if(runtime.has("pid") && runtime.get("pid").getAsLong()==ProcessHandle.current().pid())
@@ -62,6 +75,8 @@ final class VisualCamera {
     }
 
     static java.util.concurrent.CompletableFuture<Integer> action(Minecraft mc,String arguments,boolean scout) {
+        if(mc.getSingleplayerServer()==null)
+            throw new IllegalStateException("Camera scouting requires integrated terrain access; position remote QA through its authoritative server inbox, then use client clearance/readiness checks");
         String[] parts=arguments.trim().split("\\s+");
         if(parts.length!=6) throw new IllegalArgumentException("Expected position X Y Z and look-at X Y Z");
         Vec3 position=new Vec3(Double.parseDouble(parts[0]),Double.parseDouble(parts[1]),Double.parseDouble(parts[2]));
@@ -74,9 +89,9 @@ final class VisualCamera {
             try {
                 var player=mc.getSingleplayerServer().getPlayerList().getPlayer(id);
                 if(player==null) throw new IllegalStateException("No player");
-                ServerLevel level=player.serverLevel();
+                ServerLevel level=player.level();
                 if(Math.abs(position.x)>29_999_000 || Math.abs(position.z)>29_999_000
-                        || position.y<level.getMinBuildHeight() || position.y+1.8>=level.getMaxBuildHeight())
+                        || position.y<level.getMinY() || position.y+1.8>=(level.getMaxY()+1))
                     throw new IllegalArgumentException("Camera outside buildable world bounds");
                 if(!scout && !loaded(level,position)) {
                     // A reusable pose can be outside the currently loaded area.
@@ -86,12 +101,12 @@ final class VisualCamera {
                     int cx=net.minecraft.util.Mth.floor(position.x)>>4,cz=net.minecraft.util.Mth.floor(position.z)>>4;
                     for(int dz=-1;dz<=1;dz++) for(int dx=-1;dx<=1;dx++)
                         chunks.add(level.getChunkSource().getChunkFuture(cx+dx,cz+dz,
-                                net.minecraft.world.level.chunk.ChunkStatus.FULL,true));
+                                net.minecraft.world.level.chunk.status.ChunkStatus.FULL,true));
                     java.util.concurrent.CompletableFuture.allOf(chunks.toArray(java.util.concurrent.CompletableFuture[]::new))
                             .whenComplete((ignored,error)->mc.getSingleplayerServer().execute(()->{
                                 try {
                                     if(error!=null) throw new IllegalStateException("Camera destination prewarm failed",error);
-                                    if(player.hasDisconnected() || player.serverLevel()!=level)
+                                    if(player.hasDisconnected() || player.level()!=level)
                                         throw new IllegalStateException("Player changed level during camera prewarm");
                                     place(player,position,target); result.complete(1);
                                 } catch(Exception e) { result.completeExceptionally(e); }
@@ -134,11 +149,11 @@ final class VisualCamera {
     }
 
     private static void place(net.minecraft.server.level.ServerPlayer player,Vec3 position,Vec3 target) {
-        var level=player.serverLevel();
+        var level=player.level();
         if(!loaded(level,position) || !level.noCollision(player,body(position)))
             throw new IllegalStateException("Camera position is unloaded or intersects terrain");
         float[] view=angles(position,target);
-        player.teleportTo(level,position.x,position.y,position.z,view[0],view[1]);
+        player.teleportTo(level,position.x,position.y,position.z,java.util.Set.of(),view[0],view[1],true);
     }
 
     private static boolean loaded(ServerLevel level,Vec3 p) {
@@ -149,14 +164,14 @@ final class VisualCamera {
 
     static JsonArray vector(Vec3 p) { var a=new JsonArray(); a.add(p.x); a.add(p.y); a.add(p.z); return a; }
 
-    static void receipt(Minecraft mc,String tag,Path directory) throws java.io.IOException {
-        if(mc.player==null || mc.level==null || mc.getSingleplayerServer()==null) return;
+    static JsonObject captureReceipt(Minecraft mc) {
+        if(mc.player==null || mc.level==null || !QaTransport.connected(mc)) return null;
         var data=context(mc);
         data.add("lookAt",vector(mc.player.getEyePosition().add(mc.player.getLookAngle().scale(48))));
         data.addProperty("yaw",mc.player.getYRot()); data.addProperty("pitch",mc.player.getXRot());
         data.addProperty("cameraClear",mc.level.noCollision(mc.player,mc.player.getBoundingBox()));
         data.addProperty("air",com.skycraft.atmosphere.client.InteriorAtmosphere.describe());
         data.addProperty("capturedAt",System.currentTimeMillis());
-        Files.writeString(directory.resolve(tag+".json"),data.toString());
+        return data;
     }
 }

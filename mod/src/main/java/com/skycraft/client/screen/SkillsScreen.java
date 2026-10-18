@@ -10,13 +10,13 @@ import com.skycraft.network.CorePackets;
 import com.skycraft.network.SkyNetwork;
 import com.skycraft.perk.Perk;
 import com.skycraft.perk.Perks;
-import net.minecraft.Util;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.util.Util;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
-import org.lwjgl.glfw.GLFW;
+import com.mojang.blaze3d.platform.InputConstants;
 
 import java.util.List;
 import java.util.Locale;
@@ -106,28 +106,29 @@ public class SkillsScreen extends Screen {
     // ------------------------------------------------------------------ input
 
     @Override
-    public boolean keyPressed(int key, int scan, int mods) {
-        if (key == GLFW.GLFW_KEY_LEFT || key == GLFW.GLFW_KEY_A) {
+    public boolean keyPressed(net.minecraft.client.input.KeyEvent event) {
+        int key = event.key(), scan = event.keycode(), mods = event.modifiers();
+        if (key == InputConstants.KEY_LEFT || key == InputConstants.KEY_A) {
             rotate(-1);
             return true;
         }
-        if (key == GLFW.GLFW_KEY_RIGHT || key == GLFW.GLFW_KEY_D) {
+        if (key == InputConstants.KEY_RIGHT || key == InputConstants.KEY_D) {
             rotate(1);
             return true;
         }
-        if (key == GLFW.GLFW_KEY_ENTER && pendingUnlock != null) {
+        if (key == InputConstants.KEY_RETURN && pendingUnlock != null) {
             confirmUnlock();
             return true;
         }
-        if (com.skycraft.client.SkyKeys.SKILLS.matches(key, scan)) {
+        if (com.skycraft.client.SkyKeys.SKILLS.matches(event)) {
             onClose();
             return true;
         }
-        return super.keyPressed(key, scan, mods);
+        return super.keyPressed(event);
     }
 
     @Override
-    public boolean mouseScrolled(double mx, double my, double delta) {
+    public boolean mouseScrolled(double mx, double my, double horizontal, double delta) {
         rotate(delta > 0 ? -1 : 1);
         return true;
     }
@@ -147,8 +148,10 @@ public class SkillsScreen extends Screen {
     }
 
     @Override
-    public boolean mouseClicked(double mx, double my, int button) {
-        if (super.mouseClicked(mx, my, button)) return true;
+    public boolean mouseClicked(net.minecraft.client.input.MouseButtonEvent event, boolean doubleClick) {
+        double mx = event.x(), my = event.y();
+        int button = com.skycraft.client.screen.UiInput.actionButton(event.button());
+        if (super.mouseClicked(event, doubleClick)) return true;
         if (data().getPendingLevelUps() > 0) return false;
         if (hoveredDot >= 0) {
             select(hoveredDot);
@@ -179,7 +182,7 @@ public class SkillsScreen extends Screen {
     // ------------------------------------------------------------------ rendering
 
     @Override
-    public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+    public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
         PlayerData data = data();
         // Time-based easing: the carousel settles in ~0.3 s at any frame rate.
         long now = Util.getMillis();
@@ -213,10 +216,10 @@ public class SkillsScreen extends Screen {
         if (hovered != null) drawPerkTooltip(g, hovered, data);
         else if (hoveredDot >= 0) drawDotTooltip(g, Skill.VALUES[hoveredDot], data, mouseX);
         if (pendingUnlock != null && data.getPendingLevelUps() == 0) {
-            g.drawCenteredString(font, Component.translatable("screen.skycraft.unlock_confirm", pendingUnlock.displayName()), cx, height - 94, 0xFFF5EBC8);
+            g.centeredText(font, Component.translatable("screen.skycraft.unlock_confirm", pendingUnlock.displayName()), cx, height - 94, 0xFFF5EBC8);
         }
         if (data.getPendingLevelUps() > 0) drawLevelUp(g, data);
-        super.render(g, mouseX, mouseY, partialTick);
+        super.extractRenderState(g, mouseX, mouseY, partialTick);
     }
 
     private static float wrapDelta(float d) {
@@ -233,7 +236,7 @@ public class SkillsScreen extends Screen {
         return f;
     }
 
-    private void drawSky(GuiGraphics g, float partialTick) {
+    private void drawSky(GuiGraphicsExtractor g, float partialTick) {
         g.fillGradient(0, 0, width, height, 0xFF02030A, 0xFF0D1426);
         long time = System.currentTimeMillis();
         // the starfield drifts slightly with the carousel
@@ -260,7 +263,7 @@ public class SkillsScreen extends Screen {
     }
 
     /** The skill's guardian sign (Standing Stone constellation), very faint behind its perks. */
-    private void drawSign(GuiGraphics g, Skill skill, int ox, int oy, float scale, float alpha) {
+    private void drawSign(GuiGraphicsExtractor g, Skill skill, int ox, int oy, float scale, float alpha) {
         StandingStone sign;
         try {
             sign = StandingStone.valueOf(skill.sign.replace("The ", "").trim().toUpperCase(Locale.ROOT));
@@ -287,7 +290,7 @@ public class SkillsScreen extends Screen {
     }
 
     /** A dotted line (every third pixel), for the faint sign figures. */
-    private static void dashed(GuiGraphics g, int x0, int y0, int x1, int y1, int color) {
+    private static void dashed(GuiGraphicsExtractor g, int x0, int y0, int x1, int y1, int color) {
         int dx = x1 - x0, dy = y1 - y0;
         int steps = Math.max(Math.abs(dx), Math.abs(dy));
         if (steps == 0) return;
@@ -298,7 +301,7 @@ public class SkillsScreen extends Screen {
         }
     }
 
-    private void drawConstellation(GuiGraphics g, Skill skill, PlayerData data, int ox, int oy, float scale, float alpha,
+    private void drawConstellation(GuiGraphicsExtractor g, Skill skill, PlayerData data, int ox, int oy, float scale, float alpha,
                                    int mouseX, int mouseY, boolean interactive) {
         if (ox < -150 || ox > width + 150) return;
         int a = (int) (alpha * 255);
@@ -339,16 +342,16 @@ public class SkillsScreen extends Screen {
                 g.fill(x + 7, y - 7, x + 8, y + 8, 0xFFF0E6C8);
             }
             if (interactive && p.maxRank() > 1 && owned) {
-                g.drawString(font, rank + "/" + p.maxRank(), x + 6, y - 3, 0xFFC8BC9A, false);
+                g.text(font, rank + "/" + p.maxRank(), x + 6, y - 3, 0xFFC8BC9A, false);
             }
         }
         // skill name under side constellations
         if (!interactive) {
-            g.drawCenteredString(font, skill.displayName(), ox, oy + (int) (100 * scale) + 6, a << 24 | 0xA8A090);
+            g.centeredText(font, skill.displayName(), ox, oy + (int) (100 * scale) + 6, a << 24 | 0xA8A090);
         }
     }
 
-    private static void line(GuiGraphics g, int x0, int y0, int x1, int y1, int color) {
+    private static void line(GuiGraphicsExtractor g, int x0, int y0, int x1, int y1, int color) {
         int dx = x1 - x0, dy = y1 - y0;
         int steps = Math.max(Math.abs(dx), Math.abs(dy));
         if (steps == 0) return;
@@ -359,30 +362,30 @@ public class SkillsScreen extends Screen {
         }
     }
 
-    private void drawHeader(GuiGraphics g, Skill skill, PlayerData data) {
+    private void drawHeader(GuiGraphicsExtractor g, Skill skill, PlayerData data) {
         int cx = width / 2;
         int level = data.getSkill(skill);
-        g.pose().pushPose();
-        g.pose().translate(cx, 12, 0);
-        g.pose().scale(1.6f, 1.6f, 1f);
-        g.drawCenteredString(font, skill.displayName().copy().append("  " + level), 0, 0, 0xFFF5EBC8);
-        g.pose().popPose();
+        g.pose().pushMatrix();
+        g.pose().translate(cx, 12);
+        g.pose().scale(1.6f, 1.6f);
+        g.centeredText(font, skill.displayName().copy().append("  " + level), 0, 0, 0xFFF5EBC8);
+        g.pose().popMatrix();
         int barW = 140;
         g.fill(cx - barW / 2 - 1, 30, cx + barW / 2 + 1, 35, 0xFF101010);
         g.fill(cx - barW / 2, 31, cx - barW / 2 + (int) (barW * data.skillProgress(skill)), 34, 0xFFD8D0B8);
         int legendary = data.getLegendary(skill);
         if (legendary > 0) {
-            g.drawCenteredString(font, Component.translatable("screen.skycraft.legendary_count", legendary), cx, 37, 0xFFE0B040);
+            g.centeredText(font, Component.translatable("screen.skycraft.legendary_count", legendary), cx, 37, 0xFFE0B040);
         }
         Component group = Component.translatable("skillgroup.skycraft." + skill.group.name().toLowerCase(Locale.ROOT));
-        g.drawString(font, group, 10, 10, 0xFF000000 | skill.group.color, true);
-        g.drawString(font, skill.sign, 10, 21, 0xFF8A8478, false);
+        g.text(font, group, 10, 10, 0xFF000000 | skill.group.color, true);
+        g.text(font, skill.sign, 10, 21, 0xFF8A8478, false);
         String count = (selected + 1) + " / " + Skill.VALUES.length;
-        g.drawString(font, count, width - 10 - font.width(count), 10, 0xFF8A8478, false);
+        g.text(font, count, width - 10 - font.width(count), 10, 0xFF8A8478, false);
     }
 
     /** One dot per skill, grouped by color; the selected one is a gold diamond. Hover for the name, click to jump. */
-    private void drawStrip(GuiGraphics g, PlayerData data, int mouseX, int mouseY) {
+    private void drawStrip(GuiGraphicsExtractor g, PlayerData data, int mouseX, int mouseY) {
         int n = Skill.VALUES.length;
         int spacing = Mth.clamp((width - 40) / (n + 3), 8, 14);
         // a small gap between groups
@@ -418,34 +421,34 @@ public class SkillsScreen extends Screen {
         }
     }
 
-    private void drawDotTooltip(GuiGraphics g, Skill skill, PlayerData data, int mouseX) {
+    private void drawDotTooltip(GuiGraphicsExtractor g, Skill skill, PlayerData data, int mouseX) {
         Component t = skill.displayName().copy().append(" " + data.getSkill(skill));
         int w = font.width(t) + 8;
         int x = Mth.clamp(mouseX - w / 2, 4, width - w - 4);
         int y = stripY() - 20;
         g.fill(x, y, x + w, y + 12, 0xD0000000);
-        g.drawString(font, t, x + 4, y + 2, 0xFF000000 | skill.group.color, false);
+        g.text(font, t, x + 4, y + 2, 0xFF000000 | skill.group.color, false);
     }
 
-    private void drawFooter(GuiGraphics g, PlayerData data) {
+    private void drawFooter(GuiGraphicsExtractor g, PlayerData data) {
         int y = height - 26;
         g.fillGradient(0, y - 8, width, height, 0x00000000, 0xC0000000);
         int cx = width / 2;
         int half = Math.min(150, width / 2 - 8);
         Component lvl = Component.translatable("screen.skycraft.level", data.getLevel());
-        g.drawString(font, lvl, cx - half, y, 0xFFF5EBC8, true);
+        g.text(font, lvl, cx - half, y, 0xFFF5EBC8, true);
         int barX = cx - half + font.width(lvl) + 6;
         g.fill(barX - 1, y + 2, barX + 81, y + 7, 0xFF101010);
         g.fill(barX, y + 3, barX + (int) (80 * data.levelProgress()), y + 6, 0xFFD8D0B8);
         Component perks = Component.translatable("screen.skycraft.perks_to_increase", data.getPerkPoints());
-        g.drawString(font, perks, cx + half - font.width(perks), y, 0xFFF5EBC8, true);
+        g.text(font, perks, cx + half - font.width(perks), y, 0xFFF5EBC8, true);
         String stats = Component.translatable("stat.skycraft.health").getString() + " " + (int) (minecraft.player.getMaxHealth() * 5)
                 + "    " + Component.translatable("stat.skycraft.magicka").getString() + " " + (int) data.maxMagicka()
                 + "    " + Component.translatable("stat.skycraft.stamina").getString() + " " + (int) data.maxStamina();
-        g.drawCenteredString(font, stats, cx, y + 12, 0xFFBDB59E);
+        g.centeredText(font, stats, cx, y + 12, 0xFFBDB59E);
     }
 
-    private void drawPerkTooltip(GuiGraphics g, Perk perk, PlayerData data) {
+    private void drawPerkTooltip(GuiGraphicsExtractor g, Perk perk, PlayerData data) {
         int x = 12;
         int w = Math.min(220, width / 3 + 20);
         int rank = data.getPerkRank(perk.id());
@@ -454,35 +457,35 @@ public class SkillsScreen extends Screen {
         int y = Math.max(40, stripY() - 12 - h);
         g.fill(x, y, x + w, y + h, 0xD0000000);
         g.fill(x, y, x + w, y + 1, 0xFF8A7F66);
-        g.drawString(font, perk.displayName(), x + 4, y + 4, 0xFFF5EBC8, true);
+        g.text(font, perk.displayName(), x + 4, y + 4, 0xFFF5EBC8, true);
         if (perk.maxRank() > 1) {
             String rk = rank + "/" + perk.maxRank();
-            g.drawString(font, rk, x + w - 4 - font.width(rk), y + 4, 0xFFC8BC9A, false);
+            g.text(font, rk, x + w - 4 - font.width(rk), y + 4, 0xFFC8BC9A, false);
         }
         int ly = y + 16;
         for (FormattedCharSequence line : desc) {
-            g.drawString(font, line, x + 4, ly, 0xFFD8D0B8, false);
+            g.text(font, line, x + 4, ly, 0xFFD8D0B8, false);
             ly += 10;
         }
         if (rank < perk.maxRank()) {
             int req = perk.requiredLevel(rank + 1);
             boolean met = data.getSkill(perk.skill()) >= req;
-            g.drawString(font, Component.translatable("screen.skycraft.requires", perk.skill().displayName(), req),
+            g.text(font, Component.translatable("screen.skycraft.requires", perk.skill().displayName(), req),
                     x + 4, ly + 4, met ? 0xFF90C090 : 0xFFC07070, false);
         }
     }
 
-    private void drawLevelUp(GuiGraphics g, PlayerData data) {
+    private void drawLevelUp(GuiGraphicsExtractor g, PlayerData data) {
         int cx = width / 2;
         int cy = height / 2;
         int half = Math.min(150, width / 2 - 6);
         g.fill(cx - half, cy - 40, cx + half, cy + 50, 0xE0000000);
         MagicUi.hline(g, cx - half, cx + half, cy - 40, 0xC0);
         MagicUi.hline(g, cx - half, cx + half, cy + 49, 0xC0);
-        g.drawCenteredString(font, Component.translatable("screen.skycraft.level_up_title", data.getLevel()), cx, cy - 30, 0xFFF5EBC8);
-        g.drawCenteredString(font, Component.translatable("screen.skycraft.level_up_choose"), cx, cy - 14, 0xFFBDB59E);
+        g.centeredText(font, Component.translatable("screen.skycraft.level_up_title", data.getLevel()), cx, cy - 30, 0xFFF5EBC8);
+        g.centeredText(font, Component.translatable("screen.skycraft.level_up_choose"), cx, cy - 14, 0xFFBDB59E);
         if (data.getPendingLevelUps() > 1) {
-            g.drawCenteredString(font, Component.translatable("screen.skycraft.level_up_pending", data.getPendingLevelUps()), cx, cy + 40, 0xFF8A8478);
+            g.centeredText(font, Component.translatable("screen.skycraft.level_up_pending", data.getPendingLevelUps()), cx, cy + 40, 0xFF8A8478);
         }
     }
 }

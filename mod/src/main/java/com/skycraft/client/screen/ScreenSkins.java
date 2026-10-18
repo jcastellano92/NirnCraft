@@ -3,10 +3,10 @@ package com.skycraft.client.screen;
 import com.skycraft.Skycraft;
 import com.skycraft.inventory.client.SkyUi;
 import com.skycraft.visual.VisualConfig;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.ConfirmScreen;
@@ -15,10 +15,10 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.ScreenEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.ScreenEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.util.List;
 
@@ -28,12 +28,55 @@ import java.util.List;
  * confirmation dialogs (smoky panel between ornaments). Only the drawing is replaced: the screens' own widgets,
  * delays and callbacks are untouched, and anything we can't read is simply not drawn.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
 public final class ScreenSkins {
     private static Screen deathScreen;
     private static long deathSince;
 
     private ScreenSkins() {}
+
+    private static boolean multiplayerScreen(Screen screen) {
+        return screen instanceof net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen
+                || screen instanceof net.minecraft.client.gui.screens.DirectJoinServerScreen
+                || screen instanceof net.minecraft.client.gui.screens.ManageServerScreen
+                || screen instanceof net.minecraft.client.gui.screens.WorldOptionsScreen
+                || screen instanceof com.skycraft.client.screen.title.SkyLanHelpScreen;
+    }
+
+    @SubscribeEvent
+    public static void multiplayerBackground(ScreenEvent.Render.Background event) {
+        if (!enabled() || !multiplayerScreen(event.getScreen())) return;
+        Screen screen = event.getScreen();
+        GuiGraphicsExtractor g = event.getGuiGraphics();
+        g.fillGradient(0, 0, screen.width, screen.height, 0xFF080808, 0xFF141210);
+        SkyUi.smoke(g, screen.width, screen.height, (Util.getMillis() % 1_000_000L) / 1000f, 0.45f);
+    }
+
+    @SubscribeEvent
+    public static void multiplayerHelp(ScreenEvent.Init.Post event) {
+        Screen screen = event.getScreen();
+        if (screen instanceof net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen
+                || screen instanceof net.minecraft.client.gui.screens.WorldOptionsScreen) {
+            event.addListener(net.minecraft.client.gui.components.Button.builder(Component.literal("LAN Help"), button ->
+                    Minecraft.getInstance().gui.setScreen(new com.skycraft.client.screen.title.SkyLanHelpScreen(screen)))
+                    .bounds(8, 6, 86, 20).build());
+        }
+    }
+
+    @SubscribeEvent
+    public static void multiplayerButtons(ScreenEvent.Render.Post event) {
+        if (!enabled() || !multiplayerScreen(event.getScreen())) return;
+        Screen screen = event.getScreen();
+        GuiGraphicsExtractor g = event.getGuiGraphics();
+        for (GuiEventListener child : screen.children()) {
+            if (child instanceof net.minecraft.client.gui.components.Button button && button.visible) {
+                g.fill(button.getX(), button.getY(), button.getRight(), button.getBottom(), 0xFF181510);
+                boolean hover = button.isMouseOver(event.getMouseX(), event.getMouseY()) || button.isFocused();
+                SkyUi.button(g, Minecraft.getInstance().font, button.getMessage(), button.getX(), button.getY(),
+                        button.getWidth(), button.getHeight(), hover, button.active, 1f);
+            }
+        }
+    }
 
     private static boolean enabled() {
         try {
@@ -74,7 +117,7 @@ public final class ScreenSkins {
 
     // ------------------------------------------------------------------ death
 
-    private static void renderDeath(DeathScreen screen, GuiGraphics g, int mouseX, int mouseY) {
+    private static void renderDeath(DeathScreen screen, GuiGraphicsExtractor g, int mouseX, int mouseY) {
         Minecraft mc = Minecraft.getInstance();
         Font font = mc.font;
         if (deathScreen != screen) {
@@ -101,7 +144,7 @@ public final class ScreenSkins {
             List<FormattedCharSequence> lines = font.split(cause, Math.min(w - 40, 320));
             for (int i = 0; i < lines.size(); i++) {
                 FormattedCharSequence line = lines.get(i);
-                g.drawString(font, line, (w - font.width(line)) / 2, cy + 40 + i * 10, SkyUi.fade(0xFFBDB5A0, ease), true);
+                g.text(font, line, (w - font.width(line)) / 2, cy + 40 + i * 10, SkyUi.fade(0xFFBDB5A0, ease), true);
             }
         }
         drawButtons(screen, g, font, mouseX, mouseY, ease);
@@ -109,7 +152,7 @@ public final class ScreenSkins {
 
     // ------------------------------------------------------------------ confirmation
 
-    private static void renderConfirm(ConfirmScreen screen, GuiGraphics g, int mouseX, int mouseY) {
+    private static void renderConfirm(ConfirmScreen screen, GuiGraphicsExtractor g, int mouseX, int mouseY) {
         Minecraft mc = Minecraft.getInstance();
         Font font = mc.font;
         int w = screen.width, h = screen.height;
@@ -127,7 +170,7 @@ public final class ScreenSkins {
         SkyUi.ornament(g, w / 2, top + 26, Math.min(100, panelW / 2 - 20), 0xC0C8BC9A);
         for (int i = 0; i < lines.size(); i++) {
             FormattedCharSequence line = lines.get(i);
-            g.drawString(font, line, (w - font.width(line)) / 2, top + 34 + i * 10, SkyUi.TEXT, false);
+            g.text(font, line, (w - font.width(line)) / 2, top + 34 + i * 10, SkyUi.TEXT, false);
         }
         drawButtons(screen, g, font, mouseX, mouseY, 1f);
     }
@@ -140,7 +183,7 @@ public final class ScreenSkins {
         return bottom;
     }
 
-    private static void drawButtons(Screen screen, GuiGraphics g, Font font, int mouseX, int mouseY, float alpha) {
+    private static void drawButtons(Screen screen, GuiGraphicsExtractor g, Font font, int mouseX, int mouseY, float alpha) {
         for (GuiEventListener child : screen.children()) {
             if (child instanceof AbstractButton b && b.visible) {
                 boolean hover = SkyUi.inside(mouseX, mouseY, b.getX(), b.getY(), b.getX() + b.getWidth(), b.getY() + b.getHeight());

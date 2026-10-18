@@ -1,5 +1,9 @@
 package com.skycraft.loot;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
@@ -24,14 +28,12 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.functions.LootItemConditionalFunction;
-import net.minecraft.world.level.storage.loot.functions.LootItemFunctionType;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
-import net.minecraft.world.level.storage.loot.predicates.LootItemConditionType;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.registries.DeferredRegister;
+import java.util.function.Supplier;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -62,35 +64,35 @@ import java.util.WeakHashMap;
  * restocks can come back, but two chests of one dungeon never both hold it).
  */
 public final class LootFunctions {
-    public static final DeferredRegister<LootItemFunctionType> FUNCTIONS = DeferredRegister.create(Registries.LOOT_FUNCTION_TYPE, Skycraft.MODID);
-    public static final DeferredRegister<LootItemConditionType> CONDITIONS = DeferredRegister.create(Registries.LOOT_CONDITION_TYPE, Skycraft.MODID);
+    public static final DeferredRegister<MapCodec<? extends net.minecraft.world.level.storage.loot.functions.LootItemFunction>> FUNCTIONS = DeferredRegister.create(Registries.LOOT_FUNCTION_TYPE, Skycraft.MODID);
+    public static final DeferredRegister<MapCodec<? extends LootItemCondition>> CONDITIONS = DeferredRegister.create(Registries.LOOT_CONDITION_TYPE, Skycraft.MODID);
 
     /** Thirty days: Skyrim's cleared-dungeon respawn time, and Skycraft's restock time. */
     public static final long OFFER_COOLDOWN = 30L * 24000L;
 
-    public static final RegistryObject<LootItemFunctionType> SCALED_GOLD = FUNCTIONS.register("scaled_gold",
-            () -> new LootItemFunctionType(new ScaledGold.Serializer()));
-    public static final RegistryObject<LootItemFunctionType> PLACE_COLLECTIBLES = FUNCTIONS.register("place_collectibles",
-            () -> new LootItemFunctionType(new Simple.Serializer(Simple.Op.PLACE)));
-    public static final RegistryObject<LootItemFunctionType> RANDOM_UNIQUE = FUNCTIONS.register("random_unique",
-            () -> new LootItemFunctionType(new Simple.Serializer(Simple.Op.RANDOM_UNIQUE)));
-    public static final RegistryObject<LootItemFunctionType> REGIONAL_TREASURE = FUNCTIONS.register("regional_treasure",
-            () -> new LootItemFunctionType(new Simple.Serializer(Simple.Op.TREASURE)));
-    public static final RegistryObject<LootItemFunctionType> SKILL_BOOK = FUNCTIONS.register("skill_book",
-            () -> new LootItemFunctionType(new Simple.Serializer(Simple.Op.SKILL_BOOK)));
-    public static final RegistryObject<LootItemFunctionType> REGIONAL_BOOK = FUNCTIONS.register("regional_book",
-            () -> new LootItemFunctionType(new Simple.Serializer(Simple.Op.BOOK)));
-    public static final RegistryObject<LootItemFunctionType> COLLECTIBLE = FUNCTIONS.register("collectible",
-            () -> new LootItemFunctionType(new Named.Serializer(Named.Op.COLLECTIBLE)));
-    public static final RegistryObject<LootItemFunctionType> MISSING_COLLECTIBLE = FUNCTIONS.register("missing_collectible",
-            () -> new LootItemFunctionType(new Named.Serializer(Named.Op.MISSING)));
-    public static final RegistryObject<LootItemFunctionType> UNIQUE = FUNCTIONS.register("unique",
-            () -> new LootItemFunctionType(new Named.Serializer(Named.Op.UNIQUE)));
+    public static final Supplier<MapCodec<? extends LootItemConditionalFunction>> SCALED_GOLD = FUNCTIONS.register("scaled_gold",
+            () -> ScaledGold.MAP_CODEC);
+    public static final Supplier<MapCodec<? extends LootItemConditionalFunction>> PLACE_COLLECTIBLES = FUNCTIONS.register("place_collectibles",
+            () -> Simple.codecFor(Simple.Op.PLACE));
+    public static final Supplier<MapCodec<? extends LootItemConditionalFunction>> RANDOM_UNIQUE = FUNCTIONS.register("random_unique",
+            () -> Simple.codecFor(Simple.Op.RANDOM_UNIQUE));
+    public static final Supplier<MapCodec<? extends LootItemConditionalFunction>> REGIONAL_TREASURE = FUNCTIONS.register("regional_treasure",
+            () -> Simple.codecFor(Simple.Op.TREASURE));
+    public static final Supplier<MapCodec<? extends LootItemConditionalFunction>> SKILL_BOOK = FUNCTIONS.register("skill_book",
+            () -> Simple.codecFor(Simple.Op.SKILL_BOOK));
+    public static final Supplier<MapCodec<? extends LootItemConditionalFunction>> REGIONAL_BOOK = FUNCTIONS.register("regional_book",
+            () -> Simple.codecFor(Simple.Op.BOOK));
+    public static final Supplier<MapCodec<? extends LootItemConditionalFunction>> COLLECTIBLE = FUNCTIONS.register("collectible",
+            () -> Named.codecFor(Named.Op.COLLECTIBLE));
+    public static final Supplier<MapCodec<? extends LootItemConditionalFunction>> MISSING_COLLECTIBLE = FUNCTIONS.register("missing_collectible",
+            () -> Named.codecFor(Named.Op.MISSING));
+    public static final Supplier<MapCodec<? extends LootItemConditionalFunction>> UNIQUE = FUNCTIONS.register("unique",
+            () -> Named.codecFor(Named.Op.UNIQUE));
 
-    public static final RegistryObject<LootItemConditionType> LOOT_LEVEL = CONDITIONS.register("loot_level",
-            () -> new LootItemConditionType(new LevelCondition.Serializer()));
-    public static final RegistryObject<LootItemConditionType> COLLECTION_COMPLETE = CONDITIONS.register("collection_complete",
-            () -> new LootItemConditionType(new CompleteCondition.Serializer()));
+    public static final Supplier<MapCodec<? extends LootItemCondition>> LOOT_LEVEL = CONDITIONS.register("loot_level",
+            () -> LevelCondition.MAP_CODEC);
+    public static final Supplier<MapCodec<? extends LootItemCondition>> COLLECTION_COMPLETE = CONDITIONS.register("collection_complete",
+            () -> CompleteCondition.MAP_CODEC);
 
     private LootFunctions() {}
 
@@ -108,8 +110,8 @@ public final class LootFunctions {
         if (Collectibles.has(data, e)) return false;
         Set<String> rolled = ROLLED.get(context);
         if (rolled != null && rolled.contains(e.key())) return false;
-        CompoundTag offered = data.module(Collectibles.MODULE).getCompound("offered");
-        long at = offered.getLong(e.key());
+        CompoundTag offered = data.module(Collectibles.MODULE).getCompoundOrEmpty("offered");
+        long at = offered.getLongOr(e.key(), 0L);
         long now = context.getLevel().getGameTime();
         return at <= 0 || now - at >= OFFER_COOLDOWN || now < at;
     }
@@ -119,7 +121,7 @@ public final class LootFunctions {
         if (s.isEmpty()) return s;
         ROLLED.computeIfAbsent(context, k -> new HashSet<>()).add(e.key());
         CompoundTag module = data.module(Collectibles.MODULE);
-        CompoundTag offered = module.getCompound("offered");
+        CompoundTag offered = module.getCompoundOrEmpty("offered");
         offered.putLong(e.key(), context.getLevel().getGameTime());
         module.put("offered", offered);
         return s;
@@ -127,8 +129,8 @@ public final class LootFunctions {
 
     @Nullable
     private static Vec3 origin(LootContext context) {
-        Vec3 origin = context.getParamOrNull(LootContextParams.ORIGIN);
-        Entity self = context.getParamOrNull(LootContextParams.THIS_ENTITY);
+        Vec3 origin = context.getOptional(LootContextParams.ORIGIN);
+        Entity self = context.getOptional(LootContextParams.THIS_ENTITY);
         if (origin == null && self != null) origin = self.position();
         return origin;
     }
@@ -150,7 +152,7 @@ public final class LootFunctions {
     public static ItemStack skillBook(@Nullable Skill skill, int volume) {
         if (skill == null || !EconomyItems.SKILL_BOOKS.containsKey(skill)) return ItemStack.EMPTY;
         ItemStack s = new ItemStack(EconomyItems.SKILL_BOOKS.get(skill).get());
-        if (volume > 1) s.getOrCreateTag().putInt(SkillBookItem.VOLUME_NBT, Math.min(SkillBookItem.VOLUMES, volume));
+        if (volume > 1) com.skycraft.inventory.ItemData.updateCustom(s, customData263 -> customData263.putInt(SkillBookItem.VOLUME_NBT, Math.min(SkillBookItem.VOLUMES, volume)));
         return s;
     }
 
@@ -189,7 +191,7 @@ public final class LootFunctions {
         final int min, max;
         final float growth;
 
-        ScaledGold(LootItemCondition[] conditions, int min, int max, float growth) {
+        ScaledGold(java.util.Optional<net.minecraft.core.Holder<LootItemCondition>> conditions, int min, int max, float growth) {
             super(conditions);
             this.min = min;
             this.max = Math.max(min, max);
@@ -197,7 +199,7 @@ public final class LootFunctions {
         }
 
         @Override
-        public LootItemFunctionType getType() {
+        public MapCodec<? extends LootItemConditionalFunction> codec() {
             return SCALED_GOLD.get();
         }
 
@@ -212,21 +214,7 @@ public final class LootFunctions {
             return Currency.coins(amount(min, max, growth, LootLevels.of(context), context.getRandom()));
         }
 
-        public static class Serializer extends LootItemConditionalFunction.Serializer<ScaledGold> {
-            @Override
-            public void serialize(JsonObject json, ScaledGold fn, JsonSerializationContext ctx) {
-                super.serialize(json, fn, ctx);
-                json.addProperty("min", fn.min);
-                json.addProperty("max", fn.max);
-                json.addProperty("growth", fn.growth);
-            }
-
-            @Override
-            public ScaledGold deserialize(JsonObject json, JsonDeserializationContext ctx, LootItemCondition[] conditions) {
-                return new ScaledGold(conditions, GsonHelper.getAsInt(json, "min", 1), GsonHelper.getAsInt(json, "max", 10),
-                        GsonHelper.getAsFloat(json, "growth", 0.04f));
-            }
-        }
+        public static final MapCodec<ScaledGold> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> commonFields(i).and(i.group(Codec.INT.optionalFieldOf("min", 1).forGetter(f -> f.min), Codec.INT.optionalFieldOf("max", 10).forGetter(f -> f.max), Codec.FLOAT.optionalFieldOf("growth", 0.04f).forGetter(f -> f.growth))).apply(i, ScaledGold::new));
     }
 
     // ================================================================== parameterless collectible functions
@@ -236,13 +224,13 @@ public final class LootFunctions {
 
         final Op op;
 
-        Simple(LootItemCondition[] conditions, Op op) {
+        Simple(java.util.Optional<net.minecraft.core.Holder<LootItemCondition>> conditions, Op op) {
             super(conditions);
             this.op = op;
         }
 
         @Override
-        public LootItemFunctionType getType() {
+        public MapCodec<? extends LootItemConditionalFunction> codec() {
             return switch (op) {
                 case PLACE -> PLACE_COLLECTIBLES.get();
                 case RANDOM_UNIQUE -> RANDOM_UNIQUE.get();
@@ -299,17 +287,8 @@ public final class LootFunctions {
             }
         }
 
-        public static class Serializer extends LootItemConditionalFunction.Serializer<Simple> {
-            private final Op op;
-
-            Serializer(Op op) {
-                this.op = op;
-            }
-
-            @Override
-            public Simple deserialize(JsonObject json, JsonDeserializationContext ctx, LootItemCondition[] conditions) {
-                return new Simple(conditions, op);
-            }
+        public static MapCodec<Simple> codecFor(Op op) {
+            return RecordCodecBuilder.mapCodec(i -> commonFields(i).apply(i, conditions -> new Simple(conditions, op)));
         }
     }
 
@@ -323,7 +302,7 @@ public final class LootFunctions {
         final String id;
         final boolean province;
 
-        Named(LootItemCondition[] conditions, Op op, String collection, String id, boolean province) {
+        Named(java.util.Optional<net.minecraft.core.Holder<LootItemCondition>> conditions, Op op, String collection, String id, boolean province) {
             super(conditions);
             this.op = op;
             this.collection = collection;
@@ -332,7 +311,7 @@ public final class LootFunctions {
         }
 
         @Override
-        public LootItemFunctionType getType() {
+        public MapCodec<? extends LootItemConditionalFunction> codec() {
             return switch (op) {
                 case COLLECTIBLE -> COLLECTIBLE.get();
                 case MISSING -> MISSING_COLLECTIBLE.get();
@@ -366,31 +345,20 @@ public final class LootFunctions {
             return pool.isEmpty() ? ItemStack.EMPTY : offer(context, data, pool.get(context.getRandom().nextInt(pool.size())));
         }
 
-        public static class Serializer extends LootItemConditionalFunction.Serializer<Named> {
-            private final Op op;
-
-            Serializer(Op op) {
-                this.op = op;
-            }
-
-            @Override
-            public void serialize(JsonObject json, Named fn, JsonSerializationContext ctx) {
-                super.serialize(json, fn, ctx);
-                if (fn.op != Op.UNIQUE) json.addProperty("collection", fn.collection);
-                if (fn.op != Op.MISSING) json.addProperty(fn.op == Op.UNIQUE ? "id" : "entry", fn.id);
-                if (fn.op == Op.MISSING && fn.province) json.addProperty("province", true);
-            }
-
-            @Override
-            public Named deserialize(JsonObject json, JsonDeserializationContext ctx, LootItemCondition[] conditions) {
-                return switch (op) {
-                    case UNIQUE -> new Named(conditions, op, LegendaryUniques.COLLECTION, GsonHelper.getAsString(json, "id"), false);
-                    case COLLECTIBLE -> new Named(conditions, op, GsonHelper.getAsString(json, "collection"),
-                            GsonHelper.getAsString(json, "entry"), false);
-                    case MISSING -> new Named(conditions, op, GsonHelper.getAsString(json, "collection"), "",
-                            GsonHelper.getAsBoolean(json, "province", false));
-                };
-            }
+        public static MapCodec<Named> codecFor(Op op) {
+            return switch (op) {
+                case UNIQUE -> RecordCodecBuilder.mapCodec(i -> commonFields(i).and(
+                        Codec.STRING.fieldOf("id").forGetter(f -> f.id))
+                        .apply(i, (c, id) -> new Named(c, op, LegendaryUniques.COLLECTION, id, false)));
+                case COLLECTIBLE -> RecordCodecBuilder.mapCodec(i -> commonFields(i).and(i.group(
+                        Codec.STRING.fieldOf("collection").forGetter(f -> f.collection),
+                        Codec.STRING.fieldOf("entry").forGetter(f -> f.id)))
+                        .apply(i, (c, collection, id) -> new Named(c, op, collection, id, false)));
+                case MISSING -> RecordCodecBuilder.mapCodec(i -> commonFields(i).and(i.group(
+                        Codec.STRING.fieldOf("collection").forGetter(f -> f.collection),
+                        Codec.BOOL.optionalFieldOf("province", false).forGetter(f -> f.province)))
+                        .apply(i, (c, collection, province) -> new Named(c, op, collection, "", province)));
+            };
         }
     }
 
@@ -405,7 +373,7 @@ public final class LootFunctions {
         }
 
         @Override
-        public net.minecraft.world.level.storage.loot.predicates.LootItemConditionType getType() {
+        public MapCodec<? extends LootItemCondition> codec() {
             return LOOT_LEVEL.get();
         }
 
@@ -415,18 +383,7 @@ public final class LootFunctions {
             return level >= min && level <= max;
         }
 
-        public static class Serializer implements net.minecraft.world.level.storage.loot.Serializer<LevelCondition> {
-            @Override
-            public void serialize(JsonObject json, LevelCondition c, JsonSerializationContext ctx) {
-                json.addProperty("min", c.min);
-                json.addProperty("max", c.max);
-            }
-
-            @Override
-            public LevelCondition deserialize(JsonObject json, JsonDeserializationContext ctx) {
-                return new LevelCondition(GsonHelper.getAsInt(json, "min", 1), GsonHelper.getAsInt(json, "max", Integer.MAX_VALUE));
-            }
-        }
+        public static final MapCodec<LevelCondition> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> i.group(Codec.INT.optionalFieldOf("min", 1).forGetter(f -> f.min), Codec.INT.optionalFieldOf("max", Integer.MAX_VALUE).forGetter(f -> f.max)).apply(i, LevelCondition::new));
     }
 
     // ================================================================== condition: skycraft:collection_complete
@@ -439,7 +396,7 @@ public final class LootFunctions {
         }
 
         @Override
-        public net.minecraft.world.level.storage.loot.predicates.LootItemConditionType getType() {
+        public MapCodec<? extends LootItemCondition> codec() {
             return COLLECTION_COMPLETE.get();
         }
 
@@ -449,16 +406,6 @@ public final class LootFunctions {
             return player != null && Collectibles.rewarded(SkyData.get(player), collection);
         }
 
-        public static class Serializer implements net.minecraft.world.level.storage.loot.Serializer<CompleteCondition> {
-            @Override
-            public void serialize(JsonObject json, CompleteCondition c, JsonSerializationContext ctx) {
-                json.addProperty("collection", c.collection);
-            }
-
-            @Override
-            public CompleteCondition deserialize(JsonObject json, JsonDeserializationContext ctx) {
-                return new CompleteCondition(GsonHelper.getAsString(json, "collection"));
-            }
-        }
+        public static final MapCodec<CompleteCondition> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> i.group(Codec.STRING.fieldOf("collection").forGetter(f -> f.collection)).apply(i, CompleteCondition::new));
     }
 }

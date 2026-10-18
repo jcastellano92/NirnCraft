@@ -61,7 +61,7 @@ public final class CivilWar {
         final Map<String, String> control = new LinkedHashMap<>();
 
         static Store get(MinecraftServer server) {
-            return server.overworld().getDataStorage().computeIfAbsent(Store::load, Store::create, NAME);
+            return com.skycraft.platform.SavedDataTypes.get(server.overworld(), NAME, Store::load, Store::create, value263 -> value263.save(new net.minecraft.nbt.CompoundTag()));
         }
 
         static Store create() {
@@ -73,11 +73,10 @@ public final class CivilWar {
 
         static Store load(CompoundTag tag) {
             Store s = create();
-            for (String k : tag.getAllKeys()) s.control.put(k, tag.getString(k));
+            for (String k : tag.keySet()) s.control.put(k, tag.getStringOr(k, ""));
             return s;
         }
 
-        @Override
         public CompoundTag save(CompoundTag tag) {
             control.forEach(tag::putString);
             return tag;
@@ -135,21 +134,21 @@ public final class CivilWar {
 
     /** Every few seconds per player: guards around them wear the livery of whoever holds their hold. */
     public static void dressGuards(ServerPlayer player) {
-        MinecraftServer server = player.server;
+        MinecraftServer server = player.level().getServer();
         for (Mob guard : player.level().getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(40),
-                m -> m.isAlive() && m.getType().is(QuestDialogue.GUARDS))) {
+                m -> m.isAlive() && m.getType().builtInRegistryHolder().is(QuestDialogue.GUARDS))) {
             String side = controller(server, Holds.holdAt(guard.level(), guard.blockPosition()));
             ItemStack chest = guard.getItemBySlot(EquipmentSlot.CHEST);
-            boolean ours = chest.isEmpty() || chest.getTag() != null && chest.getTag().contains(LIVERY);
+            boolean ours = chest.isEmpty() || com.skycraft.inventory.ItemData.custom(chest) != null && com.skycraft.inventory.ItemData.custom(chest).contains(LIVERY);
             if (!ours) continue; // a guard given real armor keeps it
-            String worn = chest.isEmpty() ? "" : chest.getTag().getString(LIVERY);
+            String worn = chest.isEmpty() ? "" : com.skycraft.inventory.ItemData.custom(chest).getStringOr(LIVERY, "");
             if (worn.equals(side)) continue;
             if (side.isEmpty()) {
                 guard.setItemSlot(EquipmentSlot.CHEST, ItemStack.EMPTY);
                 continue;
             }
             ItemStack livery = QuestSpawner.dyed(Items.LEATHER_CHESTPLATE, IMPERIAL.equals(side) ? IMPERIAL_RED : STORMCLOAK_BLUE);
-            livery.getOrCreateTag().putString(LIVERY, side);
+            com.skycraft.inventory.ItemData.updateCustom(livery, customData263 -> customData263.putString(LIVERY, side));
             guard.setItemSlot(EquipmentSlot.CHEST, livery);
             guard.setDropChance(EquipmentSlot.CHEST, 0f);
         }

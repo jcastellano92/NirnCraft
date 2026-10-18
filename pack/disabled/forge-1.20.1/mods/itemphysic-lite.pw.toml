@@ -1,0 +1,13 @@
+name = "ItemPhysic Lite"
+filename = "ItemPhysicLite_FORGE_v1.6.13_mc1.20.1.jar"
+side = "client"
+
+[download]
+url = "https://cdn.modrinth.com/data/OuyCgP8t/versions/frnHNN8n/ItemPhysicLite_FORGE_v1.6.13_mc1.20.1.jar"
+hash-format = "sha512"
+hash = "6bc97b6f856a973125a8b7054cbe2d3cab119ab1392bf7cdf703312d7c7b9b331d94a6ef039835a0054b2f5c8d27040514f68ef9fdb5f31324072193cc9c1f64"
+
+[update]
+[update.modrinth]
+mod-id = "OuyCgP8t"
+version = "frnHNN8n"

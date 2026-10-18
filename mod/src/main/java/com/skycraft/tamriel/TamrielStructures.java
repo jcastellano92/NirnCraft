@@ -2,18 +2,19 @@ package com.skycraft.tamriel;
 
 import com.skycraft.Skycraft;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.world.level.levelgen.structure.placement.StructurePlacementType;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.RegistryObject;
+import net.minecraft.world.level.levelgen.structure.placement.StructurePlacement;
+import com.mojang.serialization.MapCodec;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.registries.DeferredRegister;
+import java.util.function.Supplier;
 
 /** Structures: the skycraft:places placement, settlements and fixed landmarks (Phase 2 workstreams S1/S2). */
 public final class TamrielStructures {
-    public static final DeferredRegister<StructurePlacementType<?>> PLACEMENTS =
+    public static final DeferredRegister<MapCodec<? extends StructurePlacement>> PLACEMENTS =
             DeferredRegister.create(Registries.STRUCTURE_PLACEMENT, Skycraft.MODID);
 
-    public static final RegistryObject<StructurePlacementType<PlacesPlacement>> PLACES_PLACEMENT =
-            PLACEMENTS.register("places", () -> () -> PlacesPlacement.CODEC);
+    public static final Supplier<MapCodec<? extends StructurePlacement>> PLACES_PLACEMENT =
+            PLACEMENTS.register("places", () -> PlacesPlacement.CODEC);
 
     private TamrielStructures() {}
 

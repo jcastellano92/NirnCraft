@@ -10,15 +10,15 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.RotatedPillarBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
-import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
+import com.skycraft.worldgen.ConfiguredFeature;
+import com.skycraft.worldgen.FeaturePlaceContext;
+import com.skycraft.worldgen.NoneFeatureConfiguration;
 
 /**
  * The Hist of Black Marsh: an ancient, twisting trunk standing in the mire on arching roots, weeping amber sap, under a
  * drooping umbrella of leaves with hanging strands. Centred on the decorated chunk to fit the 3×3-chunk write area.
  */
-public class HistTreeFeature extends Feature<NoneFeatureConfiguration> {
+public class HistTreeFeature extends ConfiguredFeature<NoneFeatureConfiguration> {
     public HistTreeFeature(Codec<NoneFeatureConfiguration> codec) {
         super(codec);
     }

@@ -4,7 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.skycraft.Skycraft;
 import com.skycraft.core.SkyData;
-import net.minecraft.client.model.PlayerModel;
+import net.minecraft.client.model.player.PlayerModel;
 import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
@@ -14,14 +14,14 @@ import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.client.player.AbstractClientPlayer;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
 
@@ -29,8 +29,8 @@ import net.minecraft.world.item.ItemStack;
  * 3D Render Layer for Jewelry (Circlets, Necklaces, Amulets, Pendants, Rings) and Layered Clothing.
  * Renders gleaming jewelry and authentic layered garments over or under armor.
  */
-public class JewelryLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> {
-    public static final ResourceLocation TEXTURE = new ResourceLocation(Skycraft.MODID, "textures/entity/society/jewelry.png");
+public class JewelryLayer extends RenderLayer<net.minecraft.client.renderer.entity.state.AvatarRenderState, PlayerModel> {
+    public static final Identifier TEXTURE = Identifier.fromNamespaceAndPath(Skycraft.MODID, "textures/entity/society/jewelry.png");
 
     private final ModelPart circlet;
     private final ModelPart torso;
@@ -39,8 +39,12 @@ public class JewelryLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<
     private final ModelPart clothingTrim;
     private final ModelPart ringRight;
     private final ModelPart ringLeft;
+    private final com.skycraft.client.CapturedPartModel circletModel, torsoModel, rightModel, leftModel;
+    private record Jewelry(boolean circlet, boolean necklace, boolean ring) {}
+    private static final net.minecraft.util.context.ContextKey<Jewelry> JEWELRY = new net.minecraft.util.context.ContextKey<>(
+            Identifier.fromNamespaceAndPath("skycraft", "jewelry"));
 
-    public JewelryLayer(RenderLayerParent<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> parent, EntityModelSet models) {
+    public JewelryLayer(RenderLayerParent<net.minecraft.client.renderer.entity.state.AvatarRenderState, PlayerModel> parent, EntityModelSet models) {
         super(parent);
         ModelPart root = models.bakeLayer(SocietyClient.JEWELRY_LAYER);
         this.circlet = root.getChild("circlet");
@@ -50,6 +54,10 @@ public class JewelryLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<
         this.clothingTrim = torso.getChild("clothing_trim");
         this.ringRight = root.getChild("ring_right");
         this.ringLeft = root.getChild("ring_left");
+        circletModel = new com.skycraft.client.CapturedPartModel(circlet);
+        torsoModel = new com.skycraft.client.CapturedPartModel(torso);
+        rightModel = new com.skycraft.client.CapturedPartModel(ringRight);
+        leftModel = new com.skycraft.client.CapturedPartModel(ringLeft);
     }
 
     public static LayerDefinition createLayer() {
@@ -81,7 +89,7 @@ public class JewelryLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<
 
     private static boolean matchKeyword(ItemStack stack, String keyword) {
         if (stack.isEmpty()) return false;
-        ResourceLocation id = BuiltInRegistries.ITEM.getKey(stack.getItem());
+        Identifier id = BuiltInRegistries.ITEM.getKey(stack.getItem());
         if (id != null && id.getPath().toLowerCase(java.util.Locale.ROOT).contains(keyword)) return true;
         String desc = stack.getItem().getDescriptionId().toLowerCase(java.util.Locale.ROOT);
         if (desc.contains(keyword)) return true;
@@ -101,41 +109,49 @@ public class JewelryLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<
         return matchKeyword(stack, "ring") || matchKeyword(stack, "band");
     }
 
-    @Override
-    public void render(PoseStack pose, MultiBufferSource buffers, int packedLight, AbstractClientPlayer player,
-                       float limbSwing, float limbSwingAmount, float partialTick, float ageInTicks, float netHeadYaw, float headPitch) {
-        if (player.isInvisible()) return;
-
+    public static void extract(net.minecraft.world.entity.player.Player player,
+                               net.minecraft.client.renderer.entity.state.AvatarRenderState state) {
         ItemStack headStack = player.getItemBySlot(EquipmentSlot.HEAD);
         ItemStack chestStack = player.getItemBySlot(EquipmentSlot.CHEST);
         ItemStack offhandStack = player.getItemBySlot(EquipmentSlot.OFFHAND);
         ItemStack mainhandStack = player.getItemBySlot(EquipmentSlot.MAINHAND);
 
         CompoundTag apparel = SkyData.get(player).module("apparel");
-        String appCirclet = apparel.getString("circlet");
-        String appNecklace = apparel.getString("necklace");
-        String appRing = apparel.getString("ring");
+        String appCirclet = apparel.getStringOr("circlet","");
+        String appNecklace = apparel.getStringOr("necklace","");
+        String appRing = apparel.getStringOr("ring","");
 
         boolean hasCirclet = isCirclet(headStack) || !appCirclet.isEmpty();
         boolean hasNecklace = isNecklace(chestStack) || isNecklace(offhandStack) || isNecklace(mainhandStack) || !appNecklace.isEmpty();
         boolean hasRing = isRing(offhandStack) || isRing(mainhandStack) || !appRing.isEmpty();
         boolean hasClothing = true; // Layered clothing trim under/over armor
 
-        // Also check player inventory if not in explicit slots
         if (!hasCirclet || !hasNecklace || !hasRing) {
-            for (ItemStack invStack : player.getInventory().items) {
-                if (invStack.isEmpty()) continue;
-                if (!hasCirclet && isCirclet(invStack)) hasCirclet = true;
-                if (!hasNecklace && isNecklace(invStack)) hasNecklace = true;
-                if (!hasRing && isRing(invStack)) hasRing = true;
+            var inventory = player.getInventory();
+            for (int i = 0; i < inventory.getContainerSize(); i++) {
+                ItemStack stack = inventory.getItem(i);
+                if (stack.isEmpty()) continue;
+                if (!hasCirclet && isCirclet(stack)) hasCirclet = true;
+                if (!hasNecklace && isNecklace(stack)) hasNecklace = true;
+                if (!hasRing && isRing(stack)) hasRing = true;
             }
         }
+        state.setRenderData(JEWELRY, new Jewelry(hasCirclet, hasNecklace, hasRing));
+    }
 
-        PlayerModel<AbstractClientPlayer> model = this.getParentModel();
-        circlet.copyFrom(model.head);
-        torso.copyFrom(model.body);
-        ringRight.copyFrom(model.rightArm);
-        ringLeft.copyFrom(model.leftArm);
+    @Override
+    public void submit(PoseStack pose, SubmitNodeCollector buffers, int packedLight,
+                       net.minecraft.client.renderer.entity.state.AvatarRenderState player, float netHeadYaw, float headPitch) {
+        Jewelry jewelry = player.getRenderData(JEWELRY);
+        if (player.isInvisible || jewelry == null) return;
+        boolean hasCirclet = jewelry.circlet(), hasNecklace = jewelry.necklace(), hasRing = jewelry.ring();
+        boolean hasClothing = true;
+        ItemStack headStack = player.headEquipment, chestStack = player.chestEquipment;
+        PlayerModel model = this.getParentModel();
+        circlet.loadPose(model.head.storePose());
+        torso.loadPose(model.body.storePose());
+        ringRight.loadPose(model.rightArm.storePose());
+        ringLeft.loadPose(model.leftArm.storePose());
 
         circlet.visible = hasCirclet;
         necklaceChain.visible = hasNecklace;
@@ -144,7 +160,7 @@ public class JewelryLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<
         ringRight.visible = hasRing;
         ringLeft.visible = hasRing;
 
-        VertexConsumer vc = buffers.getBuffer(RenderType.entityCutoutNoCull(TEXTURE));
+        var type = RenderTypes.entityCutout(TEXTURE);
         int overlay = OverlayTexture.NO_OVERLAY;
 
         boolean hasHelmet = !headStack.isEmpty();
@@ -153,7 +169,7 @@ public class JewelryLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<
             if (hasHelmet) {
                 pose.scale(1.08f, 1.08f, 1.12f);
             }
-            circlet.render(pose, vc, packedLight, overlay);
+            circletModel.submit(buffers, pose, type, packedLight, overlay, -1);
             pose.popPose();
         }
 
@@ -163,13 +179,13 @@ public class JewelryLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<
             if (hasArmor) {
                 pose.scale(1.08f, 1.02f, 1.16f);
             }
-            torso.render(pose, vc, packedLight, overlay);
+            torsoModel.submit(buffers, pose, type, packedLight, overlay, -1);
             pose.popPose();
         }
 
         if (hasRing) {
-            ringRight.render(pose, vc, packedLight, overlay);
-            ringLeft.render(pose, vc, packedLight, overlay);
+            rightModel.submit(buffers, pose, type, packedLight, overlay, -1);
+            leftModel.submit(buffers, pose, type, packedLight, overlay, -1);
         }
     }
 }

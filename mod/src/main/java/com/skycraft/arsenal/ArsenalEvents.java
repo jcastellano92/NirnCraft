@@ -26,30 +26,30 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.monster.AbstractSkeleton;
+import net.minecraft.world.entity.monster.skeleton.AbstractSkeleton;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.AbstractArrow;
-import net.minecraft.world.entity.projectile.SpectralArrow;
+import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
+import net.minecraft.world.entity.projectile.arrow.SpectralArrow;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.ProjectileWeaponItem;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.event.entity.EntityJoinLevelEvent;
-import net.minecraftforge.event.entity.living.LivingDeathEvent;
-import net.minecraftforge.event.entity.living.LivingDropsEvent;
-import net.minecraftforge.event.entity.living.LivingEvent;
-import net.minecraftforge.event.entity.living.LivingExperienceDropEvent;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
+import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
+import net.neoforged.neoforge.event.entity.living.LivingDropsEvent;
+import net.neoforged.neoforge.event.entity.living.LivingEvent;
+import net.neoforged.neoforge.event.entity.living.LivingExperienceDropEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 /**
  * Forge-bus rules of the arsenal: arrow bookkeeping (corpse arrows, contract 27), headshots, elemental arrows,
  * armor-piercing crossbows, leveled weapon drops from humanoid hostiles, kill-cam triggers and Wabbajack chickens.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class ArsenalEvents {
     /** Victim persistent data: ListTag of ItemStack NBT, the arrows stuck in its body (cap {@value #MAX_ARROWS}). */
     public static final String BODY_ARROWS = "skycraft_arrows";
@@ -62,48 +62,54 @@ public final class ArsenalEvents {
     private static final String PREPARED = "skycraft_arsenal_prepared";
     private static final String BOUND_ARROW = "skycraft_bound_arrow";
     public static final String COLLECTIBLE = "skycraft_collectible";
-    private static final java.util.UUID AFFIX_WEAPON_UUID = java.util.UUID.fromString("9d4e8c12-6a3b-4f91-8e27-5c1a9f0b3d40");
-    private static final java.util.UUID[] AFFIX_ARMOR_UUIDS = {
-            java.util.UUID.fromString("9d4e8c12-6a3b-4f91-8e27-5c1a9f0b3d41"),
-            java.util.UUID.fromString("9d4e8c12-6a3b-4f91-8e27-5c1a9f0b3d42"),
-            java.util.UUID.fromString("9d4e8c12-6a3b-4f91-8e27-5c1a9f0b3d43"),
-            java.util.UUID.fromString("9d4e8c12-6a3b-4f91-8e27-5c1a9f0b3d44")
+    private static final net.minecraft.resources.Identifier AFFIX_WEAPON_UUID = net.minecraft.resources.Identifier.parse("skycraft:modifier_9d4e8c12-6a3b-4f91-8e27-5c1a9f0b3d40");
+    private static final net.minecraft.resources.Identifier[] AFFIX_ARMOR_UUIDS = {
+            net.minecraft.resources.Identifier.parse("skycraft:modifier_9d4e8c12-6a3b-4f91-8e27-5c1a9f0b3d41"),
+            net.minecraft.resources.Identifier.parse("skycraft:modifier_9d4e8c12-6a3b-4f91-8e27-5c1a9f0b3d42"),
+            net.minecraft.resources.Identifier.parse("skycraft:modifier_9d4e8c12-6a3b-4f91-8e27-5c1a9f0b3d43"),
+            net.minecraft.resources.Identifier.parse("skycraft:modifier_9d4e8c12-6a3b-4f91-8e27-5c1a9f0b3d44")
     };
-    private static final java.util.UUID AFFIX_SHIELD_UUID = java.util.UUID.fromString("9d4e8c12-6a3b-4f91-8e27-5c1a9f0b3d45");
+    private static final net.minecraft.resources.Identifier AFFIX_SHIELD_UUID = net.minecraft.resources.Identifier.parse("skycraft:modifier_9d4e8c12-6a3b-4f91-8e27-5c1a9f0b3d45");
 
     private ArsenalEvents() {}
 
     // ------------------------------------------------------------------ affix stat modifiers
 
     @SubscribeEvent
-    public static void onAffixAttributes(net.minecraftforge.event.ItemAttributeModifierEvent event) {
+    public static void onAffixAttributes(net.neoforged.neoforge.event.ItemAttributeModifierEvent event) {
         ItemStack stack = event.getItemStack();
         if (!com.skycraft.loot.affix.ItemAffixes.hasAffixes(stack)) return;
-        net.minecraft.world.entity.EquipmentSlot slot = event.getSlotType();
-        if (stack.getItem() instanceof net.minecraft.world.item.ArmorItem armor) {
+        net.minecraft.world.entity.EquipmentSlot slot = com.skycraft.inventory.EquipmentData.slot(stack);
+        if (com.skycraft.inventory.EquipmentData.isArmor(stack)) {
             float mult = com.skycraft.loot.affix.ItemAffixes.armorMultiplier(stack);
-            if (slot == armor.getEquipmentSlot() && slot.getType() == net.minecraft.world.entity.EquipmentSlot.Type.ARMOR && Math.abs(mult - 1.0f) > 0.001f) {
-                event.addModifier(Attributes.ARMOR, new net.minecraft.world.entity.ai.attributes.AttributeModifier(
-                        AFFIX_ARMOR_UUIDS[slot.getIndex()], "Skycraft affix armor", mult - 1.0,
-                        net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.MULTIPLY_BASE));
+            if (slot != null && slot.getType() == net.minecraft.world.entity.EquipmentSlot.Type.HUMANOID_ARMOR && Math.abs(mult - 1.0f) > 0.001f) {
+                event.addModifier(Attributes.ARMOR, new net.minecraft.world.entity.ai.attributes.AttributeModifier(AFFIX_ARMOR_UUIDS[slot.getIndex()], mult - 1.0,
+                        net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADD_MULTIPLIED_BASE), slotGroup263(slot));
             }
         } else if (stack.getItem() instanceof net.minecraft.world.item.ShieldItem) {
             float mult = com.skycraft.loot.affix.ItemAffixes.armorMultiplier(stack);
-            if (slot == net.minecraft.world.entity.EquipmentSlot.OFFHAND && Math.abs(mult - 1.0f) > 0.001f) {
-                event.addModifier(Attributes.ARMOR, new net.minecraft.world.entity.ai.attributes.AttributeModifier(
-                        AFFIX_SHIELD_UUID, "Skycraft affix shield", (mult - 1.0) * 4.0,
-                        net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADDITION));
+            if (Math.abs(mult - 1.0f) > 0.001f) {
+                event.addModifier(Attributes.ARMOR, new net.minecraft.world.entity.ai.attributes.AttributeModifier(AFFIX_SHIELD_UUID, (mult - 1.0) * 4.0,
+                        net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADD_VALUE), net.minecraft.world.entity.EquipmentSlotGroup.OFFHAND);
             }
-        } else if (slot == net.minecraft.world.entity.EquipmentSlot.MAINHAND
-                && !(stack.getItem() instanceof ProjectileWeaponItem)
+        } else if (!(stack.getItem() instanceof ProjectileWeaponItem)
                 && com.skycraft.crafting.Tempering.kind(stack) == com.skycraft.crafting.Tempering.Kind.WEAPON) {
             float mult = com.skycraft.loot.affix.ItemAffixes.damageMultiplier(stack);
             if (Math.abs(mult - 1.0f) > 0.001f) {
-                event.addModifier(Attributes.ATTACK_DAMAGE, new net.minecraft.world.entity.ai.attributes.AttributeModifier(
-                        AFFIX_WEAPON_UUID, "Skycraft affix damage", mult - 1.0,
-                        net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.MULTIPLY_BASE));
+                event.addModifier(Attributes.ATTACK_DAMAGE, new net.minecraft.world.entity.ai.attributes.AttributeModifier(AFFIX_WEAPON_UUID, mult - 1.0,
+                        net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADD_MULTIPLIED_BASE), net.minecraft.world.entity.EquipmentSlotGroup.MAINHAND);
             }
         }
+    }
+
+    private static net.minecraft.world.entity.EquipmentSlotGroup slotGroup263(net.minecraft.world.entity.EquipmentSlot slot) {
+        return switch (slot) {
+            case HEAD -> net.minecraft.world.entity.EquipmentSlotGroup.HEAD;
+            case CHEST -> net.minecraft.world.entity.EquipmentSlotGroup.CHEST;
+            case LEGS -> net.minecraft.world.entity.EquipmentSlotGroup.LEGS;
+            case FEET -> net.minecraft.world.entity.EquipmentSlotGroup.FEET;
+            default -> net.minecraft.world.entity.EquipmentSlotGroup.MAINHAND;
+        };
     }
 
     // ------------------------------------------------------------------ arrows leaving the bow
@@ -112,7 +118,7 @@ public final class ArsenalEvents {
     public static void onJoin(EntityJoinLevelEvent event) {
         if (event.getLevel().isClientSide() || !(event.getEntity() instanceof AbstractArrow arrow) || event.loadedFromDisk()) return;
         CompoundTag pd = arrow.getPersistentData();
-        if (pd.getBoolean(PREPARED)) return;
+        if (pd.getBooleanOr(PREPARED, false)) return;
         pd.putBoolean(PREPARED, true);
 
         if (!(arrow instanceof SkyArrow) && arrow.pickup == AbstractArrow.Pickup.ALLOWED) {
@@ -126,10 +132,10 @@ public final class ArsenalEvents {
         if (!(rangedWeapon.getItem() instanceof ProjectileWeaponItem)) rangedWeapon = owner.getMainHandItem();
         if (!(rangedWeapon.getItem() instanceof ProjectileWeaponItem)) rangedWeapon = owner.getOffhandItem();
         if (com.skycraft.loot.affix.ItemAffixes.hasAffixes(rangedWeapon)) {
-            arrow.setBaseDamage(arrow.getBaseDamage() * com.skycraft.loot.affix.ItemAffixes.damageMultiplier(rangedWeapon));
+            arrow.setBaseDamage(com.skycraft.platform.EntityData.arrowDamage(arrow) * com.skycraft.loot.affix.ItemAffixes.damageMultiplier(rangedWeapon));
         }
 
-        if (arrow.shotFromCrossbow()) {
+        if ((arrow.getWeaponItem() != null && arrow.getWeaponItem().getItem() instanceof net.minecraft.world.item.CrossbowItem)) {
             if (arrow instanceof SkyArrow sky) {
                 sky.setFromCrossbow(true);
             }
@@ -137,12 +143,12 @@ public final class ArsenalEvents {
             Vec3 v = arrow.getDeltaMovement();
             if (v.lengthSqr() > 1.0e-4) {
                 arrow.setDeltaMovement(v.normalize().scale(4.2));
-                arrow.hurtMarked = true;
+                arrow.syncVelocity = true;
             }
             SkyCrossbowItem crossbow = owner.getMainHandItem().getItem() instanceof SkyCrossbowItem c ? c
                     : owner.getOffhandItem().getItem() instanceof SkyCrossbowItem c2 ? c2 : null;
             if (crossbow != null) {
-                arrow.setBaseDamage(arrow.getBaseDamage() + crossbow.bonusDamage);
+                arrow.setBaseDamage(com.skycraft.platform.EntityData.arrowDamage(arrow) + crossbow.bonusDamage);
                 pd.putFloat(ARMOR_PIERCE, crossbow.armorPierce);
             }
             return;
@@ -154,7 +160,7 @@ public final class ArsenalEvents {
                 if (!ammo.isEmpty()) {
                     ItemStack one = ammo.copy();
                     one.setCount(1);
-                    pd.put(AMMO, one.save(new CompoundTag()));
+                    pd.put(AMMO, com.skycraft.inventory.ItemData.save(one));
                 }
             }
         }
@@ -162,15 +168,15 @@ public final class ArsenalEvents {
 
     /** Break chance on block impact for vanilla non-SkyArrow projectiles. */
     @SubscribeEvent
-    public static void onProjectileImpact(net.minecraftforge.event.entity.ProjectileImpactEvent event) {
+    public static void onProjectileImpact(net.neoforged.neoforge.event.entity.ProjectileImpactEvent event) {
         if (event.getProjectile().level().isClientSide()) return;
         if (!(event.getProjectile() instanceof AbstractArrow arrow) || arrow instanceof SkyArrow) return;
         if (event.getRayTraceResult().getType() == net.minecraft.world.phys.HitResult.Type.BLOCK) {
             float breakChance = SkyArrow.breakChanceFor(null, arrow.getOwner());
             if (arrow.level().getRandom().nextFloat() < breakChance) {
                 if (arrow.level() instanceof ServerLevel sl) {
-                    sl.playSound(null, arrow.blockPosition(), SoundEvents.ITEM_BREAK, SoundSource.PLAYERS, 0.5f, 1.2f);
-                    sl.sendParticles(new net.minecraft.core.particles.ItemParticleOption(ParticleTypes.ITEM, ammoOf(arrow)),
+                    sl.playSound(null, arrow.blockPosition(), SoundEvents.ITEM_BREAK.value(), SoundSource.PLAYERS, 0.5f, 1.2f);
+                    sl.sendParticles(new net.minecraft.core.particles.ItemParticleOption(ParticleTypes.ITEM, net.minecraft.world.item.ItemStackTemplate.fromStack( ammoOf(arrow))),
                             arrow.getX(), arrow.getY(), arrow.getZ(), 6, 0.1, 0.1, 0.1, 0.05);
                 }
                 arrow.discard();
@@ -182,8 +188,8 @@ public final class ArsenalEvents {
     public static ItemStack ammoOf(AbstractArrow arrow) {
         if (arrow instanceof SkyArrow sky) return sky.pickupStack();
         CompoundTag pd = arrow.getPersistentData();
-        if (pd.contains(AMMO, Tag.TAG_COMPOUND)) {
-            ItemStack stack = ItemStack.of(pd.getCompound(AMMO));
+        if (com.skycraft.platform.NbtData.hasType(pd, AMMO, Tag.TAG_COMPOUND)) {
+            ItemStack stack = com.skycraft.inventory.ItemData.parse(pd.getCompoundOrEmpty(AMMO));
             if (!stack.isEmpty()) return stack;
         }
         if (arrow instanceof SpectralArrow) return new ItemStack(Items.SPECTRAL_ARROW);
@@ -195,17 +201,17 @@ public final class ArsenalEvents {
     public static boolean isCollectibleArrow(Player player, AbstractArrow arrow) {
         if (arrow == null || !arrow.isAlive() || (!SkyArrow.isArrowInGround(arrow) && !arrow.isInWater())) return false;
         CompoundTag pd = arrow.getPersistentData();
-        if (pd.getBoolean(BOUND_ARROW)) return false;
+        if (pd.getBooleanOr(BOUND_ARROW, false)) return false;
         return arrow.pickup == AbstractArrow.Pickup.ALLOWED
-                || pd.getBoolean(COLLECTIBLE)
+                || pd.getBooleanOr(COLLECTIBLE, false)
                 || (player.getAbilities().instabuild && arrow.pickup == AbstractArrow.Pickup.CREATIVE_ONLY);
     }
 
     public static boolean tryPickupArrow(Player player, AbstractArrow arrow) {
         if (!isCollectibleArrow(player, arrow) || player.distanceToSqr(arrow) > 25.0) return false;
-        if (!player.level().isClientSide) {
+        if (!player.level().isClientSide()) {
             CompoundTag pd = arrow.getPersistentData();
-            boolean giveItem = arrow.pickup == AbstractArrow.Pickup.ALLOWED || pd.getBoolean(COLLECTIBLE);
+            boolean giveItem = arrow.pickup == AbstractArrow.Pickup.ALLOWED || pd.getBooleanOr(COLLECTIBLE, false);
             if (giveItem) {
                 ItemStack stack = ammoOf(arrow);
                 if (!stack.isEmpty()) {
@@ -225,15 +231,15 @@ public final class ArsenalEvents {
 
     public static boolean tryPullArrowFromBody(Player player, LivingEntity target) {
         if (target == null || !target.isAlive() || target instanceof Player || player.distanceToSqr(target) > 20.0) return false;
-        if (player.level().isClientSide) return false;
+        if (player.level().isClientSide()) return false;
         CompoundTag pd = target.getPersistentData();
-        ListTag list = pd.getList(BODY_ARROWS, Tag.TAG_COMPOUND);
+        ListTag list = pd.getListOrEmpty(BODY_ARROWS);
         if (list.isEmpty()) return false;
         int lastIdx = list.size() - 1;
-        CompoundTag itemTag = list.getCompound(lastIdx);
+        CompoundTag itemTag = list.getCompoundOrEmpty(lastIdx);
         list.remove(lastIdx);
         pd.put(BODY_ARROWS, list);
-        ItemStack stack = ItemStack.of(itemTag);
+        ItemStack stack = com.skycraft.inventory.ItemData.parse(itemTag);
         if (!stack.isEmpty()) {
             com.skycraft.vitals.ActionHandler.addToBags(player, stack);
             if (target.getArrowCount() > 0) {
@@ -247,14 +253,14 @@ public final class ArsenalEvents {
     }
 
     @SubscribeEvent
-    public static void onEntityInteractSpecific(net.minecraftforge.event.entity.player.PlayerInteractEvent.EntityInteractSpecific event) {
+    public static void onEntityInteract(net.neoforged.neoforge.event.entity.player.PlayerInteractEvent.EntityInteract event) {
         if (event.getTarget() instanceof AbstractArrow arrow && tryPickupArrow(event.getEntity(), arrow)) {
-            event.setCancellationResult(net.minecraft.world.InteractionResult.sidedSuccess(event.getLevel().isClientSide));
+            event.setCancellationResult(com.skycraft.platform.Interactions.sidedSuccess(event.getLevel().isClientSide()));
             event.setCanceled(true);
         } else if (event.getTarget() instanceof LivingEntity living
                 && !(living instanceof net.minecraft.world.entity.npc.Npc)
-                && !(living instanceof net.minecraft.world.entity.animal.horse.AbstractHorse)) {
-            if (!event.getLevel().isClientSide && tryPullArrowFromBody(event.getEntity(), living)) {
+                && !(living instanceof net.minecraft.world.entity.animal.equine.AbstractHorse)) {
+            if (!event.getLevel().isClientSide() && tryPullArrowFromBody(event.getEntity(), living)) {
                 event.setCancellationResult(net.minecraft.world.InteractionResult.SUCCESS);
                 event.setCanceled(true);
             }
@@ -262,22 +268,7 @@ public final class ArsenalEvents {
     }
 
     @SubscribeEvent
-    public static void onEntityInteract(net.minecraftforge.event.entity.player.PlayerInteractEvent.EntityInteract event) {
-        if (event.getTarget() instanceof AbstractArrow arrow && tryPickupArrow(event.getEntity(), arrow)) {
-            event.setCancellationResult(net.minecraft.world.InteractionResult.sidedSuccess(event.getLevel().isClientSide));
-            event.setCanceled(true);
-        } else if (event.getTarget() instanceof LivingEntity living
-                && !(living instanceof net.minecraft.world.entity.npc.Npc)
-                && !(living instanceof net.minecraft.world.entity.animal.horse.AbstractHorse)) {
-            if (!event.getLevel().isClientSide && tryPullArrowFromBody(event.getEntity(), living)) {
-                event.setCancellationResult(net.minecraft.world.InteractionResult.SUCCESS);
-                event.setCanceled(true);
-            }
-        }
-    }
-
-    @SubscribeEvent
-    public static void onRightClickBlock(net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickBlock event) {
+    public static void onRightClickBlock(net.neoforged.neoforge.event.entity.player.PlayerInteractEvent.RightClickBlock event) {
         Player player = event.getEntity();
         Vec3 hitLoc = event.getHitVec() != null ? event.getHitVec().getLocation() : Vec3.atCenterOf(event.getPos());
         var arrows = event.getLevel().getEntitiesOfClass(AbstractArrow.class,
@@ -294,7 +285,7 @@ public final class ArsenalEvents {
                 }
             }
             if (tryPickupArrow(player, closest)) {
-                event.setCancellationResult(net.minecraft.world.InteractionResult.sidedSuccess(event.getLevel().isClientSide));
+                event.setCancellationResult(com.skycraft.platform.Interactions.sidedSuccess(event.getLevel().isClientSide()));
                 event.setCanceled(true);
             }
         }
@@ -304,9 +295,9 @@ public final class ArsenalEvents {
 
     /** Headshots, elemental arrows and armor piercing (before armor is applied). */
     @SubscribeEvent
-    public static void onHurt(LivingHurtEvent event) {
+    public static void onHurt(com.skycraft.combat.BeforeArmorDamageEvent event) {
         LivingEntity victim = event.getEntity();
-        if (victim.level().isClientSide) return;
+        if (victim.level().isClientSide()) return;
         DamageSource source = event.getSource();
         if (!(source.getDirectEntity() instanceof AbstractArrow arrow)) return;
         float amount = event.getAmount();
@@ -344,15 +335,15 @@ public final class ArsenalEvents {
             if (victim.level() instanceof ServerLevel sl) {
                 sl.sendParticles(ParticleTypes.CRIT, victim.getX(), victim.getEyeY(), victim.getZ(), 10, 0.2, 0.15, 0.2, 0.3);
             }
-            shooter.playNotifySound(SoundEvents.ARROW_HIT_PLAYER, SoundSource.PLAYERS, 0.6f, 1.6f);
+            com.skycraft.magic.MagicFx.soundToPlayer(shooter, SoundEvents.ARROW_HIT_PLAYER, SoundSource.PLAYERS, 0.6f, 1.6f);
         }
 
-        float pierce = arrow.getPersistentData().getFloat(ARMOR_PIERCE);
+        float pierce = arrow.getPersistentData().getFloatOr(ARMOR_PIERCE, 0f);
         if (pierce > 0 && !source.is(DamageTypeTags.BYPASSES_ARMOR) && victim.getArmorValue() > 0) {
             float armor = victim.getArmorValue();
             float toughness = (float) victim.getAttributeValue(Attributes.ARMOR_TOUGHNESS);
-            float full = CombatRules.getDamageAfterAbsorb(amount, armor, toughness);
-            float pierced = CombatRules.getDamageAfterAbsorb(amount, armor * (1f - pierce), toughness);
+            float full = CombatRules.getDamageAfterAbsorb(victim, amount, source, armor, toughness);
+            float pierced = CombatRules.getDamageAfterAbsorb(victim, amount, source, armor * (1f - pierce), toughness);
             if (full > 0.01f) amount *= pierced / full;
         }
         event.setAmount(amount);
@@ -360,14 +351,14 @@ public final class ArsenalEvents {
 
     /** Arrows that wounded a mob stay in its body (contract 27: the corpse adds them to its loot) if they don't break on impact. */
     @SubscribeEvent(priority = EventPriority.LOWEST)
-    public static void recordArrow(LivingHurtEvent event) {
+    public static void recordArrow(com.skycraft.combat.BeforeArmorDamageEvent event) {
         LivingEntity victim = event.getEntity();
-        if (victim.level().isClientSide || victim instanceof Player || event.getAmount() <= 0) return;
+        if (victim.level().isClientSide() || victim instanceof Player || event.getAmount() <= 0) return;
         if (!(event.getSource().getDirectEntity() instanceof AbstractArrow arrow) || !ArsenalConfig.RECORD_ARROWS.get()) return;
         CompoundTag apd = arrow.getPersistentData();
-        if (apd.getBoolean(RECORDED) || apd.getBoolean(BOUND_ARROW)) return;
+        if (apd.getBooleanOr(RECORDED, false) || apd.getBooleanOr(BOUND_ARROW, false)) return;
         Entity owner = arrow.getOwner();
-        boolean fromPlayer = owner instanceof Player && (arrow.pickup == AbstractArrow.Pickup.ALLOWED || apd.getBoolean(COLLECTIBLE));
+        boolean fromPlayer = owner instanceof Player && (arrow.pickup == AbstractArrow.Pickup.ALLOWED || apd.getBooleanOr(COLLECTIBLE, false));
         boolean fromMob = owner instanceof Mob && !(owner instanceof Player);
         if (!fromPlayer && !fromMob) return;
         ItemStack stack = ammoOf(arrow);
@@ -383,11 +374,11 @@ public final class ArsenalEvents {
             return; // arrow broke on impact
         }
         CompoundTag pd = victim.getPersistentData();
-        ListTag list = pd.getList(BODY_ARROWS, Tag.TAG_COMPOUND);
+        ListTag list = pd.getListOrEmpty(BODY_ARROWS);
         if (list.size() >= MAX_ARROWS) return;
         ItemStack one = stack.copy();
         one.setCount(1);
-        list.add(one.save(new CompoundTag()));
+        list.add(com.skycraft.inventory.ItemData.save(one));
         pd.put(BODY_ARROWS, list);
     }
 
@@ -415,9 +406,9 @@ public final class ArsenalEvents {
             return;
         }
         if (!(event.getSource().getEntity() instanceof ServerPlayer killer) || !(victim instanceof Mob) || !(victim instanceof Enemy)) return;
-        if (victim.isBaby() || !humanoid(victim) || victim.getType().is(ArsenalTags.GUARDS) || victim.getType().is(CombatHandler.BOSSES)) return;
+        if (victim.isBaby() || !humanoid(victim) || victim.getType().builtInRegistryHolder().is(ArsenalTags.GUARDS) || victim.getType().builtInRegistryHolder().is(CombatHandler.BOSSES)) return;
         var random = victim.getRandom();
-        double chance = ArsenalConfig.MOB_WEAPON_DROP_CHANCE.get() * (1 + 0.3 * event.getLootingLevel());
+        double chance = ArsenalConfig.MOB_WEAPON_DROP_CHANCE.get() * (1 + 0.3 * (event.getSource().getEntity() instanceof LivingEntity killer263 ? net.minecraft.world.item.enchantment.EnchantmentHelper.getEnchantmentLevel(com.skycraft.platform.EnchantmentsAccess.holder(net.minecraft.world.item.enchantment.Enchantments.LOOTING, killer263.registryAccess()), killer263) : 0));
         if (random.nextDouble() >= chance) return;
         int level = Math.max(1, SkyData.get(killer).getLevel());
         ItemStack loot;
@@ -446,7 +437,7 @@ public final class ArsenalEvents {
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onDeath(LivingDeathEvent event) {
         LivingEntity victim = event.getEntity();
-        if (victim.level().isClientSide || victim instanceof Player || !ArsenalConfig.KILL_CAMS.get()) return;
+        if (victim.level().isClientSide() || victim instanceof Player || !ArsenalConfig.KILL_CAMS.get()) return;
         DamageSource source = event.getSource();
         if (!(source.getEntity() instanceof ServerPlayer killer) || !killer.isAlive()) return;
         Entity direct = source.getDirectEntity();
@@ -467,21 +458,21 @@ public final class ArsenalEvents {
         SkyNetwork.sendToPlayer(killer, new ArsenalPackets.KillCam(victim.getId(),
                 arrow ? ArsenalPackets.KillCam.ARROW : ArsenalPackets.KillCam.MELEE, arrow ? direct.getId() : -1,
                 (float) dir.x, (float) dir.y, (float) dir.z, (float) mid.x, (float) mid.y, (float) mid.z));
-        killer.playNotifySound(SoundEvents.PLAYER_ATTACK_CRIT, SoundSource.PLAYERS, 1f, 0.55f);
-        killer.playNotifySound(SoundEvents.PLAYER_ATTACK_STRONG, SoundSource.PLAYERS, 0.8f, 0.7f);
+        com.skycraft.magic.MagicFx.soundToPlayer(killer, SoundEvents.PLAYER_ATTACK_CRIT, SoundSource.PLAYERS, 1f, 0.55f);
+        com.skycraft.magic.MagicFx.soundToPlayer(killer, SoundEvents.PLAYER_ATTACK_STRONG, SoundSource.PLAYERS, 0.8f, 0.7f);
     }
 
     // ------------------------------------------------------------------ staff effect lifetimes
 
     /** Wabbajack chickens turn back. (Summons, calm and fury are status effects / summons of the magic module.) */
     @SubscribeEvent
-    public static void onLivingTick(LivingEvent.LivingTickEvent event) {
-        LivingEntity e = event.getEntity();
-        if (e.level().isClientSide || e.tickCount % 10 != 0 || e instanceof Player) return;
+    public static void onLivingTick(net.neoforged.neoforge.event.tick.EntityTickEvent.Post event) {
+        if (!(event.getEntity() instanceof LivingEntity e)) return;
+        if (e.level().isClientSide() || e.tickCount % 10 != 0 || e instanceof Player) return;
         CompoundTag pd = e.getPersistentData();
         if (pd.isEmpty()) return;
         long now = e.level().getGameTime();
-        if (pd.contains(StaffEffects.WABBAJACK_UNTIL) && now > pd.getLong(StaffEffects.WABBAJACK_UNTIL) && pd.contains(StaffEffects.WABBAJACK_ORIGINAL)) {
+        if (pd.contains(StaffEffects.WABBAJACK_UNTIL) && now > pd.getLongOr(StaffEffects.WABBAJACK_UNTIL, 0L) && pd.contains(StaffEffects.WABBAJACK_ORIGINAL)) {
             StaffEffects.unchicken(e);
         }
     }

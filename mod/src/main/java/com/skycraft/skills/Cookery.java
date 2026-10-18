@@ -12,9 +12,9 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.event.entity.living.LivingEntityUseItemEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.entity.living.LivingEntityUseItemEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.util.List;
 
@@ -26,7 +26,7 @@ import java.util.List;
  * <p>XP: each dish cooked, by how many ingredients went in. The survival module's cooking pot calls
  * {@link #season} and {@link #onCooked}.</p>
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class Cookery {
     public static final String TAG = "skycraft_meal";
     private static final int HEARTY = 1, CAMP = 2, PRESERVER = 4, MASTER = 8, GOURMET = 16;
@@ -35,7 +35,7 @@ public final class Cookery {
 
     /** Marks a freshly cooked dish with the cook's skill and perks. Returns the stack to hand out. */
     public static ItemStack season(ServerPlayer cook, ItemStack dish) {
-        if (dish.isEmpty() || !dish.isEdible()) return dish;
+        if (dish.isEmpty() || !dish.has(net.minecraft.core.component.DataComponents.FOOD)) return dish;
         PlayerData data = SkyData.get(cook);
         int flags = 0;
         if (Perks.has(data, "cooking.hearty_meals")) flags |= HEARTY;
@@ -47,7 +47,7 @@ public final class Cookery {
         meal.putInt("skill", data.getSkill(Skill.COOKING));
         meal.putInt("cook", Perks.rank(data, "cooking.cook"));
         meal.putInt("perks", flags);
-        dish.getOrCreateTag().put(TAG, meal);
+        com.skycraft.inventory.ItemData.updateCustom(dish, customData263 -> customData263.put(TAG, meal));
         return dish;
     }
 
@@ -71,36 +71,36 @@ public final class Cookery {
     public static void onEat(LivingEntityUseItemEvent.Finish event) {
         if (!(event.getEntity() instanceof ServerPlayer p)) return;
         ItemStack stack = event.getItem();
-        CompoundTag tag = stack.getTag();
+        CompoundTag tag = com.skycraft.inventory.ItemData.custom(stack);
         if (tag == null || !tag.contains(TAG)) return;
-        CompoundTag meal = tag.getCompound(TAG);
-        int skill = meal.getInt("skill");
-        int cookRank = meal.getInt("cook");
-        int flags = meal.getInt("perks");
+        CompoundTag meal = tag.getCompoundOrEmpty(TAG);
+        int skill = meal.getIntOr("skill",0);
+        int cookRank = meal.getIntOr("cook",0);
+        int flags = meal.getIntOr("perks",0);
         float quality = 1f + 0.1f * cookRank;
         int regenTicks = Math.round((40 + skill * 2) * quality);
-        p.addEffect(new MobEffectInstance(MobEffects.REGENERATION, regenTicks, 0, false, true, true));
+        p.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.REGENERATION), regenTicks, 0, false, true, true));
         if ((flags & HEARTY) != 0) p.heal(3f * quality);
         if ((flags & CAMP) != 0) {
             PlayerData data = SkyData.get(p);
             data.setStamina(Math.min(data.maxStamina(), data.getStamina() + 25f * quality));
         }
         if ((flags & PRESERVER) != 0) {
-            p.removeEffect(MobEffects.HUNGER);
-            p.removeEffect(MobEffects.POISON);
-            p.removeEffect(MobEffects.CONFUSION);
+            p.removeEffect(com.skycraft.platform.Effects.holder(MobEffects.HUNGER));
+            p.removeEffect(com.skycraft.platform.Effects.holder(MobEffects.POISON));
+            p.removeEffect(com.skycraft.platform.Effects.holder(MobEffects.NAUSEA));
         }
-        if ((flags & MASTER) != 0) p.addEffect(new MobEffectInstance(MobEffects.HEALTH_BOOST, Math.round(20 * 180 * quality), 0, false, true, true));
-        if ((flags & GOURMET) != 0) p.addEffect(new MobEffectInstance(MobEffects.ABSORPTION, Math.round(20 * 120 * quality), 0, false, true, true));
+        if ((flags & MASTER) != 0) p.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.HEALTH_BOOST), Math.round(20 * 180 * quality), 0, false, true, true));
+        if ((flags & GOURMET) != 0) p.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.ABSORPTION), Math.round(20 * 120 * quality), 0, false, true, true));
     }
 
     /** Tooltip line for a cooked dish (client tooltip event). */
     public static void tooltip(ItemStack stack, List<Component> lines) {
-        CompoundTag tag = stack.getTag();
+        CompoundTag tag = com.skycraft.inventory.ItemData.custom(stack);
         if (tag == null || !tag.contains(TAG)) return;
-        CompoundTag meal = tag.getCompound(TAG);
-        lines.add(Component.translatable("tooltip.skycraft.meal", meal.getInt("skill")).withStyle(ChatFormatting.GOLD));
-        int flags = meal.getInt("perks");
+        CompoundTag meal = tag.getCompoundOrEmpty(TAG);
+        lines.add(Component.translatable("tooltip.skycraft.meal", meal.getIntOr("skill",0)).withStyle(ChatFormatting.GOLD));
+        int flags = meal.getIntOr("perks",0);
         if ((flags & (HEARTY | CAMP | PRESERVER | MASTER | GOURMET)) != 0) {
             lines.add(Component.translatable("tooltip.skycraft.meal_perks").withStyle(ChatFormatting.YELLOW));
         }
@@ -108,6 +108,6 @@ public final class Cookery {
 
     /** Whether a stack is a cook's dish. */
     public static boolean isMeal(ItemStack stack) {
-        return stack.hasTag() && stack.getTag().contains(TAG);
+        return com.skycraft.inventory.ItemData.hasCustom(stack) && com.skycraft.inventory.ItemData.custom(stack).contains(TAG);
     }
 }

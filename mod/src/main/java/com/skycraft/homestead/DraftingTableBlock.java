@@ -24,6 +24,8 @@ import net.minecraft.world.phys.BlockHitResult;
 public class DraftingTableBlock extends HorizontalDirectionalBlock {
     public DraftingTableBlock() {
         super(BlockBehaviour.Properties.of()
+                .setId(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.BLOCK,
+                        net.minecraft.resources.Identifier.fromNamespaceAndPath(com.skycraft.Skycraft.MODID, "drafting_table")))
                 .mapColor(MapColor.WOOD)
                 .strength(2.5f)
                 .sound(SoundType.WOOD));
@@ -40,11 +42,20 @@ public class DraftingTableBlock extends HorizontalDirectionalBlock {
         return defaultBlockState().setValue(FACING, ctx.getHorizontalDirection().getOpposite());
     }
 
+        @Override
+    protected InteractionResult useItemOn(net.minecraft.world.item.ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+        return use(state, level, pos, player, hand, hit);
+    }
+
     @Override
+    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+        return use(state, level, pos, player, InteractionHand.MAIN_HAND, hit);
+    }
+
     public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
-        if (level.isClientSide) return InteractionResult.SUCCESS;
+        if (level.isClientSide()) return InteractionResult.SUCCESS;
         if (player instanceof ServerPlayer sp) {
-            HomesteadData data = HomesteadData.get(sp.server);
+            HomesteadData data = HomesteadData.get(sp.level().getServer());
             HomesteadClaim claim = data.getClaimAt(level, pos);
             if (claim != null) {
                 if (claim.isOwner(sp)) {
@@ -69,19 +80,19 @@ public class DraftingTableBlock extends HorizontalDirectionalBlock {
     }
 
     @Override
-    public void playerWillDestroy(Level level, BlockPos pos, BlockState state, Player player) {
-        if (!level.isClientSide && player instanceof ServerPlayer sp) {
-            HomesteadData data = HomesteadData.get(sp.server);
+    public BlockState playerWillDestroy(Level level, BlockPos pos, BlockState state, Player player) {
+        if (!level.isClientSide() && player instanceof ServerPlayer sp) {
+            HomesteadData data = HomesteadData.get(sp.level().getServer());
             HomesteadClaim claim = data.getClaimAt(level, pos);
             if (claim != null && !claim.isOwner(sp) && !sp.isCreative()) {
                 Notifier.message(sp, Component.translatable("message.skycraft.homestead.cannot_destroy", claim.getOwnerName()));
-                return;
+                return state;
             }
             if (claim != null && (claim.isOwner(sp) || sp.isCreative())) {
                 data.removeClaimAt(level, pos);
                 Notifier.message(sp, Component.translatable("message.skycraft.homestead.dismantled"));
             }
         }
-        super.playerWillDestroy(level, pos, state, player);
+        return super.playerWillDestroy(level, pos, state, player);
     }
 }

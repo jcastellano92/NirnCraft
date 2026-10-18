@@ -1,0 +1,193 @@
+Skycraft full 26.3 migration — active, incomplete
+Updated 2026-10-18 (native build checkpoint 38; runtime ownership hold after PC reboot)
+
+Owner's required target
+Minecraft exactly 26.3 (Wilderness Bound), NeoForge 26.3.0.90, Java 25 LTS.
+Official Sodium 0.9.3-beta.1 for 26.3 (explicitly approved by the owner after the
+0.9.2 native runtime crash) and Iris 1.11.7+26.3-neoforge.
+Every existing Skycraft system must be ported. Removing source sets, disabling
+gameplay registrations or replacing rendering with empty methods is not acceptance.
+Normal Minecraft multiplayer/server list/direct connect/LAN replaces Essential.
+Custom shaders and Distant Horizons are preserved; incompatible versions stay
+disabled in the isolated migration profile until ported and tested.
+
+Preservation
+The old instance and saves remain untouched. Before the port, all tracked and
+nonignored untracked source, a binary worktree patch and the custom installed
+runtime jars/shader were backed up with SHA256 manifests under:
+E:\Skycraft-scratch\migration-26.3\baseline-20261018
+The old loader metadata and pack definitions are archived, not deleted.
+
+Build from repository root
+py -3 tools/dev/build_263.py --log dist/code-review/neoforge-migration/compile-next.log compileJava
+Use a new log filename for every checkpoint. Only one Gradle process at a time.
+The launcher selects the portable Java 25 installation and isolated E: cache/build
+directory. It does not change machine JAVA_HOME or overwrite the old build/runtime.
+Actual patched 26.3 source and binary jars are in the E: scratch build/moddev/artifacts.
+Use those real APIs; old Forge/Java 17 build commands in older documents describe
+the preserved baseline and do not apply to the migration profile.
+
+Current implementation
+All main Java code compiles against the exact native target, with every original
+module registration retained. The full core jar assembles. Native packet payloads,
+attachments, item components/materials, worldgen/data, UI and rendering use actual
+26.3 APIs. No old core jar is part of the Gradle runtime/test classpath.
+Checkpoint 38 passed the complete native build: 238 tests, zero failures/errors or
+skips, in 1m26s. Its actual core SHA256 is
+6bbb5bc65c129fb92106223c39118e6e612bb22c392d19b8a92650336baa8fa9.
+Checkpoint 37 passed 234 tests and added the actual-client character preview
+correction, genuine TCP QA support, codec diagnostics and valid native cavern
+palettes. Checkpoint 38 adds native FIFO ordering, adaptive Journal tabs and
+lossless item-tag allocation fixes with actual loader-backed component tests.
+Native component/equipment, real legacy data/item DFU, ticket ownership,
+terrain clipping and resource-loaded world data checks pass. Recipe suppression
+uses a required native TOP server-data pack because NeoForge supplies a higher
+priority vanilla recipe override; its obsolete unlock advancement is filtered too
+so native registry validation has no dangling recipe holder.
+Dedicated server 04 created and saved a real canonical-seed Tamriel world with all
+eight dimensions. The prior unsafe distant terrain-probe warnings did not recur.
+Its real inventory selftest exposed native fixture and double-chest behavior
+failures. Server 05 confirms damage-stage and double-chest fixes; remaining
+headless entity-readiness and recording-connection fixes now pass all 168 real
+inventory/gameplay checks on the converted legacy-controller world, which opened
+and saved all nine dimensions. The explicit vanilla random-sequence conversion is
+now implemented and actual populated legacy load/save/reload probes pass, as
+described below. Client acceptance remains open: first actual
+candidate-34 launch crashed in official Sodium's NeoForge LevelExtractorMixin,
+whose target signature differs from native NeoForge 26.3.0.90. Investigate the
+compatible exact-26.3 dependency stack; do not hide or certify this failure. The
+owner approved official Sodium 0.9.3-beta.1, which contains upstream PR 3948.
+It is hash-verified and the complete pinned pack now loads an actual integrated
+world without that Sodium crash, without changing Minecraft or Iris.
+The separate core-only diagnostic 36 actually rendered a world, exposed and
+verified the fix for lazy texture upload inside active GPU render passes, and
+captured the real RaceScreen. That capture exposed a spectator preview showing
+only a head; source 37 fixes its extracted menu state without altering player
+gamemode. Neither the core diagnostic nor successful compilation certifies the
+full Sodium/Iris client. The diagnostic stopped cleanly and saved all dimensions.
+Full-pack builds 37 and 38 ran in-world. Build 38's Helgen overview passed the
+strict native terrain/light-FIFO/propagation/Sodium/main-frame/pose/media gate in
+about 1.6s, and the actual PNG was inspected. The Journal's eight tabs now fit.
+Ground-NPC diagnostics exposed a separate confirmed native entity render-data
+lifecycle defect: NeoForge resets ContextKey data after extraction. NPC appearance
+snapshots written during extraction are erased, causing fallback textures and
+missing race features. This requires a post-reset render-state modifier and an
+audit of related entity renderers; do not call entity fidelity accepted yet.
+The three posed NPC back views showed no common cape geometry. The player menu
+separately preserves the account's actual cape; this does not prove NPC policy.
+
+The owner reported a whole-PC crash. Windows records an unexpected reboot at
+14:19 with BugcheckCode0; no cause is established and no Minecraft crash report
+was found in the owned native instance. Build38 did not stop orderly. Its logs,
+screenshots, performance sample and honest result are preserved under
+dist/code-review/neoforge-migration/client-38-before-pc-reboot.
+Another AI is also doing UI tests. Runtime launches/preparation/control, shared
+UI edits and native Gradle are held pending ownership coordination; read
+ACTIVE-AGENT-COORDINATION.txt before resuming. Pending source39 UI fixes and NPC
+lifecycle findings must be preserved. No final release is certified.
+Do not confuse the resource-only ephemeral server with a generated playable world.
+Its bounded provider uses the genuine native JUnitServer and resource bootstrap,
+retains startup failure evidence, then halts and joins the real server before FML
+closes. Checkpoint 30 confirmed one cleanup/delete with no teardown exception.
+It never substitutes fake APIs or skips assertions.
+Native JUnit logs/config/temp worlds now follow the selected build directory:
+E:/Skycraft-scratch/migration-26.3/build/minecraft-junit with the scratch launcher.
+Test results remain under build/test-results/test and build/reports/tests/test.
+
+Source and compiled-descriptor audits resolve all native event subscriptions;
+882 compiled subscribers have valid concrete event types. FML registration,
+configuration and actual worldgen/loot/recipe/tag/dimension decoding pass after
+registration-ID, concrete event, config-path, native schema and GLM priority fixes.
+All four native map bakes were recomputed and independently verified on server 04,
+then copied into source resources. Their input hash is
+577c54ed2500bd4a41cf262262819ad25102fcf0c6cd09b5afe5e6443bb6f7c9.
+Server 05 loaded all four rebuilt native bakes and verified them against fresh
+computations. Converted-save reload now passes; full-pack client visuals remain open.
+Migration helpers apply explicitly scoped edits; they are not semantic proof.
+Source reads/writes must explicitly use UTF-8 on Windows.
+
+Native rendering and data checkpoints
+The authored sky/cloud geometry and animation math now use native extracted render
+frames, GPU buffers, explicit pipelines and proper active-pass ownership. Clouds
+have native OIT variants. Weather/fog/lightning/smoke atlas packing remains intact;
+native uploads update the original resource GPU textures without replacing sampler
+objects. The native shader compiler/reflection audit passed: 106 pipelines and
+348 unique shader units across three backend macro profiles, with zero errors.
+The diagnostic and the complete approved full pack render through these native
+pipelines and record nonblocking whole-frame GPU timestamps. A separate loaded
+Helgen240-frame sample ran at a60fps/vsync cap with no unfocused frames; it is
+pacing-limited and does not establish a speedup or maximum throughput. Controlled
+motion, general entity fidelity and final integration acceptance remain open.
+Two CpuMesh native allocation/lifetime tests passed without the old core fallback.
+Native realm sky/lightmap and entity/item/armor/ship/fire geometry are ported.
+The eight new native moon resource paths preserve the old transparent moon override.
+1490 native item definitions retain authored models and 112 spawn egg palettes.
+Five item/resource conversion tests and eight pack validation tests passed.
+World/data upgrade reruns are idempotent. Static audit found no missing authored
+resources or checked registry references; native FML decoding also passed in test 27.
+
+Behavior and compatibility gates
+Native incoming damage fires before cooldown rejection. Skycraft's accepted-hit
+handlers now run through a supported DamageContainer ARMOR callback, preserving
+stamina/XP and health scaling for accepted hits. Native armor durability has already
+been charged using the original amount at that point; exact old wear timing is a
+known limitation. No mixins or access transformers have been introduced.
+Prewarm retains per-job UUID leases over shared native chunk tickets, so completion
+of one overlapping journey cannot unload another's destination.
+tools/migration/legacy_attachments_263.py converts an offline world into a separate
+new destination; it never edits the source world. Do this before first 26.3 loading
+of old Forge saves because native chunk decoding discards unknown ForgeCaps early.
+The converter/probe suite passes 17 tests. The original full-copy audit compared
+523 files and decoded 10,216 chunks. Its 298 overflow and 2,715 placed-block
+attachments were empty; these counts do not represent stored items or positions.
+An additional explicit populated legacy fixture contains 297 arrows, three worn
+enchanted swords with provenance metadata, and three placed-block positions. It
+passed 18/18 actual native load/save checks and 18/18 restart/save checks. Native
+DFU is proved by changed chunk DataVersion and component representations; all
+300 items, metadata, positions and 15 random-sequence states survive. The probe
+allows only native's verified removal of payload-free bed block entities, while
+checking their unchanged block states. Original legacy files remain untouched.
+SavedData import uses native storage with canonical precedence and rejects corrupt
+canonical data instead of silently replacing it. All 121 original ownership
+records survive; new generation adds records, so whole-tree equality is not claimed.
+See NATIVE-DATA-MIGRATION-26.3.txt and the actual comparison reports under
+dist/code-review/neoforge-migration for fixture paths and exact evidence.
+The complete JUnit/in-game suites are being migrated; narrow tests above are not
+a substitute for the required acceptance gates below.
+
+Parallel ownership
+tools/migration/imports_263.py owner(path) is the canonical current scope map.
+network: networking/packet files and common core, inventory, crafting, magic.
+world: common geography/worldgen/settlements/roads/dungeons/realms and related
+explicit feature/performance files. This agent also ports worldgen JSON schemas.
+ui: central client/QA plus other module client code, except atmosphere, visual and
+render internals. Root handles those exceptions and remaining common modules.
+Delegated focused edits are coordinated explicitly; inspect owner(path) and messages.
+Do not rerun transforms across another active agent's scope.
+
+Required acceptance before calling the port complete
+1. Full compile and build succeed on the exact target; tests retain real behavior.
+2. All authored datapack/assets load through actual native codecs; generation
+   scripts reproduce target resource paths and schemas.
+3. A dedicated server boots and exercises world creation, dimensions, persistence,
+   networking, inventory, combat, quests, NPCs, roads, dungeons and save/reload.
+4. Isolated 26.3 client joins, normal multiplayer/LAN UI works, and all screens,
+   controls, models, particles, clouds/fog/sky and lighting work in real scenes.
+5. Before/after visual and motion checks cover shader-disabled and supported
+   shader-enabled paths, plus performance and world readiness checks.
+6. Customized shader/DH integration is either verified compatible or explicitly
+   retained disabled with its exact remaining port work recorded.
+7. Package the validated full instance into dist, verify zip contents/version
+   metadata and include honest validation results. Do not ship the old core.
+
+No new commit/push has been requested for this migration.
+
+Isolated native server controls
+py -3 tools/dev/build_263.py --run-dir E:/Skycraft-scratch/migration-26.3/runtime/server --dev-dir E:/Skycraft-scratch/migration-26.3/runtime/server-control --log dist/code-review/neoforge-migration/server-boot-NN.log runServer
+The optional dev directory enables the existing server-thread command inbox;
+atomic *.cmd jobs in its inbox can run selftests, save-all flush and stop. Wait for
+the actual outbox/ready and fresh heartbeat, then inspect each job's done status.
+Never start another Gradle/client/server while this runtime or FML tests are live.
+Native client preparation and preserved-instance controls are documented in
+docs/NATIVE-26.3-PREVIEW.md. Use --output-zip to keep unvalidated candidate packages
+on scratch storage; publish the final dist archive only after acceptance.

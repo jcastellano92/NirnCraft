@@ -11,7 +11,7 @@ import com.skycraft.quest.MainQuest;
 import com.skycraft.quest.Objective;
 import com.skycraft.quest.Quest;
 import com.skycraft.quest.QuestPackets;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
@@ -22,7 +22,7 @@ import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
-import org.lwjgl.glfw.GLFW;
+import com.mojang.blaze3d.platform.InputConstants;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -47,11 +47,14 @@ public class JournalScreen extends Screen {
     private static int selectedFaction = 0;
 
     private int x0, y0, x1, y1, listX1;
+    private int tabPadding = 16, tabScroll;
     private int listScroll, detailScroll, listHeight, detailHeight;
     private boolean abandonArmed;
     private final List<Row> rows = new ArrayList<>();
     private final List<ObjRow> objRows = new ArrayList<>();
     private Button trackButton, shareButton, abandonButton, partyButton, skipButton, mapButton;
+    private Button[] questActions;
+    private int questActionsTop;
 
     private record Row(@Nullable Quest quest, int y) {
     }
@@ -77,6 +80,10 @@ public class JournalScreen extends Screen {
         x1 = x0 + w;
         y1 = y0 + h;
         listX1 = x0 + w * 36 / 100;
+        int labels = 0;
+        for (String name : TABS) labels += font.width(Component.translatable("journal.skycraft.tab." + name));
+        tabPadding = Mth.clamp((w - 16 - labels - 4 * (TABS.length - 1)) / TABS.length, 4, 16);
+        keepTabVisible();
         mapButton = addRenderableWidget(Button.builder(Component.translatable("journal.skycraft.show_on_map"),
                 b -> openMapAt(targetPosOf(selected(), null))).bounds(listX1 + 10, y1 - 22, 76, 16).build());
         shareButton = addRenderableWidget(Button.builder(Component.translatable("journal.skycraft.share"), b -> shareWithParty())
@@ -86,10 +93,11 @@ public class JournalScreen extends Screen {
         abandonButton = addRenderableWidget(Button.builder(Component.translatable("journal.skycraft.abandon"), b -> abandon())
                 .bounds(x1 - 86, y1 - 22, 78, 16).build());
         partyButton = addRenderableWidget(Button.builder(Component.translatable("journal.skycraft.open_party"),
-                b -> minecraft.setScreen(new PartyScreen())).bounds((x0 + x1) / 2 - 60, y1 - 26, 120, 18).build());
+                b -> minecraft.gui.setScreen(new PartyScreen())).bounds((x0 + x1) / 2 - 60, y1 - 26, 120, 18).build());
         skipButton = addRenderableWidget(Button.builder(Component.translatable("journal.skycraft.skip"), b -> skipStep())
                 .bounds(x1 - 180, y1 - 40, 172, 16).build());
         skipButton.setTooltip(net.minecraft.client.gui.components.Tooltip.create(Component.translatable("journal.skycraft.skip_hint")));
+        questActions = new Button[]{mapButton, shareButton, trackButton, abandonButton, skipButton};
         tick();
     }
 
@@ -98,7 +106,7 @@ public class JournalScreen extends Screen {
         if (q == null || !q.isActive() || minecraft == null || minecraft.level == null) return false;
         Objective o = q.current();
         if (o == null) return false;
-        long at = o.data.getLong("skip_at");
+        long at = o.data.getLongOr("skip_at", 0L);
         return at > 0 && minecraft.level.getGameTime() >= at;
     }
 
@@ -162,6 +170,25 @@ public class JournalScreen extends Screen {
         }
         partyButton.visible = tab == PARTY;
         skipButton.visible = show && canSkip(q);
+        layoutQuestActions();
+    }
+
+    /** Keep full action labels and wrap visible controls above the detail viewport when they need another row. */
+    private void layoutQuestActions() {
+        int left = listX1 + 10, right = x1 - 8, available = Math.max(1, right - left);
+        int x = left, row = 0, visible = 0;
+        for (Button action : questActions) {
+            if (!action.visible) continue;
+            int wanted = font.width(action.getMessage()) + 12;
+            int width = Math.min(available, Math.max(40, wanted));
+            if (x > left && x + width > right) { x = left; row++; }
+            action.setX(x); action.setY(row * 20); action.setWidth(width);
+            if (action != skipButton)
+                action.setTooltip(wanted > available ? net.minecraft.client.gui.components.Tooltip.create(action.getMessage()) : null);
+            x += width + 4; visible++;
+        }
+        questActionsTop = visible == 0 ? y1 - 8 : y1 - 8 - (row * 20 + 16);
+        for (Button action : questActions) if (action.visible) action.setY(questActionsTop + action.getY());
     }
 
     @Nullable
@@ -171,7 +198,7 @@ public class JournalScreen extends Screen {
         Objective cur = q.current();
         if (cur != null && cur.hasPos) return cur.pos;
         if (q.extra.contains("target_place")) {
-            com.skycraft.tamriel.Place p = com.skycraft.tamriel.Places.byId(q.extra.getString("target_place")).orElse(null);
+            com.skycraft.tamriel.Place p = com.skycraft.tamriel.Places.byId(q.extra.getStringOr("target_place", "")).orElse(null);
             if (p != null) return new net.minecraft.core.BlockPos(p.x(), 72, p.z());
         }
         for (Objective obj : q.objectives) {
@@ -185,9 +212,9 @@ public class JournalScreen extends Screen {
         if (pos == null || minecraft == null) return;
         net.minecraft.core.BlockPos prevWp = com.skycraft.world.client.MapScreen.customWaypoint;
         com.skycraft.world.client.MapScreen map = new com.skycraft.world.client.MapScreen();
-        minecraft.setScreen(map);
+        minecraft.gui.setScreen(map);
         com.skycraft.world.client.MapScreen.customWaypoint = pos;
-        map.keyPressed(GLFW.GLFW_KEY_F, 0, 0);
+        map.keyPressed(new net.minecraft.client.input.KeyEvent(InputConstants.KEY_F,InputConstants.KEYCODE_F,0));
         com.skycraft.world.client.MapScreen.customWaypoint = prevWp != null ? prevWp : pos;
     }
 
@@ -218,28 +245,48 @@ public class JournalScreen extends Screen {
     // ------------------------------------------------------------------ input
 
     private int tabX(int i) {
-        int x = x0 + 10;
-        for (int j = 0; j < i; j++) x += font.width(Component.translatable("journal.skycraft.tab." + TABS[j])) + 20;
+        int x = x0 + 8 - tabScroll;
+        for (int j = 0; j < i; j++) x += tabWidth(j) + 4;
         return x;
     }
 
     private int tabWidth(int i) {
-        return font.width(Component.translatable("journal.skycraft.tab." + TABS[i])) + 16;
+        return font.width(Component.translatable("journal.skycraft.tab." + TABS[i])) + tabPadding;
+    }
+
+    private int maxTabScroll() {
+        int total = 4 * (TABS.length - 1);
+        for (int i = 0; i < TABS.length; i++) total += tabWidth(i);
+        return Math.max(0, total - (x1 - x0 - 16));
+    }
+
+    private void keepTabVisible() {
+        int left = tabX(tab), right = left + tabWidth(tab);
+        if (left < x0 + 8) tabScroll -= x0 + 8 - left;
+        else if (right > x1 - 8) tabScroll += right - (x1 - 8);
+        tabScroll = Mth.clamp(tabScroll, 0, maxTabScroll());
     }
 
     private void setTab(int t) {
         tab = Math.floorMod(t, TABS.length);
+        keepTabVisible();
         listScroll = detailScroll = 0;
         abandonArmed = false;
         tick();
     }
 
     @Override
-    public boolean mouseClicked(double mx, double my, int button) {
-        if (super.mouseClicked(mx, my, button)) return true;
+    public boolean mouseClicked(net.minecraft.client.input.MouseButtonEvent event, boolean doubleClick) {
+        double mx = event.x(), my = event.y();
+        int button = com.skycraft.client.screen.UiInput.actionButton(event.button());
+        if (super.mouseClicked(event, doubleClick)) return true;
+        if (my >= y0 + 6 && my < y0 + 21) {
+            if (mx >= x0 && mx < x0 + 8 && tabScroll > 0) { setTab(tab - 1); return true; }
+            if (mx >= x1 - 8 && mx < x1 && tabScroll < maxTabScroll()) { setTab(tab + 1); return true; }
+        }
         for (int i = 0; i < TABS.length; i++) {
             int tx = tabX(i);
-            if (mx >= tx && mx < tx + tabWidth(i) && my >= y0 + 6 && my < y0 + 21) {
+            if (mx >= x0 + 8 && mx < x1 - 8 && mx >= tx && mx < tx + tabWidth(i) && my >= y0 + 6 && my < y0 + 21) {
                 setTab(i);
                 return true;
             }
@@ -269,7 +316,7 @@ public class JournalScreen extends Screen {
                     return true;
                 }
             }
-        } else if ((tab == MAIN || tab == SIDE || tab == MISC) && mx >= listX1 + 6 && mx < x1 - 4 && my >= top && my < y1 - 24) {
+        } else if ((tab == MAIN || tab == SIDE || tab == MISC) && mx >= listX1 + 6 && mx < x1 - 4 && my >= top && my < questActionsTop - 4) {
             for (ObjRow r : objRows) {
                 if (my >= r.y0() && my < r.y1()) {
                     openMapAt(r.pos());
@@ -281,39 +328,45 @@ public class JournalScreen extends Screen {
     }
 
     @Override
-    public boolean mouseScrolled(double mx, double my, double delta) {
+    public boolean mouseScrolled(double mx, double my, double horizontal, double delta) {
+        if (mx >= x0 && mx < x1 && my >= y0 + 6 && my < y0 + 21 && maxTabScroll() > 0) {
+            tabScroll = Mth.clamp(tabScroll - (int) (delta * 24), 0, maxTabScroll());
+            return true;
+        }
         int top = y0 + 30;
         int view = y1 - 8 - top;
         if (mx < listX1 && tab != STATS && tab != REPUTATION) {
             listScroll = Mth.clamp(listScroll - (int) (delta * 14), 0, Math.max(0, listHeight - view));
         } else {
-            detailScroll = Mth.clamp(detailScroll - (int) (delta * 14), 0, Math.max(0, detailHeight - view + 24));
+            int detailView = tab == MAIN || tab == SIDE || tab == MISC ? Math.max(1, questActionsTop - 4 - top) : view - 24;
+            detailScroll = Mth.clamp(detailScroll - (int) (delta * 14), 0, Math.max(0, detailHeight - detailView));
         }
         return true;
     }
 
     @Override
-    public boolean keyPressed(int key, int scan, int mods) {
-        if (SkyKeys.JOURNAL.matches(key, scan)) {
+    public boolean keyPressed(net.minecraft.client.input.KeyEvent event) {
+        int key = event.key(), scan = event.keycode(), mods = event.modifiers();
+        if (SkyKeys.JOURNAL.matches(event)) {
             onClose();
             return true;
         }
-        if (key == GLFW.GLFW_KEY_LEFT || key == GLFW.GLFW_KEY_Q) {
+        if (key == InputConstants.KEY_LEFT || key == InputConstants.KEY_Q) {
             setTab(tab - 1);
             return true;
         }
-        if (key == GLFW.GLFW_KEY_RIGHT || key == GLFW.GLFW_KEY_E) {
+        if (key == InputConstants.KEY_RIGHT || key == InputConstants.KEY_E) {
             setTab(tab + 1);
             return true;
         }
-        return super.keyPressed(key, scan, mods);
+        return super.keyPressed(event);
     }
 
     // ------------------------------------------------------------------ rendering
 
     @Override
-    public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        renderBackground(g);
+    public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
+
         Parchment.page(g, x0, y0, x1, y1);
         drawTabs(g, mouseX, mouseY);
         switch (tab) {
@@ -328,10 +381,11 @@ public class JournalScreen extends Screen {
             }
             default -> renderParty(g);
         }
-        super.render(g, mouseX, mouseY, partialTick);
+        super.extractRenderState(g, mouseX, mouseY, partialTick);
     }
 
-    private void drawTabs(GuiGraphics g, int mouseX, int mouseY) {
+    private void drawTabs(GuiGraphicsExtractor g, int mouseX, int mouseY) {
+        g.enableScissor(x0 + 8, y0 + 6, x1 - 8, y0 + 21);
         for (int i = 0; i < TABS.length; i++) {
             int tx = tabX(i);
             int tw = tabWidth(i);
@@ -340,19 +394,22 @@ public class JournalScreen extends Screen {
             if (sel) g.fill(tx, y0 + 6, tx + tw, y0 + 21, 0x50A07A3A);
             else if (hover) g.fill(tx, y0 + 6, tx + tw, y0 + 21, 0x25A07A3A);
             if (sel) g.fill(tx, y0 + 20, tx + tw, y0 + 21, Parchment.INK);
-            g.drawString(font, Component.translatable("journal.skycraft.tab." + TABS[i]), tx + 8, y0 + 9,
+            g.text(font, Component.translatable("journal.skycraft.tab." + TABS[i]), tx + tabPadding / 2, y0 + 9,
                     sel ? Parchment.INK : Parchment.INK_LIGHT, false);
         }
+        g.disableScissor();
+        if (tabScroll > 0) g.text(font, "<", x0 + 1, y0 + 9, Parchment.INK, false);
+        if (tabScroll < maxTabScroll()) g.text(font, ">", x1 - 6, y0 + 9, Parchment.INK, false);
         Parchment.rule(g, x0 + 8, x1 - 8, y0 + 24);
     }
 
-    private void heading(GuiGraphics g, Component text, int x, int y) {
-        g.drawString(font, text, x, y, Parchment.RED, false);
+    private void heading(GuiGraphicsExtractor g, Component text, int x, int y) {
+        g.text(font, text, x, y, Parchment.RED, false);
     }
 
-    private int drawWrapped(GuiGraphics g, Component text, int x, int y, int w, int color) {
+    private int drawWrapped(GuiGraphicsExtractor g, Component text, int x, int y, int w, int color) {
         for (FormattedCharSequence line : font.split(text, Math.max(20, w))) {
-            g.drawString(font, line, x, y, color, false);
+            g.text(font, line, x, y, color, false);
             y += 10;
         }
         return y;
@@ -360,7 +417,7 @@ public class JournalScreen extends Screen {
 
     // ------------------------------------------------------------------ quests tab
 
-    private void renderQuests(GuiGraphics g, int mouseX, int mouseY) {
+    private void renderQuests(GuiGraphicsExtractor g, int mouseX, int mouseY) {
         int top = y0 + 30;
         int bottom = y1 - 8;
         Parchment.vrule(g, listX1 + 3, top, bottom);
@@ -376,7 +433,7 @@ public class JournalScreen extends Screen {
         heading(g, Component.translatable("journal.skycraft.active", active.size()), lx, y);
         y += ROW + 2;
         if (active.isEmpty()) {
-            g.drawString(font, Component.translatable("journal.skycraft.no_quests"), lx + 4, y, Parchment.INK_FADED, false);
+            g.text(font, Component.translatable("journal.skycraft.no_quests"), lx + 4, y, Parchment.INK_FADED, false);
             y += ROW;
         }
         for (Quest q : active) y = questRow(g, q, lx, y, lw, sel, mouseX, mouseY);
@@ -392,13 +449,13 @@ public class JournalScreen extends Screen {
             detailHeight = 0;
             return;
         }
-        int dBottom = sel.isActive() ? bottom - (skipButton.visible ? 38 : 20) : bottom;
+        int dBottom = Math.min(bottom, questActionsTop - 4);
         g.enableScissor(listX1 + 6, top, x1 - 4, dBottom);
         detailHeight = renderQuestDetail(g, sel, listX1 + 12, top - detailScroll, x1 - listX1 - 24) - (top - detailScroll);
         g.disableScissor();
     }
 
-    private int questRow(GuiGraphics g, Quest q, int x, int y, int w, @Nullable Quest sel, int mouseX, int mouseY) {
+    private int questRow(GuiGraphicsExtractor g, Quest q, int x, int y, int w, @Nullable Quest sel, int mouseX, int mouseY) {
         boolean selected = sel != null && sel.id.equals(q.id);
         boolean hover = mouseX >= x && mouseX < x + w && mouseY >= y - 1 && mouseY < y + ROW - 1 && mouseY >= y0 + 30 && mouseY < y1 - 8;
         if (selected) g.fill(x - 2, y - 2, x + w, y + ROW - 2, Parchment.HIGHLIGHT);
@@ -408,7 +465,7 @@ public class JournalScreen extends Screen {
         int color = q.isActive() ? Parchment.INK : q.status == Quest.Status.FAILED ? 0xFF9A5A4A : Parchment.INK_FADED;
         int textW = w - 14 - (q.isActive() && ClientQuestData.isTracked(q) ? 8 : 0);
         String title = font.plainSubstrByWidth(q.title.getString(), textW);
-        g.drawString(font, title, x + 11, y, color, false);
+        g.text(font, title, x + 11, y, color, false);
         if (!q.isActive()) g.fill(x + 11, y + 4, x + 11 + font.width(title), y + 5, 0x806E5638);
         if (q.isActive() && ClientQuestData.isTracked(q)) {
             int ax = x + w - 8;
@@ -419,18 +476,18 @@ public class JournalScreen extends Screen {
     }
 
     /** Draws the selected quest; returns the y after the last line. */
-    private int renderQuestDetail(GuiGraphics g, Quest q, int x, int y, int w) {
-        g.pose().pushPose();
-        g.pose().translate(x, y, 0);
-        g.pose().scale(1.3f, 1.3f, 1f);
-        g.drawString(font, q.title, 0, 0, Parchment.INK, false);
-        g.pose().popPose();
+    private int renderQuestDetail(GuiGraphicsExtractor g, Quest q, int x, int y, int w) {
+        g.pose().pushMatrix();
+        g.pose().translate(x, y);
+        g.pose().scale(1.3f, 1.3f);
+        g.text(font, q.title, 0, 0, Parchment.INK, false);
+        g.pose().popMatrix();
         y += 16;
         Component cat = Component.translatable("journal.skycraft.category." + q.category.name().toLowerCase(Locale.ROOT));
         Faction f = Faction.byId(q.faction);
         if (f != null) cat = Component.translatable("journal.skycraft.faction_quest", f.displayName());
         if (q.shared) cat = cat.copy().append(Component.translatable("journal.skycraft.party_quest"));
-        g.drawString(font, cat, x, y, Parchment.INK_LIGHT, false);
+        g.text(font, cat, x, y, Parchment.INK_LIGHT, false);
         y += 11;
         if (!q.giverName.getString().isEmpty()) {
             Component giver = q.hold.isEmpty() ? Component.translatable("journal.skycraft.given_by", q.giverName)
@@ -443,12 +500,12 @@ public class JournalScreen extends Screen {
         y = drawWrapped(g, q.description, x, y, w, Parchment.INK);
         y += 8;
         // story quests keep a journal: what happened at each step, oldest first (the first entry is the description)
-        var journal = q.extra.getList("journal", Tag.TAG_STRING);
+        var journal = q.extra.getListOrEmpty("journal");
         if (journal.size() > 1) {
             heading(g, Component.translatable("journal.skycraft.journal"), x, y);
             y += 12;
             for (int i = 1; i < journal.size(); i++) {
-                y = drawWrapped(g, Quest.readComponent(journal.getString(i)), x + 4, y, w - 4, Parchment.INK_LIGHT) + 4;
+                y = drawWrapped(g, Quest.readComponent(journal.getStringOr(i, "")), x + 4, y, w - 4, Parchment.INK_LIGHT) + 4;
             }
             y += 4;
         }
@@ -477,18 +534,18 @@ public class JournalScreen extends Screen {
         heading(g, Component.translatable("journal.skycraft.rewards"), x, y);
         y += 12;
         if (q.rewardGold > 0) {
-            g.drawString(font, Component.translatable("journal.skycraft.reward_gold", q.rewardGold), x + 4, y, Parchment.GOLD, false);
+            g.text(font, Component.translatable("journal.skycraft.reward_gold", q.rewardGold), x + 4, y, Parchment.GOLD, false);
             y += 10;
         }
         for (ItemStack s : q.rewardItems) {
             Component name = s.getCount() > 1 ? Component.literal(s.getCount() + "x ").append(s.getHoverName()) : s.getHoverName();
-            g.drawString(font, Component.literal("• ").append(name), x + 4, y, Parchment.INK, false);
+            g.text(font, Component.literal("• ").append(name), x + 4, y, Parchment.INK, false);
             y += 10;
         }
         if (f != null) {
             Component rep = q.factionJoin ? Component.translatable("journal.skycraft.reward_join", f.displayName())
                     : Component.translatable("journal.skycraft.reward_reputation", q.factionPoints, f.displayName());
-            g.drawString(font, rep, x + 4, y, Parchment.INK_LIGHT, false);
+            g.text(font, rep, x + 4, y, Parchment.INK_LIGHT, false);
             y += 10;
         }
         if (q.category == Quest.Category.FACTION && Faction.DARK_BROTHERHOOD.id.equals(q.faction)) {
@@ -496,10 +553,10 @@ public class JournalScreen extends Screen {
         }
         y += 6;
         if (q.status == Quest.Status.COMPLETED) {
-            g.drawString(font, Component.translatable("journal.skycraft.status_completed"), x, y, Parchment.GREEN, false);
+            g.text(font, Component.translatable("journal.skycraft.status_completed"), x, y, Parchment.GREEN, false);
             y += 10;
         } else if (q.status == Quest.Status.FAILED) {
-            Component reason = Quest.readComponent(q.extra.getString("failReason"));
+            Component reason = Quest.readComponent(q.extra.getStringOr("failReason", ""));
             y = drawWrapped(g, Component.translatable("journal.skycraft.status_failed", reason), x, y, w, Parchment.RED);
         }
         return y;
@@ -507,7 +564,7 @@ public class JournalScreen extends Screen {
 
     // ------------------------------------------------------------------ factions tab
 
-    private void renderFactions(GuiGraphics g, int mouseX, int mouseY) {
+    private void renderFactions(GuiGraphicsExtractor g, int mouseX, int mouseY) {
         int top = y0 + 30;
         int bottom = y1 - 8;
         Parchment.vrule(g, listX1 + 3, top, bottom);
@@ -521,9 +578,9 @@ public class JournalScreen extends Screen {
             boolean sel = i == selectedFaction;
             if (sel) g.fill(lx - 2, y - 2, listX1 - 2, y + 20, Parchment.HIGHLIGHT);
             g.fill(lx, y + 1, lx + 6, y + 7, 0xFF000000 | f.color);
-            g.drawString(font, font.plainSubstrByWidth(f.displayName().getString(), listX1 - lx - 16), lx + 10, y, Parchment.INK, false);
+            g.text(font, font.plainSubstrByWidth(f.displayName().getString(), listX1 - lx - 16), lx + 10, y, Parchment.INK, false);
             Component sub = rank >= 0 ? f.rankName(rank) : Component.translatable("journal.skycraft.not_member");
-            g.drawString(font, sub, lx + 10, y + 10, rank >= 0 ? Parchment.INK_LIGHT : Parchment.INK_FADED, false);
+            g.text(font, sub, lx + 10, y + 10, rank >= 0 ? Parchment.INK_LIGHT : Parchment.INK_FADED, false);
             y += 22;
         }
         g.disableScissor();
@@ -534,28 +591,28 @@ public class JournalScreen extends Screen {
         int w = x1 - listX1 - 24;
         g.enableScissor(listX1 + 6, top, x1 - 4, bottom);
         y = top - detailScroll;
-        g.pose().pushPose();
-        g.pose().translate(x, y, 0);
-        g.pose().scale(1.3f, 1.3f, 1f);
-        g.drawString(font, f.displayName(), 0, 0, Parchment.INK, false);
-        g.pose().popPose();
+        g.pose().pushMatrix();
+        g.pose().translate(x, y);
+        g.pose().scale(1.3f, 1.3f);
+        g.text(font, f.displayName(), 0, 0, Parchment.INK, false);
+        g.pose().popMatrix();
         y += 18;
         int rank = Factions.rank(data, f);
         if (rank >= 0) {
-            g.drawString(font, Component.translatable("journal.skycraft.rank", f.rankName(rank), rank + 1, f.ranks), x, y, Parchment.INK, false);
+            g.text(font, Component.translatable("journal.skycraft.rank", f.rankName(rank), rank + 1, f.ranks), x, y, Parchment.INK, false);
             y += 12;
             int pts = Factions.points(data, f);
             if (rank < f.maxRank()) {
                 int from = Faction.pointsFor(rank);
                 int to = Faction.pointsFor(rank + 1);
                 Parchment.bar(g, x, y + 1, Math.min(140, w), (pts - from) / (float) Math.max(1, to - from), 0xFF000000 | f.color);
-                g.drawString(font, Component.translatable("journal.skycraft.next_rank", f.rankName(rank + 1), pts, to),
+                g.text(font, Component.translatable("journal.skycraft.next_rank", f.rankName(rank + 1), pts, to),
                         x + Math.min(140, w) + 6, y - 1, Parchment.INK_LIGHT, false);
             } else {
-                g.drawString(font, Component.translatable("journal.skycraft.max_rank"), x, y, Parchment.GOLD, false);
+                g.text(font, Component.translatable("journal.skycraft.max_rank"), x, y, Parchment.GOLD, false);
             }
             y += 12;
-            if (f == Faction.COMPANIONS && data.module("quest").getBoolean("beast_blood")) {
+            if (f == Faction.COMPANIONS && data.module("quest").getBooleanOr("beast_blood", false)) {
                 y = drawWrapped(g, Component.translatable("journal.skycraft.beast_blood"), x, y, w, Parchment.RED);
             }
         } else {
@@ -563,7 +620,7 @@ public class JournalScreen extends Screen {
             if (rival != null && Factions.isMember(data, rival)) {
                 y = drawWrapped(g, Component.translatable("journal.skycraft.enemy_of", rival.displayName()), x, y, w, Parchment.RED);
             } else {
-                g.drawString(font, Component.translatable("journal.skycraft.not_member"), x, y, Parchment.INK_FADED, false);
+                g.text(font, Component.translatable("journal.skycraft.not_member"), x, y, Parchment.INK_FADED, false);
                 y += 12;
             }
         }
@@ -590,7 +647,7 @@ public class JournalScreen extends Screen {
         y += 12;
         for (int r = 0; r < f.ranks; r++) {
             int color = r == rank ? Parchment.INK : r < rank ? Parchment.INK_LIGHT : Parchment.INK_FADED;
-            g.drawString(font, Component.literal((r + 1) + ". ").append(f.rankName(r)), x + 4, y, color, false);
+            g.text(font, Component.literal((r + 1) + ". ").append(f.rankName(r)), x + 4, y, color, false);
             y += 10;
         }
         g.disableScissor();
@@ -599,12 +656,12 @@ public class JournalScreen extends Screen {
 
     // ------------------------------------------------------------------ stats tab
 
-    private void renderStats(GuiGraphics g) {
+    private void renderStats(GuiGraphicsExtractor g) {
         PlayerData data = SkyData.get(minecraft.player);
         Map<String, String> general = new java.util.LinkedHashMap<>();
         general.put("journal.skycraft.stat_level", String.valueOf(data.getLevel()));
         general.put("journal.skycraft.stat_race", data.getRace() == null ? "-" : data.getRace().displayName().getString());
-        String title = data.module("quest").getString("title");
+        String title = data.module("quest").getStringOr("title", "");
         general.put("journal.skycraft.stat_title", title.isEmpty() ? "-" : I18n.get("journal.skycraft.title." + title));
         general.put("journal.skycraft.stat_gold", String.valueOf(data.getGold()));
         int stage = MainQuest.stage(data);
@@ -616,21 +673,21 @@ public class JournalScreen extends Screen {
 
         CompoundTag crime = data.module("crime");
         int bounty = 0;
-        CompoundTag b = crime.getCompound("bounty");
-        for (String k : b.getAllKeys()) bounty += b.getInt(k);
-        general.put("journal.skycraft.stat_murders", String.valueOf(crime.getInt("murders")));
-        general.put("journal.skycraft.stat_stolen", String.valueOf(crime.getInt("items_stolen")));
-        general.put("journal.skycraft.stat_pickpockets", String.valueOf(crime.getInt("pickpockets")));
-        general.put("journal.skycraft.stat_assaults", String.valueOf(crime.getInt("assaults")));
+        CompoundTag b = crime.getCompoundOrEmpty("bounty");
+        for (String k : b.keySet()) bounty += b.getIntOr(k, 0);
+        general.put("journal.skycraft.stat_murders", String.valueOf(crime.getIntOr("murders", 0)));
+        general.put("journal.skycraft.stat_stolen", String.valueOf(crime.getIntOr("items_stolen", 0)));
+        general.put("journal.skycraft.stat_pickpockets", String.valueOf(crime.getIntOr("pickpockets", 0)));
+        general.put("journal.skycraft.stat_assaults", String.valueOf(crime.getIntOr("assaults", 0)));
         general.put("journal.skycraft.stat_bounty", String.valueOf(bounty));
 
         CompoundTag magic = data.module("magic");
         int words = 0;
-        CompoundTag w = magic.getCompound("words");
-        for (String k : w.getAllKeys()) words += w.getInt(k);
-        general.put("journal.skycraft.stat_spells", String.valueOf(magic.getList("spells", Tag.TAG_STRING).size()));
+        CompoundTag w = magic.getCompoundOrEmpty("words");
+        for (String k : w.keySet()) words += w.getIntOr(k, 0);
+        general.put("journal.skycraft.stat_spells", String.valueOf(magic.getListOrEmpty("spells").size()));
         general.put("journal.skycraft.stat_words", String.valueOf(words));
-        general.put("journal.skycraft.stat_souls", String.valueOf(magic.getInt("dragon_souls")));
+        general.put("journal.skycraft.stat_souls", String.valueOf(magic.getIntOr("dragon_souls", 0)));
 
         Map<String, Integer> tracked = new TreeMap<>(data.stats());
 
@@ -651,12 +708,12 @@ public class JournalScreen extends Screen {
         heading(g, Component.translatable("journal.skycraft.statistics"), rx, y);
         int ry = y + 13;
         if (tracked.isEmpty()) {
-            g.drawString(font, Component.translatable("journal.skycraft.no_stats"), rx, ry, Parchment.INK_FADED, false);
+            g.text(font, Component.translatable("journal.skycraft.no_stats"), rx, ry, Parchment.INK_FADED, false);
             ry += 11;
         }
         for (Map.Entry<String, Integer> e : tracked.entrySet()) {
             String key = "journal.skycraft.stat." + e.getKey();
-            Component label = I18n.exists(key) ? Component.translatable(key) : Component.literal(prettify(e.getKey()));
+            Component label = net.minecraft.locale.Language.getInstance().has(key) ? Component.translatable(key) : Component.literal(prettify(e.getKey()));
             statLine(g, label, String.valueOf(e.getValue()), rx, ry, colW - 6);
             ry += 11;
         }
@@ -664,10 +721,10 @@ public class JournalScreen extends Screen {
         detailHeight = Math.max(ly, ry) + detailScroll - top;
     }
 
-    private void statLine(GuiGraphics g, Component label, String value, int x, int y, int w) {
+    private void statLine(GuiGraphicsExtractor g, Component label, String value, int x, int y, int w) {
         String l = font.plainSubstrByWidth(label.getString(), w - font.width(value) - 8);
-        g.drawString(font, l, x, y, Parchment.INK_LIGHT, false);
-        g.drawString(font, value, x + w - font.width(value), y, Parchment.INK, false);
+        g.text(font, l, x, y, Parchment.INK_LIGHT, false);
+        g.text(font, value, x + w - font.width(value), y, Parchment.INK, false);
         int dotsFrom = x + font.width(l) + 3;
         int dotsTo = x + w - font.width(value) - 3;
         for (int dx = dotsFrom; dx < dotsTo; dx += 3) g.fill(dx, y + 7, dx + 1, y + 8, 0x606E5638);
@@ -680,10 +737,10 @@ public class JournalScreen extends Screen {
 
     // ------------------------------------------------------------------ reputation tab
 
-    private void renderReputation(GuiGraphics g) {
+    private void renderReputation(GuiGraphicsExtractor g) {
         PlayerData data = SkyData.get(minecraft.player);
         CompoundTag crime = data.module("crime");
-        CompoundTag bountyTag = crime.getCompound("bounty");
+        CompoundTag bountyTag = crime.getCompoundOrEmpty("bounty");
 
         int top = y0 + 30;
         int bottom = y1 - 8;
@@ -698,18 +755,18 @@ public class JournalScreen extends Screen {
         int ly = y + 14;
         // Skyrim's nine holds always, then every other region where the player has a bounty
         List<String> holds = new ArrayList<>(List.of(Holds.IDS));
-        for (String k : bountyTag.getAllKeys()) {
+        for (String k : bountyTag.keySet()) {
             String id = Holds.migrate(k);
-            if (!holds.contains(id) && bountyTag.getInt(k) > 0) holds.add(id);
+            if (!holds.contains(id) && bountyTag.getIntOr(k, 0) > 0) holds.add(id);
         }
         for (String hold : holds) {
             Component hName = Holds.displayName(hold);
-            int bounty = bountyTag.getInt(hold);
-            g.drawString(font, hName, lx + 4, ly, Parchment.INK, false);
+            int bounty = bountyTag.getIntOr(hold, 0);
+            g.text(font, hName, lx + 4, ly, Parchment.INK, false);
             if (bounty > 0) {
-                g.drawString(font, Component.translatable("journal.skycraft.bounty_val", bounty), lx + colW - 70, ly, Parchment.RED, false);
+                g.text(font, Component.translatable("journal.skycraft.bounty_val", bounty), lx + colW - 70, ly, Parchment.RED, false);
             } else {
-                g.drawString(font, Component.translatable("journal.skycraft.law_abiding"), lx + colW - 70, ly, Parchment.GREEN, false);
+                g.text(font, Component.translatable("journal.skycraft.law_abiding"), lx + colW - 70, ly, Parchment.GREEN, false);
             }
             ly += 14;
         }
@@ -725,7 +782,7 @@ public class JournalScreen extends Screen {
         ry += 13;
         statLine(g, Component.translatable("journal.skycraft.total_bounty"), String.valueOf(totalBounty(data)), rx, ry, colW - 6);
         ry += 13;
-        statLine(g, Component.translatable("journal.skycraft.stolen_goods"), String.valueOf(crime.getInt("items_stolen")), rx, ry, colW - 6);
+        statLine(g, Component.translatable("journal.skycraft.stolen_goods"), String.valueOf(crime.getIntOr("items_stolen", 0)), rx, ry, colW - 6);
         ry += 13;
 
         g.disableScissor();
@@ -734,14 +791,14 @@ public class JournalScreen extends Screen {
 
     private int totalBounty(PlayerData data) {
         int total = 0;
-        CompoundTag b = data.module("crime").getCompound("bounty");
-        for (String k : b.getAllKeys()) total += b.getInt(k);
+        CompoundTag b = data.module("crime").getCompoundOrEmpty("bounty");
+        for (String k : b.keySet()) total += b.getIntOr(k, 0);
         return total;
     }
 
     // ------------------------------------------------------------------ party tab
 
-    private void renderParty(GuiGraphics g) {
+    private void renderParty(GuiGraphicsExtractor g) {
         int top = y0 + 32;
         int x = x0 + 16;
         int w = x1 - x0 - 32;
@@ -753,13 +810,13 @@ public class JournalScreen extends Screen {
             UUID leader = ClientQuestData.leader();
             for (ClientQuestData.Member m : ClientQuestData.members()) {
                 String name = (m.id().equals(leader) ? "★ " : "") + m.name();
-                g.drawString(font, name, x, y, m.online() ? Parchment.INK : Parchment.INK_FADED, false);
+                g.text(font, name, x, y, m.online() ? Parchment.INK : Parchment.INK_FADED, false);
                 if (m.online()) {
                     float fill = m.maxHealth() > 0 ? m.health() / m.maxHealth() : 0;
                     Parchment.bar(g, x + 120, y + 2, 100, fill, 0xFFB0262A);
-                    g.drawString(font, (int) (m.health() * 5) + " / " + (int) (m.maxHealth() * 5), x + 228, y, Parchment.INK_LIGHT, false);
+                    g.text(font, (int) (m.health() * 5) + " / " + (int) (m.maxHealth() * 5), x + 228, y, Parchment.INK_LIGHT, false);
                 } else {
-                    g.drawString(font, Component.translatable("party.skycraft.offline"), x + 120, y, Parchment.INK_FADED, false);
+                    g.text(font, Component.translatable("party.skycraft.offline"), x + 120, y, Parchment.INK_FADED, false);
                 }
                 y += 14;
             }
@@ -770,7 +827,7 @@ public class JournalScreen extends Screen {
         if (!invites.isEmpty()) {
             int y = y1 - 60;
             for (ClientQuestData.Invite i : invites) {
-                g.drawString(font, Component.translatable("journal.skycraft.party_invite", i.from()), x, y, Parchment.RED, false);
+                g.text(font, Component.translatable("journal.skycraft.party_invite", i.from()), x, y, Parchment.RED, false);
                 y += 11;
             }
         }

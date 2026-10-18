@@ -19,6 +19,60 @@ SPEC.loader.exec_module(PATCH)
 
 
 class WeatherPatchTest(unittest.TestCase):
+    def test_required_upstream_drift_is_rejected_without_modifying_input(self):
+        source = next((ROOT / "dist/.cache").glob("*ComplementaryReimagined_r5.9.3.zip"))
+        with tempfile.TemporaryDirectory() as tmp:
+            target = pathlib.Path(tmp) / "unsupported.zip"
+            with zipfile.ZipFile(source) as original, zipfile.ZipFile(target,"w") as changed:
+                for entry in original.infolist():
+                    raw = original.read(entry.filename)
+                    if entry.filename == "shaders/lib/lighting/mainLighting.glsl":
+                        raw = raw.replace(b"sceneLighting *= moonPhaseInfluence;", b"sceneLighting *= changedLunarContract;")
+                    changed.writestr(entry,raw)
+            before = target.read_bytes()
+            with self.assertRaisesRegex(ValueError,"Unsupported upstream"):
+                PATCH.patch_shaderpack_zip(target)
+            self.assertEqual(before,target.read_bytes())
+
+    def test_changed_patched_output_is_rejected_before_upgrade(self):
+        source = next((ROOT / "dist/.cache").glob("*ComplementaryReimagined_r5.9.3.zip"))
+        with tempfile.TemporaryDirectory() as tmp:
+            target = pathlib.Path(tmp) / "patched.zip"
+            shutil.copyfile(source,target)
+            PATCH.patch_shaderpack_zip(target)
+            with zipfile.ZipFile(target) as previous:
+                entries = {entry.filename:previous.read(entry.filename) for entry in previous.infolist()}
+            entries["shaders/lib/lighting/mainLighting.glsl"] += b"\n// unexpected external edit\n"
+            with zipfile.ZipFile(target,"w") as changed:
+                for name,raw in entries.items(): changed.writestr(name,raw)
+            before = target.read_bytes()
+            with self.assertRaisesRegex(ValueError,"changed outside"):
+                PATCH.patch_shaderpack_zip(target)
+            self.assertEqual(before,target.read_bytes())
+
+    def test_pinned_manifest_accepts_companion_solar_patch_then_upgrade(self):
+        source = next((ROOT / "dist/.cache").glob("*ComplementaryReimagined_r5.9.3.zip"))
+        spec = importlib.util.spec_from_file_location("solar_patch",pathlib.Path(__file__).with_name("patch_sun_horizon.py"))
+        solar = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(solar)
+        with tempfile.TemporaryDirectory() as tmp:
+            target = pathlib.Path(tmp) / "pipeline.zip"
+            shutil.copyfile(source,target)
+            PATCH.patch_shaderpack_zip(target)
+            solar.patch_zip(target,target)
+            PATCH.patch_shaderpack_zip(target)
+            with zipfile.ZipFile(target) as archive:
+                self.assertIn(b"skycraftSunHorizonTex",archive.read("shaders/lib/uniforms.glsl"))
+
+    def test_circular_wind_keeps_wrap_neighbors_near_north(self):
+        shader = (ROOT / "mod/src/main/resources/assets/skycraft/shaders/include/wind.glsl").read_text()
+        self.assertIn("fract(a+(fract(b-a+0.5)-0.5)*weight+1.0)",shader)
+        def mix(a,b,weight): return (a+((b-a+0.5)%1-0.5)*weight+1)%1
+        for first,second in ((359,1),(355,5),(1,359),(5,355)):
+            result = mix(first/360,second/360,0.5)*360
+            self.assertLess(min(result,360-result),1e-10)
+        self.assertAlmostEqual(90,mix(60/360,120/360,0.5)*360)
+
     def test_baked_volume_has_wrapping_slice_gutters(self):
         atlas = Image.open(ROOT / "mod/src/main/resources/assets/skycraft/textures/environment/cloud_noise_volume.png")
         self.assertEqual((528, 528), atlas.size)

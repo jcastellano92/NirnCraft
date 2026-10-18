@@ -2,15 +2,17 @@ package com.skycraft.atmosphere.client;
 
 import com.skycraft.Skycraft;
 import net.minecraft.client.Minecraft;
-import org.lwjgl.opengl.GL;
-import org.lwjgl.opengl.GL15;
-import org.lwjgl.opengl.GL33;
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.renderpearl.api.commands.GpuQueryPool;
+import com.mojang.renderpearl.api.device.GpuDevice;
 
 /** Nonblocking whole-frame GPU timing. Rendering adapts without changing weather
  * state or cloud bounds; an overloaded integrated server also reserves headroom. */
 final class AtmosphereBudget {
-    private static final int[] begin = new int[8], end = new int[8];
     private static final boolean[] pending = new boolean[8];
+    private static GpuQueryPool timestamps;
+    private static GpuDevice timerDevice;
+    private static float timestampPeriod;
     private static boolean initialized, supported, measuring;
     private static int frame, slot, samples;
     private static float scale = 1f, targetScale = 1f, gpuMs = 12f, serverMs, lastMeasurement;
@@ -19,15 +21,16 @@ final class AtmosphereBudget {
     private AtmosphereBudget() {}
 
     static void beginFrame() {
-        if (!initialized) {
+        var device = RenderSystem.getDevice();
+        if (!initialized || timerDevice != device) {
+            close();
             initialized = true;
-            var capabilities = GL.getCapabilities();
-            supported = capabilities.OpenGL33 || capabilities.GL_ARB_timer_query;
+            timerDevice = device;
+            timestampPeriod = device.getDeviceInfo().timestampPeriod();
+            supported = Float.isFinite(timestampPeriod) && timestampPeriod > 0f;
             if (Boolean.getBoolean("skycraft.autotest"))
                 Skycraft.LOGGER.info("Atmosphere GPU timer supported={}", supported);
-            if (supported) for (int i = 0; i < 8; i++) {
-                begin[i] = GL15.glGenQueries(); end[i] = GL15.glGenQueries();
-            }
+            if (supported) timestamps = device.createTimestampQueryPool(pending.length * 2);
         }
         measuring = false;
         long now=System.nanoTime();
@@ -38,7 +41,7 @@ final class AtmosphereBudget {
         float delta=targetScale-scale;
         scale+=Math.copySign(Math.min(Math.abs(delta),seconds*0.012f),delta);
         var server = Minecraft.getInstance().getSingleplayerServer();
-        serverMs = server == null ? 0f : server.getAverageTickTime();
+        serverMs = server == null ? 0f : server.getCurrentSmoothedTickTime();
         int currentFrame = frame++;
         if (currentFrame % 30 == 0) {
             if (serverMs > 42f) targetScale = Math.max(0.55f, targetScale - 0.025f);
@@ -47,9 +50,9 @@ final class AtmosphereBudget {
         if (!supported) return;
         slot = currentFrame & 7;
         if (pending[slot]) {
-            if (GL15.glGetQueryObjecti(end[slot], GL15.GL_QUERY_RESULT_AVAILABLE) == 0) return;
-            double elapsed = (GL33.glGetQueryObjectui64(end[slot], GL15.GL_QUERY_RESULT)
-                    - GL33.glGetQueryObjectui64(begin[slot], GL15.GL_QUERY_RESULT)) / 1_000_000.0;
+            var values = timestamps.getValues(slot * 2, 2);
+            if (values[0].isEmpty() || values[1].isEmpty()) return;
+            double elapsed = (values[1].getAsLong() - values[0].getAsLong()) * (double) timestampPeriod / 1_000_000.0;
             pending[slot] = false;
             lastMeasurement = (float) elapsed;
             if (elapsed > 0 && elapsed < 250) {
@@ -62,15 +65,26 @@ final class AtmosphereBudget {
                 }
             }
         }
-        GL33.glQueryCounter(begin[slot], GL33.GL_TIMESTAMP);
+        // Frame Pre/Post run outside native render passes, so the shared encoder owns these writes.
+        timerDevice.createCommandEncoder().writeTimestamp(timestamps, slot * 2);
         measuring = true;
     }
 
     static void endFrame() {
         if (!measuring) return;
-        GL33.glQueryCounter(end[slot], GL33.GL_TIMESTAMP);
+        timerDevice.createCommandEncoder().writeTimestamp(timestamps, slot * 2 + 1);
         pending[slot] = true;
         measuring = false;
+    }
+
+    /** Release device-owned queries; quality history remains useful when switching worlds. */
+    static void close() {
+        measuring = false;
+        if (timestamps != null) timestamps.close();
+        timestamps = null;
+        timerDevice = null;
+        initialized = supported = false;
+        java.util.Arrays.fill(pending, false);
     }
 
     static float scale() { return scale; }

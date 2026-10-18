@@ -17,13 +17,13 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.living.LivingChangeTargetEvent;
-import net.minecraftforge.event.entity.living.LivingFallEvent;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+
+import net.neoforged.neoforge.event.entity.living.LivingChangeTargetEvent;
+import net.neoforged.neoforge.event.entity.living.LivingFallEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 /**
  * The always-on racial abilities that no other system applies: water breathing (Argonians, Maormer), natural leaping
@@ -35,13 +35,13 @@ import net.minecraftforge.fml.common.Mod;
  * <p>Resistances, claws, attribute bonuses, disease resistance, shout recharge and Imperial luck are applied where
  * those systems live, from the values in {@link Race}.</p>
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class RacePassives {
     private RacePassives() {}
 
     @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer player)) return;
+    public static void onPlayerTick(net.neoforged.neoforge.event.tick.PlayerTickEvent.Post event) {
+        if (!(event instanceof net.neoforged.neoforge.event.tick.PlayerTickEvent.Post) || !(event.getEntity() instanceof ServerPlayer player)) return;
         Race race = SkyData.get(player).getRace();
         if (race == null) return;
         if (race.climbs() && player.horizontalCollision && !player.onGround()) player.resetFallDistance();
@@ -49,29 +49,29 @@ public final class RacePassives {
         if (race.waterBreathing() && (player.isInWater() || player.isEyeInFluid(FluidTags.WATER))) {
             passive(player, MobEffects.WATER_BREATHING, 0);
         }
-        if (race.leap() >= 0 && !player.isShiftKeyDown()) passive(player, MobEffects.JUMP, race.leap());
+        if (race.leap() >= 0 && !player.isShiftKeyDown()) passive(player, MobEffects.JUMP_BOOST, race.leap());
     }
 
     /** A hidden, short, constantly refreshed effect (no icon or particles; gone shortly after the condition ends). */
-    private static void passive(ServerPlayer player, MobEffect effect, int amplifier) {
-        MobEffectInstance cur = player.getEffect(effect);
+    private static void passive(ServerPlayer player, net.minecraft.core.Holder<MobEffect> effect, int amplifier) {
+        MobEffectInstance cur = player.getEffect(com.skycraft.platform.Effects.holder(effect));
         // never cut short a stronger or longer effect from a potion or spell
         if (cur != null && (cur.getAmplifier() > amplifier || cur.getDuration() > 60 && cur.isVisible())) return;
-        player.addEffect(new MobEffectInstance(effect, 50, amplifier, true, false, false));
+        player.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(effect), 50, amplifier, true, false, false));
     }
 
     @SubscribeEvent
     public static void onFall(LivingFallEvent event) {
-        if (!(event.getEntity() instanceof Player player) || player.level().isClientSide) return;
+        if (!(event.getEntity() instanceof Player player) || player.level().isClientSide()) return;
         Race race = SkyData.get(player).getRace();
         if (race != null && race.fallDamage() < 1f) event.setDamageMultiplier(event.getDamageMultiplier() * race.fallDamage());
     }
 
     /** After the combat handler (which runs at HIGH priority) has settled the amount. */
     @SubscribeEvent(priority = EventPriority.LOW)
-    public static void onHurt(LivingHurtEvent event) {
+    public static void onHurt(com.skycraft.combat.BeforeArmorDamageEvent event) {
         LivingEntity target = event.getEntity();
-        if (target.level().isClientSide) return;
+        if (target.level().isClientSide()) return;
         DamageSource source = event.getSource();
         float amount = event.getAmount();
         if (source.getEntity() instanceof ServerPlayer attacker && attacker != target) {
@@ -81,7 +81,7 @@ public final class RacePassives {
             Race race = SkyData.get(attacker).getRace();
             if (race == Race.TSAESCI && source.getDirectEntity() == attacker && source.is(DamageTypes.PLAYER_ATTACK)
                     && attacker.getMainHandItem().isEmpty()) {
-                target.addEffect(new MobEffectInstance(MobEffects.POISON, 20 * 4, 0), attacker);
+                target.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.POISON), 20 * 4, 0), attacker);
             }
         }
         if (target instanceof ServerPlayer player) {
@@ -99,7 +99,7 @@ public final class RacePassives {
     /** Calmed mobs won't pick a player; Dwemer automatons leave a tonally attuned player alone. */
     @SubscribeEvent
     public static void onChangeTarget(LivingChangeTargetEvent event) {
-        if (!(event.getNewTarget() instanceof Player player) || !(event.getEntity() instanceof Mob mob) || mob.level().isClientSide) return;
+        if (!(event.getNewAboutToBeSetTarget() instanceof Player player) || !(event.getEntity() instanceof Mob mob) || mob.level().isClientSide()) return;
         if (RacePowers.calmed(mob, mob.level().getGameTime())) {
             event.setCanceled(true);
             return;

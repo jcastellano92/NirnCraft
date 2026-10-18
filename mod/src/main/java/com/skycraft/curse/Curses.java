@@ -64,38 +64,38 @@ public final class Curses {
     // ------------------------------------------------------------------ queries (both sides)
 
     public static boolean isVampire(Player player) {
-        if (player.level().isClientSide && !isLocal(player)) return ClientView.stage(player) > 0;
-        return tag(player).getBoolean(VAMPIRE);
+        if (player.level().isClientSide() && !isLocal(player)) return ClientView.stage(player) > 0;
+        return tag(player).getBooleanOr(VAMPIRE, false);
     }
 
     /** Vampire stage 1..4 (0 = not a vampire). */
     public static int stage(Player player) {
-        if (player.level().isClientSide && !isLocal(player)) return ClientView.stage(player);
+        if (player.level().isClientSide() && !isLocal(player)) return ClientView.stage(player);
         CompoundTag t = tag(player);
-        if (!t.getBoolean(VAMPIRE)) return 0;
-        return Vampirism.stageFor(player.level().getGameTime() - t.getLong(FED));
+        if (!t.getBooleanOr(VAMPIRE, false)) return 0;
+        return Vampirism.stageFor(player.level().getGameTime() - t.getLongOr(FED, 0L));
     }
 
     public static boolean hasVampireLord(Player player) {
-        return isVampire(player) && tag(player).getBoolean(LORD);
+        return isVampire(player) && tag(player).getBooleanOr(LORD, false);
     }
 
     public static boolean isWerewolf(Player player) {
-        if (player.level().isClientSide && !isLocal(player)) return ClientView.werewolf(player);
-        return tag(player).getBoolean(WEREWOLF);
+        if (player.level().isClientSide() && !isLocal(player)) return ClientView.werewolf(player);
+        return tag(player).getBooleanOr(WEREWOLF, false);
     }
 
     public static boolean hasSanguinare(Player player) {
-        return tag(player).getLong(SANGUINARE) > 0;
+        return tag(player).getLongOr(SANGUINARE, 0L) > 0;
     }
 
     public static boolean hasSaniesLupinus(Player player) {
-        return tag(player).getLong(SANIES_LUPINUS) > 0;
+        return tag(player).getLongOr(SANIES_LUPINUS, 0L) > 0;
     }
 
     public static Form form(Player player) {
-        if (player.level().isClientSide) return ClientView.form(player);
-        return Form.byId(tag(player).getString(FORM));
+        if (player.level().isClientSide()) return ClientView.form(player);
+        return Form.byId(tag(player).getStringOr(FORM, ""));
     }
 
     /** In Beast Form or Vampire Lord form: no weapons, no spells, no items. */
@@ -124,7 +124,7 @@ public final class Curses {
 
     /** Survival's {@code Diseases.infect}: werewolves and vampires never catch diseases. */
     public static boolean immuneToDisease(LivingEntity entity) {
-        return entity instanceof Player p && !p.level().isClientSide && cursed(p);
+        return entity instanceof Player p && !p.level().isClientSide() && cursed(p);
     }
 
     /**
@@ -141,9 +141,9 @@ public final class Curses {
     /** Survival's {@code Diseases.cureAll} (potions, shrines, priests, death): Sanguinare is a disease until it turns. */
     public static boolean cureSanguinare(LivingEntity entity) {
         if (!(entity instanceof ServerPlayer player)) return false;
-        boolean had = player.hasEffect(CurseRegistry.SANGUINARE.get()) || hasSanguinare(player);
+        boolean had = player.hasEffect(com.skycraft.platform.Effects.holder(CurseRegistry.SANGUINARE.get())) || hasSanguinare(player);
         if (!had) return false;
-        player.removeEffect(CurseRegistry.SANGUINARE.get());
+        player.removeEffect(com.skycraft.platform.Effects.holder(CurseRegistry.SANGUINARE.get()));
         tag(player).remove(SANGUINARE);
         tag(player).remove(SANG_DAYS);
         dirty(player);
@@ -153,9 +153,9 @@ public final class Curses {
     /** Survival's {@code Diseases.cureAll}: Sanies Lupinus (Stage 1 lycanthropy) is curable until it turns after 3 days. */
     public static boolean cureSaniesLupinus(LivingEntity entity) {
         if (!(entity instanceof ServerPlayer player)) return false;
-        boolean had = player.hasEffect(CurseRegistry.SANIES_LUPINUS.get()) || hasSaniesLupinus(player);
+        boolean had = player.hasEffect(com.skycraft.platform.Effects.holder(CurseRegistry.SANIES_LUPINUS.get())) || hasSaniesLupinus(player);
         if (!had) return false;
-        player.removeEffect(CurseRegistry.SANIES_LUPINUS.get());
+        player.removeEffect(com.skycraft.platform.Effects.holder(CurseRegistry.SANIES_LUPINUS.get()));
         tag(player).remove(SANIES_LUPINUS);
         tag(player).remove(LUPINUS_DAYS);
         dirty(player);
@@ -181,8 +181,8 @@ public final class Curses {
 
     /** Harkon's gift: vampirism (if not yet) plus the Vampire Lord form. */
     public static void grantVampireLord(ServerPlayer player) {
-        if (!tag(player).getBoolean(VAMPIRE)) Vampirism.turn(player);
-        if (tag(player).getBoolean(LORD)) return;
+        if (!tag(player).getBooleanOr(VAMPIRE, false)) Vampirism.turn(player);
+        if (tag(player).getBooleanOr(LORD, false)) return;
         tag(player).putBoolean(LORD, true);
         dirty(player);
         CursePackets.sync(player);
@@ -192,12 +192,12 @@ public final class Curses {
     /** The Circle's gift (Companions' quest) or Sanies Lupinus after 3 days: lycanthropy and Beast Form. Cures vampirism. */
     public static void grantBeastBlood(ServerPlayer player) {
         CompoundTag t = tag(player);
-        if (t.getBoolean(VAMPIRE) || hasSanguinare(player)) {
+        if (t.getBooleanOr(VAMPIRE, false) || hasSanguinare(player)) {
             cureSanguinare(player);
             cure(player, CurseType.VAMPIRISM, false);
         }
         cureSaniesLupinus(player);
-        boolean had = t.getBoolean(WEREWOLF);
+        boolean had = t.getBooleanOr(WEREWOLF, false);
         t.putBoolean(WEREWOLF, true);
         t.remove(BEAST_READY);
         // the quest module's own flag (journal, +5% damage) follows the curse
@@ -207,7 +207,7 @@ public final class Curses {
         if (!had) {
             Notifier.title(player, Component.translatable("curse.skycraft.beast.granted"), Component.translatable("curse.skycraft.beast.granted.sub",
                     CursePowers.name(CursePowers.BEAST_FORM)));
-            player.level().playSound(null, player.blockPosition(), SoundEvents.WOLF_HOWL, SoundSource.PLAYERS, 1f, 0.6f);
+            player.level().playSound(null, player.blockPosition(), com.skycraft.audio.AudioSounds.creature("wolf", "howl"), SoundSource.PLAYERS, 1f, 0.6f);
         }
     }
 
@@ -221,7 +221,7 @@ public final class Curses {
         PlayerData data = SkyData.get(player);
         boolean had;
         if (type == CurseType.VAMPIRISM) {
-            had = t.getBoolean(VAMPIRE) || hasSanguinare(player);
+            had = t.getBooleanOr(VAMPIRE, false) || hasSanguinare(player);
             if (form(player) == Form.LORD) VampireLord.revert(player, false);
             cureSanguinare(player);
             t.remove(VAMPIRE);
@@ -231,7 +231,7 @@ public final class Curses {
             t.remove(SIGHT);
             Vampirism.clearEffects(player);
         } else {
-            had = t.getBoolean(WEREWOLF) || hasSaniesLupinus(player);
+            had = t.getBooleanOr(WEREWOLF, false) || hasSaniesLupinus(player);
             if (form(player) == Form.BEAST) Lycanthropy.revert(player, false);
             cureSaniesLupinus(player);
             t.remove(WEREWOLF);

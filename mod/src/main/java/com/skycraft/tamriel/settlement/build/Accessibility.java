@@ -53,7 +53,7 @@ public final class Accessibility {
 
     public static void sweep(WorldGenLevel level, BoundingBox clip, BoundingBox chunkBox) {
         BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos();
-        int minY = Math.max(clip.minY(), level.getMinBuildHeight() + 1), maxY = Math.min(clip.maxY(), level.getMaxBuildHeight() - 4);
+        int minY = Math.max(clip.minY(), level.getMinY() + 1), maxY = Math.min(clip.maxY(), (level.getMaxY() + 1) - 4);
         for (int x = clip.minX(); x <= clip.maxX(); x++) {
             for (int z = clip.minZ(); z <= clip.maxZ(); z++) {
                 for (int y = minY; y <= maxY; y++) {
@@ -261,9 +261,9 @@ public final class Accessibility {
     /** A full building block (a wall of this or another building), as opposed to furniture and vegetation. */
     private static boolean isWall(WorldGenLevel level, BlockPos p, BlockState s) {
         if (isProp(level, p, s)) return false;
-        return s.isSolidRender(level, p) || s.getBlock() instanceof StairBlock || s.getBlock() instanceof SlabBlock
+        return s.isSolidRender() || s.getBlock() instanceof StairBlock || s.getBlock() instanceof SlabBlock
                 || s.is(BlockTags.WALLS) || s.getBlock() instanceof net.minecraft.world.level.block.IronBarsBlock
-                || s.getBlock() instanceof net.minecraft.world.level.block.AbstractGlassBlock;
+                || s.getBlock() instanceof net.minecraft.world.level.block.TransparentBlock;
     }
 
     /** Furniture and clutter, vegetation and street furniture: what may be removed from a path. */
@@ -317,7 +317,7 @@ public final class Accessibility {
                 BlockState us = level.getBlockState(up);
                 if (us.getBlock() instanceof FenceBlock || us.is(BlockTags.WALLS) || us.is(BlockTags.BANNERS)
                         || us.is(BlockTags.ALL_SIGNS) || us.is(BlockTags.WOOL) || us.is(Blocks.GOLD_BLOCK)
-                        || us.is(Blocks.LIGHTNING_ROD) || us.getBlock() instanceof LanternBlock) {
+                        || us.is(com.skycraft.worldgen.VanillaBlocks.LIGHTNING_ROD) || us.getBlock() instanceof LanternBlock) {
                     level.setBlock(up, Blocks.AIR.defaultBlockState(), 2);
                     for (Direction dir : Direction.Plane.HORIZONTAL) {
                         for (int step = 1; step <= 2; step++) {

@@ -31,6 +31,15 @@
     "skycraft:tropical_beach",
     "skycraft:tsaesci_jungle",
     "skycraft:valenwood_mangrove_coast",
-    "skycraft:valenwood_rainforest"
+    "skycraft:valenwood_rainforest",
+    "minecraft:swamp",
+    "minecraft:mangrove_swamp",
+    "minecraft:jungle",
+    "minecraft:bamboo_jungle",
+    "minecraft:sparse_jungle",
+    "minecraft:beach",
+    "minecraft:lush_caves",
+    "minecraft:dripstone_caves",
+    "minecraft:sulfur_caves"
   ]
 }

@@ -1,0 +1,164 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": {
+        "type": "minecraft:uniform",
+        "min": 2,
+        "max": 5
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:leather",
+          "weight": 10,
+          "modifier": {
+            "count": {
+              "type": "minecraft:uniform",
+              "min": 1,
+              "max": 4
+            },
+            "type": "minecraft:set_count"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:wolf_pelt",
+          "weight": 6,
+          "modifier": {
+            "count": {
+              "type": "minecraft:uniform",
+              "min": 1,
+              "max": 2
+            },
+            "type": "minecraft:set_count"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:raw_venison",
+          "weight": 8,
+          "modifier": {
+            "count": {
+              "type": "minecraft:uniform",
+              "min": 1,
+              "max": 3
+            },
+            "type": "minecraft:set_count"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:hide",
+          "weight": 6,
+          "modifier": {
+            "count": {
+              "type": "minecraft:uniform",
+              "min": 1,
+              "max": 3
+            },
+            "type": "minecraft:set_count"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:arrow",
+          "weight": 8,
+          "modifier": [
+            {
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 5,
+                "max": 14
+              },
+              "type": "minecraft:set_count"
+            },
+            {
+              "kind": "arrow",
+              "type": "skycraft:leveled_gear"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:bow",
+          "weight": 3,
+          "modifier": {
+            "kind": "bow",
+            "enchant_chance": 0.1,
+            "quality_chance": 0.2,
+            "type": "skycraft:leveled_gear"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:bear_claws",
+          "weight": 2
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:septim",
+          "weight": 6,
+          "modifier": {
+            "count": {
+              "type": "minecraft:uniform",
+              "min": 3,
+              "max": 20
+            },
+            "type": "minecraft:set_count"
+          }
+        },
+        {
+          "type": "minecraft:loot_table",
+          "weight": 10,
+          "value": "skycraft:chests/skyrim_food"
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:skill_book_archery",
+          "weight": 3
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:skill_book_hunting",
+          "weight": 3
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 94
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:treasure_map",
+          "weight": 8,
+          "modifier": {
+            "type": "skycraft:explore_treasure_map"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:book",
+          "weight": 12,
+          "modifier": {
+            "type": "skycraft:explore_lead"
+          }
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 80
+        }
+      ]
+    }
+  ],
+  "random_sequence": "skycraft:explore/hunter"
+}

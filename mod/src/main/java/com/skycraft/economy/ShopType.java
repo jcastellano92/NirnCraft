@@ -4,7 +4,7 @@ import com.skycraft.Skycraft;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -55,13 +55,13 @@ public enum ShopType {
         this.stockTag = tag("merchant/" + id());
         for (String t : extraBuyTags) {
             this.extraBuyTags.add(t.contains(":")
-                    ? TagKey.create(Registries.ITEM, new ResourceLocation(t))
+                    ? TagKey.create(Registries.ITEM, Identifier.parse(t))
                     : tag(t));
         }
     }
 
     private static TagKey<Item> tag(String path) {
-        return TagKey.create(Registries.ITEM, new ResourceLocation(Skycraft.MODID, path));
+        return TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath(Skycraft.MODID, path));
     }
 
     public String id() {

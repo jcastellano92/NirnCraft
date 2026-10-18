@@ -3,9 +3,9 @@ package com.skycraft.inventory.client;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.skycraft.Skycraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 
 import java.util.Locale;
@@ -16,9 +16,9 @@ import java.util.Locale;
  * menus look alike.
  */
 public final class SkyUi {
-    public static final ResourceLocation ORNAMENT = new ResourceLocation(Skycraft.MODID, "textures/gui/hud/ornament.png");
-    public static final ResourceLocation BAR_CAPS = new ResourceLocation(Skycraft.MODID, "textures/gui/hud/bar_caps.png");
-    public static final ResourceLocation SMOKE = new ResourceLocation(Skycraft.MODID, "textures/gui/loading/smoke.png");
+    public static final Identifier ORNAMENT = Identifier.fromNamespaceAndPath(Skycraft.MODID, "textures/gui/hud/ornament.png");
+    public static final Identifier BAR_CAPS = Identifier.fromNamespaceAndPath(Skycraft.MODID, "textures/gui/hud/bar_caps.png");
+    public static final Identifier SMOKE = Identifier.fromNamespaceAndPath(Skycraft.MODID, "textures/gui/loading/smoke.png");
     public static final int TEXT = 0xFFE8E0C8;
     public static final int BRIGHT = 0xFFFFFFFF;
     public static final int DIM = 0xFF8A8478;
@@ -33,14 +33,14 @@ public final class SkyUi {
     private SkyUi() {}
 
     /** A dark translucent panel with faint gold lines on top and bottom. */
-    public static void panel(GuiGraphics g, int x1, int y1, int x2, int y2) {
+    public static void panel(GuiGraphicsExtractor g, int x1, int y1, int x2, int y2) {
         g.fillGradient(x1, y1, x2, y2, 0x90000000, 0xA8000000);
         hline(g, x1, x2, y1, 0x70);
         hline(g, x1, x2, y2 - 1, 0x70);
     }
 
     /** A thin gold line that fades out at both ends. */
-    public static void hline(GuiGraphics g, int x1, int x2, int y, int alpha) {
+    public static void hline(GuiGraphicsExtractor g, int x1, int x2, int y, int alpha) {
         int w = x2 - x1;
         if (w <= 0) return;
         int fade = Math.min(24, w / 4);
@@ -54,12 +54,12 @@ public final class SkyUi {
     }
 
     /** Divider with a small diamond in the middle (Skyrim menu ornament). */
-    public static void divider(GuiGraphics g, int cx, int y, int half) {
+    public static void divider(GuiGraphicsExtractor g, int cx, int y, int half) {
         hline(g, cx - half, cx + half, y, 0xB0);
         diamond(g, cx, y, 2, 0xFFC8BC9A);
     }
 
-    public static void diamond(GuiGraphics g, int cx, int cy, int r, int color) {
+    public static void diamond(GuiGraphicsExtractor g, int cx, int cy, int r, int color) {
         for (int i = -r; i <= r; i++) {
             int w = r - Math.abs(i);
             g.fill(cx - w, cy + i, cx + w + 1, cy + i + 1, color);
@@ -67,7 +67,7 @@ public final class SkyUi {
     }
 
     /** Hollow diamond (left-hand marker). */
-    public static void diamondOutline(GuiGraphics g, int cx, int cy, int r, int color) {
+    public static void diamondOutline(GuiGraphicsExtractor g, int cx, int cy, int r, int color) {
         for (int i = -r; i <= r; i++) {
             int w = r - Math.abs(i);
             g.fill(cx - w, cy + i, cx - w + 1, cy + i + 1, color);
@@ -78,7 +78,7 @@ public final class SkyUi {
     private static final String[] STAR = {"..#..", "#####", ".###.", ".#.#.", "#...#"};
 
     /** 5x5 pixel star (favorite marker). */
-    public static void star(GuiGraphics g, int x, int y, int color) {
+    public static void star(GuiGraphicsExtractor g, int x, int y, int color) {
         for (int r = 0; r < 5; r++) {
             for (int c = 0; c < 5; c++) {
                 if (STAR[r].charAt(c) == '#') g.fill(x + c, y + r, x + c + 1, y + r + 1, color);
@@ -87,7 +87,7 @@ public final class SkyUi {
     }
 
     /** Small triangle pointing up or down (sort direction). */
-    public static void triangle(GuiGraphics g, int cx, int y, boolean up, int color) {
+    public static void triangle(GuiGraphicsExtractor g, int cx, int y, boolean up, int color) {
         for (int i = 0; i < 3; i++) {
             int row = up ? i : 2 - i;
             g.fill(cx - row, y + i, cx + row + 1, y + i + 1, color);
@@ -99,17 +99,17 @@ public final class SkyUi {
         return c.getString().toUpperCase(Locale.ROOT);
     }
 
-    public static void caps(GuiGraphics g, Font font, Component c, int x, int y, int color) {
-        g.drawString(font, caps(c), x, y, color, false);
+    public static void caps(GuiGraphicsExtractor g, Font font, Component c, int x, int y, int color) {
+        g.text(font, caps(c), x, y, color, false);
     }
 
-    public static void capsCentered(GuiGraphics g, Font font, Component c, int cx, int y, int color) {
+    public static void capsCentered(GuiGraphicsExtractor g, Font font, Component c, int cx, int y, int color) {
         String s = caps(c);
-        g.drawString(font, s, cx - font.width(s) / 2, y, color, false);
+        g.text(font, s, cx - font.width(s) / 2, y, color, false);
     }
 
     /** Thin Skyrim vitals bar (fill shrinks toward the center). */
-    public static void bar(GuiGraphics g, int x, int y, int w, float fill, int color) {
+    public static void bar(GuiGraphicsExtractor g, int x, int y, int w, float fill, int color) {
         fill = Mth.clamp(fill, 0f, 1f);
         g.fill(x - 1, y - 1, x + w + 1, y + 4, 0xFF141414);
         g.fill(x, y, x + w, y + 3, 0xFF2A2A2A);
@@ -132,7 +132,7 @@ public final class SkyUi {
      * A Skyrim menu text button: upper-case label; when hovered or focused a dark band with fading gold lines above
      * and below and a diamond on each side. Disabled buttons are dimmed.
      */
-    public static void button(GuiGraphics g, Font font, Component label, int x, int y, int w, int h, boolean hovered, boolean active, float alpha) {
+    public static void button(GuiGraphicsExtractor g, Font font, Component label, int x, int y, int w, int h, boolean hovered, boolean active, float alpha) {
         String text = caps(label);
         int cx = x + w / 2;
         int ty = y + (h - 8) / 2;
@@ -146,22 +146,19 @@ public final class SkyUi {
         }
         int color = !active ? fade(0xFF5C574E, alpha) : hovered ? fade(BRIGHT, alpha) : fade(0xFFBDB5A0, alpha);
         String shown = ellipsize(font, text, w - 20);
-        g.drawString(font, shown, cx - font.width(shown) / 2, ty, color, hovered && active);
+        g.text(font, shown, cx - font.width(shown) / 2, ty, color, hovered && active);
     }
 
     /** The banner divider ornament (line with a central knot), centred, {@code half} wide each side. */
-    public static void ornament(GuiGraphics g, int cx, int y, int half, int argb) {
-        RenderSystem.enableBlend();
-        RenderSystem.setShaderColor(((argb >> 16) & 0xFF) / 255f, ((argb >> 8) & 0xFF) / 255f, (argb & 0xFF) / 255f, ((argb >>> 24) & 0xFF) / 255f);
-        g.blit(ORNAMENT, cx - half, y - 4, half * 2, 8, 0, 0, 128, 16, 128, 16);
-        RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
+    public static void ornament(GuiGraphicsExtractor g, int cx, int y, int half, int argb) {
+        blit(g, ORNAMENT, cx - half, y - 4, half * 2, 8, 0, 0, 128, 16, 128, 16, argb);
     }
 
     /**
      * An ornate Skyrim bar: dark trough, fill shrinking toward the centre ({@code centered}) or from the right,
      * a bright upper edge, and carved end caps ({@code boss} picks the winged pair).
      */
-    public static void ornateBar(GuiGraphics g, int x, int y, int w, int h, float fill, int rgb, float alpha, boolean centered, boolean boss) {
+    public static void ornateBar(GuiGraphicsExtractor g, int x, int y, int w, int h, float fill, int rgb, float alpha, boolean centered, boolean boss) {
         if (alpha < 0.02f) return;
         int a = (int) (alpha * 255) << 24;
         fill = Mth.clamp(fill, 0f, 1f);
@@ -173,13 +170,10 @@ public final class SkyUi {
         g.fill(left, y, left + filled, y + 1, a | brighten(rgb, 70));
         if (h > 3) g.fill(left, y + h - 1, left + filled, y + h, a | darken(rgb, 0.6f));
         // carved end caps from the bar_caps sheet (each cap 24x8 on screen)
-        RenderSystem.enableBlend();
-        RenderSystem.setShaderColor(1f, 1f, 1f, alpha);
         int cy = y + h / 2 - 4;
         int v = boss ? 16 : 0;
-        g.blit(BAR_CAPS, x - 25, cy, 24, 8, 0, v, 48, 16, 96, 32);
-        g.blit(BAR_CAPS, x + w + 1, cy, 24, 8, 48, v, 48, 16, 96, 32);
-        RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
+        blit(g, BAR_CAPS, x - 25, cy, 24, 8, 0, v, 48, 16, 96, 32, a | 0xFFFFFF);
+        blit(g, BAR_CAPS, x + w + 1, cy, 24, 8, 48, v, 48, 16, 96, 32, a | 0xFFFFFF);
     }
 
     public static int brighten(int rgb, int by) {
@@ -197,53 +191,67 @@ public final class SkyUi {
     }
 
     /** Slowly drifting smoke over the whole area (menu and loading backgrounds); {@code time} in seconds. */
-    public static void smoke(GuiGraphics g, int w, int h, float time, float alpha) {
-        RenderSystem.enableBlend();
+    public static void smoke(GuiGraphicsExtractor g, int w, int h, float time, float alpha) {
         for (int layer = 0; layer < 2; layer++) {
             float speed = layer == 0 ? 6f : -4f;
             int u = (int) (time * speed) & 255;
             int v = (int) (time * (layer == 0 ? 1.5f : 2.5f)) & 255;
-            RenderSystem.setShaderColor(0.55f, 0.53f, 0.5f, alpha * (layer == 0 ? 0.22f : 0.14f));
             int scale = layer == 0 ? 2 : 3;
-            g.blit(SMOKE, 0, 0, w, h, u, v, w / scale, h / scale, 256, 256);
+            int tint = (int) (255 * alpha * (layer == 0 ? 0.22f : 0.14f)) << 24 | 0x8C877F;
+            blit(g, SMOKE, 0, 0, w, h, u, v, w / scale, h / scale, 256, 256, tint);
         }
-        RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
     }
 
     /**
      * Renders an item as a solid 3D model (the item-frame display: flat sprites get their thickness) centred at
      * (cx, cy), {@code scale} GUI pixels per block, turned by the given angles. Lighting is restored afterwards.
      */
-    public static void item3d(GuiGraphics g, net.minecraft.world.item.ItemStack stack, float cx, float cy, float scale, float rotX, float rotY) {
-        if (stack.isEmpty()) return;
-        net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getInstance();
-        g.pose().pushPose();
-        g.pose().translate(cx, cy, 150.0);
-        g.pose().scale(scale, -scale, scale);
-        g.pose().mulPose(com.mojang.math.Axis.XP.rotationDegrees(rotX));
-        g.pose().mulPose(com.mojang.math.Axis.YP.rotationDegrees(rotY));
-        com.mojang.blaze3d.platform.Lighting.setupFor3DItems();
-        mc.getItemRenderer().renderStatic(stack, net.minecraft.world.item.ItemDisplayContext.FIXED, 0xF000F0,
-                net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY, g.pose(), g.bufferSource(), mc.level, 0);
-        g.flush();
-        com.mojang.blaze3d.platform.Lighting.setupForFlatItems();
-        g.pose().popPose();
+    public static void item3d(GuiGraphicsExtractor g, net.minecraft.world.item.ItemStack stack, float cx, float cy, float scale, float rotX, float rotY) {
+        SkyItemRender.extract(g, stack, cx, cy, scale, rotX, rotY);
+    }
+
+    /** Texture extraction with explicit tint; no global render state survives between widgets. */
+    public static void blit(GuiGraphicsExtractor g, Identifier texture, int x, int y,
+                            int width, int height, float u, float v, int sourceWidth, int sourceHeight,
+                            int textureWidth, int textureHeight, int argb) {
+        g.blit(net.minecraft.client.renderer.RenderPipelines.GUI_TEXTURED, texture, x, y, u, v,
+                width, height, sourceWidth, sourceHeight, textureWidth, textureHeight, argb);
+    }
+
+    public static void blit(GuiGraphicsExtractor g, Identifier texture, int x, int y,
+                            int width, int height, float u, float v, int sourceWidth, int sourceHeight,
+                            int textureWidth, int textureHeight) {
+        blit(g, texture, x, y, width, height, u, v, sourceWidth, sourceHeight, textureWidth, textureHeight, -1);
+    }
+
+    public static void blit(GuiGraphicsExtractor g, Identifier texture, int x, int y,
+                            float u, float v, int width, int height, int textureWidth, int textureHeight) {
+        blit(g, texture, x, y, width, height, u, v, width, height, textureWidth, textureHeight, -1);
+    }
+
+    public static void blit(GuiGraphicsExtractor g,Identifier texture,int x,int y,float u,float v,int width,int height,int textureWidth,int textureHeight,int argb) {
+        blit(g,texture,x,y,width,height,u,v,width,height,textureWidth,textureHeight,argb);
+    }
+
+    public static void blit(GuiGraphicsExtractor g, int x, int y, int ignoredDepth, int width, int height,
+                            net.minecraft.client.renderer.texture.TextureAtlasSprite sprite) {
+        g.blitSprite(net.minecraft.client.renderer.RenderPipelines.GUI_TEXTURED, sprite, x, y, width, height);
     }
 
     /** Upper-case text scaled about its centre. */
-    public static void scaledCentered(GuiGraphics g, Font font, String text, float cx, float y, float scale, int argb, boolean shadow) {
-        g.pose().pushPose();
-        g.pose().translate(cx, y, 0);
-        g.pose().scale(scale, scale, 1f);
-        g.drawString(font, text, -font.width(text) / 2, 0, argb, shadow);
-        g.pose().popPose();
+    public static void scaledCentered(GuiGraphicsExtractor g, Font font, String text, float cx, float y, float scale, int argb, boolean shadow) {
+        g.pose().pushMatrix();
+        g.pose().translate(cx, y);
+        g.pose().scale(scale, scale);
+        g.text(font, text, -font.width(text) / 2, 0, argb, shadow);
+        g.pose().popMatrix();
     }
 
     /**
      * "Weight 120/300" right-aligned to {@code rightX}, red when over capacity: the carry state every container and
      * workstation menu shows (the client's live sum of slots and pack against the server's capacity).
      */
-    public static void carryLine(GuiGraphics g, Font font, int leftX, int y, int rightX) {
+    public static void carryLine(GuiGraphicsExtractor g, Font font, int leftX, int y, int rightX) {
         net.minecraft.client.player.LocalPlayer player = net.minecraft.client.Minecraft.getInstance().player;
         if (player == null) return;
         float cur = ClientInventoryHandlers.liveCurrent();
@@ -256,8 +264,8 @@ public final class SkyUi {
         int vx = rightX - font.width(value);
         int lx = vx - 4 - font.width(label);
         if (lx < leftX) return;
-        g.drawString(font, label, lx, y, HEADER, false);
-        g.drawString(font, value, vx, y, over ? BAD : BRIGHT, false);
+        g.text(font, label, lx, y, HEADER, false);
+        g.text(font, value, vx, y, over ? BAD : BRIGHT, false);
     }
 
     public static String ellipsize(Font font, String s, int width) {

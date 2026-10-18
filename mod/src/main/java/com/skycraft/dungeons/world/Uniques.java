@@ -87,10 +87,10 @@ public final class Uniques {
         }
         fr.columns(-8, -4, 0, 4, (fw, lt, x, z) -> {
             double d = Math.hypot(fw + 4, lt);
-            if (d > 3.2 && d < 4.4) p.set(x, fr.base, z, Blocks.LIGHT_GRAY_CARPET.defaultBlockState());
+            if (d > 3.2 && d < 4.4) p.set(x, fr.base, z, com.skycraft.worldgen.VanillaBlocks.LIGHT_GRAY_CARPET.defaultBlockState());
         });
         fr.set(-4, 0, 0, Deco.campfire(false, true));
-        for (int lt = -6; lt <= 6; lt += 3) fr.set(hf0 + 1, 6, lt, Blocks.GRAY_BANNER.defaultBlockState());
+        for (int lt = -6; lt <= 6; lt += 3) fr.set(hf0 + 1, 6, lt, com.skycraft.worldgen.VanillaBlocks.GRAY_BANNER.defaultBlockState());
         // the library along the back wall
         for (int lt = -12; lt <= 12; lt++) {
             if (Math.abs(lt) <= 1) continue;
@@ -116,8 +116,8 @@ public final class Uniques {
             if (side < 0) {
                 // cells: bedrolls and footlockers
                 for (int fw = -14; fw <= 2; fw += 4) {
-                    fr.set(fw, 0, mid - 2 * side, Blocks.GRAY_CARPET);
-                    fr.set(fw + 1, 0, mid - 2 * side, Blocks.GRAY_CARPET);
+                    fr.set(fw, 0, mid - 2 * side, com.skycraft.worldgen.VanillaBlocks.GRAY_CARPET);
+                    fr.set(fw + 1, 0, mid - 2 * side, com.skycraft.worldgen.VanillaBlocks.GRAY_CARPET);
                     fr.container(fw, 0, mid - 3 * side, Deco.chest(fr.dir(Direction.EAST)), Deco.LOOT_MINOR);
                     fr.set(fw, 2, mid, Deco.lantern(false, true));
                 }
@@ -129,7 +129,7 @@ public final class Uniques {
                 }
                 fr.set(-15, 0, mid - 2, Blocks.SMOKER);
                 fr.set(-15, 0, mid + 2, Deco.campfire(false, true));
-                fr.container(-15, 0, mid, Deco.barrel(Direction.UP), new net.minecraft.resources.ResourceLocation(com.skycraft.Skycraft.MODID, "chests/skyrim_food"));
+                fr.container(-15, 0, mid, Deco.barrel(Direction.UP), net.minecraft.resources.Identifier.fromNamespaceAndPath(com.skycraft.Skycraft.MODID, "chests/skyrim_food"));
                 fr.set(2, 0, mid + 3, Blocks.BARREL);
             }
         }
@@ -142,7 +142,7 @@ public final class Uniques {
         fr.set(-5, 3, cl1, Blocks.CHISELED_STONE_BRICKS);
         // a weathered shrine to Kynareth in the courtyard
         fr.set(-1, 0, cl0 + 5, Blocks.CHISELED_STONE_BRICKS);
-        fr.set(-1, 1, cl0 + 5, Deco.candle(Blocks.WHITE_CANDLE, 4, true));
+        fr.set(-1, 1, cl0 + 5, Deco.candle(com.skycraft.worldgen.VanillaBlocks.WHITE_CANDLE, 4, true));
     }
 
     // ------------------------------------------------------------------ the summit
@@ -209,13 +209,13 @@ public final class Uniques {
         int f0 = -22, f1 = 10, hl = 9, h = 14;
         fr.fill(f0, -1, -hl, f1, -1, hl, Blocks.DEEPSLATE_TILES);
         fr.fill(f0 + 1, 0, -hl + 1, f1 - 1, h, hl - 1, Blocks.AIR);
-        for (int fw = f0 + 2; fw <= f1 - 2; fw++) for (int lt = -1; lt <= 1; lt++) fr.set(fw, -1, lt, Blocks.RED_TERRACOTTA);
+        for (int fw = f0 + 2; fw <= f1 - 2; fw++) for (int lt = -1; lt <= 1; lt++) fr.set(fw, -1, lt, com.skycraft.worldgen.VanillaBlocks.RED_TERRACOTTA);
         // Alduin's Wall along the back: a mural of glazed tiles
         for (int lt = -hl + 1; lt <= hl - 1; lt++) {
             for (int dy = 1; dy <= 9; dy++) {
                 int k = Math.floorMod(lt * 7 + dy * 3, 4);
-                Block tile = k == 0 ? Blocks.BLACK_GLAZED_TERRACOTTA : k == 1 ? Blocks.GRAY_GLAZED_TERRACOTTA
-                        : k == 2 ? Blocks.RED_GLAZED_TERRACOTTA : Blocks.LIGHT_GRAY_GLAZED_TERRACOTTA;
+                Block tile = k == 0 ? com.skycraft.worldgen.VanillaBlocks.BLACK_GLAZED_TERRACOTTA : k == 1 ? com.skycraft.worldgen.VanillaBlocks.GRAY_GLAZED_TERRACOTTA
+                        : k == 2 ? com.skycraft.worldgen.VanillaBlocks.RED_GLAZED_TERRACOTTA : com.skycraft.worldgen.VanillaBlocks.LIGHT_GRAY_GLAZED_TERRACOTTA;
                 fr.set(f0, dy, lt, tile);
             }
         }
@@ -223,8 +223,8 @@ public final class Uniques {
         for (int fw = f0 + 3; fw <= f1 - 3; fw += 5) {
             for (int lt : new int[]{-hl + 2, hl - 2}) {
                 for (int dy = 0; dy < h; dy++) fr.set(fw, dy, lt, Deco.pillar(Blocks.STRIPPED_MANGROVE_LOG, Direction.Axis.Y));
-                fr.set(fw + 1, 4, lt, Blocks.RED_WOOL);
-                fr.set(fw - 1, 4, lt, Blocks.RED_WOOL);
+                fr.set(fw + 1, 4, lt, com.skycraft.worldgen.VanillaBlocks.RED_WOOL);
+                fr.set(fw - 1, 4, lt, com.skycraft.worldgen.VanillaBlocks.RED_WOOL);
                 fr.set(fw, h - 2, lt + (lt < 0 ? 1 : -1), Deco.lantern(false, true));
             }
         }
@@ -237,8 +237,8 @@ public final class Uniques {
             fr.container(fw + 1, 0, -hl + 1, Deco.barrel(Direction.UP), Deco.LOOT_COMMON);
         }
         for (int fw = f0 + 2; fw <= f0 + 10; fw += 2) {
-            fr.set(fw, 0, hl - 1, Blocks.RED_CARPET);
-            fr.set(fw + 1, 0, hl - 1, Blocks.RED_CARPET);
+            fr.set(fw, 0, hl - 1, com.skycraft.worldgen.VanillaBlocks.RED_CARPET);
+            fr.set(fw + 1, 0, hl - 1, com.skycraft.worldgen.VanillaBlocks.RED_CARPET);
         }
         fr.container(f0 + 2, 0, hl - 2, Deco.chest(fr.f), Deco.LOOT_BOSS);
         // the facade: posts, a curved roof, the dragon head over the door

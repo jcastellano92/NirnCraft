@@ -42,7 +42,7 @@ public record HomesteadPlans(String id, String slot, List<String> requires, List
                 c(fittings, 2), c(lock, 1), c(glass, 8));
         List<String> hall = List.of("main_hall");
         plan("bedrooms", "west", hall, c(stone, 10), c(log, 10), c(clay, 4), c(nails, 24), c(hinge, 2), c(fittings, 2),
-                Cost.tag(ItemTags.WOOL, () -> Items.WHITE_WOOL, 8));
+                Cost.tag(ItemTags.WOOL, () -> com.skycraft.worldgen.VanillaBlocks.WHITE_WOOL.asItem(), 8));
         plan("greenhouse", "west", hall, c(stone, 8), c(log, 8), c(nails, 20), c(hinge, 1), c(glass, 24), c(() -> Items.DIRT, 12));
         plan("enchanters_tower", "west", hall, c(stone, 16), c(log, 12), c(clay, 6), c(nails, 30), c(hinge, 2), c(fittings, 2),
                 c(glass, 8), c(() -> Items.LAPIS_LAZULI, 4));

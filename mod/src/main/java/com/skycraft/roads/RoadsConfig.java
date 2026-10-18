@@ -1,49 +1,49 @@
 package com.skycraft.roads;
 
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 /** Roads configuration: config/skycraft-roads.toml (COMMON, server-authoritative). */
 public final class RoadsConfig {
-    public static final ForgeConfigSpec SPEC;
+    public static final ModConfigSpec SPEC;
 
     // ------------------------------------------------------------------ roads
-    public static final ForgeConfigSpec.BooleanValue ENABLED;
-    public static final ForgeConfigSpec.IntValue MAX_DISTANCE;
-    public static final ForgeConfigSpec.IntValue CONNECTIONS;
-    public static final ForgeConfigSpec.IntValue SETTLEMENT_RADIUS;
-    public static final ForgeConfigSpec.IntValue MAX_EXPANSIONS;
-    public static final ForgeConfigSpec.IntValue MAX_BRIDGE_LENGTH;
-    public static final ForgeConfigSpec.IntValue LANTERN_SPACING;
-    public static final ForgeConfigSpec.BooleanValue SIGNPOSTS;
-    public static final ForgeConfigSpec.BooleanValue LANTERNS;
-    public static final ForgeConfigSpec.BooleanValue ROADSIDE;
-    public static final ForgeConfigSpec.ConfigValue<String> LEGACY_PAVER;
-    public static final ForgeConfigSpec.BooleanValue PAINT;
+    public static final ModConfigSpec.BooleanValue ENABLED;
+    public static final ModConfigSpec.IntValue MAX_DISTANCE;
+    public static final ModConfigSpec.IntValue CONNECTIONS;
+    public static final ModConfigSpec.IntValue SETTLEMENT_RADIUS;
+    public static final ModConfigSpec.IntValue MAX_EXPANSIONS;
+    public static final ModConfigSpec.IntValue MAX_BRIDGE_LENGTH;
+    public static final ModConfigSpec.IntValue LANTERN_SPACING;
+    public static final ModConfigSpec.BooleanValue SIGNPOSTS;
+    public static final ModConfigSpec.BooleanValue LANTERNS;
+    public static final ModConfigSpec.BooleanValue ROADSIDE;
+    public static final ModConfigSpec.ConfigValue<String> LEGACY_PAVER;
+    public static final ModConfigSpec.BooleanValue PAINT;
 
     // ------------------------------------------------------------------ performance
-    public static final ForgeConfigSpec.IntValue PAVE_BLOCKS_PER_TICK;
-    public static final ForgeConfigSpec.DoubleValue PAVE_MILLIS_PER_TICK;
-    public static final ForgeConfigSpec.IntValue PLAN_INTERVAL_TICKS;
-    public static final ForgeConfigSpec.IntValue PLANNER_THREADS;
+    public static final ModConfigSpec.IntValue PAVE_BLOCKS_PER_TICK;
+    public static final ModConfigSpec.DoubleValue PAVE_MILLIS_PER_TICK;
+    public static final ModConfigSpec.IntValue PLAN_INTERVAL_TICKS;
+    public static final ModConfigSpec.IntValue PLANNER_THREADS;
 
     // ------------------------------------------------------------------ travelers
-    public static final ForgeConfigSpec.BooleanValue TRAVELERS;
-    public static final ForgeConfigSpec.IntValue TRAVELER_INTERVAL;
-    public static final ForgeConfigSpec.IntValue TRAVELER_CAP;
-    public static final ForgeConfigSpec.IntValue TRAVELER_MERCHANT_PERCENT;
-    public static final ForgeConfigSpec.IntValue TRAVELER_DESPAWN_DISTANCE;
-    public static final ForgeConfigSpec.BooleanValue BANDIT_AMBUSHES;
+    public static final ModConfigSpec.BooleanValue TRAVELERS;
+    public static final ModConfigSpec.IntValue TRAVELER_INTERVAL;
+    public static final ModConfigSpec.IntValue TRAVELER_CAP;
+    public static final ModConfigSpec.IntValue TRAVELER_MERCHANT_PERCENT;
+    public static final ModConfigSpec.IntValue TRAVELER_DESPAWN_DISTANCE;
+    public static final ModConfigSpec.BooleanValue BANDIT_AMBUSHES;
 
     // ------------------------------------------------------------------ compass
-    public static final ForgeConfigSpec.BooleanValue COMPASS_MARKERS;
-    public static final ForgeConfigSpec.IntValue COMPASS_RANGE;
+    public static final ModConfigSpec.BooleanValue COMPASS_MARKERS;
+    public static final ModConfigSpec.IntValue COMPASS_RANGE;
 
     // ------------------------------------------------------------------ carriage
-    public static final ForgeConfigSpec.BooleanValue CARRIAGES;
-    public static final ForgeConfigSpec.IntValue CARRIAGE_COST;
+    public static final ModConfigSpec.BooleanValue CARRIAGES;
+    public static final ModConfigSpec.IntValue CARRIAGE_COST;
 
     static {
-        ForgeConfigSpec.Builder b = new ForgeConfigSpec.Builder();
+        ModConfigSpec.Builder b = new ModConfigSpec.Builder();
         b.push("roads");
         ENABLED = b.comment("Master switch: detect settlements, plan and pave roads between them (overworld only).")
                 .define("enabled", true);
@@ -70,7 +70,7 @@ public final class RoadsConfig {
                         "follows the plan, and the paver only places signposts, lanterns, shrines and dressing.",
                         "auto = only in saves that predate the plan-first generation (to upgrade old worlds).",
                         "true = always (and it plans its own roads on noise heights where the plan has none).")
-                .defineInList("legacyPaver", "auto", java.util.List.of("auto", "true", "false"));
+                .defineInList("legacyPaver", "auto", java.util.Arrays.asList("auto", "true", "false"));
         PAINT = b.comment("Paint the planned roads, bridges, culverts, fords, stairs and tunnels while chunks generate",
                         "(read by worldgen threads; switch off only for A/B timing).")
                 .define("paintAtGeneration", true);

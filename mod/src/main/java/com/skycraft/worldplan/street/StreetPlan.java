@@ -257,6 +257,15 @@ public final class StreetPlan {
         return pSpec.length;
     }
 
+    /** Resolves the owning plan before callers access bucket/edge/plot arrays. */
+    public static StreetPlan planFor(int x, int z) {
+        if (!com.skycraft.tamriel.TamrielMap.inTamriel(x, z)) {
+            StreetPlan tile = com.skycraft.worldplan.tile.TilePlanner.streetPlanAt(x, z);
+            if (tile != null) return tile;
+        }
+        return get();
+    }
+
     /**
      * The street edge nearest to column (x, z) within {@link #REACH} blocks (streets, gate lanes, doorstep paths,
      * bridges, stairs): fills {@code out} and returns true, or false. Same contract as {@code RoadPlan.at}.

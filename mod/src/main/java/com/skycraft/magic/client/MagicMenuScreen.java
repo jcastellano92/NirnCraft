@@ -14,7 +14,7 @@ import com.skycraft.magic.spell.Spells;
 import com.skycraft.network.SkyNetwork;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
@@ -22,7 +22,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
-import org.lwjgl.glfw.GLFW;
+import com.mojang.blaze3d.platform.InputConstants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -313,8 +313,10 @@ public class MagicMenuScreen extends Screen {
     }
 
     @Override
-    public boolean mouseClicked(double mx, double my, int button) {
-        if (super.mouseClicked(mx, my, button)) return true;
+    public boolean mouseClicked(net.minecraft.client.input.MouseButtonEvent event, boolean doubleClick) {
+        double mx = event.x(), my = event.y();
+        int button = com.skycraft.client.screen.UiInput.actionButton(event.button());
+        if (super.mouseClicked(event, doubleClick)) return true;
         Tab[] tabs = Tab.values();
         for (int i = 0; i < tabs.length; i++) {
             int y = tabY(i);
@@ -327,8 +329,8 @@ public class MagicMenuScreen extends Screen {
         if (row >= 0) {
             cursor = row;
             Entry e = entries.get(row);
-            if (button == GLFW.GLFW_MOUSE_BUTTON_MIDDLE) favorite(e);
-            else equip(e, button == GLFW.GLFW_MOUSE_BUTTON_RIGHT);
+            if (button == 2) favorite(e);
+            else equip(e, button == 1);
             return true;
         }
         return false;
@@ -345,7 +347,7 @@ public class MagicMenuScreen extends Screen {
     }
 
     @Override
-    public boolean mouseScrolled(double mx, double my, double delta) {
+    public boolean mouseScrolled(double mx, double my, double horizontal, double delta) {
         if (mx >= listX && mx < listX + listW) {
             scroll = Mth.clamp(scroll - (int) Math.signum(delta), 0, Math.max(0, entries.size() - visibleRows()));
         } else {
@@ -356,54 +358,55 @@ public class MagicMenuScreen extends Screen {
     }
 
     @Override
-    public boolean keyPressed(int key, int scan, int mods) {
-        if (SkyKeys.MAGIC_MENU.matches(key, scan)) {
+    public boolean keyPressed(net.minecraft.client.input.KeyEvent event) {
+        int key = event.key(), scan = event.keycode(), mods = event.modifiers();
+        if (SkyKeys.MAGIC_MENU.matches(event)) {
             onClose();
             return true;
         }
         Tab[] tabs = Tab.values();
         switch (key) {
-            case GLFW.GLFW_KEY_LEFT, GLFW.GLFW_KEY_A -> {
+            case InputConstants.KEY_LEFT, InputConstants.KEY_A -> {
                 setTab(tabs[Math.floorMod(tab.ordinal() - 1, tabs.length)]);
                 return true;
             }
-            case GLFW.GLFW_KEY_RIGHT, GLFW.GLFW_KEY_D -> {
+            case InputConstants.KEY_RIGHT, InputConstants.KEY_D -> {
                 setTab(tabs[Math.floorMod(tab.ordinal() + 1, tabs.length)]);
                 return true;
             }
-            case GLFW.GLFW_KEY_UP, GLFW.GLFW_KEY_W -> {
+            case InputConstants.KEY_UP, InputConstants.KEY_W -> {
                 moveCursor(-1);
                 return true;
             }
-            case GLFW.GLFW_KEY_DOWN, GLFW.GLFW_KEY_S -> {
+            case InputConstants.KEY_DOWN, InputConstants.KEY_S -> {
                 moveCursor(1);
                 return true;
             }
-            case GLFW.GLFW_KEY_ENTER, GLFW.GLFW_KEY_E -> {
+            case InputConstants.KEY_RETURN, InputConstants.KEY_E -> {
                 if (cursor >= 0 && cursor < entries.size()) equip(entries.get(cursor), false);
                 return true;
             }
-            case GLFW.GLFW_KEY_Q -> {
+            case InputConstants.KEY_Q -> {
                 if (cursor >= 0 && cursor < entries.size()) equip(entries.get(cursor), true);
                 return true;
             }
-            case GLFW.GLFW_KEY_F -> {
+            case InputConstants.KEY_F -> {
                 if (cursor >= 0 && cursor < entries.size()) favorite(entries.get(cursor));
                 return true;
             }
-            case GLFW.GLFW_KEY_Z -> {
+            case InputConstants.KEY_Z -> {
                 handsAction(MagicPackets.MenuAction.UNEQUIP_RIGHT);
                 return true;
             }
-            case GLFW.GLFW_KEY_C -> {
+            case InputConstants.KEY_C -> {
                 handsAction(MagicPackets.MenuAction.UNEQUIP_LEFT);
                 return true;
             }
-            case GLFW.GLFW_KEY_V -> {
+            case InputConstants.KEY_V -> {
                 handsAction(MagicPackets.MenuAction.UNARMED);
                 return true;
             }
-            case GLFW.GLFW_KEY_X, GLFW.GLFW_KEY_DELETE -> {
+            case InputConstants.KEY_X, InputConstants.KEY_DELETE -> {
                 // forget a spell you made (tome spells are never forgotten)
                 if (cursor >= 0 && cursor < entries.size() && com.skycraft.magic.spell.spellmaking.CustomSpells.isCustom(entries.get(cursor).id)) {
                     SkyNetwork.sendToServer(new MagicPackets.MenuAction(MagicPackets.MenuAction.FORGET_CUSTOM, entries.get(cursor).id));
@@ -411,7 +414,7 @@ public class MagicMenuScreen extends Screen {
                 return true;
             }
             default -> {
-                return super.keyPressed(key, scan, mods);
+                return super.keyPressed(event);
             }
         }
     }
@@ -427,8 +430,8 @@ public class MagicMenuScreen extends Screen {
     // ------------------------------------------------------------------ rendering
 
     @Override
-    public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        renderBackground(g);
+    public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
+
         LocalPlayer p = player();
         if (p == null) return;
         Font font = this.font;
@@ -451,16 +454,16 @@ public class MagicMenuScreen extends Screen {
         int half15 = (int) Math.ceil(font.width(title) * 1.5f / 2f);
         int half10 = font.width(title) / 2;
         if (width / 2 - half15 >= leftEnd && width / 2 + half15 <= rightStart) {
-            g.pose().pushPose();
-            g.pose().translate(width / 2f, HEADER_ROW - 1, 0);
-            g.pose().scale(1.5f, 1.5f, 1f);
-            g.drawString(font, title, -font.width(title) / 2, 0, 0xFFF0E8D0, true);
-            g.pose().popPose();
+            g.pose().pushMatrix();
+            g.pose().translate(width / 2f, HEADER_ROW - 1);
+            g.pose().scale(1.5f, 1.5f);
+            g.text(font, title, -font.width(title) / 2, 0, 0xFFF0E8D0, true);
+            g.pose().popMatrix();
         } else if (width / 2 - half10 >= leftEnd && width / 2 + half10 <= rightStart) {
-            g.drawCenteredString(font, title, width / 2, HEADER_ROW, 0xFFF0E8D0);
+            g.centeredText(font, title, width / 2, HEADER_ROW, 0xFFF0E8D0);
         }
-        g.drawString(font, MagicUi.ellipsize(font, mag, Math.max(20, width / 2 - 20)), 14, HEADER_ROW, 0xFF7FB2FF, true);
-        g.drawString(font, souls, width - 14 - soulsW, HEADER_ROW, 0xFFE8C080, true);
+        g.text(font, MagicUi.ellipsize(font, mag, Math.max(20, width / 2 - 20)), 14, HEADER_ROW, 0xFF7FB2FF, true);
+        g.text(font, souls, width - 14 - soulsW, HEADER_ROW, 0xFFE8C080, true);
 
         // Tabs
         Tab[] tabs = Tab.values();
@@ -472,7 +475,7 @@ public class MagicMenuScreen extends Screen {
             if (sel) g.fill(tabX - 2, y - 2, tabX + tabW + 2, y - 2 + tabStep - 1, 0x30FFFFFF);
             if (sel || hover) g.fill(tabX - 2, y - 2, tabX, y - 2 + tabStep - 1, 0xFF000000 | t.color);
             String label = MagicUi.ellipsize(font, t.label().getString(), tabW - 6);
-            g.drawString(font, label, tabX + 4, y + (tabStep - 12) / 2, sel ? 0xFF000000 | t.color : hover ? 0xFFE8E2D0 : 0xFFA09A8A, true);
+            g.text(font, label, tabX + 4, y + (tabStep - 12) / 2, sel ? 0xFF000000 | t.color : hover ? 0xFFE8E2D0 : 0xFFA09A8A, true);
         }
 
         // List (clipped to its panel)
@@ -483,7 +486,7 @@ public class MagicMenuScreen extends Screen {
             Component empty = Component.translatable(tab == Tab.FAVORITES ? "magic.skycraft.no_favorites"
                     : tab == Tab.SHOUTS ? "magic.skycraft.no_shouts" : tab == Tab.POWERS ? "magic.skycraft.no_powers" : "magic.skycraft.no_spells");
             List<FormattedCharSequence> lines = font.split(empty, listW - 8);
-            for (int i = 0; i < lines.size(); i++) g.drawString(font, lines.get(i), listX + 4, top + 6 + i * 10, 0xFF807A6A, false);
+            for (int i = 0; i < lines.size(); i++) g.text(font, lines.get(i), listX + 4, top + 6 + i * 10, 0xFF807A6A, false);
         }
         List<String> favorites = MagicData.favorites(p);
         int starW = font.width("★");
@@ -502,20 +505,20 @@ public class MagicMenuScreen extends Screen {
             // The row is laid out from its right edge inwards with measured widths: star, cost (or word marks), hand
             // markers; the name gets whatever is left and is shortened to fit.
             int x = listX + listW - 3;
-            if (favorites.contains(e.id)) g.drawString(font, "★", x - starW, y + 2, 0xFFE8C860, false);
+            if (favorites.contains(e.id)) g.text(font, "★", x - starW, y + 2, 0xFFE8C860, false);
             x -= starW + 4;
             if (e.kind == Kind.SPELL) {
                 Spell s = Spells.byId(e.id);
                 if (s != null) {
                     String cost = costText(p, s);
                     int cw = font.width(cost);
-                    g.drawString(font, cost, x - cw, y + 2, 0xFF7FB2FF, false);
+                    g.text(font, cost, x - cw, y + 2, 0xFF7FB2FF, false);
                     x -= cw + 5;
                     // Hand markers: L / R
                     String hands = (e.id.equals(MagicData.leftSpell(p)) ? "L" : "") + (e.id.equals(MagicData.selectedSpell(p)) ? "R" : "");
                     if (!hands.isEmpty()) {
                         int hw = font.width(hands);
-                        g.drawString(font, hands, x - hw, y + 2, 0xFF000000 | e.color, false);
+                        g.text(font, hands, x - hw, y + 2, 0xFF000000 | e.color, false);
                         x -= hw + 5;
                     }
                 }
@@ -533,7 +536,7 @@ public class MagicMenuScreen extends Screen {
                 }
             }
             String name = MagicUi.ellipsize(font, e.name.getString(), Math.max(0, x - (listX + 8)));
-            g.drawString(font, name, listX + 8, y + 2, nameColor, false);
+            g.text(font, name, listX + 8, y + 2, nameColor, false);
         }
         g.disableScissor();
         if (entries.size() > rows) {
@@ -565,9 +568,9 @@ public class MagicMenuScreen extends Screen {
         List<FormattedCharSequence> hintLinesList = font.split(Component.translatable("magic.skycraft.menu_hint"), width - 16);
         int hy = height - 6 - 10 * Math.min(hintLines, hintLinesList.size());
         for (int i = 0; i < Math.min(hintLines, hintLinesList.size()); i++) {
-            g.drawCenteredString(font, hintLinesList.get(i), width / 2, hy + i * 10, 0xFF807A6A);
+            g.centeredText(font, hintLinesList.get(i), width / 2, hy + i * 10, 0xFF807A6A);
         }
-        super.render(g, mouseX, mouseY, partialTick);
+        super.extractRenderState(g, mouseX, mouseY, partialTick);
     }
 
     private static String costText(LocalPlayer p, Spell s) {
@@ -576,35 +579,35 @@ public class MagicMenuScreen extends Screen {
     }
 
     /** The detail panel's heading: 1.5x, shrunk (then shortened) to the panel width. */
-    private int heading(GuiGraphics g, Font font, Component name, int color) {
+    private int heading(GuiGraphicsExtractor g, Font font, Component name, int color) {
         String s = name.getString();
         float scale = 1.5f;
         int w = font.width(s);
         if (w * scale > detailW) scale = Math.max(1f, detailW / (float) Math.max(1, w));
         if (w * scale > detailW) s = MagicUi.ellipsize(font, s, detailW);
-        g.pose().pushPose();
-        g.pose().translate(detailX, top + 2 + (scale < 1.5f ? 3 : 0), 0);
-        g.pose().scale(scale, scale, 1f);
-        g.drawString(font, s, 0, 0, 0xFF000000 | color, true);
-        g.pose().popPose();
+        g.pose().pushMatrix();
+        g.pose().translate(detailX, top + 2 + (scale < 1.5f ? 3 : 0));
+        g.pose().scale(scale, scale);
+        g.text(font, s, 0, 0, 0xFF000000 | color, true);
+        g.pose().popMatrix();
         g.fill(detailX, top + 18, detailX + detailW, top + 19, 0x60C8BC9A);
         return top + 24;
     }
 
-    private int paragraph(GuiGraphics g, Font font, Component text, int y, int color) {
+    private int paragraph(GuiGraphicsExtractor g, Font font, Component text, int y, int color) {
         for (FormattedCharSequence line : font.split(text, detailW)) {
-            g.drawString(font, line, detailX, y, color, false);
+            g.text(font, line, detailX, y, color, false);
             y += 10;
         }
         return y;
     }
 
     /** One line, shortened with an ellipsis to the panel width (never wider than the detail panel). */
-    private void line(GuiGraphics g, Font font, String text, int x, int y, int maxW, int color) {
-        g.drawString(font, MagicUi.ellipsize(font, text, Math.max(0, maxW)), x, y, color, false);
+    private void line(GuiGraphicsExtractor g, Font font, String text, int x, int y, int maxW, int color) {
+        g.text(font, MagicUi.ellipsize(font, text, Math.max(0, maxW)), x, y, color, false);
     }
 
-    private void spellDetails(GuiGraphics g, Font font, LocalPlayer p, @Nullable Spell s) {
+    private void spellDetails(GuiGraphicsExtractor g, Font font, LocalPlayer p, @Nullable Spell s) {
         if (s == null) return;
         int y = heading(g, font, s.displayName(), 0xF0EAD6);
         y = paragraph(g, font, Component.translatable("tooltip.skycraft.spell_school", s.school.displayName(), s.tier.displayName()), y,
@@ -632,7 +635,7 @@ public class MagicMenuScreen extends Screen {
         if (s.isCustom()) paragraph(g, font, Component.translatable("magic.skycraft.made_spell_hint"), y + 6, 0xFF807A6A);
     }
 
-    private void shoutDetails(GuiGraphics g, Font font, LocalPlayer p, @Nullable Shout s) {
+    private void shoutDetails(GuiGraphicsExtractor g, Font font, LocalPlayer p, @Nullable Shout s) {
         if (s == null) return;
         int y = heading(g, font, s.displayName(), 0xDCEBFA);
         int learned = MagicData.wordsLearned(p, s);
@@ -645,17 +648,17 @@ public class MagicMenuScreen extends Screen {
             boolean known = i < learned;
             boolean open = i < Math.min(learned, unlocked);
             String word = known ? s.word(i) : "???";
-            g.pose().pushPose();
-            g.pose().translate(detailX, y, 0);
-            g.pose().scale(1.3f, 1.3f, 1f);
-            g.drawString(font, word, 0, 0, open ? 0xFFF2F6FF : known ? 0xFF8A9AAA : 0xFF505050, true);
-            g.pose().popPose();
+            g.pose().pushMatrix();
+            g.pose().translate(detailX, y);
+            g.pose().scale(1.3f, 1.3f);
+            g.text(font, word, 0, 0, open ? 0xFFF2F6FF : known ? 0xFF8A9AAA : 0xFF505050, true);
+            g.pose().popMatrix();
             String state = Component.translatable(open ? "magic.skycraft.word_unlocked" : known ? "magic.skycraft.word_locked" : "magic.skycraft.word_unknown").getString();
             int stateW = font.width(state);
             int trX = detailX + wordW + 8;
             int trW = detailW - wordW - 8 - stateW - 6;
             if (known && trW >= 24) line(g, font, s.translation(i).getString(), trX, y + 2, trW, open ? 0xFFD8D2C0 : 0xFF807A6A);
-            g.drawString(font, state, detailX + detailW - stateW, y + 2, open ? 0xFF90D090 : known ? 0xFFE8C080 : 0xFF606060, false);
+            g.text(font, state, detailX + detailW - stateW, y + 2, open ? 0xFF90D090 : known ? 0xFFE8C080 : 0xFF606060, false);
             y += 15;
         }
         y += 2;
@@ -673,7 +676,7 @@ public class MagicMenuScreen extends Screen {
         }
     }
 
-    private void powerDetails(GuiGraphics g, Font font, LocalPlayer p, PlayerData data, Entry entry) {
+    private void powerDetails(GuiGraphicsExtractor g, Font font, LocalPlayer p, PlayerData data, Entry entry) {
         if (entry.id.startsWith(com.skycraft.curse.CursePowers.PREFIX)) {
             String id = entry.id.substring(com.skycraft.curse.CursePowers.PREFIX.length());
             int y = heading(g, font, com.skycraft.curse.CursePowers.name(id), 0xC8303A);
@@ -695,7 +698,7 @@ public class MagicMenuScreen extends Screen {
             int y = heading(g, font, stone.powerName(), stone.color);
             y = paragraph(g, font, stone.stoneName(), y, 0xFF000000 | stone.color);
             long now = p.level().getGameTime();
-            long ready = data.module("lore").getLong("power_" + stone.id());
+            long ready = data.module("lore").getLongOr("power_" + stone.id(),0L);
             Component status = ready <= now ? Component.translatable("magic.skycraft.power_ready")
                     : Component.translatable("magic.skycraft.power_recharging", (ready - now) / 1000 + 1);
             y = paragraph(g, font, status, y, ready <= now ? 0xFF90D090 : 0xFFE8C080) + 4;

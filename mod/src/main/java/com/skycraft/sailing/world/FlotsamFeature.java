@@ -4,7 +4,7 @@ import com.mojang.serialization.Codec;
 import com.skycraft.Skycraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.WorldGenLevel;
@@ -15,16 +15,16 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
-import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
+import com.skycraft.worldgen.ConfiguredFeature;
+import com.skycraft.worldgen.FeaturePlaceContext;
+import com.skycraft.worldgen.NoneFeatureConfiguration;
 
 /**
  * Floating debris on the open sea: a raft of loose planks, a drifting spar and a barrel or crate or two with what was
  * left of some ship's stores ({@code skycraft:chests/flotsam}). Blocks rest on the water surface.
  */
-public class FlotsamFeature extends Feature<NoneFeatureConfiguration> {
-    private static final ResourceLocation LOOT = new ResourceLocation(Skycraft.MODID, "chests/flotsam");
+public class FlotsamFeature extends ConfiguredFeature<NoneFeatureConfiguration> {
+    private static final Identifier LOOT = Identifier.fromNamespaceAndPath(Skycraft.MODID, "chests/flotsam");
 
     public FlotsamFeature(Codec<NoneFeatureConfiguration> codec) {
         super(codec);
@@ -51,7 +51,7 @@ public class FlotsamFeature extends Feature<NoneFeatureConfiguration> {
                         net.minecraft.world.level.block.ChestBlock.FACING, Direction.Plane.HORIZONTAL.getRandomDirection(r))
                         : Blocks.BARREL.defaultBlockState());
                 BlockEntity be = level.getBlockEntity(p);
-                if (be instanceof RandomizableContainerBlockEntity c) c.setLootTable(LOOT, r.nextLong());
+                if (be instanceof RandomizableContainerBlockEntity c) c.setLootTable(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.LOOT_TABLE, LOOT), r.nextLong());
                 barrel = true;
             } else if (kind <= 2) {
                 BlockState slab = (r.nextBoolean() ? Blocks.SPRUCE_SLAB : Blocks.OAK_SLAB).defaultBlockState().setValue(SlabBlock.TYPE,

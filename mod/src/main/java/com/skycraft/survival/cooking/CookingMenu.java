@@ -13,7 +13,6 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.network.NetworkHooks;
 
 /**
  * Menu of the cooking pot. Like the smithing stations it has no slots of its own: hidden mirror slots keep the
@@ -36,7 +35,7 @@ public class CookingMenu extends AbstractContainerMenu {
     }
 
     public static void open(ServerPlayer player, BlockPos pos) {
-        NetworkHooks.openScreen(player,
+        player.openMenu(
                 new SimpleMenuProvider((id, inv, p) -> new CookingMenu(id, inv, pos, ContainerLevelAccess.create(player.level(), pos)),
                         Component.translatable("block.skycraft.cooking_pot")),
                 buf -> buf.writeBlockPos(pos));

@@ -27,7 +27,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
@@ -118,10 +118,10 @@ public class InsectEntity extends AmbientCreature {
     }
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        this.entityData.define(VARIANT, 0);
-        this.entityData.define(PERCHED, false);
+    protected void defineSynchedData(net.minecraft.network.syncher.SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(VARIANT, 0);
+        builder.define(PERCHED, false);
     }
 
     public int getVariant() {
@@ -145,26 +145,32 @@ public class InsectEntity extends AmbientCreature {
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag tag) {
-        super.addAdditionalSaveData(tag);
+    public void addAdditionalSaveData(net.minecraft.world.level.storage.ValueOutput output263) {
+        super.addAdditionalSaveData(output263);
+        net.minecraft.nbt.CompoundTag tag = new net.minecraft.nbt.CompoundTag();
+        
         tag.putInt("Variant", getVariant());
         if (home != null) tag.putLong("Home", home.asLong());
+    
+        output263.store(tag);
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag tag) {
-        super.readAdditionalSaveData(tag);
-        setVariant(tag.getInt("Variant"));
-        if (tag.contains("Home")) home = BlockPos.of(tag.getLong("Home"));
+    public void readAdditionalSaveData(net.minecraft.world.level.storage.ValueInput input263) {
+        super.readAdditionalSaveData(input263);
+        net.minecraft.nbt.CompoundTag tag = com.skycraft.platform.ValueTags.read(input263 , "Variant", "Home");
+        
+        setVariant(tag.getIntOr("Variant",0));
+        if (tag.contains("Home")) home = BlockPos.of(tag.getLongOr("Home",0L));
     }
 
     @Override
     @Nullable
-    public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, MobSpawnType reason,
-                                        @Nullable SpawnGroupData data, @Nullable CompoundTag tag) {
+    public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, EntitySpawnReason reason,
+                                        @Nullable SpawnGroupData data) {
         if (kind == Kind.BUTTERFLY) setVariant(this.random.nextInt(3) == 0 ? BLUE : MONARCH);
         if (home == null) home = blockPosition();
-        return super.finalizeSpawn(level, difficulty, reason, data, tag);
+        return super.finalizeSpawn(level, difficulty, reason, data);
     }
 
     /** The ingredient this insect yields when caught. */
@@ -186,13 +192,13 @@ public class InsectEntity extends AmbientCreature {
             this.discard();
             ItemStack loot = new ItemStack(ingredient());
             if (!com.skycraft.vitals.ActionHandler.addToBags(player, loot)) {
-                player.drop(loot, false);
+                player.drop(loot, false, net.minecraft.util.Prediction.SERVER_ONLY);
             }
             level.playSound(null, getX(), getY(), getZ(), SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 0.35f, 1.6f + this.random.nextFloat() * 0.3f);
             level.sendParticles(ParticleTypes.POOF, getX(), getY() + 0.15, getZ(), 3, 0.05, 0.05, 0.05, 0.01);
             if (player instanceof ServerPlayer sp) Progression.addSkillXp(sp, Skill.ALCHEMY, 0.5f);
         }
-        return InteractionResult.sidedSuccess(this.level().isClientSide);
+        return com.skycraft.platform.Interactions.sidedSuccess(this.level().isClientSide());
     }
 
     // ------------------------------------------------------------------ flight
@@ -201,9 +207,9 @@ public class InsectEntity extends AmbientCreature {
     public void tick() {
         super.tick();
         Level level = this.level();
-        if (level.isClientSide) {
+        if (level.isClientSide()) {
             if (kind == Kind.TORCHBUG && this.random.nextInt(8) == 0) {
-                level.addParticle(new DustParticleOptions(TORCHBUG_GLOW, 0.48f), getX(), getY() + 0.05, getZ(), 0, 0, 0);
+                level.addParticle(new DustParticleOptions(net.minecraft.util.ARGB.colorFromFloat(1f, TORCHBUG_GLOW.x(), TORCHBUG_GLOW.y(), TORCHBUG_GLOW.z()), 0.48f), getX(), getY() + 0.05, getZ(), 0, 0, 0);
             }
             return;
         }
@@ -214,14 +220,14 @@ public class InsectEntity extends AmbientCreature {
                 return;
             }
             // daytime insects leave at dusk, night insects at dawn (out of sight)
-            boolean day = level.isDay();
+            boolean day = level.isBrightOutside();
             if (day != kind.diurnal && this.random.nextInt(3) == 0 && this.distanceToSqr(near) > 144.0) this.discard();
         }
     }
 
     @Override
-    protected void customServerAiStep() {
-        super.customServerAiStep();
+    protected void customServerAiStep(net.minecraft.server.level.ServerLevel serverLevel263) {
+        super.customServerAiStep(serverLevel263);
         if (home == null) home = blockPosition();
         if (perchCooldown > 0) perchCooldown--;
 
@@ -276,7 +282,7 @@ public class InsectEntity extends AmbientCreature {
             }
         }
 
-        if (target != null && target != flowerTarget && (!this.level().isEmptyBlock(target) || target.getY() <= this.level().getMinBuildHeight())) {
+        if (target != null && target != flowerTarget && (!this.level().isEmptyBlock(target) || target.getY() <= this.level().getMinY())) {
             target = null;
         }
         if (hover > 0) {
@@ -406,7 +412,7 @@ public class InsectEntity extends AmbientCreature {
     }
 
     @Override
-    public boolean causeFallDamage(float distance, float multiplier, DamageSource source) {
+    public boolean causeFallDamage(double distance, float multiplier, DamageSource source) {
         return false;
     }
 
@@ -420,13 +426,14 @@ public class InsectEntity extends AmbientCreature {
     }
 
     @Override
-    public boolean canBeLeashed(Player player) {
+    public boolean canBeLeashed() {
         return false;
     }
 
     @Override
-    protected float getStandingEyeHeight(Pose pose, EntityDimensions dimensions) {
-        return dimensions.height * 0.5f;
+    protected EntityDimensions getDefaultDimensions(Pose pose) {
+        EntityDimensions dimensions = super.getDefaultDimensions(pose);
+        return dimensions.withEyeHeight(dimensions.height() * 0.5f);
     }
 
     @Override

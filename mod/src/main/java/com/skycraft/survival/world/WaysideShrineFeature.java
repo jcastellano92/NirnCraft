@@ -11,15 +11,15 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CandleBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
-import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
+import com.skycraft.worldgen.ConfiguredFeature;
+import com.skycraft.worldgen.FeaturePlaceContext;
+import com.skycraft.worldgen.NoneFeatureConfiguration;
 
 /**
  * A small wayside shrine: a 3x3 weathered stone platform with a shrine of a random Divine, candles and potted flowers.
  * Rare on the Overworld surface (see {@code skycraft:wayside_shrine} placed feature).
  */
-public class WaysideShrineFeature extends Feature<NoneFeatureConfiguration> {
+public class WaysideShrineFeature extends ConfiguredFeature<NoneFeatureConfiguration> {
     public WaysideShrineFeature(Codec<NoneFeatureConfiguration> codec) {
         super(codec);
     }

@@ -41,17 +41,26 @@ public class AyleidWellBlock extends Block {
         return SHAPE;
     }
 
-    @Override
     @SuppressWarnings("deprecation")
+        @Override
+    protected InteractionResult useItemOn(net.minecraft.world.item.ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+        return use(state, level, pos, player, hand, hit);
+    }
+
+    @Override
+    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+        return use(state, level, pos, player, InteractionHand.MAIN_HAND, hit);
+    }
+
     public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
-        if (level.isClientSide) return InteractionResult.SUCCESS;
+        if (level.isClientSide()) return InteractionResult.SUCCESS;
         if (!(player instanceof ServerPlayer sp)) return InteractionResult.PASS;
         PlayerData data = SkyData.get(sp);
         CompoundTag mod = data.module("explore");
-        CompoundTag wells = mod.getCompound("wells");
+        CompoundTag wells = mod.getCompoundOrEmpty("wells");
         String key = pos.getX() + "," + pos.getY() + "," + pos.getZ();
-        long now = level.getDayTime();
-        long last = wells.contains(key) ? wells.getLong(key) : Long.MIN_VALUE / 2;
+        long now = level.getDefaultClockTime();
+        long last = wells.contains(key) ? wells.getLongOr(key, 0L) : Long.MIN_VALUE / 2;
         if (now - last < DAY) {
             Notifier.message(sp, Component.translatable("explore.skycraft.ayleid_well.spent"));
             return InteractionResult.CONSUME;

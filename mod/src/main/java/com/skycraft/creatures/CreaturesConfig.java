@@ -1,43 +1,43 @@
 package com.skycraft.creatures;
 
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 /** Creatures configuration: config/skycraft-creatures.toml (common, server-authoritative). */
 public final class CreaturesConfig {
-    public static final ForgeConfigSpec SPEC;
+    public static final ModConfigSpec SPEC;
 
-    public static final ForgeConfigSpec.DoubleValue DRAGON_ATTACK_CHANCE;
-    public static final ForgeConfigSpec.IntValue DRAGON_ATTACK_INTERVAL;
-    public static final ForgeConfigSpec.IntValue DRAGON_MIN_LEVEL;
-    public static final ForgeConfigSpec.BooleanValue CORPSES;
-    public static final ForgeConfigSpec.IntValue CORPSE_DESPAWN_SECONDS;
-    public static final ForgeConfigSpec.IntValue EMPTY_CORPSE_DESPAWN_SECONDS;
-    public static final ForgeConfigSpec.BooleanValue LEVELED_ENEMIES;
-    public static final ForgeConfigSpec.BooleanValue GUARD_SPAWNING;
-    public static final ForgeConfigSpec.DoubleValue DRAUGR_REPLACES_ZOMBIES;
-    public static final ForgeConfigSpec.BooleanValue DISABLE_INSOMNIA;
-    public static final ForgeConfigSpec.BooleanValue REGION_SPAWNING;
-    public static final ForgeConfigSpec.IntValue HOSTILE_BUDGET;
-    public static final ForgeConfigSpec.IntValue WILDLIFE_BUDGET;
-    public static final ForgeConfigSpec.IntValue CALM_RADIUS;
-    public static final ForgeConfigSpec.IntValue START_AREA_RADIUS;
-    public static final ForgeConfigSpec.IntValue HOSTILE_COOLDOWN_SECONDS;
-    public static final ForgeConfigSpec.IntValue GRACE_SECONDS;
-    public static final ForgeConfigSpec.IntValue MAX_HOSTILE_GROUPS;
-    public static final ForgeConfigSpec.IntValue MIN_HOSTILE_DISTANCE;
-    public static final ForgeConfigSpec.DoubleValue ROAD_HOSTILE_FACTOR;
-    public static final ForgeConfigSpec.DoubleValue ROAD_PLAYER_FACTOR;
-    public static final ForgeConfigSpec.DoubleValue DAY_HOSTILE_FACTOR;
-    public static final ForgeConfigSpec.IntValue GUARD_ALERT_RADIUS;
-    public static final ForgeConfigSpec.BooleanValue GUARD_HELP_PLAYER;
-    public static final ForgeConfigSpec.BooleanValue TOWN_ALARM;
-    public static final ForgeConfigSpec.IntValue ALARM_CLEAR_SECONDS;
-    public static final ForgeConfigSpec.BooleanValue CIVILIANS_FLEE;
-    public static final ForgeConfigSpec.BooleanValue FACTION_WARS;
-    public static final ForgeConfigSpec.IntValue WAR_RADIUS;
+    public static final ModConfigSpec.DoubleValue DRAGON_ATTACK_CHANCE;
+    public static final ModConfigSpec.IntValue DRAGON_ATTACK_INTERVAL;
+    public static final ModConfigSpec.IntValue DRAGON_MIN_LEVEL;
+    public static final ModConfigSpec.BooleanValue CORPSES;
+    public static final ModConfigSpec.IntValue CORPSE_DESPAWN_SECONDS;
+    public static final ModConfigSpec.IntValue EMPTY_CORPSE_DESPAWN_SECONDS;
+    public static final ModConfigSpec.BooleanValue LEVELED_ENEMIES;
+    public static final ModConfigSpec.BooleanValue GUARD_SPAWNING;
+    public static final ModConfigSpec.DoubleValue DRAUGR_REPLACES_ZOMBIES;
+    public static final ModConfigSpec.BooleanValue DISABLE_INSOMNIA;
+    public static final ModConfigSpec.BooleanValue REGION_SPAWNING;
+    public static final ModConfigSpec.IntValue HOSTILE_BUDGET;
+    public static final ModConfigSpec.IntValue WILDLIFE_BUDGET;
+    public static final ModConfigSpec.IntValue CALM_RADIUS;
+    public static final ModConfigSpec.IntValue START_AREA_RADIUS;
+    public static final ModConfigSpec.IntValue HOSTILE_COOLDOWN_SECONDS;
+    public static final ModConfigSpec.IntValue GRACE_SECONDS;
+    public static final ModConfigSpec.IntValue MAX_HOSTILE_GROUPS;
+    public static final ModConfigSpec.IntValue MIN_HOSTILE_DISTANCE;
+    public static final ModConfigSpec.DoubleValue ROAD_HOSTILE_FACTOR;
+    public static final ModConfigSpec.DoubleValue ROAD_PLAYER_FACTOR;
+    public static final ModConfigSpec.DoubleValue DAY_HOSTILE_FACTOR;
+    public static final ModConfigSpec.IntValue GUARD_ALERT_RADIUS;
+    public static final ModConfigSpec.BooleanValue GUARD_HELP_PLAYER;
+    public static final ModConfigSpec.BooleanValue TOWN_ALARM;
+    public static final ModConfigSpec.IntValue ALARM_CLEAR_SECONDS;
+    public static final ModConfigSpec.BooleanValue CIVILIANS_FLEE;
+    public static final ModConfigSpec.BooleanValue FACTION_WARS;
+    public static final ModConfigSpec.IntValue WAR_RADIUS;
 
     static {
-        ForgeConfigSpec.Builder b = new ForgeConfigSpec.Builder();
+        ModConfigSpec.Builder b = new ModConfigSpec.Builder();
         b.push("dragons");
         DRAGON_ATTACK_CHANCE = b.comment("Chance for a dragon attack on each check (per online player, overworld, daytime/dusk, on the surface).")
                 .defineInRange("attackChance", 0.08, 0.0, 1.0);

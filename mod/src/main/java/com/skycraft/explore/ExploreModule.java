@@ -1,8 +1,8 @@
 package com.skycraft.explore;
 
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.config.ModConfig;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.ModLoadingContext;
+import net.neoforged.fml.config.ModConfig;
 
 /**
  * Exploration: Skyrim's "something worth finding every few minutes". Minor sites between the named places (camps,
@@ -14,7 +14,7 @@ public final class ExploreModule {
     private ExploreModule() {}
 
     public static void init(IEventBus modBus) {
-        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, ExploreConfig.SPEC, "skycraft-explore.toml");
+        com.skycraft.Skycraft.config(ModConfig.Type.LOCAL, ExploreConfig.SPEC, "skycraft-explore.toml");
         ExploreRegistry.init(modBus);
         ExploreLoot.init(modBus);
         SkillBookModifier.init(modBus);

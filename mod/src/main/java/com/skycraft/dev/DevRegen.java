@@ -49,10 +49,10 @@ import java.util.concurrent.CompletableFuture;
  * pin the area); the dev server drops the spawn-chunk ticket for that reason.</p>
  */
 final class DevRegen {
-    static final TicketType<ChunkPos> TICKET = TicketType.create("skycraft_dev_regen", Comparator.comparingLong(ChunkPos::toLong));
+    private static final java.util.function.Supplier<TicketType> TICKET = com.skycraft.perf.PerfTickets.REGEN;
     private static final long UNLOAD_MS = 180_000, LOAD_MS = 900_000, PAVE_MS = 300_000;
 
-    enum Phase { PROBE, LOAD_OLD, UNLOAD, REGEN, PAVE, DONE }
+    enum Phase { PROBE, LOAD_OLD, UNLOAD, DELETE, REGEN, PAVE, DONE }
 
     /** The running regen, or null. */
     static DevRegen active;
@@ -69,6 +69,7 @@ final class DevRegen {
     final LongArrayList all = new LongArrayList(), existing = new LongArrayList(), full = new LongArrayList();
     final LongArrayList forced = new LongArrayList();
     boolean ticketed;
+    CompletableFuture<Void> deletion;
     int entities, pois;
     long genMs, paveMs;
     String result;
@@ -96,7 +97,7 @@ final class DevRegen {
     static LongArrayList rect(int x1, int z1, int x2, int z2) {
         LongArrayList l = new LongArrayList();
         for (int cx = Math.min(x1, x2) >> 4; cx <= Math.max(x1, x2) >> 4; cx++) {
-            for (int cz = Math.min(z1, z2) >> 4; cz <= Math.max(z1, z2) >> 4; cz++) l.add(ChunkPos.asLong(cx, cz));
+            for (int cz = Math.min(z1, z2) >> 4; cz <= Math.max(z1, z2) >> 4; cz++) l.add(ChunkPos.pack(cx, cz));
         }
         return l;
     }
@@ -112,7 +113,7 @@ final class DevRegen {
                 int dash = run.indexOf('-', 1);
                 int a = Integer.parseInt(dash < 0 ? run : run.substring(0, dash));
                 int b = dash < 0 ? a : Integer.parseInt(run.substring(dash + 1));
-                for (int cx = a; cx <= b; cx++) l.add(ChunkPos.asLong(cx, cz));
+                for (int cx = a; cx <= b; cx++) l.add(ChunkPos.pack(cx, cz));
             }
         }
         return l;
@@ -139,25 +140,25 @@ final class DevRegen {
     }
 
     String describe() {
-        return String.format("%s chunks %d,%d..%d,%d (%d chunks, blocks %d %d %d %d) phase %s", level.dimension().location(),
+        return String.format("%s chunks %d,%d..%d,%d (%d chunks, blocks %d %d %d %d) phase %s", level.dimension().identifier(),
                 cx1, cz1, cx2, cz2, all.size(), cx1 * 16, cz1 * 16, cx2 * 16 + 15, cz2 * 16 + 15, phase);
     }
 
     /** All 8 neighbours are regenerated too, so the paver can pave the chunk. */
     private boolean interior(long c) {
         int x = ChunkPos.getX(c), z = ChunkPos.getZ(c);
-        for (int dx = -1; dx <= 1; dx++) for (int dz = -1; dz <= 1; dz++) if (!set.contains(ChunkPos.asLong(x + dx, z + dz))) return false;
+        for (int dx = -1; dx <= 1; dx++) for (int dz = -1; dz <= 1; dz++) if (!set.contains(ChunkPos.pack(x + dx, z + dz))) return false;
         return true;
     }
 
     private void ticket(LongArrayList chunks) {
-        for (long c : chunks) level.getChunkSource().addRegionTicket(TICKET, new ChunkPos(c), 0, new ChunkPos(c));
+        for (long c : chunks) level.getChunkSource().addTicketWithRadius(TICKET.get(),  ChunkPos.unpack(c),  0);
         ticketed = true;
     }
 
     void untick() {
         if (!ticketed) return;
-        for (long c : all) level.getChunkSource().removeRegionTicket(TICKET, new ChunkPos(c), 0, new ChunkPos(c));
+        for (long c : all) level.getChunkSource().removeTicketWithRadius(TICKET.get(),  ChunkPos.unpack(c),  0);
         ticketed = false;
     }
 
@@ -213,11 +214,10 @@ final class DevRegen {
                     int released=com.skycraft.quest.story.StartCottage.releaseCompletedPreparation(level);
                     if(released>0) Skycraft.LOGGER.info("[dev] Released {} completed cottage preload tickets before regeneration",released);
                     // /setworldspawn re-adds the spawn-chunk ticket (radius 11) around the new spawn: drop it again
-                    level.getChunkSource().removeRegionTicket(TicketType.START, new ChunkPos(level.getSharedSpawnPos()), 11,
-                            net.minecraft.util.Unit.INSTANCE);
-                    for (long c : level.getForcedChunks()) if (inside(c)) forced.add(c);
+                    level.getChunkSource().removeTicketWithRadius(TicketType.PLAYER_SPAWN,  ChunkPos.containing(level.getRespawnData().pos()), 3);
+                    for (long c : level.getForceLoadedChunks()) if (inside(c)) forced.add(c);
                     for (long c : forced) level.setChunkForced(ChunkPos.getX(c), ChunkPos.getZ(c), false);
-                    for (long c : all) reads.add(map.read(new ChunkPos(c)));
+                    for (long c : all) reads.add(map.read(ChunkPos.unpack(c)));
                     return;
                 }
                 for (CompletableFuture<Optional<CompoundTag>> f : reads) if (!f.isDone()) return;
@@ -225,7 +225,7 @@ final class DevRegen {
                     Optional<CompoundTag> tag = reads.get(i).join();
                     if (tag.isEmpty()) continue;
                     existing.add(all.getLong(i));
-                    if (tag.get().getString("Status").endsWith("full")) full.add(all.getLong(i));
+                    if (tag.get().getStringOr("Status","").endsWith("full")) full.add(all.getLong(i));
                 }
                 if (existing.isEmpty()) {
                     ticket(all);
@@ -245,7 +245,7 @@ final class DevRegen {
                 for (long c : full) {
                     if (level.getChunkSource().getChunkNow(ChunkPos.getX(c), ChunkPos.getZ(c)) == null || !level.areEntitiesLoaded(c)) return;
                 }
-                AABB box = new AABB(cx1 * 16, level.getMinBuildHeight(), cz1 * 16, cx2 * 16 + 16, level.getMaxBuildHeight(), cz2 * 16 + 16);
+                AABB box = new AABB(cx1 * 16, level.getMinY(), cz1 * 16, cx2 * 16 + 16, (level.getMaxY()+1), cz2 * 16 + 16);
                 for (Entity e : level.getEntities((Entity) null, box, e -> !(e instanceof Player))) {
                     if (e.getVehicle() instanceof Player || e.isRemoved()) continue;
                     e.discard();
@@ -253,7 +253,7 @@ final class DevRegen {
                 }
                 PoiManager poi = level.getPoiManager();
                 for (long c : full) {
-                    for (var pos : poi.getInChunk(t -> true, new ChunkPos(c), PoiManager.Occupancy.ANY).map(PoiRecord::getPos).toList()) {
+                    for (var pos : poi.getInChunk(t -> true, ChunkPos.unpack(c), PoiManager.Occupancy.ANY).map(PoiRecord::getPos).toList()) {
                         poi.remove(pos);
                         pois++;
                     }
@@ -268,16 +268,26 @@ final class DevRegen {
                 for (long c : all) if (Holders.held(map, c)) pinned.add(c);
                 if (!pinned.isEmpty()) {
                     if (spent > UNLOAD_MS) {
-                        fail(pinned.size() + " chunks stay loaded (e.g. " + new ChunkPos(pinned.getLong(0))
+                        fail(pinned.size() + " chunks stay loaded (e.g. " + ChunkPos.unpack(pinned.getLong(0))
                                 + "): another loaded area, a player or a ticket within ~11 chunks pins them");
                     }
                     return;
                 }
-                for (long c : existing) map.write(new ChunkPos(c), null);
-                map.flushWorker();
+                List<CompletableFuture<Void>> writes = new ArrayList<>();
+                for (long c : existing) writes.add(map.write(ChunkPos.unpack(c), (CompoundTag) null));
+                deletion = CompletableFuture.allOf(writes.toArray(CompletableFuture[]::new))
+                        .thenCompose(ignored -> map.synchronize(true));
+                next(Phase.DELETE);
+            }
+            case DELETE -> {
+                if (!deletion.isDone()) {
+                    if (spent > UNLOAD_MS) fail("region deletion/flush did not finish");
+                    return;
+                }
+                deletion.join(); // already completed; propagates every delete/flush failure before fresh generation
                 for (long c : all) {
                     if (Holders.held(map, c)) {
-                        fail("chunk " + new ChunkPos(c) + " was loaded again while deleting");
+                        fail("chunk " + ChunkPos.unpack(c) + " was loaded again while deleting");
                         return;
                     }
                 }

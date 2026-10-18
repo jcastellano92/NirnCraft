@@ -1,0 +1,119 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": {
+        "type": "minecraft:uniform",
+        "min": 1,
+        "max": 3
+      },
+      "entries": [
+        {
+          "type": "minecraft:loot_table",
+          "weight": 6,
+          "value": "skycraft:chests/spell_tomes"
+        },
+        {
+          "type": "minecraft:loot_table",
+          "weight": 6,
+          "value": "skycraft:chests/skill_books"
+        },
+        {
+          "type": "minecraft:loot_table",
+          "weight": 3,
+          "value": "skycraft:chests/gold"
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:ink_sac",
+          "weight": 3,
+          "modifier": {
+            "count": {
+              "type": "minecraft:uniform",
+              "min": 2,
+              "max": 6
+            },
+            "type": "minecraft:set_count"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:experience_bottle",
+          "weight": 4,
+          "modifier": {
+            "count": {
+              "type": "minecraft:uniform",
+              "min": 2,
+              "max": 5
+            },
+            "type": "minecraft:set_count"
+          }
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:book",
+          "weight": 1,
+          "modifier": {
+            "tag": "{book:\"apocrypha_marginalia\",skycraft_value:35}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:black_book",
+          "weight": 1,
+          "modifier": {
+            "tag": "{chapter:1,skycraft_value:500}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:black_book",
+          "weight": 1,
+          "modifier": {
+            "tag": "{chapter:2,skycraft_value:500}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:black_book",
+          "weight": 1,
+          "modifier": {
+            "tag": "{chapter:3,skycraft_value:500}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:black_book",
+          "weight": 1,
+          "modifier": {
+            "tag": "{chapter:4,skycraft_value:500}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:black_book",
+          "weight": 1,
+          "modifier": {
+            "tag": "{chapter:5,skycraft_value:500}",
+            "type": "minecraft:set_custom_data"
+          }
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 50
+        }
+      ]
+    }
+  ],
+  "random_sequence": "skycraft:chests/realms/apocrypha_chapter"
+}

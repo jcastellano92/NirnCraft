@@ -1,13 +1,13 @@
 {
   "type": "minecraft:mul",
-  "argument1": 0.0078125,
-  "argument2": {
+  "left": 0.0078125,
+  "right": {
     "type": "minecraft:add",
-    "argument1": "skycraft:tamriel/height",
-    "argument2": {
+    "left": "skycraft:tamriel/height",
+    "right": {
       "type": "minecraft:mul",
-      "argument1": -1.0,
-      "argument2": "minecraft:y"
+      "left": -1.0,
+      "right": "minecraft:y"
     }
   }
 }

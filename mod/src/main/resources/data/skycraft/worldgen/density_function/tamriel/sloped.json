@@ -1,13 +1,13 @@
 {
   "type": "minecraft:add",
-  "argument1": "skycraft:tamriel/below_surface",
-  "argument2": {
+  "left": "skycraft:tamriel/below_surface",
+  "right": {
     "type": "minecraft:mul",
-    "argument1": "skycraft:tamriel/overhang",
-    "argument2": {
+    "left": "skycraft:tamriel/overhang",
+    "right": {
       "type": "minecraft:mul",
-      "argument1": 0.55,
-      "argument2": {
+      "left": 0.55,
+      "right": {
         "type": "minecraft:noise",
         "noise": "skycraft:tamriel_overhang",
         "xz_scale": 1.0,

@@ -7,6 +7,8 @@
     "skycraft:pine_forest",
     "skycraft:snowy_pine_forest",
     "skycraft:solstheim_pine_forest",
-    "skycraft:wrothgarian_mountains"
+    "skycraft:wrothgarian_mountains",
+    "#c:is_taiga",
+    "minecraft:grove"
   ]
 }

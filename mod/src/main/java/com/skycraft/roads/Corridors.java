@@ -37,7 +37,7 @@ final class Corridors {
     /** True if (x, z) lies on a traced corridor. Thread-safe (immutable after loading). */
     static boolean on(int x, int z) {
         LongOpenHashSet cells = Holder.CELLS;
-        return !cells.isEmpty() && cells.contains(ChunkPos.asLong(Math.floorDiv(x, CELL), Math.floorDiv(z, CELL)));
+        return !cells.isEmpty() && cells.contains(ChunkPos.pack(Math.floorDiv(x, CELL), Math.floorDiv(z, CELL)));
     }
 
     static int size() {
@@ -98,7 +98,7 @@ final class Corridors {
         for (int s = 0; s <= steps; s++) {
             double t = s / (double) steps;
             int cx = (int) Math.floor((x0 + (x1 - x0) * t) / CELL), cz = (int) Math.floor((z0 + (z1 - z0) * t) / CELL);
-            for (int dx = -r; dx <= r; dx++) for (int dz = -r; dz <= r; dz++) cells.add(ChunkPos.asLong(cx + dx, cz + dz));
+            for (int dx = -r; dx <= r; dx++) for (int dz = -r; dz <= r; dz++) cells.add(ChunkPos.pack(cx + dx, cz + dz));
         }
     }
 }

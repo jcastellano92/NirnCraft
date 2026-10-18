@@ -16,7 +16,7 @@ public class ArtifactAxeItem extends SkyAxeItem implements ArtifactItem {
     private final String id;
 
     public ArtifactAxeItem(String id, SmithingTier tier, WeaponType type, Properties props) {
-        super(tier, type, props);
+        super(tier, type, props, ArtifactItem.DURABILITY);
         this.id = id;
     }
 
@@ -31,17 +31,14 @@ public class ArtifactAxeItem extends SkyAxeItem implements ArtifactItem {
     }
 
     @Override
-    public boolean isEnchantable(ItemStack stack) {
-        return false;
-    }
+    public boolean isPrimaryItemFor(ItemStack stack, net.minecraft.core.Holder<net.minecraft.world.item.enchantment.Enchantment> enchantment) { return false; }
 
     @Override
-    public boolean isBookEnchantable(ItemStack stack, ItemStack book) {
-        return false;
-    }
+    public boolean supportsEnchantment(ItemStack stack, net.minecraft.core.Holder<net.minecraft.world.item.enchantment.Enchantment> enchantment) { return false; }
+
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
+    public void appendHoverText(ItemStack stack, net.minecraft.world.item.Item.TooltipContext context263, net.minecraft.world.item.component.TooltipDisplay display263, java.util.function.Consumer<Component> tooltip, TooltipFlag flag) {
         ArtifactItem.tooltip(id, tooltip);
     }
 }

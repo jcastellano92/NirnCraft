@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "GBG",
+    "PCP",
+    "PPP"
+  ],
+  "key": {
+    "G": "minecraft:glass_bottle",
+    "B": "minecraft:brewing_stand",
+    "C": "minecraft:cauldron",
+    "P": "#minecraft:planks"
+  },
+  "result": {
+    "id": "skycraft:alchemy_lab"
+  }
+}

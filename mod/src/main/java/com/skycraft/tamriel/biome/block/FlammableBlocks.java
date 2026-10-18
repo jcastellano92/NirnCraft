@@ -52,7 +52,7 @@ public final class FlammableBlocks {
     /** Leaves (vanilla 30 / 60). */
     public static class Leaves extends LeavesBlock {
         public Leaves(Properties properties) {
-            super(properties);
+            super(net.minecraft.world.level.block.sounds.AmbientLeavesBlockSoundPlayer.noAmbientSound(), properties);
         }
 
         @Override

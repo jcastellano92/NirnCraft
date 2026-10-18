@@ -48,9 +48,9 @@ public final class LootLevels {
         Region region = EconomyLoot.regionOf(context);
         int gear = pl;
         if (region != null && region.maxLevel() > 0) gear = Math.min(gear, region.maxLevel() + REGION_SLACK);
-        Entity self = context.getParamOrNull(LootContextParams.THIS_ENTITY);
+        Entity self = context.getOptional(LootContextParams.THIS_ENTITY);
         if (self instanceof Mob mob) {
-            int mobLevel = mob.getPersistentData().getInt("skycraft_level");
+            int mobLevel = mob.getPersistentData().getIntOr("skycraft_level",0);
             if (mobLevel > 0) gear = Math.min(gear, mobLevel);
         }
         float danger = 1f;
@@ -69,12 +69,12 @@ public final class LootLevels {
      */
     @Nullable
     public static Player player(LootContext context) {
-        Entity self = context.getParamOrNull(LootContextParams.THIS_ENTITY);
+        Entity self = context.getOptional(LootContextParams.THIS_ENTITY);
         if (self instanceof Player p) return p;
-        if (context.getParamOrNull(LootContextParams.KILLER_ENTITY) instanceof Player p) return p;
-        Player last = context.getParamOrNull(LootContextParams.LAST_DAMAGE_PLAYER);
+        if (context.getOptional(LootContextParams.ATTACKING_ENTITY) instanceof Player p) return p;
+        Player last = context.getOptional(LootContextParams.LAST_DAMAGE_PLAYER);
         if (last != null) return last;
-        Vec3 origin = context.getParamOrNull(LootContextParams.ORIGIN);
+        Vec3 origin = context.getOptional(LootContextParams.ORIGIN);
         if (origin == null && self != null) origin = self.position();
         return origin == null ? null : context.getLevel().getNearestPlayer(origin.x, origin.y, origin.z, 64, false);
     }

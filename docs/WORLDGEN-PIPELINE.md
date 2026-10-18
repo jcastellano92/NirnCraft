@@ -532,7 +532,12 @@ dense forest can still be refused at realisation (the plan cannot see seeded tre
 with `PlacementMask` would need a site-pad slot there); the slope probes of a prop read up to 2 blocks into a
 neighbour chunk (its ground height, which is generated before any feature runs).
 
-## 10. P7 result: endless lands per 4 km tile (S1–S6 beyond the authored map)
+## 10. Dormant P7 prototype: endless lands per 4 km tile (S1–S6 beyond the authored map)
+
+**Superseded by the owner on 2026-10-18:** runtime geography beyond the fixed lands is now ocean,
+with far-edge opposite-side travel. Runtime tile fallback is disabled, including saved cached plans.
+The following describes retained tools/prototype architecture; it is not active terrain or a performance
+guarantee. Old first-consumer/settlement-realization gaps remain dormant rather than production work.
 
 Code: package `com.skycraft.worldplan.tile` (`TilePlan`, `TilePlanner`, `TileSheetGenerator`, `TilePlanData`,
 `TilePlanCommands`); composite fallback hooks in `RoadPlan.at` / `RoadPlan.bedHeight`, `StreetPlan.at` / `StreetPlan.pad`,

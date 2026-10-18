@@ -23,11 +23,11 @@ public final class BuiltBuilder {
             case DWEMER -> {
                 if (rel <= 0 || rel == 4) yield roll < 3 ? Blocks.CRACKED_POLISHED_BLACKSTONE_BRICKS.defaultBlockState()
                         : Blocks.POLISHED_BLACKSTONE_BRICKS.defaultBlockState();
-                if (Math.floorMod(x + z, 6) == 0) yield Blocks.WAXED_COPPER_BLOCK.defaultBlockState();
-                if (roll < 7) yield Blocks.WAXED_CUT_COPPER.defaultBlockState();
-                if (roll < 13) yield Blocks.WAXED_EXPOSED_CUT_COPPER.defaultBlockState();
-                if (roll < 18) yield Blocks.WAXED_WEATHERED_CUT_COPPER.defaultBlockState();
-                yield Blocks.WAXED_OXIDIZED_CUT_COPPER.defaultBlockState();
+                if (Math.floorMod(x + z, 6) == 0) yield com.skycraft.worldgen.VanillaBlocks.WAXED_COPPER_BLOCK.defaultBlockState();
+                if (roll < 7) yield com.skycraft.worldgen.VanillaBlocks.WAXED_CUT_COPPER.defaultBlockState();
+                if (roll < 13) yield com.skycraft.worldgen.VanillaBlocks.WAXED_EXPOSED_CUT_COPPER.defaultBlockState();
+                if (roll < 18) yield com.skycraft.worldgen.VanillaBlocks.WAXED_WEATHERED_CUT_COPPER.defaultBlockState();
+                yield com.skycraft.worldgen.VanillaBlocks.WAXED_OXIDIZED_CUT_COPPER.defaultBlockState();
             }
             case FORT -> {
                 if (roll < 8) yield Blocks.STONE_BRICKS.defaultBlockState();
@@ -53,8 +53,8 @@ public final class BuiltBuilder {
         int roll = p.roll(x, y, z, 2, 20);
         return switch (t) {
             case DWEMER -> {
-                if (Math.floorMod(x, 4) == 0 && Math.floorMod(z, 4) == 0) yield Blocks.WAXED_CUT_COPPER.defaultBlockState();
-                if (Math.floorMod(x + z, 4) == 2 && roll < 6) yield Blocks.WAXED_EXPOSED_CUT_COPPER.defaultBlockState();
+                if (Math.floorMod(x, 4) == 0 && Math.floorMod(z, 4) == 0) yield com.skycraft.worldgen.VanillaBlocks.WAXED_CUT_COPPER.defaultBlockState();
+                if (Math.floorMod(x + z, 4) == 2 && roll < 6) yield com.skycraft.worldgen.VanillaBlocks.WAXED_EXPOSED_CUT_COPPER.defaultBlockState();
                 yield roll < 3 ? Blocks.CRACKED_POLISHED_BLACKSTONE_BRICKS.defaultBlockState() : Blocks.POLISHED_BLACKSTONE.defaultBlockState();
             }
             case FORT -> roll < 10 ? Blocks.COBBLESTONE.defaultBlockState() : roll < 15 ? Blocks.STONE_BRICKS.defaultBlockState()
@@ -69,7 +69,7 @@ public final class BuiltBuilder {
         int roll = p.roll(x, y, z, 3, 20);
         return switch (t) {
             case DWEMER -> Math.floorMod(x, 3) == 0 || Math.floorMod(z, 3) == 0 ? Blocks.POLISHED_BLACKSTONE_BRICKS.defaultBlockState()
-                    : roll < 10 ? Blocks.WAXED_OXIDIZED_CUT_COPPER.defaultBlockState() : Blocks.WAXED_WEATHERED_CUT_COPPER.defaultBlockState();
+                    : roll < 10 ? com.skycraft.worldgen.VanillaBlocks.WAXED_OXIDIZED_CUT_COPPER.defaultBlockState() : com.skycraft.worldgen.VanillaBlocks.WAXED_WEATHERED_CUT_COPPER.defaultBlockState();
             case FORT -> Math.floorMod(x, 4) == 0 ? Blocks.DARK_OAK_PLANKS.defaultBlockState()
                     : roll < 12 ? Blocks.STONE_BRICKS.defaultBlockState() : Blocks.COBBLESTONE.defaultBlockState();
             default -> roll < 10 ? Blocks.STONE_BRICKS.defaultBlockState() : roll < 15 ? Blocks.MOSSY_STONE_BRICKS.defaultBlockState()
@@ -112,7 +112,7 @@ public final class BuiltBuilder {
 
     public static BlockState pillar(Theme t, int rel, int top) {
         return switch (t) {
-            case DWEMER -> rel == 0 || rel == top ? Blocks.CHISELED_POLISHED_BLACKSTONE.defaultBlockState() : Blocks.WAXED_CUT_COPPER.defaultBlockState();
+            case DWEMER -> rel == 0 || rel == top ? Blocks.CHISELED_POLISHED_BLACKSTONE.defaultBlockState() : com.skycraft.worldgen.VanillaBlocks.WAXED_CUT_COPPER.defaultBlockState();
             case FORT -> Deco.pillar(Blocks.STRIPPED_DARK_OAK_LOG, Direction.Axis.Y);
             default -> rel == 0 || rel == top ? Blocks.CHISELED_STONE_BRICKS.defaultBlockState() : Blocks.STONE_BRICKS.defaultBlockState();
         };
@@ -235,7 +235,7 @@ public final class BuiltBuilder {
                 int x = wx + right.getStepX() * lat, z = wz + right.getStepZ() * lat;
                 if (lat == 0 && dy < 2) continue;
                 p.set(x, room.floor + dy, z, lat == 0 ? Blocks.CHISELED_STONE_BRICKS.defaultBlockState()
-                        : t == Theme.DWEMER ? Blocks.WAXED_COPPER_BLOCK.defaultBlockState() : Blocks.CHISELED_STONE_BRICKS.defaultBlockState());
+                        : t == Theme.DWEMER ? com.skycraft.worldgen.VanillaBlocks.WAXED_COPPER_BLOCK.defaultBlockState() : Blocks.CHISELED_STONE_BRICKS.defaultBlockState());
             }
         }
         Deco.ironDoor(p, wx, room.floor, wz, inward);
@@ -255,7 +255,7 @@ public final class BuiltBuilder {
             int pz = wz + right.getStepZ() * s + inward.getStepZ() * 3;
             if (!room.interior(px, pz) || room.onLane(px, pz)) continue;
             p.set(px, room.floor, pz, t == Theme.DWEMER ? Blocks.CHISELED_POLISHED_BLACKSTONE.defaultBlockState() : Blocks.CHISELED_STONE_BRICKS.defaultBlockState());
-            p.set(px, room.floor + 1, pz, t == Theme.DWEMER ? Blocks.WAXED_CUT_COPPER.defaultBlockState() : Blocks.CHISELED_STONE_BRICKS.defaultBlockState());
+            p.set(px, room.floor + 1, pz, t == Theme.DWEMER ? com.skycraft.worldgen.VanillaBlocks.WAXED_CUT_COPPER.defaultBlockState() : Blocks.CHISELED_STONE_BRICKS.defaultBlockState());
             p.set(px, room.floor + 2, pz, Deco.candle(Blocks.CANDLE, 3, true));
         }
     }
@@ -337,7 +337,7 @@ public final class BuiltBuilder {
     /** A block that carries a trap's redstone: the culture's trim, or carved masonry. */
     static BlockState trapAnchor(Painter p, Theme t) {
         if (p.kit != Kit.NONE) return p.kit.palette().trim;
-        return t == Theme.DWEMER ? Blocks.WAXED_COPPER_BLOCK.defaultBlockState() : Blocks.CHISELED_STONE_BRICKS.defaultBlockState();
+        return t == Theme.DWEMER ? com.skycraft.worldgen.VanillaBlocks.WAXED_COPPER_BLOCK.defaultBlockState() : Blocks.CHISELED_STONE_BRICKS.defaultBlockState();
     }
 
     /**

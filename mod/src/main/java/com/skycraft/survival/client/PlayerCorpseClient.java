@@ -7,7 +7,7 @@ import net.minecraft.client.player.RemotePlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.scores.PlayerTeam;
 import net.minecraft.world.scores.Scoreboard;
-import net.minecraft.world.scores.Team;
+import net.minecraft.world.scores.PlayerTeam;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
@@ -21,7 +21,7 @@ public final class PlayerCorpseClient {
     private static final PlayerTeam HIDDEN = new PlayerTeam(new Scoreboard(), "skycraft_corpse");
 
     static {
-        HIDDEN.setNameTagVisibility(Team.Visibility.NEVER);
+        HIDDEN.setNameTagVisibility(net.minecraft.world.scores.Team.Visibility.NEVER);
     }
 
     private PlayerCorpseClient() {}
@@ -52,7 +52,7 @@ public final class PlayerCorpseClient {
         }
 
         @Override
-        public Team getTeam() {
+        public PlayerTeam getTeam() {
             return HIDDEN;
         }
 

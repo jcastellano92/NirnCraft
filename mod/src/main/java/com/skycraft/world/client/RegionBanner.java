@@ -5,18 +5,15 @@ import com.skycraft.tamriel.Region;
 import com.skycraft.tamriel.Regions;
 import com.skycraft.world.Provinces;
 import com.skycraft.world.WorldData;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.gui.overlay.ForgeGui;
 
 import java.util.Locale;
 
@@ -26,7 +23,6 @@ import java.util.Locale;
  * when you cross a province border. First visits get the server's "DISCOVERED" banner instead. Nothing shows on
  * login or after teleports within the first moments, so loading into the world stays quiet.
  */
-@OnlyIn(Dist.CLIENT)
 public final class RegionBanner {
     private static final long REGION_MS = 3500;
     private static final long PROVINCE_MS = 5000;
@@ -101,8 +97,8 @@ public final class RegionBanner {
     }
 
     private static boolean visited(Minecraft mc, String regionId) {
-        ListTag holds = SkyData.get(mc.player).module(WorldData.MODULE).getList("holds", Tag.TAG_STRING);
-        for (int i = 0; i < holds.size(); i++) if (holds.getString(i).equals(regionId)) return true;
+        ListTag holds = SkyData.get(mc.player).module(WorldData.MODULE).getListOrEmpty("holds");
+        for (int i = 0; i < holds.size(); i++) if (holds.getStringOr(i, "").equals(regionId)) return true;
         return false;
     }
 
@@ -116,9 +112,11 @@ public final class RegionBanner {
         return Component.literal(sb.toString());
     }
 
-    public static void render(ForgeGui gui, GuiGraphics g, float partialTick, int width, int height) {
+    public static void render(GuiGraphicsExtractor g, net.minecraft.client.DeltaTracker delta) {
+        float partialTick = delta.getGameTimeDeltaPartialTick(false);
+        int width = g.guiWidth(), height = g.guiHeight();
         Minecraft mc = Minecraft.getInstance();
-        if (mc.options.hideGui || mc.player == null) return;
+        if (mc.gui.hud.isHidden() || mc.player == null) return;
         Font font = mc.font;
         long now = Util.getMillis();
         int y = Math.max(104, height / 2 - 60);
@@ -128,14 +126,14 @@ public final class RegionBanner {
                 provinceText = null;
             } else if (a >= 0.03f) {
                 int alpha = (int) (a * 255) << 24;
-                g.pose().pushPose();
-                g.pose().translate(width / 2f, y, 0);
-                g.pose().scale(1.8f, 1.8f, 1f);
-                g.drawCenteredString(font, provinceText, 0, 0, alpha | 0xF5EBC8);
-                g.pose().popPose();
+                g.pose().pushMatrix();
+                g.pose().translate(width / 2f,  y);
+                g.pose().scale(1.8f,  1.8f);
+                g.centeredText(font, provinceText, 0, 0, alpha | 0xF5EBC8);
+                g.pose().popMatrix();
                 int half = Math.min(width / 2 - 8, (int) (font.width(provinceText) * 0.9f) + 12);
                 g.fill(width / 2 - half, y + 18, width / 2 + half, y + 19, alpha | 0x8A7F66);
-                if (!provinceSub.getString().isEmpty()) g.drawCenteredString(font, provinceSub, width / 2, y + 23, alpha | 0xBDB59E);
+                if (!provinceSub.getString().isEmpty()) g.centeredText(font, provinceSub, width / 2, y + 23, alpha | 0xBDB59E);
                 return; // the province banner already names the region
             }
         }
@@ -144,7 +142,7 @@ public final class RegionBanner {
             if (now - regionStart > REGION_MS) {
                 regionText = null;
             } else if (a >= 0.03f) {
-                g.drawCenteredString(font, regionText, width / 2, y + 4, (int) (a * 230) << 24 | 0xE8E2D0);
+                g.centeredText(font, regionText, width / 2, y + 4, (int) (a * 230) << 24 | 0xE8E2D0);
             }
         }
     }

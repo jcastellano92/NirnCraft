@@ -20,7 +20,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -30,18 +30,18 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.village.poi.PoiManager;
 import net.minecraft.world.entity.ai.village.poi.PoiTypes;
-import net.minecraft.world.entity.npc.Villager;
-import net.minecraft.world.entity.npc.VillagerProfession;
-import net.minecraft.world.entity.npc.VillagerType;
+import net.minecraft.world.entity.npc.villager.Villager;
+import net.minecraft.world.entity.npc.villager.VillagerProfession;
+import net.minecraft.world.entity.npc.villager.VillagerType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.server.ServerLifecycleHooks;
+
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,13 +54,13 @@ import java.util.Optional;
  * (their persistent {@code skycraft_shop} has the {@code food} pool, topped up from {@code #skycraft:inn_goods}),
  * and share rumors. Sleeping while a room is rented in that settlement adds the inn's rested bonus.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class Innkeepers {
     /** Entity tag and persistent-data flag marking innkeepers (other modules may set it on their own NPCs). */
     public static final String TAG = "skycraft_innkeeper";
     public static final String SETTLEMENT_KEY = "skycraft_inn_settlement";
     public static final String INN_KEY = "skycraft_inn";
-    public static final TagKey<Item> INN_GOODS = TagKey.create(Registries.ITEM, new ResourceLocation(Skycraft.MODID, "inn_goods"));
+    public static final TagKey<Item> INN_GOODS = TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath(Skycraft.MODID, "inn_goods"));
     /** Optional: a lang key suffix ({@code settlement.skycraft.name.<key>}) naming the inn, set by city plans. */
     public static final String INN_NAME_KEY = "skycraft_inn_name";
     public static final int INN_NAMES = 16;
@@ -74,26 +74,26 @@ public final class Innkeepers {
 
     public static boolean isInnkeeper(LivingEntity npc) {
         CompoundTag pd = npc.getPersistentData();
-        return pd.getBoolean(TAG) || npc.getTags().contains(TAG) || "innkeeper".equals(pd.getString("skycraft_role"));
+        return pd.getBooleanOr(TAG, false) || npc.entityTags().contains(TAG) || "innkeeper".equals(pd.getStringOr("skycraft_role",""));
     }
 
     /** The translated name of the inn an innkeeper runs. */
     public static Component innName(LivingEntity npc) {
         CompoundTag pd = npc.getPersistentData();
-        if (pd.contains(INN_NAME_KEY)) return Component.translatable("settlement.skycraft.name." + pd.getString(INN_NAME_KEY));
-        int idx = pd.contains(INN_KEY) ? pd.getInt(INN_KEY) : Math.floorMod(npc.getUUID().hashCode(), INN_NAMES);
+        if (pd.contains(INN_NAME_KEY)) return Component.translatable("settlement.skycraft.name." + pd.getStringOr(INN_NAME_KEY, ""));
+        int idx = pd.contains(INN_KEY) ? pd.getIntOr(INN_KEY, 0) : Math.floorMod(npc.getUUID().hashCode(), INN_NAMES);
         return Component.translatable("survival.skycraft.inn." + Math.floorMod(idx, INN_NAMES));
     }
 
     // ------------------------------------------------------------------ spawning
 
     @SubscribeEvent
-    public static void onServerTick(TickEvent.ServerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END) return;
+    public static void onServerTick(net.neoforged.neoforge.event.tick.ServerTickEvent.Post event) {
+        if (!(event instanceof net.neoforged.neoforge.event.tick.ServerTickEvent.Post)) return;
         MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
         if (server == null || server.getTickCount() % 100 != 37 || !SurvivalConfig.INNKEEPERS.get()) return;
         ServerLevel overworld = server.overworld();
-        if (overworld.players().isEmpty()) return;
+        if (overworld == null || overworld.players().isEmpty()) return;
         RoadsData roads = RoadsData.get(overworld);
         if (roads.settlements().isEmpty()) return;
         for (ServerPlayer player : overworld.players()) {
@@ -111,7 +111,7 @@ public final class Innkeepers {
         if (com.skycraft.quest.QuestConfig.RUINED_HELGEN.get() && com.skycraft.quest.story.StartCottage.nearHelgen(s.x, s.z, 40)) return;
         if (now - inn.lastCheck < 600) return;
         inn.lastCheck = now;
-        BlockPos center = new BlockPos(s.x, Math.max(level.getMinBuildHeight(), s.y), s.z);
+        BlockPos center = new BlockPos(s.x, Math.max(level.getMinY(), s.y), s.z);
         if (!level.isPositionEntityTicking(center)) return;
         if (com.skycraft.tamriel.settlement.SettlementAnchors.near(level, center, 48).isPresent()) return;
         List<LivingEntity> found = level.getEntitiesOfClass(LivingEntity.class, new AABB(center).inflate(96, 64, 96),
@@ -196,12 +196,12 @@ public final class Innkeepers {
         CompoundTag pd = npc.getPersistentData();
         int sid = settlementOf(npc);
         if (sid >= 0) return "s" + sid;
-        return pd.contains(SETTLEMENT_KEY) ? "s" + pd.getInt(SETTLEMENT_KEY) : "n" + npc.getStringUUID();
+        return pd.contains(SETTLEMENT_KEY) ? "s" + pd.getIntOr(SETTLEMENT_KEY, 0) : "n" + npc.getStringUUID();
     }
 
     private static int settlementOf(LivingEntity npc) {
         CompoundTag pd = npc.getPersistentData();
-        if (pd.contains(SETTLEMENT_KEY)) return pd.getInt(SETTLEMENT_KEY);
+        if (pd.contains(SETTLEMENT_KEY)) return pd.getIntOr(SETTLEMENT_KEY, 0);
         if (npc.level() instanceof ServerLevel sl && sl.dimension() == Level.OVERWORLD) {
             Settlement s = RoadsData.get(sl).zoneAt(npc.getBlockX(), npc.getBlockZ());
             if (s != null) return s.id;
@@ -211,10 +211,10 @@ public final class Innkeepers {
 
     /** True if {@code player} personally has an active rented room at {@code npc}'s inn. */
     public static boolean hasOwnRoom(ServerPlayer player, LivingEntity npc) {
-        CompoundTag rent = SkyData.get(player).module("survival").getCompound("rent");
+        CompoundTag rent = SkyData.get(player).module("survival").getCompoundOrEmpty("rent");
         String key = rentKey(npc);
         long now = OreVeins.clock(player.level());
-        return rent.contains(key) && rent.getCompound(key).getLong("until") > now;
+        return rent.contains(key) && rent.getCompoundOrEmpty(key).getLongOr("until",0L) > now;
     }
 
     /** How many guest/inn beds this inn has available to rent (at least 2). */
@@ -246,13 +246,13 @@ public final class Innkeepers {
 
     /** How many players currently have an active room rented at {@code npc}'s inn. */
     public static int bookedRooms(ServerPlayer viewer, LivingEntity npc) {
-        if (viewer.server == null) return 0;
+        if (viewer.level().getServer() == null) return 0;
         String key = rentKey(npc);
         long now = OreVeins.clock(viewer.level());
         int count = 0;
-        for (ServerPlayer p : viewer.server.getPlayerList().getPlayers()) {
-            CompoundTag rent = SkyData.get(p).module("survival").getCompound("rent");
-            if (rent.contains(key) && rent.getCompound(key).getLong("until") > now) {
+        for (ServerPlayer p : viewer.level().getServer().getPlayerList().getPlayers()) {
+            CompoundTag rent = SkyData.get(p).module("survival").getCompoundOrEmpty("rent");
+            if (rent.contains(key) && rent.getCompoundOrEmpty(key).getLongOr("until",0L) > now) {
                 count++;
             }
         }
@@ -268,10 +268,10 @@ public final class Innkeepers {
     public static void rent(ServerPlayer player, LivingEntity npc) {
         if (!npc.isAlive() || player.distanceToSqr(npc) > 64) return;
         PlayerData data = SkyData.get(player);
-        CompoundTag rent = data.module("survival").getCompound("rent");
+        CompoundTag rent = data.module("survival").getCompoundOrEmpty("rent");
         String key = rentKey(npc);
         long now = OreVeins.clock(player.level());
-        if (rent.contains(key) && rent.getCompound(key).getLong("until") > now) {
+        if (rent.contains(key) && rent.getCompoundOrEmpty(key).getLongOr("until",0L) > now) {
             Dialogue.open(player, npc, Component.translatable("survival.skycraft.inn.already_rented"));
             return;
         }
@@ -289,8 +289,8 @@ public final class Innkeepers {
         room.putInt("sid", settlementOf(npc));
         room.putInt("x", npc.getBlockX());
         room.putInt("z", npc.getBlockZ());
-        room.putString("dim", npc.level().dimension().location().toString());
-        room.putInt("inn", npc.getPersistentData().contains(INN_KEY) ? npc.getPersistentData().getInt(INN_KEY)
+        room.putString("dim", npc.level().dimension().identifier().toString());
+        room.putInt("inn", npc.getPersistentData().contains(INN_KEY) ? npc.getPersistentData().getIntOr(INN_KEY, 0)
                 : Math.floorMod(npc.getUUID().hashCode(), INN_NAMES));
         rent.put(key, room);
         data.module("survival").put("rent", rent);
@@ -314,12 +314,12 @@ public final class Innkeepers {
     public static CompoundTag roomHere(ServerPlayer player) {
         CompoundTag own = roomHereFor(player, player);
         if (own != null) return own;
-        if (player.server != null) {
+        if (player.level().getServer() != null) {
             var party = com.skycraft.quest.party.Parties.partyOf(player);
             if (party != null) {
                 for (java.util.UUID memberId : party.memberIds()) {
                     if (memberId.equals(player.getUUID())) continue;
-                    ServerPlayer member = player.server.getPlayerList().getPlayer(memberId);
+                    ServerPlayer member = player.level().getServer().getPlayerList().getPlayer(memberId);
                     if (member != null) {
                         CompoundTag shared = roomHereFor(member, player);
                         if (shared != null) return shared;
@@ -332,23 +332,23 @@ public final class Innkeepers {
 
     private static CompoundTag roomHereFor(ServerPlayer renter, ServerPlayer atPlayer) {
         PlayerData data = SkyData.get(renter);
-        CompoundTag rent = data.module("survival").getCompound("rent");
+        CompoundTag rent = data.module("survival").getCompoundOrEmpty("rent");
         if (rent.isEmpty()) return null;
         long now = OreVeins.clock(atPlayer.level());
-        String dim = atPlayer.level().dimension().location().toString();
+        String dim = atPlayer.level().dimension().identifier().toString();
         Settlement here = null;
         boolean looked = false;
         CompoundTag match = null;
         List<String> expired = new ArrayList<>();
-        for (String key : rent.getAllKeys()) {
-            CompoundTag room = rent.getCompound(key);
+        for (String key : rent.keySet()) {
+            CompoundTag room = rent.getCompoundOrEmpty(key);
             // a little grace: sleeping a full day straight after renting still counts
-            if (room.getLong("until") + 1000L < now) {
+            if (room.getLongOr("until",0L) + 1000L < now) {
                 expired.add(key);
                 continue;
             }
-            if (match != null || !dim.equals(room.getString("dim"))) continue;
-            int sid = room.getInt("sid");
+            if (match != null || !dim.equals(room.getStringOr("dim",""))) continue;
+            int sid = room.getIntOr("sid",0);
             if (sid >= 0 && atPlayer.level() instanceof ServerLevel sl && sl.dimension() == Level.OVERWORLD) {
                 if (!looked) {
                     here = RoadsData.get(sl).zoneAt(atPlayer.getBlockX(), atPlayer.getBlockZ());
@@ -357,8 +357,8 @@ public final class Innkeepers {
                 if (here != null && here.id == sid) match = room;
             }
             if (match == null) {
-                long dx = atPlayer.getBlockX() - room.getInt("x");
-                long dz = atPlayer.getBlockZ() - room.getInt("z");
+                long dx = atPlayer.getBlockX() - room.getIntOr("x",0);
+                long dz = atPlayer.getBlockZ() - room.getIntOr("z",0);
                 if (dx * dx + dz * dz <= (long) ROOM_RADIUS * ROOM_RADIUS) match = room;
             }
         }
@@ -376,7 +376,7 @@ public final class Innkeepers {
         if (room == null) return;
         Buffs.apply(player, SurvivalEvents.INN_RESTED, Math.max(duration, 20 * 60 * 10));
         Notifier.message(player, Component.translatable("message.skycraft.survival.inn_rested",
-                Component.translatable("survival.skycraft.inn." + Math.floorMod(room.getInt("inn"), INN_NAMES))));
+                Component.translatable("survival.skycraft.inn." + Math.floorMod(room.getIntOr("inn",0), INN_NAMES))));
     }
 
     /** Dialogue action: "Heard any rumors?" */

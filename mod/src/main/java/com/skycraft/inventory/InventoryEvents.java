@@ -3,20 +3,20 @@ package com.skycraft.inventory;
 import com.skycraft.Skycraft;
 import com.skycraft.network.SkyNetwork;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.event.AddReloadListenerEvent;
-import net.minecraftforge.event.OnDatapackSyncEvent;
-import net.minecraftforge.event.TagsUpdatedEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.AddServerReloadListenersEvent;
+import net.neoforged.neoforge.event.OnDatapackSyncEvent;
+import net.neoforged.neoforge.event.TagsUpdatedEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 /** Forge-bus events of the inventory module: loading and syncing item weights. */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class InventoryEvents {
     private InventoryEvents() {}
 
     @SubscribeEvent
-    public static void onAddReloadListeners(AddReloadListenerEvent event) {
-        event.addListener(new ItemWeights.Loader());
+    public static void onAddReloadListeners(AddServerReloadListenersEvent event) {
+        event.addListener(net.minecraft.resources.Identifier.fromNamespaceAndPath(Skycraft.MODID, "item_weights"), new ItemWeights.Loader());
     }
 
     /** Fired when a player joins (player set) and after /reload (player null = everyone). */
@@ -41,15 +41,15 @@ public final class InventoryEvents {
      * sees them leave the container as items.
      */
     @SubscribeEvent
-    public static void onPlayerTick(net.minecraftforge.event.TickEvent.PlayerTickEvent event) {
-        if (event.phase != net.minecraftforge.event.TickEvent.Phase.END || event.player.level().isClientSide) return;
-        if (event.player.tickCount % 10 != 0 || event.player.containerMenu != event.player.inventoryMenu) return;
-        convertCoins(event.player);
+    public static void onPlayerTick(net.neoforged.neoforge.event.tick.PlayerTickEvent.Post event) {
+        if (event.getEntity().level().isClientSide()) return;
+        if (event.getEntity().tickCount % 10 != 0 || event.getEntity().containerMenu != event.getEntity().inventoryMenu) return;
+        convertCoins(event.getEntity());
     }
 
     @SubscribeEvent
-    public static void onContainerClose(net.minecraftforge.event.entity.player.PlayerContainerEvent.Close event) {
-        if (!event.getEntity().level().isClientSide) convertCoins(event.getEntity());
+    public static void onContainerClose(net.neoforged.neoforge.event.entity.player.PlayerContainerEvent.Close event) {
+        if (!event.getEntity().level().isClientSide()) convertCoins(event.getEntity());
     }
 
     private static void convertCoins(net.minecraft.world.entity.player.Player player) {

@@ -9,7 +9,7 @@ import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.world.entity.LivingEntity;
 
 import static com.skycraft.curse.client.model.Keys.anim;
@@ -24,7 +24,7 @@ import static com.skycraft.curse.client.model.Keys.rot;
  */
 public class GargoyleModel<T extends LivingEntity> extends BeastModel<T> {
     public GargoyleModel(ModelPart root) {
-        super(root, RenderType::entityCutout);
+        super(root, net.minecraft.client.renderer.rendertype.RenderTypes::entityCutout);
     }
 
     public static LayerDefinition createLayer() {

@@ -3,13 +3,13 @@ package com.skycraft.world.client;
 import com.skycraft.client.SkyKeys;
 import com.skycraft.world.RestLogic;
 import com.skycraft.world.SkyrimCalendar;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractSliderButton;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
-import org.lwjgl.glfw.GLFW;
+import com.mojang.blaze3d.platform.InputConstants;
 
 /**
  * Skyrim's centered "Wait" / "Sleep" modal dialog: pick 1-24 hours on the slider (or with arrow keys / scroll wheel),
@@ -61,8 +61,8 @@ public class RestScreen extends Screen {
 
     void closeFromServer() {
         this.closedByServer = true;
-        if (minecraft != null && minecraft.screen == this) {
-            minecraft.setScreen(null);
+        if (minecraft != null && minecraft.gui.screen() == this) {
+            minecraft.gui.setScreen(null);
         }
     }
 
@@ -116,50 +116,51 @@ public class RestScreen extends Screen {
     }
 
     @Override
-    public boolean keyPressed(int key, int scan, int mods) {
+    public boolean keyPressed(net.minecraft.client.input.KeyEvent event) {
+        int key = event.key(), scan = event.keycode(), mods = event.modifiers();
         if (RestClient.phase() == 1) {
-            if (key == GLFW.GLFW_KEY_ENTER || key == GLFW.GLFW_KEY_KP_ENTER) {
+            if (key == InputConstants.KEY_RETURN || key == InputConstants.KEY_NUMPADENTER) {
                 confirm();
                 return true;
             }
-            if (key == GLFW.GLFW_KEY_LEFT) {
+            if (key == InputConstants.KEY_LEFT) {
                 setHours(hours - 1);
                 return true;
             }
-            if (key == GLFW.GLFW_KEY_RIGHT) {
+            if (key == InputConstants.KEY_RIGHT) {
                 setHours(hours + 1);
                 return true;
             }
-            if (key == GLFW.GLFW_KEY_UP && minecraft != null && minecraft.level != null) {
-                setHours(RestLogic.hoursUntil(minecraft.level.getDayTime(), 6));
+            if (key == InputConstants.KEY_UP && minecraft != null && minecraft.level != null) {
+                setHours(RestLogic.hoursUntil(minecraft.level.getDefaultClockTime(), 6));
                 return true;
             }
-            if (key == GLFW.GLFW_KEY_DOWN && minecraft != null && minecraft.level != null) {
-                setHours(RestLogic.hoursUntil(minecraft.level.getDayTime(), 18));
+            if (key == InputConstants.KEY_DOWN && minecraft != null && minecraft.level != null) {
+                setHours(RestLogic.hoursUntil(minecraft.level.getDefaultClockTime(), 18));
                 return true;
             }
         }
-        if (SkyKeys.WAIT.matches(key, scan)) {
+        if (SkyKeys.WAIT.matches(event)) {
             onClose();
             return true;
         }
-        return super.keyPressed(key, scan, mods);
+        return super.keyPressed(event);
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
+    public boolean mouseScrolled(double mouseX, double mouseY, double horizontal, double delta) {
         if (RestClient.phase() == 1 && delta != 0) {
             setHours(hours + (delta > 0 ? 1 : -1));
             return true;
         }
-        return super.mouseScrolled(mouseX, mouseY, delta);
+        return super.mouseScrolled(mouseX, mouseY, horizontal, delta);
     }
 
     @Override
-    public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+    public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
         syncWidgets();
         if (RestClient.phase() != 2) {
-            renderBackground(g);
+
         }
         int cx = width / 2;
         int cy = height / 2;
@@ -179,15 +180,15 @@ public class RestScreen extends Screen {
         g.fill(cx - 2, cy - 45, cx + 2, cy - 42, 0xFFC8A850);
 
         Component header = Component.translatable(sleep ? "screen.skycraft.sleep" : "screen.skycraft.wait");
-        g.pose().pushPose();
-        g.pose().translate(cx, cy - 62, 0);
-        g.pose().scale(1.6f, 1.6f, 1f);
-        g.drawCenteredString(font, header, 0, 0, 0xFFF5EBC8);
-        g.pose().popPose();
+        g.pose().pushMatrix();
+        g.pose().translate(cx, cy - 62);
+        g.pose().scale(1.6f, 1.6f);
+        g.centeredText(font, header, 0, 0, 0xFFF5EBC8);
+        g.pose().popMatrix();
 
-        long dayTime = minecraft != null && minecraft.level != null ? minecraft.level.getDayTime() : 0;
-        g.drawCenteredString(font, SkyrimCalendar.date(dayTime), cx, cy - 38, 0xFFD0C8B0);
-        g.drawCenteredString(font, SkyrimCalendar.time(dayTime), cx, cy - 26, 0xFFE8C060);
+        long dayTime = minecraft != null && minecraft.level != null ? minecraft.level.getDefaultClockTime() : 0;
+        g.centeredText(font, SkyrimCalendar.date(dayTime), cx, cy - 38, 0xFFD0C8B0);
+        g.centeredText(font, SkyrimCalendar.time(dayTime), cx, cy - 26, 0xFFE8C060);
 
         Component subLine;
         int subColor = 0xFFA89F86;
@@ -207,12 +208,12 @@ public class RestScreen extends Screen {
         } else {
             subLine = Component.translatable("world.skycraft.rest.until", SkyrimCalendar.time(dayTime + hours * 1000L));
         }
-        g.drawCenteredString(font, subLine, cx, cy - 12, subColor);
+        g.centeredText(font, subLine, cx, cy - 12, subColor);
 
         if (sleep && RestClient.phase() == 1) {
-            g.drawCenteredString(font, Component.translatable("world.skycraft.rest.vanilla_hint"), cx, cy + 72, 0xFF8A7F66);
+            g.centeredText(font, Component.translatable("world.skycraft.rest.vanilla_hint"), cx, cy + 72, 0xFF8A7F66);
         }
-        super.render(g, mouseX, mouseY, partialTick);
+        super.extractRenderState(g, mouseX, mouseY, partialTick);
     }
 
     private Component sliderLabel(int h) {

@@ -23,7 +23,7 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
@@ -34,7 +34,7 @@ import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.monster.Monster;
-import net.minecraft.world.entity.npc.AbstractVillager;
+import net.minecraft.world.entity.npc.villager.AbstractVillager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
@@ -58,7 +58,7 @@ import net.minecraft.world.item.ItemStack;
 /**
  * {@code skycraft:dragon}: flies, circles its prey high above, swoops in breathing fire (frost for Frost Dragons),
  * lands to bite and tail-sweep, then takes off again. Dragonrend (magic module) forces it to the ground:
- * {@code getPersistentData().getLong("skycraft_dragonrend_until") > gameTime}.
+ * {@code getPersistentData().getLongOr("skycraft_dragonrend_until",0L) > gameTime}.
  *
  * <p>Variants by level: Dragon, Blood Dragon, Frost Dragon, Elder Dragon, Ancient Dragon, Revered Dragon, Legendary
  * Dragon; Serpentine Dragons in Morrowind's lands, Skeletal Dragons risen without their flesh; and the named dragons
@@ -118,8 +118,7 @@ public class DragonEntity extends Monster implements AnimatedCreature {
 
     private enum Phase { CIRCLE, SWOOP, LAND, GROUND, TAKEOFF }
 
-    private final ServerBossEvent bossEvent = new ServerBossEvent(Component.translatable("entity.skycraft.dragon"),
-            BossEvent.BossBarColor.RED, BossEvent.BossBarOverlay.PROGRESS);
+    private final ServerBossEvent bossEvent = new ServerBossEvent(java.util.UUID.randomUUID(), Component.translatable("entity.skycraft.dragon"), BossEvent.BossBarColor.RED, BossEvent.BossBarOverlay.PROGRESS);
 
     private Phase phase = Phase.CIRCLE;
     private int phaseTicks;
@@ -173,15 +172,14 @@ public class DragonEntity extends Monster implements AnimatedCreature {
         super(type, level);
         this.xpReward = 500;
         this.lookControl = new DragonLookControl(this);
-        this.setMaxUpStep(1.5f);
-        this.noCulling = true;
+        this.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.STEP_HEIGHT).setBaseValue(1.5f);
         this.head = new DragonPart(this, "head", 2.0f, 2.0f, 1.25f);
         this.neck = new DragonPart(this, "neck", 1.6f, 1.6f, 1.0f);
         this.leftWing = new DragonPart(this, "left_wing", 3.5f, 1.0f, 0.6f);
         this.rightWing = new DragonPart(this, "right_wing", 3.5f, 1.0f, 0.6f);
         this.parts = new DragonPart[]{head, neck, leftWing, rightWing};
         // parts take the ids right after the dragon's (like the ender dragon's), the same on server and client
-        this.setId(ENTITY_COUNTER.getAndAdd(parts.length + 1) + 1);
+        this.setId(this.getId());
     }
 
     @Override
@@ -197,14 +195,14 @@ public class DragonEntity extends Monster implements AnimatedCreature {
     }
 
     @Override
-    public net.minecraftforge.entity.PartEntity<?>[] getParts() {
+    public net.neoforged.neoforge.entity.PartEntity<?>[] getParts() {
         return parts;
     }
 
     /** Damage taken by one of the parts (already scaled by where it hit). */
     public boolean hurtFromPart(DragonPart part, DamageSource source, float amount) {
         if (this.isRemoved() || this.isDeadOrDying()) return false;
-        return this.hurt(source, amount);
+        return com.skycraft.platform.Effects.hurt(this, source, amount);
     }
 
     /** Places the parts around the body: head and neck ahead (higher when standing), wings spread while flying. */
@@ -242,17 +240,17 @@ public class DragonEntity extends Monster implements AnimatedCreature {
     }
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        this.entityData.define(VARIANT, 0);
-        this.entityData.define(FLYING, false);
-        this.entityData.define(BREATH_TARGET, -1);
-        this.entityData.define(BREATHING, false);
-        this.entityData.define(FROST_BREATH, false);
-        this.entityData.define(ETHEREAL, false);
-        this.entityData.define(PERCHED, false);
-        this.entityData.define(ROLE, ROLE_WILD);
-        this.entityData.define(RISING, 0);
+    protected void defineSynchedData(net.minecraft.network.syncher.SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(VARIANT, 0);
+        builder.define(FLYING, false);
+        builder.define(BREATH_TARGET, -1);
+        builder.define(BREATHING, false);
+        builder.define(FROST_BREATH, false);
+        builder.define(ETHEREAL, false);
+        builder.define(PERCHED, false);
+        builder.define(ROLE, ROLE_WILD);
+        builder.define(RISING, 0);
     }
 
     /** Ticks left of rising from a dragon mound (0 = risen). */
@@ -323,7 +321,7 @@ public class DragonEntity extends Monster implements AnimatedCreature {
         @Override
         protected void findTarget() {
             // vanilla checks players by distance only; use the box for them too
-            this.target = this.mob.level().getNearestEntity(this.mob.level().getEntitiesOfClass(this.targetType,
+            this.target = ((ServerLevel)this.mob.level()).getNearestEntity(this.mob.level().getEntitiesOfClass(this.targetType,
                     this.getTargetSearchArea(0), e -> true), this.targetConditions, this.mob, this.mob.getX(), this.mob.getEyeY(), this.mob.getZ());
         }
     }
@@ -447,7 +445,7 @@ public class DragonEntity extends Monster implements AnimatedCreature {
 
     /** Dragonrend (magic): the dragon can't fly until this game time. */
     public boolean isDragonrended() {
-        return this.getPersistentData().getLong(DRAGONREND_KEY) > this.level().getGameTime();
+        return this.getPersistentData().getLongOr(DRAGONREND_KEY, 0L) > this.level().getGameTime();
     }
 
     @Override
@@ -466,7 +464,7 @@ public class DragonEntity extends Monster implements AnimatedCreature {
     }
 
     @Override
-    public boolean causeFallDamage(float distance, float multiplier, DamageSource source) {
+    public boolean causeFallDamage(double distance, float multiplier, DamageSource source) {
         return false;
     }
 
@@ -481,36 +479,35 @@ public class DragonEntity extends Monster implements AnimatedCreature {
     }
 
     @Override
-    public boolean isInvulnerableTo(DamageSource source) {
+    public boolean isInvulnerableTo(net.minecraft.server.level.ServerLevel serverLevel263, DamageSource source) {
         if (getRole() == ROLE_FLYOVER || isEthereal() || getRising() > 0) {
             return !source.is(net.minecraft.tags.DamageTypeTags.BYPASSES_INVULNERABILITY);
         }
-        return super.isInvulnerableTo(source);
+        return super.isInvulnerableTo(serverLevel263, source);
     }
 
-    @Override
     public AABB getBoundingBoxForCulling() {
         return this.getBoundingBox().inflate(8.0, 4.0, 8.0);
     }
 
     @Override
-    public boolean hurt(DamageSource source, float amount) {
+    public boolean hurtServer(net.minecraft.server.level.ServerLevel serverLevel263, DamageSource source, float amount) {
         // Frost dragons are weak to fire, like in Skyrim.
         if (isFrost() && source.is(net.minecraft.tags.DamageTypeTags.IS_FIRE)) amount *= 1.25f;
         if (getVariant() == SKELETAL && source.is(net.minecraft.tags.DamageTypeTags.IS_FIRE)) amount *= 1.5f;
         if (isCaptured() && source.getEntity() instanceof Player) return false;
         if (isPerched()) setPerched(false);
-        return super.hurt(source, amount);
+        return super.hurtServer(serverLevel263, source, amount);
     }
 
     // ------------------------------------------------------------------ spawning & tiers
 
     @Override
     @Nullable
-    public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, MobSpawnType reason,
-                                        @Nullable SpawnGroupData data, @Nullable CompoundTag tag) {
-        data = super.finalizeSpawn(level, difficulty, reason, data, tag);
-        if (reason == MobSpawnType.SPAWN_EGG || reason == MobSpawnType.COMMAND || reason == MobSpawnType.EVENT) setFlying(true);
+    public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, EntitySpawnReason reason,
+                                        @Nullable SpawnGroupData data) {
+        data = super.finalizeSpawn(level, difficulty, reason, data);
+        if (reason == EntitySpawnReason.SPAWN_ITEM_USE || reason == EntitySpawnReason.COMMAND || reason == EntitySpawnReason.EVENT) setFlying(true);
         return data;
     }
 
@@ -530,7 +527,7 @@ public class DragonEntity extends Monster implements AnimatedCreature {
         int tier = level >= 64 ? LEGENDARY : level >= 52 ? REVERED : level >= 44 ? ANCIENT : level >= 32 ? ELDER
                 : level >= 22 ? FROST : level >= 12 ? BLOOD : 0;
         BlockPos pos = this.blockPosition();
-        if (tier < FROST && this.level().getBiome(pos).value().coldEnoughToSnow(pos) && this.getRandom().nextFloat() < 0.5f) tier = FROST;
+        if (tier < FROST && this.level().getBiome(pos).value().coldEnoughToSnow(pos, this.level().getSeaLevel()) && this.getRandom().nextFloat() < 0.5f) tier = FROST;
         String province = com.skycraft.tamriel.Regions.at(this.level(), pos).province();
         if ("morrowind".equals(province) && tier < ELDER && this.getRandom().nextFloat() < 0.5f) tier = SERPENTINE;
         applyVariant(tier);
@@ -584,7 +581,7 @@ public class DragonEntity extends Monster implements AnimatedCreature {
     @Override
     public void travel(Vec3 input) {
         if (isFlying() && this.isAlive()) {
-            if (!this.level().isClientSide) this.move(MoverType.SELF, this.getDeltaMovement());
+            if (!this.level().isClientSide()) this.move(MoverType.SELF, this.getDeltaMovement());
             this.fallDistance = 0;
         } else {
             super.travel(input);
@@ -690,8 +687,8 @@ public class DragonEntity extends Monster implements AnimatedCreature {
     // ------------------------------------------------------------------ AI
 
     @Override
-    protected void customServerAiStep() {
-        super.customServerAiStep();
+    protected void customServerAiStep(net.minecraft.server.level.ServerLevel serverLevel263) {
+        super.customServerAiStep(serverLevel263);
         if (!initialized) initDragon();
         if (anchor == null) anchor = this.position();
         this.bossEvent.setProgress(this.getHealth() / this.getMaxHealth());
@@ -756,7 +753,7 @@ public class DragonEntity extends Monster implements AnimatedCreature {
     protected net.minecraft.world.InteractionResult mobInteract(Player player, InteractionHand hand) {
         if (!startsFights() && getRole() != ROLE_FLYOVER && hand == InteractionHand.MAIN_HAND) {
             if (player instanceof ServerPlayer sp) com.skycraft.creatures.dragons.NamedDragons.talk(sp, this);
-            return net.minecraft.world.InteractionResult.sidedSuccess(this.level().isClientSide);
+            return com.skycraft.platform.Interactions.sidedSuccess(this.level().isClientSide());
         }
         return super.mobInteract(player, hand);
     }
@@ -783,7 +780,7 @@ public class DragonEntity extends Monster implements AnimatedCreature {
             shout("disarm");
             ItemStack held = p.getMainHandItem().copy();
             p.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
-            ItemEntity dropped = p.drop(held, true, false);
+            ItemEntity dropped = p.drop(held, true, net.minecraft.util.Prediction.SERVER_ONLY);
             if (dropped != null) dropped.setPickUpDelay(40);
             shoutCooldown = 300 + this.getRandom().nextInt(200);
             return;
@@ -839,11 +836,11 @@ public class DragonEntity extends Monster implements AnimatedCreature {
             double along = to.dot(dir);
             if (along < 0 || along > range) continue;
             if (to.subtract(dir.scale(along)).length() > 2.0 + along * 0.35) continue;
-            e.hurt(MagicDamage.source(this.level(), MagicDamage.SPELL, null, this), 3.0f * tierDamage());
+            com.skycraft.platform.Effects.hurt(e, MagicDamage.source(this.level(), MagicDamage.SPELL, null, this), 3.0f * tierDamage());
             double kb = 2.6 * (1.0 - e.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE));
             Vec3 push = new Vec3(dir.x, 0, dir.z).normalize().scale(kb);
             e.setDeltaMovement(e.getDeltaMovement().add(push.x, 0.6, push.z));
-            e.hurtMarked = true;
+            e.syncVelocity = true;
         }
     }
 
@@ -1101,7 +1098,7 @@ public class DragonEntity extends Monster implements AnimatedCreature {
             if (biteCooldown <= 0 && facing(target, 0.5)) {
                 biteCooldown = 25;
                 CreatureAnims.play(this, AnimSlot.ATTACK);
-                this.doHurtTarget(target);
+                this.doHurtTarget((ServerLevel) this.level(), target);
                 this.playSound(voice("growl"), 1.5f, 1.0f + this.getRandom().nextFloat() * 0.15f);
             }
         } else {
@@ -1140,10 +1137,10 @@ public class DragonEntity extends Monster implements AnimatedCreature {
             Vec3 to = new Vec3(e.getX() - this.getX(), 0, e.getZ() - this.getZ());
             if (to.lengthSqr() < 1.0E-4) continue;
             if (fwd.dot(to.normalize()) > 0.4) continue; // in front: bites handle those
-            e.hurt(this.damageSources().mobAttack(this), 6.0f * tierDamage());
+            com.skycraft.platform.Effects.hurt(e, this.damageSources().mobAttack(this), 6.0f * tierDamage());
             Vec3 push = to.normalize().scale(1.6);
             e.setDeltaMovement(e.getDeltaMovement().add(push.x, 0.5, push.z));
-            e.hurtMarked = true;
+            e.syncVelocity = true;
         }
     }
 
@@ -1234,11 +1231,11 @@ public class DragonEntity extends Monster implements AnimatedCreature {
             // Breath is elemental, like a spell: fire/frost spell damage types (is_fire / is_freezing, ignore armor),
             // so Fire Resistance, wards, magic resistance and Spellbreaker all work against it.
             if (isFrost()) {
-                e.hurt(MagicDamage.source(this.level(), MagicDamage.FROST, null, this), damage);
-                e.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 80, 1), this);
+                com.skycraft.platform.Effects.hurt(e, MagicDamage.source(this.level(), MagicDamage.FROST, null, this), damage);
+                e.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.SLOWNESS), 80, 1), this);
                 if (e.canFreeze()) e.setTicksFrozen(Math.min(e.getTicksRequiredToFreeze() + 80, e.getTicksFrozen() + 25));
             } else {
-                if (e.hurt(MagicDamage.source(this.level(), MagicDamage.FIRE, null, this), damage)) e.setSecondsOnFire(5);
+                if (com.skycraft.platform.Effects.hurt(e, MagicDamage.source(this.level(), MagicDamage.FIRE, null, this), damage)) e.igniteForSeconds(5);
             }
         }
     }
@@ -1249,7 +1246,7 @@ public class DragonEntity extends Monster implements AnimatedCreature {
     public void aiStep() {
         super.aiStep();
         if (!corpsePose) updateParts();
-        if (!this.level().isClientSide || corpsePose) return;
+        if (!this.level().isClientSide() || corpsePose) return;
         if (isBreathing()) spawnBreathParticles();
         if (isEthereal() && this.tickCount % 2 == 0) {
             this.level().addParticle(ParticleTypes.END_ROD, this.getX() + (this.random.nextDouble() - 0.5) * 4, this.getY() + this.random.nextDouble() * 3,
@@ -1290,8 +1287,8 @@ public class DragonEntity extends Monster implements AnimatedCreature {
     protected void tickDeath() {
         this.deathTime++;
         if (isFlying()) setFlying(false);
-        if (!this.level().isClientSide) enableCollision();
-        if (this.level().isClientSide) {
+        if (!this.level().isClientSide()) enableCollision();
+        if (this.level().isClientSide()) {
             RandomSource r = this.getRandom();
             for (int i = 0; i < 6; i++) {
                 double x = this.getX() + (r.nextDouble() - 0.5) * 5.0;
@@ -1305,7 +1302,7 @@ public class DragonEntity extends Monster implements AnimatedCreature {
         if (deathLandedAt < 0 && (this.onGround() || this.isInWater() || this.deathTime > 200)) deathLandedAt = this.deathTime;
         if (deathLandedAt >= 0 && this.deathTime - deathLandedAt >= 40) {
             if (pendingCorpse != null && this.level() instanceof ServerLevel server) {
-                pendingCorpse.moveTo(this.getX(), this.getY(), this.getZ(), this.yBodyRot, 0);
+                pendingCorpse.snapTo(this.getX(), this.getY(), this.getZ(), this.yBodyRot, 0);
                 server.addFreshEntity(pendingCorpse);
                 pendingCorpse = null;
             }
@@ -1344,8 +1341,10 @@ public class DragonEntity extends Monster implements AnimatedCreature {
     // ------------------------------------------------------------------ save
 
     @Override
-    public void addAdditionalSaveData(CompoundTag tag) {
-        super.addAdditionalSaveData(tag);
+    public void addAdditionalSaveData(net.minecraft.world.level.storage.ValueOutput output263) {
+        super.addAdditionalSaveData(output263);
+        net.minecraft.nbt.CompoundTag tag = new net.minecraft.nbt.CompoundTag();
+        
         tag.putInt("Variant", getVariant());
         tag.putBoolean("Flying", isFlying());
         tag.putBoolean("SkycraftInit", initialized);
@@ -1364,25 +1363,29 @@ public class DragonEntity extends Monster implements AnimatedCreature {
             tag.putDouble("AnchorY", anchor.y);
             tag.putDouble("AnchorZ", anchor.z);
         }
+    
+        output263.store(tag);
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag tag) {
-        super.readAdditionalSaveData(tag);
-        setVariant(tag.getInt("Variant"));
-        setFlying(tag.getBoolean("Flying"));
-        initialized = tag.getBoolean("SkycraftInit");
-        setFrostBreath(tag.contains("FrostBreath") ? tag.getBoolean("FrostBreath") : getVariant() == FROST);
-        this.entityData.set(ROLE, tag.getInt("Role"));
-        if (tag.contains("PerchX")) perch = new Vec3(tag.getDouble("PerchX"), tag.getDouble("PerchY"), tag.getDouble("PerchZ"));
-        this.entityData.set(RISING, tag.getInt("Rising"));
-        flyoverTicks = tag.getInt("Flyover");
+    public void readAdditionalSaveData(net.minecraft.world.level.storage.ValueInput input263) {
+        super.readAdditionalSaveData(input263);
+        net.minecraft.nbt.CompoundTag tag = com.skycraft.platform.ValueTags.read(input263 , "Variant", "Flying", "SkycraftInit", "FrostBreath", "Role", "PerchX", "PerchY", "PerchZ", "Rising", "Flyover", "LastSeen", "AnchorX", "AnchorY", "AnchorZ");
+        
+        setVariant(tag.getIntOr("Variant",0));
+        setFlying(tag.getBooleanOr("Flying",false));
+        initialized = tag.getBooleanOr("SkycraftInit",false);
+        setFrostBreath(tag.contains("FrostBreath") ? tag.getBooleanOr("FrostBreath",false) : getVariant() == FROST);
+        this.entityData.set(ROLE, tag.getIntOr("Role",0));
+        if (tag.contains("PerchX")) perch = new Vec3(tag.getDoubleOr("PerchX",0D), tag.getDoubleOr("PerchY",0D), tag.getDoubleOr("PerchZ",0D));
+        this.entityData.set(RISING, tag.getIntOr("Rising",0));
+        flyoverTicks = tag.getIntOr("Flyover",0);
         if (getRole() == ROLE_FLYOVER) this.discard(); // a fly-past never outlives its moment
         if (tag.contains("LastSeen")) {
-            lastSeenTime = tag.getLong("LastSeen");
+            lastSeenTime = tag.getLongOr("LastSeen",0L);
             checkAbsence = true;
         }
-        if (tag.contains("AnchorX")) anchor = new Vec3(tag.getDouble("AnchorX"), tag.getDouble("AnchorY"), tag.getDouble("AnchorZ"));
+        if (tag.contains("AnchorX")) anchor = new Vec3(tag.getDoubleOr("AnchorX",0D), tag.getDoubleOr("AnchorY",0D), tag.getDoubleOr("AnchorZ",0D));
         this.bossEvent.setName(this.getDisplayName());
     }
 

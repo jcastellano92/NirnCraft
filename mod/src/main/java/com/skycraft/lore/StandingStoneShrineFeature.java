@@ -14,9 +14,9 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.block.state.properties.SlabType;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
-import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
+import com.skycraft.worldgen.ConfiguredFeature;
+import com.skycraft.worldgen.FeaturePlaceContext;
+import com.skycraft.worldgen.NoneFeatureConfiguration;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +26,7 @@ import java.util.List;
  * stone at its heart. One generation in eleven is the Guardian Stones instead: the Warrior, Mage and Thief stones
  * on three small plinths at the corners of a triangle (about eight blocks a side), all facing its center.
  */
-public class StandingStoneShrineFeature extends Feature<NoneFeatureConfiguration> {
+public class StandingStoneShrineFeature extends ConfiguredFeature<NoneFeatureConfiguration> {
     private static final StandingStone[] LONE = {
             StandingStone.LADY, StandingStone.LORD, StandingStone.LOVER, StandingStone.ATRONACH, StandingStone.APPRENTICE,
             StandingStone.RITUAL, StandingStone.SERPENT, StandingStone.SHADOW, StandingStone.STEED, StandingStone.TOWER};

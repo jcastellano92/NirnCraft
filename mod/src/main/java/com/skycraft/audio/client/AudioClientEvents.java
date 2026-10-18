@@ -5,24 +5,24 @@ import com.skycraft.audio.AudioSounds;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
-import net.minecraftforge.client.event.sound.PlaySoundEvent;
-import net.minecraftforge.client.event.sound.PlaySoundSourceEvent;
-import net.minecraftforge.client.event.sound.PlayStreamingSourceEvent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
+import net.neoforged.neoforge.client.event.sound.PlaySoundEvent;
+import net.neoforged.neoforge.client.event.sound.PlaySoundSourceEvent;
+import net.neoforged.neoforge.client.event.sound.PlayStreamingSourceEvent;
+import net.neoforged.neoforge.client.event.sound.SoundEngineLoadEvent;
+
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 /** Forge-bus client events of the audio module: the listener probe, ambience, acoustics. */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
 public final class AudioClientEvents {
     private AudioClientEvents() {}
 
     @SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent event) {
-        if (event.phase != TickEvent.Phase.END) return;
+    public static void onClientTick(net.neoforged.neoforge.client.event.ClientTickEvent.Post event) {
         Minecraft mc = Minecraft.getInstance();
         ListenerEnvironment.tick(mc);
         AmbienceEngine.tick(mc);
@@ -34,8 +34,8 @@ public final class AudioClientEvents {
     @SubscribeEvent
     public static void onVanillaVoice(PlaySoundEvent event) {
         SoundInstance s = event.getSound();
-        if (s == null || !"minecraft".equals(s.getLocation().getNamespace())) return;
-        String kind = switch (s.getLocation().getPath()) {
+        if (s == null || !"minecraft".equals(s.getIdentifier().getNamespace())) return;
+        String kind = switch (s.getIdentifier().getPath()) {
             case "entity.wolf.howl" -> "howl";
             case "entity.wolf.growl" -> "growl";
             default -> null;
@@ -61,6 +61,11 @@ public final class AudioClientEvents {
     @SubscribeEvent
     public static void onStream(PlayStreamingSourceEvent event) {
         Acoustics.onSource(event.getSound(), event.getChannel());
+    }
+
+    @SubscribeEvent
+    public static void onEngineLoad(SoundEngineLoadEvent event) {
+        Acoustics.onEngineLoad();
     }
 
     @SubscribeEvent

@@ -1,58 +1,35 @@
 package com.skycraft.crafting.item;
 
-import com.google.common.collect.ImmutableMultimap;
-import com.google.common.collect.Multimap;
 import com.skycraft.crafting.SkyArmorMaterial;
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.EquipmentSlotGroup;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ShieldItem;
+import net.minecraft.world.item.component.ItemAttributeModifiers;
 
-import java.util.UUID;
-
-/**
- * A Skyrim shield (Hide, Iron, Steel, Elven, Dwarven ... Daedric, Dragonplate, the Imperial and Stormcloak shields and
- * the shields of the other provinces). It blocks like the vanilla shield and, held in the off hand, adds its armour
- * rating like Skyrim's shields do. The 3D item model is generated per set by {@code tools/textures/gear.py}.
- */
+/** Skyrim shields block normally and supply their material's armor rating in the offhand. */
 public class SkyShieldItem extends ShieldItem {
-    private static final UUID ARMOR_UUID = UUID.fromString("8e3c1f0a-6b2d-4f7e-9a15-3c7d2e9b4a61");
     public final SkyArmorMaterial set;
-    private final Multimap<Attribute, AttributeModifier> offhand;
 
     public SkyShieldItem(SkyArmorMaterial set, Properties props) {
-        super(props);
+        super(com.skycraft.platform.ShieldProperties.apply(props).enchantable(set.getEnchantmentValue()).repairable(set.material()).attributes(attributes(set)));
         this.set = set;
-        ImmutableMultimap.Builder<Attribute, AttributeModifier> b = ImmutableMultimap.builder();
-        b.put(Attributes.ARMOR, new AttributeModifier(ARMOR_UUID, "Shield", set.shieldDefense, AttributeModifier.Operation.ADDITION));
-        if (set.getToughness() > 0) {
-            b.put(Attributes.ARMOR_TOUGHNESS, new AttributeModifier(ARMOR_UUID, "Shield toughness", set.getToughness() * 0.5f,
-                    AttributeModifier.Operation.ADDITION));
-        }
-        this.offhand = b.build();
+    }
+
+    private static ItemAttributeModifiers attributes(SkyArmorMaterial set) {
+        var builder = ItemAttributeModifiers.builder().add(Attributes.ARMOR,
+                new AttributeModifier(Identifier.fromNamespaceAndPath("skycraft", "shield_armor"), set.shieldDefense,
+                        AttributeModifier.Operation.ADD_VALUE), EquipmentSlotGroup.OFFHAND);
+        if (set.getToughness() > 0) builder.add(Attributes.ARMOR_TOUGHNESS,
+                new AttributeModifier(Identifier.fromNamespaceAndPath("skycraft", "shield_toughness"), set.getToughness() * 0.5,
+                        AttributeModifier.Operation.ADD_VALUE), EquipmentSlotGroup.OFFHAND);
+        return builder.build();
     }
 
     @Override
-    public String getDescriptionId(ItemStack stack) {
-        // ShieldItem appends the banner colour to the description id; Skyrim shields never carry a banner.
-        return getDescriptionId();
-    }
-
-    @Override
-    @SuppressWarnings("deprecation")
-    public Multimap<Attribute, AttributeModifier> getDefaultAttributeModifiers(EquipmentSlot slot) {
-        return slot == EquipmentSlot.OFFHAND ? offhand : super.getDefaultAttributeModifiers(slot);
-    }
-
-    @Override
-    public int getEnchantmentValue() {
-        return set.getEnchantmentValue();
-    }
-
-    @Override
-    public boolean isValidRepairItem(ItemStack toRepair, ItemStack repair) {
-        return set.getRepairIngredient().test(repair);
+    public net.minecraft.network.chat.Component getName(ItemStack stack) {
+        return net.minecraft.network.chat.Component.translatable(getDescriptionId());
     }
 }

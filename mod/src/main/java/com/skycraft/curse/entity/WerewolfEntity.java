@@ -24,7 +24,7 @@ import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.monster.Monster;
-import net.minecraft.world.entity.npc.AbstractVillager;
+import net.minecraft.world.entity.npc.villager.AbstractVillager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 
@@ -41,7 +41,7 @@ public class WerewolfEntity extends CurseMonster {
     public WerewolfEntity(EntityType<? extends WerewolfEntity> type, Level level) {
         super(type, level);
         this.xpReward = 30;
-        this.setMaxUpStep(1.1f);
+        this.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.STEP_HEIGHT).setBaseValue(1.1f);
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -66,7 +66,7 @@ public class WerewolfEntity extends CurseMonster {
         this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, true));
         this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, NpcEntity.class, true));
         this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, AbstractVillager.class, true));
-        this.targetSelector.addGoal(5, new NearestAttackableTargetGoal<>(this, Animal.class, 20, true, false, e -> this.getHealth() < this.getMaxHealth()));
+        this.targetSelector.addGoal(5, new NearestAttackableTargetGoal<>(this, Animal.class, 20, true, false, (e, targetLevel263) -> this.getHealth() < this.getMaxHealth()));
     }
 
     public void setWild(boolean wild) {
@@ -74,11 +74,11 @@ public class WerewolfEntity extends CurseMonster {
     }
 
     @Override
-    public boolean doHurtTarget(Entity target) {
+    public boolean doHurtTarget(net.minecraft.server.level.ServerLevel serverLevel263, Entity target) {
         playAnim(CurseAnims.Anim.ATTACK);
-        boolean hit = super.doHurtTarget(target);
+        boolean hit = super.doHurtTarget(serverLevel263, target);
         if (hit && target instanceof LivingEntity living && this.random.nextFloat() < 0.25f) {
-            living.addEffect(new MobEffectInstance(com.skycraft.registry.ModEffects.BLEEDING.get(), 60, 0), this);
+            living.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(com.skycraft.registry.ModEffects.BLEEDING.get()), 60, 0), this);
         }
         return hit;
     }
@@ -87,7 +87,7 @@ public class WerewolfEntity extends CurseMonster {
     public void setTarget(LivingEntity target) {
         LivingEntity previous = this.getTarget();
         super.setTarget(target);
-        if (!this.level().isClientSide && target != null && previous == null && this.level().getGameTime() >= nextHowl) {
+        if (!this.level().isClientSide() && target != null && previous == null && this.level().getGameTime() >= nextHowl) {
             howl();
         }
     }
@@ -95,30 +95,31 @@ public class WerewolfEntity extends CurseMonster {
     private void howl() {
         nextHowl = this.level().getGameTime() + 20 * 30;
         playAnim(CurseAnims.Anim.HOWL);
-        this.playSound(SoundEvents.WOLF_HOWL, 2.0f, 0.55f);
+        this.playSound(com.skycraft.audio.AudioSounds.creature("wolf", "howl"), 2.0f, 0.55f);
     }
 
     @Override
     public void aiStep() {
         super.aiStep();
-        if (this.level().isClientSide) return;
+        if (this.level().isClientSide()) return;
         // feeding on a fresh kill heals
         if (feeding > 0 && --feeding % 10 == 0) this.heal(3f);
         // wild werewolves are gone with the night
-        if (wild && this.level().isDay() && this.tickCount % 40 == 0 && this.getTarget() == null) {
+        if (wild && this.level().isBrightOutside() && this.tickCount % 40 == 0 && this.getTarget() == null) {
             if (this.level() instanceof ServerLevel sl) sl.sendParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE, getX(), getY() + 1, getZ(), 10, 0.4, 0.8, 0.4, 0.01);
             this.discard();
         }
     }
 
     @Override
-    public void awardKillScore(Entity killed, int score, DamageSource source) {
-        super.awardKillScore(killed, score, source);
-        if (!this.level().isClientSide && killed instanceof LivingEntity) {
+    public boolean killedEntity(ServerLevel level263, LivingEntity killed, DamageSource source) {
+        boolean result263 = super.killedEntity(level263, killed, source);
+        if (!this.level().isClientSide() && killed != null) {
             feeding = 60;
             playAnim(CurseAnims.Anim.FEED);
-            this.playSound(SoundEvents.GENERIC_EAT, 1f, 0.6f);
+            this.playSound(SoundEvents.GENERIC_EAT.value(), 1f, 0.6f);
         }
+        return result263;
     }
 
     @Override
@@ -128,17 +129,17 @@ public class WerewolfEntity extends CurseMonster {
 
     @Override
     protected SoundEvent getAmbientSound() {
-        return SoundEvents.WOLF_GROWL;
+        return SoundEvents.WOLF_SOUNDS.get(net.minecraft.world.entity.animal.wolf.WolfSoundVariants.SoundSet.CLASSIC).adultSounds().growlSound().value();
     }
 
     @Override
     protected SoundEvent getHurtSound(DamageSource source) {
-        return SoundEvents.WOLF_HURT;
+        return SoundEvents.WOLF_SOUNDS.get(net.minecraft.world.entity.animal.wolf.WolfSoundVariants.SoundSet.CLASSIC).adultSounds().hurtSound().value();
     }
 
     @Override
     protected SoundEvent getDeathSound() {
-        return SoundEvents.WOLF_DEATH;
+        return SoundEvents.WOLF_SOUNDS.get(net.minecraft.world.entity.animal.wolf.WolfSoundVariants.SoundSet.CLASSIC).adultSounds().deathSound().value();
     }
 
     @Override
@@ -147,14 +148,20 @@ public class WerewolfEntity extends CurseMonster {
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag tag) {
-        super.addAdditionalSaveData(tag);
+    public void addAdditionalSaveData(net.minecraft.world.level.storage.ValueOutput output263) {
+        super.addAdditionalSaveData(output263);
+        net.minecraft.nbt.CompoundTag tag = new net.minecraft.nbt.CompoundTag();
+        
         tag.putBoolean("Wild", wild);
+    
+        output263.store(tag);
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag tag) {
-        super.readAdditionalSaveData(tag);
-        wild = tag.getBoolean("Wild");
+    public void readAdditionalSaveData(net.minecraft.world.level.storage.ValueInput input263) {
+        super.readAdditionalSaveData(input263);
+        net.minecraft.nbt.CompoundTag tag = com.skycraft.platform.ValueTags.read(input263 , "Wild");
+        
+        wild = tag.getBooleanOr("Wild",false);
     }
 }

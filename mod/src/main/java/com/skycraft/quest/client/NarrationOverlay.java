@@ -1,19 +1,18 @@
 package com.skycraft.quest.client;
 
 import com.skycraft.Skycraft;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
-import net.minecraftforge.client.event.RegisterGuiOverlaysEvent;
-import net.minecraftforge.client.gui.overlay.ForgeGui;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
+import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.util.List;
 
@@ -42,17 +41,17 @@ public final class NarrationOverlay {
         text = null;
     }
 
-    @Mod.EventBusSubscriber(modid = Skycraft.MODID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+    @net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
     public static final class NarrationSetup {  // not 'Setup': Forge's ASM handler names collide per package
         private NarrationSetup() {}
 
         @SubscribeEvent
-        public static void overlays(RegisterGuiOverlaysEvent event) {
-            event.registerAboveAll("narration", NarrationOverlay::render);
+        public static void overlays(RegisterGuiLayersEvent event) {
+            event.registerAboveAll(net.minecraft.resources.Identifier.fromNamespaceAndPath("skycraft", "narration"), NarrationOverlay::render);
         }
     }
 
-    @Mod.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
+    @net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
     public static final class Events {
         private Events() {}
 
@@ -62,7 +61,8 @@ public final class NarrationOverlay {
         }
     }
 
-    static void render(ForgeGui gui, GuiGraphics g, float partialTick, int width, int height) {
+    static void render(GuiGraphicsExtractor g,net.minecraft.client.DeltaTracker delta) {
+        float partialTick=delta.getGameTimeDeltaPartialTick(false);int width=g.guiWidth(),height=g.guiHeight();
         if (text == null) return;
         long age = Util.getMillis() - startMs;
         long total = stayMs + 2 * FADE_MS;
@@ -94,7 +94,7 @@ public final class NarrationOverlay {
         int ta = Math.max(5, (int) (alpha * 255));
         for (int i = 0; i < shown; i++) {
             FormattedCharSequence line = lines.get(i);
-            g.drawString(font, line, (width - font.width(line)) / 2, y0 + 9 + i * lineH, (ta << 24) | 0xEDE6D3, true);
+            g.text(font, line, (width - font.width(line)) / 2, y0 + 9 + i * lineH, (ta << 24) | 0xEDE6D3, true);
         }
     }
 }

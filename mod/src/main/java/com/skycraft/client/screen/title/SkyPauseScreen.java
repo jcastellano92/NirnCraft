@@ -4,13 +4,13 @@ import com.skycraft.client.ClientState;
 import com.skycraft.network.CorePackets;
 import com.skycraft.network.SkyNetwork;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import org.lwjgl.glfw.GLFW;
+import com.mojang.blaze3d.platform.InputConstants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,7 +32,7 @@ public class SkyPauseScreen extends Screen {
         LOAD("menu.skycraft.load", "Save and Choose Character"),
         SETTINGS("menu.skycraft.settings", "Settings"),
         MODS("menu.skycraft.mods", "Mods"),
-        INVITE("menu.skycraft.invite", "Multiplayer / Invite Friends"),
+        MULTIPLAYER("menu.skycraft.multiplayer_options", "World & Multiplayer"),
         UNSTUCK("menu.skycraft.unstuck", "Unstuck / Respawn"),
         QUIT_TITLE("menu.skycraft.quit_title", "Quit to Main Menu"),
         QUIT_DESKTOP("menu.skycraft.quit_desktop", "Quit to Desktop");
@@ -76,7 +76,7 @@ public class SkyPauseScreen extends Screen {
         if (Minecraft.getInstance().isLocalServer()) menuItems.add(MenuItem.LOAD);
         menuItems.add(MenuItem.SETTINGS);
         menuItems.add(MenuItem.MODS);
-        menuItems.add(MenuItem.INVITE);
+        menuItems.add(MenuItem.MULTIPLAYER);
         menuItems.add(MenuItem.UNSTUCK);
         menuItems.add(MenuItem.QUIT_TITLE);
         menuItems.add(MenuItem.QUIT_DESKTOP);
@@ -87,22 +87,22 @@ public class SkyPauseScreen extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+    public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
         // Dark Nordic slate background with drifting smoke
         g.fillGradient(0, 0, width, height, 0xB0080808, 0xD0141210);
-        com.skycraft.inventory.client.SkyUi.smoke(g, width, height, (net.minecraft.Util.getMillis() % 1_000_000L) / 1000f, 0.6f);
+        com.skycraft.inventory.client.SkyUi.smoke(g, width, height, (net.minecraft.util.Util.getMillis() % 1_000_000L) / 1000f, 0.6f);
         g.fillGradient(0, 0, Math.min(300, width / 2), height, 0x90000000, 0x20000000);
 
         int titleX = 50;
         int titleY = titleY();
 
         // Header
-        g.pose().pushPose();
-        g.pose().translate(titleX, titleY - 4, 0);
-        g.pose().scale(1.6f, 1.6f, 1f);
-        g.drawString(font, "S Y S T E M", 0, 0, COLOR_GOLD, true);
-        g.pose().popPose();
-        g.drawString(font, "SKYCRAFT", titleX, titleY + 12, 0xFF8A8272, false);
+        g.pose().pushMatrix();
+        g.pose().translate(titleX, titleY - 4);
+        g.pose().scale(1.6f, 1.6f);
+        g.text(font, "S Y S T E M", 0, 0, COLOR_GOLD, true);
+        g.pose().popMatrix();
+        g.text(font, "SKYCRAFT", titleX, titleY + 12, 0xFF8A8272, false);
 
         // Divider
         int divW = Math.min(200, width / 2 - 40);
@@ -132,15 +132,15 @@ public class SkyPauseScreen extends Screen {
                 com.skycraft.inventory.client.SkyUi.diamond(g, titleX - 7, itemY + 4, 2, COLOR_GOLD);
             }
 
-            g.drawString(font, item.getLabel().getString().toUpperCase(java.util.Locale.ROOT), titleX, itemY + 2, textColor, isSelected);
+            g.text(font, item.getLabel().getString().toUpperCase(java.util.Locale.ROOT), titleX, itemY + 2, textColor, isSelected);
         }
 
         // Status message if quicksave or unstuck was pressed
         if (statusMessage != null && System.currentTimeMillis() < statusMessageExpire) {
-            g.drawString(font, statusMessage, titleX, menuStartY + menuItems.size() * itemHeight + 14, COLOR_GOLD, true);
+            g.text(font, statusMessage, titleX, menuStartY + menuItems.size() * itemHeight + 14, COLOR_GOLD, true);
         }
 
-        super.render(g, mouseX, mouseY, partialTick);
+        super.extractRenderState(g, mouseX, mouseY, partialTick);
     }
 
     /** Layout that keeps every item on screen down to the Steam Deck's 427x267 scaled resolution. */
@@ -158,7 +158,9 @@ public class SkyPauseScreen extends Screen {
     }
 
     @Override
-    public boolean mouseClicked(double mx, double my, int button) {
+    public boolean mouseClicked(net.minecraft.client.input.MouseButtonEvent event, boolean doubleClick) {
+        double mx = event.x(), my = event.y();
+        int button = com.skycraft.client.screen.UiInput.actionButton(event.button());
         if (button == 0) {
             int titleX = 50;
             int menuStartY = menuStartY();
@@ -173,30 +175,31 @@ public class SkyPauseScreen extends Screen {
                 }
             }
         }
-        return super.mouseClicked(mx, my, button);
+        return super.mouseClicked(event, doubleClick);
     }
 
     @Override
-    public boolean keyPressed(int key, int scan, int mods) {
-        if (key == GLFW.GLFW_KEY_ESCAPE) {
+    public boolean keyPressed(net.minecraft.client.input.KeyEvent event) {
+        int key = event.key(), scan = event.keycode(), mods = event.modifiers();
+        if (key == InputConstants.KEY_ESCAPE) {
             onClose();
             return true;
         }
-        if (key == GLFW.GLFW_KEY_UP || key == GLFW.GLFW_KEY_W) {
+        if (key == InputConstants.KEY_UP || key == InputConstants.KEY_W) {
             selectedIndex = (selectedIndex - 1 + menuItems.size()) % menuItems.size();
             return true;
         }
-        if (key == GLFW.GLFW_KEY_DOWN || key == GLFW.GLFW_KEY_S) {
+        if (key == InputConstants.KEY_DOWN || key == InputConstants.KEY_S) {
             selectedIndex = (selectedIndex + 1) % menuItems.size();
             return true;
         }
-        if (key == GLFW.GLFW_KEY_ENTER || key == GLFW.GLFW_KEY_SPACE) {
+        if (key == InputConstants.KEY_RETURN || key == InputConstants.KEY_SPACE) {
             if (selectedIndex >= 0 && selectedIndex < menuItems.size()) {
                 activateItem(menuItems.get(selectedIndex));
                 return true;
             }
         }
-        return super.keyPressed(key, scan, mods);
+        return super.keyPressed(event);
     }
 
     private void activateItem(MenuItem item) {
@@ -224,19 +227,20 @@ public class SkyPauseScreen extends Screen {
                     });
                 }
             }
-            case LOAD -> mc.setScreen(new ConfirmScreen(confirmed -> {
+            case LOAD -> mc.gui.setScreen(new ConfirmScreen(confirmed -> {
                 if (confirmed) {
                     // save and leave this world first (a world list can't be used from inside a running one), then pick
-                    if (mc.level != null) mc.level.disconnect();
-                    mc.clearLevel(new net.minecraft.client.gui.screens.GenericDirtMessageScreen(Component.translatable("menu.savingLevel")));
-                    mc.setScreen(new SkyLoadWorldScreen(new SkyTitleScreen()));
+                    mc.disconnectFromWorld(net.minecraft.client.multiplayer.ClientLevel.DEFAULT_QUIT_MESSAGE);
+                    mc.gui.setScreen(new SkyLoadWorldScreen(new SkyTitleScreen()));
                 } else {
-                    mc.setScreen(this);
+                    mc.gui.setScreen(this);
                 }
             }, Component.literal("Save and choose another character?"), Component.literal("Your progress is saved first.")));
-            case SETTINGS -> mc.setScreen(new net.minecraft.client.gui.screens.OptionsScreen(this, mc.options));
-            case MODS -> mc.setScreen(new net.minecraftforge.client.gui.ModListScreen(this));
-            case INVITE -> openInviteScreen();
+            case SETTINGS -> mc.gui.setScreen(new net.minecraft.client.gui.screens.options.OptionsScreen(this, mc.options));
+            case MODS -> mc.gui.setScreen(net.neoforged.neoforge.client.gui.modlist.ModListScreen.create(this));
+            case MULTIPLAYER -> {
+                if (mc.level != null) mc.gui.setScreen(new SkyWorldOptionsScreen(this, mc.level));
+            }
             case UNSTUCK -> {
                 if (ClientState.has(CorePackets.SyncVitals.IN_COMBAT)) {
                     statusMessage = "Cannot use while in combat";
@@ -248,46 +252,25 @@ public class SkyPauseScreen extends Screen {
             }
             case QUIT_TITLE -> {
                 boolean single = mc.isLocalServer();
-                mc.setScreen(new ConfirmScreen(confirmed -> {
+                mc.gui.setScreen(new ConfirmScreen(confirmed -> {
                     if (confirmed) {
-                        if (mc.level != null) mc.level.disconnect();
-                        if (single) mc.clearLevel(new net.minecraft.client.gui.screens.GenericDirtMessageScreen(Component.translatable("menu.savingLevel")));
-                        else mc.clearLevel();
-                        mc.setScreen(new SkyTitleScreen());
+                        mc.disconnectFromWorld(net.minecraft.client.multiplayer.ClientLevel.DEFAULT_QUIT_MESSAGE);
+                        mc.gui.setScreen(new SkyTitleScreen());
                     } else {
-                        mc.setScreen(this);
+                        mc.gui.setScreen(this);
                     }
                 }, Component.literal("Quit to Main Menu?"), Component.literal("Any unsaved progress will be saved.")));
             }
             case QUIT_DESKTOP -> {
-                mc.setScreen(new ConfirmScreen(confirmed -> {
+                mc.gui.setScreen(new ConfirmScreen(confirmed -> {
                     if (confirmed) {
                         mc.stop();
                     } else {
-                        mc.setScreen(this);
+                        mc.gui.setScreen(this);
                     }
                 }, Component.literal("Quit to Desktop?"), CommonComponents.EMPTY));
             }
         }
     }
 
-    private void openInviteScreen() {
-        Minecraft mc = Minecraft.getInstance();
-        try {
-            Class<?> modalFlow = Class.forName("gg.essential.gui.sps.InviteOrHostModalFlowKt");
-            java.lang.reflect.Method m = modalFlow.getMethod("launchInviteOrHostModalFlow");
-            m.invoke(null);
-            return;
-        } catch (Throwable t) {
-            try {
-                Class<?> cmdClass = Class.forName("gg.essential.commands.impl.CommandMcFriends");
-                Object cmd = cmdClass.getConstructor().newInstance();
-                cmdClass.getMethod("handle").invoke(cmd);
-                return;
-            } catch (Throwable t2) {
-                // Fallback to vanilla Open to LAN screen
-                mc.setScreen(new net.minecraft.client.gui.screens.ShareToLanScreen(this));
-            }
-        }
-    }
 }

@@ -27,7 +27,7 @@ import net.minecraft.world.level.block.entity.SignBlockEntity;
 import net.minecraft.world.level.block.entity.SignText;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
-import net.minecraft.world.level.chunk.ChunkStatus;
+import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.levelgen.Heightmap;
@@ -112,7 +112,7 @@ final class Paver {
             try {
                 used = current.step(level, data);
             } catch (RuntimeException e) {
-                Skycraft.LOGGER.warn("Skycraft roads: paving chunk {} failed", new ChunkPos(current.chunk), e);
+                Skycraft.LOGGER.warn("Skycraft roads: paving chunk {} failed", ChunkPos.unpack(current.chunk), e);
                 if (data.paved.add(current.chunk)) data.setDirty();
                 current = null;
                 continue;
@@ -203,7 +203,7 @@ final class Paver {
         /** Structure pieces reaching into the chunk, from start chunks that are already in memory (never loads any). */
         private static List<BoundingBox> pieces(ServerLevel level, int cx, int cz) {
             LevelChunk lc = level.getChunkSource().getChunkNow(cx, cz);
-            if (lc == null || !lc.hasAnyStructureReferences()) return List.of();
+            if (lc == null || lc.getAllReferences().isEmpty()) return List.of();
             int bx = cx << 4, bz = cz << 4;
             List<BoundingBox> out = new ArrayList<>();
             for (Map.Entry<Structure, LongSet> e : lc.getAllReferences().entrySet()) {
@@ -489,7 +489,7 @@ final class Paver {
         int changes = 0;
         BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos();
         int top = level.getHeight(Heightmap.Types.WORLD_SURFACE, x, z);
-        for (int y = top - 1, guard = 0; y > level.getMinBuildHeight() && guard < 64; y--, guard++) {
+        for (int y = top - 1, guard = 0; y > level.getMinY() && guard < 64; y--, guard++) {
             p.set(x, y, z);
             BlockState s = level.getBlockState(p);
             if (s.isAir()) continue;
@@ -553,7 +553,7 @@ final class Paver {
     private static int groundY(ServerLevel level, int x, int z) {
         int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z) - 1;
         BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos(x, y, z);
-        for (int guard = 0; guard < 40 && p.getY() > level.getMinBuildHeight(); guard++) {
+        for (int guard = 0; guard < 40 && p.getY() > level.getMinY(); guard++) {
             BlockState s = level.getBlockState(p);
             if (!s.getFluidState().isEmpty()) return Integer.MIN_VALUE;
             boolean passable = s.isAir() || s.is(BlockTags.LOGS) || s.is(BlockTags.LEAVES) || s.is(Blocks.SNOW)
@@ -582,7 +582,7 @@ final class Paver {
         int top = level.getHeight(Heightmap.Types.WORLD_SURFACE, x, z);
         BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos();
         BlockState air = Blocks.AIR.defaultBlockState();
-        for (int y = top - 1, guard = 0; y > level.getMinBuildHeight() && guard < 48; y--, guard++) {
+        for (int y = top - 1, guard = 0; y > level.getMinY() && guard < 48; y--, guard++) {
             p.set(x, y, z);
             BlockState s = level.getBlockState(p);
             if (s.isAir()) continue;
@@ -660,7 +660,7 @@ final class Paver {
         for (BlockPos l : logs) if (level.setBlock(l, air, QUIET)) changes++;
         // leaves: those that no remaining log within 3 blocks holds up
         int rx0 = Math.max(minX, lx0 - 6), rx1 = Math.min(maxX, lx1 + 6), rz0 = Math.max(minZ, lz0 - 6), rz1 = Math.min(maxZ, lz1 + 6);
-        int ry0 = Math.max(level.getMinBuildHeight(), minY - 2), ry1 = Math.min(level.getMaxBuildHeight() - 1, maxY + 5);
+        int ry0 = Math.max(level.getMinY(), minY - 2), ry1 = Math.min((level.getMaxY() + 1) - 1, maxY + 5);
         ArrayList<BlockPos> rest = new ArrayList<>();
         ArrayList<BlockPos> leaves = new ArrayList<>();
         BlockPos.MutableBlockPos m = new BlockPos.MutableBlockPos();
@@ -757,7 +757,7 @@ final class Paver {
     private static int pillar(ServerLevel level, BlockPos waterTop, BlockState material) {
         BlockPos.MutableBlockPos p = waterTop.mutable();
         int depth = 0;
-        while (depth < MAX_PILLAR && p.getY() > level.getMinBuildHeight()) {
+        while (depth < MAX_PILLAR && p.getY() > level.getMinY()) {
             BlockState s = level.getBlockState(p);
             if (!s.is(Blocks.WATER) && !(s.getBlock() instanceof BushBlock && !s.getFluidState().isEmpty())
                     && !s.is(Blocks.KELP) && !s.is(Blocks.KELP_PLANT) && !s.is(Blocks.SEAGRASS) && !s.is(Blocks.TALL_SEAGRASS)) break;
@@ -780,7 +780,7 @@ final class Paver {
         int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z) - 1;
         BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos(x, y, z);
         for (int guard = 0; guard < 24; guard++) {
-            if (p.getY() <= level.getMinBuildHeight()) return null;
+            if (p.getY() <= level.getMinY()) return null;
             BlockState s = level.getBlockState(p);
             if (s.is(BlockTags.LOGS)) return null;
             if (!s.getFluidState().isEmpty()) return p.immutable();
@@ -802,7 +802,7 @@ final class Paver {
     }
 
     private static boolean isTamrielGround(BlockState s) {
-        var id = net.minecraftforge.registries.ForgeRegistries.BLOCKS.getKey(s.getBlock());
+        var id = net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(s.getBlock());
         if (id == null || !com.skycraft.Skycraft.MODID.equals(id.getNamespace())) return false;
         return switch (id.getPath()) {
             case "ash_block", "volcanic_rock", "cracked_volcanic_rock", "dune_sand", "coral_stone", "frosted_stone" -> true;
@@ -849,7 +849,7 @@ final class Paver {
         int y = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z) - 1;
         BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos(x, y, z);
         int guard = 0;
-        while (p.getY() > level.getMinBuildHeight() && isPostMaterial(level.getBlockState(p)) && guard++ < 8) {
+        while (p.getY() > level.getMinY() && isPostMaterial(level.getBlockState(p)) && guard++ < 8) {
             p.move(Direction.DOWN);
         }
         BlockState s = level.getBlockState(p);
@@ -937,14 +937,14 @@ final class Paver {
         // the historic road's name (the Gold Road...) heads the sign, in each reader's language
         Component road = d.roadName().isEmpty() ? Component.empty()
                 : Component.translatable("road.skycraft." + d.roadName()).withStyle(net.minecraft.ChatFormatting.ITALIC);
-        SignText text = new SignText()
-                .setMessage(0, road)
-                .setMessage(1, name)
-                .setMessage(2, Component.literal(right ? distance + " →" : "← " + distance))
-                .setMessage(3, Component.empty());
-        if (stone) text = text.setColor(net.minecraft.world.item.DyeColor.WHITE);
-        sbe.setText(text, true);
-        sbe.setText(text, false);
+        SignText text = SignText.EMPTY
+                .asMutable().setLine(0, road).asImmutable()
+                .asMutable().setLine(1, name).asImmutable()
+                .asMutable().setLine(2, Component.literal(right ? distance + " →" : "← " + distance)).asImmutable()
+                .asMutable().setLine(3, Component.empty()).asImmutable();
+        if (stone) text = text.withColor(net.minecraft.world.item.DyeColor.WHITE);
+        sbe.setText(text, net.minecraft.world.level.block.entity.SignTextSlot.FRONT);
+        sbe.setText(text, net.minecraft.world.level.block.entity.SignTextSlot.BACK);
         sbe.setWaxed(true);
         sbe.setChanged();
         level.sendBlockUpdated(pos, sign, sign, Block.UPDATE_CLIENTS);
@@ -961,7 +961,7 @@ final class Paver {
         BlockPos at = g.above();
         if (level.getBlockState(at).is(shrine)) return 0; // already built
         RoadFeature.Dest d = f.dests.isEmpty() ? null : f.dests.get(0);
-        Direction facing = d == null ? Direction.SOUTH : Direction.getNearest(d.dirX(), 0, d.dirZ());
+        Direction facing = d == null ? Direction.SOUTH : Direction.getApproximateNearest(d.dirX(), 0, d.dirZ());
         Direction side = facing.getClockWise();
         BlockPos[] spots = {at, at.relative(side, 2), at.relative(side, -2)};
         for (BlockPos p : spots) {

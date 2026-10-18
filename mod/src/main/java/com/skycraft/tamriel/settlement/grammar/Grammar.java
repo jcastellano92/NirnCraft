@@ -207,7 +207,7 @@ public final class Grammar {
         } else if (b.roof == Roof.SPIRE) {
             Roofs.flat(c, p, m, roofY, false, false);
             ridgeTop = Roofs.spire(c, p, b.bx0 - 1, b.bz0 - 1, b.bx1 + 1, b.bz1 + 1, roofY + 1,
-                    b.culture == com.skycraft.tamriel.settlement.Culture.ALTMER ? B.s(Blocks.AMETHYST_CLUSTER) : B.s(Blocks.LIGHTNING_ROD));
+                    b.culture == com.skycraft.tamriel.settlement.Culture.ALTMER ? B.s(Blocks.AMETHYST_CLUSTER) : B.s(com.skycraft.worldgen.VanillaBlocks.LIGHTNING_ROD));
         } else if (b.roof == Roof.SHED) {
             ridgeTop = Roofs.shed(c, p, b.bx0 - 1, b.bz0 - 1, b.bx1 + 1, b.bz1 + 1, roofY, p.wall);
         } else {
@@ -513,7 +513,7 @@ public final class Grammar {
                     }
                     c.air(lx, th + 1, az1 - 1);
                 } else {
-                    Roofs.spire(c, p, ax0 - 1, az0 - 1, ax1 + 1, az1 + 1, th + 1, B.s(Blocks.LIGHTNING_ROD));
+                    Roofs.spire(c, p, ax0 - 1, az0 - 1, ax1 + 1, az1 + 1, th + 1, B.s(com.skycraft.worldgen.VanillaBlocks.LIGHTNING_ROD));
                 }
             }
             case PEN -> {
@@ -660,7 +660,7 @@ public final class Grammar {
 
     /** The wall hanging sign of the same wood as a palette's wall sign. */
     public static BlockState hanging(BlockState wallSign) {
-        net.minecraft.resources.ResourceLocation id = net.minecraftforge.registries.ForgeRegistries.BLOCKS.getKey(wallSign.getBlock());
+        net.minecraft.resources.Identifier id = net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(wallSign.getBlock());
         if (id == null) return Blocks.SPRUCE_WALL_HANGING_SIGN.defaultBlockState();
         return B.id(id.toString().replace("_wall_sign", "_wall_hanging_sign"), Blocks.SPRUCE_WALL_HANGING_SIGN);
     }

@@ -4,70 +4,65 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import com.skycraft.creatures.entity.CorpseEntity;
 import com.skycraft.creatures.entity.DragonEntity;
-import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.renderer.entity.state.EntityRenderState;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.inventory.InventoryMenu;
 
-/**
- * Renders a corpse as the dead creature lying on its side (exactly the pose of the vanilla death animation), using
- * a cached client-side dummy of the creature. Shows the name only when looked at.
- */
-public class CorpseRenderer extends EntityRenderer<CorpseEntity> {
-    public CorpseRenderer(EntityRendererProvider.Context context) {
-        super(context);
-        this.shadowRadius = 0.0f;
+/** Captures the dummy's native render state before submitting a dragged or resting corpse. */
+public class CorpseRenderer extends EntityRenderer<CorpseEntity,CorpseRenderer.State> {
+    public static class State extends EntityRenderState {
+        EntityRenderer<Entity,EntityRenderState> renderer;
+        EntityRenderState dummy;
+        float yaw,roll,headLift,half,lift;
+        boolean dragon;
     }
-
-    @Override
-    public void render(CorpseEntity corpse, float entityYaw, float partialTick, PoseStack poseStack, MultiBufferSource buffers, int packedLight) {
-        if (corpse.isVisibleYet()) {
-            Entity dummy = corpse.getRenderDummy();
-            if (dummy != null) {
-                // No try/catch around the draw: an exception half-way through would leave the vertex buffers broken.
-                // Bodies whose dummy can't even be created are skipped (CorpseEntity#getRenderDummy).
-                EntityRenderer<? super Entity> renderer = this.entityRenderDispatcher.getRenderer(dummy);
-                poseStack.pushPose();
-                poseStack.mulPose(Axis.YP.rotationDegrees(180.0f - entityYaw));
-                float roll = corpse.getRoll();
-                float headLift = 0.0f;
-                if (corpse.isDragged()) {
-                    // the body sways and its head end is lifted while being dragged
-                    float t = corpse.tickCount + partialTick;
-                    roll += Mth.sin(t * 0.35f) * 6.0f;
-                    headLift = -10.0f + Mth.sin(t * 0.5f) * 2.0f;
-                }
-                if (dummy instanceof DragonEntity dragon) {
-                    // the soul is absorbed: the flesh burns away to the bones
-                    dragon.setBurn(Mth.clamp((corpse.tickCount + partialTick - 50f) / 120f, 0f, 1f));
-                    poseStack.mulPose(Axis.ZP.rotationDegrees(10.0f + roll * 0.3f));
-                } else {
-                    float half = corpse.isCentered() ? corpse.getBodyHeight() * 0.5f : 0.0f;
-                    float lift = Math.min(dummy.getBbWidth() * 0.5f, 0.75f);
-                    poseStack.translate(0.0f, lift, 0.0f);
-                    // head end is local -X: a negative Z rotation lifts it; X rotation rolls around the long axis
-                    if (headLift != 0.0f) poseStack.mulPose(Axis.ZP.rotationDegrees(headLift));
-                    poseStack.mulPose(Axis.XP.rotationDegrees(roll));
-                    poseStack.translate(half, 0.0f, 0.0f);
-                    poseStack.mulPose(Axis.ZP.rotationDegrees(90.0f));
-                }
-                renderer.render(dummy, 0.0f, 0.0f, poseStack, buffers, packedLight);
-                poseStack.popPose();
-            }
+    public CorpseRenderer(EntityRendererProvider.Context context) { super(context); shadowRadius=0; }
+    @Override protected net.minecraft.world.phys.AABB getBoundingBoxForCulling(CorpseEntity corpse,float partialTicks){return corpse.getBoundingBoxForCulling();}
+    @Override public State createRenderState() { return new State(); }
+    @Override @SuppressWarnings({"unchecked","rawtypes"})
+    public void extractRenderState(CorpseEntity corpse,State state,float partialTick) {
+        super.extractRenderState(corpse,state,partialTick);
+        state.renderer=null; state.dummy=null;
+        if(!corpse.isVisibleYet()) return;
+        Entity dummy=corpse.getRenderDummy();
+        if(dummy==null) return;
+        state.yaw=corpse.getYRot(partialTick);
+        state.roll=corpse.getRoll(); state.headLift=0;
+        if(corpse.isDragged()) {
+            float t=corpse.tickCount+partialTick;
+            state.roll+=Mth.sin(t*.35f)*6;
+            state.headLift=-10+Mth.sin(t*.5f)*2;
         }
-        super.render(corpse, entityYaw, partialTick, poseStack, buffers, packedLight);
+        state.dragon=dummy instanceof DragonEntity;
+        if(dummy instanceof DragonEntity dragon) dragon.setBurn(Mth.clamp((corpse.tickCount+partialTick-50)/120,0,1));
+        state.half=corpse.isCentered()?corpse.getBodyHeight()*.5f:0;
+        state.lift=Math.min(dummy.getBbWidth()*.5f,.75f);
+        state.renderer=(EntityRenderer)Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(dummy);
+        state.dummy=state.renderer.createRenderState(dummy,0);
     }
-
-    @Override
-    protected boolean shouldShowName(CorpseEntity corpse) {
-        return corpse.hasCustomName() && corpse.isVisibleYet() && corpse == this.entityRenderDispatcher.crosshairPickEntity;
+    @Override public void submit(State state,PoseStack pose,SubmitNodeCollector collector,CameraRenderState camera) {
+        if(state.renderer!=null && state.dummy!=null) {
+            pose.pushPose();
+            pose.rotateDegrees(Axis.YP,180-state.yaw);
+            if(state.dragon) pose.rotateDegrees(Axis.ZP,10+state.roll*.3f);
+            else {
+                pose.translate(0,state.lift,0);
+                if(state.headLift!=0) pose.rotateDegrees(Axis.ZP,state.headLift);
+                pose.rotateDegrees(Axis.XP,state.roll);
+                pose.translate(state.half,0,0);
+                pose.rotateDegrees(Axis.ZP,90);
+            }
+            state.renderer.submit(state.dummy,pose,collector,camera);
+            pose.popPose();
+        }
+        super.submit(state,pose,collector,camera);
     }
-
-    @Override
-    public ResourceLocation getTextureLocation(CorpseEntity corpse) {
-        return InventoryMenu.BLOCK_ATLAS;
+    @Override protected boolean shouldShowName(CorpseEntity corpse,double distanceSquared) {
+        return corpse.hasCustomName()&&corpse.isVisibleYet()&&corpse==Minecraft.getInstance().crosshairPickEntity;
     }
 }

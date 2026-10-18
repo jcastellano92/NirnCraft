@@ -20,8 +20,8 @@ import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.animal.Animal;
-import net.minecraft.world.entity.animal.Rabbit;
-import net.minecraft.world.entity.animal.Sheep;
+import net.minecraft.world.entity.animal.rabbit.Rabbit;
+import net.minecraft.world.entity.animal.sheep.Sheep;
 import net.minecraft.world.entity.animal.goat.Goat;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -75,23 +75,23 @@ public class SabreCatEntity extends FaunaAnimal {
         this.goalSelector.addGoal(6, new LookAtPlayerGoal(this, Player.class, 12f));
         this.goalSelector.addGoal(7, new RandomLookAroundGoal(this));
         this.targetSelector.addGoal(1, new HurtByTargetGoal(this).setAlertOthers());
-        this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, 10, true, false, this::canAttackPlayers));
+        this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, 10, true, false, (target263, targetLevel263) -> this.canAttackPlayers(target263)));
         this.targetSelector.addGoal(3, new com.skycraft.creatures.ai.SmartPartyTargetGoal(this));
         this.targetSelector.addGoal(4, new NearestAttackableTargetGoal<>(this, Animal.class, 40, true, false,
-                e -> e instanceof DeerEntity || e instanceof ElkEntity || e instanceof Sheep || e instanceof Goat || e instanceof Rabbit));
+                (e, targetLevel263) -> e instanceof DeerEntity || e instanceof ElkEntity || e instanceof Sheep || e instanceof Goat || e instanceof Rabbit));
     }
 
     @Override
     public void tick() {
         super.tick();
-        if (this.level().isClientSide) return;
+        if (this.level().isClientSide()) return;
         if (pounceCooldown > 0) pounceCooldown--;
         LivingEntity target = getTarget();
         if (pouncing && target != null && target.isAlive() && getBoundingBox().inflate(0.4).intersects(target.getBoundingBox())) {
             pouncing = false;
             float damage = (float) getAttributeValue(Attributes.ATTACK_DAMAGE) * 1.5f;
-            if (target.hurt(damageSources().mobAttack(this), damage)) {
-                doEnchantDamageEffects(this, target);
+            if (com.skycraft.platform.Effects.hurt(target, damageSources().mobAttack(this), damage)) {
+                net.minecraft.world.item.enchantment.EnchantmentHelper.doPostAttackEffects((net.minecraft.server.level.ServerLevel)this.level(), target, damageSources().mobAttack(this));
                 CombatHandler.stagger(this, target, 20);
             }
             setLastHurtMob(target);
@@ -99,7 +99,7 @@ public class SabreCatEntity extends FaunaAnimal {
     }
 
     @Override
-    public boolean causeFallDamage(float distance, float multiplier, DamageSource source) {
+    public boolean causeFallDamage(double distance, float multiplier, DamageSource source) {
         return distance > 6 && super.causeFallDamage(distance - 3, multiplier, source); // lands on its feet
     }
 

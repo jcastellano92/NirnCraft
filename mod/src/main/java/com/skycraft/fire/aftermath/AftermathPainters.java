@@ -146,11 +146,11 @@ public final class AftermathPainters {
     }
 
     private static BlockState bedroll() {
-        return B.id("skycraft:bedroll", Blocks.RED_BED);
+        return B.id("skycraft:bedroll", com.skycraft.worldgen.VanillaBlocks.RED_BED);
     }
 
     private static BlockState candle(boolean three) {
-        BlockState s = b(Blocks.WHITE_CANDLE).setValue(CandleBlock.LIT, true);
+        BlockState s = b(com.skycraft.worldgen.VanillaBlocks.WHITE_CANDLE).setValue(CandleBlock.LIT, true);
         return three ? s.setValue(CandleBlock.CANDLES, 3) : s;
     }
 
@@ -297,13 +297,13 @@ public final class AftermathPainters {
         // a lantern under the ridge, a candle on the floor, a bundle of linen
         c.set(x0 + 2, gb + 2, z0 + 1, b(Blocks.LANTERN).setValue(LanternBlock.HANGING, true));
         c.setIfOpen(x0 + 2, gb + 1, z0 + 1, candle(false));
-        c.setIfOpen(x0 + 2, gb + 1, z0 + len - 1, b(Blocks.WHITE_CARPET));
+        c.setIfOpen(x0 + 2, gb + 1, z0 + len - 1, b(com.skycraft.worldgen.VanillaBlocks.WHITE_CARPET));
         return n;
     }
 
     private static void cloth(Canvas c, int x, int y, int z, int idx, int salt) {
         boolean grey = c.chance(x, y, z + salt, 221 + idx, 4);
-        c.set(x, y, z, grey ? b(Blocks.LIGHT_GRAY_WOOL) : b(Blocks.WHITE_WOOL));
+        c.set(x, y, z, grey ? b(com.skycraft.worldgen.VanillaBlocks.LIGHT_GRAY_WOOL) : b(com.skycraft.worldgen.VanillaBlocks.WHITE_WOOL));
     }
 
     private static void putAt(Canvas c, int x, int y, int z, BlockState s) {
@@ -328,8 +328,8 @@ public final class AftermathPainters {
             if (x >= w - 1) break;
             for (int z = 2; z + 2 < d - 1 && n < roles.length; z += 4) {
                 // the head end towards the candle, the feet towards the next body
-                putOpen(c, x, 1, z, b(Blocks.WHITE_CARPET));
-                putOpen(c, x, 1, z + 1, b(Blocks.WHITE_CARPET));
+                putOpen(c, x, 1, z, b(com.skycraft.worldgen.VanillaBlocks.WHITE_CARPET));
+                putOpen(c, x, 1, z + 1, b(com.skycraft.worldgen.VanillaBlocks.WHITE_CARPET));
                 putOpen(c, x, 1, z - 1, candle(false));
                 if (c.chance(x, 0, z, 231, 2)) putOpen(c, x - 1 >= 0 ? x - 1 : x + 1, 1, z, b(Blocks.POPPY));
                 if (c.chance(x, 0, z, 233, 3)) putOpen(c, x - 1 >= 0 ? x - 1 : x + 1, 1, z + 1, b(Blocks.LILY_OF_THE_VALLEY));
@@ -421,8 +421,8 @@ public final class AftermathPainters {
         String[] mourners = {"farmer", "citizen", "hunter"};
         int n = 0;
         for (int x = 1; x < w - 1 && n < 3; x += 2) {
-            putOpen(c, x, 1, 1, b(Blocks.WHITE_CARPET));
-            putOpen(c, x, 1, 2, b(Blocks.WHITE_CARPET));
+            putOpen(c, x, 1, 1, b(com.skycraft.worldgen.VanillaBlocks.WHITE_CARPET));
+            putOpen(c, x, 1, 2, b(com.skycraft.worldgen.VanillaBlocks.WHITE_CARPET));
             putOpen(c, x, 1, 0, candle(false));
             body(c, x, 1, roles[n], true, "s" + face(c, x, 4));
             personFacing(c, x, 4, n == 1 ? "kneel_weep" : "mourn", mourners[n], x, 2);
@@ -540,7 +540,7 @@ public final class AftermathPainters {
         put(c, 1, 2, 3, b(Blocks.CAMPFIRE).setValue(CampfireBlock.LIT, true).setValue(CampfireBlock.SIGNAL_FIRE, false));
         put(c, w - 2, 1, 3, b(Blocks.SPRUCE_FENCE));
         put(c, w - 2, 2, 3, b(Blocks.SPRUCE_FENCE));
-        put(c, w - 2, 3, 3, b(Blocks.RED_WOOL));
+        put(c, w - 2, 3, 3, b(com.skycraft.worldgen.VanillaBlocks.RED_WOOL));
         // the soldiers: three on watch, their captain, two who did not make it
         person(c, mid - 3, 3, "guard", "imperial_soldier");
         person(c, mid + 3, 3, "guard", "imperial_soldier");
@@ -611,7 +611,7 @@ public final class AftermathPainters {
         // Intact striped canopy at gy + 4 with spruce slab front/back trim and hanging lantern
         for (int x = x0; x <= x1; x++) {
             for (int z = z0; z <= z1; z++) {
-                BlockState cloth = (x % 2 == 0) ? b(Blocks.ORANGE_WOOL) : b(Blocks.WHITE_WOOL);
+                BlockState cloth = (x % 2 == 0) ? b(com.skycraft.worldgen.VanillaBlocks.ORANGE_WOOL) : b(com.skycraft.worldgen.VanillaBlocks.WHITE_WOOL);
                 c.set(x, gy + 4, z, cloth);
             }
         }
@@ -686,8 +686,8 @@ public final class AftermathPainters {
                 else if (r < 13) putOpen(c, x, 1, z, B.stair(b(Blocks.SPRUCE_STAIRS), Direction.values()[2 + c.roll(x, 1, z, 305, 4)], c.chance(x, 2, z, 307, 2)));
                 else if (r < 17) putOpen(c, x, 1, z, b(Blocks.CAULDRON));
                 else if (r < 21) putOpen(c, x, 1, z, b(Blocks.FLOWER_POT));
-                else if (r < 25) putOpen(c, x, 1, z, b(Blocks.BROWN_CARPET));
-                else if (r < 29) putOpen(c, x, 1, z, b(Blocks.WHITE_CARPET));
+                else if (r < 25) putOpen(c, x, 1, z, b(com.skycraft.worldgen.VanillaBlocks.BROWN_CARPET));
+                else if (r < 29) putOpen(c, x, 1, z, b(com.skycraft.worldgen.VanillaBlocks.WHITE_CARPET));
                 else if (r < 33) putOpen(c, x, 1, z, b(Blocks.CANDLE));
                 else if (r < 40) putOpen(c, x, 1, z, debris());
                 else if (r < 44) putOpen(c, x, 1, z, arrows());

@@ -15,7 +15,8 @@ import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
+import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.phys.BlockHitResult;
 
@@ -24,7 +25,7 @@ import net.minecraft.world.phys.BlockHitResult;
  * next glyph when used; the fixed kind is the hint tablet that shows the answer.
  */
 public class SymbolStoneBlock extends Block {
-    public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
+    public static final EnumProperty<Direction> FACING = HorizontalDirectionalBlock.FACING;
     public static final IntegerProperty SYMBOL = IntegerProperty.create("symbol", 0, Symbol.COUNT - 1);
 
     private final boolean rotating;
@@ -57,16 +58,15 @@ public class SymbolStoneBlock extends Block {
         return defaultBlockState().setValue(FACING, ctx.getHorizontalDirection().getOpposite());
     }
 
-    @Override
     @SuppressWarnings("deprecation")
     public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
         if (!rotating || hand != InteractionHand.MAIN_HAND) return InteractionResult.PASS;
-        if (!level.isClientSide) {
+        if (!level.isClientSide()) {
             int next = (state.getValue(SYMBOL) + 1) % Symbol.COUNT;
             level.setBlock(pos, state.setValue(SYMBOL, next), Block.UPDATE_ALL);
             level.playSound(null, pos, SoundEvents.GRINDSTONE_USE, SoundSource.BLOCKS, 0.6f, 0.6f);
         }
-        return InteractionResult.sidedSuccess(level.isClientSide);
+        return InteractionResult.SUCCESS;
     }
 
     @Override
@@ -79,5 +79,14 @@ public class SymbolStoneBlock extends Block {
     @SuppressWarnings("deprecation")
     public BlockState mirror(BlockState state, Mirror mirror) {
         return state.rotate(mirror.getRotation(state.getValue(FACING)));
+    }
+
+    @Override protected net.minecraft.world.InteractionResult useItemOn(net.minecraft.world.item.ItemStack stack,
+            BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+        return use(state, level, pos, player, hand, hit);
+    }
+    @Override protected net.minecraft.world.InteractionResult useWithoutItem(BlockState state, Level level,
+            BlockPos pos, Player player, BlockHitResult hit) {
+        return use(state, level, pos, player, InteractionHand.MAIN_HAND, hit);
     }
 }

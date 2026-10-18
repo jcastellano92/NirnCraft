@@ -2,7 +2,7 @@ package com.skycraft.client.hud;
 
 import com.skycraft.network.CorePackets;
 import com.skycraft.network.NotifyKind;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;

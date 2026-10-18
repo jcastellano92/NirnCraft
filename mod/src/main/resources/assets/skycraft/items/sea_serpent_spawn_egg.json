@@ -1,0 +1,16 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "skycraft:item/sea_serpent_spawn_egg",
+    "tints": [
+      {
+        "type": "minecraft:constant",
+        "value": 1722970
+      },
+      {
+        "type": "minecraft:constant",
+        "value": 11587776
+      }
+    ]
+  }
+}

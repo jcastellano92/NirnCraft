@@ -20,7 +20,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraftforge.common.ToolActions;
+import net.neoforged.neoforge.common.ItemAbilities;
 
 /**
  * Hearthfire's quarried stone and clay deposits: endless, unbreakable sources of building material next to a
@@ -36,30 +36,39 @@ public class DepositBlock extends Block {
         this.kind = kind;
     }
 
-    @Override
     @SuppressWarnings("deprecation")
+        @Override
+    protected InteractionResult useItemOn(net.minecraft.world.item.ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+        return use(state, level, pos, player, hand, hit);
+    }
+
+    @Override
+    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+        return use(state, level, pos, player, InteractionHand.MAIN_HAND, hit);
+    }
+
     public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
         ItemStack tool = player.getItemInHand(hand);
-        boolean pick = tool.canPerformAction(ToolActions.PICKAXE_DIG);
-        boolean shovel = tool.canPerformAction(ToolActions.SHOVEL_DIG);
+        boolean pick = tool.is(net.minecraft.tags.ItemTags.PICKAXES);
+        boolean shovel = tool.is(net.minecraft.tags.ItemTags.SHOVELS);
         if (!(pick || kind == Kind.CLAY && shovel)) {
-            if (!level.isClientSide && player instanceof ServerPlayer sp && hand == InteractionHand.MAIN_HAND) {
+            if (!level.isClientSide() && player instanceof ServerPlayer sp && hand == InteractionHand.MAIN_HAND) {
                 Notifier.message(sp, Component.translatable("homestead.skycraft.deposit.tool." + kind.name().toLowerCase(java.util.Locale.ROOT)));
             }
             return InteractionResult.PASS;
         }
-        if (level.isClientSide) return InteractionResult.SUCCESS;
+        if (level.isClientSide()) return InteractionResult.SUCCESS;
         if (!(player instanceof ServerPlayer sp)) return InteractionResult.CONSUME;
-        if (sp.getCooldowns().isOnCooldown(tool.getItem())) return InteractionResult.CONSUME;
+        if (sp.getCooldowns().isOnCooldown(tool)) return InteractionResult.CONSUME;
         if (!Vitals.consumeStamina(sp, 6f, false)) {
             Notifier.message(sp, Component.translatable("homestead.skycraft.deposit.tired"));
             return InteractionResult.CONSUME;
         }
-        sp.getCooldowns().addCooldown(tool.getItem(), 12);
-        sp.swing(hand, true);
+        sp.getCooldowns().addCooldown(tool, 12);
+        sp.swing(hand, net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
         ItemStack out = kind == Kind.STONE ? new ItemStack(HomesteadRegistry.QUARRIED_STONE.get()) : new ItemStack(Items.CLAY_BALL, 2);
-        if (!ActionHandler.addToBags(sp, out)) sp.drop(out, false);
-        tool.hurtAndBreak(1, sp, p -> p.broadcastBreakEvent(hand));
+        if (!ActionHandler.addToBags(sp, out)) sp.drop(out, false, net.minecraft.util.Prediction.SERVER_ONLY);
+        tool.hurtAndBreak(1, sp, hand);
         level.playSound(null, pos, kind == Kind.STONE ? SoundEvents.STONE_BREAK : SoundEvents.GRAVEL_BREAK, SoundSource.BLOCKS, 1.0f, 0.9f);
         if (level instanceof ServerLevel sl) {
             sl.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, state), pos.getX() + 0.5, pos.getY() + 1.0, pos.getZ() + 0.5,

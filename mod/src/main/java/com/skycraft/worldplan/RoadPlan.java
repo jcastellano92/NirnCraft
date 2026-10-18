@@ -77,6 +77,9 @@ public final class RoadPlan {
     public final byte[] vspan;
     public final int[] vseg;
 
+    /** Lazily derived index lives with its immutable plan, so switching tiles cannot thrash a global cache. */
+    volatile PlanGround groundIndex;
+
     // ---- index: bucket key -> edges (global index of an edge's first vertex)
     private final Long2IntOpenHashMap bucketOf = new Long2IntOpenHashMap();
     private final int[] bucketOff;
@@ -85,6 +88,8 @@ public final class RoadPlan {
 
     /** One answer of {@link #at}; reuse an instance per thread. */
     public static final class Hit {
+        /** Immutable plan owning every index in this answer (including delegated tile hits). */
+        public RoadPlan owner;
         /** Segment, its link and class, and the road bed half width. */
         public int segment = -1, link = -1, vertex = -1;
         public byte kind, span;
@@ -99,6 +104,7 @@ public final class RoadPlan {
         public float dirX, dirZ;
 
         void clear() {
+            owner = null;
             segment = -1;
             link = -1;
             vertex = -1;
@@ -107,6 +113,7 @@ public final class RoadPlan {
 
         /** Copies another answer into this one. */
         public void set(Hit o) {
+            owner = o.owner;
             segment = o.segment;
             link = o.link;
             vertex = o.vertex;
@@ -287,6 +294,7 @@ public final class RoadPlan {
             return false;
         }
         int i = bestEdge, s = vseg[i];
+        out.owner = this;
         out.segment = s;
         out.link = segLink[s];
         out.kind = segKind[s];
@@ -337,6 +345,7 @@ public final class RoadPlan {
         }
         if (bestEdge < 0) return false;
         int i = bestEdge, s = vseg[i];
+        out.owner = this;
         out.segment = s;
         out.link = segLink[s];
         out.kind = segKind[s];

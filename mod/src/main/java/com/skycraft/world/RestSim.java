@@ -9,7 +9,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.block.AbstractFurnaceBlock;
 import net.minecraft.world.level.block.BambooSaplingBlock;
 import net.minecraft.world.level.block.BambooStalkBlock;
@@ -17,8 +17,8 @@ import net.minecraft.world.level.block.BonemealableBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.CactusBlock;
 import net.minecraft.world.level.block.CampfireBlock;
-import net.minecraft.world.level.block.FarmBlock;
-import net.minecraft.world.level.block.SpreadingSnowyDirtBlock;
+import net.minecraft.world.level.block.FarmlandBlock;
+import net.minecraft.world.level.block.SpreadingSnowyBlock;
 import net.minecraft.world.level.block.SugarCaneBlock;
 import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -60,7 +60,7 @@ final class RestSim {
         return npc.isAlive() && !npc.isRemoved() && com.skycraft.society.SocietyConfig.ROUTINES.get() && npc.getHome() != null
                 && !npc.isBusy() && npc.getTarget() == null && !npc.isPrisoner() && !npc.isConversing()
                 && (npc.role().townsfolk() || com.skycraft.society.Marriage.isSpouse(npc))
-                && !npc.social().hasUUID("engaged")
+                && !npc.social().read("engaged", net.minecraft.core.UUIDUtil.CODEC).isPresent()
                 && !npc.getPersistentData().contains("skycraft_traveler");
     }
 
@@ -80,7 +80,7 @@ final class RestSim {
      */
     static int hop(ServerPlayer player, int cap, int offset) {
         if (cap <= 0) return 0;
-        ServerLevel level = player.serverLevel();
+        ServerLevel level = player.level();
         AABB box = player.getBoundingBox().inflate(HOP_RADIUS, 32, HOP_RADIUS);
         List<NpcEntity> npcs = level.getEntitiesOfClass(NpcEntity.class, box, RestSim::scheduled);
         if (npcs.isEmpty()) return 0;
@@ -116,7 +116,7 @@ final class RestSim {
         Set<UUID> seen = new HashSet<>();
         int moved = 0;
         for (ServerPlayer p : players) {
-            ServerLevel level = p.serverLevel();
+            ServerLevel level = p.level();
             AABB box = p.getBoundingBox().inflate(SETTLE_RADIUS, 96, SETTLE_RADIUS);
             for (NpcEntity npc : level.getEntitiesOfClass(NpcEntity.class, box, RestSim::scheduled)) {
                 if (!seen.add(npc.getUUID())) continue;
@@ -146,8 +146,8 @@ final class RestSim {
     private static boolean growing(BlockState s) {
         if (!s.isRandomlyTicking()) return false;
         Block b = s.getBlock();
-        if (b instanceof SpreadingSnowyDirtBlock) return false;
-        return b instanceof BonemealableBlock || b instanceof FarmBlock || b instanceof CactusBlock || b instanceof SugarCaneBlock
+        if (b instanceof SpreadingSnowyBlock) return false;
+        return b instanceof BonemealableBlock || b instanceof FarmlandBlock || b instanceof CactusBlock || b instanceof SugarCaneBlock
                 || b instanceof BambooStalkBlock || b instanceof BambooSaplingBlock;
     }
 
@@ -162,10 +162,10 @@ final class RestSim {
         for (ServerPlayer p : players) {
             ChunkPos c = p.chunkPosition();
             for (int dx = -CATCHUP_RADIUS; dx <= CATCHUP_RADIUS; dx++) {
-                for (int dz = -CATCHUP_RADIUS; dz <= CATCHUP_RADIUS; dz++) chunks.add(ChunkPos.asLong(c.x + dx, c.z + dz));
+                for (int dz = -CATCHUP_RADIUS; dz <= CATCHUP_RADIUS; dz++) chunks.add(ChunkPos.pack(c.x() + dx, c.z() + dz));
             }
         }
-        int samples = RestLogic.growthSamples(step, level.getGameRules().getInt(GameRules.RULE_RANDOMTICKING), GROWTH_CAP);
+        int samples = RestLogic.growthSamples(step, level.getGameRules().get(GameRules.RANDOM_TICK_SPEED), GROWTH_CAP);
         int machineTicks = (int) Math.min(MACHINE_CAP, step * 2);
         for (long key : chunks) {
             LevelChunk chunk = level.getChunkSource().getChunkNow(ChunkPos.getX(key), ChunkPos.getZ(key));
@@ -181,11 +181,11 @@ final class RestSim {
         for (int i = 0; i < sections.length; i++) {
             LevelChunkSection sec = sections[i];
             if (sec == null || sec.hasOnlyAir() || !sec.isRandomlyTickingBlocks() || !sec.getStates().maybeHas(RestSim::growing)) continue;
-            int y0 = (chunk.getMinSection() + i) << 4;
+            int y0 = (chunk.getMinSectionY() + i) << 4;
             for (int n = 0; n < samples; n++) {
-                int x = level.random.nextInt(16), y = level.random.nextInt(16), z = level.random.nextInt(16);
+                int x = level.getRandom().nextInt(16), y = level.getRandom().nextInt(16), z = level.getRandom().nextInt(16);
                 BlockState bs = sec.getBlockState(x, y, z);
-                if (growing(bs)) bs.randomTick(level, new BlockPos(cp.getMinBlockX() + x, y0 + y, cp.getMinBlockZ() + z), level.random);
+                if (growing(bs)) bs.randomTick(level, new BlockPos(cp.getMinBlockX() + x, y0 + y, cp.getMinBlockZ() + z), level.getRandom());
             }
         }
     }
@@ -205,8 +205,9 @@ final class RestSim {
                     BrewingStandBlockEntity.serverTick(level, b.getBlockPos(), b.getBlockState(), b);
                 }
             } else if (be instanceof CampfireBlockEntity c && c.getBlockState().getOptionalValue(CampfireBlock.LIT).orElse(false)) {
+                var recipes = net.minecraft.world.item.crafting.RecipeManager.createCheck(net.minecraft.world.item.crafting.RecipeType.CAMPFIRE_COOKING);
                 for (int i = 0; i < ticks && !c.isRemoved(); i++) {
-                    CampfireBlockEntity.cookTick(level, c.getBlockPos(), c.getBlockState(), c);
+                    CampfireBlockEntity.cookTick(level, c.getBlockPos(), c.getBlockState(), c, recipes);
                 }
             }
         }
@@ -232,9 +233,9 @@ final class RestSim {
         for (MobEffectInstance e : new ArrayList<>(player.getActiveEffects())) {
             if (e.isInfiniteDuration()) continue;
             int left = RestLogic.effectLeft(e.getDuration(), ticks);
-            player.removeEffect(e.getEffect());
+            player.removeEffect(com.skycraft.platform.Effects.holder(e.getEffect()));
             if (left > 0) {
-                player.addEffect(new MobEffectInstance(e.getEffect(), left, e.getAmplifier(), e.isAmbient(), e.isVisible(), e.showIcon()));
+                player.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(e.getEffect()), left, e.getAmplifier(), e.isAmbient(), e.isVisible(), e.showIcon()));
             }
         }
     }

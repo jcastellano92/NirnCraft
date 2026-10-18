@@ -10,7 +10,7 @@ import com.skycraft.survival.client.ClientSurvival;
 import com.skycraft.survival.mode.SurvivalMode;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
@@ -18,21 +18,20 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.animal.horse.AbstractHorse;
+import net.minecraft.world.entity.animal.equine.AbstractHorse;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
-import net.minecraftforge.client.event.ScreenEvent;
-import net.minecraftforge.client.gui.overlay.ForgeGui;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
+import net.neoforged.neoforge.client.event.ScreenEvent;
+
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -48,9 +47,9 @@ import java.util.Set;
  * behind menus. Everything is detected on the client from state the other modules already sync, so it works on any
  * server. Text: {@code guide.skycraft.hint.<id>}, with {@code {key:...}} markup for the player's real bindings.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
 public final class TutorialHints {
-    private static final TagKey<EntityType<?>> DRAGONS = TagKey.create(Registries.ENTITY_TYPE, new ResourceLocation(Skycraft.MODID, "dragons"));
+    private static final TagKey<EntityType<?>> DRAGONS = TagKey.create(Registries.ENTITY_TYPE, Identifier.fromNamespaceAndPath(Skycraft.MODID, "dragons"));
     private static final Style KEY_STYLE = Style.EMPTY.withColor(TextColor.fromRgb(0xE8C060));
     private static final int TEXT = 0xE8E2D0;
     private static final int FADE_IN = 8, FADE_OUT = 20;
@@ -140,19 +139,18 @@ public final class TutorialHints {
     }
 
     @SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent event) {
-        if (event.phase != TickEvent.Phase.END) return;
+    public static void onClientTick(net.neoforged.neoforge.client.event.ClientTickEvent.Post event) {
         Minecraft mc = Minecraft.getInstance();
         LocalPlayer player = mc.player;
         if (player == null || mc.level == null) return;
         if (current != null) {
-            if (mc.screen == null && !mc.isPaused()) shownTicks++;
+            if (mc.gui.screen() == null && !mc.isPaused()) shownTicks++;
             if (shownTicks > GuideConfig.HINT_SECONDS.get() * 20) current = null;
         }
         if (!enabled()) return;
         worldTicks++;
         if (worldTicks % 5 == 0 && player.isAlive()) detect(mc, player);
-        if (current == null && mc.screen == null && !QUEUE.isEmpty()) {
+        if (current == null && mc.gui.screen() == null && !QUEUE.isEmpty()) {
             current = QUEUE.poll();
             shownTicks = 0;
             markSeen(current);
@@ -179,23 +177,23 @@ public final class TutorialHints {
         if (data.getPerkPoints() > 0 || data.getPendingLevelUps() > 0) trigger("level_up");
 
         CompoundTag magic = data.module("magic");
-        if (!magic.getList("spells", Tag.TAG_STRING).isEmpty() && worldTicks > 20 * 90) trigger("magic");
-        CompoundTag w = magic.getCompound("words");
+        if (!magic.getListOrEmpty("spells").isEmpty() && worldTicks > 20 * 90) trigger("magic");
+        CompoundTag w = magic.getCompoundOrEmpty("words");
         int learned = 0;
-        for (String k : w.getAllKeys()) learned += w.getInt(k);
+        for (String k : w.keySet()) learned += w.getIntOr(k, 0);
         if (words >= 0 && learned > words) trigger("word_wall");
         words = learned;
-        int s = magic.getInt("dragon_souls");
+        int s = magic.getIntOr("dragon_souls",0);
         if (souls >= 0 && s > souls) trigger("dragon_soul");
         souls = s;
 
-        int found = data.module("world").getList("discovered", Tag.TAG_COMPOUND).size();
+        int found = data.module("world").getListOrEmpty("discovered").size();
         if (discovered >= 0 && found > discovered) trigger("discovery");
         discovered = found;
 
-        CompoundTag bounty = data.module("crime").getCompound("bounty");
-        for (String hold : bounty.getAllKeys()) {
-            if (bounty.getInt(hold) > 0) {
+        CompoundTag bounty = data.module("crime").getCompoundOrEmpty("bounty");
+        for (String hold : bounty.keySet()) {
+            if (bounty.getIntOr(hold, 0) > 0) {
                 trigger("bounty");
                 break;
             }
@@ -210,7 +208,7 @@ public final class TutorialHints {
         if (worldTicks % 20 == 0) {
             if (CarryWeight.isOverencumbered(player)) trigger("overencumbered");
             for (Entity e : mc.level.entitiesForRendering()) {
-                if (e.getType().is(DRAGONS) && e.distanceToSqr(player) < 96 * 96) {
+                if (e.getType().builtInRegistryHolder().is(DRAGONS) && e.distanceToSqr(player) < 96 * 96) {
                     trigger("dragon");
                     break;
                 }
@@ -221,11 +219,13 @@ public final class TutorialHints {
     // ------------------------------------------------------------------ rendering
 
     /** HUD overlay: the current hint under the top-left message log, fading in and out. */
-    public static void render(ForgeGui gui, GuiGraphics g, float partialTick, int width, int height) {
+    public static void render(GuiGraphicsExtractor g, net.minecraft.client.DeltaTracker delta) {
+        float partialTick = delta.getGameTimeDeltaPartialTick(false);
+        int width = g.guiWidth(), height = g.guiHeight();
         Minecraft mc = Minecraft.getInstance();
-        if (current == null || mc.player == null || mc.options.hideGui) return;
+        if (current == null || mc.player == null || mc.gui.hud.isHidden()) return;
         int total = GuideConfig.HINT_SECONDS.get() * 20;
-        float t = shownTicks + (mc.screen == null && !mc.isPaused() ? partialTick : 0);
+        float t = shownTicks + (mc.gui.screen() == null && !mc.isPaused() ? partialTick : 0);
         float alpha = Mth.clamp(Math.min(t / FADE_IN, (total - t) / FADE_OUT), 0f, 1f);
         if (alpha < 0.04f) return;
         Font font = mc.font;
@@ -248,7 +248,7 @@ public final class TutorialHints {
         }
         g.fill(x - 4, y - 4, x - 3, y + h + 2, (int) (alpha * 200) << 24 | 0xC8A050);
         for (FormattedCharSequence line : lines) {
-            g.drawString(font, line, x, y, a << 24 | TEXT, true);
+            g.text(font, line, x, y, a << 24 | TEXT, true);
             y += 10;
         }
     }

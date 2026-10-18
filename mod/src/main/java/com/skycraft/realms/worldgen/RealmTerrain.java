@@ -3,7 +3,7 @@ package com.skycraft.realms.worldgen;
 import com.skycraft.realms.Realm;
 import com.skycraft.realms.RealmLayout;
 import net.minecraft.util.Mth;
-import net.minecraft.world.level.levelgen.DensityFunction;
+import com.skycraft.worldgen.WorldNoise;
 
 import static com.skycraft.realms.RealmLayout.dist;
 import static com.skycraft.realms.RealmLayout.smoothstep;
@@ -33,8 +33,8 @@ public final class RealmTerrain {
 
     private static final ThreadLocal<Column> SCRATCH = ThreadLocal.withInitial(Column::new);
 
-    public static double sample(Realm realm, Channel channel, int x, int z, DensityFunction.NoiseHolder a,
-                                DensityFunction.NoiseHolder b, DensityFunction.NoiseHolder c) {
+    public static double sample(Realm realm, Channel channel, int x, int z, WorldNoise a,
+                                WorldNoise b, WorldNoise c) {
         Column col = SCRATCH.get();
         column(realm, x, z, a, b, c, col);
         return switch (channel) {
@@ -45,8 +45,8 @@ public final class RealmTerrain {
         };
     }
 
-    public static void column(Realm realm, int x, int z, DensityFunction.NoiseHolder a, DensityFunction.NoiseHolder b,
-                              DensityFunction.NoiseHolder c, Column out) {
+    public static void column(Realm realm, int x, int z, WorldNoise a, WorldNoise b,
+                              WorldNoise c, Column out) {
         switch (realm) {
             case DEADLANDS -> deadlands(x, z, a, b, c, out);
             case SOVNGARDE -> sovngarde(x, z, a, b, c, out);
@@ -70,8 +70,8 @@ public final class RealmTerrain {
     // ================================================================================================ Deadlands
 
     /** Jagged red-black islands rising from a lava sea (y 40), tall thin spires, a flat shelf around every keep. */
-    private static void deadlands(int x, int z, DensityFunction.NoiseHolder a, DensityFunction.NoiseHolder b,
-                                  DensityFunction.NoiseHolder c, Column out) {
+    private static void deadlands(int x, int z, WorldNoise a, WorldNoise b,
+                                  WorldNoise c, Column out) {
         double la = a.getValue(x, 0, z);
         double mb = b.getValue(x, 0, z);
         double dc = c.getValue(x, 0, z);
@@ -97,8 +97,8 @@ public final class RealmTerrain {
     // ================================================================================================ Sovngarde
 
     /** A wide golden valley under a ring of mountains; the arena, the chasm, the Hall's heights. No water table. */
-    private static void sovngarde(int x, int z, DensityFunction.NoiseHolder a, DensityFunction.NoiseHolder b,
-                                  DensityFunction.NoiseHolder c, Column out) {
+    private static void sovngarde(int x, int z, WorldNoise a, WorldNoise b,
+                                  WorldNoise c, Column out) {
         double la = a.getValue(x, 0, z);
         double mb = b.getValue(x, 0, z);
         double dc = c.getValue(x, 0, z);
@@ -149,8 +149,8 @@ public final class RealmTerrain {
     // ================================================================================================ Shivering Isles
 
     /** One great isle in a calm sea: rolling, cliffed Mania in the north, low boggy Dementia in the south. */
-    private static void shiveringIsles(int x, int z, DensityFunction.NoiseHolder a, DensityFunction.NoiseHolder b,
-                                       DensityFunction.NoiseHolder c, Column out) {
+    private static void shiveringIsles(int x, int z, WorldNoise a, WorldNoise b,
+                                       WorldNoise c, Column out) {
         double la = a.getValue(x, 0, z);
         double mb = b.getValue(x, 0, z);
         double dc = c.getValue(x, 0, z);
@@ -181,8 +181,8 @@ public final class RealmTerrain {
     // ================================================================================================ Apocrypha
 
     /** An ink sea (y 52) with towering, terraced stacks of pages; flat reading platforms at every chapter. */
-    private static void apocrypha(int x, int z, DensityFunction.NoiseHolder a, DensityFunction.NoiseHolder b,
-                                  DensityFunction.NoiseHolder c, Column out) {
+    private static void apocrypha(int x, int z, WorldNoise a, WorldNoise b,
+                                  WorldNoise c, Column out) {
         double mb = b.getValue(x, 0, z);
         double dc = c.getValue(x, 0, z);
         double floor = 26 + 5 * mb + 2 * dc;
@@ -206,8 +206,8 @@ public final class RealmTerrain {
     // ================================================================================================ Soul Cairn
 
     /** Ashen violet wastes: soft dunes, terraced mesas, deep rifts. No fluids. */
-    private static void soulCairn(int x, int z, DensityFunction.NoiseHolder a, DensityFunction.NoiseHolder b,
-                                  DensityFunction.NoiseHolder c, Column out) {
+    private static void soulCairn(int x, int z, WorldNoise a, WorldNoise b,
+                                  WorldNoise c, Column out) {
         double la = a.getValue(x, 0, z);
         double mb = b.getValue(x, 0, z);
         double dc = c.getValue(x, 0, z);
@@ -236,8 +236,8 @@ public final class RealmTerrain {
     // ================================================================================================ Coldharbour
 
     /** Broken, burning highlands: crags, terraced mesas, lava lowlands (y 56); the Hollow City's ruined plain. */
-    private static void coldharbour(int x, int z, DensityFunction.NoiseHolder a, DensityFunction.NoiseHolder b,
-                                    DensityFunction.NoiseHolder c, Column out) {
+    private static void coldharbour(int x, int z, WorldNoise a, WorldNoise b,
+                                    WorldNoise c, Column out) {
         double la = a.getValue(x, 0, z);
         double mb = b.getValue(x, 0, z);
         double dc = c.getValue(x, 0, z);

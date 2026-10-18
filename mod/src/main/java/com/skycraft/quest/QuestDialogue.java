@@ -11,19 +11,19 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.npc.AbstractVillager;
-import net.minecraft.world.entity.npc.Villager;
-import net.minecraft.world.entity.npc.VillagerProfession;
-import net.minecraft.world.entity.npc.WanderingTrader;
+import net.minecraft.world.entity.npc.villager.AbstractVillager;
+import net.minecraft.world.entity.npc.villager.Villager;
+import net.minecraft.world.entity.npc.villager.VillagerProfession;
+import net.minecraft.world.entity.npc.wanderingtrader.WanderingTrader;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
@@ -38,7 +38,7 @@ import java.util.function.Supplier;
  * bounties and monster hunts, faction joining and contracts, and the Thieves Guild's bounty service.
  */
 public final class QuestDialogue {
-    public static final TagKey<EntityType<?>> GUARDS = TagKey.create(Registries.ENTITY_TYPE, new ResourceLocation(Skycraft.MODID, "guards"));
+    public static final TagKey<EntityType<?>> GUARDS = TagKey.create(Registries.ENTITY_TYPE, Identifier.fromNamespaceAndPath(Skycraft.MODID, "guards"));
     /** An offer stays open this long (ticks) after the NPC pitched it. */
     private static final long OFFER_TICKS = 20L * 300;
 
@@ -88,16 +88,16 @@ public final class QuestDialogue {
 
     /** Guards (creatures module), or — if that module isn't installed — armorers and unemployed villagers. */
     public static boolean isGuard(LivingEntity e) {
-        if (e.getType().is(GUARDS)) return true;
-        if (guardsRegistered == null) guardsRegistered = EntityType.byString("skycraft:guard").isPresent();
+        if (e.getType().builtInRegistryHolder().is(GUARDS)) return true;
+        if (guardsRegistered == null) guardsRegistered = com.skycraft.worldgen.RegistryTypes.entity("skycraft:guard").isPresent();
         if (!guardsRegistered && e instanceof Villager v) {
-            VillagerProfession prof = v.getVillagerData().getProfession();
+            net.minecraft.resources.ResourceKey<VillagerProfession> prof = v.getVillagerData().profession().unwrapKey().orElseThrow();
             return prof == VillagerProfession.ARMORER || prof == VillagerProfession.NONE;
         }
         return false;
     }
 
-    private static boolean isProfession(LivingEntity e, VillagerProfession prof) {
+    private static boolean isProfession(LivingEntity e, net.minecraft.resources.ResourceKey<VillagerProfession> prof) {
         return com.skycraft.economy.Merchants.profession(e) == prof;
     }
 
@@ -119,7 +119,7 @@ public final class QuestDialogue {
         if (o.npc != null) return o.npc.equals(npc.getUUID());
         // a named story NPC ("hadvar|ralof"): whichever entity is that NPC right now
         if (o.data.contains(com.skycraft.quest.story.Story.NPC)) {
-            return com.skycraft.quest.story.QuestNpcs.matches(npc, o.data.getString(com.skycraft.quest.story.Story.NPC));
+            return com.skycraft.quest.story.QuestNpcs.matches(npc, o.data.getStringOr(com.skycraft.quest.story.Story.NPC, ""));
         }
         boolean typeOk = switch (o.npcFilter) {
             case "villager" -> isTownsperson(npc);
@@ -130,7 +130,7 @@ public final class QuestDialogue {
         };
         if (!typeOk) return false;
         if (o.hasPos && o.radius > 0) {
-            if (!npc.level().dimension().location().toString().equals(o.dim)) return false;
+            if (!npc.level().dimension().identifier().toString().equals(o.dim)) return false;
             return Locate.horizontalDist(npc.blockPosition(), o.pos) <= o.radius;
         }
         return true;
@@ -142,14 +142,14 @@ public final class QuestDialogue {
      */
     public static boolean canOfferQuest(ServerPlayer player, LivingEntity npc) {
         if (usedToday(npc, "any_quest")) return false;
-        for (Quests.Ref ref : Quests.active(player.server, player.getUUID())) {
+        for (Quests.Ref ref : Quests.active(player.level().getServer(), player.getUUID())) {
             Quest q = ref.quest();
             if (npc.getUUID().equals(q.giver)) return false;
             Objective o = q.current();
             if (o != null && (o.type == Objective.Type.TALK_TO || o.type == Objective.Type.FETCH)) {
                 if (o.npc != null && o.npc.equals(npc.getUUID())) return false;
                 if (o.data.contains(com.skycraft.quest.story.Story.NPC)
-                        && com.skycraft.quest.story.QuestNpcs.matches(npc, o.data.getString(com.skycraft.quest.story.Story.NPC))) {
+                        && com.skycraft.quest.story.QuestNpcs.matches(npc, o.data.getStringOr(com.skycraft.quest.story.Story.NPC, ""))) {
                     return false;
                 }
             }
@@ -162,7 +162,7 @@ public final class QuestDialogue {
     static void addOptions(ServerPlayer player, LivingEntity npc, List<DialogueOption> out) {
         String hold = com.skycraft.core.Holds.holdAt(player.level(), player.blockPosition());
         if (com.skycraft.crime.Crimes.isGuard(npc) && com.skycraft.crime.Bounty.get(player, hold) > 0) return;
-        MinecraftServer server = player.server;
+        MinecraftServer server = player.level().getServer();
         // 1. turn-ins for current objectives
         for (Quests.Ref ref : Quests.active(server, player.getUUID())) {
             Quest q = ref.quest();
@@ -190,7 +190,7 @@ public final class QuestDialogue {
         if (isTownsperson(npc) && canOffer
                 && com.skycraft.quest.story.QuestNpcs.idOf(npc).isEmpty()
                 && com.skycraft.quest.faction.FactionStaff.factionOf(npc) == null) {
-            VillagerProfession prof = com.skycraft.economy.Merchants.profession(npc);
+            net.minecraft.resources.ResourceKey<VillagerProfession> prof = com.skycraft.economy.Merchants.profession(npc);
             boolean hasFavor = prof != null && prof != VillagerProfession.NONE
                     && !usedToday(npc, "help")
                     && !Quests.hasActiveKind(server, player.getUUID(), "villager_")
@@ -260,13 +260,13 @@ public final class QuestDialogue {
     // ------------------------------------------------------------------ offers
 
     private static long day(LivingEntity npc) {
-        return npc.level().getDayTime() / 24000L;
+        return npc.level().getDefaultClockTime() / 24000L;
     }
 
     private static boolean usedToday(LivingEntity npc, String key) {
         CompoundTag pd = npc.getPersistentData();
         String k = "skycraft_quest_day_" + key;
-        return pd.contains(k, Tag.TAG_LONG) && pd.getLong(k) == day(npc);
+        return com.skycraft.platform.NbtData.hasType(pd, k, Tag.TAG_LONG) && pd.getLongOr(k, 0L) == day(npc);
     }
 
     private static void markToday(LivingEntity npc, String key) {
@@ -334,13 +334,13 @@ public final class QuestDialogue {
     // ------------------------------------------------------------------ turn-ins
 
     private static void turnIn(ServerPlayer player, LivingEntity npc, String questId) {
-        MinecraftServer server = player.server;
+        MinecraftServer server = player.level().getServer();
         Quests.Ref ref = Quests.find(server, player.getUUID(), questId);
         if (ref == null || !ref.quest().isActive()) return;
         Quest q = ref.quest();
         Objective o = q.current();
         if (o == null || !matchesNpc(o, npc)) return;
-        String relic = o.data.getString(com.skycraft.quest.story.Story.RELIC);
+        String relic = o.data.getStringOr(com.skycraft.quest.story.Story.RELIC, "");
         if (o.type == Objective.Type.FETCH && !relic.isEmpty()) {
             int have = com.skycraft.quest.story.Story.countRelic(player, relic);
             if (have < o.required) {
@@ -349,19 +349,19 @@ public final class QuestDialogue {
             }
             com.skycraft.quest.story.Story.removeRelic(player, relic, o.required);
         } else if (o.type == Objective.Type.FETCH) {
-            ResourceLocation id = ResourceLocation.tryParse(o.target);
-            Item item = id == null ? null : ForgeRegistries.ITEMS.getValue(id);
+            Identifier id = Identifier.tryParse(o.target);
+            Item item = id == null ? null : BuiltInRegistries.ITEM.getValue(id);
             if (item == null || item == Items.AIR) return;
             int have = Quests.count(player, item);
             if (have < o.required) {
-                Dialogue.open(player, npc, tr("quest.skycraft.reply.not_enough", have, o.required, item.getDescription()));
+                Dialogue.open(player, npc, tr("quest.skycraft.reply.not_enough", have, o.required, new net.minecraft.world.item.ItemStack(item).getHoverName()));
                 return;
             }
             Quests.remove(player, item, o.required);
         }
         if (o.data.contains("consume")) {
-            ResourceLocation id = ResourceLocation.tryParse(o.data.getString("consume"));
-            Item item = id == null ? null : ForgeRegistries.ITEMS.getValue(id);
+            Identifier id = Identifier.tryParse(o.data.getStringOr("consume",""));
+            Item item = id == null ? null : BuiltInRegistries.ITEM.getValue(id);
             if (item != null && item != Items.AIR && Quests.count(player, item) > 0) Quests.remove(player, item, 1);
         }
         Component reply = o.reply;
@@ -372,7 +372,7 @@ public final class QuestDialogue {
     // ------------------------------------------------------------------ factions
 
     private static boolean hasFactionQuest(ServerPlayer player, Faction f) {
-        for (Quests.Ref ref : Quests.active(player.server, player.getUUID())) {
+        for (Quests.Ref ref : Quests.active(player.level().getServer(), player.getUUID())) {
             if (ref.quest().faction.equals(f.id)) return true;
         }
         return false;
@@ -402,7 +402,7 @@ public final class QuestDialogue {
         Faction f = Faction.COLLEGE;
         if (!Factions.isMember(data, f)) {
             out.add(opt("quest.college.join", "dialogue.skycraft.faction.college.join", 401, (pl, n) -> {
-                int spells = SkyData.get(pl).module("magic").getList("spells", Tag.TAG_STRING).size();
+                int spells = SkyData.get(pl).module("magic").getListOrEmpty("spells").size();
                 if (spells < 3) {
                     Dialogue.open(pl, n, tr("quest.skycraft.reply.college_refuse", spells));
                 } else if (Factions.join(pl, f)) {
@@ -413,35 +413,35 @@ public final class QuestDialogue {
             out.add(opt("quest.college.work", "dialogue.skycraft.faction.work", 401,
                     (pl, n) -> factionAsk(pl, n, f, () -> RadiantQuests.collegeContract(pl, n)), f.displayName()));
 
-            if (!data.module("quest").getBoolean("college_destruction_completed") && !Quests.hasActiveKind(player.server, player.getUUID(), "college_destruction")) {
+            if (!data.module("quest").getBooleanOr("college_destruction_completed",false) && !Quests.hasActiveKind(player.level().getServer(), player.getUUID(), "college_destruction")) {
                 out.add(opt("quest.college.dest", "dialogue.skycraft.college.dest", 401, (pl, n) -> {
                     if (CollegeQuests.startDestruction(pl, n)) {
                         Dialogue.open(pl, n, tr("dialogue.skycraft.college.dest_start"));
                     }
                 }));
             }
-            if (!data.module("quest").getBoolean("college_restoration_completed") && !Quests.hasActiveKind(player.server, player.getUUID(), "college_restoration")) {
+            if (!data.module("quest").getBooleanOr("college_restoration_completed",false) && !Quests.hasActiveKind(player.level().getServer(), player.getUUID(), "college_restoration")) {
                 out.add(opt("quest.college.rest", "dialogue.skycraft.college.rest", 401, (pl, n) -> {
                     if (CollegeQuests.startRestoration(pl, n)) {
                         Dialogue.open(pl, n, tr("dialogue.skycraft.college.rest_start"));
                     }
                 }));
             }
-            if (!data.module("quest").getBoolean("college_alteration_completed") && !Quests.hasActiveKind(player.server, player.getUUID(), "college_alteration")) {
+            if (!data.module("quest").getBooleanOr("college_alteration_completed",false) && !Quests.hasActiveKind(player.level().getServer(), player.getUUID(), "college_alteration")) {
                 out.add(opt("quest.college.alt", "dialogue.skycraft.college.alt", 401, (pl, n) -> {
                     if (CollegeQuests.startAlteration(pl, n)) {
                         Dialogue.open(pl, n, tr("dialogue.skycraft.college.alt_start"));
                     }
                 }));
             }
-            if (!data.module("quest").getBoolean("college_conjuration_completed") && !Quests.hasActiveKind(player.server, player.getUUID(), "college_conjuration")) {
+            if (!data.module("quest").getBooleanOr("college_conjuration_completed",false) && !Quests.hasActiveKind(player.level().getServer(), player.getUUID(), "college_conjuration")) {
                 out.add(opt("quest.college.conj", "dialogue.skycraft.college.conj", 401, (pl, n) -> {
                     if (CollegeQuests.startConjuration(pl, n)) {
                         Dialogue.open(pl, n, tr("dialogue.skycraft.college.conj_start"));
                     }
                 }));
             }
-            if (!data.module("quest").getBoolean("college_illusion_completed") && !Quests.hasActiveKind(player.server, player.getUUID(), "college_illusion")) {
+            if (!data.module("quest").getBooleanOr("college_illusion_completed",false) && !Quests.hasActiveKind(player.level().getServer(), player.getUUID(), "college_illusion")) {
                 out.add(opt("quest.college.ill", "dialogue.skycraft.college.ill", 401, (pl, n) -> {
                     if (CollegeQuests.startIllusion(pl, n)) {
                         Dialogue.open(pl, n, tr("dialogue.skycraft.college.ill_start"));
@@ -479,7 +479,7 @@ public final class QuestDialogue {
         Faction f = Faction.THIEVES_GUILD;
         if (!Factions.isMember(data, f)) {
             out.add(opt("quest.thieves.join", "dialogue.skycraft.faction.thieves_guild.join", 404, (pl, n) -> {
-                int stolen = SkyData.get(pl).module("crime").getInt("items_stolen");
+                int stolen = SkyData.get(pl).module("crime").getIntOr("items_stolen",0);
                 if (stolen < 5) {
                     Dialogue.open(pl, n, tr("quest.skycraft.reply.thieves_refuse"));
                 } else if (Factions.join(pl, f)) {
@@ -491,7 +491,7 @@ public final class QuestDialogue {
         out.add(opt("quest.thieves.work", "dialogue.skycraft.faction.thieves_guild.work", 404,
                 (pl, n) -> factionAsk(pl, n, f, () -> RadiantQuests.thievesContract(pl, n))));
         out.add(opt("quest.thieves.bounty", "dialogue.skycraft.faction.thieves_guild.bounty", 405, (pl, n) -> {
-            if (bounties(pl).getAllKeys().isEmpty()) {
+            if (bounties(pl).keySet().isEmpty()) {
                 Dialogue.open(pl, n, tr("quest.skycraft.reply.no_bounty"));
                 return;
             }
@@ -501,7 +501,7 @@ public final class QuestDialogue {
     }
 
     private static CompoundTag bounties(ServerPlayer player) {
-        return SkyData.get(player).module("crime").getCompound("bounty");
+        return SkyData.get(player).module("crime").getCompoundOrEmpty("bounty");
     }
 
     private static long bountyCost(int bounty) {
@@ -511,16 +511,16 @@ public final class QuestDialogue {
     private static void addBountyOptions(ServerPlayer player, List<DialogueOption> out) {
         CompoundTag b = bounties(player);
         int order = 160;
-        for (String hold : b.getAllKeys()) {
-            int amount = b.getInt(hold);
+        for (String hold : b.keySet()) {
+            int amount = b.getIntOr(hold, 0);
             if (amount <= 0) continue;
             long cost = bountyCost(amount);
             out.add(new DialogueOption("quest.clear_bounty." + hold,
                     tr("dialogue.skycraft.faction.thieves_guild.clear", Holds.displayName(hold), amount, cost), order++, (pl, n) -> {
                 PlayerData data = SkyData.get(pl);
                 CompoundTag crime = data.module("crime");
-                CompoundTag current = crime.getCompound("bounty");
-                int now = current.getInt(hold);
+                CompoundTag current = crime.getCompoundOrEmpty("bounty");
+                int now = current.getIntOr(hold, 0);
                 if (now <= 0) return;
                 long price = bountyCost(now);
                 if (!Currency.take(pl, price)) {
@@ -540,9 +540,9 @@ public final class QuestDialogue {
         Faction f = Faction.DARK_BROTHERHOOD;
         if (!Factions.isNight(player.level())) return;
         if (!Factions.isMember(data, f)) {
-            if (!data.module("quest").getBoolean("db_whispered")) return;
+            if (!data.module("quest").getBooleanOr("db_whispered",false)) return;
             out.add(opt("quest.db.join", "dialogue.skycraft.faction.dark_brotherhood.join", 406, (pl, n) -> {
-                if (SkyData.get(pl).module("crime").getInt("murders") < 1) {
+                if (SkyData.get(pl).module("crime").getIntOr("murders",0) < 1) {
                     Dialogue.open(pl, n, tr("quest.skycraft.reply.db_refuse"));
                 } else if (Factions.join(pl, f)) {
                     Dialogue.open(pl, n, tr("quest.skycraft.reply.db_welcome"));

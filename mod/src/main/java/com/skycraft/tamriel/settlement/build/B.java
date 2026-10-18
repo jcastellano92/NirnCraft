@@ -1,7 +1,7 @@
 package com.skycraft.tamriel.settlement.build;
 
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.RotatedPillarBlock;
@@ -12,7 +12,8 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.Half;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.block.state.properties.SlabType;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -41,8 +42,8 @@ public final class B {
     public static BlockState id(String id, Block fallback) {
         BlockState cached = BY_ID.get(id);
         if (cached != null) return cached;
-        ResourceLocation rl = ResourceLocation.tryParse(id);
-        Block b = rl != null && ForgeRegistries.BLOCKS.containsKey(rl) ? ForgeRegistries.BLOCKS.getValue(rl) : null;
+        Identifier rl = Identifier.tryParse(id);
+        Block b = rl != null && BuiltInRegistries.BLOCK.containsKey(rl) ? BuiltInRegistries.BLOCK.getValue(rl) : null;
         Block target = (b == null || b == Blocks.AIR) ? fallback : b;
         BlockState st = s(target);
         BY_ID.put(id, st);

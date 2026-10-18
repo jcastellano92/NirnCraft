@@ -9,11 +9,11 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.event.entity.living.LivingAttackEvent;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 /**
  * Fighting from the saddle. Works with any swing that ends in a vanilla attack (Better Combat's directional combos
@@ -22,16 +22,16 @@ import net.minecraftforge.fml.common.Mod;
  * wolf, mammoth, Akaviri tiger, grazer) lashes out at whatever its rider hits. A war saddle adds to the blow
  * ({@link SaddleType#WAR}). An unridden mount defends its owner.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class MountedCombat {
     private MountedCombat() {}
 
     /** Your own mount (ridden or not) is not a target. */
     @SubscribeEvent(priority = EventPriority.HIGH)
-    public static void onAttack(LivingAttackEvent event) {
+    public static void onAttack(LivingIncomingDamageEvent event) {
         Entity src = event.getSource().getEntity();
         LivingEntity victim = event.getEntity();
-        if (!(src instanceof Player p) || victim.level().isClientSide) return;
+        if (!(src instanceof Player p) || victim.level().isClientSide()) return;
         if (p.getVehicle() == victim || Mounts.kindOf(victim) != null && Mounts.isOwner(p, victim) && !p.isCreative()) {
             event.setCanceled(true);
             // a swing at your own animal that you are not sitting on: it does not land, and it is not forgotten
@@ -40,9 +40,9 @@ public final class MountedCombat {
     }
 
     @SubscribeEvent(priority = EventPriority.LOW)
-    public static void onHurt(LivingHurtEvent event) {
+    public static void onHurt(com.skycraft.combat.BeforeArmorDamageEvent event) {
         LivingEntity victim = event.getEntity();
-        if (victim.level().isClientSide) return;
+        if (victim.level().isClientSide()) return;
         Entity src = event.getSource().getEntity();
         if (src instanceof ServerPlayer rider && event.getSource().getDirectEntity() == rider
                 && rider.getVehicle() instanceof LivingEntity mount && Mounts.kindOf(mount) != null) {

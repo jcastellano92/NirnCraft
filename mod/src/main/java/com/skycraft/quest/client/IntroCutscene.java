@@ -257,7 +257,7 @@ final class IntroCutscene {
     private void ensureDragon(ClientLevel level) {
         if (dragon != null || dragonFailed) return;
         try {
-            DragonEntity d = ModEntities.DRAGON.get().create(level);
+            DragonEntity d = ModEntities.DRAGON.get().create(level,net.minecraft.world.entity.EntitySpawnReason.LOAD);
             if (d == null) {
                 dragonFailed = true;
                 return;
@@ -290,20 +290,26 @@ final class IntroCutscene {
         dragon.yHeadRot = yaw;
         dragon.setXRot(pitch);
         dragon.tickCount++;
-        dragon.walkAnimation.update((float) Mth.clamp(vel.length() * 0.6, 0.0, 1.0), 0.4f);
+        dragon.walkAnimation.update((float) Mth.clamp(vel.length() * 0.6, 0.0, 1.0), 0.4f, 1f);
         Vec3 fwd = Vec3.directionFromRotation(0, yaw);
         mouth = pos.add(fwd.scale(7.0)).add(0, 1.6, 0);
     }
 
-    /** Draws the dragon (called from the level render stage, with the camera-relative pose stack). */
-    void render(Minecraft mc, PoseStack pose, Vec3 cam, float partial) {
-        if (dragon == null || t < 2) return;
-        double x = Mth.lerp(partial, prevPos.x, pos.x) - cam.x;
-        double y = Mth.lerp(partial, prevPos.y, pos.y) - cam.y;
-        double z = Mth.lerp(partial, prevPos.z, pos.z) - cam.z;
-        var buffers = mc.renderBuffers().bufferSource();
-        mc.getEntityRenderDispatcher().render(dragon, x, y, z, yaw, partial, pose, buffers, 15728880);
-        buffers.endBatch();
+    record Extracted(net.minecraft.client.renderer.entity.EntityRenderer<DragonEntity,com.skycraft.client.PoseRenderState> renderer,com.skycraft.client.PoseRenderState state) {
+        void submit(com.mojang.blaze3d.vertex.PoseStack pose,net.minecraft.client.renderer.SubmitNodeCollector collector,net.minecraft.client.renderer.state.level.CameraRenderState camera) {
+            pose.pushPose();pose.translate(state.x-camera.pos.x,state.y-camera.pos.y,state.z-camera.pos.z);
+            renderer.submit(state,pose,collector,camera);pose.popPose();
+        }
+    }
+    /** Captures the client-only dragon before native entity submission. */
+    @SuppressWarnings({"rawtypes","unchecked"})
+    Extracted extract(Minecraft mc,float partial) {
+        if(dragon==null||t<2)return null;
+        var renderer=(net.minecraft.client.renderer.entity.EntityRenderer<DragonEntity,com.skycraft.client.PoseRenderState>)(net.minecraft.client.renderer.entity.EntityRenderer)mc.getEntityRenderDispatcher().getRenderer(dragon);
+        var state=renderer.createRenderState(dragon,partial);
+        state.x=Mth.lerp(partial,prevPos.x,pos.x);state.y=Mth.lerp(partial,prevPos.y,pos.y);state.z=Mth.lerp(partial,prevPos.z,pos.z);
+        state.lightCoords=15728880;
+        return new Extracted(renderer,state);
     }
 
     // ------------------------------------------------------------------ sounds
@@ -342,7 +348,7 @@ final class IntroCutscene {
     // ------------------------------------------------------------------ the breath and the burning town
 
     private void particle(ClientLevel level, ParticleOptions o, double x, double y, double z, double vx, double vy, double vz) {
-        level.addParticle(o, true, x, y, z, vx, vy, vz);
+        level.addParticle(o, true, false, x, y, z, vx, vy, vz);
     }
 
     private void breaths(ClientLevel level) {
@@ -394,7 +400,7 @@ final class IntroCutscene {
             if (k == BREATH_LEN / 2 && seen && t - lastExplosion >= EXPLOSION_GAP) {
                 lastExplosion = t;
                 particle(level, ParticleTypes.EXPLOSION_EMITTER, target.x, target.y + 2, target.z, 0, 0, 0);
-                play(level, SoundEvents.GENERIC_EXPLODE, target, 0.6f, 0.55f + rng.nextFloat() * 0.15f);
+                play(level, SoundEvents.GENERIC_EXPLODE.value(), target, 0.6f, 0.55f + rng.nextFloat() * 0.15f);
                 addShake(0.45 * nearness(target));
             }
             if (k == BREATH_LEN / 2 || k == BREATH_LEN - 1) {

@@ -1,6 +1,6 @@
 package com.skycraft.fire;
 
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 /**
  * Settings of the fire module. {@code skycraft-fire-client.toml}: the far fire renderer and the volume of the fire and
@@ -8,22 +8,22 @@ import net.minecraftforge.common.ForgeConfigSpec;
  * fire does.
  */
 public final class FireConfig {
-    public static final ForgeConfigSpec CLIENT_SPEC;
-    public static final ForgeConfigSpec COMMON_SPEC;
+    public static final ModConfigSpec CLIENT_SPEC;
+    public static final ModConfigSpec COMMON_SPEC;
 
     /** Draw fire sites (flames, glow and smoke columns) out to {@link #FAR_FIRE_DISTANCE} blocks, over any terrain. */
-    public static final ForgeConfigSpec.BooleanValue FAR_FIRE;
-    public static final ForgeConfigSpec.IntValue FAR_FIRE_DISTANCE;
-    public static final ForgeConfigSpec.IntValue FAR_FIRE_MAX_SITES;
-    public static final ForgeConfigSpec.BooleanValue FAR_SMOKE;
-    public static final ForgeConfigSpec.DoubleValue AMBIENT_VOLUME;
-    public static final ForgeConfigSpec.BooleanValue AFTERMATH_MUSIC;
+    public static final ModConfigSpec.BooleanValue FAR_FIRE;
+    public static final ModConfigSpec.IntValue FAR_FIRE_DISTANCE;
+    public static final ModConfigSpec.IntValue FAR_FIRE_MAX_SITES;
+    public static final ModConfigSpec.BooleanValue FAR_SMOKE;
+    public static final ModConfigSpec.DoubleValue AMBIENT_VOLUME;
+    public static final ModConfigSpec.BooleanValue AFTERMATH_MUSIC;
 
-    public static final ForgeConfigSpec.IntValue SYNC_RADIUS;
-    public static final ForgeConfigSpec.BooleanValue BIG_FIRE_HURTS;
+    public static final ModConfigSpec.IntValue SYNC_RADIUS;
+    public static final ModConfigSpec.BooleanValue BIG_FIRE_HURTS;
 
     static {
-        ForgeConfigSpec.Builder c = new ForgeConfigSpec.Builder();
+        ModConfigSpec.Builder c = new ModConfigSpec.Builder();
         c.comment("Distant fire: burning towns stay visible from the road, as flame, glow and a rising smoke column.").push("farFire");
         FAR_FIRE = c.comment("Draw the far fire renderer (billboards drawn after the particles, independent of particle distance).")
                 .define("farFire", true);
@@ -37,7 +37,7 @@ public final class FireConfig {
         c.pop();
         CLIENT_SPEC = c.build();
 
-        ForgeConfigSpec.Builder s = new ForgeConfigSpec.Builder();
+        ModConfigSpec.Builder s = new ModConfigSpec.Builder();
         s.comment("Fire sites (server-defined fires drawn far away) and the big fire block family.").push("fire");
         SYNC_RADIUS = s.comment("Radius, in blocks, within which a player is told about fire sites.").defineInRange("syncRadius", 1100, 128, 4096);
         BIG_FIRE_HURTS = s.comment("Standing in a big fire block sets you alight and hurts (it never spreads or burns blocks).")

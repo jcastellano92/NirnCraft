@@ -2,7 +2,8 @@
 
 Skycraft's overworld is Nirn. You spawn in Skyrim, outside Whiterun. The nine holds and the other provinces of
 Tamriel sit where they do on the real map. Past Tamriel's seas the world keeps going: Atmora, Akavir, Yokuda,
-Pyandonea and Thras, then endless generated lands that reuse every biome type. Skycraft generates all of it
+Pyandonea and Thras, then open ocean. Far beyond the fixed lands, ocean travel wraps to the opposite
+edge of the overworld. Procedural expansion continents are disabled. Skycraft generates the fixed world
 itself: terrain, biomes, surface, vegetation, structures and towns. No third-party terrain, structure or village
 mods are used.
 
@@ -68,14 +69,15 @@ before datapacks load, and the client map screen needs it too.
   * **Yokuda** to the west: a desert and a sunken archipelago.
   * **Pyandonea** to the south-west: jungle isles.
   * **Thras** to the south-west: coral islands.
-* **Endless lands.** Further out, a jittered grid of 12,288-block super-cells. Each cell holds an ocean, an
-  archipelago or a continent.
-  * Each landmass gets a realm archetype, which is a palette of biome families: frozen, temperate, ash,
-    swamp, desert, jungle, crystal, savanna, mushroom or alpine.
-  * Landmasses get generated names in the "Uncharted" style, plus seeded regions inside them.
-  * They reuse every biome in the catalogue, so the world never runs out.
-* Regions out here are generated `Region` objects with stable ids such as `akavir/tsaesci_3` or `realm/x12_z-4/2`.
-  They have the same API as authored regions.
+* **Outer ocean (owner decision, 2026-10-18).** Preserve Tamriel and all fixed foreign lands. Further out,
+  generate ocean without procedural expansion continents or new outer-ocean micro-islands. Runtime
+  road/street/scene queries do not schedule or consume dormant tile plans.
+* **Opposite-edge travel.** The default symmetric seam is +/-29,360,128 blocks on X/Z, safely inside
+  Minecraft's hard boundary. The period is a multiple of the 8,192-block weather field. A server config
+  permits smaller ocean-only test boundaries, no closer than +/-65,536. Only the overworld wraps.
+  Destination loading must not block the server thread; vehicle groups retain their travel state.
+* Former generated-region IDs and explicit tile inspection tools remain readable for compatibility.
+  Previously saved chunks are not automatically regenerated.
 
 ## 4. Terrain pipeline (world preset → noise settings → density functions)
 

@@ -544,6 +544,12 @@ def skies():
 
 # ------------------------------------------------------------------------------------------------ assets
 def dump(path, obj):
+    import sys
+    from pathlib import Path
+    native_tools263 = str(Path(__file__).resolve().parents[1])
+    if native_tools263 not in sys.path: sys.path.insert(0, native_tools263)
+    from data_format_263 import prepare
+    path, obj = prepare(path, obj)
     os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, "w", encoding="utf-8", newline="\n") as f:
         json.dump(obj, f, indent=2)
@@ -567,7 +573,7 @@ def b(name):
 
 
 def loot_self(name):
-    dump(os.path.join(DATA, SK, "loot_tables", "blocks", name + ".json"),
+    dump(os.path.join(DATA, SK, "loot_table", "blocks", name + ".json"),
          {"type": "minecraft:block", "random_sequence": SK + ":blocks/" + name, "pools": [
              {"rolls": 1, "bonus_rolls": 0, "entries": [{"type": "minecraft:item", "name": SK + ":" + name}],
               "conditions": [{"condition": "minecraft:survives_explosion"}]}]})

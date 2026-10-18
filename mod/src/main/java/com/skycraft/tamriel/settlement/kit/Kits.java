@@ -101,10 +101,10 @@ public final class Kits {
         base.name = "nord";
         base.horns = true;
         base.thatch = true;
-        base.accent = s(Blocks.BLUE_WOOL);
-        base.bed = s(Blocks.BROWN_BED);
-        base.carpet = s(Blocks.BROWN_CARPET);
-        base.carpet2 = s(Blocks.WHITE_CARPET);
+        base.accent = s(com.skycraft.worldgen.VanillaBlocks.BLUE_WOOL);
+        base.bed = s(com.skycraft.worldgen.VanillaBlocks.BROWN_BED);
+        base.carpet = s(com.skycraft.worldgen.VanillaBlocks.BROWN_CARPET);
+        base.carpet2 = s(com.skycraft.worldgen.VanillaBlocks.WHITE_CARPET);
 
         Palette whiterun = base.copy();
         whiterun.name = "whiterun";
@@ -121,7 +121,7 @@ public final class Kits {
         whiterun.plaza2 = s(Blocks.ANDESITE);
         whiterun.cityWall = s(Blocks.STONE_BRICKS);
         whiterun.cityWall2 = s(Blocks.MOSSY_STONE_BRICKS);
-        whiterun.accent = s(Blocks.YELLOW_WOOL);
+        whiterun.accent = s(com.skycraft.worldgen.VanillaBlocks.YELLOW_WOOL);
         whiterun.thatch = false;
 
         Palette windhelm = base.copy();
@@ -161,8 +161,8 @@ public final class Kits {
         markarth.wallLow = s(Blocks.SMOOTH_SANDSTONE);
         markarth.wall = s(Blocks.CUT_SANDSTONE);
         markarth.wall2 = s(Blocks.CHISELED_SANDSTONE);
-        markarth.post = s(Blocks.WAXED_OXIDIZED_CUT_COPPER);
-        markarth.beam = s(Blocks.WAXED_CUT_COPPER);
+        markarth.post = s(com.skycraft.worldgen.VanillaBlocks.WAXED_OXIDIZED_CUT_COPPER);
+        markarth.beam = s(com.skycraft.worldgen.VanillaBlocks.WAXED_CUT_COPPER);
         markarth.roof = s(Blocks.SMOOTH_SANDSTONE_STAIRS);
         markarth.roofSlab = s(Blocks.SMOOTH_SANDSTONE_SLAB);
         markarth.roofFull = s(Blocks.SMOOTH_SANDSTONE);
@@ -179,8 +179,8 @@ public final class Kits {
         markarth.cityWallStairs = s(Blocks.SANDSTONE_STAIRS);
         markarth.cityWallSlab = s(Blocks.SANDSTONE_SLAB);
         markarth.cityWallWall = s(Blocks.SANDSTONE_WALL);
-        markarth.column = s(Blocks.WAXED_OXIDIZED_CUT_COPPER);
-        markarth.accent = s(Blocks.RED_WOOL);
+        markarth.column = s(com.skycraft.worldgen.VanillaBlocks.WAXED_OXIDIZED_CUT_COPPER);
+        markarth.accent = s(com.skycraft.worldgen.VanillaBlocks.RED_WOOL);
         markarth.shell = Shell.FLAT;
         markarth.hallShell = Shell.FLAT;
         markarth.timber = false;
@@ -208,7 +208,7 @@ public final class Kits {
         riften.cityWallStairs = s(Blocks.MOSSY_STONE_BRICK_STAIRS);
         riften.cityWallSlab = s(Blocks.MOSSY_STONE_BRICK_SLAB);
         riften.cityWallWall = s(Blocks.MOSSY_STONE_BRICK_WALL);
-        riften.accent = s(Blocks.PURPLE_WOOL);
+        riften.accent = s(com.skycraft.worldgen.VanillaBlocks.PURPLE_WOOL);
         riften.stilts = false;
         riften.thatch = false;
 
@@ -233,9 +233,9 @@ public final class Kits {
         solitude.path2 = s(Blocks.ANDESITE);
         solitude.plaza = s(Blocks.STONE_BRICKS);
         solitude.plaza2 = s(Blocks.POLISHED_ANDESITE);
-        solitude.accent = s(Blocks.RED_WOOL);
-        solitude.carpet = s(Blocks.RED_CARPET);
-        solitude.bed = s(Blocks.RED_BED);
+        solitude.accent = s(com.skycraft.worldgen.VanillaBlocks.RED_WOOL);
+        solitude.carpet = s(com.skycraft.worldgen.VanillaBlocks.RED_CARPET);
+        solitude.bed = s(com.skycraft.worldgen.VanillaBlocks.RED_BED);
         solitude.pitch = 2;
         solitude.thatch = false;
         solitude.horns = false;
@@ -263,7 +263,7 @@ public final class Kits {
         marsh.plaza = s(Blocks.PACKED_MUD);
         marsh.plaza2 = s(Blocks.MUD_BRICKS);
         marsh.stilts = true;
-        marsh.accent = s(Blocks.GREEN_WOOL);
+        marsh.accent = s(com.skycraft.worldgen.VanillaBlocks.GREEN_WOOL);
 
         Palette forest = base.copy();
         forest.name = "forest";
@@ -273,7 +273,7 @@ public final class Kits {
         forest.timber = false;
         forest.path = s(Blocks.DIRT_PATH);
         forest.path2 = s(Blocks.GRAVEL);
-        forest.accent = s(Blocks.GREEN_WOOL);
+        forest.accent = s(com.skycraft.worldgen.VanillaBlocks.GREEN_WOOL);
 
         Palette stone = base.copy();
         stone.name = "stone";
@@ -288,7 +288,7 @@ public final class Kits {
         stone.cityWallSlab = s(Blocks.COBBLESTONE_SLAB);
         stone.cityWallWall = s(Blocks.COBBLESTONE_WALL);
         stone.thatch = false;
-        stone.accent = s(Blocks.RED_WOOL);
+        stone.accent = s(com.skycraft.worldgen.VanillaBlocks.RED_WOOL);
 
         return new Palette[]{base, whiterun, windhelm, markarth, riften, solitude, winterhold, marsh, forest, stone};
     }
@@ -320,10 +320,10 @@ public final class Kits {
         p.planks = s(Blocks.OAK_PLANKS);
         p.slab = s(Blocks.OAK_SLAB);
         p.stairs = s(Blocks.OAK_STAIRS);
-        p.carpet = s(Blocks.RED_CARPET);
-        p.carpet2 = s(Blocks.YELLOW_CARPET);
-        p.accent = s(Blocks.RED_WOOL);
-        p.bed = s(Blocks.RED_BED);
+        p.carpet = s(com.skycraft.worldgen.VanillaBlocks.RED_CARPET);
+        p.carpet2 = s(com.skycraft.worldgen.VanillaBlocks.YELLOW_CARPET);
+        p.accent = s(com.skycraft.worldgen.VanillaBlocks.RED_WOOL);
+        p.bed = s(com.skycraft.worldgen.VanillaBlocks.RED_BED);
         p.path = s(Blocks.COBBLESTONE);
         p.path2 = s(Blocks.STONE_BRICKS);
         p.plaza = s(Blocks.STONE_BRICKS);
@@ -348,7 +348,7 @@ public final class Kits {
         ic.path2 = s(Blocks.STONE_BRICKS);
         ic.plaza = s(Blocks.QUARTZ_BRICKS);
         ic.plaza2 = s(Blocks.POLISHED_DIORITE);
-        ic.glass = s(Blocks.WHITE_STAINED_GLASS);
+        ic.glass = s(com.skycraft.worldgen.VanillaBlocks.WHITE_STAINED_GLASS);
         return new Palette[]{p, ic};
     }
 
@@ -378,10 +378,10 @@ public final class Kits {
         hlaalu.planks = s(Blocks.JUNGLE_PLANKS);
         hlaalu.slab = s(Blocks.JUNGLE_SLAB);
         hlaalu.stairs = s(Blocks.JUNGLE_STAIRS);
-        hlaalu.carpet = s(Blocks.ORANGE_CARPET);
-        hlaalu.carpet2 = s(Blocks.BROWN_CARPET);
-        hlaalu.accent = s(Blocks.ORANGE_WOOL);
-        hlaalu.bed = s(Blocks.ORANGE_BED);
+        hlaalu.carpet = s(com.skycraft.worldgen.VanillaBlocks.ORANGE_CARPET);
+        hlaalu.carpet2 = s(com.skycraft.worldgen.VanillaBlocks.BROWN_CARPET);
+        hlaalu.accent = s(com.skycraft.worldgen.VanillaBlocks.ORANGE_WOOL);
+        hlaalu.bed = s(com.skycraft.worldgen.VanillaBlocks.ORANGE_BED);
         hlaalu.path = s(Blocks.PACKED_MUD);
         hlaalu.path2 = s(Blocks.COARSE_DIRT);
         hlaalu.plaza = s(Blocks.CUT_SANDSTONE);
@@ -413,9 +413,9 @@ public final class Kits {
         redoran.door = s(Blocks.DARK_OAK_DOOR);
         redoran.sign = s(Blocks.DARK_OAK_WALL_SIGN);
         redoran.window = s(Blocks.DARK_OAK_FENCE);
-        redoran.accent = s(Blocks.RED_WOOL);
-        redoran.carpet = s(Blocks.RED_CARPET);
-        redoran.bed = s(Blocks.RED_BED);
+        redoran.accent = s(com.skycraft.worldgen.VanillaBlocks.RED_WOOL);
+        redoran.carpet = s(com.skycraft.worldgen.VanillaBlocks.RED_CARPET);
+        redoran.bed = s(com.skycraft.worldgen.VanillaBlocks.RED_BED);
         redoran.path = s(Blocks.COARSE_DIRT);
         redoran.path2 = s(Blocks.GRAVEL);
         redoran.plaza = s(Blocks.MUD_BRICKS);
@@ -444,12 +444,12 @@ public final class Kits {
         telvanni.floor = s(Blocks.MANGROVE_PLANKS);
         telvanni.door = s(Blocks.MANGROVE_DOOR);
         telvanni.sign = s(Blocks.MANGROVE_WALL_SIGN);
-        telvanni.window = s(Blocks.PURPLE_STAINED_GLASS_PANE);
-        telvanni.glass = s(Blocks.PURPLE_STAINED_GLASS);
+        telvanni.window = s(com.skycraft.worldgen.VanillaBlocks.PURPLE_STAINED_GLASS_PANE);
+        telvanni.glass = s(com.skycraft.worldgen.VanillaBlocks.PURPLE_STAINED_GLASS);
         telvanni.light = s(Blocks.SHROOMLIGHT);
-        telvanni.accent = s(Blocks.PURPLE_WOOL);
-        telvanni.carpet = s(Blocks.PURPLE_CARPET);
-        telvanni.bed = s(Blocks.PURPLE_BED);
+        telvanni.accent = s(com.skycraft.worldgen.VanillaBlocks.PURPLE_WOOL);
+        telvanni.carpet = s(com.skycraft.worldgen.VanillaBlocks.PURPLE_CARPET);
+        telvanni.bed = s(com.skycraft.worldgen.VanillaBlocks.PURPLE_BED);
         telvanni.path = s(Blocks.PACKED_MUD);
         telvanni.path2 = s(Blocks.MUD);
         telvanni.plaza = s(Blocks.MUD_BRICKS);
@@ -479,8 +479,8 @@ public final class Kits {
         velothi.plaza2 = s(Blocks.STONE_BRICKS);
         velothi.cityWall = s(Blocks.STONE_BRICKS);
         velothi.column = s(Blocks.POLISHED_BASALT);
-        velothi.accent = s(Blocks.RED_WOOL);
-        velothi.carpet = s(Blocks.RED_CARPET);
+        velothi.accent = s(com.skycraft.worldgen.VanillaBlocks.RED_WOOL);
+        velothi.carpet = s(com.skycraft.worldgen.VanillaBlocks.RED_CARPET);
         velothi.timber = false;
         velothi.shell = Shell.FLAT;
         velothi.hallShell = Shell.DOME;
@@ -514,10 +514,10 @@ public final class Kits {
         p.slab = s(Blocks.MANGROVE_SLAB);
         p.stairs = s(Blocks.MANGROVE_STAIRS);
         p.light = s(Blocks.VERDANT_FROGLIGHT);
-        p.carpet = s(Blocks.GREEN_CARPET);
+        p.carpet = s(com.skycraft.worldgen.VanillaBlocks.GREEN_CARPET);
         p.carpet2 = s(Blocks.MOSS_CARPET);
-        p.accent = s(Blocks.GREEN_WOOL);
-        p.bed = s(Blocks.GREEN_BED);
+        p.accent = s(com.skycraft.worldgen.VanillaBlocks.GREEN_WOOL);
+        p.bed = s(com.skycraft.worldgen.VanillaBlocks.GREEN_BED);
         p.path = s(Blocks.PACKED_MUD);
         p.path2 = s(Blocks.MUD);
         p.plaza = s(Blocks.MOSSY_STONE_BRICKS);
@@ -548,7 +548,7 @@ public final class Kits {
         p.beam = s(Blocks.STRIPPED_ACACIA_LOG);
         p.roof = s(Blocks.SMOOTH_SANDSTONE_STAIRS);
         p.roofSlab = s(Blocks.SMOOTH_SANDSTONE_SLAB);
-        p.roofFull = s(Blocks.ORANGE_TERRACOTTA);
+        p.roofFull = s(com.skycraft.worldgen.VanillaBlocks.ORANGE_TERRACOTTA);
         p.trim = s(Blocks.SANDSTONE_STAIRS);
         p.trimSlab = s(Blocks.SANDSTONE_SLAB);
         p.window = s(Blocks.ACACIA_FENCE);
@@ -560,10 +560,10 @@ public final class Kits {
         p.planks = s(Blocks.ACACIA_PLANKS);
         p.slab = s(Blocks.ACACIA_SLAB);
         p.stairs = s(Blocks.ACACIA_STAIRS);
-        p.carpet = s(Blocks.ORANGE_CARPET);
-        p.carpet2 = s(Blocks.RED_CARPET);
-        p.accent = s(Blocks.ORANGE_WOOL);
-        p.bed = s(Blocks.ORANGE_BED);
+        p.carpet = s(com.skycraft.worldgen.VanillaBlocks.ORANGE_CARPET);
+        p.carpet2 = s(com.skycraft.worldgen.VanillaBlocks.RED_CARPET);
+        p.accent = s(com.skycraft.worldgen.VanillaBlocks.ORANGE_WOOL);
+        p.bed = s(com.skycraft.worldgen.VanillaBlocks.ORANGE_BED);
         p.path = s(Blocks.SMOOTH_SANDSTONE);
         p.path2 = s(Blocks.SANDSTONE);
         p.plaza = s(Blocks.CUT_SANDSTONE);
@@ -585,9 +585,9 @@ public final class Kits {
         p.name = "bosmer";
         p.foundation = s(Blocks.MOSSY_COBBLESTONE);
         p.floor = s(Blocks.JUNGLE_PLANKS);
-        p.wallLow = s(Blocks.BROWN_TERRACOTTA);
-        p.wall = s(Blocks.BROWN_WOOL);
-        p.wall2 = s(Blocks.BROWN_TERRACOTTA);
+        p.wallLow = s(com.skycraft.worldgen.VanillaBlocks.BROWN_TERRACOTTA);
+        p.wall = s(com.skycraft.worldgen.VanillaBlocks.BROWN_WOOL);
+        p.wall2 = s(com.skycraft.worldgen.VanillaBlocks.BROWN_TERRACOTTA);
         p.post = s(Blocks.BONE_BLOCK);
         p.beam = s(Blocks.JUNGLE_LOG);
         p.roof = s(Blocks.MANGROVE_STAIRS);
@@ -604,10 +604,10 @@ public final class Kits {
         p.planks = s(Blocks.JUNGLE_PLANKS);
         p.slab = s(Blocks.JUNGLE_SLAB);
         p.stairs = s(Blocks.JUNGLE_STAIRS);
-        p.carpet = s(Blocks.GREEN_CARPET);
-        p.carpet2 = s(Blocks.BROWN_CARPET);
-        p.accent = s(Blocks.GREEN_WOOL);
-        p.bed = s(Blocks.GREEN_BED);
+        p.carpet = s(com.skycraft.worldgen.VanillaBlocks.GREEN_CARPET);
+        p.carpet2 = s(com.skycraft.worldgen.VanillaBlocks.BROWN_CARPET);
+        p.accent = s(com.skycraft.worldgen.VanillaBlocks.GREEN_WOOL);
+        p.bed = s(com.skycraft.worldgen.VanillaBlocks.GREEN_BED);
         p.path = s(Blocks.DIRT_PATH);
         p.path2 = s(Blocks.ROOTED_DIRT);
         p.plaza = s(Blocks.MOSSY_COBBLESTONE);
@@ -641,8 +641,8 @@ public final class Kits {
         p.roofFull = s(Blocks.HONEYCOMB_BLOCK);
         p.trim = s(Blocks.QUARTZ_STAIRS);
         p.trimSlab = s(Blocks.QUARTZ_SLAB);
-        p.window = s(Blocks.LIGHT_BLUE_STAINED_GLASS_PANE);
-        p.glass = s(Blocks.LIGHT_BLUE_STAINED_GLASS);
+        p.window = s(com.skycraft.worldgen.VanillaBlocks.LIGHT_BLUE_STAINED_GLASS_PANE);
+        p.glass = s(com.skycraft.worldgen.VanillaBlocks.LIGHT_BLUE_STAINED_GLASS);
         p.door = s(Blocks.BIRCH_DOOR);
         p.fence = s(Blocks.BIRCH_FENCE);
         p.gate = s(Blocks.BIRCH_FENCE_GATE);
@@ -652,10 +652,10 @@ public final class Kits {
         p.slab = s(Blocks.BIRCH_SLAB);
         p.stairs = s(Blocks.BIRCH_STAIRS);
         p.light = s(Blocks.SEA_LANTERN);
-        p.carpet = s(Blocks.LIGHT_BLUE_CARPET);
-        p.carpet2 = s(Blocks.YELLOW_CARPET);
-        p.accent = s(Blocks.YELLOW_WOOL);
-        p.bed = s(Blocks.LIGHT_BLUE_BED);
+        p.carpet = s(com.skycraft.worldgen.VanillaBlocks.LIGHT_BLUE_CARPET);
+        p.carpet2 = s(com.skycraft.worldgen.VanillaBlocks.YELLOW_CARPET);
+        p.accent = s(com.skycraft.worldgen.VanillaBlocks.YELLOW_WOOL);
+        p.bed = s(com.skycraft.worldgen.VanillaBlocks.LIGHT_BLUE_BED);
         p.hearth = s(Blocks.SOUL_CAMPFIRE);
         p.path = s(Blocks.POLISHED_DIORITE);
         p.path2 = s(Blocks.CALCITE);
@@ -681,12 +681,12 @@ public final class Kits {
         p.wall = s(Blocks.SMOOTH_SANDSTONE);
         p.wall2 = s(Blocks.SMOOTH_SANDSTONE);
         p.wallLow = s(Blocks.SANDSTONE);
-        p.roofFull = s(Blocks.CYAN_TERRACOTTA);
+        p.roofFull = s(com.skycraft.worldgen.VanillaBlocks.CYAN_TERRACOTTA);
         p.roof = s(Blocks.SMOOTH_SANDSTONE_STAIRS);
-        p.accent = s(Blocks.RED_WOOL);
-        p.carpet = s(Blocks.RED_CARPET);
-        p.carpet2 = s(Blocks.CYAN_CARPET);
-        p.bed = s(Blocks.RED_BED);
+        p.accent = s(com.skycraft.worldgen.VanillaBlocks.RED_WOOL);
+        p.carpet = s(com.skycraft.worldgen.VanillaBlocks.RED_CARPET);
+        p.carpet2 = s(com.skycraft.worldgen.VanillaBlocks.CYAN_CARPET);
+        p.bed = s(com.skycraft.worldgen.VanillaBlocks.RED_BED);
         p.column = s(Blocks.CHISELED_SANDSTONE);
         p.shell = Shell.FLAT;
         p.hallShell = Shell.DOME;
@@ -718,10 +718,10 @@ public final class Kits {
         p.planks = s(Blocks.DARK_OAK_PLANKS);
         p.slab = s(Blocks.DARK_OAK_SLAB);
         p.stairs = s(Blocks.DARK_OAK_STAIRS);
-        p.carpet = s(Blocks.BLUE_CARPET);
-        p.carpet2 = s(Blocks.RED_CARPET);
-        p.accent = s(Blocks.BLUE_WOOL);
-        p.bed = s(Blocks.BLUE_BED);
+        p.carpet = s(com.skycraft.worldgen.VanillaBlocks.BLUE_CARPET);
+        p.carpet2 = s(com.skycraft.worldgen.VanillaBlocks.RED_CARPET);
+        p.accent = s(com.skycraft.worldgen.VanillaBlocks.BLUE_WOOL);
+        p.bed = s(com.skycraft.worldgen.VanillaBlocks.BLUE_BED);
         p.path = s(Blocks.COBBLESTONE);
         p.path2 = s(Blocks.GRAVEL);
         p.plaza = s(Blocks.COBBLESTONE);
@@ -747,13 +747,13 @@ public final class Kits {
         p.beam = s(Blocks.STRIPPED_DARK_OAK_LOG);
         p.roof = s(Blocks.SPRUCE_STAIRS);
         p.roofSlab = s(Blocks.SPRUCE_SLAB);
-        p.roofFull = s(Blocks.BROWN_WOOL);
+        p.roofFull = s(com.skycraft.worldgen.VanillaBlocks.BROWN_WOOL);
         p.trim = s(Blocks.COBBLED_DEEPSLATE_STAIRS);
         p.trimSlab = s(Blocks.COBBLED_DEEPSLATE_SLAB);
-        p.carpet = s(Blocks.BROWN_CARPET);
-        p.carpet2 = s(Blocks.GRAY_CARPET);
-        p.accent = s(Blocks.RED_WOOL);
-        p.bed = s(Blocks.BROWN_BED);
+        p.carpet = s(com.skycraft.worldgen.VanillaBlocks.BROWN_CARPET);
+        p.carpet2 = s(com.skycraft.worldgen.VanillaBlocks.GRAY_CARPET);
+        p.accent = s(com.skycraft.worldgen.VanillaBlocks.RED_WOOL);
+        p.bed = s(com.skycraft.worldgen.VanillaBlocks.BROWN_BED);
         p.path = s(Blocks.COARSE_DIRT);
         p.path2 = s(Blocks.GRAVEL);
         p.plaza = s(Blocks.COBBLED_DEEPSLATE);
@@ -778,7 +778,7 @@ public final class Kits {
         p.floor = s(Blocks.BAMBOO_PLANKS);
         p.wallLow = s(Blocks.STONE_BRICKS);
         p.wall = s(Blocks.BIRCH_PLANKS);
-        p.wall2 = s(Blocks.WHITE_TERRACOTTA);
+        p.wall2 = s(com.skycraft.worldgen.VanillaBlocks.WHITE_TERRACOTTA);
         p.post = s(Blocks.MANGROVE_LOG);
         p.beam = s(Blocks.STRIPPED_MANGROVE_LOG);
         p.roof = s(Blocks.DEEPSLATE_TILE_STAIRS);
@@ -795,10 +795,10 @@ public final class Kits {
         p.planks = s(Blocks.BAMBOO_PLANKS);
         p.slab = s(Blocks.BAMBOO_SLAB);
         p.stairs = s(Blocks.BAMBOO_STAIRS);
-        p.carpet = s(Blocks.RED_CARPET);
-        p.carpet2 = s(Blocks.BLACK_CARPET);
-        p.accent = s(Blocks.RED_WOOL);
-        p.bed = s(Blocks.RED_BED);
+        p.carpet = s(com.skycraft.worldgen.VanillaBlocks.RED_CARPET);
+        p.carpet2 = s(com.skycraft.worldgen.VanillaBlocks.BLACK_CARPET);
+        p.accent = s(com.skycraft.worldgen.VanillaBlocks.RED_WOOL);
+        p.bed = s(com.skycraft.worldgen.VanillaBlocks.RED_BED);
         p.path = s(Blocks.GRAVEL);
         p.path2 = s(Blocks.STONE);
         p.plaza = s(Blocks.STONE_BRICKS);
@@ -826,10 +826,10 @@ public final class Kits {
         p.roofFull = s(Blocks.MOSS_BLOCK);
         p.trim = s(Blocks.COBBLESTONE_STAIRS);
         p.trimSlab = s(Blocks.COBBLESTONE_SLAB);
-        p.carpet = s(Blocks.WHITE_CARPET);
-        p.carpet2 = s(Blocks.LIGHT_GRAY_CARPET);
-        p.accent = s(Blocks.LIGHT_GRAY_WOOL);
-        p.bed = s(Blocks.WHITE_BED);
+        p.carpet = s(com.skycraft.worldgen.VanillaBlocks.WHITE_CARPET);
+        p.carpet2 = s(com.skycraft.worldgen.VanillaBlocks.LIGHT_GRAY_CARPET);
+        p.accent = s(com.skycraft.worldgen.VanillaBlocks.LIGHT_GRAY_WOOL);
+        p.bed = s(com.skycraft.worldgen.VanillaBlocks.WHITE_BED);
         p.path = s(Blocks.GRAVEL);
         p.path2 = s(Blocks.COBBLESTONE);
         p.plaza = s(Blocks.COBBLESTONE);
@@ -858,7 +858,7 @@ public final class Kits {
         p.wall2 = s(Blocks.RED_SANDSTONE);
         p.roof = s(Blocks.SMOOTH_RED_SANDSTONE_STAIRS);
         p.roofSlab = s(Blocks.SMOOTH_RED_SANDSTONE_SLAB);
-        p.roofFull = s(Blocks.ORANGE_TERRACOTTA);
+        p.roofFull = s(com.skycraft.worldgen.VanillaBlocks.ORANGE_TERRACOTTA);
         p.trim = s(Blocks.RED_SANDSTONE_STAIRS);
         p.trimSlab = s(Blocks.RED_SANDSTONE_SLAB);
         p.path = s(Blocks.SMOOTH_RED_SANDSTONE);
@@ -871,9 +871,9 @@ public final class Kits {
         p.cityWallSlab = s(Blocks.RED_SANDSTONE_SLAB);
         p.cityWallWall = s(Blocks.RED_SANDSTONE_WALL);
         p.column = s(Blocks.CHISELED_RED_SANDSTONE);
-        p.accent = s(Blocks.YELLOW_WOOL);
-        p.carpet = s(Blocks.YELLOW_CARPET);
-        p.bed = s(Blocks.YELLOW_BED);
+        p.accent = s(com.skycraft.worldgen.VanillaBlocks.YELLOW_WOOL);
+        p.carpet = s(com.skycraft.worldgen.VanillaBlocks.YELLOW_CARPET);
+        p.bed = s(com.skycraft.worldgen.VanillaBlocks.YELLOW_BED);
         p.shell = Shell.FLAT;
         p.hallShell = Shell.DOME;
         return p;
@@ -895,8 +895,8 @@ public final class Kits {
         p.roofFull = s(Blocks.DARK_PRISMARINE);
         p.trim = s(Blocks.DARK_PRISMARINE_STAIRS);
         p.trimSlab = s(Blocks.DARK_PRISMARINE_SLAB);
-        p.window = s(Blocks.CYAN_STAINED_GLASS_PANE);
-        p.glass = s(Blocks.CYAN_STAINED_GLASS);
+        p.window = s(com.skycraft.worldgen.VanillaBlocks.CYAN_STAINED_GLASS_PANE);
+        p.glass = s(com.skycraft.worldgen.VanillaBlocks.CYAN_STAINED_GLASS);
         p.door = s(Blocks.WARPED_DOOR);
         p.fence = s(Blocks.WARPED_FENCE);
         p.gate = s(Blocks.WARPED_FENCE_GATE);
@@ -906,10 +906,10 @@ public final class Kits {
         p.slab = s(Blocks.WARPED_SLAB);
         p.stairs = s(Blocks.WARPED_STAIRS);
         p.light = s(Blocks.SEA_LANTERN);
-        p.carpet = s(Blocks.CYAN_CARPET);
-        p.carpet2 = s(Blocks.LIGHT_BLUE_CARPET);
-        p.accent = s(Blocks.CYAN_WOOL);
-        p.bed = s(Blocks.CYAN_BED);
+        p.carpet = s(com.skycraft.worldgen.VanillaBlocks.CYAN_CARPET);
+        p.carpet2 = s(com.skycraft.worldgen.VanillaBlocks.LIGHT_BLUE_CARPET);
+        p.accent = s(com.skycraft.worldgen.VanillaBlocks.CYAN_WOOL);
+        p.bed = s(com.skycraft.worldgen.VanillaBlocks.CYAN_BED);
         p.hearth = s(Blocks.SOUL_CAMPFIRE);
         p.path = s(Blocks.DARK_PRISMARINE);
         p.path2 = s(Blocks.PRISMARINE);

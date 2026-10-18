@@ -1,7 +1,7 @@
 package com.skycraft.crafting.arcane.client;
 
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
@@ -106,14 +106,14 @@ public class ArcaneList<T> {
         return true;
     }
 
-    public void render(GuiGraphics g, Font font, int mouseX, int mouseY, Component emptyText) {
-        g.drawString(font, title, x + 2, y, ArcaneUi.GOLD, false);
+    public void render(GuiGraphicsExtractor g, Font font, int mouseX, int mouseY, Component emptyText) {
+        g.text(font, title, x + 2, y, ArcaneUi.GOLD, false);
         int top = listTop();
         g.fill(x, top, x + w, y + h, 0x60000000);
         ArcaneUi.frame(g, x, top, w, y + h - top, 0x50B89A50);
         hovered = -1;
         if (entries.isEmpty()) {
-            g.drawString(font, emptyText, x + 5, top + 6, ArcaneUi.MUTED, false);
+            g.text(font, emptyText, x + 5, top + 6, ArcaneUi.MUTED, false);
             return;
         }
         g.enableScissor(x + 1, top + 1, x + w - 1, y + h - 1);
@@ -130,15 +130,15 @@ public class ArcaneList<T> {
             else if (over) g.fill(x + 1, ry, x + w - 1, ry + ROW, 0x30FFFFFF);
             if (sel) g.fill(x + 1, ry, x + 3, ry + ROW, 0xFFE8C060);
             if (!e.icon().isEmpty()) {
-                g.renderItem(e.icon(), x + 4, ry + 2);
-                g.renderItemDecorations(font, e.icon(), x + 4, ry + 2);
+                g.item(e.icon(), x + 4, ry + 2);
+                g.itemDecorations(font, e.icon(), x + 4, ry + 2);
             }
             int tx = e.icon().isEmpty() ? x + 6 : x + 24;
             if (e.sub() == null || e.sub().getString().isEmpty()) {
-                g.drawString(font, e.label(), tx, ry + 6, sel ? 0xFFFFF4D0 : ArcaneUi.TEXT, false);
+                g.text(font, e.label(), tx, ry + 6, sel ? 0xFFFFF4D0 : ArcaneUi.TEXT, false);
             } else {
-                g.drawString(font, e.label(), tx, ry + 1, sel ? 0xFFFFF4D0 : ArcaneUi.TEXT, false);
-                g.drawString(font, e.sub(), tx, ry + 11, ArcaneUi.MUTED, false);
+                g.text(font, e.label(), tx, ry + 1, sel ? 0xFFFFF4D0 : ArcaneUi.TEXT, false);
+                g.text(font, e.sub(), tx, ry + 11, ArcaneUi.MUTED, false);
             }
         }
         g.disableScissor();

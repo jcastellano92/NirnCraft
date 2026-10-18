@@ -12,6 +12,9 @@
     "skycraft:pyandonean_jungle_isles",
     "skycraft:rivenspire",
     "skycraft:tsaesci_jungle",
-    "skycraft:valenwood_rainforest"
+    "skycraft:valenwood_rainforest",
+    "#c:is_dense_vegetation/overworld",
+    "#c:is_dense_vegetation/nether",
+    "#c:is_dense_vegetation/end"
   ]
 }

@@ -16,7 +16,7 @@ import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
@@ -36,9 +36,9 @@ public class SandSerpentEntity extends SkyMonster {
     }
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        this.entityData.define(BURROWED, false);
+    protected void defineSynchedData(net.minecraft.network.syncher.SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(BURROWED, false);
     }
 
     public boolean isBurrowed() {
@@ -57,21 +57,21 @@ public class SandSerpentEntity extends SkyMonster {
 
     @Override
     @Nullable
-    public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, MobSpawnType reason,
-                                        @Nullable SpawnGroupData data, @Nullable CompoundTag tag) {
-        data = super.finalizeSpawn(level, difficulty, reason, data, tag);
-        if (reason == MobSpawnType.NATURAL) setBurrowed(true);
+    public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, EntitySpawnReason reason,
+                                        @Nullable SpawnGroupData data) {
+        data = super.finalizeSpawn(level, difficulty, reason, data);
+        if (reason == EntitySpawnReason.NATURAL) setBurrowed(true);
         return data;
     }
 
     @Override
-    public boolean isInvulnerableTo(DamageSource source) {
-        return isBurrowed() && !source.is(net.minecraft.tags.DamageTypeTags.BYPASSES_INVULNERABILITY) || super.isInvulnerableTo(source);
+    public boolean isInvulnerableTo(net.minecraft.server.level.ServerLevel serverLevel263, DamageSource source) {
+        return isBurrowed() && !source.is(net.minecraft.tags.DamageTypeTags.BYPASSES_INVULNERABILITY) || super.isInvulnerableTo(serverLevel263, source);
     }
 
     @Override
-    protected void customServerAiStep() {
-        super.customServerAiStep();
+    protected void customServerAiStep(net.minecraft.server.level.ServerLevel serverLevel263) {
+        super.customServerAiStep(serverLevel263);
         LivingEntity target = this.getTarget();
         if (isBurrowed()) {
             if (target != null && Attacks.gap(this, target) < 3.5) emerge();
@@ -110,7 +110,7 @@ public class SandSerpentEntity extends SkyMonster {
     @Override
     public void aiStep() {
         super.aiStep();
-        if (this.level().isClientSide && isBurrowed() && this.tickCount % 2 == 0 && this.getDeltaMovement().horizontalDistanceSqr() > 1.0E-3) {
+        if (this.level().isClientSide() && isBurrowed() && this.tickCount % 2 == 0 && this.getDeltaMovement().horizontalDistanceSqr() > 1.0E-3) {
             BlockState ground = this.level().getBlockState(this.blockPosition().below());
             if (!ground.isAir()) {
                 this.level().addParticle(new BlockParticleOption(ParticleTypes.BLOCK, ground), this.getX(), this.getY() + 0.1, this.getZ(),
@@ -125,14 +125,20 @@ public class SandSerpentEntity extends SkyMonster {
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag tag) {
-        super.addAdditionalSaveData(tag);
+    public void addAdditionalSaveData(net.minecraft.world.level.storage.ValueOutput output263) {
+        super.addAdditionalSaveData(output263);
+        net.minecraft.nbt.CompoundTag tag = new net.minecraft.nbt.CompoundTag();
+        
         tag.putBoolean("Burrowed", isBurrowed());
+    
+        output263.store(tag);
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag tag) {
-        super.readAdditionalSaveData(tag);
-        setBurrowed(tag.getBoolean("Burrowed"));
+    public void readAdditionalSaveData(net.minecraft.world.level.storage.ValueInput input263) {
+        super.readAdditionalSaveData(input263);
+        net.minecraft.nbt.CompoundTag tag = com.skycraft.platform.ValueTags.read(input263 , "Burrowed");
+        
+        setBurrowed(tag.getBooleanOr("Burrowed",false));
     }
 }

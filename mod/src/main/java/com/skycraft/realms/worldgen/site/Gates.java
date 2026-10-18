@@ -15,7 +15,7 @@ import net.minecraft.world.level.block.state.BlockState;
 public final class Gates {
     private Gates() {}
 
-    static BlockState st(net.minecraftforge.registries.RegistryObject<Block> b) {
+    static BlockState st(java.util.function.Supplier<Block> b) {
         return b.get().defaultBlockState();
     }
 

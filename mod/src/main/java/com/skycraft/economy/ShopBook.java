@@ -150,7 +150,7 @@ public final class ShopBook extends SavedData {
     private final Map<String, Record> shops = new LinkedHashMap<>();
 
     public static ShopBook get(MinecraftServer server) {
-        return server.overworld().getDataStorage().computeIfAbsent(ShopBook::load, ShopBook::new, NAME);
+        return com.skycraft.platform.SavedDataTypes.get(server.overworld(), NAME, ShopBook::load, ShopBook::new, value263 -> value263.save(new net.minecraft.nbt.CompoundTag()));
     }
 
     // ------------------------------------------------------------------ records
@@ -200,7 +200,6 @@ public final class ShopBook extends SavedData {
 
     private static final int VERSION = 1;
 
-    @Override
     public CompoundTag save(CompoundTag tag) {
         tag.putInt("v", VERSION);
         ListTag list = new ListTag();
@@ -228,7 +227,7 @@ public final class ShopBook extends SavedData {
             for (SoldBatch sb : r.soldBatches) {
                 if (sb.count <= 0 || sb.one.isEmpty()) continue;
                 CompoundTag bTag = new CompoundTag();
-                bTag.put("s", sb.one.save(new CompoundTag()));
+                bTag.put("s", com.skycraft.inventory.ItemData.save(sb.one));
                 bTag.putInt("n", sb.count);
                 bTag.putLong("at", sb.addedAt);
                 bTag.putLong("p", sb.period);
@@ -238,8 +237,8 @@ public final class ShopBook extends SavedData {
             ListTag kept = new ListTag();
             for (Kept k : r.kept) {
                 CompoundTag c = new CompoundTag();
-                c.putUUID("p", k.player);
-                c.put("s", k.one.save(new CompoundTag()));
+                c.store("p", net.minecraft.core.UUIDUtil.CODEC,  k.player);
+                c.put("s", com.skycraft.inventory.ItemData.save(k.one));
                 c.putInt("n", k.count);
                 c.putInt("u", k.unit);
                 c.putLong("at", k.at);
@@ -254,45 +253,45 @@ public final class ShopBook extends SavedData {
 
     public static ShopBook load(CompoundTag tag) {
         ShopBook book = new ShopBook();
-        ListTag list = tag.getList("shops", Tag.TAG_COMPOUND);
+        ListTag list = tag.getListOrEmpty("shops");
         for (int i = 0; i < list.size(); i++) {
-            CompoundTag t = list.getCompound(i);
-            String key = t.getString("k");
+            CompoundTag t = list.getCompoundOrEmpty(i);
+            String key = t.getStringOr("k","");
             if (key.isEmpty() || book.shops.containsKey(key)) continue;
             Record r = new Record(key, book);
-            r.level = Math.max(1, Math.min(5, t.getInt("lv")));
-            ListTag pools = t.getList("pools", Tag.TAG_STRING);
+            r.level = Math.max(1, Math.min(5, t.getIntOr("lv",0)));
+            ListTag pools = t.getListOrEmpty("pools");
             for (int p = 0; p < pools.size(); p++) {
-                ShopType type = ShopType.byId(pools.getString(p));
+                ShopType type = ShopType.byId(pools.getStringOr(p, ""));
                 if (type != null) r.addPool(type);
             }
-            r.share = Math.max(3, t.getInt("sh"));
-            r.inn = t.getBoolean("inn");
-            r.period = t.contains("period") ? t.getLong("period") : Long.MIN_VALUE;
-            r.lastDayTime = t.contains("last_dt") ? t.getLong("last_dt") : Long.MIN_VALUE;
-            r.gold = t.getInt("gold");
-            r.invested = t.getBoolean("invested");
-            r.mtUsed = t.getCompound("mt");
-            r.pos = new BlockPos(t.getInt("x"), t.getInt("y"), t.getInt("z"));
-            r.lastDay = t.getLong("used");
-            r.stock.load(t.getCompound("stock"));
-            r.sold.load(t.getCompound("sold"));
-            ListTag batches = t.getList("sold_batches", Tag.TAG_COMPOUND);
+            r.share = Math.max(3, t.getIntOr("sh",0));
+            r.inn = t.getBooleanOr("inn",false);
+            r.period = t.contains("period") ? t.getLongOr("period",0L) : Long.MIN_VALUE;
+            r.lastDayTime = t.contains("last_dt") ? t.getLongOr("last_dt",0L) : Long.MIN_VALUE;
+            r.gold = t.getIntOr("gold",0);
+            r.invested = t.getBooleanOr("invested",false);
+            r.mtUsed = t.getCompoundOrEmpty("mt");
+            r.pos = new BlockPos(t.getIntOr("x",0), t.getIntOr("y",0), t.getIntOr("z",0));
+            r.lastDay = t.getLongOr("used",0L);
+            r.stock.load(t.getCompoundOrEmpty("stock"));
+            r.sold.load(t.getCompoundOrEmpty("sold"));
+            ListTag batches = t.getListOrEmpty("sold_batches");
             for (int b = 0; b < batches.size(); b++) {
-                CompoundTag bTag = batches.getCompound(b);
-                ItemStack one = ItemStack.of(bTag.getCompound("s"));
-                int count = bTag.getInt("n");
+                CompoundTag bTag = batches.getCompoundOrEmpty(b);
+                ItemStack one = com.skycraft.inventory.ItemData.parse(bTag.getCompoundOrEmpty("s"));
+                int count = bTag.getIntOr("n",0);
                 if (one.isEmpty() || count <= 0) continue;
                 one.setCount(1);
-                r.soldBatches.add(new SoldBatch(one, count, bTag.getLong("at"), bTag.getLong("p")));
+                r.soldBatches.add(new SoldBatch(one, count, bTag.getLongOr("at",0L), bTag.getLongOr("p",0L)));
             }
-            ListTag kept = t.getList("kept", Tag.TAG_COMPOUND);
+            ListTag kept = t.getListOrEmpty("kept");
             for (int k = 0; k < kept.size() && r.kept.size() < KEPT_TOTAL; k++) {
-                CompoundTag c = kept.getCompound(k);
-                ItemStack one = ItemStack.of(c.getCompound("s"));
-                if (one.isEmpty() || c.getInt("n") <= 0 || !c.hasUUID("p")) continue;
+                CompoundTag c = kept.getCompoundOrEmpty(k);
+                ItemStack one = com.skycraft.inventory.ItemData.parse(c.getCompoundOrEmpty("s"));
+                if (one.isEmpty() || c.getIntOr("n",0) <= 0 || !c.read("p", net.minecraft.core.UUIDUtil.CODEC).isPresent()) continue;
                 one.setCount(1);
-                r.kept.add(new Kept(c.getUUID("p"), one, c.getInt("n"), Math.max(1, c.getInt("u")), c.getLong("at")));
+                r.kept.add(new Kept(c.read("p", net.minecraft.core.UUIDUtil.CODEC).orElseThrow(), one, c.getIntOr("n",0), Math.max(1, c.getIntOr("u",0)), c.getLongOr("at",0L)));
             }
             book.shops.put(key, r);
         }

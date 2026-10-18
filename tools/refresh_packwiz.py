@@ -23,6 +23,8 @@ CORE_JAR = "mods/skycraft-core.jar"
 
 def wanted(rel):
     top, _, rest = rel.partition("/")
+    if top == "migration":
+        return rest == "platform-lock.json"
     if top in ("config", "defaultconfigs"):
         return bool(rest)
     if top in ("mods", "resourcepacks", "shaderpacks") and "/" not in rest:

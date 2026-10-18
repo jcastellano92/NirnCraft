@@ -13,10 +13,10 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.common.ForgeSpawnEggItem;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.RegistryObject;
+import net.minecraft.world.item.SpawnEggItem;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.registries.DeferredRegister;
+import java.util.function.Supplier;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,33 +32,33 @@ public final class CurseRegistry {
      * Sanguinare Vampiris: a disease (cured like the others: potion, shrine, priest) that turns its carrier into a vampire
      * after three days. The effect is only the visible marker; the infection time lives in {@code module("curse")}.
      */
-    public static final RegistryObject<MobEffect> SANGUINARE = EFFECTS.register("sanguinare_vampiris", () -> new CurseEffect(0x6A0A14));
+    public static final Supplier<MobEffect> SANGUINARE = EFFECTS.register("sanguinare_vampiris", () -> new CurseEffect(0x6A0A14));
     /**
      * Sanies Lupinus: Stage 1 incubating lycanthropy contracted from werewolf attacks, curable like any disease
      * (Cure Disease potion, shrine, priest/healer) for three in-game days before turning the carrier into a werewolf.
      */
-    public static final RegistryObject<MobEffect> SANIES_LUPINUS = EFFECTS.register("sanies_lupinus", () -> new CurseEffect(0x5C4428));
+    public static final Supplier<MobEffect> SANIES_LUPINUS = EFFECTS.register("sanies_lupinus", () -> new CurseEffect(0x5C4428));
     /** Marker shown while a vampire is in direct sunlight (the penalties are applied by {@link Vampirism}). */
-    public static final RegistryObject<MobEffect> SUN_DAMAGE = EFFECTS.register("sun_damage", () -> new CurseEffect(0xF0C060));
+    public static final Supplier<MobEffect> SUN_DAMAGE = EFFECTS.register("sun_damage", () -> new CurseEffect(0xF0C060));
 
-    public static final RegistryObject<EntityType<WerewolfEntity>> WEREWOLF = ENTITIES.register("werewolf",
-            () -> EntityType.Builder.<WerewolfEntity>of(WerewolfEntity::new, MobCategory.MONSTER)
-                    .sized(0.9f, 2.4f).clientTrackingRange(10).build(Skycraft.MODID + ":werewolf"));
-    public static final RegistryObject<EntityType<VampireLordEntity>> VAMPIRE_LORD = ENTITIES.register("vampire_lord",
-            () -> EntityType.Builder.<VampireLordEntity>of(VampireLordEntity::new, MobCategory.MONSTER)
-                    .sized(0.9f, 2.6f).clientTrackingRange(10).build(Skycraft.MODID + ":vampire_lord"));
-    public static final RegistryObject<EntityType<DeathHoundEntity>> DEATH_HOUND = ENTITIES.register("death_hound",
-            () -> EntityType.Builder.<DeathHoundEntity>of(DeathHoundEntity::new, MobCategory.MONSTER)
-                    .sized(0.9f, 1.0f).clientTrackingRange(8).build(Skycraft.MODID + ":death_hound"));
-    public static final RegistryObject<EntityType<GargoyleEntity>> GARGOYLE = ENTITIES.register("gargoyle",
-            () -> EntityType.Builder.<GargoyleEntity>of(GargoyleEntity::new, MobCategory.MONSTER)
-                    .sized(1.0f, 2.3f).clientTrackingRange(10).build(Skycraft.MODID + ":gargoyle"));
+    public static final Supplier<EntityType<WerewolfEntity>> WEREWOLF = ENTITIES.register("werewolf",
+            () -> EntityType.Builder.<WerewolfEntity>of(WerewolfEntity::new, MobCategory.MONSTER).notInPeaceful()
+                    .sized(0.9f, 2.4f).clientTrackingRange(10).build(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.ENTITY_TYPE, net.minecraft.resources.Identifier.parse(Skycraft.MODID + ":werewolf"))));
+    public static final Supplier<EntityType<VampireLordEntity>> VAMPIRE_LORD = ENTITIES.register("vampire_lord",
+            () -> EntityType.Builder.<VampireLordEntity>of(VampireLordEntity::new, MobCategory.MONSTER).notInPeaceful()
+                    .sized(0.9f, 2.6f).clientTrackingRange(10).build(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.ENTITY_TYPE, net.minecraft.resources.Identifier.parse(Skycraft.MODID + ":vampire_lord"))));
+    public static final Supplier<EntityType<DeathHoundEntity>> DEATH_HOUND = ENTITIES.register("death_hound",
+            () -> EntityType.Builder.<DeathHoundEntity>of(DeathHoundEntity::new, MobCategory.MONSTER).notInPeaceful()
+                    .sized(0.9f, 1.0f).clientTrackingRange(8).build(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.ENTITY_TYPE, net.minecraft.resources.Identifier.parse(Skycraft.MODID + ":death_hound"))));
+    public static final Supplier<EntityType<GargoyleEntity>> GARGOYLE = ENTITIES.register("gargoyle",
+            () -> EntityType.Builder.<GargoyleEntity>of(GargoyleEntity::new, MobCategory.MONSTER).notInPeaceful()
+                    .sized(1.0f, 2.3f).clientTrackingRange(10).build(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.ENTITY_TYPE, net.minecraft.resources.Identifier.parse(Skycraft.MODID + ":gargoyle"))));
 
-    static final List<RegistryObject<Item>> EGGS = new ArrayList<>();
-    public static final RegistryObject<Item> WEREWOLF_EGG = egg("werewolf", WEREWOLF, 0x3A2E26, 0xB8A890);
-    public static final RegistryObject<Item> VAMPIRE_LORD_EGG = egg("vampire_lord", VAMPIRE_LORD, 0x2A2A30, 0x8A1218);
-    public static final RegistryObject<Item> DEATH_HOUND_EGG = egg("death_hound", DEATH_HOUND, 0x3A3632, 0xC01818);
-    public static final RegistryObject<Item> GARGOYLE_EGG = egg("gargoyle", GARGOYLE, 0x6E6A64, 0x9A3A2A);
+    static final List<Supplier<Item>> EGGS = new ArrayList<>();
+    public static final Supplier<Item> WEREWOLF_EGG = egg("werewolf", WEREWOLF, 0x3A2E26, 0xB8A890);
+    public static final Supplier<Item> VAMPIRE_LORD_EGG = egg("vampire_lord", VAMPIRE_LORD, 0x2A2A30, 0x8A1218);
+    public static final Supplier<Item> DEATH_HOUND_EGG = egg("death_hound", DEATH_HOUND, 0x3A3632, 0xC01818);
+    public static final Supplier<Item> GARGOYLE_EGG = egg("gargoyle", GARGOYLE, 0x6E6A64, 0x9A3A2A);
 
     private CurseRegistry() {}
 
@@ -68,8 +68,8 @@ public final class CurseRegistry {
         ITEMS.register(modBus);
     }
 
-    private static RegistryObject<Item> egg(String name, Supplier<? extends EntityType<? extends Mob>> type, int bg, int fg) {
-        RegistryObject<Item> egg = ITEMS.register(name + "_spawn_egg", () -> new ForgeSpawnEggItem(type, bg, fg, new Item.Properties()));
+    private static Supplier<Item> egg(String name, Supplier<? extends EntityType<? extends Mob>> type, int bg, int fg) {
+        Supplier<Item> egg = ITEMS.register(name + "_spawn_egg", () -> new SpawnEggItem(com.skycraft.platform.SkyProperties.item(name + "_spawn_egg").spawnEgg(type.get())));
         EGGS.add(egg);
         return egg;
     }
@@ -80,9 +80,5 @@ public final class CurseRegistry {
             super(MobEffectCategory.HARMFUL, color);
         }
 
-        @Override
-        public List<ItemStack> getCurativeItems() {
-            return new ArrayList<>();
-        }
     }
 }

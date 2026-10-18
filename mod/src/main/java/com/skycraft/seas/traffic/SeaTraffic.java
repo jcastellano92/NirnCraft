@@ -20,7 +20,7 @@ import com.skycraft.tamriel.Region;
 import com.skycraft.tamriel.TamrielMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.FluidTags;
@@ -29,19 +29,19 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.EntityJoinLevelEvent;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.registries.ForgeRegistries;
+
+import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
+import net.minecraft.core.registries.BuiltInRegistries;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -55,14 +55,14 @@ import java.util.List;
  * Pyandonea, Sload hulks off Thras, and on rare nights a ghost ship. It follows a charted sea route when one passes
  * near, else open water. Capped per player and in all; ships and crews are never saved.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class SeaTraffic {
     private SeaTraffic() {}
 
     @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer player)) return;
-        ServerLevel level = player.serverLevel();
+    public static void onPlayerTick(net.neoforged.neoforge.event.tick.PlayerTickEvent.Post event) {
+        if (!(event instanceof net.neoforged.neoforge.event.tick.PlayerTickEvent.Post) || !(event.getEntity() instanceof ServerPlayer player)) return;
+        ServerLevel level = player.level();
         int interval = SeasConfig.TRAFFIC_INTERVAL.get() * 20;
         if ((level.getGameTime() + player.getId() * 31L) % interval != 0) return;
         if (!SeasConfig.SEA_TRAFFIC.get() || level.dimension() != Level.OVERWORLD || player.isSpectator() || !player.isAlive()) return;
@@ -132,7 +132,7 @@ public final class SeaTraffic {
     private static ShipKind choose(ServerLevel level, int x, int z, RandomSource r) {
         Region region = TamrielMap.region(x, z);
         String id = region.id(), prov = region.province();
-        boolean night = !level.isDay();
+        boolean night = !level.isBrightOutside();
         double ghost = SeasConfig.GHOST_SHIP_CHANCE.get() * (id.equals("sea/sea_of_ghosts") ? 2.5 : 1.0);
         if (night && r.nextDouble() < ghost) return ShipKind.GHOST;
         if (prov.equals("pyandonea") || Math.hypot(x + 17000, z - 19000) < 7000) return r.nextInt(4) > 0 ? ShipKind.MAORMER : ShipKind.PIRATE_LONGSHIP;
@@ -207,9 +207,9 @@ public final class SeaTraffic {
     /** A crewed ship of the traffic at a position (also used by {@code /skycraft-seas ship}). */
     @Nullable
     public static ShipEntity spawn(ServerLevel level, ShipKind kind, double x, double surface, double z, float yaw, float[] xs, float[] zs) {
-        ShipEntity ship = SailingRegistry.type(kind.type).create(level);
+        ShipEntity ship = SailingRegistry.type(kind.type).create(level, net.minecraft.world.entity.EntitySpawnReason.EVENT);
         if (ship == null) return null;
-        ship.moveTo(x, surface - kind.type.draft, z, yaw, 0f);
+        ship.snapTo(x, surface - kind.type.draft, z, yaw, 0f);
         ship.initNew(null);
         ship.setLivery(kind.livery);
         ship.setTransient(true);
@@ -225,7 +225,7 @@ public final class SeaTraffic {
     }
 
     private static void fillCargo(ServerLevel level, ShipEntity ship, ShipKind kind) {
-        LootTable table = level.getServer().getLootData().getLootTable(new ResourceLocation(Skycraft.MODID, kind.cargoTable()));
+        LootTable table = level.getServer().reloadableRegistries().getLootTable(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.LOOT_TABLE, Identifier.fromNamespaceAndPath(Skycraft.MODID, kind.cargoTable())));
         LootParams params = new LootParams.Builder(level).withParameter(LootContextParams.ORIGIN, ship.position()).create(LootContextParamSets.CHEST);
         table.fill(ship.cargo(), params, level.getRandom().nextLong());
     }
@@ -250,7 +250,7 @@ public final class SeaTraffic {
                 mob.setCustomName(Component.translatable(c.name()));
                 mob.setYRot(ship.getYRot() + r.nextFloat() * 180 - 90);
                 CrewGoals.crew(mob);
-                mob.getPersistentData().putUUID("skycraft_seas_ship", ship.getUUID());
+                mob.getPersistentData().store("skycraft_seas_ship", net.minecraft.core.UUIDUtil.CODEC,  ship.getUUID());
                 if (level.addFreshEntity(mob)) {
                     captain.addCrew(mob);
                     placed++;
@@ -261,11 +261,11 @@ public final class SeaTraffic {
 
     @Nullable
     private static Mob creature(ServerLevel level, String id, Vec3 at) {
-        EntityType<?> type = ForgeRegistries.ENTITY_TYPES.getValue(new ResourceLocation(id));
-        Entity e = type == null ? null : type.create(level);
+        EntityType<?> type = BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.parse(id));
+        Entity e = type == null ? null : type.create(level, net.minecraft.world.entity.EntitySpawnReason.EVENT);
         if (!(e instanceof Mob mob)) return null;
-        mob.moveTo(at.x, at.y, at.z, 0, 0);
-        net.minecraftforge.event.ForgeEventFactory.onFinalizeSpawn(mob, level, level.getCurrentDifficultyAt(BlockPos.containing(at)), MobSpawnType.EVENT, null, null);
+        mob.snapTo(at.x, at.y, at.z, 0, 0);
+        net.neoforged.neoforge.event.EventHooks.finalizeMobSpawn(mob, level, level.getCurrentDifficultyAt(BlockPos.containing(at)), EntitySpawnReason.EVENT, null);
         return mob;
     }
 
@@ -275,7 +275,7 @@ public final class SeaTraffic {
         if (role == null) return null;
         NpcEntity npc = Npcs.create(level, BlockPos.containing(at), role);
         if (npc == null) return null;
-        npc.moveTo(at.x, at.y, at.z, 0, 0);
+        npc.snapTo(at.x, at.y, at.z, 0, 0);
         NpcNames.Race race = switch (kind) {
             case MAORMER -> NpcNames.Race.MAORMER;
             case NORD -> NpcNames.Race.NORD;
@@ -294,17 +294,17 @@ public final class SeaTraffic {
     @SubscribeEvent
     public static void onJoin(EntityJoinLevelEvent event) {
         if (event.getLevel().isClientSide() || !event.loadedFromDisk()) return;
-        if (event.getEntity().getPersistentData().getBoolean(CrewGoals.CREW_TAG)) event.setCanceled(true);
+        if (event.getEntity().getPersistentData().getBooleanOr(CrewGoals.CREW_TAG, false)) event.setCanceled(true);
     }
 
     /** Hitting a peaceful ship's crew turns the whole crew against you. */
     @SubscribeEvent
-    public static void onHurt(LivingHurtEvent event) {
+    public static void onHurt(com.skycraft.combat.BeforeArmorDamageEvent event) {
         if (!(event.getEntity().level() instanceof ServerLevel level)) return;
-        if (!event.getEntity().getPersistentData().getBoolean(CrewGoals.CREW_TAG)) return;
+        if (!event.getEntity().getPersistentData().getBooleanOr(CrewGoals.CREW_TAG, false)) return;
         if (!(event.getSource().getEntity() instanceof net.minecraft.world.entity.LivingEntity attacker)) return;
-        if (!event.getEntity().getPersistentData().hasUUID("skycraft_seas_ship")) return;
-        Entity ship = level.getEntity(event.getEntity().getPersistentData().getUUID("skycraft_seas_ship"));
+        if (!event.getEntity().getPersistentData().read("skycraft_seas_ship", net.minecraft.core.UUIDUtil.CODEC).isPresent()) return;
+        Entity ship = level.getEntity(event.getEntity().getPersistentData().read("skycraft_seas_ship", net.minecraft.core.UUIDUtil.CODEC).orElseThrow());
         if (ship instanceof ShipEntity s && s.autopilot() instanceof NpcCaptain c) c.provoked(level, s, attacker);
     }
 }

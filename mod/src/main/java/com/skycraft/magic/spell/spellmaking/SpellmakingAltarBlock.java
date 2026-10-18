@@ -25,14 +25,14 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.DistExecutor;
+import net.neoforged.api.distmarker.Dist;
+import com.skycraft.platform.Sides;
 
 /**
  * The Spellmaking Altar (Arcane University, Mages Guild): use it to combine the magic effects you know into a new
@@ -40,7 +40,7 @@ import net.minecraftforge.fml.DistExecutor;
  * {@link #make}.
  */
 public class SpellmakingAltarBlock extends Block {
-    public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
+    public static final EnumProperty<net.minecraft.core.Direction> FACING = HorizontalDirectionalBlock.FACING;
     private static final VoxelShape SHAPE = Shapes.or(
             Block.box(1, 0, 1, 15, 3, 15),
             Block.box(4, 3, 4, 12, 11, 12),
@@ -69,12 +69,11 @@ public class SpellmakingAltarBlock extends Block {
 
     @Override
     @SuppressWarnings("deprecation")
-    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
-        if (hand != InteractionHand.MAIN_HAND) return InteractionResult.PASS;
-        if (level.isClientSide) {
-            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> com.skycraft.magic.client.MagicClient.openSpellmaking(pos));
+    public InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+        if (level.isClientSide()) {
+            Sides.runOn(Dist.CLIENT, () -> () -> com.skycraft.magic.client.MagicClient.openSpellmaking(pos));
         }
-        return InteractionResult.sidedSuccess(level.isClientSide);
+        return com.skycraft.platform.Interactions.sidedSuccess(level.isClientSide());
     }
 
     @Override
@@ -114,7 +113,7 @@ public class SpellmakingAltarBlock extends Block {
         if (spell == null) return;
         MagicData.learn(player, spell.id);
         Notifier.title(player, Component.translatable("spellmaking.skycraft.made"), spell.displayName());
-        ServerLevel level = player.serverLevel();
+        ServerLevel level = player.level();
         Vec3 c = Vec3.atCenterOf(pos).add(0, 0.6, 0);
         MagicFx.sendNear(level, c, 48, MagicFx.STREAM, spell.element, c, c, player.getId(), 40);
         SpellSounds.world(level, c, SpellSounds.Slot.SPELLMAKING, 1f, 1.1f);

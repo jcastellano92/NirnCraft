@@ -258,20 +258,20 @@ public final class MountStats {
 
     public static MountStats fromTag(MountKind kind, CompoundTag t) {
         MountStats s = new MountStats(kind);
-        byte[] q = t.getByteArray("q");
+        byte[] q = t.getByteArray("q").orElseGet(() -> new byte[0]);
         for (int i = 0; i < s.q.length && i < q.length; i++) s.q[i] = q[i];
-        byte[] g = t.getByteArray("g");
+        byte[] g = t.getByteArray("g").orElseGet(() -> new byte[0]);
         for (int i = 0; i < s.grow.length && i < g.length; i++) s.grow[i] = g[i];
-        CompoundTag tr = t.getCompound("t");
-        for (int i = 0; i < s.train.length; i++) s.train[i] = tr.getFloat(Integer.toString(i));
-        s.xp = Math.max(0f, t.getFloat("xp"));
-        s.trust = clampTrust(t.getFloat("trust"));
-        if (t.contains("fed")) s.fedAt = t.getLong("fed");
-        if (t.contains("stabled")) s.stabledAt = t.getLong("stabled");
-        s.rev = t.getInt("rev");
+        CompoundTag tr = t.getCompoundOrEmpty("t");
+        for (int i = 0; i < s.train.length; i++) s.train[i] = tr.getFloatOr(Integer.toString(i), 0f);
+        s.xp = Math.max(0f, t.getFloatOr("xp",0F));
+        s.trust = clampTrust(t.getFloatOr("trust",0F));
+        if (t.contains("fed")) s.fedAt = t.getLongOr("fed",0L);
+        if (t.contains("stabled")) s.stabledAt = t.getLongOr("stabled",0L);
+        s.rev = t.getIntOr("rev",0);
         if (t.contains("tw")) {
-            s.trainWeek = t.getInt("tw");
-            s.trainCount = t.getInt("tn");
+            s.trainWeek = t.getIntOr("tw",0);
+            s.trainCount = t.getIntOr("tn",0);
         }
         return s;
     }
@@ -284,7 +284,7 @@ public final class MountStats {
 
     /** True when a mount entity carries its stats (owned mounts always do; an untouched wild animal does not). */
     public static boolean stored(Entity e) {
-        return e.getPersistentData().contains(TAG, 10);
+        return com.skycraft.platform.NbtData.hasType(e.getPersistentData(), TAG, 10);
     }
 
     /**
@@ -293,7 +293,7 @@ public final class MountStats {
      */
     public static MountStats of(Entity e, MountKind kind) {
         CompoundTag t = e.getPersistentData();
-        if (t.contains(TAG, 10)) return fromTag(kind, t.getCompound(TAG));
+        if (com.skycraft.platform.NbtData.hasType(t, TAG, 10)) return fromTag(kind, t.getCompoundOrEmpty(TAG));
         return roll(kind, seedOf(e.getUUID(), kind), 0f, Mounts.ownerOf(e) == null);
     }
 

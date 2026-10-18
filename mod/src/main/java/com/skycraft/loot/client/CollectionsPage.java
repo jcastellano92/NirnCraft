@@ -9,7 +9,7 @@ import com.skycraft.quest.client.Parchment;
 import com.skycraft.tamriel.Places;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
 
@@ -41,7 +41,7 @@ public final class CollectionsPage {
     }
 
     /** Draws the page; returns {list height, detail height} for scrolling. */
-    public static int[] render(GuiGraphics g, Font font, int x0, int y0, int x1, int y1, int listX1, int listScroll, int detailScroll) {
+    public static int[] render(GuiGraphicsExtractor g, Font font, int x0, int y0, int x1, int y1, int listX1, int listScroll, int detailScroll) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null) return new int[]{0, 0};
         PlayerData data = SkyData.get(mc.player);
@@ -60,10 +60,10 @@ public final class CollectionsPage {
             int total = c.entries.size();
             boolean done = Collectibles.rewarded(data, c.id) || have >= total;
             if (i == selected) g.fill(x0 + 6, y, listX1 - 4, y + ROW - 2, Parchment.HIGHLIGHT);
-            g.drawString(font, font.plainSubstrByWidth(c.name().getString(), listX1 - x0 - 50), x0 + 10, y + 2,
+            g.text(font, font.plainSubstrByWidth(c.name().getString(), listX1 - x0 - 50), x0 + 10, y + 2,
                     done ? Parchment.GREEN : Parchment.INK, false);
             String count = have + "/" + total;
-            g.drawString(font, count, listX1 - 8 - font.width(count), y + 2, Parchment.INK_LIGHT, false);
+            g.text(font, count, listX1 - 8 - font.width(count), y + 2, Parchment.INK_LIGHT, false);
             Parchment.bar(g, x0 + 10, y + 13, listX1 - x0 - 22, total == 0 ? 0 : have / (float) total, done ? Parchment.GREEN : Parchment.GOLD);
             y += ROW;
         }
@@ -77,7 +77,7 @@ public final class CollectionsPage {
         int w = x1 - dx - 12;
         g.enableScissor(listX1 + 4, top, x1 - 4, bottom);
         y = top - detailScroll;
-        g.drawString(font, c.name(), dx, y, Parchment.RED, false);
+        g.text(font, c.name(), dx, y, Parchment.RED, false);
         y += 13;
         y = wrap(g, font, Component.translatable("collection.skycraft." + c.id + ".desc"), dx, y, w, Parchment.INK_LIGHT) + 4;
         boolean rewarded = Collectibles.rewarded(data, c.id);
@@ -91,9 +91,9 @@ public final class CollectionsPage {
                 int read = 0;
                 for (int v = 1; v <= SkillBookItem.VOLUMES; v++) if (SkillBookItem.hasRead(data, skill, v)) read++;
                 Parchment.checkbox(g, dx, y, read >= SkillBookItem.VOLUMES, false);
-                g.drawString(font, skill.displayName(), dx + 12, y, read > 0 ? Parchment.INK : Parchment.INK_FADED, false);
+                g.text(font, skill.displayName(), dx + 12, y, read > 0 ? Parchment.INK : Parchment.INK_FADED, false);
                 String n = read + "/" + SkillBookItem.VOLUMES;
-                g.drawString(font, n, x1 - 16 - font.width(n), y, Parchment.INK_LIGHT, false);
+                g.text(font, n, x1 - 16 - font.width(n), y, Parchment.INK_LIGHT, false);
                 y += 11;
             }
         } else {
@@ -105,11 +105,11 @@ public final class CollectionsPage {
                     Component at = where(e);
                     name = Component.translatable("journal.skycraft.collections.stone_at", at == null ? Component.literal(e.id()) : at);
                 }
-                g.drawString(font, font.plainSubstrByWidth(name.getString(), w / 2 + 20), dx + 12, y, have ? Parchment.INK : Parchment.INK_FADED, false);
+                g.text(font, font.plainSubstrByWidth(name.getString(), w / 2 + 20), dx + 12, y, have ? Parchment.INK : Parchment.INK_FADED, false);
                 Component where = where(e);
                 if (where != null && !have && !c.id.equals(Collectibles.BARENZIAH)) {
                     String s = font.plainSubstrByWidth(where.getString(), w / 2 - 30);
-                    g.drawString(font, s, x1 - 16 - font.width(s), y, Parchment.INK_FADED, false);
+                    g.text(font, s, x1 - 16 - font.width(s), y, Parchment.INK_FADED, false);
                 }
                 y += 11;
             }
@@ -129,9 +129,9 @@ public final class CollectionsPage {
         return null;
     }
 
-    private static int wrap(GuiGraphics g, Font font, Component text, int x, int y, int w, int color) {
+    private static int wrap(GuiGraphicsExtractor g, Font font, Component text, int x, int y, int w, int color) {
         for (FormattedCharSequence line : font.split(text, Math.max(20, w))) {
-            g.drawString(font, line, x, y, color, false);
+            g.text(font, line, x, y, color, false);
             y += 10;
         }
         return y;

@@ -1,0 +1,52 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:septim",
+          "weight": 1,
+          "modifier": {
+            "min": 80,
+            "max": 200,
+            "growth": 0.04,
+            "type": "skycraft:scaled_gold"
+          }
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:iron_sword",
+          "weight": 6,
+          "modifier": {
+            "kind": "any",
+            "enchant_chance": 1.0,
+            "quality_chance": 0.4,
+            "type": "skycraft:regional_gear"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "skycraft:gold_ring",
+          "weight": 2,
+          "modifier": {
+            "tag": "skycraft:loot/trinkets",
+            "type": "skycraft:regional_tag"
+          }
+        },
+        {
+          "type": "minecraft:loot_table",
+          "weight": 2,
+          "value": "skycraft:parts/gems"
+        }
+      ]
+    }
+  ],
+  "random_sequence": "skycraft:containers/reward/standard"
+}

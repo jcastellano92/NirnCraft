@@ -12,16 +12,16 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.WorldDataConfiguration;
 import net.minecraft.world.level.levelgen.WorldOptions;
 import net.minecraft.world.level.levelgen.presets.WorldPresets;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
@@ -38,7 +38,7 @@ import java.util.Locale;
  * ({@code <entity id> [variant=N] [anim=<slot>@<ticks>] [nbt={...}]}) summons the creature in front of the camera,
  * optionally plays an animation, and saves a screenshot to {@code screenshots/gallery/}. Quits when done.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
 public final class CreatureGallery {
     private static final String FILE = "skycraft-gallery.txt";
     private static final String WORLD = "skycraft_gallery";
@@ -59,14 +59,15 @@ public final class CreatureGallery {
     }
 
     @SubscribeEvent
-    public static void onTick(TickEvent.ClientTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || !enabled()) return;
+    public static void onTick(net.neoforged.neoforge.client.event.ClientTickEvent.Post event) {
+        if (!enabled()) return;
+        if (com.skycraft.client.autotest.ReviewCaptures.pending() > 0) return;
         Minecraft mc = Minecraft.getInstance();
         if (mc.level == null || mc.player == null) {
             // the main menu (vanilla's or Skycraft's own) or the first-launch accessibility screen
-            if (!worldRequested && mc.screen != null && mc.getOverlay() == null && ++menuTicks > 40) {
-                String screen = mc.screen.getClass().getSimpleName();
-                if (mc.screen instanceof TitleScreen || screen.contains("Title") || screen.contains("Onboarding")) {
+            if (!worldRequested && mc.gui.screen() != null && mc.gui.overlay() == null && ++menuTicks > 40) {
+                String screen = mc.gui.screen().getClass().getSimpleName();
+                if (mc.gui.screen() instanceof TitleScreen || screen.contains("Title") || screen.contains("Onboarding")) {
                     worldRequested = true;
                     openWorld(mc);
                 }
@@ -75,7 +76,7 @@ public final class CreatureGallery {
         }
         MinecraftServer server = mc.getSingleplayerServer();
         if (server == null) return;
-        if (mc.screen != null) mc.setScreen(null); // race selection, journals...: keep the view clear
+        if (mc.gui.screen() != null) mc.gui.setScreen(null); // race selection, journals...: keep the view clear
         ticks++;
         if (queue == null) {
             if (ticks < 80) return;
@@ -89,9 +90,9 @@ public final class CreatureGallery {
                 Skycraft.LOGGER.error("Gallery: cannot read {}", FILE, e);
                 queue = new ArrayDeque<>();
             }
-            run(server, "gamerule doDaylightCycle false", "gamerule doMobSpawning false", "gamerule doWeatherCycle false",
+            run(server, "gamerule advance_time false", "gamerule spawn_mobs false", "gamerule advance_weather false",
                     "time set 6000", "weather clear", "difficulty easy", "gamemode spectator @a");
-            mc.options.hideGui = true;
+            com.skycraft.client.autotest.ReviewWorlds.hudHidden(mc,true);
             wait = 20;
             return;
         }
@@ -132,7 +133,7 @@ public final class CreatureGallery {
                 tagSuffix += "_y" + p.substring(4);
             } else if (p.startsWith("name=")) tagSuffix += "_" + p.substring(5);
         }
-        EntityType<?> type = EntityType.byString(id).orElse(null);
+        EntityType<?> type = net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getOptional(net.minecraft.resources.Identifier.parse(id)).orElse(null);
         if (type == null) {
             Skycraft.LOGGER.warn("Gallery: unknown entity {}", id);
             current = null;
@@ -158,7 +159,7 @@ public final class CreatureGallery {
                     server.execute(() -> {
                         ServerLevel level = server.overworld();
                         for (Entity e : level.getAllEntities()) {
-                            if (e.getTags().contains("gallery")) level.broadcastEntityEvent(e, (byte) (AnimSlot.EVENT_BASE + slot.ordinal()));
+                            if (e.entityTags().contains("gallery")) level.broadcastEntityEvent(e, (byte) (AnimSlot.EVENT_BASE + slot.ordinal()));
                         }
                     });
                     wait = animTicks;
@@ -183,27 +184,19 @@ public final class CreatureGallery {
     private static void openWorld(Minecraft mc) {
         try {
             if (mc.getLevelSource().levelExists(WORLD)) {
-                mc.createWorldOpenFlows().loadLevel(mc.screen, WORLD);
+                com.skycraft.client.autotest.ReviewWorlds.open(mc,WORLD,mc.gui.screen());
                 return;
             }
-            GameRules rules = new GameRules();
-            LevelSettings settings = new LevelSettings(WORLD, GameType.CREATIVE, false, Difficulty.PEACEFUL, true, rules, WorldDataConfiguration.DEFAULT);
-            mc.createWorldOpenFlows().createFreshLevel(WORLD, settings, new WorldOptions(1L, false, false),
-                    access -> access.registryOrThrow(Registries.WORLD_PRESET).getHolderOrThrow(WorldPresets.FLAT).value().createWorldDimensions());
+            LevelSettings settings = com.skycraft.client.autotest.ReviewWorlds.settings(WORLD,  GameType.CREATIVE,  false,  Difficulty.PEACEFUL,  true,  WorldDataConfiguration.DEFAULT);
+            com.skycraft.client.autotest.ReviewWorlds.create(mc, WORLD,  settings,  new WorldOptions(1L, false, false), 
+                    access -> access.lookupOrThrow(Registries.WORLD_PRESET).getOrThrow(WorldPresets.FLAT).value().createWorldDimensions(), mc.gui.screen());
         } catch (Exception e) {
             Skycraft.LOGGER.error("Gallery: cannot open the gallery world", e);
         }
     }
 
     private static void capture(Minecraft mc, String name) {
-        try {
-            Path dir = mc.gameDirectory.toPath().resolve("screenshots").resolve("gallery");
-            Files.createDirectories(dir);
-            NativeImage img = Screenshot.takeScreenshot(mc.getMainRenderTarget());
-            img.writeToFile(dir.resolve(name + ".png"));
-            img.close();
-        } catch (Exception e) {
-            Skycraft.LOGGER.warn("Gallery: screenshot {} failed", name, e);
-        }
+        com.skycraft.client.autotest.ReviewCaptures.capture(mc, mc.gameDirectory.toPath().resolve("screenshots/gallery"), name,
+                output -> Skycraft.LOGGER.info("Gallery: saved {}", output.toAbsolutePath()));
     }
 }

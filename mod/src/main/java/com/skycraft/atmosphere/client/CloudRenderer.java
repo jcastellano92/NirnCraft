@@ -1,39 +1,44 @@
 package com.skycraft.atmosphere.client;
 
-import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexBuffer;
 import com.skycraft.Skycraft;
 import com.skycraft.atmosphere.AtmosphereConfig;
 import com.skycraft.atmosphere.weather.WeatherKind;
 import com.skycraft.atmosphere.weather.WeatherProfile;
 import com.skycraft.tamriel.Place;
 import com.skycraft.tamriel.Places;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.client.Camera;
 import net.minecraft.client.CloudStatus;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.client.renderer.ShaderInstance;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.FogType;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
-import net.minecraftforge.client.event.RenderLevelStageEvent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import org.joml.Matrix4f;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL32;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
+import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
+import org.joml.Matrix4f;
+
+import com.skycraft.render.client.CpuMesh;
+import com.skycraft.render.client.WorldMesh;
+import com.skycraft.render.client.WorldDraw;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.renderpearl.api.pipeline.PrimitiveTopology;
+import com.mojang.renderpearl.api.commands.RenderPass;
+import net.minecraft.client.renderer.state.level.LevelRenderState;
+import net.minecraft.client.renderer.oit.OitStage;
+import net.minecraft.util.context.ContextKey;
+import net.neoforged.neoforge.client.event.ExtractLevelRenderStateEvent;
+import net.neoforged.neoforge.client.event.PrepareRenderBuffersEvent;
+import net.neoforged.neoforge.client.event.RegisterRenderPipelinesEvent;
+import org.joml.Matrix4fc;
+import org.joml.Vector4f;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -51,9 +56,9 @@ import java.util.concurrent.Executors;
  * projection's far plane by drawing with depth clamping: anything past the far plane lands on the far depth, behind
  * all terrain but over the sky. The GL state is restored afterwards (Embeddium and Oculus safe).</p>
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
 public final class CloudRenderer {
-    static final ResourceLocation TEXTURE = new ResourceLocation(Skycraft.MODID, "textures/environment/clouds.png");
+    static final Identifier TEXTURE = Identifier.fromNamespaceAndPath(Skycraft.MODID, "textures/environment/clouds.png");
     private static final long BUILD_INTERVAL_MS = 1000L;
     private static final double REBUILD_DISTANCE = 14.0;
 
@@ -64,17 +69,23 @@ public final class CloudRenderer {
         return t;
     });
     private static final CloudBuilder BUILDER = new CloudBuilder();
-    private static volatile CloudBuilder.Result ready;
+    private record BuildResult(long epoch, CloudBuilder.Result result) {}
+    private static final com.skycraft.atmosphere.EpochMailbox<BuildResult> RESULTS =
+            new com.skycraft.atmosphere.EpochMailbox<>(result->release(result.result()));
+    private static long generation;
+    private static ClientLevel trackedLevel;
     private static boolean building;
     private static long lastJob;
     private static double jobX, jobY, jobZ;
 
-    private static VertexBuffer skyVb;
-    private static VertexBuffer groundVb;
+    private static WorldMesh skyVb;
+    private static WorldMesh groundVb;
     private static boolean hasSky, hasGround;
     private static double anchorX, anchorY, anchorZ, builtDriftX, builtDriftZ;
     private static boolean textureLoaded;
+    private static net.minecraft.client.renderer.texture.AbstractTexture preparedTexture;
     private static boolean renderedThisFrame;
+    private static boolean textureProbe;
 
     // ---- wind drift (blocks), accumulated each tick
     private static double driftX, driftZ, driftXO, driftZO, highX, highZ;
@@ -93,11 +104,36 @@ public final class CloudRenderer {
 
     private CloudRenderer() {}
 
+    /** One-shot QA probe after the actual solid terrain draw, not a client-tick approximation. */
+    public static void requestTextureProbe() { textureProbe=true; }
+
+    @SubscribeEvent(priority=net.neoforged.bus.api.EventPriority.LOWEST)
+    public static void textureProbeSky(RenderLevelStageEvent.AfterSky event) {
+        textureProbe(event);
+    }
+
+    @SubscribeEvent(priority=net.neoforged.bus.api.EventPriority.LOWEST)
+    public static void textureProbeTerrain(RenderLevelStageEvent.AfterOpaqueBlocks event) {
+        textureProbe(event);
+    }
+
+    private static void textureProbe(RenderLevelStageEvent event) {
+        if(!textureProbe) return;
+        if(event instanceof RenderLevelStageEvent.AfterSky
+                || event instanceof RenderLevelStageEvent.AfterOpaqueBlocks) {
+            Skycraft.LOGGER.info("Atmosphere render state probe: {}",RenderStateProbe.snapshot(event));
+            if(event instanceof RenderLevelStageEvent.AfterOpaqueBlocks) {
+                textureProbe=false;
+                Skycraft.LOGGER.info("Atmosphere terrain texture probe: {}",TextureUploadState.probe());
+            }
+        }
+    }
+
     // ================================================================== tick
 
     @SubscribeEvent
-    public static void onRenderTickStart(TickEvent.RenderTickEvent event) {
-        if (event.phase == TickEvent.Phase.START) {
+    public static void onRenderTickStart(net.neoforged.neoforge.client.event.RenderFrameEvent.Pre event) {
+        if (event instanceof net.neoforged.neoforge.client.event.RenderFrameEvent.Pre) {
             renderedThisFrame = false;
         }
     }
@@ -107,16 +143,17 @@ public final class CloudRenderer {
      * clouds drift and churn more slowly), easing in and out through dusk and dawn.
      */
     static float nightCalm(ClientLevel level, float pt) {
-        float sunY = Mth.cos(level.getTimeOfDay(pt) * Mth.TWO_PI);
+        float sunY = Mth.cos(com.skycraft.atmosphere.client.SkyEnvironment.sunCycle(level, pt) * Mth.TWO_PI);
         float night = Mth.clamp(0.5F - sunY * 2.0F, 0.0F, 1.0F);
         return 1.0F - 0.6F * night;
     }
 
     @SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent event) {
-        if (event.phase != TickEvent.Phase.END) return;
+    public static void onClientTick(net.neoforged.neoforge.client.event.ClientTickEvent.Post event) {
+        if (!(event instanceof net.neoforged.neoforge.client.event.ClientTickEvent.Post)) return;
         Minecraft mc = Minecraft.getInstance();
         ClientLevel level = mc.level;
+        if (level != trackedLevel) resetSession(level);
         if (level == null || mc.player == null || mc.isPaused()) return;
         float wind = (ClientWeather.active() ? ClientWeather.wind() : 0.3f) * nightCalm(level, 1.0F);
         float low = 0.04f + 0.22f * wind, high = 0.08f + 0.32f * wind;
@@ -128,7 +165,7 @@ public final class CloudRenderer {
         highZ += ClientWeather.windZ() * high;
         CloudClimate.tick();
         if (level.dimension() == Level.OVERWORLD) {
-            Vec3 camPos = mc.gameRenderer.getMainCamera().getPosition();
+            Vec3 camPos = mc.gameRenderer.mainCamera().position();
             DistantStorms.tick(mc, camPos, level.getGameTime());
             WeatherFieldTexture.tickUpdate(level, camPos, 0f);
         }
@@ -140,7 +177,7 @@ public final class CloudRenderer {
             Minecraft mc = Minecraft.getInstance();
             if (mc != null && mc.getTextureManager() != null) {
                 textureLoaded = true;
-                mc.getTextureManager().register(TEXTURE, new CloudTexture(TEXTURE));
+                mc.getTextureManager().registerAndLoad(TEXTURE, new CloudTexture(TEXTURE));
             }
         }
     }
@@ -169,8 +206,8 @@ public final class CloudRenderer {
         String region = com.skycraft.tamriel.TamrielMap.region(x, z).id();
         var c = com.skycraft.atmosphere.WeatherPhysics.evaluate(x, z, mc.level.getGameTime() / 20.0,
                 CloudClimate.snapshot().get(region), ClientWeather.kindOf(region), ClientWeather.windX(), ClientWeather.windZ(),
-                ClientWeather.fronts(), mc.level.getDayTime());
-        return AtmosphereBudget.describe() + " "+WeatherFieldTexture.diagnostics()+" "+FogRadianceTexture.describe()+" ahead_x=" + x + " ahead_z=" + z
+                ClientWeather.fronts(), mc.level.getDefaultClockTime());
+        return AtmosphereBudget.describe() + " "+WeatherFieldTexture.diagnostics()+" "+FogRadianceTexture.describe()+" "+TextureUploadState.describe()+" ahead_x=" + x + " ahead_z=" + z
                 + " cloud_base=" + (232f + c.cloudBaseOffset()) + " cloud_top="
                 + (304f + c.cloudBaseOffset() + 120f * c.coverage() + 300f * c.stormTower())
                 + " coverage=" + c.coverage() + " tower=" + c.stormTower() + " ground_fog=" + c.groundFog()
@@ -180,111 +217,255 @@ public final class CloudRenderer {
     /** Profiling summary since the last reset: render-thread time per frame, worker time per build, mesh size. */
     public static String stats() {
         return String.format(java.util.Locale.ROOT, "clouds: %.3f ms/frame on the render thread and %.3f ms/frame on the GPU over %d frames;"
-                        + " %.2f ms per build on the worker (%d builds); %d quads (%s)",
+                        + " %.2f ms per build on the worker (%d builds); %d quads (%s); GPU query skips=%d",
                 frameCount == 0 ? 0.0 : frameNanos / 1e6 / frameCount, gpuFrames == 0 ? 0.0 : gpuNanos / 1e6 / gpuFrames, frameCount,
-                builds == 0 ? 0.0 : buildNanos / 1e6 / builds, builds, quads, census);
+                builds == 0 ? 0.0 : buildNanos / 1e6 / builds, builds, quads, census, querySkips);
     }
 
-    /** Resets the counters and starts timing the cloud draw on the GPU (timer queries; tests only). */
+    /** Resets the counters and starts nonblocking native GPU timestamps (tests only). */
     public static void resetStats() {
+        stopStats();
         frameNanos = frameCount = buildNanos = gpuNanos = 0L;
         builds = gpuFrames = 0;
-        gpuTiming = true;
+        querySkips = 0;
+        var device = com.mojang.blaze3d.systems.RenderSystem.getDevice();
+        timestampPeriod = device.getDeviceInfo().timestampPeriod();
+        if (Float.isFinite(timestampPeriod) && timestampPeriod > 0f) {
+            queryPool = device.createTimestampQueryPool(QUERY_PENDING.length * 2);
+            gpuTiming = true;
+        }
     }
 
-    // ---- GPU timing (only while a test asked for it): two queries in flight, read a frame late
-    private static boolean gpuTiming;
-    private static final int[] QUERIES = new int[2];
-    private static final boolean[] QUERY_PENDING = new boolean[2];
+    // Eight start/end pairs. Pending slots are never reused or synchronously awaited.
+    private static boolean gpuTiming, queryActive;
+    private static com.mojang.renderpearl.api.commands.GpuQueryPool queryPool;
+    private static RenderPass queryPass;
+    private static float timestampPeriod;
+    private static final boolean[] QUERY_PENDING = new boolean[8];
     private static int query;
     private static long gpuNanos;
     private static int gpuFrames;
+    private static long querySkips;
 
-    private static void beginGpuTimer() {
-        if (!gpuTiming) return;
-        if (QUERIES[0] == 0) org.lwjgl.opengl.GL15.glGenQueries(QUERIES);
-        query ^= 1;
-        int id = QUERIES[query];
+    public static void stopStats() {
+        endGpuTimer();
+        gpuTiming = false;
+        if (queryPool != null) queryPool.close();
+        queryPool = null;
+        java.util.Arrays.fill(QUERY_PENDING, false);
+        query = 0;
+    }
+
+    private static void beginGpuTimer(RenderPass pass) {
+        queryActive = false;
+        queryPass = null;
+        if (!gpuTiming || queryPool == null) return;
+        query = (query + 1) % QUERY_PENDING.length;
         if (QUERY_PENDING[query]) {
-            gpuNanos += org.lwjgl.opengl.GL33.glGetQueryObjecti64(id, org.lwjgl.opengl.GL15.GL_QUERY_RESULT);
+            var values = queryPool.getValues(query * 2, 2);
+            if (values[0].isEmpty() || values[1].isEmpty()) {
+                querySkips++;
+                return;
+            }
+            gpuNanos += (long) ((values[1].getAsLong() - values[0].getAsLong()) * (double) timestampPeriod);
             gpuFrames++;
+            QUERY_PENDING[query] = false;
         }
-        org.lwjgl.opengl.GL15.glBeginQuery(org.lwjgl.opengl.GL33.GL_TIME_ELAPSED, id);
-        QUERY_PENDING[query] = true;
+        // Borrow the caller's active pass: creating a nested encoder is invalid on native backends.
+        pass.writeTimestamp(queryPool, query * 2);
+        queryPass = pass;
+        queryActive = true;
     }
 
     private static void endGpuTimer() {
-        if (gpuTiming) org.lwjgl.opengl.GL15.glEndQuery(org.lwjgl.opengl.GL33.GL_TIME_ELAPSED);
+        if (!queryActive) return;
+        try {
+            queryPass.writeTimestamp(queryPool, query * 2 + 1);
+            QUERY_PENDING[query] = true;
+        } finally {
+            queryActive = false;
+            queryPass = null;
+        }
     }
 
     @SubscribeEvent
     public static void onLogout(ClientPlayerNetworkEvent.LoggingOut event) {
+        resetSession(null);
+        SkyGeometry.close();
+    }
+
+    @net.neoforged.fml.common.EventBusSubscriber(modid=Skycraft.MODID,value=Dist.CLIENT)
+    public static final class CloudResourceEvents {
+        @SubscribeEvent
+        public static void reloadListeners(net.neoforged.neoforge.client.event.AddClientReloadListenersEvent event) {
+            event.addListener(Identifier.fromNamespaceAndPath(Skycraft.MODID,"cloud_cache"), (net.minecraft.server.packs.resources.ResourceManagerReloadListener) manager ->
+                    Minecraft.getInstance().execute(() -> {
+                        WeatherFieldTexture.invalidateStaticInputs();
+                        resetSession(Minecraft.getInstance().level);
+                        SkyGeometry.close();
+                    }));
+        }
+    }
+
+    private static void resetSession(ClientLevel level) {
+        generation=RESULTS.advance();
+        building=false;
+        trackedLevel=level;
+        LocalOcclusionTexture.clear();
         CloudClimate.clear();
+        SkyEnvironment.clear();
         DistantStorms.clear();
         hasSky = hasGround = false;
+        preparedTexture = null;
         lastJob = 0L;
+        driftX=driftZ=driftXO=driftZO=highX=highZ=0;
+        if(skyVb!=null) { skyVb.close(); skyVb=null; }
+        if(groundVb!=null) { groundVb.close(); groundVb=null; }
+        stopStats();
+        clearStormMeshes();
+    }
+
+    private static void release(CloudBuilder.Result result) {
+        for(var buffer:new CpuMesh[]{result.sky,result.ground})
+            if(buffer!=null) buffer.close();
     }
 
     // ================================================================== render
 
-    /**
-     * Draws Skycraft's mesh clouds when shaders are off; claims the pass when an Oculus/Iris shader pack is
-     * active so vanilla's mesh cannot overlap the shader's volumetric raymarcher (driven by {@link WeatherFieldTexture})
-     * and 3D rain curtains occluded by Distant Horizons.
-     */
-    static boolean render(ClientLevel level, float pt, PoseStack pose, double camX, double camY, double camZ, Matrix4f proj) {
-        if (!AtmosphereConfig.CLOUDS.get() || level.dimension() != Level.OVERWORLD) return false;
-        if (ShaderCompat.shadersActive()) return true;
+    private static final ContextKey<Frame> FRAME = new ContextKey<>(Identifier.fromNamespaceAndPath(Skycraft.MODID, "cloud_frame"));
+    private static final WorldDraw.Material CLOUD = WorldDraw.material(Identifier.fromNamespaceAndPath(Skycraft.MODID, "regional_clouds"),
+            DefaultVertexFormat.POSITION_TEX_COLOR, PrimitiveTopology.QUADS, WorldDraw.Blend.ALPHA, true, false, true);
+    private static final WorldDraw.Material LIGHTNING_GLOW = WorldDraw.material(Identifier.fromNamespaceAndPath(Skycraft.MODID, "storm_glow"),
+            DefaultVertexFormat.POSITION_TEX_COLOR, PrimitiveTopology.QUADS, WorldDraw.Blend.ADDITIVE, true, false, true);
+    private static final WorldDraw.Material LIGHTNING_BOLT = WorldDraw.material(Identifier.fromNamespaceAndPath(Skycraft.MODID, "storm_channels"),
+            DefaultVertexFormat.POSITION_COLOR, PrimitiveTopology.QUADS, WorldDraw.Blend.ADDITIVE, true, false, true);
+    private record Frame(long epoch, boolean enabled, boolean shaders, boolean visible, Vec3 camera,
+                         double driftX, double driftZ, float alpha, float flash, DistantStorms.RenderFrame storms) {}
+    private static WorldMesh stormGlow, stormBolts;
+
+    @SubscribeEvent public static void pipelines(RegisterRenderPipelinesEvent event) {
+        CLOUD.register(event); LIGHTNING_GLOW.register(event); LIGHTNING_BOLT.register(event);
+    }
+
+    @SubscribeEvent public static void extract(ExtractLevelRenderStateEvent event) {
+        ClientLevel level = event.getLevel();
+        if (level.dimension() != Level.OVERWORLD) return;
+        if (level != trackedLevel) resetSession(level);
+        var camera = event.getCamera();
+        float pt = event.getDeltaTracker().getGameTimeDeltaPartialTick(false);
+        Vec3 position = camera.position();
+        boolean shaders = ShaderCompat.shadersActive();
+        boolean enabled = AtmosphereConfig.CLOUDS.get();
+        boolean visible = camera.getFluidInCamera() == FogType.NONE
+                && (!(camera.entity() instanceof net.minecraft.world.entity.LivingEntity entity)
+                    || (!entity.hasEffect(com.skycraft.platform.Effects.holder(MobEffects.BLINDNESS)) && !entity.hasEffect(com.skycraft.platform.Effects.holder(MobEffects.DARKNESS))));
+        if (enabled && visible && !shaders) schedule(level, pt, position.x, position.y, position.z);
+        float fog = ClientWeather.active() ? Mth.clamp(ClientWeather.fog() * AtmosphereConfig.WEATHER_FOG_STRENGTH.get().floatValue(), 0f, 1f) : 0f;
+        float alpha = 1f - .85f * fog * (float)Math.sqrt(fog);
+        float angle = SkyEnvironment.sunCycle(level, pt) * Mth.TWO_PI;
+        float daylight = Mth.clamp(Mth.cos(angle) * 2f + .3f, 0f, 1f);
+        // Native weather extraction already carries the visible lightning flash through environment attributes.
+        float flash = SkyEnvironment.lightningFlash(level, pt) ? 1.35f : 1f;
+        var storms = AtmosphereConfig.DISTANT_WEATHER.get() && visible
+                ? DistantStorms.extract(position, pt, daylight, shaders) : null;
+        event.getRenderState().setRenderData(FRAME, new Frame(generation, enabled, shaders, visible, position,
+                Mth.lerp(pt, driftXO, driftX), Mth.lerp(pt, driftZO, driftZ), alpha, flash, storms));
+    }
+
+    /** Called before any active cloud render pass. CPU work remains on the single snapshot worker. */
+    static void prepare(LevelRenderState state) {
+        Frame frame = state.getRenderData(FRAME);
+        if (frame == null || frame.epoch != generation || !frame.enabled || frame.shaders || !frame.visible) return;
+        ensureTextureLoaded(); collect();
+        if (skyVb != null) skyVb.prepare();
+        if (groundVb != null) groundVb.prepare();
+    }
+    @SubscribeEvent public static void prepareStorms(PrepareRenderBuffersEvent event) {
+        clearStormMeshes();
+        preparedTexture = null;
+        Frame frame = event.getLevelRenderState().getRenderData(FRAME);
+        if (frame == null || frame.epoch != generation || !frame.enabled) return;
+        ensureTextureLoaded();
+        preparedTexture = Minecraft.getInstance().getTextureManager().getTexture(TEXTURE);
+        if (frame.storms == null) return;
+        stormGlow = frame.storms.glow().upload();
+        stormBolts = frame.storms.bolts().upload();
+    }
+    private static void clearStormMeshes() {
+        if (stormGlow != null) stormGlow.close();
+        if (stormBolts != null) stormBolts.close();
+        stormGlow = stormBolts = null;
+    }
+
+    static boolean render(LevelRenderState state, Matrix4fc modelView, RenderPass nativePass, OitStage stage) {
+        Frame frame = state.getRenderData(FRAME);
+        if (frame == null || frame.epoch != generation || !frame.enabled) return false;
+        if (frame.shaders || !frame.visible) return true;
+        var texture = preparedTexture;
+        if (texture == null) throw new IllegalStateException("Cloud texture was not prepared before its native render pass");
         renderedThisFrame = true;
-        Minecraft mc = Minecraft.getInstance();
-        Camera camera = mc.gameRenderer.getMainCamera();
-        if (camera.getFluidInCamera() != FogType.NONE) return true;
-        if (camera.getEntity() instanceof net.minecraft.world.entity.LivingEntity le
-                && (le.hasEffect(MobEffects.BLINDNESS) || le.hasEffect(MobEffects.DARKNESS))) return true;
         long start = System.nanoTime();
-        try {
-            ensureTextureLoaded();
-            collect();
-            schedule(level, pt, camX, camY, camZ);
-            draw(level, pt, pose, camX, camY, camZ, proj);
+        beginGpuTimer(nativePass);
+        try (var pass = WorldDraw.borrow(nativePass)) {
+            Vector4f tint = new Vector4f(frame.flash, frame.flash, frame.flash, frame.alpha);
+            if (skyVb != null) draw(pass, skyVb, CLOUD, new Matrix4f(modelView).translate(
+                    (float)(anchorX - frame.camera.x + frame.driftX - builtDriftX), (float)(anchorY - frame.camera.y),
+                    (float)(anchorZ - frame.camera.z + frame.driftZ - builtDriftZ)), tint, texture, stage);
+            if (groundVb != null) draw(pass, groundVb, CLOUD, new Matrix4f(modelView).translate(
+                    (float)(anchorX - frame.camera.x), (float)(anchorY - frame.camera.y), (float)(anchorZ - frame.camera.z)), tint, texture, stage);
+            renderStorms(pass, modelView, texture, stage, false);
         } finally {
-            frameNanos += System.nanoTime() - start;
-            frameCount++;
+            endGpuTimer(); frameNanos += System.nanoTime() - start; frameCount++;
         }
         return true;
     }
+    private static void draw(WorldDraw.Pass pass, WorldMesh mesh, WorldDraw.Material material, Matrix4fc modelView,
+                             Vector4f tint, net.minecraft.client.renderer.texture.AbstractTexture texture, OitStage stage) {
+        if (stage == null) pass.draw(mesh, material, modelView, tint, texture);
+        else pass.drawOit(mesh, material, modelView, tint, texture, stage);
+    }
+    private static void renderStorms(WorldDraw.Pass pass, Matrix4fc modelView,
+                                     net.minecraft.client.renderer.texture.AbstractTexture texture, OitStage stage, boolean boltsOnly) {
+        if (!boltsOnly && stormGlow != null) draw(pass, stormGlow, LIGHTNING_GLOW, modelView, new Vector4f(1f), texture, stage);
+        if (stormBolts != null) draw(pass, stormBolts, LIGHTNING_BOLT, modelView, new Vector4f(1f), null, stage);
+    }
+    @SubscribeEvent public static void shaderLightning(RenderLevelStageEvent.AfterWeather event) {
+        Frame frame = event.getLevelRenderState().getRenderData(FRAME);
+        if (frame == null || frame.epoch != generation || !frame.shaders || !frame.visible) return;
+        try (var pass = WorldDraw.borrow(event.getRenderPass())) {
+            renderStorms(pass, event.getModelViewMatrix(), null, null, true);
+        }
+    }
+    @SubscribeEvent public static void shaderLightningOit(RenderLevelStageEvent.OitTranslucent event) {
+        Frame frame = event.getLevelRenderState().getRenderData(FRAME);
+        if (frame == null || frame.epoch != generation || !frame.shaders || !frame.visible) return;
+        try (var pass = WorldDraw.borrow(event.getRenderPass())) {
+            renderStorms(pass, event.getModelViewMatrix(), null, event.getOitStage(), true);
+        }
+    }
 
-    /** Uploads a finished build. */
     private static void collect() {
-        CloudBuilder.Result r = ready;
-        if (r == null) return;
-        ready = null;
+        BuildResult pending = RESULTS.poll();
+        if (pending == null) return;
         building = false;
-        if (r.failed) return;
-        if (skyVb == null) {
-            skyVb = new VertexBuffer(VertexBuffer.Usage.DYNAMIC);
-            groundVb = new VertexBuffer(VertexBuffer.Usage.DYNAMIC);
+        CloudBuilder.Result result = pending.result();
+        if (pending.epoch() != generation || result.failed) { release(result); return; }
+        WorldMesh newSky = null, newGround = null;
+        try {
+            if (result.sky != null) { CpuMesh cpu = result.sky; result.sky = null; newSky = new WorldMesh(cpu); }
+            if (result.ground != null) { CpuMesh cpu = result.ground; result.ground = null; newGround = new WorldMesh(cpu); }
+        } catch (RuntimeException | Error error) {
+            if (newSky != null) newSky.close();
+            if (newGround != null) newGround.close();
+            release(result); throw error;
         }
-        hasSky = upload(skyVb, r.sky);
-        hasGround = upload(groundVb, r.ground);
-        anchorX = r.anchorX;
-        anchorY = r.anchorY;
-        anchorZ = r.anchorZ;
-        builtDriftX = r.driftX;
-        builtDriftZ = r.driftZ;
-        // Electrical candidates are qualified from WeatherPhysics independently of mesh rebuilds.
-        buildNanos += r.nanos;
-        builds++;
-        quads = r.quads;
-        census = r.census;
-    }
-
-    private static boolean upload(VertexBuffer vb, BufferBuilder.RenderedBuffer buffer) {
-        if (buffer == null) return false;
-        vb.bind();
-        vb.upload(buffer);
-        VertexBuffer.unbind();
-        return true;
+        if (skyVb != null) skyVb.close();
+        if (groundVb != null) groundVb.close();
+        skyVb = newSky; groundVb = newGround;
+        hasSky = newSky != null; hasGround = newGround != null;
+        anchorX = result.anchorX; anchorY = result.anchorY; anchorZ = result.anchorZ;
+        builtDriftX = result.driftX; builtDriftZ = result.driftZ;
+        buildNanos += result.nanos; builds++; quads = result.quads; census = result.census;
     }
 
     private static void schedule(ClientLevel level, float pt, double camX, double camY, double camZ) {
@@ -299,7 +480,11 @@ public final class CloudRenderer {
         jobZ = camZ;
         CloudBuilder.Job job = job(level, pt, camX, camY, camZ);
         building = true;
-        WORKER.execute(() -> ready = BUILDER.build(job));
+        long epoch=generation;
+        WORKER.execute(() -> {
+            var result=BUILDER.build(job);
+            RESULTS.publish(epoch,new BuildResult(epoch,result));
+        });
     }
 
     private static CloudBuilder.Job job(ClientLevel level, float pt, double camX, double camY, double camZ) {
@@ -309,22 +494,25 @@ public final class CloudRenderer {
             redMountain = Places.byId("red_mountain").orElse(null);
             throat = Places.byId("throat_of_the_world").orElse(null);
         }
-        float angle = level.getTimeOfDay(pt) * Mth.TWO_PI;
+        float angle = com.skycraft.atmosphere.client.SkyEnvironment.sunCycle(level, pt) * Mth.TWO_PI;
         float sunX = -Mth.sin(angle), sunY = Mth.cos(angle);
         Map<String, float[]> climate = CloudClimate.snapshot();
         if (!ClientWeather.active()) climate = vanillaClimate(level, pt);
         double dX = Mth.lerp(pt, driftXO, driftX), dZ = Mth.lerp(pt, driftZO, driftZ);
         float fog = ClientWeather.active() ? Mth.clamp(ClientWeather.fog() * AtmosphereConfig.WEATHER_FOG_STRENGTH.get().floatValue(), 0f, 1f) : 0f;
-        boolean fancy = mc.options.getCloudsType() == CloudStatus.FANCY;
+        boolean fancy = mc.options.getCloudStatus() == CloudStatus.FANCY;
         return new CloudBuilder.Job(camX, camY, camZ, dX, dZ, highX, highZ,
                 ClientWeather.windX(), ClientWeather.windZ(), (ClientWeather.active() ? ClientWeather.wind() : 0.3f) * nightCalm(level, pt),
                 sunX, sunY, 0f, ClientWeather.fogR, ClientWeather.fogG, ClientWeather.fogB, fog,
                 AtmosphereConfig.CLOUD_HEIGHT.get(), AtmosphereConfig.CLOUD_DISTANCE.get(), fancy,
-                AtmosphereConfig.DISTANT_WEATHER.get(), WeatherProfile.mistHour(level.getDayTime()),
+                AtmosphereConfig.DISTANT_WEATHER.get(), WeatherProfile.mistHour(level.getDefaultClockTime()),
                 (float) ((level.getGameTime() + pt) / 20.0), climate,
                 redMountain != null ? redMountain.x() : 0, redMountain != null ? redMountain.z() : 0, redMountain != null,
                 throat != null ? throat.x() : 0, throat != null ? throat.z() : 0, throat != null,
-                ClientWeather.fronts());
+                ClientWeather.fronts(),
+                com.skycraft.atmosphere.AtmosphereMath.moonLight(angle,level.getDefaultClockTime()+pt,false),
+                AtmosphereConfig.SECUNDA.get()?com.skycraft.atmosphere.AtmosphereMath.moonLight(angle,level.getDefaultClockTime()+pt,true)
+                        :com.skycraft.atmosphere.AtmosphereMath.MoonLight.DARK);
     }
 
     /**
@@ -354,62 +542,4 @@ public final class CloudRenderer {
         }
     }
 
-    private static void draw(ClientLevel level, float pt, PoseStack pose, double camX, double camY, double camZ, Matrix4f proj) {
-        if (!hasSky && !hasGround) return;
-        beginGpuTimer();
-        try {
-            drawMeshes(level, pt, pose, camX, camY, camZ, proj);
-        } finally {
-            endGpuTimer();
-        }
-    }
-
-    private static void drawMeshes(ClientLevel level, float pt, PoseStack pose, double camX, double camY, double camZ, Matrix4f proj) {
-        ShaderInstance shader = GameRenderer.getPositionTexColorShader();
-        if (shader == null) return;
-        Minecraft mc = Minecraft.getInstance();
-        float fog = ClientWeather.active() ? Mth.clamp(ClientWeather.fog() * AtmosphereConfig.WEATHER_FOG_STRENGTH.get().floatValue(), 0f, 1f) : 0f;
-        float alpha = 1f - 0.85f * fog * (float) Math.sqrt(fog);
-        float flash = level.getSkyFlashTime() > 0 ? 1.35f : 1f;
-        RenderSystem.enableBlend();
-        RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA,
-                GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-        RenderSystem.enableDepthTest();
-        RenderSystem.depthFunc(GL11.GL_LEQUAL);
-        RenderSystem.depthMask(false);
-        RenderSystem.disableCull();
-        GL11.glEnable(GL32.GL_DEPTH_CLAMP);
-        RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
-        RenderSystem.setShaderTexture(0, TEXTURE);
-        RenderSystem.setShaderColor(flash, flash, flash, alpha);
-        try {
-            if (hasSky) {
-                double dX = Mth.lerp(pt, driftXO, driftX) - builtDriftX, dZ = Mth.lerp(pt, driftZO, driftZ) - builtDriftZ;
-                pose.pushPose();
-                pose.translate(anchorX - camX + dX, anchorY - camY, anchorZ - camZ + dZ);
-                skyVb.bind();
-                skyVb.drawWithShader(pose.last().pose(), proj, shader);
-                pose.popPose();
-            }
-            if (hasGround) {
-                pose.pushPose();
-                pose.translate(anchorX - camX, anchorY - camY, anchorZ - camZ);
-                groundVb.bind();
-                groundVb.drawWithShader(pose.last().pose(), proj, shader);
-                pose.popPose();
-            }
-            VertexBuffer.unbind();
-            RenderSystem.setShaderColor(1f, 1f, 1f, alpha);
-            float angle = level.getTimeOfDay(pt) * Mth.TWO_PI;
-            float daylight = Mth.clamp(Mth.cos(angle) * 2f + 0.3f, 0f, 1f);
-            DistantStorms.render(pose.last().pose(), proj, new Vec3(camX, camY, camZ), pt, daylight);
-        } finally {
-            GL11.glDisable(GL32.GL_DEPTH_CLAMP);
-            RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
-            RenderSystem.depthMask(true);
-            RenderSystem.enableCull();
-            RenderSystem.disableBlend();
-            RenderSystem.defaultBlendFunc();
-        }
-    }
 }

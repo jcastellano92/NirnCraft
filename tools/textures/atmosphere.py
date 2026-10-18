@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Generates the Skyrim sky textures of the atmosphere module.
 
-  assets/minecraft/textures/environment/moon_phases.png   transparent vanilla moon replacement
+  assets/minecraft/textures/environment/celestial/moon/*.png   transparent native26.3 vanilla moon overrides
+  assets/minecraft/textures/environment/moon_phases.png   preserved legacy transparent moon override
   assets/skycraft/textures/environment/{masser,secunda}_phases.png 16 phases, 4x4, baked by bake_lunar.py
   assets/skycraft/textures/environment/masser_halo.png    faint shader-off lunar scattering fallback
   assets/skycraft/textures/environment/galaxy.png         horizontally tiling galaxy band
@@ -504,6 +505,18 @@ def write_blur_meta(png, clamp=False):
     png.with_name(png.name + ".mcmeta").write_text(json.dumps(meta, indent=2) + "\n")
 
 
+def vanilla_moon_overrides():
+    """Native celestials use eight atlas sprites; suppress every phase alongside Masser and Secunda."""
+    import shutil
+    VANILLA.mkdir(parents=True, exist_ok=True)
+    legacy=VANILLA / "moon_phases.png"
+    Image.new("RGBA", (4, 2), (0, 0, 0, 0)).save(legacy)
+    native=VANILLA / "celestial/moon"
+    native.mkdir(parents=True,exist_ok=True)
+    for phase in ("first_quarter","full_moon","new_moon","third_quarter","waning_crescent","waning_gibbous","waxing_crescent","waxing_gibbous"):
+        shutil.copyfile(legacy,native/(phase+".png"))
+
+
 def sky():
     rng = np.random.default_rng(1771)
     SKY.mkdir(parents=True, exist_ok=True)
@@ -517,7 +530,7 @@ def sky():
         Image.fromarray(arr, "RGBA").save(path)
         write_blur_meta(path, clamp)
     # Both renderer paths draw the same smooth-phased celestial bodies. Suppress the duplicate vanilla moon.
-    Image.new("RGBA", (4, 2), (0, 0, 0, 0)).save(VANILLA / "moon_phases.png")
+    vanilla_moon_overrides()
     import runpy
     runpy.run_path(str(pathlib.Path(__file__).with_name("bake_lunar.py")), run_name="__main__")
     print("wrote the sky textures:", ", ".join(o[0].name for o in out))
@@ -525,6 +538,9 @@ def sky():
 
 def main():
     import sys
+    if "vanilla-moons" in sys.argv[1:]:
+        vanilla_moon_overrides()
+        return
     if "sky" in sys.argv[1:]:
         sky()
         return

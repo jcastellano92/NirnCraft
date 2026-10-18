@@ -32,7 +32,7 @@ public class SiltStriderEntity extends SkyBeast {
     public void setHome(BlockPos pos, String portId) {
         this.home = pos.immutable();
         this.port = portId;
-        this.restrictTo(home, 8);
+        this.setHomeTo(home, 8);
         this.setPersistenceRequired();
     }
 
@@ -45,14 +45,14 @@ public class SiltStriderEntity extends SkyBeast {
     public InteractionResult mobInteract(Player player, InteractionHand hand) {
         if (hand == InteractionHand.MAIN_HAND) {
             if (player instanceof ServerPlayer sp) StriderPorts.talk(sp, this);
-            return InteractionResult.sidedSuccess(this.level().isClientSide);
+            return com.skycraft.platform.Interactions.sidedSuccess(this.level().isClientSide());
         }
         return super.mobInteract(player, hand);
     }
 
     @Override
-    protected void customServerAiStep() {
-        super.customServerAiStep();
+    protected void customServerAiStep(net.minecraft.server.level.ServerLevel serverLevel263) {
+        super.customServerAiStep(serverLevel263);
         if (this.tickCount % 600 == 300 && this.getRandom().nextInt(3) == 0) {
             CreatureAnims.play(this, AnimSlot.SPECIAL);
             this.playSound(com.skycraft.audio.AudioSounds.creature("silt_strider", "ambient"), 4.0f, 0.95f + this.getRandom().nextFloat() * 0.1f);
@@ -68,20 +68,26 @@ public class SiltStriderEntity extends SkyBeast {
     }
 
     @Override
-    public boolean canBeLeashed(Player player) {
+    public boolean canBeLeashed() {
         return false;
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag tag) {
-        super.addAdditionalSaveData(tag);
-        if (home != null) tag.put("Home", NbtUtils.writeBlockPos(home));
+    public void addAdditionalSaveData(net.minecraft.world.level.storage.ValueOutput output263) {
+        super.addAdditionalSaveData(output263);
+        net.minecraft.nbt.CompoundTag tag = new net.minecraft.nbt.CompoundTag();
+        
+        if (home != null) tag.put("Home", com.skycraft.platform.NbtPositions.write(home));
         if (port != null) tag.putString("Port", port);
+    
+        output263.store(tag);
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag tag) {
-        super.readAdditionalSaveData(tag);
-        if (tag.contains("Home")) setHome(NbtUtils.readBlockPos(tag.getCompound("Home")), tag.getString("Port"));
+    public void readAdditionalSaveData(net.minecraft.world.level.storage.ValueInput input263) {
+        super.readAdditionalSaveData(input263);
+        net.minecraft.nbt.CompoundTag tag = com.skycraft.platform.ValueTags.read(input263 , "Home", "Port");
+        
+        if (tag.contains("Home")) setHome(com.skycraft.platform.NbtPositions.read(tag.getCompoundOrEmpty("Home")), tag.getStringOr("Port",""));
     }
 }

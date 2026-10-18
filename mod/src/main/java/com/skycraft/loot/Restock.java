@@ -6,22 +6,22 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.event.entity.player.PlayerContainerEvent;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.neoforge.event.entity.player.PlayerContainerEvent;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity;
 import net.minecraft.world.level.saveddata.SavedData;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.ModList;
+import net.neoforged.fml.common.Mod;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -39,7 +39,7 @@ import java.util.UUID;
  * stored their own things in: what the table generated is remembered when the container is first opened, and a
  * restock waits until nothing else is inside.</p>
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class Restock {
     private static Boolean lootr;
     /** Opener -> the container whose freshly generated contents are recorded when its menu opens. */
@@ -60,10 +60,10 @@ public final class Restock {
         if (!(be instanceof RandomizableContainerBlockEntity container)) return;
         Data data = Data.get(level.getServer());
         String key = key(level, pos);
-        CompoundTag saved = be.saveWithoutMetadata();
+        CompoundTag saved = be.saveWithoutMetadata(level.registryAccess());
         long now = level.getGameTime();
-        if (saved.contains("LootTable", Tag.TAG_STRING)) {
-            String table = saved.getString("LootTable");
+        if (com.skycraft.platform.NbtData.hasType(saved, "LootTable", Tag.TAG_STRING)) {
+            String table = saved.getStringOr("LootTable","");
             if (Containers.restockDays(table) > 0) {
                 CompoundTag entry = new CompoundTag();
                 entry.putString("table", table);
@@ -74,11 +74,11 @@ public final class Restock {
             }
             return;
         }
-        CompoundTag entry = data.entries.getCompound(key);
+        CompoundTag entry = data.entries.getCompoundOrEmpty(key);
         if (entry.isEmpty() || PlacedBlocks.isPlayerPlaced(level, pos)) return;
-        String table = entry.getString("table");
+        String table = entry.getStringOr("table","");
         int days = Containers.restockDays(table);
-        if (days <= 0 || now - entry.getLong("at") < days * 24000L) return;
+        if (days <= 0 || now - entry.getLongOr("at",0L) < days * 24000L) return;
         // the player keeps their own things: wait until only what the table generated is left inside
         if (holdsForeignItems(entry, container)) return;
         // the time has come: empty it (the overflow behind the slots too: only table items are inside) and roll the
@@ -86,7 +86,7 @@ public final class Restock {
         container.clearContent();
         com.skycraft.inventory.BulkStore overflow = com.skycraft.inventory.ContainerOverflow.store(container);
         if (overflow != null) overflow.clear();
-        container.setLootTable(new ResourceLocation(table), level.getRandom().nextLong());
+        container.setLootTable(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.LOOT_TABLE, Identifier.parse(table)), level.getRandom().nextLong());
         entry.putLong("at", now);
         entry.remove("gen");
         data.setDirty();
@@ -101,8 +101,8 @@ public final class Restock {
         if (pos == null || !(player.level() instanceof ServerLevel level)) return;
         if (!(level.getBlockEntity(pos) instanceof RandomizableContainerBlockEntity container)) return;
         Data data = Data.get(level.getServer());
-        CompoundTag entry = data.entries.getCompound(key(level, pos));
-        if (entry.isEmpty() || entry.contains("gen", Tag.TAG_LIST)) return;
+        CompoundTag entry = data.entries.getCompoundOrEmpty(key(level, pos));
+        if (entry.isEmpty() || com.skycraft.platform.NbtData.hasType(entry, "gen", Tag.TAG_LIST)) return;
         Map<String, Integer> counts = new HashMap<>();
         for (int i = 0; i < container.getContainerSize(); i++) {
             ItemStack s = container.getItem(i);
@@ -121,7 +121,7 @@ public final class Restock {
     }
 
     private static String itemId(ItemStack s) {
-        ResourceLocation id = ForgeRegistries.ITEMS.getKey(s.getItem());
+        Identifier id = BuiltInRegistries.ITEM.getKey(s.getItem());
         return id == null ? "" : id.toString();
     }
 
@@ -133,9 +133,9 @@ public final class Restock {
      */
     public static boolean holdsForeignItems(CompoundTag entry, RandomizableContainerBlockEntity container) {
         Map<String, Integer> allowed = new HashMap<>();
-        for (Tag t : entry.getList("gen", Tag.TAG_COMPOUND)) {
+        for (Tag t : entry.getListOrEmpty("gen")) {
             CompoundTag c = (CompoundTag) t;
-            allowed.merge(c.getString("id"), c.getInt("n"), Integer::sum);
+            allowed.merge(c.getStringOr("id",""), c.getIntOr("n",0), Integer::sum);
         }
         for (int i = 0; i < container.getContainerSize(); i++) {
             ItemStack s = container.getItem(i);
@@ -161,7 +161,7 @@ public final class Restock {
     }
 
     private static String key(Level level, BlockPos pos) {
-        return level.dimension().location() + "|" + pos.getX() + "|" + pos.getY() + "|" + pos.getZ();
+        return level.dimension().identifier() + "|" + pos.getX() + "|" + pos.getY() + "|" + pos.getZ();
     }
 
     /** Remembered containers: "dim|x|y|z" -> {table, at}. Stored with the overworld. */
@@ -170,16 +170,15 @@ public final class Restock {
         final CompoundTag entries = new CompoundTag();
 
         static Data get(MinecraftServer server) {
-            return server.overworld().getDataStorage().computeIfAbsent(Data::load, Data::new, NAME);
+            return com.skycraft.platform.SavedDataTypes.get(server.overworld(), NAME, Data::load, Data::new, value263 -> value263.save(new net.minecraft.nbt.CompoundTag()));
         }
 
         static Data load(CompoundTag tag) {
             Data d = new Data();
-            d.entries.merge(tag.getCompound("entries"));
+            d.entries.merge(tag.getCompoundOrEmpty("entries"));
             return d;
         }
 
-        @Override
         public CompoundTag save(CompoundTag tag) {
             tag.put("entries", entries.copy());
             return tag;

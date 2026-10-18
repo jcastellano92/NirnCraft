@@ -10,7 +10,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -19,7 +19,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.SavedData;
@@ -67,7 +67,7 @@ public final class QuestNpcs {
         final Map<String, Rec> recs = new HashMap<>();
 
         static Store get(MinecraftServer server) {
-            return server.overworld().getDataStorage().computeIfAbsent(Store::load, Store::new, NAME);
+            return com.skycraft.platform.SavedDataTypes.get(server.overworld(), NAME, Store::load, Store::new, value263 -> value263.save(new net.minecraft.nbt.CompoundTag()));
         }
 
         Rec rec(String id) {
@@ -76,28 +76,27 @@ public final class QuestNpcs {
 
         static Store load(CompoundTag tag) {
             Store s = new Store();
-            for (String id : tag.getAllKeys()) {
-                CompoundTag t = tag.getCompound(id);
+            for (String id : tag.keySet()) {
+                CompoundTag t = tag.getCompoundOrEmpty(id);
                 Rec r = new Rec();
-                if (t.hasUUID("uuid")) r.uuid = t.getUUID("uuid");
-                r.dim = t.getString("dim");
-                if (t.contains("last")) r.last = NbtUtils.readBlockPos(t.getCompound("last"));
-                if (t.contains("home")) r.home = NbtUtils.readBlockPos(t.getCompound("home"));
-                r.homeDim = t.getString("homeDim");
-                r.retired = t.getBoolean("retired");
+                if (t.read("uuid", net.minecraft.core.UUIDUtil.CODEC).isPresent()) r.uuid = t.read("uuid", net.minecraft.core.UUIDUtil.CODEC).orElseThrow();
+                r.dim = t.getStringOr("dim","");
+                if (t.contains("last")) r.last = com.skycraft.platform.NbtPositions.read(t.getCompoundOrEmpty("last"));
+                if (t.contains("home")) r.home = com.skycraft.platform.NbtPositions.read(t.getCompoundOrEmpty("home"));
+                r.homeDim = t.getStringOr("homeDim","");
+                r.retired = t.getBooleanOr("retired",false);
                 s.recs.put(id, r);
             }
             return s;
         }
 
-        @Override
         public CompoundTag save(CompoundTag tag) {
             recs.forEach((id, r) -> {
                 CompoundTag t = new CompoundTag();
-                if (r.uuid != null) t.putUUID("uuid", r.uuid);
+                if (r.uuid != null) t.store("uuid", net.minecraft.core.UUIDUtil.CODEC,  r.uuid);
                 t.putString("dim", r.dim);
-                if (r.last != null) t.put("last", NbtUtils.writeBlockPos(r.last));
-                if (r.home != null) t.put("home", NbtUtils.writeBlockPos(r.home));
+                if (r.last != null) t.put("last", com.skycraft.platform.NbtPositions.write(r.last));
+                if (r.home != null) t.put("home", com.skycraft.platform.NbtPositions.write(r.home));
                 t.putString("homeDim", r.homeDim);
                 if (r.retired) t.putBoolean("retired", true);
                 tag.put(id, t);
@@ -110,7 +109,7 @@ public final class QuestNpcs {
 
     /** The quest NPC id of an entity, or empty. */
     public static String idOf(Entity e) {
-        return e.getPersistentData().getString(TAG);
+        return e.getPersistentData().getStringOr(TAG, "");
     }
 
     /** Whether the entity is one of the NPCs in {@code spec} ({@code "hadvar|ralof"}). */
@@ -168,7 +167,7 @@ public final class QuestNpcs {
         s.setDirty();
         Entity e = find(server, id);
         if (e == null) return;
-        if (e.level().dimension().location().toString().equals(dim) && e.blockPosition().distSqr(home) < 64 * 64) {
+        if (e.level().dimension().identifier().toString().equals(dim) && e.blockPosition().distSqr(home) < 64 * 64) {
             if (e instanceof NpcEntity npc) npc.setHome(home, 10);
         } else {
             // they set off for the new home: they'll be there (respawned at it) when someone arrives
@@ -180,7 +179,7 @@ public final class QuestNpcs {
 
     @Nullable
     static ServerLevel level(MinecraftServer server, String dim) {
-        ResourceLocation rl = ResourceLocation.tryParse(dim);
+        Identifier rl = Identifier.tryParse(dim);
         return rl == null ? null : server.getLevel(ResourceKey.create(Registries.DIMENSION, rl));
     }
 
@@ -210,9 +209,9 @@ public final class QuestNpcs {
 
     /** Once a second per player: the quest NPCs living near them exist. */
     public static void tickPlayer(ServerPlayer player) {
-        ServerLevel level = player.serverLevel();
-        String dim = level.dimension().location().toString();
-        MinecraftServer server = player.server;
+        ServerLevel level = player.level();
+        String dim = level.dimension().identifier().toString();
+        MinecraftServer server = player.level().getServer();
         Store store = Store.get(server);
         int px = player.getBlockX();
         int pz = player.getBlockZ();
@@ -263,7 +262,7 @@ public final class QuestNpcs {
             MISSING_SINCE.remove(id);
             if (r.last == null || r.last.distSqr(e.blockPosition()) > 64) {
                 r.last = e.blockPosition();
-                r.dim = e.level().dimension().location().toString();
+                r.dim = e.level().dimension().identifier().toString();
                 store.setDirty();
             }
             return e;
@@ -295,14 +294,14 @@ public final class QuestNpcs {
             spawned = fresh;
         }
         r.uuid = spawned.getUUID();
-        r.dim = level.dimension().location().toString();
+        r.dim = level.dimension().identifier().toString();
         r.last = spawned.blockPosition();
         store.setDirty();
         return spawned;
     }
 
     private static boolean entitiesLoaded(ServerLevel level, BlockPos pos) {
-        return level.isLoaded(pos) && level.areEntitiesLoaded(ChunkPos.asLong(pos));
+        return level.isLoaded(pos) && level.areEntitiesLoaded(ChunkPos.pack(pos));
     }
 
     /** An NPC of the same name already standing near the anchor (a settlement's Jarl...) becomes the quest NPC. */
@@ -330,10 +329,10 @@ public final class QuestNpcs {
                 : com.skycraft.society.NpcPlacement.safeSurfaceAt(level, at.getX(), at.getZ());
         LivingEntity entity = null;
         if (!def.entity.isEmpty()) {
-            Optional<EntityType<?>> type = EntityType.byString(def.entity);
-            if (type.isPresent() && type.get().create(level) instanceof LivingEntity le) {
-                le.moveTo(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5, level.random.nextFloat() * 360f, 0f);
-                if (le instanceof Mob mob) mob.finalizeSpawn(level, level.getCurrentDifficultyAt(pos), MobSpawnType.EVENT, null, null);
+            Optional<EntityType<?>> type = com.skycraft.worldgen.RegistryTypes.entity(def.entity);
+            if (type.isPresent() && type.get().create(level, net.minecraft.world.entity.EntitySpawnReason.EVENT) instanceof LivingEntity le) {
+                le.snapTo(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5, level.getRandom().nextFloat() * 360f, 0f);
+                if (le instanceof Mob mob) mob.finalizeSpawn(level, level.getCurrentDifficultyAt(pos), EntitySpawnReason.EVENT, null);
                 entity = le;
             }
         }
@@ -366,9 +365,9 @@ public final class QuestNpcs {
     /** Spawns (or fetches) the NPC right next to a player: escorts that lost their charge, scripted arrivals. */
     @Nullable
     public static Entity summonNear(ServerPlayer player, String id) {
-        Entity e = find(player.server, id);
-        ServerLevel level = player.serverLevel();
-        BlockPos near = player.blockPosition().offset(level.random.nextInt(5) - 2, 0, level.random.nextInt(5) - 2);
+        Entity e = find(player.level().getServer(), id);
+        ServerLevel level = player.level();
+        BlockPos near = player.blockPosition().offset(level.getRandom().nextInt(5) - 2, 0, level.getRandom().nextInt(5) - 2);
         // indoors (a jail cell, a hall): beside the player on their own floor rather than up on the roof
         boolean indoors = !level.canSeeSky(player.blockPosition());
         if (indoors) near = freeBeside(level, player.blockPosition());
@@ -380,7 +379,7 @@ public final class QuestNpcs {
             }
             e.discard();
         }
-        Store store = Store.get(player.server);
+        Store store = Store.get(player.level().getServer());
         store.rec(id).uuid = null;
         return ensure(level, id, near, true);
     }

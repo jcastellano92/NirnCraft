@@ -14,11 +14,11 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
+
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.util.List;
 
@@ -26,7 +26,7 @@ import java.util.List;
  * Forge-bus client logic for sailing: feeds the helmsman's movement keys to the ship (and tells the server, so other
  * players see the oars and rudder), the sail keys, and the compass marker for the nearest port.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
 public final class SailingClientEvents {
     public static final String COMPASS_SOURCE = "sailing";
     private static final int COMPASS_RANGE = 2000;
@@ -40,18 +40,17 @@ public final class SailingClientEvents {
     private SailingClientEvents() {}
 
     public static void openShipwright(BlockPos pos) {
-        Minecraft.getInstance().setScreen(new ShipwrightScreen(pos));
+        Minecraft.getInstance().gui.setScreen(new ShipwrightScreen(pos));
     }
 
     @SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent event) {
-        if (event.phase != TickEvent.Phase.START) return;
+    public static void onClientTick(net.neoforged.neoforge.client.event.ClientTickEvent.Pre event) {
         Minecraft mc = Minecraft.getInstance();
         LocalPlayer player = mc.player;
         if (player == null || mc.level == null) return;
         if (player.getVehicle() instanceof ShipEntity ship) {
             if (ship.getControllingPassenger() == player) {
-                ship.setInput(player.input.up, player.input.down, player.input.left, player.input.right);
+                ship.setInput(player.input.keyPresses.forward(), player.input.keyPresses.backward(), player.input.keyPresses.left(), player.input.keyPresses.right());
                 int bits = ship.localInput();
                 if (bits != lastBits || ship.getId() != lastShip) {
                     SkyNetwork.sendToServer(new SailingPackets.ShipControl(ship.getId(), bits));

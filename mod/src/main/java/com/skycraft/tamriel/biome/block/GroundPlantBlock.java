@@ -42,7 +42,7 @@ public final class GroundPlantBlock {
 
         @Override
         public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
-            return SHAPE.move(state.getOffset(level, pos).x, 0, state.getOffset(level, pos).z);
+            return SHAPE.move(state.getOffset( pos).x, 0, state.getOffset( pos).z);
         }
     }
 

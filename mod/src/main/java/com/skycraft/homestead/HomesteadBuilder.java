@@ -5,12 +5,12 @@ import com.skycraft.survival.Divine;
 import com.skycraft.survival.SurvivalRegistry;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.level.block.BedBlock;
 import net.minecraft.world.level.block.Block;
@@ -34,7 +34,7 @@ import net.minecraft.world.level.block.state.properties.DoorHingeSide;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.block.state.properties.Half;
 import net.minecraft.world.level.block.state.properties.SlabType;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 /**
  * Builds Hearthfire plans in the world, Nordic style: stone footings, dark log posts, spruce walls under a steep
@@ -174,7 +174,7 @@ public final class HomesteadBuilder {
         hearth(2, 2);
         lantern(0, 3, 2);
         lantern(-1, 3, 5);
-        rug(-1, 1, 1, 2, Blocks.RED_CARPET);
+        rug(-1, 1, 1, 2, com.skycraft.worldgen.VanillaBlocks.RED_CARPET);
     }
 
     private void mainHall() {
@@ -204,8 +204,8 @@ public final class HomesteadBuilder {
             lantern(3, 4, w);
         }
         lantern(0, 4, 8);
-        rug(-1, 1, 9, 10, Blocks.RED_CARPET);
-        rug(-1, 1, 12, 13, Blocks.RED_CARPET);
+        rug(-1, 1, 9, 10, com.skycraft.worldgen.VanillaBlocks.RED_CARPET);
+        rug(-1, 1, 12, 13, com.skycraft.worldgen.VanillaBlocks.RED_CARPET);
     }
 
     private void westWing(String kind) {
@@ -223,7 +223,7 @@ public final class HomesteadBuilder {
                 set(-11, 0, 9, Blocks.BARREL.defaultBlockState());
                 set(-10, 0, 9, Blocks.BARREL.defaultBlockState());
                 set(-7, 0, 9, Blocks.BARREL.defaultBlockState());
-                rug(-12, -9, 11, 12, Blocks.BLUE_CARPET);
+                rug(-12, -9, 11, 12, com.skycraft.worldgen.VanillaBlocks.BLUE_CARPET);
                 lantern(-12, 3, 11);
                 lantern(-8, 3, 11);
             }
@@ -311,7 +311,7 @@ public final class HomesteadBuilder {
                 table(8, 11);
                 chair(7, 11, 1, 0);
                 set(8, 1, 11, Blocks.CANDLE.defaultBlockState().setValue(BlockStateProperties.LIT, true));
-                rug(9, 11, 10, 12, Blocks.GREEN_CARPET);
+                rug(9, 11, 10, 12, com.skycraft.worldgen.VanillaBlocks.GREEN_CARPET);
                 lantern(10, 3, 11);
             }
             default -> {
@@ -352,7 +352,7 @@ public final class HomesteadBuilder {
                 set(0, 1, 22, Blocks.WITHER_SKELETON_SKULL.defaultBlockState());
                 armorStand(-1, 20, 0, -1);
                 armorStand(1, 20, 0, -1);
-                rug(-1, 1, 17, 21, Blocks.BROWN_CARPET);
+                rug(-1, 1, 17, 21, com.skycraft.worldgen.VanillaBlocks.BROWN_CARPET);
                 lantern(-2, 3, 19);
                 lantern(2, 3, 19);
             }
@@ -430,9 +430,9 @@ public final class HomesteadBuilder {
         set(-12, 0, 1, Blocks.HAY_BLOCK.defaultBlockState());
         set(-12, 0, 2, Blocks.HAY_BLOCK.defaultBlockState());
         set(-12, 0, 5, Blocks.WATER_CAULDRON.defaultBlockState().setValue(BlockStateProperties.LEVEL_CAULDRON, 3));
-        animal(EntityType.COW, -10, 3);
-        animal(EntityType.CHICKEN, -9, 2);
-        animal(EntityType.CHICKEN, -11, 4);
+        animal(net.minecraft.world.entity.EntityTypes.COW, -10, 3);
+        animal(net.minecraft.world.entity.EntityTypes.CHICKEN, -9, 2);
+        animal(net.minecraft.world.entity.EntityTypes.CHICKEN, -11, 4);
     }
 
     private void workshop() {
@@ -582,7 +582,7 @@ public final class HomesteadBuilder {
     /** A bed with its foot at (u, w), head toward (du, dw). Adult double beds are two of these side by side. */
     private void bed(int u, int w, int dw, boolean child) {
         Direction dir = f.dir(0, dw);
-        Block block = child ? Blocks.GREEN_BED : Blocks.RED_BED;
+        Block block = child ? com.skycraft.worldgen.VanillaBlocks.GREEN_BED : com.skycraft.worldgen.VanillaBlocks.RED_BED;
         BlockState foot = block.defaultBlockState().setValue(BedBlock.FACING, dir).setValue(BedBlock.PART, BedPart.FOOT);
         set(u, 0, w, foot);
         set(u, 0, w + dw, foot.setValue(BedBlock.PART, BedPart.HEAD));
@@ -630,7 +630,7 @@ public final class HomesteadBuilder {
     private void lantern(int u, int v, int w) {
         int top = v + 1;
         while (top < v + 10 && level.getBlockState(f.at(u, top, w)).isAir()) top++;
-        for (int c = top - 1; c > v; c--) set(u, c, w, Blocks.CHAIN.defaultBlockState());
+        for (int c = top - 1; c > v; c--) set(u, c, w, com.skycraft.worldgen.VanillaBlocks.CHAIN.defaultBlockState());
         set(u, v, w, Blocks.LANTERN.defaultBlockState().setValue(LanternBlock.HANGING, true));
     }
 
@@ -665,26 +665,26 @@ public final class HomesteadBuilder {
     }
 
     private void armorStand(int u, int w, int du, int dw) {
-        ArmorStand stand = EntityType.ARMOR_STAND.create(level);
+        ArmorStand stand = net.minecraft.world.entity.EntityTypes.ARMOR_STAND.create(level, net.minecraft.world.entity.EntitySpawnReason.EVENT);
         if (stand == null) return;
         BlockPos p = f.at(u, 0, w);
-        stand.moveTo(p.getX() + 0.5, p.getY(), p.getZ() + 0.5, f.dir(du, dw).toYRot(), 0);
+        stand.snapTo(p.getX() + 0.5, p.getY(), p.getZ() + 0.5, f.dir(du, dw).toYRot(), 0);
         level.addFreshEntity(stand);
     }
 
     private void animal(EntityType<? extends Mob> type, int u, int w) {
-        Mob mob = type.create(level);
+        Mob mob = type.create(level, net.minecraft.world.entity.EntitySpawnReason.EVENT);
         if (mob == null) return;
         BlockPos p = f.at(u, 0, w);
-        mob.moveTo(p.getX() + 0.5, p.getY(), p.getZ() + 0.5, level.random.nextFloat() * 360f, 0);
-        mob.finalizeSpawn(level, level.getCurrentDifficultyAt(p), MobSpawnType.EVENT, null, null);
+        mob.snapTo(p.getX() + 0.5, p.getY(), p.getZ() + 0.5, level.getRandom().nextFloat() * 360f, 0);
+        mob.finalizeSpawn(level, level.getCurrentDifficultyAt(p), EntitySpawnReason.EVENT, null);
         mob.setPersistenceRequired();
         level.addFreshEntity(mob);
     }
 
     /** A crafting station by id (another module's), facing into the room, or {@code fallback}. */
     private BlockState station(String id, Block fallback) {
-        Block b = ForgeRegistries.BLOCKS.getValue(new ResourceLocation(id));
+        Block b = BuiltInRegistries.BLOCK.getValue(Identifier.parse(id));
         BlockState s = (b == null || b == Blocks.AIR ? fallback : b).defaultBlockState();
         if (s.hasProperty(BlockStateProperties.HORIZONTAL_FACING)) s = s.setValue(BlockStateProperties.HORIZONTAL_FACING, f.dir(0, -1));
         return s;

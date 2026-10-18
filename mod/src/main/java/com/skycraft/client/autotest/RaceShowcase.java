@@ -11,11 +11,10 @@ import com.skycraft.society.Outfit;
 import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Screenshot;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import org.lwjgl.glfw.GLFW;
+import net.neoforged.api.distmarker.Dist;
+
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -31,7 +30,7 @@ import java.util.Locale;
  * several races and both tabs, the player in third person wearing several race looks, and line-ups of townsfolk of
  * every race and sub-people, into {@code build/race-showcase/}; then closes the client. Does nothing otherwise.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID, value = Dist.CLIENT)
 public final class RaceShowcase {
     public static final boolean ENABLED = Boolean.getBoolean("skycraft.raceshowcase");
     private static final String WORLD = "raceshowcase";
@@ -44,13 +43,14 @@ public final class RaceShowcase {
     private RaceShowcase() {}
 
     @SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent event) {
-        if (!ENABLED || event.phase != TickEvent.Phase.END) return;
+    public static void onClientTick(net.neoforged.neoforge.client.event.ClientTickEvent.Post event) {
+        if (!ENABLED) return;
         Minecraft mc = Minecraft.getInstance();
+        if(com.skycraft.client.autotest.ReviewCaptures.pending()>0)return;
         if (mc.level == null || mc.player == null) {
-            if (!started && mc.screen != null && mc.getOverlay() == null
-                    && (mc.screen instanceof net.minecraft.client.gui.screens.TitleScreen
-                    || mc.screen instanceof com.skycraft.client.screen.title.SkyTitleScreen)) {
+            if (!started && mc.gui.screen() != null && mc.gui.overlay() == null
+                    && (mc.gui.screen() instanceof net.minecraft.client.gui.screens.TitleScreen
+                    || mc.gui.screen() instanceof com.skycraft.client.screen.title.SkyTitleScreen)) {
                 started = true;
                 createWorld(mc);
             } else if (step > 0) {
@@ -80,12 +80,11 @@ public final class RaceShowcase {
                     access.deleteLevel();
                 }
             }
-            var settings = new net.minecraft.world.level.LevelSettings(WORLD, net.minecraft.world.level.GameType.CREATIVE, false,
-                    net.minecraft.world.Difficulty.PEACEFUL, true, new net.minecraft.world.level.GameRules(),
-                    net.minecraft.world.level.WorldDataConfiguration.DEFAULT);
-            mc.createWorldOpenFlows().createFreshLevel(WORLD, settings, new net.minecraft.world.level.levelgen.WorldOptions(77L, false, false),
-                    access -> access.registryOrThrow(net.minecraft.core.registries.Registries.WORLD_PRESET)
-                            .getHolderOrThrow(net.minecraft.world.level.levelgen.presets.WorldPresets.FLAT).value().createWorldDimensions());
+            var settings = ReviewWorlds.settings(WORLD, net.minecraft.world.level.GameType.CREATIVE, false,
+                    net.minecraft.world.Difficulty.PEACEFUL, true, net.minecraft.world.level.WorldDataConfiguration.DEFAULT);
+            ReviewWorlds.create(mc,WORLD, settings, new net.minecraft.world.level.levelgen.WorldOptions(77L, false, false),
+                    access -> access.lookupOrThrow(net.minecraft.core.registries.Registries.WORLD_PRESET)
+                            .getOrThrow(net.minecraft.world.level.levelgen.presets.WorldPresets.FLAT).value().createWorldDimensions(),mc.gui.screen());
         } catch (Exception e) {
             Skycraft.LOGGER.error("Race showcase: could not create the world", e);
         }
@@ -93,16 +92,16 @@ public final class RaceShowcase {
 
     private static void plan(Minecraft mc) {
         STEPS.add(() -> {
-            GLFW.glfwRestoreWindow(mc.getWindow().getWindow());
-            GLFW.glfwSetWindowSize(mc.getWindow().getWindow(), 1280, 800);
+            
+            mc.getWindow().setWindowed(1280,800);
             mc.options.guiScale().set(3);
-            run(mc, "gamerule doDaylightCycle false");
-            run(mc, "gamerule doMobSpawning false");
+            run(mc, "gamerule advance_time false");
+            run(mc, "gamerule spawn_mobs false");
             run(mc, "time set 6000");
             run(mc, "weather clear");
             choose(mc);
         });
-        STEPS.add(mc::resizeDisplay);
+        STEPS.add(mc::resizeGui);
         // the character creator on a few races, both tabs
         Object[][] screens = {{Race.NORD, false}, {Race.TSAESCI, false}, {Race.KHAJIIT, true}, {Race.LILMOTHIIT, false},
                 {Race.KA_PO_TUN, true}, {Race.TANG_MO, false}, {Race.FALMER, true}, {Race.ARGONIAN, true}, {Race.DWEMER, false}};
@@ -111,16 +110,16 @@ public final class RaceShowcase {
             boolean look = (Boolean) s[1];
             STEPS.add(() -> {
                 RaceScreen.preselect(race, look);
-                mc.setScreen(new RaceScreen());
+                mc.gui.setScreen(new RaceScreen());
             });
             STEPS.add(() -> {
             });
             STEPS.add(() -> shot(mc, "screen_" + race.id() + (look ? "_look" : "")));
         }
-        STEPS.add(() -> mc.setScreen(null));
+        STEPS.add(() -> mc.gui.setScreen(null));
         // the player in third person, front and back
         STEPS.add(() -> {
-            mc.options.hideGui = true;
+            com.skycraft.client.autotest.ReviewWorlds.hudHidden(mc, true);
             mc.options.setCameraType(CameraType.THIRD_PERSON_FRONT);
             run(mc, "tp @s 0 -60 0 180 10");
         });
@@ -210,18 +209,14 @@ public final class RaceShowcase {
         java.util.UUID id = mc.player.getUUID();
         server.execute(() -> {
             var sp = server.getPlayerList().getPlayer(id);
-            if (sp != null) server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(4), cmd);
+            if (sp != null) server.getCommands().performPrefixedCommand(sp.createCommandSourceStack().withPermission(net.minecraft.server.permissions.PermissionSet.ALL_PERMISSIONS), cmd);
         });
     }
 
     private static void shot(Minecraft mc, String name) {
         try {
             Files.createDirectories(DIR);
-            NativeImage img = Screenshot.takeScreenshot(mc.getMainRenderTarget());
-            File out = DIR.resolve(name + ".png").toFile();
-            img.writeToFile(out);
-            img.close();
-            Skycraft.LOGGER.info("Race showcase screenshot: {}", out.getAbsolutePath());
+            com.skycraft.client.autotest.ReviewCaptures.capture(mc,DIR,name,null,null);
         } catch (Exception e) {
             Skycraft.LOGGER.warn("Race showcase screenshot failed", e);
         }

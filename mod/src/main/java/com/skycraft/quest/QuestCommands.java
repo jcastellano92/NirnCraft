@@ -93,7 +93,7 @@ public final class QuestCommands {
                             Quests.abandon(player(c), StringArgumentType.getString(c, "id"));
                             return 1;
                         })))
-                .then(Commands.literal("admin").requires(s -> s.hasPermission(2))
+                .then(Commands.literal("admin").requires(s -> s.permissions().hasPermission(net.minecraft.server.permissions.Permissions.COMMANDS_GAMEMASTER))
                         .then(Commands.literal("start").then(Commands.argument("player", EntityArgument.player())
                                 .then(Commands.argument("kind", StringArgumentType.word())
                                         .suggests((c, b) -> SharedSuggestionProvider.suggest(ADMIN_KINDS, b))
@@ -101,9 +101,9 @@ public final class QuestCommands {
                         .then(Commands.literal("complete").then(Commands.argument("player", EntityArgument.player())
                                 .then(Commands.argument("id", StringArgumentType.word()).executes(c -> {
                                     ServerPlayer p = EntityArgument.getPlayer(c, "player");
-                                    Quests.Ref ref = Quests.find(p.server, p.getUUID(), StringArgumentType.getString(c, "id"));
+                                    Quests.Ref ref = Quests.find(p.level().getServer(), p.getUUID(), StringArgumentType.getString(c, "id"));
                                     if (ref == null) return fail(c, "quest.skycraft.cmd.unknown");
-                                    Quests.completeQuest(p.server, ref.key(), ref.quest());
+                                    Quests.completeQuest(p.level().getServer(), ref.key(), ref.quest());
                                     return 1;
                                 }))))
                         .then(Commands.literal("faction").then(Commands.argument("player", EntityArgument.player())
@@ -115,28 +115,28 @@ public final class QuestCommands {
                                             if (f == null) return fail(c, "quest.skycraft.cmd.unknown");
                                             Factions.setRank(p, f, IntegerArgumentType.getInteger(c, "rank"));
                                             c.getSource().sendSuccess(() -> Component.literal("Set " + f.id + " rank of "
-                                                    + p.getGameProfile().getName()), true);
+                                                    + p.getGameProfile().name()), true);
                                             return 1;
                                         })))))
                         .then(Commands.literal("mainstage").then(Commands.argument("player", EntityArgument.player())
                                 .then(Commands.argument("stage", IntegerArgumentType.integer(1, MainQuest.FINAL_STAGE)).executes(c -> {
                                     ServerPlayer p = EntityArgument.getPlayer(c, "player");
                                     int stage = IntegerArgumentType.getInteger(c, "stage");
-                                    QuestStore.get(p.server).quests(Quests.personalKey(p.getUUID()))
+                                    QuestStore.get(p.level().getServer()).quests(Quests.personalKey(p.getUUID()))
                                             .removeIf(q -> q.isMain() && q.isActive());
-                                    Quests.changed(p.server, Quests.personalKey(p.getUUID()));
+                                    Quests.changed(p.level().getServer(), Quests.personalKey(p.getUUID()));
                                     MainQuest.startStage(p, stage);
                                     return 1;
                                 }))))
                         .then(Commands.literal("reset").then(Commands.argument("player", EntityArgument.player()).executes(c -> {
                             ServerPlayer p = EntityArgument.getPlayer(c, "player");
-                            QuestStore.get(p.server).remove(Quests.personalKey(p.getUUID()));
+                            QuestStore.get(p.level().getServer()).remove(Quests.personalKey(p.getUUID()));
                             PlayerData data = SkyData.get(p);
                             net.minecraft.nbt.CompoundTag mod = data.module("quest");
-                            for (String k : new ArrayList<>(mod.getAllKeys())) mod.remove(k);
+                            for (String k : new ArrayList<>(mod.keySet())) mod.remove(k);
                             data.markDirty();
                             Quests.markPlayerDirty(p.getUUID());
-                            c.getSource().sendSuccess(() -> Component.literal("Reset quests of " + p.getGameProfile().getName()), true);
+                            c.getSource().sendSuccess(() -> Component.literal("Reset quests of " + p.getGameProfile().name()), true);
                             return 1;
                         })))));
         d.register(Commands.literal("skycraft-board")
@@ -154,7 +154,7 @@ public final class QuestCommands {
                                 .then(Commands.argument("index", IntegerArgumentType.integer(0, 6))
                                         .executes(c -> boardAccept(c, StringArgumentType.getString(c, "settlement"),
                                                 IntegerArgumentType.getInteger(c, "index"))))))
-                .then(Commands.literal("selftest").requires(s -> s.hasPermission(2))
+                .then(Commands.literal("selftest").requires(s -> s.permissions().hasPermission(net.minecraft.server.permissions.Permissions.COMMANDS_GAMEMASTER))
                         .executes(QuestCommands::boardSelftest)));
 
         com.skycraft.quest.story.StoryCommands.register(d);
@@ -188,7 +188,7 @@ public final class QuestCommands {
         Party party = Parties.partyOf(player);
         if (party == null) {
             player.sendSystemMessage(Component.translatable("party.skycraft.not_in_party").withStyle(ChatFormatting.RED));
-            for (Parties.Invite i : Parties.invitesFor(player.server, player.getUUID())) {
+            for (Parties.Invite i : Parties.invitesFor(player.level().getServer(), player.getUUID())) {
                 player.sendSystemMessage(Component.translatable("party.skycraft.invite_received", i.inviterName()).withStyle(ChatFormatting.GOLD));
             }
             return 0;
@@ -196,7 +196,7 @@ public final class QuestCommands {
         player.sendSystemMessage(Component.translatable("party.skycraft.list_header", party.members.size(), QuestConfig.MAX_PARTY_SIZE.get())
                 .withStyle(ChatFormatting.GOLD));
         party.members.forEach((uuid, name) -> {
-            ServerPlayer m = player.server.getPlayerList().getPlayer(uuid);
+            ServerPlayer m = player.level().getServer().getPlayerList().getPlayer(uuid);
             Component status = m == null ? Component.translatable("party.skycraft.offline")
                     : Component.literal((int) (m.getHealth() * 5) + "/" + (int) (m.getMaxHealth() * 5) + " HP");
             String lead = uuid.equals(party.leader) ? " ★" : "";
@@ -211,12 +211,12 @@ public final class QuestCommands {
         ServerPlayer p = c.getSource().getPlayer();
         if (p == null) return Suggestions.empty();
         List<String> ids = new ArrayList<>();
-        for (Quests.Ref ref : Quests.active(p.server, p.getUUID())) ids.add(ref.quest().id);
+        for (Quests.Ref ref : Quests.active(p.level().getServer(), p.getUUID())) ids.add(ref.quest().id);
         return SharedSuggestionProvider.suggest(ids, b);
     }
 
     private static int listQuests(ServerPlayer player) {
-        List<Quests.Ref> refs = Quests.active(player.server, player.getUUID());
+        List<Quests.Ref> refs = Quests.active(player.level().getServer(), player.getUUID());
         player.sendSystemMessage(Component.translatable("quest.skycraft.cmd.list_header", refs.size()).withStyle(ChatFormatting.GOLD));
         for (Quests.Ref ref : refs) {
             Quest q = ref.quest();
@@ -233,7 +233,7 @@ public final class QuestCommands {
         if (id.isEmpty()) {
             data.module("quest").remove("tracked");
         } else {
-            if (Quests.find(player.server, player.getUUID(), id) == null) {
+            if (Quests.find(player.level().getServer(), player.getUUID(), id) == null) {
                 player.sendSystemMessage(Component.translatable("quest.skycraft.cmd.unknown").withStyle(ChatFormatting.RED));
                 return 0;
             }

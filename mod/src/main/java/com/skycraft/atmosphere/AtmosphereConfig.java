@@ -1,49 +1,49 @@
 package com.skycraft.atmosphere;
 
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 /**
  * Settings of the atmosphere module: client presentation in {@code config/skycraft-atmosphere-client.toml}, the
- * regional weather simulation in the per-world {@code serverconfig/skycraft-atmosphere-server.toml}.
+ * regional weather simulation in the per-world {@code syncedconfig/skycraft-atmosphere-server.toml}.
  */
 public final class AtmosphereConfig {
-    public static final ForgeConfigSpec CLIENT_SPEC;
-    public static final ForgeConfigSpec SERVER_SPEC;
+    public static final ModConfigSpec CLIENT_SPEC;
+    public static final ModConfigSpec SERVER_SPEC;
 
-    public static final ForgeConfigSpec.BooleanValue SKY;
-    public static final ForgeConfigSpec.BooleanValue SECUNDA;
-    public static final ForgeConfigSpec.BooleanValue MASSER_HALO;
-    public static final ForgeConfigSpec.BooleanValue AURORA;
-    public static final ForgeConfigSpec.BooleanValue AURORA_EVERYWHERE;
-    public static final ForgeConfigSpec.DoubleValue AURORA_MAX_TEMPERATURE;
-    public static final ForgeConfigSpec.DoubleValue AURORA_BRIGHTNESS;
-    public static final ForgeConfigSpec.BooleanValue STARS;
-    public static final ForgeConfigSpec.BooleanValue GALAXY;
-    public static final ForgeConfigSpec.BooleanValue SKIP_WITH_SHADERS;
-    public static final ForgeConfigSpec.IntValue CLOUD_HEIGHT;
-    public static final ForgeConfigSpec.BooleanValue LEVEL_UP_STING;
-    public static final ForgeConfigSpec.BooleanValue AURORA_BY_REGION;
-    public static final ForgeConfigSpec.BooleanValue CONSTELLATIONS;
-    public static final ForgeConfigSpec.BooleanValue SHOOTING_STARS;
-    public static final ForgeConfigSpec.BooleanValue LOCAL_WEATHER;
-    public static final ForgeConfigSpec.BooleanValue WEATHER_FOG;
-    public static final ForgeConfigSpec.BooleanValue WEATHER_SKY;
-    public static final ForgeConfigSpec.BooleanValue WEATHER_PARTICLES;
-    public static final ForgeConfigSpec.DoubleValue WEATHER_FOG_STRENGTH;
-    public static final ForgeConfigSpec.BooleanValue CLOUDS;
-    public static final ForgeConfigSpec.BooleanValue CLOUDS_SKIP_SHADERS;
-    public static final ForgeConfigSpec.IntValue CLOUD_DISTANCE;
-    public static final ForgeConfigSpec.BooleanValue DISTANT_WEATHER;
-    public static final ForgeConfigSpec.BooleanValue DISTANT_THUNDER;
+    public static final ModConfigSpec.BooleanValue SKY;
+    public static final ModConfigSpec.BooleanValue SECUNDA;
+    public static final ModConfigSpec.BooleanValue MASSER_HALO;
+    public static final ModConfigSpec.BooleanValue AURORA;
+    public static final ModConfigSpec.BooleanValue AURORA_EVERYWHERE;
+    public static final ModConfigSpec.DoubleValue AURORA_MAX_TEMPERATURE;
+    public static final ModConfigSpec.DoubleValue AURORA_BRIGHTNESS;
+    public static final ModConfigSpec.BooleanValue STARS;
+    public static final ModConfigSpec.BooleanValue GALAXY;
+    public static final ModConfigSpec.BooleanValue SKIP_WITH_SHADERS;
+    public static final ModConfigSpec.IntValue CLOUD_HEIGHT;
+    public static final ModConfigSpec.BooleanValue LEVEL_UP_STING;
+    public static final ModConfigSpec.BooleanValue AURORA_BY_REGION;
+    public static final ModConfigSpec.BooleanValue CONSTELLATIONS;
+    public static final ModConfigSpec.BooleanValue SHOOTING_STARS;
+    public static final ModConfigSpec.BooleanValue LOCAL_WEATHER;
+    public static final ModConfigSpec.BooleanValue WEATHER_FOG;
+    public static final ModConfigSpec.BooleanValue WEATHER_SKY;
+    public static final ModConfigSpec.BooleanValue WEATHER_PARTICLES;
+    public static final ModConfigSpec.DoubleValue WEATHER_FOG_STRENGTH;
+    public static final ModConfigSpec.BooleanValue CLOUDS;
+    public static final ModConfigSpec.BooleanValue CLOUDS_SKIP_SHADERS;
+    public static final ModConfigSpec.IntValue CLOUD_DISTANCE;
+    public static final ModConfigSpec.BooleanValue DISTANT_WEATHER;
+    public static final ModConfigSpec.BooleanValue DISTANT_THUNDER;
 
-    public static final ForgeConfigSpec.BooleanValue REGIONAL_WEATHER;
-    public static final ForgeConfigSpec.BooleanValue DRIVE_VANILLA_WEATHER;
-    public static final ForgeConfigSpec.DoubleValue WEATHER_DURATION_SCALE;
+    public static final ModConfigSpec.BooleanValue REGIONAL_WEATHER;
+    public static final ModConfigSpec.BooleanValue DRIVE_VANILLA_WEATHER;
+    public static final ModConfigSpec.DoubleValue WEATHER_DURATION_SCALE;
 
     static {
-        ForgeConfigSpec.Builder b = new ForgeConfigSpec.Builder();
-        b.comment("Skyrim sky: Masser & Secunda, aurora, stars. Masser itself replaces the vanilla moon texture",
-                "(assets/minecraft/textures/environment/moon_phases.png); a resource pack can override it.").push("sky");
+        ModConfigSpec.Builder b = new ModConfigSpec.Builder();
+        b.comment("Skyrim sky: Masser & Secunda, aurora, stars. Masser uses Skycraft's authored phase atlas",
+                "(assets/skycraft/textures/environment/masser_phases.png); a resource pack can override it.").push("sky");
         SKY = b.comment("Master switch for every extra sky element below.").define("enabled", true);
         SECUNDA = b.comment("Draw Secunda, the small white moon, on its own tilted orbit.").define("secunda", true);
         MASSER_HALO = b.comment("Faint reddish glow around Masser at night.").define("masserHalo", true);
@@ -88,7 +88,7 @@ public final class AtmosphereConfig {
         b.pop();
         CLIENT_SPEC = b.build();
 
-        ForgeConfigSpec.Builder s = new ForgeConfigSpec.Builder();
+        ModConfigSpec.Builder s = new ModConfigSpec.Builder();
         s.push("weather");
         REGIONAL_WEATHER = s.comment("Each region rolls its own weather from its climate (regions.json \"weather\") and syncs it to clients.")
                 .define("regionalWeather", true);

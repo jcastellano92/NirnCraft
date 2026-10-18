@@ -45,6 +45,12 @@ def save(img, *path):
 
 
 def write_json(path, obj):
+    import sys
+    from pathlib import Path
+    native_tools263 = str(Path(__file__).resolve().parents[1])
+    if native_tools263 not in sys.path: sys.path.insert(0, native_tools263)
+    from data_format_263 import prepare
+    path, obj = prepare(path, obj)
     os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, "w", encoding="utf-8") as f:
         json.dump(obj, f, indent=2)
@@ -614,7 +620,7 @@ def altar_models():
     states = {"variants": {f"facing={f}": ({"model": "skycraft:block/spellmaking_altar", "y": r} if r else {"model": "skycraft:block/spellmaking_altar"})
                            for f, r in (("north", 0), ("east", 90), ("south", 180), ("west", 270))}}
     write_json(os.path.join(RES, "assets", "skycraft", "blockstates", "spellmaking_altar.json"), states)
-    write_json(os.path.join(DATA, "loot_tables", "blocks", "spellmaking_altar.json"), {
+    write_json(os.path.join(DATA, "loot_table", "blocks", "spellmaking_altar.json"), {
         "type": "minecraft:block",
         "pools": [{"rolls": 1, "entries": [{"type": "minecraft:item", "name": "skycraft:spellmaking_altar"}],
                    "conditions": [{"condition": "minecraft:survives_explosion"}]}],
@@ -655,9 +661,9 @@ def main():
     for spell_id, school, _tier in spells:
         write_json(os.path.join(MODELS, "item", f"spell_tome_{spell_id}.json"),
                    {"parent": "minecraft:item/generated", "textures": {"layer0": f"skycraft:item/spell_tome_{school}"}})
-    write_json(os.path.join(DATA, "tags", "items", "spell_tomes.json"),
+    write_json(os.path.join(DATA, "tags", "item", "spell_tomes.json"),
                {"replace": False, "values": [f"skycraft:spell_tome_{s}" for s, _, _ in spells]})
-    write_json(os.path.join(DATA, "loot_tables", "chests", "spell_tomes.json"), {
+    write_json(os.path.join(DATA, "loot_table", "chests", "spell_tomes.json"), {
         "type": "minecraft:chest",
         "pools": [{
             "rolls": 1,

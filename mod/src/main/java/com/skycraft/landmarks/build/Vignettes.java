@@ -75,7 +75,7 @@ final class Vignettes {
     }
 
     static Block bedFor(Stage s) {
-        Block[] beds = {Blocks.BROWN_BED, Blocks.GRAY_BED, Blocks.GREEN_BED, Blocks.RED_BED, Blocks.WHITE_BED, Blocks.BLUE_BED};
+        Block[] beds = {com.skycraft.worldgen.VanillaBlocks.BROWN_BED, com.skycraft.worldgen.VanillaBlocks.GRAY_BED, com.skycraft.worldgen.VanillaBlocks.GREEN_BED, com.skycraft.worldgen.VanillaBlocks.RED_BED, com.skycraft.worldgen.VanillaBlocks.WHITE_BED, com.skycraft.worldgen.VanillaBlocks.BLUE_BED};
         return beds[Math.floorMod(s.vary(5, 0, 600), beds.length)];
     }
 
@@ -140,9 +140,9 @@ final class Vignettes {
                 s.set(-1, g + 1, 1, s.wood.fence());
                 s.set(1, g, 1, s.wood.fence());
                 s.set(1, g + 1, 1, s.wood.fence());
-                s.set(-1, g + 2, 1, Blocks.WHITE_WOOL);
-                s.set(1, g + 2, 1, Blocks.WHITE_WOOL);
-                s.set(0, g + 2, 1, s.chance(6, 0.5) ? Blocks.RED_CARPET : Blocks.WHITE_CARPET);
+                s.set(-1, g + 2, 1, com.skycraft.worldgen.VanillaBlocks.WHITE_WOOL);
+                s.set(1, g + 2, 1, com.skycraft.worldgen.VanillaBlocks.WHITE_WOOL);
+                s.set(0, g + 2, 1, s.chance(6, 0.5) ? com.skycraft.worldgen.VanillaBlocks.RED_CARPET : com.skycraft.worldgen.VanillaBlocks.WHITE_CARPET);
                 s.standingSign(0, g, -1, 8, lines);
             }
             case "sunken" -> {
@@ -272,8 +272,8 @@ final class Vignettes {
         String a = initial(s, 0), c = initial(s, 1);
         s.wallSign(0, g + 1, -1, Direction.NORTH, "", a + " + " + c, "<3", "");
         if (s.kind.style().equals("ribbon")) {
-            s.set(1, g, -1, s.chance(3, 0.5) ? Blocks.RED_CARPET : Blocks.PINK_CARPET);
-            s.set(-1, g, -1, Blocks.PINK_CARPET);
+            s.set(1, g, -1, s.chance(3, 0.5) ? com.skycraft.worldgen.VanillaBlocks.RED_CARPET : com.skycraft.worldgen.VanillaBlocks.PINK_CARPET);
+            s.set(-1, g, -1, com.skycraft.worldgen.VanillaBlocks.PINK_CARPET);
         } else {
             // a bench under the tree for two
             s.set(-1, g, -1, s.wood.slab());
@@ -349,12 +349,12 @@ final class Vignettes {
             case "saddlebag" -> {
                 s.chest(0, g, 0, Direction.SOUTH, s.lootSmall(2));
                 s.set(1, g, 0, Blocks.HAY_BLOCK);
-                s.set(-1, g, 0, Blocks.BROWN_CARPET);
+                s.set(-1, g, 0, com.skycraft.worldgen.VanillaBlocks.BROWN_CARPET);
                 s.lying(-1, g + 1, 0, new ItemStack(Items.LEAD));
             }
             default -> {
                 BlockPos b = s.barrel(0, g, 0, s.lootSmall(2));
-                s.set(1, g, 0, Blocks.BROWN_CARPET);
+                s.set(1, g, 0, com.skycraft.worldgen.VanillaBlocks.BROWN_CARPET);
                 s.set(1, g, 1, s.wood.log().defaultBlockState().setValue(BlockStateProperties.AXIS, Direction.Axis.Z));
                 s.put(b, token(s, 3));
             }
@@ -501,7 +501,7 @@ final class Vignettes {
         int[][] hang = {{2, h - 2}, {-2, h - 3}, {1, h - 2}, {-1, h - 3}};
         for (int[] hpos : hang) {
             int len = 1 + s.vary(hpos[0] + 5, 0, 2);
-            for (int i = 1; i <= len; i++) s.set(hpos[0], g + hpos[1] - i, 0, Blocks.CHAIN);
+            for (int i = 1; i <= len; i++) s.set(hpos[0], g + hpos[1] - i, 0, com.skycraft.worldgen.VanillaBlocks.CHAIN);
             s.set(hpos[0], g + hpos[1] - len - 1, 0,
                     s.chance(hpos[0] + 9, 0.5) ? Blocks.BONE_BLOCK.defaultBlockState()
                             : Blocks.LANTERN.defaultBlockState().setValue(BlockStateProperties.HANGING, true));

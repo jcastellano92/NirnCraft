@@ -9,7 +9,7 @@ import net.minecraft.world.inventory.AnvilMenu;
 import net.minecraft.world.inventory.BeaconMenu;
 import net.minecraft.world.inventory.BrewingStandMenu;
 import net.minecraft.world.inventory.CartographyTableMenu;
-import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.inventory.CraftingMenu;
 import net.minecraft.world.inventory.EnchantmentMenu;
 import net.minecraft.world.inventory.GrindstoneMenu;
@@ -60,7 +60,7 @@ public final class MachineActions {
                 int src = source(player, menu, inv, a);
                 if (src < 0) return;
                 // shift-click: the menu's own quickMoveStack decides which slot takes it (and loops as vanilla does)
-                menu.clicked(src, 0, ClickType.QUICK_MOVE, player);
+                menu.clicked(src, 0, ContainerInput.QUICK_MOVE, player);
                 done(player, menu);
             }
             case InventoryPackets.MachineAction.PLACE_ALL, InventoryPackets.MachineAction.PLACE_ONE -> {
@@ -68,10 +68,10 @@ public final class MachineActions {
                 int src = source(player, menu, inv, a);
                 if (src < 0) return;
                 // pick the stack up, put it (or one of it) into the chosen slot, hand the rest back: all vanilla clicks
-                menu.clicked(src, 0, ClickType.PICKUP, player);
+                menu.clicked(src, 0, ContainerInput.PICKUP, player);
                 if (!menu.getCarried().isEmpty()) {
-                    menu.clicked(b, kind == InventoryPackets.MachineAction.PLACE_ONE ? 1 : 0, ClickType.PICKUP, player);
-                    if (!menu.getCarried().isEmpty()) menu.clicked(src, 0, ClickType.PICKUP, player);
+                    menu.clicked(b, kind == InventoryPackets.MachineAction.PLACE_ONE ? 1 : 0, ContainerInput.PICKUP, player);
+                    if (!menu.getCarried().isEmpty()) menu.clicked(src, 0, ContainerInput.PICKUP, player);
                 }
                 if (!menu.getCarried().isEmpty()) {
                     // the source slot was taken meanwhile: never keep or lose it

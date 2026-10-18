@@ -9,10 +9,10 @@ import com.skycraft.tamriel.TamrielMap;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
-import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.event.server.ServerAboutToStartEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.neoforge.event.server.ServerAboutToStartEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.util.Locale;
 import java.util.SplittableRandom;
@@ -23,7 +23,7 @@ import java.util.SplittableRandom;
  * map), {@code verify} (plans live, off the server thread, and compares with the loaded plan byte for byte). Autorun
  * task {@code roadplan} = stats + bench.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class RoadPlanCommands {
     private RoadPlanCommands() {}
 
@@ -48,6 +48,7 @@ public final class RoadPlanCommands {
             w.setDaemon(true);
             w.start();
         });
+        if (!com.skycraft.tamriel.terrain.TamrielSpawn.isTamriel(event.getServer())) return;
         Thread t = new Thread(() -> {
             try {
                 RoadPlan.warm();
@@ -111,7 +112,7 @@ public final class RoadPlanCommands {
     @SubscribeEvent
     public static void onCommands(RegisterCommandsEvent event) {
         CommandDispatcher<CommandSourceStack> d = event.getDispatcher();
-        d.register(Commands.literal("skycraft-roadplan").requires(s -> s.hasPermission(2))
+        d.register(Commands.literal("skycraft-roadplan").requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
                 .then(Commands.literal("stats").executes(c -> {
                     String s = stats(RoadPlan.get());
                     c.getSource().sendSuccess(() -> Component.literal(s), false);
@@ -132,7 +133,7 @@ public final class RoadPlanCommands {
                 .then(Commands.literal("bench").executes(c -> benchCmd(c.getSource(), 1))
                         .then(Commands.argument("millions", IntegerArgumentType.integer(1, 20))
                                 .executes(c -> benchCmd(c.getSource(), IntegerArgumentType.getInteger(c, "millions")))))
-                .then(Commands.literal("verify").requires(s -> s.hasPermission(4)).executes(c -> {
+                .then(Commands.literal("verify").requires(Commands.hasPermission(Commands.LEVEL_OWNERS)).executes(c -> {
                     CommandSourceStack src = c.getSource();
                     Thread t = new Thread(() -> {
                         try {

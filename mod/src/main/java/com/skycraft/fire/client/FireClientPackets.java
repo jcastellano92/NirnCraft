@@ -1,7 +1,7 @@
 package com.skycraft.fire.client;
 
 import com.skycraft.fire.FireSites;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.List;
 
@@ -9,7 +9,7 @@ import java.util.List;
 public final class FireClientPackets {
     private FireClientPackets() {}
 
-    public static void sync(ResourceLocation dimension, List<FireSites.Site> sites) {
+    public static void sync(Identifier dimension, List<FireSites.Site> sites) {
         ClientFire.setServer(dimension, sites);
     }
 

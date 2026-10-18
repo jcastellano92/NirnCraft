@@ -7,13 +7,11 @@ import com.skycraft.network.SkyNetwork;
 import com.skycraft.registry.ModCreativeTab;
 import com.skycraft.registry.ModEffects;
 import com.skycraft.registry.ModItems;
-import net.minecraftforge.common.capabilities.RegisterCapabilitiesEvent;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.config.ModConfig;
+import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import org.slf4j.Logger;
 
 /**
@@ -28,9 +26,13 @@ public class Skycraft {
     public static final String MODID = "skycraft";
     public static final Logger LOGGER = LogUtils.getLogger();
 
-    public Skycraft() {
-        IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
-        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, SkyConfig.SPEC);
+    private static ModContainer container;
+
+    public Skycraft(IEventBus modBus, ModContainer owner) {
+        container=owner;
+        config(ModConfig.Type.LOCAL, SkyConfig.SPEC, "skycraft-common.toml");
+        com.skycraft.core.SkyData.init(modBus);
+        PlacedBlocks.init(modBus);
 
         ModItems.init(modBus);
         ModEffects.init(modBus);
@@ -67,14 +69,20 @@ public class Skycraft {
         com.skycraft.protect.ProtectModule.init(modBus);
         com.skycraft.fire.FireModule.init(modBus);
 
-        modBus.addListener(this::registerCapabilities);
         modBus.addListener(this::commonSetup);
-        SkyNetwork.init();
+        SkyNetwork.init(modBus);
+        // aether: the native far field (server tile stream + far actors; the client renderer on clients)
+        com.skycraft.aether.AetherServer.init();
+        com.skycraft.platform.Sides.runOn(net.neoforged.api.distmarker.Dist.CLIENT,
+                () -> () -> com.skycraft.aether.AetherClient.init(modBus));
     }
 
-    private void registerCapabilities(RegisterCapabilitiesEvent event) {
-        event.register(PlayerData.class);
-        event.register(PlacedBlocks.Store.class);
+    public static void config(ModConfig.Type type,net.neoforged.neoforge.common.ModConfigSpec spec) {
+        container.registerConfig(type,spec);
+    }
+
+    public static void config(ModConfig.Type type,net.neoforged.neoforge.common.ModConfigSpec spec,String filename) {
+        container.registerConfig(type,spec,filename);
     }
 
     private void commonSetup(FMLCommonSetupEvent event) {

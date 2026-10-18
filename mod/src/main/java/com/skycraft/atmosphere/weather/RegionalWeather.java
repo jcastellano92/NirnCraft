@@ -16,14 +16,14 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.SavedData;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.server.ServerLifecycleHooks;
+
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.neoforge.server.ServerLifecycleHooks;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -40,7 +40,7 @@ import java.util.Random;
  * and sea-to-shore boundaries; both are synced to clients ({@link WeatherPackets}), which render local precipitation,
  * approaching horizon storm walls, fog and sky from them.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class RegionalWeather {
     /** Sample offsets around each player, so the client can blend weather across a nearby border. */
     private static final int[][] SAMPLES = {
@@ -209,10 +209,10 @@ public final class RegionalWeather {
         Data data = Data.get(server);
         long now = ow.getGameTime();
         WeatherProfile profile = WeatherProfile.of(region);
-        int len = ticks > 0 ? ticks : profile.duration(ow.random, kind);
+        int len = ticks > 0 ? ticks : profile.duration(ow.getRandom(), kind);
         Spell s = data.spells.get(region.id());
         if (s == null) {
-            s = new Spell(kind, now + len, ow.random.nextInt(360), now);
+            s = new Spell(kind, now + len, ow.getRandom().nextInt(360), now);
             data.spells.put(region.id(), s);
         } else {
             s.kind = kind;
@@ -240,15 +240,15 @@ public final class RegionalWeather {
     // ------------------------------------------------------------------ ticking
 
     @SubscribeEvent
-    public static void onServerTick(TickEvent.ServerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || ++ticks % 20 != 0) return;
+    public static void onServerTick(net.neoforged.neoforge.event.tick.ServerTickEvent.Post event) {
+        if (!(event instanceof net.neoforged.neoforge.event.tick.ServerTickEvent.Post) || ++ticks % 20 != 0) return;
         if (!AtmosphereConfig.REGIONAL_WEATHER.get()) return;
         MinecraftServer server = event.getServer();
         ServerLevel ow = server.overworld();
         if (ow == null) return;
         Data data = Data.get(server);
         long now = ow.getGameTime();
-        boolean cycle = ow.getGameRules().getBoolean(GameRules.RULE_WEATHER_CYCLE);
+        boolean cycle = ow.getGameRules().get(GameRules.ADVANCE_WEATHER);
         List<WeatherPackets.Entry> changed = new ArrayList<>();
         boolean frontsChanged = false;
 
@@ -265,7 +265,7 @@ public final class RegionalWeather {
         // make sure every region around a player (and, every five seconds, out to the horizon) has weather
         BlockPos.MutableBlockPos probe = new BlockPos.MutableBlockPos();
         boolean far = ticks % 100 == 0;
-        float mist = WeatherProfile.mistHour(ow.getDayTime());
+        float mist = WeatherProfile.mistHour(ow.getDefaultClockTime());
         // DH can show provinces far beyond loaded chunks. Keep their small regional weather
         // records alive too; this reads map data and never loads/generates distant terrain.
         if (far || ticks == 20) {
@@ -323,10 +323,10 @@ public final class RegionalWeather {
                 } else {
                     WeatherProfile profile = Regions.byId(e.getKey()).map(WeatherProfile::of)
                             .orElseGet(() -> profileFor(ow, e.getKey()));
-                    s.kind = profile.roll(ow.random, s.kind, mist);
-                    s.until = now + Math.max(600, (long) (profile.duration(ow.random, s.kind) * scale));
+                    s.kind = profile.roll(ow.getRandom(), s.kind, mist);
+                    s.until = now + Math.max(600, (long) (profile.duration(ow.getRandom(), s.kind) * scale));
                     // wind veers a little between spells
-                    s.wind = Math.floorMod(s.wind + ow.random.nextInt(91) - 45, 360);
+                    s.wind = Math.floorMod(s.wind + ow.getRandom().nextInt(91) - 45, 360);
                     changed.add(entry(e.getKey(), s));
                 }
                 data.setDirty();
@@ -350,12 +350,12 @@ public final class RegionalWeather {
         if (profile == WeatherProfile.NONE) return;
         Spell s = data.spells.get(region.id());
         if (s == null) {
-            WeatherKind kind = profile.roll(ow.random, null, mist);
+            WeatherKind kind = profile.roll(ow.getRandom(), null, mist);
             float[] wv = new float[2];
             WeatherPhysics.prevailingWind(pos.getX(), pos.getZ(), -1f, false, wv);
             int baseDeg = Math.floorMod((int) Math.round(Math.toDegrees(Math.atan2(-wv[0], wv[1]))), 360);
-            int windDeg = Math.floorMod(baseDeg + ow.random.nextInt(51) - 25, 360);
-            s = new Spell(kind, now + profile.duration(ow.random, kind), windDeg, now);
+            int windDeg = Math.floorMod(baseDeg + ow.getRandom().nextInt(51) - 25, 360);
+            s = new Spell(kind, now + profile.duration(ow.getRandom(), kind), windDeg, now);
             data.spells.put(region.id(), s);
             changed.add(entry(region.id(), s));
             data.setDirty();
@@ -389,11 +389,11 @@ public final class RegionalWeather {
                 WeatherKind kind = rain ? profile.wetKind(thunder) : WeatherKind.CLEAR;
                 Spell s = data.spells.get(region.id());
                 if (s == null) {
-                    s = new Spell(kind, 0, ow.random.nextInt(360), now);
+                    s = new Spell(kind, 0, ow.getRandom().nextInt(360), now);
                     data.spells.put(region.id(), s);
                 }
                 s.kind = kind;
-                s.until = now + profile.duration(ow.random, kind);
+                s.until = now + profile.duration(ow.getRandom(), kind);
                 changed.add(entry(region.id(), s));
             }
             data.setDirty();
@@ -413,7 +413,7 @@ public final class RegionalWeather {
         boolean raining = wet > 0 && wet * 2 >= players.size();
         boolean thundering = raining && storm > 0 && storm * 2 >= players.size();
         if (!applied || raining != ow.isRaining() || thundering != ow.isThundering() || now - lastVanillaApply > VANILLA_REFRESH_TICKS) {
-            ow.setWeatherParameters(raining ? 0 : 24000, raining ? 24000 : 0, raining, thundering);
+            ow.getServer().setWeatherParameters(raining ? 0 : 24000, raining ? 24000 : 0, raining, thundering);
             lastVanillaApply = now;
         }
         lastRaining = raining;
@@ -438,22 +438,22 @@ public final class RegionalWeather {
 
     @SubscribeEvent
     public static void onLogin(PlayerEvent.PlayerLoggedInEvent event) {
-        if (event.getEntity() instanceof ServerPlayer sp) SkyNetwork.sendToPlayer(sp, full(sp.server));
+        if (event.getEntity() instanceof ServerPlayer sp) SkyNetwork.sendToPlayer(sp, full(sp.level().getServer()));
     }
 
     @SubscribeEvent
     public static void onChangeDimension(PlayerEvent.PlayerChangedDimensionEvent event) {
-        if (event.getEntity() instanceof ServerPlayer sp) SkyNetwork.sendToPlayer(sp, full(sp.server));
+        if (event.getEntity() instanceof ServerPlayer sp) SkyNetwork.sendToPlayer(sp, full(sp.level().getServer()));
     }
 
     @SubscribeEvent
     public static void onRespawn(PlayerEvent.PlayerRespawnEvent event) {
-        if (event.getEntity() instanceof ServerPlayer sp) SkyNetwork.sendToPlayer(sp, full(sp.server));
+        if (event.getEntity() instanceof ServerPlayer sp) SkyNetwork.sendToPlayer(sp, full(sp.level().getServer()));
     }
 
     /** Forget the vanilla bookkeeping between worlds (singleplayer can open several in one session). */
     @SubscribeEvent
-    public static void onServerStopped(net.minecraftforge.event.server.ServerStoppedEvent event) {
+    public static void onServerStopped(net.neoforged.neoforge.event.server.ServerStoppedEvent event) {
         applied = false;
         ticks = 0;
     }
@@ -469,35 +469,34 @@ public final class RegionalWeather {
 
         static Data get(MinecraftServer server) {
             if (server == null) server = ServerLifecycleHooks.getCurrentServer();
-            return server.overworld().getDataStorage().computeIfAbsent(Data::load, Data::new, NAME);
+            return com.skycraft.platform.SavedDataTypes.get(server.overworld(), NAME, Data::load, Data::new, value263 -> value263.save(new net.minecraft.nbt.CompoundTag()));
         }
 
         static Data load(CompoundTag tag) {
             Data data = new Data();
-            CompoundTag spells = tag.getCompound("spells");
-            for (String id : spells.getAllKeys()) {
-                CompoundTag s = spells.getCompound(id);
-                WeatherKind kind = WeatherKind.byId(s.getString("kind"));
+            CompoundTag spells = tag.getCompoundOrEmpty("spells");
+            for (String id : spells.keySet()) {
+                CompoundTag s = spells.getCompoundOrEmpty(id);
+                WeatherKind kind = WeatherKind.byId(s.getStringOr("kind",""));
                 if (kind == null) continue;
-                data.spells.put(id, new Spell(kind, s.getLong("until"), s.getInt("wind"), s.getLong("seen")));
+                data.spells.put(id, new Spell(kind, s.getLongOr("until",0L), s.getIntOr("wind",0), s.getLongOr("seen",0L)));
             }
-            if (tag.contains("fronts", Tag.TAG_LIST)) {
-                ListTag list = tag.getList("fronts", Tag.TAG_COMPOUND);
+            if (com.skycraft.platform.NbtData.hasType(tag, "fronts", Tag.TAG_LIST)) {
+                ListTag list = tag.getListOrEmpty("fronts");
                 for (int i = 0; i < list.size(); i++) {
-                    WeatherFront f = WeatherFront.load(list.getCompound(i));
+                    WeatherFront f = WeatherFront.load(list.getCompoundOrEmpty(i));
                     if (!f.expired()) {
                         data.fronts.add(f);
                         data.nextFrontId = Math.max(data.nextFrontId, f.id + 1);
                     }
                 }
             }
-            if (tag.contains("nextFrontId", Tag.TAG_INT)) {
-                data.nextFrontId = Math.max(data.nextFrontId, tag.getInt("nextFrontId"));
+            if (com.skycraft.platform.NbtData.hasType(tag, "nextFrontId", Tag.TAG_INT)) {
+                data.nextFrontId = Math.max(data.nextFrontId, tag.getIntOr("nextFrontId",0));
             }
             return data;
         }
 
-        @Override
         public CompoundTag save(CompoundTag tag) {
             CompoundTag spells = new CompoundTag();
             this.spells.forEach((id, s) -> {

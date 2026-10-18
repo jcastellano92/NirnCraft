@@ -104,7 +104,7 @@ public class NpcCaptain implements ShipEntity.Autopilot {
     /** Despawning: nobody near for 30 s, the course run out into unloaded water, or a ghost ship at sunrise. */
     private boolean checkLeave(ServerLevel level, ShipEntity ship) {
         Player near = level.getNearestPlayer(ship, 200);
-        boolean ghostDawn = kind == ShipKind.GHOST && level.isDay() && near != null && ship.tickCount > 200;
+        boolean ghostDawn = kind == ShipKind.GHOST && level.isBrightOutside() && near != null && ship.tickCount > 200;
         if (near == null) lonelyTicks += 20;
         else lonelyTicks = 0;
         boolean aboard = false;
@@ -306,7 +306,7 @@ public class NpcCaptain implements ShipEntity.Autopilot {
         if (escapeTicks > 80 || prize) {
             mode = Mode.COURSE;
             lashedTo = null;
-            ship.level().playSound(null, ship.getX(), ship.getY() + 1, ship.getZ(), SoundEvents.LEASH_KNOT_BREAK, SoundSource.NEUTRAL, 2f, 0.6f);
+            ship.level().playSound(null, ship.getX(), ship.getY() + 1, ship.getZ(), SoundEvents.LEAD_UNTIED, SoundSource.NEUTRAL, 2f, 0.6f);
             return;
         }
         double off = (target.shipType.beam + ship.shipType.beam) / 2.0 + 0.6;

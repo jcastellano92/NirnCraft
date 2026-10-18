@@ -1,7 +1,7 @@
 package com.skycraft.loot;
 
 import com.skycraft.Skycraft;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -33,26 +33,26 @@ public final class Containers {
     public static final String[] WEALTH = {"poor", "common", "wealthy", "noble"};
     public static final String[] LOCKS = {"novice", "apprentice", "adept", "expert", "master"};
 
-    public static ResourceLocation table(String kind, String tier) {
-        return new ResourceLocation(Skycraft.MODID, "containers/" + kind + "/" + tier);
+    public static Identifier table(String kind, String tier) {
+        return Identifier.fromNamespaceAndPath(Skycraft.MODID, "containers/" + kind + "/" + tier);
     }
 
     /** A household chest of a wealth tier 0-3 (poor, common, wealthy, noble). */
-    public static ResourceLocation household(int wealth) {
+    public static Identifier household(int wealth) {
         return table("household", WEALTH[Math.max(0, Math.min(3, wealth))]);
     }
 
     /** A household store (barrel, sack, cupboard) of a wealth tier 0-3. */
-    public static ResourceLocation householdStores(int wealth) {
+    public static Identifier householdStores(int wealth) {
         return table("household_stores", WEALTH[Math.max(0, Math.min(3, wealth))]);
     }
 
-    public static ResourceLocation dungeon(String tier) {
+    public static Identifier dungeon(String tier) {
         return table("dungeon", tier);
     }
 
-    public static ResourceLocation unique(String id) {
-        return new ResourceLocation(Skycraft.MODID, "uniques/" + id);
+    public static Identifier unique(String id) {
+        return Identifier.fromNamespaceAndPath(Skycraft.MODID, "uniques/" + id);
     }
 
     // ------------------------------------------------------------------ rules by table id

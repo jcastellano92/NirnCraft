@@ -28,8 +28,7 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobType;
-import net.minecraft.world.entity.animal.AbstractGolem;
+import net.minecraft.world.entity.animal.golem.AbstractGolem;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.player.Inventory;
@@ -91,8 +90,8 @@ public final class SpellEffects {
         DamageSource source = damage(caster, spell.element, direct);
         boolean hurt;
         if (knockback) {
-            target.invulnerableTime = 0;
-            hurt = target.hurt(source, dmg);
+            target.setInvulnerableTime(0);
+            hurt = com.skycraft.platform.Effects.hurt(target, source, dmg);
         } else {
             hurt = Targeting.hurtNoKnockback(target, source, dmg);
         }
@@ -110,9 +109,9 @@ public final class SpellEffects {
     /** Fire burns, frost slows and drains stamina, shock drains magicka. */
     public static void applyElement(ServerPlayer caster, Element element, LivingEntity target, float dmg, boolean beam) {
         switch (element) {
-            case FIRE -> target.setSecondsOnFire(beam ? 3 : 5);
+            case FIRE -> target.igniteForSeconds(beam ? 3 : 5);
             case FROST -> {
-                target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, beam ? 30 : 80, beam ? 1 : 2));
+                target.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.SLOWNESS), beam ? 30 : 80, beam ? 1 : 2));
                 int frozen = Math.min(target.getTicksRequiredToFreeze() - 2, target.getTicksFrozen() + (beam ? 10 : 60));
                 target.setTicksFrozen(Math.max(target.getTicksFrozen(), frozen));
                 if (target instanceof ServerPlayer tp) {
@@ -132,7 +131,7 @@ public final class SpellEffects {
     }
 
     private static void lowHealthPerks(ServerPlayer caster, Element element, LivingEntity target, DamageSource source) {
-        if (!target.isAlive() || target.getType().is(CombatHandler.BOSSES)) return;
+        if (!target.isAlive() || target.getType().builtInRegistryHolder().is(CombatHandler.BOSSES)) return;
         float pct = target.getHealth() / target.getMaxHealth();
         switch (element) {
             case FIRE -> {
@@ -142,7 +141,7 @@ public final class SpellEffects {
             }
             case FROST -> {
                 if (pct < 0.2f && Perks.has(caster, "destruction.deep_freeze")) {
-                    target.addEffect(new MobEffectInstance(ModEffects.PARALYSIS.get(), 60));
+                    target.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(ModEffects.PARALYSIS.get()), 60));
                 }
             }
             case SHOCK -> {
@@ -174,7 +173,7 @@ public final class SpellEffects {
                     if (dir.lengthSqr() < 1e-4) dir = new Vec3(0, 0, 0);
                     else dir = dir.normalize();
                     e.push(dir.x * push * falloff, 0.25 * push, dir.z * push * falloff);
-                    e.hurtMarked = true;
+                    e.syncVelocity = true;
                 }
             }
         }
@@ -210,7 +209,7 @@ public final class SpellEffects {
     public static void explosion(SpellProjectile proj, ServerPlayer caster, Spell spell, @Nullable LivingEntity target, Vec3 pos) {
         ServerLevel level = (ServerLevel) proj.level();
         MagicFx.burst(level, pos, spell.element, spell.radius);
-        MagicFx.worldSound(level, pos, SoundEvents.GENERIC_EXPLODE, SoundSource.PLAYERS, 1.4f, 1.15f);
+        MagicFx.worldSound(level, pos, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 1.4f, 1.15f);
         MagicFx.worldSound(level, pos, SoundEvents.BLAZE_SHOOT, SoundSource.PLAYERS, 1f, 0.6f);
         if (areaDamage(caster, spell, pos, spell.radius, spell.magnitude, proj, 0.8) > 0) xp(caster, spell);
     }
@@ -225,7 +224,7 @@ public final class SpellEffects {
         for (LivingEntity e : Targeting.around(proj, c, spell.radius + 0.5, e -> Targeting.canHarm(caster, e))) {
             if (hit(caster, spell, e, spell.magnitude / 2f, null, true, false)) hits++;
         }
-        if (hits > 0 && !proj.getPersistentData().getBoolean("skycraft_xp")) {
+        if (hits > 0 && !proj.getPersistentData().getBooleanOr("skycraft_xp", false)) {
             proj.getPersistentData().putBoolean("skycraft_xp", true);
             xp(caster, spell);
         }
@@ -301,19 +300,19 @@ public final class SpellEffects {
     // ================================================================== master destruction
 
     public static Spell.Result fireStorm(ServerPlayer p, Spell spell, int tick) {
-        ServerLevel level = p.serverLevel();
+        ServerLevel level = p.level();
         Vec3 c = p.position().add(0, 1, 0);
         MagicFx.sendNear(level, c, 96, MagicFx.RING, Element.FIRE, c, c, p.getId(), Math.round(spell.radius * 10));
         MagicFx.burst(level, c, Element.FIRE, spell.radius * 0.6f);
-        MagicFx.worldSound(level, c, SoundEvents.GENERIC_EXPLODE, SoundSource.PLAYERS, 2f, 0.7f);
+        MagicFx.worldSound(level, c, SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 2f, 0.7f);
         MagicFx.worldSound(level, c, SoundEvents.BLAZE_SHOOT, SoundSource.PLAYERS, 2f, 0.5f);
         Vitals.markInCombat(p);
         return areaDamage(p, spell, c, spell.radius, spell.magnitude, null, 1.2) > 0 ? Spell.Result.EFFECT : Spell.Result.CAST;
     }
 
     public static Spell.Result blizzard(ServerPlayer p, Spell spell, int tick) {
-        MagicFx.worldSound(p.serverLevel(), p.position(), SoundEvents.POWDER_SNOW_BREAK, SoundSource.PLAYERS, 2f, 0.4f);
-        MagicFx.worldSound(p.serverLevel(), p.position(), SoundEvents.ELYTRA_FLYING, SoundSource.PLAYERS, 0.6f, 0.5f);
+        MagicFx.worldSound(p.level(), p.position(), SoundEvents.POWDER_SNOW_BREAK, SoundSource.PLAYERS, 2f, 0.4f);
+        MagicFx.worldSound(p.level(), p.position(), SoundEvents.ELYTRA_FLYING, SoundSource.PLAYERS, 0.6f, 0.5f);
         Vitals.markInCombat(p);
         MagicScheduler.area(p, p.position(), true, spell.radius, spell.duration, 5, "blizzard", (level, owner, area) -> {
             if (owner == null) return;
@@ -351,7 +350,7 @@ public final class SpellEffects {
         LivingEntity ally = front.entity();
         if (ally != null) {
             Vec3 hand = Targeting.handPos(p);
-            if (tick % 6 == 0) p.swing(SpellCasting.castingHand(), true);
+            if (tick % 6 == 0) p.swing(SpellCasting.castingHand(), net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
             if (tick % 2 == 0) MagicFx.send(p, MagicFx.BEAM, Element.HOLY, hand, front.end(), p.getId(), 1);
             if (tick % 6 == 0) MagicFx.send(ally, MagicFx.HEAL, Element.HOLY, ally.position(), ally.position(), ally.getId(), 0);
             if (tick % 20 == 0) MagicFx.sound(p, SoundEvents.AMETHYST_BLOCK_CHIME, 0.6f, 1.4f);
@@ -369,7 +368,7 @@ public final class SpellEffects {
         LivingEntity ally = front.entity();
         if (ally != null) {
             Vec3 hand = Targeting.handPos(p);
-            p.swing(SpellCasting.castingHand(), true);
+            p.swing(SpellCasting.castingHand(), net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
             MagicFx.send(p, MagicFx.BEAM, Element.HOLY, hand, front.end(), p.getId(), 1);
             MagicFx.send(ally, MagicFx.HEAL, Element.HOLY, ally.position(), ally.position(), ally.getId(), 2);
             MagicFx.sound(p, SoundEvents.AMETHYST_BLOCK_CHIME, 1f, 1.1f);
@@ -387,23 +386,23 @@ public final class SpellEffects {
     public static Spell.Result healOther(ServerPlayer p, Spell spell, int tick) {
         Targeting.Ray ray = Targeting.ray(p, spell.radius, e -> Targeting.isHelpable(p, e));
         Vec3 hand = Targeting.handPos(p);
-        if (tick % 6 == 0) p.swing(SpellCasting.castingHand(), true);
+        if (tick % 6 == 0) p.swing(SpellCasting.castingHand(), net.minecraft.world.item.component.SwingAnimation.DEFAULT, true);
         if (tick % 2 == 0) MagicFx.send(p, MagicFx.BEAM, Element.HOLY, hand, ray.end(), p.getId(), ray.entity() != null ? 1 : 0);
         LivingEntity t = ray.entity();
         if (t == null) return Spell.Result.CAST;
-        if (!Targeting.isCompanionOrParty(p, t) && (t.getMobType() == MobType.UNDEAD || t instanceof AbstractGolem)) return Spell.Result.CAST;
+        if (!Targeting.isCompanionOrParty(p, t) && (com.skycraft.platform.Effects.isUndead(t) || t instanceof AbstractGolem)) return Spell.Result.CAST;
         if (tick % 6 == 0) MagicFx.send(t, MagicFx.HEAL, Element.HOLY, t.position(), t.position(), t.getId(), 0);
         float healed = heal(p, t, spell.magnitude / 20f * SpellMath.healMult(p));
         return healed > 0 ? Spell.Result.EFFECT : Spell.Result.CAST;
     }
 
     public static Spell.Result grandHealing(ServerPlayer p, Spell spell, int tick) {
-        ServerLevel level = p.serverLevel();
+        ServerLevel level = p.level();
         float amount = spell.magnitude * SpellMath.healMult(p);
         float total = heal(p, p, amount);
         MagicFx.send(p, MagicFx.HEAL, Element.HOLY, p.position(), p.position(), p.getId(), 3);
         for (LivingEntity e : Targeting.around(p, p.position(), spell.radius, e -> e != p && !(e instanceof Enemy)
-                && e.getMobType() != MobType.UNDEAD && !(e instanceof ArmorStand) && Targeting.isHelpable(p, e))) {
+                && !com.skycraft.platform.Effects.isUndead(e) && !(e instanceof ArmorStand) && Targeting.isHelpable(p, e))) {
             total += heal(p, e, amount);
             MagicFx.send(e, MagicFx.HEAL, Element.HOLY, e.position(), e.position(), e.getId(), 2);
         }
@@ -424,12 +423,12 @@ public final class SpellEffects {
             MagicFx.sendNear(level, area.center, 64, MagicFx.RING, Element.HOLY, area.center.add(0, 0.1, 0), area.center, -1, (int) (area.radius * 10));
             if (area.age % 20 != 0) return;
             for (LivingEntity e : Targeting.around(level, area.center.add(0, 1, 0), area.radius, e -> !(e instanceof ArmorStand))) {
-                if (e.getMobType() == MobType.UNDEAD) {
+                if (com.skycraft.platform.Effects.isUndead(e)) {
                     if (owner != null && Targeting.canHarm(owner, e)) {
                         Targeting.hurtNoKnockback(e, MagicDamage.source(level, MagicDamage.SPELL, null, owner),
                                 2f * SpellMath.undeadMult(owner, e));
                         if (e.getMaxHealth() <= threshold) Illusion.applyFear(area.center, e, 60);
-                        e.setSecondsOnFire(2);
+                        e.igniteForSeconds(2);
                     }
                 } else if (owner != null && Targeting.isHelpable(owner, e)) {
                     if (heal(owner, e, heal) > 0) MagicFx.send(e, MagicFx.HEAL, Element.HOLY, e.position(), e.position(), e.getId(), 0);
@@ -470,14 +469,14 @@ public final class SpellEffects {
 
     /** Oakflesh..Ebonyflesh: armor bonus; Mage Armor multiplies it when no armor is worn. */
     public static Spell.Result flesh(ServerPlayer p, Spell spell, int tick) {
-        MobEffectInstance current = p.getEffect(FLESH.get(spell.id).get());
+        MobEffectInstance current = p.getEffect(com.skycraft.platform.Effects.holder(FLESH.get(spell.id).get()));
         boolean wasActive = current != null && current.getDuration() > spell.duration / 2;
-        for (java.util.function.Supplier<MobEffect> e : FLESH.values()) p.removeEffect(e.get());
+        for (java.util.function.Supplier<MobEffect> e : FLESH.values()) p.removeEffect(com.skycraft.platform.Effects.holder(e.get()));
         float points = spell.magnitude;
         int rank = Perks.rank(p, "alteration.mage_armor");
         if (rank > 0 && wearsNoArmor(p)) points *= rank >= 3 ? 3f : rank == 2 ? 2.5f : 2f;
         int amp = Math.max(0, Math.round(points) - 1);
-        p.addEffect(new MobEffectInstance(FLESH.get(spell.id).get(), SpellMath.alterationDuration(p, spell), amp, false, true, true));
+        p.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(FLESH.get(spell.id).get()), SpellMath.alterationDuration(p, spell), amp, false, true, true));
         MagicFx.send(p, MagicFx.AURA, Element.NATURE, p.position(), p.position(), p.getId(), spell.tier.ordinal());
         SoundEvent sound = switch (spell.id) {
             case "oakflesh" -> SoundEvents.WOOD_PLACE;
@@ -495,8 +494,8 @@ public final class SpellEffects {
         com.skycraft.magic.ActiveMagic.note(p, spell, duration);
         int found = 0;
         for (LivingEntity e : Targeting.around(p, p.position(), spell.radius, e -> e != p && !(e instanceof ArmorStand)
-                && e.getMobType() != MobType.UNDEAD && !(e instanceof AbstractGolem))) {
-            e.addEffect(new MobEffectInstance(MobEffects.GLOWING, duration, 0, false, false));
+                && !com.skycraft.platform.Effects.isUndead(e) && !(e instanceof AbstractGolem))) {
+            e.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.GLOWING), duration, 0, false, false));
             found++;
         }
         MagicFx.send(p, MagicFx.AURA, Element.ARCANE, p.position(), p.position(), p.getId(), 4);
@@ -508,7 +507,7 @@ public final class SpellEffects {
     public static Spell.Result waterbreathing(ServerPlayer p, Spell spell, int tick) {
         // trains the skill only when you actually need the air
         boolean useful = p.isUnderWater() || p.isInWater();
-        p.addEffect(new MobEffectInstance(MobEffects.WATER_BREATHING, SpellMath.alterationDuration(p, spell), 0, false, true, true));
+        p.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MobEffects.WATER_BREATHING), SpellMath.alterationDuration(p, spell), 0, false, true, true));
         MagicFx.send(p, MagicFx.AURA, Element.FROST, p.position(), p.position(), p.getId(), 1);
         MagicFx.sound(p, SoundEvents.BUBBLE_COLUMN_UPWARDS_INSIDE, 1f, 1.2f);
         return useful ? Spell.Result.EFFECT : Spell.Result.CAST;
@@ -565,8 +564,8 @@ public final class SpellEffects {
     }
 
     private static boolean paralyze(ServerPlayer caster, Spell spell, LivingEntity target) {
-        if (!Targeting.canHarm(caster, target) || target.getType().is(CombatHandler.BOSSES)) return false;
-        target.addEffect(new MobEffectInstance(ModEffects.PARALYSIS.get(), SpellMath.alterationDuration(caster, spell) * (spell.dual ? 3 : 2) / 2, 0));
+        if (!Targeting.canHarm(caster, target) || target.getType().builtInRegistryHolder().is(CombatHandler.BOSSES)) return false;
+        target.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(ModEffects.PARALYSIS.get()), SpellMath.alterationDuration(caster, spell) * (spell.dual ? 3 : 2) / 2, 0));
         if (target instanceof net.minecraft.world.entity.Mob mob) mob.setTarget(null);
         target.setDeltaMovement(0, Math.min(0, target.getDeltaMovement().y), 0);
         MagicFx.send(target, MagicFx.AURA, Element.ARCANE, target.position(), target.position(), target.getId(), 0);
@@ -586,8 +585,8 @@ public final class SpellEffects {
     }
 
     public static void soulTrap(ServerPlayer caster, LivingEntity target, int ticks) {
-        target.addEffect(new MobEffectInstance(MagicRegistry.SOUL_TRAP.get(), ticks, 0));
-        target.getPersistentData().putUUID(SOUL_TRAPPER, caster.getUUID());
+        target.addEffect(new MobEffectInstance(com.skycraft.platform.Effects.holder(MagicRegistry.SOUL_TRAP.get()), ticks, 0));
+        target.getPersistentData().store(SOUL_TRAPPER, net.minecraft.core.UUIDUtil.CODEC, caster.getUUID());
     }
 
     /** Persistent-data key on a soul-trapped creature: the UUID of the player whose gems get its soul. */

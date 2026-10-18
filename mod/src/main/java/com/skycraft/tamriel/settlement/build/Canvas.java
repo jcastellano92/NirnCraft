@@ -7,7 +7,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
@@ -71,6 +71,9 @@ public final class Canvas {
     private List<int[]> doorSink;
     private static final int MAX_CONTAINERS = 6, MAX_LOOT = 3;
     private final BlockPos.MutableBlockPos m = new BlockPos.MutableBlockPos();
+    /** Immutable seeded terrain probes, local to this painting invocation and never retained across worlds. */
+    private it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap<TerrainColumn> terrainColumns;
+    private record TerrainColumn(int ground, int water) {}
 
     /** Painting canvas, clipped to {@code clip}. */
     public Canvas(WorldGenLevel level, BoundingBox clip, int ox, int oy, int oz, Direction facing, long seed) {
@@ -82,10 +85,10 @@ public final class Canvas {
         this.seed = seed;
         this.rot = rotation(facing);
         this.x0 = clip.minX();
-        this.y0 = Math.max(clip.minY(), level.getMinBuildHeight());
+        this.y0 = Math.max(clip.minY(), level.getMinY());
         this.z0 = clip.minZ();
         this.x1 = clip.maxX();
-        this.y1 = Math.min(clip.maxY(), level.getMaxBuildHeight() - 1);
+        this.y1 = Math.min(clip.maxY(), (level.getMaxY() + 1) - 1);
         this.z1 = clip.maxZ();
         this.anchors = null;
     }
@@ -247,16 +250,19 @@ public final class Canvas {
     /** Topmost solid ground at (x, z): skips leaves, logs, plants, snow, fluids and built prop blocks. */
     public int wground(int x, int z) {
         if (level == null) return oy;
+        if (level instanceof net.minecraft.server.level.WorldGenRegion region && !region.isWithinWriteZone(m.set(x, oy, z))) {
+            return terrainColumn(region, x, z).ground();
+        }
         if (!level.hasChunk(x >> 4, z >> 4)) return com.skycraft.worldplan.street.StreetTerrain.land(x, z);
         int y = level.getHeight(worldgen() ? Heightmap.Types.OCEAN_FLOOR_WG : Heightmap.Types.OCEAN_FLOOR, x, z) - 1;
-        int min = level.getMinBuildHeight();
+        int min = level.getMinY();
         while (y > min) {
             BlockState s = level.getBlockState(m.set(x, y, z));
             if (s.isAir() || s.is(BlockTags.LEAVES) || s.is(BlockTags.LOGS) || s.canBeReplaced() || !s.getFluidState().isEmpty()
                     || s.is(Blocks.SNOW) || s.is(BlockTags.FLOWERS) || s.is(BlockTags.FENCES) || s.is(BlockTags.FENCE_GATES)
                     || s.is(BlockTags.WALLS) || s.is(BlockTags.BANNERS) || s.is(BlockTags.ALL_SIGNS)
                     || s.is(BlockTags.SLABS) || s.is(BlockTags.STAIRS) || s.is(BlockTags.TRAPDOORS)
-                    || s.is(BlockTags.WOOL) || s.is(Blocks.GOLD_BLOCK) || s.is(Blocks.LIGHTNING_ROD)
+                    || s.is(BlockTags.WOOL) || s.is(Blocks.GOLD_BLOCK) || s.is(com.skycraft.worldgen.VanillaBlocks.LIGHTNING_ROD)
                     || s.getBlock() instanceof net.minecraft.world.level.block.LanternBlock
                     || s.getBlock() instanceof net.minecraft.world.level.block.ChainBlock
                     || s.getBlock() instanceof net.minecraft.world.level.block.BarrelBlock
@@ -277,9 +283,44 @@ public final class Canvas {
 
     /** Water surface at (x, z) if the column is covered by water, else {@link Integer#MIN_VALUE}. */
     public int wwater(int x, int z) {
-        if (level == null || !level.hasChunk(x >> 4, z >> 4)) return Integer.MIN_VALUE;
+        if (level == null) return Integer.MIN_VALUE;
+        if (level instanceof net.minecraft.server.level.WorldGenRegion region && !region.isWithinWriteZone(m.set(x, oy, z))) {
+            return terrainColumn(region, x, z).water();
+        }
+        if (!level.hasChunk(x >> 4, z >> 4)) return Integer.MIN_VALUE;
         int top = level.getHeight(worldgen() ? Heightmap.Types.WORLD_SURFACE_WG : Heightmap.Types.WORLD_SURFACE, x, z) - 1;
         return level.getBlockState(m.set(x, top, z)).getFluidState().isEmpty() ? Integer.MIN_VALUE : top;
+    }
+
+    /**
+     * A distant dependency chunk may be undergoing feature writes on another worker.
+     * Query the generator's deterministic base column instead of that mutable chunk.
+     * This native path samples the same seed, density, aquifers and plan-aware terrain.
+     */
+    private TerrainColumn terrainColumn(net.minecraft.server.level.WorldGenRegion region, int x, int z) {
+        if (terrainColumns == null) terrainColumns = new it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap<>();
+        long key = net.minecraft.world.level.ChunkPos.pack(x, z);
+        TerrainColumn cached = terrainColumns.get(key);
+        if (cached != null) return cached;
+        var source = region.getLevel().getChunkSource();
+        var column = source.getGenerator().getBaseColumn(x, z, region, source.randomState());
+        int ground = region.getMinY() - 1;
+        int water = Integer.MIN_VALUE;
+        boolean surface = false;
+        for (int y = region.getMaxY(); y >= region.getMinY(); y--) {
+            BlockState state = column.getBlock(y);
+            if (!surface && !state.isAir()) {
+                surface = true;
+                if (!state.getFluidState().isEmpty()) water = y;
+            }
+            if (Heightmap.Types.OCEAN_FLOOR_WG.isOpaque().test(state)) {
+                ground = y;
+                break;
+            }
+        }
+        TerrainColumn result = new TerrainColumn(ground, water);
+        terrainColumns.put(key, result);
+        return result;
     }
 
     // ------------------------------------------------------------------ local access
@@ -553,7 +594,7 @@ public final class Canvas {
     }
 
     /** A loot container; its owner is recorded as a {@link AnchorType#CONTAINER} anchor. */
-    public void container(int lx, int ly, int lz, BlockState state, @Nullable ResourceLocation loot) {
+    public void container(int lx, int ly, int lz, BlockState state, @Nullable Identifier loot) {
         // per building (the count runs through every frame and every chunk's identical replay): few containers, and
         // only the first ones carry loot
         if (isReserved(lx, ly, lz)) return;
@@ -568,7 +609,7 @@ public final class Canvas {
         if (loot == null) return;
         m.set(x, y, z);
         if (level.getBlockEntity(m) instanceof RandomizableContainerBlockEntity c) {
-            c.setLootTable(loot, hash(x, y, z, 31));
+            c.setLootTable(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.LOOT_TABLE, loot), hash(x, y, z, 31));
         }
     }
 
@@ -595,7 +636,7 @@ public final class Canvas {
     public void furnitureContainer(
             int lx, int ly, int lz,
             com.skycraft.tamriel.settlement.furniture.FurnitureBlocks.FurnitureKind kind,
-            String cultureId, Direction localFacing, @Nullable ResourceLocation loot
+            String cultureId, Direction localFacing, @Nullable Identifier loot
     ) {
         if (isReserved(lx, ly, lz)) return;
         int n = containers[0]++;
@@ -611,7 +652,7 @@ public final class Canvas {
         if (level.getBlockEntity(m) instanceof com.skycraft.tamriel.settlement.furniture.FurnitureBlocks.FurnitureContainerBlockEntity fbe) {
             fbe.configure(kind, cultureId, (int) (hash(x, y, z, 79) & 7));
             if (loot != null) {
-                fbe.setLootTable(loot, hash(x, y, z, 31));
+                fbe.setLootTable(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.LOOT_TABLE, loot), hash(x, y, z, 31));
             }
         }
     }
@@ -649,15 +690,15 @@ public final class Canvas {
         wset(x, y, z, rot(B.face(wallSign, face)));
         BlockEntity be = level.getBlockEntity(m.set(x, y, z));
         if (!(be instanceof SignBlockEntity sign)) return;
-        SignText text = new SignText();
-        for (int i = 0; i < Math.min(4, lines.length); i++) text = text.setMessage(i, lines[i]);
-        CompoundTag tag = sign.saveWithoutMetadata();
-        SignText.DIRECT_CODEC.encodeStart(NbtOps.INSTANCE, text).result().ifPresent(t -> {
+        SignText text = SignText.EMPTY;
+        for (int i = 0; i < Math.min(4, lines.length); i++) text = text.asMutable().setLine(i, lines[i]).asImmutable();
+        CompoundTag tag = sign.saveWithoutMetadata(level.registryAccess());
+        SignText.CODEC.encodeStart(NbtOps.INSTANCE, text).result().ifPresent(t -> {
             tag.put("front_text", t);
             tag.put("back_text", t.copy());
         });
         tag.putBoolean("is_waxed", true);
-        sign.load(tag);
+        com.skycraft.worldgen.WorldgenData.load(sign, tag, level.registryAccess());
     }
 
     // ------------------------------------------------------------------ deterministic variety

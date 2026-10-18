@@ -1,0 +1,327 @@
+diff --git a/mod/src/main/java/com/skycraft/society/client/NpcRenderer.java b/mod/src/main/java/com/skycraft/society/client/NpcRenderer.java
+--- a/mod/src/main/java/com/skycraft/society/client/NpcRenderer.java
++++ b/mod/src/main/java/com/skycraft/society/client/NpcRenderer.java
+@@ -17,7 +17,7 @@
+  * tails, horns, tusks), vanilla armor and held items. Children are drawn at their smaller scale; Altmer stand a little
+  * taller and Bosmer a little shorter. NPCs without a look yet use the old per-role skins.
+  */
+-public class NpcRenderer extends HumanoidMobRenderer<NpcEntity, net.minecraft.client.renderer.entity.state.AvatarRenderState, NpcModel> {
++public class NpcRenderer extends HumanoidMobRenderer<NpcEntity, net.minecraft.client.renderer.entity.state.HumanoidRenderState, NpcModel> {
+     /** Old per-role skins; roles added later fall back to a similar one. */
+     private static final Identifier[][] TEXTURES = new Identifier[NpcRole.VALUES.length][NpcRole.SKINS];
+ 
+@@ -41,29 +41,28 @@
+         super(context, new NpcModel(context.bakeLayer(SocietyClient.NPC_LAYER)), 0.5f);
+         this.addLayer(new HumanoidArmorLayer<>(this,
+                 net.minecraft.client.renderer.entity.ArmorModelSet.bake(ModelLayers.PLAYER_ARMOR, context.getModelSet(),
+-                        part -> new net.minecraft.client.model.player.PlayerModel(part, false)), context.getEquipmentRenderer()));
++                        part -> new HumanoidModel<net.minecraft.client.renderer.entity.state.HumanoidRenderState>(part)), context.getEquipmentRenderer()));
+         this.addLayer(new RaceFeatureLayer<>(this, context.bakeLayer(SocietyClient.RACE_FEATURES_LAYER), NpcRenderer::features));
+     }
+ 
+-    private static RaceFeatureLayer.Features features(net.minecraft.client.renderer.entity.state.AvatarRenderState state) {
++    private static RaceFeatureLayer.Features features(net.minecraft.client.renderer.entity.state.HumanoidRenderState state) {
+         NpcRenderData npc = NpcRenderData.get(state);
+         return npc == null || npc.look() < 0 ? null : RaceFeatureLayer.Features.of(npc.look());
+     }
+ 
+     @Override
+-    public net.minecraft.client.renderer.entity.state.AvatarRenderState createRenderState() {
+-        return new net.minecraft.client.renderer.entity.state.AvatarRenderState();
++    public net.minecraft.client.renderer.entity.state.HumanoidRenderState createRenderState() {
++        return new net.minecraft.client.renderer.entity.state.HumanoidRenderState();
+     }
+ 
+     @Override
+-    public void extractRenderState(NpcEntity entity, net.minecraft.client.renderer.entity.state.AvatarRenderState state, float partialTick) {
++    public void extractRenderState(NpcEntity entity, net.minecraft.client.renderer.entity.state.HumanoidRenderState state, float partialTick) {
+         super.extractRenderState(entity, state, partialTick);
+-        state.setRenderData(NpcRenderData.KEY, NpcRenderData.extract(entity));
+         if (entity.getLook() >= 0 && !entity.isChild()) state.scale *= NpcLook.bodyScale(entity.getLook());
+     }
+ 
+     @Override
+-    public Identifier getTextureLocation(net.minecraft.client.renderer.entity.state.AvatarRenderState state) {
++    public Identifier getTextureLocation(net.minecraft.client.renderer.entity.state.HumanoidRenderState state) {
+         NpcRenderData npc = NpcRenderData.get(state);
+         if (npc == null) return TEXTURES[0][0];
+         Identifier skin = NpcSkins.get(npc.look());
+@@ -71,9 +70,10 @@
+     }
+ 
+     @Override
+-    protected void scale(net.minecraft.client.renderer.entity.state.AvatarRenderState state, PoseStack pose) {
++    protected void scale(net.minecraft.client.renderer.entity.state.HumanoidRenderState state, PoseStack pose) {
+         NpcRenderData npc = NpcRenderData.get(state);
+         if (npc == null) return;
++        if (npc.isChild()) pose.scale(state.ageScale, state.ageScale, state.ageScale);
+         if (npc.isHuddled()) pose.translate(0, 0.62f, 0);
+         else if (npc.isKneeling()) pose.translate(0, 0.34f, 0);
+         else if (npc.isTending()) pose.translate(0, 0.12f, 0);
+diff --git a/mod/src/main/java/com/skycraft/society/client/NpcModel.java b/mod/src/main/java/com/skycraft/society/client/NpcModel.java
+--- a/mod/src/main/java/com/skycraft/society/client/NpcModel.java
++++ b/mod/src/main/java/com/skycraft/society/client/NpcModel.java
+@@ -14,16 +14,16 @@
+  * Player-shaped NPC model (full 64x64 skin layout with overlays). Adds poses: bound hands for prisoners, raised
+  * hands while casting (mages, priests), and strumming while a bard plays.
+  */
+-public class NpcModel extends PlayerModel {
++public class NpcModel extends net.minecraft.client.model.HumanoidModel<net.minecraft.client.renderer.entity.state.HumanoidRenderState> {
+     public NpcModel(ModelPart root) {
+-        super(root, false);
++        super(root, net.minecraft.client.renderer.rendertype.RenderTypes::entityTranslucent);
+     }
+ 
+     public static LayerDefinition createLayer() {
+         return LayerDefinition.create(PlayerModel.createMesh(CubeDeformation.NONE, false), 64, 64);
+     }
+ 
+-    private void prepareNpcPose(NpcRenderData entity, net.minecraft.client.renderer.entity.state.AvatarRenderState state) {
++    private void prepareNpcPose(NpcRenderData entity, net.minecraft.client.renderer.entity.state.HumanoidRenderState state) {
+         ArmPose main = ArmPose.EMPTY;
+         ArmPose off = ArmPose.EMPTY;
+         boolean sheathed = entity.sheathed();
+@@ -51,7 +51,7 @@
+     }
+ 
+     @Override
+-    public void setupAnim(net.minecraft.client.renderer.entity.state.AvatarRenderState state) {
++    public void setupAnim(net.minecraft.client.renderer.entity.state.HumanoidRenderState state) {
+         NpcRenderData entity = NpcRenderData.get(state);
+         if (entity == null) { super.setupAnim(state); return; }
+         prepareNpcPose(entity, state);
+@@ -60,8 +60,6 @@
+         // children: a bigger head on the small body (the renderer scales the whole child down)
+         float headScale = entity.isChild() ? 1.22F : 1.0F;
+         this.head.xScale = this.head.yScale = this.head.zScale = headScale;
+-        this.hat.xScale = this.hat.yScale = this.hat.zScale = headScale;
+-        boolean changed = true;
+         if (entity.isHuddled() || entity.isKneeling() || entity.isTending() || entity.isCarrying() || entity.isWeeping()) {
+             aftermathPose(entity, ageInTicks);
+         } else if (entity.isPrisoner()) {
+@@ -73,7 +71,6 @@
+             this.leftArm.yRot = 0.0F;
+             this.leftArm.zRot = 0.35F;
+             this.head.xRot = Math.max(this.head.xRot, 0.35F);
+-            this.hat.loadPose(this.head.storePose());
+         } else if (entity.isCasting()) {
+             float wave = Mth.cos(ageInTicks * 0.65F) * 0.09F;
+             com.skycraft.magic.spell.Spell spell = entity.getCastingSpell();
+@@ -104,7 +101,6 @@
+             }
+             float sway = Mth.sin(ageInTicks * 0.22F) * 0.05F;
+             this.head.zRot += sway;
+-            this.hat.loadPose(this.head.storePose());
+             switch (pose) {
+                 case FLUTE, HORN -> {
+                     float breath = Mth.sin(ageInTicks * 0.45F) * 0.05F;
+@@ -146,13 +142,6 @@
+             float swing = Mth.sin(state.swingAnimation * (float) Math.PI);
+             this.rightArm.xRot -= swing * 0.55F;
+             this.body.yRot += swing * 0.18F;
+-            this.jacket.loadPose(this.body.storePose());
+-        } else {
+-            changed = false;
+-        }
+-        if (changed) {
+-            this.leftSleeve.loadPose(this.leftArm.storePose());
+-            this.rightSleeve.loadPose(this.rightArm.storePose());
+         }
+     }
+ 
+@@ -212,9 +201,5 @@
+             this.head.xRot = Math.max(this.head.xRot, 0.5F);
+             this.body.xRot += shake;
+         }
+-        this.hat.loadPose(this.head.storePose());
+-        this.jacket.loadPose(this.body.storePose());
+-        this.leftPants.loadPose(this.leftLeg.storePose());
+-        this.rightPants.loadPose(this.rightLeg.storePose());
+     }
+ }
+diff --git a/mod/src/main/java/com/skycraft/society/client/NpcRenderData.java b/mod/src/main/java/com/skycraft/society/client/NpcRenderData.java
+--- a/mod/src/main/java/com/skycraft/society/client/NpcRenderData.java
++++ b/mod/src/main/java/com/skycraft/society/client/NpcRenderData.java
+@@ -2,7 +2,7 @@
+ 
+ import com.skycraft.magic.spell.Spell;
+ import com.skycraft.society.entity.NpcEntity;
+-import net.minecraft.client.renderer.entity.state.AvatarRenderState;
++import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
+ import net.minecraft.resources.Identifier;
+ import net.minecraft.util.context.ContextKey;
+ import net.minecraft.world.entity.HumanoidArm;
+@@ -24,7 +24,7 @@
+                 entity.getMainHandItem().copy(), entity.getOffhandItem().copy(), entity.getCastingSpell());
+     }
+ 
+-    static NpcRenderData get(AvatarRenderState state) {
++    static NpcRenderData get(HumanoidRenderState state) {
+         return state.getRenderData(KEY);
+     }
+ }
+diff --git a/mod/src/main/java/com/skycraft/society/client/SocietyClient.java b/mod/src/main/java/com/skycraft/society/client/SocietyClient.java
+--- a/mod/src/main/java/com/skycraft/society/client/SocietyClient.java
++++ b/mod/src/main/java/com/skycraft/society/client/SocietyClient.java
+@@ -46,6 +46,13 @@
+     }
+ 
+     @SubscribeEvent
++    public static void renderStates(net.neoforged.neoforge.client.renderstate.RegisterRenderStateModifiersEvent event) {
++        event.registerEntityModifier(NpcRenderer.class,
++                (com.skycraft.society.entity.NpcEntity entity, net.minecraft.client.renderer.entity.state.HumanoidRenderState state) ->
++                        state.setRenderData(NpcRenderData.KEY, NpcRenderData.extract(entity)));
++    }
++
++    @SubscribeEvent
+     public static void addLayers(EntityRenderersEvent.AddLayers event) {
+         for (var skin : event.getSkins()) {
+             AvatarRenderer<net.minecraft.client.player.AbstractClientPlayer> renderer = event.getPlayerRenderer(skin);
+diff --git a/mod/src/main/java/com/skycraft/creatures/client/SkyHumanoidRenderer.java b/mod/src/main/java/com/skycraft/creatures/client/SkyHumanoidRenderer.java
+--- a/mod/src/main/java/com/skycraft/creatures/client/SkyHumanoidRenderer.java
++++ b/mod/src/main/java/com/skycraft/creatures/client/SkyHumanoidRenderer.java
+@@ -13,7 +13,7 @@
+ import java.util.function.Function;
+ 
+ /** Renderer for player-shaped creatures: skin chosen per entity, vanilla armor, held items, optional glowing eyes. */
+-public class SkyHumanoidRenderer<T extends Mob> extends HumanoidMobRenderer<T, net.minecraft.client.renderer.entity.state.AvatarRenderState, SkyHumanoidModel<T>> {
++public class SkyHumanoidRenderer<T extends Mob> extends HumanoidMobRenderer<T, net.minecraft.client.renderer.entity.state.HumanoidRenderState, SkyHumanoidModel<T>> {
+     public record Appearance(Identifier texture,boolean twoHanded,boolean shieldRaised) {}
+     public static final net.minecraft.util.context.ContextKey<Appearance> APPEARANCE=new net.minecraft.util.context.ContextKey<>(Identifier.fromNamespaceAndPath("skycraft","humanoid_appearance"));
+     private final java.util.List<com.skycraft.creatures.client.kit.CostumeLayer<T,SkyHumanoidModel<T>>> costumes=new java.util.ArrayList<>();
+@@ -30,7 +30,7 @@
+         if (armor) {
+             this.addLayer(new HumanoidArmorLayer<>(this,
+                 net.minecraft.client.renderer.entity.ArmorModelSet.bake(ModelLayers.PLAYER_ARMOR, context.getModelSet(),
+-                    p -> new net.minecraft.client.model.player.PlayerModel(p,false)), context.getEquipmentRenderer()));
++                    p -> new HumanoidModel<net.minecraft.client.renderer.entity.state.HumanoidRenderState>(p)), context.getEquipmentRenderer()));
+         }
+     }
+ 
+@@ -60,17 +60,22 @@
+     }
+ 
+     @Override
+-    protected void scale(net.minecraft.client.renderer.entity.state.AvatarRenderState entity, PoseStack poseStack) {
++    protected void scale(net.minecraft.client.renderer.entity.state.HumanoidRenderState entity, PoseStack poseStack) {
+         if (scale != 1.0f) poseStack.scale(scale, scale, scale);
+     }
+ 
+     @Override
+-    public Identifier getTextureLocation(net.minecraft.client.renderer.entity.state.AvatarRenderState state) { return state.getRenderData(APPEARANCE).texture(); }
+-    @Override public net.minecraft.client.renderer.entity.state.AvatarRenderState createRenderState() { return new net.minecraft.client.renderer.entity.state.AvatarRenderState(); }
+-    @Override public void extractRenderState(T entity,net.minecraft.client.renderer.entity.state.AvatarRenderState state,float partialTick) {
+-        super.extractRenderState(entity,state,partialTick);
++    public Identifier getTextureLocation(net.minecraft.client.renderer.entity.state.HumanoidRenderState state) { return state.getRenderData(APPEARANCE).texture(); }
++    @Override public net.minecraft.client.renderer.entity.state.HumanoidRenderState createRenderState() { return new net.minecraft.client.renderer.entity.state.HumanoidRenderState(); }
++    private void captureAppearance(T entity,net.minecraft.client.renderer.entity.state.HumanoidRenderState state) {
+         state.setRenderData(APPEARANCE,new Appearance(texture.apply(entity),com.skycraft.combat.WeaponClass.of(entity.getMainHandItem()).twoHanded(),entity.isAggressive()&&entity.getOffhandItem().getItem() instanceof net.minecraft.world.item.ShieldItem));
+         for (var costume:costumes) costume.extract(entity,state);
++    }
++    @SuppressWarnings("unchecked")
++    static void extractAppearance(Mob entity,net.minecraft.client.renderer.entity.state.HumanoidRenderState state) {
++        var renderer=net.minecraft.client.Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(entity);
++        if (renderer instanceof SkyHumanoidRenderer<?> humanoid)
++            ((SkyHumanoidRenderer<Mob>) humanoid).captureAppearance(entity,state);
+     }
+     @Override protected net.minecraft.client.model.HumanoidModel.ArmPose getArmPose(T entity,net.minecraft.world.entity.HumanoidArm arm) {
+         var stack=arm==entity.getMainArm()?entity.getMainHandItem():entity.getOffhandItem();
+diff --git a/mod/src/main/java/com/skycraft/creatures/client/SkyHumanoidModel.java b/mod/src/main/java/com/skycraft/creatures/client/SkyHumanoidModel.java
+--- a/mod/src/main/java/com/skycraft/creatures/client/SkyHumanoidModel.java
++++ b/mod/src/main/java/com/skycraft/creatures/client/SkyHumanoidModel.java
+@@ -13,9 +13,9 @@
+  * Player-shaped model (full 64x64 skin layout with hat/jacket/sleeve/pants overlays) for bandits, draugr, guards and
+  * giants. Raises the weapon arm when holding an item and draws the bow when an archer is aggressive.
+  */
+-public class SkyHumanoidModel<T extends Mob> extends PlayerModel {
++public class SkyHumanoidModel<T extends Mob> extends net.minecraft.client.model.HumanoidModel<net.minecraft.client.renderer.entity.state.HumanoidRenderState> {
+     public SkyHumanoidModel(ModelPart root) {
+-        super(root, false);
++        super(root, net.minecraft.client.renderer.rendertype.RenderTypes::entityTranslucent);
+     }
+ 
+     public static LayerDefinition createLayer() {
+@@ -23,7 +23,7 @@
+     }
+ 
+     @Override
+-    public void setupAnim(net.minecraft.client.renderer.entity.state.AvatarRenderState state) {
++    public void setupAnim(net.minecraft.client.renderer.entity.state.HumanoidRenderState state) {
+         super.setupAnim(state);
+         SkyHumanoidRenderer.Appearance appearance=state.getRenderData(SkyHumanoidRenderer.APPEARANCE);
+         if (appearance==null) return;
+@@ -36,13 +36,9 @@
+                 this.leftArm.yRot += swing * 0.25F;
+             }
+             this.body.yRot += swing * 0.20F;
+-            this.jacket.loadPose(this.body.storePose());
+-            this.leftSleeve.loadPose(this.leftArm.storePose());
+-            this.rightSleeve.loadPose(this.rightArm.storePose());
+         } else if (appearance.shieldRaised()) {
+             this.leftArm.xRot = -0.85F;
+             this.leftArm.yRot = 0.35F;
+-            this.leftSleeve.loadPose(this.leftArm.storePose());
+         }
+     }
+ }
+diff --git a/mod/src/main/java/com/skycraft/creatures/client/kit/CostumeLayer.java b/mod/src/main/java/com/skycraft/creatures/client/kit/CostumeLayer.java
+--- a/mod/src/main/java/com/skycraft/creatures/client/kit/CostumeLayer.java
++++ b/mod/src/main/java/com/skycraft/creatures/client/kit/CostumeLayer.java
+@@ -7,7 +7,7 @@
+ import net.minecraft.client.model.HumanoidModel;
+ import net.minecraft.client.model.geom.ModelPart;
+ import net.minecraft.client.renderer.SubmitNodeCollector;
+-import net.minecraft.client.renderer.entity.state.AvatarRenderState;
++import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
+ import com.skycraft.client.CapturedPartModel;
+ import net.minecraft.client.renderer.rendertype.RenderTypes;
+ import net.minecraft.client.renderer.rendertype.RenderType;
+@@ -29,7 +29,7 @@
+  * ({@code rig.defs.Costumes}) whose six top-level parts copy the humanoid's head, body, arms and legs every frame.
+  * Optional pieces (named bones) are shown or hidden per entity, e.g. the draugr's helmet by rank.
+  */
+-public class CostumeLayer<T extends Mob, M extends HumanoidModel<AvatarRenderState>> extends RenderLayer<AvatarRenderState, M> {
++public class CostumeLayer<T extends Mob, M extends HumanoidModel<HumanoidRenderState>> extends RenderLayer<HumanoidRenderState, M> {
+     private static final String[] PARTS = {"head", "body", "right_arm", "left_arm", "right_leg", "left_leg"};
+     private final ModelPart[] parts = new ModelPart[PARTS.length];
+     private final Map<String, ModelPart> optional = new HashMap<>();
+@@ -43,7 +43,7 @@
+     /**
+      * @param optionalBones names of the costume bones that are toggled by {@code visible}
+      */
+-    public CostumeLayer(RenderLayerParent<AvatarRenderState, M> parent, ModelPart bakedRoot, CreatureDef def, Function<T, Identifier> texture,
++    public CostumeLayer(RenderLayerParent<HumanoidRenderState, M> parent, ModelPart bakedRoot, CreatureDef def, Function<T, Identifier> texture,
+                         List<String> optionalBones, BiPredicate<T, String> visible) {
+         super(parent);
+         this.texture = texture;
+@@ -69,12 +69,12 @@
+         return p;
+     }
+ 
+-    public void extract(T entity,AvatarRenderState state) {
++    public void extract(T entity,HumanoidRenderState state) {
+         var visibility=new java.util.HashMap<String,Boolean>();
+         optional.forEach((name,part)->visibility.put(name,visible.test(entity,name)));
+         state.setRenderData(appearanceKey,new Appearance(texture.apply(entity),java.util.Map.copyOf(visibility)));
+     }
+-    @Override public void submit(PoseStack pose, SubmitNodeCollector collector,int light,AvatarRenderState state,float yaw,float pitch) {
++    @Override public void submit(PoseStack pose, SubmitNodeCollector collector,int light,HumanoidRenderState state,float yaw,float pitch) {
+         Appearance appearance=state.getRenderData(appearanceKey);
+         if (state.isInvisible||appearance==null) return;
+         M model=getParentModel();
+diff --git a/mod/src/main/java/com/skycraft/creatures/client/CreaturesClient.java b/mod/src/main/java/com/skycraft/creatures/client/CreaturesClient.java
+--- a/mod/src/main/java/com/skycraft/creatures/client/CreaturesClient.java
++++ b/mod/src/main/java/com/skycraft/creatures/client/CreaturesClient.java
+@@ -79,6 +79,12 @@
+     }
+ 
+     @SubscribeEvent
++    public static void renderStates(net.neoforged.neoforge.client.renderstate.RegisterRenderStateModifiersEvent event) {
++        event.registerEntityModifier(new com.google.common.reflect.TypeToken<SkyHumanoidRenderer<net.minecraft.world.entity.Mob>>() {},
++                SkyHumanoidRenderer::extractAppearance);
++    }
++
++    @SubscribeEvent
+     public static void renderers(EntityRenderersEvent.RegisterRenderers event) {
+         event.registerEntityRenderer(ModEntities.BANDIT.get(),
+                 ctx -> new SkyHumanoidRenderer<BanditEntity>(ctx, HUMANOID, b -> BANDIT[Math.floorMod(b.getSkin(), BANDIT.length)], 0.5f, 1.0f, true));

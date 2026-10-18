@@ -1,0 +1,15 @@
+{
+  "replace": false,
+  "values": [
+    "#forge:raw_materials/corundum",
+    "#forge:raw_materials/orichalcum",
+    "#forge:raw_materials/moonstone",
+    "#forge:raw_materials/malachite",
+    "#forge:raw_materials/quicksilver",
+    "#forge:raw_materials/ebony",
+    "#forge:raw_materials/silver",
+    "#c:raw_materials/copper",
+    "#c:raw_materials/gold",
+    "#c:raw_materials/iron"
+  ]
+}

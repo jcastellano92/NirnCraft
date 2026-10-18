@@ -2,7 +2,7 @@ package com.skycraft.society;
 
 import com.skycraft.Skycraft;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Locale;
@@ -29,7 +29,7 @@ public enum Cosmetic {
     /** Faction id (quest module's {@code factions}) the wearer must belong to. */
     public final String faction;
     private final int parts;
-    public final ResourceLocation texture;
+    public final Identifier texture;
 
     Cosmetic(String faction, Part... parts) {
         this.id = name().toLowerCase(Locale.ROOT);
@@ -37,7 +37,7 @@ public enum Cosmetic {
         int mask = 0;
         for (Part p : parts) mask |= 1 << p.ordinal();
         this.parts = mask;
-        this.texture = new ResourceLocation(Skycraft.MODID, "textures/entity/society/cosmetic/" + id + ".png");
+        this.texture = Identifier.fromNamespaceAndPath(Skycraft.MODID, "textures/entity/society/cosmetic/" + id + ".png");
     }
 
     public boolean has(Part part) {

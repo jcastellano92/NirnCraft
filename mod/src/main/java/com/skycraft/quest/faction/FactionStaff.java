@@ -47,12 +47,12 @@ public final class FactionStaff {
     /** The faction an NPC works for, if it is hall staff. */
     @Nullable
     public static Faction factionOf(LivingEntity e) {
-        String id = e.getPersistentData().getString(TAG);
+        String id = e.getPersistentData().getStringOr(TAG, "");
         return id.isEmpty() ? null : Faction.byId(id);
     }
 
     public static String job(LivingEntity e) {
-        return e.getPersistentData().getString(JOB);
+        return e.getPersistentData().getStringOr(JOB, "");
     }
 
     /** Percent off a member gets from their own faction's hall staff (0 for everyone else). */
@@ -114,7 +114,7 @@ public final class FactionStaff {
 
     private static int count(ServerLevel level, BlockPos at, Faction f, String job) {
         return level.getEntitiesOfClass(LivingEntity.class, new AABB(at).inflate(24, 8, 24),
-                e -> e.isAlive() && f.id.equals(e.getPersistentData().getString(TAG)) && job.equals(job(e))).size();
+                e -> e.isAlive() && f.id.equals(e.getPersistentData().getStringOr(TAG, "")) && job.equals(job(e))).size();
     }
 
     @Nullable
@@ -127,7 +127,7 @@ public final class FactionStaff {
         pd.putString(TAG, f.id);
         pd.putString(JOB, job);
         pd.putBoolean("skycraft_settler", true);
-        String name = pd.getString(NpcRegistry.NAME_KEY);
+        String name = pd.getStringOr(NpcRegistry.NAME_KEY, "");
         if (name.isEmpty()) name = NpcNames.generate(npc.race(), npc.isFemale(), level.getRandom());
         npc.setCustomName(Component.translatable("faction.skycraft.staff." + job, name, f.displayName()));
         // trainers teach through their trade (economy trainers), quartermasters sell the faction's stock

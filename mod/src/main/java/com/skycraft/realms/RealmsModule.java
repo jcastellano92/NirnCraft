@@ -2,7 +2,7 @@ package com.skycraft.realms;
 
 import com.skycraft.realms.creatures.RealmCreatures;
 import com.skycraft.realms.worldgen.RealmWorldgen;
-import net.minecraftforge.eventbus.api.IEventBus;
+import net.neoforged.bus.api.IEventBus;
 
 /**
  * The planes of Oblivion and the afterlife as real realms: the Deadlands (the Nether's worldgen), Sovngarde (the End's),
@@ -19,5 +19,6 @@ public final class RealmsModule {
         RealmWorldgen.init(modBus);
         RealmCreatures.init();
         RealmLore.init();
+        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(RealmClocks::onStarted);
     }
 }

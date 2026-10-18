@@ -38,7 +38,7 @@ final class SeaSpecs {
     static boolean seaPrey(LivingEntity e) {
         String id = id(e);
         return id.equals("seal") || id.equals("river_betty") || id.equals("slaughterfish") || id.equals("horker")
-                || e instanceof net.minecraft.world.entity.animal.AbstractFish;
+                || e instanceof net.minecraft.world.entity.animal.fish.AbstractFish;
     }
 
     // ================================================================================================ the deep
@@ -195,7 +195,7 @@ final class SeaSpecs {
         s.voicePitch = 1.0f;
         s.flySpeed = 0.55;
         s.category = MobCategory.AMBIENT;
-        s.prey = e -> e instanceof net.minecraft.world.entity.animal.Rabbit || id(e).equals("river_betty");
+        s.prey = e -> e instanceof net.minecraft.world.entity.animal.rabbit.Rabbit || id(e).equals("river_betty");
         s.tracking(8);
         return s;
     }

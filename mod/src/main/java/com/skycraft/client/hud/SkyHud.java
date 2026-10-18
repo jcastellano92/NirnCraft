@@ -9,13 +9,12 @@ import com.skycraft.core.Skill;
 import com.skycraft.inventory.client.SkyUi;
 import com.skycraft.network.CorePackets;
 import com.skycraft.network.NotifyKind;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
-import net.minecraftforge.client.gui.overlay.ForgeGui;
 
 /**
  * Skyrim-style HUD: Magicka (left), Health (center) and Stamina (right) bars that fade when full,
@@ -41,9 +40,11 @@ public final class SkyHud {
 
     // ------------------------------------------------------------------ bars
 
-    public static void renderVitals(ForgeGui gui, GuiGraphics g, float partialTick, int width, int height) {
+    public static void renderVitals(GuiGraphicsExtractor g, net.minecraft.client.DeltaTracker delta) {
+        float partialTick = delta.getGameTimeDeltaPartialTick(false);
+        int width = g.guiWidth(), height = g.guiHeight();
         Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null || mc.options.hideGui || mc.screen != null || !gui.shouldDrawSurvivalElements()) return;
+        if (mc.player == null || mc.gui.hud.isHidden() || mc.gui.screen() != null || !(mc.gameMode != null && mc.gameMode.canHurtPlayer())) return;
         PlayerData data = SkyData.get(mc.player);
         boolean combat = ClientState.has(CorePackets.SyncVitals.IN_COMBAT);
 
@@ -81,7 +82,7 @@ public final class SkyHud {
         if (data.getPendingLevelUps() > 0 || data.getPerkPoints() > 0) {
             Font font = mc.font;
             Component hint = Component.translatable("hud.skycraft.perks_available", data.getPerkPoints());
-            g.drawString(font, hint, width - font.width(hint) - 6, HudStack.reserve(HudStack.Zone.TOP_RIGHT, HudStack.TR_PERKS, 10, height),
+            g.text(font, hint, width - font.width(hint) - 6, HudStack.reserve(HudStack.Zone.TOP_RIGHT, HudStack.TR_PERKS, 10, height),
                     0xFFE8D9A0, true);
         }
     }
@@ -103,7 +104,7 @@ public final class SkyHud {
     }
 
     /** A Skyrim bar: dark frame, fill shrinking toward the center for the health bar, colored fill. */
-    private static void drawBar(GuiGraphics g, int x, int y, int w, float fill, int color, int dark, float alpha, boolean flash) {
+    private static void drawBar(GuiGraphicsExtractor g, int x, int y, int w, float fill, int color, int dark, float alpha, boolean flash) {
         if (alpha < 0.02f) return;
         int a = (int) (alpha * 255) << 24;
         int frame = a | 0x1A1A1A;
@@ -133,17 +134,21 @@ public final class SkyHud {
     // ------------------------------------------------------------------ sneak eye
 
     /** The Skyrim sneak eye replaces the crosshair while sneaking ({@link SneakEye}). */
-    public static void renderSneakEye(ForgeGui gui, GuiGraphics g, float partialTick, int width, int height) {
+    public static void renderSneakEye(GuiGraphicsExtractor g, net.minecraft.client.DeltaTracker delta) {
+        float partialTick = delta.getGameTimeDeltaPartialTick(false);
+        int width = g.guiWidth(), height = g.guiHeight();
         Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null || mc.options.hideGui || mc.screen != null) return;
+        if (mc.player == null || mc.gui.hud.isHidden() || mc.gui.screen() != null) return;
         SneakEye.render(g, width / 2, height / 2);
     }
 
     // ------------------------------------------------------------------ notifications
 
-    public static void renderNotifications(ForgeGui gui, GuiGraphics g, float partialTick, int width, int height) {
+    public static void renderNotifications(GuiGraphicsExtractor g, net.minecraft.client.DeltaTracker delta) {
+        float partialTick = delta.getGameTimeDeltaPartialTick(false);
+        int width = g.guiWidth(), height = g.guiHeight();
         Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null || mc.options.hideGui) return;
+        if (mc.player == null || mc.gui.hud.isHidden()) return;
         HudNotifications.prune();
         Font font = mc.font;
         PlayerData pData = SkyData.get(mc.player);
@@ -173,7 +178,7 @@ public final class SkyHud {
             int alpha = (int) (255 * Mth.clamp((1 - age) * 4, 0, 1));
             if (alpha < 8) continue;
             int color = e.msg().kind() == NotifyKind.CRIME ? 0xE04040 : 0xE8E2D0;
-            g.drawString(font, e.msg().title(), 8, my, alpha << 24 | color, true);
+            g.text(font, e.msg().title(), 8, my, alpha << 24 | color, true);
             my += 11;
         }
 
@@ -195,7 +200,7 @@ public final class SkyHud {
         }
         switch (msg.kind()) {
             case SKILL_UP -> {
-                g.drawCenteredString(font, msg.title(), width / 2, 46, a | 0xF0EAD6);
+                g.centeredText(font, msg.title(), width / 2, 46, a | 0xF0EAD6);
                 var player = mc.player;
                 Skill skill = msg.value() >= 0 && msg.value() < Skill.VALUES.length ? Skill.VALUES[msg.value()] : null;
                 float prog = skill == null ? 0 : SkyData.get(player).skillProgress(skill);
@@ -203,33 +208,33 @@ public final class SkyHud {
             }
             case LEVEL_UP -> {
                 drawDivider(g, width / 2, 58, 110, a);
-                g.pose().pushPose();
-                g.pose().translate(width / 2f, 64, 0);
-                g.pose().scale(2f, 2f, 1f);
-                g.drawCenteredString(font, msg.title(), 0, 0, a | 0xF5EBC8);
-                g.pose().popPose();
-                g.drawCenteredString(font, msg.subtitle(), width / 2, 86, a | 0xBDB59E);
+                g.pose().pushMatrix();
+                g.pose().translate(width / 2f, 64);
+                g.pose().scale(2f, 2f);
+                g.centeredText(font, msg.title(), 0, 0, a | 0xF5EBC8);
+                g.pose().popMatrix();
+                g.centeredText(font, msg.subtitle(), width / 2, 86, a | 0xBDB59E);
                 drawDivider(g, width / 2, 98, 110, a);
             }
             case BIG_TITLE -> {
-                g.pose().pushPose();
-                g.pose().translate(width / 2f, height / 2f - 50, 0);
-                g.pose().scale(2.2f, 2.2f, 1f);
-                g.drawCenteredString(font, msg.title(), 0, 0, a | 0xF5EBC8);
-                g.pose().popPose();
-                g.drawCenteredString(font, msg.subtitle(), width / 2, height / 2 - 24, a | 0xD0C8B0);
+                g.pose().pushMatrix();
+                g.pose().translate(width / 2f, height / 2f - 50);
+                g.pose().scale(2.2f, 2.2f);
+                g.centeredText(font, msg.title(), 0, 0, a | 0xF5EBC8);
+                g.pose().popMatrix();
+                g.centeredText(font, msg.subtitle(), width / 2, height / 2 - 24, a | 0xD0C8B0);
             }
             default -> {
                 // Quest and location banners: "QUEST STARTED" small caps over the name, between two dividers.
                 Component header = Component.translatable("notify.skycraft." + msg.kind().name().toLowerCase(java.util.Locale.ROOT));
                 drawDivider(g, width / 2, 50, 100, a);
-                g.drawCenteredString(font, header, width / 2, 55, a | 0xA89F86);
-                g.pose().pushPose();
-                g.pose().translate(width / 2f, 67, 0);
-                g.pose().scale(1.5f, 1.5f, 1f);
-                g.drawCenteredString(font, msg.title(), 0, 0, a | 0xF5EBC8);
-                g.pose().popPose();
-                if (!msg.subtitle().getString().isEmpty()) g.drawCenteredString(font, msg.subtitle(), width / 2, 84, a | 0xBDB59E);
+                g.centeredText(font, header, width / 2, 55, a | 0xA89F86);
+                g.pose().pushMatrix();
+                g.pose().translate(width / 2f, 67);
+                g.pose().scale(1.5f, 1.5f);
+                g.centeredText(font, msg.title(), 0, 0, a | 0xF5EBC8);
+                g.pose().popMatrix();
+                if (!msg.subtitle().getString().isEmpty()) g.centeredText(font, msg.subtitle(), width / 2, 84, a | 0xBDB59E);
                 drawDivider(g, width / 2, 95, 100, a);
                 if (msg.kind() == NotifyKind.QUEST_COMPLETED) {
                     drawAnimatedLevelXpRow(g, font, width / 2, 101, alpha, nowMs, pData);
@@ -243,7 +248,7 @@ public final class SkyHud {
      * Skill increases show the skill's progress bar; level ups and big titles ("DRAGON SOUL ABSORBED") settle in from
      * slightly larger with a faint glow.
      */
-    private static void renderBannerStyled(GuiGraphics g, Font font, Minecraft mc, CorePackets.Notify msg, int width, int height,
+    private static void renderBannerStyled(GuiGraphicsExtractor g, Font font, Minecraft mc, CorePackets.Notify msg, int width, int height,
                                            float alpha, float age) {
         int cx = width / 2;
         float settle = 1f + 0.12f * (1f - Mth.clamp(age * 5f, 0f, 1f));
@@ -251,13 +256,13 @@ public final class SkyHud {
         boolean boss = com.skycraft.client.SkyBossHud.isShowing(null);
         boolean target = TargetHud.isVisible();
         int off = msg.kind() == NotifyKind.BIG_TITLE ? 0 : ((boss || target) ? 28 : 0);
-        g.pose().pushPose();
-        g.pose().translate(0, off, 0);
+        g.pose().pushMatrix();
+        g.pose().translate(0, off);
         renderBannerBody(g, font, mc, msg, width, height, alpha, cx, settle);
-        g.pose().popPose();
+        g.pose().popMatrix();
     }
 
-    private static void renderBannerBody(GuiGraphics g, Font font, Minecraft mc, CorePackets.Notify msg, int width, int height,
+    private static void renderBannerBody(GuiGraphicsExtractor g, Font font, Minecraft mc, CorePackets.Notify msg, int width, int height,
                                          float alpha, int cx, float settle) {
         switch (msg.kind()) {
             case SKILL_UP -> {
@@ -306,7 +311,7 @@ public final class SkyHud {
     }
 
     /** Renders the Skyrim Character Level XP bar when XP is gained outside an active banner (e.g. shared party XP). */
-    private static void renderStandaloneLevelXpBar(GuiGraphics g, Font font, int width, long nowMs) {
+    private static void renderStandaloneLevelXpBar(GuiGraphicsExtractor g, Font font, int width, long nowMs) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null) return;
         float rem = (levelXpBarUntilMs - nowMs) / 3800f;
@@ -321,7 +326,7 @@ public final class SkyHud {
     }
 
     /** Draws "LEVEL X" and the animated Skyrim Character Level XP bar filling from animStartProg to animTargetProg. */
-    private static void drawAnimatedLevelXpRow(GuiGraphics g, Font font, int cx, int y, float alpha, long nowMs, PlayerData data) {
+    private static void drawAnimatedLevelXpRow(GuiGraphicsExtractor g, Font font, int cx, int y, float alpha, long nowMs, PlayerData data) {
         float t = levelXpAnimStartMs > 0 ? Mth.clamp((nowMs - levelXpAnimStartMs) / 1400f, 0f, 1f) : 1f;
         float ease = 1f - (1f - t) * (1f - t);
         float startP = nowMs < levelXpBarUntilMs ? animStartProg : data.levelProgress();
@@ -334,7 +339,7 @@ public final class SkyHud {
     }
 
     /** A horizontal dark band from y1 to y2 that fades out over its last third on each side. */
-    private static void band(GuiGraphics g, int cx, int y1, int y2, int half, float alpha) {
+    private static void band(GuiGraphicsExtractor g, int cx, int y1, int y2, int half, float alpha) {
         int solid = half * 2 / 3;
         int mid = (y1 + y2) / 2;
         int steps = 12;
@@ -356,7 +361,7 @@ public final class SkyHud {
     }
 
     /** Large title with a faint warm glow (offset copies) under it. */
-    private static void glowTitle(GuiGraphics g, Font font, String text, int cx, int y, float scale, float alpha, int rgb) {
+    private static void glowTitle(GuiGraphicsExtractor g, Font font, String text, int cx, int y, float scale, float alpha, int rgb) {
         int glow = SkyUi.fade(0x40E8C060, alpha);
         for (int i = 0; i < 4; i++) {
             float ox = (i & 1) == 0 ? -0.8f : 0.8f;
@@ -366,13 +371,13 @@ public final class SkyHud {
         SkyUi.scaledCentered(g, font, text, cx, y, scale, SkyUi.fade(0xFF000000 | rgb, alpha), true);
     }
 
-    private static void drawThinBar(GuiGraphics g, int x, int y, int w, float progress, int a) {
+    private static void drawThinBar(GuiGraphicsExtractor g, int x, int y, int w, float progress, int a) {
         g.fill(x - 1, y - 1, x + w + 1, y + 4, a | 0x101010);
         g.fill(x, y, x + w, y + 3, a | 0x2A2A2A);
         g.fill(x, y, x + (int) (w * Mth.clamp(progress, 0, 1)), y + 3, a | 0xD8D0B8);
     }
 
-    private static void drawDivider(GuiGraphics g, int cx, int y, int half, int a) {
+    private static void drawDivider(GuiGraphicsExtractor g, int cx, int y, int half, int a) {
         g.fill(cx - half, y, cx + half, y + 1, a | 0x8A7F66);
         g.fill(cx - 2, y - 2, cx + 3, y + 3, a | 0xC8BC9A);
     }

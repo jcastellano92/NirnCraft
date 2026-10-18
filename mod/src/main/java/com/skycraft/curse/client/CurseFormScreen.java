@@ -8,7 +8,7 @@ import com.skycraft.curse.Curses;
 import com.skycraft.curse.Form;
 import com.skycraft.magic.client.MagicUi;
 import com.skycraft.network.SkyNetwork;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
@@ -54,22 +54,22 @@ public class CurseFormScreen extends Screen {
 
     private String selected(String key, String fallback) {
         LocalPlayer p = minecraft.player;
-        String id = p == null ? "" : Curses.tag(p).getString(key);
+        String id = p == null ? "" : Curses.tag(p).getStringOr(key, "");
         return id.isEmpty() ? fallback : id;
     }
 
     @Override
-    public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
+    public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
         LocalPlayer player = minecraft.player;
         if (player == null) return;
         g.fillGradient(0, 0, width, height, 0xE0080406, 0xF0180808);
         MagicUi.capsCentered(g, font, title, width / 2, 14, form == Form.BEAST ? 0xFFE8C080 : 0xFFE07078);
         if (form == Form.BEAST) {
-            g.drawCenteredString(font, Component.translatable("curse.skycraft.menu.howls", SkyKeys.SHOUT.getTranslatedKeyMessage()), width / 2, 46, 0xFFA89F86);
+            g.centeredText(font, Component.translatable("curse.skycraft.menu.howls", SkyKeys.SHOUT.getTranslatedKeyMessage()), width / 2, 46, 0xFFA89F86);
         } else {
             int colW = Math.min(170, width / 2 - 30);
-            g.drawString(font, Component.translatable("curse.skycraft.menu.spells"), width / 2 - colW - 10, 46, 0xFFA89F86, false);
-            g.drawString(font, Component.translatable("curse.skycraft.menu.powers", SkyKeys.SHOUT.getTranslatedKeyMessage()), width / 2 + 10, 46, 0xFFA89F86, false);
+            g.text(font, Component.translatable("curse.skycraft.menu.spells"), width / 2 - colW - 10, 46, 0xFFA89F86, false);
+            g.text(font, Component.translatable("curse.skycraft.menu.powers", SkyKeys.SHOUT.getTranslatedKeyMessage()), width / 2 + 10, 46, 0xFFA89F86, false);
         }
         String howl = selected("howl", CursePowers.HOWL_OF_TERROR);
         String spell = selected("lord_spell", CursePowers.RAISE_DEAD);
@@ -82,30 +82,32 @@ public class CurseFormScreen extends Screen {
             if (hover) hovered = e;
             if (hover || sel) g.fill(e.x - 4, e.y - 3, e.x + e.w, e.y + 12, sel ? 0x50802028 : 0x30FFFFFF);
             if (sel) MagicUi.diamond(g, e.x - 1, e.y + 4, 2, 0xFFE8C060);
-            g.drawString(font, CursePowers.name(e.id), e.x + 6, e.y, has ? (sel ? 0xFFFFF0D8 : 0xFFE8E0C8) : 0xFF6A6460, false);
+            g.text(font, CursePowers.name(e.id), e.x + 6, e.y, has ? (sel ? 0xFFFFF0D8 : 0xFFE8E0C8) : 0xFF6A6460, false);
         }
         if (hovered != null) {
             int y = height - 96;
             g.fill(width / 2 - 170, y - 4, width / 2 + 170, height - 42, 0xA0000000);
             List<FormattedCharSequence> lines = font.split(CursePowers.description(hovered.id), 330);
             for (FormattedCharSequence l : lines) {
-                g.drawCenteredString(font, l, width / 2, y, 0xFFD8D2C0);
+                g.centeredText(font, l, width / 2, y, 0xFFD8D2C0);
                 y += 10;
             }
             if (!CursePowers.hasAbility(player, hovered.id)) {
                 CursePerks.CursePerk perk = CursePerks.get(hovered.id.equals(CursePowers.HOWL_ICE_BROTHERS) ? CursePerks.TOTEM_OF_ICE_BROTHERS
                         : hovered.id.equals(CursePowers.HOWL_MOON) ? CursePerks.TOTEM_OF_THE_MOON
                         : hovered.id.equals(CursePowers.HOWL_PREDATOR) ? CursePerks.TOTEM_OF_THE_PREDATOR : hovered.id);
-                if (perk != null) g.drawCenteredString(font, Component.translatable("curse.skycraft.menu.needs", perk.displayName()), width / 2, y + 2, 0xFFE07060);
+                if (perk != null) g.centeredText(font, Component.translatable("curse.skycraft.menu.needs", perk.displayName()), width / 2, y + 2, 0xFFE07060);
             }
         }
-        g.drawCenteredString(font, Component.translatable("curse.skycraft.menu.hint"), width / 2, height - 14, 0xFF807A6A);
-        super.render(g, mouseX, mouseY, partialTick);
+        g.centeredText(font, Component.translatable("curse.skycraft.menu.hint"), width / 2, height - 14, 0xFF807A6A);
+        super.extractRenderState(g, mouseX, mouseY, partialTick);
     }
 
     @Override
-    public boolean mouseClicked(double mx, double my, int button) {
-        if (super.mouseClicked(mx, my, button)) return true;
+    public boolean mouseClicked(net.minecraft.client.input.MouseButtonEvent event, boolean doubleClick) {
+        double mx = event.x(), my = event.y();
+        int button = com.skycraft.client.screen.UiInput.actionButton(event.button());
+        if (super.mouseClicked(event, doubleClick)) return true;
         LocalPlayer player = minecraft.player;
         if (button == 0 && hovered != null && player != null && CursePowers.hasAbility(player, hovered.id)) {
             if (hovered.id.equals(CursePowers.REVERT)) {

@@ -3,7 +3,6 @@ package com.skycraft.magic.spell;
 import com.skycraft.core.SkyData;
 import com.skycraft.perk.Perks;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.Nullable;
 
@@ -41,7 +40,7 @@ public final class SpellMath {
             default -> {
             }
         }
-        if (target != null && target.getMobType() == MobType.UNDEAD && Perks.has(player, "restoration.necromage")) mult *= 1.25f;
+        if (target != null && com.skycraft.platform.Effects.isUndead(target) && Perks.has(player, "restoration.necromage")) mult *= 1.25f;
         return mult;
     }
 
@@ -57,6 +56,6 @@ public final class SpellMath {
 
     /** Restoration spells are 25% stronger against undead with Necromage. */
     public static float undeadMult(Player player, LivingEntity target) {
-        return target.getMobType() == MobType.UNDEAD && Perks.has(player, "restoration.necromage") ? 1.25f : 1f;
+        return com.skycraft.platform.Effects.isUndead(target) && Perks.has(player, "restoration.necromage") ? 1.25f : 1f;
     }
 }

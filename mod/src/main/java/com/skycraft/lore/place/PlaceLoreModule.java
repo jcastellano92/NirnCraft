@@ -1,6 +1,6 @@
 package com.skycraft.lore.place;
 
-import net.minecraftforge.eventbus.api.IEventBus;
+import net.neoforged.bus.api.IEventBus;
 
 /**
  * Place lore: the stories, readables, mini-quests and regional rumours of Tamriel's named places ({@link PlaceLore}).

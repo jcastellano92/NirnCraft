@@ -21,7 +21,7 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -42,11 +42,11 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.saveddata.SavedData;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -67,7 +67,7 @@ import java.util.UUID;
  * player's rest point on its bed (contract 9); its doors open only to the owner and key holders. Homestead land comes
  * with a drafting table to found the homestead on the plot. Furnishing upgrades can be bought from the steward.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class Houses {
     /**
      * A home for sale.
@@ -198,7 +198,7 @@ public final class Houses {
         double bestD = Double.MAX_VALUE;
         for (HouseDef h : HOUSES) {
             if (h.homestead() || !isHouseOwner(player, h)) continue;
-            BlockPos at = site(player.serverLevel(), h.id()).map(s -> s.bed() != null ? s.bed() : s.center()).orElse(h.approxPos());
+            BlockPos at = site(player.level(), h.id()).map(s -> s.bed() != null ? s.bed() : s.center()).orElse(h.approxPos());
             double d = at.distSqr(player.blockPosition());
             if (d < bestD) {
                 bestD = d;
@@ -295,7 +295,7 @@ public final class Houses {
 
         if (house.homestead()) {
             // the land deed: a drafting table to found the homestead on the plot
-            give(player, new ItemStack(ForgeRegistries.ITEMS.getValue(new ResourceLocation(Skycraft.MODID, "drafting_table"))));
+            give(player, new ItemStack(BuiltInRegistries.ITEM.getValue(Identifier.fromNamespaceAndPath(Skycraft.MODID, "drafting_table"))));
             give(player, HouseKeyItem.forHouse(house.id()));
             Notifier.message(player, Component.translatable("settlement.skycraft.house.homestead_bought", house.displayName()));
         } else {
@@ -386,7 +386,7 @@ public final class Houses {
             case "bedroom" -> {
                 BlockPos bedPos = free(level, site, center, 2, 2);
                 if (bedPos != null && level.isEmptyBlock(bedPos.east())) {
-                    level.setBlock(bedPos, Blocks.RED_BED.defaultBlockState(), 3);
+                    level.setBlock(bedPos, com.skycraft.worldgen.VanillaBlocks.RED_BED.defaultBlockState(), 3);
                     level.setBlock(bedPos.east(), Blocks.BARREL.defaultBlockState(), 3);
                     Ownership.setPlayerOwner(level, bedPos, player);
                     Ownership.setPlayerOwner(level, bedPos.east(), player);
@@ -489,12 +489,12 @@ public final class Houses {
     private static void updateHouseSign(ServerLevel level, BlockPos pos, Component houseName, String ownerName) {
         BlockEntity be = level.getBlockEntity(pos);
         if (be instanceof SignBlockEntity sbe) {
-            net.minecraft.world.level.block.entity.SignText text = new net.minecraft.world.level.block.entity.SignText()
-                    .setMessage(0, Component.literal("=== HOME ==="))
-                    .setMessage(1, houseName)
-                    .setMessage(2, Component.literal("Owned by:"))
-                    .setMessage(3, Component.literal(ownerName));
-            sbe.setText(text, true);
+            net.minecraft.world.level.block.entity.SignText text = net.minecraft.world.level.block.entity.SignText.EMPTY
+                    .asMutable().setLine(0, Component.literal("=== HOME ===")).asImmutable()
+                    .asMutable().setLine(1, houseName).asImmutable()
+                    .asMutable().setLine(2, Component.literal("Owned by:")).asImmutable()
+                    .asMutable().setLine(3, Component.literal(ownerName)).asImmutable();
+            sbe.setText(text, net.minecraft.world.level.block.entity.SignTextSlot.FRONT);
             sbe.setWaxed(true);
             sbe.setChanged();
             BlockState state = level.getBlockState(pos);
@@ -510,8 +510,8 @@ public final class Houses {
         BlockState state = level.getBlockState(pos);
         if (!(state.getBlock() instanceof SignBlock) && !(state.getBlock() instanceof WallSignBlock)) return;
         if (!(level.getBlockEntity(pos) instanceof SignBlockEntity sign)) return;
-        String line0 = sign.getText(true).getMessage(0, false).getString().toLowerCase(Locale.ROOT);
-        String line1 = sign.getText(true).getMessage(1, false).getString().toLowerCase(Locale.ROOT);
+        String line0 = sign.getText(net.minecraft.world.level.block.entity.SignTextSlot.FRONT).getMessages(false).get(0).getString().toLowerCase(Locale.ROOT);
+        String line1 = sign.getText(net.minecraft.world.level.block.entity.SignTextSlot.FRONT).getMessages(false).get(1).getString().toLowerCase(Locale.ROOT);
         if (line0.contains("shop") || line1.contains("shop") || line0.contains("store") || line1.contains("store")) {
             boolean open = Shop.isOpen(level);
             if (event.getEntity() instanceof ServerPlayer sp && event.getHand() == InteractionHand.MAIN_HAND) {
@@ -533,7 +533,7 @@ public final class Houses {
         final Set<UUID> pendingRespawn = new HashSet<>();
 
         public static HousesData get(MinecraftServer server) {
-            return server.overworld().getDataStorage().computeIfAbsent(HousesData::load, HousesData::new, NAME);
+            return com.skycraft.platform.SavedDataTypes.get(server.overworld(), NAME, HousesData::load, HousesData::new, value263 -> value263.save(new net.minecraft.nbt.CompoundTag()));
         }
 
         @Nullable
@@ -562,32 +562,31 @@ public final class Houses {
 
         public static HousesData load(CompoundTag tag) {
             HousesData data = new HousesData();
-            CompoundTag ownersTag = tag.getCompound("owners");
-            for (String k : ownersTag.getAllKeys()) {
-                CompoundTag entry = ownersTag.getCompound(k);
-                if (entry.hasUUID("uuid")) {
-                    data.owners.put(k, entry.getUUID("uuid"));
-                    data.ownerNames.put(k, entry.getString("name"));
+            CompoundTag ownersTag = tag.getCompoundOrEmpty("owners");
+            for (String k : ownersTag.keySet()) {
+                CompoundTag entry = ownersTag.getCompoundOrEmpty(k);
+                if (entry.read("uuid", net.minecraft.core.UUIDUtil.CODEC).isPresent()) {
+                    data.owners.put(k, entry.read("uuid", net.minecraft.core.UUIDUtil.CODEC).orElseThrow());
+                    data.ownerNames.put(k, entry.getStringOr("name",""));
                 }
             }
-            CompoundTag furnTag = tag.getCompound("furnishings");
-            for (String k : furnTag.getAllKeys()) {
-                ListTag list = furnTag.getList(k, Tag.TAG_STRING);
+            CompoundTag furnTag = tag.getCompoundOrEmpty("furnishings");
+            for (String k : furnTag.keySet()) {
+                ListTag list = furnTag.getListOrEmpty(k);
                 Set<String> set = new HashSet<>();
-                for (int i = 0; i < list.size(); i++) set.add(list.getString(i));
+                for (int i = 0; i < list.size(); i++) set.add(list.getStringOr(i, ""));
                 data.furnishings.put(k, set);
             }
-            ListTag pending = tag.getList("pending", Tag.TAG_INT_ARRAY);
-            for (int i = 0; i < pending.size(); i++) data.pendingRespawn.add(net.minecraft.nbt.NbtUtils.loadUUID(pending.get(i)));
+            ListTag pending = tag.getListOrEmpty("pending");
+            for (int i = 0; i < pending.size(); i++) data.pendingRespawn.add(net.minecraft.core.UUIDUtil.CODEC.parse(net.minecraft.nbt.NbtOps.INSTANCE, pending.get(i)).getOrThrow());
             return data;
         }
 
-        @Override
         public CompoundTag save(CompoundTag tag) {
             CompoundTag ownersTag = new CompoundTag();
             for (Map.Entry<String, UUID> e : owners.entrySet()) {
                 CompoundTag entry = new CompoundTag();
-                entry.putUUID("uuid", e.getValue());
+                entry.store("uuid", net.minecraft.core.UUIDUtil.CODEC,  e.getValue());
                 String name = ownerNames.get(e.getKey());
                 if (name != null) entry.putString("name", name);
                 ownersTag.put(e.getKey(), entry);
@@ -601,7 +600,7 @@ public final class Houses {
             }
             tag.put("furnishings", furnTag);
             ListTag pending = new ListTag();
-            for (UUID u : pendingRespawn) pending.add(net.minecraft.nbt.NbtUtils.createUUID(u));
+            for (UUID u : pendingRespawn) pending.add(net.minecraft.core.UUIDUtil.CODEC.encodeStart(net.minecraft.nbt.NbtOps.INSTANCE, u).getOrThrow());
             tag.put("pending", pending);
             return tag;
         }

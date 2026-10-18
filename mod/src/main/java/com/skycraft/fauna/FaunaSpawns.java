@@ -7,15 +7,15 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.SpawnPlacements;
-import net.minecraft.world.entity.animal.WaterAnimal;
+import net.minecraft.world.entity.animal.fish.WaterAnimal;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
-import net.minecraftforge.event.entity.SpawnPlacementRegisterEvent;
+import net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent;
 
 /**
  * Spawn placement rules of the wildlife (the biome lists live in {@code data/skycraft/forge/biome_modifier/fauna_*.json}).
@@ -24,16 +24,16 @@ import net.minecraftforge.event.entity.SpawnPlacementRegisterEvent;
 public final class FaunaSpawns {
     private FaunaSpawns() {}
 
-    static void register(SpawnPlacementRegisterEvent event) {
-        SpawnPlacementRegisterEvent.Operation op = SpawnPlacementRegisterEvent.Operation.REPLACE;
-        SpawnPlacements.Type ground = SpawnPlacements.Type.ON_GROUND;
+    static void register(RegisterSpawnPlacementsEvent event) {
+        RegisterSpawnPlacementsEvent.Operation op = RegisterSpawnPlacementsEvent.Operation.REPLACE;
+        net.minecraft.world.entity.SpawnPlacementType ground = net.minecraft.world.entity.SpawnPlacementTypes.ON_GROUND;
         Heightmap.Types surface = Heightmap.Types.MOTION_BLOCKING_NO_LEAVES;
         event.register(FaunaEntities.DEER.get(), ground, surface, FaunaSpawns::grazer, op);
         event.register(FaunaEntities.ELK.get(), ground, surface, FaunaSpawns::grazer, op);
         event.register(FaunaEntities.MAMMOTH.get(), ground, surface,
                 (type, level, reason, pos, random) -> grazer(type, level, reason, pos, random) && fewNearby(type, level, pos, 96, 6), op);
         event.register(FaunaEntities.SABRE_CAT.get(), ground, surface,
-                (type, level, reason, pos, random) -> wild(level, pos) && (reason != MobSpawnType.NATURAL && reason != MobSpawnType.CHUNK_GENERATION
+                (type, level, reason, pos, random) -> wild(level, pos) && (reason != EntitySpawnReason.NATURAL && reason != EntitySpawnReason.CHUNK_GENERATION
                         || level.canSeeSky(pos)) && fewNearby(type, level, pos, 64, 1), op);
         event.register(FaunaEntities.BEAR.get(), ground, surface,
                 (type, level, reason, pos, random) -> wild(level, pos) && fewNearby(type, level, pos, 64, 1), op);
@@ -41,7 +41,7 @@ public final class FaunaSpawns {
                 (type, level, reason, pos, random) -> shore(level, pos) && fewNearby(type, level, pos, 32, 6), op);
         event.register(FaunaEntities.MUDCRAB.get(), ground, surface,
                 (type, level, reason, pos, random) -> shore(level, pos) && nearWater(level, pos, 3) && fewNearby(type, level, pos, 24, 4), op);
-        event.register(FaunaEntities.SLAUGHTERFISH.get(), SpawnPlacements.Type.IN_WATER, Heightmap.Types.OCEAN_FLOOR,
+        event.register(FaunaEntities.SLAUGHTERFISH.get(), net.minecraft.world.entity.SpawnPlacementTypes.IN_WATER, Heightmap.Types.OCEAN_FLOOR,
                 (type, level, reason, pos, random) -> WaterAnimal.checkSurfaceWaterAnimalSpawnRules(type, level, reason, pos, random)
                         && fewNearby(type, level, pos, 16, 4), op);
     }
@@ -59,7 +59,7 @@ public final class FaunaSpawns {
     }
 
     /** Grazers want open, daylit ground. */
-    static <T extends Entity> boolean grazer(EntityType<T> type, ServerLevelAccessor level, MobSpawnType reason, BlockPos pos, RandomSource random) {
+    static <T extends Entity> boolean grazer(EntityType<T> type, ServerLevelAccessor level, EntitySpawnReason reason, BlockPos pos, RandomSource random) {
         return wild(level, pos) && level.getRawBrightness(pos, 0) > 8;
     }
 

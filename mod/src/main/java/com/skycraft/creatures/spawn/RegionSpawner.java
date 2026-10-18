@@ -22,7 +22,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
@@ -31,11 +31,11 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.event.AddReloadListenerEvent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.living.LivingEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.neoforge.event.AddServerReloadListenersEvent;
+
+import net.neoforged.neoforge.event.entity.living.LivingEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,7 +55,7 @@ import java.util.List;
  * </ul>
  * Vanilla's own hostile spawning stays suppressed by {@link CreatureSpawns}.
  */
-@Mod.EventBusSubscriber(modid = Skycraft.MODID)
+@net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class RegionSpawner {
     private static final int INTERVAL = 40;
     private static final double MIN_DIST = 28;
@@ -68,29 +68,29 @@ public final class RegionSpawner {
     private RegionSpawner() {}
 
     @SubscribeEvent
-    public static void onReload(AddReloadListenerEvent event) {
-        event.addListener(new SpawnTables());
+    public static void onReload(AddServerReloadListenersEvent event) {
+        event.addListener(net.minecraft.resources.Identifier.fromNamespaceAndPath("skycraft", "spawn_tables"), new SpawnTables());
     }
 
     @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || !(event.player instanceof ServerPlayer player)) return;
-        ServerLevel level = player.serverLevel();
+    public static void onPlayerTick(net.neoforged.neoforge.event.tick.PlayerTickEvent.Post event) {
+        if (!(event instanceof net.neoforged.neoforge.event.tick.PlayerTickEvent.Post) || !(event.getEntity() instanceof ServerPlayer player)) return;
+        ServerLevel level = player.level();
         if ((level.getGameTime() + player.getId() * 7L) % INTERVAL != 0) return;
         if (!CreaturesConfig.REGION_SPAWNING.get() || player.isSpectator() || !player.isAlive()) return;
         // Nirn and the realms (the realms' tables match their dimension region, e.g. "minecraft:the_nether")
         if (level.dimension() != Level.OVERWORLD && com.skycraft.realms.Realm.of(level) == null || SpawnTables.rules().isEmpty()) return;
-        if (!level.getGameRules().getBoolean(net.minecraft.world.level.GameRules.RULE_DOMOBSPAWNING)) return;
+        if (!level.getGameRules().get(net.minecraft.world.level.gamerules.GameRules.SPAWN_MOBS)) return;
 
         List<Mob> mine = level.getEntitiesOfClass(Mob.class, player.getBoundingBox().inflate(BUDGET_RADIUS),
-                m -> m.getTags().contains(SkyCreature.REGION_SPAWN_TAG));
+                m -> m.entityTags().contains(SkyCreature.REGION_SPAWN_TAG));
         int hostile = 0;
         int wild = 0;
         java.util.Set<Long> groups = new java.util.HashSet<>();
         for (Mob m : mine) {
             if (m instanceof Enemy) {
                 hostile++;
-                groups.add(m.getPersistentData().getLong(GROUP_KEY));
+                groups.add(m.getPersistentData().getLongOr(GROUP_KEY, 0L));
             } else {
                 wild++;
             }
@@ -125,7 +125,7 @@ public final class RegionSpawner {
         // daylight makes hostile attempts rarer unless a severe regional storm darkens the sky
         WeatherKind playerWeather = RegionalWeather.kindAt(level, player.blockPosition());
         boolean severeAtPlayer = RegionalWeather.isSevere(playerWeather) || playerWeather == WeatherKind.STORM;
-        if (hostileKind && !level.isNight() && !severeAtPlayer && random.nextDouble() > CreaturesConfig.DAY_HOSTILE_FACTOR.get()) return;
+        if (hostileKind && !level.isDarkOutside() && !severeAtPlayer && random.nextDouble() > CreaturesConfig.DAY_HOSTILE_FACTOR.get()) return;
         BlockPos column = pickColumn(level, player, random, hostileKind ? CreaturesConfig.MIN_HOSTILE_DISTANCE.get() : MIN_DIST);
         if (column == null) return;
         int surface = level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, column.getX(), column.getZ());
@@ -153,7 +153,7 @@ public final class RegionSpawner {
         }
 
         Holder<Biome> biome = level.getBiome(spot);
-        BiomeFamily family = BiomeFamily.of(biome, spot);
+        BiomeFamily family = BiomeFamily.of(biome, spot, level.getSeaLevel());
         Region region = Regions.at(level, spot);
         int regionLevel = Leveling.regionLevel(level, spot);
         int playerLevel = Math.max(1, com.skycraft.core.SkyData.get(player).getLevel());
@@ -166,8 +166,8 @@ public final class RegionSpawner {
             regionLevel = Math.min(regionLevel, maxAllowedLevel);
         }
         boolean lowLevelProtected = nearStart || (hostileKind && playerLevel <= 3);
-        boolean night = level.isNight();
-        long dayTime = level.getDayTime() % 24000L;
+        boolean night = level.isDarkOutside();
+        long dayTime = level.getDefaultClockTime() % 24000L;
         SpawnTables.Weather weather = toSpawnWeather(spotWeather, level.isRaining(), level.isThundering());
         // road and settlement distances are only looked up when a rule asks for them (cached per attempt)
         Boolean roadHere = hostileKind ? Boolean.valueOf(roadSpot) : null;
@@ -237,7 +237,7 @@ public final class RegionSpawner {
 
     private static boolean hasBandit(SpawnTables.Group g) {
         for (SpawnTables.Member m : g.members()) {
-            net.minecraft.resources.ResourceLocation id = net.minecraftforge.registries.ForgeRegistries.ENTITY_TYPES.getKey(m.type());
+            net.minecraft.resources.Identifier id = net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getKey(m.type());
             if (id != null && Skycraft.MODID.equals(id.getNamespace()) && (id.getPath().equals("bandit") || id.getPath().equals("bandit_chief"))) return true;
         }
         return false;
@@ -245,7 +245,7 @@ public final class RegionSpawner {
 
     private static boolean hasBanned(SpawnTables.Group g) {
         for (SpawnTables.Member m : g.members()) {
-            net.minecraft.resources.ResourceLocation id = net.minecraftforge.registries.ForgeRegistries.ENTITY_TYPES.getKey(m.type());
+            net.minecraft.resources.Identifier id = net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getKey(m.type());
             if (id != null && Skycraft.MODID.equals(id.getNamespace()) && SpawnPacing.bannedNearStart(id.getPath())) return true;
         }
         return false;
@@ -256,7 +256,7 @@ public final class RegionSpawner {
         if (!rule.provinces().isEmpty() && !rule.provinces().contains(region.province())) return false;
         if (!rule.families().isEmpty() && !rule.families().contains(family)) return false;
         if (!rule.biomeTags().isEmpty() || !rule.biomeIds().isEmpty()) {
-            boolean any = biome.unwrapKey().map(k -> rule.biomeIds().contains(k.location())).orElse(false);
+            boolean any = biome.unwrapKey().map(k -> rule.biomeIds().contains(k.identifier())).orElse(false);
             if (!any) {
                 for (TagKey<Biome> tag : rule.biomeTags()) {
                     if (biome.is(tag)) {
@@ -293,7 +293,7 @@ public final class RegionSpawner {
         for (int dy = 0; dy < 16; dy++) {
             int y = start + (dy % 2 == 0 ? dy / 2 : -(dy / 2 + 1));
             BlockPos p = new BlockPos(column.getX(), y, column.getZ());
-            if (y <= level.getMinBuildHeight() + 2 || y >= level.getMaxBuildHeight() - 2) continue;
+            if (y <= level.getMinY() + 2 || y >= (level.getMaxY()+1) - 2) continue;
             if (standable(level, p)) return p;
         }
         return null;
@@ -364,26 +364,26 @@ public final class RegionSpawner {
     }
 
     private static boolean spawnOne(ServerLevel level, EntityType<?> type, BlockPos at, SpawnTables.Placement place) {
-        Entity e = type.create(level);
+        Entity e = type.create(level, net.minecraft.world.entity.EntitySpawnReason.EVENT);
         if (!(e instanceof Mob mob)) {
             if (e != null) e.discard();
             return false;
         }
         if (place == SpawnTables.Placement.WATER
-                && (mob instanceof net.minecraft.world.entity.animal.WaterAnimal || mob.canBreatheUnderwater())
+                && (mob instanceof net.minecraft.world.entity.animal.fish.WaterAnimal || mob.canBreatheUnderwater())
                 && level.getFluidState(at).isEmpty() && level.getFluidState(at.below()).is(FluidTags.WATER)) {
             at = at.below();
         }
-        mob.moveTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, level.getRandom().nextFloat() * 360f, 0);
+        mob.snapTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, level.getRandom().nextFloat() * 360f, 0);
         if (!level.noCollision(mob) || level.containsAnyLiquid(mob.getBoundingBox()) && place != SpawnTables.Placement.WATER) return false;
-        if (place == SpawnTables.Placement.WATER && !mob.canBreatheUnderwater() && !(mob instanceof net.minecraft.world.entity.animal.WaterAnimal)) {
+        if (place == SpawnTables.Placement.WATER && !mob.canBreatheUnderwater() && !(mob instanceof net.minecraft.world.entity.animal.fish.WaterAnimal)) {
             // land creatures listed for water spots (shore dwellers) need dry ground next to it
             if (!level.getFluidState(at).isEmpty()) return false;
         }
         mob.addTag(SkyCreature.REGION_SPAWN_TAG);
         mob.getPersistentData().putLong(SEEN_KEY, com.skycraft.world.RestManager.liveTime(level));
         mob.getPersistentData().putLong(GROUP_KEY, groupId);
-        mob.finalizeSpawn(level, level.getCurrentDifficultyAt(at), MobSpawnType.NATURAL, null, null);
+        mob.finalizeSpawn(level, level.getCurrentDifficultyAt(at), EntitySpawnReason.NATURAL, null);
         level.addFreshEntityWithPassengers(mob);
         return true;
     }
@@ -392,10 +392,10 @@ public final class RegionSpawner {
 
     /** Region-spawned creatures leave once nobody has been within 96 blocks for a minute. */
     @SubscribeEvent
-    public static void onLivingTick(LivingEvent.LivingTickEvent event) {
+    public static void onLivingTick(net.neoforged.neoforge.event.tick.EntityTickEvent.Pre event) {
         Entity e = event.getEntity();
-        if (e.tickCount % 100 != 0 || e.level().isClientSide || !(e instanceof Mob mob)) return;
-        if (!mob.getTags().contains(SkyCreature.REGION_SPAWN_TAG)) return;
+        if (e.tickCount % 100 != 0 || e.level().isClientSide() || !(e instanceof Mob mob)) return;
+        if (!mob.entityTags().contains(SkyCreature.REGION_SPAWN_TAG)) return;
         if (mob.hasCustomName() || mob.isLeashed() || mob.isPersistenceRequired() || mob.isVehicle()) {
             mob.removeTag(SkyCreature.REGION_SPAWN_TAG);
             return;
@@ -403,7 +403,7 @@ public final class RegionSpawner {
         long now = com.skycraft.world.RestManager.liveTime(mob.level());
         if (mob.level().getNearestPlayer(mob, BUDGET_RADIUS) != null) {
             mob.getPersistentData().putLong(SEEN_KEY, now);
-        } else if (now - mob.getPersistentData().getLong(SEEN_KEY) > 1200) {
+        } else if (now - mob.getPersistentData().getLongOr(SEEN_KEY, 0L) > 1200) {
             mob.discard();
         }
     }

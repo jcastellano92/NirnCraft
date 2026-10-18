@@ -528,6 +528,12 @@ def write_textures():
 
 # ------------------------------------------------------------------------------------------ assets/data
 def dump(path, obj):
+    import sys
+    from pathlib import Path
+    native_tools263 = str(Path(__file__).resolve().parents[1])
+    if native_tools263 not in sys.path: sys.path.insert(0, native_tools263)
+    from data_format_263 import prepare
+    path, obj = prepare(path, obj)
     os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, "w", encoding="utf-8", newline="\n") as f:
         json.dump(obj, f, indent=2)
@@ -547,7 +553,7 @@ def item_model(name, obj):
 
 
 def loot(name, pools):
-    dump(os.path.join(DATA, SK, "loot_tables", "blocks", name + ".json"),
+    dump(os.path.join(DATA, SK, "loot_table", "blocks", name + ".json"),
          {"type": "minecraft:block", "pools": pools, "random_sequence": "skycraft:blocks/" + name})
 
 
@@ -731,7 +737,7 @@ def write_assets():
 
 
 def recipe(name, obj):
-    dump(os.path.join(DATA, SK, "recipes", name + ".json"), obj)
+    dump(os.path.join(DATA, SK, "recipe", name + ".json"), obj)
 
 
 def write_recipes():
@@ -763,6 +769,7 @@ def write_recipes():
 
 
 def merge_tag(kind, tag, values):
+    kind = {"blocks": "block", "items": "item"}.get(kind, kind)
     ns, path = tag.split(":")
     p = os.path.join(DATA, ns, "tags", kind, *path.split("/")) + ".json"
     existing = {"replace": False, "values": []}

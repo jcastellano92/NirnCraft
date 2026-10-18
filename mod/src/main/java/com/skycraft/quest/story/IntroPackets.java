@@ -1,17 +1,16 @@
 package com.skycraft.quest.story;
 
 import com.skycraft.network.SkyNetwork;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.network.NetworkDirection;
-import net.minecraftforge.network.NetworkEvent;
+import net.neoforged.api.distmarker.Dist;
+import com.skycraft.platform.Sides;
+import net.minecraft.network.protocol.PacketFlow;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.function.Supplier;
 
 /**
  * Packets of the opening. The server owns the state machine; the client shows the loading screen, runs the cutscene
@@ -21,10 +20,10 @@ public final class IntroPackets {
     private IntroPackets() {}
 
     public static void register() {
-        SkyNetwork.register(State.class, NetworkDirection.PLAY_TO_CLIENT, State::encode, State::decode, State::handle);
-        SkyNetwork.register(Cutscene.class, NetworkDirection.PLAY_TO_CLIENT, Cutscene::encode, Cutscene::decode, Cutscene::handle);
-        SkyNetwork.register(Hidden.class, NetworkDirection.PLAY_TO_CLIENT, Hidden::encode, Hidden::decode, Hidden::handle);
-        SkyNetwork.register(Loaded.class, NetworkDirection.PLAY_TO_SERVER, Loaded::encode, Loaded::decode, Loaded::handle);
+        SkyNetwork.register(State.class, PacketFlow.CLIENTBOUND, State::encode, State::decode, State::handle);
+        SkyNetwork.register(Cutscene.class, PacketFlow.CLIENTBOUND, Cutscene::encode, Cutscene::decode, Cutscene::handle);
+        SkyNetwork.register(Hidden.class, PacketFlow.CLIENTBOUND, Hidden::encode, Hidden::decode, Hidden::handle);
+        SkyNetwork.register(Loaded.class, PacketFlow.SERVERBOUND, Loaded::encode, Loaded::decode, Loaded::handle);
     }
 
     /**
@@ -33,7 +32,7 @@ public final class IntroPackets {
      * and the server's preparation progress (0..1).
      */
     public record State(int state, float progress, int townCx, int townCz, int townRadius, int chunkRadius, int timeoutSeconds) {
-        static void encode(State m, FriendlyByteBuf b) {
+        static void encode(State m, RegistryFriendlyByteBuf b) {
             b.writeVarInt(m.state);
             b.writeFloat(m.progress);
             b.writeInt(m.townCx);
@@ -43,13 +42,12 @@ public final class IntroPackets {
             b.writeVarInt(m.timeoutSeconds);
         }
 
-        static State decode(FriendlyByteBuf b) {
+        static State decode(RegistryFriendlyByteBuf b) {
             return new State(b.readVarInt(), b.readFloat(), b.readInt(), b.readInt(), b.readVarInt(), b.readVarInt(), b.readVarInt());
         }
 
-        static void handle(State m, Supplier<NetworkEvent.Context> ctx) {
-            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> com.skycraft.quest.client.IntroClient.onState(m));
-            ctx.get().setPacketHandled(true);
+        static void handle(State m, IPayloadContext ctx) {
+            Sides.runOn(Dist.CLIENT, () -> () -> com.skycraft.quest.client.IntroClient.onState(m));
         }
     }
 
@@ -59,7 +57,7 @@ public final class IntroPackets {
      */
     public record Cutscene(boolean start, int ticks, double ex, double ey, double ez, float yaw, float pitch, double tx, double ty, double tz,
                            int townRadius, long seed, double[] burn) {
-        static void encode(Cutscene m, FriendlyByteBuf b) {
+        static void encode(Cutscene m, RegistryFriendlyByteBuf b) {
             b.writeBoolean(m.start);
             b.writeVarInt(m.ticks);
             b.writeDouble(m.ex);
@@ -76,7 +74,7 @@ public final class IntroPackets {
             for (double v : m.burn) b.writeDouble(v);
         }
 
-        static Cutscene decode(FriendlyByteBuf b) {
+        static Cutscene decode(RegistryFriendlyByteBuf b) {
             boolean start = b.readBoolean();
             int ticks = b.readVarInt();
             double ex = b.readDouble(), ey = b.readDouble(), ez = b.readDouble();
@@ -90,45 +88,42 @@ public final class IntroPackets {
             return new Cutscene(start, ticks, ex, ey, ez, yaw, pitch, tx, ty, tz, r, seed, burn);
         }
 
-        static void handle(Cutscene m, Supplier<NetworkEvent.Context> ctx) {
-            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> com.skycraft.quest.client.IntroClient.onCutscene(m));
-            ctx.get().setPacketHandled(true);
+        static void handle(Cutscene m, IPayloadContext ctx) {
+            Sides.runOn(Dist.CLIENT, () -> () -> com.skycraft.quest.client.IntroClient.onCutscene(m));
         }
     }
 
     /** Every player still in the opening: clients do not draw them (nor their name tags) until they leave the cottage. */
     public record Hidden(List<UUID> ids) {
-        static void encode(Hidden m, FriendlyByteBuf b) {
+        static void encode(Hidden m, RegistryFriendlyByteBuf b) {
             b.writeVarInt(m.ids.size());
             for (UUID u : m.ids) b.writeUUID(u);
         }
 
-        static Hidden decode(FriendlyByteBuf b) {
+        static Hidden decode(RegistryFriendlyByteBuf b) {
             int n = Math.min(b.readVarInt(), 4096);
             List<UUID> ids = new ArrayList<>(n);
             for (int i = 0; i < n; i++) ids.add(b.readUUID());
             return new Hidden(ids);
         }
 
-        static void handle(Hidden m, Supplier<NetworkEvent.Context> ctx) {
-            DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> com.skycraft.quest.client.IntroClient.onHidden(m.ids));
-            ctx.get().setPacketHandled(true);
+        static void handle(Hidden m, IPayloadContext ctx) {
+            Sides.runOn(Dist.CLIENT, () -> () -> com.skycraft.quest.client.IntroClient.onHidden(m.ids));
         }
     }
 
     /** C2S: the loading screen is satisfied (the chunks it asked for are in, or its own time ran out). */
     public record Loaded() {
-        static void encode(Loaded m, FriendlyByteBuf b) {
+        static void encode(Loaded m, RegistryFriendlyByteBuf b) {
         }
 
-        static Loaded decode(FriendlyByteBuf b) {
+        static Loaded decode(RegistryFriendlyByteBuf b) {
             return new Loaded();
         }
 
-        static void handle(Loaded m, Supplier<NetworkEvent.Context> ctx) {
-            ServerPlayer p = ctx.get().getSender();
+        static void handle(Loaded m, IPayloadContext ctx) {
+            ServerPlayer p = SkyNetwork.sender(ctx);
             if (p != null) IntroFlow.onClientLoaded(p);
-            ctx.get().setPacketHandled(true);
         }
     }
 }

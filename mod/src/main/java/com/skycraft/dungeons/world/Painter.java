@@ -5,15 +5,15 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobSpawnType;
-import net.minecraft.world.entity.vehicle.MinecartChest;
+import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.world.entity.vehicle.minecart.MinecartChest;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Block;
@@ -25,7 +25,8 @@ import net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 
 import javax.annotation.Nullable;
 
@@ -59,10 +60,10 @@ public final class Painter {
         this.box = box;
         this.seed = seed;
         this.x0 = Math.max(chunk.minX(), box.minX());
-        this.y0 = Math.max(Math.max(chunk.minY(), box.minY()), level.getMinBuildHeight());
+        this.y0 = Math.max(Math.max(chunk.minY(), box.minY()), level.getMinY());
         this.z0 = Math.max(chunk.minZ(), box.minZ());
         this.x1 = Math.min(chunk.maxX(), box.maxX());
-        this.y1 = Math.min(Math.min(chunk.maxY(), box.maxY()), level.getMaxBuildHeight() - 1);
+        this.y1 = Math.min(Math.min(chunk.maxY(), box.maxY()), (level.getMaxY() + 1) - 1);
         this.z1 = Math.min(chunk.maxZ(), box.maxZ());
     }
 
@@ -255,14 +256,14 @@ public final class Painter {
     // ------------------------------------------------------------------ containers & entities
 
     /** A container (chest, barrel, trapped chest) holding the loot table. Lockpickable via the crime module. */
-    public void container(int x, int y, int z, BlockState state, ResourceLocation loot) {
+    public void container(int x, int y, int z, BlockState state, Identifier loot) {
         if (!ok(x, y, z)) return;
         set(x, y, z, state);
         BlockPos imm = new BlockPos(x, y, z);
         // a named place's ordinary chests hold what its story says (half of them; boss and cache chests keep theirs)
         loot = Identity.loot(place, loot, hash(x, y, z, 32));
         if (level.getBlockEntity(imm) instanceof RandomizableContainerBlockEntity) {
-            RandomizableContainerBlockEntity.setLootTable(level, RandomSource.create(hash(x, y, z, 31)), imm, loot);
+            com.skycraft.worldgen.WorldgenData.setLootTable(level, RandomSource.create(hash(x, y, z, 31)), imm, loot);
         }
     }
 
@@ -279,9 +280,9 @@ public final class Painter {
 
     /** Looks a block up by id; {@code fallback} when the owning mod/module isn't present. */
     public static BlockState block(String id, BlockState fallback) {
-        ResourceLocation rl = ResourceLocation.tryParse(id);
-        if (rl == null || !ForgeRegistries.BLOCKS.containsKey(rl)) return fallback;
-        Block b = ForgeRegistries.BLOCKS.getValue(rl);
+        Identifier rl = Identifier.tryParse(id);
+        if (rl == null || !BuiltInRegistries.BLOCK.containsKey(rl)) return fallback;
+        Block b = BuiltInRegistries.BLOCK.getValue(rl);
         return b == null ? fallback : b.defaultBlockState();
     }
 
@@ -299,8 +300,8 @@ public final class Painter {
     }
 
     public static boolean entityExists(String id) {
-        ResourceLocation rl = ResourceLocation.tryParse(id);
-        return rl != null && ForgeRegistries.ENTITY_TYPES.containsKey(rl);
+        Identifier rl = Identifier.tryParse(id);
+        return rl != null && BuiltInRegistries.ENTITY_TYPE.containsKey(rl);
     }
 
     /** Picks the first registered id, or null. */
@@ -385,24 +386,24 @@ public final class Painter {
             }
         }
         if (id == null || !ok(x, y, z) || !chunk.isInside(new BlockPos(x, y, z))) return null;
-        ResourceLocation rl = ResourceLocation.tryParse(id);
-        if (rl == null || !ForgeRegistries.ENTITY_TYPES.containsKey(rl)) return null;
+        Identifier rl = Identifier.tryParse(id);
+        if (rl == null || !BuiltInRegistries.ENTITY_TYPE.containsKey(rl)) return null;
         // bosses and bandits are never placed near the world spawn
         if ("skycraft".equals(rl.getNamespace()) && com.skycraft.creatures.spawn.SpawnPacing.bannedNearStart(rl.getPath())
                 && com.skycraft.creatures.spawn.SpawnPacing.nearStart(level.getLevel(), x, z)) return null;
-        EntityType<?> type = ForgeRegistries.ENTITY_TYPES.getValue(rl);
+        EntityType<?> type = BuiltInRegistries.ENTITY_TYPE.getValue(rl);
         if (type == null) return null;
         try {
-            Entity e = type.create(level.getLevel());
+            Entity e = type.create(level.getLevel(), EntitySpawnReason.STRUCTURE);
             if (!(e instanceof Mob mob)) {
                 if (e != null) e.discard();
                 return null;
             }
-            mob.moveTo(x + 0.5, y, z + 0.5, yaw, 0.0f);
+            mob.snapTo(x + 0.5, y, z + 0.5, yaw, 0.0f);
             mob.setYHeadRot(yaw);
             // through Forge so MobSpawnEvent.FinalizeSpawn handlers (levelling, gear...) see dungeon mobs too
-            net.minecraftforge.event.ForgeEventFactory.onFinalizeSpawn(mob, level, level.getCurrentDifficultyAt(new BlockPos(x, y, z)),
-                    MobSpawnType.STRUCTURE, null, null);
+            net.neoforged.neoforge.event.EventHooks.finalizeMobSpawn(mob, level, level.getCurrentDifficultyAt(new BlockPos(x, y, z)),
+                    EntitySpawnReason.STRUCTURE, null);
             if (mob.isSpawnCancelled()) {
                 mob.discard();
                 return null;
@@ -436,10 +437,11 @@ public final class Painter {
     }
 
     /** A chest minecart with loot (mines). */
-    public void chestMinecart(int x, int y, int z, ResourceLocation loot) {
+    public void chestMinecart(int x, int y, int z, Identifier loot) {
         if (!ok(x, y, z)) return;
-        MinecartChest cart = new MinecartChest(level.getLevel(), x + 0.5, y + 0.5, z + 0.5);
-        cart.setLootTable(loot, hash(x, y, z, 77));
+        MinecartChest cart = new net.minecraft.world.entity.vehicle.minecart.MinecartChest(net.minecraft.world.entity.EntityTypes.CHEST_MINECART, level.getLevel());
+        cart.setPos( x + 0.5, y + 0.5, z + 0.5);
+        cart.setLootTable(net.minecraft.resources.ResourceKey.create(Registries.LOOT_TABLE, loot), hash(x, y, z, 77));
         level.addFreshEntity(cart);
     }
 
