@@ -3,6 +3,7 @@
 #include <chrono>
 #include <cmath>
 #include <cstring>
+#include <cstdint>
 #include <memory>
 #include <mutex>
 #include <string>
@@ -207,14 +208,18 @@ AETHER_API AetherStatus aether_render(AetherContext* ctx, const AetherFrame* f, 
     if (out->colorLinear) std::memcpy(out->colorLinear, ctx->targets.color.data(), n * 16);
     if (out->color) {
         // harness tonemapper (the game composite tonemaps near and far together instead)
+        static const auto lut = [] {
+            std::vector<uint8_t> t(4097);
+            for (int i = 0; i <= 4096; i++) t[size_t(i)] = uint8_t(std::pow(i / 4096.0f, 1.0f / 2.2f) * 255.0f + 0.5f);
+            return t;
+        }();
         const float* c = ctx->targets.color.data();
         for (size_t i = 0; i < n; i++) {
             uint32_t px = 0;
             for (int k = 0; k < 3; k++) {
-                float v = c[4 * i + k];
-                v = v / (1.0f + v);
-                v = std::pow(std::fmin(std::fmax(v, 0.0f), 1.0f), 1.0f / 2.2f);
-                px |= uint32_t(v * 255.0f + 0.5f) << (8 * k);
+                float v = std::fmax(c[4 * i + k], 0.0f);
+                v = v / (1.0f + v);  // [0, 1)
+                px |= uint32_t(lut[size_t(v * 4096.0f + 0.5f)]) << (8 * k);
             }
             px |= uint32_t(std::fmin(std::fmax(c[4 * i + 3], 0.0f), 1.0f) * 255.0f + 0.5f) << 24;
             out->color[i] = px;
