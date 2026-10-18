@@ -17,6 +17,7 @@ reported too (the lab machine, small frame: shapes, not budgets).
 
 usage (from native/, after native\\build.ps1 or a pack_lab build):
     py -3 tools/pack_lab_quality.py [--out build/quality-lab] [--w 640 --h 360] [--scenes land,water,golden,lamps,volcano]
+    (more scenes: cave, window, helgen, night)
     py -3 tools/pack_lab_quality.py --smooth [--scenes water,golden,lamps]
 --smooth: every knob together from 0 to 1 in tenths per scene (loss against all-1 and the passes' GPU time per step,
 plus a contact sheet smooth.png): the look and the cost should both change in small, even steps, with no jump.
@@ -46,7 +47,14 @@ SCENES = {
     "golden": "time=0.46 yaw=270 fog=0.15",
     "lamps": "time=0.75 lamps=1 fog=0.3 above=3 pitch=-6",
     "volcano": "time=0.3 volcano=1 pitch=6",
+    # the look pass's scenes (not in the default set the weights were fitted on): shafts through a cave mouth and a
+    # window (real shadow map), a burning town's smoke columns, a moonlit night
+    "cave": "scene=cave time=0.08 yaw=90",
+    "window": "scene=window time=0.1 yaw=38 look=55 pitch=-8",
+    "helgen": "time=0.3 x=-24 z=1143 above=6 pitch=8 fires=8",
+    "night": "time=0.75 moons=1",
 }
+DEFAULT_SCENES = ["land", "water", "golden", "lamps", "volcano"]
 # knob -> the lab keys it drives (lib/quality.glsl texels; the controller writes the wave LOD and the far fraction
 # from the same knob as the count / start)
 KNOBS = {
@@ -115,7 +123,7 @@ def main() -> int:
     ap.add_argument("--out", default=str(NATIVE / "build" / "quality-lab"))
     ap.add_argument("--w", type=int, default=640)
     ap.add_argument("--h", type=int, default=360)
-    ap.add_argument("--scenes", default=",".join(SCENES))
+    ap.add_argument("--scenes", default=",".join(DEFAULT_SCENES))
     ap.add_argument("--smooth", action="store_true")
     args = ap.parse_args()
     if args.smooth:

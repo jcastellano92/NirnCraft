@@ -6,6 +6,10 @@
 #define AETHER_FAR_FIELD        // composite aether's far field (needs the Skycraft mod's aether renderer)
 #define AETHER_HANDOFF_BAND 24.0 // [8.0 16.0 24.0 32.0 48.0] blocks over which near hands over to far
 #define EXPOSURE 1.0 // [0.6 0.8 1.0 1.2 1.4 1.7 2.0]
+#define AUTO_EXPOSURE           // the eye adapts: dark caves and nights opened up, the bright outside of a cave blown out
+#define NIGHT_VISION 2 // [0 1 2 3] dim light loses its colour to the eye's rods and leans blue (Purkinje)
+#define REGION_GRADE            // a film grade per land (baked LUTs): Skyrim's cold pines, Hammerfell's gold, Morrowind's ash ...
+#define GRADE_STRENGTH 1.0 // [0.0 0.25 0.5 0.75 1.0 1.25]
 
 // adaptive quality (lib/quality.glsl, docs/ADAPTIVE-QUALITY.md): the mod measures this machine and scales the counts
 // below at runtime (they are ceilings). The ADAPTIVE profile (these defaults) carries ULTRA's ceilings and, without the
@@ -21,6 +25,10 @@
 
 // materials
 #define PBR_MAPS                // labPBR normal and specular maps when the resource pack has them
+#define POM                     // parallax occlusion from the labPBR height map, up close (needs PBR_MAPS)
+#define POM_STEPS 24 // [8 12 16 24 32] height-map steps (the most; fewer with the SSAO knob and towards POM_DISTANCE)
+#define POM_DEPTH 0.12 // [0.06 0.09 0.12 0.18 0.25] how deep the height map reaches, in blocks
+#define POM_DISTANCE 24.0 // [8.0 12.0 16.0 24.0 32.0] blocks from the eye where the parallax has faded out
 #define SPECULAR                // sun and sky highlights (GGX), widened with distance so far ones do not shimmer
 #define FOLIAGE_SSS             // sunlight through leaves and grass
 #define SSAO                    // screen-space ambient occlusion
@@ -49,11 +57,12 @@
 #define MEDIA_STEPS 16 // [0 4 6 10 14 16] the near air march: fog sealed out of houses and caves, dungeon air, halos
 #define HALO_STEPS 12 // [0 6 8 12 16] lamps, torches, fires and spells glow in the fog around them (0: off)
 #define PLUME_STEPS 16 // [0 6 10 16] smoke columns: the Red Mountain volcano (and fires with the option below)
-//#define SMOKE_FIRE_VOLUMES      // fires' smoke as volumes too (the mod draws fire smoke as sprites: one or the other)
+#define SMOKE_FIRE_VOLUMES 12 // [0 2 4 8 12 23] fires' smoke columns as lit volumes, the strongest first (0: the mod's sprites only)
 #define LIGHTNING_LIGHT 1 // [0 1] storm channels light the ground, the rain and the clouds (outdoors only)
 //#define LIGHT_OCCLUSION        // the mod's point lights are shadowed by walls (needs -Dskycraft.localLightOcclusion)
-#define VOLUMETRIC_LIGHT        // light shafts through clouds, trees and windows
-#define VL_SAMPLES 32 // [8 12 16 24 32]
+#define VOLUMETRIC_LIGHT        // light shafts through clouds, trees, windows, doors, cave mouths and ceiling holes
+#define SHAFT_MARCH             // shafts from real occlusion (shadow map + aether's sun map); off: screen-space only
+#define VL_SAMPLES 20 // [6 8 12 16 20 24 32] shaft steps (the most; adaptive quality uses fewer when it must)
 #define STARS                   // stars and the galaxy, turning with the sky
 #define AURORA                  // northern lights in cold northern skies at night
 #define WEATHER_SKY             // the sky greys and the sky light dims under the mod's storm cells and overcast

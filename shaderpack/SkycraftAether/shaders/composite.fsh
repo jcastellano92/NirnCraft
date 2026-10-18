@@ -5,7 +5,9 @@
 //  * water: refraction with absorption by depth, screen-space reflections falling back to aether's far terrain and
 //    the sky, Fresnel, a sun glint, and foam lapping wherever the water is shallow (any shore, any pond)
 //  * glass and ice: refraction and tint; under water: absorption fog and caustics on the bed
-//  * light shafts: screen-space scattering towards the sun (or moon) through gaps in terrain, trees and aether's clouds
+//  * light shafts: the key light marched along the view ray through the air with real occlusion (lib/shafts.glsl:
+//    shadow map, aether's sun map), into colortex4's alpha for composite1.fsh; LOW (no SHAFT_MARCH): screen-space
+//    scattering towards the sun (or moon) through gaps in terrain, trees and aether's clouds
 #include "/lib/settings.glsl"
 #include "/lib/common.glsl"
 #include "/lib/atmosphere.glsl"
@@ -40,6 +42,10 @@ uniform float viewHeight;
 uniform int isEyeInWater;
 uniform ivec2 eyeBrightnessSmooth;
 uniform float wetness;
+
+#ifdef SHAFT_MARCH
+#include "/lib/shafts.glsl"
+#endif
 
 in vec2 texcoord;
 
@@ -84,7 +90,7 @@ vec3 sceneAt(vec2 uv, vec3 sun, bool marched) {
     }
 #endif
     if (marched && isEyeInWater == 0) {
-        // smoke columns (the volcano; fires with SMOKE_FIRE_VOLUMES) in front of whatever is behind them
+        // smoke columns (the volcano; the strongest fires' columns, SMOKE_FIRE_VOLUMES) in front of whatever is behind them
         vec4 pl = plumesAlong(cameraPosition, dir, fogDist, sun, airClock(), ign(gl_FragCoord.xy, 1.0), rainStrength);
         col = col * pl.a + pl.rgb;
     }
@@ -165,9 +171,10 @@ float fallsSpray(vec2 uv, vec3 n, float dist) {
 }
 #endif
 
-// screen-space light shafts: march towards the light's screen position, collecting how much of the way is open sky
+// screen-space light shafts (without SHAFT_MARCH): march towards the light's screen position, collecting how much of
+// the way is open sky
 vec3 lightShafts(vec2 uv, vec3 sun, float dist) {
-#if defined VOLUMETRIC_LIGHT && !defined SKYCRAFT_REALM
+#if defined VOLUMETRIC_LIGHT && !defined SHAFT_MARCH && !defined SKYCRAFT_REALM
     vec3 L = sun.y > -0.05 ? sun : -sun;
     vec3 lightView = mat3(gbufferModelView) * L;
     if (lightView.z > -0.05) return vec3(0.0);  // behind the camera
@@ -179,6 +186,10 @@ vec3 lightShafts(vec2 uv, vec3 sun, float dist) {
     vec2 delta = (lp - uv) / float(samples);
     float jitter = ign(gl_FragCoord.xy, frameTimeCounter * 60.0);
     vec2 p = uv + delta * jitter;
+#ifdef AETHER_FAR_FIELD
+    vec2 farSize = vec2(textureSize(aetherColor, 0));
+    bool far = aetherPresent();
+#endif
     float open = 0.0, w = 1.0, wsum = 0.0, decay = pow(0.96, 16.0 / float(samples));  // 0.96^16 over the path
     for (int i = 0; i < VL_SAMPLES; i++) {
         if (i >= samples) break;
@@ -186,7 +197,8 @@ vec3 lightShafts(vec2 uv, vec3 sun, float dist) {
         if (any(lessThan(p, vec2(0.0))) || any(greaterThan(p, vec2(1.0)))) break;
         float s = texture(depthtex1, p).r >= 1.0 ? 1.0 : 0.0;
 #ifdef AETHER_FAR_FIELD
-        s *= 1.0 - aetherColorAt(p).a;  // far terrain and clouds block the light too
+        // far terrain and clouds block the light too (one nearest texel: the march averages many)
+        if (far) s *= 1.0 - texelFetch(aetherColor, min(ivec2(p * farSize), ivec2(farSize) - 1), 0).a;
 #endif
         open += s * w;
         wsum += w;
@@ -301,5 +313,10 @@ void main() {
         col = mix(vec3(1.2, 0.35, 0.05), col, exp(-min(dist0, 50.0) * 0.8));  // lava
     }
     col += lightShafts(texcoord, sun, dist0);
-    outColor = vec4(col, 1.0);
+    // the marched shafts (composite1.fsh smooths and adds them): none seen from under water
+    float shafts = 0.0;
+#if defined VOLUMETRIC_LIGHT && defined SHAFT_MARCH
+    if (isEyeInWater == 0) shafts = shaftsMarch(dir, dist0, sun, gl_FragCoord.xy, wetness, rainStrength);
+#endif
+    outColor = vec4(col, shafts);
 }

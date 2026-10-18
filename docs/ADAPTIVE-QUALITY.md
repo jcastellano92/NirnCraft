@@ -17,14 +17,14 @@ its contribution is scaled by `q / on`, so a feature turning on or off eases in 
 | Knob | Texel.ch | Drives | Floor / on | Weight | Shape α | Distance-scaled |
 |------|----------|--------|-----------|-------:|--------:|:---:|
 | SHADOW_TAPS | 1.r (+ penumbra 1.g) | soft-shadow taps 1..SHADOW_TAPS, penumbra 0.6..1 | 1 tap | 1.5 | 3 | yes |
-| SSAO | 2.r | SSAO samples | off / 0.2 | 1.0 | 2.5 | yes |
+| SSAO | 2.r | SSAO samples; the parallax (POM) steps go with it (contact detail) | off / 0.2 | 1.0 | 2.5 | yes |
 | SSR | 3.r | reflection steps (beyond: aether / sky mirror) | off / 0.2 | 1.5 | 4 | yes |
-| LIGHT_SHAFTS | 4.r | light-shaft samples over the same path | off / 0.15 | 0.6 | 7 | |
+| LIGHT_SHAFTS | 4.r | light-shaft steps: the real-occlusion march (SHAFT_MARCH), or the screen-space samples on LOW | off / 0.15 | 0.6 | 7 | |
 | WAVES | 5.r, 5.g | waves drawn 4..WAVE_COUNT (shortest first, spectrum fixed) and wave LOD (1..2x sooner) | 4 waves | 1.9 | 0.3 | (own LOD) |
 | WATER_EXTRAS | 5.b, 5.a | caustics, falls spray | off | 0.3 | 1 | |
 | AIR_MARCH | 6.r | the near air march (closed-form fog always stays) | off / 0.1 | 1.5 | 10 | yes |
 | HALOS | 6.g | lamp / torch / spell halos | off / 0.1 | 3.2 | 12 | |
-| SMOKE_COLUMNS | 6.b | smoke-column steps | 2 steps | 1.0 | 5 | |
+| SMOKE_COLUMNS | 6.b | smoke-column steps (fewer for far columns) and how many fire columns (SMOKE_FIRE_VOLUMES x knob, the last one thinning) | 2 steps, the volcano only | 1.0 | 5 | yes |
 | FALLBACK_CLOUDS | 7.r | the pack's own deck's octaves (no aether only) | 2 octaves | 0.8 | 3 | |
 | BLOOM | 8.r | bloom strength | off | 0.3 | 0.3 | |
 | FAR_DETAIL | 9.r, 9.g | where counts start to fall with distance (16..192 blocks) and how far (to 0.3..1) | 16 / 0.3 | 0.3 | 4 | (it is the scaler) |
@@ -32,6 +32,8 @@ its contribution is scaled by `q / on`, so a feature turning on or off eases in 
 | AETHER_LOD | - | aether's LOD bias 3..1 (coarser levels sooner far away) | bias 3 | 1.0 | 3 | |
 | AETHER_CLOUDS | - | aether's cloud pass half / quarter resolution | quarter | 0.8 | - | |
 | AETHER_SHADOWS | - | far-terrain sun shadows + sun map off / 256 / 512 / 1024 | off (256 map) | 2.5 | 2 | |
+
+Fixed costs outside the knobs (every profile, too small to steer): the eye's exposure (one pixel reduces 54 mip taps; every pixel writes 4 bytes of colortex8), night vision and the regional grade in final.fsh (4 map texels and 8 LUT texels per grade in reach).
 
 Value of a knob: `V(q) = weight * (1 - e^(-αq)) / (1 - e^(-α))` (0 below "on"). α near 0 is linear (every wave
 shows); a large α means the first samples give nearly all of the look (halos, the air march, light shafts).
@@ -126,7 +128,7 @@ tell apart do not trade cost between them.
    ... at most 30) since its cost cannot be measured while it is off.
 3. Under 60% of the budget for 15 s (leaving room for aether's predicted cost) steps back up.
 
-**What the minimal tier keeps:** the deferred lighting itself (sun / moon, sky ambient, block light, coloured light,
+**What the minimal tier keeps:** the eye's adaptation, night vision and the regional grade; the deferred lighting itself (sun / moon, sky ambient, block light, coloured light,
 emissives, labPBR), one-tap sun shadows, the far-field sun map's mountain and cloud shadows (tier 0 / 1), the
 closed-form ground fog and aerial perspective (same as aether's), the sky, stars, moons and aurora, water with four
 waves, refraction, absorption, Fresnel and the sky / far-field mirror, smoke columns at two steps, and the near/far

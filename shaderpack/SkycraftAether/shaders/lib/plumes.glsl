@@ -1,8 +1,9 @@
 // Smoke columns from the mod's smoke sources (SmokeSourceTexture): source 0 is the Red Mountain volcano (a kilometre
 // of ash leaning downwind, glowing over the vent at night), 1..23 are the strongest nearby fires (Helgen burning,
-// burning farms), which the mod also draws as sprite smoke through gbuffers_textured: their volumes here are opt-in
-// (SMOKE_FIRE_VOLUMES) so the two never double. Each column is a bounded volume: the view ray is clipped to the
-// column's box once and only that interval is marched (PLUME_STEPS), so a column costs nothing off its box. Billows
+// burning farms): the tall black columns over a burning town are volumes here too, up to SMOKE_FIRE_VOLUMES of the
+// strongest (MEDIUM and up; LOW keeps the mod's sprite smoke alone), fewer as the smoke-column knob falls (the last
+// one thins out instead of popping). Each column is a bounded volume: the view ray is clipped to the column's box once
+// and only that interval is marched (PLUME_STEPS, fewer for far columns), so a column costs nothing off its box. Billows
 // rise with the mod's clock; the column leans with the weather's wind; soot is lit by the sky, a little sun, its
 // own fire at the base and the storm's lightning; no smoke under a roof.
 #ifndef SKYCRAFT_PLUMES
@@ -50,9 +51,12 @@ vec4 plumesAlong(vec3 camPos, vec3 dir, float tEnd, vec3 sun, float time, float 
     float T = 1.0;
 #if PLUME_STEPS > 0
     int count = smokeCount();
-#ifdef SMOKE_FIRE_VOLUMES
-    int last = count;
+    float qp = qualityKnob(6, 2, QUALITY_FALLBACK);
+#if SMOKE_FIRE_VOLUMES > 0
+    float fires = float(SMOKE_FIRE_VOLUMES) * qp;  // fire columns (1..), the last one fading by the fraction
+    int last = min(count, 1 + int(ceil(fires)));
 #else
+    float fires = 0.0;
     int last = min(count, 1);
 #endif
     vec3 sd = vec3(abs(dir.x) < 1e-6 ? 1e-6 : dir.x, abs(dir.y) < 1e-6 ? 1e-6 : dir.y, abs(dir.z) < 1e-6 ? 1e-6 : dir.z);
@@ -63,7 +67,7 @@ vec4 plumesAlong(vec3 camPos, vec3 dir, float tEnd, vec3 sun, float time, float 
     float phase = 0.4 + 0.6 * (1.0 - 0.2025) / pow(max(1.2025 - 0.9 * mu, 1e-3), 1.5);
     float glowDay = mix(1.0, 0.3, smoothstep(-0.1, 0.3, sun.y));  // fire light shows against the night
     // adaptive quality: steps through each column's interval (coarser billows); at least 2 (a column never vanishes)
-    int steps = qualityCount(PLUME_STEPS, qualityKnob(6, 2, QUALITY_FALLBACK), qualityDither(gl_FragCoord.xy), 2);
+    float qd = qualityDither(gl_FragCoord.xy);
     for (int i = 0; i < 24; i++) {
         if (i >= last) break;
         SmokePlume s = smokePlume(i);
@@ -78,7 +82,10 @@ vec4 plumesAlong(vec3 camPos, vec3 dir, float tEnd, vec3 sun, float time, float 
         float enter = max(0.0, max(n3.x, max(n3.y, n3.z)));
         float leave = min(tEnd, min(f3.x, min(f3.y, f3.z)));
         if (leave <= enter || enter > 40000.0) continue;
+        // adaptive quality: fewer steps through far columns first; at least 2 (a column never vanishes)
+        int steps = qualityCount(PLUME_STEPS, qp * qualityDistance(enter), qd, 2);
         float stepLen = (leave - enter) / float(steps);
+        float thin = i == 0 ? 1.0 : clamp(fires - float(i - 1), 0.0, 1.0);
         float glowScale = 8.0 + s.height * 0.12;  // a fire lights the base of its smoke; the volcano a broad cone
         vec3 Sp = vec3(0.0);
         float Tp = 1.0;
@@ -86,7 +93,7 @@ vec4 plumesAlong(vec3 camPos, vec3 dir, float tEnd, vec3 sun, float time, float 
             if (k >= steps) break;
             float t = enter + (float(k) + dither) * stepLen;
             vec3 w = camPos + dir * t;
-            float sigma = plumeDensity(s, wind, w, time) * 0.18 * (i == 0 ? 1.0 : 0.7 + 0.5 * s.smoke);
+            float sigma = plumeDensity(s, wind, w, time) * 0.18 * (i == 0 ? 1.0 : 0.7 + 0.5 * s.smoke) * thin;
             if (sigma <= 1e-5) continue;
             vec3 p = w - camPos;
             if (length(p) < 58.0) sigma *= outdoorExposure(w, camPos);  // never inside a house
