@@ -16,6 +16,8 @@ if ($LASTEXITCODE) { throw 'build failed' }
 $raster = Join-Path $here 'data\tamriel_raster.bin'
 if (-not (Test-Path $raster)) { py -3 -I (Join-Path $here 'tools\export_raster.py') (Split-Path -Parent $here) | Out-Host }
 if (-not $NoTest) {
+    & "$build$Configether_gl_test.exe" (Join-Path $here "data")
+    if ($LASTEXITCODE) { throw "gl interop test failed" }
     & "$build\$Config\aether_tests.exe" $raster
     if ($LASTEXITCODE) { throw 'tests failed' }
 }

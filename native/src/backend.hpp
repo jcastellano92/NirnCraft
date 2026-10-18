@@ -23,11 +23,30 @@ struct FrameTargets {
     std::vector<float> depth;
 };
 
+// GL texture names of the images shared with the caller's OpenGL context (bottom-up rows, GL convention).
+struct GlTargets {
+    uint32_t color = 0, normal = 0, depth = 0;
+    uint32_t width = 0, height = 0;
+};
+
 class Backend {
 public:
     virtual ~Backend() = default;
     virtual const char* name() const = 0;
     virtual bool render(const FrameInputs& in, FrameTargets& out, double* gpuMs, std::string& err) = 0;
+
+    // Zero-copy game path (render thread, the game's GL context current). Default: unsupported.
+    virtual bool glAttach(uint32_t, uint32_t, GlTargets&, std::string& err) {
+        err = "this backend cannot share images with OpenGL (use the Vulkan backend)";
+        return false;
+    }
+    // Renders straight into the shared images. GL commands issued after it returns see the frame (a GL-side
+    // semaphore wait is queued); the CPU does not block on the GPU. gpuMs reports the previous frame.
+    virtual bool glRender(const FrameInputs&, double*, std::string& err) {
+        err = "not attached";
+        return false;
+    }
+    virtual void glDetach() {}
 };
 
 std::unique_ptr<Backend> makeCpuBackend();

@@ -173,6 +173,21 @@ AETHER_API AetherStatus aether_update(AetherContext* ctx, const double centre[3]
 AETHER_API AetherStatus aether_render(AetherContext* ctx, const AetherFrame* frame, const AetherFrameOutput* out);
 AETHER_API AetherStatus aether_get_stats(AetherContext* ctx, AetherStats* out);
 
+/*
+ * Zero-copy game path (Vulkan backend; call on the render thread with the game's OpenGL context current, on the
+ * same GPU). aether_gl_attach creates color (RGBA8), normal (RGBA8) and depth (R32F, view distance in blocks)
+ * images shared with that context and returns their GL texture names (rows bottom-up, GL convention). Each
+ * aether_gl_render queues the frame and a GL-side semaphore wait: GL commands issued after it see the frame,
+ * and the CPU never blocks on the GPU. Re-attach on resize; detach before destroying the GL context.
+ */
+typedef struct AetherGlTargets {
+    uint32_t color, normal, depth;
+    uint32_t width, height;
+} AetherGlTargets;
+AETHER_API AetherStatus aether_gl_attach(AetherContext* ctx, uint32_t width, uint32_t height, AetherGlTargets* out);
+AETHER_API AetherStatus aether_gl_render(AetherContext* ctx, const AetherFrame* frame);
+AETHER_API void aether_gl_detach(AetherContext* ctx);
+
 /* Offline harness only: load native/data/tamriel_raster.bin and synthesise preview column tiles from it. */
 AETHER_API AetherStatus aether_preview_load_raster(AetherContext* ctx, const char* path);
 /* Offline harness only: fill tiles of LOD `lod` covering [x0,x1) x [z0,z1) from the preview source. */

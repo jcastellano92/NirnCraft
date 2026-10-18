@@ -31,16 +31,26 @@ add_custom_command(
           -P "${CMAKE_SOURCE_DIR}/cmake/embed_spv.cmake"
   DEPENDS "${GEN}/aether_far.spv" "${CMAKE_SOURCE_DIR}/cmake/embed_spv.cmake")
 add_custom_command(
+  OUTPUT "${GEN}/aether_publish.spv"
+  COMMAND "${SLANGC}" "${CMAKE_SOURCE_DIR}/shaders/aether_publish.slang" -target spirv -entry publishMain -stage compute -O3
+          -o "${GEN}/aether_publish.spv"
+  DEPENDS "${CMAKE_SOURCE_DIR}/shaders/aether_publish.slang" COMMENT "slangc aether_publish -> SPIR-V")
+add_custom_command(
+  OUTPUT "${GEN}/aether_publish_spv.h"
+  COMMAND "${CMAKE_COMMAND}" -DIN=${GEN}/aether_publish.spv -DOUT=${GEN}/aether_publish_spv.h -DNAME=aether_publish_spv
+          -P "${CMAKE_SOURCE_DIR}/cmake/embed_spv.cmake"
+  DEPENDS "${GEN}/aether_publish.spv" "${CMAKE_SOURCE_DIR}/cmake/embed_spv.cmake")
+add_custom_command(
   OUTPUT "${GEN}/aether_far_cpu.cpp"
   COMMAND "${SLANGC}" "${KERNEL_SRC}" -target cpp -entry farMain -stage compute -O3 -o "${GEN}/aether_far_cpu.cpp"
   DEPENDS ${KERNEL_DEPS} COMMENT "slangc aether_far -> C++ (CPU reference)")
 
 add_library(aether_core SHARED
-  src/api.cpp src/svdag.cpp src/world.cpp src/preview_source.cpp src/cpu_backend.cpp src/vk_backend.cpp
-  "${GEN}/aether_far_cpu.cpp" "${GEN}/aether_far_spv.h")
+  src/api.cpp src/svdag.cpp src/world.cpp src/preview_source.cpp src/cpu_backend.cpp src/vk_backend.cpp src/gl_api.cpp
+  "${GEN}/aether_far_cpu.cpp" "${GEN}/aether_far_spv.h" "${GEN}/aether_publish_spv.h")
 target_include_directories(aether_core PUBLIC include PRIVATE src "${GEN}" "${SLANG_ROOT}/include" "${VULKAN_SDK}/Include")
 target_compile_definitions(aether_core PRIVATE AETHER_BUILD AETHER_VERSION_STRING="${PROJECT_VERSION}")
-target_link_libraries(aether_core PRIVATE "${VULKAN_SDK}/Lib/vulkan-1.lib")
+target_link_libraries(aether_core PRIVATE "${VULKAN_SDK}/Lib/vulkan-1.lib" opengl32)
 # The generated kernel is plain arithmetic; keep MSVC from contracting differently than the GPU where it can.
 set_source_files_properties("${GEN}/aether_far_cpu.cpp" PROPERTIES COMPILE_OPTIONS "/fp:precise;/W0")
 
@@ -51,6 +61,10 @@ target_include_directories(aether_render PRIVATE src)
 add_executable(aether_tests tests/test_main.cpp src/svdag.cpp)
 target_include_directories(aether_tests PRIVATE src include)
 target_link_libraries(aether_tests PRIVATE aether_core)
+
+add_executable(aether_gl_test tests/gl_interop_test.cpp src/gl_api.cpp)
+target_include_directories(aether_gl_test PRIVATE src include)
+target_link_libraries(aether_gl_test PRIVATE aether_core opengl32 gdi32 user32)
 
 enable_testing()
 add_test(NAME aether_tests COMMAND aether_tests WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")

@@ -191,10 +191,58 @@ AETHER_API AetherStatus aether_update(AetherContext* ctx, const double centre[3]
     return AETHER_OK;
 }
 
+static AetherStatus buildInputs(AetherContext* ctx, const AetherFrame* f, FrameInputs& in);
+
 AETHER_API AetherStatus aether_render(AetherContext* ctx, const AetherFrame* f, const AetherFrameOutput* out) {
     if (!ctx || !f || !out || f->width == 0 || f->height == 0) return AETHER_ERR_ARG;
     std::lock_guard<std::mutex> lock(ctx->mu);
     FrameInputs in{};
+    AetherStatus st = buildInputs(ctx, f, in);
+    if (st != AETHER_OK) return st;
+    double ms = 0;
+    std::string err;
+    if (!ctx->backend->render(in, ctx->targets, &ms, err)) return ctx->fail(AETHER_ERR_GPU, err);
+    size_t n = size_t(f->width) * f->height;
+    if (out->color) std::memcpy(out->color, ctx->targets.color.data(), n * 4);
+    if (out->normal) std::memcpy(out->normal, ctx->targets.normal.data(), n * 4);
+    if (out->depth) std::memcpy(out->depth, ctx->targets.depth.data(), n * 4);
+    uint64_t steps = 0;
+    for (uint32_t c : ctx->targets.counters) steps += c;
+    ctx->stats.raySteps = steps;
+    ctx->stats.lastFrameMs = ms;
+    return AETHER_OK;
+}
+
+AETHER_API AetherStatus aether_gl_attach(AetherContext* ctx, uint32_t w, uint32_t h, AetherGlTargets* out) {
+    if (!ctx || !out || w == 0 || h == 0) return AETHER_ERR_ARG;
+    std::lock_guard<std::mutex> lock(ctx->mu);
+    GlTargets t;
+    std::string err;
+    if (!ctx->backend->glAttach(w, h, t, err)) return ctx->fail(AETHER_ERR_UNSUPPORTED, err);
+    *out = AetherGlTargets{t.color, t.normal, t.depth, t.width, t.height};
+    return AETHER_OK;
+}
+
+AETHER_API AetherStatus aether_gl_render(AetherContext* ctx, const AetherFrame* f) {
+    if (!ctx || !f || f->width == 0 || f->height == 0) return AETHER_ERR_ARG;
+    std::lock_guard<std::mutex> lock(ctx->mu);
+    FrameInputs in{};
+    AetherStatus st = buildInputs(ctx, f, in);
+    if (st != AETHER_OK) return st;
+    double ms = ctx->stats.lastFrameMs;
+    std::string err;
+    if (!ctx->backend->glRender(in, &ms, err)) return ctx->fail(AETHER_ERR_GPU, err);
+    ctx->stats.lastFrameMs = ms;
+    return AETHER_OK;
+}
+
+AETHER_API void aether_gl_detach(AetherContext* ctx) {
+    if (!ctx) return;
+    std::lock_guard<std::mutex> lock(ctx->mu);
+    ctx->backend->glDetach();
+}
+
+static AetherStatus buildInputs(AetherContext* ctx, const AetherFrame* f, FrameInputs& in) {
     in.scene = &ctx->world.packed();
     if (in.scene->lodCount == 0) return ctx->fail(AETHER_ERR_STATE, "call aether_update before aether_render");
     FrameGpu& g = in.frame;
@@ -225,17 +273,6 @@ AETHER_API AetherStatus aether_render(AetherContext* ctx, const AetherFrame* f, 
     in.palette = &ctx->palette;
     in.weather = &ctx->weather;
     in.cloudNoise = &ctx->cloudNoise;
-    double ms = 0;
-    std::string err;
-    if (!ctx->backend->render(in, ctx->targets, &ms, err)) return ctx->fail(AETHER_ERR_GPU, err);
-    size_t n = size_t(f->width) * f->height;
-    if (out->color) std::memcpy(out->color, ctx->targets.color.data(), n * 4);
-    if (out->normal) std::memcpy(out->normal, ctx->targets.normal.data(), n * 4);
-    if (out->depth) std::memcpy(out->depth, ctx->targets.depth.data(), n * 4);
-    uint64_t steps = 0;
-    for (uint32_t c : ctx->targets.counters) steps += c;
-    ctx->stats.raySteps = steps;
-    ctx->stats.lastFrameMs = ms;
     return AETHER_OK;
 }
 
