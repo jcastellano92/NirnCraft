@@ -90,9 +90,13 @@ int main(int argc, char** argv) {
     struct Set {
         const char* name;
         uint32_t flags;
-    } sets[] = {{"terrain", AETHER_FRAME_ATMOS},
+    } sets[] = {{"terrain, flat normals", AETHER_FRAME_ATMOS | AETHER_FRAME_FLAT_NORMALS},
+                {"terrain", AETHER_FRAME_ATMOS},
                 {"terrain+shadows", AETHER_FRAME_ATMOS | AETHER_FRAME_SHADOWS},
                 {"terrain+shadows+clouds", AETHER_FRAME_ATMOS | AETHER_FRAME_SHADOWS | AETHER_FRAME_CLOUDS}};
+    // bring the GPU to its boost clock first: short runs otherwise time the clock ramp
+    f.flags = AETHER_FRAME_ATMOS | AETHER_FRAME_SHADOWS;
+    for (int i = 0; i < 250; i++) aether_gl_render(ctx, &f);
     std::printf("%ux%u, camera (%.0f, %.0f, %.0f)\n", W, H, x, y, z);
     for (const Set& s : sets) {
         f.flags = s.flags;

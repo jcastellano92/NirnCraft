@@ -349,6 +349,8 @@ void World::repack(const int centreRegion[MAX_LODS][2]) {
                                 g.bases[0] = uint32_t(p.nodes.size());
                                 g.bases[1] = uint32_t(p.leaves.size());
                                 g.bases[2] = r->dag.root;
+                                g.bases[3] = uint32_t(p.heightMip.size());
+                                p.heightMip.insert(p.heightMip.end(), r->dag.heightMip.begin(), r->dag.heightMip.end());
                                 g.runs[0] = uint32_t(p.runEnd.size());
                                 g.runs[1] = uint32_t(r->dag.runEnd.size());
                                 p.nodes.insert(p.nodes.end(), r->dag.nodes.begin(), r->dag.nodes.end());
@@ -370,6 +372,7 @@ void World::repack(const int centreRegion[MAX_LODS][2]) {
     if (p.runEnd.empty()) p.runEnd.push_back(0);
     if (p.runMat.empty()) p.runMat.push_back(0);
     if (p.regions.empty()) p.regions.push_back({});
+    if (p.heightMip.empty()) p.heightMip.push_back(0);
     {
         auto next = std::make_shared<const PackedScene>(std::move(p));
         std::lock_guard<std::mutex> snap(snapMu_);

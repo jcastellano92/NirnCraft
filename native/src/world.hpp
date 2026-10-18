@@ -57,6 +57,7 @@ struct PackedScene {
     std::vector<uint64_t> leaves;
     std::vector<uint32_t> runEnd;
     std::vector<uint32_t> runMat;
+    std::vector<uint32_t> heightMip;  // per region 5461 entries (see Svdag::heightMip), at RegionGpu.bases.w
     LodGpu lods[MAX_LODS] = {};
     int lodCount = 0;
     uint64_t revision = 0;

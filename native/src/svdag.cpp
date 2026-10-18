@@ -21,6 +21,7 @@ public:
     explicit Builder(VoxelSource& src) : src_(src) {}
 
     Svdag run() {
+        colTop_.assign(64 * 64, 0);
         Child c = build(0, 0, 0, REGION);
         if (c.count == 0) {
             out_.root = EMPTY_ROOT;
@@ -28,6 +29,21 @@ public:
             out_.root = c.ptr;
         }
         out_.solidVoxels = total_;
+        // the max-height mip, finest (4-column cells) to coarsest (the whole region)
+        out_.heightMip.clear();
+        std::vector<uint16_t> level = colTop_;
+        for (int per = 64; per >= 1; per >>= 1) {
+            out_.heightMip.insert(out_.heightMip.end(), level.begin(), level.end());
+            if (per == 1) break;
+            int np = per >> 1;
+            std::vector<uint16_t> next(size_t(np) * np);
+            for (int z = 0; z < np; z++)
+                for (int x = 0; x < np; x++) {
+                    size_t a = size_t(2 * z) * per + 2 * x;
+                    next[size_t(z) * np + x] = std::max(std::max(level[a], level[a + 1]), std::max(level[a + per], level[a + per + 1]));
+                }
+            level.swap(next);
+        }
         return std::move(out_);
     }
 
@@ -67,9 +83,18 @@ private:
     }
 
     // A full solid subtree of size n: shared per level, materials still emitted per voxel (as one run).
-    Child full(int n, uint16_t mat) {
+    void raiseTop(int x, int z, int n, int top) {
+        for (int cz = z >> 2; cz < (z + n + 3) >> 2; cz++)
+            for (int cx = x >> 2; cx < (x + n + 3) >> 2; cx++) {
+                uint16_t& t = colTop_[size_t(cz) * 64 + cx];
+                if (top > t) t = uint16_t(top);
+            }
+    }
+
+    Child full(int n, uint16_t mat, int x, int y, int z) {
         uint64_t count = uint64_t(n) * n * n;
         emit(mat, count);
+        raiseTop(x, z, n, y + n);
         return {fullNode(n), count};
     }
 
@@ -93,7 +118,7 @@ private:
         uint16_t mat = 0;
         BoxClass cls = src_.classify(x, y, z, n, mat);
         if (cls == BoxClass::Air) return {};
-        if (cls == BoxClass::Uniform) return full(n, mat);
+        if (cls == BoxClass::Uniform) return full(n, mat, x, y, z);
         if (n == BRICK) {
             uint16_t m[64];
             src_.brick(x, y, z, m);
@@ -110,6 +135,10 @@ private:
                 }
             }
             if (!bits) return {};
+            // highest occupied layer of this brick (bits are y-major: layer j is bits 16j..16j+15)
+            int topLayer = 3;
+            while (topLayer > 0 && ((bits >> (16 * topLayer)) & 0xFFFF) == 0) topLayer--;
+            raiseTop(x, z, BRICK, y + topLayer + 1);
             return {leaf(bits), count};
         }
         int h = n / 2;
@@ -142,6 +171,7 @@ private:
     VoxelSource& src_;
     Svdag out_;
     uint64_t total_ = 0;
+    std::vector<uint16_t> colTop_;  // per 4x4-voxel column of the region: highest occupied voxel y + 1
     std::unordered_map<uint64_t, uint32_t> leafIds_;
     std::unordered_map<std::vector<uint32_t>, uint32_t, WordsHash> nodeIds_;
     uint32_t fullPtr_[9] = {UINT32_MAX, UINT32_MAX, UINT32_MAX, UINT32_MAX, UINT32_MAX,

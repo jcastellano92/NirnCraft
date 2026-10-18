@@ -29,6 +29,12 @@
 
 #include "aether_actors.slang"
 [[vk::binding(15, 0)]] StructuredBuffer<ActorGpu> actors;
+[[vk::binding(16, 0)]] StructuredBuffer<uint> heightMip;  // per region: 2D max-height mip (Svdag::heightMip)
+// the half-resolution cloud pass (cloudMain) and what it hands the far pass
+[[vk::binding(17, 0)]] RWStructuredBuffer<float4> cloudBuf;    // premultiplied cloud colour (haze applied), a = transmittance
+[[vk::binding(18, 0)]] RWStructuredBuffer<float> cloudDepth;   // first cloud distance (1e30 = none)
+[[vk::binding(19, 0)]] StructuredBuffer<float> prevSurface;    // last frame's surface distance per full-res pixel
+[[vk::binding(20, 0)]] RWStructuredBuffer<float> outSurface;   // this frame's (terrain, actor or near field; 1e30 = sky)
 
 #include "aether_clouds.slang"
 
@@ -75,10 +81,36 @@ bool traceRegion(RegionGpu r, float3 ro, float3 rd, float t0, float t1, float ep
     int3 brickOf = int3(-1, -1, -1);
     uint64_t brickBits = 0;
     uint brickRank = 0;
+    uint hmBase = r.bases.w;
     for (int it = 0; it < 1024; it++) {
         if (t >= t1) break;
         res.steps++;
         float3 p = ro + rd * t;
+        // Over terrain: find the largest column cell (whole region down to 4x4 voxels) whose highest voxel the ray
+        // stays above until it leaves the cell, and skip straight across it. Far rays spend most of their length here.
+        bool over = false;
+        int lvlOff = 5460;
+        for (int k = 6; k >= 0; k--) {
+            int per = 64 >> k;
+            int sz = 4 << k;
+            int2 cxz = clamp(int2(floor(p.xz)) >> (2 + k), int2(0, 0), int2(per - 1, per - 1));
+            uint top = heightMip[hmBase + uint(lvlOff) + uint(cxz.y * per + cxz.x)];
+            float2 bound = float2(cxz * sz) + float2(rd.x > 0 ? float(sz) : 0.0, rd.z > 0 ? float(sz) : 0.0);
+            float2 tx = (bound - ro.xz) * inv.xz;
+            tx = float2(tx.x > t ? tx.x : 1e30, tx.y > t ? tx.y : 1e30);
+            float te = min(min(tx.x, tx.y), t1);
+            float yMin = min(p.y, ro.y + rd.y * te);
+            if (yMin >= float(top)) {
+                if (te > t) {
+                    axis = te >= t1 ? axis : (tx.x <= tx.y ? 0 : 2);
+                    t = te + eps;
+                    over = true;
+                }
+                break;
+            }
+            lvlOff -= (64 >> (k - 1 < 0 ? 0 : k - 1)) * (64 >> (k - 1 < 0 ? 0 : k - 1));
+        }
+        if (over) continue;
         int3 v = clamp(int3(floor(p)), int3(0, 0, 0), int3(255, 255, 255));
         int cell = 0;
         uint64_t bits = 0;
@@ -341,6 +373,54 @@ float traceShadow(float3 p, float3 dir, int lod) {
     return 1.0;
 }
 
+uint2 cloudDims() { return uint2((frame.dims.x + 1) / 2, (frame.dims.y + 1) / 2); }
+
+// Bilinear upsample of the half-resolution deck at full-resolution pixel `px`; depth = nearest of the four taps.
+void sampleClouds(uint2 px, out float4 c, out float depth) {
+    uint2 cd = cloudDims();
+    float2 hp = (float2(px) + 0.5) * 0.5 - 0.5;
+    int2 b = int2(floor(hp));
+    float2 f = hp - float2(b);
+    int2 b0 = clamp(b, int2(0, 0), int2(cd) - 1), b1 = clamp(b + 1, int2(0, 0), int2(cd) - 1);
+    uint i00 = uint(b0.y) * cd.x + uint(b0.x), i10 = uint(b0.y) * cd.x + uint(b1.x);
+    uint i01 = uint(b1.y) * cd.x + uint(b0.x), i11 = uint(b1.y) * cd.x + uint(b1.x);
+    c = lerp(lerp(cloudBuf[i00], cloudBuf[i10], f.x), lerp(cloudBuf[i01], cloudBuf[i11], f.x), f.y);
+    depth = min(min(cloudDepth[i00], cloudDepth[i10]), min(cloudDepth[i01], cloudDepth[i11]));
+}
+
+// The cloud shell at half resolution: one ray per 2x2 block, marched up to the block's nearest surface of the last
+// frame (so clouds behind a mountain never paint over it), haze applied, stored premultiplied for the far pass.
+[shader("compute")]
+[numthreads(8, 8, 1)]
+void cloudMain(uint3 id : SV_DispatchThreadID) {
+    uint2 cd = cloudDims();
+    if (id.x >= cd.x || id.y >= cd.y) return;
+    uint w = frame.dims.x, h = frame.dims.y;
+    uint ci = id.y * cd.x + id.x;
+    uint2 full = min(id.xy * 2u, uint2(w - 1, h - 1));
+    float2 ndc = float2((float(id.x * 2u) + 1.0) / float(w) * 2.0 - 1.0, 1.0 - (float(id.y * 2u) + 1.0) / float(h) * 2.0);
+    float3 dir = normalize(unproject(frame, ndc));
+    float3 o = frame.camFrac.xyz;
+    float3 sun = frame.sunDir.xyz;
+    float limit = frame.params.y;
+    uint x1 = min(full.x + 1u, w - 1u), y1 = min(full.y + 1u, h - 1u);
+    limit = min(limit, min(min(prevSurface[full.y * w + full.x], prevSurface[full.y * w + x1]),
+                           min(prevSurface[y1 * w + full.x], prevSurface[y1 * w + x1])));
+    CloudResult cl = marchClouds(o, dir, limit, sun, id.xy);
+    float4 c = float4(0, 0, 0, 1);
+    float d = 1e30;
+    if (cl.firstHit >= 0.0) {
+        // the deck's own aerial perspective: distant storms fade into the horizon haze like the terrain does
+        // (whatever is behind the cloud already carries its own haze)
+        float trA = aerialTransmittance(cl.firstHit, frame);
+        c.rgb = cl.scatter * trA + aerialFog(dir, sun) * (1.0 - trA) * (1.0 - cl.transmittance);
+        c.a = cl.transmittance;
+        d = cl.transmittance < 0.995 ? cl.firstHit : 1e30;
+    }
+    cloudBuf[ci] = c;
+    cloudDepth[ci] = d;
+}
+
 [shader("compute")]
 [numthreads(8, 8, 1)]
 void farMain(uint3 id : SV_DispatchThreadID) {
@@ -362,15 +442,18 @@ void farMain(uint3 id : SV_DispatchThreadID) {
             float4 c = float4(0, 0, 0, 0);
             float cd = 1e30;
             if ((frame.dims.z & FRAME_CLOUDS) != 0) {
-                CloudResult cl = marchClouds(o, dir, nd, sun, id.xy);
-                if (cl.firstHit >= 0.0) {
-                    c = float4(cl.scatter, 1.0 - cl.transmittance);
-                    if (cl.transmittance < 0.99) cd = cl.firstHit;
+                float4 cl;
+                float clDepth;
+                sampleClouds(id.xy, cl, clDepth);
+                if (clDepth < nd) {
+                    c = float4(cl.rgb, 1.0 - cl.a);
+                    if (cl.a < 0.99) cd = clDepth;
                 }
             }
             outColor[pix] = c;
             outNormal[pix] = 0;
             outDepth[pix] = cd;
+            outSurface[pix] = nd;
             counters[pix] = 0;
             return;
         }
@@ -418,6 +501,7 @@ void farMain(uint3 id : SV_DispatchThreadID) {
         float3 ci = float3(frame.camInt.xyz);
         float3 centre = (floor((p + ci) / s - n * 0.5) + 0.5) * s - ci;
         float wSmooth = res.lod > 0 ? 0.85 : 0.85 * saturate((tHit - 96.0) / 400.0);
+        if ((frame.dims.z & FRAME_FLAT_NORMALS) != 0) wSmooth = 0.0;
         if (wSmooth > 0.0) {
             float3 sn = smoothNormal(res.lod, centre, 1.0);
             if (dot(sn, -dir) > 0.05) n = normalize(lerp(n, sn, wSmooth));
@@ -450,19 +534,20 @@ void farMain(uint3 id : SV_DispatchThreadID) {
         color = skyColor(dir, sun);
     }
     float coverage = tHit >= 0.0 || actorFirst || (frame.dims.z & FRAME_SKY) != 0 ? 1.0 : 0.0;
+    float surface = actorFirst ? ah.t : (tHit >= 0.0 ? tHit : 1e30);
     if ((frame.dims.z & FRAME_CLOUDS) != 0) {
-        CloudResult cl = marchClouds(o, dir, actorFirst ? ah.t : (tHit >= 0.0 ? tHit : frame.params.y), sun, id.xy);
-        if (cl.firstHit >= 0.0) {
-            // the deck's own aerial perspective: distant storms fade into the horizon haze like the terrain does
-            // (the background behind the cloud already carries its own haze)
-            float trA = aerialTransmittance(cl.firstHit, frame);
-            float3 scatter = cl.scatter * trA + aerialFog(dir, sun) * (1.0 - trA) * (1.0 - cl.transmittance);
-            color = color * cl.transmittance + scatter;
-            coverage = 1.0 - (1.0 - coverage) * cl.transmittance;
+        // the half-resolution deck, where it starts in front of this pixel's surface
+        float4 cl;
+        float clDepth;
+        sampleClouds(id.xy, cl, clDepth);
+        if (clDepth < surface) {
+            color = color * cl.a + cl.rgb;
+            coverage = 1.0 - (1.0 - coverage) * cl.a;
             // depth = the nearest thing drawn, cloud included: lets a composite keep near geometry in front of it
-            if (cl.transmittance < 0.99) depth = min(depth, cl.firstHit);
+            if (cl.a < 0.99) depth = min(depth, clDepth);
         }
     }
+    outSurface[pix] = surface;
     outColor[pix] = float4(color, coverage);
     outNormal[pix] = packNormal(n, cls, sunVis);
     outDepth[pix] = depth;

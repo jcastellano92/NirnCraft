@@ -74,6 +74,11 @@ struct FarGlobals {
     CpuBuffer<uint32_t> cloudNoise;
     CpuBuffer<float> nearDepth;
     CpuBuffer<ActorGpu> actors;
+    CpuBuffer<uint32_t> heightMip;
+    CpuBuffer<Float4> cloudBuf;
+    CpuBuffer<float> cloudDepth;
+    CpuBuffer<float> prevSurface;
+    CpuBuffer<float> outSurface;
 };
 
 }  // namespace aether

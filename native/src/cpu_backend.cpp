@@ -11,6 +11,7 @@ struct AetherGroupRange {
     uint32_t end[3];
 };
 extern "C" void farMain(void* varyingInput, void* entryPointParams, void* globalParams);
+extern "C" void cloudMain(void* varyingInput, void* entryPointParams, void* globalParams);
 
 namespace aether {
 namespace {
@@ -24,6 +25,7 @@ class CpuBackend final : public Backend {
 public:
     const char* name() const override { return "cpu (slang->c++)"; }
     std::vector<float> dummyDepth_ = std::vector<float>(1, 1e30f);
+    std::vector<float> cloud_, cloudDepth_, prevSurface_, outSurface_;
 
     bool render(const FrameInputs& in, FrameTargets& out, double* ms, std::string&) override {
         auto t0 = std::chrono::steady_clock::now();
@@ -53,22 +55,38 @@ public:
         if (in.nearDepth) g.nearDepth = {const_cast<float*>(in.nearDepth), n};
         else g.nearDepth = view(dummyDepth_);
         g.actors = view(in.actors);
+        g.heightMip = view(s.heightMip);
+        // the half-resolution cloud pass reads the last frame's surfaces (none yet, or after a resize: no limit)
+        size_t cn = size_t((w + 1) / 2) * ((h + 1) / 2);
+        cloud_.assign(cn * 4, 0.0f);
+        cloudDepth_.assign(cn, 1e30f);
+        if (prevSurface_.size() != n) prevSurface_.assign(n, 1e30f);
+        outSurface_.assign(n, 1e30f);
+        g.cloudBuf = {reinterpret_cast<Float4*>(cloud_.data()), cn};
+        g.cloudDepth = view(cloudDepth_);
+        g.prevSurface = view(prevSurface_);
+        g.outSurface = view(outSurface_);
 
-        uint32_t gx = (w + 7) / 8, gy = (h + 7) / 8;
-        std::atomic<uint32_t> nextRow{0};
-        auto worker = [&] {
-            for (;;) {
-                uint32_t row = nextRow.fetch_add(1);
-                if (row >= gy) return;
-                AetherGroupRange r{{0, row, 0}, {gx, row + 1, 1}};
-                farMain(&r, nullptr, &g);
-            }
+        auto dispatch = [&](void (*kernel)(void*, void*, void*), uint32_t gx, uint32_t gy) {
+            std::atomic<uint32_t> nextRow{0};
+            auto worker = [&] {
+                for (;;) {
+                    uint32_t row = nextRow.fetch_add(1);
+                    if (row >= gy) return;
+                    AetherGroupRange r{{0, row, 0}, {gx, row + 1, 1}};
+                    kernel(&r, nullptr, &g);
+                }
+            };
+            unsigned threads = std::max(1u, std::thread::hardware_concurrency());
+            std::vector<std::thread> pool;
+            for (unsigned i = 0; i + 1 < threads; i++) pool.emplace_back(worker);
+            worker();
+            for (auto& t : pool) t.join();
         };
-        unsigned threads = std::max(1u, std::thread::hardware_concurrency());
-        std::vector<std::thread> pool;
-        for (unsigned i = 0; i + 1 < threads; i++) pool.emplace_back(worker);
-        worker();
-        for (auto& t : pool) t.join();
+        if (frame.dims[2] & 0x1u)  // FRAME_CLOUDS
+            dispatch(cloudMain, ((w + 1) / 2 + 7) / 8, ((h + 1) / 2 + 7) / 8);
+        dispatch(farMain, (w + 7) / 8, (h + 7) / 8);
+        prevSurface_.swap(outSurface_);
         if (ms) *ms = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count();
         return true;
     }

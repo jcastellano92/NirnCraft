@@ -17,6 +17,7 @@
 #include <cstring>
 #include <vector>
 
+#include "aether_cloud_spv.h"    // generated: the same kernel source's cloudMain entry
 #include "aether_far_spv.h"      // generated: aether_far_spv[], aether_far_spv_size (bytes)
 #include "aether_ingest_spv.h"   // generated
 #include "aether_publish_spv.h"  // generated
@@ -26,11 +27,15 @@
 namespace aether {
 namespace {
 
-constexpr uint32_t BINDINGS = 16;
+constexpr uint32_t BINDINGS = 21;
 constexpr uint32_t SLOTS = 2;
 // far kernel bindings
 constexpr uint32_t B_FRAME = 0, B_PALETTE = 7, B_COLOR = 8, B_NORMAL = 9, B_DEPTH = 10, B_WEATHER = 11,
-                   B_COUNTERS = 12, B_NOISE = 13, B_NEAR = 14, B_ACTORS = 15;
+                   B_COUNTERS = 12, B_NOISE = 13, B_NEAR = 14, B_ACTORS = 15, B_HEIGHTMIP = 16, B_CLOUD = 17,
+                   B_CLOUD_DEPTH = 18, B_PREV_SURFACE = 19, B_SURFACE = 20;
+// the scene's buffers (two copies, staged off the render thread)
+constexpr uint32_t SCENE_BINDINGS[] = {1, 2, 3, 4, 5, 6, B_HEIGHTMIP};
+bool isScene(uint32_t b) { return (b >= 1 && b <= 6) || b == B_HEIGHTMIP; }
 // shared images
 constexpr int IMG_COLOR = 0, IMG_NORMAL = 1, IMG_DEPTH = 2, IMG_NEAR = 3, IMAGES = 4;
 
@@ -58,7 +63,7 @@ void main() {
 
 bool perSlot(uint32_t b) {
     return b == B_FRAME || b == B_PALETTE || b == B_COLOR || b == B_NORMAL || b == B_DEPTH || b == B_WEATHER ||
-           b == B_COUNTERS || b == B_NEAR || b == B_ACTORS;
+           b == B_COUNTERS || b == B_NEAR || b == B_ACTORS || b == B_CLOUD || b == B_CLOUD_DEPTH || b == B_SURFACE;
 }
 
 VKAPI_ATTR VkBool32 VKAPI_CALL onValidation(VkDebugUtilsMessageSeverityFlagBitsEXT sev, VkDebugUtilsMessageTypeFlagsEXT,
@@ -96,7 +101,7 @@ struct SharedSemaphore {
 
 // The scene's six buffers. Two copies: the update thread fills the one no in-flight frame reads, frames flip to it.
 struct SceneCopy {
-    Buf bufs[7];  // bindings 1..6, device-local
+    Buf bufs[BINDINGS];  // the SCENE_BINDINGS entries, device-local
     Buf staging;  // host memory the staging thread writes; a GPU copy moves it into bufs
     VkCommandBuffer uploadCmd = VK_NULL_HANDLE;
     VkFence uploadFence = VK_NULL_HANDLE;
@@ -109,6 +114,8 @@ struct SceneCopy {
 struct Slot {
     uint64_t frameNumber = 0;  // of its last submission
     int boundCopy = -1;        // scene copy its far descriptor set points at
+    VkBuffer boundPrev = VK_NULL_HANDLE;  // the previous frame's surface buffer its cloud pass reads
+    bool surfaceFresh = true;  // its surface buffer was (re)allocated: clear to "no surface" before use
     uint32_t boundGeneration = 0;
     VkCommandBuffer cmd = VK_NULL_HANDLE;
     VkFence fence = VK_NULL_HANDLE;
@@ -140,6 +147,8 @@ public:
             if (uploadPool_) vkDestroyCommandPool(dev_, uploadPool_, nullptr);
             if (pool_) vkDestroyCommandPool(dev_, pool_, nullptr);
             if (dpool_) vkDestroyDescriptorPool(dev_, dpool_, nullptr);
+            if (cloudPipe_) vkDestroyPipeline(dev_, cloudPipe_, nullptr);
+            if (cloudShader_) vkDestroyShaderModule(dev_, cloudShader_, nullptr);
             destroyPipe(farPipe_, farLayout_, farSetLayout_, farShader_);
             destroyPipe(publishPipe_, publishLayout_, publishSetLayout_, publishShader_);
             destroyPipe(ingestPipe_, ingestLayout_, ingestSetLayout_, ingestShader_);
@@ -162,6 +171,21 @@ public:
         farTypes[B_FRAME] = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
         if (!createPipe(aether_far_spv, aether_far_spv_size, farTypes, 0, farPipe_, farLayout_, farSetLayout_, farShader_, err))
             return false;
+        {
+            // the cloud pass: same source, same bindings, same descriptor set as the far pass
+            VkShaderModuleCreateInfo smci{VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO};
+            smci.codeSize = aether_cloud_spv_size;
+            smci.pCode = aether_cloud_spv;
+            if (vkCreateShaderModule(dev_, &smci, nullptr, &cloudShader_) != VK_SUCCESS) return fail(err, "cloud shader");
+            VkComputePipelineCreateInfo cp{VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO};
+            cp.stage = {VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO};
+            cp.stage.stage = VK_SHADER_STAGE_COMPUTE_BIT;
+            cp.stage.module = cloudShader_;
+            cp.stage.pName = "main";
+            cp.layout = farLayout_;
+            if (vkCreateComputePipelines(dev_, VK_NULL_HANDLE, 1, &cp, nullptr, &cloudPipe_) != VK_SUCCESS)
+                return fail(err, "cloud pipeline");
+        }
         std::vector<VkDescriptorType> pubTypes = {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
                                                   VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
                                                   VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE};
@@ -237,7 +261,7 @@ public:
         if (in.nearDepth && !upload(s.bufs[B_NEAR], in.nearDepth, px * 4, false, Mem::HostWrite, err)) return false;
         refreshDescriptors(s);
         begin(s);
-        recordFar(s, w, h);
+        recordFar(s, w, h, (frame.dims[2] & 0x1u) != 0);
         VkMemoryBarrier mb{VK_STRUCTURE_TYPE_MEMORY_BARRIER};
         mb.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
         mb.dstAccessMask = VK_ACCESS_HOST_READ_BIT;
@@ -336,7 +360,7 @@ public:
             vkCmdDispatch(s.cmd, (w + 7) / 8, (h + 7) / 8, 1);
             computeBarrier(s.cmd);
         }
-        recordFar(s, w, h);
+        recordFar(s, w, h, (frame.dims[2] & 0x1u) != 0);
         computeBarrier(s.cmd);
         vkCmdBindPipeline(s.cmd, VK_PIPELINE_BIND_POINT_COMPUTE, publishPipe_);
         vkCmdBindDescriptorSets(s.cmd, VK_PIPELINE_BIND_POINT_COMPUTE, publishLayout_, 0, 1, &s.publishSet, 0, nullptr);
@@ -667,17 +691,28 @@ private:
                   upload(s.bufs[B_ACTORS], in.actors.data(), in.actors.size() * sizeof(ActorGpu), false, Mem::HostWrite, err) &&
                   ensure(s.bufs[B_COLOR], px * 16, false, outKind, err) && ensure(s.bufs[B_NORMAL], px * 4, false, outKind, err) &&
                   ensure(s.bufs[B_DEPTH], px * 4, false, outKind, err) && ensure(s.bufs[B_COUNTERS], px * 4, false, outKind, err) &&
-                  ensure(s.bufs[B_NEAR], 16, false, readback ? Mem::HostWrite : Mem::DeviceOnly, err);
+                  ensure(s.bufs[B_NEAR], 16, false, readback ? Mem::HostWrite : Mem::DeviceOnly, err) &&
+                  ensure(s.bufs[B_CLOUD], size_t((w + 1) / 2) * ((h + 1) / 2) * 16, false, Mem::DeviceOnly, err) &&
+                  ensure(s.bufs[B_CLOUD_DEPTH], size_t((w + 1) / 2) * ((h + 1) / 2) * 4, false, Mem::DeviceOnly, err);
+        if (ok) {
+            VkBuffer before = s.bufs[B_SURFACE].buf;
+            ok = ensure(s.bufs[B_SURFACE], px * 4, false, Mem::DeviceOnly, err);
+            if (ok && s.bufs[B_SURFACE].buf != before) s.surfaceFresh = true;  // filled with "no surface" in record
+        }
         return ok;
     }
 
     void refreshDescriptors(Slot& s) {
         const SceneCopy& sc = copies_[current_];
-        if (s.farDirty || s.boundCopy != current_ || s.boundGeneration != sc.generation || sharedDirty_) {
+        int prev = prevSlot_ < 0 ? int(&s - slots_) : prevSlot_;
+        VkBuffer prevBuf = slots_[prev].bufs[B_SURFACE].buf;
+        if (s.farDirty || s.boundCopy != current_ || s.boundGeneration != sc.generation || sharedDirty_ || s.boundPrev != prevBuf) {
+            s.boundPrev = prevBuf;
             VkDescriptorBufferInfo info[BINDINGS];
             VkWriteDescriptorSet wr[BINDINGS];
             for (uint32_t i = 0; i < BINDINGS; i++) {
-                const Buf& b = perSlot(i) ? s.bufs[i] : (i >= 1 && i <= 6 ? sc.bufs[i] : shared_[i]);
+                const Buf& b = i == B_PREV_SURFACE ? slots_[prevSlot_ < 0 ? int(&s - slots_) : prevSlot_].bufs[B_SURFACE]
+                             : perSlot(i) ? s.bufs[i] : (isScene(i) ? sc.bufs[i] : shared_[i]);
                 info[i] = {b.buf, 0, VK_WHOLE_SIZE};
                 wr[i] = {VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET};
                 wr[i].dstSet = s.farSet;
@@ -741,14 +776,33 @@ private:
         vkBeginCommandBuffer(s.cmd, &bi);
         if (s.query) {
             vkCmdResetQueryPool(s.cmd, s.query, 0, 2);
-            vkCmdWriteTimestamp(s.cmd, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, s.query, 0);
+            // at the compute stage, which the GL-ready semaphore wait blocks: the time is aether's own work only
+            vkCmdWriteTimestamp(s.cmd, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, s.query, 0);
         }
     }
 
-    void recordFar(Slot& s, uint32_t w, uint32_t h) {
-        vkCmdBindPipeline(s.cmd, VK_PIPELINE_BIND_POINT_COMPUTE, farPipe_);
+    void recordFar(Slot& s, uint32_t w, uint32_t h, bool clouds) {
+        // the previous frame (other slot) wrote the surfaces this one's cloud pass reads, and will next overwrite
+        // ours: order against everything submitted before
+        computeBarrier(s.cmd);
+        if (s.surfaceFresh) {
+            vkCmdFillBuffer(s.cmd, s.bufs[B_SURFACE].buf, 0, VK_WHOLE_SIZE, 0x7149F2CAu);  // 1e30f: no surface yet
+            VkMemoryBarrier mb{VK_STRUCTURE_TYPE_MEMORY_BARRIER};
+            mb.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+            mb.dstAccessMask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT;
+            vkCmdPipelineBarrier(s.cmd, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, 0, 1, &mb, 0,
+                                 nullptr, 0, nullptr);
+            s.surfaceFresh = false;
+        }
         vkCmdBindDescriptorSets(s.cmd, VK_PIPELINE_BIND_POINT_COMPUTE, farLayout_, 0, 1, &s.farSet, 0, nullptr);
+        if (clouds) {
+            vkCmdBindPipeline(s.cmd, VK_PIPELINE_BIND_POINT_COMPUTE, cloudPipe_);
+            vkCmdDispatch(s.cmd, ((w + 1) / 2 + 7) / 8, ((h + 1) / 2 + 7) / 8, 1);
+            computeBarrier(s.cmd);
+        }
+        vkCmdBindPipeline(s.cmd, VK_PIPELINE_BIND_POINT_COMPUTE, farPipe_);
         vkCmdDispatch(s.cmd, (w + 7) / 8, (h + 7) / 8, 1);
+        prevSlot_ = int(&s - slots_);
     }
 
     static void computeBarrier(VkCommandBuffer cmd) {
@@ -1014,30 +1068,41 @@ private:
     bool uploadScene(SceneCopy& c, const PackedScene& sc, bool wait, std::string& err) {
         if (c.uploading) vkWaitForFences(dev_, 1, &c.uploadFence, VK_TRUE, UINT64_MAX);
         c.uploading = false;
-        const void* src[7] = {nullptr, sc.table.data(), sc.regions.data(), sc.nodes.data(), sc.leaves.data(),
-                              sc.runEnd.data(), sc.runMat.data()};
-        VkDeviceSize bytes[7] = {0, sc.table.size() * 4, sc.regions.size() * sizeof(RegionGpu), sc.nodes.size() * 4,
-                                 sc.leaves.size() * 8, sc.runEnd.size() * 4, sc.runMat.size() * 4};
-        VkDeviceSize offset[7] = {}, total = 0;
-        for (int i = 1; i <= 6; i++) {
+        const void* src[BINDINGS] = {};
+        VkDeviceSize bytes[BINDINGS] = {}, offset[BINDINGS] = {}, total = 0;
+        src[1] = sc.table.data();
+        bytes[1] = sc.table.size() * 4;
+        src[2] = sc.regions.data();
+        bytes[2] = sc.regions.size() * sizeof(RegionGpu);
+        src[3] = sc.nodes.data();
+        bytes[3] = sc.nodes.size() * 4;
+        src[4] = sc.leaves.data();
+        bytes[4] = sc.leaves.size() * 8;
+        src[5] = sc.runEnd.data();
+        bytes[5] = sc.runEnd.size() * 4;
+        src[6] = sc.runMat.data();
+        bytes[6] = sc.runMat.size() * 4;
+        src[B_HEIGHTMIP] = sc.heightMip.data();
+        bytes[B_HEIGHTMIP] = sc.heightMip.size() * 4;
+        for (uint32_t i : SCENE_BINDINGS) {
             offset[i] = total;
             total += (bytes[i] + 255) & ~VkDeviceSize(255);
         }
         bool realloc = false;
-        for (int i = 1; i <= 6; i++) {
+        for (uint32_t i : SCENE_BINDINGS) {
             VkBuffer before = c.bufs[i].buf;
             if (!ensure(c.bufs[i], bytes[i], false, Mem::DeviceOnly, err)) return false;
             realloc |= c.bufs[i].buf != before;
         }
         if (realloc) c.generation++;
         if (!ensure(c.staging, total, false, Mem::Staging, err)) return false;
-        for (int i = 1; i <= 6; i++)
+        for (uint32_t i : SCENE_BINDINGS)
             if (bytes[i]) std::memcpy(static_cast<char*>(c.staging.map) + offset[i], src[i], size_t(bytes[i]));
         vkResetCommandBuffer(c.uploadCmd, 0);
         VkCommandBufferBeginInfo bi{VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO};
         bi.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
         vkBeginCommandBuffer(c.uploadCmd, &bi);
-        for (int i = 1; i <= 6; i++) {
+        for (uint32_t i : SCENE_BINDINGS) {
             if (!bytes[i]) continue;
             VkBufferCopy region{offset[i], 0, bytes[i]};
             vkCmdCopyBuffer(c.uploadCmd, c.staging.buf, c.bufs[i].buf, 1, &region);
@@ -1084,6 +1149,9 @@ private:
     VkDescriptorSetLayout farSetLayout_ = VK_NULL_HANDLE, publishSetLayout_ = VK_NULL_HANDLE, ingestSetLayout_ = VK_NULL_HANDLE;
     VkPipelineLayout farLayout_ = VK_NULL_HANDLE, publishLayout_ = VK_NULL_HANDLE, ingestLayout_ = VK_NULL_HANDLE;
     VkPipeline farPipe_ = VK_NULL_HANDLE, publishPipe_ = VK_NULL_HANDLE, ingestPipe_ = VK_NULL_HANDLE;
+    VkPipeline cloudPipe_ = VK_NULL_HANDLE;
+    VkShaderModule cloudShader_ = VK_NULL_HANDLE;
+    int prevSlot_ = -1;  // slot of the last recorded frame (its surfaces feed the next cloud pass)
     VkDescriptorPool dpool_ = VK_NULL_HANDLE;
     VkCommandPool pool_ = VK_NULL_HANDLE;
 

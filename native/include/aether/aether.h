@@ -109,6 +109,7 @@ typedef struct AetherFrame {
 #define AETHER_FRAME_ACTORS   0x8u
 #define AETHER_FRAME_SKY      0x10u   /* draw aether's sky behind misses (harness); in game the pack draws its own */
 #define AETHER_FRAME_NEAR_DEPTH 0x20u /* skip pixels the near field covers (see AetherFrame.nearDepth) */
+#define AETHER_FRAME_FLAT_NORMALS 0x40u /* face normals only: cheaper, blockier in the distance */
 #define AETHER_FRAME_DEBUG_LOD 0x100u
 #define AETHER_FRAME_DEBUG_WEATHER 0x200u
 

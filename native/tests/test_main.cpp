@@ -433,6 +433,47 @@ static bool parity(const char* raster) {
     CHECK(hitMismatch / n < 0.002);
     CHECK(depthBad / n < 0.002);
     CHECK(colorBad / n < 0.01);
+
+    // the cloud shell (half-resolution pass, upsampled) through both builds: the baked noise and a fair-weather field
+    std::vector<uint32_t> noise(64 * 64 * 64);
+    bool haveNoise = false;
+    if (FILE* nf = std::fopen("native/data/cloud_noise.bin", "rb")) {
+        haveNoise = std::fread(noise.data(), 4, noise.size(), nf) == noise.size();
+        std::fclose(nf);
+    }
+    if (haveNoise) {
+        std::vector<uint32_t> fld(128 * 128), dyn(128 * 128);
+        for (int i = 0; i < 128 * 128; i++) {
+            double c = 0.40 + 0.25 * std::sin(i % 128 * 0.21) * std::cos(i / 128 * 0.17);
+            fld[i] = uint32_t(c * 255) | uint32_t(0.1 * 255) << 8 | 5u << 24;
+            dyn[i] = uint32_t(240.0 / 1024 * 255) | uint32_t(120.0 / 1024 * 255) << 8 | uint32_t(0.1024 * 255) << 16;
+        }
+        AetherWeather wth{fld.data(), dyn.data(), fld.data(), dyn.data(), 0.0f};
+        for (AetherContext* c : {cpu, gpu}) {
+            aether_set_cloud_noise(c, noise.data());
+            aether_set_weather(c, &wth);
+        }
+        AetherFrame fc = f;
+        cameraMatrix(90, 6, 70, double(W) / H, fc.invViewProj);  // up into the deck
+        fc.flags = (fc.flags | AETHER_FRAME_CLOUDS) & ~AETHER_FRAME_SKY;  // alpha = cloud opacity over the sky
+        std::vector<float> lc(W * H * 4), lg(W * H * 4);
+        AetherFrameOutput ocl{nullptr, nullptr, nullptr, lc.data()}, ogl{nullptr, nullptr, nullptr, lg.data()};
+        CHECK(aether_render(cpu, &fc, &ocl) == AETHER_OK);
+        CHECK(aether_render(gpu, &fc, &ogl) == AETHER_OK);
+        size_t cloudy = 0, bad = 0;
+        for (size_t i = 0; i < size_t(W) * H; i++) {
+            bool diff = false;
+            for (int k = 0; k < 4; k++) {
+                double a = lc[i * 4 + k], b = lg[i * 4 + k];
+                if (std::abs(a - b) > 0.01 + 0.01 * std::abs(a)) diff = true;
+            }
+            bad += diff;
+            cloudy += lc[i * 4 + 3] > 0.0f && lc[i * 4 + 3] < 0.999f;
+        }
+        std::printf("  clouds: %zu px with partial cover; %.3f%% px differ between builds\n", cloudy, 100.0 * bad / n);
+        CHECK(cloudy > size_t(W) * H / 20);
+        CHECK(bad / n < 0.01);
+    }
     aether_destroy(cpu);
     aether_destroy(gpu);
     return true;

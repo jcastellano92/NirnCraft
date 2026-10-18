@@ -39,6 +39,9 @@ struct Svdag {
     std::vector<uint32_t> runEnd;
     std::vector<uint16_t> runMat;
     uint64_t solidVoxels = 0;
+    // 2D max-height mip of the occupied voxels: level k holds (64 >> k)^2 cells of 4 << k voxel columns each, value =
+    // highest occupied voxel y + 1 in the cell (0 = empty). Levels 0..6 concatenated (64^2 + 32^2 + ... + 1).
+    std::vector<uint16_t> heightMip;
 
     bool empty() const { return root == EMPTY_ROOT; }
     size_t bytes() const { return nodes.size() * 4 + leaves.size() * 8 + runEnd.size() * 6; }
