@@ -15,6 +15,7 @@
 #include <windows.h>
 #include <GL/gl.h>
 
+#include <chrono>
 #include <cmath>
 #include <cstdio>
 #include <cstring>
@@ -190,6 +191,34 @@ double arg(int argc, char** argv, const char* k, double d) {
     return d;
 }
 
+// GPU utilisation over ~0.3 s from NVIDIA's NVML (shipped with the driver); 0 when there is no NVML (other vendors:
+// assume free)
+int gpuBusyPercent() {
+    HMODULE nv = LoadLibraryA("nvml.dll");
+    if (!nv) return 0;
+    struct Util { unsigned gpu, memory; };
+    typedef int (*Init)();
+    typedef int (*ByIndex)(unsigned, void**);
+    typedef int (*Rates)(void*, Util*);
+    auto init = reinterpret_cast<Init>(GetProcAddress(nv, "nvmlInit_v2"));
+    auto byIndex = reinterpret_cast<ByIndex>(GetProcAddress(nv, "nvmlDeviceGetHandleByIndex_v2"));
+    auto rates = reinterpret_cast<Rates>(GetProcAddress(nv, "nvmlDeviceGetUtilizationRates"));
+    auto shut = reinterpret_cast<Init>(GetProcAddress(nv, "nvmlShutdown"));
+    int busy = 0;
+    void* dev = nullptr;
+    if (init && byIndex && rates && init() == 0) {
+        if (byIndex(0, &dev) == 0)
+            for (int i = 0; i < 3; i++) {
+                Util u{};
+                if (rates(dev, &u) == 0) busy = std::max(busy, int(u.gpu));
+                Sleep(100);
+            }
+        if (shut) shut();
+    }
+    FreeLibrary(nv);
+    return busy;
+}
+
 // column-major 4x4
 struct M4 {
     double m[16] = {};
@@ -271,8 +300,20 @@ int main(int argc, char** argv) {
     // a good neighbour on a shared machine: below-normal priority, and aether on its CPU reference backend (bit-exact
     // with Vulkan, tested) unless gpu=1, so only the pack's few full-screen GL passes touch the GPU
     SetPriorityClass(GetCurrentProcess(), BELOW_NORMAL_PRIORITY_CLASS);
-    bool gpu = arg(argc, argv, "gpu", 0) != 0;
-    if (gpu ? aether_create(AETHER_BACKEND_VULKAN, &ctx) != AETHER_OK : aether_create(AETHER_BACKEND_CPU, &ctx) != AETHER_OK) return 1;
+    // gpu=1 Vulkan, gpu=0 CPU, gpu=auto (-1, default): Vulkan only while the GPU is idle (someone else's game or test
+    // keeps it), else CPU
+    int gpuArg = int(arg(argc, argv, "gpu", -1));
+    int busy = gpuArg < 0 ? gpuBusyPercent() : 0;
+    bool gpu = gpuArg > 0 || (gpuArg < 0 && busy < 40);
+    if (gpuArg < 0) std::printf("pack_lab: GPU %d%% busy -> %s\n", busy, gpu ? "Vulkan" : "CPU");
+    if (gpu && aether_create(AETHER_BACKEND_VULKAN, &ctx) != AETHER_OK) gpu = false;
+    if (!gpu && !ctx && aether_create(AETHER_BACKEND_CPU, &ctx) != AETHER_OK) return 1;
+    auto clock0 = std::chrono::steady_clock::now();
+    auto lap = [&](const char* what) {
+        auto now = std::chrono::steady_clock::now();
+        std::printf("pack_lab: %-10s %7.1f ms\n", what, std::chrono::duration<double, std::milli>(now - clock0).count());
+        clock0 = now;
+    };
     if (aether_preview_load_raster(ctx, "data/tamriel_raster.bin") != AETHER_OK) {
         std::printf("pack_lab: %s\n", aether_last_error(ctx));
         return 1;
@@ -285,6 +326,7 @@ int main(int argc, char** argv) {
             }
         return 0;
     }
+    lap("raster");
     double ground = aether_preview_height(ctx, x, z);
     double y = std::max(ground, 63.0) + arg(argc, argv, "above", 40);
     if (eyeInWater) y = std::max(ground + 2.0, 60.0);
@@ -294,7 +336,9 @@ int main(int argc, char** argv) {
         aether_preview_generate(ctx, lod, (cx - 2) * span, (cz - 2) * span, (cx + 3) * span, (cz + 3) * span);
     }
     double centre[3] = {x, y, z};
+    lap("generate");
     aether_update(ctx, centre, 0);
+    lap("svdag");
     std::vector<uint32_t> noise(64 * 64 * 64);
     bool haveNoise = false;
     if (FILE* nf = std::fopen("data/cloud_noise.bin", "rb")) {
@@ -380,6 +424,7 @@ int main(int argc, char** argv) {
     aether_render(ctx, &fr, &o3);
     std::vector<float> sunMap(size_t(1024) * 1025 * 2);
     bool haveSunMap = arg(argc, argv, "sunmap", 1) != 0 && aether_read_sun_map(ctx, sunMap.data(), uint32_t(sunMap.size())) == AETHER_OK;
+    lap("render");
 
     // ---- GL
     if (!makeContext() || !loadGl()) return 1;
@@ -597,6 +642,7 @@ int main(int argc, char** argv) {
     glBindTexture(GL_TEXTURE_2D, outTex);
     glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, px.data());
     for (uint32_t yy = 0; yy < H; yy++) std::memcpy(&img[size_t(yy) * W * 4], &px[size_t(H - 1 - yy) * W * 4], W * 4);
+    lap("gl+pack");
     aether::writePng(outPng, reinterpret_cast<const uint32_t*>(img.data()), W, H);
     std::printf("pack_lab: wrote %s (%s)\n", outPng, ok ? "all passes ran" : "a pass FAILED");
     aether_destroy(ctx);
