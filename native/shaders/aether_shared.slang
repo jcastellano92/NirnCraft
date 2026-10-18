@@ -87,19 +87,29 @@ float3 skyAmbient(float3 n, float3 sun) {
     return lerp(ground, skyUp, n.y * 0.5 + 0.5);
 }
 
-// ao: 0..1 sky-light occlusion (crevices, forest floors), applied to the ambient term only
-float3 shadeSurface(float3 albedo, MaterialGpu m, float3 n, float3 v, float3 sun, float sunVis, uint cls, float ao) {
-    float ndl = saturate(dot(n, sun));
-    float3 direct = sunRadiance(sun) * ndl * sunVis;
+// The key light: the sun, or the moon (opposite it) once the sun is below the horizon, with the shader pack's
+// moonlight (shaderpack lib/lighting.glsl shadeForward): the near and far fields light the night identically.
+float3 keyLightDir(float3 sun) { return sun.y > -0.05 ? sun : -sun; }
+
+float3 keyLightRadiance(float3 sun) {
+    return sun.y > -0.05 ? sunRadiance(sun) : float3(0.035, 0.05, 0.09) * smoothstep(-0.05, -0.2, sun.y);
+}
+
+// ao: 0..1 sky-light occlusion (crevices, forest floors), applied to the ambient term only.
+// lightVis: shadowing of the key light. reflection: what water mirrors (the sky, or traced far terrain).
+float3 shadeSurface(float3 albedo, MaterialGpu m, float3 n, float3 v, float3 sun, float lightVis, uint cls, float ao,
+                    float3 reflection) {
+    float3 L = keyLightDir(sun);
+    float ndl = saturate(dot(n, L));
+    float3 direct = keyLightRadiance(sun) * ndl * lightVis;
     float3 c = albedo * (direct + skyAmbient(n, sun) * ao);
     if (cls == 2u) {
-        // water: Schlick Fresnel against the sky, plus a soft sun glint
+        // water: Schlick Fresnel against what it reflects, plus a soft glint of the key light
         float cosv = saturate(-v.y);
         float f = 0.02 + 0.98 * pow(1.0 - cosv, 5.0);
         float3 r = reflect(v, float3(0, 1, 0));
-        float3 refl = skyColor(r, sun);
-        float spec = pow(saturate(dot(r, sun)), 400.0) * sunVis * 6.0;
-        c = lerp(c, refl, f) + sunRadiance(sun) * spec;
+        float spec = pow(saturate(dot(r, L)), 400.0) * lightVis * 6.0;
+        c = lerp(c, reflection, f) + keyLightRadiance(sun) * spec;
     }
     c += albedo * m.emisClass.x * 2.0;
     return c;

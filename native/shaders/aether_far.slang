@@ -371,6 +371,42 @@ float traceShadow(float3 p, float3 dir, int lod) {
     return 1.0;
 }
 
+// What a far water surface mirrors: a straight reflected ray through the same scene (coarser LOD, no shadows), shaded
+// simply, else the sky. Only water pixels pay for it.
+float3 waterReflection(float3 p, float3 dir, float k, float t, int lod, float3 sun) {
+    float3 slope = normalize(dir + float3(0, 2.0 * k * t, 0));
+    float3 r = reflect(slope, float3(0, 1, 0));
+    float3 sky = skyColor(r, sun);
+    if (r.y > 0.35) return sky;  // steep reflections only see sky
+    TraceResult rr;
+    rr.t = 0; rr.mat = 0; rr.axis = -1; rr.lod = 0; rr.steps = 0;
+    int lodCount = int(frame.dims.w);
+    int l = min(lod + 1, lodCount - 1);
+    float s = float(1 << lod);
+    float3 o = p + float3(0, 1.01 * s, 0);
+    float tr = 0;
+    float maxT = 12000.0;
+    for (int seg = 0; seg < 48; seg++) {
+        if (tr >= maxT) break;
+        float len = min(192.0 * float(1 << l), maxT - tr);
+        float uncExit;
+        int hit = traceLod(l, o + r * tr, r, len, rr, uncExit);
+        if (hit == TRACE_HIT) {
+            MaterialGpu m = palette[rr.mat];
+            float3 n = float3(0, 1, 0);  // shaded as tops: soft and cheap at reflection scale
+            float3 c = m.albedoRough.rgb * (keyLightRadiance(sun) * saturate(dot(n, keyLightDir(sun))) * 0.8 + skyAmbient(n, sun));
+            return applyAerial(c, r, sun, tr + rr.t, frame);
+        }
+        if (hit == TRACE_UNCOVERED) {
+            if (l + 1 < lodCount) { l++; continue; }
+            break;
+        }
+        tr += len;
+        if (o.y + r.y * tr > 640.0 - float(frame.camInt.y)) break;
+    }
+    return sky;
+}
+
 uint cloudDiv() { return (frame.dims.z & FRAME_CLOUDS_QUARTER) != 0 ? 4u : 2u; }
 uint2 cloudDims() { uint d = cloudDiv(); return uint2((frame.dims.x + d - 1) / d, (frame.dims.y + d - 1) / d); }
 
@@ -476,11 +512,11 @@ void farMain(uint3 id : SV_DispatchThreadID) {
     if (actorFirst) {
         n = ah.n;
         cls = 4u;  // far actor
-        if ((frame.dims.z & FRAME_CLOUDS) != 0) sunVis = cloudShadow(o + dir * ah.t, sun);
+        if ((frame.dims.z & FRAME_CLOUDS) != 0) sunVis = cloudShadow(o + dir * ah.t, keyLightDir(sun));
         MaterialGpu am;
         am.albedoRough = float4(ah.albedo, 0.8);
         am.emisClass = float4(0, 0, 0, 0);
-        color = shadeSurface(ah.albedo, am, n, dir, sun, sunVis, 0u, 1.0);
+        color = shadeSurface(ah.albedo, am, n, dir, sun, sunVis, 0u, 1.0, float3(0, 0, 0));
         depth = ah.t;
         color = applyAerial(color, dir, sun, ah.t, frame);
     } else if (tHit >= 0.0) {
@@ -511,10 +547,11 @@ void farMain(uint3 id : SV_DispatchThreadID) {
             // same LOD as the hit (a coarser one is fatter and self-shadows); start one voxel out along the face
             float3 faceN = float3(ax == 0 ? (slope.x > 0 ? -1.0 : 1.0) : 0.0, ax == 1 ? (slope.y > 0 ? -1.0 : 1.0) : 0.0,
                                   ax == 2 ? (slope.z > 0 ? -1.0 : 1.0) : 0.0);
-            sunVis = dot(n, sun) > 0.0 && dot(faceN, sun) > -0.2
-                ? traceShadow(p + faceN * (1.01 * s) + sun * (0.5 * s), sun, res.lod) : 0.0;
+            float3 L = keyLightDir(sun);
+            sunVis = dot(n, L) > 0.0 && dot(faceN, L) > -0.2
+                ? traceShadow(p + faceN * (1.01 * s) + L * (0.5 * s), L, res.lod) : 0.0;
         }
-        if ((frame.dims.z & FRAME_CLOUDS) != 0 && sunVis > 0.0) sunVis *= cloudShadow(p, sun);
+        if ((frame.dims.z & FRAME_CLOUDS) != 0 && sunVis > 0.0) sunVis *= cloudShadow(p, keyLightDir(sun));
         float3 albedo = m.albedoRough.rgb;
         // ambient occlusion: solid neighbours around the air voxel in front of the face (4 taps in the face plane)
         float ao = 1.0;
@@ -535,7 +572,9 @@ void farMain(uint3 id : SV_DispatchThreadID) {
             albedo *= 0.86 + 0.28 * v;
         }
         if ((frame.dims.z & FRAME_DEBUG_LOD) != 0) albedo = lodTint(res.lod);
-        color = shadeSurface(albedo, m, n, dir, sun, sunVis, cls, ao);
+        float3 reflection = float3(0, 0, 0);
+        if (cls == 2u) reflection = waterReflection(p, dir, k, tHit, res.lod, sun);
+        color = shadeSurface(albedo, m, n, dir, sun, sunVis, cls, ao, reflection);
         depth = tHit;
         color = applyAerial(color, dir, sun, tHit, frame);
         if ((frame.dims.z & FRAME_DEBUG_WEATHER) != 0) {
