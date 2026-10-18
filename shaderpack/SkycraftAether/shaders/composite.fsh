@@ -16,6 +16,7 @@
 #include "/lib/weather.glsl"
 #include "/lib/waves.glsl"
 #include "/lib/aether.glsl"
+#include "/lib/media.glsl"
 
 uniform sampler2D colortex4;
 uniform sampler2D colortex5;
@@ -43,6 +44,9 @@ in vec2 texcoord;
 layout(location = 0) out vec4 outColor;
 
 
+// the world clock the local air drifts by (the mod's game time when present: the same in every pass)
+float airClock() { return haveAir() ? airTime() : frameTimeCounter; }
+
 vec3 viewAt(vec2 uv, float d) {
     vec4 v = gbufferProjectionInverse * vec4(uv * 2.0 - 1.0, d * 2.0 - 1.0, 1.0);
     return v.xyz / v.w;
@@ -54,7 +58,7 @@ vec2 toScreen(vec3 view) {
 }
 
 // the opaque scene at uv: lit near field, aerial perspective, the far field under it, ground fog over both
-vec3 sceneAt(vec2 uv, vec3 sun) {
+vec3 sceneAt(vec2 uv, vec3 sun, bool marched) {
     vec3 col = texture(colortex4, uv).rgb;
     float d = texture(depthtex1, uv).r;
     vec3 vp = viewAt(uv, d);
@@ -76,7 +80,10 @@ vec3 sceneAt(vec2 uv, vec3 sun) {
     }
     }
 #endif
-    if (fogDist < 1e29) col = applyGroundFog(col, dir, sun, fogDist, cameraPosition.y, wetness, rainStrength);
+    if (sky && fogDist >= 1e29) col += lightningSky(dir, outdoorExposure(cameraPosition, cameraPosition));
+    else if (fogDist >= far) col += lightningSky(dir, outdoorExposure(cameraPosition, cameraPosition)) * 0.35;  // on the far field
+    if (isEyeInWater == 0)
+        col = applyMedia(col, dir, fogDist, sun, cameraPosition, wetness, rainStrength, airClock(), ign(gl_FragCoord.xy, 0.0), marched);
     return col;
 }
 
@@ -102,7 +109,7 @@ vec3 reflectionAt(vec3 vp, vec3 rWorld, vec3 sun, float skyLight) {
             float dz = hit.z - p.z;
             if (dz > 0.0 && dz < stepLen * 2.5) {
                 float edge = smoothstep(0.0, 0.08, min(min(uv.x, 1.0 - uv.x), min(uv.y, 1.0 - uv.y)));
-                return mix(sky, sceneAt(uv, sun), edge);
+                return mix(sky, sceneAt(uv, sun, false), edge);
             }
         }
     }
@@ -177,7 +184,7 @@ void main() {
         vec2 cand = texcoord + off / max(1.0, dist0 * 0.05);
         if (texture(depthtex1, cand).r > d0) uvR = cand;
 #endif
-        vec3 behind = sceneAt(uvR, sun);
+        vec3 behind = sceneAt(uvR, sun, false);
         float thick = max(length(viewAt(uvR, texture(depthtex1, uvR).r)) - dist0, 0.0);
         if (texture(depthtex1, uvR).r >= 1.0) thick = 60.0;
         if (mat == MAT_WATER && isEyeInWater == 0) {
@@ -215,8 +222,10 @@ void main() {
             col = behind * (1.0 - tr.a) + tr.rgb;
         }
         col = applyAerial(col, dir, sun, dist0, cameraPosition.y, rainStrength);
+        if (isEyeInWater == 0)
+            col = applyMedia(col, dir, dist0, sun, cameraPosition, wetness, rainStrength, airClock(), ign(gl_FragCoord.xy, 0.0), true);
     } else {
-        col = sceneAt(texcoord, sun);
+        col = sceneAt(texcoord, sun, true);
         // weather, particles, smoke, lines and the rest (shaded and fogged forward, premultiplied; additive light such
         // as flames and lightning channels carries no coverage)
         if (max(tr.a, max(tr.r, max(tr.g, tr.b))) > 1e-4) col = col * (1.0 - tr.a) + tr.rgb;

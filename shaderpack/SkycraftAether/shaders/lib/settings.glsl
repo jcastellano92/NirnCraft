@@ -35,6 +35,10 @@
 
 // atmosphere
 #define FOG_LAYERS              // low valley fog, marsh mist and height fog by weather and time of day
+#define MEDIA_STEPS 10 // [0 4 6 10 14 16] the near air march: fog sealed out of houses and caves, dungeon air, halos
+#define HALO_STEPS 8 // [0 6 8 12 16] lamps, torches, fires and spells glow in the fog around them (0: off)
+#define LIGHTNING_LIGHT 1 // [0 1] storm channels light the ground, the rain and the clouds (outdoors only)
+//#define LIGHT_OCCLUSION        // the mod's point lights are shadowed by walls (needs -Dskycraft.localLightOcclusion)
 #define VOLUMETRIC_LIGHT        // light shafts through clouds, trees and windows
 #define VL_SAMPLES 16 // [8 12 16 24 32]
 #define STARS                   // stars and the galaxy, turning with the sky
