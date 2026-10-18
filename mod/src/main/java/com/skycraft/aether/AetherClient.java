@@ -64,7 +64,10 @@ public final class AetherClient {
         // the pack's aether textures must exist before Iris builds a world pipeline (it holds the texture objects from
         // then on). Client setup runs on a loader thread, so hop to the render thread, where GPU objects may be made.
         modBus.addListener((net.neoforged.fml.event.lifecycle.FMLClientSetupEvent e) ->
-                e.enqueueWork(() -> net.minecraft.client.Minecraft.getInstance().execute(AetherTargets::registerPlaceholders)));
+                e.enqueueWork(() -> net.minecraft.client.Minecraft.getInstance().execute(() -> {
+                    AetherTargets.registerPlaceholders();
+                    com.skycraft.render.client.PackTextures.preload();
+                })));
         NeoForge.EVENT_BUS.addListener(AetherClient::afterOpaque);
         NeoForge.EVENT_BUS.addListener((net.neoforged.neoforge.client.event.ClientTickEvent.Post e) -> AetherTargets.flushClear());
         NeoForge.EVENT_BUS.addListener((ClientPlayerNetworkEvent.LoggingOut e) -> {

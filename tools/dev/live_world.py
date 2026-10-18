@@ -533,9 +533,16 @@ def dispatch(args):
         else:
             # Bootstrap from the previous live controller, which had no status JSON.
             log = GAME / "logs/latest.log"
-            if not log.exists() or "Autotest live: ready" not in log.read_text(encoding="utf-8", errors="replace"):
-                raise RuntimeError("No live controller confirmed; close the preview through its game window")
-            atomic(GAME / "skycraft-live.txt", b"stop\n")
+            if log.exists() and "Autotest live: ready" in log.read_text(encoding="utf-8", errors="replace"):
+                atomic(GAME / "skycraft-live.txt", b"stop\n")
+            else:
+                # No controller (a menu, a disconnect screen, a failed join): ask this exact instance's game window to
+                # close, as its close button does (WM_CLOSE; Minecraft shuts down and saves normally). Never a kill.
+                for p in processes():
+                    subprocess.run(["powershell", "-NoProfile", "-Command",
+                                    f"$g = Get-Process -Id {int(p['pid'])} -ErrorAction SilentlyContinue; "
+                                    "if ($g) { [void]$g.CloseMainWindow() }"], check=False)
+                print("No live controller: requested a normal window close")
         deadline = time.monotonic() + 180
         while processes() and time.monotonic() < deadline:
             time.sleep(1)
