@@ -165,7 +165,16 @@ final class AetherTileServer {
                 }
             }
         }
-        if (t.server.getTickCount() % 20 == 0) t.pregenerate();
+        // host load (render/quality HostLoad): the column pool shrinks while the server needs its cores, and
+        // pregeneration slows (then stops) as ticks lengthen
+        double mspt = t.tickMs();
+        if (t.server.getTickCount() % 100 == 0) {
+            boolean guests = !t.server.isDedicatedServer() && t.server.isPublished() && t.server.getPlayerCount() > 1;
+            t.columns.setThreads(com.skycraft.render.quality.HostLoad.serverColumnThreads(
+                    Runtime.getRuntime().availableProcessors(), t.server.isDedicatedServer(), guests, mspt));
+        }
+        int every = com.skycraft.render.quality.HostLoad.pregenIntervalTicks(mspt);
+        if (every > 0 && t.server.getTickCount() % every == 0) t.pregenerate();
     }
 
     private double tickMs() {

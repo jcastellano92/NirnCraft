@@ -97,8 +97,8 @@ subgroup ops), so Vulkan 1.2 + `shaderInt64` covers Pascal (GTX 10xx), Polaris+,
 | 2560×1440 host-copy | 9.5–11.6 ms | 17.6–19.8 ms (11.0 ms wait + 7.7 ms upload) |
 | 960×540 host-copy (gl test) | 1.5–1.9 ms | 3.6 ms (1.7 wait + 1.1 upload) |
 
-So the fallback works everywhere but costs a 1080p game roughly 10 ms of render-thread time: AetherQuality's dynamic
-scale should drop aether's resolution there. Integrated GPUs share memory, so their copy is cheaper, and they have
+So the fallback works everywhere but costs a 1080p game roughly 10 ms of render-thread time: adaptive quality's
+cost model (docs/ADAPTIVE-QUALITY.md) sees it in aether's measured time and drops aether's resolution there. Integrated GPUs share memory, so their copy is cheaper, and they have
 zero-copy anyway (Mesa RADV/radeonsi, ANV/iris, NVIDIA all ship the fd extensions).
 
 **Conformance runs** (2026-10-18): NVIDIA RTX 3090 (zero-copy and forced host-copy) and Intel UHD 630 (Vulkan; GL

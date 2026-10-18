@@ -92,6 +92,15 @@ final class AetherExactSource extends AetherRefiningSource {
         return new TamrielHeight(n[0], n[1], n[2], n[3]);
     }
 
+    /**
+     * Resizes the column pool (adaptive quality's host-load policy: fewer threads while this machine hosts LAN guests
+     * or its server ticks run long). Any thread; running tiles finish.
+     */
+    void setThreads(int threads) {
+        int n = Math.max(1, threads);
+        if (pool.getParallelism() != n) pool.setParallelism(n);
+    }
+
     /** Column threads: a quarter of the cores, leaving the rest to the server's chunk generation. */
     static int defaultThreads() {
         return Integer.getInteger("skycraft.aether.columnThreads", Math.max(1, Runtime.getRuntime().availableProcessors() / 4));

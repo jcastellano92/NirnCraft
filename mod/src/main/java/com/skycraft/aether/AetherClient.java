@@ -66,7 +66,16 @@ public final class AetherClient {
         modBus.addListener((net.neoforged.fml.event.lifecycle.FMLClientSetupEvent e) ->
                 e.enqueueWork(() -> net.minecraft.client.Minecraft.getInstance().execute(AetherTargets::registerPlaceholders)));
         NeoForge.EVENT_BUS.addListener(AetherClient::afterOpaque);
-        NeoForge.EVENT_BUS.addListener((net.neoforged.neoforge.client.event.ClientTickEvent.Post e) -> AetherTargets.flushClear());
+        NeoForge.EVENT_BUS.addListener((net.neoforged.neoforge.client.event.ClientTickEvent.Post e) -> {
+            AetherTargets.flushClear();
+            AetherFarField.restMs = com.skycraft.render.quality.QualityClient.workerRestMs();
+        });
+        // adaptive quality v2: measures the frame, tunes aether and the pack to this machine (render/quality)
+        com.skycraft.render.quality.QualityClient.init();
+        com.skycraft.render.quality.QualityClient.setColumnThreadSink(n -> {
+            AetherFarField f = farField;
+            if (f != null && f.source() instanceof AetherExactSource s) s.setThreads(n);
+        });
         NeoForge.EVENT_BUS.addListener((ClientPlayerNetworkEvent.LoggingOut e) -> {
             serverWorldId = 0;
             farActors = null;
@@ -105,6 +114,17 @@ public final class AetherClient {
             // a new world (or server): new tiles, maybe another column source
             if (ctx != null && startedFor != mc.level && mc.level.dimension() == Level.OVERWORLD) stop();
             if (ctx == null && !start(mc)) return;
+            quality.begin();
+            if (!quality.enabled()) {
+                // adaptive quality's last fallback: no far field (the targets shrink to 1 x 1: the pack's own sky
+                // and cloud deck take over); the context and its tiles stay for when it comes back
+                if (targets != null) {
+                    targets.close();
+                    targets = null;
+                }
+                com.skycraft.render.quality.QualityClient.aetherFrame(false, 0);
+                return;
+            }
             // aether's own resolution (dynamic: AetherQuality); the pack upsamples it to the window
             int w = quality.width(mc.getWindow().getWidth()), h = quality.height(mc.getWindow().getHeight());
             int sunMap = quality.sunMapSize();
@@ -121,6 +141,7 @@ public final class AetherClient {
             }
             if (mc.level.dimension() != Level.OVERWORLD) {
                 targets.clear();  // the far field is the overworld's; elsewhere the near field stands alone
+                com.skycraft.render.quality.QualityClient.aetherFrame(false, 0);
                 return;
             }
             LevelRenderState state = event.getLevelRenderState();
@@ -129,6 +150,7 @@ public final class AetherClient {
             farField.follow(p.x, p.y, p.z);
             if (!farField.updated()) {
                 targets.clear();  // the worker has not staged the first window yet: nothing far this frame
+                com.skycraft.render.quality.QualityClient.aetherFrame(false, 0);
                 return;
             }
             feedWeather();
@@ -146,14 +168,14 @@ public final class AetherClient {
             // projection's far plane: 26.3's far plane lies well beyond the chunks, which left an empty band out to it
             float handEnd = mc.options.getEffectiveRenderDistance() * 16f - 16f;
             frame.nearFieldEnd = Math.max(32f, handEnd - handoffBand);
-            frame.maxDistance = 40_000f;
+            frame.maxDistance = quality.maxDistance();
             frame.planetRadius = planetRadius;
             float[] sun = sunDirection(state.skyRenderState.sunAngle);
             frame.sunX = sun[0];
             frame.sunY = sun[1];
             frame.sunZ = sun[2];
             frame.timeSec = (state.gameTime + state.worldPartialTicks) / 20f;
-            frame.lodBias = 1f;
+            frame.lodBias = quality.lodBias();  // > 1: coarser levels sooner with distance (far detail goes first)
             // the pack draws the sky; aether adds far terrain, clouds and far actors over it
             frame.flags = quality.flags(AetherNative.FRAME_SHADOWS | AetherNative.FRAME_ATMOS | AetherNative.FRAME_CLOUDS
                     | AetherNative.FRAME_ACTORS);
@@ -167,8 +189,8 @@ public final class AetherClient {
             io.dstDepth = targets.depthId();
             io.dstSunMap = targets.sunId();
             ctx.glRender(frame, io);
-            if (quality.update((float) ctx.stats().frameMs(), mc.getFps(), System.nanoTime()))
-                com.skycraft.Skycraft.LOGGER.debug("aether quality level {} (scale {})", quality.level(), quality.scale());
+            // aether's own GPU time (its timestamps, a couple of frames late) for the quality controller's cost model
+            com.skycraft.render.quality.QualityClient.aetherFrame(true, ctx.stats().frameMs());
         } catch (Throwable t) {
             disable("aether frame failed", t);
         }
@@ -261,6 +283,7 @@ public final class AetherClient {
 
     private static void disable(String why, Throwable t) {
         failed = true;
+        com.skycraft.render.quality.QualityClient.aetherFrame(false, 0);  // its knobs cost nothing from now on
         com.skycraft.Skycraft.LOGGER.warn("{}: {}", why, t.toString());
         stop();
     }
