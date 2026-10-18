@@ -77,6 +77,10 @@ final class AetherTileServer {
         try {
             TamrielHeight h = AetherExactSource.heightOf(server);
             if (h != null) current = new AetherTileServer(server, h);
+            com.skycraft.Skycraft.LOGGER.info(h != null
+                    ? "aether tile service on: exact far tiles for clients ({} column threads, {})"
+                    : "aether tile service off: the overworld is not a Tamriel world (clients keep the stand-in)",
+                    AetherExactSource.defaultThreads(), server.isDedicatedServer() ? "dedicated, idle pregeneration" : "integrated");
         } catch (RuntimeException e) {
             // the far field is a visual service: it must never take a server down (clients keep the stand-in)
             com.skycraft.Skycraft.LOGGER.warn("aether tile service not started", e);
