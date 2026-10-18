@@ -112,6 +112,7 @@ layout(location = 0) out vec4 outColor;
 #include "/lib/lighting.glsl"
 #endif
 #ifdef TRANSLUCENT
+#include "/lib/weather.glsl"
 #include "/lib/waves.glsl"
 #endif
 
@@ -169,7 +170,10 @@ void main() {
     if (material == MAT_WATER && n.y > 0.5) {
         // open water: more sky seen = a bigger body; storms whip it up
         float openness = smoothstep(0.6, 1.0, lm.y);
-        n = waveNormal((playerPos + cameraPosition).xz, frameTimeCounter, openness, rainStrength, vec2(0.0), dist);
+        vec2 wxz = (playerPos + cameraPosition).xz;
+        // the live wind sets the heading and size of the waves; rain rings the surface where the sky reaches it
+        n = waveNormal(wxz, frameTimeCounter, openness, waterWind(wxz, rainStrength), vec2(0.0), dist,
+                       rainStrength * smoothstep(0.85, 1.0, lm.y));
         a = WATER_ALPHA;
     } else if (material == MAT_WATER) {
         a = WATER_ALPHA;  // falls and the sides of flowing water
