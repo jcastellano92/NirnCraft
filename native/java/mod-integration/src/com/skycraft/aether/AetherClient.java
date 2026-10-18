@@ -2,8 +2,10 @@ package com.skycraft.aether;
 
 import com.mojang.renderpearl.api.GpuFormat;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.client.renderer.state.level.LevelRenderState;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
@@ -40,6 +42,7 @@ public final class AetherClient {
     private static AetherNative.Context ctx;
     private static AetherTargets targets;
     private static AetherFarField farField;
+    private static ClientLevel startedFor;  // the level the far field's tiles belong to
     private static Supplier<WeatherFeed> weather = () -> null;
     private static boolean failed;
     private static final AetherNative.Frame frame = new AetherNative.Frame();
@@ -65,11 +68,17 @@ public final class AetherClient {
         try {
             Minecraft mc = Minecraft.getInstance();
             if (mc.level == null) return;
+            // a new world (or server): new tiles, maybe another column source
+            if (ctx != null && startedFor != mc.level && mc.level.dimension() == Level.OVERWORLD) stop();
             if (ctx == null && !start(mc)) return;
             int w = mc.getWindow().getWidth(), h = mc.getWindow().getHeight();
             if (targets == null || targets.width() != w || targets.height() != h) {
                 if (targets != null) targets.close();
                 targets = AetherTargets.create(ctx, w, h);
+            }
+            if (mc.level.dimension() != Level.OVERWORLD) {
+                targets.clear();  // the far field is the overworld's; elsewhere the near field stands alone
+                return;
             }
             LevelRenderState state = event.getLevelRenderState();
             CameraRenderState cam = state.cameraRenderState;
@@ -114,15 +123,22 @@ public final class AetherClient {
 
     private static boolean start(Minecraft mc) {
         try {
-            Path dll = AetherLibrary.extract(mc.gameDirectory.toPath());
-            lib = AetherNative.load(dll);
+            if (lib == null) {
+                Path dll = AetherLibrary.extract(mc.gameDirectory.toPath());
+                lib = AetherNative.load(dll);
+            }
             ctx = lib.create(AetherNative.BACKEND_VULKAN);
-            AetherFarField.ColumnSource source = AetherFarField.defaultSource();
+            // single player: the server's own terrain height (exact); otherwise the seed-free raster source
+            AetherFarField.ColumnSource source = mc.hasSingleplayerServer()
+                    ? AetherExactSource.forServer(mc.getSingleplayerServer(), AetherFarField::previewRaster) : null;
+            if (source == null) source = AetherFarField.defaultSource();
             if (source.usesBlockPalette()) ctx.setPalette(AetherPalette.blocks());  // else aether's preview palette
             int[] noise = AetherPalette.cloudNoiseVolume();
             if (noise != null) ctx.setCloudNoise(noise);
             farField = new AetherFarField(ctx, source);
-            com.skycraft.Skycraft.LOGGER.info("aether far field on: {}", lib.buildInfo());
+            startedFor = mc.level;
+            com.skycraft.Skycraft.LOGGER.info("aether far field on ({} columns): {}",
+                    source instanceof AetherExactSource ? "exact" : "raster", lib.buildInfo());
             return true;
         } catch (Throwable t) {
             disable("aether unavailable, far field off", t);
@@ -150,6 +166,11 @@ public final class AetherClient {
     private static void disable(String why, Throwable t) {
         failed = true;
         com.skycraft.Skycraft.LOGGER.warn("{}: {}", why, t.toString());
+        stop();
+    }
+
+    /** Tears aether down (start() brings it back with fresh tiles). The library stays loaded. */
+    private static void stop() {
         try {
             if (farField != null) farField.close();
             if (targets != null) targets.close();
@@ -160,7 +181,10 @@ public final class AetherClient {
         } catch (Throwable ignored) {
             // best effort: the session continues without aether
         }
+        farField = null;
+        targets = null;
         ctx = null;
+        startedFor = null;
     }
 
     static GpuFormat colorFormat() {

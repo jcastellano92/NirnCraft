@@ -240,7 +240,7 @@ float PreviewSource::height(double x, double z) const {
     return column(x, z, s);
 }
 
-std::unique_ptr<Tile> PreviewSource::makeTile(int lod, int tx, int tz) const {
+static std::unique_ptr<Tile> blankTile(int lod, int tx, int tz) {
     auto t = std::make_unique<Tile>();
     t->lod = lod;
     t->tx = tx;
@@ -252,6 +252,11 @@ std::unique_ptr<Tile> PreviewSource::makeTile(int lod, int tx, int tz) const {
     t->top.resize(n);
     t->fill.resize(n);
     t->canopyMat.assign(n, 0);
+    return t;
+}
+
+std::unique_ptr<Tile> PreviewSource::makeTile(int lod, int tx, int tz) const {
+    auto t = blankTile(lod, tx, tz);
     double s = double(1 << lod);
     double x0 = double(tx) * TILE * s, z0 = double(tz) * TILE * s;
     Sample sm;
@@ -261,15 +266,48 @@ std::unique_ptr<Tile> PreviewSource::makeTile(int lod, int tx, int tz) const {
             double x = x0 + (i + 0.5) * s, z = z0 + (j + 0.5) * s;
             sample(x, z, sm);
             float h = column(x, z, sm);
-            t->surface[c] = h;
             float wl = NAN;
             if (sm.coast < 0 || h < SEA - 0.5f) wl = float(SEA);  // the sea fills blocks up to y 62, surface at 63
             if (!std::isnan(sm.water) && (sm.lakeSD > 0 || sm.rivD < sm.rivHW)) wl = std::max(std::isnan(wl) ? -1e9f : wl, sm.water);
+            t->surface[c] = h;
+            t->water[c] = wl;
+        }
+    }
+    dress(*t);
+    return t;
+}
+
+std::unique_ptr<Tile> PreviewSource::dressTile(int lod, int tx, int tz, const float* surface, const float* water) const {
+    auto t = blankTile(lod, tx, tz);
+    std::copy(surface, surface + t->surface.size(), t->surface.begin());
+    std::copy(water, water + t->water.size(), t->water.begin());
+    dress(*t);
+    return t;
+}
+
+// Surface materials and forest canopy for a tile whose geometry is filled in: by climate, altitude, slope and the
+// shore (a stand-in for the biome surface rules). Slope is the steeper of the map's macro gradient and the tile's own
+// (central differences between neighbouring columns), so cliffs, terraces and ridged peaks in the geometry turn to
+// rock and shed their trees even where the macro raster is gentle.
+void PreviewSource::dress(Tile& tile) const {
+    Tile* t = &tile;
+    double s = double(1 << t->lod);
+    double x0 = double(t->tx) * TILE * s, z0 = double(t->tz) * TILE * s;
+    const float* hs = t->surface.data();
+    Sample sm;
+    for (int j = 0; j < TILE; j++) {
+        for (int i = 0; i < TILE; i++) {
+            size_t c = size_t(j) * TILE + i;
+            double x = x0 + (i + 0.5) * s, z = z0 + (j + 0.5) * s;
+            sample(x, z, sm);
+            float h = hs[c], wl = t->water[c];
             if (!std::isnan(wl) && wl <= h) wl = NAN;
             t->water[c] = wl;
+            int i0 = std::max(i - 1, 0), i1 = std::min(i + 1, TILE - 1), j0 = std::max(j - 1, 0), j1 = std::min(j + 1, TILE - 1);
+            float gx = (hs[size_t(j) * TILE + i1] - hs[size_t(j) * TILE + i0]) / float((i1 - i0) * s);
+            float gz = (hs[size_t(j1) * TILE + i] - hs[size_t(j0) * TILE + i]) / float((j1 - j0) * s);
+            float slope = std::max(sm.slope, std::sqrt(gx * gx + gz * gz));
 
-            // surface materials by climate, altitude, slope and the shore (stand-in for the biome surface rules)
-            float slope = sm.slope;
             int cl = sm.climate;
             float snowline = cl == FROZEN ? -100.0f : cl == SK_COLD ? 190.0f : cl == SK_TEMPERATE ? 260.0f
                            : (cl == TEMPERATE || cl == MARITIME) ? 330.0f : cl == ASH ? 400.0f : 440.0f;
@@ -312,7 +350,6 @@ std::unique_ptr<Tile> PreviewSource::makeTile(int lod, int tx, int tz) const {
             }
         }
     }
-    return t;
 }
 
 }  // namespace aether

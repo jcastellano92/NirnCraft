@@ -25,7 +25,7 @@ import static java.lang.foreign.ValueLayout.JAVA_SHORT;
  * heap access, so Java arrays are passed in place without an off-heap copy; frame rendering is a normal downcall.</p>
  */
 public final class AetherNative {
-    public static final int ABI_VERSION = 0x000300;
+    public static final int ABI_VERSION = 0x000400;
     public static final int BACKEND_CPU = 0, BACKEND_VULKAN = 1;
     public static final int FRAME_CLOUDS = 0x1, FRAME_SHADOWS = 0x2, FRAME_ATMOS = 0x4, FRAME_ACTORS = 0x8,
             FRAME_SKY = 0x10, FRAME_NEAR_DEPTH = 0x20, FRAME_DEBUG_LOD = 0x100;
@@ -39,7 +39,7 @@ public final class AetherNative {
     private final Arena libArena;
     private final MethodHandle abiVersion, buildInfo, create, destroy, lastError, setPalette, uploadTile,
             uploadSection, notifyBlock, setWeather, setCloudNoise, setActors, update, render, getStats,
-            glAttach, glRenderIo, glDetach, previewLoadRaster, previewGenerate, previewHeight;
+            glAttach, glRenderIo, glDetach, previewLoadRaster, previewGenerate, previewHeight, uploadHeights, hasTile;
 
     private AetherNative(Path library) {
         libArena = Arena.ofShared();
@@ -71,6 +71,10 @@ public final class AetherNative {
                 FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, JAVA_INT, JAVA_INT, JAVA_INT, JAVA_INT));
         previewHeight = bind(l, lib, "aether_preview_height",
                 FunctionDescriptor.of(JAVA_FLOAT, ADDRESS, JAVA_DOUBLE, JAVA_DOUBLE));
+        uploadHeights = bind(l, lib, "aether_upload_column_heights",
+                FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, JAVA_INT, JAVA_INT, ADDRESS, ADDRESS));
+        hasTile = bind(l, lib, "aether_has_tile", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, JAVA_INT, JAVA_INT),
+                critical);
     }
 
     private static MethodHandle bind(Linker l, SymbolLookup lib, String name, FunctionDescriptor fd, Linker.Option... opts) {
@@ -242,6 +246,31 @@ public final class AetherNative {
                 t.set(ADDRESS, 48, canopy != null ? copy(a, canopy) : MemorySegment.NULL);
                 t.set(ADDRESS, 56, canopyMat != null ? copy(a, canopyMat) : MemorySegment.NULL);
                 check((int) uploadTile.invokeExact(ptr, t), "aether_upload_column_tile");
+            } catch (Throwable th) {
+                throw rethrow(th);
+            }
+        }
+
+        /**
+         * Exact geometry, preview dressing: surface and water heights (NaN = no water) of one 256 x 256 tile, row-major
+         * [z][x] as in uploadColumnTile, e.g. from the game's terrain height function; aether picks materials and
+         * forest canopy from the loaded preview raster. Needs previewLoadRaster. Copied before this returns.
+         */
+        public void uploadColumnHeights(int lod, int tileX, int tileZ, float[] surface, float[] water) {
+            if (surface.length < TILE * TILE || water.length < TILE * TILE)
+                throw new IllegalArgumentException("tile arrays must hold 256*256 columns");
+            try (Arena a = Arena.ofConfined()) {
+                check((int) uploadHeights.invokeExact(ptr, lod, tileX, tileZ, copy(a, surface), copy(a, water)),
+                        "aether_upload_column_heights");
+            } catch (Throwable th) {
+                throw rethrow(th);
+            }
+        }
+
+        /** True if tile (lod, tileX, tileZ) is resident (uploaded and not evicted). */
+        public boolean hasTile(int lod, int tileX, int tileZ) {
+            try {
+                return (int) hasTile.invokeExact(ptr, lod, tileX, tileZ) != 0;
             } catch (Throwable th) {
                 throw rethrow(th);
             }

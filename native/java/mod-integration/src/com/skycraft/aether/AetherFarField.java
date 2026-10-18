@@ -3,6 +3,7 @@ package com.skycraft.aether;
 import net.minecraft.client.Minecraft;
 
 import java.io.IOException;
+import java.nio.file.Path;
 
 /**
  * Streams far-field column tiles around the camera on its own thread and rebuilds aether's clipmap there, so the
@@ -18,13 +19,20 @@ final class AetherFarField implements AutoCloseable {
 
         /** Makes sure every tile of LOD `lod` covering [x0,x1) x [z0,z1) is uploaded. */
         void cover(AetherNative.Context ctx, int lod, int x0, int z0, int x1, int z1);
+
+        default void close() {}
+    }
+
+    /** The bundled Tamriel raster, unpacked once per mod version into the game directory. */
+    static Path previewRaster() throws IOException {
+        String version = AetherFarField.class.getPackage().getImplementationVersion();
+        return AetherRasterCache.ensure(Minecraft.getInstance().gameDirectory.toPath(), version != null ? version : "dev");
     }
 
     /**
      * Seed-free source: the bundled Tamriel raster (exact macro shape, rivers, lakes, coasts, climates) with
      * aether's stand-in for the seeded detail. Works the same on multiplayer clients, which do not know the seed.
-     * An exact source evaluating the server's tamriel_height density function replaces it in single player once
-     * the 26.3 conversion of TamrielHeight lands.
+     * In single player AetherExactSource replaces it with the server's own tamriel_height.
      */
     static ColumnSource defaultSource() {
         return new ColumnSource() {
@@ -35,9 +43,7 @@ final class AetherFarField implements AutoCloseable {
 
             @Override
             public void prepare(AetherNative.Context ctx) throws IOException {
-                String version = AetherFarField.class.getPackage().getImplementationVersion();
-                ctx.previewLoadRaster(AetherRasterCache.ensure(Minecraft.getInstance().gameDirectory.toPath(),
-                        version != null ? version : "dev"));
+                ctx.previewLoadRaster(previewRaster());
             }
 
             @Override
@@ -120,5 +126,6 @@ final class AetherFarField implements AutoCloseable {
         } catch (InterruptedException ignored) {
             Thread.currentThread().interrupt();
         }
+        source.close();
     }
 }

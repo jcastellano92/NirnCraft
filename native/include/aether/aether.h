@@ -32,7 +32,7 @@ extern "C" {
 #endif
 
 /* (major << 16) | (minor << 8) | patch. Bumped on any ABI change. */
-#define AETHER_ABI_VERSION 0x000300
+#define AETHER_ABI_VERSION 0x000400
 
 typedef struct AetherContext AetherContext;
 
@@ -233,6 +233,16 @@ AETHER_API AetherStatus aether_preview_load_raster(AetherContext* ctx, const cha
 /* Offline harness only: fill tiles of LOD `lod` covering [x0,x1) x [z0,z1) from the preview source. */
 AETHER_API AetherStatus aether_preview_generate(AetherContext* ctx, int32_t lod, int32_t x0, int32_t z0, int32_t x1,
                                                 int32_t z1);
+/*
+ * Exact geometry, preview dressing: the caller's surface and water heights (NaN = no water) for the 256 x 256 columns
+ * of tile (lod, tileX, tileZ), laid out as in AetherColumnTile, e.g. evaluated from the game's own terrain height
+ * function; aether picks the top/fill materials and forest canopy from the loaded preview raster's climate, slope and
+ * shore rules (preview palette). Needs aether_preview_load_raster. Replaces the tile if present.
+ */
+AETHER_API AetherStatus aether_upload_column_heights(AetherContext* ctx, int32_t lod, int32_t tileX, int32_t tileZ,
+                                                     const float* surface, const float* water);
+/* 1 if tile (lod, tileX, tileZ) is resident (uploaded and not evicted), else 0. */
+AETHER_API int32_t aether_has_tile(AetherContext* ctx, int32_t lod, int32_t tileX, int32_t tileZ);
 /* Offline harness only: preview terrain height at a block column (for camera placement). */
 AETHER_API float aether_preview_height(AetherContext* ctx, double x, double z);
 

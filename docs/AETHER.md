@@ -104,8 +104,10 @@ The other session's conversion is in progress in the main tree, which also moves
 
 1. After the conversion: move the glue in, run the game once, and watch the hand-off seam, curvature, cloud decks
    and frame time.
-2. The exact single-player column source (`tamriel_height` via `DensitySampler`), block palette, server tile packet
-   for multiplayer, and the far-actor packet.
-3. Far terrain look: snow and forest micro-shading; SRC GI underground.
+2. Server tile packet for multiplayer (clients have no seed; today they use the raster stand-in) and the far-actor
+   packet. Done ahead of the conversion: the exact single-player source (`AetherExactSource`: the server's own
+   `tamriel_height`, exercised offline by `native/java/mod-integration/harness`, see its README).
+3. Far terrain look: a snowline that follows aspect and slope instead of a near-level cut, less boxy forest lumps
+   on slopes, block-exact surface materials (biomes) instead of the raster dressing; SRC GI underground.
 4. Owner checks in game: the near/far seam at the hand-off distance, curvature strength (planet radius), cloud
    decks against the current shader clouds, and frame time on the 3090.

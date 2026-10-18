@@ -149,6 +149,11 @@ const Tile* World::tile(int lod, int tx, int tz) const {
     return it == tiles_.end() ? nullptr : it->second.get();
 }
 
+bool World::hasTile(int lod, int tx, int tz) const {
+    std::lock_guard<std::mutex> lock(mu_);
+    return tiles_.count({lod, tx, 0, tz}) != 0;
+}
+
 void World::putSection(int sx, int sy, int sz, const uint16_t* mats) {
     auto s = std::make_unique<Section>();
     std::copy(mats, mats + 4096, s->mats.begin());

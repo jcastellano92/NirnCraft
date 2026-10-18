@@ -362,6 +362,83 @@ static void testNearDepth(const char* raster) {
     aether_destroy(ctx);
 }
 
+// Caller geometry, preview dressing (aether_upload_column_heights): the terrain sits where the caller says.
+static void testColumnHeights(const char* raster) {
+    std::printf("column heights upload\n");
+    AetherContext* ctx = nullptr;
+    aether_create(AETHER_BACKEND_CPU, &ctx);
+    std::vector<float> surf(256 * 256), water(256 * 256, NAN);
+    CHECK(aether_upload_column_heights(ctx, 0, 0, 0, surf.data(), water.data()) == AETHER_ERR_STATE);  // no raster
+    if (aether_preview_load_raster(ctx, raster) != AETHER_OK) {
+        std::printf("  SKIP: no raster\n");
+        aether_destroy(ctx);
+        return;
+    }
+    // dry upland (the uploads below carry no water, the reference keeps its seas and rivers)
+    double x = 1000.5, z = -700.5;
+    for (int k = 0; k < 400; k++) {
+        double h = aether_preview_height(ctx, x, z);
+        if (h > 120 && h < 250) break;
+        x = 1000.5 + (k % 20) * 997.0;
+        z = -700.5 + (k / 20) * 1013.0;
+    }
+    float h0 = aether_preview_height(ctx, x, z);
+    CHECK(aether_has_tile(ctx, 0, int(std::floor(x / 256)), int(std::floor(z / 256))) == 0);
+    for (int lod = 0; lod < 3; lod++) {
+        int span = 256 << lod, s = 1 << lod;
+        int cx = int(std::floor(x / span)), cz = int(std::floor(z / span));
+        for (int tz = cz - 2; tz <= cz + 2; tz++)
+            for (int tx = cx - 2; tx <= cx + 2; tx++) {
+                // the preview's own ground, lifted 7 blocks, dry: what an exact source would hand over
+                for (int j = 0; j < 256; j++)
+                    for (int i = 0; i < 256; i++)
+                        surf[j * 256 + i] = aether_preview_height(ctx, tx * span + (i + 0.5) * s, tz * span + (j + 0.5) * s) + 7.0f;
+                CHECK(aether_upload_column_heights(ctx, lod, tx, tz, surf.data(), water.data()) == AETHER_OK);
+            }
+    }
+    CHECK(aether_has_tile(ctx, 0, int(std::floor(x / 256)), int(std::floor(z / 256))) == 1);
+    CHECK(aether_upload_column_heights(ctx, 99, 0, 0, surf.data(), water.data()) == AETHER_ERR_ARG);
+    double y = h0 + 60;
+    double centre[3] = {x, y, z};
+    aether_update(ctx, centre, 0);
+    const uint32_t W = 33, H = 33;
+    AetherFrame f{};
+    f.cameraPos[0] = x;
+    f.cameraPos[1] = y;
+    f.cameraPos[2] = z;
+    cameraMatrix(0, -89.9, 20, 1.0, f.invViewProj);
+    f.width = W;
+    f.height = H;
+    f.maxDistance = 8000;
+    f.sunDir[1] = 1;
+    f.lodBias = 1;
+    // against the preview's own tiles: every pixel 7 blocks nearer (ground or the canopy dressed onto it)
+    AetherContext* ref = nullptr;
+    aether_create(AETHER_BACKEND_CPU, &ref);
+    aether_preview_load_raster(ref, raster);
+    for (int lod = 0; lod < 3; lod++) {
+        int span = 256 << lod;
+        int cx = int(std::floor(x / span)), cz = int(std::floor(z / span));
+        aether_preview_generate(ref, lod, (cx - 2) * span, (cz - 2) * span, (cx + 3) * span, (cz + 3) * span);
+    }
+    aether_update(ref, centre, 0);
+    std::vector<float> depth(W * H), refDepth(W * H);
+    AetherFrameOutput o{nullptr, nullptr, depth.data(), nullptr}, oref{nullptr, nullptr, refDepth.data(), nullptr};
+    CHECK(aether_render(ctx, &f, &o) == AETHER_OK);
+    CHECK(aether_render(ref, &f, &oref) == AETHER_OK);
+    std::vector<float> lift;
+    for (uint32_t i = 0; i < W * H; i++)
+        if (depth[i] < 1e29f && refDepth[i] < 1e29f) lift.push_back(refDepth[i] - depth[i]);
+    std::sort(lift.begin(), lift.end());
+    float med = lift.empty() ? 0.0f : lift[lift.size() / 2];
+    std::printf("  looking down from %.0f blocks: %zu px hit both, median lift %.2f blocks (expect 7)\n", y - h0,
+                lift.size(), med);
+    CHECK(lift.size() > W * H / 2);
+    CHECK(std::abs(med - 7.0f) < 0.75f);
+    aether_destroy(ref);
+    aether_destroy(ctx);
+}
+
 static bool parity(const char* raster) {
     std::printf("cpu/vulkan parity (preview terrain)\n");
     AetherContext* cpu = nullptr;
@@ -543,6 +620,7 @@ int main(int argc, char** argv) {
     testFourZones();
     testActors();
     testNearDepth(argc > 1 ? argv[1] : "native/data/tamriel_raster.bin");
+    testColumnHeights(argc > 1 ? argv[1] : "native/data/tamriel_raster.bin");
     parity(argc > 1 ? argv[1] : "native/data/tamriel_raster.bin");
     std::printf(failures ? "FAILED (%d)\n" : "PASS\n", failures);
     return failures ? 1 : 0;

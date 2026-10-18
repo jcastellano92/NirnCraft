@@ -74,6 +74,7 @@ public:
     void putSection(int sx, int sy, int sz, const uint16_t* mats);
     void editBlock(int x, int y, int z, uint16_t mat);
     const Tile* tile(int lod, int tx, int tz) const;  // caller holds mu_ (or is single threaded)
+    bool hasTile(int lod, int tx, int tz) const;      // locks
 
     // Build what the window around `centre` needs; returns regions built. budgetMs <= 0: no limit.
     int update(const double centre[3], double budgetMs, double* buildMs);

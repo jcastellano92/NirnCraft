@@ -24,6 +24,9 @@ public:
     bool load(const std::string& path, std::string& err);
     float height(double x, double z) const;
     std::unique_ptr<Tile> makeTile(int lod, int tx, int tz) const;
+    // a tile of the caller's exact geometry (surface, water: TILE^2 each), dressed with the preview materials and
+    // forest canopy for its climate, slope and shore
+    std::unique_ptr<Tile> dressTile(int lod, int tx, int tz, const float* surface, const float* water) const;
 
 private:
     struct Sample {
@@ -33,6 +36,7 @@ private:
     void sample(double x, double z, Sample& s) const;
     float column(double x, double z, const Sample& s) const;
     float cell(int cx, int cz, int ch) const;
+    void dress(Tile& t) const;  // materials and canopy over filled-in geometry
 
     int w_ = 0, h_ = 0, ch_ = 0, minX_ = 0, minZ_ = 0, cellSize_ = 32;
     std::vector<float> data_;

@@ -10,6 +10,7 @@ import com.mojang.renderpearl.backend.opengl.GlTexture;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import net.minecraft.resources.Identifier;
+import org.joml.Vector4f;
 
 import java.lang.reflect.Method;
 import java.util.OptionalDouble;
@@ -61,6 +62,13 @@ final class AetherTargets implements AutoCloseable {
         return depth.glId;
     }
 
+    /** Nothing far this frame (another dimension): coverage 0, so the pack's composite shows the near field alone. */
+    void clear() {
+        var encoder = RenderSystem.getDevice().createCommandEncoder();
+        encoder.clearColorTexture(color.getTexture(), new Vector4f(0f, 0f, 0f, 0f));
+        encoder.clearColorTexture(depth.getTexture(), new Vector4f(1e30f, 0f, 0f, 0f));
+    }
+
     /** Let native code read GL_CLIP_DEPTH_MODE (Renderpearl uses [0,1] depth when glClipControl exists). */
     static int depthZeroToOne() {
         return AetherNative.GlFrameIO.DEPTH_AUTO;
@@ -78,8 +86,9 @@ final class AetherTargets implements AutoCloseable {
 
         Target(String label, GpuFormat format, int w, int h) {
             GpuDevice device = RenderSystem.getDevice();
-            this.texture = device.createTexture(label, GpuTexture.USAGE_TEXTURE_BINDING | GpuTexture.USAGE_COPY_DST, format,
-                    w, h, 1, 1);
+            // render attachment: clearable (clear() in other dimensions)
+            this.texture = device.createTexture(label, GpuTexture.USAGE_TEXTURE_BINDING | GpuTexture.USAGE_COPY_DST
+                    | GpuTexture.USAGE_RENDER_ATTACHMENT, format, w, h, 1, 1);
             this.textureView = device.createTextureView(this.texture);
             this.sampler = device.createSampler(AddressMode.CLAMP_TO_EDGE, AddressMode.CLAMP_TO_EDGE, FilterMode.NEAREST,
                     FilterMode.NEAREST, 1, OptionalDouble.empty());

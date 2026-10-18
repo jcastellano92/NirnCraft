@@ -428,7 +428,7 @@ AETHER_API AetherStatus aether_preview_generate(AetherContext* ctx, int32_t lod,
     std::vector<std::pair<int, int>> todo;
     for (int tz = tz0; tz <= tz1; tz++)
         for (int tx = tx0; tx <= tx1; tx++)
-            if (!ctx->world.tile(lod, tx, tz)) todo.push_back({tx, tz});
+            if (!ctx->world.hasTile(lod, tx, tz)) todo.push_back({tx, tz});
     std::atomic<size_t> next{0};
     auto worker = [&] {
         for (;;) {
@@ -443,6 +443,19 @@ AETHER_API AetherStatus aether_preview_generate(AetherContext* ctx, int32_t lod,
     worker();
     for (auto& t : pool) t.join();
     return AETHER_OK;
+}
+
+AETHER_API AetherStatus aether_upload_column_heights(AetherContext* ctx, int32_t lod, int32_t tileX, int32_t tileZ,
+                                                     const float* surface, const float* water) {
+    if (!ctx || lod < 0 || lod >= MAX_LODS || !surface || !water) return AETHER_ERR_ARG;
+    if (!ctx->preview) return ctx->fail(AETHER_ERR_STATE, "no preview raster loaded (it dresses the columns)");
+    ctx->world.putTile(ctx->preview->dressTile(lod, tileX, tileZ, surface, water));
+    return AETHER_OK;
+}
+
+AETHER_API int32_t aether_has_tile(AetherContext* ctx, int32_t lod, int32_t tileX, int32_t tileZ) {
+    if (!ctx || lod < 0 || lod >= MAX_LODS) return 0;
+    return ctx->world.hasTile(lod, tileX, tileZ) ? 1 : 0;
 }
 
 AETHER_API float aether_preview_height(AetherContext* ctx, double x, double z) {
