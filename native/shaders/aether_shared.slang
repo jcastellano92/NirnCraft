@@ -8,6 +8,7 @@ static const uint FRAME_ACTORS = 0x8u;
 static const uint FRAME_SKY = 0x10u;         // draw aether's sky behind misses (harness); in game the pack draws it
 static const uint FRAME_NEAR_DEPTH = 0x20u;  // nearDepth holds the near field's view distance: covered pixels skip
 static const uint FRAME_FLAT_NORMALS = 0x40u;  // face normals only (cheaper; a quality setting)
+static const uint FRAME_CLOUDS_QUARTER = 0x80u;  // cloud pass at quarter instead of half resolution (performance)
 static const uint FRAME_DEBUG_LOD = 0x100u;
 static const uint FRAME_DEBUG_WEATHER = 0x200u;  // ground shows the sampled weather column (cov, tower, curtain)
 static const int MAX_LODS = 8;

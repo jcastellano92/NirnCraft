@@ -27,7 +27,19 @@ float4 noiseTexel(int3 c) {
 }
 
 // SkycraftCloudNoise: period 16 world units in p, trilinear over the 64^3 volume, mix(b, r, 0.3).
+// On Vulkan one hardware trilinear fetch with REPEAT (identical up to the filter's 8-bit weights); the C++ reference
+// build does the same filter by hand from the buffer.
 float cloudNoiseAt(float3 p) {
+    __target_switch {
+    case spirv:
+        float4 t = cloudNoiseTex.SampleLevel(p / 16.0, 0.0);
+        return lerp(t.b, t.r, 0.30);
+    default:
+        return cloudNoiseManual(p);
+    }
+}
+
+float cloudNoiseManual(float3 p) {
     float3 v = frac(p / 16.0) * 64.0 - 0.5;
     int3 b = int3(floor(v));
     float3 f = v - float3(b);
@@ -160,16 +172,20 @@ float cumulusDensity(float3 p, CloudColumn col, float horizontal, out float h01)
             float r1 = cloudHash(float3(cell.x, 13.0, cell.y));
             float2 centreXZ = (cell + 0.5 + (float2(r0, r1) - 0.5) * 0.55) * 256.0;
             float radius = lerp(76.0, 230.0, effectiveCov) * (0.75 + r0 * 0.45);
+            float2 deltaXZ = parcelXZ - centreXZ;
+            // growth only shrinks a parcel (<= 1): test the unshrunk bound before paying for any trigonometry
+            if (max(abs(deltaXZ.x), abs(deltaXZ.y)) > radius * 1.15) continue;
             float growth = 0.88 + 0.12 * sin(weatherTime() * 0.002 + r1 * 6.2831853);
             radius *= growth;
-            float2 deltaXZ = parcelXZ - centreXZ;
             if (max(abs(deltaXZ.x), abs(deltaXZ.y)) > radius * 1.15) continue;
             float centreY = lower + thickness * (0.38 + r1 * 0.16);
             float radiusY = thickness * (0.38 + r0 * 0.08) * growth;
             float lobe = 1.0 - length(float3(deltaXZ / radius, (p.y - centreY) / radiusY));
+            // the three buds sit 120 degrees apart: one sin/cos, then rotate (exactly the original angles)
+            float2 budDir = float2(cos(r0 * 6.2831853), sin(r0 * 6.2831853));
             for (int bud = 0; bud < 3; bud++) {
-                float angle = (r0 + float(bud) * 0.333333) * 6.2831853;
-                float2 budXZ = centreXZ + float2(cos(angle), sin(angle)) * radius * 0.53;
+                float2 budXZ = centreXZ + budDir * radius * 0.53;
+                budDir = float2(budDir.x * -0.5 - budDir.y * 0.8660254, budDir.x * 0.8660254 + budDir.y * -0.5);
                 float budY = centreY + radiusY * (bud == 0 ? 0.45 + 0.15 * r1 : (bud == 1 ? 0.08 : -0.32));
                 float budShape = 1.0 - length(float3((parcelXZ - budXZ) / (radius * 0.61), (p.y - budY) / (radiusY * 0.62)));
                 float budMix = saturate(0.5 + 0.5 * (lobe - budShape) / 0.13);

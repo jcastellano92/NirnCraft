@@ -57,7 +57,8 @@ public:
         g.actors = view(in.actors);
         g.heightMip = view(s.heightMip);
         // the half-resolution cloud pass reads the last frame's surfaces (none yet, or after a resize: no limit)
-        size_t cn = size_t((w + 1) / 2) * ((h + 1) / 2);
+        uint32_t dv = (frame.dims[2] & 0x80u) ? 4u : 2u;  // FRAME_CLOUDS_QUARTER
+        size_t cn = size_t((w + dv - 1) / dv) * ((h + dv - 1) / dv);
         cloud_.assign(cn * 4, 0.0f);
         cloudDepth_.assign(cn, 1e30f);
         if (prevSurface_.size() != n) prevSurface_.assign(n, 1e30f);
@@ -84,7 +85,7 @@ public:
             for (auto& t : pool) t.join();
         };
         if (frame.dims[2] & 0x1u)  // FRAME_CLOUDS
-            dispatch(cloudMain, ((w + 1) / 2 + 7) / 8, ((h + 1) / 2 + 7) / 8);
+            dispatch(cloudMain, ((w + dv - 1) / dv + 7) / 8, ((h + dv - 1) / dv + 7) / 8);
         dispatch(farMain, (w + 7) / 8, (h + 7) / 8);
         prevSurface_.swap(outSurface_);
         if (ms) *ms = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count();

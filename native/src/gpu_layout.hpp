@@ -79,6 +79,7 @@ struct FarGlobals {
     CpuBuffer<float> cloudDepth;
     CpuBuffer<float> prevSurface;
     CpuBuffer<float> outSurface;
+    void* cloudNoiseTex;  // Texture3D on the C++ target: unused there (the kernel samples cloudNoise by hand)
 };
 
 }  // namespace aether

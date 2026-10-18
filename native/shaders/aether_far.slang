@@ -35,6 +35,8 @@
 [[vk::binding(18, 0)]] RWStructuredBuffer<float> cloudDepth;   // first cloud distance (1e30 = none)
 [[vk::binding(19, 0)]] StructuredBuffer<float> prevSurface;    // last frame's surface distance per full-res pixel
 [[vk::binding(20, 0)]] RWStructuredBuffer<float> outSurface;   // this frame's (terrain, actor or near field; 1e30 = sky)
+// the cloud noise volume as a hardware-filtered 3D texture (Vulkan); the C++ build samples the cloudNoise buffer
+[[vk::binding(21, 0)]] Sampler3D<float4> cloudNoiseTex;
 
 #include "aether_clouds.slang"
 
@@ -369,12 +371,13 @@ float traceShadow(float3 p, float3 dir, int lod) {
     return 1.0;
 }
 
-uint2 cloudDims() { return uint2((frame.dims.x + 1) / 2, (frame.dims.y + 1) / 2); }
+uint cloudDiv() { return (frame.dims.z & FRAME_CLOUDS_QUARTER) != 0 ? 4u : 2u; }
+uint2 cloudDims() { uint d = cloudDiv(); return uint2((frame.dims.x + d - 1) / d, (frame.dims.y + d - 1) / d); }
 
 // Bilinear upsample of the half-resolution deck at full-resolution pixel `px`; depth = nearest of the four taps.
 void sampleClouds(uint2 px, out float4 c, out float depth) {
     uint2 cd = cloudDims();
-    float2 hp = (float2(px) + 0.5) * 0.5 - 0.5;
+    float2 hp = (float2(px) + 0.5) / float(cloudDiv()) - 0.5;
     int2 b = int2(floor(hp));
     float2 f = hp - float2(b);
     int2 b0 = clamp(b, int2(0, 0), int2(cd) - 1), b1 = clamp(b + 1, int2(0, 0), int2(cd) - 1);
@@ -393,13 +396,15 @@ void cloudMain(uint3 id : SV_DispatchThreadID) {
     if (id.x >= cd.x || id.y >= cd.y) return;
     uint w = frame.dims.x, h = frame.dims.y;
     uint ci = id.y * cd.x + id.x;
-    uint2 full = min(id.xy * 2u, uint2(w - 1, h - 1));
-    float2 ndc = float2((float(id.x * 2u) + 1.0) / float(w) * 2.0 - 1.0, 1.0 - (float(id.y * 2u) + 1.0) / float(h) * 2.0);
+    uint dv = cloudDiv();
+    uint2 full = min(id.xy * dv, uint2(w - 1, h - 1));
+    float2 ndc = float2((float(id.x * dv) + 0.5 * float(dv)) / float(w) * 2.0 - 1.0,
+                        1.0 - (float(id.y * dv) + 0.5 * float(dv)) / float(h) * 2.0);
     float3 dir = normalize(unproject(frame, ndc));
     float3 o = frame.camFrac.xyz;
     float3 sun = frame.sunDir.xyz;
     float limit = frame.params.y;
-    uint x1 = min(full.x + 1u, w - 1u), y1 = min(full.y + 1u, h - 1u);
+    uint x1 = min(full.x + dv - 1u, w - 1u), y1 = min(full.y + dv - 1u, h - 1u);
     limit = min(limit, min(min(prevSurface[full.y * w + full.x], prevSurface[full.y * w + x1]),
                            min(prevSurface[y1 * w + full.x], prevSurface[y1 * w + x1])));
     CloudResult cl = marchClouds(o, dir, limit, sun, id.xy);

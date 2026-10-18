@@ -27,12 +27,12 @@
 namespace aether {
 namespace {
 
-constexpr uint32_t BINDINGS = 21;
+constexpr uint32_t BINDINGS = 22;
 constexpr uint32_t SLOTS = 2;
 // far kernel bindings
 constexpr uint32_t B_FRAME = 0, B_PALETTE = 7, B_COLOR = 8, B_NORMAL = 9, B_DEPTH = 10, B_WEATHER = 11,
                    B_COUNTERS = 12, B_NOISE = 13, B_NEAR = 14, B_ACTORS = 15, B_HEIGHTMIP = 16, B_CLOUD = 17,
-                   B_CLOUD_DEPTH = 18, B_PREV_SURFACE = 19, B_SURFACE = 20;
+                   B_CLOUD_DEPTH = 18, B_PREV_SURFACE = 19, B_SURFACE = 20, B_NOISE_TEX = 21;
 // the scene's buffers (two copies, staged off the render thread)
 constexpr uint32_t SCENE_BINDINGS[] = {1, 2, 3, 4, 5, 6, B_HEIGHTMIP};
 bool isScene(uint32_t b) { return (b >= 1 && b <= 6) || b == B_HEIGHTMIP; }
@@ -139,6 +139,11 @@ public:
                 if (s.query) vkDestroyQueryPool(dev_, s.query, nullptr);
             }
             for (auto& b : shared_) release(b);
+            release(noiseStaging_);
+            if (noiseSampler_) vkDestroySampler(dev_, noiseSampler_, nullptr);
+            if (noiseView_) vkDestroyImageView(dev_, noiseView_, nullptr);
+            if (noiseImg_) vkDestroyImage(dev_, noiseImg_, nullptr);
+            if (noiseMem_) vkFreeMemory(dev_, noiseMem_, nullptr);
             for (auto& c : copies_) {
                 for (auto& b : c.bufs) release(b);
                 release(c.staging);
@@ -169,6 +174,7 @@ public:
         // far kernel: binding 0 uniform, the rest storage buffers
         std::vector<VkDescriptorType> farTypes(BINDINGS, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
         farTypes[B_FRAME] = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        farTypes[B_NOISE_TEX] = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
         if (!createPipe(aether_far_spv, aether_far_spv_size, farTypes, 0, farPipe_, farLayout_, farSetLayout_, farShader_, err))
             return false;
         {
@@ -197,12 +203,13 @@ public:
                         ingestShader_, err))
             return false;
 
-        VkDescriptorPoolSize ps[3] = {{VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, SLOTS},
+        VkDescriptorPoolSize ps[4] = {{VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, SLOTS},
                                       {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, SLOTS * (BINDINGS - 1 + 3 + 1)},
-                                      {VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, SLOTS * (3 + 1)}};
+                                      {VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, SLOTS * (3 + 1)},
+                                      {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, SLOTS}};
         VkDescriptorPoolCreateInfo dp{VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO};
         dp.maxSets = SLOTS * 3;
-        dp.poolSizeCount = 3;
+        dp.poolSizeCount = 4;
         dp.pPoolSizes = ps;
         if (vkCreateDescriptorPool(dev_, &dp, nullptr, &dpool_) != VK_SUCCESS) return fail(err, "descriptor pool");
         VkCommandPoolCreateInfo cpi{VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO};
@@ -490,6 +497,81 @@ private:
         return true;
     }
 
+    // The 64^3 RGBA8 cloud noise as a sampled 3D image (linear filter, repeat): one hardware trilinear fetch per
+    // noise lookup instead of eight buffer reads. Uploaded through a staging buffer; callers waited all slots.
+    bool uploadNoiseTexture(const std::vector<uint32_t>& vol, std::string& err) {
+        if (!noiseImg_) {
+            VkImageCreateInfo ic{VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO};
+            ic.imageType = VK_IMAGE_TYPE_3D;
+            ic.format = VK_FORMAT_R8G8B8A8_UNORM;
+            ic.extent = {64, 64, 64};
+            ic.mipLevels = 1;
+            ic.arrayLayers = 1;
+            ic.samples = VK_SAMPLE_COUNT_1_BIT;
+            ic.tiling = VK_IMAGE_TILING_OPTIMAL;
+            ic.usage = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+            if (vkCreateImage(dev_, &ic, nullptr, &noiseImg_) != VK_SUCCESS) return fail(err, "noise image");
+            VkMemoryRequirements req;
+            vkGetImageMemoryRequirements(dev_, noiseImg_, &req);
+            VkMemoryAllocateInfo ma{VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO};
+            ma.allocationSize = req.size;
+            ma.memoryTypeIndex = memoryType(req.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+            if (vkAllocateMemory(dev_, &ma, nullptr, &noiseMem_) != VK_SUCCESS) return fail(err, "noise memory");
+            vkBindImageMemory(dev_, noiseImg_, noiseMem_, 0);
+            VkImageViewCreateInfo vc{VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO};
+            vc.image = noiseImg_;
+            vc.viewType = VK_IMAGE_VIEW_TYPE_3D;
+            vc.format = VK_FORMAT_R8G8B8A8_UNORM;
+            vc.subresourceRange = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1};
+            if (vkCreateImageView(dev_, &vc, nullptr, &noiseView_) != VK_SUCCESS) return fail(err, "noise view");
+            VkSamplerCreateInfo sc{VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO};
+            sc.magFilter = VK_FILTER_LINEAR;
+            sc.minFilter = VK_FILTER_LINEAR;
+            sc.mipmapMode = VK_SAMPLER_MIPMAP_MODE_NEAREST;
+            sc.addressModeU = sc.addressModeV = sc.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+            if (vkCreateSampler(dev_, &sc, nullptr, &noiseSampler_) != VK_SUCCESS) return fail(err, "noise sampler");
+        }
+        if (!upload(noiseStaging_, vol.data(), vol.size() * 4, false, Mem::Staging, err)) return false;
+        VkCommandBuffer cmd = copies_[0].uploadCmd;  // idle: callers waited every slot and upload under sceneMu_
+        std::lock_guard<std::mutex> scene(sceneMu_);
+        if (copies_[0].uploading) vkWaitForFences(dev_, 1, &copies_[0].uploadFence, VK_TRUE, UINT64_MAX);
+        copies_[0].uploading = false;
+        vkResetCommandBuffer(cmd, 0);
+        VkCommandBufferBeginInfo bi{VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO};
+        bi.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+        vkBeginCommandBuffer(cmd, &bi);
+        VkImageMemoryBarrier b{VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER};
+        b.image = noiseImg_;
+        b.subresourceRange = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1};
+        b.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+        b.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+        b.srcQueueFamilyIndex = b.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        b.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+        vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, 0, 0, nullptr, 0,
+                             nullptr, 1, &b);
+        VkBufferImageCopy region{};
+        region.imageSubresource = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1};
+        region.imageExtent = {64, 64, 64};
+        vkCmdCopyBufferToImage(cmd, noiseStaging_.buf, noiseImg_, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
+        b.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+        b.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        b.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+        b.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+        vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, 0, 0, nullptr, 0,
+                             nullptr, 1, &b);
+        vkEndCommandBuffer(cmd);
+        VkSubmitInfo si{VK_STRUCTURE_TYPE_SUBMIT_INFO};
+        si.commandBufferCount = 1;
+        si.pCommandBuffers = &cmd;
+        vkResetFences(dev_, 1, &copies_[0].uploadFence);
+        {
+            std::lock_guard<std::mutex> q(queueMu_);
+            if (vkQueueSubmit(queue_, 1, &si, copies_[0].uploadFence) != VK_SUCCESS) return fail(err, "noise upload");
+        }
+        vkWaitForFences(dev_, 1, &copies_[0].uploadFence, VK_TRUE, UINT64_MAX);
+        return true;
+    }
+
     // ---- setup ---------------------------------------------------------------------------------------------
 
     bool createInstance(std::string& err) {
@@ -681,10 +763,14 @@ private:
             for (auto& o : slots_)
                 if (!waitSlot(o, nullptr, err)) return false;
             if (!upload(shared_[B_NOISE], in.cloudNoise->data(), in.cloudNoise->size() * 4, false, Mem::HostWrite, err)) return false;
+            if (!uploadNoiseTexture(*in.cloudNoise, err)) return false;
             noiseUploaded_ = in.cloudNoise->data();
+            sharedDirty_ = true;  // every slot's set re-points at the new image
+            sharedDirtySlots_ = 0;
         }
         // host path: outputs in cached system memory (CPU reads from BAR are uncached); GL path: device local only
         Mem outKind = readback ? Mem::Readback : Mem::DeviceOnly;
+        cloudDiv_ = (frame.dims[2] & 0x80u) ? 4u : 2u;  // FRAME_CLOUDS_QUARTER
         bool ok = upload(s.bufs[B_FRAME], &frame, sizeof(FrameGpu), true, Mem::HostWrite, err) &&
                   upload(s.bufs[B_PALETTE], in.palette->data(), in.palette->size() * sizeof(MaterialGpu), false, Mem::HostWrite, err) &&
                   upload(s.bufs[B_WEATHER], in.weather->data(), in.weather->size() * 4, false, Mem::HostWrite, err) &&
@@ -710,7 +796,17 @@ private:
             s.boundPrev = prevBuf;
             VkDescriptorBufferInfo info[BINDINGS];
             VkWriteDescriptorSet wr[BINDINGS];
+            VkDescriptorImageInfo noiseInfo{noiseSampler_, noiseView_, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL};
             for (uint32_t i = 0; i < BINDINGS; i++) {
+                if (i == B_NOISE_TEX) {
+                    wr[i] = {VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET};
+                    wr[i].dstSet = s.farSet;
+                    wr[i].dstBinding = i;
+                    wr[i].descriptorCount = 1;
+                    wr[i].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+                    wr[i].pImageInfo = &noiseInfo;
+                    continue;
+                }
                 const Buf& b = i == B_PREV_SURFACE ? slots_[prevSlot_ < 0 ? int(&s - slots_) : prevSlot_].bufs[B_SURFACE]
                              : perSlot(i) ? s.bufs[i] : (isScene(i) ? sc.bufs[i] : shared_[i]);
                 info[i] = {b.buf, 0, VK_WHOLE_SIZE};
@@ -797,7 +893,8 @@ private:
         vkCmdBindDescriptorSets(s.cmd, VK_PIPELINE_BIND_POINT_COMPUTE, farLayout_, 0, 1, &s.farSet, 0, nullptr);
         if (clouds) {
             vkCmdBindPipeline(s.cmd, VK_PIPELINE_BIND_POINT_COMPUTE, cloudPipe_);
-            vkCmdDispatch(s.cmd, ((w + 1) / 2 + 7) / 8, ((h + 1) / 2 + 7) / 8, 1);
+            uint32_t dv = cloudDiv_;
+            vkCmdDispatch(s.cmd, ((w + dv - 1) / dv + 7) / 8, ((h + dv - 1) / dv + 7) / 8, 1);
             computeBarrier(s.cmd);
         }
         vkCmdBindPipeline(s.cmd, VK_PIPELINE_BIND_POINT_COMPUTE, farPipe_);
@@ -1152,6 +1249,12 @@ private:
     VkPipeline cloudPipe_ = VK_NULL_HANDLE;
     VkShaderModule cloudShader_ = VK_NULL_HANDLE;
     int prevSlot_ = -1;  // slot of the last recorded frame (its surfaces feed the next cloud pass)
+    uint32_t cloudDiv_ = 2;  // cloud pass resolution divisor for the frame being recorded
+    VkImage noiseImg_ = VK_NULL_HANDLE;
+    VkDeviceMemory noiseMem_ = VK_NULL_HANDLE;
+    VkImageView noiseView_ = VK_NULL_HANDLE;
+    VkSampler noiseSampler_ = VK_NULL_HANDLE;
+    Buf noiseStaging_;
     VkDescriptorPool dpool_ = VK_NULL_HANDLE;
     VkCommandPool pool_ = VK_NULL_HANDLE;
 

@@ -101,6 +101,8 @@ uint32_t flagsOf(const std::string& s) {
     if (s.find("actors") != std::string::npos) f |= AETHER_FRAME_ACTORS;
     if (s.find("lod") != std::string::npos) f |= AETHER_FRAME_DEBUG_LOD;
     if (s.find("sky") != std::string::npos) f |= AETHER_FRAME_SKY;
+    if (s.find("quarter") != std::string::npos) f |= AETHER_FRAME_CLOUDS_QUARTER;
+    if (s.find("flatnormals") != std::string::npos) f |= AETHER_FRAME_FLAT_NORMALS;
     if (s.find("dbgweather") != std::string::npos) f |= AETHER_FRAME_DEBUG_WEATHER;
     return f;
 }

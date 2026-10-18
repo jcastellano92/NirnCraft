@@ -93,7 +93,8 @@ int main(int argc, char** argv) {
     } sets[] = {{"terrain, flat normals", AETHER_FRAME_ATMOS | AETHER_FRAME_FLAT_NORMALS},
                 {"terrain", AETHER_FRAME_ATMOS},
                 {"terrain+shadows", AETHER_FRAME_ATMOS | AETHER_FRAME_SHADOWS},
-                {"terrain+shadows+clouds", AETHER_FRAME_ATMOS | AETHER_FRAME_SHADOWS | AETHER_FRAME_CLOUDS}};
+                {"terrain+shadows+clouds", AETHER_FRAME_ATMOS | AETHER_FRAME_SHADOWS | AETHER_FRAME_CLOUDS},
+                {"  clouds at quarter res", AETHER_FRAME_ATMOS | AETHER_FRAME_SHADOWS | AETHER_FRAME_CLOUDS | AETHER_FRAME_CLOUDS_QUARTER}};
     // bring the GPU to its boost clock first: short runs otherwise time the clock ramp
     f.flags = AETHER_FRAME_ATMOS | AETHER_FRAME_SHADOWS;
     for (int i = 0; i < 250; i++) aether_gl_render(ctx, &f);
