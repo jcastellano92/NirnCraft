@@ -58,8 +58,11 @@ real loaded world, visual review, then saved cameras. Generation changes invalid
 ## Next
 
 T1–T12 are done (WORLD-PLAN section 10). The next programme is the **concept-art-driven Visual Targets pipeline**:
-[`docs/world/VISUAL-TARGETS-PLAN.md`](world/VISUAL-TARGETS-PLAN.md) (plan only; owner decisions in its section 10, then
-VT0 housekeeping, VT1 ingest and targets for Volume 01 Skyrim, VT2 the headless site exporter).
+the plan [`docs/world/VISUAL-TARGETS-PLAN.md`](world/VISUAL-TARGETS-PLAN.md) (owner decisions final in its section
+10), the operating manual [`docs/world/VISUAL-TARGETS-WORKFLOW.md`](world/VISUAL-TARGETS-WORKFLOW.md) (board, claims,
+broker, fast loop, saving progress), and the phase prompts `docs/prompts/VT0-foundation.md`,
+`VT1-fast-verification.md`, `VT2-world-knobs.md`, `VT3-volume-pass.md`. Start with VT0 once the 12 atlases are in
+`art/atlases/`.
 
 ## The rules (non-negotiable)
 

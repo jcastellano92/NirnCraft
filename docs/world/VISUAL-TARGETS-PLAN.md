@@ -79,7 +79,7 @@ Gaps and blockers found (each is answered in sections 3-9):
    result. "Looks right" is never a gate by itself; a rubric score with reasons is.
 5. **Unique between the plates.** Derived targets must pass neighbour-difference and blind-identity tests (G1).
 6. **The atlases are the owner's art and live in the repo** (decision 2026-10-18, section 10). Game files from any
-   Bethesda install and other fan projects' content stay out exactly as before (section 10.3).
+   Bethesda install and other fan projects' content stay out exactly as before (section 10, decision 2).
 7. **Rebuild from scratch is allowed.** Nobody plays a saved world yet: generation may change freely, worlds are
    regenerated, schemas and bakes may break, legacy code may be deleted instead of kept compatible. Prefer the right
    design over a migration.
@@ -87,9 +87,10 @@ Gaps and blockers found (each is answered in sections 3-9):
 ## 3. The pipeline (one volume at a time)
 
 ```
- PDF atlas ──► V0 ingest ──► V1 targets ──► V2 gap report ──► V3 fix (data / terrain / blocks / look / code)
-                                   ▲                                   │
-                                   └──── V5 derived targets ◄──────────┤
+ PDF atlas ──► V0 ingest ──► V1 targets + design bible ──► V1b site plans ──► V2 gap report ──► V3 fix
+                                   ▲                                                  (data / terrain / water /
+                                   │                                                   blocks / look / lore / code)
+                                   └──── V5 derived targets ◄────────────────────────────────┤
                                                                        ▼
                      V4 verify ladder: L0 lint ► L1 headless export ► L2 sweeps ► L3 dev-server regen ► L4 client
                                                                        │
@@ -133,6 +134,26 @@ the generation fingerprint (approved cameras stay valid).
 Axes: `landform`, `water`, `vegetation`, `palette`, `materials`, `silhouette`, `signature`, `light`, `weather`,
 `clutter`, `fauna`, `scale`, `flow` (traversal), `function` (services, people). Probe vocabulary is a fixed list
 implemented by the ladder tools (section 5), so targets stay declarative and machine-checkable.
+
+**Plate vs world.** Every trait whose plate disagrees with the world (lore, the map, scale) gets a recorded
+`resolution` with a reason: `builder` (we change our generator to match the plate), `plate_off` (Tamriel should be
+otherwise, per the world sheet: the trait is rewritten to what the world says), or `blend` (a middle path, described).
+The agent decides with judgement; the owner can mark a trait `binding: true` to force `builder`.
+
+### V1b Site plans (the agent designs, the plate checks)
+
+A plate shows the face and the feel; it is not a buildable layout. For every city, town, dungeon and cave target the
+agent **designs the working layout**: districts, streets, gates, tiers and stairs, water, every service building the
+settlement needs (jarl's seat, inn, smith, butcher, alchemist, temple, guild halls, barracks, jail, stables, docks),
+houses by wealth, using the building types and kits the game already has (and requesting new ones where the plate
+needs them). Output: the cityplan JSON (or dungeon/cave plan), terrain stamps and water records, plus a one-page
+`plan note` explaining how the plate was read. The plate then serves as the **visual comparison**: the silhouette,
+massing, materials, approach and mood must match; the number of buildings, street geometry and interior layouts are
+the agent's to work out so the place functions. A place may grow beyond the plate when gameplay needs it (services,
+population, a missing key element); the plate stays the guide for how it looks. Interiors are designed from the
+exterior and the building's function (the generic interior base is the starting point; the culture bible makes it
+specific). Settlement tiers, cave kinds, landmarks, roadside, item families and moods that have no plate are
+interpreted from the plates that exist (V5).
 
 ### V2 Gap report (tool: `tools/visual/gaps.py`, new; seconds)
 
@@ -286,23 +307,29 @@ generator's quality bar, not by noise. A **cave design grammar** (new doc `docs/
 * **Placement**: caves are planned like places (density per region from the Skyrim floors, never on roads or in
   towns), each with an entrance stamp in the terrain and a map marker; the planner guarantees a path from the nearest
   road or trail to the mouth.
+* **Woven into the region**: a cave is more than its purpose. It may hold a quest, a side quest, part of a faction
+  line or the main quest, a unique item, a hermit or a prisoner, a shrine, a hidden vale. People in nearby settlements
+  mention it (rumours, barks, notice boards), books and notes refer to it, and quests send the player there. A cave
+  target may therefore require new lore, quests, NPCs, building types, props, textures or other mod enhancements; the
+  gap report lists them as `lore`, `quest`, `npc`, `content` or `code` gaps and they are built like any other gap.
+* **Enemies and loot are placed, not spawned**: every encounter has an authored position, role and reason (no
+  spawners, no random population); loot is chosen for the inhabitants, the story and the region, and placed where it
+  makes sense (the boss chest, the dead adventurer, the bandit's stash).
 * **Checks** (L1/L2): the existing dungeon QA bot walks every cave (all rooms reachable, the loop closes), the export
-  renders cutaways, and probes count set pieces, vistas, water features, story props and loot per cave.
+  renders cutaways, and probes count set pieces, vistas, water features, story props, placed enemies, loot and lore
+  links (each cave is referenced by at least one rumour, note or quest) per cave.
 
 ### 4.9 Everything in a region (items, creatures, people, clutter)
 
-The atlases inform everything that exists in a region, not only terrain and towns. Each volume may include item,
-creature, costume and clutter plates; targets with `kind: item_family | creature | costume | clutter | furniture |
-heraldry` attach to existing registries:
+The atlases inform everything that exists in a region, not only terrain and towns. Most of this is **interpreted**
+from the biome, city and dungeon plates (the owner will not draw separate item, costume or creature sheets; people,
+costumes, heraldry and creatures are out of scope for this programme). Derived targets with `kind: item_family |
+clutter | furniture` attach to existing registries:
 
 * **Items**: weapon and armour sets, clothing, jewellery, food and drink, ingredients, tools, books and maps per
   region and culture. A target lists the family's materials, silhouette, motifs and colours; it feeds the texture
   painters and armour models (`crafting/client/armor`), the regional loot tables, shop stock (economy region factors)
   and crafting recipes. Probe: every region has its signature items in loot, shops and NPC gear.
-* **Creatures and fauna**: regional variants and new creatures (rigs in `tools/textures/rigs`), spawn tables with
-  `why`, dens and lairs. Probe: L2 fauna census against the target.
-* **People**: costume sets per culture, class and faction (farmer, guard, noble, priest, miner), hair and skin
-  palettes, banners and heraldry per hold. Probe: NPC outfit census per settlement.
 * **Clutter and furniture**: per-culture prop kits (what is on the table in a Nord longhouse vs a Dunmer manor), road
   signs, carts, market stalls, shrines. Probe: clutter census per building type against the culture kit.
 * **Flora**: species, colours and ground cover (4.6).
@@ -388,38 +415,42 @@ Status is from code reading; `?` means verify in the V2 gap pass.
 | 29 Bleak Falls | buttressed barrow on a ridge | `Special` exists | silhouette check |
 | 30 Castle Volkihar | gothic fortress on an ice island | ? | content, terrain (island) |
 
-## 7. Phases (sizes in agent-days; one server at a time)
+## 7. Phases
 
-| Phase | Work | Size | Exit |
+How the work runs day to day (task board, claims, leases, fast loops, saving progress) is in
+[`VISUAL-TARGETS-WORKFLOW.md`](VISUAL-TARGETS-WORKFLOW.md); each phase has a prompt in `docs/prompts/VT*.md`.
+
+| Phase | Work | Prompt | Exit |
 | --- | --- | --- | --- |
-| **VT0 Housekeeping** | fix doc drift (START-HERE, CLAUDE.md, TAMRIEL/WORLD counts), decide the client-launch rule, remove the unread micro block, decide `TamrielCaves` fate | S | docs agree with code |
-| **VT1 Ingest + schema** | `ingest_atlas.py`, target schema + lint, Volume 01 targets (30) written and owner-reviewed | M | 30 targets, lint clean |
-| **VT2 Headless export (L1)** | `SiteExport` (JavaExec, warm, multi-site), Python renders and graph probes, parity sampler | L | Whiterun, Riverwood, Markarth exported in < 20 s each; flood fill matches `bfs_truth.py` |
-| **VT3 Gap report** | `gaps.py`, Volume 01 gap list | S | ranked work list |
-| **VT4 Knobs** | 4.1 stamps, 4.2 authored water, 4.3 caves off, 4.5 looks + shader channel + emissive, 4.4 first kits, 4.6 data flora/fauna, 4.7 function model | XL (split per knob, 2-3 agents, serial for bake inputs) | knobs proven on Skyrim pilots |
-| **VT5 Skyrim pass** | apply to the 30 plates, then derived targets for all Skyrim places | L | every Skyrim target `met`; G1 >= 80% |
-| **VT6 L4 cameras** | camera plans per target, local fingerprints, side-by-side sheets, scored review, owner sign-off | M | Volume 01 signed off |
-| **VT7 Roll-out** | volumes 02-12 in WORLD-PLAN order; each: ingest, targets, gaps, fixes, sweep, cameras | L per volume | each volume signed off |
+| **VT0 Foundation** | doc drift fixes; `art/` with Git LFS and the atlas ingest; the task board, claims and progress files; the live client and dev server broker (cross-AI safe) | `VT0-foundation.md` | atlases ingested; board live; broker serves one capture batch |
+| **VT1 Fast verification** | target schema and lint (L0); `SiteExport` headless exporter, renders and probes (L1); province sweeps (L2); local camera fingerprints; side-by-side sheets and rubric scoring (L4) | `VT1-fast-verification.md` | Whiterun, Riverwood, Markarth export in < 20 s each; L1 flood fill matches the saved-world flood fill |
+| **VT2 World knobs** | caves off and the cave grammar (4.3, 4.8); terrain stamps (4.1); authored water (4.2); looks and shader channel (4.5); block kits (4.4); flora data (4.6); function model and plan synthesis support (4.7, V1b); item interpretation (4.9). Built on demand from Volume 01's gaps, general from the start | `VT2-world-knobs.md` (one card per knob) | each knob proven on its Volume 01 pilot targets |
+| **VT3 Volume pass** (x12) | for each volume: ingest, targets, culture bible, site plans, gap report, fixes, derived targets, sweeps, L4 batch, sign-off | `VT3-volume-pass.md` (repeatable) | every target `met`; G1 >= 80%; owner signs off the volume sheet |
 
-Order inside VT4: caves off and stamps first (they change the bake), then water, then looks/kits/flora (no bake), then
-the function model on the new terrain.
+Volumes: 01 Skyrim, 02-11 the other provinces in WORLD-PLAN order (High Rock, Hammerfell, Cyrodiil, Morrowind,
+Solstheim, Black Marsh, Elsweyr, Valenwood, Summerset, foreign lands; the owner's file numbering wins if it differs),
+12 the miscellaneous areas (seas and ocean isles, outer realms and planes, endless lands, anything not in a province).
+The ingest reads the volume map from `art/atlases/volumes.json`.
+
+Volume 01 is the pilot: VT1 and VT2 are built against its plates, so the knobs are proven before volumes 02-12 reuse
+them. VT3 for later volumes may run while knobs are still being refined, as long as the board marks which knobs a
+target depends on.
 
 ## 8. Tools to build (summary)
 
-| Tool | Language | Rung |
+| Tool | Language | Phase |
 | --- | --- | --- |
-| `tools/visual/ingest_atlas.py` | Python (PyMuPDF/pdfplumber, PIL, numpy) | V0 |
-| `tools/visual/target_lint.py` | Python | L0 |
-| `tools/visual/gaps.py` | Python | V2 |
-| `tools/visual/derive.py` | Python | V5 |
-| `com.skycraft.dev.SiteExport` + `tools/qa/site_export.gradle` | Java (JavaExec, no world) | L1/L2 |
-| `tools/visual/site_render.py`, `site_probes.py` | Python (reuse `render_dungeon`/`render_town` drawing) | L1/L2 |
-| `tools/visual/broker.py` (live client and dev server lease, job queue, batching) | Python | L3/L4 |
-| `tools/visual/sheet.py` | Python (plate + shots side by side, metrics) | L4 |
-| `tools/visual/score.py` | Python + vision model call with fixed rubric | L4 |
-| `world_test.py` target dimension and local camera fingerprints | Python | V6 |
-| `tools/worldgen/looks.py`, shader patch data texture | Python + GLSL | 4.5 |
-| stamps and waterfall/town-water support | Python (map) + Java (`TamrielHeight`, `Hydrology`, street planner) | 4.1/4.2 |
+| `tools/visual/ingest_atlas.py` (PDF to plates, index, swatches) | Python (PyMuPDF, PIL, numpy) | VT0 |
+| `tools/visual/board.py` (task board, claims with heartbeats, progress notes, status) | Python | VT0 |
+| `tools/visual/broker.py` (one lease for the live client and the dev server, job queue, batching, cross-AI) | Python | VT0 |
+| `tools/visual/target_lint.py` (schema, ids, `why`, probe names, resolutions) | Python | VT1 |
+| `com.skycraft.dev.SiteExport` + `tools/qa/site_export.gradle` (warm JVM, many sites, no world) | Java | VT1 |
+| `tools/visual/site_render.py`, `site_probes.py` (renders, flood fills, water graph, cave air ownership, counts) | Python | VT1 |
+| `tools/visual/sweep.py` (province-wide L2, incremental by digest) | Python | VT1 |
+| `tools/visual/sheet.py`, `score.py` (plate and shots side by side, advisory metrics, rubric scoring) | Python + vision model | VT1 |
+| `world_test.py` target dimension, local camera fingerprints | Python | VT1 |
+| `tools/visual/gaps.py`, `derive.py`, `bible.py` (culture design bible from plates and sheets) | Python | VT1 |
+| stamps, authored water, caves off, cave grammar, `looks.json` + shader channel, kits, flora data | Python + Java + GLSL | VT2 |
 
 ## 9. Replace or remove (with reasons)
 
@@ -436,71 +467,40 @@ the function model on the new terrain.
 Kept as is: the vector map and rasters, bake architecture, road plan, street planner core, dungeon generator and its
 QA bot, marquee dungeons, world sheets, scatter and scene plans, weather system, shader patcher, camera workflow.
 
-## 10. Owner decisions (2026-10-18)
+## 10. Owner decisions (2026-10-18, final for kickoff)
 
-1. **The art is the owner's and goes in the repo** (`art/`, Git LFS for PDFs and images). The repo is public: add a
-   short `art/LICENSE.md` stating the owner's terms for the art (for example "all rights reserved, not covered by the
-   code licence"), separate from the code licence.
-2. **The autotest Prism instance is authorised for agents**, through the broker only (5.1): one live client and one
-   dev server at a time, jobs queued and batched. `docs/START-HERE.md` rule 6 is updated to say so.
-3. **Fan projects**: building all of Tamriel is the same scope as other fan projects, and that is fine. The rule
-   stays narrow: do not copy their *invented content* (names they made up, their maps and layouts, text, models,
-   textures, quests), because it is theirs, under their own permissions, and copying it would make Skycraft
-   derivative instead of original. Canon lore facts from the games (place names, rough geography, history) are shared
-   ground and remain the source, as today.
-4. **From scratch is allowed** (principle 7): worlds are regenerated, no save compatibility, legacy code may be
-   deleted.
-5. **Caves**: all noise caves and random entrances go; only named, authored caves remain (4.3, 4.8). Aquifers: off
-   above sea level unless a target needs a water table.
-6. **Plate vs lore**: reconcile in both directions (principle 1); the owner can mark a plate trait `binding: true` to
-   make it win.
-7. **Open room to interpret**: targets list required traits and *intent*; everything not listed is free for the
-   generators and agents to invent, guided by the world sheet and the uniqueness gates.
+1. **The art is ours.** The atlases were generated by the owner with our model; they go in the repo (`art/`, Git
+   LFS), may be extracted, cropped and used for anything (comparison, colour sampling, texture reference). Add
+   `art/LICENSE.md` with the owner's terms because the repo is public.
+2. **Everything we make is ours.** Lore gaps are filled with our own lore. Canon facts from the games (names, rough
+   geography, history) are shared ground. Other fan projects' invented content is not copied: where they invented
+   something we also need, we make our own version with our own name and design (a nod is fine, a rip is not).
+3. **Live client and dev server**: the autotest Prism instance is authorised for agents. Exactly one live client and
+   one dev server at a time across every agent and every AI system on this machine, through the broker; if the lease
+   is taken, queue and wait your turn.
+4. **Caves**: noise caves and aquifers above sea level are removed. Only named, crafted caves and underground areas,
+   designed to match the plates and fill out the world, with lore, quests and placed enemies and loot (4.3, 4.8).
+5. **From scratch**: worlds are regenerated; no save compatibility; legacy code is deleted rather than migrated.
+6. **Plate vs world**: judgement per trait (`builder`, `plate_off`, `blend`, with a reason; V1). The plate is the
+   visual check; when it does not line up, either the plate is off because Tamriel should be otherwise, or our world
+   builder changes, or a middle path.
+7. **Plans are the agent's job**: the agent designs the buildable layout (streets, buildings, services, interiors,
+   tiers, water) from the plate plus our building types; the plate checks the look and feel (V1b).
+8. **Scale**: places grow beyond the plate when gameplay needs it or the plate lacks key elements; the plate guides
+   the look.
+9. **Interpretation**: settlement tiers, interiors, cave kinds, landmarks, roadside, item families and moods are
+   interpreted from the plates we have. People, costumes, heraldry and creatures are out of scope.
+10. **Performance** is not a gate for this programme; plate translation is.
 
-Still open (answer when convenient):
+## 11. Atlas expectations
 
-* The 12 volumes: which region set is each volume? (11 province docs exist: Skyrim, High Rock, Hammerfell, Cyrodiil,
-  Morrowind, Solstheim, Black Marsh, Elsweyr, Valenwood, Summerset, foreign lands; the 12th could be the seas and
-  outer realms or the Iliac Bay.) The ingest takes a `volume -> provinces/regions` map either way.
-
-## 11. Before kickoff: what to include in the atlases and settle
-
-The more of these the atlases cover, the less the pipeline has to guess. None is required; anything missing becomes a
-derived target.
-
-**Plate kinds worth adding per volume** (beyond biomes, sub-biomes, cities, underground and dungeons):
-
-* **Settlement ladder**: one plate per tier (capital, city, town, village, hamlet, farmstead, roadside inn, camp) so
-  the generator learns the regional style at every size.
-* **Bird's-eye or plan sketches** for the key cities and 2-3 dungeons per volume (even rough): perspective art shows
-  the face; a plan shows districts, roads, gates, water and tiers, which is what the planner needs. Cross-sections for
-  vertical cities (Markarth, Solitude) and caves.
-* **Interiors**: inn common room, a shop per trade, jarl's hall, rich and poor homes, temple, guild hall.
-* **Cave kinds** for the region (4.8): bandit, den, mine, ice, sea cave, hot-spring grotto, lair.
-* **Landmarks and roadside**: shrines, standing stones, word walls, giant camps, bridges, signposts, watchtowers.
-* **Items** (4.9): one sheet per culture of weapons and armour, one of clothing and jewellery, one of food, drink and
-  ingredients, one of furniture and clutter.
-* **People and creatures**: costumes per class and faction, heraldry and banners per hold, regional creatures.
-* **Mood**: the same place at dawn, day, dusk, night and in the region's signature weather (drives the look file).
-
-**Captions that help the ingest**: put the place or region name exactly as in the game (Whiterun, The Rift) and the
-kind (City, Cave, Item sheet) in each caption; the current atlas format already does this well.
-
-**Settle before the first volume**:
-
-* **Performance budget** as acceptance traits: chunk generation time per site, entity and block-entity counts, Distant
-  Horizons LOD behaviour for big silhouettes (Solitude's arch, the College) and light-source counts (Blackreach).
-* **Scale rules**: block scale for buildings and people, the world height limits (y -64 to 639), maximum city
-  footprint, and how much bigger than the plate a city may become to fit its population and services.
-* **A culture design bible per volume** (generated from the plates in V1, reviewed by the owner): materials, shapes,
-  roofs, motifs, colours, what is never used. Kits, items and clutter are checked against it.
-* **Order of volumes** after Skyrim (default: WORLD-PLAN order).
-* **What "done" means per volume**: the default is every target met, G1 >= 80%, owner sign-off on the L4 sheet.
+The 12 atlases follow Volume 01's format (sections: biomes and sub-biomes, cities and towns, caves and underground,
+dungeons; captions name the place and the kind). Nothing else is required: everything missing is interpreted (V5).
+Useful when they exist: more cave and dungeon plates, plates of smaller settlements, and the same place in different
+weather or time of day.
 
 ## 12. Next steps
 
-1. Owner: assign the 12 volumes to regions; drop the PDFs into `art/atlases/`.
-2. VT0 housekeeping (docs, START-HERE rule 6, unread micro block, cave router), set up Git LFS and `art/LICENSE.md`.
-3. VT1: ingest Volume 01, write its targets and the Skyrim culture design bible; owner reviews.
-4. VT2: build `SiteExport`, the L1 probes and the live client broker; prove them on Whiterun, Riverwood and Markarth.
-5. VT3: Volume 01 gap report; then VT4 knob by knob (caves off and stamps first), Skyrim first.
+1. Owner: drop the 12 PDFs into `art/atlases/` (or anywhere; VT0 moves them) and confirm `volumes.json`.
+2. Run VT0 (`docs/prompts/VT0-foundation.md`).
+3. VT1 and VT2 start on Volume 01 in parallel once the board exists (see the workflow for who may run what).

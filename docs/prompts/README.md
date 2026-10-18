@@ -20,3 +20,15 @@ Read [`_COMMON.md`](_COMMON.md) before running any phase prompt.
 | **T10** | [`T10-skybox-shaders-weather-fronts.md`](T10-skybox-shaders-weather-fronts.md) | Make `SkyRenderer` and `CloudRenderer` render seamlessly when Oculus / Complementary Reimagined shaders are active and blend fog with Distant Horizons; replace boolean aurora checks with continuous world-`Z` latitude aurora & atmospheric scattering; upgrade `RegionalWeather` to server-synced moving `WeatherFront` cells that drive NPCs indoors (`Schedule.java`) and shift dialogue/spawns. |
 | **T11** | [`T11-audio-instruments-and-bards.md`](T11-audio-instruments-and-bards.md) | Re-synthesize and un-blocklist the `10` silenced biome ambient beds and `3` insect calls in `AmbienceEngine.java`; register `10` 3D cultural musical instrument items equipped by bards (`NpcModel.java`); replace random note-block walks with cultural modal melodies, regional song lyrics, and travelling road bards. |
 | **T12** | [`T12-arsenal-perks-animations.md`](T12-arsenal-perks-animations.md) | Register missing regional polearms and heavy weapons so all `94/94` `LegendaryUniques` return non-empty items; include polearms/crossbows in `LeveledGear`/`RegionalGear`; implement the `5` unwired combat perks; wire NPC mages to cast `Spells.java` spells; add third-person animations for climbing, dodge rolling, spellcasting, and hip/back sheathed weapons. |
+
+## Visual Targets programme (`VT0`–`VT3`, current)
+
+The concept-art-driven pipeline: plan [`../world/VISUAL-TARGETS-PLAN.md`](../world/VISUAL-TARGETS-PLAN.md), operating
+manual [`../world/VISUAL-TARGETS-WORKFLOW.md`](../world/VISUAL-TARGETS-WORKFLOW.md).
+
+| Phase | Prompt File | Summary |
+| --- | --- | --- |
+| **VT0** | [`VT0-foundation.md`](VT0-foundation.md) | Doc drift, `art/` with Git LFS and the atlas ingest, the task board with claims and notes, the live client and dev server broker, merge helper for WIP commits, palettes/cave-router cleanup. |
+| **VT1** | [`VT1-fast-verification.md`](VT1-fast-verification.md) | Target schema and lint (L0), the headless `SiteExport` with renders and probes (L1), province sweeps (L2), parity sampler (L3), local camera fingerprints, side-by-side sheets and scoring (L4), gaps/derive/bible tools. |
+| **VT2** | [`VT2-world-knobs.md`](VT2-world-knobs.md) | One card per general feature: caves off and the cave grammar, terrain stamps, authored water, looks and the shader channel, block kits, flora as data, settlement function model, piers and stilts, regional items. |
+| **VT3** | [`VT3-volume-pass.md`](VT3-volume-pass.md) | Repeat for volumes 01-12: ingest, targets and culture bible, gap report, site plans, caves and contents, biomes, derived targets, sweep, capture and owner sign-off. |
