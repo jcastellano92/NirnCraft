@@ -48,6 +48,7 @@ public:
         g.outDepth = view(out.depth);
         g.weather = view(*in.weather);
         g.counters = view(out.counters);
+        g.cloudNoise = view(*in.cloudNoise);
 
         uint32_t gx = (w + 7) / 8, gy = (h + 7) / 8;
         std::atomic<uint32_t> nextRow{0};

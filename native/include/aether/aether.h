@@ -104,6 +104,7 @@ typedef struct AetherFrame {
 #define AETHER_FRAME_ATMOS    0x4u
 #define AETHER_FRAME_ACTORS   0x8u
 #define AETHER_FRAME_DEBUG_LOD 0x100u
+#define AETHER_FRAME_DEBUG_WEATHER 0x200u
 
 /*
  * Frame outputs (any pointer may be NULL to skip). Layout matches the shared G-buffer images:
@@ -162,6 +163,8 @@ AETHER_API AetherStatus aether_upload_section(AetherContext* ctx, int32_t sx, in
 /* One block edit (any thread): marks the brick dirty in every LOD that contains it. */
 AETHER_API AetherStatus aether_notify_block(AetherContext* ctx, int32_t x, int32_t y, int32_t z, uint16_t mat);
 AETHER_API AetherStatus aether_set_weather(AetherContext* ctx, const AetherWeather* weather);
+/* Cloud noise volume: 64^3 RGBA8, index (z * 64 + y) * 64 + x (the mod's cloud_noise_volume atlas, unpacked). */
+AETHER_API AetherStatus aether_set_cloud_noise(AetherContext* ctx, const uint32_t* rgba);
 AETHER_API AetherStatus aether_set_actors(AetherContext* ctx, const AetherActor* actors, uint32_t count);
 
 /* Rebuild dirty regions around `centre` (blocks) for the configured clipmap; budgetMs <= 0 means build everything. */

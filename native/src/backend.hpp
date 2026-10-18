@@ -15,6 +15,7 @@ struct FrameInputs {
     FrameGpu frame;
     const std::vector<MaterialGpu>* palette;
     const std::vector<uint32_t>* weather;
+    const std::vector<uint32_t>* cloudNoise;  // 64^3 RGBA8
 };
 
 struct FrameTargets {

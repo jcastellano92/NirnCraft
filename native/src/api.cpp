@@ -24,6 +24,7 @@ struct AetherContext {
     World world;
     std::vector<MaterialGpu> palette;
     std::vector<uint32_t> weather;  // near field, near dyn, far field, far dyn (128*128 each)
+    std::vector<uint32_t> cloudNoise = std::vector<uint32_t>(64 * 64 * 64, 0);
     float rainFactor = 0;
     std::vector<AetherActor> actors;
     std::unique_ptr<PreviewSource> preview;
@@ -156,6 +157,14 @@ AETHER_API AetherStatus aether_set_weather(AetherContext* ctx, const AetherWeath
     return AETHER_OK;
 }
 
+AETHER_API AetherStatus aether_set_cloud_noise(AetherContext* ctx, const uint32_t* rgba) {
+    if (!ctx || !rgba) return AETHER_ERR_ARG;
+    std::lock_guard<std::mutex> lock(ctx->mu);
+    std::vector<uint32_t> v(rgba, rgba + 64 * 64 * 64);
+    ctx->cloudNoise.swap(v);  // new storage: the Vulkan backend re-uploads when the pointer changes
+    return AETHER_OK;
+}
+
 AETHER_API AetherStatus aether_set_actors(AetherContext* ctx, const AetherActor* a, uint32_t count) {
     if (!ctx || (!a && count)) return AETHER_ERR_ARG;
     std::lock_guard<std::mutex> lock(ctx->mu);
@@ -204,6 +213,7 @@ AETHER_API AetherStatus aether_render(AetherContext* ctx, const AetherFrame* f, 
     std::memcpy(g.lods, in.scene->lods, sizeof(g.lods));
     in.palette = &ctx->palette;
     in.weather = &ctx->weather;
+    in.cloudNoise = &ctx->cloudNoise;
     double ms = 0;
     std::string err;
     if (!ctx->backend->render(in, ctx->targets, &ms, err)) return ctx->fail(AETHER_ERR_GPU, err);

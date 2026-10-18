@@ -24,6 +24,9 @@
 [[vk::binding(10, 0)]] RWStructuredBuffer<float> outDepth;
 [[vk::binding(11, 0)]] StructuredBuffer<uint> weather;
 [[vk::binding(12, 0)]] RWStructuredBuffer<uint> counters;
+[[vk::binding(13, 0)]] StructuredBuffer<uint> cloudNoise;
+
+#include "aether_clouds.slang"
 
 static const int TRACE_MISS = 0;
 static const int TRACE_HIT = 1;
@@ -115,7 +118,10 @@ float3 regionOriginRel(RegionGpu r) {
 }
 
 // Walk the regions of one LOD along the chord p0 + d u, u in [0, len].
-int traceLod(int lod, float3 p0, float3 d, float len, inout TraceResult res) {
+// On TRACE_UNCOVERED, uncExit is where the chord leaves the unloaded region cell (1e30 when it left the LOD's
+// window: that LOD has nothing further along this ray at all).
+int traceLod(int lod, float3 p0, float3 d, float len, inout TraceResult res, out float uncExit) {
+    uncExit = 1e30;
     LodGpu L = frame.lods[lod];
     float s = float(1 << lod);
     float rs = 256.0 * s;
@@ -141,7 +147,10 @@ int traceLod(int lod, float3 p0, float3 d, float len, inout TraceResult res) {
         } else {
             if (c.x < 0 || c.z < 0 || c.x >= L.dim.x || c.z >= L.dim.z) return TRACE_UNCOVERED;
             int idx = regionTable[L.dim.w + (c.y * L.dim.z + c.z) * L.dim.x + c.x];
-            if (idx == -2) return TRACE_UNCOVERED;
+            if (idx == -2) {
+                uncExit = uExit;
+                return TRACE_UNCOVERED;
+            }
             if (idx >= 0) {
                 RegionGpu r = regions[idx];
                 float3 ro = (p0 - regionOriginRel(r)) / s;
@@ -211,10 +220,13 @@ float traceView(float3 o, float3 dir, float t0, float t1, inout TraceResult res)
     int lod = 0;
     float t = t0;
     bool finer = false;  // this segment is searching downwards for any LOD with data
-    for (int seg = 0; seg < 512; seg++) {
+    int pinned = -1;     // a finer LOD that had data while the wanted one did not (streaming), and for how long
+    int pinLeft = 0;
+    float gapEnd = 1e30;  // nearest end of an unloaded region cell seen while searching this segment
+    for (int seg = 0; seg < 768; seg++) {
         if (t >= t1) break;
         int want = int(clamp(floor(log2(max(t * pixelAngle, 1.0))), 0.0, float(lodCount - 1)));
-        if (!finer) lod = max(lod, want);
+        if (!finer) lod = pinLeft > 0 ? pinned : max(lod, want);
         float s = float(1 << lod);
         float tn = min(t + 192.0 * s, t1);
         float3 a = worldAt(o, dir, k, t);
@@ -223,24 +235,41 @@ float traceView(float3 o, float3 dir, float t0, float t1, inout TraceResult res)
         if (a.y > worldTop && dir.y + 2.0 * k * t >= 0.0) break;
         float len = tn - t;
         float3 d = (b - a) / len;
-        int r = traceLod(lod, a, d, len, res);
+        float uncExit;
+        int r = traceLod(lod, a, d, len, res, uncExit);
         if (r == TRACE_HIT) return t + res.t;
         if (r == TRACE_UNCOVERED) {
+            res.axis = -1;
+            pinLeft = 0;
+            // chord parameter equals view distance only to O(k): fine for choosing where to resume
+            gapEnd = min(gapEnd, uncExit < 1e29 ? t + uncExit : 1e30);
             // coarser first (cheaper, and it is what this distance wants); with nothing coarser, settle for finer
             // data rather than a hole while tiles are still streaming in
-            if (lod + 1 < lodCount && !finer) { lod++; res.axis = -1; continue; }
-            if (lod > 0) {
-                if (!finer) lod = min(lod, want);  // levels above `want` were all just found empty-handed
+            if (!finer && lod + 1 < lodCount) { lod++; continue; }
+            if (!finer) {
+                lod = min(lod, want);  // levels from here up were all just found empty-handed
                 finer = true;
+            }
+            if (lod > 0) {
                 lod--;
-                if (lod < 0) break;
-                res.axis = -1;
                 continue;
             }
-            break;
+            // no LOD has this stretch (a streaming gap): resume where the nearest unloaded cell ends and look for
+            // land loaded behind it; when every LOD has left its window there is nothing further at all
+            if (gapEnd >= 1e29) break;
+            t = min(max(gapEnd, t) + 1e-3, t1);
+            gapEnd = 1e30;
+            finer = false;
+            lod = want;
+            continue;
         }
+        // this segment had data at `lod` and missed; when that took a downward search, stay on that level for a
+        // few segments instead of repeating the search every segment
+        if (finer) { pinned = lod; pinLeft = 8; }
+        else if (pinLeft > 0) pinLeft--;
         t = tn;
         finer = false;
+        gapEnd = 1e30;
     }
     return -1.0;
 }
@@ -256,7 +285,8 @@ float traceShadow(float3 p, float3 dir, int lod) {
         if (t >= maxT) break;
         float s = float(1 << lod);
         float len = min(192.0 * s, maxT - t);
-        int r = traceLod(lod, p + dir * t, dir, len, res);
+        float uncExit;
+        int r = traceLod(lod, p + dir * t, dir, len, res, uncExit);
         if (r == TRACE_HIT) return 0.0;
         if (r == TRACE_UNCOVERED) {
             if (lod + 1 < lodCount) { lod++; continue; }
@@ -317,15 +347,39 @@ void farMain(uint3 id : SV_DispatchThreadID) {
             sunVis = dot(n, sun) > 0.0 && dot(faceN, sun) > -0.2
                 ? traceShadow(p + faceN * (1.01 * s) + sun * (0.5 * s), sun, res.lod) : 0.0;
         }
+        if ((frame.dims.z & FRAME_CLOUDS) != 0 && sunVis > 0.0) sunVis *= cloudShadow(p, sun);
         float3 albedo = m.albedoRough.rgb;
         if ((frame.dims.z & FRAME_DEBUG_LOD) != 0) albedo = lodTint(res.lod);
         color = shadeSurface(albedo, m, n, dir, sun, sunVis, cls);
         depth = tHit;
         color = applyAerial(color, dir, sun, tHit, frame);
+        if ((frame.dims.z & FRAME_DEBUG_WEATHER) != 0) {
+            float3 wpos = p + float3(frame.camInt.xyz);
+            CloudColumn dbg = sampleColumn(wpos.xz, length(p.xz));
+            float lowerY = dbg.dynamics.r * 1024.0;
+            float upperY = lowerY + 72.0 + 120.0 * dbg.weather.r + 300.0 * dbg.weather.g;
+            // r: tower, g: cloud top (0 at y 200, 1 at y 1000), b: base (0 at 100, 1 at 400)
+            color = float3(dbg.weather.g, (upperY - 200.0) / 800.0, (lowerY - 100.0) / 300.0);
+            float hdbg;
+            float3 probe = float3(wpos.x, 520.0, wpos.z);
+            color.r = cumulusDensity(probe, dbg, length(p.xz), hdbg) > 0.0 ? 1.0 : 0.0;
+        }
     } else {
         color = skyColor(dir, sun);
     }
-    outColor[pix] = packColor(color, tHit >= 0.0 ? 1.0 : 0.0);
+    float coverage = tHit >= 0.0 ? 1.0 : 0.0;
+    if ((frame.dims.z & FRAME_CLOUDS) != 0) {
+        CloudResult cl = marchClouds(o, dir, tHit >= 0.0 ? tHit : frame.params.y, sun, id.xy);
+        if (cl.firstHit >= 0.0) {
+            // the deck's own aerial perspective: distant storms fade into the horizon haze like the terrain does
+            // (the background behind the cloud already carries its own haze)
+            float trA = aerialTransmittance(cl.firstHit, frame);
+            float3 scatter = cl.scatter * trA + aerialFog(dir, sun) * (1.0 - trA) * (1.0 - cl.transmittance);
+            color = color * cl.transmittance + scatter;
+            coverage = 1.0 - (1.0 - coverage) * cl.transmittance;
+        }
+    }
+    outColor[pix] = packColor(color, coverage);
     outNormal[pix] = packNormal(n, cls, sunVis);
     outDepth[pix] = depth;
     counters[pix] = res.steps;  // per-pixel step count (summed on the host; no atomics so the C++ target matches)

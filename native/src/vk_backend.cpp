@@ -14,7 +14,7 @@
 namespace aether {
 namespace {
 
-constexpr uint32_t BINDINGS = 13;
+constexpr uint32_t BINDINGS = 14;
 
 struct Buf {
     VkBuffer buf = VK_NULL_HANDLE;
@@ -188,6 +188,10 @@ public:
         ok &= ensure(8, px * 4, false, err) && ensure(9, px * 4, false, err) && ensure(10, px * 4, false, err);
         ok &= upload(11, in.weather->data(), in.weather->size() * 4, false, err);
         ok &= ensure(12, px * 4, false, err);
+        if (in.cloudNoise->data() != noiseUploaded_ || !bufs_[13].buf) {
+            ok &= upload(13, in.cloudNoise->data(), in.cloudNoise->size() * 4, false, err);
+            noiseUploaded_ = in.cloudNoise->data();
+        }
         if (!ok) return false;
         sceneRevision_ = s.revision;
         if (descriptorsDirty_) writeDescriptors();
@@ -336,6 +340,7 @@ private:
     std::vector<Buf> bufs_;
     bool descriptorsDirty_ = true;
     uint64_t sceneRevision_ = UINT64_MAX;
+    const void* noiseUploaded_ = nullptr;
     char deviceName_[300] = "vulkan";
 };
 

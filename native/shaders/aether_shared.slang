@@ -6,6 +6,7 @@ static const uint FRAME_SHADOWS = 0x2u;
 static const uint FRAME_ATMOS = 0x4u;
 static const uint FRAME_ACTORS = 0x8u;
 static const uint FRAME_DEBUG_LOD = 0x100u;
+static const uint FRAME_DEBUG_WEATHER = 0x200u;  // ground shows the sampled weather column (cov, tower, curtain)
 static const int MAX_LODS = 8;
 
 struct LodGpu {
@@ -100,16 +101,20 @@ float3 shadeSurface(float3 albedo, MaterialGpu m, float3 n, float3 v, float3 sun
 }
 
 // Aerial perspective over kilometres: extinction thins with altitude (scale height ~ 1.2 km in blocks).
-float3 applyAerial(float3 c, float3 dir, float3 sun, float t, FrameGpu f) {
+float aerialTransmittance(float t, FrameGpu f) {
     float camY = float(f.camInt.y) + f.camFrac.y;
     float h = max(camY - 63.0, 0.0);
     float density = exp(-h / 1200.0);
-    float rain = f.weatherParams.x;
-    float beta = (1.0 / 22000.0) * (1.0 + 3.0 * rain);
-    float tr = exp(-t * beta * density);
-    float3 hdir = normalize(float3(dir.x, max(dir.y, 0.02), dir.z));
-    float3 fog = skyColor(hdir, sun) * 0.9;
-    return lerp(fog, c, tr);
+    float beta = (1.0 / 22000.0) * (1.0 + 3.0 * f.weatherParams.x);
+    return exp(-t * beta * density);
+}
+
+float3 aerialFog(float3 dir, float3 sun) {
+    return skyColor(normalize(float3(dir.x, max(dir.y, 0.02), dir.z)), sun) * 0.9;
+}
+
+float3 applyAerial(float3 c, float3 dir, float3 sun, float t, FrameGpu f) {
+    return lerp(aerialFog(dir, sun), c, aerialTransmittance(t, f));
 }
 
 uint packColor(float3 c, float a) {

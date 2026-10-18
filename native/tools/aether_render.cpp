@@ -1,6 +1,7 @@
 // Offline far-field renderer: preview terrain from the Tamriel raster, rendered through aether_core.
 //   aether_render raster=native/data/tamriel_raster.bin out=shot.png x=0 z=0 above=40 yaw=0 pitch=-4 fov=70
-//                 w=1280 h=720 backend=cpu|vulkan sun=35,120 radius=6371000 near=0 far=40000 flags=shadows,atmos
+//                 w=1280 h=720 backend=cpu|vulkan sun=35,120 radius=6371000 near=0 far=40000 flags=shadows,atmos,clouds
+//                 weather=clear|fair|overcast|storm stormx= stormz= time=<seconds>
 // yaw: degrees, 0 = north (-Z), 90 = east (+X). sun=elevation,azimuth degrees (azimuth like yaw).
 // Also writes <out>_depth.png (log depth) and <out>_lod.png when lodpass=1, and prints JSON stats on stdout.
 #include <cmath>
@@ -38,6 +39,60 @@ std::string str(const std::map<std::string, std::string>& m, const char* k, cons
     return it == m.end() ? d : it->second;
 }
 
+// Synthetic weather in WeatherFieldTexture's layout (harness only; in game the fields come from WeatherPhysics).
+double vnoise(double x, double z, int seed) {
+    auto h = [&](int ix, int iz) {
+        uint32_t v = uint32_t(ix) * 374761393u + uint32_t(iz) * 668265263u + uint32_t(seed) * 1442695041u;
+        v = (v ^ (v >> 13)) * 1274126177u;
+        return double((v ^ (v >> 16)) & 0xFFFFFF) / double(0x7FFFFF) - 1.0;
+    };
+    int ix = int(std::floor(x)), iz = int(std::floor(z));
+    double tx = x - ix, tz = z - iz;
+    tx = tx * tx * (3 - 2 * tx);
+    tz = tz * tz * (3 - 2 * tz);
+    double a = h(ix, iz), b = h(ix + 1, iz), c = h(ix, iz + 1), d = h(ix + 1, iz + 1);
+    return (a + (b - a) * tx) * (1 - tz) + (c + (d - c) * tx) * tz;
+}
+
+uint32_t rgba(double r, double g, double b, double a) {
+    auto q = [](double v) { return uint32_t(std::fmax(0.0, std::fmin(1.0, v)) * 255.0 + 0.5); };
+    return q(r) | q(g) << 8 | q(b) << 16 | q(a) << 24;
+}
+
+void syntheticWeather(AetherContext* ctx, const std::string& preset, double camX, double camZ, double stormX, double stormZ) {
+    std::vector<uint32_t> nf(128 * 128), nd(128 * 128), ff(128 * 128), fd(128 * 128);
+    const double windAngle = std::atan2(0.6, 0.8) / (2 * PI);
+    for (int layer = 0; layer < 2; layer++) {
+        double cell = layer == 0 ? 64.0 : 512.0;
+        int camCell = int(std::floor((layer == 0 ? camX : camX) / cell)), camCellZ = int(std::floor(camZ / cell));
+        for (int j = 0; j < 128; j++)
+            for (int i = 0; i < 128; i++) {
+                // the world cell in the window around the camera that maps to texel (i, j) (floorMod addressing)
+                int cx = camCell - 64 + (((i - (camCell - 64)) % 128) + 128) % 128;
+                int cz = camCellZ - 64 + (((j - (camCellZ - 64)) % 128) + 128) % 128;
+                double x = (cx + 0.5) * cell, z = (cz + 0.5) * cell;
+                double n = 0.6 * vnoise(x / 5200, z / 5200, 3) + 0.4 * vnoise(x / 1900, z / 1900, 4);
+                double cov = 0, tower = 0, curtain = 0;
+                if (preset == "fair") { cov = 0.34 + 0.26 * n; tower = 0.04; }
+                else if (preset == "overcast") { cov = 0.86 + 0.08 * n; tower = 0.08; curtain = 0.25; }
+                else if (preset == "storm") {
+                    double dx = x - stormX, dz = z - stormZ, s = std::exp(-(dx * dx + dz * dz) / (3600.0 * 3600.0));
+                    cov = std::fmax(0.42 + 0.22 * n, 0.98 * s);
+                    tower = 0.92 * s;
+                    curtain = 0.85 * s * s;
+                }
+                double ground = aether_preview_height(ctx, x, z);
+                double base = 232 + 22 * vnoise(x / 3000, z / 3000, 5);
+                uint32_t field = rgba(cov, tower, curtain, 0.02);
+                uint32_t dyn = rgba(base / 1024.0, std::fmax(ground, 63.0) / 1024.0, windAngle, 0.0);
+                (layer == 0 ? nf : ff)[size_t(j) * 128 + i] = field;
+                (layer == 0 ? nd : fd)[size_t(j) * 128 + i] = dyn;
+            }
+    }
+    AetherWeather w{nf.data(), nd.data(), ff.data(), fd.data(), preset == "storm" ? 0.3f : 0.0f};
+    aether_set_weather(ctx, &w);
+}
+
 uint32_t flagsOf(const std::string& s) {
     uint32_t f = 0;
     if (s.find("clouds") != std::string::npos) f |= AETHER_FRAME_CLOUDS;
@@ -45,6 +100,7 @@ uint32_t flagsOf(const std::string& s) {
     if (s.find("atmos") != std::string::npos) f |= AETHER_FRAME_ATMOS;
     if (s.find("actors") != std::string::npos) f |= AETHER_FRAME_ACTORS;
     if (s.find("lod") != std::string::npos) f |= AETHER_FRAME_DEBUG_LOD;
+    if (s.find("dbgweather") != std::string::npos) f |= AETHER_FRAME_DEBUG_WEATHER;
     return f;
 }
 
@@ -87,6 +143,18 @@ int main(int argc, char** argv) {
     aether_get_stats(ctx, &st);
     double buildMs = st.lastBuildMs;
 
+    std::string preset = str(a, "weather", "fair");
+    {
+        std::string noisePath = str(a, "noise", "native/data/cloud_noise.bin");
+        std::vector<uint32_t> noise(64 * 64 * 64);
+        FILE* nfp = std::fopen(noisePath.c_str(), "rb");
+        if (nfp && std::fread(noise.data(), 4, noise.size(), nfp) == noise.size()) aether_set_cloud_noise(ctx, noise.data());
+        else std::fprintf(stderr, "no cloud noise at %s (run native/tools/export_cloud_noise.py); clouds will be empty\n", noisePath.c_str());
+        if (nfp) std::fclose(nfp);
+        double sx = num(a, "stormx", x + 9000), sz = num(a, "stormz", z - 6000);
+        syntheticWeather(ctx, preset, x, z, sx, sz);
+    }
+
     AetherFrame f{};
     f.cameraPos[0] = x;
     f.cameraPos[1] = y;
@@ -106,7 +174,7 @@ int main(int argc, char** argv) {
     f.sunDir[2] = float(-std::cos(sa) * std::cos(se));
     f.timeSec = float(num(a, "time", 0));
     f.lodBias = float(num(a, "bias", 1));
-    f.flags = flagsOf(str(a, "flags", "shadows,atmos"));
+    f.flags = flagsOf(str(a, "flags", "shadows,atmos,clouds"));
 
     std::vector<uint32_t> color(size_t(w) * h), normal(size_t(w) * h);
     std::vector<float> depth(size_t(w) * h);

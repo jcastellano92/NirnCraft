@@ -61,6 +61,7 @@ struct FarGlobals {
     CpuBuffer<float> outDepth;
     CpuBuffer<uint32_t> weather;
     CpuBuffer<uint32_t> counters;
+    CpuBuffer<uint32_t> cloudNoise;
 };
 
 }  // namespace aether

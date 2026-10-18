@@ -175,6 +175,84 @@ static void testAbi() {
     aether_destroy(ctx);
 }
 
+// A ray must cross a stretch no LOD has loaded yet and still hit land streamed in behind it.
+static void testStreamingGap() {
+    std::printf("streaming gap\n");
+    AetherContext* ctx = nullptr;
+    aether_create(AETHER_BACKEND_CPU, &ctx);
+    std::vector<float> flat(256 * 256, 100.0f), wall(256 * 256, 300.0f), water(256 * 256, NAN);
+    std::vector<uint16_t> top(256 * 256, 2), fill(256 * 256, 3);
+    // LOD 0 around the camera, then nothing until LOD 2 tile x = 2 (blocks 2048..3071), which is a 300-high wall
+    for (int tz = -2; tz <= 2; tz++)
+        for (int tx = -2; tx <= 2; tx++) {
+            AetherColumnTile t{0, tx, tz, flat.data(), water.data(), top.data(), fill.data(), nullptr, nullptr};
+            aether_upload_column_tile(ctx, &t);
+        }
+    for (int tz = -2; tz <= 2; tz++) {
+        AetherColumnTile t{2, 2, tz, wall.data(), water.data(), top.data(), fill.data(), nullptr, nullptr};
+        aether_upload_column_tile(ctx, &t);
+    }
+    double centre[3] = {0.5, 140.0, 0.5};
+    aether_update(ctx, centre, 0);
+    AetherFrame f{};
+    f.cameraPos[0] = 0.5;
+    f.cameraPos[1] = 140.0;
+    f.cameraPos[2] = 0.5;
+    f.width = 32;
+    f.height = 32;
+    cameraMatrix(90, 0, 10, 1.0, f.invViewProj);  // east, level, narrow: wants LOD 1-2 over the gap
+    f.maxDistance = 6000;
+    f.sunDir[1] = 1;
+    f.lodBias = 1;
+    std::vector<float> depth(32 * 32);
+    AetherFrameOutput o{nullptr, nullptr, depth.data()};
+    CHECK(aether_render(ctx, &f, &o) == AETHER_OK);
+    float d = depth[16 * 32 + 16];
+    std::printf("  centre pixel depth %.1f (wall face at 2047.5)\n", d);
+    CHECK(std::abs(d - 2047.5f) < 8.0f);
+    AetherStats st{};
+    aether_get_stats(ctx, &st);
+    aether_destroy(ctx);
+}
+
+// Four zones along one ray east at y 140: A populated air (LOD 0, x 0..255), B unloaded at every LOD (256..511),
+// C finer-only (LOD 0 air while the ray wants LOD 1-2, 512..699), D a wall (x 700). Catches early termination,
+// brick-sized stepping through B and LOD thrashing in C (either would exhaust the segment budget or miss D).
+static void testFourZones() {
+    std::printf("four-zone ray\n");
+    AetherContext* ctx = nullptr;
+    aether_create(AETHER_BACKEND_CPU, &ctx);
+    std::vector<float> flat(256 * 256, 100.0f), withWall(256 * 256, 100.0f), water(256 * 256, NAN);
+    for (int j = 0; j < 256; j++)
+        for (int i = 188; i < 256; i++) withWall[size_t(j) * 256 + i] = 300.0f;  // x >= 512 + 188 = 700
+    std::vector<uint16_t> top(256 * 256, 2), fill(256 * 256, 3);
+    for (int tz = -2; tz <= 2; tz++)
+        for (int tx = -2; tx <= 2; tx++) {
+            if (tx == 1) continue;  // zone B: no tile at any LOD
+            AetherColumnTile t{0, tx, tz, tx == 2 ? withWall.data() : flat.data(), water.data(), top.data(), fill.data(), nullptr, nullptr};
+            aether_upload_column_tile(ctx, &t);
+        }
+    double centre[3] = {0.5, 140.0, 0.5};
+    aether_update(ctx, centre, 0);
+    AetherFrame f{};
+    f.cameraPos[0] = 0.5;
+    f.cameraPos[1] = 140.0;
+    f.cameraPos[2] = 0.5;
+    f.width = 32;
+    f.height = 32;
+    cameraMatrix(90, 0, 10, 1.0, f.invViewProj);
+    f.maxDistance = 6000;
+    f.sunDir[1] = 1;
+    f.lodBias = 1;
+    std::vector<float> depth(32 * 32);
+    AetherFrameOutput o{nullptr, nullptr, depth.data()};
+    CHECK(aether_render(ctx, &f, &o) == AETHER_OK);
+    float d = depth[16 * 32 + 16];
+    std::printf("  centre pixel depth %.1f (wall face at 699.5)\n", d);
+    CHECK(std::abs(d - 699.5f) < 1.0f);
+    aether_destroy(ctx);
+}
+
 static bool parity(const char* raster) {
     std::printf("cpu/vulkan parity (preview terrain)\n");
     AetherContext* cpu = nullptr;
@@ -254,6 +332,8 @@ static bool parity(const char* raster) {
 int main(int argc, char** argv) {
     testSvdag();
     testAbi();
+    testStreamingGap();
+    testFourZones();
     parity(argc > 1 ? argv[1] : "native/data/tamriel_raster.bin");
     std::printf(failures ? "FAILED (%d)\n" : "PASS\n", failures);
     return failures ? 1 : 0;
