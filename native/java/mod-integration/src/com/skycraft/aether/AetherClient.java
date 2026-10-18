@@ -60,7 +60,12 @@ public final class AetherClient {
     private AetherClient() {}
 
     public static void init(IEventBus modBus) {
+        // the pack's aether textures must exist before Iris builds a world pipeline (it holds the texture objects from
+        // then on). Client setup runs on a loader thread, so hop to the render thread, where GPU objects may be made.
+        modBus.addListener((net.neoforged.fml.event.lifecycle.FMLClientSetupEvent e) ->
+                e.enqueueWork(() -> net.minecraft.client.Minecraft.getInstance().execute(AetherTargets::registerPlaceholders)));
         NeoForge.EVENT_BUS.addListener(AetherClient::afterOpaque);
+        NeoForge.EVENT_BUS.addListener((net.neoforged.neoforge.client.event.ClientTickEvent.Post e) -> AetherTargets.flushClear());
         NeoForge.EVENT_BUS.addListener((ClientPlayerNetworkEvent.LoggingOut e) -> {
             serverWorldId = 0;
             farActors = null;
@@ -115,6 +120,10 @@ public final class AetherClient {
             CameraRenderState cam = state.cameraRenderState;
             Vec3 p = cam.pos;
             farField.follow(p.x, p.y, p.z);
+            if (!farField.updated()) {
+                targets.clear();  // the worker has not staged the first window yet: nothing far this frame
+                return;
+            }
             feedWeather();
             feedActors();
 
@@ -126,7 +135,9 @@ public final class AetherClient {
             invVP.get(frame.invViewProj);
             frame.width = w;
             frame.height = h;
-            float handEnd = cam.depthFar - 16f;
+            // the hand-off follows the loaded terrain's radius (what Iris hands the pack as `far`), not the
+            // projection's far plane: 26.3's far plane lies well beyond the chunks, which left an empty band out to it
+            float handEnd = mc.options.getEffectiveRenderDistance() * 16f - 16f;
             frame.nearFieldEnd = Math.max(32f, handEnd - handoffBand);
             frame.maxDistance = 40_000f;
             frame.planetRadius = planetRadius;
@@ -143,7 +154,7 @@ public final class AetherClient {
             io.nearDepthTex = 0xFFFFFFFF;  // AETHER_GL_BOUND_DEPTH: the bound gbuffer target's depth
             new Matrix4f(cam.projectionMatrix).invert().get(io.nearInvProjection);
             io.depthZeroToOne = AetherTargets.depthZeroToOne();
-            io.reversedZ = false;
+            io.reversedZ = reversedZ();  // the depth convention the shader pack's gbuffers see (Iris reports it)
             io.dstColor = targets.colorId();
             io.dstNormal = 0;
             io.dstDepth = targets.depthId();
@@ -214,6 +225,25 @@ public final class AetherClient {
         double a = sunAngle, r = Math.toRadians(sunPathRotationDeg);
         double x = -Math.sin(a), y = Math.cos(r) * Math.cos(a), z = -Math.sin(r) * Math.cos(a);
         return new float[] {(float) x, (float) y, (float) z};
+    }
+
+    private static java.lang.reflect.Method irisReverseZ;
+    private static Object irisApi;
+    private static boolean irisChecked;
+
+    /** Iris 1.11: whether depth is reversed while a pack renders (26.3 itself is reverse-Z); false without Iris. */
+    private static boolean reversedZ() {
+        try {
+            if (!irisChecked) {
+                irisChecked = true;
+                Class<?> c = Class.forName("net.irisshaders.iris.api.v0.IrisApi");
+                irisApi = c.getMethod("getInstance").invoke(null);
+                irisReverseZ = c.getMethod("isReverseZDuringShaders");
+            }
+            return irisApi != null && Boolean.TRUE.equals(irisReverseZ.invoke(irisApi));
+        } catch (ReflectiveOperationException | RuntimeException e) {
+            return false;
+        }
     }
 
     private static void disable(String why, Throwable t) {

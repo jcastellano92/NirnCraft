@@ -73,6 +73,8 @@ final class AetherFarField implements AutoCloseable {
     private volatile boolean running = true;
     private volatile double camX, camY, camZ;
     private volatile boolean haveCamera;
+    /** True once the worker has staged a first update: aether renders nothing before that (and says so). */
+    private volatile boolean updated;
 
     AetherFarField(AetherNative.Context ctx, ColumnSource source) throws IOException {
         this(ctx, source, null);
@@ -93,6 +95,10 @@ final class AetherFarField implements AutoCloseable {
 
     ColumnSource source() {
         return source;
+    }
+
+    boolean updated() {
+        return updated;
     }
 
     void follow(double x, double y, double z) {
@@ -122,6 +128,7 @@ final class AetherFarField implements AutoCloseable {
                             (cz + WINDOW + 1) * span);
                 }
                 ctx.update(x, y, z, 0);  // builds what changed and stages it for the next frame
+                updated = true;
                 // idle while the camera stays inside the same finest-LOD region and nothing is left to refine
                 boolean moved = Double.isNaN(lastX) || Math.abs(x - lastX) > 32 || Math.abs(z - lastZ) > 32;
                 lastX = x;
