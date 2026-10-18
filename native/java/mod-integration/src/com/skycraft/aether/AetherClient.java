@@ -117,10 +117,11 @@ public final class AetherClient {
             Path dll = AetherLibrary.extract(mc.gameDirectory.toPath());
             lib = AetherNative.load(dll);
             ctx = lib.create(AetherNative.BACKEND_VULKAN);
-            ctx.setPalette(AetherPalette.build());
+            AetherFarField.ColumnSource source = AetherFarField.defaultSource();
+            if (source.usesBlockPalette()) ctx.setPalette(AetherPalette.blocks());  // else aether's preview palette
             int[] noise = AetherPalette.cloudNoiseVolume();
             if (noise != null) ctx.setCloudNoise(noise);
-            farField = new AetherFarField(ctx, AetherFarField.defaultSource());
+            farField = new AetherFarField(ctx, source);
             com.skycraft.Skycraft.LOGGER.info("aether far field on: {}", lib.buildInfo());
             return true;
         } catch (Throwable t) {
