@@ -150,6 +150,8 @@ vec3 lightShafts(vec2 uv, vec3 sun, float dist) {
         w *= 0.96;
     }
     open /= max(wsum, 1e-3);
+    // without the far field on screen, the low sun behind the horizon's mountains (the mod's sun_horizon) casts none
+    if (!aetherPresent() && sun.y > -0.05) open *= smoothstep(-0.015, 0.015, sun.y - sunHorizonSin());
     vec3 dir = normalize(mat3(gbufferModelViewInverse) * viewAt(uv, 1.0));
     float mu = max(dot(dir, L), 0.0);
     float phase = 0.25 + 1.5 * pow(mu, 8.0);

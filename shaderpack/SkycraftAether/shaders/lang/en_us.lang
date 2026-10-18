@@ -51,3 +51,8 @@ option.LIGHTNING_LIGHT=Lightning light
 option.LIGHTNING_LIGHT.comment=Storm channels light the ground, the rain and the clouds (outdoors only).
 option.LIGHT_OCCLUSION=Point-light shadows
 option.LIGHT_OCCLUSION.comment=Spells and creature glows are blocked by walls. Needs the mod's -Dskycraft.localLightOcclusion=true.
+option.COLORED_LIGHT=Coloured block light
+option.COLORED_LIGHT.comment=Torch, soul lantern, lava and crystal light take the colour of their source (near the player).
+option.BLOCKLIGHT_FLICKER=Flame flicker
+option.SUN_HORIZON_TAPS=Mountain sunsets (no aether)
+option.SUN_HORIZON_TAPS.comment=Without the far-field renderer: distant mountains still block the low sun. 0 off.

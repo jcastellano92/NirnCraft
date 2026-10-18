@@ -19,6 +19,9 @@
 #define FOLIAGE_SSS             // sunlight through leaves and grass
 #define SSAO                    // screen-space ambient occlusion
 #define SSAO_SAMPLES 6 // [4 6 8 12]
+#define COLORED_LIGHT           // block light takes the colour of what emits it (the mod's emitter cache, ~26 blocks)
+#define BLOCKLIGHT_FLICKER 1 // [0 1 2] torch and fire light flickers (0 steady, 2 strong)
+#define SUN_HORIZON_TAPS 6 // [0 4 6] without aether's sun map: low sun blocked by distant mountains (terrain taps)
 
 // motion
 #define WAVING_FOLIAGE          // leaves and plants sway in the wind, rooted where they grow

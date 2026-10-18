@@ -29,6 +29,9 @@ uniform float viewHeight;
 #include "/lib/lighting.glsl"
 #include "/lib/sky.glsl"
 #include "/lib/clouds.glsl"
+#include "/lib/lightning.glsl"
+
+float airClock() { return haveAir() ? airTime() : frameTimeCounter; }
 
 in vec2 texcoord;
 
@@ -101,6 +104,14 @@ void main() {
         c += aurora(dir, frameTimeCounter, cold, sun);
 #endif
         if (mtl.r > 0.99) c += srgbToLinear(texture(colortex0, texcoord).rgb) * 1.4;
+        if (!aetherPresent()) {
+            // no far field to hide it: the sun sets behind the mountains on the horizon (the mod's sun_horizon, from
+            // the camera) instead of shining through them
+            float hs = sunHorizonSin();
+            if (hs > 0.0 && sun.y < hs + 0.01 && dir.y < hs && dot(dir, sun) > 0.99995)
+                c -= sunRadiance(sun) * 18.0 * 1.6 * (1.0 - smoothstep(hs - 0.006, hs, dir.y));
+            c = max(c, vec3(0.0));
+        }
         // aether draws the clouds (and composite lays them over this sky); without it, the pack's own deck
         if (!aetherPresent()) {
             vec4 cl = fallbackClouds(dir, sun, cameraPosition, frameTimeCounter, rainStrength);
@@ -145,7 +156,12 @@ void main() {
     specular += skyColor(normalize(vec3(r.x, max(r.y, 0.02), r.z)), sun) * fr * lm.y * lm.y;
 #endif
     vec3 ambient = albedo * (skyAmbient(n, sun) * lm.y * lm.y + vec3(0.012, 0.012, 0.016)) * ao;
-    vec3 torch = albedo * blockLight(lm.x) * mix(0.6, 1.0, ao);
+    vec3 wp = playerPos + cameraPosition;
+    vec3 torch = albedo * blockLightAt(lm.x, wp, cameraPosition, airClock()) * mix(0.6, 1.0, ao);
+    // the mod's point lights (spells, atronachs, burning creatures) and storm channels light what faces them
+    loadAir(cameraPosition);
+    if (gLights > 0) torch += albedo * localLights(playerPos, n, true, cameraPosition);
+    torch += albedo * lightningSurface(playerPos, n, lm.y, outdoorExposure(wp, cameraPosition));
     vec3 emit = vec3(0.0);
     if (spec.w > 0.0) {
         float flicker = 1.0;

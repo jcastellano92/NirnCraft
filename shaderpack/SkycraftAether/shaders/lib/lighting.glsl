@@ -9,6 +9,7 @@
 #include "/lib/noise.glsl"
 #include "/lib/aether.glsl"
 #include "/lib/clouds.glsl"
+#include "/lib/air.glsl"
 
 #ifdef SHADOWS
 uniform sampler2DShadow shadowtex0;
@@ -50,6 +51,11 @@ float sunShadow(vec3 playerPos, vec3 n, vec3 toLight, vec2 px) {
 #ifdef AETHER_FAR_FIELD
 uniform sampler2D aetherSunMap;
 
+bool aetherSunMapValid() {
+    ivec2 sz = textureSize(aetherSunMap, 0);
+    return sz.x >= 2 && sz.y == sz.x + 1 && texelFetch(aetherSunMap, ivec2(6, sz.x), 0).g == 1.0;
+}
+
 // aether's sun map (docs: native/include/aether/aether.h, aether_set_sun_map): the first occluder along the key light
 // over ~4 km around the camera, traced through the far field, plus the clouds' transmittance. Returns (lit 0..1 by
 // distant terrain: mountains over valleys, beyond the shadow map's reach; cloud transmittance). (1, 1) without a map.
@@ -84,6 +90,24 @@ vec2 aetherSun(vec3 playerPos) {
 }
 #endif
 
+#if SUN_HORIZON_TAPS > 0
+// how much of the low sun clears the terrain towards it (the mod's surface heights), 1 when the sun is high
+float terrainTransmission(vec3 wp, vec3 toLight) {
+    if (!haveWeather() || toLight.y <= 0.0) return 1.0;
+    float weight = 1.0 - smoothstep(0.20, 0.36, toLight.y);
+    float horiz = max(length(toLight.xz), 1e-3);
+    vec2 d = toLight.xz / horiz;
+    float slope = toLight.y / horiz;
+    float tr = 1.0, dist = 160.0;
+    for (int i = 0; i < SUN_HORIZON_TAPS; i++) {
+        float ground = surfaceHeight(wp.xz + d * dist);
+        tr = min(tr, smoothstep(-0.006, 0.006, (wp.y + slope * dist - ground) / dist));
+        dist *= 1.85;
+    }
+    return mix(1.0, tr, weight);
+}
+#endif
+
 vec3 keyLightDir(vec3 sun) { return sun.y > -0.05 ? sun : -sun; }
 
 vec3 keyLightRadiance(vec3 sun) {
@@ -106,12 +130,50 @@ float keyVisibility(vec3 playerPos, vec3 n, vec3 toLight, vec2 px) {
     // no aether: the pack's own deck shades the ground
     if (!aetherPresent() && vis > 0.0) vis *= fallbackCloudShadow(playerPos + cameraPosition, toLight, frameTimeCounter, rainStrength);
 #endif
+#if SUN_HORIZON_TAPS > 0
+    // no sun map (aether off): distant mountains still take the low sun from the valleys, traced from each receiver
+    // over the mod's terrain surface (weather dynamics, 64-block cells, out to ~3.5 km)
+    if (vis > 0.0 && toLight.y < 0.36
+#ifdef AETHER_FAR_FIELD
+        && !aetherSunMapValid()
+#endif
+        ) vis *= terrainTransmission(playerPos + cameraPosition, toLight);
+#endif
     return vis;
 }
 
 // the light map's block light as colour: warm firelight
 vec3 blockLight(float bl) {
     return vec3(1.0, 0.62, 0.32) * (pow(bl, 3.2) * 1.8 + pow(bl, 12.0) * 2.0);
+}
+
+// block light at a world position: the colour of the emitter that lights it (the mod's coloured block-light cache,
+// within ~26 blocks: soul lanterns blue, lava orange, crystals cyan) and the flicker of flames. Flicker is coherent
+// over a few blocks (one torch lights its wall as a whole) and scaled by how flame-like the light is (warm colours
+// flicker, crystal light holds steady). time: seconds
+vec3 blockLightAt(float bl, vec3 worldPos, vec3 camPos, float time) {
+    vec3 c = blockLight(bl);
+    if (bl <= 0.0) return c;
+    float flame = 1.0;
+#ifdef COLORED_LIGHT
+    vec3 tint = airLampRadiance(worldPos, camPos);
+    float m = max(tint.r, max(tint.g, tint.b));
+    if (m > 1e-4) {
+        vec3 hue = tint / m;
+        float conf = smoothstep(0.0, 0.05, m);
+        // the emitter's hue at the brightness the light map gives
+        float lc = dot(c, vec3(0.2126, 0.7152, 0.0722)), lh = max(dot(hue, vec3(0.2126, 0.7152, 0.0722)), 0.05);
+        c = mix(c, hue * (lc / lh), conf);
+        flame = clamp((hue.r - hue.b) * 1.4, 0.0, 1.0);
+    }
+#endif
+#if BLOCKLIGHT_FLICKER > 0
+    vec3 q = floor(worldPos / 3.0);
+    float h = hash13(q);
+    float f = valueNoise(vec2(time * (5.0 + 3.0 * h), h * 97.0)) * 0.65 + valueNoise(vec2(time * 13.0, h * 41.0 + 7.0)) * 0.35;
+    c *= 1.0 + (f - 0.5) * 0.22 * float(BLOCKLIGHT_FLICKER) * flame * smoothstep(0.2, 0.6, bl);
+#endif
+    return c;
 }
 
 // forward shading (translucents, particles). albedo linear; lm = light map (block, sky) 0..1
