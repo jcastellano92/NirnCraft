@@ -45,7 +45,7 @@ if (Test-Path $so) {
         Copy-Item $so $soDst -Force
     }
 } else {
-    Write-Host "  (no $so: Linux players get no far field until native/build_linux.sh has built one)"
+    Write-Host "  (no ${so}: Linux players get no far field until native/build_linux.sh has built one)"
 }
 
 # 3. hooks
