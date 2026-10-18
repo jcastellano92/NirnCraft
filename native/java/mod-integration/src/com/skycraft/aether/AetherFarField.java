@@ -26,6 +26,11 @@ final class AetherFarField implements AutoCloseable {
         default void close() {}
     }
 
+    /** What goes on top of the ground tiles once they are resident (settlements). */
+    interface Overlay {
+        void cover(AetherNative.Context ctx, int lod, int x0, int z0, int x1, int z1);
+    }
+
     /** The bundled Tamriel raster, unpacked once per mod version into the game directory. */
     static Path previewRaster() throws IOException {
         String version = AetherFarField.class.getPackage().getImplementationVersion();
@@ -61,14 +66,24 @@ final class AetherFarField implements AutoCloseable {
 
     private final AetherNative.Context ctx;
     private final ColumnSource source;
+    private final java.util.function.Supplier<Overlay> overlayFactory;
+    private Overlay overlay;
+    private boolean overlayFailed;
     private final Thread worker;
     private volatile boolean running = true;
     private volatile double camX, camY, camZ;
     private volatile boolean haveCamera;
 
     AetherFarField(AetherNative.Context ctx, ColumnSource source) throws IOException {
+        this(ctx, source, null);
+    }
+
+    /** overlays: made on the worker thread when first needed (it may load plans); null for none. */
+    AetherFarField(AetherNative.Context ctx, ColumnSource source, java.util.function.Supplier<Overlay> overlays)
+            throws IOException {
         this.ctx = ctx;
         this.source = source;
+        this.overlayFactory = overlays;
         source.prepare(ctx);
         worker = new Thread(this::run, "skycraft-aether-farfield");
         worker.setDaemon(true);
@@ -102,6 +117,9 @@ final class AetherFarField implements AutoCloseable {
                     int cx = Math.floorDiv((int) Math.floor(x), span), cz = Math.floorDiv((int) Math.floor(z), span);
                     pending |= source.cover(ctx, lod, (cx - WINDOW) * span, (cz - WINDOW) * span,
                             (cx + WINDOW + 1) * span, (cz + WINDOW + 1) * span);
+                    Overlay ov = overlay();
+                    if (ov != null) ov.cover(ctx, lod, (cx - WINDOW) * span, (cz - WINDOW) * span, (cx + WINDOW + 1) * span,
+                            (cz + WINDOW + 1) * span);
                 }
                 ctx.update(x, y, z, 0);  // builds what changed and stages it for the next frame
                 // idle while the camera stays inside the same finest-LOD region and nothing is left to refine
@@ -120,6 +138,18 @@ final class AetherFarField implements AutoCloseable {
                 }
             }
         }
+    }
+
+    private Overlay overlay() {
+        if (overlay == null && overlayFactory != null && !overlayFailed) {
+            try {
+                overlay = overlayFactory.get();
+            } catch (RuntimeException e) {
+                overlayFailed = true;  // the far field goes on without them
+                com.skycraft.Skycraft.LOGGER.warn("aether far-field settlements off: {}", e.toString());
+            }
+        }
+        return overlay;
     }
 
     @Override

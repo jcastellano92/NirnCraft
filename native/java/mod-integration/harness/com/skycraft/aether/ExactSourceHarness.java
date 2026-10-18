@@ -1,22 +1,13 @@
 package com.skycraft.aether;
 
-import com.google.gson.JsonParser;
-import com.mojang.serialization.JsonOps;
 import com.skycraft.tamriel.MapSample;
 import com.skycraft.tamriel.TamrielMap;
 import com.skycraft.tamriel.terrain.TamrielHeight;
-import com.skycraft.worldgen.WorldNoise;
-import net.minecraft.resources.Identifier;
-import net.minecraft.world.level.levelgen.PositionalRandomFactory;
-import net.minecraft.world.level.levelgen.WorldgenRandom;
-import net.minecraft.world.level.levelgen.synth.NormalNoise;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -32,20 +23,8 @@ import java.util.Random;
 public final class ExactSourceHarness {
     private ExactSourceHarness() {}
 
-    /** The world's tamriel_height as RandomState builds it: Noises.instantiate = def.create(seed positional.fromHashOf(id)). */
     static TamrielHeight forSeed(long seed) throws Exception {
-        PositionalRandomFactory r = WorldgenRandom.Algorithm.XOROSHIRO.newInstance(seed).forkPositional();
-        WorldNoise[] n = new WorldNoise[AetherExactSource.NOISES.length];
-        for (int i = 0; i < n.length; i++) {
-            String name = AetherExactSource.NOISES[i];
-            try (InputStream in = ExactSourceHarness.class.getResourceAsStream("/data/skycraft/worldgen/noise/" + name + ".json")) {
-                if (in == null) throw new IllegalStateException("noise " + name + " not on the classpath");
-                NormalNoise def = NormalNoise.DIRECT_CODEC.parse(JsonOps.INSTANCE,
-                        JsonParser.parseString(new String(in.readAllBytes(), StandardCharsets.UTF_8))).getOrThrow();
-                n[i] = new WorldNoise(null, def.create(r.fromHashOf(Identifier.fromNamespaceAndPath("skycraft", name))));
-            }
-        }
-        return new TamrielHeight(n[0], n[1], n[2], n[3]);
+        return HarnessSeed.height(seed);
     }
 
     /** The console: vanilla's bootstrap later re-routes System.out/err into its (here silent) logger. */

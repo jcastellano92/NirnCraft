@@ -25,7 +25,7 @@ import static java.lang.foreign.ValueLayout.JAVA_SHORT;
  * heap access, so Java arrays are passed in place without an off-heap copy; frame rendering is a normal downcall.</p>
  */
 public final class AetherNative {
-    public static final int ABI_VERSION = 0x000400;
+    public static final int ABI_VERSION = 0x000500;
     public static final int BACKEND_CPU = 0, BACKEND_VULKAN = 1;
     public static final int FRAME_CLOUDS = 0x1, FRAME_SHADOWS = 0x2, FRAME_ATMOS = 0x4, FRAME_ACTORS = 0x8,
             FRAME_SKY = 0x10, FRAME_NEAR_DEPTH = 0x20, FRAME_DEBUG_LOD = 0x100;
@@ -39,7 +39,7 @@ public final class AetherNative {
     private final Arena libArena;
     private final MethodHandle abiVersion, buildInfo, create, destroy, lastError, setPalette, uploadTile,
             uploadSection, notifyBlock, setWeather, setCloudNoise, setActors, update, render, getStats,
-            glAttach, glRenderIo, glDetach, previewLoadRaster, previewGenerate, previewHeight, uploadHeights, hasTile;
+            glAttach, glRenderIo, glDetach, previewLoadRaster, previewGenerate, previewHeight, uploadHeights, hasTile, uploadStructures, setMaterials;
 
     private AetherNative(Path library) {
         libArena = Arena.ofShared();
@@ -75,6 +75,9 @@ public final class AetherNative {
                 FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, JAVA_INT, JAVA_INT, ADDRESS, ADDRESS));
         hasTile = bind(l, lib, "aether_has_tile", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, JAVA_INT, JAVA_INT),
                 critical);
+        uploadStructures = bind(l, lib, "aether_upload_column_structures",
+                FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, JAVA_INT, JAVA_INT, ADDRESS, ADDRESS, ADDRESS, ADDRESS));
+        setMaterials = bind(l, lib, "aether_set_materials", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, ADDRESS, JAVA_INT));
     }
 
     private static MethodHandle bind(Linker l, SymbolLookup lib, String name, FunctionDescriptor fd, Linker.Option... opts) {
@@ -220,6 +223,44 @@ public final class AetherNative {
                     m.set(JAVA_INT, o + 20, (int) v[5]);
                 }
                 check((int) setPalette.invokeExact(ptr, m, materials.length), "aether_set_palette");
+            } catch (Throwable t) {
+                throw rethrow(t);
+            }
+        }
+
+        /** Palette entries first .. first + n - 1 (first >= 1), same {r, g, b, roughness, emissive, class} rows. */
+        public void setMaterials(int first, float[][] materials) {
+            try (Arena a = Arena.ofConfined()) {
+                MemorySegment m = a.allocate(MATERIAL_SIZE * Math.max(1, materials.length), 8);
+                for (int i = 0; i < materials.length; i++) {
+                    float[] v = materials[i];
+                    long o = i * MATERIAL_SIZE;
+                    for (int k = 0; k < 5; k++) m.set(JAVA_FLOAT, o + 4L * k, v[k]);
+                    m.set(JAVA_INT, o + 20, (int) v[5]);
+                }
+                check((int) setMaterials.invokeExact(ptr, first, m, materials.length), "aether_set_materials");
+            } catch (Throwable t) {
+                throw rethrow(t);
+            }
+        }
+
+        /**
+         * Buildings over one tile (see aether.h): walls from the ground to wallTop, roof to roofTop (NaN = none),
+         * row-major [z][x]. wallTop == null removes the tile's buildings. Copied before this returns.
+         */
+        public void uploadColumnStructures(int lod, int tileX, int tileZ, float[] wallTop, float[] roofTop, short[] wallMat,
+                                           short[] roofMat) {
+            try (Arena a = Arena.ofConfined()) {
+                if (wallTop == null) {
+                    check((int) uploadStructures.invokeExact(ptr, lod, tileX, tileZ, MemorySegment.NULL, MemorySegment.NULL,
+                            MemorySegment.NULL, MemorySegment.NULL), "aether_upload_column_structures");
+                    return;
+                }
+                int n = TILE * TILE;
+                if (wallTop.length < n || roofTop.length < n || wallMat.length < n || roofMat.length < n)
+                    throw new IllegalArgumentException("structure arrays must hold 256*256 columns");
+                check((int) uploadStructures.invokeExact(ptr, lod, tileX, tileZ, copy(a, wallTop), copy(a, roofTop),
+                        copy(a, wallMat), copy(a, roofMat)), "aether_upload_column_structures");
             } catch (Throwable t) {
                 throw rethrow(t);
             }

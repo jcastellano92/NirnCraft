@@ -107,7 +107,8 @@ The other session's conversion is in progress in the main tree, which also moves
 2. Done ahead of the conversion (staged in `native/java/mod-integration`, see its README; compiled against 26.3 and
    exercised offline by its harness): the exact single-player source (the server's own `tamriel_height`), the
    multiplayer tile stream (bit-identical to single player, 4 MB per full window, cached on both ends) and the
-   far-actor feed. Left for the move-in: three init calls and one line in `SkyNetwork.init`.
+   far-actor feed, and the settlements (every planned city, town and village as building massing with its kit's
+   colours, client-side from the baked StreetPlan). `move_in.ps1` makes the hooks; `sandbox_check.ps1` rehearses it.
 3. Far terrain look: a snowline that follows aspect and slope instead of a near-level cut, less boxy forest lumps
    on slopes, block-exact surface materials (biomes) instead of the raster dressing; SRC GI underground.
 4. Owner checks in game: the near/far seam at the hand-off distance, curvature strength (planet radius), cloud

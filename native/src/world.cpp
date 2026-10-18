@@ -71,6 +71,11 @@ public:
             if (depth <= s + FILL_DEPTH) return t.fill[c];
             return stone;
         }
+        if (t.structures) {
+            const Structures& st = *t.structures;
+            float rt = st.roofTop[c];
+            if (yc < rt) return yc < st.wallTop[c] ? st.wallMat[c] : st.roofMat[c];  // (rt > surf: no NaN gets here)
+        }
         // canopy: crowns over trunk space (the lowest 35 % stays open, so forest edges are not solid walls)
         if (!t.canopy.empty() && t.canopy[c] > 0.0f && yc < surf + t.canopy[c] && yc >= surf + 0.35f * t.canopy[c])
             return t.canopyMat[c];
@@ -112,6 +117,7 @@ void Tile::buildPyramids() {
             float s = surface[c];
             float top = s;
             if (!canopy.empty() && canopy[c] > 0.0f) top = std::max(top, s + canopy[c]);
+            if (structures && structures->roofTop[c] > s) top = std::max(top, structures->roofTop[c]);
             if (!std::isnan(water[c])) top = std::max(top, water[c]);
             minSurf[0][c] = s;
             maxTop[0][c] = top;
@@ -137,9 +143,14 @@ int World::regionRows(int lod) {
 }
 
 void World::putTile(std::unique_ptr<Tile> t) {
+    Key3 k{t->lod, t->tx, 0, t->tz};
+    {
+        std::lock_guard<std::mutex> lock(mu_);
+        auto it = structures_.find(k);
+        t->structures = it == structures_.end() ? nullptr : it->second;
+    }
     t->buildPyramids();
     std::lock_guard<std::mutex> lock(mu_);
-    Key3 k{t->lod, t->tx, 0, t->tz};
     for (int ry = 0; ry < regionRows(t->lod); ry++) dirty_.insert({t->lod, t->tx, ry, t->tz});
     tiles_[k] = std::shared_ptr<const Tile>(std::move(t));
 }
@@ -147,6 +158,28 @@ void World::putTile(std::unique_ptr<Tile> t) {
 const Tile* World::tile(int lod, int tx, int tz) const {
     auto it = tiles_.find({lod, tx, 0, tz});
     return it == tiles_.end() ? nullptr : it->second.get();
+}
+
+void World::putStructures(int lod, int tx, int tz, std::shared_ptr<const Structures> s) {
+    Key3 k{lod, tx, 0, tz};
+    std::shared_ptr<const Tile> old;
+    {
+        std::lock_guard<std::mutex> lock(mu_);
+        if (s) structures_[k] = s;
+        else structures_.erase(k);
+        auto it = tiles_.find(k);
+        if (it == tiles_.end()) return;  // attached when the ground arrives
+        old = it->second;
+    }
+    // tiles are immutable once published (builders hold snapshots): replace with a copy carrying the new buildings
+    auto t = std::make_unique<Tile>(*old);
+    t->structures = s;
+    t->buildPyramids();
+    std::lock_guard<std::mutex> lock(mu_);
+    auto it = tiles_.find(k);
+    if (it == tiles_.end() || it->second != old) return;  // replaced meanwhile: that upload attached the latest
+    for (int ry = 0; ry < regionRows(lod); ry++) dirty_.insert({lod, tx, ry, tz});
+    it->second = std::shared_ptr<const Tile>(std::move(t));
 }
 
 bool World::hasTile(int lod, int tx, int tz) const {
@@ -297,6 +330,12 @@ int World::update(const double centre[3], double budgetMs, double* buildMs) {
             const Key3& k = it->first;
             int dx = std::abs(k.x - centreRegion[k.lod][0]), dz = std::abs(k.z - centreRegion[k.lod][1]);
             if (k.lod >= lodCount || dx > windowRadius + 2 || dz > windowRadius + 2) it = tiles_.erase(it);
+            else ++it;
+        }
+        for (auto it = structures_.begin(); it != structures_.end();) {
+            const Key3& k = it->first;
+            int dx = std::abs(k.x - centreRegion[k.lod][0]), dz = std::abs(k.z - centreRegion[k.lod][1]);
+            if (k.lod >= lodCount || dx > windowRadius + 2 || dz > windowRadius + 2) it = structures_.erase(it);
             else ++it;
         }
         for (auto it = sections_.begin(); it != sections_.end();) {

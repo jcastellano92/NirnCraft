@@ -46,6 +46,13 @@ Far actors (`AetherFarActors`, server): twice a second, per overworld player, th
 creatures past that entity type's tracking range and within 4 km (nearest 96), with velocities; the client moves them
 on between packets and draws them as impostors.
 
+Settlements (`AetherSettlements`, client, single and multiplayer alike): the StreetPlan (every named capital, city,
+town, village and farm; baked, seed-free) becomes per-tile structure layers (`aether_upload_column_structures`):
+grammar buildings as their blueprint parts with wall top, roof rise and roof shape (gable along the right axis, hip,
+flat/crenel, dome, spire), city walls as lines one column thick at least at every LOD, gates and towers as boxes,
+landmarks as towers. Colours are the kit blocks' map colours (`aether_set_materials`, ids from 64). The structure
+layer survives the ground tile being refined and is evicted with it.
+
 It is exercised before the mod compiles on 26.3:
 
 * `height-subset/build_subset.ps1` compiles the mod's height path (`files.txt`, snapshotted read-only from the main
@@ -63,6 +70,11 @@ It is exercised before the mod compiles on 26.3:
     client on the same cache needs none;
   * server-fed vs single-player render: 0 of 1,017,500 terrain pixels differ;
   * the stand-in's surface is a median 28 blocks off the real one (its synthetic relief, not misregistration).
+* `harness/run_settlement_harness.ps1 [-Place whiterun]` runs the real mod classes (sandbox_check's build) on vanilla
+  26.3 + NeoForge + FML jars: exact terrain plus the StreetPlan's buildings around a city from 2.4 km and 800 m
+  (`native/out/settlements.png`); Whiterun's wall ring, towers, houses and Dragonsreach read from 800 m.
+  The shipped bakes are read without their inputs check (the converted code invalidates them; planning live needs
+  the game's registered structure pieces).
 
 Verified against the jars:
 

@@ -167,7 +167,7 @@ public final class AetherClient {
             if (source.usesBlockPalette()) ctx.setPalette(AetherPalette.blocks());  // else aether's preview palette
             int[] noise = AetherPalette.cloudNoiseVolume();
             if (noise != null) ctx.setCloudNoise(noise);
-            farField = new AetherFarField(ctx, source);
+            farField = new AetherFarField(ctx, source, AetherSettlements::create);
             startedFor = mc.level;
             com.skycraft.Skycraft.LOGGER.info("aether far field on ({} columns): {}", source instanceof AetherExactSource
                     ? "exact" : source instanceof AetherServerSource ? "server" : "raster", lib.buildInfo());

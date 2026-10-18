@@ -32,7 +32,7 @@ extern "C" {
 #endif
 
 /* (major << 16) | (minor << 8) | patch. Bumped on any ABI change. */
-#define AETHER_ABI_VERSION 0x000400
+#define AETHER_ABI_VERSION 0x000500
 
 typedef struct AetherContext AetherContext;
 
@@ -241,6 +241,19 @@ AETHER_API AetherStatus aether_preview_generate(AetherContext* ctx, int32_t lod,
  */
 AETHER_API AetherStatus aether_upload_column_heights(AetherContext* ctx, int32_t lod, int32_t tileX, int32_t tileZ,
                                                      const float* surface, const float* water);
+/*
+ * Buildings over tile (lod, tileX, tileZ), 256 x 256 columns laid out as in AetherColumnTile: walls stand on the
+ * ground up to wallTop[c], the roof above them up to roofTop[c] (roofTop <= the ground, or NaN: no building there).
+ * Voxels below wallTop are wallMat[c], the rest roofMat[c]. Kept across later uploads of the tile's ground (a refined
+ * tile keeps its buildings) until the tile leaves the window; wallTop == NULL removes them. Copied before return.
+ */
+AETHER_API AetherStatus aether_upload_column_structures(AetherContext* ctx, int32_t lod, int32_t tileX, int32_t tileZ,
+                                                        const float* wallTop, const float* roofTop,
+                                                        const uint16_t* wallMat, const uint16_t* roofMat);
+/* Sets palette entries first .. first + count - 1 (first >= 1), growing the palette with grey where it skips ids:
+ * colours added over the current palette (building walls and roofs). */
+AETHER_API AetherStatus aether_set_materials(AetherContext* ctx, uint32_t first, const AetherMaterial* materials,
+                                             uint32_t count);
 /* 1 if tile (lod, tileX, tileZ) is resident (uploaded and not evicted), else 0. */
 AETHER_API int32_t aether_has_tile(AetherContext* ctx, int32_t lod, int32_t tileX, int32_t tileZ);
 /* Offline harness only: preview terrain height at a block column (for camera placement). */

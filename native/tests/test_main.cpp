@@ -332,6 +332,67 @@ static void testRegionSeam() {
     }
 }
 
+// Buildings over a tile (aether_upload_column_structures): a 12 x 12 house, walls to 110 and a roof to 114 on ground at
+// 100, seen from straight above; it survives the ground being re-uploaded (a refined tile) and goes when removed.
+static void testStructures() {
+    std::printf("structures\n");
+    AetherContext* ctx = nullptr;
+    aether_create(AETHER_BACKEND_CPU, &ctx);
+    const size_t N = 256 * 256;
+    std::vector<float> ground(N, 100.0f), water(N, NAN), wall(N, NAN), roof(N, NAN);
+    std::vector<uint16_t> top(N, 2), fill(N, 3), wallMat(N, 0), roofMat(N, 0);
+    for (int j = 122; j < 134; j++)
+        for (int i = 122; i < 134; i++) {
+            size_t c = size_t(j) * 256 + i;
+            wall[c] = 110.0f;
+            roof[c] = 114.0f - 0.5f * float(std::abs(2 * i - 255) / 2);  // a hip towards the edges
+            wallMat[c] = 40;
+            roofMat[c] = 41;
+        }
+    AetherMaterial extra[2] = {{{0.8f, 0.78f, 0.7f}, 0.9f, 0.0f, AETHER_CLASS_TERRAIN},
+                               {{0.5f, 0.12f, 0.08f}, 0.9f, 0.0f, AETHER_CLASS_TERRAIN}};
+    CHECK(aether_set_materials(ctx, 40, extra, 2) == AETHER_OK);
+    CHECK(aether_set_materials(ctx, 0, extra, 1) == AETHER_ERR_ARG);
+    // the buildings first, then the ground: they attach when it arrives
+    CHECK(aether_upload_column_structures(ctx, 0, 0, 0, wall.data(), roof.data(), wallMat.data(), roofMat.data()) == AETHER_OK);
+    for (int tz = -1; tz <= 1; tz++)
+        for (int tx = -1; tx <= 1; tx++) {
+            AetherColumnTile t{0, tx, tz, ground.data(), water.data(), top.data(), fill.data(), nullptr, nullptr};
+            aether_upload_column_tile(ctx, &t);
+        }
+    auto centreDepth = [&](float* edgeOut) {
+        double centre[3] = {128.0, 160.0, 128.0};
+        aether_update(ctx, centre, 0);
+        AetherFrame f{};
+        for (int i = 0; i < 3; i++) f.cameraPos[i] = centre[i];
+        f.width = f.height = 33;
+        cameraMatrix(0, -89.9, 20, 1.0, f.invViewProj);
+        f.maxDistance = 6000;
+        f.sunDir[1] = 1;
+        f.lodBias = 1;
+        std::vector<float> depth(33 * 33);
+        AetherFrameOutput o{nullptr, nullptr, depth.data(), nullptr};
+        CHECK(aether_render(ctx, &f, &o) == AETHER_OK);
+        if (edgeOut) *edgeOut = depth[0];
+        return depth[16 * 33 + 16];
+    };
+    float edge = 0, d = centreDepth(&edge);
+    std::printf("  roof below the camera at %.2f (expect ~46), ground at the frame edge %.2f\n", d, edge);
+    CHECK(std::abs(d - 46.0f) < 1.5f);
+    // the ground refined: the house stays
+    std::vector<float> ground2(N, 101.0f);
+    AetherColumnTile t2{0, 0, 0, ground2.data(), water.data(), top.data(), fill.data(), nullptr, nullptr};
+    aether_upload_column_tile(ctx, &t2);
+    float d2 = centreDepth(nullptr);
+    CHECK(std::abs(d2 - 46.0f) < 1.5f);
+    // removed: the ground (101) shows through
+    CHECK(aether_upload_column_structures(ctx, 0, 0, 0, nullptr, nullptr, nullptr, nullptr) == AETHER_OK);
+    float d3 = centreDepth(nullptr);
+    std::printf("  after a ground refine %.2f; removed %.2f (ground at 59)\n", d2, d3);
+    CHECK(std::abs(d3 - 59.0f) < 1.5f);
+    aether_destroy(ctx);
+}
+
 // A far actor on flat ground: the ray must hit its body at the analytic distance, in front of the terrain.
 static void testActors() {
     std::printf("far actors\n");
@@ -698,6 +759,7 @@ int main(int argc, char** argv) {
     testStreamingGap();
     testFourZones();
     testRegionSeam();
+    testStructures();
     testActors();
     testNearDepth(argc > 1 ? argv[1] : "native/data/tamriel_raster.bin");
     testColumnHeights(argc > 1 ? argv[1] : "native/data/tamriel_raster.bin");

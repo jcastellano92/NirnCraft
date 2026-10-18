@@ -15,7 +15,10 @@ $classes = Join-Path $env:TEMP 'skycraft-aether-harness'
 Remove-Item -Recurse -Force $classes -ErrorAction SilentlyContinue
 # all the glue, with the harness's SkyNetwork (it plays the server back) instead of compile-stubs
 $src = @('native\java\src\com\skycraft\aether\AetherNative.java', 'native\java\src\com\skycraft\aether\AetherProbe.java') +
-       (Get-ChildItem native\java\mod-integration\src, "$PSScriptRoot" -Recurse -Filter *.java | ForEach-Object FullName) +
+       (Get-ChildItem native\java\mod-integration\src -Recurse -Filter *.java |
+        Where-Object { -not (Select-String -Path $_.FullName -SimpleMatch 'aether:sandbox-only' -Quiet) } | ForEach-Object FullName) +
+       (Get-ChildItem "$PSScriptRoot" -Recurse -Filter *.java | Where-Object { $_.FullName -notmatch '\\settlements\\' } |
+        ForEach-Object FullName) +
        (Get-ChildItem native\java\mod-integration\compile-stubs -Recurse -Filter *.java |
         Where-Object { $_.Name -ne 'SkyNetwork.java' } | ForEach-Object FullName)
 & "$jdk\javac.exe" --release 25 -proc:none -encoding UTF-8 -nowarn -cp ((@("$height\classes") + $mc) -join ';') -d $classes @src

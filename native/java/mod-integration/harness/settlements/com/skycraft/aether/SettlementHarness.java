@@ -1,0 +1,135 @@
+package com.skycraft.aether;
+
+import com.skycraft.tamriel.MapSample;
+import com.skycraft.tamriel.TamrielMap;
+import com.skycraft.tamriel.terrain.TamrielHeight;
+import com.skycraft.worldplan.street.StreetPlan;
+
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.PrintStream;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
+/**
+ * Far-field settlements, offline, on the real mod classes (sandbox_check's build): exact terrain around a city
+ * (AetherExactSource) plus its planned buildings (AetherSettlements over the StreetPlan), rendered by aether_core
+ * from far and from mid distance, and the mid view again without buildings for comparison.
+ * <pre>  .\native\java\mod-integration\harness\run_settlement_harness.ps1 [-Place whiterun]</pre>
+ */
+public final class SettlementHarness {
+    private SettlementHarness() {}
+
+    static final PrintStream OUT = System.out;  // vanilla's bootstrap later silences System.out/err
+
+    public static void main(String[] a) {
+        try {
+            run(a);
+        } catch (Throwable t) {
+            t.printStackTrace(OUT);
+            System.exit(1);
+        }
+    }
+
+    static void run(String[] a) throws Exception {
+        Path dll = Path.of(a[0]).toAbsolutePath(), data = Path.of(a[1]), out = Path.of(a[2]);
+        String place = a[3];
+        long seed = Long.parseLong(a[4]);
+        long t0 = System.nanoTime();
+        net.minecraft.SharedConstants.tryDetectVersion();
+        net.minecraft.server.Bootstrap.bootStrap();
+        TamrielHeight height = HarnessSeed.height(seed);
+        StreetPlan plan = StreetPlan.get();
+        int si = plan.settlement(place);
+        if (si < 0) throw new IllegalArgumentException("no settlement " + place);
+        int px = plan.sX[si], pz = plan.sZ[si];
+        OUT.printf("bootstrap + plans: %.0f ms; %d settlements; %s at %d, %d (reach %d)%n", (System.nanoTime() - t0) / 1e6,
+                plan.settlements(), place, px, pz, plan.sReach[si]);
+
+        AetherNative n = AetherNative.load(dll);
+        Path raster = data.resolve("tamriel_raster.bin");
+        int[] noise = null;
+        Path noisePath = data.resolve("cloud_noise.bin");
+        if (Files.exists(noisePath)) {
+            noise = new int[64 * 64 * 64];
+            ByteBuffer.wrap(Files.readAllBytes(noisePath)).order(ByteOrder.LITTLE_ENDIAN).asIntBuffer().get(noise);
+        }
+        double[][] views = {{2400, 70}, {800, 45}};  // distance from the centre, height over the ground
+        int w = 1600, h = 900;
+        int[][] images = new int[3][];
+        int[] buildingPx = new int[1];
+        try (AetherNative.Context ctx = n.create(AetherNative.BACKEND_VULKAN);
+             AetherNative.Context bare = n.create(AetherNative.BACKEND_VULKAN)) {
+            AetherExactSource src = new AetherExactSource(height, () -> raster, 8);
+            AetherExactSource src2 = new AetherExactSource(height, () -> raster, 8);
+            src.prepare(ctx);
+            src2.prepare(bare);
+            AetherSettlements towns = new AetherSettlements(plan);
+            for (int v = 0; v < views.length; v++) {
+                double dist = views[v][0];
+                double cx = px + 0.8 * dist, cz = pz + 0.6 * dist;
+                MapSample m = TamrielMap.sampleScratch((int) cx, (int) cz);
+                double cy = Math.max(height.height((int) cx, (int) cz, m), 63) + views[v][1];
+                double ty = height.height(px, pz, TamrielMap.sampleScratch(px, pz)) + 25;
+                double pitch = Math.toDegrees(Math.atan2(ty - cy, dist));
+                long c0 = System.nanoTime();
+                for (AetherNative.Context c : v == 1 ? new AetherNative.Context[] {ctx, bare} : new AetherNative.Context[] {ctx}) {
+                    AetherExactSource s = c == ctx ? src : src2;
+                    for (int lod = 0; lod < AetherFarField.LODS; lod++) {
+                        int span = 256 << lod;
+                        int tx = Math.floorDiv((int) Math.floor(cx), span), tz = Math.floorDiv((int) Math.floor(cz), span);
+                        int x0 = (tx - AetherFarField.WINDOW) * span, z0 = (tz - AetherFarField.WINDOW) * span;
+                        int x1 = (tx + AetherFarField.WINDOW + 1) * span, z1 = (tz + AetherFarField.WINDOW + 1) * span;
+                        while (s.cover(c, lod, x0, z0, x1, z1)) { }
+                        if (c == ctx) towns.cover(c, lod, x0, z0, x1, z1);
+                    }
+                    if (noise != null) c.setCloudNoise(noise);
+                    c.update(cx, cy, cz, 0);
+                }
+                OUT.printf("view %d: %.0f m out, camera %.0f over the ground, pitch %.1f; tiles + buildings %.0f ms%n", v, dist,
+                        views[v][1], pitch, (System.nanoTime() - c0) / 1e6);
+                AetherNative.Frame f = new AetherNative.Frame();
+                f.x = cx;
+                f.y = cy;
+                f.z = cz;
+                f.width = w;
+                f.height = h;
+                f.maxDistance = 40000;
+                f.planetRadius = 6_371_000f;
+                f.lodBias = 1;
+                f.flags = AetherNative.FRAME_SHADOWS | AetherNative.FRAME_ATMOS | AetherNative.FRAME_SKY;
+                AetherProbe.cameraMatrix(Math.toDegrees(Math.atan2(-0.8, 0.6)), pitch, 50, w / (double) h, f.invViewProj);
+                double se = Math.toRadians(30), sa = Math.toRadians(150);
+                f.sunX = (float) (Math.sin(sa) * Math.cos(se));
+                f.sunY = (float) Math.sin(se);
+                f.sunZ = (float) (-Math.cos(sa) * Math.cos(se));
+                int[] color = new int[w * h];
+                ctx.render(f, color, null, null);
+                ctx.render(f, color, null, null);
+                images[v] = color;
+                if (v == 1) {
+                    int[] c2 = new int[w * h];
+                    bare.render(f, c2, null, null);
+                    bare.render(f, c2, null, null);
+                    images[2] = c2;
+                    for (int p = 0; p < w * h; p++) if (color[p] != c2[p]) buildingPx[0]++;
+                }
+            }
+            src.close();
+            src2.close();
+        }
+        OUT.printf("buildings change %.1f%% of the mid view's pixels%n", 100.0 * buildingPx[0] / (w * h));
+        if (buildingPx[0] < w * h / 200) throw new IllegalStateException("no buildings visible in the mid view");
+        BufferedImage img = new BufferedImage(w, h * 3 + 16, BufferedImage.TYPE_INT_RGB);
+        for (int k = 0; k < 3; k++)
+            for (int p = 0; p < w * h; p++) {
+                int c = images[k][p];
+                img.setRGB(p % w, k * (h + 8) + p / w, (c & 0xFF) << 16 | (c & 0xFF00) | (c >>> 16 & 0xFF));
+            }
+        Files.createDirectories(out.toAbsolutePath().getParent());
+        ImageIO.write(img, "png", out.toFile());
+        OUT.println("wrote " + out + " (far, mid, mid without buildings)");
+    }
+}

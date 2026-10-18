@@ -100,7 +100,7 @@ extern "C" {
 AETHER_API uint32_t aether_abi_version(void) { return AETHER_ABI_VERSION; }
 
 AETHER_API const char* aether_build_info(void) {
-    return "aether_core " AETHER_VERSION_STRING " (abi 0.3.0; slang far kernel; " __DATE__ ")";
+    return "aether_core " AETHER_VERSION_STRING " (abi 0.5.0; slang far kernel; " __DATE__ ")";
 }
 
 AETHER_API AetherStatus aether_create(AetherBackend backend, AetherContext** out) {
@@ -450,6 +450,39 @@ AETHER_API AetherStatus aether_upload_column_heights(AetherContext* ctx, int32_t
     if (!ctx || lod < 0 || lod >= MAX_LODS || !surface || !water) return AETHER_ERR_ARG;
     if (!ctx->preview) return ctx->fail(AETHER_ERR_STATE, "no preview raster loaded (it dresses the columns)");
     ctx->world.putTile(ctx->preview->dressTile(lod, tileX, tileZ, surface, water));
+    return AETHER_OK;
+}
+
+AETHER_API AetherStatus aether_upload_column_structures(AetherContext* ctx, int32_t lod, int32_t tileX, int32_t tileZ,
+                                                        const float* wallTop, const float* roofTop,
+                                                        const uint16_t* wallMat, const uint16_t* roofMat) {
+    if (!ctx || lod < 0 || lod >= MAX_LODS) return AETHER_ERR_ARG;
+    if (!wallTop) {
+        ctx->world.putStructures(lod, tileX, tileZ, nullptr);
+        return AETHER_OK;
+    }
+    if (!roofTop || !wallMat || !roofMat) return AETHER_ERR_ARG;
+    size_t n = size_t(TILE) * TILE;
+    auto s = std::make_shared<Structures>();
+    s->wallTop.assign(wallTop, wallTop + n);
+    s->roofTop.assign(roofTop, roofTop + n);
+    s->wallMat.assign(wallMat, wallMat + n);
+    s->roofMat.assign(roofMat, roofMat + n);
+    for (size_t c = 0; c < n; c++) {
+        if (std::isnan(s->roofTop[c])) s->roofTop[c] = -1e30f;  // never above any voxel
+        s->wallTop[c] = std::min(s->wallTop[c], s->roofTop[c]);
+    }
+    ctx->world.putStructures(lod, tileX, tileZ, std::move(s));
+    return AETHER_OK;
+}
+
+AETHER_API AetherStatus aether_set_materials(AetherContext* ctx, uint32_t first, const AetherMaterial* m, uint32_t count) {
+    if (!ctx || first == 0 || (!m && count)) return AETHER_ERR_ARG;
+    if (uint64_t(first) + count > 65535) return ctx->fail(AETHER_ERR_ARG, "material ids beyond 65534");
+    std::lock_guard<std::mutex> lock(ctx->mu);
+    AetherMaterial grey{{0.3f, 0.3f, 0.3f}, 0.9f, 0.0f, AETHER_CLASS_TERRAIN};
+    if (ctx->palette.size() < first + count) ctx->palette.resize(first + count, toGpu(grey));
+    for (uint32_t i = 0; i < count; i++) ctx->palette[first + i] = toGpu(m[i]);
     return AETHER_OK;
 }
 

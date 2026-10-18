@@ -30,10 +30,18 @@ struct Key3Hash {
     }
 };
 
+// Buildings over a tile's columns (dense, TILE^2 each; roofTop <= the surface or NaN = none): walls from the ground
+// up to wallTop, roof up to roofTop.
+struct Structures {
+    std::vector<float> wallTop, roofTop;
+    std::vector<uint16_t> wallMat, roofMat;
+};
+
 struct Tile {
     int lod = 0, tx = 0, tz = 0;
     std::vector<float> surface, water, canopy;
     std::vector<uint16_t> top, fill, canopyMat;
+    std::shared_ptr<const Structures> structures;  // null: none
     // min of surface and max of the highest occupied point per aligned n x n block, n = 2^level, level 0..8
     std::array<std::vector<float>, 9> minSurf, maxTop;
     void buildPyramids();
@@ -75,6 +83,8 @@ public:
     void editBlock(int x, int y, int z, uint16_t mat);
     const Tile* tile(int lod, int tx, int tz) const;  // caller holds mu_ (or is single threaded)
     bool hasTile(int lod, int tx, int tz) const;      // locks
+    // Buildings of tile (lod, tx, tz), kept across later uploads of its ground; null removes them.
+    void putStructures(int lod, int tx, int tz, std::shared_ptr<const Structures> s);
 
     // Build what the window around `centre` needs; returns regions built. budgetMs <= 0: no limit.
     int update(const double centre[3], double budgetMs, double* buildMs);
@@ -107,6 +117,7 @@ private:
     mutable std::mutex mu_;
     // immutable once published: builders hold snapshots while uploads replace entries (copy on write)
     std::unordered_map<Key3, std::shared_ptr<const Tile>, Key3Hash> tiles_;
+    std::unordered_map<Key3, std::shared_ptr<const Structures>, Key3Hash> structures_;
     std::unordered_map<Key3, std::shared_ptr<const Section>, Key3Hash> sections_;
     std::unordered_map<Key3, std::shared_ptr<const Region>, Key3Hash> regions_;
     std::unordered_set<Key3, Key3Hash> dirty_;
