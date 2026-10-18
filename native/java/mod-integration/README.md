@@ -31,6 +31,18 @@ with `aether_upload_column_heights`; aether dresses them (materials, forest cano
 the 3D overhang term are not in the far field. Water: sea level below y 63 (sea and near-surface aquifers), the map's
 river/lake level above it, filled to `ceil(level)` like `MapWaterFeature`.
 
+Exact heights on the GPU (`AetherHeightGpu`, `aether_height_*`, `native/shaders/aether_height.slang`): in single
+player the seeded noise calls of `TamrielHeight.height` (half of its CPU time) run on a Vulkan compute kernel that is
+bit-identical to Minecraft's `NoiseStack`/`PerlinNoise` (no contraction, RTE, signed zeros kept, no division or
+transcendentals, every possible denormal flagged back to the CPU); `TamrielHeight.height` itself still runs on the
+CPU with those noise values replayed into its `WorldNoise` objects. The first tile of each LOD is computed both ways
+and compared bit for bit, later tiles on 64 random columns; any difference, a device without the float controls, or
+a GPU path that is not faster than the CPU on the first LOD 1-2 tiles, and it is the CPU path for the rest of the
+session (logged). `-Dskycraft.aether.gpuHeight=false` keeps the CPU. Dedicated servers and the tile server always
+use the CPU path; the tile bytes are identical either way. The noise tables are read by reflection from the live
+`NoiseStack`/`GradientNoise` objects: if the game's module setup refuses that, the CPU path is used (an access
+transformer for `NoiseStack.layers`, `NoiseStack$Layer` and `GradientNoise.perms/offsetX/Y/Z` would enable it).
+
 Every source shows the raster stand-in for the whole window at once and refines it tile by tile, nearest first
 (`AetherRefiningSource`), so the horizon is never empty.
 

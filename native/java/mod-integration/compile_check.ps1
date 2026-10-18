@@ -5,11 +5,13 @@
 $ErrorActionPreference = 'Stop'
 $ref = 'F:\Projects\Personal\Skycraft\toolchains\ref\mc26.3'
 $jdk = 'F:\Projects\Personal\Skycraft\toolchains\jdk-25.0.4.1+1\bin'
-$height = Join-Path $env:TEMP 'skycraft-aether-height'
+# per worktree (sibling worktrees run this concurrently)
+$tag = Split-Path (Resolve-Path "$PSScriptRoot\..\..\..").Path -Leaf
+$height = Join-Path $env:TEMP "skycraft-aether-height-$tag"
 & "$PSScriptRoot\height-subset\build_subset.ps1" -Out $height
 $cp = ((@("$ref\client.jar", "$ref\neoforge-universal.jar", "$height\classes") +
         (Get-ChildItem "$ref\libs", "$ref\runtime" -Filter *.jar | ForEach-Object FullName)) -join ';')
-$out = Join-Path $env:TEMP 'skycraft-aether-gluecheck'
+$out = Join-Path $env:TEMP "skycraft-aether-gluecheck-$tag"
 Remove-Item -Recurse -Force $out -ErrorAction SilentlyContinue
 # compile-stubs: signatures of mod classes still being converted (SkyNetwork ...), never moved into the mod; glue
 # marked aether:sandbox-only needs more of the real mod and is compiled by sandbox_check.ps1 instead (its stub here)
