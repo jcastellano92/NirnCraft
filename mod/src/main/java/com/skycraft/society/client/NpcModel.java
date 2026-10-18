@@ -14,16 +14,16 @@ import net.minecraft.world.item.ItemStack;
  * Player-shaped NPC model (full 64x64 skin layout with overlays). Adds poses: bound hands for prisoners, raised
  * hands while casting (mages, priests), and strumming while a bard plays.
  */
-public class NpcModel extends PlayerModel {
+public class NpcModel extends net.minecraft.client.model.HumanoidModel<net.minecraft.client.renderer.entity.state.HumanoidRenderState> {
     public NpcModel(ModelPart root) {
-        super(root, false);
+        super(root, net.minecraft.client.renderer.rendertype.RenderTypes::entityTranslucent);
     }
 
     public static LayerDefinition createLayer() {
         return LayerDefinition.create(PlayerModel.createMesh(CubeDeformation.NONE, false), 64, 64);
     }
 
-    private void prepareNpcPose(NpcRenderData entity, net.minecraft.client.renderer.entity.state.AvatarRenderState state) {
+    private void prepareNpcPose(NpcRenderData entity, net.minecraft.client.renderer.entity.state.HumanoidRenderState state) {
         ArmPose main = ArmPose.EMPTY;
         ArmPose off = ArmPose.EMPTY;
         boolean sheathed = entity.sheathed();
@@ -51,7 +51,7 @@ public class NpcModel extends PlayerModel {
     }
 
     @Override
-    public void setupAnim(net.minecraft.client.renderer.entity.state.AvatarRenderState state) {
+    public void setupAnim(net.minecraft.client.renderer.entity.state.HumanoidRenderState state) {
         NpcRenderData entity = NpcRenderData.get(state);
         if (entity == null) { super.setupAnim(state); return; }
         prepareNpcPose(entity, state);
@@ -60,8 +60,6 @@ public class NpcModel extends PlayerModel {
         // children: a bigger head on the small body (the renderer scales the whole child down)
         float headScale = entity.isChild() ? 1.22F : 1.0F;
         this.head.xScale = this.head.yScale = this.head.zScale = headScale;
-        this.hat.xScale = this.hat.yScale = this.hat.zScale = headScale;
-        boolean changed = true;
         if (entity.isHuddled() || entity.isKneeling() || entity.isTending() || entity.isCarrying() || entity.isWeeping()) {
             aftermathPose(entity, ageInTicks);
         } else if (entity.isPrisoner()) {
@@ -73,7 +71,6 @@ public class NpcModel extends PlayerModel {
             this.leftArm.yRot = 0.0F;
             this.leftArm.zRot = 0.35F;
             this.head.xRot = Math.max(this.head.xRot, 0.35F);
-            this.hat.loadPose(this.head.storePose());
         } else if (entity.isCasting()) {
             float wave = Mth.cos(ageInTicks * 0.65F) * 0.09F;
             com.skycraft.magic.spell.Spell spell = entity.getCastingSpell();
@@ -104,7 +101,6 @@ public class NpcModel extends PlayerModel {
             }
             float sway = Mth.sin(ageInTicks * 0.22F) * 0.05F;
             this.head.zRot += sway;
-            this.hat.loadPose(this.head.storePose());
             switch (pose) {
                 case FLUTE, HORN -> {
                     float breath = Mth.sin(ageInTicks * 0.45F) * 0.05F;
@@ -146,13 +142,6 @@ public class NpcModel extends PlayerModel {
             float swing = Mth.sin(state.swingAnimation * (float) Math.PI);
             this.rightArm.xRot -= swing * 0.55F;
             this.body.yRot += swing * 0.18F;
-            this.jacket.loadPose(this.body.storePose());
-        } else {
-            changed = false;
-        }
-        if (changed) {
-            this.leftSleeve.loadPose(this.leftArm.storePose());
-            this.rightSleeve.loadPose(this.rightArm.storePose());
         }
     }
 
@@ -212,9 +201,5 @@ public class NpcModel extends PlayerModel {
             this.head.xRot = Math.max(this.head.xRot, 0.5F);
             this.body.xRot += shake;
         }
-        this.hat.loadPose(this.head.storePose());
-        this.jacket.loadPose(this.body.storePose());
-        this.leftPants.loadPose(this.leftLeg.storePose());
-        this.rightPants.loadPose(this.rightLeg.storePose());
     }
 }

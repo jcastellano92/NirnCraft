@@ -7,7 +7,7 @@ import com.skycraft.creatures.client.rig.CreatureDef;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.SubmitNodeCollector;
-import net.minecraft.client.renderer.entity.state.AvatarRenderState;
+import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
 import com.skycraft.client.CapturedPartModel;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.rendertype.RenderType;
@@ -29,7 +29,7 @@ import java.util.function.Function;
  * ({@code rig.defs.Costumes}) whose six top-level parts copy the humanoid's head, body, arms and legs every frame.
  * Optional pieces (named bones) are shown or hidden per entity, e.g. the draugr's helmet by rank.
  */
-public class CostumeLayer<T extends Mob, M extends HumanoidModel<AvatarRenderState>> extends RenderLayer<AvatarRenderState, M> {
+public class CostumeLayer<T extends Mob, M extends HumanoidModel<HumanoidRenderState>> extends RenderLayer<HumanoidRenderState, M> {
     private static final String[] PARTS = {"head", "body", "right_arm", "left_arm", "right_leg", "left_leg"};
     private final ModelPart[] parts = new ModelPart[PARTS.length];
     private final Map<String, ModelPart> optional = new HashMap<>();
@@ -43,7 +43,7 @@ public class CostumeLayer<T extends Mob, M extends HumanoidModel<AvatarRenderSta
     /**
      * @param optionalBones names of the costume bones that are toggled by {@code visible}
      */
-    public CostumeLayer(RenderLayerParent<AvatarRenderState, M> parent, ModelPart bakedRoot, CreatureDef def, Function<T, Identifier> texture,
+    public CostumeLayer(RenderLayerParent<HumanoidRenderState, M> parent, ModelPart bakedRoot, CreatureDef def, Function<T, Identifier> texture,
                         List<String> optionalBones, BiPredicate<T, String> visible) {
         super(parent);
         this.texture = texture;
@@ -69,12 +69,12 @@ public class CostumeLayer<T extends Mob, M extends HumanoidModel<AvatarRenderSta
         return p;
     }
 
-    public void extract(T entity,AvatarRenderState state) {
+    public void extract(T entity,HumanoidRenderState state) {
         var visibility=new java.util.HashMap<String,Boolean>();
         optional.forEach((name,part)->visibility.put(name,visible.test(entity,name)));
         state.setRenderData(appearanceKey,new Appearance(texture.apply(entity),java.util.Map.copyOf(visibility)));
     }
-    @Override public void submit(PoseStack pose, SubmitNodeCollector collector,int light,AvatarRenderState state,float yaw,float pitch) {
+    @Override public void submit(PoseStack pose, SubmitNodeCollector collector,int light,HumanoidRenderState state,float yaw,float pitch) {
         Appearance appearance=state.getRenderData(appearanceKey);
         if (state.isInvisible||appearance==null) return;
         M model=getParentModel();

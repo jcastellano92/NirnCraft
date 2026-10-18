@@ -2,7 +2,7 @@ package com.skycraft.society.client;
 
 import com.skycraft.magic.spell.Spell;
 import com.skycraft.society.entity.NpcEntity;
-import net.minecraft.client.renderer.entity.state.AvatarRenderState;
+import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.context.ContextKey;
 import net.minecraft.world.entity.HumanoidArm;
@@ -24,7 +24,7 @@ record NpcRenderData(int getId, int look, int role, int skin, boolean sheathed, 
                 entity.getMainHandItem().copy(), entity.getOffhandItem().copy(), entity.getCastingSpell());
     }
 
-    static NpcRenderData get(AvatarRenderState state) {
+    static NpcRenderData get(HumanoidRenderState state) {
         return state.getRenderData(KEY);
     }
 }

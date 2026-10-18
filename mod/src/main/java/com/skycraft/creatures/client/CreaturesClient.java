@@ -79,6 +79,12 @@ public final class CreaturesClient {
     }
 
     @SubscribeEvent
+    public static void renderStates(net.neoforged.neoforge.client.renderstate.RegisterRenderStateModifiersEvent event) {
+        event.registerEntityModifier(new com.google.common.reflect.TypeToken<SkyHumanoidRenderer<net.minecraft.world.entity.Mob>>() {},
+                SkyHumanoidRenderer::extractAppearance);
+    }
+
+    @SubscribeEvent
     public static void renderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerEntityRenderer(ModEntities.BANDIT.get(),
                 ctx -> new SkyHumanoidRenderer<BanditEntity>(ctx, HUMANOID, b -> BANDIT[Math.floorMod(b.getSkin(), BANDIT.length)], 0.5f, 1.0f, true));

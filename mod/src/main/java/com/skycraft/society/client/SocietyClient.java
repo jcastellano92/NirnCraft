@@ -46,6 +46,13 @@ public final class SocietyClient {
     }
 
     @SubscribeEvent
+    public static void renderStates(net.neoforged.neoforge.client.renderstate.RegisterRenderStateModifiersEvent event) {
+        event.registerEntityModifier(NpcRenderer.class,
+                (com.skycraft.society.entity.NpcEntity entity, net.minecraft.client.renderer.entity.state.HumanoidRenderState state) ->
+                        state.setRenderData(NpcRenderData.KEY, NpcRenderData.extract(entity)));
+    }
+
+    @SubscribeEvent
     public static void addLayers(EntityRenderersEvent.AddLayers event) {
         for (var skin : event.getSkins()) {
             AvatarRenderer<net.minecraft.client.player.AbstractClientPlayer> renderer = event.getPlayerRenderer(skin);

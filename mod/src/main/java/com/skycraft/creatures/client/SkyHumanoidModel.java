@@ -13,9 +13,9 @@ import net.minecraft.world.item.ItemStack;
  * Player-shaped model (full 64x64 skin layout with hat/jacket/sleeve/pants overlays) for bandits, draugr, guards and
  * giants. Raises the weapon arm when holding an item and draws the bow when an archer is aggressive.
  */
-public class SkyHumanoidModel<T extends Mob> extends PlayerModel {
+public class SkyHumanoidModel<T extends Mob> extends net.minecraft.client.model.HumanoidModel<net.minecraft.client.renderer.entity.state.HumanoidRenderState> {
     public SkyHumanoidModel(ModelPart root) {
-        super(root, false);
+        super(root, net.minecraft.client.renderer.rendertype.RenderTypes::entityTranslucent);
     }
 
     public static LayerDefinition createLayer() {
@@ -23,7 +23,7 @@ public class SkyHumanoidModel<T extends Mob> extends PlayerModel {
     }
 
     @Override
-    public void setupAnim(net.minecraft.client.renderer.entity.state.AvatarRenderState state) {
+    public void setupAnim(net.minecraft.client.renderer.entity.state.HumanoidRenderState state) {
         super.setupAnim(state);
         SkyHumanoidRenderer.Appearance appearance=state.getRenderData(SkyHumanoidRenderer.APPEARANCE);
         if (appearance==null) return;
@@ -36,13 +36,9 @@ public class SkyHumanoidModel<T extends Mob> extends PlayerModel {
                 this.leftArm.yRot += swing * 0.25F;
             }
             this.body.yRot += swing * 0.20F;
-            this.jacket.loadPose(this.body.storePose());
-            this.leftSleeve.loadPose(this.leftArm.storePose());
-            this.rightSleeve.loadPose(this.rightArm.storePose());
         } else if (appearance.shieldRaised()) {
             this.leftArm.xRot = -0.85F;
             this.leftArm.yRot = 0.35F;
-            this.leftSleeve.loadPose(this.leftArm.storePose());
         }
     }
 }

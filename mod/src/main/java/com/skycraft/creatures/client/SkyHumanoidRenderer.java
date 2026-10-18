@@ -13,7 +13,7 @@ import net.minecraft.world.entity.Mob;
 import java.util.function.Function;
 
 /** Renderer for player-shaped creatures: skin chosen per entity, vanilla armor, held items, optional glowing eyes. */
-public class SkyHumanoidRenderer<T extends Mob> extends HumanoidMobRenderer<T, net.minecraft.client.renderer.entity.state.AvatarRenderState, SkyHumanoidModel<T>> {
+public class SkyHumanoidRenderer<T extends Mob> extends HumanoidMobRenderer<T, net.minecraft.client.renderer.entity.state.HumanoidRenderState, SkyHumanoidModel<T>> {
     public record Appearance(Identifier texture,boolean twoHanded,boolean shieldRaised) {}
     public static final net.minecraft.util.context.ContextKey<Appearance> APPEARANCE=new net.minecraft.util.context.ContextKey<>(Identifier.fromNamespaceAndPath("skycraft","humanoid_appearance"));
     private final java.util.List<com.skycraft.creatures.client.kit.CostumeLayer<T,SkyHumanoidModel<T>>> costumes=new java.util.ArrayList<>();
@@ -30,7 +30,7 @@ public class SkyHumanoidRenderer<T extends Mob> extends HumanoidMobRenderer<T, n
         if (armor) {
             this.addLayer(new HumanoidArmorLayer<>(this,
                 net.minecraft.client.renderer.entity.ArmorModelSet.bake(ModelLayers.PLAYER_ARMOR, context.getModelSet(),
-                    p -> new net.minecraft.client.model.player.PlayerModel(p,false)), context.getEquipmentRenderer()));
+                    p -> new HumanoidModel<net.minecraft.client.renderer.entity.state.HumanoidRenderState>(p)), context.getEquipmentRenderer()));
         }
     }
 
@@ -60,17 +60,22 @@ public class SkyHumanoidRenderer<T extends Mob> extends HumanoidMobRenderer<T, n
     }
 
     @Override
-    protected void scale(net.minecraft.client.renderer.entity.state.AvatarRenderState entity, PoseStack poseStack) {
+    protected void scale(net.minecraft.client.renderer.entity.state.HumanoidRenderState entity, PoseStack poseStack) {
         if (scale != 1.0f) poseStack.scale(scale, scale, scale);
     }
 
     @Override
-    public Identifier getTextureLocation(net.minecraft.client.renderer.entity.state.AvatarRenderState state) { return state.getRenderData(APPEARANCE).texture(); }
-    @Override public net.minecraft.client.renderer.entity.state.AvatarRenderState createRenderState() { return new net.minecraft.client.renderer.entity.state.AvatarRenderState(); }
-    @Override public void extractRenderState(T entity,net.minecraft.client.renderer.entity.state.AvatarRenderState state,float partialTick) {
-        super.extractRenderState(entity,state,partialTick);
+    public Identifier getTextureLocation(net.minecraft.client.renderer.entity.state.HumanoidRenderState state) { return state.getRenderData(APPEARANCE).texture(); }
+    @Override public net.minecraft.client.renderer.entity.state.HumanoidRenderState createRenderState() { return new net.minecraft.client.renderer.entity.state.HumanoidRenderState(); }
+    private void captureAppearance(T entity,net.minecraft.client.renderer.entity.state.HumanoidRenderState state) {
         state.setRenderData(APPEARANCE,new Appearance(texture.apply(entity),com.skycraft.combat.WeaponClass.of(entity.getMainHandItem()).twoHanded(),entity.isAggressive()&&entity.getOffhandItem().getItem() instanceof net.minecraft.world.item.ShieldItem));
         for (var costume:costumes) costume.extract(entity,state);
+    }
+    @SuppressWarnings("unchecked")
+    static void extractAppearance(Mob entity,net.minecraft.client.renderer.entity.state.HumanoidRenderState state) {
+        var renderer=net.minecraft.client.Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(entity);
+        if (renderer instanceof SkyHumanoidRenderer<?> humanoid)
+            ((SkyHumanoidRenderer<Mob>) humanoid).captureAppearance(entity,state);
     }
     @Override protected net.minecraft.client.model.HumanoidModel.ArmPose getArmPose(T entity,net.minecraft.world.entity.HumanoidArm arm) {
         var stack=arm==entity.getMainArm()?entity.getMainHandItem():entity.getOffhandItem();

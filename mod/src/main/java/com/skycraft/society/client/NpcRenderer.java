@@ -17,7 +17,7 @@ import net.minecraft.resources.Identifier;
  * tails, horns, tusks), vanilla armor and held items. Children are drawn at their smaller scale; Altmer stand a little
  * taller and Bosmer a little shorter. NPCs without a look yet use the old per-role skins.
  */
-public class NpcRenderer extends HumanoidMobRenderer<NpcEntity, net.minecraft.client.renderer.entity.state.AvatarRenderState, NpcModel> {
+public class NpcRenderer extends HumanoidMobRenderer<NpcEntity, net.minecraft.client.renderer.entity.state.HumanoidRenderState, NpcModel> {
     /** Old per-role skins; roles added later fall back to a similar one. */
     private static final Identifier[][] TEXTURES = new Identifier[NpcRole.VALUES.length][NpcRole.SKINS];
 
@@ -41,29 +41,28 @@ public class NpcRenderer extends HumanoidMobRenderer<NpcEntity, net.minecraft.cl
         super(context, new NpcModel(context.bakeLayer(SocietyClient.NPC_LAYER)), 0.5f);
         this.addLayer(new HumanoidArmorLayer<>(this,
                 net.minecraft.client.renderer.entity.ArmorModelSet.bake(ModelLayers.PLAYER_ARMOR, context.getModelSet(),
-                        part -> new net.minecraft.client.model.player.PlayerModel(part, false)), context.getEquipmentRenderer()));
+                        part -> new HumanoidModel<net.minecraft.client.renderer.entity.state.HumanoidRenderState>(part)), context.getEquipmentRenderer()));
         this.addLayer(new RaceFeatureLayer<>(this, context.bakeLayer(SocietyClient.RACE_FEATURES_LAYER), NpcRenderer::features));
     }
 
-    private static RaceFeatureLayer.Features features(net.minecraft.client.renderer.entity.state.AvatarRenderState state) {
+    private static RaceFeatureLayer.Features features(net.minecraft.client.renderer.entity.state.HumanoidRenderState state) {
         NpcRenderData npc = NpcRenderData.get(state);
         return npc == null || npc.look() < 0 ? null : RaceFeatureLayer.Features.of(npc.look());
     }
 
     @Override
-    public net.minecraft.client.renderer.entity.state.AvatarRenderState createRenderState() {
-        return new net.minecraft.client.renderer.entity.state.AvatarRenderState();
+    public net.minecraft.client.renderer.entity.state.HumanoidRenderState createRenderState() {
+        return new net.minecraft.client.renderer.entity.state.HumanoidRenderState();
     }
 
     @Override
-    public void extractRenderState(NpcEntity entity, net.minecraft.client.renderer.entity.state.AvatarRenderState state, float partialTick) {
+    public void extractRenderState(NpcEntity entity, net.minecraft.client.renderer.entity.state.HumanoidRenderState state, float partialTick) {
         super.extractRenderState(entity, state, partialTick);
-        state.setRenderData(NpcRenderData.KEY, NpcRenderData.extract(entity));
         if (entity.getLook() >= 0 && !entity.isChild()) state.scale *= NpcLook.bodyScale(entity.getLook());
     }
 
     @Override
-    public Identifier getTextureLocation(net.minecraft.client.renderer.entity.state.AvatarRenderState state) {
+    public Identifier getTextureLocation(net.minecraft.client.renderer.entity.state.HumanoidRenderState state) {
         NpcRenderData npc = NpcRenderData.get(state);
         if (npc == null) return TEXTURES[0][0];
         Identifier skin = NpcSkins.get(npc.look());
@@ -71,9 +70,10 @@ public class NpcRenderer extends HumanoidMobRenderer<NpcEntity, net.minecraft.cl
     }
 
     @Override
-    protected void scale(net.minecraft.client.renderer.entity.state.AvatarRenderState state, PoseStack pose) {
+    protected void scale(net.minecraft.client.renderer.entity.state.HumanoidRenderState state, PoseStack pose) {
         NpcRenderData npc = NpcRenderData.get(state);
         if (npc == null) return;
+        if (npc.isChild()) pose.scale(state.ageScale, state.ageScale, state.ageScale);
         if (npc.isHuddled()) pose.translate(0, 0.62f, 0);
         else if (npc.isKneeling()) pose.translate(0, 0.34f, 0);
         else if (npc.isTending()) pose.translate(0, 0.12f, 0);
