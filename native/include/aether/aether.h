@@ -294,6 +294,20 @@ AETHER_API AetherStatus aether_upload_column_heights2(AetherContext* ctx, int32_
                                                       const float* surface, const float* water, const uint16_t* grassMat,
                                                       const uint16_t* foliageMat);
 /*
+ * (abi 0.10) As aether_upload_column_heights2, plus the surface blocks the world's own material rules paint where the
+ * caller knows them: topMat / fillMat (palette ids, 0 = the dressing's) and flags per column (may be NULL): bit 0 snow
+ * lies there (forest crowns over it are snowy too), bit 1 its water is frozen over. Rivers keep their flowing water
+ * (direction and speed from the water levels and the raster's channels), lakes and the sea still water.
+ */
+AETHER_API AetherStatus aether_upload_column_heights3(AetherContext* ctx, int32_t lod, int32_t tileX, int32_t tileZ,
+                                                      const float* surface, const float* water, const uint16_t* topMat,
+                                                      const uint16_t* fillMat, const uint16_t* grassMat,
+                                                      const uint16_t* foliageMat, const uint8_t* flags);
+#define AETHER_COLUMN_SNOW 0x1u
+#define AETHER_COLUMN_FROZEN 0x2u
+/* (abi 0.10) Falling water: a material class drawn as a white, streaming sheet (waterfalls stamped as structures). */
+#define AETHER_CLASS_FALLS 5u
+/*
  * Buildings over tile (lod, tileX, tileZ), 256 x 256 columns laid out as in AetherColumnTile: walls stand on the
  * ground up to wallTop[c], the roof above them up to roofTop[c] (roofTop <= the ground, or NaN: no building there).
  * Voxels below wallTop are wallMat[c], the rest roofMat[c]. Kept across later uploads of the tile's ground (a refined

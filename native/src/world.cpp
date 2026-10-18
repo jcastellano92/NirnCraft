@@ -81,7 +81,7 @@ public:
         if (!t.canopy.empty() && t.canopy[c] > 0.0f && yc < surf + t.canopy[c] && yc >= surf + 0.35f * t.canopy[c])
             return t.canopyMat[c];
         float w = t.water[c];
-        if (!std::isnan(w) && yc < w) return water;
+        if (!std::isnan(w) && yc < w) return t.waterMat.empty() || !t.waterMat[c] ? water : t.waterMat[c];
         return 0;
     }
 

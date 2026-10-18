@@ -41,11 +41,11 @@ final class AetherExactSource extends AetherRefiningSource {
     private final TamrielHeight height;
     private final Tinter biomes;  // null: the dressing's own grass and foliage colours
     private final AetherTileCache cache;  // null: compute every time
-    private final AetherTints tints = new AetherTints();
     private final ForkJoinPool pool;
-    private final float[] surface = new float[TILE * TILE], water = new float[TILE * TILE];
-    private final int[] grassRgb = new int[AetherTints.GRID * AetherTints.GRID], foliageRgb = new int[grassRgb.length];
-    private final short[] grassMat = new short[TILE * TILE], foliageMat = new short[TILE * TILE];
+    private final AetherTileUpload upload = new AetherTileUpload();
+    /** The world's surface painter (its material rules), or null: the raster dressing's blocks. */
+    private volatile AetherSurface surfacePainter;
+    private volatile boolean surfaceWarned;
 
     /** raster: the preview raster aether dresses the columns from (AetherRasterCache.ensure in game). */
     AetherExactSource(TamrielHeight height, Callable<Path> raster, int threads) {
@@ -109,8 +109,32 @@ final class AetherExactSource extends AetherRefiningSource {
     /** The integrated server's exact source, or null when its overworld is not a Tamriel world. */
     static AetherExactSource forServer(MinecraftServer server, Callable<Path> raster) {
         TamrielHeight h = heightOf(server);
-        return h == null ? null : new AetherExactSource(h, AetherBiomes.forServer(server), AetherTileCache.forServer(server),
+        if (h == null) return null;
+        AetherExactSource s = new AetherExactSource(h, AetherBiomes.forServer(server), AetherTileCache.forServer(server),
                 raster, defaultThreads());
+        s.surface(AetherSurface.forServer(server));
+        return s;
+    }
+
+    /** Paints the tiles' surface blocks with the world's material rules (null: the raster dressing's). */
+    void surface(AetherSurface painter) {
+        surfacePainter = painter;
+    }
+
+    AetherSurface surface() {
+        return surfacePainter;
+    }
+
+    @Override
+    void materials(AetherMaterials m) {
+        upload.materials(m);
+    }
+
+    /** The exact terrain height at a block column (TamrielHeight.height). Thread-safe. */
+    double heightAt(int x, int z) {
+        MapSample m = new MapSample();
+        TamrielMap.sample(x, z, m);
+        return height.height(x, z, m);
     }
 
     /** The terrain height at a block column (what forts and the like stand on). Thread-safe. */
@@ -123,17 +147,9 @@ final class AetherExactSource extends AetherRefiningSource {
     @Override
     Refined refine(AetherNative.Context ctx, int lod, int tx, int tz) {
         // the very bytes a server would send (cached or made now): single and multiplayer far fields are identical
-        int r = AetherTileCodec.decode(lod, tileBytes(lod, tx, tz), surface, water, grassRgb, foliageRgb);
-        if (r < 0) {  // a damaged cache entry: make it again
-            if (cache != null) cache.delete(lod, tx, tz);
-            r = AetherTileCodec.decode(lod, tileBytes(lod, tx, tz), surface, water, grassRgb, foliageRgb);
-        }
-        if (r == 1) {
-            tints.materials(grassRgb, foliageRgb, grassMat, foliageMat);
-            tints.flush(ctx);
-            ctx.uploadColumnHeights2(lod, tx, tz, surface, water, grassMat, foliageMat);
-        } else {
-            ctx.uploadColumnHeights(lod, tx, tz, surface, water);
+        if (!upload.upload(ctx, lod, tx, tz, tileBytes(lod, tx, tz))) {
+            if (cache != null) cache.delete(lod, tx, tz);  // a damaged cache entry: make it again
+            if (!upload.upload(ctx, lod, tx, tz, tileBytes(lod, tx, tz))) return Refined.NEVER;
         }
         return Refined.DONE;
     }
@@ -473,9 +489,32 @@ final class AetherExactSource extends AetherRefiningSource {
         int[] gr = new int[g], fo = new int[g];
         fill(lod, tx, tz, s, w);
         boolean tinted = tint(lod, tx, tz, s, gr, fo);
-        byte[] b = AetherTileCodec.encode(lod, s, w, tinted ? gr : null, tinted ? fo : null);
+        AetherTileCodec.Surface blocks = paint(lod, tx, tz, s, w);
+        byte[] b = AetherTileCodec.encode(lod, s, w, tinted ? gr : null, tinted ? fo : null, blocks);
         if (cache != null) cache.write(lod, tx, tz, b);
         return b;
+    }
+
+    /**
+     * The surface blocks of a filled tile from the world's material rules (16 row bands on the column pool), or null
+     * without a painter. The first failure turns the painter off for this source (logged; tiles go without blocks).
+     */
+    AetherTileCodec.Surface paint(int lod, int tx, int tz, float[] surface, float[] water) {
+        AetherSurface p = surfacePainter;
+        if (p == null) return null;
+        AetherTileCodec.Surface blocks = new AetherTileCodec.Surface();
+        try {
+            pool.submit(() -> IntStream.range(0, 16).parallel()
+                    .forEach(q -> p.fillRows(lod, tx, tz, surface, water, blocks, q * 16, q * 16 + 16))).join();
+            return blocks;
+        } catch (RuntimeException e) {
+            surfacePainter = null;
+            if (!surfaceWarned) {
+                surfaceWarned = true;
+                com.skycraft.Skycraft.LOGGER.warn("aether far surface blocks off (raster dressing): {}", e.toString());
+            }
+            return null;
+        }
     }
 
     /** The biome tint grids of a filled tile (AetherTints.GRID^2 rgb each); false when this source has no biomes. */

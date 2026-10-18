@@ -43,7 +43,11 @@ public final class SettlementHarness {
         TamrielHeight height = HarnessSeed.height(seed);
         StreetPlan plan = StreetPlan.get();
         int px, pz;
-        if (place.startsWith("place:")) {  // any place by id (forts, landmarks ...)
+        if (place.startsWith("at:")) {  // any spot: at:x,z
+            String[] xz = place.substring(3).split(",");
+            px = Integer.parseInt(xz[0]);
+            pz = Integer.parseInt(xz[1]);
+        } else if (place.startsWith("place:")) {  // any place by id (forts, landmarks ...)
             var p = com.skycraft.tamriel.Places.byId(place.substring(6)).orElseThrow(() -> new IllegalArgumentException("no place " + place));
             px = p.x();
             pz = p.z();

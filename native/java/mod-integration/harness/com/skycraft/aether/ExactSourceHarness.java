@@ -77,7 +77,7 @@ public final class ExactSourceHarness {
             noise = new int[64 * 64 * 64];
             ByteBuffer.wrap(Files.readAllBytes(noisePath)).order(ByteOrder.LITTLE_ENDIAN).asIntBuffer().get(noise);
         }
-        double y = Math.max(groundExact, 63) + 90;
+        double y = Math.max(groundExact, 63) + Double.parseDouble(System.getProperty("harness.above", "90"));
         int w = 1600, h = 900;
         int[][] images = new int[3][];
         float[][] depths = new float[3][];
@@ -148,7 +148,7 @@ public final class ExactSourceHarness {
                 f.flags = AetherNative.FRAME_SHADOWS | AetherNative.FRAME_ATMOS | AetherNative.FRAME_SKY
                         | (Boolean.getBoolean("harness.debugLod") ? AetherNative.FRAME_DEBUG_LOD : 0);
                 if (Boolean.getBoolean("harness.noShadows")) f.flags &= ~AetherNative.FRAME_SHADOWS;
-                AetherProbe.cameraMatrix(yaw, -6, 70, w / (double) h, f.invViewProj);
+                AetherProbe.cameraMatrix(yaw, Double.parseDouble(System.getProperty("harness.pitch", "-6")), 70, w / (double) h, f.invViewProj);
                 double se = Math.toRadians(24), sa = Math.toRadians(yaw + 40);
                 f.sunX = (float) (Math.sin(sa) * Math.cos(se));
                 f.sunY = (float) Math.sin(se);

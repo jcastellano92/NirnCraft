@@ -66,6 +66,7 @@ final class AetherTileServer {
         this.server = server;
         this.columns = new AetherExactSource(height, AetherBiomes.forServer(server), AetherTileCache.forServer(server),
                 () -> null, AetherExactSource.defaultThreads());
+        this.columns.surface(AetherSurface.forServer(server));
         this.worldId = worldId(server.overworld().getSeed());
         worker = new Thread(this::run, "skycraft-aether-tiles");
         worker.setDaemon(true);
@@ -187,6 +188,16 @@ final class AetherTileServer {
             boolean guests = !t.server.isDedicatedServer() && t.server.isPublished() && t.server.getPlayerCount() > 1;
             t.columns.setThreads(com.skycraft.render.quality.HostLoad.serverColumnThreads(
                     Runtime.getRuntime().availableProcessors(), t.server.isDedicatedServer(), guests, mspt));
+        }
+        // the far surface blocks against what chunk generation really painted around the players: one log line
+        // two minutes in and every ten minutes after (the in-game check of the far field's material rules)
+        int tc = t.server.getTickCount();
+        if (tc == 2400 || tc % 12000 == 0 && tc > 0) {
+            try {
+                AetherSurface.selfCheck(t.server, t.columns, 400);
+            } catch (RuntimeException ex) {
+                com.skycraft.Skycraft.LOGGER.warn("aether surface check failed: {}", ex.toString());
+            }
         }
         int every = com.skycraft.render.quality.HostLoad.pregenIntervalTicks(mspt);
         if (every > 0 && t.server.getTickCount() % every == 0) t.pregenerate();

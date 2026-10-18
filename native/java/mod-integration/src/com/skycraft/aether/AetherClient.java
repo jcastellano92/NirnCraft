@@ -238,6 +238,7 @@ public final class AetherClient {
             if (noise != null) ctx.setCloudNoise(noise);
             java.util.function.IntBinaryOperator ground = source instanceof AetherExactSource e ? e::groundAt : null;
             AetherMaterials mats = new AetherMaterials();  // one id per block across buildings, landmarks and surfaces
+            if (source instanceof AetherRefiningSource r) r.materials(mats);
             farField = new AetherFarField(ctx, source, () -> AetherSettlements.create(ground, mats));
             lightBudget = -1;
             startedFor = mc.level;

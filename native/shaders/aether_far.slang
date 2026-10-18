@@ -882,24 +882,55 @@ void farMain(uint3 id : SV_DispatchThreadID) {
                         (occupiedAt(res.lod, front + t2) ? 1.0 : 0.0) + (occupiedAt(res.lod, front - t2) ? 1.0 : 0.0);
             ao = 1.0 - 0.15 * occ;
         }
+        // falling water (waterfalls, stamped as structures): a white sheet streaming down, brighter where it breaks
+        bool falls = cls == 5u;
+        if (falls) {
+            float3 wp = p + float3(frame.camInt.xyz);
+            float streak = valueNoise(float2((wp.x + wp.z) / 1.3, wp.y / 4.0 + frame.sunDir.w * 2.5)) * 0.6
+                         + valueNoise(float2((wp.x - wp.z) / 0.7, wp.y / 1.8 + frame.sunDir.w * 4.0)) * 0.4;
+            albedo = float3(0.78, 0.84, 0.88) * (0.78 + 0.32 * streak);
+            cls = 0u;  // lit like a rough diffuse surface: it scatters, it does not mirror
+        }
         // large-scale tone variation on land (about 24 and 90 blocks), the far-field stand-in for texture detail
-        if (cls != 2u) {
+        if (cls != 2u && !falls) {
             float2 wxz = p.xz + float2(frame.camInt.xz);
             float v = valueNoise(wxz / 24.0) * 0.6 + valueNoise(wxz / 90.0 + 17.0) * 0.4;
             albedo *= 0.86 + 0.28 * v;
         }
         if ((frame.dims.z & FRAME_DEBUG_LOD) != 0) albedo = lodTint(res.lod);
         float3 reflection = float3(0, 0, 0);
+        float foam = 0.0;
         if (cls == 2u) {
             float2 wxz = p.xz + float2(frame.camInt.xz);
             float2 wind = farWaterWind(wxz, length(p.xz));
             // far water is a level sheet: a side face is only the step where its quantised level changes between
             // LODs (seen edge-on near the horizon it drew a dark seam), so every water hit is shaded as the surface
-            n = farWaveNormal(wxz, frame.sunDir.w, wind, tHit);
-            m.albedoRough.a = farWaterAlpha(wind.y, tHit);
+            float flow = m.emisClass.w;  // 0 still (sea, lakes), 1 calm, 2 fast, 3 rapids (the dressing's river flow)
+            if (flow > 0.5) {
+                // a river: the wave field runs downstream (heading from the flow, short steep waves the faster it
+                // goes), carried along at the current's speed; fast runs and rapids break into white water in
+                // streaks along the flow
+                float2 fd = float2(cos(m.emisClass.z), sin(m.emisClass.z));
+                float speed = 1.5 * flow;  // blocks per second
+                wind = float2(m.emisClass.z, saturate(0.25 + 0.22 * flow));
+                n = farWaveNormal(wxz - fd * (frame.sunDir.w * speed), frame.sunDir.w, wind, tHit);
+                float u = dot(wxz, fd), v = dot(wxz, float2(-fd.y, fd.x));
+                float streak = valueNoise(float2(u / 7.0 - frame.sunDir.w * speed / 7.0, v / 1.6)) * 0.7
+                             + valueNoise(float2(u / 2.5 - frame.sunDir.w * speed / 2.5, v / 0.8)) * 0.3;
+                foam = flow > 2.5 ? smoothstep(0.25, 0.6, streak) * 0.8 : flow > 1.5 ? smoothstep(0.55, 0.85, streak) * 0.35 : 0.0;
+            } else {
+                n = farWaveNormal(wxz, frame.sunDir.w, wind, tHit);
+            }
+            m.albedoRough.a = farWaterAlpha(wind.y, tHit) + foam * 0.2;
             reflection = waterReflection(p, dir, k, tHit, res.lod, sun, n);
         }
         color = shadeSurface(albedo, m, n, dir, sun, sunVis, cls, ao, reflection);
+        if (foam > 0.0) {
+            // white water: a bright rough surface over the river
+            float3 up = float3(0, 1, 0);
+            float3 white = float3(0.85, 0.88, 0.9) * (keyLightRadiance(sun) * saturate(dot(up, keyLightDir(sun))) * sunVis + skyAmbient(up, sun));
+            color = lerp(color, white, foam);
+        }
         depth = tHit;
         color = applyAerial(color, dir, sun, tHit, frame);
         if ((frame.dims.z & FRAME_DEBUG_ALBEDO) != 0) color = albedo;

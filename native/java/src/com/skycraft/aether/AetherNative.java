@@ -44,7 +44,7 @@ public final class AetherNative {
     private final Arena libArena;
     private final MethodHandle abiVersion, buildInfo, create, destroy, lastError, setPalette, uploadTile,
             uploadSection, notifyBlock, setWeather, setCloudNoise, setActors, update, render, getStats,
-            glAttach, glRenderIo, glDetach, info, previewLoadRaster, previewGenerate, previewHeight, uploadHeights, uploadHeights2, hasTile, uploadStructures, uploadStructures2, setMaterials, setSunMap, setTransitions, setLightGroup, setLightBudget,
+            glAttach, glRenderIo, glDetach, info, previewLoadRaster, previewGenerate, previewHeight, uploadHeights, uploadHeights2, hasTile, uploadStructures, uploadStructures2, uploadHeights3, setMaterials, setSunMap, setTransitions, setLightGroup, setLightBudget,
             heightCreate, heightDestroy, heightLastError, heightDevice, heightSetNoise, heightBatch;
 
     private AetherNative(Path library) {
@@ -82,6 +82,8 @@ public final class AetherNative {
                 FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, JAVA_INT, JAVA_INT, ADDRESS, ADDRESS));
         uploadHeights2 = bind(l, lib, "aether_upload_column_heights2",
                 FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, JAVA_INT, JAVA_INT, ADDRESS, ADDRESS, ADDRESS, ADDRESS));
+        uploadHeights3 = bind(l, lib, "aether_upload_column_heights3", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, JAVA_INT,
+                JAVA_INT, ADDRESS, ADDRESS, ADDRESS, ADDRESS, ADDRESS, ADDRESS, ADDRESS));
         hasTile = bind(l, lib, "aether_has_tile", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, JAVA_INT, JAVA_INT),
                 critical);
         uploadStructures = bind(l, lib, "aether_upload_column_structures",
@@ -453,6 +455,25 @@ public final class AetherNative {
                 MemorySegment f = foliageMat != null ? copy(a, foliageMat) : MemorySegment.NULL;
                 check((int) uploadHeights2.invokeExact(ptr, lod, tileX, tileZ, copy(a, surface), copy(a, water), g, f),
                         "aether_upload_column_heights2");
+            } catch (Throwable th) {
+                throw rethrow(th);
+            }
+        }
+
+        /**
+         * (abi 0.10) As uploadColumnHeights2, plus the world's surface blocks: topMat / fillMat palette ids (0 = the
+         * dressing's) and per column flags (1 snow cover, 2 frozen water). grassMat / foliageMat / flags may be null.
+         */
+        public void uploadColumnHeights3(int lod, int tileX, int tileZ, float[] surface, float[] water, short[] topMat,
+                                         short[] fillMat, short[] grassMat, short[] foliageMat, byte[] flags) {
+            if (surface.length < TILE * TILE || water.length < TILE * TILE || topMat.length < TILE * TILE || fillMat.length < TILE * TILE)
+                throw new IllegalArgumentException("tile arrays must hold 256*256 columns");
+            try (Arena a = Arena.ofConfined()) {
+                MemorySegment g = grassMat != null ? copy(a, grassMat) : MemorySegment.NULL;
+                MemorySegment f = foliageMat != null ? copy(a, foliageMat) : MemorySegment.NULL;
+                MemorySegment fl = flags != null ? a.allocateFrom(ValueLayout.JAVA_BYTE, flags) : MemorySegment.NULL;
+                check((int) uploadHeights3.invokeExact(ptr, lod, tileX, tileZ, copy(a, surface), copy(a, water), copy(a, topMat),
+                        copy(a, fillMat), g, f, fl), "aether_upload_column_heights3");
             } catch (Throwable th) {
                 throw rethrow(th);
             }

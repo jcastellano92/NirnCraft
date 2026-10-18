@@ -3,7 +3,9 @@
 # StreetPlan's buildings rendered by aether_core.dll. Needs native\build.ps1 first. Run from the repo root.
 #   .\native\java\mod-integration\harness\run_settlement_harness.ps1 [-Place whiterun] [-Seed 12345] [-Rebuild]
 param([string]$Place = 'whiterun', [long]$Seed = 12345, [switch]$Rebuild, [string]$Out = 'native/out/settlements.png', [double]$MidHeight = 45,
-      [string]$Sandbox = (Join-Path $env:TEMP 'skycraft-aether-sandbox'), [string]$Mod = '', [string]$JavaOpts = '')
+      [string]$Sandbox = (Join-Path $env:TEMP 'skycraft-aether-sandbox'), [string]$Mod = '', [string]$JavaOpts = '',
+      [string]$Main = 'SettlementHarness', [string]$X = '0', [string]$Z = '0')
+# -Main SurfaceHarness: the far surface painter (AetherSurface) on vanilla's overworld, offline: -Seed -X -Z
 $ErrorActionPreference = 'Stop'
 $ref = 'F:\Projects\Personal\Skycraft\toolchains\ref\mc26.3'
 $jdk = 'F:\Projects\Personal\Skycraft\toolchains\jdk-25.0.4.1+1\bin'
@@ -29,7 +31,11 @@ $src = @(Get-ChildItem "$PSScriptRoot\settlements" -Recurse -Filter *.java | For
 & "$jdk\javac.exe" --release 25 -proc:none -encoding UTF-8 -nowarn -cp ((@("$sandbox\classes") + $mc) -join ';') -d $classes @src
 if ($LASTEXITCODE) { throw 'settlement harness does not compile' }
 $cp = (@($classes, "$sandbox\classes", $resources) + $mc) -join ';'
-$opts = @(if ($JavaOpts) { $JavaOpts -split ' ' | Where-Object { $_ } })
-& "$jdk\java.exe" --enable-native-access=ALL-UNNAMED -Xmx6g @opts -cp $cp com.skycraft.aether.SettlementHarness `
-    native/build/Release/aether_core.dll native/data $Out $Place $Seed $MidHeight
+$opts = @(if ($JavaOpts) { $JavaOpts -split ' ' | Where-Object { $_ } }) + @(if ($env:HARNESS_JAVA_OPTS) { $env:HARNESS_JAVA_OPTS -split ' ' | Where-Object { $_ } })
+if ($Main -eq 'SurfaceHarness') {
+    & "$jdk\java.exe" -Xmx6g @opts -cp $cp com.skycraft.aether.SurfaceHarness $Seed $X $Z
+} else {
+    & "$jdk\java.exe" --enable-native-access=ALL-UNNAMED -Xmx6g @opts -cp $cp com.skycraft.aether.SettlementHarness `
+        native/build/Release/aether_core.dll native/data $Out $Place $Seed $MidHeight
+}
 if ($LASTEXITCODE) { throw 'settlement harness failed' }

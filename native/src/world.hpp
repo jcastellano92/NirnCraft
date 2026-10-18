@@ -43,6 +43,7 @@ struct Tile {
     int lod = 0, tx = 0, tz = 0;
     std::vector<float> surface, water, canopy;
     std::vector<uint16_t> top, fill, canopyMat;
+    std::vector<uint16_t> waterMat;  // per column (flowing water, ice), or empty: World::waterMat everywhere
     std::shared_ptr<const Structures> structures;  // null: none
     // min of surface and max of the highest occupied point per aligned n x n block, n = 2^level, level 0..8
     std::array<std::vector<float>, 9> minSurf, maxTop;

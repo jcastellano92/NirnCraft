@@ -67,6 +67,7 @@ final class AetherSettlements implements AetherFarField.Overlay {
     private final Map<Integer, List<Object>> bySettlement = new HashMap<>();  // settlement index -> masses, lines, shapes
     private final Map<Integer, List<AetherLights.Light>> settlementLights = new HashMap<>();
     private final Map<String, Optional<AetherCapture.Shape>> sites = new HashMap<>();
+    private final Map<Integer, AetherCapture.Shape> falls = new HashMap<>();
     private final Set<Long> siteCells = new HashSet<>();
     private final Set<Long> uploaded = new HashSet<>();
     private final float[] wallTop = new float[N], roofTop = new float[N], baseArr = new float[N];
@@ -157,7 +158,38 @@ final class AetherSettlements implements AetherFarField.Overlay {
             any = true;
             stamp(sh, s, bx, bz);
         }
+        com.skycraft.tamriel.terrain.Hydrology.Fall[] all = com.skycraft.tamriel.terrain.Hydrology.get().falls();
+        for (int k = 0; k < all.length; k++) {
+            com.skycraft.tamriel.terrain.Hydrology.Fall f = all[k];
+            if (f.x() < bx - 32 || f.x() >= ex + 32 || f.z() < bz - 32 || f.z() >= ez + 32) continue;
+            if (!any) clear();
+            any = true;
+            stamp(fall(k, f), s, bx, bz);
+        }
         return any;
+    }
+
+    /** The falls sheet: three blocks beyond the lip (DungeonStructure's, Hydrology's), across the channel, from the pool bed up to the upper water; its spray. */
+    private AetherCapture.Shape fall(int k, com.skycraft.tamriel.terrain.Hydrology.Fall f) {
+        return falls.computeIfAbsent(k, i -> {
+            int r = (int) Math.ceil(f.hw()) + 4;
+            AetherCapture.Shape sh = AetherCapture.Shape.around(f.x(), f.z(), r);
+            BlockState sheet = net.minecraft.world.level.block.Blocks.BUBBLE_COLUMN.defaultBlockState();
+            for (float t = -f.hw(); t <= f.hw(); t += 0.25f)
+                for (float along = 0.5f; along <= 1.5f; along += 0.5f) {
+                    int x = (int) Math.floor(f.x() + 0.5 + f.ux() * along - f.uz() * t);
+                    int z = (int) Math.floor(f.z() + 0.5 + f.uz() * along + f.ux() * t);
+                    sh.span(x, z, Float.NaN, f.up(), sheet, sheet);
+                }
+            sh.rise = f.drop();
+            float drop = f.drop();
+            long cell = (long) Math.floorDiv(f.x(), 4096) << 32 | (Math.floorDiv(f.z(), 4096) & 0xFFFFFFFFL);
+            siteLights.computeIfAbsent(cell, c -> new ArrayList<>()).add(AetherLights.mist(f.x() + 0.5 + f.ux() * 3,
+                    f.down() + 1.5 + drop * 0.15, f.z() + 0.5 + f.uz() * 3, 2f + f.hw() + drop * 0.35f,
+                    (0.12f + drop / 45f) * (f.big() ? 1.5f : 1f)));
+            if (!siteLightsPending.contains(cell)) siteLightsPending.add(cell);
+            return sh;
+        });
     }
 
     private void clear() {

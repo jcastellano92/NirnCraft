@@ -44,8 +44,16 @@ final class AetherMaterials {
         pending.clear();
     }
 
-    /** {r, g, b (linear), roughness, emissive, class}. */
+    /** The class aether draws falling water with (AETHER_CLASS_FALLS): a white sheet streaming down. */
+    static final int CLASS_FALLS = 5;
+
+    /**
+     * {r, g, b (linear), roughness, emissive, class}. The bubble column (water that moves) stands for falling water in
+     * the far field's silhouettes: waterfall sheets get the falls class.
+     */
     static float[] material(BlockState s) {
+        if (s.is(net.minecraft.world.level.block.Blocks.BUBBLE_COLUMN))
+            return new float[] {lin(200), lin(212), lin(222), 0.6f, 0f, CLASS_FALLS};
         String key = BuiltInRegistries.BLOCK.getKey(s.getBlock()).toString();
         int rgb = AetherBlockColors.rgb(key);
         if (rgb < 0) rgb = s.getMapColor(EmptyBlockGetter.INSTANCE, BlockPos.ZERO).col;

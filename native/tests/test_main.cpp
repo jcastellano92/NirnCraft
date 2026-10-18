@@ -772,6 +772,63 @@ static void testActorMotion() {
     aether_destroy(ctx);
 }
 
+// The world's surface blocks (aether_upload_column_heights3): a top block override replaces the dressing's on dry
+// ground, a frozen column turns its water to ice, and a river column gets flowing water.
+static void testSurfaceOverrides(const char* raster) {
+    std::printf("surface block overrides\n");
+    AetherContext* ctx = nullptr;
+    aether_create(AETHER_BACKEND_CPU, &ctx);
+    if (aether_preview_load_raster(ctx, raster) != AETHER_OK) {
+        std::printf("  SKIP: no raster\n");
+        aether_destroy(ctx);
+        return;
+    }
+    AetherMaterial red{{0.6f, 0.02f, 0.02f}, 0.9f, 0.0f, AETHER_CLASS_TERRAIN};
+    CHECK(aether_set_materials(ctx, 300, &red, 1) == AETHER_OK);
+    const size_t N = 256 * 256;
+    std::vector<float> surf(N, 100.0f), water(N, NAN);
+    std::vector<uint16_t> top(N, 0), fill(N, 0);
+    std::vector<uint8_t> flags(N, 0);
+    for (size_t c = 0; c < N; c++) {
+        bool wet = (c % 256) >= 128;  // the east half is a pond
+        if (wet) water[c] = 103.0f, flags[c] = AETHER_COLUMN_FROZEN;
+        else top[c] = 300;
+    }
+    for (int tz = -1; tz <= 1; tz++)
+        for (int tx = -1; tx <= 1; tx++)
+            CHECK(aether_upload_column_heights3(ctx, 0, tx, tz, surf.data(), water.data(), top.data(), fill.data(), nullptr,
+                                                nullptr, flags.data()) == AETHER_OK);
+    double centre[3] = {128.0, 180.0, 128.0};
+    aether_update(ctx, centre, 0);
+    AetherFrame f{};
+    for (int i = 0; i < 3; i++) f.cameraPos[i] = centre[i];
+    f.width = f.height = 48;
+    cameraMatrix(0, -89.9, 40, 1.0, f.invViewProj);
+    f.maxDistance = 6000;
+    f.sunDir[1] = 1;
+    f.lodBias = 1;
+    f.flags = AETHER_FRAME_DEBUG_ALBEDO;
+    std::vector<float> lin(48 * 48 * 4);
+    std::vector<uint32_t> normal(48 * 48);
+    AetherFrameOutput o{nullptr, normal.data(), nullptr, lin.data()};
+    CHECK(aether_render(ctx, &f, &o) == AETHER_OK);
+    size_t redWest = 0, iceEast = 0, waterEast = 0;
+    for (int py = 0; py < 48; py++)
+        for (int px = 0; px < 48; px++) {
+            size_t i = size_t(py) * 48 + px;
+            uint32_t cls = (normal[i] >> 16) & 255;
+            if (px < 20) redWest += lin[i * 4] > 3 * lin[i * 4 + 1] && lin[i * 4] > 0.2f;
+            if (px > 28) {
+                iceEast += cls == AETHER_CLASS_TERRAIN && lin[i * 4 + 2] > lin[i * 4] && lin[i * 4 + 2] > 0.3f;
+                waterEast += cls == AETHER_CLASS_WATER;
+            }
+        }
+    std::printf("  west (dry, red top): %zu of 960 px red; east (frozen pond): %zu ice px, %zu water px\n", redWest, iceEast, waterEast);
+    CHECK(redWest > 900);
+    CHECK(iceEast > 900 && waterEast == 0);
+    aether_destroy(ctx);
+}
+
 // Pixels the near field covers skip the far march entirely; the rest render exactly as without near depth.
 static void testNearDepth(const char* raster) {
     std::printf("near-depth skip\n");
@@ -1160,6 +1217,7 @@ int main(int argc, char** argv) {
     testNearDepth(argc > 1 ? argv[1] : "native/data/tamriel_raster.bin");
     testColumnHeights(argc > 1 ? argv[1] : "native/data/tamriel_raster.bin");
     testGrassTint(argc > 1 ? argv[1] : "native/data/tamriel_raster.bin");
+    testSurfaceOverrides(argc > 1 ? argv[1] : "native/data/tamriel_raster.bin");
     parity(argc > 1 ? argv[1] : "native/data/tamriel_raster.bin");
     std::printf(failures ? "FAILED (%d)\n" : "PASS\n", failures);
     return failures ? 1 : 0;
