@@ -19,6 +19,9 @@ import java.util.List;
 public final class IrisPipelines {
     /** Iris {@code IrisProgram} constant names this mod uses. */
     public static final String PARTICLES_TRANSLUCENT = "PARTICLES_TRANSLUCENT", EMISSIVE = "EMISSIVE_ENTITIES",
+            /** entity-style pipelines that bind their own texture as Sampler0 (Iris's particle programs bind the
+             * particle atlas instead: such a sprite came out as an opaque black box) */
+            ENTITIES_TRANSLUCENT = "ENTITIES_TRANSLUCENT",
             BASIC = "BASIC", TEXTURED = "TEXTURED", CLOUDS = "CLOUDS";
 
     private record Pending(RenderPipeline pipeline, String program) {}

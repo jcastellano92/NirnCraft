@@ -24,7 +24,7 @@ public final class FireRenderTypes {
     private static final RenderPipeline FLAME_PIPELINE=flamePipeline();
     static {
         // under a shader pack: smoke is lit and blended, flames are emissive (com.skycraft.render.client.IrisPipelines)
-        com.skycraft.render.client.IrisPipelines.assign(SMOKE_PIPELINE,com.skycraft.render.client.IrisPipelines.PARTICLES_TRANSLUCENT);
+        com.skycraft.render.client.IrisPipelines.assign(SMOKE_PIPELINE,com.skycraft.render.client.IrisPipelines.ENTITIES_TRANSLUCENT);
         com.skycraft.render.client.IrisPipelines.assign(FLAME_PIPELINE,com.skycraft.render.client.IrisPipelines.EMISSIVE);
     }
     private static final OitPipelineSet SMOKE_OIT=OitPipelineSet.builder(id("fire_smoke"),
