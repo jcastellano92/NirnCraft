@@ -7,6 +7,7 @@
 #include <atomic>
 #include <chrono>
 #include <cstdio>
+#include <cstdlib>
 #include <cstring>
 #include <memory>
 #include <mutex>
@@ -42,7 +43,7 @@ struct HeightGlobals {
 };
 
 constexpr uint32_t GROUP = 64;            // numthreads of heightMain
-constexpr uint32_t CHUNK = 16384;         // columns per submission: each stays far below a millisecond budget
+constexpr uint32_t CHUNK = 16384;         // most columns per submission (buffer size)
 constexpr uint32_t COLUMN_BYTES = AETHER_HEIGHT_COLUMN_WORDS * 4;
 
 double msSince(std::chrono::steady_clock::time_point t0) {
@@ -147,6 +148,9 @@ public:
             vkGetPhysicalDeviceProperties(devs[i], &p);
             int score = p.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU ? 3
                       : p.deviceType == VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU ? 2 : 1;
+            // AETHER_HEIGHT_DEVICE=<name part>: pick that device (parity runs on every GPU of a machine)
+            const char* want = std::getenv("AETHER_HEIGHT_DEVICE");
+            if (want && *want && std::strstr(p.deviceName, want)) score += 10;
             if (score > bestScore) {
                 bestScore = score;
                 best = int(i);
@@ -257,9 +261,12 @@ public:
         if (!ensure(outDev_, size_t(CHUNK) * 12, false, err)) return false;
         if (!ensure(readback_, size_t(CHUNK) * 12, true, err, true)) return false;
         if (dirty_) writeSet();
-        for (uint32_t c0 = 0; c0 < count; c0 += CHUNK) {
-            uint32_t n = std::min(CHUNK, count - c0);
-            int32_t width = params[3];
+        int32_t width = params[3];
+        for (uint32_t c0 = 0, n = 0; c0 < count; c0 += n) {
+            // whole rows, sized so one submission stays a few milliseconds on this device (slow FP64 parts get
+            // small chunks: no long dispatch, no watchdog risk)
+            uint32_t rows = std::max(1u, std::min(chunkCols_, CHUNK) / uint32_t(width));
+            n = std::min(rows * uint32_t(width), count - c0);
             // chunk origin: column c0 of the batch (rows of `width` columns)
             int32_t pc[5] = {params[0] + int32_t(c0 % uint32_t(width)) * params[2], params[1] + int32_t(c0 / uint32_t(width)) * params[2],
                              params[2], width, int32_t(n)};
@@ -305,8 +312,11 @@ public:
                 if (vkGetQueryPoolResults(dev_, queries_, 0, 4, sizeof(ts), ts, 8, VK_QUERY_RESULT_64_BIT) == VK_SUCCESS) {
                     double k = timestampPeriod_ * 1e-6;
                     times.uploadMs += double(ts[1] - ts[0]) * k;
-                    times.kernelMs += double(ts[2] - ts[1]) * k;
+                    double kernel = double(ts[2] - ts[1]) * k;
+                    times.kernelMs += kernel;
                     times.readbackMs += double(ts[3] - ts[2]) * k;
+                    if (kernel > 8.0 && chunkCols_ > 256) chunkCols_ /= 2;
+                    else if (kernel < 2.0 && n == rows * uint32_t(width) && chunkCols_ < CHUNK) chunkCols_ *= 2;
                 }
             }
             auto r0 = std::chrono::steady_clock::now();
@@ -337,7 +347,7 @@ private:
         VkPhysicalDeviceProperties2 p2{VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2};
         p2.pNext = &v12;
         vkGetPhysicalDeviceProperties2(d, &p2);
-        if (!v12.shaderDenormPreserveFloat32 || !v12.shaderDenormPreserveFloat64) return reason += ": denormals not preserved", false;
+        // denormal behaviour is not required: the kernel flags any column a denormal could reach
         if (!v12.shaderSignedZeroInfNanPreserveFloat32 || !v12.shaderSignedZeroInfNanPreserveFloat64)
             return reason += ": signed zero / inf / nan not preserved", false;
         if (!v12.shaderRoundingModeRTEFloat32 || !v12.shaderRoundingModeRTEFloat64) return reason += ": no RTE rounding mode", false;
@@ -433,6 +443,7 @@ private:
     VkQueryPool queries_ = VK_NULL_HANDLE;
     Buf params_, noise_, staging_, columns_, outDev_, readback_;
     uint32_t noiseWords_ = 0;
+    uint32_t chunkCols_ = 2048;  // columns per submission, adapted to the device's speed
     bool dirty_ = true;
 };
 
@@ -495,7 +506,7 @@ AETHER_API AetherStatus aether_height_batch(AetherHeight* h, int32_t x0, int32_t
                                             AetherHeightTimes* times) {
     if (!h || !columns || !heights || !flags || width == 0 || count == 0 || count > (1u << 24) || step <= 0)
         return h ? h->fail(AETHER_ERR_ARG, "bad batch arguments") : AETHER_ERR_ARG;
-    if (count > width && CHUNK % width != 0) return h->fail(AETHER_ERR_ARG, "width must divide 16384");
+    if (width > CHUNK) return h->fail(AETHER_ERR_ARG, "width above 16384");
     std::lock_guard<std::mutex> l(h->mu);
     auto t0 = std::chrono::steady_clock::now();
     AetherHeightTimes t{};

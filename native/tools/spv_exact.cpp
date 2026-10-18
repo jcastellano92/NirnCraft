@@ -1,8 +1,10 @@
 // Build step for the exact-height kernel (aether_height.slang): makes the SPIR-V's floating-point contract explicit
 // and refuses to build when it is not what the kernel's exactness argument needs.
-//  * adds the float-controls execution modes for 32 and 64 bit: RoundingModeRTE, SignedZeroInfNanPreserve and
-//    DenormPreserve (with their capabilities), so a conforming driver must round to nearest even, keep denormals,
-//    signed zeros, infinities and NaNs (the host checks the device supports each of them)
+//  * adds the float-controls execution modes for 32 and 64 bit: RoundingModeRTE and SignedZeroInfNanPreserve (with
+//    their capabilities), so a conforming driver must round to nearest even and keep signed zeros, infinities and
+//    NaNs (the host checks the device supports both). Denormal handling is left to the device: the kernel never lets
+//    a denormal reach an unflagged result (see aether_height.slang), and refuses DenormFlushToZero/DenormPreserve
+//    requests it did not make
 //  * checks every floating-point arithmetic instruction carries NoContraction (no fused multiply-add, no
 //    reassociation), and that no extended instruction other than the bit packers is used (no driver transcendentals)
 //   spv_exact in.spv out.spv
@@ -16,8 +18,9 @@ constexpr uint32_t OpExtInstImport = 11, OpExtInst = 12, OpEntryPoint = 15, OpEx
                    OpDecorate = 71, OpFNegate = 127, OpFAdd = 129, OpFSub = 131, OpFMul = 133, OpFDiv = 136,
                    OpFRem = 140, OpFMod = 141, OpVectorTimesScalar = 142, OpMatrixTimesScalar = 143, OpDot = 148;
 constexpr uint32_t NoContraction = 42;
-constexpr uint32_t CapDenormPreserve = 4464, CapSignedZeroInfNanPreserve = 4466, CapRoundingModeRTE = 4467;
-constexpr uint32_t ModeDenormPreserve = 4459, ModeSignedZeroInfNanPreserve = 4461, ModeRoundingModeRTE = 4462;
+constexpr uint32_t CapSignedZeroInfNanPreserve = 4466, CapRoundingModeRTE = 4467;
+constexpr uint32_t ModeDenormPreserve = 4459, ModeDenormFlushToZero = 4460, ModeSignedZeroInfNanPreserve = 4461,
+                   ModeRoundingModeRTE = 4462;
 // GLSL.std.450 instructions that only move bits
 const std::set<uint32_t> kBitOnly = {58 /*PackDouble2x32*/, 59 /*UnpackDouble2x32*/};
 
@@ -55,6 +58,8 @@ int main(int argc, char** argv) {
             lastEntry = i + n;
         } else if (op == OpExecutionMode) {
             if (n >= 4) modes.insert({w[i + 2], w[i + 3]});
+            if (n >= 3 && (w[i + 2] == ModeDenormPreserve || w[i + 2] == ModeDenormFlushToZero))
+                return std::fprintf(stderr, "spv_exact: unexpected denormal mode (the host does not require one)\n"), 1;
             lastMode = i + n;
         } else if (op == OpDecorate && n >= 3 && w[i + 2] == NoContraction) {
             noContraction.insert(w[i + 1]);
@@ -72,10 +77,10 @@ int main(int argc, char** argv) {
     if (version < 0x00010400u)
         return std::fprintf(stderr, "spv_exact: SPIR-V 1.4+ needed (float controls in core)\n"), 1;
     std::vector<uint32_t> addCaps, addModes;
-    for (uint32_t c : {CapDenormPreserve, CapSignedZeroInfNanPreserve, CapRoundingModeRTE})
+    for (uint32_t c : {CapSignedZeroInfNanPreserve, CapRoundingModeRTE})
         if (!caps.count(c)) addCaps.insert(addCaps.end(), {(2u << 16) | OpCapability, c});
     for (uint32_t e : entries)
-        for (uint32_t m : {ModeDenormPreserve, ModeSignedZeroInfNanPreserve, ModeRoundingModeRTE})
+        for (uint32_t m : {ModeSignedZeroInfNanPreserve, ModeRoundingModeRTE})
             for (uint32_t width : {32u, 64u})
                 if (!modes.count({m, width})) addModes.insert(addModes.end(), {(4u << 16) | OpExecutionMode, e, m, width});
     size_t modeAt = lastMode ? lastMode : lastEntry;
@@ -88,7 +93,7 @@ int main(int argc, char** argv) {
     if (!f) return std::fprintf(stderr, "spv_exact: cannot write %s\n", argv[2]), 1;
     std::fwrite(out.data(), 4, out.size(), f);
     std::fclose(f);
-    std::printf("spv_exact: %zu arithmetic instructions all NoContraction; float controls RTE + denorm + signed-zero/inf/nan "
+    std::printf("spv_exact: %zu arithmetic instructions all NoContraction; float controls RTE + signed-zero/inf/nan "
                 "preserve (32, 64)\n", arith.size());
     return 0;
 }

@@ -113,7 +113,7 @@ find_program(SPIRV_VAL spirv-val HINTS "${VULKAN_SDK}/Bin" NO_DEFAULT_PATH)
 add_custom_command(
   OUTPUT "${GEN}/aether_height.spv"
   COMMAND "${SLANGC}" "${HEIGHT_SRC}" -target spirv -entry heightMain -stage compute -O3 -fp-mode precise
-          -denorm-mode-fp32 preserve -denorm-mode-fp64 preserve -o "${GEN}/aether_height_raw.spv"
+          -o "${GEN}/aether_height_raw.spv"
   COMMAND spv_exact "${GEN}/aether_height_raw.spv" "${GEN}/aether_height.spv"
   COMMAND "${SPIRV_VAL}" --target-env vulkan1.2 "${GEN}/aether_height.spv"
   DEPENDS "${HEIGHT_SRC}" spv_exact COMMENT "slangc aether_height -> SPIR-V (exact float contract)")
