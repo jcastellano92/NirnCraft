@@ -19,6 +19,9 @@ $src = @('native\java\src\com\skycraft\aether\AetherNative.java', 'native\java\s
 & "$jdk\javac.exe" --release 25 -proc:none -encoding UTF-8 -nowarn -cp ((@("$height\classes") + $mc) -join ';') -d $classes @src
 if ($LASTEXITCODE) { throw 'harness does not compile' }
 $cp = (@($classes, "$height\classes", "$height\res") + $mc) -join ';'
-& "$jdk\java.exe" --enable-native-access=ALL-UNNAMED -Xmx6g $env:HARNESS_JAVA_OPTS -cp $cp com.skycraft.aether.ExactSourceHarness `
+# $env:HARNESS_JAVA_OPTS: extra JVM options, space separated (-Dharness.debugLod=true, -Dharness.noShadows=true,
+# -Dharness.probe=x,y0,y1 to print depth/normal down one pixel column of the exact render)
+$opts = @(if ($env:HARNESS_JAVA_OPTS) { $env:HARNESS_JAVA_OPTS -split ' ' | Where-Object { $_ } })
+& "$jdk\java.exe" --enable-native-access=ALL-UNNAMED -Xmx6g @opts -cp $cp com.skycraft.aether.ExactSourceHarness `
     native/build/Release/aether_core.dll native/data $Out $Seed $X $Z $Yaw $Threads
 if ($LASTEXITCODE) { throw 'exact source harness failed' }

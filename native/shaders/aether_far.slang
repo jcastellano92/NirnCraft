@@ -213,10 +213,10 @@ int traceLod(int lod, float3 p0, float3 d, float len, inout TraceResult res, out
     float3 inv = float3(abs(qd.x) > 1e-14 ? 1.0 / qd.x : 1e30, abs(qd.y) > 1e-14 ? 1.0 / qd.y : 1e30,
                         abs(qd.z) > 1e-14 ? 1.0 / qd.z : 1e30);
     float u = 0;
+    int3 c = int3(floor(q0));
+    int3 stepC = int3(qd.x > 0 ? 1 : -1, qd.y > 0 ? 1 : -1, qd.z > 0 ? 1 : -1);
     for (int it = 0; it < 64; it++) {
         if (u >= len) break;
-        float3 q = q0 + qd * u;
-        int3 c = int3(floor(q));
         float3 tt = (float3(c) + float3(qd.x > 0 ? 1 : 0, qd.y > 0 ? 1 : 0, qd.z > 0 ? 1 : 0) - q0) * inv;
         // as in traceRegion: a face at or behind u (a ray running inside a region boundary plane) is not an exit
         tt = float3(tt.x > u ? tt.x : 1e30, tt.y > u ? tt.y : 1e30, tt.z > u ? tt.z : 1e30);
@@ -240,7 +240,14 @@ int traceLod(int lod, float3 p0, float3 d, float len, inout TraceResult res, out
                 }
             }
         }
-        u = max(uExit, u) + 1e-4 * s;
+        if (uExit >= len) break;
+        // into the neighbour across the face we leave by, by index: re-flooring q a hair past that face is below
+        // float precision in table units (a cell is 256 voxels), lands back in the same cell, and would re-trace its
+        // region from outside it (clamped to its boundary layer: false hits one voxel past a region floor/ceiling)
+        if (tt.x <= tt.y && tt.x <= tt.z) c.x += stepC.x;
+        else if (tt.y <= tt.z) c.y += stepC.y;
+        else c.z += stepC.z;
+        u = uExit;
     }
     return TRACE_MISS;
 }

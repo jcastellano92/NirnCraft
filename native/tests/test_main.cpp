@@ -253,6 +253,85 @@ static void testFourZones() {
     aether_destroy(ctx);
 }
 
+// A slope crossing a vertical region boundary (LOD 0 regions span y -64 + 256k), seen from far enough that normals
+// are smoothed: the band of hits at the boundary must shade like the slope above and below it. Both ways: rays
+// rising into the region above (boundary 448, camera below it) and descending into the one below (boundary 192,
+// camera just above it, as on a hillside looking across a valley). (A layer
+// read wrongly at a region's bottom shows up as a band of flat, sideways normals: a dark line along the boundary.)
+static void testRegionSeam() {
+    std::printf("vertical region seam\n");
+    struct Case { float boundary, base, flat, camY, pitch; };
+    for (Case cs : {Case{448, 300, 280, 430, 2}, Case{192, 100, 90, 210.4f, -4}})
+    for (AetherBackend backend : {AETHER_BACKEND_CPU, AETHER_BACKEND_VULKAN}) {
+        std::vector<float> ramp(256 * 256), flat(256 * 256, cs.flat), water(256 * 256, NAN);
+        for (int j = 0; j < 256; j++)
+            for (int i = 0; i < 256; i++) ramp[size_t(j) * 256 + i] = cs.base + 0.8f * float(i);
+        std::vector<uint16_t> top(256 * 256, 2), fill(256 * 256, 3);
+        AetherContext* ctx = nullptr;
+        if (aether_create(backend, &ctx) != AETHER_OK) {
+            std::printf("  SKIP: no Vulkan\n");
+            continue;
+        }
+        for (int tz = -1; tz <= 1; tz++)
+            for (int tx = -3; tx <= 1; tx++) {
+                AetherColumnTile t{0, tx, tz, tx == 0 ? ramp.data() : flat.data(), water.data(), top.data(), fill.data(),
+                                   nullptr, nullptr};
+                aether_upload_column_tile(ctx, &t);
+            }
+        const uint32_t W = 160, H = 160;
+        double centre[3] = {-500.5, cs.camY, 128.5};
+        aether_update(ctx, centre, 0);
+        AetherFrame f{};
+        for (int i = 0; i < 3; i++) f.cameraPos[i] = centre[i];
+        f.width = W;
+        f.height = H;
+        cameraMatrix(90, cs.pitch, 20, 1.0, f.invViewProj);
+        f.maxDistance = 6000;
+        f.sunDir[1] = 1;
+        f.lodBias = 1;
+        std::vector<uint32_t> normal(W * H);
+        std::vector<float> depth(W * H);
+        AetherFrameOutput o{nullptr, normal.data(), depth.data(), nullptr};
+        CHECK(aether_render(ctx, &f, &o) == AETHER_OK);
+        // mean normal.y of the hits per 2-block band of world height
+        double sum[64] = {}, cnt[64] = {};
+        for (uint32_t py = 0; py < H; py++)
+            for (uint32_t px = 0; px < W; px++) {
+                float d = depth[py * W + px];
+                if (d > 1e29f) continue;
+                double nx = (px + 0.5) / W * 2 - 1, ny = 1 - (py + 0.5) / H * 2, v[4];
+                for (int r = 0; r < 4; r++) v[r] = f.invViewProj[r] * nx + f.invViewProj[4 + r] * ny + f.invViewProj[8 + r] + f.invViewProj[12 + r];
+                double dl = std::sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
+                double y = centre[1] + v[1] / dl * d;
+                int band = int(std::floor((y - (cs.boundary - 64)) / 2));
+                if (band < 0 || band >= 64) continue;
+                uint32_t nv = normal[py * W + px];
+                double ex = (nv & 255) / 255.0 * 2 - 1, ez = (nv >> 8 & 255) / 255.0 * 2 - 1;
+                double ey = 1 - std::abs(ex) - std::abs(ez);
+                double l = std::sqrt(ey * ey + (ey >= 0 ? ex * ex + ez * ez : 1.0));
+                sum[band] += ey / l;
+                cnt[band]++;
+            }
+        double seam = 0, rest = 0, nRest = 0, worst = 0;
+        for (int b = 0; b < 64; b++) {
+            if (cnt[b] < 20) continue;
+            double m = sum[b] / cnt[b];
+            if (b == 32 || b == 31) seam += m / 2;  // the two bands either side of the boundary
+            else if (b < 30 || b > 33) {
+                rest += m;
+                nRest++;
+                worst = std::max(worst, std::abs(m - 0.6));
+            }
+        }
+        rest /= std::max(1.0, nRest);
+        std::printf("  boundary %.0f, %s: mean normal.y %.2f at the boundary, %.2f elsewhere\n", cs.boundary,
+                    backend == AETHER_BACKEND_CPU ? "cpu   " : "vulkan", seam, rest);
+        CHECK(cnt[32] >= 20 && cnt[31] >= 20);
+        CHECK(std::abs(seam - rest) < 0.15);
+        aether_destroy(ctx);
+    }
+}
+
 // A far actor on flat ground: the ray must hit its body at the analytic distance, in front of the terrain.
 static void testActors() {
     std::printf("far actors\n");
@@ -618,6 +697,7 @@ int main(int argc, char** argv) {
     testAbi();
     testStreamingGap();
     testFourZones();
+    testRegionSeam();
     testActors();
     testNearDepth(argc > 1 ? argv[1] : "native/data/tamriel_raster.bin");
     testColumnHeights(argc > 1 ? argv[1] : "native/data/tamriel_raster.bin");

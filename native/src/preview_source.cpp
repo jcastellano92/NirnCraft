@@ -327,7 +327,12 @@ void PreviewSource::dressRows(Tile& tile, int jBegin, int jEnd) const {
             int cl = sm.climate;
             float snowline = cl == FROZEN ? -100.0f : cl == SK_COLD ? 190.0f : cl == SK_TEMPERATE ? 260.0f
                            : (cl == TEMPERATE || cl == MARITIME) ? 330.0f : cl == ASH ? 400.0f : 440.0f;
-            snowline += float(fbm(x, z, 120, 2, 21) * 18.0);
+            // snow lies lower on shaded faces (downhill towards -Z, north) and higher on sunny ones, not along a
+            // level line; the edge itself is ragged
+            float g = std::sqrt(gx * gx + gz * gz);
+            float northness = g > 1e-3f ? gz / g * float(smoothstep(0.08, 0.5, g)) : 0.0f;
+            snowline += float(fbm(x, z, 120, 2, 21) * 30.0) - 45.0f * northness;
+            float snowEdge = snowline + float(fbm(x, z, 37, 2, 23) * 12.0);
             uint16_t top = M_GRASS, fill = M_DIRT;
             switch (cl) {
                 case SK_TEMPERATE: top = M_TUNDRA; break;
@@ -343,7 +348,7 @@ void PreviewSource::dressRows(Tile& tile, int jBegin, int jEnd) const {
             if (sm.heat > 0.6f) top = M_ASH;
             if (h < SEA + 2.5f && sm.coast < 40 && cl != SWAMP) top = fill = M_SAND;
             if (slope > 0.9f) top = M_STONE;
-            if (h > snowline && slope < 1.4f) top = M_SNOW;
+            if (h > snowEdge && slope < 1.4f) top = M_SNOW;
             if (cl == FROZEN && sm.coast < 0) top = M_ICE;
             if (!std::isnan(wl) && wl - h > 1.5f) top = sm.coast < 0 ? M_SAND : M_GRAVEL;
             t->top[c] = top;

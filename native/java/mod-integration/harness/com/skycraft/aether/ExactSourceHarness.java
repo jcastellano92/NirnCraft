@@ -146,7 +146,9 @@ public final class ExactSourceHarness {
                 f.maxDistance = 40000;
                 f.planetRadius = 6_371_000f;
                 f.lodBias = 1;
-                f.flags = AetherNative.FRAME_SHADOWS | AetherNative.FRAME_ATMOS | AetherNative.FRAME_SKY;
+                f.flags = AetherNative.FRAME_SHADOWS | AetherNative.FRAME_ATMOS | AetherNative.FRAME_SKY
+                        | (Boolean.getBoolean("harness.debugLod") ? AetherNative.FRAME_DEBUG_LOD : 0);
+                if (Boolean.getBoolean("harness.noShadows")) f.flags &= ~AetherNative.FRAME_SHADOWS;
                 AetherProbe.cameraMatrix(yaw, -6, 70, w / (double) h, f.invViewProj);
                 double se = Math.toRadians(24), sa = Math.toRadians(yaw + 40);
                 f.sunX = (float) (Math.sin(sa) * Math.cos(se));
@@ -154,8 +156,25 @@ public final class ExactSourceHarness {
                 f.sunZ = (float) (-Math.cos(sa) * Math.cos(se));
                 int[] color = new int[w * h];
                 float[] depth = new float[w * h];
-                ctx.render(f, color, null, depth);
-                ctx.render(f, color, null, depth);
+                int[] normal = new int[w * h];
+                ctx.render(f, color, normal, depth);
+                ctx.render(f, color, normal, depth);
+                String probeAt = System.getProperty("harness.probe");  // "x,y0,y1": one pixel column, first context
+                if (probeAt != null && i == 0) {
+                    String[] q = probeAt.split(",");
+                    int px = Integer.parseInt(q[0]);
+                    for (int py = Integer.parseInt(q[1]); py <= Integer.parseInt(q[2]); py++) {
+                        int nv = normal[py * w + px];
+                        double ex = (nv & 255) / 255.0 * 2 - 1, ez = (nv >> 8 & 255) / 255.0 * 2 - 1;
+                        double ny = 1 - Math.abs(ex) - Math.abs(ez);
+                        double nx = ny >= 0 ? ex : (1 - Math.abs(ez)) * Math.signum(ex), nz = ny >= 0 ? ez : (1 - Math.abs(ex)) * Math.signum(ez);
+                        double l = Math.sqrt(nx * nx + ny * ny + nz * nz);
+                        int c = color[py * w + px];
+                        // world height of the hit: camera y + ray dir y * t (+ curvature drop ignored here: < 1 block at 1 km)
+                        OUT.printf("  probe %d,%d: depth %.2f  n (%.2f %.2f %.2f)  cls %d  sun %d  rgb %d %d %d%n", px, py,
+                                depth[py * w + px], nx / l, ny / l, nz / l, nv >> 16 & 255, nv >>> 24, c & 255, c >> 8 & 255, c >> 16 & 255);
+                    }
+                }
                 depths[i] = depth;
                 images[i++] = color;
             }
