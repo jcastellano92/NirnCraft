@@ -1,4 +1,5 @@
 #include <atomic>
+#include <cstddef>
 #include <chrono>
 #include <cmath>
 #include <cstring>
@@ -18,6 +19,16 @@
 #endif
 
 using namespace aether;
+
+// The Java binding (com.skycraft.aether.AetherNative) declares these layouts by hand; any change is an ABI bump.
+static_assert(sizeof(AetherMaterial) == 24);
+static_assert(sizeof(AetherColumnTile) == 64 && offsetof(AetherColumnTile, surface) == 16);
+static_assert(sizeof(AetherFrame) == 136 && offsetof(AetherFrame, invViewProj) == 24 && offsetof(AetherFrame, width) == 88 &&
+              offsetof(AetherFrame, sunDir) == 108 && offsetof(AetherFrame, flags) == 128);
+static_assert(sizeof(AetherFrameOutput) == 24);
+static_assert(sizeof(AetherWeather) == 40 && offsetof(AetherWeather, rainFactor) == 32);
+static_assert(sizeof(AetherActor) == 48 && offsetof(AetherActor, kind) == 36);
+static_assert(sizeof(AetherStats) == 56 && offsetof(AetherStats, nodeBytes) == 8 && offsetof(AetherStats, raySteps) == 48);
 
 struct AetherContext {
     std::unique_ptr<Backend> backend;

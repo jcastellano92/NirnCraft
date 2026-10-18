@@ -185,9 +185,10 @@ public:
             ok &= upload(6, s.runMat.data(), s.runMat.size() * 4, false, err);
         }
         ok &= upload(7, in.palette->data(), in.palette->size() * sizeof(MaterialGpu), false, err);
-        ok &= ensure(8, px * 4, false, err) && ensure(9, px * 4, false, err) && ensure(10, px * 4, false, err);
+        // outputs are read back by the host: cached system memory (CPU reads from BAR memory are uncached and slow)
+        ok &= ensure(8, px * 4, false, err, true) && ensure(9, px * 4, false, err, true) && ensure(10, px * 4, false, err, true);
         ok &= upload(11, in.weather->data(), in.weather->size() * 4, false, err);
-        ok &= ensure(12, px * 4, false, err);
+        ok &= ensure(12, px * 4, false, err, true);
         if (in.cloudNoise->data() != noiseUploaded_ || !bufs_[13].buf) {
             ok &= upload(13, in.cloudNoise->data(), in.cloudNoise->size() * 4, false, err);
             noiseUploaded_ = in.cloudNoise->data();
@@ -249,7 +250,7 @@ private:
         b = {};
     }
 
-    bool ensure(uint32_t i, VkDeviceSize size, bool uniform, std::string& err) {
+    bool ensure(uint32_t i, VkDeviceSize size, bool uniform, std::string& err, bool readback = false) {
         size = size < 16 ? 16 : size;
         Buf& b = bufs_[i];
         if (b.size >= size) return true;
@@ -266,9 +267,10 @@ private:
         vkGetPhysicalDeviceMemoryProperties(phys_, &mp);
         uint32_t want = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
         uint32_t type = UINT32_MAX;
-        // prefer device-local host-visible (resizable BAR), else plain host memory
+        // inputs: prefer device-local host-visible (resizable BAR); readback: prefer host-cached; else plain host
         for (int pass = 0; pass < 2 && type == UINT32_MAX; pass++) {
-            uint32_t need = pass == 0 ? want | VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT : want;
+            uint32_t extra = readback ? VK_MEMORY_PROPERTY_HOST_CACHED_BIT : VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+            uint32_t need = pass == 0 ? want | extra : want;
             for (uint32_t t = 0; t < mp.memoryTypeCount; t++)
                 if ((req.memoryTypeBits & (1u << t)) && (mp.memoryTypes[t].propertyFlags & need) == need) {
                     type = t;
