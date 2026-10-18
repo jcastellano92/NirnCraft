@@ -76,7 +76,11 @@ public:
 
     // Build what the window around `centre` needs; returns regions built. budgetMs <= 0: no limit.
     int update(const double centre[3], double budgetMs, double* buildMs);
-    const PackedScene& packed() const { return packed_; }
+    // Immutable snapshot of the packed scene; a frame holds it for as long as it reads it.
+    std::shared_ptr<const PackedScene> packed() const {
+        std::lock_guard<std::mutex> lock(snapMu_);
+        return packed_;
+    }
 
     static int regionRows(int lod);  // vertical regions needed to span y -64..640
 
@@ -100,7 +104,8 @@ private:
     std::unordered_map<Key3, std::shared_ptr<const Section>, Key3Hash> sections_;
     std::unordered_map<Key3, std::shared_ptr<const Region>, Key3Hash> regions_;
     std::unordered_set<Key3, Key3Hash> dirty_;
-    PackedScene packed_;
+    mutable std::mutex snapMu_;
+    std::shared_ptr<const PackedScene> packed_ = std::make_shared<PackedScene>();
     int lastCentre_[MAX_LODS][2] = {};
     bool havePacked_ = false;
 };

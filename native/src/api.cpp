@@ -45,6 +45,7 @@ struct AetherContext {
     AetherStats stats{};
     std::string error;
     std::mutex mu;
+    uint64_t stagedRevision = UINT64_MAX;
 
     AetherStatus fail(AetherStatus s, std::string msg) {
         error = std::move(msg);
@@ -190,6 +191,11 @@ AETHER_API AetherStatus aether_update(AetherContext* ctx, const double centre[3]
     double ms = 0;
     ctx->world.update(centre, budgetMs, &ms);
     ctx->stats.lastBuildMs = ms;
+    // copy a new revision to the GPU here (the game calls update off the render thread), not in the next frame
+    auto snap = ctx->world.packed();
+    if (snap->lodCount && snap->revision != ctx->stagedRevision) {
+        if (ctx->backend->stageScene(*snap)) ctx->stagedRevision = snap->revision;
+    }
     return AETHER_OK;
 }
 
@@ -264,7 +270,8 @@ AETHER_API void aether_gl_detach(AetherContext* ctx) {
 }
 
 static AetherStatus buildInputs(AetherContext* ctx, const AetherFrame* f, FrameInputs& in) {
-    in.scene = &ctx->world.packed();
+    in.sceneHold = ctx->world.packed();
+    in.scene = in.sceneHold.get();
     if (in.scene->lodCount == 0) return ctx->fail(AETHER_ERR_STATE, "call aether_update before aether_render");
     FrameGpu& g = in.frame;
     std::memcpy(g.invViewProj, f->invViewProj, sizeof(g.invViewProj));

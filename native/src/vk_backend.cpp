@@ -8,8 +8,11 @@
 #include <windows.h>
 #include <vulkan/vulkan_win32.h>
 
+#include <algorithm>
+#include <atomic>
 #include <chrono>
 #include <cstdio>
+#include <mutex>
 #include <cstdlib>
 #include <cstring>
 #include <vector>
@@ -65,7 +68,18 @@ struct SharedSemaphore {
     GLuint gl = 0;
 };
 
+// The scene's six buffers. Two copies: the update thread fills the one no in-flight frame reads, frames flip to it.
+struct SceneCopy {
+    Buf bufs[7];  // bindings 1..6
+    uint64_t revision = UINT64_MAX;
+    std::atomic<uint64_t> lastFrame{0};  // last frame number recorded against this copy
+    uint32_t generation = 0;  // bumped when a buffer is reallocated (descriptor sets must be rewritten)
+};
+
 struct Slot {
+    uint64_t frameNumber = 0;  // of its last submission
+    int boundCopy = -1;        // scene copy its far descriptor set points at
+    uint32_t boundGeneration = 0;
     VkCommandBuffer cmd = VK_NULL_HANDLE;
     VkFence fence = VK_NULL_HANDLE;
     VkQueryPool query = VK_NULL_HANDLE;
@@ -73,7 +87,6 @@ struct Slot {
     VkDescriptorSet farSet = VK_NULL_HANDLE, publishSet = VK_NULL_HANDLE, ingestSet = VK_NULL_HANDLE;
     Buf bufs[BINDINGS];  // only the per-slot bindings are used
     bool farDirty = true, publishDirty = true, ingestDirty = true;
-    uint64_t sceneRevision = UINT64_MAX;  // scene buffers this slot's descriptors point at
     SharedSemaphore glReady, vkDone;
 };
 
@@ -89,6 +102,8 @@ public:
                 if (s.query) vkDestroyQueryPool(dev_, s.query, nullptr);
             }
             for (auto& b : shared_) release(b);
+            for (auto& c : copies_)
+                for (auto& b : c.bufs) release(b);
             if (pool_) vkDestroyCommandPool(dev_, pool_, nullptr);
             if (dpool_) vkDestroyDescriptorPool(dev_, dpool_, nullptr);
             destroyPipe(farPipe_, farLayout_, farSetLayout_, farShader_);
@@ -287,6 +302,16 @@ public:
         return true;
     }
 
+    bool stageScene(const PackedScene& sc) override {
+        std::lock_guard<std::mutex> lock(sceneMu_);
+        int c = current_ == 0 ? 1 : 0;
+        if (copies_[c].lastFrame > completedFrame_.load()) return false;  // a frame may still read it
+        std::string err;
+        if (!uploadScene(copies_[c], sc, err)) return false;
+        staged_ = c;
+        return true;
+    }
+
     void glDetach() override {
         if (dev_) vkDeviceWaitIdle(dev_);
         for (auto& s : slots_) s.inFlight = false;
@@ -459,18 +484,24 @@ private:
         uint32_t w = frame.dims[0], h = frame.dims[1];
         size_t px = size_t(w) * h;
         const PackedScene& sc = *in.scene;
-        if (sc.revision != sceneRevision_) {
-            // the scene buffers are shared by both slots: nothing may still be reading them
-            for (auto& o : slots_)
-                if (!waitSlot(o, nullptr, err)) return false;
-            bool ok = upload(shared_[1], sc.table.data(), sc.table.size() * 4, false, false, err) &&
-                      upload(shared_[2], sc.regions.data(), sc.regions.size() * sizeof(RegionGpu), false, false, err) &&
-                      upload(shared_[3], sc.nodes.data(), sc.nodes.size() * 4, false, false, err) &&
-                      upload(shared_[4], sc.leaves.data(), sc.leaves.size() * 8, false, false, err) &&
-                      upload(shared_[5], sc.runEnd.data(), sc.runEnd.size() * 4, false, false, err) &&
-                      upload(shared_[6], sc.runMat.data(), sc.runMat.size() * 4, false, false, err);
-            if (!ok) return false;
-            sceneRevision_ = sc.revision;
+        {
+            // never block the frame on a stage in progress: keep drawing the current copy until it is done
+            std::unique_lock<std::mutex> lock(sceneMu_, std::try_to_lock);
+            if (!lock.owns_lock() && current_ < 0) lock.lock();
+            if (lock.owns_lock() && staged_ >= 0 && copies_[staged_].revision == sc.revision) {
+                current_ = staged_;  // staged off the render thread: just flip
+                staged_ = -1;
+            }
+            if (lock.owns_lock() && (current_ < 0 || copies_[current_].revision != sc.revision) &&
+                (staged_ < 0 || copies_[staged_].revision != sc.revision)) {
+                // not staged (no update thread, or both copies were busy): upload here, once nothing reads it
+                int c = current_ < 0 ? 0 : current_;
+                for (auto& o : slots_)
+                    if (!waitSlot(o, nullptr, err)) return false;
+                if (!uploadScene(copies_[c], sc, err)) return false;
+                current_ = c;
+                if (staged_ == c) staged_ = -1;
+            }
         }
         if (in.cloudNoise->data() != noiseUploaded_ || !shared_[B_NOISE].buf) {
             for (auto& o : slots_)
@@ -489,11 +520,12 @@ private:
     }
 
     void refreshDescriptors(Slot& s) {
-        if (s.farDirty || s.sceneRevision != sceneRevision_ || sharedDirty_) {
+        const SceneCopy& sc = copies_[current_];
+        if (s.farDirty || s.boundCopy != current_ || s.boundGeneration != sc.generation || sharedDirty_) {
             VkDescriptorBufferInfo info[BINDINGS];
             VkWriteDescriptorSet wr[BINDINGS];
             for (uint32_t i = 0; i < BINDINGS; i++) {
-                const Buf& b = perSlot(i) ? s.bufs[i] : shared_[i];
+                const Buf& b = perSlot(i) ? s.bufs[i] : (i >= 1 && i <= 6 ? sc.bufs[i] : shared_[i]);
                 info[i] = {b.buf, 0, VK_WHOLE_SIZE};
                 wr[i] = {VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET};
                 wr[i].dstSet = s.farSet;
@@ -504,7 +536,8 @@ private:
             }
             vkUpdateDescriptorSets(dev_, BINDINGS, wr, 0, nullptr);
             s.farDirty = false;
-            s.sceneRevision = sceneRevision_;
+            s.boundCopy = current_;
+            s.boundGeneration = sc.generation;
             sharedDirtySlots_ |= 1u << uint32_t(&s - slots_);
             if (sharedDirtySlots_ == (1u << SLOTS) - 1) sharedDirty_ = false;
         }
@@ -593,6 +626,8 @@ private:
         vkResetFences(dev_, 1, &s.fence);
         if (vkQueueSubmit(queue_, 1, &si, s.fence) != VK_SUCCESS) return fail(err, "submit failed");
         s.inFlight = true;
+        s.frameNumber = ++frameCounter_;
+        copies_[current_].lastFrame.store(s.frameNumber);  // current_ only changes on this thread
         return true;
     }
 
@@ -601,6 +636,8 @@ private:
         if (!s.inFlight) return true;
         if (vkWaitForFences(dev_, 1, &s.fence, VK_TRUE, 10'000'000'000ull) != VK_SUCCESS) return fail(err, "GPU timeout/device lost");
         s.inFlight = false;
+        // frames complete in submission order on our single queue
+        if (s.frameNumber > completedFrame_.load()) completedFrame_.store(s.frameNumber);
         if (s.query && gpuMs) {
             uint64_t ts[2] = {};
             vkGetQueryPoolResults(dev_, s.query, 0, 2, sizeof(ts), ts, 8, VK_QUERY_RESULT_64_BIT | VK_QUERY_RESULT_WAIT_BIT);
@@ -804,6 +841,25 @@ private:
         return true;
     }
 
+    bool uploadScene(SceneCopy& c, const PackedScene& sc, std::string& err) {
+        VkBuffer before[7];
+        for (int i = 1; i <= 6; i++) before[i] = c.bufs[i].buf;
+        bool ok = upload(c.bufs[1], sc.table.data(), sc.table.size() * 4, false, false, err) &&
+                  upload(c.bufs[2], sc.regions.data(), sc.regions.size() * sizeof(RegionGpu), false, false, err) &&
+                  upload(c.bufs[3], sc.nodes.data(), sc.nodes.size() * 4, false, false, err) &&
+                  upload(c.bufs[4], sc.leaves.data(), sc.leaves.size() * 8, false, false, err) &&
+                  upload(c.bufs[5], sc.runEnd.data(), sc.runEnd.size() * 4, false, false, err) &&
+                  upload(c.bufs[6], sc.runMat.data(), sc.runMat.size() * 4, false, false, err);
+        if (!ok) return false;
+        for (int i = 1; i <= 6; i++)
+            if (c.bufs[i].buf != before[i]) {
+                c.generation++;
+                break;
+            }
+        c.revision = sc.revision;
+        return true;
+    }
+
     bool upload(Buf& b, const void* data, size_t bytes, bool uniform, bool readback, std::string& err) {
         if (!ensure(b, bytes, uniform, readback, err)) return false;
         if (bytes) std::memcpy(b.map, data, bytes);
@@ -832,7 +888,11 @@ private:
     Buf shared_[BINDINGS];  // only the scene (1-6) and noise (13) bindings are used
     bool sharedDirty_ = true;
     uint32_t sharedDirtySlots_ = 0;
-    uint64_t sceneRevision_ = UINT64_MAX;
+    SceneCopy copies_[2];
+    int current_ = -1, staged_ = -1;
+    std::mutex sceneMu_;
+    uint64_t frameCounter_ = 0;
+    std::atomic<uint64_t> completedFrame_{0};
     const void* noiseUploaded_ = nullptr;
     uint64_t frameIndex_ = 0;
 

@@ -299,7 +299,7 @@ void World::repack(const int centreRegion[MAX_LODS][2]) {
     std::lock_guard<std::mutex> lock(mu_);
     PackedScene p;
     p.lodCount = lodCount;
-    p.revision = packed_.revision + 1;
+    p.revision = packed()->revision + 1;
     std::unordered_map<const Region*, int32_t> slot;
     int side = 2 * windowRadius + 1;
     for (int lod = 0; lod < lodCount; lod++) {
@@ -357,7 +357,11 @@ void World::repack(const int centreRegion[MAX_LODS][2]) {
     if (p.runEnd.empty()) p.runEnd.push_back(0);
     if (p.runMat.empty()) p.runMat.push_back(0);
     if (p.regions.empty()) p.regions.push_back({});
-    packed_ = std::move(p);
+    {
+        auto next = std::make_shared<const PackedScene>(std::move(p));
+        std::lock_guard<std::mutex> snap(snapMu_);
+        packed_ = std::move(next);
+    }
     for (int lod = 0; lod < lodCount; lod++) {
         lastCentre_[lod][0] = centreRegion[lod][0];
         lastCentre_[lod][1] = centreRegion[lod][1];
@@ -365,8 +369,11 @@ void World::repack(const int centreRegion[MAX_LODS][2]) {
     havePacked_ = true;
 }
 
-uint64_t World::nodeBytes() const { return packed_.nodes.size() * 4; }
-uint64_t World::leafBytes() const { return packed_.leaves.size() * 8; }
-uint64_t World::materialBytes() const { return packed_.runEnd.size() * 4 + packed_.runMat.size() * 4; }
+uint64_t World::nodeBytes() const { return packed()->nodes.size() * 4; }
+uint64_t World::leafBytes() const { return packed()->leaves.size() * 8; }
+uint64_t World::materialBytes() const {
+    auto p = packed();
+    return p->runEnd.size() * 4 + p->runMat.size() * 4;
+}
 
 }  // namespace aether

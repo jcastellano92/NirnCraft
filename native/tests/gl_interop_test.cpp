@@ -6,7 +6,10 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
+#include <algorithm>
+#include <atomic>
 #include <chrono>
+#include <thread>
 #include <cmath>
 #include <cstdio>
 #include <cstring>
@@ -176,11 +179,56 @@ int main(int argc, char** argv) {
                 coveredLit, c2.color, c2.depth);
     GLenum e = gl.GetError();
 
+    // streaming flight: a worker streams tiles and rebuilds the clipmap while frames keep coming; staging must keep
+    // the multi-megabyte scene uploads off the render thread (a render-thread upload shows as a 10+ ms frame)
+    std::atomic<double> camX{x};
+    std::atomic<bool> stop{false};
+    std::atomic<int> rebuilds{0};
+    std::thread worker([&] {
+        while (!stop) {
+            double cx = camX.load();
+            for (int lod = 0; lod < 7; lod++) {
+                int span = 256 << lod;
+                int rx = int(std::floor(cx / span)), rz = int(std::floor(z / span));
+                aether_preview_generate(ctx, lod, (rx - 2) * span, (rz - 2) * span, (rx + 3) * span, (rz + 3) * span);
+            }
+            double c[3] = {cx, y, z};
+            aether_update(ctx, c, 0);
+            rebuilds++;
+        }
+    });
+    std::vector<double> frameMs;
+    AetherFrame ff = f;
+    for (int i = 0; i < 240; i++) {
+        double px = x + i * 5.0;  // 300 blocks/s at 60 fps
+        camX = px;
+        ff.cameraPos[0] = px;
+        auto t0 = std::chrono::steady_clock::now();
+        if (aether_gl_render(ctx, &ff) != AETHER_OK) {
+            std::printf("FAIL streaming render %d: %s\n", i, aether_last_error(ctx));
+            stop = true;
+            worker.join();
+            return 1;
+        }
+        frameMs.push_back(std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count());
+        Sleep(8);  // the rest of a game frame
+    }
+    stop = true;
+    worker.join();
+    gl.Finish();
+    std::vector<double> sorted = frameMs;
+    std::sort(sorted.begin(), sorted.end());
+    std::printf("streaming flight: %d clipmap rebuilds during 240 frames; aether_gl_render CPU median %.2f ms, "
+                "p99 %.2f ms, max %.2f ms\n", rebuilds.load(), sorted[sorted.size() / 2], sorted[sorted.size() * 99 / 100],
+                sorted.back());
+    bool smooth = sorted[sorted.size() * 99 / 100] < 8.0;
+
     aether_gl_detach(ctx);
     aether_destroy(ctx);
     wglMakeCurrent(nullptr, nullptr);
     wglDeleteContext(rc);
-    bool ok = c1.color == 0 && c1.depth == 0 && c2.color == 0 && c2.depth == 0 && coveredLit == 0 && e == GL_NO_ERROR;
+    bool ok = c1.color == 0 && c1.depth == 0 && c2.color == 0 && c2.depth == 0 && coveredLit == 0 && e == GL_NO_ERROR &&
+              smooth;
     std::printf(ok ? "PASS\n" : "FAIL (gl error 0x%x)\n", e);
     return ok ? 0 : 1;
 }
