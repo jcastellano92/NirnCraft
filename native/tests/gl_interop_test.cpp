@@ -177,6 +177,48 @@ int main(int argc, char** argv) {
             coveredLit += glColor[(size_t(yy) * W + xx) * 4 + 3] != 0.0f;
     std::printf("near depth from GL: %zu covered pixels drawn; vs host: %zu colour, %zu depth pixels differ\n",
                 coveredLit, c2.color, c2.depth);
+    // the game's own depth buffer: GL depth texture -> aether linearises it; plus copies into caller textures
+    const double n0 = 0.05, f0 = 100000.0, fov = 70.0, aspect = double(W) / H;
+    const double fy = 1.0 / std::tan(fov * 3.14159265358979323846 / 360.0), fxp = fy / aspect;
+    float invProj[16] = {float(1 / fxp), 0, 0, 0, 0, float(1 / fy), 0, 0, 0, 0, 0, float((n0 - f0) / (2 * n0 * f0)),
+                         0, 0, -1, float((n0 + f0) / (2 * n0 * f0))};
+    std::vector<float> depthPx(size_t(W) * H);
+    for (uint32_t yy = 0; yy < H; yy++)  // GL rows: yy = 0 is the bottom
+        for (uint32_t xx = 0; xx < W; xx++) {
+            double nx = (xx + 0.5) / W * 2 - 1, ny = (yy + 0.5) / H * 2 - 1;
+            double vx = nx / fxp, vy = ny / fy, vz = -1.0, l = std::sqrt(vx * vx + vy * vy + 1.0);
+            double dist = 20.0, zv = vz * dist / l;  // view-space z of the point 20 blocks along this pixel's ray
+            double zn = ((f0 + n0) / (n0 - f0) * zv + 2 * f0 * n0 / (n0 - f0)) / -zv;
+            depthPx[size_t(yy) * W + xx] = xx < W / 2 ? float(zn * 0.5 + 0.5) : 1.0f;
+        }
+    GLuint depthTex = 0, dst[3] = {};
+    gl.CreateTextures(GL_TEXTURE_2D, 1, &depthTex);
+    gl.TextureStorage2D(depthTex, 1, GL_DEPTH_COMPONENT32F, GLsizei(W), GLsizei(H));
+    gl.TextureSubImage2D(depthTex, 0, 0, 0, GLsizei(W), GLsizei(H), GL_DEPTH_COMPONENT, GL_FLOAT, depthPx.data());
+    const GLenum dstFmt[3] = {GL_RGBA16F, GL_RGBA8, GL_R32F};
+    for (int i = 0; i < 3; i++) {
+        gl.CreateTextures(GL_TEXTURE_2D, 1, &dst[i]);
+        gl.TextureStorage2D(dst[i], 1, dstFmt[i], GLsizei(W), GLsizei(H));
+    }
+    AetherGlFrameIO io{};
+    io.nearDepthTex = depthTex;
+    std::memcpy(io.nearInvProjection, invProj, sizeof(invProj));
+    io.dstColor = dst[0];
+    io.dstNormal = dst[1];
+    io.dstDepth = dst[2];
+    AetherFrame fd = f;  // no NEAR_DEPTH flag: the io depth texture turns it on
+    for (int i = 0; i < 3; i++)
+        if (aether_gl_render_io(ctx, &fd, &io) != AETHER_OK) {
+            std::printf("FAIL gl render io: %s\n", aether_last_error(ctx));
+            return 1;
+        }
+    gl.Finish();
+    gl.GetTextureImage(dst[0], 0, GL_RGBA, GL_FLOAT, GLsizei(glColor.size() * 4), glColor.data());
+    gl.GetTextureImage(dst[2], 0, GL_RED, GL_FLOAT, GLsizei(glDepth.size() * 4), glDepth.data());
+    Compare c3 = compare(refColor, refDepth, glColor, glDepth, W, H);  // host ref: nearDist, left half at 20
+    std::printf("GL depth buffer input + caller copies: %zu colour, %zu depth pixels differ from host\n", c3.color, c3.depth);
+    gl.DeleteTextures(1, &depthTex);
+    gl.DeleteTextures(3, dst);
     GLenum e = gl.GetError();
 
     // streaming flight: a worker streams tiles and rebuilds the clipmap while frames keep coming; staging must keep
@@ -228,6 +270,7 @@ int main(int argc, char** argv) {
     wglMakeCurrent(nullptr, nullptr);
     wglDeleteContext(rc);
     bool ok = c1.color == 0 && c1.depth == 0 && c2.color == 0 && c2.depth == 0 && coveredLit == 0 && e == GL_NO_ERROR &&
+              c3.color == 0 && c3.depth == 0 &&
               smooth;
     std::printf(ok ? "PASS\n" : "FAIL (gl error 0x%x)\n", e);
     return ok ? 0 : 1;

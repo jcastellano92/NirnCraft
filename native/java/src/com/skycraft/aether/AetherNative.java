@@ -25,7 +25,7 @@ import static java.lang.foreign.ValueLayout.JAVA_SHORT;
  * heap access, so Java arrays are passed in place without an off-heap copy; frame rendering is a normal downcall.</p>
  */
 public final class AetherNative {
-    public static final int ABI_VERSION = 0x000200;
+    public static final int ABI_VERSION = 0x000300;
     public static final int BACKEND_CPU = 0, BACKEND_VULKAN = 1;
     public static final int FRAME_CLOUDS = 0x1, FRAME_SHADOWS = 0x2, FRAME_ATMOS = 0x4, FRAME_ACTORS = 0x8,
             FRAME_SKY = 0x10, FRAME_NEAR_DEPTH = 0x20, FRAME_DEBUG_LOD = 0x100;
@@ -34,12 +34,12 @@ public final class AetherNative {
 
     // struct sizes and offsets (see api.cpp)
     static final long MATERIAL_SIZE = 24, TILE_SIZE = 64, FRAME_SIZE = 144, OUTPUT_SIZE = 32, WEATHER_SIZE = 40,
-            ACTOR_SIZE = 48, STATS_SIZE = 56;
+            ACTOR_SIZE = 48, STATS_SIZE = 56, GL_TARGETS_SIZE = 24, GL_IO_SIZE = 96;
 
     private final Arena libArena;
     private final MethodHandle abiVersion, buildInfo, create, destroy, lastError, setPalette, uploadTile,
             uploadSection, notifyBlock, setWeather, setCloudNoise, setActors, update, render, getStats,
-            previewLoadRaster, previewGenerate, previewHeight;
+            glAttach, glRenderIo, glDetach, previewLoadRaster, previewGenerate, previewHeight;
 
     private AetherNative(Path library) {
         libArena = Arena.ofShared();
@@ -63,6 +63,9 @@ public final class AetherNative {
         update = bind(l, lib, "aether_update", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, JAVA_DOUBLE));
         render = bind(l, lib, "aether_render", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, ADDRESS));
         getStats = bind(l, lib, "aether_get_stats", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS));
+        glAttach = bind(l, lib, "aether_gl_attach", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, JAVA_INT, ADDRESS));
+        glRenderIo = bind(l, lib, "aether_gl_render_io", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, ADDRESS));
+        glDetach = bind(l, lib, "aether_gl_detach", FunctionDescriptor.ofVoid(ADDRESS));
         previewLoadRaster = bind(l, lib, "aether_preview_load_raster", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS));
         previewGenerate = bind(l, lib, "aether_preview_generate",
                 FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, JAVA_INT, JAVA_INT, JAVA_INT, JAVA_INT));
@@ -151,11 +154,34 @@ public final class AetherNative {
     public record Stats(int regions, long nodeBytes, long leafBytes, long materialBytes, double buildMs, double frameMs,
                         long raySteps) {}
 
+    /** GL texture names of the images shared with the game's GL context (rows bottom-up). */
+    public record GlTargets(int color, int normal, int depth, int nearDepth, int width, int height) {}
+
+    /** The game's side of a GL frame (see AetherGlFrameIO in aether.h); zero fields are unused. */
+    public static final class GlFrameIO {
+        public int nearDepthTex;
+        public boolean depthZeroToOne, reversedZ;
+        public final float[] nearInvProjection = new float[16];
+        public int dstColor, dstNormal, dstDepth;
+
+        void write(MemorySegment s) {
+            s.set(JAVA_INT, 0, nearDepthTex);
+            s.set(JAVA_INT, 4, depthZeroToOne ? 1 : 0);
+            s.set(JAVA_INT, 8, reversedZ ? 1 : 0);
+            s.set(JAVA_INT, 12, 0);
+            MemorySegment.copy(nearInvProjection, 0, s, JAVA_FLOAT, 16, 16);
+            s.set(JAVA_INT, 80, dstColor);
+            s.set(JAVA_INT, 84, dstNormal);
+            s.set(JAVA_INT, 88, dstDepth);
+            s.set(JAVA_INT, 92, 0);
+        }
+    }
+
     /** One aether_core context. Not thread-safe except the upload methods (which the native side locks). */
     public final class Context implements AutoCloseable {
         private final MemorySegment ptr;
         private final Arena frameArena = Arena.ofShared();
-        private MemorySegment frameSeg, outSeg, colorSeg, normalSeg, depthSeg;
+        private MemorySegment frameSeg, outSeg, colorSeg, normalSeg, depthSeg, ioSeg;
         private int outPixels = -1;
 
         Context(MemorySegment ptr) {
@@ -324,6 +350,40 @@ public final class AetherNative {
                 check((int) getStats.invokeExact(ptr, s), "aether_get_stats");
                 return new Stats(s.get(JAVA_INT, 0), s.get(JAVA_LONG, 8), s.get(JAVA_LONG, 16), s.get(JAVA_LONG, 24),
                         s.get(JAVA_DOUBLE, 32), s.get(JAVA_DOUBLE, 40), s.get(JAVA_LONG, 48));
+            } catch (Throwable t) {
+                throw rethrow(t);
+            }
+        }
+
+        // ---- game path: render thread, the game's GL context current ----
+
+        /** Creates the shared images (re-attach on resize). */
+        public GlTargets glAttach(int width, int height) {
+            try (Arena a = Arena.ofConfined()) {
+                MemorySegment t = a.allocate(GL_TARGETS_SIZE, 4);
+                check((int) glAttach.invokeExact(ptr, width, height, t), "aether_gl_attach");
+                return new GlTargets(t.get(JAVA_INT, 0), t.get(JAVA_INT, 4), t.get(JAVA_INT, 8), t.get(JAVA_INT, 12),
+                        t.get(JAVA_INT, 16), t.get(JAVA_INT, 20));
+            } catch (Throwable th) {
+                throw rethrow(th);
+            }
+        }
+
+        /** Queues the frame; GL commands issued afterwards see it. The CPU does not wait for the GPU. */
+        public void glRender(Frame f, GlFrameIO io) {
+            f.write(frameSeg);
+            if (ioSeg == null) ioSeg = frameArena.allocate(GL_IO_SIZE, 8);
+            if (io != null) io.write(ioSeg);
+            try {
+                check((int) glRenderIo.invokeExact(ptr, frameSeg, io != null ? ioSeg : MemorySegment.NULL), "aether_gl_render_io");
+            } catch (Throwable t) {
+                throw rethrow(t);
+            }
+        }
+
+        public void glDetach() {
+            try {
+                glDetach.invokeExact(ptr);
             } catch (Throwable t) {
                 throw rethrow(t);
             }

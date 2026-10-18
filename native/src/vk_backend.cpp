@@ -34,6 +34,28 @@ constexpr uint32_t B_FRAME = 0, B_PALETTE = 7, B_COLOR = 8, B_NORMAL = 9, B_DEPT
 // shared images
 constexpr int IMG_COLOR = 0, IMG_NORMAL = 1, IMG_DEPTH = 2, IMG_NEAR = 3, IMAGES = 4;
 
+// GL compute pass: the near field's depth buffer -> view distance in blocks (1e30 for sky) in the shared nearDepth
+// image. Same bottom-up rows as GL; the Vulkan ingest pass flips them for the far kernel.
+const char* LINEARIZE_GLSL = R"GLSL(#version 430
+layout(local_size_x = 8, local_size_y = 8) in;
+layout(binding = 15) uniform sampler2D aetherNearDepth;
+layout(r32f, binding = 7) uniform writeonly image2D aetherNearOut;
+uniform mat4 aetherInvProj;
+uniform vec2 aetherSize;
+uniform int aetherZeroToOne;
+uniform int aetherReversed;
+void main() {
+    ivec2 p = ivec2(gl_GlobalInvocationID.xy);
+    if (p.x >= int(aetherSize.x) || p.y >= int(aetherSize.y)) return;
+    float d = texelFetch(aetherNearDepth, p, 0).r;
+    bool sky = aetherReversed != 0 ? d <= 0.0 : d >= 1.0;
+    float z = aetherZeroToOne != 0 ? d : d * 2.0 - 1.0;
+    vec2 ndc = (vec2(p) + 0.5) / aetherSize * 2.0 - 1.0;
+    vec4 v = aetherInvProj * vec4(ndc, z, 1.0);
+    imageStore(aetherNearOut, p, vec4(sky ? 1e30 : length(v.xyz / v.w)));
+}
+)GLSL";
+
 bool perSlot(uint32_t b) {
     return b == B_FRAME || b == B_PALETTE || b == B_COLOR || b == B_NORMAL || b == B_DEPTH || b == B_WEATHER ||
            b == B_COUNTERS || b == B_NEAR || b == B_ACTORS;
@@ -254,7 +276,7 @@ public:
         return true;
     }
 
-    bool glRender(const FrameInputs& in, double* gpuMs, std::string& err) override {
+    bool glRender(const FrameInputs& in, const GlFrameIO* io, double* gpuMs, std::string& err) override {
         if (!attached_) return fail(err, "aether_gl_attach first");
         uint32_t w = in.frame.dims[0], h = in.frame.dims[1];
         if (w != width_ || h != height_) return fail(err, "frame size differs from the attached targets (re-attach)");
@@ -265,6 +287,8 @@ public:
         if (!prepare(s, in, frame, false, err)) return false;
         if (!ensure(s.bufs[B_NEAR], size_t(w) * h * 4, false, false, err)) return false;
         refreshDescriptors(s);
+
+        if (io && io->nearDepthTex && !linearizeNearDepth(*io, w, h, err)) return false;
 
         // GL releases the shared images to Vulkan (after everything GL queued so far, e.g. last frame's composite)
         GLuint tex[IMAGES];
@@ -299,6 +323,14 @@ public:
 
         // GL commands after this point wait for the Vulkan frame
         gl_.WaitSemaphoreEXT(s.vkDone.gl, 0, nullptr, IMAGES, tex, layouts);
+        if (io) {
+            // hand the frame to the caller's own textures (e.g. what a shader pack samples via customTexture)
+            const GLuint dst[3] = {io->dstColor, io->dstNormal, io->dstDepth};
+            for (int i = 0; i < 3; i++)
+                if (dst[i])
+                    gl_.CopyImageSubData(images_[i].glTex, GL_TEXTURE_2D, 0, 0, 0, 0, dst[i], GL_TEXTURE_2D, 0, 0, 0, 0,
+                                         GLsizei(w), GLsizei(h), 1);
+        }
         return true;
     }
 
@@ -322,6 +354,63 @@ private:
     static bool fail(std::string& err, const char* m) {
         err = m;
         return false;
+    }
+
+    // GL state the pass touches is saved and restored: Minecraft's renderer caches its own bindings.
+    bool linearizeNearDepth(const GlFrameIO& io, uint32_t w, uint32_t h, std::string& err) {
+        if (!linProgram_) {
+            GLuint sh = gl_.CreateShader(GL_COMPUTE_SHADER);
+            gl_.ShaderSource(sh, 1, &LINEARIZE_GLSL, nullptr);
+            gl_.CompileShader(sh);
+            GLint ok = 0;
+            gl_.GetShaderiv(sh, GL_COMPILE_STATUS, &ok);
+            if (!ok) {
+                char log[1024] = {};
+                gl_.GetShaderInfoLog(sh, sizeof(log), nullptr, log);
+                gl_.DeleteShader(sh);
+                err = std::string("near-depth GL shader: ") + log;
+                return false;
+            }
+            linProgram_ = gl_.CreateProgram();
+            gl_.AttachShader(linProgram_, sh);
+            gl_.LinkProgram(linProgram_);
+            gl_.DeleteShader(sh);
+            gl_.GetProgramiv(linProgram_, GL_LINK_STATUS, &ok);
+            if (!ok) return fail(err, "near-depth GL program link failed");
+            uInvProj_ = gl_.GetUniformLocation(linProgram_, "aetherInvProj");
+            uSize_ = gl_.GetUniformLocation(linProgram_, "aetherSize");
+            uZeroToOne_ = gl_.GetUniformLocation(linProgram_, "aetherZeroToOne");
+            uReversed_ = gl_.GetUniformLocation(linProgram_, "aetherReversed");
+            gl_.CreateSamplers(1, &linSampler_);
+            gl_.SamplerParameteri(linSampler_, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            gl_.SamplerParameteri(linSampler_, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            gl_.SamplerParameteri(linSampler_, GL_TEXTURE_COMPARE_MODE, GL_NONE);
+        }
+        gl_.ProgramUniformMatrix4fv(linProgram_, uInvProj_, 1, 0, io.nearInvProjection);
+        gl_.ProgramUniform2f(linProgram_, uSize_, float(w), float(h));
+        gl_.ProgramUniform1i(linProgram_, uZeroToOne_, GLint(io.depthZeroToOne));
+        gl_.ProgramUniform1i(linProgram_, uReversed_, GLint(io.reversedZ));
+        GLint prevProgram = 0, prevActive = 0, prevTex = 0, prevSampler = 0, prevImage = 0;
+        gl_.GetIntegerv(GL_CURRENT_PROGRAM, &prevProgram);
+        gl_.GetIntegerv(GL_ACTIVE_TEXTURE, &prevActive);
+        gl_.ActiveTexture(GL_TEXTURE0 + 15);
+        gl_.GetIntegerv(GL_TEXTURE_BINDING_2D, &prevTex);
+        gl_.GetIntegerv(GL_SAMPLER_BINDING, &prevSampler);
+        gl_.GetIntegeri_v(GL_IMAGE_BINDING_NAME, 7, &prevImage);
+        gl_.ActiveTexture(GLenum(prevActive));
+
+        gl_.UseProgram(linProgram_);
+        gl_.BindTextureUnit(15, io.nearDepthTex);
+        gl_.BindSampler(15, linSampler_);
+        gl_.BindImageTexture(7, images_[IMG_NEAR].glTex, 0, 0, 0, GL_WRITE_ONLY, GL_R32F);
+        gl_.DispatchCompute((w + 7) / 8, (h + 7) / 8, 1);
+        gl_.MemoryBarrierGL(GL_ALL_BARRIER_BITS);
+
+        gl_.UseProgram(GLuint(prevProgram));
+        gl_.BindTextureUnit(15, GLuint(prevTex));
+        gl_.BindSampler(15, GLuint(prevSampler));
+        gl_.BindImageTexture(7, GLuint(prevImage), 0, 0, 0, GL_WRITE_ONLY, GL_R32F);
+        return true;
     }
 
     // ---- setup ---------------------------------------------------------------------------------------------
@@ -778,6 +867,12 @@ private:
                 *sem = {};
             }
         }
+        if (glOk) {
+            if (linProgram_) gl_.DeleteProgram(linProgram_);
+            if (linSampler_) gl_.DeleteSamplers(1, &linSampler_);
+        }
+        linProgram_ = 0;
+        linSampler_ = 0;
         attached_ = false;
     }
 
@@ -904,6 +999,8 @@ private:
     GlApi gl_;
     SharedImage images_[IMAGES];
     uint32_t width_ = 0, height_ = 0;
+    GLuint linProgram_ = 0, linSampler_ = 0;
+    GLint uInvProj_ = -1, uSize_ = -1, uZeroToOne_ = -1, uReversed_ = -1;
 };
 
 }  // namespace

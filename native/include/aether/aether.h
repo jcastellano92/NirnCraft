@@ -32,7 +32,7 @@ extern "C" {
 #endif
 
 /* (major << 16) | (minor << 8) | patch. Bumped on any ABI change. */
-#define AETHER_ABI_VERSION 0x000200
+#define AETHER_ABI_VERSION 0x000300
 
 typedef struct AetherContext AetherContext;
 
@@ -196,6 +196,28 @@ typedef struct AetherGlTargets {
 } AetherGlTargets;
 AETHER_API AetherStatus aether_gl_attach(AetherContext* ctx, uint32_t width, uint32_t height, AetherGlTargets* out);
 AETHER_API AetherStatus aether_gl_render(AetherContext* ctx, const AetherFrame* frame);
+
+/*
+ * The game's side of a GL frame (all optional; zero = unused):
+ *  nearDepthTex      the rasterised near field's depth texture (same size as the targets). aether linearises it
+ *                    into the shared nearDepth image with a small GL compute pass, so covered pixels skip the far
+ *                    march (sets AETHER_FRAME_NEAR_DEPTH for the frame). Sky = depth 1 (or 0 when reversedZ).
+ *  depthZeroToOne    1 when that depth was written with [0,1] clip depth (glClipControl), 0 for [-1,1]
+ *  reversedZ         1 when near = 1, far = 0
+ *  nearInvProjection inverse of the projection used for that depth, column-major, camera-relative view space
+ *  dstColor/Normal/Depth  GL textures (same size and format as the shared ones) that receive copies once the
+ *                    frame is done, e.g. the textures a shader pack samples through customTexture.
+ * aether restores every piece of GL state it touches (program, texture/sampler unit 15, image unit 7).
+ */
+typedef struct AetherGlFrameIO {
+    uint32_t nearDepthTex;
+    uint32_t depthZeroToOne;
+    uint32_t reversedZ;
+    uint32_t reserved;
+    float nearInvProjection[16];
+    uint32_t dstColor, dstNormal, dstDepth, reserved2;
+} AetherGlFrameIO;
+AETHER_API AetherStatus aether_gl_render_io(AetherContext* ctx, const AetherFrame* frame, const AetherGlFrameIO* io);
 AETHER_API void aether_gl_detach(AetherContext* ctx);
 
 /* Offline harness only: load native/data/tamriel_raster.bin and synthesise preview column tiles from it. */

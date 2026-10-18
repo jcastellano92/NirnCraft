@@ -30,6 +30,8 @@ static_assert(sizeof(AetherFrame) == 144 && offsetof(AetherFrame, invViewProj) =
 static_assert(sizeof(AetherFrameOutput) == 32 && offsetof(AetherFrameOutput, colorLinear) == 24);
 static_assert(sizeof(AetherWeather) == 40 && offsetof(AetherWeather, rainFactor) == 32);
 static_assert(sizeof(AetherActor) == 48 && offsetof(AetherActor, kind) == 36);
+static_assert(sizeof(AetherGlFrameIO) == 96 && offsetof(AetherGlFrameIO, nearInvProjection) == 16 &&
+              offsetof(AetherGlFrameIO, dstColor) == 80);
 static_assert(sizeof(AetherStats) == 56 && offsetof(AetherStats, nodeBytes) == 8 && offsetof(AetherStats, raySteps) == 48);
 
 struct AetherContext {
@@ -92,7 +94,7 @@ extern "C" {
 AETHER_API uint32_t aether_abi_version(void) { return AETHER_ABI_VERSION; }
 
 AETHER_API const char* aether_build_info(void) {
-    return "aether_core " AETHER_VERSION_STRING " (abi 0.2.0; slang far kernel; " __DATE__ ")";
+    return "aether_core " AETHER_VERSION_STRING " (abi 0.3.0; slang far kernel; " __DATE__ ")";
 }
 
 AETHER_API AetherStatus aether_create(AetherBackend backend, AetherContext** out) {
@@ -251,14 +253,29 @@ AETHER_API AetherStatus aether_gl_attach(AetherContext* ctx, uint32_t w, uint32_
 }
 
 AETHER_API AetherStatus aether_gl_render(AetherContext* ctx, const AetherFrame* f) {
+    return aether_gl_render_io(ctx, f, nullptr);
+}
+
+AETHER_API AetherStatus aether_gl_render_io(AetherContext* ctx, const AetherFrame* f, const AetherGlFrameIO* io) {
     if (!ctx || !f || f->width == 0 || f->height == 0) return AETHER_ERR_ARG;
     std::lock_guard<std::mutex> lock(ctx->mu);
     FrameInputs in{};
     AetherStatus st = buildInputs(ctx, f, in);
     if (st != AETHER_OK) return st;
+    GlFrameIO g;
+    if (io) {
+        g.nearDepthTex = io->nearDepthTex;
+        g.depthZeroToOne = io->depthZeroToOne;
+        g.reversedZ = io->reversedZ;
+        std::memcpy(g.nearInvProjection, io->nearInvProjection, sizeof(g.nearInvProjection));
+        g.dstColor = io->dstColor;
+        g.dstNormal = io->dstNormal;
+        g.dstDepth = io->dstDepth;
+        if (g.nearDepthTex) in.wantNearDepth = true;
+    }
     double ms = ctx->stats.lastFrameMs;
     std::string err;
-    if (!ctx->backend->glRender(in, &ms, err)) return ctx->fail(AETHER_ERR_GPU, err);
+    if (!ctx->backend->glRender(in, io ? &g : nullptr, &ms, err)) return ctx->fail(AETHER_ERR_GPU, err);
     ctx->stats.lastFrameMs = ms;
     return AETHER_OK;
 }

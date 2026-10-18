@@ -10,6 +10,12 @@
 
 namespace aether {
 
+struct GlFrameIO {
+    uint32_t nearDepthTex = 0, depthZeroToOne = 0, reversedZ = 0;
+    float nearInvProjection[16] = {};
+    uint32_t dstColor = 0, dstNormal = 0, dstDepth = 0;
+};
+
 struct FrameInputs {
     std::shared_ptr<const PackedScene> sceneHold;  // keeps the snapshot alive for the frame
     const PackedScene* scene;
@@ -50,7 +56,7 @@ public:
     }
     // Renders straight into the shared images. GL commands issued after it returns see the frame (a GL-side
     // semaphore wait is queued); the CPU does not block on the GPU. gpuMs reports the previous frame.
-    virtual bool glRender(const FrameInputs&, double*, std::string& err) {
+    virtual bool glRender(const FrameInputs&, const GlFrameIO*, double*, std::string& err) {
         err = "not attached";
         return false;
     }
