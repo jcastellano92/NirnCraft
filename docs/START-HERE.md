@@ -77,7 +77,9 @@ VT0 housekeeping, VT1 ingest and targets for Volume 01 Skyrim, VT2 the headless 
    canonical over Daggerfall and Arena.
 6. **The fast loop.** Iterate with Tier 0 JUnit tests (`tools\qa\qa.ps1 -Unit`) and the persistent dev server
    (`tools\dev\devserver.ps1 hotswap|run`, `/skycraft-dev reload`, `/skycraft-dev regen`); run the full gates once per
-   phase (`tools\qa\qa.ps1 -Server -Rebake`). **Never launch the Minecraft client**; the owner does visual checks
-   himself. At most 3 agents at once.
+   phase (`tools\qa\qa.ps1 -Server -Rebake`). **Live client**: agents may use only the authorised autotest Prism
+   instance (`docs/LIVE-WORLD-PREVIEW.md`), and only through the live client broker
+   (`docs/world/VISUAL-TARGETS-PLAN.md` 5.1): one live client and one dev server at a time, jobs queued and batched.
+   The owner signs off visuals. At most 3 agents at once.
 7. **Gates are measurable and never weakened.** A phase is done when every gate in its prompt passes, measured by the
    named tool, with the numbers in the report.
