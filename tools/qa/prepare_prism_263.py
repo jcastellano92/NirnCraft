@@ -111,11 +111,13 @@ def validate_instance(instance, lock):
         if digest(game / "mods" / name, row["hashFormat"]) != row["hash"].lower():
             raise ValueError(f"Client dependency hash mismatch: {name}")
     validate_core_jar(game / "mods/skycraft-core.jar")
-    if (game / "shaderpacks").exists() and any((game / "shaderpacks").iterdir()):
-        raise ValueError("Customized legacy shaders must remain preserved outside the native preview")
+    packs = sorted(p.name for p in (game / "shaderpacks").iterdir()) if (game / "shaderpacks").exists() else []
+    if [p for p in packs if p != "SkycraftAether.zip"]:
+        raise ValueError(f"Only Skycraft's own shader pack may ship in the preview, found {packs}")
     iris = (game / "config/iris.properties").read_text(encoding="utf-8-sig")
-    if not re.search(r"^enableShaders=false$", iris, re.M):
-        raise ValueError("Native preview shaders must start disabled until integration acceptance")
+    if not (re.search(r"^enableShaders=false$", iris, re.M)
+            or (re.search(r"^enableShaders=true$", iris, re.M) and re.search(r"^shaderPack=SkycraftAether\.zip$", iris, re.M))):
+        raise ValueError("Preview shaders must be off or Skycraft's own SkycraftAether.zip")
     embedded = json.loads((game / "migration/platform-lock.json").read_text(encoding="utf-8-sig"))
     if embedded != lock:
         raise ValueError("Archive was built with a different platform/dependency lock")

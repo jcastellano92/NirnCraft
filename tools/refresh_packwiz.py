@@ -29,7 +29,8 @@ def wanted(rel):
         return bool(rest)
     if top in ("mods", "resourcepacks", "shaderpacks") and "/" not in rest:
         return (rest.endswith(".pw.toml") or (top == "mods" and rest.endswith(".jar"))
-                or (top == "shaderpacks" and rest.endswith(".zip.txt")))
+                or (top == "shaderpacks" and rest.endswith(".zip.txt"))
+                or (top == "shaderpacks" and rest == "SkycraftAether.zip"))  # Skycraft's own pack, built in-repo
     return False
 
 

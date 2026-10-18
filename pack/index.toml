@@ -9,8 +9,12 @@ file = "config/defaultoptions/options.txt"
 hash = "aeec438e4e522d686816dd47ae71ed6fc05c125076c6ddb1f541d72a442c53cd"
 
 [[files]]
+file = "config/dynamic_fps.json"
+hash = "20540c89aa94d1bced9ac7c2122f82018ebbf9252a7a937a41f907f088850a8c"
+
+[[files]]
 file = "config/iris.properties"
-hash = "a3e5e04c0e2b5c96a15606431b69fa7ad1a81d6e6dda0f7bb4dbc16cde0b02e8"
+hash = "4da17bdbae124b2b055d77c7113ba29cf0fb200d6499b22376a27f4ab0b290a7"
 
 [[files]]
 file = "config/lootr-common.toml"
@@ -129,3 +133,7 @@ metafile = true
 file = "mods/structure-layout-optimizer.pw.toml"
 hash = "4e4fb2264f0c6d04ccd96d2f54d110ed663d93929dab4a1e4431ac19fdb87f23"
 metafile = true
+
+[[files]]
+file = "shaderpacks/SkycraftAether.zip"
+hash = "7d7839bb31b5d7c2ff8adc573ab09c64f9d042eb0a5e8801a43d152a211f8fe0"

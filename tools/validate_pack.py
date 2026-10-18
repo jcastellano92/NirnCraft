@@ -87,8 +87,17 @@ def validate_pack(pack_dir=ROOT / "pack"):
                     raise ValueError(f"{row['key']}: missing required exact dependency {dep}")
     iris = dict(line.split("=", 1) for line in (pack_dir / "config/iris.properties").read_text().splitlines()
                 if line and not line.startswith("#") and "=" in line)
-    if iris.get("enableShaders") != "false":
-        raise ValueError("customized shader integration must remain disabled until accepted")
+    # the only shader pack is Skycraft's own (shaderpack/SkycraftAether, shipped as pack/shaderpacks/SkycraftAether.zip)
+    if iris.get("enableShaders") not in ("false", "true"):
+        raise ValueError("config/iris.properties: enableShaders must be true or false")
+    if iris.get("enableShaders") == "true" and iris.get("shaderPack") != "SkycraftAether.zip":
+        raise ValueError("config/iris.properties: the enabled shader pack must be SkycraftAether.zip")
+    shaderpacks = pack_dir / "shaderpacks"
+    extra = sorted(p.name for p in shaderpacks.iterdir() if p.name != "SkycraftAether.zip") if shaderpacks.exists() else []
+    if extra:
+        raise ValueError(f"pack/shaderpacks may hold only SkycraftAether.zip, found {extra}")
+    if iris.get("enableShaders") == "true" and not (shaderpacks / "SkycraftAether.zip").is_file():
+        raise ValueError("pack/shaderpacks/SkycraftAether.zip is missing (py -3 -I shaderpack/build_pack.py)")
     if keys & {"essential", "e4mc", "distanthorizons", "c2me-neoforge", "oculus", "embeddium"}:
         raise ValueError("unapproved hosting, legacy renderers or experimental integrations are active")
     index_path = pack_dir / pack["index"]["file"]
