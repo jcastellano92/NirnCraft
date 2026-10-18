@@ -4,7 +4,11 @@
 // into the shared nearDepth image, and the covered pixels must come back empty. When the driver pair cannot share
 // memory, aether falls back to host copies (AETHER_INTEROP=hostcopy forces it): the same frames must still match;
 // the near-depth skip is off there (every pixel is marched, so the references are the plain renders).
-//   aether_gl_test [native/data]
+// Two contexts, one after the other (gl_context.hpp): the platform's default one, then the production one, an OpenGL
+// 3.3 core forward-compatible profile like Minecraft's. The second must pass too, and land on the same interop path as
+// the first (zero-copy where the interop extensions exist, host-copy otherwise): a driver that drops an extension, or a
+// GL 4.5-only call, in the 3.3 core profile would otherwise only show up in game.
+//   aether_gl_test [native/data] [--context=both|default|core33]
 
 #include <algorithm>
 #include <atomic>
@@ -52,16 +56,31 @@ static Compare compare(const std::vector<float>& refC, const std::vector<float>&
     return c;
 }
 
-int main(int argc, char** argv) {
-    std::string data = argc > 1 ? argv[1] : "native/data";
+enum Result { PASS, FAIL, SKIP };
+
+static Result runSuite(const std::string& data, aether_test::Profile profile, std::string& mode) {
     aether_test::GlContext glc;
     GlApi gl;
     std::string err;
-    if (!glc.create(err) || !gl.load(err)) {
+    if (!glc.create(err, profile) || !gl.load(err)) {
         std::printf("SKIP: %s\n", err.c_str());
-        return 0;
+        return SKIP;
     }
     std::printf("GL (%s): %s | %s\n", glc.kind, gl.GetString(GL_RENDERER), gl.GetString(GL_VERSION));
+    if (profile == aether_test::Profile::Core33) {
+        // the context really is what the game runs on: core profile (no compatibility functions), forward-compatible
+        const GLenum GL_CONTEXT_PROFILE_MASK_ = 0x9126, GL_CONTEXT_FLAGS_ = 0x821E;
+        GLint mask = 0, flags = 0;
+        gl.GetIntegerv(GL_CONTEXT_PROFILE_MASK_, &mask);
+        gl.GetIntegerv(GL_CONTEXT_FLAGS_, &flags);
+        while (gl.GetError() != GL_NO_ERROR) {}
+        std::printf("context: OpenGL %d.%d, profile mask 0x%x (core %s), forward-compatible %s\n", gl.major, gl.minor,
+                    unsigned(mask), mask & 0x1 ? "yes" : "NO", flags & 0x1 ? "yes" : "no");
+        if (!(mask & 0x1)) {
+            std::printf("FAIL: asked for a 3.3 core profile, got profile mask 0x%x\n", unsigned(mask));
+            return FAIL;
+        }
+    }
     // a strict driver (Mesa) flags what a lenient one lets pass: no GL error may be left over at any step
     auto glCheck = [&](const char* where) {
         GLenum e = gl.GetError();
@@ -73,11 +92,11 @@ int main(int argc, char** argv) {
     AetherContext* ctx = nullptr;
     if (aether_create(AETHER_BACKEND_VULKAN, &ctx) != AETHER_OK) {
         std::printf("SKIP: no Vulkan backend (%s)\n", aether_last_error(nullptr));
-        return 0;
+        return SKIP;
     }
     if (aether_preview_load_raster(ctx, (data + "/tamriel_raster.bin").c_str()) != AETHER_OK) {
         std::printf("SKIP: %s\n", aether_last_error(ctx));
-        return 0;
+        return SKIP;
     }
     double x = 0, z = 0, y = std::fmax(aether_preview_height(ctx, x, z), 63.0) + 60;
     for (int lod = 0; lod < 7; lod++) {
@@ -109,20 +128,21 @@ int main(int argc, char** argv) {
     AetherFrameOutput o{nullptr, nullptr, refDepth.data(), refColor.data()};
     if (aether_render(ctx, &f, &o) != AETHER_OK) {
         std::printf("FAIL host render: %s\n", aether_last_error(ctx));
-        return 1;
+        return FAIL;
     }
 
     AetherGlTargets t{};
     if (aether_gl_attach(ctx, W, H, &t) != AETHER_OK) {
         std::printf("FAIL attach: %s\n", aether_last_error(ctx));
-        return 1;
+        return FAIL;
     }
     std::printf("attached: color %u normal %u depth %u nearDepth %u (%ux%u)\n", t.color, t.normal, t.depth,
                 t.nearDepth, t.width, t.height);
     std::string info = aether_info(ctx);
     std::printf("info: %s\n", info.c_str());
     const bool host = info.find("\"interop\":\"host-copy\"") != std::string::npos;
-    std::printf("mode: %s\n", host ? "host-copy" : "zero-copy");
+    mode = host ? "host-copy" : "zero-copy";
+    std::printf("mode: %s\n", mode.c_str());
     glClean &= glCheck("attach");
     // host copies march every pixel (no near-depth skip): the near-field references are the plain renders
     std::vector<float> plainColor = refColor, plainDepth = refDepth;
@@ -133,7 +153,7 @@ int main(int argc, char** argv) {
     for (int i = 0; i < FRAMES; i++) {
         if (aether_gl_render(ctx, &f) != AETHER_OK) {
             std::printf("FAIL gl render %d: %s\n", i, aether_last_error(ctx));
-            return 1;
+            return FAIL;
         }
     }
     double cpuMs = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - c0).count() / FRAMES;
@@ -164,7 +184,7 @@ int main(int argc, char** argv) {
     AetherFrameOutput on{nullptr, nullptr, refDepth.data(), refColor.data()};
     if (aether_render(ctx, &fn, &on) != AETHER_OK) {
         std::printf("FAIL host near render: %s\n", aether_last_error(ctx));
-        return 1;
+        return FAIL;
     }
     if (host) {
         refColor = plainColor;
@@ -217,7 +237,7 @@ int main(int argc, char** argv) {
     for (int i = 0; i < 3; i++)
         if (aether_gl_render_io(ctx, &fd, &io) != AETHER_OK) {
             std::printf("FAIL gl render io: %s\n", aether_last_error(ctx));
-            return 1;
+            return FAIL;
         }
     gl.Finish();
     gl.GetTextureImage(dst[0], 0, GL_RGBA, GL_FLOAT, GLsizei(glColor.size() * 4), glColor.data());
@@ -324,7 +344,7 @@ int main(int argc, char** argv) {
             std::printf("FAIL streaming render %d: %s\n", i, aether_last_error(ctx));
             stop = true;
             worker.join();
-            return 1;
+            return FAIL;
         }
         frameMs.push_back(std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count());
         std::this_thread::sleep_for(std::chrono::milliseconds(8));  // the rest of a game frame
@@ -351,5 +371,44 @@ int main(int argc, char** argv) {
               c3.color == 0 && c3.depth == 0 && c4.color == 0 && c4.depth == 0 && c5.color == 0 && c5.depth == 0 && sunOk &&
               smooth;
     std::printf(ok ? "PASS\n" : "FAIL (gl error 0x%x)\n", e);
+    return ok ? PASS : FAIL;
+}
+
+int main(int argc, char** argv) {
+    std::string data = "native/data", which = "both";
+    for (int i = 1; i < argc; i++) {
+        std::string a = argv[i];
+        if (a.rfind("--context=", 0) == 0) which = a.substr(10);
+        else data = a;
+    }
+    if (which != "both" && which != "default" && which != "core33") {
+        std::printf("usage: aether_gl_test [native/data] [--context=both|default|core33]\n");
+        return 2;
+    }
+    const char* names[3] = {"PASS", "FAIL", "SKIP"};
+    Result def = SKIP, core = SKIP;
+    std::string defMode, coreMode;
+    if (which != "core33") {
+        std::printf("== default context\n");
+        def = runSuite(data, aether_test::Profile::Default, defMode);
+    }
+    if (which != "default") {
+        std::printf("== OpenGL 3.3 core profile (the game's context)\n");
+        core = runSuite(data, aether_test::Profile::Core33, coreMode);
+    }
+    bool ok = def != FAIL && core != FAIL;
+    if (which == "both") {
+        std::printf("default context: %s (%s); 3.3 core: %s (%s)\n", names[def], defMode.empty() ? "-" : defMode.c_str(),
+                    names[core], coreMode.empty() ? "-" : coreMode.c_str());
+        if (def == PASS && core == SKIP) {
+            std::printf("FAIL: the 3.3 core context is unusable where the default context works\n");
+            ok = false;
+        }
+        if (def == PASS && core == PASS && defMode != coreMode) {
+            std::printf("FAIL: the 3.3 core context lands on %s where the default context gets %s\n", coreMode.c_str(),
+                        defMode.c_str());
+            ok = false;
+        }
+    }
     return ok ? 0 : 1;
 }
