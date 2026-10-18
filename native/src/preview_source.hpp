@@ -15,7 +15,7 @@ namespace aether {
 // Default palette ids used by the preview source (the game sends its own palette).
 enum PreviewMat : uint16_t {
     M_STONE = 1, M_GRASS, M_DIRT, M_SAND, M_SNOW, M_WATER, M_GRAVEL, M_FOLIAGE, M_ASH, M_SANDSTONE, M_MUD,
-    M_DRYGRASS, M_CONIFER, M_JUNGLE, M_REDSAND, M_ICE, M_COUNT
+    M_DRYGRASS, M_CONIFER, M_JUNGLE, M_REDSAND, M_ICE, M_TUNDRA, M_COLDGRASS, M_LUSHGRASS, M_MARSHGRASS, M_COUNT
 };
 std::vector<AetherMaterial> previewPalette();
 

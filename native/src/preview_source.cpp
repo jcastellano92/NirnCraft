@@ -73,6 +73,11 @@ std::vector<AetherMaterial> previewPalette() {
     set(M_JUNGLE, mat(0.15f, 0.36f, 0.1f, 0.95f, AETHER_CLASS_FOLIAGE));
     set(M_REDSAND, mat(0.72f, 0.45f, 0.28f, 0.85f, AETHER_CLASS_TERRAIN));
     set(M_ICE, mat(0.66f, 0.78f, 0.9f, 0.2f, AETHER_CLASS_TERRAIN));
+    // grass by climate, roughly how the holds and provinces read from a distance
+    set(M_TUNDRA, mat(0.51f, 0.52f, 0.34f, 0.9f, AETHER_CLASS_TERRAIN));      // Whiterun's golden tundra
+    set(M_COLDGRASS, mat(0.43f, 0.48f, 0.37f, 0.9f, AETHER_CLASS_TERRAIN));   // the Pale, Eastmarch, Haafingar
+    set(M_LUSHGRASS, mat(0.33f, 0.47f, 0.22f, 0.9f, AETHER_CLASS_TERRAIN));   // Cyrodiil, High Rock, the jungles
+    set(M_MARSHGRASS, mat(0.36f, 0.40f, 0.24f, 0.85f, AETHER_CLASS_TERRAIN)); // Black Marsh, Hjaalmarch
     return p;
 }
 
@@ -271,10 +276,13 @@ std::unique_ptr<Tile> PreviewSource::makeTile(int lod, int tx, int tz) const {
             snowline += float(fbm(x, z, 120, 2, 21) * 18.0);
             uint16_t top = M_GRASS, fill = M_DIRT;
             switch (cl) {
+                case SK_TEMPERATE: top = M_TUNDRA; break;
+                case SK_COLD: top = M_COLDGRASS; break;
+                case TEMPERATE: case MARITIME: case TROPICAL: case JUNGLE: top = M_LUSHGRASS; break;
                 case DESERT: top = sm.dunes > 0.2f ? M_SAND : M_SANDSTONE; fill = M_SANDSTONE; break;
                 case SAVANNA: top = M_DRYGRASS; break;
                 case ASH: top = M_ASH; fill = M_ASH; break;
-                case SWAMP: top = sm.wet > 0.3f ? M_MUD : M_GRASS; break;
+                case SWAMP: top = sm.wet > 0.3f ? M_MUD : M_MARSHGRASS; break;
                 case FROZEN: top = M_SNOW; fill = M_STONE; break;
                 default: break;
             }

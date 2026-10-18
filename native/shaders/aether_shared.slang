@@ -87,10 +87,11 @@ float3 skyAmbient(float3 n, float3 sun) {
     return lerp(ground, skyUp, n.y * 0.5 + 0.5);
 }
 
-float3 shadeSurface(float3 albedo, MaterialGpu m, float3 n, float3 v, float3 sun, float sunVis, uint cls) {
+// ao: 0..1 sky-light occlusion (crevices, forest floors), applied to the ambient term only
+float3 shadeSurface(float3 albedo, MaterialGpu m, float3 n, float3 v, float3 sun, float sunVis, uint cls, float ao) {
     float ndl = saturate(dot(n, sun));
     float3 direct = sunRadiance(sun) * ndl * sunVis;
-    float3 c = albedo * (direct + skyAmbient(n, sun));
+    float3 c = albedo * (direct + skyAmbient(n, sun) * ao);
     if (cls == 2u) {
         // water: Schlick Fresnel against the sky, plus a soft sun glint
         float cosv = saturate(-v.y);
@@ -119,6 +120,21 @@ float3 aerialFog(float3 dir, float3 sun) {
 
 float3 applyAerial(float3 c, float3 dir, float3 sun, float t, FrameGpu f) {
     return lerp(aerialFog(dir, sun), c, aerialTransmittance(t, f));
+}
+
+// Smooth value noise on a world-space grid (stable under camera motion and LOD changes).
+float hash21(int2 p) {
+    uint h = uint(p.x) * 374761393u + uint(p.y) * 668265263u;
+    h = (h ^ (h >> 13)) * 1274126177u;
+    return float(h & 0xFFFFFFu) / 16777215.0;
+}
+
+float valueNoise(float2 x) {
+    float2 i = floor(x), f = x - i;
+    f = f * f * (3.0 - 2.0 * f);
+    int2 b = int2(i);
+    float a = hash21(b), bb = hash21(b + int2(1, 0)), c = hash21(b + int2(0, 1)), d = hash21(b + int2(1, 1));
+    return lerp(lerp(a, bb, f.x), lerp(c, d, f.x), f.y);
 }
 
 uint packColor(float3 c, float a) {

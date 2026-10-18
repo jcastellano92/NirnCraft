@@ -480,7 +480,7 @@ void farMain(uint3 id : SV_DispatchThreadID) {
         MaterialGpu am;
         am.albedoRough = float4(ah.albedo, 0.8);
         am.emisClass = float4(0, 0, 0, 0);
-        color = shadeSurface(ah.albedo, am, n, dir, sun, sunVis, 0u);
+        color = shadeSurface(ah.albedo, am, n, dir, sun, sunVis, 0u, 1.0);
         depth = ah.t;
         color = applyAerial(color, dir, sun, ah.t, frame);
     } else if (tHit >= 0.0) {
@@ -516,8 +516,26 @@ void farMain(uint3 id : SV_DispatchThreadID) {
         }
         if ((frame.dims.z & FRAME_CLOUDS) != 0 && sunVis > 0.0) sunVis *= cloudShadow(p, sun);
         float3 albedo = m.albedoRough.rgb;
+        // ambient occlusion: solid neighbours around the air voxel in front of the face (4 taps in the face plane)
+        float ao = 1.0;
+        {
+            float3 fn = float3(ax == 0 ? (slope.x > 0 ? -1.0 : 1.0) : 0.0, ax == 1 ? (slope.y > 0 ? -1.0 : 1.0) : 0.0,
+                               ax == 2 ? (slope.z > 0 ? -1.0 : 1.0) : 0.0);
+            float3 front = centre + fn * s;
+            float3 t1 = ax == 0 ? float3(0, s, 0) : float3(s, 0, 0);
+            float3 t2 = ax == 2 ? float3(0, s, 0) : float3(0, 0, s);
+            float occ = (occupiedAt(res.lod, front + t1) ? 1.0 : 0.0) + (occupiedAt(res.lod, front - t1) ? 1.0 : 0.0) +
+                        (occupiedAt(res.lod, front + t2) ? 1.0 : 0.0) + (occupiedAt(res.lod, front - t2) ? 1.0 : 0.0);
+            ao = 1.0 - 0.15 * occ;
+        }
+        // large-scale tone variation on land (about 24 and 90 blocks), the far-field stand-in for texture detail
+        if (cls != 2u) {
+            float2 wxz = p.xz + float2(frame.camInt.xz);
+            float v = valueNoise(wxz / 24.0) * 0.6 + valueNoise(wxz / 90.0 + 17.0) * 0.4;
+            albedo *= 0.86 + 0.28 * v;
+        }
         if ((frame.dims.z & FRAME_DEBUG_LOD) != 0) albedo = lodTint(res.lod);
-        color = shadeSurface(albedo, m, n, dir, sun, sunVis, cls);
+        color = shadeSurface(albedo, m, n, dir, sun, sunVis, cls, ao);
         depth = tHit;
         color = applyAerial(color, dir, sun, tHit, frame);
         if ((frame.dims.z & FRAME_DEBUG_WEATHER) != 0) {
