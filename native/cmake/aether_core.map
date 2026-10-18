@@ -1,0 +1,7 @@
+/* libaether_core.so exports only the C API (AETHER_API, aether_*): not the Slang-generated CPU kernels
+   (farMain, heightMain, ...), nor C++ template instances that would otherwise interpose with other libraries
+   in the game process */
+{
+  global: aether_*;
+  local: *;
+};

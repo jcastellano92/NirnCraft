@@ -115,6 +115,12 @@ if(NOT MSVC)
     target_link_options(aether_core PRIVATE -static-libstdc++ -static-libgcc -Wl,--exclude-libs,ALL)
   endif()
   target_link_options(aether_core PRIVATE -Wl,--no-undefined)
+  # the shipped Release library: no static symbol table or DWARF (the linked-in C++ runtime brings megabytes of it);
+  # the exported AETHER_API symbols are dynamic and stay
+  target_link_options(aether_core PRIVATE $<$<CONFIG:Release>:-s>)
+  # and nothing but the C API in the dynamic symbol table (hidden visibility misses the generated kernels' exports)
+  target_link_options(aether_core PRIVATE "-Wl,--version-script=${CMAKE_SOURCE_DIR}/cmake/aether_core.map")
+  set_property(TARGET aether_core APPEND PROPERTY LINK_DEPENDS "${CMAKE_SOURCE_DIR}/cmake/aether_core.map")
 endif()
 # The generated kernel is plain arithmetic; keep MSVC from contracting differently than the GPU where it can.
 if(MSVC)
@@ -151,13 +157,27 @@ target_link_libraries(aether_bench PRIVATE aether_core ${AETHER_TEST_GL_LIBS})
 # refuses the build unless every arithmetic instruction is NoContraction and no inexact extended instruction is used.
 add_executable(spv_exact tools/spv_exact.cpp)
 set(HEIGHT_SRC "${CMAKE_SOURCE_DIR}/shaders/aether_height.slang")
-find_program(SPIRV_VAL spirv-val HINTS "${VULKAN_SDK}/Bin" NO_DEFAULT_PATH)
+# spirv-val: the SDK's on Windows; on Linux the SDK's, else PATH (spirv-tools / SPIRV-Tools package). spv_exact checks
+# the float contract itself; the validator is an extra structural check, skipped with a warning when absent on Linux.
+if(WIN32)
+  find_program(SPIRV_VAL spirv-val HINTS "${VULKAN_SDK}/Bin" NO_DEFAULT_PATH)
+else()
+  find_program(SPIRV_VAL spirv-val HINTS "${VULKAN_SDK}/bin" "${VULKAN_SDK}/Bin" "${VULKAN_HEADERS}/bin")
+endif()
+set(HEIGHT_VALIDATE)
+if(SPIRV_VAL)
+  set(HEIGHT_VALIDATE COMMAND "${SPIRV_VAL}" --target-env vulkan1.2 "${GEN}/aether_height.spv")
+elseif(WIN32)
+  message(FATAL_ERROR "spirv-val not found in ${VULKAN_SDK}/Bin")
+else()
+  message(WARNING "spirv-val not found (install spirv-tools): aether_height.spv is checked by spv_exact only")
+endif()
 add_custom_command(
   OUTPUT "${GEN}/aether_height.spv"
   COMMAND "${SLANGC}" "${HEIGHT_SRC}" -target spirv -entry heightMain -stage compute -O3 -fp-mode precise
           -o "${GEN}/aether_height_raw.spv"
   COMMAND spv_exact "${GEN}/aether_height_raw.spv" "${GEN}/aether_height.spv"
-  COMMAND "${SPIRV_VAL}" --target-env vulkan1.2 "${GEN}/aether_height.spv"
+  ${HEIGHT_VALIDATE}
   DEPENDS "${HEIGHT_SRC}" spv_exact COMMENT "slangc aether_height -> SPIR-V (exact float contract)")
 add_custom_command(
   OUTPUT "${GEN}/aether_height_spv.h"
@@ -170,9 +190,14 @@ add_custom_command(
           -o "${GEN}/aether_height_cpu.cpp"
   DEPENDS "${HEIGHT_SRC}" COMMENT "slangc aether_height -> C++ (CPU reference)")
 target_sources(aether_core PRIVATE src/height_engine.cpp "${GEN}/aether_height_cpu.cpp" "${GEN}/aether_height_spv.h")
-# x64 SSE2 scalar arithmetic is IEEE binary32/64; /fp:strict also forbids contraction and keeps the C++ reference's
-# float operations literal
-set_source_files_properties("${GEN}/aether_height_cpu.cpp" PROPERTIES COMPILE_OPTIONS "/fp:strict;/W0")
+# x64 SSE2 scalar arithmetic is IEEE binary32/64; /fp:strict (MSVC) and -ffp-contract=off -fno-fast-math (GCC/Clang)
+# forbid contraction and keep the C++ reference's float operations literal
+if(MSVC)
+  set_source_files_properties("${GEN}/aether_height_cpu.cpp" PROPERTIES COMPILE_OPTIONS "/fp:strict;/W0")
+else()
+  set_source_files_properties("${GEN}/aether_height_cpu.cpp" PROPERTIES COMPILE_OPTIONS
+                              "-ffp-contract=off;-fno-fast-math;-w")
+endif()
 
 add_executable(aether_height_test tests/height_test.cpp)
 target_include_directories(aether_height_test PRIVATE include)

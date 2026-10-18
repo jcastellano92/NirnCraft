@@ -13,6 +13,9 @@
 # Needs: a C++20 compiler (g++ >= 11 or clang++ >= 14), cmake >= 3.20, the Vulkan loader (libvulkan.so.1: every
 # Steam / Mesa / NVIDIA install has it), python3 (to export the test rasters once), curl + tar (fetches Slang and,
 # when /usr/include/vulkan is missing, Vulkan-Headers into native/build-linux/deps; nothing is installed system-wide).
+# Optional: spirv-val (spirv-tools / SPIRV-Tools) validates the exact-height kernel's SPIR-V at build time.
+# Shipping build (loads on glibc 2.28+: SteamOS, Bazzite, Fedora, Debian 10+): build against a glibc 2.28 sysroot, e.g.
+#   conda-forge's gcc_linux-64 (sysroot_linux-64 2.28): CXX=x86_64-conda-linux-gnu-g++ native/build_linux.sh
 #
 # Steam Deck (SteamOS is read-only, no compiler): build in a distrobox / toolbox container (Bazzite ships both;
 #   `distrobox create -i fedora:41 aether && distrobox enter aether`, then `sudo dnf install gcc-c++ cmake ninja-build
@@ -44,7 +47,7 @@ for a in "$@"; do
     --validate) VALIDATE=1 ;;
     --clean) CLEAN=1 ;;
     --allow-skip) ALLOW_SKIP=1 ;;
-    -h|--help) sed -n '2,30p' "$0"; exit 0 ;;
+    -h|--help) sed -n '2,29p' "$0"; exit 0 ;;
     *) echo "unknown option $a" >&2; exit 2 ;;
   esac
 done
@@ -136,7 +139,12 @@ run() {
   else echo "-- ok"; fi
 }
 run "$BUILD/aether_tests" "$RASTER"
-run "$BUILD/aether_gl_test" "$HERE/data"
+# the exact-height kernel: correctly rounded division, known inputs, Vulkan vs its C++ reference bit for bit (a device
+# without shaderFloat64 + RTE / SignedZeroInfNanPreserve float controls reports the CPU fallback and passes)
+run "$BUILD/aether_height_test"
+# the GL bridge on two contexts: a 4.5 core one, then an OpenGL 3.3 core forward-compatible profile like Minecraft's
+# (zero-copy where the interop extensions exist, host-copy otherwise; the 3.3 one must land on the same path)
+run "$BUILD/aether_gl_test" "$HERE/data" --context=both
 run "$BUILD/aether_pack_test" "$REPO/shaderpack/SkycraftAether/shaders/lib/atmosphere.glsl"
 [ "$status" = 0 ] && echo "ALL PASSED" || echo "SOME SUITES FAILED"
 exit "$status"
