@@ -40,6 +40,9 @@
 // the previous frame's cloud pass output, for temporal reprojection (declared after the texture: CPU layout order)
 [[vk::binding(22, 0)]] StructuredBuffer<float4> prevCloudBuf;
 [[vk::binding(23, 0)]] StructuredBuffer<float> prevCloudDepth;
+// the sun map: size x (size + 1) texels; rows 0 .. size-1 (occluder's sun-axis coordinate, cloud transmittance),
+// row `size` the map's parameters (see sunMapMain)
+[[vk::binding(24, 0)]] RWStructuredBuffer<float2> sunMap;
 
 #include "aether_clouds.slang"
 
@@ -520,6 +523,67 @@ void cloudMain(uint3 tid : SV_DispatchThreadID) {
     }
     cloudBuf[ci] = c;
     cloudDepth[ci] = d;
+}
+
+// One texel of the sun map: the sun line through the map plane at (u, v), traced from the world top down along the
+// key light (straight: the map spans a few km, where curvature is a block), coarsest LOD that resolves a texel and
+// coarser where that one has no data. Returns the first occluder's coordinate along L from the map centre
+// (-1e30: none) and the cloud transmittance towards the light there.
+float2 sunTexel(uint i, uint j) {
+    float S = float(frame.sunMapRows.z), he = frame.sunMapCentre.w;
+    float3 L = frame.sunMapL.xyz, X = frame.sunMapX.xyz, Y = frame.sunMapY.xyz, c = frame.sunMapCentre.xyz;
+    float u = ((float(i) + 0.5) / S * 2.0 - 1.0) * he, v = ((float(j) + 0.5) / S * 2.0 - 1.0) * he;
+    float3 P = c + X * u + Y * v;
+    bool clouds = (frame.dims.z & FRAME_CLOUDS) != 0;
+    if (L.y < 0.01) return float2(-1e30, 1.0);  // the light at the horizon: no map
+    float top = 641.0 - float(frame.camInt.y), bottom = -64.0 - float(frame.camInt.y);
+    float3 O = P + L * ((top - P.y) / L.y);
+    float3 d = -L;
+    float maxT = min((top - bottom) / L.y, 30000.0);
+    int lodCount = int(frame.dims.w);
+    int l = clamp(int(floor(log2(max(2.0 * he / S, 1.0)))), 0, lodCount - 1);
+    TraceResult rr;
+    rr.t = 0; rr.mat = 0; rr.axis = -1; rr.lod = 0; rr.steps = 0;
+    float t = 0;
+    for (int seg = 0; seg < 128; seg++) {
+        if (t >= maxT) break;
+        float s = float(1 << l);
+        float len = min(192.0 * s, maxT - t);
+        float uncExit;
+        int hit = traceLod(l, O + d * t, d, len, rr, uncExit);
+        if (hit == TRACE_HIT) {
+            float3 hp = O + d * (t + rr.t);
+            return float2(dot(hp - c, L), clouds ? cloudShadow(hp, L) : 1.0);
+        }
+        if (hit == TRACE_UNCOVERED) {
+            if (l + 1 < lodCount) { l++; continue; }
+            t += uncExit < 1e29 ? max(uncExit, s) : len;  // nothing at any LOD here: across it
+            continue;
+        }
+        t += len;
+    }
+    float3 g = P + L * ((63.0 - float(frame.camInt.y) - P.y) / L.y);
+    return float2(-1e30, clouds ? cloudShadow(g, L) : 1.0);
+}
+
+// The sun map for the near field (the pack shadows the rasterised world with it beyond its own shadow map's
+// reach: mountains over valleys, cloud shadows): rows sunMapRows.x .. +y (wrapping), refreshed progressively;
+// thread row y == count writes the parameter row: centre (world), half extent, X, Y, L.
+[shader("compute")]
+[numthreads(8, 8, 1)]
+void sunMapMain(uint3 id : SV_DispatchThreadID) {
+    uint S = frame.sunMapRows.z, count = frame.sunMapRows.y;
+    if (frame.sunMapRows.w == 0u || id.x >= S || id.y > count) return;
+    if (id.y == count) {
+        float3 cw = frame.sunMapCentre.xyz + float3(frame.camInt.xyz);
+        float3 X = frame.sunMapX.xyz, Y = frame.sunMapY.xyz, L = frame.sunMapL.xyz;
+        float2 p[7] = { float2(cw.x, cw.y), float2(cw.z, frame.sunMapCentre.w), float2(X.x, X.y), float2(X.z, Y.x),
+                        float2(Y.y, Y.z), float2(L.x, L.y), float2(L.z, 1.0) };
+        if (id.x < 7u) sunMap[S * S + id.x] = p[id.x];
+        return;
+    }
+    uint j = (frame.sunMapRows.x + id.y) % S;
+    sunMap[j * S + id.x] = sunTexel(id.x, j);
 }
 
 [shader("compute")]

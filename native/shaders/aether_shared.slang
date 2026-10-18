@@ -41,6 +41,11 @@ struct FrameGpu {
     float4 prevViewProj[4];  // last frame's camera-relative view-projection (columns), for cloud reprojection
     float4 prevCam;          // last frame's camera relative to this frame's camInt
     uint4 temporal;          // frame index, history valid (0/1)
+    float4 sunMapCentre;     // sun map centre, camera-relative; w = half extent (blocks)
+    float4 sunMapX;          // sun map basis (perpendicular to the key light)
+    float4 sunMapY;
+    float4 sunMapL;          // the key light the map is traced along
+    uint4 sunMapRows;        // first row, row count, size, enabled
 };
 
 float3 unproject(FrameGpu f, float2 ndc) {

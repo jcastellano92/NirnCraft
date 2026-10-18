@@ -87,6 +87,7 @@ int main(int argc, char** argv) {
     f.sunDir[1] = 0.5f;
     f.sunDir[2] = 0.66f;
     f.lodBias = float(arg(argc, argv, "bias", 1));
+    if (int sm = int(arg(argc, argv, "sunmap", 0))) aether_set_sun_map(ctx, uint32_t(sm), float(arg(argc, argv, "sunextent", 2048)));
     struct Set {
         const char* name;
         uint32_t flags;

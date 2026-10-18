@@ -101,9 +101,11 @@ public final class AetherClient {
             if (ctx == null && !start(mc)) return;
             // aether's own resolution (dynamic: AetherQuality); the pack upsamples it to the window
             int w = quality.width(mc.getWindow().getWidth()), h = quality.height(mc.getWindow().getHeight());
-            if (targets == null || targets.width() != w || targets.height() != h) {
+            int sunMap = quality.sunMapSize();
+            if (targets == null || targets.width() != w || targets.height() != h || targets.sunSize() != sunMap) {
                 if (targets != null) targets.close();
-                targets = AetherTargets.create(ctx, w, h);
+                ctx.setSunMap(sunMap, AetherQuality.SUN_HALF_EXTENT);
+                targets = AetherTargets.create(ctx, w, h, sunMap);
             }
             if (mc.level.dimension() != Level.OVERWORLD) {
                 targets.clear();  // the far field is the overworld's; elsewhere the near field stands alone
@@ -145,6 +147,7 @@ public final class AetherClient {
             io.dstColor = targets.colorId();
             io.dstNormal = 0;
             io.dstDepth = targets.depthId();
+            io.dstSunMap = targets.sunId();
             ctx.glRender(frame, io);
             if (quality.update((float) ctx.stats().frameMs(), mc.getFps(), System.nanoTime()))
                 com.skycraft.Skycraft.LOGGER.debug("aether quality level {} (scale {})", quality.level(), quality.scale());

@@ -19,6 +19,14 @@ final class AetherQuality {
     private int over, under;
     private long lastChange;
 
+    /** The sun map's size per level (far shadows on the near field): 4 m texels over 4 km, coarser lower down. */
+    private static final int[] SUN_MAP = {1024, 1024, 1024, 1024, 512, 512, 256, 256};
+    static final float SUN_HALF_EXTENT = 2048f;
+
+    int sunMapSize() {
+        return SUN_MAP[level];
+    }
+
     float scale() {
         return LEVELS[level][0];
     }

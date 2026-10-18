@@ -41,6 +41,15 @@ add_custom_command(
           -P "${CMAKE_SOURCE_DIR}/cmake/embed_spv.cmake"
   DEPENDS "${GEN}/aether_cloud.spv" "${CMAKE_SOURCE_DIR}/cmake/embed_spv.cmake")
 add_custom_command(
+  OUTPUT "${GEN}/aether_sunmap.spv"
+  COMMAND "${SLANGC}" "${KERNEL_SRC}" -target spirv -entry sunMapMain -stage compute -O3 -o "${GEN}/aether_sunmap.spv"
+  DEPENDS ${KERNEL_DEPS} COMMENT "slangc aether_far:sunMapMain -> SPIR-V")
+add_custom_command(
+  OUTPUT "${GEN}/aether_sunmap_spv.h"
+  COMMAND "${CMAKE_COMMAND}" -DIN=${GEN}/aether_sunmap.spv -DOUT=${GEN}/aether_sunmap_spv.h -DNAME=aether_sunmap_spv
+          -P "${CMAKE_SOURCE_DIR}/cmake/embed_spv.cmake"
+  DEPENDS "${GEN}/aether_sunmap.spv" "${CMAKE_SOURCE_DIR}/cmake/embed_spv.cmake")
+add_custom_command(
   OUTPUT "${GEN}/aether_publish.spv"
   COMMAND "${SLANGC}" "${CMAKE_SOURCE_DIR}/shaders/aether_publish.slang" -target spirv -entry publishMain -stage compute -O3
           -o "${GEN}/aether_publish.spv"
@@ -62,14 +71,14 @@ add_custom_command(
   DEPENDS "${GEN}/aether_ingest.spv" "${CMAKE_SOURCE_DIR}/cmake/embed_spv.cmake")
 add_custom_command(
   OUTPUT "${GEN}/aether_far_cpu.cpp"
-  COMMAND "${SLANGC}" "${KERNEL_SRC}" -target cpp -entry farMain -stage compute -entry cloudMain -stage compute -O3
+  COMMAND "${SLANGC}" "${KERNEL_SRC}" -target cpp -entry farMain -stage compute -entry cloudMain -stage compute -entry sunMapMain -stage compute -O3
           -o "${GEN}/aether_far_cpu.cpp"
   DEPENDS ${KERNEL_DEPS} COMMENT "slangc aether_far -> C++ (CPU reference)")
 
 add_library(aether_core SHARED
   src/api.cpp src/svdag.cpp src/world.cpp src/preview_source.cpp src/cpu_backend.cpp src/vk_backend.cpp src/gl_api.cpp
   "${GEN}/aether_far_cpu.cpp" "${GEN}/aether_far_spv.h" "${GEN}/aether_publish_spv.h" "${GEN}/aether_ingest_spv.h"
-  "${GEN}/aether_cloud_spv.h")
+  "${GEN}/aether_cloud_spv.h" "${GEN}/aether_sunmap_spv.h")
 target_include_directories(aether_core PUBLIC include PRIVATE src "${GEN}" "${SLANG_ROOT}/include" "${VULKAN_SDK}/Include")
 target_compile_definitions(aether_core PRIVATE AETHER_BUILD AETHER_VERSION_STRING="${PROJECT_VERSION}")
 target_link_libraries(aether_core PRIVATE "${VULKAN_SDK}/Lib/vulkan-1.lib" opengl32)

@@ -32,7 +32,7 @@ extern "C" {
 #endif
 
 /* (major << 16) | (minor << 8) | patch. Bumped on any ABI change. */
-#define AETHER_ABI_VERSION 0x000600
+#define AETHER_ABI_VERSION 0x000700
 
 typedef struct AetherContext AetherContext;
 
@@ -223,7 +223,8 @@ typedef struct AetherGlFrameIO {
     uint32_t reversedZ;
     uint32_t reserved;
     float nearInvProjection[16];
-    uint32_t dstColor, dstNormal, dstDepth, reserved2;
+    uint32_t dstColor, dstNormal, dstDepth;
+    uint32_t dstSunMap; /* RG32F size x size+1 (aether_set_sun_map), or 0 */
 } AetherGlFrameIO;
 AETHER_API AetherStatus aether_gl_render_io(AetherContext* ctx, const AetherFrame* frame, const AetherGlFrameIO* io);
 AETHER_API void aether_gl_detach(AetherContext* ctx);
@@ -260,6 +261,19 @@ AETHER_API AetherStatus aether_upload_column_structures(AetherContext* ctx, int3
  * colours added over the current palette (building walls and roofs). */
 AETHER_API AetherStatus aether_set_materials(AetherContext* ctx, uint32_t first, const AetherMaterial* materials,
                                              uint32_t count);
+/*
+ * The sun map: a size x size occlusion map along the key light (sun, or moon at night) over halfExtent blocks either
+ * side of the camera, traced through the far field and refreshed progressively (in full when the camera moves
+ * 256 blocks or the size changes), for a shader pack to shadow the near field with beyond its own shadow map:
+ * mountains over valleys, cloud shadows. Texel (i, j): RG = the first occluder's coordinate along the light from
+ * the map centre (-1e30 none), cloud transmittance. Row `size` holds the parameters: (cx, cy) (cz, halfExtent)
+ * (Xx, Xy) (Xz, Yx) (Yy, Yz) (Lx, Ly) (Lz, 1): centre in world blocks, the map's axes X, Y and the light L. A point
+ * p is behind an occluder when dot(p - c, L) < R - bias at (u, v) = (dot(p - c, X), dot(p - c, Y)) / halfExtent.
+ * size 0 turns it off (default). On the GL path it is copied into AetherGlFrameIO.dstSunMap (RG32F, size x size+1).
+ */
+AETHER_API AetherStatus aether_set_sun_map(AetherContext* ctx, uint32_t size, float halfExtent);
+/* The sun map as last computed (size * (size + 1) * 2 floats into out, count in floats). Waits for the GPU. */
+AETHER_API AetherStatus aether_read_sun_map(AetherContext* ctx, float* out, uint32_t count);
 /* 1 if tile (lod, tileX, tileZ) is resident (uploaded and not evicted), else 0. */
 AETHER_API int32_t aether_has_tile(AetherContext* ctx, int32_t lod, int32_t tileX, int32_t tileZ);
 /* Offline harness only: preview terrain height at a block column (for camera placement). */

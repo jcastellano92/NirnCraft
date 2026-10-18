@@ -12,6 +12,7 @@ struct AetherGroupRange {
 };
 extern "C" void farMain(void* varyingInput, void* entryPointParams, void* globalParams);
 extern "C" void cloudMain(void* varyingInput, void* entryPointParams, void* globalParams);
+extern "C" void sunMapMain(void* varyingInput, void* entryPointParams, void* globalParams);
 
 namespace aether {
 namespace {
@@ -26,6 +27,12 @@ public:
     const char* name() const override { return "cpu (slang->c++)"; }
     std::vector<float> dummyDepth_ = std::vector<float>(1, 1e30f);
     std::vector<float> cloud_, cloudDepth_, prevSurface_, outSurface_, prevCloud_, prevCloudDepth_;
+    std::vector<float> sunMap_ = std::vector<float>(2, 0.0f);
+
+    bool readSunMap(std::vector<float>& out, std::string&) override {
+        out = sunMap_.size() > 2 ? sunMap_ : std::vector<float>();
+        return true;
+    }
 
     bool render(const FrameInputs& in, FrameTargets& out, double* ms, std::string&) override {
         auto t0 = std::chrono::steady_clock::now();
@@ -73,6 +80,9 @@ public:
         g.cloudDepth = view(cloudDepth_);
         g.prevSurface = view(prevSurface_);
         g.outSurface = view(outSurface_);
+        uint32_t sms = frame.sunMapRows[3] ? frame.sunMapRows[2] : 0;
+        if (sms && sunMap_.size() != size_t(sms) * (sms + 1) * 2) sunMap_.assign(size_t(sms) * (sms + 1) * 2, 0.0f);
+        g.sunMap = {reinterpret_cast<Float2*>(sunMap_.data()), sunMap_.size() / 2};
 
         auto dispatch = [&](void (*kernel)(void*, void*, void*), uint32_t gx, uint32_t gy) {
             std::atomic<uint32_t> nextRow{0};
@@ -93,6 +103,7 @@ public:
         if (frame.dims[2] & 0x1u)  // FRAME_CLOUDS
             dispatch(cloudMain, ((w + dv - 1) / dv + 7) / 8, ((h + dv - 1) / dv + 7) / 8);
         dispatch(farMain, (w + 7) / 8, (h + 7) / 8);
+        if (sms) dispatch(sunMapMain, (sms + 7) / 8, (frame.sunMapRows[1] + 1 + 7) / 8);
         prevSurface_.swap(outSurface_);
         if (frame.dims[2] & 0x1u) {
             prevCloud_.swap(cloud_);

@@ -14,6 +14,7 @@ struct GlFrameIO {
     uint32_t nearDepthTex = 0, depthZeroToOne = 0, reversedZ = 0;
     float nearInvProjection[16] = {};
     uint32_t dstColor = 0, dstNormal = 0, dstDepth = 0;
+    uint32_t dstSunMap = 0;  // caller texture (RG32F, size x size + 1) the sun map is copied into, or 0
 };
 
 struct FrameInputs {
@@ -61,6 +62,12 @@ public:
         return false;
     }
     virtual void glDetach() {}
+    // The sun map as last computed (size * (size + 1) float2, empty when none). Waits for the GPU.
+    virtual bool readSunMap(std::vector<float>& out, std::string& err) {
+        err = "no sun map";
+        out.clear();
+        return false;
+    }
 };
 
 std::unique_ptr<Backend> makeCpuBackend();

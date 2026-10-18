@@ -35,6 +35,43 @@ float sunShadow(vec3 playerPos, vec3 n, vec3 toLight) {
 }
 #endif
 
+#ifdef AETHER_FAR_FIELD
+uniform sampler2D aetherSunMap;
+
+// aether's sun map (docs: native/include/aether/aether.h, aether_set_sun_map): the first occluder along the key light
+// over ~4 km around the camera, traced through the far field, plus the clouds' transmittance. Returns (lit 0..1 by
+// distant terrain: mountains over valleys, beyond the shadow map's reach; cloud transmittance). (1, 1) without a map.
+vec2 aetherSun(vec3 playerPos) {
+    ivec2 sz = textureSize(aetherSunMap, 0);
+    int S = sz.x;
+    if (S < 2 || sz.y != S + 1) return vec2(1.0);
+    vec2 q[7];
+    for (int k = 0; k < 7; k++) q[k] = texelFetch(aetherSunMap, ivec2(k, S), 0).rg;
+    if (q[6].y != 1.0) return vec2(1.0);
+    vec3 c = vec3(q[0].x, q[0].y, q[1].x);
+    float he = q[1].y;
+    vec3 X = vec3(q[2].x, q[2].y, q[3].x), Y = vec3(q[3].y, q[4].x, q[4].y), L = vec3(q[5].x, q[5].y, q[6].x);
+    vec3 r = playerPos + cameraPosition - c;
+    vec2 uv = vec2(dot(r, X), dot(r, Y)) / he * 0.5 + 0.5;
+    if (any(lessThan(uv, vec2(0.0))) || any(greaterThan(uv, vec2(1.0)))) return vec2(1.0);
+    float s = dot(r, L);
+    float texel = 2.0 * he / float(S);
+    float bias = 2.0 * texel + 1.5;  // the map is coarse: only occluders well above count (the shadow map has the rest)
+    vec2 p = uv * float(S) - 0.5;
+    ivec2 i0 = ivec2(floor(p));
+    vec2 f = p - vec2(i0);
+    float lit = 0.0, cloud = 0.0;
+    for (int k = 0; k < 4; k++) {
+        ivec2 o = ivec2(k & 1, k >> 1);
+        vec2 t = texelFetch(aetherSunMap, clamp(i0 + o, ivec2(0), ivec2(S - 1)), 0).rg;
+        float w = (o.x == 1 ? f.x : 1.0 - f.x) * (o.y == 1 ? f.y : 1.0 - f.y);
+        lit += w * (t.r > s + bias ? 0.0 : 1.0);
+        cloud += w * t.g;
+    }
+    return vec2(lit, cloud);
+}
+#endif
+
 // albedo linear; lm = light map (block, sky) in 0..1; sun = world direction to the sun; moon = to the moon
 vec3 shadeForward(vec3 albedo, vec3 n, vec2 lm, vec3 playerPos, vec3 sun, float emissive) {
     float sky = lm.y * lm.y;
@@ -45,6 +82,10 @@ vec3 shadeForward(vec3 albedo, vec3 n, vec2 lm, vec3 playerPos, vec3 sun, float 
     vis = sunShadow(playerPos, n, toLight);
 #else
     vis = clamp(dot(n, toLight), 0.0, 1.0);
+#endif
+#ifdef AETHER_FAR_FIELD
+    vec2 far = aetherSun(playerPos);  // mountains over valleys, cloud shadows
+    vis *= far.x * mix(0.25, 1.0, far.y);
 #endif
     // no sun where the sky cannot reach (caves): sky light is the light map's own occlusion
     float open = smoothstep(0.05, 0.35, lm.y);

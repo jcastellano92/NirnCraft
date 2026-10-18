@@ -393,6 +393,91 @@ static void testStructures() {
     aether_destroy(ctx);
 }
 
+// The sun map (aether_set_sun_map): a 200-block pillar on flat ground, the sun 30 degrees up in the east. Decoded
+// as a shader pack would (parameter row only): the ground in the pillar's shadow is behind an occluder, open ground
+// and the pillar's top are not; CPU and Vulkan agree.
+static bool sunLit(const std::vector<float>& m, uint32_t S, const double p[3]) {
+    const float* q = &m[size_t(S) * S * 2];
+    double c[3] = {q[0], q[1], q[2]}, he = q[3], X[3] = {q[4], q[5], q[6]}, Y[3] = {q[7], q[8], q[9]};
+    double L[3] = {q[10], q[11], q[12]}, r[3] = {p[0] - c[0], p[1] - c[1], p[2] - c[2]};
+    double u = (r[0] * X[0] + r[1] * X[1] + r[2] * X[2]) / he, v = (r[0] * Y[0] + r[1] * Y[1] + r[2] * Y[2]) / he;
+    int i = int((u * 0.5 + 0.5) * S), j = int((v * 0.5 + 0.5) * S);
+    if (i < 0 || j < 0 || i >= int(S) || j >= int(S)) return true;
+    double occ = m[(size_t(j) * S + i) * 2], s = r[0] * L[0] + r[1] * L[1] + r[2] * L[2];
+    return !(occ > s + 3.0);
+}
+
+static void testSunMap() {
+    std::printf("sun map\n");
+    const size_t N = 256 * 256;
+    std::vector<float> flat(N, 100.0f), pillar(N, 100.0f), water(N, NAN);
+    for (int j = 108; j < 148; j++)
+        for (int i = 108; i < 148; i++) pillar[size_t(j) * 256 + i] = 300.0f;  // x, z -20 .. 20 in tile (0, 0)
+    std::vector<uint16_t> top(N, 2), fill(N, 3);
+    std::vector<float> maps[2];
+    const uint32_t S = 256;
+    int b = 0;
+    for (AetherBackend backend : {AETHER_BACKEND_CPU, AETHER_BACKEND_VULKAN}) {
+        AetherContext* ctx = nullptr;
+        if (aether_create(backend, &ctx) != AETHER_OK) {
+            std::printf("  SKIP: no Vulkan\n");
+            continue;
+        }
+        for (int lod = 0; lod < 4; lod++) {
+            int span = 256 << lod;
+            for (int tz = -3; tz <= 2; tz++)
+                for (int tx = -3; tx <= 2; tx++) {
+                    bool p = lod == 0 && tx == 0 && tz == 0;
+                    // coarser LODs see the pillar too (a 40-block pillar is a few voxels there)
+                    std::vector<float> s = flat;
+                    if (lod > 0 && tx == 0 && tz == 0) {
+                        int c = 128 >> lod, r = std::max(1, 20 >> lod);  // the same world x, z at that LOD
+                        for (int jj = c - r; jj < c + r; jj++)
+                            for (int ii = c - r; ii < c + r; ii++) s[size_t(jj) * 256 + ii] = 300.0f;
+                    }
+                    (void)span;
+                    AetherColumnTile t{lod, tx, tz, p ? pillar.data() : s.data(), water.data(), top.data(), fill.data(), nullptr, nullptr};
+                    aether_upload_column_tile(ctx, &t);
+                }
+        }
+        CHECK(aether_set_sun_map(ctx, S, 512.0f) == AETHER_OK);
+        CHECK(aether_set_sun_map(ctx, 32, 512.0f) == AETHER_ERR_ARG);
+        double centre[3] = {128.5, 160.0, 128.5};
+        aether_update(ctx, centre, 0);
+        AetherFrame f{};
+        for (int i = 0; i < 3; i++) f.cameraPos[i] = centre[i];
+        f.width = f.height = 16;
+        cameraMatrix(0, -10, 60, 1.0, f.invViewProj);
+        f.maxDistance = 6000;
+        double el = 30.0 * 3.14159265358979 / 180.0;
+        f.sunDir[0] = float(std::cos(el));
+        f.sunDir[1] = float(std::sin(el));
+        f.lodBias = 1;
+        AetherFrameOutput o{};
+        CHECK(aether_render(ctx, &f, &o) == AETHER_OK);
+        maps[b].resize(size_t(S) * (S + 1) * 2);
+        CHECK(aether_read_sun_map(ctx, maps[b].data(), uint32_t(maps[b].size())) == AETHER_OK);
+        const auto& m = maps[b];
+        double behind[3] = {128 - 80.0, 100.5, 128}, open[3] = {128 + 150.0, 100.5, 128 + 150.0}, crest[3] = {128, 300.5, 128};
+        std::printf("  %s: behind the pillar %s, open ground %s, its top %s\n", backend == AETHER_BACKEND_CPU ? "cpu   " : "vulkan",
+                    sunLit(m, S, behind) ? "lit" : "shadowed", sunLit(m, S, open) ? "lit" : "shadowed", sunLit(m, S, crest) ? "lit" : "shadowed");
+        CHECK(!sunLit(m, S, behind));
+        CHECK(sunLit(m, S, open));
+        CHECK(sunLit(m, S, crest));
+        b++;
+        aether_destroy(ctx);
+    }
+    if (b == 2) {
+        size_t off = 0;
+        for (size_t k = 0; k < size_t(S) * S; k++) {
+            float a = maps[0][k * 2], c = maps[1][k * 2];
+            if ((a < -1e29f) != (c < -1e29f) || (a > -1e29f && std::abs(a - c) > 1.0f)) off++;
+        }
+        std::printf("  cpu/vulkan: %.3f%% texels differ\n", 100.0 * off / (double(S) * S));
+        CHECK(off < size_t(S) * S / 200);
+    }
+}
+
 // A far actor on flat ground: the ray must hit its body at the analytic distance, in front of the terrain.
 static void testActors() {
     std::printf("far actors\n");
@@ -816,6 +901,7 @@ int main(int argc, char** argv) {
     testFourZones();
     testRegionSeam();
     testStructures();
+    testSunMap();
     testActors();
     testNearDepth(argc > 1 ? argv[1] : "native/data/tamriel_raster.bin");
     testColumnHeights(argc > 1 ? argv[1] : "native/data/tamriel_raster.bin");

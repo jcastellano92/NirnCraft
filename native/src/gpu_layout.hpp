@@ -35,6 +35,13 @@ struct alignas(16) FrameGpu {
     float prevViewProj[16];
     float prevCam[4];
     uint32_t temporal[4];
+    // sun map (aether_set_sun_map): centre camera-relative + half extent; basis X, Y (perpendicular to the key
+    // light) and the key light L; rows: first row, row count, size, flags (1 = enabled)
+    float sunMapCentre[4];
+    float sunMapX[4];
+    float sunMapY[4];
+    float sunMapL[4];
+    uint32_t sunMapRows[4];
 };
 
 struct alignas(16) ActorGpu {
@@ -46,10 +53,14 @@ static_assert(sizeof(LodGpu) == 32);
 static_assert(sizeof(ActorGpu) == 32);
 static_assert(sizeof(RegionGpu) == 48);
 static_assert(sizeof(MaterialGpu) == 32);
-static_assert(sizeof(FrameGpu) == 64 + 16 * 6 + 32 * MAX_LODS + 64 + 16 + 16);
+static_assert(sizeof(FrameGpu) == 64 + 16 * 6 + 32 * MAX_LODS + 64 + 16 + 16 + 16 * 5);
 
 struct Float4 {
     float v[4];
+};
+
+struct Float2 {
+    float v[2];
 };
 
 // Slang's C++ target: StructuredBuffer<T> is { T* data; size_t count; }, ConstantBuffer<T> is T*.
@@ -85,6 +96,7 @@ struct FarGlobals {
     void* cloudNoiseTex;  // Texture3D on the C++ target: unused there (the kernel samples cloudNoise by hand)
     CpuBuffer<Float4> prevCloudBuf;
     CpuBuffer<float> prevCloudDepth;
+    CpuBuffer<Float2> sunMap;
 };
 
 }  // namespace aether

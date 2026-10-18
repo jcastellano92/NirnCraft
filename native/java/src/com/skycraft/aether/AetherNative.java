@@ -25,7 +25,7 @@ import static java.lang.foreign.ValueLayout.JAVA_SHORT;
  * heap access, so Java arrays are passed in place without an off-heap copy; frame rendering is a normal downcall.</p>
  */
 public final class AetherNative {
-    public static final int ABI_VERSION = 0x000600;
+    public static final int ABI_VERSION = 0x000700;
     public static final int BACKEND_CPU = 0, BACKEND_VULKAN = 1;
     public static final int FRAME_CLOUDS = 0x1, FRAME_SHADOWS = 0x2, FRAME_ATMOS = 0x4, FRAME_ACTORS = 0x8,
             FRAME_SKY = 0x10, FRAME_NEAR_DEPTH = 0x20, FRAME_FLAT_NORMALS = 0x40, FRAME_CLOUDS_QUARTER = 0x80,
@@ -40,7 +40,7 @@ public final class AetherNative {
     private final Arena libArena;
     private final MethodHandle abiVersion, buildInfo, create, destroy, lastError, setPalette, uploadTile,
             uploadSection, notifyBlock, setWeather, setCloudNoise, setActors, update, render, getStats,
-            glAttach, glRenderIo, glDetach, previewLoadRaster, previewGenerate, previewHeight, uploadHeights, uploadHeights2, hasTile, uploadStructures, setMaterials;
+            glAttach, glRenderIo, glDetach, previewLoadRaster, previewGenerate, previewHeight, uploadHeights, uploadHeights2, hasTile, uploadStructures, setMaterials, setSunMap;
 
     private AetherNative(Path library) {
         libArena = Arena.ofShared();
@@ -80,6 +80,7 @@ public final class AetherNative {
                 critical);
         uploadStructures = bind(l, lib, "aether_upload_column_structures",
                 FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, JAVA_INT, JAVA_INT, ADDRESS, ADDRESS, ADDRESS, ADDRESS));
+        setSunMap = bind(l, lib, "aether_set_sun_map", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, JAVA_FLOAT));
         setMaterials = bind(l, lib, "aether_set_materials", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, ADDRESS, JAVA_INT));
     }
 
@@ -176,6 +177,8 @@ public final class AetherNative {
         public boolean reversedZ;
         public final float[] nearInvProjection = new float[16];
         public int dstColor, dstNormal, dstDepth;
+        /** RG32F, sunMapSize x sunMapSize + 1 (Context.setSunMap), or 0. */
+        public int dstSunMap;
 
         void write(MemorySegment s) {
             s.set(JAVA_INT, 0, nearDepthTex);
@@ -186,7 +189,7 @@ public final class AetherNative {
             s.set(JAVA_INT, 80, dstColor);
             s.set(JAVA_INT, 84, dstNormal);
             s.set(JAVA_INT, 88, dstDepth);
-            s.set(JAVA_INT, 92, 0);
+            s.set(JAVA_INT, 92, dstSunMap);
         }
     }
 
@@ -226,6 +229,18 @@ public final class AetherNative {
                     m.set(JAVA_INT, o + 20, (int) v[5]);
                 }
                 check((int) setPalette.invokeExact(ptr, m, materials.length), "aether_set_palette");
+            } catch (Throwable t) {
+                throw rethrow(t);
+            }
+        }
+
+        /**
+         * The sun map (aether.h aether_set_sun_map): size x size along the key light over halfExtent blocks around
+         * the camera, for the pack's far shadows (mountains, clouds) on the near field; size 0 turns it off.
+         */
+        public void setSunMap(int size, float halfExtent) {
+            try {
+                check((int) setSunMap.invokeExact(ptr, size, halfExtent), "aether_set_sun_map");
             } catch (Throwable t) {
                 throw rethrow(t);
             }

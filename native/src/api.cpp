@@ -54,6 +54,12 @@ struct AetherContext {
     double prevCam[3] = {};
     uint32_t prevW = 0, prevH = 0, prevCloudFlags = 0;
     uint32_t frameIndex = 0;
+    // the sun map (aether_set_sun_map)
+    uint32_t sunMapSize = 0;
+    float sunMapHalf = 2048.0f;
+    double sunMapCentre[3] = {1e300, 0, 1e300};
+    bool sunMapFull = true;
+    uint32_t sunMapCursor = 0;
 
     AetherStatus fail(AetherStatus s, std::string msg) {
         error = std::move(msg);
@@ -279,6 +285,7 @@ AETHER_API AetherStatus aether_gl_render_io(AetherContext* ctx, const AetherFram
         g.dstColor = io->dstColor;
         g.dstNormal = io->dstNormal;
         g.dstDepth = io->dstDepth;
+        g.dstSunMap = io->dstSunMap;
         if (g.nearDepthTex) in.wantNearDepth = true;
     }
     double ms = ctx->stats.lastFrameMs;
@@ -369,6 +376,40 @@ static AetherStatus buildInputs(AetherContext* ctx, const AetherFrame* f, FrameI
         g.temporal[1] = 1;
     }
     g.temporal[0] = ctx->frameIndex;
+    if (ctx->sunMapSize) {
+        // the map stays put while the camera wanders (256-block steps), so most frames only refresh a band of rows
+        // (the light moves slowly); a step or a new size redoes all of it
+        uint32_t S = ctx->sunMapSize;
+        double cx = std::floor(f->cameraPos[0] / 256.0 + 0.5) * 256.0, cz = std::floor(f->cameraPos[2] / 256.0 + 0.5) * 256.0;
+        bool full = ctx->sunMapFull || cx != ctx->sunMapCentre[0] || cz != ctx->sunMapCentre[2];
+        ctx->sunMapCentre[0] = cx;
+        ctx->sunMapCentre[2] = cz;
+        ctx->sunMapFull = false;
+        float L[3];
+        bool day = g.sunDir[1] > -0.05f;  // the key light: the sun, or the moon opposite it at night
+        for (int i = 0; i < 3; i++) L[i] = day ? g.sunDir[i] : -g.sunDir[i];
+        float up[3] = {0, 0, 1};
+        if (std::abs(L[2]) > 0.9f) up[0] = 1, up[2] = 0;
+        float X[3] = {up[1] * L[2] - up[2] * L[1], up[2] * L[0] - up[0] * L[2], up[0] * L[1] - up[1] * L[0]};
+        float xl = std::sqrt(X[0] * X[0] + X[1] * X[1] + X[2] * X[2]);
+        for (float& v : X) v /= xl;
+        float Y[3] = {L[1] * X[2] - L[2] * X[1], L[2] * X[0] - L[0] * X[2], L[0] * X[1] - L[1] * X[0]};
+        g.sunMapCentre[0] = float(cx - double(g.camInt[0]));
+        g.sunMapCentre[1] = float(64.0 - double(g.camInt[1]));
+        g.sunMapCentre[2] = float(cz - double(g.camInt[2]));
+        g.sunMapCentre[3] = ctx->sunMapHalf;
+        for (int i = 0; i < 3; i++) {
+            g.sunMapX[i] = X[i];
+            g.sunMapY[i] = Y[i];
+            g.sunMapL[i] = L[i];
+        }
+        uint32_t band = std::max(8u, S / 8);
+        g.sunMapRows[0] = full ? 0 : ctx->sunMapCursor;
+        g.sunMapRows[1] = full ? S : band;
+        g.sunMapRows[2] = S;
+        g.sunMapRows[3] = 1;
+        ctx->sunMapCursor = full ? 0 : (ctx->sunMapCursor + band) % S;
+    }
     std::memcpy(g.lods, in.scene->lods, sizeof(g.lods));
     in.palette = &ctx->palette;
     in.weather = &ctx->weather;
@@ -492,6 +533,27 @@ AETHER_API AetherStatus aether_set_materials(AetherContext* ctx, uint32_t first,
     AetherMaterial grey{{0.3f, 0.3f, 0.3f}, 0.9f, 0.0f, AETHER_CLASS_TERRAIN};
     if (ctx->palette.size() < first + count) ctx->palette.resize(first + count, toGpu(grey));
     for (uint32_t i = 0; i < count; i++) ctx->palette[first + i] = toGpu(m[i]);
+    return AETHER_OK;
+}
+
+AETHER_API AetherStatus aether_set_sun_map(AetherContext* ctx, uint32_t size, float halfExtent) {
+    if (!ctx || (size && (size < 64 || size > 4096)) || (size && !(halfExtent >= 256.0f && halfExtent <= 16384.0f)))
+        return AETHER_ERR_ARG;
+    std::lock_guard<std::mutex> lock(ctx->mu);
+    ctx->sunMapSize = size;
+    ctx->sunMapHalf = halfExtent;
+    ctx->sunMapFull = true;
+    return AETHER_OK;
+}
+
+AETHER_API AetherStatus aether_read_sun_map(AetherContext* ctx, float* out, uint32_t count) {
+    if (!ctx || !out) return AETHER_ERR_ARG;
+    std::lock_guard<std::mutex> lock(ctx->mu);
+    std::vector<float> m;
+    std::string err;
+    if (!ctx->backend->readSunMap(m, err) || m.empty()) return ctx->fail(AETHER_ERR_STATE, err.empty() ? "no sun map yet" : err);
+    if (count < m.size()) return ctx->fail(AETHER_ERR_ARG, "sun map buffer too small");
+    std::memcpy(out, m.data(), m.size() * 4);
     return AETHER_OK;
 }
 

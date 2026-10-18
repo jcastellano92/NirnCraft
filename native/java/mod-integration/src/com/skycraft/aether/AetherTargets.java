@@ -24,26 +24,41 @@ import java.util.OptionalDouble;
 final class AetherTargets implements AutoCloseable {
     static final Identifier COLOR = Identifier.fromNamespaceAndPath("skycraft", "aether/color");
     static final Identifier DEPTH = Identifier.fromNamespaceAndPath("skycraft", "aether/depth");
+    /** the sun map (RG32F, size x size + 1: occluder along the light, cloud transmittance; last row parameters) */
+    static final Identifier SUNMAP = Identifier.fromNamespaceAndPath("skycraft", "aether/sunmap");
 
-    private final int width, height;
-    private final Target color, depth;
+    private final int width, height, sunSize;
+    private final Target color, depth, sun;
     private final AetherNative.GlTargets shared;
 
-    private AetherTargets(int width, int height, Target color, Target depth, AetherNative.GlTargets shared) {
+    private AetherTargets(int width, int height, int sunSize, Target color, Target depth, Target sun, AetherNative.GlTargets shared) {
         this.width = width;
         this.height = height;
+        this.sunSize = sunSize;
         this.color = color;
         this.depth = depth;
+        this.sun = sun;
         this.shared = shared;
     }
 
-    static AetherTargets create(AetherNative.Context ctx, int width, int height) {
+    /** sunSize: the sun map's size (0: none; the pack then sees a 1 x 2 map without a valid flag and skips it). */
+    static AetherTargets create(AetherNative.Context ctx, int width, int height, int sunSize) {
         AetherNative.GlTargets shared = ctx.glAttach(width, height);
         Target color = new Target("aether color", GpuFormat.RGBA16_FLOAT, width, height);
         Target depth = new Target("aether depth", GpuFormat.R32_FLOAT, width, height);
+        Target sun = new Target("aether sun map", GpuFormat.RG32_FLOAT, Math.max(1, sunSize), Math.max(2, sunSize + 1));
         Minecraft.getInstance().getTextureManager().register(COLOR, color);
         Minecraft.getInstance().getTextureManager().register(DEPTH, depth);
-        return new AetherTargets(width, height, color, depth, shared);
+        Minecraft.getInstance().getTextureManager().register(SUNMAP, sun);
+        return new AetherTargets(width, height, sunSize, color, depth, sun, shared);
+    }
+
+    int sunSize() {
+        return sunSize;
+    }
+
+    int sunId() {
+        return sunSize > 0 ? sun.glId : 0;
     }
 
     int width() {
@@ -78,6 +93,7 @@ final class AetherTargets implements AutoCloseable {
     public void close() {
         color.close();
         depth.close();
+        sun.close();
     }
 
     /** One registered texture; its GL name is what aether copies into. */

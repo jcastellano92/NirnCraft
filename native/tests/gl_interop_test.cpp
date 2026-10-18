@@ -257,6 +257,27 @@ int main(int argc, char** argv) {
     Compare c5 = compare(refColor, refDepth, glColor, glDepth, W, H);
     std::printf("near depth at twice aether's resolution: %zu colour, %zu depth pixels differ from host\n", c5.color, c5.depth);
     gl.DeleteTextures(1, &depthTex2);
+    // the sun map through GL: copied into the caller's RG32F texture, identical to the device buffer
+    const uint32_t SM = 128;
+    aether_set_sun_map(ctx, SM, 512.0f);
+    GLuint sunTex = 0;
+    gl.CreateTextures(GL_TEXTURE_2D, 1, &sunTex);
+    gl.TextureStorage2D(sunTex, 1, GL_RG32F, GLsizei(SM), GLsizei(SM + 1));
+    AetherGlFrameIO io3 = io;
+    io3.dstSunMap = sunTex;
+    for (int i = 0; i < 3; i++) aether_gl_render_io(ctx, &fd, &io3);
+    gl.Finish();
+    std::vector<float> sunGl(size_t(SM) * (SM + 1) * 2), sunDev(sunGl.size());
+    gl.GetTextureImage(sunTex, 0, GL_RG, GL_FLOAT, GLsizei(sunGl.size() * 4), sunGl.data());
+    bool sunRead = aether_read_sun_map(ctx, sunDev.data(), uint32_t(sunDev.size())) == AETHER_OK;
+    size_t sunOff = 0;
+    for (size_t k = 0; k < sunGl.size(); k++) sunOff += sunGl[k] != sunDev[k];
+    bool sunParams = sunGl[size_t(SM) * SM * 2 + 13] == 1.0f;  // the parameter row's valid flag
+    std::printf("sun map via GL: %zu of %zu values differ from the device buffer; parameter row %s\n", sunOff,
+                sunGl.size(), sunParams ? "present" : "MISSING");
+    aether_set_sun_map(ctx, 0, 512.0f);
+    gl.DeleteTextures(1, &sunTex);
+    bool sunOk = sunRead && sunOff == 0 && sunParams;
     gl.DeleteTextures(1, &depthTex);
     gl.DeleteTextures(3, dst);
     GLenum e = gl.GetError();
@@ -310,7 +331,7 @@ int main(int argc, char** argv) {
     wglMakeCurrent(nullptr, nullptr);
     wglDeleteContext(rc);
     bool ok = c1.color == 0 && c1.depth == 0 && c2.color == 0 && c2.depth == 0 && coveredLit == 0 && e == GL_NO_ERROR &&
-              c3.color == 0 && c3.depth == 0 && c4.color == 0 && c4.depth == 0 && c5.color == 0 && c5.depth == 0 &&
+              c3.color == 0 && c3.depth == 0 && c4.color == 0 && c4.depth == 0 && c5.color == 0 && c5.depth == 0 && sunOk &&
               smooth;
     std::printf(ok ? "PASS\n" : "FAIL (gl error 0x%x)\n", e);
     return ok ? 0 : 1;

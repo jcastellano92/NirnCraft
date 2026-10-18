@@ -17,7 +17,8 @@
 #include <cstring>
 #include <vector>
 
-#include "aether_cloud_spv.h"    // generated: the same kernel source's cloudMain entry
+#include "aether_cloud_spv.h"
+#include "aether_sunmap_spv.h"    // generated: the same kernel source's cloudMain entry
 #include "aether_far_spv.h"      // generated: aether_far_spv[], aether_far_spv_size (bytes)
 #include "aether_ingest_spv.h"   // generated
 #include "aether_publish_spv.h"  // generated
@@ -27,13 +28,13 @@
 namespace aether {
 namespace {
 
-constexpr uint32_t BINDINGS = 24;
+constexpr uint32_t BINDINGS = 25;
 constexpr uint32_t SLOTS = 2;
 // far kernel bindings
 constexpr uint32_t B_FRAME = 0, B_PALETTE = 7, B_COLOR = 8, B_NORMAL = 9, B_DEPTH = 10, B_WEATHER = 11,
                    B_COUNTERS = 12, B_NOISE = 13, B_NEAR = 14, B_ACTORS = 15, B_HEIGHTMIP = 16, B_CLOUD = 17,
                    B_CLOUD_DEPTH = 18, B_PREV_SURFACE = 19, B_SURFACE = 20, B_NOISE_TEX = 21, B_PREV_CLOUD = 22,
-                   B_PREV_CLOUD_DEPTH = 23;
+                   B_PREV_CLOUD_DEPTH = 23, B_SUNMAP = 24;
 // the scene's buffers (two copies, staged off the render thread)
 constexpr uint32_t SCENE_BINDINGS[] = {1, 2, 3, 4, 5, 6, B_HEIGHTMIP};
 bool isScene(uint32_t b) { return (b >= 1 && b <= 6) || b == B_HEIGHTMIP; }
@@ -166,6 +167,8 @@ public:
             if (dpool_) vkDestroyDescriptorPool(dev_, dpool_, nullptr);
             if (cloudPipe_) vkDestroyPipeline(dev_, cloudPipe_, nullptr);
             if (cloudShader_) vkDestroyShaderModule(dev_, cloudShader_, nullptr);
+            if (sunPipe_) vkDestroyPipeline(dev_, sunPipe_, nullptr);
+            if (sunShader_) vkDestroyShaderModule(dev_, sunShader_, nullptr);
             destroyPipe(farPipe_, farLayout_, farSetLayout_, farShader_);
             destroyPipe(publishPipe_, publishLayout_, publishSetLayout_, publishShader_);
             destroyPipe(ingestPipe_, ingestLayout_, ingestSetLayout_, ingestShader_);
@@ -203,6 +206,13 @@ public:
             cp.layout = farLayout_;
             if (vkCreateComputePipelines(dev_, VK_NULL_HANDLE, 1, &cp, nullptr, &cloudPipe_) != VK_SUCCESS)
                 return fail(err, "cloud pipeline");
+            // and the sun map pass
+            smci.codeSize = aether_sunmap_spv_size;
+            smci.pCode = aether_sunmap_spv;
+            if (vkCreateShaderModule(dev_, &smci, nullptr, &sunShader_) != VK_SUCCESS) return fail(err, "sun map shader");
+            cp.stage.module = sunShader_;
+            if (vkCreateComputePipelines(dev_, VK_NULL_HANDLE, 1, &cp, nullptr, &sunPipe_) != VK_SUCCESS)
+                return fail(err, "sun map pipeline");
         }
         std::vector<VkDescriptorType> pubTypes = {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER,
                                                   VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE,
@@ -358,15 +368,32 @@ public:
         refreshDescriptors(s);
 
         if (io && io->nearDepthTex && !linearizeNearDepth(*io, w, h, err)) return false;
+        if (sunSize_ != sunImageSize_) {
+            for (auto& o : slots_)
+                if (!waitSlot(o, nullptr, err)) return false;
+            destroyShared(sunImage_);
+            sunImageSize_ = 0;
+            if (sunSize_) {
+                if (!createShared(sunImage_, VK_FORMAT_R32G32_SFLOAT, GL_RG32F, sunSize_, sunSize_ + 1, err)) return false;
+                sunImageSize_ = sunSize_;
+                sunImageFresh_ = true;
+            }
+        }
 
         // GL releases the shared images to Vulkan (after everything GL queued so far, e.g. last frame's composite)
-        GLuint tex[IMAGES];
-        GLenum layouts[IMAGES];
+        GLuint tex[IMAGES + 1];
+        GLenum layouts[IMAGES + 1];
         for (int i = 0; i < IMAGES; i++) {
             tex[i] = images_[i].glTex;
             layouts[i] = GL_LAYOUT_GENERAL_EXT;
         }
-        gl_.SignalSemaphoreEXT(s.glReady.gl, 0, nullptr, IMAGES, tex, layouts);
+        GLuint nTex = IMAGES;
+        if (sunImage_.glTex) {
+            tex[IMAGES] = sunImage_.glTex;
+            layouts[IMAGES] = GL_LAYOUT_GENERAL_EXT;
+            nTex++;
+        }
+        gl_.SignalSemaphoreEXT(s.glReady.gl, 0, nullptr, nTex, tex, layouts);
         gl_.Flush();
 
         begin(s);
@@ -381,6 +408,7 @@ public:
         }
         recordFar(s, w, h, (frame.dims[2] & 0x1u) != 0);
         computeBarrier(s.cmd);
+        if (sunDispatchRows_ && sunImage_.image) copySunToImage(s.cmd);
         vkCmdBindPipeline(s.cmd, VK_PIPELINE_BIND_POINT_COMPUTE, publishPipe_);
         vkCmdBindDescriptorSets(s.cmd, VK_PIPELINE_BIND_POINT_COMPUTE, publishLayout_, 0, 1, &s.publishSet, 0, nullptr);
         vkCmdPushConstants(s.cmd, publishLayout_, VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(pcv), pcv);
@@ -391,7 +419,7 @@ public:
         frameIndex_++;
 
         // GL commands after this point wait for the Vulkan frame
-        gl_.WaitSemaphoreEXT(s.vkDone.gl, 0, nullptr, IMAGES, tex, layouts);
+        gl_.WaitSemaphoreEXT(s.vkDone.gl, 0, nullptr, nTex, tex, layouts);
         if (io) {
             // hand the frame to the caller's own textures (e.g. what a shader pack samples via customTexture)
             const GLuint dst[3] = {io->dstColor, io->dstNormal, io->dstDepth};
@@ -399,6 +427,9 @@ public:
                 if (dst[i])
                     gl_.CopyImageSubData(images_[i].glTex, GL_TEXTURE_2D, 0, 0, 0, 0, dst[i], GL_TEXTURE_2D, 0, 0, 0, 0,
                                          GLsizei(w), GLsizei(h), 1);
+            if (io->dstSunMap && sunImage_.glTex)
+                gl_.CopyImageSubData(sunImage_.glTex, GL_TEXTURE_2D, 0, 0, 0, 0, io->dstSunMap, GL_TEXTURE_2D, 0, 0, 0, 0,
+                                     GLsizei(sunSize_), GLsizei(sunSize_ + 1), 1);
         }
         return true;
     }
@@ -780,6 +811,21 @@ private:
             sharedDirty_ = true;  // every slot's set re-points at the new image
             sharedDirtySlots_ = 0;
         }
+        // the sun map: one persistent device buffer (frames run in order on our queue), progressively refreshed
+        {
+            uint32_t S = frame.sunMapRows[3] ? frame.sunMapRows[2] : 0;
+            VkDeviceSize bytes = S ? VkDeviceSize(S) * (S + 1) * 8 : 16;
+            if (S != sunSize_ || !shared_[B_SUNMAP].buf) {
+                for (auto& o : slots_)
+                    if (!waitSlot(o, nullptr, err)) return false;
+                release(shared_[B_SUNMAP]);
+                if (!ensure(shared_[B_SUNMAP], bytes, false, Mem::DeviceOnly, err)) return false;
+                sunSize_ = S;
+                sharedDirty_ = true;
+                sharedDirtySlots_ = 0;
+            }
+            sunDispatchRows_ = S ? frame.sunMapRows[1] : 0;
+        }
         // host path: outputs in cached system memory (CPU reads from BAR are uncached); GL path: device local only
         Mem outKind = readback ? Mem::Readback : Mem::DeviceOnly;
         cloudDiv_ = (frame.dims[2] & 0x80u) ? 4u : 2u;  // FRAME_CLOUDS_QUARTER
@@ -914,6 +960,10 @@ private:
         }
         vkCmdBindPipeline(s.cmd, VK_PIPELINE_BIND_POINT_COMPUTE, farPipe_);
         vkCmdDispatch(s.cmd, (w + 7) / 8, (h + 7) / 8, 1);
+        if (sunDispatchRows_) {
+            vkCmdBindPipeline(s.cmd, VK_PIPELINE_BIND_POINT_COMPUTE, sunPipe_);
+            vkCmdDispatch(s.cmd, (sunSize_ + 7) / 8, (sunDispatchRows_ + 1 + 7) / 8, 1);
+        }
         prevSlot_ = int(&s - slots_);
     }
 
@@ -992,10 +1042,95 @@ private:
                 b[i].dstAccessMask = 0;
             }
         }
-        vkCmdPipelineBarrier(cmd, acquire ? VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT : VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
-                             acquire ? VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT : VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, 0, 0,
-                             nullptr, 0, nullptr, IMAGES, b);
+        uint32_t n = IMAGES;
+        VkImageMemoryBarrier all[IMAGES + 1];
+        for (int i = 0; i < IMAGES; i++) all[i] = b[i];
+        if (sunImage_.image) {
+            VkImageMemoryBarrier& sb = all[n++];
+            sb = b[0];
+            sb.image = sunImage_.image;
+            bool undefined = acquire && sunImageFresh_;
+            if (acquire) {
+                sb.oldLayout = undefined ? VK_IMAGE_LAYOUT_UNDEFINED : VK_IMAGE_LAYOUT_GENERAL;
+                sb.srcQueueFamilyIndex = undefined ? VK_QUEUE_FAMILY_IGNORED : VK_QUEUE_FAMILY_EXTERNAL;
+                sb.dstQueueFamilyIndex = undefined ? VK_QUEUE_FAMILY_IGNORED : family_;
+                sb.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+            } else {
+                sb.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+            }
+            if (acquire) sunImageFresh_ = false;
+        }
+        vkCmdPipelineBarrier(cmd, acquire ? VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT : VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT |
+                                                                                   VK_PIPELINE_STAGE_TRANSFER_BIT,
+                             acquire ? VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT | VK_PIPELINE_STAGE_TRANSFER_BIT
+                                     : VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
+                             0, 0, nullptr, 0, nullptr, n, all);
     }
+
+    // The sun map buffer into its shared image (whole image: a few MB, a few microseconds of copy).
+    void copySunToImage(VkCommandBuffer cmd) {
+        VkMemoryBarrier mb{VK_STRUCTURE_TYPE_MEMORY_BARRIER};
+        mb.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
+        mb.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+        vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, 0, 1, &mb, 0, nullptr,
+                             0, nullptr);
+        VkBufferImageCopy region{};
+        region.imageSubresource = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 0, 1};
+        region.imageExtent = {sunSize_, sunSize_ + 1, 1};
+        vkCmdCopyBufferToImage(cmd, shared_[B_SUNMAP].buf, sunImage_.image, VK_IMAGE_LAYOUT_GENERAL, 1, &region);
+    }
+
+    void destroyShared(SharedImage& s) {
+        bool glOk = wglGetCurrentContext() != nullptr;
+        if (glOk) {
+            if (s.glTex) gl_.DeleteTextures(1, &s.glTex);
+            if (s.glMem) gl_.DeleteMemoryObjectsEXT(1, &s.glMem);
+        }
+        if (s.view) vkDestroyImageView(dev_, s.view, nullptr);
+        if (s.image) vkDestroyImage(dev_, s.image, nullptr);
+        if (s.mem) vkFreeMemory(dev_, s.mem, nullptr);
+        if (s.handle) CloseHandle(s.handle);
+        s = {};
+    }
+
+public:
+    bool readSunMap(std::vector<float>& out, std::string& err) override {
+        out.clear();
+        if (!sunSize_ || !shared_[B_SUNMAP].buf) return true;
+        for (auto& o : slots_)
+            if (!waitSlot(o, nullptr, err)) return false;
+        VkDeviceSize bytes = VkDeviceSize(sunSize_) * (sunSize_ + 1) * 8;
+        if (!ensure(sunReadback_, bytes, false, Mem::Readback, err)) return false;
+        std::lock_guard<std::mutex> scene(sceneMu_);
+        if (copies_[0].uploading) vkWaitForFences(dev_, 1, &copies_[0].uploadFence, VK_TRUE, UINT64_MAX);
+        copies_[0].uploading = false;
+        VkCommandBuffer cmd = copies_[0].uploadCmd;
+        vkResetCommandBuffer(cmd, 0);
+        VkCommandBufferBeginInfo bi{VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO};
+        bi.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+        vkBeginCommandBuffer(cmd, &bi);
+        VkBufferCopy rc{0, 0, bytes};
+        vkCmdCopyBuffer(cmd, shared_[B_SUNMAP].buf, sunReadback_.buf, 1, &rc);
+        VkMemoryBarrier mb{VK_STRUCTURE_TYPE_MEMORY_BARRIER};
+        mb.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+        mb.dstAccessMask = VK_ACCESS_HOST_READ_BIT;
+        vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_HOST_BIT, 0, 1, &mb, 0, nullptr, 0, nullptr);
+        vkEndCommandBuffer(cmd);
+        VkSubmitInfo si{VK_STRUCTURE_TYPE_SUBMIT_INFO};
+        si.commandBufferCount = 1;
+        si.pCommandBuffers = &cmd;
+        vkResetFences(dev_, 1, &copies_[0].uploadFence);
+        {
+            std::lock_guard<std::mutex> q(queueMu_);
+            if (vkQueueSubmit(queue_, 1, &si, copies_[0].uploadFence) != VK_SUCCESS) return fail(err, "sun map readback");
+        }
+        vkWaitForFences(dev_, 1, &copies_[0].uploadFence, VK_TRUE, UINT64_MAX);
+        out.resize(size_t(bytes / 4));
+        std::memcpy(out.data(), sunReadback_.map, size_t(bytes));
+        return true;
+    }
+
+private:
 
     // ---- resources -------------------------------------------------------------------------------------------
 
@@ -1078,6 +1213,10 @@ private:
     }
 
     void destroyInterop() {
+        if (attached_) {
+            destroyShared(sunImage_);
+            sunImageSize_ = 0;
+        }
         bool glOk = attached_ && wglGetCurrentContext() != nullptr;
         for (auto& s : images_) {
             if (glOk) {
@@ -1262,6 +1401,14 @@ private:
     VkPipelineLayout farLayout_ = VK_NULL_HANDLE, publishLayout_ = VK_NULL_HANDLE, ingestLayout_ = VK_NULL_HANDLE;
     VkPipeline farPipe_ = VK_NULL_HANDLE, publishPipe_ = VK_NULL_HANDLE, ingestPipe_ = VK_NULL_HANDLE;
     VkPipeline cloudPipe_ = VK_NULL_HANDLE;
+    VkPipeline sunPipe_ = VK_NULL_HANDLE;
+    VkShaderModule sunShader_ = VK_NULL_HANDLE;
+    uint32_t sunSize_ = 0;          // size of the sun map buffer / image now
+    uint32_t sunDispatchRows_ = 0;  // this frame's sun map rows (0: no pass)
+    SharedImage sunImage_;          // the GL-shared sun map image (RG32F, size x size + 1), when attached
+    uint32_t sunImageSize_ = 0;
+    bool sunImageFresh_ = false;
+    Buf sunReadback_;
     VkShaderModule cloudShader_ = VK_NULL_HANDLE;
     int prevSlot_ = -1;  // slot of the last recorded frame (its surfaces feed the next cloud pass)
     uint32_t cloudDiv_ = 2;  // cloud pass resolution divisor for the frame being recorded
