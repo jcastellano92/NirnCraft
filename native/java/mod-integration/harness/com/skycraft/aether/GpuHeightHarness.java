@@ -50,7 +50,7 @@ public final class GpuHeightHarness {
                 String why = src.enableGpu(n);
                 if (why != null) throw new IllegalStateException("GPU path unavailable: " + why);
                 if (first) {
-                    OUT.println("device: " + src.gpuDevice());
+                    OUT.printf("device: %s (startup probe: ~%.2f ms of kernel per tile)%n", src.gpuDevice(), src.gpuProbeMs);
                     // JIT warm-up of both paths on one tile, untimed
                     double[] h = new double[N];
                     float[] t = new float[N];

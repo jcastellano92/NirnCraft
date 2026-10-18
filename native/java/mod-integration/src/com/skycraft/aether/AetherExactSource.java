@@ -221,10 +221,40 @@ final class AetherExactSource extends AetherRefiningSource {
             gpuOffReason = why[0];
             return why[0];
         }
+        // a quick probe first: a device whose FP64 is emulated or tiny (iGPUs) would spend seconds on the first
+        // verified tiles before the speed check could turn it off
+        double tileMs = probeTileMs(g);
+        gpuProbeMs = tileMs;
+        if (!keepGpuWhenSlower && tileMs > PROBE_LIMIT_MS) {
+            g.close();
+            gpuOffReason = String.format("%s too slow (~%.0f ms of kernel per tile)", g.device(), tileMs);
+            return gpuOffReason;
+        }
         gpu = g;
         gpuOffReason = null;
-        com.skycraft.Skycraft.LOGGER.info("aether exact heights on the GPU: {} (verifying)", g.device());
+        com.skycraft.Skycraft.LOGGER.info("aether exact heights on the GPU: {} (~{} ms of kernel per tile; verifying)",
+                g.device(), String.format("%.1f", tileMs));
         return null;
+    }
+
+    /** Projected kernel time per tile above which the GPU path is not even tried (a CPU tile is ~10 ms on 8 threads). */
+    static final double PROBE_LIMIT_MS = 40;
+    /** The last probe's projected kernel ms per tile (harness). */
+    double gpuProbeMs = Double.NaN;
+
+    /** Kernel milliseconds for one tile, projected from 4 rows of typical land slots. */
+    private static double probeTileMs(AetherHeightGpu g) {
+        int n = 4 * TILE;
+        try (java.lang.foreign.Arena a = java.lang.foreign.Arena.ofConfined()) {
+            java.lang.foreign.MemorySegment slots = a.allocate(4L * n, 4), values = a.allocate(4L * n * AetherHeightGpu.SLOTS, 4),
+                    flags = a.allocate(4L * n, 4);
+            for (int k = 0; k < n; k++)
+                slots.setAtIndex(java.lang.foreign.ValueLayout.JAVA_INT, k, AetherHeightGpu.S_BASE | AetherHeightGpu.S_CRAG
+                        | (k % 3 == 0 ? AetherHeightGpu.S_RIDGE : 0));
+            g.engine.batch(-128, -128, 1, TILE, n, slots, values, flags);  // warm-up (pipeline creation, clocks)
+            AetherNative.HeightTimes t = g.engine.batch(-128, -128, 1, TILE, n, slots, values, flags);
+            return t.kernelMs() * (TILE * TILE / (double) n);
+        }
     }
 
     boolean gpuOn() {

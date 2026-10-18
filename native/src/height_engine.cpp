@@ -343,7 +343,7 @@ public:
                     times.uploadMs += double(ts[1] - ts[0]) * k;
                     times.kernelMs += kernel;
                     times.readbackMs += double(ts[3] - ts[2]) * k;
-                    if (kernel > 8.0 && chunkCols_ > 1024) chunkCols_ /= 2;
+                    if (kernel > 8.0 && chunkCols_ > width) chunkCols_ /= 2;
                     else if (kernel < 2.0 && n == rows * width && chunkCols_ < CHUNK) chunkCols_ *= 2;
                 }
             }
