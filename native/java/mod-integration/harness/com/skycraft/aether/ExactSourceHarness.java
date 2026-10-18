@@ -87,6 +87,12 @@ public final class ExactSourceHarness {
              AetherNative.Context served = n.create(AetherNative.BACKEND_VULKAN)) {
             // exact: the mod's height through AetherExactSource, the client's single-player path
             AetherExactSource src = new AetherExactSource(height, TINTS, () -> raster, threads);
+            if (Boolean.getBoolean("harness.gpu")) {
+                // the single-player source's heights on the GPU path (the server below stays on the CPU): the
+                // server-fed vs single-player check at the end then compares GPU tiles with CPU tiles
+                String why = src.enableGpu(n);
+                OUT.println("exact heights: " + (why == null ? "GPU path " + src.gpuDevice() : "CPU (" + why + ")"));
+            }
             src.prepare(exact);
             long c0 = System.nanoTime();
             int tiles = 0;

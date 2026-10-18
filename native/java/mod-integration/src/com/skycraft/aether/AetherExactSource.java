@@ -135,17 +135,237 @@ final class AetherExactSource extends AetherRefiningSource {
 
     /** Surface and water of tile (lod, tx, tz): column (i, j) sampled at its centre block, row-major [j][i]. */
     void fill(int lod, int tx, int tz, float[] surface, float[] water) {
+        double[] h = new double[TILE * TILE];
+        float[] top = new float[TILE * TILE];
+        heights(lod, tx, tz, h, top);
+        for (int k = 0; k < h.length; k++) {
+            surface[k] = (float) h[k];
+            water[k] = waterAt(h[k], top[k]);
+        }
+    }
+
+    /**
+     * The exact heights of tile (lod, tx, tz) (TamrielHeight.height, row-major) and each column's map water top
+     * ({@link #waterTop}): on the GPU when that path is on and trusted, else on the CPU. Same bits either way.
+     */
+    void heights(int lod, int tx, int tz, double[] h, float[] top) {
+        AetherHeightGpu g = gpu;
+        if (g != null && heightsGpuChecked(g, lod, tx, tz, h, top)) return;
+        heightsCpu(lod, tx, tz, h, top);
+    }
+
+    /** The CPU path: TamrielMap.sample + TamrielHeight.height per column on the column pool. */
+    void heightsCpu(int lod, int tx, int tz, double[] h, float[] top) {
         int s = 1 << lod, bx = tx * (TILE << lod) + (s >> 1), bz = tz * (TILE << lod) + (s >> 1);
         pool.submit(() -> IntStream.range(0, TILE).parallel().forEach(j -> {
             MapSample m = new MapSample();
             for (int i = 0; i < TILE; i++) {
                 int x = bx + i * s, z = bz + j * s;
                 TamrielMap.sample(x, z, m);
-                double h = height.height(x, z, m);
-                surface[j * TILE + i] = (float) h;
-                water[j * TILE + i] = waterAt(h, m);
+                h[j * TILE + i] = height.height(x, z, m);
+                top[j * TILE + i] = waterTop(m);
             }
         })).join();
+    }
+
+    // ---- the GPU path (AetherHeightGpu): exact, verified, and only used where it is faster ---------------------
+
+    /** Per-call scratch of the GPU path, off-heap for the native batch. */
+    private static final class GpuBuffers {
+        final java.lang.foreign.Arena arena = java.lang.foreign.Arena.ofAuto();
+        final java.lang.foreign.MemorySegment cols = arena.allocate((long) TILE * TILE * AetherHeightGpu.RECORD_BYTES, 8);
+        final java.lang.foreign.MemorySegment out = arena.allocate((long) TILE * TILE * 8, 8);
+        final java.lang.foreign.MemorySegment flags = arena.allocate((long) TILE * TILE * 4, 4);
+        final boolean[] cpu = new boolean[TILE * TILE];
+    }
+
+    private final ThreadLocal<GpuBuffers> gpuBuffers = ThreadLocal.withInitial(GpuBuffers::new);
+    private volatile AetherHeightGpu gpu;
+    /** LODs whose first tile was verified column by column; then the speed check; the random-sample generator. */
+    private final java.util.concurrent.atomic.AtomicInteger verifiedLods = new java.util.concurrent.atomic.AtomicInteger();
+    private final double[] gpuMsByLod = new double[8], cpuMsByLod = new double[8];
+    private final java.util.SplittableRandom sampler = new java.util.SplittableRandom(0x5EEDL);
+    /** Columns of each later tile that are recomputed on the CPU and compared. */
+    static final int SAMPLED_COLUMNS = 64;
+    /** Why the GPU path is off (null while on or never asked for). */
+    volatile String gpuOffReason;
+    /** Totals for the harness: tiles, columns the kernel flagged back to the CPU, and the GPU path's split. */
+    final java.util.concurrent.atomic.LongAdder gpuTiles = new java.util.concurrent.atomic.LongAdder(),
+            gpuFlagged = new java.util.concurrent.atomic.LongAdder(), gpuCpuColumns = new java.util.concurrent.atomic.LongAdder();
+    final java.util.concurrent.atomic.DoubleAdder gpuPrepMs = new java.util.concurrent.atomic.DoubleAdder(),
+            gpuUploadMs = new java.util.concurrent.atomic.DoubleAdder(), gpuKernelMs = new java.util.concurrent.atomic.DoubleAdder(),
+            gpuReadbackMs = new java.util.concurrent.atomic.DoubleAdder(), gpuBatchMs = new java.util.concurrent.atomic.DoubleAdder(),
+            gpuFinishMs = new java.util.concurrent.atomic.DoubleAdder();
+    /** Harness only: skip the speed check (measure the GPU path even where it is slower). */
+    boolean keepGpuWhenSlower = Boolean.getBoolean("skycraft.aether.gpuHeight.keepWhenSlower");
+
+    /**
+     * Turns the GPU path on (`lib` loaded; Vulkan). It stays on only while every check passes: the first tile of
+     * each LOD is computed both ways and compared column by column (raw double bits), later tiles on a random
+     * sample; the first difference turns it off for good (logged). After the first tiles of LODs 1 and 2 it also
+     * turns itself off when it was not faster than the CPU path on this machine. Returns the reason when it
+     * could not start (no device, unsupported noises), else null.
+     */
+    String enableGpu(AetherNative lib) {
+        String[] why = new String[1];
+        AetherHeightGpu g = AetherHeightGpu.create(lib, AetherNative.BACKEND_VULKAN, height, why);
+        if (g == null) {
+            gpuOffReason = why[0];
+            return why[0];
+        }
+        gpu = g;
+        gpuOffReason = null;
+        com.skycraft.Skycraft.LOGGER.info("aether exact heights on the GPU: {} (verifying)", g.device());
+        return null;
+    }
+
+    boolean gpuOn() {
+        return gpu != null;
+    }
+
+    /** The GPU path's engine while it is on (harness), else null. */
+    AetherHeightGpu gpu() {
+        return gpu;
+    }
+
+    String gpuDevice() {
+        AetherHeightGpu g = gpu;
+        return g == null ? "off" : g.device();
+    }
+
+    void resetGpuStats() {
+        for (var a : new java.util.concurrent.atomic.LongAdder[] {gpuTiles, gpuFlagged, gpuCpuColumns}) a.reset();
+        for (var a : new java.util.concurrent.atomic.DoubleAdder[] {gpuPrepMs, gpuUploadMs, gpuKernelMs, gpuReadbackMs,
+                gpuBatchMs, gpuFinishMs}) a.reset();
+    }
+
+    private void disableGpu(String reason) {
+        AetherHeightGpu g;
+        synchronized (this) {
+            g = gpu;
+            if (g == null) return;
+            gpu = null;
+            gpuOffReason = reason;
+        }
+        com.skycraft.Skycraft.LOGGER.warn("aether exact heights back on the CPU: {}", reason);
+        retiredGpu = g;  // another fill may still be in its batch: freed with the source
+    }
+
+    private volatile AetherHeightGpu retiredGpu;
+
+    /** The GPU path with its checks; false when the caller must use the CPU path (off, or this tile failed). */
+    private boolean heightsGpuChecked(AetherHeightGpu g, int lod, int tx, int tz, double[] h, float[] top) {
+        boolean full = (verifiedLods.get() & (1 << lod)) == 0;
+        long t0 = System.nanoTime();
+        try {
+            heightsGpu(g, lod, tx, tz, h, top);
+        } catch (RuntimeException e) {
+            disableGpu("GPU batch failed: " + e);
+            return false;
+        }
+        long t1 = System.nanoTime();
+        int s = 1 << lod, bx = tx * (TILE << lod) + (s >> 1), bz = tz * (TILE << lod) + (s >> 1);
+        if (full) {
+            double[] ref = new double[h.length];
+            float[] refTop = new float[top.length];
+            heightsCpu(lod, tx, tz, ref, refTop);
+            long t2 = System.nanoTime();
+            int bad = 0, first = -1;
+            for (int k = 0; k < h.length; k++)
+                if (Double.doubleToRawLongBits(h[k]) != Double.doubleToRawLongBits(ref[k])
+                        || Float.floatToRawIntBits(top[k]) != Float.floatToRawIntBits(refTop[k])) {
+                    if (first < 0) first = k;
+                    bad++;
+                }
+            if (bad != 0) {
+                int x = bx + (first % TILE) * s, z = bz + (first / TILE) * s;
+                disableGpu(String.format("lod %d tile %d,%d: %d of %d columns differ from the CPU (first at %d,%d: gpu %s cpu %s)",
+                        lod, tx, tz, bad, h.length, x, z, Double.toString(h[first]), Double.toString(ref[first])));
+                System.arraycopy(ref, 0, h, 0, h.length);
+                System.arraycopy(refTop, 0, top, 0, top.length);
+                return true;
+            }
+            verifiedLods.getAndUpdate(v -> v | (1 << lod));
+            gpuMsByLod[lod] = (t1 - t0) / 1e6;
+            cpuMsByLod[lod] = (t2 - t1) / 1e6;
+            if (lod == 2 && !keepGpuWhenSlower) {
+                // LOD 0 warmed the JIT up; LODs 1 and 2 decide
+                double gm = gpuMsByLod[1] + gpuMsByLod[2], cm = cpuMsByLod[1] + cpuMsByLod[2];
+                if (gm >= cm) disableGpu(String.format("not faster here (GPU path %.0f ms vs CPU %.0f ms per two tiles)", gm, cm));
+                else com.skycraft.Skycraft.LOGGER.info("aether exact heights: GPU path {} ms vs CPU {} ms per two tiles: GPU kept",
+                        Math.round(gm), Math.round(cm));
+            }
+            return true;
+        }
+        // a random sample of columns, recomputed on the CPU
+        MapSample m = new MapSample();
+        for (int n = 0; n < SAMPLED_COLUMNS; n++) {
+            int k;
+            synchronized (sampler) {
+                k = sampler.nextInt(h.length);
+            }
+            int x = bx + (k % TILE) * s, z = bz + (k / TILE) * s;
+            TamrielMap.sample(x, z, m);
+            double ref = height.height(x, z, m);
+            if (Double.doubleToRawLongBits(ref) != Double.doubleToRawLongBits(h[k])) {
+                disableGpu(String.format("lod %d tile %d,%d: sampled column %d,%d differs (gpu %s cpu %s)", lod, tx, tz,
+                        x, z, Double.toString(h[k]), Double.toString(ref)));
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /** The GPU path: map samples and records on the column pool, the kernel, then the CPU columns. */
+    void heightsGpu(AetherHeightGpu g, int lod, int tx, int tz, double[] h, float[] top) {
+        int s = 1 << lod, bx = tx * (TILE << lod) + (s >> 1), bz = tz * (TILE << lod) + (s >> 1);
+        GpuBuffers b = gpuBuffers.get();
+        long t0 = System.nanoTime();
+        java.util.concurrent.atomic.LongAdder cpuCols = new java.util.concurrent.atomic.LongAdder();
+        pool.submit(() -> IntStream.range(0, TILE).parallel().forEach(j -> {
+            MapSample m = new MapSample();
+            for (int i = 0; i < TILE; i++) {
+                int x = bx + i * s, z = bz + j * s, k = j * TILE + i;
+                TamrielMap.sample(x, z, m);
+                top[k] = waterTop(m);
+                b.cpu[k] = !g.prepare(x, z, m, b.cols, k);
+                if (b.cpu[k]) {
+                    h[k] = height.height(x, z, m);
+                    cpuCols.increment();
+                }
+            }
+        })).join();
+        long t1 = System.nanoTime();
+        AetherNative.HeightTimes t = g.engine.batch(bx, bz, s, TILE, TILE * TILE, b.cols, b.out, b.flags);
+        long t2 = System.nanoTime();
+        java.util.concurrent.atomic.LongAdder flagged = new java.util.concurrent.atomic.LongAdder();
+        pool.submit(() -> IntStream.range(0, TILE).parallel().forEach(j -> {
+            MapSample m = null;
+            for (int i = 0; i < TILE; i++) {
+                int k = j * TILE + i;
+                if (b.cpu[k]) continue;
+                if (b.flags.get(java.lang.foreign.ValueLayout.JAVA_INT, 4L * k) != 0) {
+                    // the kernel could not prove this column exact: the CPU computes it
+                    if (m == null) m = new MapSample();
+                    int x = bx + i * s, z = bz + j * s;
+                    TamrielMap.sample(x, z, m);
+                    h[k] = height.height(x, z, m);
+                    flagged.increment();
+                } else {
+                    h[k] = b.out.get(java.lang.foreign.ValueLayout.JAVA_DOUBLE, 8L * k);
+                }
+            }
+        })).join();
+        long t3 = System.nanoTime();
+        gpuTiles.increment();
+        gpuFlagged.add(flagged.sum());
+        gpuCpuColumns.add(cpuCols.sum());
+        gpuPrepMs.add((t1 - t0) / 1e6);
+        gpuBatchMs.add((t2 - t1) / 1e6);
+        gpuUploadMs.add(t.uploadMs());
+        gpuKernelMs.add(t.kernelMs());
+        gpuReadbackMs.add(t.readbackMs());
+        gpuFinishMs.add((t3 - t2) / 1e6);
     }
 
     /** True when tile (lod, tx, tz) is in the cache already. */
@@ -189,16 +409,28 @@ final class AetherExactSource extends AetherRefiningSource {
      * like MapWaterFeature does.
      */
     static float waterAt(double h, MapSample m) {
+        return waterAt(h, waterTop(m));
+    }
+
+    /** The map's water top over a column (rivers and lakes at or above sea level), NaN when none. */
+    static float waterTop(MapSample m) {
+        return m.inWater() && m.waterLevel >= TamrielMap.SEA_LEVEL ? (float) Math.ceil(m.waterLevel) : Float.NaN;
+    }
+
+    /** waterAt for a column whose map water top is `top` (waterTop). */
+    static float waterAt(double h, float top) {
         float w = h < TamrielMap.SEA_LEVEL ? TamrielMap.SEA_LEVEL : Float.NaN;
-        if (m.inWater() && m.waterLevel >= TamrielMap.SEA_LEVEL) {
-            float top = (float) Math.ceil(m.waterLevel);
-            w = Float.isNaN(w) ? top : Math.max(w, top);
-        }
+        if (!Float.isNaN(top)) w = Float.isNaN(w) ? top : Math.max(w, top);
         return w > h ? w : Float.NaN;
     }
 
     @Override
     public void close() {
         pool.shutdownNow();
+        AetherHeightGpu g = gpu, r = retiredGpu;
+        gpu = null;
+        retiredGpu = null;
+        if (g != null) g.close();
+        if (r != null) r.close();
     }
 }

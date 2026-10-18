@@ -3,8 +3,11 @@
 # Run from the repo root (any worktree).
 #   .\native\java\mod-integration\harness\run_exact_harness.ps1 [-Seed 12345] [-X 0] [-Z 0] [-Yaw 100] [-Threads 8]
 #   -Main HeightProfileHarness: CPU profile of the exact columns (sample / noise / plan / isles / rest), no native library
+#   -Gpu: GPU exact-height path vs the CPU path: every column of the window for 3 seeds x 3 cameras, raw bits, timings
+#   ($env:HARNESS_JAVA_OPTS='-Dharness.gpu=true' with the default main: the render check with GPU-made single-player tiles)
 param([long]$Seed = 12345, [double]$X = 0, [double]$Z = 0, [double]$Yaw = 100, [int]$Threads = 8,
-      [string]$Out = 'native/out/exact_source.png', [string]$Main = 'ExactSourceHarness')
+      [string]$Out = 'native/out/exact_source.png', [string]$Main = 'ExactSourceHarness', [switch]$Gpu)
+if ($Gpu) { $Main = 'GpuHeightHarness' }
 $ErrorActionPreference = 'Stop'
 $ref = 'F:\Projects\Personal\Skycraft\toolchains\ref\mc26.3'
 $jdk = 'F:\Projects\Personal\Skycraft\toolchains\jdk-25.0.4.1+1\bin'

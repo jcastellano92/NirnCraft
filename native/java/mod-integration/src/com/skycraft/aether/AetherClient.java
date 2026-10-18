@@ -170,6 +170,12 @@ public final class AetherClient {
                 source = AetherExactSource.forServer(mc.getSingleplayerServer(), AetherFarField::previewRaster);
             else if (serverWorldId != 0)
                 source = new AetherServerSource(serverWorldId, mc.gameDirectory.toPath(), AetherFarField::previewRaster);
+            // exact heights on the GPU where this machine has a device that keeps them bit-exact and it is faster
+            // (verified against the CPU path tile by tile; -Dskycraft.aether.gpuHeight=false keeps the CPU)
+            if (source instanceof AetherExactSource e && !"false".equals(System.getProperty("skycraft.aether.gpuHeight"))) {
+                String why = e.enableGpu(lib);
+                if (why != null) com.skycraft.Skycraft.LOGGER.info("aether exact heights on the CPU: {}", why);
+            }
             if (source == null) source = AetherFarField.defaultSource();
             if (source.usesBlockPalette()) ctx.setPalette(AetherPalette.blocks());  // else aether's preview palette
             int[] noise = AetherPalette.cloudNoiseVolume();

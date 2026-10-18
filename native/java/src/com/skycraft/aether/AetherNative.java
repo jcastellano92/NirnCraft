@@ -25,7 +25,7 @@ import static java.lang.foreign.ValueLayout.JAVA_SHORT;
  * heap access, so Java arrays are passed in place without an off-heap copy; frame rendering is a normal downcall.</p>
  */
 public final class AetherNative {
-    public static final int ABI_VERSION = 0x000700;
+    public static final int ABI_VERSION = 0x000800;
     public static final int BACKEND_CPU = 0, BACKEND_VULKAN = 1;
     public static final int FRAME_CLOUDS = 0x1, FRAME_SHADOWS = 0x2, FRAME_ATMOS = 0x4, FRAME_ACTORS = 0x8,
             FRAME_SKY = 0x10, FRAME_NEAR_DEPTH = 0x20, FRAME_FLAT_NORMALS = 0x40, FRAME_CLOUDS_QUARTER = 0x80,
@@ -40,7 +40,8 @@ public final class AetherNative {
     private final Arena libArena;
     private final MethodHandle abiVersion, buildInfo, create, destroy, lastError, setPalette, uploadTile,
             uploadSection, notifyBlock, setWeather, setCloudNoise, setActors, update, render, getStats,
-            glAttach, glRenderIo, glDetach, previewLoadRaster, previewGenerate, previewHeight, uploadHeights, uploadHeights2, hasTile, uploadStructures, setMaterials, setSunMap;
+            glAttach, glRenderIo, glDetach, previewLoadRaster, previewGenerate, previewHeight, uploadHeights, uploadHeights2, hasTile, uploadStructures, setMaterials, setSunMap,
+            heightCreate, heightDestroy, heightLastError, heightDevice, heightSetNoise, heightBatch;
 
     private AetherNative(Path library) {
         libArena = Arena.ofShared();
@@ -82,6 +83,94 @@ public final class AetherNative {
                 FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, JAVA_INT, JAVA_INT, ADDRESS, ADDRESS, ADDRESS, ADDRESS));
         setSunMap = bind(l, lib, "aether_set_sun_map", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, JAVA_FLOAT));
         setMaterials = bind(l, lib, "aether_set_materials", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, ADDRESS, JAVA_INT));
+        heightCreate = bind(l, lib, "aether_height_create", FunctionDescriptor.of(JAVA_INT, JAVA_INT, ADDRESS));
+        heightDestroy = bind(l, lib, "aether_height_destroy", FunctionDescriptor.ofVoid(ADDRESS));
+        heightLastError = bind(l, lib, "aether_height_last_error", FunctionDescriptor.of(ADDRESS, ADDRESS));
+        heightDevice = bind(l, lib, "aether_height_device", FunctionDescriptor.of(ADDRESS, ADDRESS));
+        heightSetNoise = bind(l, lib, "aether_height_set_noise", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, JAVA_INT));
+        heightBatch = bind(l, lib, "aether_height_batch", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, JAVA_INT,
+                JAVA_INT, JAVA_INT, JAVA_INT, ADDRESS, ADDRESS, ADDRESS, ADDRESS));
+    }
+
+    /** 32-bit words per column record and per noise layer of the exact-height kernel (aether.h). */
+    public static final int HEIGHT_COLUMN_WORDS = 40, HEIGHT_LAYER_WORDS = 76;
+
+    /** Times of one height batch (AetherHeightTimes), milliseconds. */
+    public record HeightTimes(double uploadMs, double kernelMs, double readbackMs, double totalMs) {}
+
+    /**
+     * An exact-height engine (aether_height_create): the kernel on its own Vulkan compute device, or its C++
+     * reference. Null when the backend is unavailable (no device with what the kernel's exactness needs).
+     */
+    public Height createHeight(int backend) {
+        try (Arena a = Arena.ofConfined()) {
+            MemorySegment out = a.allocate(ADDRESS);
+            int s = (int) heightCreate.invokeExact(backend, out);
+            return s == 0 ? new Height(out.get(ADDRESS, 0)) : null;
+        } catch (Throwable t) {
+            throw rethrow(t);
+        }
+    }
+
+    /** One aether_height handle; calls serialise natively, so any thread may use it. */
+    public final class Height implements AutoCloseable {
+        private final MemorySegment ptr;
+
+        private Height(MemorySegment ptr) {
+            this.ptr = ptr;
+        }
+
+        public String device() {
+            try {
+                return ((MemorySegment) heightDevice.invokeExact(ptr)).reinterpret(512).getString(0);
+            } catch (Throwable t) {
+                throw rethrow(t);
+            }
+        }
+
+        private String error() {
+            try {
+                return ((MemorySegment) heightLastError.invokeExact(ptr)).reinterpret(4096).getString(0);
+            } catch (Throwable t) {
+                throw rethrow(t);
+            }
+        }
+
+        public void setNoise(int[] table) {
+            try (Arena a = Arena.ofConfined()) {
+                int s = (int) heightSetNoise.invokeExact(ptr, copy(a, table), table.length);
+                if (s != 0) throw new IllegalStateException("aether_height_set_noise: " + s + " " + error());
+            } catch (Throwable t) {
+                throw rethrow(t);
+            }
+        }
+
+        /**
+         * count columns, column k at block (x0 + (k % width) * step, z0 + (k / width) * step); columns holds
+         * count * HEIGHT_COLUMN_WORDS words, heights receives count doubles, flags count ints (1: compute it yourself).
+         * All three are off-heap segments the caller owns.
+         */
+        public HeightTimes batch(int x0, int z0, int step, int width, int count, MemorySegment columns,
+                                 MemorySegment heights, MemorySegment flags) {
+            try (Arena a = Arena.ofConfined()) {
+                MemorySegment t = a.allocate(32, 8);
+                int s = (int) heightBatch.invokeExact(ptr, x0, z0, step, width, count, columns, heights, flags, t);
+                if (s != 0) throw new IllegalStateException("aether_height_batch: " + s + " " + error());
+                return new HeightTimes(t.get(JAVA_DOUBLE, 0), t.get(JAVA_DOUBLE, 8), t.get(JAVA_DOUBLE, 16),
+                        t.get(JAVA_DOUBLE, 24));
+            } catch (Throwable t) {
+                throw rethrow(t);
+            }
+        }
+
+        @Override
+        public void close() {
+            try {
+                heightDestroy.invokeExact(ptr);
+            } catch (Throwable t) {
+                throw rethrow(t);
+            }
+        }
     }
 
     private static MethodHandle bind(Linker l, SymbolLookup lib, String name, FunctionDescriptor fd, Linker.Option... opts) {
