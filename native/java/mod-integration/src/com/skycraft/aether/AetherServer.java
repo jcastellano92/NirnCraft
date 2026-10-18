@@ -25,6 +25,9 @@ public final class AetherServer {
         NeoForge.EVENT_BUS.addListener((PlayerEvent.PlayerLoggedOutEvent e) -> {
             if (e.getEntity() instanceof ServerPlayer p) AetherTileServer.forget(p);
         });
-        NeoForge.EVENT_BUS.addListener((ServerTickEvent.Post e) -> AetherFarActors.tick(e.getServer()));
+        NeoForge.EVENT_BUS.addListener((ServerTickEvent.Post e) -> {
+            AetherTileServer.tick();
+            AetherFarActors.tick(e.getServer());
+        });
     }
 }

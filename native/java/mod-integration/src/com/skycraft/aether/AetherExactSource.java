@@ -40,6 +40,7 @@ final class AetherExactSource extends AetherRefiningSource {
 
     private final TamrielHeight height;
     private final Tinter biomes;  // null: the dressing's own grass and foliage colours
+    private final AetherTileCache cache;  // null: compute every time
     private final AetherTints tints = new AetherTints();
     private final ForkJoinPool pool;
     private final float[] surface = new float[TILE * TILE], water = new float[TILE * TILE];
@@ -48,14 +49,22 @@ final class AetherExactSource extends AetherRefiningSource {
 
     /** raster: the preview raster aether dresses the columns from (AetherRasterCache.ensure in game). */
     AetherExactSource(TamrielHeight height, Callable<Path> raster, int threads) {
-        this(height, null, raster, threads);
+        this(height, null, null, raster, threads);
     }
 
-    /** biomes: the world's biome colours for far grass and foliage, or null. */
     AetherExactSource(TamrielHeight height, Tinter biomes, Callable<Path> raster, int threads) {
+        this(height, biomes, null, raster, threads);
+    }
+
+    /**
+     * biomes: the world's biome colours for far grass and foliage, or null. cache: the world's tile cache (shared
+     * with its tile server, so a LAN host computes each tile once for itself and its guests), or null.
+     */
+    AetherExactSource(TamrielHeight height, Tinter biomes, AetherTileCache cache, Callable<Path> raster, int threads) {
         super(raster);
         this.height = height;
         this.biomes = biomes;
+        this.cache = cache;
         pool = new ForkJoinPool(Math.max(1, threads), p -> {
             var t = ForkJoinPool.defaultForkJoinWorkerThreadFactory.newThread(p);
             t.setName("skycraft-aether-columns-" + t.getPoolIndex());
@@ -90,7 +99,8 @@ final class AetherExactSource extends AetherRefiningSource {
     /** The integrated server's exact source, or null when its overworld is not a Tamriel world. */
     static AetherExactSource forServer(MinecraftServer server, Callable<Path> raster) {
         TamrielHeight h = heightOf(server);
-        return h == null ? null : new AetherExactSource(h, AetherBiomes.forServer(server), raster, defaultThreads());
+        return h == null ? null : new AetherExactSource(h, AetherBiomes.forServer(server), AetherTileCache.forServer(server),
+                raster, defaultThreads());
     }
 
     /** The terrain height at a block column (what forts and the like stand on). Thread-safe. */
@@ -102,10 +112,13 @@ final class AetherExactSource extends AetherRefiningSource {
 
     @Override
     Refined refine(AetherNative.Context ctx, int lod, int tx, int tz) {
-        fill(lod, tx, tz, surface, water);
-        boolean tinted = tint(lod, tx, tz, surface, grassRgb, foliageRgb);  // (from the surface as computed, as a server does)
-        AetherTileCodec.quantize(lod, surface, water);  // as a server would send it: SP and MP far fields match
-        if (tinted) {
+        // the very bytes a server would send (cached or made now): single and multiplayer far fields are identical
+        int r = AetherTileCodec.decode(lod, tileBytes(lod, tx, tz), surface, water, grassRgb, foliageRgb);
+        if (r < 0) {  // a damaged cache entry: make it again
+            if (cache != null) cache.delete(lod, tx, tz);
+            r = AetherTileCodec.decode(lod, tileBytes(lod, tx, tz), surface, water, grassRgb, foliageRgb);
+        }
+        if (r == 1) {
             tints.materials(grassRgb, foliageRgb, grassMat, foliageMat);
             tints.flush(ctx);
             ctx.uploadColumnHeights2(lod, tx, tz, surface, water, grassMat, foliageMat);
@@ -133,6 +146,30 @@ final class AetherExactSource extends AetherRefiningSource {
                 water[j * TILE + i] = waterAt(h, m);
             }
         })).join();
+    }
+
+    /** True when tile (lod, tx, tz) is in the cache already. */
+    boolean cached(int lod, int tx, int tz) {
+        return cache != null && cache.has(lod, tx, tz);
+    }
+
+    /**
+     * Tile (lod, tx, tz) as AetherTileCodec bytes: from the cache, or computed (surface, water, biome tints from that
+     * surface) and cached. Thread-safe (each call has its own arrays; the column pool is shared).
+     */
+    byte[] tileBytes(int lod, int tx, int tz) {
+        if (cache != null) {
+            byte[] b = cache.read(lod, tx, tz);
+            if (b != null) return b;
+        }
+        int n = TILE * TILE, g = AetherTints.GRID * AetherTints.GRID;
+        float[] s = new float[n], w = new float[n];
+        int[] gr = new int[g], fo = new int[g];
+        fill(lod, tx, tz, s, w);
+        boolean tinted = tint(lod, tx, tz, s, gr, fo);
+        byte[] b = AetherTileCodec.encode(lod, s, w, tinted ? gr : null, tinted ? fo : null);
+        if (cache != null) cache.write(lod, tx, tz, b);
+        return b;
     }
 
     /** The biome tint grids of a filled tile (AetherTints.GRID^2 rgb each); false when this source has no biomes. */
