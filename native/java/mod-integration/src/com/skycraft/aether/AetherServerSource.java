@@ -39,7 +39,15 @@ final class AetherServerSource extends AetherRefiningSource {
     /** From the network (client thread). */
     void accept(AetherNet.TileData m) {
         arrived.add(m);
+        long n = ++receivedTiles;
+        receivedBytes += m.data().length;
+        // the first tile, then every 256: that the multiplayer stream works and what it carries
+        if (n == 1 || n % 256 == 0)
+            com.skycraft.Skycraft.LOGGER.info("aether: {} far tiles ({} MB) received from the server",
+                    n, String.format("%.1f", receivedBytes / 1e6));
     }
+
+    private long receivedTiles, receivedBytes;
 
     @Override
     Refined refine(AetherNative.Context ctx, int lod, int tx, int tz) {

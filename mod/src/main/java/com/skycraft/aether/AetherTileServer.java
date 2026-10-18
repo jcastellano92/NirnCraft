@@ -43,6 +43,8 @@ final class AetherTileServer {
     private final Thread worker;
     private volatile boolean running = true;
     private final java.util.concurrent.atomic.AtomicInteger pregenPending = new java.util.concurrent.atomic.AtomicInteger();
+    /** Server-thread counters for the stream log. */
+    private long sentTiles, sentBytes, loggedTiles;
 
     /** One tile to make; player == null for a pregeneration job. */
     private record Job(int lod, int tx, int tz, ServerPlayer player, double priority, long seq) implements Comparable<Job> {
@@ -152,6 +154,12 @@ final class AetherTileServer {
     static void tick() {
         AetherTileServer t = current;
         if (t == null) return;
+        // a line a minute while tiles flow: what the stream costs a host (LAN / dedicated) and that clients get it
+        if (t.server.getTickCount() % 1200 == 0 && t.sentTiles != t.loggedTiles) {
+            t.loggedTiles = t.sentTiles;
+            com.skycraft.Skycraft.LOGGER.info("aether tile service: {} tiles ({} MB) sent to {} players so far, {} pregenerating",
+                    t.sentTiles, String.format("%.1f", t.sentBytes / 1e6), t.peers.size(), t.pregenPending.get());
+        }
         for (Map.Entry<UUID, Peer> e : t.peers.entrySet()) {
             Peer p = e.getValue();
             synchronized (p) {
@@ -161,7 +169,11 @@ final class AetherTileServer {
                     p.tokens -= d.data().length + 16;
                     p.inFlight.decrementAndGet();
                     ServerPlayer sp = t.server.getPlayerList().getPlayer(e.getKey());
-                    if (sp != null && !sp.hasDisconnected()) SkyNetwork.sendToPlayer(sp, d);
+                    if (sp != null && !sp.hasDisconnected()) {
+                        SkyNetwork.sendToPlayer(sp, d);
+                        t.sentTiles++;
+                        t.sentBytes += d.data().length;
+                    }
                 }
             }
         }
