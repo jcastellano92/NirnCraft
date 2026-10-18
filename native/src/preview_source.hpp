@@ -37,6 +37,7 @@ private:
     float column(double x, double z, const Sample& s) const;
     float cell(int cx, int cz, int ch) const;
     void dress(Tile& t) const;  // materials and canopy over filled-in geometry
+    void dressRows(Tile& t, int jBegin, int jEnd) const;
 
     int w_ = 0, h_ = 0, ch_ = 0, minX_ = 0, minZ_ = 0, cellSize_ = 32;
     std::vector<float> data_;

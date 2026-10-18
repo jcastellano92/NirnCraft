@@ -1,5 +1,8 @@
 #include "preview_source.hpp"
 
+#include <atomic>
+#include <thread>
+
 #include <algorithm>
 #include <cmath>
 #include <cstdio>
@@ -290,12 +293,25 @@ std::unique_ptr<Tile> PreviewSource::dressTile(int lod, int tx, int tz, const fl
 // (central differences between neighbouring columns), so cliffs, terraces and ridged peaks in the geometry turn to
 // rock and shed their trees even where the macro raster is gentle.
 void PreviewSource::dress(Tile& tile) const {
+    // rows in parallel (a tile is ~20 ms of raster sampling on one core); each row writes only its own columns
+    unsigned n = std::max(1u, std::min(8u, std::thread::hardware_concurrency() / 2));
+    std::atomic<int> nextRow{0};
+    auto rows = [&] {
+        for (int j; (j = nextRow.fetch_add(4)) < TILE;) dressRows(tile, j, std::min(j + 4, int(TILE)));
+    };
+    std::vector<std::thread> pool;
+    for (unsigned i = 1; i < n; i++) pool.emplace_back(rows);
+    rows();
+    for (auto& th : pool) th.join();
+}
+
+void PreviewSource::dressRows(Tile& tile, int jBegin, int jEnd) const {
     Tile* t = &tile;
     double s = double(1 << t->lod);
     double x0 = double(t->tx) * TILE * s, z0 = double(t->tz) * TILE * s;
     const float* hs = t->surface.data();
     Sample sm;
-    for (int j = 0; j < TILE; j++) {
+    for (int j = jBegin; j < jEnd; j++) {
         for (int i = 0; i < TILE; i++) {
             size_t c = size_t(j) * TILE + i;
             double x = x0 + (i + 0.5) * s, z = z0 + (j + 0.5) * s;

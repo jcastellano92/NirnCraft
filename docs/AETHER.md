@@ -104,9 +104,10 @@ The other session's conversion is in progress in the main tree, which also moves
 
 1. After the conversion: move the glue in, run the game once, and watch the hand-off seam, curvature, cloud decks
    and frame time.
-2. Server tile packet for multiplayer (clients have no seed; today they use the raster stand-in) and the far-actor
-   packet. Done ahead of the conversion: the exact single-player source (`AetherExactSource`: the server's own
-   `tamriel_height`, exercised offline by `native/java/mod-integration/harness`, see its README).
+2. Done ahead of the conversion (staged in `native/java/mod-integration`, see its README; compiled against 26.3 and
+   exercised offline by its harness): the exact single-player source (the server's own `tamriel_height`), the
+   multiplayer tile stream (bit-identical to single player, 4 MB per full window, cached on both ends) and the
+   far-actor feed. Left for the move-in: three init calls and one line in `SkyNetwork.init`.
 3. Far terrain look: a snowline that follows aspect and slope instead of a near-level cut, less boxy forest lumps
    on slopes, block-exact surface materials (biomes) instead of the raster dressing; SRC GI underground.
 4. Owner checks in game: the near/far seam at the hand-off distance, curvature strength (planet radius), cloud

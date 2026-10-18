@@ -11,8 +11,10 @@ $cp = ((@("$ref\client.jar", "$ref\neoforge-universal.jar", "$height\classes") +
         (Get-ChildItem "$ref\libs", "$ref\runtime" -Filter *.jar | ForEach-Object FullName)) -join ';')
 $out = Join-Path $env:TEMP 'skycraft-aether-gluecheck'
 Remove-Item -Recurse -Force $out -ErrorAction SilentlyContinue
+# compile-stubs: signatures of mod classes still being converted (SkyNetwork); never moved into the mod
 $src = @('native\java\src\com\skycraft\aether\AetherNative.java') +
-       (Get-ChildItem native\java\mod-integration\src -Recurse -Filter *.java | ForEach-Object FullName)
+       (Get-ChildItem native\java\mod-integration\src, native\java\mod-integration\compile-stubs -Recurse -Filter *.java |
+        ForEach-Object FullName)
 & "$jdk\javac.exe" --release 25 -proc:none -encoding UTF-8 -cp $cp -d "$out\classes" @src
 if ($LASTEXITCODE) { throw 'glue does not compile against 26.3' }
 Write-Host 'mod glue compiles against Minecraft 26.3 + NeoForge 26.3.0.90 + the mod''s height path'

@@ -8,6 +8,7 @@ import net.minecraft.client.renderer.state.level.LevelRenderState;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import org.joml.Matrix4f;
@@ -48,11 +49,36 @@ public final class AetherClient {
     private static final AetherNative.Frame frame = new AetherNative.Frame();
     private static final AetherNative.GlFrameIO io = new AetherNative.GlFrameIO();
     private static final int[][] fields = {new int[128 * 128], new int[128 * 128], new int[128 * 128], new int[128 * 128]};
+    /** Set by the server's Hello: it streams exact far tiles for this world (0 = it does not). */
+    private static volatile long serverWorldId;
+    private static volatile AetherNet.FarActors farActors;
+    private static volatile long farActorsAt;
+    private static double[] actorXyz = new double[0];
 
     private AetherClient() {}
 
     public static void init(IEventBus modBus) {
         NeoForge.EVENT_BUS.addListener(AetherClient::afterOpaque);
+        NeoForge.EVENT_BUS.addListener((ClientPlayerNetworkEvent.LoggingOut e) -> {
+            serverWorldId = 0;
+            farActors = null;
+        });
+        AetherNet.onHello = AetherClient::onHello;
+        AetherNet.onTile = m -> {
+            if (farField != null && farField.source() instanceof AetherServerSource s) s.accept(m);
+        };
+        AetherNet.onFarActors = m -> {
+            farActors = m;
+            farActorsAt = System.nanoTime();
+        };
+    }
+
+    /** The server streams exact tiles: switch a multiplayer client from the stand-in (restarts next frame). */
+    private static void onHello(AetherNet.Hello m) {
+        if (m.codec() != AetherTileCodec.VERSION) return;  // another build: keep the stand-in
+        serverWorldId = m.worldId();
+        if (ctx != null && !Minecraft.getInstance().hasSingleplayerServer()
+                && !(farField != null && farField.source() instanceof AetherServerSource)) stop();
     }
 
     public static void setWeatherFeed(Supplier<WeatherFeed> feed) {
@@ -85,6 +111,7 @@ public final class AetherClient {
             Vec3 p = cam.pos;
             farField.follow(p.x, p.y, p.z);
             feedWeather();
+            feedActors();
 
             frame.x = p.x;
             frame.y = p.y;
@@ -128,22 +155,39 @@ public final class AetherClient {
                 lib = AetherNative.load(dll);
             }
             ctx = lib.create(AetherNative.BACKEND_VULKAN);
-            // single player: the server's own terrain height (exact); otherwise the seed-free raster source
-            AetherFarField.ColumnSource source = mc.hasSingleplayerServer()
-                    ? AetherExactSource.forServer(mc.getSingleplayerServer(), AetherFarField::previewRaster) : null;
+            // single player: the server's own terrain height (exact); multiplayer: exact tiles from the server when
+            // it streams them; otherwise (or until they arrive) the seed-free raster stand-in
+            AetherFarField.ColumnSource source = null;
+            if (mc.hasSingleplayerServer())
+                source = AetherExactSource.forServer(mc.getSingleplayerServer(), AetherFarField::previewRaster);
+            else if (serverWorldId != 0)
+                source = new AetherServerSource(serverWorldId, mc.gameDirectory.toPath(), AetherFarField::previewRaster);
             if (source == null) source = AetherFarField.defaultSource();
             if (source.usesBlockPalette()) ctx.setPalette(AetherPalette.blocks());  // else aether's preview palette
             int[] noise = AetherPalette.cloudNoiseVolume();
             if (noise != null) ctx.setCloudNoise(noise);
             farField = new AetherFarField(ctx, source);
             startedFor = mc.level;
-            com.skycraft.Skycraft.LOGGER.info("aether far field on ({} columns): {}",
-                    source instanceof AetherExactSource ? "exact" : "raster", lib.buildInfo());
+            com.skycraft.Skycraft.LOGGER.info("aether far field on ({} columns): {}", source instanceof AetherExactSource
+                    ? "exact" : source instanceof AetherServerSource ? "server" : "raster", lib.buildInfo());
             return true;
         } catch (Throwable t) {
             disable("aether unavailable, far field off", t);
             return false;
         }
+    }
+
+    /** The server's far actors, moved on by their velocity since the packet (twice a second; at most a second). */
+    private static void feedActors() {
+        AetherNet.FarActors a = farActors;
+        if (a == null) {
+            ctx.setActors(actorXyz, new float[0], new int[0], 0);
+            return;
+        }
+        double dt = Math.min((System.nanoTime() - farActorsAt) / 1e9, 1.0);
+        if (actorXyz.length < a.count() * 3) actorXyz = new double[a.count() * 3];
+        for (int i = 0; i < a.count() * 3; i++) actorXyz[i] = a.xyz()[i] + a.vel()[i] * dt;
+        ctx.setActors(actorXyz, a.yawHeightRadius(), a.kindTint(), a.count());
     }
 
     private static void feedWeather() {

@@ -86,10 +86,12 @@ public final class ExactSourceHarness {
         }
         double y = Math.max(groundExact, 63) + 90;
         int w = 1600, h = 900;
-        int[][] images = new int[2][];
+        int[][] images = new int[3][];
+        float[][] depths = new float[3][];
 
         try (AetherNative.Context exact = n.create(AetherNative.BACKEND_VULKAN);
-             AetherNative.Context preview = n.create(AetherNative.BACKEND_VULKAN)) {
+             AetherNative.Context preview = n.create(AetherNative.BACKEND_VULKAN);
+             AetherNative.Context served = n.create(AetherNative.BACKEND_VULKAN)) {
             // exact: the mod's height through AetherExactSource, the client's single-player path
             AetherExactSource src = new AetherExactSource(height, () -> raster, threads);
             src.prepare(exact);
@@ -99,8 +101,10 @@ public final class ExactSourceHarness {
                 int span = 256 << lod;
                 int cx = Math.floorDiv((int) Math.floor(x), span), cz = Math.floorDiv((int) Math.floor(z), span);
                 long l0 = System.nanoTime();
-                src.cover(exact, lod, (cx - AetherFarField.WINDOW) * span, (cz - AetherFarField.WINDOW) * span,
-                        (cx + AetherFarField.WINDOW + 1) * span, (cz + AetherFarField.WINDOW + 1) * span);
+                int calls = 0;
+                while (src.cover(exact, lod, (cx - AetherFarField.WINDOW) * span, (cz - AetherFarField.WINDOW) * span,
+                        (cx + AetherFarField.WINDOW + 1) * span, (cz + AetherFarField.WINDOW + 1) * span)) calls++;
+                if (calls == 0) throw new IllegalStateException("refining: the first cover refined the whole window");
                 int k = (2 * AetherFarField.WINDOW + 1) * (2 * AetherFarField.WINDOW + 1);
                 tiles += k;
                 OUT.printf("  lod %d (%4d m columns): %d tiles in %5.0f ms%n", lod, 1 << lod, k, (System.nanoTime() - l0) / 1e6);
@@ -112,18 +116,25 @@ public final class ExactSourceHarness {
             long r0 = System.nanoTime();
             src.cover(exact, 0, (int) x - 512, (int) z - 512, (int) x + 512, (int) z + 512);
             OUT.printf("re-cover of resident tiles: %.2f ms%n", (System.nanoTime() - r0) / 1e6);
+            codec(src, x, z);
 
             // preview: the seed-free stand-in, for comparison
             preview.previewLoadRaster(raster);
+            long p0 = System.nanoTime();
             for (int lod = 0; lod < AetherFarField.LODS; lod++) {
                 int span = 256 << lod;
                 int cx = Math.floorDiv((int) Math.floor(x), span), cz = Math.floorDiv((int) Math.floor(z), span);
                 preview.previewGenerate(lod, (cx - 2) * span, (cz - 2) * span, (cx + 3) * span, (cz + 3) * span);
             }
+            long p1 = System.nanoTime();
+            preview.update(x, Math.max(groundExact, 63) + 90, z, 0);
+            OUT.printf("stand-in window: generate %.0f ms, clipmap build %.0f ms%n", (p1 - p0) / 1e6,
+                    (System.nanoTime() - p1) / 1e6);
             compare(height, preview, x, z);
+            serverFlow(n, served, height, raster, x, z, threads);
 
             int i = 0;
-            for (AetherNative.Context ctx : new AetherNative.Context[] {exact, preview}) {
+            for (AetherNative.Context ctx : new AetherNative.Context[] {exact, preview, served}) {
                 if (noise != null) ctx.setCloudNoise(noise);
                 ctx.update(x, y, z, 0);
                 AetherNative.Frame f = new AetherNative.Frame();
@@ -142,12 +153,24 @@ public final class ExactSourceHarness {
                 f.sunY = (float) Math.sin(se);
                 f.sunZ = (float) (-Math.cos(sa) * Math.cos(se));
                 int[] color = new int[w * h];
-                ctx.render(f, color, null, null);
-                ctx.render(f, color, null, null);
+                float[] depth = new float[w * h];
+                ctx.render(f, color, null, depth);
+                ctx.render(f, color, null, depth);
+                depths[i] = depth;
                 images[i++] = color;
             }
             src.close();
         }
+        // multiplayer, server-fed: the same terrain as single player's exact source, to codec precision
+        int off = 0, both = 0;
+        for (int p = 0; p < w * h; p++) {
+            float de = depths[0][p], ds = depths[2][p];
+            if (de > 1e29f && ds > 1e29f) continue;
+            both++;
+            if (de != ds || images[0][p] != images[2][p]) off++;
+        }
+        OUT.printf("server-fed vs single-player exact render: %d of %d terrain px differ%n", off, both);
+        if (off != 0) throw new IllegalStateException("server-fed far field differs from the single-player one");
 
         BufferedImage img = new BufferedImage(w, h * 2 + 8, BufferedImage.TYPE_INT_RGB);
         for (int k = 0; k < 2; k++)
@@ -158,6 +181,101 @@ public final class ExactSourceHarness {
         Files.createDirectories(out.toAbsolutePath().getParent());
         ImageIO.write(img, "png", out.toFile());
         OUT.println("wrote " + out + " (top: exact source, bottom: preview stand-in)");
+    }
+
+    /**
+     * Multiplayer, played back in process: AetherServerSource asks (through the harness SkyNetwork), the "server"
+     * answers each TileRequest with AetherExactSource + AetherTileCodec as AetherTileServer does, until the window is
+     * all exact. Then a second client on the same cache dir must need no traffic at all.
+     */
+    static void serverFlow(AetherNative n, AetherNative.Context served, TamrielHeight height, Path raster, double x,
+                           double z, int threads) throws Exception {
+        Path gameDir = Files.createTempDirectory("aether-harness-client");
+        long worldId = AetherTileServer.worldId(12345L);
+        AetherExactSource server = new AetherExactSource(height, () -> null, threads);
+        java.util.ArrayDeque<AetherNet.TileRequest> wire = new java.util.ArrayDeque<>();
+        com.skycraft.network.SkyNetwork.toServer = m -> wire.add((AetherNet.TileRequest) m);
+        int nCols = AetherNative.TILE * AetherNative.TILE;
+        float[] s = new float[nCols], w = new float[nCols];
+        for (int pass = 0; pass < 2; pass++) {
+            AetherNative.Context ctx = pass == 0 ? served : n.create(AetherNative.BACKEND_VULKAN);
+            AetherServerSource client = new AetherServerSource(worldId, gameDir, () -> raster);
+            client.prepare(ctx);
+            long t0 = System.nanoTime(), bytes = 0;
+            int requests = 0, tiles = 0, rounds = 0;
+            boolean pending = true;
+            while (pending) {
+                if (++rounds > 2000) throw new IllegalStateException("server flow does not converge");
+                pending = false;
+                for (int lod = 0; lod < AetherFarField.LODS; lod++) {
+                    int span = 256 << lod;
+                    int cx = Math.floorDiv((int) Math.floor(x), span), cz = Math.floorDiv((int) Math.floor(z), span);
+                    pending |= client.cover(ctx, lod, (cx - AetherFarField.WINDOW) * span, (cz - AetherFarField.WINDOW) * span,
+                            (cx + AetherFarField.WINDOW + 1) * span, (cz + AetherFarField.WINDOW + 1) * span);
+                }
+                for (AetherNet.TileRequest r; (r = wire.poll()) != null; ) {
+                    requests++;
+                    if (r.lods().length > AetherNet.MAX_REQUEST) throw new IllegalStateException("request too large");
+                    for (int i = 0; i < r.lods().length; i++) {
+                        server.fill(r.lods()[i], r.txs()[i], r.tzs()[i], s, w);
+                        byte[] b = AetherTileCodec.encode(r.lods()[i], s, w);
+                        bytes += b.length;
+                        tiles++;
+                        client.accept(new AetherNet.TileData(r.lods()[i], r.txs()[i], r.tzs()[i], b));
+                    }
+                }
+            }
+            OUT.printf("server-fed client %s: %d tiles in %d requests, %.1f MB on the wire, %d rounds, %.0f ms%n",
+                    pass == 0 ? "(cold)" : "(cached)", tiles, requests, bytes / 1e6, rounds, (System.nanoTime() - t0) / 1e6);
+            if (pass == 0 && tiles != 175) throw new IllegalStateException("server flow: " + tiles + " tiles, expected 175");
+            if (pass == 1 && tiles != 0) throw new IllegalStateException("server flow: the tile cache was not used");
+            client.close();
+            if (pass == 1) ctx.close();
+        }
+        server.close();
+    }
+
+    /** The tile packet / cache format on real tiles: round trip within 1/16 block, and its size per LOD. */
+    static void codec(AetherExactSource src, double x, double z) {
+        int n = AetherNative.TILE * AetherNative.TILE;
+        float[] s = new float[n], w = new float[n], s2 = new float[n], w2 = new float[n];
+        long total = 0;
+        int count = 0;
+        StringBuilder sizes = new StringBuilder();
+        for (int lod = 0; lod < AetherFarField.LODS; lod++) {
+            int span = 256 << lod;
+            int cx = Math.floorDiv((int) Math.floor(x), span), cz = Math.floorDiv((int) Math.floor(z), span);
+            long lodBytes = 0, e0 = System.nanoTime();
+            double worst = 0;
+            boolean waterOk = true;
+            for (int k = 0; k < 3; k++) {
+                src.fill(lod, cx - 1 + k, cz + k - 1, s, w);
+                byte[] b = AetherTileCodec.encode(lod, s, w);
+                if (!AetherTileCodec.decode(lod, b, s2, w2)) throw new IllegalStateException("codec: tile does not decode");
+                if (AetherTileCodec.decode(lod + 1, b, s2, w2)) throw new IllegalStateException("codec: wrong LOD accepted");
+                AetherTileCodec.decode(lod, b, s2, w2);
+                float[] sq = s.clone(), wq = w.clone();
+                AetherTileCodec.quantize(lod, sq, wq);
+                for (int i = 0; i < n; i++) {
+                    if (Float.floatToIntBits(sq[i]) != Float.floatToIntBits(s2[i])
+                            || Float.floatToIntBits(wq[i]) != Float.floatToIntBits(w2[i]))
+                        throw new IllegalStateException("codec: decode differs from quantize");
+                    worst = Math.max(worst, Math.abs(s[i] - s2[i]));
+                    if (Float.isNaN(w[i]) != Float.isNaN(w2[i])) waterOk = false;
+                    else if (!Float.isNaN(w[i])) worst = Math.max(worst, Math.abs(w[i] - w2[i]));
+                }
+                lodBytes += b.length;
+            }
+            if (worst > AetherTileCodec.tolerance(lod) + 1e-4 || !waterOk)
+                throw new IllegalStateException("codec: round trip off by " + worst);
+            total += lodBytes;
+            count += 3;
+            sizes.append(String.format(" l%d %.0fK", lod, lodBytes / 3 / 1024.0));
+        }
+        AetherTileCodec.decode(0, new byte[] {1, 2, 3}, s2, w2);  // garbage must be refused, not thrown
+        OUT.printf("tile codec: round trip within 1/16 voxel; mean %.0f KB per tile (raw 512 KB):%s%n",
+                total / (double) count / 1024, sizes);
+        OUT.printf("  a full 7-LOD window (175 tiles) is ~%.1f MB on the wire%n", total / (double) count * 175 / 1e6);
     }
 
     /** How far the preview stand-in's surface is from the real one, over random columns within 20 km. */

@@ -17,8 +17,11 @@ final class AetherFarField implements AutoCloseable {
 
         void prepare(AetherNative.Context ctx) throws IOException;
 
-        /** Makes sure every tile of LOD `lod` covering [x0,x1) x [z0,z1) is uploaded. */
-        void cover(AetherNative.Context ctx, int lod, int x0, int z0, int x1, int z1);
+        /**
+         * Makes sure every tile of LOD `lod` covering [x0,x1) x [z0,z1) is uploaded. True when it left work for a
+         * later call (tiles still to refine), so the worker comes back soon instead of idling.
+         */
+        boolean cover(AetherNative.Context ctx, int lod, int x0, int z0, int x1, int z1);
 
         default void close() {}
     }
@@ -47,8 +50,9 @@ final class AetherFarField implements AutoCloseable {
             }
 
             @Override
-            public void cover(AetherNative.Context ctx, int lod, int x0, int z0, int x1, int z1) {
+            public boolean cover(AetherNative.Context ctx, int lod, int x0, int z0, int x1, int z1) {
                 ctx.previewGenerate(lod, x0, z0, x1, z1);  // skips tiles it already has
+                return false;
             }
         };
     }
@@ -92,18 +96,19 @@ final class AetherFarField implements AutoCloseable {
                     continue;
                 }
                 double x = camX, y = camY, z = camZ;
+                boolean pending = false;
                 for (int lod = 0; lod < LODS; lod++) {
                     int span = 256 << lod;
                     int cx = Math.floorDiv((int) Math.floor(x), span), cz = Math.floorDiv((int) Math.floor(z), span);
-                    source.cover(ctx, lod, (cx - WINDOW) * span, (cz - WINDOW) * span, (cx + WINDOW + 1) * span,
-                            (cz + WINDOW + 1) * span);
+                    pending |= source.cover(ctx, lod, (cx - WINDOW) * span, (cz - WINDOW) * span,
+                            (cx + WINDOW + 1) * span, (cz + WINDOW + 1) * span);
                 }
                 ctx.update(x, y, z, 0);  // builds what changed and stages it for the next frame
-                // idle while the camera stays inside the same finest-LOD region
+                // idle while the camera stays inside the same finest-LOD region and nothing is left to refine
                 boolean moved = Double.isNaN(lastX) || Math.abs(x - lastX) > 32 || Math.abs(z - lastZ) > 32;
                 lastX = x;
                 lastZ = z;
-                Thread.sleep(moved ? 5 : 100);
+                Thread.sleep(moved || pending ? 5 : 100);
             } catch (InterruptedException e) {
                 return;
             } catch (Throwable t) {
