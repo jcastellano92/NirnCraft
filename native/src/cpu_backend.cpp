@@ -25,7 +25,7 @@ class CpuBackend final : public Backend {
 public:
     const char* name() const override { return "cpu (slang->c++)"; }
     std::vector<float> dummyDepth_ = std::vector<float>(1, 1e30f);
-    std::vector<float> cloud_, cloudDepth_, prevSurface_, outSurface_;
+    std::vector<float> cloud_, cloudDepth_, prevSurface_, outSurface_, prevCloud_, prevCloudDepth_;
 
     bool render(const FrameInputs& in, FrameTargets& out, double* ms, std::string&) override {
         auto t0 = std::chrono::steady_clock::now();
@@ -59,8 +59,14 @@ public:
         // the half-resolution cloud pass reads the last frame's surfaces (none yet, or after a resize: no limit)
         uint32_t dv = (frame.dims[2] & 0x80u) ? 4u : 2u;  // FRAME_CLOUDS_QUARTER
         size_t cn = size_t((w + dv - 1) / dv) * ((h + dv - 1) / dv);
+        if (prevCloud_.size() != cn * 4) {
+            prevCloud_.assign(cn * 4, 0.0f);
+            prevCloudDepth_.assign(cn, 1e30f);
+        }
         cloud_.assign(cn * 4, 0.0f);
         cloudDepth_.assign(cn, 1e30f);
+        g.prevCloudBuf = {reinterpret_cast<Float4*>(prevCloud_.data()), cn};
+        g.prevCloudDepth = view(prevCloudDepth_);
         if (prevSurface_.size() != n) prevSurface_.assign(n, 1e30f);
         outSurface_.assign(n, 1e30f);
         g.cloudBuf = {reinterpret_cast<Float4*>(cloud_.data()), cn};
@@ -88,6 +94,10 @@ public:
             dispatch(cloudMain, ((w + dv - 1) / dv + 7) / 8, ((h + dv - 1) / dv + 7) / 8);
         dispatch(farMain, (w + 7) / 8, (h + 7) / 8);
         prevSurface_.swap(outSurface_);
+        if (frame.dims[2] & 0x1u) {
+            prevCloud_.swap(cloud_);
+            prevCloudDepth_.swap(cloudDepth_);
+        }
         if (ms) *ms = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count();
         return true;
     }

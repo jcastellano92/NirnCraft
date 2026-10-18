@@ -102,11 +102,11 @@ int main(int argc, char** argv) {
     const int NS = int(sizeof(sets) / sizeof(sets[0]));
     std::vector<std::vector<double>> gpu(NS);
     // interleaved so every set sees the same clocks and background load. A render reports the GPU time of the frame
-    // that finished before it (two behind), so each set renders three frames in a row and keeps the third report.
+    // that finished before it (two behind), and a set's first frame after a switch has no cloud history, so each set renders five frames and keeps the last report.
     for (int i = 0; i < frames; i++)
         for (int k = 0; k < NS; k++) {
             f.flags = sets[k].flags;
-            for (int r = 0; r < 3; r++) aether_gl_render(ctx, &f);
+            for (int r = 0; r < 5; r++) aether_gl_render(ctx, &f);
             AetherStats st{};
             aether_get_stats(ctx, &st);
             gpu[k].push_back(st.lastFrameMs);

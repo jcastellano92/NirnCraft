@@ -37,6 +37,9 @@
 [[vk::binding(20, 0)]] RWStructuredBuffer<float> outSurface;   // this frame's (terrain, actor or near field; 1e30 = sky)
 // the cloud noise volume as a hardware-filtered 3D texture (Vulkan); the C++ build samples the cloudNoise buffer
 [[vk::binding(21, 0)]] Sampler3D<float4> cloudNoiseTex;
+// the previous frame's cloud pass output, for temporal reprojection (declared after the texture: CPU layout order)
+[[vk::binding(22, 0)]] StructuredBuffer<float4> prevCloudBuf;
+[[vk::binding(23, 0)]] StructuredBuffer<float> prevCloudDepth;
 
 #include "aether_clouds.slang"
 
@@ -427,8 +430,24 @@ void sampleClouds(uint2 px, out float4 c, out float depth) {
 // frame (so clouds behind a mountain never paint over it), haze applied, stored premultiplied for the far pass.
 [shader("compute")]
 [numthreads(8, 8, 1)]
-void cloudMain(uint3 id : SV_DispatchThreadID) {
+void cloudMain(uint3 tid : SV_DispatchThreadID) {
     uint2 cd = cloudDims();
+    // temporal amortisation: a fresh ray for one pixel of every 2x2 block per frame (rotating); the others reproject
+    // last frame's deck through its camera. Off-screen reprojections and frames without history march fresh.
+    // With history, threads are dealt out by quadrant (the first quadrant takes every block's fresh pixel, the other
+    // three its reprojected ones), so a warp is all marching or all copying instead of waiting on one ray in four.
+    bool history = frame.temporal.y != 0u;
+    uint fresh = frame.temporal.x & 3u;
+    uint2 id = tid.xy;
+    uint sub = fresh;
+    if (history) {
+        uint2 hc = (cd + 1u) / 2u;
+        uint2 q = uint2(tid.x >= hc.x ? 1u : 0u, tid.y >= hc.y ? 1u : 0u);
+        uint2 l = tid.xy - q * hc;
+        if (l.x >= hc.x || l.y >= hc.y) return;
+        sub = (q.x | (q.y << 1)) ^ fresh;
+        id = l * 2u + uint2(sub & 1u, sub >> 1);
+    }
     if (id.x >= cd.x || id.y >= cd.y) return;
     uint w = frame.dims.x, h = frame.dims.y;
     uint ci = id.y * cd.x + id.x;
@@ -440,6 +459,36 @@ void cloudMain(uint3 id : SV_DispatchThreadID) {
     float3 o = frame.camFrac.xyz;
     float3 sun = frame.sunDir.xyz;
     float limit = frame.params.y;
+    if (history && sub != fresh) {
+        float pd = prevCloudDepth[ci];
+        float dd = pd < 1e29 ? pd : 20000.0;
+        float3 X = o + dir * dd - frame.prevCam.xyz;
+        float4 clip = frame.prevViewProj[0] * X.x + frame.prevViewProj[1] * X.y + frame.prevViewProj[2] * X.z + frame.prevViewProj[3];
+        if (clip.w > 1e-4) {
+            float2 pn = clip.xy / clip.w;
+            float hx = ((pn.x * 0.5 + 0.5) * float(w) - 0.5 * float(dv)) / float(dv);
+            float hy = ((0.5 - pn.y * 0.5) * float(h) - 0.5 * float(dv)) / float(dv);
+            if (hx >= 0.0 && hy >= 0.0 && hx <= float(cd.x - 1u) && hy <= float(cd.y - 1u)) {
+                // a reprojection that lands on a texel (still camera, pure translation by whole texels) takes it as-is
+                // rather than blending float-rounding fractions of its neighbours in: a still deck stays bit-stable
+                float2 hr = round(float2(hx, hy));
+                if (all(abs(float2(hx, hy) - hr) < 0.02)) {
+                    uint ih = uint(hr.y) * cd.x + uint(hr.x);
+                    cloudBuf[ci] = prevCloudBuf[ih];
+                    cloudDepth[ci] = prevCloudDepth[ih];
+                    return;
+                }
+                int2 b = int2(floor(float2(hx, hy)));
+                float2 fr = float2(hx, hy) - float2(b);
+                int2 b1 = min(b + 1, int2(cd) - 1);
+                uint i00 = uint(b.y) * cd.x + uint(b.x), i10 = uint(b.y) * cd.x + uint(b1.x);
+                uint i01 = uint(b1.y) * cd.x + uint(b.x), i11 = uint(b1.y) * cd.x + uint(b1.x);
+                cloudBuf[ci] = lerp(lerp(prevCloudBuf[i00], prevCloudBuf[i10], fr.x), lerp(prevCloudBuf[i01], prevCloudBuf[i11], fr.x), fr.y);
+                cloudDepth[ci] = min(min(prevCloudDepth[i00], prevCloudDepth[i10]), min(prevCloudDepth[i01], prevCloudDepth[i11]));
+                return;
+            }
+        }
+    }
     uint x1 = min(full.x + dv - 1u, w - 1u), y1 = min(full.y + dv - 1u, h - 1u);
     limit = min(limit, min(min(prevSurface[full.y * w + full.x], prevSurface[full.y * w + x1]),
                            min(prevSurface[y1 * w + full.x], prevSurface[y1 * w + x1])));

@@ -42,7 +42,7 @@ harness) is labelled "preview" everywhere.
 | Piece | Evidence |
 | --- | --- |
 | SVDAG | Round trips over empty, full, sphere, terrain and random volumes have 0 mismatches. Y-major order halved terrain material memory (73 → 36 MB for the 250-region clipmap). |
-| GPU cost (game path) | `aether_bench`, 2560×1440, RTX 3090, interleaved medians: terrain 3.1 ms, with sun shadows 3.6 ms; with clouds at half resolution 7.7 ms, at quarter resolution 5.3 ms. In game, near-field depth also removes the pixels the near field covers. Reached through a per-region max-height mip, device-local scene and outputs (the BAR heap is 214 MiB without Resizable BAR), a separate half/quarter-resolution cloud pass bounded by the last frame's surfaces, and 6-tap normals. |
+| GPU cost (game path) | `aether_bench`, 2560×1440, RTX 3090, interleaved medians: terrain 3.1 ms, with sun shadows 3.6 ms; clouds add about 1.6–2.4 ms at half resolution (temporal: one fresh ray per 2×2 block per frame, the rest reprojected; before that they added 4–6 ms). Absolute numbers swing ±1 ms with the 3090's clocks; the difference between sets is the stable figure. In game, near-field depth also removes the pixels the near field covers. Reached through a per-region max-height mip, device-local scene and outputs (the BAR heap is 214 MiB without Resizable BAR), a separate half/quarter-resolution cloud pass bounded by the last frame's surfaces and amortised over four frames (threads dealt out by quadrant so warps never mix marching and copying), and 6-tap normals. |
 | Ray correctness | Flat plane and four grazing directions: 0.001-block depth error. Streaming-gap and four-zone rays step exactly across unloaded cells and pin a finer LOD while coarse data is missing. |
 | CPU ≡ Vulkan | Preview Tamriel: 0.000 % hit/miss mismatch, 0.003 % colour outliers. |
 | Near-depth skip | Half the screen covered → about half the ray steps (185k → 93k). Covered pixels come back empty, the rest bit-identical. |
@@ -106,7 +106,6 @@ The other session's conversion is in progress in the main tree, which also moves
    and frame time.
 2. The exact single-player column source (`tamriel_height` via `DensitySampler`), block palette, server tile packet
    for multiplayer, and the far-actor packet.
-3. Clouds: temporal accumulation on top of the half/quarter-resolution pass (the cloud march is still about half the frame).
-4. Far terrain look: water reflections of the far field, snow and forest micro-shading; SRC GI underground.
-5. Owner checks in game: the near/far seam at the hand-off distance, curvature strength (planet radius), cloud
+3. Far terrain look: snow and forest micro-shading; SRC GI underground.
+4. Owner checks in game: the near/far seam at the hand-off distance, curvature strength (planet radius), cloud
    decks against the current shader clouds, and frame time on the 3090.

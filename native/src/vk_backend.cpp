@@ -27,12 +27,13 @@
 namespace aether {
 namespace {
 
-constexpr uint32_t BINDINGS = 22;
+constexpr uint32_t BINDINGS = 24;
 constexpr uint32_t SLOTS = 2;
 // far kernel bindings
 constexpr uint32_t B_FRAME = 0, B_PALETTE = 7, B_COLOR = 8, B_NORMAL = 9, B_DEPTH = 10, B_WEATHER = 11,
                    B_COUNTERS = 12, B_NOISE = 13, B_NEAR = 14, B_ACTORS = 15, B_HEIGHTMIP = 16, B_CLOUD = 17,
-                   B_CLOUD_DEPTH = 18, B_PREV_SURFACE = 19, B_SURFACE = 20, B_NOISE_TEX = 21;
+                   B_CLOUD_DEPTH = 18, B_PREV_SURFACE = 19, B_SURFACE = 20, B_NOISE_TEX = 21, B_PREV_CLOUD = 22,
+                   B_PREV_CLOUD_DEPTH = 23;
 // the scene's buffers (two copies, staged off the render thread)
 constexpr uint32_t SCENE_BINDINGS[] = {1, 2, 3, 4, 5, 6, B_HEIGHTMIP};
 bool isScene(uint32_t b) { return (b >= 1 && b <= 6) || b == B_HEIGHTMIP; }
@@ -259,7 +260,7 @@ public:
     }
 
     bool render(const FrameInputs& in, FrameTargets& out, double* gpuMs, std::string& err) override {
-        Slot& s = slots_[0];
+        Slot& s = slots_[frameIndex_++ % SLOTS];
         if (!waitSlot(s, gpuMs, err)) return false;
         uint32_t w = in.frame.dims[0], h = in.frame.dims[1];
         size_t px = size_t(w) * h;
@@ -791,7 +792,7 @@ private:
     void refreshDescriptors(Slot& s) {
         const SceneCopy& sc = copies_[current_];
         int prev = prevSlot_ < 0 ? int(&s - slots_) : prevSlot_;
-        VkBuffer prevBuf = slots_[prev].bufs[B_SURFACE].buf;
+        VkBuffer prevBuf = slots_[prev].bufs[B_SURFACE].buf;  // (its cloud buffers are allocated with it)
         if (s.farDirty || s.boundCopy != current_ || s.boundGeneration != sc.generation || sharedDirty_ || s.boundPrev != prevBuf) {
             s.boundPrev = prevBuf;
             VkDescriptorBufferInfo info[BINDINGS];
@@ -807,7 +808,10 @@ private:
                     wr[i].pImageInfo = &noiseInfo;
                     continue;
                 }
-                const Buf& b = i == B_PREV_SURFACE ? slots_[prevSlot_ < 0 ? int(&s - slots_) : prevSlot_].bufs[B_SURFACE]
+                const Slot& ps = slots_[prev];
+                const Buf& b = i == B_PREV_SURFACE ? ps.bufs[B_SURFACE]
+                             : i == B_PREV_CLOUD ? ps.bufs[B_CLOUD]
+                             : i == B_PREV_CLOUD_DEPTH ? ps.bufs[B_CLOUD_DEPTH]
                              : perSlot(i) ? s.bufs[i] : (isScene(i) ? sc.bufs[i] : shared_[i]);
                 info[i] = {b.buf, 0, VK_WHOLE_SIZE};
                 wr[i] = {VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET};

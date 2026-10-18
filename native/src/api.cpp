@@ -48,6 +48,12 @@ struct AetherContext {
     std::string error;
     std::mutex mu;
     uint64_t stagedRevision = UINT64_MAX;
+    // the last frame, for temporal cloud reprojection
+    bool haveHistory = false;
+    float prevInvVP[16] = {};
+    double prevCam[3] = {};
+    uint32_t prevW = 0, prevH = 0, prevCloudFlags = 0;
+    uint32_t frameIndex = 0;
 
     AetherStatus fail(AetherStatus s, std::string msg) {
         error = std::move(msg);
@@ -202,6 +208,7 @@ AETHER_API AetherStatus aether_update(AetherContext* ctx, const double centre[3]
 }
 
 static AetherStatus buildInputs(AetherContext* ctx, const AetherFrame* f, FrameInputs& in);
+static void rememberFrame(AetherContext* ctx, const AetherFrame* f);
 
 AETHER_API AetherStatus aether_render(AetherContext* ctx, const AetherFrame* f, const AetherFrameOutput* out) {
     if (!ctx || !f || !out || f->width == 0 || f->height == 0) return AETHER_ERR_ARG;
@@ -212,6 +219,7 @@ AETHER_API AetherStatus aether_render(AetherContext* ctx, const AetherFrame* f, 
     double ms = 0;
     std::string err;
     if (!ctx->backend->render(in, ctx->targets, &ms, err)) return ctx->fail(AETHER_ERR_GPU, err);
+    rememberFrame(ctx, f);
     size_t n = size_t(f->width) * f->height;
     if (out->colorLinear) std::memcpy(out->colorLinear, ctx->targets.color.data(), n * 16);
     if (out->color) {
@@ -276,6 +284,7 @@ AETHER_API AetherStatus aether_gl_render_io(AetherContext* ctx, const AetherFram
     double ms = ctx->stats.lastFrameMs;
     std::string err;
     if (!ctx->backend->glRender(in, io ? &g : nullptr, &ms, err)) return ctx->fail(AETHER_ERR_GPU, err);
+    rememberFrame(ctx, f);
     ctx->stats.lastFrameMs = ms;
     return AETHER_OK;
 }
@@ -284,6 +293,43 @@ AETHER_API void aether_gl_detach(AetherContext* ctx) {
     if (!ctx) return;
     std::lock_guard<std::mutex> lock(ctx->mu);
     ctx->backend->glDetach();
+}
+
+// General 4x4 inverse (column-major), in double. False when singular.
+static bool invert4(const float* m, float* out) {
+    double a[16], inv[16];
+    for (int i = 0; i < 16; i++) a[i] = m[i];
+    inv[0] = a[5] * a[10] * a[15] - a[5] * a[11] * a[14] - a[9] * a[6] * a[15] + a[9] * a[7] * a[14] + a[13] * a[6] * a[11] - a[13] * a[7] * a[10];
+    inv[4] = -a[4] * a[10] * a[15] + a[4] * a[11] * a[14] + a[8] * a[6] * a[15] - a[8] * a[7] * a[14] - a[12] * a[6] * a[11] + a[12] * a[7] * a[10];
+    inv[8] = a[4] * a[9] * a[15] - a[4] * a[11] * a[13] - a[8] * a[5] * a[15] + a[8] * a[7] * a[13] + a[12] * a[5] * a[11] - a[12] * a[7] * a[9];
+    inv[12] = -a[4] * a[9] * a[14] + a[4] * a[10] * a[13] + a[8] * a[5] * a[14] - a[8] * a[6] * a[13] - a[12] * a[5] * a[10] + a[12] * a[6] * a[9];
+    inv[1] = -a[1] * a[10] * a[15] + a[1] * a[11] * a[14] + a[9] * a[2] * a[15] - a[9] * a[3] * a[14] - a[13] * a[2] * a[11] + a[13] * a[3] * a[10];
+    inv[5] = a[0] * a[10] * a[15] - a[0] * a[11] * a[14] - a[8] * a[2] * a[15] + a[8] * a[3] * a[14] + a[12] * a[2] * a[11] - a[12] * a[3] * a[10];
+    inv[9] = -a[0] * a[9] * a[15] + a[0] * a[11] * a[13] + a[8] * a[1] * a[15] - a[8] * a[3] * a[13] - a[12] * a[1] * a[11] + a[12] * a[3] * a[9];
+    inv[13] = a[0] * a[9] * a[14] - a[0] * a[10] * a[13] - a[8] * a[1] * a[14] + a[8] * a[2] * a[13] + a[12] * a[1] * a[10] - a[12] * a[2] * a[9];
+    inv[2] = a[1] * a[6] * a[15] - a[1] * a[7] * a[14] - a[5] * a[2] * a[15] + a[5] * a[3] * a[14] + a[13] * a[2] * a[7] - a[13] * a[3] * a[6];
+    inv[6] = -a[0] * a[6] * a[15] + a[0] * a[7] * a[14] + a[4] * a[2] * a[15] - a[4] * a[3] * a[14] - a[12] * a[2] * a[7] + a[12] * a[3] * a[6];
+    inv[10] = a[0] * a[5] * a[15] - a[0] * a[7] * a[13] - a[4] * a[1] * a[15] + a[4] * a[3] * a[13] + a[12] * a[1] * a[7] - a[12] * a[3] * a[5];
+    inv[14] = -a[0] * a[5] * a[14] + a[0] * a[6] * a[13] + a[4] * a[1] * a[14] - a[4] * a[2] * a[13] - a[12] * a[1] * a[6] + a[12] * a[2] * a[5];
+    inv[3] = -a[1] * a[6] * a[11] + a[1] * a[7] * a[10] + a[5] * a[2] * a[11] - a[5] * a[3] * a[10] - a[9] * a[2] * a[7] + a[9] * a[3] * a[6];
+    inv[7] = a[0] * a[6] * a[11] - a[0] * a[7] * a[10] - a[4] * a[2] * a[11] + a[4] * a[3] * a[10] + a[8] * a[2] * a[7] - a[8] * a[3] * a[6];
+    inv[11] = -a[0] * a[5] * a[11] + a[0] * a[7] * a[9] + a[4] * a[1] * a[11] - a[4] * a[3] * a[9] - a[8] * a[1] * a[7] + a[8] * a[3] * a[5];
+    inv[15] = a[0] * a[5] * a[10] - a[0] * a[6] * a[9] - a[4] * a[1] * a[10] + a[4] * a[2] * a[9] + a[8] * a[1] * a[6] - a[8] * a[2] * a[5];
+    double det = a[0] * inv[0] + a[1] * inv[4] + a[2] * inv[8] + a[3] * inv[12];
+    if (std::abs(det) < 1e-30) return false;
+    for (int i = 0; i < 16; i++) out[i] = float(inv[i] / det);
+    return true;
+}
+
+// Remembers this frame as the next frame's history (after a successful render).
+static void rememberFrame(AetherContext* ctx, const AetherFrame* f) {
+    std::memcpy(ctx->prevInvVP, f->invViewProj, sizeof(ctx->prevInvVP));
+    for (int i = 0; i < 3; i++) ctx->prevCam[i] = f->cameraPos[i];
+    ctx->prevW = f->width;
+    ctx->prevH = f->height;
+    ctx->prevCloudFlags = f->flags & (AETHER_FRAME_CLOUDS | AETHER_FRAME_CLOUDS_QUARTER);
+    ctx->haveHistory = true;
+    ctx->frameIndex++;
 }
 
 static AetherStatus buildInputs(AetherContext* ctx, const AetherFrame* f, FrameInputs& in) {
@@ -314,6 +360,15 @@ static AetherStatus buildInputs(AetherContext* ctx, const AetherFrame* f, FrameI
     g.dims[2] = f->flags;
     g.dims[3] = uint32_t(in.scene->lodCount);
     g.weatherParams[0] = ctx->rainFactor;
+    // temporal clouds: last frame's view-projection (inverted back from its inverse) and camera, if comparable
+    uint32_t cloudFlags = f->flags & (AETHER_FRAME_CLOUDS | AETHER_FRAME_CLOUDS_QUARTER);
+    bool valid = ctx->haveHistory && ctx->prevW == f->width && ctx->prevH == f->height &&
+                 ctx->prevCloudFlags == cloudFlags && (cloudFlags & AETHER_FRAME_CLOUDS);
+    if (valid && invert4(ctx->prevInvVP, g.prevViewProj)) {
+        for (int i = 0; i < 3; i++) g.prevCam[i] = float(ctx->prevCam[i] - double(g.camInt[i]));
+        g.temporal[1] = 1;
+    }
+    g.temporal[0] = ctx->frameIndex;
     std::memcpy(g.lods, in.scene->lods, sizeof(g.lods));
     in.palette = &ctx->palette;
     in.weather = &ctx->weather;

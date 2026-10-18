@@ -473,6 +473,63 @@ static bool parity(const char* raster) {
         std::printf("  clouds: %zu px with partial cover; %.3f%% px differ between builds\n", cloudy, 100.0 * bad / n);
         CHECK(cloudy > size_t(W) * H / 20);
         CHECK(bad / n < 0.01);
+
+        // temporal clouds (Vulkan context, which has history from the frame above). The reference is a fresh march
+        // in its own context: a cloud-less frame of the same pose first (so the cloud pass clips to the right
+        // surfaces, as in game), then the cloud frame, which has no cloud history and so marches every block.
+        AetherContext* fresh = nullptr;
+        aether_create(AETHER_BACKEND_VULKAN, &fresh);
+        aether_preview_load_raster(fresh, raster);
+        for (int lod = 0; lod < 7; lod++) {
+            int span = 256 << lod;
+            int cx = int(std::floor(x / span)), cz = int(std::floor(z / span));
+            aether_preview_generate(fresh, lod, (cx - 2) * span, (cz - 2) * span, (cx + 3) * span, (cz + 3) * span);
+        }
+        aether_update(fresh, centre, 0);
+        aether_set_cloud_noise(fresh, noise.data());
+        aether_set_weather(fresh, &wth);
+        std::vector<float> lf(W * H * 4);
+        AetherFrameOutput olf{nullptr, nullptr, nullptr, lf.data()};
+        auto freshRender = [&](const AetherFrame& pose) {
+            AetherFrame bare = pose;
+            bare.flags &= ~(AETHER_FRAME_CLOUDS | AETHER_FRAME_CLOUDS_QUARTER);
+            CHECK(aether_render(fresh, &bare, &olf) == AETHER_OK);
+            CHECK(aether_render(fresh, &pose, &olf) == AETHER_OK);
+        };
+
+        // a static camera converges to the fresh march exactly, then stays bit-stable
+        std::vector<float> lt(W * H * 4), lt2(W * H * 4);
+        AetherFrameOutput olt{nullptr, nullptr, nullptr, lt.data()}, olt2{nullptr, nullptr, nullptr, lt2.data()};
+        for (int i = 0; i < 6; i++) CHECK(aether_render(gpu, &fc, &olt) == AETHER_OK);
+        for (int i = 0; i < 4; i++) CHECK(aether_render(gpu, &fc, &olt2) == AETHER_OK);
+        freshRender(fc);
+        size_t staticDiff = 0, freshOff = 0;
+        for (size_t i = 0; i < lt.size(); i++) {
+            staticDiff += lt[i] != lt2[i];
+            freshOff += lt[i] != lf[i];
+        }
+        std::printf("  temporal, static camera: %zu values off the fresh march, %zu change once converged\n", freshOff,
+                    staticDiff);
+        CHECK(freshOff == 0);
+        CHECK(staticDiff == 0);
+
+        // a slowly turning one stays close to a fresh march of its final pose
+        AetherFrame fm = fc;
+        for (int i = 0; i <= 8; i++) {
+            cameraMatrix(90 + i * 0.25, 6, 70, double(W) / H, fm.invViewProj);  // 0.25 degrees per frame
+            CHECK(aether_render(gpu, &fm, &olt) == AETHER_OK);
+        }
+        freshRender(fm);
+        size_t moved = 0;
+        double worstA = 0;
+        for (size_t i = 0; i < size_t(W) * H; i++) {
+            double da = std::abs(double(lt[i * 4 + 3]) - lf[i * 4 + 3]);
+            worstA = std::max(worstA, da);
+            moved += da > 0.08;
+        }
+        std::printf("  temporal, turning camera: %.2f%% px off by > 0.08 alpha (worst %.3f)\n", 100.0 * moved / n, worstA);
+        CHECK(moved / n < 0.02);
+        aether_destroy(fresh);
     }
     aether_destroy(cpu);
     aether_destroy(gpu);

@@ -32,6 +32,9 @@ struct alignas(16) FrameGpu {
     uint32_t dims[4];
     float weatherParams[4];
     LodGpu lods[MAX_LODS];
+    float prevViewProj[16];
+    float prevCam[4];
+    uint32_t temporal[4];
 };
 
 struct alignas(16) ActorGpu {
@@ -43,7 +46,7 @@ static_assert(sizeof(LodGpu) == 32);
 static_assert(sizeof(ActorGpu) == 32);
 static_assert(sizeof(RegionGpu) == 48);
 static_assert(sizeof(MaterialGpu) == 32);
-static_assert(sizeof(FrameGpu) == 64 + 16 * 6 + 32 * MAX_LODS);
+static_assert(sizeof(FrameGpu) == 64 + 16 * 6 + 32 * MAX_LODS + 64 + 16 + 16);
 
 struct Float4 {
     float v[4];
@@ -80,6 +83,8 @@ struct FarGlobals {
     CpuBuffer<float> prevSurface;
     CpuBuffer<float> outSurface;
     void* cloudNoiseTex;  // Texture3D on the C++ target: unused there (the kernel samples cloudNoise by hand)
+    CpuBuffer<Float4> prevCloudBuf;
+    CpuBuffer<float> prevCloudDepth;
 };
 
 }  // namespace aether

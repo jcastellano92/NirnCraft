@@ -38,6 +38,9 @@ struct FrameGpu {
     uint4 dims;             // width, height, flags, lod count
     float4 weatherParams;   // rain factor, 0, 0, far actor count
     LodGpu lods[MAX_LODS];
+    float4 prevViewProj[4];  // last frame's camera-relative view-projection (columns), for cloud reprojection
+    float4 prevCam;          // last frame's camera relative to this frame's camInt
+    uint4 temporal;          // frame index, history valid (0/1)
 };
 
 float3 unproject(FrameGpu f, float2 ndc) {
