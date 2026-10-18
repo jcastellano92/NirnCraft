@@ -20,6 +20,7 @@
 #include "/lib/media.glsl"
 #include "/lib/plumes.glsl"
 #include "/lib/flow.glsl"
+#include "/lib/quality.glsl"
 
 uniform sampler2D colortex4;
 uniform sampler2D colortex5;
@@ -101,12 +102,16 @@ vec3 reflectionAt(vec3 vp, vec3 rWorld, vec3 sun, float skyLight) {
     vec3 rView = mat3(gbufferModelView) * rWorld;
     vec3 sky = skyColor(normalize(vec3(rWorld.x, max(rWorld.y, 0.01), rWorld.z)), sun) * mix(0.2, 1.0, skyLight);
 #ifdef SSR
-    if (rView.z < 0.0) {
+    // adaptive quality: the march's steps (it reaches less far with fewer: beyond it the far field and sky mirror)
+    float qr = qualityKnob(3, 0, QUALITY_FALLBACK);
+    int steps = qr > 0.0 ? qualityCount(SSR_STEPS, qr * qualityDistance(length(vp)), qualityDither(gl_FragCoord.xy), 1) : 0;
+    if (rView.z < 0.0 && steps > 0) {
         float stepLen = max(0.5, -vp.z * 0.06);
         vec3 p = vp;
         float jitter = ign(gl_FragCoord.xy, frameTimeCounter * 60.0);
         p += rView * stepLen * jitter;
         for (int i = 0; i < SSR_STEPS; i++) {
+            if (i >= steps) break;
             p += rView * stepLen;
             stepLen *= 1.25;
             vec2 uv = toScreen(p);
@@ -117,7 +122,7 @@ vec3 reflectionAt(vec3 vp, vec3 rWorld, vec3 sun, float skyLight) {
             float dz = hit.z - p.z;
             if (dz > 0.0 && dz < stepLen * 2.5) {
                 float edge = smoothstep(0.0, 0.08, min(min(uv.x, 1.0 - uv.x), min(uv.y, 1.0 - uv.y)));
-                return mix(sky, sceneAt(uv, sun, false), edge);
+                return mix(sky, sceneAt(uv, sun, false), edge * qualityFade(qr, 0.2));
             }
         }
     }
@@ -143,7 +148,9 @@ float fallsSpray(vec2 uv, vec3 n, float dist) {
     if (!top && abs(n.y) > 0.3) return 0.0;
     float span = 2.5 * viewHeight / (1.4 * max(dist, 1.0)) / viewHeight;  // ~2.5 blocks in uv
     float best = 0.0;
+    int taps = qualityCount(4, qualityKnob(5, 3, 1.0), 0.5, 0);  // adaptive quality: 0 drops the spray
     for (int k = 1; k <= 4; k++) {
+        if (k > taps) break;
         vec2 q = uv + vec2(0.0, (top ? 1.0 : -1.0) * span * float(k) / 4.0);
         if (q.y < 0.0 || q.y > 1.0) break;
         vec4 inf = texture(colortex6, q);
@@ -166,11 +173,16 @@ vec3 lightShafts(vec2 uv, vec3 sun, float dist) {
     vec3 lightView = mat3(gbufferModelView) * L;
     if (lightView.z > -0.05) return vec3(0.0);  // behind the camera
     vec2 lp = toScreen(lightView * 1000.0);
-    vec2 delta = (lp - uv) / float(VL_SAMPLES);
+    // adaptive quality: fewer, longer steps over the same path (coarser, noisier shafts); none at 0
+    float qv = qualityKnob(4, 0, QUALITY_FALLBACK);
+    if (qv <= 0.0) return vec3(0.0);
+    int samples = qualityCount(VL_SAMPLES, qv, qualityDither(gl_FragCoord.xy), 1);
+    vec2 delta = (lp - uv) / float(samples);
     float jitter = ign(gl_FragCoord.xy, frameTimeCounter * 60.0);
     vec2 p = uv + delta * jitter;
-    float open = 0.0, w = 1.0, wsum = 0.0;
+    float open = 0.0, w = 1.0, wsum = 0.0, decay = pow(0.96, 16.0 / float(samples));  // 0.96^16 over the path
     for (int i = 0; i < VL_SAMPLES; i++) {
+        if (i >= samples) break;
         p += delta;
         if (any(lessThan(p, vec2(0.0))) || any(greaterThan(p, vec2(1.0)))) break;
         float s = texture(depthtex1, p).r >= 1.0 ? 1.0 : 0.0;
@@ -179,7 +191,7 @@ vec3 lightShafts(vec2 uv, vec3 sun, float dist) {
 #endif
         open += s * w;
         wsum += w;
-        w *= 0.96;
+        w *= decay;  // the same falloff along the path whatever the count
     }
     open /= max(wsum, 1e-3);
     // without the far field on screen, the low sun behind the horizon's mountains (the mod's sun_horizon) casts none
@@ -191,7 +203,7 @@ vec3 lightShafts(vec2 uv, vec3 sun, float dist) {
     float air = 0.05 + 0.4 * rainStrength + groundFogDensity(sun, wetness, rainStrength) * 40.0;
     float outdoors = smoothstep(2.0, 10.0, float(eyeBrightnessSmooth.y) / 16.0);
     vec3 rad = sun.y > -0.05 ? sunRadiance(sun) : vec3(0.035, 0.05, 0.09) * smoothstep(-0.05, -0.2, sun.y);
-    return rad * open * phase * air * outdoors * min(dist, 400.0) / 400.0 * 0.5;
+    return rad * open * phase * air * outdoors * min(dist, 400.0) / 400.0 * 0.5 * qualityFade(qv, 0.15);
 #else
     return vec3(0.0);
 #endif
@@ -228,6 +240,7 @@ void main() {
             vec3 absorb = exp(-thick * vec3(0.30, 0.09, 0.06));
             vec3 body = behind * absorb + tint * (1.0 - absorb) * 0.6;
 #ifdef CAUSTICS
+            if (qualityKnob(5, 2, 1.0) > 0.5)
             body *= 1.0 + 0.5 * caustics((cameraPosition + mat3(gbufferModelViewInverse) * viewAt(uvR, texture(depthtex1, uvR).r)).xz,
                                          frameTimeCounter) * exp(-thick * 0.3) * skyLight;
 #endif

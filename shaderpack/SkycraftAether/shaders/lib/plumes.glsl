@@ -12,6 +12,7 @@
 #include "/lib/air.glsl"
 #include "/lib/lightning.glsl"
 #include "/lib/atmosphere.glsl"
+#include "/lib/quality.glsl"
 
 float valueNoise3(vec3 p) {
     vec3 i = floor(p), f = p - i;
@@ -61,6 +62,8 @@ vec4 plumesAlong(vec3 camPos, vec3 dir, float tEnd, vec3 sun, float time, float 
     float mu = dot(dir, sun.y > -0.05 ? sun : -sun);
     float phase = 0.4 + 0.6 * (1.0 - 0.2025) / pow(max(1.2025 - 0.9 * mu, 1e-3), 1.5);
     float glowDay = mix(1.0, 0.3, smoothstep(-0.1, 0.3, sun.y));  // fire light shows against the night
+    // adaptive quality: steps through each column's interval (coarser billows); at least 2 (a column never vanishes)
+    int steps = qualityCount(PLUME_STEPS, qualityKnob(6, 2, QUALITY_FALLBACK), qualityDither(gl_FragCoord.xy), 2);
     for (int i = 0; i < 24; i++) {
         if (i >= last) break;
         SmokePlume s = smokePlume(i);
@@ -75,11 +78,12 @@ vec4 plumesAlong(vec3 camPos, vec3 dir, float tEnd, vec3 sun, float time, float 
         float enter = max(0.0, max(n3.x, max(n3.y, n3.z)));
         float leave = min(tEnd, min(f3.x, min(f3.y, f3.z)));
         if (leave <= enter || enter > 40000.0) continue;
-        float stepLen = (leave - enter) / float(PLUME_STEPS);
+        float stepLen = (leave - enter) / float(steps);
         float glowScale = 8.0 + s.height * 0.12;  // a fire lights the base of its smoke; the volcano a broad cone
         vec3 Sp = vec3(0.0);
         float Tp = 1.0;
         for (int k = 0; k < PLUME_STEPS; k++) {
+            if (k >= steps) break;
             float t = enter + (float(k) + dither) * stepLen;
             vec3 w = camPos + dir * t;
             float sigma = plumeDensity(s, wind, w, time) * 0.18 * (i == 0 ? 1.0 : 0.7 + 0.5 * s.smoke);

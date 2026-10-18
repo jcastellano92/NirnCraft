@@ -10,6 +10,7 @@
 #include "/lib/common.glsl"
 #include "/lib/materials.glsl"
 #include "/lib/pbr.glsl"
+#include "/lib/quality.glsl"
 
 uniform sampler2D colortex0;
 uniform sampler2D colortex1;
@@ -68,11 +69,16 @@ vec3 viewAt(vec2 uv, float d) {
 // a few depth taps on a disk around the pixel, scaled to the view distance: crevices and contact darken
 float screenAO(vec3 vp, vec3 vn, vec2 px) {
 #ifdef SSAO
+    // adaptive quality: the sample count (fewer far away, where the 0.6-block radius covers a pixel or two); none at 0
+    float qa = qualityKnob(2, 0, QUALITY_FALLBACK);
+    if (qa <= 0.0) return 1.0;
+    int count = qualityCount(SSAO_SAMPLES, qa * qualityDistance(length(vp)), qualityDither(px), 1);
     float occ = 0.0;
     float radius = 0.6;
     float rot = ign(px, 0.0) * 6.2831853;
     for (int i = 0; i < SSAO_SAMPLES; i++) {
-        float r = (float(i) + 0.5) / float(SSAO_SAMPLES);
+        if (i >= count) break;
+        float r = (float(i) + 0.5) / float(count);
         float a = float(i) * 2.39996 + rot;
         vec3 o = vec3(cos(a), sin(a), 0.6) * r * radius;
         // into the hemisphere of the normal
@@ -85,7 +91,7 @@ float screenAO(vec3 vp, vec3 vn, vec2 px) {
         float dz = hit.z - s.z;  // view space: z is negative forward
         occ += (dz > 0.02 && dz < radius * 2.0) ? 1.0 : 0.0;
     }
-    return 1.0 - occ / float(SSAO_SAMPLES) * 0.7;
+    return 1.0 - occ / float(count) * 0.7 * qualityFade(qa, 0.2);  // fades in and out with the knob
 #else
     return 1.0;
 #endif

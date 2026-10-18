@@ -10,6 +10,12 @@
 //                          clouds=1 temp=0.6 cold=0 aether=1]
 //   aether=0: aether's frame absent (1x1 blanks): the pack's fallback cloud deck and plain fog
 //   time: 0 sunrise, 0.25 noon, 0.5 sunset, 0.75 midnight; water=1 puts the eye under water
+// adaptive quality (shaders/lib/quality.glsl): q=<0..1> binds the mod's qualityKnobs texture with every knob at q
+//   (without q= or any q* key the pack runs its fallback counts); per-knob overrides qs (shadow taps) qa (SSAO) qr (SSR)
+//   qv (light shafts) qw (wave count) ql (wave LOD) qk (caustics) qy (falls spray) qm (air march) qh (halos)
+//   qp (smoke columns) qc (fallback clouds) qb (bloom) qd (detail falloff start) qf (far fraction)
+//   sweep=FILE: after the first image, one more per line of FILE ("out.png key=v key=v ...": the q keys above), the
+//   scene rendered once; gputime=N: GPU time of the pack's passes (GL timestamps, median of N runs) per image
 #define WIN32_LEAN_AND_MEAN
 #define NOMINMAX
 #ifndef _CRT_SECURE_NO_WARNINGS
@@ -18,6 +24,7 @@
 #include <windows.h>
 #include <GL/gl.h>
 
+#include <algorithm>
 #include <array>
 #include <chrono>
 #include <cmath>
@@ -63,6 +70,9 @@ GLF(void, glDrawBuffers, (GLsizei, const GLenum*))
 GLF(void, glActiveTexture, (GLenum))
 GLF(void, glGenerateMipmap, (GLenum))
 GLF(void, glDeleteFramebuffers, (GLsizei, const GLuint*))
+GLF(void, glGenQueries, (GLsizei, GLuint*))
+GLF(void, glQueryCounter, (GLuint, GLenum))
+GLF(void, glGetQueryObjectui64v, (GLuint, GLenum, unsigned long long*))
 
 bool loadGl() {
 #define LOAD(n) if (!(p##n = reinterpret_cast<PFN_##n>(wglGetProcAddress(#n)))) { std::printf("missing %s\n", #n); return false; }
@@ -71,6 +81,7 @@ bool loadGl() {
     LOAD(glUseProgram) LOAD(glGetUniformLocation) LOAD(glUniform1i) LOAD(glUniform1f) LOAD(glUniform2i) LOAD(glUniform3f)
     LOAD(glUniformMatrix4fv) LOAD(glGenFramebuffers) LOAD(glBindFramebuffer) LOAD(glFramebufferTexture2D)
     LOAD(glCheckFramebufferStatus) LOAD(glDrawBuffers) LOAD(glActiveTexture) LOAD(glGenerateMipmap) LOAD(glDeleteFramebuffers)
+    LOAD(glGenQueries) LOAD(glQueryCounter) LOAD(glGetQueryObjectui64v)
     return true;
 }
 
@@ -193,6 +204,28 @@ double arg(int argc, char** argv, const char* k, double d) {
     for (int i = 2; i < argc; i++)
         if (std::strncmp(argv[i], k, n) == 0 && argv[i][n] == '=') return std::atof(argv[i] + n + 1);
     return d;
+}
+
+// the mod's qualityKnobs texture (16x1 RGBA8, r the low byte; lib/quality.glsl) from q / q* keys; false when none given
+bool qualityKnobs(int argc, char** argv, uint32_t out[16]) {
+    struct K { const char* key; int texel, channel; };
+    static const K knobs[] = {{"qs", 1, 0}, {"qa", 2, 0}, {"qr", 3, 0}, {"qv", 4, 0}, {"qw", 5, 0}, {"ql", 5, 1},
+                              {"qk", 5, 2}, {"qy", 5, 3}, {"qm", 6, 0}, {"qh", 6, 1}, {"qp", 6, 2}, {"qc", 7, 0},
+                              {"qb", 8, 0}, {"qd", 9, 0}, {"qf", 9, 1}};
+    bool any = arg(argc, argv, "q", -1) >= 0;
+    for (const K& k : knobs) any = any || arg(argc, argv, k.key, -1) >= 0;
+    if (!any) return false;
+    double all = arg(argc, argv, "q", 1.0);
+    uint8_t b[16][4] = {};
+    for (const K& k : knobs)
+        b[k.texel][k.channel] = uint8_t(std::lround(std::min(std::max(arg(argc, argv, k.key, all), 0.0), 1.0) * 255));
+    b[1][1] = b[1][0];  // the penumbra follows the taps, as the mod writes it
+    b[0][0] = 165;
+    b[0][1] = 1;
+    b[0][2] = uint8_t(std::lround(std::min(std::max(all, 0.0), 1.0) * 255));
+    b[0][3] = 255;
+    for (int t = 0; t < 16; t++) out[t] = b[t][0] | b[t][1] << 8 | b[t][2] << 16 | uint32_t(b[t][3]) << 24;
+    return true;
 }
 
 // GPU utilisation over ~0.3 s from NVIDIA's NVML (shipped with the driver); 0 when there is no NVML (other vendors:
@@ -683,6 +716,11 @@ int main(int argc, char** argv) {
     GLuint smokeTex = texture2d(GL_RGBA8, 32, 4, GL_RGBA, GL_UNSIGNED_BYTE, smoke.data());
     GLuint boltTex = texture2d(GL_RGBA8, 32, 4, GL_RGBA, GL_UNSIGNED_BYTE, bolt.data());
     GLuint horizonTex = texture2d(GL_RGBA8, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, &horizon);
+    // the mod's adaptive-quality knobs; a 1x1 blank (the pack's fallback counts) without q keys
+    uint32_t knobTexels[16] = {};
+    bool haveKnobs = qualityKnobs(argc, argv, knobTexels);
+    GLuint qualityTex = haveKnobs ? texture2d(GL_RGBA8, 16, 1, GL_RGBA, GL_UNSIGNED_BYTE, knobTexels)
+                                  : texture2d(GL_RGBA8, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, &knobTexels[0]);
 
     GLuint tex[8];
     tex[0] = texture2d(GL_RGBA8, W, H, GL_RGBA, GL_UNSIGNED_BYTE, albedo.data());
@@ -813,20 +851,57 @@ int main(int argc, char** argv) {
                 {"labWater", labWater}, {"aetherColor", aetherColor}, {"aetherDepth", aetherDepth},
                 {"aetherSunMap", aetherSunMap}, {"weatherField", weatherFieldTex}, {"weatherDyn", weatherDynTex},
                 {"fogRadianceTex", fogRadTex}, {"smokeSourcesTex", smokeTex}, {"lightningTex", boltTex},
-                {"sunHorizonTex", horizonTex}, {"masserPhases", phaseTex}, {"secundaPhases", phaseTex}};
-    bool ok = run(pWater, {{5, tex[5]}, {6, tex[6]}}, false);
-    ok = ok && run(pDeferred, {{4, tex[4]}}, true);  // deferred sees the opaque depth only
-    samplers["colortex4"] = tex[4];
-    samplers["colortex5"] = tex[5];
-    samplers["colortex6"] = tex[6];
-    ok = ok && run(pComposite, {{4, alt4}}, false);  // reads colortex4, writes its other half (Iris flips)
-    glBindTexture(GL_TEXTURE_2D, alt4);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR_);
-    pglGenerateMipmap(GL_TEXTURE_2D);
-    samplers["colortex4"] = alt4;
-    ok = ok && run(pBloom, {{0, alt0}}, false);
-    samplers["colortex0"] = alt0;
-    ok = ok && run(pFinal, {{0, outTex}}, false);
+                {"sunHorizonTex", horizonTex}, {"masserPhases", phaseTex}, {"secundaPhases", phaseTex},
+                {"qualityKnobs", qualityTex}};
+    // the pack's passes, as Iris runs them (the lab's water pass first); every run starts from the same inputs
+    auto passes = [&]() {
+        samplers["colortex0"] = tex[0];
+        samplers.erase("colortex4");
+        samplers.erase("colortex5");
+        samplers.erase("colortex6");
+        bool good = run(pWater, {{5, tex[5]}, {6, tex[6]}}, false);
+        good = good && run(pDeferred, {{4, tex[4]}}, true);  // deferred sees the opaque depth only
+        samplers["colortex4"] = tex[4];
+        samplers["colortex5"] = tex[5];
+        samplers["colortex6"] = tex[6];
+        good = good && run(pComposite, {{4, alt4}}, false);  // reads colortex4, writes its other half (Iris flips)
+        glBindTexture(GL_TEXTURE_2D, alt4);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR_);
+        pglGenerateMipmap(GL_TEXTURE_2D);
+        samplers["colortex4"] = alt4;
+        good = good && run(pBloom, {{0, alt0}}, false);
+        samplers["colortex0"] = alt0;
+        good = good && run(pFinal, {{0, outTex}}, false);
+        return good;
+    };
+    // gputime=N: GPU time of the passes (timestamps around them), median of N runs after a warm-up
+    double gt = arg(argc, argv, "gputime", 0);
+    int timeRuns = gt > 0 && gt < 1000 ? int(gt) : 0;
+    GLuint tq[2] = {0, 0};
+    if (timeRuns > 0) pglGenQueries(2, tq);
+    auto timedPasses = [&](double& ms) {
+        ms = -1;
+        if (timeRuns <= 0) return passes();
+        bool good = passes();  // warm-up
+        std::vector<double> t;
+        for (int r = 0; r < timeRuns && good; r++) {
+            pglQueryCounter(tq[0], 0x8E28);  // GL_TIMESTAMP
+            good = passes();
+            pglQueryCounter(tq[1], 0x8E28);
+            unsigned long long a = 0, b = 0;
+            pglGetQueryObjectui64v(tq[0], 0x8866, &a);  // GL_QUERY_RESULT (waits)
+            pglGetQueryObjectui64v(tq[1], 0x8866, &b);
+            t.push_back(double(b - a) / 1e6);
+        }
+        if (!t.empty()) {
+            std::sort(t.begin(), t.end());
+            ms = t[t.size() / 2];
+        }
+        return good;
+    };
+    double passMs = -1;
+    bool ok = timedPasses(passMs);
+    if (passMs >= 0) std::printf("pack_lab: passes %.3f ms (median of %d)\n", passMs, timeRuns);
     if (arg(argc, argv, "probe", 0) != 0) {  // HDR after deferred and composite at a few screen points (x, y from top)
         std::vector<float> hd(N * 4), hc(N * 4);
         glBindTexture(GL_TEXTURE_2D, tex[4]);
@@ -857,6 +932,37 @@ int main(int argc, char** argv) {
     lap("gl+pack");
     aether::writePng(outPng, reinterpret_cast<const uint32_t*>(img.data()), W, H);
     std::printf("pack_lab: wrote %s (%s)\n", outPng, ok ? "all passes ran" : "a pass FAILED");
+    // sweep=FILE: the same scene under other knob settings, one image (and timing) per line
+    const char* sweep = nullptr;
+    for (int i = 2; i < argc; i++)
+        if (std::strncmp(argv[i], "sweep=", 6) == 0) sweep = argv[i] + 6;
+    if (sweep) {
+        std::ifstream sf(sweep);
+        std::string line;
+        while (ok && std::getline(sf, line)) {
+            if (!line.empty() && line.back() == '\r') line.pop_back();
+            std::istringstream ls(line);
+            std::vector<std::string> toks;
+            std::string tok;
+            while (ls >> tok) toks.push_back(tok);
+            if (toks.empty() || toks[0][0] == '#') continue;
+            std::vector<char*> av = {argv[0], toks[0].data()};
+            for (size_t k = 1; k < toks.size(); k++) av.push_back(toks[k].data());
+            uint32_t kt[16] = {};
+            bool have = qualityKnobs(int(av.size()), av.data(), kt);
+            glBindTexture(GL_TEXTURE_2D, qualityTex);
+            if (have) glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 16, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, kt);
+            else glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, kt);
+            double ms = -1;
+            ok = timedPasses(ms);
+            glBindTexture(GL_TEXTURE_2D, outTex);
+            glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, px.data());
+            for (uint32_t yy = 0; yy < H; yy++) std::memcpy(&img[size_t(yy) * W * 4], &px[size_t(H - 1 - yy) * W * 4], W * 4);
+            aether::writePng(toks[0], reinterpret_cast<const uint32_t*>(img.data()), W, H);
+            if (ms >= 0) std::printf("pack_lab: sweep %s %.3f ms\n", toks[0].c_str(), ms);
+            else std::printf("pack_lab: sweep %s\n", toks[0].c_str());
+        }
+    }
     aether_destroy(ctx);
     return ok ? 0 : 1;
 }

@@ -12,8 +12,17 @@
 #define SKYCRAFT_WAVES
 
 #include "/lib/noise.glsl"
+#include "/lib/quality.glsl"
 
 #define WAVE_COUNT (WATER_WAVES * 4 + 4)  // 8 / 12 / 16
+
+// adaptive quality: how many of the spectrum's waves are drawn (4 .. WAVE_COUNT, fractional: the last one fades in),
+// shortest dropped first. The spectrum itself (lengths, headings, amplitudes) always follows WAVE_COUNT, so a change
+// of count never shifts the waves that stay; what is dropped becomes roughness (waveRoughness), like distant waves.
+float waveCountF() { return mix(4.0, float(WAVE_COUNT), qualityKnob(5, 0, QUALITY_FALLBACK)); }
+
+// the wave LOD bias: waves fade out up to 2x sooner with distance at 0 (cheaper far water, glittering earlier)
+float waveFootScale() { return mix(2.0, 1.0, qualityKnob(5, 1, 1.0)); }
 
 // heading of each wave around the wind, in quarter turns at full spread (long waves keep close to the wind)
 const float WAVE_SPREAD[16] = float[16](0.0, 0.35, -0.42, 0.6, -0.7, 0.18, -0.25, 0.85, -0.9, 0.5, -0.55, 0.05,
@@ -43,13 +52,14 @@ vec3 waveField(vec2 p, float time, float openness, vec2 wind, vec2 flow, float d
     float wl = waveLongest(openness, wind.y);
     float decay = pow(0.7 / wl, 1.0 / float(WAVE_COUNT - 1));  // down to 0.7-block ripples
     float amp = waveAmp(openness, wind.y) * waveGroups(p, time);
-    float foot = waterFootprint(dist);
+    float foot = waterFootprint(dist) * waveFootScale();
     float drag = 0.08 + 0.3 * openness;
     float h = 0.0;
     vec2 g = vec2(0.0);
+    float count = waveCountF();
     for (int i = 0; i < 16; i++) {
-        if (i >= WAVE_COUNT) break;
-        float fade = smoothstep(3.0 * foot, 8.0 * foot, wl);
+        if (i >= WAVE_COUNT || float(i) >= count) break;
+        float fade = smoothstep(3.0 * foot, 8.0 * foot, wl) * clamp(count - float(i), 0.0, 1.0);
         if (fade <= 0.0) break;  // the rest are shorter still
         float spread = 0.25 + 0.75 * float(i) / float(WAVE_COUNT - 1);
         float ang = wind.x + WAVE_SPREAD[i] * spread * 1.5707963;
@@ -113,15 +123,17 @@ vec3 waveNormal(vec2 p, float time, float openness, vec2 wind, vec2 flow, float 
 // specular roughness of the water at `dist`: calm glassy water up close; the slope of the waves too small to resolve
 // widens the highlight with distance (a glitter path to the sun instead of sparkling pixels)
 float waveRoughness(float openness, vec2 wind, float dist) {
-    float foot = waterFootprint(dist);
+    float foot = waterFootprint(dist) * waveFootScale();
     float wl = waveLongest(openness, wind.y);
     // slope each wave carries is about amp * k (the same for every wave: amp and wl decay together)
     float slope = waveAmp(openness, wind.y) * 6.2831853 / wl * 0.6;
     float lost = 0.0;
     float decay = pow(0.7 / wl, 1.0 / float(WAVE_COUNT - 1));
+    float count = waveCountF();
     for (int i = 0; i < 16; i++) {
         if (i >= WAVE_COUNT) break;
-        lost += 1.0 - smoothstep(3.0 * foot, 8.0 * foot, wl);
+        // what is not drawn: too short for its distance, or beyond the adaptive count
+        lost += 1.0 - smoothstep(3.0 * foot, 8.0 * foot, wl) * clamp(count - float(i), 0.0, 1.0);
         wl *= decay;
     }
     // GGX alpha ~ sqrt(2) * the rms slope of what is no longer drawn (aether's far water uses the same: aether_far.slang
