@@ -1,10 +1,6 @@
 # Gradle / IDE
 .gradle/
 build/
-# ...but never Java packages or assets that happen to be named build/out/bin
-!mod/src/**/build/
-!mod/src/**/out/
-!mod/src/**/bin/
 out/
 run/
 run-data/
@@ -18,6 +14,10 @@ eclipse/
 .project
 .settings/
 bin/
+# ...but never Java packages or assets that happen to be named build/out/bin
+!mod/src/**/build/
+!mod/src/**/out/
+!mod/src/**/bin/
 # OS
 .DS_Store
 Thumbs.db
@@ -25,8 +25,37 @@ Thumbs.db
 dist/
 *.args
 __pycache__/
-# Skycraft Core is a build output; CI and tools/prepare-build-pack.sh inject it into build copies of the pack
+# Skycraft Core is a build output; packaging tools inject it into build copies of the pack
 pack/mods/skycraft-core.jar
+
+# Local game/server output and generated resolver reports (keep source assets and bakes tracked)
+/mod/logs/
+/mod/crash-reports/
+/mod/screenshots/
+/mod/saves/
+/logs/
+/crash-reports/
+*.log
+*.log.*
+*.hprof
+*.jfr
+/tools/bake/out/
+/pack/RESOLVE_REPORT.md
+
+# Local release packages and patched/downloaded shader packs; release notes stay tracked
+/releases/*.zip
+/releases/*.jar
+/releases/shaderpack/
+/releases/stage-*/
+
+# Local Python environments and analysis caches
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.pyc
+*.pyo
 
 # Claude Code agent worktrees
 .claude/

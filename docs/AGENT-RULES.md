@@ -41,8 +41,10 @@ You work in your OWN git worktree (your current working directory). Paths below 
   map. Note related bugs in your report instead.
 
 ## Git
-* Do NOT commit, push, merge, rebase, reset or switch branches. Leave all changes uncommitted in your worktree.
+* Unless the owner explicitly requests it, do NOT commit, push, merge, rebase, reset or switch branches. Leave all changes uncommitted in your worktree.
   New files are fine (leave them untracked or `git add -N`).
+* GitHub Actions is disabled; builds/tests run locally. No automatic commits or pushes. Keep runtime logs, generated
+  QA reports, caches and release packages ignored. Required source bakes/assets and bootstrap jars remain tracked.
 
 ## Final report (your last message)
 * Each finding: FIXED / PARTIAL / SKIPPED (+why), with file:line of the fix.

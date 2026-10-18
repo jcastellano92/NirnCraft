@@ -6,7 +6,9 @@ on every merge); ready-to-run phase prompts are in `docs/prompts/`; the previous
 `docs/HANDOFF.md`.
 
 ## Non-negotiables
-* Branch `tamriel-overhaul`. **Never push.** Commit locally after each green step.
+* Branch `tamriel-overhaul`. **Push only when the owner explicitly requests it.** Commit locally after each green step.
+  GitHub Actions is disabled. Keep generated logs, reports, caches and release archives outside Git; retain required
+  source bakes/assets and tool bootstrap jars. See `docs/DEVELOPING.md` for the local build/Git workflow.
 * Legal: the owner's game installs (Skyrim, Oblivion, Morrowind, Daggerfall, Arena, Redguard) and the MIT DFO
   reimplementation are reference for FACTS only (names, positions, distances, heights, layouts, road topology). Raw
   extractions stay in the gitignored `.reference/`. Never ship or commit Bethesda text, textures, models or sounds.

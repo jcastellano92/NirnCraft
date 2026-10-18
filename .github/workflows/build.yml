@@ -1,11 +1,10 @@
 name: Build
 
 on:
-  push:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: build-${{ github.ref }}
@@ -21,6 +20,8 @@ jobs:
         working-directory: mod
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -48,6 +49,8 @@ jobs:
     timeout-minutes: 120
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -71,26 +74,6 @@ jobs:
       - name: Resolve mods
         # Fails if any tools/modlist.txt entry can't be resolved. Skycraft Core is not part of the committed pack.
         run: bash tools/build-pack.sh
-      - name: Commit resolved pack
-        # Only pack metadata is committed (the core jar is git-ignored), and only when resolving changed something,
-        # i.e. tools/modlist.txt gained an entry or a .pw.toml was removed to update a mod.
-        if: github.event_name == 'push'
-        run: |
-          git config user.name "skycraft-ci"
-          git config user.email "skycraft-ci@users.noreply.github.com"
-          git add -A pack
-          if git diff --cached --quiet; then
-            echo "Pack metadata unchanged; nothing to commit."
-          else
-            git diff --cached --stat
-            git commit -m "[ci] Resolve modpack"
-            if git pull --rebase origin "${GITHUB_REF_NAME}"; then
-              git push origin "HEAD:${GITHUB_REF_NAME}" || echo "::warning::Could not push resolved pack; next run will retry."
-            else
-              git rebase --abort || true
-              echo "::warning::Branch moved; resolved pack not pushed (next run will retry)."
-            fi
-          fi
       - name: Build client instance and server
         # Also creates dist/pack-build: the pack with Skycraft Core injected (tools/prepare-build-pack.sh).
         run: bash tools/make-instances.sh "$CORE_JAR"

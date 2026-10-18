@@ -6,7 +6,10 @@ enough.
 
 ## 1. Get the files
 
-On GitHub, open the repository's **Actions** tab, pick the latest green **Build** run, and scroll to **Artifacts**:
+Get the current locally built zip from the project owner. Developers can build the full Prism instance with
+`tools/build_release.ps1`; it writes `dist/Skycraft-client-instance.zip`. GitHub Actions is disabled, so pushes
+do not create new downloadable artifacts. See [DEVELOPING.md](DEVELOPING.md#building-downloads-locally) for other
+local packaging commands.
 
 * `Skycraft-client-instance`: the ready-made Prism Launcher / MultiMC instance (recommended).
 * `Skycraft-server`: a complete dedicated server (Forge plus the server-side mods).
@@ -14,7 +17,7 @@ On GitHub, open the repository's **Actions** tab, pick the latest green **Build*
   A mod that exists on only one platform can be missing from the other platform's export, so the Prism instance is
   the complete one.
 
-GitHub wraps each artifact in a zip. Unzip it once to get the file named above.
+Use the built instance zip directly for the Prism import below.
 
 ## 2. Install on Prism Launcher (recommended)
 

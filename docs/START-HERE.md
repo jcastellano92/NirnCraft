@@ -43,7 +43,7 @@ real loaded world, visual review, then saved cameras. Generation changes invalid
 
 ## Current state (2026-10-15)
 
-* Branch `tamriel-overhaul`, local only.
+* Branch `tamriel-overhaul` tracks `origin/tamriel-overhaul`. GitHub Actions is disabled; builds and tests run locally.
 * **Foundation Complete (`P1`–`P7` & `R0`–`R15a`, commit `7b3d95f8`):**
   * **83 regions** (`75` land regions across all 9 provinces, Solstheim, and 5 Foreign lands + `8` sea regions),
   * **11 province world-model sheets** (`99` blocks × `11` causal layers = `3,019` fields, `100.0%` `F-WHY` across `30,424/30,424` content records),
@@ -65,7 +65,7 @@ Execute the **Tamriel Total Parity & Living World Master Plan (`T1`–`T12`)** d
    Nothing from any game's files (text, meshes, textures, sounds, music, voice, dialogue, rasters) enters the repo, raw
    or converted. Terrain is hand-traced vectors with our own heights. Every line of text is our own. Reference data
    stays in the gitignored `.reference/`.
-2. **Never push.** Commit locally on `tamriel-overhaul` only; worktree agents do not commit at all; the orchestrating
+2. **Push only when the owner explicitly requests it.** Commit locally on `tamriel-overhaul`; worktree agents do not commit; the orchestrating
    session merges and commits. Never force anything; never touch another worktree; never a bare `git stash`.
 3. **World building first.** Every element of a place expresses and agrees with its history, culture, conflict,
    economy, faith and ecology. Every new content record carries `why: [world-model sheet field ids]` that resolve.

@@ -1,7 +1,7 @@
 # Developing Skycraft Core
 
 Skycraft Core (`mod/`) is a **Forge 1.20.1 (47.3.x)** mod, **official Mojang mappings**, **Java 17**.
-GitHub Actions builds it on every push (`.github/workflows/build.yml`).
+Builds and tests run locally. GitHub Actions is disabled in the repository settings; pushes do not run CI.
 
 ## Architecture
 
@@ -327,8 +327,8 @@ configs that Forge copies into every new world's `serverconfig/`).
   and `index.toml` never lists it. Every build injects it into a throwaway copy:
   `tools/prepare-build-pack.sh <jar> [out]` copies `pack/` to `dist/pack-build`, adds `mods/skycraft-core.jar` and
   re-hashes the copy's index.
-* **Adding a mod:** add a line to `tools/modlist.txt`. CI (`tools/build-pack.sh`, which needs packwiz) resolves new
-  entries into `.pw.toml` files and commits them. To skip the wait, write the `.pw.toml` yourself from the Modrinth API
+* **Adding a mod:** add a line to `tools/modlist.txt`, then run `tools/build-pack.sh` locally (needs packwiz) to resolve
+  new entries into `.pw.toml` files. Review and commit those metadata changes explicitly. Alternatively, write the `.pw.toml` from the Modrinth API
   (same format as the existing ones: `name`, `filename`, `side`, `[download]` url + `hash-format` + `hash`,
   `[update.modrinth]` `mod-id` + `version`) and run `python3 tools/refresh_packwiz.py`.
 * **Updating or removing a mod:** edit or delete its `.pw.toml` (and its `modlist.txt` line), then run
@@ -351,15 +351,31 @@ configs that Forge copies into every new world's `serverconfig/`).
 | `tools/test-server.sh` | Boots `dist/Skycraft-server.zip`, generates the spawn area, fails on crashes, client classes on the server or Skycraft stack traces. |
 | `tools/test-client.sh` | Boots the Skycraft dev client (`./gradlew runClient`, Forge + Skycraft only) under Xvfb, fails on crashes, Skycraft stack traces or missing Skycraft models/textures. It does not test the full pack's client. |
 
-### CI (`.github/workflows/build.yml`)
+### Git and generated files
 
-It runs on every push and on manual dispatch. A newer run on the same ref cancels an older one.
+Commit source, pack metadata/configs, release notes, required world-generation inputs and baked source resources.
+Keep runtime logs, crash reports, caches, local saves, generated QA reports, downloaded/patched shader packs and
+release archives on disk outside Git. `dist/` contains the full instance zip and test evidence; `releases/notes/`
+remains tracked. The Gradle wrapper and packwiz bootstrap jars are required tooling and remain tracked.
+
+Ignore rules do not remove already tracked files. Use `git rm --cached -- <specific generated paths>` to stop
+tracking them while keeping local copies; do not use a blanket clean/reset or remove source bakes/assets.
+Fetch and fast-forward the current branch before committing when upstream has advanced. Only push when the
+owner asks; build/QA scripts must never create commits or push automatically.
+
+### Optional manual workflow (`.github/workflows/build.yml`)
+
+GitHub Actions was disabled repository-wide on 2026-10-17 at the owner's request. The preserved workflow only
+supports manual dispatch, has read-only repository permissions and never commits or pushes. Running it again
+requires the owner to re-enable Actions in GitHub settings. Normal development uses the local commands above.
+
+If explicitly re-enabled and dispatched, a newer run on the same ref cancels an older one:
 
 1. **Job `mod`** builds Skycraft Core (`./gradlew build`), prints a compile-error summary if that fails, and uploads
    `skycraft-core-jar`.
 2. **Job `pack`** then runs these steps:
    1. It installs a pinned packwiz and resolves `tools/modlist.txt` (`tools/build-pack.sh`), which fails if any entry
-      can't be resolved. On a push, it commits `pack/` as `[ci] Resolve modpack`, but only if that changed it.
+      can't be resolved. Resolved metadata stays in the build workspace; it is never pushed back to the repository.
    2. It builds the client instance and the server from the build copy with the jar injected
       (`tools/make-instances.sh`). Then it exports `Skycraft.mrpack` and `Skycraft-curseforge.zip` from the same
       copy. Export failures are only warnings, because some mods exist on one platform only.

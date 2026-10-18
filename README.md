@@ -61,7 +61,12 @@ Better Combat, Lootr and Controllable.
 
 ## Install
 
-Every CI run on GitHub Actions produces downloads (**Actions** → latest green **Build** run → **Artifacts**):
+Build the full Prism instance locally with `tools/build_release.ps1`; the result is
+`dist/Skycraft-client-instance.zip`. Import it through **Prism Launcher → Add Instance → Import**.
+GitHub Actions is disabled. Local packaging commands and the optional manual workflow are documented in
+[docs/DEVELOPING.md](docs/DEVELOPING.md#building-downloads-locally).
+
+The packaging tools support these outputs:
 
 | Artifact | Use |
 | --- | --- |
