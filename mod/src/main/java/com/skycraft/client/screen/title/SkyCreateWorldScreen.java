@@ -140,8 +140,8 @@ public class SkyCreateWorldScreen extends Screen {
 
     @Override
     public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
-        // Deep Nordic slate background
-        g.fillGradient(0, 0, width, height, 0xFF080808, 0xFF141210);
+        // Deep Nordic slate veil over the (blurred) Skycraft scene that SkyBackdrop draws beneath every menu
+        g.fillGradient(0, 0, width, height, 0x90080808, 0xC0141210);
 
         int cx = width / 2;
         int startY = Math.max(45, height / 5);

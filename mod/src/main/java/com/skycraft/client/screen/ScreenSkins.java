@@ -45,7 +45,8 @@ public final class ScreenSkins {
 
     @SubscribeEvent
     public static void multiplayerBackground(ScreenEvent.Render.Background event) {
-        if (!enabled() || !multiplayerScreen(event.getScreen())) return;
+        // Out of a world the shared Skycraft scene (SkyBackdrop) is already beneath these screens; in a world, cover it.
+        if (!enabled() || !multiplayerScreen(event.getScreen()) || Minecraft.getInstance().level == null) return;
         Screen screen = event.getScreen();
         GuiGraphicsExtractor g = event.getGuiGraphics();
         g.fillGradient(0, 0, screen.width, screen.height, 0xFF080808, 0xFF141210);
@@ -156,9 +157,14 @@ public final class ScreenSkins {
         Minecraft mc = Minecraft.getInstance();
         Font font = mc.font;
         int w = screen.width, h = screen.height;
-        if (mc.level == null) g.fill(0, 0, w, h, 0xFF08080A);
-        else g.fillGradient(0, 0, w, h, 0xB0000000, 0xD0000000);
-        SkyUi.smoke(g, w, h, (Util.getMillis() % 1_000_000L) / 1000f, 0.7f);
+        if (mc.level == null) {
+            // e.g. "Quit Skycraft?" over the title: the Skycraft scene, dimmed behind the panel
+            SkyBackdrop.draw(g, w, h);
+            g.fillGradient(0, 0, w, h, 0x90000000, 0xB0000000);
+        } else {
+            g.fillGradient(0, 0, w, h, 0xB0000000, 0xD0000000);
+            SkyUi.smoke(g, w, h, (Util.getMillis() % 1_000_000L) / 1000f, 0.7f);
+        }
 
         int panelW = Math.min(w - 24, 340);
         Component message = ScreenFields.component(screen, ConfirmScreen.class, 0);
