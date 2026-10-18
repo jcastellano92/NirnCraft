@@ -186,6 +186,10 @@ vec3 lightShafts(vec2 uv, vec3 sun, float dist) {
     vec2 delta = (lp - uv) / float(samples);
     float jitter = ign(gl_FragCoord.xy, frameTimeCounter * 60.0);
     vec2 p = uv + delta * jitter;
+#ifdef AETHER_FAR_FIELD
+    vec2 farSize = vec2(textureSize(aetherColor, 0));
+    bool far = aetherPresent();
+#endif
     float open = 0.0, w = 1.0, wsum = 0.0, decay = pow(0.96, 16.0 / float(samples));  // 0.96^16 over the path
     for (int i = 0; i < VL_SAMPLES; i++) {
         if (i >= samples) break;
@@ -193,7 +197,8 @@ vec3 lightShafts(vec2 uv, vec3 sun, float dist) {
         if (any(lessThan(p, vec2(0.0))) || any(greaterThan(p, vec2(1.0)))) break;
         float s = texture(depthtex1, p).r >= 1.0 ? 1.0 : 0.0;
 #ifdef AETHER_FAR_FIELD
-        s *= 1.0 - aetherColorAt(p).a;  // far terrain and clouds block the light too
+        // far terrain and clouds block the light too (one nearest texel: the march averages many)
+        if (far) s *= 1.0 - texelFetch(aetherColor, min(ivec2(p * farSize), ivec2(farSize) - 1), 0).a;
 #endif
         open += s * w;
         wsum += w;

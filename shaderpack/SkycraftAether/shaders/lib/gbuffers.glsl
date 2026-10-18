@@ -52,7 +52,7 @@ in vec4 mc_Entity;
 in vec4 at_midBlock;
 #endif
 #if defined TERRAIN && defined SOLID && defined POM && defined PBR_MAPS
-in vec4 mc_midTexCoord;
+in vec2 mc_midTexCoord;
 out vec4 tileBounds;  // the block face's sprite in the atlas: origin, size (parallax wraps inside it)
 #endif
 in vec4 at_tangent;
@@ -79,7 +79,7 @@ void main() {
     worldTangent = vec4(normalize(mat3(gbufferModelViewInverse) * (gl_NormalMatrix * at_tangent.xyz)), at_tangent.w);
     material = MAT_NONE;
 #if defined TERRAIN && defined SOLID && defined POM && defined PBR_MAPS
-    vec2 mid = (gl_TextureMatrix[0] * vec4(mc_midTexCoord.xy, 0.0, 1.0)).xy;
+    vec2 mid = (gl_TextureMatrix[0] * vec4(mc_midTexCoord, 0.0, 1.0)).xy;
     vec2 hs = abs(texcoord - mid);
     tileBounds = vec4(mid - hs, hs * 2.0);
 #endif

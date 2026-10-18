@@ -11,8 +11,8 @@
 // forest or under broken cloud. Open daylight is never brightened; nothing glows where the light cannot reach.
 // The result is a scalar k (shafts = k x keyLightRadiance), kept in colortex4's alpha; composite1.fsh smooths it over
 // the 4 x 4 block the per-pixel step offsets (Bayer) interleave over, so VL_SAMPLES steps read as 16x as many.
-// Cost: VL_SAMPLES (x the LIGHT_SHAFTS knob) steps of one hardware shadow compare, one sun-map texel and one roof
-// texel, plus a third as many far steps of one sun-map texel; nothing for pixels under water. Callers declare
+// Cost: VL_SAMPLES (x the LIGHT_SHAFTS knob, fewer far away) steps of one hardware shadow compare, one sun-map texel and
+// one roof texel, plus a third as many far steps of one sun-map texel; nothing for pixels under water. Callers declare
 // gbufferModelViewInverse, cameraPosition, frameTimeCounter and rainStrength before including this.
 #ifndef SKYCRAFT_SHAFTS
 #define SKYCRAFT_SHAFTS
@@ -80,6 +80,19 @@ float sunRayVis(SunRay r, float t) {
 #endif
 }
 
+// how open to the sky a point of the march is, cheaply: the roof cache's texel within its reach (as outdoorExposure),
+// beyond it the coarse terrain surface over the camera (one weather read per pixel instead of four per step)
+float shaftExposure(vec3 w, bool air, float surface) {
+    if (air && max(abs(w.x - cameraPosition.x), abs(w.z - cameraPosition.z)) <= 58.0) {
+        vec4 d = texBytes(fogRadianceTex, ivec2(floor(w.xz / 2.0)) & ivec2(63));
+        if (d.a >= 128.0) {
+            float roof = bytes16(d.g, d.b) - 64.0;
+            return smoothstep(roof + 0.05, roof + 0.75, w.y);
+        }
+    }
+    return 1.0 - smoothstep(4.0, 12.0, surface - w.y);
+}
+
 // the in-scattered key light along a view ray (world dir) to dist, as a multiple k of keyLightRadiance(sun)
 // (signed: shadowed fog and haze give back light). px: the pixel; wet, rain: the weather uniforms. Call after the
 // pixel's applyMedia: the fog gives back at most the sun light that call put in it (gMediaSun)
@@ -91,7 +104,7 @@ float shaftsMarch(vec3 dir, float dist, vec3 sun, vec2 px, float wet, float rain
     if (keyLum < 1e-4) return 0.0;
     float q = qualityKnob(4, 0, QUALITY_FALLBACK);
     if (q <= 0.0) return 0.0;
-    int steps = qualityCount(VL_SAMPLES, q, qualityDither(px), 2);
+    int steps = qualityCount(VL_SAMPLES, q * qualityDistance(min(dist, SHAFT_NEAR)), qualityDither(px), 2);
     float dither = shaftBayer(px);
     // the sun's share of the fog's light in applyMedia (lib/media.glsl litOut), relative to the key's light: by day
     // the key is the sun (1), by night the moon (the fog had no sun share to lose)
@@ -112,10 +125,10 @@ float shaftsMarch(vec3 dir, float dist, vec3 sun, vec2 px, float wet, float rain
     fogDensity = groundFogDensity(sun, wet, rain);
 #endif
     float drive = haveWeather() ? dyn.a : 0.0;
+    bool air = haveAir();
     float nearEnd = min(dist, min(SHAFT_NEAR, shadowDistance * 0.95));
     float T = 1.0, dust = 0.0, fog = 0.0, haze = 0.0;
-    for (int i = 0; i < VL_SAMPLES; i++) {
-        if (i >= steps) break;
+    for (int i = 0; i < steps; i++) {  // a runtime bound: the march is not unrolled (code size, registers)
         // quadratic spacing: more steps in the first blocks (a room, a cave), where shafts are seen up close
         float u0 = float(i) / float(steps), u1 = float(i + 1) / float(steps), um = (float(i) + dither) / float(steps);
         float len = nearEnd * (u1 * u1 - u0 * u0);
@@ -128,7 +141,7 @@ float shaftsMarch(vec3 dir, float dist, vec3 sun, vec2 px, float wet, float rain
             vis = texture(shadowtex0, vec3(s.xy, s.z - 0.0002));
         }
         vis *= sunRayVis(sr, t);
-        float exposure = outdoorExposure(w, cameraPosition);
+        float exposure = shaftExposure(w, air, surface);
         float h = w.y - surface;
         // indoors and underground the pack's air has no sun in it: lit dust adds it. Outdoors the haze and the fog
         // already carry the sun (lib/atmosphere.glsl, lib/media.glsl): the shadowed parts give theirs back
@@ -146,8 +159,7 @@ float shaftsMarch(vec3 dir, float dist, vec3 sun, vec2 px, float wet, float rain
         int farSteps = max(2, steps / 3);
         float ratio = farEnd / max(nearEnd, 1.0);
         float tPrev = nearEnd;
-        for (int i = 0; i < VL_SAMPLES; i++) {
-            if (i >= farSteps) break;
+        for (int i = 0; i < farSteps; i++) {
             float tNext = nearEnd * pow(ratio, float(i + 1) / float(farSteps));
             float t = nearEnd * pow(ratio, (float(i) + dither) / float(farSteps));
             float len = tNext - tPrev;
@@ -156,7 +168,7 @@ float shaftsMarch(vec3 dir, float dist, vec3 sun, vec2 px, float wet, float rain
             float shade = sunRayVis(sr, t) - 1.0;
             float h = w.y - surface;
             float beta = (1.0 / 22000.0) * (1.0 + 3.0 * rain) * exp(-max(w.y - 63.0, 0.0) / 1200.0);
-            float sFog = (fogDensity * exp(-max(h, 0.0) / 14.0) + modGroundFog(drive, h)) * outdoorExposure(w, cameraPosition);
+            float sFog = (fogDensity * exp(-max(h, 0.0) / 14.0) + modGroundFog(drive, h)) * shaftExposure(w, false, surface);
             haze += T * beta * shade * len;
             fog += T * sFog * shade * len;
             T *= exp(-(beta + sFog) * len);
