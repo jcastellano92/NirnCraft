@@ -144,6 +144,28 @@ int main(int argc, char** argv) {
     aether_get_stats(ctx, &st);
     double buildMs = st.lastBuildMs;
 
+    if (str(a, "actors", "") == "demo") {
+        // a caravan walking away along the view, a mammoth beside it, a dragon circling further out
+        double yaw = num(a, "yaw", 0) * PI / 180, fx = std::sin(yaw), fz = -std::cos(yaw), sx = std::cos(yaw), sz = std::sin(yaw);
+        std::vector<AetherActor> act;
+        auto put = [&](double along, double side, double lift, float h, float r, uint32_t kind, uint32_t tint) {
+            AetherActor q{};
+            q.pos[0] = x + fx * along + sx * side;
+            q.pos[2] = z + fz * along + sz * side;
+            q.pos[1] = std::fmax(aether_preview_height(ctx, q.pos[0], q.pos[2]), 63.0) + lift;
+            q.yaw = float(yaw);
+            q.height = h;
+            q.radius = r;
+            q.kind = kind;
+            q.tint = tint;
+            act.push_back(q);
+        };
+        for (int i = 0; i < 6; i++) put(70 + i * 4.5, (i % 2) * 1.6, 0, 1.8f, 0.35f, 0, i == 0 ? 0xFF2030B0u : 0xFF3A5A70u);
+        put(85, 9, 0, 4.6f, 2.3f, 1, 0xFF3A4A5Au);
+        put(600, -120, 55, 5.0f, 7.0f, 2, 0xFF283038u);
+        aether_set_actors(ctx, act.data(), uint32_t(act.size()));
+    }
+
     std::string preset = str(a, "weather", "fair");
     {
         std::string noisePath = str(a, "noise", "native/data/cloud_noise.bin");
@@ -175,7 +197,7 @@ int main(int argc, char** argv) {
     f.sunDir[2] = float(-std::cos(sa) * std::cos(se));
     f.timeSec = float(num(a, "time", 0));
     f.lodBias = float(num(a, "bias", 1));
-    f.flags = flagsOf(str(a, "flags", "shadows,atmos,clouds,sky"));
+    f.flags = flagsOf(str(a, "flags", "shadows,atmos,clouds,sky,actors"));
 
     std::vector<uint32_t> color(size_t(w) * h), normal(size_t(w) * h);
     std::vector<float> depth(size_t(w) * h);

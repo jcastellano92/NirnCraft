@@ -27,6 +27,9 @@
 [[vk::binding(13, 0)]] StructuredBuffer<uint> cloudNoise;
 [[vk::binding(14, 0)]] StructuredBuffer<float> nearDepth;  // view distance of the near field per pixel (row 0 top)
 
+#include "aether_actors.slang"
+[[vk::binding(15, 0)]] StructuredBuffer<ActorGpu> actors;
+
 #include "aether_clouds.slang"
 
 static const int TRACE_MISS = 0;
@@ -330,13 +333,30 @@ void farMain(uint3 id : SV_DispatchThreadID) {
         }
     }
     float tHit = traceView(o, dir, frame.params.x, frame.params.y, res);
+    ActorHit ah;
+    ah.t = -1.0;
+    ah.n = float3(0, 1, 0);
+    ah.albedo = float3(1, 1, 1);
+    if ((frame.dims.z & FRAME_ACTORS) != 0 && frame.weatherParams.w > 0.5)
+        ah = traceActors(o, dir, tHit >= 0.0 ? tHit : frame.params.y);
+    bool actorFirst = ah.t >= 0.0;
 
     float3 color = float3(0, 0, 0);
     float3 n = float3(0, 1, 0);
     uint cls = 0;
     float depth = 1e30;
     float sunVis = 1.0;
-    if (tHit >= 0.0) {
+    if (actorFirst) {
+        n = ah.n;
+        cls = 4u;  // far actor
+        if ((frame.dims.z & FRAME_CLOUDS) != 0) sunVis = cloudShadow(o + dir * ah.t, sun);
+        MaterialGpu am;
+        am.albedoRough = float4(ah.albedo, 0.8);
+        am.emisClass = float4(0, 0, 0, 0);
+        color = shadeSurface(ah.albedo, am, n, dir, sun, sunVis, 0u);
+        depth = ah.t;
+        color = applyAerial(color, dir, sun, ah.t, frame);
+    } else if (tHit >= 0.0) {
         MaterialGpu m = palette[res.mat];
         cls = uint(m.emisClass.y);
         int ax = res.axis;
@@ -386,9 +406,9 @@ void farMain(uint3 id : SV_DispatchThreadID) {
     } else if ((frame.dims.z & FRAME_SKY) != 0) {
         color = skyColor(dir, sun);
     }
-    float coverage = tHit >= 0.0 || (frame.dims.z & FRAME_SKY) != 0 ? 1.0 : 0.0;
+    float coverage = tHit >= 0.0 || actorFirst || (frame.dims.z & FRAME_SKY) != 0 ? 1.0 : 0.0;
     if ((frame.dims.z & FRAME_CLOUDS) != 0) {
-        CloudResult cl = marchClouds(o, dir, tHit >= 0.0 ? tHit : frame.params.y, sun, id.xy);
+        CloudResult cl = marchClouds(o, dir, actorFirst ? ah.t : (tHit >= 0.0 ? tHit : frame.params.y), sun, id.xy);
         if (cl.firstHit >= 0.0) {
             // the deck's own aerial perspective: distant storms fade into the horizon haze like the terrain does
             // (the background behind the cloud already carries its own haze)

@@ -18,7 +18,8 @@ set(GEN "${CMAKE_BINARY_DIR}/gen")
 file(MAKE_DIRECTORY "${GEN}")
 find_program(SLANGC slangc HINTS "${SLANG_ROOT}/bin" REQUIRED NO_DEFAULT_PATH)
 set(KERNEL_SRC "${CMAKE_SOURCE_DIR}/shaders/aether_far.slang")
-set(KERNEL_DEPS "${KERNEL_SRC}" "${CMAKE_SOURCE_DIR}/shaders/aether_shared.slang" "${CMAKE_SOURCE_DIR}/shaders/aether_clouds.slang")
+set(KERNEL_DEPS "${KERNEL_SRC}" "${CMAKE_SOURCE_DIR}/shaders/aether_shared.slang" "${CMAKE_SOURCE_DIR}/shaders/aether_clouds.slang"
+    "${CMAKE_SOURCE_DIR}/shaders/aether_actors.slang")
 
 # One kernel source, two targets.
 add_custom_command(

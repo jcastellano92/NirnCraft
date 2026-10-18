@@ -26,17 +26,17 @@
 namespace aether {
 namespace {
 
-constexpr uint32_t BINDINGS = 15;
+constexpr uint32_t BINDINGS = 16;
 constexpr uint32_t SLOTS = 2;
 // far kernel bindings
 constexpr uint32_t B_FRAME = 0, B_PALETTE = 7, B_COLOR = 8, B_NORMAL = 9, B_DEPTH = 10, B_WEATHER = 11,
-                   B_COUNTERS = 12, B_NOISE = 13, B_NEAR = 14;
+                   B_COUNTERS = 12, B_NOISE = 13, B_NEAR = 14, B_ACTORS = 15;
 // shared images
 constexpr int IMG_COLOR = 0, IMG_NORMAL = 1, IMG_DEPTH = 2, IMG_NEAR = 3, IMAGES = 4;
 
 bool perSlot(uint32_t b) {
     return b == B_FRAME || b == B_PALETTE || b == B_COLOR || b == B_NORMAL || b == B_DEPTH || b == B_WEATHER ||
-           b == B_COUNTERS || b == B_NEAR;
+           b == B_COUNTERS || b == B_NEAR || b == B_ACTORS;
 }
 
 VKAPI_ATTR VkBool32 VKAPI_CALL onValidation(VkDebugUtilsMessageSeverityFlagBitsEXT sev, VkDebugUtilsMessageTypeFlagsEXT,
@@ -513,6 +513,7 @@ private:
         bool ok = upload(s.bufs[B_FRAME], &frame, sizeof(FrameGpu), true, false, err) &&
                   upload(s.bufs[B_PALETTE], in.palette->data(), in.palette->size() * sizeof(MaterialGpu), false, false, err) &&
                   upload(s.bufs[B_WEATHER], in.weather->data(), in.weather->size() * 4, false, false, err) &&
+                  upload(s.bufs[B_ACTORS], in.actors.data(), in.actors.size() * sizeof(ActorGpu), false, false, err) &&
                   ensure(s.bufs[B_COLOR], px * 16, false, readback, err) && ensure(s.bufs[B_NORMAL], px * 4, false, readback, err) &&
                   ensure(s.bufs[B_DEPTH], px * 4, false, readback, err) && ensure(s.bufs[B_COUNTERS], px * 4, false, readback, err) &&
                   ensure(s.bufs[B_NEAR], 16, false, readback, err);

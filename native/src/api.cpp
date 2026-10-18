@@ -301,6 +301,27 @@ static AetherStatus buildInputs(AetherContext* ctx, const AetherFrame* f, FrameI
     in.palette = &ctx->palette;
     in.weather = &ctx->weather;
     in.cloudNoise = &ctx->cloudNoise;
+    // far actors: in the kernel's frame (relative to the integer camera block, like every other position there),
+    // computed in double; the curvature drop uses the distance from the camera itself
+    in.actors.clear();
+    for (const AetherActor& a : ctx->actors) {
+        ActorGpu ag{};
+        double dx = a.pos[0] - f->cameraPos[0], dz = a.pos[2] - f->cameraPos[2];
+        if (dx * dx + dz * dz > double(f->maxDistance) * f->maxDistance) continue;
+        double drop = f->planetRadius > 0 ? (dx * dx + dz * dz) / (2.0 * f->planetRadius) : 0.0;
+        ag.posYaw[0] = float(a.pos[0] - double(g.camInt[0]));
+        ag.posYaw[1] = float(a.pos[1] - double(g.camInt[1]) - drop);
+        ag.posYaw[2] = float(a.pos[2] - double(g.camInt[2]));
+        ag.posYaw[3] = a.yaw;
+        ag.shape[0] = a.height;
+        ag.shape[1] = a.radius;
+        ag.shape[2] = float(a.kind);
+        std::memcpy(&ag.shape[3], &a.tint, 4);
+        in.actors.push_back(ag);
+        if (in.actors.size() >= 512) break;
+    }
+    g.weatherParams[3] = float(in.actors.size());
+    if (in.actors.empty()) in.actors.push_back(ActorGpu{});
     in.wantNearDepth = (f->flags & AETHER_FRAME_NEAR_DEPTH) != 0;
     in.nearDepth = in.wantNearDepth ? f->nearDepth : nullptr;
     if ((f->flags & AETHER_FRAME_NEAR_DEPTH) && !f->nearDepth) g.dims[2] &= ~AETHER_FRAME_NEAR_DEPTH;  // GL path sets it back

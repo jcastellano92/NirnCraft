@@ -34,7 +34,7 @@ struct FrameGpu {
     float4 sunDir;          // world, towards the sun; w = time in seconds
     float4 params;          // near-field end, max distance, lod bias, pixel angle (radians)
     uint4 dims;             // width, height, flags, lod count
-    float4 weatherParams;   // rain factor, cloud shell base, cloud shell top, 0
+    float4 weatherParams;   // rain factor, 0, 0, far actor count
     LodGpu lods[MAX_LODS];
 };
 

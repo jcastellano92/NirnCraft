@@ -253,6 +253,56 @@ static void testFourZones() {
     aether_destroy(ctx);
 }
 
+// A far actor on flat ground: the ray must hit its body at the analytic distance, in front of the terrain.
+static void testActors() {
+    std::printf("far actors\n");
+    AetherContext* ctx = nullptr;
+    aether_create(AETHER_BACKEND_CPU, &ctx);
+    std::vector<float> flat(256 * 256, 100.0f), water(256 * 256, NAN);
+    std::vector<uint16_t> top(256 * 256, 2), fill(256 * 256, 3);
+    for (int tz = -2; tz <= 2; tz++)
+        for (int tx = -2; tx <= 2; tx++) {
+            AetherColumnTile t{0, tx, tz, flat.data(), water.data(), top.data(), fill.data(), nullptr, nullptr};
+            aether_upload_column_tile(ctx, &t);
+        }
+    double centre[3] = {0.5, 101.0, 0.5};
+    aether_update(ctx, centre, 0);
+    AetherActor a{};
+    a.pos[0] = 200.5;
+    a.pos[1] = 100.0;
+    a.pos[2] = 0.5;
+    a.height = 1.8f;
+    a.radius = 0.35f;
+    a.kind = 0;
+    a.tint = 0xFF3050C0u;
+    CHECK(aether_set_actors(ctx, &a, 1) == AETHER_OK);
+    AetherFrame f{};
+    f.cameraPos[0] = 0.5;
+    f.cameraPos[1] = 101.0;
+    f.cameraPos[2] = 0.5;
+    f.width = 33;
+    f.height = 33;
+    cameraMatrix(90, 0, 2, 1.0, f.invViewProj);  // east, level, narrow: the actor fills the centre
+    f.maxDistance = 600;
+    f.planetRadius = 0;
+    f.sunDir[1] = 1;
+    f.lodBias = 1;
+    f.flags = AETHER_FRAME_ACTORS;
+    std::vector<float> depth(33 * 33);
+    std::vector<uint32_t> normal(33 * 33);
+    AetherFrameOutput o{nullptr, normal.data(), depth.data(), nullptr};
+    CHECK(aether_render(ctx, &f, &o) == AETHER_OK);
+    float d = depth[16 * 33 + 16];
+    uint32_t cls = (normal[16 * 33 + 16] >> 16) & 255;
+    std::printf("  centre pixel depth %.3f (capsule front at 199.65), class %u\n", d, cls);
+    CHECK(std::abs(d - 199.65f) < 0.02f);
+    CHECK(cls == 4);
+    f.flags = 0;  // actors off: the same ray goes on to the far ground (level ray: no hit at all here)
+    CHECK(aether_render(ctx, &f, &o) == AETHER_OK);
+    CHECK(depth[16 * 33 + 16] > 1e29f);
+    aether_destroy(ctx);
+}
+
 // Pixels the near field covers skip the far march entirely; the rest render exactly as without near depth.
 static void testNearDepth(const char* raster) {
     std::printf("near-depth skip\n");
@@ -393,6 +443,7 @@ int main(int argc, char** argv) {
     testAbi();
     testStreamingGap();
     testFourZones();
+    testActors();
     testNearDepth(argc > 1 ? argv[1] : "native/data/tamriel_raster.bin");
     parity(argc > 1 ? argv[1] : "native/data/tamriel_raster.bin");
     std::printf(failures ? "FAILED (%d)\n" : "PASS\n", failures);

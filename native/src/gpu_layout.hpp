@@ -34,7 +34,13 @@ struct alignas(16) FrameGpu {
     LodGpu lods[MAX_LODS];
 };
 
+struct alignas(16) ActorGpu {
+    float posYaw[4];  // camera-relative feet (curvature applied), yaw
+    float shape[4];   // height, radius, kind, tint bits
+};
+
 static_assert(sizeof(LodGpu) == 32);
+static_assert(sizeof(ActorGpu) == 32);
 static_assert(sizeof(RegionGpu) == 48);
 static_assert(sizeof(MaterialGpu) == 32);
 static_assert(sizeof(FrameGpu) == 64 + 16 * 6 + 32 * MAX_LODS);
@@ -67,6 +73,7 @@ struct FarGlobals {
     CpuBuffer<uint32_t> counters;
     CpuBuffer<uint32_t> cloudNoise;
     CpuBuffer<float> nearDepth;
+    CpuBuffer<ActorGpu> actors;
 };
 
 }  // namespace aether

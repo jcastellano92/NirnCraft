@@ -19,6 +19,7 @@ struct FrameInputs {
     const std::vector<uint32_t>* cloudNoise;  // 64^3 RGBA8
     const float* nearDepth = nullptr;         // host path: w*h near-field view distances (null: none)
     bool wantNearDepth = false;               // caller asked for the near-depth skip (GL path: shared image)
+    std::vector<ActorGpu> actors;             // at least one element (count in frame.weatherParams[3])
 };
 
 struct FrameTargets {

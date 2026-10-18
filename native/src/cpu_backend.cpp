@@ -52,6 +52,7 @@ public:
         g.cloudNoise = view(*in.cloudNoise);
         if (in.nearDepth) g.nearDepth = {const_cast<float*>(in.nearDepth), n};
         else g.nearDepth = view(dummyDepth_);
+        g.actors = view(in.actors);
 
         uint32_t gx = (w + 7) / 8, gy = (h + 7) / 8;
         std::atomic<uint32_t> nextRow{0};
