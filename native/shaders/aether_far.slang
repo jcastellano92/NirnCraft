@@ -454,6 +454,14 @@ void cloudMain(uint3 id : SV_DispatchThreadID) {
         c.a = cl.transmittance;
         d = cl.transmittance < 0.995 ? cl.firstHit : 1e30;
     }
+    // rain shafts under the deck, composited with it in depth order
+    RainResult rn = marchRain(o, dir, limit, sun, id.xy);
+    if (rn.firstHit >= 0.0 && rn.alpha > 0.002) {
+        if (cl.firstHit < 0.0 || rn.firstHit < cl.firstHit) c.rgb = rn.color + (1.0 - rn.alpha) * c.rgb;
+        else c.rgb = c.rgb + c.a * rn.color;
+        c.a *= 1.0 - rn.alpha;
+        d = min(d, rn.firstHit);
+    }
     cloudBuf[ci] = c;
     cloudDepth[ci] = d;
 }

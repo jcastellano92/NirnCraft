@@ -337,6 +337,78 @@ CloudResult marchClouds(float3 o, float3 dir, float tLimit, float3 sun, uint2 pi
     return r;
 }
 
+// Distant rain shafts / virga and ash curtains under the deck: a port of GetSkycraftRainCurtains' distant branch
+// (aerosol 0 water, 3 ash) on the curved datum. Front-to-back premultiplied accumulation; firstHit < 0 = none.
+struct RainResult {
+    float3 color;
+    float alpha;
+    float firstHit;
+};
+
+RainResult marchRain(float3 o, float3 dir, float tLimit, float3 sun, uint2 pixel) {
+    RainResult r;
+    r.color = float3(0, 0, 0);
+    r.alpha = 0.0;
+    r.firstHit = -1.0;
+    float R = frame.camFrac.w;
+    float k2R = R > 0 ? 1.0 / (2.0 * R) : 0.0;
+    float maxD = min(tLimit, 14000.0);
+    if (maxD <= 200.0) return r;
+    float dither = frac(52.9829189 * frac(0.06711056 * float(pixel.x) + 0.00583715 * float(pixel.y)) + 0.37);
+    float3 skyCol = aerialFog(dir, sun);
+    float3 amb = skyAmbient(float3(0, 1, 0), sun);
+    float3 lightCol = keyLightRadiance(sun) * 0.35;
+    const int N = 28;
+    float prev = 200.0;
+    for (int i = 1; i <= N; i++) {
+        // geometric spacing from 200 blocks out to the shafts' 14 km fade
+        float d1 = 200.0 * pow(maxD / 200.0, (float(i) - 1.0 + dither) / float(N));
+        float seg = max(d1 - prev, 1.0);
+        prev = d1;
+        float3 rel = o + dir * d1;
+        float alt = curvedAltitude(rel, k2R);
+        float2 wxz = rel.xz + float2(frame.camInt.xz);
+        float horizontal = length(rel.xz);
+        CloudColumn col = sampleColumn(wxz, horizontal);
+        float surfaceY = max(63.0, col.dynamics.g * 1024.0);
+        float topY = col.dynamics.r * 1024.0;
+        if (alt < surfaceY || alt > topY + 22.0) continue;
+        float fallDist = max(0.0, topY - alt);
+        float2 slant = windOf(col.dynamics) * fallDist * 0.12;
+        CloudColumn above = sampleColumn(wxz + slant, horizontal);
+        float curtain = above.weather.b;
+        if (curtain < 0.06) continue;
+        int aerosol = clamp(int(floor(above.weather.a * 4.0)), 0, 3);
+        if (aerosol == 1 || aerosol == 2) continue;  // snow mist and haboobs are near-field effects
+        float skyTower = above.weather.g;
+        float vFade = smoothstep(surfaceY, surfaceY + 18.0, alt) * (1.0 - smoothstep(topY - 14.0, topY + 22.0, alt));
+        float dRainFade = smoothstep(85.0, 260.0, d1) * (1.0 - smoothstep(10000.0, 14000.0, d1));
+        float t = weatherTime();
+        float3 streakPos = float3(wxz.x * 0.012, alt * 0.006 - t * 0.055, wxz.y * 0.012);
+        streakPos.xz -= windOf(col.dynamics) * t * 0.006;
+        float streak = cloudNoiseAt(streakPos);
+        float shaftCore = smoothstep(0.32, 0.68, curtain) * (0.65 + 0.35 * smoothstep(0.18, 0.82, streak));
+        float shaftHaze = smoothstep(0.20, 0.52, curtain) * (1.0 - 0.65 * shaftCore);
+        float drive = smoothstep(0.08, 0.72, curtain);
+        float ext = (shaftCore * 0.0018 + shaftHaze * 0.0005) * drive * vFade * dRainFade * (0.75 + 1.8 * skyTower);
+        float a = 1.0 - exp(-ext * seg);
+        if (a < 0.004) continue;
+        float stormDark = smoothstep(0.30, 0.85, skyTower) * drive;
+        float3 baseLit = amb * lerp(0.52, 0.30, stormDark) * 2.2 + lightCol * (0.08 * (1.0 - stormDark)) * 2.2;
+        float3 coreCol = lerp(skyCol, baseLit * float3(0.48, 0.54, 0.63), 0.82);
+        float3 gapCol = lerp(skyCol, baseLit, 0.85);
+        float sunGap = saturate(shaftHaze * (1.0 - shaftCore) * (0.45 + 0.55 * smoothstep(-0.05, 0.2, sun.y)));
+        float3 c = lerp(coreCol, gapCol, sunGap);
+        if (aerosol == 3) c = lerp(skyCol, amb * 2.2 * float3(0.42, 0.34, 0.32), 0.86);
+        c = lerp(skyCol, c, exp(-d1 * 0.0004));
+        if (r.firstHit < 0.0) r.firstHit = d1;
+        r.color += (1.0 - r.alpha) * a * c;
+        r.alpha += (1.0 - r.alpha) * a;
+        if (r.alpha > 0.98) break;
+    }
+    return r;
+}
+
 // Sun transmittance through the cloud shell above a surface point (cloud shadows on terrain, 25 km away included).
 float cloudShadow(float3 rel, float3 sun) {
     float R = frame.camFrac.w;
