@@ -1,3 +1,4 @@
+#include <cstdio>
 #include <atomic>
 #include <cstddef>
 #include <chrono>
@@ -106,7 +107,13 @@ extern "C" {
 AETHER_API uint32_t aether_abi_version(void) { return AETHER_ABI_VERSION; }
 
 AETHER_API const char* aether_build_info(void) {
-    return "aether_core " AETHER_VERSION_STRING " (abi 0.6.0; slang far kernel; " __DATE__ ")";
+    // the ABI from the header itself, so the log can never claim a stale one
+    static char info[128];
+    if (!info[0])
+        std::snprintf(info, sizeof(info), "aether_core %s (abi %u.%u.%u; slang far kernel; %s)", AETHER_VERSION_STRING,
+                      (AETHER_ABI_VERSION >> 16) & 0xFFu, (AETHER_ABI_VERSION >> 8) & 0xFFu, AETHER_ABI_VERSION & 0xFFu,
+                      __DATE__);
+    return info;
 }
 
 AETHER_API AetherStatus aether_create(AetherBackend backend, AetherContext** out) {
