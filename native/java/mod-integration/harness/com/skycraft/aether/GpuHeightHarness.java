@@ -33,12 +33,13 @@ public final class GpuHeightHarness {
         Path dll = Path.of(a[0]).toAbsolutePath();
         int threads = Integer.parseInt(a[7]);
         String[] seeds = System.getProperty("harness.seeds", "12345,-4172144997902289642,42").split(",");
-        String[] cams = System.getProperty("harness.cams", "0:0;-9000:7000;4200:-3100").split(";");
+        String[] cams = System.getProperty("harness.cams", "0:0;-9000:7000;-14500:-4900").split(";");
         net.minecraft.SharedConstants.tryDetectVersion();
         net.minecraft.server.Bootstrap.bootStrap();
         AetherNative n = AetherNative.load(dll);
         long allCols = 0, allDiff = 0, allTopDiff = 0, allCodecDiff = 0, allFlagged = 0, allCpuCols = 0;
         boolean first = true;
+        double sumCpu = 0, sumGpu = 0;
         for (String seedS : seeds) {
             long seed = Long.parseLong(seedS.trim());
             TamrielHeight height = HarnessSeed.height(seed);
@@ -66,21 +67,35 @@ public final class GpuHeightHarness {
                 allFlagged += src.gpuFlagged.sum();
                 allCpuCols += src.gpuCpuColumns.sum();
                 OUT.printf("seed %d camera (%d, %d): %d columns, %d heights differ, %d water tops differ, %d tile codecs differ;"
-                                + " %d flagged back to the CPU, %d CPU (isle) columns; land %.1f%%, peaks/ridges %.1f%%, crags %.1f%%,"
+                                + " %d flagged back to the CPU, %d isle columns, %d replay misses; land %.1f%%, peaks/ridges %.1f%%, crags %.1f%%,"
                                 + " rivers/lakes %.1f%%, region borders %.1f%%, regions %d, x %d..%d z %d..%d%n",
-                        seed, cx0, cz0, w.cols, w.diff, w.topDiff, w.codecDiff, src.gpuFlagged.sum(), src.gpuCpuColumns.sum(),
+                        seed, cx0, cz0, w.cols, w.diff, w.topDiff, w.codecDiff, src.gpuFlagged.sum(), src.gpuCpuColumns.sum(), src.gpu().misses.sum(),
                         100.0 * w.land / w.cols, 100.0 * w.rugged / w.cols, 100.0 * w.crag / w.cols, 100.0 * w.water / w.cols, 100.0 * w.border / w.cols,
                         w.regions.size(), w.minX, w.maxX, w.minZ, w.maxZ);
-                OUT.printf("  window CPU %6.0f ms | GPU path %6.0f ms = prep %5.0f + batch %5.0f (upload %4.0f, kernel %4.0f, readback %4.0f)"
-                                + " + finish %4.0f%n", w.cpuMs, w.gpuMs, src.gpuPrepMs.sum(), src.gpuBatchMs.sum(),
-                        src.gpuUploadMs.sum(), src.gpuKernelMs.sum(), src.gpuReadbackMs.sum(), src.gpuFinishMs.sum());
-                for (int lod = 0; lod < AetherFarField.LODS; lod++)
-                    OUT.printf("    lod %d: CPU %5.0f ms  GPU path %5.0f ms%n", lod, w.cpuLod[lod], w.gpuLod[lod]);
+                OUT.printf("  window CPU %6.0f ms | GPU path %6.0f ms (pipelined; summed stages: map samples %5.0f, batches %5.0f ="
+                                + " upload %4.0f + kernel %4.0f + readback %4.0f + call overhead, height() with GPU noises %5.0f)%n",
+                        w.cpuMs, w.gpuMs, src.gpuPrepMs.sum(), src.gpuBatchMs.sum(), src.gpuUploadMs.sum(),
+                        src.gpuKernelMs.sum(), src.gpuReadbackMs.sum(), src.gpuFinishMs.sum());
+                // the paths on their own (not interleaved tile by tile), second of two passes each
+                double cpu = 0, gpu = 0;
+                for (int pass = 0; pass < 2; pass++) {
+                    cpu = timeWindow(src, cx0, cz0, false);
+                    src.resetGpuStats();
+                    gpu = timeWindow(src, cx0, cz0, true);
+                }
+                OUT.printf("  separate passes: window CPU %6.0f ms, GPU path %6.0f ms (%.2fx); GPU path stages summed: map samples"
+                                + " %5.0f, batches %5.0f (upload %4.0f, kernel %4.0f, readback %4.0f), height() %5.0f%n", cpu, gpu,
+                        cpu / gpu, src.gpuPrepMs.sum(), src.gpuBatchMs.sum(), src.gpuUploadMs.sum(), src.gpuKernelMs.sum(),
+                        src.gpuReadbackMs.sum(), src.gpuFinishMs.sum());
+                sumCpu += cpu;
+                sumGpu += gpu;
                 src.close();
             }
         }
+        OUT.printf("mean window: CPU %.0f ms, GPU path %.0f ms (%d threads)%n", sumCpu / (seeds.length * cams.length),
+                sumGpu / (seeds.length * cams.length), threads);
         OUT.printf("TOTAL: %d columns compared over %d windows, %d heights differ, %d water tops differ, %d tile codecs differ;"
-                        + " %d columns flagged back to the CPU by the kernel, %d CPU (isle) columns%n",
+                        + " %d columns flagged back to the CPU by the kernel, %d isle columns%n",
                 allCols, seeds.length * cams.length, allDiff, allTopDiff, allCodecDiff, allFlagged, allCpuCols);
         if (allDiff + allTopDiff + allCodecDiff != 0) throw new IllegalStateException("GPU path is not bit-exact");
 
@@ -100,6 +115,21 @@ public final class GpuHeightHarness {
         OUT.printf("in-game path (verified, speed-checked) window: %.0f ms, GPU %s%s%n", (System.nanoTime() - t0) / 1e6,
                 src.gpuOn() ? "kept" : "off", src.gpuOffReason != null ? " (" + src.gpuOffReason + ")" : "");
         src.close();
+    }
+
+    /** Wall time of one full window on the CPU path or the GPU path alone. */
+    static double timeWindow(AetherExactSource src, int x, int z, boolean gpu) {
+        double[] h = new double[N];
+        float[] t = new float[N];
+        long t0 = System.nanoTime();
+        for (int lod = 0; lod < AetherFarField.LODS; lod++) {
+            int span = TILE << lod, cx = Math.floorDiv(x, span), cz = Math.floorDiv(z, span);
+            for (int tz = cz - AetherFarField.WINDOW; tz <= cz + AetherFarField.WINDOW; tz++)
+                for (int tx = cx - AetherFarField.WINDOW; tx <= cx + AetherFarField.WINDOW; tx++)
+                    if (gpu) src.heightsGpu(src.gpu(), lod, tx, tz, h, t);
+                    else src.heightsCpu(lod, tx, tz, h, t);
+        }
+        return (System.nanoTime() - t0) / 1e6;
     }
 
     static final class Window {

@@ -170,13 +170,21 @@ final class AetherExactSource extends AetherRefiningSource {
 
     // ---- the GPU path (AetherHeightGpu): exact, verified, and only used where it is faster ---------------------
 
-    /** Per-call scratch of the GPU path, off-heap for the native batch. */
+    /** Rows per GPU batch: a tile goes through in four pipelined parts (map samples / kernel / height()). */
+    static final int PART_ROWS = 64, PARTS = TILE / PART_ROWS, PART = PART_ROWS * TILE;
+
+    /** Per-thread scratch of the GPU path: the tile's map samples, and off-heap slots / values / flags per part. */
     private static final class GpuBuffers {
         final java.lang.foreign.Arena arena = java.lang.foreign.Arena.ofAuto();
-        final java.lang.foreign.MemorySegment cols = arena.allocate((long) TILE * TILE * AetherHeightGpu.RECORD_BYTES, 8);
-        final java.lang.foreign.MemorySegment out = arena.allocate((long) TILE * TILE * 8, 8);
+        final java.lang.foreign.MemorySegment slots = arena.allocate((long) TILE * TILE * 4, 4);
+        final java.lang.foreign.MemorySegment values = arena.allocate((long) TILE * TILE * AetherHeightGpu.SLOTS * 4, 4);
         final java.lang.foreign.MemorySegment flags = arena.allocate((long) TILE * TILE * 4, 4);
-        final boolean[] cpu = new boolean[TILE * TILE];
+        final MapSample[] samples = new MapSample[TILE * TILE];
+        final int[] bits = new int[TILE * TILE];
+
+        GpuBuffers() {
+            for (int i = 0; i < samples.length; i++) samples[i] = new MapSample();
+        }
     }
 
     private final ThreadLocal<GpuBuffers> gpuBuffers = ThreadLocal.withInitial(GpuBuffers::new);
@@ -195,7 +203,7 @@ final class AetherExactSource extends AetherRefiningSource {
     final java.util.concurrent.atomic.DoubleAdder gpuPrepMs = new java.util.concurrent.atomic.DoubleAdder(),
             gpuUploadMs = new java.util.concurrent.atomic.DoubleAdder(), gpuKernelMs = new java.util.concurrent.atomic.DoubleAdder(),
             gpuReadbackMs = new java.util.concurrent.atomic.DoubleAdder(), gpuBatchMs = new java.util.concurrent.atomic.DoubleAdder(),
-            gpuFinishMs = new java.util.concurrent.atomic.DoubleAdder();
+            gpuFinishMs = new java.util.concurrent.atomic.DoubleAdder(), gpuWallMs = new java.util.concurrent.atomic.DoubleAdder();
     /** Harness only: skip the speed check (measure the GPU path even where it is slower). */
     boolean keepGpuWhenSlower = Boolean.getBoolean("skycraft.aether.gpuHeight.keepWhenSlower");
 
@@ -236,7 +244,7 @@ final class AetherExactSource extends AetherRefiningSource {
     void resetGpuStats() {
         for (var a : new java.util.concurrent.atomic.LongAdder[] {gpuTiles, gpuFlagged, gpuCpuColumns}) a.reset();
         for (var a : new java.util.concurrent.atomic.DoubleAdder[] {gpuPrepMs, gpuUploadMs, gpuKernelMs, gpuReadbackMs,
-                gpuBatchMs, gpuFinishMs}) a.reset();
+                gpuBatchMs, gpuFinishMs, gpuWallMs}) a.reset();
     }
 
     private void disableGpu(String reason) {
@@ -316,56 +324,94 @@ final class AetherExactSource extends AetherRefiningSource {
         return true;
     }
 
-    /** The GPU path: map samples and records on the column pool, the kernel, then the CPU columns. */
+    /**
+     * The GPU path, a tile in PARTS parts: map samples and slot words on the column pool, the noise kernel, then
+     * TamrielHeight.height per column with its noises answered from the kernel (sea floor columns take its first
+     * line directly). Pipelined: while the kernel runs part c, the pool samples part c + 1 and finishes part c - 1.
+     */
     void heightsGpu(AetherHeightGpu g, int lod, int tx, int tz, double[] h, float[] top) {
         int s = 1 << lod, bx = tx * (TILE << lod) + (s >> 1), bz = tz * (TILE << lod) + (s >> 1);
         GpuBuffers b = gpuBuffers.get();
-        long t0 = System.nanoTime();
-        java.util.concurrent.atomic.LongAdder cpuCols = new java.util.concurrent.atomic.LongAdder();
-        pool.submit(() -> IntStream.range(0, TILE).parallel().forEach(j -> {
-            MapSample m = new MapSample();
-            for (int i = 0; i < TILE; i++) {
-                int x = bx + i * s, z = bz + j * s, k = j * TILE + i;
-                TamrielMap.sample(x, z, m);
-                top[k] = waterTop(m);
-                b.cpu[k] = !g.prepare(x, z, m, b.cols, k);
-                if (b.cpu[k]) {
-                    h[k] = height.height(x, z, m);
-                    cpuCols.increment();
-                }
-            }
-        })).join();
-        long t1 = System.nanoTime();
-        AetherNative.HeightTimes t = g.engine.batch(bx, bz, s, TILE, TILE * TILE, b.cols, b.out, b.flags);
-        long t2 = System.nanoTime();
-        java.util.concurrent.atomic.LongAdder flagged = new java.util.concurrent.atomic.LongAdder();
-        pool.submit(() -> IntStream.range(0, TILE).parallel().forEach(j -> {
-            MapSample m = null;
-            for (int i = 0; i < TILE; i++) {
-                int k = j * TILE + i;
-                if (b.cpu[k]) continue;
-                if (b.flags.get(java.lang.foreign.ValueLayout.JAVA_INT, 4L * k) != 0) {
-                    // the kernel could not prove this column exact: the CPU computes it
-                    if (m == null) m = new MapSample();
-                    int x = bx + i * s, z = bz + j * s;
-                    TamrielMap.sample(x, z, m);
-                    h[k] = height.height(x, z, m);
-                    flagged.increment();
-                } else {
-                    h[k] = b.out.get(java.lang.foreign.ValueLayout.JAVA_DOUBLE, 8L * k);
-                }
-            }
-        })).join();
-        long t3 = System.nanoTime();
+        java.util.concurrent.atomic.LongAdder isleCols = new java.util.concurrent.atomic.LongAdder(),
+                flagged = new java.util.concurrent.atomic.LongAdder();
+        java.util.concurrent.atomic.DoubleAdder prep = new java.util.concurrent.atomic.DoubleAdder(),
+                finish = new java.util.concurrent.atomic.DoubleAdder();
+        long w0 = System.nanoTime();
+        double batch = 0, up = 0, kern = 0, read = 0;
+        java.util.concurrent.ForkJoinTask<?> sampled = pool.submit(() -> samplePart(g, b, 0, bx, bz, s, top, prep));
+        sampled.join();
+        java.util.concurrent.ForkJoinTask<?> finished = null;
+        for (int c = 0; c < PARTS; c++) {
+            final int part = c;
+            sampled = c + 1 < PARTS ? pool.submit(() -> samplePart(g, b, part + 1, bx, bz, s, top, prep)) : null;
+            long b0 = System.nanoTime();
+            AetherNative.HeightTimes t = g.engine.batch(bx, bz + c * PART_ROWS * s, s, TILE, PART,
+                    b.slots.asSlice(4L * c * PART, 4L * PART), b.values.asSlice(4L * c * PART * AetherHeightGpu.SLOTS,
+                            4L * PART * AetherHeightGpu.SLOTS), b.flags.asSlice(4L * c * PART, 4L * PART));
+            batch += (System.nanoTime() - b0) / 1e6;
+            up += t.uploadMs();
+            kern += t.kernelMs();
+            read += t.readbackMs();
+            if (finished != null) finished.join();
+            if (sampled != null) sampled.join();
+            finished = pool.submit(() -> finishPart(g, b, part, bx, bz, s, h, isleCols, flagged, finish));
+        }
+        finished.join();
         gpuTiles.increment();
         gpuFlagged.add(flagged.sum());
-        gpuCpuColumns.add(cpuCols.sum());
-        gpuPrepMs.add((t1 - t0) / 1e6);
-        gpuBatchMs.add((t2 - t1) / 1e6);
-        gpuUploadMs.add(t.uploadMs());
-        gpuKernelMs.add(t.kernelMs());
-        gpuReadbackMs.add(t.readbackMs());
-        gpuFinishMs.add((t3 - t2) / 1e6);
+        gpuCpuColumns.add(isleCols.sum());
+        gpuPrepMs.add(prep.sum());
+        gpuBatchMs.add(batch);
+        gpuUploadMs.add(up);
+        gpuKernelMs.add(kern);
+        gpuReadbackMs.add(read);
+        gpuFinishMs.add(finish.sum());
+        gpuWallMs.add((System.nanoTime() - w0) / 1e6);
+    }
+
+    /** Part c: map samples, water tops and the slot words (rows c * PART_ROWS ..). */
+    private void samplePart(AetherHeightGpu g, GpuBuffers b, int c, int bx, int bz, int s, float[] top,
+                            java.util.concurrent.atomic.DoubleAdder ms) {
+        long t0 = System.nanoTime();
+        IntStream.range(c * PART_ROWS, (c + 1) * PART_ROWS).parallel().forEach(j -> {
+            for (int i = 0; i < TILE; i++) {
+                int k = j * TILE + i;
+                MapSample m = b.samples[k];
+                TamrielMap.sample(bx + i * s, bz + j * s, m);
+                top[k] = waterTop(m);
+                b.bits[k] = AetherHeightGpu.slotsFor(m);
+                b.slots.setAtIndex(java.lang.foreign.ValueLayout.JAVA_INT, k, b.bits[k]);
+            }
+        });
+        ms.add((System.nanoTime() - t0) / 1e6);
+    }
+
+    /** Part c: the heights, from the kernel's noise values (flagged columns: the CPU path). */
+    private void finishPart(AetherHeightGpu g, GpuBuffers b, int c, int bx, int bz, int s, double[] h,
+                            java.util.concurrent.atomic.LongAdder isleCols, java.util.concurrent.atomic.LongAdder flagged,
+                            java.util.concurrent.atomic.DoubleAdder ms) {
+        long t0 = System.nanoTime();
+        java.lang.foreign.MemorySegment values = b.values.asSlice(4L * c * PART * AetherHeightGpu.SLOTS,
+                4L * PART * AetherHeightGpu.SLOTS);
+        IntStream.range(c * PART_ROWS, (c + 1) * PART_ROWS).parallel().forEach(j -> {
+            AetherHeightGpu.Column col = AetherHeightGpu.COLUMN.get();
+            for (int i = 0; i < TILE; i++) {
+                int k = j * TILE + i, kk = k - c * PART, x = bx + i * s, z = bz + j * s;
+                MapSample m = b.samples[k];
+                if (b.flags.getAtIndex(java.lang.foreign.ValueLayout.JAVA_INT, k) != 0) {
+                    h[k] = height.height(x, z, m);  // the kernel could not prove a value exact: the CPU path
+                    flagged.increment();
+                } else if (g.seaFloor(x, z, m)) {
+                    h[k] = AetherHeightGpu.seaFloorHeight(m, values.getAtIndex(java.lang.foreign.ValueLayout.JAVA_FLOAT, kk),
+                            values.getAtIndex(java.lang.foreign.ValueLayout.JAVA_FLOAT, (long) PART + kk));
+                } else {
+                    if (m.coastDistance < 0) isleCols.increment();
+                    col.set(x, z, b.bits[k], values, PART, kk);
+                    h[k] = g.replayHeight.height(x, z, m);
+                }
+            }
+        });
+        ms.add((System.nanoTime() - t0) / 1e6);
     }
 
     /** True when tile (lod, tx, tz) is in the cache already. */

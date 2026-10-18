@@ -92,14 +92,14 @@ public final class AetherNative {
                 JAVA_INT, JAVA_INT, JAVA_INT, ADDRESS, ADDRESS, ADDRESS, ADDRESS));
     }
 
-    /** 32-bit words per column record and per noise layer of the exact-height kernel (aether.h). */
-    public static final int HEIGHT_COLUMN_WORDS = 40, HEIGHT_LAYER_WORDS = 76;
+    /** 32-bit words per noise layer, and noise calls (slots) per column, of the exact-noise kernel (aether.h). */
+    public static final int HEIGHT_LAYER_WORDS = 76, HEIGHT_SLOTS = 10;
 
     /** Times of one height batch (AetherHeightTimes), milliseconds. */
     public record HeightTimes(double uploadMs, double kernelMs, double readbackMs, double totalMs) {}
 
     /**
-     * An exact-height engine (aether_height_create): the kernel on its own Vulkan compute device, or its C++
+     * An exact-noise engine (aether_height_create): the kernel on its own Vulkan compute device, or its C++
      * reference. Null when the backend is unavailable (no device with what the kernel's exactness needs).
      */
     public Height createHeight(int backend) {
@@ -146,15 +146,15 @@ public final class AetherNative {
         }
 
         /**
-         * count columns, column k at block (x0 + (k % width) * step, z0 + (k / width) * step); columns holds
-         * count * HEIGHT_COLUMN_WORDS words, heights receives count doubles, flags count ints (1: compute it yourself).
-         * All three are off-heap segments the caller owns.
+         * count columns, column k at block (x0 + (k % width) * step, z0 + (k / width) * step); slots: count ints
+         * (bit s: evaluate noise call s of column k), values receives HEIGHT_SLOTS * count floats (slot-major), flags
+         * count ints (1: the kernel could not prove a value of that column exact). Off-heap segments the caller owns.
          */
-        public HeightTimes batch(int x0, int z0, int step, int width, int count, MemorySegment columns,
-                                 MemorySegment heights, MemorySegment flags) {
+        public HeightTimes batch(int x0, int z0, int step, int width, int count, MemorySegment slots,
+                                 MemorySegment values, MemorySegment flags) {
             try (Arena a = Arena.ofConfined()) {
                 MemorySegment t = a.allocate(32, 8);
-                int s = (int) heightBatch.invokeExact(ptr, x0, z0, step, width, count, columns, heights, flags, t);
+                int s = (int) heightBatch.invokeExact(ptr, x0, z0, step, width, count, slots, values, flags, t);
                 if (s != 0) throw new IllegalStateException("aether_height_batch: " + s + " " + error());
                 return new HeightTimes(t.get(JAVA_DOUBLE, 0), t.get(JAVA_DOUBLE, 8), t.get(JAVA_DOUBLE, 16),
                         t.get(JAVA_DOUBLE, 24));
