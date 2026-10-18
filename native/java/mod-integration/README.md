@@ -1,6 +1,12 @@
 # Mod integration (staged; NeoForge 26.3)
 
-These classes join aether_core to the Skycraft mod. They are written against the NeoForge 26.3 / Minecraft 26.3
+These classes join aether_core to the Skycraft mod.
+
+**Moving in:** `move_in.ps1` does steps 1-4 below (dry run by default, `-Apply` to write; every patch is anchored,
+idempotent and refuses to guess). `sandbox_check.ps1` rehearses it without touching the main tree: it snapshots the
+main checkout's `mod/` sources, applies the move-in to the copy and compiles the whole mod with javac against the
+conversion's patched 26.3 jar and Gradle dependencies. As of 2026-10-18 the converted mod with aether moved in
+compiles with 0 errors. They are written against the NeoForge 26.3 / Minecraft 26.3
 signatures read from the real jars (`javap` on `neoforge-26.3.0.90-universal.jar` and Mojang's 26.3 client jar).
 They are kept here, not in `mod/`, until the Forge 1.20.1 → NeoForge 26.3 conversion is committed: the mod does not
 compile against 26.3 before that. Then:

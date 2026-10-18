@@ -44,7 +44,8 @@ public final class AetherClient {
     private static AetherTargets targets;
     private static AetherFarField farField;
     private static ClientLevel startedFor;  // the level the far field's tiles belong to
-    private static Supplier<WeatherFeed> weather = () -> null;
+    private static final WeatherFeed WEATHER = new AetherWeatherFeed();
+    private static Supplier<WeatherFeed> weather = () -> WEATHER;
     private static boolean failed;
     private static final AetherNative.Frame frame = new AetherNative.Frame();
     private static final AetherNative.GlFrameIO io = new AetherNative.GlFrameIO();
