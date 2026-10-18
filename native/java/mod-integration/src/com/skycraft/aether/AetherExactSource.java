@@ -81,6 +81,7 @@ final class AetherExactSource extends AetherRefiningSource {
      */
     static TamrielHeight heightOf(MinecraftServer server) {
         ServerLevel overworld = server.overworld();
+        if (overworld == null) return null;  // game-test and other servers without an overworld
         if (!(overworld.getChunkSource().getGenerator() instanceof NoiseBasedChunkGenerator g) || !g.stable(TAMRIEL))
             return null;
         RandomState rs = overworld.getChunkSource().randomState();

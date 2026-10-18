@@ -26,6 +26,8 @@ public final class AtmosParticlePipeline {
     static final SingleQuadParticle.Layer LAYER = new SingleQuadParticle.Layer(
             true, TextureAtlas.LOCATION_PARTICLES, PIPELINE, RenderPipelines.OIT_PARTICLE);
 
+    static { com.skycraft.render.client.IrisPipelines.assign(PIPELINE, com.skycraft.render.client.IrisPipelines.PARTICLES_TRANSLUCENT); }
+
     private AtmosParticlePipeline() {}
 
     @SubscribeEvent

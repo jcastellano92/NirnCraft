@@ -71,6 +71,10 @@ public class Skycraft {
 
         modBus.addListener(this::commonSetup);
         SkyNetwork.init(modBus);
+        // aether: the native far field (server tile stream + far actors; the client renderer on clients)
+        com.skycraft.aether.AetherServer.init();
+        com.skycraft.platform.Sides.runOn(net.neoforged.api.distmarker.Dist.CLIENT,
+                () -> () -> com.skycraft.aether.AetherClient.init(modBus));
     }
 
     public static void config(ModConfig.Type type,net.neoforged.neoforge.common.ModConfigSpec spec) {

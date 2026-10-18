@@ -54,6 +54,8 @@ public final class WeatherFieldTexture implements AutoCloseable {
 
     private static WeatherFieldTexture instance;
     private static WeatherFieldTexture farInstance;
+    /** Bumped on every upload of the four fields: aether copies them when it changed (copyForAether). */
+    private static final java.util.concurrent.atomic.AtomicLong AETHER_VERSION = new java.util.concurrent.atomic.AtomicLong();
     private final NativeImage image;
     private final NativeImage dynamicsImage;
     private final Identifier dynamicsLocation;
@@ -317,6 +319,20 @@ public final class WeatherFieldTexture implements AutoCloseable {
         return (a << 24) | (b << 16) | (g << 8) | r;
     }
 
+    /**
+     * aether's weather feed (com.skycraft.aether.AetherWeatherFeed): copies the four fields (RGBA8, r in the low byte,
+     * which is NativeImage's ABGR int) into the arrays when they changed since version `since`. Returns the version
+     * now held (`since` when nothing was copied). Render thread.
+     */
+    public static long copyForAether(long since, int[] nearField, int[] nearDyn, int[] farField, int[] farDyn) {
+        long v = AETHER_VERSION.get();
+        WeatherFieldTexture n = instance, f = farInstance;
+        if (v == since || n == null || f == null) return since;
+        int[][] src = {n.image.getPixelsABGR(), n.dynamicsImage.getPixelsABGR(), f.image.getPixelsABGR(), f.dynamicsImage.getPixelsABGR()};
+        int[][] dst = {nearField, nearDyn, farField, farDyn};
+        for (int k = 0; k < 4; k++) System.arraycopy(src[k], 0, dst[k], 0, Math.min(src[k].length, dst[k].length));
+        return v;
+    }
     private static int clampByte(float v) {
         int i = Math.round(Mth.clamp(v, 0.0f, 1.0f) * 255.0f);
         return Math.max(0, Math.min(255, i));
@@ -326,6 +342,7 @@ public final class WeatherFieldTexture implements AutoCloseable {
         try (var uploadState = TextureUploadState.preserve()) {
             DataTexture.write(location, image);
             DataTexture.write(dynamicsLocation, dynamicsImage);
+            AETHER_VERSION.incrementAndGet();
         }
     }
 

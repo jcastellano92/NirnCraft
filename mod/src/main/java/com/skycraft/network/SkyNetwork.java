@@ -91,6 +91,7 @@ public final class SkyNetwork {
         com.skycraft.fire.FireModule.registerPackets();
         com.skycraft.protect.ProtectModule.registerPackets();
         com.skycraft.combat.Threats.registerPackets();
+        com.skycraft.aether.AetherNet.register();
 
         initialized = true;
         modBus.addListener(SkyNetwork::registerPayloads);

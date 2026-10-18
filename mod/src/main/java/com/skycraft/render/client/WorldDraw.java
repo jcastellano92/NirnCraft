@@ -68,7 +68,9 @@ public final class WorldDraw {
             case ADDITIVE -> new ColorTargetState(new BlendFunction(
                     BlendFactor.SRC_ALPHA, BlendFactor.ONE, BlendFactor.ONE, BlendFactor.ONE_MINUS_SRC_ALPHA));
         });
-        return new Material(builder.build(), format, topology, textured, oit);
+        RenderPipeline pipeline = builder.build();
+        IrisPipelines.assign(pipeline, IrisPipelines.forWorldMaterial(blend, textured));
+        return new Material(pipeline, format, topology, textured, oit);
     }
     public static Pass open() { return open(Minecraft.getInstance().gameRenderer.mainRenderTarget()); }
     public static Pass open(RenderTarget target) { return new Pass(target); }

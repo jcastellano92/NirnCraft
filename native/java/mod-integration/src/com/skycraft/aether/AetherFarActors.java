@@ -33,6 +33,7 @@ final class AetherFarActors {
     static void tick(MinecraftServer server) {
         if (server.getTickCount() % 10 != 0) return;
         ServerLevel level = server.overworld();
+        if (level == null) return;
         List<ServerPlayer> players = level.players();
         if (players.isEmpty()) {
             lastCount.clear();

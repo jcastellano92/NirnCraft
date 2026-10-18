@@ -22,6 +22,11 @@ public final class FireRenderTypes {
     private static Identifier texture(String name){return Identifier.fromNamespaceAndPath("skycraft","textures/fire/"+name+".png");}
     private static final RenderPipeline SMOKE_PIPELINE=smokePipeline();
     private static final RenderPipeline FLAME_PIPELINE=flamePipeline();
+    static {
+        // under a shader pack: smoke is lit and blended, flames are emissive (com.skycraft.render.client.IrisPipelines)
+        com.skycraft.render.client.IrisPipelines.assign(SMOKE_PIPELINE,com.skycraft.render.client.IrisPipelines.PARTICLES_TRANSLUCENT);
+        com.skycraft.render.client.IrisPipelines.assign(FLAME_PIPELINE,com.skycraft.render.client.IrisPipelines.EMISSIVE);
+    }
     private static final OitPipelineSet SMOKE_OIT=OitPipelineSet.builder(id("fire_smoke"),
         oitEntity().withShaderDefine("ALPHA_CUTOUT",0.1f))
         .withAccumulateModifier(p->p.withShaderDefine("PER_FACE_LIGHTING").withBindGroupLayout(BindGroupLayouts.SAMPLER1).withBindGroupLayout(BindGroupLayouts.SAMPLER2)).build();

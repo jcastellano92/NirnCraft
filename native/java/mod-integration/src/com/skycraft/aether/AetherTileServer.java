@@ -74,8 +74,13 @@ final class AetherTileServer {
     /** ServerStartedEvent: serve tiles when the overworld is a Tamriel world (else clients keep the stand-in). */
     static void start(MinecraftServer server) {
         stop();
-        TamrielHeight h = AetherExactSource.heightOf(server);
-        if (h != null) current = new AetherTileServer(server, h);
+        try {
+            TamrielHeight h = AetherExactSource.heightOf(server);
+            if (h != null) current = new AetherTileServer(server, h);
+        } catch (RuntimeException e) {
+            // the far field is a visual service: it must never take a server down (clients keep the stand-in)
+            com.skycraft.Skycraft.LOGGER.warn("aether tile service not started", e);
+        }
     }
 
     static void stop() {
