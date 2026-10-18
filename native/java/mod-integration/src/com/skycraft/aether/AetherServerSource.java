@@ -47,7 +47,7 @@ final class AetherServerSource extends AetherRefiningSource {
                     n, String.format("%.1f", receivedBytes / 1e6));
     }
 
-    private long receivedTiles, receivedBytes;
+    private long receivedTiles, receivedBytes, requestsSent;
 
     @Override
     Refined refine(AetherNative.Context ctx, int lod, int tx, int tz) {
@@ -110,6 +110,7 @@ final class AetherServerSource extends AetherRefiningSource {
             tzs[i] = toAsk.get(i)[2];
         }
         toAsk.clear();
+        if (requestsSent++ == 0) com.skycraft.Skycraft.LOGGER.info("aether: asking the server for far tiles ({} in the first request)", n);
         SkyNetwork.sendToServer(new AetherNet.TileRequest(lods, txs, tzs));
     }
 

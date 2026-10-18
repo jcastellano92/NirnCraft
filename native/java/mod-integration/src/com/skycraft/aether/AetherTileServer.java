@@ -114,6 +114,9 @@ final class AetherTileServer {
 
     static void request(ServerPlayer player, AetherNet.TileRequest r) {
         AetherTileServer t = current;
+        if (t != null && !t.peers.containsKey(player.getUUID()))
+            com.skycraft.Skycraft.LOGGER.info("aether tile service: first request from {} ({} tiles, in {})",
+                    player.getName().getString(), r.lods().length, player.level().dimension().identifier());
         if (t == null) {
             for (int i = 0; i < r.lods().length; i++)  // nothing to serve: stop the client asking
                 SkyNetwork.sendToPlayer(player, new AetherNet.TileData(r.lods()[i], r.txs()[i], r.tzs()[i], new byte[0]));
