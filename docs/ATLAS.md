@@ -236,6 +236,10 @@ frame for the resolve). Both optional: a 0.11 core still loads. The mod's data t
 texel 17 = the hand-off band / 64 (the pack's crossfade), texel 18 = the interior (LocationKind.icon + 1, eased
 strength) for the pack's interior grade.
 
+ABI 0.14 (optional; a 0.11-0.13 core still loads): `atlas_set_material_shapes`, `atlas_set_surface_cards`,
+`ATLAS_FRAME_GROUPS` (the content-shaped groups, docs/ATLAS-LOD.md "The renderer's groups"; the game sets it only with
+`-Dnirncraft.atlas.groups=true`).
+
 Real far trees (`AtlasTrees`, single player, LOD 0): each chunk's tree features run as chunk decoration runs them
 (the generator's global feature indices and decoration seeds, `FeaturePlacer`), into `AtlasCapture`'s level over the
 exact ground with an `Env` (the material rules' surface block for the soil check, the map's water, the generator's
