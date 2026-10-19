@@ -51,9 +51,9 @@ def rename_text(text, rel):
 
     for p in PROTECT:
         text = re.sub(p, hold, text)
+    # the shader pack is Infinite ATLAS (with the renderer): its old name first, before the generic Skycraft rule
+    text = text.replace("SkycraftAether", "InfiniteATLAS")
     text = text.replace("Skycraft", "NirnCraft").replace("SKYCRAFT", "NIRNCRAFT").replace("skycraft", "nirncraft")
-    # NirnCraft's own lowercase / display forms that came out of compound names
-    text = text.replace("NirnCraftAether", "NirnCraft")  # the shader pack's old name (SkycraftAether)
     if is_lore_path(rel):
         # data / lore: only the renderer's own ids
         text = re.sub(r"(nirncraft:)aether/", r"\1atlas/", text)
@@ -75,7 +75,9 @@ def new_rel(rel):
     for i, p in enumerate(parts):
         q = p
         if p == "SkycraftAether":
-            q = "NirnCraft"
+            q = "InfiniteATLAS"
+        elif p == "SkycraftAether.zip":
+            q = "InfiniteATLAS.zip"
         q = q.replace("Skycraft", "NirnCraft").replace("skycraft", "nirncraft").replace("SKYCRAFT", "NIRNCRAFT")
         if not is_lore_path(rel):  # lore / data paths never rename "aether" (Aetherius etc.)
             q = re.sub(r"(?<![A-Za-z])aether(?![a-z])", "atlas", q)
@@ -143,7 +145,8 @@ def main():
             rp = Path(dp).relative_to(root).parts
             if any(s in rp for s in ALWAYS_SKIP) or ("src" not in rp and any(s in rp for s in SKIP_DIRS)):
                 continue
-            if not dn and not fn and re.search(r"(?i)skycraft|(?<![a-z])aether(?![a-z])", Path(dp).name):
+            old = any(re.search(r"(?i)skycraft|^aether$|^AETHER", part) for part in rp)
+            if old and Path(dp).is_dir() and not any(Path(dp).iterdir()):  # live check: children went first
                 os.rmdir(dp)
     print(f"{'applied' if a.apply else 'dry run'}: {edited} files edited ({occurrences} skycraft occurrences), "
           f"{renamed} paths renamed")
