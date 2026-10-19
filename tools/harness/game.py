@@ -328,6 +328,18 @@ def crashed():
     return bool(st.get("pid")) and not running()
 
 
+def closed_normally(since):
+    """The client went away through a normal shutdown (someone closed its window) rather than a crash: no crash report
+    since `since` and the log ends with Minecraft's "Stopping!"."""
+    reports = [r for r in (GAME / "crash-reports").glob("*.txt") if r.stat().st_mtime >= since - 5] \
+        if (GAME / "crash-reports").exists() else []
+    natives = [f for d in (GAME, lw.INSTANCE) for f in d.glob("hs_err_pid*.log") if f.stat().st_mtime >= since - 5]
+    if reports or natives or not LOG_FILE.exists():
+        return False
+    tail = LOG_FILE.read_text(encoding="utf-8", errors="replace").splitlines()[-40:]
+    return any("Stopping!" in l for l in tail)
+
+
 def crash_evidence(dest, since):
     """Copy what explains a crash next to the test's result: the newest crash report, a JVM native crash file
     (hs_err_pid*.log), the last 400 log lines. Returns (path, one-line cause)."""

@@ -181,6 +181,7 @@ def order(items, pos=(0, 0), group="live", shaders=True):
 
 # ================================================================================================ events, hooks, quarantine
 EVENTS = STORE / "events.jsonl"
+STOP = STORE / "stop.flag"
 QUARANTINE = STORE / "quarantine.json"
 QUARANTINE_AFTER = 3  # runs in a row a test errors / crashes (same fingerprint) before it is skipped by itself
 
@@ -257,6 +258,7 @@ class Runner:
         self.restarted = set()     # groups already restarted once for a failure streak
         self.disabled = {}         # group -> reason: its remaining live tests are skipped
         self.crashes = 0           # client crashes this run (3: the group stops)
+        self.closes = 0            # normal closes (someone closed the window): relaunched, not counted as crashes
 
     @property
     def game(self):
@@ -347,6 +349,14 @@ class Runner:
             except Exception:
                 if self._game is None or not self.game.crashed():
                     raise
+                if self.game.closed_normally(started) and attempt == 1 and self.closes < 5:
+                    # closed by someone (the window's X), not a crash: relaunch and run this test again
+                    self.closes += 1
+                    self.game.STATE.unlink(missing_ok=True)
+                    event("client_closed", test=key(s, v))
+                    tr.step("client_closed_by_user")
+                    say("  the test client was closed (not a crash): relaunching and running this test again")
+                    continue
                 self.crashes += 1
                 tr.step("client_crashed", attempt=attempt)
                 path, cause = self.game.crash_evidence(results.stem(s["id"], v).with_name(f"{v}.crash.txt"), started)
@@ -682,6 +692,18 @@ def process_queue(runner, serve=False, on_item=None):
     by_id = {s["id"]: s for s in catalog.load()}
     done_now = {}
     while True:
+        if STOP.exists():  # harness.py stop: finish here, mark the rest stopped, close the client
+            STOP.unlink(missing_ok=True)
+            for j in pending_jobs():
+                st = read_status(j["id"]) or {"id": j["id"], "items": j["items"], "done": {}}
+                for k in j["items"]:
+                    st["done"].setdefault(k, {"status": "skip", "error": "stopped by request"})
+                st["state"] = "done"
+                write_status(j["id"], st)
+                (QUEUE / f"{j['id']}.json").unlink(missing_ok=True)
+            say("stopped by request")
+            event("run_stopped")
+            return done_now
         jobs = pending_jobs()
         if not jobs:
             if serve:
@@ -1131,6 +1153,17 @@ def cmd_open(a):
         return 1
     say(f"opening {target}")
     os.startfile(str(target)) if os.name == "nt" else subprocess.run(["xdg-open", str(target)])
+
+
+def cmd_stop(a):
+    """Ask the running harness to stop after the current test (it closes the client and writes its report)."""
+    held = json.loads(OWNER.read_text(encoding="utf-8")) if OWNER.exists() else {}
+    if not alive(held.get("pid")):
+        say("no harness is running")
+        return 0
+    STOP.parent.mkdir(parents=True, exist_ok=True)
+    STOP.write_text(str(time.time()), encoding="utf-8")
+    say(f"stop requested: the harness (pid {held.get('pid')}) finishes its current test, then closes the client")
 
 
 def cmd_quarantine(a):
@@ -1598,6 +1631,7 @@ def main():
     p.add_argument("--last", type=int, default=40)
     p.add_argument("--previous", action="store_true", help="the run before this one")
     p.add_argument("--no-game-log", action="store_true")
+    sub.add_parser("stop")
     p = sub.add_parser("quarantine")
     p.add_argument("--clear", nargs="*", help="test|variant keys (none: all)")
     sub.add_parser("seed-legacy")
@@ -1611,7 +1645,7 @@ def main():
      "status": cmd_status, "report": cmd_report, "cameras": cmd_cameras, "export-tour": cmd_export_tour,
      "seed-legacy": cmd_seed_legacy, "clean": cmd_clean, "probe": cmd_probe, "zoom": cmd_zoom,
      "gate": cmd_gate, "open": cmd_open, "quarantine": cmd_quarantine, "trace": cmd_trace,
-     "audit": cmd_audit}[a.cmd](a)
+     "audit": cmd_audit, "stop": cmd_stop}[a.cmd](a)
 
 
 if __name__ == "__main__":

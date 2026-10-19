@@ -67,6 +67,14 @@ character screen or the opening's covers (`ClientAutotest.automated()`; `-Dnirnc
 opening, to test it). The harness refuses to wait behind a blocking screen and says which one, and warns when the
 installed core is older than the latest build (`--rebuild` builds, installs and restarts).
 
+## Running while you work
+
+The test client opens behind your windows and never pauses when you click elsewhere. Bring it forward to watch;
+minimize it and a watchdog restores it behind your windows within 2 s (a minimized Minecraft cannot render);
+close it with its X and the harness relaunches it and runs the interrupted test again (a normal close is not
+counted as a crash). To end a run: `harness.py stop` (finishes the current test, closes the client, writes the
+report with the rest marked stopped).
+
 ## When a test fails: clean up, record, move on
 
 Every test has a time limit (`timeout`, default 240 s; checks and lab commands are killed when they overrun). Any
