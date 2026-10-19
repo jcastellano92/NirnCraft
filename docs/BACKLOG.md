@@ -1,0 +1,131 @@
+<!-- Snapshot of the harness issue tally (.work/harness/issues.json, the live backlog: harness.py issues). Refreshed at every merge. -->
+# Issues: 83 open, 0 in-progress, 0 testing, 19 needs-review, 8 fixed (0 older fixes cleared)
+
+## needs-review (19)
+- dist-whiterun-day|shaders: hand-off change 38.39 between 168 m and 184 m
+- fid-whiterun-day|shaders: far field colour off by dE 15.37 at 60m up; far field brighter x1.292 at 60m up; far field shapes differ (49.43) at 60m 
+- treva-cascade-falls|shaders: black boxes 1 > 0; 1 black box(es)
+- whiterun-aerial|shaders: the client is stuck on LevelLoadingScreen (the world cannot load behind it); is the installed jar current? (harness.py r
+- anim-dragon|shaders: cannot access local variable 'hud' where it is not associated with a value
+- anim-longship|shaders: camera 4096 523.63 4090.15 4096 522.46 4096: java.util.concurrent.CompletionException: java.lang.IllegalStateException: 
+- gallery-longship|shaders: camera looks 17.9 deg away from the requested direction; camera looks 17.9 deg away from the requested direction
+- cast-spell-flames|shaders: black frame; game log: Failed to create block entity net.minecraft.world.level.block.entity.BlockEntityType@29dd0a0a for
+- dropped-weapon-iron-sword|shaders: [E-CAMERA-IN-TERRAIN] java.lang.IllegalStateException: Camera intersects terrain; choose a clear pose before capture
+- front-race-khajiit|shaders: black boxes 2 > 0; 2 black box(es)
+- front-role-blacksmith|shaders: [E-CAMERA-IN-TERRAIN] java.lang.IllegalStateException: Camera intersects terrain; choose a clear pose before capture
+- held-weapon-iron-sword|shaders: [E-CAMERA-IN-TERRAIN] java.lang.IllegalStateException: Camera intersects terrain; choose a clear pose before capture
+- placed-flora-nightshade|shaders: [E-CAMERA-IN-TERRAIN] java.lang.IllegalStateException: Camera intersects terrain; choose a clear pose before capture
+- placed-night-light-spellmaking-altar|shaders: [E-CAMERA-IN-TERRAIN] java.lang.IllegalStateException: Camera intersects terrain; choose a clear pose before capture
+- side-race-argonian|shaders: [E-CAMERA-IN-TERRAIN] java.lang.IllegalStateException: Camera intersects terrain; choose a clear pose before capture
+- source-ingredient-nightshade|shaders: [E-CAMERA-IN-TERRAIN] java.lang.IllegalStateException: Camera intersects terrain; choose a clear pose before capture
+- worn-armour-mask-morokei-nord|shaders: [E-CAMERA-IN-TERRAIN] frame 25 0.7: java.util.concurrent.CompletionException: java.lang.IllegalStateException: Camera po
+- gallery-dragon|shaders: [E-CAMERA-IN-TERRAIN] frame 30 0.7: java.util.concurrent.CompletionException: java.lang.IllegalStateException: Camera ey
+- calibrate-projection|shaders: camera 16.6 blocks from the requested place; camera looks 116.9 deg away from the requested direction; camera 16.6 block
+
+## open (83), by priority and cause
+- P1 [review] harness: subjects, cards, behaviours  (11 tests)
+    - work:subjects-index|plan (x1, since 2026-10-19 04:01)
+    - work:subjects-staging|plan (x1, since 2026-10-19 04:01)
+    - work:subjects-cards|plan (x1, since 2026-10-19 04:01)
+    - work:behaviour-scenarios|plan (x1, since 2026-10-19 04:01)
+    - work:gap-finder|plan (x1, since 2026-10-19 04:01)
+    - work:testing-standards|plan (x1, since 2026-10-19 04:01)
+    - work:subjects-world|plan (x1, since 2026-10-19 04:02)
+    - work:views-offline-iso|plan (x1, since 2026-10-19 04:06)
+    - ... 3 more
+- P1 [review] deterministic world weather  (5 tests)
+    - work:capture-determinism|plan (x1, since 2026-10-19 02:58)
+    - work:deterministic-world-weather|plan (x1, since 2026-10-19 03:15)
+    - work:research-multiscale-weather|plan (x1, since 2026-10-19 03:17)
+    - work:atlas-clouds-terrain|plan (x1, since 2026-10-19 03:38)
+    - work:research-gpu-weather-sim|plan (x1, since 2026-10-19 03:38)
+- P1 [review] close out test-harness  (2 tests)
+    - work:verify-new-harness-code|plan (x1, since 2026-10-19 03:05)
+    - work:schedule-auto|plan (x1, since 2026-10-19 03:05)
+- P2 [validate-tools] offline renderer one-to-one  (5 tests)
+    - twin-lab-atlas-whiterun-fair|shaders (x1, since 2026-10-19 02:43)
+    - work:lab-exact-terrain|plan (x1, since 2026-10-19 02:58)
+    - work:lab-camera-spec|plan (x1, since 2026-10-19 02:58)
+    - work:planner-conventions|plan (x1, since 2026-10-19 02:58)
+    - work:render-weather-controls|plan (x1, since 2026-10-19 03:06)
+- P2 [review] atlas: geometry fidelity  (5 tests)
+    - work:atlas-silhouette-shimmer|plan (x1, since 2026-10-19 03:37)
+    - work:atlas-refine-thrash|plan (x1, since 2026-10-19 03:37)
+    - work:atlas-roads-structures-high|plan (x1, since 2026-10-19 03:37)
+    - work:atlas-trees-buildings-accuracy|plan (x1, since 2026-10-19 03:37)
+    - town-oblique-whiterun|shaders (x2, since 2026-10-19 05:02)
+- P2 [checks] [E-CHECK-FAILED] problems #  (4 tests)
+    - check-alchemy|check (x3, since 2026-10-19 02:50)
+    - check-dungeon-reach|check (x3, since 2026-10-19 02:51)
+    - check-textures|check (x3, since 2026-10-19 02:53)
+    - check-uniques|check (x3, since 2026-10-19 02:53)
+- P2 [review] atlas: seamless hand-off  (3 tests)
+    - work:atlas-water-seams|plan (x1, since 2026-10-19 03:37)
+    - work:atlas-materials-colours-match|plan (x1, since 2026-10-19 03:37)
+    - work:atlas-seamless-taper|plan (x1, since 2026-10-19 03:37)
+- P2 [sky] night sky washed out by exposure  (2 tests)
+    - whiterun-night-sky-up|shaders (x1, since 2026-10-19 02:46)
+    - winterhold-aurora-night|shaders (x1, since 2026-10-19 02:46)
+- P2 [gallery] render: dropped items dark  (2 tests)
+    - dropped-armour-iron-chestplate|shaders (x2, since 2026-10-19 05:25)
+    - dropped-food-raw-mammoth-snout|shaders (x3, since 2026-10-19 05:26)
+- P2 [checks] [E-CHECK-FAILED] ERR shops: trade library has no stock tag merchant/li  (check-data|check, x6, since 2026-10-19 02:25)
+- P2 [review] deterministic before/after  (work:input-lock|plan, x1, since 2026-10-19 02:58)
+- P2 [places] night lighting  (dragonsreach-silhouette-night-far|shaders, x1, since 2026-10-19 03:05)
+- P2 [fx] smoke / particles  (helgen-near-smoke|shaders, x1, since 2026-10-19 03:05)
+- P2 [sky] mountain halo  (throat-ridgeline-night-halo|shaders, x1, since 2026-10-19 03:05)
+- P2 [gallery] stage: pale column  (blocks-ladder-01|shaders, x2, since 2026-10-19 03:05)
+- P2 [review] atlas: far-field look  (work:atlas-ash-black|plan, x1, since 2026-10-19 03:37)
+- P2 [review] gameplay: world items  (work:item-physics|plan, x1, since 2026-10-19 05:29)
+- P2 [gallery] furniture: rendering  (placed-furniture-cabinet|shaders, x3, since 2026-10-19 05:31)
+- P2 [towns] worldgen: unsafe reads  (town-top-border-watch|shaders, x2, since 2026-10-19 05:36)
+- P3 [distance] hand-off change # between # m and # m  (4 tests)
+    - dist-whiterun-stables-day|shaders (x1, since 2026-10-19 02:58)
+    - dist-whiterun-stables-night|shaders (x1, since 2026-10-19 02:59)
+    - dist-whiterun-night|shaders (x1, since 2026-10-19 03:06)
+    - dist-actor-dragon-day|shaders (x2, since 2026-10-19 03:29)
+- P3 [review] atlas: streaming  (3 tests)
+    - work:atlas-view-priority|plan (x1, since 2026-10-19 03:25)
+    - work:atlas-near-chunk-priority|plan (x1, since 2026-10-19 03:37)
+    - work:atlas-far-view-first|plan (x1, since 2026-10-19 03:37)
+- P3 [gallery] # black box(es)  (3 tests)
+    - dropped-item-enchanted-staff|shaders (x1, since 2026-10-19 05:27)
+    - worn-armour-imperial-chestplate-argonian|shaders (x1, since 2026-10-19 05:33)
+    - worn-armour-stormcloak-boots-argonian|shaders (x1, since 2026-10-19 05:34)
+- P3 [validate-tools] whiterun terracing missing offline  (2 tests)
+    - validate-world-whiterun|measure (x2, since 2026-10-19 02:25)
+    - dist-whiterun-day|vanilla (x2, since 2026-10-19 02:25)
+- P3 [subjects] partial: # settle(s) timed out (chunks may be missing)  (2 tests)
+    - inside-building-nord-inn-common|shaders (x4, since 2026-10-19 04:30)
+    - entry-building-nord-inn-common|shaders (x1, since 2026-10-19 05:50)
+- P3 [gallery] spells: studio  (2 tests)
+    - cast-spell-banish-daedra|shaders (x2, since 2026-10-19 05:38)
+    - cast-spell-wall-of-flames|shaders (x3, since 2026-10-19 05:38)
+- P3 [checks] [E-CHECK-FAILED] ERR [item] item abecean_longfin_spawn_egg: item model  (check-asset-chain|check, x4, since 2026-10-19 02:25)
+- P3 [checks] [E-OTHER] FAIL: foreign.json:spindrift_raider_sea_cave has invalid/mis  (check-dungeon-stats|check, x2, since 2026-10-19 02:25)
+- P3 [checks] [E-OTHER] Summary: # province(s) checked, # error(s).  (check-ecology|check, x4, since 2026-10-19 02:25)
+- P3 [checks] river water missing / hydrology  (check-hydrology|check, x4, since 2026-10-19 02:25)
+- P3 [ui] [E-CHECK-FAILED] ERR menus: minecraft:crafter_#x# has no row in the me  (check-menus|check, x5, since 2026-10-19 02:25)
+- P3 [checks] [E-CHECK-FAILED] PROBLEMS: #  (check-placement|check, x4, since 2026-10-19 02:25)
+- P3 [checks] [E-OTHER] # land regions, # failing metrics, # unavailable metrics  (check-player-flow|check, x4, since 2026-10-19 02:25)
+- P3 [lab] lab horizon black line  (lab-atlas-whiterun-fair|lab, x2, since 2026-10-19 02:43)
+- P3 [review] worldgen: foreign biomes  (work:foreign-biomes|plan, x1, since 2026-10-19 03:05)
+- P3 [ui] ui: map  (ui-map|shaders, x1, since 2026-10-19 03:05)
+- P3 [review] ui: vanilla screens left  (work:ui-disconnected-screen|plan, x1, since 2026-10-19 03:23)
+- P3 [review] atlas: anti-aliasing  (work:atlas-antialiasing|plan, x1, since 2026-10-19 03:37)
+- P3 [review] atlas: shadows  (work:atlas-shadows-complete|plan, x1, since 2026-10-19 03:37)
+- P3 [review] atlas: entities  (work:atlas-entity-lod|plan, x1, since 2026-10-19 03:38)
+- P3 [review] atlas: far-field lighting  (work:atlas-far-light-baking|plan, x1, since 2026-10-19 03:38)
+- P4 [distance] far field darker x# at #m up  (fid-whiterun-stables-night|shaders, x1, since 2026-10-19 03:01)
+- P4 [distance] far field brighter x# at #m up  (fid-whiterun-night|shaders, x1, since 2026-10-19 03:08)
+- P4 [sky] game log: com.mojang.renderpearl.api.device.SurfaceException: Cannot a  (whiterun-night-sky-north|shaders, x1, since 2026-10-19 03:41)
+
+## Recently fixed (8)
+- behaviour-corpse-on-death|measure: fixed 2026-10-19 05:57 at ea9e2def (opened 2026-10-19 05:46): [E-CRASH] crashed twice: Extracting render state for an entity in world: java.lang.IllegalStateException: Tried to acces
+- placed-night-light-soul-portal|shaders: fixed 2026-10-19 05:42 at None (opened 2026-10-19 05:32): BROKEN: Rendered as magenta blocks (missing texture/geometry)
+- check-scene-catalog|check: fixed 2026-10-19 04:31 at 64d76dd5 (opened 2026-10-19 04:31): [E-OTHER] 22678 scenes, 116 problem(s)
+- subject-index|measure: fixed 2026-10-19 04:22 at 64d76dd5 (opened 2026-10-19 04:19): Terrain did not settle before capture deadline; sequence cancelled: native=317/317 lit=317/317 radius=10 meshes=true air
+- entity-index|measure: fixed 2026-10-19 03:57 at 5f6a278f (opened 2026-10-19 03:52): client exited while loading; see logs/latest.log
+- check-pack-tool-tests|check: fixed 2026-10-19 03:43 at 5f6a278f (opened 2026-10-19 02:52): FAILED (errors=4)
+- pop-whiterun-night|shaders: fixed 2026-10-19 02:58 at e47db3fd (opened 2026-10-19 02:25): java.lang.IllegalStateException: Settle the starting camera before travel
+- check-road-headroom|check: fixed 2026-10-19 02:52 at e47db3fd (opened 2026-10-19 02:25): FAILED (errors=1)
