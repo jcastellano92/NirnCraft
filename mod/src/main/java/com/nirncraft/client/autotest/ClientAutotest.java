@@ -215,6 +215,8 @@ public final class ClientAutotest {
     private static String remoteCommandSubmitted = "";
     private static int remoteCommandSubmissions;
     private static int liveSettleUntil, liveSettleStable;
+    /** `settle-visual T static`: the world's ticking frozen while it settles (unfrozen, then a short wait, after). */
+    private static boolean settleFrozen;
     /** `settle T partial`: at the deadline the sequence goes on (counted in settlePartial) instead of being cancelled. */
     private static boolean liveSettleTolerant;
     private static int liveSettlePartial;
@@ -457,6 +459,7 @@ public final class ClientAutotest {
             }
             return;
         }
+        if (settleFrozen && liveSettleUntil == 0) unfreezeAfterSettle(mc);  // a cancelled sequence never leaves the world frozen
         if (liveSettleUntil > 0 && liveVisualSettle) {
             // settled when RENDERING has finished, not when the world stops moving: a coarse copy of the frame twice a
             // second (each cell averages a 32 x 32 block, so swaying leaves, rain, particles, flicker and walking
@@ -500,6 +503,7 @@ public final class ClientAutotest {
             boolean far = com.nirncraft.atlas.AtlasClient.farFieldIdle();
             if (visualStable >= 3 && near && far && tick >= visualSince + 60) {
                 liveSettleUntil = 0;
+                unfreezeAfterSettle(mc);
                 visualSettledAt = mc.player.position();
                 NirnCraft.LOGGER.info("Autotest live: render settled after {} ticks ({}, far field idle, structural {}%, "
                         + "exposure drift {})", tick - visualSince, READINESS.visibleDetail,
@@ -507,6 +511,7 @@ public final class ClientAutotest {
                         String.format(java.util.Locale.ROOT, "%.2f", visualDrift));
             } else if (tick >= liveSettleUntil) {
                 liveSettleUntil = 0;
+                unfreezeAfterSettle(mc);
                 liveSettlePartial++;
                 NirnCraft.LOGGER.warn("Autotest live: render not settled at the deadline, continuing (partial): {}, far "
                         + "field {}, structural {}%, exposure drift {}", READINESS.visibleDetail,
@@ -629,7 +634,15 @@ public final class ClientAutotest {
                 if(burstRemaining>0) throw new IllegalStateException("Do not measure during screenshot bursts");
                 FrameProbe.begin(mc,action.substring(8));
             } else if (action.startsWith("settle-visual ")) {  // settled when the picture stops changing
-                liveSettleUntil = tick + Math.max(60, Integer.parseInt(action.substring(14).trim().split("\\s+")[0]));
+                String[] sv = action.substring(14).trim().split(" +");
+                // static: settle with the world's ticking frozen (fire, crops, mobs, random ticks: nothing new for the
+                // far field to take in), then unfreeze and let smoke, mobs and particles come back before what follows
+                if (sv.length > 1 && sv[1].equals("static") && mc.getSingleplayerServer() != null) {
+                    var srv = mc.getSingleplayerServer();
+                    srv.execute(() -> srv.getCommands().performPrefixedCommand(srv.createCommandSourceStack().withSuppressedOutput(), "tick freeze"));
+                    settleFrozen = true;
+                }
+                liveSettleUntil = tick + Math.max(60, Integer.parseInt(sv[0]));
                 liveVisualSettle = true;
                 visualPrev = null;
                 visualStable = 0;
@@ -1298,5 +1311,15 @@ public final class ClientAutotest {
         }).whenComplete((path,failure)->{
             if(failure!=null)mc.execute(()->{liveError="Capture failed: "+name+": "+failure;LIVE_ACTIONS.clear();});
         });
+    }
+
+    /** After a static settle: the world ticks again, and dynamics get 3 s to look natural before the next action. */
+    private static void unfreezeAfterSettle(Minecraft mc) {
+        if (!settleFrozen) return;
+        settleFrozen = false;
+        var srv = mc.getSingleplayerServer();
+        if (srv != null)
+            srv.execute(() -> srv.getCommands().performPrefixedCommand(srv.createCommandSourceStack().withSuppressedOutput(), "tick unfreeze"));
+        LIVE_ACTIONS.addFirst("wait 60");
     }
 }

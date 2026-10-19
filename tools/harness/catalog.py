@@ -767,6 +767,15 @@ def pose_actions(s, plan=None, candidate=0):
 
 
 def capture_actions(s, tag, plan=None):
+    """The scene's capture sequence; a scene with "settle": "static" settles every time with the world's ticking
+    frozen (fire, crops, mobs, random ticks), then unfreezes and lets dynamics come back before the capture."""
+    lines = _capture_actions(s, tag, plan)
+    if s.get("settle") == "static":
+        lines = [l + " static" if l.startswith("settle-visual ") and not l.endswith(" static") else l for l in lines]
+    return lines
+
+
+def _capture_actions(s, tag, plan=None):
     p = s.get("pose") or {}
     if "ladder" in p and p["ladder"].get("stage"):  # on the sky stage: build it, lay out the samples, step back
         sx, sy, sz = STAGE

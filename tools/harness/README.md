@@ -76,7 +76,10 @@ rarely as possible, and applies the cheap ones per scene:
 |---|---|---|---|
 | JVM flags (`-D...`) | `group` (scenes/groups.json `jvm`) | client restart | scenes of one group run together |
 | shaders on / off | variant `shaders` / `vanilla` | live toggle | batched after the group |
-| pack options | `pack_options: {"TAA": false}` | shader reload | batched; Iris' option file, then `reload` (names checked against lib/settings.glsl) |
+| pack options | `pack_options: {"TAA": false}` | shader reload | batched; Iris' option file, then `reload` (names checked against lib/settings.glsl); lab scenes pass the same options to pack_lab as `opt=` |
+| static settle | `settle: "static"` | none | every settle in the scene runs with `tick freeze` (no fire, crops, mobs or random ticks feeding the far field), then `tick unfreeze` and 3 s for dynamics before the capture |
+| order | `after: ["scene-id"]` | none | runs after those scenes; a lab scene whose inputs are missing pulls them into the run |
+| live camera | `camera_from: {"scene", "variant"}` | none | a lab render of that live capture's own view (refused when the capture had not settled); writes `<id>/lab.twin.png`: live, offline, dE heat over the exported blocks |
 | time, weather | `time`, `weather` | none | every scene pins them |
 | weather off | `weather: "off"` | none | the client's weather-off switch: no clouds, rain, fog banks; distant haze kept |
 

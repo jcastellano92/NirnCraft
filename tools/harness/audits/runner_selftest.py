@@ -135,5 +135,10 @@ expect(settled({"weather": "rain", "tags": []}) == "rain", "an explicit weather 
 expect(settled({"weather": "clear", "tags": ["suite:weather-audit"]}) == "clear", "a weather-tagged clear sky keeps its clouds")
 expect(settled({"tags": [], "pose": {"dungeon": "x"}}) is None, "indoors has no weather")
 
+lines = catalog.capture_actions({"id": "x", "settle": "static", "pose": {}, "setup": ["settle-visual 600"], "wait": 10},
+                                "t")
+expect(all(l.endswith(" static") for l in lines if l.startswith("settle-visual ")) and any(l.startswith("settle-visual") for l in lines),
+       "a static scene settles every time with the world frozen (harness lines and its own)")
+
 print(f"problems {len(problems)}")
 sys.exit(1 if problems else 0)
