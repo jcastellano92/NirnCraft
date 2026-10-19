@@ -432,7 +432,9 @@ def validation_scenes():
                     "_file": "(generated validation)", "variants": ["shaders"], "time": ticks,
                     "weather": WEATHER_PRESET.get(a.get("weather", "fair"), "cloudy"),
                     "tags": ["suite:validate-tools", "feature:farfield", "feature:lab-twin", f"twin:{lab['id']}"],
-                    "pose": {"visit": [int(a["x"]), int(a["z"]), int(a.get("above", 40)), a.get("yaw", 0), a.get("pitch", 0)]},
+                    # atlas_render: yaw 0 = north (-Z), pitch < 0 looks down; Minecraft: yaw 0 = south, pitch > 0 down
+                    "pose": {"visit": [int(a["x"]), int(a["z"]), int(a.get("above", 40)),
+                                       (float(a.get("yaw", 0)) + 180) % 360, -float(a.get("pitch", 0))]},
                     "checks": {}, "source": f"twin of {lab['id']}"})
     return out
 
@@ -628,7 +630,8 @@ def pose_actions(s, plan=None, candidate=0):
         if pl is None:
             raise ValueError(f"{s['id']}: unknown place {p['place']}")
         dx, dz = p.get("offset", [0, 0])
-        lines.append(f"visit {int(pl['x'] + dx)} {int(pl['z'] + dz)} {int(p.get('height', 40))} {p.get('yaw', 0)} "
+        h = int(p.get('height', 40)) + 25 * candidate  # a retry after "camera intersects terrain" goes higher
+        lines.append(f"visit {int(pl['x'] + dx)} {int(pl['z'] + dz)} {h} {p.get('yaw', 0)} "
                      f"{p.get('pitch', -15)} {weather or 'clear'}")
         weather = None
     elif "stage" in p:

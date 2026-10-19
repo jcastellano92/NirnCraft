@@ -1669,7 +1669,7 @@ def issue_stats():
 
 
 FIXED_KEEP_DAYS = 7  # a fixed issue leaves the list after a week (the totals keep counting it)
-SEVERITY = {"crash": 0, "error": 1, "fail": 2, "flag": 3}
+SEVERITY = {"crash": 0, "error": 1, "fail": 2, "review": 2, "flag": 3}
 
 
 def save_issues(led):
@@ -1728,7 +1728,8 @@ def tally(s, v, rec):
             e.setdefault("notes", []).append(f"{now}: the fix did not hold ({st})")
         e.update(lastSeen=now, count=e["count"] + 1, status=st, why=why[:300], head=git_head())
         led[k] = e
-    elif st == "pass" and e and e.get("state") in ACTIVE:
+    elif st == "pass" and e and e.get("state") in ACTIVE and not (e.get("status") == "review" and e.get("state") != "testing"):
+        # (a reviewer's finding: the test never failed on it, so only a fix marked `issues fixed` moves it on)
         if e.get("visual") and e.get("state") != "needs-review":
             e.update(state="needs-review", passedAt=now)  # the numbers pass; a reviewer confirms the picture
         elif not e.get("visual"):
@@ -1751,6 +1752,27 @@ def cmd_issues(a):
         return hits
 
     act = a.action or "list"
+    if act == "add":  # a finding no test fails on (e.g. the visual reviewer's BROKEN lines) becomes a tracked issue
+        if not a.test or not a.note:
+            say('issues add <test> --note "what is wrong" [--variant V] [--priority P2] [--name group]')
+            return 1
+        s = {x["id"]: x for x in catalog.load()}.get(a.test, {})
+        k = f"{a.test}|{a.variant or (s.get('variants') or ['-'])[0]}"
+        area = next((t[6:] for t in s.get("tags", []) if t.startswith("suite:") and t not in ("suite:smoke",
+                                                                                            "suite:seam-core")), "review")
+        e = led.get(k) if led.get(k, {}).get("state") in ACTIVE else None
+        e = e or {"test": k, "area": area, "opened": now, "count": 0, "state": "open", "visual": True,
+                  "history": led.get(k, {}).get("history", [])}
+        e.update(lastSeen=now, count=e["count"] + 1, status=e.get("status") or "review", why=a.note[:300],
+                 head=git_head(), reportedBy=a.by or "reviewer")
+        if a.priority:
+            e["priority"] = a.priority.upper()
+        if a.name:
+            e["group"] = a.name
+        led[k] = e
+        save_issues(led)
+        say(f"{k}: open ({e['why'][:80]})")
+        return 0
     if act in ("prioritize", "group"):
         if not a.test:
             say(f"issues {act} needs a test id")
@@ -1972,7 +1994,8 @@ def main():
     p.add_argument("--past", action="store_true", help="also match events already in the log")
     p = sub.add_parser("issues")
     p.add_argument("action", nargs="?", choices=["list", "claim", "fixed", "verify", "confirm", "reopen", "note",
-                                                 "prioritize", "group"])
+                                                 "prioritize", "group", "add"])
+    p.add_argument("--variant", help="add: the variant (default: the test's first)")
     p.add_argument("--priority", help="prioritize: P1..P4 (empty: automatic)")
     p.add_argument("--name", help="group: a cause name to group under (empty: automatic)")
     p.add_argument("test", nargs="?", help="test id (or test|variant)")

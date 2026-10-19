@@ -133,6 +133,8 @@ start skips its group the same way.
   Open issues are listed by priority (P1..P4: severity, recurrence, and how many tests share the cause; `issues
   prioritize <test> --priority P1` overrides) and grouped by cause (same reason with numbers stripped; `issues group
   <test> --name X` regroups). Fixed issues drop off after 7 days (the totals keep counting them).
+  A finding no test fails on (the visual reviewer's BROKEN / REGRESSION lines) is filed with `issues add <test> --note
+  "what, where" [--priority P2] [--name group]`; it follows the same workflow (a visual issue ends with `confirm`).
 
 ## Hot reload kinds (watch mode and `--changed`)
 

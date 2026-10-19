@@ -2003,13 +2003,7 @@
    ],
    "pose": {
     "place": "treva_cascade_falls",
-    "height": 12,
-    "yaw": 0,
-    "pitch": 15,
-    "offset": [
-     0,
-     -30
-    ]
+    "shot": "approach"
    },
    "time": 6000,
    "weather": "clear",
@@ -2022,7 +2016,7 @@
    },
    "capture": "world",
    "source": "new (owner gap: river rapids and waterfall); place from skyrim_landmarks.json",
-   "note": "offset/yaw guessed: 30 blocks north of the landmark looking south; adjust once the water is seen"
+   "note": "camera planned offline (the planner's approach shot; it found no water shot); the guessed pose intersected the terrain"
   },
   {
    "id": "darkwater-falls-overlook",
@@ -2057,7 +2051,7 @@
    },
    "capture": "world",
    "source": "new (owner gap: river rapids and waterfall); place from skyrim_landmarks.json",
-   "note": "offset/yaw guessed: 30 blocks north of the landmark looking south; adjust once the water is seen"
+   "note": "camera planned offline (the planner's approach shot; it found no water shot); the guessed pose intersected the terrain"
   },
   {
    "id": "ilinalta-falls",
@@ -2092,7 +2086,7 @@
    },
    "capture": "world",
    "source": "new (owner gap: river rapids and waterfall); place from skyrim_landmarks.json",
-   "note": "offset/yaw guessed: 30 blocks north of the landmark looking south; adjust once the water is seen"
+   "note": "camera planned offline (the planner's approach shot; it found no water shot); the guessed pose intersected the terrain"
   },
   {
    "id": "falkreath-forest-foliage-close",
