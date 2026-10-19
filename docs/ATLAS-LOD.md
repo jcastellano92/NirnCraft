@@ -285,10 +285,14 @@ grouped voxels only decide shape and coverage. Element tier (lab-groups, 16 samp
 | element | near dE, own 4 x 4 tiles, fixed sun | near dE, cards | dE 64 m - 32 km | IoU (16 px and up) | fly-in pop fast / slow |
 |---|---|---|---|---|---|
 | whiterun-day-chunk (32 m) | 29.3 | 3.7 | 1.7 - 4.0 | 0.94 - 1.00 | 0.03 / 0.07 |
-| falkreath-wide-tree (32 m) | 10 - 14 | 6.0 | 1.7 - 3.9 | 0.92 - 0.99 | 0.05 / 0.04 |
+| falkreath-wide-tree (32 m) | 10 - 14 | 6.0; 5.0 with card leaves | 1.2 - 2.8 (card leaves) | 0.91 - 0.997 | 0.014 / 0.005 |
 
-What is left is representation: a snow layer is one micro-voxel thick (1/4 block, not 1/8), cutout foliage is hashed
-micro-voxels, grazing faces shimmer a little more than the reference's 16 samples. The far pass takes its colour the
+Leaves and plants (`leaves=cards`, the default): whole voxels whose cards' alpha is the cutout (per texel up close,
+the mip's coverage further away) instead of micro-voxels hashed by their 4 x 4 tiles' alpha: better at every
+distance and nearly no pop. The bench passes through a transparent texel along the face's own axis (the next block in
+the column), not along the ray, so a crown's ragged fringe against the sky is solid: the far pass's tracer continues
+the ray itself. What else is left is representation: a snow layer is one micro-voxel thick (1/4 block, not 1/8),
+grazing faces shimmer a little more than the reference's 16 samples. The far pass takes its colour the
 same way (cards from the real quads, light kept apart so day, night and carried lights relight them).
 
 **An exact reference: atlas_truth** (2026-10-19). atlas_lab's ref is an approximation (4 x 4 x 4 shapes, 4 x 4 tiles,
