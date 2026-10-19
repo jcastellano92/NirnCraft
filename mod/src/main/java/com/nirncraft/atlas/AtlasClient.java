@@ -393,7 +393,7 @@ public final class AtlasClient {
             if (source instanceof AtlasRefiningSource r) r.materials(mats);
             // single player: the world's own trees over the finest LODs (AtlasTrees), else the dressing's canopy
             AtlasTrees trees = source instanceof AtlasExactSource e ? AtlasTrees.forServer(mc.getSingleplayerServer(), e) : null;
-            AtlasTrees.activeLod = trees != null ? AtlasTrees.LOD : -1;  // before the first tile goes up
+            AtlasTrees.activeLod = trees != null ? AtlasTrees.APPROX_LOD : -1;  // before the first tile goes up
             farField = new AtlasFarField(ctx, source, () -> AtlasSettlements.create(ground, mats, trees), lods);
             lightBudget = -1;
             startedFor = mc.level;

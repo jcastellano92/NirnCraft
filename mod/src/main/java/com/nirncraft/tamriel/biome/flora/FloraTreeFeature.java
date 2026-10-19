@@ -69,6 +69,16 @@ public class FloraTreeFeature extends ConfiguredFeature<FloraTreeFeature.Config>
         return b.commit(x, y, z);
     }
 
+    /** The species growing at (x, z) for a roll in [0, 1) (place() rolls the chunk's random; a far field may hash). */
+    public static TreeSpecies speciesAt(Config cfg, long seed, int x, int z, double roll) {
+        return pick(cfg, seed, x, z, roll);
+    }
+
+    /** Whether a soil block suits a species' soil flags (TreeSpecies.DIRT ...). */
+    public static boolean soilFits(int soil, BlockState ground) {
+        return soilOk(soil, ground);
+    }
+
     private static TreeSpecies pick(Config cfg, long seed, int x, int z, double roll) {
         List<Entry> list = cfg.species();
         if (list.isEmpty()) return null;

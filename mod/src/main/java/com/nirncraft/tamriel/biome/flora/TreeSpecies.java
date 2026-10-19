@@ -64,6 +64,19 @@ public final class TreeSpecies {
         return shape == Shape.SHRUB || shape == Shape.STUMP || shape == Shape.FALLEN_LOG ? Math.min(3, (int) Math.ceil(r)) : (int) Math.ceil(r);
     }
 
+    /**
+     * A grown tree's far silhouette in numbers (the far field's coarse levels draw it without growing it): its mean
+     * height, crown radius, where the crown starts (fraction of the height), its leaves and the top accent (snow on
+     * the crown) or null, and the soil and water it needs.
+     */
+    public record Silhouette(Shape shape, float height, float radius, float crownBase, BlockState leaves, BlockState top,
+                             int soil, int maxWater) {}
+
+    public Silhouette silhouette() {
+        return new Silhouette(shape, (minHeight + maxHeight) * 0.5f, radius, base0, leaves,
+                accentTop && accentChance >= 0.5f ? accent : null, soil, maxWater);
+    }
+
     private TreeSpecies(String name, Shape shape) {
         this.name = name;
         this.shape = shape;

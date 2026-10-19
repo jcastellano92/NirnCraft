@@ -110,7 +110,7 @@ final class AtlasSettlements implements AtlasFarField.Overlay {
     static AtlasSettlements create(IntBinaryOperator ground, AtlasMaterials mats, AtlasTrees trees) {
         AtlasSettlements s = create(ground, mats);
         s.trees = trees;
-        AtlasTrees.activeLod = trees != null ? AtlasTrees.LOD : -1;
+        AtlasTrees.activeLod = trees != null ? AtlasTrees.APPROX_LOD : -1;
         return s;
     }
 
@@ -209,6 +209,13 @@ final class AtlasSettlements implements AtlasFarField.Overlay {
                     any = true;
                     stamp(sh, s, bx, bz);
                 }
+        }
+        if (t != null && lod > AtlasTrees.LOD && lod <= AtlasTrees.APPROX_LOD) {
+            // coarser levels: the same trees at their real places as cones and domes (not grown)
+            if (!any) clear();
+            any = true;
+            final int fs = s, fbx = bx, fbz = bz;
+            t.approximate(bx, bz, ex, ez, (x, y, z, sil, tint) -> stampTree(x, y, z, sil, tint, fs, fbx, fbz));
         }
         com.nirncraft.tamriel.terrain.Hydrology.Fall[] all = com.nirncraft.tamriel.terrain.Hydrology.get().falls();
         for (int k = 0; k < all.length; k++) {
@@ -406,6 +413,35 @@ final class AtlasSettlements implements AtlasFarField.Overlay {
                 float base = grounded ? Float.NaN : lowest;
                 short roof = sh.tint != null && sh.tint[best] != 0 ? mats.leaves(sh.roof[best], sh.tint[best]) : mats.id(sh.roof[best]);
                 put(i, j, top - 1, top, mats.id(sh.wall[best]), roof, base);
+            }
+    }
+
+    /**
+     * A tree drawn from its silhouette into the columns of a coarse tile: conifers a cone from the crown base up,
+     * other crowns a dome (shrubs low and round), leaves in their tint, a snowy top where the species wears one.
+     */
+    private void stampTree(int x, int y, int z, com.nirncraft.tamriel.biome.flora.TreeSpecies.Silhouette sil, int tint,
+                           int s, int bx, int bz) {
+        if (sil.leaves() == null) return;  // dead trees, logs, stumps: nothing a coarse column shows
+        float h = sil.height(), r = Math.max(1f, sil.radius());
+        boolean cone = sil.shape() == com.nirncraft.tamriel.biome.flora.TreeSpecies.Shape.CONIFER
+                || sil.shape() == com.nirncraft.tamriel.biome.flora.TreeSpecies.Shape.COLUMNAR;
+        boolean shrub = sil.shape() == com.nirncraft.tamriel.biome.flora.TreeSpecies.Shape.SHRUB;
+        if (shrub) h = Math.min(h, 3f);
+        float crown0 = shrub ? 0f : h * sil.crownBase();
+        short leaf = tint != 0 ? mats.leaves(sil.leaves(), tint) : mats.id(sil.leaves());
+        short top = sil.top() != null ? mats.id(sil.top()) : leaf;
+        int i0 = Math.max(0, Math.floorDiv((int) Math.floor(x - r) - bx, s)), i1 = Math.min(AtlasNative.TILE - 1, Math.floorDiv((int) Math.ceil(x + r) - bx, s));
+        int j0 = Math.max(0, Math.floorDiv((int) Math.floor(z - r) - bz, s)), j1 = Math.min(AtlasNative.TILE - 1, Math.floorDiv((int) Math.ceil(z + r) - bz, s));
+        for (int j = j0; j <= j1; j++)
+            for (int i = i0; i <= i1; i++) {
+                float wx = bx + (i + 0.5f) * s, wz = bz + (j + 0.5f) * s;
+                float d = (float) Math.hypot(wx - (x + 0.5f), wz - (z + 0.5f)) / r;
+                if (d > 1f && !(i == Math.floorDiv(x - bx, s) && j == Math.floorDiv(z - bz, s))) continue;
+                d = Math.min(d, 1f);
+                float up = cone ? crown0 + (h - crown0) * (1f - d) : crown0 + (h - crown0) * (float) Math.sqrt(1f - d * d * 0.85f);
+                float t = y + 1 + Math.max(1f, up);
+                put(i, j, t - 1, t, leaf, d < 0.5f ? top : leaf, Float.NaN);
             }
     }
 

@@ -189,6 +189,11 @@ final class AtlasCapture {
                java.util.function.Function<BlockPos, net.minecraft.core.Holder<net.minecraft.world.level.biome.Biome>> biome,
                net.minecraft.server.level.ServerLevel owner) {}
 
+    /** A level that reads like the capturing one (stand-in ground with the Env) but is only for queries. */
+    static WorldGenLevel reader(IntBinaryOperator ground, long seed, Env env) {
+        return new Recorder(ground, seed, env).level();
+    }
+
     /** As capture, with an environment the builder may read (Env). */
     static Shape capture(BoundingBox box, IntBinaryOperator ground, long seed, Env env, Consumer<WorldGenLevel> paint) {
         Recorder rec = new Recorder(ground, seed, env);

@@ -36,8 +36,10 @@ import java.util.function.Supplier;
  * real world refused next to a boulder may stand here. Chunks are cached (about 4 k).</p>
  */
 final class AtlasTrees {
-    /** The coarsest LOD that gets real trees (columns of 2^LOD blocks); coarser keeps the dressing's canopy. */
+    /** The coarsest LOD that gets real grown trees (columns of 2^LOD blocks). */
     static final int LOD = 0;
+    /** The coarsest LOD that gets trees at their real places as silhouettes (approximate); coarser keeps the canopy. */
+    static final int APPROX_LOD = 2;
     /** -1, or LOD while a tree overlay runs: tile uploads at or under it ask the dressing for no canopy. */
     static volatile int activeLod = -1;
     /** ATLAS_COLUMN_NO_CANOPY (abi 0.13): the dressing grows no forest canopy on the column. */
@@ -54,6 +56,7 @@ final class AtlasTrees {
     /** The vegetal step's tree features by global index (ascending), and which biomes have each. */
     private final int[] index;
     private final PlacedFeature[] features;
+    private final FloraTreeFeature.Config[] configs;
     private final Map<Holder<Biome>, long[]> byBiome = new java.util.concurrent.ConcurrentHashMap<>();
     private final Map<Long, AtlasCapture.Shape> cache = new LinkedHashMap<>(256, 0.75f, true) {
         @Override
@@ -76,7 +79,84 @@ final class AtlasTrees {
         ix.sort(Integer::compare);
         index = ix.stream().mapToInt(Integer::intValue).toArray();
         features = new PlacedFeature[index.length];
-        for (int k = 0; k < index.length; k++) features[k] = all.get(index[k]);
+        configs = new FloraTreeFeature.Config[index.length];
+        for (int k = 0; k < index.length; k++) {
+            features[k] = all.get(index[k]);
+            configs[k] = ConfiguredFeature.configOf(features[k].feature().value(), FloraTreeFeature.class);
+        }
+    }
+
+    /** A tree at its real place, drawn from numbers (approximate): trunk base (x, ground y, z), its silhouette. */
+    interface Visitor {
+        void tree(int x, int y, int z, com.nirncraft.tamriel.biome.flora.TreeSpecies.Silhouette s, int tint);
+    }
+
+    /**
+     * Every tree whose trunk stands in [x0, x1) x [z0, z1): the same placements chunk decoration runs (flora_scatter is
+     * a pure function of seed and place; the biome check and heightmap from this world), the species by a stable
+     * roll per place (the real one rolls the chunk's random, so a place's species may differ), soil and water
+     * checked; not grown. For coarse LODs, where a tree is a few columns.
+     */
+    void approximate(int x0, int z0, int x1, int z1, Visitor v) {
+        AtlasCapture.Env env = new AtlasCapture.Env(this::groundBlock, this::waterTop, p -> surface.biome(p.getX(), p.getY(), p.getZ()), level);
+        net.minecraft.world.level.WorldGenLevel l = AtlasCapture.reader(source::groundAt, seed, env);
+        WorldgenRandom random = new WorldgenRandom(new XoroshiroRandomSource(0L));
+        List<BlockPos> cur = new ArrayList<>(), next = new ArrayList<>();
+        for (int cz = z0 >> 4; cz <= (z1 - 1) >> 4; cz++)
+            for (int cx = x0 >> 4; cx <= (x1 - 1) >> 4; cx++) {
+                long[] run = new long[(features.length + 63) >> 6];
+                for (int q = 0; q < 4; q++) {  // a coarse look at the chunk's biomes (corners' quarts)
+                    int x = (cx << 4) + 2 + (q & 1) * 12, z = (cz << 4) + 2 + (q >> 1) * 12;
+                    long[] has = byBiome.computeIfAbsent(surface.biome(x, source.groundAt(x, z), z), this::treesOf);
+                    for (int w = 0; w < run.length; w++) run[w] |= has[w];
+                }
+                for (int k = 0; k < features.length; k++) {
+                    if ((run[k >> 6] & 1L << (k & 63)) == 0) continue;
+                    net.minecraft.world.level.levelgen.placement.PlacementContext ctx =
+                            new net.minecraft.world.level.levelgen.placement.PlacementContext(l, generator, java.util.Optional.of(features[k]));
+                    random.setFeatureSeed(seed ^ ((long) cx << 32 | (cz & 0xFFFFFFFFL)), index[k], VEGETAL);
+                    cur.clear();
+                    cur.add(new BlockPos(cx << 4, level.getMinY(), cz << 4));
+                    try {
+                        for (net.minecraft.world.level.levelgen.placement.PlacementModifier m : features[k].placement()) {
+                            next.clear();
+                            for (BlockPos p : cur) m.modify(ctx, random, p, next::add);
+                            List<BlockPos> t = cur;
+                            cur = next;
+                            next = t;
+                        }
+                    } catch (RuntimeException e) {
+                        continue;
+                    }
+                    for (BlockPos p : cur) {
+                        int x = p.getX(), z = p.getZ();
+                        if (x < x0 || x >= x1 || z < z0 || z >= z1) continue;
+                        double roll = (hash(x, z) >>> 11) * 0x1.0p-53;
+                        com.nirncraft.tamriel.biome.flora.TreeSpecies sp = FloraTreeFeature.speciesAt(configs[k], seed, x, z, roll);
+                        if (sp == null) continue;
+                        com.nirncraft.tamriel.biome.flora.TreeSpecies.Silhouette s = sp.silhouette();
+                        int gy = p.getY() - 1;
+                        if (waterTop(x, z) - gy > s.maxWater()) continue;
+                        if (!FloraTreeFeature.soilFits(s.soil(), groundBlock(x, z))) continue;
+                        if (!com.nirncraft.world.PlacementMask.clear(l, x, z, sp.crownReach())) continue;
+                        int tint = s.leaves() == null || !AtlasMaterials.biomeTinted(s.leaves()) ? 0
+                                : leafTint(s.leaves(), x, gy, z);
+                        v.tree(x, gy, z, s, tint);
+                    }
+                }
+            }
+    }
+
+    private long hash(int x, int z) {
+        long h = seed ^ 0x7EE5L ^ (x * 0x9E3779B97F4A7C15L) ^ (z * 0xC2B2AE3D27D4EB4FL);
+        h = (h ^ (h >>> 31)) * 0xBF58476D1CE4E5B9L;
+        return h ^ (h >>> 29);
+    }
+
+    private int leafTint(BlockState leaves, int x, int y, int z) {
+        String name = net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(leaves.getBlock()).getPath();
+        return name.contains("birch") ? BIRCH : name.contains("spruce") ? SPRUCE
+                : surface.biome(x, y, z).value().getFoliageColor() & 0xFFFFFF;
     }
 
     /** The trees of a single-player world's overworld, or null when its generator cannot be read (logged). */
