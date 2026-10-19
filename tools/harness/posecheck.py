@@ -10,6 +10,7 @@ Conventions: Minecraft yaw 0 = south (+Z), 90 = west (-X), pitch > 0 looks down.
 """
 import math
 
+EYE = 1.62           # the `camera` verb places the feet at its position and aims from the eyes (VisualCamera.angles)
 POS_TOL = 1.5        # blocks (visit snaps to the block centre)
 DOT_TOL = 0.998      # forward vectors within ~3.6 degrees
 DAYTIME_TOL = 200    # ticks (10 s of game time)
@@ -46,9 +47,9 @@ def requested(pose_lines):
             continue
         if w[0] == "visit" and len(w) >= 6:
             return {"xz": (float(w[1]) + 0.5, float(w[2]) + 0.5), "forward": mc_forward(w[4], w[5])}
-        if w[0] == "camera" and len(w) >= 7:
+        if w[0] == "camera" and len(w) >= 7:  # x y z are the player's feet; it aims from the eyes, EYE above them
             c, l = [float(v) for v in w[1:4]], [float(v) for v in w[4:7]]
-            return {"xz": (c[0], c[2]), "y": c[1], "forward": (l[0] - c[0], l[1] - c[1], l[2] - c[2])}
+            return {"xz": (c[0], c[2]), "y": c[1], "forward": (l[0] - c[0], l[1] - c[1] - EYE, l[2] - c[2])}
     return None
 
 

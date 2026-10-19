@@ -606,10 +606,11 @@ def pose_actions(s, plan=None, candidate=0):
     """Live verbs that put the camera on the scene (weather and time included), ready to settle. `plan`: the camera
     plan for the active seed (place poses with a "shot"); `candidate`: which planned pose (the next after a refusal)."""
     p = s.get("pose") or {}
-    weather = s.get("weather")
-    lines = []
-    if s.get("time") is not None:
-        lines.append(f"try time set {int(s['time'])}")  # 26.3 reports 0 for it: not a failure
+    # every scene pins its time and weather: unset ones would inherit whatever the previous scene left (another
+    # time of day, moon phase or weather), and a before / after would then compare two different skies
+    indoors = "realm" in p or "dungeon" in p
+    weather = s.get("weather") or (None if indoors else "clear")
+    lines = [f"try time set {int(s['time']) if s.get('time') is not None else 6000}"]  # 26.3 reports 0: not a failure
     if "visit" in p:
         x, z, h, yaw, pitch = p["visit"]
         h = int(h) + 25 * candidate  # a retry after "camera intersects terrain" goes higher
@@ -702,8 +703,8 @@ def capture_actions(s, tag, plan=None):
             lines += [f"capture {tag}-f{f}"] + ([f"wait {every}"] if f < n - 1 else [])
     else:
         hud = "feature:hud" in s.get("tags", [])
-    lines += (["hud on", "wait 10"] if hud else []) + [("capture-ui " if s.get("capture") == "ui" else "capture ") + tag] \
-        + (["hud off"] if hud else [])
+        lines += (["hud on", "wait 10"] if hud else []) + [("capture-ui " if s.get("capture") == "ui" else "capture ")
+                                                            + tag] + (["hud off"] if hud else [])
     lines += list(s.get("cleanup", []))
     if "realm" in (s.get("pose") or {}):
         lines.append("try nirncraft-realm home")
