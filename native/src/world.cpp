@@ -806,6 +806,7 @@ World::GroupStats World::groupStats() const {
         st.regions++;
         st.bytes += t.bytes();
         st.maxRegionBytes = std::max<uint64_t>(st.maxRegionBytes, t.bytes());
+        st.maxDepth = std::max(st.maxDepth, uint32_t(t.depth));
         st.prims += t.prims;
         st.nodes += t.nodes.size() / 4;
         st.bricks += t.brickCount;

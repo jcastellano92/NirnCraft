@@ -381,7 +381,9 @@ float traceView(float3 o, float3 dir, float t0, float t1, float lodDither, inout
             phasedLod = lod;
             shrink = 0.9 * frac(lodDither + 0.618034 * float(lod));
         }
-        float tn = min(t + 192.0 * s * (1.0 - shrink), t1);
+        // (groups: longer chords, each one re-enters a region's tree from its root; the chord's sag is still a few
+        // hundredths of a block at the real radius)
+        float tn = min(t + (gGroups ? 768.0 : 192.0) * s * (1.0 - shrink), t1);
         float3 a = worldAt(o, dir, k, t);
         float3 b = worldAt(o, dir, k, tn);
         // rising above the world top: the parabola only climbs further from here
@@ -943,6 +945,8 @@ void farMain(uint3 id : SV_DispatchThreadID) {
     // the content-shaped groups for this pixel's primary ray (ATLAS_FRAME_GROUPS): the footprint per block of distance
     // and the threshold, dithered per pixel (and per frame under the host's TAA, which averages the levels)
     gGroups = (frame.dims.z & FRAME_GROUPS) != 0u;
+    if (gGroups) gHead = groupData[0];
+    gAblate = asuint(frame.jitter.w);
     gGroupPa = frame.params.w * frame.params.z;
     gGroupTol = 0.7 + 0.6 * pixelDither(id.xy, phase + 5u);
     float tHit = traceView(o, dir, tStart, frame.params.y, lodDither, res);
@@ -991,11 +995,13 @@ void farMain(uint3 id : SV_DispatchThreadID) {
         // (0.55: smoothed slopes caught more light than the stepped blocks they stand for, the far field read brighter)
         float wSmooth = res.lod > 0 ? 0.55 : 0.55 * saturate((tHit - 96.0) / 400.0);
         if ((frame.dims.z & FRAME_FLAT_NORMALS) != 0) wSmooth = 0.0;
+        uint ablate = asuint(frame.jitter.w);  // (ATLAS_ABLATE, measurements)
+        if ((ablate & 2u) != 0u) wSmooth = 0.0;
         if (wSmooth > 0.0) {
             float3 sn = smoothNormal(res.lod, centre, 1.0);
             if (dot(sn, -dir) > 0.05) n = normalize(lerp(n, sn, wSmooth));
         }
-        if ((frame.dims.z & FRAME_SHADOWS) != 0) {
+        if ((frame.dims.z & FRAME_SHADOWS) != 0 && (ablate & 4u) == 0u) {
             // same LOD as the hit (a coarser one is fatter and self-shadows); start one voxel out along the face
             float3 faceN = float3(ax == 0 ? (slope.x > 0 ? -1.0 : 1.0) : 0.0, ax == 1 ? (slope.y > 0 ? -1.0 : 1.0) : 0.0,
                                   ax == 2 ? (slope.z > 0 ? -1.0 : 1.0) : 0.0);
@@ -1027,7 +1033,7 @@ void farMain(uint3 id : SV_DispatchThreadID) {
         }
         // ambient occlusion: solid neighbours around the air voxel in front of the face (4 taps in the face plane)
         float ao = 1.0;
-        {
+        if ((ablate & 1u) == 0u) {
             float3 fn = float3(ax == 0 ? (slope.x > 0 ? -1.0 : 1.0) : 0.0, ax == 1 ? (slope.y > 0 ? -1.0 : 1.0) : 0.0,
                                ax == 2 ? (slope.z > 0 ? -1.0 : 1.0) : 0.0);
             float3 front = centre + fn * s;
@@ -1077,14 +1083,14 @@ void farMain(uint3 id : SV_DispatchThreadID) {
                 n = farWaveNormal(wxz, frame.sunDir.w, wind, tHit);
             }
             m.albedoRough.a = farWaterAlpha(wind.y, tHit) + foam * 0.2;
-            reflection = waterReflection(p, dir, k, tHit, res.lod, sun, n);
+            reflection = (ablate & 16u) != 0u ? float3(0, 0, 0) : waterReflection(p, dir, k, tHit, res.lod, sun, n);
         }
         // the near field's sky light is darkened by sky occlusion, vertex AO and SSAO that a far voxel cannot see:
         // land takes their average (FAR_AMBIENT_OCCLUSION, calibrated against fid-* near / far pairs)
         if (cls != 2u) ao *= FAR_AMBIENT_OCCLUSION;
         color = shadeSurface(albedo, m, n, dir, sun, sunVis, cls, ao, reflection);
         // the lamps, torches, fires and lava around it light it (the near field's block light, ATLAS lights)
-        if (cls != 2u && (frame.dims.z & FRAME_DEBUG_ALBEDO) == 0) color += albedo * farLightsOn(id.xy, p, res.lod, sun);
+        if (cls != 2u && (frame.dims.z & FRAME_DEBUG_ALBEDO) == 0 && (ablate & 8u) == 0u) color += albedo * farLightsOn(id.xy, p, res.lod, sun);
         if (foam > 0.0) {
             // white water: a bright rough surface over the river
             float3 up = float3(0, 1, 0);

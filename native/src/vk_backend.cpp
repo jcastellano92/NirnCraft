@@ -554,11 +554,23 @@ public:
         uint32_t w = in.frame.dims[0], h = in.frame.dims[1];
         size_t px = size_t(w) * h;
         FrameGpu frame = in.frame;
-        if (!prepare(s, in, frame, true, err)) return false;
+        // ATLAS_TIMING_DEVICE_OUTPUTS=1 (offline timings, atlas_render frames=): the outputs stay in device memory as
+        // the game's are (no read back: writing a 1080p G-buffer across the bus costs the kernel ~20 ms), the frame
+        // returns zeros
+        bool deviceOnly = std::getenv("ATLAS_TIMING_DEVICE_OUTPUTS") != nullptr;
+        if (!prepare(s, in, frame, !deviceOnly, err)) return false;
         if (in.nearDepth && !upload(s.bufs[B_NEAR], in.nearDepth, px * 4, false, Mem::HostWrite, err)) return false;
         refreshDescriptors(s);
         begin(s);
         recordFar(s, w, h, (frame.dims[2] & 0x1u) != 0);
+        if (deviceOnly) {
+            if (!submit(s, nullptr, nullptr, err) || !waitSlot(s, gpuMs, err)) return false;
+            out.color.assign(px * 4, 0.0f);
+            out.normal.assign(px, 0);
+            out.depth.assign(px, 1e30f);
+            out.counters.assign(px, 0);
+            return true;
+        }
         VkMemoryBarrier mb{VK_STRUCTURE_TYPE_MEMORY_BARRIER};
         mb.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
         mb.dstAccessMask = VK_ACCESS_HOST_READ_BIT;

@@ -149,6 +149,7 @@ public:
         uint64_t bytes = 0, maxRegionBytes = 0, prims = 0, nodes = 0, bricks = 0;
         double buildMs = 0, maxBuildMs = 0;  // summed over the trees in the window; the slowest one
         uint32_t built = 0;                  // trees built by the last update
+        uint32_t maxDepth = 0;               // the deepest tree (the kernel's stack)
         double lastUpdateMs = 0;             // what the last update spent building trees (summed over threads)
     };
     GroupStats groupStats() const;

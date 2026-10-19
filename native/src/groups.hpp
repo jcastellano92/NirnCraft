@@ -76,7 +76,7 @@ constexpr uint32_t SLOT_MASKS = 0x80000000u;  // a slot whose brick carries a ma
 // box when its error is under the pixel, else stepped through).
 constexpr uint32_t NODE_INNER = 0, NODE_FLAT = 1, NODE_VOXELS = 2;
 constexpr uint32_t CHILD_MASK = 0x3FFFFFFFu;
-constexpr int GROUP_STACK = 64;  // shaders/atlas_groups.slang: the deepest chain the kernel walks
+constexpr int GROUP_STACK = 24;  // shaders/atlas_groups.slang: the deepest chain the kernel walks (real regions: 18)
 
 // Flattening errors are kept per face as a 4-bit code: the smallest of these at least as large (drawn later, never
 // earlier). 15 = more than 128 micro-voxels (only drawn when 4096 of them are under the pixel).

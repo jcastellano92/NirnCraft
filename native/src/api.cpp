@@ -257,10 +257,10 @@ ATLAS_API const char* atlas_info(AtlasContext* ctx) {
             std::snprintf(b, sizeof b,
                           ",\"groups\":{\"regions\":%u,\"refused\":%u,\"bytes\":%llu,\"maxRegionBytes\":%llu,\"prims\":%llu,"
                           "\"nodes\":%llu,\"bricks\":%llu,\"buildMs\":%.1f,\"maxBuildMs\":%.1f,\"lastBuilt\":%u,"
-                          "\"lastBuildMs\":%.1f,\"lods\":%d}",
+                          "\"lastBuildMs\":%.1f,\"lods\":%d,\"maxDepth\":%u}",
                           g.regions, g.refused, (unsigned long long)g.bytes, (unsigned long long)g.maxRegionBytes,
                           (unsigned long long)g.prims, (unsigned long long)g.nodes, (unsigned long long)g.bricks, g.buildMs,
-                          g.maxBuildMs, g.built, g.lastUpdateMs, ctx->world.groupLods);
+                          g.maxBuildMs, g.built, g.lastUpdateMs, ctx->world.groupLods, g.maxDepth);
             ctx->info.insert(ctx->info.size() - 1, b);
         }
         return ctx->info.c_str();
@@ -573,7 +573,15 @@ static AtlasStatus buildInputs(AtlasContext* ctx, const AtlasFrame* f, FrameInpu
     g.jitter[0] = f->width > 0 ? ctx->jitter[0] * 2.0f / float(f->width) : 0.0f;
     g.jitter[1] = f->height > 0 ? ctx->jitter[1] * 2.0f / float(f->height) : 0.0f;
     g.jitter[2] = ctx->jitter[0] != 0.0f || ctx->jitter[1] != 0.0f ? 1.0f : 0.0f;
-    g.jitter[3] = 0.0f;
+    // ATLAS_ABLATE=<bits>: measurements only, leave parts of the shading out (1 AO, 2 smooth normals, 4 shadows, 8 far
+    // lights, 16 water reflections, 32 the trace itself after the first hit's distance)
+    {
+        static const uint32_t ablate = [] {
+            const char* v = std::getenv("ATLAS_ABLATE");
+            return v ? uint32_t(std::strtoul(v, nullptr, 0)) : 0u;
+        }();
+        std::memcpy(&g.jitter[3], &ablate, 4);
+    }
     float a[3], b[3];
     pixelDir(f->invViewProj, f->width * 0.5f, f->height * 0.5f, f->width, f->height, a);
     pixelDir(f->invViewProj, f->width * 0.5f + 1, f->height * 0.5f, f->width, f->height, b);

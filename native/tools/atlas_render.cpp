@@ -224,7 +224,7 @@ int main(int argc, char** argv) {
                  water = exportdata::jsonColour(side, "water", 0x3F76E4);
         std::string why;
         if (!exportdata::upload(ctx, lib, secs, str(a, "keep", "far") == "all", grass, foliage, water, 64, ex, why,
-                                boxed ? box : nullptr)) {
+                                boxed ? box : nullptr, num(a, "cutout", 1) > 0)) {
             std::fprintf(stderr, "export: %s\n", why.c_str());
             return 2;
         }
@@ -359,6 +359,8 @@ int main(int argc, char** argv) {
     std::string base;
     double best = 1e30, median = 0;
     int frames = std::max(1, int(num(a, "frames", 1)));
+    bool interleave = num(a, "interleave", 0) > 0;
+    std::vector<double> otherTimes;  // (interleave) the other path's timing frames
     int spp = std::max(1, int(num(a, "spp", 1)));
     auto renderOne = [&](const std::string& out, double x, double y, double z, double yawIn, double pitchIn, double fovIn,
                          uint32_t w, uint32_t h) -> int {
@@ -404,6 +406,7 @@ int main(int argc, char** argv) {
 
         best = 1e30;
         std::vector<double> times;
+        otherTimes.clear();
         std::vector<double> acc(size_t(w) * h * 3, 0.0), share(size_t(w) * h, 0.0);
         std::vector<float> minDepth(size_t(w) * h, 1e30f);
         auto halton = [](int i, int b) {
@@ -416,15 +419,35 @@ int main(int argc, char** argv) {
         for (int smp = 0; smp < spp; smp++) {
             float jx = spp > 1 ? halton(smp + 1, 2) - 0.5f : 0.0f, jy = spp > 1 ? halton(smp + 1, 3) - 0.5f : 0.0f;
             if (spp > 1) atlas_set_jitter(ctx, jx, -jy);  // (atlas_truth's sample row grows downwards)
-            for (int i = 0; i < (smp == 0 ? frames : 1); i++) {
+            // timing frames on Vulkan keep their outputs on the device (as in game: no read back across the bus), then
+            // the frame that is written out
+            bool timeOnDevice = smp == 0 && frames > 1 && be == ATLAS_BACKEND_VULKAN;
+#ifdef _WIN32
+            if (timeOnDevice) _putenv_s("ATLAS_TIMING_DEVICE_OUTPUTS", "1");
+#else
+            if (timeOnDevice) setenv("ATLAS_TIMING_DEVICE_OUTPUTS", "1", 1);
+#endif
+            for (int i = 0; i < (smp == 0 ? frames + (timeOnDevice ? 1 : 0) : 1); i++) {
+                if (timeOnDevice && i == frames) {
+#ifdef _WIN32
+                    _putenv_s("ATLAS_TIMING_DEVICE_OUTPUTS", "");
+#else
+                    unsetenv("ATLAS_TIMING_DEVICE_OUTPUTS");
+#endif
+                }
+                // interleave=1: timing frames alternate the groups and the voxel path (the same clocks for both)
+                bool other = interleave && smp == 0 && i < frames && (i & 1);
+                uint32_t keepFlags = f.flags;
+                if (other) f.flags ^= ATLAS_FRAME_GROUPS;
                 if (atlas_render(ctx, &f, &o) != ATLAS_OK) {
                     std::fprintf(stderr, "render: %s\n", atlas_last_error(ctx));
                     return 4;
                 }
+                f.flags = keepFlags;
                 atlas_get_stats(ctx, &st);
-                if (smp == 0) {
-                    best = std::min(best, st.lastFrameMs);
-                    times.push_back(st.lastFrameMs);
+                if (smp == 0 && i < frames) {
+                    (other ? otherTimes : times).push_back(st.lastFrameMs);
+                    if (!other) best = std::min(best, st.lastFrameMs);
                 }
             }
             if (mcShade) {
@@ -474,6 +497,12 @@ int main(int argc, char** argv) {
             uint32_t px = 0xFF000000u;
             for (int k = 0; k < 3; k++) px |= uint32_t(acc[i * 3 + size_t(k)] / spp + 0.5) << (8 * k);
             if (spp > 1 || mcShade) color[i] = px;
+        }
+        if (std::getenv("ATLAS_RENDER_TIMES")) {  // every timing frame, in order (measurements)
+            for (size_t i = 0; i < times.size(); i++)
+                std::fprintf(stderr, "%.2f%s", times[i], i + 1 < times.size() ? " " : "\n");
+            for (size_t i = 0; i < otherTimes.size(); i++)
+                std::fprintf(stderr, "%.2f%s", otherTimes[i], i + 1 < otherTimes.size() ? " " : "\n");
         }
         std::sort(times.begin(), times.end());
         median = times.empty() ? 0 : times[times.size() / 2];
@@ -634,6 +663,12 @@ int main(int argc, char** argv) {
         if (haveExport) {
             std::snprintf(buf, sizeof buf, ",\"export\":{\"sections\":%zu,\"materials\":%zu,\"shaped\":%zu,\"loadMs\":%.0f}", ex.sections,
                           ex.states, ex.shaped, loadMs);
+            extra += buf;
+        }
+        if (!otherTimes.empty()) {
+            std::sort(otherTimes.begin(), otherTimes.end());
+            std::snprintf(buf, sizeof buf, ",\"otherPathBestMs\":%.2f,\"otherPathMedianMs\":%.2f", otherTimes[0],
+                          otherTimes[otherTimes.size() / 2]);
             extra += buf;
         }
         std::snprintf(buf, sizeof buf, ",\"groupsOn\":%s,\"groupsBuildMs\":%.1f,\"frameMedianMs\":%.2f,\"frames\":%d", groups ? "true" : "false",

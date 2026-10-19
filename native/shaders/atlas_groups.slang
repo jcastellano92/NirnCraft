@@ -20,7 +20,7 @@ static const uint G_INNER = 0u;
 static const uint G_FLAT = 1u;
 static const uint G_VOXELS = 2u;
 static const uint G_CHILD = 0x3FFFFFFFu;
-static const int G_STACK = 64;
+static const int G_STACK = 24;
 static const uint G_CELL_SHAPED = 0x8000u;
 static const uint G_CELL_MASKED = 0x4000u;
 static const uint G_CELL_MATERIAL = 0x3FFFu;
@@ -35,6 +35,7 @@ static bool gGroups = false;
 static float gGroupPa = 0.001;
 static float gGroupTol = 1.0;
 static float gChordT = 0.0;
+static uint gAblate = 0u;  // ATLAS_ABLATE (measurements)
 
 uint gWord(uint w) {
     uint4 q = groupData[w >> 2];
@@ -44,20 +45,38 @@ uint gWord(uint w) {
 
 // the cell (material | G_CELL_SHAPED | G_CELL_MASKED, 0 = nothing a ray can meet) of region voxel v (0..255 each);
 // a masked one's own micro-voxels in mask
+// the last brick looked up (a walk or a leaf's steps stay in one or two): its region and coordinates, where it is
+// (0: no brick there), its occupancy and whether it carries masks
+static uint gBrickRegion = 0xFFFFFFFFu;
+static int gBrickKey = -1;
+static uint gBrickAt = 0u;
+static uint2 gBrickOcc = uint2(0u, 0u);
+static bool gBrickMasks = false;
+
 uint voxelCell(RegionGpu r, int3 v, out uint2 mask) {
     mask = uint2(0u, 0u);
-    uint e = gWord(r.groups.y + uint((v.z >> 2) * 64 + (v.x >> 2)));
-    int rows = int(e >> 24);
-    int by = (v.y >> 2) - int((e >> 18) & 63u);
-    if (by < 0 || by >= rows) return 0u;
-    uint b = gWord(r.groups.z + (e & 0x3FFFFu) + uint(by));
-    if (b == 0u) return 0u;
-    // the brick: its occupancy (and with G_SLOT_MASKS which voxels carry their own micro-voxels), then the cells of
-    // the occupied voxels in order, then the masked ones' micro-voxels
-    bool masks = (b & G_SLOT_MASKS) != 0u;
-    uint at = r.groups.w + (b & ~G_SLOT_MASKS) - 1u;
+    int key = (v.x >> 2) | ((v.y >> 2) << 6) | ((v.z >> 2) << 12);
+    if (key != gBrickKey || r.groups.w != gBrickRegion) {
+        gBrickKey = key;
+        gBrickRegion = r.groups.w;
+        gBrickAt = 0u;
+        uint e = gWord(r.groups.y + uint((v.z >> 2) * 64 + (v.x >> 2)));
+        int rows = int(e >> 24);
+        int by = (v.y >> 2) - int((e >> 18) & 63u);
+        uint b = by < 0 || by >= rows ? 0u : gWord(r.groups.z + (e & 0x3FFFFu) + uint(by));
+        if (b != 0u) {
+            // the brick: its occupancy (and with G_SLOT_MASKS which voxels carry their own micro-voxels), then the
+            // cells of the occupied voxels in order, then the masked ones' micro-voxels
+            gBrickMasks = (b & G_SLOT_MASKS) != 0u;
+            gBrickAt = r.groups.w + (b & ~G_SLOT_MASKS) - 1u;
+            gBrickOcc = uint2(gWord(gBrickAt), gWord(gBrickAt + 1u));
+        }
+    }
+    if (gBrickAt == 0u) return 0u;
+    bool masks = gBrickMasks;
+    uint at = gBrickAt;
     uint i = uint((v.x & 3) + 4 * ((v.z & 3) + 4 * (v.y & 3)));
-    uint lo = gWord(at), hi = gWord(at + 1u);
+    uint lo = gBrickOcc.x, hi = gBrickOcc.y;
     uint rank;
     if (i < 32u) {
         if (((lo >> i) & 1u) == 0u) return 0u;
@@ -80,8 +99,9 @@ uint voxelCell(RegionGpu r, int3 v, out uint2 mask) {
 }
 
 // the shape of a material: its first word in groupData, or 0 (a full cube in its palette colour)
+static uint4 gHead = uint4(0u, 0u, 0u, 0u);  // groupData[0], loaded once a ray (farMain)
 uint shapeOf(uint mat) {
-    uint4 h = groupData[0];
+    uint4 h = gHead;
     if (mat >= h.z) return 0u;
     uint s = gWord(h.x + mat);
     return s == 0u ? 0u : (h.y + (s - 1u) * 32u) * 4u;
@@ -103,22 +123,38 @@ uint cutHash(int3 p) {
     return hashU(uint(p.x) * 73856093u ^ h2);
 }
 
-// whether region micro-voxel q of a voxel holding `cell` has content (its own micro-voxels; its material's shape, the
-// cut-out hashed in world space)
-bool microFilled(RegionGpu r, uint cell, uint2 own, int3 q) {
-    if ((cell & G_CELL_MASKED) != 0u) {
-        int3 mq = q & 3;
-        uint ob = uint(mq.x + 4 * (mq.z + 4 * mq.y));
-        return (((ob < 32u ? own.x >> ob : own.y >> (ob - 32u)) & 1u) != 0u);
-    }
-    if ((cell & G_CELL_SHAPED) == 0u) return true;
-    uint sh = shapeOf(cell & G_CELL_MATERIAL);
-    if (sh == 0u) return true;
+// A voxel as the micro-voxel tests need it, fetched once: its cell, its micro-voxels (its own, its material's shape,
+// or all of them) and where its cut-out alpha is (0: none)
+struct Vox {
+    uint cell;
+    uint2 bits;
+    uint alphaAt;
+};
+
+Vox voxelAt(RegionGpu r, int3 v) {
+    Vox x;
+    x.alphaAt = 0u;
+    x.cell = voxelCell(r, v, x.bits);
+    if ((x.cell & G_CELL_MASKED) != 0u || x.cell == 0u) return x;
+    x.bits = uint2(0xFFFFFFFFu, 0xFFFFFFFFu);
+    if ((x.cell & G_CELL_SHAPED) == 0u) return x;
+    uint sh = shapeOf(x.cell & G_CELL_MATERIAL);
+    if (sh == 0u) return x;
+    uint4 head = groupData[sh >> 2];  // mask lo, mask hi, flags, mean (a shape starts on a uint4)
+    x.bits = head.xy;
+    if ((head.z & 1u) != 0u) x.alphaAt = sh + 100u;
+    return x;
+}
+
+bool voxFull(Vox x) { return x.bits.x == 0xFFFFFFFFu && x.bits.y == 0xFFFFFFFFu && x.alphaAt == 0u; }
+
+// whether region micro-voxel q of voxel x has content (its micro-voxels, the cut-out hashed in world space)
+bool microFilled(RegionGpu r, Vox x, int3 q) {
     int3 m = q & 3;
     uint bit = uint(m.x + 4 * (m.z + 4 * m.y));
-    if (((gWord(sh + (bit >> 5)) >> (bit & 31u)) & 1u) == 0u) return false;
-    if ((gWord(sh + 2u) & 1u) == 0u) return true;
-    uint a = (gWord(sh + 100u + (bit >> 2)) >> ((bit & 3u) * 8u)) & 255u;
+    if ((((bit < 32u ? x.bits.x >> bit : x.bits.y >> (bit - 32u))) & 1u) == 0u) return false;
+    if (x.alphaAt == 0u) return true;
+    uint a = (gWord(x.alphaAt + (bit >> 2)) >> ((bit & 3u) * 8u)) & 255u;
     if (a == 255u) return true;
     return (cutHash(r.origin.xyz * 4 + q) >> 24) < a;
 }
@@ -207,8 +243,10 @@ bool faceWalk(RegionGpu r, int3 lo, int3 hi, int ax, bool high, float3 p, int ca
     int u = clamp(int(floor(p[a1])), lo[a1], hi[a1] - 1), v = clamp(int(floor(p[a2])), lo[a2], hi[a2] - 1);
     int n = min(hi[ax] - lo[ax], cap);
     int lastVox = -1;
-    uint cell = 0u;
-    uint2 own = uint2(0u, 0u);
+    Vox vx;
+    vx.cell = 0u;
+    vx.bits = uint2(0u, 0u);
+    vx.alphaAt = 0u;
     for (int k = 0; k < n; k++) {
         int3 q = int3(0, 0, 0);
         q[ax] = high ? hi[ax] - 1 - k : lo[ax] + k;
@@ -217,13 +255,16 @@ bool faceWalk(RegionGpu r, int3 lo, int3 hi, int ax, bool high, float3 p, int ca
         int vox = q[ax] >> 2;
         if (vox != lastVox) {
             lastVox = vox;
-            cell = voxelCell(r, q >> 2, own);
+            vx = voxelAt(r, q >> 2);
             steps++;
         }
-        if (cell == 0u) continue;
-        if (microFilled(r, cell, own, q)) {
+        if (vx.cell == 0u) {
+            k += 3 - (high ? (3 - (q[ax] & 3)) : (q[ax] & 3));  // the rest of this empty voxel
+            continue;
+        }
+        if (microFilled(r, vx, q)) {
             qHit = q;
-            cellHit = cell;
+            cellHit = vx.cell;
             return true;
         }
     }
@@ -237,6 +278,14 @@ bool drawBox(RegionGpu r, uint4 n, float3 o, float3 d, float3 inv, int3 lo, int3
     uint code = (n[ax] >> (high ? 28u : 24u)) & 15u;
     int3 q;
     uint cell;
+    if ((gAblate & 128u) != 0u) {  // (ATLAS_ABLATE 128, measurements: the box itself, no texel walk)
+        res.t = te;
+        res.mat = 1u;
+        res.axis = ax;
+        res.albedo = float3(0.5, 0.5, 0.5);
+        res.hasAlbedo = 1u;
+        return true;
+    }
     if (faceWalk(r, lo, hi, ax, high, o + d * te, int(G_ERR[code]) + 1, res.steps, q, cell)) {
         groupHit(res, te, cell, ax, dir, q);
         return true;
@@ -275,12 +324,11 @@ bool stepLeaf(RegionGpu r, float3 o, float3 d, float3 inv, int3 lo, int3 hi, flo
     // (a chord that starts inside the leaf enters its first voxel by no face: the dominant axis stands in)
     int axis = ax0 >= 0 ? ax0 : (abs(d.x) >= abs(d.y) && abs(d.x) >= abs(d.z) ? 0 : (abs(d.y) >= abs(d.z) ? 1 : 2));
     for (int it = 0; it < 48; it++) {
-        uint2 own;
-        uint cell = voxelCell(r, v, own);
+        Vox vx = voxelAt(r, v);
+        uint cell = vx.cell;
         res.steps++;
         if (cell != 0u) {
-            bool full = (cell & (G_CELL_SHAPED | G_CELL_MASKED)) == 0u
-                     || ((cell & G_CELL_MASKED) == 0u && shapeOf(cell & G_CELL_MATERIAL) == 0u);
+            bool full = voxFull(vx);
             if (full) {
                 int3 q = clamp(int3(floor(o + d * t)), v * 4, v * 4 + 3);
                 groupHit(res, t, cell, axis, dir, q);
@@ -297,7 +345,7 @@ bool stepLeaf(RegionGpu r, float3 o, float3 d, float3 inv, int3 lo, int3 hi, flo
             int am = axis;
             for (int k = 0; k < 12; k++) {
                 int3 q = v * 4 + m;
-                if (microFilled(r, cell, own, q)) {
+                if (microFilled(r, vx, q)) {
                     groupHit(res, tm, cell, am, dir, q);
                     return true;
                 }
@@ -349,7 +397,7 @@ bool traceGroups(RegionGpu r, float3 ro, float3 rd, float u0, float u1, float3 d
             bool fine = G_ERR[code] <= drawK * (gChordT + te);
             // drawn whole: a flat leaf, or any node whose error is under the pixel (not one the chord starts in);
             // stepped through: a leaf otherwise; opened: an inner node otherwise
-            bool draw = !inside && (type == G_FLAT || fine);
+            bool draw = !inside && (type == G_FLAT || fine || (gAblate & 64u) != 0u);
             if (draw) {
                 if (drawBox(r, n, o, d, inv, lo, hi, ax, te, u1, dir, res)) return true;
             } else if (type != G_INNER) {

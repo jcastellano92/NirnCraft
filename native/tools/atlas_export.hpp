@@ -213,7 +213,7 @@ struct Loaded {
 // box (world blocks, inclusive; null: everything): only the blocks inside it exist (one element cut from the export)
 inline bool upload(AtlasContext* ctx, const std::vector<State>& lib, std::vector<Section>& secs, bool keepAll,
                    uint32_t grass, uint32_t foliage, uint32_t water, uint16_t firstMat, Loaded& out, std::string& why,
-                   const int* box = nullptr) {
+                   const int* box = nullptr, bool cutouts = true) {
     if (box) {
         std::vector<Section> kept;
         for (Section& s : secs) {
@@ -266,7 +266,7 @@ inline bool upload(AtlasContext* ctx, const std::vector<State>& lib, std::vector
                     sh.faces[f][t] = (c >> 24) ? mulTint(c, tint) : 0u;
                 }
             // cut-out coverage for leaves and plants only (a grass block's overlay alpha is no hole in it)
-            sh.flags = s.cls == 1 || s.cls == 4 ? ATLAS_SHAPE_CUTOUT : 0u;
+            sh.flags = (s.cls == 1 || s.cls == 4) && cutouts ? ATLAS_SHAPE_CUTOUT : 0u;
             if (wat) sh.flags = 0;
             m = uint16_t(firstMat + mats.size());
             mats.push_back(am);
