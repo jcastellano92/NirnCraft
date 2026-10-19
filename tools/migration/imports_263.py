@@ -6,7 +6,8 @@ SCRATCH=Path(r'E:\NirnCraft-scratch\migration-26.3')
 WORLD={'tamriel','worldplan','worldgen','world','roads','dungeons','scatter','landmarks','realms','society','economy','quest','explore','sailing','seas','lore','homestead'}
 DATA={'core','inventory','crafting','magic','creatures','fauna','curse','mounts','arsenal','combat','vitals','crime','skills','loot','protect','dig','audio','perf','dev'}
 network_list=ROOT/'dist/code-review/neoforge-migration/network-transformed-files.txt'
-NETWORK={x.strip().replace('\\','/') for x in network_list.read_text().splitlines() if x.strip()}
+# the migration's generated list (dist/, not in git); without it the built-in list and network/ paths still apply
+NETWORK={x.strip().replace('\\','/') for x in network_list.read_text().splitlines() if x.strip()} if network_list.exists() else set()
 NETWORK.update('mod/src/main/java/com/nirncraft/'+x for x in ('core/SkyData.java','core/PlayerData.java','core/PlayerDataEvents.java','dig/PlacedBlocks.java','magic/MagicFx.java','creatures/CreatureItems.java','mounts/MountItems.java','registry/ModItems.java'))
 def owner(path):
     rel=path.relative_to(ROOT).as_posix()
