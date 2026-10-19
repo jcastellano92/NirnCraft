@@ -452,6 +452,7 @@ def overview(scenes):
         out.append(f"<tr><td>{tier}</td><td>{html.escape(suite)}</td>" + "".join(f"<td>{c.get(k, '')}</td>" for k in order) + "</tr>")
     out.append("</table>")
     out += seam_matrix(recs, by_id)
+    out += tool_validation(recs)
     out.append("<h2>Needs attention</h2><table><tr><th>status</th><th>test</th><th>when</th><th>why</th></tr>")
     for r in recs:
         if r.get("status") in ("pass", "skip"):
@@ -591,5 +592,47 @@ def seam_matrix(recs, by_id):
         out.append(f"<tr><td>{cat}</td><td>{subject}</td>" + "".join(
             cell(k, vals[k], w, b) if k in vals else "<td></td>" for k, _, w, b in SEAM_COLUMNS) + "</tr>")
     out.append("</table>")
+    return out
+
+
+def tool_validation(recs):
+    """Where the tools and render techniques disagree with the game: offline heights / landmarks vs the generated
+    world, lab renders vs live twins, camera plans accepted in game, detector self-test."""
+    out = ["<h2>Tool validation (offline tools vs the real game)</h2>"]
+    world = [r for r in recs if str(r.get("scene", "")).startswith("validate-world-")]
+    if world:
+        out.append("<table><tr><th>place</th><th>heights within 2</th><th>median err</th><th>bias</th>"
+                   "<th>landmarks on / off / mismatch</th><th>biomes</th></tr>")
+        for r in world:
+            m = r.get("metrics", {})
+            out.append(f"<tr class='{'bad' if r.get('status') != 'pass' else ''}'><td>{r['scene'][15:]}</td>"
+                       f"<td>{m.get('heightWithin2', '-')}%</td><td>{m.get('heightMedianErr', '-')}</td>"
+                       f"<td>{m.get('heightBias', '-')}</td><td>{m.get('landmarksOnline', '-')} / "
+                       f"{m.get('landmarksOffline', '-')} / {m.get('landmarkMismatch', '-')}</td><td>{m.get('biomes', '-')}</td></tr>")
+        out.append("</table>")
+    twins = []
+    for r in recs:
+        sid = str(r.get("scene", ""))
+        if sid.startswith("twin-") and r.get("variant") == "shaders":
+            live = SCENES / sid / "shaders.after.png"
+            lab = SCENES / sid[5:] / "lab.after.png"
+            if live.exists() and lab.exists():
+                de, luma, struct = fidelity(Image.open(live), Image.open(lab))
+                twins.append((sid[5:], de, luma, struct))
+    if twins:
+        out.append("<h3>Lab render vs live game (same place, sun, weather)</h3><table><tr><th>lab scene</th>"
+                   "<th>colour dE</th><th>brightness lab/live</th><th>shapes</th></tr>")
+        for name, de, luma, struct in twins:
+            c = "bad" if de > 8 or struct > 20 or abs(1 - luma) > 0.2 else ""
+            out.append(f"<tr class='{c}'><td>{name}</td><td>{de}</td><td>{luma}</td><td>{struct}</td></tr>")
+        out.append("</table>")
+    planned = [r for r in recs if "camera" in r]
+    if planned:
+        first = sum(1 for r in planned if r.get("camera") == 0)
+        out.append(f"<p>Planned cameras accepted in game at the first candidate: {first}/{len(planned)} "
+                   f"({100 * first // max(1, len(planned))}%)</p>")
+    det = next((r for r in recs if r.get("scene") == "check-detectors"), None)
+    if det:
+        out.append(f"<p>Image detectors self-test: {det.get('status')}</p>")
     return out
 

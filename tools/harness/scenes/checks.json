@@ -837,6 +837,29 @@
     "problems": "problems (\\d+)"
    },
    "timeout": 600
+  },
+  {
+   "id": "check-detectors",
+   "title": "Image detectors self-test (black box, missing texture, blown out, black frame, fidelity)",
+   "tags": [
+    "check:tools",
+    "suite:validate-tools",
+    "suite:harness",
+    "suite:smoke"
+   ],
+   "run": [
+    "py",
+    "-3",
+    "tools/harness/audits/detector_selftest.py"
+   ],
+   "inputs": [
+    "tools/harness/results.py",
+    "tools/harness/audits/detector_selftest.py"
+   ],
+   "metrics": {
+    "problems": "problems (\\d+)"
+   },
+   "timeout": 120
   }
  ]
 }

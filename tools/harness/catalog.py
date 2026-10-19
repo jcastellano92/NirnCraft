@@ -392,6 +392,48 @@ def shot_files(s, tag):
     return [(tag, None)]
 
 
+# ---------------------------------------------------------------------------------------------------- tool validation
+VALIDATE_PLACES = ["whiterun", "solitude", "markarth", "riften", "windhelm", "falkreath", "dawnstar",
+                   "college_of_winterhold", "helgen", "red_mountain", "imperial_city", "vivec"]
+WEATHER_PRESET = {"clear": "clear", "fair": "cloudy", "overcast": "overcast", "storm": "storm"}
+
+
+def validation_scenes():
+    """The tools checked against the real game: per place, the offline exact heights and seeded landmarks vs what the
+    world generated (/nirncraft-qa sample); per lab render, a live twin at the same place, sun and weather (compared in
+    the overview). suite:validate-tools."""
+    out = []
+    for pid in VALIDATE_PLACES:
+        pl = places().get(pid)
+        if not pl:
+            continue
+        out.append({"id": f"validate-world-{pid.replace('_', '-')}", "title": f"{pid}: offline heights and landmarks vs the generated world",
+                    "_file": "(generated validation)", "kind": "measure", "variants": ["measure"], "validate": "world",
+                    "tags": ["suite:validate-tools", "check:tools", "feature:farfield", f"place:{pid}"]
+                            + ([f"region:{pl['region']}"] if pl.get("region") else []),
+                    "pose": {"visit": [pl["x"], pl["z"] + 40, 60, 180, 30]},
+                    "measure_command": f"command nirncraft-qa sample {pl['x']} {pl['z']} 48 16",
+                    "measure_file": "nirncraft-qa/sample.json", "checks": {}, "timeout": 300,
+                    "source": "generated: catalog.validation_scenes"})
+    try:
+        labs = json.loads((SCENES / "lab.json").read_text(encoding="utf-8"))["scenes"]
+    except (OSError, ValueError, KeyError):
+        labs = []
+    for lab in labs:
+        a = lab.get("lab", {})
+        if a.get("tool") != "atlas_render" or "x" not in a or "z" not in a or a.get("flags", "").find("dbg") >= 0:
+            continue
+        elev = float(str(a.get("sun", "35,120")).split(",")[0])
+        ticks = int(round(6000 - (90 - elev) / 90 * 6000)) % 24000  # morning sun at that elevation
+        out.append({"id": f"twin-{lab['id']}", "title": f"Live twin of {lab['id']} (lab vs game)",
+                    "_file": "(generated validation)", "variants": ["shaders"], "time": ticks,
+                    "weather": WEATHER_PRESET.get(a.get("weather", "fair"), "cloudy"),
+                    "tags": ["suite:validate-tools", "feature:farfield", "feature:lab-twin", f"twin:{lab['id']}"],
+                    "pose": {"visit": [int(a["x"]), int(a["z"]), int(a.get("above", 40)), a.get("yaw", 0), a.get("pitch", 0)]},
+                    "checks": {}, "source": f"twin of {lab['id']}"})
+    return out
+
+
 # ---------------------------------------------------------------------------------------------------- loading
 def load():
     scenes, seen = [], {}
@@ -411,6 +453,7 @@ def load():
     scenes += probes()
     scenes += grounding()
     scenes += distance_scenes()
+    scenes += validation_scenes()
     seam_core(scenes)
     for s in scenes:
         if s["id"] in seen:
@@ -651,7 +694,9 @@ def capture_actions(s, tag, plan=None):
         for f in range(n):
             lines += [f"capture {tag}-f{f}"] + ([f"wait {every}"] if f < n - 1 else [])
     else:
-        lines.append(("capture-ui " if s.get("capture") == "ui" else "capture ") + tag)
+        hud = "feature:hud" in s.get("tags", [])
+    lines += (["hud on", "wait 10"] if hud else []) + [("capture-ui " if s.get("capture") == "ui" else "capture ") + tag] \
+        + (["hud off"] if hud else [])
     lines += list(s.get("cleanup", []))
     if "realm" in (s.get("pose") or {}):
         lines.append("try nirncraft-realm home")

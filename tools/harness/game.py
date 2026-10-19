@@ -120,6 +120,11 @@ def _enable_overlay():
     opts = GAME / "options.txt"
     if opts.exists():
         text = opts.read_text(encoding="utf-8")
+        # clicking elsewhere must not pause the test world (the pause menu stops the integrated server)
+        if re.search(r"^pauseOnLostFocus:", text, re.M):
+            text = re.sub(r"^pauseOnLostFocus:.*$", "pauseOnLostFocus:false", text, flags=re.M)
+        else:
+            text += "pauseOnLostFocus:false" + chr(10)
         m = re.search(r"^resourcePacks:(.*)$", text, re.M)
         packs = json.loads(m.group(1)) if m else []
         if "file/nirncraft-dev" not in packs:
@@ -144,7 +149,8 @@ def launch(group, groups, limit=900):
             STATE.parent.mkdir(parents=True, exist_ok=True)
             STATE.write_text(json.dumps({"group": group, "pid": (lw.processes() or [{}])[0].get("pid"),
                                          "shaders": True, "since": time.time()}), encoding="utf-8")
-            log(f"  client ready ({group}) after {time.monotonic() - t0:.0f} s")
+            log(f"  client ready ({group}) after {time.monotonic() - t0:.0f} s; it runs behind your windows")
+            send_to_back()
             tr.step("client_ready", group=group, seconds=round(time.monotonic() - t0, 1))
             return
         gone = gone + 1 if not running() else 0
@@ -182,6 +188,7 @@ def ensure(group, groups):
     msg = stale_core()
     if msg:
         log("  ! " + msg)
+    start_watchdog()
     if running() and client_state().get("group") == group and ready():
         return
     if running():
@@ -434,6 +441,61 @@ def ensure_visible():
         tr.step("window_restored")
         time.sleep(2)
     return restored
+
+
+_watch = {"on": False}
+
+
+def _windows():
+    import ctypes
+    from ctypes import wintypes
+    user32 = ctypes.windll.user32
+    pids = {p["pid"] for p in lw.processes()}
+    found = []
+
+    @ctypes.WINFUNCTYPE(wintypes.BOOL, wintypes.HWND, wintypes.LPARAM)
+    def each(hwnd, _):
+        pid = wintypes.DWORD()
+        user32.GetWindowThreadProcessId(hwnd, ctypes.byref(pid))
+        if pid.value in pids and user32.GetWindowTextLengthW(hwnd) > 0 and user32.IsWindowVisible(hwnd):
+            found.append(hwnd)
+        return True
+
+    if pids:
+        user32.EnumWindows(each, 0)
+    return user32, found
+
+
+def send_to_back():
+    """Behind every other window, without focus: the test runs while you work; bring it forward to watch."""
+    if os.name != "nt":
+        return
+    user32, found = _windows()
+    for h in found:
+        user32.SetWindowPos(h, 1, 0, 0, 0, 0, 0x0001 | 0x0002 | 0x0010)  # HWND_BOTTOM, NOSIZE|NOMOVE|NOACTIVATE
+
+
+def start_watchdog():
+    """While the harness runs live tests: every 2 s, a minimized test client is restored behind your windows."""
+    if _watch["on"] or os.name != "nt":
+        return
+    import threading
+    _watch["on"] = True
+
+    def loop():
+        while _watch["on"]:
+            try:
+                user32, found = _windows()
+                for h in found:
+                    if user32.IsIconic(h):
+                        user32.ShowWindow(h, 4)  # SW_SHOWNOACTIVATE
+                        user32.SetWindowPos(h, 1, 0, 0, 0, 0, 0x0001 | 0x0002 | 0x0010)
+                        tr.step("window_restored")
+            except Exception:  # noqa: BLE001
+                pass
+            time.sleep(2)
+
+    threading.Thread(target=loop, name="harness-window-watchdog", daemon=True).start()
 
 
 # ----------------------------------------------------------------------------------------------- per-test game log

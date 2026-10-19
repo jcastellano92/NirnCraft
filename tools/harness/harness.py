@@ -513,6 +513,18 @@ class Runner:
         if not out.exists():
             raise RuntimeError(f"{s['measure_command']} wrote no {s['measure_file']}")
         data = json.loads(out.read_text(encoding="utf-8"))
+        if s.get("validate") == "world":  # the offline tools' prediction for the same square, compared
+            import validation
+            req = {"id": s["id"], "x": data["x"], "z": data["z"], "radius": data["radius"], "step": data["step"]}
+            pred = validation.offline([req], self.seed, log=say).get(s["id"], {})
+            vm, vflags = validation.compare_world(data, pred)
+            if data.get("seed") not in (None, self.seed):
+                vflags.append(f"world seed {data.get('seed')} != {self.seed}")
+            log_counts, serious = g.log_summary(g.log_since(mark))
+            vm.update(log_counts)
+            self.pos = s.get("_xz") or self.pos
+            return results.record(s["id"], v, "measure", "fail" if vflags else "pass", {**vm, "flags": vflags}, fp,
+                                  extra={"fails": vflags})
         m = {name: json_sum(data, path) for name, path in (s.get("measure_sum") or {}).items()}
         log_counts, serious = g.log_summary(g.log_since(mark))
         m.update(log_counts)
