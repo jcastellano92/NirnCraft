@@ -138,7 +138,9 @@ final class AetherSettlements implements AetherFarField.Overlay {
         }
         lightsPending.clear();
         for (long cell : siteLightsPending) {
-            AetherLights.upload(ctx, SITE_GROUPS + (int) (cell * 0x9E3779B97F4A7C15L >>> 44), siteLights.get(cell));
+            // the 4 km cell's coordinates as the group (exact for 2000 km either way: no two cells share a group)
+            int gx = (int) (cell >> 32) & 0x3FF, gz = (int) cell & 0x3FF;
+            AetherLights.upload(ctx, SITE_GROUPS + (gx << 10 | gz), siteLights.get(cell));
             lightCount += siteLights.get(cell).size();
         }
         siteLightsPending.clear();
