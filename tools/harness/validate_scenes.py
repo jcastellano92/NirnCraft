@@ -12,7 +12,7 @@ import catalog  # noqa: E402
 
 VERBS = {"reload", "resources", "shaders", "rebuild", "texture-probe", "flash", "cast", "use", "fx", "wait", "settle",
          "measure", "command", "try", "camera", "camera-plan", "camera-travel", "visit", "front", "ui", "capture-ui",
-         "capture", "identity", "transport", "stop", "screen", "click", "key", "expect-screen", "perspective"}
+         "capture", "identity", "transport", "stop", "screen", "click", "key", "expect-screen", "perspective", "renderdistance"}
 ID = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
 TAG = re.compile(r"^[a-z]+:[A-Za-z0-9_/:.\-]+$")
 

@@ -190,6 +190,9 @@ public final class ClientAutotest {
     private static String remoteCommandSubmitted = "";
     private static int remoteCommandSubmissions;
     private static int liveSettleUntil, liveSettleStable;
+    /** `settle T partial`: at the deadline the sequence goes on (counted in settlePartial) instead of being cancelled. */
+    private static boolean liveSettleTolerant;
+    private static int liveSettlePartial;
     private static final WorldReadiness READINESS = new WorldReadiness();
     private static String liveCapture;
     private static java.util.concurrent.CompletableFuture<Integer> liveCommand;
@@ -243,6 +246,7 @@ public final class ClientAutotest {
             status.addProperty("waitTicks", Math.max(0, liveWait));
             status.addProperty("burstFrames", burstRemaining);
             status.addProperty("settling", liveSettleUntil > 0);
+            status.addProperty("settlePartial", liveSettlePartial);
             status.addProperty("readiness", READINESS.describe());
             status.addProperty("commandPending", liveCommand != null || liveResources != null || liveCapture != null || burstRemaining>0 || ReviewCaptures.pending()>0 || FrameProbe.active() || CameraTravel.active());
             status.addProperty("controlVersion", liveModified);
@@ -293,6 +297,7 @@ public final class ClientAutotest {
                     liveWait = 0;
                     liveError = "";
                     liveSettleUntil = liveSettleStable = 0;
+                    liveSettlePartial = 0;
                     liveCommand = null;
                     liveCapture = null;
                     FrameProbe.cancel();
@@ -368,9 +373,14 @@ public final class ClientAutotest {
             }
             else if (tick >= liveSettleUntil) {
                 liveSettleUntil = 0;
-                liveError = "Terrain did not settle before capture deadline; sequence cancelled: " + READINESS.describe();
-                LIVE_ACTIONS.clear();
-                NirnCraft.LOGGER.error("Autotest live: {}", liveError);
+                if (liveSettleTolerant) {  // capture what is there (flagged by the harness) rather than nothing
+                    liveSettlePartial++;
+                    NirnCraft.LOGGER.warn("Autotest live: settle deadline passed, continuing (partial): {}", READINESS.describe());
+                } else {
+                    liveError = "Terrain did not settle before capture deadline; sequence cancelled: " + READINESS.describe();
+                    LIVE_ACTIONS.clear();
+                    NirnCraft.LOGGER.error("Autotest live: {}", liveError);
+                }
             }
             return;
         }
@@ -449,9 +459,11 @@ public final class ClientAutotest {
                 FrameProbe.begin(mc,action.substring(8));
             } else if (action.startsWith("settle ")) {
                 String[] args=action.substring(7).trim().split("\\s+");
+                liveSettleTolerant = java.util.Arrays.asList(args).contains("partial");
+                String lod = args.length > 1 && !args[1].equals("partial") ? args[1] : null;
                 liveSettleUntil = tick + Math.max(40, Integer.parseInt(args[0]));
                 liveSettleStable = 0;
-                READINESS.begin(mc,args.length>1?Math.max(1,Math.min(256,Integer.parseInt(args[1]))):0);
+                READINESS.begin(mc,lod!=null?Math.max(1,Math.min(256,Integer.parseInt(lod))):0);
             } else if (action.startsWith("command ") || action.startsWith("try ")) {
                 // `try CMD` is `command CMD` for idempotent setup and cleanup: a zero result (nothing to kill, nothing to
                 // fill) is not a failure and does not cancel the queue
@@ -496,6 +508,13 @@ public final class ClientAutotest {
                 UiProbe.key(mc, Integer.parseInt(action.substring(4).trim()));
             } else if (action.startsWith("expect-screen ")) {
                 UiProbe.expect(mc, action.substring(14).trim());
+            } else if (action.startsWith("renderdistance ")) {  // chunks: fidelity tests draw a place far-field only
+                int chunks = Math.max(2, Math.min(32, Integer.parseInt(action.substring(15).trim())));
+                mc.options.renderDistance().set(chunks);
+                mc.levelExtractor.allChanged();
+                liveSettleUntil = tick + 1200;
+                liveSettleStable = 0;
+                READINESS.begin(mc, 0);
             } else if (action.startsWith("perspective ")) {  // first | back | front (third-person checks: mounts, armour)
                 mc.options.setCameraType(switch (action.substring(12).trim()) {
                     case "back" -> net.minecraft.client.CameraType.THIRD_PERSON_BACK;
@@ -541,7 +560,10 @@ public final class ClientAutotest {
                     throw new IllegalStateException("Camera intersects terrain; choose a clear pose before capture");
                 boolean ui=action.startsWith("capture-ui ");
                 String tag = action.substring(ui?11:8).replaceAll("[^A-Za-z0-9_-]", "_");
-                if(!ui) { mc.gui.setScreen(null); com.nirncraft.client.autotest.ReviewWorlds.hudHidden(mc, true); }
+                if(!ui) {  // a clean frame: no HUD, chat, toasts or screens (UI tests capture with capture-ui)
+                    mc.gui.setScreen(null); com.nirncraft.client.autotest.ReviewWorlds.hudHidden(mc, true);
+                    mc.gui.toastManager().clear(); mc.gui.hud.getChat().clearMessages(false);
+                }
                 liveCapture = tag;
                 mc.mouseHandler.releaseMouse();
             } else if (action.equals("stop")) {

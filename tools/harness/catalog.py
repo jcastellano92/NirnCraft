@@ -175,13 +175,14 @@ DISTANCE_SUBJECTS = [  # (place, kind, times); night ladders of lit places also 
     ("riften", "city", ("day", "night")), ("imperial_city", "city", ("day", "night")),
     ("vivec", "city", ("day", "night")), ("dragon_bridge", "river", ("day", "night")),
     ("ilinalta_fishery", "lake", ("day", "night")), ("whiterun_stables", "road", ("day", "night")),
-    ("bleak_falls_barrow", "dungeon", ("day", "night")),
+    ("bleak_falls_barrow", "dungeon", ("day", "night")), ("riverwood", "forest", ("day", "night")),
     # long shadows from the peaks across the valleys at sunrise and sunset
     ("throat_of_the_world", "mountain", ("day", "night", "dawn", "dusk")),
     ("high_hrothgar", "mountain", ("day", "dawn", "dusk")),
     ("red_mountain", "volcano", ("day", "night", "dawn", "dusk")),
 ]
-LIT = {"city", "river", "road", "lake", "dungeon"}
+LIT = {"city", "river", "road", "lake", "dungeon", "forest"}
+NEAR_RD = 12   # the test client's render distance (HANDOFF = 12 x 16 - 16)
 MATERIAL_SAMPLES = [  # metal, precious metal, glass / ice, snow, polished stone, hot rock, PBR-mapped, plain references
     "minecraft:iron_block", "minecraft:gold_block", "minecraft:copper_block", "minecraft:glass", "minecraft:ice",
     "minecraft:packed_ice", "minecraft:snow_block", "minecraft:polished_andesite", "minecraft:magma_block",
@@ -218,6 +219,12 @@ def distance_scenes():
             if tod in ("day", "night"):
                 out.append({**common, "id": f"pop-{slug}-{tod}", "title": f"{pid}: flying through the hand-off ({tod})",
                             "tags": tags + ["suite:distance-sweep"], "timeout": 600, "pose": {"sweep": {"place": pid}}})
+            if tod in ("day", "night"):  # far field vs real world: the same view, 120 m off, at three heights
+                out.append({**common, "id": f"fid-{slug}-{tod}",
+                            "title": f"{pid}: real chunks vs far field only, 3 / 60 / 200 m up ({tod})",
+                            "tags": tags + ["suite:fidelity", "feature:seam", "feature:horizon"], "timeout": 1500,
+                            "fidelity": True,
+                            "pose": {"ladder": {"place": pid, "distances": [120, 120, 120], "heights": [3, 60, 200]}}})
             out.append({**common, "id": f"alt-{slug}-{tod}", "title": f"{pid} from high altitude ({tod})",
                         "tags": tags + ["suite:altitude"], "timeout": 900,
                         "pose": {"ladder": {"place": pid, "distances": [1200, 1500, 2500],
@@ -300,8 +307,11 @@ def shot_files(s, tag):
     if "ladder" in p:
         d = p["ladder"]["distances"]
         hs = p["ladder"].get("heights")
-        return [(f"{tag}-r{i}", (f"{x} m" if x < 1000 else f"{x / 1000:g} km") + (f" @ {hs[i]} m up" if hs else ""))
-                for i, x in enumerate(d)]
+        name = lambda i, x: (f"{x} m" if x < 1000 else f"{x / 1000:g} km") + (f" @ {hs[i]} m up" if hs else "")  # noqa: E731
+        if s.get("fidelity"):
+            return [item for i, x in enumerate(d) for item in
+                    ((f"{tag}-r{i}", name(i, x) + ": real chunks"), (f"{tag}-r{i}b", name(i, x) + ": far field only"))]
+        return [(f"{tag}-r{i}", name(i, x)) for i, x in enumerate(d)]
     if "sweep" in p:
         return [(f"{tag}s_{i * 10:04d}", f"{HANDOFF + 70 - i * 5} m") for i in range(25)]
     return [(tag, None)]
@@ -499,7 +509,7 @@ def pose_actions(s, plan=None, candidate=0):
         (x, y, z), _, (lx, ly, lz) = sweep_path(s, plan)
         lines.append(f"camera {x} {y + 6 * candidate} {z} {lx} {ly} {lz}")
     elif "spawn" in p:  # the live spawn can sit inside terrain: screens and spawn shots get a clear spot above (0, 0)
-        lines.append(f"visit 0 0 {30 + 25 * candidate} 180 10 {weather or 'clear'}")
+        lines.append(f"visit -150 260 {30 + 25 * candidate} 180 10 {weather or 'clear'}")  # open ground south of Whiterun
         weather = None
     if weather:
         if weather not in WEATHERS:
@@ -519,20 +529,23 @@ def capture_actions(s, tag, plan=None):
                  f"try fill {sx - 9} {sy} {sz - 9} {sx + 9} {sy} {sz + 9} minecraft:smooth_stone",
                  f"try fill {sx - 9} {sy + 1} {sz - 9} {sx + 9} {sy + 6} {sz + 9} minecraft:air"] + list(s.get("setup", []))
         for i, d in enumerate(p["ladder"]["distances"]):
-            lines += [f"camera {sx} {sy + 2 + d * 0.35:.1f} {sz - 2 - d:.1f} {sx} {sy + 1.5} {sz + 1}", "settle 1800",
+            lines += [f"camera {sx} {sy + 2 + d * 0.35:.1f} {sz - 2 - d:.1f} {sx} {sy + 1.5} {sz + 1}", "settle 1800 partial",
                       "wait 20", f"capture {tag}-r{i}"]
         return lines + list(s.get("cleanup", []))
     if "ladder" in p:  # every rung: move, let the world load, hold, capture
         lines = []
         for i, (x, z, h, yaw, pitch, _) in enumerate(ladder_rungs(s, plan)):
-            lines += [f"visit {x} {z} {h} {yaw} {pitch} {s.get('weather') or 'clear'}", "settle 1800",
+            lines += [f"visit {x} {z} {h} {yaw} {pitch} {s.get('weather') or 'clear'}", "settle 1800 partial",
                       f"wait {int(s.get('wait', 40))}", f"capture {tag}-r{i}"]
+            if s.get("fidelity"):  # the same view drawn by the far field alone (render distance 2), then back
+                lines += ["renderdistance 2", "settle 1800 partial", f"wait {int(s.get('wait', 40))}", f"capture {tag}-r{i}b",
+                          f"renderdistance {NEAR_RD}", "settle 1800 partial"]
         return lines + list(s.get("cleanup", []))
     if "sweep" in p:  # a smooth flight through the hand-off ring; the travel verb captures every 10 steps
         _, (ex, ey, ez), (lx, ly, lz) = sweep_path(s, plan)
-        return ["settle 1800", f"wait {int(s.get('wait', 60))}",
+        return ["settle 1800 partial", f"wait {int(s.get('wait', 60))}",
                 f"camera-travel {tag}s 240 {ex} {ey} {ez} {lx} {ly} {lz}"] + list(s.get("cleanup", []))
-    lines = ["settle 1800"]  # the world behind a screen is part of the picture too
+    lines = ["settle 1800 partial"]  # the world behind a screen is part of the picture too
     if s.get("wait"):
         lines.append(f"wait {int(s['wait'])}")
     lines += list(s.get("setup", []))

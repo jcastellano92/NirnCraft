@@ -674,6 +674,8 @@ def process_queue(runner, serve=False, on_item=None):
                 (QUEUE / f"{j['id']}.json").unlink(missing_ok=True)
             continue
         items, missing = [], []
+        if any(k.rsplit("|", 1)[0] not in by_id for k in todo):  # a job queued after this owner started: newer tests
+            by_id = {s["id"]: s for s in catalog.load()}
         for k in todo:
             sid, v = k.rsplit("|", 1)
             if sid in by_id:

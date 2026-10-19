@@ -484,18 +484,63 @@ def _centre_diff(a, b, frac=0.4):
     return float(np.abs(a[y0:y1, x0:x1] - b[y0:y1, x0:x1]).mean())
 
 
+def _lab(img, w=160):
+    """CIE Lab of a downscaled copy (D65), as float arrays: perceptual colour comparisons."""
+    a = np.asarray(img.convert("RGB").resize((w, round(w * img.height / img.width))), dtype=np.float32) / 255.0
+    a = np.where(a <= 0.04045, a / 12.92, ((a + 0.055) / 1.055) ** 2.4)
+    xyz = a @ np.array([[0.4124, 0.2126, 0.0193], [0.3576, 0.7152, 0.1192], [0.1805, 0.0722, 0.9505]], dtype=np.float32)
+    xyz /= np.array([0.95047, 1.0, 1.08883], dtype=np.float32)
+    f = np.where(xyz > 0.008856, np.cbrt(xyz), 7.787 * xyz + 16 / 116)
+    return np.stack([116 * f[..., 1] - 16, 500 * (f[..., 0] - f[..., 1]), 200 * (f[..., 1] - f[..., 2])], axis=-1)
+
+
+def fidelity(near, far):
+    """How well the far field alone reproduces the real world in the same view (ground part of the frame, below the
+    upper 35 %): mean colour difference (Delta E), brightness ratio, and large-scale structure difference (8 px blur)."""
+    a, b = _lab(near), _lab(far)
+    h = a.shape[0]
+    a, b = a[int(h * 0.35):], b[int(h * 0.35):]
+    de = float(np.sqrt(((a.mean(axis=(0, 1)) - b.mean(axis=(0, 1))) ** 2).sum()))
+    luma = float(b[..., 0].mean() / max(a[..., 0].mean(), 1e-3))
+    sa = np.asarray(near.convert("L").resize((40, 22)), dtype=np.float32)
+    sb = np.asarray(far.convert("L").resize((40, 22)), dtype=np.float32)
+    struct = float(np.abs(sa[8:] - sb[8:]).mean())
+    return round(de, 2), round(luma, 3), round(struct, 2)
+
+
 def pop_metrics(scene, imgs):
     """Ladder: how much the subject changes between the two rungs that straddle the near/far hand-off (the same view
     16 blocks apart: a big change is a seam or pop). Sweep: frame-to-frame change while flying through the hand-off;
     a spike far above the flight's usual change is a pop-in / pop-out (its frame says where)."""
     p = scene.get("pose") or {}
     m, flags = {}, []
+    if scene.get("fidelity") and "ladder" in p:  # pairs: real chunks, far field only, per height
+        hs = p["ladder"].get("heights") or p["ladder"]["distances"]
+        worst = (0, 0, 0)
+        for i in range(0, len(imgs) - 1, 2):
+            de, luma, struct = fidelity(imgs[i], imgs[i + 1])
+            tag = f"{hs[i // 2]}m"
+            m[f"colorDE_{tag}"], m[f"lumaRatio_{tag}"], m[f"structure_{tag}"] = de, luma, struct
+            worst = max(worst, (de, struct, abs(1 - luma)))
+            if de > 8:
+                flags.append(f"far field colour off by dE {de} at {tag} up")
+            if abs(1 - luma) > 0.15:
+                flags.append(f"far field {'brighter' if luma > 1 else 'darker'} x{luma} at {tag} up")
+            if struct > 20:
+                flags.append(f"far field shapes differ ({struct}) at {tag} up")
+        m["fidelityDE"], m["fidelityStructure"] = worst[0], worst[1]
+        if flags:
+            m["popFlags"] = flags
+        return m
     if "ladder" in p:
         d = p["ladder"]["distances"]
         pair = [i for i in range(len(d) - 1) if d[i] < 176 <= d[i + 1]]
         if pair:
             i = pair[0]
             m["handoffDiff"] = round(_centre_diff(imgs[i], imgs[i + 1]), 2)
+            m["handoffColorDE"] = fidelity(imgs[i], imgs[i + 1])[0]  # colour jump across the ring
+            if m["handoffColorDE"] > 6:
+                flags.append(f"colour jumps by dE {m['handoffColorDE']} across the hand-off")
             if m["handoffDiff"] > 18:
                 flags.append(f"hand-off change {m['handoffDiff']} between {d[i]} m and {d[i + 1]} m")
     if "sweep" in p and len(imgs) > 3:

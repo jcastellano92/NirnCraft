@@ -461,6 +461,10 @@ def capture(scene, variant, pose_lines, capture_lines):
     rec = {}
     if (SHOTS / f"{tag}.json").exists():
         rec = json.loads((SHOTS / f"{tag}.json").read_text(encoding="utf-8"))
+    partial = (lw.read_json(GAME / "nirncraft-live-status.json") or {}).get("settlePartial", 0)
+    if partial:  # the world did not finish loading in time: the picture may miss chunks (flagged, not discarded)
+        extra.setdefault("popFlags", []).append(f"partial: {partial} settle(s) timed out (chunks may be missing)")
+        extra["settlePartial"] = partial
     perf = None
     if scene.get("measure") and (PERF / f"{tag}.json").exists():
         perf = json.loads((PERF / f"{tag}.json").read_text(encoding="utf-8"))
