@@ -53,6 +53,20 @@ def atomic(path, data):
     os.replace(tmp, path)
 
 
+def heartbeat_age(status, status_file, now=None):
+    """Seconds since the client last wrote its status. A torn or empty read (the client rewrites the file every
+    second) has no `updated`: then the file's own time decides; a missing field read as 0 made a heartbeat 56 years
+    old and closed healthy clients as "crashed" (2026-10-19). audits/runner_selftest.py holds it to that."""
+    now = time.time() if now is None else now
+    updated = (status or {}).get("updated", 0) / 1000
+    if not updated:
+        try:
+            updated = Path(status_file).stat().st_mtime
+        except OSError:
+            updated = now
+    return now - updated
+
+
 def read_json(path):
     try:
         return json.loads(path.read_text(encoding="utf-8-sig"))
@@ -219,7 +233,7 @@ def _live_actions(lines, timeout=180, cancel=False):
             return
         if c.get("error", "").startswith("client disconnected"):  # lost the world mid-step: say why, at once
             raise RuntimeError(c["error"])
-        age = time.time() - c.get("updated", 0) / 1000
+        age = heartbeat_age(c, GAME / "nirncraft-live-status.json")
         if age > HEARTBEAT_STALE:  # the client writes its status every second, loading screens included
             alive = bool(processes())
             raise RuntimeError(f"client stopped responding: heartbeat {age:.0f} s old (screen {c.get('screen')}, "

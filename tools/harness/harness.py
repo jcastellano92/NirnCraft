@@ -290,9 +290,7 @@ class Runner:
 
     def cached(self, s, v, fp):
         rec = results.latest(s["id"], v)
-        if rec and rec.get("fingerprint") == fp and rec.get("status") in ("pass", "flag", "skip"):
-            return rec
-        return None
+        return rec if reusable(rec, fp) else None
 
     def run(self, s, v, fp):
         """Any test, any failure: record why, clean up, move on. Live failures feed a circuit breaker: three in a row
@@ -400,6 +398,8 @@ class Runner:
                 self.crashes += 1
                 tr.step("client_crashed", attempt=attempt)
                 path, cause = self.game.crash_evidence(results.stem(s["id"], v).with_name(f"{v}.crash.txt"), started)
+                if lost:  # the harness closed it: its own reason, not whatever error line the game log ended on
+                    cause = f"closed by the harness: {str(e)[:200]}"
                 event("client_crashed", test=key(s, v), attempt=attempt, cause=cause, evidence=str(path))
                 say(f"  ! client crashed during {s['id']} ({cause[:120]}); evidence {path}")
                 if self.crashes >= 3:
@@ -1630,6 +1630,33 @@ def blocking(rec):
     return now is not None and before is not None and now > before
 
 
+def reusable(rec, fp):
+    """Whether a stored result stands for this test now (same fingerprint) without running it again. Only real
+    outcomes: a skip is not a result (the test never ran), and reusing one kept 170 tests "skipped" gate after gate,
+    passing on tests nobody ran (2026-10-19). audits/runner_selftest.py holds it to that."""
+    return bool(rec) and rec.get("fingerprint") == fp and rec.get("status") in ("pass", "flag")
+
+
+def gate_verdict(recs, is_blocking):
+    """recs: [(key, latest record or None)] -> (blocking, known failures, not run). A test that did not run blocks the
+    gate (a quarantined one is listed, it has its own record and reason); no result blocks; a new or worse failure
+    blocks; an old failure is known."""
+    bad, known, unrun = [], [], []
+    for k, rec in recs:
+        if not rec:
+            bad.append(f"{k} (no result)")
+        elif rec.get("status") == "skip":
+            why = rec.get("error", "")
+            unrun.append(f"{k}: {why[:100]}")
+            if "quarantined" not in why:
+                bad.append(f"{k} (not run: {why[:80]})")
+        elif is_blocking(rec):
+            bad.append(k)
+        elif rec.get("status") in ("fail", "error"):
+            known.append(k)
+    return bad, known, unrun
+
+
 def cmd_gate(a):
     """Runs exactly the tests the changes since BASE can affect (impact.json), reusing fresh results, and fails when
     one of them newly fails (or fails worse). `--install-hook` makes it the git pre-push check
@@ -1665,36 +1692,69 @@ def cmd_gate(a):
     a.reloads = reloads if a.live else []
     a.ids, a.tag, a.exclude = [s["id"] for s in sel], None, None
     cmd_run(a)
-    bad, known = [], []
-    for s, v in items:
-        rec = results.latest(s["id"], v)
-        if not rec:
-            bad.append(f"{key(s, v)} (no result)")
-        elif blocking(rec):
-            bad.append(key(s, v))
-        elif rec.get("status") in ("fail", "error"):
-            known.append(key(s, v))
-    reviewed = []
+    bad, known, unrun = gate_verdict([(key(s, v), results.latest(s["id"], v)) for s, v in items], blocking)
+    reviewed, review_state = [], "off"
     agent_dir = results.REPORTS / scope_of(a, False) / "agent"
-    if a.ai_review and (agent_dir / "index.txt").exists():  # an independent reviewer looks at the pictures too
+    index = agent_dir / "index.txt"
+    if not a.ai_review:
+        say("gate: independent visual review: off (--no-ai-review): the pictures are UNVERIFIED")
+    elif not index.exists():
+        # nothing worth a look is a result too: say it, so a skipped review never reads like a passed one
+        review_state = "nothing to review"
+        say(f"gate: independent visual review: no captures worth a look ({index} absent)")
+    else:
         import review
-        if review.available():
+        captures = [l for l in index.read_text(encoding="utf-8").splitlines() if l.strip()]
+        pages_n = len({l.split(" row ")[0] for l in captures})
+        if not review.available():
+            review_state = "unverified (no claude CLI)"
+            say(f"gate: independent visual review: no claude CLI: {len(captures)} capture(s) NOT reviewed (UNVERIFIED)")
+        else:
+            say(f"gate: independent visual review ({a.model}): {len(captures)} capture(s) on {pages_n} page(s) ...")
             before_open = {k for k, e in load_issues().items() if e.get("state") in ACTIVE}
             gated = {key(s, v) for s, v in items}
-            for kind, test, v, what in review_pages(agent_dir, f"changes since {base[:10]}", a.model):
-                k = f"{test}|{v or 'shaders'}"
-                reviewed.append(f"{kind} {k}: {what}")
-                if kind == "BROKEN" and k in gated and k not in before_open:
-                    bad.append(f"{k} (independent reviewer: {what[:100]})")
-        else:
-            say("gate: no claude CLI: the pictures were not independently reviewed (UNVERIFIED visually)")
+            try:
+                found = review_pages(agent_dir, f"changes since {base[:10]}", a.model)
+            except Exception as e:  # a reviewer that failed must not look like one that found nothing
+                found = None
+                review_state = f"unverified (reviewer failed: {e})"
+                say(f"gate: independent visual review FAILED: {str(e)[:300]} (the pictures are UNVERIFIED)")
+            if found is not None:
+                last = review.LAST_PAGES
+                ok = last.get("ok")
+                seen = (ok or 0) + len(found)
+                review_state = "reviewed"
+                for kind, test, v, what in found:
+                    k = f"{test}|{v or 'shaders'}"
+                    if kind == "BROKEN" and k in gated and k not in before_open:
+                        bad.append(f"{k} (independent reviewer: {what[:100]})")
+                        fate = "BLOCKS"
+                    elif kind == "BROKEN":
+                        fate = "already open" if k in before_open else "not in this gate's tests"
+                    elif kind == "REGRESSION":
+                        fate = "issue (does not block)"
+                    else:
+                        fate = "note"
+                    reviewed.append(f"{kind} {k}: {what} [{fate}]")
+                    say(f"  reviewer {kind:10s} {k}: {what[:140]}  [{fate}]")
+                say(f"gate: independent visual review: {len(found)} finding(s), {ok if ok is not None else '?'} said "
+                    f"to look right, of {len(captures)} capture(s)")
+                if ok is None or seen < len(captures) * 0.9:
+                    review_state = f"incomplete ({seen} of {len(captures)} accounted for)"
+                    say(f"gate: independent visual review INCOMPLETE: the reviewer accounted for {seen} of "
+                        f"{len(captures)} capture(s); the rest are UNVERIFIED (answer: {last.get('answer', '')[:200]!r})")
     head = subprocess.run(["git", "rev-parse", "HEAD"], cwd=ROOT, capture_output=True, text=True).stdout.strip()
     receipt = {"head": head, "base": base, "files": len(files), "tags": tags, "items": len(items), "blocking": bad,
-               "review": reviewed,
-               "knownFailures": known, "at": time.time()}
+               "review": reviewed, "reviewState": review_state,
+               "knownFailures": known, "notRun": unrun, "at": time.time()}
     (STORE / "gate").mkdir(parents=True, exist_ok=True)
     (STORE / "gate" / "latest.json").write_text(json.dumps(receipt, indent=1), encoding="utf-8")
-    say(f"gate: {'FAIL' if bad else 'PASS'} ({len(bad)} new failure(s), {len(known)} known, {len(items)} test item(s))")
+    if unrun:
+        say(f"gate: {len(unrun)} test item(s) did not run:")
+        for u in unrun[:10]:
+            say(f"  {u}")
+    say(f"gate: {'FAIL' if bad else 'PASS'} ({len(bad)} new failure(s), {len(known)} known, {len(unrun)} not run, "
+        f"{len(items)} test item(s); visual review: {review_state})")
     for b in bad[:20]:
         say(f"  {b}")
     sys.exit(1 if bad else 0)

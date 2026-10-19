@@ -95,10 +95,27 @@ def pages(agent_dir, model="haiku", context=""):
     prompt = (_instructions() + f"\n\nAgent folder: {agent_dir}\n" + (f"What changed: {context}\n" if context else "")
               + "You are independent of whoever made the change. Answer in the format above only.")
     text = _ask(prompt, model, [agent_dir, STORE / "zoom"])
+    found, ok = parse_pages(text)
+    LAST_PAGES.clear()
+    LAST_PAGES.update(ok=ok, findings=len(found), answer=text.strip()[-600:])
+    _log({"mode": "pages", "model": model, "dir": str(agent_dir), "answer": text[-4000:]})
+    return found
+
+
+def parse_pages(text):
+    """A pages answer -> ([(kind, test, variant, what)], the count it says look right or None when it did not say)."""
     found = []
+    ok = None
     for line in text.splitlines():
         m = re.match(r"\s*(BROKEN|REGRESSION|CHECK)\s+(\S+)\s*(?:\[([^\]]+)\])?\s*:\s*(.*)", line)
         if m:
             found.append((m.group(1), m.group(2), m.group(3) or "", m.group(4).strip()))
-    _log({"mode": "pages", "model": model, "dir": str(agent_dir), "answer": text[-4000:]})
-    return found
+        m = re.match(r"\s*OK\s+(\d+)", line)
+        if m:
+            ok = int(m.group(1))
+    return found, ok
+
+
+# what the last pages() pass reported beyond its findings: {"ok": n tests it says look right (None: it did not say),
+# "findings": n, "answer": its last words}; the gate logs coverage from it
+LAST_PAGES = {}

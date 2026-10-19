@@ -150,7 +150,14 @@ start skips its group the same way.
   `.work/harness/review/log.jsonl`.
 * **Gate review:** after its tests the gate runs the reviewer over its pictures; a confirmed BROKEN on a gated test
   that was not already a known issue blocks (`--no-ai-review` skips it; the gate then says the pictures are
-  unverified).
+  unverified). The gate logs the review: how many captures on how many pages, every finding with what it does
+  (BLOCKS / already open / not in this gate / issue / note), and the reviewer's own count; a reviewer that fails or
+  accounts for under 90% of the captures leaves the gate saying the pictures are UNVERIFIED (`reviewState` in
+  `.work/harness/gate/latest.json`).
+* **The gate never passes on tests that did not run:** a skip (a group stopped after crashes, a disabled group) is
+  not a result: it is never reused from the cache, the gate lists every test that did not run, and those block
+  (quarantined tests are listed, not blocking). `check-harness-runner` (audits/runner_selftest.py) holds the harness
+  to these rules, plus torn status reads (a client is never declared lost on a half-written heartbeat).
 * **Autonomous:** `harness.py auto` (or `auto --once` from a scheduled task) waits while the GPU is busy or another run
   owns the client, then verifies fixes marked done, has the reviewer grade them, audits a `--budget` sample, reviews
   its pictures, writes ISSUES.md and sends an `auto_cycle` event (hooks notify). `--every 120` minutes.

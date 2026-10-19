@@ -864,6 +864,31 @@
    "timeout": 120
   },
   {
+   "id": "check-harness-runner",
+   "title": "Harness verdicts self-test (no cached skips, gate blocks on tests that did not run, torn heartbeats, review coverage)",
+   "tags": [
+    "check:tools",
+    "suite:validate-tools",
+    "suite:harness",
+    "suite:smoke"
+   ],
+   "run": [
+    "py",
+    "-3",
+    "tools/harness/audits/runner_selftest.py"
+   ],
+   "inputs": [
+    "tools/harness/harness.py",
+    "tools/harness/review.py",
+    "tools/dev/live_world.py",
+    "tools/harness/audits/runner_selftest.py"
+   ],
+   "metrics": {
+    "problems": "problems (\\d+)"
+   },
+   "timeout": 120
+  },
+  {
    "id": "check-entity-construction",
    "title": "Entity constructors use nothing 26.3 assigns later (getId before ID assignment disconnects clients)",
    "tags": [
