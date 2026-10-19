@@ -357,6 +357,7 @@ int main(int argc, char** argv) {
     }
     leafCards = !cards.empty() && str(a, "leaves", "") == "cards";
     if (a.count("sky")) SKY = unpack(uint32_t(std::strtoul(a["sky"].c_str(), nullptr, 16)));
+    cardMipBias = float(num(a, "mipbias", 0));
     if (a.count("grass")) tintGrass = unpack(uint32_t(std::strtoul(a["grass"].c_str(), nullptr, 16)));
     if (a.count("foliage")) tintFoliage = unpack(uint32_t(std::strtoul(a["foliage"].c_str(), nullptr, 16)));
     int threads = int(num(a, "threads", std::max(1u, std::thread::hardware_concurrency() / 2)));
@@ -366,7 +367,10 @@ int main(int argc, char** argv) {
     std::vector<float> dists;
     for (auto& t : split(str(a, "dist", "10,50,200,600,1500"))) dists.push_back(float(std::atof(t.c_str())));
     std::vector<std::string> variants = split(str(a, "variants", "ref,current,anymip,micro,cov,covbox,boxes,groups"));
-    if (variants.empty() || variants[0] != "ref") variants.insert(variants.begin(), "ref");
+    // the sheets compare every variant with ref, so it leads; a camera frame with variants= named renders exactly
+    // those, the first to out= with its mask and depth (it had put ref there: the element tier's "groups" were ref)
+    bool namedCamera = str(a, "camera", "") == "mc" && a.count("variants");
+    if (!namedCamera && (variants.empty() || variants[0] != "ref")) variants.insert(variants.begin(), "ref");
 
     // the object's bounds (non-air blocks; a sparse view: its whole extent)
     int bmin[3] = {1 << 30, 1 << 30, 1 << 30}, bmax[3] = {-1, -1, -1};

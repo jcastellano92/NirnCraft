@@ -104,6 +104,20 @@ RGB tinted(const Block& b, RGB c) {
     return {c.r * t.r / 255.f, c.g * t.g / 255.f, c.b * t.b / 255.f};
 }
 
+// the visual hull of a block's six face tiles: micro-voxel (x, y, z) is in when each axis's pair of faces covers its
+// projection (alpha at least a quarter: a 4/16 post centred on a texel boundary covers two texels by half)
+uint64_t hull(const Block& b) {
+    auto cov = [&](int f, int x, int y, int z) { return (b.face[f][texel(f, x, y, z)] >> 24) >= 64; };
+    uint64_t m = 0;
+    for (int y = 0; y < 4; y++)
+        for (int z = 0; z < 4; z++)
+            for (int x = 0; x < 4; x++)
+                if ((cov(DOWN, x, y, z) || cov(UP, x, y, z)) && (cov(NORTH, x, y, z) || cov(SOUTH, x, y, z)) &&
+                    (cov(WEST, x, y, z) || cov(EAST, x, y, z)))
+                    m |= 1ull << (x + 4 * (z + 4 * y));
+    return m;
+}
+
 bool loadBlocks(const std::string& path) {
     std::ifstream f(path, std::ios::binary);
     if (!f) return false;
@@ -135,12 +149,10 @@ bool loadBlocks(const std::string& path) {
             for (int t = 0; t < 16; t++) b.face[f2][t] = u32();
         bool water = b.cls == 2 && !(b.flags & 4);
         if (water) b.mask = ~0ull;  // fluids have no block model: a full water voxel
-        // thinner than a micro-voxel (a snow layer, a carpet, a pressure plate: its outline fills none of the 4 x 4 x 4):
-        // one layer on the floor, or the block below shows through where the game draws the layer; only a layer, its
-        // top face (nearly) covered: a chain or a rod fills no micro-voxel either and must not become a floating slab
-        int topCover = 0;
-        for (int t = 0; t < 16; t++) topCover += (b.face[UP][t] >> 24) != 0;
-        if (!b.mask && (b.flags & 4) && b.cls != 4 && topCover >= 12) b.mask = 0xFFFFull;
+        // thinner than a micro-voxel (a snow layer, a fence post, a torch, a chain; grass and flowers have no outline at
+        // all): its outline fills none of the 4 x 4 x 4, so its shape is the visual hull of its face tiles, a voxel
+        // filled where all three of its projections are covered (a snow layer's bottom layer, a post's core column)
+        if (!b.mask && (b.flags & 4) && !water) b.mask = hull(b);
         if (water || (b.mean.r == 0 && b.mean.g == 0 && b.mean.b == 0 && b.mask)) b.mean = water ? RGB{0x3F, 0x76, 0xE4} : RGB{128, 128, 128};
         bool content[6];
         for (int f2 = 0; f2 < 6; f2++) {
@@ -300,6 +312,7 @@ struct Card {
 };
 const int MIP_AT[5] = {0, 256, 320, 336, 340};
 std::unordered_map<uint64_t, Card> cards;
+float cardMipBias = 0;  // mipbias=: levels added to the footprint's (a probe of how sharp the cards are sampled)
 inline uint64_t cardKey(int wx, int wy, int wz, int f) {
     return (uint64_t(uint32_t(wx) & 0xFFFFF) << 40) | (uint64_t(uint32_t(wy) & 0xFFFF) << 24) | (uint64_t(uint32_t(wz) & 0xFFFFF) << 4) | uint64_t(f);
 }
@@ -361,16 +374,36 @@ inline bool cardCol(int bx, int by, int bz, int f, float pu, float pv, RGB& out,
     int ax = f <= UP ? 1 : f <= SOUTH ? 2 : 0, a1 = (ax + 1) % 3, a2 = (ax + 2) % 3;
     int b[3] = {bx, by, bz};
     float u = std::clamp(pu - float(b[a1]), 0.f, 0.9999f), v = std::clamp(pv - float(b[a2]), 0.f, 0.9999f);
-    float lv = std::clamp(std::log2(std::max(fp * 16.f, 1.f)), 0.f, 4.f);
+    // as Minecraft samples its atlas (atlas_truth's sample()): nearest when a texel covers more than a pixel, else
+    // bilinear within the two nearest mip levels, blended (nearest texels at every level were twice as sharp as the
+    // game from 30 to 300 m, and shimmered on every fly-in)
+    float raw = std::log2(std::max(fp * 16.f, 1e-6f)) + cardMipBias;
+    float lv = std::clamp(raw, 0.f, 4.f);
     int l0 = int(lv), l1 = std::min(4, l0 + 1);
     float t = lv - float(l0);
+    const Card& cd = it->second;
     auto idx = [&](int l) {
         int n2 = 16 >> l;
-        return MIP_AT[l] + int(u * n2) + n2 * int(v * n2);
+        return MIP_AT[l] + std::min(n2 - 1, int(u * n2)) + n2 * std::min(n2 - 1, int(v * n2));
     };
-    auto at = [&](int l) { return it->second.mip[idx(l)]; };
-    if (cov) *cov = it->second.cov[idx(l0)] + (it->second.cov[idx(l1)] - it->second.cov[idx(l0)]) * t;
-    RGB c0 = at(l0), c1 = at(l1);
+    auto bilinear = [&](int l) {
+        int n2 = 16 >> l;
+        float x = u * n2 - 0.5f, y = v * n2 - 0.5f;
+        int x0 = int(std::floor(x)), y0 = int(std::floor(y));
+        float fx = x - float(x0), fy = y - float(y0);
+        auto px = [&](int i, int j) {
+            return cd.mip[MIP_AT[l] + std::clamp(i, 0, n2 - 1) + n2 * std::clamp(j, 0, n2 - 1)];
+        };
+        RGB a = px(x0, y0), b = px(x0 + 1, y0), c = px(x0, y0 + 1), d = px(x0 + 1, y0 + 1);
+        auto mix = [](RGB p, RGB q, float k) { return RGB{p.r + (q.r - p.r) * k, p.g + (q.g - p.g) * k, p.b + (q.b - p.b) * k}; };
+        return mix(mix(a, b, fx), mix(c, d, fx), fy);
+    };
+    if (cov) *cov = cd.cov[idx(l0)] + (cd.cov[idx(l1)] - cd.cov[idx(l0)]) * t;
+    if (raw <= 0) {
+        out = cd.mip[idx(0)];
+        return true;
+    }
+    RGB c0 = bilinear(l0), c1 = bilinear(l1);
     out = {c0.r + (c1.r - c0.r) * t, c0.g + (c1.g - c0.g) * t, c0.b + (c1.b - c0.b) * t};
     return true;
 }
@@ -704,7 +737,7 @@ bool boxFace(const Node& n, int axis, bool high, V3 p, float t, BoxCtx& c) {
     }
     int u = std::clamp(int(std::floor(p[a1] * 4.f)), lo[a1], hi[a1] - 1), v = std::clamp(int(std::floor(p[a2] * 4.f)), lo[a2], hi[a2] - 1);
     int dep, q[3], from = 0;
-    float fpb = t * c.pa / std::max(std::fabs(c.d[axis]), 0.2f);  // the footprint on the face, blocks
+    float fpb = t * c.pa / std::max(std::fabs(c.d[axis]), 0.02f);  // the footprint on the face, blocks (atlas_truth's clamp)
     for (;;) {
         if (!firstHit(lo, hi, axis, high, u, v, dep, q, from)) return false;
         float cv = 1;

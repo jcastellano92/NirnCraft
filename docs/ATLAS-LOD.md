@@ -295,6 +295,29 @@ the ray itself. What else is left is representation: a snow layer is one micro-v
 grazing faces shimmer a little more than the reference's 16 samples. The far pass takes its colour the
 same way (cards from the real quads, light kept apart so day, night and carried lights relight them).
 
+**Elements by kind, and the far field itself in the tier** (2026-10-19). element_lab finds per export its centre chunk,
+its biggest tree and featured chunks: the chunk with the most water, lights (emissive), built materials and custom
+(non-vanilla) blocks, each when it has enough. Every element has two scenes in suite:elements: the bench
+(`element-<slug>`, lab-groups: the representation alone) and the far field (`element-<slug>-far`, far-groups:
+atlas_core through atlas_render, what the game draws). An underground element (sky light near 0 on its exposed faces,
+from its cards) is skipped with its reason (judge it from inside, in the scene tier): black against black agrees
+and says nothing. A fly-in whose frames stop changing while the reference's change fails (a renderer that stopped
+following the camera reads as perfect otherwise). New subjects' inputs come from `element-export-<subject>` live
+scenes (suite:element-exports): the library and the box around a truth subject's pose, without the 1 km view.
+
+What scoring the far field found, each fixed in the game, its native copy and the bench:
+
+| found | effect in game | fix |
+|---|---|---|
+| snow layers not kept (AtlasSections.kept) | a far snowfield was the bare stone under it | snow layers and carpets kept |
+| the thin-block floor layer took chains and rods | floating slabs under hanging lanterns | only blocks that cover the floor (Java: the outline's floor cover; native: the top tile) |
+| sections sent 6 tiles out, kept 4 regions, never resent | the ring past ~1 km and everything after a trip away and back lost its real blocks | server window 4 tiles, forgotten when a tile leaves it (a return resends it); the core keeps one ring more |
+| a ripe crop's outline is a full cube | a field of crops (wheat, garlic, cabbage) a solid block of green | crops and bushes with cut-out quads are plants |
+| library exports keyed on world and packs only | a changed rule never reached blocks.bin | AtlasLabExport.LIBRARY_VERSION in the key |
+
+Open in the far field: real elements vanish from ~8 km (real sections feed LOD 0-4 only), and coarse levels show
+interior faces through walls at some transitions (High Hrothgar: fly-in pop 1.05): the coarse-levels work.
+
 **An exact reference: atlas_truth** (2026-10-19). atlas_lab's ref is an approximation (4 x 4 x 4 shapes, 4 x 4 tiles,
 hashed cutouts, no light), so it cannot be ground truth itself. `native/tools/atlas_truth.cpp` traces Minecraft's own
 chunk mesh offline instead: `/nirncraft-atlaslab quads` exports every state's model quads as the mesher gets them and
