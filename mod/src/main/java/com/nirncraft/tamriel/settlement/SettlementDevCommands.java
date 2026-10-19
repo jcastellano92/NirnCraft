@@ -550,6 +550,14 @@ public final class SettlementDevCommands {
                 gj.add(pr);
             }
             o.add("gates", gj);
+            com.google.gson.JsonArray gw = new com.google.gson.JsonArray();  // the same gates in world coordinates
+            for (int[] g : SettlementAnchors.gates(p)) {
+                com.google.gson.JsonArray pr = new com.google.gson.JsonArray();
+                pr.add(g[0]);
+                pr.add(g[1]);
+                gw.add(pr);
+            }
+            o.add("gatesWorld", gw);
             o.addProperty("chains", plan.chains.size());
             o.add("specs", com.nirncraft.tamriel.settlement.plan.CityPlans.describe(plan));
             // inns: every inn is built by Interiors#inn (bar, innkeeper behind it, lockable guest rooms); count them

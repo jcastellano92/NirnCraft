@@ -557,6 +557,14 @@ class Runner:
             pm["reposed"] = True
         rec = results.store(s["id"], v, png, meta=receipt, fingerprint=fp, extra=extra)
         rec["metrics"].update(pm)
+        if s.get("annotate") == "roads":  # the road plan drawn onto a copy of the picture through its own camera
+            try:
+                import towns
+                after = Path(f"{results.stem(s['id'], v)}.after.png")
+                rec["metrics"]["roadsDrawn"] = towns.annotate({**rec, "town": s.get("town")}, after,
+                                                              after.with_name(f"{v}.roads.png"))
+            except Exception as e:  # noqa: BLE001  an overlay is a convenience, never a failure
+                rec["metrics"]["roadsDrawn"] = f"overlay failed: {str(e)[:80]}"
         rec["metrics"]["flags"] = rec["metrics"].get("flags", []) + pflags
         if popm:  # ladder / sweep numbers, the game log of the test: they join the image's numbers and flags
             flags = popm.pop("popFlags", [])
@@ -694,7 +702,8 @@ class Runner:
         status = "fail" if fails else ("flag" if m.get("problems") else "pass")
         img = g.GAME / s["image"] if s.get("image") else None
         if img is not None and img.exists():  # a picture the command drew (a town plan): kept like a capture
-            rec = results.store(s["id"], v, img, meta={"report": data if len(json.dumps(data)) < 20000 else {}},
+            small = data if len(json.dumps(data)) < 20000 else {k: data[k] for k in s.get("keep", []) if k in data}
+            rec = results.store(s["id"], v, img, meta={"report": small},
                                 fingerprint=fp, extra={"fails": fails})
             rec["metrics"].update(m)
             rec["status"] = status if status != "pass" else rec.get("status", "pass")

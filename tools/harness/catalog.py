@@ -500,6 +500,8 @@ def load():
     scenes += camlib.scenes()
     import effects  # effects as subjects: staged, scaled, pictured (effects.py)
     scenes += effects.scenes()
+    import towns  # settlements at their real location: top, oblique, gates, distance; roads drawn on (towns.py)
+    scenes += towns.scenes()
     seam_core(scenes)
     for s in scenes:
         if s["id"] in seen:
@@ -684,7 +686,9 @@ def pose_actions(s, plan=None, candidate=0):
                   f"try fill {x - 7} {y} {z - 7} {x + 7} {y} {z + 7} minecraft:smooth_stone"]
     elif "studio" in p:
         x, y, z = STUDIO
-        lines += [f"camera {x} {y + 1} {z + 5} {x} {y + 2.5} {z - 6}",  # first: it loads the chunks
+        # the caster mid-room (a third-person camera sits 4 blocks behind it and must stay inside the room); first,
+        # because the camera loads the chunks
+        lines += [f"camera {x} {y + 1} {z + 1} {x} {y + 2.5} {z - 6}",
                   f"try fill {x - 7} {y} {z - 7} {x + 7} {y + 9} {z + 7} minecraft:black_concrete hollow",
                   f"try fill {x - 6} {y + 1} {z - 6} {x + 6} {y + 8} {z + 6} minecraft:air"] +                  [f"try setblock {x + dx} {y + 7} {z + dz} minecraft:light[level=12]" for dx in (-5, 5) for dz in (-5, 5)]
     elif "dungeon" in p:

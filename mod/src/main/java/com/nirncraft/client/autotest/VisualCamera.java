@@ -202,7 +202,18 @@ final class VisualCamera {
     static java.util.concurrent.CompletableFuture<Integer> insideFile(Minecraft mc,String arguments) {
         var o=readReport(arguments.trim().split("\\s+")[0]);
         double x=at(o,"inside",0), y=at(o,"inside",1), z=at(o,"inside",2), back=at(o,"min",2)+1;
-        return action(mc,x+" "+y+" "+(z+Math.max(1,(z-back)*0.6))+" "+x+" "+(y+1.4)+" "+back,false);
+        Vec3 eye=new Vec3(x,y+1.62,z+Math.max(1,(z-back)*0.6)), target=new Vec3(x,y+1.4,back);
+        var result=new java.util.concurrent.CompletableFuture<Integer>();
+        var id=mc.player.getUUID();
+        mc.getSingleplayerServer().execute(()->{  // only the eye must be clear: rooms are tight
+            try {
+                var player=mc.getSingleplayerServer().getPlayerList().getPlayer(id);
+                if(player==null) throw new IllegalStateException("No player");
+                placeEye(player,eye,target);
+                result.complete(1);
+            } catch(Exception e) { result.completeExceptionally(e); }
+        });
+        return result;
     }
 
     static java.util.concurrent.CompletableFuture<Integer> action(Minecraft mc,String arguments,boolean scout) {
@@ -300,6 +311,8 @@ final class VisualCamera {
         var data=context(mc);
         data.add("lookAt",vector(mc.player.getEyePosition().add(mc.player.getLookAngle().scale(48))));
         data.addProperty("yaw",mc.player.getYRot()); data.addProperty("pitch",mc.player.getXRot());
+        data.addProperty("fov",mc.options.fov().get());  // vertical degrees: with the image size, enough to project
+        data.add("eye",vector(mc.player.getEyePosition()));  // world points onto the picture (road highlights)
         data.addProperty("cameraClear",mc.level.noCollision(mc.player,mc.player.getBoundingBox()));
         data.addProperty("air",com.nirncraft.atmosphere.client.InteriorAtmosphere.describe());
         data.addProperty("capturedAt",System.currentTimeMillis());

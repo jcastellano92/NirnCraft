@@ -700,8 +700,11 @@ LEVELS = ("full", "top", "pair", "single")
 
 def _panel(scene_id, title, width):
     """The latest capture of a scene (shaders preferred), labelled; None when it was never captured."""
-    for v in ("shaders", "vanilla", "lab"):
+    for v in ("shaders", "vanilla", "lab", "measure"):
         png = Path(f"{stem(scene_id, v)}.after.png")
+        roads = png.with_name(f"{v}.roads.png")  # a town view with its roads drawn on reads better on a sheet
+        if roads.exists():
+            png = roads
         if png.exists():
             rec = latest(scene_id, v) or {}
             im = Image.open(png).convert("RGB")

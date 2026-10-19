@@ -50,6 +50,8 @@ def _scene(kind, sid, view, title, setup, frame=None, extra=None, **kw):
                              setup, 4.5, extra={"role": ROLE.get(view, "other"), **(extra or {})})
     if frame:
         s["frame"] = frame
+    if frame or (extra or {}).get("frameBox"):  # a framed subject fills the picture: dark fur or cloth is not a
+        s["checks"] = {"maxBlackTiles": 3}      # NaN box; a couple of dark areas are allowed, none elsewhere
     s.update(kw)
     return s
 
@@ -110,7 +112,7 @@ def recipes(kind, rec, index):
             out.append(_scene(kind, it, view, f"{it} ({view})", [npc, "wait 10"],
                               frame=[30 if view == "front" else 90, 0.7]))
         elif view == "cast":  # in the dark studio, seen from behind the caster, cast at the far wall
-            s = _scene(kind, it, "cast", f"spell {it}", [f"command nirncraft-dev scenario equip {it}",
+            s = _scene(kind, it, "cast", f"spell {it}", [f"command execute as @p run nirncraft-dev scenario equip {it}",
                        "perspective back", "cast start", "wait 8"], frames=[4, 6],
                        cleanup=["cast stop", "perspective first"])
             s["pose"] = {"studio": True}
@@ -224,6 +226,7 @@ def town_plans():
                     "measure_command": f"command skysettle plan {pid}",
                     "measure_file": f"nirncraft-previews/plan_{pid}.json", "image": f"nirncraft-previews/plan_{pid}.png",
                     "measure_sum": {"radius": "radius", "built": "built_ratio", "developed": "developed_ratio"},
+                    "keep": ["gatesWorld", "gates", "radius", "culture", "inns"],  # the town views need the gates
                     "checks": {}, "source": "SettlementDevCommands plan (the game's own planner)"})
     return out
 
