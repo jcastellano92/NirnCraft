@@ -589,8 +589,19 @@ def offline_vs_live(live_png, lab_png, mask_png, out_png):
     sky = np.median(top, axis=0)
     near_sky = np.sqrt(((la - sky) ** 2).sum(axis=2)) < 6.0
     missing = float((near_sky & inside).sum() / max(1, inside.sum()))
+    # flat: where the real blocks show texture but the live picture is featureless (a fogged wall, an empty patch in
+    # fog colour: not sky-coloured, so `missing` does not see it), from the local spread of lightness (5 x 5)
+    def spread(L):
+        from PIL import ImageFilter
+        im = Image.fromarray(np.clip(L * 2.55, 0, 255).astype(np.uint8))
+        mean = np.asarray(im.filter(ImageFilter.BoxBlur(2)), dtype=np.float32)
+        sq = Image.fromarray(np.clip((L * 2.55) ** 2 / 255.0, 0, 255).astype(np.uint8))
+        msq = np.asarray(sq.filter(ImageFilter.BoxBlur(2)), dtype=np.float32) * 255.0
+        return np.sqrt(np.maximum(msq - mean ** 2, 0)) / 2.55
+    sa, sb = spread(la[..., 0]), spread(lb[..., 0])
+    flat = float(((sa < 1.5) & (sb > 4.0) & inside).sum() / max(1, inside.sum()))
     out = {"liveDE": round(mean_de, 2), "liveShare": round(share, 3), "liveEdges": round(struct, 3),
-           "liveMissing": round(missing, 4)}
+           "liveMissing": round(missing, 4), "liveFlat": round(flat, 4)}
     # by distance (the offline render's out_depth.png: 1/16 blocks in 24 bits, all ones for sky): where the error is
     # (far trees thinning, far materials flattening show as the far bands' dE rising)
     depth_png = Path(str(lab_png)[:-4] + "_depth.png")

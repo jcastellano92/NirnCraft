@@ -25,10 +25,14 @@ public final class AtlasTruthView {
         // continued that fog into the far field, a pale ring at the seam with clear land beyond it. Environmental fog
         // (weather, water, lava, blindness) stays, at its real distance, near and far alike.
         if (!noFog && AtlasClient.active() && !AtlasClient.irisPackInUse()) {
-            // the fog starts where it ends, at the terrain's edge: the near field is clear right up to it, and the
-            // edge stays known (the compositor caps environmental fog there, and fogHidesFarField compares with it)
+            // the fog starts where it ends, beyond the farthest loaded chunk: the near field is never fogged (loaded
+            // chunks reach past vanilla's fog end, most at the corners: fogged at start = end they drew as pale walls
+            // in front of the far field, "a gap" at the end of a street), and the edge stays known (the compositor
+            // caps environmental fog there, and fogHidesFarField compares with it)
             var fog = event.getFogData();
-            fog.renderDistanceStart = fog.renderDistanceEnd;
+            float loaded = net.minecraft.client.Minecraft.getInstance().options.getEffectiveRenderDistance() * 16f * 1.5f;
+            float edge = Math.max(fog.renderDistanceEnd, loaded);
+            fog.renderDistanceStart = fog.renderDistanceEnd = edge;
             return;
         }
         if (!noFog) return;

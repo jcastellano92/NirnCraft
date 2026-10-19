@@ -568,6 +568,9 @@ class Runner:
             if twin:
                 rec["metrics"].update(twin)
                 flags = rec["metrics"].setdefault("flags", [])
+                if twin.get("liveFlat", 0) > 0.05 and not any(f.startswith("live view is flat") for f in flags):
+                    flags.append(f"live view is flat (fog-coloured or empty) over {twin['liveFlat']:.1%} of the real "
+                                 "blocks' textured parts: a fogged wall or a hole at the seam")
                 if twin.get("liveMissing", 0) > 0.02 and not any(f.startswith("live view shows sky") for f in flags):
                     flags.append(
                         f"live view shows sky over {twin['liveMissing']:.1%} of the real blocks: the far field (or the "
