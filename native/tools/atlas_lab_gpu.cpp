@@ -763,6 +763,7 @@ int main(int argc, char** argv) {
     int frames = int(num(a, "frames", 16)), panel = int(num(a, "panel", 160)), reps = std::max(1, int(num(a, "reps", 3)));
     int tw = int(num(a, "w", 1920)), th = int(num(a, "h", 1080));
     bool quality = num(a, "quality", 1) > 0, vulkan = str(a, "backend", "cpu") == "vulkan";
+    bool parity = num(a, "parity", 1) > 0, cpuTime = num(a, "cputime", 1) > 0;  // 0: skip that part (a short GPU-only run)
     Cam cam;
     cam.tolPix = float(num(a, "tol", 1));
     cam.fog = float(num(a, "fog", 0));
@@ -890,7 +891,7 @@ int main(int argc, char** argv) {
     std::printf("%-6s %-7s %5s | %7s %6s %6s %6s %6s | %6s %6s | %6s %6s | %6s %6s | %6s %6s%s\n", "dist", "rep", "px", "iou", "dE", "dEmax", "rgb",
                 "diff%", "fl.iou", "fl.dE", "steps", "ref", "q.iou", "q.dE", "ns cpu", "ns lab", gpuOk ? " | vk.iou  vk.dE vk.dEmax  ns vk" : "");
     bool first = true;
-    for (int ri = 0; ri < rows; ri++) {
+    for (int ri = 0; ri < (parity ? rows : 0); ri++) {
         float D = dists[size_t(ri)];
         int half = std::clamp(int(std::ceil(radius / (D * cam.pa) * 1.15f)), 6, 128);
         View vw{2 * half, 2 * half, half, half, centre - cam.fwd * D, 1};
@@ -915,10 +916,11 @@ int main(int argc, char** argv) {
                 vkImg = kernelRender(vw, frames, 0, &sVk, vkFn(r, vw));
                 if (vkImg.w) vk = compare(vkImg, ker), nsVk = vkSum * 1e6 / rays;
             }
-            char vkTxt[80] = "";
-            if (gpuOk) std::snprintf(vkTxt, sizeof vkTxt, " | %6.4f %6.2f %8.2f %6.2f", vk.iou, vk.de, vk.deMax, nsVk);
-            std::printf("%-6.0f %-7s %5d | %7.4f %6.3f %6.2f %6.2f %6.2f | %6.4f %6.2f | %6.2f %6.2f | %6.3f %6.2f | %6.1f %6.1f%s\n", D, REP_NAME[r], vw.w,
-                        p.iou, p.de, p.deMax, p.rgb, 100 * p.diff, fl.iou, fl.de, sKer, sLab, q.iou, q.de, nsKer, nsLab, vkTxt);
+            char vkTxt[80] = "", qTxt[40] = "     -      -";
+            if (gpuOk) std::snprintf(vkTxt, sizeof vkTxt, " | %6.4f %6.3f %8.2f %6.2f", vk.iou, vk.de, vk.deMax, nsVk);
+            if (quality) std::snprintf(qTxt, sizeof qTxt, "%6.3f %6.2f", q.iou, q.de);
+            std::printf("%-6.0f %-7s %5d | %7.4f %6.3f %6.2f %6.2f %6.2f | %6.4f %6.2f | %6.2f %6.2f | %s | %6.1f %6.1f%s\n", D, REP_NAME[r], vw.w, p.iou,
+                        p.de, p.deMax, p.rgb, 100 * p.diff, fl.iou, fl.de, sKer, sLab, qTxt, nsKer, nsLab, vkTxt);
             char buf[700];
             std::snprintf(buf, sizeof buf,
                           "%s{\"dist\":%.0f,\"variant\":\"%s\",\"pixels\":%d,\"parity\":{\"iou\":%.5f,\"dE\":%.4f,\"dE_max\":%.3f,\"rgb_max\":%.3f,"
@@ -944,12 +946,21 @@ int main(int argc, char** argv) {
             if (gpuOk) blit(sheet, cols * panel, vkImg, (c0 + 2) * panel, ri * panel, panel);
         }
     }
-    atlas::writePng(out, sheet.data(), uint32_t(cols * panel), uint32_t(rows * panel));
+    if (parity) atlas::writePng(out, sheet.data(), uint32_t(cols * panel), uint32_t(rows * panel));
 
     // timing: one full frame through the object at each distance
     json += "],\"timing\":[";
+    int vkFrames = std::max(8, reps * 4);
     std::printf("\ntiming: one %d x %d frame (frame 0) through the object; CPU on %d threads, best of %d; Vulkan median of %d\n", tw, th, threads, reps,
-                reps * 4);
+                vkFrames);
+    if (gpuOk) {  // warm the GPU up (clocks, caches) before anything is timed
+        View vw{tw, th, tw / 2, th / 2, centre - cam.fwd * dists[0], 1};
+        std::string err;
+        for (int i = 0; i < 32; i++) {
+            double m;
+            gpu.frame(chosen[0], lodFrame(vw, cam, chosen[0], i), nullptr, m, err);
+        }
+    }
     std::printf("%-6s %-7s %5s %7s | %9s %9s | %9s %9s | %9s %9s\n", "dist", "rep", "hit%", "steps", "cpu ms", "Mray/s", "lab ms", "Mray/s", "vk ms", "Mray/s");
     first = true;
     for (float D : dists) {
@@ -958,13 +969,18 @@ int main(int argc, char** argv) {
         for (int r : chosen) {
             double cpuMs = 1e30, labMs = 1e30, vkMs = -1, steps = 0;
             Pixels px;
-            for (int i = 0; i < reps; i++) {
+            for (int i = 0; i < (cpuTime ? reps : 0); i++) {
                 auto t0 = std::chrono::steady_clock::now();
                 cpuFrame(r, lodFrame(vw, cam, r, 0), px, threads);
                 cpuMs = std::min(cpuMs, msSince(t0));
                 t0 = std::chrono::steady_clock::now();
                 labRender(REP_NAME[r], vw, cam, 1, 0, threads, nullptr);
                 labMs = std::min(labMs, msSince(t0));
+            }
+            if (gpuOk) {
+                double m;
+                std::string err;
+                if (!cpuTime) gpu.frame(r, lodFrame(vw, cam, r, 0), &px, m, err);  // the frame's steps and hits from the GPU
             }
             double hits = 0;  // the share of the frame showing the object (the rest is sky)
             for (size_t i = 0; i < px.steps.size(); i++) steps += px.steps[i], hits += px.color[i].v[3];
@@ -973,7 +989,7 @@ int main(int argc, char** argv) {
             if (gpuOk) {
                 std::vector<double> ms;
                 std::string err;
-                for (int i = 0; i < reps * 4; i++) {
+                for (int i = 0; i < vkFrames; i++) {
                     double m;
                     if (!gpu.frame(r, lodFrame(vw, cam, r, i), nullptr, m, err)) break;
                     ms.push_back(m);
@@ -985,10 +1001,11 @@ int main(int argc, char** argv) {
                     std::fprintf(stderr, "atlas_lab_gpu: %s\n", err.c_str());
                 }
             }
-            char vkTxt[60] = "        -         -";
+            char vkTxt[60] = "        -         -", cpuTxt[60] = "        -         - |         -         -";
             if (vkMs >= 0) std::snprintf(vkTxt, sizeof vkTxt, "%9.3f %9.1f", vkMs, rays / vkMs / 1e3);
-            std::printf("%-6.0f %-7s %5.1f %7.2f | %9.1f %9.1f | %9.1f %9.1f | %s\n", D, REP_NAME[r], 100 * hits, steps, cpuMs, rays / cpuMs / 1e3, labMs,
-                        rays / labMs / 1e3, vkTxt);
+            if (cpuTime) std::snprintf(cpuTxt, sizeof cpuTxt, "%9.1f %9.1f | %9.1f %9.1f", cpuMs, rays / cpuMs / 1e3, labMs, rays / labMs / 1e3);
+            else cpuMs = labMs = -1;
+            std::printf("%-6.0f %-7s %5.1f %7.2f | %s | %s\n", D, REP_NAME[r], 100 * hits, steps, cpuTxt, vkTxt);
             char buf[300];
             std::snprintf(buf, sizeof buf,
                           "%s{\"dist\":%.0f,\"variant\":\"%s\",\"w\":%d,\"h\":%d,\"hit\":%.4f,\"steps\":%.3f,\"cpu_ms\":%.2f,\"atlas_lab_ms\":%.2f,\"vulkan_ms\":%.4f}",

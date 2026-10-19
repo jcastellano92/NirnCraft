@@ -329,6 +329,31 @@ frame on the town) boxes 621 ms, groups 574 ms (atlas_lab's hand-written tracer 
 200 m the town is a few percent of the frame and a frame is 20 - 50 ms, mostly the sky's rays. The generated C++ is
 about 1.6x slower than atlas_lab's: it is a reference, not the fast path.
 
+**Vulkan** (`backend=vulkan`; RTX 3090, the dispatch alone by GPU timestamps, median of 32 frames after a warm-up, no
+game running). The images agree with the CPU backend's: the same silhouette and steps per ray at every distance, mean
+dE at most 0.002, under 0.02 % of pixels beyond dE 1 (worst 2.4: the SPIR-V is not built with precise floats). A 1920 x
+1080 frame through the object, ms:
+
+| | 10 m | 50 m | 200 m | 600 m - 4 km |
+|---|---|---|---|---|
+| boxes, core | 1.62 | 0.90 | 0.16 | 0.14 - 0.16 |
+| groups, core | 0.97 | 0.53 | 0.12 | 0.12 |
+| boxes, area | 2.00 | 1.47 | 0.26 | 0.19 |
+| groups, area | 1.20 | 0.93 | 0.17 | 0.14 - 0.16 |
+
+At 10 m over the area (87 % of the frame on the town; 15 and 27 steps a ray) that is 1.0 G rays/s for boxes and 1.7 G
+for groups: **groups are the faster on the GPU despite nearly twice the steps**, because an octree descent fetches and
+sorts up to 8 children in local memory where a group compares 2. 0.12 - 0.19 ms is what the sky's rays cost (ray setup,
+the root box).
+
+Before the renderer can use it: a tree per region in region coordinates under a top-level structure over regions (the
+12-bit boxes), and the brick pool from the world's sections instead of a dense grid per volume; a bound on the face walk
+through holes (a hole costs the box's depth in micro-voxel fetches: a per-face first-hit depth or a coarse occupancy
+mip); building and updating groups on the GPU (LBVH, then SAH refinement; the CPU build takes 13 s for the area) with
+edits from the change feed; 16 x 16 face texels from a per-texture atlas (texture resolution up close); the G-buffer the
+pack lights (normal, material class, depth against the near field) and the far pass's jitter, fog and hand-off; then
+timings over real far-field scenes (terrain to the horizon, not one town in the sky).
+
 ## Status (branch atlas-render)
 
 * Done: trees at level 0 grown by their real features (AtlasTrees); real chunks' columns in the change feed (ground,
