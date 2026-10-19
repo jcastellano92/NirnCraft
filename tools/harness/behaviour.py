@@ -96,6 +96,9 @@ def trial_actions(sc, n):
     for p in sc.get("props", []):
         if p.get("watch"):
             lines.append(f"command nirncraft-qa record watch {x + p['at'][0]} {y + p['at'][1]} {z + p['at'][2]}")
+    # scripted actions during the trial (e.g. the test player kills an actor: a player kill leaves a body)
+    acts = [a.replace("{actor:", "@e[limit=1,tag=qa_actor_").replace("}", "]") if "{actor:" in a else a
+            for a in sc.get("act", [])]
     dur, frames = int(sc.get("duration", 600)), int(sc.get("frames", 0))
     end = sc.get("end_when", "")
     photos = n == 0 and sc.get("photos", "first") != "none" or sc.get("photos") == "all"
@@ -104,13 +107,14 @@ def trial_actions(sc, n):
     def wait(ticks):  # until decided (a kill: on after a second) or the ticks run out
         return f"wait-dead {end[5:]} {ticks}" if end.startswith("dead:") else f"wait {ticks}"
     if photos:  # start, middle (or just after the deciding moment), end: one strip with the result
-        lines += ["wait 10", f"capture b-{name}-start", wait(half), f"capture b-{name}-middle", wait(dur - half),
-                  f"capture b-{name}-end"]
+        lines += ["wait 10", f"capture b-{name}-start"] + acts + [wait(half), f"capture b-{name}-middle",
+                                                                  wait(dur - half), f"capture b-{name}-end"]
     elif frames:
+        lines += acts
         for f in range(frames):
             lines += [f"wait {dur // frames}", f"capture b-{name}-f{f}"]
     else:
-        lines.append(wait(dur))
+        lines += acts + [wait(dur)]
     lines += ["command nirncraft-qa record stop",
               f"try kill @e[type=!player,x={x},y={y},z={z},distance=..{half + 8}]", "try difficulty peaceful"]
     return name, lines
@@ -149,6 +153,18 @@ def judge(expect, rec):
             if me and math.dist((me["x"], me["y"], me["z"]), goal) <= expect.get("distance", 1.5):
                 return True, s["tick"]
         return False, None
+    if what == "appears":  # an entity of a type shows up (a corpse after a kill), within the ticks
+        hit = next((s["tick"] for s in samples if s["tick"] <= within and
+                    any(e.get("type") == expect["type"] for e in s.get("entities", []))), None)
+        return hit is not None, hit
+    if what == "rests":  # the first entity of a type stops moving (a body comes to rest)
+        pos = [next(((e["x"], e["y"], e["z"]) for e in s.get("entities", []) if e.get("type") == expect["type"]), None)
+               for s in samples]
+        pos = [q for q in pos if q]
+        if len(pos) < 3:
+            return False, "not seen long enough"
+        moved = math.dist(pos[-1], pos[-3])
+        return moved < expect.get("tolerance", 0.05), round(moved, 3)
     if what == "block_changes":
         at = expect["at"]
         for s in samples:
@@ -169,4 +185,6 @@ def describe(e):
             "health_drops": f"{e.get('actor')} loses >= {e.get('by', 1)} health",
             "alive_at_end": f"{e.get('actor')} {'alive' if e.get('alive', True) else 'dead'} at the end",
             "reaches": f"{e.get('actor')} reaches {e.get('to')}{tail}",
-            "block_changes": f"block {e.get('at')} becomes {e.get('contains')}{tail}"}.get(w, w)
+            "block_changes": f"block {e.get('at')} becomes {e.get('contains')}{tail}",
+            "appears": f"a {e.get('type')} appears{tail}",
+            "rests": f"the {e.get('type')} comes to rest"}.get(w, w)

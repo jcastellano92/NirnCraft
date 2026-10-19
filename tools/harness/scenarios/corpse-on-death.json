@@ -1,0 +1,50 @@
+{
+  "id": "corpse-on-death",
+  "title": "A bandit killed by the player leaves a body that falls and comes to rest (searchable)",
+  "tags": [
+    "behaviour:death",
+    "subject:corpse",
+    "subject:bandit"
+  ],
+  "arena": {
+    "size": 15,
+    "floor": "minecraft:grass_block",
+    "walls": "minecraft:glass",
+    "height": 3
+  },
+  "props": [],
+  "actors": [
+    {
+      "name": "bandit",
+      "entity": "nirncraft:bandit",
+      "at": [
+        0,
+        1,
+        0
+      ],
+      "nbt": "{NoAI:1b}"
+    }
+  ],
+  "act": [
+    "wait 20",
+    "command damage {actor:bandit} 1000 minecraft:player_attack by @p"
+  ],
+  "difficulty": "easy",
+  "duration": 200,
+  "every": 5,
+  "trials": 3,
+  "photos": "first",
+  "expect": [
+    {
+      "what": "appears",
+      "type": "nirncraft:corpse",
+      "within": 60,
+      "rate": 1.0
+    },
+    {
+      "what": "rests",
+      "type": "nirncraft:corpse",
+      "rate": 1.0
+    }
+  ]
+}
