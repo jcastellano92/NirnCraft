@@ -249,6 +249,19 @@ the screen only reads the cache (and a light TAA for edges). Normals and every o
 as colour: kept per face, averaged up the groups, refined where seen and where changed. Screen-space TAA tricks
 (surface-id history, adaptive blend, variance clip) are interim measures for the current renderer only.
 
+**Dynamic content** (owner, 2026-10-19: "animations at different distances, visual and lighting effects, player
+interactions, you name it"). One system, sorted by how a thing changes:
+
+| kind | examples | how |
+|---|---|---|
+| state changes | a chest lid, a door, a lever, fire's age, crops | an edit (the change feed): the groups over that block rebuild, nearest and most visible first; which properties matter is distance-dependent (a lid's open state near, nothing far: AtlasFarState is the far end of that rule) |
+| continuous motion | water and lava flow, leaves and grass swaying, flags, fire flicker, animated textures | material properties (frames, wave, sway) evaluated in the surface cache at the rate the distance needs: every frame near, averaged over time far (a flickering torch is a steady glow at 2 km) |
+| entities | mobs, NPCs, players, mounts, dropped items | their models near (Minecraft's path, sharing our G-buffer and light), stand-ins voxelised from the same models beyond, posed from a few key poses, animation rate falling with distance |
+| light | carried torches, spells, fire spreading, lightning, day and night | light sources injected into the surface cache; only the groups they reach update |
+| interaction | breaking, placing, opening, aiming | always near: exact blocks and the vanilla interaction layers on top; the change feed carries the result outward |
+
+Every row keeps the rule: nothing changes what it is with distance, only how much detail and how often it updates.
+
 **The same structure for everything** (owner): clouds, rain curtains and fog are density instead of surfaces in the
 same groups (a group keeps its mean density and the spread inside, averaged up the hierarchy like colour, traced with
 the same descend-or-draw rule, so a cloud resolves from a soft blob to its billows as it nears); light is kept per
