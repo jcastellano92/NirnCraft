@@ -222,6 +222,8 @@ public final class ClientAutotest {
      * the scene's own settle judges readiness after it, so running out of time just goes on (not a failure, not partial).
      */
     private static boolean liveSettleInternal;
+    /** The frame limit before a long server-side step capped it (0: not capped): nothing is captured meanwhile. */
+    private static int fpsBeforeCap;
     /** `settle T partial`: at the deadline the sequence goes on (counted in settlePartial) instead of being cancelled. */
     private static boolean liveSettleTolerant;
     private static int liveSettlePartial;
@@ -446,6 +448,10 @@ public final class ClientAutotest {
             }
             liveResources = null;
             return;
+        }
+        if (liveCommand == null && fpsBeforeCap > 0) {  // the long step is over: full frame rate for what follows
+            mc.options.framerateLimit().set(fpsBeforeCap);
+            fpsBeforeCap = 0;
         }
         if (liveCommand != null) {
             if (liveCommand.isDone()) {
@@ -738,6 +744,12 @@ public final class ClientAutotest {
                     return msg.contains(" sections in ") ? 1 : 0;
                 });
                 liveCommandDeadline = System.currentTimeMillis() + 1_200_000L;
+                // the server works for minutes and the picture is not used: redrawing the same frame at full rate
+                // only takes the GPU from everything else on the machine
+                if (fpsBeforeCap == 0) {
+                    fpsBeforeCap = Math.max(10, mc.options.framerateLimit().get());
+                    mc.options.framerateLimit().set(10);
+                }
             } else if (action.startsWith("atlaslab ")) {  // the far-field lab's inputs: blocks | volume ... | here ...
                 NirnCraft.LOGGER.info(com.nirncraft.atlas.AtlasLabExport.autotest(action.substring(9)));
             } else if (action.startsWith("renderdistance ")) {  // chunks: fidelity tests draw a place far-field only

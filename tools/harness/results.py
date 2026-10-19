@@ -583,7 +583,14 @@ def offline_vs_live(live_png, lab_png, mask_png, out_png):
     side.paste(b, (a.width + 8, 0))
     side.paste(Image.fromarray(hm.astype(np.uint8)), (2 * a.width + 16, 0))
     side.save(out_png)
-    return {"liveDE": round(mean_de, 2), "liveShare": round(share, 3), "liveEdges": round(struct, 3)}
+    # missing: where the real blocks have something but the live picture shows sky (its colour from the frame's top
+    # rows): a far field that did not draw, a hole at the seam. Not judged by dE alone: that averages it away.
+    top = la[: max(2, la.shape[0] // 40)].reshape(-1, 3)
+    sky = np.median(top, axis=0)
+    near_sky = np.sqrt(((la - sky) ** 2).sum(axis=2)) < 6.0
+    missing = float((near_sky & inside).sum() / max(1, inside.sum()))
+    return {"liveDE": round(mean_de, 2), "liveShare": round(share, 3), "liveEdges": round(struct, 3),
+            "liveMissing": round(missing, 4)}
 
 
 def pop_metrics(scene, imgs):

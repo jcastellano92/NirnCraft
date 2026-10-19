@@ -567,6 +567,11 @@ class Runner:
                                        **({"vsLive": twin} if twin else {})})
             if twin:
                 rec["metrics"].update(twin)
+                flags = rec["metrics"].setdefault("flags", [])
+                if twin.get("liveMissing", 0) > 0.02 and not any(f.startswith("live view shows sky") for f in flags):
+                    flags.append(
+                        f"live view shows sky over {twin['liveMissing']:.1%} of the real blocks: the far field (or the "
+                        "near field) did not draw there")
         return self.judge(s, v, rec)
 
     # ---------------------------------------------------------------------------------------- live
@@ -834,6 +839,7 @@ class Runner:
                 m["diff"] = m["changed"] = None  # nothing may be judged on a pair from two different views
         # a wrong shader state or a wrong camera: the picture is not the test, never a pass
         fails = [f for f in m.get("flags", []) if "but this is the" in f or f.startswith("camera ")
+                 or f.startswith("live view shows sky")
                  or f.startswith("twin looks")]
         if "maxBlackTiles" in c and m.get("blackBoxes", 0) > c["maxBlackTiles"]:  # boxes: the NaN signature
             fails.append(f"black boxes {m['blackBoxes']} > {c['maxBlackTiles']}")
@@ -925,13 +931,11 @@ def camera_from(ref):
                       f"last run ({rec.get('status')}: {str(rec.get('error', ''))[:80]}): capture it again")
     if not rec or not g.get("eye") or not png.exists():
         return None, f"no live capture of {ref['scene']} [{ref.get('variant', 'vanilla')}] yet: run it first"
-    import datetime
-    try:  # the picture must be the record's own, not one left from an earlier run
-        at = datetime.datetime.fromisoformat(rec.get("capturedAt", "")).timestamp()
-        if png.stat().st_mtime < at - 120:
-            return None, f"the screenshot of {ref['scene']} is older than its record: capture it again"
-    except ValueError:
-        pass
+    # the picture must be the record's own, not one left from an earlier run: the game's receipt says when it took it
+    # (the record itself is written when the scene ends, minutes later when its cleanup is long)
+    shot_at = g.get("capturedAt")
+    if isinstance(shot_at, (int, float)) and abs(png.stat().st_mtime - shot_at / 1000.0) > 300:
+        return None, f"the screenshot of {ref['scene']} is not the one its record describes: capture it again"
     if (rec.get("metrics") or {}).get("settlePartial") or (rec.get("settlePartial")):
         return None, (f"the live capture of {ref['scene']} was taken before the view settled (not fully resolved): "
                       "capture it again")

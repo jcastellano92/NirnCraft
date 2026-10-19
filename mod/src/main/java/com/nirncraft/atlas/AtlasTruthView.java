@@ -25,10 +25,10 @@ public final class AtlasTruthView {
         // continued that fog into the far field, a pale ring at the seam with clear land beyond it. Environmental fog
         // (weather, water, lava, blindness) stays, at its real distance, near and far alike.
         if (!noFog && AtlasClient.active() && !AtlasClient.irisPackInUse()) {
+            // the fog starts where it ends, at the terrain's edge: the near field is clear right up to it, and the
+            // edge stays known (the compositor caps environmental fog there, and fogHidesFarField compares with it)
             var fog = event.getFogData();
-            float far = 1.0e7f;
-            fog.renderDistanceStart = fog.renderDistanceEnd = far;
-            fog.cloudEnd = Math.max(fog.cloudEnd, far);
+            fog.renderDistanceStart = fog.renderDistanceEnd;
             return;
         }
         if (!noFog) return;

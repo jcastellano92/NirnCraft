@@ -8,6 +8,26 @@ plugins {
 // Opt-in fast scratch storage. Keep the default path for existing QA/dev tools.
 if (providers.gradleProperty('nirncraftBuildDir').isPresent()) {
     layout.buildDirectory.set(file(providers.gradleProperty('nirncraftBuildDir').get()))
+} else {
+    // The owner's checkout lives on a slow HDD: a plain `gradlew` (any tool, any agent) must not build there. mod/build
+    // becomes a directory junction to fast storage (one target per checkout, so worktrees never share outputs); every
+    // tool that reads mod/build keeps working. NIRNCRAFT_FAST_BUILD_ROOT moves it; machines without that storage (no
+    // E:\NirnCraft-scratch, not Windows) keep the plain directory.
+    def fastRoot = new File(System.getenv('NIRNCRAFT_FAST_BUILD_ROOT') ?: 'E:/NirnCraft-scratch/checkout-builds')
+    def link = file('build')
+    if (System.getProperty('os.name').toLowerCase().contains('win') && fastRoot.parentFile?.isDirectory()) {
+        def key = Integer.toHexString(projectDir.canonicalPath.toLowerCase().hashCode())
+        def target = new File(fastRoot, key)
+        if (!link.exists()) {
+            target.mkdirs()
+            def p = ['cmd', '/c', 'mklink', '/J', link.absolutePath, target.absolutePath].execute()
+            p.waitFor()
+            if (p.exitValue() != 0) logger.warn("NirnCraft: could not link mod/build to ${target}: ${p.err.text}")
+        } else if (link.canonicalPath == link.absolutePath) {
+            logger.warn("NirnCraft: mod/build is a real directory on the checkout's disk (slow HDD). Delete it and the " +
+                    "next build puts it on fast storage (${target}), or build with tools/dev/build_263.py.")
+        }
+    }
 }
 
 version = mod_version

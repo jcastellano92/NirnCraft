@@ -3,6 +3,19 @@
  "rules": [
   {
    "paths": [
+    "mod/src/main/resources/natives/*",
+    "mod/src/main/java/com/nirncraft/atlas/AtlasNative.java",
+    "native/include/atlas/atlas.h",
+    "tools/dev/check_natives.py"
+   ],
+   "tags": [
+    "check:natives"
+   ],
+   "reload": null,
+   "final": false
+  },
+  {
+   "paths": [
     "tools/harness/*.py",
     "tools/harness/impact.json"
    ],
