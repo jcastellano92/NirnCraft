@@ -1,0 +1,45 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": {
+        "type": "minecraft:uniform",
+        "min": 1,
+        "max": 2
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:book",
+          "weight": 1,
+          "modifier": {
+            "type": "nirncraft:regional_book"
+          }
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:loot_table",
+          "weight": 25,
+          "value": "nirncraft:parts/lore_note"
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:book",
+          "weight": 3,
+          "modifier": {
+            "type": "nirncraft:skill_book"
+          }
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 72
+        }
+      ]
+    }
+  ],
+  "random_sequence": "nirncraft:containers/household_books/common"
+}

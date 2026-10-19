@@ -1,0 +1,148 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "nirncraft:block/container/sack",
+    "sack": "nirncraft:block/container/sack",
+    "rope": "nirncraft:block/container/sack_rope",
+    "inner": "nirncraft:block/container/sack_inner"
+  },
+  "elements": [
+    {
+      "from": [
+        3,
+        0,
+        3
+      ],
+      "to": [
+        13,
+        9,
+        13
+      ],
+      "faces": {
+        "north": {
+          "texture": "#sack",
+          "uv": [
+            3,
+            7,
+            13,
+            16
+          ]
+        },
+        "south": {
+          "texture": "#sack",
+          "uv": [
+            3,
+            7,
+            13,
+            16
+          ]
+        },
+        "east": {
+          "texture": "#sack",
+          "uv": [
+            3,
+            7,
+            13,
+            16
+          ]
+        },
+        "west": {
+          "texture": "#sack",
+          "uv": [
+            3,
+            7,
+            13,
+            16
+          ]
+        },
+        "up": {
+          "texture": "#inner",
+          "uv": [
+            3,
+            3,
+            13,
+            13
+          ]
+        },
+        "down": {
+          "texture": "#sack",
+          "uv": [
+            3,
+            3,
+            13,
+            13
+          ],
+          "cullface": "down"
+        }
+      }
+    },
+    {
+      "from": [
+        2,
+        8,
+        2
+      ],
+      "to": [
+        14,
+        9,
+        14
+      ],
+      "faces": {
+        "north": {
+          "texture": "#sack",
+          "uv": [
+            2,
+            7,
+            14,
+            8
+          ]
+        },
+        "south": {
+          "texture": "#sack",
+          "uv": [
+            2,
+            7,
+            14,
+            8
+          ]
+        },
+        "east": {
+          "texture": "#sack",
+          "uv": [
+            2,
+            7,
+            14,
+            8
+          ]
+        },
+        "west": {
+          "texture": "#sack",
+          "uv": [
+            2,
+            7,
+            14,
+            8
+          ]
+        },
+        "up": {
+          "texture": "#inner",
+          "uv": [
+            2,
+            2,
+            14,
+            14
+          ]
+        },
+        "down": {
+          "texture": "#sack",
+          "uv": [
+            2,
+            2,
+            14,
+            14
+          ]
+        }
+      }
+    }
+  ]
+}

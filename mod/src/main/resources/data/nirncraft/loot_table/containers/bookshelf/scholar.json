@@ -1,0 +1,53 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": {
+        "type": "minecraft:uniform",
+        "min": 2,
+        "max": 4
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "nirncraft:book",
+          "weight": 1,
+          "modifier": {
+            "type": "nirncraft:regional_book"
+          }
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:book",
+          "weight": 12,
+          "modifier": {
+            "type": "nirncraft:skill_book"
+          }
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:book",
+          "weight": 10,
+          "modifier": {
+            "type": "nirncraft:leveled_tome"
+          }
+        },
+        {
+          "type": "minecraft:loot_table",
+          "weight": 18,
+          "value": "nirncraft:parts/lore_note"
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 60
+        }
+      ]
+    }
+  ],
+  "random_sequence": "nirncraft:containers/bookshelf/scholar"
+}

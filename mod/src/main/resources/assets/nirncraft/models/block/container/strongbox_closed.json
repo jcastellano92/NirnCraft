@@ -1,0 +1,9 @@
+{
+  "parent": "nirncraft:block/container/strongbox_template_closed",
+  "textures": {
+    "side": "nirncraft:block/container/strongbox_side",
+    "front": "nirncraft:block/container/strongbox_front",
+    "top": "nirncraft:block/container/strongbox_top",
+    "inner": "nirncraft:block/container/strongbox_inner"
+  }
+}

@@ -1,0 +1,319 @@
+{
+  "variants": {
+    "facing=north,lid=closed,style=nordic": {
+      "model": "nirncraft:block/container/grand_nordic_closed"
+    },
+    "facing=north,lid=closed,style=imperial": {
+      "model": "nirncraft:block/container/grand_imperial_closed"
+    },
+    "facing=north,lid=closed,style=velothi": {
+      "model": "nirncraft:block/container/grand_velothi_closed"
+    },
+    "facing=north,lid=closed,style=dwemer": {
+      "model": "nirncraft:block/container/grand_dwemer_closed"
+    },
+    "facing=north,lid=closed,style=elven": {
+      "model": "nirncraft:block/container/grand_elven_closed"
+    },
+    "facing=north,lid=closed,style=desert": {
+      "model": "nirncraft:block/container/grand_desert_closed"
+    },
+    "facing=north,lid=closed,style=rustic": {
+      "model": "nirncraft:block/container/grand_rustic_closed"
+    },
+    "facing=north,lid=ajar,style=nordic": {
+      "model": "nirncraft:block/container/grand_nordic_ajar"
+    },
+    "facing=north,lid=ajar,style=imperial": {
+      "model": "nirncraft:block/container/grand_imperial_ajar"
+    },
+    "facing=north,lid=ajar,style=velothi": {
+      "model": "nirncraft:block/container/grand_velothi_ajar"
+    },
+    "facing=north,lid=ajar,style=dwemer": {
+      "model": "nirncraft:block/container/grand_dwemer_ajar"
+    },
+    "facing=north,lid=ajar,style=elven": {
+      "model": "nirncraft:block/container/grand_elven_ajar"
+    },
+    "facing=north,lid=ajar,style=desert": {
+      "model": "nirncraft:block/container/grand_desert_ajar"
+    },
+    "facing=north,lid=ajar,style=rustic": {
+      "model": "nirncraft:block/container/grand_rustic_ajar"
+    },
+    "facing=north,lid=open,style=nordic": {
+      "model": "nirncraft:block/container/grand_nordic_open"
+    },
+    "facing=north,lid=open,style=imperial": {
+      "model": "nirncraft:block/container/grand_imperial_open"
+    },
+    "facing=north,lid=open,style=velothi": {
+      "model": "nirncraft:block/container/grand_velothi_open"
+    },
+    "facing=north,lid=open,style=dwemer": {
+      "model": "nirncraft:block/container/grand_dwemer_open"
+    },
+    "facing=north,lid=open,style=elven": {
+      "model": "nirncraft:block/container/grand_elven_open"
+    },
+    "facing=north,lid=open,style=desert": {
+      "model": "nirncraft:block/container/grand_desert_open"
+    },
+    "facing=north,lid=open,style=rustic": {
+      "model": "nirncraft:block/container/grand_rustic_open"
+    },
+    "facing=east,lid=closed,style=nordic": {
+      "model": "nirncraft:block/container/grand_nordic_closed",
+      "y": 90
+    },
+    "facing=east,lid=closed,style=imperial": {
+      "model": "nirncraft:block/container/grand_imperial_closed",
+      "y": 90
+    },
+    "facing=east,lid=closed,style=velothi": {
+      "model": "nirncraft:block/container/grand_velothi_closed",
+      "y": 90
+    },
+    "facing=east,lid=closed,style=dwemer": {
+      "model": "nirncraft:block/container/grand_dwemer_closed",
+      "y": 90
+    },
+    "facing=east,lid=closed,style=elven": {
+      "model": "nirncraft:block/container/grand_elven_closed",
+      "y": 90
+    },
+    "facing=east,lid=closed,style=desert": {
+      "model": "nirncraft:block/container/grand_desert_closed",
+      "y": 90
+    },
+    "facing=east,lid=closed,style=rustic": {
+      "model": "nirncraft:block/container/grand_rustic_closed",
+      "y": 90
+    },
+    "facing=east,lid=ajar,style=nordic": {
+      "model": "nirncraft:block/container/grand_nordic_ajar",
+      "y": 90
+    },
+    "facing=east,lid=ajar,style=imperial": {
+      "model": "nirncraft:block/container/grand_imperial_ajar",
+      "y": 90
+    },
+    "facing=east,lid=ajar,style=velothi": {
+      "model": "nirncraft:block/container/grand_velothi_ajar",
+      "y": 90
+    },
+    "facing=east,lid=ajar,style=dwemer": {
+      "model": "nirncraft:block/container/grand_dwemer_ajar",
+      "y": 90
+    },
+    "facing=east,lid=ajar,style=elven": {
+      "model": "nirncraft:block/container/grand_elven_ajar",
+      "y": 90
+    },
+    "facing=east,lid=ajar,style=desert": {
+      "model": "nirncraft:block/container/grand_desert_ajar",
+      "y": 90
+    },
+    "facing=east,lid=ajar,style=rustic": {
+      "model": "nirncraft:block/container/grand_rustic_ajar",
+      "y": 90
+    },
+    "facing=east,lid=open,style=nordic": {
+      "model": "nirncraft:block/container/grand_nordic_open",
+      "y": 90
+    },
+    "facing=east,lid=open,style=imperial": {
+      "model": "nirncraft:block/container/grand_imperial_open",
+      "y": 90
+    },
+    "facing=east,lid=open,style=velothi": {
+      "model": "nirncraft:block/container/grand_velothi_open",
+      "y": 90
+    },
+    "facing=east,lid=open,style=dwemer": {
+      "model": "nirncraft:block/container/grand_dwemer_open",
+      "y": 90
+    },
+    "facing=east,lid=open,style=elven": {
+      "model": "nirncraft:block/container/grand_elven_open",
+      "y": 90
+    },
+    "facing=east,lid=open,style=desert": {
+      "model": "nirncraft:block/container/grand_desert_open",
+      "y": 90
+    },
+    "facing=east,lid=open,style=rustic": {
+      "model": "nirncraft:block/container/grand_rustic_open",
+      "y": 90
+    },
+    "facing=south,lid=closed,style=nordic": {
+      "model": "nirncraft:block/container/grand_nordic_closed",
+      "y": 180
+    },
+    "facing=south,lid=closed,style=imperial": {
+      "model": "nirncraft:block/container/grand_imperial_closed",
+      "y": 180
+    },
+    "facing=south,lid=closed,style=velothi": {
+      "model": "nirncraft:block/container/grand_velothi_closed",
+      "y": 180
+    },
+    "facing=south,lid=closed,style=dwemer": {
+      "model": "nirncraft:block/container/grand_dwemer_closed",
+      "y": 180
+    },
+    "facing=south,lid=closed,style=elven": {
+      "model": "nirncraft:block/container/grand_elven_closed",
+      "y": 180
+    },
+    "facing=south,lid=closed,style=desert": {
+      "model": "nirncraft:block/container/grand_desert_closed",
+      "y": 180
+    },
+    "facing=south,lid=closed,style=rustic": {
+      "model": "nirncraft:block/container/grand_rustic_closed",
+      "y": 180
+    },
+    "facing=south,lid=ajar,style=nordic": {
+      "model": "nirncraft:block/container/grand_nordic_ajar",
+      "y": 180
+    },
+    "facing=south,lid=ajar,style=imperial": {
+      "model": "nirncraft:block/container/grand_imperial_ajar",
+      "y": 180
+    },
+    "facing=south,lid=ajar,style=velothi": {
+      "model": "nirncraft:block/container/grand_velothi_ajar",
+      "y": 180
+    },
+    "facing=south,lid=ajar,style=dwemer": {
+      "model": "nirncraft:block/container/grand_dwemer_ajar",
+      "y": 180
+    },
+    "facing=south,lid=ajar,style=elven": {
+      "model": "nirncraft:block/container/grand_elven_ajar",
+      "y": 180
+    },
+    "facing=south,lid=ajar,style=desert": {
+      "model": "nirncraft:block/container/grand_desert_ajar",
+      "y": 180
+    },
+    "facing=south,lid=ajar,style=rustic": {
+      "model": "nirncraft:block/container/grand_rustic_ajar",
+      "y": 180
+    },
+    "facing=south,lid=open,style=nordic": {
+      "model": "nirncraft:block/container/grand_nordic_open",
+      "y": 180
+    },
+    "facing=south,lid=open,style=imperial": {
+      "model": "nirncraft:block/container/grand_imperial_open",
+      "y": 180
+    },
+    "facing=south,lid=open,style=velothi": {
+      "model": "nirncraft:block/container/grand_velothi_open",
+      "y": 180
+    },
+    "facing=south,lid=open,style=dwemer": {
+      "model": "nirncraft:block/container/grand_dwemer_open",
+      "y": 180
+    },
+    "facing=south,lid=open,style=elven": {
+      "model": "nirncraft:block/container/grand_elven_open",
+      "y": 180
+    },
+    "facing=south,lid=open,style=desert": {
+      "model": "nirncraft:block/container/grand_desert_open",
+      "y": 180
+    },
+    "facing=south,lid=open,style=rustic": {
+      "model": "nirncraft:block/container/grand_rustic_open",
+      "y": 180
+    },
+    "facing=west,lid=closed,style=nordic": {
+      "model": "nirncraft:block/container/grand_nordic_closed",
+      "y": 270
+    },
+    "facing=west,lid=closed,style=imperial": {
+      "model": "nirncraft:block/container/grand_imperial_closed",
+      "y": 270
+    },
+    "facing=west,lid=closed,style=velothi": {
+      "model": "nirncraft:block/container/grand_velothi_closed",
+      "y": 270
+    },
+    "facing=west,lid=closed,style=dwemer": {
+      "model": "nirncraft:block/container/grand_dwemer_closed",
+      "y": 270
+    },
+    "facing=west,lid=closed,style=elven": {
+      "model": "nirncraft:block/container/grand_elven_closed",
+      "y": 270
+    },
+    "facing=west,lid=closed,style=desert": {
+      "model": "nirncraft:block/container/grand_desert_closed",
+      "y": 270
+    },
+    "facing=west,lid=closed,style=rustic": {
+      "model": "nirncraft:block/container/grand_rustic_closed",
+      "y": 270
+    },
+    "facing=west,lid=ajar,style=nordic": {
+      "model": "nirncraft:block/container/grand_nordic_ajar",
+      "y": 270
+    },
+    "facing=west,lid=ajar,style=imperial": {
+      "model": "nirncraft:block/container/grand_imperial_ajar",
+      "y": 270
+    },
+    "facing=west,lid=ajar,style=velothi": {
+      "model": "nirncraft:block/container/grand_velothi_ajar",
+      "y": 270
+    },
+    "facing=west,lid=ajar,style=dwemer": {
+      "model": "nirncraft:block/container/grand_dwemer_ajar",
+      "y": 270
+    },
+    "facing=west,lid=ajar,style=elven": {
+      "model": "nirncraft:block/container/grand_elven_ajar",
+      "y": 270
+    },
+    "facing=west,lid=ajar,style=desert": {
+      "model": "nirncraft:block/container/grand_desert_ajar",
+      "y": 270
+    },
+    "facing=west,lid=ajar,style=rustic": {
+      "model": "nirncraft:block/container/grand_rustic_ajar",
+      "y": 270
+    },
+    "facing=west,lid=open,style=nordic": {
+      "model": "nirncraft:block/container/grand_nordic_open",
+      "y": 270
+    },
+    "facing=west,lid=open,style=imperial": {
+      "model": "nirncraft:block/container/grand_imperial_open",
+      "y": 270
+    },
+    "facing=west,lid=open,style=velothi": {
+      "model": "nirncraft:block/container/grand_velothi_open",
+      "y": 270
+    },
+    "facing=west,lid=open,style=dwemer": {
+      "model": "nirncraft:block/container/grand_dwemer_open",
+      "y": 270
+    },
+    "facing=west,lid=open,style=elven": {
+      "model": "nirncraft:block/container/grand_elven_open",
+      "y": 270
+    },
+    "facing=west,lid=open,style=desert": {
+      "model": "nirncraft:block/container/grand_desert_open",
+      "y": 270
+    },
+    "facing=west,lid=open,style=rustic": {
+      "model": "nirncraft:block/container/grand_rustic_open",
+      "y": 270
+    }
+  }
+}

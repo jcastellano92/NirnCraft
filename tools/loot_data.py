@@ -342,6 +342,23 @@ def misc():
         loot("containers/lock_bonus/" + tier, [pool([gold(lo, hi, growth=0.02)]), pool(extras)])
 
 
+# ===================================================================================== bookshelves
+
+def bookshelves():
+    """NirnCraft's shelves (loot.container, docs/CONTAINERS.md): books from the lore system, the province's own first.
+    household_books/* sit in homes and are owned (the path contains containers/household); bookshelf/* are ruins',
+    scholars' and mages' shelves, finders keepers."""
+    homes = {"poor": ((0, 1), 0, 0), "common": ((1, 2), 3, 0), "wealthy": ((2, 3), 6, 2), "noble": ((2, 4), 8, 4)}
+    for tier, (n, skill, tomes) in homes.items():
+        extras = [part("lore_note", 25)] + ([skill_book(skill)] if skill else []) + ([tome(tomes)] if tomes else [])
+        loot("containers/household_books/" + tier, [pool([book(1)], n), pool(extras + [empty(75 - skill - tomes)])])
+    loot("containers/bookshelf/ruin", [pool([book(1)], (0, 2)), pool([part("lore_note", 30), skill_book(4), empty(66)])])
+    loot("containers/bookshelf/scholar", [pool([book(1)], (2, 4)), pool([skill_book(12), tome(10), part("lore_note", 18), empty(60)])])
+    loot("containers/bookshelf/arcane", [pool([book(1)], (1, 3)),
+                                         pool([tome(30), part("soul_gems", 8), skill_book(8), empty(54)]),
+                                         pool([part("staff", 1, [lvl(10)]), empty(19)])])
+
+
 # ===================================================================================== camps and sites
 
 def sites():
@@ -566,6 +583,7 @@ def main():
     dungeons()
     households()
     misc()
+    bookshelves()
     sites()
     corpses()
     rewards()

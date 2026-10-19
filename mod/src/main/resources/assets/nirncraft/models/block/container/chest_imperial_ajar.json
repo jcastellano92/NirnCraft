@@ -1,0 +1,9 @@
+{
+  "parent": "nirncraft:block/container/chest_template_ajar",
+  "textures": {
+    "side": "nirncraft:block/container/chest_imperial_side",
+    "front": "nirncraft:block/container/chest_imperial_front",
+    "top": "nirncraft:block/container/chest_imperial_top",
+    "inner": "nirncraft:block/container/chest_imperial_inner"
+  }
+}

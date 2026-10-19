@@ -51,7 +51,7 @@ public class FlotsamFeature extends ConfiguredFeature<NoneFeatureConfiguration> 
                         net.minecraft.world.level.block.ChestBlock.FACING, Direction.Plane.HORIZONTAL.getRandomDirection(r))
                         : Blocks.BARREL.defaultBlockState());
                 BlockEntity be = level.getBlockEntity(p);
-                if (be instanceof RandomizableContainerBlockEntity c) c.setLootTable(net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.LOOT_TABLE, LOOT), r.nextLong());
+                if (be instanceof RandomizableContainerBlockEntity) com.nirncraft.loot.container.LootContainers.setLootTable(level, p, LOOT, r.nextLong());
                 barrel = true;
             } else if (kind <= 2) {
                 BlockState slab = (r.nextBoolean() ? Blocks.SPRUCE_SLAB : Blocks.OAK_SLAB).defaultBlockState().setValue(SlabBlock.TYPE,

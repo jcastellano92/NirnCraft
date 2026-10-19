@@ -1,0 +1,82 @@
+{
+  "variants": {
+    "facing=up,lid=closed": {
+      "model": "nirncraft:block/container/barrel_closed"
+    },
+    "facing=up,lid=ajar": {
+      "model": "nirncraft:block/container/barrel_ajar"
+    },
+    "facing=up,lid=open": {
+      "model": "nirncraft:block/container/barrel_open"
+    },
+    "facing=down,lid=closed": {
+      "model": "nirncraft:block/container/barrel_closed",
+      "x": 180
+    },
+    "facing=down,lid=ajar": {
+      "model": "nirncraft:block/container/barrel_ajar",
+      "x": 180
+    },
+    "facing=down,lid=open": {
+      "model": "nirncraft:block/container/barrel_open",
+      "x": 180
+    },
+    "facing=north,lid=closed": {
+      "model": "nirncraft:block/container/barrel_closed",
+      "x": 90
+    },
+    "facing=north,lid=ajar": {
+      "model": "nirncraft:block/container/barrel_ajar",
+      "x": 90
+    },
+    "facing=north,lid=open": {
+      "model": "nirncraft:block/container/barrel_open",
+      "x": 90
+    },
+    "facing=south,lid=closed": {
+      "model": "nirncraft:block/container/barrel_closed",
+      "x": 90,
+      "y": 180
+    },
+    "facing=south,lid=ajar": {
+      "model": "nirncraft:block/container/barrel_ajar",
+      "x": 90,
+      "y": 180
+    },
+    "facing=south,lid=open": {
+      "model": "nirncraft:block/container/barrel_open",
+      "x": 90,
+      "y": 180
+    },
+    "facing=east,lid=closed": {
+      "model": "nirncraft:block/container/barrel_closed",
+      "x": 90,
+      "y": 90
+    },
+    "facing=east,lid=ajar": {
+      "model": "nirncraft:block/container/barrel_ajar",
+      "x": 90,
+      "y": 90
+    },
+    "facing=east,lid=open": {
+      "model": "nirncraft:block/container/barrel_open",
+      "x": 90,
+      "y": 90
+    },
+    "facing=west,lid=closed": {
+      "model": "nirncraft:block/container/barrel_closed",
+      "x": 90,
+      "y": 270
+    },
+    "facing=west,lid=ajar": {
+      "model": "nirncraft:block/container/barrel_ajar",
+      "x": 90,
+      "y": 270
+    },
+    "facing=west,lid=open": {
+      "model": "nirncraft:block/container/barrel_open",
+      "x": 90,
+      "y": 270
+    }
+  }
+}

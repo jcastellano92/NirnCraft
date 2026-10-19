@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/orientable",
+  "textures": {
+    "front": "nirncraft:block/container/shelf_imperial_books0",
+    "side": "nirncraft:block/container/shelf_imperial_side",
+    "top": "nirncraft:block/container/shelf_imperial_top"
+  }
+}

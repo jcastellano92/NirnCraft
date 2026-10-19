@@ -148,7 +148,7 @@ public final class QaDungeon {
                 RoomInfo r = roomAt(pos.getX(), pos.getY(), pos.getZ());
                 if (r != null) r.notes++;
             }
-            if (be instanceof Container) containers.add(pos);
+            if (be instanceof Container || be instanceof com.nirncraft.loot.container.LootContainerBlockEntity) containers.add(pos);
         }
         BoundingBox a = lvl.area;
         List<BlockPos> plates = new ArrayList<>();
@@ -890,6 +890,7 @@ public final class QaDungeon {
     }
 
     private static String lootTable(BlockEntity be) {
+        if (be instanceof com.nirncraft.loot.container.LootContainerBlockEntity) return com.nirncraft.loot.container.LootContainers.lootTableOf(be);
         if (!(be instanceof RandomizableContainerBlockEntity)) return null;
         CompoundTag tag = be.saveWithoutMetadata(java.util.Objects.requireNonNull(be.getLevel()).registryAccess());
         return tag.contains("LootTable") ? tag.getStringOr("LootTable", "") : null;

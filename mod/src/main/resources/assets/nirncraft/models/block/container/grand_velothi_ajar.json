@@ -1,0 +1,9 @@
+{
+  "parent": "nirncraft:block/container/grand_template_ajar",
+  "textures": {
+    "side": "nirncraft:block/container/grand_velothi_side",
+    "front": "nirncraft:block/container/grand_velothi_front",
+    "top": "nirncraft:block/container/grand_velothi_top",
+    "inner": "nirncraft:block/container/chest_velothi_inner"
+  }
+}

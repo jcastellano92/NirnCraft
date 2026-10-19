@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/orientable",
+  "textures": {
+    "front": "nirncraft:block/container/shelf_nordic_books2",
+    "side": "nirncraft:block/container/shelf_nordic_side",
+    "top": "nirncraft:block/container/shelf_nordic_top"
+  }
+}

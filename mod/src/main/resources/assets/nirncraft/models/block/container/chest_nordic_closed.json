@@ -1,0 +1,9 @@
+{
+  "parent": "nirncraft:block/container/chest_template_closed",
+  "textures": {
+    "side": "nirncraft:block/container/chest_nordic_side",
+    "front": "nirncraft:block/container/chest_nordic_front",
+    "top": "nirncraft:block/container/chest_nordic_top",
+    "inner": "nirncraft:block/container/chest_nordic_inner"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "parent": "nirncraft:block/container/urn_template_open",
+  "textures": {
+    "body": "nirncraft:block/container/urn_rustic",
+    "top": "nirncraft:block/container/urn_rustic_top",
+    "inner": "nirncraft:block/container/urn_inner"
+  }
+}

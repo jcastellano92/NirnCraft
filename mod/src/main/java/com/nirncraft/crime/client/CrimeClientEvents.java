@@ -36,7 +36,7 @@ public final class CrimeClientEvents {
         BlockPos pos = com.nirncraft.crime.Locks.normalizePos(mc.level, bhr.getBlockPos());
         var block = mc.level.getBlockState(pos).getBlock();
         BlockEntity be = mc.level.getBlockEntity(pos);
-        if (!(be instanceof Container) && !(block instanceof net.minecraft.world.level.block.DoorBlock) && !(block instanceof net.minecraft.world.level.block.TrapDoorBlock)) return;
+        if (!(be instanceof Container) && !(be instanceof com.nirncraft.loot.container.LootContainerBlockEntity) && !(block instanceof net.minecraft.world.level.block.DoorBlock) && !(block instanceof net.minecraft.world.level.block.TrapDoorBlock)) return;
         if (!pos.equals(lastQuery) || sinceQuery > 20) {
             lastQuery = pos.immutable();
             sinceQuery = 0;

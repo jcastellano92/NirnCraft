@@ -38,6 +38,9 @@ import java.util.UUID;
  * table afresh, at the opener's level. Containers players placed are never touched, and neither is one the player
  * stored their own things in: what the table generated is remembered when the container is first opened, and a
  * restock waits until nothing else is inside.</p>
+ *
+ * <p>NirnCraft's own loot containers ({@code loot.container}, docs/CONTAINERS.md) are not vanilla containers and are
+ * never touched here: they restock each player's copy themselves, by the same rules.</p>
  */
 @net.neoforged.fml.common.EventBusSubscriber(modid = NirnCraft.MODID)
 public final class Restock {
