@@ -26,11 +26,13 @@
 struct BuildParams {
     int4 dims;   // the volume in blocks; w: the number of regions
     uint4 caps;  // capacities: x work nodes, y slices a level, z partial records a level, w output nodes
-    uint4 out;   // x: the output array's end before this build (subtrees are appended from there)
+    uint4 out;   // x: the output array's end before this build (subtrees are appended from there), y: the regions (the
+                 // refit list follows them); Vulkan: z the err tasks, w the slices from which a work group takes a node
 };
 
 struct Step {
-    int4 k;  // x: the level (relayout passes), the axis (runs)
+    int4 k;  // x: the level (relayout passes), the axis (runs); refit: x the first entry of the depth, y their count
+    int4 r;  // runs: the lines (block coordinates on the next axis from x, y of them; on the one after from z, w of them)
 };
 
 [[vk::binding(0, 0)]] ConstantBuffer<BuildParams> P;
@@ -56,7 +58,7 @@ static const uint MAXL = 100;  // levels a build may have (atlas_lod.slang walks
 static const uint S_LEVEL = 0, S_NLEVELS = 1, S_DONE = 2, S_OVERFLOW = 3, S_PHASE = 4, S_NEXT = 5, S_TOTAL = 6,
                   S_SLICES = 7, S_TASKS = 8, S_CHILDREN = 9, S_ERRT = 10, S_END = 11, S_LS = 12, S_LE = 13;
 static const uint ARG_NODES = 16, ARG_SCAN = 19, ARG_TASKS = 22, ARG_SLICES = 25, ARG_ERRT = 28, ARG_ONE = 31,
-                  ARG_PACK = 34;
+                  ARG_PACK = 34, ARG_ERRWIDE = 37, ARG_SWEEPWIDE = 40;
 static const uint S_LSTART = 64;   // MAXL + 1 level starts
 static const uint S_LARG = 192;    // per level: the dispatch of its nodes (3 words)
 // S_OVERFLOW bits
@@ -153,25 +155,24 @@ uint findItem(uint t, uint n, int c) {
 
 // ---- empty runs ----------------------------------------------------------------------------------------------------
 
-// one thread a line of blocks along axis step.k.x: per block how many empty blocks start there in each direction
-// (saturating at 31). Axis 0 writes the words, 1 and 2 add their bits.
+// one thread a line of blocks along axis step.k.x (the lines step.r names): per block how many empty blocks start
+// there in each direction (saturating at 31). Each axis writes its own bits.
 [numthreads(64, 1, 1)]
 void lbRuns(uint3 id: SV_DispatchThreadID) {
     int a = step.k.x, a1 = (a + 1) % 3, a2 = (a + 2) % 3;
     int3 d = P.dims.xyz;
     uint line = lin(id);
-    if (line >= uint(d[a1] * d[a2])) return;
+    if (line >= uint(step.r.y * step.r.w)) return;
     int3 b = int3(0, 0, 0);
-    b[a1] = int(line % uint(d[a1]));
-    b[a2] = int(line / uint(d[a1]));
+    b[a1] = step.r.x + int(line % uint(step.r.y));
+    b[a2] = step.r.z + int(line / uint(step.r.y));
     uint shNeg = uint(5 * (2 * a)), shPos = uint(5 * (2 * a + 1));
     uint run = 0;
     for (int k = 0; k < d[a]; k++) {  // runs towards -a
         b[a] = k;
         uint idx = blockIndex(b);
         run = grid[idx] == 0 ? min(run + 1u, 31u) : 0u;
-        uint w = a == 0 ? 0u : runs[idx];
-        runs[idx] = (w & ~(31u << shNeg)) | run << shNeg;
+        runs[idx] = (runs[idx] & ~(31u << shNeg)) | run << shNeg;
     }
     run = 0;
     for (int k = d[a] - 1; k >= 0; k--) {  // towards +a
@@ -184,16 +185,21 @@ void lbRuns(uint3 id: SV_DispatchThreadID) {
 
 // ---- the flattening error ------------------------------------------------------------------------------------------
 
-// the depth of the first content in column (u on a1, v on a2) of box [loA, hiA) along axis a, seen from its low face
-// (side 0) or its high face; -1: none (atlas_lab's firstHit)
-int firstHit(int a, int side, int u, int v, int loA, int hiA) {
+// the first content of the micro-voxel columns uLo..uHi-1 (on a1, inside one block) at v (on a2) of box [loA, hiA)
+// along axis a, seen from its low face (side 0) or its high face (atlas_lab's firstHit, the four walked together through
+// the brick pool, empty blocks skipped by their runs): the deepest of their depths, -1 when none has content
+int firstHits4(int a, int side, int uLo, int uHi, int v, int loA, int hiA) {
     int a1 = (a + 1) % 3, a2 = (a + 2) % 3;
     int3 m = int3(0, 0, 0);
-    m[a1] = u;
+    m[a1] = uLo;
     m[a2] = v;
     int dir = side == 0 ? 1 : -1, start = side == 0 ? loA : hiA - 1, q = start;
     uint sh = uint(5 * (2 * a + (side == 0 ? 1 : 0)));
-    while (side == 0 ? q < hiA : q >= loA) {
+    int strideA = a == 0 ? 1 : a == 1 ? 16 : 4, stride1 = a1 == 0 ? 1 : a1 == 1 ? 16 : 4;
+    int bit0 = (a2 == 0 ? 1 : a2 == 1 ? 16 : 4) * (v & 3) + stride1 * (uLo & 3);  // sub-column uLo at a = 0
+    uint pending = (1u << uint(uHi - uLo)) - 1u;
+    int deepest = -1;
+    while (pending != 0 && (side == 0 ? q < hiA : q >= loA)) {
         m[a] = q;
         int3 b = m >> 2;
         uint idx = blockIndex(b);
@@ -205,16 +211,33 @@ int firstHit(int a, int side, int u, int v, int loA, int hiA) {
         }
         uint4 k = bricks[br];
         int end = side == 0 ? min(hiA, b[a] * 4 + 4) : max(loA, b[a] * 4) - 1;
-        for (; q != end; q += dir) {
-            m[a] = q;
-            uint bit = uint((m.x & 3) + 4 * ((m.z & 3) + 4 * (m.y & 3)));
-            if ((((bit < 32u ? k.x >> bit : k.y >> (bit - 32u))) & 1u) != 0) return abs(q - start);
+        for (; q != end && pending != 0; q += dir) {
+            int at = bit0 + strideA * (q & 3);
+            for (uint c = 0; c < 4u; c++) {
+                if (((pending >> c) & 1u) == 0) continue;
+                uint bit = uint(at + stride1 * int(c));
+                if ((((bit < 32u ? k.x >> bit : k.y >> (bit - 32u))) & 1u) != 0) {
+                    pending &= ~(1u << c);
+                    deepest = max(deepest, abs(q - start));
+                }
+            }
         }
     }
-    return -1;
+    return deepest;
 }
 
-// per node: its err tasks (one a face row: axis a, side, v along a2)
+// a node's err tasks: per axis a, per side, per row v (on a2), per chunk of ERR_CHUNK columns (on a1)
+static const int ERR_CHUNK = 32;
+int errChunks(int3 e, int a) { return (e[(a + 1) % 3] + ERR_CHUNK - 1) / ERR_CHUNK; }
+uint errTasks(int3 e) {
+    uint n = 0;
+    for (int a = 0; a < 3; a++) n += uint(2 * e[(a + 2) % 3] * errChunks(e, a));
+    return n;
+}
+// a node whose partial errors a work group reduces (Vulkan: P.out.z, its least err tasks; 0 never)
+bool wideErr(uint tasks) { return P.out.z != 0 && tasks >= P.out.z; }
+
+// per node: its err tasks; x: 1 when a work group reduces them
 [numthreads(64, 1, 1)]
 void lbErrCount(uint3 id: SV_DispatchThreadID) {
     uint i = lin(id), ls = state[S_LS], n = state[S_LE] - ls;
@@ -222,11 +245,8 @@ void lbErrCount(uint3 id: SV_DispatchThreadID) {
     if (i >= n) return;
     uint4 b = nbox[ls + i];
     uint tasks = 0;
-    if (((b.w >> 16) & F_EMPTY) == 0) {
-        int3 e = boxHi(b) - boxLo(b);
-        tasks = uint(2 * (e.x + e.y + e.z));
-    }
-    scanIn[i] = uint4(0, 0, 0, tasks);
+    if (((b.w >> 16) & F_EMPTY) == 0) tasks = errTasks(boxHi(b) - boxLo(b));
+    scanIn[i] = uint4(wideErr(tasks) ? 1u : 0u, 0, 0, tasks);
 }
 
 [numthreads(64, 1, 1)]
@@ -240,18 +260,49 @@ void lbErrTask(uint3 id: SV_DispatchThreadID) {
     int local = int(t - scanOut[i].w);
     int a = 0;
     for (; a < 2; a++) {
-        int per = 2 * e[(a + 2) % 3];
+        int per = 2 * e[(a + 2) % 3] * errChunks(e, a);
         if (local < per) break;
         local -= per;
     }
-    int a1 = (a + 1) % 3, a2 = (a + 2) % 3;
-    int side = local / e[a2], v = lo[a2] + local % e[a2];
+    int a1 = (a + 1) % 3, a2 = (a + 2) % 3, ch = errChunks(e, a);
+    int side = local / (e[a2] * ch), rest = local % (e[a2] * ch);
+    int v = lo[a2] + rest / ch, u0 = lo[a1] + (rest % ch) * ERR_CHUNK, u1 = min(hi[a1], u0 + ERR_CHUNK);
     int err = 0;
-    for (int u = lo[a1]; u < hi[a1]; u++) err = max(err, firstHit(a, side, u, v, lo[a], hi[a]));
+    for (int u = u0; u < u1; u = (u & ~3) + 4)  // the chunk's columns, a block's four at a time
+        err = max(err, firstHits4(a, side, u, min(u1, (u & ~3) + 4), v, lo[a], hi[a]));
     part[t] = uint4(uint(err), 0, 0, 0);
 }
 
-// per node: its error (the largest of its rows'), leaf or not; an inner node's split work counted for the next scan
+// Vulkan: one work group per node with many err tasks, their largest into the node's first partial
+groupshared uint shMax[256];
+[numthreads(256, 1, 1)]
+void lbErrMax(uint3 gid: SV_GroupID, uint3 gt: SV_GroupThreadID) {
+    uint g = gid.x + gid.y * 1024u, t = gt.x;
+    uint n = state[S_LE] - state[S_LS];
+    uint i = findItem(g, n, 0);
+    uint at = scanOut[i].w, k = scanIn[i].w, m = 0;
+    for (uint j = t; j < k; j += 256u) m = max(m, part[at + j].x);
+    shMax[t] = m;
+    GroupMemoryBarrierWithGroupSync();
+    for (uint s = 128; s > 0; s /= 2u) {
+        if (t < s) shMax[t] = max(shMax[t], shMax[t + s]);
+        GroupMemoryBarrierWithGroupSync();
+    }
+    if (t == 0) part[at] = uint4(shMax[0], 0, 0, 0);
+}
+
+// a node's error: the largest of its partials (one, when lbErrMax reduced them)
+uint nodeErr(uint i) {
+    uint at = scanOut[i].w, k = scanIn[i].w, err = 0;
+    if (wideErr(k)) k = 1;
+    for (uint j = 0; j < k; j++) err = max(err, part[at + j].x);
+    return err;
+}
+
+// a node whose SAH sweep a work group runs (Vulkan: P.out.w, its least slices; 0 never)
+bool wideSweep(int3 e) { return P.out.w != 0 && uint(e.x + e.y + e.z) >= P.out.w; }
+
+// per node: its error, leaf or not; an inner node's split work counted for the next scan (w: 1 when a work group sweeps it)
 [numthreads(64, 1, 1)]
 void lbErrReduce(uint3 id: SV_DispatchThreadID) {
     uint i = lin(id), ls = state[S_LS], n = state[S_LE] - ls;
@@ -262,8 +313,7 @@ void lbErrReduce(uint3 id: SV_DispatchThreadID) {
     uint flags = b.w >> 16;
     uint4 counts = uint4(0, 0, 0, 0);
     if ((flags & F_EMPTY) == 0) {
-        uint at = scanOut[i].w, k = scanIn[i].w, err = 0;
-        for (uint j = 0; j < k; j++) err = max(err, part[at + j].x);
+        uint err = nodeErr(i);
         int3 lo = boxLo(b), hi = boxHi(b), e = hi - lo;
         bool leaf = err == 0 || e.x * e.y * e.z <= 1;
         flags = leaf ? F_LEAF : F_INTERNAL;
@@ -272,7 +322,7 @@ void lbErrReduce(uint3 id: SV_DispatchThreadID) {
             uint tasks = 0;
             for (int a = 0; a < 3; a++)
                 tasks += uint(blocksOn(lo[a], hi[a]) * blocksOn(lo[(a + 2) % 3], hi[(a + 2) % 3]));
-            counts = uint4(uint(e.x + e.y + e.z), tasks, 2, 0);
+            counts = uint4(uint(e.x + e.y + e.z), tasks, 2, wideSweep(e) ? 1u : 0u);
         }
     }
     scanIn[i] = counts;
@@ -289,6 +339,35 @@ void axisBases(uint4 b, uint mask, int a, out uint sliceBase, out uint taskBase)
         if (((mask >> uint(k)) & 1u) == 0) continue;
         sliceBase += uint(hi[k] - lo[k]);
         taskBase += uint(blocksOn(lo[k], hi[k]) * blocksOn(lo[(k + 2) % 3], hi[(k + 2) % 3]));
+    }
+}
+
+// a brick's micro-voxel layer s across axis a: how many it holds, and which positions on a1 and on a2 (4-bit masks)
+uint yLayer(uint2 m, int y) { return ((y < 2 ? m.x : m.y) >> uint(16 * (y & 1))) & 0xFFFFu; }
+void layerStats(uint2 m, int a, int s, out uint cnt, out uint m1, out uint m2) {
+    cnt = 0;
+    m1 = 0;
+    m2 = 0;
+    if (a == 1) {  // y = s: bits x + 4 z; a1 = z, a2 = x
+        uint L = yLayer(m, s);
+        cnt = countbits(L);
+        m1 = ((L & 0xFu) != 0 ? 1u : 0u) | ((L & 0xF0u) != 0 ? 2u : 0u) | ((L & 0xF00u) != 0 ? 4u : 0u) | ((L & 0xF000u) != 0 ? 8u : 0u);
+        m2 = (L | L >> 4 | L >> 8 | L >> 12) & 0xFu;
+    } else if (a == 2) {  // z = s: a1 = x, a2 = y
+        for (int y = 0; y < 4; y++) {
+            uint nib = (yLayer(m, y) >> uint(4 * s)) & 0xFu;
+            cnt += countbits(nib);
+            m1 |= nib;
+            if (nib != 0) m2 |= 1u << uint(y);
+        }
+    } else {  // x = s: a1 = y, a2 = z
+        for (int y = 0; y < 4; y++) {
+            uint L = yLayer(m, y) >> uint(s);
+            uint c = (L & 1u) | ((L >> 3) & 2u) | ((L >> 6) & 4u) | ((L >> 9) & 8u);
+            cnt += countbits(c);
+            if (c != 0) m1 |= 1u << uint(y);
+            m2 |= c;
+        }
     }
 }
 
@@ -334,17 +413,13 @@ void lbSliceTask(uint3 id: SV_DispatchThreadID) {
             }
             continue;
         }
-        for (int h = 0; h < 2; h++) {
-            uint w = h == 0 ? m.x : m.y;
-            while (w != 0) {
-                uint bit = firstbitlow(w) + uint(32 * h);
-                w &= w - 1u;
-                int3 p = o + int3(int(bit & 3u), int(bit >> 4), int((bit >> 2) & 3u));
-                int s = p[a] & 3;
-                cnt[s]++;
-                r1[s] = merge(r1[s], range(p[a1], p[a1] + 1));
-                r2[s] = merge(r2[s], range(p[a2], p[a2] + 1));
-            }
+        for (int s = 0; s < 4; s++) {
+            uint c, m1, m2;
+            layerStats(m, a, s, c, m1, m2);
+            if (c == 0) continue;
+            cnt[s] += c;
+            r1[s] = merge(r1[s], range(o[a1] + int(firstbitlow(m1)), o[a1] + int(firstbithigh(m1)) + 1));
+            r2[s] = merge(r2[s], range(o[a2] + int(firstbitlow(m2)), o[a2] + int(firstbithigh(m2)) + 1));
         }
     }
     for (int s = 0; s < 4; s++) part[t * 4u + uint(s)] = uint4(cnt[s], r1[s], r2[s], 0);
@@ -392,8 +467,24 @@ uint4 mergeBox(uint4 x, uint4 y) { return uint4(merge(x.x, y.x), merge(x.y, y.y)
 
 // ---- the split -----------------------------------------------------------------------------------------------------
 
-// per inner node: atlas_lab's SAH over every slice plane of the three axes; the children (each side's tight box)
-// appended to the next level
+// a split node's children (each side's tight box) appended to the next level; none found (impossible for a tight box
+// of more than one micro-voxel): it stays a leaf, its two slots empty
+void writeChildren(uint i, uint node, uint4 b, int bestAxis, uint4 bestL, uint4 bestR) {
+    uint c0 = state[S_LE] + scanOut[i].z;
+    naux[c0] = uint4(0, 0, 0, 0);
+    naux[c0 + 1] = uint4(0, 0, 0, 0);
+    if (bestAxis < 0) {
+        nbox[node] = uint4(b.xyz, (b.w & 0xFFFFu) | F_LEAF << 16);
+        nbox[c0] = uint4(0, 0, 0, F_EMPTY << 16);
+        nbox[c0 + 1] = uint4(0, 0, 0, F_EMPTY << 16);
+        return;
+    }
+    nbox[c0] = uint4(bestL.xyz, 0);
+    nbox[c0 + 1] = uint4(bestR.xyz, 0);
+    naux[node].x = c0;
+}
+
+// per inner node: atlas_lab's SAH over every slice plane of the three axes (a node a work group sweeps excepted)
 [numthreads(64, 1, 1)]
 void lbSweep(uint3 id: SV_DispatchThreadID) {
     uint i = lin(id), ls = state[S_LS], le = state[S_LE];
@@ -402,6 +493,7 @@ void lbSweep(uint3 id: SV_DispatchThreadID) {
     uint4 b = nbox[node];
     if (((b.w >> 16) & F_INTERNAL) == 0) return;
     int3 lo = boxLo(b), hi = boxHi(b);
+    if (wideSweep(hi - lo)) return;
     float best = 1e30f;
     int bestAxis = -1;
     uint4 bestL = uint4(0, 0, 0, 0), bestR = uint4(0, 0, 0, 0);
@@ -437,16 +529,122 @@ void lbSweep(uint3 id: SV_DispatchThreadID) {
         }
         base += uint(n);
     }
-    if (bestAxis < 0) {  // cannot happen for a tight box of more than one micro-voxel; kept a leaf
-        nbox[node] = uint4(b.xyz, (b.w & 0xFFFFu) | F_LEAF << 16);
-        return;
+    writeChildren(i, node, b, bestAxis, bestL, bestR);
+}
+
+// Vulkan: the same sweep by one work group per large node, 256 slices at a time (suffix and prefix boxes by group
+// scans, each plane's cost as lbSweep computes it, the least cost and then the lowest plane kept: lbSweep's choice)
+groupshared uint4 shBox[256];
+groupshared uint2 shCnt[256];
+groupshared float shCost[256];
+groupshared uint shAt[256];
+
+// inclusive scan of (box, count) in thread order; afterwards shBox / shCnt hold every thread's
+void scanBoxes(uint t, inout uint4 box, inout uint2 cnt) {
+    shBox[t] = box;
+    shCnt[t] = cnt;
+    GroupMemoryBarrierWithGroupSync();
+    for (uint off = 1; off < 256u; off *= 2u) {
+        bool has = t >= off;
+        uint4 b2 = shBox[has ? t - off : t];
+        uint2 c2 = has ? shCnt[has ? t - off : t] : uint2(0, 0);
+        GroupMemoryBarrierWithGroupSync();
+        if (has) {
+            box = mergeBox(box, b2);
+            cnt = add64(cnt, c2);
+            shBox[t] = box;
+            shCnt[t] = cnt;
+        }
+        GroupMemoryBarrierWithGroupSync();
     }
-    uint c0 = le + scanOut[i].z;
-    nbox[c0] = uint4(bestL.xyz, 0);
-    nbox[c0 + 1] = uint4(bestR.xyz, 0);
-    naux[c0] = uint4(0, 0, 0, 0);
-    naux[c0 + 1] = uint4(0, 0, 0, 0);
-    naux[node].x = c0;
+}
+
+[numthreads(256, 1, 1)]
+void lbSweepWide(uint3 gid: SV_GroupID, uint3 gt: SV_GroupThreadID) {
+    uint g = gid.x + gid.y * 1024u, t = gt.x;
+    uint ls = state[S_LS], n = state[S_LE] - ls;
+    uint i = findItem(g, n, 3);
+    uint node = ls + i;
+    uint4 b = nbox[node];
+    int3 lo = boxLo(b), hi = boxHi(b);
+    float best = 1e30f;
+    int bestAxis = -1;
+    uint4 bestL = uint4(0, 0, 0, 0), bestR = uint4(0, 0, 0, 0);
+    uint base = scanOut[i].x;
+    const uint4 none = uint4(EMPTY_RANGE, EMPTY_RANGE, EMPTY_RANGE, 0);
+    for (int a = 0; a < 3; a++) {
+        int na = hi[a] - lo[a];
+        if (na >= 2) {
+            // suffix boxes, chunks from the end (thread 0 the chunk's last slice), and the total
+            uint4 carry = none;
+            uint2 total = uint2(0, 0);
+            for (int c1 = na; c1 > 0; c1 -= 256) {
+                int k = c1 - 1 - int(t);
+                uint4 box = none;
+                uint2 cnt = uint2(0, 0);
+                if (k >= 0) {
+                    uint4 rec = slices[base + uint(k)];
+                    box = sliceBox(rec, a, lo[a] + k);
+                    cnt = uint2(rec.x, 0);
+                }
+                scanBoxes(t, box, cnt);
+                if (k >= 0) suffix[base + uint(k)] = mergeBox(box, carry);
+                carry = mergeBox(carry, shBox[255]);
+                total = add64(total, shCnt[255]);
+                GroupMemoryBarrierWithGroupSync();
+            }
+            DeviceMemoryBarrierWithGroupSync();  // the suffix boxes, read by other threads below
+            // prefix boxes, each plane's cost, the chunk's least
+            uint4 pcarry = none;
+            uint2 ccarry = uint2(0, 0);
+            for (int c0 = 0; c0 < na; c0 += 256) {
+                int k = c0 + int(t), split = k + 1;  // the plane before slice k + 1: the prefix through slice k
+                uint4 box = none;
+                uint2 cnt = uint2(0, 0);
+                if (k < na) {
+                    uint4 rec = slices[base + uint(k)];
+                    box = sliceBox(rec, a, lo[a] + k);
+                    cnt = uint2(rec.x, 0);
+                }
+                scanBoxes(t, box, cnt);
+                uint4 pre = mergeBox(box, pcarry);
+                uint2 cpre = add64(cnt, ccarry);
+                float c = 1e30f;
+                if (split < na) {
+                    uint4 R = suffix[base + uint(split)];
+                    if (!emptyRange(pre.x) && !emptyRange(R.x))
+                        c = boxArea(pre) * u64ToFloat(cpre) + boxArea(R) * u64ToFloat(sub64(total, cpre));
+                }
+                shCost[t] = c;
+                shAt[t] = t;
+                GroupMemoryBarrierWithGroupSync();
+                for (uint s = 128; s > 0; s /= 2u) {
+                    if (t < s) {
+                        float co = shCost[t + s];
+                        uint ao = shAt[t + s];
+                        if (co < shCost[t] || (co == shCost[t] && ao < shAt[t])) {
+                            shCost[t] = co;
+                            shAt[t] = ao;
+                        }
+                    }
+                    GroupMemoryBarrierWithGroupSync();
+                }
+                float cm = shCost[0];
+                uint w = shAt[0];
+                if (cm < best) {
+                    best = cm;
+                    bestAxis = a;
+                    bestL = mergeBox(shBox[w], pcarry);
+                    bestR = suffix[base + uint(c0) + w + 1u];
+                }
+                pcarry = mergeBox(pcarry, shBox[255]);
+                ccarry = add64(ccarry, shCnt[255]);
+                GroupMemoryBarrierWithGroupSync();
+            }
+        }
+        base += uint(na);
+    }
+    if (t == 0) writeChildren(i, node, b, bestAxis, bestL, bestR);
 }
 
 // ---- regions -------------------------------------------------------------------------------------------------------
@@ -509,6 +707,7 @@ void lbRegionTight(uint3 id: SV_DispatchThreadID) {
 
 // after a scan of the level's counts (totals in hand): the next dispatches' sizes, the capacities checked
 void afterScan(uint4 total) {
+    if (state[S_DONE] != 0) return;  // the levels recorded past the last one do nothing
     uint phase = state[S_PHASE];
     bool over = false;
     if (phase == 0) {
@@ -518,6 +717,7 @@ void afterScan(uint4 total) {
             over = true;
         }
         setArgs(ARG_ERRT, total.w, 64u);
+        setArgs(ARG_ERRWIDE, total.x, 1u);
     } else {
         state[S_SLICES] = total.x;
         state[S_TASKS] = total.y;
@@ -537,10 +737,12 @@ void afterScan(uint4 total) {
         }
         setArgs(ARG_TASKS, total.y, 64u);
         setArgs(ARG_SLICES, total.x, 64u);
+        setArgs(ARG_SWEEPWIDE, phase == 1 ? total.w : 0u, 1u);
     }
     if (over) {  // stop: every later dispatch is empty, the host grows the buffers and builds again
         state[S_DONE] = 1;
         for (uint k = ARG_NODES; k < ARG_ONE; k++) state[k] = 0;
+        for (uint k = ARG_ERRWIDE; k < ARG_SWEEPWIDE + 3u; k++) state[k] = 0;
     }
 }
 
@@ -635,6 +837,7 @@ void lbAdvance(uint3 id: SV_DispatchThreadID) {
         state[S_DONE] = 1;
         state[S_TOTAL] = le;
         for (uint k = ARG_NODES; k < ARG_ONE; k++) state[k] = 0;
+        for (uint k = ARG_ERRWIDE; k < ARG_SWEEPWIDE + 3u; k++) state[k] = 0;
         setArgs(ARG_PACK, le, 64u);
         return;
     }
@@ -698,6 +901,61 @@ void lbPosDown(uint3 id: SV_DispatchThreadID) {
     naux[c + 1u].z = first + 1u;
     naux[c].w = first + 2u;
     naux[c + 1u].w = first + 2u + naux[c].y;
+}
+
+// ---- updates: the nodes above rebuilt subtrees, refitted -----------------------------------------------------------
+
+int3 nodeLo(uint4 w) { return int3(int(w.x & 0xFFFu), int(w.y & 0xFFFu), int(w.z & 0xFFFu)); }
+int3 nodeHi(uint4 w) { return int3(int((w.x >> 12) & 0xFFFu), int((w.y >> 12) & 0xFFFu), int((w.z >> 12) & 0xFFFu)); }
+
+// one depth of refitted nodes (entries step.k.x .. + step.k.y of the refit list, after the regions): each node's box
+// the union of its children's (an emptied child dropped from its mask), as a level for the error passes
+[numthreads(64, 1, 1)]
+void lbRefitBox(uint3 id: SV_DispatchThreadID) {
+    uint i = lin(id), n = uint(step.k.y);
+    if (state[S_OVERFLOW] != 0) return;
+    if (i == 0) {
+        state[S_DONE] = 0;  // the build is over: its scans serve the refit
+        state[S_LS] = 0;
+        state[S_LE] = n;
+        setArgs(ARG_NODES, n, 64u);
+        setArgs(ARG_SCAN, n, 1024u);
+    }
+    if (i >= n) return;
+    uint slot = regions[P.out.y + uint(step.k.x) + i].w;
+    uint4 w = outNodes[slot];
+    uint mask = (w.x >> 24) & 3u, first = w.w, kept = 0, keptFirst = 0;
+    uint4 box = uint4(EMPTY_RANGE, EMPTY_RANGE, EMPTY_RANGE, 0);
+    uint j = first;
+    for (uint c = 0; c < 2u; c++) {
+        if (((mask >> c) & 1u) == 0) continue;
+        uint4 k = outNodes[j];
+        int3 lo = nodeLo(k), hi = nodeHi(k);
+        if (lo.x < hi.x) {
+            if (kept == 0) keptFirst = j;
+            kept |= 1u << c;
+            box = mergeBox(box, uint4(range(lo.x, hi.x), range(lo.y, hi.y), range(lo.z, hi.z), 0));
+        }
+        j++;
+    }
+    nbox[i] = kept == 0 ? uint4(box.xyz, F_EMPTY << 16) : uint4(box.xyz, 0);
+    naux[i] = uint4(slot, kept, keptFirst, 0);
+}
+
+// their errors measured (the err passes ran on them), written into their slots
+[numthreads(64, 1, 1)]
+void lbRefitPack(uint3 id: SV_DispatchThreadID) {
+    uint i = lin(id), ls = state[S_LS], n = state[S_LE] - ls;
+    if (i >= n || state[S_OVERFLOW] != 0) return;
+    uint4 b = nbox[i], x = naux[i];
+    if (((b.w >> 16) & F_EMPTY) != 0) {
+        outNodes[x.x] = uint4(0, 0, 0, 0);
+        return;
+    }
+    uint e = min(nodeErr(i), 4095u);
+    int3 lo = boxLo(b), hi = boxHi(b);
+    outNodes[x.x] = uint4(uint(lo.x) | uint(hi.x) << 12 | x.y << 24, uint(lo.y) | uint(hi.y) << 12 | (e & 255u) << 24,
+                          uint(lo.z) | uint(hi.z) << 12 | (e >> 8) << 24, x.z);
 }
 
 // every node in its slot: lodPack's words
