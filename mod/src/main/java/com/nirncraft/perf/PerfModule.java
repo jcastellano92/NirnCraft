@@ -26,6 +26,7 @@ public final class PerfModule {
 
     public static void init(IEventBus modBus) {
         PerfTickets.init(modBus);
+        Lookahead.init();
         RULES.register(modBus);
         PerfPackets.register();
         com.nirncraft.NirnCraft.config(ModConfig.Type.SYNCED, PerfConfig.SPEC, "nirncraft-perf-server.toml");
