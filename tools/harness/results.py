@@ -12,6 +12,7 @@ A new result moves `after` to `before` and drops the old `before`, so iterating 
 last two looks (or numbers) of the same test. Non-visual tests (checks, perf) use the same record without images.
 """
 import json
+import re
 import shutil
 import time
 from pathlib import Path
@@ -449,7 +450,9 @@ def overview(scenes):
                + "".join(f"<th>{k}</th>" for k in order) + "</tr>")
     for (tier, suite), c in sorted(groups.items()):
         out.append(f"<tr><td>{tier}</td><td>{html.escape(suite)}</td>" + "".join(f"<td>{c.get(k, '')}</td>" for k in order) + "</tr>")
-    out.append("</table><h2>Needs attention</h2><table><tr><th>status</th><th>test</th><th>when</th><th>why</th></tr>")
+    out.append("</table>")
+    out += seam_matrix(recs, by_id)
+    out.append("<h2>Needs attention</h2><table><tr><th>status</th><th>test</th><th>when</th><th>why</th></tr>")
     for r in recs:
         if r.get("status") in ("pass", "skip"):
             continue
@@ -558,4 +561,35 @@ def pop_metrics(scene, imgs):
     if flags:
         m["popFlags"] = flags
     return m
+
+
+SEAM_COLUMNS = [  # metric, label, warn, bad (higher is worse; luma ratio as |1 - x|)
+    ("handoffDiff", "hand-off change", 10, 18), ("handoffColorDE", "hand-off colour dE", 3, 6),
+    ("popRatio", "pop in motion (x usual)", 2.5, 4), ("fidelityDE", "far field colour dE", 4, 8),
+    ("fidelityStructure", "far field shapes", 12, 20)]
+
+
+def seam_matrix(recs, by_id):
+    """Every distance / seam test's numbers in one grid: rows by category (subject:*), columns by instrument."""
+    rows = {}
+    for r in recs:
+        m = r.get("metrics", {})
+        if not any(k in m for k, *_ in SEAM_COLUMNS):
+            continue
+        s = by_id.get(r.get("scene"), {})
+        cat = next((t[8:] for t in s.get("tags", []) if t.startswith("subject:")), "other")
+        subject = re.sub(r"^(dist|pop|fid|alt)-", "", r.get("scene", ""))
+        rows.setdefault((cat, subject), {}).update({k: m[k] for k, *_ in SEAM_COLUMNS if k in m})
+    if not rows:
+        return []
+    def cell(k, v, warn, bad):
+        c = "#5c1f1f" if v >= bad else "#5c4a1f" if v >= warn else "#1f3d24"
+        return f"<td style='background:{c}'>{v}</td>"
+    out = ["<h2>Seam matrix (Infinite ATLAS at every distance)</h2><table><tr><th>category</th><th>subject</th>"
+           + "".join(f"<th>{lab}</th>" for _, lab, *_ in SEAM_COLUMNS) + "</tr>"]
+    for (cat, subject), vals in sorted(rows.items()):
+        out.append(f"<tr><td>{cat}</td><td>{subject}</td>" + "".join(
+            cell(k, vals[k], w, b) if k in vals else "<td></td>" for k, _, w, b in SEAM_COLUMNS) + "</tr>")
+    out.append("</table>")
+    return out
 

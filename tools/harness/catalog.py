@@ -20,9 +20,18 @@ WEATHERS = {"clear", "cloudy", "overcast", "fog", "drizzle", "rain", "storm", "s
             "ash_storm", "dust", "sandstorm", "blight", "gale"}
 
 
+# open ground the harness builds on (entity and material-pad seam tests); planned like any place
+HARNESS_SPOTS = {
+    "harness_actors_plains": {"id": "harness_actors_plains", "x": 420, "z": 120, "radius": 30, "type": "landmark",
+                              "region": "skyrim/whiterun"},
+    "harness_pad_plains": {"id": "harness_pad_plains", "x": 470, "z": -60, "radius": 40, "type": "landmark",
+                           "region": "skyrim/whiterun"},
+}
+
+
 @lru_cache(maxsize=1)
 def places():
-    out = {}
+    out = dict(HARNESS_SPOTS)
     for name in json.loads((PLACES / "index.json").read_text(encoding="utf-8")):
         f = PLACES / name
         if not f.exists():
@@ -183,12 +192,20 @@ DISTANCE_SUBJECTS = [  # (place, kind, times); night ladders of lit places also 
     ("vivec", "city", ("day", "night")), ("dragon_bridge", "river", ("day", "night")),
     ("ilinalta_fishery", "lake", ("day", "night")), ("whiterun_stables", "road", ("day", "night")),
     ("bleak_falls_barrow", "dungeon", ("day", "night")), ("riverwood", "forest", ("day", "night")),
+    ("helgen", "effects", ("day", "night")), ("treva_cascade_falls", "waterfall", ("day", "night")),
+    ("dawnstar", "coast", ("day", "night")), ("eldergleam_sanctuary", "landmark", ("day",)),
+    ("falkreath", "forest", ("day", "night")), ("college_of_winterhold", "landmark", ("day", "night")),
     # long shadows from the peaks across the valleys at sunrise and sunset
     ("throat_of_the_world", "mountain", ("day", "night", "dawn", "dusk")),
     ("high_hrothgar", "mountain", ("day", "dawn", "dusk")),
     ("red_mountain", "volcano", ("day", "night", "dawn", "dusk")),
 ]
-LIT = {"city", "river", "road", "lake", "dungeon", "forest"}
+LIT = {"city", "river", "road", "lake", "dungeon", "forest", "effects", "coast", "landmark", "waterfall"}
+SEAM_ACTORS = ["dragon", "giant", "mammoth", "troll", "horse"]  # far actors: model -> impostor across the ring
+PAD = [  # player edits: patches of materials built on the ground (does Infinite ATLAS show what players build?)
+    "minecraft:gold_block", "minecraft:iron_block", "minecraft:stone_bricks", "minecraft:oak_planks", "minecraft:glass",
+    "minecraft:snow_block", "minecraft:sand", "minecraft:red_concrete", "minecraft:blue_concrete",
+    "minecraft:white_wool", "minecraft:magma_block", "minecraft:water"]
 NEAR_RD = 12   # the test client's render distance (HANDOFF = 12 x 16 - 16)
 MATERIAL_SAMPLES = [  # metal, precious metal, glass / ice, snow, polished stone, hot rock, PBR-mapped, plain references
     "minecraft:iron_block", "minecraft:gold_block", "minecraft:copper_block", "minecraft:glass", "minecraft:ice",
@@ -236,6 +253,43 @@ def distance_scenes():
                         "tags": tags + ["suite:altitude"], "timeout": 900,
                         "pose": {"ladder": {"place": pid, "distances": [1200, 1500, 2500],
                                             "heights": [250, 700, 1400]}}})
+    # entities across the ring: each summoned on the plains, ladder (model -> impostor) and a sweep, day and night
+    ents = {k.split(".")[2] for f in LANG.glob("*.json") for k in json.loads(f.read_text(encoding="utf-8"))
+            if k.startswith("entity.nirncraft.") and k.count(".") == 2}
+    spot = HARNESS_SPOTS["harness_actors_plains"]
+    for e in SEAM_ACTORS:
+        eid = f"nirncraft:{e}" if e in ents else f"minecraft:{e}"
+        summon = (f"try execute positioned {spot['x']} 0 {spot['z']} positioned over world_surface run summon {eid} "
+                  f"~ ~1 ~ {{NoAI:1b,PersistenceRequired:1b,Silent:1b}}")
+        kill = f"try kill @e[type={eid}]"
+        for tod in ("day", "night"):
+            common = {"_file": "(generated distance)", "time": TIMES[tod], "weather": "clear", "variants": ["shaders"],
+                      "checks": {}, "source": "generated: catalog.distance_scenes",
+                      "setup": ["try difficulty easy", summon, "wait 20"], "cleanup": [kill, "try difficulty peaceful"],
+                      "tags": ["suite:distance", "suite:seam-entities", "feature:farfield", "feature:popin",
+                               "feature:creature", "subject:entity", f"gallery:entity:{e}", f"time:{tod}",
+                               "region:skyrim/whiterun"]}
+            out.append({**common, "id": f"dist-actor-{e}-{tod}", "title": f"{e} from 16 m to 2 km ({tod})",
+                        "tags": common["tags"] + ["suite:distance-ladder"], "timeout": 1500,
+                        "pose": {"ladder": {"place": "harness_actors_plains",
+                                            "distances": [16, 48, 128, 168, 184, 320, 640, 1280, 2048]}}})
+            out.append({**common, "id": f"pop-actor-{e}-{tod}", "title": f"{e}: flying through the hand-off ({tod})",
+                        "tags": common["tags"] + ["suite:distance-sweep"], "timeout": 600,
+                        "pose": {"sweep": {"place": "harness_actors_plains"}}})
+    # player edits: a pad of 12 x 12 material patches on the plains, then out to 2 km
+    pad = HARNESS_SPOTS["harness_pad_plains"]
+    fills = [f"try execute positioned {pad['x'] + (i % 4) * 14 - 21} 0 {pad['z'] + (i // 4) * 14 - 14} "
+             f"positioned over world_surface run fill ~ ~-1 ~ ~11 ~-1 ~11 {b}" for i, b in enumerate(PAD)]
+    for tod in ("day", "night"):
+        out.append({"_file": "(generated distance)", "id": f"dist-edits-pad-{tod}",
+                    "title": f"Player-built material pad from 24 m to 2 km ({tod}): does the far field show edits?",
+                    "time": TIMES[tod], "weather": "clear", "variants": ["shaders"], "checks": {}, "timeout": 1500,
+                    "setup": fills + ["wait 20"], "fidelity": False,
+                    "source": "generated: catalog.distance_scenes",
+                    "tags": ["suite:distance", "suite:seam-edits", "suite:distance-ladder", "feature:farfield",
+                             "feature:materials", "feature:textures", "subject:edits", f"time:{tod}", "region:skyrim/whiterun"],
+                    "pose": {"ladder": {"place": "harness_pad_plains",
+                                        "distances": [24, 64, 128, 168, 184, 320, 640, 1280, 2048]}}})
     # PBR / materials at distance: a lineup on the sky stage, 4 m to 128 m (POM range, specular fade, metal F0)
     for tod in ("day", "dusk"):
         out.append({"_file": "(generated distance)", "id": f"pbr-ladder-{tod}",
@@ -246,6 +300,19 @@ def distance_scenes():
                     "setup": [f"try setblock {STAGE[0] - 7 + i % 8 * 2} {STAGE[1] + 1 + i // 8} {STAGE[2] + (i // 8) * 2} {b}"
                               for i, b in enumerate(MATERIAL_SAMPLES)],
                     "pose": {"ladder": {"stage": True, "distances": [4, 8, 16, 32, 64, 128]}}})
+    # clouds across the ring: a storm front parked over Whiterun, seen from 64 m out to 4 km (and flown through)
+    for tod in ("day", "dusk"):
+        common = {"_file": "(generated distance)", "time": TIMES[tod], "weather": "cloudy", "variants": ["shaders"],
+                  "checks": {}, "source": "generated: catalog.distance_scenes", "front": [62, -68, 600, "storm"],
+                  "tags": ["suite:distance", "suite:clouds-distance", "feature:clouds", "feature:storm",
+                           "feature:farfield", "feature:popin", "subject:clouds", f"time:{tod}", "place:whiterun",
+                           "region:skyrim/whiterun"]}
+        out.append({**common, "id": f"dist-storm-front-{tod}", "title": f"A storm front from 64 m to 4 km ({tod})",
+                    "timeout": 1500, "tags": common["tags"] + ["suite:distance-ladder"],
+                    "pose": {"ladder": {"place": "whiterun", "distances": LADDER}}})
+        out.append({**common, "id": f"pop-storm-front-{tod}", "title": f"Flying through the hand-off under a storm ({tod})",
+                    "timeout": 600, "tags": common["tags"] + ["suite:distance-sweep"],
+                    "pose": {"sweep": {"place": "whiterun"}}})
     # clouds at every distance and on approach: one spot, rising from the ground through the deck and above it
     for weather in ("overcast", "storm", "cloudy"):
         out.append({"_file": "(generated distance)", "id": f"clouds-approach-whiterun-{weather}",
@@ -542,15 +609,17 @@ def capture_actions(s, tag, plan=None):
     if "ladder" in p:  # every rung: move, let the world load, hold, capture
         lines = []
         for i, (x, z, h, yaw, pitch, _) in enumerate(ladder_rungs(s, plan)):
-            lines += [f"visit {x} {z} {h} {yaw} {pitch} {s.get('weather') or 'clear'}", "settle 1800 partial",
-                      f"wait {int(s.get('wait', 40))}", f"capture {tag}-r{i}"]
+            lines += [f"visit {x} {z} {h} {yaw} {pitch} {s.get('weather') or 'clear'}", "settle 1800 partial"]
+            if i == 0:  # the subject's chunks are loaded now: build / summon what the test needs
+                lines += list(s.get("setup", []))
+            lines += [f"wait {int(s.get('wait', 40))}", f"capture {tag}-r{i}"]
             if s.get("fidelity"):  # the same view drawn by the far field alone (render distance 2), then back
                 lines += ["renderdistance 2", "settle 1800 partial", f"wait {int(s.get('wait', 40))}", f"capture {tag}-r{i}b",
                           f"renderdistance {NEAR_RD}", "settle 1800 partial"]
         return lines + list(s.get("cleanup", []))
     if "sweep" in p:  # a smooth flight through the hand-off ring; the travel verb captures every 10 steps
         _, (ex, ey, ez), (lx, ly, lz) = sweep_path(s, plan)
-        return ["settle 1800 partial", f"wait {int(s.get('wait', 60))}",
+        return ["settle 1800 partial"] + list(s.get("setup", [])) + [f"wait {int(s.get('wait', 60))}",
                 f"camera-travel {tag}s 240 {ex} {ey} {ez} {lx} {ly} {lz}"] + list(s.get("cleanup", []))
     lines = ["settle 1800 partial"]  # the world behind a screen is part of the picture too
     if s.get("wait"):
