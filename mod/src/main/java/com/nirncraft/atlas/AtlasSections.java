@@ -70,7 +70,8 @@ public final class AtlasSections {
 
     /**
      * A block the far field keeps as a voxel (solid, leaves, slabs and stairs, water and lava, fire and lights, snow
-     * layers and carpets: without them a far snowfield is the bare ground under its snow).
+     * layers and carpets: without them a far snowfield is the bare ground under its snow; fences and walls: the
+     * outlines of yards and towns, and what lanterns hang on, which floated without them).
      */
     static boolean kept(BlockState s) {
         if (s.isAir()) return false;
@@ -78,7 +79,10 @@ public final class AtlasSections {
         if (s.getLightEmission() >= 10) return true;
         return s.getBlock() instanceof SlabBlock || s.getBlock() instanceof StairBlock
                 || s.getBlock() instanceof net.minecraft.world.level.block.SnowLayerBlock
-                || s.getBlock() instanceof net.minecraft.world.level.block.CarpetBlock;
+                || s.getBlock() instanceof net.minecraft.world.level.block.CarpetBlock
+                || s.getBlock() instanceof net.minecraft.world.level.block.FenceBlock
+                || s.getBlock() instanceof net.minecraft.world.level.block.FenceGateBlock
+                || s.getBlock() instanceof net.minecraft.world.level.block.WallBlock;
     }
 
     /** Chunk c's surface sections (lowest ground - 16 .. highest top), recorded when they changed. Server thread. */

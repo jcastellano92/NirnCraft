@@ -111,19 +111,30 @@ def find_elements(volume_slug):
     # featured chunks: per kind the chunk of the export with the most of its blocks (when it has enough of them)
     classes = block_classes()
     picked = {tuple(e["box"]) for e in out}
+    air_ids = [i for i, n in names.items() if n.startswith(("Block{minecraft:air}", "Block{minecraft:cave_air}"))]
+    solid = ~np.isin(ids, air_ids)
+    top = np.where(solid.any(axis=0), sy - 1 - np.argmax(solid[::-1], axis=0), -1)  # (z, x): each column's top block
     for kind, want, least in FEATURED:
         sel = np.isin(ids, [i for i, n in names.items() if want(n, classes.get(i, 5))])
+        if kind == "water":  # open water: only where water is the column's top (a lake, the sea), not an aquifer
+            yy = np.arange(sy)[:, None, None]
+            sel &= yy == top[None, :, :]
         best = None
-        for gz in range(0, sz - 15, 16):
-            for gx in range(0, sx - 15, 16):
-                n = int(sel[:, gz:gz + 16, gx:gx + 16].sum())
+        cols = sel.sum(axis=0)  # per column; 16 x 16 windows every 4 blocks: the feature in the box's middle
+        for gz in range(0, sz - 15, 4):
+            for gx in range(0, sx - 15, 4):
+                n = int(cols[gz:gz + 16, gx:gx + 16].sum())
                 if n >= least and (best is None or n > best[0]):
                     best = (n, gx, gz)
         if not best:
             continue
         _, gx, gz = best
         col = np.argwhere(ids[:, gz:gz + 16, gx:gx + 16] != 0)
-        box = [x0 + gx, y0 + int(col[:, 0].min()), z0 + gz, x0 + gx + 15, y0 + int(col[:, 0].max()), z0 + gz + 15]
+        feat = np.argwhere(sel[:, gz:gz + 16, gx:gx + 16])
+        # from a few blocks under the feature to the column's top: the export reaches 32 blocks down, and a water
+        # element was a dark cube of underground stone with a sliver of lake on it
+        lo = max(int(col[:, 0].min()), int(feat[:, 0].min()) - 4)
+        box = [x0 + gx, y0 + lo, z0 + gz, x0 + gx + 15, y0 + int(col[:, 0].max()), z0 + gz + 15]
         if tuple(box) not in picked:
             picked.add(tuple(box))
             out.append({"slug": f"{volume_slug}-{kind}", "volume": volume_slug, "kind": kind, "box": box})
@@ -134,7 +145,7 @@ BUILT = ("planks", "brick", "glass", "_door", "fence", "_stairs", "_slab", "wool
          "barrel", "_bed", "lantern", "chain", "_wall")
 # (kind, does a block state (its name, its class in blocks.bin) count, how many a chunk needs)
 FEATURED = [
-    ("water", lambda n, c: n.startswith("Block{minecraft:water}"), 48),
+    ("water", lambda n, c: n.startswith("Block{minecraft:water}"), 48),  # columns of open water (see find_elements)
     ("lights", lambda n, c: c == 3, 3),  # emissive (light 10 and up): lanterns, torches, fires, glowstone
     ("building", lambda n, c: any(k in n for k in BUILT), 96),
     ("custom", lambda n, c: not n.startswith("Block{minecraft:"), 8),  # NirnCraft's own blocks, models and textures
@@ -238,13 +249,19 @@ def truth_inputs(el):
             "box": ",".join(str(v) for v in el["box"])}
 
 
+def card_path(el, tmp, kind="vanilla"):
+    """An element's cards: per element and box (a changed box reused the old cards) and per light (vanilla, or the
+    realistic / albedo bake at the time of day), baked again whenever an input is newer (render() reuses a folder)."""
+    base = f"{el['slug']}-{'_'.join(str(v) for v in el['box']).replace('-', 'm')}"
+    return Path(tmp) / (f"{base}.alc" if kind == "vanilla" else f"{base}-{kind}-{day_time()}.alc")
+
+
 def bake_cards(el, tmp, kind=None):
     """The element's surface cards (atlas_truth bake=): the real faces' colour and light, sampled by lab-groups. kind:
     vanilla (Minecraft's light), realistic (the reference's light at the time of day: the default under --truth
     realistic) or albedo (the faces' own colour, for a renderer that lights them itself)."""
     kind = kind or ("realistic" if realistic() else "vanilla")
-    # per element (and light), and again whenever an input is newer (render() reuses a folder)
-    out = tmp / (f"{el['slug']}.alc" if kind == "vanilla" else f"{el['slug']}-{kind}-{day_time()}.alc")
+    out = card_path(el, tmp, kind)
     ins = [Path(p) for k, p in truth_inputs(el).items() if k != "box"]
     if not out.exists() or any(p.stat().st_mtime > out.stat().st_mtime for p in ins if p.exists()):
         extra = {} if kind == "vanilla" else {"lighting": kind, "time": day_time(), "classes": export_dir() / "blocks.bin"}
@@ -287,6 +304,8 @@ def renderer_args(renderer, el, tmp):
                                 "spp": 16, "radius": 0, "groups": 1}
     if renderer.startswith("lab-groups-bias"):  # (a probe) cards sampled this many mip levels blurrier: lab-groups-bias0.5
         return "atlas_lab", {**lab, "surface": bake_cards(el, tmp), "leaves": "cards", "mipbias": renderer[len("lab-groups-bias"):]}
+    if renderer == "lab-groupsf":  # groups with prefiltered face textures (the footprint's average, holes as coverage)
+        return "atlas_lab", {**lab, "variants": "groupsf", "surface": bake_cards(el, tmp), "leaves": "cards"}
     if renderer.startswith("lab-groups-frames"):  # (a probe) more samples a pixel: lab-groups-frames64
         return "atlas_lab", {**lab, "surface": bake_cards(el, tmp), "leaves": "cards", "frames": renderer[len("lab-groups-frames"):]}
     if renderer == "lab-groups-finest":  # (a probe) every group descended to its leaves: no level transitions at all

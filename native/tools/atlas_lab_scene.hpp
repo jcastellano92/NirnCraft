@@ -177,7 +177,9 @@ bool loadBlocks(const std::string& path) {
         b.any = !air && (b.mask != 0 || (b.flags & 4));
         // today's far field keeps (AtlasSections.kept): solids, leaves, fluids, lights, slabs, stairs, snow layers, carpets
         b.kept = !air && (b.cls <= 3 || name.find("_slab") != std::string::npos || name.find("_stairs") != std::string::npos ||
-                          name.rfind("Block{minecraft:snow}", 0) == 0 || name.find("_carpet}") != std::string::npos);
+                          name.rfind("Block{minecraft:snow}", 0) == 0 || name.find("_carpet}") != std::string::npos ||
+                          name.find("_fence}") != std::string::npos || name.find("_fence_gate}") != std::string::npos ||
+                          name.find("_wall}") != std::string::npos);
         if (!b.mask) b.kept = false;
     }
     return true;
@@ -282,9 +284,13 @@ bool leafCards = false;
 inline bool cutoutClass(const Block* b) { return b && b->cls == 1; }
 
 // micro-voxels: 4 per block side
+// a second trace through water (translucent water: what lies behind it), as the game draws no faces between water
+thread_local bool skipWater = false;
+
 inline bool microAt(int mx, int my, int mz) {
     const Block* b = vol.at(mx >> 2, my >> 2, mz >> 2);
     if (!b || !b->any) return false;
+    if (skipWater && b->cls == 2) return false;
     int bit = (mx & 3) + 4 * ((mz & 3) + 4 * (my & 3));
     if (!((b->mask >> bit) & 1)) return false;
     if (leafCards && cutoutClass(b)) return true;
@@ -357,7 +363,18 @@ bool loadCards(const std::string& path) {
         }
         for (int t = 0; t < 256; t++)
             if (!(cd.c[t] >> 24)) cd.mip[t] = cd.mean;
-        for (int t = 0; t < 341; t++) cd.cov[t] = t < 256 ? float(cd.c[t] >> 24) / 255.f : w[t];
+        // coverage per mip texel: the mean alpha under it (leaves' texels are 0 or 1; water's its translucency, which
+        // a covered-or-not mean made opaque from the first coarser level on)
+        for (int t = 0; t < 256; t++) cd.cov[t] = float(cd.c[t] >> 24) / 255.f;
+        for (int l = 1; l < 5; l++) {
+            int n2 = 16 >> l;
+            for (int v = 0; v < n2; v++)
+                for (int u = 0; u < n2; u++) {
+                    float a = 0;
+                    for (int j = 0; j < 4; j++) a += cd.cov[MIP_AT[l - 1] + (2 * u + (j & 1)) + (2 * n2) * (2 * v + (j >> 1))];
+                    cd.cov[MIP_AT[l] + u + n2 * v] = a * 0.25f;
+                }
+        }
         cards[cardKey(h[0], h[1], h[2], h[3])] = cd;
     }
     std::fprintf(stderr, "atlas_lab: %zu surface cards\n", cards.size());
@@ -475,6 +492,7 @@ struct Sample {
     int steps = 0;
     float t = 0;  // how far along the ray the hit is (blocks): reprojection for the moving-camera TAA
     uint32_t id = 0;  // which surface was hit (block, voxel, box or group): TAA keeps history only on the same one
+    float alpha = 1;  // a translucent hit's opacity (water's card): what is behind it shows through the rest
 };
 
 // where a ray enters the cube [lo, lo + size) (0 when it starts inside)
@@ -753,6 +771,8 @@ bool boxFace(const Node& n, int axis, bool high, V3 p, float t, BoxCtx& c) {
         c.s->hit = true;
         c.s->t = t;
         c.s->c = card ? col : lit(microCol(q[0], q[1], q[2], f), f);
+        const Block* hb = vol.at(q[0] >> 2, q[1] >> 2, q[2] >> 2);
+        c.s->alpha = card && hb && hb->cls == 2 ? cv : 1.f;
         return true;
     }
 }
@@ -974,6 +994,17 @@ Sample traceGroups(V3 o, V3 d, float pa, float tol, bool prefilter = false, uint
     if (rootGroup < 0) return s;
     BoxCtx c{o, d, pa, tol, &s, prefilter, seed};
     traceGroup(rootGroup, c);
+    if (s.hit && s.alpha < 0.999f) {  // translucent water over what the ray meets without it (or the sky), as blended
+        Sample b;
+        BoxCtx cb{o, d, pa, tol, &b, prefilter, seed};
+        skipWater = true;
+        traceGroup(rootGroup, cb);
+        skipWater = false;
+        RGB under = b.hit ? b.c : RGB{0x9C, 0xC4, 0xEC};
+        float a = s.alpha;
+        s.c = {s.c.r * a + under.r * (1 - a), s.c.g * a + under.g * (1 - a), s.c.b * a + under.b * (1 - a)};
+        s.steps += b.steps;
+    }
     return s;
 }
 

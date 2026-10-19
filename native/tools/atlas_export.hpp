@@ -84,7 +84,9 @@ inline bool keptByGame(const State& s) {
     bool water = s.cls == 2 && !(s.flags & 4);
     if (!s.mask && !water) return false;
     return s.cls <= 3 || s.name.find("_slab") != std::string::npos || s.name.find("_stairs") != std::string::npos ||
-           s.name.rfind("Block{minecraft:snow}", 0) == 0 || s.name.find("_carpet}") != std::string::npos;
+           s.name.rfind("Block{minecraft:snow}", 0) == 0 || s.name.find("_carpet}") != std::string::npos ||
+           s.name.find("_fence}") != std::string::npos || s.name.find("_fence_gate}") != std::string::npos ||
+           s.name.find("_wall}") != std::string::npos;
 }
 
 inline bool anyContent(const State& s) {
