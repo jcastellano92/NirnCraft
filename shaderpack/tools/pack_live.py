@@ -198,7 +198,8 @@ def run(a):
     if a.launch:
         launch_and_wait()
     if not a.no_sync:
-        print(f"synced {sync()} changed file(s) into {DEST}")
+        n = sync()
+        print(f"synced {n} changed file(s) into {DEST_ZIP if DEST_ZIP.exists() else DEST}")
     # a shader toggle checks readiness at the current pose, and the spawn pose may be buried: move to the first
     # requested pose before reloading
     first = []
