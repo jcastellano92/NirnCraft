@@ -31,9 +31,26 @@ def scenes():
                         "run": ["py", "-3", "tools/harness/element_lab.py", e["slug"], "--renderer", renderer,
                                 "--out", f".work/harness/elements/{renderer}"],
                         "inputs": ["tools/harness/element_lab.py", "native/tools/atlas_truth.cpp"] + ins,
-                        "metrics": {"worst_dE": r'"worst": \{"dist": \d+, "dE": ([\d.]+)',
-                                    "worst_iou": r'"worst": \{"dist": \d+, "dE": [\d.]+, "iou": ([\d.]+)\}',
-                                    "pop_fast": r'"flyin_fast": \{"pop": ([\d.]+)',
-                                    "pop_slow": r'"flyin_slow": \{"pop": ([\d.]+)'},
-                        "timeout": 900, "source": "tools/harness/element_lab.py"})
+                        "metrics": METRICS, "timeout": 900, "source": "tools/harness/element_lab.py"})
+    # suite:elements-lit (opt-in): the same elements against the realistic reference (the shader pack's light ray traced
+    # on the real mesh, docs/ATLAS-LOD.md "A realistic reference") at day, dusk and night: the bench and the far field
+    # sampling cards baked in that light (the representation under it), and the far field's own lighting (far-lit)
+    lit = renderers + [("-farlit", "far-lit", "the far field's own lighting", renderers[1][3])]
+    for e in els:
+        for tod, ticks in (("day", 6000), ("dusk", 12500), ("night", 18000)):
+            for suffix, renderer, what, ins in lit:
+                out.append({"_file": "(generated elements)", "id": f"element-{e['slug']}{suffix}-lit-{tod}",
+                            "title": f"Element {e['slug']} ({e['kind']}) under realistic light at {tod}: the reference vs {what}",
+                            "tags": ["suite:elements-lit", "feature:farfield", "feature:lighting", f"element:{e['kind']}",
+                                     f"renderer:{renderer}", f"time:{tod}"], "tier": "check", "group": "-", "variants": ["check"],
+                            "run": ["py", "-3", "tools/harness/element_lab.py", e["slug"], "--renderer", renderer, "--truth",
+                                    "realistic", "--time", str(ticks), "--out", f".work/harness/elements-lit/{renderer}"],
+                            "inputs": ["tools/harness/element_lab.py", "native/tools/atlas_truth.cpp", "native/tools/pack_look.hpp"] + ins,
+                            "metrics": METRICS, "timeout": 1200, "source": "tools/harness/element_lab.py"})
     return out
+
+
+METRICS = {"worst_dE": r'"worst": \{"dist": \d+, "dE": ([\d.]+)',
+           "worst_iou": r'"worst": \{"dist": \d+, "dE": [\d.]+, "iou": ([\d.]+)\}',
+           "pop_fast": r'"flyin_fast": \{"pop": ([\d.]+)',
+           "pop_slow": r'"flyin_slow": \{"pop": ([\d.]+)'}

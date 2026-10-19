@@ -256,7 +256,6 @@ def bake_cards(el, tmp, kind=None):
 
 def renderer_args(renderer, el, tmp):
     d = export_dir()
-    sky = {"sky": light_info()["sky"]} if realistic() else {}  # the realistic reference's background
     if renderer == "truth":
         args = {"camera": "mc", **truth_inputs(el), **REFERENCE[TRUTH_MODE]}
         if realistic():
@@ -264,6 +263,7 @@ def renderer_args(renderer, el, tmp):
         elif TIME is not None:
             args["time"] = TIME
         return "atlas_truth", args
+    sky = {"sky": light_info()["sky"]} if realistic() else {}  # the realistic reference's background
     lab = {"camera": "mc", "blocks": d / "blocks.bin", "volume": d / f"{el['volume']}.alv", "box": truth_inputs(el)["box"],
            "variants": "groups", "frames": 16, "shade": "mc", **sky}
     if renderer == "lab-groups":  # the grouped-voxel representation on the CPU bench, coloured from surface cards;

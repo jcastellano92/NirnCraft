@@ -273,5 +273,29 @@ for _sub in _truth.SUBJECTS:
         _y = _math.radians(_pose.get("yaw", 0))
         expect(-_math.sin(_y) * -_ox + _math.cos(_y) * -_oz > 0, f"truth subject {_sub[0]} faces its place")
 
+# --- the realistic reference's calibration: the pack's capture takes the subject's pose, time and world without its
+# exports, and the realistic render runs in that capture's camera at the same time of day ---------------------------
+_ts = {s["id"]: s for s in _truth.scenes()}
+for _slug in _truth.CALIBRATE:
+    _cap, _lab, _exp = _ts.get(f"truth-{_slug}-pack"), _ts.get(f"truth-{_slug}-realistic"), _ts.get(f"truth-{_slug}")
+    expect(bool(_cap and _lab and _exp), f"calibration scenes for {_slug} exist")
+    if _cap and _lab and _exp:
+        expect(_cap["variants"] == ["shaders"] and _cap["pose"] == _exp["pose"] and _cap["time"] == _exp["time"]
+               and not any(c.startswith("atlaslab") for c in _cap["setup"] + _cap["cleanup"]),
+               f"{_slug}: the pack capture is the subject's view with the pack on, no exports")
+        expect(_lab["lab"]["lighting"] == "realistic" and _lab["lab"]["time"] == _exp["time"]
+               and _lab["camera_from"] == {"scene": f"truth-{_slug}-pack", "variant": "shaders"},
+               f"{_slug}: the realistic render is lit at the capture's time, in its camera")
+# --- element tier under realistic light: --time reaches the reference and the cards, far-lit only against it -------
+_el.TRUTH_MODE, _el.TIME = "realistic", 12500
+expect(_el.renderer_args("truth", {"slug": "x", "volume": "v", "box": [0, 0, 0, 1, 1, 1]}, Path("."))[1].get("time") == 12500,
+       "the realistic reference is lit at --time")
+_el.TRUTH_MODE, _el.TIME = "intended", None
+try:
+    _el.renderer_args("far-lit", {"slug": "x", "volume": "v", "box": [0, 0, 0, 1, 1, 1]}, Path("."))
+    expect(False, "far-lit refuses a reference that is not realistic")
+except ValueError:
+    pass
+
 print(f"problems {len(problems)}")
 sys.exit(1 if problems else 0)
