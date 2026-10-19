@@ -557,6 +557,14 @@ class Runner:
             pm["reposed"] = True
         rec = results.store(s["id"], v, png, meta=receipt, fingerprint=fp, extra=extra)
         rec["metrics"].update(pm)
+        if s.get("calibrate"):  # projection calibration: markers projected vs found in the picture
+            import calibrate
+            cal = calibrate.check({**rec, "calibrate": s["calibrate"]}, Path(f"{results.stem(s['id'], v)}.after.png"))
+            rec["metrics"]["calibration"] = cal
+            if cal.get("error") or cal.get("max") is None or cal["max"] > calibrate.TOL_PX:
+                rec["metrics"].setdefault("flags", []).append(
+                    f"projection off: {cal.get('error') or cal}" + (f" (scale {cal['scale']}: field of view?)"
+                                                                    if cal.get("scale") else ""))
         if s.get("annotate") == "roads":  # the road plan drawn onto a copy of the picture through its own camera
             try:
                 import towns
@@ -701,6 +709,14 @@ class Runner:
         self.pos = s.get("_xz") or self.pos
         status = "fail" if fails else ("flag" if m.get("problems") else "pass")
         img = g.GAME / s["image"] if s.get("image") else None
+        for name, extra_img in (s.get("extra_images") or {}).items():  # more pictures the command drew
+            src = g.GAME / extra_img
+            if src.exists():
+                keep = results.stem(s["id"], v).with_name(f"{v}.{name}.png")
+                keep.parent.mkdir(parents=True, exist_ok=True)
+                keep.write_bytes(src.read_bytes())
+        if img is not None and img.exists() and s.get("autocrop"):  # a drawing on an empty canvas: crop, enlarge
+            img = results.autocrop(img, img.with_name(img.stem + "_view.png"))
         if img is not None and img.exists():  # a picture the command drew (a town plan): kept like a capture
             small = data if len(json.dumps(data)) < 20000 else {k: data[k] for k in s.get("keep", []) if k in data}
             rec = results.store(s["id"], v, img, meta={"report": small},
@@ -757,7 +773,9 @@ class Runner:
         --keep / watch / serve keep it for the next job. Whoever watches the game sees why it goes away."""
         if self._game is not None and not getattr(self.a, "keep", False) and self.game.running():
             try:
-                self.game.actions([f"message Tests finished{': ' + summary if summary else ''}. Closing the test client."],
+                sx, sy, sz = catalog.STAGE  # saved there, so the next boot loads at the stage, not the spawn cabin
+                self.game.actions([f"try tp @p {sx} {sy + 2} {sz}",
+                                   f"message Tests finished{': ' + summary if summary else ''}. Closing the test client."],
                                   timeout=30)
                 time.sleep(4)
             except Exception:  # noqa: BLE001

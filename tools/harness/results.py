@@ -781,3 +781,23 @@ def subject_sheet(subject, roles, level="top", view="front", top=2):
         paths.append(f)
     return paths
 
+
+def autocrop(src, dest, target=1400, gain=1.35):
+    """A drawing on a plain dark background (a dungeon cutaway): cropped to what is drawn, scaled up crisp (nearest)
+    to about `target` pixels and brightened, so a reviewer sees the structure, not the empty canvas."""
+    im = Image.open(src).convert("RGB")
+    a = np.asarray(im, dtype=np.int16)
+    bg = a[0, 0]
+    mask = np.abs(a - bg).sum(axis=2) > 24
+    ys, xs = np.nonzero(mask)
+    if len(xs):
+        pad = 12
+        im = im.crop((max(0, xs.min() - pad), max(0, ys.min() - pad), min(im.width, xs.max() + pad),
+                      min(im.height, ys.max() + pad)))
+    s = max(1, int(target / max(im.width, im.height)))
+    if s > 1:
+        im = im.resize((im.width * s, im.height * s), Image.NEAREST)
+    im = Image.fromarray(np.clip(np.asarray(im, dtype=np.float32) * gain, 0, 255).astype(np.uint8))
+    im.save(dest)
+    return dest
+

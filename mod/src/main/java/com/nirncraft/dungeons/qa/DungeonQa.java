@@ -99,6 +99,8 @@ public final class DungeonQa {
                         .executes(c -> export(c.getSource(), StringArgumentType.getString(c, "ids")))))
                 .then(Commands.literal("air-survey").then(Commands.argument("ids", StringArgumentType.greedyString())
                         .executes(c -> airSurvey(c.getSource(), StringArgumentType.getString(c,"ids")))))
+                .then(Commands.literal("cutaway").then(Commands.argument("id", StringArgumentType.word())
+                        .executes(c -> cutaway(c.getSource(), StringArgumentType.getString(c, "id")))))
                 .then(Commands.literal("view").then(Commands.argument("id", StringArgumentType.word())
                         .executes(c -> view(c.getSource(), StringArgumentType.getString(c, "id"), "boss", 0))
                         .then(Commands.literal("boss").executes(c -> view(c.getSource(), StringArgumentType.getString(c, "id"), "boss", 0)))
@@ -281,6 +283,52 @@ public final class DungeonQa {
         net.minecraft.world.phys.shapes.VoxelShape shape = s.getCollisionShape(lvl, BlockPos.ZERO);
         if (shape.isEmpty()) return '+';
         return net.minecraft.world.level.block.Block.isShapeFullBlock(shape) ? '#' : 'o';
+    }
+
+    /**
+     * {@code /nirncraft-dungeon-qa cutaway ID}: the whole dungeon at a glance from its in-memory paint (the world is
+     * not touched): nirncraft-qa/dungeon_ID_cutaway.png (iso, floors from the inside), _plan.png (top, by height) and
+     * a JSON summary.
+     */
+    private static int cutaway(CommandSourceStack src, String id) {
+        Job j = new Job(src.getServer(), src, "cutaway");
+        QaSample s = j.namedSample(id);
+        if (s == null) {
+            src.sendFailure(Component.literal("No dungeon place " + id));
+            return 0;
+        }
+        Optional<Structure.GenerationStub> stub = j.stub(s);
+        if (stub.isEmpty()) return 0;
+        List<StructurePiece> pieces = stub.get().getPiecesBuilder().build().pieces();
+        QaLevel lvl = j.paint(s, pieces, new HashMap<>(), stub.get().position().getY());
+        if (lvl == null) {
+            src.sendFailure(Component.literal("Dungeon " + id + " has no pieces"));
+            return 0;
+        }
+        BoundingBox all = null;
+        for (StructurePiece sp : pieces) all = all == null ? BoundingBox.fromCorners(
+                new net.minecraft.core.BlockPos(sp.getBoundingBox().minX(), sp.getBoundingBox().minY(), sp.getBoundingBox().minZ()),
+                new net.minecraft.core.BlockPos(sp.getBoundingBox().maxX(), sp.getBoundingBox().maxY(), sp.getBoundingBox().maxZ()))
+                : all.encapsulate(sp.getBoundingBox());
+        try {
+            java.nio.file.Path dir = src.getServer().getServerDirectory().resolve("nirncraft-qa");
+            java.nio.file.Files.createDirectories(dir);
+            var stats = DungeonCutaway.render(lvl, all, dir.resolve("dungeon_" + id + "_cutaway.png").toFile(),
+                    dir.resolve("dungeon_" + id + "_plan.png").toFile());
+            com.google.gson.JsonObject o = new com.google.gson.JsonObject();
+            o.addProperty("id", id);
+            o.addProperty("pieces", pieces.size());
+            o.addProperty("floors", stats.floors());
+            o.addProperty("levels", stats.maxY() - stats.minY());
+            o.addProperty("width", stats.width());
+            o.addProperty("depth", stats.depth());
+            java.nio.file.Files.writeString(dir.resolve("dungeon_" + id + ".json"), o.toString());
+            src.sendSuccess(() -> Component.literal("cutaway " + id + ": " + stats.floors() + " floor tiles"), false);
+            return 1;
+        } catch (java.io.IOException e) {
+            src.sendFailure(Component.literal("cutaway failed: " + e.getMessage()));
+            return 0;
+        }
     }
 
     private static int view(CommandSourceStack src, String id, String what, int n) {

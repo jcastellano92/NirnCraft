@@ -358,6 +358,9 @@ public final class ClientAutotest {
             // a test client shows the world, not text: HUD (and with it every NirnCraft card, banner and hint) hidden
             // for the whole session; tests about the HUD turn it on with `hud on`
             com.nirncraft.client.autotest.ReviewWorlds.hudHidden(mc, true);
+            // the camera is exactly what the receipt says: no speed / flying FOV change, no view bobbing
+            mc.options.fovEffectScale().set(0.0);
+            mc.options.bobView().set(false);
             serverCommand(mc, "gamemode spectator @p");
             serverCommand(mc, "gamerule advance_time false");
             serverCommand(mc, "gamerule advance_weather false");

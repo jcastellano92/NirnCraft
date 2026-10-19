@@ -209,6 +209,29 @@ def route_audit():
 
 
 SETTLEMENTS = ("capital", "city", "town", "village", "fort")
+DUNGEONS = ("dungeon_fixed", "dungeon")
+
+
+def dungeon_cutaways():
+    """Every dungeon at a glance from its in-memory paint (the world is not touched): an iso cutaway of its floors
+    from the inside, and a top-down plan by height (/nirncraft-dungeon-qa cutaway)."""
+    out = []
+    for pid, pl in catalog.places().items():
+        if pl.get("type") not in DUNGEONS:
+            continue
+        out.append({"id": f"cutaway-{pid}".replace("_", "-"), "title": f"{pid}: dungeon cutaway (floors, levels)",
+                    "_file": "(generated subjects)", "tier": "live", "kind": "measure", "variants": ["measure"],
+                    "tags": ["suite:dungeon-cutaways", f"place:{pid}", f"subject:{pid}", "view:cutaway", "feature:dungeon"]
+                            + ([f"region:{pl['region']}"] if pl.get("region") else []),
+                    "pose": {}, "settle": False, "role": "front",
+                    "measure_command": f"command nirncraft-dungeon-qa cutaway {pid}",
+                    "measure_file": f"nirncraft-qa/dungeon_{pid}.json",
+                    "image": f"nirncraft-qa/dungeon_{pid}_cutaway.png",
+                    "extra_images": {"plan": f"nirncraft-qa/dungeon_{pid}_plan.png"}, "autocrop": True,
+                    "measure_sum": {"pieces": "pieces", "floors": "floors", "levels": "levels"},
+                    "keep": ["pieces", "floors", "levels", "width", "depth"], "timeout": 240,
+                    "checks": {}, "source": "DungeonQa cutaway (DungeonCutaway)"})
+    return out
 
 
 def town_plans():
@@ -234,7 +257,8 @@ def town_plans():
 def scenes():
     """Every subject scene the game's index asks for ([] until subject-index has run)."""
     index = catalog.subject_index()
-    out = route_audit() + town_plans()
+    import calibrate
+    out = route_audit() + town_plans() + dungeon_cutaways() + [calibrate.scene()]
     if not index:
         return out
     for rec in index.get("items", []):
