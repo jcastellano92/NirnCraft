@@ -22,6 +22,8 @@ harness.py watch --suite smoke                 # live reload: edit shaders / tex
 harness.py plan --suite dungeons               # what would run, in what order, what is cached
 harness.py audit --budget 30m                  # a spread random sample of everything that fits 5m / 30m / 1h / 2h
                                                #   (problems first, then never-run, then stalest; --focus tag, --dry)
+harness.py audit --theme dungeons --budget 30m # one subject end to end: dungeons, landscape, flora, towns, weather,
+                                               #   renderer, lights, creatures, gear, fx, ui, content, realms (themes.json)
 harness.py list --tag feature:water            # what exists
 harness.py gate                                # the merge / push gate (below);  gate --install-hook
 harness.py open                                # the latest report in your browser (also .work/harness/latest/ in VS Code)

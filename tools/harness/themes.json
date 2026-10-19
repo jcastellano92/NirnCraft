@@ -1,0 +1,177 @@
+{
+ "_comment": "Audit themes: harness.py audit --theme NAME [--budget 30m]. Each theme is the union of these tags (prefix match), checks and visuals together; the audit samples within it (problems first, never-run, stalest, spread across strata). Add themes freely.",
+ "dungeons": {
+  "description": "Dungeon design and visuals: reachability, loops, traps, loot and lore placement, entrances near and far, interiors, caves",
+  "tags": [
+   "check:dungeons",
+   "check:loot",
+   "check:uniques",
+   "suite:dungeons",
+   "feature:dungeon",
+   "feature:cave",
+   "dungeon:",
+   "subject:dungeon",
+   "type:dungeon_fixed"
+  ]
+ },
+ "landscape": {
+  "description": "Region landscape features: terrain, mountains, volcanoes, rivers, lakes, coasts, roads, regions, hydrology, far field and horizon",
+  "tags": [
+   "check:regions",
+   "check:world",
+   "check:hydrology",
+   "check:roads",
+   "check:layout",
+   "suite:altitude",
+   "suite:horizon",
+   "subject:mountain",
+   "subject:volcano",
+   "subject:river",
+   "subject:lake",
+   "subject:coast",
+   "subject:waterfall",
+   "feature:river",
+   "feature:falls",
+   "feature:road",
+   "type:landmark"
+  ]
+ },
+ "flora": {
+  "description": "Flora placement and visuals: forests, foliage, groves, scatter and ecology, foliage shading and sway, forest seams",
+  "tags": [
+   "feature:foliage",
+   "subject:forest",
+   "check:scatter",
+   "check:ecology",
+   "check:placement",
+   "feature:shafts",
+   "site-herb",
+   "type:grove"
+  ]
+ },
+ "towns": {
+  "description": "Towns and cities: street plans, buildings, interiors, walls and gates, population, grounding, cities at every distance",
+  "tags": [
+   "check:towns",
+   "check:interiors",
+   "check:npcs",
+   "feature:town",
+   "subject:city",
+   "type:town",
+   "type:city",
+   "type:capital",
+   "type:village",
+   "suite:grounding"
+  ]
+ },
+ "weather": {
+  "description": "Weather and sky: clouds, storms, fog, rain, snow, ash, sand, lightning, night sky, moons, aurora, sunrise and sunset",
+  "tags": [
+   "suite:weather",
+   "suite:sky",
+   "suite:clouds-distance",
+   "feature:clouds",
+   "feature:storm",
+   "feature:fog",
+   "feature:lightning",
+   "feature:night-sky",
+   "feature:moons",
+   "feature:aurora",
+   "weather:"
+  ]
+ },
+ "renderer": {
+  "description": "Infinite ATLAS at every scale: ladders, hand-off sweeps, fidelity, altitude, lights, entities across the ring, player edits",
+  "tags": [
+   "suite:distance",
+   "suite:fidelity",
+   "feature:farfield",
+   "feature:popin",
+   "feature:seam",
+   "check:native",
+   "suite:lab"
+  ]
+ },
+ "lights": {
+  "description": "Lights and shadows: torches, windows, fires, lava at every distance, day/night, shadow maps, moonlight",
+  "tags": [
+   "feature:lights",
+   "feature:shadows",
+   "feature:fire",
+   "time:night",
+   "time:dawn",
+   "time:dusk"
+  ]
+ },
+ "creatures": {
+  "description": "Creatures and NPCs: gallery, animations, far actors, spawn rules, ecology, renderers, races",
+  "tags": [
+   "suite:gallery",
+   "suite:animation",
+   "suite:seam-entities",
+   "feature:creature",
+   "feature:npc",
+   "check:npcs",
+   "check:creatures",
+   "gallery:monster",
+   "gallery:creature",
+   "gallery:npc"
+  ]
+ },
+ "gear": {
+  "description": "Weapons, armour, items and materials: gallery sets, contracts, textures, PBR, item audits",
+  "tags": [
+   "gallery:armor",
+   "gallery:weapons",
+   "feature:armor",
+   "feature:weapons",
+   "check:contracts",
+   "check:textures",
+   "check:pbr",
+   "feature:materials",
+   "check:assets"
+  ]
+ },
+ "fx": {
+  "description": "Effects and magic: fire, smoke, spells, staves, lightning, effects at distance, spell and alchemy data",
+  "tags": [
+   "suite:fx",
+   "feature:fx",
+   "feature:magic",
+   "feature:smoke",
+   "feature:fire",
+   "subject:effects",
+   "check:spells",
+   "check:alchemy"
+  ]
+ },
+ "ui": {
+  "description": "Screens and HUD: every screen before/after, flows, menus coverage",
+  "tags": [
+   "suite:ui",
+   "feature:ui",
+   "feature:hud",
+   "feature:menu",
+   "check:ui",
+   "check:menus"
+  ]
+ },
+ "content": {
+  "description": "Quests, lore, loot, economy, uniques: references, lang keys, distributions (checks only, fast)",
+  "tags": [
+   "check:quests",
+   "check:loot",
+   "check:economy",
+   "check:uniques",
+   "check:lang",
+   "check:data"
+  ]
+ },
+ "realms": {
+  "description": "Realms and other dimensions",
+  "tags": [
+   "suite:realms",
+   "feature:realm"
+  ]
+ }
+}

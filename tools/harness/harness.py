@@ -1410,6 +1410,21 @@ def cmd_audit(a):
     seed = a.seed_audit if a.seed_audit is not None else int(time.time()) % 100000
     rng = random.Random(seed)
     scenes = [s for s in catalog.load() if s["_file"] != "(probe)"]
+    themes = json.loads((HERE / "themes.json").read_text(encoding="utf-8"))
+    if a.theme == "list" or a.theme == "?":
+        for name, th in themes.items():
+            if not name.startswith("_"):
+                n = sum(1 for s in scenes if any(tag_match(x, s["tags"]) or any(t.startswith(x) for t in s["tags"])
+                                                 for x in th["tags"]))
+                say(f"  {name:10} {n:5} tests  {th['description']}")
+        return 0
+    if a.theme:
+        if a.theme not in themes:
+            say(f"unknown theme {a.theme}; harness.py audit --theme list")
+            return 1
+        want = themes[a.theme]["tags"]
+        scenes = [s for s in scenes if any(tag_match(x, s["tags"]) or any(t.startswith(x) for t in s["tags"]) for x in want)]
+        a.audit_scope_theme = a.theme
     if a.focus:
         scenes = [s for s in scenes if any(tag_match(f, s["tags"]) for f in a.focus.split(","))]
     if budget < 3600:  # restart groups cost a relaunch: only in the longer audits
@@ -1461,7 +1476,7 @@ def cmd_audit(a):
     by_tier = {}
     for s, v in picked:
         by_tier[s["tier"]] = by_tier.get(s["tier"], 0) + 1
-    say(f"audit {a.budget} (seed {seed}): {len(picked)} test(s), ~{spent / 60:.0f} min estimated, "
+    say(f"audit {a.theme + ' ' if a.theme else ''}{a.budget} (seed {seed}): {len(picked)} test(s), ~{spent / 60:.0f} min estimated, "
         f"{len({stratum(s) for s, _ in picked})} strata; " + ", ".join(f"{k} {n}" for k, n in sorted(by_tier.items()))
         + f"; coverage so far {covered}/{known} ({100 * covered / max(1, known):.0f}%)")
     if a.dry:
@@ -1471,7 +1486,7 @@ def cmd_audit(a):
     a.ids, a.suite, a.tag, a.tier, a.group, a.changed, a.exclude, a.variant = (
         sorted({s["id"] for s, _ in picked}), None, None, None, None, None, None, None)
     a.force = False
-    a.audit_scope = f"audit-{a.budget}"
+    a.audit_scope = f"audit-{a.theme + '-' if a.theme else ''}{a.budget}"
     return cmd_run(a)
 
 
@@ -1547,6 +1562,8 @@ def main():
     p.add_argument("--budget", default="30m", help="5m, 30m, 1h, 2h or minutes (e.g. 45m)")
     p.add_argument("--audit-seed", dest="seed_audit", type=int, default=None, help="repeat a sample")
     p.add_argument("--focus", help="only tests with these tags (comma = or), e.g. feature:farfield")
+    p.add_argument("--theme", help="a named slice (tools/harness/themes.json): dungeons, landscape, flora, towns, "
+                                   "weather, renderer, lights, creatures, gear, fx, ui, content, realms; list")
     p.add_argument("--dry", action="store_true", help="show the sample, run nothing")
     p.add_argument("--keep", action="store_true")
     p.add_argument("--rebuild", action="store_true")
