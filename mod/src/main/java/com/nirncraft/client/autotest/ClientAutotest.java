@@ -715,6 +715,10 @@ public final class ClientAutotest {
                 com.nirncraft.client.autotest.ReviewWorlds.hudHidden(mc, !action.substring(4).trim().equals("on"));
             } else if (action.startsWith("weather-off ")) {  // on | off: world-gen views without clouds, rain or fog banks
                 com.nirncraft.atmosphere.client.WeatherFieldTexture.off(action.substring(12).trim().equals("on"));
+            } else if (action.startsWith("fog-off ")) {  // on | off: ground-truth views without distance fog or haze
+                com.nirncraft.atlas.AtlasTruthView.set(action.substring(8).trim().equals("on"));
+            } else if (action.startsWith("atlas-edits-why ")) {  // on | off: log what keeps changing in re-journalled chunks
+                com.nirncraft.atlas.AtlasEdits.why = action.substring(16).trim().equals("on");
             } else if (action.startsWith("atlaslab view ")) {  // the real blocks in view to a distance: waits until written
                 String[] va = action.substring(14).trim().split(" +");
                 liveCommand = com.nirncraft.atlas.AtlasLabExport.view(va[0], Integer.parseInt(va[1])).thenApply(msg -> {

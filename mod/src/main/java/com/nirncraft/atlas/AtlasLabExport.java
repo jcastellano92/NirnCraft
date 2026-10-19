@@ -378,6 +378,8 @@ public final class AtlasLabExport {
                             os.write(le(8).put("ALS1".getBytes(StandardCharsets.US_ASCII)).putInt(sections.size()).array());
                             for (byte[] b : sections) os.write(b);
                         }
+                        // the tints the game blends at the eye (one for the whole view: a later format can carry them per section)
+                        writeTints(name, net.minecraft.core.BlockPos.containing(eye));
                         String msg = "atlaslab: view " + name + ": " + chunks.size() + " chunks to " + distance + " blocks, " + sections.size()
                                 + " sections in " + (System.currentTimeMillis() - start) / 1000 + " s -> " + out;
                         NirnCraft.LOGGER.info(msg);
@@ -457,13 +459,7 @@ public final class AtlasLabExport {
             out = dir().resolve(name + ".alv");
             Files.write(out, b.array());
             // the tints the near field uses at the box's centre (blended as the game blends them), for atlas_lab
-            var cl = Minecraft.getInstance().level;
-            BlockPos c = new BlockPos(ax + sx / 2, ay + sy / 2, az + sz / 2);
-            String tints = String.format(java.util.Locale.ROOT, "{\"grass\": \"%06X\", \"foliage\": \"%06X\", \"water\": \"%06X\"}%n",
-                    net.minecraft.client.renderer.BiomeColors.getAverageGrassColor(cl, c) & 0xFFFFFF,
-                    net.minecraft.client.renderer.BiomeColors.getAverageFoliageColor(cl, c) & 0xFFFFFF,
-                    net.minecraft.client.renderer.BiomeColors.getAverageWaterColor(cl, c) & 0xFFFFFF);
-            Files.writeString(dir().resolve(name + ".json"), tints);
+            writeTints(name, new BlockPos(ax + sx / 2, ay + sy / 2, az + sz / 2));
         } catch (IOException e) {
             return "atlaslab: volume not written (" + e + ")";
         }
@@ -475,5 +471,16 @@ public final class AtlasLabExport {
 
     private static ByteBuffer le(int n) {
         return ByteBuffer.allocate(n).order(ByteOrder.LITTLE_ENDIAN);
+    }
+
+    /** name.json beside an export: the grass, foliage and water tints the game blends at pos. */
+    static void writeTints(String name, BlockPos c) throws IOException {
+        var cl = Minecraft.getInstance().level;
+        if (cl == null) return;
+        String tints = String.format(java.util.Locale.ROOT, "{\"grass\": \"%06X\", \"foliage\": \"%06X\", \"water\": \"%06X\"}%n",
+                net.minecraft.client.renderer.BiomeColors.getAverageGrassColor(cl, c) & 0xFFFFFF,
+                net.minecraft.client.renderer.BiomeColors.getAverageFoliageColor(cl, c) & 0xFFFFFF,
+                net.minecraft.client.renderer.BiomeColors.getAverageWaterColor(cl, c) & 0xFFFFFF);
+        Files.writeString(dir().resolve(name + ".json"), tints);
     }
 }

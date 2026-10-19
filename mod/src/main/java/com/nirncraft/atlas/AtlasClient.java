@@ -300,6 +300,7 @@ public final class AtlasClient {
             // shadows included (they do not follow the weather field's cover)
             if (com.nirncraft.atmosphere.client.WeatherFieldTexture.isOff())
                 frame.flags &= ~(AtlasNative.FRAME_CLOUDS | AtlasNative.FRAME_CLOUDS_QUARTER);
+            if (AtlasTruthView.noFog) frame.flags &= ~AtlasNative.FRAME_ATMOS;  // ground-truth views: no aerial haze
             // in the open, chunks still loading show the far field instead of a hole (never underground: the far
             // field has no caves, it would cover a cave mouth)
             if (mc.player != null && mc.level != null

@@ -383,6 +383,7 @@ inline float boxEntry(V3 o, V3 d, V3 lo, float size) {
 }
 
 Sample traceMicroDense(V3 o, V3 d);
+float vanillaAo(int bx, int by, int bz, int f, V3 p);
 
 // micro-voxels inside the non-air blocks (ref, micro, and the cov chain's level 0); a sparse view's rays go section
 // by section first (a kilometre is ~60 sections, not 1000 blocks)
@@ -405,6 +406,10 @@ Sample traceMicro(V3 o, V3 d) {
                 s.t = boxEntry(o, d, {mx * 0.25f, my * 0.25f, mz * 0.25f}, 0.25f);
                 s.id = hash(uint32_t(bx) * 73856093u ^ uint32_t(by) * 19349663u ^ uint32_t(bz) * 83492791u) | 1u;
                 s.c = lit(microCol(mx, my, mz, f), f);
+                if (mcShade) {
+                    float ao = vanillaAo(bx, by, bz, f, o + d * s.t);
+                    s.c = {s.c.r * ao, s.c.g * ao, s.c.b * ao};
+                }
                 return true;
             });
             return s.hit;
@@ -428,11 +433,45 @@ Sample traceMicroDense(V3 o, V3 d) {
             s.t = boxEntry(o, d, {mx * 0.25f, my * 0.25f, mz * 0.25f}, 0.25f);
             s.id = hash(uint32_t(bx) * 73856093u ^ uint32_t(by) * 19349663u ^ uint32_t(bz) * 83492791u) | 1u;
             s.c = lit(microCol(mx, my, mz, f), f);
+            if (mcShade) {
+                float ao = vanillaAo(bx, by, bz, f, o + d * s.t);
+                s.c = {s.c.r * ao, s.c.g * ao, s.c.b * ao};
+            }
             return true;
         });
         return s.hit;
     });
     return s;
+}
+
+// vanilla smooth lighting (shade=mc): each corner of a face averages the shade of the four blocks in front of it
+// (the one the face looks into and its three neighbours around that corner), 0.2 for an opaque full block and 1.0
+// otherwise, the two sides hiding the diagonal when both are opaque; the hit point blends its face's four corners
+inline bool opaqueAt(int x, int y, int z) {
+    const Block* b = vol.at(x, y, z);
+    return b && b->cls == 0 && (b->flags & 8) && !(b->flags & 2);
+}
+float vanillaAo(int bx, int by, int bz, int f, V3 p) {
+    const int n[6][3] = {{0, -1, 0}, {0, 1, 0}, {0, 0, -1}, {0, 0, 1}, {-1, 0, 0}, {1, 0, 0}};
+    int ax = f <= UP ? 1 : f <= SOUTH ? 2 : 0;  // the face's normal axis
+    int a1 = (ax + 1) % 3, a2 = (ax + 2) % 3;
+    int o[3] = {bx + n[f][0], by + n[f][1], bz + n[f][2]};  // the block the face looks into
+    float pu = p[a1] - float(a1 == 0 ? bx : a1 == 1 ? by : bz), pv = p[a2] - float(a2 == 0 ? bx : a2 == 1 ? by : bz);
+    pu = std::clamp(pu, 0.f, 1.f), pv = std::clamp(pv, 0.f, 1.f);
+    auto shade = [&](int du, int dv) {
+        int q[3] = {o[0], o[1], o[2]};
+        q[a1] += du, q[a2] += dv;
+        return opaqueAt(q[0], q[1], q[2]) ? 0.2f : 1.0f;
+    };
+    float c0 = shade(0, 0);
+    float corner[4];
+    for (int k = 0; k < 4; k++) {
+        int du = (k & 1) ? 1 : -1, dv = (k & 2) ? 1 : -1;
+        float s1 = shade(du, 0), s2 = shade(0, dv);
+        float d = (s1 < 1.f && s2 < 1.f) ? 0.2f : shade(du, dv);
+        corner[k] = (c0 + s1 + s2 + d) * 0.25f;
+    }
+    return (corner[0] * (1 - pu) + corner[1] * pu) * (1 - pv) + (corner[2] * (1 - pu) + corner[3] * pu) * pv;
 }
 
 // ---- whole-block levels (current, anymip) ---------------------------------------------------------------------------

@@ -74,6 +74,22 @@ public final class AtlasEdits {
 
     private static final Map<Long, TileJournal> JOURNAL = new ConcurrentHashMap<>();
     private static final Map<Long, Long> CHUNK_HASH = new ConcurrentHashMap<>();  // chunk -> content hash recorded
+
+    /**
+     * Diagnostics (the autotest verb "atlas-edits-why on"): a chunk journalled again logs what changed in it (its first
+     * changed column, old -> new, by block name, and its light count), a few lines a minute. What keeps a place's far
+     * field streaming (fire spreading, leaves decaying, grass, water) shows up here.
+     */
+    public static volatile boolean why;
+    private static final Map<Long, Column[]> LAST = java.util.Collections.synchronizedMap(new java.util.LinkedHashMap<>(256, 0.75f, true) {
+        @Override
+        protected boolean removeEldestEntry(Map.Entry<Long, Column[]> e) {
+            return size() > 2048;
+        }
+    });
+    private static final Map<Long, Integer> LAST_LIGHTS = new ConcurrentHashMap<>();
+    private static long whyMinute;
+    private static int whyLines;
     private static final java.util.Set<Long> DIRTY = ConcurrentHashMap.newKeySet();  // packed (x, z) columns
     private static final Map<Long, Integer> LIGHT_DIRTY = new ConcurrentHashMap<>();
     private static final ArrayDeque<Long> CHUNKS = new ArrayDeque<>();  // chunks to scan (ChunkPos.pack)
@@ -167,6 +183,7 @@ public final class AtlasEdits {
             });
             for (long[] l : lights) h = (h ^ l[0]) * 1099511628211L;
             Long had = CHUNK_HASH.put(k, h);
+            if (why) explain(k, cx, cz, had, cols, lights.size());
             if (had != null && had == h) continue;  // as journalled
             // the chunk's real blocks around its surface: the far field's finest levels (AtlasSections)
             int low = Integer.MAX_VALUE, high = Integer.MIN_VALUE;
@@ -433,5 +450,33 @@ public final class AtlasEdits {
         }
         QUEUED.clear();
         file = null;
+    }
+
+    private static String blockName(int id) {
+        return net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(Block.stateById(id).getBlock()).getPath();
+    }
+
+    /** "atlas-edits-why": which column of a re-journalled chunk changed, and how (rate-limited). */
+    private static void explain(long k, int cx, int cz, Long had, Column[] cols, int lights) {
+        Column[] before = LAST.put(k, cols);
+        Integer lightsBefore = LAST_LIGHTS.put(k, lights);
+        if (had == null || before == null) return;
+        long minute = System.currentTimeMillis() / 60_000L;
+        if (minute != whyMinute) {
+            whyMinute = minute;
+            whyLines = 0;
+        }
+        for (int i = 0; i < 256; i++) {
+            Column a = before[i], b = cols[i];
+            if (a.equals(b)) continue;
+            if (++whyLines > 20) return;
+            int x = (cx << 4) + (i & 15), z = (cz << 4) + (i >> 4);
+            com.nirncraft.NirnCraft.LOGGER.info("atlas edits why: chunk {} {} column {} {}: top {}->{} {}->{}, under {}->{}, roof {}->{} at {}->{}, water {}->{}",
+                    cx, cz, x, z, a.top(), b.top(), blockName(a.topId()), blockName(b.topId()), blockName(a.underId()), blockName(b.underId()),
+                    blockName(a.roofId()), blockName(b.roofId()), a.spanTop(), b.spanTop(), a.water(), b.water());
+            return;
+        }
+        if (lightsBefore != null && lightsBefore != lights && ++whyLines <= 20)
+            com.nirncraft.NirnCraft.LOGGER.info("atlas edits why: chunk {} {}: lights {} -> {}", cx, cz, lightsBefore, lights);
     }
 }
