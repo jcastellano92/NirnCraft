@@ -356,6 +356,7 @@ int main(int argc, char** argv) {
         return 2;
     }
     leafCards = !cards.empty() && str(a, "leaves", "") == "cards";
+    if (a.count("sky")) SKY = unpack(uint32_t(std::strtoul(a["sky"].c_str(), nullptr, 16)));
     if (a.count("grass")) tintGrass = unpack(uint32_t(std::strtoul(a["grass"].c_str(), nullptr, 16)));
     if (a.count("foliage")) tintFoliage = unpack(uint32_t(std::strtoul(a["foliage"].c_str(), nullptr, 16)));
     int threads = int(num(a, "threads", std::max(1u, std::thread::hardware_concurrency() / 2)));

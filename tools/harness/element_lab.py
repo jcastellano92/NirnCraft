@@ -7,7 +7,14 @@ game. The frame is small (256 x 256 by default) but its pixels are the game's at
 at each distance is what a player would see.
 
     py -3 tools/harness/element_lab.py <element-slug> [--renderer lab-groups] [--out DIR] [--size 256]
+                                       [--truth intended|exact|realistic] [--time TICKS]
     py -3 tools/harness/element_lab.py --list
+
+--truth realistic scores against the shader pack's light ray traced on the real mesh (atlas_truth lighting=realistic:
+sun or moon with ray traced shadows, sky visibility, shadowed block lights, the pack's tonemap) at --time (6000 day,
+12500 dusk, 18000 night); the renderers are lit the same way: lab-groups and far-groups sample surface cards baked
+with that light (the representation under realistic light), far-lit is atlas_core's own lighting (its sun shadows,
+sky ambient, AO and far lights on the surfaces' albedo cards) through the same tonemap (where its light falls short).
 
 Prints one JSON line (the last) with per-distance dE / IoU and the fly-ins' pop; writes a sheet PNG to --out.
 """
@@ -183,8 +190,35 @@ def run(tool, args, out=None):
 # pixel: a sub-pixel tree is there or not, and flickers in motion), only for checking the reference against the game;
 # "intended" is the target our renderer is scored against: 16 samples a pixel (true coverage: a far tree fades, it
 # does not vanish), plus each documented fix of a vanilla quirk, one at a time.
-REFERENCE = {"exact": {"spp": 1}, "intended": {"spp": 16}}
+REFERENCE = {"exact": {"spp": 1}, "intended": {"spp": 16},
+             # the shader pack's light, physically placed (docs/ATLAS-LOD.md, "A realistic reference"): 16 samples a
+             # pixel, each with a sun / moon shadow ray, 4 sky rays and a ray per block light in reach
+             "realistic": {"spp": 16, "lighting": "realistic"}}
 TRUTH_MODE = "intended"
+TIME = None  # --time: the day time (ticks) the reference is lit at (realistic: 6000 when not given)
+RENDERERS = ("lab-groups", "far-groups", "far-old", "far-lit", "lab-groups-hashed", "lab-groups-own")
+
+
+def realistic():
+    return TRUTH_MODE == "realistic"
+
+
+def day_time():
+    return 6000 if TIME is None else TIME
+
+
+_INFO = {}
+
+
+def light_info():
+    """The realistic light of the time of day (atlas_truth info=1): sun, key light, exposure, the background sky."""
+    t = day_time()
+    if t not in _INFO:
+        r = subprocess.run([str(EXE / "atlas_truth.exe"), "info=1", f"time={t}"], capture_output=True, text=True)
+        if r.returncode:
+            raise RuntimeError(f"atlas_truth info failed: {r.stderr[-300:]}")
+        _INFO[t] = json.loads(r.stdout.strip().splitlines()[-1])
+    return _INFO[t]
 
 
 def truth_inputs(el):
@@ -193,21 +227,34 @@ def truth_inputs(el):
             "box": ",".join(str(v) for v in el["box"])}
 
 
-def bake_cards(el, tmp):
-    """The element's surface cards (atlas_truth bake=): the real faces' colour and light, sampled by lab-groups."""
-    out = tmp / f"{el['slug']}.alc"  # per element, and again whenever an input is newer (render() reuses a folder)
+def bake_cards(el, tmp, kind=None):
+    """The element's surface cards (atlas_truth bake=): the real faces' colour and light, sampled by lab-groups. kind:
+    vanilla (Minecraft's light), realistic (the reference's light at the time of day: the default under --truth
+    realistic) or albedo (the faces' own colour, for a renderer that lights them itself)."""
+    kind = kind or ("realistic" if realistic() else "vanilla")
+    # per element (and light), and again whenever an input is newer (render() reuses a folder)
+    out = tmp / (f"{el['slug']}.alc" if kind == "vanilla" else f"{el['slug']}-{kind}-{day_time()}.alc")
     ins = [Path(p) for k, p in truth_inputs(el).items() if k != "box"]
     if not out.exists() or any(p.stat().st_mtime > out.stat().st_mtime for p in ins if p.exists()):
-        run("atlas_truth", {**truth_inputs(el), "bake": out.as_posix()})
+        extra = {} if kind == "vanilla" else {"lighting": kind, "time": day_time(), "classes": export_dir() / "blocks.bin"}
+        if TIME is not None and kind == "vanilla":
+            extra = {"time": TIME}
+        run("atlas_truth", {**truth_inputs(el), **extra, "bake": out.as_posix()})
     return out
 
 
 def renderer_args(renderer, el, tmp):
     d = export_dir()
+    sky = {"sky": light_info()["sky"]} if realistic() else {}  # the realistic reference's background
     if renderer == "truth":
-        return "atlas_truth", {"camera": "mc", **truth_inputs(el), **REFERENCE[TRUTH_MODE]}
+        args = {"camera": "mc", **truth_inputs(el), **REFERENCE[TRUTH_MODE]}
+        if realistic():
+            args.update({"time": day_time(), "classes": d / "blocks.bin"})
+        elif TIME is not None:
+            args["time"] = TIME
+        return "atlas_truth", args
     lab = {"camera": "mc", "blocks": d / "blocks.bin", "volume": d / f"{el['volume']}.alv", "box": truth_inputs(el)["box"],
-           "variants": "groups", "frames": 16, "shade": "mc"}
+           "variants": "groups", "frames": 16, "shade": "mc", **sky}
     if renderer == "lab-groups":  # the grouped-voxel representation on the CPU bench, coloured from surface cards;
         # leaves and plants whole voxels cut by their cards' alpha (masked face textures)
         return "atlas_lab", {**lab, "surface": bake_cards(el, tmp), "leaves": "cards"}
@@ -215,7 +262,18 @@ def renderer_args(renderer, el, tmp):
         # (ATLAS_FRAME_GROUPS) or the path before them, flat world (radius 0), coloured from the same surface cards
         return "atlas_render", {"camera": "mc", "blocks": d / "blocks.bin", "volume": d / f"{el['volume']}.alv",
                                 "box": truth_inputs(el)["box"], "surface": bake_cards(el, tmp), "shade": "mc",
-                                "spp": 16, "radius": 0, "groups": 1 if renderer == "far-groups" else 0}
+                                "spp": 16, "radius": 0, "groups": 1 if renderer == "far-groups" else 0, **sky}
+    if renderer == "far-lit":  # the far field's own light (atlas_core: its sun / moon and shadows, sky ambient, AO, far
+        # lights) on the faces' albedo (cards), through the reference's tonemap: where its lighting falls short
+        if not realistic():
+            raise ValueError("far-lit is scored against the realistic reference: --truth realistic")
+        info = light_info()
+        return "atlas_render", {"camera": "mc", "blocks": d / "blocks.bin", "volume": d / f"{el['volume']}.alv",
+                                "box": truth_inputs(el)["box"], "surface": bake_cards(el, tmp, "albedo"), "shade": "pack",
+                                "flags": "shadows", "sun": f"{info['sunElevation']:.4f},{info['sunAzimuth']:.4f}",
+                                "exposure": f"{info['exposure']:.5f}", "nv": f"{info['nightVision']:.3f}",
+                                "skyhdr": ",".join(f"{v:.6f}" for v in info["skyHdr"]), "lights": 1,
+                                "spp": 16, "radius": 0, "groups": 1}
     if renderer == "lab-groups-hashed":  # the same with leaves as hashed micro-voxels (their 4 x 4 tiles' alpha)
         return "atlas_lab", {**lab, "surface": bake_cards(el, tmp)}
     if renderer == "lab-groups-own":  # the same with the bench's own 4 x 4 mean tiles under a fixed sun (no cache)
@@ -331,11 +389,14 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("element", nargs="?")
     ap.add_argument("--list", action="store_true")
-    ap.add_argument("--renderer", default="lab-groups")
+    ap.add_argument("--renderer", default="lab-groups", choices=RENDERERS)
     ap.add_argument("--out", type=Path, default=None)
     ap.add_argument("--size", type=int, default=256)
     ap.add_argument("--truth", choices=sorted(REFERENCE), default="intended",
-                    help="the reference's mode: intended (scores our renderer) or exact (Minecraft as it renders)")
+                    help="the reference's mode: intended (scores our renderer), exact (Minecraft as it renders) or "
+                         "realistic (the shader pack's light ray traced; the renderers lit the same way)")
+    ap.add_argument("--time", type=int, default=None,
+                    help="day time in ticks (6000 noon, 12500 dusk, 18000 midnight): the reference's light")
     ap.add_argument("--distances", default=",".join(str(d) for d in DISTANCES))
     a = ap.parse_args()
     els = elements()
@@ -347,11 +408,16 @@ def main():
     if not el:
         print(f"element_lab: no element {a.element} (--list)")
         return 2
-    global TRUTH_MODE
+    global TRUTH_MODE, TIME
     TRUTH_MODE = a.truth
+    TIME = a.time
+    if a.renderer == "far-lit" and not realistic():
+        print("element_lab: far-lit is scored against the realistic reference (--truth realistic)")
+        return 2
     near = 1.5 * radius(el["box"])  # never from inside or against the element: not a view anyone has of it
     dists = [d for d in (int(x) for x in a.distances.split(",")) if d >= near] or [int(near)]
-    report = {"element": el, "renderer": a.renderer, "truth": TRUTH_MODE, "distances": []}
+    report = {"element": el, "renderer": a.renderer, "truth": TRUTH_MODE, "time": TIME if TIME is not None or not realistic() else 6000,
+              "distances": []}
     rows = []
     with tempfile.TemporaryDirectory() as td:
         tmp = Path(td)
@@ -378,7 +444,8 @@ def main():
         for i, (r, o) in enumerate(rows):
             sheet.paste(r.resize((cell, cell), Image.NEAREST), (0, i * cell))
             sheet.paste(o.resize((cell, cell), Image.NEAREST), (cell + 8, i * cell))
-        sheet.save(a.out / f"{el['slug']}.png")
+        tag = "" if TRUTH_MODE == "intended" and TIME is None else f"-{TRUTH_MODE}" + (f"-{day_time()}" if realistic() or TIME is not None else "")
+        sheet.save(a.out / f"{el['slug']}{tag}.png")
     worst = max(report["distances"], key=lambda d: d["dE"])
     report["worst"] = {"dist": worst["dist"], "dE": worst["dE"], "iou": min(d["iou"] for d in report["distances"])}
     fails = []

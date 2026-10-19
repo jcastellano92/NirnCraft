@@ -970,6 +970,7 @@ struct Image {
     std::vector<float> a;  // the share of samples that hit the object
 };
 
-const RGB SKY{0x9C, 0xC4, 0xEC};
+// what a miss shows: atlas_truth's flat sky (sky=RRGGBB: another, e.g. the realistic reference's for its time of day)
+RGB SKY{0x9C, 0xC4, 0xEC};
 
 }  // namespace

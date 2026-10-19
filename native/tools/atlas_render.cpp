@@ -18,6 +18,12 @@
 // truth=<atlas_truth.exe> quads= sprites= truthvolume= renders atlas_truth's frame of the same camera and reports
 // vsTruth: CIE76 dE (tools/harness/results.py's metric) where the truth shows exported blocks, by distance band, and
 // writes <out>_truth.png and <out>_vs_truth.png (truth | this | dE). frames=N renders N times and reports the fastest.
+// sky=RRGGBB: the background of shade=mc (atlas_truth's flat sky by default). shade=pack exposure=<log2> nv=<0.7>
+// skyhdr=r,g,b: atlas_core's own lit frame (its sun / moon light, shadows, sky ambient, AO, far lights) through the
+// shader pack's tonemap (pack_look.hpp: night vision, exposure, ACES, sRGB) over a flat HDR sky, as atlas_truth
+// lighting=realistic draws it (the element tier's far-lit). lights=1: the export's emitters (light 8 and up, inside
+// box=) as far lights, as the game registers a real chunk's lights (AtlasEditsClient.lights: fires, intensity
+// level / 15).
 #include <algorithm>
 #include <chrono>
 #include <cmath>
@@ -31,6 +37,7 @@
 #include "atlas/atlas.h"
 #include "atlas_export.hpp"
 #include "camera.hpp"
+#include "pack_look.hpp"
 #include "png.hpp"
 
 namespace {
@@ -154,6 +161,16 @@ int main(int argc, char** argv) {
     // lighting)
     bool groups = num(a, "groups", haveExport ? 1 : 0) > 0;
     bool mcShade = str(a, "shade", haveExport && mcCam ? "mc" : "") == "mc";
+    bool packShade = str(a, "shade", "") == "pack";
+    packlook::Look look;
+    look.exposure = float(num(a, "exposure", 0));
+    look.nightVision = float(num(a, "nv", 0.7));
+    packlook::C3 skyHdr{0.358f, 0.636f, 1.286f};  // atlas_truth info=1 time=6000's skyHdr
+    {
+        float k[3];
+        if (std::sscanf(str(a, "skyhdr", "").c_str(), "%f,%f,%f", &k[0], &k[1], &k[2]) == 3) skyHdr = {k[0], k[1], k[2]};
+    }
+    uint32_t skyMc = uint32_t(std::strtoul(str(a, "sky", "9CC4EC").c_str(), nullptr, 16));
 
     // one element: its sections stay however far the camera goes (the world drops sections ~1.2 km out)
     if (boxed && !std::getenv("ATLAS_SECTION_KEEP")) {
@@ -264,6 +281,28 @@ int main(int argc, char** argv) {
                         return 2;
                     }
                 }
+        }
+        if (num(a, "lights", 0) > 0) {  // the emitters as far lights (AtlasEditsClient.lights)
+            std::vector<AtlasLight> ls;
+            for (const exportdata::Section& sc : secs)
+                for (int i = 0; i < 4096; i++) {
+                    uint32_t id = sc.at(i);
+                    if (id >= lib.size() || !lib[id].present || lib[id].emit < 8) continue;
+                    int bx = sc.cx * 16 + (i & 15), by = sc.sy * 16 + (i >> 8), bz = sc.cz * 16 + ((i >> 4) & 15);
+                    if (boxed && (bx < box[0] || by < box[1] || bz < box[2] || bx > box[3] || by > box[4] || bz > box[5])) continue;
+                    AtlasLight l{};
+                    l.pos[0] = bx + 0.5, l.pos[1] = by + 0.5, l.pos[2] = bz + 0.5;
+                    l.radius = 1.5f;
+                    l.intensity = std::fmin(1.0f, float(lib[id].emit) / 15.0f);
+                    l.rgb = 0xFFu | 0x86u << 8 | 0x2Eu << 16;  // AtlasLights.ORANGE
+                    l.kind = ATLAS_LIGHT_FIRE;
+                    ls.push_back(l);
+                }
+            if (!ls.empty() && atlas_set_light_group(ctx, 1, ls.data(), uint32_t(ls.size())) != ATLAS_OK) {
+                std::fprintf(stderr, "lights: %s\n", atlas_last_error(ctx));
+                return 2;
+            }
+            std::fprintf(stderr, "atlas_render: %zu far lights from the export\n", ls.size());
         }
         loadMs = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - l0).count();
         std::fprintf(stderr, "atlas_render: export: %zu sections, %zu materials (%zu shaped) in %.0f ms\n", ex.sections, ex.states,
@@ -452,7 +491,7 @@ int main(int argc, char** argv) {
             }
             if (mcShade) {
                 // Minecraft's vanilla look of what was hit: the texel's colour (sRGB) times the fixed shade of its face
-                const uint32_t sky = 0x9CC4EC;
+                const uint32_t sky = skyMc;
                 for (size_t i = 0; i < color.size(); i++) {
                     if (depth[i] > 1e29f) {
                         color[i] = 0xFF000000u | (sky & 255) << 16 | (sky & 0xFF00) | (sky >> 16);
@@ -476,6 +515,17 @@ int main(int argc, char** argv) {
                     color[i] = px;
                 }
             }
+            if (packShade) {
+                // atlas_core's own light (its HDR radiance, premultiplied by coverage) over the flat HDR sky, then the
+                // pack's look, as atlas_truth lighting=realistic tonemaps each of its samples
+                for (size_t i = 0; i < color.size(); i++) {
+                    float cov = std::fmin(1.0f, std::fmax(0.0f, linear[i * 4 + 3]));
+                    packlook::C3 c{linear[i * 4] + skyHdr.r * (1 - cov), linear[i * 4 + 1] + skyHdr.g * (1 - cov), linear[i * 4 + 2] + skyHdr.b * (1 - cov)};
+                    packlook::C3 dsp = packlook::display(c, look);
+                    auto q = [](float v) { return uint32_t(std::fmin(255.0f, std::fmax(0.0f, v * 255.0f + 0.5f))); };
+                    color[i] = 0xFF000000u | q(dsp.r) | q(dsp.g) << 8 | q(dsp.b) << 16;
+                }
+            }
             for (uint32_t py = 0; py < h; py++)
                 for (uint32_t px = 0; px < w; px++) {
                     size_t i = size_t(py) * w + px;
@@ -496,7 +546,7 @@ int main(int argc, char** argv) {
         for (size_t i = 0; i < color.size(); i++) {
             uint32_t px = 0xFF000000u;
             for (int k = 0; k < 3; k++) px |= uint32_t(acc[i * 3 + size_t(k)] / spp + 0.5) << (8 * k);
-            if (spp > 1 || mcShade) color[i] = px;
+            if (spp > 1 || mcShade || packShade) color[i] = px;
         }
         if (std::getenv("ATLAS_RENDER_TIMES")) {  // every timing frame, in order (measurements)
             for (size_t i = 0; i < times.size(); i++)
