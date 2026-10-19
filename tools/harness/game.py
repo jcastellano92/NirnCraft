@@ -287,11 +287,9 @@ def ensure_current():
     if not BUILT.exists() or newest > BUILT.stat().st_mtime + 1:
         log("  sources changed since the last build: building the jar (once for this run)")
         tr.step("auto_build")
-        r = subprocess.run([sys.executable, str(ROOT / "tools/dev/build_263.py"), "jar", "--offline"],
-                           capture_output=True, text=True)
+        r = build263(["jar", "--offline"])
         if r.returncode:
-            tail = [l for l in (r.stdout + r.stderr).splitlines() if "error:" in l or "FAILED" in l][:12]
-            raise RuntimeError("jar build failed (tests would run stale code):\n" + "\n".join(tail))
+            raise RuntimeError("jar build failed (tests would run stale code):\n" + build_failure(r))
     inst = GAME / "mods/nirncraft-core.jar"
     if BUILT.exists() and (not inst.exists() or sha(BUILT) != sha(inst)):
         log("  installing the current build (the installed core was older)")
@@ -446,6 +444,28 @@ def reload_resources(paths=None):
     return n
 
 
+BUILD_BUSY_WAIT_S = 1200  # another build holds the lock (an agent, a hand build): wait for it, do not fail the run
+
+
+def build263(args, wait_s=None, poll_s=15, run=subprocess.run):
+    """tools/dev/build_263.py with args; while another build holds its lock ("Resource busy ... no work started"),
+    waits and tries again (a run started next to a hand build failed every scene with "jar build failed")."""
+    deadline = time.monotonic() + (BUILD_BUSY_WAIT_S if wait_s is None else wait_s)
+    while True:
+        r = run([sys.executable, str(ROOT / "tools/dev/build_263.py"), *args], capture_output=True, text=True)
+        if r.returncode == 0 or "Resource busy" not in (r.stdout + r.stderr) or time.monotonic() > deadline:
+            return r
+        log("  another build holds the lock: waiting for it")
+        time.sleep(poll_s)
+
+
+def build_failure(r):
+    """A failed build's reason: its error lines, or (none) its last lines (a busy lock said nothing at all)."""
+    lines = (r.stdout + r.stderr).splitlines()
+    tail = [l for l in lines if "error:" in l or "FAILED" in l][:12]
+    return "\n".join(tail or lines[-8:])
+
+
 def reload_data(target):
     tr.step("reload", kind="data", target=target)
     r = subprocess.run([sys.executable, str(ROOT / "tools/dev/live_world.py"), "reload", target],
@@ -457,8 +477,7 @@ def reload_data(target):
 def rebuild_jar():
     """Gradle build (with tests) + install into the preview; the client must restart to load it."""
     tr.step("rebuild_jar")
-    r = subprocess.run([sys.executable, str(ROOT / "tools/dev/build_263.py"), "--offline", "build"],
-                       capture_output=True, text=True)
+    r = build263(["--offline", "build"])
     if r.returncode:
         tail = [l for l in (r.stdout + r.stderr).splitlines() if "error:" in l or "FAILED" in l][:12]
         raise RuntimeError("jar build failed:\n" + "\n".join(tail))

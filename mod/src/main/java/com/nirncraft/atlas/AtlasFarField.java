@@ -36,6 +36,12 @@ final class AtlasFarField implements AutoCloseable {
          */
         boolean cover(AtlasNative.Context ctx, int lod, int x0, int z0, int x1, int z1);
 
+        /**
+         * The instant look at a place the far field has nothing of (a join, a teleport): LOD `lod`'s window from what
+         * is ready made and stand-ins, no exact work; cover() refines it afterwards.
+         */
+        default void coverQuick(AtlasNative.Context ctx, int lod, int x0, int z0, int x1, int z1) {}
+
         default void close() {}
 
         /** Puts up again what the server's change feed changed (docs/ATLAS-DELTAS.md). Far-field worker. */
@@ -218,6 +224,26 @@ final class AtlasFarField implements AutoCloseable {
                 boolean pending = false, overlaid = false;
                 long tPass = System.nanoTime();
                 source.view(x, z, camYaw, camHalf);
+                // arrived where nothing is resident (the finest tile under the camera is missing): an instant pass first,
+                // every level from ready-made tiles and stand-ins, coarsest first, built and shown before any exact tile
+                // (the first pass after a teleport took 3.6 s, all of it before anything new was drawn)
+                int c0x = Math.floorDiv((int) Math.floor(x), AtlasNative.TILE), c0z = Math.floorDiv((int) Math.floor(z), AtlasNative.TILE);
+                boolean quick = !ctx.hasTile(0, c0x, c0z);
+                if (quick) {
+                    for (int lod = lods - 1; lod >= 0; lod--) {
+                        int span = 256 << lod;
+                        int cx = Math.floorDiv((int) Math.floor(x), span), cz = Math.floorDiv((int) Math.floor(z), span);
+                        source.coverQuick(ctx, lod, (cx - WINDOW) * span, (cz - WINDOW) * span, (cx + WINDOW + 1) * span,
+                                (cz + WINDOW + 1) * span);
+                    }
+                    ctx.update(x, y, z, 0);
+                    updated = true;
+                    long tq = System.nanoTime();
+                    synchronized (timeline) {
+                        timeline.addLast(String.format(java.util.Locale.ROOT, "{\"t\":%.1f,\"quick\":%.2f,\"pass\":%.2f,\"streaming\":\"quick\"}",
+                                (tq - timelineT0) / 1e6, ms(tPass, tq), ms(tPass, tq)));
+                    }
+                }
                 source.beginPass();
                 for (int lod = 0; lod < lods; lod++) {
                     int span = 256 << lod;
