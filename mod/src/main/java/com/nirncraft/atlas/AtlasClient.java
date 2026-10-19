@@ -85,6 +85,11 @@ public final class AtlasClient {
     /** Per far actor (entity id): its impostor's opacity, fading out while the client also has the real entity. */
     private static final it.unimi.dsi.fastutil.ints.Int2FloatOpenHashMap actorOpacity = new it.unimi.dsi.fastutil.ints.Int2FloatOpenHashMap();
     private static int lightBudget = -1;
+    /**
+     * The content-shaped groups (docs/ATLAS-LOD.md; ATLAS_FRAME_GROUPS, atlas_core 0.14): only with
+     * -Dnirncraft.atlas.groups=true until they are proven in game; the default stays the voxel path.
+     */
+    private static boolean groups;
     /** Seconds over which an impostor dissolves once the real entity is tracked (and region refinements dissolve). */
     static final float FADE_SECONDS = 0.6f;
 
@@ -306,6 +311,7 @@ public final class AtlasClient {
             if (mc.player != null && mc.level != null
                     && mc.level.canSeeSky(net.minecraft.core.BlockPos.containing(mc.player.getEyePosition())))
                 frame.flags |= AtlasNative.FRAME_FILL_NEAR;
+            if (groups) frame.flags |= AtlasNative.FRAME_GROUPS;
 
             io.nearDepthTex = 0xFFFFFFFF;  // ATLAS_GL_BOUND_DEPTH: the bound gbuffer target's depth
             new Matrix4f(cam.projectionMatrix).invert().get(io.nearInvProjection);
@@ -403,6 +409,9 @@ public final class AtlasClient {
             if (noise != null) ctx.setCloudNoise(noise);
             java.util.function.IntBinaryOperator ground = source instanceof AtlasExactSource e ? e::groundAt : null;
             AtlasMaterials mats = new AtlasMaterials();  // one id per block across buildings, landmarks and surfaces
+            groups = "true".equalsIgnoreCase(System.getProperty("nirncraft.atlas.groups")) && ctx.hasShapes();
+            if (groups) mats.enableShapes();  // every material's real shape and face tiles; real blocks per state
+            if (groups) com.nirncraft.NirnCraft.LOGGER.info("atlas: content-shaped groups on (nirncraft.atlas.groups)");
             if (source instanceof AtlasRefiningSource r) r.materials(mats);
             // single player: the world's own trees over the finest LODs (AtlasTrees), else the dressing's canopy
             // (abi 0.13: an older core ignores ATLAS_COLUMN_NO_CANOPY and would grow its canopy under them)
