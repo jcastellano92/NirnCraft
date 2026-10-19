@@ -664,6 +664,7 @@ public final class ClientAutotest {
                 }
                 liveSettleUntil = tick + Math.max(60, Integer.parseInt(sv[0]));
                 liveVisualSettle = true;
+                com.nirncraft.atlas.AtlasEdits.why = true;  // while settling: what keeps the far field streaming (the log says)
                 visualPrev = null;
                 visualStable = 0;
                 visualDiff = 99;

@@ -90,6 +90,8 @@ public final class AtlasEdits {
     private static final Map<Long, Integer> LAST_LIGHTS = new ConcurrentHashMap<>();
     private static long whyMinute;
     private static int whyLines;
+    private static long whySince;
+    private static int whyFirst, whyAgain, whyChanged, whyRehash;  // since the last summary
     private static final java.util.Set<Long> DIRTY = ConcurrentHashMap.newKeySet();  // packed (x, z) columns
     private static final Map<Long, Integer> LIGHT_DIRTY = new ConcurrentHashMap<>();
     private static final ArrayDeque<Long> CHUNKS = new ArrayDeque<>();  // chunks to scan (ChunkPos.pack)
@@ -460,6 +462,18 @@ public final class AtlasEdits {
     private static void explain(long k, int cx, int cz, Long had, Column[] cols, int lights) {
         Column[] before = LAST.put(k, cols);
         Integer lightsBefore = LAST_LIGHTS.put(k, lights);
+        long now = System.currentTimeMillis();
+        if (whySince == 0) whySince = now;
+        if (had == null) whyFirst++;
+        else if (before == null) whyRehash++;  // journalled before this session (the world's saved journal), not seen yet
+        else whyAgain++;
+        if (now - whySince >= 10_000L) {  // a summary every 10 s: is the far field's stream finite (first loads) or not
+            com.nirncraft.NirnCraft.LOGGER.info("atlas edits why: last {} s: {} chunks scanned first time, {} again from the "
+                    + "saved journal, {} again this session ({} of them changed); queue {}", (now - whySince) / 1000,
+                    whyFirst, whyRehash, whyAgain, whyChanged, CHUNKS.size());
+            whySince = now;
+            whyFirst = whyAgain = whyChanged = whyRehash = 0;
+        }
         if (had == null || before == null) return;
         long minute = System.currentTimeMillis() / 60_000L;
         if (minute != whyMinute) {
@@ -469,6 +483,7 @@ public final class AtlasEdits {
         for (int i = 0; i < 256; i++) {
             Column a = before[i], b = cols[i];
             if (a.equals(b)) continue;
+            whyChanged++;
             if (++whyLines > 20) return;
             int x = (cx << 4) + (i & 15), z = (cz << 4) + (i >> 4);
             com.nirncraft.NirnCraft.LOGGER.info("atlas edits why: chunk {} {} column {} {}: top {}->{} {}->{}, under {}->{}, roof {}->{} at {}->{}, water {}->{}",
