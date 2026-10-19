@@ -517,6 +517,39 @@ def fidelity(near, far):
     return round(de, 2), round(luma, 3), round(struct, 2)
 
 
+def twin_compare(lab_png, live_png, out_png):
+    """A lab render against its live twin, measured instead of eyeballed: both cropped to the same aspect (centre) and
+    scaled alike; colour dE, brightness ratio and large-scale structure of the ground part (fidelity) plus the skyline
+    (per column, the first row that is not sky, as a share of the height: where the land meets the sky). Writes the
+    side-by-side to out_png as the evidence."""
+    a, b = Image.open(lab_png).convert("RGB"), Image.open(live_png).convert("RGB")
+    ar = min(a.width / a.height, b.width / b.height)
+
+    def crop(im):
+        w, h = im.width, im.height
+        if w / h > ar:
+            nw = int(h * ar)
+            im = im.crop(((w - nw) // 2, 0, (w - nw) // 2 + nw, h))
+        else:
+            nh = int(w / ar)
+            im = im.crop((0, (h - nh) // 2, w, (h - nh) // 2 + nh))
+        return im.resize((640, int(640 / ar)))
+    a, b = crop(a), crop(b)
+    de, luma, struct = fidelity(a, b)
+
+    def skyline(im):
+        g = np.asarray(im.convert("L").resize((64, 64)), dtype=np.float32)
+        sky = g[:6].mean(axis=0)  # the top rows are sky in a horizon view
+        rows = np.argmax(np.abs(g - sky) > 28, axis=0)
+        return rows / 64.0
+    sky = float(np.abs(skyline(a) - skyline(b)).mean() * 100)
+    side = Image.new("RGB", (a.width * 2 + 8, a.height), (20, 20, 24))
+    side.paste(a, (0, 0))
+    side.paste(b, (a.width + 8, 0))
+    side.save(out_png)
+    return {"twinDE": de, "twinLuma": luma, "twinStructure": struct, "twinSkyline": round(sky, 2)}
+
+
 def pop_metrics(scene, imgs):
     """Ladder: how much the subject changes between the two rungs that straddle the near/far hand-off (the same view
     16 blocks apart: a big change is a seam or pop). Sweep: frame-to-frame change while flying through the hand-off;

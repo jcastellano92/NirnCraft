@@ -19,7 +19,9 @@ ATLAS** (the far-field renderer `atlas_core` + the shader pack `shaderpack/Infin
   `harness.py stop` ends one at once. Long checks: `audit --budget 30m` / `--theme dungeons`.
 * Issues: `harness.py issues` is the running tally (P1..P4, grouped by cause). Working one: `issues claim <test>
   --by NAME` -> fix -> `issues fixed <test> --note ...` -> `issues verify` (re-runs it); visual ones then need the
-  reviewer's `issues confirm <test>`. A failed verify reopens it.
+  reviewer's `issues confirm <test> --by REVIEWER --evidence IMAGE`. A failed verify reopens it.
+* Visual claims ("matches", "fixed", "gone") name the exact two pictures compared and rest on a side-by-side or
+  a metric, never a glance at one crop; the fixer does not confirm their own visual fix.
 * Visual results: **hand them to the `visual-reviewer` subagent** (`.claude/agents/visual-reviewer.md`, Haiku) with
   the agent folder the run prints; never read stacks of screenshots in the main conversation. Ask for `zoom` crops when
   a detail matters. State plainly what is still unverified visually.

@@ -135,6 +135,9 @@ start skips its group the same way.
   <test> --name X` regroups). Fixed issues drop off after 7 days (the totals keep counting them).
   A finding no test fails on (the visual reviewer's BROKEN / REGRESSION lines) is filed with `issues add <test> --note
   "what, where" [--priority P2] [--name group]`; it follows the same workflow (a visual issue ends with `confirm`).
+  `issues confirm <test> --by REVIEWER --evidence IMAGE` is refused without the image the claim is about, or when the
+  reviewer is the one who fixed it. Twins (`twin-*`) are measured against their lab render (`<variant>.twin.png`
+  side-by-side; structure, skyline, dE): "lab and live match" is a number, not a glance.
 
 ## Hot reload kinds (watch mode and `--changed`)
 

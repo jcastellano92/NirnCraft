@@ -597,6 +597,15 @@ class Runner:
             fails.append(f"luma {m['luma']} < {c['lumaMin']}")
         if "lumaMax" in c and m.get("luma", 0) > c["lumaMax"]:
             fails.append(f"luma {m['luma']} > {c['lumaMax']}")
+        twin = next((t[5:] for t in s.get("tags", []) if t.startswith("twin:")), None)
+        lab_png = Path(f"{results.stem(twin, 'lab')}.after.png") if twin else None
+        live_png = Path(f"{results.stem(s['id'], v)}.after.png")
+        if twin and lab_png.exists() and live_png.exists():  # a twin is measured against its lab render, not eyeballed
+            tm = results.twin_compare(lab_png, live_png, Path(f"{results.stem(s['id'], v)}.twin.png"))
+            m.update(tm)
+            if tm["twinStructure"] > 20 or tm["twinSkyline"] > 6:
+                m.setdefault("flags", []).append(f"lab and live differ (structure {tm['twinStructure']}, skyline "
+                                                 f"{tm['twinSkyline']}%, dE {tm['twinDE']}): not the same view or terrain")
         status = "fail" if fails else ("flag" if m.get("flags") else "pass")
         rec.update(status=status, fails=fails)
         results.stem(s["id"], v).with_suffix("")
@@ -1796,9 +1805,18 @@ def cmd_issues(a):
             if act == "claim":
                 e.update(state="in-progress", by=a.by or os.environ.get("USERNAME", "agent"), claimed=now)
             elif act == "fixed":
-                e.update(state="testing", fixNote=a.note or "", fixHead=git_head(), fixClaimed=now)
+                e.update(state="testing", fixNote=a.note or "", fixHead=git_head(), fixClaimed=now,
+                         fixedBy=a.by or e.get("by") or os.environ.get("USERNAME", "agent"))
             elif act == "confirm":
-                e.update(state="fixed", fixed=now, fixedAt=git_head(), confirmedBy=a.by or "reviewer")
+                # a confirmation is a claim about pictures: it names them, and the one who fixed it does not grade it
+                if not a.evidence or not Path(a.evidence).exists():
+                    say(f"{k}: confirm needs --evidence <image the claim is about> (e.g. the run's agent page or a "
+                        f"zoom / .twin.png side-by-side showing exactly the two pictures compared)")
+                    return 1
+                if not a.by or a.by == e.get("by") or a.by == e.get("fixedBy"):
+                    say(f"{k}: confirm needs --by REVIEWER other than who fixed it (the visual-reviewer or the owner)")
+                    return 1
+                e.update(state="fixed", fixed=now, fixedAt=git_head(), confirmedBy=a.by, evidence=str(a.evidence))
                 e.setdefault("history", []).append({"opened": e["opened"], "fixed": now, "why": e.get("why", "")[:160]})
             elif act == "reopen":
                 e.update(state="open")
@@ -1999,6 +2017,7 @@ def main():
     p.add_argument("action", nargs="?", choices=["list", "claim", "fixed", "verify", "confirm", "reopen", "note",
                                                  "prioritize", "group", "add"])
     p.add_argument("--variant", help="add: the variant (default: the test's first)")
+    p.add_argument("--evidence", help="confirm: the image the confirmation is about (required)")
     p.add_argument("--priority", help="prioritize: P1..P4 (empty: automatic)")
     p.add_argument("--name", help="group: a cause name to group under (empty: automatic)")
     p.add_argument("test", nargs="?", help="test id (or test|variant)")
