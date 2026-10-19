@@ -958,6 +958,9 @@ def cmd_run(a, watch=False):
         return 0
     keys = [key(s, v) for s, v in items]
     runner = Runner(a)
+    if getattr(a, "fresh_world", False):
+        import game
+        game.FRESH_WORLD["on"] = True
     if getattr(a, "reloads", None):
         apply_reloads(a.reloads, runner, rebuild=a.rebuild)
     jid = submit(keys, force=a.force, who="watch" if watch else "cli")
@@ -1619,6 +1622,7 @@ def main():
         p.add_argument("--keep", action="store_true", help="leave a client this run launched open")
         p.add_argument("--rebuild", action="store_true", help="rebuild + install the jar when Java changed")
         p.add_argument("--include-quarantined", action="store_true", help="also run tests quarantined for failing")
+        p.add_argument("--fresh-world", action="store_true", help="make the kept test world again (else reused)")
     selection(sub.add_parser("serve"))
     sub.add_parser("status")
     selection(sub.add_parser("report"))

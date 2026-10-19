@@ -135,10 +135,29 @@ def _enable_overlay():
             opts.write_text(text, encoding="utf-8")
 
 
+FRESH_WORLD = {"on": False}  # harness --fresh-world: make the test world again this launch
+
+
+def kept_world():
+    """The test world for this world generation: kept between runs (places generated once load from disk in seconds);
+    a worldgen change (code or data) gets a new one; worlds of older generations are deleted."""
+    import cameras
+    name = f"harness_{cameras.worldgen_hash()}"
+    saves = GAME / "saves"
+    if saves.exists():
+        for d in saves.iterdir():
+            if d.is_dir() and d.name.startswith("harness_") and (d.name != name or FRESH_WORLD["on"]):
+                shutil.rmtree(d, ignore_errors=True)
+    return name
+
+
 def launch(group, groups, limit=900):
     tr.step("launch", group=group)
     cfg = groups.get(group, {})
-    _set_group_flags(cfg.get("jvm", {}))
+    jvm = dict(cfg.get("jvm", {}))
+    if "nirncraft.autotest.world" not in jvm and group == "live":
+        jvm.update({"nirncraft.autotest.world": kept_world(), "nirncraft.autotest.keepWorld": "true"})
+    _set_group_flags(jvm)
     _enable_overlay()
     code = subprocess.run([sys.executable, str(ROOT / "tools/dev/live_world.py"), "launch"], capture_output=True, text=True)
     if code.returncode:

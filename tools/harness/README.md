@@ -67,6 +67,13 @@ character screen or the opening's covers (`ClientAutotest.automated()`; `-Dnirnc
 opening, to test it). The harness refuses to wait behind a blocking screen and says which one, and warns when the
 installed core is older than the latest build (`--rebuild` builds, installs and restarts).
 
+## Speed: kept world, visual settle
+
+The live test world is kept between runs and launches (`saves/harness_<worldgen hash>`): a place is generated once,
+later visits load it from disk; a world-generation change makes a new one (`--fresh-world` forces it). Captures
+settle visually (`settle-visual`: the downscaled frame stops changing for ~2 s, chunks around the camera present)
+instead of waiting for every chunk to the edge of view; measure tests keep the strict chunk settle.
+
 ## Running while you work
 
 The test client opens behind your windows and never pauses when you click elsewhere. Bring it forward to watch;

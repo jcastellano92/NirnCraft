@@ -668,25 +668,25 @@ def capture_actions(s, tag, plan=None):
                  f"try fill {sx - 9} {sy} {sz - 9} {sx + 9} {sy} {sz + 9} minecraft:smooth_stone",
                  f"try fill {sx - 9} {sy + 1} {sz - 9} {sx + 9} {sy + 6} {sz + 9} minecraft:air"] + list(s.get("setup", []))
         for i, d in enumerate(p["ladder"]["distances"]):
-            lines += [f"camera {sx} {sy + 2 + d * 0.35:.1f} {sz - 2 - d:.1f} {sx} {sy + 1.5} {sz + 1}", "settle 1800 partial",
+            lines += [f"camera {sx} {sy + 2 + d * 0.35:.1f} {sz - 2 - d:.1f} {sx} {sy + 1.5} {sz + 1}", "settle-visual 1800",
                       "wait 20", f"capture {tag}-r{i}"]
         return lines + list(s.get("cleanup", []))
     if "ladder" in p:  # every rung: move, let the world load, hold, capture
         lines = []
         for i, (x, z, h, yaw, pitch, _) in enumerate(ladder_rungs(s, plan)):
-            lines += [f"visit {x} {z} {h} {yaw} {pitch} {s.get('weather') or 'clear'}", "settle 1800 partial"]
+            lines += [f"visit {x} {z} {h} {yaw} {pitch} {s.get('weather') or 'clear'}", "settle-visual 1800"]
             if i == 0:  # the subject's chunks are loaded now: build / summon what the test needs
                 lines += list(s.get("setup", []))
             lines += [f"wait {int(s.get('wait', 40))}", f"capture {tag}-r{i}"]
             if s.get("fidelity"):  # the same view drawn by the far field alone (render distance 2), then back
-                lines += ["renderdistance 2", "settle 1800 partial", f"wait {int(s.get('wait', 40))}", f"capture {tag}-r{i}b",
-                          f"renderdistance {NEAR_RD}", "settle 1800 partial"]
+                lines += ["renderdistance 2", "settle-visual 1800", f"wait {int(s.get('wait', 40))}", f"capture {tag}-r{i}b",
+                          f"renderdistance {NEAR_RD}", "settle-visual 1800"]
         return lines + list(s.get("cleanup", []))
     if "sweep" in p:  # a smooth flight through the hand-off ring; the travel verb captures every 10 steps
         _, (ex, ey, ez), (lx, ly, lz) = sweep_path(s, plan)
-        return ["settle 1800 partial"] + list(s.get("setup", [])) + [f"wait {int(s.get('wait', 60))}",
+        return ["settle-visual 1800"] + list(s.get("setup", [])) + [f"wait {int(s.get('wait', 60))}",
                 f"camera-travel {tag}s 240 {ex} {ey} {ez} {lx} {ly} {lz}"] + list(s.get("cleanup", []))
-    lines = ["settle 1800 partial"]  # the world behind a screen is part of the picture too
+    lines = ["settle-visual 1800"]  # the world behind a screen is part of the picture too
     if s.get("wait"):
         lines.append(f"wait {int(s['wait'])}")
     lines += list(s.get("setup", []))
