@@ -258,12 +258,18 @@ bool loadVolume(const std::string& path) {
     return bool(f);
 }
 
+// leaves=cards (with surface cards): leaves and plants are whole voxels and their cards' alpha is the cutout, per
+// texel up close and as the mip's coverage further away (a masked face texture), instead of hashed micro-voxels
+bool leafCards = false;
+inline bool cutoutClass(const Block* b) { return b && (b->cls == 1 || b->cls == 4); }
+
 // micro-voxels: 4 per block side
 inline bool microAt(int mx, int my, int mz) {
     const Block* b = vol.at(mx >> 2, my >> 2, mz >> 2);
     if (!b || !b->any) return false;
     int bit = (mx & 3) + 4 * ((mz & 3) + 4 * (my & 3));
     if (!((b->mask >> bit) & 1)) return false;
+    if (leafCards && cutoutClass(b)) return true;
     float a = b->alpha[bit];
     // hashed in world micro-voxels: the same cutout whatever box or view the blocks were exported in
     return a >= 0.999f || hashf(mx + vol.x0 * 4, my + vol.y0 * 4, mz + vol.z0 * 4, 0x5EEDu) < a;
@@ -284,6 +290,7 @@ struct Card {
     uint32_t c[256];
     RGB mean;  // of its covered texels: where the micro-voxels hold content the exact quads do not
     RGB mip[341];  // the mip chain 16, 8, 4, 2, 1 (offsets 0, 256, 320, 336, 340): covered texels' means
+    float cov[341];  // and how much of each mip texel is covered
 };
 const int MIP_AT[5] = {0, 256, 320, 336, 340};
 std::unordered_map<uint64_t, Card> cards;
@@ -331,6 +338,7 @@ bool loadCards(const std::string& path) {
         }
         for (int t = 0; t < 256; t++)
             if (!(cd.c[t] >> 24)) cd.mip[t] = cd.mean;
+        for (int t = 0; t < 341; t++) cd.cov[t] = t < 256 ? float(cd.c[t] >> 24) / 255.f : w[t];
         cards[cardKey(h[0], h[1], h[2], h[3])] = cd;
     }
     std::fprintf(stderr, "atlas_lab: %zu surface cards\n", cards.size());
@@ -340,7 +348,7 @@ bool loadCards(const std::string& path) {
 // the card's colour at plane point (pu, pv) in blocks on face f of block (bx, by, bz) (volume coordinates), filtered
 // over a footprint of fp blocks (its mip, blended between the two nearest levels as a trilinear sampler would); false:
 // no card there
-inline bool cardCol(int bx, int by, int bz, int f, float pu, float pv, RGB& out, float fp = 0) {
+inline bool cardCol(int bx, int by, int bz, int f, float pu, float pv, RGB& out, float fp = 0, float* cov = nullptr) {
     if (cards.empty()) return false;
     auto it = cards.find(cardKey(bx + vol.x0, by + vol.y0, bz + vol.z0, f));
     if (it == cards.end()) return false;
@@ -350,10 +358,12 @@ inline bool cardCol(int bx, int by, int bz, int f, float pu, float pv, RGB& out,
     float lv = std::clamp(std::log2(std::max(fp * 16.f, 1.f)), 0.f, 4.f);
     int l0 = int(lv), l1 = std::min(4, l0 + 1);
     float t = lv - float(l0);
-    auto at = [&](int l) {
+    auto idx = [&](int l) {
         int n2 = 16 >> l;
-        return it->second.mip[MIP_AT[l] + int(u * n2) + n2 * int(v * n2)];
+        return MIP_AT[l] + int(u * n2) + n2 * int(v * n2);
     };
+    auto at = [&](int l) { return it->second.mip[idx(l)]; };
+    if (cov) *cov = it->second.cov[idx(l0)] + (it->second.cov[idx(l1)] - it->second.cov[idx(l0)]) * t;
     RGB c0 = at(l0), c1 = at(l1);
     out = {c0.r + (c1.r - c0.r) * t, c0.g + (c1.g - c0.g) * t, c0.b + (c1.b - c0.b) * t};
     return true;
@@ -553,10 +563,10 @@ struct Node {
 std::vector<Node> nodes;
 
 // the first content of the column at (u, v) of face (axis, high side) of box [lo, hi): its depth and position
-bool firstHit(const int lo[3], const int hi[3], int axis, bool high, int u, int v, int& depth, int p[3]) {
+bool firstHit(const int lo[3], const int hi[3], int axis, bool high, int u, int v, int& depth, int p[3], int from = 0) {
     int a1 = (axis + 1) % 3, a2 = (axis + 2) % 3;
     int n = hi[axis] - lo[axis];
-    for (int t = 0; t < n; t++) {
+    for (int t = from; t < n; t++) {
         p[axis] = high ? hi[axis] - 1 - t : lo[axis] + t;
         p[a1] = u, p[a2] = v;
         if (microAt(p[0], p[1], p[2])) {
@@ -687,12 +697,25 @@ bool boxFace(const Node& n, int axis, bool high, V3 p, float t, BoxCtx& c) {
         return true;
     }
     int u = std::clamp(int(std::floor(p[a1] * 4.f)), lo[a1], hi[a1] - 1), v = std::clamp(int(std::floor(p[a2] * 4.f)), lo[a2], hi[a2] - 1);
-    int dep, q[3];
-    if (!firstHit(lo, hi, axis, high, u, v, dep, q)) return false;
-    c.s->hit = true;
-    c.s->t = t;
-    if (!cardCol(q[0] >> 2, q[1] >> 2, q[2] >> 2, f, p[a1], p[a2], c.s->c, t * c.pa / std::max(std::fabs(c.d[axis]), 0.2f))) c.s->c = lit(microCol(q[0], q[1], q[2], f), f);
-    return true;
+    int dep, q[3], from = 0;
+    float fpb = t * c.pa / std::max(std::fabs(c.d[axis]), 0.2f);  // the footprint on the face, blocks
+    for (;;) {
+        if (!firstHit(lo, hi, axis, high, u, v, dep, q, from)) return false;
+        float cv = 1;
+        RGB col;
+        bool card = cardCol(q[0] >> 2, q[1] >> 2, q[2] >> 2, f, p[a1], p[a2], col, fpb, &cv);
+        if (card && leafCards && cutoutClass(vol.at(q[0] >> 2, q[1] >> 2, q[2] >> 2)) &&
+            float(hash(c.seed ^ hash(uint32_t(dep) * 0x9E3779B9u)) >> 8) * (1.0f / 16777216.0f) >= cv) {
+            // through the cutout: on past this block along the column
+            int qa = q[axis], next = high ? (qa & ~3) - 1 : (qa | 3) + 1;
+            from = high ? hi[axis] - 1 - next : next - lo[axis];
+            continue;
+        }
+        c.s->hit = true;
+        c.s->t = t;
+        c.s->c = card ? col : lit(microCol(q[0], q[1], q[2], f), f);
+        return true;
+    }
 }
 
 bool traceNode(int idx, BoxCtx& c) {

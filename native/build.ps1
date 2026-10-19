@@ -2,7 +2,9 @@
 #   .\native\build.ps1 [-Config Release|Debug] [-NoTest] [-Validate]
 # -Validate runs the GPU suites under the SDK's Khronos validation + synchronization validation. Linux: build_linux.sh.
 param([string]$Config = 'Release', [switch]$NoTest, [switch]$Validate)
-$ErrorActionPreference = 'Stop'
+# not 'Stop': Windows PowerShell 5.1 turns a native program's stderr into an error record when output is redirected,
+# and the suites print deliberate fault-injection lines there; every step checks $LASTEXITCODE and throws instead
+$ErrorActionPreference = 'Continue'
 $here = Split-Path -Parent $MyInvocation.MyCommand.Path
 $tc = if ($env:NIRNCRAFT_TOOLCHAINS) { $env:NIRNCRAFT_TOOLCHAINS } else { (& "$PSScriptRoot\toolchains.ps1") }
 . "$tc\env.ps1"
@@ -13,6 +15,8 @@ if (-not (Test-Path "$build\CMakeCache.txt")) {
 }
 cmake --build $build --config $Config --parallel | Out-Host
 if ($LASTEXITCODE) { throw 'build failed' }
+# the sources this core was built from (the harness rebuilds only when they change, not when a file's time does)
+py -3 -I (Join-Path (Split-Path -Parent $here) 'tools\dev\native_sources.py') --stamp (Join-Path $build "$Config\atlas_core.sources")
 $repo = Split-Path -Parent $here
 $raster = Join-Path $here 'data\tamriel_raster.bin'
 if (-not (Test-Path $raster)) { py -3 -I (Join-Path $here 'tools\export_raster.py') $repo | Out-Host }

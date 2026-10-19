@@ -111,6 +111,11 @@ if [ -f "$SPECS" ] && grep -q -- '-rpath' "$SPECS"; then
   sed 's/ *%{!static:-rpath [^}]*}//' "$SPECS" > "$DEPS/gcc-norpath.specs"
   LINK=(-DCMAKE_SHARED_LINKER_FLAGS="-specs=$DEPS/gcc-norpath.specs")
 fi
+# a build directory configured from another checkout (a worktree) builds that checkout's sources: start it again
+if [ -f "$BUILD/CMakeCache.txt" ] && ! grep -qxF "CMAKE_HOME_DIRECTORY:INTERNAL=$HERE" "$BUILD/CMakeCache.txt"; then
+  echo "build_linux: $BUILD was configured for another source tree; reconfiguring for $HERE"
+  rm -rf "$BUILD/CMakeCache.txt" "$BUILD/CMakeFiles"
+fi
 if [ ! -f "$BUILD/CMakeCache.txt" ]; then
   cmake -S "$HERE" -B "$BUILD" "${GEN[@]}" -DCMAKE_BUILD_TYPE="$CONFIG" "${LINK[@]}"
 fi

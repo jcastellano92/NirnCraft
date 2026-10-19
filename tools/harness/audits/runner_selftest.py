@@ -181,6 +181,11 @@ with tempfile.TemporaryDirectory() as td:
     expect(_game.native_stale(built, [src]), "native sources newer than the built core: rebuild before tests")
     _os.utime(built, (_time.time() + 100, _time.time() + 100))
     expect(not _game.native_stale(built, [src]), "a core built after its sources is current")
+    _os.utime(built, (_time.time() - 100, _time.time() - 100))
+    built.with_suffix(".sources").write_text("abc")
+    expect(not _game.native_stale(built, [src], digest="abc"),
+           "a core whose build stamp names today's sources is current, however old its file time (no relink)")
+    expect(_game.native_stale(built, [src], digest="abd"), "a stamp from other sources does not excuse an old core")
 
 # --- a failed scene's recovery never runs its exports (a long one blocked the next scene) --------------------------
 cl = _game.tolerant(["command kill @e", "atlaslab view x-view 1024 light", "fog-off off"])
@@ -200,6 +205,16 @@ expect(got == ["B"], "--offline leaves live scenes out and never pulls one in as
 pp = review.parse_pose("\n".join(["VERDICT: WEAK", "SEES: a wall", "PROBLEMS: too close", "FIX: move back 40 blocks"]))
 expect(pp["verdict"] == "WEAK" and pp["fix"] == "move back 40 blocks", "the pose review's answer is read field by field")
 expect(review.parse_pose("I could not open the image.")["verdict"] is None, "no verdict line: unvetted, never a pass")
+
+# --- truth subjects offset from their place look back at it (five faced away: yaw 0 is south in Minecraft) -----------
+import math as _math
+import truth as _truth
+for _sub in _truth.SUBJECTS:
+    _pose = _sub[2]
+    _ox, _oz = (_pose.get("offset") or [0, 0])[:2]
+    if (_ox or _oz) and _sub[0] not in _truth.LOOKS_AWAY:
+        _y = _math.radians(_pose.get("yaw", 0))
+        expect(-_math.sin(_y) * -_ox + _math.cos(_y) * -_oz > 0, f"truth subject {_sub[0]} faces its place")
 
 print(f"problems {len(problems)}")
 sys.exit(1 if problems else 0)

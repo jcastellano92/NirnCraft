@@ -147,8 +147,9 @@ def truth_inputs(el):
 
 def bake_cards(el, tmp):
     """The element's surface cards (atlas_truth bake=): the real faces' colour and light, sampled by lab-groups."""
-    out = tmp / "element.alc"
-    if not out.exists():
+    out = tmp / f"{el['slug']}.alc"  # per element, and again whenever an input is newer (render() reuses a folder)
+    ins = [Path(p) for k, p in truth_inputs(el).items() if k != "box"]
+    if not out.exists() or any(p.stat().st_mtime > out.stat().st_mtime for p in ins if p.exists()):
         run("atlas_truth", {**truth_inputs(el), "bake": out.as_posix()})
     return out
 
@@ -159,7 +160,10 @@ def renderer_args(renderer, el, tmp):
         return "atlas_truth", {"camera": "mc", **truth_inputs(el), **REFERENCE[TRUTH_MODE]}
     lab = {"camera": "mc", "blocks": d / "blocks.bin", "volume": d / f"{el['volume']}.alv", "box": truth_inputs(el)["box"],
            "variants": "groups", "frames": 16, "shade": "mc"}
-    if renderer == "lab-groups":  # the grouped-voxel representation on the CPU bench, coloured from surface cards
+    if renderer == "lab-groups":  # the grouped-voxel representation on the CPU bench, coloured from surface cards;
+        # leaves and plants whole voxels cut by their cards' alpha (masked face textures)
+        return "atlas_lab", {**lab, "surface": bake_cards(el, tmp), "leaves": "cards"}
+    if renderer == "lab-groups-hashed":  # the same with leaves as hashed micro-voxels (their 4 x 4 tiles' alpha)
         return "atlas_lab", {**lab, "surface": bake_cards(el, tmp)}
     if renderer == "lab-groups-own":  # the same with the bench's own 4 x 4 mean tiles under a fixed sun (no cache)
         return "atlas_lab", lab

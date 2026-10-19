@@ -17,6 +17,9 @@ forests, our own blocks and models in towns. Add a subject here, never by hand i
 EXPORT_DIR = "@game/nirncraft-atlaslab/"
 
 # slug, title, pose, time, tags, box (radius, down, up), underground
+# Minecraft yaw: 0 faces south (+z), 90 west (-x), 180 north (-z), -90 east (+x). A pose offset from its place looks
+# back at it (yaw from the offset), unless the subject is what lies beyond (LOOKS_AWAY; checked in the self-test).
+LOOKS_AWAY = {"high-hrothgar-mountains", "falkreath-forest", "marsh-morthal", "swamp-leyawiin"}
 SUBJECTS = [
     ("whiterun-day", "Whiterun from the plains 120 m south at noon: walls, the keep, far mountains",
      {"place": "whiterun", "height": 4, "yaw": 180, "pitch": 3, "offset": [0, 120]}, 6000, ["place:whiterun", "town:whiterun"], (48, 12, 40), False),
@@ -34,16 +37,16 @@ SUBJECTS = [
     ("dawnstar-sea", "Dawnstar's harbour and the Sea of Ghosts: shore, ice, open water",
      {"place": "dawnstar", "height": 8, "yaw": 180, "pitch": 3}, 6000, ["place:dawnstar", "feature:ocean"], (48, 24, 32), False),
     ("high-hrothgar-mountains", "Up the Throat of the World: massive mountains and the valleys below",
-     {"place": "high_hrothgar", "height": 6, "yaw": 0, "pitch": -2}, 6000, ["place:high_hrothgar", "feature:mountains",
+     {"place": "high_hrothgar", "height": 30, "yaw": 0, "pitch": 10, "offset": [0, 80]}, 6000, ["place:high_hrothgar", "feature:mountains",
                                                                             "feature:horizon"], (48, 24, 40), False),
     ("falkreath-forest", "Deep in the Falkreath pine forest: trunks, crowns, light through the canopy",
      {"place": "falkreath", "height": 3, "yaw": 135, "pitch": 4, "offset": [120, 120]}, 6000, ["place:falkreath",
                                                                                             "feature:forest"], (40, 12, 48), False),
     ("cave-mouth-near", "A cave mouth up close: the opening, the dark inside, the slope around it",
-     {"place": "greywater_grotto", "height": 3, "yaw": 0, "pitch": 4, "offset": [0, 18]}, 6000,
+     {"place": "greywater_grotto", "height": 3, "yaw": 180, "pitch": 4, "offset": [0, 18]}, 6000,
      ["feature:cave", "place:greywater_grotto"], (32, 24, 24), False),
     ("cave-mouth-far", "The same cave mouth from 200 m: does the far field keep the opening",
-     {"place": "greywater_grotto", "height": 20, "yaw": 0, "pitch": 2, "offset": [0, 200]}, 6000,
+     {"place": "greywater_grotto", "height": 20, "yaw": 180, "pitch": 2, "offset": [0, 200]}, 6000,
      ["feature:cave", "place:greywater_grotto"], (32, 24, 24), False),
     ("dungeon-mouth", "Bleak Falls Barrow's mouth by day: a custom dungeon's entrance and its ruins",
      {"dungeon": "bleak_falls_barrow", "view": "mouth"}, 6000, ["feature:dungeon", "place:bleak_falls_barrow"], (40, 16, 32), False),
@@ -57,16 +60,16 @@ SUBJECTS = [
      {"place": "morthal", "height": 3, "yaw": 0, "pitch": 3, "offset": [0, 60]}, 6000,
      ["place:morthal", "feature:marsh", "feature:water"], (48, 16, 32), False),
     ("reach-markarth", "Markarth in the Reach: red rock cliffs, the Dwemer city, scrub",
-     {"place": "markarth", "height": 6, "yaw": 90, "pitch": 2, "offset": [-120, 0]}, 6000,
+     {"place": "markarth", "height": 6, "yaw": -90, "pitch": 2, "offset": [-120, 0]}, 6000,
      ["place:markarth", "feature:cliffs"], (48, 24, 48), False),
     ("snow-winterhold", "Winterhold in snow above the Sea of Ghosts: snow cover, ice, the open sea",
      {"place": "winterhold", "height": 4, "yaw": 180, "pitch": 3}, 6000,
      ["place:winterhold", "feature:snow", "feature:ocean"], (48, 24, 32), False),
     ("water-vivec", "Vivec on the water: cantons, open sea, distant shore (Morrowind)",
-     {"place": "vivec", "height": 10, "yaw": 0, "pitch": 2, "offset": [0, 160]}, 6000,
+     {"place": "vivec", "height": 10, "yaw": 180, "pitch": 2, "offset": [0, 160]}, 6000,
      ["place:vivec", "feature:ocean", "feature:city"], (48, 32, 48), False),
     ("mountains-bruma", "Bruma under the Jerall Mountains: snowy peaks, pines, the city walls (Cyrodiil)",
-     {"place": "bruma", "height": 4, "yaw": 0, "pitch": 4, "offset": [0, 140]}, 6000,
+     {"place": "bruma", "height": 4, "yaw": 180, "pitch": 4, "offset": [0, 140]}, 6000,
      ["place:bruma", "feature:mountains", "feature:snow"], (48, 16, 48), False),
     ("swamp-leyawiin", "Leyawiin's Blackwood: swamp forest, broad-leaf trees, water (Cyrodiil)",
      {"place": "leyawiin", "height": 3, "yaw": 90, "pitch": 3, "offset": [-100, 0]}, 6000,

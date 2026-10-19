@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -53,6 +54,9 @@ def stale(platform_dir, digest=None):
 
 if __name__ == "__main__":
     now = source_hash()
+    if len(sys.argv) == 3 and sys.argv[1] == "--stamp":  # native/build.ps1: the sources this build was made from
+        Path(sys.argv[2]).write_text(now)
+        sys.exit(0)
     print(f"native sources {now[:12]}")
     for k, v in sorted(read_manifest().items()):
         print(f"  {k:16} built from {v[:12]}  {'current' if v == now else 'BEHIND: rebuild'}")
