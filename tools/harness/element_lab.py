@@ -241,8 +241,36 @@ def pop(renderer, frames_truth, frames_ours):
 # coverage off the reference's by more than presence (either way)
 LIMITS = {"iou": 0.9, "pop": 0.1, "presence": 0.75}
 SHAPE_PX = 16
-DARK_L = 8  # the reference's mean L* over the element, nearest: below it the outside is unlit (an underground chunk)
 MASS_PX = 0.25  # pixels of coverage: a dot's mass is measured to about this (16 samples, sub-pixel placement)
+DARK_LIGHT = 2  # mean sky light (0..15) on the element's exposed faces: below it, it is underground;
+# a light level, not a brightness: a tree at night is dark yet under the open sky, and night is a case to test
+
+
+def outside_light(el, alc):
+    """The mean sky light (0..15) in front of the element's exposed faces (those facing air or the box's edge), from
+    its surface cards: under the open sky (day or night) or underground (torches are block light: a lit dungeon hall
+    is still underground, and from outside the box it is a black cube)."""
+    (x0, y0, z0), ids = read_alv(export_dir() / f"{el['volume']}.alv")
+    air = {sid for sid, n in block_names().items() if n.startswith(("Block{minecraft:air}", "Block{minecraft:cave_air}",
+                                                                    "Block{minecraft:void_air}"))}
+    b = el["box"]
+    step = ((0, -1, 0), (0, 1, 0), (0, 0, -1), (0, 0, 1), (-1, 0, 0), (1, 0, 0))
+    d = Path(alc).read_bytes()
+    n, p, levels = struct.unpack("<i", d[4:8])[0], 8, []
+    for _ in range(n):
+        x, y, z, f = struct.unpack("<4i", d[p:p + 16])
+        sky = np.frombuffer(d[p + 16 + 1024:p + 16 + 1280], dtype=np.uint8)
+        cov = (np.frombuffer(d[p + 16:p + 16 + 1024], dtype="<u4") >> 24) > 0
+        p += 16 + 1536
+        q = (x + step[f][0], y + step[f][1], z + step[f][2])
+        i = (q[1] - y0, q[2] - z0, q[0] - x0)
+        if not all(0 <= i[k] < ids.shape[k] for k in range(3)):
+            continue  # beyond the export: its light is the reference's open-sky guess, not data
+        if all(b[k] <= q[k] <= b[k + 3] for k in range(3)) and int(ids[i]) not in air:
+            continue  # covered by the element's own blocks
+        if cov.any():
+            levels.append(float(sky[cov].mean()) / 16.0)
+    return round(float(np.mean(levels)), 2) if levels else 15.0
 
 
 def main():
@@ -285,10 +313,7 @@ def main():
             report["distances"].append({"dist": dist, **m})
             print(f"{dist:>7} m  iou {m['iou']:.3f}  dE {m['dE']:6.2f}  presence {m['presence']:.2f}  ({m['pixels']} px)")
             rows.append((Image.open(ref).convert("RGB"), Image.open(ours).convert("RGB")))
-            if "lightness" not in report:  # how lit the element's outside is, seen from nearest
-                rgb, mask = load(ref)
-                sel = mask > 0.5
-                report["lightness"] = round(float(lab(rgb)[..., 0][sel].mean()), 2) if sel.any() else 0.0
+        report["outsideLight"] = outside_light(el, bake_cards(el, tmp))
         for name in fly:
             report[f"flyin_{name}"] = pop(a.renderer, fly[name]["truth"], fly[name][a.renderer])
             print(f"fly-in {name}: pop {report[f'flyin_{name}']['pop']}  max {report[f'flyin_{name}']['popMax']}")
@@ -318,9 +343,9 @@ def main():
             fails.append(f"fly-in {name} pops: {report[f'flyin_{name}']['pop']} > {LIMITS['pop']}")
     report["fails"] = fails
     print(json.dumps(report))
-    if report.get("lightness", 100) < DARK_L:  # black on black agrees to dE 0 and says nothing: not a pass
-        print(f"SKIP: the element's outside is unlit (L* {report['lightness']}; underground): judge it from inside, "
-              "in the scene tier")
+    if report.get("outsideLight", 15) < DARK_LIGHT:  # black on black agrees to dE 0 and says nothing: not a pass
+        print(f"SKIP: the element is underground (sky light {report['outsideLight']} of 15 on its faces): judge it "
+              "from inside, in the scene tier")
         return 3  # harness.CHECK_SKIP_EXIT
     for f in fails:
         print("FAIL " + f)

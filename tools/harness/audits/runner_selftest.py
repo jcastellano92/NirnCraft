@@ -217,6 +217,32 @@ if _els:
     _m = _re.search(_els[0]["metrics"]["worst_iou"], _line)
     expect(bool(_m) and _m.group(1) == "0.912", "the elements suite reads the worst IoU")
 
+# --- an element is underground by its faces' sky light, not its brightness (a night tree is dark, under the sky) ----
+import struct as _struct
+import numpy as _np
+import element_lab as _el
+with tempfile.TemporaryDirectory() as _td:
+    _ids = _np.ones((3, 3, 3), dtype="<u4")  # (y, z, x): stone, the top layer air
+    _ids[2] = 0
+    _saved = (_el.read_alv, _el.block_names, _el.export_dir)
+    _el.read_alv = lambda p: ((0, 0, 0), _ids)
+    _el.block_names = lambda: {0: "Block{minecraft:air}", 1: "Block{minecraft:stone}"}
+    _el.export_dir = lambda: Path(_td)
+    def _alc(sky, extra_edge=False):
+        cards = [(1, 1, 1, 1, sky)] + ([(1, 2, 1, 1, 240)] if extra_edge else [])  # up faces; the second faces y 3
+        out = b"ALC1" + _struct.pack("<i", len(cards))
+        for x, y, z, f, s in cards:
+            out += _struct.pack("<4i", x, y, z, f) + _struct.pack("<256I", *([0xFF808080] * 256)) + bytes([s] * 256) + bytes(256)
+        path = Path(_td) / f"c{sky}{extra_edge}.alc"
+        path.write_bytes(out)
+        return path
+    _box = {"volume": "v", "box": [0, 0, 0, 2, 1, 2]}
+    expect(_el.outside_light(_box, _alc(0)) < _el.DARK_LIGHT, "a face with no sky light in front of it: underground")
+    expect(_el.outside_light(_box, _alc(240)) == 15.0, "full sky light (day or night alike): not underground")
+    expect(_el.outside_light(_box, _alc(0, True)) < _el.DARK_LIGHT,
+           "a face looking beyond the export (the reference's open-sky guess) does not count")
+    _el.read_alv, _el.block_names, _el.export_dir = _saved
+
 # --- truth subjects offset from their place look back at it (five faced away: yaw 0 is south in Minecraft) -----------
 import math as _math
 import truth as _truth
