@@ -57,8 +57,11 @@ import java.util.UUID;
  */
 @net.neoforged.fml.common.EventBusSubscriber(modid = Skycraft.MODID)
 public final class CombatHandler {
-    /** Entities that take reduced sneak attack multipliers and can't be paralyzed (bosses, dragons). */
-    public static final TagKey<EntityType<?>> BOSSES = TagKey.create(Registries.ENTITY_TYPE, Identifier.fromNamespaceAndPath("forge", "bosses"));
+    /**
+     * Entities that take reduced sneak attack multipliers and can't be paralyzed (bosses, dragons). NeoForge's common
+     * {@code #c:bosses} (what other mods tag; 1.20.1's {@code #forge:bosses}); it includes our {@code #forge:bosses} list.
+     */
+    public static final TagKey<EntityType<?>> BOSSES = net.neoforged.neoforge.common.Tags.EntityTypes.BOSSES;
     /** Creatures counted as "beasts/monsters" for the Hunting tree's Monster Hunter perk. */
     public static final TagKey<EntityType<?>> MONSTERS = TagKey.create(Registries.ENTITY_TYPE, Identifier.fromNamespaceAndPath(Skycraft.MODID, "monsters"));
     /** Skyrim damage is roughly 5x Minecraft damage; XP use values are computed in Skyrim units. */
