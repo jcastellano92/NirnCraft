@@ -32,7 +32,7 @@ Tags match by prefix (`region:skyrim` matches `region:skyrim/falkreath`).
 
 Every test (visual or not) keeps two records: `results/<test>/<variant>.after.json` (+ `.png`) is the newest,
 `.before` the one before it; a new result shifts after to before and drops the older one. Each run writes one
-report, always at the same place (older runs are deleted): `.work/harness/latest/report.html` (`harness.py open`), `sheet*.png` (before | after | change),
+report per kind of run, `.work/harness/reports/<scope>/report.html` (scope = `suite-smoke`, `tag-...`, `test-<id>`, `watch`, `gate`, `probes`, `changed`; each keeps its latest run, the newest 15 scopes stay, smoke and gate always), and one overview of every stored result, `.work/harness/index.html` (`harness.py open`; `open suite-smoke` for a report), `sheet*.png` (before | after | change),
 `combos.png` (every variant of a scene side by side) and `agent/` (below). Metrics on every image: luma, black tiles
 (the NaN / black-box signature), clipping, and how much changed since the previous capture.
 
@@ -41,7 +41,7 @@ report, always at the same place (older runs are deleted): `.work/harness/latest
 * **Claude agents: hand visual review to the `visual-reviewer` subagent** (`.claude/agents/visual-reviewer.md`, runs on
   Haiku): it reads `agent/index.txt` and the pages and answers in a fixed BROKEN / REGRESSION / CHECK / OK format, so
   screenshots never fill the main conversation. Other AIs use whatever model they like on the same pages.
-* **Read `agent/index.txt`, then only the pages it lists.** Agent pages hold at most 3 before|after rows of 760 px
+* **Read the run's `agent/index.txt` (its path is printed at the end of the run), then only the pages it lists.** Agent pages hold at most 3 before|after rows of 760 px
   per image (problems first, unchanged captures left out), about what one image read can actually resolve. Do not
   shrink more onto a page; ask for detail instead:
 * `harness.py zoom <test> --cell 1,1` (a 3x3 grid cell at full resolution) or `--crop x,y,w,h`.

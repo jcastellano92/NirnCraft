@@ -253,13 +253,20 @@ def stack(images, gap=10):
 
 
 # ------------------------------------------------------------------------------------------------------- reports
-def report(run_name, rows, title="NirnCraft harness"):
+REPORTS = STORE / "reports"
+KEEP_REPORTS = 15
+ALWAYS_KEEP = {"suite-smoke", "gate"}
+
+
+def report(run_name, rows, title="NirnCraft harness", scope="custom"):
     """Write the run folder (only the latest run is kept): compare images, sheet.png, combos.png, report.html.
     rows: [{"scene", "variant", "metrics", "tags", "title"}] in run order."""
-    shutil.rmtree(RUNS, ignore_errors=True)  # older runs go; their captures live on as `before` in results/
-    run = LATEST  # always the same place: .work/harness/latest/report.html (harness.py open)
+    shutil.rmtree(RUNS, ignore_errors=True)  # (older layouts)
+    shutil.rmtree(LATEST, ignore_errors=True)
+    run = REPORTS / scope  # one folder per kind of run: a focused run never replaces the smoke report
     shutil.rmtree(run, ignore_errors=True)
     (run / "compare").mkdir(parents=True)
+    _prune_reports(keep=run)
     cmp_imgs = []
     for r in rows:
         img = compare(r["scene"], r["variant"])
@@ -379,3 +386,64 @@ def zoom(scene, variant, crop=None, cell=None, which="both", out=None):
     out.parent.mkdir(parents=True, exist_ok=True)
     row.save(out)
     return out
+
+
+def _prune_reports(keep):
+    if not REPORTS.exists():
+        return
+    dirs = sorted((d for d in REPORTS.iterdir() if d.is_dir()), key=lambda d: d.stat().st_mtime, reverse=True)
+    for d in dirs[KEEP_REPORTS:]:
+        if d != keep and d.name not in ALWAYS_KEEP:
+            shutil.rmtree(d, ignore_errors=True)
+
+
+def overview(scenes):
+    """.work/harness/index.html from every stored result (not one run): each test's latest status by tier and suite,
+    problems first, links to every scope report and to the images. Rebuilt after each run; cheap (JSON only)."""
+    import html
+    by_id = {s["id"]: s for s in scenes}
+    recs = []
+    if SCENES.exists():
+        for f in SCENES.glob("*/*.after.json"):
+            try:
+                recs.append(json.loads(f.read_text(encoding="utf-8")))
+            except ValueError:
+                continue
+    order = {"crash": 0, "error": 1, "fail": 2, "flag": 3, "skip": 4, "pass": 5}
+    recs.sort(key=lambda r: (order.get(r.get("status"), 9), r.get("scene", "")))
+    groups = {}
+    for r in recs:
+        s = by_id.get(r.get("scene"), {})
+        suite = next((t[6:] for t in s.get("tags", []) if t.startswith("suite:")), "-")
+        g = groups.setdefault((s.get("tier", "?"), suite), {})
+        g[r.get("status")] = g.get(r.get("status"), 0) + 1
+    reports = sorted((d for d in REPORTS.iterdir() if (d / "report.html").exists()), key=lambda d: -d.stat().st_mtime) \
+        if REPORTS.exists() else []
+    out = ["<!doctype html><meta charset=utf-8><title>NirnCraft harness overview</title>",
+           "<style>body{background:#111;color:#ddd;font:14px system-ui;margin:16px}td,th{padding:3px 9px;text-align:left}"
+           "a{color:#8cf}.bad{color:#ffb74d}.crash,.error{color:#ff7a7a}</style>",
+           f"<h1>NirnCraft harness</h1><p>{len(recs)} test result(s) stored; updated {time.strftime('%Y-%m-%d %H:%M')}</p>",
+           "<h2>Reports</h2><ul>"]
+    for d in reports:
+        out.append(f"<li><a href='reports/{d.name}/report.html'>{d.name}</a> "
+                   f"({time.strftime('%m-%d %H:%M', time.localtime(d.stat().st_mtime))})"
+                   + (f" &middot; <a href='reports/{d.name}/agent/index.txt'>agent pages</a>"
+                      if (d / 'agent/index.txt').exists() else "") + "</li>")
+    out.append("</ul><h2>By tier and suite</h2><table><tr><th>tier</th><th>suite</th>"
+               + "".join(f"<th>{k}</th>" for k in order) + "</tr>")
+    for (tier, suite), c in sorted(groups.items()):
+        out.append(f"<tr><td>{tier}</td><td>{html.escape(suite)}</td>" + "".join(f"<td>{c.get(k, '')}</td>" for k in order) + "</tr>")
+    out.append("</table><h2>Needs attention</h2><table><tr><th>status</th><th>test</th><th>when</th><th>why</th></tr>")
+    for r in recs:
+        if r.get("status") in ("pass", "skip"):
+            continue
+        sid, v = r.get("scene"), r.get("variant")
+        why = r.get("error") or "; ".join((r.get("fails") or []) + (r.get("metrics", {}).get("flags") or []))
+        img = f" <a href='results/{sid}/{v}.after.png'>image</a>" if (SCENES / sid / f"{v}.after.png").exists() else ""
+        crash = f" <a href='results/{sid}/{v}.crash.txt'>crash log</a>" if (SCENES / sid / f"{v}.crash.txt").exists() else ""
+        out.append(f"<tr class='{r.get('status')} bad'><td>{r.get('status')}</td><td>{sid} [{v}]{img}{crash}</td>"
+                   f"<td>{r.get('capturedAt', '')}</td><td>{html.escape(str(why))[:220]}</td></tr>")
+    out.append("</table>")
+    (STORE / "index.html").write_text("\n".join(out), encoding="utf-8")
+    return STORE / "index.html"
+

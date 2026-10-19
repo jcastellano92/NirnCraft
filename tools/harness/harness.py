@@ -395,7 +395,10 @@ class Runner:
                     m[name] = h
         d = results.stem(s["id"], v).parent
         d.mkdir(parents=True, exist_ok=True)
-        (d / f"{v}.output.txt").write_text(out[-20000:], encoding="utf-8")
+        log_file = d / f"{v}.output.txt"
+        if log_file.exists():  # like images: the newest output and the one before it
+            log_file.replace(d / f"{v}.output.before.txt")
+        log_file.write_text(out[-20000:], encoding="utf-8")
         failed = r.returncode != 0
         if s.get("fail_regex"):  # tools that report problems as lines but exit 0 (e.g. "^ERR")
             hits = [l for l in out.splitlines() if re.search(s["fail_regex"], l)]
@@ -749,7 +752,32 @@ def print_summary(done, all_lines=False, lines=True):
         say(f"  ... {len(bad) - 25} more (see report)")
 
 
-def build_report(keys, title):
+def scope_of(a, watch=False):
+    """The report folder a run writes to: one per kind of run, so a focused run never replaces another's report."""
+    if watch:
+        return "watch"
+    if getattr(a, "cmd", "") == "gate":
+        return "gate"
+    if getattr(a, "cmd", "") == "probe":
+        return "probes"
+    if a.changed is not None:
+        return "changed"
+    slug = lambda x: re.sub(r"[^a-z0-9]+", "-", x.lower()).strip("-")[:60]  # noqa: E731
+    if a.suite:
+        return "suite-" + slug(a.suite)
+    if a.tag:
+        return "tag-" + slug("+".join(a.tag))
+    if a.ids and len(a.ids) == 1:
+        return "test-" + slug(a.ids[0])
+    if a.ids:
+        import hashlib
+        return "tests-" + hashlib.sha1(",".join(sorted(a.ids)).encode()).hexdigest()[:8]
+    if a.tier:
+        return "tier-" + slug(a.tier)
+    return "suite-smoke"
+
+
+def build_report(keys, title, scope="custom"):
     by_id = {s["id"]: s for s in catalog.load()}
     rows = []
     for k in keys:
@@ -762,7 +790,12 @@ def build_report(keys, title):
                          ([rec["error"][-120:]] if rec.get("error") else [])},
                          "tags": s.get("tags", []), "title": s.get("title", sid),
                          "crashLog": rec.get("crashLog", ""), "status": rec.get("status")})
-    return results.report(time.strftime("%Y%m%d-%H%M%S"), rows, title)
+    run = results.report(time.strftime("%Y%m%d-%H%M%S"), rows, title, scope)
+    try:
+        results.overview(catalog.load())
+    except Exception as e:  # noqa: BLE001
+        say(f"  ! overview not updated: {e}")
+    return run
 
 
 # ================================================================================================ reloads
@@ -846,11 +879,12 @@ def cmd_run(a, watch=False):
             counts = {}
             for d in st["done"].values():
                 counts[d.get("status")] = counts.get(d.get("status"), 0) + 1
-            event("run_finished", items=len(keys), counts=counts, report=str(results.LATEST / "report.html"))
-            run = build_report(keys, "NirnCraft harness")
+            event("run_finished", items=len(keys), counts=counts, scope=scope_of(a, watch),
+                  report=str(results.REPORTS / scope_of(a, watch) / "report.html"))
+            run = build_report(keys, f"NirnCraft harness: {scope_of(a, watch)}", scope_of(a, watch))
             pages = run / "agent/index.txt"
             n = len(pages.read_text(encoding="utf-8").splitlines()) if pages.exists() else 0
-            say(f"report: {run / 'report.html'}  ({time.monotonic() - t0:.0f} s)"
+            say(f"report: {run / 'report.html'}  ({time.monotonic() - t0:.0f} s); overview: {STORE / 'index.html'}"
                 + (f"; agent pages: {run / 'agent'} ({n} capture(s) worth a look)" if n else ""))
             prune()
             return runner
@@ -942,7 +976,7 @@ def cmd_watch(a):
             submit(keys, force=True, who="watch")
             t0 = time.monotonic()
             done = process_queue(runner, on_item=lambda s, v, rec: say(line(key(s, v), summary(rec))))
-            run = build_report(keys, "NirnCraft harness (watch)")
+            run = build_report(keys, "NirnCraft harness (watch)", "watch")
             say(f"{len(done)} item(s) in {time.monotonic() - t0:.0f} s; report: {run / 'report.html'}")
     except KeyboardInterrupt:
         say("watch stopped")
@@ -985,8 +1019,8 @@ def cmd_status(a):
 
 def cmd_report(a):
     items = items_of(select(catalog.load(), a), a)
-    run = build_report([key(s, v) for s, v in items], "NirnCraft harness")
-    say(f"report: {run / 'report.html'}")
+    run = build_report([key(s, v) for s, v in items], f"NirnCraft harness: {scope_of(a)}", scope_of(a))
+    say(f"report: {run / 'report.html'}; overview: {STORE / 'index.html'}")
 
 
 def cmd_cameras(a):
@@ -1045,8 +1079,13 @@ def cmd_seed_legacy(a):
 
 
 def cmd_open(a):
-    """Open the latest report (or an agent page / sheet) in the default viewer."""
-    target = results.LATEST / (a.what or "report.html")
+    """Open the overview (default), a scope's report (`open suite-smoke`) or a file inside it."""
+    if not a.what:
+        target = STORE / "index.html"
+    elif (results.REPORTS / a.what).is_dir():
+        target = results.REPORTS / a.what / "report.html"
+    else:
+        target = results.REPORTS / a.what
     if not target.exists():
         say(f"nothing yet at {target}; run something first")
         return 1
@@ -1122,7 +1161,7 @@ def fmt_step(s):
 
 def cmd_clean(a):
     import shutil
-    for d in ("results", "runs", "latest", "queue", "jobs"):
+    for d in ("results", "runs", "latest", "reports", "queue", "jobs", "trace"):
         shutil.rmtree(STORE / d, ignore_errors=True)
     say("harness results cleared")
 
@@ -1363,7 +1402,7 @@ def main():
     p.add_argument("--keep", action="store_true")
     p.add_argument("--rebuild", action="store_true")
     p.add_argument("--force", action="store_true")
-    sub.add_parser("open").add_argument("what", nargs="?", help="report.html (default), agent/page-01.png, sheet.png ...")
+    sub.add_parser("open").add_argument("what", nargs="?", help="nothing: the overview; suite-smoke: that report; suite-smoke/agent/page-01.png")
     p = sub.add_parser("trace")
     p.add_argument("test", nargs="?", help="test id or test|variant (default: the end of the run)")
     p.add_argument("--before", type=int, default=15, help="steps before the test's first step")
