@@ -139,6 +139,11 @@ add_executable(atlas_lab tools/atlas_lab.cpp)
 target_include_directories(atlas_lab PRIVATE src)
 target_link_libraries(atlas_lab PRIVATE Threads::Threads)  # std::thread: glibc < 2.34 keeps pthread in libpthread
 
+# the exact reference (docs/ATLAS-LOD.md, ground truth): Minecraft's own chunk mesh traced offline (/nirncraft-atlaslab quads)
+add_executable(atlas_truth tools/atlas_truth.cpp)
+target_include_directories(atlas_truth PRIVATE src)
+target_link_libraries(atlas_truth PRIVATE Threads::Threads)
+
 add_executable(atlas_tests tests/test_main.cpp src/svdag.cpp)
 target_include_directories(atlas_tests PRIVATE src include)
 target_link_libraries(atlas_tests PRIVATE atlas_core Threads::Threads)
