@@ -577,49 +577,10 @@ def dispatch(args):
                 f"nirncraft-dev regen {x1} {z1} {x2} {z2}", "nirncraft-dev status"])
         print("Fresh area ready; use a dungeon view/camera command to return. Release tickets when done.")
     elif args.action == "shader":
-        acceptance = read_json(GAME / "migration/custom-shader-acceptance.json")
-        if acceptance.get("target") != TARGET or acceptance.get("integrationVerified") is not True:
-            raise RuntimeError("The customized Complementary integration is preserved but has not passed native 26.3 acceptance; no shader files were changed")
-        require_ready()
-        sys.path.insert(0, str(REPO / "tools/shaders"))
-        import patch_complementary_clouds
-        import patch_sun_horizon
-        shader = GAME / "shaderpacks/ComplementaryReimagined_r5.9.3.zip"
-        log = GAME / "logs/latest.log"
-        log_offset = log.stat().st_size
-        state = status()["client"]
-        if any(state.get(k, 0) for k in ("queued", "waitTicks", "burstFrames", "settling", "commandPending")):
-            raise RuntimeError("QA capture queue is busy; wait before updating shaders")
-        # Rebuild from the same pinned original as release packaging. Editing a
-        # repeatedly patched zip can retain abandoned experiment files/uniforms.
-        original=next((REPO/'dist/.cache').glob('*ComplementaryReimagined_r5.9.3.zip'),None)
-        if original is None: raise RuntimeError('Pinned original shader cache missing; run the instance builder first')
-        temporary=shader.with_name(shader.stem+'.preview-build.zip')
-        shutil.copy2(original,temporary)
-        patch_complementary_clouds.patch_shaderpack_zip(temporary)
-        patch_sun_horizon.patch_zip(temporary,temporary)
-        def contents(path):
-            with zipfile.ZipFile(path) as pack:return {n:hashlib.sha256(pack.read(n)).hexdigest() for n in pack.namelist()}
-        if contents(shader)==contents(temporary):
-            temporary.unlink()
-            print('Shader already matches source; no reload needed')
-            return
-        backup=DEV/'shader-backups'/(str(time.time_ns())+'.zip');backup.parent.mkdir(parents=True,exist_ok=True)
-        shutil.copy2(shader,backup)
-        try:os.replace(temporary,shader)
-        except PermissionError:
-            # Windows Oculus keeps the ZIP open without delete sharing. Its
-            # existing live patch path permits writing; reload follows immediately.
-            shutil.copyfile(temporary,shader);temporary.unlink()
-        with zipfile.ZipFile(shader) as pack:
-            if pack.testzip() is not None:raise RuntimeError('Rebuilt shader archive failed CRC validation')
-        live_actions(["reload"])
-        with log.open("rb") as handle:
-            handle.seek(log_offset)
-            emitted = handle.read().decode("utf-8", errors="replace")
-        if re.search(r"error:|ShaderCompileException|Failed to compile|Invalid program|Error compiling", emitted, re.I):
-            raise RuntimeError("Shader reload logged a compilation error; inspect logs/latest.log")
-        print("Shader edits applied and reload acknowledged by the running client")
+        # The old Complementary Reimagined patch path is gone; Infinite ATLAS is the only shader pack.
+        raise RuntimeError("live_world.py shader is retired: edit shaderpack/InfiniteATLAS and run "
+                           "`py -3 tools/harness/harness.py watch` (rebuilds the pack zip and reloads Iris); "
+                           "see tools/harness/README.md")
     elif args.action == "upload-bakes":
         upload_bakes(args.folder)
 
