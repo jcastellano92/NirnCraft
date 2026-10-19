@@ -36,6 +36,7 @@
 
 #include "atlas_lod_boxes_spv.h"   // generated: slangc atlas_lod.slang -entry boxesMain
 #include "atlas_lod_build.hpp"
+#include "atlas_lod_gpubuild.hpp"  // build=gpu: the groups built by shaders/atlas_lod_build.slang
 #include "atlas_lod_groups_spv.h"  // generated: slangc atlas_lod.slang -entry groupsMain
 #include "png.hpp"
 
@@ -729,6 +730,120 @@ bool writeSynth(const std::string& dir) {
     return true;
 }
 
+// ---- build=gpu: the groups built by atlas_lod_build.slang (atlas_lod_gpubuild.hpp) ----------------------------------
+
+// a flattened groups tree's shape: leaves, and the surface of its inner boxes over the root's (the SAH's expected
+// traversal cost, up to constants: what a worse split pays for)
+struct TreeShape {
+    size_t nodes = 0, leaves = 0;
+    double innerArea = 0;
+};
+TreeShape treeShape(const LodTree& t) {
+    TreeShape s;
+    s.nodes = t.count();
+    double root = 0;
+    for (size_t i = 0; i < t.count(); i++) {
+        const uint32_t* w = &t.nodes[i * 4];
+        double e[3];
+        for (int k = 0; k < 3; k++) e[k] = double(((w[k] >> 12) & 0xFFFu)) - double(w[k] & 0xFFFu);
+        double area = e[0] * e[1] + e[1] * e[2] + e[2] * e[0];
+        if (i == 0) root = area;
+        if ((w[0] >> 24) == 0) s.leaves++;
+        else s.innerArea += area;
+    }
+    if (root > 0) s.innerArea /= root;
+    return s;
+}
+
+// the deepest chain of a flattened groups tree (levels below the root)
+int treeDepth(const LodTree& t) {
+    if (t.root < 0 || t.nodes.empty()) return 0;
+    std::vector<std::pair<uint32_t, int>> stack{{0u, 0}};
+    int depth = 0;
+    while (!stack.empty()) {
+        auto [n, d] = stack.back();
+        stack.pop_back();
+        depth = std::max(depth, d);
+        const uint32_t* w = &t.nodes[size_t(n) * 4];
+        uint32_t mask = (w[0] >> 24) & 3u, first = w[3];
+        for (uint32_t c = 0; c < uint32_t((mask & 1) + (mask >> 1)); c++) stack.push_back({first + c, d + 1});
+    }
+    return depth;
+}
+
+// builds the groups on the CPU backend and (backend=vulkan) on Vulkan, times them (buildreps=, median), compares them
+// with atlas_lab's tree (when built) word for word; the kernels then trace the GPU-built tree (Vulkan's when there)
+int gpuGroups(const Args& a, bool labGroups, bool vulkan, int threads, std::string& json) {
+    int reps = std::max(1, int(num(a, "buildreps", 5)));
+    std::vector<bool> backends = {false};
+    if (vulkan) backends.push_back(true);
+    LodTree chosenTree;
+    bool have = false;
+    TreeShape lab = labGroups ? treeShape(trees[1]) : TreeShape{};
+    std::printf("gpu build (atlas_lod_build.slang): median of %d builds from the brick pool (empty runs included)%s\n", reps,
+                labGroups ? "; against atlas_lab's groups" : "");
+    if (labGroups)
+        std::printf("  atlas_lab (CPU, one thread): %zu nodes, %zu leaves, depth %d, inner area / root %.2f\n", lab.nodes, lab.leaves,
+                    trees[1].depth, lab.innerArea);
+    json = "[";
+    for (bool vk : backends) {
+        lodgpu::LodGpuBuilder b;
+        std::string err;
+        if (!b.init(vk, threads, err)) {
+            std::fprintf(stderr, "atlas_lab_gpu: gpu build on %s unavailable: %s\n", vk ? "vulkan" : "cpu", err.c_str());
+            continue;
+        }
+        LodTree t;
+        lodgpu::Stats st;
+        if (!b.setVolume(pool, vol.sx, vol.sy, vol.sz, err) || !b.build(t, st, err)) {  // the first sizes the buffers
+            std::fprintf(stderr, "atlas_lab_gpu: gpu build (%s): %s\n", b.name.c_str(), err.c_str());
+            return 2;
+        }
+        std::vector<double> ms, gms;
+        for (int i = 0; i < reps; i++) {
+            b.invalidateRuns();
+            if (!b.build(t, st, err)) {
+                std::fprintf(stderr, "atlas_lab_gpu: gpu build (%s): %s\n", b.name.c_str(), err.c_str());
+                return 2;
+            }
+            ms.push_back(st.ms);
+            gms.push_back(st.gpuMs);
+        }
+        std::sort(ms.begin(), ms.end());
+        std::sort(gms.begin(), gms.end());
+        TreeShape s = treeShape(t);
+        bool same = labGroups && t.nodes == trees[1].nodes && t.depth == trees[1].depth;
+        size_t firstDiff = 0;
+        if (labGroups && !same)
+            while (firstDiff * 4 < std::min(t.nodes.size(), trees[1].nodes.size()) &&
+                   std::equal(&t.nodes[firstDiff * 4], &t.nodes[firstDiff * 4] + 4, &trees[1].nodes[firstDiff * 4]))
+                firstDiff++;
+        char diff[80] = "";
+        if (labGroups && !same) std::snprintf(diff, sizeof diff, " (first difference: node %zu)", firstDiff);
+        std::printf("  %-34s %zu nodes, %zu leaves, depth %d (%d levels), inner area / root %.2f; %.2f ms (GPU %.2f ms), %d dispatches in %d "
+                    "submissions, scratch %.1f MB%s%s\n",
+                    b.name.c_str(), s.nodes, s.leaves, t.depth, st.levels, s.innerArea, ms[ms.size() / 2], gms[gms.size() / 2], st.dispatches,
+                    st.submits, st.scratchBytes / 1e6, labGroups ? (same ? "; identical to atlas_lab's, word for word" : "; DIFFERS from atlas_lab's") : "",
+                    diff);
+        char buf[600];
+        std::snprintf(buf, sizeof buf,
+                      "%s{\"backend\":\"%s\",\"nodes\":%zu,\"leaves\":%zu,\"depth\":%d,\"levels\":%d,\"inner_area\":%.4f,\"ms\":%.3f,\"gpu_ms\":%.3f,"
+                      "\"ms_min\":%.3f,\"dispatches\":%d,\"submits\":%d,\"scratch_bytes\":%zu,\"identical\":%s}",
+                      json.size() > 1 ? "," : "", vk ? "vulkan" : "cpu", s.nodes, s.leaves, t.depth, st.levels, s.innerArea, ms[ms.size() / 2],
+                      gms[gms.size() / 2], ms[0], st.dispatches, st.submits, st.scratchBytes, labGroups ? (same ? "true" : "false") : "null");
+        json += buf;
+        if (vk || !have) chosenTree = t, have = true;
+    }
+    json += "]";
+    if (!have) return 2;
+    if (chosenTree.depth > LOD_GROUP_STACK) {
+        std::fprintf(stderr, "atlas_lab_gpu: gpu groups: %d levels, the kernel's stack holds %d\n", chosenTree.depth, LOD_GROUP_STACK);
+        return 2;
+    }
+    trees[1] = chosenTree;  // the kernels trace the GPU-built tree
+    return 0;
+}
+
 }  // namespace
 
 int main(int argc, char** argv) {
@@ -807,7 +922,11 @@ int main(int argc, char** argv) {
     std::string why;
     double buildMs[2] = {0, 0}, flatMs[2] = {0, 0}, poolMs = 0;
     size_t refBytes[2] = {0, 0}, refCount[2] = {0, 0};
+    // build=gpu: the groups also built by atlas_lod_build.slang (cpubuild=0: by it alone, atlas_lab's tracer then has no
+    // tree to compare with)
+    bool gpuBuild = str(a, "build", "cpu") == "gpu", labGroups = !gpuBuild || num(a, "cpubuild", 1) > 0;
     for (int r : chosen) {
+        if (r == 1 && !labGroups) continue;
         auto t0 = std::chrono::steady_clock::now();
         if (r == 0) buildBoxes();
         else buildGroups();
@@ -833,6 +952,11 @@ int main(int argc, char** argv) {
             return 2;
         }
         poolMs = msSince(t0);
+    }
+    std::string jgpu;
+    if (gpuBuild && std::find(chosen.begin(), chosen.end(), 1) != chosen.end()) {
+        int rc = gpuGroups(a, labGroups, vulkan, threads, jgpu);
+        if (rc) return rc;
     }
     size_t blocksN = size_t(vol.sx) * vol.sy * vol.sz;
     std::printf("volume %d x %d x %d blocks; brick pool: grid %zu B (4 a block), %zu bricks (16 B), %zu states (%d B): %.2f MB in %.0f ms\n",
@@ -885,7 +1009,8 @@ int main(int argc, char** argv) {
     // parity: atlas_lab's table, per distance and representation
     int cols = int(chosen.size()) * (gpuOk ? 3 : 2), rows = int(dists.size());
     std::vector<uint32_t> sheet(size_t(cols * panel) * size_t(rows * panel), 0xFF202020u);
-    std::string json = "{\"tool\":\"atlas_lab_gpu\",\"device\":\"" + std::string(gpuOk ? gpu.name : "cpu (slang->c++)") + "\",\"memory\":" + jmem + ",\"runs\":[";
+    std::string json = "{\"tool\":\"atlas_lab_gpu\",\"device\":\"" + std::string(gpuOk ? gpu.name : "cpu (slang->c++)") + "\",\"memory\":" + jmem +
+                       (jgpu.empty() ? "" : ",\"gpu_build\":" + jgpu) + ",\"runs\":[";
     std::printf("\nparity: the Slang kernel (CPU backend) against atlas_lab's tracer, same seeds; floor: atlas_lab against itself, other seeds\n");
     std::printf("(ns/ray: wall time over the window, where the object fills the view; the CPU on %d threads)\n", threads);
     std::printf("%-6s %-7s %5s | %7s %6s %6s %6s %6s | %6s %6s | %6s %6s | %6s %6s | %6s %6s%s\n", "dist", "rep", "px", "iou", "dE", "dEmax", "rgb",
@@ -900,15 +1025,21 @@ int main(int argc, char** argv) {
         if (quality) refImg = labRender("ref", vw, cam, frames, 0, threads, nullptr);
         for (size_t k = 0; k < chosen.size(); k++) {
             int r = chosen[k];
-            double sLab = 0, sKer = 0, sVk = 0, rays = double(vw.w) * vw.h * frames;
+            bool hasLab = r == 0 || labGroups;  // atlas_lab's tracer walks atlas_lab's own tree
+            double sLab = 0, sKer = 0, sVk = 0, rays = double(vw.w) * vw.h * frames, nsLab = -1;
             auto t0 = std::chrono::steady_clock::now();
-            Image lab = labRender(REP_NAME[r], vw, cam, frames, 0, threads, &sLab);
-            double nsLab = msSince(t0) * 1e6 / rays;
-            Image floorImg = labRender(REP_NAME[r], vw, cam, frames, 1000, threads, nullptr);
+            Image lab, floorImg;
+            if (hasLab) {
+                lab = labRender(REP_NAME[r], vw, cam, frames, 0, threads, &sLab);
+                nsLab = msSince(t0) * 1e6 / rays;
+                floorImg = labRender(REP_NAME[r], vw, cam, frames, 1000, threads, nullptr);
+            }
             t0 = std::chrono::steady_clock::now();
             Image ker = kernelRender(vw, frames, 0, &sKer, cpuFn(r, vw));
             double nsKer = msSince(t0) * 1e6 / rays, nsVk = -1;
-            Cmp p = compare(ker, lab), fl = compare(floorImg, lab), q, vk;
+            Cmp p, fl, q, vk;
+            if (hasLab) p = compare(ker, lab), fl = compare(floorImg, lab);
+            else lab = ker;
             if (quality) q = compare(ker, refImg);
             Image vkImg;
             if (gpuOk) {
@@ -973,6 +1104,7 @@ int main(int argc, char** argv) {
                 auto t0 = std::chrono::steady_clock::now();
                 cpuFrame(r, lodFrame(vw, cam, r, 0), px, threads);
                 cpuMs = std::min(cpuMs, msSince(t0));
+                if (r == 1 && !labGroups) continue;
                 t0 = std::chrono::steady_clock::now();
                 labRender(REP_NAME[r], vw, cam, 1, 0, threads, nullptr);
                 labMs = std::min(labMs, msSince(t0));
