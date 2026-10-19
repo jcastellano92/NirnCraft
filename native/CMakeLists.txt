@@ -172,6 +172,45 @@ else()
   set_source_files_properties("${GEN}/atlas_lod_cpu.cpp" PROPERTIES COMPILE_OPTIONS "-ffp-contract=off;-fno-fast-math;-w")
 endif()
 
+# the groups hierarchy built on the GPU (docs/ATLAS-LOD.md, "GPU group build"; atlas_lab_gpu build=gpu): one source, the
+# CPU backend's kernels (no atomics or group memory: a serial scan) and Vulkan's (a work-group scan), precise floats on
+# both so the SAH picks atlas_lab's planes; host driver tools/atlas_lod_gpubuild.hpp
+set(LODB_SRC "${CMAKE_SOURCE_DIR}/shaders/atlas_lod_build.slang")
+set(LODB_COMMON lbRuns lbErrCount lbErrTask lbErrReduce lbSliceTask lbSliceReduce lbSweep lbRegionInit lbRegionCount
+    lbRegionTight lbAdvance lbDescUp lbRootBases lbPosDown lbPack lbRefitBox lbRefitPack lbOctLeaf lbOctUp lbOctList
+    lbOctErr lbOctRoot lbOctPos lbOctPack)
+set(LODB_HEADERS)
+foreach(e ${LODB_COMMON} lbScanBlocks lbScanTop lbScanAdd lbErrMax lbSweepWide)
+  add_custom_command(
+    OUTPUT "${GEN}/atlas_lod_build_${e}.spv"
+    COMMAND "${SLANGC}" "${LODB_SRC}" -target spirv -entry ${e} -stage compute -O3 -fp-mode precise -o "${GEN}/atlas_lod_build_${e}.spv"
+    DEPENDS "${LODB_SRC}" COMMENT "slangc atlas_lod_build:${e} -> SPIR-V")
+  add_custom_command(
+    OUTPUT "${GEN}/atlas_lod_build_${e}_spv.h"
+    COMMAND "${CMAKE_COMMAND}" -DIN=${GEN}/atlas_lod_build_${e}.spv -DOUT=${GEN}/atlas_lod_build_${e}_spv.h -DNAME=lodb_${e}_spv
+            -P "${CMAKE_SOURCE_DIR}/cmake/embed_spv.cmake"
+    DEPENDS "${GEN}/atlas_lod_build_${e}.spv" "${CMAKE_SOURCE_DIR}/cmake/embed_spv.cmake")
+  list(APPEND LODB_HEADERS "${GEN}/atlas_lod_build_${e}_spv.h")
+endforeach()
+set(LODB_CPU_ENTRIES)
+foreach(e ${LODB_COMMON} lbScanSerial)
+  list(APPEND LODB_CPU_ENTRIES -entry ${e} -stage compute)
+endforeach()
+add_custom_command(
+  OUTPUT "${GEN}/atlas_lod_build_cpu.cpp"
+  COMMAND "${SLANGC}" "${LODB_SRC}" -target cpp ${LODB_CPU_ENTRIES} -O3 -fp-mode precise -o "${GEN}/atlas_lod_build_cpu.cpp"
+  DEPENDS "${LODB_SRC}" COMMENT "slangc atlas_lod_build -> C++ (CPU backend)")
+target_sources(atlas_lab_gpu PRIVATE "${GEN}/atlas_lod_build_cpu.cpp" ${LODB_HEADERS})
+# two generated kernels in one program: their file-local structs keep their own names
+set(LODB_RENAME "GlobalParams_0=LodBuildGlobals_0;KernelContext_0=LodBuildContext_0")
+if(MSVC)
+  set_source_files_properties("${GEN}/atlas_lod_build_cpu.cpp" PROPERTIES COMPILE_OPTIONS "/fp:precise;/W0"
+                              COMPILE_DEFINITIONS "${LODB_RENAME}")
+else()
+  set_source_files_properties("${GEN}/atlas_lod_build_cpu.cpp" PROPERTIES COMPILE_OPTIONS "-ffp-contract=off;-fno-fast-math;-w"
+                              COMPILE_DEFINITIONS "${LODB_RENAME}")
+endif()
+
 # the exact reference (docs/ATLAS-LOD.md, ground truth): Minecraft's own chunk mesh traced offline (/nirncraft-atlaslab quads)
 add_executable(atlas_truth tools/atlas_truth.cpp)
 target_include_directories(atlas_truth PRIVATE src)
