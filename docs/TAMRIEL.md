@@ -95,7 +95,7 @@ before datapacks load, and the client map screen needs it too.
   * `nirncraft:tamriel_channel` has a `channel` field: `continentalness`, `erosion`, `ridges`, `elevation`,
     `river` or `lake`. It samples the map with bilinear interpolation plus a small seeded domain warp, so
     borders and coasts aren't on a 32-block grid.
-  * It must be **thread-safe and allocation-free**: Distant Horizons and worldgen workers call it from many
+  * It must be **thread-safe and allocation-free**: the atlas far field and worldgen workers call it from many
     threads.
   * Wrap it in `cache_2d` in the JSON.
 * **How the noise settings combine.**

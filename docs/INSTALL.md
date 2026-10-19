@@ -18,25 +18,22 @@ is disabled, so a push does not publish a package.
   server-side dependencies, plus NirnCraft Core.
 
 Use the matching full client/server packages. A core-only diagnostic instance is
-for isolating failures and is not full-pack acceptance. Historical Modrinth and
-CurseForge exports require their own native validation before use.
+for isolating failures and is not full-pack acceptance. `NirnCraft-26.3.mrpack`
+(built by `tools/build_mrpack.py`) installs the same pinned pack in the Modrinth App.
 
 ## 2. Install on Prism Launcher
 
 1. Install [Prism Launcher](https://prismlauncher.org/) and sign in with your Microsoft account.
-2. Use **Add Instance ? Import** and choose `NirnCraft-26.3-client-instance.zip`.
+2. Use **Add Instance → Import** and choose `NirnCraft-26.3-client-instance.zip`.
    Prism resolves the exact Minecraft 26.3 and NeoForge 26.3.0.90 libraries/assets.
-3. In **Edit ? Settings ? Java**, select Java 25. The instance starts with 2048 MB
+3. In **Edit → Settings → Java**, select Java 25. The instance starts with 2048 MB
    initial and 6144 MB maximum memory; allow more when hosting if your PC has room.
-4. Launch the separate native instance. Preserve previous Forge instances, worlds,
-   custom shader files and Distant Horizons binaries.
+4. Launch the instance. Keep any older NirnCraft instance and its worlds separate.
 5. Choose **New Game** to create the authored Nirn world. Character creation and
    the Helgen opening follow; *The Traveler's Handbook* lists current controls.
 
-The current Sodium pin is the explicitly approved official 0.9.3-beta.1 build.
-Iris remains installed with shaders disabled until the custom integration passes
-its native tests. Do not replace the owner's custom shader/Distant Horizons work
-with a stock package to bypass those tests.
+The current Sodium pin is the explicitly approved official 0.9.3-beta.1 build. Iris
+runs NirnCraft's own shader pack, Infinite ATLAS, which is enabled by default.
 
 ## 3. Play with friends
 
@@ -87,17 +84,19 @@ New players get Skyrim-style keys on first launch: **E** inventory, **Tab** menu
 and all button hints (`config/controllable.client.toml`). Every NirnCraft screen fits the Deck's 1280×800 screen at GUI
 scale 3.
 
-## 6. Graphics, shaders and Distant Horizons
+## 6. Graphics, shaders and the far field
 
 * The native client uses the approved pinned Sodium build. Set render and
   simulation distances for your hardware, and compare performance in a loaded
   world before assuming a setting is inexpensive.
-* Iris is installed with `enableShaders=false`. Custom shader sources, patchers
-  and presets are preserved for the external native lighting/shader integration.
-  Do not enable the old custom pack until its real visual/motion tests pass.
-* Distant Horizons and the custom distant renderer are preserved and disabled
-  pending their separate native integration. Old LOD presets do not prove that
-  the 26.3 client is rendering or generating LODs.
+* Iris ships with `InfiniteATLAS.zip` selected (`config/iris.properties`); turn it
+  off or on in **Video Settings → Shader Packs**. It is the only supported pack: it
+  composites the atlas far field, weather, smoke, lightning and realm skies.
+* Distant terrain comes from Infinite ATLAS's native renderer (`atlas_core`), which
+  needs a Vulkan 1.2 GPU with `shaderInt64` (GTX 10xx, Polaris, RDNA, the Steam
+  Deck, Intel Gen9 or newer) and `--enable-native-access=ALL-UNNAMED` (Minecraft's
+  launcher profile passes it; add it under JVM arguments in a launcher that does
+  not). Without a usable device the far field stays off and the game runs as before.
 * NirnCraft's visual, atmosphere, audio, arsenal and guide client settings keep
   their module filenames in `config`. Review the current generated configs in
   the native instance rather than copying an entire old config directory.
@@ -109,7 +108,7 @@ scale 3.
 
 * Import the new client as a separate instance and keep the previous one intact.
   Copy only intentional personal settings and a backed-up, supported save.
-* Minecraft 1.20.1 saves require the offline conversion procedure in
+* Saves from the old Minecraft 1.20.1 version require the offline conversion procedure in
   [NATIVE-DATA-MIGRATION-26.3.txt](NATIVE-DATA-MIGRATION-26.3.txt). Never let the new
   game be the first process to modify the only copy of an old world.
 * Extract the new server to a separate directory, then restore its backed-up,
@@ -137,8 +136,8 @@ See [MUSIC.md](MUSIC.md) for all the options.
 
 ## 9. Troubleshooting
 
-* **Wrong game/loader:** require exactly Minecraft 26.3 / NeoForge 26.3.0.90. A Forge
-  1.20.1 installation is a separate preserved instance, not a native fallback.
+* **Wrong game/loader:** require exactly Minecraft 26.3 / NeoForge 26.3.0.90. An older
+  NirnCraft instance is a separate install, not a fallback.
 * **Java error:** select Java 25 in Prism or the server launcher environment.
 * **Startup crash:** inspect the actual native `logs/latest.log` and crash report;
   a core-only diagnostic succeeding does not clear a third-party full-pack failure.
@@ -147,7 +146,7 @@ See [MUSIC.md](MUSIC.md) for all the options.
 * **Kicked for flying:** keep `allow-flight=true` in the dedicated server properties.
 * **LAN discovery misses the host:** use Direct Connect with the actual local IP and
   LAN port, and check the host's local firewall permissions.
-* **Two actions on one key:** review **Options ? Controls**. The first-launch key
+* **Two actions on one key:** review **Options → Controls**. The first-launch key
   pass marker is `config/nirncraft-client-keys.done`.
 * **Tutorial hints:** `/handbook hints off` disables them; `/handbook hints reset`
   enables them again.

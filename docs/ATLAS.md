@@ -1,7 +1,10 @@
-# Atlas: NirnCraft's native far-field renderer
+# Infinite ATLAS: NirnCraft's native far-field renderer
 
-Status date: 2026-10-18. Branch `atlas-renderer` (worktree `.claude/worktrees/atlas`). Code lives in
-[`native/`](../native/README.md); the shader pack in [`shaderpack/`](../shaderpack/InfiniteATLAS). This doc covers
+NirnCraft is powered by Infinite ATLAS: the native library `atlas_core` and the `InfiniteATLAS` Iris shader pack.
+Status date: 2026-10-18. Native code lives in [`native/`](../native/README.md), the Java side in
+`mod/src/main/java/com/nirncraft/atlas`, the shader pack in [`shaderpack/InfiniteATLAS`](../shaderpack/InfiniteATLAS).
+Tests (native suites, offline `lab` renders, live scenes) run through the harness
+([tools/harness/README.md](../tools/harness/README.md)). This doc covers
 what atlas is, what is built and measured, how it joins the NeoForge 26.3 mod, and where it departs from the
 original master plan and why.
 
@@ -29,7 +32,7 @@ Everything past the rasterised near field is drawn by `atlas_core.dll`, a native
   copied into caller-owned textures that the pack samples through `customTexture`.
 * **Java 25 boundary.** `com.nirncraft.atlas.AtlasNative` binds the ABI with `java.lang.foreign`. It needs no JNI
   and no Minecraft types.
-* **NirnCraft Atlas shader pack.** NirnCraft's own Iris pack replaces the Complementary patch. The near field is
+* **InfiniteATLAS shader pack.** NirnCraft's own Iris pack (it replaced the old patched third-party pack). The near field is
   forward lit with the same sun, sky and aerial functions as atlas (verified equal), with curvature, sun shadows
   and water. The composite merges near and far over a hand-off band, and one tonemapper serves both.
 
@@ -125,11 +128,11 @@ and matches its C++ reference bit for bit; with no Vulkan driver at all the heig
 passes. Linux build fixes from the merge: `spirv-val` was looked up only in the Windows SDK's `Bin` (now the SDK or
 PATH, optional on Linux), and the height reference's MSVC-only `/fp:strict` got its GCC / Clang equivalent.
 
-## 3. How it joins the mod (after the NeoForge 26.3 conversion lands)
+## 3. How it joins the mod
 
-The other session's conversion is in progress in the main tree (it also moves the pack to Sodium 0.9.2 and Iris
-1.11.7 and drops Distant Horizons). Nothing here touches `mod/` until it is accepted. Everything is staged in
-[`native/java/mod-integration`](../native/java/mod-integration/README.md):
+The NeoForge 26.3 mod (Sodium 0.9.3, Iris 1.11.7, no Distant Horizons) carries atlas in `com.nirncraft.atlas` with
+the natives under `natives/<platform>/`. The classes were staged in
+[`native/java/mod-integration`](../native/java/mod-integration/README.md) and moved in as follows:
 
 1. `move_in.ps1` (dry run by default, `-Apply` to write) copies `com.nirncraft.atlas` and `atlas_core.dll`
    (`natives/windows-x86_64/`) into the mod and makes the hooks: `AtlasServer.init()` and
@@ -234,15 +237,15 @@ player); `atlas_bench lights=8000`; `atlas_render actors=demo dragon=near time=<
 
 ## 6. Next
 
-1. After the conversion is accepted (server boots, client joins): `move_in.ps1 -Apply` (coordinated with whoever is
-   editing `mod/`), build, ship the pack zip, then the owner's checks below.
+1. Done: atlas is moved into `mod/` and the pack ships as `pack/shaderpacks/InfiniteATLAS.zip`; the owner's checks
+   below remain the visual sign-off.
 2. Later: clouds lit from below over Red Mountain; dungeon surfaces captured from their own builders like the
    settlement landmarks (they need a DungeonPiece, so the parametric silhouettes stand in); lit windows on landmarks
    (only their light blocks glow now); SRC GI underground, a Vulkan-to-Vulkan path for the vanilla Vulkan backend.
 
 ### Owner checks in game
 
-Start single player in a Tamriel world with the NirnCraft Atlas pack, render distance 16-24 chunks:
+Start single player in a Tamriel world with the InfiniteATLAS pack, render distance 16-24 chunks:
 
 - **Hand-off seam** at the edge of the render distance: no gap, no double terrain, no colour or brightness jump
   between the rasterised near field and the far field (the band is `AtlasClient.handoffBand`, 24 blocks).
@@ -300,16 +303,20 @@ Run `native/build_linux.sh` (Linux) or `native\build.ps1 -Validate` (Windows) on
 
 ## Testing in the real game (2026-10-18)
 
-Single player, the fast loop (one client, under the live lease `.work/lease/live.json`):
+Single player: use the harness (`harness.py run --suite farfield`, `watch` for pack edits, `probe NAME --visit
+x,z,height,yaw,pitch`), which launches the disposable preview, installs a newer core with `--rebuild` and closes the
+client at the end. The pack-only loop it grew from is still available (one client, under the live lease
+`.work/lease/live.json`):
 
 ```powershell
 py -3 tools/dev/build_263.py --offline build
-py -3 tools/dev/live_world.py install-core E:/NirnCraft-scratch/migration-26.3/build/libs/nirncraft-0.1.0.jar
-py -3 .claude/worktrees/atlas/shaderpack/tools/pack_live.py --launch --close --cams helgen-near-smoke `
+py -3 tools/dev/live_world.py install-core <scratch>/build/libs/nirncraft-0.1.0.jar
+py -3 shaderpack/tools/pack_live.py --launch --close --cams helgen-near-smoke `
     --visit "n:-20,1158,90,180,-6" --wait 300 --off --tag mytest
 ```
 
-`pack_live.py` syncs the pack from its worktree (or `--no-sync`), reloads it in Iris (`shaders off/on`), prints only
+`<scratch>` is the build scratch folder (`NIRNCRAFT_263_SCRATCH`, see [NATIVE-26.3-PREVIEW.md](NATIVE-26.3-PREVIEW.md)).
+`pack_live.py` syncs the pack from its checkout (or `--no-sync`), reloads it in Iris (`shaders off/on`), prints only
 shader errors, captures after full readiness and closes cleanly. `live_world.py close` also closes a client that is
 stuck on a menu (normal window close, never a kill).
 

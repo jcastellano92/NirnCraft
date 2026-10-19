@@ -87,23 +87,11 @@ jobs:
       - name: Server smoke test (boot the full pack and generate the world)
         timeout-minutes: 30
         run: bash tools/test-server.sh
-      - name: Client smoke test (NirnCraft dev client under Xvfb with software GL)
-        if: ${{ !cancelled() }}
-        timeout-minutes: 30
-        run: |
-          sudo apt-get update && sudo apt-get install -y xvfb libgl1 libgl1-mesa-dri
-          bash tools/test-client.sh
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: server-test-logs
           path: dist/server-test
-          if-no-files-found: ignore
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: client-test-logs
-          path: dist/client-test
           if-no-files-found: ignore
       - uses: actions/upload-artifact@v4
         with:

@@ -1,6 +1,6 @@
 # Exact Minecraft 26.3 / NeoForge 26.3.0.90 / Java 25 dependency set.
 # Pinned metadata and required dependency closure: pack/migration/platform-lock.json.
-# Shaders stay disabled. Custom DH/shader and prior artifacts are preserved under pack/disabled.
+# The only shader pack is NirnCraft's own InfiniteATLAS (pack/shaderpacks). Forge-era artifacts are preserved under pack/disabled.
 # Normal Minecraft multiplayer/LAN; no Essential/e4mc hosting dependency.
 
 mr:balm

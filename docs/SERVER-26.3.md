@@ -1,10 +1,9 @@
 # Native dedicated server
 
 The server uses **Minecraft 26.3, NeoForge 26.3.0.90 and Java 25**. Normal Minecraft
-Multiplayer connects to its address; Essential/e4mc are no longer required. Local
-network discovery is for integrated LAN games. All clients must use the matching
-full pack. Shader and Distant Horizons work remains preserved and disabled until
-its separate native acceptance gate passes.
+Multiplayer connects to its address. Local network discovery is for integrated LAN
+games. All clients must use the matching full pack (the InfiniteATLAS shader pack
+and the atlas far field are client-side only).
 
 `tools/build_server_instance.py` installs the exact official NeoForge server,
 checks its installer SHA256, and selects only the platform lock's server/both mods.
@@ -18,11 +17,13 @@ For later core builds on the same platform, `--base-archive` and its recorded
 `--base-sha256` reuse only the verified native libraries from an earlier server ZIP.
 Previous core jars, mods, worlds and EULA files are never copied by that shortcut.
 
-After the full native build, create a candidate on E: without replacing an older
-archive. Use the actual tested core jar explicitly:
+After the full native build, create a candidate without replacing an older archive.
+Use the actual tested core jar explicitly. Below, `<scratch>` is the build scratch
+folder (`NIRNCRAFT_263_SCRATCH`, machine default `E:\NirnCraft-scratch\migration-26.3`)
+and `<java25>` the Java 25 executable from the toolchains folder:
 
 ```powershell
-py -3 -I tools/build_server_instance.py --core-jar E:/NirnCraft-scratch/migration-26.3/build/libs/nirncraft-0.1.0.jar --java E:/NirnCraft-scratch/toolchains/jdk-25.0.4.1+1/bin/java.exe --work-root E:/NirnCraft-scratch/migration-26.3/server-build --cache E:/NirnCraft-scratch/migration-26.3/server-cache --output-zip E:/NirnCraft-scratch/migration-26.3/candidates/NirnCraft-26.3-server-<build>.zip
+py -3 -I tools/build_server_instance.py --core-jar <scratch>/build/libs/nirncraft-0.1.0.jar --java <java25> --work-root <scratch>/server-build --cache <scratch>/server-cache --output-zip <scratch>/candidates/NirnCraft-26.3-server-<build>.zip
 ```
 
 The output contains a complete `server/` directory and native libraries. Extract
@@ -44,7 +45,7 @@ EULA acceptance, offline loopback networking and disabled empty-server pausing
 only in that disposable copy:
 
 ```powershell
-py -3 -I tools/qa/test_server_package_263.py --archive E:/NirnCraft-scratch/migration-26.3/candidates/NirnCraft-26.3-server-<build>.zip --java E:/NirnCraft-scratch/toolchains/jdk-25.0.4.1+1/bin/java.exe --work-root E:/NirnCraft-scratch/migration-26.3/server-qa
+py -3 -I tools/qa/test_server_package_263.py --archive <scratch>/candidates/NirnCraft-26.3-server-<build>.zip --java <java25> --work-root <scratch>/server-qa
 ```
 
 It waits for actual startup, command results, the live bake check, saved-game

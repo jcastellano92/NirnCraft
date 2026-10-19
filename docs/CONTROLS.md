@@ -28,10 +28,10 @@ never overrides keys you've changed. Rebind anything in **Options → Controls �
 | *(unbound)* | Ready / sheathe weapon | |
 | *(unbound)* | Standing Stone power | The once-a-day powers of the Ritual, Serpent, Shadow and Tower stones. Bind it yourself (the code default is O). |
 
-Also unbound by default: vanilla drop, swap hands, advancements, hotbar slot 9, and Oculus's reload, toggle and
+Also unbound by default: vanilla drop, swap hands, advancements, hotbar slot 9, and Iris's reload, toggle and
 select-shader keys (shaders are in **Video Settings → Shader Packs**).
 
-**Clashes:** on the first launch NirnCraft unbinds vanilla keys that clash with its own defaults, plus Oculus's keys.
+**Clashes:** on the first launch NirnCraft unbinds vanilla keys that clash with its own defaults, plus Iris's keys.
 **NirnCraft's keys win** (playtest 4: Essential's chat peek sat on Z, its emote wheel on R, friends on H, zoom on C).
 On every launch, any other mod's key that shares a key with a NirnCraft key is unbound, saved and logged; vanilla's own
 keys are only unbound when the NirnCraft key is on its documented default. The first launch of layout v2 moves

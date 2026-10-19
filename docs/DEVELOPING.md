@@ -1,10 +1,11 @@
 # Developing NirnCraft Core
 
 NirnCraft Core (`mod/`) targets **Minecraft 26.3 / NeoForge 26.3.0.90 / Java 25**, with official Mojang mappings.
-Use [NATIVE-26.3-PREVIEW.md](NATIVE-26.3-PREVIEW.md) for the current build/runtime controls and
-[SERVER-26.3.md](SERVER-26.3.md) for full server packaging and release gates. Older Forge examples below are
-historical implementation notes; they must not select a legacy build, launcher, cache or world.
-Builds and tests run locally. GitHub Actions is disabled in the repository settings; pushes do not run CI.
+The doc map is [README.md](README.md); runtime controls are in [NATIVE-26.3-PREVIEW.md](NATIVE-26.3-PREVIEW.md) and
+server packaging in [SERVER-26.3.md](SERVER-26.3.md). Tests run through the harness
+([tools/harness/README.md](../tools/harness/README.md)). Builds and tests run locally; GitHub Actions is disabled in
+the repository settings, so pushes do not run CI. The far field and shader pack (Infinite ATLAS) are documented in
+[ATLAS.md](ATLAS.md) and [native/README.md](../native/README.md).
 
 ## Architecture
 
@@ -42,7 +43,7 @@ Some modules are started by another module rather than by `NirnCraft.java`:
 | `client` | `ClientSetup` (keys, HUD overlays), `SkyKeys`, `KeyConflictResolver`, `RaceSkins`, `DialogueCamera` |
 | `client/hud` | Compass, compass markers, the HUD bars, target bar, sneak eye, crosshair, notifications |
 | `client/screen` | Race (character creator), Skills, Hub, Character Status and Dialogue screens; `title/` has the title, create-world, load, loading, options and pause screens |
-| `client/autotest` | `ClientAutotest`, `RaceShowcase` (see [Test harnesses](#test-harnesses)) |
+| `client/autotest` | `ClientAutotest`, `RaceShowcase` (see [In-game test hooks](#in-game-test-hooks)) |
 
 ### Feature modules
 
@@ -119,9 +120,9 @@ All worldgen code samples noise only, never reads or writes outside the region i
 * Each module lives in `com.nirncraft.<module>` and fills in `<Module>Module.init(IEventBus modBus)` (register its own
   `DeferredRegister`s, mod-bus listeners) and `<Module>Module.registerPackets()` (register packets through
   `SkyNetwork.register(...)` in a fixed order).
-* Forge-bus events: use `@Mod.EventBusSubscriber(modid = NirnCraft.MODID)` classes. Client-only code goes in
+* Game-bus events: use `@EventBusSubscriber(modid = NirnCraft.MODID)` classes. Client-only code goes in
   `com.nirncraft.<module>.client` with `value = Dist.CLIENT`. S2C packet handlers must reach client code through
-  `DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> SomeClientClass.handle(...))`.
+  `Sides.runOn(Dist.CLIENT, () -> () -> SomeClientClass.handle(...))` (`com.nirncraft.platform.Sides`).
 * Every NirnCraft item automatically appears in the NirnCraft creative tab — don't add your own tab.
 * Language: write **only** `mod/src/main/lang/nirncraft/<module>.json` (and `mod/src/main/lang/minecraft/<module>.json`
   to rename vanilla things). Never edit another module's file or `core.json`.
@@ -129,7 +130,9 @@ All worldgen code samples noise only, never reads or writes outside the region i
   `mod/src/main/resources/assets/nirncraft/textures/...`; run it and keep the PNGs.
 * No mixins, no access transformers, no third-party compile dependencies. Optional integrations go through tags
   with `{"id": "othermod:thing", "required": false}` entries.
-* `data/forge/loot_modifiers/global_loot_modifiers.json` is owned by the core. Its entries are
+* Global loot modifiers: NeoForge discovers every `data/nirncraft/loot_modifiers/*.json` and orders them by priority;
+  the authored order is kept in `data/neoforge/nirncraft_legacy` and converted to priorities by
+  `tools/data_format_263.py` (see [WORLDGEN-26.3.txt](WORLDGEN-26.3.txt)). The list is owned by the core. Its entries are
   `nirncraft:gold` (core), `nirncraft:spell_tomes` (magic), `nirncraft:skyrim_gear`, `nirncraft:smithing_materials`
   (crafting), `nirncraft:soul_gems`, `nirncraft:alchemy_ingredients` (crafting/arcane), `nirncraft:lockpicks` (crime), `nirncraft:skill_books` (economy). Each owner writes
   `data/nirncraft/loot_modifiers/<name>.json` (type `nirncraft:add_table`, see `loot/AddTableModifier.java`) and the
@@ -198,20 +201,20 @@ These names are fixed so modules can be written independently.
 ## Building
 
 ```
-cd mod && ./gradlew build      # needs network access to Forge & Mojang maven
+py -3 tools/dev/build_263.py --offline build      # drop --offline the first time (needs the NeoForge and Mojang mavens)
 ```
-The jar lands in `mod/build/libs/`.
+The jar lands in `build/libs/` of the scratch build directory (`NIRNCRAFT_263_SCRATCH`, machine default
+`E:\NirnCraft-scratch\migration-26.3`), not in `mod/build/libs/`.
 
-* **Toolchain.** ForgeGradle 6, Gradle 8.8 (wrapper), Java 17, official 1.20.1 mappings, compiled against Forge
-  `1.20.1-47.3.0` (the pack runs 47.4.10). There are no dependencies besides Forge.
-* **Run configurations** (working directory `mod/run`):
-  * `./gradlew runClient` starts a dev client with Forge and NirnCraft only.
-  * `./gradlew runServer` starts a `--nogui` server. Accept the EULA in `mod/run/eula.txt`, delete `mod/run/world`
-    for a fresh world, and type `stop` to end it.
-* **Gradle flags don't reach the game.** Gradle's own `-D` flags never reach the forked game JVM. Pass game system
-  properties through `JAVA_TOOL_OPTIONS` (see [Test harnesses](#test-harnesses)).
-* **API signatures.** Check real 1.20.1 signatures with `javap -cp <the mapped forge jar> <class>`. The jar is in the
-  ForgeGradle cache, under `minecraft_user_repo/net/minecraftforge/forge/1.20.1-47.3.0_mapped_official_1.20.1/`.
+* **Toolchain.** ModDevGradle 2.0.148 (`net.neoforged.moddev`), the Gradle wrapper, Java 25, official Mojang names,
+  NeoForge 26.3.0.90. There are no compile dependencies besides NeoForge. `build_263.py` (or `build_263.ps1`) selects
+  Java 25, an isolated Gradle home and the scratch build directory, and allows one build at a time.
+* **Run configurations** (game directory `mod/run/26.3`, or `-PnirncraftRunDir`): MDG's `runClient` / `runServer`
+  exist, but use the supported loops instead: `tools/dev/devserver.ps1` for the persistent dev server (hot-swap,
+  inbox commands) and the harness for the client (the disposable Prism instance).
+* **JUnit** runs through MDG's loader-backed `unitTest` setup; logs land under the scratch build's `minecraft-junit/`.
+* **API signatures.** Read the patched 26.3 sources: `moddev/artifacts/minecraft-patched-26.3.0.90-sources.jar` under
+  the scratch build directory.
 
 ## Generators (`tools/`)
 
@@ -266,35 +269,31 @@ renderer) are checks; they generate nothing. `tools/music/import_skyrim_audio.py
 importer (see [MUSIC.md](MUSIC.md)). It refuses to write inside the repository, and nothing it produces may be
 committed.
 
-## Testing tiers
+## Testing
 
-For the packaged Prism client, use the [live world preview guide](LIVE-WORLD-PREVIEW.md).
-`py -3 tools/dev/live_world.py status` checks the existing game/window and world before launching another process.
-The preview supports JSON snapshots, shader reloads, bounded world regeneration and checked bake installation.
+**Use the harness**: `py -3 tools/harness/harness.py run | watch | gate` ([tools/harness/README.md](../tools/harness/README.md)).
+It runs every test at its own tier (`check`: audits, lints, JUnit, native suites; `lab`: Infinite ATLAS offline
+renders; `live`: the disposable `NirnCraft-26.3-autotest` Prism instance through `tools/dev/live_world.py`, see
+[LIVE-WORLD-PREVIEW.md](LIVE-WORLD-PREVIEW.md)) and keeps before/after results in `.work/harness`. The dev-server
+loop below is for iterating on server-side code and data between harness runs.
 
 | Tier | Command | Speed | What it covers |
 | --- | --- | --- | --- |
-| **Tier 0 — Unit tests** | `cd mod && ./gradlew test` or `tools\qa\qa.ps1 -Unit` | < 5 s | Pure-Java JUnit 5 suite (`mod/src/test/java/com/nirncraft/**`): `RoadPlan` / `Profile` / `PlanGround`, `ScenePlan`, `StreetPlan`, `TamrielMap` / `Places` / `Regions` / `Beyond`, `Bake` input hashes, and `WorldSheets`. No Forge or Minecraft server boot. |
-| **Tier 1a — JDWP HotSwap** | `tools\dev\devserver.ps1 hotswap` | < 3 s | Compiles `mod/src/main/java` (`compileJava --build-cache`) and redefines changed method bodies in the running dev server over JDWP (`127.0.0.1:5005`, `tools/dev/hotswap.py`). If a class changes fields, signatures or hierarchy, falls back automatically to `devserver.ps1 restart`. `devserver.ps1 run` prefers `hotswap` over `restart` when `.java` files change. |
-| **Tier 1b — Data reload** | `tools\dev\devserver.ps1 run "/nirncraft-dev reload <target>" -Wait` | < 1 s | Syncs edited files from `mod/src/main/resources/nirncraft` into `mod/build/resources/main/nirncraft` and re-reads caches in-JVM (`DevReload`): `scenes` (`ScatterRules` + live `ScenePlan`), `places` (`Places` + `QuestPlaces`), `cityplans` (`CityPlans` + `Styles` + `Overlays`), `quests` (`StoryData` + `QuestPlaces`), `palettes` (`Palettes` + live `TamrielBiomeSource`), or `all`. Pair with `/nirncraft-dev regen x1 z1 x2 z2` to see worldgen changes in place. Not hot-reloaded (requires restart/rebake): map PNG rasters, `regions.json`, `hydrology.json`, `peaks.json`, baked `RoadPlan`/`StreetPlan`, and Forge/datapack registries. |
-| **Tier 2 — Dev server** | `tools\dev\devserver.ps1 run "cmd" -Wait`, `quick_corridor.ps1` | 1–15 s | In-place chunk regeneration (`/nirncraft-dev regen`), corridor grading measurement, command smoke checks. |
-| **Tier 3 — Full gates** | `tools\qa\full_corridors.ps1`, `tools\qa\qa.ps1 -Server -Rebake` | 2–4 min | Full 4-corridor road gate and full headless server boot + selftests + bake verification (run once at phase end / merge). |
+| **Unit tests** | `py -3 tools/dev/build_263.py --offline test` (the harness's JUnit check) | < 2 min | JUnit 5 suite (`mod/src/test/java/com/nirncraft/**`): `RoadPlan` / `Profile` / `PlanGround`, `ScenePlan`, `StreetPlan`, `TamrielMap` / `Places` / `Regions` / `Beyond`, `Bake` input hashes, and `WorldSheets`. |
+| **JDWP HotSwap** | `tools\dev\devserver.ps1 hotswap` | < 3 s | Compiles `mod/src/main/java` and redefines changed method bodies in the running dev server over JDWP (`127.0.0.1:5005`, `tools/dev/hotswap.py`). If a class changes fields, signatures or hierarchy, falls back automatically to `devserver.ps1 restart`. `devserver.ps1 run` prefers `hotswap` over `restart` when `.java` files change. |
+| **Data reload** | `tools\dev\devserver.ps1 run "/nirncraft-dev reload <target>" -Wait` | < 1 s | Re-reads caches in-JVM (`DevReload`): `scenes` (`ScatterRules` + live `ScenePlan`), `places` (`Places` + `QuestPlaces`), `cityplans` (`CityPlans` + `Styles` + `Overlays`), `quests` (`StoryData` + `QuestPlaces`), `palettes` (`Palettes` + live `TamrielBiomeSource`), or `all`. Pair with `/nirncraft-dev regen x1 z1 x2 z2` to see worldgen changes in place. Not hot-reloaded (requires restart/rebake): map PNG rasters, `regions.json`, `hydrology.json`, `peaks.json`, baked `RoadPlan`/`StreetPlan`, and datapack registries. |
+| **Dev server** | `tools\dev\devserver.ps1 run "cmd" -Wait`, `quick_corridor.ps1` | 1–15 s | In-place chunk regeneration (`/nirncraft-dev regen`), corridor grading measurement, command smoke checks. |
+| **Full gates** | `tools\qa\full_corridors.ps1`, `tools\bake\bake.ps1`, `harness.py gate` | minutes | Full 4-corridor road gate, bake verification in a fresh world, and the harness gate (run once at phase end / merge). |
 
-## Test harnesses
+## In-game test hooks
 
-Each harness is an `@Mod.EventBusSubscriber` class that does nothing unless triggered. Client harnesses run under
-`./gradlew runClient`, whose game directory is `mod/run/`, so relative output paths land there. Pass system
-properties through `JAVA_TOOL_OPTIONS`, for example:
-
-```
-$env:JAVA_TOOL_OPTIONS="-Dnirncraft.autotest=true -Dnirncraft.autotest.world=autotest"; cd mod; ./gradlew runClient
-```
-
-`tools/autotest.ps1 [-World <name>]` does the same for the plain screen walk-through.
+Each hook is an `@EventBusSubscriber` class that does nothing unless triggered. The harness sets these flags on the
+disposable Prism instance (`-Dnirncraft.autotest=true` and friends); its `live` scenes, the gallery and `/nirncraft-tour`
+replace the old hand-run tours. Relative output paths land in that instance's game directory.
 
 | Harness | Trigger | What it does | Output |
 | --- | --- | --- | --- |
-| `client/autotest/ClientAutotest` | `-Dnirncraft.autotest=true` | Walks through the race, skills, hub, inventory, magic, journal, map, spellmaking and staff screens, plus summoned wildlife. Ends with `mc.stop()`. | `mod/run/build/autotest-screenshots/*.png`, plus base64 JPEG thumbnails in stdout between `=== SCREENSHOT_START:<name> ===` markers |
+| `client/autotest/ClientAutotest` | `-Dnirncraft.autotest=true` | Walks through the race, skills, hub, inventory, magic, journal, map, spellmaking and staff screens, plus summoned wildlife; with the harness it is the live controller. | `build/autotest-screenshots/*.png` in the game directory |
 | ″ | `-Dnirncraft.autotest.world=<name>` | Creates that creative, cheats-on world afresh (seed 1234) from the title screen, so no person is needed. | |
 | ″ | `-Dnirncraft.autotest.createflow=true` (and optionally `-Dnirncraft.autotest.load=<save>`) | Creates (or loads) the world through the real New Game screens and screenshots any prompt that waits | `00_create_world_*` |
 | ″ | `-Dnirncraft.autotest.tour=Name:x:z[:yaw],...` (`-Dnirncraft.autotest.tourWait=400`) | Flies to each spot and shoots it from the ground and the air | `tNN_<Name>_ground/_air` |
@@ -324,7 +323,8 @@ Steps run 40 ticks apart. Screens that need preset state expose a static `presel
 
 `pack/` is a [packwiz](https://packwiz.infra.link/) pack: `pack.toml`, `index.toml`, one `mods/*.pw.toml` per
 third-party mod, `config/` (client and common configs, copied into `.minecraft/config`) and `defaultconfigs/` (server
-configs that Forge copies into every new world's `serverconfig/`).
+configs that NeoForge copies into every new world's `serverconfig/`), and `shaderpacks/InfiniteATLAS.zip` (built by
+`py -3 -I shaderpack/build_pack.py`; copy `shaderpack/build/InfiniteATLAS.zip` here, then refresh the index).
 
 * **NirnCraft Core is not in the committed pack.** The jar is a build output: git ignores `pack/mods/nirncraft-core.jar`
   and `index.toml` never lists it. Every build injects it into a throwaway copy:
@@ -336,7 +336,7 @@ configs that Forge copies into every new world's `serverconfig/`).
   `[update.modrinth]` `mod-id` + `version`) and run `python3 tools/refresh_packwiz.py`.
 * **Updating or removing a mod:** edit or delete its `.pw.toml` (and its `modlist.txt` line), then run
   `python3 tools/refresh_packwiz.py`. Entries whose `.pw.toml` exists are never re-resolved.
-* **`side`:** `client` for rendering/UI-only mods (Embeddium, Oculus, shaders, Controllable…), `server` for
+* **`side`:** `client` for rendering/UI-only mods (Sodium, Iris, Controllable…), `server` for
   server-only ones, `both` otherwise. The dedicated server zip skips client mods.
 * **After any change under `pack/`** run `python3 tools/refresh_packwiz.py` (works from any directory, hashes raw
   bytes, indexes only `config/`, `defaultconfigs/`, `mods/`, `resourcepacks/`, `shaderpacks/`). `.gitattributes` marks
@@ -349,10 +349,12 @@ configs that Forge copies into every new world's `serverconfig/`).
 
 | Command | Result |
 | --- | --- |
-| `python3 tools/build_prism_instance.py [--core-jar PATH]` | `dist/NirnCraft-client-instance.zip` without packwiz (Windows friendly). Uses `mod/build/libs`' newest jar unless `--core-jar` is given; checks every hash. |
-| `tools/make-instances.sh <core.jar>` | Client instance and dedicated server zips through a pinned packwiz-installer (Linux/macOS, needs Java and python3). |
-| `tools/test-server.sh` | Boots `dist/NirnCraft-server.zip`, generates the spawn area, fails on crashes, client classes on the server or NirnCraft stack traces. |
-| `tools/test-client.sh` | Boots the NirnCraft dev client (`./gradlew runClient`, Forge + NirnCraft only) under Xvfb, fails on crashes, NirnCraft stack traces or missing NirnCraft models/textures. It does not test the full pack's client. |
+| `py -3 tools/build_prism_instance.py --core-jar PATH` | `dist/NirnCraft-26.3-client-instance.zip` without packwiz (Windows friendly); checks every hash. |
+| `py -3 tools/build_mrpack.py --core-jar PATH` | `dist/NirnCraft-26.3.mrpack` for the Modrinth App (same pins, InfiniteATLAS and the core with its natives in `overrides/`). |
+| `py -3 tools/build_server_instance.py --core-jar PATH --java JAVA25` | `dist/NirnCraft-26.3-server.zip`, the complete dedicated server ([SERVER-26.3.md](SERVER-26.3.md)). |
+| `tools/make-instances.sh <core.jar>` | Client instance and server zips in one call (Linux/macOS wrapper over the two builders above). |
+| `tools/test-server.sh` | The installed server smoke gate (`tools/qa/test_server_package_263.py`). |
+| `tools\build_release.ps1` | Everything above with a verified bake and the server gate, into a fresh `dist/release-26.3-*` folder. |
 
 ### Git and generated files
 
@@ -374,6 +376,8 @@ requires the owner to re-enable Actions in GitHub settings. Normal development u
 
 If explicitly re-enabled and dispatched, a newer run on the same ref cancels an older one:
 
+The workflow predates the 26.3 port (it still selects Java 17 for the `mod` job) and needs updating before use.
+
 1. **Job `mod`** builds NirnCraft Core (`./gradlew build`), prints a compile-error summary if that fails, and uploads
    `nirncraft-core-jar`.
 2. **Job `pack`** then runs these steps:
@@ -384,10 +388,7 @@ If explicitly re-enabled and dispatched, a newer run on the same ref cancels an 
       copy. Export failures are only warnings, because some mods exist on one platform only.
    3. `tools/test-server.sh` boots the server zip. It generates the spawn area, runs `locate` on villages and
       dungeons, then stops. It fails on a crash, client classes on the server, or any `com.nirncraft` stack trace.
-   4. `tools/test-client.sh` boots the dev client under Xvfb (1280×800, software GL) for 60 seconds after resource
-      loading. It fails on crashes, `com.nirncraft` traces, or missing NirnCraft models and textures. It doesn't load
-      a world, so the screen walk-through runs only locally.
-   5. It uploads the server and client test logs, `NirnCraft-client-instance`, `NirnCraft-server` and
+   4. It uploads the server test logs, `NirnCraft-client-instance`, `NirnCraft-server` and
       `NirnCraft-exports` (which includes `pack/RESOLVE_REPORT.md`).
 
 ## Second-wave contracts
@@ -395,7 +396,7 @@ If explicitly re-enabled and dispatched, a newer run on the same ref cancels an 
 18. **Skill XP modifiers** (core): `Progression.registerXpModifier((player, skill) -> multiplier)` — Standing Stones,
     fortify effects, etc. multiply skill XP without touching core.
 19. **Item weights** (inventory owns): data files `data/<ns>/nirncraft_weights/*.json` with
-    `{"weights": {"minecraft:iron_sword": 9, "#forge:ingots": 1}}`; API `com.nirncraft.inventory.ItemWeights.get(ItemStack) -> float`
+    `{"weights": {"minecraft:iron_sword": 9, "#c:ingots": 1}}`; API `com.nirncraft.inventory.ItemWeights.get(ItemStack) -> float`
     (per item) and `com.nirncraft.inventory.CarryWeight.capacity(Player)`. Other modules add carry capacity with
     `data.module("bonus").putFloat("carry", ...)` (summed by inventory, like `health`/`magicka`/`stamina`).
 20. **Leveled loot** (arsenal owns): loot tables `nirncraft:chests/dungeon_common`, `nirncraft:chests/dungeon_boss`,
@@ -441,7 +442,7 @@ aquifer fluid computation (vanilla).
 places files, and the bytecode of the classes that compute the data), otherwise computes live. Baked now: the landmass
 raster labels and off-map island labels (`roads.Landmass`). Regenerate with `tools/bake/bake.ps1` (boots the dev server,
 runs the `bake` autorun task, copies into `mod/src/main/resources/nirncraft/baked/`); `/nirncraft-bake check|write` in
-game; `tools\qa\qa.ps1 -Server -Bake` fails when the bake is stale. Rebake and commit after changing map data, places,
+game; `tools\build_release.ps1` fails when the bake is stale. Rebake and commit after changing map data, places,
 or `Landmass`/`TamrielMap`/`Places`. Not baked (deferred): the road network plan (depends on world heights and is
 persisted per save), the city-plan fabric cache; hydrology rasters already ship as PNG/JSON.
 
@@ -456,11 +457,9 @@ and `Carriages` load the 7x7 chunks around the destination with tickets first (t
 chunks ready/needed), then complete the travel (25 s timeout fallback). `Prewarm.hold(...)` keeps an area loaded
 silently. `sailing.Ferries` already requests the destination chunks at departure.
 
-**Distant Horizons.** DH builds LODs from chunks that are loaded or saved, so pre-generated chunks are picked up like
-explored ones; no DH API is called. Its server-side generation runs through the normal chunk path of our noise-based
-generator; the custom biome source is read through `getNoiseBiome`. Not verified in game. Suggested: DH distant
-generation on the internal server with a modest radius and let the pre-generator do the loading (it halves its
-in-flight cap when DH is installed).
+**Distant terrain.** Infinite ATLAS draws everything past the loaded chunks ([ATLAS.md](ATLAS.md)); Java pushes
+authoritative column tiles and chunk sections to it, so pre-generated chunks sharpen the far field like explored ones.
+Distant Horizons is no longer part of the pack.
 
 **Shipping a starter world (not implemented).** Run `/nirncraft-pregen start <radius> now` on a Nirn server until
 `status` reports it finished, stop the server, zip `world/` (without `playerdata/`, `advancements/`, `stats/`) and host

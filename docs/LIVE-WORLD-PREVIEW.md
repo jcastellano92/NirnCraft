@@ -1,16 +1,14 @@
 # Live Minecraft world preview
 
-For the exact Minecraft 26.3 / NeoForge / Java 25 preparation and launch boundary, start with
-[NATIVE-26.3-PREVIEW.md](NATIVE-26.3-PREVIEW.md). The preserved Forge preview is not selected by current live controls.
+`tools/dev/live_world.py` is the low-level bridge to the disposable **NirnCraft-26.3-autotest** Prism instance. The
+test harness ([tools/harness/README.md](../tools/harness/README.md)) drives it for every live test: it launches the
+client, plans cameras offline on the seeded terrain, captures before/after results and closes the client at the end
+of a run. Use the harness for tests; read this page when you need the bridge directly. Preparation and launch
+boundaries (Java 25, exact instance, core-only diagnostic) are in [NATIVE-26.3-PREVIEW.md](NATIVE-26.3-PREVIEW.md).
 
-For camera planning, scouting, approval and reuse across every mod system, follow
-[VISUAL-TEST-CAMERAS.md](VISUAL-TEST-CAMERAS.md). `camera X Y Z TARGET_X TARGET_Y TARGET_Z` checks loaded collision
-geometry; `camera-plan` scouts 27 nearby poses once. Captures include JSON receipts, and saved camera approval is
-invalidated by seed/dimension/generation changes. Reject captures made inside terrain.
-
-This is the operating guide for future AI sessions and the owner. Run from the repository root
-the repository root, not its parent folder. The owner has authorized visual testing and live
-updates in the disposable **NirnCraft-26.3-autotest** Prism instance. Preserve the normal **NirnCraft** instance and its saves.
+`camera X Y Z TARGET_X TARGET_Y TARGET_Z` checks loaded collision geometry and refuses a pose inside terrain, trees or
+buildings; captures include JSON receipts. Run everything from the repository root. Preserve the owner's own
+**NirnCraft** instance and its saves.
 
 ## Check before launching anything
 
@@ -143,15 +141,14 @@ changed, produce and verify matching bakes first; staging must not bypass that g
 status before proceeding: PowerShell can continue after a failed Python command unless explicitly checked.
 
 ```powershell
-py -3 tools/dev/live_world.py shader
 py -3 tools/dev/live_world.py capture torch_hall
 py -3 tools/dev/live_world.py actions dist/weather-review/dungeons/capture-actions.txt
 ```
 
-This operation is gated until the customized Complementary integration has passed native 26.3 acceptance.
-After that gate it patches the installed Complementary zip from source and requests a shader reload in the running
-client, waiting for its acknowledgement. It refuses a busy capture queue. This does not rebuild the mod or restart
-Minecraft. Check `latest.log` for shader compile errors and inspect actual frames after each material change.
+Shader edits: `py -3 tools/harness/harness.py watch` rebuilds the InfiniteATLAS zip (glslang-checked) and reloads Iris
+in the running client, with before|after sheets. The old `live_world.py shader` command (which patched Complementary
+Reimagined) is retired and only prints that pointer. Check `latest.log` for shader compile errors and inspect actual
+frames after each material change.
 
 The existing `.minecraft/nirncraft-live.txt` accepts `reload`, `shaders on|off`, `command COMMAND`,
 `visit X Z HEIGHT_ABOVE_SURFACE YAW PITCH WEATHER`, `front X Z RADIUS WEATHER [VX VZ]`, `wait TICKS`, `capture TAG`,
@@ -178,49 +175,22 @@ py -3 tools/dev/live_world.py storage
 py -3 tools/dev/live_world.py profile
 ```
 
-Measured build/cache trial (2026-10-17): `py -3 tools/dev/benchmark_storage.py --scratch
-E:\NirnCraft-scratch\storage-benchmark --runs 2` froze identical sources on F:, discarded warm-ups, alternated cases
-and measured full compilation/resource processing and unchanged builds. Median seconds: F: outputs/C: caches
-85.67/11.12; E: outputs/C: caches 79.40/10.83; E: outputs/E: caches 74.03/8.98. Cache seeding cost 147 seconds once.
-Raw samples/logs: `dist/weather-review/storage/benchmark.json`. Warm filesystem, two samples per case; these are
-build timings, not worldgen or GPU speedups. The optional `tools/dev/build_fast.ps1` reuses that E: cache and writes
-to `E:\NirnCraft-scratch\storage-benchmark\build-main`. It restores GRADLE_USER_HOME on exit. Existing scripts still
-default to `mod/build`; pass the fast build's jar explicitly to packaging. Do not run simultaneous Gradles.
+`storage` reports the drives behind the build, cache and preview folders (read-only). The optional
+`tools/dev/build_fast.ps1` puts build outputs and caches on a faster scratch drive; pass its jar explicitly to
+packaging. Do not run simultaneous Gradles.
 
 `profile` extracts actual launch/world-load durations, loaded/stale bakes and regeneration phase summaries from the
 current game log. Preserve it with the run's hardware, settings and screenshots. It does not run a synthetic benchmark.
 
 Read-only drive discovery reports bus type, model, capacity and free space. Windows RAID/virtual/storage-controller
 layers can hide the underlying interface, so a non-NVMe bus label is not a universal proof of rotating storage.
-On the owner's machine on 2026-10-17, `E:` is a Samsung 970 EVO Plus NVMe SSD (~220 GB free), `C:` is a SATA SSD
-(Prism/preview), and `F:` is a rotating HDD (repository/build outputs). Prefer putting active build outputs and
-preview saves/LOD caches on fast storage when measurements show I/O stalls. Do not move the owner's saves or install
-directories automatically. Recommending existing NVMe is useful; requiring players to buy one is not justified.
+Prefer putting active build outputs and preview saves on fast storage when measurements show I/O stalls. Do not move
+the owner's saves or install directories automatically.
 
-Separate timings for launch/bootstrap, plan loading, terrain/structures/lighting, chunk mesh upload, DH LOD work,
-shader compilation and frame settling. Report time to first useful view separately from time to fully refined view.
-An SSD cannot speed up CPU density evaluation or a shader compiler directly. A GPU prototype must include transfer,
-compilation, cache warm-up and contention with actual weather rendering, with CPU fallback and repeatable output.
-Use persistent caches keyed by code/data/format/device where appropriate; invalidate only affected regions.
-
-For progressive distant rendering, evaluate coarse nearby horizon coverage first, prioritize camera-visible tiles,
-then refine with a frame-time budget and bounded queues. Preserve silhouettes, water level and direct-light/fog
-consistency between levels. Do not count incomplete near terrain or a stale distant mesh as a visual pass.
-This is a proposed renderer/generator investigation, not an implemented replacement for DH.
-
-Research checked 2026-10-17:
-
-- [C2ME upstream](https://github.com/RelativityMC/C2ME-fabric): parallel generation, loading and I/O; its tree includes
-  density compilation/OpenCL modules. Custom generators can violate threading assumptions. NirnCraft's
-  `TamrielHeight`, `TamrielChannel` and `TamrielCaves` density functions plus terrain protection queries require an
-  explicit compatibility/parity audit; a generic GPU-noise benchmark does not prove NirnCraft acceleration.
-- [Voxy official page](https://modrinth.com/mod/voxy): distant LOD rendering/conversion, OpenGL 4.6, explicit shader
-  integration; the official compatibility list does not include Forge 1.20.1. Reuse architectural lessons, and test
-  distant geometry generation separately from rendering. Its [source license](https://github.com/MCRcortex/voxy/blob/dev/LICENSE.md)
-  reserves redistribution; this is not permission to copy its renderer into NirnCraft.
-- The [unofficial Forge OpenCL port](https://github.com/udbwhdjwbdj/c2me-opencl-forge1201) describes batch biome/noise
-  generation, caching and fallback, but also labels its accelerator sources as reverse-engineered research code.
-  It has not been installed, benchmarked or treated as a production dependency here.
+Separate timings for launch/bootstrap, plan loading, terrain/structures/lighting, chunk mesh upload, atlas far-field
+work, shader compilation and frame settling. Report time to first useful view separately from time to fully refined
+view. Distant terrain is drawn by Infinite ATLAS ([ATLAS.md](ATLAS.md)); its own readiness is separate from the near
+field's.
 
 For fast side tools, prefer exporting the real Java planner/painter outputs (already supported by dungeon QA) and
 viewing those in Python or another renderer. A second implementation of generation creates a parity burden.
@@ -259,7 +229,6 @@ instance and confirm packaged hashes match what was tested. Never ship preview f
 
 ```powershell
 py -3 tools/dev/test_live_world.py
-py -3 tools/shaders/test_weather_patch.py
 ```
 
 Use real dungeon frames for entrance adaptation, long torch halls, descending stairs, pools/waterfalls, large
@@ -267,8 +236,8 @@ vegetated caverns with genuine ceiling openings, cold floor fog, campfire smoke,
 lighting. Test houses as a clear-interior control, plus shaders on/off. Record actual locations, shader options,
 weather/time, Night Vision, frame evidence and failures. File existence or a command completing is not a beauty pass.
 Use `settle` after teleporting: it waits for the effective native render disk (currently radius render-distance minus two), empty renderer work, clear camera, current dungeon-air packet/blend and weather grids for twenty stable ticks,
-then permits capture. A timeout cancels the sequence and reports an error. It does not certify distant terrain,
-DH meshes or a good camera angle; visually reject missing terrain and badly framed captures.
+then permits capture. A timeout cancels the sequence and reports an error. It does not certify distant terrain
+or a good camera angle; visually reject missing terrain and badly framed captures.
 The current atmosphere implementation still has bounded room/light counts, approximate local-light visibility,
 and no full fluid/thermal simulation or persistent ice embedding. Do not mark those as completed.
 
@@ -282,9 +251,8 @@ and cave-mouth transmission still need more complete visibility data and dedicat
 For interior captures inspect the `Autotest interior` line too: a pose can have loaded terrain while its dungeon
 atmosphere packet is still catching up. Reject `rooms=0` when the test expects an authored cave medium. Some early
 second-dome frames had this issue and are retained as failed cases. The current readiness gate certifies the fresh atmosphere packet and settled room blend. It does not certify
-all distant DH GPU meshes or exposure convergence. Optional DH column sampling proves data availability only. DH 3.3.3's inspected public render/world proxy APIs
-do not expose a simple "all generation and meshes done" method; horizon acceptance must remain explicit until a
-separate coverage/mesh readiness signal is implemented. Do not equate an empty near-render queue with a finished vista.
+the far field or exposure convergence; horizon acceptance stays explicit. Do not equate an empty near-render queue
+with a finished vista.
 
 Measured live checks on this machine: a warm corridor sequence took 4.18 seconds with command acknowledgement and
 terrain settling versus 12.26 with the old fixed waits. This is one scene, not a general performance benchmark.
@@ -293,10 +261,8 @@ the old wrapper's 12-second parking sleep. That unconditional parking sleep has 
 completion wait remains. Successful bake upload was exercised with a local bundle and all four plans loaded on
 restart. Production content, exact cave ambience and full distant readiness have not been signed off.
 
-Further runtime check: the old unload observer used official-only reflection, so the packaged Forge JVM could
-fall back to a fixed twenty seconds and then assume unloading finished. It now checks official and verified 1.20.1
-SRG names for visible/updating holders and pending unloads; missing observation refuses regeneration. It never
-declares completion from a timer. The extra one-second minimum was removed too. A second nine-chunk run completed
+The unload observer checks visible/updating chunk holders and pending unloads; missing observation refuses
+regeneration. It never declares completion from a timer. The extra one-second minimum was removed too. A second nine-chunk run completed
 in 3.617 seconds for the whole server job (3.5 seconds regeneration summary), versus the earlier 34.39-second job.
 A marker was successfully placed before that run and positively confirmed removed afterward. This is a bounded
 preview operation, not a general new-world generation benchmark. See `dist/weather-review/dungeons/regen-observed-live.log`.

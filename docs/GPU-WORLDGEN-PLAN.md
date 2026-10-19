@@ -1,5 +1,10 @@
 # World generation, distant terrain and weather acceleration
 
+> **Status note (2026-10-19).** This audit was written while the pack still pinned Distant Horizons (the Forge
+> 1.20.1-era LOD mod). Distant terrain is now drawn by Infinite ATLAS ([ATLAS.md](ATLAS.md)), which consumes Java's
+> authoritative heights instead of a second generator, so the DH and Voxy points below are history. The CPU-side
+> findings (region stencil, one authoritative terrain batch contract, exact-bit parity) still apply.
+
 Audit date: 2026-10-18. This records source/API inspection and a small exact CPU optimization. It does not claim a GPU terrain generator or a measured frame-rate improvement. The coordinated client/server build and visual pipeline remain the acceptance path in [LIVE-WORLD-PREVIEW.md](LIVE-WORLD-PREVIEW.md) and [WORLD-TESTING.md](WORLD-TESTING.md).
 
 ## What actually runs today

@@ -40,7 +40,7 @@ that project. We do not read it into NirnCraft; we only compared aggregate numbe
 Sources:
 
 * The owner's install: `ARENA2` (MAPS.BSA, BLOCKS.BSA, WOODS.WLD, CLIMATE.PAK, POLITIC.PAK, FACTION.TXT via v1).
-* DFO Online (MIT, `F:\daggerfall-js-source-main\daggerfall-js-source-main`). Its parsers
+* DFO Online (MIT; a local checkout outside the repository). Its parsers
   (`src/formats/mapsFile.js`, `blocksFile.js`, `woodsFile.js`, `pakFile.js`) are plain ES modules that Node imports
   directly. Its own road generator is `src/world/roadNetwork.js`.
 

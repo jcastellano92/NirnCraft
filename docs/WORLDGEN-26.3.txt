@@ -1,9 +1,9 @@
-Native Minecraft 26.3 world and data migration
-Updated 2026-10-18
+Minecraft 26.3 world generation and data boundaries
+Target: Minecraft 26.3 / NeoForge 26.3.0.90 / Java 25 (written at the port, 2026-10-18)
 
-Read MIGRATION-26.3.txt first for the exact loader/Java target and current full-pack
-acceptance status. The world code now compiles against the real patched native
-APIs. Compilation and static inventory checks do not certify a playable world.
+How NirnCraft's world generation, saved data and generated data files sit on the
+native 26.3 APIs, and the rules every generator follows. Compilation and static
+inventory checks do not certify a playable world; the doc map is docs/README.md.
 
 World generation contracts
 
@@ -120,12 +120,11 @@ the genuine native WorldDataMigrationTest asserts the recipe is actually absent.
 The converter suite checks actual isolated writer definitions without overwriting
 generated assets. The audit verifies every baseline resource has a native destination
 and checks world registry references against the exact native jar plus current data.
-The current report is dist/code-review/neoforge-migration/native-data-audit.json.
 JUnit runs through ModDevGradle's genuine loader-backed unitTest setup. Do not fake
 FMLLoader or remove native integration assertions to make a standalone test pass.
 
-Remaining full-pack gates are owned by the normal native runtime: load all registries,
-decode all recipes/loot/worldgen, generate representative chunks in every realm, load
-and resave a separately converted old save, run gameplay selftests, then capture
-terrain-ready motion and visual comparisons with shader configurations. A static
+Runtime checks: load all registries, decode all recipes/loot/worldgen, generate
+representative chunks in every realm, load and resave a separately converted old
+save, run gameplay selftests, then capture terrain-ready motion and visual
+comparisons with the shader pack on and off (tools/harness/README.md). A static
 catalog check cannot detect an invalid codec field, wrong lighting or a worldgen seam.

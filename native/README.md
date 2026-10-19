@@ -58,6 +58,9 @@ Arguments: `x z` (blocks), `above` (height over the ground) or `y`, `yaw` (0 = n
 `sun=elevation,azimuth`, `radius` (planet radius in blocks; 0 = flat), `far`, `bias` (LOD bias),
 `flags=shadows,atmos,lod`, `frames` (best-of timing), `depthpng=1`. It prints one JSON line of stats.
 
+The test harness wraps these as its `lab` tier (`py -3 tools/harness/harness.py run --tier lab`, see
+[tools/harness/README.md](../tools/harness/README.md)) and runs the native suites as `check` tests.
+
 These renders use **preview terrain** (raster macro shape and a seed-free stand-in for the detail), not the
 game's generator. In game, Java pushes authoritative column tiles and chunk sections through the same ABI.
 

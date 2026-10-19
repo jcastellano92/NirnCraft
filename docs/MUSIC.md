@@ -144,7 +144,7 @@ surroundings twice a second:
   (`data/nirncraft/worldgen/biome`, from `tools/worldgen/biomes.py`) onto a weighted mix of soundscape families:
   forest, pine, plains (tundra and meadows), cold marsh, warm swamp, jungle, desert, savanna, ash, volcanic, snow,
   glacier, mountain, mushroom, crystal, hot springs, ocean, river and beach. Biomes it doesn't know (vanilla, other
-  mods) are classified by their vanilla and Forge tags and by keywords in their names;
+  mods) are classified by their vanilla and common (`c:`) tags and by keywords in their names;
 * the kind of cave biome you are in: Dwemer caverns, Falmer glow caves, ice caves, lava caves, mushroom grottos, and
   vanilla's lush caves and deep dark;
 * the province (Skyrim's wolves and dragons, Vvardenfell's cliff racers and netch);
@@ -222,9 +222,9 @@ py -3 tools/music/synth_ambience.py wind cave  # only matching stems
   sound is then low-passed and slightly attenuated. Sounds outside while you are inside (rain, wind, mobs) are
   muffled, and everything is muffled underwater. The ambience beds' muffling follows you live.
 * **Not affected:** music, UI sounds and stings.
-* **How the filters get attached.** Forge's `PlaySoundSourceEvent` and `PlayStreamingSourceEvent` hand over the
-  `Channel`, and the OpenAL source id is read from its private field `source` (SRG `f_83642_`) through
-  `ObfuscationReflectionHelper`.
+* **How the filters get attached.** NeoForge's `PlaySoundSourceEvent` and `PlayStreamingSourceEvent` hand over the
+  `Channel`, and the OpenAL source id is read from its private field `Channel.source` (the one reflective read; no
+  mixin or transformer).
 * **Failure handling.** If EFX is missing or anything fails, it logs once and switches itself off.
 * **Settings:** `acoustics.reverb`, `reverbAmount` and `occlusion` in `nirncraft-audio-client.toml`.
 

@@ -1,4 +1,4 @@
-# NirnCraft visuals: the full matrix (near field = the NirnCraft Atlas shader pack, far field = atlas)
+# NirnCraft visuals: the full matrix (near field = the InfiniteATLAS shader pack, far field = atlas_core)
 
 Every effect is designed for both fields so it carries across the hand-off, and each has a cheaper fallback the
 quality controller (adaptive quality v2, docs/ADAPTIVE-QUALITY.md) or the pack profile can drop to. Status: **done**, **building**, *planned*.

@@ -1,6 +1,8 @@
-# Mod integration (staged; NeoForge 26.3)
+# Mod integration (NeoForge 26.3)
 
-These classes join atlas_core to the NirnCraft mod.
+These classes join atlas_core to the NirnCraft mod. They were staged here while the mod moved to NeoForge 26.3 and
+now live in `mod/src/main/java/com/nirncraft/atlas`; this folder keeps the move-in tooling, compile stubs and the
+offline harnesses (`harness/`, also used by `tools/harness/cameras.py`). The steps below record how the move-in works.
 
 **Moving in:** `move_in.ps1` does steps 1-4 below (dry run by default, `-Apply` to write; every patch is anchored,
 idempotent and refuses to guess). `sandbox_check.ps1` rehearses it without touching the main tree: it snapshots the
@@ -8,8 +10,7 @@ main checkout's `mod/` sources, applies the move-in to the copy and compiles the
 conversion's patched 26.3 jar and Gradle dependencies. As of 2026-10-18 the converted mod with atlas moved in
 compiles with 0 errors. They are written against the NeoForge 26.3 / Minecraft 26.3
 signatures read from the real jars (`javap` on `neoforge-26.3.0.90-universal.jar` and Mojang's 26.3 client jar).
-They are kept here, not in `mod/`, until the Forge 1.20.1 → NeoForge 26.3 conversion is committed: the mod does not
-compile against 26.3 before that. Then:
+The steps:
 
 1. Copy `src/com/nirncraft/atlas/` and `../src/com/nirncraft/atlas/AtlasNative.java` into
    `mod/src/main/java/com/nirncraft/atlas/` (drop `AtlasProbe.java`; `compile-stubs/` and `harness/` stay here).

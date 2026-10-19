@@ -1,12 +1,17 @@
 # Common rules for every phase prompt
 
+> **Platform update (2026-10-19).** NirnCraft now targets Minecraft 26.3 / NeoForge 26.3.0.90 / Java 25. Build with
+> `py -3 tools/dev/build_263.py --offline build`; test with the harness (`py -3 tools/harness/harness.py run`,
+> `run --changed`, `gate`; see `tools/harness/README.md`), which replaces the `qa.ps1` and `gradlew` commands below.
+> The doc map is `docs/README.md`.
+
 Every prompt in `docs/prompts/` says "read `_COMMON.md` first". This file holds what all phases share, so the phase
 files can stay short. If a phase file and this file disagree, the phase file wins for that phase.
 
 ## 1. Who you are and where you work
 
 * You are the **orchestrator** of one roadmap phase (or one step of a phase) of NirnCraft, a Skyrim total conversion
-  for Minecraft 1.20.1 Forge. Your session runs in the main checkout the repository root on the
+  for Minecraft 26.3 NeoForge. Your session runs in the main checkout (the repository root) on the
   local branch `tamriel-overhaul`.
 * You do the work through **worktree agents** (Agent tool, `isolation: "worktree"`), at most **3 at once** (prefer
   1-2), each with one bounded task and an explicit write set from the phase file. Small docs-only or data-only steps
@@ -52,22 +57,22 @@ Once `tools/qa/verbatim_check.py` exists (R3c) it must report 0.
 
 ## 5. Build and the fast loop (iterate cheaply, gate once)
 
-* Compile after a chunk of work, not after every edit: from `<worktree>/mod`
-  `./gradlew.bat compileJava --console=plain "-Dorg.gradle.jvmargs=-Xmx2G"`. Finish with `build` passing.
+* Compile after a chunk of work, not after every edit: `py -3 tools/dev/build_263.py --offline compileJava`.
+  Finish with `build` passing.
 * Iterate on the **dev server**, never a fresh boot per check: `tools\dev\devserver.ps1 run "cmd a|cmd b" -Wait`
   (auto-starts; restarts itself when `mod\src\main` changed), `/nirncraft-dev regen x1 z1 x2 z2` for a bounded area,
   `tools\qa\quick_corridor.ps1 <a>:<b>` (one road tile, ~15 s; `-Replan` after road planning changes). Once R2 lands:
-  `devserver.ps1 hotswap` for method-body changes and `gradlew test` / `qa.ps1 -Unit` for plan-layer tests.
+  `devserver.ps1 hotswap` for method-body changes and `build_263.py --offline test` for plan-layer tests.
 * Only ONE dev server per machine; `devserver.ps1 stop` when you finish.
-* Cheapest check first: static lint (`qa.ps1 -NoBuild`, `data_checks.py`, the domain lint) → layout lint → dev server
+* Cheapest check first: static lint (`harness.py run --tier check`, `data_checks.py`, the domain lint) → layout lint → dev server
   → offline renders + Haiku review → full gate. **Never launch the Minecraft client.** The owner runs visual and Prism
   checks himself; hand him a checklist instead.
 * Visual checks: render offline (`tools/qa/render_town.py`, `render_dungeon.py`, `region_render.py`, map previews),
   tile into one contact sheet (`contact_sheet.py`), and send it to an Agent with `model: "haiku"` and a rubric that
   returns only a numbered issue list. Fix flagged issues; do not escalate the review itself.
 * Do not read whole logs or whole JSON files; read reports, `git diff --stat` and one contact sheet.
-* After any change to the map, places, road graph, gates or worldplan code the bake is stale: `qa.ps1 -Server -Rebake`
-  re-bakes in the same boot. Road phases also run `tools\qa\full_corridors.ps1` once at the end.
+* After any change to the map, places, road graph, gates or worldplan code the bake is stale: `tools\bake\bake.ps1`
+  re-bakes and verifies it in a fresh world. Road phases also run `tools\qa\full_corridors.ps1` once at the end.
 
 ## 6. Gates
 
@@ -91,7 +96,7 @@ For each finished worktree, one at a time:
    `py -3 -I tools/worldgen/noise_settings.py`; quest text: `node tools/quest_lang.js`). Index files
    (`places/index.json`, `quests/index.json`, `lore/places/index.json`, tag lists): union both sides.
    `tools/dev/resolve_generated.py` helps.
-4. `powershell -File tools\qa\qa.ps1 -Server -Rebake` (one boot; re-bakes if stale; must print PASS). Add the phase's
+4. `py -3 tools/harness/harness.py gate` (and `tools\bake\bake.ps1` if the bake is stale; must pass). Add the phase's
    own gate commands (and `tools\qa\full_corridors.ps1` if road or worldplan code changed).
 5. Commit on `tamriel-overhaul` with a message in the style of `git log --oneline` (what changed, the key numbers),
    ending with the attribution line the harness gives you. Commit only the paths of this merge (`git add <paths>`, no

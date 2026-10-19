@@ -9,7 +9,9 @@ NirnCraft Core (`mod/`) is one custom NeoForge mod that builds all of this itsel
 music and rules. The pack (`pack/`) adds only performance mods, a few libraries and helpers such as
 Better Combat, Lootr and Controllable.
 
-* **Minecraft 26.3, NeoForge 26.3.0.90, Java 25.** See [native acceptance](docs/NATIVE-26.3-PREVIEW.md).
+* **Minecraft 26.3, NeoForge 26.3.0.90, Java 25.**
+* **Powered by Infinite ATLAS:** the native far-field renderer `atlas_core` (`native/`) draws Tamriel to the horizon
+  on a curved planet, and NirnCraft's own Iris shader pack, `InfiniteATLAS`, lights the near field to match.
 * Targets a Steam Deck-class PC. Every menu is designed for the Deck's 1280×800 screen.
 
 ## Highlights
@@ -17,8 +19,8 @@ Better Combat, Lootr and Controllable.
 * **Tamriel at real scale.** The whole continent, generated from a hand-drawn map. Skyrim is about 6,000 blocks
   across, with Whiterun at block 0, 0, and you spawn in the prisoner cottage overlooking Helgen. Cyrodiil, Morrowind,
   High Rock, Hammerfell (with the full Iliac Bay), Black Marsh, Elsweyr, Valenwood and the Summerset Isles sit where
-  they belong. Atmora, Akavir, Yokuda, Pyandonea and Thras lie beyond the seas, and past them, deterministic 4,096×4,096
-  endless generated lands (`TilePlanner`) with their own causal world-model sheets, towns, roads and dungeons.
+  they belong. Atmora, Akavir, Yokuda, Pyandonea and Thras lie beyond the seas, and past them open ocean that wraps around to
+  the opposite edge of the world.
 * **113 biomes and 533 micro-biomes** across **83 regions** (75 land regions and 8 seas), driven by 11-layer causal
   world-model sheets (`3,019` fields across `99` province/region blocks), rainshadow and geothermal rasters. From
   Whiterun's tundra and the Rift's autumn forests to Vvardenfell's ashlands, Valenwood's Graht-oaks and Summerset's
@@ -71,9 +73,9 @@ The packaging tools support these outputs:
 
 | Artifact | Use |
 | --- | --- |
-| `NirnCraft-26.3-client-instance.zip` | **Prism Launcher / MultiMC** instance with exact NeoForge and pinned mods/configs. Custom shaders and Distant Horizons are preserved and disabled until native acceptance. |
+| `NirnCraft-26.3-client-instance.zip` | **Prism Launcher / MultiMC** instance with exact NeoForge, pinned mods/configs and the InfiniteATLAS shader pack (on by default). |
 | `NirnCraft-26.3-server.zip` | Complete NeoForge dedicated server with server-side mods and checked Java 25 launchers. Accept the EULA, then run `run.sh` / `run.bat`. |
-| `NirnCraft-exports` | `NirnCraft.mrpack` (Modrinth App) and `NirnCraft-curseforge.zip` (CurseForge App). |
+| `NirnCraft-26.3.mrpack` | Modrinth App pack (`tools/build_mrpack.py`): the same pins, shader pack and core. |
 | `nirncraft-core-jar` | Just the NirnCraft Core mod. |
 
 **Playing with friends:** use Minecraft's **Open to LAN** on the same network, or **Multiplayer** with a server's
@@ -108,7 +110,7 @@ launch.
 | Sneak + right-click a body | Drag it |
 
 These are unbound by default: ready/sheathe weapon, the Standing Stone power, vanilla drop, swap hands,
-advancements, hotbar slot 9, and Oculus's shader keys. The full list is in [docs/CONTROLS.md](docs/CONTROLS.md).
+advancements, hotbar slot 9, and Iris's shader keys. The full list is in [docs/CONTROLS.md](docs/CONTROLS.md).
 
 ## Documentation
 
@@ -117,11 +119,13 @@ advancements, hotbar slot 9, and Oculus's shader keys. The full list is in [docs
 * [docs/CONTROLS.md](docs/CONTROLS.md): every key, menu shortcut and command.
 * [docs/INSTALL.md](docs/INSTALL.md): installing, hosting, performance and troubleshooting.
 * [docs/MUSIC.md](docs/MUSIC.md): the soundtrack and sound system, and importing your own Skyrim audio.
-* [docs/DEVELOPING.md](docs/DEVELOPING.md): architecture, generators, test harnesses and CI.
+* [docs/DEVELOPING.md](docs/DEVELOPING.md): architecture, generators and packaging.
+* [tools/harness/README.md](tools/harness/README.md): the test harness (every visual and non-visual test).
+* [docs/ATLAS.md](docs/ATLAS.md) and [native/README.md](native/README.md): Infinite ATLAS, the far-field renderer.
 * [docs/TAMRIEL.md](docs/TAMRIEL.md): the world plan and the worldgen contracts.
 
-Contributing or continuing development (including a new Claude Code session): start at
-[docs/START-HERE.md](docs/START-HERE.md). It links the master plan and roadmap
+Contributing or continuing development (including a new Claude Code session): the doc map with build, test and ship
+commands is [docs/README.md](docs/README.md); then [docs/START-HERE.md](docs/START-HERE.md). It links the master plan and roadmap
 ([docs/world/WORLD-PLAN.md](docs/world/WORLD-PLAN.md)) and the ready-to-run phase prompts
 ([docs/prompts/](docs/prompts/README.md)).
 
@@ -139,4 +143,5 @@ If you own Skyrim, `tools/music/import_skyrim_audio.py` can build a **private** 
 of the game's music, sounds and Thu'um voices for your personal use (see [docs/MUSIC.md](docs/MUSIC.md)). That pack
 is written outside the repository and must never be redistributed.
 
-Third-party mods in the pack belong to their authors and are downloaded from Modrinth or CurseForge at install time.
+Third-party mods in the pack belong to their authors and are downloaded from Modrinth or CurseForge when the pack is
+built or installed.
