@@ -316,6 +316,9 @@ def ladder(slug):
                      "fov": g.get("fov")})
         print(f"{d:>6} m  {px:>9.1f} px  scale {p.get('scale', 0):.5f}  dE {de}  edges {m.get('liveEdges')}  "
               f"shimmer {sh}  entities drawn by Minecraft {drawn}/{len(ents)}")
+    if not rows:  # nothing captured yet: no table, and never a pass
+        print(f"ERR no pinned rung of {slug} has been captured yet: run --tag pinned:{slug} first")
+        return 1
     out = ROOT / ".work/harness/pinned"
     out.mkdir(parents=True, exist_ok=True)
     (out / f"{slug}.json").write_text(json.dumps(rows, indent=1), encoding="utf-8")
