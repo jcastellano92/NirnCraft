@@ -68,7 +68,7 @@ public class MinorSiteFeature extends ConfiguredFeature<NoneFeatureConfiguration
             }
         }
         if (built && site.unique() != null && b.mainChest != null) {
-            b.addItem(b.mainChest, Uniques.stack(site.unique()));
+            b.addItem(b.mainChest, Uniques.stack(site.unique(), level.registryAccess()));
             Uniques.UniqueSite u = Uniques.get(site.unique());
             if (u != null && u.note() != null) {
                 LoreBooks.Book note = LoreBooks.get(u.note());

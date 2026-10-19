@@ -120,6 +120,11 @@ public final class Uniques {
 
     /** The named item, or empty if its base item is missing. */
     public static ItemStack stack(String id) {
+        return stack(id, com.skycraft.inventory.ItemData.currentRegistries());
+    }
+
+    /** World generation runs on worker threads: callers there pass the level's registries (WorldGenLevel.registryAccess()). */
+    public static ItemStack stack(String id, net.minecraft.core.HolderLookup.Provider registries) {
         UniqueSite u = BY_ID.get(id);
         if (u == null) return ItemStack.EMPTY;
         Item item = BuiltInRegistries.ITEM.getValue(Identifier.tryParse(u.item()));
@@ -136,8 +141,8 @@ public final class Uniques {
                         Component.translatable("explore.skycraft.unique.tag")
                                 .withStyle(s -> s.withColor(ChatFormatting.GRAY).withItalic(false)))));
         for (Map.Entry<String, Integer> e : u.enchant().entrySet()) {
-            Enchantment ench = com.skycraft.platform.EnchantmentsAccess.lookup(Identifier.tryParse(e.getKey()));
-            if (ench != null) stack.enchant(com.skycraft.platform.EnchantmentsAccess.holder(ench), e.getValue());
+            Enchantment ench = com.skycraft.platform.EnchantmentsAccess.lookup(Identifier.tryParse(e.getKey()), registries);
+            if (ench != null) stack.enchant(com.skycraft.platform.EnchantmentsAccess.holder(ench, registries), e.getValue());
         }
         com.skycraft.inventory.ItemData.updateCustom(stack, customData263 -> customData263.putString(TAG, id));
         return stack;
