@@ -2,7 +2,12 @@
 
 Status: **plan** (2026-10-18). Nothing in this document is built yet. It extends what exists; it replaces only what
 is a mismatch or a blocker (listed in section 9). Read `docs/START-HERE.md`, `docs/AGENT-RULES.md`,
-`docs/WORLDGEN-PIPELINE.md`, `docs/WORLD-TESTING.md` and `docs/VISUAL-TEST-CAMERAS.md` first.
+`docs/WORLDGEN-PIPELINE.md`, `docs/WORLD-TESTING.md` and `tools/harness/README.md` first.
+
+> **Update (2026-10-19).** The test harness (`tools/harness/`) now provides the live-client queue (one owner, queued
+> jobs), the scene catalog, cameras planned on the seeded terrain, before/after captures and contact sheets this plan
+> calls L4, the broker and the sheet tools. Build the remaining `tools/visual/` pieces (ingest, targets, gaps) on top
+> of it rather than beside it. The operating workflow document this plan once linked is retired.
 
 ## 0. The idea in one paragraph
 
@@ -31,7 +36,7 @@ Strong foundations to keep:
 | In-memory painting | dungeons are painted in memory and walked by a bot (0 blockers in 462) | `dungeons/qa/DungeonQa` |
 | Real screenshots | live Prism autotest client, approved camera poses with generation fingerprints, readiness waits, shaders on/off, receipts | `tools/dev/live_world.py`, `visual_cameras.py`, `world_test.py capture/review/coverage` |
 | Iteration | dev server hot-swap (~2 s), data reload (<1 s), bounded regen (9 chunks in 3.6 s), shader hot reload | `devserver.ps1`, `live_world.py` |
-| Look | per-biome colours (sky, fog, water, grass, foliage, particle), ~40 weather profiles, moving fronts, patched Complementary shader with live data textures | `tools/worldgen/biomes.py`, `atmosphere/*`, `tools/shaders/*` |
+| Look | per-biome colours (sky, fog, water, grass, foliage, particle), ~40 weather profiles, moving fronts, the InfiniteATLAS shader pack with live data textures | `tools/worldgen/biomes.py`, `atmosphere/*`, `tools/shaders/*` |
 | Blocks | ~228 custom blocks, procedural PIL painters per module, asset audit against a registry dump | `tools/textures/*`, `asset_audit.py` |
 
 Gaps and blockers found (each is answered in sections 3-9):
@@ -255,7 +260,7 @@ it, the input digests, and the reviewer. A target is `met` when `must` traits pa
   minimum light, night ambient, particle set, interior-air style (replacing the four hard-coded tints), leaf tint
   family.
 * Client: `ClientWeather` reads it instead of `if` branches (no-shader path). Shader path: one new data texture
-  (region index to look parameters, like the weather field textures) consumed by the patched Complementary code; the
+  (region index to look parameters, like the weather field textures) consumed by the InfiniteATLAS pack; the
   patcher's sky/fog/ambient functions read it. Keep the patch rule "one key light colour" (no per-region sun tint).
 * Emissive and subsurface material ids for NirnCraft blocks in the patched `block.properties` (glow fungi, crystals,
   nirnroot, magma rock).
@@ -418,7 +423,7 @@ Status is from code reading; `?` means verify in the V2 gap pass.
 ## 7. Phases
 
 How the work runs day to day (task board, claims, leases, fast loops, saving progress) is in
-[`VISUAL-TARGETS-WORKFLOW.md`](VISUAL-TARGETS-WORKFLOW.md); each phase has a prompt in `docs/prompts/VT*.md`.
+the harness (`tools/harness/README.md`); each phase has a prompt in `docs/prompts/VT*.md`.
 
 | Phase | Work | Prompt | Exit |
 | --- | --- | --- | --- |

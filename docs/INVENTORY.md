@@ -147,9 +147,9 @@ once. Vanilla and third-party readers (hoppers, brewing stands, furnaces, other 
 Skyrim's chest holds anything; the engineering cap is 2000 kinds x 1,000,000 each (`ContainerOverflow.MAX_*`).
 
 * **Where the items are.** The vanilla slots stay (27 / 54): hoppers, comparators, `/data` and every non-Skyrim reader
-  see only them. What the slots cannot hold is the **overflow**, a `BulkStore` attached to the block entity as a Forge
-  capability (`ContainerOverflow.CAP`, via `AttachCapabilitiesEvent<BlockEntity>`). Forge serialises it into the block
-  entity's NBT (`ForgeCaps`), so it is saved with the chunk, survives a restart, travels with `/clone`, and marks the
+  see only them. What the slots cannot hold is the **overflow**, a `BulkStore` attached to the block entity as a NeoForge
+  data attachment (`ContainerOverflow`, attachment type `nirncraft:overflow`). NeoForge serialises it with the block
+  entity, so it is saved with the chunk, survives a restart, travels with `/clone`, and marks the
   chunk dirty when it changes. Eligible: every `RandomizableContainerBlockEntity` (chests, trapped chests, barrels,
   modded chests, every NirnCraft container block, which are all vanilla chests/barrels) except hoppers, dispensers/
   droppers and shulker boxes (a shulker keeps its items with the item). The ender chest's overflow is the player's

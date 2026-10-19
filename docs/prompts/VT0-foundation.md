@@ -1,8 +1,9 @@
 # VT0 Foundation: art in the repo, board, broker, ingest
 
 Read `docs/prompts/_COMMON.md`, `docs/world/VISUAL-TARGETS-PLAN.md` (sections 0-3, 5.1, 10) and
-`docs/world/VISUAL-TARGETS-WORKFLOW.md` first. This phase builds the rails every later task runs on; no world
-generation changes.
+`tools/harness/README.md` first. This phase builds the rails every later task runs on; no world generation changes.
+The harness already covers the live-client broker (one owner, queued jobs), captures and sheets: build the board and
+ingest on top of it and do not duplicate it.
 
 ## Tasks (board ids `VT0.00.*`)
 
@@ -22,7 +23,7 @@ generation changes.
    Seed the board with VT1/VT2 tasks and the Volume 01 pass tasks. Unit tests (claim races, expiry, takeover).
 5. **Broker** (`VT0.00.broker`): `tools/visual/broker.py` with `submit capture|devserver|bake|qa-server`, `status`,
    `wait`, `run` (drains the queue), `recover`; leases `.work/lease/live.json` and `server.json` with heartbeats; wraps
-   `tools/dev/live_world.py`, `preview_world.py`, `devserver.ps1`, `bake.ps1`, `qa.ps1`; batching rules from the plan
+   `tools/harness/harness.py` (live captures), `preview_world.py`, `devserver.ps1`, `bake.ps1`; batching rules from the plan
    5.1; works for agents of any AI system (plain files, no Claude-specific state). Unit tests with a fake runner.
 6. **Merge helper** (`VT0.00.merge`): `tools/dev/merge_worktree.sh` diffs from `git merge-base` with
    `tamriel-overhaul` (so worktree WIP commits merge) and excludes `.work/`; `AGENT-RULES.md` and `_COMMON.md` allow

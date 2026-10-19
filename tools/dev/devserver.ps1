@@ -42,8 +42,8 @@ param(
     [string]$RuntimeRoot = ""
 )
 $ErrorActionPreference = "Stop"
-# The canonical form of a path: junctions / links followed (E:\NirnCraft-scratch and E:\Skycraft-scratch are one
-# folder), as Python's Path.resolve() writes them into the launch files; identity checks compare these.
+# The canonical form of a path: junctions / links followed (the scratch folder may be a junction to an older-named
+# one), as Python's Path.resolve() writes them into the launch files; identity checks compare these.
 function Real([string]$Path) {
     $full = [IO.Path]::GetFullPath($Path)
     $parts = $full.TrimEnd('\').Split('\')

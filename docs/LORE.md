@@ -205,10 +205,10 @@ summarised in section 3 and in the checks of `tools/place_lore.js`.
 * In game, `/nirncraft-quest selftest` builds every quest, and `/nirncraft-quest selftest flow` plays every quest to
   completion. Both include the place quests.
 * `/skylore stats|show|give|read|lectern` checks the lore directly.
-* Client screenshots: set `JAVA_TOOL_OPTIONS=-Dnirncraft.autotest.placelore=<place>`, then run
-  `tools/autotest.ps1 -World <name>`.
+* Client screenshots: the autotest hook `-Dnirncraft.autotest.placelore=<place>` (set on the disposable preview
+  instance; the harness drives it, see `tools/harness/README.md`).
   * It reads each note of the place through the server and screenshots the reading screen, the journal and the map.
-  * The shots are saved as `pl_*.png` in `mod/run/build/autotest-screenshots`.
+  * The shots are saved as `pl_*.png` in the instance's `build/autotest-screenshots`.
 
 ## 6. Coverage (first pass)
 

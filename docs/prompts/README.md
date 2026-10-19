@@ -2,7 +2,10 @@
 
 Every prompt in this folder is a self-contained execution specification for one phase of the **Tamriel Total Parity & Living World Master Plan (`T1`–`T12`)** in [`docs/world/WORLD-PLAN.md`](../world/WORLD-PLAN.md) (Sections 8–10).
 
-Read [`_COMMON.md`](_COMMON.md) before running any phase prompt.
+Read [`_COMMON.md`](_COMMON.md) before running any phase prompt. `T1`–`T12` are done; they were written for the
+Forge 1.20.1 build, so their commands (`qa.ps1`, `gradlew`, Oculus/Complementary shader steps) are historical. Today
+build with `tools/dev/build_263.py` and test with the harness (`tools/harness/README.md`); shaders are the
+InfiniteATLAS pack (`shaderpack/InfiniteATLAS`).
 
 ## Phase Prompts (`T1`–`T12`)
 
@@ -23,8 +26,8 @@ Read [`_COMMON.md`](_COMMON.md) before running any phase prompt.
 
 ## Visual Targets programme (`VT0`–`VT3`, current)
 
-The concept-art-driven pipeline: plan [`../world/VISUAL-TARGETS-PLAN.md`](../world/VISUAL-TARGETS-PLAN.md), operating
-manual [`../world/VISUAL-TARGETS-WORKFLOW.md`](../world/VISUAL-TARGETS-WORKFLOW.md).
+The concept-art-driven pipeline: plan [`../world/VISUAL-TARGETS-PLAN.md`](../world/VISUAL-TARGETS-PLAN.md). The test
+harness (`tools/harness/README.md`) already provides the live-client queue, captures and before/after sheets.
 
 | Phase | Prompt File | Summary |
 | --- | --- | --- |

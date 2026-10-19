@@ -1,10 +1,11 @@
-NirnCraft data contracts for the external native visual integration
+NirnCraft data contracts for the native visual integration (Infinite ATLAS)
 Baseline: Minecraft 26.3 / NeoForge 26.3.0.90 / Java 25
 
-This handoff describes existing data entry points. It does not certify the new
-external lighting/shader/distant-visual mod, enable preserved legacy integrations,
-or transfer ownership of NirnCraft's authoritative gameplay simulation. No new
-cross-mod snapshot facade is implemented by this document.
+These are the data entry points the renderer side consumes: the atlas_core far
+field (native/, docs/ATLAS.md) and the InfiniteATLAS shader pack
+(shaderpack/InfiniteATLAS). The renderer never owns NirnCraft's authoritative
+gameplay simulation. Where a section below says "external", read: the
+rendering side (atlas_core, its Java bridge com.nirncraft.atlas, the pack).
 
 Ownership and threading
 
@@ -182,8 +183,8 @@ renewing it; replacing it at every tick's start causes an indefinite wait. Empty
 or occluded views still require completed main-frame evidence. Readiness uses a
 bounded deadline and stops immediately when its actual conditions complete.
 
-The preserved DH probe deliberately says "sampled data ready; GPU meshes
-unverified". It cannot establish an external renderer's displayed coverage.
+The old Distant Horizons probe (DH is no longer in the pack) deliberately said
+"sampled data ready; GPU meshes unverified". It cannot establish an external renderer's displayed coverage.
 Require separate CPU-data, GPU-upload and completed-main-view revisions together
 with exact pose, requested coverage and level/session/resource identity. Near
 Sodium readiness, far-data presence and a finished GPU frame are separate claims.
@@ -194,8 +195,8 @@ Plan route/candidates, inspect loaded geometry, adjust obstructed views, then ca
 the accepted pose with map/generation identity. Reuse it with quick clearance and
 readiness checks until those inputs change. Keep atomic PNG/receipt publication
 and real readiness flags; a plausible image cannot override a failing witness.
-See VISUAL-TEST-CAMERAS.md and NATIVE-26.3-RENDER-HANDOFF.md for the existing frame
-and pass ownership. External lighting/shader/distant-renderer ownership remains
+The harness plans these cameras offline (tools/harness/README.md, "Cameras");
+NATIVE-26.3-RENDER-HANDOFF.md covers frame and pass ownership. Rendering stays
 separate from NirnCraft's authoritative world generation and gameplay.
 
 Network compatibility
@@ -232,13 +233,7 @@ snapshots must be populated after that reset; a write at the end of extraction
 or finalize still disappears. The existing core player modifiers are already
 in that supported phase. LevelRenderState sky/cloud snapshots are separate.
 
-An isolated native-compiled eight-file correction is documented at
-dist/code-review/neoforge-migration/npc-render-fix/review.txt. It is UNAPPLIED
-to shared source pending coordination with the other UI/rendering owner.
-The complete durable source proposal and hash sidecar are under
-tools/migration/patches/entity-render-state-263.unapplied.patch and .json.
-It preserves public native64x64 mesh builders, inherited clothing overlays,
-custom armor/features/costumes/poses and genuine player cosmetics/capes.
-No new mixins, access transformers or copied rendering implementation are needed.
-Full build, exact dispatcher/snapshot assertions and real NPC/creature/player
-captures remain required after integration.
+The NPC/humanoid correction for both rules is applied in society/client and
+creatures/client (non-Avatar render states, snapshots written from a
+RegisterRenderStateModifiersEvent callback). Keep new entity renderers on that
+pattern; no mixins, access transformers or copied rendering code are needed.

@@ -76,11 +76,9 @@ reference.
 * `docs/exploration/density.csv`;
 * the region table in section 5.
 
-![Walk to the nearest point of interest](exploration/heatmap_notable.png)
-
-![Before the minor sites](exploration/heatmap_notable_before.png)
-
-![Walk to the nearest major site](exploration/heatmap_major.png)
+The heatmaps (walk to the nearest point of interest, the same before the minor sites, and walk to the nearest major
+site: `docs/exploration/heatmap_notable.png`, `heatmap_notable_before.png`, `heatmap_major.png`) are regenerated
+locally by `render` and are not committed.
 
 ## 3. Minor sites
 

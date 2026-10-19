@@ -9,7 +9,7 @@ Currently:
 2. **75 `cityplans/*.json` files (`32` in Cyrodiil including all 8 county capitals `anvil`, `bravil`, `bruma`, `cheydinhal`, `chorrol`, `kvatch`, `leyawiin`, `skingrad` + `24` towns/villages; `41` in Morrowind including `balmora`, `aldruhn`, `sadrith_mora`, `ebonheart`, `caldera`, `suran`, `gnisis`, `pelagiad`, `seyda_neen`, `tel_fyr`, `tel_mora`, etc.) have `"base": "none"`, `0` `"streets"`, `0` `"nets"`, and `0` `"queue"`.** When `x.sk.streets` is empty in `Zoning.adopt()` (`Zoning.java:1744-1910`), `haveStreet` is `false`, so `reserved()`, `lining()`, `ensureTrades()`, and `fillGaps()` place **zero infill houses and zero missing trades**!
 3. **`Zoning.harbor()` and `Zoning.outskirts()` are only called in `Zoning.generic()`, never in `Zoning.adopt()`**, so coastal `cityplans` cities without pinned docks lack harbors/warehouses/fisheries.
 
-`T2` brings every settlement across Cyrodiil, Morrowind, and all other provinces to the full street network, district density, harbor, and building count bar of Skyrim's overhauled settlements (`R4a`), and verifies peninsula/coastline settlement coverage against `.reference/` and `F:\daggerfall-js-source-main\daggerfall-js-source-main`.
+`T2` brings every settlement across Cyrodiil, Morrowind, and all other provinces to the full street network, district density, harbor, and building count bar of Skyrim's overhauled settlements (`R4a`), and verifies peninsula/coastline settlement coverage against `.reference/` and the local DFO reimplementation checkout (outside the repository).
 
 ## 2. Write Set
 
@@ -31,7 +31,7 @@ Currently:
    * If `x.sk.streets.size() < 2` after `pins()` and `Nets.apply()`, automatically synthesize a cultural street network (`Nets` spine/cross/loop linking gates, main plaza, keep/hall, and pinned buildings) before running `reserved(x)`, `lining(x)`, `ensureTrades(x)`, and `fillGaps(x)`.
    * Call `Zoning.harbor(x)` (when coastal and no dock is pinned yet) and `Zoning.outskirts(x)` inside `Zoning.adopt()` so `cityplans` settlements receive coastal harbors and cultural agricultural outskirts.
 4. **Peninsula & Coastline Settlement Audit (`places/*.json`):**
-   * Cross-check peninsulas, capes, and bays across High Rock, Hammerfell, Cyrodiil, Morrowind, Black Marsh, Elsweyr, Valenwood, and Summerset against `.reference/` and `F:\daggerfall-js-source-main\daggerfall-js-source-main`, ensuring key coastal/peninsula travel corridors have well-spaced port towns and villages.
+   * Cross-check peninsulas, capes, and bays across High Rock, Hammerfell, Cyrodiil, Morrowind, Black Marsh, Elsweyr, Valenwood, and Summerset against `.reference/` and the local DFO reimplementation checkout (outside the repository), ensuring key coastal/peninsula travel corridors have well-spaced port towns and villages.
 
 ## 4. Verification Gates
 

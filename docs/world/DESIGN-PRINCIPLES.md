@@ -276,7 +276,7 @@ copying game assets or text.
 | OpenMW (GPLv3; needs Morrowind data) | Morrowind engine | Morrowind's world and faction structure as facts | REF, LOCAL (`.reference/morrowind_ref`) | Vvardenfell places (done), Great House structure (P-J1) |
 | TES3MP (GPLv3) | Morrowind multiplayer | Server-owned clock, rest and fast-travel sync, shared journal | REF | Already our model (server-authoritative, sleep vote); MS4 and MS5 run on the server clock |
 | Ghidra, Steamless, .pdb symbol recovery | Executable reverse engineering, DRM unwrapping | Nothing we need; legal risk | NO | None |
-| CommonLibSSE-NG, Address Library, SKSE | Skyrim runtime plugin frameworks | Not relevant to a Forge mod | NO | None |
+| CommonLibSSE-NG, Address Library, SKSE | Skyrim runtime plugin frameworks | Not relevant to a NeoForge mod | NO | None |
 | xEdit (SSEEdit, TES4Edit, TES3 editors) | Record browser for .esm/.esp | Extracting facts from the owner's own install: marker positions, counts of quests per hold, encounter-zone levels, faction lists | LOCAL | Fact tables in `.reference/` (as `markers.json` was); counts that calibrate section 4 |
 | TESAnnwyn | Heightmap import/export (16-bit) | Reading the owner's Skyrim heights to `.reference/` | LOCAL | Already done for Skyrim (`heightmap_tamriel_ref.png`, never committed or sampled into shipped data) |
 | World Machine, L3DT, GeoControl | Commercial terrain generators | Not needed; we have `hydrology.py`, erosion and the plan-first bake | NO | The principle only: erode, then place |
@@ -292,7 +292,7 @@ copying game assets or text.
 
 ### 2.3 What the Daggerfall bible teaches (how a whole TES world's systems fit together)
 
-The bible (`F:\daggerfall-js-source-main\...\bible`) is a port's engineering record. Its world and systems chapters
+The bible (the `bible` folder of the local DFO reimplementation checkout, outside the repository) is a port's engineering record. Its world and systems chapters
 show which systems a whole-province world needs and how they hand off to each other:
 
 * **Location instances by region at volume.** The World of Daggerfall mod data lists about 228,000 wilderness

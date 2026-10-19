@@ -386,8 +386,8 @@ hostiles and wildlife have separate budgets.
 
 ## Multiplayer
 
-* **Hosting with Essential.** Essential is in the pack: open your world, then use the Essential menu to host it and
-  invite friends. No port forwarding is needed.
+* **Hosting.** Use Minecraft's **Open to LAN** for players on the same network, or a dedicated server and
+  **Multiplayer** for everyone else.
 * **Dedicated servers** work the same way. See [INSTALL.md](INSTALL.md).
 * **Shared play:**
   * Parties share quests, rewards, map markers and fast travel.
@@ -850,7 +850,7 @@ and the fire entries of `tools/music/sound_catalog.py` / `synth_ambience.py` / `
   clients near them draw as a far fire (animated flame sprites, additive glow, rising smoke column) out to
   `farFire.distance` blocks (default 640), independent of particle culling. Saved per dimension, synced within
   `fire.syncRadius` (1100). The renderer (`FarFireRenderer`) draws in `RenderLevelStageEvent.AFTER_PARTICLES` through
-  vanilla's eyes / entity-translucent shaders (so Oculus/Iris map them), restores all state, and is switched off with
+  vanilla's eyes / entity-translucent shaders (so Iris maps them), restores all state, and is switched off with
   `farFire.farFire = false` (`nirncraft-fire-client.toml`).
 * **API for other systems**
   * Server: `FireSites.add(level, pos, intensity, height)` / `add(level, pos, intensity, height, smoke, lifeTicks)` (a
@@ -891,11 +891,11 @@ and the fire entries of `tools/music/sound_catalog.py` / `synth_ambience.py` / `
 
 ## Performance
 
-* **Distant Horizons** renders terrain to the horizon. The pack starts it at 128 chunks with the Low Impact CPU
-  preset and its auto-updater off.
-* **Rendering and memory:** Embeddium, Oculus, ImmediatelyFast, Entity Culling, Dynamic FPS, ModernFix, FerriteCore,
-  Saturn and Memory Leak Fix.
-* **Server:** Canary (a Lithium port), Krypton, Clumps and Structure Layout Optimizer. Spark is included for
-  profiling.
+* **Infinite ATLAS** renders terrain, clouds and far actors to the horizon on a curved planet (`atlas_core`, see
+  [ATLAS.md](ATLAS.md)); an adaptive quality controller keeps the frame inside a GPU budget
+  ([ADAPTIVE-QUALITY.md](ADAPTIVE-QUALITY.md)).
+* **Rendering and memory:** Sodium, Iris (with the InfiniteATLAS pack), ImmediatelyFast, Entity Culling, Dynamic FPS
+  and FerriteCore.
+* **Server:** Lithium, Clumps and Structure Layout Optimizer. Spark is included for profiling.
 * **NirnCraft's own systems** run on per-tick budgets: road paving, travellers, ambience and particles. The map
-  sampler worldgen uses is allocation-free and thread-safe, so Distant Horizons can generate far terrain in parallel.
+  sampler worldgen uses is allocation-free and thread-safe, so terrain can be sampled in parallel.

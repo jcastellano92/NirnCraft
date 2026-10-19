@@ -1,7 +1,7 @@
 # Plan-first world generation (roads, rivers, sites, terrain, scatter)
 
 Status: design, approved for execution in phases P1-P6. Written for a Sonnet session to execute; read section 0 of
-`docs/FINISH-PLAN.md` and `docs/AGENT-RULES.md` first.
+`docs/AGENT-RULES.md` first (the original FINISH-PLAN it cites is retired; its rules live in AGENT-RULES).
 
 ## 1. Why the current approach keeps breaking
 
@@ -93,8 +93,8 @@ whiterun-rorikstead, whiterun-dragon_bridge and one river crossing; plus `reach_
 * New worlds only: every phase changes generation. Keep old-save upgrade paths minimal (Paver for P3).
 * Performance budget: the road index lookup must stay well under 1 µs per column; segment buckets, no per-column
   allocation. All baked data immutable and thread-safe.
-* Distant Horizons generates through our chunk generator, so plan-first terrain shows correctly in its LODs too (a
-  bonus: post-hoc paving never reached DH LODs).
+* Plan-first terrain is what the generator produces everywhere, so the far field (Infinite ATLAS, fed from the same
+  Java heights and chunks) shows the roads too; post-hoc paving never reached distant views.
 
 ## 5. Baseline (old pipeline, measured on saved blocks)
 
@@ -211,7 +211,7 @@ generated), `tools/qa/p2_corridors.py` (corridor tiles for headless generation, 
   `overhang` channel is multiplied by `1 - 0.9 * plan weight`. Without both changes 0.4% of bed columns were off by 3 or more (pits in the bed); with them 0.07%.
 * **Cost/safety.** `PlanGround.bed`/`pad` are allocation-free (thread-local scratch `Bed`, own 32-block edge index:
   116k buckets, 2.06M edge entries, built in ~120 ms on the plan loader thread after the plan), deterministic, and
-  independent of the seed (they only read the plan and the macro sample). Distant Horizons uses the same generator.
+  independent of the seed (they only read the plan and the macro sample). The far field reads the same plan.
 
 **Numbers** (`NIRNCRAFT_AUTORUN=roadterrain:30000`, Nirn seed; 30,000 columns: a third uniform over Tamriel, a third within 40
 blocks of a road vertex, a third around pads; the height is `getBaseHeight` through the real noise router, old terrain =
@@ -279,7 +279,7 @@ changed: `RoadCells`, `Paver`, `RoadNetwork`, `RoadsData`, `Road`, `RoadsConfig`
 `PlacementMask` (+`structureGrid`, `useMapRoadChannel`), `scatter/RoadProbe`. Nothing the bake hashes changed.
 
 **Painting.** Per column of the chunk being decorated, no neighbour read, no order dependence, idempotent, written only
-inside the chunk (so Distant Horizons, which runs the same generator, shows the roads): `RoadPlan.at(x+.5, z+.5)` gives
+inside the chunk (so the far field, fed from the same generator, shows the roads): `RoadPlan.at(x+.5, z+.5)` gives
 distance, class half width, span; the surface height is `floor(profile at the column corner + 0.002)` (the height the
 terrain was shaped to in P2, centre height on steep stretches). Inside the half width: refill below (dirt then stone, until it
 rests on something solid: carver pits, caves, water), clear 4 blocks above (leaves, logs, plants, snow, props), the culture's
