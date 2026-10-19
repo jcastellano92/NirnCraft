@@ -16,6 +16,16 @@
 # Optional: spirv-val (spirv-tools / SPIRV-Tools) validates the exact-height kernel's SPIR-V at build time.
 # Shipping build (loads on glibc 2.28+: SteamOS, Bazzite, Fedora, Debian 10+): build against a glibc 2.28 sysroot, e.g.
 #   conda-forge's gcc_linux-64 (sysroot_linux-64 2.28): CXX=x86_64-conda-linux-gnu-g++ native/build_linux.sh
+#   No sudo needed (this is how the packed .so is built, also from Windows in WSL, Ubuntu 24.04; docs/PLATFORMS.md):
+#     curl -fsSL -o mm.tar.bz2 https://micro.mamba.pm/api/micromamba/linux-64/latest   # a stock WSL has no bzip2:
+#     python3 -c 'import tarfile; tarfile.open("mm.tar.bz2").extract("bin/micromamba", ".")'  # python unpacks it
+#     bin/micromamba create -y -r ~/.atlas-tc/root -p ~/.atlas-tc/env -c conda-forge --override-channels \
+#       gxx_linux-64=13 sysroot_linux-64=2.28 cmake ninja spirv-tools python=3.12 numpy pillow
+#     PATH=~/.atlas-tc/env/bin:$PATH CXX=x86_64-conda-linux-gnu-g++ BUILD_DIR=~/atlas-build native/build_linux.sh
+#   Put the env's bin on PATH rather than activating it: activation adds CXXFLAGS / LDFLAGS (-march, -isystem and
+#   -rpath into the env) that do not belong in the shipped library. The compiler's own specs add an rpath into the
+#   env too; the script links the library with a copy of them without it. python3 + numpy + pillow export the test
+#   rasters. BUILD_DIR in the Linux home builds several times faster than on a /mnt/<drive> path.
 #
 # Steam Deck (SteamOS is read-only, no compiler): build in a distrobox / toolbox container (Bazzite ships both;
 #   `distrobox create -i fedora:41 atlas && distrobox enter atlas`, then `sudo dnf install gcc-c++ cmake ninja-build
@@ -47,7 +57,7 @@ for a in "$@"; do
     --validate) VALIDATE=1 ;;
     --clean) CLEAN=1 ;;
     --allow-skip) ALLOW_SKIP=1 ;;
-    -h|--help) sed -n '2,29p' "$0"; exit 0 ;;
+    -h|--help) sed -n '2,39p' "$0"; exit 0 ;;
     *) echo "unknown option $a" >&2; exit 2 ;;
   esac
 done
@@ -92,11 +102,23 @@ export VULKAN_HEADERS="${VULKAN_HEADERS:-}"
 # ---- configure + build ----------------------------------------------------------------------------------------
 GEN=()
 command -v ninja >/dev/null 2>&1 && GEN=(-G Ninja)
+# conda-forge's gcc specs add -rpath <env>/lib to every link (%{!static:-rpath ...}): the shipped library needs no
+# runpath (it only needs glibc) and must not carry the builder's paths, so it links with a copy of the specs without
+# that clause (the test programs keep it: they find the env's libstdc++ through it)
+LINK=()
+SPECS="$("${CXX:-c++}" -print-file-name=specs 2>/dev/null || true)"
+if [ -f "$SPECS" ] && grep -q -- '-rpath' "$SPECS"; then
+  sed 's/ *%{!static:-rpath [^}]*}//' "$SPECS" > "$DEPS/gcc-norpath.specs"
+  LINK=(-DCMAKE_SHARED_LINKER_FLAGS="-specs=$DEPS/gcc-norpath.specs")
+fi
 if [ ! -f "$BUILD/CMakeCache.txt" ]; then
-  cmake -S "$HERE" -B "$BUILD" "${GEN[@]}" -DCMAKE_BUILD_TYPE="$CONFIG"
+  cmake -S "$HERE" -B "$BUILD" "${GEN[@]}" -DCMAKE_BUILD_TYPE="$CONFIG" "${LINK[@]}"
 fi
 cmake --build "$BUILD" --parallel
 echo "built: $BUILD/libatlas_core.so"
+if command -v objdump >/dev/null 2>&1 && objdump -p "$BUILD/libatlas_core.so" | grep -qE '^ *(RPATH|RUNPATH) '; then
+  echo "WARNING: libatlas_core.so has an RPATH/RUNPATH (the toolchain's): do not ship it" >&2
+fi
 # what the library needs from the system (the mod ships it to every distro: keep this list short)
 if command -v objdump >/dev/null 2>&1; then
   echo "NEEDED: $(objdump -p "$BUILD/libatlas_core.so" | awk '/NEEDED/ {printf "%s ", $2}')"

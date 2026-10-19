@@ -13,7 +13,7 @@ pack, the near field once it is ours, and the game systems behind them.
 |---|---|---|
 | kernels written once in Slang, compiled to SPIR-V (Vulkan) and to C++ (CPU) | native/shaders, native/CMakeLists.txt | the height kernel, the far field, clouds, sun map; bit-exact CPU/Vulkan checks for the height kernel |
 | CPU backend of atlas_core (no GPU, or a Vulkan failure) | native/src (AtlasBackend CPU) | works; not a tested deployment path |
-| natives packed per platform in the jar | mod/src/main/resources/natives/{windows-x86_64, linux-x86_64} | Linux is stale (ABI before 0.13: no Linux toolchain set up yet) |
+| natives packed per platform in the jar | mod/src/main/resources/natives/{windows-x86_64, linux-x86_64} | both ABI 0.13 (Linux built in WSL, glibc 2.28 floor: Next steps 1); tools/dev/check_natives.py checks them against AtlasNative |
 | one adaptive controller for the pack and the far field | docs/ADAPTIVE-QUALITY.md, render/quality/, atlas/AtlasQuality, shaders/lib/quality.glsl | continuous knobs with measured value per ms, GPU class first guess (HardwareTier, incl. the Deck and Mesa names), calibration behind the loading cover, live probes, tiers 1 / 2 down to the far field off, host load (LAN guests), saved profiles |
 | offline measurement of every knob's visual cost | native/tools/pack_lab_quality.py | the pack's knobs; atlas_lab measures the new representations |
 
@@ -84,8 +84,31 @@ average. The profile is saved per machine and per pack version.
 
 ## Next steps
 
-1. Linux x64 toolchain (WSL for builds, owner OK 2026-10-19; end users run the native library) and an ABI 0.13 .so in the jar; the harness checks the packed natives
-   ABI against the Java side's minimum.
+1. **Done 2026-10-19.** Linux x64 toolchain (WSL for builds, owner OK 2026-10-19; end users run the native library)
+   and an ABI 0.13 .so in the jar; the harness checks the packed natives ABI against the Java side's minimum
+   (tools/dev/check_natives.py; hooking it into the harness is the owner's session's step).
+   * Toolchain, no sudo: WSL Ubuntu 24.04; micromamba with conda-forge `gxx_linux-64` 13.4 + `sysroot_linux-64` 2.28
+     (glibc 2.28 headers and libs), `cmake` 4.4, `ninja` 1.13, `spirv-tools` (spirv-val), `python` 3.12 + `numpy` +
+     `pillow` (the test rasters), in `~/.atlas-tc/env`; Slang 2026.18.3 and Vulkan-Headers 1.3.296 fetched by the
+     script. The distro's Mesa (lavapipe + llvmpipe, EGL) was already installed, so `--software` runs every suite.
+   * Commands (from WSL, the worktree under /mnt/<drive>/...; the full setup is in native/build_linux.sh's header):
+
+         PATH=~/.atlas-tc/env/bin:$PATH CXX=x86_64-conda-linux-gnu-g++ BUILD_DIR=~/atlas-build \
+           taskset -c 0-7 nice -n 15 native/build_linux.sh --clean --software
+         cp ~/atlas-build/libatlas_core.so mod/src/main/resources/natives/linux-x86_64/
+         py -3 -I tools/dev/check_natives.py      # on Windows: loads the DLL, and the .so through WSL
+
+     (taskset / nice: half the cores at low priority, when the machine is shared.)
+   * Results on lavapipe / llvmpipe: atlas_tests, atlas_height_test (Vulkan vs C++ bit for bit), atlas_gl_test (both
+     contexts, host-copy: lavapipe has no external semaphore fd) and atlas_pack_test all pass (two full runs, the
+     shipped .so from the `--clean` one). In an earlier run under heavy host load, three Vulkan frames on lavapipe
+     exceeded the backend's 5 s fence timeout (FENCE_TIMEOUT_NS: "the GPU hung"), failing the region-seam and sun-map
+     checks; both later runs passed them. A slow software device, not a defect; a real GPU is far inside the limit.
+   * The .so: 47 atlas_* exports = atlas.h's declarations; newest glibc symbol GLIBC_2.27 (expf, powf, log2f), NEEDED
+     only libc / libm / libdl / libpthread / ld-linux; libstdc++ and libgcc static (no GLIBCXX / CXXABI / GCC_
+     references); no RPATH. Fixes the build needed: atlas_lab links Threads (glibc before 2.34 keeps pthread_create in
+     libpthread), and conda's gcc specs add `-rpath <env>/lib` to every link, so the library links with a copy of the
+     specs without it (build_linux.sh).
 2. The new representation's knobs (with the Slang port), measured by atlas_lab like the pack's.
 3. A CPU-backend tier test: the far field on the CPU backend at its lowest tier inside a budget on an 8-core CPU.
 4. arm64 Linux, then macOS (Slang's Metal target, or MoltenVK first as the quicker path).
