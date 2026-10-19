@@ -249,9 +249,9 @@ public final class AtlasEdits {
             BlockState r = c.getBlockState(m.set(x, crownTop, z));
             if (r.isAir() && crownTop > top + 1) r = c.getBlockState(m.set(x, crownTop - 1, z));
             spanTop = crownTop + 1;
-            roof = Block.getId(r);
+            roof = AtlasFarState.farId(r);
             if (trunkTop != NONE) {
-                wall = Block.getId(c.getBlockState(m.set(x, trunkTop, z)));  // the trunk, from the ground
+                wall = AtlasFarState.farId(c.getBlockState(m.set(x, trunkTop, z)));  // the trunk, from the ground
             } else {
                 // a crown over open air: from its lowest leaf in a run down from the top
                 int y = crownTop;
@@ -260,7 +260,7 @@ public final class AtlasEdits {
                 wall = roof;
             }
         }
-        return new Column(top, Block.getId(t), Block.getId(u), water, spanTop, spanBase, wall, roof, 0);
+        return new Column(top, AtlasFarState.farId(t), AtlasFarState.farId(u), water, spanTop, spanBase, wall, roof, 0);
     }
 
     private static void record(int x, int z, Column c) {

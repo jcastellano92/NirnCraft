@@ -104,7 +104,7 @@ public final class AtlasSections {
                         for (int z = 0; z < 16; z++)
                             for (int x = 0; x < 16; x++) {
                                 BlockState s = sec.getBlockState(x, y, z);
-                                int id = kept(s) ? Block.getId(s) : 0;
+                                int id = kept(s) ? AtlasFarState.farId(s) : 0;
                                 Integer k = pal.get(id);
                                 if (k == null) {
                                     k = ids.size();

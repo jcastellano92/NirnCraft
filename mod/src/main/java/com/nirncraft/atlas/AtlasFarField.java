@@ -113,6 +113,7 @@ final class AtlasFarField implements AutoCloseable {
     private volatile boolean updated;
     /** The worker's last pass: still refining tiles or the camera just crossed into a new region (see idle()). */
     private volatile boolean streaming = true;
+    private volatile String streamingWhy = "starting";  // what kept the last pass busy (harness settle diagnostics)
     private volatile long idleSinceMs;
 
     AtlasFarField(AtlasNative.Context ctx, ColumnSource source) throws IOException {
@@ -169,6 +170,11 @@ final class AtlasFarField implements AutoCloseable {
         return haveCamera && updated && !streaming;
     }
 
+    /** Why the far field is not idle: moved, tiles (visible ones pending), edits N, sections N, overlays; "" idle. */
+    public String streamingWhy() {
+        return streaming ? streamingWhy : "";
+    }
+
     /** Milliseconds the far field has been idle (0 while streaming). */
     public long idleMs() {
         return streaming ? 0 : System.currentTimeMillis() - idleSinceMs;
@@ -194,6 +200,8 @@ final class AtlasFarField implements AutoCloseable {
                 }
                 // the server's changes (players building, explosions, water, lights): put the tiles they touch up again
                 java.util.List<Long> edited = AtlasEditsClient.takeDirty();
+                int sectionsApplied = 0;
+                boolean overlayBusy = false;
                 if (!edited.isEmpty()) {
                     source.applyEdits(ctx, edited);
                     Overlay ovE = overlay();
@@ -201,7 +209,10 @@ final class AtlasFarField implements AutoCloseable {
                 }
                 // the server's real sections (the finest levels' real blocks), within a share of the pass
                 Overlay ovS = overlay();
-                if (ovS != null) overlaid |= ovS.applySections(ctx, System.nanoTime() + 40_000_000L) > 0;
+                if (ovS != null) {
+                    sectionsApplied = ovS.applySections(ctx, System.nanoTime() + 40_000_000L);
+                    overlaid |= sectionsApplied > 0;
+                }
                 // the ground of the new place on screen now: the overlays (buildings, trees) can take a while, and
                 // the old window stayed on screen until they finished (a teleport showed stale far ground)
                 ctx.update(x, y, z, 0);
@@ -211,8 +222,10 @@ final class AtlasFarField implements AutoCloseable {
                     for (int lod = 0; lod < lods; lod++) {
                         int span = 256 << lod;
                         int cx = Math.floorDiv((int) Math.floor(x), span), cz = Math.floorDiv((int) Math.floor(z), span);
-                        overlaid |= ov.cover(ctx, lod, (cx - WINDOW) * span, (cz - WINDOW) * span, (cx + WINDOW + 1) * span,
+                        boolean b = ov.cover(ctx, lod, (cx - WINDOW) * span, (cz - WINDOW) * span, (cx + WINDOW + 1) * span,
                                 (cz + WINDOW + 1) * span, deadline);
+                        overlayBusy |= b;
+                        overlaid |= b;
                     }
                 }
                 ctx.update(x, y, z, 0);  // builds what changed and stages it for the next frame
@@ -223,7 +236,17 @@ final class AtlasFarField implements AutoCloseable {
                 lastZ = z;
                 boolean was = streaming;
                 // only what the camera sees counts, and buildings / trees still going up (captures wait for them)
-                streaming = moved || source.visiblePending() || overlaid;
+                boolean tilesPending = source.visiblePending();
+                streaming = moved || tilesPending || overlaid;
+                if (streaming) {
+                    StringBuilder why = new StringBuilder();
+                    if (moved) why.append("moved ");
+                    if (tilesPending) why.append("tiles ");
+                    if (!edited.isEmpty()) why.append("edits ").append(edited.size()).append(' ');
+                    if (sectionsApplied > 0) why.append("sections ").append(sectionsApplied).append(' ');
+                    if (overlayBusy) why.append("overlays ");
+                    streamingWhy = why.toString().trim();
+                }
                 if (was && !streaming) idleSinceMs = System.currentTimeMillis();
                 Thread.sleep((moved || pending || overlaid ? 5 : 100) + restMs);
             } catch (InterruptedException e) {

@@ -171,6 +171,12 @@ public final class AtlasClient {
         return f == null || f.idle();
     }
 
+    /** What keeps the far field streaming ("" when idle or absent): the harness prints it when a settle times out. */
+    public static String farFieldWhy() {
+        AtlasFarField f = farField;
+        return f == null ? "" : f.streamingWhy();
+    }
+
     public static boolean active() {
         return ctx != null && !failed;
     }

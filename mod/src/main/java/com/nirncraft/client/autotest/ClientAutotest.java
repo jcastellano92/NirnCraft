@@ -509,7 +509,8 @@ public final class ClientAutotest {
                 liveSettleUntil = 0;
                 liveSettlePartial++;
                 NirnCraft.LOGGER.warn("Autotest live: render not settled at the deadline, continuing (partial): {}, far "
-                        + "field {}, structural {}%, exposure drift {}", READINESS.visibleDetail, far ? "idle" : "streaming",
+                        + "field {}, structural {}%, exposure drift {}", READINESS.visibleDetail,
+                        far ? "idle" : "streaming (" + com.nirncraft.atlas.AtlasClient.farFieldWhy() + ")",
                         String.format(java.util.Locale.ROOT, "%.1f", visualDiff),
                         String.format(java.util.Locale.ROOT, "%.2f", visualDrift));
             }
