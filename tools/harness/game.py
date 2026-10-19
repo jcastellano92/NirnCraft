@@ -559,8 +559,10 @@ DEFAULT_TIMEOUT = 240  # seconds per test; overrunning is a failure, not a hang
 
 
 def tolerant(lines):
-    """A scene's cleanup as best-effort verbs (after a failure, nothing it undoes may be there to undo)."""
-    return ["try " + l[8:] if l.startswith("command ") else l for l in lines]
+    """A scene's cleanup as best-effort verbs (after a failure, nothing it undoes may be there to undo). Exports
+    (`atlaslab ...`) are left out: after a failed capture they are pointless, and a long one (a 1 km view generating its
+    chunks) kept the client busy so the next scene failed on a busy queue."""
+    return ["try " + l[8:] if l.startswith("command ") else l for l in lines if not l.startswith("atlaslab ")]
 
 
 def recover(scene=None):

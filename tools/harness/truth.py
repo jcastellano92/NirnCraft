@@ -18,10 +18,10 @@ EXPORT_DIR = "@game/nirncraft-atlaslab/"
 
 # slug, title, pose, time, tags, box (radius, down, up), underground
 SUBJECTS = [
-    ("whiterun-day", "Whiterun from its gate road at noon: walls, plains, far mountains",
-     {"place": "whiterun", "height": 3, "yaw": 0, "pitch": 6}, 6000, ["place:whiterun", "town:whiterun"], (48, 12, 40), False),
+    ("whiterun-day", "Whiterun from the plains 120 m south at noon: walls, the keep, far mountains",
+     {"place": "whiterun", "height": 4, "yaw": 180, "pitch": 3, "offset": [0, 120]}, 6000, ["place:whiterun", "town:whiterun"], (48, 12, 40), False),
     ("whiterun-night", "Whiterun at night: lanterns, windows, the dark plains beyond",
-     {"place": "whiterun", "height": 3, "yaw": 0, "pitch": 6}, 18000, ["place:whiterun", "town:whiterun", "time:night",
+     {"place": "whiterun", "height": 4, "yaw": 180, "pitch": 3, "offset": [0, 120]}, 18000, ["place:whiterun", "town:whiterun", "time:night",
                                                                        "feature:lights"], (48, 12, 40), False),
     ("falkreath-dusk", "Falkreath at dusk: long shadows through the pines",
      {"place": "falkreath", "height": 3, "yaw": 0, "pitch": 10}, 12500, ["place:falkreath", "time:dusk",

@@ -182,5 +182,13 @@ with tempfile.TemporaryDirectory() as td:
     _os.utime(built, (_time.time() + 100, _time.time() + 100))
     expect(not _game.native_stale(built, [src]), "a core built after its sources is current")
 
+# --- a failed scene's recovery never runs its exports (a long one blocked the next scene) --------------------------
+cl = _game.tolerant(["command kill @e", "atlaslab view x-view 1024 light", "fog-off off"])
+expect(cl == ["try kill @e", "fog-off off"], "recovery keeps the cleanup's undo steps and drops its exports")
+
+lines = catalog.pose_actions({"id": "d", "pose": {"dungeon": "bleak_falls_barrow", "view": "mouth"}, "tags": []})
+expect(any("execute as @p" in l and "nirncraft-dungeon-qa view" in l for l in lines),
+       "a dungeon pose runs its view command as the player (it needs one to move)")
+
 print(f"problems {len(problems)}")
 sys.exit(1 if problems else 0)

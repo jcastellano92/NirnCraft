@@ -744,7 +744,9 @@ def pose_actions(s, plan=None, candidate=0):
                   f"try fill {x - 7} {y} {z - 7} {x + 7} {y + 9} {z + 7} minecraft:black_concrete hollow",
                   f"try fill {x - 6} {y + 1} {z - 6} {x + 6} {y + 8} {z + 6} minecraft:air"] +                  [f"try setblock {x + dx} {y + 7} {z + dz} minecraft:light[level=12]" for dx in (-5, 5) for dz in (-5, 5)]
     elif "dungeon" in p:
-        lines.append(f"command nirncraft-dungeon-qa view {p['dungeon']} {p.get('view', 'entrance')}")
+        # as the player: the view command moves the player (src.getPlayer()); from the server's own source it
+        # returned zero ("not a player") and every dungeon-pose scene failed
+        lines.append(f"command execute as @p at @s run nirncraft-dungeon-qa view {p['dungeon']} {p.get('view', 'entrance')}")
         lines.append("try effect clear @p minecraft:night_vision")  # the view adds night vision; judge real light
     elif "realm" in p:
         lines.append(f"command nirncraft-realm go {p['realm']}")

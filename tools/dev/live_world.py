@@ -234,7 +234,18 @@ def _live_actions(lines, timeout=180, cancel=False):
     if not c.get("fresh"):
         raise RuntimeError("Client control heartbeat is absent/stale; use status and wait for the world")
     if not cancel and any(c.get(k, 0) for k in ("queued", "waitTicks", "burstFrames", "settling", "commandPending")):
-        raise RuntimeError("QA control queue is busy; wait for it to finish")
+        # still finishing an earlier batch (a cleanup, a long export): wait while it makes progress, fail only when it
+        # stalls or runs past the budget (failing at once cascaded one scene's failure into the next)
+        watch, start = ProgressWatch(time.monotonic()), time.monotonic()
+        while True:
+            busy = any(c.get(k, 0) for k in ("queued", "waitTicks", "burstFrames", "settling", "commandPending"))
+            if not busy:
+                break
+            if watch.stalled_for(c.get("progress"), time.monotonic()) > STALL_S or time.monotonic() - start > min(timeout, 900):
+                raise RuntimeError(f"QA control queue is busy (on {c.get('lastAction')!r}, progress {c.get('progress')}); "
+                                   "wait for it to finish")
+            time.sleep(1.0)
+            c = read_json(GAME / "nirncraft-live-status.json") or {}
     atomic(GAME / "nirncraft-live.txt", ("\n".join(lines) + "\n").encode())
     stamp = (GAME / "nirncraft-live.txt").stat().st_mtime_ns // 1_000_000
     deadline = time.monotonic() + timeout
