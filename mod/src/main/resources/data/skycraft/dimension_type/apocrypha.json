@@ -30,7 +30,20 @@
     "minecraft:visual/default_dripstone_particle": {
       "type": "minecraft:dripping_dripstone_water"
     },
-    "minecraft:gameplay/nether_portal_spawns_piglin": false
+    "minecraft:gameplay/nether_portal_spawns_piglin": false,
+    "minecraft:visual/ambient_light_color": "#4f3d30",
+    "minecraft:audio/background_music": {
+      "creative": {
+        "max_delay": 24000,
+        "min_delay": 12000,
+        "sound": "minecraft:music.creative"
+      },
+      "default": {
+        "max_delay": 24000,
+        "min_delay": 12000,
+        "sound": "minecraft:music.game"
+      }
+    }
   },
   "has_ender_dragon_fight": false,
   "default_clock": "skycraft:fixed/apocrypha",

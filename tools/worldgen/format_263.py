@@ -205,9 +205,46 @@ def noise_settings(value, path):
     return result, extra
 
 
+def legacy_ambient_light_color(ambient, fixed_time=None):
+    """26.3's lightmap shader no longer reads a dimension's ambient_light: its floor is visual/ambient_light_color.
+
+    1.20.1 lifted every lightmap cell with ambient_light (LightTexture: brightness = lerp(ambient, curve, 1)); this is
+    that old cell at sky and block light 0 before gamma (block flicker 1.5, the sky term at the fixed time, night when
+    the time runs, then the old 4 % pull towards 0.75). Mojang's own nether (ambient 0.1) became #302821; this gives
+    #2f241d for it. An ambient of 0 keeps vanilla's overworld floor, #0a0a0a.
+    """
+    if not ambient:
+        return "#0a0a0a"
+    t = 18000 if fixed_time is None else fixed_time
+    d = (t / 24000.0 - 0.25) % 1.0
+    tod = (d * 2 + (0.5 - math.cos(d * math.pi) / 2)) / 3
+    g = 1 - (math.cos(tod * 2 * math.pi) * 2 + 0.2)
+    sky = (1 - min(max(g, 0.0), 1.0)) * 0.8 + 0.2
+    f9 = ambient * 1.5
+    block = (f9, f9 * ((f9 * 0.6 + 0.4) * 0.6 + 0.4), f9 * (f9 * f9 * 0.6 + 0.4))
+    sky_vec = [c + (1 - c) * 0.35 for c in (sky, sky, 1.0)]
+    f8 = ambient * (sky * 0.95 + 0.05)
+    rgb = [(b + s * f8) * 0.96 + 0.03 for b, s in zip(block, sky_vec)]
+    return "#%02x%02x%02x" % tuple(round(min(1.0, c) * 255) for c in rgb)
+
+
+# Musics.GAME / CREATIVE / END: 1.20.1 picked them for biomes without music (the only kind Skycraft has)
+_MUSIC_GAME = {"max_delay": 24000, "min_delay": 12000, "sound": "minecraft:music.game"}
+_MUSIC_CREATIVE = {"max_delay": 24000, "min_delay": 12000, "sound": "minecraft:music.creative"}
+_MUSIC_END = {"max_delay": 24000, "min_delay": 6000, "replace_current_music": True, "sound": "minecraft:music.end"}
+
+
 def dimension_type(value, path):
     result = copy.deepcopy(value)
     attributes = result.setdefault("attributes", {})
+    attributes.setdefault("minecraft:visual/ambient_light_color",
+                          legacy_ambient_light_color(result.get("ambient_light", 0.0), result.get("fixed_time")))
+    if path.stem == "the_end":
+        attributes.setdefault("minecraft:audio/background_music", {"default": dict(_MUSIC_END)})
+    elif path.stem == "the_nether":
+        attributes.setdefault("minecraft:audio/background_music", {"default": dict(_MUSIC_GAME)})
+    else:
+        attributes.setdefault("minecraft:audio/background_music", {"creative": dict(_MUSIC_CREATIVE), "default": dict(_MUSIC_GAME)})
     natural = result.get("natural", attributes.get("minecraft:gameplay/nether_portal_spawns_piglin", path.stem == "overworld"))
     hot = result.get("ultrawarm", attributes.get("minecraft:gameplay/water_evaporates", False))
     hot_attributes = {

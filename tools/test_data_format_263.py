@@ -229,6 +229,10 @@ class NativeDataMigration(unittest.TestCase):
             self.assertEqual(beds["can_sleep"], "when_dark" if old["bed_works"] and old["natural"] else "never")
             self.assertEqual(beds["can_set_spawn"], "always" if old["bed_works"] and old["natural"] else "never")
             self.assertEqual(beds.get("destroy_on_use", False), not old["bed_works"])
+            # 26.3's lightmap ignores ambient_light: its old lift becomes the ambient light colour
+            ambient = attributes["minecraft:visual/ambient_light_color"]
+            self.assertEqual(ambient == "#0a0a0a", not old["ambient_light"], identifier)
+            self.assertIn("default", attributes["minecraft:audio/background_music"])
             self.assertEqual(world.dimension_type(converted, Path(identifier.split(":", 1)[1] + ".json")), converted)
 
     def test_actual_generator_writers_use_native_boundary(self):
