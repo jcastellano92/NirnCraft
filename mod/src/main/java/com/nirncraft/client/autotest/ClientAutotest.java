@@ -743,7 +743,8 @@ public final class ClientAutotest {
                 com.nirncraft.atlas.AtlasEdits.why = action.substring(16).trim().equals("on");
             } else if (action.startsWith("atlaslab view ")) {  // the real blocks in view to a distance: waits until written
                 String[] va = action.substring(14).trim().split(" +");
-                liveCommand = com.nirncraft.atlas.AtlasLabExport.view(va[0], Integer.parseInt(va[1])).thenApply(msg -> {
+                boolean light = va.length > 2 && va[2].equals("light");  // ALS2: with light, variants, column tints
+                liveCommand = com.nirncraft.atlas.AtlasLabExport.view(va[0], Integer.parseInt(va[1]), light).thenApply(msg -> {
                     NirnCraft.LOGGER.info(msg);
                     return msg.contains(" sections in ") ? 1 : 0;
                 });

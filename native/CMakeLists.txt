@@ -172,6 +172,11 @@ else()
   set_source_files_properties("${GEN}/atlas_lod_cpu.cpp" PROPERTIES COMPILE_OPTIONS "-ffp-contract=off;-fno-fast-math;-w")
 endif()
 
+# the exact reference (docs/ATLAS-LOD.md, ground truth): Minecraft's own chunk mesh traced offline (/nirncraft-atlaslab quads)
+add_executable(atlas_truth tools/atlas_truth.cpp)
+target_include_directories(atlas_truth PRIVATE src)
+target_link_libraries(atlas_truth PRIVATE Threads::Threads)
+
 add_executable(atlas_tests tests/test_main.cpp src/svdag.cpp)
 target_include_directories(atlas_tests PRIVATE src include)
 target_link_libraries(atlas_tests PRIVATE atlas_core Threads::Threads)

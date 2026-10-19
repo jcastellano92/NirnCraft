@@ -1,0 +1,76 @@
+{
+  "suite": "lab",
+  "description": "Exact ground truth (atlas_truth): Minecraft's own chunk mesh traced offline from the atlaslab quads export, in a live capture's camera",
+  "defaults": {
+    "tier": "lab",
+    "group": "lab",
+    "variants": [
+      "shaders"
+    ]
+  },
+  "scenes": [
+    {
+      "id": "atlastruth-falkreath-near",
+      "title": "Exact ground truth up close: Minecraft's vanilla view of Falkreath vs its chunk mesh traced offline",
+      "tags": [
+        "feature:farfield",
+        "suite:atlaslab",
+        "place:falkreath"
+      ],
+      "tier": "lab",
+      "lab": {
+        "tool": "atlas_truth",
+        "quads": "@game/nirncraft-atlaslab/quads.bin",
+        "sprites": "@game/nirncraft-atlaslab/sprites.bin",
+        "volume": "@game/nirncraft-atlaslab/falkreath-wide.alv2"
+      },
+      "camera_from": {
+        "scene": "atlaslab-export",
+        "variant": "vanilla"
+      },
+      "after": [
+        "atlaslab-export"
+      ],
+      "wait": 0,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "native/tools/atlas_truth.cpp:1",
+      "note": "the reference atlaslab-falkreath-near approximates (4x4x4 shapes, 4x4 tiles, no light), made exact: the real quads and sprites, smooth lighting and the lightmap from the export's sky and block light, cutout and translucent layers; what remains in the .twin.png is what the game draws besides the mesh (block entities, entities, particles, animated textures)"
+    },
+    {
+      "id": "atlastruth-falkreath-view",
+      "title": "Exact ground truth to 1 km: the vanilla view (Minecraft near, today's far field beyond) vs the real chunk mesh in that view",
+      "tags": [
+        "feature:farfield",
+        "suite:atlaslab",
+        "place:falkreath",
+        "feature:horizon"
+      ],
+      "tier": "lab",
+      "lab": {
+        "tool": "atlas_truth",
+        "quads": "@game/nirncraft-atlaslab/quads.bin",
+        "sprites": "@game/nirncraft-atlaslab/sprites.bin",
+        "volume": "@game/nirncraft-atlaslab/falkreath-view.als2"
+      },
+      "camera_from": {
+        "scene": "atlaslab-export",
+        "variant": "vanilla"
+      },
+      "after": [
+        "atlaslab-export"
+      ],
+      "wait": 0,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "native/tools/atlas_truth.cpp:1",
+      "note": "beyond render distance the live picture is today's far field; the offline one is the real blocks drawn as Minecraft would draw them (light from the server's light engine, tints per column): their difference is the far field's error in the game's own view"
+    }
+  ]
+}

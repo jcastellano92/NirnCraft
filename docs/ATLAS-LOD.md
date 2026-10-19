@@ -245,6 +245,16 @@ tints.
 (the cobble path, planks); owning the near field needs faces at the texture's own resolution (16 x 16), stored once
 per texture (an atlas), not per block state.
 
+**An exact reference: atlas_truth** (2026-10-19). atlas_lab's ref is an approximation (4 x 4 x 4 shapes, 4 x 4 tiles,
+hashed cutouts, no light), so it cannot be ground truth itself. `native/tools/atlas_truth.cpp` traces Minecraft's own
+chunk mesh offline instead: `/nirncraft-atlaslab quads` exports every state's model quads as the mesher gets them and
+every sprite at native resolution; `here` / `view` with a trailing `light` write ALV2 / ALS2 (sky and block light per
+block, the model variant at each position, biome tints per column); atlas_truth renders a capture's camera with
+culling, cutout and front-to-back translucency, fluids, NeoForge's smooth lighting and the lightmap (formats in
+AtlasLabExport's Javadoc, what it does and does not reproduce in the tool's header). Synthetic checks:
+`native/tools/atlas_truth_test.py`. Harness: `atlastruth-falkreath-near` / `-view` (scenes/truth.json). On the old
+exports alone (its fallback) it already lowers the near view's liveDE from 6.3 to 5.6.
+
 **Lighting and surfaces beyond Minecraft's path** (owner): once offline and live match, the groups are the place for
 Lumen's ideas: a surface cache per group face (sun visibility, bounce, block light, sky) updated where it changed and
 where it is seen, so far light, shadows and bounce resolve like geometry; and the face textures become a virtual,
