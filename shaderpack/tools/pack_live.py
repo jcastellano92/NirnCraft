@@ -207,7 +207,7 @@ def run(a):
         first = [l for l in camera_lines(a.cams.split(",")[0], "", "") if l.startswith("camera ")]
     since = LOG.stat().st_size if LOG.exists() else 0
     t0 = time.monotonic()
-    actions(first + ["shaders off", "shaders on"])
+    actions(first + (["settle 1800"] if first else []) + ["shaders off", "shaders on"])
     errs = shader_errors(since)
     print(f"reload acknowledged in {time.monotonic() - t0:.1f} s; {len(errs)} shader log line(s)")
     for e in errs[:40]:
