@@ -232,11 +232,16 @@ NATIVE_BUILT = ROOT / "native/build/Release/atlas_core.dll"
 NATIVE_SHIPPED = ROOT / "mod/src/main/resources/natives/windows-x86_64/atlas_core.dll"
 
 
-def native_stale(built=NATIVE_BUILT, sources=None):
-    """Whether native sources (src, shaders, include) are newer than the built atlas_core."""
+def native_stale(built=NATIVE_BUILT, sources=None, digest=None):
+    """Whether native sources (src, shaders, include) are newer than the built atlas_core, unless the build stamp beside
+    it says it was built from these very sources (a change to a file the core does not use, a tool's shader, leaves
+    the linker nothing to do and the core's time where it was: without the stamp every run rebuilt it)."""
     sources = sources or [ROOT / "native/src", ROOT / "native/shaders", ROOT / "native/include"]
     newest = max((f.stat().st_mtime for d in sources for f in Path(d).rglob("*") if f.is_file()), default=0)
-    return not built.exists() or newest > built.stat().st_mtime + 1
+    if built.exists() and newest <= built.stat().st_mtime + 1:
+        return False
+    stamp = built.with_suffix(".sources")
+    return not (built.exists() and digest and stamp.exists() and stamp.read_text().strip() == digest)
 
 
 def sync_native():
@@ -247,19 +252,25 @@ def sync_native():
     WSL: tools/dev/check_natives.py guards its ABI)."""
     if os.name != "nt":
         return
-    if native_stale():
+    import native_sources  # tools/dev: which sources a core was built from (check_natives --require-fresh)
+    digest = native_sources.source_hash()
+    if native_stale(digest=digest):
         log("  native sources changed: building atlas_core (once for this run)")
         tr.step("auto_native_build")
         r = subprocess.run(["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", str(ROOT / "native/build.ps1"),
                             "-NoTest"], capture_output=True, text=True)
         if r.returncode or not NATIVE_BUILT.exists():
             raise RuntimeError("atlas_core build failed (tests would run a stale far field):\n" + (r.stdout + r.stderr)[-1200:])
+        NATIVE_BUILT.with_suffix(".sources").write_text(digest)
     if NATIVE_BUILT.exists() and (not NATIVE_SHIPPED.exists() or sha(NATIVE_BUILT) != sha(NATIVE_SHIPPED)):
         log("  shipping the current atlas_core into the mod (it differed from the built one)")
         tr.step("auto_native_ship")
         shutil.copy2(NATIVE_BUILT, NATIVE_SHIPPED)
-        import native_sources  # tools/dev: which sources the shipped core was built from (check_natives --require-fresh)
-        native_sources.record("windows-x86_64")
+        native_sources.record("windows-x86_64", digest)
+    elif NATIVE_BUILT.exists() and not native_stale(digest=digest) and native_sources.stale("windows-x86_64", digest):
+        # built from today's sources and byte for byte the shipped one: the shipped core is current, so say so (else
+        # check-natives --require-fresh failed forever after a change that left the core's bytes as they were)
+        native_sources.record("windows-x86_64", digest)
 
 
 def ensure_current():

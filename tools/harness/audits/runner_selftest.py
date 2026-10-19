@@ -181,6 +181,11 @@ with tempfile.TemporaryDirectory() as td:
     expect(_game.native_stale(built, [src]), "native sources newer than the built core: rebuild before tests")
     _os.utime(built, (_time.time() + 100, _time.time() + 100))
     expect(not _game.native_stale(built, [src]), "a core built after its sources is current")
+    _os.utime(built, (_time.time() - 100, _time.time() - 100))
+    built.with_suffix(".sources").write_text("abc")
+    expect(not _game.native_stale(built, [src], digest="abc"),
+           "a core whose build stamp names today's sources is current, however old its file time (no relink)")
+    expect(_game.native_stale(built, [src], digest="abd"), "a stamp from other sources does not excuse an old core")
 
 # --- a failed scene's recovery never runs its exports (a long one blocked the next scene) --------------------------
 cl = _game.tolerant(["command kill @e", "atlaslab view x-view 1024 light", "fog-off off"])
