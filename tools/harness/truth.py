@@ -81,8 +81,33 @@ def _lab(slug, title, tags, part, volume):
             "source": "native/tools/atlas_truth.cpp"}
 
 
+def custom_blocks():
+    """Every NirnCraft block in a 16 x 16 grid (2 m apart) on the sky stage, seen from above at 24 m, its exact box
+    exported: the exact reference must reproduce our own models and textures, not only vanilla's."""
+    import catalog
+    sx, sy, sz = catalog.STAGE
+    blocks = sorted(catalog._lang_ids("block"))
+    x0, z0, y = sx - 16, sz - 16, sy
+    setup = ["fog-off on", f"try fill {x0 - 2} {y} {z0 - 2} {x0 + 33} {y} {z0 + 33} minecraft:smooth_stone",
+             f"try fill {x0 - 2} {y + 1} {z0 - 2} {x0 + 33} {y + 8} {z0 + 33} minecraft:air"]
+    setup += [f"try setblock {x0 + (i % 16) * 2} {y + 1} {z0 + (i // 16) * 2} nirncraft:{b}" for i, b in enumerate(blocks[:256])]
+    setup += ["wait 40", "atlaslab blocks", "atlaslab quads",
+              f"atlaslab volume custom-blocks {x0 - 2} {y} {z0 - 2} {x0 + 33} {y + 8} {z0 + 33}",
+              f"atlaslab volume custom-blocks {x0 - 2} {y} {z0 - 2} {x0 + 33} {y + 8} {z0 + 33} light"]
+    cx, cz = x0 + 15, z0 + 15
+    export = {"_file": "(generated truth)", "id": "truth-custom-blocks",
+              "title": f"Ground truth capture: every NirnCraft block ({min(len(blocks), 256)}) on the sky stage",
+              "tags": ["suite:truth", "feature:farfield", "feature:custom-blocks"], "tier": "live", "group": "live",
+              "variants": ["vanilla"], "weather": "off", "time": 6000, "settle": "static",
+              "pose": {"camera": [cx, y + 22, cz - 26, cx, y + 1, cz]}, "seed": 1234, "wait": 100, "setup": setup,
+              "cleanup": ["fog-off off"], "measure": 0, "checks": {}, "capture": "world", "timeout": 1800,
+              "source": "tools/harness/truth.py"}
+    return [export, _lab("custom-blocks", "every NirnCraft block on the sky stage", ["feature:custom-blocks"], "near",
+                         "custom-blocks.alv2")]
+
+
 def scenes():
-    out = []
+    out = custom_blocks()
     for slug, title, pose, time, tags, box, underground in SUBJECTS:
         out.append(_export(slug, title, pose, time, tags, box, underground))
         out.append(_lab(slug, title, tags, "near", f"{slug}.alv2"))
