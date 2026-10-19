@@ -1649,14 +1649,70 @@ def git_head():
     return r.stdout.strip()
 
 
-def tally(s, v, rec):
-    """The running tally: a failing test opens an issue (first / last seen, how often, why); when the test passes
-    again the issue is marked fixed with the date and the commit. Flags (soft findings) are tallied too."""
-    k = key(s, v)
+ACTIVE = ("open", "in-progress", "testing", "needs-review")
+
+
+def load_issues():
     try:
         led = json.loads(ISSUES.read_text(encoding="utf-8"))
     except (OSError, ValueError):
-        led = {}
+        return {}
+    led.pop("_stats", None)
+    return led
+
+
+def issue_stats():
+    try:
+        return json.loads(ISSUES.read_text(encoding="utf-8")).get("_stats", {})
+    except (OSError, ValueError):
+        return {}
+
+
+FIXED_KEEP_DAYS = 7  # a fixed issue leaves the list after a week (the totals keep counting it)
+SEVERITY = {"crash": 0, "error": 1, "fail": 2, "flag": 3}
+
+
+def save_issues(led):
+    """Fixed issues older than FIXED_KEEP_DAYS drop off (counted in _stats), so the list stays what still matters."""
+    stats = led.pop("_stats", {"fixedTotal": 0})
+    cutoff = time.time() - FIXED_KEEP_DAYS * 86400
+    for k in [k for k, e in led.items() if e.get("state") == "fixed"]:
+        try:
+            when = time.mktime(time.strptime(led[k].get("fixed", ""), "%Y-%m-%d %H:%M"))
+        except ValueError:
+            when = time.time()
+        if when < cutoff:
+            del led[k]
+            stats["fixedTotal"] = stats.get("fixedTotal", 0) + 1
+    led["_stats"] = stats
+    STORE.mkdir(parents=True, exist_ok=True)
+    ISSUES.write_text(json.dumps(led, indent=1), encoding="utf-8")
+
+
+def cause(e):
+    """Group key: issues with the same cause (numbers and ids stripped from the reason) belong together."""
+    if e.get("group"):
+        return e["group"]
+    why = re.sub(r"[-+]?\d+(\.\d+)?", "#", e.get("why", "")).split(";")[0]
+    return re.sub(r"\s+", " ", why)[:70].strip() or e.get("area", "-")
+
+
+def priority(e, groups):
+    """P1..P4: a manual priority wins; else severity, how often it recurs, how many tests share its cause."""
+    if e.get("priority"):
+        return e["priority"]
+    score = 3 - SEVERITY.get(e.get("status"), 3)          # crash 3 .. flag 0
+    score += min(2, e.get("count", 1) // 3)                 # keeps coming back
+    score += min(2, len(groups.get(cause(e), [])) // 3)     # one cause, many tests
+    return "P1" if score >= 5 else "P2" if score >= 3 else "P3" if score >= 1 else "P4"
+
+
+def tally(s, v, rec):
+    """The running tally and its workflow: open -> in-progress (claimed) -> testing (an agent says fixed) -> verified by
+    the test passing (needs-review for visual tests, until a reviewer confirms the picture) -> fixed. A failure reopens
+    anything not fixed for good, and a fix that does not hold goes back to open with a note."""
+    k = key(s, v)
+    led = load_issues()
     st = rec.get("status")
     now = time.strftime("%Y-%m-%d %H:%M")
     area = next((t[6:] for t in s.get("tags", []) if t.startswith("suite:") and t not in ("suite:smoke", "suite:seam-core")),
@@ -1665,35 +1721,121 @@ def tally(s, v, rec):
     e = led.get(k)
     if st in ("fail", "error", "crash", "flag"):
         if not e or e.get("state") == "fixed":
-            e = {"test": k, "area": area, "opened": now, "count": 0, "state": "open", "history": (e or {}).get("history", [])}
+            e = {"test": k, "area": area, "opened": now, "count": 0, "state": "open", "history": (e or {}).get("history", []),
+                 "visual": s.get("kind") == "visual"}
+        elif e.get("state") in ("testing", "needs-review"):
+            e["state"] = "open"
+            e.setdefault("notes", []).append(f"{now}: the fix did not hold ({st})")
         e.update(lastSeen=now, count=e["count"] + 1, status=st, why=why[:300], head=git_head())
         led[k] = e
-    elif st == "pass" and e and e.get("state") == "open":
-        e.update(state="fixed", fixed=now, fixedAt=git_head())
-        e.setdefault("history", []).append({"opened": e["opened"], "fixed": now, "why": e.get("why", "")[:160]})
+    elif st == "pass" and e and e.get("state") in ACTIVE:
+        if e.get("visual") and e.get("state") != "needs-review":
+            e.update(state="needs-review", passedAt=now)  # the numbers pass; a reviewer confirms the picture
+        elif not e.get("visual"):
+            e.update(state="fixed", fixed=now, fixedAt=git_head())
+            e.setdefault("history", []).append({"opened": e["opened"], "fixed": now, "why": e.get("why", "")[:160]})
     else:
         return
-    STORE.mkdir(parents=True, exist_ok=True)
-    ISSUES.write_text(json.dumps(led, indent=1), encoding="utf-8")
+    save_issues(led)
 
 
 def cmd_issues(a):
-    try:
-        led = json.loads(ISSUES.read_text(encoding="utf-8"))
-    except (OSError, ValueError):
-        led = {}
-    open_ = [e for e in led.values() if e.get("state") == "open"]
-    fixed = sorted((e for e in led.values() if e.get("state") == "fixed"), key=lambda e: e.get("fixed", ""), reverse=True)
-    by = {}
-    for e in open_:
-        by.setdefault(e["area"], []).append(e)
-    lines = [f"# Issues: {len(open_)} open, {len(fixed)} fixed", ""]
-    for area, es in sorted(by.items(), key=lambda kv: -len(kv[1])):
-        lines.append(f"## {area} ({len(es)} open)")
-        for e in sorted(es, key=lambda e: {"crash": 0, "error": 1, "fail": 2, "flag": 3}.get(e.get("status"), 9)):
-            lines.append(f"- [{e.get('status')}] {e['test']} since {e['opened']} (x{e['count']}): {e.get('why', '')[:160]}")
+    """list | claim | fixed | verify | confirm | reopen | note: the issue workflow (see tally)."""
+    led = load_issues()
+    now = time.strftime("%Y-%m-%d %H:%M")
+
+    def find(t):
+        hits = [k for k in led if k == t or k.split("|")[0] == t]
+        if not hits:
+            say(f"no issue for {t}; harness.py issues")
+        return hits
+
+    act = a.action or "list"
+    if act in ("prioritize", "group"):
+        if not a.test:
+            say(f"issues {act} needs a test id")
+            return 1
+        for k in find(a.test):
+            if act == "prioritize":
+                led[k]["priority"] = (a.priority or "").upper() or None
+            else:
+                led[k]["group"] = a.name or None
+            say(f"{k}: priority {led[k].get('priority') or 'auto'}, group {led[k].get('group') or 'auto'}")
+        save_issues(led)
+        return 0
+    if act in ("claim", "fixed", "confirm", "reopen", "note"):
+        if not a.test:
+            say(f"issues {act} needs a test id")
+            return 1
+        for k in find(a.test):
+            e = led[k]
+            if act == "claim":
+                e.update(state="in-progress", by=a.by or os.environ.get("USERNAME", "agent"), claimed=now)
+            elif act == "fixed":
+                e.update(state="testing", fixNote=a.note or "", fixHead=git_head(), fixClaimed=now)
+            elif act == "confirm":
+                e.update(state="fixed", fixed=now, fixedAt=git_head(), confirmedBy=a.by or "reviewer")
+                e.setdefault("history", []).append({"opened": e["opened"], "fixed": now, "why": e.get("why", "")[:160]})
+            elif act == "reopen":
+                e.update(state="open")
+            if a.note:
+                e.setdefault("notes", []).append(f"{now} {act}: {a.note}")
+            say(f"{k}: {e['state']}")
+        save_issues(led)
+        return 0
+    if act == "verify":  # re-run every test an agent marked fixed; the results move the issues on
+        keys = [k for k, e in led.items() if e.get("state") == "testing"]
+        if not keys:
+            say("nothing waiting for verification (issues fixed <test> marks one)")
+            return 0
+        a.ids = sorted({k.split("|")[0] for k in keys})
+        a.suite, a.tag, a.tier, a.group, a.changed, a.exclude, a.variant, a.limit = (None,) * 7 + (0,)
+        a.force, a.keep, a.rebuild, a.include_quarantined, a.fresh_world, a.seed = True, False, False, True, False, DEFAULT_SEED
+        a.reloads = []
+        say(f"verifying {len(keys)} fix(es): " + ", ".join(keys))
+        cmd_run(a)
+        led = load_issues()
+        for k in keys:
+            say(f"  {k}: {led.get(k, {}).get('state')}")
+        return 0
+    states = {}
+    for e in led.values():
+        states.setdefault(e.get("state"), []).append(e)
+    groups = {}
+    for e in led.values():
+        if e.get("state") in ACTIVE:
+            groups.setdefault(cause(e), []).append(e)
+    lines = [f"# Issues: " + ", ".join(f"{len(states.get(s, []))} {s}" for s in ACTIVE + ("fixed",))
+             + f" ({issue_stats().get('fixedTotal', 0)} older fixes cleared)", ""]
+    for state in ("needs-review", "testing", "in-progress"):
+        es = states.get(state, [])
+        if es:
+            lines.append(f"## {state} ({len(es)})")
+            for e in es:
+                extra = f" by {e['by']}" if e.get("by") else ""
+                extra += f" (fix: {e.get('fixNote', '')[:60]})" if e.get("fixNote") else ""
+                lines.append(f"- {e['test']}{extra}: {e.get('why', '')[:120]}")
+            lines.append("")
+    opened = states.get("open", [])
+    if opened:
+        lines.append(f"## open ({len(opened)}), by priority and cause")
+        rows = {}
+        for e in opened:
+            rows.setdefault((priority(e, groups), cause(e)), []).append(e)
+        for (prio, why), es in sorted(rows.items(), key=lambda kv: (kv[0][0], -len(kv[1]))):
+            es.sort(key=lambda e: SEVERITY.get(e.get("status"), 9))
+            head = f"- {prio} [{es[0].get('area')}] {why}"
+            if len(es) == 1:
+                lines.append(f"{head}  ({es[0]['test']}, x{es[0]['count']}, since {es[0]['opened']})")
+            else:
+                lines.append(f"{head}  ({len(es)} tests)")
+                for e in es[:8]:
+                    lines.append(f"    - {e['test']} (x{e['count']}, since {e['opened']})")
+                if len(es) > 8:
+                    lines.append(f"    - ... {len(es) - 8} more")
         lines.append("")
-    lines.append("## Recently fixed")
+    fixed = sorted(states.get("fixed", []), key=lambda e: e.get("fixed", ""), reverse=True)
+    lines.append(f"## Recently fixed ({len(fixed)})")
     for e in fixed[:a.limit_fixed]:
         lines.append(f"- {e['test']}: fixed {e.get('fixed')} at {e.get('fixedAt')} (opened {e.get('opened')}): "
                      f"{e.get('why', '')[:120]}")
@@ -1829,8 +1971,16 @@ def main():
     p.add_argument("--timeout", type=int, default=0, help="seconds (0: no limit)")
     p.add_argument("--past", action="store_true", help="also match events already in the log")
     p = sub.add_parser("issues")
+    p.add_argument("action", nargs="?", choices=["list", "claim", "fixed", "verify", "confirm", "reopen", "note",
+                                                 "prioritize", "group"])
+    p.add_argument("--priority", help="prioritize: P1..P4 (empty: automatic)")
+    p.add_argument("--name", help="group: a cause name to group under (empty: automatic)")
+    p.add_argument("test", nargs="?", help="test id (or test|variant)")
+    p.add_argument("--by", help="who (claim / confirm)")
+    p.add_argument("--note")
     p.add_argument("--md", action="store_true", help="write .work/harness/ISSUES.md")
     p.add_argument("--limit-fixed", type=int, default=30)
+    p.add_argument("-v", "--verbose", action="store_true")
     p = sub.add_parser("quarantine")
     p.add_argument("--clear", nargs="*", help="test|variant keys (none: all)")
     sub.add_parser("seed-legacy")

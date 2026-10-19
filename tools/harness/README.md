@@ -26,7 +26,7 @@ harness.py audit --theme dungeons --budget 30m # one subject end to end: dungeon
                                                #   renderer, lights, creatures, gear, fx, ui, content, realms (themes.json)
 harness.py list --tag feature:water            # what exists
 harness.py gate                                # the merge / push gate (below);  gate --install-hook
-harness.py open                                # the latest report in your browser (also .work/harness/latest/ in VS Code)
+harness.py open                                # the overview in your browser (.work/harness/index.html); open suite-smoke: a report
 ```
 
 Selection: `--suite --tag --exclude --tier --group --variant --changed [REF] --limit N --seed N`.
@@ -120,8 +120,15 @@ start skips its group the same way.
 * `harness.py wait --events run_finished,client_crashed` blocks until such an event happens: an agent runs it in the
   background and is woken by its own tooling (no polling). Agents that start a run should start it as a tracked
   background task (or follow it with `wait`) so they learn when it ends.
-* `harness.py issues [--md]`: the running tally. A failing / flagged test opens an issue (first and last seen, how
-  often, why); when it passes again it is marked fixed with the date and the commit. The overview shows the counts.
+* `harness.py issues [--md]`: the running tally and its workflow. A failing / flagged test opens an issue (first and
+  last seen, how often, why). An agent working on one: `issues claim <test> --by NAME` (in-progress, so two agents do
+  not fix the same thing) -> `issues fixed <test> --note "what changed"` (testing) -> `issues verify` re-runs every test
+  marked fixed: a pass moves it to fixed (with date and commit), or for visual tests to needs-review until the
+  reviewer (visual-reviewer / a person) confirms the picture with `issues confirm <test>`; a failure reopens it with
+  "the fix did not hold". `issues reopen`, `issues note`. The overview shows the counts per state.
+  Open issues are listed by priority (P1..P4: severity, recurrence, and how many tests share the cause; `issues
+  prioritize <test> --priority P1` overrides) and grouped by cause (same reason with numbers stripped; `issues group
+  <test> --name X` regroups). Fixed issues drop off after 7 days (the totals keep counting them).
 
 ## Hot reload kinds (watch mode and `--changed`)
 

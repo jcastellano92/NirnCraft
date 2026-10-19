@@ -648,7 +648,9 @@ def _issue_line():
         led = json.loads((STORE / "issues.json").read_text(encoding="utf-8"))
     except (OSError, ValueError):
         return ""
-    o = sum(1 for e in led.values() if e.get("state") == "open")
-    f = sum(1 for e in led.values() if e.get("state") == "fixed")
-    return f" &middot; issues: {o} open, {f} fixed (harness.py issues)"
+    c = {}
+    for e in led.values():
+        c[e.get("state")] = c.get(e.get("state"), 0) + 1
+    return " &middot; issues: " + ", ".join(f"{c.get(s, 0)} {s}" for s in ("open", "in-progress", "testing",
+                                                                        "needs-review", "fixed")) + " (harness.py issues)"
 
