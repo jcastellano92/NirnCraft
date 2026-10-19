@@ -251,7 +251,10 @@ public final class WorldReadiness {
         boolean lighting=lightTasks && lightEngine && lit==total;
         boolean meshes=meshesReady(mc,lighting);
         boolean media=InteriorAtmosphere.readyAt(mc.player.getEyePosition());
-        boolean cameraClear=mc.level.noCollision(mc.player,mc.player.getBoundingBox());
+        // the eye, as the capture checks it (the test player is a spectator: its body may stand in a wall or a roof a
+        // settlement grew; the whole box failed readiness for poses whose picture was fine)
+        var eye=mc.player.getEyePosition();
+        boolean cameraClear=mc.level.noCollision(mc.player,new net.minecraft.world.phys.AABB(eye,eye).inflate(0.12));
         boolean weather=com.nirncraft.atmosphere.client.WeatherFieldTexture.ready();
         blocked=cameraClear?0:blocked+1;
         if(blocked>=5 && have==total) throw new IllegalStateException("Camera intersects loaded terrain; select another candidate");

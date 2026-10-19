@@ -356,6 +356,8 @@ int main(int argc, char** argv) {
         return 2;
     }
     leafCards = !cards.empty() && str(a, "leaves", "") == "cards";
+    if (a.count("sky")) SKY = unpack(uint32_t(std::strtoul(a["sky"].c_str(), nullptr, 16)));
+    cardMipBias = float(num(a, "mipbias", 0));
     if (a.count("grass")) tintGrass = unpack(uint32_t(std::strtoul(a["grass"].c_str(), nullptr, 16)));
     if (a.count("foliage")) tintFoliage = unpack(uint32_t(std::strtoul(a["foliage"].c_str(), nullptr, 16)));
     int threads = int(num(a, "threads", std::max(1u, std::thread::hardware_concurrency() / 2)));
@@ -365,7 +367,10 @@ int main(int argc, char** argv) {
     std::vector<float> dists;
     for (auto& t : split(str(a, "dist", "10,50,200,600,1500"))) dists.push_back(float(std::atof(t.c_str())));
     std::vector<std::string> variants = split(str(a, "variants", "ref,current,anymip,micro,cov,covbox,boxes,groups"));
-    if (variants.empty() || variants[0] != "ref") variants.insert(variants.begin(), "ref");
+    // the sheets compare every variant with ref, so it leads; a camera frame with variants= named renders exactly
+    // those, the first to out= with its mask and depth (it had put ref there: the element tier's "groups" were ref)
+    bool namedCamera = str(a, "camera", "") == "mc" && a.count("variants");
+    if (!namedCamera && (variants.empty() || variants[0] != "ref")) variants.insert(variants.begin(), "ref");
 
     // the object's bounds (non-air blocks; a sparse view: its whole extent)
     int bmin[3] = {1 << 30, 1 << 30, 1 << 30}, bmax[3] = {-1, -1, -1};
@@ -599,10 +604,11 @@ int main(int argc, char** argv) {
                                     float D = 1.f;  // the level is per ray here: the distance to what the ray meets
                                     Sample sm;
                                     if (v == "ref" || v == "micro") sm = traceMicro(eye, dir);
-                                    else if (v == "boxes" || v == "groups") {
+                                    else if (v == "boxes" || v == "groups" || v == "boxesf" || v == "groupsf") {
                                         float dither = 0.7f + 0.6f * hashf(px, py, f, 0xB0C5u);
-                                        sm = v == "boxes" ? traceBoxes(eye, dir, cpa, tolPix * dither, false, seed)
-                                                          : traceGroups(eye, dir, cpa, tolPix * dither, false, seed);
+                                        bool pre = v.back() == 'f';  // prefiltered faces (the footprint's average)
+                                        sm = v.rfind("boxes", 0) == 0 ? traceBoxes(eye, dir, cpa, tolPix * dither, pre, seed)
+                                                                      : traceGroups(eye, dir, cpa, tolPix * dither, pre, seed);
                                     } else if (v == "current") {
                                         sm = traceBlocks(curLevels, 0, eye, dir, true, seed);
                                     }

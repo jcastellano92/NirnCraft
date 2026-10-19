@@ -182,6 +182,19 @@ public final class AtlasClient {
         return f == null ? "" : f.streamingWhy();
     }
 
+    /** The far field's loading timeline from now on (harness: far-timeline start); false when there is no far field. */
+    public static boolean farTimelineMark() {
+        AtlasFarField f = farField;
+        if (f != null) f.timelineMark();
+        return f != null;
+    }
+
+    /** The loading timeline since the last mark, a JSON array ("[]" without a far field). */
+    public static String farTimelineJson() {
+        AtlasFarField f = farField;
+        return f == null ? "[]" : f.timelineJson();
+    }
+
     public static boolean active() {
         return ctx != null && !failed;
     }

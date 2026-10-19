@@ -257,6 +257,43 @@ with tempfile.TemporaryDirectory() as _td:
     _p = _el.pop("x", _tf, _of)
     expect(_p["pop"] == 0.0 and _p["frozen"] == 4, "a frozen renderer has no pop and is counted frozen (a fail)")
 
+# --- the bench's frame is scored only when atlas_lab rendered it with the representation asked for ---------------
+_log = ("atlas_lab: camera frame ref 160x160 in 64 ms -> C:/t/a.png\n"
+        "atlas_lab: camera frame groups 160x160 in 26 ms -> C:/t/a_groups.png\n")
+expect(not _el.wrote_variant(_log, Path("C:/t/a.png"), "groups"), "ref at out= is not the groups frame (it was scored as one)")
+expect(_el.wrote_variant(_log, Path("C:/t/a_groups.png"), "groups"), "the groups frame is found by its path")
+
+# --- an element's cards are its box's: a moved box bakes again -----------------------------------------------------
+expect(_el.card_path({"slug": "e", "box": [0, 1, 2, 3, 4, 5]}, Path("t")) != _el.card_path({"slug": "e", "box": [0, 1, 2, 3, 4, 6]}, Path("t")),
+       "an element's surface cards are keyed by its box, not only its name")
+
+# --- the far field's element frames name their backend; --backend forces it ------------------------------------------
+_el.FORCE_BACKEND = "cpu"
+expect(_el.backend() == "cpu", "--backend cpu renders the far field on the CPU backend")
+_el.FORCE_BACKEND = None
+expect(_el.backend() in ("vulkan", "cpu"), "the far field's backend is Vulkan or the CPU, by how busy the GPU is")
+
+# --- loading scenes: when the view came within reach of the settled one, and the jumps on the way ------------------
+import results as _results
+_frames = []
+for _i in range(6):  # grey until second 3, then the settled picture: a jump at 4 s, loaded from 4 s
+    _a = _np.full((40, 60, 3), 120 if _i < 3 else 30, dtype=_np.uint8)
+    _frames.append(_Image.fromarray(_a))
+_frames.append(_Image.fromarray(_np.full((40, 60, 3), 30, dtype=_np.uint8)))  # settled
+_lm = _results.pop_metrics({"loading": True, "frames": [6, 20]}, _frames)
+expect(_lm["loadConvergeS"] == 4.0 and _lm["loadJumpAtS"] == 4.0, "a loading strip says when it converged and where it jumped")
+expect(any("pop-in" in f for f in _lm.get("popFlags", [])), "a whole-view jump between seconds is flagged as pop-in")
+_ts = _game.timeline_summary([{"t": 900.0, "pass": 50, "cover": 10, "update1": 20, "update2": 15, "streaming": "moved"},
+                              {"t": 1500.0, "pass": 30, "cover": 5, "update2": 5, "streaming": ""}])
+expect(_ts["farFirstMs"] == 900.0 and _ts["farIdleMs"] == 1500.0 and _ts["farTotal_coverMs"] == 15,
+       "the far field's timeline reads as first pass, idle and totals per stage")
+
+# --- loading scenes look at the distance, and their poses are vetted ------------------------------------------------
+import loading as _loading
+for _sc in _loading.scenes():
+    expect(bool(_sc.get("vet_pose")) and _sc["pose"]["height"] >= 30,
+           f"{_sc['id']}: a loading view is vetted and high over the land (at 4 blocks up it faced a wall)")
+
 # --- truth subjects offset from their place look back at it (five faced away: yaw 0 is south in Minecraft) -----------
 import math as _math
 import truth as _truth
@@ -266,6 +303,30 @@ for _sub in _truth.SUBJECTS:
     if (_ox or _oz) and _sub[0] not in _truth.LOOKS_AWAY:
         _y = _math.radians(_pose.get("yaw", 0))
         expect(-_math.sin(_y) * -_ox + _math.cos(_y) * -_oz > 0, f"truth subject {_sub[0]} faces its place")
+
+# --- the realistic reference's calibration: the pack's capture takes the subject's pose, time and world without its
+# exports, and the realistic render runs in that capture's camera at the same time of day ---------------------------
+_ts = {s["id"]: s for s in _truth.scenes()}
+for _slug in _truth.CALIBRATE:
+    _cap, _lab, _exp = _ts.get(f"truth-{_slug}-pack"), _ts.get(f"truth-{_slug}-realistic"), _ts.get(f"truth-{_slug}")
+    expect(bool(_cap and _lab and _exp), f"calibration scenes for {_slug} exist")
+    if _cap and _lab and _exp:
+        expect(_cap["variants"] == ["shaders"] and _cap["pose"] == _exp["pose"] and _cap["time"] == _exp["time"]
+               and not any(c.startswith("atlaslab") for c in _cap["setup"] + _cap["cleanup"]),
+               f"{_slug}: the pack capture is the subject's view with the pack on, no exports")
+        expect(_lab["lab"]["lighting"] == "realistic" and _lab["lab"]["time"] == _exp["time"]
+               and _lab["camera_from"] == {"scene": f"truth-{_slug}-pack", "variant": "shaders"},
+               f"{_slug}: the realistic render is lit at the capture's time, in its camera")
+# --- element tier under realistic light: --time reaches the reference and the cards, far-lit only against it -------
+_el.TRUTH_MODE, _el.TIME = "realistic", 12500
+expect(_el.renderer_args("truth", {"slug": "x", "volume": "v", "box": [0, 0, 0, 1, 1, 1]}, Path("."))[1].get("time") == 12500,
+       "the realistic reference is lit at --time")
+_el.TRUTH_MODE, _el.TIME = "intended", None
+try:
+    _el.renderer_args("far-lit", {"slug": "x", "volume": "v", "box": [0, 0, 0, 1, 1, 1]}, Path("."))
+    expect(False, "far-lit refuses a reference that is not realistic")
+except ValueError:
+    pass
 
 print(f"problems {len(problems)}")
 sys.exit(1 if problems else 0)

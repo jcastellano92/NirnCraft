@@ -92,34 +92,62 @@ final class AtlasShapes {
     }
 
     /**
+     * A plant: drawn as cut-out quads, nothing a neighbour hides behind. Its outline says nothing: a ripe crop's (wheat,
+     * NirnCraft's garlic or cabbage) is a full cube, and as a solid cube a field of crops was a block of green.
+     */
+    static boolean plant(BlockState st, List<BakedQuad> quads, List<AABB> boxes) {
+        boolean cut = false;
+        for (BakedQuad q : quads) cut |= q.materialInfo().layer() == ChunkSectionLayer.CUTOUT;
+        if (!cut) return false;
+        return boxes.isEmpty() || st.is(BlockTags.REPLACEABLE_BY_TREES) || st.is(BlockTags.FLOWERS)
+                || st.getBlock() instanceof net.minecraft.world.level.block.CropBlock
+                || st.getBlock() instanceof net.minecraft.world.level.block.BushBlock;
+    }
+
+    /**
+     * The visual hull of six face tiles (face(): up / down over (x, z), north / south over (x, y), west / east over
+     * (z, y), v downwards on the sides): micro-voxel (x, y, z) is in when each axis's pair of faces covers its projection
+     * (alpha a quarter or more: a 4/16 post centred on a texel boundary covers two texels by half).
+     */
+    static long hull(int[][] faces) {
+        long m = 0;
+        for (int y = 0; y < TILE; y++)
+            for (int z = 0; z < TILE; z++)
+                for (int x = 0; x < TILE; x++) {
+                    int v = TILE - 1 - y;
+                    boolean ud = covered(faces[0], x, z) || covered(faces[1], x, z);
+                    boolean ns = covered(faces[2], x, v) || covered(faces[3], x, v);
+                    boolean we = covered(faces[4], z, v) || covered(faces[5], z, v);
+                    if (ud && ns && we) m |= 1L << (x + TILE * (z + TILE * y));
+                }
+        return m;
+    }
+
+    private static boolean covered(int[] tile, int u, int v) {
+        return tile != null && (tile[u + TILE * v] >>> 24) >= 64;
+    }
+
+    /**
      * The far field's shape of a state: its occupancy (water and other fluids without a model: a full cube), its six face
      * tiles with `tint` (RGB, or -1 for none) applied to the quads the game tints (leaves, grass: the far field's
      * material carries the biome colour it was registered with), cut-out when leaves or cut-out quads let light through.
      * Null when it has neither a shape nor a model (a full cube in its colour then).
      */
-    /** How much of the block's floor the outline's boxes in its bottom micro-voxel layer cover (0..1, about). */
-    static double floorCover(List<AABB> boxes) {
-        double a = 0;
-        for (AABB b : boxes) if (b.maxY <= 0.25) a += (b.maxX - b.minX) * (b.maxZ - b.minZ);
-        return a;
-    }
-
     static Shape of(BlockState st, int tint) {
         List<BakedQuad> quads = quads(st);
         List<AABB> boxes = boxes(st);
         long mask = mask(boxes);
-        // thinner than a micro-voxel (a snow layer, a carpet): its bottom layer, not nothing; only a layer that covers
-        // the floor (a chain or a rod fills no micro-voxel either and must not become a floating slab)
-        if (mask == 0 && !boxes.isEmpty() && !quads.isEmpty() && floorCover(boxes) >= 0.75) mask = 0xFFFFL;
+        int[][] faces = new int[6][];
+        for (Direction d : Direction.values()) faces[d.get3DDataValue()] = face(d, quads, tint);
+        // thinner than a micro-voxel (a snow layer, a carpet, a torch, a lantern's chain): its outline fills none of the
+        // 4 x 4 x 4, so its shape is the visual hull of its face tiles (a layer's bottom layer, a post's core column;
+        // a chain is no floating slab)
+        if (mask == 0 && !quads.isEmpty()) mask = hull(faces);
         boolean fluid = !st.getFluidState().isEmpty() && quads.isEmpty();
         if (fluid) mask = -1L;
         if (mask == 0 || quads.isEmpty() && !fluid) return null;
-        int[][] faces = new int[6][];
-        for (Direction d : Direction.values()) faces[d.get3DDataValue()] = face(d, quads, tint);
         // cut-out coverage for leaves and plants only (a grass block's cut-out overlay is no hole in the block)
-        boolean plant = boxes.isEmpty() || st.is(BlockTags.REPLACEABLE_BY_TREES) || st.is(BlockTags.FLOWERS);
-        boolean cutout = st.is(BlockTags.LEAVES);
-        if (plant) for (BakedQuad q : quads) cutout |= q.materialInfo().layer() == ChunkSectionLayer.CUTOUT;
+        boolean cutout = st.is(BlockTags.LEAVES) || plant(st, quads, boxes);
         return new Shape(mask, mean(faces), cutout ? AtlasNative.SHAPE_CUTOUT : 0, faces);
     }
 

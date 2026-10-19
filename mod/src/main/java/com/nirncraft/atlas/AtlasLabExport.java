@@ -148,13 +148,21 @@ public final class AtlasLabExport {
     // ---- the block-state library --------------------------------------------------------------------------------
 
     /**
+     * The library exports' own version, in their key: bump it whenever what they write changes for the same content (a
+     * class, a shape or a face tile rule: AtlasShapes, blocks(), quads()). Without it a changed rule was never written:
+     * the files counted as current for the same world and packs. 2: crops and bushes are plants (their outline is no
+     * cube), floor layers only for blocks that cover the floor.
+     */
+    static final int LIBRARY_VERSION = 2;
+
+    /**
      * Runs an export of what only the game's content and look decide (the block library, Minecraft's mesh data) unless
      * its files are current: the same generation identity, number of block states and resource packs as when they were
      * written (a suite of subjects would otherwise rewrite tens of megabytes for each one).
      */
     static String unlessCurrent(String name, String file, java.util.function.Supplier<String> export) {
         Minecraft mc = Minecraft.getInstance();
-        String key = AtlasTileCodec.identity() + " " + Block.BLOCK_STATE_REGISTRY.size() + " "
+        String key = "v" + LIBRARY_VERSION + " " + AtlasTileCodec.identity() + " " + Block.BLOCK_STATE_REGISTRY.size() + " "
                 + String.join(",", mc.getResourcePackRepository().getSelectedIds());
         try {
             Path keyFile = dir().resolve(name + ".key"), out = dir().resolve(file);
@@ -225,6 +233,7 @@ public final class AtlasLabExport {
         if (!st.getFluidState().isEmpty() && st.getFluidState().is(net.minecraft.tags.FluidTags.WATER) && !st.isSolidRender()) cls = 2;
         else if (st.getLightEmission() >= 10) cls = 3;
         else if (st.is(BlockTags.LEAVES)) cls = 1;
+        else if (AtlasShapes.plant(st, quads, boxes)) cls = 4;  // before the outline: a ripe crop's is a full cube
         else if (st.isSolidRender() || full) cls = 0;
         else if (!quads.isEmpty() && boxes.isEmpty() || st.is(BlockTags.REPLACEABLE_BY_TREES) || st.is(BlockTags.FLOWERS)) cls = 4;
         else cls = 5;

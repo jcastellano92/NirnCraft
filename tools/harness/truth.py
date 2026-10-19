@@ -102,6 +102,22 @@ def _export(slug, title, pose, time, tags, box, underground):
                     "block library and Minecraft's mesh data (quads.bin, sprites.bin); the capture is fog-free vanilla"}
 
 
+def _element_export(slug, title, pose, time, tags, box, underground):
+    """The element tier's inputs from one subject (element_lab.elements() finds its chunks, trees, water, lights,
+    buildings and custom blocks): the block library, Minecraft's mesh data and the box around the pose, without the
+    1 km view (150-200 MB the element tier never reads) and without a pose review (no capture is compared)."""
+    r, down, up = box
+    return {"_file": "(generated truth)", "id": f"element-export-{slug}", "title": f"Element tier inputs: {title}",
+            "tags": ["suite:element-exports", "feature:farfield"] + tags, "tier": "live", "group": "live",
+            "variants": ["vanilla"], "weather": "off", "time": time, "settle": "static", "pose": pose, "wait": 60,
+            "setup": ["fog-off on", "truth-quiet on", "try tick freeze", "atlaslab blocks", "atlaslab quads",
+                      f"atlaslab here {slug} {r} {down} {up}", f"atlaslab here {slug} {r} {down} {up} light"],
+            "cleanup": ["try tick unfreeze", "truth-quiet off", "fog-off off"], "measure": 0, "checks": {},
+            "capture": "world", "timeout": 1200, "source": "tools/harness/truth.py",
+            "note": f"exports {slug}(.alv, .alv2, .json) beside blocks.bin, quads.bin and sprites.bin (rewritten only when "
+                    "AtlasLabExport.LIBRARY_VERSION or the content changed)"}
+
+
 def _lab(slug, title, tags, part, volume):
     return {"_file": "(generated truth)", "id": f"truth-{slug}-{part}",
             "title": f"Ground truth {part}: {title} (Minecraft's own mesh offline vs the live capture)",
@@ -197,6 +213,50 @@ def custom_blocks():
                          "custom-blocks.alv2")]
 
 
+# The realistic reference's calibration (docs/ATLAS-LOD.md, "A realistic reference"): the shader pack's own picture of
+# a subject (day, dusk, night, the light blocks) beside atlas_truth lighting=realistic in that capture's camera, from the
+# subject's export. What they disagree on is the reference's calibration (exposure, sky ambient, block light falloff
+# and colour) or what the pack adds that the reference leaves out (regional grade, bloom, shafts, SSAO, auto exposure).
+CALIBRATE = ("whiterun-day", "falkreath-dusk", "whiterun-night", "lights-night")
+
+
+def _pack_capture(export):
+    """The subject's capture with the shader pack on, the same pose, time and world (its setup without the exports)."""
+    sc = dict(export)
+    slug = sc["id"][len("truth-"):]
+    sc.update({"id": f"truth-{slug}-pack", "title": export["title"].replace("Ground truth capture", "The shader pack's picture"),
+               "tags": ["suite:truth-realistic"] + [t for t in export["tags"] if t != "suite:truth"], "variants": ["shaders"],
+               "setup": [c for c in export["setup"] if not c.startswith("atlaslab")],
+               "cleanup": [c for c in export["cleanup"] if not c.startswith("atlaslab")],
+               "note": "calibrates atlas_truth lighting=realistic (truth-" + slug + "-realistic); the exports come from truth-" + slug})
+    sc.pop("vet_pose", None)
+    return sc
+
+
+def _realistic_lab(slug, title, time, tags):
+    return {"_file": "(generated truth)", "id": f"truth-{slug}-realistic",
+            "title": f"Realistic reference: {title} (the pack's light ray traced on the real mesh vs the pack's picture)",
+            "tags": ["suite:truth-realistic", "feature:farfield", "feature:lighting"] + list(tags), "tier": "lab", "group": "lab",
+            "variants": ["lab"],
+            "lab": {"tool": "atlas_truth", "quads": EXPORT_DIR + "quads.bin", "sprites": EXPORT_DIR + "sprites.bin",
+                    "volume": EXPORT_DIR + f"{slug}.alv2", "classes": EXPORT_DIR + "blocks.bin", "lighting": "realistic",
+                    "time": time, "spp": 4},
+            "camera_from": {"scene": f"truth-{slug}-pack", "variant": "shaders"}, "after": [f"truth-{slug}", f"truth-{slug}-pack"],
+            "wait": 0, "setup": [], "cleanup": [], "measure": 0, "checks": {}, "capture": "world",
+            "source": "native/tools/atlas_truth.cpp"}
+
+
+def _calibration(scenes):
+    out = []
+    for sc in scenes:
+        slug = sc["id"][len("truth-"):]
+        if sc.get("tier") == "live" and sc["id"].startswith("truth-") and slug in CALIBRATE:
+            out.append(_pack_capture(sc))
+            out.append(_realistic_lab(slug, sc["title"].split(": ", 1)[-1], sc["time"],
+                                      [t for t in sc["tags"] if t.startswith(("place:", "time:", "feature:"))]))
+    return out
+
+
 def scenes():
     out = custom_blocks()
     out += staged("containers", "every NirnCraft container: each style, lid closed, ajar and open; shelves by book count",
@@ -205,7 +265,9 @@ def scenes():
                   LIGHTS, time=18000, tags=["feature:lights", "time:night"], spacing=4, per_row=5)
     for slug, title, pose, time, tags, box, underground in SUBJECTS:
         out.append(_export(slug, title, pose, time, tags, box, underground))
+        out.append(_element_export(slug, title, pose, time, tags, box, underground))
         out.append(_lab(slug, title, tags, "near", f"{slug}.alv2"))
         if not underground:
             out.append(_lab(slug, title, tags, "view", f"{slug}-view.als2"))
+    out += _calibration(out)
     return out

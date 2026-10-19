@@ -263,6 +263,9 @@ before / after, never silently:
 * light through stairs and slabs (candidate, not adopted): vanilla lets sky light leak through stair and slab ceilings
   (a dungeon hall's stair ceiling shows bright stripes; the exact reference reproduces it, dE 0.44 against the game).
 
+A third mode, *realistic* (`--truth realistic --time T`), scores our renderers under the shader pack's light rather
+than Minecraft's: below, "A realistic reference".
+
 Verification tiers (owner, 2026-10-19): 1. elements offline (tools/harness/element_lab.py, suite:elements: one chunk or
 tree cut from an export by `box=`, the intended reference vs our renderer from 8 m to 64 km and two fly-ins, ~40 s an
 element, now ~12 s: one process per renderer renders the whole ladder and both fly-ins); 2. the same elements against
@@ -280,20 +283,56 @@ every face of every block (inside `box=`): the face seen straight on, 16 x 16 te
 (texture, tint, shade, AO, the lightmap at its light; sky and block light kept per texel for relighting). `atlas_lab
 surface=x.alc` takes every hit's colour from them through a mip chain picked by the pixel's footprint (trilinear).
 This is the surface cache in its simplest form: captured once from the real models with the real light, then the
-grouped voxels only decide shape and coverage. Element tier (lab-groups, 16 samples a pixel like the reference):
+grouped voxels only decide shape and coverage.
 
-| element | near dE, own 4 x 4 tiles, fixed sun | near dE, cards | dE 64 m - 32 km | IoU (16 px and up) | fly-in pop fast / slow |
-|---|---|---|---|---|---|
-| whiterun-day-chunk (32 m) | 29.3 | 3.7 | 1.7 - 4.0 | 0.94 - 1.00 | 0.03 / 0.07 |
-| falkreath-wide-tree (32 m) | 10 - 14 | 6.0; 5.0 with card leaves | 1.2 - 2.8 (card leaves) | 0.91 - 0.997 | 0.014 / 0.005 |
+Correction (2026-10-19, later the same day): until 694bde66 atlas_lab's camera frame put its ref variant (plain
+micro-voxels) at out= whatever was asked, so the first table written here measured micro-voxels with cards, not the
+groups. The camera frame now renders the variants named, and element_lab checks the log that the scored frame is the
+one asked for. With the groups themselves, cards sampled as the game samples its atlas (nearest when magnified,
+bilinear and trilinear when minified: nearest texels at every level had been twice as sharp as the game from 30 to
+300 m, which read as fly-in pop), translucent water composited over what lies under it, and thin blocks shaped by
+the visual hull of their face tiles, over the 54 elements of today's exports (suite:elements, renderer:lab-groups):
 
-Leaves and plants (`leaves=cards`, the default): whole voxels whose cards' alpha is the cutout (per texel up close,
-the mip's coverage further away) instead of micro-voxels hashed by their 4 x 4 tiles' alpha: better at every
-distance and nearly no pop. The bench passes through a transparent texel along the face's own axis (the next block in
+| | median | worst |
+|---|---|---|
+| near dE (32 m or 1.5 radii) | 0.84 | 5.3 (a stepped chunk) |
+| worst dE where the element covers 16 px or more | 4.1 | 11.8 (falkreath-wide-tree, 2-4 km) |
+| lowest IoU (16 px or more) | 0.95 | 0.73 (trees at 2-4 km) |
+| slow fly-in pop | 0.008 | 0.375 (riften-day-water) |
+
+What fails: coverage at 8-16 km (the groups' flattened faces cover a column whenever anything lies along the face's
+axis: 30-90 % too much for a dot of a pixel or two; the prefiltered faces, groupsf, cover 15-35 % too little and lose
+colour), trees in the middle distance, and fly-in pop on small odd models (a campfire as a glowing cube, a chain).
+Before the correction the bench's own 4 x 4 tiles under a fixed sun gave a near dE of 29 on the Whiterun chunk.
+
+Leaves (`leaves=cards`, the default): whole voxels whose cards' alpha is the cutout (per texel up close, the mip's
+coverage further away). The bench passes through a transparent texel along the face's own axis (the next block in
 the column), not along the ray, so a crown's ragged fringe against the sky is solid: the far pass's tracer continues
-the ray itself. What else is left is representation: a snow layer is one micro-voxel thick (1/4 block, not 1/8),
-grazing faces shimmer a little more than the reference's 16 samples. The far pass takes its colour the
-same way (cards from the real quads, light kept apart so day, night and carried lights relight them).
+the ray itself. The far pass takes its colour the same way (cards from the real quads, light kept apart so day,
+night and carried lights relight them).
+
+**Elements by kind, and the far field itself in the tier** (2026-10-19). element_lab finds per export its centre chunk,
+its biggest tree and featured chunks: the chunk with the most water, lights (emissive), built materials and custom
+(non-vanilla) blocks, each when it has enough. Every element has two scenes in suite:elements: the bench
+(`element-<slug>`, lab-groups: the representation alone) and the far field (`element-<slug>-far`, far-groups:
+atlas_core through atlas_render, what the game draws). An underground element (sky light near 0 on its exposed faces,
+from its cards) is skipped with its reason (judge it from inside, in the scene tier): black against black agrees
+and says nothing. A fly-in whose frames stop changing while the reference's change fails (a renderer that stopped
+following the camera reads as perfect otherwise). New subjects' inputs come from `element-export-<subject>` live
+scenes (suite:element-exports): the library and the box around a truth subject's pose, without the 1 km view.
+
+What scoring the far field found, each fixed in the game, its native copy and the bench:
+
+| found | effect in game | fix |
+|---|---|---|
+| snow layers not kept (AtlasSections.kept) | a far snowfield was the bare stone under it | snow layers and carpets kept |
+| the thin-block floor layer took chains and rods | floating slabs under hanging lanterns | only blocks that cover the floor (Java: the outline's floor cover; native: the top tile) |
+| sections sent 6 tiles out, kept 4 regions, never resent | the ring past ~1 km and everything after a trip away and back lost its real blocks | server window 4 tiles, forgotten when a tile leaves it (a return resends it); the core keeps one ring more |
+| a ripe crop's outline is a full cube | a field of crops (wheat, garlic, cabbage) a solid block of green | crops and bushes with cut-out quads are plants |
+| library exports keyed on world and packs only | a changed rule never reached blocks.bin | AtlasLabExport.LIBRARY_VERSION in the key |
+
+Open in the far field: real elements vanish from ~8 km (real sections feed LOD 0-4 only), and coarse levels show
+interior faces through walls at some transitions (High Hrothgar: fly-in pop 1.05): the coarse-levels work.
 
 **An exact reference: atlas_truth** (2026-10-19). atlas_lab's ref is an approximation (4 x 4 x 4 shapes, 4 x 4 tiles,
 hashed cutouts, no light), so it cannot be ground truth itself. `native/tools/atlas_truth.cpp` traces Minecraft's own
@@ -304,6 +343,107 @@ culling, cutout and front-to-back translucency, fluids, NeoForge's smooth lighti
 AtlasLabExport's Javadoc, what it does and does not reproduce in the tool's header). Synthetic checks:
 `native/tools/atlas_truth_test.py`. Harness: `atlastruth-falkreath-near` / `-view` (scenes/truth.json). On the old
 exports alone (its fallback) it already lowers the near view's liveDE from 6.3 to 5.6.
+
+**A realistic reference: atlas_truth lighting=realistic** (2026-10-19). The exact reference lights like Minecraft
+(smooth lighting, AO, the light map, no sun shadows), so it cannot judge our own lighting. `lighting=realistic` traces
+the same mesh (the same quads, sprites, culling, cutout and translucency) and lights it the way the shader pack means
+it, each term placed physically instead of read from light levels (`native/tools/pack_look.hpp` mirrors the pack:
+`lib/atmosphere.glsl`, `lib/keylight.glsl`, `lib/exposure.glsl`, `lib/grade.glsl` nightVision, `final.fsh`):
+
+| term | the pack (deferred.fsh) | the realistic reference |
+|---|---|---|
+| key light | sunRadiance (3.2 at noon, warm at the horizon); by night the vanilla moon opposite the sun, (0.035, 0.05, 0.09) | the same radiance; direction from `time=` by Minecraft's sky angle turned as Iris turns it (sunPathRotation -25): noon high in the south, sunset west |
+| its shadows | shadow map (PCSS) x atlas's sun map x the light map's openness | a ray per sample through the real quads to a point of the sun's disc (0.27 degrees): hard at contact, soft further; cutout texels pass (dappled shade under leaves); occlusion is two-sided (the ground inside a leaf bush is shaded) |
+| sky | skyAmbient(n) x skyLight^2 + floor, x SSAO | skyAmbient decomposed exactly: radiance skyUp over the horizon, ground under it; cosine-weighted rays (4 a sample, 64 a pixel) see either or are blocked: the visible hemisphere, no light levels |
+| block light | the light map's block level through pow(l, 3.2) 1.8 + pow(l, 12) 2, warm (or the mod's coloured cache) | every emitter in the box a light: a point of its model's box (soft shadows), I cos / (d^2 + 0.5^2) x (1 - (d / R)^4)^2, I = 9.4 (level / 15)^2, R = level + 1 (Minecraft's reach): the pack's curve at 3 - 8 blocks from a level-15 light; colours from FogRadianceTexture.emitterColour at the warm light's luminance |
+| emission | albedo x emission x strength (fire 5, lava 6, lights 4 x smoothstep of the texel's brightness) | the same, per texel |
+| foliage | FOLIAGE_SSS: key x through x 0.6 (leaves) / 0.5 x (pow(v.l, 4) 0.8 + 0.25) x 0.5 | the same, through = what reaches past the crown's leaves (exp(-0.45 gap)) |
+| bounce | none | optional (`bounce=1`): a sky ray that meets a surface takes its sun (shadowed), sky and block light |
+| look | the eye's auto exposure, night vision, ACES, regional grade, bloom, shafts | the eye adapted to mid grey (0.18) under the open sky at that time (the pack's exposure curve: noon x0.85, dusk x4.0, night at its x4.9 limit), night vision (NIGHT_VISION 2), ACES, sRGB; per sample, as the bench's cards are; no grade, bloom or shafts |
+
+Misses show a flat background: the pack's sky 20 degrees over the horizon, a quarter turn from the sun (`info=1`
+prints it with the rest of the time's light, for the harness to give the renderers the same). Checked on synthetic
+scenes with known answers (`native/tools/atlas_truth_realistic_test.py`, 16 checks, check-atlas-truth-realistic):
+a 3^3 box's hard shadow on a floor against an analytic slab test (279 points, 0 wrong); the soft edge (0.05 rad sun)
+lit / half / dark at -0.5 / 0 / +0.5 blocks; sky visibility at five floor points and a wall's face against a
+numerical integral (within 0.004); leaves in the air and on the floor shade the floor under their opaque texels and
+let the sun through their holes; a lantern in a closed room: no sky, no sun, the inverse square to 0.3 % at three
+points, a pillar's shadow, the lantern glowing; one bounce reddening the floor at a sunlit red wall; the tonemap
+against a numpy port of final.fsh; the sun's path at four times. The vanilla suite is unchanged. The reference's own
+noise (16 against 64 samples a pixel) is 0.3 - 0.9 dE.
+
+The element tier takes it as `--truth realistic --time T` (6000 day, 12500 dusk, 18000 night), the same
+`camera=mc ... box= cameras=` interface and outputs. The renderers are lit the same way: lab-groups and far-groups
+sample cards baked in that light (`bake= lighting=realistic`: 16 samples a texel), so they measure the representation
+under realistic light; `far-lit` is atlas_core's own lighting (atlas_render `shade=pack`: its sun / moon, its shadows,
+sky ambient, AO and far lights, on albedo cards (`bake= lighting=albedo`), the export's emitters registered as far
+lights as the game registers a real chunk's (`lights=1`), through the same exposure and tonemap over the same sky).
+Harness: suite:elements-lit (every element, three times, the three renderers; opt-in).
+
+Element tier under realistic light (2026-10-19, after the bench fix 694bde66; 256 px at 1080p's pixel size, 16
+samples a pixel; dE at 32 m / range 64 m - 2 km; pop fast / slow; the far field's losses from 8 km on are its window,
+not light: real sections feed LOD 0-4 only):
+
+| element | time | bench (lab-groups, realistic cards) | far field (far-groups, realistic cards) | far field's own light (far-lit) |
+|---|---|---|---|---|
+| whiterun-day-chunk | day | 3.5 / 1.7 - 2.3, pop 0 / 0 | 4.0 / 2.4 - 7.3, pop 0.03 / 0.16 | 6.2 / 4.9 - 8.7, pop 0.09 / 0.20 |
+| | dusk | 2.6 / 1.5 - 1.7, 0 / 0 | 3.0 / 1.9 - 6.1, 0.03 / 0.08 | 9.0 / 8.0 - 10.9, 0.21 / 0.17 |
+| | night | 2.4 / 1.0 - 1.4, 0 / 0 | 2.8 / 1.6 - 9.7, 0.06 / 0.11 | 7.7 / 6.6 - 7.5, 0.08 / 0.04 |
+| falkreath-wide-tree | day | 2.4 / 2.5 - 6.3, 0.03 / 0.01 | 3.3 / 0.9 - 6.4, 0.05 / 0.01 | 4.1 / 3.2 - 8.2, 0.06 / 0.04 |
+| | dusk | 5.6 / 4.0 - 7.4, 0.18 / 0.32 | 7.3 / 2.2 - 8.0, 0.25 / 0.41 | 7.1 / 5.5 - 9.9, 0.05 / 0.03 |
+| | night | 1.2 / 0.8 - 3.4, 0.04 / 0.03 | 1.4 / 0.5 - 6.8, 0.05 / 0.06 | 1.5 / 1.1 - 3.2, 0.03 / 0.00 |
+| whiterun-night-lights | day | 1.1 / 1.8 - 3.6, 0 / 0 | 2.1 / 3.1 - 6.7, 0.06 / 0.14 | 4.8 / 5.8 - 9.2, 0.26 / 0.53 |
+| | dusk | 1.5 / 1.8 - 3.8, 0 / 0 | 2.6 / 3.2 - 6.2, 0.07 / 0.14 | 9.3 / 8.7 - 14.9, 0.28 / 0.40 |
+| | night | 1.0 / 1.6 - 3.2, 0.05 / 0.04 | 2.2 / 2.8 - 6.8, 0.29 / 0.47 | 12.9 / 14.8 - 28.3, 2.3 / 2.5 |
+
+IoU is the representation's and the same as under Minecraft's light: bench 0.985 / 0.729 / 0.937, far field 0.926 /
+0.930 / 0.860 (worst where the element covers 16 px or more; the tree at 4 km on the bench, the lights' chunk at 4 km
+in the far field fail the 0.9 line under any light). Under realistic light the representation holds up: the bench is
+within 1 - 4 dE of the reference by day and night (the tree at dusk up to 7) and the far field's groups within
+2 dE of the bench up close.
+One new failure is the representation's, shown by the light: the tree at dusk pops 0.18 - 0.41 in both card renderers
+(0.01 - 0.05 by day): cards baked under a low sun carry dappled, high-contrast texels, and the mip levels of a cutout
+crown disagree more when its texels differ that much (the cards' mips average covered texels' colour, the reference's
+16 samples average the light the gaps let through).
+
+**Where atlas_core's lighting falls short** (far-lit against far-groups is the lighting alone: same groups, same
+cards, the far field's light instead of the reference's). Each by an experiment, not by eye:
+
+1. **The sky ambient is a constant 0.78** (`FAR_AMBIENT_OCCLUSION`, calibrated against near / far pairs as the near
+   field's average sky occlusion), times a 4-neighbour AO. The reference's sky visibility is 1 on open faces and much
+   less in crevices; the constant darkens every open surface (the day chunk's shaded sides L* 9.4 against 13.3). The
+   reference with its sky and ground radiance scaled by 0.78 scores far-lit at 4.6 / 2.8 / 4.6 dE (32 / 128 / 512 m,
+   day; from 6.2 / 4.9 / 6.4) and 5.5 / 3.7 / 5.6 at dusk (from 9.0 / 8.0 / 9.2), down to the representation's own
+   error: the constant is most of far-lit's error on open land, worst at dusk when the sky is most of the light. The
+   far field needs a sky visibility of its own (per group face, in the surface cache), not a constant.
+2. **Foliage is opaque to light.** Shadow rays (the voxel path) and the AO taps see a crown as solid, nothing passes
+   its gaps, and there is no light through leaves: the tree's crown is near black at dusk (L* 2.7 against 9.8 seen
+   from the sun's side, 2.4 against 6.9 in the tier's view) and darker by day. The reference with foliage opaque to its
+   secondary rays and no light through it (`foliagelight=opaque sss=0`, a diagnostic) and the sky at 0.78 gives the
+   crown far-lit's L* (2.4 / 2.4 dusk, 1.1 / 1.0 day) and scores far-lit at 4.1 / 2.6 / 5.2 dE at dusk (from 7.1 / 6.2 /
+   6.8). Shadows through a crown must pass its coverage (the groups' cutout cards already know it), and foliage needs
+   the pack's light-through term.
+3. **Block light is the light map's curve, not a light.** `farLightsOn` lights by the euclidean distance through the
+   pack's block-light curve, with no facing term, keeping a quarter behind an occluder, so a lantern lights whole walls
+   that face away from it, around corners and through them; and every emitter is also drawn as a far light's glow, a
+   1.5-block sphere, also up close. At night the lights' chunk scores 12.9 / 15.8 / 14.8 dE (32 / 128 / 512 m); without
+   their light on surfaces (ATLAS_ABLATE 8) 9.7 / 9.7 / 9.0, without far lights at all 6.4 / 7.8 / 7.3, and the fly-ins
+   pop 2.3 / 2.5 as lights cluster and drop in and out of the budget. A real chunk's emitters need shadowed,
+   cosine-weighted point lights near the camera, and the glow only where the light itself is under a few pixels.
+   (The reference's own block-light intensity and reach are matched to the pack's curve at 3 - 8 blocks from a
+   level-15 light; the live calibration below checks them.)
+4. **Smooth normals from 96 m** brighten slopes the blocks do not have: removing them (ATLAS_ABLATE 2) lowers far-lit's
+   dE at 512 m by 0.6 on the chunk (6.4 to 5.7) and 1.2 on the tree at dusk (6.8 to 5.6).
+5. **Sun shadows add little where they could:** removing them changes far-lit's dE by 0.0 - 0.3 on these elements
+   (the chunk casts little; the tree's crown shades itself solid either way, point 2). By night (the moon) and at
+   dusk, the voxel shadows of the coarse levels are the open question for larger elements (a town, a ridge).
+
+**Calibration against the pack itself** (to run, live): suite:truth-realistic. `truth-<subject>-pack` captures the
+subject (whiterun-day, falkreath-dusk, whiterun-night, the lights-night stage) with the pack on, from the subject's
+pose, time and world without its exports; `truth-<subject>-realistic` renders the reference in that capture's camera
+from the subject's export and reports dE against it. What they disagree on is the reference's calibration (the
+canonical exposure against the eye's, the block light's intensity and reach, the moon) or what the pack adds that the
+reference leaves out (grade, bloom, shafts, SSAO), each to be written here before the reference changes.
 
 **Pinned ground truth: Minecraft's own rendering at any distance** (2026-10-19; mod `client/pinned/PinnedTruth`,
 harness `tools/harness/pinned.py`, `harness.py run --suite pinned`, the final live validation, run deliberately).

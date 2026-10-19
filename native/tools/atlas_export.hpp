@@ -58,11 +58,16 @@ inline bool loadBlocks(const std::string& path, std::vector<State>& lib) {
         if (!get(&s.cls, 1) || !get(&s.emit, 1) || !get(&s.flags, 1) || !get(&s.tint, 1) || !get(&s.mask, 8) ||
             !get(&s.mean, 4) || !get(s.faces, sizeof s.faces))
             return false;
-        // thinner than a micro-voxel (a snow layer, a carpet): its bottom layer, not nothing (AtlasShapes.of); only a
-        // layer, its top face (nearly) covered: a chain or a rod fills no micro-voxel either, and is no floating slab
-        int topCover = 0;
-        for (int t = 0; t < 16; t++) topCover += (s.faces[1][t] >> 24) != 0;
-        if (!s.mask && (s.flags & 4) && s.cls != 2 && s.cls != 4 && topCover >= 12) s.mask = 0xFFFFull;
+        // thinner than a micro-voxel (a snow layer, a torch, a chain): its outline fills none of the 4 x 4 x 4, so its
+        // shape is the visual hull of its face tiles (AtlasShapes.hull): a layer's bottom layer, a post's core column
+        if (!s.mask && (s.flags & 4) && s.cls != 2) {
+            auto cov = [&](int f, int u, int v) { return (s.faces[f][u + 4 * v] >> 24) >= 64; };
+            for (int y = 0; y < 4; y++)
+                for (int z = 0; z < 4; z++)
+                    for (int x = 0; x < 4; x++)
+                        if ((cov(0, x, z) || cov(1, x, z)) && (cov(2, x, 3 - y) || cov(3, x, 3 - y)) && (cov(4, z, 3 - y) || cov(5, z, 3 - y)))
+                            s.mask |= 1ull << (x + 4 * (z + 4 * y));
+        }
     }
     return true;
 }
@@ -79,7 +84,9 @@ inline bool keptByGame(const State& s) {
     bool water = s.cls == 2 && !(s.flags & 4);
     if (!s.mask && !water) return false;
     return s.cls <= 3 || s.name.find("_slab") != std::string::npos || s.name.find("_stairs") != std::string::npos ||
-           s.name.rfind("Block{minecraft:snow}", 0) == 0 || s.name.find("_carpet}") != std::string::npos;
+           s.name.rfind("Block{minecraft:snow}", 0) == 0 || s.name.find("_carpet}") != std::string::npos ||
+           s.name.find("_fence}") != std::string::npos || s.name.find("_fence_gate}") != std::string::npos ||
+           s.name.find("_wall}") != std::string::npos;
 }
 
 inline bool anyContent(const State& s) {
