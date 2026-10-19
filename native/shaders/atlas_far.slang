@@ -968,8 +968,10 @@ void farMain(uint3 id : SV_DispatchThreadID) {
         if (clDepth < surface) {
             color = color * cl.a + cl.rgb;
             coverage = 1.0 - (1.0 - coverage) * cl.a;
-            // depth = the nearest thing drawn, cloud included: lets a composite keep near geometry in front of it
-            if (cl.a < 0.99) depth = min(depth, clDepth);
+            // depth = the nearest thing drawn, cloud included: lets a composite keep near geometry in front of it.
+            // Over terrain a cloud's thin fringe keeps the terrain's distance (the composite fogs by this depth: a
+            // fringe at cloud distance left an unfogged ring round every cloud seen from above); the body takes it
+            if (cl.a < (surface < 1e29 ? 0.5 : 0.99)) depth = min(depth, clDepth);
         }
     }
     outSurface[pix] = surface;

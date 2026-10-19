@@ -27,6 +27,19 @@ float atlasDepthAt(vec2 uv) {
     ivec2 sz = textureSize(atlasDepth, 0);
     return texelFetch(atlasDepth, clamp(ivec2(uv * vec2(sz)), ivec2(0), sz - 1), 0).r;
 }
+
+// at a silhouette the colour is a bilinear blend of terrain and sky texels: the terrain's distance there is the
+// nearest of the four taps that hold something (the nearest texel may be sky, 1e30)
+float atlasEdgeDepth(vec2 uv) {
+    ivec2 sz = textureSize(atlasDepth, 0);
+    ivec2 i = ivec2(floor(uv * vec2(sz) - 0.5)), m = sz - 1;
+    float d = 1e30;
+    for (int k = 0; k < 4; k++) {
+        ivec2 q = clamp(i + ivec2(k & 1, k >> 1), ivec2(0), m);
+        if (texelFetch(atlasColor, q, 0).a > 0.0) d = min(d, texelFetch(atlasDepth, q, 0).r);
+    }
+    return d;
+}
 #else
 bool atlasPresent() { return false; }
 vec4 atlasColorAt(vec2 uv) { return vec4(0.0); }

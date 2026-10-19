@@ -76,6 +76,11 @@ vec3 sceneAt(vec2 uv, vec3 sun, bool marched) {
     float dist = sky ? 1e30 : length(vp);
     if (!sky) col = applyAerial(col, dir, sun, dist, cameraPosition.y, rainStrength);
     float fogDist = dist;
+    // a far-field silhouette pixel: part far terrain, part what is behind it. Each part is fogged at its own distance
+    // (one fog distance for the blend left a dark rim or a bright halo around every far object)
+    bool farEdge = false;
+    vec4 edgeFar = vec4(0.0);
+    float edgeDist = 1e30;
 #ifdef ATLAS_FAR_FIELD
     if (atlasPresent()) {
     vec4 farc = atlasColorAt(uv);
@@ -83,6 +88,11 @@ vec3 sceneAt(vec2 uv, vec3 sun, bool marched) {
     vec3 over = col * (1.0 - farc.a) + farc.rgb;
     float handEnd = far - 16.0, handStart = handEnd - ATLAS_HANDOFF_BAND;
     if (dist >= handStart && dist < handEnd) col = mix(col, over, smoothstep(handStart, handEnd, dist));
+    else if (farc.a > 0.002 && farc.a < 0.998 && (sky || dist >= atlasEdgeDepth(uv))) {
+        farEdge = true;  // col stays what is behind; the far part is fogged and laid over at the end
+        edgeFar = farc;
+        edgeDist = atlasEdgeDepth(uv);
+    }
     else if (sky || dist >= farDist) {
         col = over;
         fogDist = min(dist, farDist);
@@ -96,8 +106,14 @@ vec3 sceneAt(vec2 uv, vec3 sun, bool marched) {
     }
     if (sky && fogDist >= 1e29) col += lightningSky(dir, outdoorExposure(cameraPosition, cameraPosition));
     else if (fogDist >= far) col += lightningSky(dir, outdoorExposure(cameraPosition, cameraPosition)) * 0.35;  // on the far field
-    if (isEyeInWater == 0)
+    if (isEyeInWater == 0) {
         col = applyMedia(col, dir, fogDist, sun, cameraPosition, wetness, rainStrength, airClock(), ign(gl_FragCoord.xy, 0.0), marched);
+        if (farEdge) {  // the far part at its own distance: media(c) = c * T + S, so the premultiplied part is far * T + S * a
+            vec3 s0 = applyMedia(vec3(0.0), dir, edgeDist, sun, cameraPosition, wetness, rainStrength, airClock(), ign(gl_FragCoord.xy, 0.0), marched);
+            vec3 t1 = applyMedia(vec3(1.0), dir, edgeDist, sun, cameraPosition, wetness, rainStrength, airClock(), ign(gl_FragCoord.xy, 0.0), marched) - s0;
+            col = col * (1.0 - edgeFar.a) + edgeFar.rgb * t1 + s0 * edgeFar.a;
+        }
+    } else if (farEdge) col = col * (1.0 - edgeFar.a) + edgeFar.rgb;
     return col;
 }
 
