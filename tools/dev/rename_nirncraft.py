@@ -23,6 +23,7 @@ import subprocess
 import sys
 from pathlib import Path
 
+ALWAYS_SKIP = {".git", ".claude", "node_modules", "__pycache__", ".gradle", ".work", ".reference"}
 SKIP_DIRS = {".git", ".claude", "build", "dist", "logs", "node_modules", "__pycache__", ".gradle", ".work", "out",
              "build-linux", "run", ".reference", "gen"}
 BINARY = {".png", ".jpg", ".jpeg", ".gif", ".bin", ".jar", ".dll", ".so", ".exe", ".zip", ".nbt", ".ogg", ".wav",
@@ -86,8 +87,12 @@ def new_rel(rel):
 
 def walk(root):
     for dp, dn, fn in os.walk(root):
-        dn[:] = [d for d in dn if d not in SKIP_DIRS and not (Path(dp) / d).is_symlink()]
+        in_src = "src" in Path(dp).parts  # source packages may be named build / out / run (explore/build)
+        dn[:] = [d for d in dn if not (Path(dp) / d).is_symlink()
+                 and d not in ALWAYS_SKIP and (in_src or d not in SKIP_DIRS)]
         for f in fn:
+            if f == ".git":
+                continue  # a worktree's .git is a file
             yield Path(dp) / f
 
 
@@ -135,7 +140,8 @@ def main():
             os.replace(root / rel, dst)
     if a.apply:  # empty old directories
         for dp, dn, fn in sorted(os.walk(root), key=lambda t: -t[0].count(os.sep)):
-            if any(s in Path(dp).parts for s in SKIP_DIRS):
+            rp = Path(dp).relative_to(root).parts
+            if any(s in rp for s in ALWAYS_SKIP) or ("src" not in rp and any(s in rp for s in SKIP_DIRS)):
                 continue
             if not dn and not fn and re.search(r"(?i)skycraft|(?<![a-z])aether(?![a-z])", Path(dp).name):
                 os.rmdir(dp)
