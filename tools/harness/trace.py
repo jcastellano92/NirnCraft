@@ -31,8 +31,8 @@ def test(key):
     _tail.clear()
 
 
-def step(kind, **data):
-    rec = {"t": time.time(), "at": time.strftime("%H:%M:%S"), "step": kind, "test": _test["key"], **data}
+def step(_step, **data):
+    rec = {"t": time.time(), "at": time.strftime("%H:%M:%S"), "step": _step, "test": _test["key"], **data}
     try:
         DIR.mkdir(parents=True, exist_ok=True)
         with open(RUN, "a", encoding="utf-8") as f:
