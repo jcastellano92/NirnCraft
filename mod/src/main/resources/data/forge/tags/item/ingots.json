@@ -10,9 +10,11 @@
     "#forge:ingots/silver",
     "#forge:ingots/steel",
     "#forge:ingots/dwarven_metal",
+    "minecraft:brick",
     "#c:ingots/copper",
     "#c:ingots/gold",
     "#c:ingots/iron",
-    "#c:ingots/netherite"
+    "#c:ingots/netherite",
+    "minecraft:nether_brick"
   ]
 }
