@@ -1,8 +1,11 @@
-"""Minimal Anvil (.mca) reader for Minecraft 1.18-1.20 worlds: stdlib + numpy only.
+"""Minimal Anvil (.mca) reader for Minecraft 1.18+ worlds: stdlib + numpy only. Finds the region folder of 26.3
+(world/dimensions/minecraft/overworld/region) and of 1.20.1 (world/region).
 Use: w = World(world_dir); arr = w.box(x1,z1,x2,z2,y1,y2) -> uint16 [y,z,x] of block ids,
 w.names[id] = 'minecraft:stone'. Also w.block_entities(x1,z1,x2,z2)."""
+import glob
 import os
 import struct
+import sys
 import zlib
 
 import numpy as np
@@ -63,10 +66,27 @@ def _unpack(longs, count, bits):
     return vals.reshape(-1)[:count].astype(np.int32)
 
 
+def region_dir(d, dimension='minecraft/overworld'):
+    """The region folder of a world: 26.3 stores world/dimensions/<ns>/<dim>/region, 1.20.1 world/region (overworld),
+    and a region folder itself is accepted too. None when there is none."""
+    cands = [os.path.join(d, 'dimensions', *dimension.split('/'), 'region')]
+    if dimension == 'minecraft/overworld':
+        cands.append(os.path.join(d, 'region'))
+    for r in cands:
+        if os.path.isdir(r):
+            return r
+    if glob.glob(os.path.join(d, 'r.*.mca')):
+        return d
+    return None
+
+
 class World:
-    def __init__(self, d):
-        r = os.path.join(d, 'region')
-        self.rdir = r if os.path.isdir(r) else d
+    def __init__(self, d, dimension='minecraft/overworld'):
+        r = region_dir(d, dimension)
+        if r is None:
+            print('mca: no region files in %s (looked for dimensions/%s/region, region/ and r.*.mca)' % (d, dimension),
+                  file=sys.stderr)
+        self.rdir = r or d
         self.names = ['minecraft:air']
         self.idx = {'minecraft:air': 0}
         self._reg = {}

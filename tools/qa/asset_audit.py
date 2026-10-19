@@ -49,10 +49,17 @@ JAVA = MAIN / "java"
 LANG = MAIN / "lang" / "nirncraft"
 DUMP_NAME = "nirncraft-asset-audit.json"
 DUMP_CANDIDATES = [ROOT / "mod" / "run" / DUMP_NAME, ROOT / "mod" / "run" / "devworld" / DUMP_NAME]
-VANILLA_JAR_GLOBS = [
-    Path.home() / ".gradle/caches/forge_gradle/minecraft_repo/versions/1.20.1/client-extra.jar",
-    Path.home() / ".gradle/caches/forge_gradle/minecraft_repo/versions/1.20.1/client.jar",
-]
+
+def _vanilla_jars():
+    """The Minecraft 26.3 client jar (tools/qa/mc263.py: toolchains/ref/mc26.3 or the moddev artifacts). Never the
+    1.20.1 Forge cache: its models and textures differ from 26.3 and would verify against the wrong game."""
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    import mc263
+    jar = mc263.client_jar()
+    return ([jar] if jar else []), mc263.missing()
+
+
+VANILLA_JAR_GLOBS, VANILLA_MISSING = _vanilla_jars()
 NS = "nirncraft"
 RID = re.compile(r"(?<![A-Za-z0-9_.:/-])#?nirncraft:([a-z0-9_./-]+)")
 
@@ -418,7 +425,7 @@ def audit(args):
     vanilla = Vanilla()
     A = Assets(vanilla, rep)
     if not vanilla.ok:
-        rep.w("setup", "vanilla client jar not found: minecraft: references are not verified")
+        rep.w("setup", f"{VANILLA_MISSING}: minecraft: references are not verified")
 
     # ---- the registry
     dump = None

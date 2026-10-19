@@ -3,7 +3,7 @@
 Usage: py -3 tools/explore/gen_explore_data.py
 
 Writes (all under mod/src/main/):
-  resources/data/nirncraft/loot_tables/explore/*.json        minor-site loot
+  resources/data/nirncraft/loot_table/explore/*.json         minor-site loot
   resources/data/nirncraft/worldgen/{configured,placed}_feature/minor_site.json
   resources/data/nirncraft/forge/biome_modifier/explore_minor_sites.json
   resources/data/nirncraft/loot_modifiers/explore_skill_books.json (+ entry in forge global_loot_modifiers.json)
