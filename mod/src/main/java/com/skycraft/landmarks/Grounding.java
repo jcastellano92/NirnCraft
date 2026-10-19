@@ -389,6 +389,16 @@ public final class Grounding {
     public static Repair fix(WorldGenLevel level, int x0, int z0, int x1, int z1, Predicate<BlockPos> writable, BlockState fallback) {
         // generation regions keep the *_WG heightmaps current; finished chunks (dev commands, showcases) the live ones
         Heightmap.Types surface = level instanceof net.minecraft.server.level.WorldGenRegion ? Heightmap.Types.WORLD_SURFACE_WG : Heightmap.Types.WORLD_SURFACE;
+        if (level instanceof net.minecraft.server.level.WorldGenRegion region) {
+            // 26.3: a feature may only read the 3x3 chunks it writes; past them nothing is written anyway, and the box
+            // sides count as terrain (the world continues there), so the scan stops at the write zone
+            net.minecraft.world.level.ChunkPos c = region.getCenter();
+            x0 = Math.max(x0, (c.x() - 1) << 4);
+            z0 = Math.max(z0, (c.z() - 1) << 4);
+            x1 = Math.min(x1, ((c.x() + 2) << 4) - 1);
+            z1 = Math.min(z1, ((c.z() + 2) << 4) - 1);
+            if (x0 > x1 || z0 > z1) return Repair.NONE;
+        }
         List<Part> parts = scan(level, x0, z0, x1, z1, surface, 1);
         if (parts.isEmpty()) return Repair.NONE;
         int filled = 0, removed = 0, added = 0, gone = 0;

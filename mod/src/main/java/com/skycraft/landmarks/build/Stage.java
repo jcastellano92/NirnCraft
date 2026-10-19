@@ -79,7 +79,7 @@ public final class Stage {
         this.size = H.between(seed, 11, 0.75, 1.3);
         this.wear = H.between(seed, 12, 0.0, 1.0);
         this.grow = H.between(seed, 13, 0.0, 1.0);
-        BlockState ground = level.getBlockState(new BlockPos(site.x(), b.y - 1, site.z()));
+        BlockState ground = com.skycraft.worldgen.SafeReads.state(level, new BlockPos(site.x(), b.y - 1, site.z()));
         boolean snow = fam.equals("tundra") || ground.is(Blocks.SNOW_BLOCK) || ground.is(Blocks.SNOW) || ground.is(Blocks.POWDER_SNOW);
         this.snowy = snow;
         this.sandy = ground.is(BlockTags.SAND) || fam.equals("desert") || ground.is(Blocks.SANDSTONE);
@@ -185,7 +185,7 @@ public final class Stage {
     }
 
     public BlockState get(int dx, int dy, int dz) {
-        return level.getBlockState(b.at(dx, dy, dz));
+        return com.skycraft.worldgen.SafeReads.state(level, b.at(dx, dy, dz));
     }
 
     /** A weathered rock block for the position: stratified when the set has bands, with moss and cracks by wear. */
@@ -235,7 +235,7 @@ public final class Stage {
 
     public boolean solidAt(int dx, int dy, int dz) {
         BlockPos p = b.at(dx, dy, dz);
-        BlockState s = level.getBlockState(p);
+        BlockState s = com.skycraft.worldgen.SafeReads.state(level, p);
         return !s.isAir() && !s.canBeReplaced() && s.getFluidState().isEmpty();
     }
 

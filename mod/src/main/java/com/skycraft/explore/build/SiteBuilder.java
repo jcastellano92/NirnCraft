@@ -93,6 +93,11 @@ public final class SiteBuilder {
         return local.getAxis().isVertical() ? local : rot.rotate(local);
     }
 
+    /** True when column (x, z) lies in the 3x3 chunks this builder may write (whatever the height). */
+    public boolean writableColumn(int x, int z) {
+        return Math.abs((x >> 4) - chunkX) <= 1 && Math.abs((z >> 4) - chunkZ) <= 1;
+    }
+
     public boolean writable(BlockPos p) {
         return Math.abs((p.getX() >> 4) - chunkX) <= 1 && Math.abs((p.getZ() >> 4) - chunkZ) <= 1
                 && p.getY() > level.getMinY() && p.getY() < (level.getMaxY()+1);
@@ -103,13 +108,13 @@ public final class SiteBuilder {
     /** Height of the solid natural ground at world column (x, z): skips trees, plants, snow, and placed props. */
     public int groundAt(int x, int z) {
         int top = Math.max(
-                level.getHeight(Heightmap.Types.WORLD_SURFACE_WG, x, z),
-                level.getHeight(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z)
+                com.skycraft.worldgen.SafeReads.height(level, Heightmap.Types.WORLD_SURFACE_WG, x, z),
+                com.skycraft.worldgen.SafeReads.height(level, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z)
         ) - 1;
         BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos(x, top, z);
         int floor = level.getMinY() + 4;
         while (p.getY() > floor) {
-            BlockState s = level.getBlockState(p);
+            BlockState s = com.skycraft.worldgen.SafeReads.state(level, p);
             if (!s.getFluidState().isEmpty()) return p.getY(); // water: the caller checks with waterAt
             if (!s.isAir() && !s.canBeReplaced() && !isNonTerrainPropOrPlant(s)) {
                 return p.getY();
@@ -154,8 +159,8 @@ public final class SiteBuilder {
     public boolean waterAt(int dx, int dz) {
         BlockPos p = at(dx, 0, dz);
         int g = groundAt(p.getX(), p.getZ());
-        return !level.getFluidState(new BlockPos(p.getX(), g, p.getZ())).isEmpty()
-                || !level.getFluidState(new BlockPos(p.getX(), g + 1, p.getZ())).isEmpty();
+        return !com.skycraft.worldgen.SafeReads.fluid(level, new BlockPos(p.getX(), g, p.getZ())).isEmpty()
+                || !com.skycraft.worldgen.SafeReads.fluid(level, new BlockPos(p.getX(), g + 1, p.getZ())).isEmpty();
     }
 
     /**
@@ -178,7 +183,7 @@ public final class SiteBuilder {
                 for (int dy = 0; dy <= height; dy++) {
                     BlockPos p = at(dx, dy, dz);
                     if (!writable(p)) continue;
-                    BlockState s = level.getBlockState(p);
+                    BlockState s = com.skycraft.worldgen.SafeReads.state(level, p);
                     // plants, trees and the rock of a slope above the base level all go
                     if (s.isAir() || !s.getFluidState().isEmpty()) continue;
                     level.setBlock(p, Blocks.AIR.defaultBlockState(), 2);
@@ -213,7 +218,7 @@ public final class SiteBuilder {
 
     /** Water or lava at {@code p}, or water directly over it (a lake bed under the footprint). */
     public boolean inFluid(BlockPos p) {
-        return !level.getFluidState(p).isEmpty() || !level.getFluidState(p.above()).isEmpty();
+        return !com.skycraft.worldgen.SafeReads.fluid(level, p).isEmpty() || !com.skycraft.worldgen.SafeReads.fluid(level, p.above()).isEmpty();
     }
 
     /**
@@ -232,7 +237,7 @@ public final class SiteBuilder {
 
     /** Solid natural footing: a full block, not water, not a tree. */
     public boolean solidGround(BlockPos p) {
-        BlockState s = level.getBlockState(p);
+        BlockState s = com.skycraft.worldgen.SafeReads.state(level, p);
         return s.isSolidRender() && s.getFluidState().isEmpty() && !s.is(BlockTags.LOGS) && !s.is(BlockTags.LEAVES);
     }
 
@@ -240,7 +245,7 @@ public final class SiteBuilder {
     public void pillarDown(int dx, int dy, int dz, BlockState state) {
         BlockPos p = at(dx, dy - 1, dz);
         for (int d = 0; d < 24 && writable(p); d++) {
-            BlockState s = level.getBlockState(p);
+            BlockState s = com.skycraft.worldgen.SafeReads.state(level, p);
             if (s.isSolidRender() && s.getFluidState().isEmpty() && !s.is(BlockTags.LOGS) && !s.is(BlockTags.LEAVES)) break;
             if (!wet && !s.getFluidState().isEmpty()) break;
             level.setBlock(p, state, 2);
@@ -268,7 +273,7 @@ public final class SiteBuilder {
 
     public void put(BlockPos p, BlockState state) {
         if (!writable(p)) return;
-        BlockState now = level.getBlockState(p);
+        BlockState now = com.skycraft.worldgen.SafeReads.state(level, p);
         if (!wet && !now.getFluidState().isEmpty()) return;
         if (now.getFluidState().is(FluidTags.WATER) && state.hasProperty(BlockStateProperties.WATERLOGGED)) {
             state = state.setValue(BlockStateProperties.WATERLOGGED, true);
@@ -321,7 +326,7 @@ public final class SiteBuilder {
         BlockState fill = pal.stone().defaultBlockState();
         BlockPos q = below;
         for (int i = 0; i < 6 && writable(q); i++) {
-            BlockState s = level.getBlockState(q);
+            BlockState s = com.skycraft.worldgen.SafeReads.state(level, q);
             if (solidSupport(q)) break;
             if (!s.getFluidState().isEmpty() || !(s.isAir() || s.canBeReplaced())) return false;
             level.setBlock(q, fill, 2);
@@ -331,7 +336,7 @@ public final class SiteBuilder {
     }
 
     private boolean solidSupport(BlockPos p) {
-        BlockState s = level.getBlockState(p);
+        BlockState s = com.skycraft.worldgen.SafeReads.state(level, p);
         return !s.isAir() && !s.canBeReplaced() && s.getFluidState().isEmpty() && s.isFaceSturdy(level, p, Direction.UP);
     }
 
@@ -468,15 +473,15 @@ public final class SiteBuilder {
             if (!writable(col)) continue;
             int gy = groundAt(col.getX(), col.getZ());
             BlockPos p = new BlockPos(col.getX(), gy + 1, col.getZ());
-            BlockState now = level.getBlockState(p);
-            if (!level.getFluidState(p).isEmpty() || !level.getFluidState(p.below()).isEmpty()) continue;
+            BlockState now = com.skycraft.worldgen.SafeReads.state(level, p);
+            if (!com.skycraft.worldgen.SafeReads.fluid(level, p).isEmpty() || !com.skycraft.worldgen.SafeReads.fluid(level, p.below()).isEmpty()) continue;
             if (now.isAir() || (replacePlants && now.canBeReplaced())) put(p, state);
         }
     }
 
     /** True when local (dx, dy, dz) is air or a replaceable plant. */
     public boolean free(int dx, int dy, int dz) {
-        BlockState s = level.getBlockState(at(dx, dy, dz));
+        BlockState s = com.skycraft.worldgen.SafeReads.state(level, at(dx, dy, dz));
         return s.isAir() || s.canBeReplaced();
     }
 
