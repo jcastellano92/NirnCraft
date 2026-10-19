@@ -89,7 +89,7 @@ unpack state is saved and restored). Host copies match zero-copy bit for bit; th
 waiting (no CPU wait, one frame of far-field lag). **Device choice:** `atlas_create` on the render thread picks the
 Vulkan device whose UUID the current GL context reports (hybrid laptops; a Deck or Fedora box with lavapipe
 installed beside RADV), else discrete > integrated > virtual > CPU; `ATLAS_VK_DEVICE=<index|name>` overrides.
-Devices below the baseline (Vulkan 1.2, `shaderInt64`, 23 storage buffers per stage, 8×8 work groups) are listed
+Devices below the baseline (Vulkan 1.2, `shaderInt64`, 24 storage buffers per stage (23 before ABI 0.14 added the groups), 8×8 work groups) are listed
 with the reason; `atlas_last_error(NULL)` reports a failed create.
 
 **Baseline:** the SPIR-V is 1.5 with only the `Shader` and `Int64` capabilities (spirv-val clean for vulkan1.2; no

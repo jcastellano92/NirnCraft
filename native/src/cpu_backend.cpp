@@ -65,6 +65,7 @@ public:
         else g.nearDepth = view(dummyDepth_);
         g.actors = view(in.actors);
         g.heightMip = view(s.heightMip);
+        g.groupData = {reinterpret_cast<Uint4*>(const_cast<uint32_t*>(s.groups.data())), s.groups.size() / 4};
         // the half-resolution cloud pass reads the last frame's surfaces (none yet, or after a resize: no limit)
         uint32_t dv = (frame.dims[2] & 0x80u) ? 4u : 2u;  // FRAME_CLOUDS_QUARTER
         size_t cn = size_t((w + dv - 1) / dv) * ((h + dv - 1) / dv);

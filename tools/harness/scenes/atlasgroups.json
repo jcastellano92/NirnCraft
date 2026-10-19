@@ -1,0 +1,131 @@
+{
+  "suite": "lab",
+  "description": "The content-shaped groups (ATLAS_FRAME_GROUPS, docs/ATLAS-LOD.md) rendered offline by atlas_render from the real exports, against atlas_truth (vsTruth in the report) and the live capture (the twin)",
+  "defaults": {
+    "tier": "lab",
+    "group": "lab",
+    "variants": [
+      "shaders"
+    ]
+  },
+  "scenes": [
+    {
+      "id": "atlasgroups-falkreath-view",
+      "title": "Groups vs the exact reference to 1 km: the export's sections as the game feeds them, the live capture's camera",
+      "tags": [
+        "feature:farfield",
+        "suite:atlaslab",
+        "place:falkreath",
+        "feature:horizon"
+      ],
+      "tier": "lab",
+      "lab": {
+        "tool": "atlas_render",
+        "blocks": "@game/nirncraft-atlaslab/blocks.bin",
+        "volume": "@game/nirncraft-atlaslab/falkreath-view.als",
+        "groups": 1,
+        "shade": "mc",
+        "radius": 0,
+        "spp": 4,
+        "truth": "native/build/Release/atlas_truth.exe",
+        "quads": "@game/nirncraft-atlaslab/quads.bin",
+        "sprites": "@game/nirncraft-atlaslab/sprites.bin",
+        "truthvolume": "@game/nirncraft-atlaslab/falkreath-view.als2"
+      },
+      "camera_from": {
+        "scene": "atlaslab-export",
+        "variant": "vanilla"
+      },
+      "after": [
+        "atlaslab-export"
+      ],
+      "wait": 0,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "native/tools/atlas_render.cpp:1",
+      "note": "report.vsTruth: dE by distance band against atlas_truth's frame of the same camera (4 jittered samples a pixel each, the groups' dither averaged as the pack's TAA averages it); shade=mc draws the texel colours with vanilla's face shade, so the remaining difference is the representation plus what vanilla adds (smooth light, the lightmap under roofs and crowns); the harness's own liveDEByBand compares with the live vanilla picture, whose far bands are today's far field"
+    },
+    {
+      "id": "atlasgroups-falkreath-view-old",
+      "title": "The same view through today's voxel path (groups=0): the baseline the groups are measured against",
+      "tags": [
+        "feature:farfield",
+        "suite:atlaslab",
+        "place:falkreath",
+        "feature:horizon"
+      ],
+      "tier": "lab",
+      "lab": {
+        "tool": "atlas_render",
+        "blocks": "@game/nirncraft-atlaslab/blocks.bin",
+        "volume": "@game/nirncraft-atlaslab/falkreath-view.als",
+        "groups": 0,
+        "shade": "mc",
+        "radius": 0,
+        "spp": 4,
+        "truth": "native/build/Release/atlas_truth.exe",
+        "quads": "@game/nirncraft-atlaslab/quads.bin",
+        "sprites": "@game/nirncraft-atlaslab/sprites.bin",
+        "truthvolume": "@game/nirncraft-atlaslab/falkreath-view.als2"
+      },
+      "camera_from": {
+        "scene": "atlaslab-export",
+        "variant": "vanilla"
+      },
+      "after": [
+        "atlaslab-export"
+      ],
+      "wait": 0,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "native/tools/atlas_render.cpp:1",
+      "note": "the old path over the same materials (palette colour per block, no shapes): the groups' gain is the difference between the two reports' vsTruth"
+    },
+    {
+      "id": "atlasgroups-falkreath-horizon-vulkan",
+      "title": "Groups to the horizon on Vulkan at 1920x1080: Falkreath's real sections over the preview terrain, frame time and memory",
+      "tags": [
+        "feature:farfield",
+        "suite:atlaslab",
+        "place:falkreath",
+        "feature:horizon",
+        "perf"
+      ],
+      "tier": "lab",
+      "lab": {
+        "tool": "atlas_render",
+        "blocks": "@game/nirncraft-atlaslab/blocks.bin",
+        "volume": "@game/nirncraft-atlaslab/falkreath-view.als",
+        "groups": 1,
+        "shade": "atlas",
+        "backend": "vulkan",
+        "x": -794.5,
+        "z": 1250.5,
+        "y": 200,
+        "yaw": 180,
+        "pitch": -3,
+        "w": 1920,
+        "h": 1080,
+        "frames": 32,
+        "flags": "shadows,atmos,sky"
+      },
+      "after": [
+        "atlaslab-export"
+      ],
+      "wait": 0,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "native/tools/atlas_render.cpp:1",
+      "note": "report: frameMs (fastest of 32, GPU timestamps) and frameMedianMs, groups.bytes / maxRegionBytes (memory), groupsBuildMs (every tree of the clipmap, all threads), buildMs (the voxel path's regions); skipped while the GPU is busy"
+    }
+  ]
+}

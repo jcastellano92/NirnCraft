@@ -1,0 +1,414 @@
+// The in-game exports (AtlasLabExport: /nirncraft-atlaslab blocks, view, here) loaded into atlas_core the way the game
+// feeds it (docs/ATLAS-LOD.md, "The renderer's groups"): every block state the export uses becomes a far material
+// (its mean colour in the palette, its 4x4x4 shape and face tiles through atlas_set_material_shapes, tints applied as
+// the lab applies them), the exported sections go up with atlas_upload_section (only the blocks the game's far field
+// keeps, AtlasSections.kept, unless keep=all), and the column tiles under them are replaced by ones derived from the
+// sections (the real ground and its blocks), so the preview raster's dressing shows only outside the export.
+// Plus what atlas_render needs to compare a frame with atlas_truth's: a reader for the stored-deflate PNGs our tools
+// write and the harness's colour metric (CIE76 in D65 Lab, results.py _lab) by distance band.
+#pragma once
+#include <algorithm>
+#include <array>
+#include <cmath>
+#include <cstdint>
+#include <cstdio>
+#include <cstring>
+#include <fstream>
+#include <map>
+#include <string>
+#include <unordered_map>
+#include <vector>
+
+#include "atlas/atlas.h"
+
+namespace exportdata {
+
+struct State {
+    bool present = false;
+    std::string name;
+    uint8_t cls = 0, emit = 0, flags = 0, tint = 0;
+    uint64_t mask = 0;
+    uint32_t mean = 0;
+    uint32_t faces[6][16] = {};
+};
+
+inline bool loadBlocks(const std::string& path, std::vector<State>& lib) {
+    std::ifstream f(path, std::ios::binary);
+    if (!f) return false;
+    std::vector<uint8_t> d((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
+    if (d.size() < 8 || std::memcmp(d.data(), "ALB1", 4) != 0) return false;
+    size_t p = 4;
+    auto get = [&](void* out, size_t n) {
+        if (p + n > d.size()) return false;
+        std::memcpy(out, &d[p], n);
+        p += n;
+        return true;
+    };
+    uint32_t n = 0;
+    get(&n, 4);
+    for (uint32_t i = 0; i < n; i++) {
+        uint32_t id = 0;
+        uint16_t nl = 0;
+        if (!get(&id, 4) || !get(&nl, 2) || p + nl > d.size()) return false;
+        if (id >= lib.size()) lib.resize(size_t(id) + 1);
+        State& s = lib[id];
+        s.present = true;
+        s.name.assign(reinterpret_cast<const char*>(&d[p]), nl);
+        p += nl;
+        if (!get(&s.cls, 1) || !get(&s.emit, 1) || !get(&s.flags, 1) || !get(&s.tint, 1) || !get(&s.mask, 8) ||
+            !get(&s.mean, 4) || !get(s.faces, sizeof s.faces))
+            return false;
+    }
+    return true;
+}
+
+inline bool isAir(const State& s) {
+    return s.name.rfind("Block{minecraft:air}", 0) == 0 || s.name.rfind("Block{minecraft:cave_air}", 0) == 0 ||
+           s.name.rfind("Block{minecraft:void_air}", 0) == 0;
+}
+
+// what the game's far field keeps as a voxel (AtlasSections.kept, as atlas_lab reads it from the library): solids,
+// leaves, fluids, lights, slabs and stairs
+inline bool keptByGame(const State& s) {
+    if (isAir(s)) return false;
+    bool water = s.cls == 2 && !(s.flags & 4);
+    if (!s.mask && !water) return false;
+    return s.cls <= 3 || s.name.find("_slab") != std::string::npos || s.name.find("_stairs") != std::string::npos;
+}
+
+inline bool anyContent(const State& s) {
+    bool water = s.cls == 2 && !(s.flags & 4);
+    return !isAir(s) && (s.mask != 0 || water);
+}
+
+// ---- volumes: ALS1 / ALS2 sparse views, ALV1 / ALV2 dense boxes, as sections --------------------------------------
+
+struct Section {
+    int cx, sy, cz;
+    std::vector<uint32_t> pal;
+    std::vector<uint16_t> idx;  // x + 16 * (z + 16 * y); empty: all pal[0]
+    uint32_t at(int i) const { return idx.empty() ? pal[0] : pal[idx[size_t(i)]]; }
+};
+
+inline bool loadVolume(const std::string& path, std::vector<Section>& out) {
+    std::ifstream f(path, std::ios::binary);
+    if (!f) return false;
+    std::vector<uint8_t> d((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
+    if (d.size() < 8) return false;
+    size_t p = 4;
+    bool ok = true;
+    auto get = [&](void* o, size_t n) {
+        if (p + n > d.size()) {
+            ok = false;
+            std::memset(o, 0, n);
+            return;
+        }
+        std::memcpy(o, &d[p], n);
+        p += n;
+    };
+    auto i32 = [&]() { int32_t v; get(&v, 4); return v; };
+    auto u32 = [&]() { uint32_t v; get(&v, 4); return v; };
+    auto u16 = [&]() { uint16_t v; get(&v, 2); return v; };
+    auto u8 = [&]() { uint8_t v; get(&v, 1); return v; };
+    bool als1 = std::memcmp(d.data(), "ALS1", 4) == 0, als2 = std::memcmp(d.data(), "ALS2", 4) == 0;
+    bool alv1 = std::memcmp(d.data(), "ALV1", 4) == 0, alv2 = std::memcmp(d.data(), "ALV2", 4) == 0;
+    if (als1 || als2) {
+        if (als2) u32(), u32();  // flags, blend radius
+        uint32_t n = u32();
+        out.reserve(n);
+        for (uint32_t k = 0; k < n && ok; k++) {
+            Section s;
+            s.cx = i32(), s.sy = i32(), s.cz = i32();
+            uint16_t pn = u16();
+            s.pal.resize(pn);
+            for (auto& v : s.pal) v = u32();
+            if (pn > 1) {
+                s.idx.resize(4096);
+                for (auto& v : s.idx) v = pn <= 256 ? u8() : u16();
+            }
+            if (als2) {
+                uint8_t sf = u8();
+                if (sf & 1) p += 4096;  // light
+                if (sf & 2) p += 4096;  // variants
+            }
+            if (!s.pal.empty()) out.push_back(std::move(s));
+        }
+        return ok;
+    }
+    if (alv1 || alv2) {
+        int x0 = i32(), y0 = i32(), z0 = i32(), sx = i32(), sy = i32(), sz = i32();
+        if (alv2) u32();
+        size_t n = size_t(sx) * sy * sz;
+        if (p + n * 4 > d.size()) return false;
+        const uint8_t* ids = &d[p];
+        auto id = [&](int x, int y, int z) {
+            uint32_t v;
+            std::memcpy(&v, ids + (size_t(x) + size_t(sx) * (size_t(z) + size_t(sz) * size_t(y))) * 4, 4);
+            return v;
+        };
+        // section-aligned cover of the box; outside it air
+        auto fd = [](int a) { return a >= 0 ? a / 16 : -((-a + 15) / 16); };
+        for (int gy = fd(y0); gy <= fd(y0 + sy - 1); gy++)
+            for (int gz = fd(z0); gz <= fd(z0 + sz - 1); gz++)
+                for (int gx = fd(x0); gx <= fd(x0 + sx - 1); gx++) {
+                    Section s{gx, gy, gz, {0}, std::vector<uint16_t>(4096, 0)};
+                    std::map<uint32_t, uint16_t> pal{{0u, uint16_t(0)}};
+                    bool any = false;
+                    for (int ly = 0; ly < 16; ly++)
+                        for (int lz = 0; lz < 16; lz++)
+                            for (int lx = 0; lx < 16; lx++) {
+                                int x = gx * 16 + lx - x0, y = gy * 16 + ly - y0, z = gz * 16 + lz - z0;
+                                if (x < 0 || y < 0 || z < 0 || x >= sx || y >= sy || z >= sz) continue;
+                                uint32_t v = id(x, y, z);
+                                auto it = pal.find(v);
+                                if (it == pal.end()) {
+                                    it = pal.emplace(v, uint16_t(s.pal.size())).first;
+                                    s.pal.push_back(v);
+                                }
+                                s.idx[size_t(lx + 16 * (lz + 16 * ly))] = it->second;
+                                any |= v != 0;
+                            }
+                    if (any) out.push_back(std::move(s));
+                }
+        return true;
+    }
+    return false;
+}
+
+// the tints the game blended at the export's centre (its .json beside it), "RRGGBB"
+inline uint32_t jsonColour(const std::string& path, const char* key, uint32_t def) {
+    std::ifstream f(path);
+    std::string txt((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
+    auto i = txt.find(std::string("\"") + key + "\"");
+    if (i == std::string::npos) return def;
+    auto q = txt.find('"', txt.find(':', i) + 1);
+    return q == std::string::npos ? def : uint32_t(std::strtoul(txt.c_str() + q + 1, nullptr, 16));
+}
+
+inline float lin8(uint32_t c) { return std::pow(float(c) / 255.0f, 2.2f); }
+
+inline uint32_t mulTint(uint32_t argb, uint32_t tint) {
+    uint32_t r = ((argb >> 16) & 255) * ((tint >> 16) & 255) / 255, g = ((argb >> 8) & 255) * ((tint >> 8) & 255) / 255,
+             b = (argb & 255) * (tint & 255) / 255;
+    return (argb & 0xFF000000u) | r << 16 | g << 8 | b;
+}
+
+// ---- the export in atlas_core ---------------------------------------------------------------------------------------
+
+struct Loaded {
+    std::unordered_map<uint32_t, uint16_t> matOf;  // state id -> far material (0: not kept)
+    std::unordered_map<uint64_t, std::pair<int, int>> chunks;  // exported chunk columns -> (lowest, highest) section
+    size_t sections = 0, states = 0, shaped = 0;
+    int x0 = 0, z0 = 0, x1 = 0, z1 = 0;  // block bounds of the exported chunks
+    static uint64_t key(int cx, int cz) { return uint64_t(uint32_t(cx)) << 32 | uint32_t(cz); }
+    bool inExport(double x, double z) const {
+        int cx = int(std::floor(x / 16.0)), cz = int(std::floor(z / 16.0));
+        return chunks.count(key(cx, cz)) != 0;
+    }
+};
+
+// Registers the export's states as far materials from `firstMat` on (palette + shapes) and uploads its sections.
+// box (world blocks, inclusive; null: everything): only the blocks inside it exist (one element cut from the export)
+inline bool upload(AtlasContext* ctx, const std::vector<State>& lib, std::vector<Section>& secs, bool keepAll,
+                   uint32_t grass, uint32_t foliage, uint32_t water, uint16_t firstMat, Loaded& out, std::string& why,
+                   const int* box = nullptr) {
+    if (box) {
+        std::vector<Section> kept;
+        for (Section& s : secs) {
+            if (s.cx * 16 + 15 < box[0] || s.cx * 16 > box[3] || s.sy * 16 + 15 < box[1] || s.sy * 16 > box[4] ||
+                s.cz * 16 + 15 < box[2] || s.cz * 16 > box[5])
+                continue;
+            // the blocks outside the box become air (palette entry 0 added as id 0)
+            std::vector<uint16_t> idx(4096);
+            std::vector<uint32_t> pal = s.pal;
+            uint16_t air = uint16_t(pal.size());
+            pal.push_back(0);
+            for (int i = 0; i < 4096; i++) {
+                int x = s.cx * 16 + (i & 15), z = s.cz * 16 + ((i >> 4) & 15), y = s.sy * 16 + (i >> 8);
+                bool in = x >= box[0] && x <= box[3] && y >= box[1] && y <= box[4] && z >= box[2] && z <= box[5];
+                idx[size_t(i)] = in ? (s.idx.empty() ? uint16_t(0) : s.idx[size_t(i)]) : air;
+            }
+            s.pal = std::move(pal);
+            s.idx = std::move(idx);
+            kept.push_back(std::move(s));
+        }
+        secs = std::move(kept);
+    }
+    std::vector<AtlasMaterial> mats;
+    std::vector<AtlasMaterialShape> shapes;
+    auto materialOf = [&](uint32_t id) -> uint16_t {
+        auto it = out.matOf.find(id);
+        if (it != out.matOf.end()) return it->second;
+        uint16_t m = 0;
+        if (id < lib.size() && lib[id].present && (keepAll ? anyContent(lib[id]) : keptByGame(lib[id]))) {
+            const State& s = lib[id];
+            bool wat = s.cls == 2 && !(s.flags & 4);
+            uint32_t tint = s.tint == 1 ? grass : s.tint == 2 ? foliage : s.tint == 3 ? water : 0xFFFFFFu;
+            uint32_t mean = s.mean & 0xFFFFFFu;
+            if (wat) mean = water;
+            else if (!mean) mean = 0x808080u;
+            uint32_t tm = mulTint(0xFF000000u | mean, tint);
+            AtlasMaterial am{};
+            am.albedo[0] = lin8((tm >> 16) & 255);
+            am.albedo[1] = lin8((tm >> 8) & 255);
+            am.albedo[2] = lin8(tm & 255);
+            am.roughness = wat ? 0.05f : 0.85f;
+            am.emissive = s.emit >= 10 ? float(s.emit) / 15.0f : 0.0f;
+            am.cls = wat ? ATLAS_CLASS_WATER : s.emit >= 10 ? ATLAS_CLASS_EMISSIVE : s.cls == 1 ? ATLAS_CLASS_FOLIAGE : ATLAS_CLASS_TERRAIN;
+            AtlasMaterialShape sh{};
+            sh.occupancy = wat ? ~0ull : s.mask;
+            sh.mean = tm;
+            bool partial = false;
+            for (int f = 0; f < 6; f++)
+                for (int t = 0; t < 16; t++) {
+                    uint32_t c = s.faces[f][t];
+                    sh.faces[f][t] = (c >> 24) ? mulTint(c, tint) : 0u;
+                    uint32_t a = c >> 24;
+                    partial |= a > 0 && a < 255;
+                }
+            sh.flags = s.cls == 1 || partial ? ATLAS_SHAPE_CUTOUT : 0u;
+            if (wat) sh.flags = 0;
+            m = uint16_t(firstMat + mats.size());
+            mats.push_back(am);
+            shapes.push_back(sh);
+            out.shaped += sh.occupancy != ~0ull || sh.flags ? 1 : 0;
+        }
+        out.matOf.emplace(id, m);
+        return m;
+    };
+    std::vector<uint16_t> ids(4096);
+    std::vector<std::vector<uint16_t>> conv(secs.size());
+    for (size_t k = 0; k < secs.size(); k++) {
+        const Section& s = secs[k];
+        conv[k].resize(4096);
+        for (int i = 0; i < 4096; i++) conv[k][size_t(i)] = materialOf(s.at(i));
+        auto [it, fresh] = out.chunks.try_emplace(Loaded::key(s.cx, s.cz), s.sy, s.sy);
+        if (!fresh) it->second.first = std::min(it->second.first, s.sy), it->second.second = std::max(it->second.second, s.sy);
+        if (k == 0) out.x0 = s.cx * 16, out.z0 = s.cz * 16, out.x1 = s.cx * 16 + 16, out.z1 = s.cz * 16 + 16;
+        out.x0 = std::min(out.x0, s.cx * 16), out.z0 = std::min(out.z0, s.cz * 16);
+        out.x1 = std::max(out.x1, s.cx * 16 + 16), out.z1 = std::max(out.z1, s.cz * 16 + 16);
+    }
+    if (firstMat + mats.size() > 16383) return why = "too many materials for the brick pool (ids under 16384)", false;
+    if (!mats.empty() && atlas_set_materials(ctx, firstMat, mats.data(), uint32_t(mats.size())) != ATLAS_OK)
+        return why = atlas_last_error(ctx), false;
+    // the shapes (an older core has no such call: the groups then draw plain cubes)
+    if (!shapes.empty() && atlas_set_material_shapes(ctx, firstMat, shapes.data(), uint32_t(shapes.size())) != ATLAS_OK)
+        return why = atlas_last_error(ctx), false;
+    for (size_t k = 0; k < secs.size(); k++) {
+        bool any = false;
+        for (uint16_t v : conv[k]) any |= v != 0;
+        if (!any) continue;
+        if (atlas_upload_section(ctx, secs[k].cx, secs[k].sy, secs[k].cz, conv[k].data()) != ATLAS_OK)
+            return why = atlas_last_error(ctx), false;
+        out.sections++;
+    }
+    out.states = mats.size();
+    return true;
+}
+
+// The ground under the export, per block column: the top of its highest kept block that is not foliage (+1), its
+// material and the one under it; NaN where the export has nothing.
+struct Ground {
+    int x0 = 0, z0 = 0, w = 0, h = 0;
+    std::vector<float> top;
+    std::vector<uint16_t> topMat, underMat;
+    bool at(int x, int z, float& t, uint16_t& m, uint16_t& u) const {
+        x -= x0, z -= z0;
+        if (x < 0 || z < 0 || x >= w || z >= h) return false;
+        size_t i = size_t(z) * size_t(w) + size_t(x);
+        if (std::isnan(top[i])) return false;
+        t = top[i], m = topMat[i], u = underMat[i];
+        return true;
+    }
+};
+
+inline Ground ground(const std::vector<Section>& secs, const std::vector<State>& lib, const Loaded& ld) {
+    Ground g;
+    g.x0 = ld.x0, g.z0 = ld.z0, g.w = ld.x1 - ld.x0, g.h = ld.z1 - ld.z0;
+    size_t n = size_t(g.w) * size_t(g.h);
+    g.top.assign(n, NAN);
+    g.topMat.assign(n, 0);
+    g.underMat.assign(n, 0);
+    std::vector<int> best(n, -100000);
+    for (const Section& s : secs)
+        for (int i = 0; i < 4096; i++) {
+            uint32_t id = s.at(i);
+            if (!id) continue;
+            auto it = ld.matOf.find(id);
+            if (it == ld.matOf.end() || !it->second) continue;
+            if (id < lib.size() && lib[id].cls == 1) continue;  // leaves: not the ground
+            int lx = i & 15, lz = (i >> 4) & 15, ly = i >> 8;
+            int x = s.cx * 16 + lx - g.x0, z = s.cz * 16 + lz - g.z0, y = s.sy * 16 + ly;
+            size_t c = size_t(z) * size_t(g.w) + size_t(x);
+            if (y > best[c]) {
+                if (best[c] == y - 1) g.underMat[c] = g.topMat[c];
+                best[c] = y;
+                g.top[c] = float(y + 1);
+                g.topMat[c] = it->second;
+            }
+        }
+    for (size_t c = 0; c < n; c++)
+        if (!std::isnan(g.top[c]) && !g.underMat[c]) g.underMat[c] = g.topMat[c];
+    return g;
+}
+
+// ---- PNG reading (our tools' stored-deflate PNGs) and the harness's colour metric ----------------------------------
+
+inline bool readPng(const std::string& path, std::vector<uint32_t>& rgba, uint32_t& w, uint32_t& h) {
+    std::ifstream f(path, std::ios::binary);
+    if (!f) return false;
+    std::vector<uint8_t> d((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
+    if (d.size() < 33 || d[1] != 'P') return false;
+    auto be = [&](size_t p) { return uint32_t(d[p]) << 24 | uint32_t(d[p + 1]) << 16 | uint32_t(d[p + 2]) << 8 | d[p + 3]; };
+    size_t p = 8;
+    std::vector<uint8_t> z;
+    uint8_t bitDepth = 0, colour = 0;
+    while (p + 8 <= d.size()) {
+        uint32_t len = be(p);
+        std::string type(reinterpret_cast<const char*>(&d[p + 4]), 4);
+        if (p + 12 + len > d.size()) return false;
+        if (type == "IHDR") w = be(p + 8), h = be(p + 12), bitDepth = d[p + 16], colour = d[p + 17];
+        if (type == "IDAT") z.insert(z.end(), d.begin() + long(p + 8), d.begin() + long(p + 8 + len));
+        p += 12 + len;
+    }
+    if (bitDepth != 8 || (colour != 6 && colour != 2)) return false;
+    int bpp = colour == 6 ? 4 : 3;
+    std::vector<uint8_t> raw;
+    size_t q = 2;  // zlib header
+    for (;;) {
+        if (q + 5 > z.size()) return false;
+        uint8_t hdr = z[q];
+        if ((hdr >> 1) & 3) return false;  // compressed blocks: not ours
+        uint16_t len = uint16_t(z[q + 1] | z[q + 2] << 8);
+        raw.insert(raw.end(), z.begin() + long(q + 5), z.begin() + long(q + 5 + len));
+        q += 5 + len;
+        if (hdr & 1) break;
+    }
+    size_t stride = size_t(w) * bpp + 1;
+    if (raw.size() < stride * h) return false;
+    rgba.resize(size_t(w) * h);
+    for (uint32_t y = 0; y < h; y++) {
+        if (raw[y * stride] != 0) return false;  // filtered rows: not ours
+        for (uint32_t x = 0; x < w; x++) {
+            const uint8_t* px = &raw[y * stride + 1 + size_t(x) * bpp];
+            rgba[size_t(y) * w + x] = uint32_t(px[0]) | uint32_t(px[1]) << 8 | uint32_t(px[2]) << 16 | (bpp == 4 ? uint32_t(px[3]) << 24 : 0xFF000000u);
+        }
+    }
+    return true;
+}
+
+// tools/harness/results.py _lab: sRGB 8-bit -> CIE Lab (D65)
+inline void lab(uint32_t c, float out[3]) {
+    float v[3];
+    for (int k = 0; k < 3; k++) {
+        float a = float((c >> (8 * k)) & 255) / 255.0f;
+        v[k] = a <= 0.04045f ? a / 12.92f : std::pow((a + 0.055f) / 1.055f, 2.4f);
+    }
+    float X = (0.4124f * v[0] + 0.3576f * v[1] + 0.1805f * v[2]) / 0.95047f;
+    float Y = 0.2126f * v[0] + 0.7152f * v[1] + 0.0722f * v[2];
+    float Z = (0.0193f * v[0] + 0.1192f * v[1] + 0.9505f * v[2]) / 1.08883f;
+    auto fn = [](float t) { return t > 0.008856f ? std::cbrt(t) : 7.787f * t + 16.0f / 116.0f; };
+    out[0] = 116.0f * fn(Y) - 16.0f, out[1] = 500.0f * (fn(X) - fn(Y)), out[2] = 200.0f * (fn(Y) - fn(Z));
+}
+
+}  // namespace exportdata

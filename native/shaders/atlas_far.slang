@@ -43,6 +43,8 @@
 // the sun map: size x (size + 1) texels; rows 0 .. size-1 (occluder's sun-axis coordinate, cloud transmittance),
 // row `size` the map's parameters (see sunMapMain)
 [[vk::binding(24, 0)]] RWStructuredBuffer<float2> sunMap;
+// (ATLAS_FRAME_GROUPS) the content-shaped groups: header, material shapes, per region nodes and brick pool
+[[vk::binding(25, 0)]] StructuredBuffer<uint4> groupData;
 
 #include "atlas_clouds.slang"
 
@@ -57,6 +59,8 @@ struct TraceResult {
     int lod;
     uint steps;
     float dither;  // 0..1, fixed per pixel: which side of a refinement fade it shows (old below the progress)
+    float3 albedo;   // a groups hit: the texel's albedo (linear), when hasAlbedo
+    uint hasAlbedo;
 };
 
 uint popcount64(uint64_t x) { return countbits(uint(x)) + countbits(uint(x >> 32)); }
@@ -218,6 +222,8 @@ float3 regionOriginRel(RegionGpu r) {
     return float3(int3(r.origin.xyz) - frame.camInt.xyz);
 }
 
+#include "atlas_groups.slang"
+
 // Walk the regions of one LOD along the chord p0 + d u, u in [0, len].
 // On TRACE_UNCOVERED, uncExit is where the chord leaves the unloaded region cell (1e30 when it left the LOD's
 // window: that LOD has nothing further along this ray at all).
@@ -236,6 +242,7 @@ int traceLod(int lod, float3 p0, float3 d, float len, inout TraceResult res, out
     float u = 0;
     int3 c = int3(floor(q0));
     int3 stepC = int3(qd.x > 0 ? 1 : -1, qd.y > 0 ? 1 : -1, qd.z > 0 ? 1 : -1);
+    bool firstCell = true;
     for (int it = 0; it < 64; it++) {
         if (u >= len) break;
         float3 tt = (float3(c) + float3(qd.x > 0 ? 1 : 0, qd.y > 0 ? 1 : 0, qd.z > 0 ? 1 : 0) - q0) * inv;
@@ -270,19 +277,34 @@ int traceLod(int lod, float3 p0, float3 d, float len, inout TraceResult res, out
                 }
                 float3 ro = (p0 - regionOriginRel(r)) / s;
                 gLeafGap = lod <= 1 ? 0.3 : 0.0;
-                if (!air && traceRegion(r, ro, d / s, u, uExit, 1e-3, res)) {
+                if (!air && gGroups && r.groups.x != 0xFFFFFFFFu) {
+                    // the chord's first cell: a ray that starts inside this level's solid (a switch to a coarser level)
+                    // hits it at once, as the old path does (the groups hold only what a ray can reach from outside)
+                    if (firstCell && traceRegion(r, ro, d / s, u, min(u + 1e-3, uExit), 1e-3, res)) {
+                        res.lod = lod;
+                        return TRACE_HIT;
+                    }
+                    if (traceGroups(r, ro, d / s, u, uExit, d, res)) {
+                        res.lod = lod;
+                        return TRACE_HIT;
+                    }
+                } else if (!air && traceRegion(r, ro, d / s, u, uExit, 1e-3, res)) {
                     res.lod = lod;
                     return TRACE_HIT;
                 }
             }
         }
+        firstCell = false;
         if (uExit >= len) break;
         // into the neighbour across the face we leave by, by index: re-flooring q a hair past that face is below
         // float precision in table units (a cell is 256 voxels), lands back in the same cell, and would re-trace its
         // region from outside it (clamped to its boundary layer: false hits one voxel past a region floor/ceiling)
-        if (tt.x <= tt.y && tt.x <= tt.z) c.x += stepC.x;
-        else if (tt.y <= tt.z) c.y += stepC.y;
-        else c.z += stepC.z;
+        // (a ray leaving through an edge or a corner crosses every face it meets there at once: stepping one of them
+        // left it in a cell it had already left, whose region the old path's clamp happened to answer for)
+        float tm = min(tt.x, min(tt.y, tt.z));
+        if (tt.x == tm) c.x += stepC.x;
+        if (tt.y == tm) c.y += stepC.y;
+        if (tt.z == tm) c.z += stepC.z;
         u = uExit;
     }
     return TRACE_MISS;
@@ -350,7 +372,8 @@ float traceView(float3 o, float3 dir, float t0, float t1, float lodDither, inout
     float shrink = 0.0;   // fraction cut off the current segment (its grid's phase)
     for (int seg = 0; seg < 768; seg++) {
         if (t >= t1) break;
-        int want = int(clamp(floor(log2(max(t * pixelAngle, 1.0))), 0.0, float(lodCount - 1)));
+        // (the groups choose their own level per node, draw-or-open: the finest level resident is the best source)
+        int want = gGroups ? 0 : int(clamp(floor(log2(max(t * pixelAngle, 1.0))), 0.0, float(lodCount - 1)));
         if (!finer) lod = pinLeft > 0 ? pinned : max(lod, want);
         float s = float(1 << lod);
         if (lodDither > 0.0 && lod != phasedLod) {
@@ -365,6 +388,7 @@ float traceView(float3 o, float3 dir, float t0, float t1, float lodDither, inout
         float len = tn - t;
         float3 d = (b - a) / len;
         float uncExit;
+        gChordT = t;
         int r = traceLod(lod, a, d, len, res, uncExit);
         if (r == TRACE_HIT) return t + res.t;
         if (r == TRACE_UNCOVERED) {
@@ -407,7 +431,7 @@ float traceView(float3 o, float3 dir, float t0, float t1, float lodDither, inout
 // Straight ray (sun shadows): 1 if lit.
 float traceShadow(float3 p, float3 dir, int lod) {
     TraceResult res;
-    res.t = 0; res.mat = 0; res.axis = -1; res.lod = 0; res.steps = 0; res.dither = 0.5;
+    res.t = 0; res.mat = 0; res.axis = -1; res.lod = 0; res.steps = 0; res.dither = 0.5; res.albedo = float3(0, 0, 0); res.hasAlbedo = 0u;
     int lodCount = int(frame.dims.w);
     float t = 0;
     float maxT = 2048.0;
@@ -536,7 +560,7 @@ float3 waterReflection(float3 p, float3 dir, float k, float t, int lod, float3 s
     float3 sky = reflectedSky(p, r, sun);
     if (r.y > 0.35) return sky;  // steep reflections only see sky
     TraceResult rr;
-    rr.t = 0; rr.mat = 0; rr.axis = -1; rr.lod = 0; rr.steps = 0; rr.dither = 0.5;
+    rr.t = 0; rr.mat = 0; rr.axis = -1; rr.lod = 0; rr.steps = 0; rr.dither = 0.5; rr.albedo = float3(0, 0, 0); rr.hasAlbedo = 0u;
     int lodCount = int(frame.dims.w);
     int l = min(lod + 1, lodCount - 1);
     float s = float(1 << lod);
@@ -665,7 +689,7 @@ float3 farLightsOn(uint2 px, float3 p, int lod, float3 sun) {
         float occ = 1.0;
         if (d > 1.5) {
             TraceResult rr;
-            rr.t = 0; rr.mat = 0; rr.axis = -1; rr.lod = 0; rr.steps = 0; rr.dither = 0.5;
+            rr.t = 0; rr.mat = 0; rr.axis = -1; rr.lod = 0; rr.steps = 0; rr.dither = 0.5; rr.albedo = float3(0, 0, 0); rr.hasAlbedo = 0u;
             float3 dirL = v / d;
             float s = float(1 << lod);
             float unc;
@@ -811,7 +835,7 @@ float2 sunTexel(uint i, uint j) {
     int lodCount = int(frame.dims.w);
     int l = clamp(int(floor(log2(max(2.0 * he / S, 1.0)))), 0, lodCount - 1);
     TraceResult rr;
-    rr.t = 0; rr.mat = 0; rr.axis = -1; rr.lod = 0; rr.steps = 0; rr.dither = 0.5;
+    rr.t = 0; rr.mat = 0; rr.axis = -1; rr.lod = 0; rr.steps = 0; rr.dither = 0.5; rr.albedo = float3(0, 0, 0); rr.hasAlbedo = 0u;
     float t = 0;
     for (int seg = 0; seg < 128; seg++) {
         if (t >= maxT) break;
@@ -870,7 +894,7 @@ void farMain(uint3 id : SV_DispatchThreadID) {
     float3 dir = normalize(unproject(frame, ndc));
     float3 o = frame.camFrac.xyz;
     TraceResult res;
-    res.t = 0; res.mat = 0; res.axis = -1; res.lod = 0; res.steps = 0;
+    res.t = 0; res.mat = 0; res.axis = -1; res.lod = 0; res.steps = 0; res.albedo = float3(0, 0, 0); res.hasAlbedo = 0u;
     // per-pixel dithers: one for refinement fades, a decorrelated one for the LOD segment phase, a third for far
     // actors' fades. Fixed on screen without a temporal resolve; with the host's TAA (jitter set) they move each frame
     // (8 phases), so the resolve averages them into a smooth fade instead of a fixed pattern
@@ -915,7 +939,13 @@ void farMain(uint3 id : SV_DispatchThreadID) {
     if ((frame.dims.z & FRAME_NEAR_DEPTH) != 0 && (frame.dims.z & FRAME_FILL_NEAR) != 0 && nearDepth[pix] >= 1.5e30
         && dir.y < 0.0)
         tStart = 2.0;
+    // the content-shaped groups for this pixel's primary ray (ATLAS_FRAME_GROUPS): the footprint per block of distance
+    // and the threshold, dithered per pixel (and per frame under the host's TAA, which averages the levels)
+    gGroups = (frame.dims.z & FRAME_GROUPS) != 0u;
+    gGroupPa = frame.params.w * frame.params.z;
+    gGroupTol = 0.7 + 0.6 * pixelDither(id.xy, phase + 5u);
     float tHit = traceView(o, dir, tStart, frame.params.y, lodDither, res);
+    gGroups = false;  // secondary rays (shadows, reflections, block light) keep the old path
     ActorHit ah;
     ah.t = -1.0;
     ah.n = float3(0, 1, 0);
@@ -973,7 +1003,7 @@ void farMain(uint3 id : SV_DispatchThreadID) {
                 ? traceShadow(p + faceN * (1.01 * s) + L * (0.5 * s), L, res.lod) : 0.0;
         }
         if ((frame.dims.z & FRAME_CLOUDS) != 0 && sunVis > 0.0) sunVis *= cloudShadow(p, keyLightDir(sun));
-        float3 albedo = m.albedoRough.rgb;
+        float3 albedo = res.hasAlbedo != 0u ? res.albedo : m.albedoRough.rgb;
         // ambient occlusion: solid neighbours around the air voxel in front of the face (4 taps in the face plane)
         float ao = 1.0;
         {
@@ -996,7 +1026,7 @@ void farMain(uint3 id : SV_DispatchThreadID) {
             cls = 0u;  // lit like a rough diffuse surface: it scatters, it does not mirror
         }
         // large-scale tone variation on land (about 24 and 90 blocks), the far-field stand-in for texture detail
-        if (cls != 2u && !falls) {
+        if (cls != 2u && !falls && res.hasAlbedo == 0u) {  // (a groups hit has its texels)
             float2 wxz = p.xz + float2(frame.camInt.xz);
             float v = valueNoise(wxz / 24.0) * 0.6 + valueNoise(wxz / 90.0 + 17.0) * 0.4;
             albedo *= 0.95 + 0.10 * v;  // gentle: stronger tone blotches the near field does not have read as a seam

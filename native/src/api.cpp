@@ -40,6 +40,8 @@ static_assert(sizeof(AtlasGlFrameIO) == 96 && offsetof(AtlasGlFrameIO, nearInvPr
               offsetof(AtlasGlFrameIO, dstColor) == 80);
 static_assert(sizeof(AtlasLight) == 40 && offsetof(AtlasLight, radius) == 24 && offsetof(AtlasLight, kind) == 36);
 static_assert(sizeof(AtlasStats) == 56 && offsetof(AtlasStats, nodeBytes) == 8 && offsetof(AtlasStats, raySteps) == 48);
+static_assert(sizeof(AtlasMaterialShape) == 400 && offsetof(AtlasMaterialShape, mean) == 8 &&
+              offsetof(AtlasMaterialShape, faces) == 16);
 
 struct AtlasContext {
     std::unique_ptr<Backend> backend;
@@ -247,6 +249,19 @@ ATLAS_API const char* atlas_info(AtlasContext* ctx) {
         ctx->info = ctx->backend->info();
         if (ctx->backend->lost() && !ctx->info.empty() && ctx->info.back() == '}')
             ctx->info.insert(ctx->info.size() - 1, ",\"deviceLost\":true");
+        if (ctx->world.groupsWanted.load() && !ctx->info.empty() && ctx->info.back() == '}') {
+            // (abi 0.14) the content-shaped groups: regions with a tree, their memory, the last update's builds
+            World::GroupStats g = ctx->world.groupStats();
+            char b[512];
+            std::snprintf(b, sizeof b,
+                          ",\"groups\":{\"regions\":%u,\"refused\":%u,\"bytes\":%llu,\"maxRegionBytes\":%llu,\"prims\":%llu,"
+                          "\"nodes\":%llu,\"bricks\":%llu,\"buildMs\":%.1f,\"maxBuildMs\":%.1f,\"lastBuilt\":%u,"
+                          "\"lastBuildMs\":%.1f,\"lods\":%d}",
+                          g.regions, g.refused, (unsigned long long)g.bytes, (unsigned long long)g.maxRegionBytes,
+                          (unsigned long long)g.prims, (unsigned long long)g.nodes, (unsigned long long)g.bricks, g.buildMs,
+                          g.maxBuildMs, g.built, g.lastUpdateMs, ctx->world.groupLods);
+            ctx->info.insert(ctx->info.size() - 1, b);
+        }
         return ctx->info.c_str();
     } catch (...) {
         return "{}";
@@ -269,6 +284,10 @@ ATLAS_API AtlasStatus atlas_create(AtlasBackend backend, AtlasContext** out) {
         ctx->backend = makeCpuBackend();
     }
     armFromEnvironment(*ctx->backend);
+    // ATLAS_GROUP_LODS=<n>: only the n finest levels get groups (the rest keep the old path); a knob for measurements
+    if (const char* gl = std::getenv("ATLAS_GROUP_LODS"))
+        ctx->world.groupLods = std::clamp(std::atoi(gl), 0, MAX_LODS);
+    if (const char* sk = std::getenv("ATLAS_SECTION_KEEP")) ctx->world.sectionKeep = std::clamp(std::atoi(sk), 0, 64);
     auto pal = previewPalette();
     setPalette(ctx.get(), pal.data(), uint32_t(pal.size()));
     ctx->weather.assign(4 * 128 * 128, 0);
@@ -530,6 +549,9 @@ static AtlasStatus buildInputs(AtlasContext* ctx, const AtlasFrame* f, FrameInpu
     in.sceneHold = ctx->world.packed();
     in.scene = in.sceneHold.get();
     if (in.scene->lodCount == 0) return ctx->fail(ATLAS_ERR_STATE, "call atlas_update before atlas_render");
+    // the first frame that traces the groups starts their building (the next atlas_update, nearest first)
+    if ((f->flags & ATLAS_FRAME_GROUPS) && !ctx->world.groupsWanted.load(std::memory_order_relaxed))
+        ctx->world.groupsWanted.store(true);
     FrameGpu& g = in.frame;
     std::memcpy(g.invViewProj, f->invViewProj, sizeof(g.invViewProj));
     for (int i = 0; i < 3; i++) {
@@ -848,6 +870,28 @@ ATLAS_API AtlasStatus atlas_set_jitter(AtlasContext* ctx, float x, float y) {
     ctx->jitter[0] = std::clamp(x, -0.5f, 0.5f);
     ctx->jitter[1] = std::clamp(y, -0.5f, 0.5f);
     return ATLAS_OK;
+}
+
+ATLAS_API AtlasStatus atlas_set_material_shapes(AtlasContext* ctx, uint32_t first, const AtlasMaterialShape* shapes,
+                                                uint32_t count) {
+    if (!ctx || first == 0 || (!shapes && count)) return ATLAS_ERR_ARG;
+    if (uint64_t(first) + count > 65535) return ctx->fail(ATLAS_ERR_ARG, "material ids beyond 65534");
+    ATLAS_TRY
+    std::vector<std::shared_ptr<const MaterialShape>> v(count);
+    for (uint32_t i = 0; i < count; i++) {
+        const AtlasMaterialShape& a = shapes[i];
+        if (!a.occupancy) continue;  // no shape: a plain full cube in the palette colour
+        auto s = std::make_shared<MaterialShape>();
+        s->mask = a.occupancy;
+        s->mean = a.mean;
+        s->flags = a.flags & ATLAS_SHAPE_CUTOUT;
+        std::memcpy(s->faces, a.faces, sizeof s->faces);
+        s->deriveAlpha();
+        v[i] = std::move(s);
+    }
+    ctx->world.setShapes(first, v);
+    return ATLAS_OK;
+    ATLAS_CATCH(ctx)
 }
 
 ATLAS_API AtlasStatus atlas_read_sun_map(AtlasContext* ctx, float* out, uint32_t count) {

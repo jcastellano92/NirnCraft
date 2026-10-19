@@ -4,6 +4,7 @@
 // their items from a shared atomic counter, so any number of them finishes the job.
 #pragma once
 #include <algorithm>
+#include <cstdlib>
 #include <exception>
 #include <mutex>
 #include <thread>
@@ -11,8 +12,19 @@
 
 namespace atlas {
 
+// ATLAS_THREADS=<n> caps every parallel run at n threads (a shared machine, a measurement at a fixed thread count)
+inline unsigned threadCap() {
+    static const unsigned cap = [] {
+        const char* v = std::getenv("ATLAS_THREADS");
+        int n = v ? std::atoi(v) : 0;
+        return n > 0 ? unsigned(n) : 0u;
+    }();
+    return cap;
+}
+
 template <typename F>
 void parallelRun(F&& worker, unsigned maxThreads = 0) {
+    if (threadCap() && (!maxThreads || maxThreads > threadCap())) maxThreads = threadCap();
     std::exception_ptr first;
     std::mutex mu;
     auto safe = [&] {

@@ -33,8 +33,8 @@ extern "C" {
 
 /* (major << 16) | (minor << 8) | patch. Bumped on any ABI change. 0.11 = 0.10 far content (lights, sites, actor
    flags, tile codec 3) + 0.10 failure handling (status codes, memory query, fault hook). 0.12 the moon, fill near;
-   0.13 primary-ray jitter (atlas_set_jitter). */
-#define ATLAS_ABI_VERSION 0x000D00
+   0.13 primary-ray jitter (atlas_set_jitter); 0.14 material shapes (atlas_set_material_shapes), ATLAS_FRAME_GROUPS. */
+#define ATLAS_ABI_VERSION 0x000E00
 
 typedef struct AtlasContext AtlasContext;
 
@@ -140,6 +140,13 @@ typedef struct AtlasFrame {
                                                  only when the camera is in the open (the far field has no caves) */
 #define ATLAS_FRAME_LOD_DITHER 0x1000u       /* (abi 0.10) dithered LOD transitions: each pixel's LOD segment grid
                                                  starts at its own phase, so a level change is a stipple band, not a line */
+#define ATLAS_FRAME_GROUPS 0x4000u           /* (abi 0.14) primary rays trace the content-shaped groups (docs/ATLAS-LOD.md):
+                                                 per region a hierarchy of boxes over its micro-voxels, each drawn whole
+                                                 with its face textures where its flattening error is under the pixel,
+                                                 else opened; the first frame with it starts building them (nearest
+                                                 first, on atlas_update); regions without one yet draw as before. The
+                                                 outputs, shadows, sun map and hand-off are unchanged. An older core
+                                                 ignores the bit. */
 
 /*
  * Frame outputs (any pointer may be NULL to skip). Layout matches the shared G-buffer images:
@@ -390,6 +397,30 @@ ATLAS_API AtlasStatus atlas_set_moon(AtlasContext* ctx, const float dir[3], cons
  * (0, 0), the default: no jitter, dithers fixed on screen.
  */
 ATLAS_API AtlasStatus atlas_set_jitter(AtlasContext* ctx, float x, float y);
+/*
+ * (abi 0.14) The shape and faces of a far material (a block state, docs/ATLAS-LOD.md "level -1"), for the content-shaped
+ * groups (ATLAS_FRAME_GROUPS): its 4 x 4 x 4 occupancy from its real shape and a 4 x 4 tile of its real textures per
+ * face, computed by the host from the block's model (AtlasLabExport's library entry). Voxels of real chunk sections
+ * (atlas_upload_section) take their material's shape at LOD 0; everything else (column tiles, structures, the coarser
+ * levels) draws a material as a full cube wearing its face tiles. A material without one stays a full cube in its
+ * palette colour.
+ *  occupancy  bit x + 4 * (z + 4 * y) of the block's micro-voxels; 0 = remove the shape (a plain full cube again)
+ *  mean       ARGB (sRGB): the colour of a texel that shows nothing (alpha 0)
+ *  flags      ATLAS_SHAPE_CUTOUT: texel alpha is how much of the micro-voxel is there (leaves: rays pass the rest,
+ *             hashed per micro-voxel in world space)
+ *  faces      down, up, north, south, west, east; 16 ARGB (sRGB, tints applied) texels each, laid out as AtlasLabExport
+ *             lays them: (u, v) along (x, z) for down / up, (x, 3 - y) for north / south, (z, 3 - y) for west / east
+ */
+#define ATLAS_SHAPE_CUTOUT 0x1u
+typedef struct AtlasMaterialShape {
+    uint64_t occupancy;
+    uint32_t mean;
+    uint32_t flags;
+    uint32_t faces[6][16];
+} AtlasMaterialShape;
+/* Sets the shapes of materials first .. first + count - 1 (first >= 1; any thread; copied). */
+ATLAS_API AtlasStatus atlas_set_material_shapes(AtlasContext* ctx, uint32_t first, const AtlasMaterialShape* shapes,
+                                                uint32_t count);
 /* The sun map as last computed (size * (size + 1) * 2 floats into out, count in floats). Waits for the GPU. */
 ATLAS_API AtlasStatus atlas_read_sun_map(AtlasContext* ctx, float* out, uint32_t count);
 /*
