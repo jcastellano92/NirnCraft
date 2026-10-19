@@ -353,8 +353,17 @@ final class JailEvidence {
         relock(level, pos);
         Locks.setLock(level, pos, st.tier);
         StoreContainer container = new StoreContainer(st.confiscated, pos);
-        player.openMenu(new SimpleMenuProvider((id, inv, p) -> new ChestMenu(MenuType.GENERIC_9x3, id, inv, container, 3),
+        player.openMenu(new SimpleMenuProvider((id, inv, p) -> confiscatedMenu(id, inv, container),
                 Component.translatable("crime.nirncraft.jail.confiscated")));
+    }
+
+    /**
+     * The confiscated goods' menu: take-only slots, every store into the jail's store (inventory.OverflowChestMenu). A
+     * plain chest menu let Store, Store All, shift-click and clicks put things in the slots of a container that is
+     * thrown away on close: they were lost.
+     */
+    static ChestMenu confiscatedMenu(int id, net.minecraft.world.entity.player.Inventory inv, StoreContainer container) {
+        return new com.nirncraft.inventory.OverflowChestMenu(id, inv, container);
     }
 
     /** Forgets who picked this lock, so the next one has to pick it again. */
@@ -365,7 +374,9 @@ final class JailEvidence {
 
     /**
      * The confiscated goods as a container the Skyrim screen and the theft machinery understand: its 27 slots never
-     * hold anything ({@code canPlaceItem} is false), everything lives in the jail's store as the overflow behind them.
+     * hold anything (the menu's slots are take-only, {@link #confiscatedMenu}; {@code canPlaceItem} is false for anything
+     * else), everything lives in the jail's store as the overflow behind them. This container is made for one opening
+     * and thrown away: whatever still reached its slots goes into the store when it closes, so nothing is ever lost.
      */
     static final class StoreContainer extends SimpleContainer implements OverflowHost {
         private final BulkStore store;
@@ -394,6 +405,18 @@ final class JailEvidence {
         @Override
         public boolean stillValid(Player player) {
             return player.distanceToSqr(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5) <= 64;
+        }
+
+        /** Closing: anything in the slots goes into the jail's store (what its caps refuse goes back to the player). */
+        @Override
+        public void stopOpen(net.minecraft.world.entity.ContainerUser user) {
+            super.stopOpen(user);
+            for (int i = 0; i < getContainerSize(); i++) {
+                ItemStack s = removeItemNoUpdate(i);
+                if (s.isEmpty()) continue;
+                store.add(s);
+                if (!s.isEmpty() && user != null && user.getLivingEntity() instanceof Player p) com.nirncraft.inventory.Pack.giveOrDrop(p, s);
+            }
         }
     }
 
