@@ -8,7 +8,7 @@
       {
         "terms": [
           {
-            "loot_table_id": "minecraft:blocks/grass",
+            "loot_table_id": "minecraft:blocks/short_grass",
             "type": "neoforge:loot_table_id"
           },
           {
