@@ -8,6 +8,13 @@
 //                 [yaw=30 pitch=-12 fov=70 tol=1 fog=0 scale=1 screen=1080 shade=mc grass= foliage= tx= ty= tz=]
 //   atlas_lab_gpu synth=<dir>   a small synthetic scene of our own there (blocks.bin, tree.alv, tree.json)
 //
+// build=gpu: the trees also built on the GPU (atlas_lod_gpubuild.hpp, shaders/atlas_lod_build.slang; docs/ATLAS-LOD.md,
+// "GPU group build"), on the CPU backend and with backend=vulkan on Vulkan, timed (buildreps=5, median), compared with
+// atlas_lab's word for word; the kernels then trace the GPU-built trees. cpubuild=0 skips atlas_lab's builders (and the
+// comparisons with its tracer); profile=1|2 times every kernel (2: level by level); wideerr= widesweep= batch= tune the
+// Vulkan build. update=carve,fill,block [edit=16 updatereps=5 regionscale=8 regrow=0 contain=0]: edits of the volume,
+// each followed by an incremental update of the GPU-built groups and a full build, both traced against ref.
+//
 // Per distance and representation, the camera and window of true pixels of atlas_lab's table:
 //   parity   the kernel's image converged over the frames (the same jitter, seeds and dithering as atlas_lab) against
 //            atlas_lab's tracer: iou (soft silhouette), dE / dEmax (CIE76, mean and worst pixel), rgb (largest channel

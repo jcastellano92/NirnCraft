@@ -466,7 +466,20 @@ side, the 12-bit boxes); the world's regions need the pool from their sections (
 grid), one tree each under the top-level structure, and the builder sharing the renderer's Vulkan device and queue (it
 makes its own today; `vkCmdDispatchIndirect` is resolved through `vkGetDeviceProcAddr`, the loader in `src/` does not
 list it); the change feed's edits as `editGrid` boxes (new block states append bricks); a policy for full rebuilds and
-compaction (above); and the octree (boxes) is still built on the CPU only.
+compaction (above).
+
+**The octree (boxes)** is built by the same kernels' file (`lbOct*`, `LodGpuBuilder::buildBoxes`), bottom up: a block's
+cell and its eight 2^3 sub-cubes straight from the brick (box, mask of occupied octants, flattening error from the 64-bit
+mask), every larger cell the union of its eight children, its flattening error through the groups' error passes (a level's
+occupied cells listed as a level of work nodes); then slots down the levels in octant order and one write a node, a
+sub-cube an F_MICRO node with its micro-voxels unstored, as lodFlattenBoxes. Word for word atlas_lab's octree on all three
+scenes; one level per power of two, so nine levels and ~100 dispatches for the area:
+
+| scene | nodes / depth | atlas_lab (build + flatten, 1 thread) | CPU backend | Vulkan, wall (GPU) |
+|---|---|---|---|---|
+| synthetic | 33,467 / 8 | 86 + 2 ms | 9 ms | 1.2 ms (0.7) |
+| Falkreath core | 363,839 / 9 | 953 + 31 ms | 39 ms | 1.5 ms (1.1) |
+| Falkreath area | 1,605,494 / 10 | 3.9 s + 113 ms | 141 - 177 ms | 3.1 ms (2.6) |
 
 ## Status (branch atlas-render)
 

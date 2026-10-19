@@ -1,20 +1,22 @@
 // atlas_lod_gpubuild: the host side of shaders/atlas_lod_build.slang (docs/ATLAS-LOD.md, "GPU group build"): atlas_lab's
-// content-shaped groups built on the GPU from the micro-voxel brick pool (atlas_lod_build.hpp LodPool), written in the
-// 16-byte layout atlas_lod.slang traces, on the CPU backend (the kernels compiled to C++, run on a thread pool) or on
-// Vulkan (SPIR-V, every dispatch sized by the GPU: one submission per batch of levels).
+// content-shaped groups (and its octree, boxes) built on the GPU from the micro-voxel brick pool (atlas_lod_build.hpp
+// LodPool), written in the 16-byte layout atlas_lod.slang traces, word for word what atlas_lab's builders and
+// lodFlattenGroups / lodFlattenBoxes make; on the CPU backend (the kernels compiled to C++, run on a thread pool) or on
+// Vulkan (SPIR-V, every dispatch sized by the GPU: a few submissions a build).
 //
 //   LodGpuBuilder b;
 //   b.init(vulkan, threads, err);            // Vulkan: its own instance and device
-//   b.setVolume(pool, sx, sy, sz, err);      // the pool's grid and bricks in, the empty runs computed
-//   b.build(tree, stats, err);               // a whole tree (LodTree: the same words as lodFlattenGroups)
-//   b.update(tree, box, stats, err);         // after setVolume of the edited pool: the subtrees over box rebuilt
+//   b.setVolume(pool, sx, sy, sz, err);      // the pool's grid and bricks in (the empty runs measured by the next build)
+//   b.build(tree, stats, err);               // the groups (LodTree: the same words as lodFlattenGroups)
+//   b.buildBoxes(tree, stats, err);          // the octree (the same words as lodFlattenBoxes)
+//   b.editGrid(pool, lo, hi, err);           // an edit: the pool's blocks in [lo, hi) changed
+//   b.update(tree, mlo, mhi, stats, err);    // the groups over micro-voxel box [mlo, mhi) rebuilt, the rest refitted
 //
-// Updates (docs/ATLAS-LOD.md, "GPU group build"): every node owns a region of space (the root the volume, a child its
-// parent's region on its side of the split plane); an edit inside box rebuilds the subtrees of the topmost nodes whose
-// regions meet the box and are no more than `regionScale` times its volume (or are leaves), appends them after the
-// array's end (the old ones become garbage until the next full build), and refits the nodes above them: their boxes
-// the union of their children's, their flattening error measured again. The planes above stay where the old SAH put them.
-#pragma once
+// Updates: every node owns a region of space (the root the volume, a child its parent's region on its side of the split
+// plane); an edit rebuilds the subtrees of the topmost nodes whose regions meet it and are no more than `regionScale`
+// times its volume (or are leaves), appends them after the array's end (the old ones become garbage until the next full
+// build), and refits the nodes above them: their boxes the union of their children's, their flattening error measured
+// again. The planes above stay where the old SAH put them.#pragma once
 #include <algorithm>
 #include <atomic>
 #include <bit>
@@ -537,7 +539,8 @@ private:
                 !ensure(B_SCANIN, size_t(capNodes_) * 4, err) || !ensure(B_SCANOUT, size_t(capNodes_) * 4, err) ||
                 !ensure(B_SCANSUM, size_t(capNodes_ / 1024 + 2) * 4, err) || !ensure(B_PART, size_t(capParts_) * 4, err) ||
                 !ensure(B_SLICES, size_t(capSlices_) * 4, err) || !ensure(B_SUFFIX, size_t(capSlices_) * 4, err) ||
-                !ensure(B_OUT, size_t(capOut) * 4, err, keep) || !ensure(B_REGIONS, std::max<size_t>(regions.size(), 4), err))
+                !ensure(B_OUT, size_t(capOut) * 4, err, keep) || !ensure(B_REGIONS, std::max<size_t>(regions.size(), 4), err) ||
+                !ensure(B_OCT, 4, err))  // unused here, but every binding needs a buffer
                 return false;
             if (restore && (attempt > 0 || uploadFirst) && !upload(B_OUT, restore->data(), restore->size(), 0, err)) return false;
             Params p{};

@@ -21,7 +21,7 @@
 //
 // Initial nodes are regions (micro-voxel boxes): the full volume for a build, or the sub-volumes an edit invalidated
 // for an update (tools/atlas_lod_gpubuild.hpp); each region's subtree is appended after the array's current end and
-// its root written into the slot the region names.
+// its root written into the slot the region names. The octree (boxes) is built here too (lbOct*, at the end), bottom up.
 
 struct BuildParams {
     int4 dims;   // the volume in blocks; w: the number of regions
