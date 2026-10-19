@@ -430,7 +430,7 @@ The groups are built on the GPU from the brick pool (`native/shaders/atlas_lod_b
 `native/tools/atlas_lod_gpubuild.hpp`), compiled like atlas_lod: Slang -> C++ for the CPU backend, Slang -> SPIR-V for
 Vulkan. `atlas_lab_gpu ... build=gpu` builds them on the CPU backend and (`backend=vulkan`) on Vulkan, compares the
 result with atlas_lab's tree word for word, and the kernels then trace the GPU-built tree (`cpubuild=0` skips atlas_lab's
-13 s build; `profile=1|2` times every kernel, `buildreps=` the builds; `update=carve,fill,block edit=16` the updates
+10 s build; `profile=1|2` times every kernel, `buildreps=` the builds; `update=carve,fill,block edit=16` the updates
 below).
 
 **The choice.** Two GPU designs were weighed. LBVH (Morton codes of occupied micro-voxels or blocks, radix sort, Karras'
@@ -443,7 +443,8 @@ box face and column), which is what a GPU wants once the scans are cheap: they r
 a time and skip empty blocks by their runs. That one was built, so **the GPU tree is atlas_lab's tree, word for word, on
 the synthetic scene, the Falkreath core and the Falkreath area (CPU backend and Vulkan): the quality cost against the CPU
 SAH is nil.** It also means the parity tables above hold unchanged for GPU-built trees (checked again: iou 1.0000, dE
-0.000, the same steps per ray, 10 m to 4 km, all three scenes).
+0.000, the same steps per ray, 10 m to 4 km, all three scenes; against ref on the area: iou / dE / steps 1.000 / 0.04 / 30.4
+at 10 m, 0.999 / 0.43 / 19.3 at 200 m, 0.991 / 2.37 / 3.05 at 1500 m, 0.975 / 3.58 / 2.64 at 4 km).
 
 **How.** Each node is a work item; a level is a range of them (breadth first), and every count comes from an exclusive scan
 (work-group scans on Vulkan, one thread on the CPU backend, which has no group memory or atomics), so each dispatch is
@@ -469,16 +470,17 @@ Buffers that overflow (nodes, slices, partial records) stop the build, grow, and
 
 | scene | nodes / depth | atlas_lab (CPU, 1 thread) | CPU backend (10 threads) | Vulkan, wall (GPU) | identical |
 |---|---|---|---|---|---|
-| synthetic (40 x 20 x 40) | 10,331 / 20 | 184 - 229 ms | 17 ms | 3.7 ms (2.9) | yes |
-| Falkreath core (65 x 51 x 65) | 73,623 / 23 | 2.8 s | 81 ms | 5.1 ms (4.2) | yes |
-| Falkreath area (129 x 61 x 129) | 257,155 / 26 | 10.9 - 11.6 s | 257 ms | 7.7 - 8.2 ms (6.9) | yes |
+| synthetic (40 x 20 x 40) | 10,331 / 20 | 183 ms | 17 ms | 3.7 - 4.3 ms (2.9) | yes |
+| Falkreath core (65 x 51 x 65) | 50,401 / 22 | 2.2 s | 71 ms | 5.7 ms (4.6) | yes |
+| Falkreath area (129 x 61 x 129) | 158,775 / 25 | 10.2 s | 213 - 230 ms | 8.4 ms (7.4) | yes |
 
 (RTX 3090, no game running, median of 5 - 9 builds, from nothing but the pool: the empty runs included; the export of
-2026-10-19 15:00, a little different from the tables above.) Where Vulkan's 6.9 ms goes, area: error tasks 1.7 ms, slice
-tasks 1.7, scans 0.9, sweeps 1.1, the rest small; by level 1.0 ms for the first (the root's region and its slices, the
+2026-10-19 15:00 read with the block library as it is now: cutouts for leaves and plants only, thin layers kept, so smaller
+trees than the tables above; the same build gave 257,155 area nodes in 7.7 ms before that change.) Where Vulkan's time goes,
+area: error tasks ~1.7 ms, slice tasks ~1.7, scans ~0.9, sweeps ~1.1, the rest small; by level 1.0 ms for the first (the root's region and its slices, the
 runs), 0.2 - 0.4 ms for the next twelve, under 0.2 below; a level costs at least ~0.04 ms of dispatch and barrier latency
 (15 dispatches), so a small build (the synthetic scene, an update) is bound by that floor, not by work. Memory: the
-scratch is 7 / 12 / 45 MB (work nodes, scans, slice records and partials, sized to the widest level), plus the empty runs
+scratch is 7 / 12 / 47 MB (work nodes, scans, slice records and partials, sized to the widest level), plus the empty runs
 (4 B a block) beside the pool; the output is the tree itself.
 
 **Updates** (`LodGpuBuilder::editGrid` + `update`). Every node owns a region of space: the root the volume, a child its
@@ -498,18 +500,19 @@ more while the output buffer grows):
 
 | edit | regions / refitted | Vulkan, wall (GPU) | CPU backend | full build, Vulkan / CPU backend |
 |---|---|---|---|---|
-| carve a 16^3 hole through the town | 5 / 21 | 4.1 ms (3.2) | 28 ms | 7.2 ms / 241 ms |
-| fill a 16 x 8 x 16 stone slab in the air above it | 4 / 29 | 3.8 ms (3.0) | 18 ms | 7.1 ms / 330 ms |
-| place one block on a roof | 1 / 10 | 1.4 ms (1.0) | 4.3 ms | 7.4 ms / 256 ms |
+| carve a 16^3 hole through the town | 4 / 20 | 5.0 ms (3.6) | 30 ms | 7.5 ms / 202 ms |
+| fill a 16 x 8 x 16 stone slab in the air above it | 4 / 28 | 3.9 ms (3.2) | 21 ms | 7.7 ms / 216 ms |
+| place one block on a roof | 1 / 10 | 1.6 ms (1.2) | 4.4 ms | 7.7 ms / 213 ms |
 
-(The core: carve 4.2 ms, fill 3.6, one block 1.2, full 4.6 - 4.9 ms.) Against ref after each edit, the updated tree and a
+(The core: carve 4.1 ms, fill 3.9, one block 1.3, full 5.1 - 5.4 ms.) Against ref after each edit, the updated tree and a
 full build of the edited volume: the silhouette and colour agree at every distance (iou within 0.002, dE within 0.1;
-identical after the carve), and so do the steps after a carve (29.0 / 19.5 / 3.0 at 10 / 200 / 1500 m against the full build's 29.1 /
-19.4 / 3.0). New content outside the old boxes is the case refitting serves worst: after the slab in the air the nodes
-above it keep the old planes and grow up past the camera, 35.9 / 23.7 / 3.6 steps against 23.6 / 20.9 / 3.2 (core: 30.5 /
-14.7 / 4.4 against 25.0 / 12.5 / 3.9); rebuilding a node whose box would grow by more than a quarter (`regrow=1.25`)
-barely helps (34.5 / 22.2 / 3.5), since the root must grow anyway. So: update where the edit is (milliseconds), and run a
-full build (7 ms for the area) when a refit grew the root's box or the garbage passes the live nodes.
+identical after the carve on the area), and so do the steps after a carve (30.35 / 19.32 / 3.05 at 10 / 200 / 1500 m, the
+full build's exactly; core 24.9 / 11.0 / 3.6 against 23.8 / 11.0 / 3.5). New content outside the old boxes is the case refitting serves worst: after the slab in the air the nodes
+above it keep the old planes and grow up past the camera, 36.3 / 23.4 / 3.6 steps against 23.9 / 20.5 / 3.2 (core: 31.9 /
+13.8 / 4.5 against 24.9 / 11.7 / 3.9); rebuilding a node whose box would grow by more than a quarter (`regrow=1.25`)
+barely helped (measured before the library change: 34.5 against 35.9 at 10 m), since the root must grow anyway, nor does
+rebuilding the smallest region holding the whole edit (`contain=64`: the slab straddles the root's plane). So: update where the edit is (milliseconds), and run a
+full build (8 ms for the area) when a refit grew the root's box or the garbage passes the live nodes.
 
 Before the far pass can use it: the builder takes one dense volume (a region in region coordinates under 1023 blocks a
 side, the 12-bit boxes); the world's regions need the pool from their sections (per-section grid rows instead of a dense
@@ -527,9 +530,12 @@ scenes; one level per power of two, so nine levels and ~100 dispatches for the a
 
 | scene | nodes / depth | atlas_lab (build + flatten, 1 thread) | CPU backend | Vulkan, wall (GPU) |
 |---|---|---|---|---|
-| synthetic | 33,467 / 8 | 86 + 2 ms | 9 ms | 1.2 ms (0.7) |
-| Falkreath core | 363,839 / 9 | 953 + 31 ms | 39 ms | 1.5 ms (1.1) |
-| Falkreath area | 1,605,494 / 10 | 3.9 s + 113 ms | 141 - 177 ms | 3.1 ms (2.6) |
+| synthetic | 33,467 / 8 | 85 + 2 ms | 9 ms | 1.0 ms (0.7) |
+| Falkreath core | 369,741 / 9 | 678 + 20 ms | 35 ms | 1.8 ms (1.4) |
+| Falkreath area | 1,627,279 / 10 | 3.5 s + 90 ms | 139 ms | 3.6 ms (3.2) |
+
+Scratch 6 / 22 / 84 MB (the cells' records). Both builders run clean under the Khronos validation layer with
+synchronization validation (builds, updates, profiling).
 
 ## Status (branch atlas-render)
 
