@@ -17,6 +17,8 @@
 //            thin wall or a sheet of ground stays as thick as it is instead of filling its voxel
 //   boxes    adaptive boxes: an octree of tight content boxes (rectangles), each drawn as one masked-texture box
 //            where flattening it is under the pixel (tol=1, fog-scaled), else split ("adaptive boxes" below)
+//   groups   boxes with a hierarchy shaped by the content (splits where the two children's boxes are tightest), not
+//            a grid: groups cross objects and chunks ("content-shaped groups" below); "boxes" in the table = the cut
 //   cov      the unified proposal: micro-voxels and a mip chain from them where each voxel keeps its per-axis coverage
 //            (how much of it blocks a ray along x, y, z) and the colour seen from each of its 6 sides; the level is
 //            continuous (the pixel's footprint, stochastically between the two nearest levels), a ray passes a voxel in
@@ -25,6 +27,7 @@
 // Metrics per (distance, representation) against ref: iou (soft silhouette), dE (mean CIE76 of the converged image),
 // dE1 (one frame: what shimmers in motion), steps (voxels visited per ray), ns (per ray). Last stdout line: JSON.
 #include <algorithm>
+#include <array>
 #include <atomic>
 #include <chrono>
 #include <cmath>
@@ -649,6 +652,8 @@ bool rayBox(V3 o, V3 d, const int16_t lo[3], const int16_t hi[3], float& t0, flo
     return t0 <= t1 && t1 > 0;
 }
 
+std::vector<std::atomic<uint8_t>>* drawnBoxes = nullptr;  // which boxes a frame drew (the cut), when counting
+
 struct BoxCtx {
     V3 o, d;
     float pa, tol;  // pixel size (tangent plane), threshold factor (dithered, fog-scaled)
@@ -678,6 +683,7 @@ bool traceNode(int idx, BoxCtx& c) {
     float t = std::max(t0, 0.f);
     bool asBox = n.child < 0 || n.err * 0.25f <= c.tol * t * c.pa;
     if (asBox) {
+        if (drawnBoxes) (*drawnBoxes)[size_t(idx)].store(1, std::memory_order_relaxed);
         V3 pin = c.o + c.d * t;
         if (boxFace(n, axis, c.d[axis] < 0, pin, c)) return true;
         // a hole: the face the ray leaves by, seen from outside
@@ -710,6 +716,173 @@ Sample traceBoxes(V3 o, V3 d, float pa, float tol) {
     if (rootNode < 0) return s;
     BoxCtx c{o, d, pa, tol, &s};
     traceNode(rootNode, c);
+    return s;
+}
+
+// ---- content-shaped groups (groups) ---------------------------------------------------------------------------------
+// As boxes, but the hierarchy follows the content instead of a fixed grid: every group splits in two at the plane (any
+// axis, any micro-voxel position) whose two children's tight boxes have the least surface (the SAH idea): a wall
+// comes away from the tree beside it whole, gaps are cut along, and nothing is chopped where a grid line happens to
+// fall. Groups ignore objects and chunks: far away one group is a stand of trees and the ground under it, up close
+// it is a leaf cluster. (A GPU builds the same kind of hierarchy in milliseconds: LBVH from Morton codes.)
+
+struct Group {
+    int16_t lo[3], hi[3];
+    float err;
+    int left = -1, right = -1;  // -1: a leaf (a single micro-voxel, or a box with nothing under its faces to split)
+};
+std::vector<Group> groups;
+int rootGroup = -1;
+
+float boxArea(const int lo[3], const int hi[3]) {
+    if (hi[0] <= lo[0]) return 0;
+    float dx = float(hi[0] - lo[0]), dy = float(hi[1] - lo[1]), dz = float(hi[2] - lo[2]);
+    return dx * dy + dy * dz + dz * dx;
+}
+
+// the tight box of the content inside [lo, hi)
+bool tightBox(const int lo[3], const int hi[3], int out0[3], int out1[3]) {
+    out0[0] = out0[1] = out0[2] = 1 << 15;
+    out1[0] = out1[1] = out1[2] = -1;
+    for (int y = lo[1]; y < hi[1]; y++)
+        for (int z = lo[2]; z < hi[2]; z++)
+            for (int x = lo[0]; x < hi[0]; x++) {
+                const Block* b = vol.at(x >> 2, y >> 2, z >> 2);
+                if (!b || !b->any || !b->mask) {
+                    x |= 3;  // the rest of this block's row is air too
+                    continue;
+                }
+                if (!microAt(x, y, z)) continue;
+                int p[3] = {x, y, z};
+                for (int a = 0; a < 3; a++) out0[a] = std::min(out0[a], p[a]), out1[a] = std::max(out1[a], p[a] + 1);
+            }
+    return out1[0] >= 0;
+}
+
+float flatError(const int lo[3], const int hi[3]) {
+    float err = 0;
+    for (int a = 0; a < 3; a++) {
+        int a1 = (a + 1) % 3, a2 = (a + 2) % 3;
+        for (int u = lo[a1]; u < hi[a1]; u++)
+            for (int v = lo[a2]; v < hi[a2]; v++)
+                for (int side = 0; side < 2; side++) {
+                    int d, p[3];
+                    if (firstHit(lo, hi, a, side == 1, u, v, d, p)) err = std::max(err, float(d));
+                }
+    }
+    return err;
+}
+
+int buildGroup(const int lo[3], const int hi[3], float err) {
+    int idx = int(groups.size());
+    groups.push_back({});
+    Group g;
+    for (int a = 0; a < 3; a++) g.lo[a] = int16_t(lo[a]), g.hi[a] = int16_t(hi[a]);
+    g.err = err;
+    if (err <= 0 || (hi[0] - lo[0]) * (hi[1] - lo[1]) * (hi[2] - lo[2]) <= 1) {  // flat: one box at every distance
+        groups[size_t(idx)] = g;
+        return idx;
+    }
+    // per axis, per slice: the content's bounds on the other two axes; prefix / suffix unions give each split's boxes
+    float best = 1e30f;
+    int bestAxis = -1, bestAt = 0;
+    for (int a = 0; a < 3; a++) {
+        int n = hi[a] - lo[a];
+        if (n < 2) continue;
+        const std::array<int, 6> none{1 << 15, 1 << 15, 1 << 15, -1, -1, -1};
+        std::vector<std::array<int, 6>> slice(size_t(n), none);
+        for (int y = lo[1]; y < hi[1]; y++)
+            for (int z = lo[2]; z < hi[2]; z++)
+                for (int x = lo[0]; x < hi[0]; x++) {
+                    if (!microAt(x, y, z)) continue;
+                    int p[3] = {x, y, z};
+                    auto& s = slice[size_t(p[a] - lo[a])];
+                    for (int k = 0; k < 3; k++) s[k] = std::min(s[k], p[k]), s[3 + k] = std::max(s[3 + k], p[k] + 1);
+                }
+        std::vector<std::array<int, 6>> pre(slice.size()), suf(slice.size());
+        for (int i = 0; i < n; i++) {
+            pre[size_t(i)] = slice[size_t(i)];
+            if (i)
+                for (int k = 0; k < 3; k++)
+                    pre[size_t(i)][k] = std::min(pre[size_t(i)][k], pre[size_t(i - 1)][k]),
+                    pre[size_t(i)][3 + k] = std::max(pre[size_t(i)][3 + k], pre[size_t(i - 1)][3 + k]);
+        }
+        for (int i = n - 1; i >= 0; i--) {
+            suf[size_t(i)] = slice[size_t(i)];
+            if (i < n - 1)
+                for (int k = 0; k < 3; k++)
+                    suf[size_t(i)][k] = std::min(suf[size_t(i)][k], suf[size_t(i + 1)][k]),
+                    suf[size_t(i)][3 + k] = std::max(suf[size_t(i)][3 + k], suf[size_t(i + 1)][3 + k]);
+        }
+        for (int i = 1; i < n; i++) {  // split before slice i
+            const auto& L = pre[size_t(i - 1)];
+            const auto& R = suf[size_t(i)];
+            if (L[3] < 0 || R[3] < 0) continue;
+            float c = boxArea(&L[0], &L[3]) + boxArea(&R[0], &R[3]);
+            if (c < best) best = c, bestAxis = a, bestAt = lo[a] + i;
+        }
+    }
+    if (bestAxis < 0) {
+        groups[size_t(idx)] = g;
+        return idx;
+    }
+    int l0[3] = {lo[0], lo[1], lo[2]}, l1[3] = {hi[0], hi[1], hi[2]}, r0[3] = {lo[0], lo[1], lo[2]}, r1[3] = {hi[0], hi[1], hi[2]};
+    l1[bestAxis] = bestAt;
+    r0[bestAxis] = bestAt;
+    int t0[3], t1[3];
+    if (tightBox(l0, l1, t0, t1)) g.left = buildGroup(t0, t1, flatError(t0, t1));
+    if (tightBox(r0, r1, t0, t1)) g.right = buildGroup(t0, t1, flatError(t0, t1));
+    groups[size_t(idx)] = g;
+    return idx;
+}
+
+void buildGroups() {
+    int lo[3] = {0, 0, 0}, hi[3] = {vol.sx * 4, vol.sy * 4, vol.sz * 4}, t0[3], t1[3];
+    groups.reserve(1 << 20);
+    if (tightBox(lo, hi, t0, t1)) rootGroup = buildGroup(t0, t1, flatError(t0, t1));
+}
+
+bool traceGroup(int idx, BoxCtx& c) {
+    const Group& g = groups[size_t(idx)];
+    float t0, t1;
+    int axis;
+    if (!rayBox(c.o, c.d, g.lo, g.hi, t0, t1, axis)) return false;
+    c.s->steps++;
+    float t = std::max(t0, 0.f);
+    bool leaf = g.left < 0 && g.right < 0;
+    if (leaf || g.err * 0.25f <= c.tol * t * c.pa) {
+        if (drawnBoxes) (*drawnBoxes)[size_t(idx)].store(1, std::memory_order_relaxed);
+        Node n{{g.lo[0], g.lo[1], g.lo[2]}, {g.hi[0], g.hi[1], g.hi[2]}, g.err, -1};
+        if (boxFace(n, axis, c.d[axis] < 0, c.o + c.d * t, c)) return true;
+        int ax2 = 0;
+        float best = 1e30f;
+        for (int a = 0; a < 3; a++) {
+            if (std::fabs(c.d[a]) < 1e-12f) continue;
+            float e = ((c.d[a] > 0 ? g.hi[a] : g.lo[a]) * 0.25f - c.o[a]) / c.d[a];
+            if (e < best) best = e, ax2 = a;
+        }
+        return boxFace(n, ax2, c.d[ax2] > 0, c.o + c.d * best, c);
+    }
+    int kids[2] = {g.left, g.right};
+    float tk[2] = {1e30f, 1e30f};
+    for (int i = 0; i < 2; i++) {
+        if (kids[i] < 0) continue;
+        float a0, a1v;
+        int ax;
+        if (!rayBox(c.o, c.d, groups[size_t(kids[i])].lo, groups[size_t(kids[i])].hi, a0, a1v, ax)) kids[i] = -1;
+        else tk[i] = a0;
+    }
+    int first = tk[0] <= tk[1] ? 0 : 1;
+    for (int i : {first, 1 - first})
+        if (kids[i] >= 0 && traceGroup(kids[i], c)) return true;
+    return false;
+}
+
+Sample traceGroups(V3 o, V3 d, float pa, float tol) {
+    Sample s;
+    if (rootGroup < 0) return s;
+    BoxCtx c{o, d, pa, tol, &s};
+    traceGroup(rootGroup, c);
     return s;
 }
 
@@ -762,7 +935,7 @@ int main(int argc, char** argv) {
     float tolPix = float(num(a, "tol", 1)), fog = float(num(a, "fog", 0));  // fog: extinction per block
     std::vector<float> dists;
     for (auto& t : split(str(a, "dist", "10,50,200,600,1500"))) dists.push_back(float(std::atof(t.c_str())));
-    std::vector<std::string> variants = split(str(a, "variants", "ref,current,anymip,micro,cov,covbox,boxes"));
+    std::vector<std::string> variants = split(str(a, "variants", "ref,current,anymip,micro,cov,covbox,boxes,groups"));
     if (variants.empty() || variants[0] != "ref") variants.insert(variants.begin(), "ref");
 
     // the object's bounds (non-air blocks)
@@ -793,9 +966,10 @@ int main(int argc, char** argv) {
     if (needAny) buildBlockLevels(anyLevels, true);
     if (needCov) buildCovLevels(threads);
     if (std::find(variants.begin(), variants.end(), "boxes") != variants.end()) buildBoxes();
+    if (std::find(variants.begin(), variants.end(), "groups") != variants.end()) buildGroups();
     double buildMs = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - tb).count();
-    std::fprintf(stderr, "atlas_lab: %dx%dx%d blocks, object %.0f blocks across, levels built in %.0f ms\n", vol.sx, vol.sy, vol.sz,
-                 2 * radius, buildMs);
+    std::fprintf(stderr, "atlas_lab: %dx%dx%d blocks, object %.0f blocks across, levels built in %.0f ms (octree %zu nodes, groups %zu)\n",
+                 vol.sx, vol.sy, vol.sz, 2 * radius, buildMs, nodes.size(), groups.size());
 
     // the camera: the game's pixel (1080 rows, fov 70), looking at the object from each distance
     float yaw = float(num(a, "yaw", 30)) * 3.14159265f / 180.f, pitch = float(num(a, "pitch", -12)) * 3.14159265f / 180.f;
@@ -807,7 +981,7 @@ int main(int argc, char** argv) {
     int cols = int(variants.size()), rows = int(dists.size());
     std::vector<uint32_t> sheet(size_t(cols * panel) * (rows * panel), 0xFF202020u);
     std::string json = "{\"tool\":\"atlas_lab\",\"build_ms\":" + std::to_string(int(buildMs)) + ",\"runs\":[";
-    std::printf("%-8s %-8s %6s %7s %6s %6s %7s %8s\n", "dist", "variant", "level", "iou", "dE", "dE1", "steps", "ns/ray");
+    std::printf("%-8s %-8s %6s %7s %6s %6s %7s %8s %7s\n", "dist", "variant", "level", "iou", "dE", "dE1", "steps", "ns/ray", "boxes");
     bool firstRun = true;
 
     for (int r = 0; r < rows; r++) {
@@ -828,7 +1002,11 @@ int main(int argc, char** argv) {
             std::vector<RGB> first(size_t(W) * W);
             std::atomic<long long> steps{0}, rays{0};
             auto t0 = std::chrono::steady_clock::now();
+            size_t markN = v == "boxes" ? nodes.size() : v == "groups" ? groups.size() : 0;
+            std::vector<std::atomic<uint8_t>> marks(markN);
+            long long drawn = -1;
             for (int f = 0; f < frames; f++) {
+                drawnBoxes = f == 0 && markN ? &marks : nullptr;
                 std::atomic<int> next{0};
                 auto work = [&]() {
                     long long st = 0, n = 0;
@@ -860,6 +1038,9 @@ int main(int argc, char** argv) {
                                 } else if (v == "boxes") {
                                     float dither = 0.7f + 0.6f * hashf(px, py, f, 0xB0C5u);
                                     sm = traceBoxes(eye, dir, pa, tolPix * dither / std::max(trans, 0.02f));
+                                } else if (v == "groups") {
+                                    float dither = 0.7f + 0.6f * hashf(px, py, f, 0xB0C5u);
+                                    sm = traceGroups(eye, dir, pa, tolPix * dither / std::max(trans, 0.02f));
                                 }
                                 st += sm.steps;
                                 n++;
@@ -882,6 +1063,11 @@ int main(int argc, char** argv) {
                 std::vector<std::thread> ts;
                 for (int t = 0; t < threads; t++) ts.emplace_back(work);
                 for (auto& t : ts) t.join();
+                if (drawnBoxes) {
+                    drawn = 0;
+                    for (auto& m : marks) drawn += m.load();
+                    drawnBoxes = nullptr;
+                }
             }
             double ms = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count();
             if (isRef) ref = img;
@@ -900,12 +1086,12 @@ int main(int argc, char** argv) {
             double iou = uni > 0 ? inter / uni : 1, mde = nde ? de / nde : 0, mde1 = nde ? de1 / nde : 0;
             double spr = rays ? double(steps) / double(rays) : 0, ns = rays ? ms * 1e6 / double(rays) : 0;
             float lvShown = v == "cov" || v == "covbox" ? std::max(0.f, microLevel) - 2.f : (v == "current" || v == "anymip") ? std::max(0.f, std::floor(blockLevel + 0.5f)) : -2.f;
-            std::printf("%-8.0f %-8s %6.2f %7.3f %6.2f %6.2f %7.1f %8.0f\n", D, v.c_str(), lvShown, iou, mde, mde1, spr, ns);
+            std::printf("%-8.0f %-8s %6.2f %7.3f %6.2f %6.2f %7.1f %8.0f %7lld\n", D, v.c_str(), lvShown, iou, mde, mde1, spr, ns, drawn);
             char buf[320];
             std::snprintf(buf, sizeof buf,
                           "%s{\"dist\":%.0f,\"variant\":\"%s\",\"level_blocks\":%.2f,\"pixels\":%d,\"iou\":%.4f,\"dE\":%.3f,\"dE1\":%.3f,"
-                          "\"steps\":%.1f,\"ns_per_ray\":%.0f}",
-                          firstRun ? "" : ",", D, v.c_str(), lvShown, W, iou, mde, mde1, spr, ns);
+                          "\"steps\":%.1f,\"ns_per_ray\":%.0f,\"boxes\":%lld}",
+                          firstRun ? "" : ",", D, v.c_str(), lvShown, W, iou, mde, mde1, spr, ns, drawn);
             json += buf;
             firstRun = false;
             // the panel: the window scaled to the panel (nearest up, box down)

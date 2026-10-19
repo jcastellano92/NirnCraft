@@ -164,6 +164,26 @@ cards); measuring that is next. Fog: an error of e shows as e times the transmit
 it falls; 1/transmittance is too strong (covbox at 1500 m in fog 0.0012: silhouette 0.52, though dE stays 3.3), a
 gentler curve is to be tuned.
 
+**Content-shaped groups** (owner, 2026-10-19: "like Lumen, objects are many boxes whose grouping changes; trees and
+structures group when it makes sense; chunks do not matter, only groups that scale with distance"): the hierarchy
+follows the content, not a grid: each group splits in two at the plane whose children's tight boxes have the least
+surface, so a wall comes away whole from the tree beside it and groups cross objects and chunks (far away one group
+is a stand of trees and the ground under it). Synthetic tree:
+
+| | hierarchy | boxes drawn at 200 / 1500 m | 1500 m iou / dE / steps |
+|---|---|---|---|
+| boxes (octree) | 74 k nodes | 911 / 44 | 0.948 / 3.6 / 1.1 |
+| groups | 9.6 k nodes | 764 / 27 | 0.970 / 2.1 / 1.5 |
+
+Groups are smaller, draw fewer boxes and are the most faithful far representation so far (micro-voxels: 0.971 /
+2.0 / 8.4). Up close (10 - 50 m) the binary tree costs more steps (31 at 10 m against 10.5): there the last levels
+should be dense bricks of micro-voxels (a hybrid), which is the next variant. A GPU builds this kind of hierarchy
+in milliseconds (LBVH from Morton codes), so groups can be rebuilt as the world changes.
+
+What this asks of generation: the content (blocks, from real sections or from the generators) must be producible
+deterministically and fast near the GPU; the grouping is built from it, never authored, so a tree, a town or a cave
+mouth needs no far version of its own.
+
 Coverage alone thickens thin sheets at grazing angles (it does not know where in the voxel the content is); the
 content box (6 numbers a voxel) fixes most of it at about half the micro-voxels' steps. Next: real objects (towns,
 forests, gates), the near-view capture of the same blocks against `ref` (validates the library), a hierarchical
