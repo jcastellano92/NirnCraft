@@ -113,6 +113,9 @@ expect(summ == {"groups": {"iouMin": 0.97, "dEMax": 3.0, "steps": 12.0}}, "atlas
 expect(harness.lab_summary({"runs": [{"variant": "boxes", "pop": 0.0, "pop_max": 0.1, "dE": 1.3, "steps": 5.3}]})
        == {"boxes": {"pop": 0.0, "popMax": 0.1, "dE": 1.3, "steps": 5.3}}, "a sweep's pop numbers are kept")
 
+expect(harness.pack_opt_args({"TAA": False, "FOG_LAYERS": 3, "SSR": True}) == ["opt=FOG_LAYERS=3", "opt=SSR", "opt=!TAA"],
+       "a scene's pack options reach pack_lab as the same switches the live run sets")
+
 # --- every scene declares its weather ---------------------------------------------------------------------------
 import catalog  # noqa: E402
 

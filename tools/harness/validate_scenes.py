@@ -58,6 +58,9 @@ def main():
         if s["tier"] == "lab":
             if not s.get("lab") or s["lab"].get("tool") not in ("atlas_render", "pack_lab", "atlas_lab"):
                 errors.append(f"{w}: lab scenes need lab.tool atlas_render|pack_lab|atlas_lab")
+            cf = s.get("camera_from")
+            if cf and (cf.get("scene") not in ids or cf.get("scene") not in s.get("after", [])):
+                errors.append(f"{w}: camera_from {cf.get('scene')} must be a scene this one comes after")
             for d in s.get("after", []):
                 if d not in ids:
                     errors.append(f"{w}: comes after {d}, which is not a scene")

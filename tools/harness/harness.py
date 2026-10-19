@@ -145,8 +145,11 @@ def with_deps(scenes):
     """A scene's `after` scenes join the selection while what they make is missing (a lab scene's exported inputs):
     a lab never skips for want of an export the same run could have made."""
     ids = {s["id"] for s in scenes}
-    need = [d for s in scenes if s["tier"] == "lab" and any(not f.exists() for f in lab_files(s.get("lab", {})))
-            for d in s.get("after", []) if d not in ids]
+    def missing(s):
+        if any(not f.exists() for f in lab_files(s.get("lab", {}))):
+            return True
+        return bool(s.get("camera_from")) and camera_from(s["camera_from"])[1] != ""
+    need = [d for s in scenes if s["tier"] == "lab" and missing(s) for d in s.get("after", []) if d not in ids]
     if not need:
         return scenes
     by_id = {s["id"]: s for s in catalog.load()}
@@ -309,6 +312,9 @@ class Runner:
         if s["tier"] == "lab":
             exe = ROOT / "native/build/Release" / f"{s['lab'].get('tool', 'atlas_render')}.exe"
             files = lab_files(s["lab"])  # exported inputs (atlas_lab): a new export is a new result
+            if s.get("camera_from"):  # and a new live capture to match is too
+                cf = s["camera_from"]
+                files = files + [Path(f"{results.stem(cf['scene'], cf.get('variant', 'vanilla'))}.after.png")]
             return {**base, "exe": results_hash([exe, ROOT / "native/build/Release/atlas_core.dll"]),
                     "pack": tree_hash(ROOT / "shaderpack/InfiniteATLAS"),
                     **({"files": results_hash([f for f in files if f.exists()])} if files else {})}
@@ -521,6 +527,13 @@ class Runner:
             return results.record(s["id"], v, "visual", "skip", {}, fp,
                                   extra={"error": f"no {missing[0].name} yet: run atlaslab-export (the in-game export) first"})
         lab = {k: (str(lab_path(val)) if isinstance(val, str) and val.startswith("@game/") else val) for k, val in lab.items()}
+        live_png = None
+        if s.get("camera_from"):  # a live capture's own camera: the offline render of exactly that view
+            cam, why = camera_from(s["camera_from"])
+            if why:
+                return results.record(s["id"], v, "visual", "skip", {}, fp, extra={"error": why})
+            live_png = cam.pop("_png")
+            lab.update(cam)
         if tool != "atlas_lab":
             lab.setdefault("w", 960)
             lab.setdefault("h", 540)
@@ -530,6 +543,8 @@ class Runner:
             if s.get("weather") == "off":  # the live weather-off switch's offline twin: same scene, same sky
                 lab.setdefault("weather", 0 if tool == "pack_lab" else "off")
             kv = [f"{k}={val}" for k, val in lab.items()]
+            if tool == "pack_lab":  # the scene's pack options, as the live run sets them: one switch for both
+                kv += pack_opt_args(s.get("pack_options"))
             cmd = [str(exe), str(png)] + kv if tool == "pack_lab" else [str(exe), f"out={png.as_posix()}"] + kv
             r = subprocess.run(cmd, cwd=ROOT / "native" if tool == "pack_lab" else ROOT, capture_output=True, text=True,
                                timeout=900,
@@ -541,8 +556,17 @@ class Runner:
             # the tool's report at the top of the record ("game" keeps it too: posecheck reads it there), and for
             # atlas_lab a per-representation summary (worst silhouette and colour, mean steps, worst pop) to read at
             # a glance and to check against
+            twin = {}
+            if live_png:  # offline next to online: live | offline | difference, measured where the exported blocks are
+                d = results.stem(s["id"], v).parent
+                d.mkdir(parents=True, exist_ok=True)
+                twin = results.offline_vs_live(live_png, png, png.with_name(png.stem + "_mask.png"),
+                                               Path(f"{results.stem(s['id'], v)}.twin.png"))
             rec = results.store(s["id"], v, png, meta={"tool": tool, "args": kv, "atlas": report}, fingerprint=fp,
-                                extra={"report": report, **({"labSummary": lab_summary(report)} if tool == "atlas_lab" else {})})
+                                extra={"report": report, **({"labSummary": lab_summary(report)} if tool == "atlas_lab" else {}),
+                                       **({"vsLive": twin} if twin else {})})
+            if twin:
+                rec["metrics"].update(twin)
         return self.judge(s, v, rec)
 
     # ---------------------------------------------------------------------------------------- live
@@ -879,6 +903,32 @@ def tree_hash(*roots):
         elif r.is_dir():
             files += sorted(f for f in r.rglob("*") if f.is_file())
     return results_hash(files)
+
+
+def pack_opt_args(opts):
+    """A scene's pack_options as pack_lab's opt= arguments (true: on, false: off, else a value)."""
+    out = []
+    for k, v in sorted((opts or {}).items()):
+        out.append(f"opt={k}" if v is True else f"opt=!{k}" if v is False else f"opt={k}={v}")
+    return out
+
+
+def camera_from(ref):
+    """A lab scene's `camera_from` {"scene", "variant"}: that live record's camera as atlas_lab arguments (Minecraft
+    conventions) plus its screenshot ("_png"), or why not: no capture yet, or one taken before the view had settled
+    (a ground truth must be the fully resolved picture)."""
+    rec = results.latest(ref["scene"], ref.get("variant", "vanilla"))
+    png = Path(f"{results.stem(ref['scene'], ref.get('variant', 'vanilla'))}.after.png")
+    g = (rec or {}).get("game") or {}
+    if not rec or not g.get("eye") or not png.exists():
+        return None, f"no live capture of {ref['scene']} [{ref.get('variant', 'vanilla')}] yet: run it first"
+    if (rec.get("metrics") or {}).get("settlePartial") or (rec.get("settlePartial")):
+        return None, (f"the live capture of {ref['scene']} was taken before the view settled (not fully resolved): "
+                      "capture it again")
+    from PIL import Image
+    w, h = Image.open(png).size
+    return {"camera": "mc", "eye": ",".join(f"{c:.3f}" for c in g["eye"]), "yaw": g.get("yaw", 0),
+            "pitch": g.get("pitch", 0), "fov": g.get("fov", 70), "w": w, "h": h, "_png": png}, ""
 
 
 def lab_summary(report):

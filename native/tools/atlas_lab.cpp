@@ -3,6 +3,8 @@
 // converged reference, at the game's true pixel size (1080p, fov 70). Quick: a CPU tracer, seconds per run.
 //
 //   atlas_lab blocks=<dir>/blocks.bin volume=<dir>/tree.alv out=sheet.png [dist=10,50,200,600,1500]
+//   atlas_lab ... camera=mc eye=x,y,z yaw=Y pitch=P fov=70 w=1280 h=800 [shade=mc]: one live capture's own view
+//             (Minecraft conventions), whole frames, for the offline-vs-live sheet (the harness's camera_from)
 //             [variants=ref,current,anymip,micro,cov] [yaw=30] [pitch=-12] [frames=16] [panel=192] [threads=N]
 //             [scale=1] [bias=0] [tol=1] [fog=0] [grass=91BD59] [foliage=77AB2F]
 //
@@ -195,17 +197,79 @@ bool loadBlocks(const std::string& path) {
 
 // ---- the volume (AtlasLabExport *.alv) ------------------------------------------------------------------------------
 
+// a sparse volume's section (AtlasLabExport view: *.als): its palette and, when it has more than one entry, indices
+struct Sec {
+    std::vector<uint32_t> pal;
+    std::vector<uint16_t> idx;  // x + 16 * (z + 16 * y)
+};
+
 struct Volume {
-    int x0 = 0, y0 = 0, z0 = 0, sx = 0, sy = 0, sz = 0;
+    int x0 = 0, y0 = 0, z0 = 0, sx = 0, sy = 0, sz = 0;  // origin (world blocks) and size; sparse: section-aligned
     std::vector<uint32_t> ids;
+    bool sparse = false;
+    int nsx = 0, nsy = 0, nsz = 0;  // sparse: the section grid
+    std::vector<Sec> secs;
+    std::vector<int32_t> secAt;  // sparse: section grid -> index in secs, -1 none (nsx * nsy * nsz)
+    const Sec* section(int gx, int gy, int gz) const {
+        if (gx < 0 || gy < 0 || gz < 0 || gx >= nsx || gy >= nsy || gz >= nsz) return nullptr;
+        int32_t i = secAt[size_t(gx + nsx * (gz + nsz * gy))];
+        return i < 0 ? nullptr : &secs[size_t(i)];
+    }
     const Block* at(int x, int y, int z) const {
         if (x < 0 || y < 0 || z < 0 || x >= sx || y >= sy || z >= sz) return nullptr;
-        uint32_t id = ids[size_t(x + sx * (z + sz * y))];
+        uint32_t id;
+        if (sparse) {
+            const Sec* c = section(x >> 4, y >> 4, z >> 4);
+            if (!c) return nullptr;
+            id = c->idx.empty() ? c->pal[0] : c->pal[c->idx[size_t((x & 15) + 16 * ((z & 15) + 16 * (y & 15)))]];
+        } else {
+            id = ids[size_t(x + sx * (z + sz * y))];
+        }
         return id < lib.size() && lib[id].present ? &lib[id] : nullptr;
     }
 } vol;
 
+bool loadSparse(const std::string& path) {
+    std::ifstream f(path, std::ios::binary);
+    if (!f) return false;
+    std::vector<uint8_t> d((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
+    if (d.size() < 8 || std::memcmp(d.data(), "ALS1", 4) != 0) return false;
+    size_t p = 4;
+    auto i32 = [&]() { int32_t v; std::memcpy(&v, &d[p], 4); p += 4; return v; };
+    auto u16 = [&]() { uint16_t v; std::memcpy(&v, &d[p], 2); p += 2; return v; };
+    uint32_t n = uint32_t(i32());
+    std::vector<std::array<int, 3>> at;
+    int lo[3] = {1 << 30, 1 << 30, 1 << 30}, hi[3] = {-(1 << 30), -(1 << 30), -(1 << 30)};
+    for (uint32_t k = 0; k < n; k++) {
+        std::array<int, 3> c{i32(), i32(), i32()};  // cx, sy, cz
+        Sec sec;
+        uint16_t pn = u16();
+        sec.pal.resize(pn);
+        for (auto& v : sec.pal) v = uint32_t(i32());
+        if (pn > 1) {
+            sec.idx.resize(4096);
+            for (auto& v : sec.idx) v = pn <= 256 ? d[p++] : u16();
+        }
+        int g[3] = {c[0], c[1], c[2]};  // x, y, z in sections
+        g[1] = c[1];
+        for (int a = 0; a < 3; a++) lo[a] = std::min(lo[a], g[a]), hi[a] = std::max(hi[a], g[a] + 1);
+        at.push_back({c[0], c[1], c[2]});
+        vol.secs.push_back(std::move(sec));
+    }
+    if (vol.secs.empty()) return false;
+    vol.sparse = true;
+    vol.nsx = hi[0] - lo[0], vol.nsy = hi[1] - lo[1], vol.nsz = hi[2] - lo[2];
+    vol.x0 = lo[0] * 16, vol.y0 = lo[1] * 16, vol.z0 = lo[2] * 16;
+    vol.sx = vol.nsx * 16, vol.sy = vol.nsy * 16, vol.sz = vol.nsz * 16;
+    vol.secAt.assign(size_t(vol.nsx) * vol.nsy * vol.nsz, -1);
+    for (size_t k = 0; k < at.size(); k++)
+        vol.secAt[size_t((at[k][0] - lo[0]) + vol.nsx * ((at[k][2] - lo[2]) + vol.nsz * (at[k][1] - lo[1])))] = int32_t(k);
+    std::fprintf(stderr, "atlas_lab: sparse view: %zu sections, %d x %d x %d blocks\n", vol.secs.size(), vol.sx, vol.sy, vol.sz);
+    return true;
+}
+
 bool loadVolume(const std::string& path) {
+    if (path.size() > 4 && path.substr(path.size() - 4) == ".als") return loadSparse(path);
     std::ifstream f(path, std::ios::binary);
     if (!f) return false;
     char magic[4];
@@ -226,7 +290,8 @@ inline bool microAt(int mx, int my, int mz) {
     int bit = (mx & 3) + 4 * ((mz & 3) + 4 * (my & 3));
     if (!((b->mask >> bit) & 1)) return false;
     float a = b->alpha[bit];
-    return a >= 0.999f || hashf(mx, my, mz, 0x5EEDu) < a;
+    // hashed in world micro-voxels: the same cutout whatever box or view the blocks were exported in
+    return a >= 0.999f || hashf(mx + vol.x0 * 4, my + vol.y0 * 4, mz + vol.z0 * 4, 0x5EEDu) < a;
 }
 inline RGB microCol(int mx, int my, int mz, int f) {
     const Block* b = vol.at(mx >> 2, my >> 2, mz >> 2);
@@ -242,7 +307,11 @@ V3 SUN = norm({0.45f, 0.8f, 0.35f});
 
 inline int enteredFace(int axis, const V3& d) { return d[axis] > 0 ? FACE_LOW[axis] : FACE_HIGH[axis]; }
 
+bool mcShade = false;  // shade=mc: vanilla's fixed face shading (as a near screenshot without a shader pack)
+const float MC_SHADE[6] = {0.5f, 1.0f, 0.8f, 0.8f, 0.6f, 0.6f};
+
 RGB lit(RGB c, int face) {
+    if (mcShade) return {c.r * MC_SHADE[face], c.g * MC_SHADE[face], c.b * MC_SHADE[face]};
     float l = 0.42f + 0.58f * std::max(0.f, dot(NORMALS[face], SUN));
     return {c.r * l, c.g * l, c.b * l};
 }
@@ -297,8 +366,37 @@ struct Sample {
     int steps = 0;
 };
 
-// micro-voxels inside the non-air blocks (ref, micro, and the cov chain's level 0)
+Sample traceMicroDense(V3 o, V3 d);
+
+// micro-voxels inside the non-air blocks (ref, micro, and the cov chain's level 0); a sparse view's rays go section
+// by section first (a kilometre is ~60 sections, not 1000 blocks)
 Sample traceMicro(V3 o, V3 d) {
+    if (!vol.sparse) return traceMicroDense(o, d);
+    Sample s;
+    s.steps = dda(o, d, 16.f, vol.nsx, vol.nsy, vol.nsz, [&](int gx, int gy, int gz, int) {
+        if (!vol.section(gx, gy, gz)) return false;
+        V3 so{float(gx * 16), float(gy * 16), float(gz * 16)};
+        s.steps += dda(o - so, d, 1.f, 16, 16, 16, [&](int lx, int ly, int lz, int) {
+            int bx = gx * 16 + lx, by = gy * 16 + ly, bz = gz * 16 + lz;
+            const Block* b = vol.at(bx, by, bz);
+            if (!b || !b->any || !b->mask) return false;
+            V3 lo{float(bx), float(by), float(bz)};
+            s.steps += dda(o - lo, d, 0.25f, 4, 4, 4, [&](int x, int y, int z, int axis) {
+                int mx = bx * 4 + x, my = by * 4 + y, mz = bz * 4 + z;
+                if (!microAt(mx, my, mz)) return false;
+                int f = enteredFace(axis, d);
+                s.hit = true;
+                s.c = lit(microCol(mx, my, mz, f), f);
+                return true;
+            });
+            return s.hit;
+        });
+        return s.hit;
+    });
+    return s;
+}
+
+Sample traceMicroDense(V3 o, V3 d) {
     Sample s;
     s.steps = dda(o, d, 1.f, vol.sx, vol.sy, vol.sz, [&](int bx, int by, int bz, int) {
         const Block* b = vol.at(bx, by, bz);
@@ -962,6 +1060,20 @@ int main(int argc, char** argv) {
         std::fprintf(stderr, "atlas_lab: no volume at '%s' (in game: /nirncraft-atlaslab here <name> <r> <down> <up>)\n", volPath.c_str());
         return 2;
     }
+    {  // the tints the game blended at the box's centre (AtlasLabExport writes them beside the volume)
+        std::string side = volPath.substr(0, volPath.size() >= 4 ? volPath.size() - 4 : 0) + ".json";
+        std::ifstream f(side);
+        std::string txt((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
+        auto field = [&](const char* k, RGB& out) {
+            auto i = txt.find(std::string("\"") + k + "\"");
+            if (i == std::string::npos) return;
+            auto q = txt.find('"', txt.find(':', i) + 1);
+            if (q != std::string::npos) out = unpack(uint32_t(std::strtoul(txt.c_str() + q + 1, nullptr, 16)));
+        };
+        field("grass", tintGrass);
+        field("foliage", tintFoliage);
+    }
+    mcShade = str(a, "shade", "") == "mc";
     if (a.count("grass")) tintGrass = unpack(uint32_t(std::strtoul(a["grass"].c_str(), nullptr, 16)));
     if (a.count("foliage")) tintFoliage = unpack(uint32_t(std::strtoul(a["foliage"].c_str(), nullptr, 16)));
     int threads = int(num(a, "threads", std::max(1u, std::thread::hardware_concurrency() / 2)));
@@ -973,9 +1085,10 @@ int main(int argc, char** argv) {
     std::vector<std::string> variants = split(str(a, "variants", "ref,current,anymip,micro,cov,covbox,boxes,groups"));
     if (variants.empty() || variants[0] != "ref") variants.insert(variants.begin(), "ref");
 
-    // the object's bounds (non-air blocks)
+    // the object's bounds (non-air blocks; a sparse view: its whole extent)
     int bmin[3] = {1 << 30, 1 << 30, 1 << 30}, bmax[3] = {-1, -1, -1};
-    for (int y = 0; y < vol.sy; y++)
+    if (vol.sparse) bmin[0] = bmin[1] = bmin[2] = 0, bmax[0] = vol.sx, bmax[1] = vol.sy, bmax[2] = vol.sz;
+    for (int y = 0; y < (vol.sparse ? 0 : vol.sy); y++)
         for (int z = 0; z < vol.sz; z++)
             for (int x = 0; x < vol.sx; x++) {
                 const Block* b = vol.at(x, y, z);
@@ -992,6 +1105,9 @@ int main(int argc, char** argv) {
     float radius = 0.5f * std::sqrt(float((bmax[0] - bmin[0]) * (bmax[0] - bmin[0]) + (bmax[1] - bmin[1]) * (bmax[1] - bmin[1]) +
                                           (bmax[2] - bmin[2]) * (bmax[2] - bmin[2])));
 
+    if (vol.sparse)  // a view is for the reference and micro-voxels (the other representations build from dense boxes)
+        variants.erase(std::remove_if(variants.begin(), variants.end(), [](const std::string& v) { return v != "ref" && v != "micro"; }),
+                       variants.end());
     auto tb = std::chrono::steady_clock::now();
     bool needCur = std::find(variants.begin(), variants.end(), "current") != variants.end();
     bool needAny = std::find(variants.begin(), variants.end(), "anymip") != variants.end();
@@ -1134,6 +1250,82 @@ int main(int argc, char** argv) {
         for (int x = 0; x < size; x++) sheet[size_t(ox + x) + size_t(sheetW) * size_t(oy)] = 0xFF000000u;
         for (int y = 0; y < size; y++) sheet[size_t(ox) + size_t(sheetW) * size_t(oy + y)] = 0xFF000000u;
     };
+
+    if (str(a, "camera", "") == "mc") {
+        // a Minecraft camera (a live capture's own: eye in world blocks, yaw 0 = south, pitch > 0 looks down, fov
+        // vertical), the whole w x h frame at true pixels; one frame per representation: out (the first) and
+        // out_<name>.png; out_mask.png is where the frame shows the exported blocks (the share of samples that hit)
+        float ex = 0, ey = 0, ez = 0;
+        std::sscanf(str(a, "eye", "0,0,0").c_str(), "%f,%f,%f", &ex, &ey, &ez);
+        float myaw = float(num(a, "yaw", 0)) * 3.14159265f / 180.f, mpitch = float(num(a, "pitch", 0)) * 3.14159265f / 180.f;
+        float mfov = float(num(a, "fov", 70)) * 3.14159265f / 180.f;
+        int w = int(num(a, "w", 1280)), h = int(num(a, "h", 720));
+        V3 cf = norm({-std::sin(myaw) * std::cos(mpitch), -std::sin(mpitch), std::cos(myaw) * std::cos(mpitch)});
+        V3 cr = norm(cross(cf, {0, 1, 0})), cu = cross(cr, cf);
+        float cpa = 2.f * std::tan(mfov / 2) / float(h);
+        V3 eye{ex - vol.x0, ey - vol.y0, ez - vol.z0};
+        std::string json = "{\"tool\":\"atlas_lab\",\"mode\":\"camera\",\"eye\":[" + std::to_string(ex) + "," + std::to_string(ey) + "," +
+                           std::to_string(ez) + "],\"frames\":[";
+        for (size_t vi = 0; vi < variants.size(); vi++) {
+            const std::string& v = variants[vi];
+            int spp = v == "ref" ? 4 : 1;
+            std::vector<RGB> acc(size_t(w) * h);
+            std::vector<float> hit(size_t(w) * h, 0.f);
+            auto t0 = std::chrono::steady_clock::now();
+            for (int f = 0; f < frames; f++) {
+                std::atomic<int> next{0};
+                auto work = [&]() {
+                    for (int py; (py = next++) < h;)
+                        for (int px = 0; px < w; px++)
+                            for (int s2 = 0; s2 < spp; s2++) {
+                                int k = f * spp + s2 + 1;
+                                float jx = 0, jy = 0, fr = 0.5f;
+                                for (int i = k; i; i /= 2, fr *= 0.5f) jx += fr * (i % 2);
+                                fr = 1.f / 3;
+                                for (int i = k; i; i /= 3, fr /= 3) jy += fr * (i % 3);
+                                V3 dir = norm(cf + cr * ((px - w * 0.5f + jx) * cpa) - cu * ((py - h * 0.5f + jy) * cpa));
+                                uint32_t seed = hash(uint32_t(px + 4096 * py) ^ hash(uint32_t(f * 977 + s2)));
+                                float D = 1.f;  // the level is per ray here: the distance to what the ray meets
+                                Sample sm;
+                                if (v == "ref" || v == "micro") sm = traceMicro(eye, dir);
+                                else if (v == "boxes" || v == "groups") {
+                                    float dither = 0.7f + 0.6f * hashf(px, py, f, 0xB0C5u);
+                                    sm = v == "boxes" ? traceBoxes(eye, dir, cpa, tolPix * dither, false, seed)
+                                                      : traceGroups(eye, dir, cpa, tolPix * dither, false, seed);
+                                } else if (v == "current") {
+                                    sm = traceBlocks(curLevels, 0, eye, dir, true, seed);
+                                }
+                                (void)D;
+                                size_t i = size_t(px + w * py);
+                                RGB c = sm.hit ? sm.c : SKY;
+                                float wgt = 1.f / float(spp * frames);
+                                acc[i].r += c.r * wgt, acc[i].g += c.g * wgt, acc[i].b += c.b * wgt;
+                                hit[i] += sm.hit ? wgt : 0.f;
+                            }
+                };
+                std::vector<std::thread> ts;
+                for (int t = 0; t < threads; t++) ts.emplace_back(work);
+                for (auto& t : ts) t.join();
+            }
+            double ms = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count();
+            std::vector<uint32_t> px(size_t(w) * h), mask(size_t(w) * h);
+            auto ch = [](float v2) { return uint32_t(std::clamp(v2, 0.f, 255.f)); };
+            for (size_t i = 0; i < px.size(); i++) {
+                px[i] = 0xFF000000u | ch(acc[i].b) << 16 | ch(acc[i].g) << 8 | ch(acc[i].r);
+                uint32_t m = uint32_t(std::clamp(hit[i] * 255.f, 0.f, 255.f));
+                mask[i] = 0xFF000000u | m << 16 | m << 8 | m;
+            }
+            std::string base = out.size() > 4 ? out.substr(0, out.size() - 4) : out;
+            std::string path = vi == 0 ? out : base + "_" + v + ".png";
+            atlas::writePng(path, px.data(), uint32_t(w), uint32_t(h));
+            if (vi == 0) atlas::writePng(base + "_mask.png", mask.data(), uint32_t(w), uint32_t(h));
+            json += (vi ? "," : "") + std::string("{\"variant\":\"") + v + "\",\"ms\":" + std::to_string(int(ms)) + "}";
+            std::fprintf(stderr, "atlas_lab: camera frame %s %dx%d in %.0f ms -> %s\n", v.c_str(), w, h, ms, path.c_str());
+        }
+        json += "]}";
+        std::printf("%s\n", json.c_str());
+        return 0;
+    }
 
     int sweep = int(num(a, "sweep", 0));
     if (sweep >= 2) {

@@ -701,6 +701,13 @@ public final class ClientAutotest {
                 com.nirncraft.client.autotest.ReviewWorlds.hudHidden(mc, !action.substring(4).trim().equals("on"));
             } else if (action.startsWith("weather-off ")) {  // on | off: world-gen views without clouds, rain or fog banks
                 com.nirncraft.atmosphere.client.WeatherFieldTexture.off(action.substring(12).trim().equals("on"));
+            } else if (action.startsWith("atlaslab view ")) {  // the real blocks in view to a distance: waits until written
+                String[] va = action.substring(14).trim().split(" +");
+                liveCommand = com.nirncraft.atlas.AtlasLabExport.view(va[0], Integer.parseInt(va[1])).thenApply(msg -> {
+                    NirnCraft.LOGGER.info(msg);
+                    return msg.contains(" sections in ") ? 1 : 0;
+                });
+                liveCommandDeadline = System.currentTimeMillis() + 1_200_000L;
             } else if (action.startsWith("atlaslab ")) {  // the far-field lab's inputs: blocks | volume ... | here ...
                 NirnCraft.LOGGER.info(com.nirncraft.atlas.AtlasLabExport.autotest(action.substring(9)));
             } else if (action.startsWith("renderdistance ")) {  // chunks: fidelity tests draw a place far-field only

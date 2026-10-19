@@ -554,6 +554,38 @@ def twin_compare(lab_png, live_png, out_png):
     return {"twinDE": de, "twinLuma": luma, "twinStructure": struct, "twinSkyline": round(sky, 2)}
 
 
+def offline_vs_live(live_png, lab_png, mask_png, out_png):
+    """The offline render of a live capture's own view against that capture, where the offline frame shows the
+    exported blocks (its mask: the live view also shows land beyond them): mean colour dE there, the share of the
+    frame compared, and the edge agreement (structure: do the outlines fall in the same places). Writes the sheet
+    live | offline | difference (dE as heat, grey outside the mask) to out_png."""
+    a = Image.open(live_png).convert("RGB")
+    b = Image.open(lab_png).convert("RGB").resize(a.size)
+    m = np.asarray(Image.open(mask_png).convert("L").resize(a.size), dtype=np.float32) / 255.0 if Path(mask_png).exists()         else np.ones((a.height, a.width), np.float32)
+    la, lb = (np.asarray(_lab(x, w=a.width), dtype=np.float32) for x in (a, b))
+    de = np.sqrt(((la - lb) ** 2).sum(axis=2))
+    inside = m > 0.5
+    share = float(inside.mean())
+    mean_de = float(de[inside].mean()) if inside.any() else 0.0
+    ga, gb = (np.asarray(x.convert("L"), dtype=np.float32) for x in (a, b))
+
+    def edges(g):
+        gx = np.abs(np.diff(g, axis=1, prepend=g[:, :1]))
+        gy = np.abs(np.diff(g, axis=0, prepend=g[:1]))
+        return (gx + gy) > 24
+    ea, eb = edges(ga) & inside, edges(gb) & inside
+    struct = float((ea & eb).sum() / max(1, (ea | eb).sum()))
+    heat = np.clip(de / 30.0, 0, 1)
+    hm = np.stack([heat * 255, (1 - np.abs(heat - 0.5) * 2) * 180, (1 - heat) * 120], axis=2)
+    hm[~inside] = 60
+    side = Image.new("RGB", (a.width * 3 + 16, a.height), (20, 20, 24))
+    side.paste(a, (0, 0))
+    side.paste(b, (a.width + 8, 0))
+    side.paste(Image.fromarray(hm.astype(np.uint8)), (2 * a.width + 16, 0))
+    side.save(out_png)
+    return {"liveDE": round(mean_de, 2), "liveShare": round(share, 3), "liveEdges": round(struct, 3)}
+
+
 def pop_metrics(scene, imgs):
     """Ladder: how much the subject changes between the two rungs that straddle the near/far hand-off (the same view
     16 blocks apart: a big change is a seam or pop). Sweep: frame-to-frame change while flying through the hand-off;
