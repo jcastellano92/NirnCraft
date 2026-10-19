@@ -105,7 +105,8 @@ vec3 sceneAt(vec2 uv, vec3 sun, bool marched) {
         col = col * pl.a + pl.rgb;
     }
     if (sky && fogDist >= 1e29) col += lightningSky(dir, outdoorExposure(cameraPosition, cameraPosition));
-    else if (fogDist >= far) col += lightningSky(dir, outdoorExposure(cameraPosition, cameraPosition)) * 0.35;  // on the far field
+    else if (fogDist >= far && fogDist < 1e29)  // on the far field: lit around each strike, not uniformly
+        col += lightningTerrain(dir * fogDist, outdoorExposure(cameraPosition, cameraPosition));
     if (isEyeInWater == 0) {
         col = applyMedia(col, dir, fogDist, sun, cameraPosition, wetness, rainStrength, airClock(), ign(gl_FragCoord.xy, 0.0), marched);
         if (farEdge) {  // the far part at its own distance: media(c) = c * T + S, so the premultiplied part is far * T + S * a

@@ -64,6 +64,22 @@ vec3 lightningSurface(vec3 p, vec3 n, float skyLight, float exposure) {
 
 // the sky and cloud deck lit by the channels, seen along dir (camera outdoors only): a glow towards each strike and a
 // broad flicker over the whole sky while one is near
+// a flash on far terrain: the light falls off with the distance from the strike to that ground (p, camera-relative),
+// not from the camera: one strike lights the land around it, it does not lift the whole distance at once
+vec3 lightningTerrain(vec3 p, float camExposure) {
+    loadStrikes();
+    if (gStrikes == 0 || camExposure <= 0.0) return vec3(0.0);
+    vec3 c = vec3(0.0);
+    for (int i = 0; i < 4; i++) {
+        if (i >= gStrikes) break;
+        Discharge s = gStrike[i];
+        vec3 base = s.p[3];  // where the channel meets the ground
+        float d = length(p - base);
+        c += LIGHTNING_COLOUR * dischargePulse(s) * 0.3 / (1.0 + d * d / 2.25e6);  // ~1.5 km radius
+    }
+    return c * camExposure;
+}
+
 vec3 lightningSky(vec3 dir, float camExposure) {
     loadStrikes();
     if (gStrikes == 0 || camExposure <= 0.0) return vec3(0.0);

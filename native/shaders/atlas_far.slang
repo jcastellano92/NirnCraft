@@ -660,7 +660,10 @@ void cloudMain(uint3 tid : SV_DispatchThreadID) {
     float limit = frame.params.y;
     if (history && sub != fresh) {
         float pd = prevCloudDepth[ci];
-        float dd = pd < 1e29 ? pd : 20000.0;
+        // an empty texel is reprojected at the terrain behind it (from above that is a few hundred blocks, not the
+        // 20000 assumed before: gaps pulled cloud colour in and edges trailed while flying)
+        float behind = prevSurface[full.y * w + full.x];
+        float dd = pd < 1e29 ? pd : (behind < 1e29 ? min(behind, limit) : 20000.0);
         float3 X = o + dir * dd - frame.prevCam.xyz;
         float4 clip = frame.prevViewProj[0] * X.x + frame.prevViewProj[1] * X.y + frame.prevViewProj[2] * X.z + frame.prevViewProj[3];
         if (clip.w > 1e-4) {
@@ -682,9 +685,15 @@ void cloudMain(uint3 tid : SV_DispatchThreadID) {
                 int2 b1 = min(b + 1, int2(cd) - 1);
                 uint i00 = uint(b.y) * cd.x + uint(b.x), i10 = uint(b.y) * cd.x + uint(b1.x);
                 uint i01 = uint(b1.y) * cd.x + uint(b.x), i11 = uint(b1.y) * cd.x + uint(b1.x);
-                cloudBuf[ci] = lerp(lerp(prevCloudBuf[i00], prevCloudBuf[i10], fr.x), lerp(prevCloudBuf[i01], prevCloudBuf[i11], fr.x), fr.y);
-                cloudDepth[ci] = min(min(prevCloudDepth[i00], prevCloudDepth[i10]), min(prevCloudDepth[i01], prevCloudDepth[i11]));
-                return;
+                // at a cloud edge the four disagree (cloud / no cloud): blending them is the screen-door fringe;
+                // march this texel fresh instead
+                uint n = (prevCloudDepth[i00] < 1e29 ? 1u : 0u) + (prevCloudDepth[i10] < 1e29 ? 1u : 0u)
+                       + (prevCloudDepth[i01] < 1e29 ? 1u : 0u) + (prevCloudDepth[i11] < 1e29 ? 1u : 0u);
+                if (n == 0u || n == 4u) {
+                    cloudBuf[ci] = lerp(lerp(prevCloudBuf[i00], prevCloudBuf[i10], fr.x), lerp(prevCloudBuf[i01], prevCloudBuf[i11], fr.x), fr.y);
+                    cloudDepth[ci] = min(min(prevCloudDepth[i00], prevCloudDepth[i10]), min(prevCloudDepth[i01], prevCloudDepth[i11]));
+                    return;
+                }
             }
         }
     }
