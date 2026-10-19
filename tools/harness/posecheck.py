@@ -40,8 +40,9 @@ def _deg(dot):
 
 
 def requested(pose_lines):
-    """What the scene asked for, from the pose verbs it sent (visit / camera): {"xz", "y" (camera only), "forward"}."""
-    for line in pose_lines:
+    """What the scene asked for, from the pose verbs it sent (visit / camera): {"xz", "y" (camera only), "forward"}.
+    The last one wins: a scene can move the camera again in its setup (the calibration's oblique view)."""
+    for line in reversed(list(pose_lines)):
         w = line.split()
         if not w:
             continue
