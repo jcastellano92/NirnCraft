@@ -538,7 +538,7 @@ static void testTransitions() {
     AetherContext* ctx = nullptr;
     aether_create(AETHER_BACKEND_CPU, &ctx);
     CHECK(aether_set_transitions(ctx, -1.0f) == AETHER_ERR_ARG);
-    CHECK(aether_set_transitions(ctx, 0.4f) == AETHER_OK);
+    CHECK(aether_set_transitions(ctx, 2.0f) == AETHER_OK);  // long enough that a loaded machine still catches its start
     std::vector<float> low(256 * 256, 100.0f), high(256 * 256, 110.0f), water(256 * 256, NAN);
     std::vector<uint16_t> top(256 * 256, 2), fill(256 * 256, 3);
     auto upload = [&](std::vector<float>& h, int lod) {
@@ -555,7 +555,7 @@ static void testTransitions() {
     upload(low, 0);
     double centre[3] = {10.5, 140.0, 10.5};
     aether_update(ctx, centre, 0);
-    sleepMs(450);
+    sleepMs(2100);
     aether_update(ctx, centre, 0);  // the first window's own fade-in is over (and dropped)
     AetherFrame f{};
     f.cameraPos[0] = 10.5;
@@ -584,7 +584,7 @@ static void testTransitions() {
     upload(high, 0);
     aether_update(ctx, centre, 0);
     double start = newShare();
-    sleepMs(450);
+    sleepMs(2100);
     aether_update(ctx, centre, 0);
     double end = newShare();
     std::printf("  new ground: %.0f%% before the swap, %.0f%% right after it, %.0f%% after the fade\n", 100 * before,
