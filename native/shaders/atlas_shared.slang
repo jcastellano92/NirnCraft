@@ -17,6 +17,7 @@ static const uint FRAME_DEBUG_WEATHER = 0x200u;  // ground shows the sampled wea
 static const float FAR_AMBIENT_OCCLUSION = 0.78;
 static const uint FRAME_FILL_NEAR = 0x2000u;   // (abi 0.12) fill pixels the near field left empty, from the camera
 static const uint FRAME_LOD_DITHER = 0x1000u;  // dithered LOD transitions (per-pixel segment phase)
+static const uint FRAME_GROUPS = 0x4000u;      // (abi 0.14) primary rays trace the content-shaped groups
 static const int MAX_LODS = 8;
 
 struct LodGpu {
@@ -28,6 +29,7 @@ struct RegionGpu {
     int4 origin;   // world block origin of voxel (0, 0, 0); w = lod
     uint4 bases;   // node base, leaf base, root (node word offset), height-mip base
     uint4 runs;    // material run base, run count
+    uint4 groups;  // its content-shaped groups (atlas_groups.slang): first node, brick columns, slots, bricks; x ~0: none
 };
 
 struct MaterialGpu {

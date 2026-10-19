@@ -171,16 +171,16 @@ const char* typeName(VkPhysicalDeviceType t) {
     }
 }
 
-constexpr uint32_t BINDINGS = 25;
+constexpr uint32_t BINDINGS = 26;
 constexpr uint32_t SLOTS = 2;
 // far kernel bindings
 constexpr uint32_t B_FRAME = 0, B_PALETTE = 7, B_COLOR = 8, B_NORMAL = 9, B_DEPTH = 10, B_WEATHER = 11,
                    B_COUNTERS = 12, B_NOISE = 13, B_NEAR = 14, B_ACTORS = 15, B_HEIGHTMIP = 16, B_CLOUD = 17,
                    B_CLOUD_DEPTH = 18, B_PREV_SURFACE = 19, B_SURFACE = 20, B_NOISE_TEX = 21, B_PREV_CLOUD = 22,
-                   B_PREV_CLOUD_DEPTH = 23, B_SUNMAP = 24;
+                   B_PREV_CLOUD_DEPTH = 23, B_SUNMAP = 24, B_GROUPS = 25;
 // the scene's buffers (two copies, staged off the render thread)
-constexpr uint32_t SCENE_BINDINGS[] = {1, 2, 3, 4, 5, 6, B_HEIGHTMIP};
-bool isScene(uint32_t b) { return (b >= 1 && b <= 6) || b == B_HEIGHTMIP; }
+constexpr uint32_t SCENE_BINDINGS[] = {1, 2, 3, 4, 5, 6, B_HEIGHTMIP, B_GROUPS};
+bool isScene(uint32_t b) { return (b >= 1 && b <= 6) || b == B_HEIGHTMIP || b == B_GROUPS; }
 // shared images
 constexpr int IMG_COLOR = 0, IMG_NORMAL = 1, IMG_DEPTH = 2, IMG_NEAR = 3, IMAGES = 4;
 
@@ -554,11 +554,23 @@ public:
         uint32_t w = in.frame.dims[0], h = in.frame.dims[1];
         size_t px = size_t(w) * h;
         FrameGpu frame = in.frame;
-        if (!prepare(s, in, frame, true, err)) return false;
+        // ATLAS_TIMING_DEVICE_OUTPUTS=1 (offline timings, atlas_render frames=): the outputs stay in device memory as
+        // the game's are (no read back: writing a 1080p G-buffer across the bus costs the kernel ~20 ms), the frame
+        // returns zeros
+        bool deviceOnly = std::getenv("ATLAS_TIMING_DEVICE_OUTPUTS") != nullptr;
+        if (!prepare(s, in, frame, !deviceOnly, err)) return false;
         if (in.nearDepth && !upload(s.bufs[B_NEAR], in.nearDepth, px * 4, false, Mem::HostWrite, err)) return false;
         refreshDescriptors(s);
         begin(s);
         recordFar(s, w, h, (frame.dims[2] & 0x1u) != 0);
+        if (deviceOnly) {
+            if (!submit(s, nullptr, nullptr, err) || !waitSlot(s, gpuMs, err)) return false;
+            out.color.assign(px * 4, 0.0f);
+            out.normal.assign(px, 0);
+            out.depth.assign(px, 1e30f);
+            out.counters.assign(px, 0);
+            return true;
+        }
         VkMemoryBarrier mb{VK_STRUCTURE_TYPE_MEMORY_BARRIER};
         mb.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
         mb.dstAccessMask = VK_ACCESS_HOST_READ_BIT;
@@ -1184,7 +1196,7 @@ private:
     }
 
     // Why a device cannot run the kernels ("" when it can): the Vulkan 1.2 baseline, 64-bit integers in shaders,
-    // a compute queue, and the far kernel's 23 storage buffers in one stage.
+    // a compute queue, and the far kernel's 24 storage buffers in one stage.
     static std::string deviceUnfit(VkPhysicalDevice d, const VkPhysicalDeviceProperties& p, const VkPhysicalDeviceFeatures& f) {
         if (p.apiVersion < VK_API_VERSION_1_2) return "Vulkan " + apiString(p.apiVersion) + " < 1.2";
         if (!f.shaderInt64) return "no shaderInt64";
@@ -2058,6 +2070,8 @@ private:
         bytes[6] = sc.runMat.size() * 4;
         src[B_HEIGHTMIP] = sc.heightMip.data();
         bytes[B_HEIGHTMIP] = sc.heightMip.size() * 4;
+        src[B_GROUPS] = sc.groups.data();
+        bytes[B_GROUPS] = sc.groups.size() * 4;
         for (uint32_t i : SCENE_BINDINGS) {
             offset[i] = total;
             total += (bytes[i] + 255) & ~VkDeviceSize(255);

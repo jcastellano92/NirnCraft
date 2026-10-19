@@ -1460,8 +1460,149 @@ static void testFaults() {
     std::printf("  clipmap levels 1 -> 2: %u -> %u regions; worker exceptions return to the caller\n", one, st.regions);
 }
 
+// The content-shaped groups (ATLAS_FRAME_GROUPS): a real section with a row of bottom slabs and a cut-out leaf cluster
+// over flat ground. Straight down the slabs read at their real half height (the voxel path draws them as full blocks),
+// the ground where both agree, the trees exist and are reported; then the same scene on the CPU and Vulkan builds.
+static AtlasContext* groupScene(AtlasBackend be) {
+    AtlasContext* ctx = nullptr;
+    if (atlas_create(be, &ctx) != ATLAS_OK) return nullptr;
+    std::vector<float> surf(256 * 256, 100.0f), water(256 * 256, NAN);
+    std::vector<uint16_t> top(256 * 256, 52), fill(256 * 256, 52);
+    for (int tz = -2; tz <= 2; tz++)
+        for (int tx = -2; tx <= 2; tx++) {
+            AtlasColumnTile t{0, tx, tz, surf.data(), water.data(), top.data(), fill.data(), nullptr, nullptr};
+            atlas_upload_column_tile(ctx, &t);
+        }
+    AtlasMaterial m[3] = {{{0.4f, 0.3f, 0.2f}, 0.9f, 0, ATLAS_CLASS_TERRAIN}, {{0.1f, 0.4f, 0.1f}, 0.9f, 0, ATLAS_CLASS_FOLIAGE},
+                          {{0.3f, 0.3f, 0.3f}, 0.9f, 0, ATLAS_CLASS_TERRAIN}};
+    atlas_set_materials(ctx, 50, m, 3);
+    AtlasMaterialShape sh[3] = {};
+    sh[0].occupancy = 0x00000000FFFFFFFFull;  // a bottom slab: micro rows y 0 and 1
+    sh[1].occupancy = ~0ull;
+    sh[1].flags = ATLAS_SHAPE_CUTOUT;
+    sh[2].occupancy = ~0ull;
+    for (int f = 0; f < 6; f++)
+        for (int t = 0; t < 16; t++) {
+            sh[0].faces[f][t] = 0xFF8A6A40u;
+            sh[1].faces[f][t] = (t & 1) ? 0x80306020u : 0xFF306020u;  // half the texels half covered
+            sh[2].faces[f][t] = 0xFF808080u;
+        }
+    CHECK(atlas_set_material_shapes(ctx, 50, sh, 3) == ATLAS_OK);
+    CHECK(atlas_set_material_shapes(ctx, 0, sh, 1) == ATLAS_ERR_ARG);
+    std::vector<uint16_t> sec(4096, 0);
+    for (int y = 0; y < 16; y++)
+        for (int z = 0; z < 16; z++)
+            for (int x = 0; x < 16; x++) {
+                int wy = 96 + y;
+                uint16_t v = wy < 100 ? 52 : (wy == 100 && x < 8) ? 50 : (wy >= 101 && wy <= 103 && x >= 8 && x <= 12 && z >= 4 && z <= 10) ? 51 : 0;
+                sec[size_t(x + 16 * (z + 16 * y))] = v;
+            }
+    CHECK(atlas_upload_section(ctx, 0, 6, 0, sec.data()) == ATLAS_OK);
+    double centre[3] = {3.5, 140.0, 3.5};
+    atlas_update(ctx, centre, 0);
+    return ctx;
+}
+
+static void testGroups() {
+    std::printf("groups\n");
+    AtlasContext* ctx = groupScene(ATLAS_BACKEND_CPU);
+    CHECK(ctx != nullptr);
+    if (!ctx) return;
+    AtlasFrame f{};
+    f.cameraPos[0] = 3.5;
+    f.cameraPos[1] = 140.0;
+    f.cameraPos[2] = 3.5;
+    float inv[16] = {0.1f, 0, 0, 0, 0, 0, 0.1f, 0, 0, -0.5f, 0, 0, 0, -0.75f, 0, 1};  // straight down (testAbi)
+    std::memcpy(f.invViewProj, inv, sizeof(inv));
+    f.width = 64;
+    f.height = 64;
+    f.maxDistance = 1000;
+    f.sunDir[1] = 1;
+    f.lodBias = 1;
+    std::vector<float> dOld(64 * 64), dGrp(64 * 64);
+    AtlasFrameOutput o1{nullptr, nullptr, dOld.data()}, o2{nullptr, nullptr, dGrp.data()};
+    CHECK(atlas_render(ctx, &f, &o1) == ATLAS_OK);
+    f.flags = ATLAS_FRAME_GROUPS;
+    CHECK(atlas_render(ctx, &f, &o2) == ATLAS_OK);  // asks for the trees: the next update builds them
+    double centre[3] = {3.5, 140.0, 3.5};
+    CHECK(atlas_update(ctx, centre, 0) == ATLAS_OK);
+    CHECK(std::strstr(atlas_info(ctx), "\"groups\":{\"regions\":") != nullptr);
+    CHECK(std::strstr(atlas_info(ctx), "\"groups\":{\"regions\":0,") == nullptr);
+    CHECK(atlas_render(ctx, &f, &o2) == ATLAS_OK);
+    double slabWorst = 0, groundWorst = 0;
+    size_t slabs = 0, ground = 0;
+    for (int py = 0; py < 64; py++)
+        for (int px = 0; px < 64; px++) {
+            float nx = (px + 0.5f) / 64 * 2 - 1, ny = 1 - (py + 0.5f) / 64 * 2;
+            double len = std::sqrt(0.01 * nx * nx + 1 + 0.01 * ny * ny);
+            double hx = 3.5 + nx * 0.1 * 40, hz = 3.5 + ny * 0.1 * 40;  // where the ray meets y = 100
+            size_t i = size_t(py) * 64 + px;
+            if (hx > 0.3 && hx < 7.7 && hz > 0.3 && hz < 7.7) {  // the slabs: top at 100.5
+                slabWorst = std::max(slabWorst, std::abs(dGrp[i] - 39.5 * len));
+                slabs++;
+                CHECK(std::abs(dOld[i] - 39.0 * len) < 0.02);  // the voxel path: a full block
+            } else if (hx < -0.3 && (hz < -0.3 || hz > 0.3)) {  // the ground, both paths
+                groundWorst = std::max(groundWorst, double(std::abs(dGrp[i] - dOld[i])));
+                ground++;
+            }
+        }
+    std::printf("  slabs at their half height: worst %.4f blocks (%zu px); ground vs the voxel path: worst %.4f (%zu px)\n",
+                slabWorst, slabs, groundWorst, ground);
+    CHECK(slabs > 200 && ground > 50);
+    CHECK(slabWorst < 0.02);
+    CHECK(groundWorst < 0.02);
+    atlas_destroy(ctx);
+
+    // CPU and Vulkan through the same trees (a slanted view over the slabs and the leaves)
+    AtlasContext* cpu = groupScene(ATLAS_BACKEND_CPU);
+    AtlasContext* gpu = groupScene(ATLAS_BACKEND_VULKAN);
+    if (!gpu) {
+        std::printf("  SKIP parity: no Vulkan device\n");
+        atlas_destroy(cpu);
+        return;
+    }
+    const uint32_t W = 160, H = 120;
+    AtlasFrame g{};
+    g.cameraPos[0] = -6.0;
+    g.cameraPos[1] = 108.0;
+    g.cameraPos[2] = -6.0;
+    cameraMatrix(135, -30, 70, double(W) / H, g.invViewProj);
+    g.width = W;
+    g.height = H;
+    g.maxDistance = 1000;
+    g.sunDir[1] = 1;
+    g.lodBias = 1;
+    g.flags = ATLAS_FRAME_GROUPS | ATLAS_FRAME_SKY;
+    std::vector<float> dc(W * H), dg(W * H);
+    std::vector<uint32_t> cc(W * H), cg(W * H);
+    AtlasFrameOutput oc{cc.data(), nullptr, dc.data()}, og{cg.data(), nullptr, dg.data()};
+    double c2[3] = {-6.0, 108.0, -6.0};
+    for (AtlasContext* c : {cpu, gpu}) {
+        atlas_render(c, &g, c == cpu ? &oc : &og);
+        atlas_update(c, c2, 0);
+    }
+    CHECK(atlas_render(cpu, &g, &oc) == ATLAS_OK);
+    CHECK(atlas_render(gpu, &g, &og) == ATLAS_OK);
+    size_t mismatch = 0, colorBad = 0;
+    for (size_t i = 0; i < dc.size(); i++) {
+        if ((dc[i] < 1e29f) != (dg[i] < 1e29f) || (dc[i] < 1e29f && std::abs(dc[i] - dg[i]) > 0.05f)) mismatch++;
+        for (int ch = 0; ch < 3; ch++)
+            if (std::abs(int((cc[i] >> (8 * ch)) & 255) - int((cg[i] >> (8 * ch)) & 255)) > 3) {
+                colorBad++;
+                break;
+            }
+    }
+    std::printf("  cpu/vulkan: hit or depth mismatch %.3f%%, colour outliers %.3f%%\n", 100.0 * mismatch / dc.size(),
+                100.0 * colorBad / dc.size());
+    CHECK(double(mismatch) / dc.size() < 0.005);
+    CHECK(double(colorBad) / dc.size() < 0.01);
+    atlas_destroy(cpu);
+    atlas_destroy(gpu);
+}
+
 int main(int argc, char** argv) {
     testSvdag();
+    testGroups();
     testAbi();
     testStreamingGap();
     testFourZones();

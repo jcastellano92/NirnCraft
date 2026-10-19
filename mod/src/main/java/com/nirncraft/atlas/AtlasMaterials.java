@@ -18,14 +18,46 @@ import java.util.Map;
  * colour is the mean of its top texture as the near field shows it (AtlasBlockColors, measured from the game's and
  * the mod's textures), else its map colour; the class follows what it is (water, leaves, light sources glow).
  * Ids run FIRST .. LAST: the native preview palette and its water / lava variants sit below, biome tints above.
+ *
+ * <p>With shapes on (the content-shaped groups, ATLAS_FRAME_GROUPS; atlas_core 0.14) every material also gets its shape
+ * (AtlasShapes: the 4x4x4 occupancy and face tiles of its real model, computed once when the id is handed out) and the
+ * real sections' blocks get one id per far block state (a top slab is not a bottom slab, a stair keeps its facing) from
+ * EXACT_FIRST up, so the palette only grows there when the groups are on.
  */
 final class AtlasMaterials {
     static final int FIRST = 64, LAST = 1023;
+    /** Per far block state ids of real sections (shapes on): above the biome tints, under the brick pool's 16384. */
+    static final int EXACT_FIRST = 4096, EXACT_LAST = 16383;
 
     private final Map<Block, Short> ids = new HashMap<>();
     private final Map<Long, Short> tinted = new HashMap<>();
     private final List<float[]> pending = new ArrayList<>();
     private int next = FIRST;
+    // shapes (setShapes): per pending material its shape (null: a plain cube), and the exact ids
+    private volatile boolean shapes;
+    private final List<AtlasShapes.Shape> pendingShapes = new ArrayList<>();
+    private final Map<Long, Short> exact = new HashMap<>();
+    private final List<float[]> pendingExact = new ArrayList<>();
+    private final List<AtlasShapes.Shape> pendingExactShapes = new ArrayList<>();
+    private int nextExact = EXACT_FIRST;
+
+    /** Shapes on: the materials handed out from now on carry their shapes, real sections use per-state ids. */
+    void enableShapes() {
+        shapes = true;
+    }
+
+    boolean shapes() {
+        return shapes;
+    }
+
+    private AtlasShapes.Shape shapeOf(BlockState s, int tint) {
+        if (!shapes) return null;
+        try {
+            return AtlasShapes.of(s, tint);
+        } catch (RuntimeException e) {
+            return null;  // a model that cannot say: a plain cube in its colour
+        }
+    }
 
     /** The palette id of a block's far colour, registered on first use (any thread). */
     synchronized short id(BlockState s) {
@@ -33,6 +65,7 @@ final class AtlasMaterials {
         if (v != null) return v;
         if (next > LAST) return (short) FIRST;  // full: the first entry (never in practice: a few hundred blocks)
         pending.add(material(s));
+        pendingShapes.add(shapeOf(s, -1));
         short id = (short) next++;
         ids.put(s.getBlock(), id);
         return id;
@@ -48,6 +81,15 @@ final class AtlasMaterials {
         Short v = tinted.get(key);
         if (v != null) return v;
         if (next > LAST) return id(s);
+        pending.add(tintedMaterial(s, q));
+        pendingShapes.add(shapeOf(s, q));
+        short id = (short) next++;
+        tinted.put(key, id);
+        return id;
+    }
+
+    /** A tinted block's far colour: its grey texture mean times the tint rgb (as the near field tints it). */
+    private static float[] tintedMaterial(BlockState s, int q) {
         float[] m = material(s);
         String name = BuiltInRegistries.BLOCK.getKey(s.getBlock()).toString();
         int grey = AtlasBlockColors.rgb(name);
@@ -55,9 +97,23 @@ final class AtlasMaterials {
         m[0] = lin(Math.round(((q >> 16) & 255) * g));
         m[1] = lin(Math.round(((q >> 8) & 255) * g));
         m[2] = lin(Math.round((q & 255) * g));
-        pending.add(m);
-        short id = (short) next++;
-        tinted.put(key, id);
+        return m;
+    }
+
+    /**
+     * The palette id of a real section's block (AtlasEditsClient): with shapes on one per far block state and tint
+     * (`tint` RGB for the blocks the game tints, -1 none) carrying its shape; else as before (leaves / id).
+     */
+    synchronized short section(BlockState s, int tint) {
+        if (!shapes || nextExact > EXACT_LAST) return tint >= 0 ? leaves(s, tint) : id(s);
+        int q = tint >= 0 ? tint & 0xF8F8F8 : -1;
+        long key = (long) AtlasFarState.farId(s) << 32 | (q & 0xFFFFFFFFL);
+        Short v = exact.get(key);
+        if (v != null) return v;
+        pendingExact.add(q >= 0 ? tintedMaterial(s, q) : material(s));
+        pendingExactShapes.add(shapeOf(s, q));
+        short id = (short) nextExact++;
+        exact.put(key, id);
         return id;
     }
 
@@ -72,9 +128,20 @@ final class AtlasMaterials {
 
     /** Registers the ids handed out since the last call (before uploading anything that uses them). */
     synchronized void flush(AtlasNative.Context ctx) {
-        if (pending.isEmpty()) return;
-        ctx.setMaterials(next - pending.size(), pending.toArray(new float[0][]));
-        pending.clear();
+        if (!pending.isEmpty()) {
+            int first = next - pending.size();
+            ctx.setMaterials(first, pending.toArray(new float[0][]));
+            if (shapes) ctx.setMaterialShapes(first, pendingShapes.toArray(new AtlasShapes.Shape[0]));
+            pending.clear();
+            pendingShapes.clear();
+        }
+        if (!pendingExact.isEmpty()) {
+            int first = nextExact - pendingExact.size();
+            ctx.setMaterials(first, pendingExact.toArray(new float[0][]));
+            ctx.setMaterialShapes(first, pendingExactShapes.toArray(new AtlasShapes.Shape[0]));
+            pendingExact.clear();
+            pendingExactShapes.clear();
+        }
     }
 
     /** The class atlas draws falling water with (ATLAS_CLASS_FALLS): a white sheet streaming down. */

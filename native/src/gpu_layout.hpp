@@ -16,6 +16,7 @@ struct alignas(16) RegionGpu {
     int32_t origin[4];
     uint32_t bases[4];
     uint32_t runs[4];
+    uint32_t groups[4];  // its groups: first node (uint4), brick columns, slots, bricks (words); x = ~0u: none
 };
 
 struct alignas(16) MaterialGpu {
@@ -57,7 +58,7 @@ struct alignas(16) ActorGpu {
 
 static_assert(sizeof(LodGpu) == 32);
 static_assert(sizeof(ActorGpu) == 48);
-static_assert(sizeof(RegionGpu) == 48);
+static_assert(sizeof(RegionGpu) == 64);
 static_assert(sizeof(MaterialGpu) == 32);
 static_assert(sizeof(FrameGpu) == 64 + 16 * 6 + 32 * MAX_LODS + 64 + 16 + 16 + 16 * 5 + 32 + 16);
 
@@ -67,6 +68,10 @@ struct Float4 {
 
 struct Float2 {
     float v[2];
+};
+
+struct Uint4 {
+    uint32_t v[4];
 };
 
 // Slang's C++ target: StructuredBuffer<T> is { T* data; size_t count; }, ConstantBuffer<T> is T*.
@@ -103,6 +108,7 @@ struct FarGlobals {
     CpuBuffer<Float4> prevCloudBuf;
     CpuBuffer<float> prevCloudDepth;
     CpuBuffer<Float2> sunMap;
+    CpuBuffer<Uint4> groupData;  // (atlas_groups.slang) PackedScene::groups
 };
 
 }  // namespace atlas

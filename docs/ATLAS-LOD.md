@@ -565,6 +565,64 @@ scenes; one level per power of two, so nine levels and ~100 dispatches for the a
 Scratch 6 / 22 / 84 MB (the cells' records). Both builders run clean under the Khronos validation layer with
 synchronization validation (builds, updates, profiling).
 
+## The renderer's groups (ATLAS_FRAME_GROUPS, ABI 0.14)
+
+The groups draw the real far field inside atlas_core, fed by what the game already sends, behind a frame flag (the
+default stays the voxel path; `-Dnirncraft.atlas.groups=true` turns it on in game with a 0.14 core).
+
+**Shapes.** `atlas_set_material_shapes`: per far material its 4 x 4 x 4 occupancy and six 4 x 4 face tiles, computed in
+game by `AtlasShapes` (the lab library's entry, moved there and shared: the shape from the outline, each tile texel
+the outermost quad over it, the biome tint on the quads the game tints; cut-out coverage only for leaves and plants,
+blocks thinner than a micro-voxel keep a floor layer). With groups on, `AtlasMaterials` sends a shape with every id
+and real sections get one id per far block state and tint (4096 up), so a top slab, a stair's facing and a log's axis
+survive. Voxels of real sections at LOD 0 take their material's shape; everything else is a full cube wearing its
+material's face tiles; a material without a shape is a cube in its palette colour.
+
+**Regions.** Per clipmap region (`World`'s keys, every level) a tree is built on update's worker threads, nearest
+first within its budget, once a frame has asked for groups; a dirty section rebuilds its regions (and the one across
+a border it touches); a region whose voxels are clean only builds its tree. Content is the region's exposed voxels
+(an open 6-neighbour: air, a shaped block's empty part, cut-out), read column by column from sections and tiles with
+a ring of the neighbours' columns. At LOD 1-4 the voxels made from real blocks carry their own micro-voxels by
+coverage (solid parts by share, cut-out parts by the opacity a ray across them meets: 1 - (1 - share)^(2^lod)), so a
+crown neither fattens nor thins as it coarsens; such a region exists even where the voxels' mip vote left it empty.
+The tree: binary SAH over voxel planes (exact sweep over presorted lists), per face a flattening error (4-bit codes,
+rounded up), leaves flat solid boxes (every face covered at depth 0) or boxes of at most 4 x 4 x 4 voxels. 16-byte
+nodes (`src/groups.hpp`), a brick pool per region (64 x 64 columns -> slots -> bricks of the occupied voxels' 16-bit
+cells, deduplicated, with masks for the coverage voxels), all in one buffer (binding 25: the baseline is now 24 storage
+buffers a stage). A tree over 2^20 nodes is refused (the region keeps the voxel path).
+
+**Trace.** `shaders/atlas_groups.slang`, called from `traceLod` for primary rays: a node is drawn when the error of the
+face the ray enters by is under the pixel's footprint there (threshold dithered per pixel, moving with the TAA's jitter
+phase), a flat leaf always, a voxel leaf bigger than the pixel is stepped voxel by voxel (micro-voxel by micro-voxel in
+shaped ones); a drawn face walks the column under the texel at most error + 1 micro-voxels (holes cost that, not the
+box's depth). The chord's first cell is tested against the voxel path's solid (a ray starting inside a coarser level's
+ground hits it at once). Same outputs; shading, shadows (voxel path), sun map, jitter and hand-off unchanged. Surface
+cards (`atlas_set_surface_cards`, atlas_truth bake=) colour a hit from the game's own rendering of that face, filtered
+by footprint; the game does not send them yet.
+
+**Measured** (offline, `atlas_render` with the Falkreath exports; harness scenes `tools/harness/scenes/atlasgroups.json`):
+
+| Falkreath view, the live camera, 4 spp, vs atlas_truth (dE) | 0-64 | 64-192 | 192-512 | 512-1024 |
+|---|---|---|---|---|
+| live (vanilla near, today's far field) | 1.2 | 4.8 | 20.5 | 23.8 |
+| voxel path (same materials, vanilla face shade) | 7.6 | 12.7 | 13.0 | 13.2 |
+| groups (shapes and face tiles) | 6.7 | 11.3 | 12.8 | 11.3 |
+
+What is left there is mostly what face tiles under a fixed shade cannot carry (the lightmap under roofs and crowns,
+smooth light, 4 x 4 against 16 x 16 texels); the element tier with surface cards (`atlas_render camera=mc box=
+cameras= surface=`, 16 spp against the intended reference) measures the representation itself: falkreath-wide-chunk
+dE 2.6-5.2 and iou 0.97-0.999 from 32 m to 2 km, 0.90-0.94 at 4-8 km; the trees 0.7-5.8 and 0.93-0.999 to 2 km;
+fly-ins pop 0.0. Elements beyond the LOD 4 window (~10 km) are gone: real sections only feed LOD 0-4, and the world
+keeps them ~1.2 km out (the server sends them to ~1.5 km); in game far trees and buildings come from the tiles.
+
+Vulkan (RTX 3090, 1920 x 1080, GPU timestamps, outputs on the device, the voxel path in alternate frames of the same
+process): the Falkreath view from 200 blocks up with the near field's 192 blocks left out, groups 13-19 ms against the
+voxel path's 12-14 ms; to the 40 km horizon 22 against 16. Both are 5-8x the preview terrain's cost over the same steps
+(13k real sections in the window). Without the texel walks the tree traversal alone is 9 ms: the face walks and leaf
+steps (a chain of brick-pool lookups a voxel) are what to cut next. CPU backend (10 threads): ~0.96 s a frame either
+way. Builds: every tree of the clipmap 24-31 s of CPU (2.9-4.9 s on 10 threads), the slowest region 0.5-0.7 s, 59 MB
+for 191 regions (largest 1.9 MB).
+
 ## Status (branch atlas-render)
 
 * Done: trees at level 0 grown by their real features (AtlasTrees); real chunks' columns in the change feed (ground,

@@ -89,7 +89,7 @@ unpack state is saved and restored). Host copies match zero-copy bit for bit; th
 waiting (no CPU wait, one frame of far-field lag). **Device choice:** `atlas_create` on the render thread picks the
 Vulkan device whose UUID the current GL context reports (hybrid laptops; a Deck or Fedora box with lavapipe
 installed beside RADV), else discrete > integrated > virtual > CPU; `ATLAS_VK_DEVICE=<index|name>` overrides.
-Devices below the baseline (Vulkan 1.2, `shaderInt64`, 23 storage buffers per stage, 8×8 work groups) are listed
+Devices below the baseline (Vulkan 1.2, `shaderInt64`, 24 storage buffers per stage (23 before ABI 0.14 added the groups), 8×8 work groups) are listed
 with the reason; `atlas_last_error(NULL)` reports a failed create.
 
 **Baseline:** the SPIR-V is 1.5 with only the `Shader` and `Int64` capabilities (spirv-val clean for vulkan1.2; no
@@ -235,6 +235,10 @@ read from Iris' option file; the cloud history reprojects unjittered, and the sc
 frame for the resolve). Both optional: a 0.11 core still loads. The mod's data texture `smoke_sources.png` row 0
 texel 17 = the hand-off band / 64 (the pack's crossfade), texel 18 = the interior (LocationKind.icon + 1, eased
 strength) for the pack's interior grade.
+
+ABI 0.14 (optional; a 0.11-0.13 core still loads): `atlas_set_material_shapes`, `atlas_set_surface_cards`,
+`ATLAS_FRAME_GROUPS` (the content-shaped groups, docs/ATLAS-LOD.md "The renderer's groups"; the game sets it only with
+`-Dnirncraft.atlas.groups=true`).
 
 Real far trees (`AtlasTrees`, single player, LOD 0): each chunk's tree features run as chunk decoration runs them
 (the generator's global feature indices and decoration seeds, `FeaturePlacer`), into `AtlasCapture`'s level over the

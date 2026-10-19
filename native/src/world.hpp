@@ -10,6 +10,7 @@
 #include <vector>
 
 #include "gpu_layout.hpp"
+#include "groups.hpp"
 #include "svdag.hpp"
 
 namespace atlas {
@@ -66,8 +67,12 @@ struct Section {
 
 struct Region {
     Key3 key;
-    Svdag dag;
-    bool empty() const { return dag.empty(); }
+    std::shared_ptr<const Svdag> dag;
+    // its content-shaped groups (groups.hpp), built once a frame asks for them (World::groupsWanted); null: not yet
+    std::shared_ptr<const GroupTree> groups;
+    // nothing to draw: no voxels, and no groups (a coarse level of a few real blocks the voxels' mip vote dropped can
+    // still have them: their coverage)
+    bool empty() const { return (!dag || dag->empty()) && (!groups || groups->empty() || groups->refused); }
 };
 
 // Packed scene: what the kernels read.
@@ -79,6 +84,10 @@ struct PackedScene {
     std::vector<uint32_t> runEnd;
     std::vector<uint32_t> runMat;
     std::vector<uint32_t> heightMip;  // per region 5461 entries (see Svdag::heightMip), at RegionGpu.bases.w
+    // the groups (shaders/atlas_groups.slang), uint4 aligned: a header (the material shape table's word offset, the
+    // shapes' uint4 offset, the table's length), the shapes (SHAPE_UINT4 each), the table (material -> shape + 1), then
+    // per region its nodes, brick columns, slots and bricks (RegionGpu.groups)
+    std::vector<uint32_t> groups;
     LodGpu lods[MAX_LODS] = {};
     int lodCount = 0;
     uint64_t revision = 0;
@@ -88,6 +97,9 @@ class World {
 public:
     int lodCount = 7;
     int windowRadius = 2;  // regions either side of the camera's region, per LOD
+    // real sections are kept this many LOD-0 regions either side of the camera (0: windowRadius + 2, ~1.2 km; the
+    // server sends them out to ~1.5 km). ATLAS_SECTION_KEEP: farther, for measurements of elements kilometres away
+    int sectionKeep = 0;
     uint16_t stoneMat = 1;
     uint16_t waterMat = 6;
     // refinement fades (atlas_set_transitions): a region rebuilt over a resident one (an exact tile replacing the
@@ -123,15 +135,41 @@ public:
     }
     uint64_t nodeBytes() const, leafBytes() const, materialBytes() const;
 
+    // ---- the content-shaped groups (docs/ATLAS-LOD.md; groups.hpp)
+    // set by the first frame that traces them (ATLAS_FRAME_GROUPS): from then on update() builds every region's tree too
+    std::atomic<bool> groupsWanted{false};
+    int groupLods = 7;  // levels that get trees (ATLAS_GROUP_LODS); coarser ones keep the old path
+    GroupLimits groupLimits;
+    // surface cards (atlas_set_surface_cards), replaced whole
+    void setCards(std::shared_ptr<const CardSet> cards);
+    // material shapes (atlas_set_material_shapes); first >= 1, null entries remove a shape
+    void setShapes(uint32_t first, const std::vector<std::shared_ptr<const MaterialShape>>& shapes);
+    struct GroupStats {
+        uint32_t regions = 0, refused = 0;  // regions with a tree; regions whose tree was refused (too large)
+        uint64_t bytes = 0, maxRegionBytes = 0, prims = 0, nodes = 0, bricks = 0;
+        double buildMs = 0, maxBuildMs = 0;  // summed over the trees in the window; the slowest one
+        uint32_t built = 0;                  // trees built by the last update
+        uint32_t maxDepth = 0;               // the deepest tree (the kernel's stack)
+        double lastUpdateMs = 0;             // what the last update spent building trees (summed over threads)
+    };
+    GroupStats groupStats() const;
+
 private:
     using SectionMap = std::unordered_map<Key3, std::shared_ptr<const Section>, Key3Hash>;
     struct Job {
         Key3 key;
         std::shared_ptr<const Tile> tile;
         SectionMap sections;
+        // groups: the neighbour tiles (x - 1, x + 1, z - 1, z + 1: the exposure of the region's border voxels), the
+        // region whose SVDAG stays (a tree-only job), whether to build the tree
+        std::shared_ptr<const Tile> nbr[4];
+        std::shared_ptr<const Region> keep;
+        bool groups = false;
+        bool wasDirty = false;  // taken off the dirty set when snapshot (put back if the budget runs out first)
     };
-    Job snapshot(const Key3& k) const;  // caller holds mu_
+    Job snapshot(const Key3& k, bool groups) const;  // caller holds mu_
     Region buildRegion(const Job& j) const;
+    std::shared_ptr<const GroupTree> buildGroups(const Job& j, const ShapeSet& shapes) const;
     void repack(const int centreRegion[MAX_LODS][2]);
 
     mutable std::mutex mu_;
@@ -153,6 +191,12 @@ private:
         bool wasEmpty;
     };
     std::unordered_map<Key3, Fade, Key3Hash> fading_;
+    std::shared_ptr<const ShapeSet> shapes_ = std::make_shared<ShapeSet>();
+    uint64_t packedShapes_ = 0;  // the shape revision the packed scene carries
+    std::shared_ptr<const CardSet> cards_ = std::make_shared<CardSet>();
+    uint64_t packedCards_ = 0;
+    uint32_t lastGroupsBuilt_ = 0;
+    double lastGroupsMs_ = 0;
 };
 
 // Milliseconds on a steady clock (wraps after 49 days; compared as signed differences).

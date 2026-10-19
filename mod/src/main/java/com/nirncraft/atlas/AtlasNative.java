@@ -28,7 +28,8 @@ public final class AtlasNative {
     /** The ABI this binding is written for (0.11: far content + failure handling); the mod ships matching natives. */
     /** (abi 0.13) Structures that are a tile's real trees: its dressing's canopy goes when they go up. */
     public static final int STRUCTURES_REPLACE_CANOPY = 0x1;
-    public static final int ABI_VERSION = 0x000D00, ABI_MIN = 0x000B00;  // 0.12: atlas_set_moon, 0.13: atlas_set_jitter (optional)
+    // 0.12: atlas_set_moon, 0.13: atlas_set_jitter, 0.14: atlas_set_material_shapes + FRAME_GROUPS (all optional)
+    public static final int ABI_VERSION = 0x000E00, ABI_MIN = 0x000B00;
     public static final int BACKEND_CPU = 0, BACKEND_VULKAN = 1;
     /** AtlasStatus (atlas.h). */
     public static final int OK = 0, ERR_ARG = -1, ERR_STATE = -2, ERR_IO = -3, ERR_GPU = -4, ERR_UNSUPPORTED = -5,
@@ -38,7 +39,10 @@ public final class AtlasNative {
     public static final int FRAME_CLOUDS = 0x1, FRAME_SHADOWS = 0x2, FRAME_ATMOS = 0x4, FRAME_ACTORS = 0x8,
             FRAME_SKY = 0x10, FRAME_NEAR_DEPTH = 0x20, FRAME_FLAT_NORMALS = 0x40, FRAME_CLOUDS_QUARTER = 0x80,
             FRAME_DEBUG_LOD = 0x100, FRAME_DEBUG_WEATHER = 0x200, FRAME_LOD_DITHER = 0x1000,
-            FRAME_FILL_NEAR = 0x2000;  // (abi 0.12) the far field fills what the near field has not loaded yet
+            FRAME_FILL_NEAR = 0x2000,  // (abi 0.12) the far field fills what the near field has not loaded yet
+            FRAME_GROUPS = 0x4000;     // (abi 0.14) primary rays trace the content-shaped groups (an older core ignores it)
+    /** (abi 0.14) AtlasMaterialShape.flags: texel alpha is coverage (cut-out leaves). */
+    public static final int SHAPE_CUTOUT = 0x1;
     /** Far actor gaits (AtlasActor.flags bits 8-9): dragons fold their wings, glide or beat them. */
     public static final int GAIT_STILL = 0, GAIT_GLIDE = 1, GAIT_FLAP = 2;
     public static final int CLASS_TERRAIN = 0, CLASS_FOLIAGE = 1, CLASS_WATER = 2, CLASS_EMISSIVE = 3;
@@ -46,7 +50,8 @@ public final class AtlasNative {
 
     // struct sizes and offsets (see api.cpp)
     static final long MATERIAL_SIZE = 24, TILE_SIZE = 64, FRAME_SIZE = 144, OUTPUT_SIZE = 32, WEATHER_SIZE = 40,
-            ACTOR_SIZE = 48, STATS_SIZE = 56, GL_TARGETS_SIZE = 24, GL_IO_SIZE = 96, LIGHT_SIZE = 40, MEMORY_INFO_SIZE = 48;
+            ACTOR_SIZE = 48, STATS_SIZE = 56, GL_TARGETS_SIZE = 24, GL_IO_SIZE = 96, LIGHT_SIZE = 40, MEMORY_INFO_SIZE = 48,
+            SHAPE_SIZE = 400;
     /** Far light kinds (AtlasLight.kind). */
     public static final int LIGHT_NIGHT = 0, LIGHT_FIRE = 1, LIGHT_LAVA = 2, LIGHT_MIST = 3;
 
@@ -123,7 +128,7 @@ public final class AtlasNative {
     private final Arena libArena;
     private final MethodHandle abiVersion, buildInfo, create, destroy, lastError, setPalette, uploadTile,
             uploadSection, notifyBlock, setWeather, setCloudNoise, setActors, update, render, getStats,
-            glAttach, glRenderIo, glDetach, info, previewLoadRaster, previewGenerate, previewHeight, uploadHeights, uploadHeights2, hasTile, uploadStructures, uploadStructures2, uploadHeights3, setMaterials, setSunMap, setMoon, setJitter, uploadStructures3, setTransitions, setLightGroup, setLightBudget,
+            glAttach, glRenderIo, glDetach, info, previewLoadRaster, previewGenerate, previewHeight, uploadHeights, uploadHeights2, hasTile, uploadStructures, uploadStructures2, uploadHeights3, setMaterials, setSunMap, setMoon, setJitter, setShapes, uploadStructures3, setTransitions, setLightGroup, setLightBudget,
             heightCreate, heightDestroy, heightLastError, heightDevice, heightSetNoise, heightBatch;
     // abi 0.10 (null with a 0.9 library)
     private final MethodHandle memoryInfo, setClipmap, debugFault;
@@ -199,6 +204,7 @@ public final class AtlasNative {
         debugFault = bindOptional(l, lib, "atlas_debug_fault", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, JAVA_INT));
         setMoon = bindOptional(l, lib, "atlas_set_moon", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, ADDRESS));
         setJitter = bindOptional(l, lib, "atlas_set_jitter", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_FLOAT, JAVA_FLOAT));
+        setShapes = bindOptional(l, lib, "atlas_set_material_shapes", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, ADDRESS, JAVA_INT));
         uploadStructures3 = bindOptional(l, lib, "atlas_upload_column_structures3",
                 FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, JAVA_INT, JAVA_INT, ADDRESS, ADDRESS, ADDRESS, ADDRESS, ADDRESS, JAVA_INT));
     }
@@ -539,6 +545,36 @@ public final class AtlasNative {
             if (setJitter == null) return false;
             try {
                 check((int) setJitter.invokeExact(ptr, x, y), "atlas_set_jitter");
+                return true;
+            } catch (Throwable t) {
+                throw rethrow(t);
+            }
+        }
+
+        /** (abi 0.14) Whether this core takes material shapes (and traces the groups, FRAME_GROUPS). */
+        public boolean hasShapes() {
+            return setShapes != null;
+        }
+
+        /**
+         * (abi 0.14) The shapes of materials first .. first + n - 1 (atlas.h atlas_set_material_shapes); a null entry or
+         * a zero occupancy leaves that material a full cube in its colour. A core without the call: false, nothing sent.
+         */
+        public boolean setMaterialShapes(int first, AtlasShapes.Shape[] shapes) {
+            if (setShapes == null) return false;
+            try (Arena a = Arena.ofConfined()) {
+                MemorySegment m = a.allocate(SHAPE_SIZE * Math.max(1, shapes.length), 8);
+                for (int i = 0; i < shapes.length; i++) {
+                    AtlasShapes.Shape v = shapes[i];
+                    if (v == null) continue;  // zeroed: no shape
+                    long o = i * SHAPE_SIZE;
+                    m.set(JAVA_LONG, o, v.occupancy());
+                    m.set(JAVA_INT, o + 8, v.mean());
+                    m.set(JAVA_INT, o + 12, v.flags());
+                    for (int f = 0; f < 6; f++)
+                        for (int t = 0; t < 16; t++) m.set(JAVA_INT, o + 16 + 4L * (f * 16 + t), v.faces()[f][t]);
+                }
+                check((int) setShapes.invokeExact(ptr, first, m, shapes.length), "atlas_set_material_shapes");
                 return true;
             } catch (Throwable t) {
                 throw rethrow(t);

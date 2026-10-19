@@ -43,7 +43,7 @@ file(MAKE_DIRECTORY "${GEN}")
 find_program(SLANGC slangc HINTS "${SLANG_ROOT}/bin" REQUIRED NO_DEFAULT_PATH)
 set(KERNEL_SRC "${CMAKE_SOURCE_DIR}/shaders/atlas_far.slang")
 set(KERNEL_DEPS "${KERNEL_SRC}" "${CMAKE_SOURCE_DIR}/shaders/atlas_shared.slang" "${CMAKE_SOURCE_DIR}/shaders/atlas_clouds.slang"
-    "${CMAKE_SOURCE_DIR}/shaders/atlas_actors.slang")
+    "${CMAKE_SOURCE_DIR}/shaders/atlas_actors.slang" "${CMAKE_SOURCE_DIR}/shaders/atlas_groups.slang")
 
 # One kernel source, two targets.
 add_custom_command(
@@ -100,7 +100,7 @@ add_custom_command(
   DEPENDS ${KERNEL_DEPS} COMMENT "slangc atlas_far -> C++ (CPU reference)")
 
 add_library(atlas_core SHARED
-  src/api.cpp src/svdag.cpp src/world.cpp src/preview_source.cpp src/cpu_backend.cpp src/vk_backend.cpp src/vk_loader.cpp
+  src/api.cpp src/svdag.cpp src/world.cpp src/groups.cpp src/preview_source.cpp src/cpu_backend.cpp src/vk_backend.cpp src/vk_loader.cpp
   src/gl_api.cpp src/lights.cpp
   "${GEN}/atlas_far_cpu.cpp" "${GEN}/atlas_far_spv.h" "${GEN}/atlas_publish_spv.h" "${GEN}/atlas_ingest_spv.h"
   "${GEN}/atlas_cloud_spv.h" "${GEN}/atlas_sunmap_spv.h")

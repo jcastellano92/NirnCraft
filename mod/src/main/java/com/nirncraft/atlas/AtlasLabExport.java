@@ -217,24 +217,9 @@ public final class AtlasLabExport {
             tinted |= q.materialInfo().tintIndex() >= 0;
             translucent |= q.materialInfo().layer() == net.minecraft.client.renderer.chunk.ChunkSectionLayer.TRANSLUCENT;
         }
-        VoxelShape shape;
-        try {
-            shape = st.getShape(EmptyBlockGetter.INSTANCE, BlockPos.ZERO);
-        } catch (RuntimeException e) {
-            shape = net.minecraft.world.phys.shapes.Shapes.empty();
-        }
-        long mask = 0;
-        List<AABB> boxes = shape.toAabbs();
-        for (int y = 0; y < TILE; y++)
-            for (int z = 0; z < TILE; z++)
-                for (int x = 0; x < TILE; x++) {
-                    double cx = (x + 0.5) / TILE, cy = (y + 0.5) / TILE, cz = (z + 0.5) / TILE;
-                    for (AABB a : boxes)
-                        if (cx > a.minX && cx < a.maxX && cy > a.minY && cy < a.maxY && cz > a.minZ && cz < a.maxZ) {
-                            mask |= 1L << (x + TILE * (z + TILE * y));
-                            break;
-                        }
-                }
+        // the shape and face tiles: AtlasShapes, shared with the far field's materials
+        List<AABB> boxes = AtlasShapes.boxes(st);
+        long mask = AtlasShapes.mask(boxes);
         boolean full = mask == -1L;
         int cls;
         if (!st.getFluidState().isEmpty() && st.getFluidState().is(net.minecraft.tags.FluidTags.WATER) && !st.isSolidRender()) cls = 2;
@@ -249,127 +234,10 @@ public final class AtlasLabExport {
         b.put((byte) cls).put((byte) st.getLightEmission()).put((byte) flags).put((byte) tintKind);
         b.putLong(mask);
         int[][] faces = new int[6][];
-        double r = 0, g = 0, bl = 0, w = 0;
-        for (Direction d : Direction.values()) {
-            int[] tile = face(d, quads);
-            faces[d.get3DDataValue()] = tile;
-            for (int c : tile) {
-                double a = (c >>> 24) / 255.0;
-                r += a * ((c >> 16) & 255);
-                g += a * ((c >> 8) & 255);
-                bl += a * (c & 255);
-                w += a;
-            }
-        }
-        int mean = w <= 0 ? 0 : 0xFF000000 | (int) Math.round(r / w) << 16 | (int) Math.round(g / w) << 8 | (int) Math.round(bl / w);
-        b.putInt(mean);
+        for (Direction d : Direction.values()) faces[d.get3DDataValue()] = AtlasShapes.face(d, quads, -1);
+        b.putInt(AtlasShapes.mean(faces));
         for (int[] tile : faces) for (int c : tile) b.putInt(c);
         return b.array();
-    }
-
-    /**
-     * Face d's 4x4 tile: each texel the outermost quad facing d over it (by its centre), its sprite averaged over the
-     * texel's area (4x4 samples), alpha the share of opaque samples. The tile's (u, v) follow the face's plane: for up
-     * and down (x, z), for north and south (x, y), for west and east (z, y); v grows downwards on the side faces.
-     */
-    private static int[] face(Direction d, List<BakedQuad> quads) {
-        int[] tile = new int[TILE * TILE];
-        float[] depth = new float[TILE * TILE];
-        java.util.Arrays.fill(depth, Float.NEGATIVE_INFINITY);
-        for (BakedQuad q : quads) {
-            if (q.direction() != d) continue;
-            TextureAtlasSprite sp = q.materialInfo().sprite();
-            NativeImage img;
-            try {
-                img = sp.contents().getOriginalImage();
-            } catch (RuntimeException e) {
-                continue;
-            }
-            int fw = sp.contents().width(), fh = sp.contents().height();
-            // the quad's extent in the face plane and its depth along d
-            float a0 = Float.MAX_VALUE, a1 = -Float.MAX_VALUE, b0 = Float.MAX_VALUE, b1 = -Float.MAX_VALUE, dep = 0;
-            float[] pa = new float[4], pb = new float[4], pu = new float[4], pv = new float[4];
-            for (int i = 0; i < 4; i++) {
-                Vector3fc p = q.position(i);
-                float[] ab = plane(d, p.x(), p.y(), p.z());
-                pa[i] = ab[0];
-                pb[i] = ab[1];
-                a0 = Math.min(a0, ab[0]);
-                a1 = Math.max(a1, ab[0]);
-                b0 = Math.min(b0, ab[1]);
-                b1 = Math.max(b1, ab[1]);
-                dep += ab[2] / 4f;
-                long uv = q.packedUV(i);
-                pu[i] = (UVPair.unpackU(uv) - sp.getU0()) / (sp.getU1() - sp.getU0());
-                pv[i] = (UVPair.unpackV(uv) - sp.getV0()) / (sp.getV1() - sp.getV0());
-            }
-            if (a1 - a0 < 1e-4f || b1 - b0 < 1e-4f) continue;  // edge-on (crossed plants seen from a side: their slant)
-            // the quad's corners in its plane: bilinear (a, b) -> (u, v) from the corner nearest each extent corner
-            int c00 = corner(pa, pb, a0, b0), c10 = corner(pa, pb, a1, b0), c01 = corner(pa, pb, a0, b1), c11 = corner(pa, pb, a1, b1);
-            for (int tv = 0; tv < TILE; tv++)
-                for (int tu = 0; tu < TILE; tu++) {
-                    int k = tu + TILE * tv;
-                    float ca = (tu + 0.5f) / TILE, cb = 1f - (tv + 0.5f) / TILE;  // tile v down = plane b down
-                    if (d.getAxis() == Direction.Axis.Y) cb = (tv + 0.5f) / TILE;  // up/down: b is z, v grows with z
-                    if (ca < a0 || ca > a1 || cb < b0 || cb > b1 || dep < depth[k]) continue;
-                    double sr = 0, sg = 0, sb = 0, sa = 0;
-                    int n = 0;
-                    for (int sy = 0; sy < 4; sy++)
-                        for (int sx = 0; sx < 4; sx++) {
-                            float aa = (tu + (sx + 0.5f) / 4f) / TILE;
-                            float bb = d.getAxis() == Direction.Axis.Y ? (tv + (sy + 0.5f) / 4f) / TILE : 1f - (tv + (sy + 0.5f) / 4f) / TILE;
-                            float s = clamp01((aa - a0) / (a1 - a0)), t = clamp01((bb - b0) / (b1 - b0));
-                            float u = lerp2(pu[c00], pu[c10], pu[c01], pu[c11], s, t), v = lerp2(pv[c00], pv[c10], pv[c01], pv[c11], s, t);
-                            int px = Math.min(fw - 1, Math.max(0, (int) (u * fw))), py = Math.min(fh - 1, Math.max(0, (int) (v * fh)));
-                            int c = img.getPixel(px, py);  // ARGB, frame 0
-                            double al = (c >>> 24) / 255.0;
-                            n++;
-                            if (al < 0.1) continue;
-                            sr += ((c >> 16) & 255);
-                            sg += ((c >> 8) & 255);
-                            sb += (c & 255);
-                            sa += 1;
-                        }
-                    if (sa == 0) continue;  // the quad is see-through here: what is behind it shows
-                    depth[k] = dep;
-                    tile[k] = (int) Math.round(255.0 * sa / n) << 24 | (int) Math.round(sr / sa) << 16 | (int) Math.round(sg / sa) << 8
-                            | (int) Math.round(sb / sa);
-                }
-        }
-        return tile;
-    }
-
-    /** (a, b, depth along d's normal) of a block-space point for face d. */
-    private static float[] plane(Direction d, float x, float y, float z) {
-        return switch (d) {
-            case DOWN -> new float[] {x, z, -y};
-            case UP -> new float[] {x, z, y};
-            case NORTH -> new float[] {x, y, -z};
-            case SOUTH -> new float[] {x, y, z};
-            case WEST -> new float[] {z, y, -x};
-            case EAST -> new float[] {z, y, x};
-        };
-    }
-
-    private static int corner(float[] pa, float[] pb, float a, float b) {
-        int best = 0;
-        float bd = Float.MAX_VALUE;
-        for (int i = 0; i < 4; i++) {
-            float dd = (pa[i] - a) * (pa[i] - a) + (pb[i] - b) * (pb[i] - b);
-            if (dd < bd) {
-                bd = dd;
-                best = i;
-            }
-        }
-        return best;
-    }
-
-    private static float lerp2(float v00, float v10, float v01, float v11, float s, float t) {
-        return (v00 * (1 - s) + v10 * s) * (1 - t) + (v01 * (1 - s) + v11 * s) * t;
-    }
-
-    private static float clamp01(float v) {
-        return v < 0 ? 0 : v > 1 ? 1 : v;
     }
 
     // ---- the exact mesh: every state's quads and every sprite (atlas_truth) -----------------------------------------
@@ -687,7 +555,7 @@ public final class AtlasLabExport {
                 for (int aa = 0; aa < 16; aa++) {
                     double ca = (aa + 0.5) / 16, cb = (bb + 0.5) / 16;
                     for (AABB box : boxes) {
-                        float[] lo = plane(d, (float) box.minX, (float) box.minY, (float) box.minZ), hi = plane(d, (float) box.maxX, (float) box.maxY, (float) box.maxZ);
+                        float[] lo = AtlasShapes.plane(d, (float) box.minX, (float) box.minY, (float) box.minZ), hi = AtlasShapes.plane(d, (float) box.maxX, (float) box.maxY, (float) box.maxZ);
                         if (ca > Math.min(lo[0], hi[0]) && ca < Math.max(lo[0], hi[0]) && cb > Math.min(lo[1], hi[1]) && cb < Math.max(lo[1], hi[1])) {
                             rows[bb] |= (short) (1 << aa);
                             break;

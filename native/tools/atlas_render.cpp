@@ -5,6 +5,21 @@
 //                 the game's weather-off switch)
 // yaw: degrees, 0 = north (-Z), 90 = east (+X). sun=elevation,azimuth degrees (azimuth like yaw).
 // Also writes <out>_depth.png (log depth) and <out>_lod.png when lodpass=1, and prints JSON stats on stdout.
+//
+// Real data (the in-game exports, docs/ATLAS-LOD.md "The renderer's groups"): blocks=<dir>/blocks.bin
+// volume=<dir>/x.als|.als2|.alv|.alv2 puts the export's sections up as the game does (materials, shapes, sections;
+// keep=all keeps every block with a shape, not only what the game's far field keeps) over the preview terrain, the
+// column tiles under it derived from the sections. groups=1 traces the content-shaped groups (ATLAS_FRAME_GROUPS).
+// camera=mc eye=x,y,z yaw= pitch= fov= takes a live capture's camera (Minecraft conventions: yaw 0 = south, pitch > 0
+// looks down), as the harness passes it. shade=mc outputs what Minecraft's vanilla view draws for the surfaces hit:
+// the texel's colour times the fixed face shade (down 0.5, up 1, north / south 0.8, west / east 0.6), the sky in
+// atlas_truth's colour, for comparisons with atlas_truth. With an export it also writes <out>_mask.png (where the frame
+// shows exported chunks) and <out>_depth.png (1/16 blocks in 24 bits, sky all ones: atlas_truth's encodings).
+// truth=<atlas_truth.exe> quads= sprites= truthvolume= renders atlas_truth's frame of the same camera and reports
+// vsTruth: CIE76 dE (tools/harness/results.py's metric) where the truth shows exported blocks, by distance band, and
+// writes <out>_truth.png and <out>_vs_truth.png (truth | this | dE). frames=N renders N times and reports the fastest.
+#include <algorithm>
+#include <chrono>
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
@@ -14,6 +29,7 @@
 #include <vector>
 
 #include "atlas/atlas.h"
+#include "atlas_export.hpp"
 #include "camera.hpp"
 #include "png.hpp"
 
@@ -118,7 +134,35 @@ int main(int argc, char** argv) {
     uint32_t w = uint32_t(num(a, "w", 1280)), h = uint32_t(num(a, "h", 720));
     double x = num(a, "x", 0), z = num(a, "z", 0);
     int lods = int(num(a, "lods", 7));
+    // a live capture's camera (Minecraft conventions) -> ours: yaw + 180, pitch negated
+    bool mcCam = str(a, "camera", "") == "mc";
+    double eye[3] = {0, 0, 0};
+    if (mcCam) {
+        std::sscanf(str(a, "eye", "0,0,0").c_str(), "%lf,%lf,%lf", &eye[0], &eye[1], &eye[2]);
+        x = eye[0], z = eye[2];
+    }
+    bool haveExport = a.count("volume") != 0;
+    // box=x0,y0,z0,x1,y1,z1 (world blocks, inclusive): one element cut from the export, nothing else in the world (no
+    // terrain either), as atlas_truth / atlas_lab take it
+    int box[6] = {0, 0, 0, 0, 0, 0};
+    bool boxed = haveExport && a.count("box") &&
+                 std::sscanf(str(a, "box", "").c_str(), "%d,%d,%d,%d,%d,%d", &box[0], &box[1], &box[2], &box[3], &box[4], &box[5]) == 6;
+    if (boxed)
+        for (int k = 0; k < 3; k++)
+            if (box[k] > box[k + 3]) std::swap(box[k], box[k + 3]);
+    // with an export the groups and Minecraft's own look are the defaults (groups=0 / shade=atlas: the old path, our
+    // lighting)
+    bool groups = num(a, "groups", haveExport ? 1 : 0) > 0;
+    bool mcShade = str(a, "shade", haveExport && mcCam ? "mc" : "") == "mc";
 
+    // one element: its sections stay however far the camera goes (the world drops sections ~1.2 km out)
+    if (boxed && !std::getenv("ATLAS_SECTION_KEEP")) {
+#ifdef _WIN32
+        _putenv_s("ATLAS_SECTION_KEEP", "64");
+#else
+        setenv("ATLAS_SECTION_KEEP", "64", 0);
+#endif
+    }
     AtlasContext* ctx = nullptr;
     AtlasBackend be = backendName == "vulkan" ? ATLAS_BACKEND_VULKAN : ATLAS_BACKEND_CPU;
     if (atlas_create(be, &ctx) != ATLAS_OK) {
@@ -130,14 +174,116 @@ int main(int argc, char** argv) {
         return 2;
     }
     double ground = atlas_preview_height(ctx, x, z);
-    double y = a.count("y") ? num(a, "y", 100) : std::max(ground, 63.0) + num(a, "above", 40);
+    double y = mcCam ? eye[1] : a.count("y") ? num(a, "y", 100) : std::max(ground, 63.0) + num(a, "above", 40);
     double centre[3] = {x, y, z};
 
-    // preview tiles for every LOD window (2 regions of slack either side, matching World::windowRadius)
+    // preview tiles for every LOD window (2 regions of slack either side, matching World::windowRadius); for one element
+    // empty ones (no ground: the regions exist, only the element's sections fill them)
     for (int lod = 0; lod < lods; lod++) {
         int span = 256 << lod;
         int cx = int(std::floor(x / span)), cz = int(std::floor(z / span));
-        atlas_preview_generate(ctx, lod, (cx - 2) * span, (cz - 2) * span, (cx + 3) * span, (cz + 3) * span);
+        if (!boxed) {
+            atlas_preview_generate(ctx, lod, (cx - 2) * span, (cz - 2) * span, (cx + 3) * span, (cz + 3) * span);
+            continue;
+        }
+    }
+    // one element: empty column tiles (no ground) over every level's window around a camera, as it moves
+    auto emptyTiles = [&](double cxw, double czw) {
+        std::vector<float> surf(256 * 256, -1000.0f), wat(256 * 256, NAN);
+        std::vector<uint16_t> zero(256 * 256, 0);
+        for (int lod = 0; lod < lods; lod++) {
+            int span = 256 << lod;
+            int cx = int(std::floor(cxw / span)), cz = int(std::floor(czw / span));
+            for (int tz = cz - 2; tz <= cz + 2; tz++)
+                for (int tx = cx - 2; tx <= cx + 2; tx++) {
+                    if (atlas_has_tile(ctx, lod, tx, tz)) continue;
+                    AtlasColumnTile t{lod, tx, tz, surf.data(), wat.data(), zero.data(), zero.data(), nullptr, nullptr};
+                    atlas_upload_column_tile(ctx, &t);
+                }
+        }
+    };
+    if (boxed) emptyTiles(x, z);
+    // the in-game export: its states as far materials, its sections, the ground under them in the column tiles
+    exportdata::Loaded ex;
+    double loadMs = 0;
+    if (haveExport) {
+        auto l0 = std::chrono::steady_clock::now();
+        std::vector<exportdata::State> lib;
+        std::vector<exportdata::Section> secs;
+        std::string vol = str(a, "volume", "");
+        if (!exportdata::loadBlocks(str(a, "blocks", ""), lib)) {
+            std::fprintf(stderr, "no block library at '%s' (blocks=)\n", str(a, "blocks", "").c_str());
+            return 2;
+        }
+        if (!exportdata::loadVolume(vol, secs)) {
+            std::fprintf(stderr, "no volume at '%s'\n", vol.c_str());
+            return 2;
+        }
+        std::string side = vol.substr(0, vol.rfind('.')) + ".json";
+        uint32_t grass = exportdata::jsonColour(side, "grass", 0x91BD59), foliage = exportdata::jsonColour(side, "foliage", 0x77AB2F),
+                 water = exportdata::jsonColour(side, "water", 0x3F76E4);
+        std::string why;
+        if (!exportdata::upload(ctx, lib, secs, str(a, "keep", "far") == "all", grass, foliage, water, 64, ex, why,
+                                boxed ? box : nullptr, num(a, "cutout", 1) > 0)) {
+            std::fprintf(stderr, "export: %s\n", why.c_str());
+            return 2;
+        }
+        if (boxed && !ex.sections) {
+            std::fprintf(stderr, "export: nothing the far field keeps inside box=%s\n", str(a, "box", "").c_str());
+            return 2;
+        }
+        // the column tiles under the export: its ground (no canopy of the dressing's), the preview's elsewhere
+        exportdata::Ground gr = exportdata::ground(secs, lib, ex);
+        for (int lod = 0; lod < lods && !boxed; lod++) {
+            int s = 1 << lod, span = 256 << lod;
+            int cx = int(std::floor(x / span)), cz = int(std::floor(z / span));
+            for (int tz = cz - 2; tz <= cz + 2; tz++)
+                for (int tx = cx - 2; tx <= cx + 2; tx++) {
+                    if ((tx + 1) * span <= ex.x0 || tx * span >= ex.x1 || (tz + 1) * span <= ex.z0 || tz * span >= ex.z1) continue;
+                    std::vector<float> surf(256 * 256), wat(256 * 256, NAN);
+                    std::vector<uint16_t> top(256 * 256, 0), fill(256 * 256, 0);
+                    std::vector<uint8_t> flags(256 * 256, 0);
+                    bool any = false;
+                    for (int j = 0; j < 256; j++)
+                        for (int i = 0; i < 256; i++) {
+                            size_t c = size_t(j) * 256 + size_t(i);
+                            int bx = tx * span + i * s + s / 2, bz = tz * span + j * s + s / 2;
+                            float t;
+                            uint16_t m, u;
+                            if (gr.at(bx, bz, t, m, u)) {
+                                surf[c] = t, top[c] = m, fill[c] = u, flags[c] = ATLAS_COLUMN_NO_CANOPY;
+                                any = true;
+                            } else {
+                                surf[c] = atlas_preview_height(ctx, bx, bz);
+                                if (surf[c] < 63.0f) wat[c] = 63.0f;
+                            }
+                        }
+                    if (any && atlas_upload_column_heights3(ctx, lod, tx, tz, surf.data(), wat.data(), top.data(), fill.data(), nullptr,
+                                                            nullptr, flags.data()) != ATLAS_OK) {
+                        std::fprintf(stderr, "tile: %s\n", atlas_last_error(ctx));
+                        return 2;
+                    }
+                }
+        }
+        loadMs = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - l0).count();
+        std::fprintf(stderr, "atlas_render: export: %zu sections, %zu materials (%zu shaped) in %.0f ms\n", ex.sections, ex.states,
+                     ex.shaped, loadMs);
+    }
+    // surface cards (atlas_truth bake=: the game's own colour and light per block face): surface= or cards=
+    size_t cardCount = 0;
+    if (a.count("surface") || a.count("cards")) {
+        std::vector<AtlasSurfaceCard> cards;
+        std::string cp = a.count("surface") ? str(a, "surface", "") : str(a, "cards", "");
+        if (!exportdata::readCards(cp, cards)) {
+            std::fprintf(stderr, "no surface cards at '%s'\n", cp.c_str());
+            return 2;
+        }
+        if (atlas_set_surface_cards(ctx, cards.data(), uint32_t(cards.size())) != ATLAS_OK) {
+            std::fprintf(stderr, "cards: %s\n", atlas_last_error(ctx));
+            return 2;
+        }
+        cardCount = cards.size();
+        std::fprintf(stderr, "atlas_render: %zu surface cards\n", cardCount);
     }
     if (atlas_update(ctx, centre, 0) != ATLAS_OK) {
         std::fprintf(stderr, "update: %s\n", atlas_last_error(ctx));
@@ -145,7 +291,26 @@ int main(int argc, char** argv) {
     }
     AtlasStats st{};
     atlas_get_stats(ctx, &st);
-    double buildMs = st.lastBuildMs;
+    double buildMs = st.lastBuildMs, groupsMs = 0;
+    if (groups) {
+        // a frame asking for the groups starts their building; the next update builds every region's tree
+        AtlasFrame f1{};
+        f1.cameraPos[0] = x, f1.cameraPos[1] = y, f1.cameraPos[2] = z;
+        atlas::cameraMatrix(0, 0, 70, 1, f1.invViewProj);
+        f1.width = f1.height = 1;
+        f1.maxDistance = 100;
+        f1.flags = ATLAS_FRAME_GROUPS;
+        uint32_t c1 = 0, n1 = 0;
+        float d1 = 0;
+        AtlasFrameOutput o1{&c1, &n1, &d1};
+        atlas_render(ctx, &f1, &o1);
+        if (atlas_update(ctx, centre, 0) != ATLAS_OK) {
+            std::fprintf(stderr, "update: %s\n", atlas_last_error(ctx));
+            return 3;
+        }
+        atlas_get_stats(ctx, &st);
+        groupsMs = st.lastBuildMs;
+    }
 
     if (str(a, "actors", "") == "demo") {
         // a caravan walking away along the view, a mammoth beside it, a dragon circling further out
@@ -186,42 +351,292 @@ int main(int argc, char** argv) {
         syntheticWeather(ctx, preset, x, z, sx, sz);
     }
 
+    // one frame (the arguments' camera, or each line of cameras=): its outputs in the vectors below
     AtlasFrame f{};
-    f.cameraPos[0] = x;
-    f.cameraPos[1] = y;
-    f.cameraPos[2] = z;
-    atlas::cameraMatrix(num(a, "yaw", 0), num(a, "pitch", -4), num(a, "fov", 70), double(w) / h, f.invViewProj);
-    f.width = w;
-    f.height = h;
-    f.nearFieldEnd = float(num(a, "near", 0));
-    f.maxDistance = float(num(a, "far", 40000));
-    f.planetRadius = float(num(a, "radius", 6371000));
-    double se = 35, sa = 120;
-    if (a.count("sun")) std::sscanf(a["sun"].c_str(), "%lf,%lf", &se, &sa);
-    se *= PI / 180;
-    sa *= PI / 180;
-    f.sunDir[0] = float(std::sin(sa) * std::cos(se));
-    f.sunDir[1] = float(std::sin(se));
-    f.sunDir[2] = float(-std::cos(sa) * std::cos(se));
-    f.timeSec = float(num(a, "time", 0));
-    f.lodBias = float(num(a, "bias", 1));
-    f.flags = flagsOf(str(a, "flags", "shadows,atmos,clouds,sky,actors"));
-
-    std::vector<uint32_t> color(size_t(w) * h), normal(size_t(w) * h);
-    std::vector<float> depth(size_t(w) * h);
-    AtlasFrameOutput o{color.data(), normal.data(), depth.data()};
-    int frames = int(num(a, "frames", 1));
-    double best = 1e30;
-    for (int i = 0; i < frames; i++) {
-        if (atlas_render(ctx, &f, &o) != ATLAS_OK) {
-            std::fprintf(stderr, "render: %s\n", atlas_last_error(ctx));
-            return 4;
+    std::vector<uint32_t> color, normal;
+    std::vector<float> depth, linear;
+    std::vector<uint8_t> shown;
+    std::string base;
+    double best = 1e30, median = 0;
+    int frames = std::max(1, int(num(a, "frames", 1)));
+    bool interleave = num(a, "interleave", 0) > 0;
+    std::vector<double> otherTimes;  // (interleave) the other path's timing frames
+    int spp = std::max(1, int(num(a, "spp", 1)));
+    auto renderOne = [&](const std::string& out, double x, double y, double z, double yawIn, double pitchIn, double fovIn,
+                         uint32_t w, uint32_t h) -> int {
+        double c[3] = {x, y, z};
+        if (boxed) emptyTiles(x, z);
+        if (atlas_update(ctx, c, 0) != ATLAS_OK) {  // the window follows the camera (nothing to do when it stays)
+            std::fprintf(stderr, "update: %s\n", atlas_last_error(ctx));
+            return 3;
         }
-        atlas_get_stats(ctx, &st);
-        best = std::min(best, st.lastFrameMs);
+        f = AtlasFrame{};
+        f.cameraPos[0] = x;
+        f.cameraPos[1] = y;
+        f.cameraPos[2] = z;
+        double camYaw = mcCam ? yawIn + 180.0 : yawIn, camPitch = mcCam ? -pitchIn : pitchIn;
+        atlas::cameraMatrix(camYaw, camPitch, fovIn, double(w) / h, f.invViewProj);
+        f.width = w;
+        f.height = h;
+        f.nearFieldEnd = float(num(a, "near", 0));
+        f.maxDistance = float(num(a, "far", 40000));
+        f.planetRadius = float(num(a, "radius", haveExport ? 0 : 6371000));  // (the exact reference is flat)
+        double se = 35, sa = 120;
+        if (a.count("sun")) std::sscanf(a["sun"].c_str(), "%lf,%lf", &se, &sa);
+        se *= PI / 180;
+        sa *= PI / 180;
+        f.sunDir[0] = float(std::sin(sa) * std::cos(se));
+        f.sunDir[1] = float(std::sin(se));
+        f.sunDir[2] = float(-std::cos(sa) * std::cos(se));
+        f.timeSec = float(num(a, "time", 0));
+        f.lodBias = float(num(a, "bias", 1));
+        // shade=mc: the surfaces' albedo and face normals only (the vanilla look is put together below)
+        f.flags = flagsOf(str(a, "flags", mcShade ? "flatnormals" : "shadows,atmos,clouds,sky,actors"));
+        if (mcShade) f.flags |= ATLAS_FRAME_DEBUG_ALBEDO | ATLAS_FRAME_FLAT_NORMALS;
+        if (groups) f.flags |= ATLAS_FRAME_GROUPS;
+
+        color.assign(size_t(w) * h, 0);
+        normal.assign(size_t(w) * h, 0);
+        depth.assign(size_t(w) * h, 0.0f);
+        linear.assign(size_t(w) * h * 4, 0.0f);
+        AtlasFrameOutput o{color.data(), normal.data(), depth.data(), linear.data()};
+
+        // spp=N: N jittered samples a pixel (atlas_set_jitter, Halton 2/3 as atlas_truth's spp), averaged: what the host's
+        // TAA converges to (the groups' dithered threshold moves with the jitter), against a truth of as many samples
+
+        best = 1e30;
+        std::vector<double> times;
+        otherTimes.clear();
+        std::vector<double> acc(size_t(w) * h * 3, 0.0), share(size_t(w) * h, 0.0);
+        std::vector<float> minDepth(size_t(w) * h, 1e30f);
+        auto halton = [](int i, int b) {
+            float r = 0, fr = 1.0f / float(b);
+            for (; i; i /= b, fr /= float(b)) r += fr * float(i % b);
+            return r;
+        };
+        float inv[16];
+        std::memcpy(inv, f.invViewProj, sizeof inv);
+        for (int smp = 0; smp < spp; smp++) {
+            float jx = spp > 1 ? halton(smp + 1, 2) - 0.5f : 0.0f, jy = spp > 1 ? halton(smp + 1, 3) - 0.5f : 0.0f;
+            if (spp > 1) atlas_set_jitter(ctx, jx, -jy);  // (atlas_truth's sample row grows downwards)
+            // timing frames on Vulkan keep their outputs on the device (as in game: no read back across the bus), then
+            // the frame that is written out
+            bool timeOnDevice = smp == 0 && frames > 1 && be == ATLAS_BACKEND_VULKAN;
+#ifdef _WIN32
+            if (timeOnDevice) _putenv_s("ATLAS_TIMING_DEVICE_OUTPUTS", "1");
+#else
+            if (timeOnDevice) setenv("ATLAS_TIMING_DEVICE_OUTPUTS", "1", 1);
+#endif
+            for (int i = 0; i < (smp == 0 ? frames + (timeOnDevice ? 1 : 0) : 1); i++) {
+                if (timeOnDevice && i == frames) {
+#ifdef _WIN32
+                    _putenv_s("ATLAS_TIMING_DEVICE_OUTPUTS", "");
+#else
+                    unsetenv("ATLAS_TIMING_DEVICE_OUTPUTS");
+#endif
+                }
+                // interleave=1: timing frames alternate the groups and the voxel path (the same clocks for both)
+                bool other = interleave && smp == 0 && i < frames && (i & 1);
+                uint32_t keepFlags = f.flags;
+                if (other) f.flags ^= ATLAS_FRAME_GROUPS;
+                if (atlas_render(ctx, &f, &o) != ATLAS_OK) {
+                    std::fprintf(stderr, "render: %s\n", atlas_last_error(ctx));
+                    return 4;
+                }
+                f.flags = keepFlags;
+                atlas_get_stats(ctx, &st);
+                if (smp == 0 && i < frames) {
+                    (other ? otherTimes : times).push_back(st.lastFrameMs);
+                    if (!other) best = std::min(best, st.lastFrameMs);
+                }
+            }
+            if (mcShade) {
+                // Minecraft's vanilla look of what was hit: the texel's colour (sRGB) times the fixed shade of its face
+                const uint32_t sky = 0x9CC4EC;
+                for (size_t i = 0; i < color.size(); i++) {
+                    if (depth[i] > 1e29f) {
+                        color[i] = 0xFF000000u | (sky & 255) << 16 | (sky & 0xFF00) | (sky >> 16);
+                        continue;
+                    }
+                    float ox = float(normal[i] & 255) / 255.0f * 2.0f - 1.0f, oz = float((normal[i] >> 8) & 255) / 255.0f * 2.0f - 1.0f;
+                    float ny = 1.0f - std::fabs(ox) - std::fabs(oz);  // octahedral decode (atlas_shared.slang octEncode)
+                    float nx = ox, nz = oz;
+                    if (ny < 0) {
+                        nx = (1.0f - std::fabs(oz)) * (ox >= 0 ? 1.0f : -1.0f);
+                        nz = (1.0f - std::fabs(ox)) * (oz >= 0 ? 1.0f : -1.0f);
+                    }
+                    float ax = std::fabs(nx), ay = std::fabs(ny), az = std::fabs(nz);
+                    float shade = ay >= ax && ay >= az ? (ny > 0 ? 1.0f : 0.5f) : az >= ax ? 0.8f : 0.6f;
+                    if (((normal[i] >> 16) & 255) == 6) shade = 1.0f;  // a surface card: the game's own shade and light
+                    uint32_t px = 0xFF000000u;
+                    for (int k = 0; k < 3; k++) {
+                        float v = std::pow(std::fmax(linear[i * 4 + size_t(k)], 0.0f), 1.0f / 2.2f) * shade;
+                        px |= uint32_t(std::fmin(255.0f, v * 255.0f + 0.5f)) << (8 * k);
+                    }
+                    color[i] = px;
+                }
+            }
+            for (uint32_t py = 0; py < h; py++)
+                for (uint32_t px = 0; px < w; px++) {
+                    size_t i = size_t(py) * w + px;
+                    for (int k = 0; k < 3; k++) acc[i * 3 + size_t(k)] += double((color[i] >> (8 * k)) & 255);
+                    float d = depth[i];
+                    if (d >= 1e29f || !haveExport) continue;
+                    // where this sample shows the export (the element's box, or the exported chunks)
+                    float nx = (float(px) + 0.5f + jx) / float(w) * 2.0f - 1.0f, ny = 1.0f - (float(py) + 0.5f + jy) / float(h) * 2.0f, q[4];
+                    for (int r = 0; r < 4; r++) q[r] = inv[r] * nx + inv[4 + r] * ny + inv[8 + r] * 0.5f + inv[12 + r];
+                    float l = std::sqrt(q[0] * q[0] + q[1] * q[1] + q[2] * q[2]);
+                    double hx = x + q[0] / l * d, hy = y + q[1] / l * d, hz = z + q[2] / l * d;
+                    bool in = boxed ? hx >= box[0] - 0.5 && hx <= box[3] + 1.5 && hy >= box[1] - 0.5 && hy <= box[4] + 1.5 &&
+                                          hz >= box[2] - 0.5 && hz <= box[5] + 1.5
+                                    : ex.inExport(hx, hz);
+                    if (in) share[i] += 1.0 / spp, minDepth[i] = std::min(minDepth[i], d);
+                }
+        }
+        for (size_t i = 0; i < color.size(); i++) {
+            uint32_t px = 0xFF000000u;
+            for (int k = 0; k < 3; k++) px |= uint32_t(acc[i * 3 + size_t(k)] / spp + 0.5) << (8 * k);
+            if (spp > 1 || mcShade) color[i] = px;
+        }
+        if (std::getenv("ATLAS_RENDER_TIMES")) {  // every timing frame, in order (measurements)
+            for (size_t i = 0; i < times.size(); i++)
+                std::fprintf(stderr, "%.2f%s", times[i], i + 1 < times.size() ? " " : "\n");
+            for (size_t i = 0; i < otherTimes.size(); i++)
+                std::fprintf(stderr, "%.2f%s", otherTimes[i], i + 1 < otherTimes.size() ? " " : "\n");
+        }
+        std::sort(times.begin(), times.end());
+        median = times.empty() ? 0 : times[times.size() / 2];
+        atlas::writePng(out, color.data(), w, h);
+        base = out.size() > 4 ? out.substr(0, out.size() - 4) : out;
+        shown.assign(size_t(w) * h, 0);  // where this frame shows the export (its mask: most samples)
+        if (haveExport) {
+            // where the frame shows exported content (the share of its samples), and how far (atlas_truth's encodings)
+            std::vector<uint32_t> mask(size_t(w) * h), dp(size_t(w) * h);
+            for (size_t i = 0; i < mask.size(); i++) {
+                float d = minDepth[i];
+                uint32_t v = d >= 1e29f ? 0xFFFFFFu : uint32_t(std::min(d * 16.f, 16777214.f));
+                dp[i] = 0xFF000000u | (v & 255u) << 16 | ((v >> 8) & 255u) << 8 | (v >> 16);
+                uint32_t m = uint32_t(std::lround(share[i] * 255.0));
+                mask[i] = 0xFF000000u | m << 16 | m << 8 | m;
+                shown[i] = share[i] > 0.5 ? 1 : 0;
+            }
+            atlas::writePng(base + "_mask.png", mask.data(), w, h);
+            atlas::writePng(base + "_depth.png", dp.data(), w, h);
+        }
+        return 0;
+    };
+    // cameras=FILE: one frame per line ("out ex,ey,ez yaw pitch fov w h"), everything loaded once (the element tier's
+    // ladders and fly-ins in one process); a JSON line per frame
+    if (a.count("cameras")) {
+        FILE* cf = std::fopen(str(a, "cameras", "").c_str(), "r");
+        if (!cf) {
+            std::fprintf(stderr, "no cameras file '%s'\n", str(a, "cameras", "").c_str());
+            return 2;
+        }
+        char line[2048];
+        int n = 0;
+        while (std::fgets(line, sizeof line, cf)) {
+            char op[1024];
+            double ex2 = 0, ey2 = 0, ez2 = 0, yw = 0, pt = 0, fv = 70;
+            unsigned cw = w, ch = h;
+            if (std::sscanf(line, "%1023s %lf,%lf,%lf %lf %lf %lf %u %u", op, &ex2, &ey2, &ez2, &yw, &pt, &fv, &cw, &ch) < 4) continue;
+            int rc = renderOne(op, ex2, ey2, ez2, yw, pt, fv, cw, ch);
+            if (rc) return rc;
+            std::string oj = op;
+            for (char& ch2 : oj) ch2 = ch2 == '\\' ? '/' : ch2;
+            std::printf("{\"frame\":%d,\"out\":\"%s\",\"frameMs\":%.2f}\n", n++, oj.c_str(), best);
+        }
+        std::fclose(cf);
+        std::printf("{\"backend\":\"%s\",\"frames\":%d,\"groupsOn\":%s,\"groupsBuildMs\":%.1f}\n", backendName.c_str(), n,
+                    groups ? "true" : "false", groupsMs);
+        atlas_destroy(ctx);
+        return 0;
     }
-    atlas::writePng(out, color.data(), w, h);
-    if (num(a, "depthpng", 0) > 0) {
+    if (int rc = renderOne(out, x, y, z, num(a, "yaw", 0), num(a, "pitch", mcCam ? 0 : -4), num(a, "fov", 70), w, h)) return rc;
+    // atlas_truth's frame of the same camera, and how far this one is from it (the harness's metric, by distance)
+    std::string vsTruth;
+    if (a.count("truth") && mcCam) {
+        std::string tp = base + "_truth.png";
+        std::string cmd = "\"\"" + str(a, "truth", "") + "\" quads=\"" + str(a, "quads", "") + "\" sprites=\"" + str(a, "sprites", "") +
+                          "\" volume=\"" + str(a, "truthvolume", str(a, "volume", "").c_str()) + "\" eye=" + str(a, "eye", "0,0,0") +
+                          " yaw=" + str(a, "yaw", "0") + " pitch=" + str(a, "pitch", "0") + " fov=" + str(a, "fov", "70") +
+                          " w=" + std::to_string(w) + " h=" + std::to_string(h) + " spp=" + std::to_string(spp) + (boxed ? " box=" + str(a, "box", "") : "") +
+                          " out=\"" + tp + "\"\" > nul";
+        if (std::system(cmd.c_str()) != 0) {
+            std::fprintf(stderr, "atlas_truth failed: %s\n", cmd.c_str());
+            return 5;
+        }
+        std::vector<uint32_t> tc, tm, td;
+        uint32_t tw = 0, th = 0;
+        std::string tb = tp.substr(0, tp.size() - 4);
+        if (!exportdata::readPng(tp, tc, tw, th) || !exportdata::readPng(tb + "_mask.png", tm, tw, th) ||
+            !exportdata::readPng(tb + "_depth.png", td, tw, th) || tw != w || th != h) {
+            std::fprintf(stderr, "could not read atlas_truth's frame %s\n", tp.c_str());
+            return 5;
+        }
+        const float bands[6] = {0, 64, 192, 512, 1024, 4096};
+        double sum[5] = {}, all = 0;
+        size_t cnt[5] = {}, inside = 0, both = 0, either = 0;
+        double meanT[3] = {}, meanC[3] = {};
+        std::vector<uint32_t> sheet(size_t(w) * 3 * h);
+        for (size_t i = 0; i < tc.size(); i++) {
+            float la[3], lb[3];
+            exportdata::lab(tc[i], la);
+            exportdata::lab(color[i], lb);
+            float de = std::sqrt((la[0] - lb[0]) * (la[0] - lb[0]) + (la[1] - lb[1]) * (la[1] - lb[1]) + (la[2] - lb[2]) * (la[2] - lb[2]));
+            bool in = (tm[i] & 255) > 127;
+            both += in && shown[i];
+            either += in || shown[i];
+            if (in || shown[i])  // the mean colour over both silhouettes (a sub-pixel element: its share of the pixels)
+                for (int k = 0; k < 3; k++) meanT[k] += double((tc[i] >> (8 * k)) & 255), meanC[k] += double((color[i] >> (8 * k)) & 255);
+            uint32_t dv = (td[i] & 255) << 16 | ((td[i] >> 8) & 255) << 8 | ((td[i] >> 16) & 255);
+            float dist = float(dv) / 16.0f;
+            if (in) {
+                inside++;
+                all += de;
+                for (int b = 0; b < 5; b++)
+                    if (dist >= bands[b] && dist < bands[b + 1]) sum[b] += de, cnt[b]++;
+            }
+            size_t row = i / w, col = i % w;
+            float heat = std::fmin(de / 30.0f, 1.0f);
+            uint32_t hm = in ? 0xFF000000u | uint32_t(heat * 255) | uint32_t((1 - std::fabs(heat - 0.5f) * 2) * 180) << 8 |
+                                   uint32_t((1 - heat) * 120) << 16
+                             : 0xFF3C3C3Cu;
+            sheet[row * w * 3 + col] = tc[i];
+            sheet[row * w * 3 + w + col] = color[i];
+            sheet[row * w * 3 + 2 * w + col] = hm;
+        }
+        atlas::writePng(base + "_vs_truth.png", sheet.data(), w * 3, h);
+        char buf[256];
+        vsTruth = ",\"vsTruth\":{";
+        std::snprintf(buf, sizeof buf, "\"dE\":%.2f,\"share\":%.4f,\"iou\":%.4f,\"shownShare\":%.4f,",
+                      inside ? all / double(inside) : 0.0, double(inside) / double(tc.size()),
+                      either ? double(both) / double(either) : 1.0,
+                      double(std::count(shown.begin(), shown.end(), uint8_t(1))) / double(tc.size()));
+        vsTruth += buf;
+        {
+            uint32_t pt = 0, pc = 0;
+            for (int k = 0; k < 3; k++)
+                pt |= uint32_t(meanT[k] / double(std::max<size_t>(either, 1)) + 0.5) << (8 * k),
+                    pc |= uint32_t(meanC[k] / double(std::max<size_t>(either, 1)) + 0.5) << (8 * k);
+            float la[3], lb[3];
+            exportdata::lab(pt, la);
+            exportdata::lab(pc, lb);
+            std::snprintf(buf, sizeof buf, "\"meanDE\":%.2f,\"bands\":{", std::sqrt((la[0] - lb[0]) * (la[0] - lb[0]) + (la[1] - lb[1]) * (la[1] - lb[1]) +
+                                                                     (la[2] - lb[2]) * (la[2] - lb[2])));
+        }
+        vsTruth += buf;
+        bool firstBand = true;
+        for (int b = 0; b < 5; b++) {
+            if (cnt[b] <= 200) continue;
+            std::snprintf(buf, sizeof buf, "%s\"%d-%d\":{\"dE\":%.2f,\"share\":%.3f}", firstBand ? "" : ",", int(bands[b]),
+                          int(bands[b + 1]), sum[b] / double(cnt[b]), double(cnt[b]) / double(tc.size()));
+            vsTruth += buf;
+            firstBand = false;
+        }
+        vsTruth += "}}";
+    }
+    if (num(a, "depthpng", 0) > 0 && !haveExport) {
         std::vector<uint32_t> d(size_t(w) * h);
         for (size_t i = 0; i < d.size(); i++) {
             float t = depth[i] > 1e29f ? 0.0f : float(1.0 - std::log2(1.0 + depth[i]) / std::log2(1.0 + f.maxDistance));
@@ -237,12 +652,35 @@ int main(int argc, char** argv) {
             hits++;
             far = std::max(far, double(d));
         }
-    std::printf("{\"backend\":\"%s\",\"terrain\":\"preview\",\"camera\":[%.1f,%.1f,%.1f],\"ground\":%.1f,\"w\":%u,\"h\":%u,"
+    // the groups' memory and builds (atlas_info's "groups" object), and what the export put up
+    std::string extra, outJson = out;
+    {
+        std::string info = atlas_info(ctx);
+        auto g = info.find("\"groups\":{");
+        for (char& c : outJson) c = c == '\\' ? '/' : c;  // a JSON string
+        if (g != std::string::npos) extra += "," + info.substr(g, info.find('}', g) - g + 1);
+        char buf[512];
+        if (haveExport) {
+            std::snprintf(buf, sizeof buf, ",\"export\":{\"sections\":%zu,\"materials\":%zu,\"shaped\":%zu,\"loadMs\":%.0f}", ex.sections,
+                          ex.states, ex.shaped, loadMs);
+            extra += buf;
+        }
+        if (!otherTimes.empty()) {
+            std::sort(otherTimes.begin(), otherTimes.end());
+            std::snprintf(buf, sizeof buf, ",\"otherPathBestMs\":%.2f,\"otherPathMedianMs\":%.2f", otherTimes[0],
+                          otherTimes[otherTimes.size() / 2]);
+            extra += buf;
+        }
+        std::snprintf(buf, sizeof buf, ",\"groupsOn\":%s,\"groupsBuildMs\":%.1f,\"frameMedianMs\":%.2f,\"frames\":%d", groups ? "true" : "false",
+                      groupsMs, median, frames);
+        extra += buf;
+    }
+    std::printf("{\"backend\":\"%s\",\"terrain\":\"%s\",\"camera\":[%.1f,%.1f,%.1f],\"ground\":%.1f,\"w\":%u,\"h\":%u,"
                 "\"regions\":%u,\"nodeBytes\":%llu,\"leafBytes\":%llu,\"materialBytes\":%llu,\"buildMs\":%.1f,"
-                "\"frameMs\":%.2f,\"raySteps\":%llu,\"hitFraction\":%.3f,\"farthestHit\":%.0f,\"out\":\"%s\"}\n",
-                backendName.c_str(), x, y, z, ground, w, h, st.regions, (unsigned long long)st.nodeBytes,
-                (unsigned long long)st.leafBytes, (unsigned long long)st.materialBytes, buildMs, best,
-                (unsigned long long)st.raySteps, double(hits) / depth.size(), far, out.c_str());
+                "\"frameMs\":%.2f,\"raySteps\":%llu,\"hitFraction\":%.3f,\"farthestHit\":%.0f,\"out\":\"%s\"%s%s}\n",
+                backendName.c_str(), haveExport ? "export+preview" : "preview", x, y, z, ground, w, h, st.regions,
+                (unsigned long long)st.nodeBytes, (unsigned long long)st.leafBytes, (unsigned long long)st.materialBytes, buildMs,
+                best, (unsigned long long)st.raySteps, double(hits) / depth.size(), far, outJson.c_str(), extra.c_str(), vsTruth.c_str());
     atlas_destroy(ctx);
     return 0;
 }
