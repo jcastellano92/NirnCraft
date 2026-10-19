@@ -198,6 +198,45 @@ final class VisualCamera {
                 +at(o,"max",2)+" "+(a.length>1?a[1]:"0")+" "+(a.length>2?a[2]:"0.75"));
     }
 
+    /**
+     * `door-file REPORT outside|inside [FILL]`: the building's real front door (the report's door and outward
+     * direction). outside: standing in the street at eye height, backed up until the facade fills FILL of the view,
+     * looking at it; inside: just through the door, looking into the room.
+     */
+    static java.util.concurrent.CompletableFuture<Integer> doorFile(Minecraft mc,String arguments) {
+        String[] a=arguments.trim().split("\\s+");
+        var o=readReport(a[0]);
+        if(!o.has("door")) throw new IllegalStateException("the building has no door in its report");
+        boolean outside=a.length<2 || !a[1].equals("inside");
+        double fill=a.length>2?Double.parseDouble(a[2]):0.8;
+        double dx=at(o,"door",0)+0.5, dy=at(o,"door",1), dz=at(o,"door",2)+0.5;
+        double ux=o.getAsJsonArray("outward").get(0).getAsDouble(), uz=o.getAsJsonArray("outward").get(1).getAsDouble();
+        double w=Math.abs(ux)>0 ? at(o,"max",2)-at(o,"min",2)+1 : at(o,"max",0)-at(o,"min",0)+1;
+        double h=at(o,"max",1)-dy+1;
+        Vec3 eye, target;
+        if(outside) {
+            var facade=new net.minecraft.world.phys.AABB(0,0,0,w,h,0.1);
+            double dist=Math.max(4,fit(mc,facade,0,fill));
+            eye=new Vec3(dx+ux*dist,dy+1.62,dz+uz*dist);
+            target=new Vec3(dx,dy+Math.min(h*0.45,6),dz);
+        } else {
+            eye=new Vec3(dx-ux*1.3,dy+1.62,dz-uz*1.3);
+            target=new Vec3(dx-ux*9,dy+1.3,dz-uz*9);
+        }
+        var result=new java.util.concurrent.CompletableFuture<Integer>();
+        var id=mc.player.getUUID();
+        Vec3 e=eye, tg=target;
+        mc.getSingleplayerServer().execute(()->{
+            try {
+                var player=mc.getSingleplayerServer().getPlayerList().getPlayer(id);
+                if(player==null) throw new IllegalStateException("No player");
+                placeEye(player,e,tg);
+                result.complete(1);
+            } catch(Exception ex) { result.completeExceptionally(ex); }
+        });
+        return result;
+    }
+
     /** `inside-file REPORT`: stand at the reported interior point, looking at the back (north) wall at eye height. */
     static java.util.concurrent.CompletableFuture<Integer> insideFile(Minecraft mc,String arguments) {
         var o=readReport(arguments.trim().split("\\s+")[0]);

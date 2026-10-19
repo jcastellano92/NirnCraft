@@ -389,6 +389,32 @@ public final class QaCommands {
         o.add("min", min);
         o.add("max", max);
         o.add("inside", inside);
+        // the real front door: a door's lower half on the box's outer wall, the one furthest out (south-facing
+        // buildings: the largest z); its outward direction points away from the building's centre
+        net.minecraft.core.BlockPos door = null;
+        double best = -1e9, cx = (box.minX() + box.maxX()) / 2.0, cz = (box.minZ() + box.maxZ()) / 2.0;
+        for (var bp : net.minecraft.core.BlockPos.betweenClosed(box.minX(), box.minY(), box.minZ(), box.maxX(), box.maxY(), box.maxZ())) {
+            var st = level.getBlockState(bp);
+            if (!(st.getBlock() instanceof net.minecraft.world.level.block.DoorBlock)
+                    || st.getValue(net.minecraft.world.level.block.DoorBlock.HALF) != net.minecraft.world.level.block.state.properties.DoubleBlockHalf.LOWER)
+                continue;
+            double out = Math.max(Math.abs(bp.getX() - cx) / Math.max(1, box.getXSpan()), Math.abs(bp.getZ() - cz) / Math.max(1, box.getZSpan()))
+                    + (bp.getZ() - cz) * 1e-3;  // ties: the south side (the street side of the grammar's buildings)
+            if (out > best) { best = out; door = bp.immutable(); }
+        }
+        if (door != null) {
+            JsonArray d = new JsonArray();
+            d.add(door.getX()); d.add(door.getY()); d.add(door.getZ());
+            o.add("door", d);
+            double ox = door.getX() - cx, oz = door.getZ() - cz;  // outward: the axis the door sits out on
+            JsonArray outward = new JsonArray();
+            if (Math.abs(ox) / Math.max(1, box.getXSpan()) > Math.abs(oz) / Math.max(1, box.getZSpan())) {
+                outward.add(Math.signum(ox)); outward.add(0);
+            } else {
+                outward.add(0); outward.add(Math.signum(oz));
+            }
+            o.add("outward", outward);
+        }
         try {
             Path dir = src.getServer().getServerDirectory().resolve("nirncraft-qa");
             Files.createDirectories(dir);

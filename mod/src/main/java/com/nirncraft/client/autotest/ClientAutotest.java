@@ -719,6 +719,10 @@ public final class ClientAutotest {
             } else if (action.startsWith("frame-file ")) {
                 liveCommand=VisualCamera.frameFile(mc,action.substring(11));
                 liveCommandDeadline=System.currentTimeMillis()+60_000;
+            } else if (action.startsWith("door-file ")) {
+                VisualCamera.lastFrame=null;
+                liveCommand=VisualCamera.doorFile(mc,action.substring(10));
+                liveCommandDeadline=System.currentTimeMillis()+60_000;
             } else if (action.startsWith("inside-file ")) {
                 VisualCamera.lastFrame=null;
                 liveCommand=VisualCamera.insideFile(mc,action.substring(12));

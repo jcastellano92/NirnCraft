@@ -37,7 +37,8 @@ VIEWS = {
 }
 ROLE = {"icon": "front", "placed": "front", "front": "front", "exterior": "front", "cast": "front",
         "side": "side", "exterior-side": "side", "dropped": "side", "placed-night": "other", "held": "other",
-        "worn": "other", "source": "other", "inside": "other", "exterior-night": "other"}
+        "worn": "other", "source": "other", "inside": "other", "front-night": "other", "entry": "other",
+        "overview": "side"}
 WORN_RACES = ("nord", "khajiit", "argonian", "altmer", "orc")  # a spread of body shapes; --tag race:<r> for one
 SLOTS = {"head": "armor.head", "chest": "armor.chest", "legs": "armor.legs", "feet": "armor.feet"}
 BUILD_AT = (8192, 540, 8192)  # the building yard above the clouds: one building at a time, rebuilt per scene
@@ -145,16 +146,18 @@ def _building(culture, use, wealth):
     sid = f"{culture}-{use}-{wealth}"
     report = "nirncraft-qa/building.json"
     out = []
-    views = [("exterior", f"frame-file {report} 20 0.8"), ("exterior-side", f"frame-file {report} 110 0.8"),
-             ("inside", f"inside-file {report}")]
-    if wealth == "common":  # night only where it shows something: lit windows (most subjects are noon only)
-        views.append(("exterior-night", f"frame-file {report} 20 0.8"))
+    # as a visitor sees it: from the street in front of the real door (backed up until the facade fits), stepping
+    # through the door, the room from its middle; then the overview from above
+    views = [("front", f"door-file {report} outside 0.8"), ("entry", f"door-file {report} inside"),
+             ("inside", f"inside-file {report}"), ("overview", f"frame-file {report} 20 0.8")]
+    if wealth == "common":  # night only where it shows something: lit windows from the street
+        views.append(("front-night", f"door-file {report} outside 0.8"))
     for view, verb in views:
         s = {"id": f"{view}-building-{sid}".replace("_", "-"), "title": f"{use} ({culture}, {wealth}): {view}",
              "_file": "(generated subjects)", "tier": "live", "kind": "visual",
              "tags": ["suite:subjects", "suite:buildings", f"subject:{sid}", "kind:building", f"view:{view}",
                       f"culture:{culture}", f"use:{use}", f"wealth:{wealth}"],
-             "pose": {"visit": [bx, bz + 60, 40, 180, 20]}, "time": 18000 if view == "exterior-night" else 6000,
+             "pose": {"visit": [bx, bz + 60, 40, 180, 20]}, "time": 18000 if view == "front-night" else 6000,
              "weather": "clear", "variants": ["shaders"],
              "setup": [f"command nirncraft-qa building {culture} {use} {wealth} {bx} {by} {bz}", "wait 10"],
              "camera_verb": verb, "role": ROLE[view], "checks": {"maxBlackTiles": 0},
