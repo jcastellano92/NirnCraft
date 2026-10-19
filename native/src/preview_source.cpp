@@ -81,7 +81,19 @@ std::vector<AetherMaterial> previewPalette() {
     set(M_COLDGRASS, mat(0.43f, 0.48f, 0.37f, 0.9f, AETHER_CLASS_TERRAIN));   // the Pale, Eastmarch, Haafingar
     set(M_LUSHGRASS, mat(0.33f, 0.47f, 0.22f, 0.9f, AETHER_CLASS_TERRAIN));   // Cyrodiil, High Rock, the jungles
     set(M_MARSHGRASS, mat(0.36f, 0.40f, 0.24f, 0.85f, AETHER_CLASS_TERRAIN)); // Black Marsh, Hjaalmarch
+    // flowing water: the water colour (the kernel adds the white water of fast runs and rapids from the flow)
+    for (int k = 0; k < FLOW_DIRS * FLOW_SPEEDS; k++) set(PreviewMat(M_FLOW0 + k), mat(0.16f, 0.27f, 0.42f, 0.05f, AETHER_CLASS_WATER));
+    set(M_SNOWCANOPY, mat(0.6f, 0.66f, 0.64f, 0.9f, AETHER_CLASS_FOLIAGE));  // snow on conifer crowns
     return p;
+}
+
+void applyWaterFlow(std::vector<MaterialGpu>& palette) {
+    for (int k = 0; k < FLOW_DIRS * FLOW_SPEEDS; k++) {
+        size_t id = size_t(M_FLOW0 + k);
+        if (id >= palette.size() || palette[id].emisClass[1] != float(AETHER_CLASS_WATER)) continue;
+        palette[id].emisClass[2] = float(k / FLOW_SPEEDS) * (6.2831853f / FLOW_DIRS);  // heading: atan2(z, x)
+        palette[id].emisClass[3] = float(k % FLOW_SPEEDS + 1);                        // 1 calm, 2 fast, 3 rapids
+    }
 }
 
 bool PreviewSource::load(const std::string& path, std::string& err) {
@@ -276,7 +288,7 @@ std::unique_ptr<Tile> PreviewSource::makeTile(int lod, int tx, int tz) const {
             t->water[c] = wl;
         }
     }
-    dress(*t);
+    dress(*t, Overrides{});
     return t;
 }
 
@@ -285,28 +297,86 @@ std::unique_ptr<Tile> PreviewSource::dressTile(int lod, int tx, int tz, const fl
     auto t = blankTile(lod, tx, tz);
     std::copy(surface, surface + t->surface.size(), t->surface.begin());
     std::copy(water, water + t->water.size(), t->water.begin());
-    dress(*t, grassMat, foliageMat);
+    Overrides o;
+    o.grassMat = grassMat;
+    o.foliageMat = foliageMat;
+    dress(*t, o);
     return t;
+}
+
+std::unique_ptr<Tile> PreviewSource::dressTile(int lod, int tx, int tz, const float* surface, const float* water,
+                                              const Overrides& o) const {
+    auto t = blankTile(lod, tx, tz);
+    std::copy(surface, surface + t->surface.size(), t->surface.begin());
+    std::copy(water, water + t->water.size(), t->water.begin());
+    dress(*t, o);
+    return t;
+}
+
+// The flowing water over a river column: along the channel (perpendicular to the raster's distance-to-river field),
+// downhill by the raster's water level 24 blocks either way, its speed class by that slope (calm, fast, rapids);
+// 0 for still water (the sea, lakes, marsh pools).
+uint16_t PreviewSource::flowMaterial(double x, double z, const Sample& s, float level, const Tile& t, int i, int j) const {
+    if (s.coast < 0 || s.lakeSD > 0 || !(s.rivHW > 0) || s.rivD > s.rivHW + 3) return 0;
+    Sample a, b;
+    sample(x + 6, z, a);
+    sample(x - 6, z, b);
+    double gx = a.rivD - b.rivD;
+    sample(x, z + 6, a);
+    sample(x, z - 6, b);
+    double gz = a.rivD - b.rivD;
+    double gl = std::sqrt(gx * gx + gz * gz);
+    if (gl < 1e-3) return 0;
+    double tx = -gz / gl, tz = gx / gl;  // along the channel
+    sample(x + tx * 24, z + tz * 24, a);
+    sample(x - tx * 24, z - tz * 24, b);
+    double ahead = std::isnan(a.water) ? level : a.water, behind = std::isnan(b.water) ? level : b.water;
+    double baseline = 48.0;  // blocks between the two samples
+    // the tile's own levels (exact, falls included) where the raster is flat
+    if (std::abs(ahead - behind) < 0.25) {
+        int s2 = 3, ia = std::clamp(i + int(std::lround(tx * s2)), 0, TILE - 1), ja = std::clamp(j + int(std::lround(tz * s2)), 0, TILE - 1);
+        int ib = std::clamp(i - int(std::lround(tx * s2)), 0, TILE - 1), jb = std::clamp(j - int(std::lround(tz * s2)), 0, TILE - 1);
+        float wa = t.water[size_t(ja) * TILE + ia], wb = t.water[size_t(jb) * TILE + ib];
+        if (!std::isnan(wa) && !std::isnan(wb)) {
+            ahead = wa;
+            behind = wb;
+            baseline = 2.0 * s2 * double(1 << t.lod);
+        }
+    }
+    if (ahead > behind) {
+        tx = -tx;
+        tz = -tz;
+    }
+    double slope = std::abs(ahead - behind) / baseline;
+    int speed = slope < 0.015 && s.rivHW >= 2.0f ? 0 : slope < 0.05 ? 1 : 2;
+    int dir = int(std::lround(std::atan2(tz, tx) / (6.283185307 / FLOW_DIRS))) & (FLOW_DIRS - 1);
+    return uint16_t(M_FLOW0 + dir * FLOW_SPEEDS + speed);
 }
 
 // Surface materials and forest canopy for a tile whose geometry is filled in: by climate, altitude, slope and the
 // shore (a stand-in for the biome surface rules). Slope is the steeper of the map's macro gradient and the tile's own
 // (central differences between neighbouring columns), so cliffs, terraces and ridged peaks in the geometry turn to
 // rock and shed their trees even where the macro raster is gentle.
-void PreviewSource::dress(Tile& tile, const uint16_t* grassMat, const uint16_t* foliageMat) const {
+void PreviewSource::dress(Tile& tile, const Overrides& o) const {
+    bool wet = false;
+    for (float w : tile.water) wet |= !std::isnan(w);
+    if (wet) tile.waterMat.assign(tile.water.size(), 0);
     // rows in parallel (a tile is ~20 ms of raster sampling on one core); each row writes only its own columns
     unsigned n = std::max(1u, std::min(8u, std::thread::hardware_concurrency() / 2));
     std::atomic<int> nextRow{0};
     auto rows = [&] {
-        for (int j; (j = nextRow.fetch_add(4)) < TILE;) dressRows(tile, j, std::min(j + 4, int(TILE)), grassMat, foliageMat);
+        for (int j; (j = nextRow.fetch_add(4)) < TILE;) dressRows(tile, j, std::min(j + 4, int(TILE)), o);
     };
     std::vector<std::thread> pool;
     for (unsigned i = 1; i < n; i++) pool.emplace_back(rows);
     rows();
     for (auto& th : pool) th.join();
+    if (wet && std::all_of(tile.waterMat.begin(), tile.waterMat.end(), [](uint16_t m) { return m == 0; })) tile.waterMat.clear();
 }
 
-void PreviewSource::dressRows(Tile& tile, int jBegin, int jEnd, const uint16_t* grassMat, const uint16_t* foliageMat) const {
+void PreviewSource::dressRows(Tile& tile, int jBegin, int jEnd, const Overrides& o) const {
+    const uint16_t* grassMat = o.grassMat;
+    const uint16_t* foliageMat = o.foliageMat;
     Tile* t = &tile;
     double s = double(1 << t->lod);
     double x0 = double(t->tx) * TILE * s, z0 = double(t->tz) * TILE * s;
@@ -349,15 +419,23 @@ void PreviewSource::dressRows(Tile& tile, int jBegin, int jEnd, const uint16_t* 
             if (sm.heat > 0.6f) top = M_ASH;
             if (h < SEA + 2.5f && sm.coast < 40 && cl != SWAMP) top = fill = M_SAND;
             if (slope > 0.9f) top = M_STONE;
-            if (h > snowEdge && slope < 1.4f) top = M_SNOW;
+            if (h > snowEdge && slope < 1.4f && sm.heat < 0.45f) top = M_SNOW;  // (no snow on hot ground: Red Mountain)
             if (cl == FROZEN && sm.coast < 0) top = M_ICE;
             if (!std::isnan(wl) && wl - h > 1.5f) top = sm.coast < 0 ? M_SAND : M_GRAVEL;
             // the biome's own grass colour where the game would show a tinted grass block (the near field's tint)
             if (grassMat && grassMat[c] && (top == M_GRASS || top == M_LUSHGRASS || top == M_COLDGRASS || top == M_MARSHGRASS ||
                                             top == M_DRYGRASS || top == M_TUNDRA))
                 top = grassMat[c];
+            uint8_t flags = o.flags ? o.flags[c] : 0;
+            // the world's own surface blocks where the caller knows them (its material rules, snow and ice)
+            if (o.topMat && o.topMat[c]) top = o.topMat[c];
+            if (o.fillMat && o.fillMat[c]) fill = o.fillMat[c];
             t->top[c] = top;
             t->fill[c] = fill;
+            if (!std::isnan(wl)) {
+                uint16_t wm = (flags & AETHER_COLUMN_FROZEN) ? uint16_t(M_ICE) : flowMaterial(x, z, sm, wl, *t, i, j);
+                if (wm) t->waterMat[c] = wm;  // (allocated by dress before the rows run)
+            }
 
             // forests: canopy lumps on gentle ground below the tree line, by climate
             bool dry = cl == DESERT || cl == FROZEN || cl == ASH;
@@ -402,6 +480,7 @@ void PreviewSource::dressRows(Tile& tile, int jBegin, int jEnd, const uint16_t* 
                         t->canopy[c] = ht;
                         t->canopyMat[c] = conifer ? M_CONIFER : cl == JUNGLE || cl == TROPICAL ? M_JUNGLE : M_FOLIAGE;
                         if (!conifer && foliageMat && foliageMat[c]) t->canopyMat[c] = foliageMat[c];  // biome foliage
+                        if (flags & AETHER_COLUMN_SNOW) t->canopyMat[c] = M_SNOWCANOPY;
                     }
                 }
             }

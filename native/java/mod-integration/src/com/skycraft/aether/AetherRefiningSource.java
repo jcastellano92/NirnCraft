@@ -84,6 +84,9 @@ abstract class AetherRefiningSource implements AetherFarField.ColumnSource {
 
     enum Refined { DONE, LATER, NEVER }
 
+    /** The context's block palette, for tiles that carry surface blocks (codec v3). */
+    void materials(AetherMaterials m) {}
+
     /** Uploads the exact geometry of one tile if it is available now (DONE), will be (LATER), or never (NEVER). */
     abstract Refined refine(AetherNative.Context ctx, int lod, int tx, int tz);
 

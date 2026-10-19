@@ -26,10 +26,7 @@ final class AetherServerSource extends AetherRefiningSource {
     private final Map<Long, byte[]> ready = new HashMap<>();
     private final Map<Long, Long> asked = new HashMap<>();  // key -> when
     private final List<int[]> toAsk = new ArrayList<>();
-    private final float[] surface = new float[AetherNative.TILE * AetherNative.TILE], water = new float[surface.length];
-    private final int[] grassRgb = new int[AetherTints.GRID * AetherTints.GRID], foliageRgb = new int[grassRgb.length];
-    private final short[] grassMat = new short[surface.length], foliageMat = new short[surface.length];
-    private final AetherTints tints = new AetherTints();
+    private final AetherTileUpload upload = new AetherTileUpload();
 
     AetherServerSource(long worldId, Path gameDir, Callable<Path> raster) {
         super(raster);
@@ -64,17 +61,8 @@ final class AetherServerSource extends AetherRefiningSource {
         boolean cached = b == null;
         if (cached) b = load(lod, tx, tz);
         if (b != null) {
-            int r = AetherTileCodec.decode(lod, b, surface, water, grassRgb, foliageRgb);
-            if (r >= 0) {
-                if (r == 1) {  // the server's biome tints
-                    tints.materials(grassRgb, foliageRgb, grassMat, foliageMat);
-                    tints.flush(ctx);
-                    ctx.uploadColumnHeights2(lod, tx, tz, surface, water, grassMat, foliageMat);
-                } else {
-                    ctx.uploadColumnHeights(lod, tx, tz, surface, water);
-                }
-                return Refined.DONE;
-            }
+            // the server's exact geometry, biome tints and surface blocks, dressed as in single player
+            if (upload.upload(ctx, lod, tx, tz, b)) return Refined.DONE;
             if (!cached) return Refined.NEVER;  // the server sent garbage: keep the stand-in
             try {
                 Files.deleteIfExists(file(lod, tx, tz));  // a damaged cache entry: ask again
@@ -91,6 +79,11 @@ final class AetherServerSource extends AetherRefiningSource {
             toAsk.add(new int[] {lod, tx, tz});
         }
         return Refined.LATER;
+    }
+
+    @Override
+    void materials(AetherMaterials m) {
+        upload.materials(m);
     }
 
     @Override

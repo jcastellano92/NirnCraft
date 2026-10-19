@@ -101,7 +101,7 @@ add_custom_command(
 
 add_library(aether_core SHARED
   src/api.cpp src/svdag.cpp src/world.cpp src/preview_source.cpp src/cpu_backend.cpp src/vk_backend.cpp src/vk_loader.cpp
-  src/gl_api.cpp
+  src/gl_api.cpp src/lights.cpp
   "${GEN}/aether_far_cpu.cpp" "${GEN}/aether_far_spv.h" "${GEN}/aether_publish_spv.h" "${GEN}/aether_ingest_spv.h"
   "${GEN}/aether_cloud_spv.h" "${GEN}/aether_sunmap_spv.h")
 target_include_directories(aether_core PUBLIC include PRIVATE src "${GEN}" "${SLANG_ROOT}/include" "${AETHER_VK_INCLUDE}")

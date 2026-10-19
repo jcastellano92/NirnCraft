@@ -56,6 +56,7 @@ struct TraceResult {
     int axis;      // axis of the face crossed into the hit voxel
     int lod;
     uint steps;
+    float dither;  // 0..1, fixed per pixel: which side of a refinement fade it shows (old below the progress)
 };
 
 uint popcount64(uint64_t x) { return countbits(uint(x)) + countbits(uint(x >> 32)); }
@@ -240,8 +241,22 @@ int traceLod(int lod, float3 p0, float3 d, float len, inout TraceResult res, out
             }
             if (idx >= 0) {
                 RegionGpu r = regions[idx];
+                bool air = false;  // a fading region that was empty air before: nothing to trace for these pixels
+                if (r.runs.z != 0u) {
+                    // a refinement fade (World::fading_): pixels whose dither is past the fade's progress still see
+                    // what the region replaced, or the coarser LOD when it is new to the window
+                    float prog = float(int(frame.temporal.z - r.runs.w)) / float(max(frame.temporal.w, 1u));
+                    if (res.dither >= prog) {
+                        if (r.runs.z == 0xFFFFFFFFu) {
+                            uncExit = uExit;
+                            return TRACE_UNCOVERED;
+                        }
+                        if (r.runs.z == 0xFFFFFFFEu) air = true;
+                        else r = regions[r.runs.z - 1u];
+                    }
+                }
                 float3 ro = (p0 - regionOriginRel(r)) / s;
-                if (traceRegion(r, ro, d / s, u, uExit, 1e-3, res)) {
+                if (!air && traceRegion(r, ro, d / s, u, uExit, 1e-3, res)) {
                     res.lod = lod;
                     return TRACE_HIT;
                 }
@@ -301,7 +316,11 @@ float3 worldAt(float3 o, float3 dir, float k, float t) {
 }
 
 // Trace the curved view ray from t0 to t1. Returns the hit distance along the view ray or -1.
-float traceView(float3 o, float3 dir, float t0, float t1, inout TraceResult res) {
+// lodDither (0..1 per pixel, 0 = off): the segment grid of every LOD starts at a per-pixel phase. A ray changes LOD
+// only at a segment start (the first segment that leaves a level's window, or whose footprint wants a coarser level),
+// so with a fixed grid every pixel switches on the same jagged line; with the phase spread over one segment the switch
+// becomes a stochastic band a segment wide (dithered LOD transitions, no pop line).
+float traceView(float3 o, float3 dir, float t0, float t1, float lodDither, inout TraceResult res) {
     float R = frame.camFrac.w;
     float k = R > 0 ? dot(dir.xz, dir.xz) / (2.0 * R) : 0.0;
     float pixelAngle = frame.params.w * frame.params.z;
@@ -313,12 +332,18 @@ float traceView(float3 o, float3 dir, float t0, float t1, inout TraceResult res)
     int pinned = -1;     // a finer LOD that had data while the wanted one did not (streaming), and for how long
     int pinLeft = 0;
     float gapEnd = 1e30;  // nearest end of an unloaded region cell seen while searching this segment
+    int phasedLod = -1;   // the level whose segment grid was last phase-shifted (lodDither)
+    float shrink = 0.0;   // fraction cut off the current segment (its grid's phase)
     for (int seg = 0; seg < 768; seg++) {
         if (t >= t1) break;
         int want = int(clamp(floor(log2(max(t * pixelAngle, 1.0))), 0.0, float(lodCount - 1)));
         if (!finer) lod = pinLeft > 0 ? pinned : max(lod, want);
         float s = float(1 << lod);
-        float tn = min(t + 192.0 * s, t1);
+        if (lodDither > 0.0 && lod != phasedLod) {
+            phasedLod = lod;
+            shrink = 0.9 * frac(lodDither + 0.618034 * float(lod));
+        }
+        float tn = min(t + 192.0 * s * (1.0 - shrink), t1);
         float3 a = worldAt(o, dir, k, t);
         float3 b = worldAt(o, dir, k, tn);
         // rising above the world top: the parabola only climbs further from here
@@ -358,6 +383,7 @@ float traceView(float3 o, float3 dir, float t0, float t1, inout TraceResult res)
         if (finer) { pinned = lod; pinLeft = 8; }
         else if (pinLeft > 0) pinLeft--;
         t = tn;
+        shrink = 0.0;
         finer = false;
         gapEnd = 1e30;
     }
@@ -367,7 +393,7 @@ float traceView(float3 o, float3 dir, float t0, float t1, inout TraceResult res)
 // Straight ray (sun shadows): 1 if lit.
 float traceShadow(float3 p, float3 dir, int lod) {
     TraceResult res;
-    res.t = 0; res.mat = 0; res.axis = -1; res.lod = 0; res.steps = 0;
+    res.t = 0; res.mat = 0; res.axis = -1; res.lod = 0; res.steps = 0; res.dither = 0.5;
     int lodCount = int(frame.dims.w);
     float t = 0;
     float maxT = 2048.0;
@@ -496,7 +522,7 @@ float3 waterReflection(float3 p, float3 dir, float k, float t, int lod, float3 s
     float3 sky = reflectedSky(p, r, sun);
     if (r.y > 0.35) return sky;  // steep reflections only see sky
     TraceResult rr;
-    rr.t = 0; rr.mat = 0; rr.axis = -1; rr.lod = 0; rr.steps = 0;
+    rr.t = 0; rr.mat = 0; rr.axis = -1; rr.lod = 0; rr.steps = 0; rr.dither = 0.5;
     int lodCount = int(frame.dims.w);
     int l = min(lod + 1, lodCount - 1);
     float s = float(1 << lod);
@@ -524,6 +550,61 @@ float3 waterReflection(float3 p, float3 dir, float k, float t, int lod, float3 s
         if (o.y + r.y * tr > 640.0 - float(frame.camInt.y)) break;
     }
     return sky;
+}
+
+// ---- far lights (lights.cpp packs them after the far actors, then 32 px tile lists) -------------------------------
+
+// Word k (0..11) of record `rec` of the actor buffer, read as an unsigned integer (the tile tables).
+uint actorWord(uint rec, uint k) {
+    ActorGpu a = actors[rec];
+    float v = k < 4u ? a.posYaw[k] : k < 8u ? a.shape[k - 4u] : a.motion[k - 8u];
+    return asuint(v);
+}
+
+// The glow of the far lights over this pixel: each light of the pixel's tile that nothing nearer hides (its distance
+// against the pixel's surface, with a voxel of slack) adds a core about a pixel wide (or its own size up close) and a
+// halo that widens with the haze between it and the camera. Town lights show from dusk to dawn, fires flicker, lava
+// pulses, spray is lit by the sun and sky.
+float3 farLights(uint2 px, float3 o, float3 dir, float surface, float3 sun) {
+    uint L = uint(frame.weatherParams.y);
+    if (L == 0u) return float3(0, 0, 0);
+    uint A = uint(frame.weatherParams.w);
+    uint tilesX = (frame.dims.x + 31u) / 32u, tilesY = (frame.dims.y + 31u) / 32u;
+    uint tile = (px.y / 32u) * tilesX + px.x / 32u;
+    uint tableBase = A + L, indexBase = tableBase + (tilesX * tilesY + 5u) / 6u;
+    uint start = actorWord(tableBase + tile / 6u, (tile % 6u) * 2u);
+    uint count = min(actorWord(tableBase + tile / 6u, (tile % 6u) * 2u + 1u), 64u);
+    float night = smoothstep(0.12, -0.1, sun.y);
+    float day = smoothstep(-0.12, 0.2, sun.y);
+    float pa = max(frame.params.w, 1e-5);
+    float t = frame.sunDir.w;
+    float3 sum = float3(0, 0, 0);
+    for (uint k = 0u; k < count; k++) {
+        uint e = start + k;
+        uint li = actorWord(indexBase + e / 12u, e % 12u);
+        ActorGpu l = actors[A + li];
+        float dist = l.motion.x;
+        float slack = max(3.0, dist * pa * 3.0) + l.motion.w;
+        if (surface < dist - slack) continue;  // terrain, a building or an actor in front of it
+        uint kind = uint(l.shape.w + 0.5);
+        float vis = kind == 0u ? night
+                  : kind == 1u ? (0.1 + 0.9 * night) * (0.82 + 0.18 * sin(t * 11.0 + l.motion.y * 7.0) * sin(t * 4.3 + l.motion.y))
+                  : kind == 2u ? 0.85 + 0.15 * sin(t * 1.3 + l.motion.y)
+                  : day;
+        if (vis <= 0.001) continue;
+        float3 v = l.posYaw.xyz - o;
+        float c = dot(dir, v) / max(length(v), 1e-3);
+        float apx = sqrt(max(0.0, 2.0 * (1.0 - c))) / pa;
+        float sigma = l.posYaw.w, halo = l.motion.z;
+        float T = aerialTransmittance(dist, frame);
+        float q = apx / sigma;
+        float core = exp(-0.5 * q * q);
+        float glow = (1.0 - T) * 0.15 * exp(-apx / halo);
+        float3 rad = l.shape.xyz;
+        if (kind == 3u) rad *= keyLightRadiance(sun) * 0.25 + skyAmbient(float3(0, 1, 0), sun);  // spray: lit, not glowing
+        sum += rad * vis * (core * T + glow);
+    }
+    return sum;
 }
 
 uint cloudDiv() { return (frame.dims.z & FRAME_CLOUDS_QUARTER) != 0 ? 4u : 2u; }
@@ -649,7 +730,7 @@ float2 sunTexel(uint i, uint j) {
     int lodCount = int(frame.dims.w);
     int l = clamp(int(floor(log2(max(2.0 * he / S, 1.0)))), 0, lodCount - 1);
     TraceResult rr;
-    rr.t = 0; rr.mat = 0; rr.axis = -1; rr.lod = 0; rr.steps = 0;
+    rr.t = 0; rr.mat = 0; rr.axis = -1; rr.lod = 0; rr.steps = 0; rr.dither = 0.5;
     float t = 0;
     for (int seg = 0; seg < 128; seg++) {
         if (t >= maxT) break;
@@ -703,6 +784,10 @@ void farMain(uint3 id : SV_DispatchThreadID) {
     float3 o = frame.camFrac.xyz;
     TraceResult res;
     res.t = 0; res.mat = 0; res.axis = -1; res.lod = 0; res.steps = 0;
+    // per-pixel dithers, fixed on screen (the pack has no temporal accumulation to resolve a moving pattern): one for
+    // refinement fades, a decorrelated one for the LOD segment phase, a third for far actors' fades
+    res.dither = pixelDither(id.xy, 0u);
+    float lodDither = (frame.dims.z & FRAME_LOD_DITHER) != 0 ? max(pixelDither(id.xy, 1u), 1e-3) : 0.0;
     float3 sun = frame.sunDir.xyz;
 
     // the rasterised near field already covers this pixel: only the air in front of it (cloud, if the camera is up
@@ -729,13 +814,13 @@ void farMain(uint3 id : SV_DispatchThreadID) {
             return;
         }
     }
-    float tHit = traceView(o, dir, frame.params.x, frame.params.y, res);
+    float tHit = traceView(o, dir, frame.params.x, frame.params.y, lodDither, res);
     ActorHit ah;
     ah.t = -1.0;
     ah.n = float3(0, 1, 0);
     ah.albedo = float3(1, 1, 1);
     if ((frame.dims.z & FRAME_ACTORS) != 0 && frame.weatherParams.w > 0.5)
-        ah = traceActors(o, dir, tHit >= 0.0 ? tHit : frame.params.y);
+        ah = traceActors(o, dir, frame.params.x, tHit >= 0.0 ? tHit : frame.params.y, pixelDither(id.xy, 2u));
     bool actorFirst = ah.t >= 0.0;
 
     float3 color = float3(0, 0, 0);
@@ -799,24 +884,55 @@ void farMain(uint3 id : SV_DispatchThreadID) {
                         (occupiedAt(res.lod, front + t2) ? 1.0 : 0.0) + (occupiedAt(res.lod, front - t2) ? 1.0 : 0.0);
             ao = 1.0 - 0.15 * occ;
         }
+        // falling water (waterfalls, stamped as structures): a white sheet streaming down, brighter where it breaks
+        bool falls = cls == 5u;
+        if (falls) {
+            float3 wp = p + float3(frame.camInt.xyz);
+            float streak = valueNoise(float2((wp.x + wp.z) / 1.3, wp.y / 4.0 + frame.sunDir.w * 2.5)) * 0.6
+                         + valueNoise(float2((wp.x - wp.z) / 0.7, wp.y / 1.8 + frame.sunDir.w * 4.0)) * 0.4;
+            albedo = float3(0.78, 0.84, 0.88) * (0.78 + 0.32 * streak);
+            cls = 0u;  // lit like a rough diffuse surface: it scatters, it does not mirror
+        }
         // large-scale tone variation on land (about 24 and 90 blocks), the far-field stand-in for texture detail
-        if (cls != 2u) {
+        if (cls != 2u && !falls) {
             float2 wxz = p.xz + float2(frame.camInt.xz);
             float v = valueNoise(wxz / 24.0) * 0.6 + valueNoise(wxz / 90.0 + 17.0) * 0.4;
             albedo *= 0.86 + 0.28 * v;
         }
         if ((frame.dims.z & FRAME_DEBUG_LOD) != 0) albedo = lodTint(res.lod);
         float3 reflection = float3(0, 0, 0);
+        float foam = 0.0;
         if (cls == 2u) {
             float2 wxz = p.xz + float2(frame.camInt.xz);
             float2 wind = farWaterWind(wxz, length(p.xz));
             // far water is a level sheet: a side face is only the step where its quantised level changes between
             // LODs (seen edge-on near the horizon it drew a dark seam), so every water hit is shaded as the surface
-            n = farWaveNormal(wxz, frame.sunDir.w, wind, tHit);
-            m.albedoRough.a = farWaterAlpha(wind.y, tHit);
+            float flow = m.emisClass.w;  // 0 still (sea, lakes), 1 calm, 2 fast, 3 rapids (the dressing's river flow)
+            if (flow > 0.5) {
+                // a river: the wave field runs downstream (heading from the flow, short steep waves the faster it
+                // goes), carried along at the current's speed; fast runs and rapids break into white water in
+                // streaks along the flow
+                float2 fd = float2(cos(m.emisClass.z), sin(m.emisClass.z));
+                float speed = 1.5 * flow;  // blocks per second
+                wind = float2(m.emisClass.z, saturate(0.25 + 0.22 * flow));
+                n = farWaveNormal(wxz - fd * (frame.sunDir.w * speed), frame.sunDir.w, wind, tHit);
+                float u = dot(wxz, fd), v = dot(wxz, float2(-fd.y, fd.x));
+                float streak = valueNoise(float2(u / 7.0 - frame.sunDir.w * speed / 7.0, v / 1.6)) * 0.7
+                             + valueNoise(float2(u / 2.5 - frame.sunDir.w * speed / 2.5, v / 0.8)) * 0.3;
+                foam = flow > 2.5 ? smoothstep(0.25, 0.6, streak) * 0.8 : flow > 1.5 ? smoothstep(0.55, 0.85, streak) * 0.35 : 0.0;
+            } else {
+                n = farWaveNormal(wxz, frame.sunDir.w, wind, tHit);
+            }
+            m.albedoRough.a = farWaterAlpha(wind.y, tHit) + foam * 0.2;
             reflection = waterReflection(p, dir, k, tHit, res.lod, sun, n);
         }
         color = shadeSurface(albedo, m, n, dir, sun, sunVis, cls, ao, reflection);
+        if (foam > 0.0) {
+            // white water: a bright rough surface over the river
+            float3 up = float3(0, 1, 0);
+            float3 white = float3(0.85, 0.88, 0.9) * (keyLightRadiance(sun) * saturate(dot(up, keyLightDir(sun))) * sunVis + skyAmbient(up, sun));
+            color = lerp(color, white, foam);
+        }
         depth = tHit;
         color = applyAerial(color, dir, sun, tHit, frame);
         if ((frame.dims.z & FRAME_DEBUG_ALBEDO) != 0) color = albedo;
@@ -836,6 +952,8 @@ void farMain(uint3 id : SV_DispatchThreadID) {
     }
     float coverage = tHit >= 0.0 || actorFirst || (frame.dims.z & FRAME_SKY) != 0 ? 1.0 : 0.0;
     float surface = actorFirst ? ah.t : (tHit >= 0.0 ? tHit : 1e30);
+    // far lights, under the cloud deck (clouds in front of the surface veil them with it)
+    if ((frame.dims.z & FRAME_DEBUG_ALBEDO) == 0) color += farLights(id.xy, o, dir, surface, sun);
     if ((frame.dims.z & FRAME_CLOUDS) != 0) {
         // the half-resolution deck, where it starts in front of this pixel's surface
         float4 cl;

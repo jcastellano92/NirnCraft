@@ -55,8 +55,16 @@ public final class AetherClient {
     /** Set by the server's Hello: it streams exact far tiles for this world (0 = it does not). */
     private static volatile long serverWorldId;
     private static volatile AetherNet.FarActors farActors;
+    /** The server's latest list of natural landmarks around this player (AetherNatural), for the far field. */
+    static volatile AetherNet.FarSites farSites;
     private static volatile long farActorsAt;
     private static double[] actorXyz = new double[0];
+    private static int[] actorFlags = new int[0];
+    /** Per far actor (entity id): its impostor's opacity, fading out while the client also has the real entity. */
+    private static final it.unimi.dsi.fastutil.ints.Int2FloatOpenHashMap actorOpacity = new it.unimi.dsi.fastutil.ints.Int2FloatOpenHashMap();
+    private static int lightBudget = -1;
+    /** Seconds over which an impostor dissolves once the real entity is tracked (and region refinements dissolve). */
+    static final float FADE_SECONDS = 0.6f;
 
     private AetherClient() {}
 
@@ -82,6 +90,7 @@ public final class AetherClient {
         NeoForge.EVENT_BUS.addListener((ClientPlayerNetworkEvent.LoggingOut e) -> {
             serverWorldId = 0;
             farActors = null;
+            farSites = null;
         });
         AetherNet.onHello = AetherClient::onHello;
         AetherNet.onTile = m -> {
@@ -91,6 +100,7 @@ public final class AetherClient {
             farActors = m;
             farActorsAt = System.nanoTime();
         };
+        AetherNet.onFarSites = m -> farSites = m;
     }
 
     /** The server streams exact tiles: switch a multiplayer client from the stand-in (restarts next frame). */
@@ -157,7 +167,12 @@ public final class AetherClient {
                 return;
             }
             feedWeather();
-            feedActors();
+            feedActors(mc.level);
+            int budget = quality.lightBudget();
+            if (budget != lightBudget) {
+                lightBudget = budget;
+                ctx.setLightBudget(budget, 6000f);
+            }
 
             frame.x = p.x;
             frame.y = p.y;
@@ -181,7 +196,7 @@ public final class AetherClient {
             frame.lodBias = quality.lodBias();  // > 1: coarser levels sooner with distance (far detail goes first)
             // the pack draws the sky; aether adds far terrain, clouds and far actors over it
             frame.flags = quality.flags(AetherNative.FRAME_SHADOWS | AetherNative.FRAME_ATMOS | AetherNative.FRAME_CLOUDS
-                    | AetherNative.FRAME_ACTORS);
+                    | AetherNative.FRAME_ACTORS | AetherNative.FRAME_LOD_DITHER);
 
             io.nearDepthTex = 0xFFFFFFFF;  // AETHER_GL_BOUND_DEPTH: the bound gbuffer target's depth
             new Matrix4f(cam.projectionMatrix).invert().get(io.nearInvProjection);
@@ -206,6 +221,7 @@ public final class AetherClient {
                 lib = AetherNative.load(dll);
             }
             ctx = lib.create(AetherNative.BACKEND_VULKAN);
+            ctx.setTransitions(FADE_SECONDS);  // refined tiles, new buildings and finer LODs dissolve in, never pop
             // single player: the server's own terrain height (exact); multiplayer: exact tiles from the server when
             // it streams them; otherwise (or until they arrive) the seed-free raster stand-in
             AetherFarField.ColumnSource source = null;
@@ -224,7 +240,10 @@ public final class AetherClient {
             int[] noise = AetherPalette.cloudNoiseVolume();
             if (noise != null) ctx.setCloudNoise(noise);
             java.util.function.IntBinaryOperator ground = source instanceof AetherExactSource e ? e::groundAt : null;
-            farField = new AetherFarField(ctx, source, () -> AetherSettlements.create(ground));
+            AetherMaterials mats = new AetherMaterials();  // one id per block across buildings, landmarks and surfaces
+            if (source instanceof AetherRefiningSource r) r.materials(mats);
+            farField = new AetherFarField(ctx, source, () -> AetherSettlements.create(ground, mats));
+            lightBudget = -1;
             startedFor = mc.level;
             com.skycraft.Skycraft.LOGGER.info("aether far field on ({} columns): {}", source instanceof AetherExactSource
                     ? "exact" : source instanceof AetherServerSource ? "server" : "raster", lib.buildInfo());
@@ -235,17 +254,52 @@ public final class AetherClient {
         }
     }
 
-    /** The server's far actors, moved on by their velocity since the packet (twice a second; at most a second). */
-    private static void feedActors() {
+    /**
+     * The server's far actors, moved on by their velocity since the packet (twice a second; at most a second). An
+     * impostor is never drawn for an entity the client has: by its id, or (an id the client does not know, e.g. a
+     * camera away from the player the server measures from) any client entity of about its size standing where it
+     * stands. One the client stops having shows at once, and aether itself draws impostors only beyond the near field,
+     * dissolving them in across the first 16 blocks past it (traceActors), so nothing pops or doubles at the hand-off.
+     * Dragons beat their wings while climbing or cruising, glide while descending, and fold them on the ground.
+     */
+    private static void feedActors(net.minecraft.client.multiplayer.ClientLevel level) {
         AetherNet.FarActors a = farActors;
+        long now = System.nanoTime();
         if (a == null) {
-            ctx.setActors(actorXyz, new float[0], new int[0], 0);
+            actorOpacity.clear();
+            ctx.setActors(actorXyz, new float[0], new int[0], null, 0);
             return;
         }
-        double dt = Math.min((System.nanoTime() - farActorsAt) / 1e9, 1.0);
-        if (actorXyz.length < a.count() * 3) actorXyz = new double[a.count() * 3];
-        for (int i = 0; i < a.count() * 3; i++) actorXyz[i] = a.xyz()[i] + a.vel()[i] * dt;
-        ctx.setActors(actorXyz, a.yawHeightRadius(), a.kindTint(), a.count());
+        double dt = Math.min((now - farActorsAt) / 1e9, 1.0);
+        int n = a.count();
+        if (actorXyz.length < n * 3) actorXyz = new double[n * 3];
+        if (actorFlags.length < n) actorFlags = new int[n];
+        for (int i = 0; i < n * 3; i++) actorXyz[i] = a.xyz()[i] + a.vel()[i] * dt;
+        it.unimi.dsi.fastutil.ints.IntOpenHashSet live = new it.unimi.dsi.fastutil.ints.IntOpenHashSet(n);
+        for (int i = 0; i < n; i++) {
+            int id = a.idFlags()[i * 2];
+            live.add(id);
+            float o = clientHas(level, a, i, id) ? 0f : 1f;
+            actorOpacity.put(id, o);
+            int gait;
+            if ((a.idFlags()[i * 2 + 1] & AetherNet.FarActors.ON_GROUND) != 0) gait = AetherNative.GAIT_STILL;
+            else gait = a.vel()[i * 3 + 1] < -4f ? AetherNative.GAIT_GLIDE : AetherNative.GAIT_FLAP;
+            int seed = (id * 0x9E3779B1) >>> 16;
+            actorFlags[i] = Math.round((1f - o) * 255f) | gait << 8 | seed << 16;
+        }
+        actorOpacity.keySet().retainAll(live);
+        ctx.setActors(actorXyz, a.yawHeightRadius(), a.kindTint(), actorFlags, n);
+    }
+
+    /** True when the client has actor i's entity: the same id, or an entity of about its size where it stands. */
+    private static boolean clientHas(net.minecraft.client.multiplayer.ClientLevel level, AetherNet.FarActors a, int i, int id) {
+        if (level.getEntity(id) != null) return true;
+        double x = a.xyz()[i * 3], y = a.xyz()[i * 3 + 1], z = a.xyz()[i * 3 + 2];
+        float h = a.yawHeightRadius()[i * 3 + 1], r = a.yawHeightRadius()[i * 3 + 2];
+        double pad = Math.max(1.5, r * 2);
+        net.minecraft.world.phys.AABB box = new net.minecraft.world.phys.AABB(x - pad, y - 1, z - pad, x + pad, y + h + 1, z + pad);
+        return !level.getEntities((net.minecraft.world.entity.Entity) null, box,
+                e -> e.getBbHeight() >= h * 0.5f && e.getBbHeight() <= h * 2f).isEmpty();
     }
 
     private static void feedWeather() {

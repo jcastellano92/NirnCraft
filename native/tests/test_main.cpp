@@ -1,4 +1,6 @@
 // aether_core tests: SVDAG round trips, sharing, the C ABI, and CPU/Vulkan kernel parity on preview terrain.
+#include <algorithm>
+#include <array>
 #include <chrono>
 #include <cmath>
 #include <cstdio>
@@ -528,6 +530,388 @@ static void testActors() {
     aether_destroy(ctx);
 }
 
+// Refinement fades: a tile replaced while resident dissolves from the old ground to the new one over the fade time,
+// per pixel (most pixels still show the old ground just after the swap, every pixel the new one once it is over).
+// Then LOD dither: a flat plane looks the same at every level, so depth must not change while the level map does.
+static void testTransitions() {
+    std::printf("refinement fades and LOD dither\n");
+    AetherContext* ctx = nullptr;
+    aether_create(AETHER_BACKEND_CPU, &ctx);
+    CHECK(aether_set_transitions(ctx, -1.0f) == AETHER_ERR_ARG);
+    CHECK(aether_set_transitions(ctx, 2.0f) == AETHER_OK);  // long enough that a loaded machine still catches its start
+    std::vector<float> low(256 * 256, 100.0f), high(256 * 256, 110.0f), water(256 * 256, NAN);
+    std::vector<uint16_t> top(256 * 256, 2), fill(256 * 256, 3);
+    auto upload = [&](std::vector<float>& h, int lod) {
+        for (int tz = -2; tz <= 2; tz++)
+            for (int tx = -2; tx <= 2; tx++) {
+                AetherColumnTile t{lod, tx, tz, h.data(), water.data(), top.data(), fill.data(), nullptr, nullptr};
+                aether_upload_column_tile(ctx, &t);
+            }
+    };
+    auto sleepMs = [](int ms) {
+        auto end = std::chrono::steady_clock::now() + std::chrono::milliseconds(ms);
+        while (std::chrono::steady_clock::now() < end) {}
+    };
+    upload(low, 0);
+    double centre[3] = {10.5, 140.0, 10.5};
+    aether_update(ctx, centre, 0);
+    sleepMs(2100);
+    aether_update(ctx, centre, 0);  // the first window's own fade-in is over (and dropped)
+    AetherFrame f{};
+    f.cameraPos[0] = 10.5;
+    f.cameraPos[1] = 140.0;
+    f.cameraPos[2] = 10.5;
+    float inv[16] = {0.1f, 0, 0, 0, 0, 0, 0.1f, 0, 0, -0.5f, 0, 0, 0, -0.75f, 0, 1};  // straight down
+    std::memcpy(f.invViewProj, inv, sizeof(inv));
+    f.width = 64;
+    f.height = 64;
+    f.maxDistance = 1000;
+    f.sunDir[1] = 1;
+    f.lodBias = 1;
+    std::vector<float> depth(64 * 64);
+    AetherFrameOutput o{nullptr, nullptr, depth.data()};
+    auto newShare = [&] {
+        CHECK(aether_render(ctx, &f, &o) == AETHER_OK);
+        size_t n = 0;
+        for (size_t i = 0; i < depth.size(); i++) {
+            float nx = (float(i % 64) + 0.5f) / 64 * 2 - 1, ny = 1 - (float(i / 64) + 0.5f) / 64 * 2;
+            float len = std::sqrt(0.01f * nx * nx + 1 + 0.01f * ny * ny);
+            n += std::abs(depth[i] / len - 30.0f) < 0.5f;  // the new ground is 30 below the camera, the old 40
+        }
+        return double(n) / double(depth.size());
+    };
+    double before = newShare();
+    upload(high, 0);
+    aether_update(ctx, centre, 0);
+    double start = newShare();
+    sleepMs(2100);
+    aether_update(ctx, centre, 0);
+    double end = newShare();
+    std::printf("  new ground: %.0f%% before the swap, %.0f%% right after it, %.0f%% after the fade\n", 100 * before,
+                100 * start, 100 * end);
+    CHECK(before == 0.0);
+    CHECK(start < 0.5);
+    CHECK(end == 1.0);
+    aether_set_transitions(ctx, 0.0f);  // fades off: the swap is immediate
+    upload(low, 0);
+    aether_update(ctx, centre, 0);
+    CHECK(newShare() == 0.0);
+
+    for (int lod = 1; lod < 3; lod++) upload(low, lod);  // (y 100 is a face at LODs 0-2: 2^lod divides 164)
+    aether_update(ctx, centre, 0);
+    AetherFrame g = f;
+    g.width = 160;
+    g.height = 90;
+    cameraMatrix(90, -4, 70, 160.0 / 90.0, g.invViewProj);
+    g.maxDistance = 6000;
+    g.flags = AETHER_FRAME_DEBUG_LOD;
+    std::vector<float> d0(160 * 90), d1(160 * 90);
+    std::vector<uint32_t> c0(160 * 90), c1(160 * 90);
+    AetherFrameOutput o0{c0.data(), nullptr, d0.data()}, o1{c1.data(), nullptr, d1.data()};
+    CHECK(aether_render(ctx, &g, &o0) == AETHER_OK);
+    g.flags |= AETHER_FRAME_LOD_DITHER;
+    CHECK(aether_render(ctx, &g, &o1) == AETHER_OK);
+    size_t hits = 0, depthOff = 0, lodChanged = 0;
+    for (size_t i = 0; i < d0.size(); i++) {
+        if (d0[i] > 1e29f) continue;
+        hits++;
+        depthOff += std::abs(d0[i] - d1[i]) > 0.01f + 1e-4f * d0[i];
+        lodChanged += c0[i] != c1[i];
+    }
+    std::printf("  dither: %zu ground px, %zu change level, %zu change depth\n", hits, lodChanged, depthOff);
+    CHECK(hits > 1000);
+    CHECK(lodChanged > 0 && lodChanged < hits / 3);
+    CHECK(depthOff < hits / 200 + 2);
+    aether_destroy(ctx);
+}
+
+// Far lights: a lantern 600 blocks out glows at night (a bright core at its pixel, nothing far from it), is gone by day,
+// and a wall between it and the camera hides it; fires stay lit by day.
+static void testLights() {
+    std::printf("far lights\n");
+    AetherContext* ctx = nullptr;
+    aether_create(AETHER_BACKEND_CPU, &ctx);
+    std::vector<float> flat(256 * 256, 100.0f), water(256 * 256, NAN);
+    std::vector<uint16_t> top(256 * 256, 2), fill(256 * 256, 3);
+    for (int tz = -2; tz <= 2; tz++)
+        for (int tx = -2; tx <= 2; tx++) {
+            AetherColumnTile t{0, tx, tz, flat.data(), water.data(), top.data(), fill.data(), nullptr, nullptr};
+            aether_upload_column_tile(ctx, &t);
+        }
+    double centre[3] = {0.5, 104.0, 0.5};
+    aether_update(ctx, centre, 0);
+    AetherLight l{{600.5, 103.0, 0.5}, 1.0f, 1.0f, 0x40A0FFu, AETHER_LIGHT_NIGHT};
+    CHECK(aether_set_light_group(ctx, 7, &l, 1) == AETHER_OK);
+    AetherFrame f{};
+    f.cameraPos[0] = 0.5;
+    f.cameraPos[1] = 104.0;
+    f.cameraPos[2] = 0.5;
+    f.width = 65;
+    f.height = 65;
+    f.maxDistance = 2000;
+    f.planetRadius = 0;
+    f.lodBias = 1;
+    f.flags = AETHER_FRAME_ATMOS;
+    std::vector<float> lin(65 * 65 * 4);
+    AetherFrameOutput o{nullptr, nullptr, nullptr, lin.data()};
+    auto lum = [&](int x, int y) {
+        const float* p = &lin[(size_t(y) * 65 + x) * 4];
+        return p[0] + p[1] + p[2];
+    };
+    auto shoot = [&](float sunY) {
+        f.sunDir[0] = 0;
+        f.sunDir[1] = sunY;
+        f.sunDir[2] = std::sqrt(1 - sunY * sunY);
+        cameraMatrix(90, 0, 6, 1.0, f.invViewProj);  // east, level, narrow
+        CHECK(aether_render(ctx, &f, &o) == AETHER_OK);
+    };
+    // where the light falls on screen: the brightest pixel
+    shoot(-0.5f);
+    int bx = 0, by = 0;
+    for (int y = 0; y < 65; y++)
+        for (int x = 0; x < 65; x++)
+            if (lum(x, y) > lum(bx, by)) bx = x, by = y;
+    float nightCore = lum(bx, by), nightFar = lum(std::min(64, bx + 12), by);
+    shoot(0.6f);
+    float dayCore = lum(bx, by) - lum(std::min(64, bx + 12), by);
+    std::printf("  night: core %.3f at (%d, %d), 12 px away %.4f; day: core excess %.4f\n", nightCore, bx, by, nightFar, dayCore);
+    CHECK(std::abs(bx - 32) <= 1 && std::abs(by - 32) <= 3);
+    CHECK(nightCore > 0.2f && nightCore > 20 * nightFar);
+    CHECK(std::abs(dayCore) < 0.01f);
+    // a wall at x 300..303, 40 blocks high, hides it
+    std::vector<float> wall = flat;
+    for (int z = 0; z < 256; z++)
+        for (int x = 44; x < 48; x++) wall[size_t(z) * 256 + x] = 140.0f;
+    AetherColumnTile t{0, 1, 0, wall.data(), water.data(), top.data(), fill.data(), nullptr, nullptr};
+    aether_upload_column_tile(ctx, &t);
+    AetherColumnTile t2{0, 1, -1, wall.data(), water.data(), top.data(), fill.data(), nullptr, nullptr};
+    aether_upload_column_tile(ctx, &t2);
+    aether_update(ctx, centre, 0);
+    shoot(-0.5f);
+    float hidden = lum(bx, by);
+    std::printf("  behind a wall: %.4f\n", hidden);
+    CHECK(hidden < nightCore * 0.05f);
+    // a fire stays lit by day (dimmer against the bright day it is drawn over, but there)
+    l.kind = AETHER_LIGHT_FIRE;
+    l.pos[1] = 160.0;  // above the wall
+    aether_set_light_group(ctx, 7, &l, 1);
+    shoot(0.6f);
+    float fire = 0;
+    for (int y = 0; y < 65; y++)
+        for (int x = 0; x < 65; x++) fire = std::max(fire, lum(x, y));
+    std::printf("  a fire by day: core %.3f\n", fire);
+    CHECK(fire > 0.2f);
+    CHECK(aether_set_light_group(ctx, 7, nullptr, 0) == AETHER_OK);
+    aether_destroy(ctx);
+}
+
+// A humanoid impostor is a lit silhouette, never a filled dark rectangle: its pixels cover a humanoid share of their
+// bounding box (tall and narrow, about 60 %, not ~100 %), their colour is near the tint and lit (not black), their
+// height matches the actor's; and none is drawn nearer than the near field's end (the game draws what is there), with
+// a dissolve over the first 16 blocks past it.
+static void testImpostorShape() {
+    std::printf("humanoid impostor shape\n");
+    AetherContext* ctx = nullptr;
+    aether_create(AETHER_BACKEND_CPU, &ctx);
+    std::vector<float> flat(256 * 256, 100.0f), water(256 * 256, NAN);
+    std::vector<uint16_t> top(256 * 256, 2), fill(256 * 256, 3);
+    for (int tz = -2; tz <= 2; tz++)
+        for (int tx = -2; tx <= 2; tx++) {
+            AetherColumnTile t{0, tx, tz, flat.data(), water.data(), top.data(), fill.data(), nullptr, nullptr};
+            aether_upload_column_tile(ctx, &t);
+        }
+    double centre[3] = {0.5, 101.62, 0.5};
+    aether_update(ctx, centre, 0);
+    AetherActor a{};
+    a.pos[0] = 0.5;
+    a.pos[1] = 100.0;
+    a.pos[2] = -29.5;  // 30 blocks north
+    a.yaw = 0.7f;
+    a.height = 1.8f;
+    a.radius = 0.3f;
+    a.kind = 0;
+    a.tint = 0xFFC05020u;  // blue-ish cloth (r 0x20, g 0x50, b 0xC0)
+    aether_set_actors(ctx, &a, 1);
+    AetherFrame f{};
+    for (int i = 0; i < 3; i++) f.cameraPos[i] = centre[i];
+    f.width = 128;
+    f.height = 128;
+    cameraMatrix(0, -0.0, 6, 1.0, f.invViewProj);  // north, level, narrow: the actor about 70 px tall
+    f.maxDistance = 600;
+    f.planetRadius = 0;
+    f.sunDir[0] = 0.3f;
+    f.sunDir[1] = 0.8f;
+    f.sunDir[2] = 0.5f;
+    f.lodBias = 1;
+    f.flags = AETHER_FRAME_ACTORS | AETHER_FRAME_SKY;
+    std::vector<uint32_t> normal(128 * 128);
+    std::vector<float> lin(128 * 128 * 4);
+    AetherFrameOutput o{nullptr, normal.data(), nullptr, lin.data()};
+    auto measure = [&](float nearEnd, size_t& px, int& w, int& h, double rgb[3]) {
+        f.nearFieldEnd = nearEnd;
+        CHECK(aether_render(ctx, &f, &o) == AETHER_OK);
+        int x0 = 128, x1 = -1, y0 = 128, y1 = -1;
+        px = 0;
+        rgb[0] = rgb[1] = rgb[2] = 0;
+        for (int y = 0; y < 128; y++)
+            for (int x = 0; x < 128; x++) {
+                size_t i = size_t(y) * 128 + x;
+                if (((normal[i] >> 16) & 255) != 4) continue;
+                px++;
+                x0 = std::min(x0, x), x1 = std::max(x1, x), y0 = std::min(y0, y), y1 = std::max(y1, y);
+                for (int k = 0; k < 3; k++) rgb[k] += lin[i * 4 + k];
+            }
+        w = x1 - x0 + 1;
+        h = y1 - y0 + 1;
+        if (px) for (int k = 0; k < 3; k++) rgb[k] /= double(px);
+    };
+    size_t px = 0;
+    int w = 0, h = 0;
+    double rgb[3];
+    measure(0.0f, px, w, h, rgb);
+    double cover = px ? double(px) / (double(w) * h) : 0;
+    // the expected height on screen: 1.8 blocks at 30 over a 6-degree, 128 px view
+    double expectH = 1.8 / 30.0 / (2 * std::tan(3.0 * 3.14159265 / 180)) * 128;
+    std::printf("  %zu px in a %d x %d box (fill %.2f, expected height %.0f px); mean linear rgb %.3f %.3f %.3f\n", px, w, h,
+                cover, expectH, rgb[0], rgb[1], rgb[2]);
+    CHECK(px > 200);
+    CHECK(h > 2 * w);                         // tall and narrow
+    CHECK(cover > 0.4 && cover < 0.9);        // a silhouette, not a filled rectangle
+    CHECK(std::abs(h - expectH) < 0.15 * expectH);
+    CHECK(rgb[2] > rgb[0] && rgb[0] + rgb[1] + rgb[2] > 0.05);  // the tint's hue, and lit
+    size_t inside = 0, band = 0;
+    measure(40.0f, inside, w, h, rgb);         // the near field reaches past it: not drawn
+    measure(22.0f, band, w, h, rgb);           // 8 blocks into the 16-block fade-in: about half its pixels
+    std::printf("  near field to 40: %zu px; to 22 (fading in): %zu px\n", inside, band);
+    CHECK(inside == 0);
+    CHECK(band > px / 4 && band < px * 3 / 4);
+    aether_destroy(ctx);
+}
+
+// A dragon's wings beat (its silhouette changes over the beat), fold on the ground, and an impostor marked half
+// transparent covers about half its pixels (the per-pixel dissolve of a tracking-boundary cross-fade).
+static void testActorMotion() {
+    std::printf("far actor motion and fades\n");
+    AetherContext* ctx = nullptr;
+    aether_create(AETHER_BACKEND_CPU, &ctx);
+    std::vector<float> flat(256 * 256, 100.0f), water(256 * 256, NAN);
+    std::vector<uint16_t> top(256 * 256, 2), fill(256 * 256, 3);
+    for (int tz = -2; tz <= 2; tz++)
+        for (int tx = -2; tx <= 2; tx++) {
+            AetherColumnTile t{0, tx, tz, flat.data(), water.data(), top.data(), fill.data(), nullptr, nullptr};
+            aether_upload_column_tile(ctx, &t);
+        }
+    double centre[3] = {0.5, 160.0, 0.5};
+    aether_update(ctx, centre, 0);
+    AetherActor a{};
+    a.pos[0] = 0.5;
+    a.pos[1] = 140.0;
+    a.pos[2] = -150.5;
+    a.height = 5.0f;
+    a.radius = 6.0f;
+    a.kind = 2;  // dragon, facing -Z (away from the camera)
+    a.tint = 0xFF283038u;
+    AetherFrame f{};
+    f.cameraPos[0] = 0.5;
+    f.cameraPos[1] = 180.0;
+    f.cameraPos[2] = 0.5;
+    f.width = 96;
+    f.height = 64;
+    cameraMatrix(0, -14.5, 24, 1.5, f.invViewProj);  // north, from above and behind: the wings' upper faces
+    f.maxDistance = 600;
+    f.planetRadius = 0;
+    f.sunDir[1] = 1;
+    f.lodBias = 1;
+    f.flags = AETHER_FRAME_ACTORS;
+    std::vector<uint32_t> normal(96 * 64);
+    AetherFrameOutput o{nullptr, normal.data(), nullptr, nullptr};
+    auto cover = [&](uint32_t flags, float t) {
+        a.flags = flags;
+        aether_set_actors(ctx, &a, 1);
+        f.timeSec = t;
+        CHECK(aether_render(ctx, &f, &o) == AETHER_OK);
+        size_t n = 0, top = 64, bottom = 0;
+        for (size_t i = 0; i < normal.size(); i++)
+            if (((normal[i] >> 16) & 255) == 4) {
+                n++;
+                top = std::min(top, i / 96);
+                bottom = std::max(bottom, i / 96);
+            }
+        return std::array<size_t, 3>{n, top, bottom};
+    };
+    auto up = cover(AETHER_GAIT_FLAP << 8, 0.3125f);    // beat phase 90 degrees: wings raised
+    auto down = cover(AETHER_GAIT_FLAP << 8, 0.9375f);  // 270 degrees: lowered
+    auto folded = cover(AETHER_GAIT_STILL << 8, 0.3125f);
+    auto full = cover(AETHER_GAIT_GLIDE << 8, 0.0f);
+    auto half = cover((AETHER_GAIT_GLIDE << 8) | 128u, 0.0f);
+    auto gone = cover((AETHER_GAIT_GLIDE << 8) | 255u, 0.0f);
+    std::printf("  dragon px: wings up %zu (rows %zu-%zu), down %zu (rows %zu-%zu), folded %zu; gliding %zu, half faded %zu, "
+                "gone %zu\n", up[0], up[1], up[2], down[0], down[1], down[2], folded[0], full[0], half[0], gone[0]);
+    CHECK(up[0] > 50 && down[0] > 50);
+    CHECK(up[1] < down[1]);       // raised wings reach higher on screen
+    CHECK(folded[0] < full[0]);   // folded wings cover less than spread ones
+    CHECK(half[0] > full[0] / 4 && half[0] < full[0] * 3 / 4);
+    CHECK(gone[0] == 0);
+    aether_destroy(ctx);
+}
+
+// The world's surface blocks (aether_upload_column_heights3): a top block override replaces the dressing's on dry
+// ground, a frozen column turns its water to ice, and a river column gets flowing water.
+static void testSurfaceOverrides(const char* raster) {
+    std::printf("surface block overrides\n");
+    AetherContext* ctx = nullptr;
+    aether_create(AETHER_BACKEND_CPU, &ctx);
+    if (aether_preview_load_raster(ctx, raster) != AETHER_OK) {
+        std::printf("  SKIP: no raster\n");
+        aether_destroy(ctx);
+        return;
+    }
+    AetherMaterial red{{0.6f, 0.02f, 0.02f}, 0.9f, 0.0f, AETHER_CLASS_TERRAIN};
+    CHECK(aether_set_materials(ctx, 300, &red, 1) == AETHER_OK);
+    const size_t N = 256 * 256;
+    std::vector<float> surf(N, 100.0f), water(N, NAN);
+    std::vector<uint16_t> top(N, 0), fill(N, 0);
+    std::vector<uint8_t> flags(N, 0);
+    for (size_t c = 0; c < N; c++) {
+        bool wet = (c % 256) >= 128;  // the east half is a pond
+        if (wet) water[c] = 103.0f, flags[c] = AETHER_COLUMN_FROZEN;
+        else top[c] = 300;
+    }
+    for (int tz = -1; tz <= 1; tz++)
+        for (int tx = -1; tx <= 1; tx++)
+            CHECK(aether_upload_column_heights3(ctx, 0, tx, tz, surf.data(), water.data(), top.data(), fill.data(), nullptr,
+                                                nullptr, flags.data()) == AETHER_OK);
+    double centre[3] = {128.0, 180.0, 128.0};
+    aether_update(ctx, centre, 0);
+    AetherFrame f{};
+    for (int i = 0; i < 3; i++) f.cameraPos[i] = centre[i];
+    f.width = f.height = 48;
+    cameraMatrix(0, -89.9, 40, 1.0, f.invViewProj);
+    f.maxDistance = 6000;
+    f.sunDir[1] = 1;
+    f.lodBias = 1;
+    f.flags = AETHER_FRAME_DEBUG_ALBEDO;
+    std::vector<float> lin(48 * 48 * 4);
+    std::vector<uint32_t> normal(48 * 48);
+    AetherFrameOutput o{nullptr, normal.data(), nullptr, lin.data()};
+    CHECK(aether_render(ctx, &f, &o) == AETHER_OK);
+    size_t redWest = 0, iceEast = 0, waterEast = 0;
+    for (int py = 0; py < 48; py++)
+        for (int px = 0; px < 48; px++) {
+            size_t i = size_t(py) * 48 + px;
+            uint32_t cls = (normal[i] >> 16) & 255;
+            if (px < 20) redWest += lin[i * 4] > 3 * lin[i * 4 + 1] && lin[i * 4] > 0.2f;
+            if (px > 28) {
+                iceEast += cls == AETHER_CLASS_TERRAIN && lin[i * 4 + 2] > lin[i * 4] && lin[i * 4 + 2] > 0.3f;
+                waterEast += cls == AETHER_CLASS_WATER;
+            }
+        }
+    std::printf("  west (dry, red top): %zu of 960 px red; east (frozen pond): %zu ice px, %zu water px\n", redWest, iceEast, waterEast);
+    CHECK(redWest > 900);
+    CHECK(iceEast > 900 && waterEast == 0);
+    aether_destroy(ctx);
+}
+
 // Pixels the near field covers skip the far march entirely; the rest render exactly as without near depth.
 static void testNearDepth(const char* raster) {
     std::printf("near-depth skip\n");
@@ -738,6 +1122,11 @@ static bool parity(const char* raster) {
     double x = 0, z = 0;
     double y = aether_preview_height(cpu, x, z) + 60;
     double centre[3] = {x, y, z};
+    // a row of fires out east (the far-light pass in both builds)
+    std::vector<AetherLight> fires;
+    for (int i = 0; i < 40; i++)
+        fires.push_back(AetherLight{{x + 400.0 + i * 90.0, aether_preview_height(cpu, x + 400.0 + i * 90.0, z + (i % 7 - 3) * 40.0) + 4.0,
+                                     z + (i % 7 - 3) * 40.0}, 1.5f, 2.0f, 0x2080FFu, AETHER_LIGHT_FIRE});
     for (AetherContext* c : {cpu, gpu}) {
         for (int lod = 0; lod < 7; lod++) {
             int span = 256 << lod;
@@ -745,6 +1134,7 @@ static bool parity(const char* raster) {
             aether_preview_generate(c, lod, (cx - 2) * span, (cz - 2) * span, (cx + 3) * span, (cz + 3) * span);
         }
         aether_update(c, centre, 0);
+        aether_set_light_group(c, 1, fires.data(), uint32_t(fires.size()));
     }
     const uint32_t W = 320, H = 180;
     AetherFrame f{};
@@ -845,6 +1235,7 @@ static bool parity(const char* raster) {
         }
         aether_update(fresh, centre, 0);
         aether_set_cloud_noise(fresh, noise.data());
+        aether_set_light_group(fresh, 1, fires.data(), uint32_t(fires.size()));
         aether_set_weather(fresh, &wth);
         std::vector<float> lf(W * H * 4);
         AetherFrameOutput olf{nullptr, nullptr, nullptr, lf.data()};
@@ -903,9 +1294,14 @@ int main(int argc, char** argv) {
     testStructures();
     testSunMap();
     testActors();
+    testImpostorShape();
+    testActorMotion();
+    testTransitions();
+    testLights();
     testNearDepth(argc > 1 ? argv[1] : "native/data/tamriel_raster.bin");
     testColumnHeights(argc > 1 ? argv[1] : "native/data/tamriel_raster.bin");
     testGrassTint(argc > 1 ? argv[1] : "native/data/tamriel_raster.bin");
+    testSurfaceOverrides(argc > 1 ? argv[1] : "native/data/tamriel_raster.bin");
     parity(argc > 1 ? argv[1] : "native/data/tamriel_raster.bin");
     std::printf(failures ? "FAILED (%d)\n" : "PASS\n", failures);
     return failures ? 1 : 0;

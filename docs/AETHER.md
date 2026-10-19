@@ -167,13 +167,78 @@ The other session's conversion is in progress in the main tree (it also moves th
 * **Split Radiance Cascades** (arXiv 2607.20384) for underground GI is a later phase. It needs the near-field voxel
   overlay first.
 
-## 5. Next
+## 5. World content in the far field (ABI 0.10, tile codec 3; branch aether-far2, 2026-10-18)
+
+What the far field now shows is what the near field will build, from the mod's own data and builders:
+
+* **Landmarks.** A settlement landmark is captured from its real builder: `AetherCapture` runs `Landmarks.build` on a
+  `Canvas` (framed and seeded exactly as `SettlementPiece` frames it) over a `WorldGenLevel` proxy whose ground is the
+  far field's, and keeps per world column the span the builder made above the ground: its top, the bottom of the run
+  reaching it (gaps under 10 blocks merged, so hollow towers stay solid while an arch's deck, a tree's crown or a
+  floating rock keeps the air under it, `aether_upload_column_structures2`), the top block and the column's wall
+  block. The White-Gold Tower's tapering shaft and gold needle, the College on its sea stack, Solitude's arch, Elden
+  Root's tree: 325 of 325 landmarks around the Imperial City capture (about 9 ms each, once, on the far-field
+  worker); one that cannot run falls back to the old profile box, one that builds nothing above the ground (a sea
+  stack the terrain's pad already is) adds nothing. Silhouettes are max-pooled into far columns, so a needle keeps
+  its column out to the horizon. The named wild sites (`AetherSites`: forts, watchtowers, lighthouses, mage towers,
+  great lifts, dragon lairs, groves, camps, prince shrines and the two great statues, standing stones, word walls,
+  High Hrothgar, the Throat of the World, Sky Haven, Labyrinthian, every built world wonder, dungeon entrances) are
+  drawn from their builders' dimensions, placed like DungeonStructure (nudged off water) and seed-free: 3868 in a
+  40 km window. The seeded natural landmarks (`AetherNatural`: colossal trees, spires, ribcages, stone arches,
+  mesas, menhirs, hoodoos ...) need the world seed, so the server enumerates them around each player (XL to 16 km,
+  the tall L kinds to 6 km, again after 1.5 km of travel; packet `FarSites`, the integrated server too) and the
+  client draws them from their builders' dimensions. Block colours: `AetherBlockColors`, the linear-light mean of
+  each block's top texture (`native/tools/export_block_colors.py`).
+* **Surface blocks.** `AetherSurface` evaluates the overworld's own material rule per far column (the per-biome
+  presets, the seeded surface noises and depth, the biomes through the seeded BiomeManager zoom, vanilla's
+  chunk-clamped steepness) at the exact top block, and freeze_top_layer's snow and ice where the biome is cold
+  enough there. 26.3 builds its rule context only per chunk, so it is driven reflectively (falls back to the raster
+  dressing with one log line if that fails). Coarse LODs share one evaluation per 2 x 2 group (shores re-evaluated).
+  The blocks travel in the tile (`AetherTileCodec` v3: a block table and top / under / flags planes), so server-fed
+  far fields stay bit-identical to single player; `aether_upload_column_heights3` takes them (snow makes forest
+  crowns snowy, frozen water renders as ice). Cost on vanilla's multi-noise biomes (`SurfaceHarness`): about
+  45 us per column per thread at LOD 0 and 22 at coarser LODs, once per tile (cached on disk).
+* **Far lights** (`aether_set_light_group`, `aether_set_light_budget`): each settlement's lit windows (one light per
+  facade, as bright as its windows), street lamps, braziers, wall lanterns, gate torches, camp fires and its
+  landmarks' light blocks; each site's (lighthouse lamps, shrine braziers, camp fires); the Red Mountain citadel's
+  lava moat and the caldera's glow above the rim. Per frame the lights beyond the near field are culled, merged into
+  16-block clusters beyond 6 km, ranked with a cap of 64 per 32 px screen tile (a near town is never crowded out by
+  far ones) and binned; the far kernel adds a core at least a pixel wide and a halo that widens with the haze, unless
+  something nearer covers the light. Towns light up from dusk to dawn, fires flicker, lava pulses, spray is sunlit.
+  Budget 4096 a frame, falling with aether's LOD knob to 1024 (512 at fallback tier 1). Cost (aether_bench,
+  2560x1440, 8000 town lights): +0.08 ms GPU, about 0.1 ms CPU.
+* **Water.** River columns get a flowing-water material (8 headings x calm / fast / rapids from the raster's channel
+  direction and the water levels downstream); the kernel carries the wave field downstream and breaks fast runs and
+  rapids into white-water streaks. Hydrology's 511 falls stand as falling-water sheets across the channel below the
+  lip (`AETHER_CLASS_FALLS`: white, streaming down) with sunlit spray at the pool (`AETHER_LIGHT_MIST`).
+* **Transitions.** `aether_set_transitions(0.6 s)`: a region rebuilt over a resident one (an exact tile replacing
+  the stand-in, buildings arriving, a finer LOD entering the window over the coarser one) keeps the old one packed
+  and dissolves into the new per pixel; `AETHER_FRAME_LOD_DITHER` gives each pixel its own LOD segment phase, so a
+  level change is a stipple band instead of a line. Both screen-stable (the pack has no temporal accumulation).
+* **Far actors.** The dragon impostor has a neck, head, tail and hinged two-part wings beating at 0.8 Hz (gliding
+  when descending, folded on the ground: `AetherActor.flags`); the packet carries the entity id, and an impostor the
+  client also tracks dissolves out over 0.6 s (the server now sends actors from 32 blocks inside the tracking range).
+
+ABI 0.10 (minor bump; everything 0.9 still works): `aether_set_transitions`, `aether_set_light_group`,
+`aether_set_light_budget`, `aether_upload_column_heights3`, `aether_upload_column_structures2`; `AetherActor.flags`
+(in the old padding), `AetherLight`, `AETHER_FRAME_LOD_DITHER`, `AETHER_CLASS_FALLS`, `AETHER_COLUMN_*`. Network:
+`FarActors` gains id/flags, new `FarSites`; tile codec 3 (caches re-key: `Hello` carries the codec version).
+
+Offline checks: `native\build.ps1` (new tests: fades, LOD dither, dragon motion and fades, far lights day/night and
+occlusion, surface overrides and frozen water, lights in the CPU/Vulkan parity scene);
+`run_settlement_harness.ps1 -Sandbox <dir> -Mod <worktree>\mod [-Rebuild] -Place imperial_city | at:x,z | xl:n,x,z`
+(day, mid, mid without buildings, night; capture / site / light counts and costs; `-Dharness.overhead=true`);
+`run_settlement_harness.ps1 -Main SurfaceHarness` (the surface painter on vanilla's overworld); `run_exact_harness.ps1`
+(now built against the sandbox build of the worktree's mod: exact terrain, flowing rivers, server-fed = single
+player); `aether_bench lights=8000`; `aether_render actors=demo dragon=near time=<s>`.
+
+## 6. Next
 
 1. After the conversion is accepted (server boots, client joins): `move_in.ps1 -Apply` (coordinated with whoever is
    editing `mod/`), build, ship the pack zip, then the owner's checks below.
-2. Later: block-exact surface materials (the material rules per biome, not the raster dressing), wild landmarks
-   (seeded, not in the plan), per-landmark silhouettes (White-Gold Tower's spire is a rounded tower today), SRC GI
-   underground, a Vulkan-to-Vulkan path for the vanilla Vulkan backend.
+2. Later: clouds lit from below over Red Mountain; dungeon surfaces captured from their own builders like the
+   settlement landmarks (they need a DungeonPiece, so the parametric silhouettes stand in); lit windows on landmarks
+   (only their light blocks glow now); SRC GI underground, a Vulkan-to-Vulkan path for the vanilla Vulkan backend.
 
 ### Owner checks in game
 
@@ -192,6 +257,22 @@ Start single player in a Tamriel world with the Skycraft Aether pack, render dis
 - **Multiplayer:** on a dedicated server the far field fills in the same (log line `aether far field on (server
   columns)`); rejoining the same world is instant (tile cache).
 - **Frame time** on the 3090 at 1440p: aether costs about 4-6 ms with clouds; F3 shows the rest as before.
+- **Imperial City / White-Gold Tower from far** (e.g. from the Rumare shore 2-3 km out, and flying in): the tower's
+  tapering shaft and gold needle, not a rounded stand-in; no pop when it enters the near field. Then Solitude's arch
+  over the water, the College on its stack, a fort / watchtower / lighthouse along a road: each the shape it becomes.
+- **A town at night from a hill** (1-3 km): lit windows, lamps along the streets, wall lanterns; towns behind the
+  hills glow over them; nothing lit by day (fires barely).
+- **Red Mountain at night** from Balmora / the Ascadian Isles: a red glow over the caldera rim, the citadel's moat.
+- **A river valley with falls** (e.g. near Markarth): rivers continuous, white water on rapids moving downstream, the
+  falls a white sheet with spray at the pool; near/far water joins at the hand-off.
+- **Flying a dragon in** (or watching one): wings beating at a distance; no double dragon and no gap as it crosses the
+  tracking range (the impostor dissolves out as the real one appears).
+- **Surface blocks:** snow, rock bands, sand, podzol and ash in the far field matching the near field at the
+  hand-off; the log line `aether surface check: N columns, top block matches P%` two minutes in (expect 85 %+; it
+  only compares columns where the ground is where the far field puts it). If instead the log says
+  `far surface blocks from the raster dressing (...)`, the reflective rule driver failed: report the reason.
+- **No pops:** flying fast, refined tiles, new buildings and finer LODs dissolve in (0.6 s); LOD changes far out are
+  a fine stipple band, not a line.
 - **Fallbacks:** in the Nether and End the far field is off; without the library or a usable Vulkan device the
   game runs as before with one log line; on a GL context aether cannot share memory with, the far field still
   draws through host copies (the `aether: {...}` log line says `"interop":"host-copy"` and why).

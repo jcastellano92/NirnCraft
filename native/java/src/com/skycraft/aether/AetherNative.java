@@ -25,22 +25,26 @@ import static java.lang.foreign.ValueLayout.JAVA_SHORT;
  * heap access, so Java arrays are passed in place without an off-heap copy; frame rendering is a normal downcall.</p>
  */
 public final class AetherNative {
-    public static final int ABI_VERSION = 0x000900;
+    public static final int ABI_VERSION = 0x000A00;
     public static final int BACKEND_CPU = 0, BACKEND_VULKAN = 1;
     public static final int FRAME_CLOUDS = 0x1, FRAME_SHADOWS = 0x2, FRAME_ATMOS = 0x4, FRAME_ACTORS = 0x8,
             FRAME_SKY = 0x10, FRAME_NEAR_DEPTH = 0x20, FRAME_FLAT_NORMALS = 0x40, FRAME_CLOUDS_QUARTER = 0x80,
-            FRAME_DEBUG_LOD = 0x100, FRAME_DEBUG_WEATHER = 0x200;
+            FRAME_DEBUG_LOD = 0x100, FRAME_DEBUG_WEATHER = 0x200, FRAME_LOD_DITHER = 0x1000;
+    /** Far actor gaits (AetherActor.flags bits 8-9): dragons fold their wings, glide or beat them. */
+    public static final int GAIT_STILL = 0, GAIT_GLIDE = 1, GAIT_FLAP = 2;
     public static final int CLASS_TERRAIN = 0, CLASS_FOLIAGE = 1, CLASS_WATER = 2, CLASS_EMISSIVE = 3;
     public static final int TILE = 256;
 
     // struct sizes and offsets (see api.cpp)
     static final long MATERIAL_SIZE = 24, TILE_SIZE = 64, FRAME_SIZE = 144, OUTPUT_SIZE = 32, WEATHER_SIZE = 40,
-            ACTOR_SIZE = 48, STATS_SIZE = 56, GL_TARGETS_SIZE = 24, GL_IO_SIZE = 96;
+            ACTOR_SIZE = 48, STATS_SIZE = 56, GL_TARGETS_SIZE = 24, GL_IO_SIZE = 96, LIGHT_SIZE = 40;
+    /** Far light kinds (AetherLight.kind). */
+    public static final int LIGHT_NIGHT = 0, LIGHT_FIRE = 1, LIGHT_LAVA = 2, LIGHT_MIST = 3;
 
     private final Arena libArena;
     private final MethodHandle abiVersion, buildInfo, create, destroy, lastError, setPalette, uploadTile,
             uploadSection, notifyBlock, setWeather, setCloudNoise, setActors, update, render, getStats,
-            glAttach, glRenderIo, glDetach, info, previewLoadRaster, previewGenerate, previewHeight, uploadHeights, uploadHeights2, hasTile, uploadStructures, setMaterials, setSunMap,
+            glAttach, glRenderIo, glDetach, info, previewLoadRaster, previewGenerate, previewHeight, uploadHeights, uploadHeights2, hasTile, uploadStructures, uploadStructures2, uploadHeights3, setMaterials, setSunMap, setTransitions, setLightGroup, setLightBudget,
             heightCreate, heightDestroy, heightLastError, heightDevice, heightSetNoise, heightBatch;
 
     private AetherNative(Path library) {
@@ -78,12 +82,19 @@ public final class AetherNative {
                 FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, JAVA_INT, JAVA_INT, ADDRESS, ADDRESS));
         uploadHeights2 = bind(l, lib, "aether_upload_column_heights2",
                 FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, JAVA_INT, JAVA_INT, ADDRESS, ADDRESS, ADDRESS, ADDRESS));
+        uploadHeights3 = bind(l, lib, "aether_upload_column_heights3", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, JAVA_INT,
+                JAVA_INT, ADDRESS, ADDRESS, ADDRESS, ADDRESS, ADDRESS, ADDRESS, ADDRESS));
         hasTile = bind(l, lib, "aether_has_tile", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, JAVA_INT, JAVA_INT),
                 critical);
         uploadStructures = bind(l, lib, "aether_upload_column_structures",
                 FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, JAVA_INT, JAVA_INT, ADDRESS, ADDRESS, ADDRESS, ADDRESS));
+        uploadStructures2 = bind(l, lib, "aether_upload_column_structures2",
+                FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, JAVA_INT, JAVA_INT, ADDRESS, ADDRESS, ADDRESS, ADDRESS, ADDRESS));
         setSunMap = bind(l, lib, "aether_set_sun_map", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, JAVA_FLOAT));
         setMaterials = bind(l, lib, "aether_set_materials", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, ADDRESS, JAVA_INT));
+        setTransitions = bind(l, lib, "aether_set_transitions", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_FLOAT));
+        setLightGroup = bind(l, lib, "aether_set_light_group", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, ADDRESS, JAVA_INT));
+        setLightBudget = bind(l, lib, "aether_set_light_budget", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, JAVA_FLOAT));
         heightCreate = bind(l, lib, "aether_height_create", FunctionDescriptor.of(JAVA_INT, JAVA_INT, ADDRESS));
         heightDestroy = bind(l, lib, "aether_height_destroy", FunctionDescriptor.ofVoid(ADDRESS));
         heightLastError = bind(l, lib, "aether_height_last_error", FunctionDescriptor.of(ADDRESS, ADDRESS));
@@ -362,6 +373,15 @@ public final class AetherNative {
          */
         public void uploadColumnStructures(int lod, int tileX, int tileZ, float[] wallTop, float[] roofTop, short[] wallMat,
                                            short[] roofMat) {
+            uploadColumnStructures(lod, tileX, tileZ, wallTop, roofTop, wallMat, roofMat, null);
+        }
+
+        /**
+         * (abi 0.10) As uploadColumnStructures, plus base (may be null): per column the bottom of the span for what does
+         * not stand on the ground (an arch's deck, a tree's crown, a floating rock); NaN = from the ground.
+         */
+        public void uploadColumnStructures(int lod, int tileX, int tileZ, float[] wallTop, float[] roofTop, short[] wallMat,
+                                           short[] roofMat, float[] base) {
             try (Arena a = Arena.ofConfined()) {
                 if (wallTop == null) {
                     check((int) uploadStructures.invokeExact(ptr, lod, tileX, tileZ, MemorySegment.NULL, MemorySegment.NULL,
@@ -371,8 +391,9 @@ public final class AetherNative {
                 int n = TILE * TILE;
                 if (wallTop.length < n || roofTop.length < n || wallMat.length < n || roofMat.length < n)
                     throw new IllegalArgumentException("structure arrays must hold 256*256 columns");
-                check((int) uploadStructures.invokeExact(ptr, lod, tileX, tileZ, copy(a, wallTop), copy(a, roofTop),
-                        copy(a, wallMat), copy(a, roofMat)), "aether_upload_column_structures");
+                MemorySegment b = base != null ? copy(a, base) : MemorySegment.NULL;
+                check((int) uploadStructures2.invokeExact(ptr, lod, tileX, tileZ, copy(a, wallTop), copy(a, roofTop),
+                        copy(a, wallMat), copy(a, roofMat), b), "aether_upload_column_structures2");
             } catch (Throwable t) {
                 throw rethrow(t);
             }
@@ -439,6 +460,25 @@ public final class AetherNative {
             }
         }
 
+        /**
+         * (abi 0.10) As uploadColumnHeights2, plus the world's surface blocks: topMat / fillMat palette ids (0 = the
+         * dressing's) and per column flags (1 snow cover, 2 frozen water). grassMat / foliageMat / flags may be null.
+         */
+        public void uploadColumnHeights3(int lod, int tileX, int tileZ, float[] surface, float[] water, short[] topMat,
+                                         short[] fillMat, short[] grassMat, short[] foliageMat, byte[] flags) {
+            if (surface.length < TILE * TILE || water.length < TILE * TILE || topMat.length < TILE * TILE || fillMat.length < TILE * TILE)
+                throw new IllegalArgumentException("tile arrays must hold 256*256 columns");
+            try (Arena a = Arena.ofConfined()) {
+                MemorySegment g = grassMat != null ? copy(a, grassMat) : MemorySegment.NULL;
+                MemorySegment f = foliageMat != null ? copy(a, foliageMat) : MemorySegment.NULL;
+                MemorySegment fl = flags != null ? a.allocateFrom(ValueLayout.JAVA_BYTE, flags) : MemorySegment.NULL;
+                check((int) uploadHeights3.invokeExact(ptr, lod, tileX, tileZ, copy(a, surface), copy(a, water), copy(a, topMat),
+                        copy(a, fillMat), g, f, fl), "aether_upload_column_heights3");
+            } catch (Throwable th) {
+                throw rethrow(th);
+            }
+        }
+
         /** True if tile (lod, tileX, tileZ) is resident (uploaded and not evicted). */
         public boolean hasTile(int lod, int tileX, int tileZ) {
             try {
@@ -490,8 +530,61 @@ public final class AetherNative {
             }
         }
 
+        /**
+         * (abi 0.10) Refinement fades: a region rebuilt over a resident one (exact tile over the stand-in, buildings
+         * arriving, a finer LOD entering the window) dissolves into the new content over this many seconds; 0 = at once.
+         */
+        public void setTransitions(float fadeSeconds) {
+            try {
+                check((int) setTransitions.invokeExact(ptr, fadeSeconds), "aether_set_transitions");
+            } catch (Throwable t) {
+                throw rethrow(t);
+            }
+        }
+
+        /**
+         * (abi 0.10) Replaces far-light group `group` (count 0 removes it): per light x, y, z (xyz), radius and intensity
+         * (radiusIntensity), sRGB colour and kind (rgbKind, LIGHT_*). Any thread; copied.
+         */
+        public void setLightGroup(int group, double[] xyz, float[] radiusIntensity, int[] rgbKind, int count) {
+            try (Arena a = Arena.ofConfined()) {
+                MemorySegment s = a.allocate(Math.max(1, count) * LIGHT_SIZE, 8);
+                for (int i = 0; i < count; i++) {
+                    long o = i * LIGHT_SIZE;
+                    s.set(JAVA_DOUBLE, o, xyz[3 * i]);
+                    s.set(JAVA_DOUBLE, o + 8, xyz[3 * i + 1]);
+                    s.set(JAVA_DOUBLE, o + 16, xyz[3 * i + 2]);
+                    s.set(JAVA_FLOAT, o + 24, radiusIntensity[2 * i]);
+                    s.set(JAVA_FLOAT, o + 28, radiusIntensity[2 * i + 1]);
+                    s.set(JAVA_INT, o + 32, rgbKind[2 * i]);
+                    s.set(JAVA_INT, o + 36, rgbKind[2 * i + 1]);
+                }
+                MemorySegment arg = count > 0 ? s : MemorySegment.NULL;
+                check((int) setLightGroup.invokeExact(ptr, group, arg, count), "aether_set_light_group");
+            } catch (Throwable t) {
+                throw rethrow(t);
+            }
+        }
+
+        /** (abi 0.10) At most maxPerFrame far lights a frame (brightest first), merged into clusters beyond clusterDistance. */
+        public void setLightBudget(int maxPerFrame, float clusterDistance) {
+            try {
+                check((int) setLightBudget.invokeExact(ptr, maxPerFrame, clusterDistance), "aether_set_light_budget");
+            } catch (Throwable t) {
+                throw rethrow(t);
+            }
+        }
+
         /** Far actors: x, y, z, yaw, height, radius, kind, tint per actor. */
         public void setActors(double[] xyz, float[] yawHeightRadius, int[] kindTint, int count) {
+            setActors(xyz, yawHeightRadius, kindTint, null, count);
+        }
+
+        /**
+         * As setActors, plus per actor flags (abi 0.10, may be null): bits 0-7 transparency (0 opaque .. 255 gone, the
+         * per-pixel dissolve of a cross-fade with the real entity), bits 8-9 the gait (GAIT_*), bits 16-31 a phase seed.
+         */
+        public void setActors(double[] xyz, float[] yawHeightRadius, int[] kindTint, int[] flags, int count) {
             try (Arena a = Arena.ofConfined()) {
                 MemorySegment s = a.allocate(Math.max(1, count) * ACTOR_SIZE, 8);
                 for (int i = 0; i < count; i++) {
@@ -504,6 +597,7 @@ public final class AetherNative {
                     s.set(JAVA_FLOAT, o + 32, yawHeightRadius[3 * i + 2]);
                     s.set(JAVA_INT, o + 36, kindTint[2 * i]);
                     s.set(JAVA_INT, o + 40, kindTint[2 * i + 1]);
+                    s.set(JAVA_INT, o + 44, flags != null ? flags[i] : 0);
                 }
                 check((int) setActors.invokeExact(ptr, s, count), "aether_set_actors");
             } catch (Throwable t) {

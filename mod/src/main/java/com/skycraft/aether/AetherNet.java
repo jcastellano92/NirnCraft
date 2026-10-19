@@ -15,7 +15,7 @@ import java.util.function.Consumer;
 public final class AetherNet {
     private AetherNet() {}
 
-    static final int MAX_REQUEST = 32, MAX_ACTORS = 96;
+    static final int MAX_REQUEST = 32, MAX_ACTORS = 96, MAX_SITES = 4096;
 
     /**
      * S->C on login and on entering the overworld: this server streams exact far tiles. worldId names the world for
@@ -31,14 +31,25 @@ public final class AetherNet {
 
     /**
      * S->C, twice a second: actors beyond the client's tracking range (players, large creatures, dragons, ships), as
-     * aether impostors. Per actor: xyz (3 doubles), velocity in blocks/s (3), yaw/height/radius (3), kind/tint (2).
+     * aether impostors. Per actor: xyz (3 doubles), velocity in blocks/s (3), yaw/height/radius (3), kind/tint (2),
+     * entity id/flags (2: the id the client knows the entity by once it tracks it, so the impostor cross-fades into the
+     * real one instead of doubling it; flags bit 0 = on the ground).
      */
-    public record FarActors(int count, double[] xyz, float[] vel, float[] yawHeightRadius, int[] kindTint) {}
+    public record FarActors(int count, double[] xyz, float[] vel, float[] yawHeightRadius, int[] kindTint, int[] idFlags) {
+        public static final int ON_GROUND = 1;
+    }
+
+    /**
+     * S->C when a player has moved far enough: the seeded natural landmarks around it (AetherNatural: the world seed never
+     * leaves the server), nearest first. Per site: x, z (xz), kind id, its seed (size and details), facing (2D value).
+     */
+    public record FarSites(int count, int[] xz, String[] kinds, long[] seeds, byte[] facing) {}
 
     // client side handlers, set by AetherClient (so a dedicated server never loads client classes)
     static volatile Consumer<Hello> onHello = m -> {};
     static volatile Consumer<TileData> onTile = m -> {};
     static volatile Consumer<FarActors> onFarActors = m -> {};
+    static volatile Consumer<FarSites> onFarSites = m -> {};
 
     public static void register() {
         SkyNetwork.register(Hello.class, PacketFlow.CLIENTBOUND, (m, b) -> {
@@ -62,6 +73,9 @@ public final class AetherNet {
 
         SkyNetwork.register(FarActors.class, PacketFlow.CLIENTBOUND, AetherNet::writeActors, AetherNet::readActors,
                 (m, ctx) -> onFarActors.accept(m));
+
+        SkyNetwork.register(FarSites.class, PacketFlow.CLIENTBOUND, AetherNet::writeSites, AetherNet::readSites,
+                (m, ctx) -> onFarSites.accept(m));
     }
 
     private static void writeRequest(TileRequest m, RegistryFriendlyByteBuf b) {
@@ -86,6 +100,34 @@ public final class AetherNet {
         return new TileRequest(lods, txs, tzs);
     }
 
+    private static void writeSites(FarSites m, RegistryFriendlyByteBuf b) {
+        b.writeVarInt(m.count);
+        for (int i = 0; i < m.count; i++) {
+            b.writeInt(m.xz[i * 2]);
+            b.writeInt(m.xz[i * 2 + 1]);
+            b.writeUtf(m.kinds[i], 64);
+            b.writeLong(m.seeds[i]);
+            b.writeByte(m.facing[i]);
+        }
+    }
+
+    private static FarSites readSites(RegistryFriendlyByteBuf b) {
+        int n = b.readVarInt();
+        if (n < 0 || n > MAX_SITES) throw new IllegalArgumentException("aether far sites: " + n);
+        int[] xz = new int[n * 2];
+        String[] kinds = new String[n];
+        long[] seeds = new long[n];
+        byte[] facing = new byte[n];
+        for (int i = 0; i < n; i++) {
+            xz[i * 2] = b.readInt();
+            xz[i * 2 + 1] = b.readInt();
+            kinds[i] = b.readUtf(64);
+            seeds[i] = b.readLong();
+            facing[i] = b.readByte();
+        }
+        return new FarSites(n, xz, kinds, seeds, facing);
+    }
+
     private static void writeActors(FarActors m, RegistryFriendlyByteBuf b) {
         b.writeVarInt(m.count);
         for (int i = 0; i < m.count; i++) {
@@ -94,6 +136,8 @@ public final class AetherNet {
             for (int k = 0; k < 3; k++) b.writeFloat(m.yawHeightRadius[i * 3 + k]);
             b.writeInt(m.kindTint[i * 2]);
             b.writeInt(m.kindTint[i * 2 + 1]);
+            b.writeVarInt(m.idFlags[i * 2]);
+            b.writeByte(m.idFlags[i * 2 + 1]);
         }
     }
 
@@ -102,14 +146,16 @@ public final class AetherNet {
         if (n < 0 || n > MAX_ACTORS) throw new IllegalArgumentException("aether far actors: " + n);
         double[] xyz = new double[n * 3];
         float[] vel = new float[n * 3], yhr = new float[n * 3];
-        int[] kt = new int[n * 2];
+        int[] kt = new int[n * 2], idf = new int[n * 2];
         for (int i = 0; i < n; i++) {
             for (int k = 0; k < 3; k++) xyz[i * 3 + k] = b.readDouble();
             for (int k = 0; k < 3; k++) vel[i * 3 + k] = b.readFloat();
             for (int k = 0; k < 3; k++) yhr[i * 3 + k] = b.readFloat();
             kt[i * 2] = b.readInt();
             kt[i * 2 + 1] = b.readInt();
+            idf[i * 2] = b.readVarInt();
+            idf[i * 2 + 1] = b.readUnsignedByte();
         }
-        return new FarActors(n, xyz, vel, yhr, kt);
+        return new FarActors(n, xyz, vel, yhr, kt, idf);
     }
 }

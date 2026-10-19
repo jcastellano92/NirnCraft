@@ -32,7 +32,7 @@ extern "C" {
 #endif
 
 /* (major << 16) | (minor << 8) | patch. Bumped on any ABI change. */
-#define AETHER_ABI_VERSION 0x000900
+#define AETHER_ABI_VERSION 0x000A00
 
 typedef struct AetherContext AetherContext;
 
@@ -115,6 +115,8 @@ typedef struct AetherFrame {
 #define AETHER_FRAME_DEBUG_WEATHER 0x200u
 #define AETHER_FRAME_DEBUG_ALBEDO 0x400u      /* surfaces output their albedo (offline G-buffers: the pack lab) */
 #define AETHER_FRAME_SEE_THROUGH_WATER 0x800u /* rays pass water (the bed under it, offline) */
+#define AETHER_FRAME_LOD_DITHER 0x1000u       /* (abi 0.10) dithered LOD transitions: each pixel's LOD segment grid
+                                                 starts at its own phase, so a level change is a stipple band, not a line */
 
 /*
  * Frame outputs (any pointer may be NULL to skip). Layout matches the shared G-buffer images:
@@ -148,7 +150,32 @@ typedef struct AetherActor {
     float height, radius;       /* blocks */
     uint32_t kind;              /* impostor atlas row; 0 = generic humanoid */
     uint32_t tint;              /* RGBA8 */
+    /* (abi 0.10, in what was padding; zero = the old behaviour) bits 0-7: transparency 0..255 (the impostor dissolves
+       per pixel: 0 opaque, 255 gone; a cross-fade with the real entity at the tracking boundary), bits 8-9: gait
+       (AETHER_GAIT_*), bits 16-31: animation phase seed (e.g. the entity id), so a flock does not beat in step */
+    uint32_t flags;
 } AetherActor;
+#define AETHER_GAIT_STILL 0u  /* on the ground: dragons fold their wings */
+#define AETHER_GAIT_GLIDE 1u
+#define AETHER_GAIT_FLAP 2u
+
+/*
+ * (abi 0.10) A far light: something that glows from kilometres away (a town's lit windows and street lamps at night,
+ * braziers and camp fires, lava), or, for AETHER_LIGHT_MIST, the spray of a waterfall lit by the sun. Drawn by the far
+ * kernel as a glow on top of the far field where nothing nearer hides it, at least a pixel wide whatever the distance,
+ * spreading into a halo through the haze; never inside the near field's radius (the game draws its own lights there).
+ */
+typedef struct AetherLight {
+    double pos[3];        /* world block coordinates */
+    float radius;         /* blocks: the glowing thing's size (a window 1, a brazier 1.5, a lava pool 6, falls mist 12) */
+    float intensity;      /* relative radiance (1 = a lantern) */
+    uint32_t rgb;         /* sRGB colour, r in the low byte */
+    uint32_t kind;        /* AETHER_LIGHT_* */
+} AetherLight;
+#define AETHER_LIGHT_NIGHT 0u  /* windows, lamps: lit from dusk to dawn */
+#define AETHER_LIGHT_FIRE 1u   /* braziers, camp fires: always lit, flickering (they read at night) */
+#define AETHER_LIGHT_LAVA 2u   /* always lit, a slow pulse */
+#define AETHER_LIGHT_MIST 3u   /* spray, lit by the sun and the sky: a white haze by day, faint by night */
 
 typedef struct AetherStats {
     uint32_t regions, regionsDirty;
@@ -267,6 +294,20 @@ AETHER_API AetherStatus aether_upload_column_heights2(AetherContext* ctx, int32_
                                                       const float* surface, const float* water, const uint16_t* grassMat,
                                                       const uint16_t* foliageMat);
 /*
+ * (abi 0.10) As aether_upload_column_heights2, plus the surface blocks the world's own material rules paint where the
+ * caller knows them: topMat / fillMat (palette ids, 0 = the dressing's) and flags per column (may be NULL): bit 0 snow
+ * lies there (forest crowns over it are snowy too), bit 1 its water is frozen over. Rivers keep their flowing water
+ * (direction and speed from the water levels and the raster's channels), lakes and the sea still water.
+ */
+AETHER_API AetherStatus aether_upload_column_heights3(AetherContext* ctx, int32_t lod, int32_t tileX, int32_t tileZ,
+                                                      const float* surface, const float* water, const uint16_t* topMat,
+                                                      const uint16_t* fillMat, const uint16_t* grassMat,
+                                                      const uint16_t* foliageMat, const uint8_t* flags);
+#define AETHER_COLUMN_SNOW 0x1u
+#define AETHER_COLUMN_FROZEN 0x2u
+/* (abi 0.10) Falling water: a material class drawn as a white, streaming sheet (waterfalls stamped as structures). */
+#define AETHER_CLASS_FALLS 5u
+/*
  * Buildings over tile (lod, tileX, tileZ), 256 x 256 columns laid out as in AetherColumnTile: walls stand on the
  * ground up to wallTop[c], the roof above them up to roofTop[c] (roofTop <= the ground, or NaN: no building there).
  * Voxels below wallTop are wallMat[c], the rest roofMat[c]. Kept across later uploads of the tile's ground (a refined
@@ -275,6 +316,13 @@ AETHER_API AetherStatus aether_upload_column_heights2(AetherContext* ctx, int32_
 AETHER_API AetherStatus aether_upload_column_structures(AetherContext* ctx, int32_t lod, int32_t tileX, int32_t tileZ,
                                                         const float* wallTop, const float* roofTop,
                                                         const uint16_t* wallMat, const uint16_t* roofMat);
+/* (abi 0.10) As aether_upload_column_structures, plus base (may be NULL): per column the bottom of the span, for
+ * structures that do not stand on the ground (an arch's deck, a tree's crown, a floating rock: air between the ground and
+ * base); NaN or <= the ground = from the ground. */
+AETHER_API AetherStatus aether_upload_column_structures2(AetherContext* ctx, int32_t lod, int32_t tileX, int32_t tileZ,
+                                                         const float* wallTop, const float* roofTop,
+                                                         const uint16_t* wallMat, const uint16_t* roofMat,
+                                                         const float* base);
 /* Sets palette entries first .. first + count - 1 (first >= 1), growing the palette with grey where it skips ids:
  * colours added over the current palette (building walls and roofs). */
 AETHER_API AetherStatus aether_set_materials(AetherContext* ctx, uint32_t first, const AetherMaterial* materials,
@@ -292,6 +340,21 @@ AETHER_API AetherStatus aether_set_materials(AetherContext* ctx, uint32_t first,
 AETHER_API AetherStatus aether_set_sun_map(AetherContext* ctx, uint32_t size, float halfExtent);
 /* The sun map as last computed (size * (size + 1) * 2 floats into out, count in floats). Waits for the GPU. */
 AETHER_API AetherStatus aether_read_sun_map(AetherContext* ctx, float* out, uint32_t count);
+/*
+ * (abi 0.10) Refinement fades: a region rebuilt over a resident one (an exact tile replacing the raster stand-in,
+ * buildings or landmarks arriving on a tile, a finer LOD entering the window over the coarser one) dissolves from what
+ * was there to the new content per pixel over fadeSeconds (the old region stays packed meanwhile; a fade already running
+ * keeps its start, so a tile refined twice in a row dissolves once). 0 (default) swaps at once.
+ */
+AETHER_API AetherStatus aether_set_transitions(AetherContext* ctx, float fadeSeconds);
+/*
+ * (abi 0.10) Far lights, in groups (a settlement, the sites of an area, the falls of a region ...): replaces group
+ * `group`'s lights (count 0 removes the group). Any thread; copied. Each frame aether picks the lights in view beyond
+ * the near field (merged into clusters of about a pixel beyond clusterDistance), at most maxPerFrame of them, brightest
+ * first (aether_set_light_budget; defaults 4096 and 6000 blocks).
+ */
+AETHER_API AetherStatus aether_set_light_group(AetherContext* ctx, uint32_t group, const AetherLight* lights, uint32_t count);
+AETHER_API AetherStatus aether_set_light_budget(AetherContext* ctx, uint32_t maxPerFrame, float clusterDistance);
 /* 1 if tile (lod, tileX, tileZ) is resident (uploaded and not evicted), else 0. */
 AETHER_API int32_t aether_has_tile(AetherContext* ctx, int32_t lod, int32_t tileX, int32_t tileZ);
 /* Offline harness only: preview terrain height at a block column (for camera placement). */

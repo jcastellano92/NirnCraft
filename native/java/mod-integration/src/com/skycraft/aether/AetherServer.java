@@ -17,17 +17,23 @@ public final class AetherServer {
 
     public static void init() {
         NeoForge.EVENT_BUS.addListener((ServerStartedEvent e) -> AetherTileServer.start(e.getServer()));
-        NeoForge.EVENT_BUS.addListener((ServerStoppingEvent e) -> AetherTileServer.stop());
+        NeoForge.EVENT_BUS.addListener((ServerStoppingEvent e) -> {
+            AetherTileServer.stop();
+            AetherNatural.stop();
+        });
         NeoForge.EVENT_BUS.addListener((PlayerEvent.PlayerLoggedInEvent e) -> {
             AetherNet.Hello hello = AetherTileServer.hello();
             if (hello != null && e.getEntity() instanceof ServerPlayer p) SkyNetwork.sendToPlayer(p, hello);
+            AetherNatural.forget(e.getEntity().getUUID());
         });
         NeoForge.EVENT_BUS.addListener((PlayerEvent.PlayerLoggedOutEvent e) -> {
             if (e.getEntity() instanceof ServerPlayer p) AetherTileServer.forget(p);
+            AetherNatural.forget(e.getEntity().getUUID());
         });
         NeoForge.EVENT_BUS.addListener((ServerTickEvent.Post e) -> {
             AetherTileServer.tick();
             AetherFarActors.tick(e.getServer());
+            AetherNatural.tick(e.getServer());
         });
     }
 }

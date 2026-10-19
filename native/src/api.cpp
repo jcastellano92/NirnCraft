@@ -14,6 +14,7 @@
 
 #include "aether/aether.h"
 #include "backend.hpp"
+#include "lights.hpp"
 #include "preview_source.hpp"
 #include "world.hpp"
 
@@ -34,6 +35,7 @@ static_assert(sizeof(AetherWeather) == 40 && offsetof(AetherWeather, rainFactor)
 static_assert(sizeof(AetherActor) == 48 && offsetof(AetherActor, kind) == 36);
 static_assert(sizeof(AetherGlFrameIO) == 96 && offsetof(AetherGlFrameIO, nearInvProjection) == 16 &&
               offsetof(AetherGlFrameIO, dstColor) == 80);
+static_assert(sizeof(AetherLight) == 40 && offsetof(AetherLight, radius) == 24 && offsetof(AetherLight, kind) == 36);
 static_assert(sizeof(AetherStats) == 56 && offsetof(AetherStats, nodeBytes) == 8 && offsetof(AetherStats, raySteps) == 48);
 
 struct AetherContext {
@@ -44,6 +46,7 @@ struct AetherContext {
     std::vector<uint32_t> cloudNoise = std::vector<uint32_t>(64 * 64 * 64, 0);
     float rainFactor = 0;
     std::vector<AetherActor> actors;
+    Lights lights;
     std::unique_ptr<PreviewSource> preview;
     FrameTargets targets;
     AetherStats stats{};
@@ -97,6 +100,7 @@ void setPalette(AetherContext* ctx, const AetherMaterial* m, uint32_t n) {
         if (!water && m[i].cls == AETHER_CLASS_WATER) water = uint16_t(i + 1);
     }
     if (water) ctx->world.waterMat = water;
+    applyWaterFlow(ctx->palette);
 }
 
 // Camera-relative direction through the centre of pixel (px, py).
@@ -422,6 +426,8 @@ static AetherStatus buildInputs(AetherContext* ctx, const AetherFrame* f, FrameI
         g.temporal[1] = 1;
     }
     g.temporal[0] = ctx->frameIndex;
+    g.temporal[2] = nowMs();  // World's clock: refinement fades (RegionGpu.runs.w) are stamped with it
+    g.temporal[3] = ctx->world.fadeMs;
     if (ctx->sunMapSize) {
         // the map stays put while the camera wanders (256-block steps), so most frames only refresh a band of rows
         // (the light moves slowly); a step or a new size redoes all of it
@@ -476,10 +482,36 @@ static AetherStatus buildInputs(AetherContext* ctx, const AetherFrame* f, FrameI
         ag.shape[1] = a.radius;
         ag.shape[2] = float(a.kind);
         std::memcpy(&ag.shape[3], &a.tint, 4);
+        ag.motion[0] = float((a.flags >> 16) & 0xFFFFu) / 65536.0f;
+        ag.motion[1] = float((a.flags >> 8) & 3u);
+        ag.motion[2] = 1.0f - float(a.flags & 255u) / 255.0f;
+        if ((a.flags & 255u) == 255u) continue;  // fully dissolved: the real entity has taken over
         in.actors.push_back(ag);
         if (in.actors.size() >= 512) break;
     }
     g.weatherParams[3] = float(in.actors.size());
+    // far lights after the actors (then their screen-tile lists); the kernel finds them from the two counts
+    {
+        LightView lv{};
+        for (int i = 0; i < 3; i++) {
+            lv.cam[i] = f->cameraPos[i];
+            lv.camInt[i] = g.camInt[i];
+        }
+        float vp[16];
+        if (invert4(f->invViewProj, vp)) {
+            std::memcpy(lv.viewProj, vp, sizeof(vp));
+            lv.width = f->width;
+            lv.height = f->height;
+            lv.pixelAngle = g.params[3];
+            lv.nearEnd = f->nearFieldEnd;
+            lv.maxDist = f->maxDistance;
+            lv.planetRadius = f->planetRadius;
+            lv.sunY = g.sunDir[1];
+            double h = std::max(f->cameraPos[1] - 63.0, 0.0);
+            lv.hazeDensity = float(std::exp(-h / 1200.0) * (1.0 / 22000.0) * (1.0 + 3.0 * ctx->rainFactor));
+            g.weatherParams[1] = float(ctx->lights.frame(lv, in.actors));
+        }
+    }
     if (in.actors.empty()) in.actors.push_back(ActorGpu{});
     in.wantNearDepth = (f->flags & AETHER_FRAME_NEAR_DEPTH) != 0;
     in.nearDepth = in.wantNearDepth ? f->nearDepth : nullptr;
@@ -549,9 +581,32 @@ AETHER_API AetherStatus aether_upload_column_heights2(AetherContext* ctx, int32_
     return AETHER_OK;
 }
 
+AETHER_API AetherStatus aether_upload_column_heights3(AetherContext* ctx, int32_t lod, int32_t tileX, int32_t tileZ,
+                                                      const float* surface, const float* water, const uint16_t* topMat,
+                                                      const uint16_t* fillMat, const uint16_t* grassMat,
+                                                      const uint16_t* foliageMat, const uint8_t* flags) {
+    if (!ctx || lod < 0 || lod >= MAX_LODS || !surface || !water) return AETHER_ERR_ARG;
+    if (!ctx->preview) return ctx->fail(AETHER_ERR_STATE, "no preview raster loaded (it dresses the columns)");
+    PreviewSource::Overrides o;
+    o.grassMat = grassMat;
+    o.foliageMat = foliageMat;
+    o.topMat = topMat;
+    o.fillMat = fillMat;
+    o.flags = flags;
+    ctx->world.putTile(ctx->preview->dressTile(lod, tileX, tileZ, surface, water, o));
+    return AETHER_OK;
+}
+
 AETHER_API AetherStatus aether_upload_column_structures(AetherContext* ctx, int32_t lod, int32_t tileX, int32_t tileZ,
                                                         const float* wallTop, const float* roofTop,
                                                         const uint16_t* wallMat, const uint16_t* roofMat) {
+    return aether_upload_column_structures2(ctx, lod, tileX, tileZ, wallTop, roofTop, wallMat, roofMat, nullptr);
+}
+
+AETHER_API AetherStatus aether_upload_column_structures2(AetherContext* ctx, int32_t lod, int32_t tileX, int32_t tileZ,
+                                                         const float* wallTop, const float* roofTop,
+                                                         const uint16_t* wallMat, const uint16_t* roofMat,
+                                                         const float* base) {
     if (!ctx || lod < 0 || lod >= MAX_LODS) return AETHER_ERR_ARG;
     if (!wallTop) {
         ctx->world.putStructures(lod, tileX, tileZ, nullptr);
@@ -564,6 +619,15 @@ AETHER_API AetherStatus aether_upload_column_structures(AetherContext* ctx, int3
     s->roofTop.assign(roofTop, roofTop + n);
     s->wallMat.assign(wallMat, wallMat + n);
     s->roofMat.assign(roofMat, roofMat + n);
+    bool floating = false;
+    if (base) {
+        s->base.assign(base, base + n);
+        for (size_t c = 0; c < n; c++) {
+            if (std::isnan(s->base[c])) s->base[c] = -1e30f;  // from the ground
+            floating |= s->base[c] > -1e29f;
+        }
+        if (!floating) s->base.clear();
+    }
     for (size_t c = 0; c < n; c++) {
         if (std::isnan(s->roofTop[c])) s->roofTop[c] = -1e30f;  // never above any voxel
         s->wallTop[c] = std::min(s->wallTop[c], s->roofTop[c]);
@@ -600,6 +664,25 @@ AETHER_API AetherStatus aether_read_sun_map(AetherContext* ctx, float* out, uint
     if (!ctx->backend->readSunMap(m, err) || m.empty()) return ctx->fail(AETHER_ERR_STATE, err.empty() ? "no sun map yet" : err);
     if (count < m.size()) return ctx->fail(AETHER_ERR_ARG, "sun map buffer too small");
     std::memcpy(out, m.data(), m.size() * 4);
+    return AETHER_OK;
+}
+
+AETHER_API AetherStatus aether_set_light_group(AetherContext* ctx, uint32_t group, const AetherLight* lights, uint32_t count) {
+    if (!ctx || (!lights && count)) return AETHER_ERR_ARG;
+    if (count > 1u << 20) return ctx->fail(AETHER_ERR_ARG, "light group too large");
+    ctx->lights.setGroup(group, lights, count);
+    return AETHER_OK;
+}
+
+AETHER_API AetherStatus aether_set_light_budget(AetherContext* ctx, uint32_t maxPerFrame, float clusterDistance) {
+    if (!ctx || !(clusterDistance >= 0.0f)) return AETHER_ERR_ARG;
+    ctx->lights.setBudget(maxPerFrame, clusterDistance);
+    return AETHER_OK;
+}
+
+AETHER_API AetherStatus aether_set_transitions(AetherContext* ctx, float fadeSeconds) {
+    if (!ctx || !(fadeSeconds >= 0.0f && fadeSeconds <= 10.0f)) return AETHER_ERR_ARG;
+    ctx->world.fadeMs = uint32_t(fadeSeconds * 1000.0f + 0.5f);
     return AETHER_OK;
 }
 

@@ -150,7 +150,7 @@ int main(int argc, char** argv) {
         // a caravan walking away along the view, a mammoth beside it, a dragon circling further out
         double yaw = num(a, "yaw", 0) * PI / 180, fx = std::sin(yaw), fz = -std::cos(yaw), sx = std::cos(yaw), sz = std::sin(yaw);
         std::vector<AetherActor> act;
-        auto put = [&](double along, double side, double lift, float h, float r, uint32_t kind, uint32_t tint) {
+        auto put = [&](double along, double side, double lift, float h, float r, uint32_t kind, uint32_t tint, uint32_t flags = 0) {
             AetherActor q{};
             q.pos[0] = x + fx * along + sx * side;
             q.pos[2] = z + fz * along + sz * side;
@@ -160,11 +160,16 @@ int main(int argc, char** argv) {
             q.radius = r;
             q.kind = kind;
             q.tint = tint;
+            q.flags = flags;
             act.push_back(q);
         };
-        for (int i = 0; i < 6; i++) put(70 + i * 4.5, (i % 2) * 1.6, 0, 1.8f, 0.35f, 0, i == 0 ? 0xFF2030B0u : 0xFF3A5A70u);
+        // actors=demo close=1: villagers 15-25 blocks out (inside a game's near field: the case of a detached camera)
+        double first = num(a, "close", 0) > 0 ? 15 : 70;
+        for (int i = 0; i < 6; i++) put(first + i * (first < 50 ? 2.0 : 4.5), (i % 2) * 1.6 - 0.8, 0, 1.8f, 0.35f, 0, i == 0 ? 0xFF2030B0u : 0xFF3A5A70u);
         put(85, 9, 0, 4.6f, 2.3f, 1, 0xFF3A4A5Au);
-        put(600, -120, 55, 5.0f, 7.0f, 2, 0xFF283038u);
+        // dragon=near: one beating its wings 120 blocks out (the impostor's animation; time= picks the beat phase)
+        if (str(a, "dragon", "") == "near") put(120, 0, 20, 5.0f, 7.0f, 2, 0xFF283038u, AETHER_GAIT_FLAP << 8);
+        else put(600, -120, 55, 5.0f, 7.0f, 2, 0xFF283038u, AETHER_GAIT_FLAP << 8);
         aether_set_actors(ctx, act.data(), uint32_t(act.size()));
     }
 

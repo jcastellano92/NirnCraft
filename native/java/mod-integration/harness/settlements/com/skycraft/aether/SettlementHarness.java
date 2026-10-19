@@ -43,7 +43,25 @@ public final class SettlementHarness {
         TamrielHeight height = HarnessSeed.height(seed);
         StreetPlan plan = StreetPlan.get();
         int px, pz;
-        if (place.startsWith("place:")) {  // any place by id (forts, landmarks ...)
+        if (place.startsWith("xl:")) {  // the n-th XL natural landmark nearest the given spot: xl:n,x,z
+            String[] q = place.substring(3).split(",");
+            int n = Integer.parseInt(q[0]);
+            AetherNet.FarSites fs = AetherNatural.enumerate(seed, Integer.parseInt(q[1]), Integer.parseInt(q[2]));
+            int found = -1;
+            for (int i = 0, seen = 0; i < fs.count(); i++)
+                if (fs.kinds()[i].startsWith("xl_") && seen++ == n) {
+                    found = i;
+                    break;
+                }
+            if (found < 0) throw new IllegalArgumentException("no XL landmark there");
+            px = fs.xz()[found * 2];
+            pz = fs.xz()[found * 2 + 1];
+            OUT.printf("XL landmark %s at %d, %d%n", fs.kinds()[found], px, pz);
+        } else if (place.startsWith("at:")) {  // any spot: at:x,z
+            String[] xz = place.substring(3).split(",");
+            px = Integer.parseInt(xz[0]);
+            pz = Integer.parseInt(xz[1]);
+        } else if (place.startsWith("place:")) {  // any place by id (forts, landmarks ...)
             var p = com.skycraft.tamriel.Places.byId(place.substring(6)).orElseThrow(() -> new IllegalArgumentException("no place " + place));
             px = p.x();
             pz = p.z();
@@ -71,22 +89,37 @@ public final class SettlementHarness {
         double mid = a.length > 5 ? Double.parseDouble(a[5]) : 45;
         double[][] views = {{2400, 70}, {800, mid}};  // distance from the centre, height over the ground
         int w = 1600, h = 900;
-        int[][] images = new int[3][];
-        int[] buildingPx = new int[1];
+        int[][] images = new int[4][];
+        int[] buildingPx = new int[1], counters = new int[4];
+        double[] ms = new double[3];
         try (AetherNative.Context ctx = n.create(AetherNative.BACKEND_VULKAN);
              AetherNative.Context bare = n.create(AetherNative.BACKEND_VULKAN)) {
             AetherExactSource src = new AetherExactSource(height, () -> raster, 8);
             AetherExactSource src2 = new AetherExactSource(height, () -> raster, 8);
             src.prepare(ctx);
             src2.prepare(bare);
-            AetherSettlements towns = new AetherSettlements(plan, src::groundAt);
+            AetherSettlements towns = new AetherSettlements(plan, src::groundAt, new AetherMaterials());
+            // the natural landmarks the server would send this player (AetherNatural over the harness's seed)
+            long n0 = System.nanoTime();
+            AetherNet.FarSites sites = AetherNatural.enumerate(seed, px, pz);
+            int xl = 0;
+            for (int i = 0; i < sites.count(); i++) if (sites.kinds()[i].startsWith("xl_")) xl++;
+            OUT.printf("natural landmarks around: %d (%d XL) in %.0f ms%n", sites.count(), xl, (System.nanoTime() - n0) / 1e6);
+            AetherSettlements.farSites = () -> sites;
+            ctx.setTransitions(0f);
             for (int v = 0; v < views.length; v++) {
                 double dist = views[v][0];
-                double cx = px + 0.8 * dist, cz = pz + 0.6 * dist;
+                // -Dharness.overhead=true: the mid view straight down from above the target instead
+                boolean overhead = v == 1 && Boolean.getBoolean("harness.overhead");
+                double cx = overhead ? px + 0.5 : px + 0.8 * dist, cz = overhead ? pz + 0.5 : pz + 0.6 * dist;
                 MapSample m = TamrielMap.sampleScratch((int) cx, (int) cz);
                 double cy = Math.max(height.height((int) cx, (int) cz, m), 63) + views[v][1];
                 double ty = height.height(px, pz, TamrielMap.sampleScratch(px, pz)) + 25;
                 double pitch = Math.toDegrees(Math.atan2(ty - cy, dist));
+                if (overhead) {
+                    cy = ty + 220;
+                    pitch = -89.5;
+                }
                 long c0 = System.nanoTime();
                 for (AetherNative.Context c : v == 1 ? new AetherNative.Context[] {ctx, bare} : new AetherNative.Context[] {ctx}) {
                     AetherExactSource s = c == ctx ? src : src2;
@@ -122,6 +155,20 @@ public final class SettlementHarness {
                 ctx.render(f, color, null, null);
                 ctx.render(f, color, null, null);
                 images[v] = color;
+                if (v == 0) {
+                    // the same far view at night: the town's windows, lamps and fires
+                    double ne = Math.toRadians(-18);
+                    f.sunX = (float) (Math.sin(sa) * Math.cos(ne));
+                    f.sunY = (float) Math.sin(ne);
+                    f.sunZ = (float) (-Math.cos(sa) * Math.cos(ne));
+                    int[] night = new int[w * h];
+                    ctx.render(f, night, null, null);
+                    ctx.render(f, night, null, null);
+                    images[3] = night;
+                    f.sunX = (float) (Math.sin(sa) * Math.cos(se));
+                    f.sunY = (float) Math.sin(se);
+                    f.sunZ = (float) (-Math.cos(sa) * Math.cos(se));
+                }
                 if (v == 1) {
                     int[] c2 = new int[w * h];
                     bare.render(f, c2, null, null);
@@ -130,19 +177,30 @@ public final class SettlementHarness {
                     for (int p = 0; p < w * h; p++) if (color[p] != c2[p]) buildingPx[0]++;
                 }
             }
+            counters[0] = towns.captured;
+            counters[1] = towns.profiled;
+            counters[2] = towns.siteShapes;
+            counters[3] = towns.lightCount;
+            ms[0] = towns.captureMs;
+            ms[1] = towns.siteMs;
+            ms[2] = towns.massingMs;
+            for (String why : towns.fallbacks) OUT.println("  profile: " + why);
             src.close();
             src2.close();
         }
         OUT.printf("buildings change %.1f%% of the mid view's pixels%n", 100.0 * buildingPx[0] / (w * h));
-        if (buildingPx[0] < w * h / 200) throw new IllegalStateException("no buildings visible in the mid view");
-        BufferedImage img = new BufferedImage(w, h * 3 + 16, BufferedImage.TYPE_INT_RGB);
-        for (int k = 0; k < 3; k++)
+        OUT.printf("landmarks: %d captured from their builders, %d as profiles; %d wild site silhouettes; %d far lights%n",
+                counters[0], counters[1], counters[2], counters[3]);
+        OUT.printf("cost: landmark captures %.0f ms, site silhouettes %.0f ms, settlement massing in all %.0f ms%n", ms[0], ms[1], ms[2]);
+        if (buildingPx[0] < w * h / 200 && !place.contains(":")) throw new IllegalStateException("no buildings visible in the mid view");
+        BufferedImage img = new BufferedImage(w, h * 4 + 24, BufferedImage.TYPE_INT_RGB);
+        for (int k = 0; k < 4; k++)
             for (int p = 0; p < w * h; p++) {
                 int c = images[k][p];
                 img.setRGB(p % w, k * (h + 8) + p / w, (c & 0xFF) << 16 | (c & 0xFF00) | (c >>> 16 & 0xFF));
             }
         Files.createDirectories(out.toAbsolutePath().getParent());
         ImageIO.write(img, "png", out.toFile());
-        OUT.println("wrote " + out + " (far, mid, mid without buildings)");
+        OUT.println("wrote " + out + " (far, mid, mid without buildings, far at night)");
     }
 }

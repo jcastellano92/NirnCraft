@@ -6,18 +6,22 @@ import com.skycraft.tamriel.Place;
 import com.skycraft.tamriel.PlaceType;
 import com.skycraft.tamriel.Places;
 import com.skycraft.tamriel.settlement.Culture;
+import com.skycraft.tamriel.settlement.SettlementPiece;
 import com.skycraft.tamriel.settlement.build.Builders;
+import com.skycraft.tamriel.settlement.build.Canvas;
 import com.skycraft.tamriel.settlement.build.LandmarkRegistry;
+import com.skycraft.tamriel.settlement.build.Landmarks;
 import com.skycraft.tamriel.settlement.grammar.Blueprint;
+import com.skycraft.tamriel.settlement.grammar.Outdoors;
 import com.skycraft.tamriel.settlement.kit.Kits;
 import com.skycraft.tamriel.settlement.kit.Palette;
 import com.skycraft.tamriel.settlement.plan.Archetype;
+import com.skycraft.tamriel.settlement.plan.Cities;
 import com.skycraft.tamriel.settlement.plan.Spec;
 import com.skycraft.worldplan.street.StreetPlan;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.world.level.EmptyBlockGetter;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,23 +29,29 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.IntBinaryOperator;
 
 /**
  * Far-field buildings: Skycraft's planned settlements (StreetPlan: every named capital, city, town, village and farm,
- * baked and seed-free, so clients draw them themselves) rasterised into aether's per-tile structure layers. Each
- * planned piece becomes massing: grammar buildings their blueprint's parts with wall top, roof rise and roof shape;
- * city walls lines from floor to floor2; gates and towers boxes; landmarks a tower profile. Forts (not in the plan:
- * SurfaceBuilder's fixed 27-block square of curtain wall, corner towers and keep) stand on the ground. Wall and roof colours
- * are the kit's blocks' map colours, registered as extra palette entries. Detail below a column's size is sampled
- * away (houses fade with distance), but walls stay at least one column thick so a city's outline carries to the
- * horizon.
+ * baked and seed-free, so clients draw them themselves) and the named wild sites (AetherSites: forts, towers, shrines,
+ * wonders, dungeon entrances) rasterised into aether's per-tile structure layers. Grammar buildings become their
+ * blueprint's parts with wall top, roof rise and roof shape; city walls lines from floor to floor2; gates and towers
+ * boxes. Landmarks (the White-Gold Tower, the College on its sea stack, Elden Root's tree ...) are captured from the
+ * mod's own landmark builders (AetherCapture: the exact silhouette, spans floating where they do, e.g. an arch's deck),
+ * falling back to a profile box if a builder cannot run outside a world. Colours are the blocks' far colours
+ * (AetherMaterials). Detail below a column's size is sampled away (houses fade with distance), but walls stay at least
+ * one column thick and silhouettes are max-pooled, so a city's outline and its towers carry to the horizon.
+ *
+ * <p>Lights: every settlement also uploads its lights as one aether light group (night windows of its buildings,
+ * street lamps and braziers, wall lanterns, gate torches, camp fires, and the light blocks of captured landmarks), and
+ * every wild site its own (lighthouse lamps, shrine braziers, the Red Mountain moat), for the far field's night.</p>
  */
 final class AetherSettlements implements AetherFarField.Overlay {
-    /** First palette id for wall and roof colours (the preview palette ends far below). */
-    static final int FIRST_MATERIAL = 64;
     private static final int N = AetherNative.TILE * AetherNative.TILE;
+    /** Light groups: settlement i is 1 + i; the wild sites of a 4 km cell are SITE_GROUPS + a cell hash. */
+    static final int SITE_GROUPS = 0x100000;
 
     enum Roof { FLAT, GABLE_X, GABLE_Z, HIP, DOME, SPIRE }
 
@@ -52,35 +62,56 @@ final class AetherSettlements implements AetherFarField.Overlay {
     record Line(float ax, float az, float bx, float bz, float half, float topA, float topB, short mat) {}
 
     private final StreetPlan plan;
-    private final IntBinaryOperator ground;  // block x, z -> terrain height, for forts (null: aether's stand-in)
-    private final Map<Integer, List<Object>> bySettlement = new HashMap<>();  // settlement index -> masses and lines
-    private final Map<String, List<Object>> forts = new HashMap<>();
-    private final Map<BlockState, Short> ids = new HashMap<>();
-    private final List<float[]> newMaterials = new ArrayList<>();
+    private final IntBinaryOperator ground;  // block x, z -> terrain height (null: aether's stand-in)
+    private final AetherMaterials mats;
+    private final Map<Integer, List<Object>> bySettlement = new HashMap<>();  // settlement index -> masses, lines, shapes
+    private final Map<Integer, List<AetherLights.Light>> settlementLights = new HashMap<>();
+    private final Map<String, Optional<AetherCapture.Shape>> sites = new HashMap<>();
+    private final Map<Integer, AetherCapture.Shape> falls = new HashMap<>();
+    /** Natural landmarks from the server (AetherNatural), by "x,z,kind": their silhouettes, built once. */
+    private final Map<String, Optional<AetherCapture.Shape>> natural = new HashMap<>();
+    private AetherNet.FarSites sitesSeen;
+    /** Supplies the server's natural-landmark list (AetherClient.farSites in game; the harness sets its own). */
+    static volatile java.util.function.Supplier<AetherNet.FarSites> farSites = () -> AetherClient.farSites;
+    private final Set<Long> siteCells = new HashSet<>();
     private final Set<Long> uploaded = new HashSet<>();
-    private final float[] wallTop = new float[N], roofTop = new float[N];
+    private final float[] wallTop = new float[N], roofTop = new float[N], baseArr = new float[N];
     private final short[] wallMat = new short[N], roofMat = new short[N];
+    private boolean floating;
+    private IntBinaryOperator g;
+    private static volatile boolean captureWarned;
+    /** Landmarks from their own builders (off: the old profile boxes, for comparison in the harness). */
+    static final boolean CAPTURE = !Boolean.getBoolean("skycraft.aether.noCapture");
+    /** Harness counters: landmarks captured from their builders / drawn as profiles, wild site silhouettes, lights. */
+    int captured, profiled, siteShapes, lightCount;
+    /** Harness timings (ms): landmark captures, wild site silhouettes, settlement massing in all. */
+    double captureMs, siteMs, massingMs;
+    /** Harness: why landmarks fell back to profiles (first few). */
+    final List<String> fallbacks = new ArrayList<>();
 
-    AetherSettlements(StreetPlan plan, IntBinaryOperator ground) {
+    AetherSettlements(StreetPlan plan, IntBinaryOperator ground, AetherMaterials mats) {
         this.plan = plan;
         this.ground = ground;
+        this.mats = mats;
     }
 
     /**
      * Over the mod's street plan (loads or plans it on first use: call off the render thread). ground: the terrain
      * height forts stand on (the exact one in single player), or null for aether's raster stand-in.
      */
-    static AetherSettlements create(IntBinaryOperator ground) {
-        return new AetherSettlements(StreetPlan.get(), ground);
+    static AetherSettlements create(IntBinaryOperator ground, AetherMaterials mats) {
+        return new AetherSettlements(StreetPlan.get(), ground, mats);
     }
 
     /**
      * Buildings for every resident tile of LOD `lod` in the window that has not had them yet (tiles evicted since are
-     * redone when they come back). Far-field worker thread.
+     * redone when they come back), and the light groups of the settlements and sites they touch. Far-field worker.
      */
     @Override
     public void cover(AetherNative.Context ctx, int lod, int x0, int z0, int x1, int z1) {
         int span = AetherNative.TILE << lod;
+        g = ground != null ? ground : (x, z) -> (int) Math.floor(ctx.previewHeight(x + 0.5, z + 0.5));
+        refreshNatural();
         for (int tz = Math.floorDiv(z0, span); tz <= Math.floorDiv(z1 - 1, span); tz++)
             for (int tx = Math.floorDiv(x0, span); tx <= Math.floorDiv(x1 - 1, span); tx++) {
                 long k = AetherRefiningSource.key(lod, tx, tz);
@@ -89,70 +120,178 @@ final class AetherSettlements implements AetherFarField.Overlay {
                     continue;
                 }
                 if (!uploaded.add(k)) continue;
-                IntBinaryOperator g = ground != null ? ground : (x, z) -> (int) Math.floor(ctx.previewHeight(x + 0.5, z + 0.5));
-                if (!fill(lod, tx, tz, g)) continue;  // nothing planned here
-                if (!newMaterials.isEmpty()) {
-                    ctx.setMaterials(FIRST_MATERIAL + ids.size() - newMaterials.size(), newMaterials.toArray(new float[0][]));
-                    newMaterials.clear();
-                }
-                ctx.uploadColumnStructures(lod, tx, tz, wallTop, roofTop, wallMat, roofMat);
+                boolean any = fill(lod, tx, tz);
+                mats.flush(ctx);
+                flushLights(ctx);
+                if (any) ctx.uploadColumnStructures(lod, tx, tz, wallTop, roofTop, wallMat, roofMat, floating ? baseArr : null);
             }
     }
 
-    /** Rasterises tile (lod, tx, tz) into the arrays; false when no settlement or fort reaches it. */
-    boolean fill(int lod, int tx, int tz, IntBinaryOperator g) {
+    private final List<Integer> lightsPending = new ArrayList<>();
+    private final List<Long> siteLightsPending = new ArrayList<>();
+    private final Map<Long, List<AetherLights.Light>> siteLights = new HashMap<>();
+
+    private void flushLights(AetherNative.Context ctx) {
+        for (int i : lightsPending) {
+            AetherLights.upload(ctx, 1 + i, settlementLights.get(i));
+            lightCount += settlementLights.get(i).size();
+        }
+        lightsPending.clear();
+        for (long cell : siteLightsPending) {
+            // the 4 km cell's coordinates as the group (exact for 2000 km either way: no two cells share a group)
+            int gx = (int) (cell >> 32) & 0x3FF, gz = (int) cell & 0x3FF;
+            AetherLights.upload(ctx, SITE_GROUPS + (gx << 10 | gz), siteLights.get(cell));
+            lightCount += siteLights.get(cell).size();
+        }
+        siteLightsPending.clear();
+    }
+
+    /** Rasterises tile (lod, tx, tz) into the arrays; false when no settlement or site reaches it. */
+    boolean fill(int lod, int tx, int tz) {
         int s = 1 << lod, bx = tx * (AetherNative.TILE << lod), bz = tz * (AetherNative.TILE << lod);
         int ex = bx + (AetherNative.TILE << lod), ez = bz + (AetherNative.TILE << lod);
         boolean any = false;
         for (int i = 0; i < plan.settlements(); i++) {
             int r = plan.sReach[i] + 64;
             if (plan.sX[i] + r < bx || plan.sX[i] - r >= ex || plan.sZ[i] + r < bz || plan.sZ[i] - r >= ez) continue;
-            if (!any) {
-                Arrays.fill(wallTop, Float.NaN);
-                Arrays.fill(roofTop, Float.NaN);
-                Arrays.fill(wallMat, (short) 0);
-                Arrays.fill(roofMat, (short) 0);
-                any = true;
-            }
+            if (!any) clear();
+            any = true;
             for (Object o : pieces(i)) stamp(o, s, bx, bz);
         }
-        for (Place p : Places.overlapping(bx - 20, bz - 20, ex + 20, ez + 20)) {
-            if (p.type() != PlaceType.FORT) continue;
-            if (!any) {
-                Arrays.fill(wallTop, Float.NaN);
-                Arrays.fill(roofTop, Float.NaN);
-                Arrays.fill(wallMat, (short) 0);
-                Arrays.fill(roofMat, (short) 0);
-                any = true;
-            }
-            for (Object o : forts.computeIfAbsent(p.id(), id -> fort(p, g))) stamp(o, s, bx, bz);
+        for (Place p : Places.overlapping(bx - 64, bz - 64, ex + 64, ez + 64)) {
+            if (p.type().isSettlement()) continue;
+            AetherCapture.Shape sh = site(p);
+            if (sh == null) continue;
+            if (!any) clear();
+            any = true;
+            stamp(sh, s, bx, bz);
+        }
+        AetherNet.FarSites ns = sitesSeen;
+        for (int k = 0; ns != null && k < ns.count(); k++) {
+            int nx = ns.xz()[k * 2], nz = ns.xz()[k * 2 + 1];
+            if (nx < bx - 32 || nx >= ex + 32 || nz < bz - 32 || nz >= ez + 32) continue;
+            AetherCapture.Shape sh = naturalShape(ns, k);
+            if (sh == null) continue;
+            if (!any) clear();
+            any = true;
+            stamp(sh, s, bx, bz);
+        }
+        com.skycraft.tamriel.terrain.Hydrology.Fall[] all = com.skycraft.tamriel.terrain.Hydrology.get().falls();
+        for (int k = 0; k < all.length; k++) {
+            com.skycraft.tamriel.terrain.Hydrology.Fall f = all[k];
+            if (f.x() < bx - 32 || f.x() >= ex + 32 || f.z() < bz - 32 || f.z() >= ez + 32) continue;
+            if (!any) clear();
+            any = true;
+            stamp(fall(k, f), s, bx, bz);
         }
         return any;
     }
 
-    private void stamp(Object o, int s, int bx, int bz) {
-        if (o instanceof Mass m) stamp(m, s, bx, bz);
-        else stamp((Line) o, s, bx, bz);
+    private AetherCapture.Shape naturalShape(AetherNet.FarSites ns, int k) {
+        String key = ns.xz()[k * 2] + "," + ns.xz()[k * 2 + 1] + "," + ns.kinds()[k];
+        return natural.computeIfAbsent(key, q -> {
+            try {
+                return Optional.ofNullable(AetherNatural.shape(ns, k, g));
+            } catch (RuntimeException e) {
+                return Optional.empty();
+            }
+        }).orElse(null);
     }
 
     /**
-     * SurfaceBuilder.fort's massing around the place: curtain wall on the square ring 12 out (to base + 7), 5-block
-     * towers on its corners (base + 11), a 9-block keep (base + 12). Its facing is per world, its plan symmetric.
+     * A new list of natural landmarks from the server: the resident tiles that a site new to the list touches are
+     * stamped again (their buildings re-uploaded: the refinement fade dissolves the landmark in).
      */
-    private List<Object> fort(Place p, IntBinaryOperator g) {
-        int cx = p.x(), cz = p.z();
-        float base = g.applyAsInt(cx, cz) + 1;
-        short stone = id(net.minecraft.world.level.block.Blocks.STONE_BRICKS.defaultBlockState());
-        List<Object> out = new ArrayList<>();
-        float[][] ring = {{-12, -12}, {12, -12}, {12, 12}, {-12, 12}};
-        for (int k = 0; k < 4; k++) {
-            float[] a = ring[k], b = ring[(k + 1) % 4];
-            out.add(new Line(cx + a[0] + 0.5f, cz + a[1] + 0.5f, cx + b[0] + 0.5f, cz + b[1] + 0.5f, 0.5f, base + 7, base + 7, stone));
-            out.add(new Mass(cx + (int) a[0] - 2, cz + (int) a[1] - 2, cx + (int) a[0] + 2, cz + (int) a[1] + 2, base + 10, 1,
-                    Roof.FLAT, stone, stone));
+    private void refreshNatural() {
+        AetherNet.FarSites now = farSites.get();
+        if (now == null || now == sitesSeen) return;
+        java.util.Set<String> before = new HashSet<>();
+        AetherNet.FarSites old = sitesSeen;
+        for (int k = 0; old != null && k < old.count(); k++) before.add(old.xz()[k * 2] + "," + old.xz()[k * 2 + 1]);
+        sitesSeen = now;
+        for (int k = 0; k < now.count(); k++) {
+            int nx = now.xz()[k * 2], nz = now.xz()[k * 2 + 1];
+            if (before.contains(nx + "," + nz)) continue;
+            for (int lod = 0; lod < AetherFarField.LODS; lod++) {
+                int span = AetherNative.TILE << lod;
+                for (int tz = Math.floorDiv(nz - 32, span); tz <= Math.floorDiv(nz + 32, span); tz++)
+                    for (int tx = Math.floorDiv(nx - 32, span); tx <= Math.floorDiv(nx + 32, span); tx++)
+                        uploaded.remove(AetherRefiningSource.key(lod, tx, tz));
+            }
         }
-        out.add(new Mass(cx - 4, cz - 4, cx + 4, cz + 4, base + 11, 1, Roof.FLAT, stone, stone));
-        return out;
+    }
+
+    /** The falls sheet: three blocks beyond the lip (DungeonStructure's, Hydrology's), across the channel, from the pool bed up to the upper water; its spray. */
+    private AetherCapture.Shape fall(int k, com.skycraft.tamriel.terrain.Hydrology.Fall f) {
+        return falls.computeIfAbsent(k, i -> {
+            int r = (int) Math.ceil(f.hw()) + 4;
+            AetherCapture.Shape sh = AetherCapture.Shape.around(f.x(), f.z(), r);
+            BlockState sheet = net.minecraft.world.level.block.Blocks.BUBBLE_COLUMN.defaultBlockState();
+            for (float t = -f.hw(); t <= f.hw(); t += 0.25f)
+                for (float along = 0.5f; along <= 1.5f; along += 0.5f) {
+                    int x = (int) Math.floor(f.x() + 0.5 + f.ux() * along - f.uz() * t);
+                    int z = (int) Math.floor(f.z() + 0.5 + f.uz() * along + f.ux() * t);
+                    sh.span(x, z, Float.NaN, f.up(), sheet, sheet);
+                }
+            sh.rise = f.drop();
+            float drop = f.drop();
+            long cell = (long) Math.floorDiv(f.x(), 4096) << 32 | (Math.floorDiv(f.z(), 4096) & 0xFFFFFFFFL);
+            siteLights.computeIfAbsent(cell, c -> new ArrayList<>()).add(AetherLights.mist(f.x() + 0.5 + f.ux() * 3,
+                    f.down() + 1.5 + drop * 0.15, f.z() + 0.5 + f.uz() * 3, 2f + f.hw() + drop * 0.35f,
+                    (0.12f + drop / 45f) * (f.big() ? 1.5f : 1f)));
+            if (!siteLightsPending.contains(cell)) siteLightsPending.add(cell);
+            return sh;
+        });
+    }
+
+    private void clear() {
+        Arrays.fill(wallTop, Float.NaN);
+        Arrays.fill(roofTop, Float.NaN);
+        Arrays.fill(baseArr, Float.NaN);
+        Arrays.fill(wallMat, (short) 0);
+        Arrays.fill(roofMat, (short) 0);
+        floating = false;
+    }
+
+    /** A wild site's silhouette, built once; its lights join its 4 km cell's light group. */
+    private AetherCapture.Shape site(Place p) {
+        Optional<AetherCapture.Shape> v = sites.get(p.id());
+        if (v == null) {
+            AetherCapture.Shape sh = null;
+            long t0 = System.nanoTime();
+            try {
+                sh = AetherSites.shape(p, g);
+            } catch (RuntimeException e) {
+                // one odd site must not cost the far field
+            }
+            siteMs += (System.nanoTime() - t0) / 1e6;
+            v = Optional.ofNullable(sh);
+            sites.put(p.id(), v);
+            if (sh != null) siteShapes++;
+            if (sh != null && !sh.lights.isEmpty()) {
+                long cell = (long) Math.floorDiv(p.x(), 4096) << 32 | (Math.floorDiv(p.z(), 4096) & 0xFFFFFFFFL);
+                List<AetherLights.Light> l = siteLights.computeIfAbsent(cell, k -> new ArrayList<>());
+                boolean volcano = p.id().equals("red_mountain") || p.id().equals("dagoth_ur");
+                for (int[] q : sh.lights)
+                    l.add(volcano && q[3] >= 15 ? AetherLights.lava(q[0] + 0.5, q[1] + 0.5, q[2] + 0.5, 4f)
+                            : AetherLights.fire(q[0] + 0.5, q[1] + 0.5, q[2] + 0.5, q[3] / 15f));
+                if (p.id().equals("red_mountain")) {
+                    // the caldera's glow: the crater floor's lava lighting the ash and smoke over it, so it reads above
+                    // the rim from anywhere on Vvardenfell (the rim hides the floor itself from below)
+                    double fx = sh.x0 + sh.w * 0.5, fz = sh.z0 + sh.d * 0.5, floorY = sh.lights.get(0)[1] + 1.0;
+                    l.add(new AetherLights.Light(fx, floorY + 2, fz, 40f, 3f, AetherLights.LAVA_RGB, AetherLights.LAVA));
+                    l.add(new AetherLights.Light(fx, floorY + 85, fz, 110f, 0.55f, AetherLights.LAVA_RGB, AetherLights.LAVA));
+                }
+                if (!siteLightsPending.contains(cell)) siteLightsPending.add(cell);
+            }
+        }
+        return v.orElse(null);
+    }
+
+    private void stamp(Object o, int s, int bx, int bz) {
+        if (o instanceof Mass m) stamp(m, s, bx, bz);
+        else if (o instanceof Line l) stamp(l, s, bx, bz);
+        else stamp((AetherCapture.Shape) o, s, bx, bz);
     }
 
     private void stamp(Mass m, int s, int bx, int bz) {
@@ -181,7 +320,7 @@ final class AetherSettlements implements AetherFarField.Overlay {
                     case DOME -> (float) Math.sqrt(Math.max(0f, 1f - ux * ux - uz * uz));
                     case SPIRE -> Math.max(0f, 1f - (float) Math.sqrt(ux * ux + uz * uz));
                 };
-                put(i, j, m.wallTop, m.wallTop + m.rise * up, m.wall, m.roofMat);
+                put(i, j, m.wallTop, m.wallTop + m.rise * up, m.wall, m.roofMat, Float.NaN);
             }
     }
 
@@ -199,43 +338,88 @@ final class AetherSettlements implements AetherFarField.Overlay {
                 float px = l.ax + dx * t - wx, pz = l.az + dz * t - wz;
                 if (px * px + pz * pz > half * half) continue;
                 float top = l.topA + (l.topB - l.topA) * t;
-                put(i, j, top, top, l.mat, l.mat);
+                put(i, j, top, top, l.mat, l.mat, Float.NaN);
             }
     }
 
-    private void put(int i, int j, float wTop, float rTop, short wMat, short rMat) {
+    /**
+     * A captured or parametric silhouette, max-pooled into each column it touches: the tallest span in the column
+     * wins (a spire narrower than a column keeps its column, so it carries to the horizon), grounded if any of the
+     * column's spans stands on the ground. Shapes that would be a bump lower than half a column are skipped.
+     */
+    private void stamp(AetherCapture.Shape sh, int s, int bx, int bz) {
+        if (sh.rise < s * 0.5f && Math.max(sh.w, sh.d) < s) return;
+        int i0 = Math.max(0, Math.floorDiv(sh.x0 - bx, s)), i1 = Math.min(AetherNative.TILE - 1, Math.floorDiv(sh.x0 + sh.w - 1 - bx, s));
+        int j0 = Math.max(0, Math.floorDiv(sh.z0 - bz, s)), j1 = Math.min(AetherNative.TILE - 1, Math.floorDiv(sh.z0 + sh.d - 1 - bz, s));
+        for (int j = j0; j <= j1; j++)
+            for (int i = i0; i <= i1; i++) {
+                int cx0 = Math.max(bx + i * s, sh.x0), cx1 = Math.min(bx + (i + 1) * s, sh.x0 + sh.w);
+                int cz0 = Math.max(bz + j * s, sh.z0), cz1 = Math.min(bz + (j + 1) * s, sh.z0 + sh.d);
+                int best = -1;
+                boolean grounded = false;
+                float lowest = Float.POSITIVE_INFINITY;
+                for (int z = cz0; z < cz1; z++)
+                    for (int x = cx0; x < cx1; x++) {
+                        int c = (z - sh.z0) * sh.w + (x - sh.x0);
+                        float t = sh.top[c];
+                        if (Float.isNaN(t)) continue;
+                        if (best < 0 || t > sh.top[best]) best = c;
+                        if (Float.isNaN(sh.base[c])) grounded = true;
+                        else lowest = Math.min(lowest, sh.base[c]);
+                    }
+                if (best < 0) continue;
+                float top = sh.top[best];
+                float base = grounded ? Float.NaN : lowest;
+                put(i, j, top - 1, top, mats.id(sh.wall[best]), mats.id(sh.roof[best]), base);
+            }
+    }
+
+    private void put(int i, int j, float wTop, float rTop, short wMat, short rMat, float base) {
         int c = j * AetherNative.TILE + i;
         if (!(rTop > roofTop[c]) && !Float.isNaN(roofTop[c])) return;  // the taller piece wins
         wallTop[c] = wTop;
         roofTop[c] = rTop;
         wallMat[c] = wMat;
         roofMat[c] = rMat;
+        baseArr[c] = base;
+        floating |= !Float.isNaN(base);
     }
 
-    /** Massing of settlement i, built once. */
+    /** Massing of settlement i, built once (and its light group queued). */
     private List<Object> pieces(int i) {
         return bySettlement.computeIfAbsent(i, k -> {
+            long t0 = System.nanoTime();
             List<Object> out = new ArrayList<>();
-            for (Spec sp : plan.layout(plan.sId[k])) {
+            List<AetherLights.Light> lights = new ArrayList<>();
+            String id = plan.sId[k];
+            Place place = Places.byId(id).orElse(null);
+            long seed = place != null ? Cities.seed(place) : 0L;
+            List<Spec> layout = plan.layout(id);
+            for (int n = 0; n < layout.size(); n++) {
+                Spec sp = layout.get(n);
                 try {
-                    piece(sp, out);
+                    piece(sp, out, lights, id, seed ^ (n * 0x9E3779B97F4A7C15L));
                 } catch (RuntimeException e) {
                     // one odd piece must not cost the town: skip it
                 }
             }
+            settlementLights.put(k, lights);
+            lightsPending.add(k);
+            massingMs += (System.nanoTime() - t0) / 1e6;
             return out;
         });
     }
 
-    private void piece(Spec s, List<Object> out) {
+    private void piece(Spec s, List<Object> out, List<AetherLights.Light> lights, String settlement, long pieceSeed) {
         if (s.has(Spec.OMIT) || s.floor == Spec.UNSET || s.kind == null) return;
         Archetype k = s.kind;
         float floor = s.floor + 1;  // floor is the y of the floor block: walls stand on top of it
+        lightsOf(s, floor, lights);
         if (k == Archetype.WALL) {
             Palette p = palette(s);
             float f2 = (s.floor2 == Spec.UNSET ? s.floor : s.floor2) + 1;
             BlockState b = s.has(Spec.PALISADE) ? p.post : p.cityWall;
-            out.add(new Line(s.x + 0.5f, s.z + 0.5f, s.x2 + 0.5f, s.z2 + 0.5f, Math.max(1, s.w) * 0.5f, floor + s.h, f2 + s.h, id(b)));
+            out.add(new Line(s.x + 0.5f, s.z + 0.5f, s.x2 + 0.5f, s.z2 + 0.5f, Math.max(1, s.w) * 0.5f, floor + s.h, f2 + s.h, mats.id(b)));
             return;
         }
         if (k == Archetype.GATE) {
@@ -244,27 +428,43 @@ final class AetherSettlements implements AetherFarField.Overlay {
             return;
         }
         if (k == Archetype.LANDMARK) {
+            long t0 = System.nanoTime();
+            Optional<AetherCapture.Shape> cap = CAPTURE ? captureLandmark(s, settlement, pieceSeed) : null;
+            captureMs += (System.nanoTime() - t0) / 1e6;
+            if (cap != null) {
+                captured++;
+                // nothing above the ground: a rock or sea stack the terrain itself already shapes (the plan's pads)
+                if (cap.isEmpty()) return;
+                AetherCapture.Shape sh = cap.get();
+                out.add(sh);
+                for (int[] q : sh.lights) lights.add(AetherLights.lamp(q[0] + 0.5, q[1] + 0.5, q[2] + 0.5, q[3] / 15f));
+                return;
+            }
+            profiled++;
             LandmarkRegistry.Def d = LandmarkRegistry.ofVariant(s.variant);
             float h = s.h > 0 ? s.h : d != null ? d.h() : 20;
             Palette p = palette(s);
             int w = Math.max(s.w, d != null ? d.w() : s.w), dd = Math.max(s.d, d != null ? d.d() : s.d);
-            int x0 = s.x - w / 2, z0 = s.z - dd / 2;
-            // a tall thin landmark is a tower with a pointed top; a broad one a block with a domed top
+            // the rotated footprint (a south-facing 55 x 25 cliff runs along x, an east-facing one along z)
+            boolean turned = s.facing.getAxis() == Direction.Axis.X;
+            int fw = turned ? dd : w, fd = turned ? w : dd;
+            int x0 = s.x - fw / 2, z0 = s.z - fd / 2;
             boolean spire = h > 3 * Math.max(w, dd);
             float rise = spire ? Math.max(w, dd) * 1.5f : Math.min(w, dd) * 0.25f;
-            out.add(new Mass(x0, z0, x0 + w - 1, z0 + dd - 1, floor + h - rise, rise, spire ? Roof.SPIRE : Roof.DOME,
-                    id(p.cityWall), id(p.roofFull)));
+            out.add(new Mass(x0, z0, x0 + fw - 1, z0 + fd - 1, floor + h - rise, rise, spire ? Roof.SPIRE : Roof.DOME,
+                    mats.id(p.cityWall), mats.id(p.roofFull)));
             return;
         }
         if (!k.building) return;  // streets, plazas, fields, docks, stalls ...: ground detail
         if (s.grammar()) {
             Blueprint bp = Blueprint.of(s);
             float wall = floor + bp.wallTop() + 1;
+            windows(s, bp, floor, lights);
             if (bp.body != Blueprint.Body.RECT) {
                 box(s, out, floor + bp.height() - 4, 0, Roof.DOME, bp.pal.wall, bp.pal.roofFull);
                 return;
             }
-            int[] o = com.skycraft.tamriel.settlement.SettlementPiece.origin(s);
+            int[] o = SettlementPiece.origin(s);
             for (Blueprint.Part part : bp.parts) {
                 int ax = o[0] + mapX(s.facing, part.x0(), part.z0()), az = o[1] + mapZ(s.facing, part.x0(), part.z0());
                 int cx = o[0] + mapX(s.facing, part.x1(), part.z1()), cz = o[1] + mapZ(s.facing, part.x1(), part.z1());
@@ -278,7 +478,7 @@ final class AetherSettlements implements AetherFarField.Overlay {
                     default -> alongWorldZ ? Roof.GABLE_Z : Roof.GABLE_X;
                 };
                 out.add(new Mass(Math.min(ax, cx), Math.min(az, cz), Math.max(ax, cx), Math.max(az, cz), wall, bp.rise(part),
-                        roof, id(bp.pal.wall), id(bp.pal.roofFull)));
+                        roof, mats.id(bp.pal.wall), mats.id(bp.pal.roofFull)));
             }
             return;
         }
@@ -288,15 +488,111 @@ final class AetherSettlements implements AetherFarField.Overlay {
         boolean tower = k == Archetype.TOWER;
         box(s, out, floor + (tower ? h : h * 0.62f), tower ? 2 : h * 0.38f, tower ? Roof.FLAT : Roof.HIP,
                 tower ? p.cityWall : p.wall, p.roofFull);
+        windows(s, null, floor, lights);
+    }
+
+    /**
+     * The exact silhouette of a settlement landmark: Landmarks.build run on a canvas over a capturing level, framed
+     * exactly as SettlementPiece frames it (origin, facing, the piece's seed). Empty when it builds nothing above the
+     * ground; null when the builder cannot run here (then a profile stands in).
+     */
+    private Optional<AetherCapture.Shape> captureLandmark(Spec s, String settlement, long seed) {
+        try {
+            BoundingBox piece = SettlementPiece.box(s);
+            int h = Math.max(s.h, Builders.height(s));
+            int x0 = piece.minX(), z0 = piece.minZ(), x1 = piece.maxX(), z1 = piece.maxZ(), top = s.floor + h + 60;
+            String[] arch = s.variant == Landmarks.ARCH ? s.name.split(",") : new String[0];
+            if (arch.length >= 6) {
+                // an arch spans between two world points of its spec's name ("sx,sz,ex,ez,top,width")
+                int ax = Integer.parseInt(arch[0]), az = Integer.parseInt(arch[1]), bx = Integer.parseInt(arch[2]), bz = Integer.parseInt(arch[3]);
+                int w = Integer.parseInt(arch[5]) / 2 + 6;
+                x0 = Math.min(ax, bx) - w;
+                z0 = Math.min(az, bz) - w;
+                x1 = Math.max(ax, bx) + w;
+                z1 = Math.max(az, bz) + w;
+                top = s.floor + (int) (Integer.parseInt(arch[4]) * 1.7) + 20;
+            }
+            BoundingBox box = new BoundingBox(x0 - 12, Math.max(-63, s.floor - 40), z0 - 12, x1 + 12, Math.min(638, top), z1 + 12);
+            Palette p = palette(s);
+            int[] o = s.isLine() ? new int[] {0, 0} : SettlementPiece.origin(s);
+            Direction f = s.isLine() ? Direction.NORTH : s.facing;
+            AetherCapture.Shape sh = AetherCapture.capture(box, g, seed, level -> {
+                Canvas c = new Canvas(level, box, o[0], s.floor, o[1], f, seed);
+                Landmarks.build(c, p, s, settlement);
+            });
+            return Optional.ofNullable(sh);
+        } catch (RuntimeException | LinkageError e) {
+            if (fallbacks.size() < 12) fallbacks.add(settlement + " variant " + s.variant + ": " + e);
+            if (!captureWarned) {
+                captureWarned = true;
+                com.skycraft.Skycraft.LOGGER.info("aether: landmark capture fell back to profiles ({})", e.toString());
+            }
+            return null;
+        }
+    }
+
+    // ---- lights ----------------------------------------------------------------------------------------------
+
+    /** Street lamps, braziers, camp fires, wall lanterns and gate torches of a piece (Outdoors, Works, Zoning). */
+    private static void lightsOf(Spec s, float floor, List<AetherLights.Light> out) {
+        switch (s.kind) {
+            case YARD -> {
+                if (s.variant == Outdoors.LAMP_POST) out.add(AetherLights.lamp(s.x + 0.5, floor + 3, s.z + 0.5, 0.8f));
+                else if (s.variant == Outdoors.BRAZIER) out.add(AetherLights.fire(s.x + 0.5, floor + 2, s.z + 0.5, 1f));
+            }
+            case LAMP -> out.add(AetherLights.lamp(s.x + 0.5, floor + 3, s.z + 0.5, 0.8f));
+            case CAMP -> out.add(AetherLights.fire(s.x + 0.5, floor + 1, s.z + 0.5, 1.2f));
+            case PLAZA -> {
+                if (s.variant == 3) out.add(AetherLights.fire(s.x + 0.5, floor + 2, s.z + 0.5, 1.2f));
+                if (s.w >= 9) {
+                    out.add(AetherLights.lamp(s.x - s.w / 2 + 0.5, floor + 3, s.z - s.d / 2 + 0.5, 0.8f));
+                    out.add(AetherLights.lamp(s.x + s.w / 2 + 0.5, floor + 3, s.z + s.d / 2 + 0.5, 0.8f));
+                }
+            }
+            case WALL -> {
+                // a lantern on about one wall-top column in nine
+                float f2 = (s.floor2 == Spec.UNSET ? s.floor : s.floor2) + 1;
+                double len = Math.hypot(s.x2 - s.x, s.z2 - s.z);
+                for (double t = 4.5; t < len; t += 9) {
+                    double u = t / len;
+                    out.add(AetherLights.lamp(s.x + (s.x2 - s.x) * u + 0.5, floor + (f2 - floor) * u + s.h + 2, s.z + (s.z2 - s.z) * u + 0.5, 0.6f));
+                }
+            }
+            case GATE -> out.add(AetherLights.fire(s.x + 0.5, floor + 3, s.z + 0.5, 1f));
+            default -> { }
+        }
+    }
+
+    /**
+     * A building's lit windows at night: one light per facade the windows face, at the first storey's window height,
+     * as bright as its window count (one every three blocks per storey, about half of them lit), set a block out from
+     * the wall so the building itself hides the facades facing away. Lanterns by the door of inns, shops and keeps.
+     */
+    private static void windows(Spec s, Blueprint bp, float floor, List<AetherLights.Light> out) {
+        int storeys = bp != null ? Math.max(1, bp.storeys) : 1;
+        int[] o = SettlementPiece.origin(s);
+        // facade centres in the local frame: front (z = 0), back, left, right
+        double[][] faces = {{(s.w - 1) * 0.5, -1, s.w}, {(s.w - 1) * 0.5, s.d, s.w}, {-1, (s.d - 1) * 0.5, s.d}, {s.w, (s.d - 1) * 0.5, s.d}};
+        for (double[] f : faces) {
+            double wx = o[0] + mapX(s.facing, (int) Math.round(f[0]), (int) Math.round(f[1])) + 0.5;
+            double wz = o[1] + mapZ(s.facing, (int) Math.round(f[0]), (int) Math.round(f[1])) + 0.5;
+            float lit = (float) (f[2] / 3.0 * storeys * 0.5);
+            if (lit < 0.5f) continue;
+            out.add(AetherLights.window(wx, floor + 2.5, wz, Math.min(6f, lit) * 0.25f));
+        }
+        if (bp != null && bp.lanterns) {
+            double wx = o[0] + mapX(s.facing, bp.doorX, -1) + 0.5, wz = o[1] + mapZ(s.facing, bp.doorX, -1) + 0.5;
+            out.add(AetherLights.lamp(wx, floor + 2.5, wz, 0.7f));
+        }
     }
 
     /** The piece's rotated footprint as one mass. */
     private void box(Spec s, List<Object> out, float wallTop, float rise, Roof roof, BlockState wall, BlockState roofB) {
-        int[] o = com.skycraft.tamriel.settlement.SettlementPiece.origin(s);
+        int[] o = SettlementPiece.origin(s);
         int ax = o[0] + mapX(s.facing, 0, 0), az = o[1] + mapZ(s.facing, 0, 0);
         int cx = o[0] + mapX(s.facing, s.w - 1, s.d - 1), cz = o[1] + mapZ(s.facing, s.w - 1, s.d - 1);
         out.add(new Mass(Math.min(ax, cx), Math.min(az, cz), Math.max(ax, cx), Math.max(az, cz), wallTop, rise, roof,
-                id(wall), id(roofB)));
+                mats.id(wall), mats.id(roofB)));
     }
 
     private static Palette palette(Spec s) {
@@ -320,22 +616,6 @@ final class AetherSettlements implements AetherFarField.Overlay {
             case WEST -> -lx;
             default -> lz;
         };
-    }
-
-    /** Palette id of a block's far colour (its map colour, linear), registered on first use. */
-    private short id(BlockState b) {
-        Short v = ids.get(b);
-        if (v != null) return v;
-        int rgb = b.getMapColor(EmptyBlockGetter.INSTANCE, BlockPos.ZERO).col;
-        float r = lin((rgb >> 16) & 255), g = lin((rgb >> 8) & 255), bl = lin(rgb & 255);
-        newMaterials.add(new float[] {r, g, bl, 0.85f, 0f, AetherNative.CLASS_TERRAIN});
-        short id = (short) (FIRST_MATERIAL + ids.size());
-        ids.put(b, id);
-        return id;
-    }
-
-    private static float lin(int c) {
-        return (float) Math.pow(c / 255.0, 2.2);
     }
 
     private static int ceilDiv(int a, int b) {

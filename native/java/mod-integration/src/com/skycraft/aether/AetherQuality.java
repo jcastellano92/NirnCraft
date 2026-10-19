@@ -53,6 +53,16 @@ final class AetherQuality {
         return (float) Knob.aetherLodBias(q[Knob.AETHER_LOD.ordinal()]);
     }
 
+    /**
+     * Far lights a frame (the brightest first): 4096 at full far detail, falling with aether's LOD bias (the knob that
+     * coarsens far detail first) to 1024 at bias 3, 512 at fallback tier 1. Each costs a few ALU per pixel of its tiles.
+     */
+    int lightBudget() {
+        if (tier >= 1) return 512;
+        float b = lodBias();
+        return Math.max(1024, Math.round(4096f / (b * b) / 64f) * 64);
+    }
+
     /** How far aether traces (blocks): 40 km, 16 km at fallback tier 1. */
     float maxDistance() {
         return tier >= 1 ? 16_000f : 40_000f;

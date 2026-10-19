@@ -1,6 +1,7 @@
 // The far-field world: column tiles and chunk sections in, a clipmap of SVDAG regions out, packed for the kernels.
 #pragma once
 #include <array>
+#include <atomic>
 #include <cstdint>
 #include <memory>
 #include <mutex>
@@ -31,9 +32,10 @@ struct Key3Hash {
 };
 
 // Buildings over a tile's columns (dense, TILE^2 each; roofTop <= the surface or NaN = none): walls from the ground
-// up to wallTop, roof up to roofTop.
+// up to wallTop, roof up to roofTop. base (empty, or TILE^2): where the span starts instead of the ground (an arch's
+// deck, a canopy, a floating rock: air below it); -inf = from the ground.
 struct Structures {
-    std::vector<float> wallTop, roofTop;
+    std::vector<float> wallTop, roofTop, base;
     std::vector<uint16_t> wallMat, roofMat;
 };
 
@@ -41,6 +43,7 @@ struct Tile {
     int lod = 0, tx = 0, tz = 0;
     std::vector<float> surface, water, canopy;
     std::vector<uint16_t> top, fill, canopyMat;
+    std::vector<uint16_t> waterMat;  // per column (flowing water, ice), or empty: World::waterMat everywhere
     std::shared_ptr<const Structures> structures;  // null: none
     // min of surface and max of the highest occupied point per aligned n x n block, n = 2^level, level 0..8
     std::array<std::vector<float>, 9> minSurf, maxTop;
@@ -77,6 +80,10 @@ public:
     int windowRadius = 2;  // regions either side of the camera's region, per LOD
     uint16_t stoneMat = 1;
     uint16_t waterMat = 6;
+    // refinement fades (aether_set_transitions): a region rebuilt over a resident one (an exact tile replacing the
+    // stand-in, buildings arriving) keeps the old one packed for fadeMs, and the kernel dissolves from old to new
+    // per pixel over that time. 0 = off (swap at once).
+    std::atomic<uint32_t> fadeMs{0};
 
     void putTile(std::unique_ptr<Tile> t);
     void putSection(int sx, int sy, int sz, const uint16_t* mats);
@@ -125,6 +132,16 @@ private:
     std::shared_ptr<const PackedScene> packed_ = std::make_shared<PackedScene>();
     int lastCentre_[MAX_LODS][2] = {};
     bool havePacked_ = false;
+    // regions mid-fade: the one they replaced (null: there was nothing, the new one dissolves in) and when
+    struct Fade {
+        std::shared_ptr<const Region> old;  // null: empty before (wasEmpty) or new to the window
+        uint32_t startMs;
+        bool wasEmpty;
+    };
+    std::unordered_map<Key3, Fade, Key3Hash> fading_;
 };
+
+// Milliseconds on a steady clock (wraps after 49 days; compared as signed differences).
+uint32_t nowMs();
 
 }  // namespace aether
