@@ -306,8 +306,10 @@ class Runner:
         tr.step("test_start", tier=s["tier"], group=s.get("group"), fingerprint=fp)
         t0 = time.monotonic()
         rec = self._run(s, v, fp)
-        tr.step("test_end", status=rec.get("status"), seconds=round(time.monotonic() - t0, 1),
-                error=(rec.get("error") or "")[:300])
+        secs = round(time.monotonic() - t0, 1)
+        tr.step("test_end", status=rec.get("status"), seconds=secs, error=(rec.get("error") or "")[:300])
+        if rec.get("status") not in ("skip",) and not rec.get("_cached"):
+            note_duration(k, secs)
         if rec.get("status") in ("error", "crash"):  # what led up to it travels with the result
             rec["trace"] = tr.tail(25)
             Path(f"{results.stem(s['id'], v)}.after.json").write_text(json.dumps(rec, indent=1, default=str),
@@ -773,6 +775,8 @@ def scope_of(a, watch=False):
         return "gate"
     if getattr(a, "cmd", "") == "probe":
         return "probes"
+    if getattr(a, "audit_scope", None):
+        return a.audit_scope
     if a.changed is not None:
         return "changed"
     slug = lambda x: re.sub(r"[^a-z0-9]+", "-", x.lower()).strip("-")[:60]  # noqa: E731
@@ -1348,6 +1352,129 @@ def cmd_gate(a):
     sys.exit(1 if bad else 0)
 
 
+# ================================================================================================ budgeted audits
+DURATIONS = STORE / "durations.json"
+BUDGETS = {"5m": 300, "30m": 1800, "1h": 3600, "2h": 7200}
+
+
+def note_duration(k, secs):
+    try:
+        d = json.loads(DURATIONS.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        d = {}
+    old = d.get(k)
+    d[k] = round(secs if old is None else 0.6 * old + 0.4 * secs, 1)  # smoothed: one slow run does not dominate
+    STORE.mkdir(parents=True, exist_ok=True)
+    DURATIONS.write_text(json.dumps(d), encoding="utf-8")
+
+
+def estimate(s, v, ledger):
+    """Seconds a test will take: its own history, else a default by kind."""
+    k = key(s, v)
+    if k in ledger:
+        return ledger[k]
+    p = s.get("pose") or {}
+    if s["tier"] == "check":
+        return {"check-unit": 240, "check-native": 600, "check-camera-planner": 120}.get(s["id"], 30)
+    if s["tier"] == "lab":
+        return 15
+    base = 25 + (10 if v == "vanilla" else 0)
+    if "ladder" in p:
+        n = len(p["ladder"]["distances"])
+        return base + n * (16 if s.get("fidelity") else 8)
+    if "sweep" in p:
+        return base + 55
+    if s.get("measure_command"):
+        return 35
+    if s.get("frames"):
+        return base + 10
+    if "stage" in p:
+        return 12
+    return base
+
+
+def stratum(s):
+    tags = s["tags"]
+    suite = next((t[6:] for t in tags if t.startswith("suite:") and t not in ("suite:smoke", "suite:seam-core")), "-")
+    sub = next((t for t in tags if t.startswith(("subject:", "gallery:monster", "gallery:creature", "gallery:npc",
+                                                  "gallery:armor", "gallery:weapons", "gallery:blocks", "type:"))), "")
+    return (s["tier"], suite, sub)
+
+
+def cmd_audit(a):
+    """A random but well-spread sample of everything that fits a time budget: failing / flagged tests first, then
+    never-run, then the stalest, rotating across strata (tier x suite x category) so even 5 minutes touches many
+    areas, and repeated audits cover the whole world over time."""
+    import random
+    budget = BUDGETS.get(a.budget) or int(float(a.budget.rstrip("m")) * 60)
+    seed = a.seed_audit if a.seed_audit is not None else int(time.time()) % 100000
+    rng = random.Random(seed)
+    scenes = [s for s in catalog.load() if s["_file"] != "(probe)"]
+    if a.focus:
+        scenes = [s for s in scenes if any(tag_match(f, s["tags"]) for f in a.focus.split(","))]
+    if budget < 3600:  # restart groups cost a relaunch: only in the longer audits
+        scenes = [s for s in scenes if s["tier"] != "live" or s["group"] == "live"]
+    try:
+        ledger = json.loads(DURATIONS.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        ledger = {}
+    now = time.time()
+    strata = {}
+    for s in scenes:
+        for v in (s["variants"] if s["tier"] == "live" else [s["tier"]]):
+            rec = results.latest(s["id"], v) or {}
+            status = rec.get("status")
+            try:
+                age = now - time.mktime(time.strptime(rec["capturedAt"], "%Y-%m-%dT%H:%M:%S"))
+            except (KeyError, ValueError):
+                age = None
+            # priority: re-check problems, then never run, then stalest; random tie-breaks spread the sample
+            weight = (0 if status in ("fail", "error", "crash", "flag") else 1 if age is None else 2,
+                      -(age or 0), rng.random())
+            strata.setdefault(stratum(s), []).append((weight, s, v))
+    for items in strata.values():
+        items.sort(key=lambda x: x[0])
+    total = sum(len(v) for v in strata.values())
+    keys = list(strata)
+    rng.shuffle(keys)
+    keys.sort(key=lambda k: 0 if k[0] == "check" else 1 if k[0] == "lab" else 2)  # cheap tiers lead
+    picked, spent, live = [], 0.0, False
+    while keys and spent < budget:
+        progressed = False
+        for k in list(keys):
+            if not strata[k]:
+                keys.remove(k)
+                continue
+            _, s, v = strata[k].pop(0)
+            cost = estimate(s, v, ledger) + (0 if live or s["tier"] != "live" else 70)  # first live test: launch
+            if spent + cost > budget:
+                continue
+            picked.append((s, v))
+            spent += cost
+            live = live or s["tier"] == "live"
+            progressed = True
+        if not progressed:
+            break
+    known = total
+    covered = sum(1 for s in scenes for v in (s["variants"] if s["tier"] == "live" else [s["tier"]])
+                  if (results.latest(s["id"], v) or {}).get("capturedAt"))
+    by_tier = {}
+    for s, v in picked:
+        by_tier[s["tier"]] = by_tier.get(s["tier"], 0) + 1
+    say(f"audit {a.budget} (seed {seed}): {len(picked)} test(s), ~{spent / 60:.0f} min estimated, "
+        f"{len({stratum(s) for s, _ in picked})} strata; " + ", ".join(f"{k} {n}" for k, n in sorted(by_tier.items()))
+        + f"; coverage so far {covered}/{known} ({100 * covered / max(1, known):.0f}%)")
+    if a.dry:
+        for s, v in order(picked):
+            say(f"  {s['tier']:5} {v:8} {s['id']}")
+        return 0
+    a.ids, a.suite, a.tag, a.tier, a.group, a.changed, a.exclude, a.variant = (
+        sorted({s["id"] for s, _ in picked}), None, None, None, None, None, None, None)
+    a.force = False
+    a.audit_scope = f"audit-{a.budget}"
+    return cmd_run(a)
+
+
 def main():
     global VERBOSE
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -1416,6 +1543,15 @@ def main():
     p.add_argument("--rebuild", action="store_true")
     p.add_argument("--force", action="store_true")
     sub.add_parser("open").add_argument("what", nargs="?", help="nothing: the overview; suite-smoke: that report; suite-smoke/agent/page-01.png")
+    p = selection(sub.add_parser("audit"))
+    p.add_argument("--budget", default="30m", help="5m, 30m, 1h, 2h or minutes (e.g. 45m)")
+    p.add_argument("--audit-seed", dest="seed_audit", type=int, default=None, help="repeat a sample")
+    p.add_argument("--focus", help="only tests with these tags (comma = or), e.g. feature:farfield")
+    p.add_argument("--dry", action="store_true", help="show the sample, run nothing")
+    p.add_argument("--keep", action="store_true")
+    p.add_argument("--rebuild", action="store_true")
+    p.add_argument("--force", action="store_true")
+    p.add_argument("--include-quarantined", action="store_true")
     p = sub.add_parser("trace")
     p.add_argument("test", nargs="?", help="test id or test|variant (default: the end of the run)")
     p.add_argument("--before", type=int, default=15, help="steps before the test's first step")
@@ -1434,7 +1570,8 @@ def main():
     {"list": cmd_list, "plan": cmd_plan, "run": cmd_run, "watch": cmd_watch, "serve": cmd_serve,
      "status": cmd_status, "report": cmd_report, "cameras": cmd_cameras, "export-tour": cmd_export_tour,
      "seed-legacy": cmd_seed_legacy, "clean": cmd_clean, "probe": cmd_probe, "zoom": cmd_zoom,
-     "gate": cmd_gate, "open": cmd_open, "quarantine": cmd_quarantine, "trace": cmd_trace}[a.cmd](a)
+     "gate": cmd_gate, "open": cmd_open, "quarantine": cmd_quarantine, "trace": cmd_trace,
+     "audit": cmd_audit}[a.cmd](a)
 
 
 if __name__ == "__main__":

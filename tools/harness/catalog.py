@@ -387,7 +387,8 @@ def shot_files(s, tag):
                     ((f"{tag}-r{i}", name(i, x) + ": real chunks"), (f"{tag}-r{i}b", name(i, x) + ": far field only"))]
         return [(f"{tag}-r{i}", name(i, x)) for i, x in enumerate(d)]
     if "sweep" in p:
-        return [(f"{tag}s_{i * 10:04d}", f"{HANDOFF + 70 - i * 5} m") for i in range(25)]
+        # camera-travel captures every 10 steps from step 10 (240 steps over 120 m: 0.5 m a step)
+        return [(f"{tag}s_{i * 10:04d}", f"{HANDOFF + 70 - i * 5} m") for i in range(1, 25)]
     return [(tag, None)]
 
 

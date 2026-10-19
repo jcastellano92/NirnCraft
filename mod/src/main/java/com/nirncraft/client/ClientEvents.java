@@ -502,9 +502,19 @@ public final class ClientEvents {
         return !state.isAir() && state.isSolid() && state.getFluidState().isEmpty();
     }
 
+    /** NirnCraft GUI layers that are camera effects, not HUD: they stay when the HUD is hidden. */
+    private static final java.util.Set<String> CAMERA_EFFECT_LAYERS = java.util.Set.of("world_fade", "curse_tint", "intro_letterbox");
+
     @SubscribeEvent
     public static void hideVanillaBars(RenderGuiLayerEvent.Pre event) {
         var id = event.getName();
+        // F1 (hidden HUD) hides every NirnCraft layer too: narration cards, region banners, compass, notifications,
+        // hints... Clean screenshots for players and clean test captures. Camera effects stay (they are the picture).
+        if (id.getNamespace().equals("nirncraft") && Minecraft.getInstance().gui.hud.isHidden()
+                && !CAMERA_EFFECT_LAYERS.contains(id.getPath())) {
+            event.setCanceled(true);
+            return;
+        }
         if (id.equals(VanillaGuiLayers.PLAYER_HEALTH) || id.equals(VanillaGuiLayers.FOOD_LEVEL)
                 || id.equals(VanillaGuiLayers.ARMOR_LEVEL) || id.equals(VanillaGuiLayers.CONTEXTUAL_INFO_BAR)
                 || id.equals(VanillaGuiLayers.HOTBAR)) {
