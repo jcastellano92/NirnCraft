@@ -365,7 +365,10 @@ public final class ClientAutotest {
                 NirnCraft.LOGGER.error("Autotest live: {}",liveError);
                 return;
             }
-            liveSettleStable = ready ? liveSettleStable + 1 : 0;
+            // a living place (doors, random ticks, block updates) rebuilds a section every few ticks: a not-ready tick
+            // costs two, not the whole streak, so a world that is ready ~3/4 of the time settles in seconds, while
+            // terrain still loading (mostly not ready) never does
+            liveSettleStable = ready ? liveSettleStable + 1 : Math.max(0, liveSettleStable - 2);
             if (liveSettleStable >= 20) {
                 liveSettleUntil = 0;
                 READINESS.settled(mc);
