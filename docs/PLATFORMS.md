@@ -40,6 +40,10 @@ the budget where it buys the most:
 
 * **GPU:** the pack's and the far field's knobs (existing), and the new representation's: group threshold (tol),
   rays per pixel, surface cache refresh per frame, face texture density, far resolution scale.
+* **CPU threads:** the CPU paths already run on every hardware thread (atlas::parallelRun: the CPU backend's frame,
+  the voxeliser; the height kernel up to 8; the preview source half the cores); the thread count becomes a knob
+  too, so they take all cores when the machine has them free (no GPU, a loading cover, a many-core CPU) and give
+  them back when Minecraft's chunk builder or the integrated server needs them.
 * **CPU (client):** chunk meshing share, far-field worker passes, change-feed apply budget, entity stand-in distance,
   particle and weather simulation density.
 * **CPU (server / host):** generation and pregeneration share, the change feed's push rate, section recording,
@@ -63,7 +67,7 @@ average. The profile is saved per machine and per pack version.
 
 ## Next steps
 
-1. Linux x64 toolchain (WSL or a container) and an ABI 0.13 .so in the jar; the harness checks the packed natives'
+1. Linux x64 toolchain (WSL for builds, owner OK 2026-10-19; end users run the native library) and an ABI 0.13 .so in the jar; the harness checks the packed natives
    ABI against the Java side's minimum.
 2. The new representation's knobs (with the Slang port), measured by atlas_lab like the pack's.
 3. A CPU-backend tier test: the far field on the CPU backend at its lowest tier inside a budget on an 8-core CPU.
