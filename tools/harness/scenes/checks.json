@@ -932,6 +932,26 @@
         "tools/dev/check_natives.py"
       ],
       "timeout": 120
+    },
+    {
+      "id": "check-bake-packaged",
+      "title": "The core jar's packaged bake matches its inputs (else the game computes the plans at every start)",
+      "tags": [
+        "check:bake",
+        "suite:validate-tools",
+        "suite:smoke"
+      ],
+      "run": [
+        "py",
+        "-3",
+        "tools/dev/check_bake.py"
+      ],
+      "inputs": [
+        "mod/src/main/resources/nirncraft/baked",
+        "mod/src/main/java/com/nirncraft/bake/Bake.java",
+        "tools/dev/check_bake.py"
+      ],
+      "timeout": 300
     }
   ]
 }

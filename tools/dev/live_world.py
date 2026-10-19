@@ -473,9 +473,15 @@ def install_core(jar):
             except (ValueError, KeyError):
                 # A core can have computed live because its embedded bake was stale. A staged,
                 # fully verified replacement should replace that bake, never inherit it.
-                verified_entries(new)
+                try:
+                    verified_entries(new)
+                    fresh_verified_bakes = True
+                except (ValueError, KeyError) as e:
+                    # neither jar carries a bake for these inputs: install the code anyway (the game computes the
+                    # plans at start, slower) and say so; a stale packaged bake must never block a code install
+                    print(f'WARNING: no packaged bake matches the runtime inputs ({e}); the game computes the plans at '
+                          'start. Rebake: tools/bake/bake.ps1', file=sys.stderr)
                 safe = False
-                fresh_verified_bakes = True
         backup = DEV / 'core-backups' / str(time.time_ns()) / 'nirncraft-core.jar'
         backup.parent.mkdir(parents=True)
         shutil.copy2(core, backup)
