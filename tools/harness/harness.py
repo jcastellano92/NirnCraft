@@ -78,6 +78,13 @@ def alive(pid):
 
 
 # ================================================================================================ selection
+CHECK_SKIP_EXIT = 3  # a check command's "I cannot judge this case" (its last line says why), e.g. an unlit element
+
+
+def check_skipped(returncode):
+    return returncode == CHECK_SKIP_EXIT
+
+
 def tag_match(q, tags):
     q = q.lower()
     return any(t.lower() == q or t.lower().startswith(q + "/") or t.lower().startswith(q + ":") for t in tags)
@@ -508,6 +515,8 @@ class Runner:
         if log_file.exists():  # like images: the newest output and the one before it
             log_file.replace(d / f"{v}.output.before.txt")
         log_file.write_text(out[-20000:], encoding="utf-8")
+        if check_skipped(r.returncode):  # the check cannot judge this case (says why): neither a pass nor a fail
+            return results.record(s["id"], v, "check", "skip", m, fp, extra={"error": out.strip().splitlines()[-1][:300] if out.strip() else ""})
         failed = r.returncode != 0
         if s.get("fail_regex"):  # tools that report problems as lines but exit 0 (e.g. "^ERR")
             hits = [l for l in out.splitlines() if re.search(s["fail_regex"], l)]

@@ -136,8 +136,11 @@ bool loadBlocks(const std::string& path) {
         bool water = b.cls == 2 && !(b.flags & 4);
         if (water) b.mask = ~0ull;  // fluids have no block model: a full water voxel
         // thinner than a micro-voxel (a snow layer, a carpet, a pressure plate: its outline fills none of the 4 x 4 x 4):
-        // one layer on the floor, or the block below shows through where the game draws the layer
-        if (!b.mask && (b.flags & 4) && b.cls != 4) b.mask = 0xFFFFull;
+        // one layer on the floor, or the block below shows through where the game draws the layer; only a layer, its
+        // top face (nearly) covered: a chain or a rod fills no micro-voxel either and must not become a floating slab
+        int topCover = 0;
+        for (int t = 0; t < 16; t++) topCover += (b.face[UP][t] >> 24) != 0;
+        if (!b.mask && (b.flags & 4) && b.cls != 4 && topCover >= 12) b.mask = 0xFFFFull;
         if (water || (b.mean.r == 0 && b.mean.g == 0 && b.mean.b == 0 && b.mask)) b.mean = water ? RGB{0x3F, 0x76, 0xE4} : RGB{128, 128, 128};
         bool content[6];
         for (int f2 = 0; f2 < 6; f2++) {

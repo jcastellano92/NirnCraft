@@ -26,7 +26,7 @@ def scenes():
                     "inputs": ["tools/harness/element_lab.py", "native/tools/atlas_truth.cpp", "native/tools/atlas_lab.cpp",
                                "native/tools/atlas_lab_scene.hpp"],
                     "metrics": {"worst_dE": r'"worst": \{"dist": \d+, "dE": ([\d.]+)',
-                                "worst_iou": r'"iou": ([\d.]+)\}\}?$',
+                                "worst_iou": r'"worst": \{"dist": \d+, "dE": [\d.]+, "iou": ([\d.]+)\}',
                                 "pop_fast": r'"flyin_fast": \{"pop": ([\d.]+)',
                                 "pop_slow": r'"flyin_slow": \{"pop": ([\d.]+)'},
                     "timeout": 900, "source": "tools/harness/element_lab.py"})

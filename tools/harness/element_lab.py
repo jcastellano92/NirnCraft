@@ -241,6 +241,7 @@ def pop(renderer, frames_truth, frames_ours):
 # coverage off the reference's by more than presence (either way)
 LIMITS = {"iou": 0.9, "pop": 0.1, "presence": 0.75}
 SHAPE_PX = 16
+DARK_L = 8  # the reference's mean L* over the element, nearest: below it the outside is unlit (an underground chunk)
 MASS_PX = 0.25  # pixels of coverage: a dot's mass is measured to about this (16 samples, sub-pixel placement)
 
 
@@ -284,6 +285,10 @@ def main():
             report["distances"].append({"dist": dist, **m})
             print(f"{dist:>7} m  iou {m['iou']:.3f}  dE {m['dE']:6.2f}  presence {m['presence']:.2f}  ({m['pixels']} px)")
             rows.append((Image.open(ref).convert("RGB"), Image.open(ours).convert("RGB")))
+            if "lightness" not in report:  # how lit the element's outside is, seen from nearest
+                rgb, mask = load(ref)
+                sel = mask > 0.5
+                report["lightness"] = round(float(lab(rgb)[..., 0][sel].mean()), 2) if sel.any() else 0.0
         for name in fly:
             report[f"flyin_{name}"] = pop(a.renderer, fly[name]["truth"], fly[name][a.renderer])
             print(f"fly-in {name}: pop {report[f'flyin_{name}']['pop']}  max {report[f'flyin_{name}']['popMax']}")
@@ -313,6 +318,10 @@ def main():
             fails.append(f"fly-in {name} pops: {report[f'flyin_{name}']['pop']} > {LIMITS['pop']}")
     report["fails"] = fails
     print(json.dumps(report))
+    if report.get("lightness", 100) < DARK_L:  # black on black agrees to dE 0 and says nothing: not a pass
+        print(f"SKIP: the element's outside is unlit (L* {report['lightness']}; underground): judge it from inside, "
+              "in the scene tier")
+        return 3  # harness.CHECK_SKIP_EXIT
     for f in fails:
         print("FAIL " + f)
     return 1 if fails else 0

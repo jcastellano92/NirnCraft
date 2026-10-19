@@ -206,6 +206,17 @@ pp = review.parse_pose("\n".join(["VERDICT: WEAK", "SEES: a wall", "PROBLEMS: to
 expect(pp["verdict"] == "WEAK" and pp["fix"] == "move back 40 blocks", "the pose review's answer is read field by field")
 expect(review.parse_pose("I could not open the image.")["verdict"] is None, "no verdict line: unvetted, never a pass")
 
+# --- a check can say it cannot judge a case (an unlit element): a skip, never a pass or a fail --------------------
+expect(harness.check_skipped(harness.CHECK_SKIP_EXIT) and not harness.check_skipped(0) and not harness.check_skipped(1),
+       "a check's skip exit is recorded as a skip")
+import re as _re
+import elements as _elements
+_line = json.dumps({"worst": {"dist": 32, "dE": 3.7, "iou": 0.912}, "fails": []})
+_els = _elements.scenes()  # none on a machine without exports: nothing to read then
+if _els:
+    _m = _re.search(_els[0]["metrics"]["worst_iou"], _line)
+    expect(bool(_m) and _m.group(1) == "0.912", "the elements suite reads the worst IoU")
+
 # --- truth subjects offset from their place look back at it (five faced away: yaw 0 is south in Minecraft) -----------
 import math as _math
 import truth as _truth
