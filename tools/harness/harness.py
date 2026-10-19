@@ -1843,10 +1843,11 @@ def cmd_issues(a):
     opened = states.get("open", [])
     if opened:
         lines.append(f"## open ({len(opened)}), by priority and cause")
-        rows = {}
+        by_cause = {}
         for e in opened:
-            rows.setdefault((issue_priority(e, groups), cause(e)), []).append(e)
-        for (prio, why), es in sorted(rows.items(), key=lambda kv: (kv[0][0], -len(kv[1]))):
+            by_cause.setdefault(cause(e), []).append(e)
+        rows = {(min(issue_priority(e, groups) for e in es), why): es for why, es in by_cause.items()}  # a group
+        for (prio, why), es in sorted(rows.items(), key=lambda kv: (kv[0][0], -len(kv[1]))):     # at its top priority
             es.sort(key=lambda e: SEVERITY.get(e.get("status"), 9))
             head = f"- {prio} [{es[0].get('area')}] {why}"
             if len(es) == 1:
