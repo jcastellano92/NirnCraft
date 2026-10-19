@@ -104,6 +104,20 @@ RGB tinted(const Block& b, RGB c) {
     return {c.r * t.r / 255.f, c.g * t.g / 255.f, c.b * t.b / 255.f};
 }
 
+// the visual hull of a block's six face tiles: micro-voxel (x, y, z) is in when each axis's pair of faces covers its
+// projection (alpha at least a quarter: a 4/16 post centred on a texel boundary covers two texels by half)
+uint64_t hull(const Block& b) {
+    auto cov = [&](int f, int x, int y, int z) { return (b.face[f][texel(f, x, y, z)] >> 24) >= 64; };
+    uint64_t m = 0;
+    for (int y = 0; y < 4; y++)
+        for (int z = 0; z < 4; z++)
+            for (int x = 0; x < 4; x++)
+                if ((cov(DOWN, x, y, z) || cov(UP, x, y, z)) && (cov(NORTH, x, y, z) || cov(SOUTH, x, y, z)) &&
+                    (cov(WEST, x, y, z) || cov(EAST, x, y, z)))
+                    m |= 1ull << (x + 4 * (z + 4 * y));
+    return m;
+}
+
 bool loadBlocks(const std::string& path) {
     std::ifstream f(path, std::ios::binary);
     if (!f) return false;
@@ -135,12 +149,10 @@ bool loadBlocks(const std::string& path) {
             for (int t = 0; t < 16; t++) b.face[f2][t] = u32();
         bool water = b.cls == 2 && !(b.flags & 4);
         if (water) b.mask = ~0ull;  // fluids have no block model: a full water voxel
-        // thinner than a micro-voxel (a snow layer, a carpet, a pressure plate: its outline fills none of the 4 x 4 x 4):
-        // one layer on the floor, or the block below shows through where the game draws the layer; only a layer, its
-        // top face (nearly) covered: a chain or a rod fills no micro-voxel either and must not become a floating slab
-        int topCover = 0;
-        for (int t = 0; t < 16; t++) topCover += (b.face[UP][t] >> 24) != 0;
-        if (!b.mask && (b.flags & 4) && b.cls != 4 && topCover >= 12) b.mask = 0xFFFFull;
+        // thinner than a micro-voxel (a snow layer, a fence post, a torch, a chain; grass and flowers have no outline at
+        // all): its outline fills none of the 4 x 4 x 4, so its shape is the visual hull of its face tiles, a voxel
+        // filled where all three of its projections are covered (a snow layer's bottom layer, a post's core column)
+        if (!b.mask && (b.flags & 4) && !water) b.mask = hull(b);
         if (water || (b.mean.r == 0 && b.mean.g == 0 && b.mean.b == 0 && b.mask)) b.mean = water ? RGB{0x3F, 0x76, 0xE4} : RGB{128, 128, 128};
         bool content[6];
         for (int f2 = 0; f2 < 6; f2++) {
