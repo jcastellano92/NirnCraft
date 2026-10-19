@@ -243,6 +243,20 @@ with tempfile.TemporaryDirectory() as _td:
            "a face looking beyond the export (the reference's open-sky guess) does not count")
     _el.read_alv, _el.block_names, _el.export_dir = _saved
 
+# --- a renderer that stops following the camera is caught, not scored as a perfect fly-in -------------------------
+from PIL import Image as _Image
+with tempfile.TemporaryDirectory() as _td:
+    _tf, _of = [], []
+    for _i in range(5):
+        _a = _np.zeros((8, 8, 3), dtype=_np.uint8)
+        _a[:, :_i + 1] = 200  # the reference: the element grows as the camera nears
+        _tp, _op = Path(_td) / f"t{_i}.png", Path(_td) / f"o{_i}.png"
+        _Image.fromarray(_a).save(_tp)
+        _Image.fromarray(_np.zeros((8, 8, 3), dtype=_np.uint8)).save(_op)  # ours: the same empty frame every step
+        _tf.append((_tp, None)), _of.append((_op, None))
+    _p = _el.pop("x", _tf, _of)
+    expect(_p["pop"] == 0.0 and _p["frozen"] == 4, "a frozen renderer has no pop and is counted frozen (a fail)")
+
 # --- truth subjects offset from their place look back at it (five faced away: yaw 0 is south in Minecraft) -----------
 import math as _math
 import truth as _truth

@@ -288,7 +288,9 @@ ATLAS_API AtlasStatus atlas_create(AtlasBackend backend, AtlasContext** out) {
     // ATLAS_GROUP_LODS=<n>: only the n finest levels get groups (the rest keep the old path); a knob for measurements
     if (const char* gl = std::getenv("ATLAS_GROUP_LODS"))
         ctx->world.groupLods = std::clamp(std::atoi(gl), 0, MAX_LODS);
-    if (const char* sk = std::getenv("ATLAS_SECTION_KEEP")) ctx->world.sectionKeep = std::clamp(std::atoi(sk), 0, 64);
+    // ATLAS_SECTION_KEEP=<n>: keep real sections n LOD-0 regions either side (tools: an element seen from 64 km and
+    // back has no server to send it again; 256 regions is 64 km)
+    if (const char* sk = std::getenv("ATLAS_SECTION_KEEP")) ctx->world.sectionKeep = std::clamp(std::atoi(sk), 0, 1024);
     auto pal = previewPalette();
     setPalette(ctx.get(), pal.data(), uint32_t(pal.size()));
     ctx->weather.assign(4 * 128 * 128, 0);

@@ -756,7 +756,10 @@ int World::update(const double centre[3], double budgetMs, double* buildMs) {
             if (k.lod >= lodCount || dx > windowRadius + 2 || dz > windowRadius + 2) it = structures_.erase(it);
             else ++it;
         }
-        int keep = sectionKeep > 0 ? sectionKeep : windowRadius + 2;  // LOD-0 regions either side
+        // LOD-0 regions either side: one ring beyond the server's sections window (AtlasSections.RADIUS_TILES = 4, the
+        // same 256-block grid), which forgets a tile once it leaves and sends it again on return; what the core drops
+        // inside that window would never come back
+        int keep = sectionKeep > 0 ? sectionKeep : windowRadius + 3;
         for (auto it = sections_.begin(); it != sections_.end();) {
             int rx = floorDiv(it->first.x * 16, 256), rz = floorDiv(it->first.z * 16, 256);
             if (std::abs(rx - centreRegion[0][0]) > keep || std::abs(rz - centreRegion[0][1]) > keep)

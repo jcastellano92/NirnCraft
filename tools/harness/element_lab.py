@@ -16,6 +16,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import os
 import struct
 import subprocess
 import sys
@@ -126,7 +127,11 @@ def camera(box, dist, yaw_deg=30.0, pitch_deg=25.0, size=256):
 
 def run(tool, args, out=None):
     cmd = [str(EXE / f"{tool}.exe")] + ([f"out={out}"] if out else []) + [f"{k}={v}" for k, v in args.items()]
-    r = subprocess.run(cmd, capture_output=True, text=True, creationflags=0x00004000 if sys.platform == "win32" else 0)
+    env = dict(os.environ)
+    # the far field drops real sections a few regions from the camera and the game's server sends them again on
+    # return; atlas_render has no server, so after a far rung every later frame was sky: keep them all
+    env["ATLAS_SECTION_KEEP"] = "320"  # regions of 256 blocks: past the 65 km rung
+    r = subprocess.run(cmd, capture_output=True, text=True, env=env, creationflags=0x00004000 if sys.platform == "win32" else 0)
     if r.returncode:
         raise RuntimeError(f"{tool} failed: {(r.stdout + r.stderr)[-400:]}")
 
@@ -163,6 +168,11 @@ def renderer_args(renderer, el, tmp):
     if renderer == "lab-groups":  # the grouped-voxel representation on the CPU bench, coloured from surface cards;
         # leaves and plants whole voxels cut by their cards' alpha (masked face textures)
         return "atlas_lab", {**lab, "surface": bake_cards(el, tmp), "leaves": "cards"}
+    if renderer in ("far-groups", "far-old"):  # the far field itself (atlas_core through atlas_render): its groups
+        # (ATLAS_FRAME_GROUPS) or the path before them, flat world (radius 0), coloured from the same surface cards
+        return "atlas_render", {"camera": "mc", "blocks": d / "blocks.bin", "volume": d / f"{el['volume']}.alv",
+                                "box": truth_inputs(el)["box"], "surface": bake_cards(el, tmp), "shade": "mc",
+                                "spp": 16, "radius": 0, "groups": 1 if renderer == "far-groups" else 0}
     if renderer == "lab-groups-hashed":  # the same with leaves as hashed micro-voxels (their 4 x 4 tiles' alpha)
         return "atlas_lab", {**lab, "surface": bake_cards(el, tmp)}
     if renderer == "lab-groups-own":  # the same with the bench's own 4 x 4 mean tiles under a fixed sun (no cache)
@@ -225,16 +235,17 @@ def flyin_frames(el, start, end, steps, tmp, name, size):
 
 def pop(renderer, frames_truth, frames_ours):
     """Frame-to-frame change of ours beyond the reference's own along an approach: popping or shimmer."""
-    excess, prev = [], None
+    excess, prev, still = [], None, 0
     for (pt, _), (po, _) in zip(frames_truth, frames_ours):
         cur = (lab(load(pt)[0]), lab(load(po)[0]))
         if prev:
             ct = float(np.sqrt(((cur[0] - prev[0]) ** 2).sum(axis=2)).mean())
             co = float(np.sqrt(((cur[1] - prev[1]) ** 2).sum(axis=2)).mean())
             excess.append(max(0.0, co - ct))
+            still += co == 0.0 and ct > 0.5  # the reference moved, ours did not change a pixel
         prev = cur
     return {"pop": round(float(np.mean(excess)), 3) if excess else 0.0, "popMax": round(float(max(excess)), 3) if excess else 0.0,
-            "steps": [round(e, 3) for e in excess]}
+            "steps": [round(e, 3) for e in excess], "frozen": still}
 
 
 # an element fails below this silhouette agreement, above this popping, or (a dot of under SHAPE_PX pixels) with its
@@ -339,6 +350,11 @@ def main():
         if d["pixels"] < SHAPE_PX and off > max((1 - LIMITS["presence"]) * d["mass"], MASS_PX):
             fails.append(f"presence {d['massOurs']:.2f} px of coverage vs the reference's {d['mass']:.2f} at {d['dist']} m")
     for name in FLYINS:
+        # a renderer that stops following the camera changes less than the reference everywhere: "no pop" (atlas_render
+        # once drew sky for every frame after a far rung, and every fly-in read as perfect)
+        if report[f"flyin_{name}"]["frozen"] >= 3:
+            fails.append(f"fly-in {name}: ours did not change over {report[f'flyin_{name}']['frozen']} steps where the "
+                         "reference did (the renderer stopped following the camera)")
         if report[f"flyin_{name}"]["pop"] > LIMITS["pop"]:
             fails.append(f"fly-in {name} pops: {report[f'flyin_{name}']['pop']} > {LIMITS['pop']}")
     report["fails"] = fails

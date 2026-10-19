@@ -163,8 +163,9 @@ bool loadBlocks(const std::string& path) {
         bool air = name.rfind("Block{minecraft:air}", 0) == 0 || name.rfind("Block{minecraft:cave_air}", 0) == 0 ||
                    name.rfind("Block{minecraft:void_air}", 0) == 0;
         b.any = !air && (b.mask != 0 || (b.flags & 4));
-        // today's far field keeps (AtlasSections.kept): solids, leaves, fluids, lights, slabs, stairs
-        b.kept = !air && (b.cls <= 3 || name.find("_slab") != std::string::npos || name.find("_stairs") != std::string::npos);
+        // today's far field keeps (AtlasSections.kept): solids, leaves, fluids, lights, slabs, stairs, snow layers, carpets
+        b.kept = !air && (b.cls <= 3 || name.find("_slab") != std::string::npos || name.find("_stairs") != std::string::npos ||
+                          name.rfind("Block{minecraft:snow}", 0) == 0 || name.find("_carpet}") != std::string::npos);
         if (!b.mask) b.kept = false;
     }
     return true;

@@ -95,7 +95,7 @@
         "suite:atlaslab",
         "place:falkreath",
         "feature:horizon",
-        "perf"
+        "feature:perf"
       ],
       "tier": "lab",
       "lab": {

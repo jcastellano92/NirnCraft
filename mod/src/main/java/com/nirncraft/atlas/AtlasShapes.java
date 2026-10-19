@@ -97,12 +97,20 @@ final class AtlasShapes {
      * material carries the biome colour it was registered with), cut-out when leaves or cut-out quads let light through.
      * Null when it has neither a shape nor a model (a full cube in its colour then).
      */
+    /** How much of the block's floor the outline's boxes in its bottom micro-voxel layer cover (0..1, about). */
+    static double floorCover(List<AABB> boxes) {
+        double a = 0;
+        for (AABB b : boxes) if (b.maxY <= 0.25) a += (b.maxX - b.minX) * (b.maxZ - b.minZ);
+        return a;
+    }
+
     static Shape of(BlockState st, int tint) {
         List<BakedQuad> quads = quads(st);
         List<AABB> boxes = boxes(st);
         long mask = mask(boxes);
-        // thinner than a micro-voxel (a snow layer, a carpet): its bottom layer, not nothing
-        if (mask == 0 && !boxes.isEmpty() && !quads.isEmpty()) mask = 0xFFFFL;
+        // thinner than a micro-voxel (a snow layer, a carpet): its bottom layer, not nothing; only a layer that covers
+        // the floor (a chain or a rod fills no micro-voxel either and must not become a floating slab)
+        if (mask == 0 && !boxes.isEmpty() && !quads.isEmpty() && floorCover(boxes) >= 0.75) mask = 0xFFFFL;
         boolean fluid = !st.getFluidState().isEmpty() && quads.isEmpty();
         if (fluid) mask = -1L;
         if (mask == 0 || quads.isEmpty() && !fluid) return null;

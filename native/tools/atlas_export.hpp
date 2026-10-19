@@ -58,8 +58,11 @@ inline bool loadBlocks(const std::string& path, std::vector<State>& lib) {
         if (!get(&s.cls, 1) || !get(&s.emit, 1) || !get(&s.flags, 1) || !get(&s.tint, 1) || !get(&s.mask, 8) ||
             !get(&s.mean, 4) || !get(s.faces, sizeof s.faces))
             return false;
-        // thinner than a micro-voxel (a snow layer, a carpet, a rail): its bottom layer, not nothing (AtlasShapes.of)
-        if (!s.mask && (s.flags & 4) && s.cls != 2 && s.cls != 4) s.mask = 0xFFFFull;
+        // thinner than a micro-voxel (a snow layer, a carpet): its bottom layer, not nothing (AtlasShapes.of); only a
+        // layer, its top face (nearly) covered: a chain or a rod fills no micro-voxel either, and is no floating slab
+        int topCover = 0;
+        for (int t = 0; t < 16; t++) topCover += (s.faces[1][t] >> 24) != 0;
+        if (!s.mask && (s.flags & 4) && s.cls != 2 && s.cls != 4 && topCover >= 12) s.mask = 0xFFFFull;
     }
     return true;
 }
@@ -70,12 +73,13 @@ inline bool isAir(const State& s) {
 }
 
 // what the game's far field keeps as a voxel (AtlasSections.kept, as atlas_lab reads it from the library): solids,
-// leaves, fluids, lights, slabs and stairs
+// leaves, fluids, lights, slabs and stairs, snow layers and carpets (the cover a far snowfield or a floor shows)
 inline bool keptByGame(const State& s) {
     if (isAir(s)) return false;
     bool water = s.cls == 2 && !(s.flags & 4);
     if (!s.mask && !water) return false;
-    return s.cls <= 3 || s.name.find("_slab") != std::string::npos || s.name.find("_stairs") != std::string::npos;
+    return s.cls <= 3 || s.name.find("_slab") != std::string::npos || s.name.find("_stairs") != std::string::npos ||
+           s.name.rfind("Block{minecraft:snow}", 0) == 0 || s.name.find("_carpet}") != std::string::npos;
 }
 
 inline bool anyContent(const State& s) {

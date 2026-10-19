@@ -40,8 +40,12 @@ import java.util.zip.InflaterInputStream;
 public final class AtlasSections {
     private AtlasSections() {}
 
-    /** Window half-size in LOD-0 tiles for sections: the LOD 4 regions' reach is wider, but a section is 16 blocks. */
-    static final int RADIUS_TILES = 6;
+    /**
+     * Window half-size in LOD-0 tiles for sections. Inside the core's own keep (World::sectionKeep: windowRadius + 3
+     * regions of the same 256 blocks): the core drops sections outside its keep and never asks again, so what was sent
+     * beyond it was lost, and a tile is forgotten here once it leaves this window, so a returning player gets it again.
+     */
+    static final int RADIUS_TILES = 4;
     private static final int PER_PACKET = 64;
 
     static final class TileSections {
@@ -64,12 +68,17 @@ public final class AtlasSections {
         DIRTY_TILES.clear();
     }
 
-    /** A block the far field keeps as a voxel (solid, leaves, slabs and stairs, water and lava, fire and lights). */
+    /**
+     * A block the far field keeps as a voxel (solid, leaves, slabs and stairs, water and lava, fire and lights, snow
+     * layers and carpets: without them a far snowfield is the bare ground under its snow).
+     */
     static boolean kept(BlockState s) {
         if (s.isAir()) return false;
         if (s.isSolidRender() || s.is(BlockTags.LEAVES) || !s.getFluidState().isEmpty()) return true;
         if (s.getLightEmission() >= 10) return true;
-        return s.getBlock() instanceof SlabBlock || s.getBlock() instanceof StairBlock;
+        return s.getBlock() instanceof SlabBlock || s.getBlock() instanceof StairBlock
+                || s.getBlock() instanceof net.minecraft.world.level.block.SnowLayerBlock
+                || s.getBlock() instanceof net.minecraft.world.level.block.CarpetBlock;
     }
 
     /** Chunk c's surface sections (lowest ground - 16 .. highest top), recorded when they changed. Server thread. */
@@ -149,6 +158,12 @@ public final class AtlasSections {
         return t;
     }
 
+    /** Whether tile `tk` lies outside the sections window around tile (ptx, ptz). */
+    static boolean outside(long tk, int ptx, int ptz) {
+        int tx = (int) (tk >> 32), tz = (int) tk;
+        return Math.abs(tx - ptx) > RADIUS_TILES || Math.abs(tz - ptz) > RADIUS_TILES;
+    }
+
     /** Each player's fine window: the chunks' sections newer than what that player has. */
     static void push(MinecraftServer server, ServerLevel level) {
         if (dir == null) open(server);
@@ -170,6 +185,8 @@ public final class AtlasSections {
                     for (int i = 0; i < blobs.size(); i += PER_PACKET)
                         SkyNetwork.sendToPlayer(p, new AtlasNet.FarSections(blobs.subList(i, Math.min(blobs.size(), i + PER_PACKET)).toArray(new byte[0][])));
                 }
+            // tiles that left the window: the client's core drops their sections, so they count as never sent
+            sent.keySet().removeIf(tk -> outside(tk, ptx, ptz));
         }
         SENT.keySet().removeIf(u -> server.getPlayerList().getPlayer(u) == null);
     }
