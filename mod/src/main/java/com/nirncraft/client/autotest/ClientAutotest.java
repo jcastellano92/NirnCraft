@@ -759,6 +759,15 @@ public final class ClientAutotest {
                     mc.options.particles().set(truthParticles);
                     truthParticles = null;
                 }
+            } else if (action.startsWith("far-timeline ")) {  // start | dump <name>: the far field's loading timeline
+                String[] v = action.substring(13).trim().split("\\s+");
+                if (v[0].equals("start")) {
+                    if (!com.nirncraft.atlas.AtlasClient.farTimelineMark()) throw new IllegalStateException("No far field to time");
+                } else if (v[0].equals("dump") && v.length > 1) {
+                    java.nio.file.Files.createDirectories(SCREENSHOT_DIR);
+                    java.nio.file.Files.writeString(SCREENSHOT_DIR.resolve(v[1].replaceAll("[^A-Za-z0-9_-]", "_") + "-timeline.json"),
+                            com.nirncraft.atlas.AtlasClient.farTimelineJson());
+                } else throw new IllegalArgumentException("far-timeline start | dump <name>");
             } else if (action.startsWith("fog-off ")) {  // on | off: ground-truth views without distance fog or haze
                 com.nirncraft.atlas.AtlasTruthView.set(action.substring(8).trim().equals("on"));
             } else if (action.startsWith("pin ") || action.startsWith("pin-")) {  // pinned ground truth (client/pinned/PinnedTruth)

@@ -115,6 +115,13 @@ final class AtlasFarField implements AutoCloseable {
     private volatile boolean streaming = true;
     private volatile String streamingWhy = "starting";  // what kept the last pass busy (harness settle diagnostics)
     private volatile long idleSinceMs;
+    /**
+     * The loading timeline (the harness's far-timeline verb): one JSON entry a pass since the last mark, what the pass
+     * spent where (ms) and what it left, so a join or a teleport can be read as when the far field first showed,
+     * what each pass cost and when it settled.
+     */
+    private final java.util.ArrayDeque<String> timeline = new java.util.ArrayDeque<>();
+    private volatile long timelineT0 = System.nanoTime();
 
     AtlasFarField(AtlasNative.Context ctx, ColumnSource source) throws IOException {
         this(ctx, source, null);
@@ -175,6 +182,25 @@ final class AtlasFarField implements AutoCloseable {
         return streaming ? streamingWhy : "";
     }
 
+    /** Starts the loading timeline again (the next pass is its first entry). */
+    public void timelineMark() {
+        synchronized (timeline) {
+            timeline.clear();
+        }
+        timelineT0 = System.nanoTime();
+    }
+
+    /** The loading timeline since the last mark, a JSON array. */
+    public String timelineJson() {
+        synchronized (timeline) {
+            return "[" + String.join(",", timeline) + "]";
+        }
+    }
+
+    private static double ms(long from, long to) {
+        return Math.round((to - from) / 1e4) / 100.0;
+    }
+
     /** Milliseconds the far field has been idle (0 while streaming). */
     public long idleMs() {
         return streaming ? 0 : System.currentTimeMillis() - idleSinceMs;
@@ -190,6 +216,7 @@ final class AtlasFarField implements AutoCloseable {
                 }
                 double x = camX, y = camY, z = camZ;
                 boolean pending = false, overlaid = false;
+                long tPass = System.nanoTime();
                 source.view(x, z, camYaw, camHalf);
                 source.beginPass();
                 for (int lod = 0; lod < lods; lod++) {
@@ -198,6 +225,7 @@ final class AtlasFarField implements AutoCloseable {
                     pending |= source.cover(ctx, lod, (cx - WINDOW) * span, (cz - WINDOW) * span,
                             (cx + WINDOW + 1) * span, (cz + WINDOW + 1) * span);
                 }
+                long tCover = System.nanoTime();
                 // the server's changes (players building, explosions, water, lights): put the tiles they touch up again
                 java.util.List<Long> edited = AtlasEditsClient.takeDirty();
                 int sectionsApplied = 0;
@@ -207,6 +235,7 @@ final class AtlasFarField implements AutoCloseable {
                     Overlay ovE = overlay();
                     if (ovE != null) ovE.invalidate(edited);
                 }
+                long tEdits = System.nanoTime();
                 // the server's real sections (the finest levels' real blocks), within a share of the pass
                 Overlay ovS = overlay();
                 if (ovS != null) {
@@ -215,7 +244,9 @@ final class AtlasFarField implements AutoCloseable {
                 }
                 // the ground of the new place on screen now: the overlays (buildings, trees) can take a while, and
                 // the old window stayed on screen until they finished (a teleport showed stale far ground)
+                long tSections = System.nanoTime();
                 ctx.update(x, y, z, 0);
+                long tUpdate1 = System.nanoTime();
                 Overlay ov = overlay();
                 if (ov != null) {
                     long deadline = System.nanoTime() + OVERLAY_BUDGET_MS * 1_000_000L;
@@ -228,7 +259,10 @@ final class AtlasFarField implements AutoCloseable {
                         overlaid |= b;
                     }
                 }
+                long tOverlays = System.nanoTime();
                 ctx.update(x, y, z, 0);  // builds what changed and stages it for the next frame
+                long tUpdate2 = System.nanoTime();
+                boolean first = !updated;
                 updated = true;
                 // idle while the camera stays inside the same finest-LOD region and nothing is left to refine
                 boolean moved = Double.isNaN(lastX) || Math.abs(x - lastX) > 32 || Math.abs(z - lastZ) > 32;
@@ -248,6 +282,18 @@ final class AtlasFarField implements AutoCloseable {
                     streamingWhy = why.toString().trim();
                 }
                 if (was && !streaming) idleSinceMs = System.currentTimeMillis();
+                AtlasNative.Stats st = ctx.stats();
+                String entry = String.format(java.util.Locale.ROOT,
+                        "{\"t\":%.1f,\"pass\":%.2f,\"cover\":%.2f,\"edits\":%.2f,\"editedTiles\":%d,\"sections\":%.2f,"
+                                + "\"sectionsApplied\":%d,\"update1\":%.2f,\"overlays\":%.2f,\"update2\":%.2f,\"regions\":%d,"
+                                + "\"pending\":%b,\"first\":%b,\"streaming\":\"%s\"}",
+                        (tUpdate2 - timelineT0) / 1e6, ms(tPass, tUpdate2), ms(tPass, tCover), ms(tCover, tEdits), edited.size(),
+                        ms(tEdits, tSections), sectionsApplied, ms(tSections, tUpdate1), ms(tUpdate1, tOverlays),
+                        ms(tOverlays, tUpdate2), st.regions(), pending, first, streaming ? streamingWhy : "");
+                synchronized (timeline) {
+                    timeline.addLast(entry);
+                    while (timeline.size() > 4000) timeline.removeFirst();
+                }
                 Thread.sleep((moved || pending || overlaid ? 5 : 100) + restMs);
             } catch (InterruptedException e) {
                 return;

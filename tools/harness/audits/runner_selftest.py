@@ -273,6 +273,21 @@ expect(_el.backend() == "cpu", "--backend cpu renders the far field on the CPU b
 _el.FORCE_BACKEND = None
 expect(_el.backend() in ("vulkan", "cpu"), "the far field's backend is Vulkan or the CPU, by how busy the GPU is")
 
+# --- loading scenes: when the view came within reach of the settled one, and the jumps on the way ------------------
+import results as _results
+_frames = []
+for _i in range(6):  # grey until second 3, then the settled picture: a jump at 4 s, loaded from 4 s
+    _a = _np.full((40, 60, 3), 120 if _i < 3 else 30, dtype=_np.uint8)
+    _frames.append(_Image.fromarray(_a))
+_frames.append(_Image.fromarray(_np.full((40, 60, 3), 30, dtype=_np.uint8)))  # settled
+_lm = _results.pop_metrics({"loading": True, "frames": [6, 20]}, _frames)
+expect(_lm["loadConvergeS"] == 4.0 and _lm["loadJumpAtS"] == 4.0, "a loading strip says when it converged and where it jumped")
+expect(any("pop-in" in f for f in _lm.get("popFlags", [])), "a whole-view jump between seconds is flagged as pop-in")
+_ts = _game.timeline_summary([{"t": 900.0, "pass": 50, "cover": 10, "update1": 20, "update2": 15, "streaming": "moved"},
+                              {"t": 1500.0, "pass": 30, "cover": 5, "update2": 5, "streaming": ""}])
+expect(_ts["farFirstMs"] == 900.0 and _ts["farIdleMs"] == 1500.0 and _ts["farTotal_coverMs"] == 15,
+       "the far field's timeline reads as first pass, idle and totals per stage")
+
 # --- truth subjects offset from their place look back at it (five faced away: yaw 0 is south in Minecraft) -----------
 import math as _math
 import truth as _truth

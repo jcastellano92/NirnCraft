@@ -429,7 +429,10 @@ def shot_files(s, tag):
     """The screenshots a scene writes ([(file stem, label)]): one, or several that become one labelled strip."""
     p = s.get("pose") or {}
     if s.get("frames"):
-        return [(f"{tag}-f{i}", f"frame {i + 1}") for i in range(s["frames"][0])]
+        n, every = s["frames"]
+        if s.get("loading"):  # a loading timeline: frames every `every` ticks after the move, then the settled view
+            return [(f"{tag}-f{i}", f"{(i + 1) * every / 20:g} s") for i in range(n)] + [(f"{tag}-settled", "settled")]
+        return [(f"{tag}-f{i}", f"frame {i + 1}") for i in range(n)]
     if "ladder" in p:
         d = p["ladder"]["distances"]
         hs = p["ladder"].get("heights")
@@ -525,6 +528,8 @@ def load():
     scenes += elements.scenes()
     import pinned  # the same elements drawn by Minecraft itself at any distance: pinned copies on the sky stage (pinned.py)
     scenes += pinned.scenes()
+    import loading  # how fast the far field shows a place just arrived at, and how it resolves (loading.py)
+    scenes += loading.scenes()
     seam_core(scenes)
     for s in scenes:
         if s["id"] in seen:
@@ -825,7 +830,12 @@ def _capture_actions(s, tag, plan=None):
         lines += [s["camera_verb"], "settle-visual 900"]
     if s.get("measure"):
         lines.append(f"measure {tag} {int(s['measure'])}")
-    if s.get("frames"):
+    if s.get("frames") and s.get("loading"):  # the move is setup's last line: frames at fixed times after it
+        n, every = s["frames"]
+        for f in range(n):
+            lines += [f"wait {every}", f"capture {tag}-f{f}"]
+        lines += ["settle-visual 3600", "wait 20", f"capture {tag}-settled", f"far-timeline dump {tag}"]
+    elif s.get("frames"):
         n, every = s["frames"]
         for f in range(n):
             lines += [f"capture {tag}-f{f}"] + ([f"wait {every}"] if f < n - 1 else [])

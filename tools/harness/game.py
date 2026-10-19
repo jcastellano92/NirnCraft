@@ -747,6 +747,21 @@ def screen_blocking(limit=600):
         time.sleep(0.5)
 
 
+def timeline_summary(passes):
+    """The far field's loading timeline (far-timeline dump: one entry a worker pass since the mark) as metrics: when it
+    first showed, when it went idle, the passes' totals per stage, the slowest pass, and the first 300 passes."""
+    if not passes:
+        return {"farPasses": 0}
+    stages = ("cover", "edits", "sections", "update1", "overlays", "update2")
+    idle = next((p["t"] for p in passes if not p.get("streaming")), None)
+    slow = max(passes, key=lambda p: p["pass"])
+    return {"farPasses": len(passes), "farFirstMs": round(passes[0]["t"], 1),
+            "farIdleMs": round(idle, 1) if idle is not None else None,
+            "farSlowestPassMs": slow["pass"], "farSlowestPassAtMs": round(slow["t"], 1),
+            **{f"farTotal_{k}Ms": round(sum(p.get(k, 0) for p in passes), 1) for k in stages},
+            "farTimeline": passes[:300]}
+
+
 def capture(scene, variant, pose_lines, capture_lines):
     """Run one scene + variant; returns (png path, receipt dict, perf dict or None)."""
     tag = f"h-{scene['id']}-{variant}"
@@ -804,6 +819,13 @@ def capture(scene, variant, pose_lines, capture_lines):
     rec = {}
     if (SHOTS / f"{tag}.json").exists():
         rec = json.loads((SHOTS / f"{tag}.json").read_text(encoding="utf-8"))
+    tl = SHOTS / f"{tag}-timeline.json"  # far-timeline dump (a loading scene): its summary and passes travel with it
+    if tl.exists():
+        try:
+            extra.update(timeline_summary(json.loads(tl.read_text(encoding="utf-8"))))
+        except (ValueError, OSError) as e:
+            extra.setdefault("popFlags", []).append(f"far timeline unreadable: {e}")
+        tl.unlink(missing_ok=True)
     lines = log_since(mark)
     if lines:  # every warning and error the game logged during this test travels with its result
         counts, serious = log_summary(lines)
