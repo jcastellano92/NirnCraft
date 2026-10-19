@@ -265,13 +265,31 @@ before / after, never silently:
 
 Verification tiers (owner, 2026-10-19): 1. elements offline (tools/harness/element_lab.py, suite:elements: one chunk or
 tree cut from an export by `box=`, the intended reference vs our renderer from 8 m to 64 km and two fly-ins, ~40 s an
-element); 2. the same elements against Minecraft's own rendering, live, pinned (suite:pinned, final); 3. full scenes
-offline (suite:truth's lab scenes); 4. full scenes live, last. Live captures only when a tier needs new inputs, and
-every new camera position is vetted by a cheap visual review before it is relied on.
+element, now ~12 s: one process per renderer renders the whole ladder and both fly-ins); 2. the same elements against
+Minecraft's own rendering, live, pinned (suite:pinned, final); 3. full scenes offline (suite:truth's lab scenes); 4.
+full scenes live, last. Live captures only when a tier needs new inputs, and every new camera position is vetted by a
+cheap visual review before it is relied on. An element fails below IoU 0.9 (where it covers 16 px or more), with a
+dot's coverage off the reference's by more than 25 % or 0.25 px, or above 0.1 fly-in pop.
 
 **Texture resolution up close** (ground truth, 2026-10-19): the 4 x 4 face tiles are right far away but flat up close
 (the cobble path, planks); owning the near field needs faces at the texture's own resolution (16 x 16), stored once
 per texture (an atlas), not per block state.
+
+**Surface cards: colour and light from the real faces** (2026-10-19). `atlas_truth bake=x.alc` writes a card for
+every face of every block (inside `box=`): the face seen straight on, 16 x 16 texels of what the game draws there
+(texture, tint, shade, AO, the lightmap at its light; sky and block light kept per texel for relighting). `atlas_lab
+surface=x.alc` takes every hit's colour from them through a mip chain picked by the pixel's footprint (trilinear).
+This is the surface cache in its simplest form: captured once from the real models with the real light, then the
+grouped voxels only decide shape and coverage. Element tier (lab-groups, 16 samples a pixel like the reference):
+
+| element | near dE, own 4 x 4 tiles, fixed sun | near dE, cards | dE 64 m - 32 km | IoU (16 px and up) | fly-in pop fast / slow |
+|---|---|---|---|---|---|
+| whiterun-day-chunk (32 m) | 29.3 | 3.7 | 1.7 - 4.0 | 0.94 - 1.00 | 0.03 / 0.07 |
+| falkreath-wide-tree (32 m) | 10 - 14 | 6.0 | 1.7 - 3.9 | 0.92 - 0.99 | 0.05 / 0.04 |
+
+What is left is representation: a snow layer is one micro-voxel thick (1/4 block, not 1/8), cutout foliage is hashed
+micro-voxels, grazing faces shimmer a little more than the reference's 16 samples. The far pass takes its colour the
+same way (cards from the real quads, light kept apart so day, night and carried lights relight them).
 
 **An exact reference: atlas_truth** (2026-10-19). atlas_lab's ref is an approximation (4 x 4 x 4 shapes, 4 x 4 tiles,
 hashed cutouts, no light), so it cannot be ground truth itself. `native/tools/atlas_truth.cpp` traces Minecraft's own
