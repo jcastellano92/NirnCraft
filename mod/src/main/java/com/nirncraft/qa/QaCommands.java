@@ -298,6 +298,28 @@ public final class QaCommands {
             landmarks.add(o);
         }
         root.add("landmarks", landmarks);
+        JsonArray weather = new JsonArray();  // per region: its climate, the weather it can have, a place to look at it
+        for (var region : com.nirncraft.tamriel.Regions.all()) {
+            JsonObject o = new JsonObject();
+            o.addProperty("region", region.id());
+            var profile = com.nirncraft.atmosphere.weather.WeatherProfile.of(region);
+            o.addProperty("profile", profile.id);
+            JsonArray kinds = new JsonArray();
+            profile.table().forEach((k, w) -> { if (w > 0) kinds.add(k.name().toLowerCase(java.util.Locale.ROOT)); });
+            o.add("kinds", kinds);
+            com.nirncraft.tamriel.Place at = null;
+            for (var pl : com.nirncraft.tamriel.Places.all()) {
+                if (!region.id().equals(pl.regionId())) continue;
+                if (at == null || pl.id().equals(region.capital())) at = pl;
+            }
+            if (at != null) {
+                o.addProperty("place", at.id());
+                o.addProperty("x", at.x());
+                o.addProperty("z", at.z());
+            }
+            weather.add(o);
+        }
+        root.add("weather", weather);
         JsonArray landmarkKinds = new JsonArray();
         for (var k : com.nirncraft.landmarks.Kinds.all()) landmarkKinds.add(k.id());
         root.add("landmarkKinds", landmarkKinds);

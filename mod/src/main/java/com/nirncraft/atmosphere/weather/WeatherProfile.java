@@ -287,6 +287,13 @@ public final class WeatherProfile {
         this.totalWeight = total;
     }
 
+    /** The weather kinds this climate rolls and their weights (read-only; QA subject index, weather audit). */
+    public java.util.Map<WeatherKind, Integer> table() {
+        var m = new java.util.LinkedHashMap<WeatherKind, Integer>();
+        for (int i = 0; i < kinds.length; i++) m.put(kinds[i], weights[i]);
+        return java.util.Collections.unmodifiableMap(m);
+    }
+
     private static WeatherProfile register(String id, Ambient ambient, int snowLine, boolean aurora, int minTicks, int maxTicks, Object... table) {
         WeatherProfile p = new WeatherProfile(id, ambient, snowLine, aurora, minTicks, maxTicks, table);
         BY_ID.put(id, p);

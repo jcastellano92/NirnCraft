@@ -8,6 +8,8 @@ writing them. What each kind is shown as lives in VIEWS; how a view is staged li
 Every scene carries: subject:<id>, kind:<kind>, view:<view>, suite:subjects, and a sheet role (front / side /
 animation / other) so `harness.py sheet <id>` lays it out.
 """
+import json
+
 import catalog
 
 # what each kind of subject is shown as (views in sheet order)
@@ -156,12 +158,60 @@ def _building(culture, use, wealth):
     return out
 
 
+def weather_audit(index):
+    """Every weather a region's climate can roll, seen from beside the region's capital (or first place): the
+    weather audit. Pinned at noon with a front over the place so the weather is really there when captured."""
+    out = []
+    for w in index.get("weather", []):
+        if "x" not in w:
+            continue
+        rid = w["region"].replace("/", "-").replace("_", "-")
+        for kind in w.get("kinds", []):
+            if kind not in catalog.WEATHERS:
+                continue
+            out.append({"id": f"weather-{rid}-{kind.replace('_', '-')}",
+                        "title": f"{w['region']}: {kind} ({w.get('profile')} climate) over {w.get('place')}",
+                        "_file": "(generated subjects)", "tier": "live", "kind": "visual", "variants": ["shaders"],
+                        "tags": ["suite:weather-audit", f"region:{w['region']}", f"weather:{kind}",
+                                 f"climate:{w.get('profile')}", f"place:{w.get('place')}"],
+                        "pose": {"visit": [w["x"], w["z"] + 140, 50, 180, 6]}, "time": 6000, "weather": kind,
+                        "front": [w["x"], w["z"], 2600, kind], "checks": {"maxBlackTiles": 0},
+                        "source": "the game's weather profiles (subject index)"})
+    return out
+
+
+ROUTES = catalog.ROOT / ".work/harness/route-problems.json"  # written by check-roadplan (roadplan_lint --problems)
+
+
+def route_audit():
+    """The road plan's problem spots and a spread sample of its bridges, tunnels, switchbacks, stairs, fords,
+    culverts, cuts and fills, each seen from above and to the side (the route audit)."""
+    try:
+        data = json.loads(ROUTES.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return []
+    out = []
+    for n, spot in enumerate(data.get("problems", []) + data.get("samples", [])):
+        x, z, h = spot["x"], spot["z"], spot.get("h", 80)
+        eye = (x + 22, h + 16, z + 22)
+        kind = spot["kind"]
+        out.append({"id": f"route-{kind}-{n}", "title": f"road {kind} ({spot.get('class')}) at {int(x)},{int(z)}",
+                    "_file": "(generated subjects)", "tier": "live", "kind": "visual", "variants": ["shaders"],
+                    "tags": ["suite:route-audit", f"route:{kind}", f"road:{spot.get('class')}", "feature:road"]
+                            + (["route:problem"] if spot in data.get("problems", []) else []),
+                    "pose": {"camera": [round(eye[0], 1), round(eye[1] - 1.62, 1), round(eye[2], 1),
+                                        round(x, 1), round(h, 1), round(z, 1)]},
+                    "time": 6000, "weather": "clear", "checks": {"maxBlackTiles": 0},
+                    "source": "road plan (tools/qa/roadplan_lint.py --problems)", "spot": spot})
+    return out
+
+
 def scenes():
     """Every subject scene the game's index asks for ([] until subject-index has run)."""
     index = catalog.subject_index()
+    out = route_audit()
     if not index:
-        return []
-    out = []
+        return out
     for rec in index.get("items", []):
         out += recipes(rec.get("kind", "item"), rec, index)
     for rec in index.get("blocks", []):
@@ -180,6 +230,7 @@ def scenes():
         for use in b.get("uses", []):
             for wealth in b.get("wealth", []):
                 out += _building(culture, use, wealth)
+    out += weather_audit(index)
     seen, unique = set(), []
     for s in out:
         if s["id"] not in seen:

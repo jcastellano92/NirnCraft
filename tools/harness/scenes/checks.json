@@ -403,7 +403,9 @@
    "run": [
     "py",
     "-3",
-    "tools/qa/roadplan_lint.py"
+    "tools/qa/roadplan_lint.py",
+    "--problems",
+    ".work/harness/route-problems.json"
    ],
    "inputs": [
     "mod/src/main/resources/nirncraft/tamriel",

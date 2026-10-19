@@ -101,8 +101,12 @@ def load(path):
     return plan
 
 
+PROBLEMS = []  # spots with coordinates (--problems FILE): the harness puts a camera on each
+
+
 def lint(plan):
     errs, warns, out = [], [], []
+    PROBLEMS.clear()
     links, segs = plan['links'], plan['segs']
     # ---- profile within grade caps
     over = [0] * 4
@@ -117,6 +121,8 @@ def lint(plan):
             tol = cap + (1 / 16 + cap * 0.1 + 0.01) / ds  # heights and positions are stored in 1/16 blocks
             if gr > tol:
                 over[s['kind']] += 1
+                PROBLEMS.append({'kind': 'grade', 'class': CLASSES[s['kind']], 'x': s['x'][i], 'z': s['z'][i],
+                                 'h': s['h'][i], 'value': round(gr, 3), 'cap': round(cap, 3), 'link': s['link']})
             worst[s['kind']] = max(worst[s['kind']], gr)
     failed = [l for l in links if l['status'] == 1]
     merged = [l for l in links if l['status'] == 2]
@@ -146,10 +152,14 @@ def lint(plan):
             t = s['span'][i]
             if t not in crossings:
                 unspanned += 1
+                PROBLEMS.append({'kind': 'water-unspanned', 'class': CLASSES[s['kind']], 'x': s['x'][i],
+                                 'z': s['z'][i], 'h': s['h'][i], 'value': s['w'][i], 'link': s['link']})
                 continue
             need = 0 if t == FORD else (2 if t == CULVERT else CLEARANCE[s['kind']])
             if t != FORD and s['h'][i] < s['w'][i] + need - 0.07:
                 low += 1
+                PROBLEMS.append({'kind': 'bridge-low', 'class': CLASSES[s['kind']], 'x': s['x'][i], 'z': s['z'][i],
+                                 'h': s['h'][i], 'value': round(s['w'][i] + need - s['h'][i], 2), 'link': s['link']})
         for t, f, to, deck, piers in s['spans']:
             if t in crossings and any(s['w'][k] is not None for k in range(f, to + 1)):
                 crossings[t] += 1
@@ -339,7 +349,8 @@ def site(plan, sid):
 
 def main(argv):
     path = DEFAULT
-    args = [a for a in argv if not a.startswith('--')]
+    skip = {argv.index('--problems') + 1} if '--problems' in argv else set()
+    args = [a for i, a in enumerate(argv) if not a.startswith('--') and i not in skip]
     if args:
         path = args[0]
     plan = load(path)
@@ -350,6 +361,34 @@ def main(argv):
         print(line)
     for line in errs:
         print(line)
+    if '--problems' in argv:  # one spot per 48-block cluster and kind, worst first: cameras for the harness
+        dest = argv[argv.index('--problems') + 1]
+        spots = {}
+        for pr in sorted(PROBLEMS, key=lambda q: -abs(q.get('value') or 0)):
+            k = (pr['kind'], int(pr['x'] // 48), int(pr['z'] // 48))
+            if k not in spots:
+                spots[k] = pr
+        # a spread sample of the pieces where roads usually look wrong even when they lint clean: every k-th
+        # bridge (and bridges over dry gaps), tunnel, switchback, stair run, ford, culvert, cut, fill
+        samples, per = [], 12
+        for t_ in (BRIDGE, SPANS.index('tunnel'), SPANS.index('switchback'), SPANS.index('stairs'), FORD, CULVERT,
+                   SPANS.index('cut'), SPANS.index('fill')):
+            found = []
+            for s in plan['segs']:
+                for kind, f0, to, deck, piers in s['spans']:
+                    if kind == t_:
+                        m = (f0 + to) // 2
+                        dry = kind == BRIDGE and all(s['w'][k] is None for k in range(f0, to + 1))
+                        found.append({'kind': SPANS[kind] + ('-dry' if dry else ''), 'class': CLASSES[s['kind']],
+                                      'x': s['x'][m], 'z': s['z'][m], 'h': s['h'][m], 'link': s['link'],
+                                      'length': round(s['arc'][to] - s['arc'][f0], 1)})
+            step = max(1, len(found) // per)
+            samples += found[::step][:per]
+        import json
+        with open(dest, 'w', encoding='utf-8') as f:
+            json.dump({'source': path, 'problems': list(spots.values())[:300], 'total': len(PROBLEMS),
+                       'samples': samples}, f, indent=1)
+        print('problems %d spots (%d raw) -> %s' % (min(300, len(spots)), len(PROBLEMS), dest))
     if '--render' in argv or '--screens' in argv:
         od = os.path.join(ROOT, 'tools', 'qa', 'out', 'roadplan')
         os.makedirs(od, exist_ok=True)
