@@ -33,7 +33,9 @@ public final class QaCommands {
 
     public static void init() {
         NeoForge.EVENT_BUS.addListener((RegisterCommandsEvent e) -> e.getDispatcher().register(
-                Commands.literal("nirncraft-qa").requires(Tour::host)
+                Commands.literal("nirncraft-qa").requires(src -> Tour.host(src)  // the host, or the server itself
+                                || !(src.getEntity() instanceof net.minecraft.server.level.ServerPlayer)
+                                && Commands.hasPermission(Commands.LEVEL_GAMEMASTERS).test(src))
                         .then(Commands.literal("sample")
                                 .then(Commands.argument("x", IntegerArgumentType.integer())
                                         .then(Commands.argument("z", IntegerArgumentType.integer())
