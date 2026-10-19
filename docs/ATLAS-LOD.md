@@ -252,6 +252,23 @@ The new far field is judged against the reference out to the exported view (1 km
 own, no pop, no shimmer). Further out, where nothing can be ground truth, it is judged on stability, smoothness,
 absence of artefacts, and updates when blocks change.
 
+**Reference modes and vanilla quirks** (owner, 2026-10-19: "some ground truth is worse too... careful"). The exact
+reference has two modes. *Exact* is Minecraft as it renders, quirks included; it is used only to check the reference
+against the live game (the near comparisons, 1.24 dE at Falkreath). *Intended* is what our renderer is scored against:
+16 samples a pixel (true coverage: an 11 x 20-block pine at 8 km covers a fifth of a pixel; exact mode shows nothing,
+so Minecraft flickers it in and out while moving, while the grouped representation fades it out smoothly, IoU 0.94 -
+0.996 against intended from 8 m to 32 km), plus fixes of vanilla quirks, each written here, one at a time, with a
+before / after, never silently:
+* sub-pixel coverage (adopted): intended = supersampled.
+* light through stairs and slabs (candidate, not adopted): vanilla lets sky light leak through stair and slab ceilings
+  (a dungeon hall's stair ceiling shows bright stripes; the exact reference reproduces it, dE 0.44 against the game).
+
+Verification tiers (owner, 2026-10-19): 1. elements offline (tools/harness/element_lab.py, suite:elements: one chunk or
+tree cut from an export by `box=`, the intended reference vs our renderer from 8 m to 64 km and two fly-ins, ~40 s an
+element); 2. the same elements against Minecraft's own rendering, live, pinned (suite:pinned, final); 3. full scenes
+offline (suite:truth's lab scenes); 4. full scenes live, last. Live captures only when a tier needs new inputs, and
+every new camera position is vetted by a cheap visual review before it is relied on.
+
 **Texture resolution up close** (ground truth, 2026-10-19): the 4 x 4 face tiles are right far away but flat up close
 (the cobble path, planks); owning the near field needs faces at the texture's own resolution (16 x 16), stored once
 per texture (an atlas), not per block state.
