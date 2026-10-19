@@ -100,7 +100,50 @@ def find_elements(volume_slug):
         out.append({"slug": f"{volume_slug}-tree", "volume": volume_slug, "kind": "tree",
                     "box": [x0 + int(lo[2]), y0 + int(lo[0]) - 1, z0 + int(lo[1]), x0 + int(hi[2]), y0 + int(hi[0]),
                             z0 + int(hi[1])]})
+    # featured chunks: per kind the chunk of the export with the most of its blocks (when it has enough of them)
+    classes = block_classes()
+    picked = {tuple(e["box"]) for e in out}
+    for kind, want, least in FEATURED:
+        sel = np.isin(ids, [i for i, n in names.items() if want(n, classes.get(i, 5))])
+        best = None
+        for gz in range(0, sz - 15, 16):
+            for gx in range(0, sx - 15, 16):
+                n = int(sel[:, gz:gz + 16, gx:gx + 16].sum())
+                if n >= least and (best is None or n > best[0]):
+                    best = (n, gx, gz)
+        if not best:
+            continue
+        _, gx, gz = best
+        col = np.argwhere(ids[:, gz:gz + 16, gx:gx + 16] != 0)
+        box = [x0 + gx, y0 + int(col[:, 0].min()), z0 + gz, x0 + gx + 15, y0 + int(col[:, 0].max()), z0 + gz + 15]
+        if tuple(box) not in picked:
+            picked.add(tuple(box))
+            out.append({"slug": f"{volume_slug}-{kind}", "volume": volume_slug, "kind": kind, "box": box})
     return out
+
+
+BUILT = ("planks", "brick", "glass", "_door", "fence", "_stairs", "_slab", "wool", "terracotta", "trapdoor", "bookshelf",
+         "barrel", "_bed", "lantern", "chain", "_wall")
+# (kind, does a block state (its name, its class in blocks.bin) count, how many a chunk needs)
+FEATURED = [
+    ("water", lambda n, c: n.startswith("Block{minecraft:water}"), 48),
+    ("lights", lambda n, c: c == 3, 3),  # emissive (light 10 and up): lanterns, torches, fires, glowstone
+    ("building", lambda n, c: any(k in n for k in BUILT), 96),
+    ("custom", lambda n, c: not n.startswith("Block{minecraft:"), 8),  # NirnCraft's own blocks, models and textures
+]
+
+
+def block_classes():
+    """blocks.bin's class per state id (0 solid, 1 foliage, 2 water, 3 emissive, 4 plant, 5 other)."""
+    b = (export_dir() / "blocks.bin").read_bytes()
+    n = struct.unpack("<I", b[4:8])[0]
+    p, cls = 8, {}
+    for _ in range(n):
+        sid, nl = struct.unpack("<IH", b[p:p + 6])
+        p += 6 + nl
+        cls[sid] = b[p]
+        p += 4 + 8 + 4 + 6 * 16 * 4
+    return cls
 
 
 def elements():

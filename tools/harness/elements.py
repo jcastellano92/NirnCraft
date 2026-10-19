@@ -17,17 +17,23 @@ def scenes():
     except Exception:  # noqa: BLE001  no exports yet (a fresh machine): no element scenes, never a broken catalog
         return []
     out = []
+    # per element: the CPU bench (lab-groups: the representation alone) and the far field itself (far-groups:
+    # atlas_core through atlas_render, what the game draws)
+    renderers = [("", "lab-groups", "the bench's groups", ["native/tools/atlas_lab.cpp", "native/tools/atlas_lab_scene.hpp"]),
+                 ("-far", "far-groups", "the far field's groups",
+                  ["native/src", "native/shaders", "native/include", "native/tools/atlas_render.cpp", "native/tools/atlas_export.hpp"])]
     for e in els:
-        out.append({"_file": "(generated elements)", "id": f"element-{e['slug']}",
-                    "title": f"Element {e['slug']} ({e['kind']}): the reference vs our renderer, 8 m to 64 km, fly-ins",
-                    "tags": ["suite:elements", "feature:farfield", f"element:{e['kind']}"], "tier": "check",
-                    "group": "-", "variants": ["check"],
-                    "run": ["py", "-3", "tools/harness/element_lab.py", e["slug"], "--out", ".work/harness/elements"],
-                    "inputs": ["tools/harness/element_lab.py", "native/tools/atlas_truth.cpp", "native/tools/atlas_lab.cpp",
-                               "native/tools/atlas_lab_scene.hpp"],
-                    "metrics": {"worst_dE": r'"worst": \{"dist": \d+, "dE": ([\d.]+)',
-                                "worst_iou": r'"worst": \{"dist": \d+, "dE": [\d.]+, "iou": ([\d.]+)\}',
-                                "pop_fast": r'"flyin_fast": \{"pop": ([\d.]+)',
-                                "pop_slow": r'"flyin_slow": \{"pop": ([\d.]+)'},
-                    "timeout": 900, "source": "tools/harness/element_lab.py"})
+        for suffix, renderer, what, ins in renderers:
+            out.append({"_file": "(generated elements)", "id": f"element-{e['slug']}{suffix}",
+                        "title": f"Element {e['slug']} ({e['kind']}): the reference vs {what}, 32 m to 64 km, fly-ins",
+                        "tags": ["suite:elements", "feature:farfield", f"element:{e['kind']}", f"renderer:{renderer}"], "tier": "check",
+                        "group": "-", "variants": ["check"],
+                        "run": ["py", "-3", "tools/harness/element_lab.py", e["slug"], "--renderer", renderer,
+                                "--out", f".work/harness/elements/{renderer}"],
+                        "inputs": ["tools/harness/element_lab.py", "native/tools/atlas_truth.cpp"] + ins,
+                        "metrics": {"worst_dE": r'"worst": \{"dist": \d+, "dE": ([\d.]+)',
+                                    "worst_iou": r'"worst": \{"dist": \d+, "dE": [\d.]+, "iou": ([\d.]+)\}',
+                                    "pop_fast": r'"flyin_fast": \{"pop": ([\d.]+)',
+                                    "pop_slow": r'"flyin_slow": \{"pop": ([\d.]+)'},
+                        "timeout": 900, "source": "tools/harness/element_lab.py"})
     return out

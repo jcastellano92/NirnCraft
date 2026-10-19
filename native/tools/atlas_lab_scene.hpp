@@ -262,10 +262,12 @@ bool loadVolume(const std::string& path) {
     return bool(f);
 }
 
-// leaves=cards (with surface cards): leaves and plants are whole voxels and their cards' alpha is the cutout, per
-// texel up close and as the mip's coverage further away (a masked face texture), instead of hashed micro-voxels
+// leaves=cards (with surface cards): leaves are whole voxels and their cards' alpha is the cutout, per texel up close
+// and as the mip's coverage further away (a masked face texture), instead of hashed micro-voxels. Leaves only: a
+// plant is a cross of diagonal quads, its card seen straight on nearly all covered, and as a whole voxel it became a
+// solid cube (crops as bright green blocks); plants keep their hashed micro-voxels
 bool leafCards = false;
-inline bool cutoutClass(const Block* b) { return b && (b->cls == 1 || b->cls == 4); }
+inline bool cutoutClass(const Block* b) { return b && b->cls == 1; }
 
 // micro-voxels: 4 per block side
 inline bool microAt(int mx, int my, int mz) {

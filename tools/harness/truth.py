@@ -102,6 +102,22 @@ def _export(slug, title, pose, time, tags, box, underground):
                     "block library and Minecraft's mesh data (quads.bin, sprites.bin); the capture is fog-free vanilla"}
 
 
+def _element_export(slug, title, pose, time, tags, box, underground):
+    """The element tier's inputs from one subject (element_lab.elements() finds its chunks, trees, water, lights,
+    buildings and custom blocks): the block library, Minecraft's mesh data and the box around the pose, without the
+    1 km view (150-200 MB the element tier never reads) and without a pose review (no capture is compared)."""
+    r, down, up = box
+    return {"_file": "(generated truth)", "id": f"element-export-{slug}", "title": f"Element tier inputs: {title}",
+            "tags": ["suite:element-exports", "feature:farfield"] + tags, "tier": "live", "group": "live",
+            "variants": ["vanilla"], "weather": "off", "time": time, "settle": "static", "pose": pose, "wait": 60,
+            "setup": ["fog-off on", "truth-quiet on", "try tick freeze", "atlaslab blocks", "atlaslab quads",
+                      f"atlaslab here {slug} {r} {down} {up}", f"atlaslab here {slug} {r} {down} {up} light"],
+            "cleanup": ["try tick unfreeze", "truth-quiet off", "fog-off off"], "measure": 0, "checks": {},
+            "capture": "world", "timeout": 1200, "source": "tools/harness/truth.py",
+            "note": f"exports {slug}(.alv, .alv2, .json) beside blocks.bin, quads.bin and sprites.bin (rewritten only when "
+                    "AtlasLabExport.LIBRARY_VERSION or the content changed)"}
+
+
 def _lab(slug, title, tags, part, volume):
     return {"_file": "(generated truth)", "id": f"truth-{slug}-{part}",
             "title": f"Ground truth {part}: {title} (Minecraft's own mesh offline vs the live capture)",
@@ -205,6 +221,7 @@ def scenes():
                   LIGHTS, time=18000, tags=["feature:lights", "time:night"], spacing=4, per_row=5)
     for slug, title, pose, time, tags, box, underground in SUBJECTS:
         out.append(_export(slug, title, pose, time, tags, box, underground))
+        out.append(_element_export(slug, title, pose, time, tags, box, underground))
         out.append(_lab(slug, title, tags, "near", f"{slug}.alv2"))
         if not underground:
             out.append(_lab(slug, title, tags, "view", f"{slug}-view.als2"))

@@ -97,6 +97,19 @@ final class AtlasShapes {
      * material carries the biome colour it was registered with), cut-out when leaves or cut-out quads let light through.
      * Null when it has neither a shape nor a model (a full cube in its colour then).
      */
+    /**
+     * A plant: drawn as cut-out quads, nothing a neighbour hides behind. Its outline says nothing: a ripe crop's (wheat,
+     * NirnCraft's garlic or cabbage) is a full cube, and as a solid cube a field of crops was a block of green.
+     */
+    static boolean plant(BlockState st, List<BakedQuad> quads, List<AABB> boxes) {
+        boolean cut = false;
+        for (BakedQuad q : quads) cut |= q.materialInfo().layer() == ChunkSectionLayer.CUTOUT;
+        if (!cut) return false;
+        return boxes.isEmpty() || st.is(BlockTags.REPLACEABLE_BY_TREES) || st.is(BlockTags.FLOWERS)
+                || st.getBlock() instanceof net.minecraft.world.level.block.CropBlock
+                || st.getBlock() instanceof net.minecraft.world.level.block.BushBlock;
+    }
+
     /** How much of the block's floor the outline's boxes in its bottom micro-voxel layer cover (0..1, about). */
     static double floorCover(List<AABB> boxes) {
         double a = 0;
@@ -117,9 +130,7 @@ final class AtlasShapes {
         int[][] faces = new int[6][];
         for (Direction d : Direction.values()) faces[d.get3DDataValue()] = face(d, quads, tint);
         // cut-out coverage for leaves and plants only (a grass block's cut-out overlay is no hole in the block)
-        boolean plant = boxes.isEmpty() || st.is(BlockTags.REPLACEABLE_BY_TREES) || st.is(BlockTags.FLOWERS);
-        boolean cutout = st.is(BlockTags.LEAVES);
-        if (plant) for (BakedQuad q : quads) cutout |= q.materialInfo().layer() == ChunkSectionLayer.CUTOUT;
+        boolean cutout = st.is(BlockTags.LEAVES) || plant(st, quads, boxes);
         return new Shape(mask, mean(faces), cutout ? AtlasNative.SHAPE_CUTOUT : 0, faces);
     }
 
