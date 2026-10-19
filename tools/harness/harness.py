@@ -1205,14 +1205,45 @@ def cmd_open(a):
 
 
 def cmd_stop(a):
-    """Ask the running harness to stop after the current test (it closes the client and writes its report)."""
+    """Stop the running harness: by default at once (the run ends, the client's queue is cancelled and the client closes
+    cleanly, the rest is marked stopped); --after-test lets the current test finish first."""
     held = json.loads(OWNER.read_text(encoding="utf-8")) if OWNER.exists() else {}
-    if not alive(held.get("pid")):
+    pid = held.get("pid")
+    if not alive(pid):
         say("no harness is running")
+        OWNER.unlink(missing_ok=True)
         return 0
     STOP.parent.mkdir(parents=True, exist_ok=True)
     STOP.write_text(str(time.time()), encoding="utf-8")
-    say(f"stop requested: the harness (pid {held.get('pid')}) finishes its current test, then closes the client")
+    if a.after_test:
+        say(f"stop requested: the harness (pid {pid}) finishes its current test, then closes the client")
+        return 0
+    if os.name == "nt":  # the owner and its launcher wrappers (py.exe): ours to end
+        subprocess.run(["taskkill", "/PID", str(pid), "/T", "/F"], capture_output=True)
+    else:
+        os.kill(int(pid), 15)
+    OWNER.unlink(missing_ok=True)
+    STOP.unlink(missing_ok=True)
+    for j in pending_jobs() + [json.loads(f.read_text(encoding="utf-8")) for f in QUEUE.glob("*.json")] if QUEUE.exists() else []:
+        st = read_status(j["id"]) or {"id": j["id"], "items": j["items"], "done": {}}
+        for k in j["items"]:
+            st["done"].setdefault(k, {"status": "skip", "error": "stopped by request"})
+        st["state"] = "done"
+        write_status(j["id"], st)
+        (QUEUE / f"{j['id']}.json").unlink(missing_ok=True)
+    try:
+        import game
+        if game.running():
+            try:
+                game.lw.live_actions(["# stopped by harness.py stop"], timeout=30, cancel=True)
+            except Exception:  # noqa: BLE001
+                pass
+            game.close()
+        game.drop_lease()
+    except Exception as e:  # noqa: BLE001
+        say(f"  ! client close: {e}")
+    event("run_stopped", now=True)
+    say(f"stopped the harness (pid {pid}) and closed the test client")
 
 
 def cmd_quarantine(a):
@@ -1686,7 +1717,7 @@ def main():
     p.add_argument("--last", type=int, default=40)
     p.add_argument("--previous", action="store_true", help="the run before this one")
     p.add_argument("--no-game-log", action="store_true")
-    sub.add_parser("stop")
+    sub.add_parser("stop").add_argument("--after-test", action="store_true", help="let the current test finish")
     p = sub.add_parser("quarantine")
     p.add_argument("--clear", nargs="*", help="test|variant keys (none: all)")
     sub.add_parser("seed-legacy")

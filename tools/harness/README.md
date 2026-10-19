@@ -79,8 +79,8 @@ instead of waiting for every chunk to the edge of view; measure tests keep the s
 The test client opens behind your windows and never pauses when you click elsewhere. Bring it forward to watch;
 minimize it and a watchdog restores it behind your windows within 2 s (a minimized Minecraft cannot render);
 close it with its X and the harness relaunches it and runs the interrupted test again (a normal close is not
-counted as a crash). To end a run: `harness.py stop` (finishes the current test, closes the client, writes the
-report with the rest marked stopped).
+counted as a crash). To end a run: `harness.py stop` (at once: the run ends, the client closes cleanly, the rest is marked stopped;
+`--after-test` lets the current test finish).
 
 ## When a test fails: clean up, record, move on
 
