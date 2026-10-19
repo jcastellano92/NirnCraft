@@ -17,6 +17,7 @@
 #pragma once
 #include <algorithm>
 #include <atomic>
+#include <bit>
 #include <chrono>
 #include <condition_variable>
 #include <cstdint>
@@ -35,6 +36,13 @@
 #include "atlas_lod_build_lbErrReduce_spv.h"
 #include "atlas_lod_build_lbErrMax_spv.h"
 #include "atlas_lod_build_lbErrTask_spv.h"
+#include "atlas_lod_build_lbOctErr_spv.h"
+#include "atlas_lod_build_lbOctLeaf_spv.h"
+#include "atlas_lod_build_lbOctList_spv.h"
+#include "atlas_lod_build_lbOctPack_spv.h"
+#include "atlas_lod_build_lbOctPos_spv.h"
+#include "atlas_lod_build_lbOctRoot_spv.h"
+#include "atlas_lod_build_lbOctUp_spv.h"
 #include "atlas_lod_build_lbPack_spv.h"
 #include "atlas_lod_build_lbPosDown_spv.h"
 #include "atlas_lod_build_lbRefitBox_spv.h"
@@ -56,7 +64,7 @@
 #define LODB_KERNELS(X)                                                                                                \
     X(lbRuns) X(lbErrCount) X(lbErrTask) X(lbErrReduce) X(lbSliceTask) X(lbSliceReduce) X(lbSweep) X(lbRegionInit)    \
     X(lbRegionCount) X(lbRegionTight) X(lbAdvance) X(lbDescUp) X(lbRootBases) X(lbPosDown) X(lbPack) X(lbRefitBox)        \
-    X(lbRefitPack)
+    X(lbRefitPack) X(lbOctLeaf) X(lbOctUp) X(lbOctList) X(lbOctErr) X(lbOctRoot) X(lbOctPos) X(lbOctPack)
 #define LODB_DECLARE(name) extern "C" void name(void* varyingInput, void* entryPointParams, void* globalParams);
 LODB_KERNELS(LODB_DECLARE)
 extern "C" void lbScanSerial(void* varyingInput, void* entryPointParams, void* globalParams);
@@ -76,16 +84,18 @@ constexpr uint32_t F_EMPTY = 1, F_LEAF = 2, F_INTERNAL = 8;
 enum Kernel {
     K_RUNS, K_ERRCOUNT, K_ERRTASK, K_ERRREDUCE, K_SLICETASK, K_SLICEREDUCE, K_SWEEP, K_REGIONINIT, K_REGIONCOUNT,
     K_REGIONTIGHT, K_ADVANCE, K_DESCUP, K_ROOTBASES, K_POSDOWN, K_PACK, K_SCANSERIAL, K_SCANBLOCKS, K_SCANTOP, K_SCANADD,
-    K_REFITBOX, K_REFITPACK, K_ERRMAX, K_SWEEPWIDE, K_COUNT
+    K_REFITBOX, K_REFITPACK, K_ERRMAX, K_SWEEPWIDE, K_OCTLEAF, K_OCTUP, K_OCTLIST, K_OCTERR, K_OCTROOT, K_OCTPOS, K_OCTPACK,
+    K_COUNT
 };
 const char* const KERNEL_NAME[K_COUNT] = {"lbRuns", "lbErrCount", "lbErrTask", "lbErrReduce", "lbSliceTask", "lbSliceReduce",
                                           "lbSweep", "lbRegionInit", "lbRegionCount", "lbRegionTight", "lbAdvance",
                                           "lbDescUp", "lbRootBases", "lbPosDown", "lbPack", "lbScanSerial",
-                                          "lbScanBlocks", "lbScanTop", "lbScanAdd", "lbRefitBox", "lbRefitPack", "lbErrMax", "lbSweepWide"};
+                                          "lbScanBlocks", "lbScanTop", "lbScanAdd", "lbRefitBox", "lbRefitPack", "lbErrMax", "lbSweepWide", "lbOctLeaf", "lbOctUp", "lbOctList",
+                                          "lbOctErr", "lbOctRoot", "lbOctPos", "lbOctPack"};
 
 // the buffers, by binding (0 is the parameters)
 enum Buf { B_GRID = 1, B_BRICKS, B_RUNS, B_STATE, B_NBOX, B_NAUX, B_SCANIN, B_SCANOUT, B_SCANSUM, B_PART, B_SLICES, B_SUFFIX,
-           B_OUT, B_REGIONS, B_COUNT };
+           B_OUT, B_REGIONS, B_OCT, B_COUNT };
 
 struct Params {
     int32_t dims[4];   // blocks; w: regions
@@ -290,6 +300,101 @@ public:
         out.root = 0;
         st.nodes = out.count();
         return true;
+    }
+
+    // the octree (boxes): out holds the same words lodFlattenBoxes writes (micro: the folded micro-voxels)
+    bool buildBoxes(LodTree& out, Stats& st, std::string& err) {
+        st = {};
+        auto t0 = std::chrono::steady_clock::now();
+        // the levels of cells from the blocks (size 4) up to the root's single cell: first cell, size in cells
+        struct Level {
+            uint32_t base;
+            int d[3];
+        };
+        std::vector<Level> lv{{0u, {dims_[0], dims_[1], dims_[2]}}};
+        while (lv.back().d[0] > 1 || lv.back().d[1] > 1 || lv.back().d[2] > 1) {
+            const Level& p = lv.back();
+            Level n{p.base + uint32_t(p.d[0] * p.d[1] * p.d[2]), {(p.d[0] + 1) / 2, (p.d[1] + 1) / 2, (p.d[2] + 1) / 2}};
+            lv.push_back(n);
+        }
+        uint32_t cells = lv.back().base + 1, widest = 1;
+        for (size_t L = 1; L < lv.size(); L++) widest = std::max(widest, uint32_t(lv[L].d[0] * lv[L].d[1] * lv[L].d[2]));
+        auto level = [&](int kernel, size_t L, bool indirectNodes = false) {
+            Dispatch x = indirectNodes ? indirect(kernel, ARG_NODES) : direct(kernel, (uint32_t(lv[L].d[0] * lv[L].d[1] * lv[L].d[2]) + 63) / 64);
+            x.k[0] = int32_t(lv[L].base), x.k[1] = lv[L].d[0], x.k[2] = lv[L].d[1], x.k[3] = lv[L].d[2];
+            if (L > 0) x.r[0] = int32_t(lv[L - 1].base), x.r[1] = lv[L - 1].d[0], x.r[2] = lv[L - 1].d[1], x.r[3] = lv[L - 1].d[2];
+            else x.r[0] = 1;  // lbOctPack: the block level
+            return x;
+        };
+        if (capNodes_ == 0) {
+            capNodes_ = uint32_t(std::max<size_t>(4096, nonEmpty_ * 2 + 64));
+            capSlices_ = std::max<uint32_t>(1u << 16, capNodes_);
+            capParts_ = std::max<uint32_t>(1u << 18, capNodes_ * 2);
+        }
+        for (int attempt = 0;; attempt++) {
+            uint32_t capItems = std::max(capNodes_, widest);
+            if (!ensure(B_STATE, STATE_WORDS, err) || !ensure(B_NBOX, size_t(capItems) * 4, err) || !ensure(B_NAUX, size_t(capItems) * 4, err) ||
+                !ensure(B_SCANIN, size_t(capItems) * 4, err) || !ensure(B_SCANOUT, size_t(capItems) * 4, err) ||
+                !ensure(B_SCANSUM, size_t(capItems / 1024 + 2) * 4, err) || !ensure(B_PART, size_t(capParts_) * 4, err) ||
+                !ensure(B_OCT, size_t(cells) * 8, err) || !ensure(B_REGIONS, 4, err) || !ensure(B_SLICES, 4, err) || !ensure(B_SUFFIX, 4, err) ||
+                !ensure(B_OUT, 4, err))
+                return false;
+            Params p{};
+            p.dims[0] = dims_[0], p.dims[1] = dims_[1], p.dims[2] = dims_[2];
+            p.caps[0] = capItems, p.caps[1] = capSlices_, p.caps[2] = capParts_, p.caps[3] = uint32_t(bytes(B_OUT) / 16);
+            p.out[2] = vk_ ? wideErr : 0;
+            params_ = p;
+            if (!setParams(err)) return false;
+            if (vk_) prologue_ = 0, clearState_ = true;
+            else std::fill(host_[B_STATE].begin(), host_[B_STATE].end(), 0u);
+            std::vector<Dispatch> d = runsJobs_;
+            d.push_back(level(K_OCTLEAF, 0));
+            for (size_t L = 1; L < lv.size(); L++) {
+                d.push_back(level(K_OCTUP, L));
+                scan(d);
+                d.push_back(level(K_OCTLIST, L));
+                d.push_back(indirect(K_ERRCOUNT, ARG_NODES));
+                scan(d);
+                d.push_back(indirect(K_ERRTASK, ARG_ERRT));
+                if (vk_) d.push_back(indirect(K_ERRMAX, ARG_ERRWIDE));
+                d.push_back(level(K_OCTERR, L, true));
+            }
+            d.push_back(level(K_OCTROOT, lv.size() - 1));
+            if (!exec(d, st, err)) return false;
+            runsJobs_.clear();
+            uint32_t words[STATE_WORDS];
+            readState(words);
+            if (words[S_OVERFLOW] & (O_NODES | O_PARTS)) {
+                if (!grow(words[S_OVERFLOW], st, attempt, err)) return false;
+                continue;
+            }
+            uint32_t end = words[S_END];
+            if (!ensure(B_OUT, std::max<size_t>(end, 1) * 4, err)) return false;
+            params_.caps[3] = uint32_t(bytes(B_OUT) / 16);
+            if (!setParams(err)) return false;
+            d.clear();
+            for (size_t L = lv.size() - 1; L >= 1; L--) d.push_back(level(K_OCTPOS, L));
+            for (size_t L = lv.size(); L-- > 0;) d.push_back(level(K_OCTPACK, L));
+            if (!exec(d, st, err)) return false;
+            st.ms = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count();
+            if (!vk_) st.gpuMs = st.ms;
+            st.levels = int(lv.size());
+            st.workNodes = cells;
+            st.scratchBytes = 0;
+            for (int b = B_STATE; b < B_COUNT; b++)
+                if (b != B_OUT && b != B_REGIONS && b != B_GRID && b != B_BRICKS) st.scratchBytes += bytes(b);
+            out = {};
+            if (end == 0) return true;
+            out.nodes.resize(size_t(end) * 4);
+            if (!download(B_OUT, out.nodes.data(), out.nodes.size(), err)) return false;
+            out.root = 0;
+            out.depth = int(lv.size()) + 1;  // the root's level is log2 of its size: blocks are 2, the folded micro-voxels one more
+            for (size_t i = 0; i < out.count(); i++)
+                if ((out.nodes[i * 4 + 2] >> 28) & 1u) out.micro += size_t(std::popcount(out.nodes[i * 4] >> 24));
+            resident_ = 0;  // the output buffer holds an octree now
+            st.nodes = out.count();
+            return true;
+        }
     }
 
     // after editGrid: the subtrees over micro-voxel box [lo, hi) rebuilt, the nodes above them refitted (tree: the
@@ -662,7 +767,8 @@ private:
         static const KernelFn fns[K_COUNT] = {lbRuns,       lbErrCount, lbErrTask,  lbErrReduce, lbSliceTask,
                                               lbSliceReduce, lbSweep,    lbRegionInit, lbRegionCount, lbRegionTight,
                                               lbAdvance,    lbDescUp,   lbRootBases, lbPosDown,  lbPack,
-                                              lbScanSerial, nullptr,    nullptr,    nullptr,    lbRefitBox, lbRefitPack, nullptr, nullptr};
+                                              lbScanSerial, nullptr,    nullptr,    nullptr,    lbRefitBox, lbRefitPack, nullptr, nullptr,
+                                              lbOctLeaf,    lbOctUp,    lbOctList,  lbOctErr,   lbOctRoot,  lbOctPos,  lbOctPack};
         return fns[k];
     }
 
@@ -719,7 +825,8 @@ private:
     VkQueryPool queries_ = VK_NULL_HANDLE;
     PFN_vkCmdDispatchIndirect cmdDispatchIndirect_ = nullptr;
     VkBuf vbuf_[B_COUNT], ubo_, staging_, stateRead_, regionStage_;
-    size_t prologue_ = 0;  // bytes of regions the next submission copies in (after clearing the state)
+    size_t prologue_ = 0;      // bytes of regions the next submission copies in (after clearing the state)
+    bool clearState_ = false;  // the next submission clears the state first
     void* stateMap_ = nullptr;
     bool descDirty_ = true;
 
@@ -812,6 +919,13 @@ private:
             {lodb_lbRefitPack_spv, lodb_lbRefitPack_spv_size},
             {lodb_lbErrMax_spv, lodb_lbErrMax_spv_size},
             {lodb_lbSweepWide_spv, lodb_lbSweepWide_spv_size},
+            {lodb_lbOctLeaf_spv, lodb_lbOctLeaf_spv_size},
+            {lodb_lbOctUp_spv, lodb_lbOctUp_spv_size},
+            {lodb_lbOctList_spv, lodb_lbOctList_spv_size},
+            {lodb_lbOctErr_spv, lodb_lbOctErr_spv_size},
+            {lodb_lbOctRoot_spv, lodb_lbOctRoot_spv_size},
+            {lodb_lbOctPos_spv, lodb_lbOctPos_spv_size},
+            {lodb_lbOctPack_spv, lodb_lbOctPack_spv_size},
         };
         for (int i = 0; i < K_COUNT; i++) {
             if (!code[i].words) continue;
@@ -1016,13 +1130,14 @@ private:
         begin();
         vkCmdResetQueryPool(cmd_, queries_, 0, nq);
         vkCmdWriteTimestamp(cmd_, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, queries_, 0);
-        if (prologue_) {  // a build's first submission: the state cleared, the regions in
+        if (prologue_ || clearState_) {  // a build's first submission: the state cleared, the regions in
             vkCmdFillBuffer(cmd_, vbuf_[B_STATE].buf, 0, STATE_WORDS * 4, 0);
             VkBufferCopy c{0, 0, prologue_};
-            vkCmdCopyBuffer(cmd_, regionStage_.buf, vbuf_[B_REGIONS].buf, 1, &c);
+            if (prologue_) vkCmdCopyBuffer(cmd_, regionStage_.buf, vbuf_[B_REGIONS].buf, 1, &c);
             barrier(VK_ACCESS_TRANSFER_WRITE_BIT, VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT,
                     VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
             prologue_ = 0;
+            clearState_ = false;
         }
         vkCmdBindDescriptorSets(cmd_, VK_PIPELINE_BIND_POINT_COMPUTE, layout_, 0, 1, &set_, 0, nullptr);
         int bound = -1;

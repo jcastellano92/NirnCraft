@@ -177,7 +177,8 @@ endif()
 # both so the SAH picks atlas_lab's planes; host driver tools/atlas_lod_gpubuild.hpp
 set(LODB_SRC "${CMAKE_SOURCE_DIR}/shaders/atlas_lod_build.slang")
 set(LODB_COMMON lbRuns lbErrCount lbErrTask lbErrReduce lbSliceTask lbSliceReduce lbSweep lbRegionInit lbRegionCount
-    lbRegionTight lbAdvance lbDescUp lbRootBases lbPosDown lbPack lbRefitBox lbRefitPack)
+    lbRegionTight lbAdvance lbDescUp lbRootBases lbPosDown lbPack lbRefitBox lbRefitPack lbOctLeaf lbOctUp lbOctList
+    lbOctErr lbOctRoot lbOctPos lbOctPack)
 set(LODB_HEADERS)
 foreach(e ${LODB_COMMON} lbScanBlocks lbScanTop lbScanAdd lbErrMax lbSweepWide)
   add_custom_command(

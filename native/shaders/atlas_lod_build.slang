@@ -51,6 +51,7 @@ struct Step {
 [[vk::binding(12, 0)]] RWStructuredBuffer<uint4> suffix;  // per slice: the box of the content from it on
 [[vk::binding(13, 0)]] RWStructuredBuffer<uint4> outNodes;  // atlas_lod.slang's node layout
 [[vk::binding(14, 0)]] StructuredBuffer<uint4> regions;    // per region: lo | hi << 16 per axis; w: its slot
+[[vk::binding(15, 0)]] RWStructuredBuffer<uint4> oct;      // the octree's cells (lbOct*), two records a cell
 
 static const uint F_EMPTY = 1, F_LEAF = 2, F_REGION = 4, F_INTERNAL = 8;
 static const uint MAXL = 100;  // levels a build may have (atlas_lod.slang walks 64)
@@ -718,6 +719,13 @@ void afterScan(uint4 total) {
         }
         setArgs(ARG_ERRT, total.w, 64u);
         setArgs(ARG_ERRWIDE, total.x, 1u);
+    } else if (phase == 3) {  // the octree: a level's occupied cells counted (lbOctList lists them)
+        state[S_NEXT] = total.x;
+        if (total.x > P.caps.x) {
+            state[S_OVERFLOW] |= O_NODES;
+            over = true;
+        }
+        setArgs(ARG_NODES, total.x, 64u);
     } else {
         state[S_SLICES] = total.x;
         state[S_TASKS] = total.y;
@@ -979,4 +987,223 @@ void lbPack(uint3 id: SV_DispatchThreadID) {
     int3 lo = boxLo(b), hi = boxHi(b);
     outNodes[x.z] = uint4(uint(lo.x) | uint(hi.x) << 12 | mask << 24, uint(lo.y) | uint(hi.y) << 12 | (e & 255u) << 24,
                           uint(lo.z) | uint(hi.z) << 12 | (e >> 8) << 24, inner ? x.w : 0u);
+}
+
+// ---- the octree (boxes: atlas_lab_scene.hpp buildBoxes, atlas_lod_build.hpp lodFlattenBoxes) -----------------------
+// Bottom up over the power-of-two cells of micro-voxels: a block (size 4) and its eight 2^3 sub-cubes straight from the
+// brick, a larger cell the union of its eight children; per cell two records in `oct` (level by level from the blocks
+// up: the host's push constants give a level's first record and size, and its children's): box (lo | hi << 16 per
+// axis) and err | mask << 16 (the occupied octants), then the nodes below it, its slot and its first child's slot. The
+// flattening error of cells of size 8 and more goes through the err passes above (a level's occupied cells listed as a
+// level of work nodes); a block's and a sub-cube's comes from the brick's mask. Then slots down the levels (children in
+// octant order, depth first) and one write a node; a sub-cube is a F_MICRO node, its micro-voxels not stored.
+// Push constants: k = (the level's first cell, its size in cells x, y, z), r = (the children's level the same).
+
+static const uint F_MICRO = 1;
+
+bool maskBit(uint2 m, int3 p) {
+    uint bit = uint(p.x + 4 * (p.z + 4 * p.y));
+    return (((bit < 32u ? m.x >> bit : m.y >> (bit - 32u))) & 1u) != 0;
+}
+
+// the tight box (block-local micro-voxels) of the content of brick mask m inside [lo, hi)
+bool maskBox(uint2 m, int3 lo, int3 hi, out int3 bl, out int3 bh) {
+    bl = int3(4, 4, 4);
+    bh = int3(0, 0, 0);
+    for (int y = lo.y; y < hi.y; y++)
+        for (int z = lo.z; z < hi.z; z++)
+            for (int x = lo.x; x < hi.x; x++)
+                if (maskBit(m, int3(x, y, z))) {
+                    bl = min(bl, int3(x, y, z));
+                    bh = max(bh, int3(x, y, z) + 1);
+                }
+    return bh.x > 0;
+}
+
+// atlas_lab's flatError for a box inside one block (local)
+uint maskErr(uint2 m, int3 lo, int3 hi) {
+    int err = 0;
+    for (int a = 0; a < 3; a++) {
+        int a1 = (a + 1) % 3, a2 = (a + 2) % 3, n = hi[a] - lo[a];
+        for (int u = lo[a1]; u < hi[a1]; u++)
+            for (int v = lo[a2]; v < hi[a2]; v++)
+                for (int side = 0; side < 2; side++)
+                    for (int t = 0; t < n; t++) {
+                        int3 p = int3(0, 0, 0);
+                        p[a] = side == 1 ? hi[a] - 1 - t : lo[a] + t;
+                        p[a1] = u;
+                        p[a2] = v;
+                        if (maskBit(m, p)) {
+                            err = max(err, t);
+                            break;
+                        }
+                    }
+    }
+    return uint(err);
+}
+
+int3 octant(int k) { return int3(k & 1, k >> 2, (k >> 1) & 1); }
+
+int3 cellOf(uint c, int3 d) { return int3(int(c % uint(d.x)), int(c / uint(d.x * d.z)), int((c / uint(d.x)) % uint(d.z))); }
+uint cellIndex(int3 p, int3 d) { return uint(p.x + d.x * (p.z + d.z * p.y)); }
+
+// sub-cube k of a block: its micro-voxel mask (bit j: octant j), and its box
+uint subMask(uint2 m, int k, out int3 bl, out int3 bh) {
+    int3 o = octant(k) * 2;
+    if (!maskBox(m, o, o + 2, bl, bh)) return 0;
+    uint mask = 0;
+    for (int j = 0; j < 8; j++)
+        if (maskBit(m, o + octant(j))) mask |= 1u << uint(j);
+    return mask;
+}
+
+// the blocks: cell = block (grid order)
+[numthreads(64, 1, 1)]
+void lbOctLeaf(uint3 id: SV_DispatchThreadID) {
+    uint c = lin(id);
+    int3 d = P.dims.xyz;
+    if (c >= uint(d.x * d.y * d.z)) return;
+    uint4 r0 = uint4(EMPTY_RANGE, EMPTY_RANGE, EMPTY_RANGE, 0), r1 = uint4(0, 0, 0, 0);
+    uint br = grid[c];
+    int3 bl, bh;
+    if (br != 0) {
+        uint2 m = bricks[br].xy;
+        if (maskBox(m, int3(0, 0, 0), int3(4, 4, 4), bl, bh)) {
+            uint mask = 0;
+            for (int k = 0; k < 8; k++) {
+                int3 sl, sh;
+                if (subMask(m, k, sl, sh) != 0) mask |= 1u << uint(k);
+            }
+            int3 o = cellOf(c, d) * 4;
+            r0 = uint4(range(o.x + bl.x, o.x + bh.x), range(o.y + bl.y, o.y + bh.y), range(o.z + bl.z, o.z + bh.z),
+                       maskErr(m, bl, bh) | mask << 16);
+            r1.x = countbits(mask);
+        }
+    }
+    oct[2u * c] = r0;
+    oct[2u * c + 1u] = r1;
+}
+
+// a level of cells of size 8 and more: each the union of its children; the occupied ones counted for a scan
+[numthreads(64, 1, 1)]
+void lbOctUp(uint3 id: SV_DispatchThreadID) {
+    uint c = lin(id), base = uint(step.k.x), cbase = uint(step.r.x);
+    int3 d = step.k.yzw, cd = step.r.yzw;
+    uint n = uint(d.x * d.y * d.z);
+    if (c == 0) {
+        state[S_LS] = 0;
+        state[S_LE] = n;
+        state[S_PHASE] = 3;
+        setArgs(ARG_SCAN, n, 1024u);
+    }
+    if (c >= n) return;
+    int3 p = cellOf(c, d);
+    uint4 box = uint4(EMPTY_RANGE, EMPTY_RANGE, EMPTY_RANGE, 0);
+    uint mask = 0, desc = 0;
+    for (int k = 0; k < 8; k++) {
+        int3 q = p * 2 + octant(k);
+        if (any(q >= cd)) continue;
+        uint cc = cbase + cellIndex(q, cd);
+        uint4 r = oct[2u * cc];
+        if (emptyRange(r.x)) continue;
+        mask |= 1u << uint(k);
+        box = mergeBox(box, r);
+        desc += 1u + oct[2u * cc + 1u].x;
+    }
+    oct[2u * (base + c)] = uint4(box.xyz, mask << 16);
+    oct[2u * (base + c) + 1u] = uint4(desc, 0, 0, 0);
+    scanIn[c] = uint4(mask != 0 ? 1u : 0u, 0, 0, 0);
+}
+
+// the level's occupied cells as a level of work nodes for the err passes
+[numthreads(64, 1, 1)]
+void lbOctList(uint3 id: SV_DispatchThreadID) {
+    uint c = lin(id), base = uint(step.k.x);
+    int3 d = step.k.yzw;
+    if (c == 0) {
+        uint n = state[S_NEXT];
+        state[S_LS] = 0;
+        state[S_LE] = n;
+        setArgs(ARG_SCAN, n, 1024u);
+    }
+    if (c >= uint(d.x * d.y * d.z)) return;
+    uint4 r = oct[2u * (base + c)];
+    if ((r.w >> 16) == 0) return;
+    uint i = scanOut[c].x;
+    nbox[i] = uint4(r.xyz, 0);
+    naux[i] = uint4(c, 0, 0, 0);
+}
+
+// their errors into the cells
+[numthreads(64, 1, 1)]
+void lbOctErr(uint3 id: SV_DispatchThreadID) {
+    uint i = lin(id), n = state[S_LE] - state[S_LS];
+    if (i >= n || state[S_OVERFLOW] != 0) return;
+    uint at = 2u * (uint(step.k.x) + naux[i].x);
+    oct[at].w = (oct[at].w & 0xFFFF0000u) | min(nodeErr(i), 0xFFFFu);
+}
+
+// the root (the one cell of the top level): slot 0, its children from slot 1; the tree's size
+[numthreads(1, 1, 1)]
+void lbOctRoot(uint3 id: SV_DispatchThreadID) {
+    uint at = 2u * uint(step.k.x);
+    if (state[S_OVERFLOW] != 0) return;
+    if ((oct[at].w >> 16) == 0) {
+        state[S_END] = 0;
+        return;
+    }
+    oct[at + 1u] = uint4(oct[at + 1u].x, 0, 1, 0);
+    state[S_END] = 1u + oct[at + 1u].x;
+    if (state[S_END] > P.caps.w) state[S_OVERFLOW] |= O_OUT;
+}
+
+// a level, top down: each cell's children take its first slots in octant order, their subtrees after them in turn
+[numthreads(64, 1, 1)]
+void lbOctPos(uint3 id: SV_DispatchThreadID) {
+    uint c = lin(id), base = uint(step.k.x), cbase = uint(step.r.x);
+    int3 d = step.k.yzw, cd = step.r.yzw;
+    if (c >= uint(d.x * d.y * d.z) || state[S_OVERFLOW] != 0) return;
+    uint4 r = oct[2u * (base + c)];
+    uint mask = r.w >> 16;
+    if (mask == 0) return;
+    uint first = oct[2u * (base + c) + 1u].z, next = first + countbits(mask), j = 0;
+    int3 p = cellOf(c, d);
+    for (int k = 0; k < 8; k++) {
+        if (((mask >> uint(k)) & 1u) == 0) continue;
+        uint cc = 2u * (cbase + cellIndex(p * 2 + octant(k), cd)) + 1u;
+        uint4 x = oct[cc];
+        oct[cc] = uint4(x.x, first + j, next, 0);
+        next += x.x;
+        j++;
+    }
+}
+
+uint4 packNode(int3 lo, int3 hi, uint err, uint mask, uint flags, uint first) {
+    uint e = min(err, 4095u);
+    return uint4(uint(lo.x) | uint(hi.x) << 12 | mask << 24, uint(lo.y) | uint(hi.y) << 12 | (e & 255u) << 24,
+                 uint(lo.z) | uint(hi.z) << 12 | (e >> 8) << 24 | flags << 28, first);
+}
+
+// a level's cells in their slots (the blocks, the level at cell 0: their sub-cubes too, F_MICRO nodes)
+[numthreads(64, 1, 1)]
+void lbOctPack(uint3 id: SV_DispatchThreadID) {
+    uint c = lin(id), base = uint(step.k.x);
+    int3 d = step.k.yzw;
+    if (c >= uint(d.x * d.y * d.z) || state[S_OVERFLOW] != 0 || state[S_END] == 0) return;
+    uint4 r = oct[2u * (base + c)], x = oct[2u * (base + c) + 1u];
+    uint mask = r.w >> 16;
+    if (mask == 0) return;
+    int3 lo = boxLo(r), hi = boxHi(r);
+    outNodes[x.y] = packNode(lo, hi, r.w & 0xFFFFu, mask, 0, x.z);
+    if (base != 0) return;
+    uint2 m = bricks[grid[c]].xy;  // a block (the level at base 0): its sub-cubes at its first slots
+    int3 o = cellOf(c, d) * 4;
+    uint j = 0;
+    for (int k = 0; k < 8; k++) {
+        int3 sl, sh;
+        uint sm = subMask(m, k, sl, sh);
+        if (sm == 0) continue;
+        outNodes[x.z + j] = packNode(o + sl, o + sh, maskErr(m, sl, sh), sm, F_MICRO, 0);
+        j++;
+    }
 }
