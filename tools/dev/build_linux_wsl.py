@@ -8,6 +8,7 @@ WSL: this only produces the .so on a Windows development machine.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import os
 import shutil
 import subprocess
@@ -30,14 +31,16 @@ def main():
     ap.add_argument("--test", action="store_true", help="run the native suites (software Vulkan: slow)")
     a = ap.parse_args()
     digest = native_sources.source_hash()
+    # one build directory per checkout: a shared one silently built whichever worktree configured it first
+    build = "~/atlas-build-" + hashlib.sha256(str(ROOT.resolve()).lower().encode()).hexdigest()[:10]
     cores = max(1, (os.cpu_count() or 2) // 2)
-    script = (f"cd {wsl_path(ROOT)} && PATH=~/.atlas-tc/env/bin:$PATH CXX=x86_64-conda-linux-gnu-g++ BUILD_DIR=~/atlas-build "
+    script = (f"cd {wsl_path(ROOT)} && PATH=~/.atlas-tc/env/bin:$PATH CXX=x86_64-conda-linux-gnu-g++ BUILD_DIR={build} "
               f"taskset -c 0-{cores - 1} nice -n 15 native/build_linux.sh {'--software' if a.test else '--no-test'}")
     r = subprocess.run(["wsl", "-d", a.distro, "-e", "bash", "-lc", script])
     if r.returncode:
         print("build_linux_wsl: the WSL build failed (see above); nothing shipped")
         return 1
-    built = subprocess.run(["wsl", "-d", a.distro, "-e", "bash", "-lc", "wslpath -w ~/atlas-build/libatlas_core.so"],
+    built = subprocess.run(["wsl", "-d", a.distro, "-e", "bash", "-lc", f"wslpath -w {build}/libatlas_core.so"],
                            capture_output=True, text=True).stdout.strip()
     if not built or not Path(built).exists():
         print(f"build_linux_wsl: no libatlas_core.so at {built!r}")
