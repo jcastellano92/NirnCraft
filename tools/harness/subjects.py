@@ -62,14 +62,13 @@ def _icon(kind, it):
 
 
 def _dropped(kind, it):
-    """The item lying on the floor, still: a display entity laid flat on the pad (a real dropped item spins and
-    bobs forever, which no picture can judge), framed by its spot on the floor."""
+    """The item dropped as the game drops it: a real item entity falling onto the pad, framed where it lands. NirnCraft
+    items are meant to come to rest lying in the world like Skyrim's (physics, interact to pick up); until that
+    exists the picture shows the vanilla spin and bob, on purpose (work:item-physics)."""
     sx, sy, sz = catalog.STAGE
-    flat = ('transformation:{left_rotation:[0.7071f,0f,0f,0.7071f],right_rotation:[0f,0f,0f,1f],'
-            'translation:[0f,0f,0f],scale:[0.7f,0.7f,0.7f]}')
-    return _scene(kind, it, "dropped", f"{it}: lying on the floor", [
-        f"command summon item_display {sx + 0.5} {sy + 1.03} {sz + 0.5} {{item:{{id:\"nirncraft:{it}\",count:1}},{flat}}}",
-        "wait 5"], extra={"frameBox": [sx, sy + 1, sz, sx, sy + 1, sz, 30, 0.5]})
+    return _scene(kind, it, "dropped", f"{it}: dropped", [
+        f"command summon item {sx + 0.5} {sy + 1.6} {sz + 0.5} {{Item:{{id:\"nirncraft:{it}\",count:1}},"
+        f"PickupDelay:32767,Age:-32768}}", "wait 30"], extra={"frameBox": [sx, sy + 1, sz, sx, sy + 1, sz, 30, 0.5]})
 
 
 def _npc(role="citizen", race="nord"):
