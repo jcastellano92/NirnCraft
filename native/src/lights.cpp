@@ -208,10 +208,14 @@ uint32_t Lights::frame(const LightView& v, std::vector<ActorGpu>& out) {
             float cxp = (m[0] * X + m[4] * Y + m[8] * Z + m[12]) / cw, cyp = (m[1] * X + m[5] * Y + m[9] * Z + m[13]) / cw;
             float px = (cxp * 0.5f + 0.5f) * float(v.width), py = (0.5f - cyp * 0.5f) * float(v.height);
             float d = float(dist);
-            float sigma = std::max(0.6f, 0.5f * r.radius / (d * pa));
+            // the flame or lamp itself, not the whole light: about a third of its radius (at least half a pixel)
+            float sigma = std::max(0.5f, 0.3f * r.radius / (d * pa));
             float T = std::exp(-d * v.hazeDensity);
             float halo = 1.5f + 8.0f * (1.0f - T);
-            float reach = std::min(64.0f, 3.0f * sigma + 3.0f * halo);
+            // its glow, and the ground and walls it lights (block light reaches 15 x intensity blocks)
+            float lit = r.kind == ATLAS_LIGHT_MIST ? 0.0f
+                      : (15.0f * std::min(r.intensity, 1.0f) + (r.kind == ATLAS_LIGHT_LAVA ? r.radius : 0.0f)) / (d * pa);
+            float reach = std::min(96.0f, std::max(3.0f * sigma + 3.0f * halo, lit));
             if (px + reach < 0 || py + reach < 0 || px - reach > float(v.width) || py - reach > float(v.height)) continue;
             cands.push_back({&r, r.intensity * falloff(d), d, px, py, sigma, halo, reach, rx, ry, rz});
         }

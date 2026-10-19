@@ -599,10 +599,63 @@ float3 farLights(uint2 px, float3 o, float3 dir, float surface, float3 sun) {
         float T = aerialTransmittance(dist, frame);
         float q = apx / sigma;
         float core = exp(-0.5 * q * q);
-        float glow = (1.0 - T) * 0.15 * exp(-apx / halo);
+        float glow = (1.0 - T) * 0.06 * exp(-apx / halo);
         float3 rad = l.shape.xyz;
         if (kind == 3u) rad *= keyLightRadiance(sun) * 0.25 + skyAmbient(float3(0, 1, 0), sun);  // spray: lit, not glowing
         sum += rad * vis * (core * T + glow);
+    }
+    return sum;
+}
+
+// The far lights on the surfaces around them, as the near field lights them: Minecraft's block light (level 15 x the
+// light's intensity, plus a lava pool's radius, one level less per block; no facing term, like the light map) through
+// the pack's block light curve (lib/lighting.glsl blockLight: pow(l, 3.2) * 1.8 + pow(l, 12) * 2), in the light's
+// colour. What stands between keeps a quarter (the flood fill bends around corners; a wall in the way still shades).
+// p: the hit, camera-relative to camInt; lod: its level (the occlusion trace's).
+float3 farLightsOn(uint2 px, float3 p, int lod, float3 sun) {
+    uint L = uint(frame.weatherParams.y);
+    if (L == 0u) return float3(0, 0, 0);
+    uint A = uint(frame.weatherParams.w);
+    uint tilesX = (frame.dims.x + 31u) / 32u, tilesY = (frame.dims.y + 31u) / 32u;
+    uint tile = (px.y / 32u) * tilesX + px.x / 32u;
+    uint tableBase = A + L, indexBase = tableBase + (tilesX * tilesY + 5u) / 6u;
+    uint start = actorWord(tableBase + tile / 6u, (tile % 6u) * 2u);
+    uint count = min(actorWord(tableBase + tile / 6u, (tile % 6u) * 2u + 1u), 64u);
+    float night = smoothstep(0.12, -0.1, sun.y);
+    float t = frame.sunDir.w;
+    float3 sum = float3(0, 0, 0);
+    for (uint k = 0u; k < count; k++) {
+        uint e = start + k;
+        uint li = actorWord(indexBase + e / 12u, e % 12u);
+        ActorGpu l = actors[A + li];
+        uint kind = uint(l.shape.w + 0.5);
+        if (kind == 3u) continue;  // spray is lit, it lights nothing
+        float vis = kind == 0u ? night
+                  : kind == 1u ? (0.1 + 0.9 * night) * (0.82 + 0.18 * sin(t * 11.0 + l.motion.y * 7.0) * sin(t * 4.3 + l.motion.y))
+                  : 0.85 + 0.15 * sin(t * 1.3 + l.motion.y);
+        if (vis <= 0.001) continue;
+        // the record's radiance is scaled for the glow (6 x intensity x falloff(dist), lights.cpp): undo it
+        float fall = 1.0 / pow(1.0 + l.motion.x / 1500.0, 1.5);
+        float3 base = l.shape.xyz / (6.0 * fall);
+        float inten = max(base.r, max(base.g, base.b));
+        if (inten <= 1e-4) continue;
+        float level = 15.0 * min(inten, 1.0) + (kind == 2u ? l.motion.w : 0.0);
+        float3 v = l.posYaw.xyz - p;
+        float d = length(v);
+        if (d >= level) continue;
+        float b = (level - d) / 15.0;
+        float3 hue = base / inten;
+        float occ = 1.0;
+        if (d > 1.5) {
+            TraceResult rr;
+            rr.t = 0; rr.mat = 0; rr.axis = -1; rr.lod = 0; rr.steps = 0; rr.dither = 0.5;
+            float3 dirL = v / d;
+            float s = float(1 << lod);
+            float unc;
+            // from just off the surface towards the light, stopping a block short of it (its own block)
+            if (traceLod(lod, p + dirL * (0.6 * s), dirL, max(d - 1.2 * s, 0.0), rr, unc) == TRACE_HIT) occ = 0.25;
+        }
+        sum += hue * (pow(b, 3.2) * 1.8 + pow(b, 12.0) * 2.0) * vis * occ;
     }
     return sum;
 }
@@ -955,6 +1008,8 @@ void farMain(uint3 id : SV_DispatchThreadID) {
         // land takes their average (FAR_AMBIENT_OCCLUSION, calibrated against fid-* near / far pairs)
         if (cls != 2u) ao *= FAR_AMBIENT_OCCLUSION;
         color = shadeSurface(albedo, m, n, dir, sun, sunVis, cls, ao, reflection);
+        // the lamps, torches, fires and lava around it light it (the near field's block light, ATLAS lights)
+        if (cls != 2u && (frame.dims.z & FRAME_DEBUG_ALBEDO) == 0) color += albedo * farLightsOn(id.xy, p, res.lod, sun);
         if (foam > 0.0) {
             // white water: a bright rough surface over the river
             float3 up = float3(0, 1, 0);
