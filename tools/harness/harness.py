@@ -531,12 +531,13 @@ class Runner:
             return results.record(s["id"], v, "visual", "skip", {}, fp,
                                   extra={"error": f"no {missing[0].name} yet: run atlaslab-export (the in-game export) first"})
         lab = {k: (str(lab_path(val)) if isinstance(val, str) and val.startswith("@game/") else val) for k, val in lab.items()}
-        live_png = None
+        live_png, near_limit = None, None
         if s.get("camera_from"):  # a live capture's own camera: the offline render of exactly that view
             cam, why = camera_from(s["camera_from"])
             if why:
                 return results.record(s["id"], v, "visual", "skip", {}, fp, extra={"error": why})
             live_png = cam.pop("_png")
+            near_limit = cam.pop("_near", None)
             lab.update(cam)
         if tool != "atlas_lab":
             lab.setdefault("w", 960)
@@ -565,7 +566,7 @@ class Runner:
                 d = results.stem(s["id"], v).parent
                 d.mkdir(parents=True, exist_ok=True)
                 twin = results.offline_vs_live(live_png, png, png.with_name(png.stem + "_mask.png"),
-                                               Path(f"{results.stem(s['id'], v)}.twin.png"))
+                                               Path(f"{results.stem(s['id'], v)}.twin.png"), near_limit)
             rec = results.store(s["id"], v, png, meta={"tool": tool, "args": kv, "atlas": report}, fingerprint=fp,
                                 extra={"report": report, **({"labSummary": lab_summary(report)} if tool == "atlas_lab" else {}),
                                        **({"vsLive": twin} if twin else {})})
@@ -950,6 +951,8 @@ def camera_from(ref):
     w, h = Image.open(png).size
     cam = {"camera": "mc", "eye": ",".join(f"{c:.3f}" for c in g["eye"]), "yaw": g.get("yaw", 0),
            "pitch": g.get("pitch", 0), "fov": g.get("fov", 70), "w": w, "h": h, "_png": png}
+    if isinstance(g.get("renderDistance"), (int, float)):  # ground truth only where Minecraft itself renders: its chunks
+        cam["_near"] = max(16, (int(g["renderDistance"]) - 1) * 16)  # (one chunk inside its render distance)
     if isinstance(g.get("dayTime"), (int, float)):  # night captures are rendered at night (sky light, the lightmap)
         cam["time"] = int(g["dayTime"]) % 24000
     return cam, ""

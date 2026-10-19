@@ -554,29 +554,42 @@ def twin_compare(lab_png, live_png, out_png):
     return {"twinDE": de, "twinLuma": luma, "twinStructure": struct, "twinSkyline": round(sky, 2)}
 
 
-def offline_vs_live(live_png, lab_png, mask_png, out_png):
+def offline_vs_live(live_png, lab_png, mask_png, out_png, near_limit=None):
     """The offline render of a live capture's own view against that capture, where the offline frame shows the
-    exported blocks (its mask: the live view also shows land beyond them): mean colour dE there, the share of the
-    frame compared, and the edge agreement (structure: do the outlines fall in the same places). Writes the sheet
-    live | offline | difference (dE as heat, grey outside the mask) to out_png."""
+    exported blocks (its mask: the live view also shows land beyond them).
+
+    Ground truth only where Minecraft itself renders: with near_limit (blocks, from the capture's render distance) and
+    the offline depth image, colour dE and edge agreement are judged within it; beyond it the live picture is the far
+    field being replaced, not ground truth, so its dE against the real blocks is reported as liveFarDE (information,
+    never a verdict). Missing (sky over real blocks) and flat (a fog-coloured or empty patch over textured blocks) are
+    judged over the whole frame: a hole or a fog wall is wrong wherever it is. Writes the sheet live | offline |
+    difference (dE as heat; dimmed beyond near_limit; grey outside the mask) to out_png."""
     a = Image.open(live_png).convert("RGB")
     b = Image.open(lab_png).convert("RGB").resize(a.size)
     m = np.asarray(Image.open(mask_png).convert("L").resize(a.size), dtype=np.float32) / 255.0 if Path(mask_png).exists()         else np.ones((a.height, a.width), np.float32)
     la, lb = (np.asarray(_lab(x, w=a.width), dtype=np.float32) for x in (a, b))
     de = np.sqrt(((la - lb) ** 2).sum(axis=2))
     inside = m > 0.5
-    share = float(inside.mean())
-    mean_de = float(de[inside].mean()) if inside.any() else 0.0
+    depth_png = Path(str(lab_png)[:-4] + "_depth.png")
+    dist = None
+    if depth_png.exists():
+        dp = np.asarray(Image.open(depth_png).convert("RGB").resize(a.size, Image.NEAREST), dtype=np.uint32)
+        dist = ((dp[..., 0] << 16) | (dp[..., 1] << 8) | dp[..., 2]).astype(np.float64) / 16.0
+    verdict = inside if (near_limit is None or dist is None) else (inside & (dist <= near_limit))
+    beyond = inside & ~verdict
+    share = float(verdict.mean())
+    mean_de = float(de[verdict].mean()) if verdict.any() else 0.0
     ga, gb = (np.asarray(x.convert("L"), dtype=np.float32) for x in (a, b))
 
     def edges(g):
         gx = np.abs(np.diff(g, axis=1, prepend=g[:, :1]))
         gy = np.abs(np.diff(g, axis=0, prepend=g[:1]))
         return (gx + gy) > 24
-    ea, eb = edges(ga) & inside, edges(gb) & inside
+    ea, eb = edges(ga) & verdict, edges(gb) & verdict
     struct = float((ea & eb).sum() / max(1, (ea | eb).sum()))
     heat = np.clip(de / 30.0, 0, 1)
     hm = np.stack([heat * 255, (1 - np.abs(heat - 0.5) * 2) * 180, (1 - heat) * 120], axis=2)
+    hm[beyond] = hm[beyond] * 0.45 + 30  # beyond Minecraft's render distance: information only, dimmed
     hm[~inside] = 60
     side = Image.new("RGB", (a.width * 3 + 16, a.height), (20, 20, 24))
     side.paste(a, (0, 0))
@@ -602,12 +615,14 @@ def offline_vs_live(live_png, lab_png, mask_png, out_png):
     flat = float(((sa < 1.5) & (sb > 4.0) & inside).sum() / max(1, inside.sum()))
     out = {"liveDE": round(mean_de, 2), "liveShare": round(share, 3), "liveEdges": round(struct, 3),
            "liveMissing": round(missing, 4), "liveFlat": round(flat, 4)}
+    if near_limit is not None:
+        out["liveNearLimit"] = round(float(near_limit), 1)
+        if beyond.sum() > 200:
+            out["liveFarDE"] = round(float(de[beyond].mean()), 2)
+            out["liveFarShare"] = round(float(beyond.mean()), 3)
     # by distance (the offline render's out_depth.png: 1/16 blocks in 24 bits, all ones for sky): where the error is
     # (far trees thinning, far materials flattening show as the far bands' dE rising)
-    depth_png = Path(str(lab_png)[:-4] + "_depth.png")
-    if depth_png.exists():
-        dp = np.asarray(Image.open(depth_png).convert("RGB").resize(a.size, Image.NEAREST), dtype=np.uint32)
-        dist = ((dp[..., 0] << 16) | (dp[..., 1] << 8) | dp[..., 2]).astype(np.float64) / 16.0
+    if dist is not None:
         bands = {}
         for lo, hi in ((0, 64), (64, 192), (192, 512), (512, 1024), (1024, 4096)):
             sel = inside & (dist >= lo) & (dist < hi)

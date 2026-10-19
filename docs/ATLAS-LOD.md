@@ -241,6 +241,17 @@ what is left is texture detail (the 4 x 4 face tiles against Minecraft's 16 x 16
 tinted pictures, so the export scene now captures with fog-off (no vanilla fog, no atlas haze) and writes the view's
 tints.
 
+**What each comparison means** (owner, 2026-10-19). Ground truth exists only where Minecraft itself renders: the
+truth suite (tools/harness/truth.py) judges colour and outlines against the exact reference (atlas_truth: Minecraft's
+own mesh, offline) only within the capture's render distance (minus a chunk), with entities and particles removed from
+the capture (truth-quiet: the reference draws neither) and the world frozen through it. Beyond the render distance
+the live picture is today's far field, the thing being replaced: its error against the real blocks is information
+(liveFarDE), never a verdict. Holes and fog walls (sky or a flat fog colour over real blocks) are failures anywhere.
+The new far field is judged against the reference out to the exported view (1 km): does it represent the real blocks
+(dE by distance band), and how does it resolve as the camera approaches (the fly-in: no change beyond the reference's
+own, no pop, no shimmer). Further out, where nothing can be ground truth, it is judged on stability, smoothness,
+absence of artefacts, and updates when blocks change.
+
 **Texture resolution up close** (ground truth, 2026-10-19): the 4 x 4 face tiles are right far away but flat up close
 (the cobble path, planks); owning the near field needs faces at the texture's own resolution (16 x 16), stored once
 per texture (an atlas), not per block state.

@@ -55,11 +55,11 @@ SUBJECTS = [
 
 def _export(slug, title, pose, time, tags, box, underground):
     r, down, up = box
-    setup = ["fog-off on", "atlaslab blocks", "atlaslab quads",
+    setup = ["fog-off on", "truth-quiet on", "try tick freeze", "atlaslab blocks", "atlaslab quads",
              f"atlaslab here {slug} {r} {down} {up}", f"atlaslab here {slug} {r} {down} {up} light"]
-    cleanup = [f"atlaslab view {slug}-view 1024 light", "fog-off off"]
+    cleanup = ["try tick unfreeze", "truth-quiet off", f"atlaslab view {slug}-view 1024 light", "fog-off off"]
     if underground:  # no view far out underground: the box is the whole truth there
-        cleanup = ["fog-off off"]
+        cleanup = ["try tick unfreeze", "truth-quiet off", "fog-off off"]
     return {"_file": "(generated truth)", "id": f"truth-{slug}", "title": f"Ground truth capture: {title}",
             "tags": ["suite:truth", "feature:farfield"] + tags, "tier": "live", "group": "live", "variants": ["vanilla"],
             "weather": "off", "time": time, "settle": "static", "pose": pose, "wait": 100,
@@ -88,7 +88,7 @@ def custom_blocks():
     sx, sy, sz = catalog.STAGE
     blocks = sorted(catalog._lang_ids("block"))
     x0, z0, y = sx - 16, sz - 16, sy
-    setup = ["fog-off on", f"try fill {x0 - 2} {y} {z0 - 2} {x0 + 33} {y} {z0 + 33} minecraft:smooth_stone",
+    setup = ["fog-off on", "truth-quiet on", f"try fill {x0 - 2} {y} {z0 - 2} {x0 + 33} {y} {z0 + 33} minecraft:smooth_stone",
              f"try fill {x0 - 2} {y + 1} {z0 - 2} {x0 + 33} {y + 8} {z0 + 33} minecraft:air"]
     setup += [f"try setblock {x0 + (i % 16) * 2} {y + 1} {z0 + (i // 16) * 2} nirncraft:{b}" for i, b in enumerate(blocks[:256])]
     setup += ["wait 40", "atlaslab blocks", "atlaslab quads",
@@ -100,7 +100,7 @@ def custom_blocks():
               "tags": ["suite:truth", "feature:farfield", "feature:custom-blocks"], "tier": "live", "group": "live",
               "variants": ["vanilla"], "weather": "off", "time": 6000, "settle": "static",
               "pose": {"camera": [cx, y + 22, cz - 26, cx, y + 1, cz]}, "seed": 1234, "wait": 100, "setup": setup,
-              "cleanup": ["fog-off off"], "measure": 0, "checks": {}, "capture": "world", "timeout": 1800,
+              "cleanup": ["truth-quiet off", "fog-off off"], "measure": 0, "checks": {}, "capture": "world", "timeout": 1800,
               "source": "tools/harness/truth.py"}
     return [export, _lab("custom-blocks", "every NirnCraft block on the sky stage", ["feature:custom-blocks"], "near",
                          "custom-blocks.alv2")]

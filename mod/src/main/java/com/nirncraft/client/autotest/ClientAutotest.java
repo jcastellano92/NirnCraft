@@ -224,6 +224,8 @@ public final class ClientAutotest {
     private static boolean liveSettleInternal;
     /** The frame limit before a long server-side step capped it (0: not capped): nothing is captured meanwhile. */
     private static int fpsBeforeCap;
+    /** The particle setting before a ground-truth capture made them minimal (null: not changed). */
+    private static net.minecraft.server.level.ParticleStatus truthParticles;
     /** `settle T partial`: at the deadline the sequence goes on (counted in settlePartial) instead of being cancelled. */
     private static boolean liveSettleTolerant;
     private static int liveSettlePartial;
@@ -737,6 +739,25 @@ public final class ClientAutotest {
                 com.nirncraft.client.autotest.ReviewWorlds.hudHidden(mc, !action.substring(4).trim().equals("on"));
             } else if (action.startsWith("weather-off ")) {  // on | off: world-gen views without clouds, rain or fog banks
                 com.nirncraft.atmosphere.client.WeatherFieldTexture.off(action.substring(12).trim().equals("on"));
+            } else if (action.startsWith("truth-quiet ")) {
+                // on | off: a ground-truth capture shows only blocks (the offline reference draws no entities or
+                // particles): every non-player entity within 600 blocks removed (the test world is a disposable copy),
+                // particles minimal and the ones on screen cleared; off restores the particle setting
+                boolean on = action.substring(12).trim().equals("on");
+                if (on) {
+                    if (truthParticles == null) truthParticles = mc.options.particles().get();
+                    mc.options.particles().set(net.minecraft.server.level.ParticleStatus.MINIMAL);
+                    mc.particleEngine.clearParticles();
+                    var srv = mc.getSingleplayerServer();
+                    if (srv != null && mc.player != null) {
+                        String who = mc.player.getGameProfile().name();
+                        srv.execute(() -> srv.getCommands().performPrefixedCommand(srv.createCommandSourceStack().withSuppressedOutput(),
+                                "execute as " + who + " at @s run kill @e[type=!minecraft:player,distance=..600]"));
+                    }
+                } else if (truthParticles != null) {
+                    mc.options.particles().set(truthParticles);
+                    truthParticles = null;
+                }
             } else if (action.startsWith("fog-off ")) {  // on | off: ground-truth views without distance fog or haze
                 com.nirncraft.atlas.AtlasTruthView.set(action.substring(8).trim().equals("on"));
             } else if (action.startsWith("atlas-edits-why ")) {  // on | off: log what keeps changing in re-journalled chunks
