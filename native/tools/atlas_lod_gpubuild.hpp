@@ -211,7 +211,8 @@ public:
     int levelBatch = 16;       // Vulkan: levels recorded per submission before the host looks whether the tree is done
     double regionScale = 8;    // updates: a region is rebuilt whole when no more than this times the edit's volume
     double regrow = 0;         // updates: and a node whose box the edit could grow past this factor in surface (0: never)
-    uint32_t wideErr = 256, wideSweep = 128;  // Vulkan: a work group reduces a node's errors / sweeps its SAH from these
+    double contain = 0;        // updates: and the smallest region holding the whole edit, when at most this times its volume
+    uint32_t wideErr = 256, wideSweep = 64;  // Vulkan: a work group reduces a node's errors / sweeps its SAH from these
     bool profile = false;      // Stats::kernelMs (a timestamp after every dispatch on Vulkan, the wall clock on the CPU)
     std::string name = "cpu (slang->c++)";
 
@@ -273,7 +274,7 @@ public:
         st = {};
         std::vector<uint32_t> region = {range(0, dims_[0] * 4), range(0, dims_[1] * 4), range(0, dims_[2] * 4), 0u};
         uint32_t end = 1;
-        if (!run(region, 1, {}, end, false, nullptr, false, st, err)) return false;
+        if (!run(region, 1, 0, end, false, nullptr, false, st, err)) return false;
         out = {};
         uint32_t words[STATE_WORDS];
         readState(words);
@@ -329,6 +330,11 @@ public:
             uint32_t mask = (w[0] >> 24) & 3u, first = w[3];
             int kids = int(mask & 1u) + int(mask >> 1);
             bool rebuild = kids == 0 || vol <= regionScale * editVol;
+            if (!rebuild && contain > 0 && vol <= contain * editVol) {  // the edit whole inside this region: kept together
+                bool inside = true;
+                for (int a = 0; a < 3; a++) inside = inside && it.r.lo[a] <= lo[a] && hi[a] <= it.r.hi[a];
+                rebuild = inside;
+            }
             if (!rebuild && regrow > 0) {  // the box could grow by the edit's part of the region: past regrow, rebuild
                 int l[3], h[3], gl[3], gh[3];
                 boxOf(it.slot, l, h);
@@ -365,17 +371,12 @@ public:
                 stack.push_back(r);
             }
         }
-        // the refit list, deepest first, one dispatch group a depth
+        // the refit list after the regions, deepest first (a parent after its children)
         std::sort(refit.begin(), refit.end(), [](auto& x, auto& y) { return x.first > y.first; });
         uint32_t n = uint32_t(regions.size() / 4);
-        std::vector<std::pair<int, int>> groups;
-        for (size_t i = 0; i < refit.size(); i++) {
-            if (i == 0 || refit[i].first != refit[i - 1].first) groups.push_back({int(i), 0});
-            groups.back().second++;
-            regions.insert(regions.end(), {0u, 0u, 0u, refit[i].second});
-        }
+        for (auto& r : refit) regions.insert(regions.end(), {0u, 0u, 0u, r.second});
         uint32_t end = uint32_t(tree.count()), before = end;
-        if (!run(regions, n, groups, end, true, &tree.nodes, resident_ != tree.count(), st, err)) return false;
+        if (!run(regions, n, uint32_t(refit.size()), end, true, &tree.nodes, resident_ != tree.count(), st, err)) return false;
         st.ms = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count();
         if (!vk_) st.gpuMs = st.ms;
         st.regions = int(n);
@@ -412,10 +413,10 @@ private:
     // ---- one build: regions in, subtrees out ----
 
     // builds the subtrees of n regions (4 words each: lo | hi << 16 per axis, the slot; then the refit list, the slot in
-    // the 4th word), appends them from `end` (updated), then refits the listed nodes a depth at a time (refit: first
-    // entry and count per depth, deepest first). keep: the output buffer holds the tree being updated (restore: its
+    // the 4th word, refitCount of them, deepest first), appends them from `end` (updated), then refits the listed nodes.
+    // keep: the output buffer holds the tree being updated (restore: its
     // words, uploaded first when uploadFirst, and again before a run that overflowed starts over)
-    bool run(const std::vector<uint32_t>& regions, uint32_t n, const std::vector<std::pair<int, int>>& refit, uint32_t& end, bool keep,
+    bool run(const std::vector<uint32_t>& regions, uint32_t n, uint32_t refitCount, uint32_t& end, bool keep,
              const std::vector<uint32_t>* restore, bool uploadFirst, Stats& st, std::string& err) {
         auto t0 = std::chrono::steady_clock::now();
         // capacities: grown when a build overflows them (and the build run again)
@@ -442,10 +443,18 @@ private:
             p.out[2] = vk_ ? wideErr : 0;  // the CPU backend has no group memory: every node its thread's
             p.out[3] = vk_ ? wideSweep : 0;
             params_ = p;
-            std::vector<uint32_t> zero(STATE_WORDS, 0);
-            if (!upload(B_STATE, zero.data(), zero.size(), 0, err) || !upload(B_REGIONS, regions.data(), regions.size(), 0, err) ||
-                !setParams(err))
-                return false;
+            if (!setParams(err)) return false;
+            if (vk_) {  // the state cleared and the regions copied by the first submission itself
+                if (!regionStage_.buf || regionStage_.size < regions.size() * 4) {
+                    releaseBuf(regionStage_);
+                    if (!createVk(regionStage_, std::max<size_t>(regions.size() * 4, 4096), true, false, err)) return false;
+                }
+                std::memcpy(regionStage_.map, regions.data(), regions.size() * 4);
+                prologue_ = regions.size() * 4;
+            } else {
+                std::fill(host_[B_STATE].begin(), host_[B_STATE].end(), 0u);
+                std::memcpy(host_[B_REGIONS].data(), regions.data(), regions.size() * 4);
+            }
 
             std::vector<Dispatch> d = runsJobs_;
             d.push_back(direct(K_REGIONINIT, 1));
@@ -477,10 +486,10 @@ private:
             d.push_back(direct(K_ROOTBASES, 1));
             for (int L = 0; L + 1 < levels; L++) d.push_back(indirect(K_POSDOWN, int(S_LARG) + 3 * L, L));
             d.push_back(indirect(K_PACK, ARG_PACK));
-            // the nodes above, refitted
-            for (auto [first, count] : refit) {
-                Dispatch x = direct(K_REFITBOX, uint32_t(count + 63) / 64);
-                x.k[0] = first, x.k[1] = count;
+            // the nodes above, refitted: their boxes (one thread, deepest first), then all their errors at once
+            if (refitCount) {
+                Dispatch x = direct(K_REFITBOX, 1);
+                x.k[1] = int32_t(refitCount);
                 d.push_back(x);
                 d.push_back(indirect(K_ERRCOUNT, ARG_NODES));
                 scan(d);
@@ -709,7 +718,8 @@ private:
     VkFence fence_ = VK_NULL_HANDLE;
     VkQueryPool queries_ = VK_NULL_HANDLE;
     PFN_vkCmdDispatchIndirect cmdDispatchIndirect_ = nullptr;
-    VkBuf vbuf_[B_COUNT], ubo_, staging_, stateRead_;
+    VkBuf vbuf_[B_COUNT], ubo_, staging_, stateRead_, regionStage_;
+    size_t prologue_ = 0;  // bytes of regions the next submission copies in (after clearing the state)
     void* stateMap_ = nullptr;
     bool descDirty_ = true;
 
@@ -864,6 +874,7 @@ private:
             releaseBuf(ubo_);
             releaseBuf(staging_);
             releaseBuf(stateRead_);
+            releaseBuf(regionStage_);
             if (queries_) vkDestroyQueryPool(dev_, queries_, nullptr);
             if (fence_) vkDestroyFence(dev_, fence_, nullptr);
             if (cmdPool_) vkDestroyCommandPool(dev_, cmdPool_, nullptr);
@@ -1005,6 +1016,14 @@ private:
         begin();
         vkCmdResetQueryPool(cmd_, queries_, 0, nq);
         vkCmdWriteTimestamp(cmd_, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, queries_, 0);
+        if (prologue_) {  // a build's first submission: the state cleared, the regions in
+            vkCmdFillBuffer(cmd_, vbuf_[B_STATE].buf, 0, STATE_WORDS * 4, 0);
+            VkBufferCopy c{0, 0, prologue_};
+            vkCmdCopyBuffer(cmd_, regionStage_.buf, vbuf_[B_REGIONS].buf, 1, &c);
+            barrier(VK_ACCESS_TRANSFER_WRITE_BIT, VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_SHADER_WRITE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT,
+                    VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT);
+            prologue_ = 0;
+        }
         vkCmdBindDescriptorSets(cmd_, VK_PIPELINE_BIND_POINT_COMPUTE, layout_, 0, 1, &set_, 0, nullptr);
         int bound = -1;
         uint32_t q = 1;

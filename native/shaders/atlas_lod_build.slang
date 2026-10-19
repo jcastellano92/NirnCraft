@@ -908,40 +908,44 @@ void lbPosDown(uint3 id: SV_DispatchThreadID) {
 int3 nodeLo(uint4 w) { return int3(int(w.x & 0xFFFu), int(w.y & 0xFFFu), int(w.z & 0xFFFu)); }
 int3 nodeHi(uint4 w) { return int3(int((w.x >> 12) & 0xFFFu), int((w.y >> 12) & 0xFFFu), int((w.z >> 12) & 0xFFFu)); }
 
-// one depth of refitted nodes (entries step.k.x .. + step.k.y of the refit list, after the regions): each node's box
-// the union of its children's (an emptied child dropped from its mask), as a level for the error passes
-[numthreads(64, 1, 1)]
+// the refitted nodes (the step.k.y entries of the refit list after the regions, deepest first), one thread: each
+// node's box the union of its children's (an emptied child dropped from its mask), written into its slot at once (its
+// parent, later in the list, reads it; the error is measured next), and the list made a level for the error passes
+[numthreads(1, 1, 1)]
 void lbRefitBox(uint3 id: SV_DispatchThreadID) {
-    uint i = lin(id), n = uint(step.k.y);
+    uint n = uint(step.k.y);
     if (state[S_OVERFLOW] != 0) return;
-    if (i == 0) {
-        state[S_DONE] = 0;  // the build is over: its scans serve the refit
-        state[S_LS] = 0;
-        state[S_LE] = n;
-        setArgs(ARG_NODES, n, 64u);
-        setArgs(ARG_SCAN, n, 1024u);
-    }
-    if (i >= n) return;
-    uint slot = regions[P.out.y + uint(step.k.x) + i].w;
-    uint4 w = outNodes[slot];
-    uint mask = (w.x >> 24) & 3u, first = w.w, kept = 0, keptFirst = 0;
-    uint4 box = uint4(EMPTY_RANGE, EMPTY_RANGE, EMPTY_RANGE, 0);
-    uint j = first;
-    for (uint c = 0; c < 2u; c++) {
-        if (((mask >> c) & 1u) == 0) continue;
-        uint4 k = outNodes[j];
-        int3 lo = nodeLo(k), hi = nodeHi(k);
-        if (lo.x < hi.x) {
-            if (kept == 0) keptFirst = j;
-            kept |= 1u << c;
-            box = mergeBox(box, uint4(range(lo.x, hi.x), range(lo.y, hi.y), range(lo.z, hi.z), 0));
+    state[S_DONE] = 0;  // the build is over: its scans serve the refit
+    state[S_LS] = 0;
+    state[S_LE] = n;
+    setArgs(ARG_NODES, n, 64u);
+    setArgs(ARG_SCAN, n, 1024u);
+    for (uint i = 0; i < n; i++) {
+        uint slot = regions[P.out.y + i].w;
+        uint4 w = outNodes[slot];
+        uint mask = (w.x >> 24) & 3u, first = w.w, kept = 0, keptFirst = 0;
+        uint4 box = uint4(EMPTY_RANGE, EMPTY_RANGE, EMPTY_RANGE, 0);
+        uint j = first;
+        for (uint c = 0; c < 2u; c++) {
+            if (((mask >> c) & 1u) == 0) continue;
+            uint4 k = outNodes[j];
+            int3 lo = nodeLo(k), hi = nodeHi(k);
+            if (lo.x < hi.x) {
+                if (kept == 0) keptFirst = j;
+                kept |= 1u << c;
+                box = mergeBox(box, uint4(range(lo.x, hi.x), range(lo.y, hi.y), range(lo.z, hi.z), 0));
+            }
+            j++;
         }
-        j++;
+        bool none = kept == 0;
+        nbox[i] = none ? uint4(box.xyz, F_EMPTY << 16) : uint4(box.xyz, 0);
+        naux[i] = uint4(slot, kept, keptFirst, 0);
+        int3 lo = boxLo(box), hi = boxHi(box);
+        outNodes[slot] = none ? uint4(0, 0, 0, 0)
+                              : uint4(uint(lo.x) | uint(hi.x) << 12 | kept << 24, uint(lo.y) | uint(hi.y) << 12, uint(lo.z) | uint(hi.z) << 12,
+                                      keptFirst);
     }
-    nbox[i] = kept == 0 ? uint4(box.xyz, F_EMPTY << 16) : uint4(box.xyz, 0);
-    naux[i] = uint4(slot, kept, keptFirst, 0);
 }
-
 // their errors measured (the err passes ran on them), written into their slots
 [numthreads(64, 1, 1)]
 void lbRefitPack(uint3 id: SV_DispatchThreadID) {

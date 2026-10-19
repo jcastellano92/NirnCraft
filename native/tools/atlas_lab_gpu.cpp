@@ -796,6 +796,9 @@ int gpuGroups(const Args& a, bool labGroups, bool vulkan, int threads, std::stri
             std::fprintf(stderr, "atlas_lab_gpu: gpu build on %s unavailable: %s\n", vk ? "vulkan" : "cpu", err.c_str());
             continue;
         }
+        b.wideErr = uint32_t(num(a, "wideerr", b.wideErr));
+        b.wideSweep = uint32_t(num(a, "widesweep", b.wideSweep));
+        b.levelBatch = int(num(a, "batch", b.levelBatch));
         LodTree t;
         lodgpu::Stats st;
         if (!b.setVolume(pool, vol.sx, vol.sy, vol.sz, err) || !b.build(t, st, err)) {  // the first sizes the buffers
@@ -880,6 +883,7 @@ int gpuUpdates(const Args& a, const Cam& cam, V3 centre, float radius, const std
     lodgpu::LodGpuBuilder& b = *gpuBuilder;
     b.regionScale = num(a, "regionscale", b.regionScale);
     b.regrow = num(a, "regrow", b.regrow);
+    b.contain = num(a, "contain", b.contain);
     lodgpu::LodGpuBuilder fresh;
     std::string err;
     if (!fresh.init(b.vulkan(), threads, err)) return std::fprintf(stderr, "atlas_lab_gpu: %s\n", err.c_str()), 2;
@@ -909,8 +913,8 @@ int gpuUpdates(const Args& a, const Cam& cam, V3 centre, float radius, const std
     std::printf("\nupdates: %d-block edits, each followed by an update of the tree (median of %d; subtrees over the edit rebuilt where "
                 "their region is at most %.0fx its volume, the nodes above refitted) and a full build for comparison; %s\n",
                 E, reps, b.regionScale, b.name.c_str());
-    std::printf("%-6s %-22s %4s %5s %8s %8s %9s %9s %9s | %-26s | %-26s\n", "edit", "box (blocks)", "regs", "refit", "appended", "garbage", "upd ms",
-                "upd gpu", "full ms", "updated: iou / dE / steps", "full build: iou / dE / steps");
+    std::printf("%-6s %-22s %4s %5s %8s %8s %8s %9s %9s %9s | %-26s | %-26s\n", "edit", "box (blocks)", "regs", "refit", "appended", "garbage", "1st ms",
+                "upd ms", "upd gpu", "full ms", "updated: iou / dE / steps", "full build: iou / dE / steps");
     json = "[";
     int cx = (bmin[0] + bmax[0]) / 2, cz = (bmin[2] + bmax[2]) / 2, top = bmax[1];
     size_t garbageTotal = 0;
@@ -964,15 +968,15 @@ int gpuUpdates(const Args& a, const Cam& cam, V3 centre, float radius, const std
             return std::fprintf(stderr, "atlas_lab_gpu: full build: %s\n", err.c_str()), 2;
         char boxTxt[40];
         std::snprintf(boxTxt, sizeof boxTxt, "%d,%d,%d+%dx%dx%d", lo[0], lo[1], lo[2], hi[0] - lo[0], hi[1] - lo[1], hi[2] - lo[2]);
-        std::printf("%-6s %-22s %4d %5d %8zu %8zu %9.2f %9.2f %9.2f | nodes %zu (live %zu) | nodes %zu\n", e.c_str(), boxTxt, first.regions,
-                    first.refit, first.appended, first.garbage, ms[ms.size() / 2], gms[gms.size() / 2], fs.ms, tree.count(),
+        std::printf("%-6s %-22s %4d %5d %8zu %8zu %8.2f %9.2f %9.2f %9.2f | nodes %zu (live %zu) | nodes %zu\n", e.c_str(), boxTxt, first.regions,
+                    first.refit, first.appended, first.garbage, first.ms, ms[ms.size() / 2], gms[gms.size() / 2], fs.ms, tree.count(),
                     tree.count() - garbageTotal, full.count());
         char buf[500];
         std::snprintf(buf, sizeof buf,
                       "%s{\"edit\":\"%s\",\"lo\":[%d,%d,%d],\"hi\":[%d,%d,%d],\"regions\":%d,\"refit\":%d,\"appended\":%zu,\"garbage\":%zu,"
-                      "\"update_ms\":%.3f,\"update_gpu_ms\":%.3f,\"full_ms\":%.3f,\"nodes\":%zu,\"full_nodes\":%zu,\"depth\":%d,\"full_depth\":%d,\"dist\":[",
+                      "\"first_ms\":%.3f,\"update_ms\":%.3f,\"update_gpu_ms\":%.3f,\"full_ms\":%.3f,\"nodes\":%zu,\"full_nodes\":%zu,\"depth\":%d,\"full_depth\":%d,\"dist\":[",
                       json.size() > 1 ? "," : "", e.c_str(), lo[0], lo[1], lo[2], hi[0], hi[1], hi[2], first.regions, first.refit, first.appended,
-                      first.garbage, ms[ms.size() / 2], gms[gms.size() / 2], fs.ms, tree.count(), full.count(), tree.depth, full.depth);
+                      first.garbage, first.ms, ms[ms.size() / 2], gms[gms.size() / 2], fs.ms, tree.count(), full.count(), tree.depth, full.depth);
         json += buf;
         // both trees against ref
         for (size_t di = 0; di < dists.size(); di++) {
@@ -990,7 +994,7 @@ int gpuUpdates(const Args& a, const Cam& cam, V3 centre, float radius, const std
                 });
                 q[k] = compare(img, refImg);
             }
-            std::printf("  %6.0f m %71s | %6.4f / %5.2f / %6.2f   | %6.4f / %5.2f / %6.2f\n", D, "", q[0].iou, q[0].de, steps[0], q[1].iou, q[1].de,
+            std::printf("  %6.0f m %80s | %6.4f / %5.2f / %6.2f   | %6.4f / %5.2f / %6.2f\n", D, "", q[0].iou, q[0].de, steps[0], q[1].iou, q[1].de,
                         steps[1]);
             std::snprintf(buf, sizeof buf, "%s{\"dist\":%.0f,\"iou\":%.5f,\"dE\":%.4f,\"steps\":%.3f,\"full_iou\":%.5f,\"full_dE\":%.4f,\"full_steps\":%.3f}",
                           di ? "," : "", D, q[0].iou, q[0].de, steps[0], q[1].iou, q[1].de, steps[1]);
