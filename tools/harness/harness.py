@@ -540,7 +540,8 @@ class Runner:
         if perf:
             extra["perf"] = {k: perf[k] for k in ("median", "p95", "p99", "stalls", "frames") if k in perf}
         # a framed scene: the game placed the camera from the subject's size; check it framed the right subject
-        staged = s.get("frame") or s.get("frameBox") or s.get("camera_verb") or s.get("capture") == "ui"
+        moving = any(k in (s.get("pose") or {}) for k in ("sweep", "ladder"))  # the camera moves on purpose
+        staged = s.get("frame") or s.get("frameBox") or s.get("camera_verb") or s.get("capture") == "ui" or moving
         want = None if staged else posecheck.requested(catalog.pose_actions(s, self.plan, cand) + list(s.get("setup", [])))
         pflags, pm = posecheck.pose(want, receipt)
         if s.get("frame"):

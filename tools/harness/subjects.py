@@ -69,7 +69,7 @@ def _dropped(kind, it):
     sx, sy, sz = catalog.STAGE
     return _scene(kind, it, "dropped", f"{it}: dropped", [
         f"command summon item {sx + 0.5} {sy + 1.6} {sz + 0.5} {{Item:{{id:\"nirncraft:{it}\",count:1}},"
-        f"PickupDelay:32767,Age:-32768}}", "wait 30"], extra={"frameBox": [sx, sy + 1, sz, sx, sy + 1, sz, 30, 0.5]})
+        f"PickupDelay:32767,Age:-32768}}", "wait 30"], extra={"frameBox": [sx, sy + 1, sz, sx, sy + 1, sz, 30, 0.85]})
 
 
 def _npc(role="citizen", race="nord"):

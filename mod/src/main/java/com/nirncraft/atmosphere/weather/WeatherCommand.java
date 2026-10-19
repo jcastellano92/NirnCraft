@@ -39,6 +39,10 @@ public final class WeatherCommand {
                     int n = RegionalWeather.clearFronts(c.getSource().getServer());
                     c.getSource().sendSuccess(() -> net.minecraft.network.chat.Component.literal(n + " weather front(s) cleared"), false);
                     return Math.max(1, n);
+                })).then(Commands.literal("resume").executes(c -> {
+                    RegionalWeather.resumeFronts(c.getSource().getServer());
+                    c.getSource().sendSuccess(() -> net.minecraft.network.chat.Component.literal("natural weather fronts back on"), false);
+                    return 1;
                 })))
                 .then(Commands.literal("set").then(Commands.argument("kind", StringArgumentType.word())
                         .suggests((c, b) -> SharedSuggestionProvider.suggest(Arrays.stream(WeatherKind.values()).map(WeatherKind::id), b))

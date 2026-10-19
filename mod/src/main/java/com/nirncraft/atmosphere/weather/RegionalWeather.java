@@ -193,12 +193,21 @@ public final class RegionalWeather {
     }
 
     /** Adds or replaces an active {@link WeatherFront} on the server and syncs it to clients. */
-    /** Removes every weather front (tests: a scene's weather never inherits a front an earlier scene added). */
+    /** Natural fronts back on (after fronts clear). */
+    public static void resumeFronts(MinecraftServer server) {
+        if (server == null) return;
+        Data data = Data.get(server);
+        data.frontsOff = false;
+        data.setDirty();
+    }
+
+    /** Removes every weather front and stops natural ones (tests: a scene's weather is only its own). */
     public static int clearFronts(MinecraftServer server) {
         if (server == null) return 0;
         Data data = Data.get(server);
         int n = data.fronts.size();
         data.fronts.clear();
+        data.frontsOff = true;  // and none seeded again: an empty list re-seeded six random fronts at once
         data.setDirty();
         SkyNetwork.sendToAll(new WeatherPackets.Sync(false, List.of(), data.fronts));
         return n;
@@ -263,7 +272,7 @@ public final class RegionalWeather {
         List<WeatherPackets.Entry> changed = new ArrayList<>();
         boolean frontsChanged = false;
 
-        if (data.fronts.isEmpty()) {
+        if (data.fronts.isEmpty() && !data.frontsOff) {
             List<WeatherFront> initial = seedInitialFronts(ow.getSeed() ^ now);
             data.fronts.addAll(initial);
             for (WeatherFront f : initial) {
@@ -312,7 +321,7 @@ public final class RegionalWeather {
                     frontsChanged = true;
                 }
             }
-            if (data.fronts.size() < TARGET_SYNOPTIC_FRONTS) {
+            if (data.fronts.size() < TARGET_SYNOPTIC_FRONTS && !data.frontsOff) {
                 Random r = new Random(ow.getSeed() + now * 31L + data.nextFrontId);
                 while (data.fronts.size() < TARGET_SYNOPTIC_FRONTS) {
                     int id = data.nextFrontId++;
@@ -477,6 +486,8 @@ public final class RegionalWeather {
         final Map<String, Spell> spells = new HashMap<>();
         final List<WeatherFront> fronts = new ArrayList<>();
         int nextFrontId = 1;
+        /** No natural fronts (tests: /nirncraft-weather fronts clear; fronts resume turns them back on). */
+        boolean frontsOff;
 
         static Data get(MinecraftServer server) {
             if (server == null) server = ServerLifecycleHooks.getCurrentServer();
@@ -502,6 +513,7 @@ public final class RegionalWeather {
                     }
                 }
             }
+            data.frontsOff = tag.getBooleanOr("frontsOff", false);
             if (com.nirncraft.platform.NbtData.hasType(tag, "nextFrontId", Tag.TAG_INT)) {
                 data.nextFrontId = Math.max(data.nextFrontId, tag.getIntOr("nextFrontId",0));
             }
@@ -525,6 +537,7 @@ public final class RegionalWeather {
             }
             tag.put("fronts", frontList);
             tag.putInt("nextFrontId", this.nextFrontId);
+            tag.putBoolean("frontsOff", this.frontsOff);
             return tag;
         }
     }
