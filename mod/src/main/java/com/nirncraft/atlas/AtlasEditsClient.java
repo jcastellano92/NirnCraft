@@ -39,6 +39,7 @@ final class AtlasEditsClient {
             cols.put(AtlasEdits.colKey(c[i], c[i + 1]),
                     new Column(c[i + 2], c[i + 3], c[i + 4], c[i + 5], c[i + 6], c[i + 7], c[i + 8], c[i + 9]));
         int[] l = m.lights();
+        boolean columns = c.length >= AtlasEdits.COL;
         if (l.length > 0) {
             Map<Long, int[]> ls = LIGHTS.computeIfAbsent(tk, k -> new ConcurrentHashMap<>());
             for (int i = 0; i + 3 < l.length; i += 4) {
@@ -47,7 +48,19 @@ final class AtlasEditsClient {
                 else ls.put(pk, new int[] {l[i], l[i + 1], l[i + 2], l[i + 3]});
             }
         }
-        DIRTY.add(tk);
+        // a change to the blocks puts the tile up again at every level; a change to its lights only (a torch lit or
+        // placed in the open) is a re-light: the far lights go up, the tiles stay (they were re-uploaded at all 7 LODs)
+        if (columns) DIRTY.add(tk);
+        else if (l.length > 0) LIGHTS_DIRTY.add(tk);
+    }
+
+    private static final Set<Long> LIGHTS_DIRTY = ConcurrentHashMap.newKeySet();  // LOD-0 tiles whose lights changed only
+
+    /** The LOD-0 tiles whose lights changed and nothing else (taken: the caller puts their lights up). */
+    static List<Long> takeLightsDirty() {
+        List<Long> out = new ArrayList<>(LIGHTS_DIRTY);
+        LIGHTS_DIRTY.removeAll(out);
+        return out;
     }
 
     private static final java.util.concurrent.ConcurrentLinkedQueue<byte[]> SECTIONS = new java.util.concurrent.ConcurrentLinkedQueue<>();
@@ -108,6 +121,7 @@ final class AtlasEditsClient {
         COLUMNS.clear();
         LIGHTS.clear();
         DIRTY.clear();
+        LIGHTS_DIRTY.clear();
     }
 
     static boolean any() {

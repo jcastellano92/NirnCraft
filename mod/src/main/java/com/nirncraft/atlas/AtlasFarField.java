@@ -235,6 +235,8 @@ final class AtlasFarField implements AutoCloseable {
                     Overlay ovE = overlay();
                     if (ovE != null) ovE.invalidate(edited);
                 }
+                for (long ck : AtlasEditsClient.takeLightsDirty())  // a re-light: lights only, no tile, no rebuild
+                    AtlasLights.upload(ctx, AtlasEditsClient.lightGroup(ck), AtlasEditsClient.lights(ck));
                 long tEdits = System.nanoTime();
                 // the server's real sections (the finest levels' real blocks), within a share of the pass
                 Overlay ovS = overlay();
