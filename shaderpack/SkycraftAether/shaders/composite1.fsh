@@ -40,7 +40,7 @@ vec3 knee(vec3 c, float e) {
 }
 
 void main() {
-    vec3 c = texture(colortex4, texcoord).rgb;
+    vec3 c = finite(texture(colortex4, texcoord).rgb);
 #if defined VOLUMETRIC_LIGHT && defined SHAFT_MARCH && !defined SKYCRAFT_REALM
     // four bilinear taps on pixel corners: the mean of the 4 x 4 block around the pixel (colortex4's alpha: the
     // shafts as a multiple of the key light)

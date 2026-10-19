@@ -318,5 +318,5 @@ void main() {
 #if defined VOLUMETRIC_LIGHT && defined SHAFT_MARCH
     if (isEyeInWater == 0) shafts = shaftsMarch(dir, dist0, sun, gl_FragCoord.xy, wetness, rainStrength);
 #endif
-    outColor = vec4(col, shafts);
+    outColor = vec4(finite(col), finite(shafts));  // feeds the mip chain (bloom, exposure)
 }
