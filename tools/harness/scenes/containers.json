@@ -1,0 +1,40 @@
+{
+  "suite": "containers",
+  "description": "NirnCraft's own loot containers (docs/CONTAINERS.md): live checks.",
+  "defaults": {
+    "tier": "live",
+    "group": "live",
+    "variants": [
+      "vanilla"
+    ]
+  },
+  "scenes": [
+    {
+      "id": "containers-selftest",
+      "title": "Containers selftest in a live world: per-player copies, lids, restock, conversion, Lootr migration",
+      "tags": [
+        "feature:loot",
+        "suite:containers",
+        "suite:smoke"
+      ],
+      "pose": {
+        "place": "falkreath",
+        "height": 3,
+        "yaw": 0,
+        "pitch": 10
+      },
+      "weather": "off",
+      "time": 6000,
+      "wait": 40,
+      "setup": [
+        "command nirncraft-containers selftest"
+      ],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "mod/src/main/java/com/nirncraft/loot/container/ContainerSelfTest.java",
+      "note": "the command returns 0 when any check fails, which fails the scene; the log has each check ([containers] lines)"
+    }
+  ]
+}

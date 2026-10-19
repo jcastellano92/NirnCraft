@@ -3,6 +3,18 @@
  "rules": [
   {
    "paths": [
+    "mod/src/main/java/com/nirncraft/loot/container/*",
+    "mod/src/main/resources/assets/nirncraft/blockstates/container*",
+    "mod/src/main/resources/data/nirncraft/loot_table/containers/*"
+   ],
+   "tags": [
+    "suite:containers"
+   ],
+   "reload": null,
+   "final": false
+  },
+  {
+   "paths": [
     "mod/src/*",
     "mod/build.gradle"
    ],
