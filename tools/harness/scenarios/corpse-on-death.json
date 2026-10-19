@@ -30,8 +30,8 @@
     "command damage {actor:bandit} 1000 minecraft:player_attack by @p"
   ],
   "difficulty": "easy",
-  "duration": 200,
-  "every": 5,
+  "duration": 40,
+  "every": 2,
   "trials": 3,
   "photos": "first",
   "expect": [
