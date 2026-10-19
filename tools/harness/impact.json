@@ -7,8 +7,8 @@
     "tools/harness/impact.json"
    ],
    "tags": [
-    "suite:smoke",
-    "suite:harness"
+    "suite:harness",
+    "suite:smoke"
    ],
    "reload": null
   },
@@ -28,11 +28,11 @@
     "shaderpack/InfiniteATLAS/shaders/lib/water*"
    ],
    "tags": [
-    "feature:water",
-    "feature:river",
+    "check:shaders",
     "feature:falls",
-    "suite:smoke",
-    "check:shaders"
+    "feature:river",
+    "feature:water",
+    "suite:smoke"
    ],
    "reload": "shaders"
   },
@@ -44,13 +44,13 @@
     "shaderpack/InfiniteATLAS/shaders/lib/media*"
    ],
    "tags": [
+    "check:shaders",
     "feature:clouds",
     "feature:fog",
-    "feature:storm",
     "feature:smoke",
-    "suite:weather",
+    "feature:storm",
     "suite:smoke",
-    "check:shaders"
+    "suite:weather"
    ],
    "reload": "shaders"
   },
@@ -61,12 +61,12 @@
     "shaderpack/InfiniteATLAS/shaders/lib/sky*"
    ],
    "tags": [
-    "suite:sky",
-    "feature:night-sky",
+    "check:shaders",
     "feature:moons",
-    "time:night",
+    "feature:night-sky",
+    "suite:sky",
     "suite:smoke",
-    "check:shaders"
+    "time:night"
    ],
    "reload": "shaders"
   },
@@ -77,10 +77,10 @@
     "shaderpack/build_pack.py"
    ],
    "tags": [
-    "suite:smoke",
-    "suite:farfield",
+    "check:shaders",
     "suite:lab",
-    "check:shaders"
+    "suite:seam-core",
+    "suite:smoke"
    ],
    "reload": "shaders"
   },
@@ -89,9 +89,9 @@
     "native/*"
    ],
    "tags": [
+    "check:native",
     "suite:lab",
-    "suite:farfield",
-    "check:native"
+    "suite:seam-core"
    ],
    "reload": null
   },
@@ -103,9 +103,9 @@
     "mod/src/main/java/com/nirncraft/*/client/*Renderer*"
    ],
    "tags": [
-    "suite:gallery",
+    "check:unit",
     "suite:creatures",
-    "check:unit"
+    "suite:gallery"
    ],
    "reload": "resources",
    "final": false
@@ -128,10 +128,10 @@
     "mod/src/main/resources/nirncraft/tamriel/places/*"
    ],
    "tags": [
-    "suite:places",
-    "suite:places-planned",
+    "check:cameras",
     "check:world",
-    "check:cameras"
+    "suite:places",
+    "suite:places-planned"
    ],
    "reload": "data:places"
   },
@@ -143,10 +143,10 @@
     "mod/src/main/java/com/nirncraft/town*/*"
    ],
    "tags": [
-    "feature:town",
-    "suite:places",
+    "check:interiors",
     "check:towns",
-    "check:interiors"
+    "feature:town",
+    "suite:places"
    ],
    "reload": "data:cityplans"
   },
@@ -157,10 +157,10 @@
     "mod/src/main/resources/nirncraft/dungeons/*"
    ],
    "tags": [
-    "suite:dungeons",
-    "feature:dungeon",
+    "check:dungeons",
     "feature:cave",
-    "check:dungeons"
+    "feature:dungeon",
+    "suite:dungeons"
    ],
    "reload": "jar"
   },
@@ -170,11 +170,11 @@
     "mod/src/main/resources/nirncraft/worldplan/*"
    ],
    "tags": [
-    "feature:road",
-    "feature:river",
-    "check:roads",
+    "check:cameras",
     "check:hydrology",
-    "check:cameras"
+    "check:roads",
+    "feature:river",
+    "feature:road"
    ],
    "reload": "jar"
   },
@@ -186,12 +186,12 @@
     "mod/src/main/resources/nirncraft/tamriel/*"
    ],
    "tags": [
-    "suite:farfield",
-    "suite:places",
-    "check:world",
+    "check:cameras",
     "check:hydrology",
     "check:roads",
-    "check:cameras"
+    "check:world",
+    "suite:places",
+    "suite:seam-core"
    ],
    "reload": "jar"
   },
@@ -201,9 +201,9 @@
     "mod/src/main/java/com/nirncraft/weather/*"
    ],
    "tags": [
-    "suite:weather",
+    "check:unit",
     "suite:sky",
-    "check:unit"
+    "suite:weather"
    ],
    "reload": "jar"
   },
@@ -212,10 +212,10 @@
     "mod/src/main/java/com/nirncraft/atlas/*"
    ],
    "tags": [
-    "suite:farfield",
-    "suite:smoke",
+    "check:native",
     "check:unit",
-    "check:native"
+    "suite:seam-core",
+    "suite:smoke"
    ],
    "reload": "jar"
   },
@@ -226,11 +226,11 @@
     "mod/src/main/java/com/nirncraft/spell*/*"
    ],
    "tags": [
-    "suite:fx",
+    "check:spells",
+    "check:unit",
     "feature:fire",
     "feature:magic",
-    "check:unit",
-    "check:spells"
+    "suite:fx"
    ],
    "reload": "jar"
   },
@@ -239,8 +239,8 @@
     "mod/src/main/java/com/nirncraft/realm*/*"
    ],
    "tags": [
-    "suite:realms",
-    "check:unit"
+    "check:unit",
+    "suite:realms"
    ],
    "reload": "jar"
   },
@@ -250,9 +250,9 @@
     "mod/src/main/java/com/nirncraft/client/*"
    ],
    "tags": [
-    "suite:ui",
+    "check:unit",
     "suite:smoke",
-    "check:unit"
+    "suite:ui"
    ],
    "reload": "jar"
   },
@@ -331,8 +331,8 @@
     "mod/src/main/resources/*"
    ],
    "tags": [
-    "check:unit",
-    "check:assets"
+    "check:assets",
+    "check:unit"
    ],
    "reload": "jar"
   },

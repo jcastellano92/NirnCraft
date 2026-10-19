@@ -410,6 +410,7 @@ def load():
     scenes += probes()
     scenes += grounding()
     scenes += distance_scenes()
+    seam_core(scenes)
     for s in scenes:
         if s["id"] in seen:
             raise ValueError(f"duplicate scene id {s['id']} ({seen[s['id']]} and {s['_file']})")
@@ -482,6 +483,23 @@ def grounding():
                                     "built": "categories.*.built", "control": "categories.control.floating"},
                     "checks": {}, "source": "LandmarkCommands groundcheck"})
     return out
+
+
+def seam_core(scenes):
+    """One subject per category (its first), day and night, each instrument: the subset the gate runs for renderer
+    and shader changes (the full matrix is `--suite distance`)."""
+    first = {}
+    for s in scenes:
+        if "suite:distance" not in s["tags"]:
+            continue
+        cat = next((x for x in s["tags"] if x.startswith("subject:")), None)
+        place = next((x for x in s["tags"] if x.startswith("place:") or x.startswith("gallery:entity:")), None)
+        if cat and place:
+            first.setdefault(cat, place)
+    for s in scenes:
+        cat = next((x for x in s["tags"] if x.startswith("subject:")), None)
+        if cat and first.get(cat) in s["tags"] and any(x in s["tags"] for x in ("time:day", "time:night"))                 and "suite:altitude" not in s["tags"]:
+            s["tags"].append("suite:seam-core")
 
 
 def legacy_seed():
