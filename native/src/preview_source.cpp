@@ -417,7 +417,7 @@ void PreviewSource::dressRows(Tile& tile, int jBegin, int jEnd, const Overrides&
             if (sm.heat > 0.6f) top = M_ASH;
             if (h < SEA + 2.5f && sm.coast < 40 && cl != SWAMP) top = fill = M_SAND;
             if (slope > 0.9f) top = M_STONE;
-            if (h > snowEdge && slope < 1.4f) top = M_SNOW;
+            if (h > snowEdge && slope < 1.4f && sm.heat < 0.45f) top = M_SNOW;  // (no snow on hot ground: Red Mountain)
             if (cl == FROZEN && sm.coast < 0) top = M_ICE;
             if (!std::isnan(wl) && wl - h > 1.5f) top = sm.coast < 0 ? M_SAND : M_GRAVEL;
             // the biome's own grass colour where the game would show a tinted grass block (the near field's tint)

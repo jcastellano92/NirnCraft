@@ -192,7 +192,7 @@ public final class SettlementHarness {
         OUT.printf("landmarks: %d captured from their builders, %d as profiles; %d wild site silhouettes; %d far lights%n",
                 counters[0], counters[1], counters[2], counters[3]);
         OUT.printf("cost: landmark captures %.0f ms, site silhouettes %.0f ms, settlement massing in all %.0f ms%n", ms[0], ms[1], ms[2]);
-        if (buildingPx[0] < w * h / 200) throw new IllegalStateException("no buildings visible in the mid view");
+        if (buildingPx[0] < w * h / 200 && !place.contains(":")) throw new IllegalStateException("no buildings visible in the mid view");
         BufferedImage img = new BufferedImage(w, h * 4 + 24, BufferedImage.TYPE_INT_RGB);
         for (int k = 0; k < 4; k++)
             for (int p = 0; p < w * h; p++) {

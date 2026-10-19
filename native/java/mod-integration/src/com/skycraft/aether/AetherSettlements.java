@@ -273,8 +273,13 @@ final class AetherSettlements implements AetherFarField.Overlay {
                 for (int[] q : sh.lights)
                     l.add(volcano && q[3] >= 15 ? AetherLights.lava(q[0] + 0.5, q[1] + 0.5, q[2] + 0.5, 4f)
                             : AetherLights.fire(q[0] + 0.5, q[1] + 0.5, q[2] + 0.5, q[3] / 15f));
-                if (p.id().equals("red_mountain"))  // the caldera's glow over the whole crater floor, seen across Vvardenfell
-                    l.add(AetherLights.lava(sh.x0 + sh.w * 0.5, sh.lights.get(0)[1] + 2.0, sh.z0 + sh.d * 0.5, 48f));
+                if (p.id().equals("red_mountain")) {
+                    // the caldera's glow: the crater floor's lava lighting the ash and smoke over it, so it reads above
+                    // the rim from anywhere on Vvardenfell (the rim hides the floor itself from below)
+                    double fx = sh.x0 + sh.w * 0.5, fz = sh.z0 + sh.d * 0.5, floorY = sh.lights.get(0)[1] + 1.0;
+                    l.add(new AetherLights.Light(fx, floorY + 2, fz, 40f, 3f, AetherLights.LAVA_RGB, AetherLights.LAVA));
+                    l.add(new AetherLights.Light(fx, floorY + 85, fz, 110f, 0.55f, AetherLights.LAVA_RGB, AetherLights.LAVA));
+                }
                 if (!siteLightsPending.contains(cell)) siteLightsPending.add(cell);
             }
         }
