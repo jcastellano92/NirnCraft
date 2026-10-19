@@ -263,6 +263,10 @@ _log = ("atlas_lab: camera frame ref 160x160 in 64 ms -> C:/t/a.png\n"
 expect(not _el.wrote_variant(_log, Path("C:/t/a.png"), "groups"), "ref at out= is not the groups frame (it was scored as one)")
 expect(_el.wrote_variant(_log, Path("C:/t/a_groups.png"), "groups"), "the groups frame is found by its path")
 
+# --- an element's cards are its box's: a moved box bakes again -----------------------------------------------------
+expect(_el.card_path({"slug": "e", "box": [0, 1, 2, 3, 4, 5]}, Path("t")) != _el.card_path({"slug": "e", "box": [0, 1, 2, 3, 4, 6]}, Path("t")),
+       "an element's surface cards are keyed by its box, not only its name")
+
 # --- truth subjects offset from their place look back at it (five faced away: yaw 0 is south in Minecraft) -----------
 import math as _math
 import truth as _truth
