@@ -65,6 +65,23 @@ average. The profile is saved per machine and per pack version.
   run per machine (the harness's smoke suite) that records the class, the backend that loaded, the controller's
   settled knobs and frame times.
 
+## Distribution and updates (owner, 2026-10-19: needed once real players test)
+
+* **The modpack as a Modrinth pack** (`.mrpack`): Prism, the Modrinth app and other launchers install it, update
+  it, and drop or add mods between versions (Lootr leaving when NirnCraft's containers replace it is one such pack
+  version). NirnCraft itself as a Modrinth project the pack depends on; third-party mods by their Modrinth versions.
+* **One jar for every platform:** the natives for each OS / architecture inside it (natives/<os>-<arch>/), the right
+  one loaded at start, the CPU backend when none fits; the shader pack shipped in the pack (shaderpacks/) at the
+  version the mod expects (the mod warns when they differ).
+* **Native libraries and hosting rules:** check the hosting platform's rules on bundled native code before the first
+  upload; if they object, the jar ships without natives and fetches the matching one from the project's GitHub
+  releases on first run (checksum pinned in the jar), or the whole pack is distributed from GitHub releases.
+* **Updates in steady state:** semantic versions, a changelog per release, save-format migrations run on world load
+  (the far tile cache already keys itself by the far identity hash and rebuilds when generation changes), and a
+  rollback path (the previous pack version stays installable).
+* **Release checks:** the harness smoke suite on the release build, the natives' ABI check for every platform, and
+  the real-machine runs above.
+
 ## Next steps
 
 1. Linux x64 toolchain (WSL for builds, owner OK 2026-10-19; end users run the native library) and an ABI 0.13 .so in the jar; the harness checks the packed natives
