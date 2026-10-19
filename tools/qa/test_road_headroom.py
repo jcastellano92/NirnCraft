@@ -1,8 +1,13 @@
 """A roof above a blocked road must not turn a hay obstruction into a cliff."""
+import os
+import sys
 import unittest
 import numpy as np
 from types import SimpleNamespace
-from road_measure import covered_point
+
+# runs as `py -3 -m unittest tools.qa.test_road_headroom` from the repo root (check-road-headroom) and from tools/qa
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from road_measure import covered_point  # noqa: E402
 
 
 class RoofTest(unittest.TestCase):

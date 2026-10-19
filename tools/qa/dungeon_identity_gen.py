@@ -8,7 +8,7 @@ Reads   mod/src/main/resources/nirncraft/tamriel/places/skyrim_landmarks.json   
 Writes  mod/src/main/resources/nirncraft/dungeons/identity/skyrim.json          (per place: family, boss, sign, notes, motif, loot)
         mod/src/main/resources/nirncraft/dungeons/blueprints/motif_*.json       (set-piece furnishings by motif)
         mod/src/main/resources/nirncraft/dungeons/blueprints/index.json         (motif entries appended, existing kept)
-        mod/src/main/resources/data/nirncraft/loot_tables/chests/story_*.json   (themed loot of each family)
+        mod/src/main/resources/data/nirncraft/loot_table/chests/story_*.json    (themed loot of each family)
 
 Everything is original text and data. The identity of a place comes from its lore: the first reader note's author is
 "the person" on the entrance sign and lectern; a chief's own notes name the boss of a bandit, forsworn, vampire,
@@ -815,7 +815,6 @@ def main():
     files[idx_path] = dumps(idx)
     changed = 0
     for path, text in files.items():
-        import sys
         from pathlib import Path
         native_tools263 = str(Path(__file__).resolve().parents[1])
         if native_tools263 not in sys.path: sys.path.insert(0, native_tools263)

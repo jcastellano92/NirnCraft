@@ -6,7 +6,7 @@ Output (all read by mod/.../dungeons/world/cavern/CavernLibrary.java; nothing in
   mod/src/main/resources/nirncraft/dungeons/caverns/index.json
   mod/src/main/resources/nirncraft/dungeons/caverns/shapes.json
   mod/src/main/resources/nirncraft/dungeons/caverns/profiles/<group>.json
-  mod/src/main/resources/data/nirncraft/loot_tables/chests/cavern/<kind>.json
+  mod/src/main/resources/data/nirncraft/loot_table/chests/cavern/<kind>.json
 
 A block is "namespace:id[props]@weight" ("rock" = the dungeon's own rock). The profile files can also be edited by hand;
 this script only keeps the ~60 hand-written looks in one readable place. Every block id is checked against
@@ -18,7 +18,7 @@ import sys
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 OUT = os.path.join(ROOT, "mod", "src", "main", "resources", "nirncraft", "dungeons", "caverns")
-LOOT = os.path.join(ROOT, "mod", "src", "main", "resources", "data", "nirncraft", "loot_tables", "chests", "cavern")
+LOOT = os.path.join(ROOT, "mod", "src", "main", "resources", "data", "nirncraft", "loot_table", "chests", "cavern")
 
 M = "minecraft:"
 

@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Progression simulator for NirnCraft's loot economy (docs/LOOT.md).
 
-Rolls the generated loot tables (mod/src/main/resources/data/nirncraft/loot_tables) with Python models of the Java
+Rolls the generated loot tables (mod/src/main/resources/data/nirncraft/loot_table, the native 26.3 schema written by
+tools/data_format_263.py: entry `value` for table references, `condition` / `modifier` objects or lists keyed by `type`) with Python models of the Java
 loot functions (scaled_gold, leveled/regional gear on the LootTiers ladders, the level-scaled enchant chance, tempering,
 potions, tomes...) and values every item with the nirncraft_values data, like ItemValues does. For each level band it
 simulates a character clearing N dungeons (1 boss chest, 3 chests, 6 urns/barrels, 2 picked locks, 7 enemies and a
@@ -144,12 +145,28 @@ def rolls_of(r, rnd):
     return int(r)
 
 
+def as_list(x):
+    """26.3 loot JSON holds one condition / modifier as an object and several as a list."""
+    return [] if x is None else x if isinstance(x, list) else [x]
+
+
+def kind_of(x):
+    # 26.3 keys every condition and modifier by `type`; the pre-26.3 authoring shape used `condition` / `function`
+    return x.get("type") or x.get("condition") or x.get("function")
+
+
 def test(conds, ctx, rnd):
-    for c in conds or []:
-        t = c["condition"]
+    for c in as_list(conds):
+        t = kind_of(c)
+        if t == "minecraft:all_of" and not test(c.get("terms"), ctx, rnd):
+            return False
+        if t == "minecraft:any_of" and c.get("terms") and not any(test(x, ctx, rnd) for x in c["terms"]):
+            return False
         if t == "minecraft:random_chance" and rnd.random() >= c["chance"]:
             return False
         if t == "minecraft:random_chance_with_looting" and rnd.random() >= c["chance"]:
+            return False
+        if t == "minecraft:random_chance_with_enchanted_bonus" and rnd.random() >= c.get("unenchanted_chance", 1):
             return False
         if t == SK + "loot_level" and not (c.get("min", 1) <= ctx["level"] <= c.get("max", 999)):
             return False
@@ -158,27 +175,31 @@ def test(conds, ctx, rnd):
     return True
 
 
+MISSING = set()  # referenced tables that do not exist (a silent zero in game)
+
+
 def roll_table(tid, ctx, rnd, out):
     t = TABLES.get(tid)
     if t is None:
+        MISSING.add(tid)
         return
     for p in t.get("pools", []):
-        if not test(p.get("conditions"), ctx, rnd):
+        if not test(p.get("condition", p.get("conditions")), ctx, rnd):
             continue
         for _ in range(rolls_of(p.get("rolls", 1), rnd)):
-            entries = [e for e in p["entries"] if test(e.get("conditions"), ctx, rnd)]
+            entries = [e for e in p["entries"] if test(e.get("condition", e.get("conditions")), ctx, rnd)]
             if not entries:
                 continue
             e = weighted(rnd, [(e, e.get("weight", 1)) for e in entries])
             if e["type"] == "minecraft:empty":
                 continue
             if e["type"] == "minecraft:loot_table":
-                roll_table(e["name"], ctx, rnd, out)
+                roll_table(e.get("value", e.get("name")), ctx, rnd, out)
                 continue
             if e["type"] != "minecraft:item":
                 out.append(Drop("tag", 1, 5))
                 continue
-            d = apply(Drop(e["name"]), e.get("functions", []), ctx, rnd)
+            d = apply(Drop(e["name"]), as_list(e.get("modifier", e.get("functions"))), ctx, rnd)
             if d is not None:
                 out.append(d)
 
@@ -189,11 +210,11 @@ TOME_VALUE = [(1, 50), (6, 120), (14, 300), (26, 600), (40, 1200)]
 def apply(d, fns, ctx, rnd):
     L = ctx["level"]
     for f in fns:
-        fn = f["function"]
+        fn = kind_of(f)
         if fn == "minecraft:set_count":
             c = f["count"]
             d.count = rnd.randint(int(c["min"]), int(c["max"])) if isinstance(c, dict) else int(c)
-        elif fn == "minecraft:set_nbt":
+        elif fn in ("minecraft:set_nbt", "minecraft:set_custom_data"):
             tag = f["tag"]
             if "nirncraft_value:" in tag:
                 d.value = int(tag.split("nirncraft_value:")[1].split("}")[0].split(",")[0])
@@ -307,6 +328,14 @@ def main():
     rnd = random.Random(args.seed)
     problems = []
 
+    if not TABLES:
+        print(f"no loot tables under {LOOT}")
+        print("problems 1")
+        return 1
+    if not TABLES:
+        print(f"no loot tables under {LOOT}")
+        print("problems 1")
+        return 1
     if args.table:
         print(f"{args.table}:")
         for L in LEVELS:
@@ -367,9 +396,12 @@ def main():
             if b < a * .9:
                 problems.append(f"{t}: value drops with the level ({a:.0f} -> {b:.0f})")
 
+    problems += [f"missing loot table {t} (referenced, rolls nothing)" for t in sorted(MISSING)]
+    print(f"\n{len(TABLES)} tables loaded from {LOOT.relative_to(ROOT).as_posix()}")
     print("\n" + ("OK: curves smooth and on the reference" if not problems else "PROBLEMS:"))
     for p in problems[:40]:
         print("  " + p)
+    print(f"problems {len(problems)}")
     return 1 if problems else 0
 
 

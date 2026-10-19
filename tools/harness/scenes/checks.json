@@ -628,6 +628,195 @@
     "tools/audit_items.py"
    ],
    "timeout": 600
+  },
+  {
+   "id": "check-loot-sim",
+   "title": "Loot progression simulator: dungeon value / coins on the Skyrim curve, no drought, no jackpot, no missing tables",
+   "tags": [
+    "check:loot",
+    "check:economy"
+   ],
+   "run": [
+    "py",
+    "-3",
+    "tools/loot_sim.py"
+   ],
+   "inputs": [
+    "mod/src/main/resources/data/nirncraft/loot_table",
+    "mod/src/main/resources/data/nirncraft/nirncraft_values",
+    "mod/src/main/resources/nirncraft/loot",
+    "tools/loot_sim.py"
+   ],
+   "metrics": {
+    "problems": "problems (\\d+)"
+   },
+   "timeout": 600
+  },
+  {
+   "id": "check-entity-renderers",
+   "title": "Every registered entity type has a renderer; every rig renderer its model def and skins",
+   "tags": [
+    "check:npcs",
+    "check:creatures",
+    "check:contracts"
+   ],
+   "run": [
+    "py",
+    "-3",
+    "tools/audit_entity_renderers.py"
+   ],
+   "inputs": [
+    "mod/src/main/java/com/nirncraft",
+    "mod/src/main/resources/assets/nirncraft/textures/entity",
+    "tools/audit_entity_renderers.py"
+   ],
+   "metrics": {
+    "problems": "problems (\\d+)",
+    "entities": "Registered entity types found: (\\d+)"
+   },
+   "timeout": 300
+  },
+  {
+   "id": "check-quest-refs",
+   "title": "Quest references: places, npcs, entities, items, relics, bosses, scenes, quests, uniques, lang keys exist",
+   "tags": [
+    "check:quests"
+   ],
+   "run": [
+    "py",
+    "-3",
+    "tools/qa/quest_refs.py"
+   ],
+   "inputs": [
+    "mod/src/main/resources/nirncraft/quests",
+    "mod/src/main/resources/nirncraft/tamriel/places",
+    "mod/src/main/lang",
+    "mod/src/main/resources/assets/nirncraft/items",
+    "tools/qa/quest_refs.py",
+    "tools/qa/refs.py"
+   ],
+   "metrics": {
+    "problems": "problems (\\d+)"
+   },
+   "timeout": 600
+  },
+  {
+   "id": "check-cityplans",
+   "title": "City plans: schema, index, places, styles / kits / overlays, plots in bounds, unique names, gates on the wall ring",
+   "tags": [
+    "check:towns",
+    "check:interiors"
+   ],
+   "run": [
+    "py",
+    "-3",
+    "tools/qa/cityplan_lint.py"
+   ],
+   "inputs": [
+    "mod/src/main/resources/nirncraft/tamriel/cityplans",
+    "mod/src/main/resources/nirncraft/tamriel/styles",
+    "mod/src/main/java/com/nirncraft/tamriel/settlement",
+    "tools/qa/cityplan_lint.py",
+    "tools/qa/refs.py"
+   ],
+   "metrics": {
+    "problems": "problems (\\d+)"
+   },
+   "timeout": 300
+  },
+  {
+   "id": "check-dungeon-reach",
+   "title": "Dungeon QA export gate: rooms reached, no trap pockets, exit and loop back, boss, enemies, loot",
+   "tags": [
+    "check:dungeons",
+    "check:loot"
+   ],
+   "run": [
+    "py",
+    "-3",
+    "tools/qa/dungeon_csv_gate.py"
+   ],
+   "inputs": [
+    "tools/dungeon_qa/after/dungeons.csv",
+    "tools/qa/dungeon_csv_gate.py"
+   ],
+   "metrics": {
+    "problems": "problems (\\d+)"
+   },
+   "timeout": 120
+  },
+  {
+   "id": "check-uniques",
+   "title": "Uniques and artifacts: defined once, placed exactly once, lang and item assets",
+   "tags": [
+    "check:loot",
+    "check:contracts"
+   ],
+   "run": [
+    "py",
+    "-3",
+    "tools/qa/uniques_audit.py"
+   ],
+   "inputs": [
+    "mod/src/main/java/com/nirncraft/loot",
+    "mod/src/main/resources/data/nirncraft/loot_table",
+    "mod/src/main/resources/nirncraft/explore",
+    "mod/src/main/resources/nirncraft/quests",
+    "mod/src/main/lang",
+    "tools/qa/uniques_audit.py",
+    "tools/qa/refs.py"
+   ],
+   "metrics": {
+    "problems": "problems (\\d+)"
+   },
+   "timeout": 300
+  },
+  {
+   "id": "check-spells",
+   "title": "Spells: school, tier, cost > 0, lang name and description, tome item / value / tag",
+   "tags": [
+    "check:spells"
+   ],
+   "run": [
+    "py",
+    "-3",
+    "tools/qa/spell_lint.py"
+   ],
+   "inputs": [
+    "mod/src/main/java/com/nirncraft/magic",
+    "mod/src/main/lang",
+    "mod/src/main/resources/assets/nirncraft/items",
+    "mod/src/main/resources/data/nirncraft",
+    "tools/qa/spell_lint.py",
+    "tools/qa/refs.py"
+   ],
+   "metrics": {
+    "problems": "problems (\\d+)"
+   },
+   "timeout": 120
+  },
+  {
+   "id": "check-alchemy",
+   "title": "Alchemy matrix: four distinct effects per ingredient, every effect brewable (>= 2 ingredients)",
+   "tags": [
+    "check:alchemy",
+    "check:loot"
+   ],
+   "run": [
+    "py",
+    "-3",
+    "tools/qa/ingredient_matrix.py"
+   ],
+   "inputs": [
+    "mod/src/main/java/com/nirncraft/crafting/arcane/alchemy",
+    "mod/src/main/java/com/nirncraft/survival/fishing",
+    "tools/qa/ingredient_matrix.py",
+    "tools/qa/refs.py"
+   ],
+   "metrics": {
+    "problems": "problems (\\d+)"
+   },
+   "timeout": 120
   }
  ]
 }

@@ -1,7 +1,9 @@
 """Offline town audit data + automated checks, working on a SAVED world folder (no Minecraft needed).
 
 Reads settlement plan pieces out of chunk structure starts (kind, footprint, wealth, use, yard variant), the road
-network out of world/data/nirncraft_roads*.dat, and real blocks via mca.World.  Used by render_town.py too.
+network out of world/dimensions/minecraft/overworld/data/nirncraft/nirncraft_roads*.dat (26.3; 1.20.1:
+world/data/nirncraft_roads*.dat; a world without it fails with a clear message), and real blocks via mca.World.
+Used by render_town.py too.
 
 usage: py -3 -I tools/qa/town_checks.py <world_dir> [samples.json] [--json out.json]
 """
@@ -122,16 +124,37 @@ def load_pieces(world, x1, z1, x2, z2):
     return list(seen.values())
 
 
+def road_files(world_dir):
+    """The road network's saved-data files (main + per-region buckets), by file name. 26.3 stores
+    dimensions/minecraft/overworld/data/nirncraft/nirncraft_roads*.dat (id nirncraft:nirncraft_roads); 1.20.1 worlds and
+    not-yet-migrated buckets use data/nirncraft_roads*.dat. The canonical copy wins over a legacy one."""
+    dirs = [os.path.join(world_dir, 'dimensions', 'minecraft', 'overworld', 'data', 'nirncraft'),
+            os.path.join(world_dir, 'dimensions', 'minecraft', 'overworld', 'data'),
+            os.path.join(world_dir, 'data', 'nirncraft'),
+            os.path.join(world_dir, 'data')]
+    found = {}
+    for d in dirs:
+        for f in sorted(glob.glob(os.path.join(d, 'nirncraft_roads*.dat'))):
+            found.setdefault(os.path.basename(f), f)
+    return found, dirs
+
+
 class Roads:
     def __init__(self, world_dir):
         self.roads = []       # dict(id,a,b,xs,zs,flags,kind,name)
         self.settlements = {}  # id -> dict
         self.features = []
-        d = os.path.join(world_dir, 'data')
-        for f in glob.glob(os.path.join(d, 'nirncraft_roads*.dat')):
+        files, dirs = road_files(world_dir)
+        if 'nirncraft_roads.dat' not in files:
+            raise FileNotFoundError(
+                'no road network save (nirncraft_roads.dat) in %s; looked in %s. Run the world with roads first '
+                '(the server plans them on start), or pass the world folder itself' % (world_dir, ', '.join(dirs)))
+        self.files = files
+        for f in files.values():
             try:
                 data = _nbt(gzip.decompress(open(f, 'rb').read())).get('data', {})
-            except Exception:
+            except Exception as e:  # noqa: BLE001
+                print('roads: cannot read %s: %s' % (f, e), file=sys.stderr)
                 continue
             for r in data.get('roads', []) or []:
                 self.roads.append(dict(id=r['id'], a=r['a'], b=r['b'], xs=np.array(r['x']), zs=np.array(r['z']),
@@ -797,7 +820,11 @@ def main():
     a = ap.parse_args()
     samples = json.load(open(a.samples, encoding='utf8')) if a.samples else []
     world = World(a.world)
-    roads = Roads(a.world)
+    try:
+        roads = Roads(a.world)
+    except FileNotFoundError as e:
+        print("ERROR roads: %s" % e)
+        return 1
     print('roads: %d polylines, %d settlements, %d features' % (len(roads.roads), len(roads.settlements), len(roads.features)))
     allres = []
     hdr = '%-16s %-8s %4s %4s %5s %5s | %5s %5s | %5s %5s %5s | %5s %5s | %s'
@@ -843,4 +870,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    sys.exit(main())

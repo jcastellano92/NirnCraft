@@ -4,21 +4,23 @@ usage: py -3 -I tools/qa/menu_coverage.py      (from the repo root; also run by 
 
 The rule (docs/UI-COVERAGE.md): no menu a player can open may show the vanilla look by accident. The checks:
 
-  * the menu types of the game (the 25 of Minecraft 1.20.1; when the Forge jar and javap are found, the list is read
-    from the jar's `MenuType` class and compared) and of the mod (every `MENUS.register("id", ...)` in Java) each have a
-    row in the "menu type map" table of docs/UI-COVERAGE.md with status `skyrim` or `vanilla-allowed`;
+  * the menu types of the game (the 25 of Minecraft 26.3; when the 26.3 reference jars are found (tools/qa/mc263.py:
+    the patched sources jar, else the client jar's MenuType class), the list is read from them and compared) and of
+    the mod (every `MENUS.register("id", ...)` in Java) each have a row in the "menu type map" table of
+    docs/UI-COVERAGE.md with status `skyrim` or `vanilla-allowed`;
   * `vanilla-allowed` needs a reason (a sentence, not a word);
   * `skyrim` for a game menu type needs a `skin(MenuType.X, Kind.Y)` line in inventory/client/MenuSkins.java and names
     the screen class of that kind (CONTAINER -> SkyrimContainerScreen, MACHINE -> SkyrimMachineScreen,
-    BOOK -> SkyrimLecternScreen); `skyrim` for a mod menu type needs its `MenuScreens.register(...)` and names that screen;
+    BOOK -> SkyrimLecternScreen); `skyrim` for a mod menu type needs its screen registration (26.3 / NeoForge:
+    `event.register(X.get(), Screen::new)` in a RegisterMenuScreensEvent listener; the old `MenuScreens.register(...)`
+    is still recognised) and names that screen;
   * the named screen class exists in the sources; a skin line without a table row, or a row for a menu type that no
     longer exists, is stale and fails too.
 """
 import glob
 import os
 import re
-import shutil
-import subprocess
+import struct
 import sys
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
@@ -26,11 +28,12 @@ JAVA = os.path.join(ROOT, "mod", "src", "main", "java")
 DOC = os.path.join(ROOT, "docs", "UI-COVERAGE.md")
 SKINS = os.path.join(JAVA, "com", "nirncraft", "inventory", "client", "MenuSkins.java")
 
-# MenuType field -> registry id, Minecraft 1.20.1 (cross-checked against the jar below when it can be found)
+# MenuType field -> registry id, Minecraft 26.3 (cross-checked against the 26.3 jars below when they can be found)
 VANILLA = {
     "GENERIC_9x1": "minecraft:generic_9x1", "GENERIC_9x2": "minecraft:generic_9x2", "GENERIC_9x3": "minecraft:generic_9x3",
     "GENERIC_9x4": "minecraft:generic_9x4", "GENERIC_9x5": "minecraft:generic_9x5", "GENERIC_9x6": "minecraft:generic_9x6",
-    "GENERIC_3x3": "minecraft:generic_3x3", "ANVIL": "minecraft:anvil", "BEACON": "minecraft:beacon",
+    "GENERIC_3x3": "minecraft:generic_3x3", "CRAFTER_3x3": "minecraft:crafter_3x3", "ANVIL": "minecraft:anvil",
+    "BEACON": "minecraft:beacon",
     "BLAST_FURNACE": "minecraft:blast_furnace", "BREWING_STAND": "minecraft:brewing_stand", "CRAFTING": "minecraft:crafting",
     "ENCHANTMENT": "minecraft:enchantment", "FURNACE": "minecraft:furnace", "GRINDSTONE": "minecraft:grindstone",
     "HOPPER": "minecraft:hopper", "LECTERN": "minecraft:lectern", "LOOM": "minecraft:loom", "MERCHANT": "minecraft:merchant",
@@ -42,25 +45,27 @@ MODID = "nirncraft"
 
 
 def _jar_fields():
-    """MenuType fields from the Forge jar's class (None when the jar or javap cannot be found)."""
-    home = os.path.expanduser("~")
-    jars = glob.glob(os.path.join(home, ".gradle", "caches", "forge_gradle", "minecraft_user_repo", "net", "minecraftforge",
-                                  "forge", "*", "forge-*_mapped_official_*.jar"))
-    if not jars:
-        return None
-    javap = shutil.which("javap")
-    for base in (os.environ.get("JAVA_HOME"), r"C:\Program Files\Java\jdk-17"):
-        if not javap and base and os.path.exists(os.path.join(base, "bin", "javap.exe")):
-            javap = os.path.join(base, "bin", "javap.exe")
-    if not javap:
-        return None
-    try:
-        out = subprocess.run([javap, "-cp", jars[0], "net.minecraft.world.inventory.MenuType"], capture_output=True, text=True,
-                             timeout=60).stdout
-    except (OSError, subprocess.SubprocessError):
-        return None
-    fields = set(re.findall(r"public static final \S*MenuType<.*?>\s+(\w+);", out))
-    return fields or None
+    """(MenuType fields of the 26.3 game, where they were read) or (None, why) when no 26.3 jar can be found."""
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import mc263
+    src_jar = mc263.sources_jar()
+    if src_jar:
+        src = mc263.read(src_jar, "net/minecraft/world/inventory/MenuType.java")
+        if src:
+            fields = set(re.findall(r"public static final MenuType<[^=;]*?>\s+(\w+)\s*=", src.decode("utf-8", "replace")))
+            if fields:
+                return fields, src_jar.name
+    cls_jar = mc263.class_jar()
+    if cls_jar:
+        b = mc263.read(cls_jar, "net/minecraft/world/inventory/MenuType.class")
+        if b:
+            try:
+                fields = {n for n, d in mc263.static_fields(b) if d == "Lnet/minecraft/world/inventory/MenuType;"}
+            except (ValueError, IndexError, struct.error):
+                fields = set()
+            if fields:
+                return fields, cls_jar.name
+    return None, mc263.missing()
 
 
 def _read(path):
@@ -89,7 +94,9 @@ def check(verbose=False):
             errs.append(f"menus: unreadable row in the menu type map: {line.strip()[:90]}")
 
     # --- what the game registers (table, cross-checked with the jar) and what the mod registers
-    jar = _jar_fields()
+    jar, jar_src = _jar_fields()
+    if verbose and jar is None:
+        print(f"menus: {jar_src}; using the built-in 26.3 table only")
     if jar is not None:
         for f in sorted(jar - set(VANILLA)):
             errs.append(f"menus: the game has MenuType.{f} which tools/qa/menu_coverage.py does not know: add it to VANILLA, "
@@ -114,7 +121,9 @@ def check(verbose=False):
             mod_ids[f"{MODID}:{rm.group(2)}"] = os.path.relpath(f, JAVA)
             if rm.group(1):
                 consts[rm.group(1)] = f"{MODID}:{rm.group(2)}"
-        for sm in re.finditer(r"MenuScreens\.register\(\s*[\w.]*?(\w+)\.get\(\)\s*,\s*([\w.]+)::new", src):
+        # 26.3 / NeoForge: RegisterMenuScreensEvent#register(menu, factory); 1.20.1: MenuScreens.register(menu, factory)
+        reg_rx = r"\b(?:MenuScreens|\w+)\.register\(" if "RegisterMenuScreensEvent" in src else r"\bMenuScreens\.register\("
+        for sm in re.finditer(reg_rx + r"\s*[\w.]*?(\w+)\.get\(\)\s*,\s*([\w.]+)::new", src):
             screens[sm.group(1)] = sm.group(2).split(".")[-1]
     classes = {os.path.splitext(os.path.basename(f))[0] for f in _java_files()}
 
@@ -151,7 +160,7 @@ def check(verbose=False):
             const = next((c for c, i in consts.items() if i == mid), None)
             reg = screens.get(const) if const else None
             if reg is None:
-                errs.append(f"menus: {mid} ({mod_ids[mid]}) has no MenuScreens.register(...) screen")
+                errs.append(f"menus: {mid} ({mod_ids[mid]}) has no screen registration (RegisterMenuScreensEvent register(...))")
             elif reg != screen:
                 errs.append(f"menus: {mid}: registered with {reg}, the table names {screen}")
 
@@ -167,7 +176,7 @@ def check(verbose=False):
             errs.append(f"menus: MenuSkins.java uses unknown Kind.{k}")
 
     if verbose:
-        print(f"menus: {len(VANILLA)} game menu types ({'jar-verified' if jar else 'table only'}), {len(mod_ids)} mod menu types, "
+        print(f"menus: {len(VANILLA)} game menu types ({'verified against ' + jar_src if jar else 'table only'}), {len(mod_ids)} mod menu types, "
               f"{len(rows)} rows, {len(skins)} skins, {len(errs)} problems")
     return errs
 
@@ -176,6 +185,7 @@ def main():
     errs = check(verbose=True)
     for e in errs:
         print("ERR", e)
+    print(f"problems {len(errs)}")
     return 1 if errs else 0
 
 
