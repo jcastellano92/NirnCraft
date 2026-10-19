@@ -64,8 +64,9 @@ def _icon(kind, it):
 def _dropped(kind, it):
     sx, sy, sz = catalog.STAGE
     return _scene(kind, it, "dropped", f"{it}: dropped", [
-        f"command summon item {sx} {sy + 1.1} {sz} {{Item:{{id:\"nirncraft:{it}\",count:1}},PickupDelay:32767,"
-        f"Age:-32768,NoGravity:1b}}", "wait 10"], frame=[30, 0.45])
+        # dropped as in the game: it falls onto the pad (no pickup, no despawn), then it is framed where it lies
+        f"command summon item {sx} {sy + 1.6} {sz} {{Item:{{id:\"nirncraft:{it}\",count:1}},PickupDelay:32767,"
+        f"Age:-32768}}", "wait 30"], frame=[30, 0.45])
 
 
 def _npc(role="citizen", race="nord"):
