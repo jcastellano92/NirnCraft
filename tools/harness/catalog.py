@@ -10,6 +10,8 @@ import re
 from functools import lru_cache
 from pathlib import Path
 
+import feature_scenes
+
 ROOT = Path(__file__).resolve().parents[2]
 SCENES = ROOT / "tools/harness/scenes"
 PLACES = ROOT / "mod/src/main/resources/nirncraft/tamriel/places"
@@ -454,6 +456,7 @@ def load():
     scenes += grounding()
     scenes += distance_scenes()
     scenes += validation_scenes()
+    scenes += feature_scenes.feature_scenes()  # every generated biome / landmark / site kind (the cached index)
     seam_core(scenes)
     for s in scenes:
         if s["id"] in seen:
