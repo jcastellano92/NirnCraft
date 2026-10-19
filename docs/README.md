@@ -31,6 +31,9 @@ py -3 tools/harness/harness.py run              # the smoke suite (checks, offli
 py -3 tools/harness/harness.py run --changed    # only what your changes can affect
 py -3 tools/harness/harness.py watch            # hot reload shaders / textures / data with before|after sheets
 py -3 tools/harness/harness.py gate             # the merge / push gate
+py -3 tools/harness/harness.py audit --budget 30m   # a random, well-spread sample (5m / 30m / 1h / 2h; --theme dungeons)
+py -3 tools/harness/harness.py issues           # the running issue tally and its fix workflow
+py -3 tools/harness/harness.py wait             # block until the current run ends (agents: run in the background)
 ```
 
 Tiers: `check` (audits, lints, JUnit, native suites), `lab` (Infinite ATLAS offline renders, no Minecraft) and `live`

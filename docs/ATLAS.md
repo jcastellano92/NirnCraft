@@ -303,22 +303,13 @@ Run `native/build_linux.sh` (Linux) or `native\build.ps1 -Validate` (Windows) on
 
 ## Testing in the real game (2026-10-18)
 
-Single player: use the harness (`harness.py run --suite farfield`, `watch` for pack edits, `probe NAME --visit
-x,z,height,yaw,pitch`), which launches the disposable preview, installs a newer core with `--rebuild` and closes the
-client at the end. The pack-only loop it grew from is still available (one client, under the live lease
-`.work/lease/live.json`):
-
-```powershell
-py -3 tools/dev/build_263.py --offline build
-py -3 tools/dev/live_world.py install-core <scratch>/build/libs/nirncraft-0.1.0.jar
-py -3 shaderpack/tools/pack_live.py --launch --close --cams helgen-near-smoke `
-    --visit "n:-20,1158,90,180,-6" --wait 300 --off --tag mytest
-```
-
-`<scratch>` is the build scratch folder (`NIRNCRAFT_263_SCRATCH`, see [NATIVE-26.3-PREVIEW.md](NATIVE-26.3-PREVIEW.md)).
-`pack_live.py` syncs the pack from its checkout (or `--no-sync`), reloads it in Iris (`shaders off/on`), prints only
-shader errors, captures after full readiness and closes cleanly. `live_world.py close` also closes a client that is
-stuck on a menu (normal window close, never a kill).
+Single player: use the harness ([tools/harness/README.md](../tools/harness/README.md)). `run --suite seam-core`
+covers the near/far hand-off, `run --tag suite:distance` the distance ladders, pop sweeps and fidelity pairs, `watch`
+rebuilds and reloads the pack on every edit with before|after sheets, and `probe NAME --visit x,z,height,yaw,pitch`
+looks at one spot. It launches the disposable preview on a kept test world, installs a newer core with `--rebuild` and
+closes the client at the end. Captures wait for the render to settle: the chunks in the camera's view built and lit,
+Infinite ATLAS idle for the tiles in the view cone (`AtlasClient.farFieldIdle()`), and a steady picture.
+`shaderpack/tools/pack_live.py` (the pack-only loop the harness grew from) is kept for low-level debugging only.
 
 Multiplayer over TCP (full-pack dedicated server + the full-pack client):
 

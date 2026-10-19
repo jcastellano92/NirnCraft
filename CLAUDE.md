@@ -15,6 +15,11 @@ ATLAS** (the far-field renderer `atlas_core` + the shader pack `shaderpack/Infin
   disposable test client (`NirnCraft-26.3-autotest`), closes it after every run, and never touches a normal instance.
   Do not launch Minecraft any other way. Cheap first: `run --changed` / `run --tier check`, then `run --suite smoke`;
   `watch` for live reload; `gate` before merging or pushing (it runs exactly the tests your changes can affect).
+  Start runs as a tracked background task (or follow them with `harness.py wait`) so you are woken when they end;
+  `harness.py stop` ends one at once. Long checks: `audit --budget 30m` / `--theme dungeons`.
+* Issues: `harness.py issues` is the running tally (P1..P4, grouped by cause). Working one: `issues claim <test>
+  --by NAME` -> fix -> `issues fixed <test> --note ...` -> `issues verify` (re-runs it); visual ones then need the
+  reviewer's `issues confirm <test>`. A failed verify reopens it.
 * Visual results: **hand them to the `visual-reviewer` subagent** (`.claude/agents/visual-reviewer.md`, Haiku) with
   the agent folder the run prints; never read stacks of screenshots in the main conversation. Ask for `zoom` crops when
   a detail matters. State plainly what is still unverified visually.

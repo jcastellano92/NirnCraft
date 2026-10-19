@@ -71,8 +71,12 @@ installed core is older than the latest build (`--rebuild` builds, installs and 
 
 The live test world is kept between runs and launches (`saves/harness_<worldgen hash>`): a place is generated once,
 later visits load it from disk; a world-generation change makes a new one (`--fresh-world` forces it). Captures
-settle visually (`settle-visual`: the downscaled frame stops changing for ~2 s, chunks around the camera present)
-instead of waiting for every chunk to the edge of view; measure tests keep the strict chunk settle.
+settle on what the camera sees (`settle-visual`), not on fixed timers: the chunks in the view cone (plus a ring
+around the camera) loaded, lit and built by Sodium; Infinite ATLAS has no tiles pending in the view cone; and the
+picture is steady (structure change under 3 %, exposure drift under 0.8, three samples, at least 3 s after the move).
+Animation (water, leaves, particles) does not hold it up. At the deadline it continues and the result is flagged
+`partial` with what was still missing. Measure tests keep the strict chunk settle. The HUD and every NirnCraft overlay
+are hidden for the whole session (UI tests turn the HUD back on); the character screen is skipped.
 
 ## Running while you work
 
@@ -154,6 +158,16 @@ start skips its group the same way.
 * **grounding** (`suite:grounding`): the floating-parts census (`/nirncraft-landmarks groundcheck`) for every place,
   numbers with before/after; getting worse fails the gate.
 * **checks** (`scenes/checks.json`): every offline audit, each with tags (`check:roads`, `check:dungeons`, ...).
+* **distance** (`suite:distance`): per place and time of day, a ladder of heights across the near/far hand-off
+  (`dist-*`, one sheet), a pop sweep flying through it (`pop-*`, hand-off change and pop ratio), fidelity pairs of the
+  same view near vs far (`fid-*`, colour dE, brightness, structure), PBR / block ladders on the stage
+  (`pbr-ladder-*`, `blocks-ladder-*`), clouds, actors, lights and player edits at distance. `suite:seam-core` is the
+  short set the gate runs for renderer changes.
+* **horizon** (`scenes/horizon.json`): horizon fade, mountain shadows and the far edge at several times and weathers.
+* **tool validation** (`suite:validate-tools`): `validate-world-*` samples the real heights in game
+  (`/nirncraft-qa sample x z r step`) and compares them with the offline generator; `twin-*` renders the same view
+  in the offline lab and live; `check-detectors` proves the black / magenta / box detectors still fire. The
+  overview shows where the offline tools and the real game disagree.
 
 Scene fields: `id, title, tags, pose (visit | camera | place [+shot] | dungeon | realm | stage | spawn), time,
 weather, front, setup, cleanup, wait, variants (shaders, vanilla), frames, measure, checks (maxBlackTiles, lumaMin,
