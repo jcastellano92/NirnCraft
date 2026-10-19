@@ -958,6 +958,12 @@ def camera_from(ref):
         cam["_near"] = max(16, (int(g["renderDistance"]) - 1) * 16)  # (one chunk inside its render distance)
     if isinstance(g.get("dayTime"), (int, float)):  # night captures are rendered at night (sky light, the lightmap)
         cam["time"] = int(g["dayTime"]) % 24000
+    if ref.get("pinned"):  # a pinned copy (pinned.py): rendered from its equivalent eye, its box cut out, ground truth
+        p = g.get("pinned") or {}  # at any distance (the stage camera's render distance says nothing about it)
+        if not p.get("eye") or not p.get("box"):
+            return None, f"the capture of {ref['scene']} carries no pinned view (receipt 'pinned'): capture it again"
+        cam.update(eye=",".join(f"{c:.4f}" for c in p["eye"]), box=p["box"])
+        cam.pop("_near", None)
     return cam, ""
 
 
