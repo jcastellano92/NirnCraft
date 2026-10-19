@@ -168,6 +168,7 @@ final class AtlasSurface {
         for (int j = j0; j < j1; j++)
             for (int i = 0; i < n; i++) {
                 int c = j * n + i;
+                int x = bx + i * s + (s >> 1), z = bz + j * s + (s >> 1);
                 if (lod > 0 && ((i | j) & 1) != 0) {
                     // a coarse column (2+ blocks) shares its 2 x 2 group's rule evaluation (the group's first column),
                     // unless it is under water where that one is dry or the other way round (shores stay right)
@@ -176,10 +177,10 @@ final class AtlasSurface {
                         out.top[c] = out.top[c0];
                         out.under[c] = out.under[c0];
                         out.flags[c] = out.flags[c0];
+                        road(out, c, x, z, s, wet(surface[c], water[c]));
                         continue;
                     }
                 }
-                int x = bx + i * s + (s >> 1), z = bz + j * s + (s >> 1);
                 int gx, gz;
                 if (lod == 0) {
                     // vanilla's gradient over the WORLD_SURFACE_WG heights, clamped to the chunk
@@ -195,7 +196,14 @@ final class AtlasSurface {
                 out.top[c] = out.index(r[0]);
                 out.under[c] = out.index(r[1]);
                 out.flags[c] = flags;
+                road(out, c, x, z, s, wet(surface[c], water[c]));
             }
+    }
+
+    /** A road over this column (the near world's road plan and styles): its surface replaces the terrain's top. */
+    private static void road(AtlasTileCodec.Surface out, int c, int x, int z, int span, boolean wet) {
+        BlockState r = com.nirncraft.roads.FarRoads.surface(x, z, span, wet);
+        if (r != null) out.top[c] = out.index(r);
     }
 
     /**

@@ -70,7 +70,7 @@ class AtlasStatusLineTest {
         assertFalse(e.outOfMemory());
         assertEquals("device lost", AtlasNative.AtlasException.statusName(AtlasNative.ERR_DEVICE_LOST));
         assertEquals("status -42", AtlasNative.AtlasException.statusName(-42));
-        assertEquals("0.11.0", AtlasNative.abiString(AtlasNative.ABI_VERSION));
+        assertEquals("0.12.0", AtlasNative.abiString(AtlasNative.ABI_VERSION));
         assertEquals("0.11.0", AtlasNative.abiString(AtlasNative.ABI_MIN));
         assertTrue(AtlasNative.enableNativeAccessArg().startsWith("--enable-native-access="));
     }

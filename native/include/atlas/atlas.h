@@ -33,7 +33,7 @@ extern "C" {
 
 /* (major << 16) | (minor << 8) | patch. Bumped on any ABI change. 0.11 = 0.10 far content (lights, sites, actor
    flags, tile codec 3) + 0.10 failure handling (status codes, memory query, fault hook). */
-#define ATLAS_ABI_VERSION 0x000B00
+#define ATLAS_ABI_VERSION 0x000C00
 
 typedef struct AtlasContext AtlasContext;
 
@@ -357,6 +357,14 @@ ATLAS_API AtlasStatus atlas_set_materials(AtlasContext* ctx, uint32_t first, con
  * size 0 turns it off (default). On the GL path it is copied into AtlasGlFrameIO.dstSunMap (RG32F, size x size+1).
  */
 ATLAS_API AtlasStatus atlas_set_sun_map(AtlasContext* ctx, uint32_t size, float halfExtent);
+
+/*
+ * (abi 0.12) The night's key light as the host's sky has it (the shader pack's lunar key: the brighter moon's
+ * direction and the moons' light), so the far field lights the night exactly like the near field. dir: unit, world
+ * space, towards the moon; radiance: linear RGB before the night fade. Not called (or a zero radiance): the old fixed
+ * moonlight opposite the sun. Also the sun map's light at night.
+ */
+ATLAS_API AtlasStatus atlas_set_moon(AtlasContext* ctx, const float dir[3], const float radiance[3]);
 /* The sun map as last computed (size * (size + 1) * 2 floats into out, count in floats). Waits for the GPU. */
 ATLAS_API AtlasStatus atlas_read_sun_map(AtlasContext* ctx, float* out, uint32_t count);
 /*

@@ -63,6 +63,9 @@ final class RoofShelterCache {
         return ((encoded & 255) << 8) | ((encoded >>> 8) << 16) | 0xFF000000;
     }
 
+    /** Blocks of air under a roof that still count as the room it covers (more: open sky under something high). */
+    private static final int MAX_SHELTER = 20;
+
     private void sample(ClientLevel level, int x, int z) {
         int index = Math.floorMod(z, SIDE) * SIDE + Math.floorMod(x, SIDE);
         cellX[index] = x; cellZ[index] = z; valid[index] = false;
@@ -81,6 +84,14 @@ final class RoofShelterCache {
                 if (++scans >= 48) return;
                 y--;
             }
+            // a roof only when there is a floor under it within a room's height: a platform or a bridge far above
+            // the ground is not shelter (the space beneath it was treated as indoors: a bright dust column)
+            int gap = 0;
+            for (int fy = y - 1; fy >= level.getMinY() && gap <= MAX_SHELTER; fy--, gap++) {
+                var below = chunk.getBlockState(probe.set(bx, fy, bz));
+                if (below.isSolid() || !below.getFluidState().isEmpty()) break;
+            }
+            if (gap > MAX_SHELTER) continue;
             highest = Math.max(highest, y + 1);
         }
         height[index] = highest; valid[index] = true;

@@ -628,6 +628,8 @@ void sampleClouds(uint2 px, out float4 c, out float depth) {
 [shader("compute")]
 [numthreads(8, 8, 1)]
 void cloudMain(uint3 tid : SV_DispatchThreadID) {
+    gMoonDir = frame.moonDir;
+    gMoonRad = frame.moonRad;
     uint2 cd = cloudDims();
     // temporal amortisation: a fresh ray for one pixel of every 2x2 block per frame (rotating); the others reproject
     // last frame's deck through its camera. Off-screen reprojections and frames without history march fresh.
@@ -759,6 +761,8 @@ float2 sunTexel(uint i, uint j) {
 [shader("compute")]
 [numthreads(8, 8, 1)]
 void sunMapMain(uint3 id : SV_DispatchThreadID) {
+    gMoonDir = frame.moonDir;
+    gMoonRad = frame.moonRad;
     uint S = frame.sunMapRows.z, count = frame.sunMapRows.y;
     if (frame.sunMapRows.w == 0u || id.x >= S || id.y > count) return;
     if (id.y == count) {
@@ -776,6 +780,8 @@ void sunMapMain(uint3 id : SV_DispatchThreadID) {
 [shader("compute")]
 [numthreads(8, 8, 1)]
 void farMain(uint3 id : SV_DispatchThreadID) {
+    gMoonDir = frame.moonDir;
+    gMoonRad = frame.moonRad;
     uint w = frame.dims.x, h = frame.dims.y;
     if (id.x >= w || id.y >= h) return;
     uint pix = id.y * w + id.x;

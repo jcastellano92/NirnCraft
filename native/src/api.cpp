@@ -68,6 +68,9 @@ struct AtlasContext {
     double sunMapCentre[3] = {1e300, 0, 1e300};
     bool sunMapFull = true;
     uint32_t sunMapCursor = 0;
+    // the night key light (atlas_set_moon)
+    float moonDir[3] = {0, 1, 0}, moonRad[3] = {0, 0, 0};
+    bool moonSet = false;
 
     AtlasStatus fail(AtlasStatus s, std::string msg) noexcept {
         try {
@@ -524,6 +527,12 @@ static AtlasStatus buildInputs(AtlasContext* ctx, const AtlasFrame* f, FrameInpu
     float sl = std::sqrt(f->sunDir[0] * f->sunDir[0] + f->sunDir[1] * f->sunDir[1] + f->sunDir[2] * f->sunDir[2]);
     for (int i = 0; i < 3; i++) g.sunDir[i] = sl > 0 ? f->sunDir[i] / sl : (i == 1 ? 1.0f : 0.0f);
     g.sunDir[3] = f->timeSec;
+    for (int i = 0; i < 3; i++) {
+        g.moonDir[i] = ctx->moonDir[i];
+        g.moonRad[i] = ctx->moonRad[i];
+    }
+    g.moonDir[3] = ctx->moonSet ? 1.0f : 0.0f;
+    g.moonRad[3] = 0.0f;
     float a[3], b[3];
     pixelDir(f->invViewProj, f->width * 0.5f, f->height * 0.5f, f->width, f->height, a);
     pixelDir(f->invViewProj, f->width * 0.5f + 1, f->height * 0.5f, f->width, f->height, b);
@@ -559,7 +568,7 @@ static AtlasStatus buildInputs(AtlasContext* ctx, const AtlasFrame* f, FrameInpu
         ctx->sunMapFull = false;
         float L[3];
         bool day = g.sunDir[1] > -0.05f;  // the key light: the sun, or the moon opposite it at night
-        for (int i = 0; i < 3; i++) L[i] = day ? g.sunDir[i] : -g.sunDir[i];
+        for (int i = 0; i < 3; i++) L[i] = day ? g.sunDir[i] : (ctx->moonSet ? g.moonDir[i] : -g.sunDir[i]);
         float up[3] = {0, 0, 1};
         if (std::abs(L[2]) > 0.9f) up[0] = 1, up[2] = 0;
         float X[3] = {up[1] * L[2] - up[2] * L[1], up[2] * L[0] - up[0] * L[2], up[0] * L[1] - up[1] * L[0]};
@@ -783,6 +792,19 @@ ATLAS_API AtlasStatus atlas_set_sun_map(AtlasContext* ctx, uint32_t size, float 
     ctx->sunMapSize = size;
     ctx->sunMapHalf = halfExtent;
     ctx->sunMapFull = true;
+    return ATLAS_OK;
+}
+
+ATLAS_API AtlasStatus atlas_set_moon(AtlasContext* ctx, const float dir[3], const float radiance[3]) {
+    if (!ctx || !dir || !radiance) return ATLAS_ERR_ARG;
+    float len = std::sqrt(dir[0] * dir[0] + dir[1] * dir[1] + dir[2] * dir[2]);
+    if (!(len > 1e-4f) || !std::isfinite(len)) return ATLAS_ERR_ARG;
+    std::lock_guard<std::mutex> lock(ctx->mu);
+    for (int i = 0; i < 3; i++) {
+        ctx->moonDir[i] = dir[i] / len;
+        ctx->moonRad[i] = std::isfinite(radiance[i]) ? std::max(0.0f, radiance[i]) : 0.0f;
+    }
+    ctx->moonSet = ctx->moonRad[0] + ctx->moonRad[1] + ctx->moonRad[2] > 0.0f;
     return ATLAS_OK;
 }
 

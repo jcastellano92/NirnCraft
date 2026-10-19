@@ -42,6 +42,9 @@ struct alignas(16) FrameGpu {
     float sunMapY[4];
     float sunMapL[4];
     uint32_t sunMapRows[4];
+    // (abi 0.12) the night key light set by atlas_set_moon: direction (w = 1 when set) and radiance
+    float moonDir[4];
+    float moonRad[4];
 };
 
 struct alignas(16) ActorGpu {
@@ -54,7 +57,7 @@ static_assert(sizeof(LodGpu) == 32);
 static_assert(sizeof(ActorGpu) == 48);
 static_assert(sizeof(RegionGpu) == 48);
 static_assert(sizeof(MaterialGpu) == 32);
-static_assert(sizeof(FrameGpu) == 64 + 16 * 6 + 32 * MAX_LODS + 64 + 16 + 16 + 16 * 5);
+static_assert(sizeof(FrameGpu) == 64 + 16 * 6 + 32 * MAX_LODS + 64 + 16 + 16 + 16 * 5 + 32);
 
 struct Float4 {
     float v[4];

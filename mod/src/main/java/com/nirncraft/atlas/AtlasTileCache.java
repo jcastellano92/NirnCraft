@@ -24,7 +24,7 @@ final class AtlasTileCache {
     /** The world's cache (dedicated, integrated and LAN-hosted servers alike). */
     static AtlasTileCache forServer(MinecraftServer server) {
         return new AtlasTileCache(server.getWorldPath(LevelResource.DATA).resolve("nirncraft_atlas")
-                .resolve("tiles-v" + AtlasTileCodec.VERSION));
+                .resolve("tiles-v" + AtlasTileCodec.VERSION + "r" + AtlasTileCodec.CONTENT));
     }
 
     Path file(int lod, int tx, int tz) {

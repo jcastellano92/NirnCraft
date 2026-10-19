@@ -74,7 +74,8 @@ float roofExposure(vec3 worldPos, vec3 camPos) {
     vec4 d = texBytes(fogRadianceTex, cell);
     if (d.a < 128.0) return 1.0;  // unknown columns are not invented as roofs
     float roof = bytes16(d.g, d.b) - 64.0;
-    return smoothstep(roof + 0.05, roof + 0.75, worldPos.y);
+    return max(smoothstep(roof + 0.05, roof + 0.75, worldPos.y),  // a roof shelters only the room under it:
+                   smoothstep(16.0, 24.0, roof - worldPos.y));  // far below something floating is open sky
 }
 
 // coloured block light in the air around worldPos (trilinear over the 4-block cells, ~26 blocks around the camera),

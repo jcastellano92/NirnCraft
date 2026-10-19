@@ -250,7 +250,9 @@ void main() {
     if (albedo.a < 0.1) discard;
 #endif
 #ifdef ENTITY
-    albedo.rgb = mix(albedo.rgb, entityColor.rgb, entityColor.a);  // the hurt flash
+    // the hurt flash; an unbound overlay (dropped items) reads as opaque black and turned items black: a real flash
+    // is never black, so a black tint is no tint
+    albedo.rgb = mix(albedo.rgb, entityColor.rgb, entityColor.a * step(0.02, max(entityColor.r, max(entityColor.g, entityColor.b))));
 #endif
     vec2 lm = clamp((lmcoord - 1.0 / 32.0) * (16.0 / 15.0), 0.0, 1.0);
     vec4 nm = vec4(0.0), sp = vec4(0.0);

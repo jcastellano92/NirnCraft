@@ -30,7 +30,7 @@ final class AtlasServerSource extends AtlasRefiningSource {
 
     AtlasServerSource(long worldId, Path gameDir, Callable<Path> raster) {
         super(raster);
-        cache = gameDir.resolve("atlas-cache").resolve(Long.toHexString(worldId)).resolve("v" + AtlasTileCodec.VERSION);
+        cache = gameDir.resolve("atlas-cache").resolve(Long.toHexString(worldId)).resolve("v" + AtlasTileCodec.VERSION + "r" + AtlasTileCodec.CONTENT);
     }
 
     /** From the network (client thread). */

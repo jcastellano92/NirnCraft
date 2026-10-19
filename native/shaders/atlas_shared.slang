@@ -49,7 +49,13 @@ struct FrameGpu {
     float4 sunMapY;
     float4 sunMapL;          // the key light the map is traced along
     uint4 sunMapRows;        // first row, row count, size, enabled
+    float4 moonDir;          // (abi 0.12) night key light towards the moon, w = 1 when the host set it
+    float4 moonRad;          // its radiance (before the night fade)
 };
+
+// the frame's moon, copied by each entry point (the shared lighting has no frame of its own)
+static float4 gMoonDir = float4(0.0, 1.0, 0.0, 0.0);
+static float4 gMoonRad = float4(0.0, 0.0, 0.0, 0.0);
 
 float3 unproject(FrameGpu f, float2 ndc) {
     float4 p = f.invViewProj[0] * ndc.x + f.invViewProj[1] * ndc.y + f.invViewProj[2] * 0.5 + f.invViewProj[3];
@@ -100,10 +106,12 @@ float3 skyAmbient(float3 n, float3 sun) {
 
 // The key light: the sun, or the moon (opposite it) once the sun is below the horizon, with the shader pack's
 // moonlight (shaderpack lib/lighting.glsl shadeForward): the near and far fields light the night identically.
-float3 keyLightDir(float3 sun) { return sun.y > -0.05 ? sun : -sun; }
+float3 keyLightDir(float3 sun) { return sun.y > -0.05 ? sun : (gMoonDir.w > 0.5 ? gMoonDir.xyz : -sun); }
 
 float3 keyLightRadiance(float3 sun) {
-    return sun.y > -0.05 ? sunRadiance(sun) : float3(0.035, 0.05, 0.09) * smoothstep(-0.05, -0.2, sun.y);
+    if (sun.y > -0.05) return sunRadiance(sun);
+    float3 moon = gMoonDir.w > 0.5 ? gMoonRad.xyz : float3(0.035, 0.05, 0.09);  // the host's moons, else the old key
+    return moon * smoothstep(-0.05, -0.2, sun.y);
 }
 
 // ao: 0..1 sky-light occlusion (crevices, forest floors), applied to the ambient term only.

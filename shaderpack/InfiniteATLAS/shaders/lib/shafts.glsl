@@ -87,7 +87,8 @@ float shaftExposure(vec3 w, bool air, float surface) {
         vec4 d = texBytes(fogRadianceTex, ivec2(floor(w.xz / 2.0)) & ivec2(63));
         if (d.a >= 128.0) {
             float roof = bytes16(d.g, d.b) - 64.0;
-            return smoothstep(roof + 0.05, roof + 0.75, w.y);
+            return max(smoothstep(roof + 0.05, roof + 0.75, w.y),  // a roof shelters only the room under it:
+                   smoothstep(16.0, 24.0, roof - w.y));  // far below something floating is open sky
         }
     }
     return 1.0 - smoothstep(4.0, 12.0, surface - w.y);

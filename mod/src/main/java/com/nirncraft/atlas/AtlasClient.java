@@ -269,6 +269,15 @@ public final class AtlasClient {
             frame.sunY = sun[1];
             frame.sunZ = sun[2];
             frame.timeSec = (state.gameTime + state.worldPartialTicks) / 20f;
+            if (sun[1] < 0f && mc.level != null) {  // night: the pack's moon, not a fixed one (both fields alike)
+                float[] key = com.nirncraft.atmosphere.client.LunarKey.compute(mc.level, sun, sunPathRotationDeg,
+                        state.worldPartialTicks);
+                try {
+                    ctx.setMoon(new float[] {key[0], key[1], key[2]}, new float[] {key[3], key[4], key[5]});
+                } catch (RuntimeException e) {
+                    com.nirncraft.NirnCraft.LOGGER.debug("atlas: moon not set: {}", e.toString());
+                }
+            }
             frame.lodBias = quality.lodBias();  // > 1: coarser levels sooner with distance (far detail goes first)
             // the pack draws the sky; atlas adds far terrain, clouds and far actors over it (no pack: no clouds,
             // NirnCraft's own cloud deck draws them)
