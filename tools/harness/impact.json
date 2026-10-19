@@ -357,6 +357,15 @@
    ],
    "tags": [],
    "reload": null
+  },
+  {
+   "paths": [
+    "mod/src/main/java/*"
+   ],
+   "tags": [
+    "check:entity-construction"
+   ],
+   "final": false
   }
  ]
 }

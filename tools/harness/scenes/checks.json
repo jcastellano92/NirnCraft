@@ -860,6 +860,28 @@
     "problems": "problems (\\d+)"
    },
    "timeout": 120
+  },
+  {
+   "id": "check-entity-construction",
+   "title": "Entity constructors use nothing 26.3 assigns later (getId before ID assignment disconnects clients)",
+   "tags": [
+    "check:entity-construction",
+    "check:unit",
+    "suite:smoke"
+   ],
+   "run": [
+    "py",
+    "-3",
+    "tools/harness/audits/entity_construction.py"
+   ],
+   "inputs": [
+    "mod/src/main/java",
+    "tools/harness/audits/entity_construction.py"
+   ],
+   "metrics": {
+    "problems": "entity construction: (\\d+) problem"
+   },
+   "timeout": 120
   }
  ]
 }

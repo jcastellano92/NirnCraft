@@ -351,10 +351,17 @@ class Runner:
                 rec = self.run_live(s, v, fp)
                 self.streak = ("", 0)
                 return rec
-            except Exception:
-                if self._game is None or not self.game.crashed():
+            except Exception as e:
+                # a client that is still running but lost (disconnected, or its heartbeat stopped) is a crash too
+                lost = any(w in str(e) for w in ("client disconnected", "client stopped responding"))
+                if self._game is None or not (lost or self.game.crashed()):
                     raise
-                if self.game.closed_normally(started) and attempt == 1 and self.closes < 5:
+                if lost and self.game.running():
+                    try:
+                        self.game.close()
+                    except RuntimeError as ce:
+                        say(f"  ! could not close the lost client: {str(ce)[:120]}")
+                if not lost and self.game.closed_normally(started) and attempt == 1 and self.closes < 5:
                     # closed by someone (the window's X), not a crash: relaunch and run this test again
                     self.closes += 1
                     self.game.STATE.unlink(missing_ok=True)

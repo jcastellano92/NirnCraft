@@ -35,6 +35,7 @@ def selected_instance(name):
 INSTANCE_NAME = selected_instance(os.environ.get("NIRNCRAFT_NATIVE_INSTANCE", TARGET["instanceName"]))
 INSTANCE = PRISM_ROOT / "instances" / INSTANCE_NAME
 GAME = INSTANCE / ".minecraft"
+HEARTBEAT_STALE = 30  # seconds without a status write: the client froze, crashed or lost its control loop
 DEV = GAME / "world-preview"
 GROUPS = {
     "scenes": ["nirncraft/scatter"],
@@ -216,6 +217,13 @@ def _live_actions(lines, timeout=180, cancel=False):
             if c.get("error"):
                 raise RuntimeError(c["error"])
             return
+        if c.get("error", "").startswith("client disconnected"):  # lost the world mid-step: say why, at once
+            raise RuntimeError(c["error"])
+        age = time.time() - c.get("updated", 0) / 1000
+        if age > HEARTBEAT_STALE:  # the client writes its status every second, loading screens included
+            alive = bool(processes())
+            raise RuntimeError(f"client stopped responding: heartbeat {age:.0f} s old (screen {c.get('screen')}, "
+                               f"process {'alive' if alive else 'gone'})")
         time.sleep(0.5)
     raise RuntimeError("Client did not acknowledge completion; inspect status/log before retrying")
 
