@@ -328,6 +328,9 @@ ATLAS_API AtlasStatus atlas_upload_column_heights3(AtlasContext* ctx, int32_t lo
                                                       const uint16_t* foliageMat, const uint8_t* flags);
 #define ATLAS_COLUMN_SNOW 0x1u
 #define ATLAS_COLUMN_FROZEN 0x2u
+/* (abi 0.13) the caller stamps this column's trees itself (as structures, where the world grows them): no forest
+   canopy from the dressing here */
+#define ATLAS_COLUMN_NO_CANOPY 0x4u
 /* (abi 0.10) Falling water: a material class drawn as a white, streaming sheet (waterfalls stamped as structures). */
 #define ATLAS_CLASS_FALLS 5u
 /*

@@ -89,6 +89,9 @@ final class AtlasSettlements implements AtlasFarField.Overlay {
     /** Harness: why landmarks fell back to profiles (first few). */
     final List<String> fallbacks = new ArrayList<>();
 
+    /** The world's real trees for the finest LODs (single player), or null: the dressing's canopy. */
+    volatile AtlasTrees trees;
+
     AtlasSettlements(StreetPlan plan, IntBinaryOperator ground, AtlasMaterials mats) {
         this.plan = plan;
         this.ground = ground;
@@ -101,6 +104,14 @@ final class AtlasSettlements implements AtlasFarField.Overlay {
      */
     static AtlasSettlements create(IntBinaryOperator ground, AtlasMaterials mats) {
         return new AtlasSettlements(StreetPlan.get(), ground, mats);
+    }
+
+    /** As create, with the world's real trees over the finest LODs (AtlasTrees; null: the dressing's canopy). */
+    static AtlasSettlements create(IntBinaryOperator ground, AtlasMaterials mats, AtlasTrees trees) {
+        AtlasSettlements s = create(ground, mats);
+        s.trees = trees;
+        AtlasTrees.activeLod = trees != null ? AtlasTrees.LOD : -1;
+        return s;
     }
 
     /**
@@ -186,6 +197,18 @@ final class AtlasSettlements implements AtlasFarField.Overlay {
             if (!any) clear();
             any = true;
             stamp(sh, s, bx, bz);
+        }
+        AtlasTrees t = trees;
+        if (t != null && lod <= AtlasTrees.LOD) {
+            // the world's own trees, chunk by chunk (each chunk's crowns may reach into its neighbours' columns)
+            for (int cz = (bz >> 4) - 1; cz <= (ez - 1 >> 4) + 1; cz++)
+                for (int cx = (bx >> 4) - 1; cx <= (ex - 1 >> 4) + 1; cx++) {
+                    AtlasCapture.Shape sh = t.chunk(cx, cz);
+                    if (sh == null) continue;
+                    if (!any) clear();
+                    any = true;
+                    stamp(sh, s, bx, bz);
+                }
         }
         com.nirncraft.tamriel.terrain.Hydrology.Fall[] all = com.nirncraft.tamriel.terrain.Hydrology.get().falls();
         for (int k = 0; k < all.length; k++) {
@@ -381,7 +404,8 @@ final class AtlasSettlements implements AtlasFarField.Overlay {
                 if (best < 0) continue;
                 float top = sh.top[best];
                 float base = grounded ? Float.NaN : lowest;
-                put(i, j, top - 1, top, mats.id(sh.wall[best]), mats.id(sh.roof[best]), base);
+                short roof = sh.tint != null && sh.tint[best] != 0 ? mats.leaves(sh.roof[best], sh.tint[best]) : mats.id(sh.roof[best]);
+                put(i, j, top - 1, top, mats.id(sh.wall[best]), roof, base);
             }
     }
 

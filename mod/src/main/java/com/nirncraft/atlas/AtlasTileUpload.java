@@ -58,6 +58,8 @@ final class AtlasTileUpload {
                 fillMat[c] = u < byIndex.length && !grass[u] ? byIndex[u] : 0;
                 flags[c] = blocks.flags[c];
             }
+            if (lod <= AtlasTrees.activeLod)  // the world's real trees stand here (AtlasTrees): no canopy lumps under them
+                for (int c = 0; c < N; c++) flags[c] |= AtlasTrees.NO_CANOPY;
             m.flush(ctx);
             ctx.uploadColumnHeights3(lod, tx, tz, surface, water, topMat, fillMat, tinted ? grassMat : null, tinted ? foliageMat : null, flags);
         } else if (tinted) {

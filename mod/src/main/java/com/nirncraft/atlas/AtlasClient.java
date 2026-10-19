@@ -391,7 +391,10 @@ public final class AtlasClient {
             java.util.function.IntBinaryOperator ground = source instanceof AtlasExactSource e ? e::groundAt : null;
             AtlasMaterials mats = new AtlasMaterials();  // one id per block across buildings, landmarks and surfaces
             if (source instanceof AtlasRefiningSource r) r.materials(mats);
-            farField = new AtlasFarField(ctx, source, () -> AtlasSettlements.create(ground, mats), lods);
+            // single player: the world's own trees over the finest LODs (AtlasTrees), else the dressing's canopy
+            AtlasTrees trees = source instanceof AtlasExactSource e ? AtlasTrees.forServer(mc.getSingleplayerServer(), e) : null;
+            AtlasTrees.activeLod = trees != null ? AtlasTrees.LOD : -1;  // before the first tile goes up
+            farField = new AtlasFarField(ctx, source, () -> AtlasSettlements.create(ground, mats, trees), lods);
             lightBudget = -1;
             startedFor = mc.level;
             retryAt = 0;

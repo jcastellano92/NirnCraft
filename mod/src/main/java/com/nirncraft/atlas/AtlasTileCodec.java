@@ -28,7 +28,7 @@ final class AtlasTileCodec {
 
     static final int VERSION = 3;
     /** What the tiles contain (not their format): caches made before a content change are not reused. 1: roads. */
-    static final int CONTENT = 2;
+    static final int CONTENT = 3;
     private static final int N = AtlasNative.TILE * AtlasNative.TILE, W = AtlasNative.TILE;
     private static final int HEAD = 3, G = AtlasTints.GRID * AtlasTints.GRID, TINT_BYTES = 2 * 3 * G;
     private static final int FLAG_TINTS = 1, FLAG_SURFACE = 2;

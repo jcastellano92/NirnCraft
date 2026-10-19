@@ -275,6 +275,21 @@ final class AtlasSurface {
         return flags;
     }
 
+    /** The biome at a block as chunks store it (the generator's source through the seeded zoom). Thread-safe. */
+    Holder<Biome> biome(int x, int y, int z) {
+        return eval.get().biomes.getBiome(new BlockPos(x, y, z));
+    }
+
+    /**
+     * The block the material rules paint on top of the ground at (x, z) whose exact surface height is `surface`,
+     * before any snow (what trees and plants find there when they grow), flat-ground steepness. Thread-safe.
+     */
+    BlockState groundBlock(int x, int z, float surface) {
+        BlockState[] r = new BlockState[2];
+        byte f = column(eval.get(), x, z, surface, 0, 0, Float.NaN, r);
+        return (f & SNOW) != 0 ? r[1] : r[0];
+    }
+
     /** Under the sea or a lake or river (the surface rules' wet branch, or ice instead of snow). */
     private boolean wet(float surface, float water) {
         return Math.ceil(surface) - 1 < seaLevel - 1 || !Float.isNaN(water) && water > surface;

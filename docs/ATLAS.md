@@ -236,6 +236,13 @@ frame for the resolve). Both optional: a 0.11 core still loads. The mod's data t
 texel 17 = the hand-off band / 64 (the pack's crossfade), texel 18 = the interior (LocationKind.icon + 1, eased
 strength) for the pack's interior grade.
 
+Real far trees (`AtlasTrees`, single player, LOD 0): each chunk's tree features run as chunk decoration runs them
+(the generator's global feature indices and decoration seeds, `FeaturePlacer`), into `AtlasCapture`'s level over the
+exact ground with an `Env` (the material rules' surface block for the soil check, the map's water, the generator's
+biomes, the real level for the road / site masks). The crowns and trunks are stamped with the buildings (leaves in
+the biome's foliage colour, birch and spruce their fixed ones); those tiles carry `ATLAS_COLUMN_NO_CANOPY` (ABI 0.13)
+so the dressing grows no noise canopy under them. Coarser LODs keep the dressing's canopy.
+
 Offline checks: `native\build.ps1` (new tests: fades, LOD dither, dragon motion and fades, far lights day/night and
 occlusion, surface overrides and frozen water, lights in the CPU/Vulkan parity scene);
 `run_settlement_harness.ps1 -Sandbox <dir> -Mod <worktree>\mod [-Rebuild] -Place imperial_city | at:x,z | xl:n,x,z`

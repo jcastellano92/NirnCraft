@@ -21,8 +21,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * ground cover (grass, ferns, flowers, berries) was placed before it: in the near world a cold meadow is grass with
  * snow in the gaps, not a white sheet. The far field has no plants, so it estimates them: each biome's ground_cover
  * features give the expected plants per block at (x, z) (count x cluster x the flora_density field there), the share
- * of ground they cover is 1 - e^-plants, and a hash of the column picks whether this one is a gap (snow) or a plant
- * (its grass). Same share, same drifts and bare patches as the near world, column by column statistically.
+ * of ground they cover is 1 - e^-plants, and a hash per few-block patch picks whether it is a gap (snow) or plants
+ * (their grass). Same share, same drifts and bare patches as the near world, column by column statistically.
  */
 final class AtlasSnowCover {
     /** One ground_cover feature: plants per chunk before the density field, and the field (null: everywhere). */
@@ -46,13 +46,23 @@ final class AtlasSnowCover {
         return Math.exp(-plants);
     }
 
-    /** Whether this column is one of the bare ones (a stable hash of the column against the bare share). */
+    /**
+     * Whether this column is one of the bare ones. Plants grow in tufts (a cluster within a couple of blocks), so the
+     * gaps between them, where the snow lies, come in patches too: the roll is per ~3-block cell (cells jittered per
+     * column so their edges are ragged, not a grid), each cell bare with the bare share. Stable per column.
+     */
     boolean snows(double bare, int x, int z) {
         if (bare >= 1.0) return true;
-        long h = seed ^ (x * 0x9E3779B97F4A7C15L) ^ (z * 0xC2B2AE3D27D4EB4FL);
+        long j = hash(x, z, 0x51ED27L);
+        int cx = Math.floorDiv(x + (int) (j & 1) + (int) ((j >>> 8) & 1), 3);
+        int cz = Math.floorDiv(z + (int) ((j >>> 16) & 1) + (int) ((j >>> 24) & 1), 3);
+        return (hash(cx, cz, 0x5A0EL) >>> 11) * 0x1.0p-53 < bare;
+    }
+
+    private long hash(int x, int z, long salt) {
+        long h = seed ^ salt ^ (x * 0x9E3779B97F4A7C15L) ^ (z * 0xC2B2AE3D27D4EB4FL);
         h = (h ^ (h >>> 31)) * 0xBF58476D1CE4E5B9L;
-        h ^= h >>> 29;
-        return (h >>> 11) * 0x1.0p-53 < bare;
+        return h ^ (h >>> 29);
     }
 
     private static Cover[] covers(Holder<Biome> biome) {

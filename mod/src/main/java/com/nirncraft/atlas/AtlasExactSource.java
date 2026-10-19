@@ -144,6 +144,13 @@ final class AtlasExactSource extends AtlasRefiningSource {
         return (int) Math.floor(height.height(x, z, m));
     }
 
+    /** The water level over a block column (the sea, the map's rivers and lakes), NaN where it is dry. Thread-safe. */
+    float waterLevelAt(int x, int z) {
+        MapSample m = new MapSample();
+        TamrielMap.sample(x, z, m);
+        return waterAt(height.height(x, z, m), waterTop(m));
+    }
+
     @Override
     Refined refine(AtlasNative.Context ctx, int lod, int tx, int tz) {
         // the very bytes a server would send (cached or made now): single and multiplayer far fields are identical

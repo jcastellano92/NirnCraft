@@ -438,7 +438,8 @@ void PreviewSource::dressRows(Tile& tile, int jBegin, int jEnd, const Overrides&
             // forests: canopy lumps on gentle ground below the tree line, by climate
             bool dry = cl == DESERT || cl == FROZEN || cl == ASH;
             float treeLine = snowline - 40.0f;
-            if (!dry && std::isnan(wl) && h < treeLine && slope < 0.8f && sm.road < 0.3f && top != M_SAND) {
+            if (!(flags & ATLAS_COLUMN_NO_CANOPY) && !dry && std::isnan(wl) && h < treeLine && slope < 0.8f
+                && sm.road < 0.3f && top != M_SAND) {
                 double density = cl == JUNGLE ? 0.75 : cl == SAVANNA ? 0.12 : cl == SWAMP ? 0.45 : 0.42;
                 density += 0.35 * sm.rain;
                 double f = fbm(x, z, 300, 3, 31) * 0.5 + 0.5;

@@ -42,7 +42,8 @@ final class AtlasCapture {
     /** Air gaps (blocks) inside a column that still count as one span. */
     static final int MAX_GAP = 10;
     static final int MIN_Y = -64, HEIGHT = 704;
-    private static final BlockState AIR = Blocks.AIR.defaultBlockState(), STONE = Blocks.STONE.defaultBlockState();
+    private static final BlockState AIR = Blocks.AIR.defaultBlockState(), STONE = Blocks.STONE.defaultBlockState(),
+            WATER = Blocks.WATER.defaultBlockState();
 
     /** A far silhouette: solid spans over the world columns [x0, x0 + w) x [z0, z0 + d). */
     static final class Shape {
@@ -56,6 +57,8 @@ final class AtlasCapture {
         final List<int[]> lights = new ArrayList<>();
         /** Highest point above the ground at the centre (to skip shapes that vanish at a LOD). */
         float rise;
+        /** Per column the biome tint of its roof block (leaves wearing the biome's foliage), 0 = untinted; may be null. */
+        int[] tint;
 
         Shape(int x0, int z0, int w, int d) {
             this.x0 = x0;
@@ -173,7 +176,22 @@ final class AtlasCapture {
      * {@code paint} gets the level to build its canvas on (e.g. a settlement Canvas clipped to the box).
      */
     static Shape capture(BoundingBox box, IntBinaryOperator ground, long seed, Consumer<WorldGenLevel> paint) {
-        Recorder rec = new Recorder(ground, seed);
+        return capture(box, ground, seed, null, paint);
+    }
+
+    /**
+     * What a capturing level knows beyond its stand-in ground, for builders that look at the world (trees check
+     * their soil, the water they stand in, their biome and the roads around them): the ground's top block, the water
+     * level over a column (NaN: dry), the biome at a block, and the real level they belong to (getLevel: the
+     * placement masks read the world's plans through it). Any part may be null.
+     */
+    record Env(java.util.function.BiFunction<Integer, Integer, BlockState> groundBlock, java.util.function.IntBinaryOperator water,
+               java.util.function.Function<BlockPos, net.minecraft.core.Holder<net.minecraft.world.level.biome.Biome>> biome,
+               net.minecraft.server.level.ServerLevel owner) {}
+
+    /** As capture, with an environment the builder may read (Env). */
+    static Shape capture(BoundingBox box, IntBinaryOperator ground, long seed, Env env, Consumer<WorldGenLevel> paint) {
+        Recorder rec = new Recorder(ground, seed, env);
         paint.accept(rec.level());
         return rec.shape(box, ground);
     }
@@ -186,10 +204,14 @@ final class AtlasCapture {
         final IntBinaryOperator ground;
         final long seed;
         final RandomSource random;
+        final Env env;
+        final Long2IntOpenHashMap waterCache = new Long2IntOpenHashMap();
 
-        Recorder(IntBinaryOperator ground, long seed) {
+        Recorder(IntBinaryOperator ground, long seed, Env env) {
             this.ground = ground;
             this.seed = seed;
+            this.env = env;
+            waterCache.defaultReturnValue(Integer.MIN_VALUE);
             random = RandomSource.create(seed);
             columnTop.defaultReturnValue(Integer.MIN_VALUE);
             groundCache.defaultReturnValue(Integer.MIN_VALUE);
@@ -208,7 +230,25 @@ final class AtlasCapture {
         BlockState state(BlockPos p) {
             BlockState s = blocks.get(p.asLong());
             if (s != null) return s;
-            return p.getY() <= ground(p.getX(), p.getZ()) ? STONE : AIR;
+            int gy = ground(p.getX(), p.getZ());
+            if (p.getY() > gy) return p.getY() <= water(p.getX(), p.getZ()) ? WATER : AIR;
+            if (p.getY() == gy && env != null && env.groundBlock() != null) {
+                BlockState top = env.groundBlock().apply(p.getX(), p.getZ());
+                if (top != null) return top;
+            }
+            return STONE;
+        }
+
+        /** The top water block over column (x, z), or below the ground when dry. */
+        int water(int x, int z) {
+            if (env == null || env.water() == null) return Integer.MIN_VALUE;
+            long k = BlockPos.asLong(x, 0, z);
+            int w = waterCache.get(k);
+            if (w == Integer.MIN_VALUE) {
+                w = env.water().applyAsInt(x, z);
+                waterCache.put(k, w);
+            }
+            return w;
         }
 
         void put(BlockPos p, BlockState s) {
@@ -249,7 +289,14 @@ final class AtlasCapture {
                         break;
                     case "getHeight":
                         if (n == 0) return HEIGHT;
-                        if (n == 3) return height((int) args[1], (int) args[2]);
+                        if (n == 3) {
+                            int x = (int) args[1], z = (int) args[2], top = height(x, z);
+                            // water counts for every heightmap but the ocean floor's
+                            boolean floor = args[0] instanceof net.minecraft.world.level.levelgen.Heightmap.Types t
+                                    && (t == net.minecraft.world.level.levelgen.Heightmap.Types.OCEAN_FLOOR
+                                        || t == net.minecraft.world.level.levelgen.Heightmap.Types.OCEAN_FLOOR_WG);
+                            return floor ? top : Math.max(top, water(x, z) + 1);
+                        }
                         break;
                     case "getMinY":
                         return MIN_Y;
@@ -270,6 +317,15 @@ final class AtlasCapture {
                         return false;
                     case "getSeaLevel":
                         return 63;
+                    case "getBiome":
+                        if (n == 1 && args[0] instanceof BlockPos p && env != null && env.biome() != null) return env.biome().apply(p);
+                        break;
+                    case "getLevel":
+                        if (n == 0 && env != null && env.owner() != null) return env.owner();
+                        break;
+                    case "registryAccess":
+                        if (n == 0 && env != null && env.owner() != null) return env.owner().registryAccess();
+                        break;
                     case "getHeightmapPos":
                         if (n == 2 && args[1] instanceof BlockPos p) return new BlockPos(p.getX(), height(p.getX(), p.getZ()), p.getZ());
                         break;

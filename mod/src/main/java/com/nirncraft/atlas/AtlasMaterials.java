@@ -23,6 +23,7 @@ final class AtlasMaterials {
     static final int FIRST = 64, LAST = 1023;
 
     private final Map<Block, Short> ids = new HashMap<>();
+    private final Map<Long, Short> tinted = new HashMap<>();
     private final List<float[]> pending = new ArrayList<>();
     private int next = FIRST;
 
@@ -35,6 +36,38 @@ final class AtlasMaterials {
         short id = (short) next++;
         ids.put(s.getBlock(), id);
         return id;
+    }
+
+    /**
+     * The palette id of tinted leaves: the block's grey texture mean times the biome's foliage colour rgb (as the near
+     * field tints them), registered per block and tint (quantized to 5 bits a channel: a few dozen per world).
+     */
+    synchronized short leaves(BlockState s, int rgb) {
+        int q = rgb & 0xF8F8F8;
+        long key = (long) BuiltInRegistries.BLOCK.getId(s.getBlock()) << 32 | q;
+        Short v = tinted.get(key);
+        if (v != null) return v;
+        if (next > LAST) return id(s);
+        float[] m = material(s);
+        String name = BuiltInRegistries.BLOCK.getKey(s.getBlock()).toString();
+        int grey = AtlasBlockColors.rgb(name);
+        float g = grey < 0 ? 0.48f : (0.2126f * ((grey >> 16) & 255) + 0.7152f * ((grey >> 8) & 255) + 0.0722f * (grey & 255)) / 255f;
+        m[0] = lin(Math.round(((q >> 16) & 255) * g));
+        m[1] = lin(Math.round(((q >> 8) & 255) * g));
+        m[2] = lin(Math.round((q & 255) * g));
+        pending.add(m);
+        short id = (short) next++;
+        tinted.put(key, id);
+        return id;
+    }
+
+    /** Whether a leaf block takes the biome's foliage colour in the near field (its texture is grey). */
+    static boolean biomeTinted(BlockState s) {
+        if (!s.is(BlockTags.LEAVES)) return false;
+        int c = AtlasBlockColors.rgb(BuiltInRegistries.BLOCK.getKey(s.getBlock()).toString());
+        if (c < 0) return false;
+        int r = (c >> 16) & 255, g = (c >> 8) & 255, b = c & 255;
+        return Math.max(r, Math.max(g, b)) - Math.min(r, Math.min(g, b)) < 20;
     }
 
     /** Registers the ids handed out since the last call (before uploading anything that uses them). */
