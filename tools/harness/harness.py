@@ -156,9 +156,19 @@ def key(s, v):
 
 
 # ================================================================================================ ordering
-def priority(s, v, pos, group, shaders):
-    """Greedy next-item key: cheap tiers first; then stay in the running client's group, then in its shader state,
-    then the nearest pose (chunks already loaded); realms last (they leave the overworld)."""
+def options_key(opts):
+    """A scene's pack options as one comparable string ('' = the pack's defaults); game.options_key's twin (game is
+    imported only when something live runs)."""
+    if not opts:
+        return ""
+    return ";".join(f"{k}={str(v).lower() if isinstance(v, bool) else v}" for k, v in sorted(opts.items()))
+
+
+def priority(s, v, pos, group, shaders, opts=""):
+    """Greedy next-item key: cheap tiers first; then stay in the running client's group (its JVM settings: a change is
+    a restart), then in its shader state, then in its pack options (a change is a shader reload), then the nearest
+    pose (chunks already loaded); realms last (they leave the overworld). Runtime settings (time, weather, weather-off)
+    are set per scene and cost nothing to change."""
     tier = TIER_RANK.get(s["tier"], 3)
     if s["tier"] != "live":
         return (tier, 0, 0, 0, 0, s["id"])
@@ -167,18 +177,19 @@ def priority(s, v, pos, group, shaders):
     dist = 0 if xz is None or pos is None else math.hypot(xz[0] - pos[0], xz[1] - pos[1])
     if xz is None and "spawn" not in p:
         dist = 1e7
-    return (tier, s["group"] != group, s["group"] != "live", (v == "vanilla") == shaders, "realm" in p, dist, s["id"])
+    return (tier, s["group"] != group, s["group"] != "live", (v == "vanilla") == shaders,
+            options_key(s.get("pack_options")) != opts, "realm" in p, dist, s["id"])
 
 
-def order(items, pos=(0, 0), group="live", shaders=True):
+def order(items, pos=(0, 0), group="live", shaders=True, opts=""):
     left, out = list(items), []
     while left:
-        i = min(range(len(left)), key=lambda k: priority(*left[k], pos, group, shaders))
+        i = min(range(len(left)), key=lambda k: priority(*left[k], pos, group, shaders, opts))
         s, v = left.pop(i)
         out.append((s, v))
         if s["tier"] == "live":
             pos = s.get("_xz") or pos
-            group, shaders = s["group"], v != "vanilla"
+            group, shaders, opts = s["group"], v != "vanilla", options_key(s.get("pack_options"))
     return out
 
 
@@ -487,6 +498,9 @@ class Runner:
         lab.setdefault("h", 540)
         with tempfile.TemporaryDirectory() as tmp:
             png = Path(tmp) / "lab.png"
+            lab = dict(lab)
+            if s.get("weather") == "off":  # the live weather-off switch's offline twin: same scene, same sky
+                lab.setdefault("weather", 0 if tool == "pack_lab" else "off")
             kv = [f"{k}={val}" for k, val in lab.items()]
             cmd = [str(exe), str(png)] + kv if tool == "pack_lab" else [str(exe), f"out={png.as_posix()}"] + kv
             r = subprocess.run(cmd, cwd=ROOT / "native" if tool == "pack_lab" else ROOT, capture_output=True, text=True,
@@ -512,6 +526,7 @@ class Runner:
         except Exception as e:  # noqa: BLE001  the client cannot start: skip the group, do not hang on it
             self.disabled[s["group"]] = f"skipped: the client did not start ({str(e)[:160]})"
             raise
+        g.pack_options(s.get("pack_options"))  # the scene's pack options (a reload only when they change)
         if s.get("kind") == "behaviour":
             return self.run_behaviour(s, v, fp)
         if s.get("measure_command"):

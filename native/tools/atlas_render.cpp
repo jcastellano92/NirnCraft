@@ -1,7 +1,8 @@
 // Offline far-field renderer: preview terrain from the Tamriel raster, rendered through atlas_core.
 //   atlas_render raster=native/data/tamriel_raster.bin out=shot.png x=0 z=0 above=40 yaw=0 pitch=-4 fov=70
 //                 w=1280 h=720 backend=cpu|vulkan sun=35,120 radius=6371000 near=0 far=40000 flags=shadows,atmos,clouds
-//                 weather=clear|fair|overcast|storm stormx= stormz= time=<seconds>
+//                 weather=off|clear|fair|overcast|storm stormx= stormz= time=<seconds>  (off = clear: no cover,
+//                 the game's weather-off switch)
 // yaw: degrees, 0 = north (-Z), 90 = east (+X). sun=elevation,azimuth degrees (azimuth like yaw).
 // Also writes <out>_depth.png (log depth) and <out>_lod.png when lodpass=1, and prints JSON stats on stdout.
 #include <cmath>

@@ -551,6 +551,13 @@ int main(int argc, char** argv) {
     if (haveNoise) atlas_set_cloud_noise(ctx, noise.data());
     std::vector<uint32_t> fld(128 * 128), dyn(128 * 128);
     double groundFog = arg(argc, argv, "fog", 0);  // the mod's ground-fog drive (weather_dynamics a)
+    // weather=0: the game's weather-off switch (WeatherFieldTexture.isOff): no cover, rain, curtains or ground fog,
+    // the aerosol band kept (distant haze), as the live harness's world-gen scenes draw it
+    bool weatherOn = arg(argc, argv, "weather", 1) != 0;
+    if (!weatherOn) {
+        rain = 0;
+        groundFog = 0;
+    }
     int band = int(arg(argc, argv, "band", 0));     // aerosol band: 0 rain, 1 snow, 2 dust, 3 ash
     for (int i = 0; i < 128 * 128; i++) {
         // smooth value noise over the cells (two octaves): patchy cover rather than a regular pattern
@@ -565,7 +572,7 @@ int main(int argc, char** argv) {
             return a + (b - a) * ty;
         };
         double cx = i % 128, cy = i / 128;
-        double c = 0.2 + 0.25 * rain + 0.35 * vnoise(cx / 9, cy / 9) + 0.2 * vnoise(cx / 3.5 + 11, cy / 3.5 + 5);
+        double c = !weatherOn ? 0.0 : 0.2 + 0.25 * rain + 0.35 * vnoise(cx / 9, cy / 9) + 0.2 * vnoise(cx / 3.5 + 11, cy / 3.5 + 5);
         fld[i] = uint32_t(std::min(c, 1.0) * 255) | uint32_t(rain * 255) << 8 | uint32_t(rain * 0.6 * 255) << 16
                | uint32_t(std::lround((band * 0.25 + 0.02) * 255)) << 24;
         dyn[i] = uint32_t(240.0 / 1024 * 255) | uint32_t(120.0 / 1024 * 255) << 8 | uint32_t(0.1024 * 255) << 16

@@ -18,7 +18,7 @@ PLACES = ROOT / "mod/src/main/resources/nirncraft/tamriel/places"
 LANG = ROOT / "mod/src/main/lang/nirncraft"
 NOT_SCENES = {"groups.json", "legacy-seed.json"}
 POSES = ("visit", "camera", "place", "dungeon", "realm", "spawn", "stage", "studio", "ladder", "sweep")
-WEATHERS = {"clear", "cloudy", "overcast", "fog", "drizzle", "rain", "storm", "snow", "blizzard", "ashfall",
+WEATHERS = {"off", "clear", "cloudy", "overcast", "fog", "drizzle", "rain", "storm", "snow", "blizzard", "ashfall",
             "ash_storm", "dust", "sandstorm", "blight", "gale"}
 
 
@@ -269,7 +269,7 @@ def distance_scenes():
             tags = ["suite:distance", "feature:farfield", "feature:popin", f"place:{pid}", f"subject:{kind}",
                     f"time:{tod}"] + region + (["feature:lights"] if tod == "night" and kind in LIT else []) \
                 + (["feature:shadows"] if tod in ("dawn", "dusk") else [])
-            common = {"_file": "(generated distance)", "time": TIMES[tod], "weather": "clear", "variants": ["shaders"],
+            common = {"_file": "(generated distance)", "time": TIMES[tod], "weather": "off", "variants": ["shaders"],
                       "checks": {}, "source": "generated: catalog.distance_scenes"}
             rungs = NIGHT_LADDER if tod == "night" and kind in LIT else LADDER
             out.append({**common, "id": f"dist-{slug}-{tod}", "title": f"{pid} from {rungs[0]} m to 4 km ({tod})",
@@ -300,7 +300,7 @@ def distance_scenes():
                   f"~ ~1 ~ {{NoAI:1b,PersistenceRequired:1b,Silent:1b}}")
         kill = f"try kill @e[type={eid}]"
         for tod in ("day", "night"):
-            common = {"_file": "(generated distance)", "time": TIMES[tod], "weather": "clear", "variants": ["shaders"],
+            common = {"_file": "(generated distance)", "time": TIMES[tod], "weather": "off", "variants": ["shaders"],
                       "checks": {}, "source": "generated: catalog.distance_scenes",
                       "setup": ["try difficulty easy", summon, "wait 20"], "cleanup": [kill, "try difficulty peaceful"],
                       "tags": ["suite:distance", "suite:seam-entities", "feature:farfield", "feature:popin",
@@ -320,7 +320,7 @@ def distance_scenes():
     for tod in ("day", "night"):
         out.append({"_file": "(generated distance)", "id": f"dist-edits-pad-{tod}",
                     "title": f"Player-built material pad from 24 m to 2 km ({tod}): does the far field show edits?",
-                    "time": TIMES[tod], "weather": "clear", "variants": ["shaders"], "checks": {}, "timeout": 1500,
+                    "time": TIMES[tod], "weather": "off", "variants": ["shaders"], "checks": {}, "timeout": 1500,
                     "setup": fills + ["wait 20"], "fidelity": False,
                     "source": "generated: catalog.distance_scenes",
                     "tags": ["suite:distance", "suite:seam-edits", "suite:distance-ladder", "feature:farfield",
@@ -331,12 +331,27 @@ def distance_scenes():
     for tod in ("day", "dusk"):
         out.append({"_file": "(generated distance)", "id": f"pbr-ladder-{tod}",
                     "title": f"Materials from 4 m to 128 m ({tod}): metal, glass, ice, snow, PBR-mapped, plain",
-                    "time": TIMES[tod], "weather": "clear", "variants": ["shaders", "vanilla"], "checks": {},
+                    "time": TIMES[tod], "weather": "off", "variants": ["shaders", "vanilla"], "checks": {},
                     "timeout": 900, "source": "generated: catalog.distance_scenes",
                     "tags": ["suite:distance", "suite:pbr", "feature:materials", "feature:pbr", f"time:{tod}"],
                     "setup": [f"try setblock {STAGE[0] - 7 + i % 8 * 2} {STAGE[1] + 1 + i // 8} {STAGE[2] + (i // 8) * 2} {b}"
                               for i, b in enumerate(MATERIAL_SAMPLES)],
                     "pose": {"ladder": {"stage": True, "distances": [4, 8, 16, 32, 64, 128]}}})
+    # the Whiterun pair without the pack's TAA (pack options: one shader reload, batched): what TAA changes far off
+    out.append({"_file": "(generated distance)", "id": "fid-whiterun-day-notaa", "title": "whiterun: real vs far field, TAA off",
+                "time": TIMES["day"], "weather": "off", "variants": ["shaders"], "checks": {}, "timeout": 1500,
+                "fidelity": True, "pack_options": {"TAA": False}, "source": "generated: catalog.distance_scenes",
+                "tags": ["suite:fidelity", "feature:taa", "feature:farfield", "place:whiterun", "time:day"],
+                "pose": {"ladder": {"place": "whiterun", "distances": [120, 120, 120], "heights": [3, 60, 200]}}})
+    # the same ladders under fixed weather (the world-gen ladders above run with weather off): distant visuals in
+    # overcast, rain and snow, consistent run to run (clouds still in tests, the weather set everywhere)
+    for pid, w in (("whiterun", "overcast"), ("whiterun", "rain"), ("falkreath", "snow")):
+        out.append({"_file": "(generated distance)", "id": f"dist-{pid}-day-{w}", "title": f"{pid} from 64 m to 4 km ({w})",
+                    "time": TIMES["day"], "weather": w, "variants": ["shaders"], "checks": {}, "timeout": 1500,
+                    "source": "generated: catalog.distance_scenes",
+                    "tags": ["suite:distance", "suite:distance-ladder", "suite:weather-distance", "feature:farfield",
+                             "feature:weather", f"weather:{w}", f"place:{pid}", "time:day"],
+                    "pose": {"ladder": {"place": pid, "distances": LADDER}}})
     # clouds across the ring: a storm front parked over Whiterun, seen from 64 m out to 4 km (and flown through)
     for tod in ("day", "dusk"):
         common = {"_file": "(generated distance)", "time": TIMES[tod], "weather": "cloudy", "variants": ["shaders"],
@@ -538,7 +553,7 @@ def planned_places():
                         "_file": "(generated planned places)",
                         "tags": ["suite:places-planned", f"place:{pid}", f"type:{kind}", f"shot:{shot}"]
                                 + ([f"region:{region}"] if region else []),
-                        "pose": {"place": pid, "shot": shot}, "time": 6000, "weather": "clear",
+                        "pose": {"place": pid, "shot": shot}, "time": 6000, "weather": "off",
                         "variants": ["shaders"], "checks": {}, "source": "planned from the places index"})
     return out
 
@@ -654,8 +669,14 @@ def pose_actions(s, plan=None, candidate=0):
     # time of day, moon phase or weather), and a before / after would then compare two different skies
     indoors = "realm" in p or "dungeon" in p
     weather = s.get("weather") or (None if indoors else "clear")
+    # "off": the world itself (terrain, flora, buildings, far field) with no clouds, rain or fog banks, distant haze
+    # kept (the client's weather-off switch); every other scene has the switch off and its own fixed weather
+    off = weather == "off"
+    if off:
+        weather = "clear"
     lines = [f"try time set {int(s['time']) if s.get('time') is not None else 6000}",  # 26.3 reports 0: not a failure
-             "try nirncraft-weather fronts clear"]  # fronts never expire in tests: one scene's storm leaked into the next
+             "try nirncraft-weather fronts clear",  # fronts never expire in tests: one scene's storm leaked into the next
+             f"weather-off {'on' if off else 'off'}"]
     if not indoors:  # the whole world in the scene's weather (a region set alone left neighbours snowing / overcast)
         lines.append(f"try nirncraft-weather set-all {weather or 'clear'} 120")
     if "visit" in p:

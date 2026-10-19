@@ -67,6 +67,24 @@ character screen or the opening's covers (`ClientAutotest.automated()`; `-Dnirnc
 opening, to test it). The harness refuses to wait behind a blocking screen and says which one, and warns when the
 installed core is older than the latest build (`--rebuild` builds, installs and restarts).
 
+## Scene settings and batching
+
+A scene declares what it needs; the runner orders scenes so that settings which cost a restart or a reload change as
+rarely as possible, and applies the cheap ones per scene:
+
+| setting | in the scene | cost | how |
+|---|---|---|---|
+| JVM flags (`-D...`) | `group` (scenes/groups.json `jvm`) | client restart | scenes of one group run together |
+| shaders on / off | variant `shaders` / `vanilla` | live toggle | batched after the group |
+| pack options | `pack_options: {"TAA": false}` | shader reload | batched; Iris' option file, then `reload` (names checked against lib/settings.glsl) |
+| time, weather | `time`, `weather` | none | every scene pins them |
+| weather off | `weather: "off"` | none | the client's weather-off switch: no clouds, rain, fog banks; distant haze kept |
+
+World-gen scenes (distance ladders, flights, fidelity pairs, planned places) run with `weather: "off"`; weather has
+its own ladders (`suite:weather-distance`: overcast, rain, snow) and the storm-front scenes. Lab scenes with
+`weather: "off"` pass the same switch to the offline renderers (`pack_lab weather=0`, `atlas_render weather=off`), so
+an offline render and its live twin show the same sky.
+
 ## Speed: kept world, visual settle
 
 The live test world is kept between runs and launches (`saves/harness_<worldgen hash>`): a place is generated once,

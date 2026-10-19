@@ -77,5 +77,18 @@ expect(len(found) == 3 and ok == 59, "findings and the OK count are both read")
 found, ok = review.parse_pages("I could not open the folder.")
 expect(found == [] and ok is None, "an answer with no verdicts reads as unaccounted (ok None), not as clean")
 
+# --- batching by settings ---------------------------------------------------------------------------------------
+def scene(i, opts=None, group="live"):
+    return ({"id": i, "tier": "live", "group": group, "pose": {}, "pack_options": opts}, "shaders")
+
+
+order = [x[0]["id"] for x in harness.order([scene("a"), scene("b", {"TAA": False}), scene("c"), scene("d", {"TAA": False}),
+                                             scene("e", None, "other")])]
+expect(order.index("c") < order.index("b") and order.index("d") == order.index("b") + 1,
+       "scenes with the same pack options run together (one shader reload per run of them)")
+expect(order[-1] == "e", "another group (JVM settings: a restart) comes after the running group's scenes")
+expect(harness.options_key({"TAA": False, "A": 1}) == "A=1;TAA=false" and harness.options_key(None) == "",
+       "pack options compare as one stable key")
+
 print(f"problems {len(problems)}")
 sys.exit(1 if problems else 0)

@@ -289,6 +289,47 @@ def sync_overlay(paths=None):
     return n
 
 
+PACK_OPTIONS = GAME / "shaderpacks" / (PACK_ZIP.name + ".txt")  # Iris' option file for the pack
+
+
+def options_key(opts):
+    """A scene's pack options as one comparable string ('' = the pack's defaults)."""
+    if not opts:
+        return ""
+    return ";".join(f"{k}={str(v).lower() if isinstance(v, bool) else v}" for k, v in sorted(opts.items()))
+
+
+def pack_options(opts):
+    """Puts the pack in the scene's options (Iris' option file, then a shader reload while the client runs); the
+    pack's defaults for None / {}. Only when they differ from what is loaded: scenes are ordered so that runs of the
+    same options share one reload. Returns True when it reloaded."""
+    want = options_key(opts)
+    st = client_state()
+    have = st.get("packOptions", options_key(_read_options()))
+    if have == want:
+        return False
+    tr.step("pack_options", options=want or "(defaults)")
+    PACK_OPTIONS.parent.mkdir(parents=True, exist_ok=True)
+    if want:
+        PACK_OPTIONS.write_text("\n".join(want.split(";")) + "\n", encoding="utf-8")
+    else:
+        PACK_OPTIONS.unlink(missing_ok=True)
+    if running():
+        actions(["reload"], timeout=600)
+    st["packOptions"] = want
+    if STATE.exists() or st:
+        STATE.parent.mkdir(parents=True, exist_ok=True)
+        STATE.write_text(json.dumps(st), encoding="utf-8")
+    return True
+
+
+def _read_options():
+    try:
+        return dict(l.split("=", 1) for l in PACK_OPTIONS.read_text(encoding="utf-8").splitlines() if "=" in l)
+    except OSError:
+        return {}
+
+
 def reload_shaders():
     tr.step("reload", kind="shaders")
     since = (GAME / "logs/latest.log").stat().st_size if (GAME / "logs/latest.log").exists() else 0

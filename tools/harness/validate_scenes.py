@@ -11,10 +11,19 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import catalog  # noqa: E402
 
+# the pack's options (a #define, commented or not, or a const in lib/settings.glsl): what pack_options may name
+def _pack_options():
+    import re
+    text = (Path(__file__).resolve().parents[2] / "shaderpack/InfiniteATLAS/shaders/lib/settings.glsl").read_text(encoding="utf-8")
+    return {a or b for a, b in re.findall(r"^\s*(?://)?#define\s+(\w+)|^\s*const\s+\w+\s+(\w+)\s*=", text, re.M)}
+
+
+PACK_OPTIONS = _pack_options()
+
 VERBS = {"wait-dead", "door-file", "frame", "frame-box", "frame-file", "inside-file", "showcase", "reload", "resources", "shaders", "rebuild", "texture-probe", "flash", "cast", "use", "fx", "wait", "settle",
          "measure", "command", "try", "camera", "camera-plan", "camera-travel", "visit", "front", "ui", "capture-ui",
          "capture", "identity", "transport", "stop", "screen", "click", "key", "expect-screen", "perspective",
-         "renderdistance", "hud", "settle-visual", "message"}
+         "renderdistance", "hud", "settle-visual", "message", "weather-off"}
 ID = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
 TAG = re.compile(r"^[a-z]+:[A-Za-z0-9_/:.\-]+$")
 SUMMON = re.compile(r"\bsummon\s+nirncraft:([a-z0-9_]+)")
@@ -71,6 +80,9 @@ def main():
             errors.append(f"{w}: shot is aerial|approach")
         if s.get("weather") and s["weather"] not in catalog.WEATHERS:
             errors.append(f"{w}: unknown weather {s['weather']}")
+        for opt in (s.get("pack_options") or {}):
+            if opt not in PACK_OPTIONS:
+                errors.append(f"{w}: pack option {opt} is not an option of the pack (lib/settings.glsl)")
         if s.get("front") and (len(s["front"]) < 4 or s["front"][3] not in catalog.WEATHERS):
             errors.append(f"{w}: front is [x, z, radius, weather, vx?, vz?]")
         for v in s.get("setup", []) + s.get("cleanup", []):
