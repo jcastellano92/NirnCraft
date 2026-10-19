@@ -498,6 +498,8 @@ def load():
     scenes += behaviour.scenes()
     import camlib  # named cameras saved in game (/nirncraft-tour save) and imported
     scenes += camlib.scenes()
+    import effects  # effects as subjects: staged, scaled, pictured (effects.py)
+    scenes += effects.scenes()
     seam_core(scenes)
     for s in scenes:
         if s["id"] in seen:
