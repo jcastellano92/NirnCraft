@@ -83,7 +83,8 @@ final class CloudClimate {
                 }
                 continue;
             }
-            for (int i = 0; i < COUNT; i++) cur[i] += (t[i] - cur[i]) * EASE;
+            float ease = com.nirncraft.client.autotest.ClientAutotest.ENABLED ? 1f : EASE;  // tests: no blend from before
+            for (int i = 0; i < COUNT; i++) cur[i] += (t[i] - cur[i]) * ease;
         }
     }
 

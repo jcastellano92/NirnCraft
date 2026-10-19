@@ -224,6 +224,11 @@ public final class RegionalWeather {
     }
 
     /** Forces a region's weather (commands, quests). {@code ticks <= 0} uses a profile-length spell. */
+    /** Every region's weather at once (tests: the whole world in the scene's weather, not only where the player is). */
+    public static void setAll(MinecraftServer server, WeatherKind kind, int ticks) {
+        for (Region region : com.nirncraft.tamriel.Regions.all()) set(server, region, kind, ticks);
+    }
+
     public static void set(MinecraftServer server, Region region, WeatherKind kind, int ticks) {
         ServerLevel ow = server.overworld();
         Data data = Data.get(server);

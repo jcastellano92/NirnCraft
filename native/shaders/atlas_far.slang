@@ -876,7 +876,8 @@ void farMain(uint3 id : SV_DispatchThreadID) {
         // centre of the hit voxel on the world voxel grid (multiples of s; y -64 is a multiple for s <= 64)
         float3 ci = float3(frame.camInt.xyz);
         float3 centre = (floor((p + ci) / s - n * 0.5) + 0.5) * s - ci;
-        float wSmooth = res.lod > 0 ? 0.85 : 0.85 * saturate((tHit - 96.0) / 400.0);
+        // (0.55: smoothed slopes caught more light than the stepped blocks they stand for, the far field read brighter)
+        float wSmooth = res.lod > 0 ? 0.55 : 0.55 * saturate((tHit - 96.0) / 400.0);
         if ((frame.dims.z & FRAME_FLAT_NORMALS) != 0) wSmooth = 0.0;
         if (wSmooth > 0.0) {
             float3 sn = smoothNormal(res.lod, centre, 1.0);
@@ -917,7 +918,7 @@ void farMain(uint3 id : SV_DispatchThreadID) {
         if (cls != 2u && !falls) {
             float2 wxz = p.xz + float2(frame.camInt.xz);
             float v = valueNoise(wxz / 24.0) * 0.6 + valueNoise(wxz / 90.0 + 17.0) * 0.4;
-            albedo *= 0.86 + 0.28 * v;
+            albedo *= 0.95 + 0.10 * v;  // gentle: stronger tone blotches the near field does not have read as a seam
         }
         if ((frame.dims.z & FRAME_DEBUG_LOD) != 0) albedo = lodTint(res.lod);
         float3 reflection = float3(0, 0, 0);
@@ -946,6 +947,9 @@ void farMain(uint3 id : SV_DispatchThreadID) {
             m.albedoRough.a = farWaterAlpha(wind.y, tHit) + foam * 0.2;
             reflection = waterReflection(p, dir, k, tHit, res.lod, sun, n);
         }
+        // the near field's sky light is darkened by sky occlusion, vertex AO and SSAO that a far voxel cannot see:
+        // land takes their average (FAR_AMBIENT_OCCLUSION, calibrated against fid-* near / far pairs)
+        if (cls != 2u) ao *= FAR_AMBIENT_OCCLUSION;
         color = shadeSurface(albedo, m, n, dir, sun, sunVis, cls, ao, reflection);
         if (foam > 0.0) {
             // white water: a bright rough surface over the river

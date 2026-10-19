@@ -231,7 +231,8 @@ public final class ClientWeather {
             }
         }
         for (int i = 0; i < P.COUNT; i++) {
-            cur[i] = snap ? target[i] : cur[i] + (target[i] - cur[i]) * EASE;
+            // test sessions snap: a capture must show the weather the scene set, not a blend from the scene before
+            cur[i] = snap || com.nirncraft.client.autotest.ClientAutotest.ENABLED ? target[i] : cur[i] + (target[i] - cur[i]) * EASE;
         }
         float dw = Mth.wrapDegrees(windTargetDeg - windDeg);
         windDeg = snap ? windTargetDeg : windDeg + dw * 0.02f;
