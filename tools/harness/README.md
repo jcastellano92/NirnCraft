@@ -293,6 +293,10 @@ their id, so a scene that was not built as designed never passes. New kind: one 
   (`pbr-ladder-*`, `blocks-ladder-*`), clouds, actors, lights and player edits at distance. `suite:seam-core` is the
   short set the gate runs for renderer changes.
 * **horizon** (`scenes/horizon.json`): horizon fade, mountain shadows and the far edge at several times and weathers.
+* **pinned** (`suite:pinned`, `pinned.py`; run deliberately, never in smoke or the gate): one element pinned and drawn by
+  Minecraft's own code on the sky stage from 8 m to 64 km (scaled past the far plane), three fly-ins, each rung against
+  atlas_truth from the capture's equivalent eye; `pinned-<element>-ladder` tabulates where Minecraft itself stops being a
+  usable ground truth (sub-pixel, shimmer, culled entities). Verbs `pin`, `pin-view`, `pin-fly`, ... (PinnedTruth).
 * **tool validation** (`suite:validate-tools`): `validate-world-*` samples the real heights in game
   (`/nirncraft-qa sample x z r step`) and compares them with the offline generator; `twin-*` renders the same view
   in the offline lab and live; `check-detectors` proves the black / magenta / box detectors still fire. The

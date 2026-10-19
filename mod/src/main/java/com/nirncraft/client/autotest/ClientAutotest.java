@@ -260,6 +260,7 @@ public final class ClientAutotest {
             logPerf(mc,tag);
             liveCapture=null;
             NirnCraft.LOGGER.info("Autotest live: captured {}",tag);
+            com.nirncraft.client.pinned.PinnedTruth.captured();  // a pinned fly-in takes its next step
         }
         if(burstRemaining<=0) return;
         String tag=burstName+"_"+String.format(java.util.Locale.ROOT,"%02d",72-burstRemaining--);
@@ -760,6 +761,11 @@ public final class ClientAutotest {
                 }
             } else if (action.startsWith("fog-off ")) {  // on | off: ground-truth views without distance fog or haze
                 com.nirncraft.atlas.AtlasTruthView.set(action.substring(8).trim().equals("on"));
+            } else if (action.startsWith("pin ") || action.startsWith("pin-")) {  // pinned ground truth (client/pinned/PinnedTruth)
+                liveCommand = com.nirncraft.client.pinned.PinnedTruth.autotest(action);
+                liveCommandDeadline = System.currentTimeMillis() + 120_000L;
+            } else if (action.startsWith("atlas-suspend ")) {  // on | off: no far field at all (pinned ground-truth captures)
+                com.nirncraft.atlas.AtlasClient.suspended = action.substring(14).trim().equals("on");
             } else if (action.startsWith("atlas-edits-why ")) {  // on | off: log what keeps changing in re-journalled chunks
                 com.nirncraft.atlas.AtlasEdits.why = action.substring(16).trim().equals("on");
             } else if (action.startsWith("atlaslab view ")) {  // the real blocks in view to a distance: waits until written

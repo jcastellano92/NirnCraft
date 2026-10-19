@@ -523,6 +523,8 @@ def load():
     scenes += truth.scenes()
     import elements  # element tests: one chunk / tree from the exports, the reference vs our renderer to 64 km (elements.py)
     scenes += elements.scenes()
+    import pinned  # the same elements drawn by Minecraft itself at any distance: pinned copies on the sky stage (pinned.py)
+    scenes += pinned.scenes()
     seam_core(scenes)
     for s in scenes:
         if s["id"] in seen:
