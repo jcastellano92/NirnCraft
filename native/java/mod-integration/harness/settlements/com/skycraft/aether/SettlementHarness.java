@@ -43,7 +43,21 @@ public final class SettlementHarness {
         TamrielHeight height = HarnessSeed.height(seed);
         StreetPlan plan = StreetPlan.get();
         int px, pz;
-        if (place.startsWith("at:")) {  // any spot: at:x,z
+        if (place.startsWith("xl:")) {  // the n-th XL natural landmark nearest the given spot: xl:n,x,z
+            String[] q = place.substring(3).split(",");
+            int n = Integer.parseInt(q[0]);
+            AetherNet.FarSites fs = AetherNatural.enumerate(seed, Integer.parseInt(q[1]), Integer.parseInt(q[2]));
+            int found = -1;
+            for (int i = 0, seen = 0; i < fs.count(); i++)
+                if (fs.kinds()[i].startsWith("xl_") && seen++ == n) {
+                    found = i;
+                    break;
+                }
+            if (found < 0) throw new IllegalArgumentException("no XL landmark there");
+            px = fs.xz()[found * 2];
+            pz = fs.xz()[found * 2 + 1];
+            OUT.printf("XL landmark %s at %d, %d%n", fs.kinds()[found], px, pz);
+        } else if (place.startsWith("at:")) {  // any spot: at:x,z
             String[] xz = place.substring(3).split(",");
             px = Integer.parseInt(xz[0]);
             pz = Integer.parseInt(xz[1]);
@@ -85,14 +99,27 @@ public final class SettlementHarness {
             src.prepare(ctx);
             src2.prepare(bare);
             AetherSettlements towns = new AetherSettlements(plan, src::groundAt, new AetherMaterials());
+            // the natural landmarks the server would send this player (AetherNatural over the harness's seed)
+            long n0 = System.nanoTime();
+            AetherNet.FarSites sites = AetherNatural.enumerate(seed, px, pz);
+            int xl = 0;
+            for (int i = 0; i < sites.count(); i++) if (sites.kinds()[i].startsWith("xl_")) xl++;
+            OUT.printf("natural landmarks around: %d (%d XL) in %.0f ms%n", sites.count(), xl, (System.nanoTime() - n0) / 1e6);
+            AetherSettlements.farSites = () -> sites;
             ctx.setTransitions(0f);
             for (int v = 0; v < views.length; v++) {
                 double dist = views[v][0];
-                double cx = px + 0.8 * dist, cz = pz + 0.6 * dist;
+                // -Dharness.overhead=true: the mid view straight down from above the target instead
+                boolean overhead = v == 1 && Boolean.getBoolean("harness.overhead");
+                double cx = overhead ? px + 0.5 : px + 0.8 * dist, cz = overhead ? pz + 0.5 : pz + 0.6 * dist;
                 MapSample m = TamrielMap.sampleScratch((int) cx, (int) cz);
                 double cy = Math.max(height.height((int) cx, (int) cz, m), 63) + views[v][1];
                 double ty = height.height(px, pz, TamrielMap.sampleScratch(px, pz)) + 25;
                 double pitch = Math.toDegrees(Math.atan2(ty - cy, dist));
+                if (overhead) {
+                    cy = ty + 220;
+                    pitch = -89.5;
+                }
                 long c0 = System.nanoTime();
                 for (AetherNative.Context c : v == 1 ? new AetherNative.Context[] {ctx, bare} : new AetherNative.Context[] {ctx}) {
                     AetherExactSource s = c == ctx ? src : src2;

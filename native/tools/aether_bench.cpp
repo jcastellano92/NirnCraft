@@ -83,14 +83,44 @@ int main(int argc, char** argv) {
     f.sunDir[2] = 0.66f;
     f.lodBias = float(arg(argc, argv, "bias", 1));
     if (int sm = int(arg(argc, argv, "sunmap", 0))) aether_set_sun_map(ctx, uint32_t(sm), float(arg(argc, argv, "sunextent", 2048)));
+    // lights=N: a night scene with N town lights scattered over the terrain ahead (lit windows, lamps), timed with and
+    // without them (the far-light pass's cost)
+    int nLights = int(arg(argc, argv, "lights", 0));
+    std::vector<AetherLight> lights;
+    if (nLights > 0) {
+        f.sunDir[0] = 0.55f;
+        f.sunDir[1] = -0.45f;
+        f.sunDir[2] = 0.7f;
+        double yaw = arg(argc, argv, "yaw", 105) * 3.14159265 / 180;
+        uint32_t h = 12345;
+        auto rnd = [&] {
+            h = h * 1664525u + 1013904223u;
+            return double(h >> 8) / double(1 << 24);
+        };
+        for (int i = 0; i < nLights; i++) {
+            // towns: clusters of 40 around random centres 0.5 .. 12 km ahead
+            if (i % 40 == 0) {
+                double d = 500 + 11500 * rnd(), a = yaw + (rnd() - 0.5) * 1.2;
+                lights.push_back({{x + std::sin(a) * d, 0, z - std::cos(a) * d}, 1.5f, 0.4f, 0x58A8FFu, AETHER_LIGHT_NIGHT});
+            } else {
+                const AetherLight& c = lights[size_t(i / 40) * 40];
+                lights.push_back({{c.pos[0] + (rnd() - 0.5) * 160, 0, c.pos[2] + (rnd() - 0.5) * 160}, 1.5f, 0.4f, 0x58A8FFu,
+                                  AETHER_LIGHT_NIGHT});
+            }
+            AetherLight& l = lights.back();
+            l.pos[1] = std::fmax(aether_preview_height(ctx, l.pos[0], l.pos[2]), 63.0) + 3.0;
+        }
+    }
     struct Set {
         const char* name;
         uint32_t flags;
-    } sets[] = {{"terrain, flat normals", AETHER_FRAME_ATMOS | AETHER_FRAME_FLAT_NORMALS},
-                {"terrain", AETHER_FRAME_ATMOS},
-                {"terrain+shadows", AETHER_FRAME_ATMOS | AETHER_FRAME_SHADOWS},
-                {"terrain+shadows+clouds", AETHER_FRAME_ATMOS | AETHER_FRAME_SHADOWS | AETHER_FRAME_CLOUDS},
-                {"  clouds at quarter res", AETHER_FRAME_ATMOS | AETHER_FRAME_SHADOWS | AETHER_FRAME_CLOUDS | AETHER_FRAME_CLOUDS_QUARTER}};
+        bool lights;
+    } sets[] = {{"terrain, flat normals", AETHER_FRAME_ATMOS | AETHER_FRAME_FLAT_NORMALS, false},
+                {"terrain", AETHER_FRAME_ATMOS, false},
+                {"terrain+shadows", AETHER_FRAME_ATMOS | AETHER_FRAME_SHADOWS, false},
+                {"terrain+shadows+lights", AETHER_FRAME_ATMOS | AETHER_FRAME_SHADOWS, true},
+                {"terrain+shadows+clouds", AETHER_FRAME_ATMOS | AETHER_FRAME_SHADOWS | AETHER_FRAME_CLOUDS, false},
+                {"  clouds at quarter res", AETHER_FRAME_ATMOS | AETHER_FRAME_SHADOWS | AETHER_FRAME_CLOUDS | AETHER_FRAME_CLOUDS_QUARTER, false}};
     // bring the GPU to its boost clock first: short runs otherwise time the clock ramp
     f.flags = AETHER_FRAME_ATMOS | AETHER_FRAME_SHADOWS;
     for (int i = 0; i < 250; i++) aether_gl_render(ctx, &f);
@@ -101,7 +131,9 @@ int main(int argc, char** argv) {
     // that finished before it (two behind), and a set's first frame after a switch has no cloud history, so each set renders five frames and keeps the last report.
     for (int i = 0; i < frames; i++)
         for (int k = 0; k < NS; k++) {
+            if (sets[k].lights && lights.empty()) continue;
             f.flags = sets[k].flags;
+            aether_set_light_group(ctx, 1, sets[k].lights ? lights.data() : nullptr, sets[k].lights ? uint32_t(lights.size()) : 0u);
             for (int r = 0; r < 4; r++) aether_gl_render(ctx, &f);
             auto c0 = std::chrono::steady_clock::now();
             aether_gl_render(ctx, &f);
@@ -111,6 +143,7 @@ int main(int argc, char** argv) {
             gpu[k].push_back(st.lastFrameMs);
         }
     for (int k = 0; k < NS; k++) {
+        if (gpu[k].empty()) continue;
         std::sort(gpu[k].begin(), gpu[k].end());
         std::sort(cpu[k].begin(), cpu[k].end());
         // CPU: the aether_gl_render call itself (zero-copy: recording; host-copy: plus the wait and the uploads)

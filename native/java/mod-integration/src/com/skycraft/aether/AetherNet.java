@@ -15,7 +15,7 @@ import java.util.function.Consumer;
 public final class AetherNet {
     private AetherNet() {}
 
-    static final int MAX_REQUEST = 32, MAX_ACTORS = 96;
+    static final int MAX_REQUEST = 32, MAX_ACTORS = 96, MAX_SITES = 4096;
 
     /**
      * S->C on login and on entering the overworld: this server streams exact far tiles. worldId names the world for
@@ -39,10 +39,17 @@ public final class AetherNet {
         public static final int ON_GROUND = 1;
     }
 
+    /**
+     * S->C when a player has moved far enough: the seeded natural landmarks around it (AetherNatural: the world seed never
+     * leaves the server), nearest first. Per site: x, z (xz), kind id, its seed (size and details), facing (2D value).
+     */
+    public record FarSites(int count, int[] xz, String[] kinds, long[] seeds, byte[] facing) {}
+
     // client side handlers, set by AetherClient (so a dedicated server never loads client classes)
     static volatile Consumer<Hello> onHello = m -> {};
     static volatile Consumer<TileData> onTile = m -> {};
     static volatile Consumer<FarActors> onFarActors = m -> {};
+    static volatile Consumer<FarSites> onFarSites = m -> {};
 
     public static void register() {
         SkyNetwork.register(Hello.class, PacketFlow.CLIENTBOUND, (m, b) -> {
@@ -66,6 +73,9 @@ public final class AetherNet {
 
         SkyNetwork.register(FarActors.class, PacketFlow.CLIENTBOUND, AetherNet::writeActors, AetherNet::readActors,
                 (m, ctx) -> onFarActors.accept(m));
+
+        SkyNetwork.register(FarSites.class, PacketFlow.CLIENTBOUND, AetherNet::writeSites, AetherNet::readSites,
+                (m, ctx) -> onFarSites.accept(m));
     }
 
     private static void writeRequest(TileRequest m, RegistryFriendlyByteBuf b) {
@@ -88,6 +98,34 @@ public final class AetherNet {
             tzs[i] = b.readInt();
         }
         return new TileRequest(lods, txs, tzs);
+    }
+
+    private static void writeSites(FarSites m, RegistryFriendlyByteBuf b) {
+        b.writeVarInt(m.count);
+        for (int i = 0; i < m.count; i++) {
+            b.writeInt(m.xz[i * 2]);
+            b.writeInt(m.xz[i * 2 + 1]);
+            b.writeUtf(m.kinds[i], 64);
+            b.writeLong(m.seeds[i]);
+            b.writeByte(m.facing[i]);
+        }
+    }
+
+    private static FarSites readSites(RegistryFriendlyByteBuf b) {
+        int n = b.readVarInt();
+        if (n < 0 || n > MAX_SITES) throw new IllegalArgumentException("aether far sites: " + n);
+        int[] xz = new int[n * 2];
+        String[] kinds = new String[n];
+        long[] seeds = new long[n];
+        byte[] facing = new byte[n];
+        for (int i = 0; i < n; i++) {
+            xz[i * 2] = b.readInt();
+            xz[i * 2 + 1] = b.readInt();
+            kinds[i] = b.readUtf(64);
+            seeds[i] = b.readLong();
+            facing[i] = b.readByte();
+        }
+        return new FarSites(n, xz, kinds, seeds, facing);
     }
 
     private static void writeActors(FarActors m, RegistryFriendlyByteBuf b) {

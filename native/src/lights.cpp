@@ -27,19 +27,128 @@ float falloff(float d) { return 1.0f / std::pow(1.0f + d / 1500.0f, 1.5f); }
 }  // namespace
 
 struct LightIndex {
+    // a 1 km cell: each group's lights in it, all of them (fine) and their far clusters (coarse); immutable once
+    // published (an update copies the cells it touches)
     struct Cell {
         int cx, cz;
+        std::map<uint32_t, std::vector<Rec>> groups;
         std::vector<Rec> fine, coarse;
     };
-    std::vector<Cell> cells;
+    std::vector<std::shared_ptr<const Cell>> cells;
+    std::unordered_map<int64_t, size_t> at;  // cell key -> index in cells
     size_t total = 0;
 };
 
+namespace {
+int64_t cellKey(int cx, int cz) { return (int64_t(cx) << 32) ^ int64_t(uint32_t(cz)); }
+
+// A cell's flat list and its far clusters: lights of one kind within a CLUSTER square merged (intensity summed,
+// position and colour weighted by it).
+void finish(LightIndex::Cell& c) {
+    c.fine.clear();
+    c.coarse.clear();
+    for (auto& [g, list] : c.groups) c.fine.insert(c.fine.end(), list.begin(), list.end());
+    std::unordered_map<int64_t, size_t> at;
+    for (const Rec& r : c.fine) {
+        int64_t k = (cellKey(int(std::floor(r.x / CLUSTER)), int(std::floor(r.z / CLUSTER))) << 2) ^ int64_t(r.kind);
+        auto it = at.find(k);
+        if (it == at.end()) {
+            at.emplace(k, c.coarse.size());
+            Rec q = r;
+            q.x *= r.intensity;
+            q.y *= r.intensity;
+            q.z *= r.intensity;
+            q.r *= r.intensity;
+            q.g *= r.intensity;
+            q.b *= r.intensity;
+            c.coarse.push_back(q);
+        } else {
+            Rec& q = c.coarse[it->second];
+            q.x += r.x * r.intensity;
+            q.y += r.y * r.intensity;
+            q.z += r.z * r.intensity;
+            q.r += r.r * r.intensity;
+            q.g += r.g * r.intensity;
+            q.b += r.b * r.intensity;
+            q.intensity += r.intensity;
+            q.radius = std::max(q.radius, r.radius);
+        }
+    }
+    for (Rec& q : c.coarse) {
+        float w = 1.0f / q.intensity;
+        q.x *= w;
+        q.y *= w;
+        q.z *= w;
+        q.r *= w;
+        q.g *= w;
+        q.b *= w;
+        q.radius = std::max(q.radius, CLUSTER * 0.5f);
+    }
+}
+}  // namespace
+
+// Only the cells the group had or now has are rebuilt (a settlement's lights touch one or two): uploading hundreds of
+// groups as a far field fills costs each one its own size, not the whole index.
 void Lights::setGroup(uint32_t group, const AetherLight* l, uint32_t n) {
     std::lock_guard<std::mutex> lock(mu_);
-    if (n == 0 || !l) groups_.erase(group);
-    else groups_[group].assign(l, l + n);
-    rebuild();
+    std::unordered_map<int64_t, std::vector<Rec>> fresh;
+    for (uint32_t i = 0; l && i < n; i++) {
+        const AetherLight& a = l[i];
+        if (!std::isfinite(a.pos[0]) || !std::isfinite(a.pos[1]) || !std::isfinite(a.pos[2]) || !(a.intensity > 0)) continue;
+        int cx = int(std::floor(a.pos[0] / CELL)), cz = int(std::floor(a.pos[2] / CELL));
+        fresh[cellKey(cx, cz)].push_back(Rec{a.pos[0], a.pos[1], a.pos[2], std::max(0.25f, a.radius), a.intensity, lin(a.rgb),
+                                             lin(a.rgb >> 8), lin(a.rgb >> 16), std::min(a.kind, 3u),
+                                             float((uint32_t(int32_t(std::floor(a.pos[0]))) * 2654435761u ^
+                                                    uint32_t(int32_t(std::floor(a.pos[2])))) % 6283u) * 0.001f});
+    }
+    std::vector<int64_t> touched = groupCells_[group];
+    for (auto& [k, v] : fresh)
+        if (std::find(touched.begin(), touched.end(), k) == touched.end()) touched.push_back(k);
+    auto idx = index_ ? std::make_shared<LightIndex>(*index_) : std::make_shared<LightIndex>();
+    for (int64_t k : touched) {
+        auto it = idx->at.find(k);
+        auto cell = it != idx->at.end() ? std::make_shared<LightIndex::Cell>(*idx->cells[it->second])
+                                        : std::make_shared<LightIndex::Cell>();
+        if (it == idx->at.end()) {
+            cell->cx = int(k >> 32);
+            cell->cz = int(int32_t(uint32_t(k)));
+        }
+        auto old = cell->groups.find(group);
+        if (old != cell->groups.end()) {
+            idx->total -= old->second.size();
+            cell->groups.erase(old);
+        }
+        auto f = fresh.find(k);
+        if (f != fresh.end()) {
+            idx->total += f->second.size();
+            cell->groups[group] = std::move(f->second);
+        }
+        finish(*cell);
+        if (it != idx->at.end()) {
+            idx->cells[it->second] = std::move(cell);
+        } else if (!cell->fine.empty()) {
+            idx->at.emplace(k, idx->cells.size());
+            idx->cells.push_back(std::move(cell));
+        }
+    }
+    // drop emptied cells (swap with the last, fixing its index)
+    for (size_t i = 0; i < idx->cells.size();) {
+        if (!idx->cells[i]->fine.empty()) {
+            i++;
+            continue;
+        }
+        idx->at.erase(cellKey(idx->cells[i]->cx, idx->cells[i]->cz));
+        if (i + 1 != idx->cells.size()) {
+            idx->cells[i] = std::move(idx->cells.back());
+            idx->at[cellKey(idx->cells[i]->cx, idx->cells[i]->cz)] = i;
+        }
+        idx->cells.pop_back();
+    }
+    std::vector<int64_t> now;
+    for (auto& [k, v] : fresh) now.push_back(k);
+    if (now.empty()) groupCells_.erase(group);
+    else groupCells_[group] = std::move(now);
+    index_ = std::move(idx);
 }
 
 void Lights::setBudget(uint32_t maxPerFrame, float clusterDistance) {
@@ -51,66 +160,6 @@ void Lights::setBudget(uint32_t maxPerFrame, float clusterDistance) {
 size_t Lights::total() const {
     std::lock_guard<std::mutex> lock(mu_);
     return index_ ? index_->total : 0;
-}
-
-void Lights::rebuild() {
-    auto idx = std::make_shared<LightIndex>();
-    std::unordered_map<int64_t, size_t> cellOf;
-    auto key = [](int cx, int cz) { return (int64_t(cx) << 32) ^ int64_t(uint32_t(cz)); };
-    for (auto& [g, list] : groups_)
-        for (const AetherLight& a : list) {
-            if (!std::isfinite(a.pos[0]) || !std::isfinite(a.pos[1]) || !std::isfinite(a.pos[2]) || !(a.intensity > 0)) continue;
-            int cx = int(std::floor(a.pos[0] / CELL)), cz = int(std::floor(a.pos[2] / CELL));
-            auto it = cellOf.find(key(cx, cz));
-            if (it == cellOf.end()) {
-                it = cellOf.emplace(key(cx, cz), idx->cells.size()).first;
-                idx->cells.push_back({cx, cz, {}, {}});
-            }
-            Rec r{a.pos[0], a.pos[1], a.pos[2], std::max(0.25f, a.radius), a.intensity, lin(a.rgb), lin(a.rgb >> 8), lin(a.rgb >> 16),
-                  std::min(a.kind, 3u), float((uint32_t(int32_t(std::floor(a.pos[0]))) * 2654435761u ^ uint32_t(int32_t(std::floor(a.pos[2])))) % 6283u) * 0.001f};
-            idx->cells[it->second].fine.push_back(r);
-            idx->total++;
-        }
-    // far clusters: lights of one kind within a CLUSTER square merged (intensity summed, position and colour weighted)
-    for (auto& c : idx->cells) {
-        std::unordered_map<int64_t, size_t> at;
-        for (const Rec& r : c.fine) {
-            int64_t k = (key(int(std::floor(r.x / CLUSTER)), int(std::floor(r.z / CLUSTER))) << 2) ^ int64_t(r.kind);
-            auto it = at.find(k);
-            if (it == at.end()) {
-                at.emplace(k, c.coarse.size());
-                Rec q = r;
-                q.x *= r.intensity;
-                q.y *= r.intensity;
-                q.z *= r.intensity;
-                q.r *= r.intensity;
-                q.g *= r.intensity;
-                q.b *= r.intensity;
-                c.coarse.push_back(q);
-            } else {
-                Rec& q = c.coarse[it->second];
-                q.x += r.x * r.intensity;
-                q.y += r.y * r.intensity;
-                q.z += r.z * r.intensity;
-                q.r += r.r * r.intensity;
-                q.g += r.g * r.intensity;
-                q.b += r.b * r.intensity;
-                q.intensity += r.intensity;
-                q.radius = std::max(q.radius, r.radius);
-            }
-        }
-        for (Rec& q : c.coarse) {
-            float w = 1.0f / q.intensity;
-            q.x *= w;
-            q.y *= w;
-            q.z *= w;
-            q.r *= w;
-            q.g *= w;
-            q.b *= w;
-            q.radius = std::max(q.radius, CLUSTER * 0.5f);
-        }
-    }
-    index_ = std::move(idx);
 }
 
 uint32_t Lights::frame(const LightView& v, std::vector<ActorGpu>& out) {
@@ -135,7 +184,8 @@ uint32_t Lights::frame(const LightView& v, std::vector<ActorGpu>& out) {
     cands.reserve(1024);
     const float* m = v.viewProj;
     float pa = std::max(v.pixelAngle, 1e-5f);
-    for (const auto& c : idx->cells) {
+    for (const auto& cp : idx->cells) {
+        const LightIndex::Cell& c = *cp;
         double x0 = double(c.cx) * CELL, z0 = double(c.cz) * CELL;
         double dx = std::max({x0 - v.cam[0], v.cam[0] - (x0 + CELL), 0.0}), dz = std::max({z0 - v.cam[2], v.cam[2] - (z0 + CELL), 0.0});
         double near = std::sqrt(dx * dx + dz * dz);

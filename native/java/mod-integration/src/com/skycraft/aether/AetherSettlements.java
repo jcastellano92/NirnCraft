@@ -68,6 +68,11 @@ final class AetherSettlements implements AetherFarField.Overlay {
     private final Map<Integer, List<AetherLights.Light>> settlementLights = new HashMap<>();
     private final Map<String, Optional<AetherCapture.Shape>> sites = new HashMap<>();
     private final Map<Integer, AetherCapture.Shape> falls = new HashMap<>();
+    /** Natural landmarks from the server (AetherNatural), by "x,z,kind": their silhouettes, built once. */
+    private final Map<String, Optional<AetherCapture.Shape>> natural = new HashMap<>();
+    private AetherNet.FarSites sitesSeen;
+    /** Supplies the server's natural-landmark list (AetherClient.farSites in game; the harness sets its own). */
+    static volatile java.util.function.Supplier<AetherNet.FarSites> farSites = () -> AetherClient.farSites;
     private final Set<Long> siteCells = new HashSet<>();
     private final Set<Long> uploaded = new HashSet<>();
     private final float[] wallTop = new float[N], roofTop = new float[N], baseArr = new float[N];
@@ -106,6 +111,7 @@ final class AetherSettlements implements AetherFarField.Overlay {
     public void cover(AetherNative.Context ctx, int lod, int x0, int z0, int x1, int z1) {
         int span = AetherNative.TILE << lod;
         g = ground != null ? ground : (x, z) -> (int) Math.floor(ctx.previewHeight(x + 0.5, z + 0.5));
+        refreshNatural();
         for (int tz = Math.floorDiv(z0, span); tz <= Math.floorDiv(z1 - 1, span); tz++)
             for (int tx = Math.floorDiv(x0, span); tx <= Math.floorDiv(x1 - 1, span); tx++) {
                 long k = AetherRefiningSource.key(lod, tx, tz);
@@ -158,6 +164,16 @@ final class AetherSettlements implements AetherFarField.Overlay {
             any = true;
             stamp(sh, s, bx, bz);
         }
+        AetherNet.FarSites ns = sitesSeen;
+        for (int k = 0; ns != null && k < ns.count(); k++) {
+            int nx = ns.xz()[k * 2], nz = ns.xz()[k * 2 + 1];
+            if (nx < bx - 32 || nx >= ex + 32 || nz < bz - 32 || nz >= ez + 32) continue;
+            AetherCapture.Shape sh = naturalShape(ns, k);
+            if (sh == null) continue;
+            if (!any) clear();
+            any = true;
+            stamp(sh, s, bx, bz);
+        }
         com.skycraft.tamriel.terrain.Hydrology.Fall[] all = com.skycraft.tamriel.terrain.Hydrology.get().falls();
         for (int k = 0; k < all.length; k++) {
             com.skycraft.tamriel.terrain.Hydrology.Fall f = all[k];
@@ -167,6 +183,40 @@ final class AetherSettlements implements AetherFarField.Overlay {
             stamp(fall(k, f), s, bx, bz);
         }
         return any;
+    }
+
+    private AetherCapture.Shape naturalShape(AetherNet.FarSites ns, int k) {
+        String key = ns.xz()[k * 2] + "," + ns.xz()[k * 2 + 1] + "," + ns.kinds()[k];
+        return natural.computeIfAbsent(key, q -> {
+            try {
+                return Optional.ofNullable(AetherNatural.shape(ns, k, g));
+            } catch (RuntimeException e) {
+                return Optional.empty();
+            }
+        }).orElse(null);
+    }
+
+    /**
+     * A new list of natural landmarks from the server: the resident tiles that a site new to the list touches are
+     * stamped again (their buildings re-uploaded: the refinement fade dissolves the landmark in).
+     */
+    private void refreshNatural() {
+        AetherNet.FarSites now = farSites.get();
+        if (now == null || now == sitesSeen) return;
+        java.util.Set<String> before = new HashSet<>();
+        AetherNet.FarSites old = sitesSeen;
+        for (int k = 0; old != null && k < old.count(); k++) before.add(old.xz()[k * 2] + "," + old.xz()[k * 2 + 1]);
+        sitesSeen = now;
+        for (int k = 0; k < now.count(); k++) {
+            int nx = now.xz()[k * 2], nz = now.xz()[k * 2 + 1];
+            if (before.contains(nx + "," + nz)) continue;
+            for (int lod = 0; lod < AetherFarField.LODS; lod++) {
+                int span = AetherNative.TILE << lod;
+                for (int tz = Math.floorDiv(nz - 32, span); tz <= Math.floorDiv(nz + 32, span); tz++)
+                    for (int tx = Math.floorDiv(nx - 32, span); tx <= Math.floorDiv(nx + 32, span); tx++)
+                        uploaded.remove(AetherRefiningSource.key(lod, tx, tz));
+            }
+        }
     }
 
     /** The falls sheet: three blocks beyond the lip (DungeonStructure's, Hydrology's), across the channel, from the pool bed up to the upper water; its spray. */

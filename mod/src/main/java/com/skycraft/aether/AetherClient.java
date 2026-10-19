@@ -55,6 +55,8 @@ public final class AetherClient {
     /** Set by the server's Hello: it streams exact far tiles for this world (0 = it does not). */
     private static volatile long serverWorldId;
     private static volatile AetherNet.FarActors farActors;
+    /** The server's latest list of natural landmarks around this player (AetherNatural), for the far field. */
+    static volatile AetherNet.FarSites farSites;
     private static volatile long farActorsAt;
     private static double[] actorXyz = new double[0];
     private static int[] actorFlags = new int[0];
@@ -89,6 +91,7 @@ public final class AetherClient {
         NeoForge.EVENT_BUS.addListener((ClientPlayerNetworkEvent.LoggingOut e) -> {
             serverWorldId = 0;
             farActors = null;
+            farSites = null;
         });
         AetherNet.onHello = AetherClient::onHello;
         AetherNet.onTile = m -> {
@@ -98,6 +101,7 @@ public final class AetherClient {
             farActors = m;
             farActorsAt = System.nanoTime();
         };
+        AetherNet.onFarSites = m -> farSites = m;
     }
 
     /** The server streams exact tiles: switch a multiplayer client from the stand-in (restarts next frame). */

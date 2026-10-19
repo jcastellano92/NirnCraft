@@ -39,9 +39,8 @@ public:
     size_t total() const;
 
 private:
-    void rebuild();  // caller holds mu_
     mutable std::mutex mu_;
-    std::map<uint32_t, std::vector<AetherLight>> groups_;
+    std::map<uint32_t, std::vector<int64_t>> groupCells_;  // the index cells each group has lights in
     std::shared_ptr<const LightIndex> index_;
     uint32_t maxPerFrame_ = 4096;
     float clusterDistance_ = 6000.0f;
