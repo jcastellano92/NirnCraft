@@ -17,6 +17,7 @@ import argparse
 import json
 import math
 import os
+import re
 import struct
 import subprocess
 import sys
@@ -177,6 +178,17 @@ def run(tool, args, out=None):
     r = subprocess.run(cmd, capture_output=True, text=True, env=env, creationflags=0x00004000 if sys.platform == "win32" else 0)
     if r.returncode:
         raise RuntimeError(f"{tool} failed: {(r.stdout + r.stderr)[-400:]}")
+    return r
+
+
+def wrote_variant(log, png, variant):
+    """Whether atlas_lab's log says frame `png` was rendered by `variant` ("camera frame <v> WxH in N ms -> <path>")."""
+    want = str(Path(png)).replace("\\", "/").lower()
+    for line in log.splitlines():
+        m = re.match(r"atlas_lab: camera frame (\S+) \d+x\d+ in \d+ ms -> (.+)$", line.strip())
+        if m and m.group(2).replace("\\", "/").lower() == want:
+            return m.group(1) == variant
+    return False
 
 
 # The reference's two modes (docs/ATLAS-LOD.md, "Reference modes"): "exact" is Minecraft as it renders (one sample a
@@ -216,6 +228,12 @@ def renderer_args(renderer, el, tmp):
         return "atlas_render", {"camera": "mc", "blocks": d / "blocks.bin", "volume": d / f"{el['volume']}.alv",
                                 "box": truth_inputs(el)["box"], "surface": bake_cards(el, tmp), "shade": "mc",
                                 "spp": 16, "radius": 0, "groups": 1 if renderer == "far-groups" else 0}
+    if renderer.startswith("lab-groups-bias"):  # (a probe) cards sampled this many mip levels blurrier: lab-groups-bias0.5
+        return "atlas_lab", {**lab, "surface": bake_cards(el, tmp), "leaves": "cards", "mipbias": renderer[len("lab-groups-bias"):]}
+    if renderer.startswith("lab-groups-frames"):  # (a probe) more samples a pixel: lab-groups-frames64
+        return "atlas_lab", {**lab, "surface": bake_cards(el, tmp), "leaves": "cards", "frames": renderer[len("lab-groups-frames"):]}
+    if renderer == "lab-groups-finest":  # (a probe) every group descended to its leaves: no level transitions at all
+        return "atlas_lab", {**lab, "surface": bake_cards(el, tmp), "leaves": "cards", "tol": 0.0001}
     if renderer == "lab-groups-hashed":  # the same with leaves as hashed micro-voxels (their 4 x 4 tiles' alpha)
         return "atlas_lab", {**lab, "surface": bake_cards(el, tmp)}
     if renderer == "lab-groups-own":  # the same with the bench's own 4 x 4 mean tiles under a fixed sun (no cache)
@@ -229,10 +247,14 @@ def render_all(renderer, el, frames, tmp):
     lst.write_text("".join(f"{png.as_posix()} {c['eye']} {c['yaw']} {c['pitch']} {c['fov']} {c['w']} {c['h']}\n"
                            for png, c in frames), encoding="utf-8")
     tool, args = renderer_args(renderer, el, tmp)
-    run(tool, {**args, "cameras": lst.as_posix()})
+    r = run(tool, {**args, "cameras": lst.as_posix()})
     missing = [png for png, _ in frames if not png.exists()]
     if missing:
         raise RuntimeError(f"{tool} wrote no {missing[0].name}")
+    # atlas_lab's camera frame once put its ref variant at out= whatever was asked: every "lab-groups" number was the
+    # plain micro-voxels; the frames scored must be the representation's own
+    if tool == "atlas_lab" and not wrote_variant(r.stderr, frames[0][0], args["variants"].split(",")[0]):
+        raise RuntimeError(f"atlas_lab did not render {frames[0][0].name} with {args['variants'].split(',')[0]}")
 
 
 def render(renderer, el, cam, out):  # one frame (probes, debugging)

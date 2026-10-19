@@ -257,6 +257,12 @@ with tempfile.TemporaryDirectory() as _td:
     _p = _el.pop("x", _tf, _of)
     expect(_p["pop"] == 0.0 and _p["frozen"] == 4, "a frozen renderer has no pop and is counted frozen (a fail)")
 
+# --- the bench's frame is scored only when atlas_lab rendered it with the representation asked for ---------------
+_log = ("atlas_lab: camera frame ref 160x160 in 64 ms -> C:/t/a.png\n"
+        "atlas_lab: camera frame groups 160x160 in 26 ms -> C:/t/a_groups.png\n")
+expect(not _el.wrote_variant(_log, Path("C:/t/a.png"), "groups"), "ref at out= is not the groups frame (it was scored as one)")
+expect(_el.wrote_variant(_log, Path("C:/t/a_groups.png"), "groups"), "the groups frame is found by its path")
+
 # --- truth subjects offset from their place look back at it (five faced away: yaw 0 is south in Minecraft) -----------
 import math as _math
 import truth as _truth
