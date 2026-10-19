@@ -97,6 +97,33 @@ public final class QualityClient {
         controller.observeAether(recent[(int) ((frameIndex - 2) & 3)], gpuMs);
     }
 
+    private static double[] aetherLimits;  // scale ceiling, shadow ceiling, quarter clouds (0/1), initial tier
+
+    /**
+     * The machine's memory limits for aether (AetherMemory's plan, from the aether package): knob ceilings for its
+     * render scale and sun map, quarter-resolution clouds, and the fallback tier to start from. Kept for a controller
+     * that starts later (the first world frame); render thread.
+     */
+    public static void setAetherLimits(double scaleCeil, double shadowCeil, boolean quarterClouds, int initialTier) {
+        aetherLimits = new double[] {scaleCeil, shadowCeil, quarterClouds ? 1 : 0, initialTier};
+        if (controller != null) {
+            try {
+                controller.limitAether(scaleCeil, shadowCeil, quarterClouds, initialTier);
+            } catch (Throwable t) {
+                fail(t);
+            }
+        }
+    }
+
+    /** The GPU class the controller works with ("HIGH", "DECK", ...; "adaptive off" appended), or null before start. */
+    public static String qualityName() {
+        if (controller == null) return null;
+        String n = controller.hardware().tier().name();
+        if (!ADAPTIVE) n += ", adaptive off";
+        else if (failed) n += ", adaptive failed";
+        return n;
+    }
+
     /** How aether's exact far field sets its column threads (AetherClient installs it). */
     public static void setColumnThreadSink(IntConsumer sink) {
         columnThreads = sink == null ? n -> {} : sink;
@@ -210,6 +237,8 @@ public final class QualityClient {
         profileKey = QualityProfiles.key(info.name(), info.driverInfo(), w, h);
         QualityProfiles.Profile p = QualityProfiles.find(QualityProfiles.load(file(mc)), profileKey, gpuName, w, h);
         controller.restore(p);
+        double[] lim = aetherLimits;
+        if (lim != null) controller.limitAether(lim[0], lim[1], lim[2] != 0, (int) lim[3]);
         Skycraft.LOGGER.info("adaptive quality: {} ({}, x{} of a GTX 1080's frame time), {} fps target, {}",
                 info.name(), guess.tier(), guess.speed(), Math.round(controller.targetFps()),
                 !ADAPTIVE ? "off (skycraft.quality.adaptive=false)" : p != null ? "profile " + p.key() : "calibrating");

@@ -68,6 +68,10 @@ final class AetherFarField implements AutoCloseable {
 
     private final AetherNative.Context ctx;
     private final ColumnSource source;
+    /** Clipmap levels streamed (7, or 6 where memory is short: AetherMemory; the context keeps the same count). */
+    private final int lods;
+    /** The worker's last error, for the frame to report (null while it works). */
+    private volatile Throwable workerError;
     private final java.util.function.Supplier<Overlay> overlayFactory;
     private Overlay overlay;
     private boolean overlayFailed;
@@ -85,9 +89,15 @@ final class AetherFarField implements AutoCloseable {
     /** overlays: made on the worker thread when first needed (it may load plans); null for none. */
     AetherFarField(AetherNative.Context ctx, ColumnSource source, java.util.function.Supplier<Overlay> overlays)
             throws IOException {
+        this(ctx, source, overlays, LODS);
+    }
+
+    AetherFarField(AetherNative.Context ctx, ColumnSource source, java.util.function.Supplier<Overlay> overlays, int lods)
+            throws IOException {
         this.ctx = ctx;
         this.source = source;
         this.overlayFactory = overlays;
+        this.lods = Math.max(1, Math.min(LODS, lods));
         source.prepare(ctx);
         worker = new Thread(this::run, "skycraft-aether-farfield");
         worker.setDaemon(true);
@@ -101,6 +111,11 @@ final class AetherFarField implements AutoCloseable {
 
     boolean updated() {
         return updated;
+    }
+
+    /** A worker failure the native side reported as a lost device or exhausted memory (null otherwise). */
+    Throwable workerError() {
+        return workerError;
     }
 
     void follow(double x, double y, double z) {
@@ -120,7 +135,7 @@ final class AetherFarField implements AutoCloseable {
                 }
                 double x = camX, y = camY, z = camZ;
                 boolean pending = false;
-                for (int lod = 0; lod < LODS; lod++) {
+                for (int lod = 0; lod < lods; lod++) {
                     int span = 256 << lod;
                     int cx = Math.floorDiv((int) Math.floor(x), span), cz = Math.floorDiv((int) Math.floor(z), span);
                     pending |= source.cover(ctx, lod, (cx - WINDOW) * span, (cz - WINDOW) * span,
@@ -139,6 +154,10 @@ final class AetherFarField implements AutoCloseable {
             } catch (InterruptedException e) {
                 return;
             } catch (Throwable t) {
+                if (t instanceof AetherNative.AetherException a && (a.deviceLost() || a.outOfMemory())) {
+                    workerError = t;  // the render thread turns the far field off (and retries) with one line
+                    return;
+                }
                 com.skycraft.Skycraft.LOGGER.warn("aether far field worker: {}", t.toString());
                 try {
                     Thread.sleep(1000);

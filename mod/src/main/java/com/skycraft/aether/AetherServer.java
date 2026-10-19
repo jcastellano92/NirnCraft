@@ -16,18 +16,22 @@ public final class AetherServer {
     private AetherServer() {}
 
     public static void init() {
-        NeoForge.EVENT_BUS.addListener((ServerStartedEvent e) -> AetherTileServer.start(e.getServer()));
-        NeoForge.EVENT_BUS.addListener((ServerStoppingEvent e) -> AetherTileServer.stop());
+        // never crash the server for the far field: a failing hook turns its feature off with one WARN line
+        NeoForge.EVENT_BUS.addListener((ServerStartedEvent e) ->
+                AetherGuard.run("aether tile service", () -> AetherTileServer.start(e.getServer())));
+        NeoForge.EVENT_BUS.addListener((ServerStoppingEvent e) -> AetherGuard.run("aether tile service stop", AetherTileServer::stop));
         NeoForge.EVENT_BUS.addListener((PlayerEvent.PlayerLoggedInEvent e) -> {
-            AetherNet.Hello hello = AetherTileServer.hello();
-            if (hello != null && e.getEntity() instanceof ServerPlayer p) SkyNetwork.sendToPlayer(p, hello);
+            AetherGuard.run("aether tile service", () -> {
+                AetherNet.Hello hello = AetherTileServer.hello();
+                if (hello != null && e.getEntity() instanceof ServerPlayer p) SkyNetwork.sendToPlayer(p, hello);
+            });
         });
         NeoForge.EVENT_BUS.addListener((PlayerEvent.PlayerLoggedOutEvent e) -> {
-            if (e.getEntity() instanceof ServerPlayer p) AetherTileServer.forget(p);
+            if (e.getEntity() instanceof ServerPlayer p) AetherGuard.run("aether tile service", () -> AetherTileServer.forget(p));
         });
         NeoForge.EVENT_BUS.addListener((ServerTickEvent.Post e) -> {
-            AetherTileServer.tick();
-            AetherFarActors.tick(e.getServer());
+            AetherGuard.run("aether tile service", AetherTileServer::tick);
+            AetherGuard.run("aether far actors", () -> AetherFarActors.tick(e.getServer()));
         });
     }
 }

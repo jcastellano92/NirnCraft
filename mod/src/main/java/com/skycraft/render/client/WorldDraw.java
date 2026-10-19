@@ -12,6 +12,8 @@ import com.mojang.renderpearl.api.pipeline.CompareOp;
 import com.mojang.renderpearl.api.pipeline.DepthStencilState;
 import com.mojang.renderpearl.api.pipeline.PrimitiveTopology;
 import com.mojang.renderpearl.api.pipeline.RenderPipeline;
+import com.mojang.renderpearl.api.textures.GpuSampler;
+import com.mojang.renderpearl.api.textures.GpuTextureView;
 import com.mojang.renderpearl.api.vertex.VertexFormat;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BindGroupLayouts;
@@ -112,6 +114,19 @@ public final class WorldDraw {
                     .writeTransform(new Matrix4f(modelView), new Vector4f(tint)));
             if (material.textured()) pass.setUniform("Sampler0", texture.getTextureView(), texture.getSampler());
             mesh.draw(pass);
+        }
+        /**
+         * A full-screen draw: vanilla's core/screenquad vertex shader (three vertices, no buffers, clip z 0 = the far
+         * plane under 26.3's reverse-Z) with the pipeline's own fragment shader and its two samplers. The pipeline's
+         * depth state decides where it lands (GREATER_THAN_OR_EQUAL: only where nothing nearer was drawn).
+         */
+        public void drawScreen(RenderPipeline pipeline, GpuTextureView view0, GpuSampler sampler0,
+                               @Nullable GpuTextureView view1, @Nullable GpuSampler sampler1) {
+            pass.setPipeline(RenderSystem.getCompiledPipeline(pipeline));
+            RenderSystem.bindDefaultUniforms(pass);
+            pass.setUniform("Sampler0", view0, sampler0);
+            if (view1 != null) pass.setUniform("Sampler1", view1, sampler1);
+            pass.draw(3, 1, 0, 0);
         }
         @Override public void close() { if (ownsPass) pass.close(); }
     }
