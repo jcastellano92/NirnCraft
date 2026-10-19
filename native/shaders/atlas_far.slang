@@ -601,7 +601,10 @@ float3 farLights(uint2 px, float3 o, float3 dir, float surface, float3 sun) {
         float core = exp(-0.5 * q * q);
         float glow = (1.0 - T) * 0.06 * exp(-apx / halo);
         float3 rad = l.shape.xyz;
-        if (kind == 3u) rad *= keyLightRadiance(sun) * 0.25 + skyAmbient(float3(0, 1, 0), sun);  // spray: lit, not glowing
+        // spray: a translucent haze lit by the sun and sky, not a light: its intensity is how much of it there is
+        // (about a third of a lit white surface at full), without the far-visibility boost point lights get
+        if (kind == 3u) rad = (l.shape.xyz / (6.0 / pow(1.0 + dist / 1500.0, 1.5))) * 0.35
+                            * (keyLightRadiance(sun) * 0.25 + skyAmbient(float3(0, 1, 0), sun)) / 3.14159;
         sum += rad * vis * (core * T + glow);
     }
     return sum;
