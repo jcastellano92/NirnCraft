@@ -241,6 +241,14 @@ where it is seen, so far light, shadows and bounce resolve like geometry; and th
 resolution-on-demand atlas (each group face asks for the texel density its footprint needs), better than block meshes
 with fixed textures.
 
+**Plan of record: accumulate on surfaces, not the screen** (owner, 2026-10-19). Every group face carries its full
+surface state in a surface cache: albedo, normal, roughness, emission and lighting (sun visibility, sky, bounce,
+block light), at the texel density its footprint asks for. Stochastic choices (level dithering, coverage, shadow
+and light samples) converge there, in object space, so camera motion throws nothing away and nothing is reprojected;
+the screen only reads the cache (and a light TAA for edges). Normals and every other attribute follow the same rule
+as colour: kept per face, averaged up the groups, refined where seen and where changed. Screen-space TAA tricks
+(surface-id history, adaptive blend, variance clip) are interim measures for the current renderer only.
+
 **The same structure for everything** (owner): clouds, rain curtains and fog are density instead of surfaces in the
 same groups (a group keeps its mean density and the spread inside, averaged up the hierarchy like colour, traced with
 the same descend-or-draw rule, so a cloud resolves from a soft blob to its billows as it nears); light is kept per
