@@ -128,8 +128,8 @@ public final class AtlasLabExport {
         String[] a = args.trim().split("\\s+");
         boolean light = a.length > 1 && a[a.length - 1].equals("light");
         return switch (a[0]) {
-            case "blocks" -> blocks();
-            case "quads" -> quads();
+            case "blocks" -> unlessCurrent("blocks", "blocks.bin", AtlasLabExport::blocks);
+            case "quads" -> unlessCurrent("quads", "quads.bin", AtlasLabExport::quads);
             case "volume" -> volume(a[1], Integer.parseInt(a[2]), Integer.parseInt(a[3]), Integer.parseInt(a[4]),
                     Integer.parseInt(a[5]), Integer.parseInt(a[6]), Integer.parseInt(a[7]), light);
             case "here" -> here(a[1], Integer.parseInt(a[2]), Integer.parseInt(a[3]), Integer.parseInt(a[4]), light);
@@ -146,6 +146,27 @@ public final class AtlasLabExport {
     }
 
     // ---- the block-state library --------------------------------------------------------------------------------
+
+    /**
+     * Runs an export of what only the game's content and look decide (the block library, Minecraft's mesh data) unless
+     * its files are current: the same generation identity, number of block states and resource packs as when they were
+     * written (a suite of subjects would otherwise rewrite tens of megabytes for each one).
+     */
+    static String unlessCurrent(String name, String file, java.util.function.Supplier<String> export) {
+        Minecraft mc = Minecraft.getInstance();
+        String key = AtlasTileCodec.identity() + " " + Block.BLOCK_STATE_REGISTRY.size() + " "
+                + String.join(",", mc.getResourcePackRepository().getSelectedIds());
+        try {
+            Path keyFile = dir().resolve(name + ".key"), out = dir().resolve(file);
+            if (Files.isRegularFile(out) && Files.isRegularFile(keyFile) && Files.readString(keyFile).trim().equals(key))
+                return "atlaslab: " + name + " is up to date -> " + out;
+            String r = export.get();
+            Files.writeString(keyFile, key);
+            return r;
+        } catch (IOException e) {
+            return export.get();
+        }
+    }
 
     static String blocks() {
         Minecraft mc = Minecraft.getInstance();

@@ -948,8 +948,11 @@ def camera_from(ref):
                       "capture it again")
     from PIL import Image
     w, h = Image.open(png).size
-    return {"camera": "mc", "eye": ",".join(f"{c:.3f}" for c in g["eye"]), "yaw": g.get("yaw", 0),
-            "pitch": g.get("pitch", 0), "fov": g.get("fov", 70), "w": w, "h": h, "_png": png}, ""
+    cam = {"camera": "mc", "eye": ",".join(f"{c:.3f}" for c in g["eye"]), "yaw": g.get("yaw", 0),
+           "pitch": g.get("pitch", 0), "fov": g.get("fov", 70), "w": w, "h": h, "_png": png}
+    if isinstance(g.get("dayTime"), (int, float)):  # night captures are rendered at night (sky light, the lightmap)
+        cam["time"] = int(g["dayTime"]) % 24000
+    return cam, ""
 
 
 def lab_summary(report):
