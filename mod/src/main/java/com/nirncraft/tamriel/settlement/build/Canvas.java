@@ -245,6 +245,22 @@ public final class Canvas {
         }
         if (burn > 0 && !s.isAir()) s = com.nirncraft.fire.aftermath.Charring.apply(s, x, y, z, y - oy, seed, burn);
         level.setBlock(m, s, 2 | 16);
+        if (!s.isAir()) smotherGrassBelow(x, y, z, s);
+    }
+
+    /**
+     * Grass under a block that covers it (a sturdy bottom face: logs, hay, bottom slabs, walls; or a full fluid) turns to
+     * dirt now, as vanilla's random ticks would do over the next minutes: left as grass, a whole town's covered grass
+     * decayed after generation, each change re-journalled and re-sent to every client's far field (and the town's look
+     * shifting while players watched). Fences, carpets and other blocks that leave grass alive in vanilla leave it here.
+     */
+    private void smotherGrassBelow(int x, int y, int z, BlockState s) {
+        if (!okWorld(x, y - 1, z)) return;
+        BlockPos below = new BlockPos(x, y - 1, z);
+        BlockState b = level.getBlockState(below);
+        if (!(b.getBlock() instanceof net.minecraft.world.level.block.SpreadingSnowyBlock)) return;
+        boolean fullFluid = !s.getFluidState().isEmpty() && s.getFluidState().getAmount() == 8;
+        if (fullFluid || s.isFaceSturdy(level, m, Direction.DOWN)) level.setBlock(below, Blocks.DIRT.defaultBlockState(), 2 | 16);
     }
 
     /** Topmost solid ground at (x, z): skips leaves, logs, plants, snow, fluids and built prop blocks. */
