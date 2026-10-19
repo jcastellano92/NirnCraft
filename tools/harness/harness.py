@@ -601,10 +601,16 @@ class Runner:
         Path(f"{results.stem(s['id'], v)}.after.json").write_text(json.dumps(rec, indent=1), encoding="utf-8")
         return rec
 
-    def close(self):
+    def close(self, summary=""):
         """A run leaves nothing running: the client closes at the end (also after errors), whoever launched it; only
-        --keep / watch / serve keep it for the next job."""
+        --keep / watch / serve keep it for the next job. Whoever watches the game sees why it goes away."""
         if self._game is not None and not getattr(self.a, "keep", False) and self.game.running():
+            try:
+                self.game.actions([f"message Tests finished{': ' + summary if summary else ''}. Closing the test client."],
+                                  timeout=30)
+                time.sleep(4)
+            except Exception:  # noqa: BLE001
+                pass
             say("closing the test client")
             self.game.close()
 
@@ -983,6 +989,7 @@ def cmd_run(a, watch=False):
             counts = {}
             for d in st["done"].values():
                 counts[d.get("status")] = counts.get(d.get("status"), 0) + 1
+            runner.summary = ", ".join(f"{n} {k}" for k, n in sorted(counts.items(), key=lambda x: str(x[0])))
             event("run_finished", items=len(keys), counts=counts, scope=scope_of(a, watch),
                   report=str(results.REPORTS / scope_of(a, watch) / "report.html"))
             run = build_report(keys, f"NirnCraft harness: {scope_of(a, watch)}", scope_of(a, watch))
@@ -995,7 +1002,7 @@ def cmd_run(a, watch=False):
         finally:
             if not watch:
                 try:
-                    runner.close()
+                    runner.close(getattr(runner, "summary", ""))
                 except Exception as e:  # noqa: BLE001
                     say(f"! could not close the client cleanly: {e}")
                 release()

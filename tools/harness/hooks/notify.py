@@ -3,7 +3,7 @@
     "client_crashed": ["py -3 tools/harness/hooks/notify.py"]     in tools/harness/hooks.json or .work/harness/hooks.json
 
 Windows: a tray balloon through PowerShell (no extra modules); Linux: notify-send when present; otherwise a line on
-stdout. run_finished only notifies when something failed, crashed or was skipped.
+stdout.
 """
 import json
 import os
@@ -16,9 +16,6 @@ def text(ev):
     kind = ev.get("event", "")
     if kind == "run_finished":
         c = ev.get("counts", {})
-        bad = {k: v for k, v in c.items() if k in ("error", "crash", "fail", "skip")}
-        if not bad:
-            return None
         return "Harness run finished", ", ".join(f"{v} {k}" for k, v in sorted(c.items(), key=str)) + f"\n{ev.get('report', '')}"
     title = {"client_crashed": "Test client crashed", "test_crashed": "Test crashed", "test_failed": "Test failed",
              "test_quarantined": "Test quarantined", "group_skipped": "Tests skipped",

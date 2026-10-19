@@ -433,6 +433,7 @@ public final class ClientAutotest {
                 for (int j = -1; j <= 1 && near; j++) near = mc.level.getChunkSource().hasChunk(cx + i, cz + j);
             if (visualStable >= 3 && near && tick >= visualSince + 60) {
                 liveSettleUntil = 0;
+                visualSettledAt = mc.player.position();
                 NirnCraft.LOGGER.info("Autotest live: render settled after {} ticks (structural {}% , exposure drift {})",
                         tick - visualSince, String.format(java.util.Locale.ROOT, "%.1f", visualDiff),
                         String.format(java.util.Locale.ROOT, "%.2f", visualDrift));
@@ -615,6 +616,9 @@ public final class ClientAutotest {
                 UiProbe.key(mc, Integer.parseInt(action.substring(4).trim()));
             } else if (action.startsWith("expect-screen ")) {
                 UiProbe.expect(mc, action.substring(14).trim());
+            } else if (action.startsWith("message ")) {  // a plain message on screen (e.g. "tests finished, closing")
+                mc.gui.setScreen(new net.minecraft.client.gui.screens.GenericMessageScreen(
+                        net.minecraft.network.chat.Component.literal(action.substring(8).trim())));
             } else if (action.startsWith("hud ")) {  // on | off: HUD tests show it, everything else keeps it hidden
                 com.nirncraft.client.autotest.ReviewWorlds.hudHidden(mc, !action.substring(4).trim().equals("on"));
             } else if (action.startsWith("renderdistance ")) {  // chunks: fidelity tests draw a place far-field only
@@ -687,7 +691,11 @@ public final class ClientAutotest {
         }
     }
     private static final int TOUR_WAIT = Integer.getInteger("nirncraft.autotest.tourWait", 400);
-    static boolean readinessPassed(Minecraft mc) { return READINESS.validAt(mc); }
+    /** Settled here: strictly (every chunk ready) or by the render settle (settle-visual) at this very position. */
+    static boolean readinessPassed(Minecraft mc) {
+        return READINESS.validAt(mc) || visualSettledAt != null && visualSettledAt.distanceToSqr(mc.player.position()) < 0.01;
+    }
+    private static net.minecraft.world.phys.Vec3 visualSettledAt;
     static String readinessDescription() { return READINESS.describe(); }
     static void travelCapture(String tag) { liveCapture=tag; }
     /** Height above the ground and pitch of the second ("air") shot: e.g. 14 and 12 for a view over the treetops. */
