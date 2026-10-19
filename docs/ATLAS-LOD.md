@@ -241,6 +241,34 @@ what is left is texture detail (the 4 x 4 face tiles against Minecraft's 16 x 16
 tinted pictures, so the export scene now captures with fog-off (no vanilla fog, no atlas haze) and writes the view's
 tints.
 
+**What each comparison means** (owner, 2026-10-19). Ground truth exists only where Minecraft itself renders: the
+truth suite (tools/harness/truth.py) judges colour and outlines against the exact reference (atlas_truth: Minecraft's
+own mesh, offline) only within the capture's render distance (minus a chunk), with entities and particles removed from
+the capture (truth-quiet: the reference draws neither) and the world frozen through it. Beyond the render distance
+the live picture is today's far field, the thing being replaced: its error against the real blocks is information
+(liveFarDE), never a verdict. Holes and fog walls (sky or a flat fog colour over real blocks) are failures anywhere.
+The new far field is judged against the reference out to the exported view (1 km): does it represent the real blocks
+(dE by distance band), and how does it resolve as the camera approaches (the fly-in: no change beyond the reference's
+own, no pop, no shimmer). Further out, where nothing can be ground truth, it is judged on stability, smoothness,
+absence of artefacts, and updates when blocks change.
+
+**Reference modes and vanilla quirks** (owner, 2026-10-19: "some ground truth is worse too... careful"). The exact
+reference has two modes. *Exact* is Minecraft as it renders, quirks included; it is used only to check the reference
+against the live game (the near comparisons, 1.24 dE at Falkreath). *Intended* is what our renderer is scored against:
+16 samples a pixel (true coverage: an 11 x 20-block pine at 8 km covers a fifth of a pixel; exact mode shows nothing,
+so Minecraft flickers it in and out while moving, while the grouped representation fades it out smoothly, IoU 0.94 -
+0.996 against intended from 8 m to 32 km), plus fixes of vanilla quirks, each written here, one at a time, with a
+before / after, never silently:
+* sub-pixel coverage (adopted): intended = supersampled.
+* light through stairs and slabs (candidate, not adopted): vanilla lets sky light leak through stair and slab ceilings
+  (a dungeon hall's stair ceiling shows bright stripes; the exact reference reproduces it, dE 0.44 against the game).
+
+Verification tiers (owner, 2026-10-19): 1. elements offline (tools/harness/element_lab.py, suite:elements: one chunk or
+tree cut from an export by `box=`, the intended reference vs our renderer from 8 m to 64 km and two fly-ins, ~40 s an
+element); 2. the same elements against Minecraft's own rendering, live, pinned (suite:pinned, final); 3. full scenes
+offline (suite:truth's lab scenes); 4. full scenes live, last. Live captures only when a tier needs new inputs, and
+every new camera position is vetted by a cheap visual review before it is relied on.
+
 **Texture resolution up close** (ground truth, 2026-10-19): the 4 x 4 face tiles are right far away but flat up close
 (the cobble path, planks); owning the near field needs faces at the texture's own resolution (16 x 16), stored once
 per texture (an atlas), not per block state.
@@ -254,6 +282,28 @@ culling, cutout and front-to-back translucency, fluids, NeoForge's smooth lighti
 AtlasLabExport's Javadoc, what it does and does not reproduce in the tool's header). Synthetic checks:
 `native/tools/atlas_truth_test.py`. Harness: `atlastruth-falkreath-near` / `-view` (scenes/truth.json). On the old
 exports alone (its fallback) it already lowers the near view's liveDE from 6.3 to 5.6.
+
+**Pinned ground truth: Minecraft's own rendering at any distance** (2026-10-19; mod `client/pinned/PinnedTruth`,
+harness `tools/harness/pinned.py`, `harness.py run --suite pinned`, the final live validation, run deliberately).
+Minecraft unloads chunks past its render distance and clips at its far plane, so the truth suite ends there. A pin
+keeps one element (a box: blocks, light with a one-block margin, blended tints, block entities, optionally its
+entities) and Minecraft draws it wherever the harness puts it: its own SectionCompiler meshes the box from a
+RenderSectionRegion that answers from the snapshot (models, NeoForge's smooth lighting and AO, tints, fluids, the
+three layers), its terrain pipelines draw it (ChunkSection uniform per section, the block atlas with the chunk
+layer sampler's settings, the lightmap; translucent through the OIT stages or the classic pass), and the entity and
+block entity renderers draw the render states they extracted at the pin. Beyond 32 m the copy is drawn smaller and
+nearer (scale s, the same picture: every direction from the camera is the same, every distance s times shorter, so
+the same pixels, texture derivatives and mip levels, and the same baked per-vertex light); the capture receipt
+carries the equivalent eye and atlas_truth renders the export from there (box= cuts the element out, the light kept).
+What depends on position and is therefore not invariant: fog (off for these captures), the lightmap's inputs (the
+environment attributes are probed at the camera: on the sky stage, the stage's; pin-view writes them as
+name.view.json for the offline render), chunk fade-in (forced visible), and with a shader pack anything the pack
+derives from world position (the suite runs vanilla). What is not reproduced: particles, anything a block entity or
+entity does after the pin (states are frozen), mods' additional section geometry (AddSectionGeometryEvent), and
+NeoForge model data other than block entities'. Per rung the suite also measures Minecraft's own stability
+(pin-shimmer: the same frame twice, 6 ticks apart) and records what Minecraft itself would draw at the true distance
+(entity view distance from Entity.shouldRenderAtSqrDistance, block entity renderers' view distance): where Minecraft
+culls or the element is sub-pixel, disagreement with it is information, not error.
 
 **Lighting and surfaces beyond Minecraft's path** (owner): once offline and live match, the groups are the place for
 Lumen's ideas: a surface cache per group face (sun visibility, bounce, block light, sky) updated where it changed and

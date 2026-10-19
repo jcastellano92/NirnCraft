@@ -356,6 +356,8 @@ final class VisualCamera {
         data.addProperty("air",com.nirncraft.atmosphere.client.InteriorAtmosphere.describe());
         data.addProperty("capturedAt",System.currentTimeMillis());
         if(lastFrame!=null) data.add("frame",lastFrame);
+        var pinned=com.nirncraft.client.pinned.PinnedTruth.receipt();  // a pinned copy in view: its equivalent eye
+        if(pinned!=null) data.add("pinned",pinned);
         return data;
     }
 }

@@ -163,7 +163,10 @@ def ready(s, pending):
 
 def items_of(scenes, a):
     out = []
-    for s in with_deps(scenes):
+    offline = getattr(a, "offline", False)
+    for s in (scenes if offline else with_deps(scenes)):
+        if offline and s["tier"] == "live":  # --offline: what needs the game waits for a run that allows it
+            continue
         for v in s["variants"] if s["tier"] == "live" else [s["tier"]]:  # measure scenes: variant "measure"
             if a.variant and v not in a.variant.split(","):
                 continue
@@ -531,12 +534,13 @@ class Runner:
             return results.record(s["id"], v, "visual", "skip", {}, fp,
                                   extra={"error": f"no {missing[0].name} yet: run atlaslab-export (the in-game export) first"})
         lab = {k: (str(lab_path(val)) if isinstance(val, str) and val.startswith("@game/") else val) for k, val in lab.items()}
-        live_png = None
+        live_png, near_limit = None, None
         if s.get("camera_from"):  # a live capture's own camera: the offline render of exactly that view
             cam, why = camera_from(s["camera_from"])
             if why:
                 return results.record(s["id"], v, "visual", "skip", {}, fp, extra={"error": why})
             live_png = cam.pop("_png")
+            near_limit = cam.pop("_near", None)
             lab.update(cam)
         if tool != "atlas_lab":
             lab.setdefault("w", 960)
@@ -565,7 +569,7 @@ class Runner:
                 d = results.stem(s["id"], v).parent
                 d.mkdir(parents=True, exist_ok=True)
                 twin = results.offline_vs_live(live_png, png, png.with_name(png.stem + "_mask.png"),
-                                               Path(f"{results.stem(s['id'], v)}.twin.png"))
+                                               Path(f"{results.stem(s['id'], v)}.twin.png"), near_limit)
             rec = results.store(s["id"], v, png, meta={"tool": tool, "args": kv, "atlas": report}, fingerprint=fp,
                                 extra={"report": report, **({"labSummary": lab_summary(report)} if tool == "atlas_lab" else {}),
                                        **({"vsLive": twin} if twin else {})})
@@ -862,6 +866,14 @@ class Runner:
             if tm["twinStructure"] > 20 or tm["twinSkyline"] > 6:
                 m.setdefault("flags", []).append(f"lab and live differ (structure {tm['twinStructure']}, skyline "
                                                  f"{tm['twinSkyline']}%, dE {tm['twinDE']}): not the same view or terrain")
+        if s.get("vet_pose") and s["tier"] == "live" and live_png.exists():  # does the capture show what it is for
+            import review
+            pv = review.pose(live_png, s.get("vet_pose") if isinstance(s.get("vet_pose"), str) else s.get("title", s["id"]))
+            m["pose"] = pv.get("verdict") or "unvetted"
+            if pv.get("verdict") == "USELESS":
+                fails.append(f"pose useless (the reviewer sees: {pv.get('sees', '')[:90]}); fix: {pv.get('fix', '')[:120]}")
+            elif pv.get("verdict") == "WEAK":
+                m.setdefault("flags", []).append(f"pose weak: {pv.get('problems', '')[:80]}; fix: {pv.get('fix', '')[:120]}")
         status = "fail" if fails else ("flag" if m.get("flags") else "pass")
         rec.update(status=status, fails=fails)
         results.stem(s["id"], v).with_suffix("")
@@ -948,8 +960,19 @@ def camera_from(ref):
                       "capture it again")
     from PIL import Image
     w, h = Image.open(png).size
-    return {"camera": "mc", "eye": ",".join(f"{c:.3f}" for c in g["eye"]), "yaw": g.get("yaw", 0),
-            "pitch": g.get("pitch", 0), "fov": g.get("fov", 70), "w": w, "h": h, "_png": png}, ""
+    cam = {"camera": "mc", "eye": ",".join(f"{c:.3f}" for c in g["eye"]), "yaw": g.get("yaw", 0),
+           "pitch": g.get("pitch", 0), "fov": g.get("fov", 70), "w": w, "h": h, "_png": png}
+    if isinstance(g.get("renderDistance"), (int, float)):  # ground truth only where Minecraft itself renders: its chunks
+        cam["_near"] = max(16, (int(g["renderDistance"]) - 1) * 16)  # (one chunk inside its render distance)
+    if isinstance(g.get("dayTime"), (int, float)):  # night captures are rendered at night (sky light, the lightmap)
+        cam["time"] = int(g["dayTime"]) % 24000
+    if ref.get("pinned"):  # a pinned copy (pinned.py): rendered from its equivalent eye, its box cut out, ground truth
+        p = g.get("pinned") or {}  # at any distance (the stage camera's render distance says nothing about it)
+        if not p.get("eye") or not p.get("box"):
+            return None, f"the capture of {ref['scene']} carries no pinned view (receipt 'pinned'): capture it again"
+        cam.update(eye=",".join(f"{c:.4f}" for c in p["eye"]), box=p["box"])
+        cam.pop("_near", None)
+    return cam, ""
 
 
 def lab_summary(report):
@@ -2674,6 +2697,8 @@ def main():
         p.add_argument("--tier")
         p.add_argument("--group")
         p.add_argument("--variant")
+        p.add_argument("--offline", action="store_true",
+                       help="never the game: live scenes are left out and never pulled in as another scene's inputs")
         p.add_argument("--changed", nargs="?", const="HEAD", default=None, help="tests touched by changes since REF")
         p.add_argument("--limit", type=int, default=0)
         p.add_argument("--seed", type=int, default=DEFAULT_SEED)

@@ -15,6 +15,7 @@
 #include <map>
 #include <sstream>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 namespace {
@@ -134,6 +135,9 @@ bool loadBlocks(const std::string& path) {
             for (int t = 0; t < 16; t++) b.face[f2][t] = u32();
         bool water = b.cls == 2 && !(b.flags & 4);
         if (water) b.mask = ~0ull;  // fluids have no block model: a full water voxel
+        // thinner than a micro-voxel (a snow layer, a carpet, a pressure plate: its outline fills none of the 4 x 4 x 4):
+        // one layer on the floor, or the block below shows through where the game draws the layer
+        if (!b.mask && (b.flags & 4) && b.cls != 4) b.mask = 0xFFFFull;
         if (water || (b.mean.r == 0 && b.mean.g == 0 && b.mean.b == 0 && b.mask)) b.mean = water ? RGB{0x3F, 0x76, 0xE4} : RGB{128, 128, 128};
         bool content[6];
         for (int f2 = 0; f2 < 6; f2++) {
@@ -149,7 +153,9 @@ bool loadBlocks(const std::string& path) {
                     s += float(b.face[f2][texel(f2, x, y, z)] >> 24) / 255.f;
                     k++;
                 }
-            b.alpha[m] = k ? s / k : 1.f;
+            // cutout coverage is for leaves and plants; a solid block's partly transparent tiles (grass's side overlay)
+            // are drawn over its opaque base, not holes
+            b.alpha[m] = (b.cls == 1 || b.cls == 4) && k ? s / k : 1.f;
         }
         bool air = name.rfind("Block{minecraft:air}", 0) == 0 || name.rfind("Block{minecraft:cave_air}", 0) == 0 ||
                    name.rfind("Block{minecraft:void_air}", 0) == 0;
@@ -181,8 +187,11 @@ struct Volume {
         int32_t i = secAt[size_t(gx + nsx * (gz + nsz * gy))];
         return i < 0 ? nullptr : &secs[size_t(i)];
     }
+    bool cropped = false;
+    int c0[3] = {0, 0, 0}, c1[3] = {0, 0, 0};  // box= (volume coordinates, inclusive): one element, the rest air
     const Block* at(int x, int y, int z) const {
         if (x < 0 || y < 0 || z < 0 || x >= sx || y >= sy || z >= sz) return nullptr;
+        if (cropped && (x < c0[0] || y < c0[1] || z < c0[2] || x > c1[0] || y > c1[1] || z > c1[2])) return nullptr;
         uint32_t id;
         if (sparse) {
             const Sec* c = section(x >> 4, y >> 4, z >> 4);
@@ -263,6 +272,91 @@ inline RGB microCol(int mx, int my, int mz, int f) {
     const Block* b = vol.at(mx >> 2, my >> 2, mz >> 2);
     uint32_t c = b->face[f][texel(f, mx & 3, my & 3, mz & 3)];
     return tinted(*b, (c >> 24) ? unpack(c) : b->mean);
+}
+
+// ---- surface cards (atlas_truth bake=: *.alc) -----------------------------------------------------------------------
+// Every face of every block seen straight on, 16 x 16 texels of what the game draws there: texture, tint, shade, AO and
+// the lightmap at its light. With cards loaded a hit takes its colour from them (the surface cache) instead of the 4 x 4
+// mean tiles under a fixed sun, so what is left between ours and the reference is the representation: shape, coverage,
+// filtering. Texel (u, v) of face f: u along (axis + 1) % 3, v along (axis + 2) % 3 of f's normal axis.
+
+struct Card {
+    uint32_t c[256];
+    RGB mean;  // of its covered texels: where the micro-voxels hold content the exact quads do not
+    RGB mip[341];  // the mip chain 16, 8, 4, 2, 1 (offsets 0, 256, 320, 336, 340): covered texels' means
+};
+const int MIP_AT[5] = {0, 256, 320, 336, 340};
+std::unordered_map<uint64_t, Card> cards;
+inline uint64_t cardKey(int wx, int wy, int wz, int f) {
+    return (uint64_t(uint32_t(wx) & 0xFFFFF) << 40) | (uint64_t(uint32_t(wy) & 0xFFFF) << 24) | (uint64_t(uint32_t(wz) & 0xFFFFF) << 4) | uint64_t(f);
+}
+
+bool loadCards(const std::string& path) {
+    std::ifstream f(path, std::ios::binary);
+    char magic[4];
+    int32_t n;
+    if (!f.read(magic, 4) || std::memcmp(magic, "ALC1", 4) != 0 || !f.read(reinterpret_cast<char*>(&n), 4)) return false;
+    for (int32_t i = 0; i < n; i++) {
+        int32_t h[4];
+        Card cd;
+        uint8_t light[512];
+        f.read(reinterpret_cast<char*>(h), sizeof h);
+        f.read(reinterpret_cast<char*>(cd.c), sizeof cd.c);
+        f.read(reinterpret_cast<char*>(light), sizeof light);
+        if (!f) return false;
+        RGB s{};
+        int k = 0;
+        float w[341] = {};
+        for (int t = 0; t < 256; t++) {
+            uint32_t c = cd.c[t];
+            cd.mip[t] = unpack(c), w[t] = (c >> 24) ? 1.f : 0.f;
+            if (c >> 24) s.r += cd.mip[t].r, s.g += cd.mip[t].g, s.b += cd.mip[t].b, k++;
+        }
+        cd.mean = k ? RGB{s.r / k, s.g / k, s.b / k} : RGB{};
+        for (int l = 1; l < 5; l++) {
+            int n2 = 16 >> l;
+            for (int v = 0; v < n2; v++)
+                for (int u = 0; u < n2; u++) {
+                    RGB acc{};
+                    float ws = 0;
+                    for (int j = 0; j < 4; j++) {
+                        int src = MIP_AT[l - 1] + (2 * u + (j & 1)) + (2 * n2) * (2 * v + (j >> 1));
+                        acc.r += cd.mip[src].r * w[src], acc.g += cd.mip[src].g * w[src], acc.b += cd.mip[src].b * w[src];
+                        ws += w[src];
+                    }
+                    int dst = MIP_AT[l] + u + n2 * v;
+                    w[dst] = ws * 0.25f;
+                    cd.mip[dst] = ws > 0 ? RGB{acc.r / ws, acc.g / ws, acc.b / ws} : cd.mean;
+                }
+        }
+        for (int t = 0; t < 256; t++)
+            if (!(cd.c[t] >> 24)) cd.mip[t] = cd.mean;
+        cards[cardKey(h[0], h[1], h[2], h[3])] = cd;
+    }
+    std::fprintf(stderr, "atlas_lab: %zu surface cards\n", cards.size());
+    return true;
+}
+
+// the card's colour at plane point (pu, pv) in blocks on face f of block (bx, by, bz) (volume coordinates), filtered
+// over a footprint of fp blocks (its mip, blended between the two nearest levels as a trilinear sampler would); false:
+// no card there
+inline bool cardCol(int bx, int by, int bz, int f, float pu, float pv, RGB& out, float fp = 0) {
+    if (cards.empty()) return false;
+    auto it = cards.find(cardKey(bx + vol.x0, by + vol.y0, bz + vol.z0, f));
+    if (it == cards.end()) return false;
+    int ax = f <= UP ? 1 : f <= SOUTH ? 2 : 0, a1 = (ax + 1) % 3, a2 = (ax + 2) % 3;
+    int b[3] = {bx, by, bz};
+    float u = std::clamp(pu - float(b[a1]), 0.f, 0.9999f), v = std::clamp(pv - float(b[a2]), 0.f, 0.9999f);
+    float lv = std::clamp(std::log2(std::max(fp * 16.f, 1.f)), 0.f, 4.f);
+    int l0 = int(lv), l1 = std::min(4, l0 + 1);
+    float t = lv - float(l0);
+    auto at = [&](int l) {
+        int n2 = 16 >> l;
+        return it->second.mip[MIP_AT[l] + int(u * n2) + n2 * int(v * n2)];
+    };
+    RGB c0 = at(l0), c1 = at(l1);
+    out = {c0.r + (c1.r - c0.r) * t, c0.g + (c1.g - c0.g) * t, c0.b + (c1.b - c0.b) * t};
+    return true;
 }
 
 // ---- traversal ------------------------------------------------------------------------------------------------------
@@ -397,9 +491,12 @@ Sample traceMicro(V3 o, V3 d) {
                 s.hit = true;
                 s.t = boxEntry(o, d, {mx * 0.25f, my * 0.25f, mz * 0.25f}, 0.25f);
                 s.id = hash(uint32_t(bx) * 73856093u ^ uint32_t(by) * 19349663u ^ uint32_t(bz) * 83492791u) | 1u;
+                V3 hp = o + d * s.t;
+                int ax = f <= UP ? 1 : f <= SOUTH ? 2 : 0;
+                if (cardCol(bx, by, bz, f, hp[(ax + 1) % 3], hp[(ax + 2) % 3], s.c)) return true;
                 s.c = lit(microCol(mx, my, mz, f), f);
                 if (mcShade) {
-                    float ao = vanillaAo(bx, by, bz, f, o + d * s.t);
+                    float ao = vanillaAo(bx, by, bz, f, hp);
                     s.c = {s.c.r * ao, s.c.g * ao, s.c.b * ao};
                 }
                 return true;
@@ -424,9 +521,12 @@ Sample traceMicroDense(V3 o, V3 d) {
             s.hit = true;
             s.t = boxEntry(o, d, {mx * 0.25f, my * 0.25f, mz * 0.25f}, 0.25f);
             s.id = hash(uint32_t(bx) * 73856093u ^ uint32_t(by) * 19349663u ^ uint32_t(bz) * 83492791u) | 1u;
+            V3 hp = o + d * s.t;
+            int ax = f <= UP ? 1 : f <= SOUTH ? 2 : 0;
+            if (cardCol(bx, by, bz, f, hp[(ax + 1) % 3], hp[(ax + 2) % 3], s.c)) return true;
             s.c = lit(microCol(mx, my, mz, f), f);
             if (mcShade) {
-                float ao = vanillaAo(bx, by, bz, f, o + d * s.t);
+                float ao = vanillaAo(bx, by, bz, f, hp);
                 s.c = {s.c.r * ao, s.c.g * ao, s.c.b * ao};
             }
             return true;
@@ -574,14 +674,16 @@ bool boxFace(const Node& n, int axis, bool high, V3 p, float t, BoxCtx& c) {
                 if (u < lo[a1] || u >= hi[a1] || v < lo[a2] || v >= hi[a2]) continue;
                 int dep, q[3];
                 if (!firstHit(lo, hi, axis, high, u, v, dep, q)) continue;
-                RGB m = microCol(q[0], q[1], q[2], f);
+                RGB m;
+                float su = (u + 0.5f) * 0.25f, sv = (v + 0.5f) * 0.25f;
+                if (!cardCol(q[0] >> 2, q[1] >> 2, q[2] >> 2, f, su, sv, m, fp * 0.25f / k)) m = lit(microCol(q[0], q[1], q[2], f), f);
                 acc.r += m.r, acc.g += m.g, acc.b += m.b;
                 hits++;
             }
         if (!hits || hashf(int(p[a1] * 64.f), int(p[a2] * 64.f), axis, c.seed) >= float(hits) / float(k * k)) return false;
         c.s->hit = true;
     c.s->t = t;
-        c.s->c = lit({acc.r / hits, acc.g / hits, acc.b / hits}, f);
+        c.s->c = {acc.r / hits, acc.g / hits, acc.b / hits};
         return true;
     }
     int u = std::clamp(int(std::floor(p[a1] * 4.f)), lo[a1], hi[a1] - 1), v = std::clamp(int(std::floor(p[a2] * 4.f)), lo[a2], hi[a2] - 1);
@@ -589,7 +691,7 @@ bool boxFace(const Node& n, int axis, bool high, V3 p, float t, BoxCtx& c) {
     if (!firstHit(lo, hi, axis, high, u, v, dep, q)) return false;
     c.s->hit = true;
     c.s->t = t;
-    c.s->c = lit(microCol(q[0], q[1], q[2], f), f);
+    if (!cardCol(q[0] >> 2, q[1] >> 2, q[2] >> 2, f, p[a1], p[a2], c.s->c, t * c.pa / std::max(std::fabs(c.d[axis]), 0.2f))) c.s->c = lit(microCol(q[0], q[1], q[2], f), f);
     return true;
 }
 

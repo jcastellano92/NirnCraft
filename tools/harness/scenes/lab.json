@@ -459,6 +459,8 @@
       "wait": 200,
       "setup": [
         "fog-off on",
+        "truth-quiet on",
+        "try tick freeze",
         "atlas-edits-why on",
         "atlaslab blocks",
         "atlaslab quads",
@@ -467,6 +469,8 @@
         "atlaslab here falkreath-wide 64 12 48 light"
       ],
       "cleanup": [
+        "try tick unfreeze",
+        "truth-quiet off",
         "atlaslab view falkreath-view 1024",
         "atlaslab view falkreath-view 1024 light",
         "atlas-edits-why off",

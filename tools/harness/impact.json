@@ -40,7 +40,8 @@
     "mod/src/main/resources/natives/*",
     "mod/src/main/java/com/nirncraft/atlas/AtlasNative.java",
     "native/include/atlas/atlas.h",
-    "tools/dev/check_natives.py"
+    "tools/dev/check_natives.py",
+    "native/*"
    ],
    "tags": [
     "check:natives"

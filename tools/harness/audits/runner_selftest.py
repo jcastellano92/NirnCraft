@@ -182,5 +182,24 @@ with tempfile.TemporaryDirectory() as td:
     _os.utime(built, (_time.time() + 100, _time.time() + 100))
     expect(not _game.native_stale(built, [src]), "a core built after its sources is current")
 
+# --- a failed scene's recovery never runs its exports (a long one blocked the next scene) --------------------------
+cl = _game.tolerant(["command kill @e", "atlaslab view x-view 1024 light", "fog-off off"])
+expect(cl == ["try kill @e", "fog-off off"], "recovery keeps the cleanup's undo steps and drops its exports")
+
+lines = catalog.pose_actions({"id": "d", "pose": {"dungeon": "bleak_falls_barrow", "view": "mouth"}, "tags": []})
+expect(any("execute as @p" in l and "nirncraft-dungeon-qa view" in l for l in lines),
+       "a dungeon pose runs its view command as the player (it needs one to move)")
+
+class _A: pass
+oa = _A(); oa.variant = None; oa.offline = True
+live_scene = {"id": "L", "tier": "live", "variants": ["vanilla"]}
+lab_scene = {"id": "B", "tier": "lab", "after": ["L"], "camera_from": {"scene": "L"}, "lab": {"tool": "atlas_truth"}}
+got = [s["id"] for s, _ in harness.items_of([live_scene, lab_scene], oa)]
+expect(got == ["B"], "--offline leaves live scenes out and never pulls one in as another scene's inputs")
+
+pp = review.parse_pose("\n".join(["VERDICT: WEAK", "SEES: a wall", "PROBLEMS: too close", "FIX: move back 40 blocks"]))
+expect(pp["verdict"] == "WEAK" and pp["fix"] == "move back 40 blocks", "the pose review's answer is read field by field")
+expect(review.parse_pose("I could not open the image.")["verdict"] is None, "no verdict line: unvetted, never a pass")
+
 print(f"problems {len(problems)}")
 sys.exit(1 if problems else 0)
