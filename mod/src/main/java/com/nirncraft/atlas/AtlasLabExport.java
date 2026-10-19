@@ -921,6 +921,11 @@ public final class AtlasLabExport {
         }
     }
 
+    /** lighting() for other packages (the pinned views' name.view.json, client/pinned/PinnedTruth). */
+    public static String lightingJson() {
+        return lighting();
+    }
+
     /** name.json beside an export: the grass, foliage and water tints the game blends at pos, and the lighting. */
     static void writeTints(String name, BlockPos c, String lighting) throws IOException {
         var cl = Minecraft.getInstance().level;

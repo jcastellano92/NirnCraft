@@ -252,9 +252,44 @@ The new far field is judged against the reference out to the exported view (1 km
 own, no pop, no shimmer). Further out, where nothing can be ground truth, it is judged on stability, smoothness,
 absence of artefacts, and updates when blocks change.
 
+**Reference modes and vanilla quirks** (owner, 2026-10-19: "some ground truth is worse too... careful"). The exact
+reference has two modes. *Exact* is Minecraft as it renders, quirks included; it is used only to check the reference
+against the live game (the near comparisons, 1.24 dE at Falkreath). *Intended* is what our renderer is scored against:
+16 samples a pixel (true coverage: an 11 x 20-block pine at 8 km covers a fifth of a pixel; exact mode shows nothing,
+so Minecraft flickers it in and out while moving, while the grouped representation fades it out smoothly, IoU 0.94 -
+0.996 against intended from 8 m to 32 km), plus fixes of vanilla quirks, each written here, one at a time, with a
+before / after, never silently:
+* sub-pixel coverage (adopted): intended = supersampled.
+* light through stairs and slabs (candidate, not adopted): vanilla lets sky light leak through stair and slab ceilings
+  (a dungeon hall's stair ceiling shows bright stripes; the exact reference reproduces it, dE 0.44 against the game).
+
+Verification tiers (owner, 2026-10-19): 1. elements offline (tools/harness/element_lab.py, suite:elements: one chunk or
+tree cut from an export by `box=`, the intended reference vs our renderer from 8 m to 64 km and two fly-ins, ~40 s an
+element, now ~12 s: one process per renderer renders the whole ladder and both fly-ins); 2. the same elements against
+Minecraft's own rendering, live, pinned (suite:pinned, final); 3. full scenes offline (suite:truth's lab scenes); 4.
+full scenes live, last. Live captures only when a tier needs new inputs, and every new camera position is vetted by a
+cheap visual review before it is relied on. An element fails below IoU 0.9 (where it covers 16 px or more), with a
+dot's coverage off the reference's by more than 25 % or 0.25 px, or above 0.1 fly-in pop.
+
 **Texture resolution up close** (ground truth, 2026-10-19): the 4 x 4 face tiles are right far away but flat up close
 (the cobble path, planks); owning the near field needs faces at the texture's own resolution (16 x 16), stored once
 per texture (an atlas), not per block state.
+
+**Surface cards: colour and light from the real faces** (2026-10-19). `atlas_truth bake=x.alc` writes a card for
+every face of every block (inside `box=`): the face seen straight on, 16 x 16 texels of what the game draws there
+(texture, tint, shade, AO, the lightmap at its light; sky and block light kept per texel for relighting). `atlas_lab
+surface=x.alc` takes every hit's colour from them through a mip chain picked by the pixel's footprint (trilinear).
+This is the surface cache in its simplest form: captured once from the real models with the real light, then the
+grouped voxels only decide shape and coverage. Element tier (lab-groups, 16 samples a pixel like the reference):
+
+| element | near dE, own 4 x 4 tiles, fixed sun | near dE, cards | dE 64 m - 32 km | IoU (16 px and up) | fly-in pop fast / slow |
+|---|---|---|---|---|---|
+| whiterun-day-chunk (32 m) | 29.3 | 3.7 | 1.7 - 4.0 | 0.94 - 1.00 | 0.03 / 0.07 |
+| falkreath-wide-tree (32 m) | 10 - 14 | 6.0 | 1.7 - 3.9 | 0.92 - 0.99 | 0.05 / 0.04 |
+
+What is left is representation: a snow layer is one micro-voxel thick (1/4 block, not 1/8), cutout foliage is hashed
+micro-voxels, grazing faces shimmer a little more than the reference's 16 samples. The far pass takes its colour the
+same way (cards from the real quads, light kept apart so day, night and carried lights relight them).
 
 **An exact reference: atlas_truth** (2026-10-19). atlas_lab's ref is an approximation (4 x 4 x 4 shapes, 4 x 4 tiles,
 hashed cutouts, no light), so it cannot be ground truth itself. `native/tools/atlas_truth.cpp` traces Minecraft's own
@@ -265,6 +300,28 @@ culling, cutout and front-to-back translucency, fluids, NeoForge's smooth lighti
 AtlasLabExport's Javadoc, what it does and does not reproduce in the tool's header). Synthetic checks:
 `native/tools/atlas_truth_test.py`. Harness: `atlastruth-falkreath-near` / `-view` (scenes/truth.json). On the old
 exports alone (its fallback) it already lowers the near view's liveDE from 6.3 to 5.6.
+
+**Pinned ground truth: Minecraft's own rendering at any distance** (2026-10-19; mod `client/pinned/PinnedTruth`,
+harness `tools/harness/pinned.py`, `harness.py run --suite pinned`, the final live validation, run deliberately).
+Minecraft unloads chunks past its render distance and clips at its far plane, so the truth suite ends there. A pin
+keeps one element (a box: blocks, light with a one-block margin, blended tints, block entities, optionally its
+entities) and Minecraft draws it wherever the harness puts it: its own SectionCompiler meshes the box from a
+RenderSectionRegion that answers from the snapshot (models, NeoForge's smooth lighting and AO, tints, fluids, the
+three layers), its terrain pipelines draw it (ChunkSection uniform per section, the block atlas with the chunk
+layer sampler's settings, the lightmap; translucent through the OIT stages or the classic pass), and the entity and
+block entity renderers draw the render states they extracted at the pin. Beyond 32 m the copy is drawn smaller and
+nearer (scale s, the same picture: every direction from the camera is the same, every distance s times shorter, so
+the same pixels, texture derivatives and mip levels, and the same baked per-vertex light); the capture receipt
+carries the equivalent eye and atlas_truth renders the export from there (box= cuts the element out, the light kept).
+What depends on position and is therefore not invariant: fog (off for these captures), the lightmap's inputs (the
+environment attributes are probed at the camera: on the sky stage, the stage's; pin-view writes them as
+name.view.json for the offline render), chunk fade-in (forced visible), and with a shader pack anything the pack
+derives from world position (the suite runs vanilla). What is not reproduced: particles, anything a block entity or
+entity does after the pin (states are frozen), mods' additional section geometry (AddSectionGeometryEvent), and
+NeoForge model data other than block entities'. Per rung the suite also measures Minecraft's own stability
+(pin-shimmer: the same frame twice, 6 ticks apart) and records what Minecraft itself would draw at the true distance
+(entity view distance from Entity.shouldRenderAtSqrDistance, block entity renderers' view distance): where Minecraft
+culls or the element is sub-pixel, disagreement with it is information, not error.
 
 **Lighting and surfaces beyond Minecraft's path** (owner): once offline and live match, the groups are the place for
 Lumen's ideas: a surface cache per group face (sun visibility, bounce, block light, sky) updated where it changed and

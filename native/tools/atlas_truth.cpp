@@ -1701,82 +1701,182 @@ int main(int argc, char** argv) {
         return 0;
     }
 
-    // a Minecraft camera (a live capture's own: eye in world blocks, yaw 0 = south, pitch > 0 looks down, fov vertical)
-    float ex = 0, ey = 0, ez = 0;
-    std::sscanf(str(a, "eye", "0,0,0").c_str(), "%f,%f,%f", &ex, &ey, &ez);
-    float yaw = float(num(a, "yaw", 0)) * 3.14159265f / 180.f, pitch = float(num(a, "pitch", 0)) * 3.14159265f / 180.f;
-    float fov = float(num(a, "fov", 70)) * 3.14159265f / 180.f;
-    int w = int(num(a, "w", 1280)), h = int(num(a, "h", 720)), spp = std::max(1, int(num(a, "spp", 1)));
-    V3 cf = norm({-std::sin(yaw) * std::cos(pitch), -std::sin(pitch), std::cos(yaw) * std::cos(pitch)});
-    V3 cr = norm(cross(cf, {0, 1, 0})), cu = cross(cr, cf);
-    float cpa = 2.f * std::tan(fov / 2) / float(h);
-    pixelAngle = cpa;
-    V3 eye{ex - float(vol.x0), ey - float(vol.y0), ez - float(vol.z0)};
-    auto rayDir = [&](float sx, float sy) { return norm(cf + cr * ((sx - float(w) * 0.5f) * cpa) - cu * ((sy - float(h) * 0.5f) * cpa)); };
-    {  // probe=x,y;x,y: what each of those pixels shows, layer by layer
-        std::stringstream ss(str(a, "probe", ""));
-        for (std::string one; std::getline(ss, one, ';');) {
-            int qx = 0, qy = 0;
-            if (std::sscanf(one.c_str(), "%d,%d", &qx, &qy) != 2) continue;
-            std::string log;
-            Pixel px = traceRay(eye, rayDir(float(qx) + 0.5f, float(qy) + 0.5f), &log);
-            std::fprintf(stderr, "probe %d,%d: %s rgb %.0f %.0f %.0f [%s]\n", qx, qy, px.hit ? "hit" : "sky", px.c.r * 255, px.c.g * 255, px.c.b * 255,
-                         log.c_str());
-        }
-    }
-    std::vector<RGB> acc(size_t(w) * h);
-    std::vector<float> hit(size_t(w) * h, 0.f), depth(size_t(w) * h, 1e30f);
-    std::atomic<int> next{0}, translucentPx{0};
-    auto t0 = std::chrono::steady_clock::now();
-    auto work = [&]() {
-        for (int py; (py = next++) < h;)
-            for (int px = 0; px < w; px++) {
-                size_t i = size_t(px + w * py);
-                bool tr = false;
-                for (int s = 0; s < spp; s++) {
-                    float jx = 0.5f, jy = 0.5f;
-                    if (spp > 1) {  // Halton (2, 3) jitter, as atlas_lab's frames
-                        jx = 0, jy = 0;
-                        float fr = 0.5f;
-                        for (int k = s + 1; k; k /= 2, fr *= 0.5f) jx += fr * float(k % 2);
-                        fr = 1.f / 3;
-                        for (int k = s + 1; k; k /= 3, fr /= 3) jy += fr * float(k % 3);
-                    }
-                    Pixel p = traceRay(eye, rayDir(float(px) + jx, float(py) + jy));
-                    float wt = 1.f / float(spp);
-                    acc[i].r += p.c.r * wt, acc[i].g += p.c.g * wt, acc[i].b += p.c.b * wt;
-                    hit[i] += p.hit ? wt : 0.f;
-                    if (p.hit) depth[i] = std::min(depth[i], p.depth);
-                    tr |= p.translucent;
+    // bake=FILE.alc: the surface cards: every face of every block (inside box=) seen straight on, 16 x 16 texels of what
+    // the game draws there (texture, tint, shade, AO, the lightmap at its light): what a grouped-voxel renderer samples
+    // instead of its own colours (a surface cache captured from the real models). Texel (u, v) of face f lies along the
+    // axes after f's normal axis: u on (axis + 1) % 3, v on (axis + 2) % 3, texel centres at (i + 0.5) / 16.
+    if (a.count("bake")) {
+        pixelAngle = 0.0005f;
+        int lo[3] = {0, 0, 0}, hi[3] = {vol.sx - 1, vol.sy - 1, vol.sz - 1};
+        if (vol.cropped)
+            for (int k = 0; k < 3; k++) lo[k] = std::max(0, vol.c0[k]), hi[k] = std::min(k == 0 ? vol.sx - 1 : k == 1 ? vol.sy - 1 : vol.sz - 1, vol.c1[k]);
+        struct Card {
+            int x, y, z, f;
+            uint32_t c[256];
+            uint8_t sky[256], blk[256];
+        };
+        std::vector<std::array<int, 3>> blocks;
+        for (int y = lo[1]; y <= hi[1]; y++)
+            for (int z = lo[2]; z <= hi[2]; z++)
+                for (int x = lo[0]; x <= hi[0]; x++)
+                    if (vol.id(x, y, z)) blocks.push_back({x, y, z});
+        std::vector<std::vector<Card>> per;
+        per.resize(size_t(threads));
+        std::atomic<size_t> next{0};
+        auto work = [&](int ti) {
+            const int N[6][3] = {{0, -1, 0}, {0, 1, 0}, {0, 0, -1}, {0, 0, 1}, {-1, 0, 0}, {1, 0, 0}};
+            for (size_t i; (i = next.fetch_add(1)) < blocks.size();) {
+                auto [x, y, z] = blocks[i];
+                for (int f = 0; f < 6; f++) {
+                    int ax = f <= UP ? 1 : f <= SOUTH ? 2 : 0, a1 = (ax + 1) % 3, a2 = (ax + 2) % 3;
+                    bool high = N[f][ax] > 0;
+                    Card cd{x, y, z, f, {}, {}, {}};
+                    int any = 0;
+                    for (int tv = 0; tv < 16; tv++)
+                        for (int tu = 0; tu < 16; tu++) {
+                            float p[3] = {float(x), float(y), float(z)};
+                            p[ax] += high ? 1.01f : -0.01f;
+                            p[a1] += (tu + 0.5f) / 16.f, p[a2] += (tv + 0.5f) / 16.f;
+                            V3 o{p[0], p[1], p[2]}, d{-float(N[f][0]), -float(N[f][1]), -float(N[f][2])};
+                            float tmin = 0;
+                            for (int tries = 0; tries < 6; tries++) {  // past what a neighbour pokes into the ray
+                                Hit h = nearest(o, d, tmin);
+                                if (!h.hit || h.t > 1.02f) break;
+                                if (h.bx != x || h.by != y || h.bz != z) {
+                                    tmin = h.t + 1e-4f;
+                                    continue;
+                                }
+                                Shaded s = shade(h);
+                                float al = h.layer == TRANSLUCENT ? h.tex[3] : 1.f;
+                                auto q = [](float v) { return uint32_t(std::lround(std::clamp(v, 0.f, 1.f) * 255.f)); };
+                                cd.c[tu + 16 * tv] = q(al) << 24 | q(s.c.r) << 16 | q(s.c.g) << 8 | q(s.c.b);
+                                cd.sky[tu + 16 * tv] = uint8_t(std::lround(s.sky * 16.f)), cd.blk[tu + 16 * tv] = uint8_t(std::lround(s.block * 16.f));
+                                any++;
+                                break;
+                            }
+                        }
+                    if (any) per[size_t(ti)].push_back(cd);
                 }
-                if (tr) translucentPx++;
             }
-    };
-    std::vector<std::thread> ts;
-    for (int t = 0; t < threads; t++) ts.emplace_back(work);
-    for (auto& t : ts) t.join();
-    double ms = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count();
-    std::vector<uint32_t> img(size_t(w) * h), mask(size_t(w) * h), dp(size_t(w) * h);
-    auto ch = [](float v) { return uint32_t(std::clamp(int(std::lround(v * 255.f)), 0, 255)); };
-    double hits = 0;
-    for (size_t i = 0; i < img.size(); i++) {
-        img[i] = 0xFF000000u | ch(acc[i].b) << 16 | ch(acc[i].g) << 8 | ch(acc[i].r);
-        uint32_t m = ch(hit[i]);
-        mask[i] = 0xFF000000u | m << 16 | m << 8 | m;
-        hits += hit[i];
-        // the distance to what each pixel shows, 1/16 block steps in 24 bits (R high, G, B low), all ones for sky
-        uint32_t v = depth[i] >= 1e29f ? 0xFFFFFFu : uint32_t(std::min(depth[i] * 16.f, 16777214.f));
-        dp[i] = 0xFF000000u | (v & 255u) << 16 | ((v >> 8) & 255u) << 8 | (v >> 16);
+        };
+        auto tb0 = std::chrono::steady_clock::now();
+        std::vector<std::thread> pool;
+        for (int ti = 0; ti < threads; ti++) pool.emplace_back(work, ti);
+        for (auto& t : pool) t.join();
+        std::ofstream bf(a["bake"], std::ios::binary);
+        size_t n = 0;
+        for (auto& v : per) n += v.size();
+        auto w32 = [&](int32_t v) { bf.write(reinterpret_cast<const char*>(&v), 4); };
+        bf.write("ALC1", 4);
+        w32(int32_t(n));
+        for (auto& v : per)
+            for (const Card& cd : v) {
+                w32(cd.x + vol.x0), w32(cd.y + vol.y0), w32(cd.z + vol.z0), w32(cd.f);
+                bf.write(reinterpret_cast<const char*>(cd.c), sizeof cd.c);
+                bf.write(reinterpret_cast<const char*>(cd.sky), 256);
+                bf.write(reinterpret_cast<const char*>(cd.blk), 256);
+            }
+        std::fprintf(stderr, "atlas_truth: baked %zu surface cards of %zu blocks (%.0f ms)\n", n, blocks.size(),
+                     std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - tb0).count());
+        return bf ? 0 : 1;
     }
-    std::string base = stem(out);
-    atlas::writePng(out, img.data(), uint32_t(w), uint32_t(h));
-    atlas::writePng(base + "_mask.png", mask.data(), uint32_t(w), uint32_t(h));
-    atlas::writePng(base + "_depth.png", dp.data(), uint32_t(w), uint32_t(h));
-    std::fprintf(stderr, "atlas_truth: %dx%d (%d spp) in %.0f ms on %d threads -> %s\n", w, h, spp, ms, threads, out.c_str());
-    std::printf("{\"tool\":\"atlas_truth\",\"mode\":\"camera\",\"eye\":[%f,%f,%f],\"w\":%d,\"h\":%d,\"spp\":%d,\"ms\":%d,\"hitShare\":%.4f,"
-                "\"translucentShare\":%.4f,\"light\":\"%s\",\"tints\":\"%s\",\"states\":%zu,\"models\":%zu,\"quads\":%zu,\"sprites\":%zu,"
-                "\"frames\":[{\"variant\":\"truth\",\"ms\":%d}]}\n",
-                ex, ey, ez, w, h, spp, int(ms), hits / double(img.size()), double(translucentPx.load()) / double(img.size()), lightSrc.c_str(),
-                vol.hasTints ? "column" : "global", states.size(), models.size(), nquads, sprites.size(), int(ms));
+
+    // cameras=FILE: one frame per line ("out eyex,eyey,eyez yaw pitch fov w h"), the mesh, textures and volume loaded
+    // once (an element's distance ladder and fly-ins in one process); otherwise the one camera of the arguments
+    auto frame = [&](Args ca, const std::string& outp) {
+        // a Minecraft camera (a live capture's own: eye in world blocks, yaw 0 = south, pitch > 0 looks down, fov vertical)
+        float ex = 0, ey = 0, ez = 0;
+        std::sscanf(str(ca, "eye", "0,0,0").c_str(), "%f,%f,%f", &ex, &ey, &ez);
+        float yaw = float(num(ca, "yaw", 0)) * 3.14159265f / 180.f, pitch = float(num(ca, "pitch", 0)) * 3.14159265f / 180.f;
+        float fov = float(num(ca, "fov", 70)) * 3.14159265f / 180.f;
+        int w = int(num(ca, "w", 1280)), h = int(num(ca, "h", 720)), spp = std::max(1, int(num(ca, "spp", 1)));
+        V3 cf = norm({-std::sin(yaw) * std::cos(pitch), -std::sin(pitch), std::cos(yaw) * std::cos(pitch)});
+        V3 cr = norm(cross(cf, {0, 1, 0})), cu = cross(cr, cf);
+        float cpa = 2.f * std::tan(fov / 2) / float(h);
+        pixelAngle = cpa;
+        V3 eye{ex - float(vol.x0), ey - float(vol.y0), ez - float(vol.z0)};
+        auto rayDir = [&](float sx, float sy) { return norm(cf + cr * ((sx - float(w) * 0.5f) * cpa) - cu * ((sy - float(h) * 0.5f) * cpa)); };
+        {  // probe=x,y;x,y: what each of those pixels shows, layer by layer
+            std::stringstream ss(str(ca, "probe", ""));
+            for (std::string one; std::getline(ss, one, ';');) {
+                int qx = 0, qy = 0;
+                if (std::sscanf(one.c_str(), "%d,%d", &qx, &qy) != 2) continue;
+                std::string log;
+                Pixel px = traceRay(eye, rayDir(float(qx) + 0.5f, float(qy) + 0.5f), &log);
+                std::fprintf(stderr, "probe %d,%d: %s rgb %.0f %.0f %.0f [%s]\n", qx, qy, px.hit ? "hit" : "sky", px.c.r * 255, px.c.g * 255, px.c.b * 255,
+                             log.c_str());
+            }
+        }
+        std::vector<RGB> acc(size_t(w) * h);
+        std::vector<float> hit(size_t(w) * h, 0.f), depth(size_t(w) * h, 1e30f);
+        std::atomic<int> next{0}, translucentPx{0};
+        auto t0 = std::chrono::steady_clock::now();
+        auto work = [&]() {
+            for (int py; (py = next++) < h;)
+                for (int px = 0; px < w; px++) {
+                    size_t i = size_t(px + w * py);
+                    bool tr = false;
+                    for (int s = 0; s < spp; s++) {
+                        float jx = 0.5f, jy = 0.5f;
+                        if (spp > 1) {  // Halton (2, 3) jitter, as atlas_lab's frames
+                            jx = 0, jy = 0;
+                            float fr = 0.5f;
+                            for (int k = s + 1; k; k /= 2, fr *= 0.5f) jx += fr * float(k % 2);
+                            fr = 1.f / 3;
+                            for (int k = s + 1; k; k /= 3, fr /= 3) jy += fr * float(k % 3);
+                        }
+                        Pixel p = traceRay(eye, rayDir(float(px) + jx, float(py) + jy));
+                        float wt = 1.f / float(spp);
+                        acc[i].r += p.c.r * wt, acc[i].g += p.c.g * wt, acc[i].b += p.c.b * wt;
+                        hit[i] += p.hit ? wt : 0.f;
+                        if (p.hit) depth[i] = std::min(depth[i], p.depth);
+                        tr |= p.translucent;
+                    }
+                    if (tr) translucentPx++;
+                }
+        };
+        std::vector<std::thread> ts;
+        for (int t = 0; t < threads; t++) ts.emplace_back(work);
+        for (auto& t : ts) t.join();
+        double ms = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count();
+        std::vector<uint32_t> img(size_t(w) * h), mask(size_t(w) * h), dp(size_t(w) * h);
+        auto ch = [](float v) { return uint32_t(std::clamp(int(std::lround(v * 255.f)), 0, 255)); };
+        double hits = 0;
+        for (size_t i = 0; i < img.size(); i++) {
+            img[i] = 0xFF000000u | ch(acc[i].b) << 16 | ch(acc[i].g) << 8 | ch(acc[i].r);
+            uint32_t m = ch(hit[i]);
+            mask[i] = 0xFF000000u | m << 16 | m << 8 | m;
+            hits += hit[i];
+            // the distance to what each pixel shows, 1/16 block steps in 24 bits (R high, G, B low), all ones for sky
+            uint32_t v = depth[i] >= 1e29f ? 0xFFFFFFu : uint32_t(std::min(depth[i] * 16.f, 16777214.f));
+            dp[i] = 0xFF000000u | (v & 255u) << 16 | ((v >> 8) & 255u) << 8 | (v >> 16);
+        }
+        std::string base = stem(outp);
+        atlas::writePng(outp, img.data(), uint32_t(w), uint32_t(h));
+        atlas::writePng(base + "_mask.png", mask.data(), uint32_t(w), uint32_t(h));
+        atlas::writePng(base + "_depth.png", dp.data(), uint32_t(w), uint32_t(h));
+        std::fprintf(stderr, "atlas_truth: %dx%d (%d spp) in %.0f ms on %d threads -> %s\n", w, h, spp, ms, threads, outp.c_str());
+        std::printf("{\"tool\":\"atlas_truth\",\"mode\":\"camera\",\"eye\":[%f,%f,%f],\"w\":%d,\"h\":%d,\"spp\":%d,\"ms\":%d,\"hitShare\":%.4f,"
+                    "\"translucentShare\":%.4f,\"light\":\"%s\",\"tints\":\"%s\",\"states\":%zu,\"models\":%zu,\"quads\":%zu,\"sprites\":%zu,"
+                    "\"frames\":[{\"variant\":\"truth\",\"ms\":%d}]}\n",
+                    ex, ey, ez, w, h, spp, int(ms), hits / double(img.size()), double(translucentPx.load()) / double(img.size()), lightSrc.c_str(),
+                    vol.hasTints ? "column" : "global", states.size(), models.size(), nquads, sprites.size(), int(ms));
+    };
+    if (a.count("cameras")) {
+        std::ifstream cf(a["cameras"]);
+        int n = 0;
+        for (std::string line; std::getline(cf, line);) {
+            std::istringstream ls(line);
+            std::string o, e, yw, pt, fv, ww, hh;
+            if (!(ls >> o >> e >> yw >> pt >> fv >> ww >> hh)) continue;
+            Args ca = a;
+            ca["eye"] = e, ca["yaw"] = yw, ca["pitch"] = pt, ca["fov"] = fv, ca["w"] = ww, ca["h"] = hh;
+            frame(ca, o);
+            n++;
+        }
+        std::fprintf(stderr, "atlas_truth: %d camera frames\n", n);
+    } else {
+        frame(a, out);
+    }
     return 0;
 }

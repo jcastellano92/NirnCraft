@@ -186,11 +186,19 @@ public final class AtlasClient {
         return ctx != null && !failed;
     }
 
+    /** No far field at all while set (the autotest verb atlas-suspend: pinned ground-truth captures, client/pinned). */
+    public static volatile boolean suspended;
+
     private static void afterOpaque(RenderLevelStageEvent.AfterOpaqueBlocks event) {
         if (failed) return;
         try {
             Minecraft mc = Minecraft.getInstance();
             if (mc.level == null) return;
+            if (suspended) {  // nothing far this frame (a pack composites the targets: they are cleared)
+                if (targets != null) targets.clear();
+                com.nirncraft.render.quality.QualityClient.atlasFrame(false, 0);
+                return;
+            }
             long now = System.nanoTime();
             if (ctx == null && retryAt != 0 && now < retryAt) return;  // cooling down after a lost device
             boolean pack = irisPackInUse();
