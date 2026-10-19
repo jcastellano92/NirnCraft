@@ -139,6 +139,36 @@ start skips its group the same way.
   reviewer is the one who fixed it. Twins (`twin-*`) are measured against their lab render (`<variant>.twin.png`
   side-by-side; structure, skyline, dE): "lab and live match" is a number, not a glance.
 
+## Independent review, autonomous runs
+
+* **Independent reviewer** (`tools/harness/review.py`): a fresh headless Claude session (Haiku by default, `--model`)
+  with read-only tools, run in an empty folder: it sees only the evidence images and the claim, never the
+  conversation of the agent that made the change. `harness.py review` grades every needs-review issue (pass ->
+  fixed with the reviewer and the evidence recorded, fail -> open again, unsure -> stays for the owner);
+  `review --pages DIR` reviews a run's agent pages. A BROKEN / REGRESSION only counts when a second look at that
+  test's own before | after sheet confirms it; otherwise it is an "(unconfirmed)" note. Every answer is kept in
+  `.work/harness/review/log.jsonl`.
+* **Gate review:** after its tests the gate runs the reviewer over its pictures; a confirmed BROKEN on a gated test
+  that was not already a known issue blocks (`--no-ai-review` skips it; the gate then says the pictures are
+  unverified).
+* **Autonomous:** `harness.py auto` (or `auto --once` from a scheduled task) waits while the GPU is busy or another run
+  owns the client, then verifies fixes marked done, has the reviewer grade them, audits a `--budget` sample, reviews
+  its pictures, writes ISSUES.md and sends an `auto_cycle` event (hooks notify). `--every 120` minutes.
+
+## Where the picture was taken: hard checks
+
+* **Pose:** every live capture's receipt (position, yaw, pitch) is checked against the pose the scene asked for
+  (`posecheck.py`): more than 1.5 blocks or ~3.6 degrees off fails the test. When the camera moved (a bumped mouse,
+  a pose that did not apply) the harness poses again and captures once more before anything is stored.
+* **Comparable before / after:** a pair is only diffed when both were taken at the same place, looking the same way,
+  at the same time of day and moon phase, in the same weather, world, shader state and render distance. Otherwise the
+  sheet shows "before: NOT COMPARABLE (why)" and no diff numbers exist for it.
+* **Twins:** the lab camera (atlas_render: yaw 0 = north, pitch < 0 down) and the live camera (Minecraft: yaw 0 =
+  south, pitch > 0 down) are compared in world space (a convention error is a 180 degree fail), plus the picture
+  metrics (structure, skyline, dE) and the `.twin.png` side-by-side.
+* Not yet deterministic: ATLAS clouds move with world game time, weather fronts simulate, mobs and particles move.
+  Pinned capture clock, tick freeze and input lock are queued (`issues`: deterministic before/after).
+
 ## Hot reload kinds (watch mode and `--changed`)
 
 | change | reload | restart? |

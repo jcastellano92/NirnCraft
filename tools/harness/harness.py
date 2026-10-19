@@ -42,6 +42,7 @@ import cameras  # noqa: E402
 import features  # noqa: E402
 import trace as tr  # noqa: E402
 import catalog  # noqa: E402
+import posecheck
 import results  # noqa: E402
 
 STORE = results.STORE
@@ -452,7 +453,8 @@ class Runner:
             tr.step("lab_command", cmd=cmd, exit=r.returncode)
             if r.returncode or not png.exists():
                 raise RuntimeError(f"{tool} failed: " + (r.stdout + r.stderr)[-800:])
-            rec = results.store(s["id"], v, png, meta={"tool": tool, "args": kv}, fingerprint=fp)
+            report = next((json.loads(l) for l in reversed(r.stdout.strip().splitlines()) if l.startswith("{")), {})
+            rec = results.store(s["id"], v, png, meta={"tool": tool, "args": kv, "atlas": report}, fingerprint=fp)
         return self.judge(s, v, rec)
 
     # ---------------------------------------------------------------------------------------- live
@@ -493,7 +495,18 @@ class Runner:
         extra = {"camera": cand} if p.get("shot") else {}
         if perf:
             extra["perf"] = {k: perf[k] for k in ("median", "p95", "p99", "stalls", "frames") if k in perf}
+        want = posecheck.requested(catalog.pose_actions(s, self.plan, cand))
+        pflags, pm = posecheck.pose(want, receipt)
+        if pflags:  # the camera is not where the scene put it (a bumped mouse, a pose that did not apply): pose again
+            say(f"  {s['id']} [{v}]: {pflags[0]}; posing again and capturing once more")
+            tr.step("repose", test=key(s, v), why=pflags)
+            png, receipt, perf, popm = g.capture(s, v, catalog.pose_actions(s, self.plan, cand),
+                                                 lambda tag: catalog.capture_actions(s, tag, self.plan))
+            pflags, pm = posecheck.pose(want, receipt)
+            pm["reposed"] = True
         rec = results.store(s["id"], v, png, meta=receipt, fingerprint=fp, extra=extra)
+        rec["metrics"].update(pm)
+        rec["metrics"]["flags"] = rec["metrics"].get("flags", []) + pflags
         if popm:  # ladder / sweep numbers, the game log of the test: they join the image's numbers and flags
             flags = popm.pop("popFlags", [])
             game_log = popm.pop("gameLog", [])
@@ -590,14 +603,30 @@ class Runner:
 
     def judge(self, s, v, rec):
         m, c = rec["metrics"], s.get("checks") or {}
-        fails = [f for f in m.get("flags", []) if "but this is the" in f]  # wrong shader state: never a pass
+        twin = next((t[5:] for t in s.get("tags", []) if t.startswith("twin:")), None)
+        if twin and rec.get("game"):  # the twin's camera against the lab camera, in world space
+            lab_rec = results.latest(twin, "lab") or {}
+            tf, tm = posecheck.twin(lab_rec.get("game"), rec["game"])
+            m.update(tm)
+            m["flags"] = m.get("flags", []) + tf
+        before = Path(f"{results.stem(s['id'], v)}.before.json")
+        if before.exists():  # only the same place, direction, time, weather, world and settings make a before/after
+            try:
+                why = posecheck.comparable(json.loads(before.read_text(encoding="utf-8")), rec)
+            except ValueError:
+                why = []
+            if why:
+                m["notComparable"] = why
+                m["diff"] = m["changed"] = None  # nothing may be judged on a pair from two different views
+        # a wrong shader state or a wrong camera: the picture is not the test, never a pass
+        fails = [f for f in m.get("flags", []) if "but this is the" in f or f.startswith("camera ")
+                 or f.startswith("twin looks")]
         if "maxBlackTiles" in c and m.get("blackBoxes", 0) > c["maxBlackTiles"]:  # boxes: the NaN signature
             fails.append(f"black boxes {m['blackBoxes']} > {c['maxBlackTiles']}")
         if "lumaMin" in c and m.get("luma", 0) < c["lumaMin"]:
             fails.append(f"luma {m['luma']} < {c['lumaMin']}")
         if "lumaMax" in c and m.get("luma", 0) > c["lumaMax"]:
             fails.append(f"luma {m['luma']} > {c['lumaMax']}")
-        twin = next((t[5:] for t in s.get("tags", []) if t.startswith("twin:")), None)
         lab_png = Path(f"{results.stem(twin, 'lab')}.after.png") if twin else None
         live_png = Path(f"{results.stem(s['id'], v)}.after.png")
         if twin and lab_png.exists() and live_png.exists():  # a twin is measured against its lab render, not eyeballed
@@ -1500,8 +1529,23 @@ def cmd_gate(a):
             bad.append(key(s, v))
         elif rec.get("status") in ("fail", "error"):
             known.append(key(s, v))
+    reviewed = []
+    agent_dir = results.REPORTS / scope_of(a, False) / "agent"
+    if a.ai_review and (agent_dir / "index.txt").exists():  # an independent reviewer looks at the pictures too
+        import review
+        if review.available():
+            before_open = {k for k, e in load_issues().items() if e.get("state") in ACTIVE}
+            gated = {key(s, v) for s, v in items}
+            for kind, test, v, what in review_pages(agent_dir, f"changes since {base[:10]}", a.model):
+                k = f"{test}|{v or 'shaders'}"
+                reviewed.append(f"{kind} {k}: {what}")
+                if kind == "BROKEN" and k in gated and k not in before_open:
+                    bad.append(f"{k} (independent reviewer: {what[:100]})")
+        else:
+            say("gate: no claude CLI: the pictures were not independently reviewed (UNVERIFIED visually)")
     head = subprocess.run(["git", "rev-parse", "HEAD"], cwd=ROOT, capture_output=True, text=True).stdout.strip()
     receipt = {"head": head, "base": base, "files": len(files), "tags": tags, "items": len(items), "blocking": bad,
+               "review": reviewed,
                "knownFailures": known, "at": time.time()}
     (STORE / "gate").mkdir(parents=True, exist_ok=True)
     (STORE / "gate" / "latest.json").write_text(json.dumps(receipt, indent=1), encoding="utf-8")
@@ -1917,6 +1961,160 @@ def cmd_wait(a):
     return 1
 
 
+# ================================================================================================ independent review
+def review_claims(keys=None, model="haiku"):
+    """Hand every needs-review issue (or the given keys) to the independent reviewer; its verdicts move the issues:
+    pass -> fixed (confirmed by the reviewer, the evidence kept), fail -> open again, unsure -> stays for the owner."""
+    import review
+    led = load_issues()
+    keys = keys or [k for k, e in led.items() if e.get("state") == "needs-review"]
+    items = []
+    out = STORE / "review" / "evidence"
+    out.mkdir(parents=True, exist_ok=True)
+    for k in keys:
+        e = led.get(k)
+        if not e:
+            continue
+        sid, v = k.rsplit("|", 1)
+        imgs = []
+        sheet = results.compare(sid, v)
+        if sheet is not None:
+            f = out / f"{sid}--{v}.png"
+            sheet.save(f)
+            imgs.append(f)
+        tw = Path(f"{results.stem(sid, v)}.twin.png")
+        if tw.exists():
+            imgs.append(tw)
+        if not imgs:
+            continue
+        claim = (f"the problem '{e.get('why', '')[:200]}' is gone in AFTER"
+                 + (f" (claimed fix: {e['fixNote'][:160]})" if e.get("fixNote") else ""))
+        items.append({"key": k, "title": sid, "claim": claim, "images": [str(i) for i in imgs]})
+    if not items:
+        say("review: nothing to review")
+        return {}
+    say(f"review: {len(items)} claim(s) to the independent reviewer ({model})")
+    verdicts = review.claims(items, model)
+    led = load_issues()
+    now = time.strftime("%Y-%m-%d %H:%M")
+    by = f"ai-reviewer:{model}"
+    for it in items:
+        k, vd = it["key"], verdicts.get(it["key"], {})
+        e = led.get(k)
+        if not e:
+            continue
+        verdict, why = vd.get("verdict", "unsure"), vd.get("reason", "")[:240]
+        e.setdefault("reviews", []).append({"at": now, "by": by, "verdict": verdict, "reason": why,
+                                            "evidence": it["images"]})
+        if verdict == "pass" and by not in (e.get("by"), e.get("fixedBy")):
+            e.update(state="fixed", fixed=now, fixedAt=git_head(), confirmedBy=by, evidence=it["images"][0])
+            e.setdefault("history", []).append({"opened": e["opened"], "fixed": now, "why": e.get("why", "")[:160]})
+        elif verdict == "fail":
+            e["state"] = "open"
+            e.setdefault("notes", []).append(f"{now}: {by} rejected the fix: {why}")
+        else:
+            e.setdefault("notes", []).append(f"{now}: {by} unsure ({why}); the owner should look")
+        say(f"  {k}: {verdict}: {why[:100]}")
+    save_issues(led)
+    event("review_finished", items=len(items), verdicts={k: v.get("verdict") for k, v in verdicts.items()})
+    return verdicts
+
+
+def review_pages(agent_dir, context="", model="haiku"):
+    """The independent visual pass over a run's agent pages: BROKEN / REGRESSION become tracked issues."""
+    import review
+    found = review.pages(agent_dir, model, context)
+    # a second, independent look before a finding counts: the test's own before | after sheet, asked only whether the
+    # named defect is really in the picture (a page-level glance misreads layouts; one reviewer alone never blocks)
+    out = STORE / "review" / "evidence"
+    out.mkdir(parents=True, exist_ok=True)
+    asks = []
+    for kind, test, v, what in found:
+        sheet = results.compare(test, v or "shaders") if kind != "CHECK" else None
+        if sheet is not None:
+            f = out / f"{test}--{v or 'shaders'}.png"
+            sheet.save(f)
+            asks.append({"key": f"{test}|{v or 'shaders'}", "title": test, "images": [str(f)],
+                         "claim": f"this defect is really visible in AFTER: {what[:200]}"})
+    second = review.claims(asks, model) if asks else {}
+    confirmed = []
+    for kind, test, v, what in found:
+        k = f"{test}|{v or 'shaders'}"
+        if kind != "CHECK" and second.get(k, {}).get("verdict") != "pass":
+            kind = "CHECK"  # not confirmed by the second look: a note to look at, never an issue or a block
+            what = f"(unconfirmed) {what}"
+        confirmed.append((kind, test, v, what))
+    found = confirmed
+    led = load_issues()
+    now = time.strftime("%Y-%m-%d %H:%M")
+    for kind, test, v, what in found:
+        if kind == "CHECK":
+            continue
+        k = f"{test}|{v or 'shaders'}"
+        e = led.get(k) if led.get(k, {}).get("state") in ACTIVE else None
+        e = e or {"test": k, "area": "review", "opened": now, "count": 0, "state": "open", "visual": True,
+                  "status": "review", "history": led.get(k, {}).get("history", [])}
+        e.update(lastSeen=now, count=e["count"] + 1, why=f"{kind}: {what}"[:300], reportedBy=f"ai-reviewer:{model}")
+        led[k] = e
+    save_issues(led)
+    return found
+
+
+def cmd_review(a):
+    """The independent reviewer by hand: claims (default: every needs-review issue) or --pages DIR."""
+    import review
+    if not review.available():
+        say("review: the claude CLI is not on PATH")
+        return 1
+    if a.pages:
+        found = review_pages(a.pages, a.note or "", a.model)
+        for f in found:
+            say(f"  {f[0]} {f[1]} [{f[2]}]: {f[3]}")
+        say(f"review: {len(found)} finding(s); BROKEN / REGRESSION are in harness.py issues")
+        return 0
+    keys = [k for k in load_issues() if any(k == t or k.split("|")[0] == t for t in a.ids)] if a.ids else None
+    review_claims(keys, a.model)
+    return 0
+
+
+# ================================================================================================ autonomous loop
+def cmd_auto(a):
+    """The harness on its own: verify fixes agents marked done, let the independent reviewer grade them, audit a
+    budgeted sample, review its pictures, write ISSUES.md, notify. Waits while the GPU is busy (the owner may be
+    playing) or another run owns the client. --once: one cycle (for a scheduled task)."""
+    import review
+    while True:
+        if gpu_busy() > 40 or OWNER.exists():
+            say(f"auto: busy (GPU {gpu_busy()}% or a run owns the client); next look in 10 min")
+            if a.once:
+                return 0
+            time.sleep(600)
+            continue
+        cycle = time.strftime("%Y-%m-%d %H:%M")
+        say(f"auto: cycle {cycle}")
+        if any(e.get("state") == "testing" for e in load_issues().values()):
+            sub = argparse.Namespace(**vars(a))
+            sub.action, sub.test, sub.md = "verify", None, False
+            cmd_issues(sub)
+        if review.available():
+            review_claims(model=a.model)
+        sub = argparse.Namespace(**vars(a))
+        sub.theme, sub.focus, sub.dry, sub.seed_audit = None, None, False, None
+        cmd_audit(sub)
+        agent_dir = results.REPORTS / f"audit-{a.budget}" / "agent"
+        if review.available() and (agent_dir / "index.txt").exists():
+            review_pages(agent_dir, "scheduled audit", a.model)
+        sub = argparse.Namespace(**vars(a))
+        sub.action, sub.test, sub.md = "list", None, True
+        cmd_issues(sub)
+        led = load_issues()
+        event("auto_cycle", at=cycle, open=sum(1 for e in led.values() if e.get("state") == "open"),
+              review=sum(1 for e in led.values() if e.get("state") == "needs-review"))
+        if a.once:
+            return 0
+        time.sleep(a.every * 60)
+
+
 def main():
     global VERBOSE
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -1985,6 +2183,9 @@ def main():
     p.add_argument("--base", default="origin/main")
     p.add_argument("--live", action="store_true", default=True)
     p.add_argument("--no-live", dest="live", action="store_false", help="checks + lab only (fast; live unverified)")
+    p.add_argument("--no-ai-review", dest="ai_review", action="store_false", default=True,
+                   help="skip the independent reviewer's pass over the pictures")
+    p.add_argument("--model", default="haiku", help="the independent reviewer's model")
     p.add_argument("--dry", action="store_true")
     p.add_argument("--install-hook", action="store_true")
     p.add_argument("--keep", action="store_true")
@@ -2009,6 +2210,19 @@ def main():
     p.add_argument("--previous", action="store_true", help="the run before this one")
     p.add_argument("--no-game-log", action="store_true")
     sub.add_parser("stop").add_argument("--after-test", action="store_true", help="let the current test finish")
+    p = sub.add_parser("review")
+    p.add_argument("ids", nargs="*", help="issues to review (default: every needs-review issue)")
+    p.add_argument("--pages", help="review a run's agent folder instead (BROKEN / REGRESSION become issues)")
+    p.add_argument("--note", help="pages: what changed")
+    p.add_argument("--model", default="haiku")
+    p = selection(sub.add_parser("auto"))
+    p.add_argument("--once", action="store_true", help="one cycle (a scheduled task)")
+    p.add_argument("--every", type=int, default=120, help="minutes between cycles")
+    p.add_argument("--budget", default="30m")
+    p.add_argument("--model", default="haiku")
+    p.add_argument("--keep", action="store_true")
+    p.add_argument("--rebuild", action="store_true")
+    p.add_argument("--force", action="store_true")
     p = sub.add_parser("wait")
     p.add_argument("--events", default="run_finished,client_crashed,run_stopped")
     p.add_argument("--timeout", type=int, default=0, help="seconds (0: no limit)")
@@ -2039,7 +2253,8 @@ def main():
      "status": cmd_status, "report": cmd_report, "cameras": cmd_cameras, "features": cmd_features, "export-tour": cmd_export_tour,
      "seed-legacy": cmd_seed_legacy, "clean": cmd_clean, "probe": cmd_probe, "zoom": cmd_zoom,
      "gate": cmd_gate, "open": cmd_open, "quarantine": cmd_quarantine, "trace": cmd_trace,
-     "audit": cmd_audit, "stop": cmd_stop, "wait": cmd_wait, "issues": cmd_issues}[a.cmd](a)
+     "audit": cmd_audit, "stop": cmd_stop, "wait": cmd_wait, "issues": cmd_issues,
+     "review": cmd_review, "auto": cmd_auto}[a.cmd](a)
 
 
 if __name__ == "__main__":

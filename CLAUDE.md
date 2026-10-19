@@ -22,6 +22,8 @@ ATLAS** (the far-field renderer `atlas_core` + the shader pack `shaderpack/Infin
   reviewer's `issues confirm <test> --by REVIEWER --evidence IMAGE`. A failed verify reopens it.
 * Visual claims ("matches", "fixed", "gone") name the exact two pictures compared and rest on a side-by-side or
   a metric, never a glance at one crop; the fixer does not confirm their own visual fix.
+* Independent review: `harness.py review` (a headless Haiku reviewer that sees only evidence and claim) grades
+  needs-review issues; the gate runs it over its pictures. `harness.py auto` runs verify / review / audit on its own.
 * Visual results: **hand them to the `visual-reviewer` subagent** (`.claude/agents/visual-reviewer.md`, Haiku) with
   the agent folder the run prints; never read stacks of screenshots in the main conversation. Ask for `zoom` crops when
   a detail matters. State plainly what is still unverified visually.

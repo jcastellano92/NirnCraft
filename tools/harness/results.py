@@ -212,8 +212,12 @@ def compare(scene, variant, width=640):
         sub += "   ! " + ", ".join(m["flags"])
     panels = [_label(after.resize(size), "after", sub, (255, 214, 120) if m.get("flags") else (235, 235, 235))]
     if before is not None:
-        panels.insert(0, _label(before.resize(size), "before", "previous capture"))
-        panels.append(_label(_diff_image(before, after).resize(size), "change", "x4 per-pixel difference"))
+        if m.get("notComparable"):  # not the same view / time / weather: shown, never diffed
+            panels.insert(0, _label(before.resize(size), "before: NOT COMPARABLE", "; ".join(m["notComparable"]),
+                                    (255, 110, 110)))
+        else:
+            panels.insert(0, _label(before.resize(size), "before", "previous capture"))
+            panels.append(_label(_diff_image(before, after).resize(size), "change", "x4 per-pixel difference"))
     h = max(p.height for p in panels)
     out = Image.new("RGB", (sum(p.width for p in panels) + 6 * (len(panels) - 1), h + 34), (10, 10, 12))
     d = ImageDraw.Draw(out)
