@@ -139,6 +139,39 @@ add_executable(atlas_lab tools/atlas_lab.cpp)
 target_include_directories(atlas_lab PRIVATE src)
 target_link_libraries(atlas_lab PRIVATE Threads::Threads)  # std::thread: glibc < 2.34 keeps pthread in libpthread
 
+# atlas_lab's two finalists in Slang (docs/ATLAS-LOD.md, "Slang port"): one kernel source for the CPU backend (Slang ->
+# C++) and Vulkan (Slang -> SPIR-V, the loader opened at run time); parity against atlas_lab's tracers, timings, memory.
+# 41035: slangc cannot see that the traversal stacks are written before they are read.
+set(LOD_SRC "${CMAKE_SOURCE_DIR}/shaders/atlas_lod.slang")
+foreach(rep boxes groups)
+  add_custom_command(
+    OUTPUT "${GEN}/atlas_lod_${rep}.spv"
+    COMMAND "${SLANGC}" "${LOD_SRC}" -target spirv -entry ${rep}Main -stage compute -O3 -warnings-disable 41035
+            -o "${GEN}/atlas_lod_${rep}.spv"
+    DEPENDS "${LOD_SRC}" COMMENT "slangc atlas_lod:${rep}Main -> SPIR-V")
+  add_custom_command(
+    OUTPUT "${GEN}/atlas_lod_${rep}_spv.h"
+    COMMAND "${CMAKE_COMMAND}" -DIN=${GEN}/atlas_lod_${rep}.spv -DOUT=${GEN}/atlas_lod_${rep}_spv.h -DNAME=atlas_lod_${rep}_spv
+            -P "${CMAKE_SOURCE_DIR}/cmake/embed_spv.cmake"
+    DEPENDS "${GEN}/atlas_lod_${rep}.spv" "${CMAKE_SOURCE_DIR}/cmake/embed_spv.cmake")
+endforeach()
+# precise floats on the CPU: the kernel's arithmetic as literal as atlas_lab's, so the two images agree exactly
+add_custom_command(
+  OUTPUT "${GEN}/atlas_lod_cpu.cpp"
+  COMMAND "${SLANGC}" "${LOD_SRC}" -target cpp -entry boxesMain -stage compute -entry groupsMain -stage compute -O3 -fp-mode precise
+          -warnings-disable 41035 -o "${GEN}/atlas_lod_cpu.cpp"
+  DEPENDS "${LOD_SRC}" COMMENT "slangc atlas_lod -> C++ (CPU backend)")
+add_executable(atlas_lab_gpu tools/atlas_lab_gpu.cpp src/vk_loader.cpp "${GEN}/atlas_lod_cpu.cpp" "${GEN}/atlas_lod_boxes_spv.h"
+               "${GEN}/atlas_lod_groups_spv.h")
+target_include_directories(atlas_lab_gpu PRIVATE src "${GEN}" "${SLANG_ROOT}/include" "${ATLAS_VK_INCLUDE}")
+target_compile_definitions(atlas_lab_gpu PRIVATE VK_NO_PROTOTYPES)
+target_link_libraries(atlas_lab_gpu PRIVATE Threads::Threads ${CMAKE_DL_LIBS})
+if(MSVC)
+  set_source_files_properties("${GEN}/atlas_lod_cpu.cpp" PROPERTIES COMPILE_OPTIONS "/fp:precise;/W0")
+else()
+  set_source_files_properties("${GEN}/atlas_lod_cpu.cpp" PROPERTIES COMPILE_OPTIONS "-ffp-contract=off;-fno-fast-math;-w")
+endif()
+
 add_executable(atlas_tests tests/test_main.cpp src/svdag.cpp)
 target_include_directories(atlas_tests PRIVATE src include)
 target_link_libraries(atlas_tests PRIVATE atlas_core Threads::Threads)

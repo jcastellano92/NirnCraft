@@ -288,6 +288,82 @@ content box (6 numbers a voxel) fixes most of it at about half the micro-voxels'
 forests, gates), the near-view capture of the same blocks against `ref` (validates the library), a hierarchical
 traversal for the cost numbers, then the winner ported to Slang.
 
+## Slang port
+
+Both finalists run through the renderer's own Slang paths: `native/shaders/atlas_lod.slang` (entries `boxesMain`,
+`groupsMain`) compiles to C++ for the CPU backend and to SPIR-V for Vulkan, like atlas_far. `atlas_lab_gpu` (target of
+the same name) loads atlas_lab's inputs, builds the hierarchies with atlas_lab's own builders (atlas_lab_scene.hpp, the
+code atlas_lab runs, moved out of it unchanged: same output bit for bit), flattens them (atlas_lod_build.hpp) and checks
+the kernels against atlas_lab's tracers:
+
+    atlas_lab_gpu synth=<dir>                                   a small synthetic scene of our own (no game assets)
+    atlas_lab_gpu blocks=<dir>/blocks.bin volume=<dir>/x.alv [dist=10,50,200,600,1500] [backend=vulkan] [w=1920 h=1080]
+
+**Layout.** One 16-byte node for both hierarchies (`uint4`): the content's tight box in micro-voxels (12 bits a
+coordinate: volumes up to 1023 blocks a side, so the renderer keeps one tree per region in region coordinates), the
+flattening error (12 bits, an integer number of micro-voxels, saturating: drawn later, never earlier), an 8-bit child
+mask and the first child (children contiguous: the octree's occupied octants in octant order, the groups' left and
+right side by side). The octree's single micro-voxels are not stored: a 2^3 node's mask says which of its octants are
+filled and the kernel rebuilds their boxes from its own (seven in eight of atlas_lab's octree entries are such leaves
+or empty octants). Face texels are **not** stored per node: a drawn box finds each texel by walking the column under it in a
+micro-voxel brick pool (per block a brick index; per brick the block's resolved 4 x 4 x 4 occupancy, leaves' cutout
+hashed in, and its state; per state its 6 x 4 x 4 texels, mean colour and tint), exactly as atlas_lab's boxFace walks
+microAt. Storing every node's faces at micro-voxel resolution instead would cost far more than the nodes (the "faces MB"
+column below: every level of the hierarchy repeats the surface), and the pool is what a block world costs anyway; the
+price is the walk (one fetch where the content is at the face, the box's depth through a hole). Traversal is iterative
+with a fixed stack a thread: the octree one entry per level (8 bytes: the first child and the rest of that level's
+children sorted by entry, 3 bits each; 16 levels, 128 bytes), the groups one per level (the farther child; 64 levels,
+256 bytes; the builder refuses deeper trees).
+
+| scene | boxes: nodes / MB (atlas_lab's tree; faces MB) | groups: nodes / MB (atlas_lab's; faces MB) | brick pool |
+|---|---|---|---|
+| synthetic tree, hut, pond (40 x 20 x 40) | 33 k / 0.54 (5.4; 12) | 10 k / 0.17 (0.25; 4.6) | 0.14 MB |
+| Falkreath core (65 x 51 x 65) | 365 k / 5.8 (58; 131) | 78 k / 1.25 (1.9; 54) | 0.96 MB: 1,744 bricks, 172 states |
+| Falkreath area (129 x 61 x 129) | 1.61 M / 25.7 (257; 569) | 266 k / 4.25 (6.4; 184) | 4.26 MB: 4 MB of it the dense block grid |
+
+Builds on the CPU (atlas_lab's builders, one thread): the area's octree 4.3 s, its groups 12.8 s; flattening 0.1 s.
+
+**Parity** (CPU backend against atlas_lab, same jitter, seeds and dithering): the images are identical at every
+distance on all three scenes, 10 m to 4 km: iou 1.0000, dE 0.000, largest channel difference 0, the same steps per ray
+(the C++ is compiled with precise floats; the kernel mirrors atlas_lab's operation order). For scale, atlas_lab against
+itself with other seeds (what the dithering alone moves): dE 0.06 at 10 m, 0.6 at 200 m, 2.2 at 1500 m, 3.3 at 4 km.
+Against ref (micro-voxels, 64 samples) the kernels reproduce the table above (Falkreath area):
+
+| | 10 m | 50 m | 200 m | 600 m | 1500 m | 4000 m |
+|---|---|---|---|---|---|---|
+| boxes iou / dE / steps | 1.000 / 0.04 / 16 | 1.000 / 0.12 / 18 | 1.000 / 0.40 / 11 | 0.996 / 1.4 / 2.3 | 0.990 / 2.3 / 1.8 | 0.978 / 3.4 / 1.6 |
+| groups | 1.000 / 0.04 / 31 | 1.000 / 0.15 / 35 | 0.999 / 0.43 / 19 | 0.997 / 1.4 / 3.9 | 0.991 / 2.2 / 3.0 | 0.974 / 3.4 / 2.6 |
+
+**Cost on the CPU backend** (10 threads, a 1920 x 1080 frame through the object; Falkreath area): at 10 m (87 % of the
+frame on the town) boxes 621 ms, groups 574 ms (atlas_lab's hand-written tracer on the same threads: 384, 368); from
+200 m the town is a few percent of the frame and a frame is 20 - 50 ms, mostly the sky's rays. The generated C++ is
+about 1.6x slower than atlas_lab's: it is a reference, not the fast path.
+
+**Vulkan** (`backend=vulkan`; RTX 3090, the dispatch alone by GPU timestamps, median of 32 frames after a warm-up, no
+game running). The images agree with the CPU backend's: the same silhouette and steps per ray at every distance, mean
+dE at most 0.002, under 0.02 % of pixels beyond dE 1 (worst 2.4: the SPIR-V is not built with precise floats). A 1920 x
+1080 frame through the object, ms:
+
+| | 10 m | 50 m | 200 m | 600 m - 4 km |
+|---|---|---|---|---|
+| boxes, core | 1.62 | 0.90 | 0.16 | 0.14 - 0.16 |
+| groups, core | 0.97 | 0.53 | 0.12 | 0.12 |
+| boxes, area | 2.00 | 1.47 | 0.26 | 0.19 |
+| groups, area | 1.20 | 0.93 | 0.17 | 0.14 - 0.16 |
+
+At 10 m over the area (87 % of the frame on the town; 15 and 27 steps a ray) that is 1.0 G rays/s for boxes and 1.7 G
+for groups: **groups are the faster on the GPU despite nearly twice the steps**, because an octree descent fetches and
+sorts up to 8 children in local memory where a group compares 2. 0.12 - 0.19 ms is what the sky's rays cost (ray setup,
+the root box).
+
+Before the renderer can use it: a tree per region in region coordinates under a top-level structure over regions (the
+12-bit boxes), and the brick pool from the world's sections instead of a dense grid per volume; a bound on the face walk
+through holes (a hole costs the box's depth in micro-voxel fetches: a per-face first-hit depth or a coarse occupancy
+mip); building and updating groups on the GPU (LBVH, then SAH refinement; the CPU build takes 13 s for the area) with
+edits from the change feed; 16 x 16 face texels from a per-texture atlas (texture resolution up close); the G-buffer the
+pack lights (normal, material class, depth against the near field) and the far pass's jitter, fog and hand-off; then
+timings over real far-field scenes (terrain to the horizon, not one town in the sky).
+
 ## Status (branch atlas-render)
 
 * Done: trees at level 0 grown by their real features (AtlasTrees); real chunks' columns in the change feed (ground,
