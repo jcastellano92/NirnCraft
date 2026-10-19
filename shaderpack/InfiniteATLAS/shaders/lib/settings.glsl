@@ -75,3 +75,12 @@
 const int shadowMapResolution = 2048; // [1024 2048 3072 4096]
 const float shadowDistance = 128.0; // [64.0 96.0 128.0 192.0 256.0]
 const float sunPathRotation = -25.0; // [-40.0 -30.0 -25.0 -15.0 0.0]
+
+// Iris lists a #define as a toggle in the settings menu only when some #ifdef / #ifndef tests it; these are otherwise
+// tested with `#if defined X && ...` only
+#ifdef VOLUMETRIC_LIGHT
+#endif
+#ifdef POM
+#endif
+#ifdef LUNAR_KEY
+#endif
