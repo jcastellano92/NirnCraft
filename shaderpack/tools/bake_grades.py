@@ -106,8 +106,33 @@ GRADES = [
     # Summerset and the southern isles: clean, bright, soft gold
     grade("summerset", temp=0.15, chroma=1.04, bands=((255, 40, 0, 1.06, 0.0), (330, 40, 0, 1.08, 0.0)),
           shadows=(-0.002, -0.008), highlights=(0.004, 0.010), contrast=0.0, lift=0.004),
+    # interiors (the place the player is in, from the mod: lib/grade.glsl interiorGrade). Nordic barrows and tombs:
+    # cold blue-grey stone, deep shadows, the torches' warmth only in the highlights
+    grade("interior_barrow", temp=-0.35, chroma=0.75, shadows=(-0.006, -0.014), highlights=(0.004, 0.008),
+          contrast=0.14),
+    # Dwemer ruins: brass and amber, hard contrast
+    grade("interior_dwemer", temp=0.4, chroma=0.95, bands=((40, 40, -4, 1.15, 0.0),), shadows=(0.004, -0.004),
+          highlights=(0.008, 0.014), contrast=0.16),
+    # caves and mines: earthy, damp teal shadows
+    grade("interior_cave", temp=0.05, chroma=0.85, shadows=(-0.006, -0.006), highlights=(0.004, 0.010), contrast=0.10),
+    # forts, towers, bandit holds: neutral stone, warm torchlight
+    grade("interior_fort", temp=0.15, chroma=0.88, shadows=(-0.004, -0.008), highlights=(0.004, 0.012), contrast=0.12),
+    # Oblivion and Daedric places: smouldering red, crushed greens
+    grade("interior_oblivion", temp=0.3, chroma=0.9, bands=((20, 40, 0, 1.2, 0.0), (130, 40, -20, 0.5, 0.0)),
+          shadows=(0.012, 0.002), highlights=(0.008, 0.010), contrast=0.22),
+    # temples, shrines, Sovngarde's hall: soft gold, lifted
+    grade("interior_sacred", temp=0.2, chroma=0.95, highlights=(0.004, 0.012), contrast=0.0, lift=0.006),
+    # homes, manors and inns: the hearth's warmth
+    grade("interior_home", temp=0.3, chroma=1.0, shadows=(0.004, 0.0), highlights=(0.006, 0.012), contrast=0.06),
 ]
 GRADE_INDEX = {g["name"]: i for i, g in enumerate(GRADES)}
+
+# LocationKind.icon (mod/src/main/java/com/nirncraft/world/LocationKind.java) -> interior grade
+INTERIOR_GRADE = {1: "interior_barrow", 2: "interior_cave", 3: "interior_cave", 4: "interior_fort", 5: "interior_fort",
+                  7: "interior_barrow", 8: "interior_dwemer", 9: "interior_sacred", 11: "interior_oblivion",
+                  12: "interior_oblivion", 14: "interior_home", 15: "interior_sacred", 16: "interior_home",
+                  18: "interior_sacred", 19: "interior_barrow", 20: "interior_barrow", 21: "interior_fort",
+                  22: "interior_oblivion", 30: "interior_oblivion"}
 
 # region id -> grade (regions.json ids); anything unlisted falls back by its climate ("weather")
 REGION_GRADE = {
@@ -304,6 +329,9 @@ def main() -> None:
         f"const vec2 GRADE_MAP_ORIGIN = vec2({MAP_MIN_X}.0, {MAP_MIN_Z}.0);  // world x, z of texel (0, 0)'s corner\n"
         f"const float GRADE_MAP_CELL = {GRADE_CELL}.0;  // blocks per texel\n"
         f"const ivec2 GRADE_MAP_SIZE = ivec2({gmap.shape[1]}, {gmap.shape[0]});\n"
+        "// LocationKind.icon -> interior grade (-1: none)\n"
+        "const int INTERIOR_GRADE[32] = int[](" + ", ".join(
+            str(GRADE_INDEX[INTERIOR_GRADE[k]]) if k in INTERIOR_GRADE else "-1" for k in range(32)) + ");\n"
         "#endif\n", encoding="utf-8", newline="\n")
     print(f"bake_grades: {len(GRADES)} grades -> {tex / 'grade_lut.png'} ({lut.shape[1]}x{lut.shape[0]}), "
           f"map {gmap.shape[1]}x{gmap.shape[0]} texels of {GRADE_CELL} blocks")

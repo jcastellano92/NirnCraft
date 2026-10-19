@@ -68,6 +68,16 @@ vec2 toScreen(vec3 view) {
 }
 
 // the opaque scene at uv: lit near field, aerial perspective, the far field under it, ground fog over both
+// the near / far hand-off band the mod's far field actually uses (it starts its march there), published in the mod's
+// data texture; the pack's own setting only without the mod (one source of truth: a mismatch drew a ring)
+float handoffBand() {
+    if (haveSmoke()) {
+        float b = texelFetch(smokeSourcesTex, ivec2(17, 0), 0).r * 64.0;
+        if (b > 1.0) return b;
+    }
+    return ATLAS_HANDOFF_BAND;
+}
+
 vec3 sceneAt(vec2 uv, vec3 sun, bool marched) {
     vec3 col = texture(colortex4, uv).rgb;
     float d = texture(depthtex1, uv).r;
@@ -77,13 +87,26 @@ vec3 sceneAt(vec2 uv, vec3 sun, bool marched) {
     float dist = sky ? 1e30 : length(vp);
     if (!sky) col = applyAerial(col, dir, sun, dist, cameraPosition.y, rainStrength);
     float fogDist = dist;
+    // a far-field silhouette pixel: part far terrain, part what is behind it. Each part is fogged at its own distance
+    // (one fog distance for the blend left a dark rim or a bright halo around every far object)
+    bool farEdge = false;
+    vec4 edgeFar = vec4(0.0);
+    float edgeDist = 1e30;
 #ifdef ATLAS_FAR_FIELD
     if (atlasPresent()) {
     vec4 farc = atlasColorAt(uv);
     float farDist = atlasDepthAt(uv);
     vec3 over = col * (1.0 - farc.a) + farc.rgb;
-    float handEnd = far - 16.0, handStart = handEnd - ATLAS_HANDOFF_BAND;
-    if (dist >= handStart && dist < handEnd) col = mix(col, over, smoothstep(handStart, handEnd, dist));
+    float handEnd = far - 16.0, handStart = handEnd - handoffBand();
+    if (dist >= handStart && dist < handEnd) {  // smootherstep: no visible start or end of the crossfade
+        float x = clamp((dist - handStart) / (handEnd - handStart), 0.0, 1.0);
+        col = mix(col, over, x * x * x * (x * (x * 6.0 - 15.0) + 10.0));
+    }
+    else if (farc.a > 0.002 && farc.a < 0.998 && (sky || dist >= atlasEdgeDepth(uv))) {
+        farEdge = true;  // col stays what is behind; the far part is fogged and laid over at the end
+        edgeFar = farc;
+        edgeDist = atlasEdgeDepth(uv);
+    }
     else if (sky || dist >= farDist) {
         col = over;
         fogDist = min(dist, farDist);
@@ -96,9 +119,16 @@ vec3 sceneAt(vec2 uv, vec3 sun, bool marched) {
         col = col * pl.a + pl.rgb;
     }
     if (sky && fogDist >= 1e29) col += lightningSky(dir, outdoorExposure(cameraPosition, cameraPosition));
-    else if (fogDist >= far) col += lightningSky(dir, outdoorExposure(cameraPosition, cameraPosition)) * 0.35;  // on the far field
-    if (isEyeInWater == 0)
+    else if (fogDist >= far && fogDist < 1e29)  // on the far field: lit around each strike, not uniformly
+        col += lightningTerrain(dir * fogDist, outdoorExposure(cameraPosition, cameraPosition));
+    if (isEyeInWater == 0) {
         col = applyMedia(col, dir, fogDist, sun, cameraPosition, wetness, rainStrength, airClock(), ign(gl_FragCoord.xy, 0.0), marched);
+        if (farEdge) {  // the far part at its own distance: media(c) = c * T + S, so the premultiplied part is far * T + S * a
+            vec3 s0 = applyMedia(vec3(0.0), dir, edgeDist, sun, cameraPosition, wetness, rainStrength, airClock(), ign(gl_FragCoord.xy, 0.0), marched);
+            vec3 t1 = applyMedia(vec3(1.0), dir, edgeDist, sun, cameraPosition, wetness, rainStrength, airClock(), ign(gl_FragCoord.xy, 0.0), marched) - s0;
+            col = col * (1.0 - edgeFar.a) + edgeFar.rgb * t1 + s0 * edgeFar.a;
+        }
+    } else if (farEdge) col = col * (1.0 - edgeFar.a) + edgeFar.rgb;
     return col;
 }
 
@@ -319,5 +349,5 @@ void main() {
 #if defined VOLUMETRIC_LIGHT && defined SHAFT_MARCH
     if (isEyeInWater == 0) shafts = shaftsMarch(dir, dist0, sun, gl_FragCoord.xy, wetness, rainStrength);
 #endif
-    outColor = vec4(col, shafts);
+    outColor = vec4(finite(col), finite(shafts));  // feeds the mip chain (bloom, exposure)
 }

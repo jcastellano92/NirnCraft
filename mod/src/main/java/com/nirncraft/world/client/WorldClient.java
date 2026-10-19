@@ -7,6 +7,13 @@ import net.minecraft.network.chat.Component;
 public final class WorldClient {
     private WorldClient() {}
 
+    /** The enclosed place the player is in (LocationKind.icon), -1 outside: the pack's interior grade follows it. */
+    public static volatile int interior = -1;
+
+    public static void interior(int kind) {
+        interior = kind;
+    }
+
     public static void cue(int cue) {
         if (cue == WorldPackets.Cue.DISCOVERY) MusicController.playDiscoverySting();
     }

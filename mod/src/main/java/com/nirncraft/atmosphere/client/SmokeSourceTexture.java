@@ -28,6 +28,8 @@ public final class SmokeSourceTexture {
     private static int activeSources;
     private static ClientLevel tracked;
     private static final float[] AURORA = new float[com.nirncraft.atmosphere.AuroraMath.VALUES];
+    private static int interiorKind = -1;
+    private static float interiorStrength;
 
     private SmokeSourceTexture() {}
 
@@ -71,6 +73,13 @@ public final class SmokeSourceTexture {
         // the far field's near / far hand-off band (blocks / 64): the pack's crossfade uses the same one. Row 0 from
         // texel 17 on is free (row 1's odd texels from 17 hold the aurora)
         image.setPixelABGR(17, 0, rgba(Math.min(1f, com.nirncraft.atlas.AtlasClient.handoffBand / 64f), 0f, 0f, 1f));
+        // the enclosed place the player is in (LocationKind.icon, from the server) and how far the look has eased into
+        // it (about 2 s): the pack's interior grade (lib/grade.glsl). The kind stays while the look eases out
+        int inside = com.nirncraft.world.client.WorldClient.interior;
+        if (inside >= 0) interiorKind = inside;
+        interiorStrength += ((inside >= 0 ? 1f : 0f) - interiorStrength) * 0.08f;
+        if (interiorStrength < 0.01f && inside < 0) interiorKind = -1;
+        image.setPixelABGR(18, 0, rgba((interiorKind + 1) / 255f, interiorStrength, 0f, 1f));
         image.setPixelABGR(3, 1, rgba(NightSkyState.visibility, NightSkyState.pollution,
                 NightSkyState.masserLight, NightSkyState.secundaLight));
         double solarAngle = com.nirncraft.atmosphere.client.SkyEnvironment.sunCycle(level, 1f) * Math.PI * 2;

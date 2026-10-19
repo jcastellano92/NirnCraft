@@ -22,6 +22,25 @@ public final class WorldPackets {
         SkyNetwork.register(RestHint.class, PacketFlow.CLIENTBOUND, RestHint::encode, RestHint::decode, RestHint::handle);
         SkyNetwork.register(Rest.class, PacketFlow.SERVERBOUND, Rest::encode, Rest::decode, Rest::handle);
         SkyNetwork.register(FastTravel.class, PacketFlow.SERVERBOUND, FastTravel::encode, FastTravel::decode, FastTravel::handle);
+        SkyNetwork.register(Interior.class, PacketFlow.CLIENTBOUND, Interior::encode, Interior::decode, Interior::handle);
+    }
+
+    /**
+     * The kind of enclosed place the player is in (LocationKind.icon: a barrow, a Dwemer ruin, a cave ...), -1 outside;
+     * sent when it changes. The client's look follows it (the shader pack's interior grade).
+     */
+    public record Interior(int kind) {
+        static void encode(Interior m, RegistryFriendlyByteBuf buf) {
+            buf.writeVarInt(m.kind + 1);
+        }
+
+        static Interior decode(RegistryFriendlyByteBuf buf) {
+            return new Interior(buf.readVarInt() - 1);
+        }
+
+        static void handle(Interior m, IPayloadContext ctx) {
+            Sides.runOn(Dist.CLIENT, () -> () -> WorldClient.interior(m.kind));
+        }
     }
 
     // ------------------------------------------------------------------ S2C

@@ -12,6 +12,7 @@
 #include "/lib/air.glsl"
 #include "/lib/keylight.glsl"
 #include "/lib/quality.glsl"
+#include "/lib/taa.glsl"
 
 #ifdef SHADOWS
 uniform sampler2DShadow shadowtex0;
@@ -53,7 +54,7 @@ float sunShadow(vec3 playerPos, vec3 n, vec3 toLight, vec2 px, float spread) {
     float uvPerBlock = 0.5 * shadowProjection[0][0] / f;
     float blocksPerDepth = 8.0 / abs(shadowProjection[2][2]);
     float cone = 2.0 * tan(spread);  // penumbra width per block of gap
-    float rot = ign(px, 0.0) * 6.2831853;
+    float rot = ign(px, taaPhase()) * 6.2831853;
     // blocker search: the mean depth of what lies towards the light within the widest penumbra a 24-block gap makes
     float search = clamp(24.0 * cone * uvPerBlock, 2.0 * texel, 32.0 * texel);
     float blockers = 0.0, nb = 0.0;

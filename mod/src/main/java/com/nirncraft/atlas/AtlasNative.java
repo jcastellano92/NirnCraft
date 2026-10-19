@@ -26,7 +26,7 @@ import static java.lang.foreign.ValueLayout.JAVA_SHORT;
  */
 public final class AtlasNative {
     /** The ABI this binding is written for (0.11: far content + failure handling); the mod ships matching natives. */
-    public static final int ABI_VERSION = 0x000C00, ABI_MIN = 0x000B00;  // 0.12: atlas_set_moon (optional)
+    public static final int ABI_VERSION = 0x000D00, ABI_MIN = 0x000B00;  // 0.12: atlas_set_moon, 0.13: atlas_set_jitter (optional)
     public static final int BACKEND_CPU = 0, BACKEND_VULKAN = 1;
     /** AtlasStatus (atlas.h). */
     public static final int OK = 0, ERR_ARG = -1, ERR_STATE = -2, ERR_IO = -3, ERR_GPU = -4, ERR_UNSUPPORTED = -5,
@@ -121,7 +121,7 @@ public final class AtlasNative {
     private final Arena libArena;
     private final MethodHandle abiVersion, buildInfo, create, destroy, lastError, setPalette, uploadTile,
             uploadSection, notifyBlock, setWeather, setCloudNoise, setActors, update, render, getStats,
-            glAttach, glRenderIo, glDetach, info, previewLoadRaster, previewGenerate, previewHeight, uploadHeights, uploadHeights2, hasTile, uploadStructures, uploadStructures2, uploadHeights3, setMaterials, setSunMap, setMoon, setTransitions, setLightGroup, setLightBudget,
+            glAttach, glRenderIo, glDetach, info, previewLoadRaster, previewGenerate, previewHeight, uploadHeights, uploadHeights2, hasTile, uploadStructures, uploadStructures2, uploadHeights3, setMaterials, setSunMap, setMoon, setJitter, setTransitions, setLightGroup, setLightBudget,
             heightCreate, heightDestroy, heightLastError, heightDevice, heightSetNoise, heightBatch;
     // abi 0.10 (null with a 0.9 library)
     private final MethodHandle memoryInfo, setClipmap, debugFault;
@@ -196,6 +196,7 @@ public final class AtlasNative {
         setClipmap = bindOptional(l, lib, "atlas_set_clipmap", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT));
         debugFault = bindOptional(l, lib, "atlas_debug_fault", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, JAVA_INT));
         setMoon = bindOptional(l, lib, "atlas_set_moon", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, ADDRESS));
+        setJitter = bindOptional(l, lib, "atlas_set_jitter", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_FLOAT, JAVA_FLOAT));
     }
 
     private static MethodHandle bindOptional(Linker l, SymbolLookup lib, String name, FunctionDescriptor fd) {
@@ -520,6 +521,20 @@ public final class AtlasNative {
             try (Arena a = Arena.ofConfined()) {
                 MemorySegment d = a.allocateFrom(JAVA_FLOAT, dir), r = a.allocateFrom(JAVA_FLOAT, radiance);
                 check((int) setMoon.invokeExact(ptr, d, r), "atlas_set_moon");
+                return true;
+            } catch (Throwable t) {
+                throw rethrow(t);
+            }
+        }
+
+        /**
+         * (abi 0.13) The primary rays' sub-pixel offset in atlas pixels (atlas.h atlas_set_jitter), for the pack's TAA.
+         * A core without it renders unjittered; false then.
+         */
+        public boolean setJitter(float x, float y) {
+            if (setJitter == null) return false;
+            try {
+                check((int) setJitter.invokeExact(ptr, x, y), "atlas_set_jitter");
                 return true;
             } catch (Throwable t) {
                 throw rethrow(t);

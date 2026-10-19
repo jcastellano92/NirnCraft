@@ -69,6 +69,7 @@
 #define MOD_SKY                 // Nirn's sky from the mod: Masser and Secunda, the live aurora, the mod's sky options
 #define LUNAR_KEY               // nights lit (and shadowed) by the brighter moon, Masser or Secunda
 #define BLOOM                   // glow around bright lights, lava, fire and magic
+#define TAA                     // temporal anti-aliasing: smooth edges and distant detail near and far (lib/taa.glsl)
 #define EMISSIVE_STRENGTH 4.0 // [2.0 3.0 4.0 6.0] brightness of flames and other added light (the mod's fire meshes)
 #define FALLBACK_CLOUDS 2 // [0 1 2] the pack's own cloud deck when atlas's far field is absent: 0 none, 1 flat, 2 self-shadowed
 

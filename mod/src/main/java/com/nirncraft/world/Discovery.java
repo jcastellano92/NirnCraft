@@ -183,6 +183,7 @@ public final class Discovery {
                 checkStructures(player);
             }
             checkRegion(player);
+            checkInterior(player);
         } catch (RuntimeException e) {
             NirnCraft.LOGGER.debug("NirnCraft discovery check failed for {}", player.getName().getString(), e);
         }
@@ -296,6 +297,37 @@ public final class Discovery {
     }
 
     // ------------------------------------------------------------------ structures
+
+    private static final Map<UUID, Integer> LAST_INTERIOR = new HashMap<>();
+
+    /** Tells the client when the enclosed place it is in changes (interiorKind). */
+    private static void checkInterior(ServerPlayer player) {
+        int kind = interiorKind(player);
+        Integer last = LAST_INTERIOR.put(player.getUUID(), kind);
+        if (last == null || last != kind) SkyNetwork.sendToPlayer(player, new WorldPackets.Interior(kind));
+    }
+
+    /**
+     * The kind of enclosed place the player stands in (LocationKind.icon), for the client's look: inside a piece of an
+     * underground or walled place (barrow, Dwemer ruin, fort, mine ...) under a roof, or a natural cave well below the
+     * surface; -1 in the open.
+     */
+    static int interiorKind(ServerPlayer player) {
+        ServerLevel level = (ServerLevel) player.level();
+        BlockPos pos = player.blockPosition();
+        if (!level.isLoaded(pos)) return -1;
+        int surface = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                pos.getX(), pos.getZ());
+        if (surface - pos.getY() <= 2) return -1;  // nothing overhead: outdoors
+        StructureManager structures = level.structureManager();
+        for (Structure structure : structures.getAllStructuresAt(pos).keySet()) {
+            LocationKind kind = LocationTags.classify(level, structure);
+            if (kind == null || !kind.insidePieces) continue;
+            StructureStart start = structures.getStructureWithPieceAt(pos, h -> h.value() == structure);
+            if (start != null && start.isValid()) return kind.icon;
+        }
+        return surface - pos.getY() > 12 && !level.canSeeSky(pos) ? LocationKind.CAVE.icon : -1;
+    }
 
     private static void checkStructures(ServerPlayer player) {
         ServerLevel level = (ServerLevel) player.level();
@@ -468,5 +500,6 @@ public final class Discovery {
     @SubscribeEvent
     public static void onLogout(PlayerEvent.PlayerLoggedOutEvent event) {
         LAST_HOLD.remove(event.getEntity().getUUID());
+        LAST_INTERIOR.remove(event.getEntity().getUUID());
     }
 }

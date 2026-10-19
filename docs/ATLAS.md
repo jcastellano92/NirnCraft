@@ -217,7 +217,8 @@ What the far field now shows is what the near field will build, from the mod's o
 * **Transitions.** `atlas_set_transitions(0.6 s)`: a region rebuilt over a resident one (an exact tile replacing
   the stand-in, buildings arriving, a finer LOD entering the window over the coarser one) keeps the old one packed
   and dissolves into the new per pixel; `ATLAS_FRAME_LOD_DITHER` gives each pixel its own LOD segment phase, so a
-  level change is a stipple band instead of a line. Both screen-stable (the pack has no temporal accumulation).
+  level change is a stipple band instead of a line. Both screen-stable without TAA; with the pack's TAA (ABI 0.13)
+  they move per frame and the resolve averages them into a smooth fade.
 * **Far actors.** The dragon impostor has a neck, head, tail and hinged two-part wings beating at 0.8 Hz (gliding
   when descending, folded on the ground: `AtlasActor.flags`); the packet carries the entity id, and an impostor the
   client also tracks dissolves out over 0.6 s (the server now sends actors from 32 blocks inside the tracking range).
@@ -226,6 +227,14 @@ ABI 0.10 (minor bump; everything 0.9 still works): `atlas_set_transitions`, `atl
 `atlas_set_light_budget`, `atlas_upload_column_heights3`, `atlas_upload_column_structures2`; `AtlasActor.flags`
 (in the old padding), `AtlasLight`, `ATLAS_FRAME_LOD_DITHER`, `ATLAS_CLASS_FALLS`, `ATLAS_COLUMN_*`. Network:
 `FarActors` gains id/flags, new `FarSites`; tile codec 3 (caches re-key: `Hello` carries the codec version).
+
+ABI 0.12 (2026-10-19): `atlas_set_moon` (the pack's lunar key lights the far night too), `ATLAS_FRAME_FILL_NEAR`
+(where the near field drew nothing in the open, the far field fills from 2 m). ABI 0.13: `atlas_set_jitter` (primary
+rays offset by the pack's TAA sequence; `AtlasClient` sets it only while Infinite ATLAS runs with its TAA option on,
+read from Iris' option file; the cloud history reprojects unjittered, and the screen-fixed dithers then move per
+frame for the resolve). Both optional: a 0.11 core still loads. The mod's data texture `smoke_sources.png` row 0
+texel 17 = the hand-off band / 64 (the pack's crossfade), texel 18 = the interior (LocationKind.icon + 1, eased
+strength) for the pack's interior grade.
 
 Offline checks: `native\build.ps1` (new tests: fades, LOD dither, dragon motion and fades, far lights day/night and
 occlusion, surface overrides and frozen water, lights in the CPU/Vulkan parity scene);

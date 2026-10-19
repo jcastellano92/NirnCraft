@@ -54,6 +54,7 @@ struct FrameGpu {
     uint4 sunMapRows;        // first row, row count, size, enabled
     float4 moonDir;          // (abi 0.12) night key light towards the moon, w = 1 when the host set it
     float4 moonRad;          // its radiance (before the night fade)
+    float4 jitter;           // (abi 0.13) primary-ray NDC offset x, y; z = 1 when the host jitters (TAA)
 };
 
 // the frame's moon, copied by each entry point (the shared lighting has no frame of its own)

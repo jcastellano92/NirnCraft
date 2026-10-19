@@ -269,6 +269,10 @@ public final class AtlasClient {
             frame.sunY = sun[1];
             frame.sunZ = sun[2];
             frame.timeSec = (state.gameTime + state.worldPartialTicks) / 20f;
+            // visual tests: the clouds (and their shadows) still, so the views of a pair taken seconds apart see one
+            // sky (the day time stands still there: the clock of the scene's time of day)
+            if (com.nirncraft.client.autotest.ClientAutotest.ENABLED && mc.level != null)
+                frame.timeSec = Math.floorMod(mc.level.getOverworldClockTime(), 24000L) / 20f;
             if (sun[1] < 0f && mc.level != null) {  // night: the pack's moon, not a fixed one (both fields alike)
                 float[] key = com.nirncraft.atmosphere.client.LunarKey.compute(mc.level, sun, sunPathRotationDeg,
                         state.worldPartialTicks);
@@ -279,6 +283,7 @@ public final class AtlasClient {
                 }
             }
             frame.lodBias = quality.lodBias();  // > 1: coarser levels sooner with distance (far detail goes first)
+            jitter(ctx, pack && packTaa(mc));
             // the pack draws the sky; atlas adds far terrain, clouds and far actors over it (no pack: no clouds,
             // NirnCraft's own cloud deck draws them)
             frame.flags = quality.flags(AtlasNative.FRAME_SHADOWS | AtlasNative.FRAME_ATMOS | AtlasNative.FRAME_CLOUDS
@@ -653,6 +658,66 @@ public final class AtlasClient {
     }
 
     /** True while an Iris shader pack renders the world (false without Iris). */
+    private static int jitterIndex;
+    private static boolean jittering;
+    private static long taaCheckedAt;
+    private static boolean taaOn;
+
+    /**
+     * The far field's sub-pixel jitter for the pack's TAA (8 Halton (2, 3) offsets, one per frame), or none: without a
+     * temporal resolve a jittered far field would visibly shake by a pixel.
+     */
+    private static void jitter(AtlasNative.Context ctx, boolean on) {
+        try {
+            if (on) {
+                int i = (jitterIndex++ & 7) + 1;
+                jittering = ctx.setJitter(halton(i, 2) - 0.5f, halton(i, 3) - 0.5f);
+            } else if (jittering) {
+                ctx.setJitter(0f, 0f);
+                jittering = false;
+            }
+        } catch (RuntimeException e) {
+            com.nirncraft.NirnCraft.LOGGER.debug("atlas: jitter not set: {}", e.toString());
+        }
+    }
+
+    private static float halton(int i, int base) {
+        float f = 1f, r = 0f;
+        for (; i > 0; i /= base) {
+            f /= base;
+            r += f * (i % base);
+        }
+        return r;
+    }
+
+    /**
+     * Whether Infinite ATLAS resolves frames temporally: its TAA option, on unless switched off in Iris' option file
+     * for the pack (shaderpacks/PACK.txt). Another pack has no resolve for atlas's jitter. Re-read every 2 s.
+     */
+    static boolean packTaa(Minecraft mc) {
+        long now = System.currentTimeMillis();
+        if (now - taaCheckedAt < 2000) return taaOn;
+        taaCheckedAt = now;
+        taaOn = false;
+        java.nio.file.Path game = mc.gameDirectory.toPath();
+        try (var in = java.nio.file.Files.newBufferedReader(game.resolve("config/iris.properties"))) {
+            java.util.Properties iris = new java.util.Properties();
+            iris.load(in);
+            String name = iris.getProperty("shaderPack", "");
+            if (!name.contains("InfiniteATLAS")) return false;
+            java.nio.file.Path opts = game.resolve("shaderpacks").resolve(name + ".txt");
+            java.util.Properties o = new java.util.Properties();
+            if (java.nio.file.Files.isRegularFile(opts))
+                try (var r = java.nio.file.Files.newBufferedReader(opts)) {
+                    o.load(r);
+                }
+            taaOn = !"false".equalsIgnoreCase(o.getProperty("TAA", "true").trim());
+        } catch (java.io.IOException | RuntimeException e) {
+            taaOn = false;
+        }
+        return taaOn;
+    }
+
     static boolean irisPackInUse() {
         iris();
         try {

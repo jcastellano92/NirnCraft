@@ -32,8 +32,9 @@ extern "C" {
 #endif
 
 /* (major << 16) | (minor << 8) | patch. Bumped on any ABI change. 0.11 = 0.10 far content (lights, sites, actor
-   flags, tile codec 3) + 0.10 failure handling (status codes, memory query, fault hook). */
-#define ATLAS_ABI_VERSION 0x000C00
+   flags, tile codec 3) + 0.10 failure handling (status codes, memory query, fault hook). 0.12 the moon, fill near;
+   0.13 primary-ray jitter (atlas_set_jitter). */
+#define ATLAS_ABI_VERSION 0x000D00
 
 typedef struct AtlasContext AtlasContext;
 
@@ -368,6 +369,14 @@ ATLAS_API AtlasStatus atlas_set_sun_map(AtlasContext* ctx, uint32_t size, float 
  * moonlight opposite the sun. Also the sun map's light at night.
  */
 ATLAS_API AtlasStatus atlas_set_moon(AtlasContext* ctx, const float dir[3], const float radiance[3]);
+/*
+ * (abi 0.13) The next frames' sub-pixel offset of the primary rays, in pixels of atlas's render target (-0.5..0.5 each),
+ * for a host that resolves frames temporally (the shader pack's TAA): over a jitter sequence the far field's
+ * silhouettes and distant detail are sampled across each pixel instead of at its centre. Reprojection (the cloud
+ * history) keeps the unjittered camera, and the fixed per-pixel dithers then vary per frame for the host to resolve.
+ * (0, 0), the default: no jitter, dithers fixed on screen.
+ */
+ATLAS_API AtlasStatus atlas_set_jitter(AtlasContext* ctx, float x, float y);
 /* The sun map as last computed (size * (size + 1) * 2 floats into out, count in floats). Waits for the GPU. */
 ATLAS_API AtlasStatus atlas_read_sun_map(AtlasContext* ctx, float* out, uint32_t count);
 /*

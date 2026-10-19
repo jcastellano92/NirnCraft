@@ -794,15 +794,19 @@ void farMain(uint3 id : SV_DispatchThreadID) {
     uint w = frame.dims.x, h = frame.dims.y;
     if (id.x >= w || id.y >= h) return;
     uint pix = id.y * w + id.x;
-    float2 ndc = float2((float(id.x) + 0.5) / float(w) * 2.0 - 1.0, 1.0 - (float(id.y) + 0.5) / float(h) * 2.0);
+    // the host's sub-pixel jitter (atlas_set_jitter, for its TAA): the ray through a point across the pixel
+    float2 ndc = float2((float(id.x) + 0.5) / float(w) * 2.0 - 1.0, 1.0 - (float(id.y) + 0.5) / float(h) * 2.0)
+               + frame.jitter.xy;
     float3 dir = normalize(unproject(frame, ndc));
     float3 o = frame.camFrac.xyz;
     TraceResult res;
     res.t = 0; res.mat = 0; res.axis = -1; res.lod = 0; res.steps = 0;
-    // per-pixel dithers, fixed on screen (the pack has no temporal accumulation to resolve a moving pattern): one for
-    // refinement fades, a decorrelated one for the LOD segment phase, a third for far actors' fades
-    res.dither = pixelDither(id.xy, 0u);
-    float lodDither = (frame.dims.z & FRAME_LOD_DITHER) != 0 ? max(pixelDither(id.xy, 1u), 1e-3) : 0.0;
+    // per-pixel dithers: one for refinement fades, a decorrelated one for the LOD segment phase, a third for far
+    // actors' fades. Fixed on screen without a temporal resolve; with the host's TAA (jitter set) they move each frame
+    // (8 phases), so the resolve averages them into a smooth fade instead of a fixed pattern
+    uint phase = frame.jitter.z > 0.5 ? (frame.temporal.x & 7u) * 3u : 0u;
+    res.dither = pixelDither(id.xy, phase);
+    float lodDither = (frame.dims.z & FRAME_LOD_DITHER) != 0 ? max(pixelDither(id.xy, phase + 1u), 1e-3) : 0.0;
     float3 sun = frame.sunDir.xyz;
 
     // the rasterised near field already covers this pixel: only the air in front of it (cloud, if the camera is up
@@ -840,7 +844,7 @@ void farMain(uint3 id : SV_DispatchThreadID) {
     ah.n = float3(0, 1, 0);
     ah.albedo = float3(1, 1, 1);
     if ((frame.dims.z & FRAME_ACTORS) != 0 && frame.weatherParams.w > 0.5)
-        ah = traceActors(o, dir, frame.params.x, tHit >= 0.0 ? tHit : frame.params.y, pixelDither(id.xy, 2u));
+        ah = traceActors(o, dir, frame.params.x, tHit >= 0.0 ? tHit : frame.params.y, pixelDither(id.xy, phase + 2u));
     bool actorFirst = ah.t >= 0.0;
 
     float3 color = float3(0, 0, 0);

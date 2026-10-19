@@ -19,10 +19,19 @@
 //   16 jungle
 //   17 elsweyr
 //   18 summerset
+//   19 interior_barrow
+//   20 interior_dwemer
+//   21 interior_cave
+//   22 interior_fort
+//   23 interior_oblivion
+//   24 interior_sacred
+//   25 interior_home
 #ifndef NIRNCRAFT_GRADE_TABLE
 #define NIRNCRAFT_GRADE_TABLE
-const int GRADE_COUNT = 19;
+const int GRADE_COUNT = 26;
 const vec2 GRADE_MAP_ORIGIN = vec2(-15360.0, -5120.0);  // world x, z of texel (0, 0)'s corner
 const float GRADE_MAP_CELL = 256.0;  // blocks per texel
 const ivec2 GRADE_MAP_SIZE = ivec2(110, 84);
+// LocationKind.icon -> interior grade (-1: none)
+const int INTERIOR_GRADE[32] = int[](-1, 19, 21, 21, 22, 22, -1, 19, 20, 24, -1, 23, 23, -1, 25, 24, 25, -1, 24, 19, 19, 22, 23, -1, -1, -1, -1, -1, -1, -1, 23, -1);
 #endif

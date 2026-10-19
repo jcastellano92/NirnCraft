@@ -47,6 +47,9 @@ uniform vec4 entityColor;
 #endif
 
 #ifdef VSH
+#include "/lib/taa.glsl"
+uniform float viewWidth;
+uniform float viewHeight;
 #if defined TERRAIN || defined TRANSLUCENT
 in vec4 mc_Entity;
 in vec4 at_midBlock;
@@ -99,6 +102,7 @@ void main() {
 #else
     gl_Position = gl_ProjectionMatrix * (gbufferModelView * vec4(curvePlayerPos(playerPos), 1.0));
 #endif
+    gl_Position.xy += taaJitter() * 2.0 / vec2(viewWidth, viewHeight) * gl_Position.w;  // TAA (lib/taa.glsl)
 }
 #endif
 

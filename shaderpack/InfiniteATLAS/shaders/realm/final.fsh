@@ -6,7 +6,7 @@
 //  * the fitted ACES curve (Stephen Hill's RRT + ODT fit, sRGB primaries) for a filmic toe and a highlight roll-off
 //    that keeps colour
 //  * the regional film grade (lib/grade.glsl: a baked LUT per land, blended by where the camera is), eased by
-//    overcast and night
+//    overcast and night; inside a dungeon, cave or building the place's own grade instead
 #include "/lib/settings.glsl"
 #include "/lib/common.glsl"
 #include "/lib/exposure.glsl"
@@ -53,7 +53,10 @@ void main() {
     vec3 sun = worldSunDir(gbufferModelViewInverse, sunPosition);
     float night = smoothstep(0.02, -0.15, sun.y);
     float overcast = max(rainStrength, haveWeather() ? smoothstep(0.55, 0.95, weatherSample(weatherField, cameraPosition.xz).r) : 0.0);
-    c = regionalGrade(c, cameraPosition.xz, GRADE_STRENGTH * (1.0 - 0.5 * night) * (1.0 - 0.35 * overcast));
+    float inside;
+    int ig = interiorGradeIndex(inside);
+    c = regionalGrade(c, cameraPosition.xz, GRADE_STRENGTH * (1.0 - 0.5 * night) * (1.0 - 0.35 * overcast) * (1.0 - inside));
+    if (ig >= 0 && inside > 0.0 && gradeReady()) c = mix(c, gradeLookup(ig, c), GRADE_STRENGTH * inside);
 #endif
     fragColor = vec4(c, 1.0);
 }

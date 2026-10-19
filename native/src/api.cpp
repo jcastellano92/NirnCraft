@@ -1,5 +1,6 @@
 #include <cstdio>
 #include <cstdlib>
+#include <algorithm>
 #include <atomic>
 #include <cstddef>
 #include <chrono>
@@ -71,6 +72,8 @@ struct AtlasContext {
     // the night key light (atlas_set_moon)
     float moonDir[3] = {0, 1, 0}, moonRad[3] = {0, 0, 0};
     bool moonSet = false;
+    // the host's primary-ray jitter in pixels (atlas_set_jitter)
+    float jitter[2] = {0, 0};
 
     AtlasStatus fail(AtlasStatus s, std::string msg) noexcept {
         try {
@@ -533,6 +536,10 @@ static AtlasStatus buildInputs(AtlasContext* ctx, const AtlasFrame* f, FrameInpu
     }
     g.moonDir[3] = ctx->moonSet ? 1.0f : 0.0f;
     g.moonRad[3] = 0.0f;
+    g.jitter[0] = f->width > 0 ? ctx->jitter[0] * 2.0f / float(f->width) : 0.0f;
+    g.jitter[1] = f->height > 0 ? ctx->jitter[1] * 2.0f / float(f->height) : 0.0f;
+    g.jitter[2] = ctx->jitter[0] != 0.0f || ctx->jitter[1] != 0.0f ? 1.0f : 0.0f;
+    g.jitter[3] = 0.0f;
     float a[3], b[3];
     pixelDir(f->invViewProj, f->width * 0.5f, f->height * 0.5f, f->width, f->height, a);
     pixelDir(f->invViewProj, f->width * 0.5f + 1, f->height * 0.5f, f->width, f->height, b);
@@ -805,6 +812,14 @@ ATLAS_API AtlasStatus atlas_set_moon(AtlasContext* ctx, const float dir[3], cons
         ctx->moonRad[i] = std::isfinite(radiance[i]) ? std::max(0.0f, radiance[i]) : 0.0f;
     }
     ctx->moonSet = ctx->moonRad[0] + ctx->moonRad[1] + ctx->moonRad[2] > 0.0f;
+    return ATLAS_OK;
+}
+
+ATLAS_API AtlasStatus atlas_set_jitter(AtlasContext* ctx, float x, float y) {
+    if (!ctx || !std::isfinite(x) || !std::isfinite(y)) return ATLAS_ERR_ARG;
+    std::lock_guard<std::mutex> lock(ctx->mu);
+    ctx->jitter[0] = std::clamp(x, -0.5f, 0.5f);
+    ctx->jitter[1] = std::clamp(y, -0.5f, 0.5f);
     return ATLAS_OK;
 }
 

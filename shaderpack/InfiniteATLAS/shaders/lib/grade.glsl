@@ -6,11 +6,15 @@
 //    Marsh's murk, ...), picked by a baked map over Tamriel (256-block texels) and blended between the four texels
 //    around the camera, so walking from one land to the next eases over a few hundred blocks; weather and night ease
 //    the grade towards neutral (overcast light is flat, night is the rods' look)
+//  * interior grades: inside a barrow, a Dwemer ruin, a cave, a fort, a temple, a home or a Daedric place (the mod's
+//    data texture: the place the server says the player is in, eased in and out over about 2 s) the place's own LUT
+//    takes over from the land's
 // Cost: 4 map texels and 8 LUT texels per grade in reach (one where a single grade covers the camera's cell).
 #ifndef NIRNCRAFT_GRADE
 #define NIRNCRAFT_GRADE
 
 #include "/lib/grade_table.glsl"
+#include "/lib/modtex.glsl"
 
 #ifdef REGION_GRADE
 uniform sampler2D gradeLut;  // customTexture: textures/grade_lut.png
@@ -51,6 +55,21 @@ vec3 gradeLookup(int g, vec3 c) {
 int gradeAt(ivec2 t) {
     if (any(lessThan(t, ivec2(0))) || any(greaterThanEqual(t, GRADE_MAP_SIZE))) return 0;  // beyond the map: neutral
     return clamp(int(texelFetch(gradeMap, t, 0).r * 255.0 + 0.5), 0, GRADE_COUNT - 1);
+}
+#endif
+
+#ifdef REGION_GRADE
+// the interior grade in force (-1: none) and how far the look has eased into it (texel 18,0 of the mod's data texture:
+// LocationKind.icon + 1, strength)
+int interiorGradeIndex(out float strength) {
+    strength = 0.0;
+    if (!haveSmoke()) return -1;
+    vec4 t = texelFetch(smokeSourcesTex, ivec2(18, 0), 0);
+    int kind = int(t.r * 255.0 + 0.5) - 1;
+    if (kind < 0 || kind > 31) return -1;
+    int g = INTERIOR_GRADE[kind];
+    if (g >= 0) strength = t.g;
+    return g;
 }
 #endif
 
