@@ -36,6 +36,14 @@ public final class QaRecorder {
     private static int every = 10, ticks;
     private static final List<BlockPos> watched = new ArrayList<>();
     private static JsonArray samples;
+    /** Actors that died or vanished this recording (a scenario can end as soon as it is decided). */
+    private static final java.util.Set<String> DEAD = java.util.concurrent.ConcurrentHashMap.newKeySet();
+    private static final java.util.Set<String> SEEN = java.util.concurrent.ConcurrentHashMap.newKeySet();
+
+    /** True once the named actor (or, for "any", any actor) died or vanished in the current recording. */
+    public static boolean dead(String actor) {
+        return "any".equals(actor) ? !DEAD.isEmpty() : DEAD.contains(actor);
+    }
 
     static void init() {
         NeoForge.EVENT_BUS.addListener((ServerTickEvent.Post e) -> {
@@ -50,6 +58,8 @@ public final class QaRecorder {
         every = Math.max(1, everyTicks);
         ticks = 0;
         watched.clear();
+        DEAD.clear();
+        SEEN.clear();
         samples = new JsonArray();
         sample();
     }
@@ -67,10 +77,16 @@ public final class QaRecorder {
         JsonObject s = new JsonObject();
         s.addProperty("tick", ticks);
         JsonArray ents = new JsonArray();
+        java.util.Set<String> present = new java.util.HashSet<>();
         for (Entity e : level.getEntities((Entity) null, box, x -> !(x instanceof net.minecraft.world.entity.player.Player))) {
             JsonObject o = new JsonObject();
             String a = actor(e);
-            if (a != null) o.addProperty("actor", a);
+            if (a != null) {
+                o.addProperty("actor", a);
+                SEEN.add(a);
+                if (e.isAlive()) present.add(a);
+                else DEAD.add(a);
+            }
             o.addProperty("type", BuiltInRegistries.ENTITY_TYPE.getKey(e.getType()).toString());
             o.addProperty("x", Math.round(e.getX() * 100) / 100.0);
             o.addProperty("y", Math.round(e.getY() * 100) / 100.0);
@@ -84,6 +100,7 @@ public final class QaRecorder {
             ents.add(o);
         }
         s.add("entities", ents);
+        for (String a : SEEN) if (!present.contains(a)) DEAD.add(a);  // killed and already removed
         JsonArray blocks = new JsonArray();
         for (BlockPos p : watched) {
             JsonObject o = new JsonObject();

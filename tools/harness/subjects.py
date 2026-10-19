@@ -212,6 +212,29 @@ SETTLEMENTS = ("capital", "city", "town", "village", "fort")
 DUNGEONS = ("dungeon_fixed", "dungeon")
 
 
+def city_cutaways():
+    """Settlements with their roofs off, painted in memory on the generator's ground (/skysettle cutaway): every
+    building's rooms, walls and furnishing at once; the ground floor for every settlement, the first upper floor for
+    cities and capitals too."""
+    out = []
+    for pid, pl in catalog.places().items():
+        if pl.get("type") not in SETTLEMENTS:
+            continue
+        for storey in ([0, 1] if pl["type"] in ("capital", "city") else [0]):
+            name = f"city_{pid}_s{storey}"
+            out.append({"id": f"cutaway-city-{pid}-s{storey}".replace("_", "-"),
+                        "title": f"{pid}: roofs off, storey {storey}", "_file": "(generated subjects)",
+                        "tier": "live", "kind": "measure", "variants": ["measure"],
+                        "tags": ["suite:city-cutaways", f"place:{pid}", f"subject:{pid}", "view:cutaway",
+                                 f"storey:{storey}", f"type:{pl['type']}"], "pose": {}, "settle": False,
+                        "role": "other", "measure_command": f"command skysettle cutaway {pid} {storey}",
+                        "measure_file": f"nirncraft-qa/{name}.json", "image": f"nirncraft-qa/{name}_cutaway.png",
+                        "extra_images": {"plan": f"nirncraft-qa/{name}_plan.png"}, "autocrop": True,
+                        "measure_sum": {"pieces": "pieces", "blocks": "blocks"}, "keep": ["pieces", "blocks", "builtColumns"],
+                        "timeout": 300, "checks": {}, "source": "SettlementDevCommands cutaway (CityCutaway)"})
+    return out
+
+
 def dungeon_cutaways():
     """Every dungeon at a glance from its in-memory paint (the world is not touched): an iso cutaway of its floors
     from the inside, and a top-down plan by height (/nirncraft-dungeon-qa cutaway)."""
@@ -258,7 +281,7 @@ def scenes():
     """Every subject scene the game's index asks for ([] until subject-index has run)."""
     index = catalog.subject_index()
     import calibrate
-    out = route_audit() + town_plans() + dungeon_cutaways() + [calibrate.scene()]
+    out = route_audit() + town_plans() + city_cutaways() + dungeon_cutaways() + [calibrate.scene()]
     if not index:
         return out
     for rec in index.get("items", []):

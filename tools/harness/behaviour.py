@@ -8,6 +8,7 @@ A scenario is a JSON file in tools/harness/scenarios/ (`harness.py scenario new 
      "actors": [{"name": "wolf", "entity": "nirncraft:wolf", "at": [-5, 1, 0], "nbt": "{}"},
                 {"name": "sheep", "entity": "minecraft:sheep", "at": [5, 1, 0]}],
      "difficulty": "easy", "duration": 600, "every": 10, "trials": 5, "frames": 0,
+     "end_when": "dead:sheep",
      "expect": [{"what": "targets", "actor": "wolf", "target": "sheep", "within": 400, "rate": 0.6}]}
 
 Positions are relative to the arena centre. Every trial rebuilds the arena, spawns the actors (tagged
@@ -96,11 +97,20 @@ def trial_actions(sc, n):
         if p.get("watch"):
             lines.append(f"command nirncraft-qa record watch {x + p['at'][0]} {y + p['at'][1]} {z + p['at'][2]}")
     dur, frames = int(sc.get("duration", 600)), int(sc.get("frames", 0))
-    if frames:
+    end = sc.get("end_when", "")
+    photos = n == 0 and sc.get("photos", "first") != "none" or sc.get("photos") == "all"
+    half = dur // 2
+
+    def wait(ticks):  # until decided (a kill: on after a second) or the ticks run out
+        return f"wait-dead {end[5:]} {ticks}" if end.startswith("dead:") else f"wait {ticks}"
+    if photos:  # start, middle (or just after the deciding moment), end: one strip with the result
+        lines += ["wait 10", f"capture b-{name}-start", wait(half), f"capture b-{name}-middle", wait(dur - half),
+                  f"capture b-{name}-end"]
+    elif frames:
         for f in range(frames):
             lines += [f"wait {dur // frames}", f"capture b-{name}-f{f}"]
     else:
-        lines.append(f"wait {dur}")
+        lines.append(wait(dur))
     lines += ["command nirncraft-qa record stop",
               f"try kill @e[type=!player,x={x},y={y},z={z},distance=..{half + 8}]", "try difficulty peaceful"]
     return name, lines

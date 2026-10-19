@@ -656,12 +656,27 @@ class Runner:
             trials.append(row)
             say(f"    trial {n + 1}/{n_trials}: " + ", ".join(("ok " if r["ok"] else "NO ") + r["expect"] for r in row))
         metrics, fails = {"trials": n_trials}, []
+        shots = [(f"b-{sc['id']}-t0-{w}", w) for w in ("start", "middle", "end")]
+        found = [(g.SHOTS / f"{tag}.png", w) for tag, w in shots if (g.SHOTS / f"{tag}.png").exists()]
         for i, e in enumerate(expect):
             rate = hits[i] / max(1, n_trials)
             metrics[behaviour.describe(e)] = round(rate, 2)
             if rate < e.get("rate", 1.0):
                 fails.append(f"{behaviour.describe(e)}: {hits[i]}/{n_trials} trials (needs {e.get('rate', 1.0):.0%})")
-        return results.record(s["id"], v, "behaviour", "fail" if fails else "pass", metrics, fp,
+        status = "fail" if fails else "pass"
+        if found:  # the first trial's start / middle / end as one strip: before / after across runs, sheets, review
+            from PIL import Image
+            strip = results.strip([Image.open(f) for f, _ in found], [w for _, w in found])
+            tmp = g.SHOTS / f"b-{sc['id']}-strip.png"
+            strip.save(tmp)
+            rec = results.store(s["id"], v, tmp, fingerprint=fp, extra={"fails": fails, "trials": trials,
+                                                                        "scenario": sc.get("id")})
+            rec["metrics"].update(metrics)
+            rec["status"] = status
+            Path(f"{results.stem(s['id'], v)}.after.json").write_text(json.dumps(rec, indent=1, default=str),
+                                                                       encoding="utf-8")
+            return rec
+        return results.record(s["id"], v, "behaviour", status, metrics, fp,
                               extra={"fails": fails, "trials": trials, "scenario": sc.get("id")})
 
     def run_measure(self, s, v, fp):

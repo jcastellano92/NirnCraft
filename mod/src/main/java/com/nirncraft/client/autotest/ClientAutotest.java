@@ -205,6 +205,8 @@ public final class ClientAutotest {
     private static final java.util.ArrayDeque<String> LIVE_ACTIONS = new java.util.ArrayDeque<>();
     private static long liveModified;
     private static int liveWait;
+    /** `wait-dead NAME|any MAX`: the actor (scenario tag qa_actor_NAME) whose death ends the wait early. */
+    private static String liveWaitDead;
     private static int liveCastUntil,liveUseUntil;
     private static boolean liveStarted;
     private static int burstRemaining;
@@ -541,7 +543,12 @@ public final class ClientAutotest {
             }
             return;
         }
+        if (liveWaitDead != null && liveWait > 20 && com.nirncraft.qa.QaRecorder.dead(liveWaitDead)) {
+            liveWait = 20;  // the scenario is decided: a second of grace, then on (no standing around)
+            liveWaitDead = null;
+        }
         if (liveWait-- > 0 || LIVE_ACTIONS.isEmpty()) return;
+        liveWaitDead = null;
         String action = LIVE_ACTIONS.removeFirst().trim();
         if (action.isEmpty() || action.startsWith("#")) return;
         liveLastAction = action;
@@ -611,6 +618,10 @@ public final class ClientAutotest {
                 liveWait=35;
             } else if (action.startsWith("wait ")) {
                 liveWait = Integer.parseInt(action.substring(5).trim());
+            } else if (action.startsWith("wait-dead ")) {
+                String[] v = action.substring(10).trim().split("\s+");
+                liveWaitDead = v[0];
+                liveWait = v.length > 1 ? Integer.parseInt(v[1]) : 600;
             } else if(action.startsWith("measure ")) {
                 if(burstRemaining>0) throw new IllegalStateException("Do not measure during screenshot bursts");
                 FrameProbe.begin(mc,action.substring(8));

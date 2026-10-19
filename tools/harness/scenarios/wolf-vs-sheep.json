@@ -1,16 +1,56 @@
 {
   "id": "wolf-vs-sheep",
   "title": "A wolf hunts a sheep in an open pen (predation)",
-  "tags": ["behaviour:predation", "subject:wolf"],
-  "arena": {"size": 21, "floor": "minecraft:grass_block", "walls": "minecraft:glass", "height": 3},
+  "tags": [
+    "behaviour:predation",
+    "subject:wolf"
+  ],
+  "arena": {
+    "size": 21,
+    "floor": "minecraft:grass_block",
+    "walls": "minecraft:glass",
+    "height": 3
+  },
   "props": [],
   "actors": [
-    {"name": "wolf", "entity": "nirncraft:wolf", "at": [-5, 1, 0]},
-    {"name": "sheep", "entity": "minecraft:sheep", "at": [5, 1, 0]}
+    {
+      "name": "wolf",
+      "entity": "nirncraft:wolf",
+      "at": [
+        -5,
+        1,
+        0
+      ]
+    },
+    {
+      "name": "sheep",
+      "entity": "minecraft:sheep",
+      "at": [
+        5,
+        1,
+        0
+      ]
+    }
   ],
-  "difficulty": "easy", "duration": 600, "every": 10, "trials": 5, "frames": 0,
+  "difficulty": "easy",
+  "duration": 600,
+  "every": 10,
+  "trials": 5,
+  "frames": 0,
   "expect": [
-    {"what": "targets", "actor": "wolf", "target": "sheep", "within": 400, "rate": 0.6},
-    {"what": "health_drops", "actor": "sheep", "by": 2, "rate": 0.6}
-  ]
+    {
+      "what": "targets",
+      "actor": "wolf",
+      "target": "sheep",
+      "within": 400,
+      "rate": 0.6
+    },
+    {
+      "what": "health_drops",
+      "actor": "sheep",
+      "by": 2,
+      "rate": 0.6
+    }
+  ],
+  "end_when": "dead:sheep"
 }

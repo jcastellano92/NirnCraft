@@ -11,7 +11,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import catalog  # noqa: E402
 
-VERBS = {"frame", "frame-box", "frame-file", "inside-file", "showcase", "reload", "resources", "shaders", "rebuild", "texture-probe", "flash", "cast", "use", "fx", "wait", "settle",
+VERBS = {"wait-dead", "frame", "frame-box", "frame-file", "inside-file", "showcase", "reload", "resources", "shaders", "rebuild", "texture-probe", "flash", "cast", "use", "fx", "wait", "settle",
          "measure", "command", "try", "camera", "camera-plan", "camera-travel", "visit", "front", "ui", "capture-ui",
          "capture", "identity", "transport", "stop", "screen", "click", "key", "expect-screen", "perspective",
          "renderdistance", "hud", "settle-visual", "message"}

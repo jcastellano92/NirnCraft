@@ -1,17 +1,75 @@
 {
   "id": "guard-vs-bandit",
   "title": "A guard engages a bandit; a door between them is watched",
-  "tags": ["behaviour:combat", "subject:guard", "subject:bandit"],
-  "arena": {"size": 21, "floor": "minecraft:stone_bricks", "walls": "minecraft:glass", "height": 3},
-  "props": [{"block": "minecraft:oak_door[facing=south,half=lower]", "at": [0, 1, 6], "watch": true},
-            {"block": "minecraft:oak_door[facing=south,half=upper]", "at": [0, 2, 6]}],
-  "actors": [
-    {"name": "guard", "entity": "nirncraft:guard", "at": [-5, 1, 0]},
-    {"name": "bandit", "entity": "nirncraft:bandit", "at": [5, 1, 0]}
+  "tags": [
+    "behaviour:combat",
+    "subject:guard",
+    "subject:bandit"
   ],
-  "difficulty": "easy", "duration": 600, "every": 10, "trials": 3, "frames": 2,
+  "arena": {
+    "size": 21,
+    "floor": "minecraft:stone_bricks",
+    "walls": "minecraft:glass",
+    "height": 3
+  },
+  "props": [
+    {
+      "block": "minecraft:oak_door[facing=south,half=lower]",
+      "at": [
+        0,
+        1,
+        6
+      ],
+      "watch": true
+    },
+    {
+      "block": "minecraft:oak_door[facing=south,half=upper]",
+      "at": [
+        0,
+        2,
+        6
+      ]
+    }
+  ],
+  "actors": [
+    {
+      "name": "guard",
+      "entity": "nirncraft:guard",
+      "at": [
+        -5,
+        1,
+        0
+      ]
+    },
+    {
+      "name": "bandit",
+      "entity": "nirncraft:bandit",
+      "at": [
+        5,
+        1,
+        0
+      ]
+    }
+  ],
+  "difficulty": "easy",
+  "duration": 600,
+  "every": 10,
+  "trials": 3,
+  "frames": 0,
   "expect": [
-    {"what": "targets", "actor": "guard", "target": "bandit", "within": 300, "rate": 0.66},
-    {"what": "health_drops", "actor": "bandit", "by": 2, "rate": 0.66}
-  ]
+    {
+      "what": "targets",
+      "actor": "guard",
+      "target": "bandit",
+      "within": 300,
+      "rate": 0.66
+    },
+    {
+      "what": "health_drops",
+      "actor": "bandit",
+      "by": 2,
+      "rate": 0.66
+    }
+  ],
+  "end_when": "dead:any"
 }

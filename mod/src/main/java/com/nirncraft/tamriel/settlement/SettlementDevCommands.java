@@ -94,6 +94,10 @@ public final class SettlementDevCommands {
                                         .executes(SettlementDevCommands::site))))))
                 .then(Commands.literal("plan").then(Commands.argument("id", StringArgumentType.word()).executes(SettlementDevCommands::planOne)))
                 .then(Commands.literal("plans").executes(SettlementDevCommands::planAll))
+                .then(Commands.literal("cutaway").then(Commands.argument("id", StringArgumentType.word())
+                        .executes(c -> cutaway(c, 0))
+                        .then(Commands.argument("storey", IntegerArgumentType.integer(0, 6))
+                                .executes(c -> cutaway(c, IntegerArgumentType.getInteger(c, "storey"))))))
                 .then(Commands.literal("terrain").then(Commands.argument("id", StringArgumentType.word()).executes(SettlementDevCommands::terrainMap)))
                 .then(Commands.literal("reload").executes(c -> {
                     Styles.reload();
@@ -498,6 +502,82 @@ public final class SettlementDevCommands {
         }
         say(c, "Terrain " + id + ": " + rows.size() + " rows");
         return 1;
+    }
+
+    /**
+     * {@code /skysettle cutaway ID [storey]}: the settlement painted in memory (the world is not touched) on the
+     * generator's own ground, roofs off above the storey (CityCutaway): nirncraft-qa/city_ID_s{storey}_cutaway.png,
+     * _plan.png and a JSON summary.
+     */
+    static int cutaway(CommandContext<CommandSourceStack> c, int storey) {
+        ServerLevel level = c.getSource().getLevel();
+        String id = StringArgumentType.getString(c, "id");
+        Place p = Places.byId(id).orElse(null);
+        if (p == null) {
+            c.getSource().sendFailure(Component.literal("No place " + id));
+            return 0;
+        }
+        Plan plan = SettlementStructure.planPlace(context(level, p.x(), p.z()), p, "auto");
+        List<SettlementPiece> pieces = new ArrayList<>();
+        for (int i = 0; i < plan.specs.size(); i++)
+            pieces.add(new SettlementPiece(plan.specs.get(i), plan.seed ^ (i * 0x9E3779B97F4A7C15L), plan.key, i));
+        if (pieces.isEmpty()) {
+            c.getSource().sendFailure(Component.literal("No pieces planned for " + id));
+            return 0;
+        }
+        BoundingBox all = null;
+        for (SettlementPiece sp : pieces) {
+            BoundingBox b = sp.getBoundingBox();
+            all = all == null ? new BoundingBox(b.minX(), b.minY(), b.minZ(), b.maxX(), b.maxY(), b.maxZ()) : all.encapsulate(b);
+        }
+        BoundingBox area = new BoundingBox(all.minX() - 6, Math.max(level.getMinY(), all.minY() - 6), all.minZ() - 6,
+                all.maxX() + 6, Math.min(level.getMaxY(), all.maxY() + 6), all.maxZ() + 6);
+        ChunkGenerator gen = level.getChunkSource().getGenerator();
+        var rs = level.getChunkSource().randomState();
+        int nx = area.getXSpan(), nz = area.getZSpan();
+        int[] h = new int[nx * nz];
+        for (int x = 0; x < nx; x++)
+            for (int z = 0; z < nz; z++)
+                h[x * nz + z] = gen.getBaseHeight(area.minX() + x, area.minZ() + z,
+                        net.minecraft.world.level.levelgen.Heightmap.Types.OCEAN_FLOOR_WG, level, rs) - 1;
+        com.nirncraft.dungeons.qa.QaLevel lvl = new com.nirncraft.dungeons.qa.QaLevel(level, area, (x, z) -> {
+            int i = Math.max(0, Math.min(nx - 1, x - area.minX())), k = Math.max(0, Math.min(nz - 1, z - area.minZ()));
+            return h[i * nz + k];
+        });
+        for (int cx = area.minX() >> 4; cx <= area.maxX() >> 4; cx++) {
+            for (int cz = area.minZ() >> 4; cz <= area.maxZ() >> 4; cz++) {
+                BoundingBox chunkBox = new BoundingBox(cx << 4, area.minY(), cz << 4, (cx << 4) + 15, area.maxY(), (cz << 4) + 15);
+                ChunkPos cp = new ChunkPos(cx, cz);
+                for (SettlementPiece sp : pieces) {
+                    if (!sp.getBoundingBox().intersects(chunkBox)) continue;
+                    try {
+                        sp.postProcess(lvl, level.structureManager(), gen, RandomSource.create(cp.pack()), chunkBox, cp, BlockPos.ZERO);
+                    } catch (RuntimeException e) {
+                        NirnCraft.LOGGER.warn("cutaway {}: piece {} failed in memory: {}", id, sp.getBoundingBox(), e.toString());
+                    }
+                }
+            }
+        }
+        try {
+            java.nio.file.Path dir = c.getSource().getServer().getServerDirectory().resolve("nirncraft-qa");
+            java.nio.file.Files.createDirectories(dir);
+            String name = "city_" + id + "_s" + storey;
+            var stats = CityCutaway.render(lvl, all, storey, dir.resolve(name + "_cutaway.png").toFile(),
+                    dir.resolve(name + "_plan.png").toFile());
+            com.google.gson.JsonObject o = new com.google.gson.JsonObject();
+            o.addProperty("id", id);
+            o.addProperty("storey", storey);
+            o.addProperty("pieces", pieces.size());
+            o.addProperty("blocks", stats.blocks());
+            o.addProperty("builtColumns", stats.buildingsArea());
+            java.nio.file.Files.writeString(dir.resolve(name + ".json"), o.toString());
+            c.getSource().sendSuccess(() -> Component.literal("city cutaway " + id + " storey " + storey + ": "
+                    + stats.blocks() + " blocks"), false);
+            return 1;
+        } catch (IOException e) {
+            c.getSource().sendFailure(Component.literal("cutaway failed: " + e.getMessage()));
+            return 0;
+        }
     }
 
     static boolean exportPlan(ServerLevel level, String id, java.util.function.Consumer<String> say) {
