@@ -589,8 +589,21 @@ def offline_vs_live(live_png, lab_png, mask_png, out_png):
     sky = np.median(top, axis=0)
     near_sky = np.sqrt(((la - sky) ** 2).sum(axis=2)) < 6.0
     missing = float((near_sky & inside).sum() / max(1, inside.sum()))
-    return {"liveDE": round(mean_de, 2), "liveShare": round(share, 3), "liveEdges": round(struct, 3),
-            "liveMissing": round(missing, 4)}
+    out = {"liveDE": round(mean_de, 2), "liveShare": round(share, 3), "liveEdges": round(struct, 3),
+           "liveMissing": round(missing, 4)}
+    # by distance (the offline render's out_depth.png: 1/16 blocks in 24 bits, all ones for sky): where the error is
+    # (far trees thinning, far materials flattening show as the far bands' dE rising)
+    depth_png = Path(str(lab_png)[:-4] + "_depth.png")
+    if depth_png.exists():
+        dp = np.asarray(Image.open(depth_png).convert("RGB").resize(a.size, Image.NEAREST), dtype=np.uint32)
+        dist = ((dp[..., 0] << 16) | (dp[..., 1] << 8) | dp[..., 2]).astype(np.float64) / 16.0
+        bands = {}
+        for lo, hi in ((0, 64), (64, 192), (192, 512), (512, 1024), (1024, 4096)):
+            sel = inside & (dist >= lo) & (dist < hi)
+            if sel.sum() > 200:
+                bands[f"{lo}-{hi}"] = {"dE": round(float(de[sel].mean()), 2), "share": round(float(sel.mean()), 3)}
+        out["liveDEByBand"] = bands
+    return out
 
 
 def pop_metrics(scene, imgs):

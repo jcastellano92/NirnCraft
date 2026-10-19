@@ -1363,6 +1363,7 @@ int main(int argc, char** argv) {
             int spp = v == "ref" ? 4 : 1;
             std::vector<RGB> acc(size_t(w) * h);
             std::vector<float> hit(size_t(w) * h, 0.f);
+            std::vector<float> depth(size_t(w) * h, 1e30f);  // nearest hit over the samples (blocks)
             auto t0 = std::chrono::steady_clock::now();
             for (int f = 0; f < frames; f++) {
                 std::atomic<int> next{0};
@@ -1393,6 +1394,7 @@ int main(int argc, char** argv) {
                                 float wgt = 1.f / float(spp * frames);
                                 acc[i].r += c.r * wgt, acc[i].g += c.g * wgt, acc[i].b += c.b * wgt;
                                 hit[i] += sm.hit ? wgt : 0.f;
+                                if (sm.hit) depth[i] = std::min(depth[i], sm.t);
                             }
                 };
                 std::vector<std::thread> ts;
@@ -1410,7 +1412,17 @@ int main(int argc, char** argv) {
             std::string base = out.size() > 4 ? out.substr(0, out.size() - 4) : out;
             std::string path = vi == 0 ? out : base + "_" + v + ".png";
             atlas::writePng(path, px.data(), uint32_t(w), uint32_t(h));
-            if (vi == 0) atlas::writePng(base + "_mask.png", mask.data(), uint32_t(w), uint32_t(h));
+            if (vi == 0) {
+                atlas::writePng(base + "_mask.png", mask.data(), uint32_t(w), uint32_t(h));
+                // out_depth.png: the distance to what each pixel shows, 1/16 block steps in 24 bits (R high, G, B low),
+                // all ones for sky: the harness splits the comparison by distance band with it
+                std::vector<uint32_t> dp(size_t(w) * h);
+                for (size_t i = 0; i < dp.size(); i++) {
+                    uint32_t v = depth[i] >= 1e29f ? 0xFFFFFFu : uint32_t(std::min(depth[i] * 16.f, 16777214.f));
+                    dp[i] = 0xFF000000u | (v & 255u) << 16 | ((v >> 8) & 255u) << 8 | (v >> 16);
+                }
+                atlas::writePng(base + "_depth.png", dp.data(), uint32_t(w), uint32_t(h));
+            }
             json += (vi ? "," : "") + std::string("{\"variant\":\"") + v + "\",\"ms\":" + std::to_string(int(ms)) + "}";
             std::fprintf(stderr, "atlas_lab: camera frame %s %dx%d in %.0f ms -> %s\n", v.c_str(), w, h, ms, path.c_str());
         }
