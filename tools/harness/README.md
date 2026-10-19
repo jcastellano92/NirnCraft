@@ -169,6 +169,68 @@ start skips its group the same way.
 * Not yet deterministic: ATLAS clouds move with world game time, weather fronts simulate, mobs and particles move.
   Pinned capture clock, tick freeze and input lock are queued (`issues`: deterministic before/after).
 
+## Subjects: everything the game defines, with views, sheets and cards
+
+The game lists what can be tested itself: `harness.py run subject-index` (once per build that adds things) runs
+`/nirncraft-qa subjects` and stores `.work/harness/subjects.json`: entities by kind (boss, monster, creature, mount, npc,
+fish, water, vehicle), races, NPC races and roles, blocks by kind (flora, crop, sapling, light, door, furniture, block),
+items by kind (weapon, armour with its slot, tool, food, ingredient, fish), ingredients with effects, spells, trees,
+furniture kinds, building uses x cultures x wealth, landmarks. `subjects.py` turns every subject into scenes with the
+views its kind gets (`VIEWS`): icon (the item as the UI shows it), dropped, held, worn (by several races), source
+(an ingredient's plant), placed (and at night for lights), portraits (races, roles), spells cast in the dark studio,
+buildings outside / side / inside (+ at night). **A new entity, item, block, spell, race, role or building type gets
+its scenes by itself.** Only lights and buildings get a night view; everything else is shot at noon.
+
+* Framing is done by the game from the subject's real size (`frame`, `frame-box`, `frame-file`), so a mudcrab and a
+  dragon both fill the picture; the receipt records what was framed (a wrong subject fails).
+* Select: `--tag kind:weapon`, `--tag subject:iron_sword`, `--tag view:icon`, `--tag race:khajiit`, `--tag suite:buildings`.
+* `harness.py sheet SUBJECT --level full|top|pair|single [--view front|side] [--top N]`: one subject's pictures on a
+  sheet (several pages when needed); `single` is the one view an agent asks for.
+* `harness.py card SUBJECT --level basic|mid|full` (or `--kind weapon`): the subject's card: game facts (size, slot,
+  effects, cost ...), coverage (views captured / passing), open issues, pictures; PNG for reviewers, card.json and
+  card.md for agents, in `.work/harness/cards/<subject>/`.
+
+## Behaviour scenarios
+
+`tools/harness/scenarios/*.json`, one per behaviour (`harness.py scenario new NAME` writes a template; `scenario list`).
+An arena in the sky (floor, walls, props such as doors), actors (entity, position, NBT; tagged `qa_actor_<name>`),
+duration, sampling and trials. The game records every actor's position, health, target and the watched blocks
+(`/nirncraft-qa record`); expectations are judged on the recordings with statistics: `targets`, `never_targets`,
+`health_drops`, `alive_at_end`, `reaches`, `block_changes`, each with `within` (ticks) and `rate` (share of trials).
+Run: `harness.py run behaviour-wolf-vs-sheep` or `--tag suite:behaviour`; every trial's recording is kept next to the
+result.
+
+## Gaps and what a change needs
+
+* `harness.py gaps [--kind K] [--md] [-v]`: per kind, how many subjects are fully captured / failing; screens no scene
+  opens (or that docs/UI-COVERAGE.md does not list).
+* `harness.py recommend [--staged | --base REF]`: before a commit: the tests the change affects (impact.json), ids it
+  adds that the subject index does not know yet (refresh it, the new subject's scenes and card follow), screens it
+  touches and whether a scene covers them. `recommend --install-hook`: an advisory pre-commit hook (never blocks).
+
+## Error ids
+
+Every failure carries a stable id and a hint (`errors.py`), in the result (`errorCode`, `errorHint`, `[E-...]` in the
+error), the summary, events and the issue tally: E-SETTLE-TIMEOUT, E-CAMERA-IN-TERRAIN, E-POS-UNLOADED, E-DISCONNECT,
+E-HEARTBEAT, E-CRASH, E-CLIENT-CLOSED, E-STUCK-SCREEN, E-CMD-FAILED, E-UNKNOWN-ID, E-NO-SUBJECT, E-WRONG-POSE,
+E-SHADER-STATE, E-TIMEOUT, E-NO-REPORT, E-VALIDATE, E-CHECK-FAILED, E-METRIC. The game's own complaints during a test
+(a setup command that quietly did nothing: "That position is not loaded") are found in its log and flag the test with
+their id, so a scene that was not built as designed never passes. New kind: one line in `errors.py`.
+
+## Testing standards
+
+* **Adding something to the game** (entity, item, block, spell, race, role, building type): register it, run
+  `harness.py recommend`, then `run subject-index` and `run --tag subject:<id>`; look at `card <id>`. Nothing to write.
+* **A new test**: a scene in `scenes/<domain>.json` (kebab-case id, one pose, tags `suite:` / `feature:` / `region:`,
+  pinned `time` and `weather` or the defaults noon / clear), or a generated set in `catalog.py` / `subjects.py`, or a
+  scenario JSON for behaviour, or a check in `scenes/checks.json` with `fail_regex` when the tool exits 0 on errors.
+  `check-scene-catalog` validates them all.
+* **Pictures**: framed by the game, pinned time / weather / moon, before / after only when comparable; no claim that a
+  picture is right without a side-by-side or a metric; visual fixes are confirmed by the independent reviewer
+  (`issues confirm --evidence`, `harness.py review`), never by whoever fixed them.
+* **Numbers**: every check states what it measures and its threshold; failures carry an error id.
+* **Before a commit**: `recommend --staged`; before a merge / push: `gate`.
+
 ## Hot reload kinds (watch mode and `--changed`)
 
 | change | reload | restart? |

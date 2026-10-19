@@ -494,6 +494,8 @@ def load():
     scenes += feature_scenes.feature_scenes()  # every generated biome / landmark / site kind (the cached index)
     import subjects  # every subject the game defines x the views its kind gets (the game's subject index)
     scenes += subjects.scenes()
+    import behaviour  # behaviour scenarios (tools/harness/scenarios/*.json)
+    scenes += behaviour.scenes()
     seam_core(scenes)
     for s in scenes:
         if s["id"] in seen:

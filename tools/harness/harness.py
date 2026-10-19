@@ -505,6 +505,8 @@ class Runner:
         except Exception as e:  # noqa: BLE001  the client cannot start: skip the group, do not hang on it
             self.disabled[s["group"]] = f"skipped: the client did not start ({str(e)[:160]})"
             raise
+        if s.get("kind") == "behaviour":
+            return self.run_behaviour(s, v, fp)
         if s.get("measure_command"):
             return self.run_measure(s, v, fp)
         p = s.get("pose") or {}
@@ -599,6 +601,45 @@ class Runner:
             m["landmarkConfirmed"] = mark.lower() in kinds
             if not m["landmarkConfirmed"]:
                 m["flags"].append(f"no {mark} within 64 blocks online (found: {', '.join(sorted(kinds)) or 'none'})")
+
+    def run_behaviour(self, s, v, fp):
+        """A behaviour scenario: every trial rebuilds the arena, spawns the actors, records them, and each expectation
+        is judged on the recording; it passes when every expectation holds in at least its `rate` of the trials."""
+        import behaviour
+        g = self.game
+        g.ensure_visible()
+        sc = s["scenario"]
+        g.actions(["ui close"] + catalog.pose_actions(s, self.plan) + ["settle-visual 900"], timeout=300)
+        expect = sc.get("expect", [])
+        n_trials = int(sc.get("trials", 5))
+        hits = [0] * len(expect)
+        trials = []
+        keep = results.stem(s["id"], v).parent
+        keep.mkdir(parents=True, exist_ok=True)
+        for n in range(n_trials):
+            name, lines = behaviour.trial_actions(sc, n)
+            out = g.GAME / f"nirncraft-qa/record-{name}.json"
+            out.unlink(missing_ok=True)
+            g.actions(lines, timeout=int(sc.get("duration", 600)) // 20 + 180)
+            if not out.exists():
+                raise RuntimeError(f"trial {n}: the recorder wrote no {out.name}")
+            rec = json.loads(out.read_text(encoding="utf-8"))
+            (keep / f"{v}.trial{n}.json").write_text(json.dumps(rec), encoding="utf-8")
+            row = []
+            for i, e in enumerate(expect):
+                ok, info = behaviour.judge(e, rec)
+                hits[i] += 1 if ok else 0
+                row.append({"expect": behaviour.describe(e), "ok": ok, "info": info})
+            trials.append(row)
+            say(f"    trial {n + 1}/{n_trials}: " + ", ".join(("ok " if r["ok"] else "NO ") + r["expect"] for r in row))
+        metrics, fails = {"trials": n_trials}, []
+        for i, e in enumerate(expect):
+            rate = hits[i] / max(1, n_trials)
+            metrics[behaviour.describe(e)] = round(rate, 2)
+            if rate < e.get("rate", 1.0):
+                fails.append(f"{behaviour.describe(e)}: {hits[i]}/{n_trials} trials (needs {e.get('rate', 1.0):.0%})")
+        return results.record(s["id"], v, "behaviour", "fail" if fails else "pass", metrics, fp,
+                              extra={"fails": fails, "trials": trials, "scenario": sc.get("id")})
 
     def run_measure(self, s, v, fp):
         """A live test without a picture: go there, settle, run a command that writes a JSON report, keep its numbers."""
@@ -2297,6 +2338,27 @@ def cmd_recommend(a):
     return 0
 
 
+def cmd_scenario(a):
+    """`scenario new NAME`: a behaviour scenario template to fill in; `scenario list`: the scenarios there are."""
+    import behaviour
+    if a.action == "new":
+        if not a.name:
+            say("scenario new NAME")
+            return 1
+        f = behaviour.SCENARIOS / f"{a.name}.json"
+        if f.exists():
+            say(f"{f} exists")
+            return 1
+        behaviour.SCENARIOS.mkdir(parents=True, exist_ok=True)
+        tpl = dict(behaviour.TEMPLATE, id=a.name)
+        f.write_text(json.dumps(tpl, indent=2) + "\n", encoding="utf-8")
+        say(f"written {f}: set the actors and expectations, then: harness.py run behaviour-{a.name}")
+        return 0
+    for sc in behaviour.load():
+        say(f"  behaviour-{sc['id']:30} {sc.get('title', '')[:70]}" + (f"  BROKEN: {sc['_broken']}" if sc.get("_broken") else ""))
+    return 0
+
+
 def main():
     global VERBOSE
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -2397,6 +2459,9 @@ def main():
     p.add_argument("--level", choices=["full", "top", "pair", "single"], default="top")
     p.add_argument("--view", choices=["front", "side"], default="front", help="single: which view")
     p.add_argument("--top", type=int, default=2, help="top: how many other views (flagged first)")
+    p = sub.add_parser("scenario")
+    p.add_argument("action", choices=["new", "list"])
+    p.add_argument("name", nargs="?")
     p = sub.add_parser("gaps")
     p.add_argument("--kind", help="one kind of subject")
     p.add_argument("--md", action="store_true", help="write .work/harness/GAPS.md")
@@ -2455,7 +2520,7 @@ def main():
      "gate": cmd_gate, "open": cmd_open, "quarantine": cmd_quarantine, "trace": cmd_trace,
      "audit": cmd_audit, "stop": cmd_stop, "wait": cmd_wait, "issues": cmd_issues,
      "review": cmd_review, "auto": cmd_auto, "sheet": cmd_sheet, "card": cmd_card,
-     "gaps": cmd_gaps, "recommend": cmd_recommend}[a.cmd](a)
+     "gaps": cmd_gaps, "recommend": cmd_recommend, "scenario": cmd_scenario}[a.cmd](a)
 
 
 if __name__ == "__main__":
