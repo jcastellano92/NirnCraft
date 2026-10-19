@@ -1,0 +1,2129 @@
+{
+ "suite": "places",
+ "description": "Towns (aerial overviews), minor sites, landmarks, rivers/falls, night towns and legacy town captures",
+ "defaults": {
+  "tier": "live",
+  "group": "live",
+  "variants": [
+   "shaders"
+  ]
+ },
+ "scenes": [
+  {
+   "id": "whiterun-aerial",
+   "title": "Whiterun from the air (capital overview)",
+   "tags": [
+    "region:skyrim/whiterun",
+    "place:whiterun",
+    "town:whiterun",
+    "feature:town",
+    "suite:smoke"
+   ],
+   "pose": {
+    "place": "whiterun",
+    "height": 115,
+    "yaw": 180,
+    "pitch": 30,
+    "offset": [
+     0,
+     150
+    ]
+   },
+   "wait": 0,
+   "setup": [],
+   "cleanup": [],
+   "measure": 0,
+   "checks": {
+    "maxBlackTiles": 0
+   },
+   "capture": "world",
+   "source": "tools/qa/skyrim_sweep.json:3"
+  },
+  {
+   "id": "riverwood-aerial",
+   "title": "Riverwood from the air (town overview)",
+   "tags": [
+    "region:skyrim/whiterun",
+    "place:riverwood",
+    "town:riverwood",
+    "feature:town"
+   ],
+   "pose": {
+    "place": "riverwood",
+    "height": 60,
+    "yaw": 180,
+    "pitch": 30,
+    "offset": [
+     0,
+     78
+    ]
+   },
+   "wait": 0,
+   "setup": [],
+   "cleanup": [],
+   "measure": 0,
+   "checks": {
+    "maxBlackTiles": 0
+   },
+   "capture": "world",
+   "source": "tools/qa/skyrim_sweep.json:12"
+  },
+  {
+   "id": "rorikstead-aerial",
+   "title": "Rorikstead from the air (town overview)",
+   "tags": [
+    "region:skyrim/whiterun",
+    "place:rorikstead",
+    "town:rorikstead",
+    "feature:town"
+   ],
+   "pose": {
+    "place": "rorikstead",
+    "height": 55,
+    "yaw": 180,
+    "pitch": 30,
+    "offset": [
+     0,
+     72
+    ]
+   },
+   "wait": 0,
+   "setup": [],
+   "cleanup": [],
+   "measure": 0,
+   "checks": {
+    "maxBlackTiles": 0
+   },
+   "capture": "world",
+   "source": "tools/qa/skyrim_sweep.json:21"
+  },
+  {
+   "id": "solitude-aerial",
+   "title": "Solitude from the air (capital overview)",
+   "tags": [
+    "region:skyrim/haafingar",
+    "place:solitude",
+    "town:solitude",
+    "feature:town"
+   ],
+   "pose": {
+    "place": "solitude",
+    "height": 135,
+    "yaw": 180,
+    "pitch": 30,
+    "offset": [
+     0,
+     176
+    ]
+   },
+   "wait": 0,
+   "setup": [],
+   "cleanup": [],
+   "measure": 0,
+   "checks": {
+    "maxBlackTiles": 0
+   },
+   "capture": "world",
+   "source": "tools/qa/skyrim_sweep.json:30"
+  },
+  {
+   "id": "dragon-bridge-aerial",
+   "title": "Dragon Bridge from the air (town overview)",
+   "tags": [
+    "region:skyrim/haafingar",
+    "place:dragon_bridge",
+    "town:dragon_bridge",
+    "feature:town"
+   ],
+   "pose": {
+    "place": "dragon_bridge",
+    "height": 55,
+    "yaw": 180,
+    "pitch": 30,
+    "offset": [
+     0,
+     72
+    ]
+   },
+   "wait": 0,
+   "setup": [],
+   "cleanup": [],
+   "measure": 0,
+   "checks": {
+    "maxBlackTiles": 0
+   },
+   "capture": "world",
+   "source": "tools/qa/skyrim_sweep.json:39"
+  },
+  {
+   "id": "windhelm-aerial",
+   "title": "Windhelm from the air (capital overview)",
+   "tags": [
+    "region:skyrim/eastmarch",
+    "place:windhelm",
+    "town:windhelm",
+    "feature:town"
+   ],
+   "pose": {
+    "place": "windhelm",
+    "height": 100,
+    "yaw": 180,
+    "pitch": 30,
+    "offset": [
+     0,
+     130
+    ]
+   },
+   "wait": 0,
+   "setup": [],
+   "cleanup": [],
+   "measure": 0,
+   "checks": {
+    "maxBlackTiles": 0
+   },
+   "capture": "world",
+   "source": "tools/qa/skyrim_sweep.json:48"
+  },
+  {
+   "id": "kynesgrove-aerial",
+   "title": "Kynesgrove from the air (town overview)",
+   "tags": [
+    "region:skyrim/eastmarch",
+    "place:kynesgrove",
+    "town:kynesgrove",
+    "feature:town"
+   ],
+   "pose": {
+    "place": "kynesgrove",
+    "height": 50,
+    "yaw": 180,
+    "pitch": 30,
+    "offset": [
+     0,
+     65
+    ]
+   },
+   "wait": 0,
+   "setup": [],
+   "cleanup": [],
+   "measure": 0,
+   "checks": {
+    "maxBlackTiles": 0
+   },
+   "capture": "world",
+   "source": "tools/qa/skyrim_sweep.json:57"
+  },
+  {
+   "id": "darkwater-crossing-aerial",
+   "title": "Darkwater Crossing from the air (village overview)",
+   "tags": [
+    "region:skyrim/eastmarch",
+    "place:darkwater_crossing",
+    "town:darkwater_crossing",
+    "feature:town"
+   ],
+   "pose": {
+    "place": "darkwater_crossing",
+    "height": 40,
+    "yaw": 180,
+    "pitch": 30,
+    "offset": [
+     0,
+     52
+    ]
+   },
+   "wait": 0,
+   "setup": [],
+   "cleanup": [],
+   "measure": 0,
+   "checks": {
+    "maxBlackTiles": 0
+   },
+   "capture": "world",
+   "source": "tools/qa/skyrim_sweep.json:66"
+  },
+  {
+   "id": "riften-aerial",
+   "title": "Riften from the air (capital overview)",
+   "tags": [
+    "region:skyrim/the_rift",
+    "place:riften",
+    "town:riften",
+    "feature:town"
+   ],
+   "pose": {
+    "place": "riften",
+    "height": 80,
+    "yaw": 180,
+    "pitch": 30,
+    "offset": [
+     0,
+     104
+    ]
+   },
+   "wait": 0,
+   "setup": [],
+   "cleanup": [],
+   "measure": 0,
+   "checks": {
+    "maxBlackTiles": 0
+   },
+   "capture": "world",
+   "source": "tools/qa/skyrim_sweep.json:75"
+  },
+  {
+   "id": "ivarstead-aerial",
+   "title": "Ivarstead from the air (town overview)",
+   "tags": [
+    "region:skyrim/the_rift",
+    "place:ivarstead",
+    "town:ivarstead",
+    "feature:town"
+   ],
+   "pose": {
+    "place": "ivarstead",
+    "height": 55,
+    "yaw": 180,
+    "pitch": 30,
+    "offset": [
+     0,
+     72
+    ]
+   },
+   "wait": 0,
+   "setup": [],
+   "cleanup": [],
+   "measure": 0,
+   "checks": {
+    "maxBlackTiles": 0
+   },
+   "capture": "world",
+   "source": "tools/qa/skyrim_sweep.json:84"
+  },
+  {
+   "id": "shors-stone-aerial",
+   "title": "Shors Stone from the air (town overview)",
+   "tags": [
+    "region:skyrim/the_rift",
+    "place:shors_stone",
+    "town:shors_stone",
+    "feature:town"
+   ],
+   "pose": {
+    "place": "shors_stone",
+    "height": 45,
+    "yaw": 180,
+    "pitch": 30,
+    "offset": [
+     0,
+     58
+    ]
+   },
+   "wait": 0,
+   "setup": [],
+   "cleanup": [],
+   "measure": 0,
+   "checks": {
+    "maxBlackTiles": 0
+   },
+   "capture": "world",
+   "source": "tools/qa/skyrim_sweep.json:93"
+  },
+  {
+   "id": "heartwood-mill-aerial",
+   "title": "Heartwood Mill from the air (village overview)",
+   "tags": [
+    "region:skyrim/the_rift",
+    "place:heartwood_mill",
+    "town:heartwood_mill",
+    "feature:town"
+   ],
+   "pose": {
+    "place": "heartwood_mill",
+    "height": 40,
+    "yaw": 180,
+    "pitch": 30,
+    "offset": [
+     0,
+     42
+    ]
+   },
+   "wait": 0,
+   "setup": [],
+   "cleanup": [],
+   "measure": 0,
+   "checks": {
+    "maxBlackTiles": 0
+   },
+   "capture": "world",
+   "source": "tools/qa/skyrim_sweep.json:102"
+  },
+  {
+   "id": "largashbur-aerial",
+   "title": "Largashbur from the air (village overview)",
+   "tags": [
+    "region:skyrim/the_rift",
+    "place:largashbur",
+    "town:largashbur",
+    "feature:town"
+   ],
+   "pose": {
+    "place": "largashbur",
+    "height": 40,
+    "yaw": 180,
+    "pitch": 30,
+    "offset": [
+     0,
+     49
+    ]
+   },
+   "wait": 0,
+   "setup": [],
+   "cleanup": [],
+   "measure": 0,
+   "checks": {
+    "maxBlackTiles": 0
+   },
+   "capture": "world",
+   "source": "tools/qa/skyrim_sweep.json:111"
+  },
+  {
+   "id": "markarth-aerial",
+   "title": "Markarth from the air (capital overview)",
+   "tags": [
+    "region:skyrim/the_reach",
+    "place:markarth",
+    "town:markarth",
+    "feature:town"
+   ],
+   "pose": {
+    "place": "markarth",
+    "height": 85,
+    "yaw": 180,
+    "pitch": 30,
+    "offset": [
+     0,
+     110
+    ]
+   },
+   "wait": 0,
+   "setup": [],
+   "cleanup": [],
+   "measure": 0,
+   "checks": {
+    "maxBlackTiles": 0
+   },
+   "capture": "world",
+   "source": "tools/qa/skyrim_sweep.json:120"
+  },
+  {
+   "id": "karthwasten-aerial",
+   "title": "Karthwasten from the air (town overview)",
+   "tags": [
+    "region:skyrim/the_reach",
+    "place:karthwasten",
+    "town:karthwasten",
+    "feature:town"
+   ],
+   "pose": {
+    "place": "karthwasten",
+    "height": 50,
+    "yaw": 180,
+    "pitch": 30,
+    "offset": [
+     0,
+     65
+    ]
+   },
+   "wait": 0,
+   "setup": [],
+   "cleanup": [],
+   "measure": 0,
+   "checks": {
+    "maxBlackTiles": 0
+   },
+   "capture": "world",
+   "source": "tools/qa/skyrim_sweep.json:129"
+  },
+  {
+   "id": "old-hroldan-aerial",
+   "title": "Old Hroldan from the air (village overview)",
+   "tags": [
+    "region:skyrim/the_reach",
+    "place:old_hroldan",
+    "town:old_hroldan",
+    "feature:town"
+   ],
+   "pose": {
+    "place": "old_hroldan",
+    "height": 40,
+    "yaw": 180,
+    "pitch": 30,
+    "offset": [
+     0,
+     34
+    ]
+   },
+   "wait": 0,
+   "setup": [],
+   "cleanup": [],
+   "measure": 0,
+   "checks": {
+    "maxBlackTiles": 0
+   },
+   "capture": "world",
+   "source": "tools/qa/skyrim_sweep.json:138"
+  },
+  {
+   "id": "dushnikh-yal-aerial",
+   "title": "Dushnikh Yal from the air (village overview)",
+   "tags": [
+    "region:skyrim/the_reach",
+    "place:dushnikh_yal",
+    "town:dushnikh_yal",
+    "feature:town"
+   ],
+   "pose": {
+    "place": "dushnikh_yal",
+    "height": 40,
+    "yaw": 180,
+    "pitch": 30,
+    "offset": [
+     0,
+     49
+    ]
+   },
+   "wait": 0,
+   "setup": [],
+   "cleanup": [],
+   "measure": 0,
+   "checks": {
+    "maxBlackTiles": 0
+   },
+   "capture": "world",
+   "source": "tools/qa/skyrim_sweep.json:147"
+  },
+  {
+   "id": "falkreath-aerial",
+   "title": "Falkreath from the air (capital overview)",
+   "tags": [
+    "region:skyrim/falkreath",
+    "place:falkreath",
+    "town:falkreath",
+    "feature:town"
+   ],
+   "pose": {
+    "place": "falkreath",
+    "height": 85,
+    "yaw": 180,
+    "pitch": 30,
+    "offset": [
+     0,
+     110
+    ]
+   },
+   "wait": 0,
+   "setup": [],
+   "cleanup": [],
+   "measure": 0,
+   "checks": {
+    "maxBlackTiles": 0
+   },
+   "capture": "world",
+   "source": "tools/qa/skyrim_sweep.json:156"
+  },
+  {
+   "id": "helgen-aerial",
+   "title": "Helgen from the air (town overview)",
+   "tags": [
+    "region:skyrim/falkreath",
+    "place:helgen",
+    "town:helgen",
+    "feature:town"
+   ],
+   "pose": {
+    "place": "helgen",
+    "height": 60,
+    "yaw": 180,
+    "pitch": 30,
+    "offset": [
+     0,
+     78
+    ]
+   },
+   "wait": 0,
+   "setup": [],
+   "cleanup": [],
+   "measure": 0,
+   "checks": {
+    "maxBlackTiles": 0
+   },
+   "capture": "world",
+   "source": "tools/qa/skyrim_sweep.json:165"
+  },
+  {
+   "id": "morthal-aerial",
+   "title": "Morthal from the air (capital overview)",
+   "tags": [
+    "region:skyrim/hjaalmarch",
+    "place:morthal",
+    "town:morthal",
+    "feature:town"
+   ],
+   "pose": {
+    "place": "morthal",
+    "height": 75,
+    "yaw": 180,
+    "pitch": 30,
+    "offset": [
+     0,
+     98
+    ]
+   },
+   "wait": 0,
+   "setup": [],
+   "cleanup": [],
+   "measure": 0,
+   "checks": {
+    "maxBlackTiles": 0
+   },
+   "capture": "world",
+   "source": "tools/qa/skyrim_sweep.json:174"
+  },
+  {
+   "id": "stonehills-aerial",
+   "title": "Stonehills from the air (village overview)",
+   "tags": [
+    "region:skyrim/hjaalmarch",
+    "place:stonehills",
+    "town:stonehills",
+    "feature:town"
+   ],
+   "pose": {
+    "place": "stonehills",
+    "height": 40,
+    "yaw": 180,
+    "pitch": 30,
+    "offset": [
+     0,
+     52
+    ]
+   },
+   "wait": 0,
+   "setup": [],
+   "cleanup": [],
+   "measure": 0,
+   "checks": {
+    "maxBlackTiles": 0
+   },
+   "capture": "world",
+   "source": "tools/qa/skyrim_sweep.json:183"
+  },
+  {
+   "id": "dawnstar-aerial",
+   "title": "Dawnstar from the air (capital overview)",
+   "tags": [
+    "region:skyrim/the_pale",
+    "place:dawnstar",
+    "town:dawnstar",
+    "feature:town"
+   ],
+   "pose": {
+    "place": "dawnstar",
+    "height": 85,
+    "yaw": 180,
+    "pitch": 30,
+    "offset": [
+     0,
+     110
+    ]
+   },
+   "wait": 0,
+   "setup": [],
+   "cleanup": [],
+   "measure": 0,
+   "checks": {
+    "maxBlackTiles": 0
+   },
+   "capture": "world",
+   "source": "tools/qa/skyrim_sweep.json:192"
+  },
+  {
+   "id": "winterhold-aerial",
+   "title": "Winterhold from the air (capital overview)",
+   "tags": [
+    "region:skyrim/winterhold",
+    "place:winterhold",
+    "town:winterhold",
+    "feature:town"
+   ],
+   "pose": {
+    "place": "winterhold",
+    "height": 70,
+    "yaw": 180,
+    "pitch": 30,
+    "offset": [
+     0,
+     91
+    ]
+   },
+   "wait": 0,
+   "setup": [],
+   "cleanup": [],
+   "measure": 0,
+   "checks": {
+    "maxBlackTiles": 0
+   },
+   "capture": "world",
+   "source": "tools/qa/skyrim_sweep.json:201"
+  },
+  {
+   "id": "college-of-winterhold-aerial",
+   "title": "College Of Winterhold from the air (town overview)",
+   "tags": [
+    "region:skyrim/winterhold",
+    "place:college_of_winterhold",
+    "town:college_of_winterhold",
+    "feature:town"
+   ],
+   "pose": {
+    "place": "college_of_winterhold",
+    "height": 60,
+    "yaw": 180,
+    "pitch": 30,
+    "offset": [
+     0,
+     78
+    ]
+   },
+   "wait": 0,
+   "setup": [],
+   "cleanup": [],
+   "measure": 0,
+   "checks": {
+    "maxBlackTiles": 0
+   },
+   "capture": "world",
+   "source": "tools/qa/skyrim_sweep.json:210"
+  },
+  {
+   "id": "site-hunters-camp-ground",
+   "title": "Hunters Camp minor site from the ground",
+   "tags": [
+    "region:skyrim/falkreath",
+    "weather:clear"
+   ],
+   "pose": {
+    "visit": [
+     -53,
+     747,
+     2,
+     -90,
+     8
+    ]
+   },
+   "weather": "clear",
+   "wait": 500,
+   "setup": [],
+   "cleanup": [],
+   "measure": 0,
+   "checks": {
+    "maxBlackTiles": 0
+   },
+   "capture": "world",
+   "source": "tools/explore/tour.ps1:4",
+   "note": "tour runs with -Dnirncraft.autotest.tourWait=500; seed 1234 world"
+  },
+  {
+   "id": "site-hunters-camp-air",
+   "title": "Hunters Camp minor site from the air",
+   "tags": [
+    "region:skyrim/falkreath",
+    "weather:clear"
+   ],
+   "pose": {
+    "visit": [
+     -53,
+     747,
+     70,
+     -90,
+     28
+    ]
+   },
+   "weather": "clear",
+   "wait": 375,
+   "setup": [],
+   "cleanup": [],
+   "measure": 0,
+   "checks": {
+    "maxBlackTiles": 0
+   },
+   "capture": "world",
+   "source": "tools/explore/tour.ps1:4",
+   "note": "air shot uses tourUp=70 and tourPitch=28 defaults (ClientAutotest.tourTick)"
+  },
+  {
+   "id": "site-nordic-cairn-ground",
+   "title": "Nordic Cairn minor site from the ground",
+   "tags": [
+    "region:skyrim/falkreath",
+    "weather:clear"
+   ],
+   "pose": {
+    "visit": [
+     107,
+     1352,
+     2,
+     -90,
+     8
+    ]
+   },
+   "weather": "clear",
+   "wait": 500,
+   "setup": [],
+   "cleanup": [],
+   "measure": 0,
+   "checks": {
+    "maxBlackTiles": 0
+   },
+   "capture": "world",
+   "source": "tools/explore/tour.ps1:4",
+   "note": "tour runs with -Dnirncraft.autotest.tourWait=500; seed 1234 world"
+  },
+  {
+   "id": "site-nordic-cairn-air",
+   "title": "Nordic Cairn minor site from the air",
+   "tags": [
+    "region:skyrim/falkreath",
+    "weather:clear"
+   ],
+   "pose": {
+    "visit": [
+     107,
+     1352,
+     70,
+     -90,
+     28
+    ]
+   },
+   "weather": "clear",
+   "wait": 375,
+   "setup": [],
+   "cleanup": [],
+   "measure": 0,
+   "checks": {
+    "maxBlackTiles": 0
+   },
+   "capture": "world",
+   "source": "tools/explore/tour.ps1:4",
+   "note": "air shot uses tourUp=70 and tourPitch=28 defaults (ClientAutotest.tourTick)"
+  },
+  {
+   "id": "site-abandoned-camp-ground",
+   "title": "Abandoned Camp minor site from the ground",
+   "tags": [
+    "region:skyrim/falkreath",
+    "weather:clear"
+   ],
+   "pose": {
+    "visit": [
+     232,
+     681,
+     2,
+     -90,
+     8
+    ]
+   },
+   "weather": "clear",
+   "wait": 500,
+   "setup": [],
+   "cleanup": [],
+   "measure": 0,
+   "checks": {
+    "maxBlackTiles": 0
+   },
+   "capture": "world",
+   "source": "tools/explore/tour.ps1:4",
+   "note": "tour runs with -Dnirncraft.autotest.tourWait=500; seed 1234 world"
+  },
+  {
+   "id": "site-abandoned-camp-air",
+   "title": "Abandoned Camp minor site from the air",
+   "tags": [
+    "region:skyrim/falkreath",
+    "weather:clear"
+   ],
+   "pose": {
+    "visit": [
+     232,
+     681,
+     70,
+     -90,
+     28
+    ]
+   },
+   "weather": "clear",
+   "wait": 375,
+   "setup": [],
+   "cleanup": [],
+   "measure": 0,
+   "checks": {
+    "maxBlackTiles": 0
+   },
+   "capture": "world",
+   "source": "tools/explore/tour.ps1:4",
+   "note": "air shot uses tourUp=70 and tourPitch=28 defaults (ClientAutotest.tourTick)"
+  },
+  {
+   "id": "site-herb-garden-ground",
+   "title": "Herb Garden minor site from the ground",
+   "tags": [
+    "region:skyrim/falkreath",
+    "feature:foliage",
+    "weather:clear"
+   ],
+   "pose": {
+    "visit": [
+     426,
+     1220,
+     2,
+     -90,
+     8
+    ]
+   },
+   "weather": "clear",
+   "wait": 500,
+   "setup": [],
+   "cleanup": [],
+   "measure": 0,
+   "checks": {
+    "maxBlackTiles": 0
+   },
+   "capture": "world",
+   "source": "tools/explore/tour.ps1:4",
+   "note": "tour runs with -Dnirncraft.autotest.tourWait=500; seed 1234 world"
+  },
+  {
+   "id": "site-herb-garden-air",
+   "title": "Herb Garden minor site from the air",
+   "tags": [
+    "region:skyrim/falkreath",
+    "feature:foliage",
+    "weather:clear"
+   ],
+   "pose": {
+    "visit": [
+     426,
+     1220,
+     70,
+     -90,
+     28
+    ]
+   },
+   "weather": "clear",
+   "wait": 375,
+   "setup": [],
+   "cleanup": [],
+   "measure": 0,
+   "checks": {
+    "maxBlackTiles": 0
+   },
+   "capture": "world",
+   "source": "tools/explore/tour.ps1:4",
+   "note": "air shot uses tourUp=70 and tourPitch=28 defaults (ClientAutotest.tourTick)"
+  },
+  {
+   "id": "site-mineral-vein-ground",
+   "title": "Mineral Vein minor site from the ground",
+   "tags": [
+    "region:skyrim/falkreath",
+    "weather:clear"
+   ],
+   "pose": {
+    "visit": [
+     -263,
+     1528,
+     2,
+     -90,
+     8
+    ]
+   },
+   "weather": "clear",
+   "wait": 500,
+   "setup": [],
+   "cleanup": [],
+   "measure": 0,
+   "checks": {
+    "maxBlackTiles": 0
+   },
+   "capture": "world",
+   "source": "tools/explore/tour.ps1:4",
+   "note": "tour runs with -Dnirncraft.autotest.tourWait=500; seed 1234 world"
+  },
+  {
+   "id": "site-mineral-vein-air",
+   "title": "Mineral Vein minor site from the air",
+   "tags": [
+    "region:skyrim/falkreath",
+    "weather:clear"
+   ],
+   "pose": {
+    "visit": [
+     -263,
+     1528,
+     70,
+     -90,
+     28
+    ]
+   },
+   "weather": "clear",
+   "wait": 375,
+   "setup": [],
+   "cleanup": [],
+   "measure": 0,
+   "checks": {
+    "maxBlackTiles": 0
+   },
+   "capture": "world",
+   "source": "tools/explore/tour.ps1:4",
+   "note": "air shot uses tourUp=70 and tourPitch=28 defaults (ClientAutotest.tourTick)"
+  },
+  {
+   "id": "site-bandit-lookout-ground",
+   "title": "Bandit Lookout minor site from the ground",
+   "tags": [
+    "region:skyrim/falkreath",
+    "weather:clear"
+   ],
+   "pose": {
+    "visit": [
+     -438,
+     1542,
+     2,
+     -90,
+     8
+    ]
+   },
+   "weather": "clear",
+   "wait": 500,
+   "setup": [],
+   "cleanup": [],
+   "measure": 0,
+   "checks": {
+    "maxBlackTiles": 0
+   },
+   "capture": "world",
+   "source": "tools/explore/tour.ps1:4",
+   "note": "tour runs with -Dnirncraft.autotest.tourWait=500; seed 1234 world"
+  },
+  {
+   "id": "site-bandit-lookout-air",
+   "title": "Bandit Lookout minor site from the air",
+   "tags": [
+    "region:skyrim/falkreath",
+    "weather:clear"
+   ],
+   "pose": {
+    "visit": [
+     -438,
+     1542,
+     70,
+     -90,
+     28
+    ]
+   },
+   "weather": "clear",
+   "wait": 375,
+   "setup": [],
+   "cleanup": [],
+   "measure": 0,
+   "checks": {
+    "maxBlackTiles": 0
+   },
+   "capture": "world",
+   "source": "tools/explore/tour.ps1:4",
+   "note": "air shot uses tourUp=70 and tourPitch=28 defaults (ClientAutotest.tourTick)"
+  },
+  {
+   "id": "site-overlook-ground",
+   "title": "Overlook minor site from the ground",
+   "tags": [
+    "region:skyrim/falkreath",
+    "weather:clear"
+   ],
+   "pose": {
+    "visit": [
+     -213,
+     1668,
+     2,
+     -90,
+     8
+    ]
+   },
+   "weather": "clear",
+   "wait": 500,
+   "setup": [],
+   "cleanup": [],
+   "measure": 0,
+   "checks": {
+    "maxBlackTiles": 0
+   },
+   "capture": "world",
+   "source": "tools/explore/tour.ps1:4",
+   "note": "tour runs with -Dnirncraft.autotest.tourWait=500; seed 1234 world"
+  },
+  {
+   "id": "site-overlook-air",
+   "title": "Overlook minor site from the air",
+   "tags": [
+    "region:skyrim/falkreath",
+    "weather:clear"
+   ],
+   "pose": {
+    "visit": [
+     -213,
+     1668,
+     70,
+     -90,
+     28
+    ]
+   },
+   "weather": "clear",
+   "wait": 375,
+   "setup": [],
+   "cleanup": [],
+   "measure": 0,
+   "checks": {
+    "maxBlackTiles": 0
+   },
+   "capture": "world",
+   "source": "tools/explore/tour.ps1:4",
+   "note": "air shot uses tourUp=70 and tourPitch=28 defaults (ClientAutotest.tourTick)"
+  },
+  {
+   "id": "site-dwemer-vent-ground",
+   "title": "Dwemer Vent minor site from the ground",
+   "tags": [
+    "region:skyrim/falkreath",
+    "weather:clear"
+   ],
+   "pose": {
+    "visit": [
+     665,
+     1226,
+     2,
+     -90,
+     8
+    ]
+   },
+   "weather": "clear",
+   "wait": 500,
+   "setup": [],
+   "cleanup": [],
+   "measure": 0,
+   "checks": {
+    "maxBlackTiles": 0
+   },
+   "capture": "world",
+   "source": "tools/explore/tour.ps1:4",
+   "note": "tour runs with -Dnirncraft.autotest.tourWait=500; seed 1234 world"
+  },
+  {
+   "id": "site-dwemer-vent-air",
+   "title": "Dwemer Vent minor site from the air",
+   "tags": [
+    "region:skyrim/falkreath",
+    "weather:clear"
+   ],
+   "pose": {
+    "visit": [
+     665,
+     1226,
+     70,
+     -90,
+     28
+    ]
+   },
+   "weather": "clear",
+   "wait": 375,
+   "setup": [],
+   "cleanup": [],
+   "measure": 0,
+   "checks": {
+    "maxBlackTiles": 0
+   },
+   "capture": "world",
+   "source": "tools/explore/tour.ps1:4",
+   "note": "air shot uses tourUp=70 and tourPitch=28 defaults (ClientAutotest.tourTick)"
+  },
+  {
+   "id": "site-wayshrine-ground",
+   "title": "Wayshrine minor site from the ground",
+   "tags": [
+    "region:skyrim/falkreath",
+    "weather:clear"
+   ],
+   "pose": {
+    "visit": [
+     -598,
+     1545,
+     2,
+     -90,
+     8
+    ]
+   },
+   "weather": "clear",
+   "wait": 500,
+   "setup": [],
+   "cleanup": [],
+   "measure": 0,
+   "checks": {
+    "maxBlackTiles": 0
+   },
+   "capture": "world",
+   "source": "tools/explore/tour.ps1:4",
+   "note": "tour runs with -Dnirncraft.autotest.tourWait=500; seed 1234 world"
+  },
+  {
+   "id": "site-wayshrine-air",
+   "title": "Wayshrine minor site from the air",
+   "tags": [
+    "region:skyrim/falkreath",
+    "weather:clear"
+   ],
+   "pose": {
+    "visit": [
+     -598,
+     1545,
+     70,
+     -90,
+     28
+    ]
+   },
+   "weather": "clear",
+   "wait": 375,
+   "setup": [],
+   "cleanup": [],
+   "measure": 0,
+   "checks": {
+    "maxBlackTiles": 0
+   },
+   "capture": "world",
+   "source": "tools/explore/tour.ps1:4",
+   "note": "air shot uses tourUp=70 and tourPitch=28 defaults (ClientAutotest.tourTick)"
+  },
+  {
+   "id": "site-dead-adventurer-ground",
+   "title": "Dead Adventurer minor site from the ground",
+   "tags": [
+    "region:skyrim/whiterun",
+    "weather:clear"
+   ],
+   "pose": {
+    "visit": [
+     367,
+     584,
+     2,
+     -90,
+     8
+    ]
+   },
+   "weather": "clear",
+   "wait": 500,
+   "setup": [],
+   "cleanup": [],
+   "measure": 0,
+   "checks": {
+    "maxBlackTiles": 0
+   },
+   "capture": "world",
+   "source": "tools/explore/tour.ps1:4",
+   "note": "tour runs with -Dnirncraft.autotest.tourWait=500; seed 1234 world"
+  },
+  {
+   "id": "site-dead-adventurer-air",
+   "title": "Dead Adventurer minor site from the air",
+   "tags": [
+    "region:skyrim/whiterun",
+    "weather:clear"
+   ],
+   "pose": {
+    "visit": [
+     367,
+     584,
+     70,
+     -90,
+     28
+    ]
+   },
+   "weather": "clear",
+   "wait": 375,
+   "setup": [],
+   "cleanup": [],
+   "measure": 0,
+   "checks": {
+    "maxBlackTiles": 0
+   },
+   "capture": "world",
+   "source": "tools/explore/tour.ps1:4",
+   "note": "air shot uses tourUp=70 and tourPitch=28 defaults (ClientAutotest.tourTick)"
+  },
+  {
+   "id": "site-treasure-cache-ground",
+   "title": "Treasure Cache minor site from the ground",
+   "tags": [
+    "region:skyrim/falkreath",
+    "weather:clear"
+   ],
+   "pose": {
+    "visit": [
+     -563,
+     548,
+     2,
+     -90,
+     8
+    ]
+   },
+   "weather": "clear",
+   "wait": 500,
+   "setup": [],
+   "cleanup": [],
+   "measure": 0,
+   "checks": {
+    "maxBlackTiles": 0
+   },
+   "capture": "world",
+   "source": "tools/explore/tour.ps1:4",
+   "note": "tour runs with -Dnirncraft.autotest.tourWait=500; seed 1234 world"
+  },
+  {
+   "id": "site-treasure-cache-air",
+   "title": "Treasure Cache minor site from the air",
+   "tags": [
+    "region:skyrim/falkreath",
+    "weather:clear"
+   ],
+   "pose": {
+    "visit": [
+     -563,
+     548,
+     70,
+     -90,
+     28
+    ]
+   },
+   "weather": "clear",
+   "wait": 375,
+   "setup": [],
+   "cleanup": [],
+   "measure": 0,
+   "checks": {
+    "maxBlackTiles": 0
+   },
+   "capture": "world",
+   "source": "tools/explore/tour.ps1:4",
+   "note": "air shot uses tourUp=70 and tourPitch=28 defaults (ClientAutotest.tourTick)"
+  },
+  {
+   "id": "site-ayleid-well-ground",
+   "title": "Ayleid Well minor site from the ground",
+   "tags": [
+    "region:cyrodiil/heartlands",
+    "weather:clear"
+   ],
+   "pose": {
+    "visit": [
+     2532,
+     6704,
+     2,
+     -90,
+     8
+    ]
+   },
+   "weather": "clear",
+   "wait": 500,
+   "setup": [],
+   "cleanup": [],
+   "measure": 0,
+   "checks": {
+    "maxBlackTiles": 0
+   },
+   "capture": "world",
+   "source": "tools/explore/tour.ps1:4",
+   "note": "tour runs with -Dnirncraft.autotest.tourWait=500; seed 1234 world"
+  },
+  {
+   "id": "site-ayleid-well-air",
+   "title": "Ayleid Well minor site from the air",
+   "tags": [
+    "region:cyrodiil/heartlands",
+    "weather:clear"
+   ],
+   "pose": {
+    "visit": [
+     2532,
+     6704,
+     70,
+     -90,
+     28
+    ]
+   },
+   "weather": "clear",
+   "wait": 375,
+   "setup": [],
+   "cleanup": [],
+   "measure": 0,
+   "checks": {
+    "maxBlackTiles": 0
+   },
+   "capture": "world",
+   "source": "tools/explore/tour.ps1:4",
+   "note": "air shot uses tourUp=70 and tourPitch=28 defaults (ClientAutotest.tourTick)"
+  },
+  {
+   "id": "site-velothi-shrine-ground",
+   "title": "Velothi Shrine minor site from the ground",
+   "tags": [
+    "region:morrowind/vvardenfell_ashlands",
+    "weather:clear"
+   ],
+   "pose": {
+    "visit": [
+     6466,
+     -1840,
+     2,
+     -90,
+     8
+    ]
+   },
+   "weather": "clear",
+   "wait": 500,
+   "setup": [],
+   "cleanup": [],
+   "measure": 0,
+   "checks": {
+    "maxBlackTiles": 0
+   },
+   "capture": "world",
+   "source": "tools/explore/tour.ps1:4",
+   "note": "tour runs with -Dnirncraft.autotest.tourWait=500; seed 1234 world"
+  },
+  {
+   "id": "site-velothi-shrine-air",
+   "title": "Velothi Shrine minor site from the air",
+   "tags": [
+    "region:morrowind/vvardenfell_ashlands",
+    "weather:clear"
+   ],
+   "pose": {
+    "visit": [
+     6466,
+     -1840,
+     70,
+     -90,
+     28
+    ]
+   },
+   "weather": "clear",
+   "wait": 375,
+   "setup": [],
+   "cleanup": [],
+   "measure": 0,
+   "checks": {
+    "maxBlackTiles": 0
+   },
+   "capture": "world",
+   "source": "tools/explore/tour.ps1:4",
+   "note": "air shot uses tourUp=70 and tourPitch=28 defaults (ClientAutotest.tourTick)"
+  },
+  {
+   "id": "site-yokudan-obelisk-ground",
+   "title": "Yokudan Obelisk minor site from the ground",
+   "tags": [
+    "region:hammerfell/alikr_desert",
+    "weather:clear"
+   ],
+   "pose": {
+    "visit": [
+     -8286,
+     7120,
+     2,
+     -90,
+     8
+    ]
+   },
+   "weather": "clear",
+   "wait": 500,
+   "setup": [],
+   "cleanup": [],
+   "measure": 0,
+   "checks": {
+    "maxBlackTiles": 0
+   },
+   "capture": "world",
+   "source": "tools/explore/tour.ps1:4",
+   "note": "tour runs with -Dnirncraft.autotest.tourWait=500; seed 1234 world"
+  },
+  {
+   "id": "site-yokudan-obelisk-air",
+   "title": "Yokudan Obelisk minor site from the air",
+   "tags": [
+    "region:hammerfell/alikr_desert",
+    "weather:clear"
+   ],
+   "pose": {
+    "visit": [
+     -8286,
+     7120,
+     70,
+     -90,
+     28
+    ]
+   },
+   "weather": "clear",
+   "wait": 375,
+   "setup": [],
+   "cleanup": [],
+   "measure": 0,
+   "checks": {
+    "maxBlackTiles": 0
+   },
+   "capture": "world",
+   "source": "tools/explore/tour.ps1:4",
+   "note": "air shot uses tourUp=70 and tourPitch=28 defaults (ClientAutotest.tourTick)"
+  },
+  {
+   "id": "site-hist-sapling-ground",
+   "title": "Hist Sapling minor site from the ground",
+   "tags": [
+    "region:black_marsh/shadowfen",
+    "feature:foliage",
+    "weather:clear"
+   ],
+   "pose": {
+    "visit": [
+     8864,
+     5200,
+     2,
+     -90,
+     8
+    ]
+   },
+   "weather": "clear",
+   "wait": 500,
+   "setup": [],
+   "cleanup": [],
+   "measure": 0,
+   "checks": {
+    "maxBlackTiles": 0
+   },
+   "capture": "world",
+   "source": "tools/explore/tour.ps1:4",
+   "note": "tour runs with -Dnirncraft.autotest.tourWait=500; seed 1234 world"
+  },
+  {
+   "id": "site-hist-sapling-air",
+   "title": "Hist Sapling minor site from the air",
+   "tags": [
+    "region:black_marsh/shadowfen",
+    "feature:foliage",
+    "weather:clear"
+   ],
+   "pose": {
+    "visit": [
+     8864,
+     5200,
+     70,
+     -90,
+     28
+    ]
+   },
+   "weather": "clear",
+   "wait": 375,
+   "setup": [],
+   "cleanup": [],
+   "measure": 0,
+   "checks": {
+    "maxBlackTiles": 0
+   },
+   "capture": "world",
+   "source": "tools/explore/tour.ps1:4",
+   "note": "air shot uses tourUp=70 and tourPitch=28 defaults (ClientAutotest.tourTick)"
+  },
+  {
+   "id": "site-shipwreck-ground",
+   "title": "Shipwreck minor site from the ground",
+   "tags": [
+    "region:skyrim/winterhold",
+    "feature:water",
+    "weather:clear"
+   ],
+   "pose": {
+    "visit": [
+     495,
+     -1979,
+     2,
+     -90,
+     8
+    ]
+   },
+   "weather": "clear",
+   "wait": 500,
+   "setup": [],
+   "cleanup": [],
+   "measure": 0,
+   "checks": {
+    "maxBlackTiles": 0
+   },
+   "capture": "world",
+   "source": "tools/explore/tour.ps1:4",
+   "note": "tour runs with -Dnirncraft.autotest.tourWait=500; seed 1234 world"
+  },
+  {
+   "id": "site-shipwreck-air",
+   "title": "Shipwreck minor site from the air",
+   "tags": [
+    "region:skyrim/winterhold",
+    "feature:water",
+    "weather:clear"
+   ],
+   "pose": {
+    "visit": [
+     495,
+     -1979,
+     70,
+     -90,
+     28
+    ]
+   },
+   "weather": "clear",
+   "wait": 375,
+   "setup": [],
+   "cleanup": [],
+   "measure": 0,
+   "checks": {
+    "maxBlackTiles": 0
+   },
+   "capture": "world",
+   "source": "tools/explore/tour.ps1:4",
+   "note": "air shot uses tourUp=70 and tourPitch=28 defaults (ClientAutotest.tourTick)"
+  },
+  {
+   "id": "site-fishing-dock-ground",
+   "title": "Fishing Dock minor site from the ground",
+   "tags": [
+    "region:cyrodiil/heartlands",
+    "feature:water",
+    "weather:clear"
+   ],
+   "pose": {
+    "visit": [
+     934,
+     4074,
+     2,
+     -90,
+     8
+    ]
+   },
+   "weather": "clear",
+   "wait": 500,
+   "setup": [],
+   "cleanup": [],
+   "measure": 0,
+   "checks": {
+    "maxBlackTiles": 0
+   },
+   "capture": "world",
+   "source": "tools/explore/tour.ps1:4",
+   "note": "tour runs with -Dnirncraft.autotest.tourWait=500; seed 1234 world"
+  },
+  {
+   "id": "site-fishing-dock-air",
+   "title": "Fishing Dock minor site from the air",
+   "tags": [
+    "region:cyrodiil/heartlands",
+    "feature:water",
+    "weather:clear"
+   ],
+   "pose": {
+    "visit": [
+     934,
+     4074,
+     70,
+     -90,
+     28
+    ]
+   },
+   "weather": "clear",
+   "wait": 375,
+   "setup": [],
+   "cleanup": [],
+   "measure": 0,
+   "checks": {
+    "maxBlackTiles": 0
+   },
+   "capture": "world",
+   "source": "tools/explore/tour.ps1:4",
+   "note": "air shot uses tourUp=70 and tourPitch=28 defaults (ClientAutotest.tourTick)"
+  },
+  {
+   "id": "dragon-bridge-road-barn",
+   "title": "Reproduce actual covered road/hay obstruction with a clear local interior camera",
+   "tags": [
+    "region:skyrim/haafingar",
+    "town:dragon_bridge",
+    "place:dragon_bridge",
+    "feature:road",
+    "feature:town",
+    "weather:fog",
+    "time:26385"
+   ],
+   "pose": {
+    "camera": [
+     -1951.0,
+     73.0,
+     -1387.0,
+     -1982.83,
+     57.94,
+     -1355.17
+    ]
+   },
+   "time": 26385,
+   "weather": "fog",
+   "wait": 0,
+   "setup": [],
+   "cleanup": [],
+   "variants": [
+    "vanilla"
+   ],
+   "measure": 0,
+   "checks": {},
+   "capture": "world",
+   "source": "tools/qa/visual-cameras.json:205",
+   "note": "captured in a world with seed 2428247 (not the default 1234)",
+   "seed": 2428247
+  },
+  {
+   "id": "helgen-legacy-west-dawn",
+   "title": "Helgen street looking west at dawn",
+   "tags": [
+    "region:skyrim/falkreath",
+    "town:helgen",
+    "place:helgen",
+    "feature:town",
+    "feature:fire",
+    "feature:smoke",
+    "weather:clear",
+    "time:dawn"
+   ],
+   "pose": {
+    "camera": [
+     -19.5,
+     133.0,
+     1158.5,
+     -119.3,
+     140.0,
+     1158.5
+    ]
+   },
+   "time": 180,
+   "weather": "clear",
+   "wait": 0,
+   "setup": [],
+   "cleanup": [],
+   "variants": [
+    "shaders"
+   ],
+   "measure": 0,
+   "checks": {},
+   "capture": "world",
+   "source": ".work/visual/legacy/v11-helgen.json:1",
+   "note": "same pose captured as v10-helgen and v10-helgen-nosmoke (smoke disabled build); seeded with v11"
+  },
+  {
+   "id": "helgen-legacy-yaw120-dawn",
+   "title": "Helgen looking north-west (yaw 120) at dawn",
+   "tags": [
+    "region:skyrim/falkreath",
+    "town:helgen",
+    "place:helgen",
+    "feature:town",
+    "feature:fire",
+    "weather:clear",
+    "time:dawn"
+   ],
+   "pose": {
+    "camera": [
+     -19.5,
+     133.0,
+     1158.5,
+     -106.1,
+     133.0,
+     1108.5
+    ]
+   },
+   "time": 180,
+   "weather": "clear",
+   "wait": 0,
+   "setup": [],
+   "cleanup": [],
+   "variants": [
+    "shaders"
+   ],
+   "measure": 0,
+   "checks": {},
+   "capture": "world",
+   "source": ".work/visual/legacy/v11-yaw120.json:1",
+   "note": "same pose also captured as v10-yaw120; seeded with v11"
+  },
+  {
+   "id": "helgen-legacy-yaw60-dawn",
+   "title": "Helgen looking south-west (yaw 60) at dawn",
+   "tags": [
+    "region:skyrim/falkreath",
+    "town:helgen",
+    "place:helgen",
+    "feature:town",
+    "feature:fire",
+    "weather:clear",
+    "time:dawn"
+   ],
+   "pose": {
+    "camera": [
+     -19.5,
+     135.0,
+     1158.5,
+     -105.9,
+     142.0,
+     1208.4
+    ]
+   },
+   "time": 180,
+   "weather": "clear",
+   "wait": 0,
+   "setup": [],
+   "cleanup": [],
+   "variants": [
+    "shaders"
+   ],
+   "measure": 0,
+   "checks": {},
+   "capture": "world",
+   "source": ".work/visual/legacy/v10-yaw60.json:1"
+  },
+  {
+   "id": "imperial-city-legacy-near",
+   "title": "Imperial City approach from the north, looking south",
+   "tags": [
+    "region:cyrodiil/heartlands",
+    "town:imperial_city",
+    "place:imperial_city",
+    "feature:town",
+    "weather:clear",
+    "time:dawn"
+   ],
+   "pose": {
+    "camera": [
+     900.5,
+     118.0,
+     4700.5,
+     901.8,
+     114.8,
+     4800.4
+    ]
+   },
+   "time": 180,
+   "weather": "clear",
+   "wait": 0,
+   "setup": [],
+   "cleanup": [],
+   "variants": [
+    "shaders"
+   ],
+   "measure": 0,
+   "checks": {},
+   "capture": "world",
+   "source": ".work/visual/legacy/v11-ic-near.json:1",
+   "note": "legacy capture was not readiness-passed (meshes=false)"
+  },
+  {
+   "id": "whiterun-legacy-night-east",
+   "title": "Whiterun at night from the eastern plains",
+   "tags": [
+    "region:skyrim/whiterun",
+    "town:whiterun",
+    "place:whiterun",
+    "feature:town",
+    "feature:night-sky",
+    "weather:clear",
+    "time:night"
+   ],
+   "pose": {
+    "camera": [
+     450.5,
+     142.0,
+     -67.5,
+     350.7,
+     149.0,
+     -67.5
+    ]
+   },
+   "time": 18000,
+   "weather": "clear",
+   "wait": 0,
+   "setup": [],
+   "cleanup": [],
+   "variants": [
+    "shaders"
+   ],
+   "measure": 0,
+   "checks": {
+    "lumaMin": 2
+   },
+   "capture": "world",
+   "source": ".work/visual/legacy/v11-whiterun-night.json:1",
+   "note": "legacy capture was not readiness-passed (meshes=false)"
+  },
+  {
+   "id": "dragonsreach-silhouette-night-far",
+   "title": "Dragonsreach silhouette on its hill at night from ~1 km north",
+   "tags": [
+    "region:skyrim/whiterun",
+    "place:whiterun",
+    "town:whiterun",
+    "feature:town",
+    "feature:night-sky",
+    "feature:farfield",
+    "weather:clear",
+    "time:night"
+   ],
+   "pose": {
+    "visit": [
+     62,
+     -1148,
+     30,
+     0,
+     -3
+    ]
+   },
+   "time": 18000,
+   "weather": "clear",
+   "wait": 300,
+   "setup": [],
+   "cleanup": [],
+   "measure": 0,
+   "checks": {
+    "lumaMin": 2
+   },
+   "capture": "world",
+   "source": "new (owner gap); Dragonsreach at local (0,-80) in mod/src/main/java/com/nirncraft/tamriel/settlement/plan/Cities.java:392",
+   "note": "height above surface guessed; Whiterun lights should read as windows, not halos"
+  },
+  {
+   "id": "dragonsreach-silhouette-night-2km",
+   "title": "Dragonsreach silhouette at night from ~2 km west on the Rorikstead plains",
+   "tags": [
+    "region:skyrim/whiterun",
+    "place:whiterun",
+    "town:whiterun",
+    "feature:town",
+    "feature:night-sky",
+    "feature:farfield",
+    "weather:clear",
+    "time:night"
+   ],
+   "pose": {
+    "visit": [
+     -1938,
+     -148,
+     25,
+     -90,
+     -2
+    ]
+   },
+   "time": 18000,
+   "weather": "clear",
+   "wait": 300,
+   "setup": [],
+   "cleanup": [],
+   "measure": 0,
+   "checks": {
+    "lumaMin": 2
+   },
+   "capture": "world",
+   "source": "new (owner gap); Cities.java:392",
+   "note": "pose guessed (open tundra east of Rorikstead); verify line of sight"
+  },
+  {
+   "id": "whiterun-night-town-street",
+   "title": "Whiterun Plains District street at night, looking up to Dragonsreach",
+   "tags": [
+    "region:skyrim/whiterun",
+    "place:whiterun",
+    "town:whiterun",
+    "feature:town",
+    "feature:night-sky",
+    "weather:clear",
+    "time:night"
+   ],
+   "pose": {
+    "visit": [
+     62,
+     -28,
+     2,
+     180,
+     -8
+    ]
+   },
+   "time": 18000,
+   "weather": "clear",
+   "wait": 200,
+   "setup": [],
+   "cleanup": [],
+   "measure": 0,
+   "checks": {
+    "lumaMin": 2
+   },
+   "capture": "world",
+   "source": "new (owner gap: night town)",
+   "note": "street position guessed from the Cities.whiterun plan (gate at local z=+108)"
+  },
+  {
+   "id": "treva-cascade-falls",
+   "title": "Treva cascade falls and rapids in the Rift",
+   "tags": [
+    "region:skyrim/the_rift",
+    "place:treva_cascade_falls",
+    "feature:water",
+    "feature:river",
+    "feature:falls",
+    "suite:smoke",
+    "weather:clear",
+    "time:noon"
+   ],
+   "pose": {
+    "place": "treva_cascade_falls",
+    "height": 12,
+    "yaw": 0,
+    "pitch": 15,
+    "offset": [
+     0,
+     -30
+    ]
+   },
+   "time": 6000,
+   "weather": "clear",
+   "wait": 200,
+   "setup": [],
+   "cleanup": [],
+   "measure": 0,
+   "checks": {
+    "maxBlackTiles": 0
+   },
+   "capture": "world",
+   "source": "new (owner gap: river rapids and waterfall); place from skyrim_landmarks.json",
+   "note": "offset/yaw guessed: 30 blocks north of the landmark looking south; adjust once the water is seen"
+  },
+  {
+   "id": "darkwater-falls-overlook",
+   "title": "Darkwater river rapids and falls",
+   "tags": [
+    "region:skyrim/eastmarch",
+    "place:darkwater_falls_overlook",
+    "feature:water",
+    "feature:river",
+    "feature:falls",
+    "weather:clear",
+    "time:noon"
+   ],
+   "pose": {
+    "place": "darkwater_falls_overlook",
+    "height": 14,
+    "yaw": 0,
+    "pitch": 20,
+    "offset": [
+     0,
+     -30
+    ]
+   },
+   "time": 6000,
+   "weather": "clear",
+   "wait": 200,
+   "setup": [],
+   "cleanup": [],
+   "measure": 0,
+   "checks": {
+    "maxBlackTiles": 0
+   },
+   "capture": "world",
+   "source": "new (owner gap: river rapids and waterfall); place from skyrim_landmarks.json",
+   "note": "offset/yaw guessed: 30 blocks north of the landmark looking south; adjust once the water is seen"
+  },
+  {
+   "id": "ilinalta-falls",
+   "title": "Ilinalta falls in Falkreath hold",
+   "tags": [
+    "region:skyrim/falkreath",
+    "place:ilinalta_falls",
+    "feature:water",
+    "feature:river",
+    "feature:falls",
+    "weather:clear",
+    "time:noon"
+   ],
+   "pose": {
+    "place": "ilinalta_falls",
+    "height": 12,
+    "yaw": 0,
+    "pitch": 15,
+    "offset": [
+     0,
+     -30
+    ]
+   },
+   "time": 6000,
+   "weather": "clear",
+   "wait": 200,
+   "setup": [],
+   "cleanup": [],
+   "measure": 0,
+   "checks": {
+    "maxBlackTiles": 0
+   },
+   "capture": "world",
+   "source": "new (owner gap: river rapids and waterfall); place from skyrim_landmarks.json",
+   "note": "offset/yaw guessed: 30 blocks north of the landmark looking south; adjust once the water is seen"
+  },
+  {
+   "id": "falkreath-forest-foliage-close",
+   "title": "Falkreath pine forest foliage close-up",
+   "tags": [
+    "region:skyrim/falkreath",
+    "feature:foliage",
+    "weather:clear",
+    "time:noon"
+   ],
+   "pose": {
+    "visit": [
+     -700,
+     1150,
+     2,
+     0,
+     5
+    ]
+   },
+   "time": 6000,
+   "weather": "clear",
+   "wait": 200,
+   "setup": [],
+   "cleanup": [],
+   "measure": 0,
+   "checks": {
+    "maxBlackTiles": 0
+   },
+   "capture": "world",
+   "source": "new (owner gap: forest foliage close-up)",
+   "note": "pose guessed between Helgen and Falkreath; verify trees fill the frame"
+  }
+ ]
+}

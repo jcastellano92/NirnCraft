@@ -49,7 +49,10 @@ public final class ClientPacketHandlers {
         Minecraft mc = Minecraft.getInstance();
         switch (screen) {
             case CorePackets.OpenScreen.RACE -> {
-                if (mc.gui.screen() == null) mc.gui.setScreen(new RaceScreen());
+                if (com.nirncraft.client.autotest.ClientAutotest.automated()) {  // tests: choose, never stop on it
+                    com.nirncraft.network.SkyNetwork.sendToServer(
+                            new com.nirncraft.network.CorePackets.ChooseRace(com.nirncraft.core.Race.NORD.id()));
+                } else if (mc.gui.screen() == null) mc.gui.setScreen(new RaceScreen());
             }
             case CorePackets.OpenScreen.LEVEL_UP, CorePackets.OpenScreen.SKILLS -> mc.gui.setScreen(new SkillsScreen());
             default -> {

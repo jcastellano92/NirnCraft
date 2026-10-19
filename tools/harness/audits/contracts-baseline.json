@@ -1,0 +1,1616 @@
+{
+ "block": {
+  "ash_creep_cluster": [
+   "loot_table/blocks"
+  ],
+  "ash_hopper_jelly": [
+   "loot_table/blocks"
+  ],
+  "ash_yam": [
+   "loot_table/blocks"
+  ],
+  "ashen_grass_pod": [
+   "loot_table/blocks"
+  ],
+  "bedroll": [
+   "loot_table/blocks"
+  ],
+  "bittergreen_petals": [
+   "loot_table/blocks"
+  ],
+  "black_book": [
+   "loot_table/blocks"
+  ],
+  "bleeding_crown": [
+   "loot_table/blocks"
+  ],
+  "blisterwort": [
+   "item definition",
+   "loot_table/blocks"
+  ],
+  "boar_tusk": [
+   "loot_table/blocks"
+  ],
+  "bog_beacon": [
+   "item definition",
+   "loot_table/blocks"
+  ],
+  "briar_heart": [
+   "loot_table/blocks"
+  ],
+  "burnt_spriggan_wood": [
+   "loot_table/blocks"
+  ],
+  "cabbage_crop": [
+   "item definition"
+  ],
+  "cactus_pulp": [
+   "item definition",
+   "loot_table/blocks"
+  ],
+  "canis_root": [
+   "loot_table/blocks"
+  ],
+  "chaurus_hunter_antennae": [
+   "loot_table/blocks"
+  ],
+  "claw_keyhole": [
+   "item definition",
+   "loot_table/blocks"
+  ],
+  "clay_deposit": [
+   "loot_table/blocks"
+  ],
+  "coda_flower": [
+   "item definition",
+   "loot_table/blocks"
+  ],
+  "coldharbour_portal": [
+   "item definition",
+   "loot_table/blocks"
+  ],
+  "comberry": [
+   "loot_table/blocks"
+  ],
+  "creature_den": [
+   "item definition",
+   "loot_table/blocks"
+  ],
+  "creep_cluster": [
+   "loot_table/blocks"
+  ],
+  "crimson_nirnroot": [
+   "item definition",
+   "loot_table/blocks"
+  ],
+  "depleted_ore": [
+   "item definition",
+   "loot_table/blocks"
+  ],
+  "desert_rose": [
+   "item definition",
+   "loot_table/blocks"
+  ],
+  "dwarven_oil": [
+   "loot_table/blocks"
+  ],
+  "elves_ear": [
+   "loot_table/blocks"
+  ],
+  "emperor_parasol_moss": [
+   "loot_table/blocks"
+  ],
+  "eye_of_sabre_cat": [
+   "loot_table/blocks"
+  ],
+  "falmer_ear": [
+   "loot_table/blocks"
+  ],
+  "fly_amanita": [
+   "item definition",
+   "loot_table/blocks"
+  ],
+  "garlic_crop": [
+   "item definition"
+  ],
+  "giant_lichen": [
+   "loot_table/blocks"
+  ],
+  "glowing_mushroom": [
+   "loot_table/blocks"
+  ],
+  "gold_kanet": [
+   "loot_table/blocks"
+  ],
+  "hackle_lo": [
+   "item definition",
+   "loot_table/blocks"
+  ],
+  "hanging_moss": [
+   "loot_table/blocks"
+  ],
+  "hawk_beak": [
+   "loot_table/blocks"
+  ],
+  "hawks_egg": [
+   "loot_table/blocks"
+  ],
+  "hist_carp": [
+   "item definition",
+   "loot_table/blocks"
+  ],
+  "hist_sap": [
+   "loot_table/blocks"
+  ],
+  "hypha_facia": [
+   "loot_table/blocks"
+  ],
+  "imp_stool": [
+   "loot_table/blocks"
+  ],
+  "jazbay_grapes": [
+   "loot_table/blocks"
+  ],
+  "juniper_berries": [
+   "loot_table/blocks"
+  ],
+  "kresh_fiber": [
+   "item definition",
+   "loot_table/blocks"
+  ],
+  "kwama_egg": [
+   "loot_table/blocks"
+  ],
+  "lair_marker": [
+   "item definition",
+   "loot_table/blocks"
+  ],
+  "leek_crop": [
+   "item definition"
+  ],
+  "luminous_russula": [
+   "item definition",
+   "loot_table/blocks"
+  ],
+  "madness_door": [
+   "item definition",
+   "loot_table/blocks"
+  ],
+  "marshmerrow": [
+   "loot_table/blocks"
+  ],
+  "moon_sugar": [
+   "loot_table/blocks"
+  ],
+  "mora_tapinella": [
+   "loot_table/blocks"
+  ],
+  "namiras_rot": [
+   "loot_table/blocks"
+  ],
+  "nordic_barnacle": [
+   "loot_table/blocks"
+  ],
+  "oblivion_portal": [
+   "item definition",
+   "loot_table/blocks"
+  ],
+  "pearl": [
+   "loot_table/blocks"
+  ],
+  "pine_thrush_egg": [
+   "loot_table/blocks"
+  ],
+  "poison_bloom": [
+   "loot_table/blocks"
+  ],
+  "powdered_mammoth_tusk": [
+   "loot_table/blocks"
+  ],
+  "puzzle_lever": [
+   "item definition",
+   "loot_table/blocks"
+  ],
+  "road_lantern": [
+   "item definition"
+  ],
+  "road_soul_lantern": [
+   "item definition"
+  ],
+  "rock_warbler_egg": [
+   "loot_table/blocks"
+  ],
+  "rot_scale_fungus": [
+   "item definition",
+   "loot_table/blocks"
+  ],
+  "saltrice": [
+   "loot_table/blocks"
+  ],
+  "scaly_pholiota": [
+   "item definition",
+   "loot_table/blocks"
+  ],
+  "scrib_jelly": [
+   "loot_table/blocks"
+  ],
+  "sigil_flame": [
+   "item definition",
+   "loot_table/blocks"
+  ],
+  "sigil_stone": [
+   "loot_table/blocks"
+  ],
+  "sky_furniture": [
+   "item definition",
+   "loot_table/blocks"
+  ],
+  "sky_furniture_container": [
+   "item definition",
+   "loot_table/blocks"
+  ],
+  "small_pearl": [
+   "loot_table/blocks"
+  ],
+  "snowberries": [
+   "item definition",
+   "loot_table/blocks"
+  ],
+  "soul_portal": [
+   "item definition",
+   "loot_table/blocks"
+  ],
+  "spawn_ash": [
+   "loot_table/blocks"
+  ],
+  "spider_egg": [
+   "loot_table/blocks"
+  ],
+  "standing_stone_allmaker_beast": [
+   "loot_table/blocks"
+  ],
+  "standing_stone_allmaker_earth": [
+   "loot_table/blocks"
+  ],
+  "standing_stone_allmaker_sun": [
+   "loot_table/blocks"
+  ],
+  "standing_stone_allmaker_tree": [
+   "loot_table/blocks"
+  ],
+  "standing_stone_allmaker_water": [
+   "loot_table/blocks"
+  ],
+  "standing_stone_allmaker_wind": [
+   "loot_table/blocks"
+  ],
+  "standing_stone_apprentice": [
+   "loot_table/blocks"
+  ],
+  "standing_stone_atronach": [
+   "loot_table/blocks"
+  ],
+  "standing_stone_lady": [
+   "loot_table/blocks"
+  ],
+  "standing_stone_lord": [
+   "loot_table/blocks"
+  ],
+  "standing_stone_lover": [
+   "loot_table/blocks"
+  ],
+  "standing_stone_mage": [
+   "loot_table/blocks"
+  ],
+  "standing_stone_ritual": [
+   "loot_table/blocks"
+  ],
+  "standing_stone_serpent": [
+   "loot_table/blocks"
+  ],
+  "standing_stone_shadow": [
+   "loot_table/blocks"
+  ],
+  "standing_stone_steed": [
+   "loot_table/blocks"
+  ],
+  "standing_stone_thief": [
+   "loot_table/blocks"
+  ],
+  "standing_stone_tower": [
+   "loot_table/blocks"
+  ],
+  "standing_stone_warrior": [
+   "loot_table/blocks"
+  ],
+  "stone_deposit": [
+   "loot_table/blocks"
+  ],
+  "swamp_fungal_pod": [
+   "loot_table/blocks"
+  ],
+  "symbol_pillar": [
+   "item definition",
+   "loot_table/blocks"
+  ],
+  "symbol_tablet": [
+   "item definition",
+   "loot_table/blocks"
+  ],
+  "tent": [
+   "item definition",
+   "loot_table/blocks"
+  ],
+  "thistle_branch": [
+   "loot_table/blocks"
+  ],
+  "tomato_crop": [
+   "item definition"
+  ],
+  "trail_torch": [
+   "item definition"
+  ],
+  "trail_wall_torch": [
+   "item definition",
+   "loot_table/blocks"
+  ],
+  "trama_root": [
+   "loot_table/blocks"
+  ],
+  "valor_portal": [
+   "item definition",
+   "loot_table/blocks"
+  ],
+  "white_cap": [
+   "loot_table/blocks"
+  ],
+  "wisp_wrappings": [
+   "loot_table/blocks"
+  ]
+ },
+ "item": {
+  "altmer_crystal_harp": [
+   "value",
+   "weight"
+  ],
+  "argonian_reed_marimba": [
+   "value",
+   "weight"
+  ],
+  "arvaks_skull": [
+   "value",
+   "weight"
+  ],
+  "ash_salts": [
+   "weight"
+  ],
+  "bosmer_bone_pipe": [
+   "value",
+   "weight"
+  ],
+  "chaurus_eggs": [
+   "weight"
+  ],
+  "cliff_racer_plumes": [
+   "weight"
+  ],
+  "cottage_key": [
+   "value",
+   "weight"
+  ],
+  "dreugh_wax": [
+   "weight"
+  ],
+  "ectoplasm": [
+   "weight"
+  ],
+  "frame_drum": [
+   "value",
+   "weight"
+  ],
+  "frostbite_venom": [
+   "weight"
+  ],
+  "gargoyle_shard": [
+   "weight"
+  ],
+  "glow_dust": [
+   "weight"
+  ],
+  "hagraven_feathers": [
+   "weight"
+  ],
+  "harpy_feather": [
+   "weight"
+  ],
+  "ice_wraith_teeth": [
+   "weight"
+  ],
+  "indrik_feather": [
+   "weight"
+  ],
+  "kamal_horn": [
+   "weight"
+  ],
+  "khajiit_sitar": [
+   "value",
+   "weight"
+  ],
+  "legendary_fish": [
+   "item definition",
+   "value"
+  ],
+  "leviathan_tooth": [
+   "weight"
+  ],
+  "lute": [
+   "value",
+   "weight"
+  ],
+  "marsh_shoes": [
+   "value",
+   "weight"
+  ],
+  "minotaur_horn": [
+   "weight"
+  ],
+  "netch_jelly": [
+   "weight"
+  ],
+  "nirnroot": [
+   "weight"
+  ],
+  "nix_hound_meat": [
+   "weight"
+  ],
+  "nord_war_horn": [
+   "value",
+   "weight"
+  ],
+  "ogre_tooth": [
+   "weight"
+  ],
+  "poison_of": [
+   "item definition",
+   "value"
+  ],
+  "potion_of": [
+   "item definition",
+   "value"
+  ],
+  "redguard_oud": [
+   "value",
+   "weight"
+  ],
+  "scamp_skin": [
+   "weight"
+  ],
+  "scorpion_stinger": [
+   "weight"
+  ],
+  "sea_serpent_scale": [
+   "weight"
+  ],
+  "shadowmere_bridle": [
+   "value",
+   "weight"
+  ],
+  "sigil_stone": [
+   "value",
+   "weight"
+  ],
+  "skill_book_acrobatics": [
+   "value",
+   "weight"
+  ],
+  "skill_book_alchemy": [
+   "value",
+   "weight"
+  ],
+  "skill_book_alteration": [
+   "value",
+   "weight"
+  ],
+  "skill_book_archery": [
+   "value",
+   "weight"
+  ],
+  "skill_book_athletics": [
+   "value",
+   "weight"
+  ],
+  "skill_book_block": [
+   "value",
+   "weight"
+  ],
+  "skill_book_conjuration": [
+   "value",
+   "weight"
+  ],
+  "skill_book_cooking": [
+   "value",
+   "weight"
+  ],
+  "skill_book_destruction": [
+   "value",
+   "weight"
+  ],
+  "skill_book_enchanting": [
+   "value",
+   "weight"
+  ],
+  "skill_book_fishing": [
+   "value",
+   "weight"
+  ],
+  "skill_book_heavy_armor": [
+   "value",
+   "weight"
+  ],
+  "skill_book_hunting": [
+   "value",
+   "weight"
+  ],
+  "skill_book_illusion": [
+   "value",
+   "weight"
+  ],
+  "skill_book_light_armor": [
+   "value",
+   "weight"
+  ],
+  "skill_book_lockpicking": [
+   "value",
+   "weight"
+  ],
+  "skill_book_mining": [
+   "value",
+   "weight"
+  ],
+  "skill_book_mysticism": [
+   "value",
+   "weight"
+  ],
+  "skill_book_one_handed": [
+   "value",
+   "weight"
+  ],
+  "skill_book_pickpocket": [
+   "value",
+   "weight"
+  ],
+  "skill_book_polearm": [
+   "value",
+   "weight"
+  ],
+  "skill_book_restoration": [
+   "value",
+   "weight"
+  ],
+  "skill_book_riding": [
+   "value",
+   "weight"
+  ],
+  "skill_book_smithing": [
+   "value",
+   "weight"
+  ],
+  "skill_book_sneak": [
+   "value",
+   "weight"
+  ],
+  "skill_book_speech": [
+   "value",
+   "weight"
+  ],
+  "skill_book_two_handed": [
+   "value",
+   "weight"
+  ],
+  "skill_book_unarmed": [
+   "value",
+   "weight"
+  ],
+  "skill_book_woodcutting": [
+   "value",
+   "weight"
+  ],
+  "spell_tome_absorb_health": [
+   "weight"
+  ],
+  "spell_tome_absorb_magicka": [
+   "weight"
+  ],
+  "spell_tome_absorb_stamina": [
+   "weight"
+  ],
+  "spell_tome_almsivi_intervention": [
+   "weight"
+  ],
+  "spell_tome_ash_shell": [
+   "weight"
+  ],
+  "spell_tome_bane_of_the_undead": [
+   "weight"
+  ],
+  "spell_tome_banish_daedra": [
+   "weight"
+  ],
+  "spell_tome_blizzard": [
+   "weight"
+  ],
+  "spell_tome_call_to_arms": [
+   "weight"
+  ],
+  "spell_tome_calm": [
+   "weight"
+  ],
+  "spell_tome_candlelight": [
+   "weight"
+  ],
+  "spell_tome_chain_lightning": [
+   "weight"
+  ],
+  "spell_tome_circle_of_protection": [
+   "weight"
+  ],
+  "spell_tome_clairvoyance": [
+   "weight"
+  ],
+  "spell_tome_close_wounds": [
+   "weight"
+  ],
+  "spell_tome_command_daedra": [
+   "weight"
+  ],
+  "spell_tome_conjure_dremora_lord": [
+   "weight"
+  ],
+  "spell_tome_conjure_familiar": [
+   "weight"
+  ],
+  "spell_tome_conjure_flame_atronach": [
+   "weight"
+  ],
+  "spell_tome_conjure_frost_atronach": [
+   "weight"
+  ],
+  "spell_tome_conjure_seeker": [
+   "weight"
+  ],
+  "spell_tome_conjure_storm_atronach": [
+   "weight"
+  ],
+  "spell_tome_courage": [
+   "weight"
+  ],
+  "spell_tome_dead_thrall": [
+   "weight"
+  ],
+  "spell_tome_detect_dead": [
+   "weight"
+  ],
+  "spell_tome_detect_life": [
+   "weight"
+  ],
+  "spell_tome_detect_life_mysticism": [
+   "weight"
+  ],
+  "spell_tome_dispel": [
+   "weight"
+  ],
+  "spell_tome_divine_intervention": [
+   "weight"
+  ],
+  "spell_tome_dragonhide": [
+   "weight"
+  ],
+  "spell_tome_dread_zombie": [
+   "weight"
+  ],
+  "spell_tome_ebonyflesh": [
+   "weight"
+  ],
+  "spell_tome_equilibrium": [
+   "weight"
+  ],
+  "spell_tome_fast_healing": [
+   "weight"
+  ],
+  "spell_tome_fear": [
+   "weight"
+  ],
+  "spell_tome_fire_rune": [
+   "weight"
+  ],
+  "spell_tome_fire_storm": [
+   "weight"
+  ],
+  "spell_tome_fireball": [
+   "weight"
+  ],
+  "spell_tome_firebolt": [
+   "weight"
+  ],
+  "spell_tome_flame_cloak": [
+   "weight"
+  ],
+  "spell_tome_flame_thrall": [
+   "weight"
+  ],
+  "spell_tome_flames": [
+   "weight"
+  ],
+  "spell_tome_flaming_familiar": [
+   "weight"
+  ],
+  "spell_tome_frenzy": [
+   "weight"
+  ],
+  "spell_tome_frost_cloak": [
+   "weight"
+  ],
+  "spell_tome_frost_rune": [
+   "weight"
+  ],
+  "spell_tome_frost_thrall": [
+   "weight"
+  ],
+  "spell_tome_frostbite": [
+   "weight"
+  ],
+  "spell_tome_fury": [
+   "weight"
+  ],
+  "spell_tome_grand_healing": [
+   "weight"
+  ],
+  "spell_tome_greater_ward": [
+   "weight"
+  ],
+  "spell_tome_guardian_circle": [
+   "weight"
+  ],
+  "spell_tome_harmony": [
+   "weight"
+  ],
+  "spell_tome_heal_other": [
+   "weight"
+  ],
+  "spell_tome_healing": [
+   "weight"
+  ],
+  "spell_tome_healing_hands": [
+   "weight"
+  ],
+  "spell_tome_hysteria": [
+   "weight"
+  ],
+  "spell_tome_ice_spike": [
+   "weight"
+  ],
+  "spell_tome_ice_storm": [
+   "weight"
+  ],
+  "spell_tome_incinerate": [
+   "weight"
+  ],
+  "spell_tome_invisibility": [
+   "weight"
+  ],
+  "spell_tome_ironflesh": [
+   "weight"
+  ],
+  "spell_tome_lesser_ward": [
+   "weight"
+  ],
+  "spell_tome_levitate": [
+   "weight"
+  ],
+  "spell_tome_lightning_bolt": [
+   "weight"
+  ],
+  "spell_tome_lightning_cloak": [
+   "weight"
+  ],
+  "spell_tome_lightning_rune": [
+   "weight"
+  ],
+  "spell_tome_lightning_storm": [
+   "weight"
+  ],
+  "spell_tome_magelight": [
+   "weight"
+  ],
+  "spell_tome_mark": [
+   "weight"
+  ],
+  "spell_tome_mass_dispel": [
+   "weight"
+  ],
+  "spell_tome_mass_paralysis": [
+   "weight"
+  ],
+  "spell_tome_mayhem": [
+   "weight"
+  ],
+  "spell_tome_muffle": [
+   "weight"
+  ],
+  "spell_tome_oakflesh": [
+   "weight"
+  ],
+  "spell_tome_pacify": [
+   "weight"
+  ],
+  "spell_tome_paralyze": [
+   "weight"
+  ],
+  "spell_tome_raise_zombie": [
+   "weight"
+  ],
+  "spell_tome_rally": [
+   "weight"
+  ],
+  "spell_tome_reanimate_corpse": [
+   "weight"
+  ],
+  "spell_tome_recall": [
+   "weight"
+  ],
+  "spell_tome_reflect_spell": [
+   "weight"
+  ],
+  "spell_tome_repel_lesser_undead": [
+   "weight"
+  ],
+  "spell_tome_repel_undead": [
+   "weight"
+  ],
+  "spell_tome_revenant": [
+   "weight"
+  ],
+  "spell_tome_rout": [
+   "weight"
+  ],
+  "spell_tome_slowfall": [
+   "weight"
+  ],
+  "spell_tome_soul_trap": [
+   "weight"
+  ],
+  "spell_tome_soul_trap_mysticism": [
+   "weight"
+  ],
+  "spell_tome_sparks": [
+   "weight"
+  ],
+  "spell_tome_spell_absorption": [
+   "weight"
+  ],
+  "spell_tome_spell_turning": [
+   "weight"
+  ],
+  "spell_tome_steadfast_ward": [
+   "weight"
+  ],
+  "spell_tome_stendarrs_aura": [
+   "weight"
+  ],
+  "spell_tome_stoneflesh": [
+   "weight"
+  ],
+  "spell_tome_storm_thrall": [
+   "weight"
+  ],
+  "spell_tome_sun_fire": [
+   "weight"
+  ],
+  "spell_tome_telekinesis": [
+   "weight"
+  ],
+  "spell_tome_telekinetic_hurl": [
+   "weight"
+  ],
+  "spell_tome_thunderbolt": [
+   "weight"
+  ],
+  "spell_tome_transmute": [
+   "weight"
+  ],
+  "spell_tome_turn_greater_undead": [
+   "weight"
+  ],
+  "spell_tome_turn_lesser_undead": [
+   "weight"
+  ],
+  "spell_tome_turn_undead": [
+   "weight"
+  ],
+  "spell_tome_vampires_bane": [
+   "weight"
+  ],
+  "spell_tome_wall_of_flames": [
+   "weight"
+  ],
+  "spell_tome_wall_of_frost": [
+   "weight"
+  ],
+  "spell_tome_wall_of_storms": [
+   "weight"
+  ],
+  "spell_tome_water_walking": [
+   "weight"
+  ],
+  "spell_tome_waterbreathing": [
+   "weight"
+  ],
+  "spriggan_sap": [
+   "weight"
+  ],
+  "travelers_handbook": [
+   "value",
+   "weight"
+  ],
+  "treasure_map": [
+   "value",
+   "weight"
+  ],
+  "tsaesci_scale": [
+   "weight"
+  ],
+  "velothi_ash_flute": [
+   "value",
+   "weight"
+  ],
+  "wamasu_scale": [
+   "weight"
+  ],
+  "wooden_flute": [
+   "value",
+   "weight"
+  ]
+ },
+ "weapon": {
+  "akaviri_bow": [
+   "weapon_attributes"
+  ],
+  "akaviri_glaive": [
+   "value",
+   "weight",
+   "item tag",
+   "obtainable (recipe or loot)"
+  ],
+  "akaviri_halberd": [
+   "value",
+   "weight",
+   "item tag",
+   "obtainable (recipe or loot)"
+  ],
+  "akaviri_spear": [
+   "value",
+   "weight",
+   "item tag",
+   "obtainable (recipe or loot)"
+  ],
+  "ancient_nord_bow": [
+   "weapon_attributes"
+  ],
+  "ancient_nord_glaive": [
+   "value",
+   "weight",
+   "item tag",
+   "obtainable (recipe or loot)"
+  ],
+  "ancient_nord_halberd": [
+   "value",
+   "weight",
+   "item tag",
+   "obtainable (recipe or loot)"
+  ],
+  "ancient_nord_spear": [
+   "value",
+   "weight",
+   "item tag",
+   "obtainable (recipe or loot)"
+  ],
+  "argonian_bow": [
+   "weapon_attributes"
+  ],
+  "argonian_glaive": [
+   "value",
+   "weight",
+   "item tag",
+   "obtainable (recipe or loot)"
+  ],
+  "argonian_halberd": [
+   "value",
+   "weight",
+   "item tag",
+   "obtainable (recipe or loot)"
+  ],
+  "argonian_spear": [
+   "value",
+   "weight",
+   "item tag",
+   "obtainable (recipe or loot)"
+  ],
+  "atmoran_bow": [
+   "weapon_attributes"
+  ],
+  "atmoran_glaive": [
+   "value",
+   "weight",
+   "item tag",
+   "obtainable (recipe or loot)"
+  ],
+  "atmoran_halberd": [
+   "value",
+   "weight",
+   "item tag",
+   "obtainable (recipe or loot)"
+  ],
+  "atmoran_spear": [
+   "value",
+   "weight",
+   "item tag",
+   "obtainable (recipe or loot)"
+  ],
+  "auriels_bow": [
+   "weapon_attributes"
+  ],
+  "bosmer_bow": [
+   "weapon_attributes"
+  ],
+  "bosmer_glaive": [
+   "value",
+   "weight",
+   "item tag",
+   "obtainable (recipe or loot)"
+  ],
+  "bosmer_halberd": [
+   "value",
+   "weight",
+   "item tag",
+   "obtainable (recipe or loot)"
+  ],
+  "bosmer_spear": [
+   "value",
+   "weight",
+   "item tag",
+   "obtainable (recipe or loot)"
+  ],
+  "bound_battleaxe": [
+   "obtainable (recipe or loot)"
+  ],
+  "bound_bow": [
+   "item tag",
+   "obtainable (recipe or loot)",
+   "weapon_attributes"
+  ],
+  "bound_dagger": [
+   "obtainable (recipe or loot)"
+  ],
+  "bound_sword": [
+   "item tag",
+   "obtainable (recipe or loot)"
+  ],
+  "breton_bow": [
+   "weapon_attributes"
+  ],
+  "breton_glaive": [
+   "value",
+   "weight",
+   "item tag",
+   "obtainable (recipe or loot)"
+  ],
+  "breton_halberd": [
+   "value",
+   "weight",
+   "item tag",
+   "obtainable (recipe or loot)"
+  ],
+  "breton_spear": [
+   "value",
+   "weight",
+   "item tag",
+   "obtainable (recipe or loot)"
+  ],
+  "chitin_bow": [
+   "weapon_attributes"
+  ],
+  "chitin_glaive": [
+   "value",
+   "weight",
+   "item tag",
+   "obtainable (recipe or loot)"
+  ],
+  "chitin_halberd": [
+   "value",
+   "weight",
+   "item tag",
+   "obtainable (recipe or loot)"
+  ],
+  "chitin_spear": [
+   "value",
+   "weight",
+   "item tag",
+   "obtainable (recipe or loot)"
+  ],
+  "coral_claw": [
+   "item tag",
+   "weapon_attributes"
+  ],
+  "daedric_bow": [
+   "weapon_attributes"
+  ],
+  "daedric_glaive": [
+   "obtainable (recipe or loot)"
+  ],
+  "daedric_halberd": [
+   "obtainable (recipe or loot)"
+  ],
+  "daedric_spear": [
+   "obtainable (recipe or loot)"
+  ],
+  "diamond_claw": [
+   "item tag",
+   "obtainable (recipe or loot)",
+   "weapon_attributes"
+  ],
+  "dragonbone_bow": [
+   "weapon_attributes"
+  ],
+  "dragonbone_glaive": [
+   "obtainable (recipe or loot)"
+  ],
+  "dragonbone_halberd": [
+   "obtainable (recipe or loot)"
+  ],
+  "dragonbone_spear": [
+   "obtainable (recipe or loot)"
+  ],
+  "dwarven_bow": [
+   "weapon_attributes"
+  ],
+  "dwarven_crossbow": [
+   "weapon_attributes"
+  ],
+  "dwarven_glaive": [
+   "obtainable (recipe or loot)"
+  ],
+  "dwarven_halberd": [
+   "obtainable (recipe or loot)"
+  ],
+  "dwarven_spear": [
+   "obtainable (recipe or loot)"
+  ],
+  "ebony_bow": [
+   "weapon_attributes"
+  ],
+  "ebony_claw": [
+   "item tag",
+   "obtainable (recipe or loot)",
+   "weapon_attributes"
+  ],
+  "ebony_glaive": [
+   "obtainable (recipe or loot)"
+  ],
+  "ebony_halberd": [
+   "obtainable (recipe or loot)"
+  ],
+  "ebony_spear": [
+   "obtainable (recipe or loot)"
+  ],
+  "elven_bow": [
+   "weapon_attributes"
+  ],
+  "elven_glaive": [
+   "obtainable (recipe or loot)"
+  ],
+  "elven_halberd": [
+   "obtainable (recipe or loot)"
+  ],
+  "elven_spear": [
+   "obtainable (recipe or loot)"
+  ],
+  "emerald_claw": [
+   "item tag",
+   "obtainable (recipe or loot)",
+   "weapon_attributes"
+  ],
+  "enchanted_staff": [
+   "item tag",
+   "obtainable (recipe or loot)",
+   "weapon_attributes"
+  ],
+  "enhanced_crossbow": [
+   "weapon_attributes"
+  ],
+  "enhanced_dwarven_crossbow": [
+   "weapon_attributes"
+  ],
+  "falmer_bow": [
+   "weapon_attributes"
+  ],
+  "falmer_glaive": [
+   "value",
+   "weight",
+   "item tag",
+   "obtainable (recipe or loot)"
+  ],
+  "falmer_halberd": [
+   "value",
+   "weight",
+   "item tag",
+   "obtainable (recipe or loot)"
+  ],
+  "falmer_spear": [
+   "value",
+   "weight",
+   "item tag",
+   "obtainable (recipe or loot)"
+  ],
+  "forsworn_bow": [
+   "weapon_attributes"
+  ],
+  "forsworn_glaive": [
+   "value",
+   "weight",
+   "item tag",
+   "obtainable (recipe or loot)"
+  ],
+  "forsworn_halberd": [
+   "value",
+   "weight",
+   "item tag",
+   "obtainable (recipe or loot)"
+  ],
+  "forsworn_spear": [
+   "value",
+   "weight",
+   "item tag",
+   "obtainable (recipe or loot)"
+  ],
+  "glass_bow": [
+   "weapon_attributes"
+  ],
+  "glass_claw": [
+   "item tag",
+   "obtainable (recipe or loot)",
+   "weapon_attributes"
+  ],
+  "glass_glaive": [
+   "obtainable (recipe or loot)"
+  ],
+  "glass_halberd": [
+   "obtainable (recipe or loot)"
+  ],
+  "glass_spear": [
+   "obtainable (recipe or loot)"
+  ],
+  "golden_claw": [
+   "item tag",
+   "obtainable (recipe or loot)",
+   "weapon_attributes"
+  ],
+  "hagraven_claw": [
+   "weight",
+   "weapon_attributes"
+  ],
+  "imperial_bow": [
+   "weapon_attributes"
+  ],
+  "imperial_crossbow": [
+   "weapon_attributes"
+  ],
+  "imperial_glaive": [
+   "value",
+   "weight",
+   "item tag",
+   "obtainable (recipe or loot)"
+  ],
+  "imperial_halberd": [
+   "value",
+   "weight",
+   "item tag",
+   "obtainable (recipe or loot)"
+  ],
+  "imperial_spear": [
+   "value",
+   "weight",
+   "item tag",
+   "obtainable (recipe or loot)"
+  ],
+  "iron_bow": [
+   "weapon_attributes"
+  ],
+  "iron_claw": [
+   "item tag",
+   "obtainable (recipe or loot)",
+   "weapon_attributes"
+  ],
+  "iron_glaive": [
+   "obtainable (recipe or loot)"
+  ],
+  "iron_halberd": [
+   "obtainable (recipe or loot)"
+  ],
+  "iron_spear": [
+   "obtainable (recipe or loot)"
+  ],
+  "ivory_claw": [
+   "item tag",
+   "obtainable (recipe or loot)",
+   "weapon_attributes"
+  ],
+  "khajiit_bow": [
+   "weapon_attributes"
+  ],
+  "khajiit_glaive": [
+   "value",
+   "weight",
+   "item tag",
+   "obtainable (recipe or loot)"
+  ],
+  "khajiit_halberd": [
+   "value",
+   "weight",
+   "item tag",
+   "obtainable (recipe or loot)"
+  ],
+  "khajiit_spear": [
+   "value",
+   "weight",
+   "item tag",
+   "obtainable (recipe or loot)"
+  ],
+  "maormer_battleaxe": [
+   "value",
+   "weight",
+   "item tag",
+   "obtainable (recipe or loot)"
+  ],
+  "maormer_bow": [
+   "obtainable (recipe or loot)",
+   "weapon_attributes"
+  ],
+  "maormer_dagger": [
+   "obtainable (recipe or loot)"
+  ],
+  "maormer_glaive": [
+   "value",
+   "weight",
+   "item tag",
+   "obtainable (recipe or loot)"
+  ],
+  "maormer_greatsword": [
+   "value",
+   "weight",
+   "item tag",
+   "obtainable (recipe or loot)"
+  ],
+  "maormer_halberd": [
+   "value",
+   "weight",
+   "item tag",
+   "obtainable (recipe or loot)"
+  ],
+  "maormer_mace": [
+   "value",
+   "weight",
+   "item tag",
+   "obtainable (recipe or loot)"
+  ],
+  "maormer_spear": [
+   "value",
+   "weight",
+   "item tag",
+   "obtainable (recipe or loot)"
+  ],
+  "maormer_sword": [
+   "obtainable (recipe or loot)"
+  ],
+  "maormer_war_axe": [
+   "obtainable (recipe or loot)"
+  ],
+  "maormer_warhammer": [
+   "value",
+   "weight",
+   "item tag",
+   "obtainable (recipe or loot)"
+  ],
+  "nightingale_bow": [
+   "weapon_attributes"
+  ],
+  "nordic_bow": [
+   "weapon_attributes"
+  ],
+  "nordic_glaive": [
+   "value",
+   "weight",
+   "item tag",
+   "obtainable (recipe or loot)"
+  ],
+  "nordic_halberd": [
+   "value",
+   "weight",
+   "item tag",
+   "obtainable (recipe or loot)"
+  ],
+  "nordic_spear": [
+   "value",
+   "weight",
+   "item tag",
+   "obtainable (recipe or loot)"
+  ],
+  "orcish_bow": [
+   "weapon_attributes"
+  ],
+  "orcish_glaive": [
+   "obtainable (recipe or loot)"
+  ],
+  "orcish_halberd": [
+   "obtainable (recipe or loot)"
+  ],
+  "orcish_spear": [
+   "obtainable (recipe or loot)"
+  ],
+  "redguard_bow": [
+   "weapon_attributes"
+  ],
+  "redguard_glaive": [
+   "value",
+   "weight",
+   "item tag",
+   "obtainable (recipe or loot)"
+  ],
+  "redguard_halberd": [
+   "value",
+   "weight",
+   "item tag",
+   "obtainable (recipe or loot)"
+  ],
+  "redguard_spear": [
+   "value",
+   "weight",
+   "item tag",
+   "obtainable (recipe or loot)"
+  ],
+  "ruby_claw": [
+   "item tag",
+   "obtainable (recipe or loot)",
+   "weapon_attributes"
+  ],
+  "sapphire_claw": [
+   "item tag",
+   "obtainable (recipe or loot)",
+   "weapon_attributes"
+  ],
+  "silver_bow": [
+   "weapon_attributes"
+  ],
+  "silver_glaive": [
+   "value",
+   "weight",
+   "item tag",
+   "obtainable (recipe or loot)"
+  ],
+  "silver_halberd": [
+   "value",
+   "weight",
+   "item tag",
+   "obtainable (recipe or loot)"
+  ],
+  "silver_spear": [
+   "value",
+   "weight",
+   "item tag",
+   "obtainable (recipe or loot)"
+  ],
+  "skyforge_bow": [
+   "weapon_attributes"
+  ],
+  "skyforge_glaive": [
+   "value",
+   "weight",
+   "item tag",
+   "obtainable (recipe or loot)"
+  ],
+  "skyforge_halberd": [
+   "value",
+   "weight",
+   "item tag",
+   "obtainable (recipe or loot)"
+  ],
+  "skyforge_spear": [
+   "value",
+   "weight",
+   "item tag",
+   "obtainable (recipe or loot)"
+  ],
+  "spell_tome_bound_battleaxe": [
+   "weight",
+   "obtainable (recipe or loot)",
+   "weapon_attributes"
+  ],
+  "spell_tome_bound_bow": [
+   "weight",
+   "obtainable (recipe or loot)",
+   "weapon_attributes"
+  ],
+  "spell_tome_bound_dagger": [
+   "weight",
+   "obtainable (recipe or loot)",
+   "weapon_attributes"
+  ],
+  "spell_tome_bound_sword": [
+   "weight",
+   "obtainable (recipe or loot)",
+   "weapon_attributes"
+  ],
+  "spell_tome_icy_spear": [
+   "weight",
+   "obtainable (recipe or loot)",
+   "weapon_attributes"
+  ],
+  "stalhrim_bow": [
+   "weapon_attributes"
+  ],
+  "stalhrim_glaive": [
+   "value",
+   "weight",
+   "item tag",
+   "obtainable (recipe or loot)"
+  ],
+  "stalhrim_halberd": [
+   "value",
+   "weight",
+   "item tag",
+   "obtainable (recipe or loot)"
+  ],
+  "stalhrim_spear": [
+   "value",
+   "weight",
+   "item tag",
+   "obtainable (recipe or loot)"
+  ],
+  "steel_bow": [
+   "weapon_attributes"
+  ],
+  "steel_glaive": [
+   "obtainable (recipe or loot)"
+  ],
+  "steel_halberd": [
+   "obtainable (recipe or loot)"
+  ],
+  "steel_spear": [
+   "obtainable (recipe or loot)"
+  ],
+  "unenchanted_staff": [
+   "obtainable (recipe or loot)",
+   "weapon_attributes"
+  ],
+  "yokudan_bow": [
+   "weapon_attributes"
+  ],
+  "yokudan_glaive": [
+   "value",
+   "weight",
+   "item tag",
+   "obtainable (recipe or loot)"
+  ],
+  "yokudan_halberd": [
+   "value",
+   "weight",
+   "item tag",
+   "obtainable (recipe or loot)"
+  ],
+  "yokudan_spear": [
+   "value",
+   "weight",
+   "item tag",
+   "obtainable (recipe or loot)"
+  ]
+ }
+}

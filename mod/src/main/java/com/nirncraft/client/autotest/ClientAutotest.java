@@ -164,6 +164,20 @@ public final class ClientAutotest {
     private static final String TOUR = System.getProperty("nirncraft.autotest.tour", "");
     /** Optional persistent Prism preview: write commands to nirncraft-live.txt in the disposable game directory. */
     private static final boolean LIVE = Boolean.getBoolean("nirncraft.autotest.live");
+    /** Minutes without a harness action before a live test client closes itself (0: never): no client outlives its run. */
+    private static final long IDLE_EXIT_MINUTES = Long.getLong("nirncraft.autotest.idleExitMinutes", 20);
+    private static long liveStartedAt;
+
+    /**
+     * Any automated test boot (live preview, screen walk, visual tests, showcases): the opening's character screen and
+     * covers stay out of the way and the race is chosen for the test. -Dnirncraft.autotest.intro=true keeps the
+     * opening (to test the opening itself).
+     */
+    public static boolean automated() {
+        if (Boolean.getBoolean("nirncraft.autotest.intro")) return false;
+        return ENABLED || LIVE || !System.getProperty("nirncraft.visualtest", "").isEmpty()
+                || Boolean.getBoolean("nirncraft.raceshowcase") || Boolean.getBoolean("nirncraft.npcshowcase");
+    }
     private static final Path LIVE_FILE = Paths.get("nirncraft-live.txt");
     private static final java.util.ArrayDeque<String> LIVE_ACTIONS = new java.util.ArrayDeque<>();
     private static long liveModified;
@@ -179,6 +193,8 @@ public final class ClientAutotest {
     private static final WorldReadiness READINESS = new WorldReadiness();
     private static String liveCapture;
     private static java.util.concurrent.CompletableFuture<Integer> liveCommand;
+    /** A `resources` reload in flight (textures, models, sounds, lang from the dev overlay pack): the queue waits on it. */
+    private static java.util.concurrent.CompletableFuture<Void> liveResources;
     private static long liveCommandDeadline;
 
     /** Short real-frame bursts avoid missing a return stroke while PNG/JPEG encoding blocks the render thread. */
@@ -228,7 +244,7 @@ public final class ClientAutotest {
             status.addProperty("burstFrames", burstRemaining);
             status.addProperty("settling", liveSettleUntil > 0);
             status.addProperty("readiness", READINESS.describe());
-            status.addProperty("commandPending", liveCommand != null || liveCapture != null || burstRemaining>0 || ReviewCaptures.pending()>0 || FrameProbe.active() || CameraTravel.active());
+            status.addProperty("commandPending", liveCommand != null || liveResources != null || liveCapture != null || burstRemaining>0 || ReviewCaptures.pending()>0 || FrameProbe.active() || CameraTravel.active());
             status.addProperty("controlVersion", liveModified);
             status.addProperty("lastAction", liveLastAction);
             status.addProperty("error", liveError);
@@ -252,6 +268,20 @@ public final class ClientAutotest {
             serverCommand(mc, "execute as @p at @p run nirncraft-quest intro skip");
             com.nirncraft.network.SkyNetwork.sendToServer(new com.nirncraft.network.CorePackets.ChooseRace(com.nirncraft.core.Race.NORD.id()));
             NirnCraft.LOGGER.info("Autotest live: ready; control file {}", LIVE_FILE.toAbsolutePath());
+            liveStartedAt = System.currentTimeMillis();
+        }
+        if (IDLE_EXIT_MINUTES > 0 && tick % 200 == 0 && LIVE_ACTIONS.isEmpty() && liveCommand == null
+                && liveResources == null && liveSettleUntil == 0) {
+            long last = liveStartedAt;
+            try {
+                if (Files.exists(LIVE_FILE)) last = Math.max(last, Files.getLastModifiedTime(LIVE_FILE).toMillis());
+            } catch (java.io.IOException ignored) {
+            }
+            if (System.currentTimeMillis() - last > IDLE_EXIT_MINUTES * 60_000L) {
+                NirnCraft.LOGGER.info("Autotest live: no harness action for {} min; closing the test client", IDLE_EXIT_MINUTES);
+                mc.stop();
+                return;
+            }
         }
         if (tick % 5 == 0 && Files.exists(LIVE_FILE)) {
             try {
@@ -287,6 +317,22 @@ public final class ClientAutotest {
                 CameraTravel.cancel(); liveError="Travel failed: "+e; LIVE_ACTIONS.clear();
                 NirnCraft.LOGGER.error("Autotest live: {}",liveError);
             }
+            return;
+        }
+        if (liveResources != null) {
+            if (!liveResources.isDone()) return;
+            try {
+                liveResources.join();
+                NirnCraft.LOGGER.info("Autotest live: resource reload complete");
+                liveSettleUntil = tick + 1200;
+                liveSettleStable = 0;
+                READINESS.begin(mc, 0);
+            } catch (Exception e) {
+                liveError = "Resource reload failed: " + e;
+                LIVE_ACTIONS.clear();
+                NirnCraft.LOGGER.error("Autotest live: {}", liveError);
+            }
+            liveResources = null;
             return;
         }
         if (liveCommand != null) {
@@ -354,6 +400,8 @@ public final class ClientAutotest {
                 liveSettleUntil = tick + 1200;
                 liveSettleStable = 0;
                 READINESS.begin(mc,0);
+            } else if (action.equals("resources")) {
+                liveResources = mc.reloadResourcePacks();
             } else if (action.equals("rebuild")) {
                 mc.levelExtractor.allChanged();
                 liveSettleUntil = tick + 1200;
@@ -404,10 +452,13 @@ public final class ClientAutotest {
                 liveSettleUntil = tick + Math.max(40, Integer.parseInt(args[0]));
                 liveSettleStable = 0;
                 READINESS.begin(mc,args.length>1?Math.max(1,Math.min(256,Integer.parseInt(args[1]))):0);
-            } else if (action.startsWith("command ")) {
+            } else if (action.startsWith("command ") || action.startsWith("try ")) {
+                // `try CMD` is `command CMD` for idempotent setup and cleanup: a zero result (nothing to kill, nothing to
+                // fill) is not a failure and does not cancel the queue
+                boolean tolerant = action.startsWith("try ");
                 var server = mc.getSingleplayerServer();
                 String name = mc.player.getGameProfile().name();
-                String command = action.substring(8).replace("@p", name);
+                String command = action.substring(tolerant ? 4 : 8).replace("@p", name);
                 if (server == null) {
                     if (!QaTransport.remote(mc) || !QaTransport.operatorReady(mc))
                         throw new IllegalStateException("Remote QA command requires a connected TCP player granted op by the dedicated server");
@@ -420,7 +471,7 @@ public final class ClientAutotest {
                     liveCommand = completion;
                     liveCommandDeadline = System.currentTimeMillis() + 600_000L;
                     server.execute(() -> {
-                        try { server.getCommands().performPrefixedCommand(server.createCommandSourceStack().withCallback((success,result)->completion.complete(success?result:0)),command); }
+                        try { server.getCommands().performPrefixedCommand(server.createCommandSourceStack().withCallback((success,result)->completion.complete(tolerant ? 1 : success?result:0)),command); }
                         catch (Exception e) { completion.completeExceptionally(e); }
                     });
                 }
@@ -436,6 +487,20 @@ public final class ClientAutotest {
                     case "hub" -> new HubScreen();
                     case "close" -> null;
                     default -> throw new IllegalArgumentException("Unknown QA screen");
+                });
+            } else if (action.startsWith("screen ")) {
+                UiProbe.open(mc, action.substring(7).trim());
+            } else if (action.startsWith("click ")) {
+                UiProbe.click(mc, action.substring(6).trim());
+            } else if (action.startsWith("key ")) {
+                UiProbe.key(mc, Integer.parseInt(action.substring(4).trim()));
+            } else if (action.startsWith("expect-screen ")) {
+                UiProbe.expect(mc, action.substring(14).trim());
+            } else if (action.startsWith("perspective ")) {  // first | back | front (third-person checks: mounts, armour)
+                mc.options.setCameraType(switch (action.substring(12).trim()) {
+                    case "back" -> net.minecraft.client.CameraType.THIRD_PERSON_BACK;
+                    case "front" -> net.minecraft.client.CameraType.THIRD_PERSON_FRONT;
+                    default -> net.minecraft.client.CameraType.FIRST_PERSON;
                 });
             } else if (action.startsWith("camera ") || action.startsWith("camera-plan ")) {
                 boolean scout=action.startsWith("camera-plan ");

@@ -1,0 +1,626 @@
+{
+ "suite": "checks",
+ "description": "Non-visual checks (tier check): builds, validators, audits and unit suites, each a command with an exit code and optional metrics parsed from its output. {core} = the preview instance's installed core jar.",
+ "defaults": {
+  "tier": "check",
+  "group": "-",
+  "variants": [
+   "check"
+  ]
+ },
+ "scenes": [
+  {
+   "id": "check-shaderpack-compile",
+   "title": "Infinite ATLAS pack builds and every program stage compiles (glslang)",
+   "tags": [
+    "check:shaders",
+    "suite:smoke"
+   ],
+   "run": [
+    "py",
+    "-3",
+    "-I",
+    "shaderpack/build_pack.py"
+   ],
+   "inputs": [
+    "shaderpack/InfiniteATLAS",
+    "shaderpack/build_pack.py"
+   ],
+   "metrics": {
+    "stages": "(\\d+)/\\d+ program stages compile"
+   },
+   "timeout": 300
+  },
+  {
+   "id": "check-scene-catalog",
+   "title": "Harness scene catalog: ids unique, poses valid, places exist",
+   "tags": [
+    "check:catalog",
+    "suite:catalog",
+    "suite:harness",
+    "suite:smoke"
+   ],
+   "run": [
+    "py",
+    "-3",
+    "tools/harness/validate_scenes.py"
+   ],
+   "inputs": [
+    "tools/harness"
+   ],
+   "metrics": {
+    "scenes": "(\\d+) scenes"
+   },
+   "timeout": 120
+  },
+  {
+   "id": "check-camera-planner",
+   "title": "Offline camera planner runs on the exact terrain (Helgen, Whiterun, Riverwood)",
+   "tags": [
+    "check:cameras",
+    "check:world"
+   ],
+   "run": [
+    "py",
+    "-3",
+    "tools/harness/harness.py",
+    "cameras",
+    "atlas-helgen-*",
+    "atlas-whiterun-*",
+    "atlas-riverwood-*",
+    "--tag",
+    "suite:places-planned"
+   ],
+   "inputs": [
+    "mod/src/main/java/com/nirncraft/qa",
+    "mod/src/main/java/com/nirncraft/tamriel",
+    "native/java/mod-integration/harness"
+   ],
+   "timeout": 1800
+  },
+  {
+   "id": "check-validate-pack",
+   "title": "Modpack validation against the installed core jar",
+   "tags": [
+    "check:pack"
+   ],
+   "run": [
+    "py",
+    "-3",
+    "tools/validate_pack.py",
+    "--core-jar",
+    "{core}"
+   ],
+   "inputs": [
+    "pack",
+    "tools/validate_pack.py"
+   ],
+   "timeout": 600
+  },
+  {
+   "id": "check-pack-tool-tests",
+   "title": "Pack / instance / server packaging tool tests",
+   "tags": [
+    "check:pack"
+   ],
+   "run": [
+    "py",
+    "-3",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "tools",
+    "-p",
+    "test_*.py"
+   ],
+   "inputs": [
+    "tools",
+    "pack"
+   ],
+   "metrics": {
+    "tests": "Ran (\\d+) tests?"
+   },
+   "timeout": 900
+  },
+  {
+   "id": "check-unit",
+   "title": "Gradle build with every JUnit suite (mod logic, data, bake validation)",
+   "tags": [
+    "check:unit",
+    "check:assets",
+    "check:lang",
+    "check:loot",
+    "check:economy",
+    "check:quests",
+    "check:npcs",
+    "check:spells",
+    "check:dungeons",
+    "check:towns",
+    "check:interiors",
+    "check:roads",
+    "check:hydrology"
+   ],
+   "run": [
+    "py",
+    "-3",
+    "tools/dev/build_263.py",
+    "--offline",
+    "build"
+   ],
+   "inputs": [
+    "mod/src",
+    "mod/build.gradle"
+   ],
+   "metrics": {
+    "seconds_gradle": "BUILD SUCCESSFUL in (\\d+)"
+   },
+   "timeout": 3600
+  },
+  {
+   "id": "check-native",
+   "title": "Infinite ATLAS native library: build + every native suite (CPU reference, Vulkan, GL interop)",
+   "tags": [
+    "check:native",
+    "suite:lab"
+   ],
+   "run": [
+    "powershell",
+    "-NoProfile",
+    "-ExecutionPolicy",
+    "Bypass",
+    "-File",
+    "native/build.ps1"
+   ],
+   "inputs": [
+    "native/src",
+    "native/include",
+    "native/tests",
+    "native/shaders",
+    "native/CMakeLists.txt"
+   ],
+   "timeout": 3600
+  },
+  {
+   "id": "check-pbr-materials",
+   "title": "PBR / material audit: material ids, labPBR map coverage and validity, misclassified blocks",
+   "tags": [
+    "check:pbr",
+    "check:assets",
+    "feature:materials"
+   ],
+   "run": [
+    "py",
+    "-3",
+    "tools/harness/audits/pbr_audit.py"
+   ],
+   "inputs": [
+    "mod/src/main/resources/assets/nirncraft/textures/block",
+    "mod/src/main/resources/assets/nirncraft/blockstates",
+    "shaderpack/InfiniteATLAS/shaders/block.properties"
+   ],
+   "metrics": {
+    "classified": "material id \\d+ \\((\\d+)%\\)",
+    "specular": "labPBR specular \\d+ \\((\\d+)%\\)",
+    "normal": "normal \\d+ \\((\\d+)%\\)"
+   },
+   "timeout": 300
+  },
+  {
+   "id": "check-contracts",
+   "title": "Registration contracts: every item / weapon / armour / block / entity wired everywhere it must be (new gaps fail)",
+   "tags": [
+    "check:contracts",
+    "check:assets",
+    "check:unit",
+    "suite:smoke"
+   ],
+   "run": [
+    "py",
+    "-3",
+    "tools/harness/audits/contracts.py"
+   ],
+   "inputs": [
+    "mod/src/main/resources",
+    "mod/src/main/lang",
+    "mod/src/main/java/com/nirncraft/crafting",
+    "tools/harness/audits"
+   ],
+   "timeout": 600,
+   "metrics": {
+    "problems": "problems (\\d+) new"
+   }
+  },
+  {
+   "id": "check-hydrology",
+   "title": "Rivers run downhill and end in the sea, a lake or a river; lakes, pits, runoff",
+   "tags": [
+    "check:hydrology",
+    "feature:river"
+   ],
+   "run": [
+    "py",
+    "-3",
+    "tools/harness/audits/hydrology_gate.py"
+   ],
+   "inputs": [
+    "mod/src/main/resources/nirncraft/tamriel",
+    "tools/worldgen"
+   ],
+   "timeout": 600,
+   "metrics": {
+    "problems": "problems (\\d+)"
+   }
+  },
+  {
+   "id": "check-spawn-rules",
+   "title": "Region spawn tables valid",
+   "tags": [
+    "check:npcs",
+    "check:world",
+    "check:regions"
+   ],
+   "run": [
+    "py",
+    "-3",
+    "tools/qa/spawn_audit.py"
+   ],
+   "inputs": [
+    "mod/src/main/resources/nirncraft",
+    "tools/qa/spawn_audit.py"
+   ],
+   "timeout": 600
+  },
+  {
+   "id": "check-player-flow",
+   "title": "Regional player-flow metrics (27 FLW per land region)",
+   "tags": [
+    "check:world",
+    "check:regions",
+    "check:places"
+   ],
+   "run": [
+    "py",
+    "-3",
+    "tools/qa/flow_gate.py"
+   ],
+   "inputs": [
+    "mod/src/main/resources/nirncraft",
+    "tools/qa/flow_gate.py",
+    "tools/qa/flow_audit.py"
+   ],
+   "timeout": 900,
+   "metrics": {
+    "problems": "(\\d+) fail"
+   }
+  },
+  {
+   "id": "check-data",
+   "title": "JSON parses, duplicate ids, quest index, guards, menus, inventory facade",
+   "tags": [
+    "check:world",
+    "check:quests",
+    "check:npcs",
+    "check:assets",
+    "suite:smoke"
+   ],
+   "run": [
+    "py",
+    "-3",
+    "tools/qa/data_checks.py"
+   ],
+   "inputs": [
+    "mod/src/main/resources/nirncraft",
+    "mod/src/main/resources/data",
+    "tools/qa/data_checks.py"
+   ],
+   "timeout": 600
+  },
+  {
+   "id": "check-asset-chain",
+   "title": "Blockstate -> model -> texture chain resolves",
+   "tags": [
+    "check:assets"
+   ],
+   "run": [
+    "py",
+    "-3",
+    "tools/qa/asset_audit.py",
+    "--list",
+    "30"
+   ],
+   "inputs": [
+    "mod/src/main/resources/assets",
+    "tools/qa/asset_audit.py"
+   ],
+   "timeout": 600
+  },
+  {
+   "id": "check-assets-items",
+   "title": "Item assets: models, textures, lang for every item",
+   "tags": [
+    "check:assets",
+    "check:contracts"
+   ],
+   "run": [
+    "py",
+    "-3",
+    "tools/check_assets.py"
+   ],
+   "inputs": [
+    "mod/src/main/resources/assets",
+    "mod/src/main/lang"
+   ],
+   "timeout": 600
+  },
+  {
+   "id": "check-layout",
+   "title": "Places on land, spacing, against the map rasters",
+   "tags": [
+    "check:places",
+    "check:world",
+    "check:towns"
+   ],
+   "run": [
+    "py",
+    "-3",
+    "tools/qa/layout_lint.py"
+   ],
+   "inputs": [
+    "mod/src/main/resources/nirncraft/tamriel",
+    "tools/qa/layout_lint.py"
+   ],
+   "timeout": 600
+  },
+  {
+   "id": "check-reach",
+   "title": "Road/trail reaches every place",
+   "tags": [
+    "check:roads",
+    "check:places"
+   ],
+   "run": [
+    "py",
+    "-3",
+    "tools/qa/reach_lint.py"
+   ],
+   "inputs": [
+    "mod/src/main/resources/nirncraft/tamriel",
+    "tools/qa/reach_lint.py"
+   ],
+   "timeout": 600
+  },
+  {
+   "id": "check-roadplan",
+   "title": "Baked road plan: grade caps, water spans, overlap, span tiling",
+   "tags": [
+    "check:roads",
+    "feature:road"
+   ],
+   "run": [
+    "py",
+    "-3",
+    "tools/qa/roadplan_lint.py"
+   ],
+   "inputs": [
+    "mod/src/main/resources/nirncraft/tamriel",
+    "mod/src/main/resources/nirncraft/worldplan",
+    "tools/qa/roadplan_lint.py"
+   ],
+   "timeout": 600
+  },
+  {
+   "id": "check-road-headroom",
+   "title": "Road headroom under bridges and arches",
+   "tags": [
+    "check:roads"
+   ],
+   "run": [
+    "py",
+    "-3",
+    "-m",
+    "unittest",
+    "tools.qa.test_road_headroom"
+   ],
+   "inputs": [
+    "tools/qa/test_road_headroom.py",
+    "mod/src/main/resources/nirncraft"
+   ],
+   "timeout": 600
+  },
+  {
+   "id": "check-ecology",
+   "title": "Creature diet / habitat / encounter library",
+   "tags": [
+    "check:npcs",
+    "check:creatures",
+    "check:world"
+   ],
+   "run": [
+    "py",
+    "-3",
+    "tools/qa/ecology_report.py",
+    "--all"
+   ],
+   "inputs": [
+    "mod/src/main/resources/nirncraft",
+    "tools/qa/ecology_report.py"
+   ],
+   "timeout": 600,
+   "metrics": {
+    "problems": "(\\d+) errors?"
+   }
+  },
+  {
+   "id": "check-worldsheets",
+   "title": "World sheets L1..L11 causal citations",
+   "tags": [
+    "check:world",
+    "check:regions"
+   ],
+   "run": [
+    "py",
+    "-3",
+    "tools/qa/worldsheet_lint.py"
+   ],
+   "inputs": [
+    "docs/world",
+    "tools/qa/worldsheet_lint.py"
+   ],
+   "timeout": 600
+  },
+  {
+   "id": "check-menus",
+   "title": "Every menu has its Skyrim screen",
+   "tags": [
+    "check:ui",
+    "suite:ui"
+   ],
+   "run": [
+    "py",
+    "-3",
+    "tools/qa/menu_coverage.py"
+   ],
+   "inputs": [
+    "mod/src/main/java/com/nirncraft",
+    "tools/qa/menu_coverage.py"
+   ],
+   "timeout": 600
+  },
+  {
+   "id": "check-dungeon-stats",
+   "title": "Dungeon class tags and room bands for every dungeon place",
+   "tags": [
+    "check:dungeons",
+    "feature:dungeon"
+   ],
+   "run": [
+    "py",
+    "-3",
+    "tools/qa/dungeon_stats.py"
+   ],
+   "inputs": [
+    "mod/src/main/resources/nirncraft",
+    "tools/qa/dungeon_stats.py"
+   ],
+   "timeout": 600,
+   "metrics": {
+    "problems": "(\\d+) places? untagged"
+   }
+  },
+  {
+   "id": "check-dungeon-identity",
+   "title": "Dungeon identity: sign, lectern, lore note, boss",
+   "tags": [
+    "check:dungeons",
+    "check:loot"
+   ],
+   "run": [
+    "py",
+    "-3",
+    "tools/qa/dungeon_identity_lint.py",
+    "--static"
+   ],
+   "inputs": [
+    "mod/src/main/resources/nirncraft",
+    "tools/qa/dungeon_identity_lint.py"
+   ],
+   "timeout": 600
+  },
+  {
+   "id": "check-placement",
+   "title": "Scatter placement density: waysides and scenes per km within targets",
+   "tags": [
+    "check:places",
+    "check:scatter",
+    "check:world"
+   ],
+   "run": [
+    "py",
+    "-3",
+    "tools/qa/placement_lint.py"
+   ],
+   "inputs": [
+    "mod/src/main/resources/nirncraft",
+    "tools/qa/placement_lint.py"
+   ],
+   "timeout": 600,
+   "metrics": {
+    "problems": "(\\d+) problems?"
+   }
+  },
+  {
+   "id": "check-regions",
+   "title": "Region variety and seam scores (83 regions)",
+   "tags": [
+    "check:regions",
+    "check:world"
+   ],
+   "run": [
+    "py",
+    "-3",
+    "tools/qa/region_audit.py"
+   ],
+   "inputs": [
+    "mod/src/main/resources/nirncraft/tamriel",
+    "tools/qa/region_audit.py"
+   ],
+   "timeout": 600
+  },
+  {
+   "id": "check-stories",
+   "title": "Story quest lint (references, flow)",
+   "tags": [
+    "check:quests"
+   ],
+   "run": [
+    "py",
+    "-3",
+    "tools/qa/story_lint.py"
+   ],
+   "inputs": [
+    "mod/src/main/resources/nirncraft/quests",
+    "tools/qa/story_lint.py"
+   ],
+   "timeout": 600
+  },
+  {
+   "id": "check-population",
+   "title": "Town population: beds, jobs, trainers (needs skypop dumps when present)",
+   "tags": [
+    "check:npcs",
+    "check:towns"
+   ],
+   "run": [
+    "py",
+    "-3",
+    "tools/qa/population_lint.py"
+   ],
+   "inputs": [
+    "mod/src/main/resources/nirncraft",
+    "tools/qa/population_lint.py"
+   ],
+   "timeout": 600
+  },
+  {
+   "id": "check-items",
+   "title": "Item stats, values, weights, ingredient effects (4 distinct per ingredient)",
+   "tags": [
+    "check:loot",
+    "check:economy",
+    "check:contracts",
+    "check:alchemy"
+   ],
+   "run": [
+    "py",
+    "-3",
+    "tools/audit_items.py"
+   ],
+   "inputs": [
+    "mod/src/main/resources",
+    "tools/audit_items.py"
+   ],
+   "timeout": 600
+  }
+ ]
+}

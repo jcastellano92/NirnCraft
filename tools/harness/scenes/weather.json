@@ -1,0 +1,875 @@
+{
+  "suite": "weather",
+  "description": "Cloud types, local and distant weather, fronts and cloud performance (CloudTour, VisualAutotest weathers)",
+  "defaults": {
+    "tier": "live",
+    "group": "live",
+    "variants": [
+      "shaders"
+    ]
+  },
+  "scenes": [
+    {
+      "id": "whiterun-cumulus-noon",
+      "title": "Fair-weather cumulus over the Whiterun plains",
+      "tags": [
+        "region:skyrim/whiterun",
+        "feature:clouds",
+        "feature:sky",
+        "weather:cloudy",
+        "time:noon"
+      ],
+      "pose": {
+        "visit": [
+          0,
+          0,
+          60,
+          180,
+          -6
+        ]
+      },
+      "time": 5000,
+      "weather": "cloudy",
+      "wait": 500,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {
+        "maxBlackTiles": 0
+      },
+      "capture": "world",
+      "source": "mod/src/main/java/com/nirncraft/visual/client/CloudTour.java:61"
+    },
+    {
+      "id": "whiterun-vanilla-clouds-reference",
+      "title": "Vanilla clouds reference over Whiterun (NirnCraft clouds off)",
+      "tags": [
+        "region:skyrim/whiterun",
+        "feature:clouds",
+        "weather:cloudy",
+        "time:noon"
+      ],
+      "pose": {
+        "visit": [
+          0,
+          0,
+          60,
+          180,
+          -6
+        ]
+      },
+      "time": 5000,
+      "weather": "cloudy",
+      "wait": 60,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "mod/src/main/java/com/nirncraft/visual/client/CloudTour.java:63",
+      "note": "source toggles AtmosphereConfig.CLOUDS=false before the shot; no live verb for that config, harness must flip it"
+    },
+    {
+      "id": "whiterun-clear-cirrus",
+      "title": "Clear-sky cirrus looking high over Whiterun",
+      "tags": [
+        "region:skyrim/whiterun",
+        "feature:clouds",
+        "feature:sky",
+        "weather:clear",
+        "time:noon"
+      ],
+      "pose": {
+        "visit": [
+          0,
+          0,
+          60,
+          180,
+          -40
+        ]
+      },
+      "time": 5000,
+      "weather": "clear",
+      "wait": 140,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {
+        "maxBlackTiles": 0
+      },
+      "capture": "world",
+      "source": "mod/src/main/java/com/nirncraft/visual/client/CloudTour.java:67"
+    },
+    {
+      "id": "whiterun-overcast-deck",
+      "title": "Overcast cloud deck over Whiterun",
+      "tags": [
+        "region:skyrim/whiterun",
+        "feature:clouds",
+        "weather:overcast",
+        "time:noon"
+      ],
+      "pose": {
+        "visit": [
+          0,
+          0,
+          60,
+          180,
+          -8
+        ]
+      },
+      "time": 5000,
+      "weather": "overcast",
+      "wait": 140,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {
+        "maxBlackTiles": 0
+      },
+      "capture": "world",
+      "source": "mod/src/main/java/com/nirncraft/visual/client/CloudTour.java:70"
+    },
+    {
+      "id": "whiterun-gale-fractus",
+      "title": "Gale with torn fractus clouds over Whiterun",
+      "tags": [
+        "region:skyrim/whiterun",
+        "feature:clouds",
+        "weather:gale",
+        "time:noon"
+      ],
+      "pose": {
+        "visit": [
+          0,
+          0,
+          60,
+          180,
+          -8
+        ]
+      },
+      "time": 5000,
+      "weather": "gale",
+      "wait": 140,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {
+        "maxBlackTiles": 0
+      },
+      "capture": "world",
+      "source": "mod/src/main/java/com/nirncraft/visual/client/CloudTour.java:72"
+    },
+    {
+      "id": "whiterun-distant-storm-rift",
+      "title": "Distant storm over the Rift seen from Whiterun",
+      "tags": [
+        "region:skyrim/whiterun",
+        "feature:storm",
+        "feature:clouds",
+        "suite:smoke",
+        "weather:clear",
+        "time:noon"
+      ],
+      "pose": {
+        "visit": [
+          0,
+          0,
+          60,
+          -60,
+          -4
+        ]
+      },
+      "time": 5000,
+      "weather": "clear",
+      "front": [
+        2435,
+        1418,
+        700,
+        "storm",
+        0,
+        0
+      ],
+      "wait": 160,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {
+        "maxBlackTiles": 0
+      },
+      "capture": "world",
+      "source": "mod/src/main/java/com/nirncraft/visual/client/CloudTour.java:78",
+      "note": "source set the whole region's weather with RegionalWeather.set; approximated here by a stationary front at the region centre"
+    },
+    {
+      "id": "whiterun-distant-rain-falkreath",
+      "title": "Distant rain over Falkreath seen from Whiterun",
+      "tags": [
+        "region:skyrim/whiterun",
+        "feature:storm",
+        "feature:clouds",
+        "weather:clear",
+        "time:noon"
+      ],
+      "pose": {
+        "visit": [
+          0,
+          0,
+          60,
+          32,
+          -3
+        ]
+      },
+      "time": 5000,
+      "weather": "clear",
+      "front": [
+        -795,
+        1250,
+        700,
+        "rain",
+        0,
+        0
+      ],
+      "wait": 140,
+      "setup": [
+        "front 2435 1418 700 storm 0 0"
+      ],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {
+        "maxBlackTiles": 0
+      },
+      "capture": "world",
+      "source": "mod/src/main/java/com/nirncraft/visual/client/CloudTour.java:81",
+      "note": "source set the whole region's weather with RegionalWeather.set; approximated here by a stationary front at the region centre (the Rift storm from the previous shot is still set, re-added in setup)"
+    },
+    {
+      "id": "whiterun-snow-squalls-north",
+      "title": "Snow squalls on the northern mountains seen from Whiterun",
+      "tags": [
+        "region:skyrim/whiterun",
+        "feature:snow",
+        "feature:storm",
+        "feature:clouds",
+        "weather:clear",
+        "time:noon"
+      ],
+      "pose": {
+        "visit": [
+          0,
+          0,
+          60,
+          180,
+          -2
+        ]
+      },
+      "time": 5000,
+      "weather": "clear",
+      "front": [
+        174,
+        -1801,
+        700,
+        "blizzard",
+        0,
+        0
+      ],
+      "wait": 160,
+      "setup": [
+        "front 1417 -1749 700 snow 0 0",
+        "front -928 -1176 700 snow 0 0"
+      ],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {
+        "maxBlackTiles": 0
+      },
+      "capture": "world",
+      "source": "mod/src/main/java/com/nirncraft/visual/client/CloudTour.java:109",
+      "note": "source set the whole region's weather with RegionalWeather.set; approximated here by a stationary front at the region centre (blizzard over Dawnstar, snow over Winterhold and Morthal)"
+    },
+    {
+      "id": "throat-of-the-world-cap-cloud",
+      "title": "The Throat of the World wearing its cap cloud",
+      "tags": [
+        "region:skyrim/whiterun",
+        "place:throat_of_the_world",
+        "feature:clouds",
+        "feature:sky",
+        "weather:cloudy",
+        "time:noon"
+      ],
+      "pose": {
+        "visit": [
+          380,
+          860,
+          40,
+          -136,
+          -32
+        ]
+      },
+      "time": 5000,
+      "weather": "cloudy",
+      "wait": 500,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {
+        "maxBlackTiles": 0
+      },
+      "capture": "world",
+      "source": "mod/src/main/java/com/nirncraft/visual/client/CloudTour.java:115"
+    },
+    {
+      "id": "hjaalmarch-dawn-marsh-fog",
+      "title": "Dawn mist over the Hjaalmarch marshes near Morthal",
+      "tags": [
+        "region:skyrim/hjaalmarch",
+        "place:morthal",
+        "feature:fog",
+        "weather:clear",
+        "time:dawn"
+      ],
+      "pose": {
+        "visit": [
+          -928,
+          -1176,
+          30,
+          0,
+          12
+        ]
+      },
+      "time": 23500,
+      "weather": "clear",
+      "wait": 500,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "mod/src/main/java/com/nirncraft/visual/client/CloudTour.java:121"
+    },
+    {
+      "id": "hjaalmarch-marsh-fog-from-above",
+      "title": "Hjaalmarch marsh fog seen from above at dawn",
+      "tags": [
+        "region:skyrim/hjaalmarch",
+        "place:morthal",
+        "feature:fog",
+        "weather:clear",
+        "time:dawn"
+      ],
+      "pose": {
+        "visit": [
+          -928,
+          -1176,
+          140,
+          0,
+          35
+        ]
+      },
+      "time": 23500,
+      "weather": "clear",
+      "wait": 260,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "mod/src/main/java/com/nirncraft/visual/client/CloudTour.java:123"
+    },
+    {
+      "id": "red-mountain-plume-ashfall",
+      "title": "Red Mountain ash plume under ashfall",
+      "tags": [
+        "region:morrowind/vvardenfell_ashlands",
+        "place:red_mountain",
+        "feature:ash",
+        "feature:smoke",
+        "feature:sky",
+        "weather:ashfall",
+        "time:noon"
+      ],
+      "pose": {
+        "visit": [
+          6100,
+          -500,
+          50,
+          -84,
+          -8
+        ]
+      },
+      "time": 6000,
+      "weather": "ashfall",
+      "wait": 600,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "mod/src/main/java/com/nirncraft/visual/client/CloudTour.java:130"
+    },
+    {
+      "id": "red-mountain-ash-storm-wall",
+      "title": "Ash storm wall marching off Red Mountain",
+      "tags": [
+        "region:morrowind/vvardenfell_ashlands",
+        "place:red_mountain",
+        "feature:ash",
+        "feature:storm",
+        "weather:clear",
+        "time:noon"
+      ],
+      "pose": {
+        "visit": [
+          6100,
+          -500,
+          50,
+          -84,
+          -8
+        ]
+      },
+      "time": 6000,
+      "weather": "clear",
+      "front": [
+        7100,
+        -400,
+        700,
+        "ash_storm",
+        0,
+        0
+      ],
+      "wait": 160,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "mod/src/main/java/com/nirncraft/visual/client/CloudTour.java:133",
+      "note": "source set the whole region's weather with RegionalWeather.set; approximated here by a stationary front at the region centre"
+    },
+    {
+      "id": "red-mountain-blight-storm",
+      "title": "Blight storm over Red Mountain",
+      "tags": [
+        "region:morrowind/vvardenfell_ashlands",
+        "place:red_mountain",
+        "feature:ash",
+        "feature:storm",
+        "weather:clear",
+        "time:noon"
+      ],
+      "pose": {
+        "visit": [
+          6100,
+          -500,
+          50,
+          -84,
+          -8
+        ]
+      },
+      "time": 6000,
+      "weather": "clear",
+      "front": [
+        7100,
+        -400,
+        700,
+        "blight",
+        0,
+        0
+      ],
+      "wait": 160,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "mod/src/main/java/com/nirncraft/visual/client/CloudTour.java:135",
+      "note": "source set the whole region's weather with RegionalWeather.set; approximated here by a stationary front at the region centre"
+    },
+    {
+      "id": "alikr-desert-haze",
+      "title": "Desert dust haze over the Alik'r",
+      "tags": [
+        "region:hammerfell/alikr_desert",
+        "feature:sand",
+        "weather:dust",
+        "time:noon"
+      ],
+      "pose": {
+        "visit": [
+          -6400,
+          5700,
+          50,
+          90,
+          0
+        ]
+      },
+      "time": 6000,
+      "weather": "dust",
+      "wait": 600,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {
+        "maxBlackTiles": 0
+      },
+      "capture": "world",
+      "source": "mod/src/main/java/com/nirncraft/visual/client/CloudTour.java:140"
+    },
+    {
+      "id": "alikr-sandstorm-wall",
+      "title": "Sandstorm wall marching in across the Alik'r",
+      "tags": [
+        "region:hammerfell/alikr_desert",
+        "feature:sand",
+        "feature:storm",
+        "weather:clear",
+        "time:noon"
+      ],
+      "pose": {
+        "visit": [
+          -6400,
+          5700,
+          50,
+          90,
+          -3
+        ]
+      },
+      "time": 6000,
+      "weather": "clear",
+      "front": [
+        -7400,
+        5700,
+        500,
+        "sandstorm",
+        0,
+        0
+      ],
+      "wait": 160,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {
+        "maxBlackTiles": 0
+      },
+      "capture": "world",
+      "source": "mod/src/main/java/com/nirncraft/visual/client/CloudTour.java:142",
+      "note": "source (nearestOther) searches 200..1500 blocks around (-6400,5700) for the first other region, gives it sandstorm and turns to it; the direction is data-dependent, approximated by a sandstorm front 1 km west (yaw 90)"
+    },
+    {
+      "id": "whiterun-above-overcast-deck",
+      "title": "Above the overcast deck over Whiterun",
+      "tags": [
+        "region:skyrim/whiterun",
+        "feature:clouds",
+        "feature:sky",
+        "weather:overcast",
+        "time:noon"
+      ],
+      "pose": {
+        "camera": [
+          0,
+          430,
+          0,
+          0.0,
+          387.7,
+          90.6
+        ]
+      },
+      "time": 6000,
+      "weather": "overcast",
+      "wait": 400,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {
+        "maxBlackTiles": 0
+      },
+      "capture": "world",
+      "source": "mod/src/main/java/com/nirncraft/visual/client/CloudTour.java:146"
+    },
+    {
+      "id": "whiterun-clouds-perf",
+      "title": "Frame time: Whiterun cumulus plus a distant Rift storm",
+      "tags": [
+        "region:skyrim/whiterun",
+        "feature:perf",
+        "feature:clouds",
+        "weather:cloudy",
+        "time:noon"
+      ],
+      "pose": {
+        "visit": [
+          0,
+          0,
+          60,
+          135,
+          -5
+        ]
+      },
+      "time": 6000,
+      "weather": "cloudy",
+      "front": [
+        2435,
+        1418,
+        700,
+        "storm",
+        0,
+        0
+      ],
+      "wait": 700,
+      "setup": [],
+      "cleanup": [],
+      "measure": 300,
+      "checks": {},
+      "capture": "world",
+      "source": "mod/src/main/java/com/nirncraft/visual/client/CloudTour.java:160",
+      "note": "source times 4 phases (NirnCraft clouds, vanilla clouds, no clouds, NirnCraft again) with vsync off and a 260 fps cap; config toggles have no live verb, only the first phase is expressed"
+    },
+    {
+      "id": "whiterun-weather-snow",
+      "title": "Local snow around the player near Whiterun",
+      "tags": [
+        "region:skyrim/whiterun",
+        "feature:snow",
+        "weather:snow",
+        "time:noon"
+      ],
+      "pose": {
+        "visit": [
+          0,
+          0,
+          40,
+          30,
+          -8
+        ]
+      },
+      "time": 6000,
+      "weather": "snow",
+      "wait": 320,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "mod/src/main/java/com/nirncraft/visual/client/VisualAutotest.java:90",
+      "note": "source is spawn-relative (40 blocks above spawn of seed 20261010); fixed here to (0,0) near Whiterun"
+    },
+    {
+      "id": "whiterun-weather-blizzard",
+      "title": "Local blizzard around the player near Whiterun",
+      "tags": [
+        "region:skyrim/whiterun",
+        "feature:snow",
+        "feature:storm",
+        "weather:blizzard",
+        "time:noon"
+      ],
+      "pose": {
+        "visit": [
+          0,
+          0,
+          40,
+          30,
+          -8
+        ]
+      },
+      "time": 6000,
+      "weather": "blizzard",
+      "wait": 320,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "mod/src/main/java/com/nirncraft/visual/client/VisualAutotest.java:91",
+      "note": "source is spawn-relative (40 blocks above spawn of seed 20261010); fixed here to (0,0) near Whiterun"
+    },
+    {
+      "id": "whiterun-weather-fog",
+      "title": "Local fog around the player near Whiterun",
+      "tags": [
+        "region:skyrim/whiterun",
+        "feature:fog",
+        "weather:fog",
+        "time:noon"
+      ],
+      "pose": {
+        "visit": [
+          0,
+          0,
+          40,
+          30,
+          -8
+        ]
+      },
+      "time": 6000,
+      "weather": "fog",
+      "wait": 320,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "mod/src/main/java/com/nirncraft/visual/client/VisualAutotest.java:92",
+      "note": "source is spawn-relative (40 blocks above spawn of seed 20261010); fixed here to (0,0) near Whiterun"
+    },
+    {
+      "id": "whiterun-weather-rain",
+      "title": "Local rain around the player near Whiterun",
+      "tags": [
+        "region:skyrim/whiterun",
+        "feature:storm",
+        "weather:rain",
+        "time:noon"
+      ],
+      "pose": {
+        "visit": [
+          0,
+          0,
+          40,
+          30,
+          -8
+        ]
+      },
+      "time": 6000,
+      "weather": "rain",
+      "wait": 320,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "mod/src/main/java/com/nirncraft/visual/client/VisualAutotest.java:93",
+      "note": "source is spawn-relative (40 blocks above spawn of seed 20261010); fixed here to (0,0) near Whiterun"
+    },
+    {
+      "id": "whiterun-weather-ash-storm",
+      "title": "Local ash storm around the player near Whiterun",
+      "tags": [
+        "region:skyrim/whiterun",
+        "feature:ash",
+        "feature:storm",
+        "weather:ash_storm",
+        "time:noon"
+      ],
+      "pose": {
+        "visit": [
+          0,
+          0,
+          40,
+          30,
+          -8
+        ]
+      },
+      "time": 6000,
+      "weather": "ash_storm",
+      "wait": 320,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "mod/src/main/java/com/nirncraft/visual/client/VisualAutotest.java:94",
+      "note": "source is spawn-relative (40 blocks above spawn of seed 20261010); fixed here to (0,0) near Whiterun"
+    },
+    {
+      "id": "whiterun-weather-sandstorm",
+      "title": "Local sandstorm around the player near Whiterun",
+      "tags": [
+        "region:skyrim/whiterun",
+        "feature:sand",
+        "feature:storm",
+        "weather:sandstorm",
+        "time:noon"
+      ],
+      "pose": {
+        "visit": [
+          0,
+          0,
+          40,
+          30,
+          -8
+        ]
+      },
+      "time": 6000,
+      "weather": "sandstorm",
+      "wait": 320,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "mod/src/main/java/com/nirncraft/visual/client/VisualAutotest.java:95",
+      "note": "source is spawn-relative (40 blocks above spawn of seed 20261010); fixed here to (0,0) near Whiterun"
+    },
+    {
+      "id": "whiterun-storm-front-approach",
+      "title": "A moving storm front seen from the Whiterun plains",
+      "tags": [
+        "region:skyrim/whiterun",
+        "feature:storm",
+        "feature:clouds",
+        "weather:cloudy",
+        "time:noon"
+      ],
+      "pose": {
+        "visit": [
+          0,
+          0,
+          40,
+          -53,
+          -4
+        ]
+      },
+      "time": 7000,
+      "weather": "cloudy",
+      "front": [
+        1200,
+        900,
+        600,
+        "storm",
+        -2,
+        -1.5
+      ],
+      "wait": 200,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {
+        "maxBlackTiles": 0
+      },
+      "capture": "world",
+      "source": "new (owner gap: storm front from distance)"
+    },
+    {
+      "id": "hjaalmarch-ground-fog-dawn",
+      "title": "Ground fog in the Hjaalmarch marsh at dawn, eye height",
+      "tags": [
+        "region:skyrim/hjaalmarch",
+        "feature:fog",
+        "feature:water",
+        "weather:fog",
+        "time:dawn"
+      ],
+      "pose": {
+        "visit": [
+          -850,
+          -1250,
+          2,
+          0,
+          0
+        ]
+      },
+      "time": 23200,
+      "weather": "fog",
+      "wait": 300,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "new (owner gap: fog at dawn in a marsh)"
+    }
+  ]
+}

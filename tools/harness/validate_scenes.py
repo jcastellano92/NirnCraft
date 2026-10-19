@@ -1,0 +1,76 @@
+"""Validates the harness catalog exactly as the harness loads it (scene files + generated sets): ids unique and
+kebab-case, one pose kind, known places / weathers / groups / live verbs, check scenes runnable, lab scenes complete.
+
+    py -3 tools/harness/validate_scenes.py        exit 1 with one line per problem
+"""
+import re
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import catalog  # noqa: E402
+
+VERBS = {"reload", "resources", "shaders", "rebuild", "texture-probe", "flash", "cast", "use", "fx", "wait", "settle",
+         "measure", "command", "try", "camera", "camera-plan", "camera-travel", "visit", "front", "ui", "capture-ui",
+         "capture", "identity", "transport", "stop", "screen", "click", "key", "expect-screen", "perspective"}
+ID = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
+TAG = re.compile(r"^[a-z]+:[A-Za-z0-9_/:.\-]+$")
+
+
+def main():
+    errors = []
+    try:
+        scenes = catalog.load()
+    except ValueError as e:  # duplicate ids
+        print(f"catalog: {e}")
+        return 1
+    places, groups = catalog.places(), catalog.groups()
+    for s in scenes:
+        w = f"{s['_file']}/{s['id']}"
+        if not ID.match(s["id"]):
+            errors.append(f"{w}: id is not kebab-case")
+        for t in s["tags"]:
+            if not TAG.match(t):
+                errors.append(f"{w}: bad tag {t!r}")
+        if s["tier"] == "check":
+            if not s.get("run"):
+                errors.append(f"{w}: check scenes need a run command")
+            continue
+        if s["tier"] == "lab":
+            if not s.get("lab") or s["lab"].get("tool") not in ("atlas_render", "pack_lab"):
+                errors.append(f"{w}: lab scenes need lab.tool atlas_render|pack_lab")
+            continue
+        if s["group"] not in groups:
+            errors.append(f"{w}: unknown group {s['group']}")
+        pose = s.get("pose") or {}
+        kinds = [k for k in catalog.POSES if k in pose]
+        if len(kinds) != 1:
+            errors.append(f"{w}: needs exactly one pose kind, has {kinds}")
+            continue
+        k = kinds[0]
+        if k == "visit" and len(pose["visit"]) != 5:
+            errors.append(f"{w}: visit is [x, z, height, yaw, pitch]")
+        if k == "camera" and len(pose["camera"]) != 6:
+            errors.append(f"{w}: camera is [x, y, z, lookX, lookY, lookZ]")
+        if k in ("place", "dungeon") and pose[k] not in places:
+            errors.append(f"{w}: unknown place {pose[k]}")
+        if k == "place" and pose.get("shot") not in (None, "aerial", "approach"):
+            errors.append(f"{w}: shot is aerial|approach")
+        if s.get("weather") and s["weather"] not in catalog.WEATHERS:
+            errors.append(f"{w}: unknown weather {s['weather']}")
+        if s.get("front") and (len(s["front"]) < 4 or s["front"][3] not in catalog.WEATHERS):
+            errors.append(f"{w}: front is [x, z, radius, weather, vx?, vz?]")
+        for v in s.get("setup", []) + s.get("cleanup", []):
+            verb = v.split()[0] if v.split() else ""
+            if verb not in VERBS:
+                errors.append(f"{w}: unknown live verb {verb!r} in {v!r}")
+        if s.get("frames") and (len(s["frames"]) != 2 or s["frames"][0] < 2):
+            errors.append(f"{w}: frames is [count >= 2, ticks between]")
+    for e in errors[:200]:
+        print(e)
+    print(f"{len(scenes)} scenes, {len(errors)} problem(s)")
+    return 1 if errors else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

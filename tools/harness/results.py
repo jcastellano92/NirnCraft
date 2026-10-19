@@ -2,13 +2,14 @@
 
 Layout (all under .work/harness, never in git):
 
-    scenes/<scene>/<variant>.after.png|json    the newest capture of that scene + variant
-    scenes/<scene>/<variant>.before.png|json   the capture before it (older ones are deleted)
+    results/<test>/<variant>.after.json        the newest result of that test + variant (every kind: status, metrics,
+                                               fingerprint, game receipt), .after.png for visual tests
+    results/<test>/<variant>.before.json|png   the result before it (older ones are deleted)
     runs/<stamp>/                               the latest run only: report.html, sheet.png (all scenes, before|after),
                                                 combos.png (every variant of a scene side by side), compare/*.png
 
-A new capture moves `after` to `before` and drops the old `before`, so iterating with live reload always compares the
-last two looks of the same pose.
+A new result moves `after` to `before` and drops the old `before`, so iterating with live reload always compares the
+last two looks (or numbers) of the same test. Non-visual tests (checks, perf) use the same record without images.
 """
 import json
 import shutil
@@ -20,7 +21,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 ROOT = Path(__file__).resolve().parents[2]
 STORE = ROOT / ".work/harness"
-SCENES = STORE / "scenes"
+SCENES = STORE / "results"
 RUNS = STORE / "runs"
 
 
@@ -72,24 +73,59 @@ def stem(scene, variant):
     return SCENES / scene / variant
 
 
-def store(scene, variant, png, meta=None):
-    """Rotate after -> before and file the new capture as after; returns its metrics."""
+def _rotate(base):
+    for ext in ("png", "json"):
+        src, dst = Path(f"{base}.after.{ext}"), Path(f"{base}.before.{ext}")
+        dst.unlink(missing_ok=True)
+        if src.exists():
+            src.replace(dst)
+
+
+def store(scene, variant, png, meta=None, status=None, fingerprint="", extra=None):
+    """Visual result: rotate after -> before, file the capture as after; returns the record."""
     base = stem(scene, variant)
     base.parent.mkdir(parents=True, exist_ok=True)
-    after, before = Path(f"{base}.after.png"), Path(f"{base}.before.png")
-    if after.exists():
-        for ext in ("png", "json"):
-            src, dst = Path(f"{base}.after.{ext}"), Path(f"{base}.before.{ext}")
-            if src.exists():
-                dst.unlink(missing_ok=True)
-                src.replace(dst)
+    before = Path(f"{base}.before.png")
+    if Path(f"{base}.after.png").exists():
+        _rotate(base)
+    after = Path(f"{base}.after.png")
     shutil.move(str(png), after)
-    img = Image.open(after)
-    m = metrics(img, Image.open(before) if before.exists() else None)
-    record = {"scene": scene, "variant": variant, "capturedAt": time.strftime("%Y-%m-%dT%H:%M:%S"), "metrics": m,
-              "game": meta or {}}
-    Path(f"{base}.after.json").write_text(json.dumps(record, indent=1), encoding="utf-8")
-    return m
+    m = metrics(Image.open(after), Image.open(before) if before.exists() else None)
+    return _write(base, scene, variant, "visual", status or ("flag" if m["flags"] else "pass"), m, fingerprint, meta,
+                  extra)
+
+
+def record(scene, variant, kind, status, metrics_, fingerprint="", meta=None, extra=None):
+    """Non-visual result (check, perf, error): same rotation and record, no image."""
+    base = stem(scene, variant)
+    base.parent.mkdir(parents=True, exist_ok=True)
+    if Path(f"{base}.after.json").exists():
+        _rotate(base)
+        Path(f"{base}.before.png").unlink(missing_ok=True)  # a failed capture keeps no stale picture as `after`
+    return _write(base, scene, variant, kind, status, metrics_, fingerprint, meta, extra)
+
+
+def _write(base, scene, variant, kind, status, m, fingerprint, meta, extra):
+    prev = Path(f"{base}.before.json")
+    rec = {"scene": scene, "variant": variant, "kind": kind, "status": status,
+           "capturedAt": time.strftime("%Y-%m-%dT%H:%M:%S"), "fingerprint": fingerprint, "metrics": m,
+           "game": meta or {}, **(extra or {})}
+    if prev.exists():
+        try:
+            rec["previous"] = {k: v for k, v in json.loads(prev.read_text(encoding="utf-8")).items()
+                               if k in ("status", "metrics", "capturedAt", "fingerprint")}
+        except ValueError:
+            pass
+    Path(f"{base}.after.json").write_text(json.dumps(rec, indent=1), encoding="utf-8")
+    return rec
+
+
+def latest(scene, variant):
+    j = Path(f"{stem(scene, variant)}.after.json")
+    try:
+        return json.loads(j.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
 
 
 def seed_before(scene, variant, png):
@@ -217,13 +253,15 @@ def report(run_name, rows, title="NirnCraft harness"):
     c = stack(combo_imgs)
     if c is not None:
         c.save(run / "combos.png")
+    agent_dir, agent_n = agent_pages(run, rows)
     flagged = [r for r in rows if r.get("metrics", {}).get("flags")]
     html = [f"<!doctype html><meta charset=utf-8><title>{title}</title>",
             "<style>body{background:#111;color:#ddd;font:14px system-ui;margin:16px}img{max-width:100%}"
             "td,th{padding:4px 10px;text-align:left}tr.bad{color:#ffb74d}a{color:#8cf}</style>",
             f"<h1>{title}</h1><p>{len(rows)} capture(s), {len(flagged)} flagged. Sheets: "
             + " ".join(f"<a href='{s}'>{s}</a>" for s in sheets)
-            + (" <a href='combos.png'>combos.png</a>" if c is not None else "") + "</p>",
+            + (" <a href='combos.png'>combos.png</a>" if c is not None else "")
+            + f" Agent pages: {agent_n} capture(s) in <a href='agent/index.txt'>agent/</a></p>",
             "<table><tr><th>scene</th><th>variant</th><th>tags</th><th>luma</th><th>diff</th><th>changed %</th>"
             "<th>flags</th></tr>"]
     for r in rows:
@@ -239,3 +277,74 @@ def report(run_name, rows, title="NirnCraft harness"):
                         f"<img src='{r['compare']}'>")
     (run / "report.html").write_text("\n".join(html), encoding="utf-8")
     return run
+
+# ------------------------------------------------------------------------------------------------------- agent pages
+AGENT_TILE = 760   # px per image: enough for an agent to see a broken texture, a black box, a missing NPC
+AGENT_ROWS = 3     # rows per page: a page stays under ~1550 px, about what one agent image read resolves
+
+
+def agent_pages(run, rows, include_unchanged=False):
+    """Pages made for agents: before | after pairs at a size they can actually judge, problems first, unchanged captures
+    left out; page-NN.png plus index.txt (which row is which test, with its numbers). More detail: harness.py zoom."""
+    def weight(r):
+        m = r.get("metrics", {})
+        return (0 if m.get("flags") else 1, -(m.get("changed") or 0))
+    picked = []
+    for r in sorted(rows, key=weight):
+        m = r.get("metrics", {})
+        if not include_unchanged and not m.get("flags") and (m.get("changed") is not None and m["changed"] < 1.0):
+            continue
+        before, after, _ = load(r["scene"], r["variant"])
+        if after is not None:
+            picked.append((r, before, after))
+    d = run / "agent"
+    d.mkdir(parents=True, exist_ok=True)
+    index = []
+    for p in range(0, len(picked), AGENT_ROWS):
+        tiles = []
+        for n, (r, before, after) in enumerate(picked[p:p + AGENT_ROWS]):
+            size = (AGENT_TILE, round(after.height * AGENT_TILE / after.width))
+            m = r.get("metrics", {})
+            head = f"{n + 1}. {r['scene']} [{r['variant']}]"
+            sub = f"luma {m.get('luma')} diff {m.get('diff', '-')} changed {m.get('changed', '-')}%"
+            if m.get("flags"):
+                sub += "  ! " + ", ".join(m["flags"])[:90]
+            left = _label(before.resize(size), "before", "") if before is not None else _label(Image.new("RGB", size, (30, 30, 34)), "before", "(first capture)")
+            right = _label(after.resize(size), head, sub, (255, 214, 120) if m.get("flags") else (235, 235, 235))
+            row = Image.new("RGB", (left.width + right.width + 8, max(left.height, right.height)), (10, 10, 12))
+            row.paste(left, (0, 0))
+            row.paste(right, (left.width + 8, 0))
+            tiles.append(row)
+            index.append(f"page-{p // AGENT_ROWS + 1:02d} row {n + 1}: {r['scene']} [{r['variant']}] {sub}")
+        stack(tiles, 8).save(d / f"page-{p // AGENT_ROWS + 1:02d}.png")
+    (d / "index.txt").write_text(chr(10).join(index) + chr(10), encoding="utf-8")
+    return d, len(picked)
+
+
+def zoom(scene, variant, crop=None, cell=None, which="both", out=None):
+    """Full-resolution crop of before/after (x,y,w,h in after pixels, or cell "c,r" of a 3x3 grid)."""
+    before, after, _ = load(scene, variant)
+    if after is None:
+        raise SystemExit(f"no capture for {scene} [{variant}]")
+    W, H = after.size
+    if cell:
+        c, r = (int(v) for v in cell.split(","))
+        crop = (c * W // 3, r * H // 3, W // 3, H // 3)
+    x, y, w, h = crop or (0, 0, W, H)
+    box = (x, y, x + w, y + h)
+    imgs = []
+    if which in ("both", "before") and before is not None:
+        imgs.append(_label(before.resize(after.size).crop(box), "before", f"{box}"))
+    if which in ("both", "after"):
+        imgs.append(_label(after.crop(box), "after", f"{box}"))
+    scale = min(1.0, 1500 / max(1, sum(i.width for i in imgs)))
+    imgs = [i.resize((round(i.width * scale), round(i.height * scale))) for i in imgs]
+    row = Image.new("RGB", (sum(i.width for i in imgs) + 8 * (len(imgs) - 1), max(i.height for i in imgs)), (10, 10, 12))
+    xx = 0
+    for i in imgs:
+        row.paste(i, (xx, 0))
+        xx += i.width + 8
+    out = Path(out or STORE / "zoom" / f"{scene}--{variant}--{x}-{y}-{w}-{h}.png")
+    out.parent.mkdir(parents=True, exist_ok=True)
+    row.save(out)
+    return out

@@ -1,0 +1,325 @@
+{
+  "suite": "farfield",
+  "description": "Infinite ATLAS far-field vistas in the live game (high altitude, dawn/dusk/night)",
+  "defaults": {
+    "tier": "live",
+    "group": "live",
+    "variants": [
+      "shaders"
+    ]
+  },
+  "scenes": [
+    {
+      "id": "helgen-atlas-overlook",
+      "title": "Infinite ATLAS far field from high above Helgen, looking north",
+      "tags": [
+        "region:skyrim/falkreath",
+        "place:helgen",
+        "feature:farfield",
+        "suite:smoke",
+        "weather:clear"
+      ],
+      "pose": {
+        "visit": [
+          -20,
+          1158,
+          90,
+          180,
+          -6
+        ]
+      },
+      "weather": "clear",
+      "wait": 300,
+      "setup": [],
+      "cleanup": [],
+      "variants": [
+        "shaders",
+        "vanilla"
+      ],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "docs/ATLAS.md:309",
+      "note": "pack_live --cams helgen-near-smoke --visit n:-20,1158,90,180,-6 --off; --off = also capture with shaders off"
+    },
+    {
+      "id": "farfield-whiterun-high-dawn",
+      "title": "Infinite ATLAS vista high over Whiterun at dawn",
+      "tags": [
+        "region:skyrim/whiterun",
+        "place:whiterun",
+        "feature:farfield",
+        "feature:sky",
+        "weather:clear",
+        "time:dawn"
+      ],
+      "pose": {
+        "visit": [
+          62,
+          -68,
+          300,
+          -90,
+          6
+        ]
+      },
+      "time": 23300,
+      "weather": "clear",
+      "wait": 300,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "new (farfield vistas; height/pitch after ClientAutotest tourFar shot, pitch 6)"
+    },
+    {
+      "id": "farfield-whiterun-high-dusk",
+      "title": "Infinite ATLAS vista high over Whiterun at dusk",
+      "tags": [
+        "region:skyrim/whiterun",
+        "place:whiterun",
+        "feature:farfield",
+        "feature:sky",
+        "weather:clear",
+        "time:dusk"
+      ],
+      "pose": {
+        "visit": [
+          62,
+          -68,
+          300,
+          90,
+          6
+        ]
+      },
+      "time": 12400,
+      "weather": "clear",
+      "wait": 300,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "new (farfield vistas; height/pitch after ClientAutotest tourFar shot, pitch 6)"
+    },
+    {
+      "id": "farfield-whiterun-high-night",
+      "title": "Infinite ATLAS vista high over Whiterun at night",
+      "tags": [
+        "region:skyrim/whiterun",
+        "place:whiterun",
+        "feature:farfield",
+        "feature:sky",
+        "feature:night-sky",
+        "weather:clear",
+        "time:night"
+      ],
+      "pose": {
+        "visit": [
+          62,
+          -68,
+          300,
+          180,
+          6
+        ]
+      },
+      "time": 18000,
+      "weather": "clear",
+      "wait": 300,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {
+        "lumaMin": 2
+      },
+      "capture": "world",
+      "source": "new (farfield vistas; height/pitch after ClientAutotest tourFar shot, pitch 6)"
+    },
+    {
+      "id": "farfield-helgen-high-dawn",
+      "title": "Infinite ATLAS vista high over Helgen at dawn",
+      "tags": [
+        "region:skyrim/falkreath",
+        "place:helgen",
+        "feature:farfield",
+        "feature:sky",
+        "weather:clear",
+        "time:dawn"
+      ],
+      "pose": {
+        "visit": [
+          -24,
+          1143,
+          250,
+          -90,
+          6
+        ]
+      },
+      "time": 23300,
+      "weather": "clear",
+      "wait": 300,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "new (farfield vistas; height/pitch after ClientAutotest tourFar shot, pitch 6)"
+    },
+    {
+      "id": "farfield-helgen-high-dusk",
+      "title": "Infinite ATLAS vista high over Helgen at dusk",
+      "tags": [
+        "region:skyrim/falkreath",
+        "place:helgen",
+        "feature:farfield",
+        "feature:sky",
+        "weather:clear",
+        "time:dusk"
+      ],
+      "pose": {
+        "visit": [
+          -24,
+          1143,
+          250,
+          90,
+          6
+        ]
+      },
+      "time": 12400,
+      "weather": "clear",
+      "wait": 300,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "new (farfield vistas; height/pitch after ClientAutotest tourFar shot, pitch 6)"
+    },
+    {
+      "id": "farfield-helgen-high-night",
+      "title": "Infinite ATLAS vista high over Helgen at night",
+      "tags": [
+        "region:skyrim/falkreath",
+        "place:helgen",
+        "feature:farfield",
+        "feature:sky",
+        "feature:night-sky",
+        "weather:clear",
+        "time:night"
+      ],
+      "pose": {
+        "visit": [
+          -24,
+          1143,
+          250,
+          180,
+          6
+        ]
+      },
+      "time": 18000,
+      "weather": "clear",
+      "wait": 300,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {
+        "lumaMin": 2
+      },
+      "capture": "world",
+      "source": "new (farfield vistas; height/pitch after ClientAutotest tourFar shot, pitch 6)"
+    },
+    {
+      "id": "farfield-throat-high-dawn",
+      "title": "Infinite ATLAS vista high over Throat Of The World at dawn",
+      "tags": [
+        "region:skyrim/whiterun",
+        "place:throat_of_the_world",
+        "feature:farfield",
+        "feature:sky",
+        "weather:clear",
+        "time:dawn"
+      ],
+      "pose": {
+        "visit": [
+          579,
+          652,
+          120,
+          -90,
+          6
+        ]
+      },
+      "time": 23300,
+      "weather": "clear",
+      "wait": 300,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "new (farfield vistas; height/pitch after ClientAutotest tourFar shot, pitch 6)"
+    },
+    {
+      "id": "farfield-throat-high-dusk",
+      "title": "Infinite ATLAS vista high over Throat Of The World at dusk",
+      "tags": [
+        "region:skyrim/whiterun",
+        "place:throat_of_the_world",
+        "feature:farfield",
+        "feature:sky",
+        "weather:clear",
+        "time:dusk"
+      ],
+      "pose": {
+        "visit": [
+          579,
+          652,
+          120,
+          90,
+          6
+        ]
+      },
+      "time": 12400,
+      "weather": "clear",
+      "wait": 300,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "new (farfield vistas; height/pitch after ClientAutotest tourFar shot, pitch 6)"
+    },
+    {
+      "id": "farfield-throat-high-night",
+      "title": "Infinite ATLAS vista high over Throat Of The World at night",
+      "tags": [
+        "region:skyrim/whiterun",
+        "place:throat_of_the_world",
+        "feature:farfield",
+        "feature:sky",
+        "feature:night-sky",
+        "weather:clear",
+        "time:night"
+      ],
+      "pose": {
+        "visit": [
+          579,
+          652,
+          120,
+          180,
+          6
+        ]
+      },
+      "time": 18000,
+      "weather": "clear",
+      "wait": 300,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {
+        "lumaMin": 2
+      },
+      "capture": "world",
+      "source": "new (farfield vistas; height/pitch after ClientAutotest tourFar shot, pitch 6)"
+    }
+  ]
+}

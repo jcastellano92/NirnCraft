@@ -42,17 +42,32 @@ param(
     [string]$RuntimeRoot = ""
 )
 $ErrorActionPreference = "Stop"
+# The canonical form of a path: junctions / links followed (E:\NirnCraft-scratch and E:\Skycraft-scratch are one
+# folder), as Python's Path.resolve() writes them into the launch files; identity checks compare these.
+function Real([string]$Path) {
+    $full = [IO.Path]::GetFullPath($Path)
+    $parts = $full.TrimEnd('\').Split('\')
+    $acc = $parts[0] + '\'
+    for ($i = 1; $i -lt $parts.Count; $i++) {
+        $acc = Join-Path $acc $parts[$i]
+        $item = Get-Item -LiteralPath $acc -Force -ErrorAction SilentlyContinue
+        if ($item -and $item.LinkType -in @('Junction', 'SymbolicLink') -and $item.Target) {
+            $acc = [IO.Path]::GetFullPath([string]@($item.Target)[0])
+        }
+    }
+    return $acc
+}
 $Root = Resolve-Path (Join-Path $PSScriptRoot "..\..")
 $Mod = Join-Path $Root "mod"
 $Dev = Join-Path $Mod "run\devworld-26.3"
-$Scratch = if ($env:NIRNCRAFT_263_SCRATCH) { [IO.Path]::GetFullPath($env:NIRNCRAFT_263_SCRATCH) } else { 'E:\NirnCraft-scratch\migration-26.3' }
+$Scratch = Real $(if ($env:NIRNCRAFT_263_SCRATCH) { $env:NIRNCRAFT_263_SCRATCH } else { 'E:\NirnCraft-scratch\migration-26.3' })
 $Compiled = Join-Path $Scratch 'build\classes\java\main'
 $JavaRoot = if ($env:NIRNCRAFT_JAVA25_HOME) { $env:NIRNCRAFT_JAVA25_HOME } else { (Get-Content -LiteralPath 'E:\NirnCraft-scratch\toolchains\java25-location.txt' -Raw).Trim() }
-$JavaExe = [IO.Path]::GetFullPath((Join-Path $JavaRoot 'bin\java.exe'))
+$JavaExe = Real (Join-Path $JavaRoot 'bin\java.exe')
 if ($RuntimeRoot) {
-    $candidate = [IO.Path]::GetFullPath($RuntimeRoot).TrimEnd('\')
+    $candidate = (Real $RuntimeRoot).TrimEnd('\')
     $workspacePrefix = ([IO.Path]::GetFullPath((Join-Path $Root 'dist\world-tests\runtimes')).TrimEnd('\') + '\')
-    $nvmePrefix = 'E:\NirnCraft-scratch\world-benchmark\'
+    $nvmePrefix = (Real 'E:\NirnCraft-scratch\world-benchmark').TrimEnd('\') + '\'
     $nativePrefix = [IO.Path]::GetFullPath((Join-Path $Scratch 'runtime')).TrimEnd('\') + '\'
     if (-not ($candidate.StartsWith($workspacePrefix,[StringComparison]::OrdinalIgnoreCase) -or
               $candidate.StartsWith($nvmePrefix,[StringComparison]::OrdinalIgnoreCase) -or

@@ -103,6 +103,7 @@ public final class IntroClient {
      * once this lifts, and by then the chunks are in.)
      */
     static boolean coverWanted() {
+        if (com.nirncraft.client.autotest.ClientAutotest.automated()) return false;  // tests see the world at once
         if (awaiting) return true;
         return state == IntroState.JOINED || state == IntroState.CHARACTER || state == IntroState.LOADING;
     }
@@ -110,6 +111,14 @@ public final class IntroClient {
     /** True while the character screen is what the player must be looking at. */
     private static boolean needsCharacter(Minecraft mc) {
         if (characterDone || mc.player == null) return false;
+        if (com.nirncraft.client.autotest.ClientAutotest.automated()) {  // a test never stops at the character screen
+            if (SkyData.get(mc.player).getRace() == null) {
+                com.nirncraft.network.SkyNetwork.sendToServer(
+                        new com.nirncraft.network.CorePackets.ChooseRace(com.nirncraft.core.Race.NORD.id()));
+                characterConfirmed();
+            }
+            return false;
+        }
         if (state != IntroState.JOINED && state != IntroState.CHARACTER) return false;
         return SkyData.get(mc.player).getRace() == null;
     }

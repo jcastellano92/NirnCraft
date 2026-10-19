@@ -1,0 +1,348 @@
+"""Live game control for the harness: one disposable preview client (NirnCraft-26.3-autotest), driven through
+tools/dev/live_world.py's bridge. Owns launch per restart group, the shader / resource / data / jar reload kinds, and
+running one scene per action batch (a failing scene clears only its own batch).
+"""
+import filecmp
+import hashlib
+import json
+import re
+import shutil
+import subprocess
+import sys
+import time
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT / "tools/dev"))
+sys.path.insert(0, str(ROOT / "tools"))
+import live_world as lw  # noqa: E402
+
+GAME = lw.GAME
+SHOTS = GAME / "build/autotest-screenshots"
+PERF = GAME / "build/autotest-performance"
+STATE = ROOT / ".work/harness/client.json"
+LEASE = ROOT / ".work/lease/live.json"
+PACK_SRC = ROOT / "shaderpack"
+PACK_ZIP = GAME / "shaderpacks/InfiniteATLAS.zip"
+OVERLAY = GAME / "resourcepacks/nirncraft-dev"
+ASSETS = ROOT / "mod/src/main/resources/assets"
+MARK = ("-Dnirncraft.harness=1", "-Dnirncraft.harness.end=1")  # brackets the group's flags in JvmArgs
+
+
+def log(msg):
+    print(msg, flush=True)
+
+
+def sha(path):
+    try:
+        return hashlib.sha256(Path(path).read_bytes()).hexdigest()[:16]
+    except OSError:
+        return "-"
+
+
+def inputs():
+    """Build inputs every live result depends on (feeds scene fingerprints)."""
+    overlay = hashlib.sha256()
+    if OVERLAY.exists():
+        for f in sorted(OVERLAY.rglob("*")):
+            if f.is_file():
+                overlay.update(f.relative_to(OVERLAY).as_posix().encode() + f.read_bytes())
+    return {"core": sha(GAME / "mods/nirncraft-core.jar"), "pack": sha(PACK_ZIP), "overlay": overlay.hexdigest()[:16]}
+
+
+# ----------------------------------------------------------------------------------------------- lease + state
+def take_lease(owner="harness"):
+    now = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+    if LEASE.exists():
+        try:
+            held = json.loads(LEASE.read_text(encoding="utf-8"))
+            age = time.time() - time.mktime(time.strptime(held.get("heartbeat", now), "%Y-%m-%dT%H:%M:%SZ")) + time.timezone
+            mine = held.get("owner", "").startswith(("harness", "aether/shader", "atlas/shader"))
+            if not mine and age < 600:
+                raise SystemExit(f"live lease held by {held.get('owner')} ({int(age)} s ago); wait or ask its owner")
+        except ValueError:
+            pass
+    LEASE.parent.mkdir(parents=True, exist_ok=True)
+    LEASE.write_text(json.dumps({"owner": owner, "system": "claude-code", "job": "harness",
+                                 "instance": lw.INSTANCE_NAME, "heartbeat": now}), encoding="utf-8")
+
+
+def drop_lease():
+    LEASE.unlink(missing_ok=True)
+
+
+def client_state():
+    try:
+        return json.loads(STATE.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {}
+
+
+def running():
+    return bool(lw.processes())
+
+
+def ready():
+    st = lw.status()
+    c = st.get("client", {})
+    return bool(c.get("fresh") and (st.get("serverReady") or (c.get("remote") and c.get("worldLoaded"))))
+
+
+# ----------------------------------------------------------------------------------------------- launch / close
+def _set_group_flags(jvm):
+    cfg = lw.INSTANCE / "instance.cfg"
+    text = cfg.read_text(encoding="utf-8")
+    m = re.search(r'^JvmArgs="?(.*?)"?$', text, re.M)
+    if not m:
+        raise SystemExit("instance has no JvmArgs; prepare it with tools/qa/prism_autotest.ps1 -PrepareOnly -Live")
+    args = re.sub(re.escape(MARK[0]) + r".*?" + re.escape(MARK[1]), "", m.group(1)).strip()
+    extra = " ".join(f"-D{k}={v}" for k, v in sorted(jvm.items()))
+    if extra:
+        args = f"{args} {MARK[0]} {extra} {MARK[1]}"
+    text = text[:m.start()] + f'JvmArgs="{args}"' + text[m.end():]
+    lw.atomic(cfg, text.encode())
+
+
+def _enable_overlay():
+    """The dev overlay resource pack sits above the mod's own assets, so edited textures / models / sounds / lang
+    reload live (`resources` verb) without a jar rebuild. Enabled in options.txt while the client is closed."""
+    (OVERLAY / "assets").mkdir(parents=True, exist_ok=True)
+    meta = OVERLAY / "pack.mcmeta"
+    if not meta.exists():
+        meta.write_text(json.dumps({"pack": {"description": "NirnCraft harness dev overlay",
+                                             "min_format": 1, "max_format": 999}}), encoding="utf-8")
+    opts = GAME / "options.txt"
+    if opts.exists():
+        text = opts.read_text(encoding="utf-8")
+        m = re.search(r"^resourcePacks:(.*)$", text, re.M)
+        packs = json.loads(m.group(1)) if m else []
+        if "file/nirncraft-dev" not in packs:
+            packs = [p for p in packs if p != "file/nirncraft-dev"] or ["vanilla", "mod_resources"]
+            packs.append("file/nirncraft-dev")
+            line = "resourcePacks:" + json.dumps(packs, separators=(",", ":"))
+            text = text[:m.start()] + line + text[m.end():] if m else text + line + "\n"
+            opts.write_text(text, encoding="utf-8")
+
+
+def launch(group, groups, limit=900):
+    cfg = groups.get(group, {})
+    _set_group_flags(cfg.get("jvm", {}))
+    _enable_overlay()
+    code = subprocess.run([sys.executable, str(ROOT / "tools/dev/live_world.py"), "launch"], capture_output=True, text=True)
+    if code.returncode:
+        raise RuntimeError("launch failed: " + (code.stdout + code.stderr)[-600:])
+    t0, gone = time.monotonic(), 0
+    while time.monotonic() - t0 < limit:
+        if ready():
+            STATE.parent.mkdir(parents=True, exist_ok=True)
+            STATE.write_text(json.dumps({"group": group, "pid": (lw.processes() or [{}])[0].get("pid"),
+                                         "shaders": True, "since": time.time()}), encoding="utf-8")
+            log(f"  client ready ({group}) after {time.monotonic() - t0:.0f} s")
+            return
+        gone = gone + 1 if not running() else 0
+        if gone >= 10 and time.monotonic() - t0 > 60:
+            raise RuntimeError("client exited while loading; see logs/latest.log")
+        time.sleep(3)
+    raise RuntimeError("world not ready in time; client left running for inspection")
+
+
+def close():
+    if not running():
+        STATE.unlink(missing_ok=True)
+        return
+    r = subprocess.run([sys.executable, str(ROOT / "tools/dev/live_world.py"), "close"], capture_output=True, text=True)
+    if r.returncode:
+        raise RuntimeError("clean close failed: " + (r.stdout + r.stderr)[-400:])
+    STATE.unlink(missing_ok=True)
+
+
+BUILT = Path("E:/NirnCraft-scratch/migration-26.3/build/libs/nirncraft-0.1.0.jar")
+
+
+def stale_core():
+    """A message when the installed core is older than the latest build (tests would run yesterday's code)."""
+    inst = GAME / "mods/nirncraft-core.jar"
+    if BUILT.exists() and inst.exists() and BUILT.stat().st_mtime > inst.stat().st_mtime + 60 and sha(BUILT) != sha(inst):
+        return (f"the installed core ({time.ctime(inst.stat().st_mtime)}) is older than the latest build "
+                f"({time.ctime(BUILT.stat().st_mtime)}): run with --rebuild, or tools/dev/live_world.py install-core")
+    return None
+
+
+def ensure(group, groups):
+    """The client for `group`, reusing a running one when it was booted for the same group."""
+    msg = stale_core()
+    if msg:
+        log("  ! " + msg)
+    if running() and client_state().get("group") == group and ready():
+        return
+    if running():
+        log(f"  restart: client is in group {client_state().get('group')!r}, need {group!r}")
+        close()
+    launch(group, groups)
+
+
+def actions(lines, timeout=900):
+    lw.live_actions(lines, timeout=timeout)
+
+
+def shaders(on):
+    st = client_state()
+    if st.get("shaders") == on:
+        return
+    actions([f"shaders {'on' if on else 'off'}"], timeout=600)
+    st["shaders"] = on
+    STATE.write_text(json.dumps(st), encoding="utf-8")
+
+
+# ----------------------------------------------------------------------------------------------- reload kinds
+def sync_pack():
+    """Build the pack zip (glslang-validated, as shipped) and install it; returns True when it changed."""
+    r = subprocess.run([sys.executable, "-I", str(PACK_SRC / "build_pack.py")], capture_output=True, text=True)
+    if r.returncode:
+        raise RuntimeError("pack build failed:\n" + (r.stdout + r.stderr)[-1500:])
+    built = PACK_SRC / "build/InfiniteATLAS.zip"
+    if PACK_ZIP.exists() and filecmp.cmp(built, PACK_ZIP, shallow=False):
+        return False
+    shutil.copy2(built, PACK_ZIP)
+    return True
+
+
+def sync_overlay(paths=None):
+    """Copy edited mod assets into the overlay pack (all of them when paths is None); returns the count."""
+    n = 0
+    src = [Path(p) for p in paths] if paths else [p for p in ASSETS.rglob("*") if p.is_file()]
+    for p in src:
+        p = p.resolve()
+        try:
+            rel = p.relative_to(ASSETS.resolve())
+        except ValueError:
+            continue
+        dst = OVERLAY / "assets" / rel
+        if p.exists():
+            if dst.exists() and filecmp.cmp(p, dst, shallow=False):
+                continue
+            dst.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(p, dst)
+        else:
+            dst.unlink(missing_ok=True)
+        n += 1
+    return n
+
+
+def reload_shaders():
+    since = (GAME / "logs/latest.log").stat().st_size if (GAME / "logs/latest.log").exists() else 0
+    changed = sync_pack()
+    if changed and running():
+        actions(["reload"], timeout=600)
+    return changed, shader_errors(since)
+
+
+def reload_resources(paths=None):
+    n = sync_overlay(paths)
+    if n and running():
+        actions(["resources"], timeout=900)
+    return n
+
+
+def reload_data(target):
+    r = subprocess.run([sys.executable, str(ROOT / "tools/dev/live_world.py"), "reload", target],
+                       capture_output=True, text=True)
+    if r.returncode:
+        raise RuntimeError(f"data reload {target} failed: " + (r.stdout + r.stderr)[-600:])
+
+
+def rebuild_jar():
+    """Gradle build (with tests) + install into the preview; the client must restart to load it."""
+    r = subprocess.run([sys.executable, str(ROOT / "tools/dev/build_263.py"), "--offline", "build"],
+                       capture_output=True, text=True)
+    if r.returncode:
+        tail = [l for l in (r.stdout + r.stderr).splitlines() if "error:" in l or "FAILED" in l][:12]
+        raise RuntimeError("jar build failed:\n" + "\n".join(tail))
+    jar = next(iter(sorted(Path("E:/NirnCraft-scratch/migration-26.3/build/libs").glob("nirncraft-*.jar"))), None)
+    if jar is None:
+        raise RuntimeError("built jar not found")
+    if running():
+        close()
+    r = subprocess.run([sys.executable, str(ROOT / "tools/dev/live_world.py"), "install-core", str(jar)],
+                       capture_output=True, text=True)
+    if r.returncode:
+        raise RuntimeError("install-core failed: " + (r.stdout + r.stderr)[-600:])
+
+
+ERR = re.compile(r"(error|failed|exception|could not|unable to)", re.I)
+
+
+def shader_errors(since):
+    p = GAME / "logs/latest.log"
+    if not p.exists():
+        return []
+    with open(p, "rb") as f:
+        f.seek(since)
+        text = f.read().decode("utf-8", "replace")
+    out = []
+    for line in text.splitlines():
+        low = line.lower()
+        if ("iris" in low or "shader" in low or "glsl" in low) and ERR.search(line) and "option menu" not in low:
+            out.append(line.strip()[:300])
+    return out
+
+
+# ----------------------------------------------------------------------------------------------- one scene
+BLOCKING = {"RaceScreen", "IntroLoadingScreen", "ReceivingLevelScreen", "LevelLoadingScreen", "GenericMessageScreen",
+            "DisconnectedScreen", "TitleScreen"}
+
+
+def screen_blocking():
+    """The screen covering the world when it is one a scene cannot pass (None when the world is showing)."""
+    s = (lw.read_json(GAME / "nirncraft-live-status.json") or {}).get("screen")
+    return s if s in BLOCKING else None
+
+def capture(scene, variant, pose_lines, capture_lines, timeout=900):
+    """Run one scene + variant; returns (png path, receipt dict, perf dict or None)."""
+    tag = f"h-{scene['id']}-{variant}"
+    for ext in ("png", "json"):
+        (SHOTS / f"{tag}.{ext}").unlink(missing_ok=True)
+    blocked = screen_blocking()
+    if blocked and scene.get("capture") != "ui":
+        raise RuntimeError(f"the client is stuck on {blocked} (the world cannot load behind it); is the installed "
+                           f"jar current? (harness.py run --rebuild)")
+    shaders(variant != "vanilla")
+    try:
+        actions(pose_lines + capture_lines(tag), timeout=timeout)
+    except RuntimeError as e:
+        blocked = screen_blocking()
+        raise RuntimeError(f"{e} [blocked by {blocked}]" if blocked else str(e)) from None
+    png = SHOTS / f"{tag}.png"
+    frames = [SHOTS / f"{tag}-f{i}.png" for i in range(scene["frames"][0])] if scene.get("frames") else [png]
+    for f in frames:
+        t0, last = time.monotonic(), -1
+        while time.monotonic() - t0 < 60:  # screenshots encode off-thread
+            size = f.stat().st_size if f.exists() else -1
+            if size > 0 and size == last:
+                break
+            last = size
+            time.sleep(0.4)
+        if not f.exists():
+            raise RuntimeError(f"no screenshot written for {f.stem}")
+    if scene.get("frames"):  # an animation: one filmstrip (2 rows), so before/after compares the whole motion
+        from PIL import Image
+        imgs = [Image.open(f).convert("RGB") for f in frames]
+        w, h = imgs[0].width // 2, imgs[0].height // 2
+        cols = (len(imgs) + 1) // 2
+        strip = Image.new("RGB", (w * cols, h * 2))
+        for i, im in enumerate(imgs):
+            strip.paste(im.resize((w, h)), ((i % cols) * w, (i // cols) * h))
+        strip.save(png)
+        for f in frames:
+            f.unlink(missing_ok=True)
+        if not (SHOTS / f"{tag}.json").exists() and (SHOTS / f"{tag}-f0.json").exists():
+            (SHOTS / f"{tag}-f0.json").replace(SHOTS / f"{tag}.json")
+        for i in range(1, len(frames)):
+            (SHOTS / f"{tag}-f{i}.json").unlink(missing_ok=True)
+    rec = {}
+    if (SHOTS / f"{tag}.json").exists():
+        rec = json.loads((SHOTS / f"{tag}.json").read_text(encoding="utf-8"))
+    perf = None
+    if scene.get("measure") and (PERF / f"{tag}.json").exists():
+        perf = json.loads((PERF / f"{tag}.json").read_text(encoding="utf-8"))
+    return png, rec, perf

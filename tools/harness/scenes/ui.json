@@ -1,0 +1,588 @@
+{
+  "suite": "ui",
+  "description": "Menus, screens, HUD and banners (live ui verbs where they exist, boot groups for the rest)",
+  "defaults": {
+    "tier": "live",
+    "group": "live",
+    "variants": [
+      "shaders"
+    ]
+  },
+  "scenes": [
+    {
+      "id": "ui-skills",
+      "title": "Skills (constellations) screen",
+      "tags": [
+        "feature:ui",
+        "feature:menu"
+      ],
+      "pose": {
+        "spawn": true
+      },
+      "wait": 0,
+      "setup": [
+        "ui skills",
+        "wait 40"
+      ],
+      "cleanup": [
+        "ui close"
+      ],
+      "variants": [
+        "shaders"
+      ],
+      "measure": 0,
+      "checks": {},
+      "capture": "ui",
+      "source": "mod/src/main/java/com/nirncraft/client/autotest/ClientAutotest.java:891"
+    },
+    {
+      "id": "ui-hub",
+      "title": "Menu hub (Tab)",
+      "tags": [
+        "feature:ui",
+        "feature:menu"
+      ],
+      "pose": {
+        "spawn": true
+      },
+      "wait": 0,
+      "setup": [
+        "ui hub",
+        "wait 40"
+      ],
+      "cleanup": [
+        "ui close"
+      ],
+      "variants": [
+        "shaders"
+      ],
+      "measure": 0,
+      "checks": {},
+      "capture": "ui",
+      "source": "mod/src/main/java/com/nirncraft/client/autotest/ClientAutotest.java:899"
+    },
+    {
+      "id": "ui-inventory",
+      "title": "Skyrim-style inventory",
+      "tags": [
+        "feature:ui",
+        "feature:menu"
+      ],
+      "pose": {
+        "spawn": true
+      },
+      "wait": 0,
+      "setup": [
+        "ui inventory",
+        "wait 40"
+      ],
+      "cleanup": [
+        "ui close"
+      ],
+      "variants": [
+        "shaders"
+      ],
+      "measure": 0,
+      "checks": {},
+      "capture": "ui",
+      "source": "mod/src/main/java/com/nirncraft/client/autotest/ClientAutotest.java:907; mod/src/main/java/com/nirncraft/visual/client/VisualAutotest.java:122"
+    },
+    {
+      "id": "ui-magic",
+      "title": "Magic menu",
+      "tags": [
+        "feature:ui",
+        "feature:menu"
+      ],
+      "pose": {
+        "spawn": true
+      },
+      "wait": 0,
+      "setup": [
+        "ui magic",
+        "wait 40"
+      ],
+      "cleanup": [
+        "ui close"
+      ],
+      "variants": [
+        "shaders"
+      ],
+      "measure": 0,
+      "checks": {},
+      "capture": "ui",
+      "source": "mod/src/main/java/com/nirncraft/client/autotest/ClientAutotest.java:915"
+    },
+    {
+      "id": "ui-journal",
+      "title": "Quest journal",
+      "tags": [
+        "feature:ui",
+        "feature:menu"
+      ],
+      "pose": {
+        "spawn": true
+      },
+      "wait": 0,
+      "setup": [
+        "ui journal",
+        "wait 40"
+      ],
+      "cleanup": [
+        "ui close"
+      ],
+      "variants": [
+        "shaders"
+      ],
+      "measure": 0,
+      "checks": {},
+      "capture": "ui",
+      "source": "mod/src/main/java/com/nirncraft/client/autotest/ClientAutotest.java:923"
+    },
+    {
+      "id": "ui-map",
+      "title": "World map",
+      "tags": [
+        "feature:ui",
+        "feature:menu",
+        "suite:smoke"
+      ],
+      "pose": {
+        "spawn": true
+      },
+      "wait": 0,
+      "setup": [
+        "ui map",
+        "wait 40"
+      ],
+      "cleanup": [
+        "ui close"
+      ],
+      "variants": [
+        "shaders"
+      ],
+      "measure": 0,
+      "checks": {},
+      "capture": "ui",
+      "source": "mod/src/main/java/com/nirncraft/client/autotest/ClientAutotest.java:931"
+    },
+    {
+      "id": "ui-race-screen",
+      "title": "Character creator (RaceScreen)",
+      "tags": [
+        "feature:ui",
+        "feature:menu"
+      ],
+      "group": "screenwalk",
+      "pose": {
+        "spawn": true
+      },
+      "wait": 0,
+      "setup": [],
+      "cleanup": [],
+      "variants": [
+        "shaders"
+      ],
+      "measure": 0,
+      "checks": {},
+      "capture": "ui",
+      "groupCapture": "01_race_screen",
+      "source": "mod/src/main/java/com/nirncraft/client/autotest/ClientAutotest.java:883; mod/src/main/java/com/nirncraft/visual/client/VisualAutotest.java:128",
+      "note": "no live ui verb for this screen; captured by the screenwalk boot (ClientAutotest.runStep) as groupCapture"
+    },
+    {
+      "id": "ui-skills-mysticism",
+      "title": "Skills screen preselected on Mysticism",
+      "tags": [
+        "feature:ui",
+        "feature:menu"
+      ],
+      "group": "screenwalk",
+      "pose": {
+        "spawn": true
+      },
+      "wait": 0,
+      "setup": [],
+      "cleanup": [],
+      "variants": [
+        "shaders"
+      ],
+      "measure": 0,
+      "checks": {},
+      "capture": "ui",
+      "groupCapture": "09_skills_mysticism",
+      "source": "mod/src/main/java/com/nirncraft/client/autotest/ClientAutotest.java:949",
+      "note": "no live ui verb for this screen; captured by the screenwalk boot (ClientAutotest.runStep) as groupCapture"
+    },
+    {
+      "id": "ui-spellmaking",
+      "title": "Spellmaking altar with four effects",
+      "tags": [
+        "feature:ui",
+        "feature:menu"
+      ],
+      "group": "screenwalk",
+      "pose": {
+        "spawn": true
+      },
+      "wait": 0,
+      "setup": [],
+      "cleanup": [],
+      "variants": [
+        "shaders"
+      ],
+      "measure": 0,
+      "checks": {},
+      "capture": "ui",
+      "groupCapture": "10_spellmaking_screen",
+      "source": "mod/src/main/java/com/nirncraft/client/autotest/ClientAutotest.java:956",
+      "note": "no live ui verb for this screen; captured by the screenwalk boot (ClientAutotest.runStep) as groupCapture"
+    },
+    {
+      "id": "ui-staff-enchanter",
+      "title": "Staff enchanter screen",
+      "tags": [
+        "feature:ui",
+        "feature:menu"
+      ],
+      "group": "screenwalk",
+      "pose": {
+        "spawn": true
+      },
+      "wait": 0,
+      "setup": [],
+      "cleanup": [],
+      "variants": [
+        "shaders"
+      ],
+      "measure": 0,
+      "checks": {},
+      "capture": "ui",
+      "groupCapture": "11_staff_enchanter_screen",
+      "source": "mod/src/main/java/com/nirncraft/client/autotest/ClientAutotest.java:961",
+      "note": "no live ui verb for this screen; captured by the screenwalk boot (ClientAutotest.runStep) as groupCapture"
+    },
+    {
+      "id": "ui-magic-mysticism",
+      "title": "Magic menu preselected on Mysticism",
+      "tags": [
+        "feature:ui",
+        "feature:menu"
+      ],
+      "group": "screenwalk",
+      "pose": {
+        "spawn": true
+      },
+      "wait": 0,
+      "setup": [],
+      "cleanup": [],
+      "variants": [
+        "shaders"
+      ],
+      "measure": 0,
+      "checks": {},
+      "capture": "ui",
+      "groupCapture": "12_magic_mysticism",
+      "source": "mod/src/main/java/com/nirncraft/client/autotest/ClientAutotest.java:969",
+      "note": "no live ui verb for this screen; captured by the screenwalk boot (ClientAutotest.runStep) as groupCapture"
+    },
+    {
+      "id": "hud-world-loading",
+      "title": "World loading screen",
+      "tags": [
+        "feature:ui",
+        "feature:menu"
+      ],
+      "group": "visualtest",
+      "pose": {
+        "spawn": true
+      },
+      "wait": 0,
+      "setup": [],
+      "cleanup": [],
+      "variants": [
+        "shaders"
+      ],
+      "measure": 0,
+      "checks": {},
+      "capture": "ui",
+      "groupCapture": "00_world_loading",
+      "source": "mod/src/main/java/com/nirncraft/visual/client/VisualAutotest.java:206",
+      "note": "needs a client-side call with no live verb; captured by the visualtest boot (VisualAutotest.defaultSteps) as groupCapture"
+    },
+    {
+      "id": "hud-target-health",
+      "title": "HUD with a struck target (zombie) health bar",
+      "tags": [
+        "feature:hud",
+        "feature:ui",
+        "time:dawn"
+      ],
+      "group": "visualtest",
+      "pose": {
+        "spawn": true
+      },
+      "time": 1000,
+      "wait": 0,
+      "setup": [],
+      "cleanup": [],
+      "variants": [
+        "shaders"
+      ],
+      "measure": 0,
+      "checks": {},
+      "capture": "ui",
+      "groupCapture": "20_target_hud",
+      "source": "mod/src/main/java/com/nirncraft/visual/client/VisualAutotest.java:102",
+      "note": "needs a client-side call with no live verb; captured by the visualtest boot (VisualAutotest.defaultSteps) as groupCapture"
+    },
+    {
+      "id": "hud-level-up-banner",
+      "title": "Level up banner",
+      "tags": [
+        "feature:hud",
+        "feature:ui",
+        "time:dawn"
+      ],
+      "group": "visualtest",
+      "pose": {
+        "spawn": true
+      },
+      "time": 1000,
+      "wait": 0,
+      "setup": [],
+      "cleanup": [],
+      "variants": [
+        "shaders"
+      ],
+      "measure": 0,
+      "checks": {},
+      "capture": "ui",
+      "groupCapture": "21_level_up_banner",
+      "source": "mod/src/main/java/com/nirncraft/visual/client/VisualAutotest.java:104",
+      "note": "needs a client-side call with no live verb; captured by the visualtest boot (VisualAutotest.defaultSteps) as groupCapture"
+    },
+    {
+      "id": "hud-dragon-soul-banner",
+      "title": "Dragon soul absorbed big title",
+      "tags": [
+        "feature:hud",
+        "feature:ui",
+        "time:dawn"
+      ],
+      "group": "visualtest",
+      "pose": {
+        "spawn": true
+      },
+      "time": 1000,
+      "wait": 0,
+      "setup": [],
+      "cleanup": [],
+      "variants": [
+        "shaders"
+      ],
+      "measure": 0,
+      "checks": {},
+      "capture": "ui",
+      "groupCapture": "22_dragon_soul",
+      "source": "mod/src/main/java/com/nirncraft/visual/client/VisualAutotest.java:106",
+      "note": "needs a client-side call with no live verb; captured by the visualtest boot (VisualAutotest.defaultSteps) as groupCapture"
+    },
+    {
+      "id": "hud-quest-banner",
+      "title": "Quest started banner (Bleak Falls Barrow)",
+      "tags": [
+        "feature:hud",
+        "feature:ui",
+        "time:dawn"
+      ],
+      "group": "visualtest",
+      "pose": {
+        "spawn": true
+      },
+      "time": 1000,
+      "wait": 0,
+      "setup": [],
+      "cleanup": [],
+      "variants": [
+        "shaders"
+      ],
+      "measure": 0,
+      "checks": {},
+      "capture": "ui",
+      "groupCapture": "23_quest_banner",
+      "source": "mod/src/main/java/com/nirncraft/visual/client/VisualAutotest.java:108",
+      "note": "needs a client-side call with no live verb; captured by the visualtest boot (VisualAutotest.defaultSteps) as groupCapture"
+    },
+    {
+      "id": "hud-sneak-eye",
+      "title": "Sneak eye indicator",
+      "tags": [
+        "feature:hud",
+        "feature:ui",
+        "time:dawn"
+      ],
+      "group": "visualtest",
+      "pose": {
+        "spawn": true
+      },
+      "time": 1000,
+      "wait": 0,
+      "setup": [],
+      "cleanup": [],
+      "variants": [
+        "shaders"
+      ],
+      "measure": 0,
+      "checks": {},
+      "capture": "ui",
+      "groupCapture": "24_sneak_eye",
+      "source": "mod/src/main/java/com/nirncraft/visual/client/VisualAutotest.java:110",
+      "note": "needs a client-side call with no live verb; captured by the visualtest boot (VisualAutotest.defaultSteps) as groupCapture"
+    },
+    {
+      "id": "ui-saving-screen-early",
+      "title": "Saving level message screen (early)",
+      "tags": [
+        "feature:ui",
+        "feature:menu"
+      ],
+      "group": "visualtest",
+      "pose": {
+        "spawn": true
+      },
+      "wait": 0,
+      "setup": [],
+      "cleanup": [],
+      "variants": [
+        "shaders"
+      ],
+      "measure": 0,
+      "checks": {},
+      "capture": "ui",
+      "groupCapture": "30_loading_screen_a",
+      "source": "mod/src/main/java/com/nirncraft/visual/client/VisualAutotest.java:113",
+      "note": "needs a client-side call with no live verb; captured by the visualtest boot (VisualAutotest.defaultSteps) as groupCapture"
+    },
+    {
+      "id": "ui-saving-screen-late",
+      "title": "Saving level message screen (after 200 ticks)",
+      "tags": [
+        "feature:ui",
+        "feature:menu"
+      ],
+      "group": "visualtest",
+      "pose": {
+        "spawn": true
+      },
+      "wait": 0,
+      "setup": [],
+      "cleanup": [],
+      "variants": [
+        "shaders"
+      ],
+      "measure": 0,
+      "checks": {},
+      "capture": "ui",
+      "groupCapture": "31_loading_screen_b",
+      "source": "mod/src/main/java/com/nirncraft/visual/client/VisualAutotest.java:114",
+      "note": "needs a client-side call with no live verb; captured by the visualtest boot (VisualAutotest.defaultSteps) as groupCapture"
+    },
+    {
+      "id": "ui-pause",
+      "title": "Pause menu",
+      "tags": [
+        "feature:ui",
+        "feature:menu"
+      ],
+      "group": "visualtest",
+      "pose": {
+        "spawn": true
+      },
+      "wait": 0,
+      "setup": [],
+      "cleanup": [],
+      "variants": [
+        "shaders"
+      ],
+      "measure": 0,
+      "checks": {},
+      "capture": "ui",
+      "groupCapture": "32_pause",
+      "source": "mod/src/main/java/com/nirncraft/visual/client/VisualAutotest.java:116",
+      "note": "needs a client-side call with no live verb; captured by the visualtest boot (VisualAutotest.defaultSteps) as groupCapture"
+    },
+    {
+      "id": "ui-confirm-dialog",
+      "title": "Quit-to-menu confirm dialog",
+      "tags": [
+        "feature:ui",
+        "feature:menu"
+      ],
+      "group": "visualtest",
+      "pose": {
+        "spawn": true
+      },
+      "wait": 0,
+      "setup": [],
+      "cleanup": [],
+      "variants": [
+        "shaders"
+      ],
+      "measure": 0,
+      "checks": {},
+      "capture": "ui",
+      "groupCapture": "33_confirm",
+      "source": "mod/src/main/java/com/nirncraft/visual/client/VisualAutotest.java:118",
+      "note": "needs a client-side call with no live verb; captured by the visualtest boot (VisualAutotest.defaultSteps) as groupCapture"
+    },
+    {
+      "id": "ui-death-screen",
+      "title": "Death screen",
+      "tags": [
+        "feature:ui",
+        "feature:menu"
+      ],
+      "group": "visualtest",
+      "pose": {
+        "spawn": true
+      },
+      "wait": 0,
+      "setup": [],
+      "cleanup": [],
+      "variants": [
+        "shaders"
+      ],
+      "measure": 0,
+      "checks": {},
+      "capture": "ui",
+      "groupCapture": "34_death",
+      "source": "mod/src/main/java/com/nirncraft/visual/client/VisualAutotest.java:120",
+      "note": "needs a client-side call with no live verb; captured by the visualtest boot (VisualAutotest.defaultSteps) as groupCapture"
+    },
+    {
+      "id": "ui-inventory-inspect",
+      "title": "Inventory item inspect view (X key)",
+      "tags": [
+        "feature:ui",
+        "feature:menu"
+      ],
+      "group": "visualtest",
+      "pose": {
+        "spawn": true
+      },
+      "wait": 0,
+      "setup": [],
+      "cleanup": [],
+      "variants": [
+        "shaders"
+      ],
+      "measure": 0,
+      "checks": {},
+      "capture": "ui",
+      "groupCapture": "35b_inventory_inspect",
+      "source": "mod/src/main/java/com/nirncraft/visual/client/VisualAutotest.java:126",
+      "note": "needs a client-side call with no live verb; captured by the visualtest boot (VisualAutotest.defaultSteps) as groupCapture"
+    }
+  ]
+}

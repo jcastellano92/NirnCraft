@@ -1,0 +1,209 @@
+{
+  "suite": "creatures",
+  "description": "Wildlife, mounts, NPC navigation, townsfolk groups and race/NPC showcases",
+  "defaults": {
+    "tier": "live",
+    "group": "live",
+    "variants": [
+      "shaders"
+    ]
+  },
+  "scenes": [
+    {
+      "id": "whiterun-wildlife-lineup",
+      "title": "NirnCraft wildlife in view: deer, sabre cat, bear, mudcrab, mammoth",
+      "tags": [
+        "region:skyrim/whiterun",
+        "feature:creature",
+        "weather:clear",
+        "time:noon"
+      ],
+      "pose": {
+        "visit": [
+          200,
+          0,
+          2,
+          -90,
+          10
+        ]
+      },
+      "time": 6000,
+      "weather": "clear",
+      "wait": 0,
+      "setup": [
+        "command execute as @p at @p run summon nirncraft:deer ~2 ~ ~",
+        "command execute as @p at @p run summon nirncraft:sabre_cat ~3 ~ ~1",
+        "command execute as @p at @p run summon nirncraft:bear ~-3 ~ ~2",
+        "command execute as @p at @p run summon nirncraft:mudcrab ~1 ~ ~3",
+        "command execute as @p at @p run summon nirncraft:mammoth ~5 ~ ~-2",
+        "wait 40"
+      ],
+      "cleanup": [
+        "command kill @e[type=nirncraft:deer,distance=..20]",
+        "command kill @e[type=nirncraft:sabre_cat,distance=..20]",
+        "command kill @e[type=nirncraft:bear,distance=..20]",
+        "command kill @e[type=nirncraft:mudcrab,distance=..20]",
+        "command kill @e[type=nirncraft:mammoth,distance=..20]"
+      ],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "mod/src/main/java/com/nirncraft/client/autotest/ClientAutotest.java:62; mod/src/main/java/com/nirncraft/client/autotest/ClientAutotest.java:941",
+      "note": "source summons around the player at spawn (seed 1234); fixed to Whiterun plains looking +X; kill selectors run as the server, add \"execute as @p at @p run\" if distance must be player-relative"
+    },
+    {
+      "id": "cave-navigation-npc-arrival",
+      "title": "Native NPC walks five metres along the Embershard walkway toward the observer",
+      "tags": [
+        "region:skyrim/falkreath",
+        "place:embershard_mine",
+        "dungeon:embershard_mine",
+        "feature:npc",
+        "feature:cave",
+        "weather:storm",
+        "time:noon"
+      ],
+      "pose": {
+        "camera": [
+          -275.0,
+          89.0,
+          804.0,
+          -275.0,
+          82.12,
+          756.76
+        ]
+      },
+      "time": 6000,
+      "weather": "storm",
+      "wait": 0,
+      "setup": [
+        "command gamemode creative @p",
+        "command execute as @p at @p run nirncraft-dev scenario spawn cave-navigation nirncraft:npc -275 89 795 active",
+        "wait 100",
+        "command execute as @p at @p run nirncraft-dev scenario move cave-navigation -275 88 800",
+        "wait 200",
+        "command execute as @p at @p run nirncraft-dev scenario move cave-navigation -275 88 800",
+        "wait 200"
+      ],
+      "cleanup": [
+        "command execute as @p at @p run nirncraft-dev scenario cleanup cave-navigation",
+        "command gamemode spectator @p"
+      ],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "tools/qa/scenarios/cave-navigation.json:1",
+      "note": "scenario waits for onGround then goalReached (observe probes, re-issuing move while pending); approximated with fixed waits"
+    },
+    {
+      "id": "whiterun-market-npc-group",
+      "title": "Townsfolk group in the Whiterun Plains District market street",
+      "tags": [
+        "region:skyrim/whiterun",
+        "place:whiterun",
+        "town:whiterun",
+        "feature:npc",
+        "feature:town",
+        "weather:clear",
+        "time:noon"
+      ],
+      "pose": {
+        "visit": [
+          62,
+          10,
+          2,
+          180,
+          5
+        ]
+      },
+      "time": 8000,
+      "weather": "clear",
+      "wait": 200,
+      "setup": [
+        "command execute as @p at @p run summon nirncraft:npc ^ ^ ^5",
+        "command execute as @p at @p run summon nirncraft:npc ^1.5 ^ ^6",
+        "command execute as @p at @p run summon nirncraft:npc ^-1.5 ^ ^6",
+        "command execute as @p at @p run summon nirncraft:npc ^0.5 ^ ^8",
+        "wait 60"
+      ],
+      "cleanup": [
+        "command kill @e[type=nirncraft:npc,tag=!persistent,distance=..12]"
+      ],
+      "measure": 0,
+      "checks": {
+        "maxBlackTiles": 0
+      },
+      "capture": "world",
+      "source": "new (owner gap: NPC group in a town street)",
+      "note": "market street position guessed from the Cities.whiterun plan; native townsfolk may already populate it, summons guarantee a group (the kill selector is a guess; check it spares the town population)"
+    },
+    {
+      "id": "npc-showcase-lineup",
+      "title": "Every race in several outfits lined up (NPC showcase)",
+      "tags": [
+        "feature:npc"
+      ],
+      "group": "npcshowcase",
+      "pose": {
+        "spawn": true
+      },
+      "wait": 0,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "groupCapture": "build/npc-showcase/*",
+      "source": "mod/src/main/java/com/nirncraft/society/client/NpcShowcase.java:30",
+      "note": "the showcase boot opens saves/npcws (or a quickPlay world), takes its own screenshots into build/npc-showcase/ and quits"
+    },
+    {
+      "id": "race-showcase-lineup",
+      "title": "Character creator on several races, third-person race looks and race line-ups",
+      "tags": [
+        "feature:npc",
+        "feature:ui"
+      ],
+      "group": "raceshowcase",
+      "pose": {
+        "spawn": true
+      },
+      "wait": 0,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "groupCapture": "build/race-showcase/*",
+      "source": "mod/src/main/java/com/nirncraft/client/autotest/RaceShowcase.java:35",
+      "note": "boot creates a flat creative world at Steam Deck size and quits after its own screenshots"
+    },
+    {
+      "id": "mounts-lineup",
+      "title": "Mount line-ups (camel, guar, senche, giant wolf, indrik, mammoth, tiger...)",
+      "tags": [
+        "region:skyrim/whiterun",
+        "feature:creature"
+      ],
+      "group": "mounts",
+      "pose": {
+        "visit": [
+          -700,
+          -140,
+          2,
+          0,
+          5
+        ]
+      },
+      "wait": 0,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "groupCapture": "MountsAutotest captures",
+      "source": "mod/src/main/java/com/nirncraft/client/autotest/MountsAutotest.java:27",
+      "note": "mounts boot runs MountsAutotest at lineupX/lineupZ (-700,-140) and captures itself"
+    }
+  ]
+}

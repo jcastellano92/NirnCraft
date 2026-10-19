@@ -1,0 +1,764 @@
+{
+  "suite": "fx",
+  "description": "Fire, smoke, lightning, spells, staves and magic beam FX",
+  "defaults": {
+    "tier": "live",
+    "group": "live",
+    "variants": [
+      "shaders"
+    ]
+  },
+  "scenes": [
+    {
+      "id": "helgen-near-smoke",
+      "title": "Near Helgen fire plume, roof occlusion and smoke depth",
+      "tags": [
+        "region:skyrim/falkreath",
+        "town:helgen",
+        "place:helgen",
+        "feature:fire",
+        "feature:smoke",
+        "suite:smoke",
+        "feature:fx",
+        "feature:perf",
+        "weather:clear",
+        "time:noon"
+      ],
+      "pose": {
+        "camera": [
+          -20.0,
+          130.0,
+          1158.0,
+          -14.46,
+          161.83,
+          1121.11
+        ]
+      },
+      "time": 6000,
+      "weather": "clear",
+      "wait": 0,
+      "setup": [],
+      "cleanup": [],
+      "variants": [
+        "shaders"
+      ],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "tools/qa/visual-cameras.json:73"
+    },
+    {
+      "id": "whiterun-rift-storm-lightning-dusk",
+      "title": "Lightning in the distant Rift storm at dusk",
+      "tags": [
+        "region:skyrim/whiterun",
+        "feature:lightning",
+        "feature:storm",
+        "weather:clear",
+        "time:dusk"
+      ],
+      "pose": {
+        "visit": [
+          0,
+          0,
+          60,
+          -60,
+          -4
+        ]
+      },
+      "time": 13800,
+      "weather": "clear",
+      "front": [
+        2435,
+        1418,
+        700,
+        "storm",
+        0,
+        0
+      ],
+      "wait": 0,
+      "setup": [
+        "front -795 1250 700 rain 0 0",
+        "wait 120",
+        "flash",
+        "wait 30"
+      ],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {
+        "lumaMin": 2
+      },
+      "capture": "world",
+      "source": "mod/src/main/java/com/nirncraft/visual/client/CloudTour.java:87",
+      "note": "source set the whole region's weather with RegionalWeather.set; approximated here by a stationary front at the region centre; source fires CloudRenderer.testLightning() 4 times and shoots each (c07_storm_lightning_0..3)"
+    },
+    {
+      "id": "rift-storm-lightning-cg",
+      "title": "Distant Rift storm, cloud-to-ground lightning burst at dusk",
+      "tags": [
+        "region:skyrim/whiterun",
+        "feature:lightning",
+        "feature:storm",
+        "weather:clear",
+        "time:dusk"
+      ],
+      "pose": {
+        "visit": [
+          0,
+          0,
+          60,
+          -60,
+          -4
+        ]
+      },
+      "time": 13800,
+      "weather": "clear",
+      "front": [
+        2435,
+        1418,
+        700,
+        "storm",
+        0,
+        0
+      ],
+      "wait": 0,
+      "setup": [
+        "wait 120",
+        "flash cg"
+      ],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {
+        "lumaMin": 2
+      },
+      "capture": "world",
+      "source": "mod/src/main/java/com/nirncraft/client/autotest/ClientAutotest.java:386 (flash <ic|c2c|cg>)",
+      "note": "\"flash <mode>\" also takes its own 72-frame burst capture"
+    },
+    {
+      "id": "rift-storm-lightning-ic",
+      "title": "Distant Rift storm, intra-cloud lightning burst at dusk",
+      "tags": [
+        "region:skyrim/whiterun",
+        "feature:lightning",
+        "feature:storm",
+        "weather:clear",
+        "time:dusk"
+      ],
+      "pose": {
+        "visit": [
+          0,
+          0,
+          60,
+          -60,
+          -4
+        ]
+      },
+      "time": 13800,
+      "weather": "clear",
+      "front": [
+        2435,
+        1418,
+        700,
+        "storm",
+        0,
+        0
+      ],
+      "wait": 0,
+      "setup": [
+        "wait 120",
+        "flash ic"
+      ],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {
+        "lumaMin": 2
+      },
+      "capture": "world",
+      "source": "mod/src/main/java/com/nirncraft/client/autotest/ClientAutotest.java:386 (flash <ic|c2c|cg>)",
+      "note": "\"flash <mode>\" also takes its own 72-frame burst capture"
+    },
+    {
+      "id": "rift-storm-lightning-c2c",
+      "title": "Distant Rift storm, cloud-to-cloud lightning burst at dusk",
+      "tags": [
+        "region:skyrim/whiterun",
+        "feature:lightning",
+        "feature:storm",
+        "weather:clear",
+        "time:dusk"
+      ],
+      "pose": {
+        "visit": [
+          0,
+          0,
+          60,
+          -60,
+          -4
+        ]
+      },
+      "time": 13800,
+      "weather": "clear",
+      "front": [
+        2435,
+        1418,
+        700,
+        "storm",
+        0,
+        0
+      ],
+      "wait": 0,
+      "setup": [
+        "wait 120",
+        "flash c2c"
+      ],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {
+        "lumaMin": 2
+      },
+      "capture": "world",
+      "source": "mod/src/main/java/com/nirncraft/client/autotest/ClientAutotest.java:386 (flash <ic|c2c|cg>)",
+      "note": "\"flash <mode>\" also takes its own 72-frame burst capture"
+    },
+    {
+      "id": "cave-spells-flames",
+      "title": "Embershard spell lane: flames beam hitting a target",
+      "tags": [
+        "region:skyrim/falkreath",
+        "place:embershard_mine",
+        "dungeon:embershard_mine",
+        "feature:magic",
+        "feature:fx",
+        "feature:cave",
+        "weather:storm",
+        "time:noon"
+      ],
+      "pose": {
+        "camera": [
+          -275.0,
+          89.0,
+          804.0,
+          -275.0,
+          82.12,
+          756.76
+        ]
+      },
+      "time": 6000,
+      "weather": "storm",
+      "wait": 0,
+      "setup": [
+        "command nirncraft-dev scenario difficulty normal",
+        "command gamemode creative @p",
+        "command execute as @p at @p run nirncraft-dev scenario equip flames",
+        "command execute as @p at @p run nirncraft-dev scenario spawn cave-spells-flames minecraft:zombie -275 88 795",
+        "cast start",
+        "wait 40"
+      ],
+      "cleanup": [
+        "cast stop",
+        "command execute as @p at @p run nirncraft-dev scenario cleanup cave-spells-flames",
+        "command gamemode spectator @p",
+        "command nirncraft-dev scenario difficulty peaceful"
+      ],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "tools/qa/scenarios/cave-spells.json:1",
+      "note": "scenario waitFor assertions (healthLost>=0.1, damageFromObserver) are not expressible; wait 40 approximates; camera mine-spell-lane"
+    },
+    {
+      "id": "cave-spells-frostbite",
+      "title": "Embershard spell lane: frostbite beam hitting a target",
+      "tags": [
+        "region:skyrim/falkreath",
+        "place:embershard_mine",
+        "dungeon:embershard_mine",
+        "feature:magic",
+        "feature:fx",
+        "feature:cave",
+        "weather:storm",
+        "time:noon"
+      ],
+      "pose": {
+        "camera": [
+          -275.0,
+          89.0,
+          804.0,
+          -275.0,
+          82.12,
+          756.76
+        ]
+      },
+      "time": 6000,
+      "weather": "storm",
+      "wait": 0,
+      "setup": [
+        "command nirncraft-dev scenario difficulty normal",
+        "command gamemode creative @p",
+        "command execute as @p at @p run nirncraft-dev scenario equip frostbite",
+        "command execute as @p at @p run nirncraft-dev scenario spawn cave-spells-frostbite minecraft:zombie -275 88 795",
+        "cast start",
+        "wait 40"
+      ],
+      "cleanup": [
+        "cast stop",
+        "command execute as @p at @p run nirncraft-dev scenario cleanup cave-spells-frostbite",
+        "command gamemode spectator @p",
+        "command nirncraft-dev scenario difficulty peaceful"
+      ],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "tools/qa/scenarios/cave-spells.json:1",
+      "note": "scenario waitFor assertions (healthLost>=0.1, damageFromObserver) are not expressible; wait 40 approximates; camera mine-spell-lane"
+    },
+    {
+      "id": "cave-spells-sparks",
+      "title": "Embershard spell lane: sparks beam hitting a target",
+      "tags": [
+        "region:skyrim/falkreath",
+        "place:embershard_mine",
+        "dungeon:embershard_mine",
+        "feature:magic",
+        "feature:fx",
+        "feature:cave",
+        "weather:storm",
+        "time:noon"
+      ],
+      "pose": {
+        "camera": [
+          -275.0,
+          89.0,
+          804.0,
+          -275.0,
+          82.12,
+          756.76
+        ]
+      },
+      "time": 6000,
+      "weather": "storm",
+      "wait": 0,
+      "setup": [
+        "command nirncraft-dev scenario difficulty normal",
+        "command gamemode creative @p",
+        "command execute as @p at @p run nirncraft-dev scenario equip sparks",
+        "command execute as @p at @p run nirncraft-dev scenario spawn cave-spells-sparks minecraft:zombie -275 88 795",
+        "cast start",
+        "wait 40"
+      ],
+      "cleanup": [
+        "cast stop",
+        "command execute as @p at @p run nirncraft-dev scenario cleanup cave-spells-sparks",
+        "command gamemode spectator @p",
+        "command nirncraft-dev scenario difficulty peaceful"
+      ],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "tools/qa/scenarios/cave-spells.json:1",
+      "note": "scenario waitFor assertions (healthLost>=0.1, damageFromObserver) are not expressible; wait 40 approximates; camera mine-spell-lane"
+    },
+    {
+      "id": "cave-staves-flames",
+      "title": "Embershard spell lane: staff of flames beam hitting a target",
+      "tags": [
+        "region:skyrim/falkreath",
+        "place:embershard_mine",
+        "dungeon:embershard_mine",
+        "feature:magic",
+        "feature:fx",
+        "feature:cave",
+        "weather:storm",
+        "time:noon"
+      ],
+      "pose": {
+        "camera": [
+          -275.0,
+          89.0,
+          804.0,
+          -275.0,
+          82.12,
+          756.76
+        ]
+      },
+      "time": 6000,
+      "weather": "storm",
+      "wait": 0,
+      "setup": [
+        "command nirncraft-dev scenario difficulty normal",
+        "command gamemode creative @p",
+        "command item replace entity @p weapon.mainhand with nirncraft:staff_of_flames",
+        "command execute as @p at @p run nirncraft-dev scenario spawn cave-staves-flames minecraft:zombie -275 88 798",
+        "use down",
+        "wait 40"
+      ],
+      "cleanup": [
+        "use up",
+        "command execute as @p at @p run nirncraft-dev scenario cleanup cave-staves-flames",
+        "command gamemode spectator @p",
+        "command nirncraft-dev scenario difficulty peaceful",
+        "command item replace entity @p weapon.mainhand with minecraft:air"
+      ],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "tools/qa/scenarios/cave-staves.json:1",
+      "note": "scenario waitFor assertions (healthLost>=0.1, damageFromObserver) are not expressible; wait 40 approximates; camera mine-spell-lane"
+    },
+    {
+      "id": "cave-staves-frostbite",
+      "title": "Embershard spell lane: staff of frostbite beam hitting a target",
+      "tags": [
+        "region:skyrim/falkreath",
+        "place:embershard_mine",
+        "dungeon:embershard_mine",
+        "feature:magic",
+        "feature:fx",
+        "feature:cave",
+        "weather:storm",
+        "time:noon"
+      ],
+      "pose": {
+        "camera": [
+          -275.0,
+          89.0,
+          804.0,
+          -275.0,
+          82.12,
+          756.76
+        ]
+      },
+      "time": 6000,
+      "weather": "storm",
+      "wait": 0,
+      "setup": [
+        "command nirncraft-dev scenario difficulty normal",
+        "command gamemode creative @p",
+        "command item replace entity @p weapon.mainhand with nirncraft:staff_of_frostbite",
+        "command execute as @p at @p run nirncraft-dev scenario spawn cave-staves-frostbite minecraft:zombie -275 88 798",
+        "use down",
+        "wait 40"
+      ],
+      "cleanup": [
+        "use up",
+        "command execute as @p at @p run nirncraft-dev scenario cleanup cave-staves-frostbite",
+        "command gamemode spectator @p",
+        "command nirncraft-dev scenario difficulty peaceful",
+        "command item replace entity @p weapon.mainhand with minecraft:air"
+      ],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "tools/qa/scenarios/cave-staves.json:1",
+      "note": "scenario waitFor assertions (healthLost>=0.1, damageFromObserver) are not expressible; wait 40 approximates; camera mine-spell-lane"
+    },
+    {
+      "id": "cave-staves-sparks",
+      "title": "Embershard spell lane: staff of sparks beam hitting a target",
+      "tags": [
+        "region:skyrim/falkreath",
+        "place:embershard_mine",
+        "dungeon:embershard_mine",
+        "feature:magic",
+        "feature:fx",
+        "feature:cave",
+        "weather:storm",
+        "time:noon"
+      ],
+      "pose": {
+        "camera": [
+          -275.0,
+          89.0,
+          804.0,
+          -275.0,
+          82.12,
+          756.76
+        ]
+      },
+      "time": 6000,
+      "weather": "storm",
+      "wait": 0,
+      "setup": [
+        "command nirncraft-dev scenario difficulty normal",
+        "command gamemode creative @p",
+        "command item replace entity @p weapon.mainhand with nirncraft:staff_of_sparks",
+        "command execute as @p at @p run nirncraft-dev scenario spawn cave-staves-sparks minecraft:zombie -275 88 798",
+        "use down",
+        "wait 40"
+      ],
+      "cleanup": [
+        "use up",
+        "command execute as @p at @p run nirncraft-dev scenario cleanup cave-staves-sparks",
+        "command gamemode spectator @p",
+        "command nirncraft-dev scenario difficulty peaceful",
+        "command item replace entity @p weapon.mainhand with minecraft:air"
+      ],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "tools/qa/scenarios/cave-staves.json:1",
+      "note": "scenario waitFor assertions (healthLost>=0.1, damageFromObserver) are not expressible; wait 40 approximates; camera mine-spell-lane"
+    },
+    {
+      "id": "whiterun-magic-fx-fire-dusk",
+      "title": "Magic fire beam FX outdoors near Whiterun at dusk",
+      "tags": [
+        "region:skyrim/whiterun",
+        "feature:magic",
+        "feature:fx",
+        "weather:clear",
+        "time:dusk"
+      ],
+      "pose": {
+        "visit": [
+          0,
+          0,
+          2,
+          180,
+          0
+        ]
+      },
+      "time": 12800,
+      "weather": "clear",
+      "wait": 0,
+      "setup": [
+        "fx fire"
+      ],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "new (owner gap: magic fx); live verb \"fx <element>\" in mod/src/main/java/com/nirncraft/client/autotest/ClientAutotest.java:404",
+      "note": "\"fx\" takes its own 36-frame burst"
+    },
+    {
+      "id": "embershard-magic-fx-fire",
+      "title": "Magic fire beam FX in the dark Embershard spell lane",
+      "tags": [
+        "region:skyrim/falkreath",
+        "place:embershard_mine",
+        "dungeon:embershard_mine",
+        "feature:magic",
+        "feature:fx",
+        "feature:cave",
+        "time:noon"
+      ],
+      "pose": {
+        "camera": [
+          -275.0,
+          89.0,
+          804.0,
+          -275.0,
+          82.12,
+          756.76
+        ]
+      },
+      "time": 6000,
+      "wait": 0,
+      "setup": [
+        "fx fire"
+      ],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "new (owner gap: magic fx in fog); mod/src/main/java/com/nirncraft/client/autotest/ClientAutotest.java:404"
+    },
+    {
+      "id": "whiterun-magic-fx-frost-dusk",
+      "title": "Magic frost beam FX outdoors near Whiterun at dusk",
+      "tags": [
+        "region:skyrim/whiterun",
+        "feature:magic",
+        "feature:fx",
+        "weather:clear",
+        "time:dusk"
+      ],
+      "pose": {
+        "visit": [
+          0,
+          0,
+          2,
+          180,
+          0
+        ]
+      },
+      "time": 12800,
+      "weather": "clear",
+      "wait": 0,
+      "setup": [
+        "fx frost"
+      ],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "new (owner gap: magic fx); live verb \"fx <element>\" in mod/src/main/java/com/nirncraft/client/autotest/ClientAutotest.java:404",
+      "note": "\"fx\" takes its own 36-frame burst"
+    },
+    {
+      "id": "embershard-magic-fx-frost",
+      "title": "Magic frost beam FX in the dark Embershard spell lane",
+      "tags": [
+        "region:skyrim/falkreath",
+        "place:embershard_mine",
+        "dungeon:embershard_mine",
+        "feature:magic",
+        "feature:fx",
+        "feature:cave",
+        "time:noon"
+      ],
+      "pose": {
+        "camera": [
+          -275.0,
+          89.0,
+          804.0,
+          -275.0,
+          82.12,
+          756.76
+        ]
+      },
+      "time": 6000,
+      "wait": 0,
+      "setup": [
+        "fx frost"
+      ],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "new (owner gap: magic fx in fog); mod/src/main/java/com/nirncraft/client/autotest/ClientAutotest.java:404"
+    },
+    {
+      "id": "whiterun-magic-fx-shock-dusk",
+      "title": "Magic shock beam FX outdoors near Whiterun at dusk",
+      "tags": [
+        "region:skyrim/whiterun",
+        "feature:magic",
+        "feature:fx",
+        "weather:clear",
+        "time:dusk"
+      ],
+      "pose": {
+        "visit": [
+          0,
+          0,
+          2,
+          180,
+          0
+        ]
+      },
+      "time": 12800,
+      "weather": "clear",
+      "wait": 0,
+      "setup": [
+        "fx shock"
+      ],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "new (owner gap: magic fx); live verb \"fx <element>\" in mod/src/main/java/com/nirncraft/client/autotest/ClientAutotest.java:404",
+      "note": "\"fx\" takes its own 36-frame burst"
+    },
+    {
+      "id": "embershard-magic-fx-shock",
+      "title": "Magic shock beam FX in the dark Embershard spell lane",
+      "tags": [
+        "region:skyrim/falkreath",
+        "place:embershard_mine",
+        "dungeon:embershard_mine",
+        "feature:magic",
+        "feature:fx",
+        "feature:cave",
+        "time:noon"
+      ],
+      "pose": {
+        "camera": [
+          -275.0,
+          89.0,
+          804.0,
+          -275.0,
+          82.12,
+          756.76
+        ]
+      },
+      "time": 6000,
+      "wait": 0,
+      "setup": [
+        "fx shock"
+      ],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "new (owner gap: magic fx in fog); mod/src/main/java/com/nirncraft/client/autotest/ClientAutotest.java:404"
+    },
+    {
+      "id": "helgen-fire-close-street",
+      "title": "Helgen burning street close-up: fire and smoke columns",
+      "tags": [
+        "region:skyrim/falkreath",
+        "place:helgen",
+        "town:helgen",
+        "feature:fire",
+        "feature:smoke",
+        "weather:clear",
+        "time:noon"
+      ],
+      "pose": {
+        "visit": [
+          -24,
+          1150,
+          2,
+          180,
+          -15
+        ]
+      },
+      "time": 6000,
+      "weather": "clear",
+      "wait": 200,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "new (owner gap: fire/smoke at Helgen close)",
+      "note": "street position guessed; Helgen fire plumes are narrative state"
+    },
+    {
+      "id": "helgen-fire-close-night",
+      "title": "Helgen fires and smoke at night",
+      "tags": [
+        "region:skyrim/falkreath",
+        "place:helgen",
+        "town:helgen",
+        "feature:fire",
+        "feature:smoke",
+        "weather:clear",
+        "time:night"
+      ],
+      "pose": {
+        "visit": [
+          -24,
+          1150,
+          2,
+          180,
+          -15
+        ]
+      },
+      "time": 18000,
+      "weather": "clear",
+      "wait": 200,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {
+        "lumaMin": 2
+      },
+      "capture": "world",
+      "source": "new (owner gap: fire/smoke at Helgen close, night lighting)"
+    }
+  ]
+}

@@ -1,0 +1,438 @@
+{
+  "suite": "lab",
+  "description": "Offline Infinite ATLAS (atlas_render) and shader-lab (pack_lab) scenes",
+  "defaults": {
+    "tier": "lab",
+    "group": "lab",
+    "variants": [
+      "shaders"
+    ]
+  },
+  "scenes": [
+    {
+      "id": "lab-pack-land",
+      "title": "Lab: plain land at noon",
+      "tags": [
+        "feature:farfield"
+      ],
+      "tier": "lab",
+      "lab": {
+        "tool": "pack_lab",
+        "time": 0.25
+      },
+      "wait": 0,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "native/tools/pack_lab_quality.py:45",
+      "note": "pack_lab_quality runs it with w=640 h=360 gpu=0 gputime=5 q=1 plus a knob sweep; default set: land,water,golden,lamps,volcano"
+    },
+    {
+      "id": "lab-pack-water",
+      "title": "Lab: water at x=5000 near the surface",
+      "tags": [
+        "feature:water"
+      ],
+      "tier": "lab",
+      "lab": {
+        "tool": "pack_lab",
+        "x": 5000,
+        "z": 0,
+        "above": 6,
+        "pitch": -12,
+        "yaw": 90,
+        "time": 0.42
+      },
+      "wait": 0,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "native/tools/pack_lab_quality.py:46",
+      "note": "pack_lab_quality runs it with w=640 h=360 gpu=0 gputime=5 q=1 plus a knob sweep; default set: land,water,golden,lamps,volcano"
+    },
+    {
+      "id": "lab-pack-golden",
+      "title": "Lab: golden-hour light with haze",
+      "tags": [
+        "feature:sky",
+        "feature:fog"
+      ],
+      "tier": "lab",
+      "lab": {
+        "tool": "pack_lab",
+        "time": 0.46,
+        "yaw": 270,
+        "fog": 0.15
+      },
+      "wait": 0,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "native/tools/pack_lab_quality.py:47",
+      "note": "pack_lab_quality runs it with w=640 h=360 gpu=0 gputime=5 q=1 plus a knob sweep; default set: land,water,golden,lamps,volcano"
+    },
+    {
+      "id": "lab-pack-lamps",
+      "title": "Lab: lamps at midnight in fog",
+      "tags": [
+        "feature:fire",
+        "feature:fog"
+      ],
+      "tier": "lab",
+      "lab": {
+        "tool": "pack_lab",
+        "time": 0.75,
+        "lamps": 1,
+        "fog": 0.3,
+        "above": 3,
+        "pitch": -6
+      },
+      "wait": 0,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "native/tools/pack_lab_quality.py:48",
+      "note": "pack_lab_quality runs it with w=640 h=360 gpu=0 gputime=5 q=1 plus a knob sweep; default set: land,water,golden,lamps,volcano"
+    },
+    {
+      "id": "lab-pack-volcano",
+      "title": "Lab: volcano plume",
+      "tags": [
+        "feature:ash",
+        "feature:smoke"
+      ],
+      "tier": "lab",
+      "lab": {
+        "tool": "pack_lab",
+        "time": 0.3,
+        "volcano": 1,
+        "pitch": 6
+      },
+      "wait": 0,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "native/tools/pack_lab_quality.py:49",
+      "note": "pack_lab_quality runs it with w=640 h=360 gpu=0 gputime=5 q=1 plus a knob sweep; default set: land,water,golden,lamps,volcano"
+    },
+    {
+      "id": "lab-pack-cave",
+      "title": "Lab: light shafts through a synthetic cave mouth",
+      "tags": [
+        "feature:cave"
+      ],
+      "tier": "lab",
+      "lab": {
+        "tool": "pack_lab",
+        "scene": "cave",
+        "time": 0.08,
+        "yaw": 90
+      },
+      "wait": 0,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "native/tools/pack_lab_quality.py:52",
+      "note": "pack_lab_quality runs it with w=640 h=360 gpu=0 gputime=5 q=1 plus a knob sweep; default set: land,water,golden,lamps,volcano (not in the default set)"
+    },
+    {
+      "id": "lab-pack-window",
+      "title": "Lab: light shafts through a synthetic window",
+      "tags": [
+        "feature:interior"
+      ],
+      "tier": "lab",
+      "lab": {
+        "tool": "pack_lab",
+        "scene": "window",
+        "time": 0.1,
+        "yaw": 38,
+        "look": 55,
+        "pitch": -8
+      },
+      "wait": 0,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "native/tools/pack_lab_quality.py:53",
+      "note": "pack_lab_quality runs it with w=640 h=360 gpu=0 gputime=5 q=1 plus a knob sweep; default set: land,water,golden,lamps,volcano (not in the default set)"
+    },
+    {
+      "id": "lab-pack-helgen",
+      "title": "Lab: burning Helgen smoke columns (8 fires)",
+      "tags": [
+        "feature:fire",
+        "feature:smoke",
+        "town:helgen",
+        "region:skyrim/falkreath",
+        "place:helgen"
+      ],
+      "tier": "lab",
+      "lab": {
+        "tool": "pack_lab",
+        "time": 0.3,
+        "x": -24,
+        "z": 1143,
+        "above": 6,
+        "pitch": 8,
+        "fires": 8
+      },
+      "wait": 0,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "native/tools/pack_lab_quality.py:54",
+      "note": "pack_lab_quality runs it with w=640 h=360 gpu=0 gputime=5 q=1 plus a knob sweep; default set: land,water,golden,lamps,volcano (not in the default set)"
+    },
+    {
+      "id": "lab-pack-night",
+      "title": "Lab: moonlit night with the mod sky",
+      "tags": [
+        "feature:night-sky",
+        "feature:moons"
+      ],
+      "tier": "lab",
+      "lab": {
+        "tool": "pack_lab",
+        "time": 0.75,
+        "moons": 1
+      },
+      "wait": 0,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "native/tools/pack_lab_quality.py:55",
+      "note": "pack_lab_quality runs it with w=640 h=360 gpu=0 gputime=5 q=1 plus a knob sweep; default set: land,water,golden,lamps,volcano (not in the default set)"
+    },
+    {
+      "id": "lab-atlas-whiterun-fair",
+      "title": "ATLAS offline far field over (0,0), fair weather (header example)",
+      "tags": [
+        "region:skyrim/whiterun",
+        "feature:farfield",
+        "feature:clouds"
+      ],
+      "tier": "lab",
+      "lab": {
+        "tool": "atlas_render",
+        "x": 0,
+        "z": 0,
+        "above": 40,
+        "yaw": 0,
+        "pitch": -4,
+        "fov": 70,
+        "w": 1280,
+        "h": 720,
+        "backend": "cpu",
+        "sun": "35,120",
+        "flags": "shadows,atmos,clouds",
+        "weather": "fair"
+      },
+      "wait": 0,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "native/tools/atlas_render.cpp:2",
+      "note": "atlas_render yaw: 0 = north (-Z), 90 = east (+X), unlike Minecraft"
+    },
+    {
+      "id": "lab-atlas-whiterun-storm",
+      "title": "ATLAS offline far field over (0,0), storm weather",
+      "tags": [
+        "region:skyrim/whiterun",
+        "feature:farfield",
+        "feature:clouds",
+        "feature:storm"
+      ],
+      "tier": "lab",
+      "lab": {
+        "tool": "atlas_render",
+        "x": 0,
+        "z": 0,
+        "above": 40,
+        "yaw": 0,
+        "pitch": -4,
+        "weather": "storm"
+      },
+      "wait": 0,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "docs/ATLAS.md:63",
+      "note": "storm placed by default at stormx=x+9000 stormz=z-6000"
+    },
+    {
+      "id": "lab-atlas-whiterun-overcast",
+      "title": "ATLAS offline far field over (0,0), overcast weather",
+      "tags": [
+        "region:skyrim/whiterun",
+        "feature:farfield",
+        "feature:clouds"
+      ],
+      "tier": "lab",
+      "lab": {
+        "tool": "atlas_render",
+        "x": 0,
+        "z": 0,
+        "above": 40,
+        "yaw": 0,
+        "pitch": -4,
+        "weather": "overcast"
+      },
+      "wait": 0,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "docs/ATLAS.md:63"
+    },
+    {
+      "id": "lab-atlas-whiterun-clear",
+      "title": "ATLAS offline far field over (0,0), clear weather",
+      "tags": [
+        "region:skyrim/whiterun",
+        "feature:farfield",
+        "feature:clouds"
+      ],
+      "tier": "lab",
+      "lab": {
+        "tool": "atlas_render",
+        "x": 0,
+        "z": 0,
+        "above": 40,
+        "yaw": 0,
+        "pitch": -4,
+        "weather": "clear"
+      },
+      "wait": 0,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "native/tools/atlas_render.cpp:4"
+    },
+    {
+      "id": "lab-atlas-lod-debug",
+      "title": "ATLAS offline LOD debug colouring",
+      "tags": [
+        "feature:farfield"
+      ],
+      "tier": "lab",
+      "lab": {
+        "tool": "atlas_render",
+        "x": 0,
+        "z": 0,
+        "above": 40,
+        "yaw": 0,
+        "pitch": -4,
+        "flags": "shadows,atmos,clouds,sky,actors,lod"
+      },
+      "wait": 0,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "docs/ATLAS.md:63"
+    },
+    {
+      "id": "lab-atlas-weather-debug",
+      "title": "ATLAS offline weather-field debug view",
+      "tags": [
+        "feature:farfield",
+        "feature:storm"
+      ],
+      "tier": "lab",
+      "lab": {
+        "tool": "atlas_render",
+        "x": 0,
+        "z": 0,
+        "above": 40,
+        "yaw": 0,
+        "pitch": -4,
+        "weather": "storm",
+        "flags": "shadows,atmos,clouds,sky,actors,dbgweather"
+      },
+      "wait": 0,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "docs/ATLAS.md:63"
+    },
+    {
+      "id": "lab-atlas-actors-dragon-near",
+      "title": "ATLAS offline far actors demo with a near dragon",
+      "tags": [
+        "feature:farfield",
+        "feature:creature"
+      ],
+      "tier": "lab",
+      "lab": {
+        "tool": "atlas_render",
+        "actors": "demo",
+        "dragon": "near",
+        "time": 0
+      },
+      "wait": 0,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "docs/ATLAS.md:233",
+      "note": "docs give time=<s> unspecified; 0 used"
+    },
+    {
+      "id": "lab-atlas-whiterun-vulkan",
+      "title": "ATLAS offline far field over (0,0) on the Vulkan backend (CPU/Vulkan parity)",
+      "tags": [
+        "feature:farfield"
+      ],
+      "tier": "lab",
+      "lab": {
+        "tool": "atlas_render",
+        "x": 0,
+        "z": 0,
+        "above": 40,
+        "yaw": 0,
+        "pitch": -4,
+        "backend": "vulkan",
+        "weather": "fair"
+      },
+      "wait": 0,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "native/tools/atlas_render.cpp:3",
+      "note": "uses the GPU (Vulkan); run only when the GPU is free"
+    }
+  ]
+}

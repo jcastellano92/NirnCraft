@@ -1,0 +1,333 @@
+{
+  "suite": "sky",
+  "description": "Night sky, moons, aurora, sunsets/sunrises and ridgeline halos against the sky",
+  "defaults": {
+    "tier": "live",
+    "group": "live",
+    "variants": [
+      "shaders"
+    ]
+  },
+  "scenes": [
+    {
+      "id": "whiterun-night-sky-north",
+      "title": "Night sky over Whiterun looking north",
+      "tags": [
+        "region:skyrim/whiterun",
+        "feature:night-sky",
+        "feature:moons",
+        "feature:sky",
+        "suite:smoke",
+        "weather:clear",
+        "time:night"
+      ],
+      "pose": {
+        "visit": [
+          0,
+          0,
+          40,
+          180,
+          -35
+        ]
+      },
+      "time": 18000,
+      "weather": "clear",
+      "wait": 200,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {
+        "lumaMin": 2
+      },
+      "capture": "world",
+      "source": "mod/src/main/java/com/nirncraft/visual/client/VisualAutotest.java:84",
+      "note": "source is spawn-relative (40 blocks above spawn); fixed here to (0,0) near Whiterun"
+    },
+    {
+      "id": "whiterun-night-sky-up",
+      "title": "Night sky over Whiterun looking overhead",
+      "tags": [
+        "region:skyrim/whiterun",
+        "feature:night-sky",
+        "feature:moons",
+        "feature:sky",
+        "weather:clear",
+        "time:night"
+      ],
+      "pose": {
+        "visit": [
+          0,
+          0,
+          40,
+          90,
+          -70
+        ]
+      },
+      "time": 18000,
+      "weather": "clear",
+      "wait": 40,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {
+        "lumaMin": 2
+      },
+      "capture": "world",
+      "source": "mod/src/main/java/com/nirncraft/visual/client/VisualAutotest.java:86",
+      "note": "source is spawn-relative (40 blocks above spawn); fixed here to (0,0) near Whiterun"
+    },
+    {
+      "id": "whiterun-night-sky-east",
+      "title": "Night sky over Whiterun looking east",
+      "tags": [
+        "region:skyrim/whiterun",
+        "feature:night-sky",
+        "feature:moons",
+        "feature:sky",
+        "weather:clear",
+        "time:night"
+      ],
+      "pose": {
+        "visit": [
+          0,
+          0,
+          40,
+          -90,
+          -20
+        ]
+      },
+      "time": 18000,
+      "weather": "clear",
+      "wait": 40,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {
+        "lumaMin": 2
+      },
+      "capture": "world",
+      "source": "mod/src/main/java/com/nirncraft/visual/client/VisualAutotest.java:88",
+      "note": "source is spawn-relative (40 blocks above spawn); fixed here to (0,0) near Whiterun"
+    },
+    {
+      "id": "whiterun-sunset-cumulus",
+      "title": "Sunset through cumulus, looking west from Whiterun",
+      "tags": [
+        "region:skyrim/whiterun",
+        "feature:clouds",
+        "feature:sky",
+        "weather:cloudy",
+        "time:dusk"
+      ],
+      "pose": {
+        "visit": [
+          0,
+          0,
+          60,
+          90,
+          -4
+        ]
+      },
+      "time": 12300,
+      "weather": "cloudy",
+      "wait": 160,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "mod/src/main/java/com/nirncraft/visual/client/CloudTour.java:94"
+    },
+    {
+      "id": "whiterun-sunrise-cumulus",
+      "title": "Sunrise through cumulus, looking east from Whiterun",
+      "tags": [
+        "region:skyrim/whiterun",
+        "feature:clouds",
+        "feature:sky",
+        "weather:cloudy",
+        "time:dawn"
+      ],
+      "pose": {
+        "visit": [
+          0,
+          0,
+          60,
+          -90,
+          -4
+        ]
+      },
+      "time": 23300,
+      "weather": "cloudy",
+      "wait": 120,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "mod/src/main/java/com/nirncraft/visual/client/CloudTour.java:97"
+    },
+    {
+      "id": "whiterun-night-clouds",
+      "title": "Moonlit clouds at midnight over Whiterun",
+      "tags": [
+        "region:skyrim/whiterun",
+        "feature:clouds",
+        "feature:night-sky",
+        "feature:moons",
+        "weather:cloudy",
+        "time:night"
+      ],
+      "pose": {
+        "visit": [
+          0,
+          0,
+          60,
+          180,
+          -12
+        ]
+      },
+      "time": 18000,
+      "weather": "cloudy",
+      "wait": 120,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {
+        "lumaMin": 2
+      },
+      "capture": "world",
+      "source": "mod/src/main/java/com/nirncraft/visual/client/CloudTour.java:100"
+    },
+    {
+      "id": "throat-ridgeline-night-halo",
+      "title": "Throat of the World ridgeline against the night sky (halo check)",
+      "tags": [
+        "region:skyrim/whiterun",
+        "place:throat_of_the_world",
+        "feature:night-sky",
+        "feature:moons",
+        "feature:farfield",
+        "weather:clear",
+        "time:night"
+      ],
+      "pose": {
+        "visit": [
+          250,
+          150,
+          20,
+          -33,
+          -6
+        ]
+      },
+      "time": 18000,
+      "weather": "clear",
+      "wait": 200,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {
+        "lumaMin": 2
+      },
+      "capture": "world",
+      "source": "new (owner gap: mountain ridgelines at night, halo check)"
+    },
+    {
+      "id": "throat-ridgeline-dusk-halo",
+      "title": "Throat of the World ridgeline against the dusk sky (halo check)",
+      "tags": [
+        "region:skyrim/whiterun",
+        "place:throat_of_the_world",
+        "feature:sky",
+        "feature:farfield",
+        "weather:clear",
+        "time:dusk"
+      ],
+      "pose": {
+        "visit": [
+          250,
+          150,
+          20,
+          -33,
+          -6
+        ]
+      },
+      "time": 13000,
+      "weather": "clear",
+      "wait": 200,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "new (owner gap: mountain ridgelines against the sky, halo check)"
+    },
+    {
+      "id": "falkreath-ridgeline-night-halo",
+      "title": "Jagged Falkreath ridgelines south of Helgen against the night sky",
+      "tags": [
+        "region:skyrim/falkreath",
+        "feature:night-sky",
+        "feature:farfield",
+        "weather:clear",
+        "time:night"
+      ],
+      "pose": {
+        "visit": [
+          -24,
+          1000,
+          15,
+          0,
+          -8
+        ]
+      },
+      "time": 18000,
+      "weather": "clear",
+      "wait": 200,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {
+        "lumaMin": 2
+      },
+      "capture": "world",
+      "source": "new (owner gap: mountain ridgelines at night, halo check)",
+      "note": "pose guessed: north of Helgen looking south (+Z) at the pass ridgelines; verify the camera is clear"
+    },
+    {
+      "id": "winterhold-aurora-night",
+      "title": "Aurora and moons over Winterhold",
+      "tags": [
+        "region:skyrim/winterhold",
+        "place:winterhold",
+        "feature:aurora",
+        "feature:night-sky",
+        "feature:moons",
+        "feature:snow",
+        "weather:clear",
+        "time:night"
+      ],
+      "pose": {
+        "visit": [
+          1417,
+          -1749,
+          30,
+          180,
+          -40
+        ]
+      },
+      "time": 18000,
+      "weather": "clear",
+      "wait": 200,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {
+        "lumaMin": 2
+      },
+      "capture": "world",
+      "source": "new (gap: aurora/moons in the far north)",
+      "note": "aurora visibility depends on the sky model; pose guessed"
+    }
+  ]
+}

@@ -1,0 +1,50 @@
+{
+  "live": {
+    "description": "default live preview (tools/dev/live_world.py lease; driven by live actions)",
+    "jvm": {},
+    "server": false
+  },
+  "screenwalk": {
+    "description": "ClientAutotest screen walk (non-live): creates creative world seed 1234, opens race/skills/hub/inventory/magic/journal/map, wildlife, mysticism, spellmaking, staff enchanter; captures to build/autotest-screenshots then quits",
+    "jvm": {
+      "nirncraft.autotest": "true",
+      "nirncraft.autotest.world": "autotest"
+    },
+    "server": false
+  },
+  "visualtest": {
+    "description": "VisualAutotest default steps: new world seed 20261010 from the title screen, night sky, weathers, HUD target/banners/sneak eye, saving/pause/confirm/death/inventory/race screens; captures to build/visualtest-screenshots then quits (any non-empty value other than \"clouds\")",
+    "jvm": {
+      "nirncraft.visualtest": "menus"
+    },
+    "server": false
+  },
+  "npcshowcase": {
+    "description": "NpcShowcase: every race in outfits lined up; needs saves/npcws or a quickPlay singleplayer world; captures to build/npc-showcase then quits",
+    "jvm": {
+      "nirncraft.npcshowcase": "true"
+    },
+    "server": false
+  },
+  "raceshowcase": {
+    "description": "RaceShowcase: flat creative world at Steam Deck size; character creator and race line-ups into build/race-showcase then quits",
+    "jvm": {
+      "nirncraft.raceshowcase": "true"
+    },
+    "server": false
+  },
+  "mounts": {
+    "description": "MountsAutotest mount line-ups at lineupX/lineupZ in an autotest world",
+    "jvm": {
+      "nirncraft.autotest": "true",
+      "nirncraft.autotest.world": "mounts",
+      "nirncraft.autotest.mounts": "true"
+    },
+    "server": false
+  },
+  "lab": {
+    "description": "offline tools (native/build/Release/atlas_render.exe, pack_lab.exe); no game client",
+    "jvm": {},
+    "server": false
+  }
+}

@@ -1,0 +1,151 @@
+{
+  "suite": "realms",
+  "description": "Daedric realms and Sovngarde at their RealmLayout landmarks (shader smoke)",
+  "defaults": {
+    "tier": "live",
+    "group": "live",
+    "variants": [
+      "shaders"
+    ]
+  },
+  "scenes": [
+    {
+      "id": "realm-shivering-isles",
+      "title": "Shivering Isles: New Sheoth",
+      "tags": [
+        "feature:realm"
+      ],
+      "pose": {
+        "realm": "shivering_isles",
+        "look": "0 0 90 120 35"
+      },
+      "wait": 0,
+      "setup": [],
+      "cleanup": [],
+      "variants": [
+        "shaders"
+      ],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "dimension": "nirncraft:shivering_isles",
+      "source": "tools/qa/realm_shader_smoke.py:20",
+      "note": "commands: nirncraft-realm go shivering_isles; nirncraft-realm look 0 0 90 120 35; then ui close, shaders on, settle 1800; return with nirncraft-realm home"
+    },
+    {
+      "id": "realm-apocrypha",
+      "title": "Apocrypha: chapter zero / Summit",
+      "tags": [
+        "feature:realm"
+      ],
+      "pose": {
+        "realm": "apocrypha",
+        "look": "0 0 90 120 35"
+      },
+      "wait": 0,
+      "setup": [],
+      "cleanup": [],
+      "variants": [
+        "shaders"
+      ],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "dimension": "nirncraft:apocrypha",
+      "source": "tools/qa/realm_shader_smoke.py:21",
+      "note": "commands: nirncraft-realm go apocrypha; nirncraft-realm look 0 0 90 120 35; then ui close, shaders on, settle 1800; return with nirncraft-realm home"
+    },
+    {
+      "id": "realm-soul-cairn",
+      "title": "Soul Cairn: Valerica keep",
+      "tags": [
+        "feature:realm"
+      ],
+      "pose": {
+        "realm": "soul_cairn",
+        "look": "0 -180 90 120 35"
+      },
+      "wait": 0,
+      "setup": [],
+      "cleanup": [],
+      "variants": [
+        "shaders"
+      ],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "dimension": "nirncraft:soul_cairn",
+      "source": "tools/qa/realm_shader_smoke.py:22",
+      "note": "commands: nirncraft-realm go soul_cairn; nirncraft-realm look 0 -180 90 120 35; then ui close, shaders on, settle 1800; return with nirncraft-realm home"
+    },
+    {
+      "id": "realm-coldharbour",
+      "title": "Coldharbour: Hollow City",
+      "tags": [
+        "feature:realm"
+      ],
+      "pose": {
+        "realm": "coldharbour",
+        "look": "0 -200 90 120 35"
+      },
+      "wait": 0,
+      "setup": [],
+      "cleanup": [],
+      "variants": [
+        "shaders"
+      ],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "dimension": "nirncraft:coldharbour",
+      "source": "tools/qa/realm_shader_smoke.py:23",
+      "note": "commands: nirncraft-realm go coldharbour; nirncraft-realm look 0 -200 90 120 35; then ui close, shaders on, settle 1800; return with nirncraft-realm home"
+    },
+    {
+      "id": "realm-sovngarde",
+      "title": "Sovngarde: Hall of Valor",
+      "tags": [
+        "feature:realm"
+      ],
+      "pose": {
+        "realm": "sovngarde",
+        "look": "0 -275 90 120 35"
+      },
+      "wait": 0,
+      "setup": [],
+      "cleanup": [],
+      "variants": [
+        "shaders"
+      ],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "dimension": "minecraft:the_end",
+      "source": "tools/qa/realm_shader_smoke.py:24",
+      "note": "commands: nirncraft-realm go sovngarde; nirncraft-realm look 0 -275 90 120 35; then ui close, shaders on, settle 1800; return with nirncraft-realm home"
+    },
+    {
+      "id": "realm-deadlands",
+      "title": "Deadlands: Great Sigil Tower",
+      "tags": [
+        "feature:realm"
+      ],
+      "pose": {
+        "realm": "deadlands",
+        "look": "8 8 90 120 35"
+      },
+      "wait": 0,
+      "setup": [],
+      "cleanup": [],
+      "variants": [
+        "shaders"
+      ],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "dimension": "minecraft:the_nether",
+      "source": "tools/qa/realm_shader_smoke.py:25",
+      "note": "commands: nirncraft-realm go deadlands; nirncraft-realm look 8 8 90 120 35; then ui close, shaders on, settle 1800; return with nirncraft-realm home"
+    }
+  ]
+}

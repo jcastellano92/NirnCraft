@@ -44,5 +44,6 @@ public final class TamrielTerrain {
         FEATURES.register(modBus);
         NeoForge.EVENT_BUS.addListener(TamrielSpawn::onCreateSpawn);
         NeoForge.EVENT_BUS.addListener(TamrielDevCommands::register);
+        com.nirncraft.qa.Tour.init();  // the host's camera tour (/nirncraft-tour)
     }
 }

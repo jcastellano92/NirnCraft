@@ -1,0 +1,746 @@
+{
+  "suite": "dungeons",
+  "description": "Dungeon entrances/halls across every theme and province, Embershard/Blackreach approved cameras, cave mouths",
+  "defaults": {
+    "tier": "live",
+    "group": "live",
+    "variants": [
+      "shaders"
+    ]
+  },
+  "scenes": [
+    {
+      "id": "bleak-falls-barrow-entrance",
+      "title": "Bleak Falls Barrow entrance (barrow)",
+      "tags": [
+        "region:skyrim/falkreath",
+        "place:bleak_falls_barrow",
+        "dungeon:bleak_falls_barrow",
+        "feature:dungeon"
+      ],
+      "pose": {
+        "dungeon": "bleak_falls_barrow",
+        "view": "entrance"
+      },
+      "wait": 0,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "tools/qa/dungeon_sample.json:27"
+    },
+    {
+      "id": "bleak-falls-barrow-hall",
+      "title": "Bleak Falls Barrow interior hall (barrow)",
+      "tags": [
+        "region:skyrim/falkreath",
+        "place:bleak_falls_barrow",
+        "dungeon:bleak_falls_barrow",
+        "feature:dungeon",
+        "feature:interior"
+      ],
+      "pose": {
+        "dungeon": "bleak_falls_barrow",
+        "view": "hall"
+      },
+      "wait": 0,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "tools/qa/dungeon_sample.json:27"
+    },
+    {
+      "id": "angarvunde-entrance",
+      "title": "Angarvunde entrance (barrow)",
+      "tags": [
+        "region:skyrim/the_rift",
+        "place:angarvunde",
+        "dungeon:angarvunde",
+        "feature:dungeon"
+      ],
+      "pose": {
+        "dungeon": "angarvunde",
+        "view": "entrance"
+      },
+      "wait": 0,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "tools/qa/dungeon_sample.json:35"
+    },
+    {
+      "id": "gyldenhul-barrow-entrance",
+      "title": "Gyldenhul Barrow entrance (barrow)",
+      "tags": [
+        "region:morrowind/solstheim",
+        "place:gyldenhul_barrow",
+        "dungeon:gyldenhul_barrow",
+        "feature:dungeon"
+      ],
+      "pose": {
+        "dungeon": "gyldenhul_barrow",
+        "view": "entrance"
+      },
+      "wait": 0,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "tools/qa/dungeon_sample.json:43"
+    },
+    {
+      "id": "alftand-entrance",
+      "title": "Alftand entrance (dwemer)",
+      "tags": [
+        "region:skyrim/winterhold",
+        "place:alftand",
+        "dungeon:alftand",
+        "feature:dungeon"
+      ],
+      "pose": {
+        "dungeon": "alftand",
+        "view": "entrance"
+      },
+      "wait": 0,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "tools/qa/dungeon_sample.json:51"
+    },
+    {
+      "id": "alftand-hall",
+      "title": "Alftand interior hall (dwemer)",
+      "tags": [
+        "region:skyrim/winterhold",
+        "place:alftand",
+        "dungeon:alftand",
+        "feature:dungeon",
+        "feature:interior"
+      ],
+      "pose": {
+        "dungeon": "alftand",
+        "view": "hall"
+      },
+      "wait": 0,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "tools/qa/dungeon_sample.json:51"
+    },
+    {
+      "id": "nchardak-entrance",
+      "title": "Nchardak entrance (dwemer)",
+      "tags": [
+        "region:morrowind/solstheim",
+        "place:nchardak",
+        "dungeon:nchardak",
+        "feature:dungeon"
+      ],
+      "pose": {
+        "dungeon": "nchardak",
+        "view": "entrance"
+      },
+      "wait": 0,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "tools/qa/dungeon_sample.json:59"
+    },
+    {
+      "id": "mthartzel-entrance",
+      "title": "Mthartzel entrance (dwemer)",
+      "tags": [
+        "region:high_rock/glenumbra",
+        "place:mthartzel",
+        "dungeon:mthartzel",
+        "feature:dungeon"
+      ],
+      "pose": {
+        "dungeon": "mthartzel",
+        "view": "entrance"
+      },
+      "wait": 0,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "tools/qa/dungeon_sample.json:67"
+    },
+    {
+      "id": "bonechill-passage-entrance",
+      "title": "Bonechill Passage entrance (cave)",
+      "tags": [
+        "region:skyrim/falkreath",
+        "place:bonechill_passage",
+        "dungeon:bonechill_passage",
+        "feature:dungeon",
+        "feature:cave"
+      ],
+      "pose": {
+        "dungeon": "bonechill_passage",
+        "view": "entrance"
+      },
+      "wait": 0,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "tools/qa/dungeon_sample.json:75"
+    },
+    {
+      "id": "bonechill-passage-hall",
+      "title": "Bonechill Passage interior hall (cave)",
+      "tags": [
+        "region:skyrim/falkreath",
+        "place:bonechill_passage",
+        "dungeon:bonechill_passage",
+        "feature:dungeon",
+        "feature:cave",
+        "feature:interior"
+      ],
+      "pose": {
+        "dungeon": "bonechill_passage",
+        "view": "hall"
+      },
+      "wait": 0,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "tools/qa/dungeon_sample.json:75"
+    },
+    {
+      "id": "ahabah-hollow-entrance",
+      "title": "Ahabah Hollow entrance (cave)",
+      "tags": [
+        "region:hammerfell/alikr_desert",
+        "place:ahabah_hollow",
+        "dungeon:ahabah_hollow",
+        "feature:dungeon",
+        "feature:cave"
+      ],
+      "pose": {
+        "dungeon": "ahabah_hollow",
+        "view": "entrance"
+      },
+      "wait": 0,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "tools/qa/dungeon_sample.json:83"
+    },
+    {
+      "id": "bilegulch-mine-entrance",
+      "title": "Bilegulch Mine entrance (mine)",
+      "tags": [
+        "region:skyrim/falkreath",
+        "place:bilegulch_mine",
+        "dungeon:bilegulch_mine",
+        "feature:dungeon",
+        "feature:cave"
+      ],
+      "pose": {
+        "dungeon": "bilegulch_mine",
+        "view": "entrance"
+      },
+      "wait": 0,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "tools/qa/dungeon_sample.json:91"
+    },
+    {
+      "id": "badgerrun-quarry-entrance",
+      "title": "Badgerrun Quarry entrance (mine)",
+      "tags": [
+        "region:cyrodiil/gold_coast",
+        "place:badgerrun_quarry",
+        "dungeon:badgerrun_quarry",
+        "feature:dungeon",
+        "feature:cave"
+      ],
+      "pose": {
+        "dungeon": "badgerrun_quarry",
+        "view": "entrance"
+      },
+      "wait": 0,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "tools/qa/dungeon_sample.json:99"
+    },
+    {
+      "id": "amelion-tomb-entrance",
+      "title": "Amelion Tomb entrance (ruin)",
+      "tags": [
+        "region:cyrodiil/blackwood",
+        "place:amelion_tomb",
+        "dungeon:amelion_tomb",
+        "feature:dungeon"
+      ],
+      "pose": {
+        "dungeon": "amelion_tomb",
+        "view": "entrance"
+      },
+      "wait": 0,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "tools/qa/dungeon_sample.json:107"
+    },
+    {
+      "id": "alas-ancestral-tomb-entrance",
+      "title": "Alas Ancestral Tomb entrance (ruin)",
+      "tags": [
+        "region:morrowind/grazelands",
+        "place:alas_ancestral_tomb",
+        "dungeon:alas_ancestral_tomb",
+        "feature:dungeon"
+      ],
+      "pose": {
+        "dungeon": "alas_ancestral_tomb",
+        "view": "entrance"
+      },
+      "wait": 0,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "tools/qa/dungeon_sample.json:115"
+    },
+    {
+      "id": "alas-ancestral-tomb-hall",
+      "title": "Alas Ancestral Tomb interior hall (ruin)",
+      "tags": [
+        "region:morrowind/grazelands",
+        "place:alas_ancestral_tomb",
+        "dungeon:alas_ancestral_tomb",
+        "feature:dungeon",
+        "feature:interior"
+      ],
+      "pose": {
+        "dungeon": "alas_ancestral_tomb",
+        "view": "hall"
+      },
+      "wait": 0,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "tools/qa/dungeon_sample.json:115"
+    },
+    {
+      "id": "ahaleb-necropolis-entrance",
+      "title": "Ahaleb Necropolis entrance (ruin)",
+      "tags": [
+        "region:hammerfell/hews_bane",
+        "place:ahaleb_necropolis",
+        "dungeon:ahaleb_necropolis",
+        "feature:dungeon"
+      ],
+      "pose": {
+        "dungeon": "ahaleb_necropolis",
+        "view": "entrance"
+      },
+      "wait": 0,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "tools/qa/dungeon_sample.json:123"
+    },
+    {
+      "id": "aphrens-tomb-entrance",
+      "title": "Aphrens Tomb entrance (ruin)",
+      "tags": [
+        "region:high_rock/stormhaven",
+        "place:aphrens_tomb",
+        "dungeon:aphrens_tomb",
+        "feature:dungeon"
+      ],
+      "pose": {
+        "dungeon": "aphrens_tomb",
+        "view": "entrance"
+      },
+      "wait": 0,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "tools/qa/dungeon_sample.json:131"
+    },
+    {
+      "id": "wolf-jarls-howe-entrance",
+      "title": "Wolf Jarls Howe entrance (ruin)",
+      "tags": [
+        "region:atmora/ice_waste",
+        "place:wolf_jarls_howe",
+        "dungeon:wolf_jarls_howe",
+        "feature:dungeon"
+      ],
+      "pose": {
+        "dungeon": "wolf_jarls_howe",
+        "view": "entrance"
+      },
+      "wait": 0,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "tools/qa/dungeon_sample.json:139"
+    },
+    {
+      "id": "fort-fellhammer-entrance",
+      "title": "Fort Fellhammer entrance (fort)",
+      "tags": [
+        "region:skyrim/winterhold",
+        "place:fort_fellhammer",
+        "dungeon:fort_fellhammer",
+        "feature:dungeon"
+      ],
+      "pose": {
+        "dungeon": "fort_fellhammer",
+        "view": "entrance"
+      },
+      "wait": 0,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "tools/qa/dungeon_sample.json:147"
+    },
+    {
+      "id": "castle-volkihar-entrance",
+      "title": "Castle Volkihar entrance (fort)",
+      "tags": [
+        "region:skyrim/haafingar",
+        "place:castle_volkihar",
+        "dungeon:castle_volkihar",
+        "feature:dungeon"
+      ],
+      "pose": {
+        "dungeon": "castle_volkihar",
+        "view": "entrance"
+      },
+      "wait": 0,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "tools/qa/dungeon_sample.json:155"
+    },
+    {
+      "id": "castle-volkihar-hall",
+      "title": "Castle Volkihar interior hall (fort)",
+      "tags": [
+        "region:skyrim/haafingar",
+        "place:castle_volkihar",
+        "dungeon:castle_volkihar",
+        "feature:dungeon",
+        "feature:interior"
+      ],
+      "pose": {
+        "dungeon": "castle_volkihar",
+        "view": "hall"
+      },
+      "wait": 0,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "tools/qa/dungeon_sample.json:155"
+    },
+    {
+      "id": "ravenscar-hollow-entrance",
+      "title": "Ravenscar Hollow entrance (hagraven_lair)",
+      "tags": [
+        "region:skyrim/haafingar",
+        "place:ravenscar_hollow",
+        "dungeon:ravenscar_hollow",
+        "feature:dungeon"
+      ],
+      "pose": {
+        "dungeon": "ravenscar_hollow",
+        "view": "entrance"
+      },
+      "wait": 0,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "tools/qa/dungeon_sample.json:163"
+    },
+    {
+      "id": "haemars-shame-entrance",
+      "title": "Haemars Shame entrance (vampire_lair)",
+      "tags": [
+        "region:skyrim/falkreath",
+        "place:haemars_shame",
+        "dungeon:haemars_shame",
+        "feature:dungeon"
+      ],
+      "pose": {
+        "dungeon": "haemars_shame",
+        "view": "entrance"
+      },
+      "wait": 0,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "tools/qa/dungeon_sample.json:171"
+    },
+    {
+      "id": "bramcliff-crypt-entrance",
+      "title": "Bramcliff Crypt entrance (necromancer_lair)",
+      "tags": [
+        "region:high_rock/glenumbra",
+        "place:bramcliff_crypt",
+        "dungeon:bramcliff_crypt",
+        "feature:dungeon"
+      ],
+      "pose": {
+        "dungeon": "bramcliff_crypt",
+        "view": "entrance"
+      },
+      "wait": 0,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "tools/qa/dungeon_sample.json:179"
+    },
+    {
+      "id": "mine-entry-ladder",
+      "title": "Mine entry landing and ascent ladder",
+      "tags": [
+        "region:skyrim/falkreath",
+        "dungeon:embershard_mine",
+        "place:embershard_mine",
+        "feature:town",
+        "feature:dungeon"
+      ],
+      "pose": {
+        "camera": [
+          -245.0,
+          90.0,
+          792.0,
+          -198.49,
+          103.49,
+          792.0
+        ]
+      },
+      "wait": 0,
+      "setup": [],
+      "cleanup": [],
+      "variants": [
+        "shaders",
+        "vanilla"
+      ],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "tools/qa/visual-cameras.json:4"
+    },
+    {
+      "id": "mine-crystal-chamber",
+      "title": "Crystal chamber, waterfall, lantern walkway, smooth mist travel reference",
+      "tags": [
+        "region:skyrim/falkreath",
+        "dungeon:embershard_mine",
+        "place:embershard_mine",
+        "feature:water",
+        "feature:falls",
+        "suite:smoke",
+        "feature:cave",
+        "feature:dungeon",
+        "feature:fx",
+        "weather:clear",
+        "time:noon"
+      ],
+      "pose": {
+        "camera": [
+          -275.0,
+          89.0,
+          804.0,
+          -275.0,
+          111.18,
+          760.63
+        ]
+      },
+      "time": 6000,
+      "weather": "clear",
+      "wait": 0,
+      "setup": [],
+      "cleanup": [],
+      "variants": [
+        "vanilla"
+      ],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "tools/qa/visual-cameras.json:33"
+    },
+    {
+      "id": "blackreach-mushroom-dome",
+      "title": "Loaded cavern geometry and atmosphere baseline; mushroom canopy, ceiling, floor and short motion route; reject incomplete mesh or lighting work",
+      "tags": [
+        "region:skyrim/the_pale",
+        "feature:foliage",
+        "feature:cave",
+        "feature:dungeon",
+        "feature:fx",
+        "feature:perf",
+        "weather:clear",
+        "time:noon"
+      ],
+      "pose": {
+        "camera": [
+          420.0,
+          -20.0,
+          -975.0,
+          420.0,
+          -10.92,
+          -927.58
+        ]
+      },
+      "time": 6000,
+      "weather": "clear",
+      "wait": 0,
+      "setup": [],
+      "cleanup": [],
+      "variants": [
+        "shaders",
+        "vanilla"
+      ],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "tools/qa/visual-cameras.json:115",
+      "note": "source reviewed a short loaded motion route too; express with camera-travel if needed"
+    },
+    {
+      "id": "embershard-mine-mouth-daylight",
+      "title": "Embershard Mine mouth looking out at daylight (eye adaptation)",
+      "tags": [
+        "region:skyrim/falkreath",
+        "place:embershard_mine",
+        "dungeon:embershard_mine",
+        "feature:cave",
+        "feature:dungeon",
+        "weather:clear",
+        "time:noon"
+      ],
+      "pose": {
+        "dungeon": "embershard_mine",
+        "view": "mouth"
+      },
+      "time": 6000,
+      "weather": "clear",
+      "wait": 200,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "new (owner gap: cave mouth looking out at daylight); view mouth in mod/src/main/java/com/nirncraft/dungeons/qa/DungeonQa.java:107"
+    },
+    {
+      "id": "bleak-falls-barrow-mouth-daylight",
+      "title": "Bleak Falls Barrow tunnel mouth looking out at daylight",
+      "tags": [
+        "region:skyrim/falkreath",
+        "place:bleak_falls_barrow",
+        "dungeon:bleak_falls_barrow",
+        "feature:cave",
+        "feature:dungeon",
+        "feature:snow",
+        "weather:clear",
+        "time:noon"
+      ],
+      "pose": {
+        "dungeon": "bleak_falls_barrow",
+        "view": "mouth"
+      },
+      "time": 6000,
+      "weather": "clear",
+      "wait": 200,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "new (owner gap: eye adaptation); DungeonQa.java:107"
+    },
+    {
+      "id": "embershard-crystal-mist-push",
+      "title": "Embershard crystal chamber mist displaced by the player (fx push)",
+      "tags": [
+        "region:skyrim/falkreath",
+        "place:embershard_mine",
+        "dungeon:embershard_mine",
+        "feature:cave",
+        "feature:fog",
+        "feature:fx",
+        "time:noon"
+      ],
+      "pose": {
+        "camera": [
+          -275.0,
+          89.0,
+          804.0,
+          -275.0,
+          111.18,
+          760.63
+        ]
+      },
+      "time": 6000,
+      "wait": 0,
+      "setup": [
+        "fx push"
+      ],
+      "cleanup": [],
+      "variants": [
+        "shaders"
+      ],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "new; live verb \"fx push\" in mod/src/main/java/com/nirncraft/client/autotest/ClientAutotest.java:408"
+    }
+  ]
+}

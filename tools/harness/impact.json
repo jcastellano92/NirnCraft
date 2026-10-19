@@ -1,0 +1,33 @@
+{
+  "description": "Changed files -> the tests they can affect (tags, prefix match) and the hot reload they need. First matching rule wins unless it says \"final\": false. Used by `harness.py run --changed [REF]`, `harness.py gate` (merge / push) and watch mode.",
+  "rules": [
+    {"paths": ["tools/harness/*.py", "tools/harness/impact.json"], "tags": ["suite:smoke", "suite:harness"], "reload": null},
+    {"paths": ["tools/harness/scenes/*"], "tags": ["suite:catalog"], "reload": null},
+    {"paths": ["shaderpack/InfiniteATLAS/shaders/*water*", "shaderpack/InfiniteATLAS/shaders/lib/waves*", "shaderpack/InfiniteATLAS/shaders/lib/water*"], "tags": ["feature:water", "feature:river", "feature:falls", "suite:smoke", "check:shaders"], "reload": "shaders"},
+    {"paths": ["shaderpack/InfiniteATLAS/shaders/lib/atmospherics/*", "shaderpack/InfiniteATLAS/shaders/lib/weather*", "shaderpack/InfiniteATLAS/shaders/lib/air*", "shaderpack/InfiniteATLAS/shaders/lib/media*"], "tags": ["feature:clouds", "feature:fog", "feature:storm", "feature:smoke", "suite:weather", "suite:smoke", "check:shaders"], "reload": "shaders"},
+    {"paths": ["shaderpack/InfiniteATLAS/shaders/lib/celestial*", "shaderpack/InfiniteATLAS/shaders/lib/keylight*", "shaderpack/InfiniteATLAS/shaders/lib/sky*"], "tags": ["suite:sky", "feature:night-sky", "feature:moons", "time:night", "suite:smoke", "check:shaders"], "reload": "shaders"},
+    {"paths": ["shaderpack/InfiniteATLAS/shaders/*", "shaderpack/InfiniteATLAS/*", "shaderpack/build_pack.py"], "tags": ["suite:smoke", "suite:farfield", "suite:lab", "check:shaders"], "reload": "shaders"},
+    {"paths": ["native/*"], "tags": ["suite:lab", "suite:farfield", "check:native"], "reload": null},
+    {"paths": ["mod/src/main/resources/assets/*/textures/entity/*", "mod/src/main/resources/assets/*/models/entity/*", "mod/src/main/java/com/nirncraft/creatures/*", "mod/src/main/java/com/nirncraft/*/client/*Renderer*"], "tags": ["suite:gallery", "suite:creatures", "check:unit"], "reload": "resources", "final": false},
+    {"paths": ["mod/src/main/resources/assets/*"], "tags": ["suite:smoke", "suite:ui", "check:assets"], "reload": "resources"},
+    {"paths": ["mod/src/main/resources/nirncraft/tamriel/places/*"], "tags": ["suite:places", "suite:places-planned", "check:world", "check:cameras"], "reload": "data:places"},
+    {"paths": ["mod/src/main/resources/nirncraft/tamriel/cityplans/*", "mod/src/main/resources/nirncraft/tamriel/styles/*", "mod/src/main/java/com/nirncraft/settlement/*", "mod/src/main/java/com/nirncraft/town*/*"], "tags": ["feature:town", "suite:places", "check:towns", "check:interiors"], "reload": "data:cityplans"},
+    {"paths": ["mod/src/main/java/com/nirncraft/dungeon*/*", "mod/src/main/resources/data/nirncraft/structure*/*", "mod/src/main/resources/nirncraft/dungeons/*"], "tags": ["suite:dungeons", "feature:dungeon", "feature:cave", "check:dungeons"], "reload": "jar"},
+    {"paths": ["mod/src/main/java/com/nirncraft/worldplan/*", "mod/src/main/resources/nirncraft/worldplan/*"], "tags": ["feature:road", "feature:river", "check:roads", "check:hydrology", "check:cameras"], "reload": "jar"},
+    {"paths": ["mod/src/main/java/com/nirncraft/tamriel/*", "mod/src/main/java/com/nirncraft/worldgen/*", "mod/src/main/resources/data/nirncraft/worldgen/*", "mod/src/main/resources/nirncraft/tamriel/*"], "tags": ["suite:farfield", "suite:places", "check:world", "check:hydrology", "check:roads", "check:cameras"], "reload": "jar"},
+    {"paths": ["mod/src/main/java/com/nirncraft/atmosphere/*", "mod/src/main/java/com/nirncraft/weather/*"], "tags": ["suite:weather", "suite:sky", "check:unit"], "reload": "jar"},
+    {"paths": ["mod/src/main/java/com/nirncraft/atlas/*"], "tags": ["suite:farfield", "suite:smoke", "check:unit", "check:native"], "reload": "jar"},
+    {"paths": ["mod/src/main/java/com/nirncraft/fire/*", "mod/src/main/java/com/nirncraft/magic/*", "mod/src/main/java/com/nirncraft/spell*/*"], "tags": ["suite:fx", "feature:fire", "feature:magic", "check:unit", "check:spells"], "reload": "jar"},
+    {"paths": ["mod/src/main/java/com/nirncraft/realm*/*"], "tags": ["suite:realms", "check:unit"], "reload": "jar"},
+    {"paths": ["mod/src/main/java/com/nirncraft/*/client/*", "mod/src/main/java/com/nirncraft/client/*"], "tags": ["suite:ui", "suite:smoke", "check:unit"], "reload": "jar"},
+    {"paths": ["mod/src/main/java/com/nirncraft/loot/*", "mod/src/main/java/com/nirncraft/explore/*", "tools/loot_*.py"], "tags": ["check:loot", "check:unit"], "reload": "jar"},
+    {"paths": ["mod/src/main/java/com/nirncraft/economy/*", "tools/economy_data.py"], "tags": ["check:economy", "check:unit"], "reload": "jar"},
+    {"paths": ["mod/src/main/java/com/nirncraft/quest*/*", "mod/src/main/resources/nirncraft/quests/*"], "tags": ["check:quests", "check:unit"], "reload": "data:quests"},
+    {"paths": ["mod/src/main/java/com/nirncraft/society/*", "mod/src/main/java/com/nirncraft/npc*/*"], "tags": ["check:npcs", "check:unit", "suite:creatures"], "reload": "jar"},
+    {"paths": ["mod/src/main/lang/*"], "tags": ["check:lang", "suite:ui"], "reload": "jar"},
+    {"paths": ["mod/src/main/java/*", "mod/src/test/*", "mod/build.gradle", "mod/*.gradle", "mod/gradle.properties"], "tags": ["check:unit", "suite:smoke"], "reload": "jar"},
+    {"paths": ["mod/src/main/resources/*"], "tags": ["check:unit", "check:assets"], "reload": "jar"},
+    {"paths": ["pack/*", "tools/build_prism_instance.py", "tools/build_mrpack.py", "tools/validate_pack.py", "tools/refresh_packwiz.py"], "tags": ["check:pack"], "reload": null},
+    {"paths": ["tools/*", "docs/*", "*.md"], "tags": [], "reload": null}
+  ]
+}
