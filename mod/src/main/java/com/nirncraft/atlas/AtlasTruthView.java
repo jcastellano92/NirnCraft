@@ -24,8 +24,12 @@ public final class AtlasTruthView {
         float far = 1.0e7f;
         event.setNearPlaneDistance(far);
         event.setFarPlaneDistance(far);
+        // every range, not only the one the event's setters move: the fallback compositor's seam band
+        // (atlas_fallback.fsh "fog continuity") reads the render-distance range, and that was the pale band left
         var fog = event.getFogData();
-        fog.skyEnd = Math.max(fog.skyEnd, far);
+        fog.environmentalStart = fog.environmentalEnd = far;
+        fog.renderDistanceStart = fog.renderDistanceEnd = far;
+        fog.skyEnd = fog.cloudEnd = far;
     }
 
     /** The autotest verb: "on" | "off" (fog is set every frame: nothing to rebuild). */
