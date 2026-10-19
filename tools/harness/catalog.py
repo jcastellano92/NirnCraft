@@ -652,7 +652,8 @@ def pose_actions(s, plan=None, candidate=0):
     # time of day, moon phase or weather), and a before / after would then compare two different skies
     indoors = "realm" in p or "dungeon" in p
     weather = s.get("weather") or (None if indoors else "clear")
-    lines = [f"try time set {int(s['time']) if s.get('time') is not None else 6000}"]  # 26.3 reports 0: not a failure
+    lines = [f"try time set {int(s['time']) if s.get('time') is not None else 6000}",  # 26.3 reports 0: not a failure
+             "try nirncraft-weather fronts clear"]  # fronts never expire in tests: one scene's storm leaked into the next
     if "visit" in p:
         x, z, h, yaw, pitch = p["visit"]
         h = int(h) + 25 * candidate  # a retry after "camera intersects terrain" goes higher

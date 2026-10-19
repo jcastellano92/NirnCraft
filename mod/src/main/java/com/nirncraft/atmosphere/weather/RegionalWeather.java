@@ -193,6 +193,17 @@ public final class RegionalWeather {
     }
 
     /** Adds or replaces an active {@link WeatherFront} on the server and syncs it to clients. */
+    /** Removes every weather front (tests: a scene's weather never inherits a front an earlier scene added). */
+    public static int clearFronts(MinecraftServer server) {
+        if (server == null) return 0;
+        Data data = Data.get(server);
+        int n = data.fronts.size();
+        data.fronts.clear();
+        data.setDirty();
+        SkyNetwork.sendToAll(new WeatherPackets.Sync(false, List.of(), data.fronts));
+        return n;
+    }
+
     public static void addFront(MinecraftServer server, WeatherFront front) {
         if (server == null || front == null) return;
         Data data = Data.get(server);

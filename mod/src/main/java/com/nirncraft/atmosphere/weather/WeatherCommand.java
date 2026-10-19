@@ -35,6 +35,11 @@ public final class WeatherCommand {
         d.register(Commands.literal("nirncraft-weather").requires(s -> s.permissions().hasPermission(net.minecraft.server.permissions.Permissions.COMMANDS_GAMEMASTER))
                 .then(Commands.literal("info").executes(WeatherCommand::info))
                 .then(Commands.literal("reroll").executes(WeatherCommand::reroll))
+                .then(Commands.literal("fronts").then(Commands.literal("clear").executes(c -> {
+                    int n = RegionalWeather.clearFronts(c.getSource().getServer());
+                    c.getSource().sendSuccess(() -> net.minecraft.network.chat.Component.literal(n + " weather front(s) cleared"), false);
+                    return Math.max(1, n);
+                })))
                 .then(Commands.literal("set").then(Commands.argument("kind", StringArgumentType.word())
                         .suggests((c, b) -> SharedSuggestionProvider.suggest(Arrays.stream(WeatherKind.values()).map(WeatherKind::id), b))
                         .executes(c -> set(c, 0))
