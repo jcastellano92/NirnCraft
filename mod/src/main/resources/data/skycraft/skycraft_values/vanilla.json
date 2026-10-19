@@ -237,7 +237,7 @@
     "minecraft:salmon_bucket": 20,
     "minecraft:sand": 0,
     "minecraft:sandstone": 1,
-    "minecraft:scute": 30,
+    "minecraft:turtle_scute": 30,
     "minecraft:shears": 8,
     "minecraft:shield": 20,
     "minecraft:shulker_shell": 100,
@@ -289,16 +289,16 @@
     "#minecraft:wool": 2,
     "#minecraft:saplings": 1,
     "#minecraft:small_flowers": 2,
-    "#minecraft:music_discs": 80,
+    "#c:music_discs": 80,
     "#forge:ingots/silver": 50,
     "#forge:raw_materials/silver": 35,
     "#forge:ores/silver": 35,
-    "#forge:ingots/tin": 5,
-    "#forge:ingots/lead": 6,
-    "#forge:ingots/bronze": 9,
+    "#c:ingots/tin": 5,
+    "#c:ingots/lead": 6,
+    "#c:ingots/bronze": 9,
     "#forge:ingots/steel": 12,
     "#forge:gems/ruby": 120,
     "#forge:gems/sapphire": 120,
-    "#forge:gems/amethyst": 20
+    "#c:gems/amethyst": 20
   }
 }

@@ -109,7 +109,7 @@ public final class Ingredients {
         add("minecraft:slime_ball", LEAP, SLOW, RESIST_POISON, FORTIFY_CARRY_WEIGHT);
         add("minecraft:ink_sac", FORTIFY_SNEAK, WATERBREATHING, DAMAGE_MAGICKA, FEAR);
         add("minecraft:glow_ink_sac", NIGHT_EYE, FORTIFY_ILLUSION, RESTORE_MAGICKA, WATERBREATHING);
-        add("minecraft:scute", WATERBREATHING, FORTIFY_HEAVY_ARMOR, RESIST_POISON, FORTIFY_BLOCK);
+        add("minecraft:turtle_scute", WATERBREATHING, FORTIFY_HEAVY_ARMOR, RESIST_POISON, FORTIFY_BLOCK);
         add("minecraft:amethyst_shard", FORTIFY_ENCHANTING, RESIST_MAGIC, REGENERATE_MAGICKA, FORTIFY_ILLUSION);
         // ------------------------------------------------------------ Skycraft ingredients (arcane)
         add("skycraft:salt_pile", WEAKNESS_TO_MAGIC, FORTIFY_RESTORATION, SLOW, REGENERATE_MAGICKA);

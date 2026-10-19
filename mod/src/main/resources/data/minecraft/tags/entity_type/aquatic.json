@@ -2,6 +2,14 @@
   "replace": false,
   "values": [
     "skycraft:sea_serpent",
-    "skycraft:slaughterfish"
+    "skycraft:slaughterfish",
+    "skycraft:dreugh",
+    "skycraft:dreugh_queen",
+    "skycraft:sea_leviathan",
+    "skycraft:giant_slaughterfish",
+    "skycraft:sea_netch",
+    "skycraft:whale",
+    "skycraft:river_betty",
+    "skycraft:abecean_longfin"
   ]
 }
