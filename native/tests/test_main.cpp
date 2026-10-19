@@ -1,7 +1,10 @@
 // aether_core tests: SVDAG round trips, sharing, the C ABI, and CPU/Vulkan kernel parity on preview terrain.
 #include <algorithm>
 #include <array>
+#include <atomic>
 #include <chrono>
+#include <cstdlib>
+#include <stdexcept>
 #include <cmath>
 #include <cstdio>
 #include <cstring>
@@ -13,6 +16,7 @@
 #include "aether/aether.h"
 #include "camera.hpp"
 #include "svdag.hpp"
+#include "parallel.hpp"
 
 using namespace aether;
 
@@ -1285,6 +1289,177 @@ static bool parity(const char* raster) {
     return true;
 }
 
+// The error paths (aether.h AetherStatus): out of memory, a lost device and a hang, through the test hook
+// (aether_debug_fault / AETHER_FAULT), on the CPU backend always and on Vulkan when a device is there; a fresh
+// context after a loss (the mod's retry); the memory query; the clipmap size; worker exceptions never terminating.
+static bool faultScene(AetherContext* ctx, AetherFrame& f) {
+    std::vector<float> surf(256 * 256, 100.0f), water(256 * 256, NAN);
+    std::vector<uint16_t> top(256 * 256, 2), fill(256 * 256, 3);
+    for (int tz = -1; tz <= 1; tz++)
+        for (int tx = -1; tx <= 1; tx++) {
+            AetherColumnTile t{0, tx, tz, surf.data(), water.data(), top.data(), fill.data(), nullptr, nullptr};
+            if (aether_upload_column_tile(ctx, &t) != AETHER_OK) return false;
+        }
+    double centre[3] = {10.5, 140.0, 10.5};
+    if (aether_update(ctx, centre, 0) != AETHER_OK) return false;
+    f = AetherFrame{};
+    f.cameraPos[0] = 10.5;
+    f.cameraPos[1] = 140.0;
+    f.cameraPos[2] = 10.5;
+    float inv[16] = {0.1f, 0, 0, 0, 0, 0, 0.1f, 0, 0, -0.5f, 0, 0, 0, -0.75f, 0, 1};
+    std::memcpy(f.invViewProj, inv, sizeof(inv));
+    f.width = 32;
+    f.height = 32;
+    f.maxDistance = 1000;
+    f.sunDir[1] = 1;
+    f.lodBias = 1;
+    return true;
+}
+
+static void setEnv(const char* k, const char* v) {
+#ifdef _WIN32
+    _putenv_s(k, v ? v : "");
+#else
+    if (v) setenv(k, v, 1);
+    else unsetenv(k);
+#endif
+}
+
+static void testFaults() {
+    std::printf("faults\n");
+    std::vector<float> depth(32 * 32);
+    AetherFrameOutput o{nullptr, nullptr, depth.data(), nullptr};
+    for (AetherBackend be : {AETHER_BACKEND_CPU, AETHER_BACKEND_VULKAN}) {
+        const char* name = be == AETHER_BACKEND_CPU ? "cpu" : "vulkan";
+        AetherContext* ctx = nullptr;
+        if (aether_create(be, &ctx) != AETHER_OK) {
+            CHECK(be == AETHER_BACKEND_VULKAN);
+            std::printf("  vulkan: no device (%s): skipped\n", aether_last_error(nullptr));
+            continue;
+        }
+        AetherFrame f;
+        CHECK(faultScene(ctx, f));
+        CHECK(aether_render(ctx, &f, &o) == AETHER_OK);
+        CHECK(std::abs(depth[16 * 32 + 16] - 40.0f) < 0.5f);
+        CHECK(aether_debug_fault(ctx, 99, 0) == AETHER_ERR_ARG);
+
+        // out of memory: the armed frame fails, the context goes on
+        CHECK(aether_debug_fault(ctx, AETHER_FAULT_OUT_OF_MEMORY, 1) == AETHER_OK);
+        CHECK(aether_render(ctx, &f, &o) == AETHER_OK);
+        CHECK(aether_render(ctx, &f, &o) == AETHER_ERR_OUT_OF_MEMORY);
+        CHECK(std::strstr(aether_last_error(ctx), "OUT_OF_DEVICE_MEMORY") != nullptr);
+        CHECK(aether_render(ctx, &f, &o) == AETHER_OK);
+
+        // memory: Vulkan knows its heaps (and what it allocated); the CPU backend has none
+        AetherMemoryInfo mi{};
+        AetherStatus ms = aether_memory_info(ctx, &mi);
+        if (be == AETHER_BACKEND_CPU) {
+            CHECK(ms == AETHER_ERR_UNSUPPORTED);
+        } else {
+            CHECK(ms == AETHER_OK);
+            CHECK(mi.deviceLocalBytes > (64ull << 20));
+            CHECK(mi.aetherBytes > 0 && mi.aetherBytes < mi.deviceLocalBytes + mi.hostHeapBytes);
+            if (mi.flags & AETHER_MEMORY_BUDGET_EXT)
+                CHECK(mi.deviceLocalBudget > 0 && mi.deviceLocalBudget <= mi.deviceLocalBytes);
+            std::printf("  vulkan memory: device-local %.0f MB (budget %.0f MB, used %.0f MB, %s), host heap %.0f MB, "
+                        "aether %.1f MB%s\n",
+                        mi.deviceLocalBytes / 1048576.0, mi.deviceLocalBudget / 1048576.0, mi.deviceLocalUsage / 1048576.0,
+                        (mi.flags & AETHER_MEMORY_BUDGET_EXT) ? "VK_EXT_memory_budget" : "no budget extension",
+                        mi.hostHeapBytes / 1048576.0, mi.aetherBytes / 1048576.0, mi.integrated ? ", integrated" : "");
+        }
+
+        // a lost device: the frame fails, every later GPU call too; CPU-side uploads still work; destroy is clean
+        CHECK(aether_debug_fault(ctx, AETHER_FAULT_DEVICE_LOST, 0) == AETHER_OK);
+        CHECK(aether_render(ctx, &f, &o) == AETHER_ERR_DEVICE_LOST);
+        CHECK(std::strstr(aether_last_error(ctx), "DEVICE_LOST") != nullptr);
+        CHECK(aether_render(ctx, &f, &o) == AETHER_ERR_DEVICE_LOST);
+        CHECK(std::strstr(aether_last_error(ctx), "lost earlier") != nullptr);
+        AetherGlTargets gt{};
+        CHECK(aether_gl_attach(ctx, 64, 64, &gt) == AETHER_ERR_DEVICE_LOST);
+        double centre[3] = {10.5, 140.0, 10.5};
+        CHECK(aether_update(ctx, centre, 0) == AETHER_OK);
+        CHECK(aether_memory_info(ctx, &mi) == AETHER_ERR_DEVICE_LOST);
+        CHECK(std::string(aether_info(ctx)).find("\"deviceLost\":true") != std::string::npos);
+        aether_gl_detach(ctx);
+        aether_destroy(ctx);
+
+        // a hang: AETHER_ERR_TIMEOUT, then dead the same way; destroy abandons the device instead of waiting
+        ctx = nullptr;
+        CHECK(aether_create(be, &ctx) == AETHER_OK);
+        if (ctx) {
+            CHECK(faultScene(ctx, f));
+            CHECK(aether_debug_fault(ctx, AETHER_FAULT_TIMEOUT, 0) == AETHER_OK);
+            CHECK(aether_render(ctx, &f, &o) == AETHER_ERR_TIMEOUT);
+            CHECK(aether_render(ctx, &f, &o) == AETHER_ERR_TIMEOUT);
+            aether_destroy(ctx);
+        }
+
+        // the retry: a new context renders again
+        ctx = nullptr;
+        CHECK(aether_create(be, &ctx) == AETHER_OK);
+        if (ctx) {
+            CHECK(faultScene(ctx, f));
+            CHECK(aether_render(ctx, &f, &o) == AETHER_OK);
+            CHECK(std::abs(depth[16 * 32 + 16] - 40.0f) < 0.5f);
+            aether_destroy(ctx);
+        }
+
+        // AETHER_FAULT arms every new context: device_lost after one good frame
+        setEnv("AETHER_FAULT", "device_lost@1");
+        ctx = nullptr;
+        CHECK(aether_create(be, &ctx) == AETHER_OK);
+        setEnv("AETHER_FAULT", nullptr);
+        if (ctx) {
+            CHECK(faultScene(ctx, f));
+            CHECK(aether_render(ctx, &f, &o) == AETHER_OK);
+            CHECK(aether_render(ctx, &f, &o) == AETHER_ERR_DEVICE_LOST);
+            aether_destroy(ctx);
+        }
+        std::printf("  %s: out of memory recovers; device lost / timeout stay dead and destroy cleanly; a new context renders\n",
+                    name);
+    }
+
+    // the clipmap: argument checks, and fewer levels keep fewer regions
+    AetherContext* ctx = nullptr;
+    CHECK(aether_create(AETHER_BACKEND_CPU, &ctx) == AETHER_OK);
+    CHECK(aether_set_clipmap(ctx, 0) == AETHER_ERR_ARG);
+    CHECK(aether_set_clipmap(ctx, 8) == AETHER_ERR_ARG);
+    CHECK(aether_set_clipmap(ctx, 1) == AETHER_OK);
+    std::vector<float> surf(256 * 256, 100.0f), water(256 * 256, NAN);
+    std::vector<uint16_t> top(256 * 256, 2), fill(256 * 256, 3);
+    auto upload = [&] {
+        for (int lod = 0; lod < 2; lod++) {
+            AetherColumnTile t{lod, 0, 0, surf.data(), water.data(), top.data(), fill.data(), nullptr, nullptr};
+            CHECK(aether_upload_column_tile(ctx, &t) == AETHER_OK);
+        }
+    };
+    upload();
+    double centre[3] = {10.5, 140.0, 10.5};
+    CHECK(aether_update(ctx, centre, 0) == AETHER_OK);
+    AetherStats st{};
+    CHECK(aether_get_stats(ctx, &st) == AETHER_OK);
+    uint32_t one = st.regions;
+    CHECK(aether_set_clipmap(ctx, 2) == AETHER_OK);
+    upload();
+    CHECK(aether_update(ctx, centre, 0) == AETHER_OK);
+    CHECK(aether_get_stats(ctx, &st) == AETHER_OK);
+    CHECK(one > 0 && st.regions > one);
+    aether_destroy(ctx);
+
+    // a worker's exception comes back to the caller (no std::terminate), after every worker stopped
+    std::atomic<int> ran{0};
+    bool caught = false;
+    try {
+        parallelRun([&] {
+            if (ran.fetch_add(1) == 0) throw std::runtime_error("worker failed");
+        });
+    } catch (const std::runtime_error&) {
+        caught = true;
+    }
+    CHECK(caught && ran.load() >= 1);
+    std::printf("  clipmap levels 1 -> 2: %u -> %u regions; worker exceptions return to the caller\n", one, st.regions);
+}
+
 int main(int argc, char** argv) {
     testSvdag();
     testAbi();
@@ -1298,6 +1473,7 @@ int main(int argc, char** argv) {
     testActorMotion();
     testTransitions();
     testLights();
+    testFaults();
     testNearDepth(argc > 1 ? argv[1] : "native/data/tamriel_raster.bin");
     testColumnHeights(argc > 1 ? argv[1] : "native/data/tamriel_raster.bin");
     testGrassTint(argc > 1 ? argv[1] : "native/data/tamriel_raster.bin");

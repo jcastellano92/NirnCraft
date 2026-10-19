@@ -16,6 +16,10 @@ final class AetherQuality {
 
     private double[] q = new double[Knob.COUNT];
     private int tier;
+    /** The machine's memory ceiling (AetherMemory); unlimited until the context reports its device. */
+    private AetherMemory.Plan memory = AetherMemory.unlimited("not measured yet");
+    /** No shader pack: aether's own clouds and the sun map are not drawn (the mod's cloud deck draws; nobody reads it). */
+    private boolean fallbackMode;
 
     AetherQuality() {
         java.util.Arrays.fill(q, 1);
@@ -27,25 +31,45 @@ final class AetherQuality {
         tier = QualityClient.fallbackTier();
     }
 
+    void setMemory(AetherMemory.Plan plan) {
+        memory = plan;
+    }
+
+    AetherMemory.Plan memory() {
+        return memory;
+    }
+
+    void setFallbackMode(boolean on) {
+        fallbackMode = on;
+    }
+
+    boolean fallbackMode() {
+        return fallbackMode;
+    }
+
     /** False at fallback tier 2: no far field this frame. */
     boolean enabled() {
         return tier < 2;
     }
 
     float scale() {
-        return tier >= 1 ? 0.33f : (float) Knob.aetherScale(q[Knob.AETHER_SCALE.ordinal()]);
+        float s = tier >= 1 ? 0.33f : (float) Knob.aetherScale(q[Knob.AETHER_SCALE.ordinal()]);
+        return Math.min(s, (float) memory.maxScale());  // the controller already holds it there; a non-adaptive game too
     }
 
-    /** The sun map's size (256 while far shadows are off: the near field still reads the map's clouds). */
+    /** The sun map's size (256 while far shadows are off: the near field still reads the map's clouds; 0 without a pack). */
     int sunMapSize() {
+        if (fallbackMode) return 0;
         int s = Knob.aetherSunMap(q[Knob.AETHER_SHADOWS.ordinal()]);
-        return s == 0 ? 256 : s;
+        return Math.min(s == 0 ? 256 : s, memory.maxSunMap());
     }
 
     int flags(int base) {
         int f = base;
-        if (Knob.AETHER_CLOUDS.snap(q[Knob.AETHER_CLOUDS.ordinal()]) < 1) f |= AetherNative.FRAME_CLOUDS_QUARTER;
+        if (Knob.AETHER_CLOUDS.snap(q[Knob.AETHER_CLOUDS.ordinal()]) < 1 || memory.quarterClouds())
+            f |= AetherNative.FRAME_CLOUDS_QUARTER;
         if (Knob.aetherSunMap(q[Knob.AETHER_SHADOWS.ordinal()]) == 0) f &= ~AetherNative.FRAME_SHADOWS;
+        if (fallbackMode) f &= ~(AetherNative.FRAME_CLOUDS | AetherNative.FRAME_CLOUDS_QUARTER);
         return f;
     }
 

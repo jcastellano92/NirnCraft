@@ -363,13 +363,57 @@ static Result runSuite(const std::string& data, aether_test::Profile profile, st
     bool smooth = host || (slow && *slow == '1') || sorted[sorted.size() * 99 / 100] < 8.0;
     glClean &= glCheck("streaming");
 
+    // a lost device mid-game (the test hook, as a TDR / GPU reset would): that frame fails with
+    // AETHER_ERR_DEVICE_LOST before GL is asked to wait on anything, every later frame fails the same way, GL stays
+    // clean and usable, detach and destroy are safe; then a fresh context (the mod's retry) renders again
+    bool lossOk = aether_debug_fault(ctx, AETHER_FAULT_DEVICE_LOST, 0) == AETHER_OK;
+    lossOk &= aether_gl_render(ctx, &ff) == AETHER_ERR_DEVICE_LOST;
+    lossOk &= aether_gl_render(ctx, &ff) == AETHER_ERR_DEVICE_LOST;
+    lossOk &= std::string(aether_info(ctx)).find("\"deviceLost\":true") != std::string::npos;
+    glClean &= glCheck("device lost");
     aether_gl_detach(ctx);
     glClean &= glCheck("detach");
     aether_destroy(ctx);
+    {
+        // GL still runs (nothing waits on a semaphore the lost device never signals)
+        GLuint probe = 0;
+        float one[4] = {1, 1, 1, 1};
+        gl.CreateTextures(GL_TEXTURE_2D, 1, &probe);
+        gl.TextureStorage2D(probe, 1, GL_RGBA16F, 4, 4);
+        gl.ClearTexImage(probe, 0, GL_RGBA, GL_FLOAT, one);
+        gl.Finish();
+        gl.DeleteTextures(1, &probe);
+    }
+    glClean &= glCheck("after the loss");
+    {
+        AetherContext* again = nullptr;
+        bool retry = aether_create(AETHER_BACKEND_VULKAN, &again) == AETHER_OK;
+        if (retry) {
+            std::vector<float> s0(256 * 256, 100.0f), w0(256 * 256, NAN);
+            std::vector<uint16_t> t0(256 * 256, 2), f0(256 * 256, 3);
+            AetherColumnTile tile{0, int32_t(std::floor(x / 256)), int32_t(std::floor(z / 256)), s0.data(), w0.data(),
+                                  t0.data(), f0.data(), nullptr, nullptr};
+            AetherGlTargets t2{};
+            AetherFrame small = ff;
+            small.width = 160;
+            small.height = 90;
+            retry = aether_upload_column_tile(again, &tile) == AETHER_OK && aether_update(again, centre, 0) == AETHER_OK &&
+                    aether_gl_attach(again, 160, 90, &t2) == AETHER_OK && aether_gl_render(again, &small) == AETHER_OK &&
+                    aether_gl_render(again, &small) == AETHER_OK;
+            if (!retry) std::printf("  retry context: %s\n", aether_last_error(again));
+            gl.Finish();
+            aether_gl_detach(again);
+            aether_destroy(again);
+        }
+        lossOk &= retry;
+        glClean &= glCheck("retry context");
+    }
+    std::printf("device loss: %s\n", lossOk ? "frame fails with AETHER_ERR_DEVICE_LOST, GL clean, a new context renders"
+                                             : "FAILED");
     glc.destroy();
     bool ok = c1.color == 0 && c1.depth == 0 && c2.color == 0 && c2.depth == 0 && coveredLit == 0 && glClean &&
               c3.color == 0 && c3.depth == 0 && c4.color == 0 && c4.depth == 0 && c5.color == 0 && c5.depth == 0 && sunOk &&
-              smooth;
+              smooth && lossOk;
     std::printf(ok ? "PASS\n" : "FAIL (gl error 0x%x)\n", e);
     return ok ? PASS : FAIL;
 }

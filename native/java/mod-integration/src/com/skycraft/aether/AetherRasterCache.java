@@ -29,11 +29,35 @@ final class AetherRasterCache {
 
     private AetherRasterCache() {}
 
+    /** Bytes of a complete file before its climate table (a shorter file is a damaged one). */
+    static final long MIN_BYTES = 4 + 7 * 4 + (long) W * H * CH * 4 + (long) W * H + 4;
+
+    /**
+     * The raster file for this mod version: in the game directory's skycraft/cache, or, when that is read-only (a
+     * Flatpak sandbox, a locked-down PC), in the same fallback places the native library goes (AetherLibrary).
+     */
     static Path ensure(Path gameDir, String modVersion) throws IOException {
-        Path dir = gameDir.resolve("skycraft").resolve("cache");
+        java.util.List<Path> dirs = new java.util.ArrayList<>();
+        dirs.add(gameDir.resolve("skycraft").resolve("cache"));
+        for (Path p : AetherLibrary.directories(null, System.getenv())) dirs.add(p.resolveSibling(p.getFileName() + "-cache"));
+        IOException first = null;
+        for (Path d : dirs) {
+            try {
+                return ensureIn(d, modVersion);
+            } catch (IOException | RuntimeException e) {
+                IOException io = e instanceof IOException x ? x : new IOException(e);
+                if (first == null) first = io;
+                else first.addSuppressed(io);
+            }
+        }
+        throw first != null ? first : new IOException("no directory for the raster cache");
+    }
+
+    private static Path ensureIn(Path dir, String modVersion) throws IOException {
         Files.createDirectories(dir);
         Path file = dir.resolve("tamriel_raster-" + modVersion.replaceAll("[^A-Za-z0-9._-]", "_") + ".bin");
-        if (Files.exists(file)) return file;
+        if (Files.isRegularFile(file) && Files.size(file) >= MIN_BYTES) return file;
+        Files.deleteIfExists(file);  // damaged (a disk error, a cleaner): build it again
         Raster regions = read("regions.png"), elev = read("elevation.png"), feat = read("features.png"),
                 ter = read("terrain.png"), wat = read("water.png"), coast = read("coast.png");
         Raster rain = readOptional("rainshadow.png"), heat = readOptional("heat.png");
@@ -75,10 +99,21 @@ final class AetherRasterCache {
         b.put(climate);
         b.flip();
         Path tmp = Files.createTempFile(dir, "raster", ".tmp");
-        try (FileChannel ch = FileChannel.open(tmp, StandardOpenOption.WRITE)) {
-            while (b.hasRemaining()) ch.write(b);
+        try {
+            try (FileChannel ch = FileChannel.open(tmp, StandardOpenOption.WRITE)) {
+                while (b.hasRemaining()) ch.write(b);
+                ch.force(true);
+            }
+            try {
+                Files.move(tmp, file, java.nio.file.StandardCopyOption.ATOMIC_MOVE);
+            } catch (java.nio.file.FileSystemException e) {
+                // another instance finished first (or the file system cannot move atomically): take a complete one
+                if (!(Files.isRegularFile(file) && Files.size(file) >= MIN_BYTES))
+                    Files.move(tmp, file, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+            }
+        } finally {
+            Files.deleteIfExists(tmp);
         }
-        Files.move(tmp, file);
         return file;
     }
 

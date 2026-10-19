@@ -239,8 +239,47 @@ struct Buf {
     VkDeviceMemory mem = VK_NULL_HANDLE;
     void* map = nullptr;
     VkDeviceSize size = 0;
+    VkDeviceSize memBytes = 0;  // of its allocation (aether_memory_info's aetherBytes)
     Mem kind = Mem::HostWrite;
 };
+
+// Fence waits: far longer than any frame or upload aether makes (a 4K frame on an iGPU is ~100 ms), shorter than a
+// player waits for a frozen game. Windows resets a GPU stuck for 2 s (TDR) and amdgpu after 10 s; either way the wait
+// returns VK_ERROR_DEVICE_LOST, and a wait that runs out first means a hung device, treated as lost.
+constexpr uint64_t FENCE_TIMEOUT_NS = 5'000'000'000ull;
+
+const char* vkResultName(VkResult r) {
+    switch (r) {
+        case VK_SUCCESS: return "VK_SUCCESS";
+        case VK_TIMEOUT: return "VK_TIMEOUT";
+        case VK_NOT_READY: return "VK_NOT_READY";
+        case VK_ERROR_DEVICE_LOST: return "VK_ERROR_DEVICE_LOST";
+        case VK_ERROR_OUT_OF_HOST_MEMORY: return "VK_ERROR_OUT_OF_HOST_MEMORY";
+        case VK_ERROR_OUT_OF_DEVICE_MEMORY: return "VK_ERROR_OUT_OF_DEVICE_MEMORY";
+        case VK_ERROR_OUT_OF_POOL_MEMORY: return "VK_ERROR_OUT_OF_POOL_MEMORY";
+        case VK_ERROR_FRAGMENTED_POOL: return "VK_ERROR_FRAGMENTED_POOL";
+        case VK_ERROR_INITIALIZATION_FAILED: return "VK_ERROR_INITIALIZATION_FAILED";
+        case VK_ERROR_MEMORY_MAP_FAILED: return "VK_ERROR_MEMORY_MAP_FAILED";
+        case VK_ERROR_TOO_MANY_OBJECTS: return "VK_ERROR_TOO_MANY_OBJECTS";
+        default: return "VkResult";
+    }
+}
+
+// What a failed VkResult means for the context (aether.h AetherStatus).
+Fault classify(VkResult r) {
+    switch (r) {
+        case VK_SUCCESS: return Fault::None;
+        case VK_ERROR_DEVICE_LOST: return Fault::DeviceLost;
+        case VK_TIMEOUT: return Fault::Timeout;
+        case VK_ERROR_OUT_OF_HOST_MEMORY:
+        case VK_ERROR_OUT_OF_DEVICE_MEMORY:
+        case VK_ERROR_OUT_OF_POOL_MEMORY:
+        case VK_ERROR_FRAGMENTED_POOL:
+        case VK_ERROR_TOO_MANY_OBJECTS:
+        case VK_ERROR_MEMORY_MAP_FAILED: return Fault::OutOfMemory;
+        default: return Fault::Error;
+    }
+}
 
 struct SharedImage {
     VkImage image = VK_NULL_HANDLE;
@@ -291,8 +330,14 @@ struct Slot {
 class VulkanBackend final : public Backend {
 public:
     ~VulkanBackend() override {
+        if (fault_ == Fault::Timeout) {
+            // a hung device may still run aether's work: destroying what it uses (or waiting for it) could crash or
+            // freeze the game, so everything is left to the driver and the process exit (a few hundred MB at most)
+            std::fprintf(stderr, "[aether] the GPU hung: the Vulkan device is abandoned, not destroyed\n");
+            return;
+        }
         if (dev_) {
-            vkDeviceWaitIdle(dev_);
+            vkDeviceWaitIdle(dev_);  // after a loss it returns VK_ERROR_DEVICE_LOST at once
             destroyInterop();
             for (auto& s : slots_) {
                 for (auto& b : s.bufs) release(b);
@@ -434,12 +479,12 @@ public:
             cba.commandBufferCount = 1;
             if (vkAllocateCommandBuffers(dev_, &cba, &s.cmd) != VK_SUCCESS) return fail(err, "command buffer");
             VkFenceCreateInfo fci{VK_STRUCTURE_TYPE_FENCE_CREATE_INFO};
-            vkCreateFence(dev_, &fci, nullptr, &s.fence);
+            if (!vkOk(vkCreateFence(dev_, &fci, nullptr, &s.fence), "vkCreateFence", err)) return false;
             if (timestamps_) {
                 VkQueryPoolCreateInfo q{VK_STRUCTURE_TYPE_QUERY_POOL_CREATE_INFO};
                 q.queryType = VK_QUERY_TYPE_TIMESTAMP;
                 q.queryCount = 2;
-                vkCreateQueryPool(dev_, &q, nullptr, &s.query);
+                if (vkCreateQueryPool(dev_, &q, nullptr, &s.query) != VK_SUCCESS) s.query = VK_NULL_HANDLE;  // no GPU timer
             }
             VkDescriptorSetLayout layouts[3] = {farSetLayout_, publishSetLayout_, ingestSetLayout_};
             VkDescriptorSet sets[3];
@@ -464,12 +509,41 @@ public:
             cba.commandBufferCount = 1;
             if (vkAllocateCommandBuffers(dev_, &cba, &c.uploadCmd) != VK_SUCCESS) return fail(err, "upload command buffer");
             VkFenceCreateInfo fci{VK_STRUCTURE_TYPE_FENCE_CREATE_INFO};
-            vkCreateFence(dev_, &fci, nullptr, &c.uploadFence);
+            if (!vkOk(vkCreateFence(dev_, &fci, nullptr, &c.uploadFence), "vkCreateFence (upload)", err)) return false;
         }
         return true;
     }
 
+    bool memoryInfo(MemoryInfo& m, std::string&) override {
+        VkPhysicalDeviceMemoryBudgetPropertiesEXT budget{VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MEMORY_BUDGET_PROPERTIES_EXT};
+        VkPhysicalDeviceMemoryProperties2 mp2{VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MEMORY_PROPERTIES_2};
+        if (budgetExt_) mp2.pNext = &budget;
+        vkGetPhysicalDeviceMemoryProperties2(phys_, &mp2);
+        const VkPhysicalDeviceMemoryProperties& mp = mp2.memoryProperties;
+        int local = -1, host = -1;
+        for (uint32_t h = 0; h < mp.memoryHeapCount; h++) {
+            bool isLocal = (mp.memoryHeaps[h].flags & VK_MEMORY_HEAP_DEVICE_LOCAL_BIT) != 0;
+            int& best = isLocal ? local : host;
+            if (best < 0 || mp.memoryHeaps[h].size > mp.memoryHeaps[best].size) best = int(h);
+        }
+        if (local >= 0) {
+            m.deviceLocalBytes = mp.memoryHeaps[local].size;
+            if (budgetExt_) {
+                m.deviceLocalBudget = budget.heapBudget[local];
+                m.deviceLocalUsage = budget.heapUsage[local];
+            }
+        }
+        if (host >= 0) m.hostHeapBytes = mp.memoryHeaps[host].size;
+        m.aetherBytes = allocated_.load();
+        m.integrated = props_.deviceType == VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU ||
+                       props_.deviceType == VK_PHYSICAL_DEVICE_TYPE_CPU;
+        m.budgetExt = budgetExt_;
+        return true;
+    }
+
     bool render(const FrameInputs& in, FrameTargets& out, double* gpuMs, std::string& err) override {
+        if (lost_) return fail(err, "the device was lost");
+        if (injectedNow(err)) return false;  // aether_debug_fault / AETHER_FAULT
         Slot& s = slots_[frameIndex_++ % SLOTS];
         if (!waitSlot(s, gpuMs, err)) return false;
         uint32_t w = in.frame.dims[0], h = in.frame.dims[1];
@@ -557,6 +631,9 @@ public:
 
     bool glRender(const FrameInputs& in, const GlFrameIO* io, double* gpuMs, std::string& err) override {
         if (!attached_) return fail(err, "aether_gl_attach first");
+        if (lost_) return fail(err, "the device was lost");
+        // before any GL semaphore is signalled: a failure here leaves GL waiting on nothing
+        if (injectedNow(err)) return false;
         uint32_t w = in.frame.dims[0], h = in.frame.dims[1];
         if (w != width_ || h != height_) return fail(err, "frame size differs from the attached targets (re-attach)");
         Slot& s = slots_[frameIndex_ % SLOTS];
@@ -757,6 +834,7 @@ public:
     }
 
     bool stageScene(const PackedScene& sc) override {
+        if (lost_) return false;
         std::lock_guard<std::mutex> lock(sceneMu_);
         int c = current_ == 0 ? 1 : 0;
         if (copies_[c].lastFrame > completedFrame_.load()) return false;  // a frame may still read it
@@ -768,6 +846,12 @@ public:
     }
 
     void glDetach() override {
+        if (fault_ == Fault::Timeout) {
+            // hung: nothing that work may still touch is freed (see the destructor); GL forgets the images
+            attached_ = false;
+            mode_ = Interop::None;
+            return;
+        }
         if (dev_) vkDeviceWaitIdle(dev_);
         for (auto& s : slots_) s.inFlight = false;
         destroyInterop();
@@ -775,9 +859,20 @@ public:
     }
 
 private:
-    static bool fail(std::string& err, const char* m) {
-        err = m;
-        return false;
+    bool fail(std::string& err, const char* m) { return failWith(Fault::Error, err, m); }
+
+    // false (and the fault recorded: lost, out of memory, timeout or plain error) unless r is VK_SUCCESS
+    bool vkOk(VkResult r, const char* what, std::string& err) {
+        if (r == VK_SUCCESS) return true;
+        Fault f = classify(r);
+        std::string msg = std::string(what) + ": " + vkResultName(r) + " (" + std::to_string(int(r)) + ")";
+        if (f == Fault::DeviceLost) msg += ": the GPU was reset (driver timeout / TDR, GPU reset) or aether's work faulted";
+        if (f == Fault::Timeout) msg += ": the GPU did not finish aether's work in 5 s (hung or stalled)";
+        return failWith(f, err, msg);
+    }
+
+    bool waitFence(VkFence f, const char* what, std::string& err) {
+        return vkOk(vkWaitForFences(dev_, 1, &f, VK_TRUE, FENCE_TIMEOUT_NS), what, err);
     }
 
     // GL state the pass touches is saved and restored: Minecraft's renderer caches its own bindings.
@@ -900,7 +995,7 @@ private:
         if (!upload(noiseStaging_, vol.data(), vol.size() * 4, false, Mem::Staging, err)) return false;
         VkCommandBuffer cmd = copies_[0].uploadCmd;  // idle: callers waited every slot and upload under sceneMu_
         std::lock_guard<std::mutex> scene(sceneMu_);
-        if (copies_[0].uploading) vkWaitForFences(dev_, 1, &copies_[0].uploadFence, VK_TRUE, UINT64_MAX);
+        if (copies_[0].uploading && !waitFence(copies_[0].uploadFence, "noise upload wait", err)) return false;
         copies_[0].uploading = false;
         vkResetCommandBuffer(cmd, 0);
         VkCommandBufferBeginInfo bi{VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO};
@@ -932,10 +1027,9 @@ private:
         vkResetFences(dev_, 1, &copies_[0].uploadFence);
         {
             std::lock_guard<std::mutex> q(queueMu_);
-            if (vkQueueSubmit(queue_, 1, &si, copies_[0].uploadFence) != VK_SUCCESS) return fail(err, "noise upload");
+            if (!vkOk(vkQueueSubmit(queue_, 1, &si, copies_[0].uploadFence), "noise upload", err)) return false;
         }
-        vkWaitForFences(dev_, 1, &copies_[0].uploadFence, VK_TRUE, UINT64_MAX);
-        return true;
+        return waitFence(copies_[0].uploadFence, "noise upload", err);
     }
 
     // ---- setup ---------------------------------------------------------------------------------------------
@@ -1189,6 +1283,11 @@ private:
         };
         std::vector<const char*> enable;
         // external memory / semaphores themselves are core in 1.1; only the handle flavour is an extension
+        // VK_EXT_memory_budget (optional): what the process may use of each heap, for aether_memory_info
+        if (has(VK_EXT_MEMORY_BUDGET_EXTENSION_NAME)) {
+            enable.push_back(VK_EXT_MEMORY_BUDGET_EXTENSION_NAME);
+            budgetExt_ = true;
+        }
         if (has(MEM_EXT) && has(SEM_EXT)) {
             enable.push_back(MEM_EXT);
             enable.push_back(SEM_EXT);
@@ -1211,7 +1310,22 @@ private:
         dci.pEnabledFeatures = &feats;
         dci.enabledExtensionCount = uint32_t(enable.size());
         dci.ppEnabledExtensionNames = enable.data();
-        if (vkCreateDevice(phys_, &dci, nullptr, &dev_) != VK_SUCCESS) return fail(err, "vkCreateDevice failed");
+        VkResult cr = vkCreateDevice(phys_, &dci, nullptr, &dev_);
+        if (cr != VK_SUCCESS && budgetExt_) {
+            // a driver that lists the budget extension yet refuses it: try again without
+            enable.erase(std::remove_if(enable.begin(), enable.end(),
+                                        [](const char* e) { return std::strcmp(e, VK_EXT_MEMORY_BUDGET_EXTENSION_NAME) == 0; }),
+                         enable.end());
+            budgetExt_ = false;
+            dci.enabledExtensionCount = uint32_t(enable.size());
+            dci.ppEnabledExtensionNames = enable.data();
+            dev_ = VK_NULL_HANDLE;
+            cr = vkCreateDevice(phys_, &dci, nullptr, &dev_);
+        }
+        if (cr != VK_SUCCESS) {
+            dev_ = VK_NULL_HANDLE;
+            return vkOk(cr, "vkCreateDevice", err);
+        }
         vkGetDeviceQueue(dev_, family_, 0, &queue_);
         if (interopCapable_) interopCapable_ = export_.load(dev_);
         return true;
@@ -1269,8 +1383,9 @@ private:
             std::unique_lock<std::mutex> lock(sceneMu_, std::try_to_lock);
             if (!lock.owns_lock() && current_ < 0) lock.lock();
             // the very first frame has nothing else to draw: it waits for a staged upload still in flight
-            if (lock.owns_lock() && current_ < 0 && staged_ >= 0 && copies_[staged_].revision == sc.revision)
-                vkWaitForFences(dev_, 1, &copies_[staged_].uploadFence, VK_TRUE, UINT64_MAX);
+            if (lock.owns_lock() && current_ < 0 && staged_ >= 0 && copies_[staged_].revision == sc.revision &&
+                !waitFence(copies_[staged_].uploadFence, "first scene upload", err))
+                return false;
             if (lock.owns_lock() && staged_ >= 0 && copies_[staged_].revision == sc.revision &&
                 vkGetFenceStatus(dev_, copies_[staged_].uploadFence) == VK_SUCCESS) {
                 current_ = staged_;  // staged off the render thread: just flip
@@ -1499,7 +1614,7 @@ private:
         vkResetFences(dev_, 1, &s.fence);
         {
             std::lock_guard<std::mutex> q(queueMu_);  // the staging thread submits scene copies to the same queue
-            if (vkQueueSubmit(queue_, 1, &si, s.fence) != VK_SUCCESS) return fail(err, "submit failed");
+            if (!vkOk(vkQueueSubmit(queue_, 1, &si, s.fence), "vkQueueSubmit (frame)", err)) return false;
         }
         s.inFlight = true;
         s.frameNumber = ++frameCounter_;
@@ -1510,7 +1625,7 @@ private:
     // Waits for the slot's previous submission and reports its GPU time.
     bool waitSlot(Slot& s, double* gpuMs, std::string& err) {
         if (!s.inFlight) return true;
-        if (vkWaitForFences(dev_, 1, &s.fence, VK_TRUE, 10'000'000'000ull) != VK_SUCCESS) return fail(err, "GPU timeout/device lost");
+        if (!waitFence(s.fence, "frame wait", err)) return false;
         s.inFlight = false;
         // frames complete in submission order on our single queue
         if (s.frameNumber > completedFrame_.load()) completedFrame_.store(s.frameNumber);
@@ -1599,7 +1714,10 @@ private:
         }
         if (s.view) vkDestroyImageView(dev_, s.view, nullptr);
         if (s.image) vkDestroyImage(dev_, s.image, nullptr);
-        if (s.mem) vkFreeMemory(dev_, s.mem, nullptr);
+        if (s.mem) {
+            vkFreeMemory(dev_, s.mem, nullptr);
+            allocated_ -= s.size;
+        }
         closeHandle(s.handle);
         s = {};
     }
@@ -1613,7 +1731,7 @@ public:
         VkDeviceSize bytes = VkDeviceSize(sunSize_) * (sunSize_ + 1) * 8;
         if (!ensure(sunReadback_, bytes, false, Mem::HostRead, err)) return false;
         std::lock_guard<std::mutex> scene(sceneMu_);
-        if (copies_[0].uploading) vkWaitForFences(dev_, 1, &copies_[0].uploadFence, VK_TRUE, UINT64_MAX);
+        if (copies_[0].uploading && !waitFence(copies_[0].uploadFence, "sun map readback wait", err)) return false;
         copies_[0].uploading = false;
         VkCommandBuffer cmd = copies_[0].uploadCmd;
         vkResetCommandBuffer(cmd, 0);
@@ -1633,9 +1751,9 @@ public:
         vkResetFences(dev_, 1, &copies_[0].uploadFence);
         {
             std::lock_guard<std::mutex> q(queueMu_);
-            if (vkQueueSubmit(queue_, 1, &si, copies_[0].uploadFence) != VK_SUCCESS) return fail(err, "sun map readback");
+            if (!vkOk(vkQueueSubmit(queue_, 1, &si, copies_[0].uploadFence), "sun map readback", err)) return false;
         }
-        vkWaitForFences(dev_, 1, &copies_[0].uploadFence, VK_TRUE, UINT64_MAX);
+        if (!waitFence(copies_[0].uploadFence, "sun map readback", err)) return false;
         out.resize(size_t(bytes / 4));
         std::memcpy(out.data(), sunReadback_.map, size_t(bytes));
         return true;
@@ -1708,7 +1826,10 @@ private:
         ic.tiling = VK_IMAGE_TILING_OPTIMAL;
         ic.usage = SHARED_USAGE;
         ic.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-        if (vkCreateImage(dev_, &ic, nullptr, &s.image) != VK_SUCCESS) return fail(err, "vkCreateImage (shared)");
+        if (!vkOk(vkCreateImage(dev_, &ic, nullptr, &s.image), "vkCreateImage (shared)", err)) {
+            s.image = VK_NULL_HANDLE;
+            return false;
+        }
         VkImageMemoryRequirementsInfo2 ri{VK_STRUCTURE_TYPE_IMAGE_MEMORY_REQUIREMENTS_INFO_2};
         ri.image = s.image;
         VkMemoryDedicatedRequirements dr{VK_STRUCTURE_TYPE_MEMORY_DEDICATED_REQUIREMENTS};
@@ -1728,10 +1849,10 @@ private:
         ma.allocationSize = req.size;
         ma.memoryTypeIndex = memoryType(req.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
         if (ma.memoryTypeIndex == UINT32_MAX) ma.memoryTypeIndex = memoryType(req.memoryTypeBits, 0);
-        if (ma.memoryTypeIndex == UINT32_MAX || vkAllocateMemory(dev_, &ma, nullptr, &s.mem) != VK_SUCCESS)
-            return fail(err, "vkAllocateMemory (shared image)");
-        if (vkBindImageMemory(dev_, s.image, s.mem, 0) != VK_SUCCESS) return fail(err, "vkBindImageMemory (shared)");
+        if (ma.memoryTypeIndex == UINT32_MAX) return fail(err, "no memory type for the shared image");
+        if (!vkOk(allocate(ma, s.mem), "vkAllocateMemory (shared image)", err)) return false;
         s.size = req.size;
+        if (!vkOk(vkBindImageMemory(dev_, s.image, s.mem, 0), "vkBindImageMemory (shared)", err)) return false;
         VkImageViewCreateInfo vc{VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO};
         vc.image = s.image;
         vc.viewType = VK_IMAGE_VIEW_TYPE_2D;
@@ -1819,8 +1940,20 @@ private:
     void release(Buf& b) {
         if (b.map) vkUnmapMemory(dev_, b.mem);
         if (b.buf) vkDestroyBuffer(dev_, b.buf, nullptr);
-        if (b.mem) vkFreeMemory(dev_, b.mem, nullptr);
+        if (b.mem) {
+            vkFreeMemory(dev_, b.mem, nullptr);
+            allocated_ -= b.memBytes;
+        }
         b = {};
+    }
+
+    // vkAllocateMemory with the bookkeeping aether_memory_info reports (and the test hook's view of it)
+    VkResult allocate(const VkMemoryAllocateInfo& ma, VkDeviceMemory& mem) {
+        mem = VK_NULL_HANDLE;
+        VkResult r = vkAllocateMemory(dev_, &ma, nullptr, &mem);
+        if (r == VK_SUCCESS) allocated_ += ma.allocationSize;
+        else mem = VK_NULL_HANDLE;
+        return r;
     }
 
     // (Re)allocates b when too small or in the wrong memory kind. The caller guarantees the GPU is not using it
@@ -1839,7 +1972,10 @@ private:
         bc.size = alloc;
         bc.usage = (uniform ? VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT : VK_BUFFER_USAGE_STORAGE_BUFFER_BIT) |
                    VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
-        if (vkCreateBuffer(dev_, &bc, nullptr, &b.buf) != VK_SUCCESS) return fail(err, "vkCreateBuffer");
+        if (!vkOk(vkCreateBuffer(dev_, &bc, nullptr, &b.buf), "vkCreateBuffer", err)) {
+            b.buf = VK_NULL_HANDLE;
+            return false;
+        }
         VkMemoryRequirements req;
         vkGetBufferMemoryRequirements(dev_, b.buf, &req);
         uint32_t want = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
@@ -1857,7 +1993,9 @@ private:
         VkMemoryAllocateInfo ma{VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO};
         ma.allocationSize = req.size;
         ma.memoryTypeIndex = type;
-        if (vkAllocateMemory(dev_, &ma, nullptr, &b.mem) != VK_SUCCESS) {
+        VkResult ar = allocate(ma, b.mem);
+        if (ar == VK_ERROR_DEVICE_LOST) return vkOk(ar, "vkAllocateMemory", err);
+        if (ar != VK_SUCCESS) {
             // BAR heaps are small on some systems; retry in system memory
             VkPhysicalDeviceMemoryProperties mp;
             vkGetPhysicalDeviceMemoryProperties(phys_, &mp);
@@ -1869,10 +2007,15 @@ private:
                     break;
                 }
             ma.memoryTypeIndex = type;
-            if (type == UINT32_MAX || vkAllocateMemory(dev_, &ma, nullptr, &b.mem) != VK_SUCCESS) return fail(err, "vkAllocateMemory");
+            if (type == UINT32_MAX) return vkOk(ar, "vkAllocateMemory (no system-memory fallback)", err);
+            if (!vkOk(allocate(ma, b.mem), "vkAllocateMemory", err)) return false;
         }
-        vkBindBufferMemory(dev_, b.buf, b.mem, 0);
-        if (kind != Mem::DeviceOnly) vkMapMemory(dev_, b.mem, 0, VK_WHOLE_SIZE, 0, &b.map);
+        b.memBytes = req.size;
+        if (!vkOk(vkBindBufferMemory(dev_, b.buf, b.mem, 0), "vkBindBufferMemory", err)) return false;
+        if (kind != Mem::DeviceOnly && !vkOk(vkMapMemory(dev_, b.mem, 0, VK_WHOLE_SIZE, 0, &b.map), "vkMapMemory", err)) {
+            b.map = nullptr;
+            return false;
+        }
         b.size = alloc;
         b.kind = kind;
         // whichever set points at this buffer must be rewritten
@@ -1892,7 +2035,7 @@ private:
     // Scene arrays -> staging (CPU) -> device-local buffers (GPU copy). The caller holds sceneMu_ and guarantees no
     // frame reads this copy. wait: block until the copy is done (render-thread fallback).
     bool uploadScene(SceneCopy& c, const PackedScene& sc, bool wait, std::string& err) {
-        if (c.uploading) vkWaitForFences(dev_, 1, &c.uploadFence, VK_TRUE, UINT64_MAX);
+        if (c.uploading && !waitFence(c.uploadFence, "scene upload wait", err)) return false;
         c.uploading = false;
         const void* src[BINDINGS] = {};
         VkDeviceSize bytes[BINDINGS] = {}, offset[BINDINGS] = {}, total = 0;
@@ -1946,20 +2089,23 @@ private:
         vkResetFences(dev_, 1, &c.uploadFence);
         {
             std::lock_guard<std::mutex> q(queueMu_);
-            if (vkQueueSubmit(queue_, 1, &si, c.uploadFence) != VK_SUCCESS) return fail(err, "scene upload submit failed");
+            if (!vkOk(vkQueueSubmit(queue_, 1, &si, c.uploadFence), "vkQueueSubmit (scene upload)", err)) return false;
         }
         c.uploading = true;
         c.revision = sc.revision;
-        if (wait) vkWaitForFences(dev_, 1, &c.uploadFence, VK_TRUE, UINT64_MAX);
+        if (wait && !waitFence(c.uploadFence, "scene upload", err)) return false;
         return true;
     }
 
     bool upload(Buf& b, const void* data, size_t bytes, bool uniform, Mem kind, std::string& err) {
         if (!ensure(b, bytes, uniform, kind, err)) return false;
+        if (bytes && !b.map) return fail(err, "upload into an unmapped buffer");
         if (bytes) std::memcpy(b.map, data, bytes);
         return true;
     }
 
+    std::atomic<uint64_t> allocated_{0};  // device memory allocated by this backend (bytes)
+    bool budgetExt_ = false;              // VK_EXT_memory_budget enabled
     VkInstance inst_ = VK_NULL_HANDLE;
     VkDebugUtilsMessengerEXT messenger_ = VK_NULL_HANDLE;
     VkPhysicalDevice phys_ = VK_NULL_HANDLE;

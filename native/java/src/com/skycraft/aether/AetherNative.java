@@ -25,8 +25,14 @@ import static java.lang.foreign.ValueLayout.JAVA_SHORT;
  * heap access, so Java arrays are passed in place without an off-heap copy; frame rendering is a normal downcall.</p>
  */
 public final class AetherNative {
-    public static final int ABI_VERSION = 0x000A00;
+    /** The ABI this binding is written for (0.11: far content + failure handling); the mod ships matching natives. */
+    public static final int ABI_VERSION = 0x000B00, ABI_MIN = 0x000B00;
     public static final int BACKEND_CPU = 0, BACKEND_VULKAN = 1;
+    /** AetherStatus (aether.h). */
+    public static final int OK = 0, ERR_ARG = -1, ERR_STATE = -2, ERR_IO = -3, ERR_GPU = -4, ERR_UNSUPPORTED = -5,
+            ERR_DEVICE_LOST = -6, ERR_OUT_OF_MEMORY = -7, ERR_TIMEOUT = -8, ERR_INTERNAL = -9;
+    /** aether_debug_fault kinds. */
+    public static final int FAULT_NONE = 0, FAULT_DEVICE_LOST = 1, FAULT_OUT_OF_MEMORY = 2, FAULT_TIMEOUT = 3;
     public static final int FRAME_CLOUDS = 0x1, FRAME_SHADOWS = 0x2, FRAME_ATMOS = 0x4, FRAME_ACTORS = 0x8,
             FRAME_SKY = 0x10, FRAME_NEAR_DEPTH = 0x20, FRAME_FLAT_NORMALS = 0x40, FRAME_CLOUDS_QUARTER = 0x80,
             FRAME_DEBUG_LOD = 0x100, FRAME_DEBUG_WEATHER = 0x200, FRAME_LOD_DITHER = 0x1000;
@@ -37,19 +43,102 @@ public final class AetherNative {
 
     // struct sizes and offsets (see api.cpp)
     static final long MATERIAL_SIZE = 24, TILE_SIZE = 64, FRAME_SIZE = 144, OUTPUT_SIZE = 32, WEATHER_SIZE = 40,
-            ACTOR_SIZE = 48, STATS_SIZE = 56, GL_TARGETS_SIZE = 24, GL_IO_SIZE = 96, LIGHT_SIZE = 40;
+            ACTOR_SIZE = 48, STATS_SIZE = 56, GL_TARGETS_SIZE = 24, GL_IO_SIZE = 96, LIGHT_SIZE = 40, MEMORY_INFO_SIZE = 48;
     /** Far light kinds (AetherLight.kind). */
     public static final int LIGHT_NIGHT = 0, LIGHT_FIRE = 1, LIGHT_LAVA = 2, LIGHT_MIST = 3;
+
+    /**
+     * A failed aether call, with its AetherStatus. {@link #deviceLost()}: the GPU was reset or hung (the context is
+     * dead; make a new one after a cool-down); {@link #outOfMemory()}: retry smaller.
+     */
+    public static final class AetherException extends IllegalStateException {
+        public final int status;
+
+        public AetherException(int status, String message) {
+            super(message);
+            this.status = status;
+        }
+
+        public boolean deviceLost() {
+            return status == ERR_DEVICE_LOST || status == ERR_TIMEOUT;
+        }
+
+        public boolean outOfMemory() {
+            return status == ERR_OUT_OF_MEMORY;
+        }
+
+        public static String statusName(int s) {
+            return switch (s) {
+                case OK -> "ok";
+                case ERR_ARG -> "bad argument";
+                case ERR_STATE -> "bad state";
+                case ERR_IO -> "i/o error";
+                case ERR_GPU -> "GPU error";
+                case ERR_UNSUPPORTED -> "unsupported";
+                case ERR_DEVICE_LOST -> "device lost";
+                case ERR_OUT_OF_MEMORY -> "out of memory";
+                case ERR_TIMEOUT -> "GPU timeout";
+                case ERR_INTERNAL -> "internal error";
+                default -> "status " + s;
+            };
+        }
+    }
+
+    /**
+     * Java refused this module a restricted method (java.lang.foreign needs native access: --enable-native-access,
+     * or the launcher's module layer granting it). Carries the line to log.
+     */
+    public static final class NativeAccessDenied extends RuntimeException {
+        public NativeAccessDenied(String message, Throwable cause) {
+            super(message, cause);
+        }
+    }
+
+    /** The JVM argument that grants this class's module native access (ALL-UNNAMED for the class path). */
+    public static String enableNativeAccessArg() {
+        Module m = AetherNative.class.getModule();
+        return "--enable-native-access=" + (m.isNamed() ? m.getName() : "ALL-UNNAMED");
+    }
+
+    /**
+     * Null when this module may call restricted methods without a warning; else one actionable line (Java 25 still
+     * allows the calls with a warning unless --illegal-native-access=deny; later releases will refuse them).
+     */
+    public static String nativeAccessAdvice() {
+        Module m = AetherNative.class.getModule();
+        if (m.isNativeAccessEnabled()) return null;
+        return "native access is not enabled for " + (m.isNamed() ? "module " + m.getName() : "the class path")
+                + " (add the JVM argument " + enableNativeAccessArg() + "; Java 25 only warns, later releases will refuse)";
+    }
+
+    static NativeAccessDenied denied(IllegalCallerException e) {
+        return new NativeAccessDenied("Java denied native access (" + e.getMessage() + "): start the game with the JVM "
+                + "argument " + enableNativeAccessArg() + " (Prism: Edit instance > Settings > Java > JVM arguments; "
+                + "Skycraft's Prism instance zip sets it; a .mrpack cannot, add it in the launcher)", e);
+    }
 
     private final Arena libArena;
     private final MethodHandle abiVersion, buildInfo, create, destroy, lastError, setPalette, uploadTile,
             uploadSection, notifyBlock, setWeather, setCloudNoise, setActors, update, render, getStats,
             glAttach, glRenderIo, glDetach, info, previewLoadRaster, previewGenerate, previewHeight, uploadHeights, uploadHeights2, hasTile, uploadStructures, uploadStructures2, uploadHeights3, setMaterials, setSunMap, setTransitions, setLightGroup, setLightBudget,
             heightCreate, heightDestroy, heightLastError, heightDevice, heightSetNoise, heightBatch;
+    // abi 0.10 (null with a 0.9 library)
+    private final MethodHandle memoryInfo, setClipmap, debugFault;
+    private int abi;
 
     private AetherNative(Path library) {
         libArena = Arena.ofShared();
-        SymbolLookup lib = SymbolLookup.libraryLookup(library, libArena);
+        SymbolLookup lib;
+        try {
+            lib = SymbolLookup.libraryLookup(library, libArena);
+        } catch (IllegalCallerException e) {
+            libArena.close();
+            throw denied(e);
+        } catch (IllegalArgumentException e) {
+            libArena.close();
+            // the library would not load (wrong architecture, a missing dependency, a noexec mount)
+            throw new UnsatisfiedLinkError("aether_core does not load from " + library + ": " + e.getMessage());
+        }
         Linker l = Linker.nativeLinker();
         Linker.Option critical = Linker.Option.critical(true);
         abiVersion = bind(l, lib, "aether_abi_version", FunctionDescriptor.of(JAVA_INT), critical);
@@ -102,6 +191,18 @@ public final class AetherNative {
         heightSetNoise = bind(l, lib, "aether_height_set_noise", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, JAVA_INT));
         heightBatch = bind(l, lib, "aether_height_batch", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, JAVA_INT,
                 JAVA_INT, JAVA_INT, JAVA_INT, ADDRESS, ADDRESS, ADDRESS, ADDRESS));
+        memoryInfo = bindOptional(l, lib, "aether_memory_info", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS));
+        setClipmap = bindOptional(l, lib, "aether_set_clipmap", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT));
+        debugFault = bindOptional(l, lib, "aether_debug_fault", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, JAVA_INT));
+    }
+
+    private static MethodHandle bindOptional(Linker l, SymbolLookup lib, String name, FunctionDescriptor fd) {
+        return lib.find(name).map(s -> l.downcallHandle(s, fd)).orElse(null);
+    }
+
+    /** The loaded library's ABI version. */
+    public int abi() {
+        return abi;
     }
 
     /** 32-bit words per noise layer, and noise calls (slots) per column, of the exact-noise kernel (aether.h). */
@@ -190,15 +291,28 @@ public final class AetherNative {
         return l.downcallHandle(sym, fd, opts);
     }
 
-    /** Loads the library and checks its ABI version. */
+    /**
+     * Loads the library and checks its ABI version (ABI_MIN .. ABI_VERSION). Throws {@link NativeAccessDenied} when
+     * Java refuses this module native access, UnsatisfiedLinkError when the file is not a usable aether_core.
+     */
     public static AetherNative load(Path library) {
-        AetherNative n = new AetherNative(library);
-        int v = n.abiVersion();
-        if (v != ABI_VERSION) {
-            throw new UnsatisfiedLinkError("aether_core ABI " + Integer.toHexString(v) + ", binding expects "
-                    + Integer.toHexString(ABI_VERSION));
+        AetherNative n;
+        try {
+            n = new AetherNative(library);
+        } catch (IllegalCallerException e) {
+            throw denied(e);  // Linker.downcallHandle is restricted too
         }
+        int v = n.abiVersion();
+        if (v < ABI_MIN || v > ABI_VERSION) {
+            throw new UnsatisfiedLinkError("aether_core ABI " + abiString(v) + ", this binding drives "
+                    + abiString(ABI_MIN) + " .. " + abiString(ABI_VERSION));
+        }
+        n.abi = v;
         return n;
+    }
+
+    public static String abiString(int v) {
+        return (v >> 16 & 255) + "." + (v >> 8 & 255) + "." + (v & 255);
     }
 
     public int abiVersion() {
@@ -224,7 +338,8 @@ public final class AetherNative {
             if (s != 0) {
                 // no context to ask: aether_last_error(NULL) holds why (e.g. every Vulkan device and its reason)
                 String why = ((MemorySegment) lastError.invokeExact(MemorySegment.NULL)).reinterpret(4096).getString(0);
-                throw new IllegalStateException("aether_create(" + backend + ") failed: " + s + " (" + why + ")");
+                throw new AetherException(s, "aether_create(" + backend + ") failed: " + AetherException.statusName(s)
+                        + " (" + why + ")");
             }
             return new Context(out.get(ADDRESS, 0));
         } catch (Throwable t) {
@@ -269,6 +384,10 @@ public final class AetherNative {
 
     public record Stats(int regions, long nodeBytes, long leafBytes, long materialBytes, double buildMs, double frameMs,
                         long raySteps) {}
+
+    /** aether_memory_info (abi 0.10): bytes; budget / usage 0 when the driver lacks VK_EXT_memory_budget. */
+    public record MemoryInfo(long deviceLocal, long budget, long usage, long hostHeap, long aether, boolean integrated,
+                             boolean budgetExt) {}
 
     /** GL texture names of the images shared with the game's GL context (rows bottom-up). */
     public record GlTargets(int color, int normal, int depth, int nearDepth, int width, int height) {}
@@ -320,7 +439,46 @@ public final class AetherNative {
         }
 
         private void check(int status, String what) {
-            if (status != 0) throw new IllegalStateException(what + " failed (" + status + "): " + lastError());
+            if (status != 0) {
+                throw new AetherException(status, what + " failed (" + AetherException.statusName(status) + "): "
+                        + lastError());
+            }
+        }
+
+        /** The device's memory (abi 0.10), or null (a 0.9 library, the CPU backend, a lost device). */
+        public MemoryInfo memoryInfo() {
+            if (memoryInfo == null) return null;
+            try (Arena a = Arena.ofConfined()) {
+                MemorySegment m = a.allocate(MEMORY_INFO_SIZE, 8);
+                int s = (int) memoryInfo.invokeExact(ptr, m);
+                if (s != 0) return null;
+                return new MemoryInfo(m.get(JAVA_LONG, 0), m.get(JAVA_LONG, 8), m.get(JAVA_LONG, 16), m.get(JAVA_LONG, 24),
+                        m.get(JAVA_LONG, 32), m.get(JAVA_INT, 40) != 0, (m.get(JAVA_INT, 44) & 1) != 0);
+            } catch (Throwable t) {
+                throw rethrow(t);
+            }
+        }
+
+        /** Clipmap levels kept (abi 0.10; before the first update). False with a 0.9 library (it keeps 7). */
+        public boolean setClipmap(int lodCount) {
+            if (setClipmap == null) return false;
+            try {
+                check((int) setClipmap.invokeExact(ptr, lodCount), "aether_set_clipmap");
+                return true;
+            } catch (Throwable t) {
+                throw rethrow(t);
+            }
+        }
+
+        /** Test hook (abi 0.10): fail as the driver would after afterFrames frames. False with a 0.9 library. */
+        public boolean debugFault(int fault, int afterFrames) {
+            if (debugFault == null) return false;
+            try {
+                check((int) debugFault.invokeExact(ptr, fault, afterFrames), "aether_debug_fault");
+                return true;
+            } catch (Throwable t) {
+                throw rethrow(t);
+            }
         }
 
         /** Palette ids 1..n: albedo linear rgb, roughness, emissive, class. */

@@ -16,24 +16,28 @@ public final class AetherServer {
     private AetherServer() {}
 
     public static void init() {
-        NeoForge.EVENT_BUS.addListener((ServerStartedEvent e) -> AetherTileServer.start(e.getServer()));
+        // never crash the server for the far field: a failing hook turns its feature off with one WARN line
+        NeoForge.EVENT_BUS.addListener((ServerStartedEvent e) ->
+                AetherGuard.run("aether tile service", () -> AetherTileServer.start(e.getServer())));
         NeoForge.EVENT_BUS.addListener((ServerStoppingEvent e) -> {
-            AetherTileServer.stop();
-            AetherNatural.stop();
+            AetherGuard.run("aether tile service stop", AetherTileServer::stop);
+            AetherGuard.run("aether natural sites stop", AetherNatural::stop);
         });
         NeoForge.EVENT_BUS.addListener((PlayerEvent.PlayerLoggedInEvent e) -> {
-            AetherNet.Hello hello = AetherTileServer.hello();
-            if (hello != null && e.getEntity() instanceof ServerPlayer p) SkyNetwork.sendToPlayer(p, hello);
-            AetherNatural.forget(e.getEntity().getUUID());
+            AetherGuard.run("aether tile service", () -> {
+                AetherNet.Hello hello = AetherTileServer.hello();
+                if (hello != null && e.getEntity() instanceof ServerPlayer p) SkyNetwork.sendToPlayer(p, hello);
+            });
+            AetherGuard.run("aether natural sites", () -> AetherNatural.forget(e.getEntity().getUUID()));
         });
         NeoForge.EVENT_BUS.addListener((PlayerEvent.PlayerLoggedOutEvent e) -> {
-            if (e.getEntity() instanceof ServerPlayer p) AetherTileServer.forget(p);
-            AetherNatural.forget(e.getEntity().getUUID());
+            if (e.getEntity() instanceof ServerPlayer p) AetherGuard.run("aether tile service", () -> AetherTileServer.forget(p));
+            AetherGuard.run("aether natural sites", () -> AetherNatural.forget(e.getEntity().getUUID()));
         });
         NeoForge.EVENT_BUS.addListener((ServerTickEvent.Post e) -> {
-            AetherTileServer.tick();
-            AetherFarActors.tick(e.getServer());
-            AetherNatural.tick(e.getServer());
+            AetherGuard.run("aether tile service", AetherTileServer::tick);
+            AetherGuard.run("aether far actors", () -> AetherFarActors.tick(e.getServer()));
+            AetherGuard.run("aether natural sites", () -> AetherNatural.tick(e.getServer()));
         });
     }
 }

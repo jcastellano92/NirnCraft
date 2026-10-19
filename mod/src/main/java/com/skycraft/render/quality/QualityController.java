@@ -50,6 +50,8 @@ public final class QualityController {
     private final boolean adaptive;
 
     private final double[] floor = new double[N], ceil = new double[N], ones = new double[N];
+    /** Ceilings from the machine's memory (aether's scale, sun map, cloud pass): 1 unless {@link #limitAether}. */
+    private final double[] memCeil = new double[N];
     private final double[] target = new double[N], applied = new double[N], out = new double[N];
     private final double[] discreteOut = new double[N];
     private final long[] discreteChanged = new long[N];
@@ -81,6 +83,7 @@ public final class QualityController {
         for (Knob k : Knob.ALL) {
             floor[k.ordinal()] = k.floor;
             ceil[k.ordinal()] = 1;
+            memCeil[k.ordinal()] = 1;
         }
         Arrays.fill(ones, 1);
         Arrays.fill(out, 1);
@@ -112,6 +115,25 @@ public final class QualityController {
     /** True while an integrated server hosting guests runs long ticks: quality never drops for the CPU's sake. */
     public void setHostBusy(boolean busy) {
         hostBusy = busy;
+    }
+
+    /**
+     * What this machine's memory allows aether (AetherMemory's plan): ceilings for its render scale and sun map knobs,
+     * quarter-resolution clouds, and the fallback tier to start from (1: the far field at its lowest until the frame
+     * has room). The ceilings hold in every tier and through calibration; a later call replaces them (after running
+     * out of memory the plan shrinks). Callable before or after the first frame.
+     */
+    public void limitAether(double scaleCeil, double shadowCeil, boolean quarterClouds, int initialTier) {
+        memCeil[Knob.AETHER_SCALE.ordinal()] = Knob.clamp01(scaleCeil);
+        memCeil[Knob.AETHER_SHADOWS.ordinal()] = Knob.clamp01(shadowCeil);
+        memCeil[Knob.AETHER_CLOUDS.ordinal()] = quarterClouds ? 0 : 1;
+        if (initialTier > fallback && initialTier <= 1) fallback = initialTier;
+        applyFallbackCeilings();
+    }
+
+    /** The ceiling a knob is held under now (tier and memory). */
+    public double ceiling(Knob k) {
+        return ceil[k.ordinal()];
     }
 
     /** Starts from a saved profile (skips calibration). */
@@ -162,7 +184,8 @@ public final class QualityController {
                 enter(Phase.QUICK, now);  // the cover went away: finish with gentle nudges
             } else {
                 double[] step = plan.get(planIndex);
-                System.arraycopy(step, 0, out, 0, N);
+                // the plan's settings, under the memory ceilings (calibration must not allocate what cannot fit)
+                for (int k = 0; k < N; k++) out[k] = Math.min(step[k], memCeil[k]);
                 if (++planFrames >= CAL_FRAMES) {
                     planFrames = 0;
                     if (++planIndex >= plan.size()) {
@@ -187,7 +210,8 @@ public final class QualityController {
     }
 
     private void start(long now) {
-        Arrays.fill(ceil, 1);
+        System.arraycopy(memCeil, 0, ceil, 0, N);
+        if (fallback > 0) applyFallbackCeilings();
         reallocate(now, true);  // from the priors (or the restored profile)
         System.arraycopy(target, 0, applied, 0, N);
         for (int k = 0; k < N; k++) discreteOut[k] = Knob.ALL[k].snap(target[k]);
@@ -299,7 +323,7 @@ public final class QualityController {
 
     private void applyFallbackCeilings() {
         for (Knob k : new Knob[] {Knob.AETHER_SCALE, Knob.AETHER_LOD, Knob.AETHER_CLOUDS, Knob.AETHER_SHADOWS})
-            ceil[k.ordinal()] = fallback > 0 ? 0 : 1;
+            ceil[k.ordinal()] = fallback > 0 ? 0 : memCeil[k.ordinal()];
         for (int k = 0; k < N; k++) target[k] = Math.min(target[k], ceil[k]);
         gpuEma = -1;  // the new tier measures afresh
         residual = 0;

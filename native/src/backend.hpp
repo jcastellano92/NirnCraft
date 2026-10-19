@@ -41,10 +41,35 @@ struct GlTargets {
     uint32_t width = 0, height = 0;
 };
 
+// Why a backend call failed, beyond its message: decides the status the C API returns (aether.h AetherStatus).
+enum class Fault { None, Error, DeviceLost, OutOfMemory, Timeout };
+
+// Memory of the device (aether_memory_info); zeros where unknown.
+struct MemoryInfo {
+    uint64_t deviceLocalBytes = 0, deviceLocalBudget = 0, deviceLocalUsage = 0, hostHeapBytes = 0, aetherBytes = 0;
+    bool integrated = false, budgetExt = false;
+};
+
 class Backend {
 public:
     virtual ~Backend() = default;
     virtual const char* name() const = 0;
+
+    // ---- failure state (every backend): what the last failed call ran into, and whether the device is gone
+    Fault fault() const { return fault_; }
+    // True once the device is lost or hung: the backend refuses every further GPU call (and frees nothing it would
+    // have to wait on).
+    bool lost() const { return lost_; }
+    void clearFault() { if (!lost_) fault_ = Fault::None; }
+    // Test hook (aether_debug_fault): fail as the driver would, after `afterFrames` more frames.
+    void injectFault(Fault f, uint32_t afterFrames) {
+        injected_ = f;
+        injectCountdown_ = afterFrames;
+    }
+    virtual bool memoryInfo(MemoryInfo&, std::string& err) {
+        err = "this backend has no device memory";
+        return false;
+    }
     // One line of JSON for logs: device, driver, interop mode and the features it was chosen from.
     virtual std::string info() const { return std::string("{\"backend\":\"") + name() + "\"}"; }
     virtual bool render(const FrameInputs& in, FrameTargets& out, double* gpuMs, std::string& err) = 0;
@@ -71,6 +96,37 @@ public:
         out.clear();
         return false;
     }
+
+protected:
+    // Records a failure; a lost device (or a hang) is permanent for this backend.
+    bool failWith(Fault f, std::string& err, const std::string& msg) {
+        fault_ = f;
+        if (f == Fault::DeviceLost || f == Fault::Timeout) lost_ = true;
+        err = msg;
+        return false;
+    }
+    // Called at the start of every frame: true (and err set, the fault recorded) when an injected fault fires now.
+    bool injectedNow(std::string& err) {
+        if (injected_ == Fault::None) return false;
+        if (injectCountdown_ > 0) {
+            injectCountdown_--;
+            return false;
+        }
+        Fault f = injected_;
+        injected_ = Fault::None;
+        const char* what = f == Fault::DeviceLost    ? "VK_ERROR_DEVICE_LOST (injected by aether_debug_fault / AETHER_FAULT)"
+                           : f == Fault::Timeout     ? "GPU timeout (injected by aether_debug_fault / AETHER_FAULT)"
+                           : f == Fault::OutOfMemory ? "VK_ERROR_OUT_OF_DEVICE_MEMORY (injected by aether_debug_fault / AETHER_FAULT)"
+                                                     : "injected error";
+        return !failWith(f, err, what);
+    }
+
+    Fault fault_ = Fault::None;
+    bool lost_ = false;
+
+private:
+    Fault injected_ = Fault::None;
+    uint32_t injectCountdown_ = 0;
 };
 
 std::unique_ptr<Backend> makeCpuBackend();

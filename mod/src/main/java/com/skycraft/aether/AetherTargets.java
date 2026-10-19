@@ -101,6 +101,15 @@ final class AetherTargets implements AutoCloseable {
         return depth.glId;
     }
 
+    /** The registered textures (what the pack samples; the fallback compositor draws from them). */
+    Target colorTarget() {
+        return color;
+    }
+
+    Target depthTarget() {
+        return depth;
+    }
+
     /** Nothing far (another dimension, or no window built yet): coverage 0, so the pack shows the near field alone.
      * Requested from inside the level render (where a pass is open and no encoder work is allowed) and carried out
      * by {@link #flushClear()} between frames. */

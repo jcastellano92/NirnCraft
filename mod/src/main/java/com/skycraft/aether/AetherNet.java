@@ -60,7 +60,7 @@ public final class AetherNet {
         SkyNetwork.register(TileRequest.class, PacketFlow.SERVERBOUND, AetherNet::writeRequest, AetherNet::readRequest,
                 (m, ctx) -> {
                     ServerPlayer p = SkyNetwork.sender(ctx);
-                    if (p != null) AetherTileServer.request(p, m);
+                    if (p != null) AetherGuard.run("aether tile service", () -> AetherTileServer.request(p, m));
                 });
 
         SkyNetwork.register(TileData.class, PacketFlow.CLIENTBOUND, (m, b) -> {
