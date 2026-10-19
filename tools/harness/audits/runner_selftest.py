@@ -201,5 +201,15 @@ pp = review.parse_pose("\n".join(["VERDICT: WEAK", "SEES: a wall", "PROBLEMS: to
 expect(pp["verdict"] == "WEAK" and pp["fix"] == "move back 40 blocks", "the pose review's answer is read field by field")
 expect(review.parse_pose("I could not open the image.")["verdict"] is None, "no verdict line: unvetted, never a pass")
 
+# --- truth subjects offset from their place look back at it (five faced away: yaw 0 is south in Minecraft) -----------
+import math as _math
+import truth as _truth
+for _sub in _truth.SUBJECTS:
+    _pose = _sub[2]
+    _ox, _oz = (_pose.get("offset") or [0, 0])[:2]
+    if (_ox or _oz) and _sub[0] not in _truth.LOOKS_AWAY:
+        _y = _math.radians(_pose.get("yaw", 0))
+        expect(-_math.sin(_y) * -_ox + _math.cos(_y) * -_oz > 0, f"truth subject {_sub[0]} faces its place")
+
 print(f"problems {len(problems)}")
 sys.exit(1 if problems else 0)
