@@ -151,6 +151,19 @@ First result (a synthetic tree on a grass slab, before real exports):
 | cov (per-axis coverage + side colours) | 0.84 | 13.6 | 4.2 |
 | covbox (cov + the content's box per voxel) | 0.94 | 3.6 | 4.4 |
 
+| boxes (adaptive tight boxes with masked face textures, below) | 0.95 | 3.6 | 1.1 |
+
+**Adaptive boxes** (owner, 2026-10-19: "smaller boxes where detail is needed, large ones where it is the same,
+rectangles not only cubes, textures for the sub-parts"): an octree where each node keeps the tight box of its content
+(a rectangle: a wall's node is a thin slab, a ground plane one flat box) and its flattening error (how deep the
+content lies under its box's faces). A ray draws a node as one box whose faces are masked textures (the first
+content under each texel, holes where there is none) when that error is under the pixel there, else descends. Same
+quality as covbox at a quarter of its steps (at 200 m: 1.4 steps a ray against micro-voxels' 9.8). The cost moves to
+memory: each drawn box needs its face textures at its footprint's resolution (a mip chain of surfaces, like Lumen's
+cards); measuring that is next. Fog: an error of e shows as e times the transmittance, so the threshold may grow as
+it falls; 1/transmittance is too strong (covbox at 1500 m in fog 0.0012: silhouette 0.52, though dE stays 3.3), a
+gentler curve is to be tuned.
+
 Coverage alone thickens thin sheets at grazing angles (it does not know where in the voxel the content is); the
 content box (6 numbers a voxel) fixes most of it at about half the micro-voxels' steps. Next: real objects (towns,
 forests, gates), the near-view capture of the same blocks against `ref` (validates the library), a hierarchical

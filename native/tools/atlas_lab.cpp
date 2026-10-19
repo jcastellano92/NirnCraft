@@ -4,7 +4,7 @@
 //
 //   atlas_lab blocks=<dir>/blocks.bin volume=<dir>/tree.alv out=sheet.png [dist=10,50,200,600,1500]
 //             [variants=ref,current,anymip,micro,cov] [yaw=30] [pitch=-12] [frames=16] [panel=192] [threads=N]
-//             [scale=1] [bias=0] [grass=91BD59] [foliage=77AB2F]
+//             [scale=1] [bias=0] [tol=1] [fog=0] [grass=91BD59] [foliage=77AB2F]
 //
 // Representations (one column each in the sheet, rows are distances):
 //   ref      micro-voxels (each block state's 4x4x4 shape and its face texels), 64 samples a pixel: what a perfect near
@@ -15,6 +15,8 @@
 //   micro    the micro-voxels at every distance, one sample a frame (level -1 alone: exact but aliasing and costly far)
 //   covbox   cov, and each voxel keeps its content's box (6 small numbers): a ray must cross the box, so a slab, a
 //            thin wall or a sheet of ground stays as thick as it is instead of filling its voxel
+//   boxes    adaptive boxes: an octree of tight content boxes (rectangles), each drawn as one masked-texture box
+//            where flattening it is under the pixel (tol=1, fog-scaled), else split ("adaptive boxes" below)
 //   cov      the unified proposal: micro-voxels and a mip chain from them where each voxel keeps its per-axis coverage
 //            (how much of it blocks a ray along x, y, z) and the colour seen from each of its 6 sides; the level is
 //            continuous (the pixel's footprint, stochastically between the two nearest levels), a ray passes a voxel in
@@ -538,6 +540,179 @@ Sample traceCov(int level, V3 o, V3 d, uint32_t seed, bool boxed = false) {
     return s;
 }
 
+// ---- adaptive boxes (boxes) -----------------------------------------------------------------------------------------
+// An octree over the micro-voxels where every node keeps the tight box of its content (a rectangle, not its cube: a
+// wall's node is a thin slab) and its flattening error: how deep under its box's faces the first content lies, seen
+// along each axis. A ray draws a node as one textured box when that error is under the pixel's footprint there (times
+// tol, divided by the fog's transmittance: what fog hides may be rougher), else descends into its children; a box's
+// face is a masked texture: the first content of the column under the point the ray enters (none: a hole, the ray
+// tries the face it leaves by, then goes on). Big flat things (a ground plane, a wall) are one box at any distance;
+// a crown splits until its leaves are under a pixel. The threshold is dithered per pixel and frame (TAA blends it).
+
+struct Node {
+    int16_t lo[3], hi[3];  // content box, micro-voxels, [lo, hi)
+    float err;             // micro-voxels
+    int child;             // first of 8 (an empty one has lo >= hi), -1 = a single micro-voxel
+};
+std::vector<Node> nodes;
+
+// the first content of the column at (u, v) of face (axis, high side) of box [lo, hi): its depth and position
+bool firstHit(const int lo[3], const int hi[3], int axis, bool high, int u, int v, int& depth, int p[3]) {
+    int a1 = (axis + 1) % 3, a2 = (axis + 2) % 3;
+    int n = hi[axis] - lo[axis];
+    for (int t = 0; t < n; t++) {
+        p[axis] = high ? hi[axis] - 1 - t : lo[axis] + t;
+        p[a1] = u, p[a2] = v;
+        if (microAt(p[0], p[1], p[2])) {
+            depth = t;
+            return true;
+        }
+    }
+    return false;
+}
+
+Node buildNode(int x, int y, int z, int size) {
+    Node nd{{0, 0, 0}, {0, 0, 0}, 0.f, -1};
+    // empty space: no non-air block under the cube
+    bool any = false;
+    for (int by = y >> 2; by <= (y + size - 1) >> 2 && !any; by++)
+        for (int bz = z >> 2; bz <= (z + size - 1) >> 2 && !any; bz++)
+            for (int bx = x >> 2; bx <= (x + size - 1) >> 2 && !any; bx++) {
+                const Block* b = vol.at(bx, by, bz);
+                any = b && b->any && b->mask;
+            }
+    if (!any) return nd;
+    if (size == 1) {
+        if (microAt(x, y, z))
+            for (int a = 0; a < 3; a++) {
+                int p = a == 0 ? x : a == 1 ? y : z;
+                nd.lo[a] = int16_t(p), nd.hi[a] = int16_t(p + 1);
+            }
+        return nd;
+    }
+    int first = int(nodes.size());
+    nodes.resize(nodes.size() + 8);
+    int h = size / 2;
+    int lo[3] = {1 << 15, 1 << 15, 1 << 15}, hi[3] = {-1, -1, -1};
+    for (int k = 0; k < 8; k++) {
+        Node c = buildNode(x + (k & 1) * h, y + (k >> 2) * h, z + ((k >> 1) & 1) * h, h);
+        nodes[size_t(first + k)] = c;
+        if (c.lo[0] < c.hi[0])
+            for (int a = 0; a < 3; a++) lo[a] = std::min(lo[a], int(c.lo[a])), hi[a] = std::max(hi[a], int(c.hi[a]));
+    }
+    if (hi[0] < 0) {
+        nodes.resize(size_t(first));
+        return nd;
+    }
+    for (int a = 0; a < 3; a++) nd.lo[a] = int16_t(lo[a]), nd.hi[a] = int16_t(hi[a]);
+    nd.child = first;
+    float err = 0;
+    for (int a = 0; a < 3; a++) {
+        int a1 = (a + 1) % 3, a2 = (a + 2) % 3;
+        for (int u = lo[a1]; u < hi[a1]; u++)
+            for (int v = lo[a2]; v < hi[a2]; v++)
+                for (int side = 0; side < 2; side++) {
+                    int d, p[3];
+                    if (firstHit(lo, hi, a, side == 1, u, v, d, p)) err = std::max(err, float(d));
+                }
+    }
+    nd.err = err;
+    return nd;
+}
+
+int rootNode = -1;
+
+void buildBoxes() {
+    int n = 1;
+    while (n < std::max({vol.sx, vol.sy, vol.sz}) * 4) n *= 2;
+    nodes.reserve(1 << 20);
+    nodes.push_back({});
+    Node r = buildNode(0, 0, 0, n);
+    nodes[0] = r;
+    rootNode = r.lo[0] < r.hi[0] ? 0 : -1;
+}
+
+bool rayBox(V3 o, V3 d, const int16_t lo[3], const int16_t hi[3], float& t0, float& t1, int& axis) {
+    t0 = -1e30f, t1 = 1e30f;
+    axis = 0;
+    for (int a = 0; a < 3; a++) {
+        float l = lo[a] * 0.25f, h = hi[a] * 0.25f;
+        if (std::fabs(d[a]) < 1e-12f) {
+            if (o[a] < l || o[a] > h) return false;
+            continue;
+        }
+        float ta = (l - o[a]) / d[a], tb = (h - o[a]) / d[a];
+        if (ta > tb) std::swap(ta, tb);
+        if (ta > t0) t0 = ta, axis = a;
+        t1 = std::min(t1, tb);
+    }
+    return t0 <= t1 && t1 > 0;
+}
+
+struct BoxCtx {
+    V3 o, d;
+    float pa, tol;  // pixel size (tangent plane), threshold factor (dithered, fog-scaled)
+    Sample* s;
+};
+
+// the masked texture of face (axis, side) at the ray's point p on it
+bool boxFace(const Node& n, int axis, bool high, V3 p, BoxCtx& c) {
+    int lo[3] = {n.lo[0], n.lo[1], n.lo[2]}, hi[3] = {n.hi[0], n.hi[1], n.hi[2]};
+    int a1 = (axis + 1) % 3, a2 = (axis + 2) % 3;
+    int u = std::clamp(int(std::floor(p[a1] * 4.f)), lo[a1], hi[a1] - 1), v = std::clamp(int(std::floor(p[a2] * 4.f)), lo[a2], hi[a2] - 1);
+    int dep, q[3];
+    c.s->steps++;  // a texture fetch
+    if (!firstHit(lo, hi, axis, high, u, v, dep, q)) return false;
+    int f = high ? FACE_HIGH[axis] : FACE_LOW[axis];
+    c.s->hit = true;
+    c.s->c = lit(microCol(q[0], q[1], q[2], f), f);
+    return true;
+}
+
+bool traceNode(int idx, BoxCtx& c) {
+    const Node& n = nodes[size_t(idx)];
+    float t0, t1;
+    int axis;
+    if (!rayBox(c.o, c.d, n.lo, n.hi, t0, t1, axis)) return false;
+    c.s->steps++;
+    float t = std::max(t0, 0.f);
+    bool asBox = n.child < 0 || n.err * 0.25f <= c.tol * t * c.pa;
+    if (asBox) {
+        V3 pin = c.o + c.d * t;
+        if (boxFace(n, axis, c.d[axis] < 0, pin, c)) return true;
+        // a hole: the face the ray leaves by, seen from outside
+        int ax2 = 0;
+        float best = 1e30f;
+        for (int a = 0; a < 3; a++) {
+            if (std::fabs(c.d[a]) < 1e-12f) continue;
+            float e = ((c.d[a] > 0 ? n.hi[a] : n.lo[a]) * 0.25f - c.o[a]) / c.d[a];
+            if (e < best) best = e, ax2 = a;
+        }
+        return boxFace(n, ax2, c.d[ax2] > 0, c.o + c.d * best, c);
+    }
+    std::pair<float, int> order[8];
+    int k = 0;
+    for (int i = 0; i < 8; i++) {
+        const Node& ch = nodes[size_t(n.child + i)];
+        if (ch.lo[0] >= ch.hi[0]) continue;
+        float a0, a1v;
+        int ax;
+        if (rayBox(c.o, c.d, ch.lo, ch.hi, a0, a1v, ax)) order[k++] = {a0, n.child + i};
+    }
+    std::sort(order, order + k);
+    for (int i = 0; i < k; i++)
+        if (traceNode(order[i].second, c)) return true;
+    return false;
+}
+
+Sample traceBoxes(V3 o, V3 d, float pa, float tol) {
+    Sample s;
+    if (rootNode < 0) return s;
+    BoxCtx c{o, d, pa, tol, &s};
+    traceNode(rootNode, c);
+    return s;
+}
+
 // ---- metrics --------------------------------------------------------------------------------------------------------
 
 void lab(RGB c, float& L, float& A, float& B) {
@@ -584,9 +759,10 @@ int main(int argc, char** argv) {
     int threads = int(num(a, "threads", std::max(1u, std::thread::hardware_concurrency() / 2)));
     int frames = int(num(a, "frames", 16)), panel = int(num(a, "panel", 192));
     float scale = float(num(a, "scale", 1)), bias = float(num(a, "bias", 0));
+    float tolPix = float(num(a, "tol", 1)), fog = float(num(a, "fog", 0));  // fog: extinction per block
     std::vector<float> dists;
     for (auto& t : split(str(a, "dist", "10,50,200,600,1500"))) dists.push_back(float(std::atof(t.c_str())));
-    std::vector<std::string> variants = split(str(a, "variants", "ref,current,anymip,micro,cov,covbox"));
+    std::vector<std::string> variants = split(str(a, "variants", "ref,current,anymip,micro,cov,covbox,boxes"));
     if (variants.empty() || variants[0] != "ref") variants.insert(variants.begin(), "ref");
 
     // the object's bounds (non-air blocks)
@@ -616,6 +792,7 @@ int main(int argc, char** argv) {
     if (needCur) buildBlockLevels(curLevels, false);
     if (needAny) buildBlockLevels(anyLevels, true);
     if (needCov) buildCovLevels(threads);
+    if (std::find(variants.begin(), variants.end(), "boxes") != variants.end()) buildBoxes();
     double buildMs = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - tb).count();
     std::fprintf(stderr, "atlas_lab: %dx%dx%d blocks, object %.0f blocks across, levels built in %.0f ms\n", vol.sx, vol.sy, vol.sz,
                  2 * radius, buildMs);
@@ -639,7 +816,9 @@ int main(int argc, char** argv) {
         int half = std::clamp(int(std::ceil(radius / (D * pa) * 1.15f)), 6, 128);  // a window of true pixels
         int W = 2 * half;
         float foot = D * pa;  // the pixel's size at the object, blocks
-        float microLevel = std::log2(std::max(foot * 4.f, 1e-6f)) + bias, blockLevel = std::log2(std::max(foot, 1e-6f)) + bias;
+        // fog: what it hides may be rougher (an error of e shows as e times the transmittance)
+        float trans = std::exp(-fog * D), fogBias = fog > 0 ? -std::log2(std::max(trans, 0.02f)) : 0.f;
+        float microLevel = std::log2(std::max(foot * 4.f, 1e-6f)) + bias + fogBias, blockLevel = std::log2(std::max(foot, 1e-6f)) + bias + fogBias;
         Image ref;
         for (int vi = 0; vi < cols; vi++) {
             const std::string& v = variants[size_t(vi)];
@@ -678,10 +857,16 @@ int main(int argc, char** argv) {
                                     int l0 = int(std::floor(l));
                                     int lvl = l0 + (hashf(px, py, f, 0xC0FFEEu) < l - l0 ? 1 : 0);
                                     sm = traceCov(lvl, eye, dir, seed, v == "covbox");
+                                } else if (v == "boxes") {
+                                    float dither = 0.7f + 0.6f * hashf(px, py, f, 0xB0C5u);
+                                    sm = traceBoxes(eye, dir, pa, tolPix * dither / std::max(trans, 0.02f));
                                 }
                                 st += sm.steps;
                                 n++;
                                 RGB c = sm.hit ? sm.c : SKY;
+                                if (fog > 0 && sm.hit) {  // the same fog for every representation (at the object's distance)
+                                    c.r = c.r * trans + SKY.r * (1 - trans), c.g = c.g * trans + SKY.g * (1 - trans), c.b = c.b * trans + SKY.b * (1 - trans);
+                                }
                                 acc.r += c.r, acc.g += c.g, acc.b += c.b;
                                 hit += sm.hit ? 1.f : 0.f;
                             }
