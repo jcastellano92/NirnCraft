@@ -111,9 +111,11 @@ def _enable_overlay():
     reload live (`resources` verb) without a jar rebuild. Enabled in options.txt while the client is closed."""
     (OVERLAY / "assets").mkdir(parents=True, exist_ok=True)
     meta = OVERLAY / "pack.mcmeta"
-    if not meta.exists():
-        meta.write_text(json.dumps({"pack": {"description": "NirnCraft harness dev overlay",
-                                             "min_format": 1, "max_format": 999}}), encoding="utf-8")
+    mod_meta = json.loads((ROOT / "mod/src/main/resources/pack.mcmeta").read_text(encoding="utf-8"))["pack"]
+    want = {"pack": {"description": "NirnCraft harness dev overlay", "min_format": mod_meta["min_format"],
+                     "max_format": mod_meta["max_format"]}}  # the formats the mod's own resources declare
+    if not meta.exists() or json.loads(meta.read_text(encoding="utf-8")) != want:
+        meta.write_text(json.dumps(want), encoding="utf-8")
     opts = GAME / "options.txt"
     if opts.exists():
         text = opts.read_text(encoding="utf-8")
