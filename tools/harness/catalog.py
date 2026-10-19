@@ -56,8 +56,9 @@ def groups():
 # ---------------------------------------------------------------------------------------------------- gallery
 # A stage in the sky (fixed noon light, clear weather, sky backdrop, nothing else in frame): every entity gets its own
 # scene so one creature, one section (gallery:monster ...) or all of them can be asked for. All gallery scenes share
-# the stage, so a run never moves the camera between shots.
-STAGE = (4096, 300, 4096)
+# the stage, so a run never moves the camera between shots. y 520: above the cloud deck (base ~232, top ~320 in clear
+# weather, see WeatherPhysics) and below the build limit (640); at 300 the near rungs sat inside the clouds.
+STAGE = (4096, 520, 4096)
 BIG = {"giant": 12, "mammoth": 12, "dragon": 26, "alduin": 30, "dwarven_centurion": 12, "netch": 10, "troll": 7,
        "frost_troll": 7, "silt_strider": 30, "wispmother": 7, "dragon_priest": 6, "werewolf": 6, "horker": 6,
        "sabre_cat": 6, "bear": 6, "mudcrab": 4}

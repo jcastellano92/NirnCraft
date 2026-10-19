@@ -574,7 +574,7 @@ class Runner:
             log_counts, serious = g.log_summary(g.log_since(mark))
             vm.update(log_counts)
             self.pos = s.get("_xz") or self.pos
-            return results.record(s["id"], v, "measure", "fail" if vflags else "pass", {**vm, "flags": vflags}, fp,
+            return results.record(s["id"], v, "measure", "fail" if vflags else "pass", vm, fp,
                                   extra={"fails": vflags})
         m = {name: json_sum(data, path) for name, path in (s.get("measure_sum") or {}).items()}
         log_counts, serious = g.log_summary(g.log_since(mark))
@@ -1697,7 +1697,7 @@ def cause(e):
     return re.sub(r"\s+", " ", why)[:70].strip() or e.get("area", "-")
 
 
-def priority(e, groups):
+def issue_priority(e, groups):
     """P1..P4: a manual priority wins; else severity, how often it recurs, how many tests share its cause."""
     if e.get("priority"):
         return e["priority"]
@@ -1821,7 +1821,7 @@ def cmd_issues(a):
         lines.append(f"## open ({len(opened)}), by priority and cause")
         rows = {}
         for e in opened:
-            rows.setdefault((priority(e, groups), cause(e)), []).append(e)
+            rows.setdefault((issue_priority(e, groups), cause(e)), []).append(e)
         for (prio, why), es in sorted(rows.items(), key=lambda kv: (kv[0][0], -len(kv[1]))):
             es.sort(key=lambda e: SEVERITY.get(e.get("status"), 9))
             head = f"- {prio} [{es[0].get('area')}] {why}"

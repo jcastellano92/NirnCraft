@@ -19,7 +19,8 @@
         "feature:sky",
         "suite:smoke",
         "weather:clear",
-        "time:night"
+        "time:night",
+        "moon:new"
       ],
       "pose": {
         "visit": [
@@ -30,7 +31,7 @@
           -35
         ]
       },
-      "time": 18000,
+      "time": 114000,
       "weather": "clear",
       "wait": 200,
       "setup": [],
@@ -52,7 +53,8 @@
         "feature:moons",
         "feature:sky",
         "weather:clear",
-        "time:night"
+        "time:night",
+        "moon:new"
       ],
       "pose": {
         "visit": [
@@ -63,7 +65,7 @@
           -70
         ]
       },
-      "time": 18000,
+      "time": 114000,
       "weather": "clear",
       "wait": 40,
       "setup": [],
@@ -85,7 +87,8 @@
         "feature:moons",
         "feature:sky",
         "weather:clear",
-        "time:night"
+        "time:night",
+        "moon:new"
       ],
       "pose": {
         "visit": [
@@ -96,7 +99,7 @@
           -20
         ]
       },
-      "time": 18000,
+      "time": 114000,
       "weather": "clear",
       "wait": 40,
       "setup": [],
@@ -305,7 +308,8 @@
         "feature:moons",
         "feature:snow",
         "weather:clear",
-        "time:night"
+        "time:night",
+        "moon:new"
       ],
       "pose": {
         "visit": [
@@ -316,7 +320,7 @@
           -40
         ]
       },
-      "time": 18000,
+      "time": 114000,
       "weather": "clear",
       "wait": 200,
       "setup": [],
