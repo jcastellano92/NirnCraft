@@ -228,6 +228,37 @@ def stale_core():
 
 _CURRENT = {"checked": False}
 
+NATIVE_BUILT = ROOT / "native/build/Release/atlas_core.dll"
+NATIVE_SHIPPED = ROOT / "mod/src/main/resources/natives/windows-x86_64/atlas_core.dll"
+
+
+def native_stale(built=NATIVE_BUILT, sources=None):
+    """Whether native sources (src, shaders, include) are newer than the built atlas_core."""
+    sources = sources or [ROOT / "native/src", ROOT / "native/shaders", ROOT / "native/include"]
+    newest = max((f.stat().st_mtime for d in sources for f in Path(d).rglob("*") if f.is_file()), default=0)
+    return not built.exists() or newest > built.stat().st_mtime + 1
+
+
+def sync_native():
+    """The far-field core the game loads is the one built from today's sources: rebuilt when its sources changed
+    (native/build.ps1 -NoTest; the native suites run in the check tier), and copied into the mod's resources when it
+    differs from the shipped one (the jar rebuild and install that follow put it in the game). Before this, a shader or
+    native change reached the game only when someone copied the DLL by hand. Windows only (the Linux .so is built in
+    WSL: tools/dev/check_natives.py guards its ABI)."""
+    if os.name != "nt":
+        return
+    if native_stale():
+        log("  native sources changed: building atlas_core (once for this run)")
+        tr.step("auto_native_build")
+        r = subprocess.run(["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", str(ROOT / "native/build.ps1"),
+                            "-NoTest"], capture_output=True, text=True)
+        if r.returncode or not NATIVE_BUILT.exists():
+            raise RuntimeError("atlas_core build failed (tests would run a stale far field):\n" + (r.stdout + r.stderr)[-1200:])
+    if NATIVE_BUILT.exists() and (not NATIVE_SHIPPED.exists() or sha(NATIVE_BUILT) != sha(NATIVE_SHIPPED)):
+        log("  shipping the current atlas_core into the mod (it differed from the built one)")
+        tr.step("auto_native_ship")
+        shutil.copy2(NATIVE_BUILT, NATIVE_SHIPPED)
+
 
 def ensure_current():
     """Once per run, before the first test that needs the client: tests never run stale code. The jar is built when a
@@ -237,6 +268,7 @@ def ensure_current():
     if _CURRENT["checked"] or os.environ.get("NIRNCRAFT_HARNESS_NO_BUILD") == "1":
         return
     _CURRENT["checked"] = True
+    sync_native()
     src = ROOT / "mod/src/main"
     newest = max((f.stat().st_mtime for f in src.rglob("*") if f.is_file()), default=0)
     if not BUILT.exists() or newest > BUILT.stat().st_mtime + 1:

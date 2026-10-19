@@ -143,6 +143,9 @@ float3 shadeSurface(float3 albedo, MaterialGpu m, float3 n, float3 v, float3 sun
 
 // Aerial perspective over kilometres: extinction thins with altitude (scale height ~ 1.2 km in blocks).
 float aerialTransmittance(float t, FrameGpu f) {
+    // no aerial perspective without FRAME_ATMOS (ground-truth views: the game's fog-off; the flag was set by every
+    // caller but read by none, so fog-off left this haze on)
+    if ((f.dims.z & FRAME_ATMOS) == 0u) return 1.0;
     float camY = float(f.camInt.y) + f.camFrac.y;
     float h = max(camY - 63.0, 0.0);
     float density = exp(-h / 1200.0);

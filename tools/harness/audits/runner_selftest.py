@@ -169,5 +169,18 @@ finally:
     harness.results.latest = real_latest
 expect(a.get("live") != b.get("live"), "a failed live capture changes the lab's fingerprint (no reused old pass)")
 
+# --- a native change reaches the game: stale sources are detected against the built core --------------------------
+import tempfile, os as _os, time as _time
+import game as _game  # noqa: E402
+with tempfile.TemporaryDirectory() as td:
+    src, built = Path(td) / "src", Path(td) / "atlas_core.dll"
+    src.mkdir()
+    (src / "a.cpp").write_text("x")
+    built.write_text("dll")
+    _os.utime(built, (_time.time() - 100, _time.time() - 100))
+    expect(_game.native_stale(built, [src]), "native sources newer than the built core: rebuild before tests")
+    _os.utime(built, (_time.time() + 100, _time.time() + 100))
+    expect(not _game.native_stale(built, [src]), "a core built after its sources is current")
+
 print(f"problems {len(problems)}")
 sys.exit(1 if problems else 0)
