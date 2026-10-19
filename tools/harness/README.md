@@ -80,7 +80,11 @@ rarely as possible, and applies the cheap ones per scene:
 | time, weather | `time`, `weather` | none | every scene pins them |
 | weather off | `weather: "off"` | none | the client's weather-off switch: no clouds, rain, fog banks; distant haze kept |
 
-World-gen scenes (distance ladders, flights, fidelity pairs, planned places) run with `weather: "off"`; weather has
+Every live scene declares its weather when the catalog loads (catalog.settle_weather): a scene about weather (an
+explicit weather other than clear, or a weather / clouds / storm / fog / rain / lightning tag) keeps it; every other
+one (the world itself: galleries, towns, ladders, flights, fidelity pairs, planned places) gets `weather: "off"`;
+indoors has none. The validator refuses a weather-tagged scene with weather off. In particular world-gen scenes
+run with `weather: "off"`; weather has
 its own ladders (`suite:weather-distance`: overcast, rain, snow) and the storm-front scenes. Lab scenes with
 `weather: "off"` pass the same switch to the offline renderers (`pack_lab weather=0`, `atlas_render weather=off`), so
 an offline render and its live twin show the same sky.

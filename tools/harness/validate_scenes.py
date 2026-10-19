@@ -80,6 +80,8 @@ def main():
             errors.append(f"{w}: shot is aerial|approach")
         if s.get("weather") and s["weather"] not in catalog.WEATHERS:
             errors.append(f"{w}: unknown weather {s['weather']}")
+        if s.get("weather") == "off" and any(tag.startswith(catalog.WEATHER_TAGS) for tag in s.get("tags", [])):
+            errors.append(f"{w}: tagged as a weather scene but has weather off")
         for opt in (s.get("pack_options") or {}):
             if opt not in PACK_OPTIONS:
                 errors.append(f"{w}: pack option {opt} is not an option of the pack (lib/settings.glsl)")

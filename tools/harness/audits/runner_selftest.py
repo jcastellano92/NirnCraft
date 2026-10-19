@@ -90,5 +90,20 @@ expect(order[-1] == "e", "another group (JVM settings: a restart) comes after th
 expect(harness.options_key({"TAA": False, "A": 1}) == "A=1;TAA=false" and harness.options_key(None) == "",
        "pack options compare as one stable key")
 
+# --- every scene declares its weather ---------------------------------------------------------------------------
+import catalog  # noqa: E402
+
+def settled(sc):
+    sc = dict(sc, tier="live")
+    catalog.settle_weather(sc)
+    return sc.get("weather")
+
+
+expect(settled({"weather": "clear", "tags": []}) == "off", "a world scene with 'clear' shows the world with weather off")
+expect(settled({"tags": []}) == "off", "a world scene with no weather gets weather off")
+expect(settled({"weather": "rain", "tags": []}) == "rain", "an explicit weather is kept")
+expect(settled({"weather": "clear", "tags": ["suite:weather-audit"]}) == "clear", "a weather-tagged clear sky keeps its clouds")
+expect(settled({"tags": [], "pose": {"dungeon": "x"}}) is None, "indoors has no weather")
+
 print(f"problems {len(problems)}")
 sys.exit(1 if problems else 0)

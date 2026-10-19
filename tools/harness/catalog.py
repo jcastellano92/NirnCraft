@@ -531,7 +531,31 @@ def load():
         if "camera" in (s.get("pose") or {}):
             s.setdefault("seed", 1234)  # absolute poses belong to the world they were made in (surface-relative ones don't)
         s["_xz"] = position(s)
+        settle_weather(s)
     return scenes
+
+
+WEATHER_TAGS = ("weather:", "suite:weather", "suite:clouds", "feature:clouds", "feature:storm", "feature:weather",
+                "feature:fog", "feature:rain", "feature:lightning", "effect:weather", "subject:clouds")
+
+
+def about_weather(s):
+    """Whether a scene is about weather (its explicit weather other than clear, or its tags): it keeps its weather."""
+    w = s.get("weather")
+    return (w not in (None, "clear", "off")) or any(t.startswith(WEATHER_TAGS) for t in s.get("tags", []))
+
+
+def settle_weather(s):
+    """Every live scene declares its weather: one about weather keeps it (clear included: a clear sky with its fair
+    clouds); every other one shows the world itself with weather off (no clouds, rain or fog banks; distant haze kept),
+    the setting the client defaults to while the world is matched near to far. Indoors (realms, dungeons) has none."""
+    if s.get("tier") != "live" or s.get("weather") == "off":
+        return
+    p = s.get("pose") or {}
+    if "realm" in p or "dungeon" in p:
+        return
+    if not about_weather(s):
+        s["weather"] = "off"
 
 
 # ---------------------------------------------------------------------------------------------------- planned places
