@@ -7,6 +7,7 @@
     py -3 tools/harness/harness.py watch   [selection] [--rebuild]  live reload loop: edit, see before|after in seconds
     py -3 tools/harness/harness.py serve                            stay up as the owner and run queued jobs
     py -3 tools/harness/harness.py status | report [selection] | cameras [selection] | export-tour NAME [selection]
+    py -3 tools/harness/harness.py features [--seed N] [--force]        the generated-feature index (feature_scenes.py)
     py -3 tools/harness/harness.py seed-legacy | clean
 
 selection: [ID-or-glob ...] [--suite smoke,weather] [--tag region:skyrim/whiterun --tag weather:storm,weather:rain]
@@ -38,6 +39,7 @@ HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
 sys.path.insert(0, str(HERE))
 import cameras  # noqa: E402
+import features  # noqa: E402
 import trace as tr  # noqa: E402
 import catalog  # noqa: E402
 import results  # noqa: E402
@@ -1052,6 +1054,18 @@ def cmd_cameras(a):
                 say(f"  {pid:28} {k:8} camera {e[k][0]['camera']} visible {e[k][0]['visible']}")
 
 
+def cmd_features(a):
+    """The generated-feature index for the seed (made when missing or stale): spots per biome / landmark / site kind."""
+    idx = features.ensure(a.seed, threads=a.threads, per=a.per, force=a.force, log=say)
+    found = idx.get("_found", {})
+    for g in features.GROUPS:
+        kinds = idx.get(g, {})
+        say(f"{g}: {len(kinds)} kind(s), {sum(len(v) for v in kinds.values())} spot(s)")
+        for k, spots in sorted(kinds.items()):
+            say(f"  {k:44} {len(spots)} spot(s) of {found.get(g, {}).get(k, '?')} found")
+    say(f"index: {features.index_path(a.seed)}")
+
+
 def cmd_export_tour(a):
     """A stop list for /nirncraft-tour start file:NAME (the host's in-game tour), from the selected scenes."""
     stops = []
@@ -1521,6 +1535,11 @@ def main():
     sub.add_parser("status")
     selection(sub.add_parser("report"))
     selection(sub.add_parser("cameras"))
+    p = sub.add_parser("features")
+    p.add_argument("--seed", type=int, default=DEFAULT_SEED)
+    p.add_argument("--threads", type=int, default=8)
+    p.add_argument("--per", type=int, default=6, help="spots per kind")
+    p.add_argument("--force", action="store_true", help="make the index again")
     p = selection(sub.add_parser("export-tour"))
     p.add_argument("name")
     p.add_argument("--to", action="append", help="a .minecraft folder (default: the preview instance)")
@@ -1585,7 +1604,7 @@ def main():
     VERBOSE = getattr(a, "verbose", False)
     a.reloads = []
     {"list": cmd_list, "plan": cmd_plan, "run": cmd_run, "watch": cmd_watch, "serve": cmd_serve,
-     "status": cmd_status, "report": cmd_report, "cameras": cmd_cameras, "export-tour": cmd_export_tour,
+     "status": cmd_status, "report": cmd_report, "cameras": cmd_cameras, "features": cmd_features, "export-tour": cmd_export_tour,
      "seed-legacy": cmd_seed_legacy, "clean": cmd_clean, "probe": cmd_probe, "zoom": cmd_zoom,
      "gate": cmd_gate, "open": cmd_open, "quarantine": cmd_quarantine, "trace": cmd_trace,
      "audit": cmd_audit}[a.cmd](a)

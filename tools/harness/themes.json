@@ -15,7 +15,7 @@
   ]
  },
  "landscape": {
-  "description": "Region landscape features: terrain, mountains, volcanoes, rivers, lakes, coasts, roads, regions, hydrology, far field and horizon",
+  "description": "Region landscape features: terrain, mountains, volcanoes, rivers, lakes, coasts, roads, regions, hydrology, far field and horizon, natural landmarks and formations",
   "tags": [
    "check:regions",
    "check:world",
@@ -33,11 +33,12 @@
    "feature:river",
    "feature:falls",
    "feature:road",
-   "type:landmark"
+   "type:landmark",
+   "suite:natural-landmarks"
   ]
  },
  "flora": {
-  "description": "Flora placement and visuals: forests, foliage, groves, scatter and ecology, foliage shading and sway, forest seams",
+  "description": "Flora placement and visuals: forests, foliage, groves, scatter and ecology, foliage shading and sway, forest seams; vegetated biomes and flora landmarks of the generated-feature index",
   "tags": [
    "feature:foliage",
    "subject:forest",
@@ -46,7 +47,8 @@
    "check:placement",
    "feature:shafts",
    "site-herb",
-   "type:grove"
+   "type:grove",
+   "feature:flora"
   ]
  },
  "towns": {
@@ -172,6 +174,12 @@
   "tags": [
    "suite:realms",
    "feature:realm"
+  ]
+ },
+ "features": {
+  "description": "Every generated feature type of the seed: each biome (ground and aerial), natural landmark and formation, minor site, stash and scene-plan kind / anchor (harness.py features)",
+  "tags": [
+   "suite:features"
   ]
  }
 }

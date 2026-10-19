@@ -137,6 +137,22 @@ world-generation fingerprint, so changing terrain code or data re-plans them by 
 carry the seed they were made in and are skipped in another world; surface-relative and planned poses work in any.
 The in-game `camera` verb still refuses a pose inside trees or buildings; the harness then tries the next candidate.
 
+## Generated features: every biome, landmark and site kind
+
+`harness.py features [--seed N] [--force]` builds the generated-feature index offline (`features.py` runs
+`FeatureIndexHarness` on the seeded terrain, about 10 s; cached in `.work/harness/features/<seed>-<hash>.json` and made
+again when world generation, landmark, explore or scatter code / data change): the world's own biome source with the
+seeded climate on a 32-block grid over Tamriel and the foreign lands (per biome up to 6 interior spots, spread across
+regions, on land unless the biome is aquatic), every seeded natural landmark kind and Discoveries formation, and every
+minor site, stash, scene-plan kind and anchor. `feature_scenes.py` turns the cached index into scenes (`suite:features`;
+nothing runs Java at catalog load, no index = no scenes): `biome-<id>-<n>-ground` / `-aerial` (`suite:biomes`,
+`biome:<id>`), `nat-<kind>-<n>-approach` / `-aerial` (`suite:natural-landmarks`, `landmark:<kind>`) and
+`site-<kind>-<n>` (`suite:sites`, `site:minor/...`, `site:scene/...`, `site:anchor/...`, `site:stash`), with `region:`,
+`shot:` and `feature:flora|foliage|water|snow|ash|sand` tags; all visit poses for the index's seed. Audit theme
+`features`; vegetated ones join `flora`, natural landmarks `landscape`. Not covered: underground and realm biomes
+(not on the overworld surface), the per-chunk natural micro-scatter (rolled during chunk generation), fidelity
+ladders (they need a named place).
+
 ## In game: the host's tour
 
 `/nirncraft-tour start towns|cities|landmarks|forts|dungeons|all|<ids>|file:<name> [region:<prefix>] [near:<blocks>]
