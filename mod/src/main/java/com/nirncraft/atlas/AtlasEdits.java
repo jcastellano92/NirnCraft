@@ -312,12 +312,29 @@ public final class AtlasEdits {
                     if (j.version <= have) continue;
                     msgs = encode(tx, tz, j, have);
                     sent.put(k, j.version);
+                    if (why) {
+                        pushTiles++;
+                        pushMsgs += msgs.size();
+                        if (pushSample.isEmpty()) pushSample = tx + "," + tz + " v" + have + "->" + j.version;
+                    }
                 }
                 for (AtlasNet.FarEdits m : msgs) SkyNetwork.sendToPlayer(p, m);
             }
         }
         SENT.keySet().removeIf(u -> server.getPlayerList().getPlayer(u) == null);
+        long now = System.currentTimeMillis();
+        if (why && now - pushSince >= 10_000L) {  // what the stream to the clients is made of (diagnostics)
+            com.nirncraft.NirnCraft.LOGGER.info("atlas edits why: pushed {} tile updates in {} packets in {} s (e.g. tile {}); "
+                    + "journal {} tiles, scan queue {}", pushTiles, pushMsgs, (now - pushSince) / 1000, pushSample, JOURNAL.size(), CHUNKS.size());
+            pushSince = now;
+            pushTiles = pushMsgs = 0;
+            pushSample = "";
+        }
     }
+
+    private static long pushSince = System.currentTimeMillis();
+    private static int pushTiles, pushMsgs;
+    private static String pushSample = "";
 
     private static int[] pack(long ck, Column col, int[] out, int at) {
         out[at] = (int) (ck >> 32);
