@@ -169,6 +169,38 @@ public final class SettlementDevCommands {
         return Culture.of(s);
     }
 
+    /**
+     * One building of a culture, use and wealth on a grass platform at (x, y, z) (the gallery's recipe for a single
+     * cell): the harness photographs it outside and inside. Returns its bounding box.
+     */
+    public static BoundingBox placeBuilding(ServerLevel level, Culture cul, Use u, Wealth w, int x, int y, int z, int style) {
+        int half = 20;
+        for (int cx = (x - half) >> 4; cx <= (x + half) >> 4; cx++)
+            for (int cz = (z - half) >> 4; cz <= (z + half) >> 4; cz++) level.getChunk(cx, cz);
+        BlockPos.MutableBlockPos m = new BlockPos.MutableBlockPos();
+        for (int bx = x - half; bx <= x + half; bx++) {
+            for (int bz = z - half; bz <= z + half; bz++) {
+                level.setBlock(m.set(bx, y - 1, bz), Blocks.DIRT.defaultBlockState(), 2);
+                level.setBlock(m.set(bx, y, bz), Blocks.GRASS_BLOCK.defaultBlockState(), 2);
+                for (int yy = y + 1; yy < y + 70; yy++)
+                    if (!level.getBlockState(m.set(bx, yy, bz)).isAir()) level.setBlock(m, Blocks.AIR.defaultBlockState(), 2);
+            }
+        }
+        RandomSource r = RandomSource.create(cul.ordinal() * 31L + style * 7L + u.ordinal() * 131L + w.ordinal());
+        int[] sz = u.size(w, r);
+        Spec s = Spec.at(u.archetype(), x, z, Direction.SOUTH).size(sz[0], sz[1]);
+        s.use(u, w);
+        s.culture = cul.ordinal();
+        s.style = style;
+        s.gseed = r.nextInt();
+        s.floor = y + 1;
+        s.margin = 2;
+        if (w.atLeast(Wealth.WEALTHY)) s.flags |= Spec.RICH;
+        SettlementPiece piece = new SettlementPiece(s, r.nextLong(), "qa", 0);
+        paint(level, List.of(piece));
+        return piece.getBoundingBox();
+    }
+
     static Layouts.Size size(String s) {
         return Layouts.Size.of(s);
     }

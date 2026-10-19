@@ -123,6 +123,10 @@ final class DevScenario {
                 src.sendSuccess(()->Component.literal(message),false);return 1;
             }
             throw new IllegalArgumentException("Use equip SPELL | spawn TAG ENTITY X Y Z [active] | observe TAG | cleanup TAG");
-        } catch(Exception e) {src.sendFailure(Component.literal("Scenario failed: "+e));return 0;}
+        } catch(Exception e) {
+            // logged too: the harness reads a test's log for failures it can name (E-CMD-FAILED)
+            com.nirncraft.NirnCraft.LOGGER.warn("Scenario failed: {} ({})",arguments,e.toString());
+            src.sendFailure(Component.literal("Scenario failed: "+e));return 0;
+        }
     }
 }

@@ -310,8 +310,10 @@ class Runner:
         tr.test(k)
         tr.step("test_start", tier=s["tier"], group=s.get("group"), fingerprint=fp)
         t0 = time.monotonic()
+        mark = self.game.log_mark() if s["tier"] == "live" and self._game is not None and self.game.running() else None
         rec = self._run(s, v, fp)
         secs = round(time.monotonic() - t0, 1)
+        self.identify(s, v, rec, mark)
         tr.step("test_end", status=rec.get("status"), seconds=secs, error=(rec.get("error") or "")[:300])
         if rec.get("status") not in ("skip",) and not rec.get("_cached"):
             note_duration(k, secs)
@@ -341,6 +343,32 @@ class Runner:
             if s["tier"] == "live":
                 self.trip(s, msg)
             return results.record(s["id"], v, s["kind"], "error", {}, fp, extra={"error": msg})
+
+    def identify(self, s, v, rec, mark):
+        """Every failure gets a stable id and a hint (errors.py); the game's own complaints during the test (a setup
+        command that quietly did nothing) become flagged ids too, so a scene not built as designed never passes."""
+        import errors
+        text = rec.get("error") or "; ".join((rec.get("fails") or []) + (rec.get("metrics", {}).get("flags") or []))
+        if rec.get("status") in ("error", "crash", "fail", "flag") and text:
+            code, hint = errors.classify(text)
+            rec["errorCode"], rec["errorHint"] = code, hint
+            if rec.get("error") and not rec["error"].startswith("["):
+                rec["error"] = f"[{code}] {rec['error']}"
+        if mark is not None and self._game is not None:
+            try:
+                fb = errors.feedback(self.game.log_since(mark))
+            except Exception:  # noqa: BLE001  the log is evidence, never a reason to fail the run
+                fb = []
+            if fb:
+                rec["feedback"] = [{"code": c, "message": m, "count": n} for c, m, n in fb]
+                if rec.get("status") == "pass":
+                    rec["status"] = "flag"
+                    m = rec.setdefault("metrics", {})
+                    m["flags"] = (m.get("flags") or []) + [f"[{c}] setup: {msg} (x{n})" for c, msg, n in fb]
+                    rec.setdefault("errorCode", fb[0][0])
+        if rec.get("errorCode") or rec.get("feedback"):
+            Path(f"{results.stem(s['id'], v)}.after.json").write_text(json.dumps(rec, indent=1, default=str),
+                                                                       encoding="utf-8")
 
     def run_live_restarting(self, s, v, fp):
         """A client crash during a test: keep the evidence next to the result, relaunch, and run the same test again
@@ -503,7 +531,8 @@ class Runner:
         if perf:
             extra["perf"] = {k: perf[k] for k in ("median", "p95", "p99", "stalls", "frames") if k in perf}
         # a framed scene: the game placed the camera from the subject's size; check it framed the right subject
-        want = None if s.get("frame") else posecheck.requested(catalog.pose_actions(s, self.plan, cand))
+        staged = s.get("frame") or s.get("frameBox") or s.get("camera_verb") or s.get("capture") == "ui"
+        want = None if staged else posecheck.requested(catalog.pose_actions(s, self.plan, cand))
         pflags, pm = posecheck.pose(want, receipt)
         if s.get("frame"):
             fr = (receipt or {}).get("frame") or {}
@@ -579,7 +608,8 @@ class Runner:
         out = g.GAME / s["measure_file"]
         out.unlink(missing_ok=True)
         try:
-            g.actions(["ui close"] + catalog.pose_actions(s, self.plan) + ["settle 1800"] + list(s.get("setup", []))
+            g.actions(["ui close"] + catalog.pose_actions(s, self.plan) + ([] if s.get("settle") is False else ["settle 1800"])
+                      + list(s.get("setup", []))
                       + [s["measure_command"]] + list(s.get("cleanup", [])), timeout=s.get("timeout", g.DEFAULT_TIMEOUT))
         except RuntimeError:
             g.recover(s)
@@ -2144,8 +2174,8 @@ def subject_roles(subject):
                 or s["id"] in (f"gallery-{sid}", f"gallery-{sid}-side", f"anim-{sid}")
                 or s["id"].startswith((f"dist-actor-{sid}-", f"pop-actor-{sid}-"))):
             continue
-        role = ("front" if s["id"] == f"gallery-{sid}" else "side" if s["id"] == f"gallery-{sid}-side"
-                else "animation" if s["id"] == f"anim-{sid}" or "suite:animation" in tags else "other")
+        role = s.get("role") or ("front" if s["id"] == f"gallery-{sid}" else "side" if s["id"] == f"gallery-{sid}-side"
+                                 else "animation" if s["id"] == f"anim-{sid}" or "suite:animation" in tags else "other")
         roles.append((role, s["id"], s.get("title", s["id"])))
     return roles
 
@@ -2163,6 +2193,107 @@ def cmd_sheet(a):
         return 1
     for f in paths:
         say(str(f))
+    return 0
+
+
+def cmd_card(a):
+    """A subject's card (basic / mid / full); with --kind, the cards of every subject of that kind."""
+    import cards
+    subjects_ = [a.subject] if a.subject else []
+    if a.kind:
+        idx = catalog.subject_index()
+        for section in ("entities", "items", "blocks", "spells"):
+            subjects_ += [r["id"] for r in idx.get(section, []) if r.get("kind") == a.kind or section == a.kind]
+        subjects_ += idx.get(a.kind, []) if isinstance(idx.get(a.kind), list) and idx.get(a.kind) and \
+            isinstance(idx[a.kind][0], str) else []
+    if not subjects_:
+        say("card: a subject id, or --kind (e.g. weapon, flora, monster, npcRaces, roles)")
+        return 1
+    for sub in subjects_[:a.limit or None]:
+        roles = subject_roles(sub)
+        paths = cards.card(sub, roles, a.level)
+        say(f"{sub}: " + ", ".join(p.name for p in paths))
+    say(f"cards in {cards.CARDS}")
+    return 0
+
+
+def cmd_gaps(a):
+    """What is not tested: subjects whose views were never captured / fail / flag, screens no scene opens."""
+    import gaps
+    cov = gaps.coverage(a.kind)
+    never = {k: e for k, e in cov.items() if e["never"]}
+    failing = {k: e for k, e in cov.items() if e["failing"]}
+    by_kind = {}
+    for k, e in cov.items():
+        b = by_kind.setdefault(e["kind"], [0, 0, 0])
+        b[0] += 1
+        b[1] += 1 if not e["never"] else 0
+        b[2] += 1 if e["failing"] else 0
+    lines = ["# Test gaps", "", f"{len(cov)} subject(s); {len(never)} with views never captured; {len(failing)} failing", "",
+             "| kind | subjects | fully captured | failing |", "| --- | --- | --- | --- |"]
+    lines += [f"| {k} | {n} | {c} | {f} |" for k, (n, c, f) in sorted(by_kind.items())]
+    scr = gaps.screens()
+    unc = [s for s in scr if not s[2]]
+    lines += ["", f"## screens: {len(scr) - len(unc)}/{len(scr)} opened by a scene or listed in docs/UI-COVERAGE.md", ""]
+    lines += [f"- {n} ({f})" for n, f, _ in unc[:80]]
+    if a.verbose:
+        lines += ["", "## never captured"] + [f"- {k} ({e['kind']}): {len(e['never'])} view(s)" for k, e in
+                                               sorted(never.items())[:300]]
+    stale = not catalog.SUBJECT_INDEX.exists()
+    lines += ["", "the subject index is missing: harness.py run subject-index" if stale else
+              "run a kind: harness.py run --tag kind:<kind>; one subject: --tag subject:<id>"]
+    text = "\n".join(lines) + "\n"
+    if a.md:
+        (STORE / "GAPS.md").write_text(text, encoding="utf-8")
+        say(f"written {STORE / 'GAPS.md'}")
+    else:
+        say(text)
+    return 0
+
+
+def cmd_recommend(a):
+    """Before a commit: the tests this change affects, the new ids it brings and what they need, the screens it
+    touches, and whether the subject index must be refreshed. --install-hook: an advisory pre-commit hook."""
+    import gaps
+    if a.install_hook:
+        hook = ROOT / ".git/hooks/pre-commit"
+        hook.write_text("#!/bin/sh\n# NirnCraft harness: what this commit needs tested (advisory, never blocks)\n"
+                        "py -3 tools/harness/harness.py recommend --staged || true\n", encoding="utf-8", newline="\n")
+        say(f"pre-commit hook installed (advisory): {hook}")
+        return 0
+    if a.staged:
+        files = subprocess.run(["git", "diff", "--name-only", "--cached"], cwd=ROOT, capture_output=True,
+                               text=True).stdout.split()
+    else:
+        files = changed_files(a.base)
+    tags, _ = impact(files)
+    tests = []
+    if tags:
+        sel = argparse.Namespace(ids=[], suite=None, tag=[",".join(sorted(tags))], tier=None, group=None, variant=None,
+                                 changed=None, exclude="suite:places-planned,suite:animation,suite:subjects", limit=0,
+                                 seed=DEFAULT_SEED)
+        tests = [s["id"] for s in select(catalog.load(), sel)]
+    r = gaps.recommend(files, tests, a.base, a.staged)
+    say(f"recommend: {len(files)} changed file(s) -> {len(tests)} test(s) affected")
+    if tests:
+        tiers = {}
+        for s in catalog.load():
+            if s["id"] in set(tests):
+                tiers[s["tier"]] = tiers.get(s["tier"], 0) + 1
+        say("  " + ", ".join(f"{n} {t}" for t, n in tiers.items()) + "  ->  harness.py run --changed "
+            + ("(or: harness.py gate)" if a.staged else ""))
+    if r["newIds"]:
+        say(f"  new ids the game index does not know yet ({len(r['newIds'])}): "
+            + ", ".join(i for i, _ in r["newIds"][:12]))
+        say("    -> harness.py run subject-index, then harness.py run --tag subject:<id> (scenes and a card appear "
+            "by themselves); check the registration contract (check-contracts)")
+    elif r["indexStale"]:
+        say("  Java changed since the subject index was built: harness.py run subject-index")
+    for n, f, covered in r["screens"]:
+        say(f"  screen {n} ({f}): " + ("covered" if covered else "NO scene opens it: add a ui scene or a "
+                                                                 "docs/UI-COVERAGE.md row"))
+    if not (tests or r["newIds"] or r["screens"]):
+        say("  nothing testable changed")
     return 0
 
 
@@ -2266,6 +2397,19 @@ def main():
     p.add_argument("--level", choices=["full", "top", "pair", "single"], default="top")
     p.add_argument("--view", choices=["front", "side"], default="front", help="single: which view")
     p.add_argument("--top", type=int, default=2, help="top: how many other views (flagged first)")
+    p = sub.add_parser("gaps")
+    p.add_argument("--kind", help="one kind of subject")
+    p.add_argument("--md", action="store_true", help="write .work/harness/GAPS.md")
+    p.add_argument("-v", "--verbose", action="store_true")
+    p = sub.add_parser("recommend")
+    p.add_argument("--staged", action="store_true", help="what is staged for the next commit")
+    p.add_argument("--base", default="HEAD", help="changes since this ref (default: uncommitted)")
+    p.add_argument("--install-hook", action="store_true", help="advisory git pre-commit hook")
+    p = sub.add_parser("card")
+    p.add_argument("subject", nargs="?")
+    p.add_argument("--kind", help="every subject of a kind (weapon, armour, flora, monster, roles, npcRaces, ...)")
+    p.add_argument("--level", choices=["basic", "mid", "full"], default="mid")
+    p.add_argument("--limit", type=int, default=0)
     p = sub.add_parser("review")
     p.add_argument("ids", nargs="*", help="issues to review (default: every needs-review issue)")
     p.add_argument("--pages", help="review a run's agent folder instead (BROKEN / REGRESSION become issues)")
@@ -2310,7 +2454,8 @@ def main():
      "seed-legacy": cmd_seed_legacy, "clean": cmd_clean, "probe": cmd_probe, "zoom": cmd_zoom,
      "gate": cmd_gate, "open": cmd_open, "quarantine": cmd_quarantine, "trace": cmd_trace,
      "audit": cmd_audit, "stop": cmd_stop, "wait": cmd_wait, "issues": cmd_issues,
-     "review": cmd_review, "auto": cmd_auto, "sheet": cmd_sheet}[a.cmd](a)
+     "review": cmd_review, "auto": cmd_auto, "sheet": cmd_sheet, "card": cmd_card,
+     "gaps": cmd_gaps, "recommend": cmd_recommend}[a.cmd](a)
 
 
 if __name__ == "__main__":

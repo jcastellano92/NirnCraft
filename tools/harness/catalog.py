@@ -17,7 +17,7 @@ SCENES = ROOT / "tools/harness/scenes"
 PLACES = ROOT / "mod/src/main/resources/nirncraft/tamriel/places"
 LANG = ROOT / "mod/src/main/lang/nirncraft"
 NOT_SCENES = {"groups.json", "legacy-seed.json"}
-POSES = ("visit", "camera", "place", "dungeon", "realm", "spawn", "stage", "ladder", "sweep")
+POSES = ("visit", "camera", "place", "dungeon", "realm", "spawn", "stage", "studio", "ladder", "sweep")
 WEATHERS = {"clear", "cloudy", "overcast", "fog", "drizzle", "rain", "storm", "snow", "blizzard", "ashfall",
             "ash_storm", "dust", "sandstorm", "blight", "gale"}
 
@@ -59,22 +59,32 @@ def groups():
 # the stage, so a run never moves the camera between shots. y 520: above the cloud deck (base ~232, top ~320 in clear
 # weather, see WeatherPhysics) and below the build limit (640); at 300 the near rungs sat inside the clouds.
 STAGE = (4096, 520, 4096)
+# the dark studio beside the stage: a black room lit by invisible light blocks, for spells and effects (they read
+# best against black); the camera stands at the south end looking north across it
+STUDIO = (4096 + 48, 520, 4096)
 BIG = {"giant": 12, "mammoth": 12, "dragon": 26, "alduin": 30, "dwarven_centurion": 12, "netch": 10, "troll": 7,
        "frost_troll": 7, "silt_strider": 30, "wispmother": 7, "dragon_priest": 6, "werewolf": 6, "horker": 6,
        "sabre_cat": 6, "bear": 6, "mudcrab": 4, "longship": 18, "cog": 14, "rowboat": 5}
 
 
-ENTITY_INDEX = ROOT / ".work/harness/entities.json"  # the game's own answer (scene entity-index)
+SUBJECT_INDEX = ROOT / ".work/harness/subjects.json"  # the game's own answer (scene subject-index)
+
+
+def subject_index():
+    """The game's subject index ({} until `harness.py run subject-index` has run once)."""
+    try:
+        return json.loads(SUBJECT_INDEX.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {}
 SIDE_KINDS = ("boss", "monster", "creature", "npc", "mount", "fish", "water")  # these get a side profile too
 
 
 def _entity_categories():
     """id -> boss / monster / creature / water / npc / vehicle / misc. The game's index when it exists (harness.py run
     entity-index: /nirncraft-qa entities inspects every type), else a best-effort read of the Java registrations."""
-    try:
-        return {e["id"]: e.get("kind", "misc") for e in json.loads(ENTITY_INDEX.read_text(encoding="utf-8"))}
-    except (OSError, ValueError, TypeError):
-        pass
+    ents = subject_index().get("entities")
+    if ents:
+        return {e["id"]: e.get("kind", "misc") for e in ents}
     cats = {}
     for f in ROOT.glob("mod/src/main/java/com/nirncraft/**/*.java"):
         text = f.read_text(encoding="utf-8", errors="replace")
@@ -126,12 +136,12 @@ def gallery():
     stands with the set, its shield and a weapon), gallery:weapons (every weapon of a material on stands),
     gallery:blocks / gallery:furniture (block lineups), suite:animation (entities moving, a 6-frame filmstrip)."""
     sx, sy, sz = STAGE
-    out = [{"id": "entity-index", "title": "What every NirnCraft entity is (kind, category, size), from the game",
-            "_file": "(generated gallery)", "kind": "measure", "tags": ["suite:gallery", "check:entities"],
-            "pose": {"stage": [sx, sy, sz, 4.5]}, "variants": ["measure"],
+    out = [{"id": "subject-index", "title": "Every testable subject the game defines, by kind, from its registries",
+            "_file": "(generated gallery)", "kind": "measure", "tags": ["suite:gallery", "check:entities", "check:subjects"],
+            "pose": {}, "settle": False, "variants": ["measure"],  # pure data: no camera, no terrain to wait for
             "setup": ["try difficulty easy"],  # monsters cannot even be created in peaceful
-            "measure_command": "command nirncraft-qa entities", "measure_file": "nirncraft-qa/entities.json",
-            "export": "entities.json", "checks": {}, "source": "QaCommands entities"}]
+            "measure_command": "command nirncraft-qa subjects", "measure_file": "nirncraft-qa/subjects.json",
+            "export": "subjects.json", "checks": {}, "source": "QaCommands subjects"}]
     cats = _entity_categories()
     for e in sorted(_lang_ids("entity")):
         cat = cats.get(e, "npc")
@@ -141,11 +151,11 @@ def gallery():
         # framed by the game from the subject's real bounding box: three-quarter front, and a side profile for
         # monsters, creatures and NPCs (frame ANGLE FILL, see VisualCamera.frame)
         out.append(_stage_scene(f"gallery-{e.replace('_', '-')}", f"Gallery: {e}", tags,
-                                ["try difficulty easy", summon, "wait 30"], BIG.get(e, 4.5),
+                                ["try difficulty easy", summon, "wait 10"], BIG.get(e, 4.5),
                                 extra={"frame": [30, 0.7], "subject": f"nirncraft:{e}"}))
         if cat in SIDE_KINDS:
             out.append(_stage_scene(f"gallery-{e.replace('_', '-')}-side", f"Gallery: {e} (side)",
-                                    tags + ["gallery:side"], ["try difficulty easy", summon, "wait 30"],
+                                    tags + ["gallery:side"], ["try difficulty easy", summon, "wait 10"],
                                     BIG.get(e, 4.5), extra={"frame": [90, 0.7], "subject": f"nirncraft:{e}"}))
         # animation: free to move inside an invisible pen; six frames a third of a second apart
         pen = f"try fill {sx - 6} {sy + 1} {sz - 6} {sx + 6} {sy + 5} {sz + 6} minecraft:barrier hollow"
@@ -482,6 +492,8 @@ def load():
     scenes += distance_scenes()
     scenes += validation_scenes()
     scenes += feature_scenes.feature_scenes()  # every generated biome / landmark / site kind (the cached index)
+    import subjects  # every subject the game defines x the views its kind gets (the game's subject index)
+    scenes += subjects.scenes()
     seam_core(scenes)
     for s in scenes:
         if s["id"] in seen:
@@ -659,9 +671,16 @@ def pose_actions(s, plan=None, candidate=0):
         weather = None
     elif "stage" in p:
         x, y, z, d = p["stage"]
-        lines += [f"try fill {x - 7} {y} {z - 7} {x + 7} {y} {z + 7} minecraft:glass",
-                  f"try fill {x - 7} {y} {z - 7} {x + 7} {y} {z + 7} minecraft:smooth_stone",
-                  f"camera {x} {y + 1 + d * 0.45:.2f} {z - d:.2f} {x} {y + 1 + d * 0.25:.2f} {z}"]
+        # the camera first: it loads the chunks around itself, so the pad below can then be built
+        lines += [f"camera {x} {y + 1 + d * 0.45:.2f} {z - d:.2f} {x} {y + 1 + d * 0.25:.2f} {z}",
+                  f"try setworldspawn {x} {y + 1} {z}",  # the next boot loads here, not in the spawn cabin
+                  f"try fill {x - 7} {y} {z - 7} {x + 7} {y} {z + 7} minecraft:glass",
+                  f"try fill {x - 7} {y} {z - 7} {x + 7} {y} {z + 7} minecraft:smooth_stone"]
+    elif "studio" in p:
+        x, y, z = STUDIO
+        lines += [f"camera {x} {y + 1} {z + 5} {x} {y + 2.5} {z - 6}",  # first: it loads the chunks
+                  f"try fill {x - 7} {y} {z - 7} {x + 7} {y + 9} {z + 7} minecraft:black_concrete hollow",
+                  f"try fill {x - 6} {y + 1} {z - 6} {x + 6} {y + 8} {z + 6} minecraft:air"] +                  [f"try setblock {x + dx} {y + 7} {z + dz} minecraft:light[level=12]" for dx in (-5, 5) for dz in (-5, 5)]
     elif "dungeon" in p:
         lines.append(f"command nirncraft-dungeon-qa view {p['dungeon']} {p.get('view', 'entrance')}")
         lines.append("try effect clear @p minecraft:night_vision")  # the view adds night vision; judge real light
@@ -713,12 +732,20 @@ def capture_actions(s, tag, plan=None):
         _, (ex, ey, ez), (lx, ly, lz) = sweep_path(s, plan)
         return ["settle-visual 1800"] + list(s.get("setup", [])) + [f"wait {int(s.get('wait', 60))}",
                 f"camera-travel {tag}s 240 {ex} {ey} {ez} {lx} {ly} {lz}"] + list(s.get("cleanup", []))
-    lines = ["settle-visual 1800"]  # the world behind a screen is part of the picture too
+    staged = s.get("frame") or s.get("frameBox") or s.get("camera_verb")
+    showcase = any(str(c).startswith("showcase ") for c in s.get("setup", []))
+    # the world behind a screen is part of the picture too; a staged subject settles once, after it is framed;
+    # a showcase (an item's UI view) needs no world at all
+    lines = [] if (staged or showcase) else ["settle-visual 1800"]
     if s.get("wait"):
         lines.append(f"wait {int(s['wait'])}")
     lines += list(s.get("setup", []))
     if s.get("frame"):  # the game frames the subject that setup just placed, from its real size
         lines += [f"frame {s['frame'][0]} {s['frame'][1]}", "settle-visual 600"]
+    elif s.get("frameBox"):  # a placed block / furniture: framed by its box
+        lines += ["frame-box " + " ".join(str(v) for v in s["frameBox"]), "settle-visual 600"]
+    elif s.get("camera_verb"):  # e.g. a building framed from the report its command wrote
+        lines += [s["camera_verb"], "settle-visual 900"]
     if s.get("measure"):
         lines.append(f"measure {tag} {int(s['measure'])}")
     if s.get("frames"):

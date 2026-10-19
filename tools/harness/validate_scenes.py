@@ -11,7 +11,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import catalog  # noqa: E402
 
-VERBS = {"frame", "reload", "resources", "shaders", "rebuild", "texture-probe", "flash", "cast", "use", "fx", "wait", "settle",
+VERBS = {"frame", "frame-box", "frame-file", "inside-file", "showcase", "reload", "resources", "shaders", "rebuild", "texture-probe", "flash", "cast", "use", "fx", "wait", "settle",
          "measure", "command", "try", "camera", "camera-plan", "camera-travel", "visit", "front", "ui", "capture-ui",
          "capture", "identity", "transport", "stop", "screen", "click", "key", "expect-screen", "perspective",
          "renderdistance", "hud", "settle-visual", "message"}
@@ -53,6 +53,8 @@ def main():
             errors.append(f"{w}: unknown group {s['group']}")
         pose = s.get("pose") or {}
         kinds = [k for k in catalog.POSES if k in pose]
+        if not pose and s.get("kind") == "measure" and s.get("settle") is False:
+            continue  # pure data (e.g. subject-index): no camera at all
         if len(kinds) != 1:
             errors.append(f"{w}: needs exactly one pose kind, has {kinds}")
             continue

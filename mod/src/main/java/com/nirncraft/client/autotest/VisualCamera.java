@@ -74,6 +74,30 @@ final class VisualCamera {
                 (float)-Math.toDegrees(Math.atan2(direction.y,Math.hypot(direction.x,direction.z)))};
     }
 
+    /**
+     * Camera distance that fits a box: its projected half-height and half-width (seen along yaw) fill FILL of the
+     * vertical / horizontal field of view, plus half its depth; as close as 0.6 blocks for small things.
+     */
+    static double fit(Minecraft mc,net.minecraft.world.phys.AABB box,double yaw,double fill) {
+        double fovV=Math.toRadians(mc.options.fov().get());
+        double aspect=Math.max(0.5,(double)mc.getWindow().getWidth()/Math.max(1,mc.getWindow().getHeight()));
+        double fovH=2*Math.atan(Math.tan(fovV/2)*aspect);
+        double c=Math.abs(Math.cos(yaw)), s=Math.abs(Math.sin(yaw));
+        double halfW=0.5*(box.getXsize()*c+box.getZsize()*s), depth=0.5*(box.getXsize()*s+box.getZsize()*c);
+        double dv=(0.5*box.getYsize())/Math.tan(fill*fovV/2), dh=halfW/Math.tan(fill*fovH/2);
+        return Math.max(0.6,Math.max(dv,dh)+depth);
+    }
+
+    /** Put the camera's eye at EYE looking at TARGET: only the eye must be clear (the test player is a spectator). */
+    static void placeEye(net.minecraft.server.level.ServerPlayer player,Vec3 eye,Vec3 target) {
+        var level=player.level();
+        if(!loaded(level,eye) || !level.noCollision(player,new net.minecraft.world.phys.AABB(eye,eye).inflate(0.12)))
+            throw new IllegalStateException("Camera eye is unloaded or inside a block");
+        Vec3 feet=eye.subtract(0,1.62,0);
+        float[] view=angles(feet,target);
+        player.teleportTo(level,feet.x,feet.y,feet.z,java.util.Set.of(),view[0],view[1],true);
+    }
+
     /** What the last `frame` put in view (part of the capture receipt). */
     static volatile JsonObject lastFrame;
 
@@ -86,7 +110,6 @@ final class VisualCamera {
         if(mc.getSingleplayerServer()==null) throw new IllegalStateException("frame needs the integrated server");
         String[] a=arguments.trim().split("\\s+");
         double angle=a.length>0?Double.parseDouble(a[0]):30, fill=a.length>1?Double.parseDouble(a[1]):0.7;
-        double fovV=Math.toRadians(mc.options.fov().get());
         var result=new java.util.concurrent.CompletableFuture<Integer>();
         var id=mc.player.getUUID();
         mc.getSingleplayerServer().execute(()->{
@@ -101,12 +124,11 @@ final class VisualCamera {
                 if(subject.isMultipartEntity() && subject.getParts()!=null)
                     for(var part:subject.getParts()) box=box.minmax(part.getBoundingBox());
                 Vec3 centre=box.getCenter();
-                double radius=0.5*Math.sqrt(box.getXsize()*box.getXsize()+box.getYsize()*box.getYsize()+box.getZsize()*box.getZsize());
-                double distance=Math.max(1.5,radius/Math.tan(fill*fovV/2));
                 double yaw=Math.toRadians(subject.getYRot()+angle), elev=Math.toRadians(10);
+                double distance=fit(mc,box,yaw,fill);
                 Vec3 facing=new Vec3(-Math.sin(yaw),0,Math.cos(yaw));
                 Vec3 eye=centre.add(facing.scale(distance*Math.cos(elev))).add(0,distance*Math.sin(elev),0);
-                place(player,eye.subtract(0,1.62,0),centre);
+                placeEye(player,eye,centre);
                 var info=new JsonObject();
                 info.addProperty("subject",net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getKey(subject.getType()).toString());
                 info.add("box",vector(new Vec3(box.getXsize(),box.getYsize(),box.getZsize())));
@@ -119,6 +141,67 @@ final class VisualCamera {
             } catch(Exception e) { result.completeExceptionally(e); }
         });
         return result;
+    }
+
+    /**
+     * `frame-box X1 Y1 Z1 X2 Y2 Z2 ANGLE FILL`: like frame, for a box in the world (placed blocks, a building, a
+     * patch of flora): ANGLE 0 looks from the south (buildings face south), 90 from the west.
+     */
+    static java.util.concurrent.CompletableFuture<Integer> frameBox(Minecraft mc,String arguments) {
+        if(mc.getSingleplayerServer()==null) throw new IllegalStateException("frame-box needs the integrated server");
+        String[] a=arguments.trim().split("\\s+");
+        if(a.length<6) throw new IllegalArgumentException("frame-box X1 Y1 Z1 X2 Y2 Z2 [ANGLE] [FILL]");
+        var box=new net.minecraft.world.phys.AABB(Double.parseDouble(a[0]),Double.parseDouble(a[1]),Double.parseDouble(a[2]),
+                Double.parseDouble(a[3])+1,Double.parseDouble(a[4])+1,Double.parseDouble(a[5])+1);
+        double angle=a.length>6?Double.parseDouble(a[6]):30, fill=a.length>7?Double.parseDouble(a[7]):0.7;
+        var result=new java.util.concurrent.CompletableFuture<Integer>();
+        var id=mc.player.getUUID();
+        mc.getSingleplayerServer().execute(()->{
+            try {
+                var player=mc.getSingleplayerServer().getPlayerList().getPlayer(id);
+                if(player==null) throw new IllegalStateException("No player");
+                Vec3 centre=box.getCenter();
+                double yaw=Math.toRadians(angle), elev=Math.toRadians(14);
+                double distance=fit(mc,box,yaw,fill);
+                Vec3 eye=centre.add(new Vec3(-Math.sin(yaw),0,Math.cos(yaw)).scale(distance*Math.cos(elev))).add(0,distance*Math.sin(elev),0);
+                placeEye(player,eye,centre);
+                var info=new JsonObject();
+                info.addProperty("subject","box");
+                info.add("box",vector(new Vec3(box.getXsize(),box.getYsize(),box.getZsize())));
+                info.add("centre",vector(centre));
+                info.addProperty("distance",distance);
+                info.addProperty("angle",angle);
+                info.addProperty("fill",fill);
+                lastFrame=info;
+                result.complete(1);
+            } catch(Exception e) { result.completeExceptionally(e); }
+        });
+        return result;
+    }
+
+    private static JsonObject readReport(String path) {
+        try {
+            return com.google.gson.JsonParser.parseString(Files.readString(Path.of(path))).getAsJsonObject();
+        } catch(Exception e) {
+            throw new IllegalStateException("cannot read "+path+": "+e.getMessage());
+        }
+    }
+
+    private static double at(JsonObject o,String key,int i) { return o.getAsJsonArray(key).get(i).getAsDouble(); }
+
+    /** `frame-file REPORT ANGLE FILL`: frame-box over the min / max a QA command just reported (a building). */
+    static java.util.concurrent.CompletableFuture<Integer> frameFile(Minecraft mc,String arguments) {
+        String[] a=arguments.trim().split("\\s+");
+        var o=readReport(a[0]);
+        return frameBox(mc,at(o,"min",0)+" "+at(o,"min",1)+" "+at(o,"min",2)+" "+at(o,"max",0)+" "+at(o,"max",1)+" "
+                +at(o,"max",2)+" "+(a.length>1?a[1]:"0")+" "+(a.length>2?a[2]:"0.75"));
+    }
+
+    /** `inside-file REPORT`: stand at the reported interior point, looking at the back (north) wall at eye height. */
+    static java.util.concurrent.CompletableFuture<Integer> insideFile(Minecraft mc,String arguments) {
+        var o=readReport(arguments.trim().split("\\s+")[0]);
+        double x=at(o,"inside",0), y=at(o,"inside",1), z=at(o,"inside",2), back=at(o,"min",2)+1;
+        return action(mc,x+" "+y+" "+(z+Math.max(1,(z-back)*0.6))+" "+x+" "+(y+1.4)+" "+back,false);
     }
 
     static java.util.concurrent.CompletableFuture<Integer> action(Minecraft mc,String arguments,boolean scout) {

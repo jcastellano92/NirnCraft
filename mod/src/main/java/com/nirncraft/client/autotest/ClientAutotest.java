@@ -696,6 +696,22 @@ public final class ClientAutotest {
                     case "front" -> net.minecraft.client.CameraType.THIRD_PERSON_FRONT;
                     default -> net.minecraft.client.CameraType.FIRST_PERSON;
                 });
+            } else if (action.startsWith("showcase ")) {  // one item as the UI shows it (capture-ui next)
+                var item = net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(
+                        net.minecraft.resources.Identifier.parse(action.substring(9).trim()));
+                if (item == null || item == net.minecraft.world.item.Items.AIR)
+                    throw new IllegalArgumentException("Unknown item " + action.substring(9).trim());
+                mc.gui.setScreen(new ShowcaseScreen(new net.minecraft.world.item.ItemStack(item)));
+            } else if (action.startsWith("frame-file ")) {
+                liveCommand=VisualCamera.frameFile(mc,action.substring(11));
+                liveCommandDeadline=System.currentTimeMillis()+60_000;
+            } else if (action.startsWith("inside-file ")) {
+                VisualCamera.lastFrame=null;
+                liveCommand=VisualCamera.insideFile(mc,action.substring(12));
+                liveCommandDeadline=System.currentTimeMillis()+60_000;
+            } else if (action.startsWith("frame-box ")) {
+                liveCommand=VisualCamera.frameBox(mc,action.substring(10));
+                liveCommandDeadline=System.currentTimeMillis()+60_000;
             } else if (action.equals("frame") || action.startsWith("frame ")) {
                 liveCommand=VisualCamera.frame(mc,action.length()>5?action.substring(6):"");
                 liveCommandDeadline=System.currentTimeMillis()+60_000;
