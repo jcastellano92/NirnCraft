@@ -398,6 +398,38 @@ def recover(scene=None):
         pass
 
 
+# ----------------------------------------------------------------------------------------------- per-test game log
+LOG_FILE = GAME / "logs/latest.log"
+NOISE = re.compile(r"(Unable to resolve shader pack option menu element|Error loading class: (mezz|com/simibubi|"
+                   r"blusunrize|mekanism|com/direwolf20|com/portingdeadmods)|Missing sound for event|"
+                   r"Received passengers for unknown entity)", re.I)
+SERIOUS = re.compile(r"(did not parse|Exception|ERROR\]|Unknown live action|Readiness failed|cancelled)", re.I)
+
+
+def log_mark():
+    return LOG_FILE.stat().st_size if LOG_FILE.exists() else 0
+
+
+def log_since(mark):
+    """The game's WARN / ERROR / exception lines written since `mark` (known harmless noise dropped)."""
+    if not LOG_FILE.exists():
+        return []
+    with open(LOG_FILE, "rb") as f:
+        size = f.seek(0, 2)
+        f.seek(mark if mark <= size else 0)  # the log was rotated (new client): read it all
+        text = f.read().decode("utf-8", "replace")
+    out = []
+    for line in text.splitlines():
+        if ("/WARN]" in line or "/ERROR]" in line or "Exception" in line) and not NOISE.search(line):
+            out.append(line.strip()[:400])
+    return out
+
+
+def log_summary(lines):
+    serious = [l for l in lines if SERIOUS.search(l)]
+    return {"logWarnings": len(lines) - len(serious), "logErrors": len(serious)}, serious
+
+
 # ----------------------------------------------------------------------------------------------- one scene
 BLOCKING = {"RaceScreen", "IntroLoadingScreen", "ReceivingLevelScreen", "LevelLoadingScreen", "GenericMessageScreen",
             "DisconnectedScreen", "TitleScreen"}
@@ -417,6 +449,7 @@ def capture(scene, variant, pose_lines, capture_lines):
     if blocked and scene.get("capture") != "ui":
         raise RuntimeError(f"the client is stuck on {blocked} (the world cannot load behind it); is the installed "
                            f"jar current? (harness.py run --rebuild)")
+    mark = log_mark()
     want = variant != "vanilla"
     st = client_state()
     # the shader toggle settles where the camera is: move to this scene first, then toggle (in one batch)
@@ -461,6 +494,13 @@ def capture(scene, variant, pose_lines, capture_lines):
     rec = {}
     if (SHOTS / f"{tag}.json").exists():
         rec = json.loads((SHOTS / f"{tag}.json").read_text(encoding="utf-8"))
+    lines = log_since(mark)
+    if lines:  # every warning and error the game logged during this test travels with its result
+        counts, serious = log_summary(lines)
+        extra.update(counts)
+        extra["gameLog"] = lines[:200]
+        for l in serious[:3]:
+            extra.setdefault("popFlags", []).append("game log: " + l[l.find("]: ") + 3 if "]: " in l else 0:][:140])
     partial = (lw.read_json(GAME / "nirncraft-live-status.json") or {}).get("settlePartial", 0)
     if partial:  # the world did not finish loading in time: the picture may miss chunks (flagged, not discarded)
         extra.setdefault("popFlags", []).append(f"partial: {partial} settle(s) timed out (chunks may be missing)")

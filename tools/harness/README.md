@@ -96,6 +96,9 @@ start skips its group the same way.
   kept). A failed test's record carries its last 25 steps. `harness.py trace <test>` prints what led up to it,
   interleaved with the game's log lines of the same seconds; `--previous` for the run before.
 * Checks that print problems but exit 0 use `fail_regex` (e.g. `^ERR`) so they cannot pass falsely.
+* **Game log per test:** every WARN / ERROR / exception the game logs during a live test is kept with its result
+  (`results/<test>/<variant>.log.txt`, previous as `.log.before.txt`), counted (`logWarnings`, `logErrors`) and
+  serious ones (a command that did not parse, an exception) flagged, so a skipped `try` never goes unseen.
 
 ## Hot reload kinds (watch mode and `--changed`)
 

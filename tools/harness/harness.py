@@ -479,10 +479,17 @@ class Runner:
         if perf:
             extra["perf"] = {k: perf[k] for k in ("median", "p95", "p99", "stalls", "frames") if k in perf}
         rec = results.store(s["id"], v, png, meta=receipt, fingerprint=fp, extra=extra)
-        if popm:  # distance ladders / pop sweeps: their numbers and flags join the image's
+        if popm:  # ladder / sweep numbers, the game log of the test: they join the image's numbers and flags
             flags = popm.pop("popFlags", [])
+            game_log = popm.pop("gameLog", [])
             rec["metrics"].update(popm)
             rec["metrics"]["flags"] = rec["metrics"].get("flags", []) + flags
+            if game_log:
+                lf = results.stem(s["id"], v).with_name(f"{v}.log.txt")
+                if lf.exists():  # like images: this test's log and the one before it
+                    lf.replace(lf.with_name(f"{v}.log.before.txt"))
+                lf.write_text("\n".join(game_log) + "\n", encoding="utf-8")
+                rec["gameLogFile"] = str(lf)
         if receipt.get("seed") not in (None, self.seed):
             rec["metrics"]["flags"].append(f"world seed {receipt.get('seed')} != {self.seed}")
         return self.judge(s, v, rec)
@@ -490,6 +497,7 @@ class Runner:
     def run_measure(self, s, v, fp):
         """A live test without a picture: go there, settle, run a command that writes a JSON report, keep its numbers."""
         g = self.game
+        mark = g.log_mark()
         out = g.GAME / s["measure_file"]
         out.unlink(missing_ok=True)
         try:
@@ -505,6 +513,8 @@ class Runner:
             raise RuntimeError(f"{s['measure_command']} wrote no {s['measure_file']}")
         data = json.loads(out.read_text(encoding="utf-8"))
         m = {name: json_sum(data, path) for name, path in (s.get("measure_sum") or {}).items()}
+        log_counts, serious = g.log_summary(g.log_since(mark))
+        m.update(log_counts)
         if "floating" in m and "control" in m:
             m["floating"] -= m["control"]  # the plain-terrain control is not the place's fault
             m["problems"] = m["floating"]
