@@ -224,7 +224,7 @@ public final class WeatherFieldTexture implements AutoCloseable {
             WeatherKind fallback=level.getThunderLevel(partialTick)>0.2f?WeatherKind.STORM
                     :level.getRainLevel(partialTick)>0.2f?WeatherKind.RAIN:WeatherKind.CLEAR;
             double seconds=(level.getGameTime()+partialTick)/20.0;
-            long dayTime=level.getDefaultClockTime();
+            long dayTime=level.getOverworldClockTime();
             Object identity=samplingIdentity;
             // Immutable inputs only: no ClientLevel, entity, chunk, GL or mutable table reads.
             pendingGrid=java.util.concurrent.CompletableFuture.supplyAsync(()->{

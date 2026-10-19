@@ -80,7 +80,7 @@ public final class SurvivalConfig {
 
         b.push("survival_mode");
         SURVIVAL_MODE = b.comment("Skyrim's Survival Mode: hunger, fatigue and cold meters with their penalties, warmth from clothing,",
-                        "and a lower carry weight. Each world can still switch it off with the game rule skycraftSurvivalMode.")
+                        "and a lower carry weight. Each world can still switch it off with the game rule skycraft:survival_mode.")
                 .define("enabled", true);
         HUNGER_PER_HOUR = b.comment("Hunger gained per in-game hour (0-240 scale: Peckish at 40, Hungry 80, Famished 120, Starving 180).")
                 .defineInRange("hungerPerHour", 4.0, 0.0, 240.0);

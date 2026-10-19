@@ -231,7 +231,7 @@
   "entity.skycraft.player_corpse": "Body",
   "entity.skycraft.player_corpse.named": "%s's Body",
   "survival.skycraft.corpse.not_yours": "This is %s's body. Only they and their party may search it.",
-  "gamerule.skycraftSurvivalMode": "Skycraft Survival Mode (hunger, fatigue, cold)",
+  "gamerule.skycraft.survival_mode": "Skycraft Survival Mode (hunger, fatigue, cold)",
   "effect.skycraft.warming_meal": "Warming Meal",
   "effect.skycraft.rested": "Rested",
   "tooltip.skycraft.survival.warmth": "Warmth %s",

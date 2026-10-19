@@ -69,7 +69,7 @@ final class Formations {
     }
 
     static boolean crystalBloom(Brush br, Kind k) {
-        Terrain.Ground g = Terrain.ground(br.b.level.getBlockState(br.b.at(0, -1, 0)));
+        Terrain.Ground g = Terrain.ground(com.skycraft.worldgen.SafeReads.state(br.b.level, br.b.at(0, -1, 0)));
         Block base = switch (g) {
             case ASH -> Blocks.BLACKSTONE;
             case SAND -> Blocks.SMOOTH_SANDSTONE;

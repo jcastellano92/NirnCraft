@@ -42,9 +42,9 @@ public final class Brush {
 
     /** Rigid placement relative to the base level. Above-ground blocks only go into air or plants. */
     public boolean set(int dx, int dy, int dz, BlockState state) {
-        if (dy >= 0 && !b.free(dx, dy, dz)) return false;
         BlockPos p = b.at(dx, dy, dz);
-        if (!b.writable(p)) return false;
+        if (!b.writable(p)) return false; // first: nothing outside the write zone is read either
+        if (dy >= 0 && !b.free(dx, dy, dz)) return false;
         b.set(dx, dy, dz, state);
         written++;
         track(p, state);
@@ -57,6 +57,8 @@ public final class Brush {
 
     /** A block resting {@code up} blocks above the ground of its own column. */
     public boolean top(int dx, int dz, int up, BlockState state) {
+        BlockPos col = b.at(dx, 0, dz);
+        if (!b.writableColumn(col.getX(), col.getZ())) return false; // set() would refuse it: skip the ground probe too
         int dy = gy(dx, dz) + up;
         if (up > 0 && b.free(dx, dy - 1, dz)) return false;
         return set(dx, dy, dz, state);
@@ -93,10 +95,13 @@ public final class Brush {
             BlockState s = b.level.getBlockState(p);
             if (!(s.getBlock() instanceof FenceBlock || s.getBlock() instanceof WallBlock
                     || s.getBlock() instanceof IronBarsBlock || s.getBlock() instanceof StairBlock)) continue;
+            // a stair reads its neighbours through the level itself: leave one whose neighbours are outside the zone
+            if (s.getBlock() instanceof StairBlock && !(com.skycraft.worldgen.SafeReads.readable(b.level, p.offset(-1, 0, -1))
+                    && com.skycraft.worldgen.SafeReads.readable(b.level, p.offset(1, 0, 1)))) continue;
             BlockState n = s;
             for (Direction d : Direction.Plane.HORIZONTAL) {
                 BlockPos np = p.relative(d);
-                n = n.updateShape(b.level, b.level, p, d, np, b.level.getBlockState(np), b.level.getRandom());
+                n = n.updateShape(b.level, b.level, p, d, np, com.skycraft.worldgen.SafeReads.state(b.level, np), b.level.getRandom());
             }
             if (n != s && b.writable(p)) b.level.setBlock(p, n, 2);
         }

@@ -213,8 +213,8 @@ public final class RestClient {
         switch (event.getKey()) {
             case com.mojang.blaze3d.platform.InputConstants.KEY_LEFT -> chosen = Math.max(1, chosen - 1);
             case com.mojang.blaze3d.platform.InputConstants.KEY_RIGHT -> chosen = Math.min(24, chosen + 1);
-            case com.mojang.blaze3d.platform.InputConstants.KEY_UP -> chosen = RestLogic.hoursUntil(mc.level.getDefaultClockTime(), 6);
-            case com.mojang.blaze3d.platform.InputConstants.KEY_DOWN -> chosen = RestLogic.hoursUntil(mc.level.getDefaultClockTime(), 18);
+            case com.mojang.blaze3d.platform.InputConstants.KEY_UP -> chosen = RestLogic.hoursUntil(mc.level.getOverworldClockTime(), 6);
+            case com.mojang.blaze3d.platform.InputConstants.KEY_DOWN -> chosen = RestLogic.hoursUntil(mc.level.getOverworldClockTime(), 18);
             case com.mojang.blaze3d.platform.InputConstants.KEY_RETURN, com.mojang.blaze3d.platform.InputConstants.KEY_NUMPADENTER -> {
                 if (can) start();
             }
@@ -322,7 +322,7 @@ public final class RestClient {
             return;
         }
         if (mc.gui.screen() instanceof RestScreen) return;
-        long dayTime = mc.level.getDefaultClockTime();
+        long dayTime = mc.level.getOverworldClockTime();
         boolean jail = mode == RestLogic.JAIL;
         if (phase == 2) {
             int panelH = 36;

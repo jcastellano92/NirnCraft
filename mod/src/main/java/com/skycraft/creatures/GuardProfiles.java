@@ -214,7 +214,9 @@ public final class GuardProfiles {
     public static Profile at(Level level, BlockPos pos) {
         String region = Holds.holdAt(level, pos);
         String place = null, culture = null;
-        if (level instanceof ServerLevel sl) {
+        // worldgen spawns (dungeon camps) call this from a worker thread: the settlement anchors are saved data the
+        // server thread mutates (and 26.3's SavedDataStorage cache is a plain HashMap), so only the region counts there
+        if (level instanceof ServerLevel sl && sl.getServer().isSameThread()) {
             var near = SettlementAnchors.near(sl, pos, 24);
             if (near.isPresent() && !near.get().homestead()) {
                 place = near.get().key;

@@ -286,7 +286,7 @@ public final class FactionDialogue {
         int bounty = Bounty.get(p, hold);
         if (rank < 3 || bounty <= 0) return;
         CompoundTag mod = data.module("quest");
-        long day = p.level().getDefaultClockTime() / 24000L;
+        long day = p.level().getOverworldClockTime() / 24000L;
         if (mod.getLongOr("faction_pull_day",0L) == day + 1) {
             Dialogue.open(p, guard, tr("faction.skycraft.reply.pull_used"));
             return;

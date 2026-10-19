@@ -993,7 +993,7 @@ public class MapScreen extends Screen {
         g.pose().scale(s, s);
         g.centeredText(font, region, 0, 0, 0xFFF5EBC8);
         g.pose().popMatrix();
-        long dayTime = level.getDefaultClockTime();
+        long dayTime = level.getOverworldClockTime();
         Component when = SkyrimCalendar.date(dayTime).copy().append("   ").append(SkyrimCalendar.time(dayTime));
         float ws = 0.72f;
         drawScaled(g, when, width / 2f - font.width(when) * ws / 2f, 5 + 9 * s + 2, ws, 0xFFBDB59E);

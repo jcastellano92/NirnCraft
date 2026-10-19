@@ -269,7 +269,7 @@ public final class Factions {
         if (data.module("crime").getIntOr("murders",0) < 1) return;
         Level level = player.level();
         if (level.dimension() != Level.OVERWORLD) return;
-        long time = level.getDefaultClockTime() % 24000L;
+        long time = level.getOverworldClockTime() % 24000L;
         if (time < 13000 || time > 23000) return;
         mod.putBoolean("db_whispered", true);
         data.markDirty();
@@ -280,7 +280,7 @@ public final class Factions {
     }
 
     public static boolean isNight(Level level) {
-        long time = level.getDefaultClockTime() % 24000L;
+        long time = level.getOverworldClockTime() % 24000L;
         return time >= 13000 && time <= 23000;
     }
 }

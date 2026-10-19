@@ -380,7 +380,7 @@ public final class QaLevel implements WorldGenLevel {
     }
 
     public long dayTime() {
-        return real.getDefaultClockTime();
+        return real.getOverworldClockTime();
     }
 
     @Override

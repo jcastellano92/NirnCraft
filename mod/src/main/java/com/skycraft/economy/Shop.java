@@ -68,7 +68,7 @@ public final class Shop {
      * signs agree. Works on both sides.
      */
     public static boolean isOpen(net.minecraft.world.level.Level level) {
-        long t = level.getDefaultClockTime() % 24000L;
+        long t = level.getOverworldClockTime() % 24000L;
         return t >= 2000L && t < 14000L;
     }
 
@@ -115,7 +115,7 @@ public final class Shop {
 
     static long today(net.minecraft.world.level.Level level) {
         // day time advances when sleeping; game time keeps going even with the daylight cycle off
-        return Math.max(level.getDefaultClockTime(), level.getGameTime()) / 24000L;
+        return Math.max(level.getOverworldClockTime(), level.getGameTime()) / 24000L;
     }
 
     /**
@@ -352,7 +352,7 @@ public final class Shop {
     // ------------------------------------------------------------------ restock
 
     public void restockIfDue() {
-        long dt = npc.level().getDefaultClockTime();
+        long dt = npc.level().getOverworldClockTime();
         long period = Math.floorDiv(today(npc.level()), (long) RESTOCK_DAYS);
         if (rec.lastDayTime != Long.MIN_VALUE && dt - rec.lastDayTime >= 24000L * RESTOCK_DAYS && period == rec.period) {
             period = rec.period + Math.floorDiv(dt - rec.lastDayTime, 24000L * RESTOCK_DAYS);

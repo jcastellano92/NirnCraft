@@ -54,7 +54,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Tamrielic festival calendar (MS16).
  *
- * <p>Maps Minecraft world days ({@code level.getDefaultClockTime() / 24000L}) onto Tamriel's 12 months
+ * <p>Maps Minecraft world days ({@code level.getOverworldClockTime() / 24000L}) onto Tamriel's 12 months
  * (30 days per month, 360 days per year) and activates regional hold festivals loaded from
  * {@code /skycraft/calendar/festivals.json}. When a festival is active in a settlement, a
  * non-destructive temporary plaza overlay (lanterns, hold banners, campfire brazier) is placed
@@ -260,7 +260,7 @@ public final class FestivalCalendar {
     }
 
     public static TamrielDate dateAt(ServerLevel level) {
-        return dateFromDayTime(level.getDefaultClockTime());
+        return dateFromDayTime(level.getOverworldClockTime());
     }
 
     public static TamrielDate dateFromDayTime(long dayTime) {

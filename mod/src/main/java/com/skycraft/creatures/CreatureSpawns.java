@@ -440,7 +440,7 @@ public final class CreatureSpawns {
         int questStage = com.skycraft.quest.MainQuest.stage(data);
         if (questStage < 4) return;
 
-        long dayTime = level.getDefaultClockTime() % 24000L;
+        long dayTime = level.getOverworldClockTime() % 24000L;
         if (dayTime > 13500L) return; // day and dusk only
 
         float baseChance = (float) (double) CreaturesConfig.DRAGON_ATTACK_CHANCE.get();

@@ -30,16 +30,17 @@ public final class AudioClientEvents {
         AudioDebug.tick(mc);
     }
 
+    private static final java.util.regex.Pattern WOLF_VOICE = java.util.regex.Pattern.compile("entity\\.(baby_)?wolf(_[a-z]+)?\\.(howl|growl)");
+
     /** Skyrim's wolves: vanilla wolves howl and growl with Skycraft's voices. */
     @SubscribeEvent
     public static void onVanillaVoice(PlaySoundEvent event) {
         SoundInstance s = event.getSound();
         if (s == null || !"minecraft".equals(s.getIdentifier().getNamespace())) return;
-        String kind = switch (s.getIdentifier().getPath()) {
-            case "entity.wolf.howl" -> "howl";
-            case "entity.wolf.growl" -> "growl";
-            default -> null;
-        };
+        // 26.3 gives each wolf a sound variant: entity.wolf.growl (classic), entity.wolf_angry.growl, ...,
+        // entity.baby_wolf.growl; 1.20.1 had only entity.wolf.growl / entity.wolf.howl for every wolf
+        String path = s.getIdentifier().getPath();
+        String kind = !WOLF_VOICE.matcher(path).matches() ? null : path.endsWith(".howl") ? "howl" : "growl";
         if (kind == null) return;
         // (the original isn't resolved yet, so its volume and pitch can't be read here)
         event.setSound(new SimpleSoundInstance(AudioSounds.creature("wolf", kind), s.getSource(), 1.0f,

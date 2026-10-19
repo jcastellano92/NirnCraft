@@ -152,7 +152,7 @@ public final class ProvincialHomes {
         if (home.getBooleanOr("cleansed",false) || !home.getBooleanOr("built",false)) return;
         UUID owner = Houses.HousesData.get(level.getServer()).getOwner(HAUNTED);
         if (owner == null || !owner.equals(player.getUUID())) return;
-        long time = level.getDefaultClockTime() % 24000L;
+        long time = level.getOverworldClockTime() % 24000L;
         if (time < 13000 || time > 23000) return;
         Optional<SettlementAnchors.HouseSite> site = Houses.site(level, HAUNTED);
         if (site.isEmpty() || !site.get().contains(player.blockPosition())) return;

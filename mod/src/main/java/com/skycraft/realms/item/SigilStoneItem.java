@@ -88,7 +88,8 @@ public class SigilStoneItem extends Item {
         CompoundTag tag = ItemData.custom(stack);
         if (tag == null || !tag.contains("sigil")) return null;
         Identifier id = Identifier.tryParse(tag.getCompoundOrEmpty("sigil").getStringOr("ench", ""));
-        return id == null || registries == null ? null : registries.lookupOrThrow(Registries.ENCHANTMENT).get(ResourceKey.create(Registries.ENCHANTMENT, id)).orElse(null);
+        // through EnchantmentsAccess: stones made on 1.20.1 may still name minecraft:sweeping (custom data is not datafixed)
+        return id == null || registries == null ? null : com.skycraft.platform.EnchantmentsAccess.find(id, registries);
     }
 
     public static int level(ItemStack stack) {

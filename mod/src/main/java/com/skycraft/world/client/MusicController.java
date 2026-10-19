@@ -311,7 +311,7 @@ public final class MusicController {
         if (dungeon != null) return new Mood(Kind.DUNGEON, dungeon);
         String town = town(mc, pos, region);
         if (town != null) return new Mood(Kind.TOWN, town);
-        long time = Math.floorMod(level.getDefaultClockTime(), 24000L);
+        long time = Math.floorMod(level.getOverworldClockTime(), 24000L);
         boolean night = time >= 13000 && time < 23000;
         String set = AmbienceEngine.atSea() ? "sea" : musicSet(region);
         if ("skyrim".equals(set)) return new Mood(Kind.EXPLORE, night ? "music.explore_night" : "music.explore");

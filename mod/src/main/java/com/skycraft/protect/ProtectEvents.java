@@ -211,6 +211,18 @@ public final class ProtectEvents {
         if (!(hit.getEntity().level() instanceof ServerLevel level)) return;
         if (Protect.bypassed(shooter instanceof Player p ? p : null)) return;
         if (shooter instanceof Player p && Protect.mayBuildAt(p, level, hit.getEntity().blockPosition())) return;
+        // 1.20.1 used ImpactResult.SKIP_ENTITY: the arrow ignored the decor and flew on. 26.3 only has cancelling, and a
+        // cancelled arrow is left at the hit point and hits the same entity again every tick (it hangs in the air), so
+        // carry it through the decor's box first. Other projectiles keep moving after a cancelled impact by themselves.
+        if (event.getProjectile() instanceof net.minecraft.world.entity.projectile.arrow.AbstractArrow arrow) {
+            Vec3 v = arrow.getDeltaMovement();
+            if (v.lengthSqr() > 1.0E-6) {
+                Vec3 dir = v.normalize();
+                net.minecraft.world.phys.AABB box = hit.getEntity().getBoundingBox().inflate(0.31);
+                Vec3 far = hit.getLocation().add(dir.scale(box.getSize() * 2 + 1));
+                box.clip(far, hit.getLocation()).ifPresent(exit -> arrow.setPos(exit.add(dir.scale(0.05))));
+            }
+        }
         event.setCanceled(true);
     }
 

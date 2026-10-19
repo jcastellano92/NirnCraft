@@ -108,7 +108,8 @@ public final class PhysicsClutter {
         wakeToPhysics(frame, impulse);
     }
 
-    @SubscribeEvent
+    /** Also when protection cancelled the hit (1.20.1's SKIP_ENTITY did not cancel, so this still ran). */
+    @SubscribeEvent(receiveCanceled = true)
     public static void onProjectileImpactClutter(ProjectileImpactEvent event) {
         Entity proj = event.getProjectile();
         Level level = proj.level();

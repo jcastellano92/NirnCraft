@@ -35,7 +35,7 @@ public final class Schedule {
 
     /** Skyrim clock hour (0-23) for the level's time of day; day time 0 is 6 am. */
     public static int hour(Level level) {
-        long t = Math.floorMod(level.getDefaultClockTime(), 24000L);
+        long t = Math.floorMod(level.getOverworldClockTime(), 24000L);
         return (int) ((t / 1000L + 6) % 24);
     }
 
@@ -55,7 +55,7 @@ public final class Schedule {
     public static Activity activityAt(NpcEntity npc, WeatherKind weather) {
         Level level = npc.level();
         int h = hour(level);
-        long day = level.getDefaultClockTime() / 24000L;
+        long day = level.getOverworldClockTime() / 24000L;
         // a stable per-person habit that changes day to day: some take lunch at the inn, some at home
         boolean social = ((npc.getUUID().getLeastSignificantBits() >>> 3) + day) % 3 != 0;
         NpcRole role = npc.role();

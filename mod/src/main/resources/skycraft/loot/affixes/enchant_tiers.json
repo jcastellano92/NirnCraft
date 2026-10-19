@@ -189,7 +189,7 @@
       "id": "fortify_arms",
       "enchantments": [
         "minecraft:sharpness",
-        "minecraft:sweeping",
+        "minecraft:sweeping_edge",
         "minecraft:knockback"
       ],
       "keywords": [

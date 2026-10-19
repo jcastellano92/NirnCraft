@@ -260,7 +260,7 @@ public final class QuestDialogue {
     // ------------------------------------------------------------------ offers
 
     private static long day(LivingEntity npc) {
-        return npc.level().getDefaultClockTime() / 24000L;
+        return npc.level().getOverworldClockTime() / 24000L;
     }
 
     private static boolean usedToday(LivingEntity npc, String key) {

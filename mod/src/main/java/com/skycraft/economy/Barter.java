@@ -374,11 +374,12 @@ public final class Barter {
     public static boolean sellable(ItemStack stack) {
         if (stack.isEmpty() || Currency.valueOf(stack) > 0 || isQuestKind(stack)) return false;
         if (com.skycraft.magic.bound.BoundWeapons.isBound(stack)) return false;
-        CompoundTag tag = com.skycraft.inventory.ItemData.custom(stack);
-        if (tag == null) return true;
-        if (com.skycraft.platform.NbtData.hasType(tag, "Items", Tag.TAG_LIST) && !tag.getListOrEmpty("Items").isEmpty()) return false;
-        CompoundTag be = tag.getCompoundOrEmpty("BlockEntityTag");
-        return !(com.skycraft.platform.NbtData.hasType(be, "Items", Tag.TAG_LIST) && !be.getListOrEmpty("Items").isEmpty());
+        // 26.3: contents live in components (bundle_contents, container), not in the 1.20.1 "Items" /
+        // "BlockEntityTag.Items" NBT the stack used to carry
+        net.minecraft.world.item.component.BundleContents bundle = stack.get(net.minecraft.core.component.DataComponents.BUNDLE_CONTENTS);
+        if (bundle != null && !bundle.isEmpty()) return false;
+        net.minecraft.world.item.component.ItemContainerContents box = stack.get(net.minecraft.core.component.DataComponents.CONTAINER);
+        return box == null || !box.nonEmptyItemCopyStream().findAny().isPresent();
     }
 
     // ------------------------------------------------------------------ state

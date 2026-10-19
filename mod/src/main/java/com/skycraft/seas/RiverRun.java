@@ -32,7 +32,7 @@ public final class RiverRun {
 
     /** True during the run. */
     public static boolean running(ServerLevel level) {
-        long day = level.getDefaultClockTime() / 24000L;
+        long day = level.getOverworldClockTime() / 24000L;
         long d = Math.floorMod(day, (long) YEAR);
         return d >= RUN_FROM && d < RUN_TO;
     }

@@ -267,7 +267,7 @@ public final class SurvivalMode {
     /** The clock that drives hunger and fatigue: the day clock, or plain game time while the daylight cycle is off. */
     private static long clock(ServerPlayer player) {
         ServerLevel ow = player.level().getServer().overworld();
-        return ow.getGameRules().get(GameRules.ADVANCE_TIME) ? ow.getDefaultClockTime() : ow.getGameTime();
+        return ow.getGameRules().get(GameRules.ADVANCE_TIME) ? ow.getOverworldClockTime() : ow.getGameTime();
     }
 
     private static void stepCold(ServerPlayer player, CompoundTag t, int ticks, int skippedTicks) {

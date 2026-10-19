@@ -20,6 +20,11 @@ public final class CampingEvents {
         if (pos == null || !(event.getEntity() instanceof ServerPlayer player)) return;
         ServerLevel level = player.level().getServer().getLevel(event.getSpawnLevel());
         if (isCampBed(level, pos)) event.setCanceled(true);
+        // 26.3 sets the respawn point inside vanilla's bed check, before CanPlayerSleepEvent can refuse a bed someone
+        // else owns (Forge 1.20.1's PlayerSleepInBedEvent ran first and stopped it): keep a stranger's bed from
+        // becoming your spawn here. Not for forced spawns (/spawnpoint).
+        else if (!event.isForced() && level != null && level.getBlockState(pos).getBlock() instanceof net.minecraft.world.level.block.BedBlock
+                && com.skycraft.crime.Ownership.isOwnedByOther(player, level, pos)) event.setCanceled(true);
     }
 
     /** A bedroll (or anything of a tent) at {@code pos}. */

@@ -84,7 +84,7 @@ public final class Builders {
     }
 
     private static boolean soilBelow(Brush br, int dx, int dz) {
-        BlockState g = br.b.level.getBlockState(br.b.at(dx, br.gy(dx, dz) - 1, dz));
+        BlockState g = com.skycraft.worldgen.SafeReads.state(br.b.level, br.b.at(dx, br.gy(dx, dz) - 1, dz));
         return g.is(Blocks.GRASS_BLOCK) || g.is(Blocks.DIRT) || g.is(Blocks.PODZOL) || g.is(Blocks.COARSE_DIRT)
                 || g.is(Blocks.MOSS_BLOCK) || g.is(Blocks.ROOTED_DIRT) || g.is(Blocks.MYCELIUM);
     }
@@ -183,7 +183,7 @@ public final class Builders {
     }
 
     static boolean crystalOutcrop(Brush br, Kind k) {
-        Terrain.Ground g = Terrain.ground(br.b.level.getBlockState(br.b.at(0, -1, 0)));
+        Terrain.Ground g = Terrain.ground(com.skycraft.worldgen.SafeReads.state(br.b.level, br.b.at(0, -1, 0)));
         Block base = switch (g) {
             case ASH -> Blocks.BLACKSTONE;
             case SAND -> Blocks.SMOOTH_SANDSTONE;
@@ -298,7 +298,7 @@ public final class Builders {
 
     static boolean wildflowers(Brush br, Kind k) {
         int n = br.range(p(k, "min", 8), p(k, "max", 14)), rad = p(k, "radius", 3);
-        Terrain.Ground g = Terrain.ground(br.b.level.getBlockState(br.b.at(0, -1, 0)));
+        Terrain.Ground g = Terrain.ground(com.skycraft.worldgen.SafeReads.state(br.b.level, br.b.at(0, -1, 0)));
         Block[] set = g == Terrain.Ground.SNOW
                 ? new Block[]{Blocks.CORNFLOWER, Blocks.LILY_OF_THE_VALLEY, Blocks.AZURE_BLUET,
                         ArcaneRegistry.FROST_MIRRIAM.get(), ArcaneRegistry.floraBlock("snowberries"), ArcaneRegistry.floraBlock("thistle_branch")}

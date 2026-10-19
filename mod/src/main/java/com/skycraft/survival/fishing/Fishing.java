@@ -71,7 +71,7 @@ public final class Fishing {
         if (base <= 30) kinds.add(FishSpecies.Water.WARM);
         WeatherKind weather = RegionalWeather.kindAt(level, hook);
         boolean rain = weather != null && weather.wet();
-        return new Waters(kinds, region.province(), region.shortId(), depth, rain, level.getDefaultClockTime());
+        return new Waters(kinds, region.province(), region.shortId(), depth, rain, level.getOverworldClockTime());
     }
 
     /** True if {@code s} can bite in these waters. */

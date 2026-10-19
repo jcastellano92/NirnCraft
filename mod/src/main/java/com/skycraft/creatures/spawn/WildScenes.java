@@ -400,7 +400,7 @@ public final class WildScenes {
         if ("day".equals(s.time) && !level.isBrightOutside()) return false;
         if ("night".equals(s.time) && !level.isDarkOutside()) return false;
         if ("dawn_dusk".equals(s.time)) {
-            long tod = level.getDefaultClockTime() % 24000L;
+            long tod = level.getOverworldClockTime() % 24000L;
             boolean dawnOrDusk = tod <= 3000L || (tod >= 11000L && tod <= 14500L) || tod >= 22000L;
             if (!dawnOrDusk && !level.isBrightOutside()) return false;
         }

@@ -255,7 +255,7 @@ public final class Merchants {
             };
             variants = 3;
         }
-        int pick = Math.floorMod(npc.getUUID().hashCode() + (int) (npc.level().getDefaultClockTime() / 24000L), variants);
+        int pick = Math.floorMod(npc.getUUID().hashCode() + (int) (npc.level().getOverworldClockTime() / 24000L), variants);
         return Component.translatable("dialogue.skycraft.economy.greeting." + kind + "." + pick);
     }
 }

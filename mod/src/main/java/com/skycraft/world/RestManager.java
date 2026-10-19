@@ -1023,7 +1023,12 @@ public final class RestManager {
     @SubscribeEvent
     public static void onSleepingTimeCheck(CanContinueSleepingEvent event) {
         Session s = SESSIONS.get(event.getEntity().getUUID());
-        if (s != null && s.mode != RestLogic.WAIT) event.setContinueSleeping(true);
+        if (s == null || s.mode == RestLogic.WAIT) return;
+        // 26.3 posts this event for the missing-bed check too (Forge 1.20.1's SleepingTimeCheckEvent was the daytime
+        // check only): a sleeper whose bed or bedroll was broken must still wake up
+        var level = event.getEntity().level();
+        boolean bed = event.getEntity().getSleepingPos().map(p -> level.getBlockState(p).getBlock() instanceof BedBlock).orElse(false);
+        if (bed) event.setContinueSleeping(true);
     }
 
     /**

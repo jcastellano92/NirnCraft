@@ -253,7 +253,7 @@ public final class ContextualDialogue {
         String province = region != null ? region.province() : null;
         List<String> deeds = activeDeeds(player, hold);
         if (deeds.isEmpty()) return null;
-        String deed = deeds.get(Math.floorMod(speaker.getUUID().hashCode() + (int) (speaker.level().getDefaultClockTime() / 1200L), deeds.size()));
+        String deed = deeds.get(Math.floorMod(speaker.getUUID().hashCode() + (int) (speaker.level().getOverworldClockTime() / 1200L), deeds.size()));
         String key = resolveReactiveKey(hold, province, deed);
         return Component.translatable(key, player.getName());
     }
@@ -362,7 +362,7 @@ public final class ContextualDialogue {
         if (weatherKey != null && level.canSeeSky(pos) && r.nextInt(3) == 0) {
             return Component.translatable(weatherKey);
         }
-        long time = level.getDefaultClockTime() % 24000L;
+        long time = level.getOverworldClockTime() % 24000L;
         if (time >= 13500L && time < 22500L && r.nextInt(4) == 0) {
             return Component.translatable("society.skycraft.context.greet.night." + r.nextInt(2));
         }
@@ -500,7 +500,7 @@ public final class ContextualDialogue {
         }
 
         Personality p = Personality.of(npc);
-        long time = level.getDefaultClockTime() % 24000L;
+        long time = level.getOverworldClockTime() % 24000L;
         boolean night = time >= 13000L && time < 23000L;
         float temp = level.getBiome(pos).value().getBaseTemperature();
 

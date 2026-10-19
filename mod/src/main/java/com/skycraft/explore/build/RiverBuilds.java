@@ -48,7 +48,7 @@ public final class RiverBuilds {
     private static int waterTop(SiteBuilder b, int dx, int dz) {
         BlockPos p = b.at(dx, 0, dz);
         int g = b.groundAt(p.getX(), p.getZ());
-        if (b.level.getFluidState(new BlockPos(p.getX(), g, p.getZ())).isEmpty()) return Integer.MIN_VALUE;
+        if (com.skycraft.worldgen.SafeReads.fluid(b.level, new BlockPos(p.getX(), g, p.getZ())).isEmpty()) return Integer.MIN_VALUE;
         return g;
     }
 
@@ -70,7 +70,7 @@ public final class RiverBuilds {
                 for (int y = top - 1; y > top - 8; y--) {
                     BlockPos p = b.at(0, 0, z);
                     BlockPos q = new BlockPos(p.getX(), y, p.getZ());
-                    if (!b.level.getBlockState(q).getFluidState().isEmpty() || b.level.getBlockState(q).isAir()) {
+                    if (!com.skycraft.worldgen.SafeReads.state(b.level, q).getFluidState().isEmpty() || com.skycraft.worldgen.SafeReads.state(b.level, q).isAir()) {
                         b.put(q, b.pal.log().defaultBlockState());
                     } else {
                         break;
@@ -159,7 +159,7 @@ public final class RiverBuilds {
                 // fill the bed up to one block under the surface: knee-deep water over gravel
                 for (int y = top - 1; y > top - 8; y--) {
                     BlockPos q = new BlockPos(p.getX(), y, p.getZ());
-                    if (b.level.getBlockState(q).getFluidState().isEmpty() && !b.level.getBlockState(q).isAir()) break;
+                    if (com.skycraft.worldgen.SafeReads.state(b.level, q).getFluidState().isEmpty() && !com.skycraft.worldgen.SafeReads.state(b.level, q).isAir()) break;
                     b.put(q, ((dx + dz) & 1) == 0 ? Blocks.GRAVEL.defaultBlockState() : Blocks.COBBLESTONE.defaultBlockState());
                 }
             }
@@ -169,7 +169,7 @@ public final class RiverBuilds {
             int dx = s * (wet / 2 + 4);
             BlockPos p = b.at(dx, 0, 2);
             int gy = b.groundAt(p.getX(), p.getZ());
-            if (b.level.getFluidState(new BlockPos(p.getX(), gy, p.getZ())).isEmpty()) {
+            if (com.skycraft.worldgen.SafeReads.fluid(b.level, new BlockPos(p.getX(), gy, p.getZ())).isEmpty()) {
                 b.put(new BlockPos(p.getX(), gy + 1, p.getZ()), b.pal.fence().defaultBlockState());
                 b.put(new BlockPos(p.getX(), gy + 2, p.getZ()), b.pal.fence().defaultBlockState());
                 b.put(new BlockPos(p.getX(), gy + 3, p.getZ()), Blocks.LANTERN.defaultBlockState());
@@ -198,7 +198,7 @@ public final class RiverBuilds {
         }
         if (top != Integer.MIN_VALUE) {
             BlockPos p = b.at(1, 0, zAt + 2);
-            if (b.writable(p) && b.level.getFluidState(new BlockPos(p.getX(), top, p.getZ())).isSource()) {
+            if (b.writable(p) && com.skycraft.worldgen.SafeReads.fluid(b.level, new BlockPos(p.getX(), top, p.getZ())).isSource()) {
                 Boat boat = net.minecraft.world.entity.EntityTypes.SPRUCE_BOAT.create(b.level.getLevel(), net.minecraft.world.entity.EntitySpawnReason.STRUCTURE);
                 if (boat == null) return false;
                 boat.setPos(p.getX() + 0.5, top + 0.5, p.getZ() + 0.5);
@@ -267,7 +267,7 @@ public final class RiverBuilds {
                     BlockPos p = b.at(dx, 0, dz);
                     BlockPos q = new BlockPos(p.getX(), y, p.getZ());
                     if (!b.writable(q)) return false;
-                    BlockState s = b.level.getBlockState(q);
+                    BlockState s = com.skycraft.worldgen.SafeReads.state(b.level, q);
                     if (s.isAir() || !s.getFluidState().isEmpty() || !s.canOcclude() || s.is(net.minecraft.tags.BlockTags.LEAVES)
                             || s.is(net.minecraft.tags.BlockTags.LOGS)) {
                         return false;
@@ -277,7 +277,7 @@ public final class RiverBuilds {
         }
         // the plunge pool must really be there: water below the lip, air above it
         BlockPos pool = b.at(0, 0, 2);
-        if (b.level.getFluidState(new BlockPos(pool.getX(), poolTop, pool.getZ())).isEmpty()) return false;
+        if (com.skycraft.worldgen.SafeReads.fluid(b.level, new BlockPos(pool.getX(), poolTop, pool.getZ())).isEmpty()) return false;
         BlockState air = Blocks.AIR.defaultBlockState();
         BlockState brick = b.pal.brick().defaultBlockState();
         for (int dx = -1; dx <= 1; dx++) {
@@ -306,16 +306,16 @@ public final class RiverBuilds {
 
     public static boolean sunkenCache(SiteBuilder b) {
         BlockPos c = b.at(0, 0, 0);
-        int floor = b.level.getHeight(Heightmap.Types.OCEAN_FLOOR_WG, c.getX(), c.getZ());
-        int surface = b.level.getHeight(Heightmap.Types.WORLD_SURFACE_WG, c.getX(), c.getZ());
-        if (surface - floor < 3 || b.level.getFluidState(new BlockPos(c.getX(), surface - 1, c.getZ())).isEmpty()) return false;
+        int floor = com.skycraft.worldgen.SafeReads.height(b.level, Heightmap.Types.OCEAN_FLOOR_WG, c.getX(), c.getZ());
+        int surface = com.skycraft.worldgen.SafeReads.height(b.level, Heightmap.Types.WORLD_SURFACE_WG, c.getX(), c.getZ());
+        if (surface - floor < 3 || com.skycraft.worldgen.SafeReads.fluid(b.level, new BlockPos(c.getX(), surface - 1, c.getZ())).isEmpty()) return false;
         BlockPos p = new BlockPos(c.getX(), floor, c.getZ());
         b.put(p, Blocks.CHEST.defaultBlockState().setValue(net.minecraft.world.level.block.ChestBlock.FACING, b.dir(Direction.SOUTH)));
         com.skycraft.worldgen.WorldgenData.setLootTable(b.level, b.r, p, ExploreLoot.table("shipwreck"));
         b.mainChest = p;
         for (int[] o : new int[][]{{1, 0}, {-1, 0}, {0, 1}, {0, -1}}) {
             BlockPos q = b.at(o[0], 0, o[1]);
-            int f2 = b.level.getHeight(Heightmap.Types.OCEAN_FLOOR_WG, q.getX(), q.getZ());
+            int f2 = com.skycraft.worldgen.SafeReads.height(b.level, Heightmap.Types.OCEAN_FLOOR_WG, q.getX(), q.getZ());
             if (b.r.nextInt(3) == 0) b.put(new BlockPos(q.getX(), f2, q.getZ()), Blocks.MOSSY_COBBLESTONE.defaultBlockState());
         }
         return true;
@@ -381,7 +381,7 @@ public final class RiverBuilds {
                 BlockPos col = b.at(dx, 0, dz);
                 int gy = b.groundAt(col.getX(), col.getZ());
                 BlockPos p = new BlockPos(col.getX(), gy + 1, col.getZ());
-                if (b.level.getBlockState(p).isAir() || b.level.getBlockState(p).canBeReplaced()) {
+                if (com.skycraft.worldgen.SafeReads.state(b.level, p).isAir() || com.skycraft.worldgen.SafeReads.state(b.level, p).canBeReplaced()) {
                     b.put(p, (dx + dz) % 2 == 0 ? Blocks.MOSSY_COBBLESTONE.defaultBlockState() : Blocks.COBBLESTONE.defaultBlockState());
                 }
             }
@@ -389,7 +389,7 @@ public final class RiverBuilds {
         BlockPos c = b.at(0, 0, 0);
         int gy = b.groundAt(c.getX(), c.getZ());
         BlockPos top = new BlockPos(c.getX(), gy + 1, c.getZ());
-        if (b.level.getBlockState(top).isAir() || b.level.getBlockState(top).canBeReplaced()) b.put(top, Blocks.AZURE_BLUET.defaultBlockState());
+        if (com.skycraft.worldgen.SafeReads.state(b.level, top).isAir() || com.skycraft.worldgen.SafeReads.state(b.level, top).canBeReplaced()) b.put(top, Blocks.AZURE_BLUET.defaultBlockState());
         return true;
     }
 }

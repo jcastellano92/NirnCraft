@@ -45,7 +45,6 @@ public final class BoundWeapons {
     /** Marks arrows fired from a bound bow (persistent data), so bound-weapon perks apply to them. */
     public static final String ARROW_TAG = "skycraft_bound_arrow";
     /** Vanilla bundle contents tag. */
-    private static final String BUNDLE_ITEMS = "Items";
 
     private BoundWeapons() {}
 
@@ -162,34 +161,26 @@ public final class BoundWeapons {
     /** A bound weapon, or a bundle with one inside: neither may be stored anywhere but the caster's own inventory. */
     public static boolean holdsBound(ItemStack stack) {
         if (isBound(stack)) return true;
-        if (!(stack.getItem() instanceof BundleItem)) return false;
-        CompoundTag tag = com.skycraft.inventory.ItemData.custom(stack);
-        if (tag == null || !com.skycraft.platform.NbtData.hasType(tag, BUNDLE_ITEMS, Tag.TAG_LIST)) return false;
-        ListTag items = tag.getListOrEmpty(BUNDLE_ITEMS);
-        for (int i = 0; i < items.size(); i++) {
-            if (holdsBound(com.skycraft.inventory.ItemData.parse(items.getCompoundOrEmpty(i)))) return true;
-        }
-        return false;
+        // 26.3: a bundle's contents are its bundle_contents component (1.20.1 kept them in the stack's NBT "Items")
+        net.minecraft.world.item.component.BundleContents contents = stack.get(net.minecraft.core.component.DataComponents.BUNDLE_CONTENTS);
+        return contents != null && contents.itemCopies().anyMatch(BoundWeapons::holdsBound);
     }
 
     /** Removes bound weapons from a bundle's contents (also nested bundles). Returns true if anything was removed. */
     public static boolean purgeBundle(ItemStack bundle) {
-        if (!(bundle.getItem() instanceof BundleItem)) return false;
-        CompoundTag tag = com.skycraft.inventory.ItemData.custom(bundle);
-        if (tag == null || !com.skycraft.platform.NbtData.hasType(tag, BUNDLE_ITEMS, Tag.TAG_LIST)) return false;
-        ListTag items = tag.getListOrEmpty(BUNDLE_ITEMS);
+        net.minecraft.world.item.component.BundleContents contents = bundle.get(net.minecraft.core.component.DataComponents.BUNDLE_CONTENTS);
+        if (contents == null || contents.isEmpty()) return false;
         boolean changed = false;
-        for (int i = items.size() - 1; i >= 0; i--) {
-            ItemStack inside = com.skycraft.inventory.ItemData.parse(items.getCompoundOrEmpty(i));
+        java.util.List<ItemStack> kept = new java.util.ArrayList<>();
+        for (ItemStack inside : contents.itemCopies().toList()) {
             if (isBound(inside)) {
-                items.remove(i);
                 changed = true;
-            } else if (purgeBundle(inside)) {
-                items.set(i, com.skycraft.inventory.ItemData.save(inside));
-                changed = true;
+                continue;
             }
+            if (purgeBundle(inside)) changed = true;
+            kept.add(inside);
         }
-        if (items.isEmpty()) tag.remove(BUNDLE_ITEMS);
+        if (changed) bundle.set(net.minecraft.core.component.DataComponents.BUNDLE_CONTENTS, contents.copyWithContents(kept.stream()));
         return changed;
     }
 

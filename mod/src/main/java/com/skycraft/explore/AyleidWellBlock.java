@@ -59,7 +59,7 @@ public class AyleidWellBlock extends Block {
         CompoundTag mod = data.module("explore");
         CompoundTag wells = mod.getCompoundOrEmpty("wells");
         String key = pos.getX() + "," + pos.getY() + "," + pos.getZ();
-        long now = level.getDefaultClockTime();
+        long now = level.getOverworldClockTime();
         long last = wells.contains(key) ? wells.getLongOr(key, 0L) : Long.MIN_VALUE / 2;
         if (now - last < DAY) {
             Notifier.message(sp, Component.translatable("explore.skycraft.ayleid_well.spent"));

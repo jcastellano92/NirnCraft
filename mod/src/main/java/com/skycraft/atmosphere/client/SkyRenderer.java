@@ -114,7 +114,7 @@ public final class SkyRenderer {
         float clear = shadersActive ? 1f : 1f - overcast * .72f;
         double camZ = camera.position().z;
         double seconds = (level.getGameTime() + pt) / 20.0;
-        double dayTime = level.getDefaultClockTime() + pt;
+        double dayTime = level.getOverworldClockTime() + pt;
         List<Draw> draws = new ArrayList<>(48);
         PoseStack pose = new PoseStack();
         float veil = overcast * (1f - .5f * level.getRainLevel(pt));
@@ -313,14 +313,14 @@ public final class SkyRenderer {
 
     /** A rare, gradually varying high-altitude red component; unrelated to volcanic heat. */
     static float auroraRedMix(ClientLevel level) {
-        double days = level.getDefaultClockTime() / 24000.0;
+        double days = level.getOverworldClockTime() / 24000.0;
         double storm = 0.5 + 0.5 * Math.sin(days * 0.17 + Math.sin(days * 0.043));
         return (float) Math.pow(Math.max(0.0, (storm - 0.95) / 0.05), 2.0);
     }
 
     /** Some nights the aurora is faint, some nights it blazes: a stable pseudo-random per in-game day, plus slow surges. */
     static float activity(ClientLevel level) {
-        long day = Math.floorDiv(level.getDefaultClockTime() + 12000L, 24000L);
+        long day = Math.floorDiv(level.getOverworldClockTime() + 12000L, 24000L);
         long h = day * 0x9E3779B97F4A7C15L;
         h ^= (h >>> 29);
         h *= 0xBF58476D1CE4E5B9L;

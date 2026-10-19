@@ -292,7 +292,7 @@ public final class NpcDialogue {
             out.add(new DialogueOption("society.reveler_drink", serviceLabel(Component.literal("I'll share a drink with you! (Toast)")), 10, (p, n) -> {
                 // one toast per reveler per player per in-game day
                 CompoundTag toasts = n.getPersistentData().getCompoundOrEmpty("skycraft_toasts");
-                long day = p.level().getDefaultClockTime() / 24000L;
+                long day = p.level().getOverworldClockTime() / 24000L;
                 String key = p.getUUID().toString();
                 if (toasts.contains(key) && toasts.getLongOr(key, 0L) == day) {
                     Dialogue.open(p, n, Component.literal("Ha! You've had your share today, friend. Come back tomorrow!"));
@@ -419,7 +419,7 @@ public final class NpcDialogue {
     /** "Any news?": a rumour about a nearby named place, which goes on the player's map. */
     private static void news(ServerPlayer player, LivingEntity entity) {
         if (!(entity instanceof NpcEntity npc)) return;
-        long day = player.level().getDefaultClockTime() / 24000L;
+        long day = player.level().getOverworldClockTime() / 24000L;
         CompoundTag told = Npcs.sub(npc.social(), "news_day");
         if (told.getLongOr(player.getStringUUID(), 0L) == day + 1) {
             Dialogue.open(player, npc, say("news.none." + player.getRandom().nextInt(2)));
@@ -462,7 +462,7 @@ public final class NpcDialogue {
         }
         PlayerData data = SkyData.get(player);
         CompoundTag mod = data.module(Reputation.MODULE);
-        long day = player.level().getDefaultClockTime() / 24000L;
+        long day = player.level().getOverworldClockTime() / 24000L;
         if (mod.getLongOr("charity_day",0L) != day) {
             mod.putLong("charity_day", day);
             mod.putInt("charity", 0);

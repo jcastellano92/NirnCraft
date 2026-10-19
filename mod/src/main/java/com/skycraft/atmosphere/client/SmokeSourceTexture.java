@@ -67,14 +67,14 @@ public final class SmokeSourceTexture {
                     | (Math.round(aurora * 7) << 8) | Math.round(aurora * 2));
         }
         // Odd row-one texels are a shared celestial state; even texels remain smoke shapes.
-        image.setPixelABGR(1, 1, (int) Math.floorMod(level.getDefaultClockTime(), 1_728_000L));
+        image.setPixelABGR(1, 1, (int) Math.floorMod(level.getOverworldClockTime(), 1_728_000L));
         image.setPixelABGR(3, 1, rgba(NightSkyState.visibility, NightSkyState.pollution,
                 NightSkyState.masserLight, NightSkyState.secundaLight));
         double solarAngle = com.skycraft.atmosphere.client.SkyEnvironment.sunCycle(level, 1f) * Math.PI * 2;
         int masserElevation = Mth.clamp(Math.round((com.skycraft.atmosphere.AtmosphereMath.moonElevation(solarAngle,
-                com.skycraft.atmosphere.AtmosphereMath.moonCycle(level.getDefaultClockTime(), false), false) * 0.5f + 0.5f) * 65535), 0, 65535);
+                com.skycraft.atmosphere.AtmosphereMath.moonCycle(level.getOverworldClockTime(), false), false) * 0.5f + 0.5f) * 65535), 0, 65535);
         int secundaElevation = Mth.clamp(Math.round((com.skycraft.atmosphere.AtmosphereMath.moonElevation(solarAngle,
-                com.skycraft.atmosphere.AtmosphereMath.moonCycle(level.getDefaultClockTime(), true), true) * 0.5f + 0.5f) * 65535), 0, 65535);
+                com.skycraft.atmosphere.AtmosphereMath.moonCycle(level.getOverworldClockTime(), true), true) * 0.5f + 0.5f) * 65535), 0, 65535);
         image.setPixelABGR(16, 0, masserElevation | (secundaElevation << 16));
         image.setPixelABGR(5, 1, rgba(SkyRenderer.latitudeFactor(camera.z), SkyRenderer.activity(level),
                 SkyRenderer.auroraRedMix(level), 1f));

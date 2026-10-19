@@ -73,7 +73,10 @@ public class CorpseEntity extends Entity {
     private static final String[] STRIP = {"Brain", "Offers", "Gossips", "Inventory", "Items", "Passengers", "ActiveEffects",
             "Attributes", "Leash", "HurtTime", "DeathTime", "HurtByTimestamp", "CustomName", "CustomNameVisible", "UUID",
             "ForgeCaps", "ForgeData", "Motion", "FallDistance", "Fire", "Air", "PortalCooldown", "Tags", "Team", "Xp",
-            "RecipeBook", "abilities", "EnderItems", "SelectedItem", "ChestedHorse", "Bees", "Trusted", "Owner", "AngryAt"};
+            "RecipeBook", "abilities", "EnderItems", "SelectedItem", "ChestedHorse", "Bees", "Trusted", "Owner", "AngryAt",
+            // the same data under its 26.3 names (the 1.20.1 ones above no longer match)
+            "active_effects", "attributes", "leash", "angry_at", "fall_distance", "ticks_since_last_hurt_by_mob",
+            "NeoForgeData", "neoforge:attachments"};
 
     /** The body's loot, shared by every looter. */
     private final Loot loot = new Loot();

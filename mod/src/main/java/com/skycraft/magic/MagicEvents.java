@@ -149,6 +149,10 @@ public final class MagicEvents {
         // Slow Time: creatures in the field skip most of their ticks.
         if (com.skycraft.magic.shout.SlowTime.skipsTick(e)) {
             event.setCanceled(true);
+            // 26.3's cancel also skips commonTick(); 1.20.1's LivingTickEvent cancel only skipped tick(), so the age
+            // and the previous position still advanced (i-frames were frozen in both: they count down in the tick body)
+            e.setOldPosAndRot();
+            e.tickCount++;
             return;
         }
         if (e.tickCount % 10 == 0 && e.level() instanceof net.minecraft.server.level.ServerLevel sl) {
@@ -351,7 +355,10 @@ public final class MagicEvents {
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onDamage(LivingDamageEvent.Pre event) {
         if (!(event.getEntity() instanceof ServerPlayer p) || !Perks.has(p, "restoration.avoid_death")) return;
-        float after = p.getHealth() - event.getNewDamage();
+        // Pre comes before absorption hearts on 26.3 (Forge 1.20.1's LivingDamageEvent came after them)
+        float dmg = event.getNewDamage();
+        dmg -= Math.min(p.getAbsorptionAmount(), dmg);
+        float after = p.getHealth() - dmg;
         if (after > p.getMaxHealth() * 0.1f) return;
         CompoundTag tag = MagicData.tag(p);
         long now = p.level().getGameTime();
