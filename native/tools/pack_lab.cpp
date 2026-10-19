@@ -1007,10 +1007,11 @@ int main(int argc, char** argv) {
     // colortex4..8 as Iris keeps them: two halves each (a pass writes one half, then the buffer flips), HDR and linear;
     // colortex8 is the pack's persistent exposure (R32F, clear = false)
     std::vector<float> zeroes(N * 4, 0.0f);
-    GLuint ct[9][2] = {}, lowAlt[4];
+    // colortex9: the pack's TAA history (RGBA16F, clear = false, like the exposure)
+    GLuint ct[10][2] = {}, lowAlt[4];
     for (int i = 0; i < 4; i++) lowAlt[i] = texture2d(GL_RGBA16F_, W, H, GL_RGBA, GL_FLOAT, nullptr, true);
-    int cur[9] = {};
-    for (int i = 4; i <= 8; i++)
+    int cur[10] = {};
+    for (int i = 4; i <= 9; i++)
         for (int k = 0; k < 2; k++)
             ct[i][k] = i == 8 ? texture2d(GL_R32F_, W, H, GL_RED, GL_FLOAT, zeroes.data())
                               : texture2d(i == 6 ? GL_RGBA16_ : GL_RGBA16F_, W, H, GL_RGBA, GL_FLOAT, zeroes.data(), i != 6);
@@ -1075,6 +1076,22 @@ int main(int argc, char** argv) {
     } else {
         shadowTex = texture2d(GL_DEPTH_COMPONENT32F_, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &one);
     }
+    // shadowtex1: the same depths unfiltered (the pack's blocker search: shadowHardwareFiltering1 = false), a copy
+    // without the compare mode; shadowcolor0: white, alpha 1 (no foliage casters in the lab's solids)
+    GLuint shadowTex1;
+    {
+        GLint sw = 1, sh = 1;
+        glBindTexture(GL_TEXTURE_2D, shadowTex);
+        glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &sw);
+        glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &sh);
+        std::vector<float> depths(size_t(sw) * sh);
+        glGetTexImage(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, GL_FLOAT, depths.data());
+        shadowTex1 = texture2d(GL_DEPTH_COMPONENT32F_, sw, sh, GL_DEPTH_COMPONENT, GL_FLOAT, depths.data());
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    }
+    uint32_t whiteTexel = 0xFFFFFFFFu;
+    GLuint shadowColor0 = texture2d(GL_RGBA8, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, &whiteTexel);
     glBindTexture(GL_TEXTURE_2D, shadowTex);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE_, GL_COMPARE_REF_TO_TEXTURE_);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -1134,11 +1151,11 @@ int main(int argc, char** argv) {
         std::map<int, GLuint> targetTex;
         for (int t : pr.targets) {
             if (toScreen) targetTex[t] = outTex;
-            else if (t >= 4 && t <= 8) targetTex[t] = ct[t][1 - cur[t]];
+            else if (t >= 4 && t <= 9) targetTex[t] = ct[t][1 - cur[t]];
             else if (t >= 0 && t < 4) targetTex[t] = lowAlt[t];  // an older pack's HDR through colortex0..3
             else { std::printf("pack_lab: a pass writes colortex%d (not modelled)\n", t); return false; }
         }
-        for (int i = 4; i <= 8; i++) samplers["colortex" + std::to_string(i)] = ct[i][cur[i]];
+        for (int i = 4; i <= 9; i++) samplers["colortex" + std::to_string(i)] = ct[i][cur[i]];
         pglUseProgram(pr.id);
         int unit = 0;
         auto bindS = [&](const char* name, GLuint t) {
@@ -1152,12 +1169,21 @@ int main(int argc, char** argv) {
         bindS("depthtex0", deferredDepth ? d1 : d0);
         bindS("depthtex1", d1);
         bindS("shadowtex0", shadowTex);
+        bindS("shadowtex1", shadowTex1);
+        bindS("shadowcolor0", shadowColor0);
         auto m4 = [&](const char* n, const float* v) { GLint l = pglGetUniformLocation(pr.id, n); if (l >= 0) pglUniformMatrix4fv(l, 1, GL_FALSE, v); };
         auto f1 = [&](const char* n, float v) { GLint l = pglGetUniformLocation(pr.id, n); if (l >= 0) pglUniform1f(l, v); };
         m4("gbufferModelView", fV);
         m4("gbufferModelViewInverse", fiV);
         m4("gbufferProjection", fP);
         m4("gbufferProjectionInverse", fiP);
+        // TAA: a still camera (last frame's matrices are this frame's), the frame index
+        m4("gbufferPreviousModelView", fV);
+        m4("gbufferPreviousProjection", fP);
+        {
+            GLint fc = pglGetUniformLocation(pr.id, "frameCounter");
+            if (fc >= 0) pglUniform1i(fc, 0);
+        }
         m4("shadowModelView", shadowMV);
         m4("shadowProjection", shadowP);  // the scene's map, or everything inside the lit 1x1 stand-in
         GLint l = pglGetUniformLocation(pr.id, "sunPosition");
@@ -1167,6 +1193,8 @@ int main(int argc, char** argv) {
         l = pglGetUniformLocation(pr.id, "shadowLightPosition");
         if (l >= 0) pglUniform3f(l, float(sv[0] * sl), float(sv[1] * sl), float(sv[2] * sl));
         l = pglGetUniformLocation(pr.id, "cameraPosition");
+        if (l >= 0) pglUniform3f(l, float(x), float(y), float(z));
+        l = pglGetUniformLocation(pr.id, "previousCameraPosition");
         if (l >= 0) pglUniform3f(l, float(x), float(y), float(z));
         f1("rainStrength", float(rain));
         f1("wetness", float(rain));

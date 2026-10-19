@@ -488,7 +488,7 @@ class Runner:
         with tempfile.TemporaryDirectory() as tmp:
             png = Path(tmp) / "lab.png"
             kv = [f"{k}={val}" for k, val in lab.items()]
-            cmd = [str(exe), str(png)] + kv if tool == "pack_lab" else [str(exe), f"out={png}"] + kv
+            cmd = [str(exe), str(png)] + kv if tool == "pack_lab" else [str(exe), f"out={png.as_posix()}"] + kv
             r = subprocess.run(cmd, cwd=ROOT / "native" if tool == "pack_lab" else ROOT, capture_output=True, text=True,
                                timeout=900,
                                creationflags=0x00004000 if os.name == "nt" else 0)
