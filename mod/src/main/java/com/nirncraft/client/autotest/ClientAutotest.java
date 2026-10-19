@@ -255,6 +255,29 @@ public final class ClientAutotest {
     }
 
     private static long noWorldWritten;
+    /** When the world last finished loading (the harness's "loading is done" signal; 0 while loading). */
+    private static long worldReadyAt;
+    private static final java.util.Set<String> LOADING_SCREENS = java.util.Set.of("LevelLoadingScreen",
+            "ReceivingLevelScreen", "IntroLoadingScreen", "GenericMessageScreen", "ProgressScreen");
+
+    static boolean loading(Minecraft mc) {
+        var screen = mc.gui.screen();
+        return mc.level == null || mc.player == null
+                || screen != null && LOADING_SCREENS.contains(screen.getClass().getSimpleName());
+    }
+
+    /** The loading-done hook: the moment the world is in and no loading screen covers it. */
+    private static void worldReadyHook(Minecraft mc) {
+        boolean ready = !loading(mc);
+        if (ready && worldReadyAt == 0) {
+            worldReadyAt = System.currentTimeMillis();
+            NirnCraft.LOGGER.info("Autotest live: world ready");
+        } else if (!ready && worldReadyAt != 0) {
+            worldReadyAt = 0;
+            NirnCraft.LOGGER.info("Autotest live: loading ({})", mc.gui.screen() == null ? "no world"
+                    : mc.gui.screen().getClass().getSimpleName());
+        }
+    }
 
     /**
      * The heartbeat while no world is loaded (loading screens, a dimension change, a disconnect): the harness can tell
@@ -270,6 +293,8 @@ public final class ClientAutotest {
         status.addProperty("pid", ProcessHandle.current().pid());
         status.addProperty("updated", now);
         status.addProperty("worldLoaded", false);
+        status.addProperty("loading", true);
+        status.addProperty("worldReadyAt", 0);
         status.addProperty("screen", screen == null ? "none" : screen.getClass().getSimpleName());
         status.addProperty("controlVersion", liveModified);
         status.addProperty("lastAction", liveLastAction);
@@ -298,6 +323,8 @@ public final class ClientAutotest {
             status.addProperty("pid", ProcessHandle.current().pid());
             status.addProperty("updated", System.currentTimeMillis());
             status.addProperty("worldLoaded", mc.level != null && mc.player != null && QaTransport.connected(mc));
+            status.addProperty("loading", loading(mc));
+            status.addProperty("worldReadyAt", worldReadyAt);
             QaTransport.describe(mc, status);
             status.addProperty("remoteQaOperatorReady", QaTransport.remote(mc) && QaTransport.operatorReady(mc));
             status.addProperty("remoteCommandSubmitted", remoteCommandSubmitted);
@@ -1027,6 +1054,7 @@ public final class ClientAutotest {
             NirnCraft.LOGGER.info("Autotest: accepted the experimental-settings prompt for the kept test world");
             return;
         }
+        if (LIVE) worldReadyHook(mc);
         if (LIVE && mc.level == null) noWorldHeartbeat(mc);
         if (mc.level == null && !AUTO_SERVER.isEmpty()) {
             // Keep failed TCP diagnostics on their real connection screen; never fall back to an integrated world.
