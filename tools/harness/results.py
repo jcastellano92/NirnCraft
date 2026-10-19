@@ -598,10 +598,16 @@ def offline_vs_live(live_png, lab_png, mask_png, out_png, near_limit=None):
     side.save(out_png)
     # missing: where the real blocks have something but the live picture shows sky (its colour from the frame's top
     # rows): a far field that did not draw, a hole at the seam. Not judged by dE alone: that averages it away.
-    top = la[: max(2, la.shape[0] // 40)].reshape(-1, 3)
-    sky = np.median(top, axis=0)
-    near_sky = np.sqrt(((la - sky) ** 2).sum(axis=2)) < 6.0
-    missing = float((near_sky & inside).sum() / max(1, inside.sum()))
+    # the sky's colour from live pixels where the reference sees nothing (real sky), not from the frame's top rows (a
+    # rock ceiling indoors, a wall ahead: every pixel of that colour counted as "missing"); none in view (a dungeon
+    # hall): nothing can be sky over blocks. A pixel only counts when it also differs from the reference there.
+    open_sky = (m < 0.05) if dist is None else ((m < 0.05) & (dist >= 1e6))
+    if open_sky.sum() > 200:
+        sky = np.median(la[open_sky], axis=0)
+        near_sky = np.sqrt(((la - sky) ** 2).sum(axis=2)) < 6.0
+        missing = float((near_sky & inside & (de > 12.0)).sum() / max(1, inside.sum()))
+    else:
+        missing = 0.0
     # flat: where the real blocks show texture but the live picture is featureless (a fogged wall, an empty patch in
     # fog colour: not sky-coloured, so `missing` does not see it), from the local spread of lightness (5 x 5)
     def spread(L):

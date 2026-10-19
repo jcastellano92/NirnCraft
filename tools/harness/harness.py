@@ -163,7 +163,10 @@ def ready(s, pending):
 
 def items_of(scenes, a):
     out = []
-    for s in with_deps(scenes):
+    offline = getattr(a, "offline", False)
+    for s in (scenes if offline else with_deps(scenes)):
+        if offline and s["tier"] == "live":  # --offline: what needs the game waits for a run that allows it
+            continue
         for v in s["variants"] if s["tier"] == "live" else [s["tier"]]:  # measure scenes: variant "measure"
             if a.variant and v not in a.variant.split(","):
                 continue
@@ -2680,6 +2683,8 @@ def main():
         p.add_argument("--tier")
         p.add_argument("--group")
         p.add_argument("--variant")
+        p.add_argument("--offline", action="store_true",
+                       help="never the game: live scenes are left out and never pulled in as another scene's inputs")
         p.add_argument("--changed", nargs="?", const="HEAD", default=None, help="tests touched by changes since REF")
         p.add_argument("--limit", type=int, default=0)
         p.add_argument("--seed", type=int, default=DEFAULT_SEED)

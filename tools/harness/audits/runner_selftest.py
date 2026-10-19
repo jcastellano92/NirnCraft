@@ -190,5 +190,12 @@ lines = catalog.pose_actions({"id": "d", "pose": {"dungeon": "bleak_falls_barrow
 expect(any("execute as @p" in l and "nirncraft-dungeon-qa view" in l for l in lines),
        "a dungeon pose runs its view command as the player (it needs one to move)")
 
+class _A: pass
+oa = _A(); oa.variant = None; oa.offline = True
+live_scene = {"id": "L", "tier": "live", "variants": ["vanilla"]}
+lab_scene = {"id": "B", "tier": "lab", "after": ["L"], "camera_from": {"scene": "L"}, "lab": {"tool": "atlas_truth"}}
+got = [s["id"] for s, _ in harness.items_of([live_scene, lab_scene], oa)]
+expect(got == ["B"], "--offline leaves live scenes out and never pulls one in as another scene's inputs")
+
 print(f"problems {len(problems)}")
 sys.exit(1 if problems else 0)
