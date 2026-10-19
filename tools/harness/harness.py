@@ -920,8 +920,18 @@ def camera_from(ref):
     rec = results.latest(ref["scene"], ref.get("variant", "vanilla"))
     png = Path(f"{results.stem(ref['scene'], ref.get('variant', 'vanilla'))}.after.png")
     g = (rec or {}).get("game") or {}
+    if rec and rec.get("status") not in ("pass", "flag"):  # its own run failed: the screenshot left there is an older one
+        return None, (f"the live capture of {ref['scene']} [{ref.get('variant', 'vanilla')}] did not succeed in its "
+                      f"last run ({rec.get('status')}: {str(rec.get('error', ''))[:80]}): capture it again")
     if not rec or not g.get("eye") or not png.exists():
         return None, f"no live capture of {ref['scene']} [{ref.get('variant', 'vanilla')}] yet: run it first"
+    import datetime
+    try:  # the picture must be the record's own, not one left from an earlier run
+        at = datetime.datetime.fromisoformat(rec.get("capturedAt", "")).timestamp()
+        if png.stat().st_mtime < at - 120:
+            return None, f"the screenshot of {ref['scene']} is older than its record: capture it again"
+    except ValueError:
+        pass
     if (rec.get("metrics") or {}).get("settlePartial") or (rec.get("settlePartial")):
         return None, (f"the live capture of {ref['scene']} was taken before the view settled (not fully resolved): "
                       "capture it again")

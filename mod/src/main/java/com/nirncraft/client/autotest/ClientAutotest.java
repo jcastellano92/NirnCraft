@@ -217,6 +217,11 @@ public final class ClientAutotest {
     private static int liveSettleUntil, liveSettleStable;
     /** `settle-visual T static`: the world's ticking frozen while it settles (unfrozen, then a short wait, after). */
     private static boolean settleFrozen;
+    /**
+     * A wait the autotest adds itself (after a shader toggle, a reload, a rebuild): it only lets the change take effect;
+     * the scene's own settle judges readiness after it, so running out of time just goes on (not a failure, not partial).
+     */
+    private static boolean liveSettleInternal;
     /** `settle T partial`: at the deadline the sequence goes on (counted in settlePartial) instead of being cancelled. */
     private static boolean liveSettleTolerant;
     private static int liveSettlePartial;
@@ -540,7 +545,10 @@ public final class ClientAutotest {
             }
             else if (tick >= liveSettleUntil) {
                 liveSettleUntil = 0;
-                if (liveSettleTolerant) {  // capture what is there (flagged by the harness) rather than nothing
+                if (liveSettleInternal) {  // the scene's own settle comes next and judges
+                    liveSettleInternal = false;
+                    NirnCraft.LOGGER.info("Autotest live: internal wait ended without a calm streak, going on: {}", READINESS.describe());
+                } else if (liveSettleTolerant) {  // capture what is there (flagged by the harness) rather than nothing
                     liveSettlePartial++;
                     NirnCraft.LOGGER.warn("Autotest live: settle deadline passed, continuing (partial): {}", READINESS.describe());
                 } else {
@@ -566,6 +574,7 @@ public final class ClientAutotest {
                 NirnCraft.LOGGER.info("Autotest live: shader reload complete");
                 liveSettleUntil = tick + 1200;
                 liveSettleStable = 0;
+                liveSettleInternal = true;
                 READINESS.begin(mc,0);
             } else if (action.startsWith("shaders ")) {
                 boolean enabled = action.substring(8).trim().equals("on");
@@ -581,6 +590,7 @@ public final class ClientAutotest {
                 if (actual != enabled) throw new IllegalStateException("Shader mode did not apply; inspect the shader compilation log");
                 liveSettleUntil = tick + 1200;
                 liveSettleStable = 0;
+                liveSettleInternal = true;
                 READINESS.begin(mc,0);
             } else if (action.equals("resources")) {
                 liveResources = mc.reloadResourcePacks();
@@ -588,6 +598,7 @@ public final class ClientAutotest {
                 mc.levelExtractor.allChanged();
                 liveSettleUntil = tick + 1200;
                 liveSettleStable = 0;
+                liveSettleInternal = true;
                 READINESS.begin(mc,0);
             } else if (action.equals("texture-probe")) {
                 com.nirncraft.atmosphere.client.CloudRenderer.requestTextureProbe();
@@ -652,6 +663,7 @@ public final class ClientAutotest {
                 liveVisualSettle = false;
                 String[] args=action.substring(7).trim().split("\\s+");
                 liveSettleTolerant = java.util.Arrays.asList(args).contains("partial");
+                liveSettleInternal = false;
                 String lod = args.length > 1 && !args[1].equals("partial") ? args[1] : null;
                 liveSettleUntil = tick + Math.max(40, Integer.parseInt(args[0]));
                 liveSettleStable = 0;

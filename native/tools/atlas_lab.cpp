@@ -1339,6 +1339,25 @@ int main(int argc, char** argv) {
         V3 eye{ex - vol.x0, ey - vol.y0, ez - vol.z0};
         std::string json = "{\"tool\":\"atlas_lab\",\"mode\":\"camera\",\"eye\":[" + std::to_string(ex) + "," + std::to_string(ey) + "," +
                            std::to_string(ez) + "],\"frames\":[";
+        // probe=x,y;x,y...: what the real blocks show at those pixels (pixel centres): distance, block, world position
+        {
+            std::string ps = str(a, "probe", "");
+            std::stringstream ss(ps);
+            for (std::string one; std::getline(ss, one, ';');) {
+                int px = 0, py = 0;
+                if (std::sscanf(one.c_str(), "%d,%d", &px, &py) != 2) continue;
+                V3 dir = norm(cf + cr * ((px + 0.5f - w * 0.5f) * cpa) - cu * ((py + 0.5f - h * 0.5f) * cpa));
+                Sample sm = traceMicro(eye, dir);
+                if (!sm.hit) {
+                    std::fprintf(stderr, "probe %d,%d: sky (nothing in the exported blocks)\n", px, py);
+                    continue;
+                }
+                V3 hp = eye + dir * (sm.t + 0.01f);
+                const Block* b = vol.at(int(std::floor(hp.x)), int(std::floor(hp.y)), int(std::floor(hp.z)));
+                std::fprintf(stderr, "probe %d,%d: %.1f blocks, %s at %d %d %d\n", px, py, sm.t, b ? b->name.c_str() : "?",
+                             int(std::floor(hp.x)) + vol.x0, int(std::floor(hp.y)) + vol.y0, int(std::floor(hp.z)) + vol.z0);
+            }
+        }
         for (size_t vi = 0; vi < variants.size(); vi++) {
             const std::string& v = variants[vi];
             int spp = v == "ref" ? 4 : 1;

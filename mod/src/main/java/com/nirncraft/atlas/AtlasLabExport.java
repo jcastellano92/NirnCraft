@@ -328,6 +328,20 @@ public final class AtlasLabExport {
         }
         var eye = mc.player.getEyePosition();
         double yaw = Math.toRadians(mc.player.getYRot());
+        // already exported for this generation, pose and distance: nothing to redo (a test world restored from its copy
+        // would otherwise regenerate the whole view every session); anything that changes generation changes the key
+        String key = AtlasTileCodec.identity() + " " + String.format(java.util.Locale.ROOT, "%.1f %.1f %.1f %.1f %d %d",
+                eye.x, eye.y, eye.z, mc.player.getYRot(), distance, mc.options.fov().get());
+        try {
+            Path keyFile = dir().resolve(name + ".key"), als = dir().resolve(name + ".als");
+            if (Files.isRegularFile(als) && Files.isRegularFile(keyFile) && Files.readString(keyFile).trim().equals(key)) {
+                done.complete("atlaslab: view " + name + " is up to date (same generation, pose and distance) -> " + als
+                        + " (0 sections in 0 s)");
+                return done;
+            }
+        } catch (IOException e) {
+            // export it again
+        }
         double aspect = (double) mc.getWindow().getWidth() / Math.max(1, mc.getWindow().getHeight());
         double vfov = Math.toRadians(mc.options.fov().get());
         double half = Math.atan(Math.tan(vfov / 2) * aspect) + Math.toRadians(8);  // half the horizontal view, a margin
@@ -380,6 +394,7 @@ public final class AtlasLabExport {
                         }
                         // the tints the game blends at the eye (one for the whole view: a later format can carry them per section)
                         writeTints(name, net.minecraft.core.BlockPos.containing(eye));
+                        Files.writeString(dir().resolve(name + ".key"), key);
                         String msg = "atlaslab: view " + name + ": " + chunks.size() + " chunks to " + distance + " blocks, " + sections.size()
                                 + " sections in " + (System.currentTimeMillis() - start) / 1000 + " s -> " + out;
                         NirnCraft.LOGGER.info(msg);

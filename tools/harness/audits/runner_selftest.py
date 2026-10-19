@@ -140,5 +140,13 @@ lines = catalog.capture_actions({"id": "x", "settle": "static", "pose": {}, "set
 expect(all(l.endswith(" static") for l in lines if l.startswith("settle-visual ")) and any(l.startswith("settle-visual") for l in lines),
        "a static scene settles every time with the world frozen (harness lines and its own)")
 
+real_latest = harness.results.latest
+harness.results.latest = lambda scene, v: {"status": "error", "error": "E-SETTLE-TIMEOUT", "game": {"eye": [0, 0, 0]}}
+try:
+    cam, why = harness.camera_from({"scene": "no-such-scene", "variant": "vanilla"})
+finally:
+    harness.results.latest = real_latest
+expect(cam is None and "did not succeed" in why, "camera_from refuses a live capture whose last run failed (no stale screenshot)")
+
 print(f"problems {len(problems)}")
 sys.exit(1 if problems else 0)
