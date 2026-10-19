@@ -696,7 +696,11 @@ public final class ClientAutotest {
                     case "front" -> net.minecraft.client.CameraType.THIRD_PERSON_FRONT;
                     default -> net.minecraft.client.CameraType.FIRST_PERSON;
                 });
+            } else if (action.equals("frame") || action.startsWith("frame ")) {
+                liveCommand=VisualCamera.frame(mc,action.length()>5?action.substring(6):"");
+                liveCommandDeadline=System.currentTimeMillis()+60_000;
             } else if (action.startsWith("camera ") || action.startsWith("camera-plan ")) {
+                VisualCamera.lastFrame=null;  // a plain camera move: no framed subject in the receipt
                 boolean scout=action.startsWith("camera-plan ");
                 liveCommand=VisualCamera.action(mc,action.substring(scout?12:7),scout);
                 liveCommandDeadline=System.currentTimeMillis()+60_000;
@@ -726,6 +730,7 @@ public final class ClientAutotest {
                                 Float.parseFloat(v[2]), v.length > 4 ? Float.parseFloat(v[4]) : 0f,
                                 v.length > 5 ? Float.parseFloat(v[5]) : 0f, kind, 1f, 12000)));
             } else if (action.startsWith("visit ")) {
+                VisualCamera.lastFrame=null;
                 String[] v = action.substring(6).trim().split("\\s+");
                 tourTeleport(mc, Integer.parseInt(v[0]), Integer.parseInt(v[1]), Integer.parseInt(v[2]),
                         Float.parseFloat(v[3]), Float.parseFloat(v[4]), v[5]);

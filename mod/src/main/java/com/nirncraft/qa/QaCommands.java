@@ -36,6 +36,7 @@ public final class QaCommands {
                 Commands.literal("nirncraft-qa").requires(src -> Tour.host(src)  // the host, or the server itself
                                 || !(src.getEntity() instanceof net.minecraft.server.level.ServerPlayer)
                                 && Commands.hasPermission(Commands.LEVEL_GAMEMASTERS).test(src))
+                        .then(Commands.literal("entities").executes(c -> entities(c.getSource())))
                         .then(Commands.literal("sample")
                                 .then(Commands.argument("x", IntegerArgumentType.integer())
                                         .then(Commands.argument("z", IntegerArgumentType.integer())
@@ -46,6 +47,70 @@ public final class QaCommands {
                                                                         IntegerArgumentType.getInteger(c, "z"),
                                                                         IntegerArgumentType.getInteger(c, "radius"),
                                                                         IntegerArgumentType.getInteger(c, "step"))))))))));
+    }
+
+    /**
+     * {@code /nirncraft-qa entities}: what every NirnCraft entity type is, from the game itself (the harness gallery
+     * reads it instead of guessing from source): kind boss / monster / creature / water / npc / vehicle / misc, its
+     * MobCategory and size. Writes {@code nirncraft-qa/entities.json}. Instances are created to inspect, never added.
+     */
+    static int entities(CommandSourceStack src) {
+        ServerLevel level = src.getServer().overworld();
+        JsonArray out = new JsonArray();
+        for (var type : net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE) {
+            var key = net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getKey(type);
+            if (!"nirncraft".equals(key.getNamespace())) continue;
+            JsonObject e = new JsonObject();
+            e.addProperty("id", key.getPath());
+            e.addProperty("category", type.getCategory().getName());
+            e.addProperty("width", type.getDimensions().width());
+            e.addProperty("height", type.getDimensions().height());
+            String kind = "misc";
+            try {
+                var entity = type.create(level, net.minecraft.world.entity.EntitySpawnReason.COMMAND);
+                if (entity != null) {
+                    boolean boss = false;
+                    for (Class<?> c = entity.getClass(); c != null && !boss; c = c.getSuperclass())
+                        for (var f : c.getDeclaredFields())
+                            if (net.minecraft.server.level.ServerBossEvent.class.isAssignableFrom(f.getType())) boss = true;
+                    boolean water = entity instanceof net.minecraft.world.entity.animal.fish.WaterAnimal
+                            || type.getCategory().getName().contains("water");
+                    kind = boss ? "boss"
+                            : entity instanceof com.nirncraft.society.entity.NpcEntity
+                              || entity.getClass().getSimpleName().startsWith("Guard") ? "npc"
+                            : entity instanceof com.nirncraft.sailing.ShipEntity
+                              || entity instanceof net.minecraft.world.entity.vehicle.VehicleEntity ? "vehicle"
+                            : entity instanceof com.nirncraft.mounts.MountBeast ? "mount"
+                            : entity instanceof net.minecraft.world.entity.monster.Enemy ? "monster"
+                            : water ? (type.getDimensions().width() < 1.0f ? "fish" : "water")
+                            : entity instanceof net.minecraft.world.entity.PathfinderMob ? "creature" : "misc";
+                    e.addProperty("multipart", entity.isMultipartEntity());
+                    e.addProperty("class", entity.getClass().getSimpleName());
+                    entity.discard();
+                }
+            } catch (RuntimeException ex) {
+                e.addProperty("error", String.valueOf(ex.getMessage()));
+            }
+            if (!e.has("class")) {  // no instance (e.g. a monster in peaceful): its registered category decides
+                String cat = type.getCategory().getName();
+                kind = cat.equals("monster") ? "monster" : cat.contains("water") ? "water"
+                        : cat.equals("creature") || cat.equals("ambient") ? "creature" : "misc";
+                e.addProperty("kindFrom", "category");
+            }
+            e.addProperty("kind", kind);
+            out.add(e);
+        }
+        try {
+            Path dir = src.getServer().getServerDirectory().resolve("nirncraft-qa");
+            Files.createDirectories(dir);
+            Files.writeString(dir.resolve("entities.json"), new GsonBuilder().create().toJson(out), StandardCharsets.UTF_8);
+        } catch (java.io.IOException ex) {
+            src.sendFailure(Component.literal("Could not write nirncraft-qa/entities.json: " + ex.getMessage()));
+            return 0;
+        }
+        final int n = out.size();
+        src.sendSuccess(() -> Component.literal("qa entities: " + n + " types -> nirncraft-qa/entities.json"), false);
+        return Math.max(1, n);
     }
 
     static int sample(CommandSourceStack src, int x, int z, int radius, int step) {

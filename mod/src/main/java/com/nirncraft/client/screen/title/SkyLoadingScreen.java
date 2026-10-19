@@ -246,16 +246,22 @@ public final class SkyLoadingScreen {
 
     private static ItemStack artifact() {
         if (artifacts == null) {
-            List<ItemStack> list = new ArrayList<>();
-            for (String id : ARTIFACT_IDS) {
-                Item item = BuiltInRegistries.ITEM.getValue(Identifier.parse(id));
-                if (item != null && item != Items.AIR) list.add(new ItemStack(item));
+            // during early loading the items' data components are not bound yet and new ItemStack throws ("Components
+            // not bound yet", a startup crash): draw no artifact until they are, and do not cache the empty answer
+            try {
+                List<ItemStack> list = new ArrayList<>();
+                for (String id : ARTIFACT_IDS) {
+                    Item item = BuiltInRegistries.ITEM.getValue(Identifier.parse(id));
+                    if (item != null && item != Items.AIR) list.add(new ItemStack(item));
+                }
+                if (list.isEmpty()) {
+                    list.add(new ItemStack(Items.IRON_SWORD));
+                    list.add(new ItemStack(Items.SHIELD));
+                }
+                artifacts = list.toArray(new ItemStack[0]);
+            } catch (NullPointerException | IllegalStateException notReady) {
+                return ItemStack.EMPTY;
             }
-            if (list.isEmpty()) {
-                list.add(new ItemStack(Items.IRON_SWORD));
-                list.add(new ItemStack(Items.SHIELD));
-            }
-            artifacts = list.toArray(new ItemStack[0]);
         }
         return artifacts[Math.floorMod(session * 3 + scene / 2, artifacts.length)];
     }

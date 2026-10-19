@@ -64,8 +64,17 @@ BIG = {"giant": 12, "mammoth": 12, "dragon": 26, "alduin": 30, "dwarven_centurio
        "sabre_cat": 6, "bear": 6, "mudcrab": 4, "longship": 18, "cog": 14, "rowboat": 5}
 
 
+ENTITY_INDEX = ROOT / ".work/harness/entities.json"  # the game's own answer (scene entity-index)
+SIDE_KINDS = ("boss", "monster", "creature", "npc", "mount", "fish", "water")  # these get a side profile too
+
+
 def _entity_categories():
-    """id -> monster / creature / npc / water / misc, read from the Java registrations (best effort)."""
+    """id -> boss / monster / creature / water / npc / vehicle / misc. The game's index when it exists (harness.py run
+    entity-index: /nirncraft-qa entities inspects every type), else a best-effort read of the Java registrations."""
+    try:
+        return {e["id"]: e.get("kind", "misc") for e in json.loads(ENTITY_INDEX.read_text(encoding="utf-8"))}
+    except (OSError, ValueError, TypeError):
+        pass
     cats = {}
     for f in ROOT.glob("mod/src/main/java/com/nirncraft/**/*.java"):
         text = f.read_text(encoding="utf-8", errors="replace")
@@ -117,21 +126,34 @@ def gallery():
     stands with the set, its shield and a weapon), gallery:weapons (every weapon of a material on stands),
     gallery:blocks / gallery:furniture (block lineups), suite:animation (entities moving, a 6-frame filmstrip)."""
     sx, sy, sz = STAGE
-    out = []
+    out = [{"id": "entity-index", "title": "What every NirnCraft entity is (kind, category, size), from the game",
+            "_file": "(generated gallery)", "kind": "measure", "tags": ["suite:gallery", "check:entities"],
+            "pose": {"stage": [sx, sy, sz, 4.5]}, "variants": ["measure"],
+            "setup": ["try difficulty easy"],  # monsters cannot even be created in peaceful
+            "measure_command": "command nirncraft-qa entities", "measure_file": "nirncraft-qa/entities.json",
+            "export": "entities.json", "checks": {}, "source": "QaCommands entities"}]
     cats = _entity_categories()
     for e in sorted(_lang_ids("entity")):
         cat = cats.get(e, "npc")
         summon = (f"command summon nirncraft:{e} {sx} {sy + 1} {sz} {{NoAI:1b,PersistenceRequired:1b,Silent:1b,"
                   f"Rotation:[180f,0f]}}")
         tags = [f"gallery:{cat}", f"gallery:entity:{e}", "feature:creature"]
+        # framed by the game from the subject's real bounding box: three-quarter front, and a side profile for
+        # monsters, creatures and NPCs (frame ANGLE FILL, see VisualCamera.frame)
         out.append(_stage_scene(f"gallery-{e.replace('_', '-')}", f"Gallery: {e}", tags,
-                                ["try difficulty easy", summon, "wait 30"], BIG.get(e, 4.5)))
+                                ["try difficulty easy", summon, "wait 30"], BIG.get(e, 4.5),
+                                extra={"frame": [30, 0.7], "subject": f"nirncraft:{e}"}))
+        if cat in SIDE_KINDS:
+            out.append(_stage_scene(f"gallery-{e.replace('_', '-')}-side", f"Gallery: {e} (side)",
+                                    tags + ["gallery:side"], ["try difficulty easy", summon, "wait 30"],
+                                    BIG.get(e, 4.5), extra={"frame": [90, 0.7], "subject": f"nirncraft:{e}"}))
         # animation: free to move inside an invisible pen; six frames a third of a second apart
         pen = f"try fill {sx - 6} {sy + 1} {sz - 6} {sx + 6} {sy + 5} {sz + 6} minecraft:barrier hollow"
         walk = summon.replace("NoAI:1b,", "")
         out.append(_stage_scene(f"anim-{e.replace('_', '-')}", f"Animation: {e}", tags + ["suite:animation",
                                 "feature:animation"], [pen, "try difficulty easy", walk, "wait 20"],
-                                BIG.get(e, 4.5) * 1.3, frames=[6, 7]))
+                                BIG.get(e, 4.5) * 1.3, frames=[6, 7],
+                                extra={"frame": [30, 0.55], "subject": f"nirncraft:{e}"}))
     items = _lang_ids("item")
     mats = sorted({i[: -len("_chestplate")] for i in items if i.endswith("_chestplate")})
     for m in mats:
@@ -695,6 +717,8 @@ def capture_actions(s, tag, plan=None):
     if s.get("wait"):
         lines.append(f"wait {int(s['wait'])}")
     lines += list(s.get("setup", []))
+    if s.get("frame"):  # the game frames the subject that setup just placed, from its real size
+        lines += [f"frame {s['frame'][0]} {s['frame'][1]}", "settle-visual 600"]
     if s.get("measure"):
         lines.append(f"measure {tag} {int(s['measure'])}")
     if s.get("frames"):

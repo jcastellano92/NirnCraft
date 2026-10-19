@@ -502,8 +502,14 @@ class Runner:
         extra = {"camera": cand} if p.get("shot") else {}
         if perf:
             extra["perf"] = {k: perf[k] for k in ("median", "p95", "p99", "stalls", "frames") if k in perf}
-        want = posecheck.requested(catalog.pose_actions(s, self.plan, cand))
+        # a framed scene: the game placed the camera from the subject's size; check it framed the right subject
+        want = None if s.get("frame") else posecheck.requested(catalog.pose_actions(s, self.plan, cand))
         pflags, pm = posecheck.pose(want, receipt)
+        if s.get("frame"):
+            fr = (receipt or {}).get("frame") or {}
+            pm.update(framedSubject=fr.get("subject"), framedBox=fr.get("box"), framedDistance=fr.get("distance"))
+            if s.get("subject") and fr.get("subject") != s["subject"]:
+                pflags.append(f"camera framed {fr.get('subject') or 'nothing'}, not {s['subject']}")
         if pflags:  # the camera is not where the scene put it (a bumped mouse, a pose that did not apply): pose again
             say(f"  {s['id']} [{v}]: {pflags[0]}; posing again and capturing once more")
             tr.step("repose", test=key(s, v), why=pflags)
@@ -584,6 +590,8 @@ class Runner:
         if not out.exists():
             raise RuntimeError(f"{s['measure_command']} wrote no {s['measure_file']}")
         data = json.loads(out.read_text(encoding="utf-8"))
+        if s.get("export"):  # the game's own index (e.g. entities.json): kept for the catalog and other tools
+            (STORE / s["export"]).write_text(json.dumps(data, indent=1), encoding="utf-8")
         if s.get("validate") == "world":  # the offline tools' prediction for the same square, compared
             import validation
             req = {"id": s["id"], "x": data["x"], "z": data["z"], "radius": data["radius"], "step": data["step"]}
@@ -2122,6 +2130,42 @@ def cmd_auto(a):
         time.sleep(a.every * 60)
 
 
+# ================================================================================================ subject sheets
+SUBJECT_TAGS = ("gallery:entity:", "gallery:block:", "gallery:material:", "flora:", "place:", "subject:", "boss:")
+
+
+def subject_roles(subject):
+    """Every captured view of one subject: front / side / animation / other (effects, distance, places)."""
+    sid = subject.replace("_", "-")
+    roles = []
+    for s in catalog.load():
+        tags = s.get("tags", [])
+        if not (any(t.startswith(p) and t[len(p):] == subject for p in SUBJECT_TAGS for t in tags)
+                or s["id"] in (f"gallery-{sid}", f"gallery-{sid}-side", f"anim-{sid}")
+                or s["id"].startswith((f"dist-actor-{sid}-", f"pop-actor-{sid}-"))):
+            continue
+        role = ("front" if s["id"] == f"gallery-{sid}" else "side" if s["id"] == f"gallery-{sid}-side"
+                else "animation" if s["id"] == f"anim-{sid}" or "suite:animation" in tags else "other")
+        roles.append((role, s["id"], s.get("title", s["id"])))
+    return roles
+
+
+def cmd_sheet(a):
+    """A subject's sheet (front, side, animation, effects, distance) at a level of detail for people and reviewers."""
+    roles = subject_roles(a.subject)
+    if not roles:
+        say(f"sheet: no scenes for {a.subject} (an entity / block / material / flora / place id)")
+        return 1
+    paths = results.subject_sheet(a.subject, roles, a.level, a.view, a.top)
+    if not paths:
+        missing = " ".join(sorted({sid for _, sid, _ in roles})[:8])
+        say(f"sheet: nothing captured yet for {a.subject}; run: harness.py run {missing}")
+        return 1
+    for f in paths:
+        say(str(f))
+    return 0
+
+
 def main():
     global VERBOSE
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -2217,6 +2261,11 @@ def main():
     p.add_argument("--previous", action="store_true", help="the run before this one")
     p.add_argument("--no-game-log", action="store_true")
     sub.add_parser("stop").add_argument("--after-test", action="store_true", help="let the current test finish")
+    p = sub.add_parser("sheet")
+    p.add_argument("subject", help="entity / block / material / flora / place id, e.g. dragon, draugr, iron")
+    p.add_argument("--level", choices=["full", "top", "pair", "single"], default="top")
+    p.add_argument("--view", choices=["front", "side"], default="front", help="single: which view")
+    p.add_argument("--top", type=int, default=2, help="top: how many other views (flagged first)")
     p = sub.add_parser("review")
     p.add_argument("ids", nargs="*", help="issues to review (default: every needs-review issue)")
     p.add_argument("--pages", help="review a run's agent folder instead (BROKEN / REGRESSION become issues)")
@@ -2261,7 +2310,7 @@ def main():
      "seed-legacy": cmd_seed_legacy, "clean": cmd_clean, "probe": cmd_probe, "zoom": cmd_zoom,
      "gate": cmd_gate, "open": cmd_open, "quarantine": cmd_quarantine, "trace": cmd_trace,
      "audit": cmd_audit, "stop": cmd_stop, "wait": cmd_wait, "issues": cmd_issues,
-     "review": cmd_review, "auto": cmd_auto}[a.cmd](a)
+     "review": cmd_review, "auto": cmd_auto, "sheet": cmd_sheet}[a.cmd](a)
 
 
 if __name__ == "__main__":

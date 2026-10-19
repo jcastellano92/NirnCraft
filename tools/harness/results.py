@@ -691,3 +691,90 @@ def _issue_line():
     return " &middot; issues: " + ", ".join(f"{c.get(s, 0)} {s}" for s in ("open", "in-progress", "testing",
                                                                         "needs-review", "fixed")) + " (harness.py issues)"
 
+
+# ------------------------------------------------------------------------------------------------ subject sheets
+SHEETS = STORE / "sheets"
+SHEET_W = 1600                 # what a reviewer can still judge per page
+LEVELS = ("full", "top", "pair", "single")
+
+
+def _panel(scene_id, title, width):
+    """The latest capture of a scene (shaders preferred), labelled; None when it was never captured."""
+    for v in ("shaders", "vanilla", "lab"):
+        png = Path(f"{stem(scene_id, v)}.after.png")
+        if png.exists():
+            rec = latest(scene_id, v) or {}
+            im = Image.open(png).convert("RGB")
+            im = im.resize((width, round(im.height * width / im.width)))
+            flags = (rec.get("metrics") or {}).get("flags") or []
+            return _label(im, title, "; ".join(flags)[:120] if flags else f"[{v}] {rec.get('status', '')}",
+                          (255, 214, 120) if flags else (235, 235, 235)), bool(flags)
+    return None
+
+
+def subject_sheet(subject, roles, level="top", view="front", top=2):
+    """One subject on a sheet: roles is [(role, scene_id, title)] with role front / side / animation / other.
+    Levels: full (every view, several pages when needed), top (front, side, animation and the `top` other views,
+    flagged ones first), pair (front | side), single (`view`: front or side). Returns the written page paths."""
+    by_role = {}
+    for role, sid, title in roles:
+        by_role.setdefault(role, []).append((sid, title))
+    if level == "single":
+        pick = by_role.get(view) or by_role.get("front") or by_role.get("side") or []
+        rows = [[pick[0]]] if pick else []
+    elif level == "pair":
+        rows = [[x for x in (by_role.get("front", [])[:1] + by_role.get("side", [])[:1])]]
+    else:
+        rows = [by_role.get("front", [])[:1] + by_role.get("side", [])[:1]]
+        rows += [[a] for a in by_role.get("animation", [])]  # strips: a row of their own
+        others = by_role.get("other", [])
+        if level == "top":
+            scored = []
+            for sid, title in others:
+                got = _panel(sid, title, 400)
+                if got:
+                    scored.append((0 if got[1] else 1, sid, title))
+            others = [(sid, title) for _, sid, title in sorted(scored)[:top]]
+        rows += [others[i:i + 2] for i in range(0, len(others), 2)]
+    rows = [r for r in rows if r]
+    imgs = []
+    for r in rows:
+        w = SHEET_W // len(r) - (6 if len(r) > 1 else 0)
+        panels = [x[0] for x in (_panel(sid, title, w) for sid, title in r) if x]
+        if panels:
+            h = max(pn.height for pn in panels)
+            row = Image.new("RGB", (SHEET_W, h), (10, 10, 12))
+            x = 0
+            for pn in panels:
+                row.paste(pn, (x, 0))
+                x += pn.width + 6
+            imgs.append(row)
+    if not imgs:
+        return []
+    out = SHEETS / subject
+    out.mkdir(parents=True, exist_ok=True)
+    for f in out.glob(f"{level}*.png"):
+        f.unlink()
+    pages, page, height = [], [], 0
+    for im in imgs:  # pages up to ~square so a reviewer still sees detail
+        if page and height + im.height > SHEET_W:
+            pages.append(page)
+            page, height = [], 0
+        page.append(im)
+        height += im.height + 6
+    pages.append(page)
+    paths = []
+    for n, page in enumerate(pages, 1):
+        sheet = Image.new("RGB", (SHEET_W, sum(i.height + 6 for i in page) + 36), (10, 10, 12))
+        d = ImageDraw.Draw(sheet)
+        d.text((8, 8), f"{subject}  [{level}]" + (f"  page {n}/{len(pages)}" if len(pages) > 1 else ""),
+               font=_font(20), fill=(255, 255, 255))
+        y = 36
+        for im in page:
+            sheet.paste(im, (0, y))
+            y += im.height + 6
+        f = out / (f"{level}.png" if len(pages) == 1 else f"{level}-p{n}.png")
+        sheet.save(f)
+        paths.append(f)
+    return paths
+

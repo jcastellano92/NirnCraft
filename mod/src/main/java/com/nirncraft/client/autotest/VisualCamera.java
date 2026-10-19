@@ -74,6 +74,53 @@ final class VisualCamera {
                 (float)-Math.toDegrees(Math.atan2(direction.y,Math.hypot(direction.x,direction.z)))};
     }
 
+    /** What the last `frame` put in view (part of the capture receipt). */
+    static volatile JsonObject lastFrame;
+
+    /**
+     * `frame ANGLE FILL`: the camera fits the subject nearest to it (its real bounding box, multipart parts included)
+     * so the box fills FILL of the frame height, seen from ANGLE degrees off the way it faces (0 front, 90 its side),
+     * 10 degrees above. Sizes come from the game itself, so a dragon and a mudcrab are both framed properly.
+     */
+    static java.util.concurrent.CompletableFuture<Integer> frame(Minecraft mc,String arguments) {
+        if(mc.getSingleplayerServer()==null) throw new IllegalStateException("frame needs the integrated server");
+        String[] a=arguments.trim().split("\\s+");
+        double angle=a.length>0?Double.parseDouble(a[0]):30, fill=a.length>1?Double.parseDouble(a[1]):0.7;
+        double fovV=Math.toRadians(mc.options.fov().get());
+        var result=new java.util.concurrent.CompletableFuture<Integer>();
+        var id=mc.player.getUUID();
+        mc.getSingleplayerServer().execute(()->{
+            try {
+                var player=mc.getSingleplayerServer().getPlayerList().getPlayer(id);
+                if(player==null) throw new IllegalStateException("No player");
+                var subject=player.level().getEntities(player,player.getBoundingBox().inflate(64),e->!(e instanceof net.minecraft.world.entity.player.Player)
+                        && !(e instanceof net.neoforged.neoforge.entity.PartEntity<?>)).stream()
+                        .min(java.util.Comparator.comparingDouble(e->e.distanceToSqr(player))).orElse(null);
+                if(subject==null) throw new IllegalStateException("frame: no subject within 64 blocks");
+                var box=subject.getBoundingBox();
+                if(subject.isMultipartEntity() && subject.getParts()!=null)
+                    for(var part:subject.getParts()) box=box.minmax(part.getBoundingBox());
+                Vec3 centre=box.getCenter();
+                double radius=0.5*Math.sqrt(box.getXsize()*box.getXsize()+box.getYsize()*box.getYsize()+box.getZsize()*box.getZsize());
+                double distance=Math.max(1.5,radius/Math.tan(fill*fovV/2));
+                double yaw=Math.toRadians(subject.getYRot()+angle), elev=Math.toRadians(10);
+                Vec3 facing=new Vec3(-Math.sin(yaw),0,Math.cos(yaw));
+                Vec3 eye=centre.add(facing.scale(distance*Math.cos(elev))).add(0,distance*Math.sin(elev),0);
+                place(player,eye.subtract(0,1.62,0),centre);
+                var info=new JsonObject();
+                info.addProperty("subject",net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getKey(subject.getType()).toString());
+                info.add("box",vector(new Vec3(box.getXsize(),box.getYsize(),box.getZsize())));
+                info.add("centre",vector(centre));
+                info.addProperty("distance",distance);
+                info.addProperty("angle",angle);
+                info.addProperty("fill",fill);
+                lastFrame=info;
+                result.complete(1);
+            } catch(Exception e) { result.completeExceptionally(e); }
+        });
+        return result;
+    }
+
     static java.util.concurrent.CompletableFuture<Integer> action(Minecraft mc,String arguments,boolean scout) {
         if(mc.getSingleplayerServer()==null)
             throw new IllegalStateException("Camera scouting requires integrated terrain access; position remote QA through its authoritative server inbox, then use client clearance/readiness checks");
@@ -172,6 +219,7 @@ final class VisualCamera {
         data.addProperty("cameraClear",mc.level.noCollision(mc.player,mc.player.getBoundingBox()));
         data.addProperty("air",com.nirncraft.atmosphere.client.InteriorAtmosphere.describe());
         data.addProperty("capturedAt",System.currentTimeMillis());
+        if(lastFrame!=null) data.add("frame",lastFrame);
         return data;
     }
 }
