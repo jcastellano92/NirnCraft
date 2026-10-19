@@ -106,6 +106,13 @@ finally:
     harness.catalog.load = real
 expect(got == ["lab-x", "exp"], "a lab scene whose exports are missing pulls its `after` scene into the run")
 
+# --- lab reports are kept and summarised ------------------------------------------------------------------------
+summ = harness.lab_summary({"runs": [{"dist": 10, "variant": "groups", "iou": 1.0, "dE": 0.1, "steps": 20},
+                                     {"dist": 600, "variant": "groups", "iou": 0.97, "dE": 3.0, "steps": 4}]})
+expect(summ == {"groups": {"iouMin": 0.97, "dEMax": 3.0, "steps": 12.0}}, "atlas_lab runs summarise per representation")
+expect(harness.lab_summary({"runs": [{"variant": "boxes", "pop": 0.0, "pop_max": 0.1, "dE": 1.3, "steps": 5.3}]})
+       == {"boxes": {"pop": 0.0, "popMax": 0.1, "dE": 1.3, "steps": 5.3}}, "a sweep's pop numbers are kept")
+
 # --- every scene declares its weather ---------------------------------------------------------------------------
 import catalog  # noqa: E402
 

@@ -538,7 +538,11 @@ class Runner:
             if r.returncode or not png.exists():
                 raise RuntimeError(f"{tool} failed: " + (r.stdout + r.stderr)[-800:])
             report = next((json.loads(l) for l in reversed(r.stdout.strip().splitlines()) if l.startswith("{")), {})
-            rec = results.store(s["id"], v, png, meta={"tool": tool, "args": kv, "atlas": report}, fingerprint=fp)
+            # the tool's report at the top of the record ("game" keeps it too: posecheck reads it there), and for
+            # atlas_lab a per-representation summary (worst silhouette and colour, mean steps, worst pop) to read at
+            # a glance and to check against
+            rec = results.store(s["id"], v, png, meta={"tool": tool, "args": kv, "atlas": report}, fingerprint=fp,
+                                extra={"report": report, **({"labSummary": lab_summary(report)} if tool == "atlas_lab" else {})})
         return self.judge(s, v, rec)
 
     # ---------------------------------------------------------------------------------------- live
@@ -875,6 +879,24 @@ def tree_hash(*roots):
         elif r.is_dir():
             files += sorted(f for f in r.rglob("*") if f.is_file())
     return results_hash(files)
+
+
+def lab_summary(report):
+    """atlas_lab's runs per representation: worst iou, worst dE, mean steps (table mode), or its pop numbers (sweep)."""
+    out = {}
+    for r in report.get("runs", []):
+        v = out.setdefault(r["variant"], {})
+        if "pop" in r:  # sweep
+            v.update(pop=r["pop"], popMax=r["pop_max"], dE=r["dE"], steps=r["steps"])
+            continue
+        v["iouMin"] = min(v.get("iouMin", 1.0), r["iou"])
+        v["dEMax"] = max(v.get("dEMax", 0.0), r["dE"])
+        v.setdefault("_steps", []).append(r["steps"])
+    for v in out.values():
+        st = v.pop("_steps", None)
+        if st:
+            v["steps"] = round(sum(st) / len(st), 2)
+    return out
 
 
 def lab_path(val):

@@ -485,7 +485,8 @@
         "yaw": 30,
         "pitch": -12,
         "grass": "6A9A3A",
-        "foliage": "5A8A3A"
+        "foliage": "5A8A3A",
+        "variants": "ref,current,micro,covbox,boxes,groups"
       },
       "wait": 0,
       "setup": [],
@@ -514,7 +515,7 @@
         "dist": "200,600,1500,4000",
         "yaw": 30,
         "pitch": -8,
-        "variants": "ref,current,micro,covbox",
+        "variants": "ref,current,micro,boxes,groups",
         "grass": "6A9A3A",
         "foliage": "5A8A3A"
       },
@@ -529,6 +530,38 @@
       "after": [
         "atlaslab-export"
       ]
+    },
+    {
+      "id": "atlaslab-falkreath-sweep",
+      "title": "Far-field lab: flying into Falkreath from 2.5 km to 60 m (popping)",
+      "tags": [
+        "feature:farfield",
+        "suite:atlaslab",
+        "feature:popin"
+      ],
+      "tier": "lab",
+      "lab": {
+        "tool": "atlas_lab",
+        "blocks": "@game/nirncraft-atlaslab/blocks.bin",
+        "volume": "@game/nirncraft-atlaslab/falkreath.alv",
+        "sweep": 20,
+        "dist": "60,2500",
+        "frames": 12,
+        "variants": "ref,current,micro,boxes,groups",
+        "grass": "6A9A3A",
+        "foliage": "5A8A3A"
+      },
+      "after": [
+        "atlaslab-export"
+      ],
+      "wait": 0,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "native/tools/atlas_lab.cpp:1",
+      "note": "labSummary per representation: pop (beyond its own noise), popMax, dE over the flight, steps"
     }
   ]
 }
