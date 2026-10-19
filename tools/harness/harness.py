@@ -2359,6 +2359,31 @@ def cmd_scenario(a):
     return 0
 
 
+def cmd_library(a):
+    """The camera library: import cameras saved in game (/nirncraft-tour save NAME), list them, suggest places
+    that still need one."""
+    import camlib
+    if a.action == "import":
+        files = camlib.saved_files()
+        if not files:
+            say("no nirncraft-cameras.jsonl in any Prism instance yet: in game, /nirncraft-tour save NAME [note]")
+            return 0
+        added, skipped = camlib.import_saved(a.replace)
+        say(f"library: {len(added)} added ({', '.join(added[:10])}), {len(skipped)} already there "
+            f"({camlib.LIBRARY}); run them: harness.py run --suite camera-library")
+    elif a.action == "list":
+        for e in camlib.load():
+            say(f"  cam-{e['name']:28} {e.get('place') or '-':24} {e.get('biome', '-'):28} {e.get('note', '')[:50]}")
+    else:
+        rows = camlib.suggest(a.limit or 40)
+        say(f"{len(rows)} place(s) without a good camera (no library camera, planned views see < 60%):")
+        for radius, pid, kind, best in rows:
+            say(f"  {pid:32} {kind:14} radius {radius:4}  best planned view "
+                + ("not planned yet (harness.py cameras)" if best is None else f"{best:.0%}"))
+        say("go there in game and /nirncraft-tour save <name> <note>, then harness.py library import")
+    return 0
+
+
 def main():
     global VERBOSE
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -2459,6 +2484,10 @@ def main():
     p.add_argument("--level", choices=["full", "top", "pair", "single"], default="top")
     p.add_argument("--view", choices=["front", "side"], default="front", help="single: which view")
     p.add_argument("--top", type=int, default=2, help="top: how many other views (flagged first)")
+    p = sub.add_parser("library")
+    p.add_argument("action", choices=["import", "list", "suggest"])
+    p.add_argument("--replace", action="store_true", help="import: replace cameras with the same name")
+    p.add_argument("--limit", type=int, default=40)
     p = sub.add_parser("scenario")
     p.add_argument("action", choices=["new", "list"])
     p.add_argument("name", nargs="?")
@@ -2520,7 +2549,8 @@ def main():
      "gate": cmd_gate, "open": cmd_open, "quarantine": cmd_quarantine, "trace": cmd_trace,
      "audit": cmd_audit, "stop": cmd_stop, "wait": cmd_wait, "issues": cmd_issues,
      "review": cmd_review, "auto": cmd_auto, "sheet": cmd_sheet, "card": cmd_card,
-     "gaps": cmd_gaps, "recommend": cmd_recommend, "scenario": cmd_scenario}[a.cmd](a)
+     "gaps": cmd_gaps, "recommend": cmd_recommend, "scenario": cmd_scenario,
+     "library": cmd_library}[a.cmd](a)
 
 
 if __name__ == "__main__":

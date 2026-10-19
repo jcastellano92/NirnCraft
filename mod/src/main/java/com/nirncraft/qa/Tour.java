@@ -137,10 +137,65 @@ public final class Tour {
                 .then(Commands.literal("dwell").then(Commands.argument("seconds", IntegerArgumentType.integer(1, 3600))
                         .executes(c -> dwell(c.getSource(), IntegerArgumentType.getInteger(c, "seconds")))))
                 .then(Commands.literal("status").executes(c -> status(c.getSource())))
+                .then(Commands.literal("save").then(Commands.argument("name", StringArgumentType.word())
+                        .executes(c -> save(c.getSource(), StringArgumentType.getString(c, "name"), ""))
+                        .then(Commands.argument("note", StringArgumentType.greedyString())
+                                .executes(c -> save(c.getSource(), StringArgumentType.getString(c, "name"),
+                                        StringArgumentType.getString(c, "note"))))))
                 .then(Commands.literal("stop").executes(c -> {
                     ServerPlayer p = c.getSource().getPlayerOrException();
                     return end(p, "Tour stopped") ? 1 : 0;
                 })));
+    }
+
+    /**
+     * {@code /nirncraft-tour save NAME [note]}: the host's current view as a named test camera: eye position, yaw,
+     * pitch, dimension, seed, biome and the nearest named place, appended to {@code nirncraft-cameras.jsonl} in the
+     * game folder. The harness imports them (harness.py cameras import) into its camera library, where each becomes
+     * a test at exactly that view.
+     */
+    static int save(CommandSourceStack src, String name, String note) {
+        ServerPlayer p;
+        try {
+            p = src.getPlayerOrException();
+        } catch (Exception e) {
+            return 0;
+        }
+        var eye = p.getEyePosition();
+        JsonObject o = new JsonObject();
+        o.addProperty("name", name);
+        o.addProperty("note", note);
+        o.addProperty("x", Math.round(eye.x * 100) / 100.0);
+        o.addProperty("y", Math.round(eye.y * 100) / 100.0);
+        o.addProperty("z", Math.round(eye.z * 100) / 100.0);
+        o.addProperty("yaw", p.getYRot());
+        o.addProperty("pitch", p.getXRot());
+        o.addProperty("dimension", p.level().dimension().identifier().toString());
+        o.addProperty("seed", p.level().getSeed());
+        p.level().getBiome(p.blockPosition()).unwrapKey().ifPresent(k -> o.addProperty("biome", k.identifier().toString()));
+        Place near = null;
+        double best = 1e18;
+        for (Place pl : Places.all()) {
+            double d = (pl.x() - eye.x) * (pl.x() - eye.x) + (pl.z() - eye.z) * (pl.z() - eye.z);
+            if (d < best) { best = d; near = pl; }
+        }
+        if (near != null) {
+            o.addProperty("place", near.id());
+            o.addProperty("placeDistance", Math.round(Math.sqrt(best)));
+        }
+        o.addProperty("savedAt", System.currentTimeMillis());
+        try {
+            java.nio.file.Path f = src.getServer().getServerDirectory().resolve("nirncraft-cameras.jsonl");
+            java.nio.file.Files.writeString(f, o + System.lineSeparator(), java.nio.charset.StandardCharsets.UTF_8,
+                    java.nio.file.StandardOpenOption.CREATE, java.nio.file.StandardOpenOption.APPEND);
+        } catch (java.io.IOException e) {
+            src.sendFailure(Component.literal("could not save the camera: " + e.getMessage()));
+            return 0;
+        }
+        final Place nearFinal = near;
+        src.sendSuccess(() -> Component.literal("camera '" + name + "' saved" + (nearFinal != null ? " near " + nearFinal.id() : "")
+                + " (harness.py cameras import)"), false);
+        return 1;
     }
 
     // ------------------------------------------------------------------------------------------------ selection

@@ -496,6 +496,8 @@ def load():
     scenes += subjects.scenes()
     import behaviour  # behaviour scenarios (tools/harness/scenarios/*.json)
     scenes += behaviour.scenes()
+    import camlib  # named cameras saved in game (/nirncraft-tour save) and imported
+    scenes += camlib.scenes()
     seam_core(scenes)
     for s in scenes:
         if s["id"] in seen:
