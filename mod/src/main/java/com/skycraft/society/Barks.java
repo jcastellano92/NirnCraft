@@ -313,7 +313,7 @@ public final class Barks {
             if (p == Biome.Precipitation.RAIN) return "town.rain";
             if (p == Biome.Precipitation.SNOW) return "town.snow";
         }
-        long time = level.getDefaultClockTime() % 24000L;
+        long time = level.getOverworldClockTime() % 24000L;
         if (time > 13000 && time < 23000 && r.nextInt(3) == 0) return group + ".night";
         if (!guard && time < 3000 && r.nextInt(3) == 0) return "town.morning";
         return group + ".generic";

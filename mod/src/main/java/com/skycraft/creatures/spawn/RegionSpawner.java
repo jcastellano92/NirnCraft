@@ -167,7 +167,7 @@ public final class RegionSpawner {
         }
         boolean lowLevelProtected = nearStart || (hostileKind && playerLevel <= 3);
         boolean night = level.isDarkOutside();
-        long dayTime = level.getDefaultClockTime() % 24000L;
+        long dayTime = level.getOverworldClockTime() % 24000L;
         SpawnTables.Weather weather = toSpawnWeather(spotWeather, level.isRaining(), level.isThundering());
         // road and settlement distances are only looked up when a rule asks for them (cached per attempt)
         Boolean roadHere = hostileKind ? Boolean.valueOf(roadSpot) : null;

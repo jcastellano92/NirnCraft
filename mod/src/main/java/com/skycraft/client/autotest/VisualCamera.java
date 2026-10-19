@@ -45,7 +45,7 @@ final class VisualCamera {
         data.add("position",vector(mc.player.position()));
         data.addProperty("difficulty",mc.level.getDifficulty().getSerializedName());
         data.addProperty("cameraClear",mc.level.noCollision(mc.player,mc.player.getBoundingBox()));
-        data.addProperty("dayTime",mc.level.getDefaultClockTime());
+        data.addProperty("dayTime",mc.level.getOverworldClockTime());
         data.addProperty("gameTime",mc.level.getGameTime());
         data.addProperty("nightVision",mc.player.hasEffect(com.skycraft.platform.Effects.holder(net.minecraft.world.effect.MobEffects.NIGHT_VISION)));
         data.addProperty("weather",com.skycraft.atmosphere.client.ClientWeather.kind().id());

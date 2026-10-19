@@ -88,7 +88,7 @@ public final class Vampirism {
     static boolean computeSun(ServerPlayer player) {
         Level level = player.level();
         if (level.dimension() != Level.OVERWORLD || player.isSpectator()) return false;
-        long t = level.getDefaultClockTime() % DAY;
+        long t = level.getOverworldClockTime() % DAY;
         if (t > 12600 && t < 23400) return false;
         BlockPos eye = BlockPos.containing(player.getX(), player.getEyeY(), player.getZ());
         if (!level.canSeeSky(eye)) return false;

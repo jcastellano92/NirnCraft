@@ -182,7 +182,7 @@ public final class Relationships {
                     && com.skycraft.economy.Merchants.profession(npc) == null
                     && com.skycraft.quest.story.QuestNpcs.idOf(npc).isEmpty()
                     && com.skycraft.quest.QuestDialogue.canOfferQuest(player, npc)
-                    && ((npc.getUUID().getLeastSignificantBits() ^ (npc.level().getDefaultClockTime() / DAY)) & 7L) == 0L) {
+                    && ((npc.getUUID().getLeastSignificantBits() ^ (npc.level().getOverworldClockTime() / DAY)) & 7L) == 0L) {
                 out.add(new DialogueOption("society.favor",
                         com.skycraft.quest.QuestDialogue.questLabel(Component.translatable("dialogue.skycraft.society.favor")),
                         475, Relationships::offerFavor));
@@ -202,7 +202,7 @@ public final class Relationships {
         if (!(entity instanceof NpcEntity npc) || player.distanceToSqr(npc) > 64) return;
         ItemStack held = player.getMainHandItem();
         if (held.isEmpty()) return;
-        long day = player.level().getDefaultClockTime() / DAY;
+        long day = player.level().getOverworldClockTime() / DAY;
         CompoundTag gifts = Npcs.sub(npc.social(), "gift_day");
         if (gifts.getLongOr(player.getStringUUID(), 0L) == day + 1) {
             Dialogue.open(player, npc, Component.translatable("society.skycraft.say.gift.again"));

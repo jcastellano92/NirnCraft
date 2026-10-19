@@ -206,7 +206,7 @@ public final class CloudRenderer {
         String region = com.skycraft.tamriel.TamrielMap.region(x, z).id();
         var c = com.skycraft.atmosphere.WeatherPhysics.evaluate(x, z, mc.level.getGameTime() / 20.0,
                 CloudClimate.snapshot().get(region), ClientWeather.kindOf(region), ClientWeather.windX(), ClientWeather.windZ(),
-                ClientWeather.fronts(), mc.level.getDefaultClockTime());
+                ClientWeather.fronts(), mc.level.getOverworldClockTime());
         return AtmosphereBudget.describe() + " "+WeatherFieldTexture.diagnostics()+" "+FogRadianceTexture.describe()+" "+TextureUploadState.describe()+" ahead_x=" + x + " ahead_z=" + z
                 + " cloud_base=" + (232f + c.cloudBaseOffset()) + " cloud_top="
                 + (304f + c.cloudBaseOffset() + 120f * c.coverage() + 300f * c.stormTower())
@@ -505,13 +505,13 @@ public final class CloudRenderer {
                 ClientWeather.windX(), ClientWeather.windZ(), (ClientWeather.active() ? ClientWeather.wind() : 0.3f) * nightCalm(level, pt),
                 sunX, sunY, 0f, ClientWeather.fogR, ClientWeather.fogG, ClientWeather.fogB, fog,
                 AtmosphereConfig.CLOUD_HEIGHT.get(), AtmosphereConfig.CLOUD_DISTANCE.get(), fancy,
-                AtmosphereConfig.DISTANT_WEATHER.get(), WeatherProfile.mistHour(level.getDefaultClockTime()),
+                AtmosphereConfig.DISTANT_WEATHER.get(), WeatherProfile.mistHour(level.getOverworldClockTime()),
                 (float) ((level.getGameTime() + pt) / 20.0), climate,
                 redMountain != null ? redMountain.x() : 0, redMountain != null ? redMountain.z() : 0, redMountain != null,
                 throat != null ? throat.x() : 0, throat != null ? throat.z() : 0, throat != null,
                 ClientWeather.fronts(),
-                com.skycraft.atmosphere.AtmosphereMath.moonLight(angle,level.getDefaultClockTime()+pt,false),
-                AtmosphereConfig.SECUNDA.get()?com.skycraft.atmosphere.AtmosphereMath.moonLight(angle,level.getDefaultClockTime()+pt,true)
+                com.skycraft.atmosphere.AtmosphereMath.moonLight(angle,level.getOverworldClockTime()+pt,false),
+                AtmosphereConfig.SECUNDA.get()?com.skycraft.atmosphere.AtmosphereMath.moonLight(angle,level.getOverworldClockTime()+pt,true)
                         :com.skycraft.atmosphere.AtmosphereMath.MoonLight.DARK);
     }
 

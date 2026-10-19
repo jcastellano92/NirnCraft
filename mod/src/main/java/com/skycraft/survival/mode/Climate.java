@@ -156,7 +156,7 @@ public final class Climate {
     }
 
     private static boolean isNight(Level level) {
-        long time = level.getDefaultClockTime() % 24000L;
+        long time = level.getOverworldClockTime() % 24000L;
         return time >= 13000 && time <= 23000;
     }
 

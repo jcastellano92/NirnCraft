@@ -101,7 +101,7 @@ public final class HelgenFolk {
         var rnd = npc.getRandom();
         Tableau.Pose pose = Tableau.poseOf(npc);
         String group = pose != null && !pose.lines.isEmpty() ? pose.lines : byRole(npc);
-        long time = npc.level().getDefaultClockTime() % 24000L;
+        long time = npc.level().getOverworldClockTime() % 24000L;
         boolean night = time >= 13000L && time < 23000L;
         boolean armed = !com.skycraft.combat.Sheathe.isSheathed(player) && !player.getMainHandItem().isEmpty();
         if (armed && rnd.nextInt(3) == 0) group = "wary";

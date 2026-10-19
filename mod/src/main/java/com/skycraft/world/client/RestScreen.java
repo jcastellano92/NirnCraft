@@ -132,11 +132,11 @@ public class RestScreen extends Screen {
                 return true;
             }
             if (key == InputConstants.KEY_UP && minecraft != null && minecraft.level != null) {
-                setHours(RestLogic.hoursUntil(minecraft.level.getDefaultClockTime(), 6));
+                setHours(RestLogic.hoursUntil(minecraft.level.getOverworldClockTime(), 6));
                 return true;
             }
             if (key == InputConstants.KEY_DOWN && minecraft != null && minecraft.level != null) {
-                setHours(RestLogic.hoursUntil(minecraft.level.getDefaultClockTime(), 18));
+                setHours(RestLogic.hoursUntil(minecraft.level.getOverworldClockTime(), 18));
                 return true;
             }
         }
@@ -186,7 +186,7 @@ public class RestScreen extends Screen {
         g.centeredText(font, header, 0, 0, 0xFFF5EBC8);
         g.pose().popMatrix();
 
-        long dayTime = minecraft != null && minecraft.level != null ? minecraft.level.getDefaultClockTime() : 0;
+        long dayTime = minecraft != null && minecraft.level != null ? minecraft.level.getOverworldClockTime() : 0;
         g.centeredText(font, SkyrimCalendar.date(dayTime), cx, cy - 38, 0xFFD0C8B0);
         g.centeredText(font, SkyrimCalendar.time(dayTime), cx, cy - 26, 0xFFE8C060);
 

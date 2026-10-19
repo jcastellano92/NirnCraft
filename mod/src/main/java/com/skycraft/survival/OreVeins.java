@@ -57,7 +57,7 @@ public final class OreVeins {
 
     /** The clock regrowth is measured in: game time, but sleeping/waiting (which moves the day time) counts too. */
     public static long clock(Level level) {
-        return Math.max(level.getDefaultClockTime(), level.getGameTime());
+        return Math.max(level.getOverworldClockTime(), level.getGameTime());
     }
 
     private static boolean applies(Level level) {

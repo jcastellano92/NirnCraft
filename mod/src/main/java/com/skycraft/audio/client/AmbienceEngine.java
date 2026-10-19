@@ -137,7 +137,7 @@ public final class AmbienceEngine {
         h.onWater = mc.player.isInWater() || mc.player.getVehicle() != null && mc.player.getVehicle().isInWater()
                 || level.getFluidState(at.below()).isSource();
 
-        long time = Math.floorMod(level.getDefaultClockTime(), 24000L);
+        long time = Math.floorMod(level.getOverworldClockTime(), 24000L);
         // smooth day/night: dusk 12000..13500, dawn 22500..24000
         float night;
         if (time < 12000) night = 0f;

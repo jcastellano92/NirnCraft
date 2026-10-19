@@ -369,7 +369,7 @@ public final class NoticeBoards {
 
     public static long currentEpoch(@Nullable MinecraftServer server) {
         if (server == null || server.overworld() == null) return 0L;
-        return Math.max(0L, server.overworld().getDefaultClockTime() / REFRESH_TICKS);
+        return Math.max(0L, server.overworld().getOverworldClockTime() / REFRESH_TICKS);
     }
 
     /** Determines the dungeon {@link Size} tier of a target {@link Place}. */

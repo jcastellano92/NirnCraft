@@ -5,7 +5,9 @@ from imports_263 import ROOT,owner
 
 METHODS={
     'serverLevel':'level',
-    'getDayTime':'getDefaultClockTime',
+    # 1.20.1 getDayTime() was the shared overworld day time in every dimension; getDefaultClockTime() is the
+    # dimension's own clock (paused in the fixed-time realms)
+    'getDayTime':'getOverworldClockTime',
     'location':'identifier',
     'setPixelRGBA':'setPixelABGR',
     'getParamOrNull':'getOptional',

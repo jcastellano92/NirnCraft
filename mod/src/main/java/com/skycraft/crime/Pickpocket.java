@@ -105,7 +105,7 @@ public final class Pickpocket {
 
     private static List<ItemStack> pockets(ServerPlayer player, LivingEntity npc) {
         CompoundTag data = npc.getPersistentData();
-        long day = npc.level().getDefaultClockTime() / 24000L;
+        long day = npc.level().getOverworldClockTime() / 24000L;
         long since = day - data.getLongOr(POCKETS_DAY, 0L);
         // pockets refill on a long cooldown per person, not every dawn: sleeping through days must not farm them
         // a jail guard's key is what the prison break needs: his ring is refilled every day

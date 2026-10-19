@@ -26,8 +26,8 @@ final class NightSkyState {
         if (previousLevel != level) { pollution = target; previousLevel = level; }
         pollution = Mth.lerp(0.04f, pollution, target);
         double solarAngle = com.skycraft.atmosphere.client.SkyEnvironment.sunCycle(level, 1f) * Math.PI * 2;
-        masserLight = AtmosphereMath.visibleMoonIllumination(solarAngle, AtmosphereMath.moonCycle(level.getDefaultClockTime(), false), false);
-        secundaLight = AtmosphereMath.visibleMoonIllumination(solarAngle, AtmosphereMath.moonCycle(level.getDefaultClockTime(), true), true);
+        masserLight = AtmosphereMath.visibleMoonIllumination(solarAngle, AtmosphereMath.moonCycle(level.getOverworldClockTime(), false), false);
+        secundaLight = AtmosphereMath.visibleMoonIllumination(solarAngle, AtmosphereMath.moonCycle(level.getOverworldClockTime(), true), true);
         night = Mth.clamp(com.skycraft.atmosphere.client.SkyEnvironment.starBrightness(level, 1f) * 2f, 0f, 1f);
         visibility = AtmosphereMath.nightSkyVisibility(night, 0.80f * masserLight + 0.20f * secundaLight, pollution);
     }

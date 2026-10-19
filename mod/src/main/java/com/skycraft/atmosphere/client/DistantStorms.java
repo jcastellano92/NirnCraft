@@ -292,7 +292,7 @@ final class DistantStorms {
      * Qualifies electrical columns independently of mesh rebuilding for both renderer paths.
      */
     private static void discoverStormCells(Vec3 cam, double timeSec) {
-        long dayTime = Minecraft.getInstance().level.getDefaultClockTime();
+        long dayTime = Minecraft.getInstance().level.getOverworldClockTime();
         float[] buf = SHADER_CELLS;
         int count = 0;
         int cloudBase = 232;

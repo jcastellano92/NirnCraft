@@ -256,7 +256,7 @@ public final class AmbientParticles {
 
     /** Fireflies drift up from the undergrowth on clear warm nights. */
     private static void fireflies(ClientLevel level, RandomSource rnd, Vec3 cam, float scale, int budget) {
-        long time = level.getDefaultClockTime() % 24000L;
+        long time = level.getOverworldClockTime() % 24000L;
         if (time < 13000L || time > 23000L) return;
         if (level.getRainLevel(1f) > 0.2f) return;
         if (rnd.nextFloat() > 0.35f * scale || !room(budget)) return;
@@ -270,7 +270,7 @@ public final class AmbientParticles {
 
     /** Low wisps of fog over marsh ground and water, mostly at dawn, dusk and night. */
     private static void marshWisps(ClientLevel level, RandomSource rnd, Vec3 cam, float scale, int budget, float wx, float wz) {
-        long time = level.getDefaultClockTime() % 24000L;
+        long time = level.getOverworldClockTime() % 24000L;
         boolean dim = time > 11500L || time < 1500L;
         float rate = (dim ? 0.12f : 0.04f) + ClientWeather.fog() * 0.15f;
         if (rnd.nextFloat() > rate * scale || !room(budget)) return;

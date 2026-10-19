@@ -20,7 +20,7 @@ public final class PlazaHours {
 
     /** Whether it is this person's hour at the plaza (Skyrim clock hour 0-23). */
     public static boolean theirHour(NpcEntity npc, int hour) {
-        long day = npc.level().getDefaultClockTime() / 24000L;
+        long day = npc.level().getOverworldClockTime() / 24000L;
         int slot = (int) Math.floorMod((npc.getUUID().getLeastSignificantBits() >>> 9) + day * 7919L, (long) WINDOWS.length);
         int start = WINDOWS[slot];
         return hour >= start && hour < start + 2;

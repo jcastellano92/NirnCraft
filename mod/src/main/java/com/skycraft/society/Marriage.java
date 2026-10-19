@@ -281,8 +281,8 @@ public final class Marriage {
         CompoundTag s = new CompoundTag();
         s.store("uuid", net.minecraft.core.UUIDUtil.CODEC,  npc.getUUID());
         s.putString("name", npc.getDisplayName().getString());
-        s.putLong("since", player.level().getDefaultClockTime() / DAY);
-        s.putLong("gold_day", player.level().getDefaultClockTime() / DAY);
+        s.putLong("since", player.level().getOverworldClockTime() / DAY);
+        s.putLong("gold_day", player.level().getOverworldClockTime() / DAY);
         d.put("spouse", s);
         pd.markDirty();
         pd.addStat("married", 1);
@@ -324,7 +324,7 @@ public final class Marriage {
                         Dialogue.open(p, n, Component.translatable("society.skycraft.say.spouse_follow"));
                     }));
         }
-        long day = player.level().getDefaultClockTime() / DAY;
+        long day = player.level().getOverworldClockTime() / DAY;
         CompoundTag s = data(player).getCompoundOrEmpty("spouse");
         if (s.getLongOr("gold_day",0L) < day) {
             out.add(new DialogueOption("society.spouse_gold", Component.translatable("dialogue.skycraft.society.spouse_gold"), 143,
@@ -373,7 +373,7 @@ public final class Marriage {
 
     private static void collectEarnings(ServerPlayer player, LivingEntity entity) {
         if (!(entity instanceof NpcEntity npc) || !isSpouseOf(npc, player)) return;
-        long day = player.level().getDefaultClockTime() / DAY;
+        long day = player.level().getOverworldClockTime() / DAY;
         CompoundTag d = data(player);
         CompoundTag s = d.getCompoundOrEmpty("spouse");
         if (s.getLongOr("gold_day",0L) >= day) return;
@@ -389,7 +389,7 @@ public final class Marriage {
 
     private static void homeMeal(ServerPlayer player, LivingEntity entity) {
         if (!(entity instanceof NpcEntity npc) || !isSpouseOf(npc, player)) return;
-        long day = player.level().getDefaultClockTime() / DAY;
+        long day = player.level().getOverworldClockTime() / DAY;
         CompoundTag d = data(player);
         CompoundTag s = d.getCompoundOrEmpty("spouse");
         if (s.getLongOr("meal_day",0L) >= day + 1) return;

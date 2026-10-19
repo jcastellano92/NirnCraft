@@ -265,7 +265,7 @@ public final class RegionalWeather {
         // make sure every region around a player (and, every five seconds, out to the horizon) has weather
         BlockPos.MutableBlockPos probe = new BlockPos.MutableBlockPos();
         boolean far = ticks % 100 == 0;
-        float mist = WeatherProfile.mistHour(ow.getDefaultClockTime());
+        float mist = WeatherProfile.mistHour(ow.getOverworldClockTime());
         // DH can show provinces far beyond loaded chunks. Keep their small regional weather
         // records alive too; this reads map data and never loads/generates distant terrain.
         if (far || ticks == 20) {

@@ -234,7 +234,7 @@ public final class SkyFlocks {
         BlockPos at = player.blockPosition();
         var biome = level.getBiome(at);
         String path = biome.unwrapKey().map(k -> k.identifier().getPath()).orElse("");
-        long time = level.getDefaultClockTime() % 24000L;
+        long time = level.getOverworldClockTime() % 24000L;
         boolean day = time < 12500 || time > 23200;
         boolean dusk = time > 11500 && time < 14000;
         if (level.isRaining() && r.nextBoolean()) return;
@@ -336,7 +336,7 @@ public final class SkyFlocks {
 
     /** Dusk to dawn: the day birds roost, the bats come out. */
     private static boolean isNight(ClientLevel level) {
-        long t = level.getDefaultClockTime() % 24000L;
+        long t = level.getOverworldClockTime() % 24000L;
         return t > 13000L && t < 23000L;
     }
 
@@ -642,7 +642,7 @@ public final class SkyFlocks {
             }
         }
         if (ticks % 7 != 0 || LEAPS.size() >= 6) return;
-        long time = level.getDefaultClockTime() % 24000L;
+        long time = level.getOverworldClockTime() % 24000L;
         if (time > 12500) return;
         for (int i = 0; i < 2; i++) {
             int x = Mth.floor(player.getX()) + r.nextInt(41) - 20, z = Mth.floor(player.getZ()) + r.nextInt(41) - 20;

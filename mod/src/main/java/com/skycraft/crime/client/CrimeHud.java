@@ -224,7 +224,7 @@ public final class CrimeHud {
                     || block instanceof net.minecraft.world.level.block.TrapDoorBlock
                     || block instanceof net.minecraft.world.level.block.FenceGateBlock) {
                 boolean owned = Ownership.isOwnedByOther(mc.player, mc.level, bpos);
-                long dayTime = mc.level.getDefaultClockTime() % 24000L;
+                long dayTime = mc.level.getOverworldClockTime() % 24000L;
                 boolean night = dayTime >= 13000L && dayTime <= 23000L;
                 boolean matchesInfo = info != null && (info.pos().equals(bpos) || info.pos().equals(bpos.below()) || info.pos().equals(bpos.above()));
                 boolean locked = (matchesInfo && info.lock() != Locks.NOT_LOCKED && !info.unlocked())

@@ -433,7 +433,7 @@ public final class ClientWeather {
         // The local precipitation and visibility sample the same world-space band
         // seen at a distance. A summit above a valley fog layer must remain clear.
         var column = com.skycraft.atmosphere.WeatherPhysics.evaluate(here.getX(), here.getZ(),
-                level.getGameTime() / 20.0, CloudClimate.snapshot().get(region.id()), kind(), windX(), windZ(), fronts(), level.getDefaultClockTime());
+                level.getGameTime() / 20.0, CloudClimate.snapshot().get(region.id()), kind(), windX(), windZ(), fronts(), level.getOverworldClockTime());
         float bandAmount = Mth.clamp(0.35f + 1.25f * column.curtainDensity(), 0.2f, 1f);
         target[P.VANILLA] *= bandAmount;
         target[P.SNOW] *= bandAmount;
