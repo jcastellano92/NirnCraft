@@ -13,6 +13,7 @@ static const uint FRAME_DEBUG_LOD = 0x100u;
 static const uint FRAME_DEBUG_ALBEDO = 0x400u;        // surfaces output their albedo (the pack lab's G-buffer)
 static const uint FRAME_SEE_THROUGH_WATER = 0x800u;  // rays pass water voxels (the bed under a lake, for the lab)
 static const uint FRAME_DEBUG_WEATHER = 0x200u;  // ground shows the sampled weather column (cov, tower, curtain)
+static const uint FRAME_FILL_NEAR = 0x2000u;   // (abi 0.12) fill pixels the near field left empty, from the camera
 static const uint FRAME_LOD_DITHER = 0x1000u;  // dithered LOD transitions (per-pixel segment phase)
 static const int MAX_LODS = 8;
 

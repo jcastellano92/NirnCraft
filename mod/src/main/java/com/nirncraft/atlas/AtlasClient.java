@@ -283,6 +283,11 @@ public final class AtlasClient {
             // NirnCraft's own cloud deck draws them)
             frame.flags = quality.flags(AtlasNative.FRAME_SHADOWS | AtlasNative.FRAME_ATMOS | AtlasNative.FRAME_CLOUDS
                     | AtlasNative.FRAME_ACTORS | AtlasNative.FRAME_LOD_DITHER);
+            // in the open, chunks still loading show the far field instead of a hole (never underground: the far
+            // field has no caves, it would cover a cave mouth)
+            if (mc.player != null && mc.level != null
+                    && mc.level.canSeeSky(net.minecraft.core.BlockPos.containing(mc.player.getEyePosition())))
+                frame.flags |= AtlasNative.FRAME_FILL_NEAR;
 
             io.nearDepthTex = 0xFFFFFFFF;  // ATLAS_GL_BOUND_DEPTH: the bound gbuffer target's depth
             new Matrix4f(cam.projectionMatrix).invert().get(io.nearInvProjection);

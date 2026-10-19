@@ -829,7 +829,12 @@ void farMain(uint3 id : SV_DispatchThreadID) {
             return;
         }
     }
-    float tHit = traceView(o, dir, frame.params.x, frame.params.y, lodDither, res);
+    // the near field drew nothing here (a chunk still loading): fill from the camera so the place shows the far
+    // field instead of a hole (only in the open: FRAME_FILL_NEAR)
+    float tStart = frame.params.x;
+    if ((frame.dims.z & FRAME_NEAR_DEPTH) != 0 && (frame.dims.z & FRAME_FILL_NEAR) != 0 && nearDepth[pix] >= 1e29)
+        tStart = 2.0;
+    float tHit = traceView(o, dir, tStart, frame.params.y, lodDither, res);
     ActorHit ah;
     ah.t = -1.0;
     ah.n = float3(0, 1, 0);

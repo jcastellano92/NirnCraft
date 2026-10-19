@@ -35,7 +35,8 @@ public final class AtlasNative {
     public static final int FAULT_NONE = 0, FAULT_DEVICE_LOST = 1, FAULT_OUT_OF_MEMORY = 2, FAULT_TIMEOUT = 3;
     public static final int FRAME_CLOUDS = 0x1, FRAME_SHADOWS = 0x2, FRAME_ATMOS = 0x4, FRAME_ACTORS = 0x8,
             FRAME_SKY = 0x10, FRAME_NEAR_DEPTH = 0x20, FRAME_FLAT_NORMALS = 0x40, FRAME_CLOUDS_QUARTER = 0x80,
-            FRAME_DEBUG_LOD = 0x100, FRAME_DEBUG_WEATHER = 0x200, FRAME_LOD_DITHER = 0x1000;
+            FRAME_DEBUG_LOD = 0x100, FRAME_DEBUG_WEATHER = 0x200, FRAME_LOD_DITHER = 0x1000,
+            FRAME_FILL_NEAR = 0x2000;  // (abi 0.12) the far field fills what the near field has not loaded yet
     /** Far actor gaits (AtlasActor.flags bits 8-9): dragons fold their wings, glide or beat them. */
     public static final int GAIT_STILL = 0, GAIT_GLIDE = 1, GAIT_FLAP = 2;
     public static final int CLASS_TERRAIN = 0, CLASS_FOLIAGE = 1, CLASS_WATER = 2, CLASS_EMISSIVE = 3;

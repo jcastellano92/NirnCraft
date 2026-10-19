@@ -134,6 +134,9 @@ typedef struct AtlasFrame {
 #define ATLAS_FRAME_DEBUG_WEATHER 0x200u
 #define ATLAS_FRAME_DEBUG_ALBEDO 0x400u      /* surfaces output their albedo (offline G-buffers: the pack lab) */
 #define ATLAS_FRAME_SEE_THROUGH_WATER 0x800u /* rays pass water (the bed under it, offline) */
+#define ATLAS_FRAME_FILL_NEAR 0x2000u        /* (abi 0.12) with NEAR_DEPTH: where the near field drew nothing (a chunk not
+                                                 loaded yet) the far field marches from the camera and fills it; set
+                                                 only when the camera is in the open (the far field has no caves) */
 #define ATLAS_FRAME_LOD_DITHER 0x1000u       /* (abi 0.10) dithered LOD transitions: each pixel's LOD segment grid
                                                  starts at its own phase, so a level change is a stipple band, not a line */
 
