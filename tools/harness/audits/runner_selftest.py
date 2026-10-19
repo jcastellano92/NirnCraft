@@ -267,6 +267,12 @@ expect(_el.wrote_variant(_log, Path("C:/t/a_groups.png"), "groups"), "the groups
 expect(_el.card_path({"slug": "e", "box": [0, 1, 2, 3, 4, 5]}, Path("t")) != _el.card_path({"slug": "e", "box": [0, 1, 2, 3, 4, 6]}, Path("t")),
        "an element's surface cards are keyed by its box, not only its name")
 
+# --- the far field's element frames name their backend; --backend forces it ------------------------------------------
+_el.FORCE_BACKEND = "cpu"
+expect(_el.backend() == "cpu", "--backend cpu renders the far field on the CPU backend")
+_el.FORCE_BACKEND = None
+expect(_el.backend() in ("vulkan", "cpu"), "the far field's backend is Vulkan or the CPU, by how busy the GPU is")
+
 # --- truth subjects offset from their place look back at it (five faced away: yaw 0 is south in Minecraft) -----------
 import math as _math
 import truth as _truth
