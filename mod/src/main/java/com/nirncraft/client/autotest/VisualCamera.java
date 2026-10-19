@@ -91,8 +91,9 @@ final class VisualCamera {
     /** Put the camera's eye at EYE looking at TARGET: only the eye must be clear (the test player is a spectator). */
     static void placeEye(net.minecraft.server.level.ServerPlayer player,Vec3 eye,Vec3 target) {
         var level=player.level();
-        if(!loaded(level,eye) || !level.noCollision(player,new net.minecraft.world.phys.AABB(eye,eye).inflate(0.12)))
-            throw new IllegalStateException("Camera eye is unloaded or inside a block");
+        level.getChunk(net.minecraft.util.Mth.floor(eye.x)>>4,net.minecraft.util.Mth.floor(eye.z)>>4);  // load it if needed
+        if(!level.noCollision(player,new net.minecraft.world.phys.AABB(eye,eye).inflate(0.12)))
+            throw new IllegalStateException("Camera eye is inside a block");
         Vec3 feet=eye.subtract(0,1.62,0);
         float[] view=angles(feet,target);
         player.teleportTo(level,feet.x,feet.y,feet.z,java.util.Set.of(),view[0],view[1],true);

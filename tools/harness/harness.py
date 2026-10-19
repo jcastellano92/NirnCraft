@@ -413,7 +413,14 @@ class Runner:
                 event("client_restarted", test=key(s, v))
                 say("  restarting the client and trying the same test again")
 
+    # failures a client restart can cure (the client's state); a bad pose, an unknown id or a failed command is the
+    # scene's own problem and must not take the whole group down with it
+    RESTARTABLE = ("E-SETTLE-TIMEOUT", "E-TIMEOUT", "E-STUCK-SCREEN", "E-HEARTBEAT", "E-POS-UNLOADED", "E-OTHER")
+
     def trip(self, s, msg):
+        import errors
+        if errors.classify(msg)[0] not in self.RESTARTABLE:
+            return
         kind = re.sub(r"[0-9]+", "#", msg.split(";")[0])[:80]
         n = self.streak[1] + 1 if self.streak[0] == kind else 1
         self.streak = (kind, n)

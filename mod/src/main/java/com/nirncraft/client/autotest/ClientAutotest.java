@@ -752,7 +752,8 @@ public final class ClientAutotest {
                         Float.parseFloat(v[3]), Float.parseFloat(v[4]), v[5]);
                 resetFps();
             } else if (action.startsWith("capture ") || action.startsWith("capture-ui ")) {
-                if(!mc.level.noCollision(mc.player,mc.player.getBoundingBox()))
+                // the picture is taken from the eye (the test player is a spectator): only the eye must be clear
+                if(!mc.level.noCollision(mc.player,new net.minecraft.world.phys.AABB(mc.player.getEyePosition(),mc.player.getEyePosition()).inflate(0.12)))
                     throw new IllegalStateException("Camera intersects terrain; choose a clear pose before capture");
                 boolean ui=action.startsWith("capture-ui ");
                 String tag = action.substring(ui?11:8).replaceAll("[^A-Za-z0-9_-]", "_");
