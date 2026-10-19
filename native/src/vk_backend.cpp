@@ -203,6 +203,7 @@ void main() {
     ivec2 full = textureSize(atlasNearDepth, 0);
     vec2 f = vec2(full) / atlasSize;
     float dist = 0.0;
+    int skies = 0;
     for (int k = 0; k < 4; k++) {
         vec2 o = vec2(k & 1, k >> 1) * 0.5 + 0.25;
         ivec2 q = clamp(ivec2((vec2(p) + o) * f), ivec2(0), full - 1);
@@ -212,8 +213,12 @@ void main() {
         vec2 ndc = (vec2(q) + 0.5) / vec2(full) * 2.0 - 1.0;
         vec4 v = atlasInvProj * vec4(ndc, z, 1.0);
         dist = max(dist, sky ? 1e30 : length(v.xyz / v.w));
+        skies += sky ? 1 : 0;
     }
-    imageStore(atlasNearOut, p, vec4(dist));
+    // all four sky: 2e30 (the near field drew nothing here: a chunk not loaded, the far field may fill from the
+    // camera); some sky: 1e30 (a near silhouette's edge: the far field only behind it, never its own copy of the
+    // near object, which drew a moving outline around every tree and ridge against the sky)
+    imageStore(atlasNearOut, p, vec4(skies == 4 ? 2e30 : dist));
 }
 )GLSL";
 

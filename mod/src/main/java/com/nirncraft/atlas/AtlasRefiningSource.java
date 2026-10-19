@@ -90,8 +90,25 @@ abstract class AtlasRefiningSource implements AtlasFarField.ColumnSource {
                 }
                 todo.add(new int[] {tx, tz});
             }
+        // what the camera sees first, then nearest the window's centre
+        todo.sort((a, b) -> {
+            boolean sa = seen(lod, a[0], a[1]), sb = seen(lod, b[0], b[1]);
+            if (sa != sb) return sa ? -1 : 1;
+            return Double.compare(Math.hypot(a[0] - cx, a[1] - cz), Math.hypot(b[0] - cx, b[1] - cz));
+        });
+        // tiles made before (the world's disk cache: a revisit, a teleport back) go up exact at once, before any
+        // stand-in: decoding is milliseconds, and a stand-in first showed the raster's ground and forests for passes
+        int quick = CACHED_PER_PASS;
+        for (int i = 0; i < todo.size() && quick > 0; i++) {
+            int[] t = todo.get(i);
+            if (!cached(lod, t[0], t[1])) continue;
+            quick--;
+            if (refine(ctx, lod, t[0], t[1]) == Refined.DONE) {
+                exact.add(key(lod, t[0], t[1]));
+                todo.remove(i--);
+            }
+        }
         ctx.previewGenerate(lod, x0, z0, x1, z1);  // stand-ins where nothing is resident (skips the rest)
-        todo.sort((a, b) -> Double.compare(Math.hypot(a[0] - cx, a[1] - cz), Math.hypot(b[0] - cx, b[1] - cz)));
         boolean pending = false;
         int budget = budget(lod);
         for (int i = 0; i < todo.size(); i++) {
@@ -119,6 +136,14 @@ abstract class AtlasRefiningSource implements AtlasFarField.ColumnSource {
     }
 
     enum Refined { DONE, LATER, NEVER }
+
+    /** Cached tiles put up per LOD and pass ahead of the budget (each a decode and an upload). */
+    static final int CACHED_PER_PASS = 32;
+
+    /** Whether tile (lod, tx, tz) is ready made (a disk cache): it is put up before stand-ins, outside the budget. */
+    boolean cached(int lod, int tx, int tz) {
+        return false;
+    }
 
     /** The context's block palette, for tiles that carry surface blocks (codec v3). */
     void materials(AtlasMaterials m) {}

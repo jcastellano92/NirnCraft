@@ -119,14 +119,20 @@ final class AtlasSettlements implements AtlasFarField.Overlay {
      * redone when they come back), and the light groups of the settlements and sites they touch. Far-field worker.
      */
     @Override
-    public boolean cover(AtlasNative.Context ctx, int lod, int x0, int z0, int x1, int z1) {
+    public boolean cover(AtlasNative.Context ctx, int lod, int x0, int z0, int x1, int z1, long deadline) {
         boolean did = false;
         int span = AtlasNative.TILE << lod;
         g = ground != null ? ground : (x, z) -> (int) Math.floor(ctx.previewHeight(x + 0.5, z + 0.5));
         refreshNatural();
         java.util.Set<Long> window = new HashSet<>();
+        // nearest the window's centre first (the camera's tile), so a time-boxed pass fills what is close
+        double ctx0 = (Math.floorDiv(x0, span) + Math.floorDiv(x1 - 1, span)) / 2.0, ctz0 = (Math.floorDiv(z0, span) + Math.floorDiv(z1 - 1, span)) / 2.0;
+        List<int[]> order = new ArrayList<>();
         for (int tz = Math.floorDiv(z0, span); tz <= Math.floorDiv(z1 - 1, span); tz++)
-            for (int tx = Math.floorDiv(x0, span); tx <= Math.floorDiv(x1 - 1, span); tx++) {
+            for (int tx = Math.floorDiv(x0, span); tx <= Math.floorDiv(x1 - 1, span); tx++) order.add(new int[] {tx, tz});
+        order.sort((a, b) -> Double.compare(Math.hypot(a[0] - ctx0, a[1] - ctz0), Math.hypot(b[0] - ctx0, b[1] - ctz0)));
+        for (int[] t : order) {
+                int tx = t[0], tz = t[1];
                 long k = AtlasRefiningSource.key(lod, tx, tz);
                 window.add(k);
                 if (!ctx.hasTile(lod, tx, tz)) {
@@ -134,6 +140,10 @@ final class AtlasSettlements implements AtlasFarField.Overlay {
                     continue;
                 }
                 if (uploaded.contains(k)) continue;
+                if (System.nanoTime() > deadline) {  // the rest next pass (marks only after a tile is really up)
+                    did = true;
+                    continue;
+                }
                 try {
                     did = true;
                     boolean any = fill(lod, tx, tz);
@@ -344,7 +354,8 @@ final class AtlasSettlements implements AtlasFarField.Overlay {
         int j0 = Math.max(0, ceilDiv(m.z0 - bz - s / 2, s)), j1 = Math.min(AtlasNative.TILE - 1, Math.floorDiv(m.z1 - bz - s / 2, s));
         if (i0 > i1 || j0 > j1) {
             // smaller than a column: only big pieces (towers, keeps, landmarks) keep their column
-            if (m.x1 - m.x0 + 1 < 9 && m.z1 - m.z0 + 1 < 9) return;
+            // (a house keeps its nearest column: dropping every mass under 9 blocks lost half a village's cottages)
+            if (m.x1 - m.x0 + 1 < 3 && m.z1 - m.z0 + 1 < 3) return;
             int ci = Math.floorDiv((m.x0 + m.x1) / 2 - bx, s), cj = Math.floorDiv((m.z0 + m.z1) / 2 - bz, s);
             if (ci < 0 || cj < 0 || ci >= AtlasNative.TILE || cj >= AtlasNative.TILE) return;
             i0 = i1 = ci;
@@ -469,14 +480,22 @@ final class AtlasSettlements implements AtlasFarField.Overlay {
             Place place = Places.byId(id).orElse(null);
             long seed = place != null ? Cities.seed(place) : 0L;
             List<Spec> layout = plan.layout(id);
+            int failed = 0;
+            RuntimeException first = null;
             for (int n = 0; n < layout.size(); n++) {
                 Spec sp = layout.get(n);
                 try {
                     piece(sp, out, lights, id, seed ^ (n * 0x9E3779B97F4A7C15L));
                 } catch (RuntimeException e) {
-                    // one odd piece must not cost the town: skip it
+                    // one odd piece must not cost the town: skip it (but say so: a town drawn half empty looked fine
+                    // to nobody)
+                    failed++;
+                    if (first == null) first = e;
                 }
             }
+            if (failed > 0)
+                com.nirncraft.NirnCraft.LOGGER.warn("atlas: {} of {} pieces of {} not drawn far (first: {})", failed,
+                        layout.size(), id, first.toString());
             settlementLights.put(k, lights);
             lightsPending.add(k);
             massingMs += (System.nanoTime() - t0) / 1e6;
@@ -497,8 +516,24 @@ final class AtlasSettlements implements AtlasFarField.Overlay {
             return;
         }
         if (k == Archetype.GATE) {
+            // the gatehouse with its passage open, as Works.gate builds it: piers either side of an opening
+            // max(3, w - 6) wide and min(h - 4, 6) high, the lintel spanning it (a floating span over the road)
             Palette p = palette(s);
-            box(s, out, floor + s.h, 0, Roof.FLAT, p.cityWall, p.cityWall);
+            int open = Math.max(3, s.w - 6), ox0 = (s.w - open) / 2, ox1 = ox0 + open - 1;
+            int archH = Math.max(2, Math.min(s.h - 4, 6));
+            int[] o = SettlementPiece.origin(s);
+            int ax = o[0] + mapX(s.facing, 0, 0), az = o[1] + mapZ(s.facing, 0, 0);
+            int bx = o[0] + mapX(s.facing, s.w - 1, s.d - 1), bz = o[1] + mapZ(s.facing, s.w - 1, s.d - 1);
+            AtlasCapture.Shape sh = new AtlasCapture.Shape(Math.min(ax, bx), Math.min(az, bz), Math.abs(bx - ax) + 1, Math.abs(bz - az) + 1);
+            float top = floor + s.h;
+            for (int lx = 0; lx < s.w; lx++)
+                for (int lz = 0; lz < s.d; lz++) {
+                    int wx = o[0] + mapX(s.facing, lx, lz), wz = o[1] + mapZ(s.facing, lx, lz);
+                    boolean passage = lx >= ox0 && lx <= ox1;
+                    sh.span(wx, wz, passage ? floor + archH : Float.NaN, top, p.cityWall, p.cityWall);
+                }
+            sh.rise = s.h;
+            out.add(sh);
             return;
         }
         if (k == Archetype.LANDMARK) {
@@ -527,6 +562,20 @@ final class AtlasSettlements implements AtlasFarField.Overlay {
             float rise = spire ? Math.max(w, dd) * 1.5f : Math.min(w, dd) * 0.25f;
             out.add(new Mass(x0, z0, x0 + fw - 1, z0 + fd - 1, floor + h - rise, rise, spire ? Roof.SPIRE : Roof.DOME,
                     mats.id(p.cityWall), mats.id(p.roofFull)));
+            return;
+        }
+        if (k == Archetype.PEN || k == Archetype.HOMESTEAD_PLOT || k == Archetype.GARDEN || k == Archetype.YARD) {
+            // fenced ground: its fence around the footprint (a block and a half, as the near field's fence posts)
+            int[] o = SettlementPiece.origin(s);
+            int ax = o[0] + mapX(s.facing, 0, 0), az = o[1] + mapZ(s.facing, 0, 0);
+            int cx = o[0] + mapX(s.facing, s.w - 1, s.d - 1), cz = o[1] + mapZ(s.facing, s.w - 1, s.d - 1);
+            float x0 = Math.min(ax, cx) + 0.5f, z0 = Math.min(az, cz) + 0.5f, x1 = Math.max(ax, cx) + 0.5f, z1 = Math.max(az, cz) + 0.5f;
+            short fence = mats.id(palette(s).fence);
+            float top = floor + 1.5f;
+            out.add(new Line(x0, z0, x1, z0, 0.25f, top, top, fence));
+            out.add(new Line(x1, z0, x1, z1, 0.25f, top, top, fence));
+            out.add(new Line(x1, z1, x0, z1, 0.25f, top, top, fence));
+            out.add(new Line(x0, z1, x0, z0, 0.25f, top, top, fence));
             return;
         }
         if (!k.building) return;  // streets, plazas, fields, docks, stalls ...: ground detail

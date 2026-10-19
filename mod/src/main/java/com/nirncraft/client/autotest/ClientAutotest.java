@@ -697,6 +697,8 @@ public final class ClientAutotest {
                         net.minecraft.network.chat.Component.literal(action.substring(8).trim())));
             } else if (action.startsWith("hud ")) {  // on | off: HUD tests show it, everything else keeps it hidden
                 com.nirncraft.client.autotest.ReviewWorlds.hudHidden(mc, !action.substring(4).trim().equals("on"));
+            } else if (action.startsWith("weather-off ")) {  // on | off: world-gen views without clouds, rain or fog banks
+                com.nirncraft.atmosphere.client.WeatherFieldTexture.off(action.substring(12).trim().equals("on"));
             } else if (action.startsWith("renderdistance ")) {  // chunks: fidelity tests draw a place far-field only
                 int chunks = Math.max(2, Math.min(32, Integer.parseInt(action.substring(15).trim())));
                 mc.options.renderDistance().set(chunks);

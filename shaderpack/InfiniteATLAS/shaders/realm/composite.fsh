@@ -107,7 +107,9 @@ vec3 sceneAt(vec2 uv, vec3 sun, bool marched) {
         edgeFar = farc;
         edgeDist = atlasEdgeDepth(uv);
     }
-    else if (sky || dist >= farDist) {
+    // past the band the far field's copy of the same ground wins (within a tolerance growing with distance):
+    // a strict depth test between two copies of one surface flipped per pixel and frame, a shimmering ring
+    else if (sky || dist >= farDist - (dist >= handEnd ? 8.0 + 0.05 * dist : 0.0)) {
         col = over;
         fogDist = min(dist, farDist);
     }

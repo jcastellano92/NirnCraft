@@ -40,7 +40,7 @@ public final class HostLoad {
     /** Ticks between pregeneration attempts (0 = none now). */
     public static int pregenIntervalTicks(double mspt) {
         if (mspt > IDLE_MS) return 0;
-        return mspt < 12 ? 20 : 60;
+        return mspt < 12 ? 2 : 60;  // light: keep the worker busy (two jobs in flight), each check is a few file lookups
     }
 
     /** Extra milliseconds the client's far-field worker rests between passes while hosting a busy server. */

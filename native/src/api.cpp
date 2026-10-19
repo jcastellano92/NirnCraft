@@ -72,6 +72,8 @@ struct AtlasContext {
     // the night key light (atlas_set_moon)
     float moonDir[3] = {0, 1, 0}, moonRad[3] = {0, 0, 0};
     bool moonSet = false;
+    // the host path's near depths with its sky marked all-sky (FRAME_FILL_NEAR)
+    std::vector<float> nearDepthHost;
     // the host's primary-ray jitter in pixels (atlas_set_jitter)
     float jitter[2] = {0, 0};
 
@@ -651,6 +653,13 @@ static AtlasStatus buildInputs(AtlasContext* ctx, const AtlasFrame* f, FrameInpu
     if (in.actors.empty()) in.actors.push_back(ActorGpu{});
     in.wantNearDepth = (f->flags & ATLAS_FRAME_NEAR_DEPTH) != 0;
     in.nearDepth = in.wantNearDepth ? f->nearDepth : nullptr;
+    if (in.nearDepth && (f->flags & ATLAS_FRAME_FILL_NEAR)) {
+        // the host's depths are per pixel: its sky is all-sky (2e30), as the GL path marks a fully uncovered pixel
+        ctx->nearDepthHost.assign(f->nearDepth, f->nearDepth + size_t(f->width) * f->height);
+        for (float& d : ctx->nearDepthHost)
+            if (d >= 1e29f) d = 2e30f;
+        in.nearDepth = ctx->nearDepthHost.data();
+    }
     if ((f->flags & ATLAS_FRAME_NEAR_DEPTH) && !f->nearDepth) g.dims[2] &= ~ATLAS_FRAME_NEAR_DEPTH;  // GL path sets it back
     return ATLAS_OK;
 }

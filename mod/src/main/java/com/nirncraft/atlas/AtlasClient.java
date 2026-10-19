@@ -675,15 +675,28 @@ public final class AtlasClient {
     private static void jitter(AtlasNative.Context ctx, boolean on) {
         try {
             if (on) {
-                int i = (jitterIndex++ & 7) + 1;
-                jittering = ctx.setJitter(halton(i, 2) - 0.5f, halton(i, 3) - 0.5f);
+                // the offset the pack's vertices took this frame (the index published last frame), in atlas pixels
+                // (the pack's are screen pixels: at a reduced atlas scale the far field moved too far)
+                int i = (jitterIndex & 7) + 1;
+                float scale = (float) farScaleX();
+                jittering = ctx.setJitter((halton(i, 2) - 0.5f) * scale, (halton(i, 3) - 0.5f) * scale);
+                jitterIndex++;
+                com.nirncraft.atmosphere.client.SmokeSourceTexture.jitterIndex(jitterIndex & 7);  // next frame's
             } else if (jittering) {
                 ctx.setJitter(0f, 0f);
                 jittering = false;
+                com.nirncraft.atmosphere.client.SmokeSourceTexture.jitterIndex(-1);
             }
         } catch (RuntimeException e) {
             com.nirncraft.NirnCraft.LOGGER.debug("atlas: jitter not set: {}", e.toString());
         }
+    }
+
+    /** atlas's render width over the window's (its dynamic scale). */
+    private static double farScaleX() {
+        Minecraft mc = Minecraft.getInstance();
+        int w = mc.getWindow().getWidth();
+        return targets == null || w <= 0 ? 1.0 : targets.width() / (double) w;
     }
 
     private static float halton(int i, int base) {

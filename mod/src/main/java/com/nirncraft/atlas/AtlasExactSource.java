@@ -477,7 +477,8 @@ final class AtlasExactSource extends AtlasRefiningSource {
         ms.add((System.nanoTime() - t0) / 1e6);
     }
 
-    /** True when tile (lod, tx, tz) is in the cache already. */
+    /** True when tile (lod, tx, tz) is in the cache already (put up before stand-ins: AtlasRefiningSource.cover). */
+    @Override
     boolean cached(int lod, int tx, int tz) {
         return cache != null && cache.has(lod, tx, tz);
     }

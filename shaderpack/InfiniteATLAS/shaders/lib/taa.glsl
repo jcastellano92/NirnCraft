@@ -7,6 +7,8 @@
 #ifndef NIRNCRAFT_TAA
 #define NIRNCRAFT_TAA
 
+#include "/lib/modtex.glsl"
+
 uniform int frameCounter;
 
 float taaHalton(int i, int b) {
@@ -22,7 +24,12 @@ float taaHalton(int i, int b) {
 // this frame's offset in pixels (-0.5 .. 0.5), none without TAA
 vec2 taaJitter() {
 #ifdef TAA
+    // the mod's index (data texel 20,0) when it is there: its far field takes the same offset this frame
     int i = frameCounter % 8 + 1;
+    if (haveSmoke()) {
+        vec4 t = texelFetch(smokeSourcesTex, ivec2(20, 0), 0);
+        if (t.a > 0.5) i = int(t.r * 255.0 + 0.5) % 8 + 1;
+    }
     return vec2(taaHalton(i, 2), taaHalton(i, 3)) - 0.5;
 #else
     return vec2(0.0);

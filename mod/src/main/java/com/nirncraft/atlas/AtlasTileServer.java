@@ -7,6 +7,8 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -207,11 +209,15 @@ final class AtlasTileServer {
         return server.getAverageTickTimeNanos() / 1e6;
     }
 
-    /** Queue the most useful uncached tile around the players, one at a time, when nothing else is waiting. */
+    /**
+     * Pre-builds far tiles into the world's tile cache while the server idles (single player too: the host's client
+     * reads the same cache, so a revisit or a teleport puts exact tiles up at once instead of the raster stand-in):
+     * first what is missing in the players' windows (most useful first), then the whole map's coarse levels (LOD 6
+     * down to 2, nearest the players first: about 800 tiles, ten-odd seconds once per world, so the horizon is never
+     * the stand-in's). The cache is keyed by the tiles' content revision: a generation change rebuilds, never stale.
+     */
     private void pregenerate() {
-        // (single player: the host's own client computes its tiles; pregenerate for guests: dedicated or opened to LAN)
-        if (!server.isDedicatedServer() && !server.isPublished()) return;
-        if (!queue.isEmpty() || pregenPending.get() > 0 || tickMs() > TICK_IDLE_MS) return;
+        if (!queue.isEmpty() || pregenPending.get() >= PREGEN_INFLIGHT || tickMs() > TICK_IDLE_MS) return;
         Job best = null;
         for (ServerPlayer p : server.overworld().players()) {
             for (int lod = AtlasFarField.LODS - 1; lod >= 0; lod--) {
@@ -227,10 +233,59 @@ final class AtlasTileServer {
                     }
             }
         }
+        if (best == null) best = nextSweep();
         if (best != null) {
             pregenPending.incrementAndGet();
             queue.add(best);
         }
+    }
+
+    /** Jobs in flight at once for pre-building (each tile already spreads over the column threads). */
+    private static final int PREGEN_INFLIGHT = 2;
+    /** The coarsest level the whole-map sweep goes down to (finer ones follow the players). */
+    static final int SWEEP_FINEST_LOD = 2;
+    private List<long[]> sweep;
+    private int sweepAt;
+    private boolean sweepLogged;
+
+    /** The next uncached tile of the whole-map sweep (coarse levels over Tamriel), or null when done. */
+    private Job nextSweep() {
+        if (sweep == null) {
+            sweep = new ArrayList<>();
+            double px = 0, pz = 0;
+            List<ServerPlayer> ps = server.overworld().players();
+            if (!ps.isEmpty()) {
+                px = ps.get(0).getX();
+                pz = ps.get(0).getZ();
+            }
+            int margin = 2048;  // the endless lands just past the map's edge show too
+            for (int lod = AtlasFarField.LODS - 1; lod >= SWEEP_FINEST_LOD; lod--) {
+                int span = AtlasNative.TILE << lod;
+                List<long[]> level = new ArrayList<>();
+                for (int tz = Math.floorDiv(com.nirncraft.tamriel.TamrielMap.MIN_Z - margin, span);
+                     tz <= Math.floorDiv(com.nirncraft.tamriel.TamrielMap.MAX_Z + margin, span); tz++)
+                    for (int tx = Math.floorDiv(com.nirncraft.tamriel.TamrielMap.MIN_X - margin, span);
+                         tx <= Math.floorDiv(com.nirncraft.tamriel.TamrielMap.MAX_X + margin, span); tx++) {
+                        double d = Math.hypot((tx + 0.5) * span - px, (tz + 0.5) * span - pz);
+                        level.add(new long[] {lod, tx, tz, (long) d});
+                    }
+                level.sort((a, b) -> Long.compare(a[3], b[3]));
+                sweep.addAll(level);
+            }
+            sweepAt = 0;
+            com.nirncraft.NirnCraft.LOGGER.info("atlas: pre-building the far field's coarse tiles (LOD {}..{}, {} tiles) "
+                    + "while the server idles", AtlasFarField.LODS - 1, SWEEP_FINEST_LOD, sweep.size());
+        }
+        while (sweepAt < sweep.size()) {
+            long[] t = sweep.get(sweepAt++);
+            if (columns.cached((int) t[0], (int) t[1], (int) t[2])) continue;
+            return new Job((int) t[0], (int) t[1], (int) t[2], null, 1e9 + sweepAt, order.incrementAndGet());
+        }
+        if (!sweepLogged) {
+            sweepLogged = true;
+            com.nirncraft.NirnCraft.LOGGER.info("atlas: far field coarse tiles all built ({} tiles)", sweep.size());
+        }
+        return null;
     }
 
     private void run() {

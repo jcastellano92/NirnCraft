@@ -102,7 +102,7 @@ public final class ClientWeather {
 
     /** The server is running regional weather and the client option is on. */
     public static boolean active() {
-        return (!TABLE.isEmpty() || !FRONTS.isEmpty()) && AtmosphereConfig.LOCAL_WEATHER.get();
+        return (!TABLE.isEmpty() || !FRONTS.isEmpty()) && AtmosphereConfig.LOCAL_WEATHER.get() && !WeatherFieldTexture.isOff();
     }
 
     public static float snow() { return cur[P.SNOW]; }

@@ -106,6 +106,28 @@ public final class WeatherFieldTexture implements AutoCloseable {
         fillDefault();
     }
 
+    /**
+     * Weather off (visual tests of the world itself): no cloud cover, storm towers, rain curtains or fog banks in the
+     * fields the pack and Infinite ATLAS read, at once; the aerosol band stays, so distance still hazes as the air
+     * there does. Off by default; the autotest verb `weather-off on|off` switches it.
+     */
+    private static volatile Boolean testOff;  // the autotest verb's choice, else the client option
+
+    public static void off(boolean on) {
+        testOff = on;
+    }
+
+    /** Weather drawn nowhere: a visual test's `weather-off on`, or the `weather.visuals` option off. */
+    public static boolean isOff() {
+        Boolean t = testOff;
+        if (t != null) return t;
+        try {
+            return !com.nirncraft.atmosphere.AtmosphereConfig.WEATHER_VISUALS.get();
+        } catch (IllegalStateException e) {
+            return false;  // config not loaded yet
+        }
+    }
+
     public static WeatherFieldTexture get() {
         if (instance == null) {
             instance = new WeatherFieldTexture(LOCATION, WeatherPhysics.FIELD_GRID_SIZE, WeatherPhysics.FIELD_CELL_BLOCKS);
@@ -152,6 +174,10 @@ public final class WeatherFieldTexture implements AutoCloseable {
      * with lightning transported separately by {@link LightningFieldTexture}.
      */
     public static void tickUpdate(ClientLevel level, Vec3 cam, float partialTick) {
+        if (isOff() && level != null) {  // no rain or thunder either (the pack's wetness and rain follow these)
+            level.setRainLevel(0f);
+            level.setThunderLevel(0f);
+        }
         try(var uploadState=TextureUploadState.preserve()) {
         ensureRegistered();
         get().update(level, cam, partialTick);
@@ -256,6 +282,9 @@ public final class WeatherFieldTexture implements AutoCloseable {
                 displayWindX[i] = Mth.lerp(0.025f, displayWindX[i], targetWindX[i]);
                 displayWindZ[i] = Mth.lerp(0.025f, displayWindZ[i], targetWindZ[i]);
                 displayFog[i] = Mth.lerp(0.035f, displayFog[i], targetFog[i]);
+                if (isOff()) {  // world-gen views: the air's haze band only
+                    displayR[i] = displayG[i] = displayB[i] = displayFog[i] = 0f;
+                }
                 // Lightning has its own 512-byte 3D packet; never rescan both weather grids per flash.
                 int rgba = packAbgr(displayR[i], displayG[i], displayB[i], baseBand[i]);
                 int alpha = ((rgba >>> 24) & 254) | (smokeColumns[i] ? 1 : 0);

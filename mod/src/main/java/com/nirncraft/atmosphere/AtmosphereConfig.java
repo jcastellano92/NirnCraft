@@ -26,6 +26,7 @@ public final class AtmosphereConfig {
     public static final ModConfigSpec.BooleanValue CONSTELLATIONS;
     public static final ModConfigSpec.BooleanValue SHOOTING_STARS;
     public static final ModConfigSpec.BooleanValue LOCAL_WEATHER;
+    public static final ModConfigSpec.BooleanValue WEATHER_VISUALS;
     public static final ModConfigSpec.BooleanValue WEATHER_FOG;
     public static final ModConfigSpec.BooleanValue WEATHER_SKY;
     public static final ModConfigSpec.BooleanValue WEATHER_PARTICLES;
@@ -64,6 +65,9 @@ public final class AtmosphereConfig {
                 "higher; shader packs that follow the cloud height (Complementary) move with it.").defineInRange("cloudHeight", 330, 64, 2048);
         b.pop();
         b.push("weather");
+        WEATHER_VISUALS = b.comment("Draw the weather: clouds, rain and snow, fog banks, storm curtains. Off while the world itself",
+                "(terrain, flora, towns, the far field) is being matched near to far: the sky, sun, moons, distant haze and",
+                "all lighting stay. Comes back once weather is positional and deterministic.").define("visuals", false);
         LOCAL_WEATHER = b.comment("Render the server's regional weather where you stand (local rain, snow, ash and sand storms,",
                 "fog and overcast) instead of vanilla's one global weather.").define("localWeather", true);
         WEATHER_FOG = b.comment("Regional fog (mist, blizzards, ash and sand storms).").define("fog", true);

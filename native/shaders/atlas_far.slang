@@ -862,7 +862,9 @@ void farMain(uint3 id : SV_DispatchThreadID) {
     // (8 phases), so the resolve averages them into a smooth fade instead of a fixed pattern
     uint phase = frame.jitter.z > 0.5 ? (frame.temporal.x & 7u) * 3u : 0u;
     res.dither = pixelDither(id.xy, phase);
-    float lodDither = (frame.dims.z & FRAME_LOD_DITHER) != 0 ? max(pixelDither(id.xy, phase + 1u), 1e-3) : 0.0;
+    // the LOD segment phase stays fixed on screen: moving it per frame at a reduced atlas scale made blobs larger
+    // than the TAA's neighbourhood, clipped from the history: a flickering fringe on distant ridges
+    float lodDither = (frame.dims.z & FRAME_LOD_DITHER) != 0 ? max(pixelDither(id.xy, 1u), 1e-3) : 0.0;
     float3 sun = frame.sunDir.xyz;
 
     // the rasterised near field already covers this pixel: only the air in front of it (cloud, if the camera is up
@@ -892,7 +894,8 @@ void farMain(uint3 id : SV_DispatchThreadID) {
     // the near field drew nothing here (a chunk still loading): fill from the camera so the place shows the far
     // field instead of a hole (only in the open: FRAME_FILL_NEAR)
     float tStart = frame.params.x;
-    if ((frame.dims.z & FRAME_NEAR_DEPTH) != 0 && (frame.dims.z & FRAME_FILL_NEAR) != 0 && nearDepth[pix] >= 1e29)
+    // (2e30: every sample of the pixel's footprint was sky; 1e30 is a near silhouette's edge, never filled)
+    if ((frame.dims.z & FRAME_NEAR_DEPTH) != 0 && (frame.dims.z & FRAME_FILL_NEAR) != 0 && nearDepth[pix] >= 1.5e30)
         tStart = 2.0;
     float tHit = traceView(o, dir, tStart, frame.params.y, lodDither, res);
     ActorHit ah;

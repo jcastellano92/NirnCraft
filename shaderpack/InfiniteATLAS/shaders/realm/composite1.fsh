@@ -68,7 +68,8 @@ vec2 previousUv(vec2 uv) {
         c = gbufferPreviousProjection * (gbufferPreviousModelView * vec4(p, 1.0));
     }
     if (c.w <= 0.0) return vec2(-1.0);
-    return c.xy / c.w * 0.5 + 0.5;
+    // last frame's pixel, where this frame's jitter put this one (without it a still view wobbled by the jitter)
+    return c.xy / c.w * 0.5 + 0.5 + j;
 }
 
 // colours are blended tonemapped (a lone bright pixel does not dominate) and clipped in YCoCg (luma apart from chroma)

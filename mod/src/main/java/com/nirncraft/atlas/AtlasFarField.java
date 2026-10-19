@@ -41,8 +41,11 @@ final class AtlasFarField implements AutoCloseable {
 
     /** What goes on top of the ground tiles once they are resident (settlements). */
     interface Overlay {
-        /** Builds what the window needs; true when it put anything up this pass (the far field is not idle yet). */
-        boolean cover(AtlasNative.Context ctx, int lod, int x0, int z0, int x1, int z1);
+        /**
+         * Builds what the window needs, nearest tiles first, until `deadline` (System.nanoTime); true when it put
+         * anything up or left work for the next pass (the far field is not idle yet).
+         */
+        boolean cover(AtlasNative.Context ctx, int lod, int x0, int z0, int x1, int z1, long deadline);
     }
 
     /** The bundled Tamriel raster, unpacked once per mod version into the game directory. */
@@ -77,6 +80,8 @@ final class AtlasFarField implements AutoCloseable {
     }
 
     static final int LODS = 7, WINDOW = 2;
+    /** Time the overlays (buildings, trees) may take per pass before the far field shows what it has. */
+    static final long OVERLAY_BUDGET_MS = 120;
     /** Extra rest between passes (ms) while this machine hosts a busy server (adaptive quality's host-load policy). */
     static volatile int restMs;
 
@@ -175,9 +180,19 @@ final class AtlasFarField implements AutoCloseable {
                     int cx = Math.floorDiv((int) Math.floor(x), span), cz = Math.floorDiv((int) Math.floor(z), span);
                     pending |= source.cover(ctx, lod, (cx - WINDOW) * span, (cz - WINDOW) * span,
                             (cx + WINDOW + 1) * span, (cz + WINDOW + 1) * span);
-                    Overlay ov = overlay();
-                    if (ov != null) overlaid |= ov.cover(ctx, lod, (cx - WINDOW) * span, (cz - WINDOW) * span, (cx + WINDOW + 1) * span,
-                            (cz + WINDOW + 1) * span);
+                }
+                // the ground of the new place on screen now: the overlays (buildings, trees) can take a while, and
+                // the old window stayed on screen until they finished (a teleport showed stale far ground)
+                ctx.update(x, y, z, 0);
+                Overlay ov = overlay();
+                if (ov != null) {
+                    long deadline = System.nanoTime() + OVERLAY_BUDGET_MS * 1_000_000L;
+                    for (int lod = 0; lod < lods; lod++) {
+                        int span = 256 << lod;
+                        int cx = Math.floorDiv((int) Math.floor(x), span), cz = Math.floorDiv((int) Math.floor(z), span);
+                        overlaid |= ov.cover(ctx, lod, (cx - WINDOW) * span, (cz - WINDOW) * span, (cx + WINDOW + 1) * span,
+                                (cz + WINDOW + 1) * span, deadline);
+                    }
                 }
                 ctx.update(x, y, z, 0);  // builds what changed and stages it for the next frame
                 updated = true;

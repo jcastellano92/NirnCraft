@@ -126,6 +126,18 @@ public final class SmokeSourceTexture {
                 | (Mth.clamp(Math.round(b * 255), 0, 255) << 16) | (Mth.clamp(Math.round(a * 255), 0, 255) << 24);
     }
 
+    /**
+     * The TAA jitter index (0..7) the pack's next frame takes (texel 20,0; -1: none, the pack counts its own frames),
+     * so the far field (atlas_set_jitter) and the near field move together. Render thread, once per frame.
+     */
+    public static void jitterIndex(int index) {
+        if (image == null || !currentTexture()) return;
+        try (var uploadState = TextureUploadState.preserve()) {
+            image.setPixelABGR(20, 0, index < 0 ? 0 : (Math.max(0, index) & 255) | (255 << 24));
+            DataTexture.writeRect(LOCATION, image, 20, 0, 1, 1);
+        }
+    }
+
     /** Two header texels per rendered frame; source discovery remains tick-budgeted. */
     static void renderClock(ClientLevel level, float partialTick) {
         if (image == null || !currentTexture()) return;
