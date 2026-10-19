@@ -112,19 +112,30 @@ final class AtlasSettlements implements AtlasFarField.Overlay {
         int span = AtlasNative.TILE << lod;
         g = ground != null ? ground : (x, z) -> (int) Math.floor(ctx.previewHeight(x + 0.5, z + 0.5));
         refreshNatural();
+        java.util.Set<Long> window = new HashSet<>();
         for (int tz = Math.floorDiv(z0, span); tz <= Math.floorDiv(z1 - 1, span); tz++)
             for (int tx = Math.floorDiv(x0, span); tx <= Math.floorDiv(x1 - 1, span); tx++) {
                 long k = AtlasRefiningSource.key(lod, tx, tz);
+                window.add(k);
                 if (!ctx.hasTile(lod, tx, tz)) {
                     uploaded.remove(k);  // evicted (the buildings went with it): again when it is back
                     continue;
                 }
-                if (!uploaded.add(k)) continue;
-                boolean any = fill(lod, tx, tz);
-                mats.flush(ctx);
-                flushLights(ctx);
-                if (any) ctx.uploadColumnStructures(lod, tx, tz, wallTop, roofTop, wallMat, roofMat, floating ? baseArr : null);
+                if (uploaded.contains(k)) continue;
+                try {
+                    boolean any = fill(lod, tx, tz);
+                    mats.flush(ctx);
+                    flushLights(ctx);
+                    if (any) ctx.uploadColumnStructures(lod, tx, tz, wallTop, roofTop, wallMat, roofMat, floating ? baseArr : null);
+                    uploaded.add(k);  // only once its buildings are really there: a failure is tried again next pass
+                } catch (RuntimeException e) {
+                    com.nirncraft.NirnCraft.LOGGER.warn("atlas: settlement tile {} {} {} failed: {}", lod, tx, tz, e.toString());
+                }
             }
+        // tiles that left the window may be evicted natively (their buildings with them) before this overlay sees
+        // them missing; when the camera comes back the ground is re-uploaded first and a stale mark skipped the
+        // buildings for good (cities stayed bare terrain): forget marks outside the window, they are redone on return
+        uploaded.removeIf(k -> (int) (k >>> 56) == lod && !window.contains(k));
     }
 
     private final List<Integer> lightsPending = new ArrayList<>();
