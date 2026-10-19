@@ -119,7 +119,8 @@ final class AtlasSettlements implements AtlasFarField.Overlay {
      * redone when they come back), and the light groups of the settlements and sites they touch. Far-field worker.
      */
     @Override
-    public void cover(AtlasNative.Context ctx, int lod, int x0, int z0, int x1, int z1) {
+    public boolean cover(AtlasNative.Context ctx, int lod, int x0, int z0, int x1, int z1) {
+        boolean did = false;
         int span = AtlasNative.TILE << lod;
         g = ground != null ? ground : (x, z) -> (int) Math.floor(ctx.previewHeight(x + 0.5, z + 0.5));
         refreshNatural();
@@ -134,6 +135,7 @@ final class AtlasSettlements implements AtlasFarField.Overlay {
                 }
                 if (uploaded.contains(k)) continue;
                 try {
+                    did = true;
                     boolean any = fill(lod, tx, tz);
                     mats.flush(ctx);
                     flushLights(ctx);
@@ -147,6 +149,7 @@ final class AtlasSettlements implements AtlasFarField.Overlay {
         // them missing; when the camera comes back the ground is re-uploaded first and a stale mark skipped the
         // buildings for good (cities stayed bare terrain): forget marks outside the window, they are redone on return
         uploaded.removeIf(k -> (int) (k >>> 56) == lod && !window.contains(k));
+        return did;
     }
 
     private final List<Integer> lightsPending = new ArrayList<>();
@@ -604,20 +607,25 @@ final class AtlasSettlements implements AtlasFarField.Overlay {
 
     // ---- lights ----------------------------------------------------------------------------------------------
 
-    /** Street lamps, braziers, camp fires, wall lanterns and gate torches of a piece (Outdoors, Works, Zoning). */
+    /**
+     * Street lamps, braziers, camp fires, wall lanterns and gate torches of a piece (Outdoors, Works, Zoning). Lanterns
+     * at a lantern's emission (15: intensity 1), as the far field lights surfaces with block light like the near field.
+     */
+    private static final float LANTERN = 1f;
+
     private static void lightsOf(Spec s, float floor, List<AtlasLights.Light> out) {
         switch (s.kind) {
             case YARD -> {
-                if (s.variant == Outdoors.LAMP_POST) out.add(AtlasLights.lamp(s.x + 0.5, floor + 3, s.z + 0.5, 0.8f));
+                if (s.variant == Outdoors.LAMP_POST) out.add(AtlasLights.lamp(s.x + 0.5, floor + 3, s.z + 0.5, LANTERN));
                 else if (s.variant == Outdoors.BRAZIER) out.add(AtlasLights.fire(s.x + 0.5, floor + 2, s.z + 0.5, 1f));
             }
-            case LAMP -> out.add(AtlasLights.lamp(s.x + 0.5, floor + 3, s.z + 0.5, 0.8f));
+            case LAMP -> out.add(AtlasLights.lamp(s.x + 0.5, floor + 3, s.z + 0.5, LANTERN));
             case CAMP -> out.add(AtlasLights.fire(s.x + 0.5, floor + 1, s.z + 0.5, 1.2f));
             case PLAZA -> {
                 if (s.variant == 3) out.add(AtlasLights.fire(s.x + 0.5, floor + 2, s.z + 0.5, 1.2f));
                 if (s.w >= 9) {
-                    out.add(AtlasLights.lamp(s.x - s.w / 2 + 0.5, floor + 3, s.z - s.d / 2 + 0.5, 0.8f));
-                    out.add(AtlasLights.lamp(s.x + s.w / 2 + 0.5, floor + 3, s.z + s.d / 2 + 0.5, 0.8f));
+                    out.add(AtlasLights.lamp(s.x - s.w / 2 + 0.5, floor + 3, s.z - s.d / 2 + 0.5, LANTERN));
+                    out.add(AtlasLights.lamp(s.x + s.w / 2 + 0.5, floor + 3, s.z + s.d / 2 + 0.5, LANTERN));
                 }
             }
             case WALL -> {
@@ -626,7 +634,7 @@ final class AtlasSettlements implements AtlasFarField.Overlay {
                 double len = Math.hypot(s.x2 - s.x, s.z2 - s.z);
                 for (double t = 4.5; t < len; t += 9) {
                     double u = t / len;
-                    out.add(AtlasLights.lamp(s.x + (s.x2 - s.x) * u + 0.5, floor + (f2 - floor) * u + s.h + 2, s.z + (s.z2 - s.z) * u + 0.5, 0.6f));
+                    out.add(AtlasLights.lamp(s.x + (s.x2 - s.x) * u + 0.5, floor + (f2 - floor) * u + s.h + 2, s.z + (s.z2 - s.z) * u + 0.5, LANTERN));
                 }
             }
             case GATE -> out.add(AtlasLights.fire(s.x + 0.5, floor + 3, s.z + 0.5, 1f));
@@ -653,7 +661,7 @@ final class AtlasSettlements implements AtlasFarField.Overlay {
         }
         if (bp != null && bp.lanterns) {
             double wx = o[0] + mapX(s.facing, bp.doorX, -1) + 0.5, wz = o[1] + mapZ(s.facing, bp.doorX, -1) + 0.5;
-            out.add(AtlasLights.lamp(wx, floor + 2.5, wz, 0.7f));
+            out.add(AtlasLights.lamp(wx, floor + 2.5, wz, LANTERN));
         }
     }
 

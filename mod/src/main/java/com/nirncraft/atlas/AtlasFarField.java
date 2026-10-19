@@ -41,7 +41,8 @@ final class AtlasFarField implements AutoCloseable {
 
     /** What goes on top of the ground tiles once they are resident (settlements). */
     interface Overlay {
-        void cover(AtlasNative.Context ctx, int lod, int x0, int z0, int x1, int z1);
+        /** Builds what the window needs; true when it put anything up this pass (the far field is not idle yet). */
+        boolean cover(AtlasNative.Context ctx, int lod, int x0, int z0, int x1, int z1);
     }
 
     /** The bundled Tamriel raster, unpacked once per mod version into the game directory. */
@@ -166,7 +167,7 @@ final class AtlasFarField implements AutoCloseable {
                     continue;
                 }
                 double x = camX, y = camY, z = camZ;
-                boolean pending = false;
+                boolean pending = false, overlaid = false;
                 source.view(x, z, camYaw, camHalf);
                 source.beginPass();
                 for (int lod = 0; lod < lods; lod++) {
@@ -175,7 +176,7 @@ final class AtlasFarField implements AutoCloseable {
                     pending |= source.cover(ctx, lod, (cx - WINDOW) * span, (cz - WINDOW) * span,
                             (cx + WINDOW + 1) * span, (cz + WINDOW + 1) * span);
                     Overlay ov = overlay();
-                    if (ov != null) ov.cover(ctx, lod, (cx - WINDOW) * span, (cz - WINDOW) * span, (cx + WINDOW + 1) * span,
+                    if (ov != null) overlaid |= ov.cover(ctx, lod, (cx - WINDOW) * span, (cz - WINDOW) * span, (cx + WINDOW + 1) * span,
                             (cz + WINDOW + 1) * span);
                 }
                 ctx.update(x, y, z, 0);  // builds what changed and stages it for the next frame
@@ -185,9 +186,10 @@ final class AtlasFarField implements AutoCloseable {
                 lastX = x;
                 lastZ = z;
                 boolean was = streaming;
-                streaming = moved || source.visiblePending();  // only what the camera sees counts
+                // only what the camera sees counts, and buildings / trees still going up (captures wait for them)
+                streaming = moved || source.visiblePending() || overlaid;
                 if (was && !streaming) idleSinceMs = System.currentTimeMillis();
-                Thread.sleep((moved || pending ? 5 : 100) + restMs);
+                Thread.sleep((moved || pending || overlaid ? 5 : 100) + restMs);
             } catch (InterruptedException e) {
                 return;
             } catch (Throwable t) {

@@ -35,7 +35,10 @@ import java.util.function.IntConsumer;
  */
 public final class QualityClient {
     private static final int SLOTS = 8;
-    private static final boolean ADAPTIVE = !"false".equals(System.getProperty("nirncraft.quality.adaptive"));
+    // visual tests render at the tier's fixed settings: a controller still tuning (or a learned profile) made the
+    // first capture after a start differ from the later ones (far shadows, the sun map, atlas's scale)
+    private static final boolean TESTING = Boolean.getBoolean("nirncraft.autotest");
+    private static final boolean ADAPTIVE = !"false".equals(System.getProperty("nirncraft.quality.adaptive")) && !TESTING;
     private static final boolean LOG = Boolean.getBoolean("nirncraft.quality.log");
     private static final String FILE = "nirncraft-quality.properties";
 
@@ -236,7 +239,7 @@ public final class QualityClient {
         profileH = h;
         profileKey = QualityProfiles.key(info.name(), info.driverInfo(), w, h);
         QualityProfiles.Profile p = QualityProfiles.find(QualityProfiles.load(file(mc)), profileKey, gpuName, w, h);
-        controller.restore(p);
+        if (!TESTING) controller.restore(p);
         double[] lim = atlasLimits;
         if (lim != null) controller.limitAtlas(lim[0], lim[1], lim[2] != 0, (int) lim[3]);
         NirnCraft.LOGGER.info("adaptive quality: {} ({}, x{} of a GTX 1080's frame time), {} fps target, {}",

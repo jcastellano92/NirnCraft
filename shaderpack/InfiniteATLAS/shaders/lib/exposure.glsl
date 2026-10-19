@@ -11,6 +11,8 @@
 #ifndef NIRNCRAFT_EXPOSURE
 #define NIRNCRAFT_EXPOSURE
 
+#include "/lib/modtex.glsl"
+
 const float EXPOSURE_FIXED = -0.3219;  // log2(0.8): the pack's exposure before the eye adapted (and AUTO_EXPOSURE off)
 const float EXPOSURE_KEY = -0.79;      // log2 exposure at a scene log-average of 1.0 (pack_lab: noon land keeps the old x0.8)
 const float EXPOSURE_SLOPE = 0.72;     // how much of a luminance change the eye undoes (1 = all of it)
@@ -59,6 +61,8 @@ float exposureTarget(float logL) {
 // one frame of adaptation from prev towards target (log2), dt seconds
 float exposureAdapt(float prev, float target, float dt) {
     if (prev < -998.0) return target;
+    // the mod's visual tests (data texel 19,0): the eye is there at once, so the two views of a pair are exposed alike
+    if (haveSmoke() && texelFetch(smokeSourcesTex, ivec2(19, 0), 0).r > 0.5) return target;
     float tau = target < prev ? ADAPT_BRIGHTER : ADAPT_DARKER;
     return prev + (target - prev) * (1.0 - exp(-clamp(dt, 0.0, 0.25) / tau));
 }
