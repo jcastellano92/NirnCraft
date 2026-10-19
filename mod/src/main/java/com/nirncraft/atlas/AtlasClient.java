@@ -54,7 +54,7 @@ public final class AtlasClient {
     public static float planetRadius = 6_371_000f;
     public static float sunPathRotationDeg = -25f;
     /** Blocks over which the rasterised near field hands over to atlas, ending 16 blocks inside render distance. */
-    public static float handoffBand = 24f;
+    public static float handoffBand = 48f;  // published to the pack (data texture texel 17,1): both use this one value
 
     /** Device losses tolerated per session (each followed by a cool-down and a fresh context). */
     static final int MAX_LOSSES = 2;

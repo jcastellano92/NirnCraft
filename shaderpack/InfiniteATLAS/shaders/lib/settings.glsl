@@ -4,7 +4,7 @@
 #define CURVATURE              // bend the world over a planet of PLANET_RADIUS blocks
 #define PLANET_RADIUS 6371000.0 // [100000.0 400000.0 1000000.0 6371000.0]
 #define ATLAS_FAR_FIELD        // composite atlas's far field (needs the NirnCraft mod's atlas renderer)
-#define ATLAS_HANDOFF_BAND 24.0 // [8.0 16.0 24.0 32.0 48.0] blocks over which near hands over to far
+#define ATLAS_HANDOFF_BAND 48.0 // [8.0 16.0 24.0 32.0 48.0 64.0] blocks over which near hands over to far (without the mod: with it the mod's value)
 #define EXPOSURE 1.0 // [0.6 0.8 1.0 1.2 1.4 1.7 2.0]
 #define AUTO_EXPOSURE           // the eye adapts: dark caves and nights opened up, the bright outside of a cave blown out
 #define NIGHT_VISION 2 // [0 1 2 3] dim light loses its colour to the eye's rods and leans blue (Purkinje)

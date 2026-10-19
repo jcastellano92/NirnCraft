@@ -67,6 +67,16 @@ vec2 toScreen(vec3 view) {
 }
 
 // the opaque scene at uv: lit near field, aerial perspective, the far field under it, ground fog over both
+// the near / far hand-off band the mod's far field actually uses (it starts its march there), published in the mod's
+// data texture; the pack's own setting only without the mod (one source of truth: a mismatch drew a ring)
+float handoffBand() {
+    if (haveSmoke()) {
+        float b = texelFetch(smokeSourcesTex, ivec2(17, 1), 0).r * 64.0;
+        if (b > 1.0) return b;
+    }
+    return ATLAS_HANDOFF_BAND;
+}
+
 vec3 sceneAt(vec2 uv, vec3 sun, bool marched) {
     vec3 col = texture(colortex4, uv).rgb;
     float d = texture(depthtex1, uv).r;
@@ -86,8 +96,11 @@ vec3 sceneAt(vec2 uv, vec3 sun, bool marched) {
     vec4 farc = atlasColorAt(uv);
     float farDist = atlasDepthAt(uv);
     vec3 over = col * (1.0 - farc.a) + farc.rgb;
-    float handEnd = far - 16.0, handStart = handEnd - ATLAS_HANDOFF_BAND;
-    if (dist >= handStart && dist < handEnd) col = mix(col, over, smoothstep(handStart, handEnd, dist));
+    float handEnd = far - 16.0, handStart = handEnd - handoffBand();
+    if (dist >= handStart && dist < handEnd) {  // smootherstep: no visible start or end of the crossfade
+        float x = clamp((dist - handStart) / (handEnd - handStart), 0.0, 1.0);
+        col = mix(col, over, x * x * x * (x * (x * 6.0 - 15.0) + 10.0));
+    }
     else if (farc.a > 0.002 && farc.a < 0.998 && (sky || dist >= atlasEdgeDepth(uv))) {
         farEdge = true;  // col stays what is behind; the far part is fogged and laid over at the end
         edgeFar = farc;
