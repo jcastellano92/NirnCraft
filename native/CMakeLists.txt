@@ -137,6 +137,7 @@ target_include_directories(atlas_render PRIVATE src)
 # the far-field experiment bed (docs/ATLAS-LOD.md): CPU only, inputs exported in game with /nirncraft-atlaslab
 add_executable(atlas_lab tools/atlas_lab.cpp)
 target_include_directories(atlas_lab PRIVATE src)
+target_link_libraries(atlas_lab PRIVATE Threads::Threads)  # std::thread: glibc < 2.34 keeps pthread in libpthread
 
 add_executable(atlas_tests tests/test_main.cpp src/svdag.cpp)
 target_include_directories(atlas_tests PRIVATE src include)
