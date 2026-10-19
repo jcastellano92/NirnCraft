@@ -99,14 +99,19 @@ final class AtlasShapes {
      */
     static Shape of(BlockState st, int tint) {
         List<BakedQuad> quads = quads(st);
-        long mask = mask(boxes(st));
+        List<AABB> boxes = boxes(st);
+        long mask = mask(boxes);
+        // thinner than a micro-voxel (a snow layer, a carpet): its bottom layer, not nothing
+        if (mask == 0 && !boxes.isEmpty() && !quads.isEmpty()) mask = 0xFFFFL;
         boolean fluid = !st.getFluidState().isEmpty() && quads.isEmpty();
         if (fluid) mask = -1L;
         if (mask == 0 || quads.isEmpty() && !fluid) return null;
         int[][] faces = new int[6][];
         for (Direction d : Direction.values()) faces[d.get3DDataValue()] = face(d, quads, tint);
+        // cut-out coverage for leaves and plants only (a grass block's cut-out overlay is no hole in the block)
+        boolean plant = boxes.isEmpty() || st.is(BlockTags.REPLACEABLE_BY_TREES) || st.is(BlockTags.FLOWERS);
         boolean cutout = st.is(BlockTags.LEAVES);
-        for (BakedQuad q : quads) cutout |= q.materialInfo().layer() == ChunkSectionLayer.CUTOUT;
+        if (plant) for (BakedQuad q : quads) cutout |= q.materialInfo().layer() == ChunkSectionLayer.CUTOUT;
         return new Shape(mask, mean(faces), cutout ? AtlasNative.SHAPE_CUTOUT : 0, faces);
     }
 

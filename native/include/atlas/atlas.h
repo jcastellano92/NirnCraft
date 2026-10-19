@@ -421,6 +421,22 @@ typedef struct AtlasMaterialShape {
 /* Sets the shapes of materials first .. first + count - 1 (first >= 1; any thread; copied). */
 ATLAS_API AtlasStatus atlas_set_material_shapes(AtlasContext* ctx, uint32_t first, const AtlasMaterialShape* shapes,
                                                 uint32_t count);
+/*
+ * (abi 0.14) Surface cards (a surface cache captured from the game's own rendering, docs/ATLAS-LOD.md): what one face of
+ * one block shows seen straight on, 16 x 16 texels (texture, tint, face shade, AO and the lightmap at the face's light,
+ * ARGB sRGB, alpha 0 where the face shows nothing) with the sky and block light of each texel (level x 16, for relighting
+ * later). Texel (u, v) runs along the axes after the face's normal axis: u on (axis + 1) % 3, v on (axis + 2) % 3, centres
+ * at (i + 0.5) / 16. A hit on a face with a card takes its colour from the card, filtered over the pixel's footprint (a mip
+ * chain of the covered texels); faces without one keep their face tiles. Replaces every card (count 0 removes them). The
+ * game does not send them yet: offline tools (atlas_render surface=, from atlas_truth bake=).
+ */
+typedef struct AtlasSurfaceCard {
+    int32_t x, y, z;  /* the block, world */
+    uint32_t face;    /* 0 down, 1 up, 2 north, 3 south, 4 west, 5 east */
+    uint32_t texels[256];
+    uint8_t sky[256], block[256];
+} AtlasSurfaceCard;
+ATLAS_API AtlasStatus atlas_set_surface_cards(AtlasContext* ctx, const AtlasSurfaceCard* cards, uint32_t count);
 /* The sun map as last computed (size * (size + 1) * 2 floats into out, count in floats). Waits for the GPU. */
 ATLAS_API AtlasStatus atlas_read_sun_map(AtlasContext* ctx, float* out, uint32_t count);
 /*

@@ -58,6 +58,8 @@ inline bool loadBlocks(const std::string& path, std::vector<State>& lib) {
         if (!get(&s.cls, 1) || !get(&s.emit, 1) || !get(&s.flags, 1) || !get(&s.tint, 1) || !get(&s.mask, 8) ||
             !get(&s.mean, 4) || !get(s.faces, sizeof s.faces))
             return false;
+        // thinner than a micro-voxel (a snow layer, a carpet, a rail): its bottom layer, not nothing (AtlasShapes.of)
+        if (!s.mask && (s.flags & 4) && s.cls != 2 && s.cls != 4) s.mask = 0xFFFFull;
     }
     return true;
 }
@@ -258,15 +260,13 @@ inline bool upload(AtlasContext* ctx, const std::vector<State>& lib, std::vector
             AtlasMaterialShape sh{};
             sh.occupancy = wat ? ~0ull : s.mask;
             sh.mean = tm;
-            bool partial = false;
             for (int f = 0; f < 6; f++)
                 for (int t = 0; t < 16; t++) {
                     uint32_t c = s.faces[f][t];
                     sh.faces[f][t] = (c >> 24) ? mulTint(c, tint) : 0u;
-                    uint32_t a = c >> 24;
-                    partial |= a > 0 && a < 255;
                 }
-            sh.flags = s.cls == 1 || partial ? ATLAS_SHAPE_CUTOUT : 0u;
+            // cut-out coverage for leaves and plants only (a grass block's overlay alpha is no hole in it)
+            sh.flags = s.cls == 1 || s.cls == 4 ? ATLAS_SHAPE_CUTOUT : 0u;
             if (wat) sh.flags = 0;
             m = uint16_t(firstMat + mats.size());
             mats.push_back(am);
@@ -350,6 +350,24 @@ inline Ground ground(const std::vector<Section>& secs, const std::vector<State>&
     for (size_t c = 0; c < n; c++)
         if (!std::isnan(g.top[c]) && !g.underMat[c]) g.underMat[c] = g.topMat[c];
     return g;
+}
+
+// atlas_truth bake= (ALC1): per card i32 x y z face, 256 u32 ARGB texels, 256 u8 sky and 256 u8 block light
+inline bool readCards(const std::string& path, std::vector<AtlasSurfaceCard>& out) {
+    std::ifstream f(path, std::ios::binary);
+    char magic[4];
+    int32_t n = 0;
+    if (!f.read(magic, 4) || std::memcmp(magic, "ALC1", 4) != 0 || !f.read(reinterpret_cast<char*>(&n), 4) || n < 0) return false;
+    out.resize(size_t(n));
+    for (auto& c : out) {
+        int32_t h[4];
+        f.read(reinterpret_cast<char*>(h), sizeof h);
+        c.x = h[0], c.y = h[1], c.z = h[2], c.face = uint32_t(h[3]);
+        f.read(reinterpret_cast<char*>(c.texels), sizeof c.texels);
+        f.read(reinterpret_cast<char*>(c.sky), sizeof c.sky);
+        f.read(reinterpret_cast<char*>(c.block), sizeof c.block);
+    }
+    return bool(f);
 }
 
 // ---- PNG reading (our tools' stored-deflate PNGs) and the harness's colour metric ----------------------------------

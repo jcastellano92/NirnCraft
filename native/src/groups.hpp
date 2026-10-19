@@ -45,6 +45,19 @@ struct ShapeSet {
     const MaterialShape* at(uint32_t m) const { return m < byMaterial.size() ? byMaterial[m].get() : nullptr; }
 };
 
+// A surface card (atlas_set_surface_cards): a block face's colour as the game draws it, as a mip chain of its covered
+// texels (16, 8, 4, 2, 1 a side: 341 RGB words; a texel showing nothing takes the face's mean).
+struct SurfaceCard {
+    int32_t x, y, z;
+    uint32_t face;
+    uint32_t mip[341];
+};
+constexpr int CARD_WORDS = 341;
+struct CardSet {
+    std::vector<SurfaceCard> cards;
+    uint64_t revision = 0;
+};
+
 // ---- one region's groups --------------------------------------------------------------------------------------------
 
 // A voxel as the builder and the brick pool hold it: palette id, | VOXEL_SHAPED when it is a real block (a section at

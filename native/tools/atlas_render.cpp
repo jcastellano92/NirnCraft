@@ -155,6 +155,14 @@ int main(int argc, char** argv) {
     bool groups = num(a, "groups", haveExport ? 1 : 0) > 0;
     bool mcShade = str(a, "shade", haveExport && mcCam ? "mc" : "") == "mc";
 
+    // one element: its sections stay however far the camera goes (the world drops sections ~1.2 km out)
+    if (boxed && !std::getenv("ATLAS_SECTION_KEEP")) {
+#ifdef _WIN32
+        _putenv_s("ATLAS_SECTION_KEEP", "64");
+#else
+        setenv("ATLAS_SECTION_KEEP", "64", 0);
+#endif
+    }
     AtlasContext* ctx = nullptr;
     AtlasBackend be = backendName == "vulkan" ? ATLAS_BACKEND_VULKAN : ATLAS_BACKEND_CPU;
     if (atlas_create(be, &ctx) != ATLAS_OK) {
@@ -178,14 +186,23 @@ int main(int argc, char** argv) {
             atlas_preview_generate(ctx, lod, (cx - 2) * span, (cz - 2) * span, (cx + 3) * span, (cz + 3) * span);
             continue;
         }
+    }
+    // one element: empty column tiles (no ground) over every level's window around a camera, as it moves
+    auto emptyTiles = [&](double cxw, double czw) {
         std::vector<float> surf(256 * 256, -1000.0f), wat(256 * 256, NAN);
         std::vector<uint16_t> zero(256 * 256, 0);
-        for (int tz = cz - 2; tz <= cz + 2; tz++)
-            for (int tx = cx - 2; tx <= cx + 2; tx++) {
-                AtlasColumnTile t{lod, tx, tz, surf.data(), wat.data(), zero.data(), zero.data(), nullptr, nullptr};
-                atlas_upload_column_tile(ctx, &t);
-            }
-    }
+        for (int lod = 0; lod < lods; lod++) {
+            int span = 256 << lod;
+            int cx = int(std::floor(cxw / span)), cz = int(std::floor(czw / span));
+            for (int tz = cz - 2; tz <= cz + 2; tz++)
+                for (int tx = cx - 2; tx <= cx + 2; tx++) {
+                    if (atlas_has_tile(ctx, lod, tx, tz)) continue;
+                    AtlasColumnTile t{lod, tx, tz, surf.data(), wat.data(), zero.data(), zero.data(), nullptr, nullptr};
+                    atlas_upload_column_tile(ctx, &t);
+                }
+        }
+    };
+    if (boxed) emptyTiles(x, z);
     // the in-game export: its states as far materials, its sections, the ground under them in the column tiles
     exportdata::Loaded ex;
     double loadMs = 0;
@@ -251,6 +268,22 @@ int main(int argc, char** argv) {
         loadMs = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - l0).count();
         std::fprintf(stderr, "atlas_render: export: %zu sections, %zu materials (%zu shaped) in %.0f ms\n", ex.sections, ex.states,
                      ex.shaped, loadMs);
+    }
+    // surface cards (atlas_truth bake=: the game's own colour and light per block face): surface= or cards=
+    size_t cardCount = 0;
+    if (a.count("surface") || a.count("cards")) {
+        std::vector<AtlasSurfaceCard> cards;
+        std::string cp = a.count("surface") ? str(a, "surface", "") : str(a, "cards", "");
+        if (!exportdata::readCards(cp, cards)) {
+            std::fprintf(stderr, "no surface cards at '%s'\n", cp.c_str());
+            return 2;
+        }
+        if (atlas_set_surface_cards(ctx, cards.data(), uint32_t(cards.size())) != ATLAS_OK) {
+            std::fprintf(stderr, "cards: %s\n", atlas_last_error(ctx));
+            return 2;
+        }
+        cardCount = cards.size();
+        std::fprintf(stderr, "atlas_render: %zu surface cards\n", cardCount);
     }
     if (atlas_update(ctx, centre, 0) != ATLAS_OK) {
         std::fprintf(stderr, "update: %s\n", atlas_last_error(ctx));
@@ -318,129 +351,179 @@ int main(int argc, char** argv) {
         syntheticWeather(ctx, preset, x, z, sx, sz);
     }
 
+    // one frame (the arguments' camera, or each line of cameras=): its outputs in the vectors below
     AtlasFrame f{};
-    f.cameraPos[0] = x;
-    f.cameraPos[1] = y;
-    f.cameraPos[2] = z;
-    double camYaw = mcCam ? num(a, "yaw", 0) + 180.0 : num(a, "yaw", 0), camPitch = mcCam ? -num(a, "pitch", 0) : num(a, "pitch", -4);
-    atlas::cameraMatrix(camYaw, camPitch, num(a, "fov", 70), double(w) / h, f.invViewProj);
-    f.width = w;
-    f.height = h;
-    f.nearFieldEnd = float(num(a, "near", 0));
-    f.maxDistance = float(num(a, "far", 40000));
-    f.planetRadius = float(num(a, "radius", 6371000));
-    double se = 35, sa = 120;
-    if (a.count("sun")) std::sscanf(a["sun"].c_str(), "%lf,%lf", &se, &sa);
-    se *= PI / 180;
-    sa *= PI / 180;
-    f.sunDir[0] = float(std::sin(sa) * std::cos(se));
-    f.sunDir[1] = float(std::sin(se));
-    f.sunDir[2] = float(-std::cos(sa) * std::cos(se));
-    f.timeSec = float(num(a, "time", 0));
-    f.lodBias = float(num(a, "bias", 1));
-    // shade=mc: the surfaces' albedo and face normals only (the vanilla look is put together below)
-    f.flags = flagsOf(str(a, "flags", mcShade ? "flatnormals" : "shadows,atmos,clouds,sky,actors"));
-    if (mcShade) f.flags |= ATLAS_FRAME_DEBUG_ALBEDO | ATLAS_FRAME_FLAT_NORMALS;
-    if (groups) f.flags |= ATLAS_FRAME_GROUPS;
-
-    std::vector<uint32_t> color(size_t(w) * h), normal(size_t(w) * h);
-    std::vector<float> depth(size_t(w) * h), linear(size_t(w) * h * 4);
-    AtlasFrameOutput o{color.data(), normal.data(), depth.data(), linear.data()};
+    std::vector<uint32_t> color, normal;
+    std::vector<float> depth, linear;
+    std::vector<uint8_t> shown;
+    std::string base;
+    double best = 1e30, median = 0;
     int frames = std::max(1, int(num(a, "frames", 1)));
-    // spp=N: N jittered samples a pixel (atlas_set_jitter, Halton 2/3 as atlas_truth's spp), averaged: what the host's
-    // TAA converges to (the groups' dithered threshold moves with the jitter), against a truth of as many samples
     int spp = std::max(1, int(num(a, "spp", 1)));
-    double best = 1e30;
-    std::vector<double> times;
-    std::vector<double> acc(size_t(w) * h * 3, 0.0), share(size_t(w) * h, 0.0);
-    std::vector<float> minDepth(size_t(w) * h, 1e30f);
-    auto halton = [](int i, int b) {
-        float r = 0, fr = 1.0f / float(b);
-        for (; i; i /= b, fr /= float(b)) r += fr * float(i % b);
-        return r;
+    auto renderOne = [&](const std::string& out, double x, double y, double z, double yawIn, double pitchIn, double fovIn,
+                         uint32_t w, uint32_t h) -> int {
+        double c[3] = {x, y, z};
+        if (boxed) emptyTiles(x, z);
+        if (atlas_update(ctx, c, 0) != ATLAS_OK) {  // the window follows the camera (nothing to do when it stays)
+            std::fprintf(stderr, "update: %s\n", atlas_last_error(ctx));
+            return 3;
+        }
+        f = AtlasFrame{};
+        f.cameraPos[0] = x;
+        f.cameraPos[1] = y;
+        f.cameraPos[2] = z;
+        double camYaw = mcCam ? yawIn + 180.0 : yawIn, camPitch = mcCam ? -pitchIn : pitchIn;
+        atlas::cameraMatrix(camYaw, camPitch, fovIn, double(w) / h, f.invViewProj);
+        f.width = w;
+        f.height = h;
+        f.nearFieldEnd = float(num(a, "near", 0));
+        f.maxDistance = float(num(a, "far", 40000));
+        f.planetRadius = float(num(a, "radius", haveExport ? 0 : 6371000));  // (the exact reference is flat)
+        double se = 35, sa = 120;
+        if (a.count("sun")) std::sscanf(a["sun"].c_str(), "%lf,%lf", &se, &sa);
+        se *= PI / 180;
+        sa *= PI / 180;
+        f.sunDir[0] = float(std::sin(sa) * std::cos(se));
+        f.sunDir[1] = float(std::sin(se));
+        f.sunDir[2] = float(-std::cos(sa) * std::cos(se));
+        f.timeSec = float(num(a, "time", 0));
+        f.lodBias = float(num(a, "bias", 1));
+        // shade=mc: the surfaces' albedo and face normals only (the vanilla look is put together below)
+        f.flags = flagsOf(str(a, "flags", mcShade ? "flatnormals" : "shadows,atmos,clouds,sky,actors"));
+        if (mcShade) f.flags |= ATLAS_FRAME_DEBUG_ALBEDO | ATLAS_FRAME_FLAT_NORMALS;
+        if (groups) f.flags |= ATLAS_FRAME_GROUPS;
+
+        color.assign(size_t(w) * h, 0);
+        normal.assign(size_t(w) * h, 0);
+        depth.assign(size_t(w) * h, 0.0f);
+        linear.assign(size_t(w) * h * 4, 0.0f);
+        AtlasFrameOutput o{color.data(), normal.data(), depth.data(), linear.data()};
+
+        // spp=N: N jittered samples a pixel (atlas_set_jitter, Halton 2/3 as atlas_truth's spp), averaged: what the host's
+        // TAA converges to (the groups' dithered threshold moves with the jitter), against a truth of as many samples
+
+        best = 1e30;
+        std::vector<double> times;
+        std::vector<double> acc(size_t(w) * h * 3, 0.0), share(size_t(w) * h, 0.0);
+        std::vector<float> minDepth(size_t(w) * h, 1e30f);
+        auto halton = [](int i, int b) {
+            float r = 0, fr = 1.0f / float(b);
+            for (; i; i /= b, fr /= float(b)) r += fr * float(i % b);
+            return r;
+        };
+        float inv[16];
+        std::memcpy(inv, f.invViewProj, sizeof inv);
+        for (int smp = 0; smp < spp; smp++) {
+            float jx = spp > 1 ? halton(smp + 1, 2) - 0.5f : 0.0f, jy = spp > 1 ? halton(smp + 1, 3) - 0.5f : 0.0f;
+            if (spp > 1) atlas_set_jitter(ctx, jx, -jy);  // (atlas_truth's sample row grows downwards)
+            for (int i = 0; i < (smp == 0 ? frames : 1); i++) {
+                if (atlas_render(ctx, &f, &o) != ATLAS_OK) {
+                    std::fprintf(stderr, "render: %s\n", atlas_last_error(ctx));
+                    return 4;
+                }
+                atlas_get_stats(ctx, &st);
+                if (smp == 0) {
+                    best = std::min(best, st.lastFrameMs);
+                    times.push_back(st.lastFrameMs);
+                }
+            }
+            if (mcShade) {
+                // Minecraft's vanilla look of what was hit: the texel's colour (sRGB) times the fixed shade of its face
+                const uint32_t sky = 0x9CC4EC;
+                for (size_t i = 0; i < color.size(); i++) {
+                    if (depth[i] > 1e29f) {
+                        color[i] = 0xFF000000u | (sky & 255) << 16 | (sky & 0xFF00) | (sky >> 16);
+                        continue;
+                    }
+                    float ox = float(normal[i] & 255) / 255.0f * 2.0f - 1.0f, oz = float((normal[i] >> 8) & 255) / 255.0f * 2.0f - 1.0f;
+                    float ny = 1.0f - std::fabs(ox) - std::fabs(oz);  // octahedral decode (atlas_shared.slang octEncode)
+                    float nx = ox, nz = oz;
+                    if (ny < 0) {
+                        nx = (1.0f - std::fabs(oz)) * (ox >= 0 ? 1.0f : -1.0f);
+                        nz = (1.0f - std::fabs(ox)) * (oz >= 0 ? 1.0f : -1.0f);
+                    }
+                    float ax = std::fabs(nx), ay = std::fabs(ny), az = std::fabs(nz);
+                    float shade = ay >= ax && ay >= az ? (ny > 0 ? 1.0f : 0.5f) : az >= ax ? 0.8f : 0.6f;
+                    if (((normal[i] >> 16) & 255) == 6) shade = 1.0f;  // a surface card: the game's own shade and light
+                    uint32_t px = 0xFF000000u;
+                    for (int k = 0; k < 3; k++) {
+                        float v = std::pow(std::fmax(linear[i * 4 + size_t(k)], 0.0f), 1.0f / 2.2f) * shade;
+                        px |= uint32_t(std::fmin(255.0f, v * 255.0f + 0.5f)) << (8 * k);
+                    }
+                    color[i] = px;
+                }
+            }
+            for (uint32_t py = 0; py < h; py++)
+                for (uint32_t px = 0; px < w; px++) {
+                    size_t i = size_t(py) * w + px;
+                    for (int k = 0; k < 3; k++) acc[i * 3 + size_t(k)] += double((color[i] >> (8 * k)) & 255);
+                    float d = depth[i];
+                    if (d >= 1e29f || !haveExport) continue;
+                    // where this sample shows the export (the element's box, or the exported chunks)
+                    float nx = (float(px) + 0.5f + jx) / float(w) * 2.0f - 1.0f, ny = 1.0f - (float(py) + 0.5f + jy) / float(h) * 2.0f, q[4];
+                    for (int r = 0; r < 4; r++) q[r] = inv[r] * nx + inv[4 + r] * ny + inv[8 + r] * 0.5f + inv[12 + r];
+                    float l = std::sqrt(q[0] * q[0] + q[1] * q[1] + q[2] * q[2]);
+                    double hx = x + q[0] / l * d, hy = y + q[1] / l * d, hz = z + q[2] / l * d;
+                    bool in = boxed ? hx >= box[0] - 0.5 && hx <= box[3] + 1.5 && hy >= box[1] - 0.5 && hy <= box[4] + 1.5 &&
+                                          hz >= box[2] - 0.5 && hz <= box[5] + 1.5
+                                    : ex.inExport(hx, hz);
+                    if (in) share[i] += 1.0 / spp, minDepth[i] = std::min(minDepth[i], d);
+                }
+        }
+        for (size_t i = 0; i < color.size(); i++) {
+            uint32_t px = 0xFF000000u;
+            for (int k = 0; k < 3; k++) px |= uint32_t(acc[i * 3 + size_t(k)] / spp + 0.5) << (8 * k);
+            if (spp > 1 || mcShade) color[i] = px;
+        }
+        std::sort(times.begin(), times.end());
+        median = times.empty() ? 0 : times[times.size() / 2];
+        atlas::writePng(out, color.data(), w, h);
+        base = out.size() > 4 ? out.substr(0, out.size() - 4) : out;
+        shown.assign(size_t(w) * h, 0);  // where this frame shows the export (its mask: most samples)
+        if (haveExport) {
+            // where the frame shows exported content (the share of its samples), and how far (atlas_truth's encodings)
+            std::vector<uint32_t> mask(size_t(w) * h), dp(size_t(w) * h);
+            for (size_t i = 0; i < mask.size(); i++) {
+                float d = minDepth[i];
+                uint32_t v = d >= 1e29f ? 0xFFFFFFu : uint32_t(std::min(d * 16.f, 16777214.f));
+                dp[i] = 0xFF000000u | (v & 255u) << 16 | ((v >> 8) & 255u) << 8 | (v >> 16);
+                uint32_t m = uint32_t(std::lround(share[i] * 255.0));
+                mask[i] = 0xFF000000u | m << 16 | m << 8 | m;
+                shown[i] = share[i] > 0.5 ? 1 : 0;
+            }
+            atlas::writePng(base + "_mask.png", mask.data(), w, h);
+            atlas::writePng(base + "_depth.png", dp.data(), w, h);
+        }
+        return 0;
     };
-    float inv[16];
-    std::memcpy(inv, f.invViewProj, sizeof inv);
-    for (int smp = 0; smp < spp; smp++) {
-        float jx = spp > 1 ? halton(smp + 1, 2) - 0.5f : 0.0f, jy = spp > 1 ? halton(smp + 1, 3) - 0.5f : 0.0f;
-        if (spp > 1) atlas_set_jitter(ctx, jx, -jy);  // (atlas_truth's sample row grows downwards)
-        for (int i = 0; i < (smp == 0 ? frames : 1); i++) {
-            if (atlas_render(ctx, &f, &o) != ATLAS_OK) {
-                std::fprintf(stderr, "render: %s\n", atlas_last_error(ctx));
-                return 4;
-            }
-            atlas_get_stats(ctx, &st);
-            if (smp == 0) {
-                best = std::min(best, st.lastFrameMs);
-                times.push_back(st.lastFrameMs);
-            }
+    // cameras=FILE: one frame per line ("out ex,ey,ez yaw pitch fov w h"), everything loaded once (the element tier's
+    // ladders and fly-ins in one process); a JSON line per frame
+    if (a.count("cameras")) {
+        FILE* cf = std::fopen(str(a, "cameras", "").c_str(), "r");
+        if (!cf) {
+            std::fprintf(stderr, "no cameras file '%s'\n", str(a, "cameras", "").c_str());
+            return 2;
         }
-        if (mcShade) {
-            // Minecraft's vanilla look of what was hit: the texel's colour (sRGB) times the fixed shade of its face
-            const uint32_t sky = 0x9CC4EC;
-            for (size_t i = 0; i < color.size(); i++) {
-                if (depth[i] > 1e29f) {
-                    color[i] = 0xFF000000u | (sky & 255) << 16 | (sky & 0xFF00) | (sky >> 16);
-                    continue;
-                }
-                float ox = float(normal[i] & 255) / 255.0f * 2.0f - 1.0f, oz = float((normal[i] >> 8) & 255) / 255.0f * 2.0f - 1.0f;
-                float ny = 1.0f - std::fabs(ox) - std::fabs(oz);  // octahedral decode (atlas_shared.slang octEncode)
-                float nx = ox, nz = oz;
-                if (ny < 0) {
-                    nx = (1.0f - std::fabs(oz)) * (ox >= 0 ? 1.0f : -1.0f);
-                    nz = (1.0f - std::fabs(ox)) * (oz >= 0 ? 1.0f : -1.0f);
-                }
-                float ax = std::fabs(nx), ay = std::fabs(ny), az = std::fabs(nz);
-                float shade = ay >= ax && ay >= az ? (ny > 0 ? 1.0f : 0.5f) : az >= ax ? 0.8f : 0.6f;
-                uint32_t px = 0xFF000000u;
-                for (int k = 0; k < 3; k++) {
-                    float v = std::pow(std::fmax(linear[i * 4 + size_t(k)], 0.0f), 1.0f / 2.2f) * shade;
-                    px |= uint32_t(std::fmin(255.0f, v * 255.0f + 0.5f)) << (8 * k);
-                }
-                color[i] = px;
-            }
+        char line[2048];
+        int n = 0;
+        while (std::fgets(line, sizeof line, cf)) {
+            char op[1024];
+            double ex2 = 0, ey2 = 0, ez2 = 0, yw = 0, pt = 0, fv = 70;
+            unsigned cw = w, ch = h;
+            if (std::sscanf(line, "%1023s %lf,%lf,%lf %lf %lf %lf %u %u", op, &ex2, &ey2, &ez2, &yw, &pt, &fv, &cw, &ch) < 4) continue;
+            int rc = renderOne(op, ex2, ey2, ez2, yw, pt, fv, cw, ch);
+            if (rc) return rc;
+            std::string oj = op;
+            for (char& ch2 : oj) ch2 = ch2 == '\\' ? '/' : ch2;
+            std::printf("{\"frame\":%d,\"out\":\"%s\",\"frameMs\":%.2f}\n", n++, oj.c_str(), best);
         }
-        for (uint32_t py = 0; py < h; py++)
-            for (uint32_t px = 0; px < w; px++) {
-                size_t i = size_t(py) * w + px;
-                for (int k = 0; k < 3; k++) acc[i * 3 + size_t(k)] += double((color[i] >> (8 * k)) & 255);
-                float d = depth[i];
-                if (d >= 1e29f || !haveExport) continue;
-                // where this sample shows the export (the element's box, or the exported chunks)
-                float nx = (float(px) + 0.5f + jx) / float(w) * 2.0f - 1.0f, ny = 1.0f - (float(py) + 0.5f + jy) / float(h) * 2.0f, q[4];
-                for (int r = 0; r < 4; r++) q[r] = inv[r] * nx + inv[4 + r] * ny + inv[8 + r] * 0.5f + inv[12 + r];
-                float l = std::sqrt(q[0] * q[0] + q[1] * q[1] + q[2] * q[2]);
-                double hx = x + q[0] / l * d, hy = y + q[1] / l * d, hz = z + q[2] / l * d;
-                bool in = boxed ? hx >= box[0] - 0.5 && hx <= box[3] + 1.5 && hy >= box[1] - 0.5 && hy <= box[4] + 1.5 &&
-                                      hz >= box[2] - 0.5 && hz <= box[5] + 1.5
-                                : ex.inExport(hx, hz);
-                if (in) share[i] += 1.0 / spp, minDepth[i] = std::min(minDepth[i], d);
-            }
+        std::fclose(cf);
+        std::printf("{\"backend\":\"%s\",\"frames\":%d,\"groupsOn\":%s,\"groupsBuildMs\":%.1f}\n", backendName.c_str(), n,
+                    groups ? "true" : "false", groupsMs);
+        atlas_destroy(ctx);
+        return 0;
     }
-    for (size_t i = 0; i < color.size(); i++) {
-        uint32_t px = 0xFF000000u;
-        for (int k = 0; k < 3; k++) px |= uint32_t(acc[i * 3 + size_t(k)] / spp + 0.5) << (8 * k);
-        if (spp > 1 || mcShade) color[i] = px;
-    }
-    std::sort(times.begin(), times.end());
-    double median = times.empty() ? 0 : times[times.size() / 2];
-    atlas::writePng(out, color.data(), w, h);
-    std::string base = out.size() > 4 ? out.substr(0, out.size() - 4) : out;
-    std::vector<uint8_t> shown(size_t(w) * h, 0);  // where this frame shows the export (its mask: most samples)
-    if (haveExport) {
-        // where the frame shows exported content (the share of its samples), and how far (atlas_truth's encodings)
-        std::vector<uint32_t> mask(size_t(w) * h), dp(size_t(w) * h);
-        for (size_t i = 0; i < mask.size(); i++) {
-            float d = minDepth[i];
-            uint32_t v = d >= 1e29f ? 0xFFFFFFu : uint32_t(std::min(d * 16.f, 16777214.f));
-            dp[i] = 0xFF000000u | (v & 255u) << 16 | ((v >> 8) & 255u) << 8 | (v >> 16);
-            uint32_t m = uint32_t(std::lround(share[i] * 255.0));
-            mask[i] = 0xFF000000u | m << 16 | m << 8 | m;
-            shown[i] = share[i] > 0.5 ? 1 : 0;
-        }
-        atlas::writePng(base + "_mask.png", mask.data(), w, h);
-        atlas::writePng(base + "_depth.png", dp.data(), w, h);
-    }
+    if (int rc = renderOne(out, x, y, z, num(a, "yaw", 0), num(a, "pitch", mcCam ? 0 : -4), num(a, "fov", 70), w, h)) return rc;
     // atlas_truth's frame of the same camera, and how far this one is from it (the harness's metric, by distance)
     std::string vsTruth;
     if (a.count("truth") && mcCam) {

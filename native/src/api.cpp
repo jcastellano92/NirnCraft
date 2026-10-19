@@ -40,6 +40,7 @@ static_assert(sizeof(AtlasGlFrameIO) == 96 && offsetof(AtlasGlFrameIO, nearInvPr
               offsetof(AtlasGlFrameIO, dstColor) == 80);
 static_assert(sizeof(AtlasLight) == 40 && offsetof(AtlasLight, radius) == 24 && offsetof(AtlasLight, kind) == 36);
 static_assert(sizeof(AtlasStats) == 56 && offsetof(AtlasStats, nodeBytes) == 8 && offsetof(AtlasStats, raySteps) == 48);
+static_assert(sizeof(AtlasSurfaceCard) == 1552 && offsetof(AtlasSurfaceCard, texels) == 16);
 static_assert(sizeof(AtlasMaterialShape) == 400 && offsetof(AtlasMaterialShape, mean) == 8 &&
               offsetof(AtlasMaterialShape, faces) == 16);
 
@@ -890,6 +891,57 @@ ATLAS_API AtlasStatus atlas_set_material_shapes(AtlasContext* ctx, uint32_t firs
         v[i] = std::move(s);
     }
     ctx->world.setShapes(first, v);
+    return ATLAS_OK;
+    ATLAS_CATCH(ctx)
+}
+
+ATLAS_API AtlasStatus atlas_set_surface_cards(AtlasContext* ctx, const AtlasSurfaceCard* cards, uint32_t count) {
+    if (!ctx || (!cards && count)) return ATLAS_ERR_ARG;
+    if (count > (1u << 24)) return ctx->fail(ATLAS_ERR_ARG, "too many surface cards");
+    ATLAS_TRY
+    auto set = std::make_shared<CardSet>();
+    set->cards.resize(count);
+    const int at[5] = {0, 256, 320, 336, 340};
+    for (uint32_t i = 0; i < count; i++) {
+        const AtlasSurfaceCard& a = cards[i];
+        SurfaceCard& c = set->cards[i];
+        c.x = a.x, c.y = a.y, c.z = a.z, c.face = a.face % 6;
+        // the mip chain of the covered texels (atlas_lab's loadCards): means of what shows, the face's mean elsewhere
+        float rgb[341][3] = {}, w[341] = {}, mean[3] = {};
+        int k = 0;
+        for (int t = 0; t < 256; t++) {
+            uint32_t v = a.texels[t];
+            for (int ch = 0; ch < 3; ch++) rgb[t][ch] = float((v >> (16 - 8 * ch)) & 255);
+            w[t] = (v >> 24) ? 1.0f : 0.0f;
+            if (v >> 24) {
+                for (int ch = 0; ch < 3; ch++) mean[ch] += rgb[t][ch];
+                k++;
+            }
+        }
+        for (float& m : mean) m = k ? m / float(k) : 0.0f;
+        for (int l = 1; l < 5; l++) {
+            int n2 = 16 >> l;
+            for (int v = 0; v < n2; v++)
+                for (int u = 0; u < n2; u++) {
+                    float acc[3] = {}, ws = 0;
+                    for (int j = 0; j < 4; j++) {
+                        int src = at[l - 1] + (2 * u + (j & 1)) + (2 * n2) * (2 * v + (j >> 1));
+                        for (int ch = 0; ch < 3; ch++) acc[ch] += rgb[src][ch] * w[src];
+                        ws += w[src];
+                    }
+                    int dst = at[l] + u + n2 * v;
+                    w[dst] = ws * 0.25f;
+                    for (int ch = 0; ch < 3; ch++) rgb[dst][ch] = ws > 0 ? acc[ch] / ws : mean[ch];
+                }
+        }
+        for (int t = 0; t < 341; t++) {
+            if (t < 256 && w[t] == 0) for (int ch = 0; ch < 3; ch++) rgb[t][ch] = mean[ch];
+            uint32_t v = 0;
+            for (int ch = 0; ch < 3; ch++) v |= uint32_t(std::lround(std::clamp(rgb[t][ch], 0.0f, 255.0f))) << (16 - 8 * ch);
+            c.mip[t] = v;
+        }
+    }
+    ctx->world.setCards(set);
     return ATLAS_OK;
     ATLAS_CATCH(ctx)
 }

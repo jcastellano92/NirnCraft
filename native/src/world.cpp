@@ -475,27 +475,37 @@ std::shared_ptr<const GroupTree> World::buildGroups(const Job& j, const ShapeSet
         }
     in.vox.resize(total);
     // A coarser level's voxel from real blocks: the mip's material (or, where the mip's vote left it air, its blocks'
-    // commonest), and its own micro-voxels by coverage: each micro-voxel is there with the probability of what its
-    // blocks fill of it (a shaped block by its shape, cut-out leaves by their texels' alpha), hashed in world space. So
-    // a crown thins as it coarsens instead of filling its voxels, and a thin wall or a trunk keeps its share (coverage,
-    // docs/ATLAS-LOD.md's plan of record step 1, in the groups' micro-voxels).
-    std::vector<float> covOf;  // per material: the share of a block it fills (-1: not known yet)
-    auto blockCover = [&](uint16_t m) -> float {
-        if (!m) return 0.0f;
-        if (m >= covOf.size()) covOf.resize(size_t(m) + 1, -1.0f);
-        float& c = covOf[m];
-        if (c < 0) {
+    // commonest), and its own micro-voxels by coverage: each micro-voxel is there with the probability that a ray across
+    // it meets what its blocks hold (a shaped block by its shape, cut-out leaves by their texels' alpha), hashed in world
+    // space. Solid parts count by the share they fill; cut-out parts as a ray crossing 2^lod of the finest micro-voxels
+    // sees them (1 - (1 - share)^(2^lod): a crown keeps its opacity as it coarsens instead of thinning or filling its
+    // voxels), so a thin wall or a trunk keeps its share (coverage, docs/ATLAS-LOD.md's plan of record step 1, in the
+    // groups' micro-voxels).
+    struct Cover {
+        float solid = -1, cut = 0;  // shares of a block: what is solid, what is cut-out (by alpha)
+    };
+    std::vector<Cover> covOf;  // per material (solid < 0: not known yet)
+    auto blockCover = [&](uint16_t m) -> Cover {
+        if (!m) return {0, 0};
+        if (m >= covOf.size()) covOf.resize(size_t(m) + 1);
+        Cover& c = covOf[m];
+        if (c.solid < 0) {
             const MaterialShape* s = shapes.at(m);
-            if (!s) {
-                c = 1.0f;
-            } else {
+            c = {1.0f, 0.0f};
+            if (s) {
                 float sum = 0;
                 for (int b = 0; b < 64; b++)
                     if ((s->mask >> b) & 1) sum += float(s->alpha[b]) / 255.0f;
-                c = sum / 64.0f;
+                c = (s->flags & SHAPE_CUTOUT) ? Cover{0.0f, sum / 64.0f} : Cover{sum / 64.0f, 0.0f};
             }
         }
         return c;
+    };
+    auto effective = [&](float solid, float cut) {
+        solid = std::min(solid, 1.0f);
+        if (solid >= 0.999f) return 1.0f;
+        float rest = std::min(cut / (1.0f - solid), 1.0f);
+        return solid + (1.0f - solid) * (1.0f - std::pow(1.0f - rest, float(1 << lod)));
     };
     auto coarseVoxel = [&](const Section& sec, int wx, int wy, int wz, uint16_t mip, GroupInput& gi, uint32_t idx) -> uint32_t {
         int bx = wx & 15, by = wy & 15, bz = wz & 15;  // its first block in the section
@@ -532,22 +542,26 @@ std::shared_ptr<const GroupTree> World::buildGroups(const Job& j, const ShapeSet
                 uint16_t m = sec.mats[size_t((bx + (mx >> 1)) + 16 * ((bz + (mz >> 1)) + 16 * (by + (my >> 1))))];
                 if (m) {
                     const MaterialShape* sh = shapes.at(m);
+                    bool cutout = sh && (sh->flags & SHAPE_CUTOUT);
                     float sum = 0;
                     for (int q = 0; q < 8; q++) {
                         int ux = (mx & 1) * 2 + (q & 1), uy = (my & 1) * 2 + (q >> 2), uz = (mz & 1) * 2 + ((q >> 1) & 1);
                         int ub = ux + 4 * (uz + 4 * uy);
                         sum += !sh ? 1.0f : ((sh->mask >> ub) & 1) ? float(sh->alpha[ub]) / 255.0f : 0.0f;
                     }
-                    c = sum / 8.0f;
+                    c = cutout ? effective(0.0f, sum / 8.0f) : sum / 8.0f;
                 }
             } else {
                 int kb = n / 4;  // blocks a side of a micro-voxel
-                float sum = 0;
+                float solid = 0, cut = 0;
                 for (int y = 0; y < kb; y++)
                     for (int z = 0; z < kb; z++)
-                        for (int x = 0; x < kb; x++)
-                            sum += blockCover(sec.mats[size_t((bx + mx * kb + x) + 16 * ((bz + mz * kb + z) + 16 * (by + my * kb + y)))]);
-                c = sum / float(kb * kb * kb);
+                        for (int x = 0; x < kb; x++) {
+                            Cover cv = blockCover(sec.mats[size_t((bx + mx * kb + x) + 16 * ((bz + mz * kb + z) + 16 * (by + my * kb + y)))]);
+                            solid += cv.solid, cut += cv.cut;
+                        }
+                float nb = float(kb * kb * kb);
+                c = effective(solid / nb, cut / nb);
             }
             if (c <= 0.0f) continue;
             if (c < 0.999f) {
@@ -630,7 +644,7 @@ int World::update(const double centre[3], double budgetMs, double* buildMs) {
                         auto r = regions_.find(k);
                         // with groups wanted, a region without its tree yet gets one (its SVDAG kept)
                         if (r == regions_.end() || dirty_.count(k) ||
-                            (groups && lod < groupLods && !r->second->empty() && !r->second->groups))
+                            (groups && lod < groupLods && !r->second->groups && (!r->second->empty() || (lod <= 4 && !sections_.empty()))))
                             want.push_back(k);
                     }
                 }
@@ -674,7 +688,7 @@ int World::update(const double centre[3], double budgetMs, double* buildMs) {
             } else {
                 r = buildRegion(j);
             }
-            if (j.groups && !r.empty()) {
+            if (j.groups && (!r.empty() || !j.sections.empty())) {
                 r.groups = buildGroups(j, *shapes);
                 treesBuilt++;
                 treeUs += int64_t(r.groups->buildMs * 1000.0);
@@ -755,7 +769,7 @@ int World::update(const double centre[3], double budgetMs, double* buildMs) {
     bool reshaped;
     {
         std::lock_guard<std::mutex> lock(mu_);
-        reshaped = shapes_->revision != packedShapes_;
+        reshaped = shapes_->revision != packedShapes_ || cards_->revision != packedCards_;
     }
     if (built > 0 || moved || reshaped) repack(centreRegion);
     if (buildMs) *buildMs = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - start).count();
@@ -769,6 +783,13 @@ void World::setShapes(uint32_t first, const std::vector<std::shared_ptr<const Ma
     for (size_t i = 0; i < shapes.size(); i++) next->byMaterial[first + i] = shapes[i];
     next->revision = shapes_->revision + 1;
     shapes_ = std::move(next);
+}
+
+void World::setCards(std::shared_ptr<const CardSet> cards) {
+    std::lock_guard<std::mutex> lock(mu_);
+    auto next = std::make_shared<CardSet>(*cards);
+    next->revision = cards_->revision + 1;
+    cards_ = std::move(next);
 }
 
 World::GroupStats World::groupStats() const {
@@ -829,6 +850,34 @@ void World::repack(const int centreRegion[MAX_LODS][2]) {
         p.groups[1] = shapeBase;
         p.groups[2] = uint32_t(table.size());
         packedShapes_ = sh.revision;
+        // the surface cards: a header (table entries, the table's first uint4, the cards' first word, count), an
+        // open-addressing table of (x, y, z, face + 1 | card << 3), then each card's mip chain
+        const CardSet& cs = *cards_;
+        packedCards_ = cs.revision;
+        if (!cs.cards.empty()) {
+            uint32_t size = 1;
+            while (size < cs.cards.size() * 2) size <<= 1;
+            uint32_t head = uint32_t(p.groups.size() / 4);
+            p.groups.resize(p.groups.size() + 4 + size_t(size) * 4, 0);
+            uint32_t tableAt = head + 1, dataAt = uint32_t(p.groups.size());
+            for (size_t i = 0; i < cs.cards.size(); i++) {
+                const SurfaceCard& c = cs.cards[i];
+                uint32_t h = cutHash(c.x, c.y, c.z ^ int(c.face * 0x9E3779B1u)) & (size - 1);
+                for (;;) {
+                    uint32_t* e = &p.groups[size_t(tableAt + h) * 4];
+                    if (e[3] == 0) {
+                        e[0] = uint32_t(c.x), e[1] = uint32_t(c.y), e[2] = uint32_t(c.z), e[3] = (c.face + 1) | uint32_t(i) << 3;
+                        break;
+                    }
+                    h = (h + 1) & (size - 1);
+                }
+                p.groups.insert(p.groups.end(), c.mip, c.mip + CARD_WORDS);
+            }
+            p.groups.resize((p.groups.size() + 3) & ~size_t(3), 0);
+            uint32_t* hd = &p.groups[size_t(head) * 4];
+            hd[0] = size, hd[1] = tableAt, hd[2] = dataAt, hd[3] = uint32_t(cs.cards.size());
+            p.groups[3] = head;
+        }
     }
     // a region's DAG, materials and height mip appended to the scene; returns its slot
     auto pack = [&](const Region* r, const Key3& k) {

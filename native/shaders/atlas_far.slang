@@ -280,7 +280,7 @@ int traceLod(int lod, float3 p0, float3 d, float len, inout TraceResult res, out
                 if (!air && gGroups && r.groups.x != 0xFFFFFFFFu) {
                     // the chord's first cell: a ray that starts inside this level's solid (a switch to a coarser level)
                     // hits it at once, as the old path does (the groups hold only what a ray can reach from outside)
-                    if (firstCell && traceRegion(r, ro, d / s, u, min(u + 1e-3, uExit), 1e-3, res)) {
+                    if (firstCell && r.bases.z != 0xFFFFFFFFu && traceRegion(r, ro, d / s, u, min(u + 1e-3, uExit), 1e-3, res)) {
                         res.lod = lod;
                         return TRACE_HIT;
                     }
@@ -288,7 +288,7 @@ int traceLod(int lod, float3 p0, float3 d, float len, inout TraceResult res, out
                         res.lod = lod;
                         return TRACE_HIT;
                     }
-                } else if (!air && traceRegion(r, ro, d / s, u, uExit, 1e-3, res)) {
+                } else if (!air && r.bases.z != 0xFFFFFFFFu && traceRegion(r, ro, d / s, u, uExit, 1e-3, res)) {
                     res.lod = lod;
                     return TRACE_HIT;
                 }
@@ -322,6 +322,7 @@ bool occupiedAt(int lod, float3 p) {
     int idx = regionTable[L.dim.w + (c.y * L.dim.z + c.z) * L.dim.x + c.x];
     if (idx < 0) return false;
     RegionGpu r = regions[idx];
+    if (r.bases.z == 0xFFFFFFFFu) return false;  // (a region with groups only)
     int3 v = vq & 255;
     uint ptr = r.bases.z;
     for (int size = 256; size > 4; size >>= 1) {
@@ -1004,6 +1005,26 @@ void farMain(uint3 id : SV_DispatchThreadID) {
         }
         if ((frame.dims.z & FRAME_CLOUDS) != 0 && sunVis > 0.0) sunVis *= cloudShadow(p, keyLightDir(sun));
         float3 albedo = res.hasAlbedo != 0u ? res.albedo : m.albedoRough.rgb;
+        // a surface card on this face of the block (the game's own colour and light there, atlas_set_surface_cards):
+        // filtered over the pixel's footprint on the face; as albedo its vanilla face shade is taken out again
+        bool carded = false;
+        {
+            float3 fn0 = float3(ax == 0 ? (slope.x > 0 ? -1.0 : 1.0) : 0.0, ax == 1 ? (slope.y > 0 ? -1.0 : 1.0) : 0.0,
+                                ax == 2 ? (slope.z > 0 ? -1.0 : 1.0) : 0.0);
+            float3 pw = p + float3(frame.camInt.xyz);
+            int3 blk = int3(floor(pw - fn0 * 0.01));
+            int f = ax == 1 ? (fn0.y < 0.0 ? 0 : 1) : ax == 2 ? (fn0.z < 0.0 ? 2 : 3) : (fn0.x < 0.0 ? 4 : 5);
+            uint card = cardOf(blk, f);
+            if (card != 0u) {
+                int a1 = (ax + 1) % 3, a2 = (ax + 2) % 3;
+                float3 lp = pw - float3(blk);
+                float fp = tHit * frame.params.w / max(abs(dot(dir, fn0)), 0.2);
+                float3 cc = cardColour(card, clamp(lp[a1], 0.0, 0.9999), clamp(lp[a2], 0.0, 0.9999), fp);
+                const float SHADE[6] = { 0.5, 1.0, 0.8, 0.8, 0.6, 0.6 };
+                albedo = (frame.dims.z & FRAME_DEBUG_ALBEDO) != 0 ? cc : cc / SHADE[f];
+                carded = true;
+            }
+        }
         // ambient occlusion: solid neighbours around the air voxel in front of the face (4 taps in the face plane)
         float ao = 1.0;
         {
@@ -1026,7 +1047,7 @@ void farMain(uint3 id : SV_DispatchThreadID) {
             cls = 0u;  // lit like a rough diffuse surface: it scatters, it does not mirror
         }
         // large-scale tone variation on land (about 24 and 90 blocks), the far-field stand-in for texture detail
-        if (cls != 2u && !falls && res.hasAlbedo == 0u) {  // (a groups hit has its texels)
+        if (cls != 2u && !falls && res.hasAlbedo == 0u && !carded) {  // (a groups hit has its texels)
             float2 wxz = p.xz + float2(frame.camInt.xz);
             float v = valueNoise(wxz / 24.0) * 0.6 + valueNoise(wxz / 90.0 + 17.0) * 0.4;
             albedo *= 0.95 + 0.10 * v;  // gentle: stronger tone blotches the near field does not have read as a seam
@@ -1073,6 +1094,7 @@ void farMain(uint3 id : SV_DispatchThreadID) {
         depth = tHit;
         color = applyAerial(color, dir, sun, tHit, frame);
         if ((frame.dims.z & FRAME_DEBUG_ALBEDO) != 0) color = albedo;
+        if ((frame.dims.z & FRAME_DEBUG_ALBEDO) != 0 && carded) cls = 6u;  // (already shaded: the offline tools leave it)
         if ((frame.dims.z & FRAME_DEBUG_WEATHER) != 0) {
             float3 wpos = p + float3(frame.camInt.xyz);
             CloudColumn dbg = sampleColumn(wpos.xz, length(p.xz));

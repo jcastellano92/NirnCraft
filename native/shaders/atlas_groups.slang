@@ -147,6 +147,35 @@ float3 cellAlbedo(uint cell, int f, int3 q) {
     return srgbLinear(c);
 }
 
+// The surface card of face f of world block b (atlas_set_surface_cards): its first word, or 0 (none).
+uint cardOf(int3 b, int f) {
+    uint head = groupData[0].w;
+    if (head == 0u) return 0u;
+    uint4 hd = groupData[head];
+    uint mask = hd.x - 1u;
+    uint h = cutHash(int3(b.x, b.y, b.z ^ int(uint(f) * 0x9E3779B1u))) & mask;
+    for (int k = 0; k < 64; k++) {
+        uint4 e = groupData[hd.y + h];
+        if (e.w == 0u) return 0u;
+        if (int(e.x) == b.x && int(e.y) == b.y && int(e.z) == b.z && (e.w & 7u) == uint(f + 1))
+            return hd.z + (e.w >> 3) * 341u;
+        h = (h + 1u) & mask;
+    }
+    return 0u;
+}
+
+// a card's colour (linear) at (u, v) in 0..1 over a footprint of fp blocks: its mip chain (16, 8, 4, 2, 1), blended
+// between the two nearest levels as a trilinear sampler would
+float3 cardColour(uint at, float u, float v, float fp) {
+    float lv = clamp(log2(max(fp * 16.0, 1.0)), 0.0, 4.0);
+    int l0 = int(lv), l1 = min(4, l0 + 1);
+    static const uint MIP_AT[5] = { 0u, 256u, 320u, 336u, 340u };
+    int n0 = 16 >> l0, n1 = 16 >> l1;
+    uint c0 = gWord(at + MIP_AT[l0] + uint(min(int(u * float(n0)), n0 - 1) + n0 * min(int(v * float(n0)), n0 - 1)));
+    uint c1 = gWord(at + MIP_AT[l1] + uint(min(int(u * float(n1)), n1 - 1) + n1 * min(int(v * float(n1)), n1 - 1)));
+    return lerp(srgbLinear(c0), srgbLinear(c1), lv - float(l0));
+}
+
 // a hit: what the shading needs (the old path's TraceResult, plus the texel's albedo)
 void groupHit(inout TraceResult res, float t, uint cell, int axis, float3 dir, int3 q) {
     res.t = t;

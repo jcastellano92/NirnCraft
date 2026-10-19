@@ -70,7 +70,9 @@ struct Region {
     std::shared_ptr<const Svdag> dag;
     // its content-shaped groups (groups.hpp), built once a frame asks for them (World::groupsWanted); null: not yet
     std::shared_ptr<const GroupTree> groups;
-    bool empty() const { return !dag || dag->empty(); }
+    // nothing to draw: no voxels, and no groups (a coarse level of a few real blocks the voxels' mip vote dropped can
+    // still have them: their coverage)
+    bool empty() const { return (!dag || dag->empty()) && (!groups || groups->empty() || groups->refused); }
 };
 
 // Packed scene: what the kernels read.
@@ -138,6 +140,8 @@ public:
     std::atomic<bool> groupsWanted{false};
     int groupLods = 7;  // levels that get trees (ATLAS_GROUP_LODS); coarser ones keep the old path
     GroupLimits groupLimits;
+    // surface cards (atlas_set_surface_cards), replaced whole
+    void setCards(std::shared_ptr<const CardSet> cards);
     // material shapes (atlas_set_material_shapes); first >= 1, null entries remove a shape
     void setShapes(uint32_t first, const std::vector<std::shared_ptr<const MaterialShape>>& shapes);
     struct GroupStats {
@@ -188,6 +192,8 @@ private:
     std::unordered_map<Key3, Fade, Key3Hash> fading_;
     std::shared_ptr<const ShapeSet> shapes_ = std::make_shared<ShapeSet>();
     uint64_t packedShapes_ = 0;  // the shape revision the packed scene carries
+    std::shared_ptr<const CardSet> cards_ = std::make_shared<CardSet>();
+    uint64_t packedCards_ = 0;
     uint32_t lastGroupsBuilt_ = 0;
     double lastGroupsMs_ = 0;
 };
