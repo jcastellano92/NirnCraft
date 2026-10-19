@@ -1730,6 +1730,8 @@ def tally(s, v, rec):
         led[k] = e
     elif st == "pass" and e and e.get("state") in ACTIVE and not (e.get("status") == "review" and e.get("state") != "testing"):
         # (a reviewer's finding: the test never failed on it, so only a fix marked `issues fixed` moves it on)
+        if e.get("visual") is None:  # entries from before the flag existed
+            e["visual"] = s.get("kind") == "visual"
         if e.get("visual") and e.get("state") != "needs-review":
             e.update(state="needs-review", passedAt=now)  # the numbers pass; a reviewer confirms the picture
         elif not e.get("visual"):
