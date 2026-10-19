@@ -23,6 +23,9 @@
 //            a grid: groups cross objects and chunks ("content-shaped groups" below); "boxes" in the table = the cut
 //   boxesf / groupsf   the same with prefiltered face textures (the average under the pixel, holes as coverage)
 //
+// motion=1 [mframes=48 speed=0.5 strafe=0.3 blend=0.1]: the moving camera with a real TAA (reprojection by hit
+// distance, neighbourhood clamp, 10 % blend) at each distance; motion dE against ref at every frame, and flicker:
+// the mean frame-to-frame change of each pixel's error (shimmer, crawling edges; a steady blur scores low).
 // sweep=N: instead of the table, a fly-in from the farthest to the nearest distance in N steps through one window
 // (window=96 half-size); per representation pop (how much more its picture changes per step than ref's: popping),
 // popMax, dE against ref, steps; the sheet's rows are the representations, its columns the steps.
@@ -364,7 +367,19 @@ struct Sample {
     bool hit = false;
     RGB c;
     int steps = 0;
+    float t = 0;  // how far along the ray the hit is (blocks): reprojection for the moving-camera TAA
 };
+
+// where a ray enters the cube [lo, lo + size) (0 when it starts inside)
+inline float boxEntry(V3 o, V3 d, V3 lo, float size) {
+    float t0 = 0;
+    for (int a = 0; a < 3; a++) {
+        if (std::fabs(d[a]) < 1e-12f) continue;
+        float ta = (lo[a] - o[a]) / d[a], tb = (lo[a] + size - o[a]) / d[a];
+        t0 = std::max(t0, std::min(ta, tb));
+    }
+    return t0;
+}
 
 Sample traceMicroDense(V3 o, V3 d);
 
@@ -386,6 +401,7 @@ Sample traceMicro(V3 o, V3 d) {
                 if (!microAt(mx, my, mz)) return false;
                 int f = enteredFace(axis, d);
                 s.hit = true;
+                s.t = boxEntry(o, d, {mx * 0.25f, my * 0.25f, mz * 0.25f}, 0.25f);
                 s.c = lit(microCol(mx, my, mz, f), f);
                 return true;
             });
@@ -407,6 +423,7 @@ Sample traceMicroDense(V3 o, V3 d) {
             if (!microAt(mx, my, mz)) return false;
             int f = enteredFace(axis, d);
             s.hit = true;
+            s.t = boxEntry(o, d, {mx * 0.25f, my * 0.25f, mz * 0.25f}, 0.25f);
             s.c = lit(microCol(mx, my, mz, f), f);
             return true;
         });
@@ -481,6 +498,7 @@ Sample traceBlocks(const std::vector<BlockLevel>& L, int level, V3 o, V3 d, bool
         if (leafGap && b.cls == 1 && level <= 1 && hashf(x, y, z, seed) < 0.3f) return false;
         int f = enteredFace(axis, d);
         s.hit = true;
+        s.t = boxEntry(o, d, {x * cs, y * cs, z * cs}, cs);
         s.c = lit(tinted(b, b.mean), f);
         return true;
     });
@@ -640,6 +658,7 @@ Sample traceCov(int level, V3 o, V3 d, uint32_t seed, bool boxed = false) {
             cc = {cc.r / w, cc.g / w, cc.b / w};
         }
         s.hit = true;
+        s.t = boxEntry(o, d, {x * cs, y * cs, z * cs}, cs);
         s.c = cc;
         return true;
     });
@@ -790,6 +809,7 @@ bool boxFace(const Node& n, int axis, bool high, V3 p, float t, BoxCtx& c) {
             }
         if (!hits || hashf(int(p[a1] * 64.f), int(p[a2] * 64.f), axis, c.seed) >= float(hits) / float(k * k)) return false;
         c.s->hit = true;
+    c.s->t = t;
         c.s->c = lit({acc.r / hits, acc.g / hits, acc.b / hits}, f);
         return true;
     }
@@ -797,6 +817,7 @@ bool boxFace(const Node& n, int axis, bool high, V3 p, float t, BoxCtx& c) {
     int dep, q[3];
     if (!firstHit(lo, hi, axis, high, u, v, dep, q)) return false;
     c.s->hit = true;
+    c.s->t = t;
     c.s->c = lit(microCol(q[0], q[1], q[2], f), f);
     return true;
 }
@@ -1137,9 +1158,13 @@ int main(int argc, char** argv) {
         long long drawn = -1;
         double steps = 0, ns = 0, level = -2;
     };
-    auto render = [&](float D, const std::string& v, int half, int offset = 0) {  // offset: other seeds and jitters
+    // offset: other seeds and jitters; eyeAt: another eye (the moving camera; D still sets the level and fog);
+    // tOut: per pixel the hit's distance along its ray (-1 sky); framesN: frames instead of `frames`
+    auto render = [&](float D, const std::string& v, int half, int offset = 0, const V3* eyeAt = nullptr,
+                      std::vector<float>* tOut = nullptr, int framesN = 0) {
         View out;
-        V3 eye = centre - fwd * D;
+        V3 eye = eyeAt ? *eyeAt : centre - fwd * D;
+        int nf = framesN > 0 ? framesN : frames;
         int W = 2 * half;
         float foot = D * pa;  // the pixel's size at the object, blocks
         // fog: what it hides may be rougher (an error of e shows as e times the transmittance)
@@ -1155,7 +1180,8 @@ int main(int argc, char** argv) {
         auto t0 = std::chrono::steady_clock::now();
         size_t markN = boxed ? nodes.size() : grouped ? groups.size() : 0;
         std::vector<std::atomic<uint8_t>> marks(markN);
-        for (int f = 0; f < frames; f++) {
+        if (tOut) tOut->assign(size_t(W) * W, -1.f);
+        for (int f = 0; f < nf; f++) {
             drawnBoxes = f == 0 && markN ? &marks : nullptr;
             std::atomic<int> next{0};
             auto work = [&]() {
@@ -1191,6 +1217,7 @@ int main(int argc, char** argv) {
                             }
                             st += sm.steps;
                             n++;
+                            if (tOut) (*tOut)[size_t(px + W * py)] = sm.hit ? sm.t : -1.f;
                             RGB c = sm.hit ? sm.c : SKY;
                             if (fog > 0 && sm.hit) {  // the same fog for every representation (at the object's distance)
                                 c.r = c.r * trans + SKY.r * (1 - trans), c.g = c.g * trans + SKY.g * (1 - trans), c.b = c.b * trans + SKY.b * (1 - trans);
@@ -1201,8 +1228,8 @@ int main(int argc, char** argv) {
                         size_t i = size_t(px + W * py);
                         RGB c{acc.r / spp, acc.g / spp, acc.b / spp};
                         if (f == 0) out.first[i] = c;
-                        img.c[i].r += c.r / frames, img.c[i].g += c.g / frames, img.c[i].b += c.b / frames;
-                        img.a[i] += hit / spp / frames;
+                        img.c[i].r += c.r / nf, img.c[i].g += c.g / nf, img.c[i].b += c.b / nf;
+                        img.a[i] += hit / spp / nf;
                     }
                 steps += st;
                 rays += n;
@@ -1322,6 +1349,116 @@ int main(int argc, char** argv) {
             json += (vi ? "," : "") + std::string("{\"variant\":\"") + v + "\",\"ms\":" + std::to_string(int(ms)) + "}";
             std::fprintf(stderr, "atlas_lab: camera frame %s %dx%d in %.0f ms -> %s\n", v.c_str(), w, h, ms, path.c_str());
         }
+        json += "]}";
+        std::printf("%s\n", json.c_str());
+        return 0;
+    }
+
+    if (num(a, "motion", 0) > 0) {
+        // the moving camera with a real TAA: at each distance, `mframes` frames of one sample each while the camera
+        // moves `speed` blocks a frame towards the object and `strafe` sideways (what uncovers hidden parts and breaks
+        // history); each frame's history is the last output reprojected through the camera's motion (by each pixel's
+        // hit distance), clamped to the current 3 x 3 neighbourhood, blended 10 % new: what a real TAA keeps and
+        // throws away. Against ref converged at every frame: dE (what you see while moving) and flicker (frame to
+        // frame change beyond ref's own), over the last two thirds of the move (the history has filled)
+        int half = int(num(a, "window", 96)), W = 2 * half, mframes = int(num(a, "mframes", 48));
+        float speed = float(num(a, "speed", 0.5)), strafe = float(num(a, "strafe", 0.3)), blend = float(num(a, "blend", 0.1));
+        int size = int(num(a, "panel", 160));
+        int sheetW = int(dists.size()) * size, sheetH = int(variants.size()) * size;
+        std::vector<uint32_t> sheet(size_t(sheetW) * sheetH, 0xFF202020u);
+        std::string json = "{\"tool\":\"atlas_lab\",\"mode\":\"motion\",\"runs\":[";
+        std::printf("%-8s %-8s %8s %8s %7s\n", "dist", "variant", "motiondE", "flicker", "steps");
+        bool firstRun = true;
+        for (size_t di = 0; di < dists.size(); di++) {
+            float D0 = dists[di];
+            std::vector<View> refs;
+            std::vector<V3> eyes;
+            for (int k = 0; k < mframes; k++) {
+                float Dk = D0 - speed * k;
+                eyes.push_back(centre - fwd * Dk + right * (strafe * k));
+                refs.push_back(render(Dk, "ref", half, 0, &eyes.back(), nullptr, 2));
+            }
+            for (size_t vi = 0; vi < variants.size(); vi++) {
+                const std::string& v = variants[vi];
+                Image hist{W, W, std::vector<RGB>(size_t(W) * W), std::vector<float>(size_t(W) * W, 0)};
+                Image prevOut;
+                std::vector<float> prevErr;  // per pixel the last frame's dE against its ref
+                bool have = false;
+                double de = 0, flick = 0, stepsSum = 0;
+                int counted = 0;
+                for (int k = 0; k < mframes; k++) {
+                    float Dk = D0 - speed * k;
+                    std::vector<float> tb;
+                    View cur = render(Dk, v, half, k, &eyes[size_t(k)], &tb, 1);
+                    stepsSum += cur.steps;
+                    Image outI = cur.img;
+                    if (have) {
+                        V3 pe = eyes[size_t(k - 1)];
+                        for (int py = 0; py < W; py++)
+                            for (int px = 0; px < W; px++) {
+                                size_t i = size_t(px + W * py);
+                                float hx = float(px), hy = float(py);
+                                if (tb[i] >= 0) {  // the point this pixel sees, where the previous camera saw it
+                                    V3 dir = norm(fwd + right * ((px - half + 0.5f) * pa) - up * ((py - half + 0.5f) * pa));
+                                    V3 P = eyes[size_t(k)] + dir * tb[i], q = P - pe;
+                                    float zf = dot(q, fwd);
+                                    if (zf <= 0) continue;
+                                    hx = dot(q, right) / zf / pa + half - 0.5f;
+                                    hy = -dot(q, up) / zf / pa + half - 0.5f;
+                                }
+                                if (hx < 0 || hy < 0 || hx > W - 1 || hy > W - 1) continue;  // no history: this frame alone
+                                int x0 = int(hx), y0 = int(hy), x1 = std::min(x0 + 1, W - 1), y1 = std::min(y0 + 1, W - 1);
+                                float fx = hx - x0, fy = hy - y0;
+                                auto H = [&](int x, int y) { return hist.c[size_t(x + W * y)]; };
+                                RGB h00 = H(x0, y0), h10 = H(x1, y0), h01 = H(x0, y1), h11 = H(x1, y1);
+                                RGB h{(h00.r * (1 - fx) + h10.r * fx) * (1 - fy) + (h01.r * (1 - fx) + h11.r * fx) * fy,
+                                      (h00.g * (1 - fx) + h10.g * fx) * (1 - fy) + (h01.g * (1 - fx) + h11.g * fx) * fy,
+                                      (h00.b * (1 - fx) + h10.b * fx) * (1 - fy) + (h01.b * (1 - fx) + h11.b * fx) * fy};
+                                RGB lo{1e9f, 1e9f, 1e9f}, hi{-1e9f, -1e9f, -1e9f};
+                                for (int dy = -1; dy <= 1; dy++)
+                                    for (int dx = -1; dx <= 1; dx++) {
+                                        int nx = std::clamp(px + dx, 0, W - 1), ny = std::clamp(py + dy, 0, W - 1);
+                                        const RGB& c = cur.img.c[size_t(nx + W * ny)];
+                                        lo = {std::min(lo.r, c.r), std::min(lo.g, c.g), std::min(lo.b, c.b)};
+                                        hi = {std::max(hi.r, c.r), std::max(hi.g, c.g), std::max(hi.b, c.b)};
+                                    }
+                                h = {std::clamp(h.r, lo.r, hi.r), std::clamp(h.g, lo.g, hi.g), std::clamp(h.b, lo.b, hi.b)};
+                                const RGB& c = cur.img.c[i];
+                                outI.c[i] = {h.r + blend * (c.r - h.r), h.g + blend * (c.g - h.g), h.b + blend * (c.b - h.b)};
+                                outI.a[i] = std::max(cur.img.a[i], refs[size_t(k)].img.a[i]);
+                            }
+                    }
+                    // flicker: how much each pixel's error changes from frame to frame (a steady blur is calm, shimmer
+                    // and crawling edges are not), over the pixels showing the object
+                    std::vector<float> err(size_t(W) * W, -1.f);
+                    for (size_t i = 0; i < err.size(); i++)
+                        if (std::max(outI.a[i], refs[size_t(k)].img.a[i]) > 0.01f) err[i] = deltaE(outI.c[i], refs[size_t(k)].img.c[i]);
+                    if (k >= mframes / 3) {
+                        de += diff(outI, refs[size_t(k)].img);
+                        double ch = 0;
+                        int n2 = 0;
+                        for (size_t i = 0; i < err.size(); i++)
+                            if (err[i] >= 0 && !prevErr.empty() && prevErr[i] >= 0) ch += std::fabs(err[i] - prevErr[i]), n2++;
+                        flick += n2 ? ch / n2 : 0;
+                        counted++;
+                    }
+                    prevErr = err;
+                    hist = outI;
+                    prevOut = outI;
+                    have = true;
+                }
+                de /= std::max(1, counted);
+                flick /= std::max(1, counted);
+                std::printf("%-8.0f %-8s %8.2f %8.2f %7.1f\n", D0, v.c_str(), de, flick, stepsSum / mframes);
+                char buf[200];
+                std::snprintf(buf, sizeof buf, "%s{\"dist\":%.0f,\"variant\":\"%s\",\"motion_dE\":%.3f,\"flicker\":%.3f,\"steps\":%.2f}",
+                              firstRun ? "" : ",", D0, v.c_str(), de, flick, stepsSum / mframes);
+                json += buf;
+                firstRun = false;
+                blit(sheet, sheetW, prevOut, int(di) * size, int(vi) * size, size);
+            }
+        }
+        atlas::writePng(out, sheet.data(), uint32_t(sheetW), uint32_t(sheetH));
         json += "]}";
         std::printf("%s\n", json.c_str());
         return 0;

@@ -112,6 +112,10 @@ summ = harness.lab_summary({"runs": [{"dist": 10, "variant": "groups", "iou": 1.
 expect(summ == {"groups": {"iouMin": 0.97, "dEMax": 3.0, "steps": 12.0}}, "atlas_lab runs summarise per representation")
 expect(harness.lab_summary({"runs": [{"variant": "boxes", "pop": 0.0, "pop_max": 0.1, "dE": 1.3, "steps": 5.3}]})
        == {"boxes": {"pop": 0.0, "popMax": 0.1, "dE": 1.3, "steps": 5.3}}, "a sweep's pop numbers are kept")
+expect(harness.lab_summary({"runs": [{"dist": 60, "variant": "groups", "motion_dE": 2.0, "flicker": 2.1, "steps": 6},
+                                     {"dist": 600, "variant": "groups", "motion_dE": 6.5, "flicker": 3.2, "steps": 2}]})
+       == {"groups": {"motionDEMax": 6.5, "flickerMax": 3.2, "steps": 4.0}}, "a moving-camera run keeps its worst distance")
+expect(harness.lab_summary({"runs": [{"variant": "ref", "ms": 65}]}) == {"ref": {}}, "a camera frame summarises to nothing")
 
 expect(harness.pack_opt_args({"TAA": False, "FOG_LAYERS": 3, "SSR": True}) == ["opt=FOG_LAYERS=3", "opt=SSR", "opt=!TAA"],
        "a scene's pack options reach pack_lab as the same switches the live run sets")

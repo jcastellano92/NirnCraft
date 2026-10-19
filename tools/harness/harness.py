@@ -939,6 +939,13 @@ def lab_summary(report):
         if "pop" in r:  # sweep
             v.update(pop=r["pop"], popMax=r["pop_max"], dE=r["dE"], steps=r["steps"])
             continue
+        if "motion_dE" in r:  # moving camera with TAA: the worst distance
+            v["motionDEMax"] = max(v.get("motionDEMax", 0.0), r["motion_dE"])
+            v["flickerMax"] = max(v.get("flickerMax", 0.0), r["flicker"])
+            v.setdefault("_steps", []).append(r["steps"])
+            continue
+        if "iou" not in r:  # a camera frame: nothing to summarise
+            continue
         v["iouMin"] = min(v.get("iouMin", 1.0), r["iou"])
         v["dEMax"] = max(v.get("dEMax", 0.0), r["dE"])
         v.setdefault("_steps", []).append(r["steps"])

@@ -634,6 +634,37 @@
       "capture": "world",
       "source": "native/tools/atlas_lab.cpp:1",
       "note": "beyond render distance the live picture is today's far field; the offline one is the real blocks: their difference is the far field's error in the game's own view"
+    },
+    {
+      "id": "atlaslab-falkreath-motion",
+      "title": "Far-field lab: moving camera with a real TAA over Falkreath (shimmer, history loss)",
+      "tags": [
+        "feature:farfield",
+        "suite:atlaslab"
+      ],
+      "tier": "lab",
+      "lab": {
+        "tool": "atlas_lab",
+        "blocks": "@game/nirncraft-atlaslab/blocks.bin",
+        "volume": "@game/nirncraft-atlaslab/falkreath.alv",
+        "motion": 1,
+        "dist": "60,200,600",
+        "mframes": 48,
+        "speed": 0.5,
+        "strafe": 0.3,
+        "variants": "ref,current,micro,boxes,groups"
+      },
+      "after": [
+        "atlaslab-export"
+      ],
+      "wait": 0,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "native/tools/atlas_lab.cpp:1",
+      "note": "labSummary: motionDEMax, flickerMax per representation (ref's own numbers are TAA's floor)"
     }
   ]
 }

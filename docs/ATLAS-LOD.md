@@ -215,6 +215,32 @@ for no visible pop; groups stay closest to ref. Prefiltering the face textures o
 twice (TAA's jitter already averages the pixel), so it is off; it may still earn its place for single frames in fast
 motion (dE1), to be measured with a moving-camera TAA.
 
+**Moving camera with a real TAA** (`motion=1`: short moves at game speed, 0.5 blocks a frame forward and 0.3
+sideways, history reprojected by hit distance, clamped to the 3 x 3 neighbourhood, 10 % blend; against ref converged
+at every frame; synthetic tree):
+
+| | 60 m dE / flicker | 200 m | 600 m |
+|---|---|---|---|
+| ref through the same TAA (TAA's own floor) | 2.0 / 2.1 | 4.2 / 2.9 | 7.5 / 3.5 |
+| current | 2.9 / 3.0 | 6.3 / 3.5 | 8.5 / 3.3 |
+| micro-voxels | 2.0 / 2.1 | 3.6 / 2.8 | 6.7 / 3.2 |
+| boxes | 2.0 / 2.1 | 3.6 / 2.8 | 6.5 / 3.2 |
+| groups | 2.0 / 2.1 | 3.6 / 2.9 | 6.5 / 3.2 |
+| groups, prefiltered faces | 2.0 / 2.1 | 3.7 / 2.9 | 7.4 / 3.5 |
+
+In motion boxes and groups shimmer no more than exact micro-voxels; most of what remains is TAA's own lag (ref
+scores the same), a TAA question, not a representation one. Prefiltered faces are worse in motion too: dropped.
+
+**Texture resolution up close** (ground truth, 2026-10-19): the 4 x 4 face tiles are right far away but flat up close
+(the cobble path, planks); owning the near field needs faces at the texture's own resolution (16 x 16), stored once
+per texture (an atlas), not per block state.
+
+**Lighting and surfaces beyond Minecraft's path** (owner): once offline and live match, the groups are the place for
+Lumen's ideas: a surface cache per group face (sun visibility, bounce, block light, sky) updated where it changed and
+where it is seen, so far light, shadows and bounce resolve like geometry; and the face textures become a virtual,
+resolution-on-demand atlas (each group face asks for the texel density its footprint needs), better than block meshes
+with fixed textures.
+
 **The same structure for everything** (owner): clouds, rain curtains and fog are density instead of surfaces in the
 same groups (a group keeps its mean density and the spread inside, averaged up the hierarchy like colour, traced with
 the same descend-or-draw rule, so a cloud resolves from a soft blob to its billows as it nears); light is kept per
