@@ -587,7 +587,18 @@ def pop_metrics(scene, imgs):
             m["handoffColorDE"] = fidelity(imgs[i], imgs[i + 1])[0]  # colour jump across the ring
             if m["handoffColorDE"] > 6:
                 flags.append(f"colour jumps by dE {m['handoffColorDE']} across the hand-off")
-            if m["handoffDiff"] > 18:
+            # control pairs: the same step wholly inside or wholly outside the ring; a step changes the view about in
+            # proportion to step / distance, so each is scaled to the hand-off distance
+            step = d[i + 1] - d[i]
+            ctrl = [_centre_diff(imgs[k], imgs[k + 1]) * d[k] / d[i] for k in range(len(d) - 1)
+                    if k != i and d[k + 1] - d[k] == step and k + 1 < len(imgs)]
+            if ctrl:
+                m["handoffExpected"] = round(float(np.mean(ctrl)), 2)
+                m["handoffExcess"] = round(m["handoffDiff"] - m["handoffExpected"], 2)
+                if m["handoffExcess"] > 10:
+                    flags.append(f"hand-off change {m['handoffDiff']} between {d[i]} m and {d[i + 1]} m "
+                                 f"({m['handoffExcess']} over the {m['handoffExpected']} a {step} m step makes anyway)")
+            elif m["handoffDiff"] > 18:
                 flags.append(f"hand-off change {m['handoffDiff']} between {d[i]} m and {d[i + 1]} m")
     if "sweep" in p and len(imgs) > 3:
         diffs = [_centre_diff(imgs[i], imgs[i + 1]) for i in range(len(imgs) - 1)]
@@ -603,7 +614,7 @@ def pop_metrics(scene, imgs):
 
 
 SEAM_COLUMNS = [  # metric, label, warn, bad (higher is worse; luma ratio as |1 - x|)
-    ("handoffDiff", "hand-off change", 10, 18), ("handoffColorDE", "hand-off colour dE", 3, 6),
+    ("handoffDiff", "hand-off change", 10, 18), ("handoffExcess", "hand-off excess", 5, 10), ("handoffColorDE", "hand-off colour dE", 3, 6),
     ("popRatio", "pop in motion (x usual)", 2.5, 4), ("fidelityDE", "far field colour dE", 4, 8),
     ("fidelityStructure", "far field shapes", 12, 20)]
 

@@ -15,18 +15,29 @@
 
 #ifdef SHADOWS
 uniform sampler2DShadow shadowtex0;
+uniform sampler2D shadowtex1;  // the same map's opaque depths, unfiltered: the blocker search reads distances from it
+uniform sampler2D shadowcolor0;  // alpha 0.5 where the caster is foliage (shadow.fsh)
 uniform mat4 shadowModelView;
 uniform mat4 shadowProjection;
-const bool shadowHardwareFiltering = true;
+const bool shadowHardwareFiltering0 = true;
+const bool shadowHardwareFiltering1 = false;
 
 vec3 distortShadow(vec3 p) {
     float f = (1.0 - SHADOW_DISTORT) + length(p.xy) * SHADOW_DISTORT;
     return vec3(p.xy / f, p.z * 0.25);
 }
 
+// the last sunShadow(): blocks from the receiver to what shades it, and the share of that which is foliage
+float gShadowGap = 0.0, gShadowFoliage = 0.0;
+
 // playerPos: camera-relative world position (before curvature); n: world normal; toLight: world direction;
-// px: the pixel (rotates the sample disk per pixel so a few taps read as a soft edge)
-float sunShadow(vec3 playerPos, vec3 n, vec3 toLight, vec2 px) {
+// px: the pixel (rotates the sample disk per pixel so a few taps read as a soft edge); spread: the light's angular
+// radius in radians (the sun's disc, widened by the cloud and rain it shines through).
+// Contact hardening: the penumbra is as wide as the light's spread across the gap from occluder to receiver, so a
+// shadow is sharp where the post meets the ground and soft at the far end of the tree's shade.
+float sunShadow(vec3 playerPos, vec3 n, vec3 toLight, vec2 px, float spread) {
+    gShadowGap = 0.0;
+    gShadowFoliage = 0.0;
     float ndl = dot(n, toLight);
     if (ndl <= 0.0) return 0.0;
     float dist = length(playerPos);
@@ -37,11 +48,36 @@ float sunShadow(vec3 playerPos, vec3 n, vec3 toLight, vec2 px) {
     vec4 sp = shadowProjection * (shadowModelView * vec4(p, 1.0));
     vec3 s = distortShadow(sp.xyz / sp.w) * 0.5 + 0.5;
     float texel = 1.0 / float(shadowMapResolution);
+    // shadow-map units: uv per block at this receiver (orthographic, through the distortion), blocks per depth unit
+    float f = (1.0 - SHADOW_DISTORT) + length(sp.xy / sp.w) * SHADOW_DISTORT;
+    float uvPerBlock = 0.5 * shadowProjection[0][0] / f;
+    float blocksPerDepth = 8.0 / abs(shadowProjection[2][2]);
+    float cone = 2.0 * tan(spread);  // penumbra width per block of gap
+    float rot = ign(px, 0.0) * 6.2831853;
+    // blocker search: the mean depth of what lies towards the light within the widest penumbra a 24-block gap makes
+    float search = clamp(24.0 * cone * uvPerBlock, 2.0 * texel, 32.0 * texel);
+    float blockers = 0.0, nb = 0.0;
+    for (int i = 0; i < 8; i++) {
+        float r = sqrt((float(i) + 0.5) / 8.0);
+        float a = float(i) * 2.39996 + rot + 1.3;
+        vec2 q = s.xy + vec2(cos(a), sin(a)) * r * search;
+        float d = texture(shadowtex1, q).r;
+        if (d < s.z - 0.0004) {
+            blockers += d;
+            nb += 1.0;
+            gShadowFoliage += step(texture(shadowcolor0, q).a, 0.75);
+        }
+    }
+    if (nb == 0.0) return 1.0;  // nothing towards the light here: lit (the filter would agree)
+    float gap = max(s.z - blockers / nb, 0.0) * blocksPerDepth;
+    gShadowGap = gap;
+    gShadowFoliage /= nb;
     // adaptive quality: fewer taps far away first, and a tighter penumbra with fewer taps (less visible noise)
     float qTaps = qualityKnob(1, 0, QUALITY_FALLBACK);
-    float radius = texel * SHADOW_SOFTNESS * mix(0.6, 1.0, qualityKnob(1, 1, 1.0)) * (1.5 + dist * 0.02);
+    // never sharper than the map can resolve here (its texels grow with distance), never wider than 32 texels
+    float minRadius = texel * SHADOW_SOFTNESS * mix(0.6, 1.0, qualityKnob(1, 1, 1.0)) * (0.75 + dist * 0.02);
+    float radius = clamp(gap * cone * 0.5 * uvPerBlock * SHADOW_SOFTNESS, minRadius, 32.0 * texel);
     int taps = qualityCount(SHADOW_TAPS, qTaps * qualityDistance(dist), qualityDither(px), 1);
-    float rot = ign(px, 0.0) * 6.2831853;
     float lit = 0.0;
     for (int i = 0; i < SHADOW_TAPS; i++) {
         if (i >= taps) break;
@@ -117,17 +153,31 @@ float terrainTransmission(vec3 wp, vec3 toLight) {
 
 
 // how much of the key light (sun, or moon at night) reaches this point: shadow map, distant terrain, clouds
+// the last keyVisibility(): the key light that gets through foliage to a leaf (thin leaves glow when the sun is behind
+// them even inside the crown: a few blocks of leaves pass some light, more pass less); walls pass none
+float gKeyThrough = 1.0;
+
 float keyVisibility(vec3 playerPos, vec3 n, vec3 toLight, vec2 px) {
-    float vis = 1.0;
+    float vis = 1.0, through = 1.0;
+#ifdef ATLAS_FAR_FIELD
+    vec2 far = atlasSun(playerPos);
+#else
+    vec2 far = vec2(1.0);
+#endif
 #ifdef SHADOWS
-    vis = sunShadow(playerPos, n, toLight, px);
+    // the light's apparent size: the sun's disc (0.27 degrees), spread by the cloud between it and here and by rain:
+    // under overcast the light comes from a bright patch of sky, not a disc, and shadows go soft
+    float spread = 0.0047 + 0.06 * (1.0 - far.y) + 0.035 * rainStrength;
+    vis = sunShadow(playerPos, n, toLight, px, spread);
+    through = max(vis, gShadowFoliage * exp(-gShadowGap * 0.45));
 #else
     vis = clamp(dot(n, toLight) * 4.0, 0.0, 1.0);
 #endif
 #ifdef ATLAS_FAR_FIELD
-    vec2 far = atlasSun(playerPos);
     vis *= far.x * mix(0.25, 1.0, far.y);
+    through *= far.x * mix(0.25, 1.0, far.y);
 #endif
+    gKeyThrough = through;
 #if FALLBACK_CLOUDS > 0
     // no atlas: the pack's own deck shades the ground
     if (!atlasPresent() && vis > 0.0) vis *= fallbackCloudShadow(playerPos + cameraPosition, toLight, frameTimeCounter, rainStrength);

@@ -38,7 +38,8 @@ import java.util.function.Function;
  * per-biome presets: grass, podzol, coarse dirt, sand, gravel, snow caps, rock bands, ash, scree on steep north and
  * east faces ...) evaluated per column at its exact top block, with the world's seeded surface noises, its biomes
  * (the generator's biome source through the seeded BiomeManager zoom, as chunks store them) and the real surface
- * depth; then freeze_top_layer's snow and ice where the biome is cold enough there. The top block and the one under it
+ * depth; then freeze_top_layer's snow and ice where the biome is cold enough there (snow only in the gaps its ground
+ * cover leaves: AtlasSnowCover). The top block and the one under it
  * go into the tile (AtlasTileCodec v3), so single and multiplayer far fields wear the same blocks.
  *
  * <p>Vanilla only builds its rule context for whole chunks; it is driven here through the same context class,
@@ -65,12 +66,16 @@ final class AtlasSurface {
     private final Constructor<?> ctor;
     private final MethodHandle updateXZ, updateY;
     private final ThreadLocal<Eval> eval;
+    private final AtlasSnowCover snowCover;
 
     /** One thread's rule context and its compiled rule. */
     private final class Eval {
         final MaterialRuleContext ctx;
         final RuleEvaluator rule;
         final BiomeManager biomes;
+        /** The last column(): the share of its ground snow lies on (0 where it does not snow) and its bare ground. */
+        double bare;
+        BlockState groundTop, groundUnder;
 
         Eval() throws ReflectiveOperationException {
             BiomeResolver r = biomeSource.createResolver(random.createClimateSampler(SamplerContext.EMPTY_UNCACHED));
@@ -104,6 +109,7 @@ final class AtlasSurface {
         this.zoomSeed = BiomeManager.obfuscateSeed(seed);
         this.genContext = gen;
         this.seaLevel = seaLevel;
+        this.snowCover = new AtlasSnowCover(seed);
         Class<?> c = MaterialRuleContext.class;
         ctor = c.getDeclaredConstructors()[0];
         ctor.setAccessible(true);
@@ -165,6 +171,9 @@ final class AtlasSurface {
         int n = AtlasNative.TILE, s = 1 << lod;
         int bx = tx * (n << lod), bz = tz * (n << lod);
         BlockState[] r = new BlockState[2];
+        // per 2 x 2 group (coarse tiles): its first column's snow share and bare ground, for the others to roll their own
+        double[] bare = lod > 0 ? new double[n * n] : null;
+        byte[] groundTop = lod > 0 ? new byte[n * n] : null, groundUnder = lod > 0 ? new byte[n * n] : null;
         for (int j = j0; j < j1; j++)
             for (int i = 0; i < n; i++) {
                 int c = j * n + i;
@@ -177,6 +186,12 @@ final class AtlasSurface {
                         out.top[c] = out.top[c0];
                         out.under[c] = out.under[c0];
                         out.flags[c] = out.flags[c0];
+                        if (bare[c0] > 0) {  // cold ground: this column is a gap or a plant by its own roll
+                            boolean snow = snowCover.snows(bare[c0], x, z);
+                            out.top[c] = snow ? out.index(SNOW_LAYER) : groundTop[c0];
+                            out.under[c] = snow ? groundTop[c0] : groundUnder[c0];
+                            out.flags[c] = (byte) (snow ? out.flags[c0] | SNOW : out.flags[c0] & ~SNOW);
+                        }
                         road(out, c, x, z, s, wet(surface[c], water[c]));
                         continue;
                     }
@@ -196,6 +211,13 @@ final class AtlasSurface {
                 out.top[c] = out.index(r[0]);
                 out.under[c] = out.index(r[1]);
                 out.flags[c] = flags;
+                if (bare != null) {
+                    bare[c] = e.bare;
+                    if (e.bare > 0) {
+                        groundTop[c] = out.index(e.groundTop);
+                        groundUnder[c] = out.index(e.groundUnder);
+                    }
+                }
                 road(out, c, x, z, s, wet(surface[c], water[c]));
             }
     }
@@ -227,15 +249,22 @@ final class AtlasSurface {
         if (topB == null) topB = STONE;
         if (under == null) under = STONE;
         byte flags = 0;
+        e.bare = 0;
         BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
         if (Float.isNaN(water) || water <= surface) {
-            // freeze_top_layer: snow on the ground where the biome is cold enough at its height
+            // freeze_top_layer: snow on the ground where the biome is cold enough at its height, and no plant stands
             pos.set(x, top + 1, z);
+            Holder<Biome> biome;
             if (!sea && topB.isSolidRender() && !topB.is(Blocks.ICE) && !topB.is(Blocks.PACKED_ICE)
-                    && e.biomes.getBiome(pos).value().coldEnoughToSnow(pos, seaLevel)) {
-                under = topB;
-                topB = SNOW_LAYER;
-                flags |= SNOW;
+                    && (biome = e.biomes.getBiome(pos)).value().coldEnoughToSnow(pos, seaLevel)) {
+                e.bare = Math.max(1e-6, snowCover.bare(biome, x, z));
+                e.groundTop = topB;
+                e.groundUnder = under;
+                if (snowCover.snows(e.bare, x, z)) {
+                    under = topB;
+                    topB = SNOW_LAYER;
+                    flags |= SNOW;
+                }
             }
         } else {
             pos.set(x, (int) Math.ceil(water) - 1, z);
@@ -273,7 +302,7 @@ final class AtlasSurface {
         ServerLevel level = server.overworld();
         if (level == null || source == null || source.surface() == null || level.players().isEmpty()) return;
         java.util.SplittableRandom rnd = new java.util.SplittableRandom(level.getGameTime());
-        int checked = 0, same = 0, snowAgree = 0, snowReal = 0;
+        int checked = 0, same = 0, snowAgree = 0, snowReal = 0, snowPred = 0;
         Map<String, int[]> byBlock = new HashMap<>();
         var player = level.players().get(0);
         int px = player.getBlockX(), pz = player.getBlockZ();
@@ -284,10 +313,8 @@ final class AtlasSurface {
             if (level.getChunkSource().getChunkNow(x >> 4, z >> 4) == null) continue;
             int y = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.WORLD_SURFACE, x, z) - 1;
             BlockPos.MutableBlockPos p = new BlockPos.MutableBlockPos(x, y, z);
-            boolean snow = false;
             while (y > level.getMinY()) {
                 BlockState b = level.getBlockState(p.setY(y));
-                if (b.is(Blocks.SNOW)) snow = true;
                 if (b.isAir() || b.canBeReplaced() || b.is(net.minecraft.tags.BlockTags.LEAVES) || b.is(net.minecraft.tags.BlockTags.LOGS)
                         || b.is(Blocks.SNOW) || !b.getFluidState().isEmpty()) {
                     y--;
@@ -298,6 +325,8 @@ final class AtlasSurface {
             int ground = source.groundAt(x, z);
             if (y != ground) continue;  // a road, a town pad, a structure, a cave mouth: not what the rules painted
             BlockState real = level.getBlockState(p.setY(y));
+            boolean snow = level.getBlockState(p.setY(y + 1)).is(Blocks.SNOW);  // on the ground, not on leaves
+            p.setY(y);
             // vanilla's chunk-clamped gradient from the exact heights around the column
             AtlasSurface sf = source.surface();
             int lx = x & 15, lz = z & 15;
@@ -310,6 +339,7 @@ final class AtlasSurface {
             checked++;
             if (ok) same++;
             if (snow) snowReal++;
+            if (predSnow) snowPred++;
             if (snow == predSnow) snowAgree++;
             int[] v = byBlock.computeIfAbsent(realName, k -> new int[2]);
             v[0]++;
@@ -320,7 +350,7 @@ final class AtlasSurface {
         byBlock.entrySet().stream().sorted((a, b) -> b.getValue()[0] - a.getValue()[0]).limit(6).forEach(en ->
                 sb.append(' ').append(en.getKey().replace("minecraft:", "")).append(' ')
                         .append(Math.round(100.0 * en.getValue()[1] / en.getValue()[0])).append("% of ").append(en.getValue()[0]).append(';'));
-        com.nirncraft.NirnCraft.LOGGER.info("atlas surface check: {} columns, top block matches {}% (snow cover agrees {}%, {} snowy);{}",
-                checked, Math.round(100.0 * same / checked), Math.round(100.0 * snowAgree / checked), snowReal, sb);
+        com.nirncraft.NirnCraft.LOGGER.info("atlas surface check: {} columns, top block matches {}% (snow cover agrees {}%, {} snowy, {} predicted);{}",
+                checked, Math.round(100.0 * same / checked), Math.round(100.0 * snowAgree / checked), snowReal, snowPred, sb);
     }
 }

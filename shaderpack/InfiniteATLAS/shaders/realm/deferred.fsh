@@ -199,7 +199,7 @@ void main() {
     if (spec.z > 0.0) {
         // light through thin leaves: strongest looking towards the sun through them, softly wrapped otherwise
         float back = pow(max(dot(-v, L), 0.0), 4.0) * 0.8 + 0.25;
-        diffuse += albedo * rad * vis * open * spec.z * back * 0.5;
+        diffuse += albedo * rad * gKeyThrough * open * spec.z * back * 0.5;
     }
 #endif
     vec3 specular = vec3(0.0);

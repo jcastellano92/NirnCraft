@@ -29,6 +29,16 @@ public abstract class ConfiguredFeature<C> {
         return java.util.stream.Stream.empty();
     }
 
+    /** The options of a feature bound to an algorithm of class {@code algorithm}, else null (for code that reasons
+     *  about features without placing them, like the far field's snow cover). */
+    public static <C> C configOf(Feature feature, Class<? extends ConfiguredFeature<C>> algorithm) {
+        if (feature instanceof Bound<?> b && algorithm.isInstance(b.algorithm())) {
+            @SuppressWarnings("unchecked") C c = (C) b.config();
+            return c;
+        }
+        return null;
+    }
+
     private record Bound<C>(ConfiguredFeature<C> algorithm, C config) implements Feature {
         @Override public MapCodec<? extends Feature> codec() { return algorithm.codec(); }
         @Override public java.util.stream.Stream<Holder<Feature>> getSubFeatures() {

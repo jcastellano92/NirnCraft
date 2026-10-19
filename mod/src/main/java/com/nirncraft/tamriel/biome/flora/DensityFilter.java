@@ -30,10 +30,14 @@ public class DensityFilter implements PlacementFilter {
         this.field = field;
     }
 
+    /** The chance a position at (x, z) is kept. */
+    public double keep(long worldSeed, int x, int z) {
+        return floor + (density - floor) * field.sample(worldSeed, x, z);
+    }
+
     @Override
     public boolean shouldPlace(PlacementContext ctx, RandomSource random, BlockPos pos) {
-        double p = floor + (density - floor) * field.sample(ctx.getLevel().getSeed(), pos.getX(), pos.getZ());
-        return random.nextDouble() < p;
+        return random.nextDouble() < keep(ctx.getLevel().getSeed(), pos.getX(), pos.getZ());
     }
 
     @Override

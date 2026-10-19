@@ -218,7 +218,9 @@ def gallery():
 # The renderer at every scale: near chunks end at render distance x 16 - 16 (176 at the test client's 12 chunks) and
 # Infinite ATLAS takes over; these scenes look at the same subjects across that hand-off and far beyond it.
 HANDOFF = 176
-LADDER = [64, 128, 168, 184, 256, 512, 1024, 2048, 4096]      # 168 / 184 straddle the hand-off ring
+# 168 / 184 straddle the hand-off ring; 112 / 128 (all near) and 256 / 272 (all far) are the same 16 m step away from
+# it: how much a 16 m step changes the view anyway (results.pop_metrics: only the excess counts as a seam)
+LADDER = [64, 112, 128, 168, 184, 256, 272, 512, 1024, 2048, 4096]
 TIMES = {"day": 6000, "night": 18000, "dawn": 23300, "dusk": 12600}
 DISTANCE_SUBJECTS = [  # (place, kind, times); night ladders of lit places also get close rungs (torches, windows)
     ("whiterun", "city", ("day", "night")), ("solitude", "city", ("day", "night")),

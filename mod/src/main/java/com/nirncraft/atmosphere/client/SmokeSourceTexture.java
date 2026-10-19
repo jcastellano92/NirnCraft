@@ -68,8 +68,9 @@ public final class SmokeSourceTexture {
         }
         // Odd row-one texels are a shared celestial state; even texels remain smoke shapes.
         image.setPixelABGR(1, 1, (int) Math.floorMod(level.getOverworldClockTime(), 1_728_000L));
-        // the far field's near / far hand-off band (blocks / 64): the pack's crossfade uses the same one
-        image.setPixelABGR(17, 1, rgba(Math.min(1f, com.nirncraft.atlas.AtlasClient.handoffBand / 64f), 0f, 0f, 1f));
+        // the far field's near / far hand-off band (blocks / 64): the pack's crossfade uses the same one. Row 0 from
+        // texel 17 on is free (row 1's odd texels from 17 hold the aurora)
+        image.setPixelABGR(17, 0, rgba(Math.min(1f, com.nirncraft.atlas.AtlasClient.handoffBand / 64f), 0f, 0f, 1f));
         image.setPixelABGR(3, 1, rgba(NightSkyState.visibility, NightSkyState.pollution,
                 NightSkyState.masserLight, NightSkyState.secundaLight));
         double solarAngle = com.nirncraft.atmosphere.client.SkyEnvironment.sunCycle(level, 1f) * Math.PI * 2;

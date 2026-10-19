@@ -71,7 +71,7 @@ vec2 toScreen(vec3 view) {
 // data texture; the pack's own setting only without the mod (one source of truth: a mismatch drew a ring)
 float handoffBand() {
     if (haveSmoke()) {
-        float b = texelFetch(smokeSourcesTex, ivec2(17, 1), 0).r * 64.0;
+        float b = texelFetch(smokeSourcesTex, ivec2(17, 0), 0).r * 64.0;
         if (b > 1.0) return b;
     }
     return ATLAS_HANDOFF_BAND;
