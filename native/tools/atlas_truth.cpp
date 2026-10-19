@@ -53,6 +53,7 @@
 #include <windows.h>
 #endif
 
+#include "pack_look.hpp"
 #include "png.hpp"
 
 namespace {
@@ -249,6 +250,7 @@ struct Quad {
     // fluids: lit and tinted when built (FluidRenderer gives a face one colour and one light)
     bool baked = false;
     uint32_t bakedColor = 0xFFFFFFFF;
+    uint32_t bakedTint = 0xFFFFFFFF;  // (the colour without the face's shade: lighting=realistic's albedo)
     int bakedLight = 0;
 };
 struct Model {
@@ -282,6 +284,7 @@ struct State {
     std::vector<Tint> tints;
     std::vector<int> variants;
     bool overflow = false;  // geometry beyond its own cell: rays through the neighbours test it too
+    uint8_t cls = 255;      // blocks.bin's class (classes=): 0 solid, 1 foliage, 2 water, 3 emissive, 4 plant; 255 unknown
     bool has(uint16_t f) const { return (flags & f) != 0; }
 };
 std::vector<Model> models;
@@ -1245,6 +1248,7 @@ void fluidQuads(const State& self, int x, int y, int z, std::vector<Quad>& out) 
         float us[4] = {u0, u1, u2, u3}, vs[4] = {v0, v1, v2, v3};
         for (int i = 0; i < 4; i++) q.p[i] = ps[i], q.u[i] = us[i], q.v[i] = vs[i];
         q.sprite = sprite, q.dir = uint8_t(dir), q.layer = fm.layer, q.baked = true, q.bakedColor = color, q.bakedLight = light;
+        q.bakedTint = tint;
         finishQuad(q);
         out.push_back(q);
         if (back) {  // addFace's back face: the same vertices in reverse order
@@ -1312,6 +1316,9 @@ struct Hit {
 };
 
 float pixelAngle = 0.001f;  // the camera's pixel size on the tangent plane (the mip level's scale)
+// a secondary ray (lighting=realistic: shadows, sky visibility, light): cutouts at their full resolution, as a shadow
+// map or a ray traced shadow sees the leaf, not the camera's mip of it
+thread_local bool tlSecondary = false;
 
 // one-sided ray / quad (its two triangles, 0-1-2 and 0-2-3 as the GPU draws a quad), nearest beyond tmin
 bool hitQuad(const Quad& q, V3 base, V3 o, V3 d, float tmin, float& t, int& tri, float& b1, float& b2) {
@@ -1320,7 +1327,9 @@ bool hitQuad(const Quad& q, V3 base, V3 o, V3 d, float tmin, float& t, int& tri,
         V3 v0 = q.p[0] + base, v1 = q.p[k == 0 ? 1 : 2] + base, v2 = q.p[k == 0 ? 2 : 3] + base;
         V3 e1 = v1 - v0, e2 = v2 - v0, pv = cross(d, e2);
         float det = dot(e1, pv);
-        if (det <= 1e-12f) continue;  // back face or edge-on: culled as the terrain pipelines cull
+        // back face or edge-on: culled as the terrain pipelines cull. A secondary ray (shadow, sky, light) meets both
+        // sides: light is stopped by a leaf seen from behind too (the ground inside a bush of leaves blocks)
+        if (tlSecondary ? std::fabs(det) <= 1e-12f : det <= 1e-12f) continue;
         float inv = 1.f / det;
         V3 tv = o - v0;
         float u = dot(tv, pv) * inv;
@@ -1358,7 +1367,7 @@ void testBlock(int x, int y, int z, V3 o, V3 d, float tmin, Hit& best, std::vect
         // the mip level: texels per pixel along the most stretched screen axis
         V3 nrm = cross(q.p[idx[1]] - q.p[idx[0]], q.p[idx[2]] - q.p[idx[0]]);
         float cosT = std::fabs(dot(norm(nrm), d));
-        float lod = std::log2(std::max(1e-6f, q.rho * t * pixelAngle / std::max(cosT, 0.02f)));
+        float lod = tlSecondary ? -1.f : std::log2(std::max(1e-6f, q.rho * t * pixelAngle / std::max(cosT, 0.02f)));
         RGBA tex = sample(q.sprite, u, v, lod);
         uint8_t layer = q.layer;
         if (!opt.cutoutLeaves && st.has(F_LEAVES)) layer = SOLID;  // ModelBlockRenderer.forceOpaque
@@ -1542,6 +1551,431 @@ Pixel traceRay(V3 o, V3 d, std::string* log = nullptr) {
     return px;
 }
 
+// ---- lighting=realistic: the shader pack's light, physically placed ------------------------------------------------
+// The same mesh, lit the way InfiniteATLAS means it rather than the way Minecraft's light map approximates it
+// (docs/ATLAS-LOD.md, "A realistic reference"): the pack's sun / moon radiance with ray traced shadows against the real
+// quads (cutout texels let light through: dappled shade under leaves), its sky ambient as the visibility of the sky
+// hemisphere (cosine weighted rays: no light levels), block lights as shadowed point lights at the emitters with an
+// inverse square falloff, emitters glowing as the pack's materials do, optionally one bounce, then the pack's exposure,
+// night vision and ACES tonemap (pack_look.hpp). The element tier scores the renderers against it under the same light.
+using packlook::C3;
+
+struct RealOpts {
+    int mode = 0;  // 0 vanilla (Minecraft's light), 1 realistic, 2 albedo (bake= only: the surfaces' own colour)
+    float sun[3] = {0, 1, 0}, key[3] = {0, 1, 0};
+    C3 keyRad, skyUp, ground, floor, bgHdr;
+    packlook::Look look;
+    float spread = 0.0047f;  // the key light's angular radius (lib/lighting.glsl: the sun's disc, 0.27 degrees)
+    int ao = 4;              // sky rays a sample
+    int bounce = 0;          // 1: sky rays that meet a surface take its light (one bounce)
+    bool lights = true, sss = true;
+    float lightI = 9.4f;     // a level-15 emitter's intensity: the pack's block light curve at 3 - 8 blocks
+    float lightR0 = 0.5f;    // blocks: the softening radius of the inverse square (the emitter's size)
+} real;
+
+// leaves and plants: light passes through them (the pack's FOLIAGE_SSS) and shadow rays carry on through them for it
+bool foliage(const State& s) { return s.cls == 1 || s.cls == 4 || (s.cls == 255 && (s.has(F_LEAVES) || s.offType != 0)); }
+
+// a point light: an emitting block (its model's box: sampled for soft shadows), Minecraft's reach as its range
+struct PLight {
+    V3 lo, hi;  // the emitting box, volume coordinates
+    V3 c;
+    float I = 0, R = 0;
+    C3 col;
+    int b[3];
+};
+std::vector<PLight> plights;
+std::map<std::array<int, 3>, std::vector<int>> lightCells;  // 16-block cells -> lights reaching into them
+
+// the emitter's hue: the mod's coloured block light (FogRadianceTexture.emitterColour), at the warm light's luminance
+// as the pack mixes it (lib/lighting.glsl blockLightAt); warm firelight for everything else
+C3 emitterHue(const std::string& n) {
+    auto has = [&](const char* k) { return n.find(k) != std::string::npos; };
+    uint32_t c = 0;
+    if (has("soul") || has("crimson_nirnroot")) c = has("crimson") ? 0xFF7290 : 0x71DBFF;
+    else if (has("sea_lantern") || has("crystal") || has("glow_lichen")) c = 0x91DFFF;
+    else if (has("end_rod") || has("pearlescent")) c = 0xD9B7FF;
+    else if (has("verdant_froglight")) c = 0xBFFFA4;
+    else if (has("redstone")) c = 0xFF3D25;
+    else if (has("lava") || has("magma")) c = 0xFF7028;
+    C3 warm = packlook::blockLightHue();
+    if (!c) return warm;
+    C3 h{std::pow(float((c >> 16) & 255) / 255.f, 2.2f), std::pow(float((c >> 8) & 255) / 255.f, 2.2f), std::pow(float(c & 255) / 255.f, 2.2f)};
+    return h * (packlook::lum(warm) / std::max(packlook::lum(h), 1e-4f));
+}
+
+void collectLights() {
+    plights.clear(), lightCells.clear();
+    auto add = [&](int x, int y, int z) {
+        const State& s = stateAt(x, y, z);
+        if (s.emit == 0 || s.has(F_AIR)) return;
+        PLight L;
+        const Model* m = modelAt(s, x, y, z);
+        V3 base = V3{float(x), float(y), float(z)} + offsetOf(s, x + vol.x0, z + vol.z0);
+        V3 lo = m ? m->lo : V3{0, 0, 0}, hi = m ? m->hi : V3{1, 1, 1};
+        if (s.fluid >= 0) lo = {0, 0, 0}, hi = {1, s.fluidH, 1};
+        for (int a = 0; a < 3; a++) lo[a] = std::clamp(lo[a], 0.f, 1.f), hi[a] = std::clamp(hi[a], lo[a], 1.f);
+        L.lo = base + lo, L.hi = base + hi, L.c = (L.lo + L.hi) * 0.5f;
+        L.I = real.lightI * (float(s.emit) / 15.f) * (float(s.emit) / 15.f);
+        L.R = float(s.emit) + 1.f;
+        L.col = emitterHue(s.name);
+        L.b[0] = x, L.b[1] = y, L.b[2] = z;
+        int i = int(plights.size());
+        plights.push_back(L);
+        for (int cx = int(std::floor((L.c.x - L.R) / 16)); cx <= int(std::floor((L.c.x + L.R) / 16)); cx++)
+            for (int cy = int(std::floor((L.c.y - L.R) / 16)); cy <= int(std::floor((L.c.y + L.R) / 16)); cy++)
+                for (int cz = int(std::floor((L.c.z - L.R) / 16)); cz <= int(std::floor((L.c.z + L.R) / 16)); cz++) lightCells[{cx, cy, cz}].push_back(i);
+    };
+    int lo[3] = {0, 0, 0}, hi[3] = {vol.sx - 1, vol.sy - 1, vol.sz - 1};
+    if (vol.cropped)
+        for (int k = 0; k < 3; k++) lo[k] = std::max(lo[k], vol.c0[k]), hi[k] = std::min(hi[k], vol.c1[k]);
+    if (!vol.sparse) {
+        for (int y = lo[1]; y <= hi[1]; y++)
+            for (int z = lo[2]; z <= hi[2]; z++)
+                for (int x = lo[0]; x <= hi[0]; x++)
+                    if (stateAt(x, y, z).emit) add(x, y, z);
+    } else {
+        for (int gy = 0; gy < vol.nsy; gy++)
+            for (int gz = 0; gz < vol.nsz; gz++)
+                for (int gx = 0; gx < vol.nsx; gx++) {
+                    const Section* c = vol.section(gx, gy, gz);
+                    if (!c) continue;
+                    bool any = false;
+                    for (uint32_t id : c->pal) any |= stateOf(id).emit != 0;
+                    if (!any) continue;
+                    for (int i = 0; i < 4096; i++) {
+                        int x = gx * 16 + (i & 15), y = gy * 16 + (i >> 8), z = gz * 16 + ((i >> 4) & 15);
+                        if (x >= lo[0] && y >= lo[1] && z >= lo[2] && x <= hi[0] && y <= hi[1] && z <= hi[2] && stateAt(x, y, z).emit) add(x, y, z);
+                    }
+                }
+    }
+}
+
+// ---- sampling: per pixel (or texel) a random rotation of low-discrepancy sequences (R2), so a pixel's samples spread
+// evenly over the sun's disc, the hemisphere and each light
+uint32_t hash32(uint32_t x) {
+    x ^= x >> 16, x *= 0x7feb352du, x ^= x >> 15, x *= 0x846ca68bu, x ^= x >> 16;
+    return x;
+}
+float hashf(uint32_t a, uint32_t b) { return float(hash32(a * 0x9E3779B9u ^ hash32(b)) >> 8) / 16777216.f; }
+void r2(uint32_t j, uint32_t seed, uint32_t salt, float& u, float& v) {
+    double fu = 0.5 + double(j) * 0.7548776662466927 + double(hashf(seed, salt * 2 + 1)),
+           fv = 0.5 + double(j) * 0.5698402909980532 + double(hashf(seed, salt * 2 + 2));
+    u = float(fu - std::floor(fu)), v = float(fv - std::floor(fv));
+}
+void basis(V3 n, V3& t, V3& b) {  // Duff et al. 2017
+    float s = n.z >= 0 ? 1.f : -1.f, a = -1.f / (s + n.z), c = n.x * n.y * a;
+    t = {1 + s * n.x * n.x * a, s * c, -s * n.x};
+    b = {c, s + n.y * n.y * a, -n.y};
+}
+V3 cosineDir(V3 n, float u, float v) {
+    V3 t, b;
+    basis(n, t, b);
+    float r = std::sqrt(u), ph = 2 * packlook::PI * v;
+    return norm(t * (r * std::cos(ph)) + b * (r * std::sin(ph)) + n * std::sqrt(std::max(0.f, 1 - u)));
+}
+V3 coneDir(V3 n, float ang, float u, float v) {
+    if (ang <= 0) return n;
+    V3 t, b;
+    basis(n, t, b);
+    float r = std::tan(ang) * std::sqrt(u), ph = 2 * packlook::PI * v;
+    return norm(n + t * (r * std::cos(ph)) + b * (r * std::sin(ph)));
+}
+
+struct Secondary {  // a scope tracing secondary rays
+    bool prev;
+    Secondary() : prev(tlSecondary) { tlSecondary = true; }
+    ~Secondary() { tlSecondary = prev; }
+};
+
+// where a ray leaves everything it can meet: the crop box (and a block of what pokes out of it), else the volume
+float contentExit(V3 o, V3 d) {
+    float lo[3] = {-1, -1, -1}, hi[3] = {float(vol.sx + 1), float(vol.sy + 1), float(vol.sz + 1)};
+    if (vol.cropped)
+        for (int k = 0; k < 3; k++) lo[k] = float(vol.c0[k] - 1), hi[k] = float(vol.c1[k] + 2);
+    float t1 = 1e30f;
+    for (int a = 0; a < 3; a++) {
+        if (std::fabs(d[a]) < 1e-12f) continue;
+        float ta = (lo[a] - o[a]) / d[a], tb = (hi[a] - o[a]) / d[a];
+        t1 = std::min(t1, std::max(ta, tb));
+    }
+    return std::max(t1, 0.f);
+}
+
+// what passes along o + d t, 0 < t < tmax: translucent layers keep (1 - alpha), cutout holes pass, an opaque texel stops
+// it. through: foliage does not stop it (its first distance is kept), only other blocks do (light through leaves).
+// skip: the block of the light the ray goes to (its own quads are the light, not in the way)
+struct Vis {
+    float T = 1, firstT = -1;
+    bool solid = false;
+};
+Vis visibility(V3 o, V3 d, float tmax, const int* skip = nullptr, bool through = false) {
+    Secondary sec;
+    Vis v;
+    tmax = std::min(tmax, contentExit(o, d));
+    float tmin = 0;
+    for (int layer = 0; layer < 64; layer++) {
+        Hit h = nearest(o, d, tmin);
+        if (!h.hit || h.t >= tmax) return v;
+        if (skip && h.bx == skip[0] && h.by == skip[1] && h.bz == skip[2]) return v;
+        tmin = h.t + 1e-4f;
+        if (h.layer == TRANSLUCENT) {
+            v.T *= 1 - h.tex[3];
+            if (v.T < 1e-3f) return v.T = 0, v.solid = true, v;
+            continue;
+        }
+        if (v.firstT < 0) v.firstT = h.t;
+        if (through && foliage(*h.st)) continue;
+        v.T = 0, v.solid = true;
+        return v;
+    }
+    return v;
+}
+
+// the nearest opaque hit (translucent layers in front attenuate T)
+Hit firstOpaque(V3 o, V3 d, float& T) {
+    Secondary sec;
+    T = 1;
+    float tmax = contentExit(o, d), tmin = 0;
+    for (int layer = 0; layer < 64; layer++) {
+        Hit h = nearest(o, d, tmin);
+        if (!h.hit || h.t >= tmax) return Hit{};
+        if (h.layer != TRANSLUCENT) return h;
+        T *= 1 - h.tex[3];
+        tmin = h.t + 1e-4f;
+    }
+    return Hit{};
+}
+
+struct Surf {
+    V3 P, Ng, N;
+    C3 albedo, emit;
+    bool fol = false;
+    int b[3];
+};
+
+// a hit's surface: where, its geometric and shading normals (towards the ray's origin), its albedo (the texel times the
+// tint, linear by the pack's pow 2.2) and what it emits (lib/materials.glsl: fire 5, lava 6, hot rock, lights by their
+// texel's brightness, 4)
+Surf surfaceOf(const Hit& h, V3 o, V3 d) {
+    Surf s;
+    const Quad& q = h.q;
+    int idx[3];
+    float w[3];
+    triWeights(h.tri, h.b1, h.b2, idx, w);
+    s.P = o + d * h.t;
+    V3 ng = cross(q.p[idx[1]] - q.p[idx[0]], q.p[idx[2]] - q.p[idx[0]]);
+    s.Ng = len(ng) > 1e-12f ? norm(ng) : V3{float(DV[q.dir][0]), float(DV[q.dir][1]), float(DV[q.dir][2])};
+    if (dot(s.Ng, d) > 0) s.Ng = s.Ng * -1.f;
+    V3 n{0, 0, 0};
+    for (int i = 0; i < 3; i++) n = n + q.n[idx[i]] * w[i];
+    s.N = len(n) > 0.5f ? norm(n) : s.Ng;
+    if (dot(s.N, s.Ng) <= 0.05f) s.N = s.Ng;
+    uint32_t tint = 0xFFFFFFFFu;
+    if (q.baked) tint = q.bakedTint;
+    else if (q.tint >= 0 && size_t(q.tint) < h.st->tints.size()) tint = tintOf(h.st->tints[size_t(q.tint)], h.bx, h.bz);
+    auto lin = [](float v) { return std::pow(std::clamp(v, 0.f, 1.f), 2.2f); };
+    s.albedo = {lin(h.tex[0] * float((tint >> 16) & 255) / 255.f), lin(h.tex[1] * float((tint >> 8) & 255) / 255.f),
+                lin(h.tex[2] * float(tint & 255) / 255.f)};
+    s.fol = foliage(*h.st);
+    s.b[0] = h.bx, s.b[1] = h.by, s.b[2] = h.bz;
+    if (h.st->emit || q.emit) {
+        const std::string& n2 = h.st->name;
+        float k;
+        if (n2.find("fire") != std::string::npos) k = 5.f;
+        else if (n2.find("lava") != std::string::npos) k = 6.f;
+        else if (n2.find("magma") != std::string::npos) k = 3.f * 0.6f * packlook::smooth(0.3f, 0.7f, s.albedo.r - s.albedo.b);
+        else k = 4.f * packlook::smooth(0.35f, 0.8f, packlook::lum(s.albedo));
+        s.emit = s.albedo * k;
+    }
+    return s;
+}
+
+V3 offsetAlong(const Surf& s, V3 dir) { return s.P + s.Ng * (dot(s.Ng, dir) > 0 ? 2e-3f : -2e-3f); }
+
+// the block lights at a surface: each emitter within reach, a point of its box (soft shadows), inverse square softened
+// by R0 and windowed to Minecraft's reach (1 - (d / R)^4)^2, the cosine (both sides for foliage), shadowed
+C3 blockIrradiance(const Surf& s, uint32_t j, uint32_t seed) {
+    C3 sum;
+    if (!real.lights || plights.empty()) return sum;
+    auto it = lightCells.find({int(std::floor(s.P.x / 16)), int(std::floor(s.P.y / 16)), int(std::floor(s.P.z / 16))});
+    if (it == lightCells.end()) return sum;
+    for (int li : it->second) {
+        const PLight& L = plights[size_t(li)];
+        if (L.b[0] == s.b[0] && L.b[1] == s.b[1] && L.b[2] == s.b[2]) continue;  // its own block: its glow is its emission
+        V3 dc = L.c - s.P;
+        if (dot(dc, dc) >= (L.R + 1) * (L.R + 1)) continue;
+        float u, v;
+        r2(j, seed, 100u + uint32_t(li), u, v);
+        float ww = hashf(seed ^ (uint32_t(li) * 7919u), j);
+        V3 p{L.lo.x + (L.hi.x - L.lo.x) * u, L.lo.y + (L.hi.y - L.lo.y) * v, L.lo.z + (L.hi.z - L.lo.z) * ww};
+        V3 l = p - s.P;
+        float dist = len(l);
+        if (dist < 1e-4f || dist >= L.R) continue;
+        l = l * (1.f / dist);
+        float c = dot(s.N, l);
+        if (s.fol) c = std::fabs(c);
+        if (c <= 0) continue;
+        float x = dist / L.R, x4 = x * x * x * x, win = (1 - x4) * (1 - x4);
+        float E = L.I * c / (dist * dist + real.lightR0 * real.lightR0) * win;
+        Vis vv = visibility(offsetAlong(s, l), l, dist, L.b);
+        if (vv.T <= 0) continue;
+        sum = sum + L.col * (E * vv.T);
+    }
+    return sum;
+}
+
+struct RealParts {
+    C3 albedo, direct, sss, ambient, block, emit, hdr;
+    float sunVis = 0, through = 0, skyVis = 0;
+};
+
+C3 bounceRadiance(const Hit& h, V3 o, V3 d, uint32_t j, uint32_t seed);
+
+// one sample of a hit's outgoing radiance (deferred.fsh's sum, each term physically placed):
+//   albedo x (key light x n.l x its ray traced visibility + light through foliage + sky (the visible hemisphere's
+//   radiance, cosine weighted) + the pack's ambient floor + the shadowed block lights) + emission
+RealParts realShade(const Hit& h, V3 o, V3 d, uint32_t j, uint32_t seed, bool bounce) {
+    RealParts r;
+    Surf s = surfaceOf(h, o, d);
+    r.albedo = s.albedo, r.emit = s.emit;
+    V3 L{real.key[0], real.key[1], real.key[2]};
+    float u, v;
+    r2(j, seed, 1, u, v);
+    V3 Ls = coneDir(L, real.spread, u, v);
+    float ndl = dot(s.N, L);
+    if ((ndl > 0 || (s.fol && real.sss)) && packlook::lum(real.keyRad) > 0) {
+        Vis vv = visibility(offsetAlong(s, Ls), Ls, 1e30f, nullptr, s.fol && real.sss);
+        r.sunVis = vv.firstT < 0 && !vv.solid ? vv.T : 0.f;
+        r.direct = real.keyRad * (std::max(ndl, 0.f) * r.sunVis);
+        if (s.fol && real.sss) {
+            // FOLIAGE_SSS: light through thin leaves, strongest looking towards the light through them; what reaches
+            // through a crown fades with the leaves crossed (the pack's exp(-gap 0.45) from its blocker search)
+            r.through = std::max(r.sunVis, vv.solid ? 0.f : vv.T * (vv.firstT < 0 ? 1.f : std::exp(-0.45f * vv.firstT)));
+            float back = std::pow(std::max(dot(d, L), 0.f), 4.f) * 0.8f + 0.25f;
+            float k = h.st->cls == 4 || (h.st->cls == 255 && !h.st->has(F_LEAVES)) ? 0.5f : 0.6f;
+            r.sss = real.keyRad * (r.through * k * back * 0.5f);
+        }
+    }
+    C3 sky;
+    float vis = 0;
+    int n = std::max(1, real.ao);
+    for (int k = 0; k < n; k++) {
+        r2(j * uint32_t(n) + uint32_t(k), seed, 2, u, v);
+        V3 w = cosineDir(s.N, u, v);
+        if (dot(w, s.Ng) <= 0) continue;  // under the surface (a bent shading normal): no light from there
+        V3 org = offsetAlong(s, w);
+        if (!bounce) {
+            Vis vv = visibility(org, w, 1e30f);
+            if (vv.solid) continue;
+            sky = sky + (w.y >= 0 ? real.skyUp : real.ground) * vv.T;
+            vis += vv.T;
+            continue;
+        }
+        float T;
+        Hit b = firstOpaque(org, w, T);
+        if (!b.hit) {
+            sky = sky + (w.y >= 0 ? real.skyUp : real.ground) * T;
+            vis += T;
+        } else {
+            sky = sky + bounceRadiance(b, org, w, j * uint32_t(n) + uint32_t(k), seed ^ 0xB0B0u) * T;
+        }
+    }
+    r.skyVis = vis / float(n);
+    r.ambient = sky * (1.f / float(n));
+    r.block = blockIrradiance(s, j, seed);
+    r.hdr = s.albedo * (r.direct + r.sss + r.ambient + real.floor + r.block) + s.emit;
+    return r;
+}
+
+// a surface a sky ray met: its light (sun with its shadow, the open sky, the floor, the block lights), no further rays
+C3 bounceRadiance(const Hit& h, V3 o, V3 d, uint32_t j, uint32_t seed) {
+    Surf s = surfaceOf(h, o, d);
+    V3 L{real.key[0], real.key[1], real.key[2]};
+    float ndl = dot(s.N, L);
+    C3 e;
+    if (ndl > 0 && packlook::lum(real.keyRad) > 0) e = real.keyRad * (ndl * visibility(offsetAlong(s, L), L, 1e30f).T);
+    C3 amb = packlook::mix(real.ground, real.skyUp, s.N.y * 0.5f + 0.5f);
+    return s.albedo * (e + amb + real.floor + blockIrradiance(s, j, seed)) + s.emit;
+}
+
+// front to back as traceRay, each layer lit realistically; HDR radiance (misses: the background sky)
+C3 traceReal(V3 o, V3 d, uint32_t j, uint32_t seed, bool& hit, float& depth, bool& translucent) {
+    C3 c;
+    float trans = 1, tmin = 0;
+    hit = false, translucent = false, depth = 1e30f;
+    for (int layer = 0; layer < 24; layer++) {
+        Hit h = nearest(o, d, tmin);
+        if (!h.hit) {
+            c = c + real.bgHdr * trans;
+            break;
+        }
+        if (!hit) depth = h.t;
+        hit = true;
+        RealParts p = realShade(h, o, d, j, seed + uint32_t(layer) * 7919u, real.bounce != 0);
+        float a = h.layer == TRANSLUCENT ? h.tex[3] : 1.f;
+        c = c + p.hdr * (trans * a);
+        if (h.layer != TRANSLUCENT) break;
+        translucent = true;
+        trans *= 1 - a;
+        tmin = h.t + 1e-4f;
+        if (trans < 1e-3f) break;
+    }
+    return c;
+}
+
+// the time of day (time=, ticks) or sun=x,y,z, and the pack's light and look for it
+void setupReal(const Args& a) {
+    float t = float(num(a, "time", 6000));
+    if (a.count("sun")) {
+        float s[3];
+        if (std::sscanf(str(a, "sun", "").c_str(), "%f,%f,%f", &s[0], &s[1], &s[2]) == 3) {
+            V3 n = norm({s[0], s[1], s[2]});
+            real.sun[0] = n.x, real.sun[1] = n.y, real.sun[2] = n.z;
+        }
+    } else {
+        packlook::sunDirAt(t, float(num(a, "sunpath", -25)), real.sun);
+    }
+    packlook::keyLight(real.sun, real.key, real.keyRad);
+    packlook::skyAmbientParts(real.sun, real.skyUp, real.ground);
+    real.floor = packlook::ambientFloor();
+    real.look.exposure = a.count("exposure") ? float(num(a, "exposure", 0)) : packlook::canonicalExposure(real.sun);
+    real.look.exposureOption = float(num(a, "exposureoption", 1));
+    real.look.nightVision = float(num(a, "nv", 0.7));
+    real.bgHdr = packlook::backgroundSky(real.sun);
+    real.spread = float(num(a, "spread", 0.0047));
+    real.ao = int(num(a, "ao", 4));
+    real.bounce = int(num(a, "bounce", 0));
+    real.lights = num(a, "lights", 1) != 0;
+    real.sss = num(a, "sss", 1) != 0;
+    real.lightI = float(num(a, "lighti", 9.4));
+    real.lightR0 = float(num(a, "lightr0", 0.5));
+    if (num(a, "floor", 1) == 0) real.floor = C3{};
+    float k[3];
+    if (a.count("keyrad") && std::sscanf(str(a, "keyrad", "").c_str(), "%f,%f,%f", &k[0], &k[1], &k[2]) == 3) real.keyRad = {k[0], k[1], k[2]};
+    if (a.count("skyrad") && std::sscanf(str(a, "skyrad", "").c_str(), "%f,%f,%f", &k[0], &k[1], &k[2]) == 3) real.skyUp = {k[0], k[1], k[2]};
+    if (a.count("groundrad") && std::sscanf(str(a, "groundrad", "").c_str(), "%f,%f,%f", &k[0], &k[1], &k[2]) == 3) real.ground = {k[0], k[1], k[2]};
+}
+
+uint32_t hexOf(C3 c) {
+    auto q = [](float v) { return uint32_t(std::lround(std::clamp(v, 0.f, 1.f) * 255.f)); };
+    return q(c.r) << 16 | q(c.g) << 8 | q(c.b);
+}
+
+// classes=<dir>/blocks.bin: each state's class (foliage and plants pass light; the old library's ids are the same)
+void loadClasses(const std::string& path) {
+    Reader r;
+    if (!r.load(path) || !r.magic("ALB1")) return;
+    uint32_t n = r.u32();
+    for (uint32_t i = 0; i < n && r.ok; i++) {
+        uint32_t id = r.u32();
+        r.bytes(r.u16());
+        uint8_t cls = r.u8();
+        r.p += 3 + 8 + 4 + 6 * 16 * 4;
+        if (id < states.size() && states[id].present) states[id].cls = cls;
+    }
+}
+
 // ---- the sidecars: quads.json (options) and the volume's json (tints, lighting) ------------------------------------
 
 std::string readText(const std::string& path) {
@@ -1601,6 +2035,27 @@ int main(int argc, char** argv) {
     SetPriorityClass(GetCurrentProcess(), BELOW_NORMAL_PRIORITY_CLASS);  // a tool beside the game: never ahead of it
 #endif
     auto a = parse(argc, argv);
+    // lighting=vanilla (Minecraft's light map, the default) | realistic (the shader pack's light, ray traced) | albedo
+    // (bake= only: the surfaces' own colour, for renderers that light it themselves)
+    {
+        std::string lm = str(a, "lighting", "vanilla");
+        real.mode = lm == "realistic" ? 1 : lm == "albedo" ? 2 : 0;
+        if (real.mode || a.count("info")) setupReal(a);
+    }
+    // info=1: the time of day's light and look as the realistic mode uses them (one JSON line; for the harness, which
+    // lights our renderers the same way)
+    if (a.count("info")) {
+        C3 bg = packlook::display(real.bgHdr, real.look);
+        float el = std::asin(std::clamp(real.sun[1], -1.f, 1.f)) * 180 / packlook::PI;
+        float az = std::atan2(real.sun[0], -real.sun[2]) * 180 / packlook::PI;
+        std::printf("{\"tool\":\"atlas_truth\",\"mode\":\"info\",\"time\":%g,\"sun\":[%.6f,%.6f,%.6f],\"sunElevation\":%.4f,"
+                    "\"sunAzimuth\":%.4f,\"key\":[%.6f,%.6f,%.6f],\"keyRad\":[%.5f,%.5f,%.5f],\"skyUp\":[%.5f,%.5f,%.5f],"
+                    "\"ground\":[%.5f,%.5f,%.5f],\"exposure\":%.5f,\"nightVision\":%.3f,\"sky\":\"%06X\",\"skyHdr\":[%.6f,%.6f,%.6f]}\n",
+                    num(a, "time", 6000), real.sun[0], real.sun[1], real.sun[2], el, az, real.key[0], real.key[1], real.key[2],
+                    real.keyRad.r, real.keyRad.g, real.keyRad.b, real.skyUp.r, real.skyUp.g, real.skyUp.b, real.ground.r, real.ground.g,
+                    real.ground.b, real.look.exposure, real.look.nightVision, hexOf(bg), real.bgHdr.r, real.bgHdr.g, real.bgHdr.b);
+        return 0;
+    }
     std::string quadsPath = str(a, "quads", ""), volPath = str(a, "volume", ""), out = str(a, "out", "atlas_truth.png");
     std::string spritesPath = str(a, "sprites", quadsPath.empty() ? "" : dirOf(quadsPath) + "sprites.bin");
     bool library = false;
@@ -1633,6 +2088,7 @@ int main(int argc, char** argv) {
         std::fprintf(stderr, "atlas_truth: no block library (quads=<dir>/quads.bin, or the old blocks=<dir>/blocks.bin)\n");
         return 2;
     }
+    if (a.count("classes")) loadClasses(a["classes"]);
     if (!loadVolume(volPath)) {
         std::fprintf(stderr, "atlas_truth: no volume at '%s' (in game: /nirncraft-atlaslab here <name> <r> <down> <up> light)\n", volPath.c_str());
         return 2;
@@ -1677,6 +2133,7 @@ int main(int argc, char** argv) {
     buildLightmap();
     auto tb = std::chrono::steady_clock::now();
     markOverflow();
+    if (real.mode == 1) collectLights();
     int threads = int(num(a, "threads", std::max(1u, std::thread::hardware_concurrency() / 2)));
     size_t nquads = 0;
     for (const Model& m : models) nquads += m.quads.size();
@@ -1684,6 +2141,10 @@ int main(int argc, char** argv) {
                  states.size(), models.size(), nquads, sprites.size(), vol.sx, vol.sy, vol.sz, vol.x0, vol.y0, vol.z0, lightSrc.c_str(),
                  vol.hasTints ? "per column" : "one for all",
                  std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - tb).count());
+    if (real.mode == 1)
+        std::fprintf(stderr, "atlas_truth: realistic light: sun %.3f %.3f %.3f, key radiance %.3f %.3f %.3f, exposure %.3f, %d sky rays a sample, "
+                     "bounce %d, %zu point lights\n", real.sun[0], real.sun[1], real.sun[2], real.keyRad.r, real.keyRad.g, real.keyRad.b,
+                     real.look.exposure, real.ao, real.bounce, plights.size());
 
     // single rays (tests): ray=ox,oy,oz,dx,dy,dz;... in world coordinates, a JSON line each
     if (a.count("ray")) {
@@ -1695,8 +2156,40 @@ int main(int argc, char** argv) {
             pixelAngle = float(num(a, "pixel", 0.001));
             std::string log;
             Pixel px = traceRay(o, d, &log);
-            std::printf("{\"ray\":[%g,%g,%g,%g,%g,%g],\"hit\":%s,\"rgb\":[%.2f,%.2f,%.2f],\"layers\":[%s]}\n", r[0], r[1], r[2], r[3], r[4], r[5],
-                        px.hit ? "true" : "false", px.c.r * 255, px.c.g * 255, px.c.b * 255, log.c_str());
+            std::string rl;
+            if (real.mode == 1) {  // the realistic terms of the first surface and the pixel, averaged over samples=
+                int N = std::max(1, int(num(a, "samples", 256)));
+                uint32_t seed = hash32(uint32_t(std::hash<std::string>{}(one)));
+                Hit h = nearest(o, d, 0);
+                RealParts sum;
+                C3 pix;
+                for (int j = 0; j < N; j++) {
+                    bool hh, tt;
+                    float dd;
+                    pix = pix + traceReal(o, d, uint32_t(j), seed, hh, dd, tt) * (1.f / float(N));
+                    if (!h.hit) continue;
+                    RealParts p = realShade(h, o, d, uint32_t(j), seed, real.bounce != 0);
+                    float k = 1.f / float(N);
+                    sum.direct = sum.direct + p.direct * k, sum.sss = sum.sss + p.sss * k, sum.ambient = sum.ambient + p.ambient * k;
+                    sum.block = sum.block + p.block * k, sum.emit = sum.emit + p.emit * k, sum.hdr = sum.hdr + p.hdr * k;
+                    sum.albedo = p.albedo, sum.sunVis += p.sunVis * k, sum.through += p.through * k, sum.skyVis += p.skyVis * k;
+                }
+                C3 disp = packlook::display(pix, real.look);
+                char buf[1024];
+                auto c3 = [](C3 c) {
+                    char b[96];
+                    std::snprintf(b, sizeof b, "[%.6f,%.6f,%.6f]", c.r, c.g, c.b);
+                    return std::string(b);
+                };
+                std::snprintf(buf, sizeof buf, ",\"real\":{\"albedo\":%s,\"direct\":%s,\"sss\":%s,\"ambient\":%s,\"block\":%s,\"emit\":%s,"
+                              "\"hdr\":%s,\"sunVis\":%.4f,\"through\":%.4f,\"skyVis\":%.4f,\"pixelHdr\":%s,\"display\":[%.2f,%.2f,%.2f]}",
+                              c3(sum.albedo).c_str(), c3(sum.direct).c_str(), c3(sum.sss).c_str(), c3(sum.ambient).c_str(), c3(sum.block).c_str(),
+                              c3(sum.emit).c_str(), c3(sum.hdr).c_str(), sum.sunVis, sum.through, sum.skyVis, c3(pix).c_str(), disp.r * 255,
+                              disp.g * 255, disp.b * 255);
+                rl = buf;
+            }
+            std::printf("{\"ray\":[%g,%g,%g,%g,%g,%g],\"hit\":%s,\"rgb\":[%.2f,%.2f,%.2f],\"layers\":[%s]%s}\n", r[0], r[1], r[2], r[3], r[4], r[5],
+                        px.hit ? "true" : "false", px.c.r * 255, px.c.g * 255, px.c.b * 255, log.c_str(), rl.c_str());
         }
         return 0;
     }
@@ -1707,6 +2200,7 @@ int main(int argc, char** argv) {
     // axes after f's normal axis: u on (axis + 1) % 3, v on (axis + 2) % 3, texel centres at (i + 0.5) / 16.
     if (a.count("bake")) {
         pixelAngle = 0.0005f;
+        int bakeN = std::max(1, int(num(a, "bakespp", 16)));
         int lo[3] = {0, 0, 0}, hi[3] = {vol.sx - 1, vol.sy - 1, vol.sz - 1};
         if (vol.cropped)
             for (int k = 0; k < 3; k++) lo[k] = std::max(0, vol.c0[k]), hi[k] = std::min(k == 0 ? vol.sx - 1 : k == 1 ? vol.sy - 1 : vol.sz - 1, vol.c1[k]);
@@ -1749,6 +2243,17 @@ int main(int argc, char** argv) {
                                 Shaded s = shade(h);
                                 float al = h.layer == TRANSLUCENT ? h.tex[3] : 1.f;
                                 auto q = [](float v) { return uint32_t(std::lround(std::clamp(v, 0.f, 1.f) * 255.f)); };
+                                if (real.mode == 1) {  // the realistic light: bakespp samples of the texel, the mean tonemapped
+                                    uint32_t seed = hash32(uint32_t(i) * 2654435761u ^ uint32_t(f * 256 + tu + 16 * tv) * 40503u);
+                                    C3 acc;
+                                    for (int k = 0; k < bakeN; k++) acc = acc + realShade(h, o, d, uint32_t(k), seed, real.bounce != 0).hdr;
+                                    C3 disp = packlook::display(acc * (1.f / float(bakeN)), real.look);
+                                    s.c = {disp.r, disp.g, disp.b};
+                                } else if (real.mode == 2) {  // the albedo, times the face shade atlas_far divides a card by
+                                    static const float SHADE[6] = {0.5f, 1.0f, 0.8f, 0.8f, 0.6f, 0.6f};
+                                    C3 alb = surfaceOf(h, o, d).albedo * SHADE[f];
+                                    s.c = {std::pow(alb.r, 1 / 2.2f), std::pow(alb.g, 1 / 2.2f), std::pow(alb.b, 1 / 2.2f)};
+                                }
                                 cd.c[tu + 16 * tv] = q(al) << 24 | q(s.c.r) << 16 | q(s.c.g) << 8 | q(s.c.b);
                                 cd.sky[tu + 16 * tv] = uint8_t(std::lround(s.sky * 16.f)), cd.blk[tu + 16 * tv] = uint8_t(std::lround(s.block * 16.f));
                                 any++;
@@ -1825,7 +2330,15 @@ int main(int argc, char** argv) {
                             fr = 1.f / 3;
                             for (int k = s + 1; k; k /= 3, fr /= 3) jy += fr * float(k % 3);
                         }
-                        Pixel p = traceRay(eye, rayDir(float(px) + jx, float(py) + jy));
+                        Pixel p;
+                        if (real.mode == 1) {  // the realistic light, tonemapped per sample (as the bench's cards are)
+                            C3 hdr = traceReal(eye, rayDir(float(px) + jx, float(py) + jy), uint32_t(s), hash32(uint32_t(i) * 747796405u + 2891336453u),
+                                               p.hit, p.depth, p.translucent);
+                            C3 disp = packlook::display(hdr, real.look);
+                            p.c = {disp.r, disp.g, disp.b};
+                        } else {
+                            p = traceRay(eye, rayDir(float(px) + jx, float(py) + jy));
+                        }
                         float wt = 1.f / float(spp);
                         acc[i].r += p.c.r * wt, acc[i].g += p.c.g * wt, acc[i].b += p.c.b * wt;
                         hit[i] += p.hit ? wt : 0.f;
@@ -1857,9 +2370,10 @@ int main(int argc, char** argv) {
         atlas::writePng(base + "_depth.png", dp.data(), uint32_t(w), uint32_t(h));
         std::fprintf(stderr, "atlas_truth: %dx%d (%d spp) in %.0f ms on %d threads -> %s\n", w, h, spp, ms, threads, outp.c_str());
         std::printf("{\"tool\":\"atlas_truth\",\"mode\":\"camera\",\"eye\":[%f,%f,%f],\"w\":%d,\"h\":%d,\"spp\":%d,\"ms\":%d,\"hitShare\":%.4f,"
-                    "\"translucentShare\":%.4f,\"light\":\"%s\",\"tints\":\"%s\",\"states\":%zu,\"models\":%zu,\"quads\":%zu,\"sprites\":%zu,"
+                    "\"translucentShare\":%.4f,\"lighting\":\"%s\",\"light\":\"%s\",\"tints\":\"%s\",\"states\":%zu,\"models\":%zu,\"quads\":%zu,\"sprites\":%zu,"
                     "\"frames\":[{\"variant\":\"truth\",\"ms\":%d}]}\n",
-                    ex, ey, ez, w, h, spp, int(ms), hits / double(img.size()), double(translucentPx.load()) / double(img.size()), lightSrc.c_str(),
+                    ex, ey, ez, w, h, spp, int(ms), hits / double(img.size()), double(translucentPx.load()) / double(img.size()),
+                    real.mode == 1 ? "realistic" : "vanilla", lightSrc.c_str(),
                     vol.hasTints ? "column" : "global", states.size(), models.size(), nquads, sprites.size(), int(ms));
     };
     if (a.count("cameras")) {
