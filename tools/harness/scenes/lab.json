@@ -669,6 +669,73 @@
       "capture": "world",
       "source": "native/tools/atlas_lab.cpp:1",
       "note": "labSummary: motionDEMax, flickerMax per representation (ref's own numbers are TAA's floor)"
+    },
+    {
+      "id": "atlaslab-seam",
+      "title": "Falkreath's street in normal play without a shader pack: the near/far seam (no fog-off)",
+      "tags": [
+        "feature:farfield",
+        "feature:seam",
+        "suite:atlaslab",
+        "place:falkreath",
+        "town:falkreath"
+      ],
+      "tier": "live",
+      "group": "live",
+      "variants": [
+        "vanilla"
+      ],
+      "weather": "off",
+      "time": 6000,
+      "settle": "static",
+      "pose": {
+        "place": "falkreath",
+        "height": 3,
+        "yaw": 0,
+        "pitch": 10
+      },
+      "wait": 100,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "mod/src/main/java/com/nirncraft/atlas/AtlasTruthView.java",
+      "note": "what a player sees at the hand-off; atlaslab-falkreath-seam measures it against the real blocks"
+    },
+    {
+      "id": "atlaslab-falkreath-seam",
+      "title": "The seam in normal play against the real blocks to 1 km (a fog ring or hole shows as dE at the hand-off)",
+      "tags": [
+        "feature:farfield",
+        "feature:seam",
+        "suite:atlaslab",
+        "place:falkreath"
+      ],
+      "tier": "lab",
+      "lab": {
+        "tool": "atlas_lab",
+        "blocks": "@game/nirncraft-atlaslab/blocks.bin",
+        "volume": "@game/nirncraft-atlaslab/falkreath-view.als",
+        "shade": "mc",
+        "frames": 2,
+        "variants": "ref"
+      },
+      "camera_from": {
+        "scene": "atlaslab-seam",
+        "variant": "vanilla"
+      },
+      "after": [
+        "atlaslab-seam",
+        "atlaslab-export"
+      ],
+      "wait": 0,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "native/tools/atlas_lab.cpp:1"
     }
   ]
 }

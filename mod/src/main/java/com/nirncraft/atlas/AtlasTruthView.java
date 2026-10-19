@@ -20,6 +20,17 @@ public final class AtlasTruthView {
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onRenderFog(ViewportEvent.RenderFog event) {
+        // the far field on screen (vanilla path): no render-distance fog. It only hid the edge of the loaded chunks,
+        // which the far field now continues; left on it fogged the near field's edge and the fallback compositor
+        // continued that fog into the far field, a pale ring at the seam with clear land beyond it. Environmental fog
+        // (weather, water, lava, blindness) stays, at its real distance, near and far alike.
+        if (!noFog && AtlasClient.active() && !AtlasClient.irisPackInUse()) {
+            var fog = event.getFogData();
+            float far = 1.0e7f;
+            fog.renderDistanceStart = fog.renderDistanceEnd = far;
+            fog.cloudEnd = Math.max(fog.cloudEnd, far);
+            return;
+        }
         if (!noFog) return;
         float far = 1.0e7f;
         event.setNearPlaneDistance(far);
