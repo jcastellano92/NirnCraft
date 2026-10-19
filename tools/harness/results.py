@@ -341,6 +341,18 @@ def agent_pages(run, rows, include_unchanged=False):
     for p in range(0, len(picked), AGENT_ROWS):
         tiles = []
         for n, (r, before, after) in enumerate(picked[p:p + AGENT_ROWS]):
+            if after.width > 2.2 * after.height:  # a strip (ladder / sweep / frames): full width, before under it
+                m = r.get("metrics", {})
+                wide = (2 * AGENT_TILE + 8, round(after.height * (2 * AGENT_TILE + 8) / after.width))
+                head = f"{n + 1}. {r['scene']} [{r['variant']}]"
+                sub = "; ".join(m.get("flags", []))[:120] or f"changed {m.get('changed', '-')}%"
+                parts = [_label(after.resize(wide), head + " (after)", sub,
+                                (255, 214, 120) if m.get("flags") else (235, 235, 235))]
+                if before is not None:
+                    parts.append(_label(before.resize(wide), "before", ""))
+                tiles.append(stack(parts, 4))
+                index.append(f"page-{p // AGENT_ROWS + 1:02d} row {n + 1}: {r['scene']} [{r['variant']}] strip; {sub}")
+                continue
             size = (AGENT_TILE, round(after.height * AGENT_TILE / after.width))
             m = r.get("metrics", {})
             head = f"{n + 1}. {r['scene']} [{r['variant']}]"
@@ -446,4 +458,55 @@ def overview(scenes):
     out.append("</table>")
     (STORE / "index.html").write_text("\n".join(out), encoding="utf-8")
     return STORE / "index.html"
+
+# ------------------------------------------------------------------------------------------------------- strips + pop
+def strip(imgs, labels, tile_w=480):
+    """Several captures as one labelled grid (rows of up to 5): ladders, sweeps, animation frames."""
+    cols = min(5, len(imgs))
+    rows = (len(imgs) + cols - 1) // cols
+    th = round(imgs[0].height * tile_w / imgs[0].width)
+    out = Image.new("RGB", (cols * tile_w, rows * (th + 22)), (10, 10, 12))
+    d = ImageDraw.Draw(out)
+    for i, (im, lab) in enumerate(zip(imgs, labels)):
+        x, y = (i % cols) * tile_w, (i // cols) * (th + 22)
+        out.paste(im.resize((tile_w, th)), (x, y + 22))
+        if lab:
+            d.text((x + 6, y + 3), lab, font=_font(14), fill=(235, 235, 235))
+    return out
+
+
+def _centre_diff(a, b, frac=0.4):
+    w, h = 320, round(320 * a.height / a.width)
+    a = np.asarray(a.resize((w, h)), dtype=np.float32)
+    b = np.asarray(b.resize((w, h)), dtype=np.float32)
+    y0, y1 = int(h * (0.5 - frac / 2)), int(h * (0.5 + frac / 2))
+    x0, x1 = int(w * (0.5 - frac / 2)), int(w * (0.5 + frac / 2))
+    return float(np.abs(a[y0:y1, x0:x1] - b[y0:y1, x0:x1]).mean())
+
+
+def pop_metrics(scene, imgs):
+    """Ladder: how much the subject changes between the two rungs that straddle the near/far hand-off (the same view
+    16 blocks apart: a big change is a seam or pop). Sweep: frame-to-frame change while flying through the hand-off;
+    a spike far above the flight's usual change is a pop-in / pop-out (its frame says where)."""
+    p = scene.get("pose") or {}
+    m, flags = {}, []
+    if "ladder" in p:
+        d = p["ladder"]["distances"]
+        pair = [i for i in range(len(d) - 1) if d[i] < 176 <= d[i + 1]]
+        if pair:
+            i = pair[0]
+            m["handoffDiff"] = round(_centre_diff(imgs[i], imgs[i + 1]), 2)
+            if m["handoffDiff"] > 18:
+                flags.append(f"hand-off change {m['handoffDiff']} between {d[i]} m and {d[i + 1]} m")
+    if "sweep" in p and len(imgs) > 3:
+        diffs = [_centre_diff(imgs[i], imgs[i + 1]) for i in range(len(imgs) - 1)]
+        med = float(np.median(diffs)) or 0.5
+        k = int(np.argmax(diffs))
+        m.update(popMax=round(max(diffs), 2), popMedian=round(med, 2), popRatio=round(max(diffs) / max(med, 0.5), 2),
+                 popFrame=k + 1)
+        if m["popRatio"] > 4 and m["popMax"] > 6:
+            flags.append(f"pop during the flight at frame {k + 1} (x{m['popRatio']} the usual change)")
+    if flags:
+        m["popFlags"] = flags
+    return m
 

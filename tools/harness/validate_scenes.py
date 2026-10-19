@@ -52,6 +52,8 @@ def main():
             errors.append(f"{w}: visit is [x, z, height, yaw, pitch]")
         if k == "camera" and len(pose["camera"]) != 6:
             errors.append(f"{w}: camera is [x, y, z, lookX, lookY, lookZ]")
+        if k in ("ladder", "sweep") and not pose[k].get("stage") and pose[k].get("place") not in places:
+            errors.append(f"{w}: unknown place {pose[k].get('place')}")
         if k in ("place", "dungeon") and pose[k] not in places:
             errors.append(f"{w}: unknown place {pose[k]}")
         if k == "place" and pose.get("shot") not in (None, "aerial", "approach"):

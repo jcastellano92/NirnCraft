@@ -432,8 +432,10 @@ def capture(scene, variant, pose_lines, capture_lines):
         recover(scene)  # a failed scene cleans up after itself, then the run moves on
         raise RuntimeError(f"{e} [blocked by {blocked}]" if blocked else str(e)) from None
     png = SHOTS / f"{tag}.png"
-    frames = [SHOTS / f"{tag}-f{i}.png" for i in range(scene["frames"][0])] if scene.get("frames") else [png]
-    for f in frames:
+    import catalog as _cat
+    shots = _cat.shot_files(scene, tag)
+    files = [SHOTS / f"{stem}.png" for stem, _ in shots]
+    for f in files:
         t0, last = time.monotonic(), -1
         while time.monotonic() - t0 < 60:  # screenshots encode off-thread
             size = f.stat().st_size if f.exists() else -1
@@ -443,25 +445,23 @@ def capture(scene, variant, pose_lines, capture_lines):
             time.sleep(0.4)
         if not f.exists():
             raise RuntimeError(f"no screenshot written for {f.stem}")
-    if scene.get("frames"):  # an animation: one filmstrip (2 rows), so before/after compares the whole motion
+    extra = {}
+    if len(files) > 1:  # frames / a distance ladder / a pop sweep: one labelled strip, so before/after compares all
         from PIL import Image
-        imgs = [Image.open(f).convert("RGB") for f in frames]
-        w, h = imgs[0].width // 2, imgs[0].height // 2
-        cols = (len(imgs) + 1) // 2
-        strip = Image.new("RGB", (w * cols, h * 2))
-        for i, im in enumerate(imgs):
-            strip.paste(im.resize((w, h)), ((i % cols) * w, (i // cols) * h))
-        strip.save(png)
-        for f in frames:
+        import results as _res
+        imgs = [Image.open(f).convert("RGB") for f in files]
+        extra = _res.pop_metrics(scene, imgs)
+        _res.strip(imgs, [label for _, label in shots]).save(png)
+        first_json = SHOTS / f"{shots[0][0]}.json"
+        if first_json.exists() and not (SHOTS / f"{tag}.json").exists():
+            first_json.replace(SHOTS / f"{tag}.json")
+        for f in files:
             f.unlink(missing_ok=True)
-        if not (SHOTS / f"{tag}.json").exists() and (SHOTS / f"{tag}-f0.json").exists():
-            (SHOTS / f"{tag}-f0.json").replace(SHOTS / f"{tag}.json")
-        for i in range(1, len(frames)):
-            (SHOTS / f"{tag}-f{i}.json").unlink(missing_ok=True)
+            f.with_suffix(".json").unlink(missing_ok=True)
     rec = {}
     if (SHOTS / f"{tag}.json").exists():
         rec = json.loads((SHOTS / f"{tag}.json").read_text(encoding="utf-8"))
     perf = None
     if scene.get("measure") and (PERF / f"{tag}.json").exists():
         perf = json.loads((PERF / f"{tag}.json").read_text(encoding="utf-8"))
-    return png, rec, perf
+    return png, rec, perf, extra

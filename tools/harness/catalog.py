@@ -15,7 +15,7 @@ SCENES = ROOT / "tools/harness/scenes"
 PLACES = ROOT / "mod/src/main/resources/nirncraft/tamriel/places"
 LANG = ROOT / "mod/src/main/lang/nirncraft"
 NOT_SCENES = {"groups.json", "legacy-seed.json"}
-POSES = ("visit", "camera", "place", "dungeon", "realm", "spawn", "stage")
+POSES = ("visit", "camera", "place", "dungeon", "realm", "spawn", "stage", "ladder", "sweep")
 WEATHERS = {"clear", "cloudy", "overcast", "fog", "drizzle", "rain", "storm", "snow", "blizzard", "ashfall",
             "ash_storm", "dust", "sandstorm", "blight", "gale"}
 
@@ -163,6 +163,150 @@ def gallery():
     return out
 
 
+# ---------------------------------------------------------------------------------------------------- distance
+# The renderer at every scale: near chunks end at render distance x 16 - 16 (176 at the test client's 12 chunks) and
+# Infinite ATLAS takes over; these scenes look at the same subjects across that hand-off and far beyond it.
+HANDOFF = 176
+LADDER = [64, 128, 168, 184, 256, 512, 1024, 2048, 4096]      # 168 / 184 straddle the hand-off ring
+TIMES = {"day": 6000, "night": 18000, "dawn": 23300, "dusk": 12600}
+DISTANCE_SUBJECTS = [  # (place, kind, times); night ladders of lit places also get close rungs (torches, windows)
+    ("whiterun", "city", ("day", "night")), ("solitude", "city", ("day", "night")),
+    ("windhelm", "city", ("day", "night")), ("markarth", "city", ("day", "night")),
+    ("riften", "city", ("day", "night")), ("imperial_city", "city", ("day", "night")),
+    ("vivec", "city", ("day", "night")), ("dragon_bridge", "river", ("day", "night")),
+    ("ilinalta_fishery", "lake", ("day", "night")), ("whiterun_stables", "road", ("day", "night")),
+    ("bleak_falls_barrow", "dungeon", ("day", "night")),
+    # long shadows from the peaks across the valleys at sunrise and sunset
+    ("throat_of_the_world", "mountain", ("day", "night", "dawn", "dusk")),
+    ("high_hrothgar", "mountain", ("day", "dawn", "dusk")),
+    ("red_mountain", "volcano", ("day", "night", "dawn", "dusk")),
+]
+LIT = {"city", "river", "road", "lake", "dungeon"}
+MATERIAL_SAMPLES = [  # metal, precious metal, glass / ice, snow, polished stone, hot rock, PBR-mapped, plain references
+    "minecraft:iron_block", "minecraft:gold_block", "minecraft:copper_block", "minecraft:glass", "minecraft:ice",
+    "minecraft:packed_ice", "minecraft:snow_block", "minecraft:polished_andesite", "minecraft:magma_block",
+    "nirncraft:crystal_block", "nirncraft:rubble_floor", "nirncraft:fire_coals", "minecraft:oak_planks",
+    "minecraft:stone_bricks", "minecraft:mossy_cobblestone", "minecraft:quartz_block"]
+NIGHT_LADDER = [16, 32] + LADDER  # lights: close, mid, far, very far
+
+
+def distance_scenes():
+    """Per subject and time of day: a distance ladder (one bearing, one labelled strip, the hand-off pair measured;
+    at night lit places start at 16 m so torches and windows are seen at every distance), a pop sweep (a smooth 120 m
+    flight through the hand-off ring, a frame every 10 steps, frame-to-frame change measured: pop-in of terrain,
+    buildings and lights) and high-altitude views; plus clouds approached from below and through the deck.
+    suite:distance-ladder / distance-sweep / altitude / clouds-distance."""
+    out = []
+    for pid, kind, times in DISTANCE_SUBJECTS:
+        pl = places().get(pid)
+        if not pl:
+            continue
+        region = [f"region:{pl['region']}"] if pl.get("region") else []
+        slug = pid.replace("_", "-")
+        for tod in times:
+            tags = ["suite:distance", "feature:farfield", "feature:popin", f"place:{pid}", f"subject:{kind}",
+                    f"time:{tod}"] + region + (["feature:lights"] if tod == "night" and kind in LIT else []) \
+                + (["feature:shadows"] if tod in ("dawn", "dusk") else [])
+            common = {"_file": "(generated distance)", "time": TIMES[tod], "weather": "clear", "variants": ["shaders"],
+                      "checks": {}, "source": "generated: catalog.distance_scenes"}
+            rungs = NIGHT_LADDER if tod == "night" and kind in LIT else LADDER
+            out.append({**common, "id": f"dist-{slug}-{tod}", "title": f"{pid} from {rungs[0]} m to 4 km ({tod})",
+                        "tags": tags + ["suite:distance-ladder"], "timeout": 1500,
+                        # by day also without shaders: the fallback far field at every scale (combos.png: side by side)
+                        "variants": ["shaders", "vanilla"] if tod == "day" else ["shaders"],
+                        "pose": {"ladder": {"place": pid, "distances": rungs}}})
+            if tod in ("day", "night"):
+                out.append({**common, "id": f"pop-{slug}-{tod}", "title": f"{pid}: flying through the hand-off ({tod})",
+                            "tags": tags + ["suite:distance-sweep"], "timeout": 600, "pose": {"sweep": {"place": pid}}})
+            out.append({**common, "id": f"alt-{slug}-{tod}", "title": f"{pid} from high altitude ({tod})",
+                        "tags": tags + ["suite:altitude"], "timeout": 900,
+                        "pose": {"ladder": {"place": pid, "distances": [1200, 1500, 2500],
+                                            "heights": [250, 700, 1400]}}})
+    # PBR / materials at distance: a lineup on the sky stage, 4 m to 128 m (POM range, specular fade, metal F0)
+    for tod in ("day", "dusk"):
+        out.append({"_file": "(generated distance)", "id": f"pbr-ladder-{tod}",
+                    "title": f"Materials from 4 m to 128 m ({tod}): metal, glass, ice, snow, PBR-mapped, plain",
+                    "time": TIMES[tod], "weather": "clear", "variants": ["shaders", "vanilla"], "checks": {},
+                    "timeout": 900, "source": "generated: catalog.distance_scenes",
+                    "tags": ["suite:distance", "suite:pbr", "feature:materials", "feature:pbr", f"time:{tod}"],
+                    "setup": [f"try setblock {STAGE[0] - 7 + i % 8 * 2} {STAGE[1] + 1 + i // 8} {STAGE[2] + (i // 8) * 2} {b}"
+                              for i, b in enumerate(MATERIAL_SAMPLES)],
+                    "pose": {"ladder": {"stage": True, "distances": [4, 8, 16, 32, 64, 128]}}})
+    # clouds at every distance and on approach: one spot, rising from the ground through the deck and above it
+    for weather in ("overcast", "storm", "cloudy"):
+        out.append({"_file": "(generated distance)", "id": f"clouds-approach-whiterun-{weather}",
+                    "title": f"Clouds from the ground up through the deck ({weather})", "time": 6000, "weather": weather,
+                    "variants": ["shaders"], "checks": {}, "timeout": 1500, "source": "generated: catalog.distance_scenes",
+                    "tags": ["suite:distance", "suite:clouds-distance", "feature:clouds", "feature:farfield",
+                             f"weather:{weather}", "place:whiterun", "region:skyrim/whiterun"],
+                    "pose": {"ladder": {"place": "whiterun", "distances": [600, 600, 600, 600, 600, 600],
+                                        "heights": [40, 200, 400, 700, 1000, 1400]}}})
+    return out
+
+
+def _bearing(plan, pid):
+    """Unit vector from the subject towards its best planned aerial camera (a clear line of sight), else south."""
+    e = (plan or {}).get(pid) or {}
+    shots = e.get("aerial") or []
+    pl = places().get(pid) or {}
+    if shots and pl:
+        cx, _, cz = shots[0]["camera"]
+        dx, dz = cx - pl["x"], cz - pl["z"]
+        n = math.hypot(dx, dz) or 1.0
+        return dx / n, dz / n
+    return 0.0, 1.0
+
+
+def _aim(cx, cz, h, sx, sz, rise=15.0):
+    """Yaw / pitch from a camera h above ground at (cx, cz) to a subject at (sx, sz), Minecraft convention."""
+    yaw = math.degrees(math.atan2(-(sx - cx), sz - cz))
+    pitch = math.degrees(math.atan2(h - rise, math.hypot(sx - cx, sz - cz)))
+    return round(yaw, 1), round(pitch, 1)
+
+
+def ladder_rungs(s, plan):
+    """[(x, z, height, yaw, pitch, distance)] for a ladder pose (stage ladders: see stage_rungs)."""
+    lad = s["pose"]["ladder"]
+    pl = places()[lad["place"]]
+    bx, bz = _bearing(plan, lad["place"])
+    heights = lad.get("heights")
+    rungs = []
+    for i, d in enumerate(lad["distances"]):
+        h = heights[i] if heights else max(25, round(d * 0.10))
+        x, z = pl["x"] + bx * d, pl["z"] + bz * d
+        rungs.append((int(x), int(z), int(h)) + _aim(x, z, h, pl["x"], pl["z"]) + (d,))
+    return rungs
+
+
+def sweep_path(s, plan):
+    """((start x, y, z), (end x, y, z), (look x, y, z)): 70 m outside the hand-off ring to 50 m inside it, at a height
+    above the subject that clears the ground between."""
+    pid = s["pose"]["sweep"]["place"]
+    pl = places()[pid]
+    ground = ((plan or {}).get(pid) or {}).get("ground", 100.0)
+    bx, bz = _bearing(plan, pid)
+    y = round(ground + 60, 1)
+    d0, d1 = HANDOFF + 70, HANDOFF - 50
+    start = (round(pl["x"] + bx * d0, 1), y, round(pl["z"] + bz * d0, 1))
+    end = (round(pl["x"] + bx * d1, 1), y, round(pl["z"] + bz * d1, 1))
+    return start, end, (pl["x"], round(ground + 15, 1), pl["z"])
+
+
+def shot_files(s, tag):
+    """The screenshots a scene writes ([(file stem, label)]): one, or several that become one labelled strip."""
+    p = s.get("pose") or {}
+    if s.get("frames"):
+        return [(f"{tag}-f{i}", f"frame {i + 1}") for i in range(s["frames"][0])]
+    if "ladder" in p:
+        d = p["ladder"]["distances"]
+        hs = p["ladder"].get("heights")
+        return [(f"{tag}-r{i}", (f"{x} m" if x < 1000 else f"{x / 1000:g} km") + (f" @ {hs[i]} m up" if hs else ""))
+                for i, x in enumerate(d)]
+    if "sweep" in p:
+        return [(f"{tag}s_{i * 10:04d}", f"{HANDOFF + 70 - i * 5} m") for i in range(25)]
+    return [(tag, None)]
+
+
 # ---------------------------------------------------------------------------------------------------- loading
 def load():
     scenes, seen = [], {}
@@ -181,6 +325,7 @@ def load():
     scenes += planned_places()
     scenes += probes()
     scenes += grounding()
+    scenes += distance_scenes()
     for s in scenes:
         if s["id"] in seen:
             raise ValueError(f"duplicate scene id {s['id']} ({seen[s['id']]} and {s['_file']})")
@@ -269,6 +414,13 @@ def position(s):
         return p["camera"][0], p["camera"][2]
     if "stage" in p:
         return p["stage"][0], p["stage"][2]
+    if "ladder" in p and p["ladder"].get("stage"):
+        return STAGE[0], STAGE[2]
+    for k in ("ladder", "sweep"):
+        if k in p:
+            pl = places().get(p[k].get("place"))
+            if pl:
+                return pl["x"], pl["z"]
     if "place" in p:
         pl = places().get(p["place"])
         if pl:
@@ -341,6 +493,11 @@ def pose_actions(s, plan=None, candidate=0):
         lines.append(f"command nirncraft-realm go {p['realm']}")
         if p.get("look"):
             lines.append(f"command nirncraft-realm look {p['look']}")
+    elif "ladder" in p:
+        pass  # each rung moves the camera itself (capture_actions)
+    elif "sweep" in p:
+        (x, y, z), _, (lx, ly, lz) = sweep_path(s, plan)
+        lines.append(f"camera {x} {y + 6 * candidate} {z} {lx} {ly} {lz}")
     elif "spawn" in p:  # the live spawn can sit inside terrain: screens and spawn shots get a clear spot above (0, 0)
         lines.append(f"visit 0 0 {30 + 25 * candidate} 180 10 {weather or 'clear'}")
         weather = None
@@ -354,7 +511,27 @@ def pose_actions(s, plan=None, candidate=0):
     return lines
 
 
-def capture_actions(s, tag):
+def capture_actions(s, tag, plan=None):
+    p = s.get("pose") or {}
+    if "ladder" in p and p["ladder"].get("stage"):  # on the sky stage: build it, lay out the samples, step back
+        sx, sy, sz = STAGE
+        lines = [f"try fill {sx - 9} {sy} {sz - 9} {sx + 9} {sy} {sz + 9} minecraft:glass",
+                 f"try fill {sx - 9} {sy} {sz - 9} {sx + 9} {sy} {sz + 9} minecraft:smooth_stone",
+                 f"try fill {sx - 9} {sy + 1} {sz - 9} {sx + 9} {sy + 6} {sz + 9} minecraft:air"] + list(s.get("setup", []))
+        for i, d in enumerate(p["ladder"]["distances"]):
+            lines += [f"camera {sx} {sy + 2 + d * 0.35:.1f} {sz - 2 - d:.1f} {sx} {sy + 1.5} {sz + 1}", "settle 1800",
+                      "wait 20", f"capture {tag}-r{i}"]
+        return lines + list(s.get("cleanup", []))
+    if "ladder" in p:  # every rung: move, let the world load, hold, capture
+        lines = []
+        for i, (x, z, h, yaw, pitch, _) in enumerate(ladder_rungs(s, plan)):
+            lines += [f"visit {x} {z} {h} {yaw} {pitch} {s.get('weather') or 'clear'}", "settle 1800",
+                      f"wait {int(s.get('wait', 40))}", f"capture {tag}-r{i}"]
+        return lines + list(s.get("cleanup", []))
+    if "sweep" in p:  # a smooth flight through the hand-off ring; the travel verb captures every 10 steps
+        _, (ex, ey, ez), (lx, ly, lz) = sweep_path(s, plan)
+        return ["settle 1800", f"wait {int(s.get('wait', 60))}",
+                f"camera-travel {tag}s 240 {ex} {ey} {ez} {lx} {ly} {lz}"] + list(s.get("cleanup", []))
     lines = ["settle 1800"]  # the world behind a screen is part of the picture too
     if s.get("wait"):
         lines.append(f"wait {int(s['wait'])}")

@@ -453,8 +453,8 @@ class Runner:
         err = None
         for cand in range(tries):
             try:
-                png, receipt, perf = g.capture(s, v, catalog.pose_actions(s, self.plan, cand),
-                                               lambda tag: catalog.capture_actions(s, tag))
+                png, receipt, perf, popm = g.capture(s, v, catalog.pose_actions(s, self.plan, cand),
+                                                     lambda tag: catalog.capture_actions(s, tag, self.plan))
                 break
             except ValueError as e:  # no (more) planned cameras
                 err = e
@@ -472,6 +472,10 @@ class Runner:
         if perf:
             extra["perf"] = {k: perf[k] for k in ("median", "p95", "p99", "stalls", "frames") if k in perf}
         rec = results.store(s["id"], v, png, meta=receipt, fingerprint=fp, extra=extra)
+        if popm:  # distance ladders / pop sweeps: their numbers and flags join the image's
+            flags = popm.pop("popFlags", [])
+            rec["metrics"].update(popm)
+            rec["metrics"]["flags"] = rec["metrics"].get("flags", []) + flags
         if receipt.get("seed") not in (None, self.seed):
             rec["metrics"]["flags"].append(f"world seed {receipt.get('seed')} != {self.seed}")
         return self.judge(s, v, rec)
@@ -692,6 +696,8 @@ def process_queue(runner, serve=False, on_item=None):
                 live_items.append((s, v))
         if live_items:
             place_ids = [s["pose"]["place"] for s, _ in live_items if (s.get("pose") or {}).get("shot")]
+            place_ids += [s["pose"][k]["place"] for s, _ in live_items for k in ("ladder", "sweep")
+                          if k in (s.get("pose") or {}) and s["pose"][k].get("place")]
             if place_ids:
                 runner.plan = cameras.ensure(place_ids, runner.seed, catalog.places(), log=say)
             gstate = runner.game.client_state() if any(s["tier"] == "live" for s, _ in live_items) else {}
