@@ -149,7 +149,8 @@ public class ShipEntity extends Entity implements HasCustomInventoryScreen {
         for (int i = 0; i < parts.length; i++) {
             parts[i] = new ShipPart(this, shipType.parts[i], shipType.hitWidth(), shipType.height);
         }
-        if (parts.length > 0) this.setId(this.getId());
+        // the parts get their ids in setId() when the ship gets its own (26.3 assigns it after construction:
+        // getId() here throws "before ID assignment" and every client the ship is sent to disconnects)
     }
 
     @Override
@@ -315,6 +316,7 @@ public class ShipEntity extends Entity implements HasCustomInventoryScreen {
     @Override
     public void setId(int id) {
         super.setId(id);
+        if (parts == null) return;  // a superclass constructor may set the id before the parts exist
         for (int i = 0; i < parts.length; i++) parts[i].setId(id + i + 1);
     }
 

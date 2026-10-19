@@ -178,8 +178,8 @@ public class DragonEntity extends Monster implements AnimatedCreature {
         this.leftWing = new DragonPart(this, "left_wing", 3.5f, 1.0f, 0.6f);
         this.rightWing = new DragonPart(this, "right_wing", 3.5f, 1.0f, 0.6f);
         this.parts = new DragonPart[]{head, neck, leftWing, rightWing};
-        // parts take the ids right after the dragon's (like the ender dragon's), the same on server and client
-        this.setId(this.getId());
+        // parts take the ids right after the dragon's, the same on server and client: setId() hands them out when
+        // the dragon gets its id (26.3 assigns it after construction; getId() here throws and the client disconnects)
     }
 
     @Override

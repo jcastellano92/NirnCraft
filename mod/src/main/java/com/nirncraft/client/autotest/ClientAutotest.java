@@ -254,6 +254,39 @@ public final class ClientAutotest {
 
     }
 
+    private static long noWorldWritten;
+
+    /**
+     * The heartbeat while no world is loaded (loading screens, a dimension change, a disconnect): the harness can tell
+     * "still loading" (fresh, a loading screen) from "lost" (fresh, the disconnect screen: its reason becomes the
+     * step's error at once) from "frozen or dead" (stale). liveTick writes the full status while a world is loaded.
+     */
+    private static void noWorldHeartbeat(Minecraft mc) {
+        long now = System.currentTimeMillis();
+        if (now - noWorldWritten < 1000) return;
+        noWorldWritten = now;
+        var screen = mc.gui.screen();
+        var status = new com.google.gson.JsonObject();
+        status.addProperty("pid", ProcessHandle.current().pid());
+        status.addProperty("updated", now);
+        status.addProperty("worldLoaded", false);
+        status.addProperty("screen", screen == null ? "none" : screen.getClass().getSimpleName());
+        status.addProperty("controlVersion", liveModified);
+        status.addProperty("lastAction", liveLastAction);
+        if (screen instanceof net.minecraft.client.gui.screens.DisconnectedScreen) {
+            String why = "client disconnected: " + screen.getNarrationMessage().getString();
+            if (!why.equals(liveError)) NirnCraft.LOGGER.error("Autotest live: {}", why);
+            liveError = why;
+        }
+        status.addProperty("error", liveError);
+        try {
+            Path tmp = Paths.get("nirncraft-live-status.tmp");
+            Files.writeString(tmp, status.toString());
+            Files.move(tmp, Paths.get("nirncraft-live-status.json"),
+                    java.nio.file.StandardCopyOption.REPLACE_EXISTING, java.nio.file.StandardCopyOption.ATOMIC_MOVE);
+        } catch (Exception ignored) {}
+    }
+
     private static void liveTick(Minecraft mc) {
         if(liveCastUntil>0 && tick>=liveCastUntil) {
             liveCastUntil=0;
@@ -994,6 +1027,7 @@ public final class ClientAutotest {
             NirnCraft.LOGGER.info("Autotest: accepted the experimental-settings prompt for the kept test world");
             return;
         }
+        if (LIVE && mc.level == null) noWorldHeartbeat(mc);
         if (mc.level == null && !AUTO_SERVER.isEmpty()) {
             // Keep failed TCP diagnostics on their real connection screen; never fall back to an integrated world.
             if (!autoServerStarted && (mc.gui.screen() instanceof net.minecraft.client.gui.screens.TitleScreen
