@@ -134,8 +134,9 @@ private:
     bool havePacked_ = false;
     // regions mid-fade: the one they replaced (null: there was nothing, the new one dissolves in) and when
     struct Fade {
-        std::shared_ptr<const Region> old;
+        std::shared_ptr<const Region> old;  // null: empty before (wasEmpty) or new to the window
         uint32_t startMs;
+        bool wasEmpty;
     };
     std::unordered_map<Key3, Fade, Key3Hash> fading_;
 };

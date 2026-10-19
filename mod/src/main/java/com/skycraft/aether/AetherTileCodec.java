@@ -115,8 +115,34 @@ final class AetherTileCodec {
         return encode(lod, surface, water, grass, foliage, null);
     }
 
+    /** True when tile bytes of this codec carry surface blocks (inflates the header only). */
+    static boolean hasSurface(byte[] bytes) {
+        byte[] head = new byte[HEAD];
+        Inflater in = new Inflater();
+        try {
+            in.setInput(bytes);
+            int got = 0;
+            while (got < HEAD && !in.finished()) {
+                int k = in.inflate(head, got, HEAD - got);
+                if (k == 0 && (in.needsInput() || in.needsDictionary())) return false;
+                got += k;
+            }
+            return got == HEAD && (head[0] & 0xFF) == VERSION && (head[2] & FLAG_SURFACE) != 0;
+        } catch (DataFormatException e) {
+            return false;
+        } finally {
+            in.end();
+        }
+    }
+
     /** As encode, plus the tile's surface blocks (null for none; canonicalised in place first). */
     static byte[] encode(int lod, float[] surface, float[] water, int[] grass, int[] foliage, Surface blocks) {
+        byte[] out = encodeRaw(lod, surface, water, grass, foliage, blocks);
+        // never more than a client accepts (MAX_BYTES): without the surface planes (the dressing paints it) if need be
+        return out.length > MAX_BYTES && blocks != null ? encodeRaw(lod, surface, water, grass, foliage, null) : out;
+    }
+
+    private static byte[] encodeRaw(int lod, float[] surface, float[] water, int[] grass, int[] foliage, Surface blocks) {
         boolean tints = grass != null && foliage != null;
         byte[] table = new byte[0];
         if (blocks != null) {

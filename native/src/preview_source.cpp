@@ -331,6 +331,7 @@ uint16_t PreviewSource::flowMaterial(double x, double z, const Sample& s, float 
     sample(x + tx * 24, z + tz * 24, a);
     sample(x - tx * 24, z - tz * 24, b);
     double ahead = std::isnan(a.water) ? level : a.water, behind = std::isnan(b.water) ? level : b.water;
+    double baseline = 48.0;  // blocks between the two samples
     // the tile's own levels (exact, falls included) where the raster is flat
     if (std::abs(ahead - behind) < 0.25) {
         int s2 = 3, ia = std::clamp(i + int(std::lround(tx * s2)), 0, TILE - 1), ja = std::clamp(j + int(std::lround(tz * s2)), 0, TILE - 1);
@@ -339,13 +340,14 @@ uint16_t PreviewSource::flowMaterial(double x, double z, const Sample& s, float 
         if (!std::isnan(wa) && !std::isnan(wb)) {
             ahead = wa;
             behind = wb;
+            baseline = 2.0 * s2 * double(1 << t.lod);
         }
     }
     if (ahead > behind) {
         tx = -tx;
         tz = -tz;
     }
-    double slope = std::abs(ahead - behind) / 48.0;
+    double slope = std::abs(ahead - behind) / baseline;
     int speed = slope < 0.015 && s.rivHW >= 2.0f ? 0 : slope < 0.05 ? 1 : 2;
     int dir = int(std::lround(std::atan2(tz, tx) / (6.283185307 / FLOW_DIRS))) & (FLOW_DIRS - 1);
     return uint16_t(M_FLOW0 + dir * FLOW_SPEEDS + speed);

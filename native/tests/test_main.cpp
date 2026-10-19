@@ -705,6 +705,89 @@ static void testLights() {
     aether_destroy(ctx);
 }
 
+// A humanoid impostor is a lit silhouette, never a filled dark rectangle: its pixels cover a humanoid share of their
+// bounding box (tall and narrow, about 60 %, not ~100 %), their colour is near the tint and lit (not black), their
+// height matches the actor's; and none is drawn nearer than the near field's end (the game draws what is there), with
+// a dissolve over the first 16 blocks past it.
+static void testImpostorShape() {
+    std::printf("humanoid impostor shape\n");
+    AetherContext* ctx = nullptr;
+    aether_create(AETHER_BACKEND_CPU, &ctx);
+    std::vector<float> flat(256 * 256, 100.0f), water(256 * 256, NAN);
+    std::vector<uint16_t> top(256 * 256, 2), fill(256 * 256, 3);
+    for (int tz = -2; tz <= 2; tz++)
+        for (int tx = -2; tx <= 2; tx++) {
+            AetherColumnTile t{0, tx, tz, flat.data(), water.data(), top.data(), fill.data(), nullptr, nullptr};
+            aether_upload_column_tile(ctx, &t);
+        }
+    double centre[3] = {0.5, 101.62, 0.5};
+    aether_update(ctx, centre, 0);
+    AetherActor a{};
+    a.pos[0] = 0.5;
+    a.pos[1] = 100.0;
+    a.pos[2] = -29.5;  // 30 blocks north
+    a.yaw = 0.7f;
+    a.height = 1.8f;
+    a.radius = 0.3f;
+    a.kind = 0;
+    a.tint = 0xFFC05020u;  // blue-ish cloth (r 0x20, g 0x50, b 0xC0)
+    aether_set_actors(ctx, &a, 1);
+    AetherFrame f{};
+    for (int i = 0; i < 3; i++) f.cameraPos[i] = centre[i];
+    f.width = 128;
+    f.height = 128;
+    cameraMatrix(0, -0.0, 6, 1.0, f.invViewProj);  // north, level, narrow: the actor about 70 px tall
+    f.maxDistance = 600;
+    f.planetRadius = 0;
+    f.sunDir[0] = 0.3f;
+    f.sunDir[1] = 0.8f;
+    f.sunDir[2] = 0.5f;
+    f.lodBias = 1;
+    f.flags = AETHER_FRAME_ACTORS | AETHER_FRAME_SKY;
+    std::vector<uint32_t> normal(128 * 128);
+    std::vector<float> lin(128 * 128 * 4);
+    AetherFrameOutput o{nullptr, normal.data(), nullptr, lin.data()};
+    auto measure = [&](float nearEnd, size_t& px, int& w, int& h, double rgb[3]) {
+        f.nearFieldEnd = nearEnd;
+        CHECK(aether_render(ctx, &f, &o) == AETHER_OK);
+        int x0 = 128, x1 = -1, y0 = 128, y1 = -1;
+        px = 0;
+        rgb[0] = rgb[1] = rgb[2] = 0;
+        for (int y = 0; y < 128; y++)
+            for (int x = 0; x < 128; x++) {
+                size_t i = size_t(y) * 128 + x;
+                if (((normal[i] >> 16) & 255) != 4) continue;
+                px++;
+                x0 = std::min(x0, x), x1 = std::max(x1, x), y0 = std::min(y0, y), y1 = std::max(y1, y);
+                for (int k = 0; k < 3; k++) rgb[k] += lin[i * 4 + k];
+            }
+        w = x1 - x0 + 1;
+        h = y1 - y0 + 1;
+        if (px) for (int k = 0; k < 3; k++) rgb[k] /= double(px);
+    };
+    size_t px = 0;
+    int w = 0, h = 0;
+    double rgb[3];
+    measure(0.0f, px, w, h, rgb);
+    double cover = px ? double(px) / (double(w) * h) : 0;
+    // the expected height on screen: 1.8 blocks at 30 over a 6-degree, 128 px view
+    double expectH = 1.8 / 30.0 / (2 * std::tan(3.0 * 3.14159265 / 180)) * 128;
+    std::printf("  %zu px in a %d x %d box (fill %.2f, expected height %.0f px); mean linear rgb %.3f %.3f %.3f\n", px, w, h,
+                cover, expectH, rgb[0], rgb[1], rgb[2]);
+    CHECK(px > 200);
+    CHECK(h > 2 * w);                         // tall and narrow
+    CHECK(cover > 0.4 && cover < 0.9);        // a silhouette, not a filled rectangle
+    CHECK(std::abs(h - expectH) < 0.15 * expectH);
+    CHECK(rgb[2] > rgb[0] && rgb[0] + rgb[1] + rgb[2] > 0.05);  // the tint's hue, and lit
+    size_t inside = 0, band = 0;
+    measure(40.0f, inside, w, h, rgb);         // the near field reaches past it: not drawn
+    measure(22.0f, band, w, h, rgb);           // 8 blocks into the 16-block fade-in: about half its pixels
+    std::printf("  near field to 40: %zu px; to 22 (fading in): %zu px\n", inside, band);
+    CHECK(inside == 0);
+    CHECK(band > px / 4 && band < px * 3 / 4);
+    aether_destroy(ctx);
+}
+
 // A dragon's wings beat (its silhouette changes over the beat), fold on the ground, and an impostor marked half
 // transparent covers about half its pixels (the per-pixel dissolve of a tracking-boundary cross-fade).
 static void testActorMotion() {
@@ -1211,6 +1294,7 @@ int main(int argc, char** argv) {
     testStructures();
     testSunMap();
     testActors();
+    testImpostorShape();
     testActorMotion();
     testTransitions();
     testLights();

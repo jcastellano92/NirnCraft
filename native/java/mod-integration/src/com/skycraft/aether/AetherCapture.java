@@ -85,14 +85,37 @@ final class AetherCapture {
             return true;
         }
 
-        /** A span over column (x, z) from bottom (NaN: the ground) to top; the taller one wins. */
+        /**
+         * A span over column (x, z) from bottom (NaN: the ground) to top. Spans that overlap or lie within MAX_GAP of
+         * the column's existing one merge with it (a crown over its trunk, a cap over its stem: one span from the lower
+         * bottom, grounded if either is, to the higher top, wearing the taller one's blocks); otherwise the taller wins.
+         */
         void span(int x, int z, float bottom, float topY, BlockState wallB, BlockState roofB) {
             int c = index(x, z);
-            if (c < 0 || !(topY > (Float.isNaN(top[c]) ? -1e30f : top[c]))) return;
-            top[c] = topY;
-            base[c] = bottom;
-            wall[c] = wallB;
-            roof[c] = roofB;
+            if (c < 0 || !(topY > -1e29f)) return;
+            if (Float.isNaN(top[c])) {
+                top[c] = topY;
+                base[c] = bottom;
+                wall[c] = wallB;
+                roof[c] = roofB;
+                return;
+            }
+            float ob = Float.isNaN(base[c]) ? -1e30f : base[c], nb = Float.isNaN(bottom) ? -1e30f : bottom, ot = top[c];
+            boolean touch = nb <= ot + MAX_GAP && ob <= topY + MAX_GAP;
+            if (touch) {
+                float lo = Math.min(ob, nb);
+                base[c] = lo <= -1e29f ? Float.NaN : lo;
+                if (topY > ot) {
+                    top[c] = topY;
+                    wall[c] = wallB;
+                    roof[c] = roofB;
+                }
+            } else if (topY > ot) {
+                top[c] = topY;
+                base[c] = bottom;
+                wall[c] = wallB;
+                roof[c] = roofB;
+            }
         }
 
         // ---- parametric primitives (AetherSites), world coordinates ------------------------------------------

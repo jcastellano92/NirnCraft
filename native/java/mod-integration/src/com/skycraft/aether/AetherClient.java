@@ -62,7 +62,6 @@ public final class AetherClient {
     private static int[] actorFlags = new int[0];
     /** Per far actor (entity id): its impostor's opacity, fading out while the client also has the real entity. */
     private static final it.unimi.dsi.fastutil.ints.Int2FloatOpenHashMap actorOpacity = new it.unimi.dsi.fastutil.ints.Int2FloatOpenHashMap();
-    private static long actorsFedAt;
     private static int lightBudget = -1;
     /** Seconds over which an impostor dissolves once the real entity is tracked (and region refinements dissolve). */
     static final float FADE_SECONDS = 0.6f;
@@ -257,15 +256,15 @@ public final class AetherClient {
 
     /**
      * The server's far actors, moved on by their velocity since the packet (twice a second; at most a second). An
-     * actor the client also tracks (the real entity is drawn by the near field) dissolves over FADE_SECONDS; one it
-     * stops tracking shows at once, so nothing is ever missing at the boundary. Dragons beat their wings while
-     * climbing or cruising, glide while descending, and fold them on the ground.
+     * impostor is never drawn for an entity the client has: by its id, or (an id the client does not know, e.g. a
+     * camera away from the player the server measures from) any client entity of about its size standing where it
+     * stands. One the client stops having shows at once, and aether itself draws impostors only beyond the near field,
+     * dissolving them in across the first 16 blocks past it (traceActors), so nothing pops or doubles at the hand-off.
+     * Dragons beat their wings while climbing or cruising, glide while descending, and fold them on the ground.
      */
     private static void feedActors(net.minecraft.client.multiplayer.ClientLevel level) {
         AetherNet.FarActors a = farActors;
         long now = System.nanoTime();
-        float step = actorsFedAt == 0 ? 0f : Math.min((now - actorsFedAt) / 1e9f, 0.25f) / FADE_SECONDS;
-        actorsFedAt = now;
         if (a == null) {
             actorOpacity.clear();
             ctx.setActors(actorXyz, new float[0], new int[0], null, 0);
@@ -280,8 +279,7 @@ public final class AetherClient {
         for (int i = 0; i < n; i++) {
             int id = a.idFlags()[i * 2];
             live.add(id);
-            float o = actorOpacity.getOrDefault(id, 1f);
-            o = level.getEntity(id) != null ? Math.max(0f, o - step) : 1f;
+            float o = clientHas(level, a, i, id) ? 0f : 1f;
             actorOpacity.put(id, o);
             int gait;
             if ((a.idFlags()[i * 2 + 1] & AetherNet.FarActors.ON_GROUND) != 0) gait = AetherNative.GAIT_STILL;
@@ -291,6 +289,17 @@ public final class AetherClient {
         }
         actorOpacity.keySet().retainAll(live);
         ctx.setActors(actorXyz, a.yawHeightRadius(), a.kindTint(), actorFlags, n);
+    }
+
+    /** True when the client has actor i's entity: the same id, or an entity of about its size where it stands. */
+    private static boolean clientHas(net.minecraft.client.multiplayer.ClientLevel level, AetherNet.FarActors a, int i, int id) {
+        if (level.getEntity(id) != null) return true;
+        double x = a.xyz()[i * 3], y = a.xyz()[i * 3 + 1], z = a.xyz()[i * 3 + 2];
+        float h = a.yawHeightRadius()[i * 3 + 1], r = a.yawHeightRadius()[i * 3 + 2];
+        double pad = Math.max(1.5, r * 2);
+        net.minecraft.world.phys.AABB box = new net.minecraft.world.phys.AABB(x - pad, y - 1, z - pad, x + pad, y + h + 1, z + pad);
+        return !level.getEntities((net.minecraft.world.entity.Entity) null, box,
+                e -> e.getBbHeight() >= h * 0.5f && e.getBbHeight() <= h * 2f).isEmpty();
     }
 
     private static void feedWeather() {

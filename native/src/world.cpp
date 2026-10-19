@@ -325,8 +325,9 @@ int World::update(const double centre[3], double budgetMs, double* buildMs) {
                 auto f = fading_.find(k);
                 if (f == fading_.end() || int32_t(now - f->second.startMs) >= int32_t(fadeMs)) {
                     std::shared_ptr<const Region> prev = old != regions_.end() ? old->second : nullptr;
-                    if (prev && prev->empty()) prev = nullptr;
-                    fading_[k] = Fade{prev, now};
+                    bool wasEmpty = prev && prev->empty();
+                    if (wasEmpty) prev = nullptr;
+                    fading_[k] = Fade{prev, now, wasEmpty};
                 }
             }
             regions_[k] = r;
@@ -437,9 +438,11 @@ void World::repack(const int centreRegion[MAX_LODS][2]) {
                                 v = pack(r, k);
                                 auto f = fading_.find(k);
                                 if (f != fading_.end()) {
-                                    // the kernel dissolves from runs.z (old slot + 1, or ~0: nothing, look coarser)
-                                    // to this region between runs.w and runs.w + fadeMs
-                                    uint32_t oldSlot = f->second.old ? uint32_t(pack(f->second.old.get(), k)) + 1u : 0xFFFFFFFFu;
+                                    // the kernel dissolves from runs.z (old slot + 1; ~1: it was empty air, walk on at
+                                    // this LOD; ~0: new to the window, look coarser) to this region between runs.w
+                                    // and runs.w + fadeMs
+                                    uint32_t oldSlot = f->second.old ? uint32_t(pack(f->second.old.get(), k)) + 1u
+                                                     : f->second.wasEmpty ? 0xFFFFFFFEu : 0xFFFFFFFFu;
                                     p.regions[size_t(v)].runs[2] = oldSlot;
                                     p.regions[size_t(v)].runs[3] = f->second.startMs;
                                 }

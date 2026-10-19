@@ -72,11 +72,17 @@ final class AetherNatural {
                         if (sp != null && !sp.hasDisconnected()) SkyNetwork.sendToPlayer(sp, m);
                     });
                 } catch (RuntimeException e) {
+                    server.execute(() -> sentAt.remove(id));  // try again next round
                     com.skycraft.Skycraft.LOGGER.warn("aether far sites: {}", e.toString());
                 }
             });
         }
         sentAt.keySet().removeIf(u -> server.getPlayerList().getPlayer(u) == null);
+    }
+
+    /** A player logged in or out: the next round sends it a fresh list (its client dropped the old one). */
+    static void forget(UUID player) {
+        sentAt.remove(player);
     }
 
     static void stop() {

@@ -241,6 +241,7 @@ int traceLod(int lod, float3 p0, float3 d, float len, inout TraceResult res, out
             }
             if (idx >= 0) {
                 RegionGpu r = regions[idx];
+                bool air = false;  // a fading region that was empty air before: nothing to trace for these pixels
                 if (r.runs.z != 0u) {
                     // a refinement fade (World::fading_): pixels whose dither is past the fade's progress still see
                     // what the region replaced, or the coarser LOD when it is new to the window
@@ -250,11 +251,12 @@ int traceLod(int lod, float3 p0, float3 d, float len, inout TraceResult res, out
                             uncExit = uExit;
                             return TRACE_UNCOVERED;
                         }
-                        r = regions[r.runs.z - 1u];
+                        if (r.runs.z == 0xFFFFFFFEu) air = true;
+                        else r = regions[r.runs.z - 1u];
                     }
                 }
                 float3 ro = (p0 - regionOriginRel(r)) / s;
-                if (traceRegion(r, ro, d / s, u, uExit, 1e-3, res)) {
+                if (!air && traceRegion(r, ro, d / s, u, uExit, 1e-3, res)) {
                     res.lod = lod;
                     return TRACE_HIT;
                 }
@@ -818,7 +820,7 @@ void farMain(uint3 id : SV_DispatchThreadID) {
     ah.n = float3(0, 1, 0);
     ah.albedo = float3(1, 1, 1);
     if ((frame.dims.z & FRAME_ACTORS) != 0 && frame.weatherParams.w > 0.5)
-        ah = traceActors(o, dir, tHit >= 0.0 ? tHit : frame.params.y, pixelDither(id.xy, 2u));
+        ah = traceActors(o, dir, frame.params.x, tHit >= 0.0 ? tHit : frame.params.y, pixelDither(id.xy, 2u));
     bool actorFirst = ah.t >= 0.0;
 
     float3 color = float3(0, 0, 0);
@@ -951,7 +953,7 @@ void farMain(uint3 id : SV_DispatchThreadID) {
     float coverage = tHit >= 0.0 || actorFirst || (frame.dims.z & FRAME_SKY) != 0 ? 1.0 : 0.0;
     float surface = actorFirst ? ah.t : (tHit >= 0.0 ? tHit : 1e30);
     // far lights, under the cloud deck (clouds in front of the surface veil them with it)
-    color += farLights(id.xy, o, dir, surface, sun);
+    if ((frame.dims.z & FRAME_DEBUG_ALBEDO) == 0) color += farLights(id.xy, o, dir, surface, sun);
     if ((frame.dims.z & FRAME_CLOUDS) != 0) {
         // the half-resolution deck, where it starts in front of this pixel's surface
         float4 cl;

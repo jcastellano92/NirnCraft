@@ -480,9 +480,11 @@ final class AetherExactSource extends AetherRefiningSource {
      * surface) and cached. Thread-safe (each call has its own arrays; the column pool is shared).
      */
     byte[] tileBytes(int lod, int tx, int tz) {
+        boolean painting = surfacePainter != null;
         if (cache != null) {
             byte[] b = cache.read(lod, tx, tz);
-            if (b != null) return b;
+            // a tile cached while the painter was off (or failing) is made again once it works
+            if (b != null && (!painting || AetherTileCodec.hasSurface(b))) return b;
         }
         int n = TILE * TILE, g = AetherTints.GRID * AetherTints.GRID;
         float[] s = new float[n], w = new float[n];
@@ -491,7 +493,8 @@ final class AetherExactSource extends AetherRefiningSource {
         boolean tinted = tint(lod, tx, tz, s, gr, fo);
         AetherTileCodec.Surface blocks = paint(lod, tx, tz, s, w);
         byte[] b = AetherTileCodec.encode(lod, s, w, tinted ? gr : null, tinted ? fo : null, blocks);
-        if (cache != null) cache.write(lod, tx, tz, b);
+        // not cached when the painter failed on it: a later session (or a fixed painter) makes it with its blocks
+        if (cache != null && (!painting || blocks != null)) cache.write(lod, tx, tz, b);
         return b;
     }
 

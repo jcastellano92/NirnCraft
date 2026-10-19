@@ -102,8 +102,12 @@ float rayWing(float3 ro, float3 rd, float sgn, float3 shoulder, float len1, floa
 }
 
 // dither: this pixel's threshold for actors fading at the tracking boundary (motion.z < 1: the client has the real
-// entity, or just lost it, and the impostor dissolves)
-ActorHit traceActors(float3 o, float3 dir, float tMax, float dither) {
+// entity, or just lost it, and the impostor dissolves). tMin: where the near field ends: an impostor is the far field's
+// stand-in for an entity the game cannot draw, so none is drawn nearer than that (the game draws what is there, and the
+// pack's composite would put an impostor in front of nearer houses); across the next ACTOR_FADE_IN blocks it dissolves
+// in, so an actor walking out of the near field never pops.
+static const float ACTOR_FADE_IN = 16.0;
+ActorHit traceActors(float3 o, float3 dir, float tMin, float tMax, float dither) {
     ActorHit h;
     h.t = -1.0;
     h.n = float3(0, 1, 0);
@@ -172,11 +176,14 @@ ActorHit traceActors(float3 o, float3 dir, float tMax, float dither) {
             keepNearest(rayCapsule(lo, ld, float3(0, height * 0.3, 0), float3(0, height, 0), radius * 0.04, nn), nn, t, ln);
             keepNearest(rayBox(lo - float3(0, height * 0.7, 0), ld, float3(radius * 0.32, height * 0.25, radius * 0.02), nn), nn, t, ln);
         }
+        if (t < best && (t < tMin || dither >= a.motion.z * saturate((t - tMin) / ACTOR_FADE_IN))) t = best;  // inside or entering the near field
         if (t < best) {
             best = t;
             h.t = t;
             // back to world: inverse yaw rotation
-            h.n = normalize(float3(cy * ln.x + sy * ln.z, ln.y, -sy * ln.x + cy * ln.z));
+            float3 wn = float3(cy * ln.x + sy * ln.z, ln.y, -sy * ln.x + cy * ln.z);
+            // a degenerate normal (a ray through a primitive's axis) must not shade the impostor NaN (drawn black)
+            h.n = dot(wn, wn) > 1e-12 && all(wn == wn) ? normalize(wn) : -dir;
             uint tint = asuint(a.shape.w);
             h.albedo = pow(float3(float(tint & 255u), float((tint >> 8) & 255u), float((tint >> 16) & 255u)) / 255.0,
                            float3(2.2, 2.2, 2.2));
