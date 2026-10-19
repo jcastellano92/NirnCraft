@@ -392,7 +392,9 @@ public final class AtlasClient {
             AtlasMaterials mats = new AtlasMaterials();  // one id per block across buildings, landmarks and surfaces
             if (source instanceof AtlasRefiningSource r) r.materials(mats);
             // single player: the world's own trees over the finest LODs (AtlasTrees), else the dressing's canopy
-            AtlasTrees trees = source instanceof AtlasExactSource e ? AtlasTrees.forServer(mc.getSingleplayerServer(), e) : null;
+            // (abi 0.13: an older core ignores ATLAS_COLUMN_NO_CANOPY and would grow its canopy under them)
+            AtlasTrees trees = source instanceof AtlasExactSource e && lib.abi() >= 0x000D00
+                    ? AtlasTrees.forServer(mc.getSingleplayerServer(), e) : null;
             AtlasTrees.activeLod = trees != null ? AtlasTrees.APPROX_LOD : -1;  // before the first tile goes up
             farField = new AtlasFarField(ctx, source, () -> AtlasSettlements.create(ground, mats, trees), lods);
             lightBudget = -1;
