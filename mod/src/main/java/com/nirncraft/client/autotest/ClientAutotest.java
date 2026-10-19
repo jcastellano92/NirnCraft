@@ -265,6 +265,9 @@ public final class ClientAutotest {
             if (QaTransport.remote(mc) && !QaTransport.operatorReady(mc)) return;
             liveStarted = true;
             mc.gui.setScreen(null);
+            // a test client shows the world, not text: HUD (and with it every NirnCraft card, banner and hint) hidden
+            // for the whole session; tests about the HUD turn it on with `hud on`
+            com.nirncraft.client.autotest.ReviewWorlds.hudHidden(mc, true);
             serverCommand(mc, "gamemode spectator @p");
             serverCommand(mc, "gamerule advance_time false");
             serverCommand(mc, "gamerule advance_weather false");
@@ -519,6 +522,8 @@ public final class ClientAutotest {
                 UiProbe.key(mc, Integer.parseInt(action.substring(4).trim()));
             } else if (action.startsWith("expect-screen ")) {
                 UiProbe.expect(mc, action.substring(14).trim());
+            } else if (action.startsWith("hud ")) {  // on | off: HUD tests show it, everything else keeps it hidden
+                com.nirncraft.client.autotest.ReviewWorlds.hudHidden(mc, !action.substring(4).trim().equals("on"));
             } else if (action.startsWith("renderdistance ")) {  // chunks: fidelity tests draw a place far-field only
                 int chunks = Math.max(2, Math.min(32, Integer.parseInt(action.substring(15).trim())));
                 mc.options.renderDistance().set(chunks);

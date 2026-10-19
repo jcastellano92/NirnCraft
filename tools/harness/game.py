@@ -3,6 +3,7 @@ tools/dev/live_world.py's bridge. Owns launch per restart group, the shader / re
 running one scene per action batch (a failing scene clears only its own batch).
 """
 import filecmp
+import os
 import hashlib
 import json
 import re
@@ -400,6 +401,41 @@ def recover(scene=None):
         pass
 
 
+# ----------------------------------------------------------------------------------------------- window
+def ensure_visible():
+    """A minimized Minecraft stops rendering (no chunk meshes: every settle times out). Restore the test client's
+    window without activating it (SW_SHOWNOACTIVATE: it comes back behind whatever you are working in)."""
+    if os.name != "nt":
+        return False
+    import ctypes
+    from ctypes import wintypes
+    user32 = ctypes.windll.user32
+    pids = {p["pid"] for p in lw.processes()}
+    if not pids:
+        return False
+    found = []
+
+    @ctypes.WINFUNCTYPE(wintypes.BOOL, wintypes.HWND, wintypes.LPARAM)
+    def each(hwnd, _):
+        pid = wintypes.DWORD()
+        user32.GetWindowThreadProcessId(hwnd, ctypes.byref(pid))
+        if pid.value in pids and user32.GetWindowTextLengthW(hwnd) > 0:
+            found.append(hwnd)
+        return True
+
+    user32.EnumWindows(each, 0)
+    restored = False
+    for h in found:
+        if user32.IsIconic(h):
+            user32.ShowWindow(h, 4)  # SW_SHOWNOACTIVATE
+            restored = True
+    if restored:
+        log("  the test client was minimized (it cannot render then): restored behind your windows")
+        tr.step("window_restored")
+        time.sleep(2)
+    return restored
+
+
 # ----------------------------------------------------------------------------------------------- per-test game log
 LOG_FILE = GAME / "logs/latest.log"
 NOISE = re.compile(r"(Unable to resolve shader pack option menu element|Error loading class: (mezz|com/simibubi|"
@@ -451,6 +487,7 @@ def capture(scene, variant, pose_lines, capture_lines):
     if blocked and scene.get("capture") != "ui":
         raise RuntimeError(f"the client is stuck on {blocked} (the world cannot load behind it); is the installed "
                            f"jar current? (harness.py run --rebuild)")
+    ensure_visible()
     mark = log_mark()
     want = variant != "vanilla"
     st = client_state()

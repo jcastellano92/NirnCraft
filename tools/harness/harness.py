@@ -497,6 +497,7 @@ class Runner:
     def run_measure(self, s, v, fp):
         """A live test without a picture: go there, settle, run a command that writes a JSON report, keep its numbers."""
         g = self.game
+        g.ensure_visible()
         mark = g.log_mark()
         out = g.GAME / s["measure_file"]
         out.unlink(missing_ok=True)
