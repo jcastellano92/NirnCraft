@@ -750,7 +750,7 @@ Sample traceBoxes(V3 o, V3 d, float pa, float tol, bool prefilter = false, uint3
 
 // ---- content-shaped groups (groups) ---------------------------------------------------------------------------------
 // As boxes, but the hierarchy follows the content instead of a fixed grid: every group splits in two at the plane (any
-// axis, any micro-voxel position) whose two children's tight boxes have the least surface (the SAH idea): a wall
+// axis, any micro-voxel position) whose two children's tight boxes have the least surface times content (the SAH): a wall
 // comes away from the tree beside it whole, gaps are cut along, and nothing is chopped where a grid line happens to
 // fall. Groups ignore objects and chunks: far away one group is a stand of trees and the ground under it, up close
 // it is a leaf cluster. (A GPU builds the same kind of hierarchy in milliseconds: LBVH from Morton codes.)
@@ -820,11 +820,13 @@ int buildGroup(const int lo[3], const int hi[3], float err) {
         if (n < 2) continue;
         const std::array<int, 6> none{1 << 15, 1 << 15, 1 << 15, -1, -1, -1};
         std::vector<std::array<int, 6>> slice(size_t(n), none);
+        std::vector<long long> count(size_t(n), 0);  // micro-voxels per slice: the SAH's weights
         for (int y = lo[1]; y < hi[1]; y++)
             for (int z = lo[2]; z < hi[2]; z++)
                 for (int x = lo[0]; x < hi[0]; x++) {
                     if (!microAt(x, y, z)) continue;
                     int p[3] = {x, y, z};
+                    count[size_t(p[a] - lo[a])]++;
                     auto& s = slice[size_t(p[a] - lo[a])];
                     for (int k = 0; k < 3; k++) s[k] = std::min(s[k], p[k]), s[3 + k] = std::max(s[3 + k], p[k] + 1);
                 }
@@ -843,11 +845,15 @@ int buildGroup(const int lo[3], const int hi[3], float err) {
                     suf[size_t(i)][k] = std::min(suf[size_t(i)][k], suf[size_t(i + 1)][k]),
                     suf[size_t(i)][3 + k] = std::max(suf[size_t(i)][3 + k], suf[size_t(i + 1)][3 + k]);
         }
+        std::vector<long long> cpre(size_t(n) + 1, 0);
+        for (int i = 0; i < n; i++) cpre[size_t(i + 1)] = cpre[size_t(i)] + count[size_t(i)];
         for (int i = 1; i < n; i++) {  // split before slice i
             const auto& L = pre[size_t(i - 1)];
             const auto& R = suf[size_t(i)];
             if (L[3] < 0 || R[3] < 0) continue;
-            float c = boxArea(&L[0], &L[3]) + boxArea(&R[0], &R[3]);
+            // the SAH: each side's surface times how much it holds (surface alone peels thin slices off one side
+            // at a time: a deep, unbalanced tree on a real town)
+            float c = boxArea(&L[0], &L[3]) * float(cpre[size_t(i)]) + boxArea(&R[0], &R[3]) * float(cpre[size_t(n)] - cpre[size_t(i)]);
             if (c < best) best = c, bestAxis = a, bestAt = lo[a] + i;
         }
     }

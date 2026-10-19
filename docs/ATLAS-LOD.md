@@ -180,6 +180,23 @@ Groups are smaller, draw fewer boxes and are the most faithful far representatio
 should be dense bricks of micro-voxels (a hybrid), which is the next variant. A GPU builds this kind of hierarchy
 in milliseconds (LBVH from Morton codes), so groups can be rebuilt as the world changes.
 
+**Real data (Falkreath, exported 2026-10-19: 36,954 block states, a 65 x 51 x 65 core and a 129 x 61 x 129 area).**
+The synthetic tree misled once: groups split by surface alone peeled thin slices off a real town (114 k nodes, 25 -
+237 steps a ray); weighting each side by its content (the real SAH) fixed it (77 k nodes, 3.4 - 25 steps, built in
+2.2 s). Wide area:
+
+| | 200 m iou / dE / steps | 1500 m | 4000 m | hierarchy |
+|---|---|---|---|---|
+| current | 0.993 / 4.8 / 104 | 0.967 / 6.8 / 11 | 0.935 / 8.2 / 6.1 | - |
+| micro-voxels | 1.000 / 0.4 / 105 | 0.994 / 1.3 / 22 | 0.984 / 1.8 / 22 | - |
+| boxes (octree) | 1.000 / 0.4 / 10 | 0.989 / 2.1 / 1.6 | 0.974 / 3.3 / 1.5 | 12.9 M nodes |
+| groups (SAH) | 1.000 / 0.4 / 18 | 0.990 / 2.0 / 2.6 | 0.971 / 3.2 / 2.3 | 260 k nodes |
+
+Fly-in from 2.5 km to 60 m over the core: no representation pops beyond its noise; dE over the flight current 4.6,
+boxes 1.3, groups 1.3 (micro 0.9). Finalists: boxes and groups (same quality; groups 50x smaller and draw about a third
+fewer boxes, boxes take about 60 % of the steps). Next: both in Slang (one source, CPU for exact comparisons, GPU for
+real timings), and ref against Minecraft's own view of the same blocks (the export scene's capture) at 3 - 10 m.
+
 **Smooth between groupings** (owner, 2026-10-19: "all we see is more detail resolving: a pixel becomes a group of
 pixels, then a window"): measured by a fly-in (`sweep=24 dist=40,2000`: the camera from 2 km to 40 m through one
 window; pop = how much more a representation's picture changes per step than ref's, beyond its own frame noise).
