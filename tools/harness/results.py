@@ -55,6 +55,8 @@ def metrics(img, before=None):
         # solid rectangles of them in a frame that is not dark overall: the NaN-in-a-mip-chain black-box signature
         "blackBoxes": _boxes(black) if mean > 40 else 0,
         "clipped": round(float((a.max(axis=2) >= 254).mean()) * 100, 2),
+        # Minecraft's missing-texture checkerboard is magenta (#F800F8) and black
+        "magenta": round(float(((a[..., 0] > 235) & (a[..., 1] < 25) & (a[..., 2] > 235)).mean()) * 100, 3),
     }
     if before is not None:
         b = np.asarray(before.convert("RGB").resize(img.size), dtype=np.float32)
@@ -68,6 +70,8 @@ def metrics(img, before=None):
         flags.append("black frame")
     if out["clipped"] > 25:
         flags.append("blown out")
+    if out["magenta"] > 0.05:
+        flags.append(f"missing texture? {out['magenta']}% magenta")
     out["flags"] = flags
     return out
 

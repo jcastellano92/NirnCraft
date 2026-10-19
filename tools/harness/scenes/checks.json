@@ -817,6 +817,28 @@
     "problems": "problems (\\d+)"
    },
    "timeout": 120
+  },
+  {
+   "id": "check-textures",
+   "title": "Every mod texture: sizes, animation strips, empty / flat / magenta placeholders, PBR map sizes, legacy armour layers",
+   "tags": [
+    "check:textures",
+    "check:assets",
+    "check:pbr",
+    "feature:textures"
+   ],
+   "run": [
+    "py",
+    "-3",
+    "tools/harness/audits/texture_audit.py"
+   ],
+   "inputs": [
+    "mod/src/main/resources/assets/nirncraft/textures"
+   ],
+   "metrics": {
+    "problems": "problems (\\d+)"
+   },
+   "timeout": 600
   }
  ]
 }

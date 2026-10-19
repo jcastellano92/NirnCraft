@@ -160,6 +160,13 @@ def gallery():
         out.append(_stage_scene(f"gallery-blocks-{part // 9 + 1:02d}", f"Blocks {part + 1}-{part + len(chunk)}: "
                                 + ", ".join(chunk), ["gallery:blocks"] + (["gallery:furniture"] if fur else [])
                                 + [f"gallery:block:{b}" for b in chunk], place + ["wait 5"], 10.0))
+        # the same lineup at distance: textures, mipmaps and shimmer from 6 m to 128 m
+        out.append({"id": f"blocks-ladder-{part // 9 + 1:02d}", "title": f"Blocks {part + 1}-{part + len(chunk)} from 6 m to 128 m",
+                    "_file": "(generated gallery)", "tags": ["suite:gallery", "suite:distance", "gallery:blocks",
+                    "feature:textures", "feature:materials"] + [f"gallery:block:{b}" for b in chunk],
+                    "time": 6000, "weather": "clear", "variants": ["shaders", "vanilla"], "checks": {}, "timeout": 900,
+                    "setup": place, "pose": {"ladder": {"stage": True, "distances": [6, 16, 48, 128]}},
+                    "source": "generated from the mod's lang ids (tools/harness/catalog.py gallery)"})
     return out
 
 
