@@ -508,6 +508,14 @@ int main(int argc, char** argv) {
         median = times.empty() ? 0 : times[times.size() / 2];
         atlas::writePng(out, color.data(), w, h);
         base = out.size() > 4 ? out.substr(0, out.size() - 4) : out;
+        if (num(a, "classpng", 0) > 0) {  // (debugging) the last sample's surface class per pixel: 6 (white) a surface card
+            std::vector<uint32_t> cl(size_t(w) * h);
+            for (size_t i = 0; i < cl.size(); i++) {
+                uint32_t c = (normal[i] >> 16) & 255, v = depth[i] > 1e29f ? 0 : c == 6 ? 255 : 40 + 20 * std::min(c, 6u);
+                cl[i] = 0xFF000000u | v << 16 | v << 8 | v;
+            }
+            atlas::writePng(base + "_class.png", cl.data(), w, h);
+        }
         shown.assign(size_t(w) * h, 0);  // where this frame shows the export (its mask: most samples)
         if (haveExport) {
             // where the frame shows exported content (the share of its samples), and how far (atlas_truth's encodings)

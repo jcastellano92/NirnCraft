@@ -19,7 +19,7 @@
 static const uint G_INNER = 0u;
 static const uint G_FLAT = 1u;
 static const uint G_VOXELS = 2u;
-static const uint G_CHILD = 0x3FFFFFFFu;
+static const uint G_CHILD = 0x7FFFFFu;  // (groups.hpp CHILD_MASK; bits 23-29: largest error code, holes per axis)
 static const int G_STACK = 24;
 static const uint G_CELL_SHAPED = 0x8000u;
 static const uint G_CELL_MASKED = 0x4000u;
@@ -392,12 +392,24 @@ bool traceGroups(RegionGpu r, float3 ro, float3 rd, float u0, float u1, float3 d
             res.steps++;
             float te = max(tn, u0);
             uint type = n.w >> 30;
-            bool inside = tn < u0;  // the chord starts in it: its faces are behind
+            // the chord starts in it: its faces are behind. (A node whose face lies on the region's face, entered there:
+            // tn and u0 are the same plane in float and may land either side; taken as inside it was stepped with the
+            // dominant axis for its entry face, and a chunk's wall on a region border lost its card and its normal.)
+            bool inside = tn < u0 - 1e-4 * max(1.0, u0);
             uint code = (n[ax] >> (d[ax] < 0.0 ? 28u : 24u)) & 15u;
+            // the entry face's error, if that face has no holes; else every face's (groups.hpp: through a hole a ray
+            // reaches content the entry face's error says nothing about)
+            if (((n.w >> (27u + uint(ax))) & 1u) != 0u) code = (n.w >> 23u) & 15u;
             bool fine = G_ERR[code] <= drawK * (gChordT + te);
             // drawn whole: a flat leaf, or any node whose error is under the pixel (not one the chord starts in);
             // stepped through: a leaf otherwise; opened: an inner node otherwise
-            bool draw = !inside && (type == G_FLAT || fine || (gAblate & 64u) != 0u);
+            // (ATLAS_ABLATE 256, measurements: never draw a node whole for its error, open or step it)
+            // A node the ray leaves past this chord's end is opened, never drawn: drawn, a ray entering it through a
+            // hole in its face skipped everything inside it for the rest of the chord, and the next chord started
+            // inside it (a house seen through its own wall, the lit interior behind: the far pass's see-through holes,
+            // moving with the chords' dithered starts). A flat leaf's faces are covered: its entry face always hits.
+            bool fits = tf <= u1 || type == G_FLAT;
+            bool draw = !inside && (type == G_FLAT || (fine && fits && (gAblate & 256u) == 0u) || (gAblate & 64u) != 0u);
             if (draw) {
                 if (drawBox(r, n, o, d, inv, lo, hi, ax, te, u1, dir, res)) return true;
             } else if (type != G_INNER) {

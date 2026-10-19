@@ -576,7 +576,8 @@ static AtlasStatus buildInputs(AtlasContext* ctx, const AtlasFrame* f, FrameInpu
     g.jitter[1] = f->height > 0 ? ctx->jitter[1] * 2.0f / float(f->height) : 0.0f;
     g.jitter[2] = ctx->jitter[0] != 0.0f || ctx->jitter[1] != 0.0f ? 1.0f : 0.0f;
     // ATLAS_ABLATE=<bits>: measurements only, leave parts of the shading out (1 AO, 2 smooth normals, 4 shadows, 8 far
-    // lights, 16 water reflections, 32 the trace itself after the first hit's distance)
+    // lights, 16 water reflections, 32 the trace itself after the first hit's distance; the groups: 64 draw every node
+    // whole, 128 a drawn box without its texel walk, 256 never draw a node whole for its error)
     {
         static const uint32_t ablate = [] {
             const char* v = std::getenv("ATLAS_ABLATE");

@@ -600,6 +600,34 @@ ground hits it at once). Same outputs; shading, shadows (voxel path), sun map, j
 cards (`atlas_set_surface_cards`, atlas_truth bake=) colour a hit from the game's own rendering of that face, filtered
 by footprint; the game does not send them yet.
 
+**See-through holes and pops in the far pass** (2026-10-19; element tier, far-groups). Three defects of the trace, none
+in the data (the CPU bench drew the same elements clean):
+* *Drawn by a face with holes.* A node was drawn whole when the face the ray enters by had a small error, but that error
+  only bounds the columns that have content: through a hole (a door, a window, the gap under a roof) the ray reached the
+  content deep inside, which drawing skipped (a house seen through its front wall, the lit stairs inside). A node now
+  carries a hole bit per axis and its largest face error (w bits 23-29, `groups.hpp`): through a face with holes it is
+  drawn only when every face's error is under the pixel (the bench's one error a group).
+* *Drawn past the chord.* A drawn box whose texel walks missed and whose exit lay past the chord's end gave up; the next
+  chord started inside it, so a hollow closed box (a room: every face covered, a flat leaf) was stepped from inside. A
+  node the ray leaves past its chord is now opened, not drawn.
+* *A face on a region's face.* A box whose face lies on the region's face, entered there, compared its entry with the
+  region's entry in float and could count as "the chord starts inside it": stepped with the dominant axis as its
+  entry face, a chunk wall on a region border lost its surface card and its normal (bright, unlit walls from 128 m on
+  some elements). Now within 1e-4 of the entry it is entered by its face.
+
+| element (far-groups) | dE 64 / 128 / 256 m before | after | fly-in pop fast / slow before | after |
+|---|---|---|---|---|
+| high-hrothgar-mountains-chunk | 4.2 / 9.5 / 11.4 | 0.83 / 0.60 / 0.91 | 0.34 / 1.05 | 0.007 / 0.030 |
+| whiterun-night-tree | 2.5 / 2.4 / 2.4 | 0.7 / 0.7 / 0.8 | 0.29 / 0.55 | 0.003 / 0.004 |
+| whiterun-day-tree | 2.1 / 2.0 / 2.0 | 0.9 / 0.8 / 0.9 | 0.13 / 0.27 | 0.006 / 0.020 |
+| cave-mouth-near-chunk | 2.1 / 1.3 / 1.3 | 1.2 / 0.7 / 0.7 | 0.13 / 0.18 | 0.016 / 0.007 |
+| whiterun-night-chunk | 1.5 / 1.4 / 3.8 | 1.2 / 1.1 / 3.7 | 0.07 / 0.12 | 0.024 / 0.028 |
+
+Every element's fly-ins pass but snow-winterhold-tree's slow one (0.28): its windows are dark oak fences, whose posts
+(4/16 wide, off the quarter grid) fill no micro-voxel of the 4 x 4 x 4 shape library, so no renderer on that library
+draws them (the near field does, at those distances). `ATLAS_ABLATE` 256 (never draw a node whole for its error)
+measures the drawn boxes against stepping everything.
+
 **Measured** (offline, `atlas_render` with the Falkreath exports; harness scenes `tools/harness/scenes/atlasgroups.json`):
 
 | Falkreath view, the live camera, 4 spp, vs atlas_truth (dE) | 0-64 | 64-192 | 192-512 | 512-1024 |

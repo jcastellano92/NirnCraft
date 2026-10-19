@@ -73,9 +73,14 @@ constexpr uint32_t SLOT_MASKS = 0x80000000u;  // a slot whose brick carries a ma
 
 // Node types (bits 30-31 of a node's w): an inner node (its two children at w & CHILD_MASK and the one after), a flat
 // solid leaf (every face covered at depth 0: drawn as its box), a voxel leaf (at most 4 x 4 x 4 voxels: drawn as its
-// box when its error is under the pixel, else stepped through).
+// box when its error is under the pixel, else stepped through). Bits 27-29: per axis whether its faces on that axis
+// have holes (columns with nothing in them); bits 23-26: the largest of its six faces' error codes. A node is drawn
+// whole only when the face the ray enters by has no holes, or when all its content lies near every face (the bench's
+// one error a group): through a hole in a flat face a ray reaches content deep inside that the face's error says
+// nothing about (a house's front wall flat, its door open, the stairs inside).
 constexpr uint32_t NODE_INNER = 0, NODE_FLAT = 1, NODE_VOXELS = 2;
-constexpr uint32_t CHILD_MASK = 0x3FFFFFFFu;
+constexpr uint32_t CHILD_MASK = 0x7FFFFFu;  // (GroupLimits.maxNodes 2^20 fits)
+constexpr uint32_t NODE_HOLES_SHIFT = 27, NODE_MAXERR_SHIFT = 23;
 constexpr int GROUP_STACK = 24;  // shaders/atlas_groups.slang: the deepest chain the kernel walks (real regions: 18)
 
 // Flattening errors are kept per face as a 4-bit code: the smallest of these at least as large (drawn later, never

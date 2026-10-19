@@ -167,11 +167,15 @@ private:
         }
     }
 
-    void write(uint32_t at, const Box& box, const uint32_t err[6], uint32_t type, uint32_t child) {
+    void write(uint32_t at, const Box& box, const uint32_t err[6], const bool holes[3], uint32_t type, uint32_t child) {
         uint32_t* w = &out_->nodes[size_t(at) * 4];
-        for (int a = 0; a < 3; a++)
+        uint32_t most = 0, hb = 0;
+        for (int a = 0; a < 3; a++) {
             w[a] = uint32_t(box.lo[a]) | uint32_t(box.hi[a]) << 12 | errCode(err[2 * a]) << 24 | errCode(err[2 * a + 1]) << 28;
-        w[3] = type << 30 | child;
+            most = std::max(most, std::max(err[2 * a], err[2 * a + 1]));
+            hb |= holes[a] ? 1u << a : 0u;
+        }
+        w[3] = type << 30 | hb << NODE_HOLES_SHIFT | errCode(most) << NODE_MAXERR_SHIFT | child;
     }
 
     void build(uint32_t at, uint32_t b, uint32_t e, const Box& box, int depth) {
@@ -182,10 +186,10 @@ private:
         analyze(b, e, box, err, holes);
         bool flat = !holes[0] && !holes[1] && !holes[2];
         for (int f = 0; f < 6; f++) flat = flat && err[f] == 0;
-        if (flat) return write(at, box, err, NODE_FLAT, 0);
+        if (flat) return write(at, box, err, holes, NODE_FLAT, 0);
         bool small = true;
         for (int a = 0; a < 3; a++) small = small && ((box.hi[a] + 3) >> 2) - (box.lo[a] >> 2) <= 4;
-        if (small || e - b == 1 || depth >= GROUP_STACK - 4) return write(at, box, err, NODE_VOXELS, 0);
+        if (small || e - b == 1 || depth >= GROUP_STACK - 4) return write(at, box, err, holes, NODE_VOXELS, 0);
         // the SAH over every voxel plane of every axis: each side's tight box surface times what it holds
         float best = 3.4e38f;
         int bestAxis = -1, bestPlane = 0;
@@ -219,7 +223,7 @@ private:
                 }
             }
         }
-        if (bestAxis < 0) return write(at, box, err, NODE_VOXELS, 0);
+        if (bestAxis < 0) return write(at, box, err, holes, NODE_VOXELS, 0);
         // partition every axis' order stably: the left side first
         uint32_t nl = 0;
         for (uint32_t i = b; i < e; i++) {
@@ -234,12 +238,12 @@ private:
             std::copy(scratch_.begin(), scratch_.begin() + (e - b), ord.begin() + b);
         }
         uint32_t first = uint32_t(out_->nodes.size() / 4);
-        if (first + 2 > lim_.maxNodes) {
+        if (first + 2 > std::min<uint32_t>(lim_.maxNodes, CHILD_MASK)) {
             failed_ = true;
             return;
         }
         out_->nodes.resize(out_->nodes.size() + 8);
-        write(at, box, err, NODE_INNER, first);
+        write(at, box, err, holes, NODE_INNER, first);
         build(first, b, b + nl, bestL, depth + 1);
         build(first + 1, b + nl, e, bestR, depth + 1);
     }
