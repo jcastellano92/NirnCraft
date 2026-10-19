@@ -288,6 +288,12 @@ _ts = _game.timeline_summary([{"t": 900.0, "pass": 50, "cover": 10, "update1": 2
 expect(_ts["farFirstMs"] == 900.0 and _ts["farIdleMs"] == 1500.0 and _ts["farTotal_coverMs"] == 15,
        "the far field's timeline reads as first pass, idle and totals per stage")
 
+# --- loading scenes look at the distance, and their poses are vetted ------------------------------------------------
+import loading as _loading
+for _sc in _loading.scenes():
+    expect(bool(_sc.get("vet_pose")) and _sc["pose"]["height"] >= 30,
+           f"{_sc['id']}: a loading view is vetted and high over the land (at 4 blocks up it faced a wall)")
+
 # --- truth subjects offset from their place look back at it (five faced away: yaw 0 is south in Minecraft) -----------
 import math as _math
 import truth as _truth

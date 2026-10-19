@@ -16,20 +16,25 @@ TRIPS = [
     ("whiterun-hop", "A short hop out of Whiterun: most of the far field is already there", "whiterun", "whiterun", 0, 4),
 ]
 FRAMES, EVERY = 16, 20  # 16 captures a second apart (20 ticks)
+# the camera high over the land, a little down: a loading test is about the distance, and at 4 blocks up the start
+# pose faced a wall at arm's length (owner, 2026-10-19); every pose is vetted (the settled panel must be a vista)
+HEIGHT, PITCH = 60, 8
+VET = ("a far vista: the camera high over the land, distant terrain (hills, forest, mountains, water) filling most of "
+       "every panel of this strip, the last panel the settled view")
 
 
 def scenes():
     import catalog
     out = []
     for slug, title, start, to, yaw, pitch in TRIPS:
-        arrive = {"place": to, "height": 4, "yaw": yaw, "pitch": pitch}
+        arrive = {"place": to, "height": HEIGHT, "yaw": yaw, "pitch": PITCH}
         if start == to:
             arrive["offset"] = [0, -3000]  # 3 km north of the start
         move = catalog.pose_actions({"id": f"load-{slug}", "pose": arrive, "time": 6000, "weather": "clear", "tags": []})
         out.append({"_file": "(generated loading)", "id": f"load-{slug}", "title": f"Loading: {title}",
                     "tags": ["suite:loading", "feature:farfield", f"place:{to}"], "tier": "live", "group": "live",
                     "variants": ["vanilla"], "weather": "clear", "time": 6000,
-                    "pose": {"place": start, "height": 4, "yaw": yaw, "pitch": pitch},
+                    "pose": {"place": start, "height": HEIGHT, "yaw": yaw, "pitch": PITCH}, "vet_pose": VET,
                     "setup": ["far-timeline start"] + move,
                     "frames": [FRAMES, EVERY], "loading": True, "measure": 0, "checks": {}, "capture": "world",
                     "timeout": 1800, "source": "tools/harness/loading.py",
