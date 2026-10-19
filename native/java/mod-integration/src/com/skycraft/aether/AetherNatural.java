@@ -50,7 +50,7 @@ final class AetherNatural {
     static void tick(MinecraftServer server) {
         if (server.getTickCount() % 100 != 0) return;
         ServerLevel level = server.overworld();
-        if (level == null) return;
+        if (level == null || AetherTileServer.hello() == null) return;  // not a Tamriel world: no far field to feed
         long seed = level.getSeed();
         for (ServerPlayer p : level.players()) {
             long[] at = sentAt.get(p.getUUID());
