@@ -245,6 +245,8 @@ def main():
     ap.add_argument("--json", action="store_true", help="print one JSON document instead of the table")
     ap.add_argument("--require-current", action="store_true",
                     help="also fail when a native is older than AtlasNative.ABI_VERSION")
+    ap.add_argument("--require-fresh", action="store_true",
+                    help="also fail when a platform's library was built from older native sources (natives/manifest.json)")
     ap.add_argument("--no-wsl", action="store_true", help="never use WSL to load Linux natives on Windows")
     ap.add_argument("--wsl-distro", default=os.environ.get("NIRNCRAFT_WSL_DISTRO") or None)
     args = ap.parse_args()
@@ -302,6 +304,18 @@ def main():
 
     if not libs:
         failed = True
+    if args.require_fresh:  # built from today's native sources? (natives/manifest.json; the ABI alone cannot tell)
+        sys.path.insert(0, str(Path(__file__).resolve().parent))
+        import native_sources
+        now = native_sources.source_hash(args.repo)
+        made = native_sources.read_manifest()
+        for r in rows:
+            plat = Path(r["file"]).parent.name
+            if made.get(plat) != now:
+                r["ok"] = False
+                how = "tools/dev/build_linux_wsl.py" if plat.startswith("linux") else "native/build.ps1 (the harness ships it)"
+                r["problems"].append(f"built from older native sources ({str(made.get(plat))[:12]} vs {now[:12]}): rebuild with {how}")
+                failed = True
     if args.json:
         print(json.dumps({"abi_min": abi_str(abi_min), "abi_version": abi_str(abi_cur), "natives": rows,
                           "ok": not failed}, indent=2))

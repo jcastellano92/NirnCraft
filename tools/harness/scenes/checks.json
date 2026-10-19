@@ -912,7 +912,7 @@
     },
     {
       "id": "check-natives",
-      "title": "Packed natives: every platform's atlas_core is inside the ABI range AtlasNative loads (no stale library ships)",
+      "title": "Packed natives: every platform's atlas_core is in the ABI range AtlasNative loads and built from today's native sources",
       "tags": [
         "check:natives",
         "check:tools",
@@ -924,12 +924,17 @@
         "py",
         "-3",
         "tools/dev/check_natives.py",
-        "--no-wsl"
+        "--no-wsl",
+        "--require-fresh"
       ],
       "inputs": [
         "mod/src/main/resources/natives",
         "mod/src/main/java/com/nirncraft/atlas/AtlasNative.java",
-        "tools/dev/check_natives.py"
+        "tools/dev/check_natives.py",
+        "native/src",
+        "native/shaders",
+        "native/include",
+        "native/CMakeLists.txt"
       ],
       "timeout": 120
     },

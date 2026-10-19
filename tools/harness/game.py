@@ -258,6 +258,8 @@ def sync_native():
         log("  shipping the current atlas_core into the mod (it differed from the built one)")
         tr.step("auto_native_ship")
         shutil.copy2(NATIVE_BUILT, NATIVE_SHIPPED)
+        import native_sources  # tools/dev: which sources the shipped core was built from (check_natives --require-fresh)
+        native_sources.record("windows-x86_64")
 
 
 def ensure_current():
