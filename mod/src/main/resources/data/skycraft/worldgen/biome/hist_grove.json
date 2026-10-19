@@ -65,6 +65,11 @@
     ]
   ],
   "attributes": {
+    "minecraft:gameplay/snow_golem_melts": true,
+    "minecraft:visual/water_fog_end_distance": {
+      "argument": 0.85,
+      "modifier": "multiply"
+    },
     "minecraft:visual/sky_color": "#84a08a",
     "minecraft:visual/fog_color": "#a0b898",
     "minecraft:visual/water_fog_color": "#0a2014",

@@ -61,6 +61,7 @@
     ]
   ],
   "attributes": {
+    "minecraft:gameplay/snow_golem_melts": true,
     "minecraft:visual/sky_color": "#6eb0ff",
     "minecraft:visual/fog_color": "#f0dcb0",
     "minecraft:visual/water_fog_color": "#050533",

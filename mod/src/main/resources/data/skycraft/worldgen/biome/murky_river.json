@@ -61,6 +61,10 @@
     ]
   ],
   "attributes": {
+    "minecraft:visual/water_fog_end_distance": {
+      "argument": 0.85,
+      "modifier": "multiply"
+    },
     "minecraft:visual/sky_color": "#7a9878",
     "minecraft:visual/fog_color": "#8aa088",
     "minecraft:visual/water_fog_color": "#0a1a0a",
