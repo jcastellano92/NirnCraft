@@ -290,7 +290,13 @@ public final class AtlasEdits {
     private static void record(int x, int z, Column c) {
         TileJournal j = JOURNAL.computeIfAbsent(tileKey(Math.floorDiv(x, TILE), Math.floorDiv(z, TILE)), k -> new TileJournal());
         synchronized (j) {
-            if (c.same(j.columns.get(colKey(x, z)))) return;
+            Column was = j.columns.get(colKey(x, z));
+            if (c.same(was)) return;
+            if (why && was != null && ++whyLines <= 30)  // what keeps changing in a loaded world (diagnostics)
+                com.nirncraft.NirnCraft.LOGGER.info("atlas edits why: column {} {} changed: top {}->{} {}->{}, under {}->{}, "
+                        + "roof {}->{} at {}->{}, water {}->{}", x, z, was.top(), c.top(), blockName(was.topId()),
+                        blockName(c.topId()), blockName(was.underId()), blockName(c.underId()), blockName(was.roofId()),
+                        blockName(c.roofId()), was.spanTop(), c.spanTop(), was.water(), c.water());
             j.version++;
             j.columns.put(colKey(x, z), new Column(c.top(), c.topId(), c.underId(), c.water(), c.spanTop(), c.spanBase(),
                     c.wallId(), c.roofId(), j.version));
