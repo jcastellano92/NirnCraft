@@ -180,6 +180,31 @@ Groups are smaller, draw fewer boxes and are the most faithful far representatio
 should be dense bricks of micro-voxels (a hybrid), which is the next variant. A GPU builds this kind of hierarchy
 in milliseconds (LBVH from Morton codes), so groups can be rebuilt as the world changes.
 
+**Smooth between groupings** (owner, 2026-10-19: "all we see is more detail resolving: a pixel becomes a group of
+pixels, then a window"): measured by a fly-in (`sweep=24 dist=40,2000`: the camera from 2 km to 40 m through one
+window; pop = how much more a representation's picture changes per step than ref's, beyond its own frame noise).
+
+| | pop (mean / largest) | dE vs ref over the flight | steps |
+|---|---|---|---|
+| current | 0.07 / 1.55 | 5.8 | 10.1 |
+| micro-voxels | 0 / 0 | 0.9 | 10.1 |
+| covbox | 0 / 0 | 1.4 | 10.5 |
+| boxes | 0 / 0 | 1.4 | 2.3 |
+| groups | 0 / 0 | 1.1 | 4.6 |
+| groups, prefiltered faces | 0 / 0 | 2.2 | 4.6 |
+
+The dithered switch (each pixel and frame draws a group whole or splits it around the threshold) plus TAA is enough
+for no visible pop; groups stay closest to ref. Prefiltering the face textures over the pixel's footprint blurs
+twice (TAA's jitter already averages the pixel), so it is off; it may still earn its place for single frames in fast
+motion (dE1), to be measured with a moving-camera TAA.
+
+**The same structure for everything** (owner): clouds, rain curtains and fog are density instead of surfaces in the
+same groups (a group keeps its mean density and the spread inside, averaged up the hierarchy like colour, traced with
+the same descend-or-draw rule, so a cloud resolves from a soft blob to its billows as it nears); light is kept per
+group face (Lumen's surface cache: sun visibility, bounce, block light, updated where it changed and where it is
+seen), so lighting and shadows also coarsen and resolve smoothly. Each is an experiment for this bed once surfaces
+are settled on real data.
+
 What this asks of generation: the content (blocks, from real sections or from the generators) must be producible
 deterministically and fast near the GPU; the grouping is built from it, never authored, so a tree, a town or a cave
 mouth needs no far version of its own.

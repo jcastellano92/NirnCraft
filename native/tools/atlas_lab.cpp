@@ -19,6 +19,11 @@
 //            where flattening it is under the pixel (tol=1, fog-scaled), else split ("adaptive boxes" below)
 //   groups   boxes with a hierarchy shaped by the content (splits where the two children's boxes are tightest), not
 //            a grid: groups cross objects and chunks ("content-shaped groups" below); "boxes" in the table = the cut
+//   boxesf / groupsf   the same with prefiltered face textures (the average under the pixel, holes as coverage)
+//
+// sweep=N: instead of the table, a fly-in from the farthest to the nearest distance in N steps through one window
+// (window=96 half-size); per representation pop (how much more its picture changes per step than ref's: popping),
+// popMax, dE against ref, steps; the sheet's rows are the representations, its columns the steps.
 //   cov      the unified proposal: micro-voxels and a mip chain from them where each voxel keeps its per-axis coverage
 //            (how much of it blocks a ray along x, y, z) and the colour seen from each of its 6 sides; the level is
 //            continuous (the pixel's footprint, stochastically between the two nearest levels), a ray passes a voxel in
@@ -658,17 +663,41 @@ struct BoxCtx {
     V3 o, d;
     float pa, tol;  // pixel size (tangent plane), threshold factor (dithered, fog-scaled)
     Sample* s;
+    bool prefilter = false;  // face textures averaged over the pixel's footprint (their mip), holes as coverage
+    uint32_t seed = 0;
 };
 
-// the masked texture of face (axis, side) at the ray's point p on it
-bool boxFace(const Node& n, int axis, bool high, V3 p, BoxCtx& c) {
+// the masked texture of face (axis, side) at the ray's point p on it (t along the ray). Prefiltered: the texel is the
+// average of what lies under the pixel's footprint on the face (the texture's mip at that distance), its holes a
+// coverage the ray passes in proportion; so a pixel becomes 4 texels becomes a window as the camera comes closer,
+// with no level where the picture jumps.
+bool boxFace(const Node& n, int axis, bool high, V3 p, float t, BoxCtx& c) {
     int lo[3] = {n.lo[0], n.lo[1], n.lo[2]}, hi[3] = {n.hi[0], n.hi[1], n.hi[2]};
     int a1 = (axis + 1) % 3, a2 = (axis + 2) % 3;
+    int f = high ? FACE_HIGH[axis] : FACE_LOW[axis];
+    c.s->steps++;  // a texture fetch
+    float fp = t * c.pa * 4.f;  // the footprint, micro-voxels
+    if (c.prefilter && fp > 1.f) {
+        int k = std::min(int(std::ceil(fp)), 6), hits = 0;
+        RGB acc{};
+        for (int i = 0; i < k; i++)
+            for (int j = 0; j < k; j++) {
+                int u = int(std::floor(p[a1] * 4.f + ((i + 0.5f) / k - 0.5f) * fp)), v = int(std::floor(p[a2] * 4.f + ((j + 0.5f) / k - 0.5f) * fp));
+                if (u < lo[a1] || u >= hi[a1] || v < lo[a2] || v >= hi[a2]) continue;
+                int dep, q[3];
+                if (!firstHit(lo, hi, axis, high, u, v, dep, q)) continue;
+                RGB m = microCol(q[0], q[1], q[2], f);
+                acc.r += m.r, acc.g += m.g, acc.b += m.b;
+                hits++;
+            }
+        if (!hits || hashf(int(p[a1] * 64.f), int(p[a2] * 64.f), axis, c.seed) >= float(hits) / float(k * k)) return false;
+        c.s->hit = true;
+        c.s->c = lit({acc.r / hits, acc.g / hits, acc.b / hits}, f);
+        return true;
+    }
     int u = std::clamp(int(std::floor(p[a1] * 4.f)), lo[a1], hi[a1] - 1), v = std::clamp(int(std::floor(p[a2] * 4.f)), lo[a2], hi[a2] - 1);
     int dep, q[3];
-    c.s->steps++;  // a texture fetch
     if (!firstHit(lo, hi, axis, high, u, v, dep, q)) return false;
-    int f = high ? FACE_HIGH[axis] : FACE_LOW[axis];
     c.s->hit = true;
     c.s->c = lit(microCol(q[0], q[1], q[2], f), f);
     return true;
@@ -685,7 +714,7 @@ bool traceNode(int idx, BoxCtx& c) {
     if (asBox) {
         if (drawnBoxes) (*drawnBoxes)[size_t(idx)].store(1, std::memory_order_relaxed);
         V3 pin = c.o + c.d * t;
-        if (boxFace(n, axis, c.d[axis] < 0, pin, c)) return true;
+        if (boxFace(n, axis, c.d[axis] < 0, pin, t, c)) return true;
         // a hole: the face the ray leaves by, seen from outside
         int ax2 = 0;
         float best = 1e30f;
@@ -694,7 +723,7 @@ bool traceNode(int idx, BoxCtx& c) {
             float e = ((c.d[a] > 0 ? n.hi[a] : n.lo[a]) * 0.25f - c.o[a]) / c.d[a];
             if (e < best) best = e, ax2 = a;
         }
-        return boxFace(n, ax2, c.d[ax2] > 0, c.o + c.d * best, c);
+        return boxFace(n, ax2, c.d[ax2] > 0, c.o + c.d * best, best, c);
     }
     std::pair<float, int> order[8];
     int k = 0;
@@ -711,10 +740,10 @@ bool traceNode(int idx, BoxCtx& c) {
     return false;
 }
 
-Sample traceBoxes(V3 o, V3 d, float pa, float tol) {
+Sample traceBoxes(V3 o, V3 d, float pa, float tol, bool prefilter = false, uint32_t seed = 0) {
     Sample s;
     if (rootNode < 0) return s;
-    BoxCtx c{o, d, pa, tol, &s};
+    BoxCtx c{o, d, pa, tol, &s, prefilter, seed};
     traceNode(rootNode, c);
     return s;
 }
@@ -853,7 +882,7 @@ bool traceGroup(int idx, BoxCtx& c) {
     if (leaf || g.err * 0.25f <= c.tol * t * c.pa) {
         if (drawnBoxes) (*drawnBoxes)[size_t(idx)].store(1, std::memory_order_relaxed);
         Node n{{g.lo[0], g.lo[1], g.lo[2]}, {g.hi[0], g.hi[1], g.hi[2]}, g.err, -1};
-        if (boxFace(n, axis, c.d[axis] < 0, c.o + c.d * t, c)) return true;
+        if (boxFace(n, axis, c.d[axis] < 0, c.o + c.d * t, t, c)) return true;
         int ax2 = 0;
         float best = 1e30f;
         for (int a = 0; a < 3; a++) {
@@ -861,7 +890,7 @@ bool traceGroup(int idx, BoxCtx& c) {
             float e = ((c.d[a] > 0 ? g.hi[a] : g.lo[a]) * 0.25f - c.o[a]) / c.d[a];
             if (e < best) best = e, ax2 = a;
         }
-        return boxFace(n, ax2, c.d[ax2] > 0, c.o + c.d * best, c);
+        return boxFace(n, ax2, c.d[ax2] > 0, c.o + c.d * best, best, c);
     }
     int kids[2] = {g.left, g.right};
     float tk[2] = {1e30f, 1e30f};
@@ -878,10 +907,10 @@ bool traceGroup(int idx, BoxCtx& c) {
     return false;
 }
 
-Sample traceGroups(V3 o, V3 d, float pa, float tol) {
+Sample traceGroups(V3 o, V3 d, float pa, float tol, bool prefilter = false, uint32_t seed = 0) {
     Sample s;
     if (rootGroup < 0) return s;
-    BoxCtx c{o, d, pa, tol, &s};
+    BoxCtx c{o, d, pa, tol, &s, prefilter, seed};
     traceGroup(rootGroup, c);
     return s;
 }
@@ -965,8 +994,9 @@ int main(int argc, char** argv) {
     if (needCur) buildBlockLevels(curLevels, false);
     if (needAny) buildBlockLevels(anyLevels, true);
     if (needCov) buildCovLevels(threads);
-    if (std::find(variants.begin(), variants.end(), "boxes") != variants.end()) buildBoxes();
-    if (std::find(variants.begin(), variants.end(), "groups") != variants.end()) buildGroups();
+    auto wants = [&](const char* x) { return std::find(variants.begin(), variants.end(), x) != variants.end(); };
+    if (wants("boxes") || wants("boxesf")) buildBoxes();
+    if (wants("groups") || wants("groupsf")) buildGroups();
     double buildMs = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - tb).count();
     std::fprintf(stderr, "atlas_lab: %dx%dx%d blocks, object %.0f blocks across, levels built in %.0f ms (octree %zu nodes, groups %zu)\n",
                  vol.sx, vol.sy, vol.sz, 2 * radius, buildMs, nodes.size(), groups.size());
@@ -978,145 +1008,217 @@ int main(int argc, char** argv) {
     V3 fwd = norm({std::sin(yaw) * std::cos(pitch), std::sin(pitch), -std::cos(yaw) * std::cos(pitch)});
     V3 right = norm(cross(fwd, {0, 1, 0})), up = cross(right, fwd);
 
-    int cols = int(variants.size()), rows = int(dists.size());
-    std::vector<uint32_t> sheet(size_t(cols * panel) * (rows * panel), 0xFF202020u);
-    std::string json = "{\"tool\":\"atlas_lab\",\"build_ms\":" + std::to_string(int(buildMs)) + ",\"runs\":[";
-    std::printf("%-8s %-8s %6s %7s %6s %6s %7s %8s %7s\n", "dist", "variant", "level", "iou", "dE", "dE1", "steps", "ns/ray", "boxes");
-    bool firstRun = true;
-
-    for (int r = 0; r < rows; r++) {
-        float D = dists[size_t(r)];
+    // one view: the object from distance D through a window of 2 * half true pixels, converged over the frames (TAA)
+    struct View {
+        Image img;
+        std::vector<RGB> first;  // frame 0 alone
+        long long drawn = -1;
+        double steps = 0, ns = 0, level = -2;
+    };
+    auto render = [&](float D, const std::string& v, int half, int offset = 0) {  // offset: other seeds and jitters
+        View out;
         V3 eye = centre - fwd * D;
-        int half = std::clamp(int(std::ceil(radius / (D * pa) * 1.15f)), 6, 128);  // a window of true pixels
         int W = 2 * half;
         float foot = D * pa;  // the pixel's size at the object, blocks
         // fog: what it hides may be rougher (an error of e shows as e times the transmittance)
         float trans = std::exp(-fog * D), fogBias = fog > 0 ? -std::log2(std::max(trans, 0.02f)) : 0.f;
         float microLevel = std::log2(std::max(foot * 4.f, 1e-6f)) + bias + fogBias, blockLevel = std::log2(std::max(foot, 1e-6f)) + bias + fogBias;
-        Image ref;
+        bool isRef = v == "ref", grouped = v == "groups" || v == "groupsf", boxed = v == "boxes" || v == "boxesf";
+        bool prefilter = v == "groupsf" || v == "boxesf";
+        int spp = isRef ? 4 : 1;
+        Image& img = out.img;
+        img = Image{W, W, std::vector<RGB>(size_t(W) * W), std::vector<float>(size_t(W) * W, 0)};
+        out.first.assign(size_t(W) * W, RGB{});
+        std::atomic<long long> steps{0}, rays{0};
+        auto t0 = std::chrono::steady_clock::now();
+        size_t markN = boxed ? nodes.size() : grouped ? groups.size() : 0;
+        std::vector<std::atomic<uint8_t>> marks(markN);
+        for (int f = 0; f < frames; f++) {
+            drawnBoxes = f == 0 && markN ? &marks : nullptr;
+            std::atomic<int> next{0};
+            auto work = [&]() {
+                long long st = 0, n = 0;
+                for (int py; (py = next++) < W;)
+                    for (int px = 0; px < W; px++) {
+                        RGB acc{};
+                        float hit = 0;
+                        for (int s = 0; s < spp; s++) {
+                            // Halton (2, 3) jitter: the frame's TAA offset, and ref's extra samples
+                            int k = (f + offset) * spp + s + 1;
+                            float jx = 0, jy = 0, fr = 0.5f;
+                            for (int i = k; i; i /= 2, fr *= 0.5f) jx += fr * (i % 2);
+                            fr = 1.f / 3;
+                            for (int i = k; i; i /= 3, fr /= 3) jy += fr * (i % 3);
+                            float ox = (px - half + jx) * pa, oy = (py - half + jy) * pa;
+                            V3 dir = norm(fwd + right * ox - up * oy);
+                            uint32_t seed = hash(uint32_t(px + 4096 * py) ^ hash(uint32_t((f + offset) * 977 + s)));
+                            Sample sm;
+                            if (isRef || v == "micro") sm = traceMicro(eye, dir);
+                            else if (v == "current" || v == "anymip") {
+                                sm = traceBlocks(v == "current" ? curLevels : anyLevels, std::max(0, int(std::floor(blockLevel + 0.5f))), eye, dir,
+                                                 v == "current", seed);
+                            } else if (v == "cov" || v == "covbox") {
+                                float l = std::max(0.f, microLevel);
+                                int l0 = int(std::floor(l));
+                                int lvl = l0 + (hashf(px, py, f + offset, 0xC0FFEEu) < l - l0 ? 1 : 0);
+                                sm = traceCov(lvl, eye, dir, seed, v == "covbox");
+                            } else if (boxed || grouped) {
+                                float dither = 0.7f + 0.6f * hashf(px, py, f + offset, 0xB0C5u);
+                                float tol = tolPix * dither / std::max(trans, 0.02f);
+                                sm = boxed ? traceBoxes(eye, dir, pa, tol, prefilter, seed) : traceGroups(eye, dir, pa, tol, prefilter, seed);
+                            }
+                            st += sm.steps;
+                            n++;
+                            RGB c = sm.hit ? sm.c : SKY;
+                            if (fog > 0 && sm.hit) {  // the same fog for every representation (at the object's distance)
+                                c.r = c.r * trans + SKY.r * (1 - trans), c.g = c.g * trans + SKY.g * (1 - trans), c.b = c.b * trans + SKY.b * (1 - trans);
+                            }
+                            acc.r += c.r, acc.g += c.g, acc.b += c.b;
+                            hit += sm.hit ? 1.f : 0.f;
+                        }
+                        size_t i = size_t(px + W * py);
+                        RGB c{acc.r / spp, acc.g / spp, acc.b / spp};
+                        if (f == 0) out.first[i] = c;
+                        img.c[i].r += c.r / frames, img.c[i].g += c.g / frames, img.c[i].b += c.b / frames;
+                        img.a[i] += hit / spp / frames;
+                    }
+                steps += st;
+                rays += n;
+            };
+            std::vector<std::thread> ts;
+            for (int t = 0; t < threads; t++) ts.emplace_back(work);
+            for (auto& t : ts) t.join();
+            if (drawnBoxes) {
+                out.drawn = 0;
+                for (auto& m : marks) out.drawn += m.load();
+                drawnBoxes = nullptr;
+            }
+        }
+        double ms = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count();
+        out.steps = rays ? double(steps) / double(rays) : 0;
+        out.ns = rays ? ms * 1e6 / double(rays) : 0;
+        out.level = v == "cov" || v == "covbox" ? std::max(0.f, microLevel) - 2.f
+                    : (v == "current" || v == "anymip") ? std::max(0.f, std::floor(blockLevel + 0.5f)) : -2.f;
+        return out;
+    };
+    // mean colour difference over the pixels where either image shows the object
+    auto diff = [](const Image& x, const Image& y) {
+        double de = 0;
+        int n = 0;
+        for (size_t i = 0; i < x.a.size(); i++)
+            if (std::max(x.a[i], y.a[i]) > 0.01f) de += deltaE(x.c[i], y.c[i]), n++;
+        return n ? de / n : 0.0;
+    };
+    auto blit = [&](std::vector<uint32_t>& sheet, int sheetW, const Image& img, int ox, int oy, int size) {
+        int W = img.w;
+        for (int y = 0; y < size; y++)
+            for (int x = 0; x < size; x++) {
+                int sx0 = x * W / size, sx1 = std::max(sx0 + 1, (x + 1) * W / size);
+                int sy0 = y * W / size, sy1 = std::max(sy0 + 1, (y + 1) * W / size);
+                RGB c{};
+                int k = 0;
+                for (int yy = sy0; yy < sy1; yy++)
+                    for (int xx = sx0; xx < sx1; xx++, k++) {
+                        const RGB& p = img.c[size_t(xx + W * yy)];
+                        c.r += p.r, c.g += p.g, c.b += p.b;
+                    }
+                auto ch = [&](float v2) { return uint32_t(std::clamp(v2 / k, 0.f, 255.f)); };
+                sheet[size_t(ox + x) + size_t(sheetW) * size_t(oy + y)] = 0xFF000000u | ch(c.b) << 16 | ch(c.g) << 8 | ch(c.r);
+            }
+        for (int x = 0; x < size; x++) sheet[size_t(ox + x) + size_t(sheetW) * size_t(oy)] = 0xFF000000u;
+        for (int y = 0; y < size; y++) sheet[size_t(ox) + size_t(sheetW) * size_t(oy + y)] = 0xFF000000u;
+    };
+
+    int sweep = int(num(a, "sweep", 0));
+    if (sweep >= 2) {
+        // the fly-in: the camera from the farthest to the nearest distance in `sweep` steps (geometric), one fixed
+        // window; pop = how much more a representation's picture changes from step to step than ref's does, beyond
+        // its own noise (a second render with other seeds: what TAA leaves) - what the eye sees as popping: geometry
+        // or colour jumping as levels or groupings change
+        float far = *std::max_element(dists.begin(), dists.end()), near = *std::min_element(dists.begin(), dists.end());
+        int half = int(num(a, "window", 96));
+        int shown = std::min(sweep, 10), size = int(num(a, "panel", 128));
+        int sheetW = shown * size, sheetH = int(variants.size()) * size;
+        std::vector<uint32_t> sheet(size_t(sheetW) * sheetH, 0xFF202020u);
+        std::vector<View> refViews;
+        std::string json = "{\"tool\":\"atlas_lab\",\"mode\":\"sweep\",\"steps\":" + std::to_string(sweep) + ",\"runs\":[";
+        std::printf("%-8s %7s %7s %7s %7s %7s\n", "variant", "pop", "popMax", "dE", "steps", "boxes");
+        for (size_t vi = 0; vi < variants.size(); vi++) {
+            const std::string& v = variants[vi];
+            double pop = 0, popMax = 0, de = 0, stepsSum = 0;
+            long long boxesMax = -1;
+            View prev;
+            for (int k = 0; k < sweep; k++) {
+                float D = far * std::pow(near / far, float(k) / float(sweep - 1));
+                View cur = render(D, v, half);
+                double noise = diff(cur.img, render(D, v, half, 1000).img);
+                if (v == "ref") refViews.push_back(cur);
+                const View& r = refViews[size_t(k)];
+                de += diff(cur.img, r.img);
+                stepsSum += cur.steps;
+                boxesMax = std::max(boxesMax, cur.drawn);
+                if (k > 0) {
+                    double change = diff(cur.img, prev.img), refChange = diff(r.img, refViews[size_t(k - 1)].img);
+                    double excess = std::max(0.0, change - refChange - noise);
+                    pop += excess / (sweep - 1);
+                    popMax = std::max(popMax, excess);
+                }
+                int col = k * shown / sweep;
+                if ((k * shown) % sweep < shown) blit(sheet, sheetW, cur.img, col * size, int(vi) * size, size);
+                prev = std::move(cur);
+            }
+            de /= sweep;
+            std::printf("%-8s %7.2f %7.2f %7.2f %7.1f %7lld\n", v.c_str(), pop, popMax, de, stepsSum / sweep, boxesMax);
+            char buf[256];
+            std::snprintf(buf, sizeof buf, "%s{\"variant\":\"%s\",\"pop\":%.3f,\"pop_max\":%.3f,\"dE\":%.3f,\"steps\":%.2f,\"boxes_max\":%lld}",
+                          vi ? "," : "", v.c_str(), pop, popMax, de, stepsSum / sweep, boxesMax);
+            json += buf;
+        }
+        atlas::writePng(out, sheet.data(), uint32_t(sheetW), uint32_t(sheetH));
+        json += "],\"rows\":\"";
+        for (size_t c = 0; c < variants.size(); c++) json += (c ? "," : "") + variants[c];
+        json += "\"}";
+        std::printf("%s\n", json.c_str());
+        return 0;
+    }
+
+    int cols = int(variants.size()), rows = int(dists.size());
+    std::vector<uint32_t> sheet(size_t(cols * panel) * (rows * panel), 0xFF202020u);
+    std::string json = "{\"tool\":\"atlas_lab\",\"build_ms\":" + std::to_string(int(buildMs)) + ",\"runs\":[";
+    std::printf("%-8s %-8s %6s %7s %6s %6s %7s %8s %7s\n", "dist", "variant", "level", "iou", "dE", "dE1", "steps", "ns/ray", "boxes");
+    bool firstRun = true;
+    for (int r = 0; r < rows; r++) {
+        float D = dists[size_t(r)];
+        int half = std::clamp(int(std::ceil(radius / (D * pa) * 1.15f)), 6, 128);  // a window of true pixels
+        View ref;
         for (int vi = 0; vi < cols; vi++) {
             const std::string& v = variants[size_t(vi)];
-            bool isRef = v == "ref";
-            int spp = isRef ? 4 : 1;
-            Image img{W, W, std::vector<RGB>(size_t(W) * W), std::vector<float>(size_t(W) * W, 0)};
-            std::vector<RGB> first(size_t(W) * W);
-            std::atomic<long long> steps{0}, rays{0};
-            auto t0 = std::chrono::steady_clock::now();
-            size_t markN = v == "boxes" ? nodes.size() : v == "groups" ? groups.size() : 0;
-            std::vector<std::atomic<uint8_t>> marks(markN);
-            long long drawn = -1;
-            for (int f = 0; f < frames; f++) {
-                drawnBoxes = f == 0 && markN ? &marks : nullptr;
-                std::atomic<int> next{0};
-                auto work = [&]() {
-                    long long st = 0, n = 0;
-                    for (int py; (py = next++) < W;)
-                        for (int px = 0; px < W; px++) {
-                            RGB acc{};
-                            float hit = 0;
-                            for (int s = 0; s < spp; s++) {
-                                // Halton (2, 3) jitter: the frame's TAA offset, and ref's extra samples
-                                int k = f * spp + s + 1;
-                                float jx = 0, jy = 0, fr = 0.5f;
-                                for (int i = k; i; i /= 2, fr *= 0.5f) jx += fr * (i % 2);
-                                fr = 1.f / 3;
-                                for (int i = k; i; i /= 3, fr /= 3) jy += fr * (i % 3);
-                                float ox = (px - half + jx) * pa, oy = (py - half + jy) * pa;
-                                V3 dir = norm(fwd + right * ox - up * oy);
-                                uint32_t seed = hash(uint32_t(px + 4096 * py) ^ hash(uint32_t(f * 977 + s)));
-                                Sample sm;
-                                float lv = 0;
-                                if (isRef || v == "micro") sm = traceMicro(eye, dir);
-                                else if (v == "current" || v == "anymip") {
-                                    lv = std::floor(blockLevel + 0.5f);
-                                    sm = traceBlocks(v == "current" ? curLevels : anyLevels, std::max(0, int(lv)), eye, dir, v == "current", seed);
-                                } else if (v == "cov" || v == "covbox") {
-                                    float l = std::max(0.f, microLevel);
-                                    int l0 = int(std::floor(l));
-                                    int lvl = l0 + (hashf(px, py, f, 0xC0FFEEu) < l - l0 ? 1 : 0);
-                                    sm = traceCov(lvl, eye, dir, seed, v == "covbox");
-                                } else if (v == "boxes") {
-                                    float dither = 0.7f + 0.6f * hashf(px, py, f, 0xB0C5u);
-                                    sm = traceBoxes(eye, dir, pa, tolPix * dither / std::max(trans, 0.02f));
-                                } else if (v == "groups") {
-                                    float dither = 0.7f + 0.6f * hashf(px, py, f, 0xB0C5u);
-                                    sm = traceGroups(eye, dir, pa, tolPix * dither / std::max(trans, 0.02f));
-                                }
-                                st += sm.steps;
-                                n++;
-                                RGB c = sm.hit ? sm.c : SKY;
-                                if (fog > 0 && sm.hit) {  // the same fog for every representation (at the object's distance)
-                                    c.r = c.r * trans + SKY.r * (1 - trans), c.g = c.g * trans + SKY.g * (1 - trans), c.b = c.b * trans + SKY.b * (1 - trans);
-                                }
-                                acc.r += c.r, acc.g += c.g, acc.b += c.b;
-                                hit += sm.hit ? 1.f : 0.f;
-                            }
-                            size_t i = size_t(px + W * py);
-                            RGB c{acc.r / spp, acc.g / spp, acc.b / spp};
-                            if (f == 0) first[i] = c;
-                            img.c[i].r += c.r / frames, img.c[i].g += c.g / frames, img.c[i].b += c.b / frames;
-                            img.a[i] += hit / spp / frames;
-                        }
-                    steps += st;
-                    rays += n;
-                };
-                std::vector<std::thread> ts;
-                for (int t = 0; t < threads; t++) ts.emplace_back(work);
-                for (auto& t : ts) t.join();
-                if (drawnBoxes) {
-                    drawn = 0;
-                    for (auto& m : marks) drawn += m.load();
-                    drawnBoxes = nullptr;
-                }
-            }
-            double ms = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count();
-            if (isRef) ref = img;
-            // metrics against ref
+            View cur = render(D, v, half);
+            if (v == "ref") ref = cur;
+            const Image& img = cur.img;
             double inter = 0, uni = 0, de = 0, de1 = 0;
             int nde = 0;
             for (size_t i = 0; i < img.a.size(); i++) {
-                inter += std::min(img.a[i], ref.a[i]);
-                uni += std::max(img.a[i], ref.a[i]);
-                if (std::max(img.a[i], ref.a[i]) > 0.01f) {
-                    de += deltaE(img.c[i], ref.c[i]);
-                    de1 += deltaE(first[i], ref.c[i]);
+                inter += std::min(img.a[i], ref.img.a[i]);
+                uni += std::max(img.a[i], ref.img.a[i]);
+                if (std::max(img.a[i], ref.img.a[i]) > 0.01f) {
+                    de += deltaE(img.c[i], ref.img.c[i]);
+                    de1 += deltaE(cur.first[i], ref.img.c[i]);
                     nde++;
                 }
             }
             double iou = uni > 0 ? inter / uni : 1, mde = nde ? de / nde : 0, mde1 = nde ? de1 / nde : 0;
-            double spr = rays ? double(steps) / double(rays) : 0, ns = rays ? ms * 1e6 / double(rays) : 0;
-            float lvShown = v == "cov" || v == "covbox" ? std::max(0.f, microLevel) - 2.f : (v == "current" || v == "anymip") ? std::max(0.f, std::floor(blockLevel + 0.5f)) : -2.f;
-            std::printf("%-8.0f %-8s %6.2f %7.3f %6.2f %6.2f %7.1f %8.0f %7lld\n", D, v.c_str(), lvShown, iou, mde, mde1, spr, ns, drawn);
+            std::printf("%-8.0f %-8s %6.2f %7.3f %6.2f %6.2f %7.1f %8.0f %7lld\n", D, v.c_str(), cur.level, iou, mde, mde1, cur.steps, cur.ns, cur.drawn);
             char buf[320];
             std::snprintf(buf, sizeof buf,
                           "%s{\"dist\":%.0f,\"variant\":\"%s\",\"level_blocks\":%.2f,\"pixels\":%d,\"iou\":%.4f,\"dE\":%.3f,\"dE1\":%.3f,"
                           "\"steps\":%.1f,\"ns_per_ray\":%.0f,\"boxes\":%lld}",
-                          firstRun ? "" : ",", D, v.c_str(), lvShown, W, iou, mde, mde1, spr, ns, drawn);
+                          firstRun ? "" : ",", D, v.c_str(), cur.level, img.w, iou, mde, mde1, cur.steps, cur.ns, cur.drawn);
             json += buf;
             firstRun = false;
-            // the panel: the window scaled to the panel (nearest up, box down)
-            for (int y = 0; y < panel; y++)
-                for (int x = 0; x < panel; x++) {
-                    int sx0 = x * W / panel, sx1 = std::max(sx0 + 1, (x + 1) * W / panel);
-                    int sy0 = y * W / panel, sy1 = std::max(sy0 + 1, (y + 1) * W / panel);
-                    RGB c{};
-                    int k = 0;
-                    for (int yy = sy0; yy < sy1; yy++)
-                        for (int xx = sx0; xx < sx1; xx++, k++) {
-                            const RGB& p = img.c[size_t(xx + W * yy)];
-                            c.r += p.r, c.g += p.g, c.b += p.b;
-                        }
-                    auto ch = [&](float v2) { return uint32_t(std::clamp(v2 / k, 0.f, 255.f)); };
-                    sheet[size_t(vi * panel + x) + size_t(cols * panel) * size_t(r * panel + y)] =
-                        0xFF000000u | ch(c.b) << 16 | ch(c.g) << 8 | ch(c.r);
-                }
+            blit(sheet, cols * panel, img, vi * panel, r * panel, panel);
         }
     }
-    // thin separators between panels
-    for (int r = 0; r < rows; r++)
-        for (int x = 0; x < cols * panel; x++) sheet[size_t(x) + size_t(cols * panel) * size_t(r * panel)] = 0xFF000000u;
-    for (int c = 0; c < cols; c++)
-        for (int y = 0; y < rows * panel; y++) sheet[size_t(c * panel) + size_t(cols * panel) * size_t(y)] = 0xFF000000u;
     atlas::writePng(out, sheet.data(), uint32_t(cols * panel), uint32_t(rows * panel));
     json += "],\"columns\":\"";
     for (int c = 0; c < cols; c++) json += (c ? "," : "") + variants[size_t(c)];
