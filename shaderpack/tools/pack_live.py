@@ -156,7 +156,8 @@ def launch_and_wait(limit=900):
     while time.monotonic() - t0 < limit:
         st = client_state()
         c = st.get("client", {})
-        if c.get("fresh") and st.get("serverReady"):
+        remote = c.get("connected") and c.get("remote") and not c.get("integratedServer")  # TCP multiplayer
+        if c.get("fresh") and (st.get("serverReady") or (remote and c.get("worldLoaded"))):
             print(f"world ready after {time.monotonic() - t0:.0f} s")
             return
         gone = gone + 1 if not st.get("running") else 0
@@ -196,9 +197,17 @@ def run(a):
         launch_and_wait()
     if not a.no_sync:
         print(f"synced {sync()} changed file(s) into {DEST}")
+    # a shader toggle checks readiness at the current pose, and the spawn pose may be buried: move to the first
+    # requested pose before reloading
+    first = []
+    if a.visit:
+        x, z, h, yaw, pitch, *w = a.visit[0].split(":", 1)[1].split(",")
+        first = [f"visit {x} {z} {h} {yaw} {pitch} {w[0] if w else 'clear'}"]
+    elif [c for c in a.cams.split(",") if c]:
+        first = [l for l in camera_lines(a.cams.split(",")[0], "", "") if l.startswith("camera ")]
     since = LOG.stat().st_size if LOG.exists() else 0
     t0 = time.monotonic()
-    actions(["shaders off", "shaders on", "settle 1200"])
+    actions(first + ["shaders off", "shaders on"])
     errs = shader_errors(since)
     print(f"reload acknowledged in {time.monotonic() - t0:.1f} s; {len(errs)} shader log line(s)")
     for e in errs[:40]:
