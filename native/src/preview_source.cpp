@@ -1,4 +1,5 @@
 #include "preview_source.hpp"
+#include "parallel.hpp"
 
 #include <atomic>
 #include <thread>
@@ -300,10 +301,7 @@ void PreviewSource::dress(Tile& tile, const uint16_t* grassMat, const uint16_t* 
     auto rows = [&] {
         for (int j; (j = nextRow.fetch_add(4)) < TILE;) dressRows(tile, j, std::min(j + 4, int(TILE)), grassMat, foliageMat);
     };
-    std::vector<std::thread> pool;
-    for (unsigned i = 1; i < n; i++) pool.emplace_back(rows);
-    rows();
-    for (auto& th : pool) th.join();
+    parallelRun(rows, n);
 }
 
 void PreviewSource::dressRows(Tile& tile, int jBegin, int jEnd, const uint16_t* grassMat, const uint16_t* foliageMat) const {

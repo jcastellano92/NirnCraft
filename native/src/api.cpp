@@ -1,4 +1,5 @@
 #include <cstdio>
+#include <cstdlib>
 #include <atomic>
 #include <cstddef>
 #include <chrono>
@@ -14,6 +15,7 @@
 
 #include "aether/aether.h"
 #include "backend.hpp"
+#include "parallel.hpp"
 #include "preview_source.hpp"
 #include "world.hpp"
 
@@ -64,8 +66,12 @@ struct AetherContext {
     bool sunMapFull = true;
     uint32_t sunMapCursor = 0;
 
-    AetherStatus fail(AetherStatus s, std::string msg) {
-        error = std::move(msg);
+    AetherStatus fail(AetherStatus s, std::string msg) noexcept {
+        try {
+            error = std::move(msg);
+        } catch (...) {
+            // no memory even for the message: the status says enough
+        }
         return s;
     }
 };
@@ -76,6 +82,75 @@ namespace {
 std::string& createError() {
     thread_local std::string e;
     return e;
+}
+
+// Every entry point catches what C++ throws inside (std::bad_alloc, std::system_error from a thread pool, ...): an
+// exception escaping into the JVM's downcall would terminate the game.
+AetherStatus caught(AetherContext* ctx, AetherStatus s, const char* what) noexcept {
+    if (ctx) return ctx->fail(s, what);
+    try {
+        createError() = what;
+    } catch (...) {
+    }
+    return s;
+}
+#define AETHER_TRY try {
+#define AETHER_CATCH(ctx)                                                                     \
+    }                                                                                         \
+    catch (const std::bad_alloc&) {                                                           \
+        return caught(ctx, AETHER_ERR_OUT_OF_MEMORY, "out of host memory (std::bad_alloc)"); \
+    }                                                                                         \
+    catch (const std::exception& e) {                                                         \
+        return caught(ctx, AETHER_ERR_INTERNAL, e.what());                                    \
+    }                                                                                         \
+    catch (...) {                                                                             \
+        return caught(ctx, AETHER_ERR_INTERNAL, "unknown exception");                         \
+    }
+
+// The status for a backend call that failed: a lost device, a hang and running out of memory get their own codes
+// (the caller turns the far field off and retries later, or shrinks), anything else `otherwise`.
+AetherStatus backendFailure(AetherContext* ctx, const std::string& err, AetherStatus otherwise) noexcept {
+    Fault f = ctx->backend->fault();
+    AetherStatus s = f == Fault::DeviceLost    ? AETHER_ERR_DEVICE_LOST
+                     : f == Fault::Timeout     ? AETHER_ERR_TIMEOUT
+                     : f == Fault::OutOfMemory ? AETHER_ERR_OUT_OF_MEMORY
+                                               : otherwise;
+    ctx->backend->clearFault();
+    try {
+        return ctx->fail(s, err);
+    } catch (...) {
+        return s;
+    }
+}
+
+// A context whose device is gone refuses GPU work (the same status every time) until it is destroyed.
+bool deadDevice(AetherContext* ctx, AetherStatus& s) noexcept {
+    if (!ctx->backend->lost()) {
+        ctx->backend->clearFault();  // a fault an earlier call recovered from (e.g. zero-copy -> host-copy) is not this one's
+        return false;
+    }
+    s = ctx->backend->fault() == Fault::Timeout ? AETHER_ERR_TIMEOUT : AETHER_ERR_DEVICE_LOST;
+    ctx->fail(s, s == AETHER_ERR_TIMEOUT ? "the GPU hung earlier (timeout); destroy this context and create a new one"
+                                         : "the GPU device was lost earlier; destroy this context and create a new one");
+    return true;
+}
+
+// AETHER_FAULT=<device_lost|timeout|oom>[@frames]: arms the test hook on every new context.
+void armFromEnvironment(Backend& b) {
+    const char* v = std::getenv("AETHER_FAULT");
+    if (!v || !*v) return;
+    std::string s(v);
+    uint32_t after = 0;
+    size_t at = s.find('@');
+    if (at != std::string::npos) {
+        for (size_t i = at + 1; i < s.size() && s[i] >= '0' && s[i] <= '9'; i++) after = after * 10 + uint32_t(s[i] - '0');
+        s = s.substr(0, at);
+    }
+    Fault f = s == "device_lost" ? Fault::DeviceLost : s == "timeout" ? Fault::Timeout : s == "oom" ? Fault::OutOfMemory : Fault::None;
+    if (f != Fault::None) {
+        b.injectFault(f, after);
+        std::fprintf(stderr, "[aether] AETHER_FAULT: %s after %u frames\n", s.c_str(), after);
+    }
 }
 
 MaterialGpu toGpu(const AetherMaterial& m) {
@@ -146,33 +221,48 @@ AETHER_API const char* aether_build_info(void) {
 
 AETHER_API const char* aether_info(AetherContext* ctx) {
     if (!ctx) return "{}";
-    std::lock_guard<std::mutex> lock(ctx->mu);
-    ctx->info = ctx->backend->info();
-    return ctx->info.c_str();
+    try {
+        std::lock_guard<std::mutex> lock(ctx->mu);
+        ctx->info = ctx->backend->info();
+        if (ctx->backend->lost() && !ctx->info.empty() && ctx->info.back() == '}')
+            ctx->info.insert(ctx->info.size() - 1, ",\"deviceLost\":true");
+        return ctx->info.c_str();
+    } catch (...) {
+        return "{}";
+    }
 }
 
 AETHER_API AetherStatus aether_create(AetherBackend backend, AetherContext** out) {
     if (!out) return AETHER_ERR_ARG;
+    *out = nullptr;
+    AETHER_TRY
     auto ctx = std::make_unique<AetherContext>();
     if (backend == AETHER_BACKEND_VULKAN) {
         std::string err;
         ctx->backend = makeVulkanBackend(err);
         if (!ctx->backend) {
-            *out = nullptr;
             createError() = "Vulkan backend unavailable: " + err;  // aether_last_error(NULL) reports it
             return AETHER_ERR_GPU;
         }
     } else {
         ctx->backend = makeCpuBackend();
     }
+    armFromEnvironment(*ctx->backend);
     auto pal = previewPalette();
     setPalette(ctx.get(), pal.data(), uint32_t(pal.size()));
     ctx->weather.assign(4 * 128 * 128, 0);
     *out = ctx.release();
     return AETHER_OK;
+    AETHER_CATCH(nullptr)
 }
 
-AETHER_API void aether_destroy(AetherContext* ctx) { delete ctx; }
+AETHER_API void aether_destroy(AetherContext* ctx) {
+    try {
+        delete ctx;
+    } catch (...) {
+        // destructors do not throw; if one ever did, leaking beats terminating the game
+    }
+}
 
 AETHER_API const char* aether_last_error(AetherContext* ctx) {
     if (ctx) return ctx->error.c_str();
@@ -182,14 +272,17 @@ AETHER_API const char* aether_last_error(AetherContext* ctx) {
 AETHER_API AetherStatus aether_set_palette(AetherContext* ctx, const AetherMaterial* m, uint32_t count) {
     if (!ctx || (!m && count)) return AETHER_ERR_ARG;
     if (count > 65534) return ctx->fail(AETHER_ERR_ARG, "palette too large");
+    AETHER_TRY
     std::lock_guard<std::mutex> lock(ctx->mu);
     setPalette(ctx, m, count);
     return AETHER_OK;
+    AETHER_CATCH(ctx)
 }
 
 AETHER_API AetherStatus aether_upload_column_tile(AetherContext* ctx, const AetherColumnTile* t) {
     if (!ctx || !t || !t->surface || !t->water || !t->topMat || !t->fillMat) return AETHER_ERR_ARG;
     if (t->lod < 0 || t->lod >= MAX_LODS) return ctx->fail(AETHER_ERR_ARG, "lod out of range");
+    AETHER_TRY
     auto tile = std::make_unique<Tile>();
     size_t n = size_t(TILE) * TILE;
     tile->lod = t->lod;
@@ -205,19 +298,24 @@ AETHER_API AetherStatus aether_upload_column_tile(AetherContext* ctx, const Aeth
     }
     ctx->world.putTile(std::move(tile));
     return AETHER_OK;
+    AETHER_CATCH(ctx)
 }
 
 AETHER_API AetherStatus aether_upload_section(AetherContext* ctx, int32_t sx, int32_t sy, int32_t sz, const uint16_t* mats) {
     if (!ctx || !mats) return AETHER_ERR_ARG;
+    AETHER_TRY
     ctx->world.putSection(sx, sy, sz, mats);
     return AETHER_OK;
+    AETHER_CATCH(ctx)
 }
 
 AETHER_API AetherStatus aether_notify_block(AetherContext* ctx, int32_t x, int32_t y, int32_t z, uint16_t mat) {
     if (!ctx) return AETHER_ERR_ARG;
     if (y < WORLD_MIN_Y || y >= WORLD_TOP_Y) return AETHER_OK;
+    AETHER_TRY
     ctx->world.editBlock(x, y, z, mat);
     return AETHER_OK;
+    AETHER_CATCH(ctx)
 }
 
 AETHER_API AetherStatus aether_set_weather(AetherContext* ctx, const AetherWeather* w) {
@@ -233,30 +331,37 @@ AETHER_API AetherStatus aether_set_weather(AetherContext* ctx, const AetherWeath
 
 AETHER_API AetherStatus aether_set_cloud_noise(AetherContext* ctx, const uint32_t* rgba) {
     if (!ctx || !rgba) return AETHER_ERR_ARG;
+    AETHER_TRY
     std::lock_guard<std::mutex> lock(ctx->mu);
     std::vector<uint32_t> v(rgba, rgba + 64 * 64 * 64);
     ctx->cloudNoise.swap(v);  // new storage: the Vulkan backend re-uploads when the pointer changes
     return AETHER_OK;
+    AETHER_CATCH(ctx)
 }
 
 AETHER_API AetherStatus aether_set_actors(AetherContext* ctx, const AetherActor* a, uint32_t count) {
     if (!ctx || (!a && count)) return AETHER_ERR_ARG;
+    AETHER_TRY
     std::lock_guard<std::mutex> lock(ctx->mu);
     ctx->actors.assign(a, a + count);
     return AETHER_OK;
+    AETHER_CATCH(ctx)
 }
 
 AETHER_API AetherStatus aether_update(AetherContext* ctx, const double centre[3], double budgetMs) {
     if (!ctx || !centre) return AETHER_ERR_ARG;
+    AETHER_TRY
     double ms = 0;
     ctx->world.update(centre, budgetMs, &ms);
     ctx->stats.lastBuildMs = ms;
-    // copy a new revision to the GPU here (the game calls update off the render thread), not in the next frame
+    // copy a new revision to the GPU here (the game calls update off the render thread), not in the next frame;
+    // a lost device stages nothing (the render thread reports the loss)
     auto snap = ctx->world.packed();
-    if (snap->lodCount && snap->revision != ctx->stagedRevision) {
+    if (snap->lodCount && snap->revision != ctx->stagedRevision && !ctx->backend->lost()) {
         if (ctx->backend->stageScene(*snap)) ctx->stagedRevision = snap->revision;
     }
     return AETHER_OK;
+    AETHER_CATCH(ctx)
 }
 
 static AetherStatus buildInputs(AetherContext* ctx, const AetherFrame* f, FrameInputs& in);
@@ -264,13 +369,16 @@ static void rememberFrame(AetherContext* ctx, const AetherFrame* f);
 
 AETHER_API AetherStatus aether_render(AetherContext* ctx, const AetherFrame* f, const AetherFrameOutput* out) {
     if (!ctx || !f || !out || f->width == 0 || f->height == 0) return AETHER_ERR_ARG;
+    AETHER_TRY
     std::lock_guard<std::mutex> lock(ctx->mu);
+    AetherStatus dead;
+    if (deadDevice(ctx, dead)) return dead;
     FrameInputs in{};
     AetherStatus st = buildInputs(ctx, f, in);
     if (st != AETHER_OK) return st;
     double ms = 0;
     std::string err;
-    if (!ctx->backend->render(in, ctx->targets, &ms, err)) return ctx->fail(AETHER_ERR_GPU, err);
+    if (!ctx->backend->render(in, ctx->targets, &ms, err)) return backendFailure(ctx, err, AETHER_ERR_GPU);
     rememberFrame(ctx, f);
     size_t n = size_t(f->width) * f->height;
     if (out->colorLinear) std::memcpy(out->colorLinear, ctx->targets.color.data(), n * 16);
@@ -300,16 +408,21 @@ AETHER_API AetherStatus aether_render(AetherContext* ctx, const AetherFrame* f, 
     ctx->stats.raySteps = steps;
     ctx->stats.lastFrameMs = ms;
     return AETHER_OK;
+    AETHER_CATCH(ctx)
 }
 
 AETHER_API AetherStatus aether_gl_attach(AetherContext* ctx, uint32_t w, uint32_t h, AetherGlTargets* out) {
     if (!ctx || !out || w == 0 || h == 0) return AETHER_ERR_ARG;
+    AETHER_TRY
     std::lock_guard<std::mutex> lock(ctx->mu);
+    AetherStatus dead;
+    if (deadDevice(ctx, dead)) return dead;
     GlTargets t;
     std::string err;
-    if (!ctx->backend->glAttach(w, h, t, err)) return ctx->fail(AETHER_ERR_UNSUPPORTED, err);
+    if (!ctx->backend->glAttach(w, h, t, err)) return backendFailure(ctx, err, AETHER_ERR_UNSUPPORTED);
     *out = AetherGlTargets{t.color, t.normal, t.depth, t.nearDepth, t.width, t.height};
     return AETHER_OK;
+    AETHER_CATCH(ctx)
 }
 
 AETHER_API AetherStatus aether_gl_render(AetherContext* ctx, const AetherFrame* f) {
@@ -318,7 +431,10 @@ AETHER_API AetherStatus aether_gl_render(AetherContext* ctx, const AetherFrame* 
 
 AETHER_API AetherStatus aether_gl_render_io(AetherContext* ctx, const AetherFrame* f, const AetherGlFrameIO* io) {
     if (!ctx || !f || f->width == 0 || f->height == 0) return AETHER_ERR_ARG;
+    AETHER_TRY
     std::lock_guard<std::mutex> lock(ctx->mu);
+    AetherStatus dead;
+    if (deadDevice(ctx, dead)) return dead;
     FrameInputs in{};
     AetherStatus st = buildInputs(ctx, f, in);
     if (st != AETHER_OK) return st;
@@ -336,16 +452,20 @@ AETHER_API AetherStatus aether_gl_render_io(AetherContext* ctx, const AetherFram
     }
     double ms = ctx->stats.lastFrameMs;
     std::string err;
-    if (!ctx->backend->glRender(in, io ? &g : nullptr, &ms, err)) return ctx->fail(AETHER_ERR_GPU, err);
+    if (!ctx->backend->glRender(in, io ? &g : nullptr, &ms, err)) return backendFailure(ctx, err, AETHER_ERR_GPU);
     rememberFrame(ctx, f);
     ctx->stats.lastFrameMs = ms;
     return AETHER_OK;
+    AETHER_CATCH(ctx)
 }
 
 AETHER_API void aether_gl_detach(AetherContext* ctx) {
     if (!ctx) return;
-    std::lock_guard<std::mutex> lock(ctx->mu);
-    ctx->backend->glDetach();
+    try {
+        std::lock_guard<std::mutex> lock(ctx->mu);
+        ctx->backend->glDetach();  // after a loss: frees the GL side and the images without waiting on the device
+    } catch (...) {
+    }
 }
 
 // General 4x4 inverse (column-major), in double. False when singular.
@@ -489,26 +609,31 @@ static AetherStatus buildInputs(AetherContext* ctx, const AetherFrame* f, FrameI
 
 AETHER_API AetherStatus aether_get_stats(AetherContext* ctx, AetherStats* out) {
     if (!ctx || !out) return AETHER_ERR_ARG;
+    AETHER_TRY
     ctx->stats.regions = uint32_t(ctx->world.regionCount());
     ctx->stats.nodeBytes = ctx->world.nodeBytes();
     ctx->stats.leafBytes = ctx->world.leafBytes();
     ctx->stats.materialBytes = ctx->world.materialBytes();
     *out = ctx->stats;
     return AETHER_OK;
+    AETHER_CATCH(ctx)
 }
 
 AETHER_API AetherStatus aether_preview_load_raster(AetherContext* ctx, const char* path) {
     if (!ctx || !path) return AETHER_ERR_ARG;
+    AETHER_TRY
     auto p = std::make_unique<PreviewSource>();
     std::string err;
     if (!p->load(path, err)) return ctx->fail(AETHER_ERR_IO, err);
     ctx->preview = std::move(p);
     return AETHER_OK;
+    AETHER_CATCH(ctx)
 }
 
 AETHER_API AetherStatus aether_preview_generate(AetherContext* ctx, int32_t lod, int32_t x0, int32_t z0, int32_t x1, int32_t z1) {
     if (!ctx || lod < 0 || lod >= MAX_LODS) return AETHER_ERR_ARG;
     if (!ctx->preview) return ctx->fail(AETHER_ERR_STATE, "no preview raster loaded");
+    AETHER_TRY
     int span = 256 << lod;
     auto fdiv = [](int a, int b) { return a >= 0 ? a / b : -((-a + b - 1) / b); };
     int tx0 = fdiv(x0, span), tz0 = fdiv(z0, span), tx1 = fdiv(x1 - 1, span), tz1 = fdiv(z1 - 1, span);
@@ -524,20 +649,19 @@ AETHER_API AetherStatus aether_preview_generate(AetherContext* ctx, int32_t lod,
             ctx->world.putTile(ctx->preview->makeTile(lod, todo[i].first, todo[i].second));
         }
     };
-    unsigned n = std::max(1u, std::thread::hardware_concurrency());
-    std::vector<std::thread> pool;
-    for (unsigned i = 0; i + 1 < n; i++) pool.emplace_back(worker);
-    worker();
-    for (auto& t : pool) t.join();
+    parallelRun(worker);
     return AETHER_OK;
+    AETHER_CATCH(ctx)
 }
 
 AETHER_API AetherStatus aether_upload_column_heights(AetherContext* ctx, int32_t lod, int32_t tileX, int32_t tileZ,
                                                      const float* surface, const float* water) {
     if (!ctx || lod < 0 || lod >= MAX_LODS || !surface || !water) return AETHER_ERR_ARG;
     if (!ctx->preview) return ctx->fail(AETHER_ERR_STATE, "no preview raster loaded (it dresses the columns)");
+    AETHER_TRY
     ctx->world.putTile(ctx->preview->dressTile(lod, tileX, tileZ, surface, water));
     return AETHER_OK;
+    AETHER_CATCH(ctx)
 }
 
 AETHER_API AetherStatus aether_upload_column_heights2(AetherContext* ctx, int32_t lod, int32_t tileX, int32_t tileZ,
@@ -545,14 +669,17 @@ AETHER_API AetherStatus aether_upload_column_heights2(AetherContext* ctx, int32_
                                                       const uint16_t* foliageMat) {
     if (!ctx || lod < 0 || lod >= MAX_LODS || !surface || !water) return AETHER_ERR_ARG;
     if (!ctx->preview) return ctx->fail(AETHER_ERR_STATE, "no preview raster loaded (it dresses the columns)");
+    AETHER_TRY
     ctx->world.putTile(ctx->preview->dressTile(lod, tileX, tileZ, surface, water, grassMat, foliageMat));
     return AETHER_OK;
+    AETHER_CATCH(ctx)
 }
 
 AETHER_API AetherStatus aether_upload_column_structures(AetherContext* ctx, int32_t lod, int32_t tileX, int32_t tileZ,
                                                         const float* wallTop, const float* roofTop,
                                                         const uint16_t* wallMat, const uint16_t* roofMat) {
     if (!ctx || lod < 0 || lod >= MAX_LODS) return AETHER_ERR_ARG;
+    AETHER_TRY
     if (!wallTop) {
         ctx->world.putStructures(lod, tileX, tileZ, nullptr);
         return AETHER_OK;
@@ -570,16 +697,19 @@ AETHER_API AetherStatus aether_upload_column_structures(AetherContext* ctx, int3
     }
     ctx->world.putStructures(lod, tileX, tileZ, std::move(s));
     return AETHER_OK;
+    AETHER_CATCH(ctx)
 }
 
 AETHER_API AetherStatus aether_set_materials(AetherContext* ctx, uint32_t first, const AetherMaterial* m, uint32_t count) {
     if (!ctx || first == 0 || (!m && count)) return AETHER_ERR_ARG;
     if (uint64_t(first) + count > 65535) return ctx->fail(AETHER_ERR_ARG, "material ids beyond 65534");
+    AETHER_TRY
     std::lock_guard<std::mutex> lock(ctx->mu);
     AetherMaterial grey{{0.3f, 0.3f, 0.3f}, 0.9f, 0.0f, AETHER_CLASS_TERRAIN};
     if (ctx->palette.size() < first + count) ctx->palette.resize(first + count, toGpu(grey));
     for (uint32_t i = 0; i < count; i++) ctx->palette[first + i] = toGpu(m[i]);
     return AETHER_OK;
+    AETHER_CATCH(ctx)
 }
 
 AETHER_API AetherStatus aether_set_sun_map(AetherContext* ctx, uint32_t size, float halfExtent) {
@@ -594,23 +724,72 @@ AETHER_API AetherStatus aether_set_sun_map(AetherContext* ctx, uint32_t size, fl
 
 AETHER_API AetherStatus aether_read_sun_map(AetherContext* ctx, float* out, uint32_t count) {
     if (!ctx || !out) return AETHER_ERR_ARG;
+    AETHER_TRY
     std::lock_guard<std::mutex> lock(ctx->mu);
+    AetherStatus dead;
+    if (deadDevice(ctx, dead)) return dead;
     std::vector<float> m;
     std::string err;
-    if (!ctx->backend->readSunMap(m, err) || m.empty()) return ctx->fail(AETHER_ERR_STATE, err.empty() ? "no sun map yet" : err);
+    if (!ctx->backend->readSunMap(m, err)) return backendFailure(ctx, err.empty() ? "no sun map yet" : err, AETHER_ERR_STATE);
+    if (m.empty()) return ctx->fail(AETHER_ERR_STATE, "no sun map yet");
     if (count < m.size()) return ctx->fail(AETHER_ERR_ARG, "sun map buffer too small");
     std::memcpy(out, m.data(), m.size() * 4);
     return AETHER_OK;
+    AETHER_CATCH(ctx)
 }
 
 AETHER_API int32_t aether_has_tile(AetherContext* ctx, int32_t lod, int32_t tileX, int32_t tileZ) {
     if (!ctx || lod < 0 || lod >= MAX_LODS) return 0;
-    return ctx->world.hasTile(lod, tileX, tileZ) ? 1 : 0;
+    try {
+        return ctx->world.hasTile(lod, tileX, tileZ) ? 1 : 0;
+    } catch (...) {
+        return 0;
+    }
 }
 
 AETHER_API float aether_preview_height(AetherContext* ctx, double x, double z) {
     if (!ctx || !ctx->preview) return NAN;
     return ctx->preview->height(x, z);
+}
+
+AETHER_API AetherStatus aether_memory_info(AetherContext* ctx, AetherMemoryInfo* out) {
+    if (!ctx || !out) return AETHER_ERR_ARG;
+    AETHER_TRY
+    std::lock_guard<std::mutex> lock(ctx->mu);
+    *out = AetherMemoryInfo{};
+    AetherStatus dead;
+    if (deadDevice(ctx, dead)) return dead;
+    MemoryInfo m;
+    std::string err;
+    if (!ctx->backend->memoryInfo(m, err)) return ctx->fail(AETHER_ERR_UNSUPPORTED, err);
+    out->deviceLocalBytes = m.deviceLocalBytes;
+    out->deviceLocalBudget = m.deviceLocalBudget;
+    out->deviceLocalUsage = m.deviceLocalUsage;
+    out->hostHeapBytes = m.hostHeapBytes;
+    out->aetherBytes = m.aetherBytes;
+    out->integrated = m.integrated ? 1u : 0u;
+    out->flags = m.budgetExt ? AETHER_MEMORY_BUDGET_EXT : 0u;
+    return AETHER_OK;
+    AETHER_CATCH(ctx)
+}
+
+AETHER_API AetherStatus aether_set_clipmap(AetherContext* ctx, uint32_t lodCount) {
+    if (!ctx || lodCount < 1 || lodCount > 7u) return AETHER_ERR_ARG;  // 7: the default (and the most the mod streams)
+    ctx->world.lodCount = int(lodCount);
+    return AETHER_OK;
+}
+
+AETHER_API AetherStatus aether_debug_fault(AetherContext* ctx, uint32_t fault, uint32_t afterFrames) {
+    if (!ctx || fault > AETHER_FAULT_TIMEOUT) return AETHER_ERR_ARG;
+    AETHER_TRY
+    std::lock_guard<std::mutex> lock(ctx->mu);
+    Fault f = fault == AETHER_FAULT_DEVICE_LOST    ? Fault::DeviceLost
+              : fault == AETHER_FAULT_OUT_OF_MEMORY ? Fault::OutOfMemory
+              : fault == AETHER_FAULT_TIMEOUT       ? Fault::Timeout
+                                                    : Fault::None;
+    ctx->backend->injectFault(f, afterFrames);
+    return AETHER_OK;
+    AETHER_CATCH(ctx)
 }
 
 }  // extern "C"

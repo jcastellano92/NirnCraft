@@ -31,11 +31,26 @@
 extern "C" {
 #endif
 
-/* (major << 16) | (minor << 8) | patch. Bumped on any ABI change. */
-#define AETHER_ABI_VERSION 0x000900
+/* (major << 16) | (minor << 8) | patch. Bumped on any ABI change. 0.10 only adds functions and status codes to 0.9
+   (every 0.9 struct is unchanged), so a 0.10 binding can drive a 0.9 library without the 0.10 calls. */
+#define AETHER_ABI_VERSION 0x000A00
 
 typedef struct AetherContext AetherContext;
 
+/*
+ * Errors never abort the process: every entry point catches what goes wrong inside (allocation failures, a lost
+ * device, driver errors) and returns one of these; the caller decides what to turn off.
+ *  AETHER_ERR_DEVICE_LOST    (abi 0.10) the Vulkan device was lost (VK_ERROR_DEVICE_LOST: a driver reset such as a
+ *                            Windows TDR or an amdgpu GPU reset, or a fault in aether's own work). The context is
+ *                            dead: every GPU call on it returns this again; destroy it (safe) and, after a
+ *                            cool-down, create a new one.
+ *  AETHER_ERR_OUT_OF_MEMORY  (abi 0.10) device or host memory ran out (VK_ERROR_OUT_OF_*_MEMORY, std::bad_alloc).
+ *                            The context stays usable: retry with smaller targets / sun map / clipmap.
+ *  AETHER_ERR_TIMEOUT        (abi 0.10) the GPU did not finish aether's work in time (a hung or stalled device).
+ *                            Treated like a lost device: the context is dead.
+ *  AETHER_ERR_INTERNAL       (abi 0.10) an unexpected C++ exception inside aether; the context may be inconsistent:
+ *                            destroy it.
+ */
 typedef enum AetherStatus {
     AETHER_OK = 0,
     AETHER_ERR_ARG = -1,
@@ -43,6 +58,10 @@ typedef enum AetherStatus {
     AETHER_ERR_IO = -3,
     AETHER_ERR_GPU = -4,
     AETHER_ERR_UNSUPPORTED = -5,
+    AETHER_ERR_DEVICE_LOST = -6,
+    AETHER_ERR_OUT_OF_MEMORY = -7,
+    AETHER_ERR_TIMEOUT = -8,
+    AETHER_ERR_INTERNAL = -9,
 } AetherStatus;
 
 typedef enum AetherBackend {
@@ -296,6 +315,45 @@ AETHER_API AetherStatus aether_read_sun_map(AetherContext* ctx, float* out, uint
 AETHER_API int32_t aether_has_tile(AetherContext* ctx, int32_t lod, int32_t tileX, int32_t tileZ);
 /* Offline harness only: preview terrain height at a block column (for camera placement). */
 AETHER_API float aether_preview_height(AetherContext* ctx, double x, double z);
+
+/*
+ * (abi 0.10) Memory of the device this context runs on, for sizing aether's targets, sun map and clipmap to what the
+ * machine can spare (an iGPU or a Steam Deck shares system RAM; a 4 GB card has little to give). Budget and usage
+ * come from VK_EXT_memory_budget where the driver has it (flags bit 0), and are re-read on every call. The CPU
+ * backend returns AETHER_ERR_UNSUPPORTED.
+ */
+#define AETHER_MEMORY_BUDGET_EXT 0x1u
+typedef struct AetherMemoryInfo {
+    uint64_t deviceLocalBytes;  /* size of the largest device-local heap */
+    uint64_t deviceLocalBudget; /* what this process may use of that heap now (VK_EXT_memory_budget), 0 = unknown */
+    uint64_t deviceLocalUsage;  /* what this process uses of it now (VK_EXT_memory_budget), 0 = unknown */
+    uint64_t hostHeapBytes;     /* size of the largest host-visible heap that is not device-local, 0 = none */
+    uint64_t aetherBytes;       /* device memory this context has allocated (buffers and images, both frame slots) */
+    uint32_t integrated;        /* 1: an integrated / unified-memory device (its heaps are system RAM) */
+    uint32_t flags;             /* AETHER_MEMORY_* */
+} AetherMemoryInfo;
+AETHER_API AetherStatus aether_memory_info(AetherContext* ctx, AetherMemoryInfo* out);
+
+/*
+ * (abi 0.10) Clipmap levels kept resident (1..7, default 7: voxel sizes 1..64 blocks, out to ~32 km). Fewer levels
+ * keep fewer tiles and regions in host and device memory and end the far field sooner (6: ~16 km). Call before the
+ * first aether_update; tiles of levels at or above the count are dropped by the next update.
+ */
+AETHER_API AetherStatus aether_set_clipmap(AetherContext* ctx, uint32_t lodCount);
+
+/*
+ * (abi 0.10) Test hook: make the context fail as if the driver had failed, after `afterFrames` more frames
+ * (aether_render / aether_gl_render calls): AETHER_FAULT_DEVICE_LOST and AETHER_FAULT_TIMEOUT kill the context
+ * (as a real loss would: every later GPU call returns the same error), AETHER_FAULT_OUT_OF_MEMORY fails that one
+ * frame (the next ones work). AETHER_FAULT_NONE disarms. The environment variable AETHER_FAULT=<kind>[@frames]
+ * (kind: device_lost, timeout, oom) arms every context created afterwards the same way, e.g. AETHER_FAULT=
+ * device_lost@600. Harmless in release builds: nothing happens unless asked for.
+ */
+#define AETHER_FAULT_NONE 0
+#define AETHER_FAULT_DEVICE_LOST 1
+#define AETHER_FAULT_OUT_OF_MEMORY 2
+#define AETHER_FAULT_TIMEOUT 3
+AETHER_API AetherStatus aether_debug_fault(AetherContext* ctx, uint32_t fault, uint32_t afterFrames);
 
 /*
  * Exact seeded noise for the terrain height (shaders/aether_height.slang): the WorldNoise evaluations the mod's

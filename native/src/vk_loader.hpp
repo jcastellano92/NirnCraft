@@ -15,7 +15,7 @@
 #define AETHER_VK_INSTANCE_FNS(X)                                                                                      \
     X(vkDestroyInstance) X(vkEnumeratePhysicalDevices) X(vkGetPhysicalDeviceFeatures) X(vkGetPhysicalDeviceProperties)                                \
     X(vkGetPhysicalDeviceProperties2) X(vkGetPhysicalDeviceQueueFamilyProperties)                                    \
-    X(vkGetPhysicalDeviceMemoryProperties) X(vkGetPhysicalDeviceImageFormatProperties2)                              \
+    X(vkGetPhysicalDeviceMemoryProperties) X(vkGetPhysicalDeviceMemoryProperties2) X(vkGetPhysicalDeviceImageFormatProperties2)                        \
     X(vkGetPhysicalDeviceExternalSemaphoreProperties) X(vkEnumerateDeviceExtensionProperties) X(vkCreateDevice)      \
     X(vkGetDeviceProcAddr) X(vkDestroyDevice) X(vkGetDeviceQueue) X(vkDeviceWaitIdle) X(vkQueueSubmit)               \
     X(vkAllocateMemory) X(vkFreeMemory) X(vkMapMemory) X(vkUnmapMemory) X(vkCreateBuffer) X(vkDestroyBuffer)          \

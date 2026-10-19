@@ -1,4 +1,5 @@
 #include "world.hpp"
+#include "parallel.hpp"
 
 #include <algorithm>
 #include <atomic>
@@ -304,11 +305,7 @@ int World::update(const double centre[3], double budgetMs, double* buildMs) {
             built++;
         }
     };
-    unsigned n = std::max(1u, std::thread::hardware_concurrency());
-    std::vector<std::thread> pool;
-    for (unsigned i = 0; i + 1 < n; i++) pool.emplace_back(worker);
-    worker();
-    for (auto& th : pool) th.join();
+    parallelRun(worker);  // a worker's exception (bad_alloc) comes back here, after all have stopped
 
     bool moved = !havePacked_;
     {
