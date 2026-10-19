@@ -42,6 +42,22 @@ def main():
                     print(f"ERR {f.relative_to(ROOT).as_posix()}:{line}: {word} in a constructor ({code[:90]}); "
                           f"26.3 assigns entity ids after construction: use setId()")
                     bad += 1
+    # client-only dummies (rendered, never added to a level) need an id too: rendering reads it (a corpse's body
+    # crashed the client whenever it appeared, 2026-10-19)
+    for f in sorted(SRC.rglob("*.java")):
+        lines = f.read_text(encoding="utf-8", errors="replace").splitlines()
+        for i, line in enumerate(lines):
+            if not re.search(r"\.create\(.*EntitySpawnReason", line):
+                continue
+            around = " ".join(lines[max(0, i - 25):i + 25]).lower()
+            if "dummy" not in around and "render" not in around:
+                continue
+            after = " ".join(lines[i:i + 15])
+            if any(k in after for k in ("setId(", "addFreshEntity", "addEntity(", "getRenderer(")):
+                continue
+            print(f"ERR {f.relative_to(ROOT).as_posix()}:{i + 1}: an entity created for rendering gets no id "
+                  f"(26.3 assigns ids on joining a level; rendering reads it): setId(negative) after creating it")
+            bad += 1
     print(f"entity construction: {bad} problem(s)")
     return 1 if bad else 0
 

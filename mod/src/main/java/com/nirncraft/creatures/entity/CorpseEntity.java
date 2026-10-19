@@ -684,6 +684,9 @@ public class CorpseEntity extends Entity {
                 dummyFailed = true;
                 return null;
             }
+            // 26.3 assigns ids when an entity joins a level; this dummy never joins one, but rendering reads its id
+            // (it crashed the client whenever a body appeared). Negative: never a real entity's id.
+            e.setId(-1 - this.getId());
             CompoundTag tag = this.entityData.get(BODY).copy();
             if (!tag.isEmpty()) com.nirncraft.platform.EntityData.load(e, tag);
             e.setPos(this.getX(), this.getY(), this.getZ());
