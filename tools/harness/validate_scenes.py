@@ -23,7 +23,7 @@ PACK_OPTIONS = _pack_options()
 VERBS = {"wait-dead", "door-file", "frame", "frame-box", "frame-file", "inside-file", "showcase", "reload", "resources", "shaders", "rebuild", "texture-probe", "flash", "cast", "use", "fx", "wait", "settle",
          "measure", "command", "try", "camera", "camera-plan", "camera-travel", "visit", "front", "ui", "capture-ui",
          "capture", "identity", "transport", "stop", "screen", "click", "key", "expect-screen", "perspective",
-         "renderdistance", "hud", "settle-visual", "message", "weather-off"}
+         "renderdistance", "hud", "settle-visual", "message", "weather-off", "atlaslab"}
 ID = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
 TAG = re.compile(r"^[a-z]+:[A-Za-z0-9_/:.\-]+$")
 SUMMON = re.compile(r"\bsummon\s+nirncraft:([a-z0-9_]+)")
@@ -43,6 +43,7 @@ def main():
         print(f"catalog: {e}")
         return 1
     places, groups = catalog.places(), catalog.groups()
+    ids = {s["id"] for s in scenes}
     for s in scenes:
         w = f"{s['_file']}/{s['id']}"
         if not ID.match(s["id"]):
@@ -55,8 +56,11 @@ def main():
                 errors.append(f"{w}: check scenes need a run command")
             continue
         if s["tier"] == "lab":
-            if not s.get("lab") or s["lab"].get("tool") not in ("atlas_render", "pack_lab"):
-                errors.append(f"{w}: lab scenes need lab.tool atlas_render|pack_lab")
+            if not s.get("lab") or s["lab"].get("tool") not in ("atlas_render", "pack_lab", "atlas_lab"):
+                errors.append(f"{w}: lab scenes need lab.tool atlas_render|pack_lab|atlas_lab")
+            for d in s.get("after", []):
+                if d not in ids:
+                    errors.append(f"{w}: comes after {d}, which is not a scene")
             continue
         if s["group"] not in groups:
             errors.append(f"{w}: unknown group {s['group']}")

@@ -141,9 +141,26 @@ def select(scenes, a):
     return out
 
 
+def with_deps(scenes):
+    """A scene's `after` scenes join the selection while what they make is missing (a lab scene's exported inputs):
+    a lab never skips for want of an export the same run could have made."""
+    ids = {s["id"] for s in scenes}
+    need = [d for s in scenes if s["tier"] == "lab" and any(not f.exists() for f in lab_files(s.get("lab", {})))
+            for d in s.get("after", []) if d not in ids]
+    if not need:
+        return scenes
+    by_id = {s["id"]: s for s in catalog.load()}
+    return list(scenes) + [by_id[d] for d in dict.fromkeys(need) if d in by_id]
+
+
+def ready(s, pending):
+    """Every scene it comes `after` has run (or is not in this run)."""
+    return not any(d in pending and d != s["id"] for d in s.get("after", []))
+
+
 def items_of(scenes, a):
     out = []
-    for s in scenes:
+    for s in with_deps(scenes):
         for v in s["variants"] if s["tier"] == "live" else [s["tier"]]:  # measure scenes: variant "measure"
             if a.variant and v not in a.variant.split(","):
                 continue
@@ -184,7 +201,9 @@ def priority(s, v, pos, group, shaders, opts=""):
 def order(items, pos=(0, 0), group="live", shaders=True, opts=""):
     left, out = list(items), []
     while left:
-        i = min(range(len(left)), key=lambda k: priority(*left[k], pos, group, shaders, opts))
+        pending = {x["id"] for x, _ in left}
+        cands = [k for k in range(len(left)) if ready(left[k][0], pending)] or range(len(left))
+        i = min(cands, key=lambda k: priority(*left[k], pos, group, shaders, opts))
         s, v = left.pop(i)
         out.append((s, v))
         if s["tier"] == "live":
@@ -289,8 +308,10 @@ class Runner:
             return {**base, **self._inputs}
         if s["tier"] == "lab":
             exe = ROOT / "native/build/Release" / f"{s['lab'].get('tool', 'atlas_render')}.exe"
+            files = lab_files(s["lab"])  # exported inputs (atlas_lab): a new export is a new result
             return {**base, "exe": results_hash([exe, ROOT / "native/build/Release/atlas_core.dll"]),
-                    "pack": tree_hash(ROOT / "shaderpack/InfiniteATLAS")}
+                    "pack": tree_hash(ROOT / "shaderpack/InfiniteATLAS"),
+                    **({"files": results_hash([f for f in files if f.exists()])} if files else {})}
         return {**base, "inputs": tree_hash(*[ROOT / g for g in s.get("inputs", [])])}
 
     def invalidate(self):
@@ -494,8 +515,15 @@ class Runner:
         gpu = str(lab.get("backend", "")).lower() in ("vulkan", "gpu") or str(lab.get("gpu", "0")) not in ("0", "")
         if gpu and gpu_busy() > 40:  # machine safety: GPU work only when the GPU is mostly idle
             return results.record(s["id"], v, "visual", "skip", {}, fp, extra={"error": "GPU busy"})
-        lab.setdefault("w", 960)
-        lab.setdefault("h", 540)
+        files = lab_files(lab)
+        missing = [f for f in files if not f.exists()]
+        if missing:
+            return results.record(s["id"], v, "visual", "skip", {}, fp,
+                                  extra={"error": f"no {missing[0].name} yet: run atlaslab-export (the in-game export) first"})
+        lab = {k: (str(lab_path(val)) if isinstance(val, str) and val.startswith("@game/") else val) for k, val in lab.items()}
+        if tool != "atlas_lab":
+            lab.setdefault("w", 960)
+            lab.setdefault("h", 540)
         with tempfile.TemporaryDirectory() as tmp:
             png = Path(tmp) / "lab.png"
             lab = dict(lab)
@@ -849,6 +877,20 @@ def tree_hash(*roots):
     return results_hash(files)
 
 
+def lab_path(val):
+    """A lab argument's file: "@game/..." is under the test instance's game directory (where in-game exports land)."""
+    if val.startswith("@game/"):
+        sys.path.insert(0, str(ROOT / "tools/dev"))
+        import live_world as lw  # noqa: E402
+        return lw.GAME / val[len("@game/"):]
+    return ROOT / val
+
+
+def lab_files(lab):
+    """The exported input files a lab scene reads (its "@game/..." arguments)."""
+    return [lab_path(v) for v in lab.values() if isinstance(v, str) and v.startswith("@game/")]
+
+
 def gpu_busy():
     try:
         out = subprocess.run(["nvidia-smi", "--query-gpu=utilization.gpu", "--format=csv,noheader,nounits"],
@@ -1005,7 +1047,8 @@ def process_queue(runner, serve=False, on_item=None):
                 pass
             # labs in parallel (CPU, low priority): when the next item is a lab, run every pending lab together
             if s["tier"] == "lab":
-                labs = [(x, y) for x, y in live_items if x["tier"] == "lab"]
+                pending = {x["id"] for x, _ in live_items}
+                labs = [(x, y) for x, y in live_items if x["tier"] == "lab" and ready(x, pending)]
                 with ThreadPoolExecutor(max_workers=2) as pool:
                     recs = list(pool.map(lambda it: runner.run(it[0], it[1], runner.fingerprint(*it)), labs))
                 ran = list(zip(labs, recs))

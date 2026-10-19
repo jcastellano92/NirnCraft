@@ -433,6 +433,102 @@
       "capture": "world",
       "source": "native/tools/atlas_render.cpp:3",
       "note": "uses the GPU (Vulkan); run only when the GPU is free"
+    },
+    {
+      "id": "atlaslab-export",
+      "title": "Far-field lab inputs: the block-state library and Falkreath's real blocks",
+      "tags": [
+        "feature:farfield",
+        "suite:atlaslab",
+        "place:falkreath",
+        "town:falkreath"
+      ],
+      "tier": "live",
+      "variants": [
+        "shaders"
+      ],
+      "weather": "off",
+      "time": 6000,
+      "pose": {
+        "place": "falkreath",
+        "height": 3,
+        "yaw": 0,
+        "pitch": 10
+      },
+      "wait": 100,
+      "setup": [
+        "atlaslab blocks",
+        "atlaslab here falkreath 32 10 40",
+        "atlaslab here falkreath-wide 64 12 48"
+      ],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "mod/src/main/java/com/nirncraft/atlas/AtlasLabExport.java",
+      "note": "writes <game>/nirncraft-atlaslab/{blocks.bin,falkreath.alv,falkreath-wide.alv} for the atlaslab-* lab scenes; the capture is the near view of the same blocks",
+      "group": "live"
+    },
+    {
+      "id": "atlaslab-falkreath",
+      "title": "Far-field lab: Falkreath's real blocks by each representation, 10 m to 1.5 km",
+      "tags": [
+        "feature:farfield",
+        "suite:atlaslab"
+      ],
+      "tier": "lab",
+      "lab": {
+        "tool": "atlas_lab",
+        "blocks": "@game/nirncraft-atlaslab/blocks.bin",
+        "volume": "@game/nirncraft-atlaslab/falkreath.alv",
+        "dist": "10,50,200,600,1500",
+        "yaw": 30,
+        "pitch": -12,
+        "grass": "6A9A3A",
+        "foliage": "5A8A3A"
+      },
+      "wait": 0,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "native/tools/atlas_lab.cpp:1",
+      "note": "CPU only; columns ref,current,anymip,micro,cov,covbox; metrics (iou, dE, dE1, steps) in the record's atlas report; inputs from atlaslab-export (listed in \"after\": it runs first, and joins the run while the exports are missing)",
+      "after": [
+        "atlaslab-export"
+      ]
+    },
+    {
+      "id": "atlaslab-falkreath-wide",
+      "title": "Far-field lab: 129 blocks of Falkreath from 200 m to 4 km",
+      "tags": [
+        "feature:farfield",
+        "suite:atlaslab"
+      ],
+      "tier": "lab",
+      "lab": {
+        "tool": "atlas_lab",
+        "blocks": "@game/nirncraft-atlaslab/blocks.bin",
+        "volume": "@game/nirncraft-atlaslab/falkreath-wide.alv",
+        "dist": "200,600,1500,4000",
+        "yaw": 30,
+        "pitch": -8,
+        "variants": "ref,current,micro,covbox",
+        "grass": "6A9A3A",
+        "foliage": "5A8A3A"
+      },
+      "wait": 0,
+      "setup": [],
+      "cleanup": [],
+      "measure": 0,
+      "checks": {},
+      "capture": "world",
+      "source": "native/tools/atlas_lab.cpp:1",
+      "note": "inputs from atlaslab-export (listed in \"after\": it runs first, and joins the run while the exports are missing)",
+      "after": [
+        "atlaslab-export"
+      ]
     }
   ]
 }

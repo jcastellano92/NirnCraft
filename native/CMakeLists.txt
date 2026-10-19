@@ -134,6 +134,10 @@ add_executable(atlas_render tools/atlas_render.cpp)
 target_link_libraries(atlas_render PRIVATE atlas_core)
 target_include_directories(atlas_render PRIVATE src)
 
+# the far-field experiment bed (docs/ATLAS-LOD.md): CPU only, inputs exported in game with /nirncraft-atlaslab
+add_executable(atlas_lab tools/atlas_lab.cpp)
+target_include_directories(atlas_lab PRIVATE src)
+
 add_executable(atlas_tests tests/test_main.cpp src/svdag.cpp)
 target_include_directories(atlas_tests PRIVATE src include)
 target_link_libraries(atlas_tests PRIVATE atlas_core Threads::Threads)

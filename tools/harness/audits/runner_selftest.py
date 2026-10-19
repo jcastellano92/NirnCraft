@@ -90,6 +90,22 @@ expect(order[-1] == "e", "another group (JVM settings: a restart) comes after th
 expect(harness.options_key({"TAA": False, "A": 1}) == "A=1;TAA=false" and harness.options_key(None) == "",
        "pack options compare as one stable key")
 
+# --- dependencies: a lab scene that reads an in-game export ---------------------------------------------------
+lab = {"id": "lab-x", "tier": "lab", "group": "lab", "after": ["exp"], "lab": {"tool": "atlas_lab", "blocks": "@game/no-such-dir/none.bin"}}
+exp = ({"id": "exp", "tier": "live", "group": "live", "pose": {}}, "shaders")
+order = [x[0]["id"] for x in harness.order([(lab, "lab"), exp])]
+expect(order == ["exp", "lab-x"], "a lab scene runs after the live scene it comes after (cheap tiers do not jump it)")
+order = [x[0]["id"] for x in harness.order([(lab, "lab"), scene("z")])]
+expect(order[0] == "lab-x", "an `after` scene not in the run does not hold the lab back")
+expect(not harness.ready(lab, {"exp", "lab-x"}) and harness.ready(lab, {"lab-x"}), "ready: waits only for pending deps")
+real = harness.catalog.load
+harness.catalog.load = lambda: [lab, exp[0]]
+try:
+    got = [s["id"] for s in harness.with_deps([lab])]
+finally:
+    harness.catalog.load = real
+expect(got == ["lab-x", "exp"], "a lab scene whose exports are missing pulls its `after` scene into the run")
+
 # --- every scene declares its weather ---------------------------------------------------------------------------
 import catalog  # noqa: E402
 

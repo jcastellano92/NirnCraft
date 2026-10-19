@@ -340,6 +340,8 @@ public final class ClientAutotest {
             status.addProperty("settlePartial", liveSettlePartial);
             status.addProperty("shaders", shadersInUse());
             status.addProperty("readiness", READINESS.describe());
+            int[] pre = com.nirncraft.atlas.AtlasTileServer.prebuildProgress();  // the far field's coarse pre-build
+            if (pre != null) status.addProperty("farPrebuild", pre[0] + "/" + pre[1]);
             status.addProperty("commandPending", liveCommand != null || liveResources != null || liveCapture != null || burstRemaining>0 || ReviewCaptures.pending()>0 || FrameProbe.active() || CameraTravel.active());
             status.addProperty("controlVersion", liveModified);
             status.addProperty("lastAction", liveLastAction);
@@ -699,6 +701,8 @@ public final class ClientAutotest {
                 com.nirncraft.client.autotest.ReviewWorlds.hudHidden(mc, !action.substring(4).trim().equals("on"));
             } else if (action.startsWith("weather-off ")) {  // on | off: world-gen views without clouds, rain or fog banks
                 com.nirncraft.atmosphere.client.WeatherFieldTexture.off(action.substring(12).trim().equals("on"));
+            } else if (action.startsWith("atlaslab ")) {  // the far-field lab's inputs: blocks | volume ... | here ...
+                NirnCraft.LOGGER.info(com.nirncraft.atlas.AtlasLabExport.autotest(action.substring(9)));
             } else if (action.startsWith("renderdistance ")) {  // chunks: fidelity tests draw a place far-field only
                 int chunks = Math.max(2, Math.min(32, Integer.parseInt(action.substring(15).trim())));
                 mc.options.renderDistance().set(chunks);
