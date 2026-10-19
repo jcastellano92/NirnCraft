@@ -631,6 +631,11 @@ def tool_validation(recs):
         first = sum(1 for r in planned if r.get("camera") == 0)
         out.append(f"<p>Planned cameras accepted in game at the first candidate: {first}/{len(planned)} "
                    f"({100 * first // max(1, len(planned))}%)</p>")
+    conf = [r["metrics"]["biomeConfirmed"] for r in recs if "biomeConfirmed" in r.get("metrics", {})]
+    lconf = [r["metrics"]["landmarkConfirmed"] for r in recs if "landmarkConfirmed" in r.get("metrics", {})]
+    if conf or lconf:
+        out.append(f"<p>Feature index confirmed online: biomes {sum(conf)}/{len(conf)}, "
+                   f"landmarks {sum(lconf)}/{len(lconf)}</p>")
     det = next((r for r in recs if r.get("scene") == "check-detectors"), None)
     if det:
         out.append(f"<p>Image detectors self-test: {det.get('status')}</p>")

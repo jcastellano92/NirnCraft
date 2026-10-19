@@ -504,7 +504,39 @@ class Runner:
                 rec["gameLogFile"] = str(lf)
         if receipt.get("seed") not in (None, self.seed):
             rec["metrics"]["flags"].append(f"world seed {receipt.get('seed')} != {self.seed}")
+        self.confirm_online(s, rec)
         return self.judge(s, v, rec)
+
+    def confirm_online(self, s, rec):
+        """Generated-feature tests: does the real world have what the offline index predicted here? (the online
+        feature index: final confirmation of the picture, and validation of the index itself)"""
+        biome = next((t[6:] for t in s["tags"] if t.startswith("biome:")), None)
+        mark = next((t[9:] for t in s["tags"] if t.startswith("landmark:")), None)
+        p = (s.get("pose") or {}).get("visit")
+        if not (biome or mark) or not p:
+            return
+        g = self.game
+        out = g.GAME / "nirncraft-qa/sample.json"
+        out.unlink(missing_ok=True)
+        radius = 0 if biome else 64
+        try:
+            g.actions([f"try nirncraft-qa sample {int(p[0])} {int(p[1])} {radius} {max(1, radius)}"], timeout=120)
+            data = json.loads(out.read_text(encoding="utf-8"))
+        except (RuntimeError, OSError, ValueError) as e:
+            rec["metrics"]["flags"].append(f"online confirmation failed: {str(e)[:80]}")
+            return
+        m = rec["metrics"]
+        if biome:
+            online = (data.get("points") or [{}])[0].get("biome", "?")
+            m["onlineBiome"] = online
+            m["biomeConfirmed"] = online.split(":")[-1] == biome
+            if not m["biomeConfirmed"]:
+                m["flags"].append(f"offline index said {biome}, the world has {online}")
+        if mark:
+            kinds = {l["kind"] for l in data.get("landmarks", [])}
+            m["landmarkConfirmed"] = mark.lower() in kinds
+            if not m["landmarkConfirmed"]:
+                m["flags"].append(f"no {mark} within 64 blocks online (found: {', '.join(sorted(kinds)) or 'none'})")
 
     def run_measure(self, s, v, fp):
         """A live test without a picture: go there, settle, run a command that writes a JSON report, keep its numbers."""
