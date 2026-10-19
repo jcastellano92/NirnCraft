@@ -1,5 +1,6 @@
 """Validates the harness catalog exactly as the harness loads it (scene files + generated sets): ids unique and
-kebab-case, one pose kind, known places / weathers / groups / live verbs, check scenes runnable, lab scenes complete.
+kebab-case, one pose kind, known places / weathers / groups / live verbs, check scenes runnable, lab scenes complete,
+and every nirncraft block / entity a scene's commands name exists (an unknown id does not parse in game).
 
     py -3 tools/harness/validate_scenes.py        exit 1 with one line per problem
 """
@@ -12,9 +13,17 @@ import catalog  # noqa: E402
 
 VERBS = {"reload", "resources", "shaders", "rebuild", "texture-probe", "flash", "cast", "use", "fx", "wait", "settle",
          "measure", "command", "try", "camera", "camera-plan", "camera-travel", "visit", "front", "ui", "capture-ui",
-         "capture", "identity", "transport", "stop", "screen", "click", "key", "expect-screen", "perspective", "renderdistance"}
+         "capture", "identity", "transport", "stop", "screen", "click", "key", "expect-screen", "perspective",
+         "renderdistance"}
 ID = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
 TAG = re.compile(r"^[a-z]+:[A-Za-z0-9_/:.\-]+$")
+SUMMON = re.compile(r"\bsummon\s+nirncraft:([a-z0-9_]+)")
+PLACE = re.compile(r"\b(?:setblock|fill)\b")
+ID_ANY = re.compile(r"nirncraft:([a-z0-9_]+)")
+ROOT = Path(__file__).resolve().parents[2]
+BLOCKS = {p.stem for p in (ROOT / "mod/src/main/resources/assets/nirncraft/blockstates").glob("*.json")}
+ENTITIES = set(catalog._lang_ids("entity"))
+ITEMS = set(catalog._lang_ids("item")) | BLOCKS
 
 
 def main():
@@ -66,6 +75,16 @@ def main():
             verb = v.split()[0] if v.split() else ""
             if verb not in VERBS:
                 errors.append(f"{w}: unknown live verb {verb!r} in {v!r}")
+            ent = SUMMON.findall(v)
+            for rid in ent:
+                if rid not in ENTITIES:
+                    errors.append(f"{w}: summon names entity nirncraft:{rid}, which does not exist")
+            if PLACE.search(v) or ent:  # the other ids: blocks for setblock / fill, items (equipment) for summon
+                for rid in ID_ANY.findall(v):
+                    if rid in ent:
+                        continue
+                    if rid not in (BLOCKS if PLACE.search(v) else ITEMS):
+                        errors.append(f"{w}: names nirncraft:{rid}, which does not exist")
         if s.get("frames") and (len(s["frames"]) != 2 or s["frames"][0] < 2):
             errors.append(f"{w}: frames is [count >= 2, ticks between]")
     for e in errors[:200]:

@@ -210,7 +210,7 @@ NEAR_RD = 12   # the test client's render distance (HANDOFF = 12 x 16 - 16)
 MATERIAL_SAMPLES = [  # metal, precious metal, glass / ice, snow, polished stone, hot rock, PBR-mapped, plain references
     "minecraft:iron_block", "minecraft:gold_block", "minecraft:copper_block", "minecraft:glass", "minecraft:ice",
     "minecraft:packed_ice", "minecraft:snow_block", "minecraft:polished_andesite", "minecraft:magma_block",
-    "nirncraft:crystal_block", "nirncraft:rubble_floor", "nirncraft:fire_coals", "minecraft:oak_planks",
+    "nirncraft:crystal_block", "nirncraft:rubble_fire", "minecraft:oak_planks",
     "minecraft:stone_bricks", "minecraft:mossy_cobblestone", "minecraft:quartz_block"]
 NIGHT_LADDER = [16, 32] + LADDER  # lights: close, mid, far, very far
 

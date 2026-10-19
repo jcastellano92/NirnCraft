@@ -486,7 +486,15 @@ public final class ClientAutotest {
                     liveCommand = completion;
                     liveCommandDeadline = System.currentTimeMillis() + 600_000L;
                     server.execute(() -> {
-                        try { server.getCommands().performPrefixedCommand(server.createCommandSourceStack().withCallback((success,result)->completion.complete(tolerant ? 1 : success?result:0)),command); }
+                        try {
+                            server.getCommands().performPrefixedCommand(server.createCommandSourceStack().withCallback((success,result)->completion.complete(tolerant ? 1 : success?result:0)),command);
+                            // a command that does not parse (unknown block, typo) never calls back: settle it now instead of
+                            // waiting for the 10-minute deadline (zero: a failure for `command`, skipped for `try`)
+                            if (!completion.isDone()) {
+                                NirnCraft.LOGGER.warn("Autotest live: command gave no result (did not parse?): {}", command);
+                                completion.complete(tolerant ? 1 : 0);
+                            }
+                        }
                         catch (Exception e) { completion.completeExceptionally(e); }
                     });
                 }
