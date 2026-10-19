@@ -56,7 +56,9 @@ public final class MountCompanionEvents {
     public static void onDamage(LivingDamageEvent.Pre event) {
         LivingEntity victim = event.getEntity();
         if (victim.level().isClientSide() || !(victim instanceof Mob mob) || !MountCompanion.mayDown(mob, event.getSource())) return;
-        if (event.getNewDamage() < mob.getHealth()) return;
+        // what reaches health: Pre comes before absorption hearts on 26.3 (1.20.1's LivingDamageEvent came after them)
+        float dmg = event.getNewDamage() - Math.min(mob.getAbsorptionAmount(), event.getNewDamage());
+        if (dmg < mob.getHealth()) return;
         event.setNewDamage(0f);
         MountCompanion.down(mob, mob.level().getGameTime(), MountCompanion.owner(mob));
     }

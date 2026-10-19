@@ -529,6 +529,9 @@ public final class CombatHandler {
     @SubscribeEvent
     public static void onShieldBlock(LivingShieldBlockEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
+        // 26.3 posts this for every hit while a shield is raised, also hits from behind (nothing blocked) and sources
+        // that bypass shields; Forge 1.20.1's ShieldBlockEvent only fired once the shield had really blocked
+        if (!event.getBlocked() || event.getOriginalBlockedDamage() <= 0) return;
         PlayerData data = SkyData.get(player);
         DamageSource source = event.getDamageSource();
         float original = event.getOriginalBlockedDamage();
