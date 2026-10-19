@@ -144,7 +144,7 @@ public class LootContainerBlockEntity extends BlockEntity implements MenuProvide
     public @Nullable AbstractContainerMenu createMenu(int id, Inventory inventory, Player player) {
         if (!(player instanceof ServerPlayer sp) || !(level instanceof ServerLevel)) return null;
         LootWindow window = prepare(sp);
-        return new ChestMenu(MenuType.GENERIC_9x3, id, inventory, window, 3);
+        return new LootMenu(id, inventory, window);
     }
 
     /**

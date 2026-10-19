@@ -126,7 +126,9 @@ Each kind is one block (`nirncraft:<id>`) with its own models and block entity t
   Creative players keep the vanilla screen and see the slots.
 * The title is the kind in its style ("Dwemer Chest", "Velothi Urn": `container.nirncraft.<id>.<style>` in
   `lang/nirncraft/loot.json`).
-* **Storing** never puts an item in a slot (`canPlaceItem` is false): every store goes through the window's room rule
+* **Storing** never puts an item in a slot: the menu is a `LootMenu` whose container slots are take-only (a menu slot
+  never asks the container's `canPlaceItem`), and its shift-click stores through the overflow; every store goes
+  through the window's room rule
   (section 7), so the balance rule and the shelf's books-only rule hold exactly. On close the slots fold back into the
   copy; a save while the window is open writes the slots as rows, so a crash loses nothing.
 * **HUD.** `crime.client.CrimeHud` shows "[F] Open" / "[F] Steal" over our containers and asks the server whether they

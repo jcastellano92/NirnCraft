@@ -172,6 +172,67 @@ class LootInstanceTest {
         });
     }
 
+    /** A 10 kg item whatever the weight tables say (the per-stack weight override). */
+    private static ItemStack heavy(int n) {
+        ItemStack s = new ItemStack(Items.IRON_BLOCK, n);
+        com.nirncraft.inventory.ItemData.updateCustom(s, t -> t.putFloat(com.nirncraft.inventory.ItemWeights.WEIGHT_NBT, 10f));
+        return s;
+    }
+
+    /**
+     * The live selftest found a world sack holding 2,561 kg against a 41 kg cap: Store All fills a menu's container
+     * slots before its overflow, and a menu slot never asks the container's canPlaceItem (Slot#mayPlace is true), so the
+     * slots took everything past the allowance. Every way in must keep the allowance: slot insertion (Store, Store All,
+     * clicks, drags), shift-click, the overflow; a player's own container stays unlimited.
+     */
+    @Test @ExtendWith(BoundedServerProvider.class)
+    void everyWayIntoAWorldContainerKeepsItsAllowance(MinecraftServer server) {
+        onServer(server, () -> {
+            var pos = net.minecraft.core.BlockPos.ZERO;
+            LootContainerBlockEntity sack = new LootContainerBlockEntity(pos, ContainerRegistry.block(ContainerKind.SACK).defaultBlockState());
+            sack.setWorldLoot("nirncraft:containers/misc/satchel");
+            float allowance = sack.stashKg();
+            assertTrue(allowance > 0, "a world sack has a stash allowance");
+            LootInstance copy = sack.instance(LootContainerBlockEntity.SHARED);
+            copy.restock(List.of(new ItemStack(Items.BREAD)), 0, com.nirncraft.inventory.ItemWeights::get);
+            var inv = new net.minecraft.world.entity.player.Inventory(null, new net.minecraft.world.entity.EntityEquipment());
+            LootMenu menu = new LootMenu(1, inv, new LootWindow(sack, copy));
+
+            // 1. the bypass: Store / Store All insert into the container slots first (merge, then empty slots)
+            for (int i = 0; i < LootWindow.SLOTS; i++) {
+                var slot = menu.getSlot(i);
+                ItemStack offer = heavy(64);
+                assertFalse(slot.mayPlace(offer), "container slot " + i + " must not accept a stored item");
+                ItemStack rest = slot.safeInsert(offer);
+                assertEquals(64, rest.getCount(), "container slot " + i + " took items past the allowance");
+            }
+            ItemStack bread = new ItemStack(Items.BREAD);
+            assertEquals(1, menu.getSlot(0).safeInsert(bread).getCount(), "not even a merge onto the same item");
+
+            // 2. shift-click from the player's inventory (inventory slot 9 is menu slot 27): only the allowance goes in
+            inv.setItem(9, heavy(64));
+            menu.quickMoveStack(null, 27);
+            int expected = (int) Math.floor((allowance + 0.001) / 10f);
+            assertEquals(64 - expected, inv.getItem(9).getCount(), "what the allowance refuses stays with the player");
+            assertTrue(copy.weight(com.nirncraft.inventory.ItemWeights::get) <= copy.rolledKg() + allowance + 0.01,
+                    copy.weight(com.nirncraft.inventory.ItemWeights::get) + " kg inside");
+
+            // 3. the overflow path itself (Store All's last step) refuses once the allowance is used
+            ItemStack more = heavy(64);
+            assertEquals(0, new com.nirncraft.inventory.ContainerOverflow.Bound(copy.items(), menu.window()).add(more));
+            assertEquals(64, more.getCount());
+
+            // 4. a player's own container is unlimited on the same paths
+            LootContainerBlockEntity own = new LootContainerBlockEntity(pos, ContainerRegistry.block(ContainerKind.CHEST).defaultBlockState());
+            LootInstance mine = own.instance(LootContainerBlockEntity.SHARED);
+            LootMenu ownMenu = new LootMenu(2, inv, new LootWindow(own, mine));
+            inv.setItem(10, heavy(64));
+            ownMenu.quickMoveStack(null, 28);
+            assertTrue(inv.getItem(10).isEmpty(), "a player's own container takes it all");
+            assertEquals(64, mine.items().count(Items.IRON_BLOCK));
+        });
+    }
+
     @Test @ExtendWith(BoundedServerProvider.class)
     void kindsStylesAndLids(MinecraftServer server) {
         onServer(server, () -> {

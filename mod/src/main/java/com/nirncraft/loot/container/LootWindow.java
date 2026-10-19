@@ -19,7 +19,8 @@ import net.minecraft.world.item.ItemStack;
  * <ul>
  *     <li><b>Slots.</b> Filled from the copy's store when the window opens; everything else stays in the store, which
  *     is the window's overflow ({@link OverflowHost}) and is listed after the slots. On close the slots fold back.</li>
- *     <li><b>Storing.</b> The slots never accept a stored item ({@code canPlaceItem} is false), so every store goes
+ *     <li><b>Storing.</b> The slots never accept a stored item ({@link LootMenu}'s take-only slots; a menu slot never
+ *     asks {@code canPlaceItem}, which is false too for anything else that might), so every store goes
  *     through {@link #overflowRoom}: the balance rule of world containers and the books-only rule of shelves apply
  *     exactly, with no stack of slack.</li>
  * </ul>
@@ -89,13 +90,13 @@ public final class LootWindow extends SimpleContainer implements OverflowHost {
     @Override
     public void startOpen(ContainerUser user) {
         openers++;
-        if (user.getLivingEntity() instanceof Player p) be.viewerOpened(p);
+        if (user != null && user.getLivingEntity() instanceof Player p) be.viewerOpened(p);
     }
 
     @Override
     public void stopOpen(ContainerUser user) {
         if (--openers <= 0) foldBack();
-        if (user.getLivingEntity() instanceof Player p) be.viewerClosed(p);
+        if (user != null && user.getLivingEntity() instanceof Player p) be.viewerClosed(p);
     }
 
     public boolean isClosed() {
