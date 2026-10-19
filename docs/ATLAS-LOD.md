@@ -231,6 +231,16 @@ at every frame; synthetic tree):
 In motion boxes and groups shimmer no more than exact micro-voxels; most of what remains is TAA's own lag (ref
 scores the same), a TAA question, not a representation one. Prefiltered faces are worse in motion too: dropped.
 
+**Ground truth against Minecraft itself** (2026-10-19; harness atlaslab-falkreath-near: the vanilla capture's own
+camera, the offline reference of the same blocks with vanilla face shading and smooth-lighting AO). Geometry matches
+(houses, path, bench, trees, torches in place). Colour dE 6.2 over the 87 % of the frame the exported blocks cover;
+blurred 4x 4.8, blurred 16x 3.1, lightness within 0.8: the average colour and brightness already match, and most of
+what is left is texture detail (the 4 x 4 face tiles against Minecraft's 16 x 16 texels). Block-entity visuals
+(campfire flames, chests) are absent from the reference: they are drawn by code, not models. The 1 km view
+(atlaslab-falkreath-view) measures today's far field in the game's own view; its first run compared foggy, wrongly
+tinted pictures, so the export scene now captures with fog-off (no vanilla fog, no atlas haze) and writes the view's
+tints.
+
 **Texture resolution up close** (ground truth, 2026-10-19): the 4 x 4 face tiles are right far away but flat up close
 (the cobble path, planks); owning the near field needs faces at the texture's own resolution (16 x 16), stored once
 per texture (an atlas), not per block state.
