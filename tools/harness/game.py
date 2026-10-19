@@ -151,8 +151,19 @@ def kept_world():
     return name
 
 
+def _iris_enable():
+    """Every launch starts with the shader pack on (a shaders-off variant saves enableShaders=false into Iris's config,
+    which would turn every later "shaders" capture into a vanilla one)."""
+    cfg = GAME / "config/iris.properties"
+    if cfg.exists():
+        text = cfg.read_text(encoding="utf-8")
+        if re.search(r"^enableShaders=false", text, re.M):
+            cfg.write_text(re.sub(r"^enableShaders=false", "enableShaders=true", text, flags=re.M), encoding="utf-8")
+
+
 def launch(group, groups, limit=900):
     tr.step("launch", group=group)
+    _iris_enable()
     cfg = groups.get(group, {})
     jvm = dict(cfg.get("jvm", {}))
     if "nirncraft.autotest.world" not in jvm and group == "live":
@@ -584,8 +595,10 @@ def capture(scene, variant, pose_lines, capture_lines):
     mark = log_mark()
     want = variant != "vanilla"
     st = client_state()
+    real = (lw.read_json(GAME / "nirncraft-live-status.json") or {}).get("shaders")
+    current = real if isinstance(real, bool) else st.get("shaders", True)  # the game's word, not ours
     # the shader toggle settles where the camera is: move to this scene first, then toggle (in one batch)
-    toggle = [] if st.get("shaders", True) == want else [f"shaders {'on' if want else 'off'}"]
+    toggle = [] if current == want else [f"shaders {'on' if want else 'off'}"]
     lead = ["ui close", "perspective first"]  # nothing left over from an earlier scene (an open map pauses the world)
     try:
         actions(lead + pose_lines + toggle + capture_lines(tag), timeout=scene.get("timeout", DEFAULT_TIMEOUT))

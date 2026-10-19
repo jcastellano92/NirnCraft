@@ -186,6 +186,16 @@ public final class ClientAutotest {
      * covers stay out of the way and the race is chosen for the test. -Dnirncraft.autotest.intro=true keeps the
      * opening (to test the opening itself).
      */
+    /** Whether Iris is actually drawing with a shader pack now (the harness toggles from this, never from belief). */
+    static boolean shadersInUse() {
+        try {
+            Class<?> api = Class.forName("net.irisshaders.iris.api.v0.IrisApi");
+            return Boolean.TRUE.equals(api.getMethod("isShaderPackInUse").invoke(api.getMethod("getInstance").invoke(null)));
+        } catch (ReflectiveOperationException | RuntimeException e) {
+            return false;
+        }
+    }
+
     public static boolean automated() {
         if (Boolean.getBoolean("nirncraft.autotest.intro")) return false;
         return ENABLED || LIVE || !System.getProperty("nirncraft.visualtest", "").isEmpty()
@@ -266,6 +276,7 @@ public final class ClientAutotest {
             status.addProperty("burstFrames", burstRemaining);
             status.addProperty("settling", liveSettleUntil > 0);
             status.addProperty("settlePartial", liveSettlePartial);
+            status.addProperty("shaders", shadersInUse());
             status.addProperty("readiness", READINESS.describe());
             status.addProperty("commandPending", liveCommand != null || liveResources != null || liveCapture != null || burstRemaining>0 || ReviewCaptures.pending()>0 || FrameProbe.active() || CameraTravel.active());
             status.addProperty("controlVersion", liveModified);

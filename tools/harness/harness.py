@@ -505,6 +505,10 @@ class Runner:
                 rec["gameLogFile"] = str(lf)
         if receipt.get("seed") not in (None, self.seed):
             rec["metrics"]["flags"].append(f"world seed {receipt.get('seed')} != {self.seed}")
+        if "shaders" in receipt and bool(receipt["shaders"]) != (v != "vanilla"):  # the picture is not the variant
+            rec["metrics"]["flags"].append(f"captured with shaders {'on' if receipt['shaders'] else 'off'}, "
+                                           f"but this is the {v} variant")
+            rec["status"] = "fail"
         self.confirm_online(s, rec)
         return self.judge(s, v, rec)
 
@@ -584,7 +588,7 @@ class Runner:
 
     def judge(self, s, v, rec):
         m, c = rec["metrics"], s.get("checks") or {}
-        fails = []
+        fails = [f for f in m.get("flags", []) if "but this is the" in f]  # wrong shader state: never a pass
         if "maxBlackTiles" in c and m.get("blackBoxes", 0) > c["maxBlackTiles"]:  # boxes: the NaN signature
             fails.append(f"black boxes {m['blackBoxes']} > {c['maxBlackTiles']}")
         if "lumaMin" in c and m.get("luma", 0) < c["lumaMin"]:
