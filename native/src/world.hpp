@@ -37,6 +37,7 @@ struct Key3Hash {
 struct Structures {
     std::vector<float> wallTop, roofTop, base;
     std::vector<uint16_t> wallMat, roofMat;
+    bool replacesCanopy = false;  // the tile's real trees: its dressing's canopy goes (ATLAS_STRUCTURES_REPLACE_CANOPY)
 };
 
 struct Tile {
@@ -52,6 +53,15 @@ struct Tile {
 
 struct Section {
     std::array<uint16_t, 4096> mats;  // x + 16 * (z + 16 * y)
+    // the generated coarser levels (docs/ATLAS-LOD.md): mip[k - 1] is level k, (16 >> k)^3 voxels, same layout
+    std::array<std::vector<uint16_t>, 4> mip;
+    // builds mip from mats: cls[material] = its class (0 terrain / solid, 1 foliage, 2 water, 3 emissive, 5 falls)
+    void buildMips(const std::vector<uint8_t>& cls);
+    uint16_t at(int level, int lx, int ly, int lz) const {  // level 0..4, coordinates in that level's voxels
+        if (level == 0) return mats[size_t(lx + 16 * (lz + 16 * ly))];
+        int n = 16 >> level;
+        return mip[size_t(level - 1)][size_t(lx + n * (lz + n * ly))];
+    }
 };
 
 struct Region {
@@ -87,6 +97,9 @@ public:
 
     void putTile(std::unique_ptr<Tile> t);
     void putSection(int sx, int sy, int sz, const uint16_t* mats);
+    // the palette's material classes (for the sections' generated levels); set when the palette changes
+    void setClasses(std::vector<uint8_t> cls);
+    void markSectionDirty(int sx, int sy, int sz);  // caller holds mu_
     void editBlock(int x, int y, int z, uint16_t mat);
     const Tile* tile(int lod, int tx, int tz) const;  // caller holds mu_ (or is single threaded)
     bool hasTile(int lod, int tx, int tz) const;      // locks
@@ -126,6 +139,7 @@ private:
     std::unordered_map<Key3, std::shared_ptr<const Tile>, Key3Hash> tiles_;
     std::unordered_map<Key3, std::shared_ptr<const Structures>, Key3Hash> structures_;
     std::unordered_map<Key3, std::shared_ptr<const Section>, Key3Hash> sections_;
+    std::vector<uint8_t> classes_;  // material -> class (setClasses), for the sections' generated levels
     std::unordered_map<Key3, std::shared_ptr<const Region>, Key3Hash> regions_;
     std::unordered_set<Key3, Key3Hash> dirty_;
     mutable std::mutex snapMu_;

@@ -22,7 +22,13 @@ public final class AtlasServer {
         NeoForge.EVENT_BUS.addListener((ServerStoppingEvent e) -> {
             AtlasGuard.run("atlas tile service stop", AtlasTileServer::stop);
             AtlasGuard.run("atlas natural sites stop", AtlasNatural::stop);
+            AtlasGuard.run("atlas far changes stop", AtlasEdits::stop);
         });
+        // the change feed (docs/ATLAS-DELTAS.md): what the world does that the far field's prediction cannot know
+        NeoForge.EVENT_BUS.addListener((net.neoforged.neoforge.event.level.BlockEvent.NeighborNotifyEvent e) ->
+                AtlasGuard.run("atlas far changes", () -> AtlasEdits.onBlockChanged(e)));
+        NeoForge.EVENT_BUS.addListener((net.neoforged.neoforge.event.level.ChunkEvent.Load e) ->
+                AtlasGuard.run("atlas far changes", () -> AtlasEdits.onChunkLoaded(e)));
         NeoForge.EVENT_BUS.addListener((PlayerEvent.PlayerLoggedInEvent e) -> {
             AtlasGuard.run("atlas tile service", () -> {
                 AtlasNet.Hello hello = AtlasTileServer.hello();
@@ -37,6 +43,7 @@ public final class AtlasServer {
         NeoForge.EVENT_BUS.addListener((ServerTickEvent.Post e) -> {
             AtlasGuard.run("atlas tile service", AtlasTileServer::tick);
             AtlasGuard.run("atlas far actors", () -> AtlasFarActors.tick(e.getServer()));
+            AtlasGuard.run("atlas far changes", () -> AtlasEdits.tick(e.getServer()));
             AtlasGuard.run("atlas natural sites", () -> AtlasNatural.tick(e.getServer()));
         });
     }

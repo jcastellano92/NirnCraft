@@ -43,6 +43,11 @@ final class AtlasExactSource extends AtlasRefiningSource {
     private final AtlasTileCache cache;  // null: compute every time
     private final ForkJoinPool pool;
     private final AtlasTileUpload upload = new AtlasTileUpload();
+
+    @Override
+    public void applyEdits(AtlasNative.Context ctx, java.util.List<Long> changedTiles) {
+        upload.applyEdits(ctx, changedTiles);
+    }
     /** The world's surface painter (its material rules), or null: the raster dressing's blocks. */
     private volatile AtlasSurface surfacePainter;
     private volatile boolean surfaceWarned;

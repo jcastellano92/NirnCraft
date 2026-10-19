@@ -71,6 +71,10 @@ uint lookupMaterial(RegionGpu r, uint rank) {
 }
 
 // March one region in its voxel units. ro/rd: chord origin and direction in region voxels per unit t.
+// the share of foliage voxels a ray passes at the current trace's LOD (set by traceLod: leaves are cutout cubes in the
+// near field, light and sky show between them; 0 at coarse LODs, where a forest reads as a mass)
+static float gLeafGap = 0.0;
+
 bool traceRegion(RegionGpu r, float3 ro, float3 rd, float t0, float t1, float eps, inout TraceResult res) {
     float3 inv = float3(abs(rd.x) > 1e-12 ? 1.0 / rd.x : 1e30, abs(rd.y) > 1e-12 ? 1.0 / rd.y : 1e30,
                         abs(rd.z) > 1e-12 ? 1.0 / rd.z : 1e30);
@@ -170,7 +174,16 @@ bool traceRegion(RegionGpu r, float3 ro, float3 rd, float t0, float t1, float ep
             if (((bits >> b) & 1) != 0) {
                 rank += popcount64(bits & ((uint64_t(1) << b) - 1));
                 uint hitMat = lookupMaterial(r, rank);
-                bool passWater = (frame.dims.z & FRAME_SEE_THROUGH_WATER) != 0 && uint(palette[hitMat].emisClass.y) == 2u;
+                uint hitCls = uint(palette[hitMat].emisClass.y);
+                bool passWater = (frame.dims.z & FRAME_SEE_THROUGH_WATER) != 0 && hitCls == 2u;
+                // gaps between leaves: a hashed share of foliage voxels lets the ray through (moving with the TAA
+                // phase, so the resolve sees crowns as dappled, not solid; shadow rays get dappled light the same way)
+                if (!passWater && hitCls == 1u && gLeafGap > 0.0) {
+                    uint phase = frame.jitter.z > 0.5 ? (frame.temporal.x & 7u) : 0u;
+                    uint hh = (uint(v.x) * 73856093u) ^ (uint(v.y) * 19349663u) ^ (uint(v.z) * 83492791u) ^ (r.bases.x * 2654435761u) ^ (phase * 374761393u);
+                    hh = (hh ^ (hh >> 13)) * 1274126177u;
+                    passWater = float(hh & 0xFFFFu) / 65535.0 < gLeafGap;
+                }
                 if (!passWater) {
                 res.t = t;
                 res.mat = hitMat;
@@ -256,6 +269,7 @@ int traceLod(int lod, float3 p0, float3 d, float len, inout TraceResult res, out
                     }
                 }
                 float3 ro = (p0 - regionOriginRel(r)) / s;
+                gLeafGap = lod <= 1 ? 0.3 : 0.0;
                 if (!air && traceRegion(r, ro, d / s, u, uExit, 1e-3, res)) {
                     res.lod = lod;
                     return TRACE_HIT;
@@ -895,7 +909,11 @@ void farMain(uint3 id : SV_DispatchThreadID) {
     // field instead of a hole (only in the open: FRAME_FILL_NEAR)
     float tStart = frame.params.x;
     // (2e30: every sample of the pixel's footprint was sky; 1e30 is a near silhouette's edge, never filled)
-    if ((frame.dims.z & FRAME_NEAR_DEPTH) != 0 && (frame.dims.z & FRAME_FILL_NEAR) != 0 && nearDepth[pix] >= 1.5e30)
+    // and only below the horizon: a missing chunk is a hole in the ground; above the horizon an empty near pixel is the
+    // real sky, and filling it drew the far field's own copies of the buildings and trees around the camera into it
+    // (Helgen's keep as a dark slab in the sky)
+    if ((frame.dims.z & FRAME_NEAR_DEPTH) != 0 && (frame.dims.z & FRAME_FILL_NEAR) != 0 && nearDepth[pix] >= 1.5e30
+        && dir.y < 0.0)
         tStart = 2.0;
     float tHit = traceView(o, dir, tStart, frame.params.y, lodDither, res);
     ActorHit ah;

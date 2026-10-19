@@ -149,7 +149,10 @@ final class AtlasSettlements implements AtlasFarField.Overlay {
                     boolean any = fill(lod, tx, tz);
                     mats.flush(ctx);
                     flushLights(ctx);
+                    // a tile whose trees were stamped: they replace its canopy as they go up (until then it keeps it)
+                    ctx.structureFlags = treesStamped ? AtlasNative.STRUCTURES_REPLACE_CANOPY : 0;
                     if (any) ctx.uploadColumnStructures(lod, tx, tz, wallTop, roofTop, wallMat, roofMat, floating ? baseArr : null);
+                    ctx.structureFlags = 0;
                     uploaded.add(k);  // only once its buildings are really there: a failure is tried again next pass
                 } catch (RuntimeException e) {
                     com.nirncraft.NirnCraft.LOGGER.warn("atlas: settlement tile {} {} {} failed: {}", lod, tx, tz, e.toString());
@@ -182,7 +185,11 @@ final class AtlasSettlements implements AtlasFarField.Overlay {
     }
 
     /** Rasterises tile (lod, tx, tz) into the arrays; false when no settlement or site reaches it. */
+    /** The last fill stamped the tile's trees (they replace its canopy: AtlasNative.STRUCTURES_REPLACE_CANOPY). */
+    private boolean treesStamped;
+
     boolean fill(int lod, int tx, int tz) {
+        treesStamped = false;
         int s = 1 << lod, bx = tx * (AtlasNative.TILE << lod), bz = tz * (AtlasNative.TILE << lod);
         int ex = bx + (AtlasNative.TILE << lod), ez = bz + (AtlasNative.TILE << lod);
         boolean any = false;
@@ -212,6 +219,12 @@ final class AtlasSettlements implements AtlasFarField.Overlay {
             stamp(sh, s, bx, bz);
         }
         AtlasTrees t = trees;
+        if (t != null && lod <= AtlasTrees.APPROX_LOD) {
+            // the tile's trees are decided here (even none: a meadow): it goes up and its canopy with it
+            treesStamped = true;
+            if (!any) clear();
+            any = true;
+        }
         if (t != null && lod <= AtlasTrees.LOD) {
             // the world's own trees, chunk by chunk (each chunk's crowns may reach into its neighbours' columns)
             for (int cz = (bz >> 4) - 1; cz <= (ez - 1 >> 4) + 1; cz++)
@@ -229,6 +242,27 @@ final class AtlasSettlements implements AtlasFarField.Overlay {
             any = true;
             final int fs = s, fbx = bx, fbz = bz;
             t.approximate(bx, bz, ex, ez, (x, y, z, sil, tint) -> stampTree(x, y, z, sil, tint, fs, fbx, fbz));
+        }
+        // where the server has the real world: its trees and crowns in place of the prediction (its buildings and props
+        // are the real ground: the tile's ground is patched with them)
+        if (AtlasEditsClient.any()) {
+            if (!any) clear();
+            any = true;
+            AtlasEditsClient.spans(lod, tx, tz, new AtlasEditsClient.SpanSink() {
+                @Override
+                public void put(int i, int j, float wallTop, float roofTop, short wall, short roof, float base) {
+                    int c = j * AtlasNative.TILE + i;
+                    wallTop_(c, wallTop, roofTop, wall, roof, base);
+                }
+
+                @Override
+                public void clear(int i, int j) {
+                    int c = j * AtlasNative.TILE + i;
+                    wallTop[c] = Float.NaN;
+                    roofTop[c] = Float.NaN;
+                    baseArr[c] = Float.NaN;
+                }
+            }, mats::id);
         }
         com.nirncraft.tamriel.terrain.Hydrology.Fall[] all = com.nirncraft.tamriel.terrain.Hydrology.get().falls();
         for (int k = 0; k < all.length; k++) {
@@ -459,9 +493,39 @@ final class AtlasSettlements implements AtlasFarField.Overlay {
             }
     }
 
+    @Override
+    public int applySections(AtlasNative.Context ctx, long deadline) {
+        return AtlasEditsClient.applySections(ctx, mats, deadline);
+    }
+
+    @Override
+    public void invalidate(List<Long> changedTiles) {
+        uploaded.removeIf(k -> {
+            int lod = (int) (k >>> 56);
+            int tx = (int) (k << 8 >> 36), tz = (int) (k << 36 >> 36);
+            int span = AtlasNative.TILE << lod;
+            for (long ck : changedTiles) {
+                int ex = (int) (ck >> 32) * AtlasEdits.TILE, ez = (int) ck * AtlasEdits.TILE;
+                if (ex + AtlasEdits.TILE > tx * span && ex < (tx + 1) * span && ez + AtlasEdits.TILE > tz * span && ez < (tz + 1) * span)
+                    return true;
+            }
+            return false;
+        });
+    }
+
     private void put(int i, int j, float wTop, float rTop, short wMat, short rMat, float base) {
         int c = j * AtlasNative.TILE + i;
         if (!(rTop > roofTop[c]) && !Float.isNaN(roofTop[c])) return;  // the taller piece wins
+        wallTop[c] = wTop;
+        roofTop[c] = rTop;
+        wallMat[c] = wMat;
+        roofMat[c] = rMat;
+        baseArr[c] = base;
+        floating |= !Float.isNaN(base);
+    }
+
+    /** A real column's span replaces whatever the prediction stamped in column c. */
+    private void wallTop_(int c, float wTop, float rTop, short wMat, short rMat, float base) {
         wallTop[c] = wTop;
         roofTop[c] = rTop;
         wallMat[c] = wMat;

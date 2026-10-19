@@ -28,6 +28,11 @@ final class AtlasServerSource extends AtlasRefiningSource {
     private final List<int[]> toAsk = new ArrayList<>();
     private final AtlasTileUpload upload = new AtlasTileUpload();
 
+    @Override
+    public void applyEdits(AtlasNative.Context ctx, java.util.List<Long> changedTiles) {
+        upload.applyEdits(ctx, changedTiles);
+    }
+
     AtlasServerSource(long worldId, Path gameDir, Callable<Path> raster) {
         super(raster);
         cache = gameDir.resolve("atlas-cache").resolve(Long.toHexString(worldId)).resolve("v" + AtlasTileCodec.VERSION + "r" + AtlasTileCodec.CONTENT);

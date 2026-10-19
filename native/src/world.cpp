@@ -23,7 +23,9 @@ public:
         bx_ = k.x * 256;
         by_ = WORLD_MIN_Y + k.y * 256;
         bz_ = k.z * 256;
-        if (k.lod != 0 || !sections_ || sections_->empty()) sections_ = nullptr;
+        lod_ = k.lod;
+        // real blocks (sections) and their generated levels up to LOD 4 (a section is one 16-block voxel there)
+        if (k.lod > 4 || !sections_ || sections_->empty()) sections_ = nullptr;
     }
 
     BoxClass classify(int x, int y, int z, int n, uint16_t& mat) override {
@@ -51,12 +53,12 @@ public:
 
     uint16_t voxel(int x, int y, int z) const {
         if (sections_) {
-            int wx = bx_ + x, wy = by_ + y, wz = bz_ + z;
+            // the voxel's first block in world blocks, its section, its coordinates in that section's level
+            int s = 1 << lod_;
+            int wx = (bx_ + x) * s, wy = WORLD_MIN_Y + (by_ - WORLD_MIN_Y + y) * s, wz = (bz_ + z) * s;
             auto it = sections_->find({0, floorDiv(wx, 16), floorDiv(wy, 16), floorDiv(wz, 16)});
-            if (it != sections_->end()) {
-                int lx = wx & 15, ly = wy & 15, lz = wz & 15;
-                return it->second->mats[size_t(lx + 16 * (lz + 16 * ly))];
-            }
+            if (it != sections_->end() && (lod_ == 0 || !it->second->mip[0].empty()))
+                return it->second->at(lod_, (wx & 15) >> lod_, (wy & 15) >> lod_, (wz & 15) >> lod_);
         }
         if (!t_) return 0;
         size_t c = size_t(z) * TILE + size_t(x);
@@ -68,18 +70,32 @@ public:
         float surf = t.surface[c];
         if (yc < surf) {
             float depth = surf - yc;
-            if (depth <= s) return t.top[c];
+            if (depth <= s) {
+                // a forest seen from far: crowns too thin for this voxel size are the ground's colour (as forests read
+                // from afar), not geometry; tested at the voxel's centre they vanished in most columns, and filling the
+                // whole voxel would raise a slab as tall as the voxel
+                if (!t.canopy.empty() && t.canopy[c] > 0.0f && 0.65f * t.canopy[c] < 0.75f * s) return t.canopyMat[c];
+                return t.top[c];
+            }
             if (depth <= s + FILL_DEPTH) return t.fill[c];
             return stone;
         }
         if (t.structures) {
             const Structures& st = *t.structures;
             float rt = st.roofTop[c];
-            if (yc < rt && (st.base.empty() || yc >= st.base[c]))  // (rt > surf: no NaN gets here)
-                return yc < st.wallTop[c] ? st.wallMat[c] : st.roofMat[c];
+            bool inside = yc < rt && (st.base.empty() || yc >= st.base[c]);  // (rt > surf: no NaN gets here)
+            if (!inside && rt > surf) {
+                // a span thinner than the voxel (a tree crown, a roof at a coarse LOD): the voxel shows it when they
+                // overlap, else a centre-point test lost it in most columns
+                float lo = st.base.empty() || std::isnan(st.base[c]) ? surf : st.base[c];
+                if (rt - lo < s) inside = yc + 0.5f * s > lo && yc - 0.5f * s < rt;
+            }
+            if (inside) return yc < st.wallTop[c] ? st.wallMat[c] : st.roofMat[c];
         }
-        // canopy: crowns over trunk space (the lowest 35 % stays open, so forest edges are not solid walls)
-        if (!t.canopy.empty() && t.canopy[c] > 0.0f && yc < surf + t.canopy[c] && yc >= surf + 0.35f * t.canopy[c])
+        // canopy: crowns over trunk space (the lowest 35 % stays open, so forest edges are not solid walls), as geometry
+        // while the voxel is small enough to resolve the crowns' band (thinner bands colour the ground: above)
+        if (!t.canopy.empty() && t.canopy[c] > 0.0f && 0.65f * t.canopy[c] >= 0.75f * s && yc < surf + t.canopy[c]
+            && yc >= surf + 0.35f * t.canopy[c])
             return t.canopyMat[c];
         float w = t.water[c];
         if (!std::isnan(w) && yc < w) return t.waterMat.empty() || !t.waterMat[c] ? water : t.waterMat[c];
@@ -88,9 +104,10 @@ public:
 
 private:
     bool anySection(int x, int y, int z, int n) const {
-        int sx0 = floorDiv(bx_ + x, 16), sx1 = floorDiv(bx_ + x + n - 1, 16);
-        int sy0 = floorDiv(by_ + y, 16), sy1 = floorDiv(by_ + y + n - 1, 16);
-        int sz0 = floorDiv(bz_ + z, 16), sz1 = floorDiv(bz_ + z + n - 1, 16);
+        int s = 1 << lod_;
+        int sx0 = floorDiv((bx_ + x) * s, 16), sx1 = floorDiv((bx_ + x + n) * s - 1, 16);
+        int sy0 = floorDiv(WORLD_MIN_Y + (by_ - WORLD_MIN_Y + y) * s, 16), sy1 = floorDiv(WORLD_MIN_Y + (by_ - WORLD_MIN_Y + y + n) * s - 1, 16);
+        int sz0 = floorDiv((bz_ + z) * s, 16), sz1 = floorDiv((bz_ + z + n) * s - 1, 16);
         for (int sy = sy0; sy <= sy1; sy++)
             for (int sz = sz0; sz <= sz1; sz++)
                 for (int sx = sx0; sx <= sx1; sx++)
@@ -101,6 +118,7 @@ private:
     const Tile* t_;
     uint16_t stone_, water_;
     const SectionMap* sections_;
+    int lod_ = 0;
     float s_, y0_;
     int bx_, by_, bz_;
 };
@@ -151,6 +169,10 @@ void World::putTile(std::unique_ptr<Tile> t) {
         auto it = structures_.find(k);
         t->structures = it == structures_.end() ? nullptr : it->second;
     }
+    if (t->structures && t->structures->replacesCanopy) {  // the real trees are up: no canopy lumps under them
+        t->canopy.clear();
+        t->canopyMat.clear();
+    }
     t->buildPyramids();
     std::lock_guard<std::mutex> lock(mu_);
     for (int ry = 0; ry < regionRows(t->lod); ry++) dirty_.insert({t->lod, t->tx, ry, t->tz});
@@ -176,6 +198,10 @@ void World::putStructures(int lod, int tx, int tz, std::shared_ptr<const Structu
     // tiles are immutable once published (builders hold snapshots): replace with a copy carrying the new buildings
     auto t = std::make_unique<Tile>(*old);
     t->structures = s;
+    if (s && s->replacesCanopy) {
+        t->canopy.clear();
+        t->canopyMat.clear();
+    }
     t->buildPyramids();
     std::lock_guard<std::mutex> lock(mu_);
     auto it = tiles_.find(k);
@@ -189,13 +215,74 @@ bool World::hasTile(int lod, int tx, int tz) const {
     return tiles_.count({lod, tx, 0, tz}) != 0;
 }
 
+void World::setClasses(std::vector<uint8_t> cls) {
+    std::lock_guard<std::mutex> lock(mu_);
+    classes_ = std::move(cls);
+}
+
 void World::putSection(int sx, int sy, int sz, const uint16_t* mats) {
     auto s = std::make_unique<Section>();
     std::copy(mats, mats + 4096, s->mats.begin());
     std::lock_guard<std::mutex> lock(mu_);
+    s->buildMips(classes_);
     sections_[{0, sx, sy, sz}] = std::move(s);
-    int rx = floorDiv(sx * 16, 256), ry = floorDiv(sy * 16 - WORLD_MIN_Y, 256), rz = floorDiv(sz * 16, 256);
-    dirty_.insert({0, rx, ry, rz});
+    markSectionDirty(sx, sy, sz);
+}
+
+void World::markSectionDirty(int sx, int sy, int sz) {
+    // the section's region at every level that reads sections (0..4)
+    for (int lod = 0; lod <= 4; lod++) {
+        int span = 256 << lod;
+        dirty_.insert({lod, floorDiv(sx * 16, span), floorDiv(sy * 16 - WORLD_MIN_Y, span), floorDiv(sz * 16, span)});
+    }
+}
+
+// docs/ATLAS-LOD.md: a coarse voxel from its 2 x 2 x 2 children. Solid (terrain, walls, trunks, emitters' blocks) when
+// 3 or more children are solid; else foliage when 2 or more are leaves; else water when 4 or more are water; else air.
+// Its material: the most common among the children of the winning kind, ties to the higher child.
+void Section::buildMips(const std::vector<uint8_t>& cls) {
+    auto kind = [&](uint16_t m) -> int {
+        if (m == 0) return -1;
+        uint8_t c = m < cls.size() ? cls[m] : 0;
+        return c == 1 ? 1 : c == 2 ? 2 : 0;  // emissive and falls count as solid blocks
+    };
+    const uint16_t* src = mats.data();
+    int n = 16;
+    std::vector<uint16_t> prev(mats.begin(), mats.end());
+    for (int level = 1; level <= 4; level++) {
+        int m = n / 2;
+        std::vector<uint16_t> out(size_t(m) * m * m, 0);
+        for (int y = 0; y < m; y++)
+            for (int z = 0; z < m; z++)
+                for (int x = 0; x < m; x++) {
+                    uint16_t ch[8];
+                    int counts[3] = {0, 0, 0};
+                    for (int k = 0; k < 8; k++) {
+                        int cx = 2 * x + (k & 1), cz = 2 * z + ((k >> 1) & 1), cy = 2 * y + (k >> 2);
+                        ch[k] = prev[size_t(cx + n * (cz + n * cy))];
+                        int kd = kind(ch[k]);
+                        if (kd >= 0) counts[kd]++;
+                    }
+                    int want = counts[0] >= 3 ? 0 : counts[1] >= 2 ? 1 : counts[2] >= 4 ? 2 : -1;
+                    if (want < 0) continue;
+                    uint16_t best = 0;
+                    int bestN = 0;
+                    for (int a = 7; a >= 0; a--) {  // the upper children first: ties go up
+                        if (kind(ch[a]) != want) continue;
+                        int c = 0;
+                        for (int b = 0; b < 8; b++) c += ch[b] == ch[a] ? 1 : 0;
+                        if (c > bestN) {
+                            bestN = c;
+                            best = ch[a];
+                        }
+                    }
+                    out[size_t(x + m * (z + m * y))] = best;
+                }
+        mip[size_t(level - 1)] = out;
+        prev.swap(out);
+        n = m;
+    }
+    (void)src;
 }
 
 void World::editBlock(int x, int y, int z, uint16_t mat) {
@@ -223,8 +310,9 @@ void World::editBlock(int x, int y, int z, uint16_t mat) {
                 }
     }
     s->mats[size_t((x & 15) + 16 * ((z & 15) + 16 * (y & 15)))] = mat;
+    s->buildMips(classes_);
     sections_[sk] = std::move(s);
-    dirty_.insert({0, floorDiv(x, 256), floorDiv(y - WORLD_MIN_Y, 256), floorDiv(z, 256)});
+    markSectionDirty(sx, sy, sz);
 }
 
 World::Job World::snapshot(const Key3& k) const {
@@ -232,11 +320,12 @@ World::Job World::snapshot(const Key3& k) const {
     j.key = k;
     auto it = tiles_.find({k.lod, k.x, 0, k.z});
     if (it != tiles_.end()) j.tile = it->second;
-    if (k.lod == 0 && !sections_.empty()) {
-        int sx0 = k.x * 16, sy0 = (WORLD_MIN_Y + k.y * 256) / 16, sz0 = k.z * 16;
-        if (sections_.size() < 4096) {
+    if (k.lod <= 4 && !sections_.empty()) {
+        int per = 16 << k.lod;  // sections per region side at this level
+        int sx0 = k.x * per, sy0 = floorDiv(WORLD_MIN_Y + k.y * 256 * (1 << k.lod), 16), sz0 = k.z * per;
+        if (k.lod > 0 || sections_.size() < 4096) {
             for (auto& [sk, sec] : sections_)
-                if (sk.x >= sx0 && sk.x < sx0 + 16 && sk.y >= sy0 && sk.y < sy0 + 16 && sk.z >= sz0 && sk.z < sz0 + 16)
+                if (sk.x >= sx0 && sk.x < sx0 + per && sk.y >= sy0 && sk.y < sy0 + per && sk.z >= sz0 && sk.z < sz0 + per)
                     j.sections.emplace(sk, sec);
         } else {
             for (int sy = sy0; sy < sy0 + 16; sy++)

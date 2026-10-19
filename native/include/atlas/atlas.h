@@ -331,6 +331,16 @@ ATLAS_API AtlasStatus atlas_upload_column_heights3(AtlasContext* ctx, int32_t lo
 /* (abi 0.13) the caller stamps this column's trees itself (as structures, where the world grows them): no forest
    canopy from the dressing here */
 #define ATLAS_COLUMN_NO_CANOPY 0x4u
+/*
+ * (abi 0.13) As atlas_upload_column_structures2, with flags: ATLAS_STRUCTURES_REPLACE_CANOPY = these are the tile's
+ * real trees: the dressing's canopy of the tile goes when they go up (and stays gone when the ground is uploaded again),
+ * so a tile keeps its canopy until its trees replace it (no bare band while they are being built).
+ */
+#define ATLAS_STRUCTURES_REPLACE_CANOPY 0x1u
+ATLAS_API AtlasStatus atlas_upload_column_structures3(AtlasContext* ctx, int32_t lod, int32_t tileX, int32_t tileZ,
+                                                         const float* wallTop, const float* roofTop,
+                                                         const uint16_t* wallMat, const uint16_t* roofMat,
+                                                         const float* base, uint32_t flags);
 /* (abi 0.10) Falling water: a material class drawn as a white, streaming sheet (waterfalls stamped as structures). */
 #define ATLAS_CLASS_FALLS 5u
 /*

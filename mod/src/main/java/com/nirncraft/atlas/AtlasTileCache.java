@@ -8,6 +8,7 @@ import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.List;
 
 /**
  * Encoded far tiles on disk (AtlasTileCodec bytes, one file per tile). A tile is the generator's surface, never the
@@ -23,8 +24,39 @@ final class AtlasTileCache {
 
     /** The world's cache (dedicated, integrated and LAN-hosted servers alike). */
     static AtlasTileCache forServer(MinecraftServer server) {
-        return new AtlasTileCache(server.getWorldPath(LevelResource.DATA).resolve("nirncraft_atlas")
-                .resolve("tiles-v" + AtlasTileCodec.VERSION + "r" + AtlasTileCodec.CONTENT));
+        java.nio.file.Path root = server.getWorldPath(LevelResource.DATA).resolve("nirncraft_atlas");
+        String name = "tiles-v" + AtlasTileCodec.VERSION + "-" + AtlasTileCodec.identity();
+        pruneOthers(root, "tiles-", name);
+        return new AtlasTileCache(root.resolve(name));
+    }
+
+    /**
+     * Deletes the caches of other generations next to this one (`prefix`*, not `keep`): tiles of an older world
+     * generation or painting code are never read again, and a world's data folder should not grow with every build.
+     * In the background (a big cache takes a moment to delete).
+     */
+    static void pruneOthers(java.nio.file.Path root, String prefix, String keep) {
+        if (!Files.isDirectory(root)) return;
+        try (var dirs = Files.list(root)) {
+            List<java.nio.file.Path> old = dirs.filter(d -> Files.isDirectory(d) && d.getFileName().toString().startsWith(prefix)
+                    && !d.getFileName().toString().equals(keep)).toList();
+            if (old.isEmpty()) return;
+            Thread t = new Thread(() -> {
+                for (java.nio.file.Path d : old) {
+                    try (var walk = Files.walk(d)) {
+                        walk.sorted(java.util.Comparator.reverseOrder()).forEach(f -> f.toFile().delete());
+                    } catch (IOException | RuntimeException e) {
+                        // left for the next start
+                    }
+                }
+                com.nirncraft.NirnCraft.LOGGER.info("atlas: removed {} far tile cache(s) of older generations", old.size());
+            }, "nirncraft-atlas-cache-prune");
+            t.setDaemon(true);
+            t.setPriority(Thread.MIN_PRIORITY);
+            t.start();
+        } catch (IOException e) {
+            // nothing to prune
+        }
     }
 
     Path file(int lod, int tx, int tz) {

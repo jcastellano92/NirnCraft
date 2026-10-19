@@ -15,7 +15,7 @@ import java.util.function.Consumer;
 public final class AtlasNet {
     private AtlasNet() {}
 
-    static final int MAX_REQUEST = 32, MAX_ACTORS = 96, MAX_SITES = 4096;
+    static final int MAX_REQUEST = 32, MAX_ACTORS = 96, MAX_SITES = 4096, MAX_EDITS = 8192;
 
     /**
      * S->C on login and on entering the overworld: this server streams exact far tiles. worldId names the world for
@@ -45,11 +45,24 @@ public final class AtlasNet {
      */
     public record FarSites(int count, int[] xz, String[] kinds, long[] seeds, byte[] facing) {}
 
+    /**
+     * S->C: changes to one 256-block tile the far field's prediction cannot know (docs/ATLAS-DELTAS.md), newer than what
+     * this player has. cols: per column (AtlasEdits.COL ints) x, z, top (y of the ground's top block), top block id,
+     * under block id, water top (MIN_VALUE: dry), span top (exclusive; MIN_VALUE: none), span base (MIN_VALUE: from the
+     * ground), span wall block id (trunk), span roof block id (crown); lights: per light x, y, z, emission (0: gone).
+     */
+    public record FarEdits(int tx, int tz, int[] cols, int[] lights) {}
+
+    /** S->C: real chunks' surface sections for the far field's finest levels (AtlasSections blobs, one per chunk). */
+    public record FarSections(byte[][] blobs) {}
+
     // client side handlers, set by AtlasClient (so a dedicated server never loads client classes)
     static volatile Consumer<Hello> onHello = m -> {};
     static volatile Consumer<TileData> onTile = m -> {};
     static volatile Consumer<FarActors> onFarActors = m -> {};
     static volatile Consumer<FarSites> onFarSites = m -> {};
+    static volatile Consumer<FarEdits> onFarEdits = m -> {};
+    static volatile Consumer<FarSections> onFarSections = m -> {};
 
     public static void register() {
         SkyNetwork.register(Hello.class, PacketFlow.CLIENTBOUND, (m, b) -> {
@@ -76,6 +89,37 @@ public final class AtlasNet {
 
         SkyNetwork.register(FarSites.class, PacketFlow.CLIENTBOUND, AtlasNet::writeSites, AtlasNet::readSites,
                 (m, ctx) -> onFarSites.accept(m));
+
+        SkyNetwork.register(FarEdits.class, PacketFlow.CLIENTBOUND, (m, b) -> {
+            b.writeInt(m.tx);
+            b.writeInt(m.tz);
+            b.writeVarInt(m.cols.length / AtlasEdits.COL);
+            for (int v : m.cols) b.writeInt(v);
+            b.writeVarInt(m.lights.length / 4);
+            for (int v : m.lights) b.writeInt(v);
+        }, b -> {
+            int tx = b.readInt(), tz = b.readInt();
+            int n = b.readVarInt();
+            if (n < 0 || n > MAX_EDITS) throw new IllegalArgumentException("atlas far edits of " + n + " columns");
+            int[] cols = new int[n * AtlasEdits.COL];
+            for (int i = 0; i < cols.length; i++) cols[i] = b.readInt();
+            int nl = b.readVarInt();
+            if (nl < 0 || nl > MAX_EDITS) throw new IllegalArgumentException("atlas far edits of " + nl + " lights");
+            int[] lights = new int[nl * 4];
+            for (int i = 0; i < lights.length; i++) lights[i] = b.readInt();
+            return new FarEdits(tx, tz, cols, lights);
+        }, (m, ctx) -> onFarEdits.accept(m));
+
+        SkyNetwork.register(FarSections.class, PacketFlow.CLIENTBOUND, (m, b) -> {
+            b.writeVarInt(m.blobs.length);
+            for (byte[] x : m.blobs) b.writeByteArray(x);
+        }, b -> {
+            int n = b.readVarInt();
+            if (n < 0 || n > 256) throw new IllegalArgumentException("atlas far sections of " + n + " chunks");
+            byte[][] blobs = new byte[n][];
+            for (int i = 0; i < n; i++) blobs[i] = b.readByteArray(1 << 20);
+            return new FarSections(blobs);
+        }, (m, ctx) -> onFarSections.accept(m));
     }
 
     private static void writeRequest(TileRequest m, RegistryFriendlyByteBuf b) {

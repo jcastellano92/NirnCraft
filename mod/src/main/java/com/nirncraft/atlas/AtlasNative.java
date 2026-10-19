@@ -26,6 +26,8 @@ import static java.lang.foreign.ValueLayout.JAVA_SHORT;
  */
 public final class AtlasNative {
     /** The ABI this binding is written for (0.11: far content + failure handling); the mod ships matching natives. */
+    /** (abi 0.13) Structures that are a tile's real trees: its dressing's canopy goes when they go up. */
+    public static final int STRUCTURES_REPLACE_CANOPY = 0x1;
     public static final int ABI_VERSION = 0x000D00, ABI_MIN = 0x000B00;  // 0.12: atlas_set_moon, 0.13: atlas_set_jitter (optional)
     public static final int BACKEND_CPU = 0, BACKEND_VULKAN = 1;
     /** AtlasStatus (atlas.h). */
@@ -121,7 +123,7 @@ public final class AtlasNative {
     private final Arena libArena;
     private final MethodHandle abiVersion, buildInfo, create, destroy, lastError, setPalette, uploadTile,
             uploadSection, notifyBlock, setWeather, setCloudNoise, setActors, update, render, getStats,
-            glAttach, glRenderIo, glDetach, info, previewLoadRaster, previewGenerate, previewHeight, uploadHeights, uploadHeights2, hasTile, uploadStructures, uploadStructures2, uploadHeights3, setMaterials, setSunMap, setMoon, setJitter, setTransitions, setLightGroup, setLightBudget,
+            glAttach, glRenderIo, glDetach, info, previewLoadRaster, previewGenerate, previewHeight, uploadHeights, uploadHeights2, hasTile, uploadStructures, uploadStructures2, uploadHeights3, setMaterials, setSunMap, setMoon, setJitter, uploadStructures3, setTransitions, setLightGroup, setLightBudget,
             heightCreate, heightDestroy, heightLastError, heightDevice, heightSetNoise, heightBatch;
     // abi 0.10 (null with a 0.9 library)
     private final MethodHandle memoryInfo, setClipmap, debugFault;
@@ -197,6 +199,8 @@ public final class AtlasNative {
         debugFault = bindOptional(l, lib, "atlas_debug_fault", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, JAVA_INT));
         setMoon = bindOptional(l, lib, "atlas_set_moon", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS, ADDRESS));
         setJitter = bindOptional(l, lib, "atlas_set_jitter", FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_FLOAT, JAVA_FLOAT));
+        uploadStructures3 = bindOptional(l, lib, "atlas_upload_column_structures3",
+                FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, JAVA_INT, JAVA_INT, ADDRESS, ADDRESS, ADDRESS, ADDRESS, ADDRESS, JAVA_INT));
     }
 
     private static MethodHandle bindOptional(Linker l, SymbolLookup lib, String name, FunctionDescriptor fd) {
@@ -570,6 +574,9 @@ public final class AtlasNative {
          * (abi 0.10) As uploadColumnStructures, plus base (may be null): per column the bottom of the span for what does
          * not stand on the ground (an arch's deck, a tree's crown, a floating rock); NaN = from the ground.
          */
+        /** (abi 0.13) Flags for the next structure uploads: STRUCTURES_REPLACE_CANOPY (the tile's real trees). */
+        public int structureFlags;
+
         public void uploadColumnStructures(int lod, int tileX, int tileZ, float[] wallTop, float[] roofTop, short[] wallMat,
                                            short[] roofMat, float[] base) {
             try (Arena a = Arena.ofConfined()) {
@@ -582,8 +589,12 @@ public final class AtlasNative {
                 if (wallTop.length < n || roofTop.length < n || wallMat.length < n || roofMat.length < n)
                     throw new IllegalArgumentException("structure arrays must hold 256*256 columns");
                 MemorySegment b = base != null ? copy(a, base) : MemorySegment.NULL;
-                check((int) uploadStructures2.invokeExact(ptr, lod, tileX, tileZ, copy(a, wallTop), copy(a, roofTop),
-                        copy(a, wallMat), copy(a, roofMat), b), "atlas_upload_column_structures2");
+                if (structureFlags != 0 && uploadStructures3 != null)
+                    check((int) uploadStructures3.invokeExact(ptr, lod, tileX, tileZ, copy(a, wallTop), copy(a, roofTop),
+                            copy(a, wallMat), copy(a, roofMat), b, structureFlags), "atlas_upload_column_structures3");
+                else
+                    check((int) uploadStructures2.invokeExact(ptr, lod, tileX, tileZ, copy(a, wallTop), copy(a, roofTop),
+                            copy(a, wallMat), copy(a, roofMat), b), "atlas_upload_column_structures2");
             } catch (Throwable t) {
                 throw rethrow(t);
             }

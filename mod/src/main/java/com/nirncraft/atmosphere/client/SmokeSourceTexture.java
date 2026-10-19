@@ -81,7 +81,9 @@ public final class SmokeSourceTexture {
         if (interiorStrength < 0.01f && inside < 0) interiorKind = -1;
         image.setPixelABGR(18, 0, rgba((interiorKind + 1) / 255f, interiorStrength, 0f, 1f));
         // visual tests: the pack's eye adapts at once (lib/exposure.glsl), so captures do not depend on timing
-        image.setPixelABGR(19, 0, rgba(com.nirncraft.client.autotest.ClientAutotest.ENABLED ? 1f : 0f, 0f, 0f, 1f));
+        // g: weather off (WeatherFieldTexture.isOff): the pack's near air keeps only the distant haze, like the far field
+        image.setPixelABGR(19, 0, rgba(com.nirncraft.client.autotest.ClientAutotest.ENABLED ? 1f : 0f,
+                WeatherFieldTexture.isOff() ? 1f : 0f, 0f, 1f));
         image.setPixelABGR(3, 1, rgba(NightSkyState.visibility, NightSkyState.pollution,
                 NightSkyState.masserLight, NightSkyState.secundaLight));
         double solarAngle = com.nirncraft.atmosphere.client.SkyEnvironment.sunCycle(level, 1f) * Math.PI * 2;

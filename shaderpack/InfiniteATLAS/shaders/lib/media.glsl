@@ -40,7 +40,14 @@ float modGroundFog(float drive, float h) {
 }
 
 // outdoor fog extinction at world point w (before exposure); dyn / wf: weather there; band: aerosol band
+// the mod's weather-off switch (data texel 19,0 g): no mists, fog banks or storm haze in the near air, only the
+// distance haze the far field has too (while the world is matched near to far, weather comes back on its own branch)
+bool weatherOff() {
+    return haveSmoke() && texelFetch(smokeSourcesTex, ivec2(19, 0), 0).g > 0.5;
+}
+
 float outdoorSigma(vec3 w, vec4 dyn, vec4 wf, int band, vec3 sun, float wet, float rain) {
+    if (weatherOff()) return 0.0;
     float surface = haveWeather() ? max(63.0, dyn.g * 1024.0) : 63.0;
     float h = w.y - surface;
     if (h < -2.0) return 0.0;  // the coarse terrain: below it there is no outdoor air

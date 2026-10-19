@@ -29,6 +29,29 @@ final class AtlasTileCodec {
     static final int VERSION = 3;
     /** What the tiles contain (not their format): caches made before a content change are not reused. 1: roads. */
     static final int CONTENT = 3;
+
+    private static String identity;
+
+    /**
+     * What the tiles are a function of: world generation (code and data) and the far field's own painting code, hashed
+     * by the build (nirncraft/far-identity.txt, Gradle task farIdentity). Caches are keyed by it, so a change to any of
+     * those starts fresh caches by itself. Twelve hex digits ("dev" when the resource is missing: a bare IDE run).
+     */
+    static synchronized String identity() {
+        if (identity != null) return identity;
+        String id = "dev";
+        try (var in = AtlasTileCodec.class.getResourceAsStream("/nirncraft/far-identity.txt")) {
+            if (in != null) {
+                String t = new String(in.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8).trim();
+                int c = t.indexOf(':');
+                id = (c >= 0 ? t.substring(c + 1) : t);
+                id = id.substring(0, Math.min(12, id.length()));
+            }
+        } catch (java.io.IOException e) {
+            // keep "dev"
+        }
+        return identity = id;
+    }
     private static final int N = AtlasNative.TILE * AtlasNative.TILE, W = AtlasNative.TILE;
     private static final int HEAD = 3, G = AtlasTints.GRID * AtlasTints.GRID, TINT_BYTES = 2 * 3 * G;
     private static final int FLAG_TINTS = 1, FLAG_SURFACE = 2;

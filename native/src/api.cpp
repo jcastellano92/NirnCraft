@@ -87,6 +87,14 @@ struct AtlasContext {
     }
 };
 
+// the palette's material classes for the world's generated section levels (docs/ATLAS-LOD.md)
+static void syncClasses(AtlasContext* ctx) {
+    std::vector<uint8_t> cls(ctx->palette.size(), 0);
+    for (size_t i = 0; i < cls.size(); i++) cls[i] = uint8_t(ctx->palette[i].emisClass[1]);
+    ctx->world.setClasses(std::move(cls));
+}
+
+
 namespace {
 
 // why the last atlas_create on this thread failed (there is no context to hold the message)
@@ -184,6 +192,7 @@ void setPalette(AtlasContext* ctx, const AtlasMaterial* m, uint32_t n) {
     }
     if (water) ctx->world.waterMat = water;
     applyWaterFlow(ctx->palette);
+    syncClasses(ctx);
 }
 
 // Camera-relative direction through the centre of pixel (px, py).
@@ -758,6 +767,13 @@ ATLAS_API AtlasStatus atlas_upload_column_structures2(AtlasContext* ctx, int32_t
                                                          const float* wallTop, const float* roofTop,
                                                          const uint16_t* wallMat, const uint16_t* roofMat,
                                                          const float* base) {
+    return atlas_upload_column_structures3(ctx, lod, tileX, tileZ, wallTop, roofTop, wallMat, roofMat, base, 0u);
+}
+
+ATLAS_API AtlasStatus atlas_upload_column_structures3(AtlasContext* ctx, int32_t lod, int32_t tileX, int32_t tileZ,
+                                                         const float* wallTop, const float* roofTop,
+                                                         const uint16_t* wallMat, const uint16_t* roofMat,
+                                                         const float* base, uint32_t flags) {
     if (!ctx || lod < 0 || lod >= MAX_LODS) return ATLAS_ERR_ARG;
     ATLAS_TRY
     if (!wallTop) {
@@ -767,6 +783,7 @@ ATLAS_API AtlasStatus atlas_upload_column_structures2(AtlasContext* ctx, int32_t
     if (!roofTop || !wallMat || !roofMat) return ATLAS_ERR_ARG;
     size_t n = size_t(TILE) * TILE;
     auto s = std::make_shared<Structures>();
+    s->replacesCanopy = (flags & ATLAS_STRUCTURES_REPLACE_CANOPY) != 0;
     s->wallTop.assign(wallTop, wallTop + n);
     s->roofTop.assign(roofTop, roofTop + n);
     s->wallMat.assign(wallMat, wallMat + n);
@@ -797,6 +814,7 @@ ATLAS_API AtlasStatus atlas_set_materials(AtlasContext* ctx, uint32_t first, con
     AtlasMaterial grey{{0.3f, 0.3f, 0.3f}, 0.9f, 0.0f, ATLAS_CLASS_TERRAIN};
     if (ctx->palette.size() < first + count) ctx->palette.resize(first + count, toGpu(grey));
     for (uint32_t i = 0; i < count; i++) ctx->palette[first + i] = toGpu(m[i]);
+    syncClasses(ctx);
     return ATLAS_OK;
     ATLAS_CATCH(ctx)
 }

@@ -4,7 +4,9 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Block;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -23,16 +25,59 @@ final class AtlasTileUpload {
     private final AtlasTints tints = new AtlasTints();
     private final Map<String, Short> ids = new HashMap<>();
     private volatile AtlasMaterials mats;
+    /** The bytes of the tiles put up lately (lod, tx, tz key), to put a tile up again when changes arrive for it. */
+    private final java.util.LinkedHashMap<Long, byte[]> recent = new java.util.LinkedHashMap<>(64, 0.75f, true) {
+        @Override
+        protected boolean removeEldestEntry(Map.Entry<Long, byte[]> e) {
+            return size() > 160;
+        }
+    };
 
     /** The context's block palette (set before the first upload; without it surface blocks are left to the dressing). */
     void materials(AtlasMaterials m) {
         mats = m;
     }
 
+    /**
+     * Puts up again every recent tile that covers one of the LOD-0 tiles with new changes (each patched as it goes
+     * up), and the changed tiles' far lights. Far-field worker.
+     */
+    void applyEdits(AtlasNative.Context ctx, List<Long> changed) {
+        if (changed.isEmpty()) return;
+        List<long[]> redo = new ArrayList<>();
+        synchronized (recent) {
+            for (Map.Entry<Long, byte[]> e : recent.entrySet()) {
+                long k = e.getKey();
+                int lod = (int) (k >>> 56);
+                int tx = (int) (k << 8 >> 36), tz = (int) (k << 36 >> 36);
+                int span = AtlasNative.TILE << lod;
+                for (long ck : changed) {
+                    int etx = (int) (ck >> 32), etz = (int) ck;
+                    int ex = etx * AtlasEdits.TILE, ez = etz * AtlasEdits.TILE;
+                    if (ex + AtlasEdits.TILE > tx * span && ex < (tx + 1) * span && ez + AtlasEdits.TILE > tz * span && ez < (tz + 1) * span) {
+                        redo.add(new long[] {lod, tx, tz, k});
+                        break;
+                    }
+                }
+            }
+        }
+        for (long[] t : redo) {
+            byte[] bytes;
+            synchronized (recent) {
+                bytes = recent.get(t[3]);
+            }
+            if (bytes != null && ctx.hasTile((int) t[0], (int) t[1], (int) t[2])) upload(ctx, (int) t[0], (int) t[1], (int) t[2], bytes);
+        }
+        for (long ck : changed) AtlasLights.upload(ctx, AtlasEditsClient.lightGroup(ck), AtlasEditsClient.lights(ck));
+    }
+
     /** Decodes and uploads tile (lod, tx, tz); false when the bytes are not a tile of this codec version and LOD. */
     boolean upload(AtlasNative.Context ctx, int lod, int tx, int tz, byte[] bytes) {
         int r = AtlasTileCodec.decode(lod, bytes, surface, water, grassRgb, foliageRgb, blocks);
         if (r < 0) return false;
+        synchronized (recent) {
+            recent.put(AtlasRefiningSource.key(lod, tx, tz), bytes);
+        }
         boolean tinted = (r & 1) != 0, surf = (r & 2) != 0;
         if (tinted) {
             tints.materials(grassRgb, foliageRgb, grassMat, foliageMat);
@@ -58,8 +103,10 @@ final class AtlasTileUpload {
                 fillMat[c] = u < byIndex.length && !grass[u] ? byIndex[u] : 0;
                 flags[c] = blocks.flags[c];
             }
-            if (lod <= AtlasTrees.activeLod)  // the world's real trees stand here (AtlasTrees): no canopy lumps under them
-                for (int c = 0; c < N; c++) flags[c] |= AtlasTrees.NO_CANOPY;
+            // (the dressing's canopy stays until the tile's real trees replace it: AtlasSettlements uploads them with
+            // STRUCTURES_REPLACE_CANOPY, so the tree line never goes bare while they are being built)
+            // what the world did that the prediction cannot know (the server's change feed)
+            AtlasEditsClient.patch(lod, tx, tz, surface, water, topMat, fillMat, m::id);
             m.flush(ctx);
             ctx.uploadColumnHeights3(lod, tx, tz, surface, water, topMat, fillMat, tinted ? grassMat : null, tinted ? foliageMat : null, flags);
         } else if (tinted) {

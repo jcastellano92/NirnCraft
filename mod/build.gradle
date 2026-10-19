@@ -129,6 +129,29 @@ tasks.register('generationIdentity') {
 }
 sourceSets.main.resources.srcDir(files(generationIdentityDir).builtBy('generationIdentity'))
 
+// The far field's tiles (Infinite ATLAS) are a function of world generation and of the code that paints them: their
+// cache is keyed by this identity, so any change to either starts a fresh cache by itself (nothing to remember).
+def farIdentityDir = layout.buildDirectory.dir('generated/far-identity')
+def farSources = fileTree('src/main/java/com/nirncraft/atlas') {
+    include 'AtlasSurface.java', 'AtlasSnowCover.java', 'AtlasTileCodec.java', 'AtlasExactSource.java',
+            'AtlasBiomes.java', 'AtlasGround.java', 'AtlasHeightGpu.java', 'AtlasTints.java'
+}
+tasks.register('farIdentity') {
+    inputs.files generationSources, generationData, farSources
+    outputs.dir farIdentityDir
+    doLast {
+        def digest = java.security.MessageDigest.getInstance('SHA-256')
+        (generationSources.files + generationData.files + farSources.files).sort { a, b -> a.path <=> b.path }.each { f ->
+            digest.update(project.relativePath(f).replace('\\', '/').getBytes('UTF-8'))
+            digest.update(java.security.MessageDigest.getInstance('SHA-256').digest(f.bytes))
+        }
+        def out = farIdentityDir.get().file('nirncraft/far-identity.txt').asFile
+        out.parentFile.mkdirs()
+        out.setText('v1:' + digest.digest().encodeHex().toString() + '\n', 'UTF-8')
+    }
+}
+sourceSets.main.resources.srcDir(files(farIdentityDir).builtBy('farIdentity'))
+
 repositories {
     mavenCentral()
 }

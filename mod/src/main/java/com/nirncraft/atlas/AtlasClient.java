@@ -149,6 +149,8 @@ public final class AtlasClient {
             farActorsAt = System.nanoTime();
         };
         AtlasNet.onFarSites = m -> farSites = m;
+        AtlasNet.onFarEdits = AtlasEditsClient::accept;
+        AtlasNet.onFarSections = AtlasEditsClient::acceptSections;
     }
 
     /** The server streams exact tiles: switch a multiplayer client from the stand-in (restarts next frame). */
@@ -288,6 +290,10 @@ public final class AtlasClient {
             // NirnCraft's own cloud deck draws them)
             frame.flags = quality.flags(AtlasNative.FRAME_SHADOWS | AtlasNative.FRAME_ATMOS | AtlasNative.FRAME_CLOUDS
                     | AtlasNative.FRAME_ACTORS | AtlasNative.FRAME_LOD_DITHER);
+            // weather off (the world matched near to far without it): no cloud pass at all, high wisps and cloud
+            // shadows included (they do not follow the weather field's cover)
+            if (com.nirncraft.atmosphere.client.WeatherFieldTexture.isOff())
+                frame.flags &= ~(AtlasNative.FRAME_CLOUDS | AtlasNative.FRAME_CLOUDS_QUARTER);
             // in the open, chunks still loading show the far field instead of a hole (never underground: the far
             // field has no caves, it would cover a cave mouth)
             if (mc.player != null && mc.level != null
@@ -736,7 +742,7 @@ public final class AtlasClient {
         return taaOn;
     }
 
-    static boolean irisPackInUse() {
+    public static boolean irisPackInUse() {
         iris();
         try {
             return irisApi != null && irisInUse != null && Boolean.TRUE.equals(irisInUse.invoke(irisApi));
@@ -779,6 +785,7 @@ public final class AtlasClient {
             // best effort
         }
         farField = null;
+        AtlasEditsClient.clear();  // the next world's changes come from its own server
         targets = null;
         ctx = null;
         infoLogged = false;

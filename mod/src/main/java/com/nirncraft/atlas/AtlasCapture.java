@@ -373,14 +373,18 @@ final class AtlasCapture {
                 int x = BlockPos.getX(e.getKey()), z = BlockPos.getZ(e.getKey());
                 List<long[]> l = e.getValue();
                 l.sort((a, b) -> Long.compare(b[0], a[0]));
-                int topY = (int) l.get(0)[0], bottom = topY;
+                int topY = (int) l.get(0)[0], bottom = topY, bottomId = (int) l.get(0)[1];
                 Map<Integer, Integer> count = new HashMap<>();
                 for (long[] v : l) {
                     if (v[0] < bottom - MAX_GAP - 1) break;
                     bottom = (int) v[0];
+                    bottomId = (int) v[1];
                     count.merge((int) v[1], 1, Integer::sum);
                 }
                 int wallId = count.entrySet().stream().max(Map.Entry.comparingByValue()).get().getKey();
+                // a tree's trunk column: the trunk is its wall (the most common block was the crown's leaves: a leaf
+                // pillar to the ground where the near field has a trunk)
+                if (states.get(bottomId).is(net.minecraft.tags.BlockTags.LOGS)) wallId = bottomId;
                 int gr = ground(x, z);
                 s.span(x, z, bottom <= gr + 1 ? Float.NaN : bottom, topY + 1, states.get(wallId), states.get((int) l.get(0)[1]));
             }

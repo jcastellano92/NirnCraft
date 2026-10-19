@@ -37,10 +37,21 @@ final class AtlasFarField implements AutoCloseable {
         boolean cover(AtlasNative.Context ctx, int lod, int x0, int z0, int x1, int z1);
 
         default void close() {}
+
+        /** Puts up again what the server's change feed changed (docs/ATLAS-DELTAS.md). Far-field worker. */
+        default void applyEdits(AtlasNative.Context ctx, java.util.List<Long> changedTiles) {}
     }
 
     /** What goes on top of the ground tiles once they are resident (settlements). */
     interface Overlay {
+        /** Tiles covering these LOD-0 tiles are built again on the next pass (the server's real columns arrived). */
+        default void invalidate(java.util.List<Long> changedTiles) {}
+
+        /** Puts the server's real sections up until `deadline`; how many chunks. */
+        default int applySections(AtlasNative.Context ctx, long deadline) {
+            return 0;
+        }
+
         /**
          * Builds what the window needs, nearest tiles first, until `deadline` (System.nanoTime); true when it put
          * anything up or left work for the next pass (the far field is not idle yet).
@@ -181,6 +192,16 @@ final class AtlasFarField implements AutoCloseable {
                     pending |= source.cover(ctx, lod, (cx - WINDOW) * span, (cz - WINDOW) * span,
                             (cx + WINDOW + 1) * span, (cz + WINDOW + 1) * span);
                 }
+                // the server's changes (players building, explosions, water, lights): put the tiles they touch up again
+                java.util.List<Long> edited = AtlasEditsClient.takeDirty();
+                if (!edited.isEmpty()) {
+                    source.applyEdits(ctx, edited);
+                    Overlay ovE = overlay();
+                    if (ovE != null) ovE.invalidate(edited);
+                }
+                // the server's real sections (the finest levels' real blocks), within a share of the pass
+                Overlay ovS = overlay();
+                if (ovS != null) overlaid |= ovS.applySections(ctx, System.nanoTime() + 40_000_000L) > 0;
                 // the ground of the new place on screen now: the overlays (buildings, trees) can take a while, and
                 // the old window stayed on screen until they finished (a teleport showed stale far ground)
                 ctx.update(x, y, z, 0);

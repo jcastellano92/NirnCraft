@@ -228,6 +228,9 @@ public final class FarFireRenderer {
     private static int glowOf(VertexConsumer c, Matrix4f m, Vec3 cp, Vector3f left, Vector3f up, ClientFire.View v, double d,
                               double time, float daylight) {
         if ((v.flags & FireSites.FLAG_SMOKE_ONLY) != 0) return 0;
+        // under a shader pack the fire's light is drawn as light (the pack's halos, the far field's lights): the glow
+        // sprite, a stand-in for that without shaders, became a hard pulsing orb in the pack's emissive program
+        if (com.nirncraft.atlas.AtlasClient.irisPackInUse()) return 0;
         float env = envelope(v, time);
         if (env <= 0.01f) return 0;
         float k = (float) Mth.clamp(0.55 + 0.45 * v.intensity, 0.4, 1.7);

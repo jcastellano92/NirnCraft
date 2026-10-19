@@ -28,7 +28,7 @@ import java.util.concurrent.atomic.AtomicLong;
  *   <li>Sends are paced per player (BYTES_PER_SECOND), so a joining player's 4 MB window never floods a link.</li>
  * </ul>
  */
-final class AtlasTileServer {
+public final class AtlasTileServer {
     static final int OUTSTANDING = 24;
     static final int BYTES_PER_SECOND = Integer.getInteger("nirncraft.atlas.tileBytesPerSecond", 2_000_000);
     static final double TICK_BUSY_MS = Double.parseDouble(System.getProperty("nirncraft.atlas.tickBusyMs", "45"));
@@ -109,7 +109,9 @@ final class AtlasTileServer {
     }
 
     static long worldId(long seed) {
-        long z = seed ^ SALT ^ (long) AtlasTileCodec.VERSION << 48;  // splitmix64 finaliser
+        // the seed, the codec and the far identity (world generation + painting code): a client's cache of another
+        // generation is never reused
+        long z = seed ^ SALT ^ (long) AtlasTileCodec.VERSION << 48 ^ AtlasTileCodec.identity().hashCode() * 0x9E3779B97F4A7C15L;
         z = (z ^ (z >>> 30)) * 0xBF58476D1CE4E5B9L;
         z = (z ^ (z >>> 27)) * 0x94D049BB133111EBL;
         return z ^ (z >>> 31);
@@ -247,6 +249,17 @@ final class AtlasTileServer {
     private List<long[]> sweep;
     private int sweepAt;
     private boolean sweepLogged;
+
+    /**
+     * The coarse pre-build's progress {tiles checked or built, tiles in all}, {0, 0} before it started, null without a
+     * tile server (a remote client). Visual tests wait for it before far-field scenes (no stand-ins in a capture).
+     */
+    public static int[] prebuildProgress() {
+        AtlasTileServer t = current;
+        if (t == null) return null;
+        List<long[]> sw = t.sweep;
+        return sw == null ? new int[] {0, 0} : new int[] {Math.min(t.sweepAt, sw.size()), sw.size()};
+    }
 
     /** The next uncached tile of the whole-map sweep (coarse levels over Tamriel), or null when done. */
     private Job nextSweep() {

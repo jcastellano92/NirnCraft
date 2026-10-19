@@ -213,8 +213,49 @@ def stale_core():
     return None
 
 
+_CURRENT = {"checked": False}
+
+
+def ensure_current():
+    """Once per run, before the first test that needs the client: tests never run stale code. The jar is built when a
+    mod source is newer than the built jar (the generation and far identities come with it, so a world-generation
+    change also starts fresh far caches); the installed core is replaced when it differs (the client restarts); the
+    shader pack is synced from its source. One build for the whole run: a run never changes code half way."""
+    if _CURRENT["checked"] or os.environ.get("NIRNCRAFT_HARNESS_NO_BUILD") == "1":
+        return
+    _CURRENT["checked"] = True
+    src = ROOT / "mod/src/main"
+    newest = max((f.stat().st_mtime for f in src.rglob("*") if f.is_file()), default=0)
+    if not BUILT.exists() or newest > BUILT.stat().st_mtime + 1:
+        log("  sources changed since the last build: building the jar (once for this run)")
+        tr.step("auto_build")
+        r = subprocess.run([sys.executable, str(ROOT / "tools/dev/build_263.py"), "jar", "--offline"],
+                           capture_output=True, text=True)
+        if r.returncode:
+            tail = [l for l in (r.stdout + r.stderr).splitlines() if "error:" in l or "FAILED" in l][:12]
+            raise RuntimeError("jar build failed (tests would run stale code):\n" + "\n".join(tail))
+    inst = GAME / "mods/nirncraft-core.jar"
+    if BUILT.exists() and (not inst.exists() or sha(BUILT) != sha(inst)):
+        log("  installing the current build (the installed core was older)")
+        tr.step("auto_install")
+        if running():
+            close()
+        r = subprocess.run([sys.executable, str(ROOT / "tools/dev/live_world.py"), "install-core", str(BUILT)],
+                           capture_output=True, text=True)
+        if r.returncode:
+            raise RuntimeError("install-core failed: " + (r.stdout + r.stderr)[-600:])
+    try:
+        if sync_pack():
+            log("  shader pack updated from its source")
+            if running() and ready():
+                actions(["reload"], timeout=600)
+    except RuntimeError as e:
+        raise RuntimeError(f"shader pack build failed (tests would run a stale pack): {e}")
+
+
 def ensure(group, groups):
-    """The client for `group`, reusing a running one when it was booted for the same group."""
+    """The client for `group`, reusing a running one when it was booted for the same group (and the current build)."""
+    ensure_current()
     msg = stale_core()
     if msg:
         log("  ! " + msg)
