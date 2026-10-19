@@ -206,10 +206,32 @@ def route_audit():
     return out
 
 
+SETTLEMENTS = ("capital", "city", "town", "village", "fort")
+
+
+def town_plans():
+    """Every settlement's plan as the game computes it (streets, plots, buildings; /skysettle plan, nothing built):
+    the town layout view, with its built / developed ratios as numbers."""
+    out = []
+    for pid, pl in catalog.places().items():
+        if pl.get("type") not in SETTLEMENTS:
+            continue
+        out.append({"id": f"plan-{pid}".replace("_", "-"), "title": f"{pid}: town plan (streets, plots, buildings)",
+                    "_file": "(generated subjects)", "tier": "live", "kind": "measure", "variants": ["measure"],
+                    "tags": ["suite:town-plans", f"place:{pid}", f"subject:{pid}", "view:plan", f"type:{pl['type']}"]
+                            + ([f"region:{pl['region']}"] if pl.get("region") else []),
+                    "pose": {}, "settle": False, "role": "front",
+                    "measure_command": f"command skysettle plan {pid}",
+                    "measure_file": f"nirncraft-previews/plan_{pid}.json", "image": f"nirncraft-previews/plan_{pid}.png",
+                    "measure_sum": {"radius": "radius", "built": "built_ratio", "developed": "developed_ratio"},
+                    "checks": {}, "source": "SettlementDevCommands plan (the game's own planner)"})
+    return out
+
+
 def scenes():
     """Every subject scene the game's index asks for ([] until subject-index has run)."""
     index = catalog.subject_index()
-    out = route_audit()
+    out = route_audit() + town_plans()
     if not index:
         return out
     for rec in index.get("items", []):

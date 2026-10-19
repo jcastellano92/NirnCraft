@@ -691,7 +691,16 @@ class Runner:
         c = s.get("checks") or {}
         fails = [f"{k} {m.get(k)} > {lim}" for k, lim in (c.get("max") or {}).items() if (m.get(k) or 0) > lim]
         self.pos = s.get("_xz") or self.pos
-        return results.record(s["id"], v, "measure", "fail" if fails else ("flag" if m.get("problems") else "pass"),
+        status = "fail" if fails else ("flag" if m.get("problems") else "pass")
+        img = g.GAME / s["image"] if s.get("image") else None
+        if img is not None and img.exists():  # a picture the command drew (a town plan): kept like a capture
+            rec = results.store(s["id"], v, img, meta={"report": data if len(json.dumps(data)) < 20000 else {}},
+                                fingerprint=fp, extra={"fails": fails})
+            rec["metrics"].update(m)
+            rec["status"] = status if status != "pass" else rec.get("status", "pass")
+            Path(f"{results.stem(s['id'], v)}.after.json").write_text(json.dumps(rec, indent=1), encoding="utf-8")
+            return rec
+        return results.record(s["id"], v, "measure", status,
                               m, fp, extra={"fails": fails, "report": data if len(json.dumps(data)) < 20000 else {}})
 
     def judge(self, s, v, rec):
