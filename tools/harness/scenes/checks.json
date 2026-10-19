@@ -980,6 +980,32 @@
         "failures": "(\\d+) failure"
       },
       "timeout": 600
+    },
+    {
+      "id": "check-atlas-truth-realistic",
+      "title": "The realistic reference (lighting=realistic) on scenes with known answers: a box's shadow, sky visibility, dappled leaves, a lantern in a closed room, one bounce, the pack's tonemap and sun path",
+      "tags": [
+        "check:atlas-truth",
+        "suite:validate-tools",
+        "feature:farfield",
+        "feature:lighting"
+      ],
+      "run": [
+        "py",
+        "-3",
+        "native/tools/atlas_truth_realistic_test.py"
+      ],
+      "inputs": [
+        "native/tools/atlas_truth.cpp",
+        "native/tools/pack_look.hpp",
+        "native/tools/atlas_truth_test.py",
+        "native/tools/atlas_truth_realistic_test.py"
+      ],
+      "fail_regex": "^FAIL",
+      "metrics": {
+        "failures": "(\\d+) failure"
+      },
+      "timeout": 900
     }
   ]
 }
