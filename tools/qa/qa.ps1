@@ -192,7 +192,7 @@ if ($Server) {
     Remove-Item (Join-Path $Run "nirncraft-asset-audit.json") -ErrorAction SilentlyContinue
     # society selftest is async (about 40 s of server time: crowd cap, gate guards, night sleepers, respawn); the housing
     # dumps that follow give it the time, one command every 300 ticks
-    $cmds = @("forceload add -96 -96 96 96", "nirncraft-quest selftest flow", "nirncraft magic selftest", "nirncraft-protect selftest", "nirncraft-inventory selftest",
+    $cmds = @("forceload add -96 -96 96 96", "nirncraft-quest selftest flow", "nirncraft magic selftest", "nirncraft-protect selftest", "nirncraft-inventory selftest", "nirncraft-containers selftest",
         "nirncraft-quest intro selftest", "nirncraft-mounts selftest", "nirncraft-fire selftest", "nirncraft-fire census helgen generate", "nirncraft-society selftest", "skylore selftest lecterns")
     # housing model dump for the population lint (tools/qa/population_lint.py): no building, no chunk loads
     $popSample = @("whiterun", "riverwood", "helgen", "rorikstead", "dragon_bridge", "falkreath", "old_hroldan")
@@ -245,6 +245,16 @@ if ($Server) {
         Select-String -Path $out -Pattern "\[inventory\] FAIL" | Select-Object -First 8 | ForEach-Object { Add("       " + ($_.Line -replace "^.*?\[inventory\] ", "")) }
     } else {
         Result "inventory" $false "no 'Inventory selftest' line in the server log"
+    }
+    # loot container self-test (com.nirncraft.loot.container.ContainerSelfTest): per-player copies, restock, stash balance,
+    # unlimited player storage, shelves, the shared window, lid models, save/load, vanilla conversion, Lootr migration
+    $ct = Select-String -Path $out -Pattern "Containers selftest:" | Select-Object -Last 1
+    if ($ct) {
+        $ctl = ($ct.Line -replace "^.*?Containers selftest: ", "")
+        Result "containers" ($ctl -match "^\d+/\d+ checks passed, 0 problems") $ctl
+        Select-String -Path $out -Pattern "\[containers\] FAIL" | Select-Object -First 8 | ForEach-Object { Add("       " + ($_.Line -replace "^.*?\[containers\] ", "")) }
+    } else {
+        Result "containers" $false "no 'Containers selftest' line in the server log"
     }
     # Helgen aftermath census (com.nirncraft.fire.FireCommands): the scene exists and nothing in it floats
     $fc = Select-String -Path $out -Pattern "\[fire\] +fire sites \d+.*burnt blocks \(charred\+scorched\) (\d+)" | Select-Object -Last 1
