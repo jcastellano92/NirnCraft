@@ -3,7 +3,7 @@
 // converged reference, at the game's true pixel size (1080p, fov 70). Quick: a CPU tracer, seconds per run.
 //
 //   atlas_lab blocks=<dir>/blocks.bin volume=<dir>/tree.alv out=sheet.png [dist=10,50,200,600,1500]
-//   atlas_lab ... camera=mc eye=x,y,z yaw=Y pitch=P fov=70 w=1280 h=800 [shade=mc]: one live capture's own view
+//   atlas_lab ... camera=mc eye=x,y,z yaw=Y pitch=P fov=70 w=1280 h=800 [shade=mc] [surface=x.alc]: one live capture's own view
 //             (Minecraft conventions), whole frames, for the offline-vs-live sheet (the harness's camera_from)
 //             [variants=ref,current,anymip,micro,cov] [yaw=30] [pitch=-12] [frames=16] [panel=192] [threads=N]
 //             [scale=1] [bias=0] [tol=1] [fog=0] [grass=91BD59] [foliage=77AB2F]
@@ -350,6 +350,11 @@ int main(int argc, char** argv) {
         field("foliage", tintFoliage);
     }
     mcShade = str(a, "shade", "") == "mc";
+    // surface=<x>.alc (atlas_truth bake=): hits take their colour from the real faces' cards (see Card)
+    if (a.count("surface") && !loadCards(a["surface"])) {
+        std::fprintf(stderr, "atlas_lab: no surface cards at '%s'\n", a["surface"].c_str());
+        return 2;
+    }
     if (a.count("grass")) tintGrass = unpack(uint32_t(std::strtoul(a["grass"].c_str(), nullptr, 16)));
     if (a.count("foliage")) tintFoliage = unpack(uint32_t(std::strtoul(a["foliage"].c_str(), nullptr, 16)));
     int threads = int(num(a, "threads", std::max(1u, std::thread::hardware_concurrency() / 2)));

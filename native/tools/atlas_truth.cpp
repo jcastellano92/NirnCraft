@@ -1701,6 +1701,86 @@ int main(int argc, char** argv) {
         return 0;
     }
 
+    // bake=FILE.alc: the surface cards: every face of every block (inside box=) seen straight on, 16 x 16 texels of what
+    // the game draws there (texture, tint, shade, AO, the lightmap at its light): what a grouped-voxel renderer samples
+    // instead of its own colours (a surface cache captured from the real models). Texel (u, v) of face f lies along the
+    // axes after f's normal axis: u on (axis + 1) % 3, v on (axis + 2) % 3, texel centres at (i + 0.5) / 16.
+    if (a.count("bake")) {
+        pixelAngle = 0.0005f;
+        int lo[3] = {0, 0, 0}, hi[3] = {vol.sx - 1, vol.sy - 1, vol.sz - 1};
+        if (vol.cropped)
+            for (int k = 0; k < 3; k++) lo[k] = std::max(0, vol.c0[k]), hi[k] = std::min(k == 0 ? vol.sx - 1 : k == 1 ? vol.sy - 1 : vol.sz - 1, vol.c1[k]);
+        struct Card {
+            int x, y, z, f;
+            uint32_t c[256];
+            uint8_t sky[256], blk[256];
+        };
+        std::vector<std::array<int, 3>> blocks;
+        for (int y = lo[1]; y <= hi[1]; y++)
+            for (int z = lo[2]; z <= hi[2]; z++)
+                for (int x = lo[0]; x <= hi[0]; x++)
+                    if (vol.id(x, y, z)) blocks.push_back({x, y, z});
+        std::vector<std::vector<Card>> per;
+        per.resize(size_t(threads));
+        std::atomic<size_t> next{0};
+        auto work = [&](int ti) {
+            const int N[6][3] = {{0, -1, 0}, {0, 1, 0}, {0, 0, -1}, {0, 0, 1}, {-1, 0, 0}, {1, 0, 0}};
+            for (size_t i; (i = next.fetch_add(1)) < blocks.size();) {
+                auto [x, y, z] = blocks[i];
+                for (int f = 0; f < 6; f++) {
+                    int ax = f <= UP ? 1 : f <= SOUTH ? 2 : 0, a1 = (ax + 1) % 3, a2 = (ax + 2) % 3;
+                    bool high = N[f][ax] > 0;
+                    Card cd{x, y, z, f, {}, {}, {}};
+                    int any = 0;
+                    for (int tv = 0; tv < 16; tv++)
+                        for (int tu = 0; tu < 16; tu++) {
+                            float p[3] = {float(x), float(y), float(z)};
+                            p[ax] += high ? 1.01f : -0.01f;
+                            p[a1] += (tu + 0.5f) / 16.f, p[a2] += (tv + 0.5f) / 16.f;
+                            V3 o{p[0], p[1], p[2]}, d{-float(N[f][0]), -float(N[f][1]), -float(N[f][2])};
+                            float tmin = 0;
+                            for (int tries = 0; tries < 6; tries++) {  // past what a neighbour pokes into the ray
+                                Hit h = nearest(o, d, tmin);
+                                if (!h.hit || h.t > 1.02f) break;
+                                if (h.bx != x || h.by != y || h.bz != z) {
+                                    tmin = h.t + 1e-4f;
+                                    continue;
+                                }
+                                Shaded s = shade(h);
+                                float al = h.layer == TRANSLUCENT ? h.tex[3] : 1.f;
+                                auto q = [](float v) { return uint32_t(std::lround(std::clamp(v, 0.f, 1.f) * 255.f)); };
+                                cd.c[tu + 16 * tv] = q(al) << 24 | q(s.c.r) << 16 | q(s.c.g) << 8 | q(s.c.b);
+                                cd.sky[tu + 16 * tv] = uint8_t(std::lround(s.sky * 16.f)), cd.blk[tu + 16 * tv] = uint8_t(std::lround(s.block * 16.f));
+                                any++;
+                                break;
+                            }
+                        }
+                    if (any) per[size_t(ti)].push_back(cd);
+                }
+            }
+        };
+        auto tb0 = std::chrono::steady_clock::now();
+        std::vector<std::thread> pool;
+        for (int ti = 0; ti < threads; ti++) pool.emplace_back(work, ti);
+        for (auto& t : pool) t.join();
+        std::ofstream bf(a["bake"], std::ios::binary);
+        size_t n = 0;
+        for (auto& v : per) n += v.size();
+        auto w32 = [&](int32_t v) { bf.write(reinterpret_cast<const char*>(&v), 4); };
+        bf.write("ALC1", 4);
+        w32(int32_t(n));
+        for (auto& v : per)
+            for (const Card& cd : v) {
+                w32(cd.x + vol.x0), w32(cd.y + vol.y0), w32(cd.z + vol.z0), w32(cd.f);
+                bf.write(reinterpret_cast<const char*>(cd.c), sizeof cd.c);
+                bf.write(reinterpret_cast<const char*>(cd.sky), 256);
+                bf.write(reinterpret_cast<const char*>(cd.blk), 256);
+            }
+        std::fprintf(stderr, "atlas_truth: baked %zu surface cards of %zu blocks (%.0f ms)\n", n, blocks.size(),
+                     std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - tb0).count());
+        return bf ? 0 : 1;
+    }
+
     // cameras=FILE: one frame per line ("out eyex,eyey,eyez yaw pitch fov w h"), the mesh, textures and volume loaded
     // once (an element's distance ladder and fly-ins in one process); otherwise the one camera of the arguments
     auto frame = [&](Args ca, const std::string& outp) {

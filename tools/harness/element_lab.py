@@ -111,9 +111,10 @@ def elements():
     return out
 
 
-def camera(box, dist, yaw_deg=30.0, pitch_deg=-15.0, size=256):
-    """A Minecraft camera looking at the box's centre from `dist` blocks, yaw / pitch in Minecraft's conventions, the
-    fov narrowed so a `size`-pixel frame keeps 1080p's pixel size at fov 70."""
+def camera(box, dist, yaw_deg=30.0, pitch_deg=25.0, size=256):
+    """A Minecraft camera looking at the box's centre from `dist` blocks, yaw / pitch in Minecraft's conventions (pitch
+    > 0 looks down: an element seen from above, as a player sees the land around them), the fov narrowed so a
+    `size`-pixel frame keeps 1080p's pixel size at fov 70."""
     c = [(box[0] + box[3] + 1) / 2, (box[1] + box[4] + 1) / 2, (box[2] + box[5] + 1) / 2]
     yaw, pitch = math.radians(yaw_deg), math.radians(pitch_deg)
     f = (-math.sin(yaw) * math.cos(pitch), -math.sin(pitch), math.cos(yaw) * math.cos(pitch))
@@ -138,15 +139,30 @@ REFERENCE = {"exact": {"spp": 1}, "intended": {"spp": 16}}
 TRUTH_MODE = "intended"
 
 
-def renderer_args(renderer, el):
+def truth_inputs(el):
     d = export_dir()
-    box = ",".join(str(v) for v in el["box"])
+    return {"quads": d / "quads.bin", "sprites": d / "sprites.bin", "volume": d / f"{el['volume']}.alv2",
+            "box": ",".join(str(v) for v in el["box"])}
+
+
+def bake_cards(el, tmp):
+    """The element's surface cards (atlas_truth bake=): the real faces' colour and light, sampled by lab-groups."""
+    out = tmp / "element.alc"
+    if not out.exists():
+        run("atlas_truth", {**truth_inputs(el), "bake": out.as_posix()})
+    return out
+
+
+def renderer_args(renderer, el, tmp):
+    d = export_dir()
     if renderer == "truth":
-        return "atlas_truth", {"camera": "mc", "quads": d / "quads.bin", "sprites": d / "sprites.bin",
-                               "volume": d / f"{el['volume']}.alv2", "box": box, **REFERENCE[TRUTH_MODE]}
-    if renderer == "lab-groups":  # the grouped-voxel representation on the CPU bench (until the far pass lands)
-        return "atlas_lab", {"camera": "mc", "blocks": d / "blocks.bin", "volume": d / f"{el['volume']}.alv", "box": box,
-                             "variants": "groups", "frames": 4, "shade": "mc"}
+        return "atlas_truth", {"camera": "mc", **truth_inputs(el), **REFERENCE[TRUTH_MODE]}
+    lab = {"camera": "mc", "blocks": d / "blocks.bin", "volume": d / f"{el['volume']}.alv", "box": truth_inputs(el)["box"],
+           "variants": "groups", "frames": 16, "shade": "mc"}
+    if renderer == "lab-groups":  # the grouped-voxel representation on the CPU bench, coloured from surface cards
+        return "atlas_lab", {**lab, "surface": bake_cards(el, tmp)}
+    if renderer == "lab-groups-own":  # the same with the bench's own 4 x 4 mean tiles under a fixed sun (no cache)
+        return "atlas_lab", lab
     raise ValueError(f"unknown renderer {renderer}")
 
 
@@ -155,7 +171,7 @@ def render_all(renderer, el, frames, tmp):
     lst = tmp / f"cameras-{renderer}.txt"
     lst.write_text("".join(f"{png.as_posix()} {c['eye']} {c['yaw']} {c['pitch']} {c['fov']} {c['w']} {c['h']}\n"
                            for png, c in frames), encoding="utf-8")
-    tool, args = renderer_args(renderer, el)
+    tool, args = renderer_args(renderer, el, tmp)
     run(tool, {**args, "cameras": lst.as_posix()})
     missing = [png for png, _ in frames if not png.exists()]
     if missing:
@@ -187,7 +203,9 @@ def compare(ref_png, our_png):
     de = np.sqrt(((lab(a) - lab(b)) ** 2).sum(axis=2))
     return {"iou": round(float(inter / union), 4) if union > 0 else 1.0,
             "dE": round(float(de[sel].mean()), 2) if sel.any() else 0.0,
-            "pixels": int(sel.sum())}
+            "pixels": int(sel.sum()),
+            "presence": round(float(mb.sum() / ma.sum()), 3) if ma.sum() > 0 else (0.0 if mb.sum() > 0 else 1.0),
+            "mass": round(float(ma.sum()), 3), "massOurs": round(float(mb.sum()), 3)}
 
 
 def radius(box):
@@ -211,10 +229,15 @@ def pop(renderer, frames_truth, frames_ours):
             co = float(np.sqrt(((cur[1] - prev[1]) ** 2).sum(axis=2)).mean())
             excess.append(max(0.0, co - ct))
         prev = cur
-    return {"pop": round(float(np.mean(excess)), 3) if excess else 0.0, "popMax": round(float(max(excess)), 3) if excess else 0.0}
+    return {"pop": round(float(np.mean(excess)), 3) if excess else 0.0, "popMax": round(float(max(excess)), 3) if excess else 0.0,
+            "steps": [round(e, 3) for e in excess]}
 
 
-LIMITS = {"iou": 0.9, "pop": 0.1}  # an element fails below this silhouette agreement or above this popping
+# an element fails below this silhouette agreement, above this popping, or (a dot of under SHAPE_PX pixels) with its
+# coverage off the reference's by more than presence (either way)
+LIMITS = {"iou": 0.9, "pop": 0.1, "presence": 0.75}
+SHAPE_PX = 16
+MASS_PX = 0.25  # pixels of coverage: a dot's mass is measured to about this (16 samples, sub-pixel placement)
 
 
 def main():
@@ -255,7 +278,7 @@ def main():
         for (ref, _), (ours, _), dist in zip(ladder["truth"], ladder[a.renderer], dists):
             m = compare(ref, ours)
             report["distances"].append({"dist": dist, **m})
-            print(f"{dist:>7} m  iou {m['iou']:.3f}  dE {m['dE']:6.2f}  ({m['pixels']} px)")
+            print(f"{dist:>7} m  iou {m['iou']:.3f}  dE {m['dE']:6.2f}  presence {m['presence']:.2f}  ({m['pixels']} px)")
             rows.append((Image.open(ref).convert("RGB"), Image.open(ours).convert("RGB")))
         for name in fly:
             report[f"flyin_{name}"] = pop(a.renderer, fly[name]["truth"], fly[name][a.renderer])
@@ -271,9 +294,16 @@ def main():
     worst = max(report["distances"], key=lambda d: d["dE"])
     report["worst"] = {"dist": worst["dist"], "dE": worst["dE"], "iou": min(d["iou"] for d in report["distances"])}
     fails = []
-    if report["worst"]["iou"] < LIMITS["iou"]:
-        bad = min(report["distances"], key=lambda d: d["iou"])
+    # a silhouette needs pixels to have a shape: below SHAPE_PX the element is a dot whose IoU is sub-pixel placement,
+    # and what matters is that it is there as much as the reference (its coverage mass)
+    shaped = [d for d in report["distances"] if d["pixels"] >= SHAPE_PX]
+    if shaped and min(d["iou"] for d in shaped) < LIMITS["iou"]:
+        bad = min(shaped, key=lambda d: d["iou"])
         fails.append(f"silhouette {bad['iou']:.3f} < {LIMITS['iou']} at {bad['dist']} m")
+    for d in report["distances"]:  # within presence of the reference's coverage, or MASS_PX (its sampling's grain)
+        off = abs(d["massOurs"] - d["mass"])
+        if d["pixels"] < SHAPE_PX and off > max((1 - LIMITS["presence"]) * d["mass"], MASS_PX):
+            fails.append(f"presence {d['massOurs']:.2f} px of coverage vs the reference's {d['mass']:.2f} at {d['dist']} m")
     for name in FLYINS:
         if report[f"flyin_{name}"]["pop"] > LIMITS["pop"]:
             fails.append(f"fly-in {name} pops: {report[f'flyin_{name}']['pop']} > {LIMITS['pop']}")
