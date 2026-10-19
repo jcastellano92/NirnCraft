@@ -194,6 +194,46 @@ public final class WorldReadiness {
         });
     }
 
+    /** "need/have" of the last visibleReady, for logs. */
+    String visibleDetail = "";
+
+    /**
+     * What the camera can actually see is ready: the chunk columns inside its view cone (horizontal FOV plus a margin)
+     * and the ring right around it are loaded and lit, and Sodium reports the visible terrain built. Chunks behind the
+     * camera or outside the view are not waited for.
+     */
+    boolean visibleReady(Minecraft mc) {
+        int radius = Math.max(1, mc.options.getEffectiveRenderDistance() - 2);
+        var c = mc.player.chunkPosition();
+        double yaw = Math.toRadians(mc.player.getYRot());
+        double fx = -Math.sin(yaw), fz = Math.cos(yaw);
+        double half = Math.toRadians(Math.min(85, mc.options.fov().get() * 0.75 + 20));
+        double minDot = Math.cos(half);
+        int need = 0, have = 0;
+        for (int dz = -radius; dz <= radius; dz++)
+            for (int dx = -radius; dx <= radius; dx++) {
+                int d2 = dx * dx + dz * dz;
+                if (d2 > radius * radius) continue;
+                double len = Math.sqrt(d2);
+                boolean ring = d2 <= 4, cone = len > 0 && (dx * fx + dz * fz) / len >= minDot;
+                if (!ring && !cone) continue;
+                need++;
+                var chunk = mc.level.getChunkSource().getChunk(c.x() + dx, c.z() + dz, ChunkStatus.FULL, false);
+                if (chunk != null && !(chunk instanceof EmptyLevelChunk) && mc.level.getLightEngine()
+                        .lightOnInColumn(net.minecraft.core.SectionPos.asLong(c.x() + dx, 0, c.z() + dz))) have++;
+            }
+        boolean terrain = true;
+        checkRenderer();
+        if (rendererInstance != null) try {
+            Object r = rendererInstance.invoke(null);
+            terrain = r != null && Boolean.TRUE.equals(rendererComplete.invoke(r));
+        } catch (ReflectiveOperationException e) {
+            terrain = false;
+        }
+        visibleDetail = "visible chunks " + have + "/" + need + " terrain " + (terrain ? "built" : "building");
+        return have == need && terrain;
+    }
+
     boolean poll(Minecraft mc) {
         int radius=Math.max(1,mc.options.getEffectiveRenderDistance()-2), have=0, total=0, lit=0;
         var camera=mc.player.chunkPosition();

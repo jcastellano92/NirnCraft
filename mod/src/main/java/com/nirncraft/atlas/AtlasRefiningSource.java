@@ -18,6 +18,36 @@ abstract class AtlasRefiningSource implements AtlasFarField.ColumnSource {
     private final Callable<Path> raster;
     /** Tiles holding exact geometry: (lod, tx, tz) packed by key(). Entries of evicted tiles are dropped on sight. */
     private final Set<Long> exact = new HashSet<>();
+    private volatile double viewX, viewZ, viewFx, viewFz = 1, viewMinDot = -1;
+    private volatile boolean visiblePending;
+
+    @Override
+    public void view(double x, double z, double yawDeg, double halfDeg) {
+        double yaw = Math.toRadians(yawDeg);
+        viewX = x;
+        viewZ = z;
+        viewFx = -Math.sin(yaw);
+        viewFz = Math.cos(yaw);
+        viewMinDot = Math.cos(Math.toRadians(Math.min(89, halfDeg)));
+    }
+
+    @Override
+    public void beginPass() {
+        visiblePending = false;
+    }
+
+    @Override
+    public boolean visiblePending() {
+        return visiblePending;
+    }
+
+    /** A tile the camera can see: its centre inside the view cone, or the tile under the camera itself. */
+    private boolean seen(int lod, int tx, int tz) {
+        double span = AtlasNative.TILE << lod;
+        double dx = (tx + 0.5) * span - viewX, dz = (tz + 0.5) * span - viewZ;
+        double len = Math.hypot(dx, dz);
+        return len < span || (dx * viewFx + dz * viewFz) / len >= viewMinDot;
+    }
 
     AtlasRefiningSource(Callable<Path> raster) {
         this.raster = raster;
@@ -64,9 +94,12 @@ abstract class AtlasRefiningSource implements AtlasFarField.ColumnSource {
         todo.sort((a, b) -> Double.compare(Math.hypot(a[0] - cx, a[1] - cz), Math.hypot(b[0] - cx, b[1] - cz)));
         boolean pending = false;
         int budget = budget(lod);
-        for (int[] t : todo) {
+        for (int i = 0; i < todo.size(); i++) {
+            int[] t = todo.get(i);
             if (budget <= 0) {
                 pending = true;
+                for (int k = i; k < todo.size() && !visiblePending; k++)  // left for later: is any of it on screen?
+                    if (seen(lod, todo.get(k)[0], todo.get(k)[1])) visiblePending = true;
                 break;
             }
             switch (refine(ctx, lod, t[0], t[1])) {
@@ -74,7 +107,10 @@ abstract class AtlasRefiningSource implements AtlasFarField.ColumnSource {
                     exact.add(key(lod, t[0], t[1]));
                     budget--;
                 }
-                case LATER -> pending = true;
+                case LATER -> {
+                    pending = true;
+                    if (seen(lod, t[0], t[1])) visiblePending = true;
+                }
                 case NEVER -> exact.add(key(lod, t[0], t[1]));  // keep the stand-in, stop asking
             }
         }

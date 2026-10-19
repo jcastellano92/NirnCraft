@@ -427,21 +427,23 @@ public final class ClientAutotest {
                     }
                 });
             }
-            int cx = mc.player.blockPosition().getX() >> 4, cz = mc.player.blockPosition().getZ() >> 4;
-            boolean near = true;
-            for (int i = -1; i <= 1 && near; i++)
-                for (int j = -1; j <= 1 && near; j++) near = mc.level.getChunkSource().hasChunk(cx + i, cz + j);
-            if (visualStable >= 3 && near && tick >= visualSince + 60) {
+            // the engine's own signals: what the camera sees is loaded, lit and built, and Infinite ATLAS has nothing
+            // left to stream; the picture check then only waits for exposure and anything the signals cannot see
+            boolean near = READINESS.visibleReady(mc);
+            boolean far = com.nirncraft.atlas.AtlasClient.farFieldIdle();
+            if (visualStable >= 3 && near && far && tick >= visualSince + 60) {
                 liveSettleUntil = 0;
                 visualSettledAt = mc.player.position();
-                NirnCraft.LOGGER.info("Autotest live: render settled after {} ticks (structural {}% , exposure drift {})",
-                        tick - visualSince, String.format(java.util.Locale.ROOT, "%.1f", visualDiff),
+                NirnCraft.LOGGER.info("Autotest live: render settled after {} ticks ({}, far field idle, structural {}%, "
+                        + "exposure drift {})", tick - visualSince, READINESS.visibleDetail,
+                        String.format(java.util.Locale.ROOT, "%.1f", visualDiff),
                         String.format(java.util.Locale.ROOT, "%.2f", visualDrift));
             } else if (tick >= liveSettleUntil) {
                 liveSettleUntil = 0;
                 liveSettlePartial++;
-                NirnCraft.LOGGER.warn("Autotest live: render still changing at the deadline, continuing (partial): "
-                        + "structural {}%, exposure drift {}", String.format(java.util.Locale.ROOT, "%.1f", visualDiff),
+                NirnCraft.LOGGER.warn("Autotest live: render not settled at the deadline, continuing (partial): {}, far "
+                        + "field {}, structural {}%, exposure drift {}", READINESS.visibleDetail, far ? "idle" : "streaming",
+                        String.format(java.util.Locale.ROOT, "%.1f", visualDiff),
                         String.format(java.util.Locale.ROOT, "%.2f", visualDrift));
             }
             return;

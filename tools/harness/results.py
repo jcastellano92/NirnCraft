@@ -439,7 +439,8 @@ def overview(scenes):
     out = ["<!doctype html><meta charset=utf-8><title>NirnCraft harness overview</title>",
            "<style>body{background:#111;color:#ddd;font:14px system-ui;margin:16px}td,th{padding:3px 9px;text-align:left}"
            "a{color:#8cf}.bad{color:#ffb74d}.crash,.error{color:#ff7a7a}</style>",
-           f"<h1>NirnCraft harness</h1><p>{len(recs)} test result(s) stored; updated {time.strftime('%Y-%m-%d %H:%M')}</p>",
+           f"<h1>NirnCraft harness</h1><p>{len(recs)} test result(s) stored; updated {time.strftime('%Y-%m-%d %H:%M')}"
+           + _issue_line() + "</p>",
            "<h2>Reports</h2><ul>"]
     for d in reports:
         out.append(f"<li><a href='reports/{d.name}/report.html'>{d.name}</a> "
@@ -640,4 +641,14 @@ def tool_validation(recs):
     if det:
         out.append(f"<p>Image detectors self-test: {det.get('status')}</p>")
     return out
+
+
+def _issue_line():
+    try:
+        led = json.loads((STORE / "issues.json").read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return ""
+    o = sum(1 for e in led.values() if e.get("state") == "open")
+    f = sum(1 for e in led.values() if e.get("state") == "fixed")
+    return f" &middot; issues: {o} open, {f} fixed (harness.py issues)"
 

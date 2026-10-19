@@ -12,6 +12,19 @@ import java.nio.file.Path;
 final class AtlasFarField implements AutoCloseable {
     /** Where far-field columns come from. */
     interface ColumnSource {
+        /** The camera's view (position, yaw in Minecraft degrees, horizontal half-angle) for visiblePending(). */
+        default void view(double x, double z, double yawDeg, double halfDeg) {
+        }
+
+        /** Start of a worker pass over every LOD (visiblePending() then covers that pass). */
+        default void beginPass() {
+        }
+
+        /** Tiles in the camera's view cone (or right around it) still waiting for exact geometry this pass. */
+        default boolean visiblePending() {
+            return false;
+        }
+
         /** True when tiles carry block palette ids (AtlasPalette.blocks), false for atlas's preview palette. */
         boolean usesBlockPalette();
 
@@ -77,10 +90,13 @@ final class AtlasFarField implements AutoCloseable {
     private boolean overlayFailed;
     private final Thread worker;
     private volatile boolean running = true;
-    private volatile double camX, camY, camZ;
+    private volatile double camX, camY, camZ, camYaw, camHalf = 80;
     private volatile boolean haveCamera;
     /** True once the worker has staged a first update: atlas renders nothing before that (and says so). */
     private volatile boolean updated;
+    /** The worker's last pass: still refining tiles or the camera just crossed into a new region (see idle()). */
+    private volatile boolean streaming = true;
+    private volatile long idleSinceMs;
 
     AtlasFarField(AtlasNative.Context ctx, ColumnSource source) throws IOException {
         this(ctx, source, null);
@@ -125,6 +141,22 @@ final class AtlasFarField implements AutoCloseable {
         haveCamera = true;
     }
 
+    /** Where the camera looks (Minecraft yaw, horizontal half-angle): idle() then only waits for what it can see. */
+    void look(double yawDeg, double halfDeg) {
+        camYaw = yawDeg;
+        camHalf = halfDeg;
+    }
+
+    /** Nothing left to refine around the current camera and its tiles are built (a harness render-settle signal). */
+    public boolean idle() {
+        return haveCamera && updated && !streaming;
+    }
+
+    /** Milliseconds the far field has been idle (0 while streaming). */
+    public long idleMs() {
+        return streaming ? 0 : System.currentTimeMillis() - idleSinceMs;
+    }
+
     private void run() {
         double lastX = Double.NaN, lastZ = Double.NaN;
         while (running) {
@@ -135,6 +167,8 @@ final class AtlasFarField implements AutoCloseable {
                 }
                 double x = camX, y = camY, z = camZ;
                 boolean pending = false;
+                source.view(x, z, camYaw, camHalf);
+                source.beginPass();
                 for (int lod = 0; lod < lods; lod++) {
                     int span = 256 << lod;
                     int cx = Math.floorDiv((int) Math.floor(x), span), cz = Math.floorDiv((int) Math.floor(z), span);
@@ -150,6 +184,9 @@ final class AtlasFarField implements AutoCloseable {
                 boolean moved = Double.isNaN(lastX) || Math.abs(x - lastX) > 32 || Math.abs(z - lastZ) > 32;
                 lastX = x;
                 lastZ = z;
+                boolean was = streaming;
+                streaming = moved || source.visiblePending();  // only what the camera sees counts
+                if (was && !streaming) idleSinceMs = System.currentTimeMillis();
                 Thread.sleep((moved || pending ? 5 : 100) + restMs);
             } catch (InterruptedException e) {
                 return;

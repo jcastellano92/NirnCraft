@@ -163,6 +163,12 @@ public final class AtlasClient {
         weather = feed;
     }
 
+    /** The far field has finished streaming around the camera (true when it is off: nothing to wait for). */
+    public static boolean farFieldIdle() {
+        AtlasFarField f = farField;
+        return f == null || f.idle();
+    }
+
     public static boolean active() {
         return ctx != null && !failed;
     }
@@ -229,6 +235,8 @@ public final class AtlasClient {
             CameraRenderState cam = state.cameraRenderState;
             Vec3 p = cam.pos;
             farField.follow(p.x, p.y, p.z);
+            if (mc.player != null)  // horizontal half-FOV with a margin: what the frame can show
+                farField.look(mc.player.getYRot(), Math.min(85, mc.options.fov().get() * 0.75 + 20));
             if (!farField.updated()) {
                 targets.clear();  // the worker has not staged the first window yet: nothing far this frame
                 com.nirncraft.render.quality.QualityClient.atlasFrame(false, 0);

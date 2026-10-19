@@ -323,6 +323,8 @@ class Runner:
             event("test_crashed" if rec["status"] == "crash" else "test_failed", test=k, status=rec["status"],
                   reason=(rec.get("error") or "; ".join(rec.get("fails", [])))[:300])
         note_outcome(k, fp, rec.get("status"), rec.get("error", ""))
+        if not rec.get("_cached"):
+            tally(s, v, rec)
         return rec
 
     def _run(self, s, v, fp):
@@ -1638,6 +1640,98 @@ def cmd_audit(a):
     return cmd_run(a)
 
 
+# ================================================================================================ subscriptions + issue tally
+ISSUES = STORE / "issues.json"
+
+
+def git_head():
+    r = subprocess.run(["git", "rev-parse", "--short", "HEAD"], cwd=ROOT, capture_output=True, text=True)
+    return r.stdout.strip()
+
+
+def tally(s, v, rec):
+    """The running tally: a failing test opens an issue (first / last seen, how often, why); when the test passes
+    again the issue is marked fixed with the date and the commit. Flags (soft findings) are tallied too."""
+    k = key(s, v)
+    try:
+        led = json.loads(ISSUES.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        led = {}
+    st = rec.get("status")
+    now = time.strftime("%Y-%m-%d %H:%M")
+    area = next((t[6:] for t in s.get("tags", []) if t.startswith("suite:") and t not in ("suite:smoke", "suite:seam-core")),
+                s.get("tier", "-"))
+    why = rec.get("error") or "; ".join((rec.get("fails") or []) + (rec.get("metrics", {}).get("flags") or []))
+    e = led.get(k)
+    if st in ("fail", "error", "crash", "flag"):
+        if not e or e.get("state") == "fixed":
+            e = {"test": k, "area": area, "opened": now, "count": 0, "state": "open", "history": (e or {}).get("history", [])}
+        e.update(lastSeen=now, count=e["count"] + 1, status=st, why=why[:300], head=git_head())
+        led[k] = e
+    elif st == "pass" and e and e.get("state") == "open":
+        e.update(state="fixed", fixed=now, fixedAt=git_head())
+        e.setdefault("history", []).append({"opened": e["opened"], "fixed": now, "why": e.get("why", "")[:160]})
+    else:
+        return
+    STORE.mkdir(parents=True, exist_ok=True)
+    ISSUES.write_text(json.dumps(led, indent=1), encoding="utf-8")
+
+
+def cmd_issues(a):
+    try:
+        led = json.loads(ISSUES.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        led = {}
+    open_ = [e for e in led.values() if e.get("state") == "open"]
+    fixed = sorted((e for e in led.values() if e.get("state") == "fixed"), key=lambda e: e.get("fixed", ""), reverse=True)
+    by = {}
+    for e in open_:
+        by.setdefault(e["area"], []).append(e)
+    lines = [f"# Issues: {len(open_)} open, {len(fixed)} fixed", ""]
+    for area, es in sorted(by.items(), key=lambda kv: -len(kv[1])):
+        lines.append(f"## {area} ({len(es)} open)")
+        for e in sorted(es, key=lambda e: {"crash": 0, "error": 1, "fail": 2, "flag": 3}.get(e.get("status"), 9)):
+            lines.append(f"- [{e.get('status')}] {e['test']} since {e['opened']} (x{e['count']}): {e.get('why', '')[:160]}")
+        lines.append("")
+    lines.append("## Recently fixed")
+    for e in fixed[:a.limit_fixed]:
+        lines.append(f"- {e['test']}: fixed {e.get('fixed')} at {e.get('fixedAt')} (opened {e.get('opened')}): "
+                     f"{e.get('why', '')[:120]}")
+    text = "\n".join(lines) + "\n"
+    if a.md:
+        out = STORE / "ISSUES.md"
+        out.write_text(text, encoding="utf-8")
+        say(f"written {out}")
+    else:
+        say(text)
+
+
+def cmd_wait(a):
+    """Block until one of the given events happens (agents: run this in the background and get woken by it).
+    Events: run_finished, test_failed, test_crashed, client_crashed, client_closed, client_restarted, test_quarantined,
+    group_skipped, run_stopped."""
+    kinds = set(a.events.split(","))
+    start = EVENTS.stat().st_size if EVENTS.exists() and not a.past else 0
+    t0 = time.monotonic()
+    while a.timeout <= 0 or time.monotonic() - t0 < a.timeout:
+        if EVENTS.exists() and EVENTS.stat().st_size > start:
+            with open(EVENTS, encoding="utf-8") as f:
+                f.seek(start)
+                chunk = f.read()
+            start += len(chunk.encode("utf-8"))
+            for line in chunk.splitlines():
+                try:
+                    ev = json.loads(line)
+                except ValueError:
+                    continue
+                if ev.get("event") in kinds:
+                    say(json.dumps(ev))
+                    return 0
+        time.sleep(2)
+    say(f"no {a.events} within {a.timeout} s")
+    return 1
+
+
 def main():
     global VERBOSE
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -1730,6 +1824,13 @@ def main():
     p.add_argument("--previous", action="store_true", help="the run before this one")
     p.add_argument("--no-game-log", action="store_true")
     sub.add_parser("stop").add_argument("--after-test", action="store_true", help="let the current test finish")
+    p = sub.add_parser("wait")
+    p.add_argument("--events", default="run_finished,client_crashed,run_stopped")
+    p.add_argument("--timeout", type=int, default=0, help="seconds (0: no limit)")
+    p.add_argument("--past", action="store_true", help="also match events already in the log")
+    p = sub.add_parser("issues")
+    p.add_argument("--md", action="store_true", help="write .work/harness/ISSUES.md")
+    p.add_argument("--limit-fixed", type=int, default=30)
     p = sub.add_parser("quarantine")
     p.add_argument("--clear", nargs="*", help="test|variant keys (none: all)")
     sub.add_parser("seed-legacy")
@@ -1743,7 +1844,7 @@ def main():
      "status": cmd_status, "report": cmd_report, "cameras": cmd_cameras, "features": cmd_features, "export-tour": cmd_export_tour,
      "seed-legacy": cmd_seed_legacy, "clean": cmd_clean, "probe": cmd_probe, "zoom": cmd_zoom,
      "gate": cmd_gate, "open": cmd_open, "quarantine": cmd_quarantine, "trace": cmd_trace,
-     "audit": cmd_audit, "stop": cmd_stop}[a.cmd](a)
+     "audit": cmd_audit, "stop": cmd_stop, "wait": cmd_wait, "issues": cmd_issues}[a.cmd](a)
 
 
 if __name__ == "__main__":

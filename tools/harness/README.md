@@ -115,6 +115,14 @@ start skips its group the same way.
   (`results/<test>/<variant>.log.txt`, previous as `.log.before.txt`), counted (`logWarnings`, `logErrors`) and
   serious ones (a command that did not parse, an exception) flagged, so a skipped `try` never goes unseen.
 
+## Subscribe, issues tally
+
+* `harness.py wait --events run_finished,client_crashed` blocks until such an event happens: an agent runs it in the
+  background and is woken by its own tooling (no polling). Agents that start a run should start it as a tracked
+  background task (or follow it with `wait`) so they learn when it ends.
+* `harness.py issues [--md]`: the running tally. A failing / flagged test opens an issue (first and last seen, how
+  often, why); when it passes again it is marked fixed with the date and the commit. The overview shows the counts.
+
 ## Hot reload kinds (watch mode and `--changed`)
 
 | change | reload | restart? |
