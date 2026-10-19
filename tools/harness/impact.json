@@ -3,6 +3,16 @@
  "rules": [
   {
    "paths": [
+    "native/tools/atlas_truth*"
+   ],
+   "tags": [
+    "check:atlas-truth"
+   ],
+   "reload": null,
+   "final": false
+  },
+  {
+   "paths": [
     "mod/src/main/java/com/nirncraft/loot/container/*",
     "mod/src/main/resources/assets/nirncraft/blockstates/container*",
     "mod/src/main/resources/data/nirncraft/loot_table/containers/*"

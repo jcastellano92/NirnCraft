@@ -461,11 +461,14 @@
         "fog-off on",
         "atlas-edits-why on",
         "atlaslab blocks",
+        "atlaslab quads",
         "atlaslab here falkreath 32 10 40",
-        "atlaslab here falkreath-wide 64 12 48"
+        "atlaslab here falkreath-wide 64 12 48",
+        "atlaslab here falkreath-wide 64 12 48 light"
       ],
       "cleanup": [
         "atlaslab view falkreath-view 1024",
+        "atlaslab view falkreath-view 1024 light",
         "atlas-edits-why off",
         "fog-off off"
       ],
@@ -473,7 +476,7 @@
       "checks": {},
       "capture": "world",
       "source": "mod/src/main/java/com/nirncraft/atlas/AtlasLabExport.java",
-      "note": "writes <game>/nirncraft-atlaslab/{blocks.bin, falkreath(.alv,.json), falkreath-wide(.alv,.json), falkreath-view.als (the real blocks in the camera's view out to 1 km)}; the vanilla capture is the ground truth the lab scenes match (camera_from), taken only once the view has settled, without fog or haze (fog-off: geometry and materials are what is compared); the view export runs after the capture (generating those chunks feeds the far field real data: the capture shows it as a newcomer sees it)",
+      "note": "writes <game>/nirncraft-atlaslab/{blocks.bin, falkreath(.alv,.json), falkreath-wide(.alv,.json), falkreath-view.als (the real blocks in the camera's view out to 1 km)}; the vanilla capture is the ground truth the lab scenes match (camera_from), taken only once the view has settled, without fog or haze (fog-off: geometry and materials are what is compared); the view export runs after the capture (generating those chunks feeds the far field real data: the capture shows it as a newcomer sees it); for the exact reference (truth.json): quads.bin, sprites.bin, quads.json, falkreath-wide.alv2, falkreath-view.als2",
       "group": "live",
       "timeout": 1800,
       "settle": "static"

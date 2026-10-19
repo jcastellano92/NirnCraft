@@ -952,6 +952,29 @@
         "tools/dev/check_bake.py"
       ],
       "timeout": 300
+    },
+    {
+      "id": "check-atlas-truth",
+      "title": "The exact reference renderer against hand-computed cases (shapes, cutout, translucency, light, tints)",
+      "tags": [
+        "check:atlas-truth",
+        "suite:validate-tools",
+        "feature:farfield"
+      ],
+      "run": [
+        "py",
+        "-3",
+        "native/tools/atlas_truth_test.py"
+      ],
+      "inputs": [
+        "native/tools/atlas_truth.cpp",
+        "native/tools/atlas_truth_test.py"
+      ],
+      "fail_regex": "^FAIL",
+      "metrics": {
+        "failures": "(\\d+) failure"
+      },
+      "timeout": 600
     }
   ]
 }
