@@ -316,6 +316,24 @@ int main(int argc, char** argv) {
             vol.cropped = true;
             for (int k = 0; k < 3; k++)
                 vol.c0[k] = std::min(b[k], b[k + 3]) - o[k], vol.c1[k] = std::max(b[k], b[k + 3]) - o[k];
+            if (!vol.sparse) {  // a dense volume shrinks to the box: every level and tree is built over the element only
+                int n[3], lo[3];
+                for (int k = 0; k < 3; k++) {
+                    int dim = k == 0 ? vol.sx : k == 1 ? vol.sy : vol.sz;
+                    lo[k] = std::clamp(vol.c0[k], 0, dim - 1);
+                    n[k] = std::clamp(vol.c1[k], 0, dim - 1) - lo[k] + 1;
+                }
+                std::vector<uint32_t> ids(size_t(n[0]) * n[1] * n[2]);
+                for (int y = 0; y < n[1]; y++)
+                    for (int z = 0; z < n[2]; z++)
+                        for (int x = 0; x < n[0]; x++)
+                            ids[size_t(x + n[0] * (z + n[2] * y))] =
+                                vol.ids[size_t((x + lo[0]) + vol.sx * ((z + lo[2]) + vol.sz * (y + lo[1])))];
+                vol.ids.swap(ids);
+                vol.x0 += lo[0], vol.y0 += lo[1], vol.z0 += lo[2];
+                vol.sx = n[0], vol.sy = n[1], vol.sz = n[2];
+                vol.cropped = false;
+            }
         }
     }
     {  // the tints the game blended at the box's centre (AtlasLabExport writes them beside the volume)
@@ -516,109 +534,129 @@ int main(int argc, char** argv) {
     };
 
     if (str(a, "camera", "") == "mc") {
-        // a Minecraft camera (a live capture's own: eye in world blocks, yaw 0 = south, pitch > 0 looks down, fov
-        // vertical), the whole w x h frame at true pixels; one frame per representation: out (the first) and
-        // out_<name>.png; out_mask.png is where the frame shows the exported blocks (the share of samples that hit)
-        float ex = 0, ey = 0, ez = 0;
-        std::sscanf(str(a, "eye", "0,0,0").c_str(), "%f,%f,%f", &ex, &ey, &ez);
-        float myaw = float(num(a, "yaw", 0)) * 3.14159265f / 180.f, mpitch = float(num(a, "pitch", 0)) * 3.14159265f / 180.f;
-        float mfov = float(num(a, "fov", 70)) * 3.14159265f / 180.f;
-        int w = int(num(a, "w", 1280)), h = int(num(a, "h", 720));
-        V3 cf = norm({-std::sin(myaw) * std::cos(mpitch), -std::sin(mpitch), std::cos(myaw) * std::cos(mpitch)});
-        V3 cr = norm(cross(cf, {0, 1, 0})), cu = cross(cr, cf);
-        float cpa = 2.f * std::tan(mfov / 2) / float(h);
-        V3 eye{ex - vol.x0, ey - vol.y0, ez - vol.z0};
-        std::string json = "{\"tool\":\"atlas_lab\",\"mode\":\"camera\",\"eye\":[" + std::to_string(ex) + "," + std::to_string(ey) + "," +
-                           std::to_string(ez) + "],\"frames\":[";
-        // probe=x,y;x,y...: what the real blocks show at those pixels (pixel centres): distance, block, world position
-        {
-            std::string ps = str(a, "probe", "");
-            std::stringstream ss(ps);
-            for (std::string one; std::getline(ss, one, ';');) {
-                int px = 0, py = 0;
-                if (std::sscanf(one.c_str(), "%d,%d", &px, &py) != 2) continue;
-                V3 dir = norm(cf + cr * ((px + 0.5f - w * 0.5f) * cpa) - cu * ((py + 0.5f - h * 0.5f) * cpa));
-                Sample sm = traceMicro(eye, dir);
-                if (!sm.hit) {
-                    std::fprintf(stderr, "probe %d,%d: sky (nothing in the exported blocks)\n", px, py);
-                    continue;
+        // cameras=FILE: one frame per line ("out eyex,eyey,eyez yaw pitch fov w h"), everything loaded and built once
+        // (an element's distance ladder and fly-ins in one process); otherwise the one camera of the arguments
+        auto frame = [&](Args ca, const std::string& outp) {
+            // a Minecraft camera (a live capture's own: eye in world blocks, yaw 0 = south, pitch > 0 looks down, fov
+            // vertical), the whole w x h frame at true pixels; one frame per representation: out (the first) and
+            // out_<name>.png; out_mask.png is where the frame shows the exported blocks (the share of samples that hit)
+            float ex = 0, ey = 0, ez = 0;
+            std::sscanf(str(ca, "eye", "0,0,0").c_str(), "%f,%f,%f", &ex, &ey, &ez);
+            float myaw = float(num(ca, "yaw", 0)) * 3.14159265f / 180.f, mpitch = float(num(ca, "pitch", 0)) * 3.14159265f / 180.f;
+            float mfov = float(num(ca, "fov", 70)) * 3.14159265f / 180.f;
+            int w = int(num(ca, "w", 1280)), h = int(num(ca, "h", 720));
+            V3 cf = norm({-std::sin(myaw) * std::cos(mpitch), -std::sin(mpitch), std::cos(myaw) * std::cos(mpitch)});
+            V3 cr = norm(cross(cf, {0, 1, 0})), cu = cross(cr, cf);
+            float cpa = 2.f * std::tan(mfov / 2) / float(h);
+            V3 eye{ex - vol.x0, ey - vol.y0, ez - vol.z0};
+            std::string json = "{\"tool\":\"atlas_lab\",\"mode\":\"camera\",\"eye\":[" + std::to_string(ex) + "," + std::to_string(ey) + "," +
+                               std::to_string(ez) + "],\"frames\":[";
+            // probe=x,y;x,y...: what the real blocks show at those pixels (pixel centres): distance, block, world position
+            {
+                std::string ps = str(ca, "probe", "");
+                std::stringstream ss(ps);
+                for (std::string one; std::getline(ss, one, ';');) {
+                    int px = 0, py = 0;
+                    if (std::sscanf(one.c_str(), "%d,%d", &px, &py) != 2) continue;
+                    V3 dir = norm(cf + cr * ((px + 0.5f - w * 0.5f) * cpa) - cu * ((py + 0.5f - h * 0.5f) * cpa));
+                    Sample sm = traceMicro(eye, dir);
+                    if (!sm.hit) {
+                        std::fprintf(stderr, "probe %d,%d: sky (nothing in the exported blocks)\n", px, py);
+                        continue;
+                    }
+                    V3 hp = eye + dir * (sm.t + 0.01f);
+                    const Block* b = vol.at(int(std::floor(hp.x)), int(std::floor(hp.y)), int(std::floor(hp.z)));
+                    std::fprintf(stderr, "probe %d,%d: %.1f blocks, %s at %d %d %d\n", px, py, sm.t, b ? b->name.c_str() : "?",
+                                 int(std::floor(hp.x)) + vol.x0, int(std::floor(hp.y)) + vol.y0, int(std::floor(hp.z)) + vol.z0);
                 }
-                V3 hp = eye + dir * (sm.t + 0.01f);
-                const Block* b = vol.at(int(std::floor(hp.x)), int(std::floor(hp.y)), int(std::floor(hp.z)));
-                std::fprintf(stderr, "probe %d,%d: %.1f blocks, %s at %d %d %d\n", px, py, sm.t, b ? b->name.c_str() : "?",
-                             int(std::floor(hp.x)) + vol.x0, int(std::floor(hp.y)) + vol.y0, int(std::floor(hp.z)) + vol.z0);
             }
-        }
-        for (size_t vi = 0; vi < variants.size(); vi++) {
-            const std::string& v = variants[vi];
-            int spp = v == "ref" ? 4 : 1;
-            std::vector<RGB> acc(size_t(w) * h);
-            std::vector<float> hit(size_t(w) * h, 0.f);
-            std::vector<float> depth(size_t(w) * h, 1e30f);  // nearest hit over the samples (blocks)
-            auto t0 = std::chrono::steady_clock::now();
-            for (int f = 0; f < frames; f++) {
-                std::atomic<int> next{0};
-                auto work = [&]() {
-                    for (int py; (py = next++) < h;)
-                        for (int px = 0; px < w; px++)
-                            for (int s2 = 0; s2 < spp; s2++) {
-                                int k = f * spp + s2 + 1;
-                                float jx = 0, jy = 0, fr = 0.5f;
-                                for (int i = k; i; i /= 2, fr *= 0.5f) jx += fr * (i % 2);
-                                fr = 1.f / 3;
-                                for (int i = k; i; i /= 3, fr /= 3) jy += fr * (i % 3);
-                                V3 dir = norm(cf + cr * ((px - w * 0.5f + jx) * cpa) - cu * ((py - h * 0.5f + jy) * cpa));
-                                uint32_t seed = hash(uint32_t(px + 4096 * py) ^ hash(uint32_t(f * 977 + s2)));
-                                float D = 1.f;  // the level is per ray here: the distance to what the ray meets
-                                Sample sm;
-                                if (v == "ref" || v == "micro") sm = traceMicro(eye, dir);
-                                else if (v == "boxes" || v == "groups") {
-                                    float dither = 0.7f + 0.6f * hashf(px, py, f, 0xB0C5u);
-                                    sm = v == "boxes" ? traceBoxes(eye, dir, cpa, tolPix * dither, false, seed)
-                                                      : traceGroups(eye, dir, cpa, tolPix * dither, false, seed);
-                                } else if (v == "current") {
-                                    sm = traceBlocks(curLevels, 0, eye, dir, true, seed);
+            for (size_t vi = 0; vi < variants.size(); vi++) {
+                const std::string& v = variants[vi];
+                int spp = v == "ref" ? 4 : 1;
+                std::vector<RGB> acc(size_t(w) * h);
+                std::vector<float> hit(size_t(w) * h, 0.f);
+                std::vector<float> depth(size_t(w) * h, 1e30f);  // nearest hit over the samples (blocks)
+                auto t0 = std::chrono::steady_clock::now();
+                for (int f = 0; f < frames; f++) {
+                    std::atomic<int> next{0};
+                    auto work = [&]() {
+                        for (int py; (py = next++) < h;)
+                            for (int px = 0; px < w; px++)
+                                for (int s2 = 0; s2 < spp; s2++) {
+                                    int k = f * spp + s2 + 1;
+                                    float jx = 0, jy = 0, fr = 0.5f;
+                                    for (int i = k; i; i /= 2, fr *= 0.5f) jx += fr * (i % 2);
+                                    fr = 1.f / 3;
+                                    for (int i = k; i; i /= 3, fr /= 3) jy += fr * (i % 3);
+                                    V3 dir = norm(cf + cr * ((px - w * 0.5f + jx) * cpa) - cu * ((py - h * 0.5f + jy) * cpa));
+                                    uint32_t seed = hash(uint32_t(px + 4096 * py) ^ hash(uint32_t(f * 977 + s2)));
+                                    float D = 1.f;  // the level is per ray here: the distance to what the ray meets
+                                    Sample sm;
+                                    if (v == "ref" || v == "micro") sm = traceMicro(eye, dir);
+                                    else if (v == "boxes" || v == "groups") {
+                                        float dither = 0.7f + 0.6f * hashf(px, py, f, 0xB0C5u);
+                                        sm = v == "boxes" ? traceBoxes(eye, dir, cpa, tolPix * dither, false, seed)
+                                                          : traceGroups(eye, dir, cpa, tolPix * dither, false, seed);
+                                    } else if (v == "current") {
+                                        sm = traceBlocks(curLevels, 0, eye, dir, true, seed);
+                                    }
+                                    (void)D;
+                                    size_t i = size_t(px + w * py);
+                                    RGB c = sm.hit ? sm.c : SKY;
+                                    float wgt = 1.f / float(spp * frames);
+                                    acc[i].r += c.r * wgt, acc[i].g += c.g * wgt, acc[i].b += c.b * wgt;
+                                    hit[i] += sm.hit ? wgt : 0.f;
+                                    if (sm.hit) depth[i] = std::min(depth[i], sm.t);
                                 }
-                                (void)D;
-                                size_t i = size_t(px + w * py);
-                                RGB c = sm.hit ? sm.c : SKY;
-                                float wgt = 1.f / float(spp * frames);
-                                acc[i].r += c.r * wgt, acc[i].g += c.g * wgt, acc[i].b += c.b * wgt;
-                                hit[i] += sm.hit ? wgt : 0.f;
-                                if (sm.hit) depth[i] = std::min(depth[i], sm.t);
-                            }
-                };
-                std::vector<std::thread> ts;
-                for (int t = 0; t < threads; t++) ts.emplace_back(work);
-                for (auto& t : ts) t.join();
-            }
-            double ms = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count();
-            std::vector<uint32_t> px(size_t(w) * h), mask(size_t(w) * h);
-            auto ch = [](float v2) { return uint32_t(std::clamp(v2, 0.f, 255.f)); };
-            for (size_t i = 0; i < px.size(); i++) {
-                px[i] = 0xFF000000u | ch(acc[i].b) << 16 | ch(acc[i].g) << 8 | ch(acc[i].r);
-                uint32_t m = uint32_t(std::clamp(hit[i] * 255.f, 0.f, 255.f));
-                mask[i] = 0xFF000000u | m << 16 | m << 8 | m;
-            }
-            std::string base = out.size() > 4 ? out.substr(0, out.size() - 4) : out;
-            std::string path = vi == 0 ? out : base + "_" + v + ".png";
-            atlas::writePng(path, px.data(), uint32_t(w), uint32_t(h));
-            if (vi == 0) {
-                atlas::writePng(base + "_mask.png", mask.data(), uint32_t(w), uint32_t(h));
-                // out_depth.png: the distance to what each pixel shows, 1/16 block steps in 24 bits (R high, G, B low),
-                // all ones for sky: the harness splits the comparison by distance band with it
-                std::vector<uint32_t> dp(size_t(w) * h);
-                for (size_t i = 0; i < dp.size(); i++) {
-                    uint32_t v = depth[i] >= 1e29f ? 0xFFFFFFu : uint32_t(std::min(depth[i] * 16.f, 16777214.f));
-                    dp[i] = 0xFF000000u | (v & 255u) << 16 | ((v >> 8) & 255u) << 8 | (v >> 16);
+                    };
+                    std::vector<std::thread> ts;
+                    for (int t = 0; t < threads; t++) ts.emplace_back(work);
+                    for (auto& t : ts) t.join();
                 }
-                atlas::writePng(base + "_depth.png", dp.data(), uint32_t(w), uint32_t(h));
+                double ms = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count();
+                std::vector<uint32_t> px(size_t(w) * h), mask(size_t(w) * h);
+                auto ch = [](float v2) { return uint32_t(std::clamp(v2, 0.f, 255.f)); };
+                for (size_t i = 0; i < px.size(); i++) {
+                    px[i] = 0xFF000000u | ch(acc[i].b) << 16 | ch(acc[i].g) << 8 | ch(acc[i].r);
+                    uint32_t m = uint32_t(std::clamp(hit[i] * 255.f, 0.f, 255.f));
+                    mask[i] = 0xFF000000u | m << 16 | m << 8 | m;
+                }
+                std::string base = outp.size() > 4 ? outp.substr(0, outp.size() - 4) : outp;
+                std::string path = vi == 0 ? outp : base + "_" + v + ".png";
+                atlas::writePng(path, px.data(), uint32_t(w), uint32_t(h));
+                if (vi == 0) {
+                    atlas::writePng(base + "_mask.png", mask.data(), uint32_t(w), uint32_t(h));
+                    // out_depth.png: the distance to what each pixel shows, 1/16 block steps in 24 bits (R high, G, B low),
+                    // all ones for sky: the harness splits the comparison by distance band with it
+                    std::vector<uint32_t> dp(size_t(w) * h);
+                    for (size_t i = 0; i < dp.size(); i++) {
+                        uint32_t v = depth[i] >= 1e29f ? 0xFFFFFFu : uint32_t(std::min(depth[i] * 16.f, 16777214.f));
+                        dp[i] = 0xFF000000u | (v & 255u) << 16 | ((v >> 8) & 255u) << 8 | (v >> 16);
+                    }
+                    atlas::writePng(base + "_depth.png", dp.data(), uint32_t(w), uint32_t(h));
+                }
+                json += (vi ? "," : "") + std::string("{\"variant\":\"") + v + "\",\"ms\":" + std::to_string(int(ms)) + "}";
+                std::fprintf(stderr, "atlas_lab: camera frame %s %dx%d in %.0f ms -> %s\n", v.c_str(), w, h, ms, path.c_str());
             }
-            json += (vi ? "," : "") + std::string("{\"variant\":\"") + v + "\",\"ms\":" + std::to_string(int(ms)) + "}";
-            std::fprintf(stderr, "atlas_lab: camera frame %s %dx%d in %.0f ms -> %s\n", v.c_str(), w, h, ms, path.c_str());
+            json += "]}";
+            std::printf("%s\n", json.c_str());
+        };
+        if (a.count("cameras")) {
+            std::ifstream cf(a["cameras"]);
+            int n = 0;
+            for (std::string line; std::getline(cf, line);) {
+                std::istringstream ls(line);
+                std::string o, e, yw, pt, fv, ww, hh;
+                if (!(ls >> o >> e >> yw >> pt >> fv >> ww >> hh)) continue;
+                Args ca = a;
+                ca["eye"] = e, ca["yaw"] = yw, ca["pitch"] = pt, ca["fov"] = fv, ca["w"] = ww, ca["h"] = hh;
+                frame(ca, o);
+                n++;
+            }
+            std::fprintf(stderr, "atlas_lab: %d camera frames\n", n);
+        } else {
+            frame(a, out);
         }
-        json += "]}";
-        std::printf("%s\n", json.c_str());
         return 0;
     }
 

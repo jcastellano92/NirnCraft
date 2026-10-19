@@ -123,10 +123,10 @@ def camera(box, dist, yaw_deg=30.0, pitch_deg=-15.0, size=256):
             "fov": f"{fov:.4f}", "w": size, "h": size}
 
 
-def run(tool, args, out):
-    cmd = [str(EXE / f"{tool}.exe"), f"out={out}"] + [f"{k}={v}" for k, v in args.items()]
+def run(tool, args, out=None):
+    cmd = [str(EXE / f"{tool}.exe")] + ([f"out={out}"] if out else []) + [f"{k}={v}" for k, v in args.items()]
     r = subprocess.run(cmd, capture_output=True, text=True, creationflags=0x00004000 if sys.platform == "win32" else 0)
-    if r.returncode or not Path(out).exists():
+    if r.returncode:
         raise RuntimeError(f"{tool} failed: {(r.stdout + r.stderr)[-400:]}")
 
 
@@ -138,17 +138,32 @@ REFERENCE = {"exact": {"spp": 1}, "intended": {"spp": 16}}
 TRUTH_MODE = "intended"
 
 
-def render(renderer, el, cam, out):
+def renderer_args(renderer, el):
     d = export_dir()
     box = ",".join(str(v) for v in el["box"])
     if renderer == "truth":
-        run("atlas_truth", {**cam, "quads": d / "quads.bin", "sprites": d / "sprites.bin",
-                            "volume": d / f"{el['volume']}.alv2", "box": box, **REFERENCE[TRUTH_MODE]}, out)
-    elif renderer == "lab-groups":  # the grouped-voxel representation on the CPU bench (until the far pass lands)
-        run("atlas_lab", {**cam, "blocks": d / "blocks.bin", "volume": d / f"{el['volume']}.alv", "box": box,
-                          "variants": "groups", "frames": 4, "shade": "mc"}, out)
-    else:
-        raise ValueError(f"unknown renderer {renderer}")
+        return "atlas_truth", {"camera": "mc", "quads": d / "quads.bin", "sprites": d / "sprites.bin",
+                               "volume": d / f"{el['volume']}.alv2", "box": box, **REFERENCE[TRUTH_MODE]}
+    if renderer == "lab-groups":  # the grouped-voxel representation on the CPU bench (until the far pass lands)
+        return "atlas_lab", {"camera": "mc", "blocks": d / "blocks.bin", "volume": d / f"{el['volume']}.alv", "box": box,
+                             "variants": "groups", "frames": 4, "shade": "mc"}
+    raise ValueError(f"unknown renderer {renderer}")
+
+
+def render_all(renderer, el, frames, tmp):
+    """Every (png, camera) of `frames` in one process: the mesh, textures, volume and trees loaded once."""
+    lst = tmp / f"cameras-{renderer}.txt"
+    lst.write_text("".join(f"{png.as_posix()} {c['eye']} {c['yaw']} {c['pitch']} {c['fov']} {c['w']} {c['h']}\n"
+                           for png, c in frames), encoding="utf-8")
+    tool, args = renderer_args(renderer, el)
+    run(tool, {**args, "cameras": lst.as_posix()})
+    missing = [png for png, _ in frames if not png.exists()]
+    if missing:
+        raise RuntimeError(f"{tool} wrote no {missing[0].name}")
+
+
+def render(renderer, el, cam, out):  # one frame (probes, debugging)
+    render_all(renderer, el, [(Path(out), cam)], Path(out).parent)
 
 
 def load(png):
@@ -175,23 +190,31 @@ def compare(ref_png, our_png):
             "pixels": int(sel.sum())}
 
 
-def flyin(renderer, el, start, end, steps, tmp, size):
-    """Frame-to-frame change of ours beyond the reference's own along a geometric approach: popping or shimmer."""
-    prev = {}
-    excess = []
-    for i in range(steps):
-        dist = start * (end / start) ** (i / (steps - 1))
-        cam = camera(el["box"], dist, size=size)
-        cur = {}
-        for r in ("truth", renderer):
-            p = tmp / f"fly-{r}-{i}.png"
-            render(r, el, cam, p)
-            cur[r] = lab(load(p)[0])
+def radius(box):
+    return 0.5 * math.sqrt(sum((box[k + 3] - box[k] + 1) ** 2 for k in range(3)))
+
+
+def flyin_frames(el, start, end, steps, tmp, name, size):
+    near = max(end, 1.5 * radius(el["box"]))
+    dists = [start * (near / start) ** (i / (steps - 1)) for i in range(steps)]
+    return [(tmp / f"fly-{name}-{r}-{i}.png", camera(el["box"], d, size=size)) for i, d in enumerate(dists)
+            for r in ("x",)]
+
+
+def pop(renderer, frames_truth, frames_ours):
+    """Frame-to-frame change of ours beyond the reference's own along an approach: popping or shimmer."""
+    excess, prev = [], None
+    for (pt, _), (po, _) in zip(frames_truth, frames_ours):
+        cur = (lab(load(pt)[0]), lab(load(po)[0]))
         if prev:
-            ch = {r: float(np.sqrt(((cur[r] - prev[r]) ** 2).sum(axis=2)).mean()) for r in cur}
-            excess.append(max(0.0, ch[renderer] - ch["truth"]))
+            ct = float(np.sqrt(((cur[0] - prev[0]) ** 2).sum(axis=2)).mean())
+            co = float(np.sqrt(((cur[1] - prev[1]) ** 2).sum(axis=2)).mean())
+            excess.append(max(0.0, co - ct))
         prev = cur
     return {"pop": round(float(np.mean(excess)), 3) if excess else 0.0, "popMax": round(float(max(excess)), 3) if excess else 0.0}
+
+
+LIMITS = {"iou": 0.9, "pop": 0.1}  # an element fails below this silhouette agreement or above this popping
 
 
 def main():
@@ -216,21 +239,26 @@ def main():
         return 2
     global TRUTH_MODE
     TRUTH_MODE = a.truth
-    dists = [int(x) for x in a.distances.split(",")]
-    rows, report = [], {"element": el, "renderer": a.renderer, "distances": []}
+    near = 1.5 * radius(el["box"])  # never from inside or against the element: not a view anyone has of it
+    dists = [d for d in (int(x) for x in a.distances.split(",")) if d >= near] or [int(near)]
+    report = {"element": el, "renderer": a.renderer, "truth": TRUTH_MODE, "distances": []}
+    rows = []
     with tempfile.TemporaryDirectory() as td:
         tmp = Path(td)
-        for dist in dists:
-            cam = camera(el["box"], dist, size=a.size)
-            ref, ours = tmp / f"truth-{dist}.png", tmp / f"ours-{dist}.png"
-            render("truth", el, cam, ref)
-            render(a.renderer, el, cam, ours)
+        ladder = {r: [(tmp / f"{r}-{d}.png", camera(el["box"], d, size=a.size)) for d in dists] for r in ("truth", a.renderer)}
+        fly = {}
+        for name, (st, en, n) in FLYINS.items():
+            base = flyin_frames(el, st, en, n, tmp, name, min(a.size, 160))
+            fly[name] = {r: [(tmp / f"fly-{name}-{r}-{i}.png", c) for i, (_, c) in enumerate(base)] for r in ("truth", a.renderer)}
+        for r in ("truth", a.renderer):  # one process per renderer: the ladder and every fly-in frame
+            render_all(r, el, ladder[r] + [f for name in fly for f in fly[name][r]], tmp)
+        for (ref, _), (ours, _), dist in zip(ladder["truth"], ladder[a.renderer], dists):
             m = compare(ref, ours)
             report["distances"].append({"dist": dist, **m})
             print(f"{dist:>7} m  iou {m['iou']:.3f}  dE {m['dE']:6.2f}  ({m['pixels']} px)")
             rows.append((Image.open(ref).convert("RGB"), Image.open(ours).convert("RGB")))
-        for name, (s, e, n) in FLYINS.items():
-            report[f"flyin_{name}"] = flyin(a.renderer, el, s, e, n, tmp, min(a.size, 160))
+        for name in fly:
+            report[f"flyin_{name}"] = pop(a.renderer, fly[name]["truth"], fly[name][a.renderer])
             print(f"fly-in {name}: pop {report[f'flyin_{name}']['pop']}  max {report[f'flyin_{name}']['popMax']}")
     if a.out:
         a.out.mkdir(parents=True, exist_ok=True)
@@ -242,8 +270,18 @@ def main():
         sheet.save(a.out / f"{el['slug']}.png")
     worst = max(report["distances"], key=lambda d: d["dE"])
     report["worst"] = {"dist": worst["dist"], "dE": worst["dE"], "iou": min(d["iou"] for d in report["distances"])}
+    fails = []
+    if report["worst"]["iou"] < LIMITS["iou"]:
+        bad = min(report["distances"], key=lambda d: d["iou"])
+        fails.append(f"silhouette {bad['iou']:.3f} < {LIMITS['iou']} at {bad['dist']} m")
+    for name in FLYINS:
+        if report[f"flyin_{name}"]["pop"] > LIMITS["pop"]:
+            fails.append(f"fly-in {name} pops: {report[f'flyin_{name}']['pop']} > {LIMITS['pop']}")
+    report["fails"] = fails
     print(json.dumps(report))
-    return 0
+    for f in fails:
+        print("FAIL " + f)
+    return 1 if fails else 0
 
 
 if __name__ == "__main__":
