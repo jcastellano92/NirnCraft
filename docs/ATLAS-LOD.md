@@ -327,6 +327,12 @@ NeoForge model data other than block entities'. Per rung the suite also measures
 (entity view distance from Entity.shouldRenderAtSqrDistance, block entity renderers' view distance): where Minecraft
 culls or the element is sub-pixel, disagreement with it is information, not error.
 
+First live run (2026-10-19, whiterun-day-chunk, three rungs, 6 scenes in 353 s with the jar build): the offline
+reference (atlas_truth, exact mode, from the receipt's equivalent eye) against Minecraft's pinned rendering: liveDE
+0.32 at 32 m, 0.42 at 1 km (edges 0.84 / 1.0, nothing missing); at 16 km the chunk is under half a pixel and neither
+draws it. So the offline reference is Minecraft's rendering for this element at those distances, and the element
+tier's comparisons against it stand for comparisons against the game.
+
 **Lighting and surfaces beyond Minecraft's path** (owner): once offline and live match, the groups are the place for
 Lumen's ideas: a surface cache per group face (sun visibility, bounce, block light, sky) updated where it changed and
 where it is seen, so far light, shadows and bounce resolve like geometry; and the face textures become a virtual,
