@@ -66,8 +66,9 @@ tools/worldgen/preview_places*.png
 # private reference data extracted from the owner's own game installs (facts only; never commit)
 .reference/
 
-# offline QA renders (large); small contact sheets are copied to docs/screens/
+# offline QA renders and native build/test output (large; regenerate with the tools)
 tools/qa/out/
+native/out/
 
-# multi-agent claims, leases, queue (docs/world/VISUAL-TARGETS-WORKFLOW.md)
+# local work area: harness results and reports (.work/harness), queues, scratch
 .work/

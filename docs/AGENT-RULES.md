@@ -1,13 +1,9 @@
 # NirnCraft agent rules
 
-**Current platform override: Minecraft 26.3 / NeoForge 26.3.0.90 / Java 25.** Before building or controlling a runtime,
-read [NATIVE-26.3-PREVIEW.md](NATIVE-26.3-PREVIEW.md). Use the isolated native build helper and current native devserver;
-legacy Forge artifacts, Java 17 signatures and old runtime paths below are historical, not fallbacks. Preserve old
-worlds/custom integrations. Normal Minecraft multiplayer/LAN replaces the older Essential requirement. Source/build
-success does not replace the dedicated-server and actual loaded-world visual gates. Other ownership, legal, Git,
-world-building and verification rules continue to apply.
-
-For concurrent sessions, also read [ACTIVE-AGENT-COORDINATION.txt](ACTIVE-AGENT-COORDINATION.txt) before editing shared UI/rendering files or controlling a runtime.
+**Platform: Minecraft 26.3 / NeoForge 26.3.0.90 / Java 25, official Mojang mappings.** Before building or controlling
+a runtime, read [NATIVE-26.3-PREVIEW.md](NATIVE-26.3-PREVIEW.md); the doc map is [README.md](README.md). Preserve the
+owner's own instances and worlds. Normal Minecraft multiplayer/LAN is the only hosting path. A green build does not
+replace the dedicated-server and loaded-world visual gates.
 
 Rules every agent/workstream follows. Reference data from the owner's game installs lives in `.reference/` (gitignored, facts only).
 New sessions start at `docs/START-HERE.md`; the roadmap and its state table are in `docs/world/WORLD-PLAN.md`, the
@@ -15,30 +11,30 @@ phase prompts in `docs/prompts/`. The world-building rules at the end of this fi
 
 ## Phase 1 rules (still apply)
 
-You are fixing review findings in NirnCraft, a Skyrim total-conversion for Minecraft 1.20.1 Forge
-(compiled against 47.3.0, the pack runs 47.4.10), official Mojang mappings, Java 17.
-You work in your OWN git worktree (your current working directory). Paths below are relative to the repo root.
+You work on NirnCraft, a Skyrim total conversion for Minecraft 26.3 NeoForge (mod id `nirncraft`, Java package
+`com.nirncraft`), usually in your OWN git worktree (your current working directory). Paths below are relative to the
+repository root.
 
 ## Build
-* From `<your worktree>/mod` run `./gradlew.bat compileJava --console=plain "-Dorg.gradle.jvmargs=-Xmx2G"`
-  (PowerShell) or `./gradlew compileJava --console=plain -Dorg.gradle.jvmargs=-Xmx2G` (bash). Trust the
-  `BUILD SUCCESSFUL` / `BUILD FAILED` line. Six workstreams share one PC: compile after a chunk of work, not
-  after each edit. You MUST finish with `build` passing.
-* Real 1.20.1 signatures: `javap -cp <jar> <class>` with javap at `C:\Program Files\Java\jdk-17\bin\javap.exe`
-  and the jar
-  `C:\Users\Jeremy\.gradle\caches\forge_gradle\minecraft_user_repo\net\minecraftforge\forge\1.20.1-47.3.0_mapped_official_1.20.1\forge-1.20.1-47.3.0_mapped_official_1.20.1.jar`.
+* `py -3 tools/dev/build_263.py --offline compileJava` (or `build`; `tools/dev/build_263.ps1 -Tasks build -Offline` in
+  PowerShell). It selects Java 25, an isolated Gradle home and a build directory outside the checkout
+  (`NIRNCRAFT_263_SCRATCH`, machine default `E:\NirnCraft-scratch\migration-26.3`), and holds a lock so only one build
+  runs at a time. Trust the `BUILD SUCCESSFUL` / `BUILD FAILED` line. Compile after a chunk of work, not after each
+  edit. You MUST finish with `build` passing.
+* Real 26.3 signatures: the patched sources and classes jars under that build directory
+  (`moddev/artifacts/minecraft-patched-26.3.0.90-sources.jar`); read them instead of assuming older signatures.
   Third-party mod jars are cached in `dist\.cache\` (read-only).
 
 ## Code rules
-* No mixins, no access transformers. Forge events and public API; screens replaced via `ScreenEvent.Opening`.
+* No mixins, no access transformers. NeoForge events and public API; screens replaced via `ScreenEvent.Opening`.
 * NEVER reference client classes (`Minecraft`, `Screen` and subclasses, `KeyMapping`, renderers, `LocalPlayer`)
   from common code, not even behind an `isClientSide` check: the bytecode verifier loads them and the dedicated
-  server crashes. Hand off via `DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> SomeClientClass.method(...))`
-  where `SomeClientClass` lives in a `client` package.
+  server crashes. Hand off via `Sides.runOn(Dist.CLIENT, () -> () -> SomeClientClass.method(...))`
+  (`com.nirncraft.platform.Sides`) where `SomeClientClass` lives in a `client` package.
 * Worldgen code never reads/writes outside the region being generated, never touches `ServerLevel`-only services
   (POI manager, entity lookups) off the server thread.
 * Server is authoritative. Validate every client packet (distance, menu type, ownership, value bounds).
-* Multiplayer must work both on an Essential-hosted integrated server and on a dedicated server.
+* Multiplayer must work both on an integrated (LAN) server and on a dedicated server.
 * Player data: `SkyData.get(player).module("<name>")`.
 * Lang: only your module's file `mod/src/main/lang/nirncraft/<module>.json` (merged at build time).
 * Match the surrounding code style, comment density and naming. Don't reformat files. Don't rewrite files
@@ -59,7 +55,7 @@ You work in your OWN git worktree (your current working directory). Paths below 
 * Each finding: FIXED / PARTIAL / SKIPPED (+why), with file:line of the fix.
 * Every file you created; every file outside your owned packages you edited.
 * Anything risky, needing playtest, or left for later.
-* Confirm the final `./gradlew build` result.
+* Confirm the final `build_263.py build` result and the harness result you ran.
 # NirnCraft Phase 2+ rules (every workstream reads this)
 
 Read these first:
@@ -88,7 +84,7 @@ Read these first:
   * Previews and heightmaps: `preview_markers.png`, `preview_holds_tamriel.png`, `heightmap_tamriel_ref.png`
     (16-bit; height units = pixel − 37032; 256 game units per pixel), and `water_tamriel.png`, plus the
     Solstheim versions.
-  * The game install itself is `E:\Steam\steamapps\common\Skyrim Special Edition` (read-only).
+  * The game install itself is the owner's own Skyrim Special Edition (read-only; its path is machine-specific).
 * **Legal rule (strict).** Bethesda's assets are copyrighted, and this mod is redistributed.
   * NEVER copy game meshes, textures, sounds, voice, music, book text or dialogue into the repo, raw or
     converted.
@@ -107,33 +103,22 @@ Read these first:
 * Skyrim's map spans about mcX −3180..2830 and mcZ −2480..1880, with Whiterun at 0,0.
 * Vertical: compress heights so the Throat of the World peaks near y 370 (world top is y 383; sea level 63).
 
-## Test in game where possible
-* `./gradlew runServer` (with `--nogui`, from `mod/`) generates a world with only NirnCraft loaded. Use it to
-  smoke-test worldgen: no crashes, and sensible timing.
-* Accept the EULA in `mod/run/eula.txt`. Stop the server cleanly with the `stop` command on stdin, or kill it
-  after a timeout.
-* World creation can be slow. Delete `mod/run/world` before each test.
-* `tools/autotest.ps1` can launch the client and capture screenshots. Read it before using it.
-* Only one Gradle run per worktree at a time.
+## Test
 
-## Fast loop (every workstream; docs/FINISH-PLAN.md section 2)
-
-* **Iterate with quick checks; run the full gate once at the end of a phase.** Start with Tier 0 pure-Java JUnit 5
-  tests (`tools\qa\qa.ps1 -Unit`, < 5 s, no server) for worldplan/map/bake logic. While developing against the
-  persistent dev server, use Tier 1 (`tools\dev\devserver.ps1 hotswap` for < 3 s JDWP method-body hot-swap, and
-  `/nirncraft-dev reload <scenes|places|cityplans|quests|palettes|all>` for < 1 s in-JVM JSON reload),
-  `tools\dev\devserver.ps1 run "cmd|cmd" -Wait`, `tools\qa\quick_corridor.ps1 <a>:<b>` (one tile, ~15 s) and
-  `/nirncraft-dev regen` for a bounded area. Compile (`compileJava`) after a chunk of work, as above.
-* **Full gates only at a checkpoint:** `tools\qa\full_corridors.ps1` (the 4-corridor road gate) when the road work of
-  the phase is done, and `tools\qa\qa.ps1 -Server -Rebake` before merging (one boot, re-bakes in the same run). Do not
-  repeat a full gate after each small edit and do not weaken one: a gate that only the slow path can run is run once,
-  not skipped.
-* The dev server hot-swaps method-body edits (`devserver.ps1 hotswap`, ~2 s) and only restarts (~40 s) when class
-  schemas or non-reloadable resources changed; it uses its own world (`mod\run\devworld`), port and working directory,
-  so it never collides with `qa.ps1`/`bake.ps1`. Only ONE dev server per machine (`devserver.ps1` refuses a second;
-  servers get `-Xmx4G`): stop it (`devserver.ps1 stop`) when you finish and before another agent needs one; do not
-  leave it running between sessions.
-* Release builds stay strict: `tools\build_release.ps1` bakes explicitly and runs `qa.ps1 -Server -Bake`.
+* **Use the harness** for every test, visual or not: `py -3 tools/harness/harness.py run` (smoke), `run --changed`,
+  `watch`, `gate` (before a merge). Read [tools/harness/README.md](../tools/harness/README.md) first. Live tests run
+  only in the disposable `NirnCraft-26.3-autotest` Prism instance, which the harness launches and closes; never touch
+  the owner's own instance. Only one live client and one dev server per machine.
+* **Fast loop with the persistent dev server**: `tools\dev\devserver.ps1 start|status|hotswap|run "cmd|cmd" -Wait|stop`
+  (JDWP method-body hot-swap in seconds; restarts only for schema or non-reloadable resource changes; its own world in
+  `mod/run/devworld-26.3`), `/nirncraft-dev reload <scenes|places|cityplans|quests|palettes|all>` for in-JVM JSON
+  reload, `tools\qa\quick_corridor.ps1 <a>:<b>` (one tile) and `/nirncraft-dev regen` for a bounded area. Servers get
+  `-Xmx4G`; stop the dev server when you finish.
+* **Full gates only at a checkpoint:** `tools\qa\full_corridors.ps1` (the 4-corridor road gate) when the road work of a
+  phase is done, re-bake after world-generation changes (`tools\bake\bake.ps1`), and `harness.py gate` before merging.
+  Do not weaken a gate; a gate that only the slow path can run is run once, not skipped.
+* Release builds stay strict: `tools\build_release.ps1` builds, verifies the bake in a fresh world and runs the server
+  smoke gate.
 
 ## World-building rules (every workstream; docs/world/DESIGN-PRINCIPLES.md)
 

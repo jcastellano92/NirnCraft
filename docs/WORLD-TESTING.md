@@ -1,8 +1,14 @@
-# World testing workflow
+# World testing: regional coverage
 
-Read `docs/START-HERE.md` and `docs/LIVE-WORLD-PREVIEW.md`. Operate only the disposable
-NirnCraft-autotest instance; check status and reuse its world. Preserve the owner's normal instance.
-Do not run a headless server alongside its integrated server or two drivers against the live queue.
+**Run tests with the harness first:** `py -3 tools/harness/harness.py run --tag region:skyrim/falkreath` and friends
+([tools/harness/README.md](../tools/harness/README.md)). It owns the scene catalog, cameras planned on the seeded
+terrain, before/after results in `.work/harness` and the merge gate. This page covers the older regional coverage
+bookkeeping in `tools/qa/world_test.py` (obligations per region and system, review records, coverage reports) and the
+evidence rules both share.
+
+Operate only the disposable `NirnCraft-26.3-autotest` instance ([LIVE-WORLD-PREVIEW.md](LIVE-WORLD-PREVIEW.md));
+check status and reuse its world. Preserve the owner's normal instance. Do not run a headless server alongside its
+integrated server or two drivers against the live queue.
 
 `tools/qa/world_test.py` composes existing audits and real preview controls. Its manifest,
 `tools/qa/world-tests.json`, defines fifteen systems and their required regional conditions. `plan`
@@ -29,8 +35,13 @@ reject failure output. They are contracts, not complete playthroughs. Asynchrono
 observed completion signal; do not guess a sleep. Add new checks to the manifest with their actual
 success/failure signals, timeout, systems and scope.
 
-Visual tests follow `docs/VISUAL-TEST-CAMERAS.md`: actual plan/routes, loaded-world scouting, frame
-inspection, then approval. Never accept a buried camera. Capture receipts require clear geometry,
+Visual evidence rules (the harness applies the same ones): a coordinate guessed from a bounding box is a
+candidate, not a test camera; aim at what the test must show (a corridor sightline, stair descent, entrance, water
+feature, cave opening, large chamber, enemy encounter or landmark) using the actual plan and routes; inspect the
+actual frame. Never accept a buried or through-the-wall camera. Saved poses carry the seed, dimension and
+world-generation fingerprint they were made in and are stale, not approved, when those change; regenerate the
+affected disposable area and plan again instead of replacing the fingerprint. `tools/qa/visual_cameras.py`
+(`plan`, `scout`, `approve`, `run`) keeps the approved poses in `tools/qa/visual-cameras.json`. Capture receipts require clear geometry,
 successful readiness at that pose, actual shader state and no Night Vision. Both shader modes start
 as `awaiting_review`. Open each image before recording concrete observations:
 
@@ -116,8 +127,8 @@ condition acceptance, especially where different variants were tested. All accep
 until a reviewer verifies the complete behavior/performance/route obligations. The active identity cannot prove old
 chunks were regenerated; retain regeneration receipts for affected areas.
 
-Storage experiments are opt-in. `tools/dev/build_fast.ps1` puts build outputs/caches on the measured NVMe;
-`py -3 tools/dev/benchmark_world.py --runs 2` creates stopped-world copies on F and E, alternates order,
+Storage experiments are opt-in. `tools/dev/build_fast.ps1` puts build outputs/caches on a faster scratch drive;
+`py -3 tools/dev/benchmark_world.py --runs 2` creates stopped-world copies on two drives, alternates order,
 measures full corridor regeneration and preserves failed road gates. Close the disposable preview first. No user
 installation/save is moved. Runtime roots are restricted to owned QA folders and only one server runs at a time.
 
@@ -125,7 +136,7 @@ installation/save is moved. Runtime roots are restricted to owned QA folders and
 For exact headless-world visual review, first stop the server and disposable client, then:
 
 ```powershell
-py -3 tools/dev/preview_world.py import E:/NirnCraft-scratch/world-benchmark/RUN/world qa_road_review
+py -3 tools/dev/preview_world.py import STOPPED_BENCHMARK_WORLD qa_road_review   # e.g. RUN/world from benchmark_world.py
 py -3 tools/dev/live_world.py launch
 # Inspect real plan/route, scout, approve camera for this actual seed and generation, then capture.
 py -3 tools/dev/live_world.py close
