@@ -295,7 +295,7 @@ class QualityControllerTest {
         assertEquals(1, HostLoad.serverColumnThreads(16, true, false, 45));
         assertEquals(2, HostLoad.serverColumnThreads(16, false, true, 10));
         assertEquals(1, HostLoad.serverColumnThreads(16, false, false, 10));
-        assertEquals(20, HostLoad.pregenIntervalTicks(8));
+        assertEquals(2, HostLoad.pregenIntervalTicks(8));  // light: the idle map pre-build keeps its worker busy
         assertEquals(60, HostLoad.pregenIntervalTicks(20));
         assertEquals(0, HostLoad.pregenIntervalTicks(30));
         assertEquals(0, HostLoad.clientWorkerRestMs(false, 60));

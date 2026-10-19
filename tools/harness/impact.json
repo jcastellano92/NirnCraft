@@ -3,6 +3,18 @@
  "rules": [
   {
    "paths": [
+    "mod/src/*",
+    "mod/build.gradle"
+   ],
+   "tags": [
+    "check:unit"
+   ],
+   "reload": null,
+   "final": false,
+   "why": "every change under mod/src runs the full build with all JUnit suites (check-unit): a stale test never merges"
+  },
+  {
+   "paths": [
     "mod/src/main/resources/natives/*",
     "mod/src/main/java/com/nirncraft/atlas/AtlasNative.java",
     "native/include/atlas/atlas.h",
@@ -110,21 +122,6 @@
   },
   {
    "paths": [
-    "mod/src/main/resources/assets/*/textures/entity/*",
-    "mod/src/main/resources/assets/*/models/entity/*",
-    "mod/src/main/java/com/nirncraft/creatures/*",
-    "mod/src/main/java/com/nirncraft/*/client/*Renderer*"
-   ],
-   "tags": [
-    "check:unit",
-    "suite:creatures",
-    "suite:gallery"
-   ],
-   "reload": "resources",
-   "final": false
-  },
-  {
-   "paths": [
     "mod/src/main/resources/assets/*"
    ],
    "tags": [
@@ -210,142 +207,11 @@
   },
   {
    "paths": [
-    "mod/src/main/java/com/nirncraft/atmosphere/*",
-    "mod/src/main/java/com/nirncraft/weather/*"
-   ],
-   "tags": [
-    "check:unit",
-    "suite:sky",
-    "suite:weather"
-   ],
-   "reload": "jar"
-  },
-  {
-   "paths": [
-    "mod/src/main/java/com/nirncraft/atlas/*"
-   ],
-   "tags": [
-    "check:native",
-    "check:unit",
-    "suite:seam-core",
-    "suite:smoke"
-   ],
-   "reload": "jar"
-  },
-  {
-   "paths": [
-    "mod/src/main/java/com/nirncraft/fire/*",
-    "mod/src/main/java/com/nirncraft/magic/*",
-    "mod/src/main/java/com/nirncraft/spell*/*"
-   ],
-   "tags": [
-    "check:spells",
-    "check:unit",
-    "feature:fire",
-    "feature:magic",
-    "suite:fx"
-   ],
-   "reload": "jar"
-  },
-  {
-   "paths": [
-    "mod/src/main/java/com/nirncraft/realm*/*"
-   ],
-   "tags": [
-    "check:unit",
-    "suite:realms"
-   ],
-   "reload": "jar"
-  },
-  {
-   "paths": [
-    "mod/src/main/java/com/nirncraft/*/client/*",
-    "mod/src/main/java/com/nirncraft/client/*"
-   ],
-   "tags": [
-    "check:unit",
-    "suite:smoke",
-    "suite:ui"
-   ],
-   "reload": "jar"
-  },
-  {
-   "paths": [
-    "mod/src/main/java/com/nirncraft/loot/*",
-    "mod/src/main/java/com/nirncraft/explore/*",
-    "tools/loot_*.py"
-   ],
-   "tags": [
-    "check:loot",
-    "check:unit"
-   ],
-   "reload": "jar"
-  },
-  {
-   "paths": [
-    "mod/src/main/java/com/nirncraft/economy/*",
-    "tools/economy_data.py"
-   ],
-   "tags": [
-    "check:economy",
-    "check:unit"
-   ],
-   "reload": "jar"
-  },
-  {
-   "paths": [
-    "mod/src/main/java/com/nirncraft/quest*/*",
-    "mod/src/main/resources/nirncraft/quests/*"
-   ],
-   "tags": [
-    "check:quests",
-    "check:unit"
-   ],
-   "reload": "data:quests"
-  },
-  {
-   "paths": [
-    "mod/src/main/java/com/nirncraft/society/*",
-    "mod/src/main/java/com/nirncraft/npc*/*"
-   ],
-   "tags": [
-    "check:npcs",
-    "check:unit",
-    "suite:creatures"
-   ],
-   "reload": "jar"
-  },
-  {
-   "paths": [
     "mod/src/main/lang/*"
    ],
    "tags": [
     "check:lang",
     "suite:ui"
-   ],
-   "reload": "jar"
-  },
-  {
-   "paths": [
-    "mod/src/main/java/*",
-    "mod/src/test/*",
-    "mod/build.gradle",
-    "mod/*.gradle",
-    "mod/gradle.properties"
-   ],
-   "tags": [
-    "check:unit",
-    "suite:smoke"
-   ],
-   "reload": "jar"
-  },
-  {
-   "paths": [
-    "mod/src/main/resources/*"
-   ],
-   "tags": [
-    "check:assets",
-    "check:unit"
    ],
    "reload": "jar"
   },
