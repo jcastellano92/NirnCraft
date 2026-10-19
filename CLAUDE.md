@@ -32,7 +32,7 @@ ATLAS** (the far-field renderer `atlas_core` + the shader pack `shaderpack/Infin
 * Ship: `shaderpack/build_pack.py` + `tools/refresh_packwiz.py`, `tools/build_prism_instance.py`, `tools/build_mrpack.py`.
 
 ## Non-negotiables
-* Work on the current branch (`infiniteATLAS`); commit locally after each green step. **Push only when the owner
+* Work on whatever branch is checked out (`git branch --show-current`; the owner picks it); commit locally after each green step. **Push only when the owner
   explicitly asks.** GitHub Actions is disabled. Keep logs, reports, caches and archives out of Git (`.work/`,
   `dist/`, the scratch drive); the project's pre-rename name must not reappear anywhere (a case-insensitive `git grep` for it must stay empty).
 * Legal: the owner's game installs (Skyrim, Oblivion, Morrowind, Daggerfall, Arena, Redguard) and the MIT DFO
